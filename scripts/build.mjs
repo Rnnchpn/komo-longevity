@@ -124,7 +124,45 @@ const pulseJourney = {
     clinicalImageAlt: 'Un paciente camina durante una evaluación de movilidad tranquila con una profesional'
   }
 };
+
+const komoEntrances = {
+  en: {
+    eyebrow: 'START WHERE YOU ARE',
+    title: 'One method.<br>Three ways <em>to enter.</em>',
+    lead: 'You do not need to understand the whole KŌMØ ecosystem today. Choose the entry that matches your reason for being here; Pulse keeps the thread as your trajectory evolves.',
+    continuity: 'Begin with one door. Move across the ecosystem only when the next step becomes useful.',
+    paths: [
+      { tone: 'pulse', number: '01', audience: 'FOR YOURSELF', title: 'Begin with your mobility.', body: 'Create your personal KŌMØ Pulse, complete an educational Mobility Check and make the next step clear.', cta: 'Start my KŌMØ Pulse', note: 'Personal start · around 10 minutes', page: 'pulse' },
+      { tone: 'clinical', number: '02', audience: 'FOR CLINICIANS & PARTNERS', title: 'Bring movement into a responsible pathway.', body: 'Explore a structured clinical approach, measurement and continuity for a practice, centre or destination.', cta: 'Explore KŌMØ Clinical', note: 'Professional programme · selective opening', page: 'clinical' },
+      { tone: 'coast', number: '03', audience: 'FOR WHITE COAST', title: 'Move. Recover. Belong.', body: 'Enter the first local KŌMØ chapter: places, practices and people building a longer, more active life on the Costa Blanca.', cta: 'Discover White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+    ]
+  },
+  fr: {
+    eyebrow: 'COMMENCER LÀ OÙ VOUS EN ÊTES',
+    title: 'Une même méthode.<br>Trois portes <em>d’entrée.</em>',
+    lead: 'Il n’est pas nécessaire de comprendre tout l’écosystème KŌMØ aujourd’hui. Choisissez l’entrée qui correspond à ce qui vous amène ici ; Pulse garde le fil à mesure que votre trajectoire évolue.',
+    continuity: 'Commencez par une porte. Le reste de l’écosystème devient utile au bon moment.',
+    paths: [
+      { tone: 'pulse', number: '01', audience: 'POUR VOUS', title: 'Commencer par votre mobilité.', body: 'Créez votre KŌMØ Pulse personnel, réalisez un Mobility Check éducatif et rendez la prochaine étape visible.', cta: 'Commencer mon KŌMØ Pulse', note: 'Départ personnel · environ 10 minutes', page: 'pulse' },
+      { tone: 'clinical', number: '02', audience: 'POUR LES PRATICIENS & PARTENAIRES', title: 'Inscrire le mouvement dans un parcours responsable.', body: 'Découvrez une approche clinique structurée, la mesure et la continuité pour un cabinet, un centre ou un lieu partenaire.', cta: 'Découvrir KŌMØ Clinical', note: 'Programme professionnel · ouverture sélective', page: 'clinical' },
+      { tone: 'coast', number: '03', audience: 'POUR WHITE COAST', title: 'Bouger. Récupérer. Appartenir.', body: 'Entrez dans le premier chapitre local de KŌMØ : lieux, pratiques et personnes qui construisent une vie plus longue et plus active sur la Costa Blanca.', cta: 'Découvrir White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+    ]
+  },
+  es: {
+    eyebrow: 'EMPIEZA DONDE ESTÁS',
+    title: 'Un mismo método.<br>Tres formas <em>de entrar.</em>',
+    lead: 'No necesitas comprender hoy todo el ecosistema KŌMØ. Elige la puerta que corresponde a lo que te trae aquí; Pulse mantiene el hilo mientras tu trayectoria evoluciona.',
+    continuity: 'Empieza por una puerta. El resto del ecosistema será útil cuando llegue el momento adecuado.',
+    paths: [
+      { tone: 'pulse', number: '01', audience: 'PARA TI', title: 'Empieza por tu movilidad.', body: 'Crea tu KŌMØ Pulse personal, completa un Mobility Check educativo y haz visible el siguiente paso.', cta: 'Empezar mi KŌMØ Pulse', note: 'Inicio personal · unos 10 minutos', page: 'pulse' },
+      { tone: 'clinical', number: '02', audience: 'PARA CLÍNICOS Y SOCIOS', title: 'Integrar el movimiento en un recorrido responsable.', body: 'Descubre un enfoque clínico estructurado, la medición y la continuidad para una consulta, centro o destino asociado.', cta: 'Descubrir KŌMØ Clinical', note: 'Programa profesional · apertura selectiva', page: 'clinical' },
+      { tone: 'coast', number: '03', audience: 'PARA WHITE COAST', title: 'Muévete. Recupera. Pertenece.', body: 'Entra en el primer capítulo local de KŌMØ: lugares, prácticas y personas que construyen una vida más larga y activa en la Costa Blanca.', cta: 'Descubrir White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+    ]
+  }
+};
+
 const journeyCopy = (locale) => pulseJourney[locale] || pulseJourney.en;
+const entranceCopy = (locale) => komoEntrances[locale] || komoEntrances.en;
 const canonical = (locale, page) => `${site.origin}${pagePath(locale, page)}`;
 const link = (locale, page) => /^https?:\/\//.test(page) || page.startsWith('mailto:') ? page : pagePath(locale, page);
 const pulseStartLink = (locale) => `${pagePath(locale, 'pulse')}#start-pulse`;
@@ -133,6 +171,20 @@ const article = (locale) => `${pagePath(locale, 'library')}#articles`;
 
 const raw = (value = '') => String(value);
 const text = (value = '') => escapeHtml(value);
+
+function pageAction(locale, page) {
+  const c = translations[locale];
+  const routeActions = {
+    clinical: { label: c.clinical.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
+    'white-coast': { label: c.whiteCoast.cta, href: 'https://community.komolongevity.com/', external: true },
+    'motion-retreats': { label: c.motionRetreats.cta, href: pagePath(locale, 'white-coast') },
+    library: { label: c.library.cta, href: scoreLink(locale) },
+    circle: { label: c.circle.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
+    science: { label: c.science.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
+    contact: { label: c.global.contactUs, href: 'mailto:contact@komolongevity.com', external: true }
+  };
+  return routeActions[page] || { label: journeyCopy(locale).navCta, href: scoreLink(locale) };
+}
 
 function languageMenu(locale, page) {
   const current = translations[locale];
@@ -150,7 +202,7 @@ function languageMenu(locale, page) {
 
 function header(locale, page) {
   const c = translations[locale];
-  const j = journeyCopy(locale);
+  const action = pageAction(locale, page);
   const navItems = [
     ['pulse', c.nav.pulse], ['clinical', c.nav.clinical], ['library', c.nav.library], ['white-coast', c.nav.whiteCoast]
   ];
@@ -168,7 +220,7 @@ function header(locale, page) {
         </nav>
         <div class="header-actions">
           ${languageMenu(locale, page)}
-          <a class="nav-cta" href="${scoreLink(locale)}">${text(j.navCta)}</a>
+          <a class="nav-cta" href="${text(action.href)}" ${action.external ? 'target="_blank" rel="noreferrer"' : ''}>${text(action.label)}</a>
           <button class="menu-toggle" type="button" data-menu-toggle aria-expanded="false" aria-label="${text(c.nav.menu)}"><span></span></button>
         </div>
       </div>
@@ -198,7 +250,7 @@ function footer(locale) {
 
 function layout(locale, page, content, meta) {
   const c = translations[locale];
-  const j = journeyCopy(locale);
+  const action = pageAction(locale, page);
   const alternatives = site.locales.map((item) => `<link rel="alternate" hreflang="${item}" href="${canonical(item, page)}">`).join('\n    ');
   const defaultUrl = canonical('en', page);
   return `<!doctype html>
@@ -229,7 +281,7 @@ function layout(locale, page, content, meta) {
 ${header(locale, page)}
 <main id="main">${content}</main>
 ${footer(locale)}
-<a class="button mobile-cta" href="${scoreLink(locale)}">${text(j.navCta)}</a>
+<a class="button mobile-cta" href="${text(action.href)}" ${action.external ? 'target="_blank" rel="noreferrer"' : ''}>${text(action.label)}</a>
 </body>
 </html>`;
 }
@@ -299,17 +351,33 @@ function homePage(locale) {
       </div>
     </section>
 
-    <section class="section">
-      <div class="shell"><div class="intro-grid reveal"><div><p class="eyebrow">${text(h.entryEyebrow)}</p><h2 class="section-heading">${raw(h.entryTitle)}</h2></div><p class="section-lead">${text(h.entryLead)}</p></div>
-        <div class="entry-cards">${h.entries.map((item) => `<article class="entry-card reveal"><span class="entry-orb" aria-hidden="true"></span><p class="eyebrow">${text(item.eyebrow)}</p><h3>${text(item.title)}</h3><p>${text(item.text)}</p><a class="text-link" href="${pagePath(locale, item.page)}">${text(item.link)}</a></article>`).join('')}</div>
-      </div>
-    </section>
+    ${komoEntranceSection(locale)}
 
     <section class="chapter"><div class="shell chapter-inner"><div class="chapter-card reveal"><p class="eyebrow eyebrow-light">${text(h.chapterEyebrow)}</p><h2>${raw(h.chapterTitle)}</h2><p>${text(h.chapterText)}</p><div class="hero-actions"><a class="button button-light" href="${pagePath(locale, 'white-coast')}">${text(h.chapterCta)}</a></div><div class="chapter-notes">${h.chapterNotes.map(([label, value]) => `<div><strong>${text(label)}</strong>${text(value)}</div>`).join('')}</div></div><p class="chapter-quote reveal">${raw(h.chapterQuote)}</p></div></section>
 
     <section class="section"><div class="shell intro-grid reveal"><div><p class="eyebrow">${text(h.scienceEyebrow)}</p><h2 class="section-heading">${raw(h.scienceTitle)}</h2></div><div><p class="section-lead">${text(h.scienceLead)}</p><a class="text-link" href="${pagePath(locale, 'science')}">${text(h.scienceCta)}</a></div></div></section>
 
     <section class="quote-band"><div class="shell"><blockquote class="reveal">${raw(h.finalTitle)}</blockquote><p class="section-lead" style="color:rgba(255,255,255,.72)">${text(h.finalText)}</p><div class="hero-actions"><a class="button button-light" href="${scoreLink(locale)}">${text(j.primaryCta)}</a></div></div></section>`;
+}
+
+function komoEntranceSection(locale) {
+  const copy = entranceCopy(locale);
+  return `<section class="section entry-choice" id="choose-your-entry">
+    <div class="shell">
+      <div class="entry-choice-intro reveal">
+        <div><p class="eyebrow">${text(copy.eyebrow)}</p><h2 class="section-heading">${raw(copy.title)}</h2></div>
+        <p class="section-lead">${text(copy.lead)}</p>
+      </div>
+      <div class="entry-choice-grid">
+        ${copy.paths.map((path) => `<article class="entry-choice-card entry-choice-card--${text(path.tone)} reveal">
+          <div class="entry-choice-top"><span>${text(path.number)}</span><span>${text(path.audience)}</span></div>
+          <div class="entry-choice-copy"><h3>${text(path.title)}</h3><p>${text(path.body)}</p></div>
+          <div class="entry-choice-action"><small>${text(path.note)}</small><a class="text-link" href="${pagePath(locale, path.page)}">${text(path.cta)} <span aria-hidden="true">↗</span></a></div>
+        </article>`).join('')}
+      </div>
+      <p class="entry-choice-continuity reveal"><span aria-hidden="true">→</span>${text(copy.continuity)}</p>
+    </div>
+  </section>`;
 }
 
 function pulsePathSection(locale) {
