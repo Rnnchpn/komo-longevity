@@ -18,6 +18,10 @@ L’anglais est la version éditoriale de référence et la langue par défaut d
 
 Le projet reste également publiable sur Netlify grâce au fichier `netlify.toml`.
 
+### Aperçu de cette branche
+
+La branche `agent/english-first-site` est volontairement isolée de `main`. Une fois le projet Vercel relié au dépôt, ce commit déclenche un aperçu de revue sans modifier la production ni les domaines KŌMØ.
+
 ## Développement
 
 ```bash
