@@ -127,38 +127,47 @@ const pulseJourney = {
 
 const komoEntrances = {
   en: {
-    eyebrow: 'START WHERE YOU ARE',
-    title: 'One method.<br>Three ways <em>to enter.</em>',
-    lead: 'You do not need to understand the whole KŌMØ ecosystem today. Choose the entry that matches your reason for being here; Pulse keeps the thread as your trajectory evolves.',
-    continuity: 'Begin with one door. Move across the ecosystem only when the next step becomes useful.',
+    eyebrow: 'FIND YOUR STARTING POINT',
+    title: 'What brings you<br><em>to KŌMØ?</em>',
+    lead: 'Choose the path that sounds most like you. You do not need to understand everything today — we make the next step clear.',
+    continuity: 'One clear beginning. The rest of KŌMØ becomes useful only when you need it.',
+    heroCta: 'Choose my starting point',
     paths: [
-      { tone: 'pulse', number: '01', audience: 'FOR YOURSELF', title: 'Begin with your mobility.', body: 'Create your personal KŌMØ Pulse, complete an educational Mobility Check and make the next step clear.', cta: 'Start my KŌMØ Pulse', note: 'Personal start · around 10 minutes', page: 'pulse' },
-      { tone: 'clinical', number: '02', audience: 'FOR CLINICIANS & PARTNERS', title: 'Bring movement into a responsible pathway.', body: 'Explore a structured clinical approach, measurement and continuity for a practice, centre or destination.', cta: 'Explore KŌMØ Clinical', note: 'Professional programme · selective opening', page: 'clinical' },
-      { tone: 'coast', number: '03', audience: 'FOR WHITE COAST', title: 'Move. Recover. Belong.', body: 'Enter the first local KŌMØ chapter: places, practices and people building a longer, more active life on the Costa Blanca.', cta: 'Discover White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+      { tone: 'pulse', number: '01', audience: 'I AM HERE FOR MYSELF', title: 'I want to understand my mobility.', body: 'Begin with a personal KŌMØ Pulse, a guided educational Mobility Check and one understandable next step.', cta: 'Start my KŌMØ Pulse', note: 'Personal start · around 10 minutes', page: 'pulse' },
+      { tone: 'clinical', number: '02', audience: 'I AM A CLINICIAN OR PARTNER', title: 'I want to bring movement into a responsible pathway.', body: 'Explore structured assessment, meaningful measurement and continuity for a practice, centre or destination.', cta: 'Explore KŌMØ Clinical', note: 'Professional programme · selective opening', page: 'clinical' },
+      { tone: 'coast', number: '03', audience: 'I AM DISCOVERING WHITE COAST', title: 'I want to move, recover and belong.', body: 'Meet the first local KŌMØ chapter: places, practices and people shaping a longer, more active life on the Costa Blanca.', cta: 'Discover White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
     ]
   },
   fr: {
-    eyebrow: 'COMMENCER LÀ OÙ VOUS EN ÊTES',
-    title: 'Une même méthode.<br>Trois portes <em>d’entrée.</em>',
-    lead: 'Il n’est pas nécessaire de comprendre tout l’écosystème KŌMØ aujourd’hui. Choisissez l’entrée qui correspond à ce qui vous amène ici ; Pulse garde le fil à mesure que votre trajectoire évolue.',
-    continuity: 'Commencez par une porte. Le reste de l’écosystème devient utile au bon moment.',
+    eyebrow: 'TROUVER VOTRE POINT DE DÉPART',
+    title: 'Qu’est-ce qui vous amène<br><em>chez KŌMØ&nbsp;?</em>',
+    lead: 'Choisissez le chemin qui vous ressemble le plus. Il n’est pas nécessaire de tout comprendre aujourd’hui : nous rendons la prochaine étape claire.',
+    continuity: 'Un début clair. Le reste de KŌMØ devient utile seulement lorsque vous en avez besoin.',
+    heroCta: 'Choisir mon point de départ',
     paths: [
-      { tone: 'pulse', number: '01', audience: 'POUR VOUS', title: 'Commencer par votre mobilité.', body: 'Créez votre KŌMØ Pulse personnel, réalisez un Mobility Check éducatif et rendez la prochaine étape visible.', cta: 'Commencer mon KŌMØ Pulse', note: 'Départ personnel · environ 10 minutes', page: 'pulse' },
-      { tone: 'clinical', number: '02', audience: 'POUR LES PRATICIENS & PARTENAIRES', title: 'Inscrire le mouvement dans un parcours responsable.', body: 'Découvrez une approche clinique structurée, la mesure et la continuité pour un cabinet, un centre ou un lieu partenaire.', cta: 'Découvrir KŌMØ Clinical', note: 'Programme professionnel · ouverture sélective', page: 'clinical' },
-      { tone: 'coast', number: '03', audience: 'POUR WHITE COAST', title: 'Bouger. Récupérer. Appartenir.', body: 'Entrez dans le premier chapitre local de KŌMØ : lieux, pratiques et personnes qui construisent une vie plus longue et plus active sur la Costa Blanca.', cta: 'Découvrir White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+      { tone: 'pulse', number: '01', audience: 'JE COMMENCE POUR MOI', title: 'Je veux mieux comprendre ma mobilité.', body: 'Commencez avec votre KŌMØ Pulse personnel, un Mobility Check éducatif guidé et une prochaine étape lisible.', cta: 'Commencer mon KŌMØ Pulse', note: 'Départ personnel · environ 10 minutes', page: 'pulse' },
+      { tone: 'clinical', number: '02', audience: 'JE SUIS PRATICIEN OU PARTENAIRE', title: 'Je veux inscrire le mouvement dans un parcours responsable.', body: 'Découvrez une évaluation structurée, une mesure utile et une continuité pour un cabinet, un centre ou un lieu partenaire.', cta: 'Découvrir KŌMØ Clinical', note: 'Programme professionnel · ouverture sélective', page: 'clinical' },
+      { tone: 'coast', number: '03', audience: 'JE DÉCOUVRE WHITE COAST', title: 'Je veux bouger, récupérer et appartenir.', body: 'Découvrez le premier chapitre local de KŌMØ : lieux, pratiques et personnes qui construisent une vie plus longue et plus active sur la Costa Blanca.', cta: 'Découvrir White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
     ]
   },
   es: {
-    eyebrow: 'EMPIEZA DONDE ESTÁS',
-    title: 'Un mismo método.<br>Tres formas <em>de entrar.</em>',
-    lead: 'No necesitas comprender hoy todo el ecosistema KŌMØ. Elige la puerta que corresponde a lo que te trae aquí; Pulse mantiene el hilo mientras tu trayectoria evoluciona.',
-    continuity: 'Empieza por una puerta. El resto del ecosistema será útil cuando llegue el momento adecuado.',
+    eyebrow: 'ENCUENTRA TU PUNTO DE PARTIDA',
+    title: '¿Qué te trae<br><em>a KŌMØ?</em>',
+    lead: 'Elige el camino que más se parece a ti. No necesitas entenderlo todo hoy: hacemos que el siguiente paso sea claro.',
+    continuity: 'Un comienzo claro. El resto de KŌMØ será útil solo cuando lo necesites.',
+    heroCta: 'Elegir mi punto de partida',
     paths: [
-      { tone: 'pulse', number: '01', audience: 'PARA TI', title: 'Empieza por tu movilidad.', body: 'Crea tu KŌMØ Pulse personal, completa un Mobility Check educativo y haz visible el siguiente paso.', cta: 'Empezar mi KŌMØ Pulse', note: 'Inicio personal · unos 10 minutos', page: 'pulse' },
-      { tone: 'clinical', number: '02', audience: 'PARA CLÍNICOS Y SOCIOS', title: 'Integrar el movimiento en un recorrido responsable.', body: 'Descubre un enfoque clínico estructurado, la medición y la continuidad para una consulta, centro o destino asociado.', cta: 'Descubrir KŌMØ Clinical', note: 'Programa profesional · apertura selectiva', page: 'clinical' },
-      { tone: 'coast', number: '03', audience: 'PARA WHITE COAST', title: 'Muévete. Recupera. Pertenece.', body: 'Entra en el primer capítulo local de KŌMØ: lugares, prácticas y personas que construyen una vida más larga y activa en la Costa Blanca.', cta: 'Descubrir White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+      { tone: 'pulse', number: '01', audience: 'EMPIEZO PARA MÍ', title: 'Quiero entender mejor mi movilidad.', body: 'Empieza con tu KŌMØ Pulse personal, un Mobility Check educativo guiado y un siguiente paso comprensible.', cta: 'Empezar mi KŌMØ Pulse', note: 'Inicio personal · unos 10 minutos', page: 'pulse' },
+      { tone: 'clinical', number: '02', audience: 'SOY CLÍNICO O SOCIO', title: 'Quiero integrar el movimiento en un recorrido responsable.', body: 'Descubre evaluación estructurada, medición útil y continuidad para una consulta, centro o destino asociado.', cta: 'Descubrir KŌMØ Clinical', note: 'Programa profesional · apertura selectiva', page: 'clinical' },
+      { tone: 'coast', number: '03', audience: 'DESCUBRO WHITE COAST', title: 'Quiero moverme, recuperarme y pertenecer.', body: 'Descubre el primer capítulo local de KŌMØ: lugares, prácticas y personas que construyen una vida más larga y activa en la Costa Blanca.', cta: 'Descubrir White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
     ]
   }
+};
+
+const chairHeroAlt = {
+  en: 'A seated woman and a standing man balancing on one leg beside two wooden chairs',
+  fr: 'Une femme assise et un homme debout en équilibre sur une jambe, à côté de deux chaises en bois',
+  es: 'Una mujer sentada y un hombre de pie en equilibrio sobre una pierna junto a dos sillas de madera'
 };
 
 const journeyCopy = (locale) => pulseJourney[locale] || pulseJourney.en;
@@ -294,30 +303,14 @@ function buttons(locale, first, second, secondHref) {
 function homePage(locale) {
   const h = translations[locale].home;
   const j = journeyCopy(locale);
+  const entry = entranceCopy(locale);
   return `
-    <section class="hero hero-visual">
-      <div class="hero-media" aria-hidden="true"><img src="/assets/images/hero-mediterranean-motion-v1.webp" alt="" width="1672" height="941" fetchpriority="high" decoding="async"></div>
-      <div class="shell hero-visual-grid">
-        <div class="hero-copy">
-          <p class="eyebrow eyebrow-light reveal">${text(j.heroEyebrow)}</p>
-          <h1 class="display reveal">${raw(j.heroTitle)}</h1>
-          <p class="lede reveal">${text(j.heroLead)}</p>
-          ${buttons(locale, j.primaryCta, j.secondaryCta, '#your-path')}
-          <div class="trust-row reveal">${j.heroTrust.map((item) => `<span>${text(item)}</span>`).join('')}</div>
-        </div>
-        <aside class="pulse-start-card reveal" aria-label="${text(j.miniTitle)}">
-          <div class="pulse-start-head"><span>KŌMØ Pulse</span><span>01 / 04</span></div>
-          <div class="pulse-start-copy">
-            <p class="eyebrow eyebrow-light">${text(j.miniLabel)}</p>
-            <h2>${text(j.miniTitle)}</h2>
-          </div>
-          <ol class="mini-pulse-steps">
-            ${j.steps.map(([number, title, body], index) => `<li class="${index === 0 ? 'is-current' : ''}"><span>${text(number)}</span><div><strong>${text(title)}</strong><small>${index === 0 ? text(j.journeyNow) : text(body)}</small></div></li>`).join('')}
-          </ol>
-          <a class="button button-light" href="${scoreLink(locale)}">${text(j.miniCta)} <span aria-hidden="true">↗</span></a>
-        </aside>
-      </div>
+    <section class="hero hero-chair" aria-label="KŌMØ — ${text(entry.heroCta)}">
+      <img class="hero-chair-media" src="/assets/images/hero-chair-balance-v1.webp" alt="${text(chairHeroAlt[locale] || chairHeroAlt.en)}" width="1672" height="941" fetchpriority="high" decoding="async">
+      <div class="hero-chair-control"><a href="#choose-your-entry"><span>01</span>${text(entry.heroCta)}<b aria-hidden="true">↓</b></a></div>
     </section>
+
+    ${komoEntranceSection(locale)}
 
     ${pulsePathSection(locale)}
 
@@ -352,8 +345,6 @@ function homePage(locale) {
       </div>
     </section>
 
-    ${komoEntranceSection(locale)}
-
     <section class="chapter"><div class="shell chapter-inner"><div class="chapter-card reveal"><p class="eyebrow eyebrow-light">${text(h.chapterEyebrow)}</p><h2>${raw(h.chapterTitle)}</h2><p>${text(h.chapterText)}</p><div class="hero-actions"><a class="button button-light" href="${link(locale, 'white-coast')}">${text(h.chapterCta)}</a></div><div class="chapter-notes">${h.chapterNotes.map(([label, value]) => `<div><strong>${text(label)}</strong>${text(value)}</div>`).join('')}</div></div><p class="chapter-quote reveal">${raw(h.chapterQuote)}</p></div></section>
 
     <section class="section"><div class="shell intro-grid reveal"><div><p class="eyebrow">${text(h.scienceEyebrow)}</p><h2 class="section-heading">${raw(h.scienceTitle)}</h2></div><div><p class="section-lead">${text(h.scienceLead)}</p><a class="text-link" href="${pagePath(locale, 'science')}">${text(h.scienceCta)}</a></div></div></section>
@@ -373,7 +364,7 @@ function komoEntranceSection(locale) {
         ${copy.paths.map((path) => `<article class="entry-choice-card entry-choice-card--${text(path.tone)} reveal">
           <div class="entry-choice-top"><span>${text(path.number)}</span><span>${text(path.audience)}</span></div>
           <div class="entry-choice-copy"><h3>${text(path.title)}</h3><p>${text(path.body)}</p></div>
-          <div class="entry-choice-action"><small>${text(path.note)}</small><a class="text-link" href="${pagePath(locale, path.page)}">${text(path.cta)} <span aria-hidden="true">↗</span></a></div>
+          <div class="entry-choice-action"><small>${text(path.note)}</small><a class="text-link" href="${link(locale, path.page)}" ${path.page === 'white-coast' ? 'target="_blank" rel="noreferrer"' : ''}>${text(path.cta)} <span aria-hidden="true">↗</span></a></div>
         </article>`).join('')}
       </div>
       <p class="entry-choice-continuity reveal"><span aria-hidden="true">→</span>${text(copy.continuity)}</p>
