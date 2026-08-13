@@ -6,6 +6,9 @@ import { site, translations } from '../src/content.mjs';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const output = join(root, 'site');
 const sourceAssets = join(root, 'src', 'assets');
+// Static assets are served aggressively by the CDN. Bump this whenever a
+// shared stylesheet or script changes so visitors receive the matching UI.
+const assetVersion = '20260814-v7';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -284,8 +287,8 @@ function layout(locale, page, content, meta) {
   <meta property="og:image" content="${site.origin}/assets/og-komo.svg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/css/site.css">
-  <script defer src="/assets/js/site.js"></script>
+  <link rel="stylesheet" href="/assets/css/site.css?v=${assetVersion}">
+  <script defer src="/assets/js/site.js?v=${assetVersion}"></script>
 </head>
 <body data-page="${text(page)}">
 ${header(locale, page)}
