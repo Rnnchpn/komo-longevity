@@ -255,7 +255,7 @@ img { max-width: 100%; display: block; }
 .entry-choice-card::after { content: ''; position: absolute; right: 11%; bottom: 16%; width: 114px; aspect-ratio: 1; border: 1px solid currentColor; border-radius: 50%; opacity: .1; }
 .entry-choice-card:hover { transform: translateY(-5px); box-shadow: 0 22px 48px rgba(8,35,39,.13); }
 .entry-choice-card--pulse { color: #fff; border-color: transparent; background: linear-gradient(145deg, #104e55 0%, #063c42 57%, #0b2d31 100%); }
-.entry-choice-card--clinical { color: var(--ink); background: linear-gradient(135deg, #eadbc7, #d8d4c5 70%, #c1d0c8); }
+.entry-choice-card--community { color: var(--ink); background: linear-gradient(135deg, #eadbc7, #d8d4c5 70%, #c1d0c8); }
 .entry-choice-card--coast { color: #fff; border-color: transparent; background: linear-gradient(145deg, #6f928d 0%, #325e63 57%, #154449 100%); }
 .entry-choice-top { position: relative; z-index: 1; display: flex; justify-content: space-between; gap: 1rem; color: currentColor; font: 500 .61rem/1.25 var(--mono); letter-spacing: .11em; text-transform: uppercase; }
 .entry-choice-top span:last-child { max-width: 66%; text-align: right; opacity: .7; }
