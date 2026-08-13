@@ -3,6 +3,23 @@
   "buildCommand": "node scripts/build.mjs",
   "outputDirectory": "site",
   "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "locomotor.komolongevity.com" }],
+      "destination": "/locomotor/"
+    },
+    {
+      "source": "/fr",
+      "has": [{ "type": "host", "value": "locomotor.komolongevity.com" }],
+      "destination": "/fr/locomotor/"
+    },
+    {
+      "source": "/es",
+      "has": [{ "type": "host", "value": "locomotor.komolongevity.com" }],
+      "destination": "/es/locomotor/"
+    }
+  ],
   "headers": [
     {
       "source": "/assets/(.*)",

@@ -1,6 +1,6 @@
 export const site = {
   origin: 'https://www.komolongevity.com',
-  pages: ['index', 'pulse', 'clinical', 'white-coast', 'motion-retreats', 'library', 'circle', 'science', 'contact'],
+  pages: ['index', 'pulse', 'clinical', 'white-coast', 'motion-retreats', 'library', 'locomotor', 'circle', 'science', 'contact'],
   locales: ['fr', 'en', 'es']
 };
 
@@ -10,7 +10,7 @@ const base = {
     lang: 'fr',
     languageName: 'Français',
     nav: {
-      pulse: 'Pulse', clinical: 'Clinical', whiteCoast: 'White Coast', retreats: 'Retreats', library: 'Bibliothèque', circle: 'Circle', science: 'Science', contact: 'Contact', score: 'Calculer mon Motion Score', menu: 'Ouvrir le menu', close: 'Fermer le menu'
+      pulse: 'Pulse', clinical: 'Clinical', whiteCoast: 'White Coast', retreats: 'Retreats', library: 'Bibliothèque', locomotor: 'Locomotor', circle: 'Circle', science: 'Science', contact: 'Contact', score: 'Calculer mon Motion Score', menu: 'Ouvrir le menu', close: 'Fermer le menu'
     },
     global: {
       brandSubtitle: 'Longévité en mouvement',
@@ -33,7 +33,7 @@ const base = {
       resources: 'Ressources',
       company: 'KŌMØ',
       links1: [['Pulse', 'pulse'], ['KŌMØ Clinical', 'clinical'], ['White Coast', 'white-coast'], ['Motion Retreats', 'motion-retreats']],
-      links2: [['Bibliothèque', 'library'], ['Science & méthode', 'science'], ['KŌMØ Circle', 'circle'], ['Contact', 'contact']],
+      links2: [['Locomotor', 'locomotor'], ['Bibliothèque', 'library'], ['Science & méthode', 'science'], ['KŌMØ Circle', 'circle'], ['Contact', 'contact']],
       links3: [['À propos', 'index'], ['contact@komolongevity.com', 'mailto:contact@komolongevity.com'], ['Instagram', 'https://www.instagram.com/komo_longevity/']]
     },
     home: {
@@ -236,9 +236,9 @@ const base = {
   },
   en: {
     code: 'EN', lang: 'en', languageName: 'English',
-    nav: {pulse: 'Pulse', clinical: 'Clinical', whiteCoast: 'White Coast', retreats: 'Retreats', library: 'Library', circle: 'Circle', science: 'Science', contact: 'Contact', score: 'Explore your mobility', menu: 'Open menu', close: 'Close menu'},
+    nav: {pulse: 'Pulse', clinical: 'Clinical', whiteCoast: 'White Coast', retreats: 'Retreats', library: 'Library', locomotor: 'Locomotor', circle: 'Circle', science: 'Science', contact: 'Contact', score: 'Explore your mobility', menu: 'Open menu', close: 'Close menu'},
     global: {brandSubtitle: 'Longevity in motion', allRights: '© 2026 KŌMØ. All rights reserved.', footerCopy: 'Measure, understand and preserve human mobility throughout life.', madeBy: 'Built with clinical rigour, for real life.', legal: 'Legal notice', privacy: 'Privacy', terms: 'Terms', currentLanguage: 'EN', skip: 'Skip to content', explore: 'Explore', discover: 'Discover', getStarted: 'Get started', readMore: 'Read the story', contactUs: 'Contact us', visit: 'Visit website', medicalNotice: 'The Motion Score is a personal educational indicator. It is not a diagnosis, medical advice or a care decision.'},
-    footer: {ecosystem: 'Ecosystem', resources: 'Resources', company: 'KŌMØ', links1: [['Pulse', 'pulse'], ['KŌMØ Clinical', 'clinical'], ['White Coast', 'white-coast'], ['Motion Retreats', 'motion-retreats']], links2: [['Library', 'library'], ['Science & method', 'science'], ['KŌMØ Circle', 'circle'], ['Contact', 'contact']], links3: [['About', 'index'], ['contact@komolongevity.com', 'mailto:contact@komolongevity.com'], ['Instagram', 'https://www.instagram.com/komo_longevity/']]},
+    footer: {ecosystem: 'Ecosystem', resources: 'Resources', company: 'KŌMØ', links1: [['Pulse', 'pulse'], ['KŌMØ Clinical', 'clinical'], ['White Coast', 'white-coast'], ['Motion Retreats', 'motion-retreats']], links2: [['Locomotor', 'locomotor'], ['Library', 'library'], ['Science & method', 'science'], ['KŌMØ Circle', 'circle'], ['Contact', 'contact']], links3: [['About', 'index'], ['contact@komolongevity.com', 'mailto:contact@komolongevity.com'], ['Instagram', 'https://www.instagram.com/komo_longevity/']]},
     home: {
       metaTitle: 'KŌMØ — Longevity in motion', metaDescription: 'KŌMØ connects mobility measurement, clinical guidance, retreats and community to make locomotor longevity a new standard.', eyebrow: 'KŌMØ · Locomotor Longevity Network', title: 'Your body.<br>Your life, <em>in motion.</em>', lead: 'KŌMØ turns mobility from a feeling into a trajectory — connecting your personal reference points, clinical expertise, restorative places and the people who make a longer life more alive.', primaryCta: 'Explore your mobility', secondaryCta: 'Discover the ecosystem', trust: ['Educational orientation · not an online diagnosis', 'Clinical assessment when it is relevant', 'One trajectory, at your own pace'], objectKicker: 'The thread that connects', objectNumber: '01', objectTitle: 'Access.<br>Understand.<br>Continue.', objectText: 'Pulse connects your first reading, qualified professionals and the experiences that support your next step.',
       introEyebrow: 'The KŌMØ method', introTitle: 'One starting point.<br>An ecosystem <em>for what follows.</em>', introLead: 'KŌMØ is more than a score. Pulse keeps the thread; medicine, places, community and knowledge make that continuity real.',
@@ -270,9 +270,9 @@ const base = {
   },
   es: {
     code: 'ES', lang: 'es', languageName: 'Español',
-    nav: {pulse:'Pulse',clinical:'Clinical',whiteCoast:'White Coast',retreats:'Retreats',library:'Biblioteca',circle:'Circle',science:'Ciencia',contact:'Contacto',score:'Calcular mi Motion Score',menu:'Abrir menú',close:'Cerrar menú'},
+    nav: {pulse:'Pulse',clinical:'Clinical',whiteCoast:'White Coast',retreats:'Retreats',library:'Biblioteca',locomotor:'Locomotor',circle:'Circle',science:'Ciencia',contact:'Contacto',score:'Calcular mi Motion Score',menu:'Abrir menú',close:'Cerrar menú'},
     global: {brandSubtitle:'Longevidad en movimiento',allRights:'© 2026 KŌMØ. Todos los derechos reservados.',footerCopy:'Medir, comprender y preservar la movilidad humana durante toda la vida.',madeBy:'Diseñado con rigor clínico, para la vida real.',legal:'Aviso legal',privacy:'Privacidad',terms:'Condiciones',currentLanguage:'ES',skip:'Ir al contenido',explore:'Explorar',discover:'Descubrir',getStarted:'Empezar',readMore:'Leer el dossier',contactUs:'Contactar',visit:'Visitar el sitio',medicalNotice:'El Motion Score es un indicador educativo personal. No constituye un diagnóstico, un consejo médico ni una decisión asistencial.'},
-    footer: {ecosystem:'Ecosistema',resources:'Recursos',company:'KŌMØ',links1:[['Pulse','pulse'],['KŌMØ Clinical','clinical'],['White Coast','white-coast'],['Motion Retreats','motion-retreats']],links2:[['Biblioteca','library'],['Ciencia y método','science'],['KŌMØ Circle','circle'],['Contacto','contact']],links3:[['Acerca de','index'],['contact@komolongevity.com','mailto:contact@komolongevity.com'],['Instagram','https://www.instagram.com/komo_longevity/']]},
+    footer: {ecosystem:'Ecosistema',resources:'Recursos',company:'KŌMØ',links1:[['Pulse','pulse'],['KŌMØ Clinical','clinical'],['White Coast','white-coast'],['Motion Retreats','motion-retreats']],links2:[['Locomotor','locomotor'],['Biblioteca','library'],['Ciencia y método','science'],['KŌMØ Circle','circle'],['Contacto','contact']],links3:[['Acerca de','index'],['contact@komolongevity.com','mailto:contact@komolongevity.com'],['Instagram','https://www.instagram.com/komo_longevity/']]},
     home: {
       metaTitle:'KŌMØ — Longevidad en movimiento',metaDescription:'KŌMØ conecta la medición de la movilidad, el acompañamiento clínico, los retiros y la comunidad para convertir la longevidad locomotora en un nuevo estándar.',eyebrow:'KŌMØ · Locomotor Longevity Network',title:'Tu cuerpo.<br>Tu vida, <em>en movimiento.</em>',lead:'KŌMØ conecta tu recorrido de salud, tus referencias personales, los lugares que te restauran y las personas que hacen que una vida más larga sea más viva.',primaryCta:'Calcular mi Motion Score',secondaryCta:'Descubrir el ecosistema',trust:['Gratis · unos 10 minutos','Puntuación educativa, sin diagnóstico online','Tu recorrido Pulse, a tu ritmo'],objectKicker:'El hilo que conecta',objectNumber:'01',objectTitle:'Una medición.<br>Una trayectoria.',objectText:'Pulse conecta tu primera lectura, los profesionales y las experiencias que importan.',
       introEyebrow:'El método KŌMØ',introTitle:'Un punto de partida.<br>Un ecosistema <em>para lo que sigue.</em>',introLead:'KŌMØ es más que una puntuación. Pulse mantiene el hilo; la medicina, los lugares, la comunidad y el conocimiento hacen real esa continuidad.',wheel:[{num:'01',title:'Pulse & Clinical',text:'Tu puntuación, evaluación y seguimiento en un recorrido comprensible.',link:'Descubrir Pulse',page:'pulse'},{num:'02',title:'White Coast',text:'Una comunidad y una conserjería local para el movimiento, la recuperación y una forma de vivir en la Costa Blanca.',link:'Descubrir White Coast',page:'white-coast'},{num:'03',title:'KŌMØ Library',text:'Comprender con rigor antes de actuar, sin prometer de más.',link:'Explorar la biblioteca',page:'library'},{num:'04',title:'Circle',text:'Anuncios, encuentros y conexiones útiles en la vida real.',link:'Descubrir Circle',page:'circle'}],
