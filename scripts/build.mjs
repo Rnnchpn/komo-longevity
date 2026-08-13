@@ -131,39 +131,39 @@ const pulseJourney = {
 
 const komoEntrances = {
   en: {
-    eyebrow: 'FIND YOUR STARTING POINT',
-    title: 'What brings you<br><em>to KŌMØ?</em>',
-    lead: 'Choose the path that sounds most like you. You do not need to understand everything today — we make the next step clear.',
-    continuity: 'One clear beginning. The rest of KŌMØ becomes useful only when you need it.',
+    eyebrow: 'CHOOSE YOUR KŌMØ',
+    title: 'What do you need<br><em>today?</em>',
+    lead: 'Your Motion Score. Your local network. Or your KŌMØ stay on the White Coast.',
+    continuity: 'One KŌMØ ecosystem: health, people and places.',
     heroCta: 'Choose my starting point',
     paths: [
-      { tone: 'pulse', number: '01', audience: 'I AM HERE FOR MYSELF', title: 'I want to understand my mobility.', body: 'Begin with a personal KŌMØ Pulse, a guided educational Mobility Check and one understandable next step.', cta: 'Start my KŌMØ Pulse', note: 'Personal start · around 10 minutes', page: 'pulse' },
-      { tone: 'clinical', number: '02', audience: 'I AM A CLINICIAN OR PARTNER', title: 'I want to bring movement into a responsible pathway.', body: 'Explore structured assessment, meaningful measurement and continuity for a practice, centre or destination.', cta: 'Explore KŌMØ Clinical', note: 'Professional programme · selective opening', page: 'clinical' },
-      { tone: 'coast', number: '03', audience: 'I AM DISCOVERING WHITE COAST', title: 'I want to move, recover and belong.', body: 'Meet the first local KŌMØ chapter: places, practices and people shaping a longer, more active life on the Costa Blanca.', cta: 'Discover White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+      { tone: 'pulse', number: '01', audience: 'KŌMØ PULSE · MEDICAL', title: 'Your Motion Score.', body: 'A medically informed score for your mobility, health and performance — with one clear next step.', cta: 'Get my Motion Score', note: 'Health · performance · profile', page: 'pulse' },
+      { tone: 'community', number: '02', audience: 'KŌMØ COMMUNITY · LOCAL', title: 'Your local network.', body: 'A personal concierge, trusted introductions and selected local experiences — so the White Coast opens up to you.', cta: 'Explore KŌMØ Community', note: 'Concierge · network · experiences', page: 'white-coast' },
+      { tone: 'coast', number: '03', audience: 'KŌMØ WHITE COAST · HOSPITALITY', title: 'Your KŌMØ stay.', body: 'Selected hotels, carefully designed stays and longevity experiences made for the way you want to live.', cta: 'Explore White Coast stays', note: 'Hospitality · stays · experiences', page: 'motion-retreats' }
     ]
   },
   fr: {
-    eyebrow: 'TROUVER VOTRE POINT DE DÉPART',
-    title: 'Qu’est-ce qui vous amène<br><em>chez KŌMØ&nbsp;?</em>',
-    lead: 'Choisissez le chemin qui vous ressemble le plus. Il n’est pas nécessaire de tout comprendre aujourd’hui : nous rendons la prochaine étape claire.',
-    continuity: 'Un début clair. Le reste de KŌMØ devient utile seulement lorsque vous en avez besoin.',
+    eyebrow: 'CHOISISSEZ VOTRE KŌMØ',
+    title: 'De quoi avez-vous besoin<br><em>aujourd’hui&nbsp;?</em>',
+    lead: 'Votre Motion Score. Votre réseau local. Ou votre séjour KŌMØ sur la White Coast.',
+    continuity: 'Un seul écosystème KŌMØ : santé, réseau et expériences.',
     heroCta: 'Choisir mon point de départ',
     paths: [
-      { tone: 'pulse', number: '01', audience: 'JE COMMENCE POUR MOI', title: 'Je veux mieux comprendre ma mobilité.', body: 'Commencez avec votre KŌMØ Pulse personnel, un Mobility Check éducatif guidé et une prochaine étape lisible.', cta: 'Commencer mon KŌMØ Pulse', note: 'Départ personnel · environ 10 minutes', page: 'pulse' },
-      { tone: 'clinical', number: '02', audience: 'JE SUIS PRATICIEN OU PARTENAIRE', title: 'Je veux inscrire le mouvement dans un parcours responsable.', body: 'Découvrez une évaluation structurée, une mesure utile et une continuité pour un cabinet, un centre ou un lieu partenaire.', cta: 'Découvrir KŌMØ Clinical', note: 'Programme professionnel · ouverture sélective', page: 'clinical' },
-      { tone: 'coast', number: '03', audience: 'JE DÉCOUVRE WHITE COAST', title: 'Je veux bouger, récupérer et appartenir.', body: 'Découvrez le premier chapitre local de KŌMØ : lieux, pratiques et personnes qui construisent une vie plus longue et plus active sur la Costa Blanca.', cta: 'Découvrir White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+      { tone: 'pulse', number: '01', audience: 'KŌMØ PULSE · MÉDICAL', title: 'Votre Motion Score.', body: 'Une lecture médicale de votre mobilité, de votre santé et de votre performance — avec une prochaine étape claire.', cta: 'Obtenir mon Motion Score', note: 'Santé · performance · profil', page: 'pulse' },
+      { tone: 'community', number: '02', audience: 'KŌMØ COMMUNITY · LOCAL', title: 'Votre réseau local.', body: 'Une conciergerie personnelle, des mises en relation de confiance et des expériences locales choisies — pour que la White Coast s’ouvre à vous.', cta: 'Découvrir KŌMØ Community', note: 'Conciergerie · réseau · expériences', page: 'white-coast' },
+      { tone: 'coast', number: '03', audience: 'KŌMØ WHITE COAST · HÔTELLERIE', title: 'Votre séjour KŌMØ.', body: 'Des hôtels sélectionnés, des séjours conçus avec soin et des expériences longévité pensées pour votre manière de vivre.', cta: 'Découvrir les séjours White Coast', note: 'Hôtellerie · séjours · expériences', page: 'motion-retreats' }
     ]
   },
   es: {
-    eyebrow: 'ENCUENTRA TU PUNTO DE PARTIDA',
-    title: '¿Qué te trae<br><em>a KŌMØ?</em>',
-    lead: 'Elige el camino que más se parece a ti. No necesitas entenderlo todo hoy: hacemos que el siguiente paso sea claro.',
-    continuity: 'Un comienzo claro. El resto de KŌMØ será útil solo cuando lo necesites.',
+    eyebrow: 'ELIGE TU KŌMØ',
+    title: '¿Qué necesitas<br><em>hoy?</em>',
+    lead: 'Tu Motion Score. Tu red local. O tu estancia KŌMØ en la White Coast.',
+    continuity: 'Un ecosistema KŌMØ: salud, red y experiencias.',
     heroCta: 'Elegir mi punto de partida',
     paths: [
-      { tone: 'pulse', number: '01', audience: 'EMPIEZO PARA MÍ', title: 'Quiero entender mejor mi movilidad.', body: 'Empieza con tu KŌMØ Pulse personal, un Mobility Check educativo guiado y un siguiente paso comprensible.', cta: 'Empezar mi KŌMØ Pulse', note: 'Inicio personal · unos 10 minutos', page: 'pulse' },
-      { tone: 'clinical', number: '02', audience: 'SOY CLÍNICO O SOCIO', title: 'Quiero integrar el movimiento en un recorrido responsable.', body: 'Descubre evaluación estructurada, medición útil y continuidad para una consulta, centro o destino asociado.', cta: 'Descubrir KŌMØ Clinical', note: 'Programa profesional · apertura selectiva', page: 'clinical' },
-      { tone: 'coast', number: '03', audience: 'DESCUBRO WHITE COAST', title: 'Quiero moverme, recuperarme y pertenecer.', body: 'Descubre el primer capítulo local de KŌMØ: lugares, prácticas y personas que construyen una vida más larga y activa en la Costa Blanca.', cta: 'Descubrir White Coast', note: 'Jávea · Dénia · Moraira · Altea', page: 'white-coast' }
+      { tone: 'pulse', number: '01', audience: 'KŌMØ PULSE · MÉDICO', title: 'Tu Motion Score.', body: 'Una lectura médica de tu movilidad, salud y rendimiento — con un siguiente paso claro.', cta: 'Obtener mi Motion Score', note: 'Salud · rendimiento · perfil', page: 'pulse' },
+      { tone: 'community', number: '02', audience: 'KŌMØ COMMUNITY · LOCAL', title: 'Tu red local.', body: 'Conserjería personal, conexiones de confianza y experiencias locales seleccionadas para que la White Coast se abra ante ti.', cta: 'Descubrir KŌMØ Community', note: 'Conserjería · red · experiencias', page: 'white-coast' },
+      { tone: 'coast', number: '03', audience: 'KŌMØ WHITE COAST · HOSPITALITY', title: 'Tu estancia KŌMØ.', body: 'Hoteles seleccionados, estancias cuidadosamente diseñadas y experiencias de longevidad pensadas para tu forma de vivir.', cta: 'Descubrir estancias White Coast', note: 'Hotelería · estancias · experiencias', page: 'motion-retreats' }
     ]
   }
 };
