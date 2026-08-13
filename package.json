@@ -1,0 +1,10 @@
+{
+  "name": "komo-international-v2",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "preview": "python3 -m http.server 8080 --directory site"
+  }
+}

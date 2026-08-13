@@ -1,52 +1,35 @@
-# KŌMØ Longevity - Site Officiel
+# KŌMØ — International V3
 
-Écosystème français de la prévention locomotrice 4.0.
+Site statique, trilingue et pré-généré pour KŌMØ.
 
-## Pages incluses
-- **index.html** : Homepage premium avec modals interactifs pour KOMO Score, KOMO Case, KOMO Pulse. Design luxury dark.
-- **syndrome-locomoteur.html** : Page complète et interactive sur le Syndrome Locomoteur avec :
-  - Calculateur gamifié "Capital Mobilité" (3 étapes, score /100, plan d'action personnalisé)
-  - Tests simulés (Stand-up, Two-Step)
-  - Questionnaire 25 questions interactif
-  - Checklist signes d'alerte
-  - LLP Age Score simulator
-  - Prévention (exercices + nutrition)
-  - Sources scientifiques
+## English-first structure
 
-## Liens qui fonctionnent
-- Tous les ancres (#defi, #solution, etc.) → navigation fluide
-- Lien "Découvrir plus en détail le syndrome locomoteur" → syndrome-locomoteur.html
-- Boutons Summit → scroll ou modals
-- Modals premium qui s'ouvrent comme des pages
-- Tous les boutons et calculateurs JS 100% fonctionnels
+- English reference site: `/`, `/pulse/`, `/clinical/`, `/library/`…
+- Français : `/fr/`, `/fr/pulse/`, `/fr/clinical/`…
+- Español : `/es/`, `/es/pulse/`, `/es/clinical/`…
 
-## Déploiement Vercel (1 clic - tout automatique)
-1. Va sur [Vercel.com](https://vercel.com) et connecte ton compte GitHub
-2. Clique **"Add New Project"** → Import Git Repository
-3. Sélectionne `Rnnchpn/komo-longevity`
-4. Vercel détecte automatiquement que c'est un site statique → **Deploy**
-5. Ton site est live en ~1 minute avec URL personnalisée (ex: komo-longevity.vercel.app)
-6. Chaque push sur `main` → déploiement automatique
+L’anglais est la version éditoriale de référence et la langue par défaut du domaine. Le français et l’espagnol sont des localisations natives distinctes. Chaque page possède ses propres balises SEO, canonical et liens `hreflang`.
 
-Aucune configuration manuelle requise. Tout est prêt.
+## Déploiement Vercel
 
-## Structure
-```
-komo-longevity/
-├── index.html              # Homepage KŌMØ
-├── syndrome-locomoteur.html # Page Syndrome + outils interactifs
-├── vercel.json             # Config Vercel (optionnel)
-└── README.md
+1. Importer ce dossier dans le dépôt qui alimente réellement `www.komolongevity.com`.
+2. Dans Vercel, connecter le dépôt puis laisser `vercel.json` appliquer la commande `node scripts/build.mjs` et le dossier de publication `site`.
+3. Déployer d’abord un aperçu de branche, puis publier une fois la revue terminée.
+
+Le projet reste également publiable sur Netlify grâce au fichier `netlify.toml`.
+
+## Développement
+
+```bash
+npm run build
+npm run preview
 ```
 
-## Personnalisation future
-- Remplace les images placeholder par tes assets (renan-chapon.jpg etc.)
-- Ajoute /summit.html si besoin
-- Connecte les formulaires à un backend (Formspree, Supabase...)
-- Passe en Next.js + Tailwind build pour production scale
+Le contenu est centralisé dans `src/content.mjs`; les pages sont générées par `scripts/build.mjs`. Le répertoire `site/` est généré et directement publiable.
 
-Créé automatiquement pour toi. Tout fonctionne, tout est prêt pour Vercel.
+## Points éditoriaux importants
 
-**Marchez sur vos deux pieds toute votre vie.** 🦵
-
-© 2026 KŌMØ Health Corporation - Locotech Lab
+- KŌMØ Locomo Check est présenté comme une orientation éducative, et non comme un diagnostic en ligne.
+- Les services cliniques ne sont jamais annoncés en dehors de structures et de professionnels autorisés.
+- White Coast est présenté comme un chapitre communautaire local et dirige vers `https://community.komolongevity.com/`.
+- Le formulaire de contact ouvre directement un e-mail vers `contact@komolongevity.com` tant qu’un endpoint Brevo ou Supabase n’est pas connecté.
