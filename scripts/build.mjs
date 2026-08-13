@@ -2,13 +2,14 @@ import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { site, translations } from '../src/content.mjs';
+import { locomotorCopy, locomotorReferences } from '../src/locomotor.mjs';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const output = join(root, 'site');
 const sourceAssets = join(root, 'src', 'assets');
 // Static assets are served aggressively by the CDN. Bump this whenever a
 // shared stylesheet or script changes so visitors receive the matching UI.
-const assetVersion = '20260814-v7';
+const assetVersion = '20260814-v8';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -217,7 +218,7 @@ function header(locale, page) {
   const c = translations[locale];
   const action = pageAction(locale, page);
   const navItems = [
-    ['pulse', c.nav.pulse], ['clinical', c.nav.clinical], ['library', c.nav.library], ['white-coast', c.nav.whiteCoast]
+    ['pulse', c.nav.pulse], ['clinical', c.nav.clinical], ['locomotor', c.nav.locomotor], ['library', c.nav.library], ['white-coast', c.nav.whiteCoast]
   ];
   return `
     <a class="skip-link" href="#main">${text(c.global.skip)}</a>
@@ -261,6 +262,35 @@ function footer(locale) {
     </footer>`;
 }
 
+function structuredData(locale, page, meta) {
+  if (page !== 'locomotor') return '';
+  const conditionNames = {
+    en: 'Locomotive syndrome',
+    fr: 'Syndrome locomoteur',
+    es: 'Síndrome locomotor'
+  };
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'MedicalWebPage',
+    name: meta.metaTitle,
+    description: meta.metaDescription,
+    url: canonical(locale, page),
+    inLanguage: translations[locale].lang,
+    dateModified: '2026-08-13',
+    about: {
+      '@type': 'MedicalCondition',
+      name: conditionNames[locale]
+    },
+    citation: locomotorReferences.map((reference) => reference.url),
+    publisher: {
+      '@type': 'Organization',
+      name: 'KŌMØ',
+      url: site.origin
+    }
+  };
+  return `<script type="application/ld+json">${JSON.stringify(data).replaceAll('<', '\\u003c')}</script>`;
+}
+
 function layout(locale, page, content, meta) {
   const c = translations[locale];
   const action = pageAction(locale, page);
@@ -278,7 +308,7 @@ function layout(locale, page, content, meta) {
   <link rel="canonical" href="${canonical(locale, page)}">
   ${alternatives}
   <link rel="alternate" hreflang="x-default" href="${defaultUrl}">
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="${page === 'locomotor' ? 'article' : 'website'}">
   <meta property="og:locale" content="${locale === 'en' ? 'en_GB' : locale === 'fr' ? 'fr_FR' : 'es_ES'}">
   <meta property="og:site_name" content="KŌMØ">
   <meta property="og:title" content="${text(meta.metaTitle)}">
@@ -288,6 +318,7 @@ function layout(locale, page, content, meta) {
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/assets/css/site.css?v=${assetVersion}">
+  ${structuredData(locale, page, meta)}
   <script defer src="/assets/js/site.js?v=${assetVersion}"></script>
 </head>
 <body data-page="${text(page)}">
@@ -470,7 +501,126 @@ function retreatsPage(locale) {
 function libraryPage(locale) {
   const c = translations[locale]; const p = c.library;
   return `${genericHero(locale, 'library', p)}${introBlock(p)}<div class="article-callout reveal"><strong>KŌMØ Library</strong>${text(c.global.medicalNotice)}</div></div></section>
-  <section class="section-tight" id="articles" style="background:var(--paper-strong)"><div class="shell"><div class="article-grid">${p.articles.map(([tag,title,body]) => `<article class="article-card reveal"><span class="tag">${text(tag)}</span><h3>${text(title)}</h3><p>${text(body)}</p><a class="text-link" href="${article(locale)}">${text(c.global.readMore)}</a></article>`).join('')}</div></div></section>${finalBand(locale,p.finalTitle,p.finalText,p.cta,'pulse')}`;
+  <section class="section-tight" id="articles" style="background:var(--paper-strong)"><div class="shell"><div class="article-grid">${p.articles.map(([tag,title,body], index) => `<article class="article-card reveal"><span class="tag">${text(tag)}</span><h3>${text(title)}</h3><p>${text(body)}</p><a class="text-link" href="${index === 1 ? pagePath(locale, 'locomotor') : article(locale)}">${text(c.global.readMore)}</a></article>`).join('')}</div></div></section>${finalBand(locale,p.finalTitle,p.finalText,p.cta,'pulse')}`;
+}
+
+function locomotorPage(locale) {
+  const p = locomotorCopy[locale] || locomotorCopy.en;
+  const citation = (...indexes) => `<span class="inline-citations" aria-label="Sources">${indexes.map((index) => `<a href="#ref-${index}">[${index}]</a>`).join('')}</span>`;
+  return `
+  <section class="locomotor-hero">
+    <div class="shell">
+      <p class="breadcrumb locomotor-breadcrumb"><a href="${pagePath(locale)}">KŌMØ</a><span>/</span><a href="${pagePath(locale, 'library')}">Library</a><span>/</span><span>Locomotor</span></p>
+      <div class="locomotor-hero-grid">
+        <div class="locomotor-hero-copy">
+          <p class="eyebrow eyebrow-light reveal">${text(p.eyebrow)}</p>
+          <h1 class="display reveal">${raw(p.title)}</h1>
+          <p class="lede reveal">${text(p.lead)} ${citation('01', '02')}</p>
+          <div class="hero-actions reveal"><a class="button button-light" href="#framework">${text(p.heroPrimary)}</a><a class="button button-ghost-light" href="${scoreLink(locale)}">${text(p.heroSecondary)} <span aria-hidden="true">↗</span></a></div>
+          <p class="locomotor-review-note reveal">${text(p.note)}</p>
+        </div>
+        <aside class="locomotor-signal-card reveal" aria-label="${text(p.heroCard.label)}">
+          <div class="locomotor-card-head"><span>${text(p.heroCard.label)}</span><span>JOA · 2020</span></div>
+          <h2>${raw(p.heroCard.title)}</h2>
+          <ol>${p.heroCard.rows.map(([number, title, body]) => `<li><span>${text(number)}</span><div><strong>${text(title)}</strong><small>${text(body)}</small></div></li>`).join('')}</ol>
+          <p>${text(p.heroCard.foot)}</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <nav class="locomotor-jump" aria-label="${text(p.jumpLabel)}"><div class="shell"><strong>${text(p.jumpLabel)}</strong><div>${p.jumps.map(([href, label]) => `<a href="${href}">${text(label)}</a>`).join('')}</div></div></nav>
+
+  <section class="section locomotor-definition" id="definition">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.definition.eyebrow)}</p><h2 class="section-heading">${raw(p.definition.title)}</h2></div><p class="section-lead">${text(p.definition.lead)} ${citation('01', '02')}</p></div>
+      <div class="locomotor-concept-grid">
+        <article class="locomotor-concept reveal"><span>01</span><h3>${text(p.definition.originTitle)}</h3><p>${text(p.definition.originBody)}</p></article>
+        <article class="locomotor-concept reveal"><span>02</span><h3>${text(p.definition.systemTitle)}</h3><p>${text(p.definition.systemBody)}</p></article>
+      </div>
+      <div class="locomotor-system-grid">${p.definition.components.map(([title, body], index) => `<article class="locomotor-system-card reveal"><span>0${index + 1}</span><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div>
+      <aside class="locomotor-not reveal"><div><p class="eyebrow">BOUNDARIES</p><h3>${text(p.definition.notTitle)}</h3></div><ul>${p.definition.notItems.map((item) => `<li>${text(item)}</li>`).join('')}</ul></aside>
+    </div>
+  </section>
+
+  <section class="section locomotor-framework" id="framework">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.framework.eyebrow)}</p><h2 class="section-heading">${raw(p.framework.title)}</h2></div><p class="section-lead">${text(p.framework.lead)} ${citation('01', '04')}</p></div>
+      <div class="locomotor-stage-grid">${p.framework.stageCards.map(([number, title, body, action]) => `<article class="locomotor-stage reveal" data-stage="${text(number)}"><span class="locomotor-stage-number">${text(number)}</span><h3>${text(title)}</h3><p>${text(body)}</p><small>${text(action)}</small></article>`).join('')}</div>
+      <div class="locomotor-table-wrap reveal">
+        <table class="locomotor-table">
+          <caption>${text(p.framework.tableCaption)}</caption>
+          <thead><tr>${p.framework.headers.map((header) => `<th scope="col">${text(header)}</th>`).join('')}</tr></thead>
+          <tbody>${p.framework.rows.map((row) => `<tr>${row.map((cell, index) => index === 0 ? `<th scope="row">${text(cell)}</th>` : `<td>${text(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <p class="locomotor-formula reveal">${text(p.framework.formula)}</p>
+      <div class="locomotor-evidence-note reveal"><strong>${text(p.framework.caveatTitle)}</strong><p>${text(p.framework.caveatBody)}</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="tests">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.tests.eyebrow)}</p><h2 class="section-heading">${raw(p.tests.title)}</h2></div><p class="section-lead">${text(p.tests.lead)} ${citation('01', '03')}</p></div>
+      <div class="locomotor-test-grid">${p.tests.cards.map((card) => `<article class="locomotor-test reveal"><div class="locomotor-test-head"><span>${text(card.number)}</span><small>${text(card.purpose)}</small></div><h3>${text(card.title)}</h3><p>${text(card.body)}</p><dl><div><dt>${text(p.tests.methodLabel)}</dt><dd>${text(card.detail)}</dd></div><div><dt>${text(p.tests.safetyLabel)}</dt><dd>${text(card.safety)}</dd></div></dl></article>`).join('')}</div>
+      <div class="locomotor-test-actions reveal"><a class="text-link" href="https://locomo-joa.jp/en" target="_blank" rel="noreferrer">${text(p.tests.sourceCta)} <span aria-hidden="true">↗</span></a></div>
+      <aside class="locomotor-safety reveal"><span aria-hidden="true">!</span><div><h3>${text(p.tests.safetyTitle)}</h3><p>${text(p.tests.safetyBody)}</p></div></aside>
+    </div>
+  </section>
+
+  <section class="section-tight locomotor-distinction">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.distinctions.eyebrow)}</p><h2 class="section-heading">${raw(p.distinctions.title)}</h2></div><p class="section-lead">${text(p.distinctions.lead)} ${citation('05')}</p></div>
+      <div class="locomotor-table-wrap reveal"><table class="locomotor-table locomotor-compare"><thead><tr>${p.distinctions.headers.map((header) => `<th scope="col">${text(header)}</th>`).join('')}</tr></thead><tbody>${p.distinctions.rows.map((row) => `<tr>${row.map((cell, index) => index === 0 ? `<th scope="row">${text(cell)}</th>` : `<td>${text(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+      <p class="locomotor-table-foot reveal">${text(p.distinctions.foot)}</p>
+    </div>
+  </section>
+
+  <section class="section locomotor-action" id="action">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.action.eyebrow)}</p><h2 class="section-heading">${raw(p.action.title)}</h2></div><p class="section-lead">${text(p.action.lead)}</p></div>
+      <ol class="locomotor-action-grid">${p.action.steps.map(([number, title, body]) => `<li class="reveal"><span>${text(number)}</span><div><h3>${text(title)}</h3><p>${text(body)}</p></div></li>`).join('')}</ol>
+      <div class="locomotor-training reveal">
+        <div class="locomotor-training-intro"><p class="eyebrow">${text(p.action.trainingEyebrow)}</p><h3>${raw(p.action.trainingTitle)}</h3><p>${text(p.action.trainingLead)} ${citation('01')}</p></div>
+        <div class="locomotor-training-grid">${p.action.trainingCards.map(([number, title, body, target]) => `<article><span>${text(number)}</span><h4>${text(title)}</h4><p>${text(body)}</p><small>${text(target)}</small></article>`).join('')}</div>
+      </div>
+      <div class="locomotor-evidence-note reveal"><strong>${text(p.action.evidenceTitle)} ${citation('07')}</strong><p>${text(p.action.evidenceBody)}</p></div>
+      <aside class="locomotor-urgent reveal"><h3>${text(p.action.urgentTitle)}</h3><ul>${p.action.urgentItems.map((item) => `<li>${text(item)}</li>`).join('')}</ul></aside>
+    </div>
+  </section>
+
+  <section class="section locomotor-evidence" id="evidence">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.evidence.eyebrow)}</p><h2 class="section-heading">${raw(p.evidence.title)}</h2></div><p class="section-lead">${text(p.evidence.lead)}</p></div>
+      <div class="locomotor-evidence-grid">${p.evidence.cards.map(([value, title, body], index) => `<article class="reveal"><span>${text(value)}</span><h3>${text(title)}</h3><p>${text(body)} ${index === 0 ? citation('02') : index === 1 ? citation('01') : index === 2 ? citation('04') : citation('08')}</p></article>`).join('')}</div>
+      <div class="locomotor-context-grid"><article class="reveal"><span>COHORT</span><h3>${text(p.evidence.prevalenceTitle)}</h3><p>${text(p.evidence.prevalenceBody)} ${citation('04')}</p></article><article class="reveal"><span>AGE</span><h3>${text(p.evidence.youngerTitle)}</h3><p>${text(p.evidence.youngerBody)} ${citation('06')}</p></article></div>
+      <div class="locomotor-status reveal">${p.evidence.status.map(([label, body], index) => `<div data-level="${index + 1}"><strong>${text(label)}</strong><p>${text(body)}</p></div>`).join('')}</div>
+    </div>
+  </section>
+
+  <section class="locomotor-komo" id="komo-layer">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow eyebrow-light">${text(p.komo.eyebrow)}</p><h2 class="section-heading">${raw(p.komo.title)}</h2></div><p class="section-lead">${text(p.komo.lead)}</p></div>
+      <div class="locomotor-komo-grid">${p.komo.additions.map(([title, body], index) => `<article class="reveal"><span>0${index + 1}</span><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div>
+      <div class="locomotor-komo-status reveal"><strong>${text(p.komo.statusTitle)}</strong><p>${text(p.komo.statusBody)}</p><a class="button button-light" href="${pagePath(locale, 'clinical')}">${text(p.komo.cta)} <span aria-hidden="true">↗</span></a></div>
+    </div>
+  </section>
+
+  <section class="section locomotor-faq">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.faq.eyebrow)}</p><h2 class="section-heading">${raw(p.faq.title)}</h2></div></div>
+      <div class="locomotor-faq-list">${p.faq.items.map(([question, answer], index) => `<details class="reveal" ${index === 0 ? 'open' : ''}><summary><span>0${index + 1}</span>${text(question)}</summary><p>${text(answer)}</p></details>`).join('')}</div>
+    </div>
+  </section>
+
+  <section class="section-tight locomotor-references">
+    <div class="shell">
+      <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.references.eyebrow)}</p><h2 class="section-heading">${raw(p.references.title)}</h2></div><p class="section-lead">${text(p.references.lead)}</p></div>
+      <ol>${locomotorReferences.map((reference) => `<li class="reveal" id="ref-${text(reference.index)}"><span>${text(reference.index)}</span><p>${text(reference.citation)}</p><a href="${text(reference.url)}" target="_blank" rel="noreferrer" aria-label="${text(p.references.link)} ${text(reference.index)}">${text(p.references.link)} ↗</a></li>`).join('')}</ol>
+    </div>
+  </section>
+
+  <section class="quote-band locomotor-final"><div class="shell"><blockquote class="reveal">${raw(p.finalTitle)}</blockquote><p class="section-lead">${text(p.finalText)}</p><div class="hero-actions"><a class="button button-light" href="${scoreLink(locale)}">${text(p.finalCta)} <span aria-hidden="true">↗</span></a></div></div></section>`;
 }
 
 function circlePage(locale) {
@@ -501,11 +651,12 @@ function renderPage(locale, page) {
     'white-coast': whiteCoastPage,
     'motion-retreats': retreatsPage,
     library: libraryPage,
+    locomotor: locomotorPage,
     circle: circlePage,
     science: sciencePage,
     contact: contactPage
   }[page](locale);
-  const data = page === 'index' ? c.home : c[page === 'white-coast' ? 'whiteCoast' : page === 'motion-retreats' ? 'motionRetreats' : page];
+  const data = page === 'locomotor' ? (locomotorCopy[locale] || locomotorCopy.en) : page === 'index' ? c.home : c[page === 'white-coast' ? 'whiteCoast' : page === 'motion-retreats' ? 'motionRetreats' : page];
   return layout(locale, page, body, data);
 }
 

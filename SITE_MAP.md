@@ -10,11 +10,14 @@
 | `/white-coast/` | First local community chapter | Visit `community.komolongevity.com` |
 | `/motion-retreats/` | Longitudinal retreat concept | Discover White Coast |
 | `/library/` | Evidence-led public knowledge | Read and understand |
+| `/locomotor/` | Public, evidence-led reference on locomotive syndrome | Understand the framework / explore Pulse |
 | `/circle/` | Events, announcements and introductions | Receive relevant updates |
 | `/science/` | Method, evidence and progressive validation | Propose a methodological collaboration |
 | `/contact/` | Direct professional contact | Compose an email to contact@komolongevity.com |
 
 French and Spanish carry the same routes under `/fr/` and `/es/`.
+
+`locomotor.komolongevity.com` is configured as a discovery entry point: its root serves `/locomotor/`, while `/fr` and `/es` serve the corresponding localised reference pages. The canonical URLs remain on the main domain so the same content is not indexed as duplicates.
 
 ## Product hierarchy
 
