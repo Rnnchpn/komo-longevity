@@ -9,7 +9,7 @@ const output = join(root, 'site');
 const sourceAssets = join(root, 'src', 'assets');
 // Static assets are served aggressively by the CDN. Bump this whenever a
 // shared stylesheet or script changes so visitors receive the matching UI.
-const assetVersion = '20260814-v8';
+const assetVersion = '20260814-v9';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -507,6 +507,11 @@ function libraryPage(locale) {
 function locomotorPage(locale) {
   const p = locomotorCopy[locale] || locomotorCopy.en;
   const citation = (...indexes) => `<span class="inline-citations" aria-label="Sources">${indexes.map((index) => `<a href="#ref-${index}">[${index}]</a>`).join('')}</span>`;
+  const testVisuals = {
+    '01': '/assets/images/locomotor-stand-up-test.svg',
+    '02': '/assets/images/locomotor-two-step-test.svg',
+    '03': '/assets/images/locomotor-glfs-25.svg'
+  };
   return `
   <section class="locomotor-hero">
     <div class="shell">
@@ -562,7 +567,7 @@ function locomotorPage(locale) {
   <section class="section" id="tests">
     <div class="shell">
       <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.tests.eyebrow)}</p><h2 class="section-heading">${raw(p.tests.title)}</h2></div><p class="section-lead">${text(p.tests.lead)} ${citation('01', '03')}</p></div>
-      <div class="locomotor-test-grid">${p.tests.cards.map((card) => `<article class="locomotor-test reveal"><div class="locomotor-test-head"><span>${text(card.number)}</span><small>${text(card.purpose)}</small></div><h3>${text(card.title)}</h3><p>${text(card.body)}</p><dl><div><dt>${text(p.tests.methodLabel)}</dt><dd>${text(card.detail)}</dd></div><div><dt>${text(p.tests.safetyLabel)}</dt><dd>${text(card.safety)}</dd></div></dl></article>`).join('')}</div>
+      <div class="locomotor-test-grid">${p.tests.cards.map((card) => `<article class="locomotor-test reveal"><div class="locomotor-test-head"><span>${text(card.number)}</span><small>${text(card.purpose)}</small></div><h3>${text(card.title)}</h3><figure class="locomotor-test-visual"><img src="${testVisuals[card.number]}" alt="${text(card.visualAlt)}" width="1200" height="760" loading="lazy" decoding="async"></figure><p>${text(card.body)}</p><dl><div><dt>${text(p.tests.methodLabel)}</dt><dd>${text(card.detail)}</dd></div><div><dt>${text(p.tests.safetyLabel)}</dt><dd>${text(card.safety)}</dd></div></dl></article>`).join('')}</div>
       <div class="locomotor-test-actions reveal"><a class="text-link" href="https://locomo-joa.jp/en" target="_blank" rel="noreferrer">${text(p.tests.sourceCta)} <span aria-hidden="true">↗</span></a></div>
       <aside class="locomotor-safety reveal"><span aria-hidden="true">!</span><div><h3>${text(p.tests.safetyTitle)}</h3><p>${text(p.tests.safetyBody)}</p></div></aside>
     </div>

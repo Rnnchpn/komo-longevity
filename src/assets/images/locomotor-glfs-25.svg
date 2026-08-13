@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">GLFS-25 questionnaire illustration</title>
+  <desc id="desc">A vector illustration of a 25-item questionnaire with five response levels from zero to four.</desc>
+  <rect width="1200" height="760" rx="44" fill="#073f45"/>
+  <circle cx="1084" cy="68" r="180" fill="none" stroke="#2a6264" stroke-width="2"/>
+  <circle cx="1084" cy="68" r="126" fill="none" stroke="#356e6d" stroke-width="2"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="56" y="72" fill="#d6bd90" font-size="20" font-weight="700" letter-spacing="5">03</text>
+    <text x="1035" y="107" fill="#d8e7e2" font-size="55" font-weight="400" text-anchor="middle">25</text>
+  </g>
+
+  <g transform="translate(80 126)">
+    <rect x="0" y="0" width="606" height="548" rx="34" fill="#f4f1e9"/>
+    <rect x="204" y="-18" width="198" height="44" rx="22" fill="#d2b181"/>
+    <path d="M54 86H552" stroke="#c5d2cd" stroke-width="3"/>
+    <g fill="#0a4d53" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">
+      <text x="54" y="64">GLFS</text><text x="552" y="64" text-anchor="end">0–100</text>
+    </g>
+    <g transform="translate(70 128)">
+      <g fill="#c47755"><circle cx="0" cy="0" r="12"/><circle cx="92" cy="0" r="12"/><circle cx="184" cy="0" r="12"/><circle cx="276" cy="0" r="12"/><circle cx="368" cy="0" r="12"/></g>
+      <g fill="#d2b181"><circle cx="0" cy="78" r="12"/><circle cx="92" cy="78" r="12"/><circle cx="184" cy="78" r="12"/><circle cx="276" cy="78" r="12"/><circle cx="368" cy="78" r="12"/></g>
+      <g fill="#91aea6"><circle cx="0" cy="156" r="12"/><circle cx="92" cy="156" r="12"/><circle cx="184" cy="156" r="12"/><circle cx="276" cy="156" r="12"/><circle cx="368" cy="156" r="12"/></g>
+      <g fill="#4e7f7c"><circle cx="0" cy="234" r="12"/><circle cx="92" cy="234" r="12"/><circle cx="184" cy="234" r="12"/><circle cx="276" cy="234" r="12"/><circle cx="368" cy="234" r="12"/></g>
+      <g fill="#0a4d53"><circle cx="0" cy="312" r="12"/><circle cx="92" cy="312" r="12"/><circle cx="184" cy="312" r="12"/><circle cx="276" cy="312" r="12"/><circle cx="368" cy="312" r="12"/></g>
+      <g stroke="#c4cec9" stroke-width="2"><path d="M0 22V52M92 22V52M184 22V52M276 22V52M368 22V52M0 100V130M92 100V130M184 100V130M276 100V130M368 100V130M0 178V208M92 178V208M184 178V208M276 178V208M368 178V208M0 256V286M92 256V286M184 256V286M276 256V286M368 256V286"/></g>
+    </g>
+    <g transform="translate(54 482)" fill="#71847f" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" letter-spacing="1">
+      <text x="0" y="0">5 × 5</text><text x="498" y="0" text-anchor="end">25</text>
+    </g>
+  </g>
+
+  <g transform="translate(756 232)" font-family="Arial, Helvetica, sans-serif">
+    <text x="0" y="0" fill="#c7ddd6" font-size="16" font-weight="700" letter-spacing="3">0 — 4</text>
+    <g transform="translate(0 62)">
+      <path d="M20 0V306" stroke="#477a77" stroke-width="3"/>
+      <g font-size="20" font-weight="700">
+        <circle cx="20" cy="0" r="18" fill="#d8e7e2"/><text x="58" y="7" fill="#d8e7e2">0</text>
+        <circle cx="20" cy="76" r="18" fill="#b6cec6"/><text x="58" y="83" fill="#d8e7e2">1</text>
+        <circle cx="20" cy="152" r="18" fill="#d6bd90"/><text x="58" y="159" fill="#d8e7e2">2</text>
+        <circle cx="20" cy="228" r="18" fill="#c98969"/><text x="58" y="235" fill="#d8e7e2">3</text>
+        <circle cx="20" cy="304" r="18" fill="#b9624a"/><text x="58" y="311" fill="#d8e7e2">4</text>
+      </g>
+    </g>
+    <rect x="174" y="47" width="180" height="344" rx="90" fill="none" stroke="#356e6d" stroke-width="2"/>
+    <path d="M264 103C218 103 184 141 184 187C184 247 239 277 264 319C289 277 344 247 344 187C344 141 310 103 264 103Z" fill="#0e5054"/>
+    <path d="M225 188C244 165 283 159 307 185M229 230C250 248 281 249 302 228" fill="none" stroke="#9bbab1" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="264" cy="145" r="22" fill="#d6bd90"/>
+  </g>
+</svg>

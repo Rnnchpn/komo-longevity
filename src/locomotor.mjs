@@ -110,18 +110,21 @@ export const locomotorCopy = {
       cards: [
         {
           number: '01', title: 'Stand-Up Test', purpose: 'Leg strength · balance',
+          visualAlt: 'Illustrated sequence of sitting, rising and standing with arms folded, with the four official seat heights.',
           body: 'The person rises from seats 40, 30, 20 and 10 cm high, using both legs and then one leg according to the official sequence. Arms remain folded and the standing position is held for three seconds.',
           detail: 'The result is the lowest successful height and whether the task was completed on two legs or separately on both single legs.',
           safety: 'Stop if knee or other pain appears. Avoid momentum and protect against a backward fall.'
         },
         {
           number: '02', title: 'Two-Step Test', purpose: 'Stride · dynamic control',
+          visualAlt: 'Illustrated sequence of the starting position and two maximal consecutive steps, with distance divided by height.',
           body: 'From a marked line, the person takes two consecutive maximal steps, brings the feet together and remains balanced. The distance is measured twice; the better valid attempt is divided by height.',
           detail: 'A trial is invalid if balance is lost or if the person jumps. Use a non-slip surface and adequate space.',
           safety: 'The JOA advises a caregiver, warm-up and a non-slippery floor.'
         },
         {
           number: '03', title: 'GLFS-25', purpose: 'Symptoms · daily life · participation',
+          visualAlt: 'Illustration of the 25-item questionnaire and its five response levels from zero to four.',
           body: 'A 25-item self-administered questionnaire explores pain, movement-related difficulty, activities of daily living, social function and psychological concerns over the preceding month.',
           detail: 'Each item is scored 0–4; the total ranges from 0 to 100. Higher scores indicate greater perceived locomotive difficulty.',
           safety: 'Use an authorised language version and the official scoring instructions.'
@@ -286,18 +289,21 @@ export const locomotorCopy = {
       cards: [
         {
           number: '01', title: 'Stand-Up Test', purpose: 'Force des jambes · équilibre',
+          visualAlt: 'Séquence illustrée de la position assise au lever, bras croisés, avec les quatre hauteurs d’assise officielles.',
           body: 'La personne se relève d’assises de 40, 30, 20 et 10 cm, sur les deux jambes puis sur une jambe selon la séquence officielle. Les bras restent croisés et la station debout est maintenue trois secondes.',
           detail: 'Le résultat correspond à la plus faible hauteur réussie et précise si la tâche a été accomplie sur deux jambes ou séparément sur chacune des jambes.',
           safety: 'Arrêter en cas de douleur du genou ou autre douleur. Éviter l’élan et prévenir la chute en arrière.'
         },
         {
           number: '02', title: 'Two-Step Test', purpose: 'Enjambée · contrôle dynamique',
+          visualAlt: 'Séquence illustrée de la position de départ et des deux pas maximaux, avec la distance divisée par la taille.',
           body: 'Depuis une ligne, la personne réalise deux pas maximaux consécutifs, rejoint les pieds et reste stable. La distance est mesurée deux fois ; le meilleur essai valide est divisé par la taille.',
           detail: 'L’essai est invalide en cas de perte d’équilibre ou de saut. Il faut un sol non glissant et un espace suffisant.',
           safety: 'La JOA recommande la présence d’un accompagnant, un échauffement et un sol non glissant.'
         },
         {
           number: '03', title: 'GLFS-25', purpose: 'Symptômes · vie quotidienne · participation',
+          visualAlt: 'Illustration du questionnaire de 25 items et de ses cinq niveaux de réponse, de zéro à quatre.',
           body: 'Ce questionnaire auto-administré de 25 items explore la douleur, les difficultés de mouvement, les activités de la vie quotidienne, la fonction sociale et les préoccupations psychologiques du mois précédent.',
           detail: 'Chaque item est coté de 0 à 4 ; le total varie de 0 à 100. Un score plus élevé traduit davantage de difficultés locomotrices perçues.',
           safety: 'Utiliser une version linguistique autorisée et les instructions officielles de cotation.'
@@ -462,18 +468,21 @@ export const locomotorCopy = {
       cards: [
         {
           number: '01', title: 'Stand-Up Test', purpose: 'Fuerza de piernas · equilibrio',
+          visualAlt: 'Secuencia ilustrada desde la posición sentada hasta ponerse de pie con los brazos cruzados y las cuatro alturas oficiales.',
           body: 'La persona se levanta de asientos de 40, 30, 20 y 10 cm, con ambas piernas y después con una según la secuencia oficial. Los brazos permanecen cruzados y se mantiene la bipedestación durante tres segundos.',
           detail: 'El resultado es la menor altura superada e indica si la tarea se completó con dos piernas o por separado con ambas piernas en apoyo monopodal.',
           safety: 'Detenerse si aparece dolor de rodilla u otro dolor. Evitar el impulso y proteger frente a una caída hacia atrás.'
         },
         {
           number: '02', title: 'Two-Step Test', purpose: 'Zancada · control dinámico',
+          visualAlt: 'Secuencia ilustrada de la posición inicial y los dos pasos máximos, con la distancia dividida por la altura.',
           body: 'Desde una línea marcada, la persona da dos pasos máximos consecutivos, junta los pies y mantiene el equilibrio. Se mide dos veces; el mejor intento válido se divide por la altura.',
           detail: 'El intento no es válido si se pierde el equilibrio o si la persona salta. Se necesita una superficie antideslizante y espacio suficiente.',
           safety: 'La JOA aconseja un acompañante, calentamiento y un suelo no deslizante.'
         },
         {
           number: '03', title: 'GLFS-25', purpose: 'Síntomas · vida diaria · participación',
+          visualAlt: 'Ilustración del cuestionario de 25 ítems y sus cinco niveles de respuesta, de cero a cuatro.',
           body: 'Este cuestionario autoadministrado de 25 ítems explora dolor, dificultad de movimiento, actividades de la vida diaria, función social y preocupaciones psicológicas durante el mes anterior.',
           detail: 'Cada ítem puntúa de 0 a 4; el total oscila entre 0 y 100. Una puntuación mayor indica más dificultad locomotora percibida.',
           safety: 'Utilizar una versión lingüística autorizada y las instrucciones oficiales de puntuación.'

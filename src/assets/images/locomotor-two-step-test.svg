@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Two-Step Test movement sequence</title>
+  <desc id="desc">A vector sequence showing a starting position and two maximal consecutive steps, with distance divided by height.</desc>
+  <rect width="1200" height="760" rx="44" fill="#e8eeea"/>
+  <path d="M0 524C244 483 411 574 645 529C841 491 1013 472 1200 522V760H0Z" fill="#f4f1e9"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="56" y="72" fill="#0a4d53" font-size="20" font-weight="700" letter-spacing="5">02</text>
+    <text x="1068" y="92" fill="#66847e" font-size="16" font-weight="700" text-anchor="middle" letter-spacing="2">D ÷ H</text>
+  </g>
+  <circle cx="1068" cy="86" r="73" fill="none" stroke="#b8ccc5" stroke-width="2"/>
+
+  <path d="M112 576H1090" stroke="#75938d" stroke-width="3"/>
+  <path d="M151 152V592" stroke="#bb7454" stroke-width="4" stroke-dasharray="10 12"/>
+  <path d="M151 636H1042" stroke="#0a4d53" stroke-width="4"/>
+  <path d="M151 622L129 636L151 650M1042 622L1064 636L1042 650" fill="none" stroke="#0a4d53" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="596" y="681" fill="#0a4d53" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700" text-anchor="middle">D</text>
+
+  <g stroke="#8ca8a2" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".42">
+    <circle cx="255" cy="234" r="34" fill="#d5b286" stroke="none"/>
+    <path d="M253 280L256 421M254 321L205 379M255 321L303 379M256 421L223 560M256 421L289 560M223 562H185M289 562H327"/>
+  </g>
+  <g stroke="#2e6d6b" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <circle cx="528" cy="220" r="34" fill="#d5b286" stroke="none"/>
+    <path d="M524 266L562 405M536 318L478 367M540 321L603 359M562 405L452 559M562 405L686 559M452 561H405M686 561H733"/>
+  </g>
+  <g stroke="#063f45" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <circle cx="870" cy="211" r="35" fill="#d5b286" stroke="none"/>
+    <path d="M866 258L894 407M875 309L816 361M880 313L942 360M894 407L875 560M894 407L914 560M875 562H838M914 562H951"/>
+  </g>
+
+  <g fill="none" stroke="#0a4d53" stroke-width="4" stroke-linecap="round">
+    <path d="M318 478C367 417 404 389 455 376"/>
+    <path d="M438 362L459 375L444 393"/>
+    <path d="M710 477C750 414 775 389 809 377"/>
+    <path d="M792 363L813 376L798 394"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="700" text-anchor="middle">
+    <circle cx="390" cy="393" r="24" fill="#f8f6f0" stroke="#a9bdb7"/><text x="390" y="400" fill="#0a4d53" font-size="18">1</text>
+    <circle cx="754" cy="398" r="24" fill="#f8f6f0" stroke="#a9bdb7"/><text x="754" y="405" fill="#0a4d53" font-size="18">2</text>
+  </g>
+  <g stroke="#bb7454" stroke-width="3" fill="none">
+    <path d="M1095 211V560"/>
+    <path d="M1082 211H1108M1082 560H1108"/>
+  </g>
+  <text x="1126" y="393" fill="#bb7454" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">H</text>
+</svg>
