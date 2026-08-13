@@ -126,7 +126,8 @@ const pulseJourney = {
 };
 const journeyCopy = (locale) => pulseJourney[locale] || pulseJourney.en;
 const canonical = (locale, page) => `${site.origin}${pagePath(locale, page)}`;
-const link = (locale, page) => /^https?:\/\//.test(page) || page.startsWith('mailto:') ? page : pagePath(locale, page);
+const communityUrl = 'https://community.komolongevity.com/';
+const link = (locale, page) => page === 'white-coast' ? communityUrl : (/^https?:\/\//.test(page) || page.startsWith('mailto:') ? page : pagePath(locale, page));
 const pulseStartLink = (locale) => `${pagePath(locale, 'pulse')}#start-pulse`;
 const scoreLink = (locale) => pulseStartLink(locale);
 const article = (locale) => `${pagePath(locale, 'library')}#articles`;
@@ -163,7 +164,7 @@ function header(locale, page) {
           <span>KŌMØ<small>${text(c.global.brandSubtitle)}</small></span>
         </a>
         <nav class="primary-nav" aria-label="Navigation principale" data-primary-nav>
-          ${navItems.map(([target, label]) => `<a href="${pagePath(locale, target)}" ${page === target ? 'aria-current="page"' : ''}>${text(label)}</a>`).join('')}
+          ${navItems.map(([target, label]) => `<a href="${link(locale, target)}" ${page === target ? 'aria-current="page"' : ''}>${text(label)}</a>`).join('')}
           <a href="${pagePath(locale, 'contact')}" ${page === 'contact' ? 'aria-current="page"' : ''}>${text(c.nav.contact)}</a>
         </nav>
         <div class="header-actions">
@@ -287,7 +288,7 @@ function homePage(locale) {
       <div class="shell">
         <div class="intro-grid reveal"><div><p class="eyebrow">${text(h.introEyebrow)}</p><h2 class="section-heading">${raw(h.introTitle)}</h2></div><p class="section-lead">${text(h.introLead)}</p></div>
         <div class="ecosystem-grid">
-          ${h.wheel.map((item) => `<article class="ecosystem-card reveal"><span class="ecosystem-index">${text(item.num)}</span><h3>${text(item.title)}</h3><p>${text(item.text)}</p><a class="text-link" href="${pagePath(locale, item.page)}">${text(item.link)}</a></article>`).join('')}
+          ${h.wheel.map((item) => `<article class="ecosystem-card reveal"><span class="ecosystem-index">${text(item.num)}</span><h3>${text(item.title)}</h3><p>${text(item.text)}</p><a class="text-link" href="${link(locale, item.page)}">${text(item.link)}</a></article>`).join('')}
         </div>
       </div>
     </section>
@@ -301,11 +302,11 @@ function homePage(locale) {
 
     <section class="section">
       <div class="shell"><div class="intro-grid reveal"><div><p class="eyebrow">${text(h.entryEyebrow)}</p><h2 class="section-heading">${raw(h.entryTitle)}</h2></div><p class="section-lead">${text(h.entryLead)}</p></div>
-        <div class="entry-cards">${h.entries.map((item) => `<article class="entry-card reveal"><span class="entry-orb" aria-hidden="true"></span><p class="eyebrow">${text(item.eyebrow)}</p><h3>${text(item.title)}</h3><p>${text(item.text)}</p><a class="text-link" href="${pagePath(locale, item.page)}">${text(item.link)}</a></article>`).join('')}</div>
+        <div class="entry-cards">${h.entries.map((item) => `<article class="entry-card reveal"><span class="entry-orb" aria-hidden="true"></span><p class="eyebrow">${text(item.eyebrow)}</p><h3>${text(item.title)}</h3><p>${text(item.text)}</p><a class="text-link" href="${link(locale, item.page)}">${text(item.link)}</a></article>`).join('')}</div>
       </div>
     </section>
 
-    <section class="chapter"><div class="shell chapter-inner"><div class="chapter-card reveal"><p class="eyebrow eyebrow-light">${text(h.chapterEyebrow)}</p><h2>${raw(h.chapterTitle)}</h2><p>${text(h.chapterText)}</p><div class="hero-actions"><a class="button button-light" href="${pagePath(locale, 'white-coast')}">${text(h.chapterCta)}</a></div><div class="chapter-notes">${h.chapterNotes.map(([label, value]) => `<div><strong>${text(label)}</strong>${text(value)}</div>`).join('')}</div></div><p class="chapter-quote reveal">${raw(h.chapterQuote)}</p></div></section>
+    <section class="chapter"><div class="shell chapter-inner"><div class="chapter-card reveal"><p class="eyebrow eyebrow-light">${text(h.chapterEyebrow)}</p><h2>${raw(h.chapterTitle)}</h2><p>${text(h.chapterText)}</p><div class="hero-actions"><a class="button button-light" href="${link(locale, 'white-coast')}">${text(h.chapterCta)}</a></div><div class="chapter-notes">${h.chapterNotes.map(([label, value]) => `<div><strong>${text(label)}</strong>${text(value)}</div>`).join('')}</div></div><p class="chapter-quote reveal">${raw(h.chapterQuote)}</p></div></section>
 
     <section class="section"><div class="shell intro-grid reveal"><div><p class="eyebrow">${text(h.scienceEyebrow)}</p><h2 class="section-heading">${raw(h.scienceTitle)}</h2></div><div><p class="section-lead">${text(h.scienceLead)}</p><a class="text-link" href="${pagePath(locale, 'science')}">${text(h.scienceCta)}</a></div></div></section>
 
@@ -341,7 +342,7 @@ function genericHero(locale, page, data) {
     clinical: pagePath(locale, 'contact'),
     science: pagePath(locale, 'contact'),
     circle: pagePath(locale, 'contact'),
-    'motion-retreats': pagePath(locale, 'white-coast')
+    'motion-retreats': link(locale, 'white-coast')
   }[page] || scoreLink(locale);
   const external = page === 'white-coast';
   const ctaLabel = page === 'pulse' ? journeyCopy(locale).primaryCta : data.cta;
