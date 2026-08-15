@@ -6,6 +6,24 @@
   "rewrites": [
     {
       "source": "/",
+      "has": [{ "type": "host", "value": "locotechsummit.com" }],
+      "destination": "/assets/locotech-summit/"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.locotechsummit.com" }],
+      "destination": "/assets/locotech-summit/"
+    },
+    {
+      "source": "/locotech-summit",
+      "destination": "/assets/locotech-summit/"
+    },
+    {
+      "source": "/locotech-summit/:path*",
+      "destination": "/assets/locotech-summit/:path*"
+    },
+    {
+      "source": "/",
       "has": [{ "type": "host", "value": "locomotor.komolongevity.com" }],
       "destination": "/locomotor/"
     },
