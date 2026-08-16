@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Stand-Up Test movement sequence</title>
+  <desc id="desc">A vector sequence showing a person seated, rising and standing with arms folded, alongside the four official seat heights.</desc>
+  <rect width="1200" height="760" rx="44" fill="#ebe8df"/>
+  <path d="M0 566C256 492 491 591 715 526C916 468 1067 486 1200 526V760H0Z" fill="#dfe7e1"/>
+  <circle cx="1065" cy="94" r="168" fill="none" stroke="#b9cfc7" stroke-width="2"/>
+  <circle cx="1065" cy="94" r="118" fill="none" stroke="#cbdad4" stroke-width="2"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <text x="56" y="72" fill="#0a4d53" font-size="20" font-weight="700" letter-spacing="5">01</text>
+    <text x="1045" y="104" fill="#0a4d53" font-size="18" font-weight="700" text-anchor="middle">3 s</text>
+  </g>
+
+  <g stroke="#224c4e" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <circle cx="260" cy="253" r="36" fill="#d7b486" stroke="none"/>
+    <path d="M256 300L250 412L336 430"/>
+    <path d="M250 348L309 382M311 337L254 383" stroke-width="14"/>
+    <path d="M336 430L434 430L443 551"/>
+    <path d="M443 551L501 551"/>
+  </g>
+  <g stroke="#8da8a1" stroke-width="17" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity=".58">
+    <circle cx="690" cy="220" r="34" fill="#d7b486" stroke="none"/>
+    <path d="M675 264L635 377L690 392"/>
+    <path d="M658 304L610 337M648 316L698 339" stroke-width="13"/>
+    <path d="M690 392L751 452L786 548"/>
+    <path d="M690 392L639 470L619 551"/>
+    <path d="M615 551H563M787 551H839"/>
+  </g>
+  <g stroke="#073f45" stroke-width="19" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <circle cx="927" cy="170" r="36" fill="#d7b486" stroke="none"/>
+    <path d="M923 216L925 392"/>
+    <path d="M922 276L983 315M979 271L924 316" stroke-width="14"/>
+    <path d="M925 392L881 548M925 392L969 548"/>
+    <path d="M881 551H827M969 551H1023"/>
+  </g>
+
+  <g stroke="#0a4d53" stroke-width="4" fill="none" stroke-linecap="round">
+    <path d="M486 347C521 319 551 305 575 302"/>
+    <path d="M564 287L579 301L563 314"/>
+    <path d="M800 313C833 288 855 276 876 267"/>
+    <path d="M863 255L881 265L869 282"/>
+  </g>
+
+  <g stroke="#a47c57" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M176 420H365V448H176Z" fill="#cda579"/>
+    <path d="M193 448L178 558M348 448L365 558"/>
+  </g>
+  <path d="M92 578H1098" stroke="#7a9691" stroke-width="3"/>
+
+  <g transform="translate(702 622)" font-family="Arial, Helvetica, sans-serif">
+    <rect x="0" y="0" width="420" height="82" rx="20" fill="#f8f6f0" stroke="#cbd7d1"/>
+    <g fill="#0a4d53" font-size="18" font-weight="700" text-anchor="middle">
+      <text x="56" y="56">40</text><text x="150" y="56">30</text><text x="244" y="56">20</text><text x="338" y="56">10</text>
+    </g>
+    <text x="389" y="56" fill="#7d8c88" font-size="14">cm</text>
+    <g fill="#c3d3cd">
+      <rect x="29" y="16" width="54" height="14" rx="7"/><rect x="123" y="20" width="54" height="10" rx="5"/><rect x="217" y="23" width="54" height="7" rx="3.5"/><rect x="311" y="26" width="54" height="4" rx="2"/>
+    </g>
+  </g>
+</svg>

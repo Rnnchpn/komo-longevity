@@ -448,7 +448,7 @@ img { max-width: 100%; display: block; }
 .locomotor-evidence-note strong { display: block; color: var(--sea); font: 600 .7rem var(--mono); letter-spacing: .07em; text-transform: uppercase; }
 .locomotor-evidence-note p { margin: .55rem 0 0; color: var(--ink-soft); font-size: .86rem; }
 .locomotor-test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 4rem; }
-.locomotor-test { min-height: 590px; display: flex; flex-direction: column; padding: 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; }
+.locomotor-test { min-height: 825px; display: flex; flex-direction: column; padding: 1.4rem; border: 1px solid var(--line); border-radius: var(--radius-lg); background: #fff; }
 .locomotor-test:nth-child(2) { background: #eef1ec; }
 .locomotor-test:nth-child(3) { color: #fff; background: var(--sea-deep); }
 .locomotor-test-head { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
@@ -456,7 +456,11 @@ img { max-width: 100%; display: block; }
 .locomotor-test:nth-child(3) .locomotor-test-head > span { color: #d9bd8a; }
 .locomotor-test-head small { max-width: 160px; color: var(--sea); text-align: right; font: 500 .6rem/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; }
 .locomotor-test:nth-child(3) .locomotor-test-head small { color: #c7ded6; }
-.locomotor-test h3 { margin: 3.5rem 0 .8rem; font: 500 clamp(2rem, 3vw, 3.2rem)/.95 var(--display); letter-spacing: -.055em; }
+.locomotor-test h3 { margin: 2.6rem 0 .8rem; font: 500 clamp(2rem, 3vw, 3.2rem)/.95 var(--display); letter-spacing: -.055em; }
+.locomotor-test-visual { position: relative; margin: .65rem 0 1.15rem; overflow: hidden; border: 1px solid var(--line); border-radius: calc(var(--radius-md) + 2px); background: var(--paper); }
+.locomotor-test:nth-child(3) .locomotor-test-visual { border-color: rgba(255,255,255,.18); }
+.locomotor-test-visual img { width: 100%; height: auto; aspect-ratio: 1200 / 760; object-fit: cover; transition: transform .5s ease; }
+.locomotor-test:hover .locomotor-test-visual img { transform: scale(1.018); }
 .locomotor-test > p { margin: 0; color: var(--ink-soft); font-size: .88rem; }
 .locomotor-test:nth-child(3) > p { color: rgba(255,255,255,.72); }
 .locomotor-test dl { margin: auto 0 0; padding-top: 2rem; }
@@ -570,7 +574,7 @@ img { max-width: 100%; display: block; }
   .pulse-entry-grid { grid-template-columns: minmax(220px, .72fr) minmax(0, 1.28fr); }
   .pulse-dashboard { grid-column: 1 / -1; min-height: auto; }
   .locomotor-system-grid, .locomotor-stage-grid, .locomotor-evidence-grid, .locomotor-komo-grid { grid-template-columns: repeat(2, 1fr); }
-  .locomotor-test { min-height: 635px; }
+  .locomotor-test { min-height: 870px; }
 }
 @media (max-width: 800px) {
   .shell { width: min(calc(100% - 30px), var(--max)); }
