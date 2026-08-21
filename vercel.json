@@ -93,6 +93,17 @@
   ],
   "redirects": [
     {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.komolongevity.com"
+        }
+      ],
+      "destination": "https://komolongevity.com/:path*",
+      "permanent": true
+    },
+    {
       "source": "/white-coast",
       "destination": "/partners",
       "permanent": true
