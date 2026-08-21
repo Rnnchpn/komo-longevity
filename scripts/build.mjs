@@ -9,7 +9,7 @@ const output = join(root, 'site');
 const sourceAssets = join(root, 'src', 'assets');
 // Static assets are served aggressively by the CDN. Bump this whenever a
 // shared stylesheet or script changes so visitors receive the matching UI.
-const assetVersion = '20260814-v8';
+const assetVersion = '20260821-v9';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -174,6 +174,310 @@ const chairHeroAlt = {
   es: 'Una mujer sentada y un hombre de pie en equilibrio sobre una pierna junto a dos sillas de madera'
 };
 
+const komoCaseCopy = {
+  "en": {
+    "heroEyebrow": "KŌMØ CASE · POWERED BY MYODEV",
+    "heroTitle": "One case.<br>Six sensors.<br><em>One score to make movement clear.</em>",
+    "heroLead": "A clinician-led locomotor check-up that combines standardised functional tests with Myodev sensor data, then returns a KŌMØ Motion Score to discuss in context.",
+    "heroPrimaryCta": "See the KŌMØ Check",
+    "heroSecondaryCta": "For clinicians",
+    "heroProof": [
+      "6 wireless Myodev sensors",
+      "Standardised functional tests",
+      "Clinician-led interpretation"
+    ],
+    "heroNote": "A measurement framework for appropriate clinical settings — never an automatic diagnosis.",
+    "heroImageAlt": "Illustration of the KŌMØ Motion Score and the portable KŌMØ Case",
+    "checkEyebrow": "THE KŌMØ CHECK",
+    "checkTitle": "The case is portable.<br>The method is <em>clinical.</em>",
+    "checkLead": "KŌMØ Case makes objective movement measurement possible during a clinician-led assessment. It keeps the evidence visible without pretending that one signal can answer every health question.",
+    "checkSteps": [
+      [
+        "01",
+        "Start with the person",
+        "Goals, symptoms, functional history and relevant existing results define what should be assessed."
+      ],
+      [
+        "02",
+        "Measure the movement",
+        "Six Myodev sensors can document activation, bilateral symmetry and control during defined tasks."
+      ],
+      [
+        "03",
+        "Test real function",
+        "Stand-up, Two-Step and 4-metre walk tests, plus a targeted examination, structure a reproducible assessment."
+      ],
+      [
+        "04",
+        "Interpret and return",
+        "The clinician puts the measurements in context, names the next priorities and decides whether other data are relevant."
+      ]
+    ],
+    "checkNotice": "Biology, imaging and any additional tests are only considered when a clinical question and the care setting make them appropriate.",
+    "scoreEyebrow": "THE KŌMØ MOTION SCORE",
+    "scoreTitle": "A score, but never<br>just <em>a number.</em>",
+    "scoreLead": "The Motion Score organises the parts of the assessment that are meaningful to compare. It shows what was measured, how reliable the data are and what is worth discussing next.",
+    "scorePillars": [
+      [
+        "Mobility",
+        "How you rise, walk and adapt to movement."
+      ],
+      [
+        "Muscle",
+        "Activation and bilateral contribution on defined tasks."
+      ],
+      [
+        "Balance & coordination",
+        "Control, symmetry and confidence in movement."
+      ],
+      [
+        "Posture & context",
+        "Relevant clinical findings, only when indicated."
+      ]
+    ],
+    "scoreNoteTitle": "A clear clinical boundary",
+    "scoreNote": "The score supports a clinical conversation. It does not diagnose a condition, replace an examination or make a care decision on its own.",
+    "scoreImageAlt": "Diagram of the KŌMØ Longevity Score around the portable KŌMØ Case",
+    "technologyEyebrow": "MEASUREMENT, MADE VISIBLE",
+    "technologyTitle": "Myodev technology.<br><em>KŌMØ clinical method.</em>",
+    "technologyLead": "The KŌMØ Case combines Myodev movement technology with a clinician-led framework: the professional chooses the indication, test conditions and interpretation.",
+    "sensorCards": [
+      [
+        "Muscle signal",
+        "Defined sensor placement helps observe muscle activation and left/right contribution during relevant tasks.",
+        "komo-case-muscle.jpeg",
+        "Illustration of six wearable sensors used to observe lower-limb muscle activation"
+      ],
+      [
+        "Walking pattern",
+        "A 4-metre walk and camera-supported observation can make gait, cadence, symmetry and balance more legible.",
+        "komo-case-gait.jpeg",
+        "Illustration of a camera-supported gait assessment with wearable sensors"
+      ]
+    ],
+    "technologyPoints": [
+      [
+        "Inside the case",
+        "Six wireless sensors, an adjustable capture setup and the KŌMØ workflow."
+      ],
+      [
+        "In the session",
+        "A defined protocol, supervision and a record of data quality."
+      ],
+      [
+        "After the session",
+        "A clinically interpreted report and priorities to revisit through Pulse."
+      ]
+    ],
+    "technologyCta": "Discuss a clinical deployment",
+    "closingEyebrow": "ONE PRODUCT · ONE TRAJECTORY",
+    "closingTitle": "From the KŌMØ Case<br>to a plan <em>that continues.</em>",
+    "closingLead": "Pulse keeps the thread between a first reference, a clinician-led assessment and the next conversation. White Coast and the wider ecosystem add the conditions to live that trajectory well.",
+    "closingCta": "Explore the KŌMØ ecosystem"
+  },
+  "fr": {
+    "heroEyebrow": "KŌMØ CASE · POWERED BY MYODEV",
+    "heroTitle": "Une valise.<br>Six capteurs.<br><em>Un score pour mieux comprendre votre mouvement.</em>",
+    "heroLead": "Un bilan locomoteur réalisé avec un professionnel : des tests fonctionnels standardisés, des données issues des capteurs Myodev et un KŌMØ Motion Score à interpréter dans son contexte.",
+    "heroPrimaryCta": "Découvrir le KŌMØ Check",
+    "heroSecondaryCta": "Pour les professionnels",
+    "heroProof": [
+      "6 capteurs sans fil Myodev",
+      "Tests fonctionnels standardisés",
+      "Interprétation par un professionnel"
+    ],
+    "heroNote": "Un cadre de mesure pour les lieux de soin appropriés — jamais un diagnostic automatique.",
+    "heroImageAlt": "Illustration du KŌMØ Motion Score et de la KŌMØ Case portable",
+    "checkEyebrow": "LE KŌMØ CHECK",
+    "checkTitle": "Une valise portable.<br>Une méthode <em>clinique.</em>",
+    "checkLead": "La KŌMØ Case rend la mesure objective du mouvement possible pendant une évaluation menée par un professionnel. Elle rend les données visibles, sans prétendre qu’un seul signal puisse répondre à toutes les questions de santé.",
+    "checkSteps": [
+      [
+        "01",
+        "Partir de la personne",
+        "Objectif, symptômes, histoire fonctionnelle et résultats déjà disponibles précisent ce qui mérite d’être évalué."
+      ],
+      [
+        "02",
+        "Mesurer le mouvement",
+        "Les six capteurs Myodev peuvent documenter l’activation, la symétrie bilatérale et le contrôle sur des tâches définies."
+      ],
+      [
+        "03",
+        "Tester la fonction réelle",
+        "Lever de chaise, Two-Step Test, marche de 4 mètres et examen ciblé structurent une évaluation reproductible."
+      ],
+      [
+        "04",
+        "Interpréter et restituer",
+        "Le professionnel remet les mesures en contexte, nomme les priorités et décide si d’autres données sont pertinentes."
+      ]
+    ],
+    "checkNotice": "Biologie, imagerie et examens complémentaires ne sont envisagés que lorsqu’une question clinique et le cadre de soin le justifient.",
+    "scoreEyebrow": "LE KŌMØ MOTION SCORE",
+    "scoreTitle": "Un score, mais jamais<br>seulement <em>un chiffre.</em>",
+    "scoreLead": "Le Motion Score organise les éléments de l’évaluation qui peuvent être comparés avec sens. Il indique ce qui a été mesuré, la qualité des données et ce qui mérite d’être discuté ensuite.",
+    "scorePillars": [
+      [
+        "Mobilité",
+        "La manière de se lever, marcher et s’adapter au mouvement."
+      ],
+      [
+        "Muscle",
+        "Activation et contribution droite/gauche sur des tâches définies."
+      ],
+      [
+        "Équilibre & coordination",
+        "Contrôle, symétrie et confiance dans le mouvement."
+      ],
+      [
+        "Posture & contexte",
+        "Éléments cliniques pertinents, uniquement lorsqu’ils sont indiqués."
+      ]
+    ],
+    "scoreNoteTitle": "Une frontière clinique claire",
+    "scoreNote": "Le score soutient une conversation clinique. Il ne pose pas de diagnostic, ne remplace pas l’examen et ne décide pas d’un soin à lui seul.",
+    "scoreImageAlt": "Diagramme du KŌMØ Longevity Score autour de la KŌMØ Case portable",
+    "technologyEyebrow": "LA MESURE, RENDUE VISIBLE",
+    "technologyTitle": "Technologie Myodev.<br><em>Méthode clinique KŌMØ.</em>",
+    "technologyLead": "La KŌMØ Case associe la technologie de mouvement Myodev à un cadre mené par un professionnel : il choisit l’indication, les conditions de test et l’interprétation.",
+    "sensorCards": [
+      [
+        "Signal musculaire",
+        "Un placement de capteurs défini aide à observer l’activation musculaire et la contribution droite/gauche pendant des tâches pertinentes.",
+        "komo-case-muscle.jpeg",
+        "Illustration de six capteurs portables utilisés pour observer l’activation musculaire des membres inférieurs"
+      ],
+      [
+        "Profil de marche",
+        "Une marche de 4 mètres et une observation assistée par caméra peuvent rendre la cadence, la symétrie et l’équilibre plus lisibles.",
+        "komo-case-gait.jpeg",
+        "Illustration d’une évaluation de la marche assistée par caméra avec des capteurs portables"
+      ]
+    ],
+    "technologyPoints": [
+      [
+        "Dans la valise",
+        "Six capteurs sans fil, un dispositif de capture ajustable et le workflow KŌMØ."
+      ],
+      [
+        "Pendant la séance",
+        "Un protocole défini, une supervision et une trace de la qualité des données."
+      ],
+      [
+        "Après la séance",
+        "Un compte rendu interprété et des priorités à retrouver dans Pulse."
+      ]
+    ],
+    "technologyCta": "Échanger sur un déploiement clinique",
+    "closingEyebrow": "UN PRODUIT · UNE TRAJECTOIRE",
+    "closingTitle": "De la KŌMØ Case<br>à un plan <em>qui se poursuit.</em>",
+    "closingLead": "Pulse garde le fil entre un premier repère, une évaluation menée par un professionnel et la conversation suivante. White Coast et le reste de l’écosystème ajoutent les conditions pour bien vivre cette trajectoire.",
+    "closingCta": "Explorer l’écosystème KŌMØ"
+  },
+  "es": {
+    "heroEyebrow": "KŌMØ CASE · POWERED BY MYODEV",
+    "heroTitle": "Una maleta.<br>Seis sensores.<br><em>Una puntuación para entender mejor tu movimiento.</em>",
+    "heroLead": "Un chequeo locomotor realizado con un profesional: pruebas funcionales estandarizadas, datos de sensores Myodev y un KŌMØ Motion Score que se interpreta en su contexto.",
+    "heroPrimaryCta": "Descubrir el KŌMØ Check",
+    "heroSecondaryCta": "Para profesionales",
+    "heroProof": [
+      "6 sensores inalámbricos Myodev",
+      "Pruebas funcionales estandarizadas",
+      "Interpretación profesional"
+    ],
+    "heroNote": "Un marco de medición para entornos sanitarios adecuados; nunca un diagnóstico automático.",
+    "heroImageAlt": "Ilustración del KŌMØ Motion Score y de la KŌMØ Case portátil",
+    "checkEyebrow": "EL KŌMØ CHECK",
+    "checkTitle": "Una maleta portátil.<br>Un método <em>clínico.</em>",
+    "checkLead": "La KŌMØ Case permite medir objetivamente el movimiento durante una evaluación dirigida por un profesional. Hace visibles los datos sin pretender que una sola señal responda a todas las preguntas de salud.",
+    "checkSteps": [
+      [
+        "01",
+        "Empezar por la persona",
+        "Objetivos, síntomas, historia funcional y resultados relevantes ya disponibles precisan qué conviene evaluar."
+      ],
+      [
+        "02",
+        "Medir el movimiento",
+        "Los seis sensores Myodev pueden documentar activación, simetría bilateral y control durante tareas definidas."
+      ],
+      [
+        "03",
+        "Probar la función real",
+        "Levantarse de una silla, Two-Step Test, marcha de 4 metros y exploración dirigida estructuran una evaluación reproducible."
+      ],
+      [
+        "04",
+        "Interpretar y devolver",
+        "El profesional contextualiza las mediciones, nombra las prioridades y decide si otros datos son pertinentes."
+      ]
+    ],
+    "checkNotice": "Biología, imagen y pruebas adicionales solo se consideran cuando la pregunta clínica y el entorno asistencial lo justifican.",
+    "scoreEyebrow": "EL KŌMØ MOTION SCORE",
+    "scoreTitle": "Una puntuación, pero nunca<br>solo <em>un número.</em>",
+    "scoreLead": "El Motion Score organiza las partes de la evaluación que tiene sentido comparar. Muestra qué se midió, la calidad de los datos y qué merece discutirse después.",
+    "scorePillars": [
+      [
+        "Movilidad",
+        "La forma de levantarte, caminar y adaptarte al movimiento."
+      ],
+      [
+        "Músculo",
+        "Activación y contribución bilateral en tareas definidas."
+      ],
+      [
+        "Equilibrio y coordinación",
+        "Control, simetría y confianza en el movimiento."
+      ],
+      [
+        "Postura y contexto",
+        "Hallazgos clínicos relevantes, solo cuando están indicados."
+      ]
+    ],
+    "scoreNoteTitle": "Un límite clínico claro",
+    "scoreNote": "La puntuación apoya una conversación clínica. No diagnostica una condición, no sustituye una exploración ni decide un tratamiento por sí sola.",
+    "scoreImageAlt": "Diagrama del KŌMØ Longevity Score alrededor de la KŌMØ Case portátil",
+    "technologyEyebrow": "MEDICIÓN HECHA VISIBLE",
+    "technologyTitle": "Tecnología Myodev.<br><em>Método clínico KŌMØ.</em>",
+    "technologyLead": "La KŌMØ Case combina la tecnología de movimiento Myodev con un marco dirigido por un profesional: este elige la indicación, las condiciones de prueba y la interpretación.",
+    "sensorCards": [
+      [
+        "Señal muscular",
+        "Una colocación definida de sensores ayuda a observar activación muscular y contribución izquierda/derecha durante tareas pertinentes.",
+        "komo-case-muscle.jpeg",
+        "Ilustración de seis sensores portátiles utilizados para observar la activación muscular de las extremidades inferiores"
+      ],
+      [
+        "Patrón de marcha",
+        "Una marcha de 4 metros y una observación asistida por cámara pueden hacer más legibles la cadencia, la simetría y el equilibrio.",
+        "komo-case-gait.jpeg",
+        "Ilustración de una evaluación de la marcha asistida por cámara con sensores portátiles"
+      ]
+    ],
+    "technologyPoints": [
+      [
+        "Dentro de la maleta",
+        "Seis sensores inalámbricos, un sistema de captura ajustable y el flujo de trabajo KŌMØ."
+      ],
+      [
+        "Durante la sesión",
+        "Un protocolo definido, supervisión y un registro de la calidad de los datos."
+      ],
+      [
+        "Después de la sesión",
+        "Un informe interpretado y prioridades que se pueden revisar en Pulse."
+      ]
+    ],
+    "technologyCta": "Hablar de un despliegue clínico",
+    "closingEyebrow": "UN PRODUCTO · UNA TRAYECTORIA",
+    "closingTitle": "De la KŌMØ Case<br>a un plan <em>que continúa.</em>",
+    "closingLead": "Pulse mantiene el hilo entre una primera referencia, una evaluación realizada por un profesional y la siguiente conversación. White Coast y el resto del ecosistema añaden las condiciones para vivir bien esa trayectoria.",
+    "closingCta": "Explorar el ecosistema KŌMØ"
+  }
+};
+const caseCheckCopy = (locale) => komoCaseCopy[locale] || komoCaseCopy.en;
+
 const journeyCopy = (locale) => pulseJourney[locale] || pulseJourney.en;
 const entranceCopy = (locale) => komoEntrances[locale] || komoEntrances.en;
 const canonical = (locale, page) => `${site.origin}${pagePath(locale, page)}`;
@@ -197,7 +501,7 @@ function pageAction(locale, page) {
     science: { label: c.science.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
     contact: { label: c.global.contactUs, href: 'mailto:contact@komolongevity.com', external: true }
   };
-  return routeActions[page] || { label: journeyCopy(locale).navCta, href: scoreLink(locale) };
+  return routeActions[page] || (page === 'index' ? { label: caseCheckCopy(locale).heroPrimaryCta, href: '#komo-check' } : { label: journeyCopy(locale).navCta, href: scoreLink(locale) });
 }
 
 function languageMenu(locale, page) {
@@ -337,12 +641,31 @@ function buttons(locale, first, second, secondHref) {
 function homePage(locale) {
   const h = translations[locale].home;
   const j = journeyCopy(locale);
-  const entry = entranceCopy(locale);
+  const c = caseCheckCopy(locale);
   return `
-    <section class="hero hero-chair" aria-label="KŌMØ — ${text(entry.heroCta)}">
-      <img class="hero-chair-media" src="/assets/images/hero-chair-balance-v1.webp" alt="${text(chairHeroAlt[locale] || chairHeroAlt.en)}" width="1672" height="941" fetchpriority="high" decoding="async">
-      <div class="hero-chair-control"><a href="#choose-your-entry"><span>01</span>${text(entry.heroCta)}<b aria-hidden="true">↓</b></a></div>
+    <section class="case-hero" aria-label="KŌMØ Case">
+      <div class="shell case-hero-grid">
+        <div class="case-hero-copy">
+          <p class="eyebrow">${text(c.heroEyebrow)}</p>
+          <h1 class="case-hero-title">${raw(c.heroTitle)}</h1>
+          <p class="case-hero-lead">${text(c.heroLead)}</p>
+          <div class="hero-actions case-hero-actions">
+            <a class="button" href="#komo-check">${text(c.heroPrimaryCta)} <span aria-hidden="true">↓</span></a>
+            <a class="button button-outline" href="${link(locale, 'clinical')}">${text(c.heroSecondaryCta)} <span aria-hidden="true">↗</span></a>
+          </div>
+          <ul class="case-hero-proof" aria-label="KŌMØ Case proof points">
+            ${c.heroProof.map((item) => `<li>${text(item)}</li>`).join('')}
+          </ul>
+          <p class="case-hero-note">${text(c.heroNote)}</p>
+        </div>
+        <figure class="case-hero-visual reveal">
+          <img src="/assets/images/komo-case-score.jpeg" alt="${text(c.heroImageAlt)}" width="1122" height="1402" fetchpriority="high" decoding="async">
+          <figcaption><span>01 / KŌMØ Case</span><span>Powered by Myodev</span></figcaption>
+        </figure>
+      </div>
     </section>
+
+    ${caseCheckSection(locale)}
 
     ${komoEntranceSection(locale)}
 
@@ -386,6 +709,60 @@ function homePage(locale) {
     <section class="quote-band"><div class="shell"><blockquote class="reveal">${raw(h.finalTitle)}</blockquote><p class="section-lead" style="color:rgba(255,255,255,.72)">${text(h.finalText)}</p><div class="hero-actions"><a class="button button-light" href="${scoreLink(locale)}">${text(j.primaryCta)}</a></div></div></section>`;
 }
 
+function caseCheckSection(locale) {
+  const c = caseCheckCopy(locale);
+  return `
+    <section class="case-check section" id="komo-check">
+      <div class="shell">
+        <div class="case-section-intro reveal">
+          <div><p class="eyebrow">${text(c.checkEyebrow)}</p><h2 class="section-heading">${raw(c.checkTitle)}</h2></div>
+          <p class="section-lead">${text(c.checkLead)}</p>
+        </div>
+        <ol class="case-measure-grid">
+          ${c.checkSteps.map(([number, title, body]) => `<li class="case-measure-card reveal"><span>${text(number)}</span><h3>${text(title)}</h3><p>${text(body)}</p></li>`).join('')}
+        </ol>
+        <p class="case-check-notice reveal"><span aria-hidden="true">+</span>${text(c.checkNotice)}</p>
+      </div>
+    </section>
+
+    <section class="case-score-section">
+      <div class="shell case-score-grid">
+        <figure class="case-score-visual reveal"><img src="/assets/images/komo-case-overview.jpeg" alt="${text(c.scoreImageAlt)}" width="1122" height="1402" loading="lazy" decoding="async"></figure>
+        <div class="case-score-copy reveal">
+          <p class="eyebrow">${text(c.scoreEyebrow)}</p>
+          <h2 class="section-heading">${raw(c.scoreTitle)}</h2>
+          <p class="section-lead">${text(c.scoreLead)}</p>
+          <div class="case-score-pillars">
+            ${c.scorePillars.map(([title, body], index) => `<article><span>0${index + 1}</span><div><h3>${text(title)}</h3><p>${text(body)}</p></div></article>`).join('')}
+          </div>
+          <aside class="case-score-note"><strong>${text(c.scoreNoteTitle)}</strong><p>${text(c.scoreNote)}</p></aside>
+        </div>
+      </div>
+    </section>
+
+    <section class="case-technology section" id="myodev">
+      <div class="shell">
+        <div class="case-section-intro reveal">
+          <div><p class="eyebrow">${text(c.technologyEyebrow)}</p><h2 class="section-heading">${raw(c.technologyTitle)}</h2></div>
+          <p class="section-lead">${text(c.technologyLead)}</p>
+        </div>
+        <div class="case-sensor-grid">
+          ${c.sensorCards.map(([title, body, image, alt]) => `<article class="case-sensor-card reveal"><figure><img src="/assets/images/${text(image)}" alt="${text(alt)}" width="1122" height="1402" loading="lazy" decoding="async"></figure><div><h3>${text(title)}</h3><p>${text(body)}</p></div></article>`).join('')}
+        </div>
+        <div class="case-technology-bar reveal">
+          <div class="case-technology-points">${c.technologyPoints.map(([label, body]) => `<article><strong>${text(label)}</strong><p>${text(body)}</p></article>`).join('')}</div>
+          <a class="button button-outline" href="${pagePath(locale, 'contact')}#contact-form">${text(c.technologyCta)} <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="case-closing">
+      <div class="shell case-closing-grid">
+        <div class="reveal"><p class="eyebrow eyebrow-light">${text(c.closingEyebrow)}</p><h2>${raw(c.closingTitle)}</h2></div>
+        <div class="reveal"><p>${text(c.closingLead)}</p><a class="button button-light" href="#ecosystem">${text(c.closingCta)} <span aria-hidden="true">↓</span></a></div>
+      </div>
+    </section>`;
+}
 function komoEntranceSection(locale) {
   const copy = entranceCopy(locale);
   return `<section class="section entry-choice" id="choose-your-entry">
