@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f6f4ef">
+<meta name="robots" content="index,follow">
+<title>KŌMØ Check — GLFS-25</title>
+<meta name="description" content="KŌMØ Check: complete the GLFS-25 online and receive your locomotor function score immediately, without sign-up.">
+<link rel="canonical" href="https://komolongevity.com/check">
+<style>
+:root{--ink:#11120f;--muted:#6f726b;--paper:#f6f4ef;--paper2:#ebe7df;--white:#fff;--sage:#8e9f8a;--sage2:#dfe6dd;--line:rgba(17,18,15,.12);--danger:#7f2f2d;--warn:#8b6724;--ok:#4e6d57;--shadow:0 24px 70px rgba(25,25,20,.08)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button,select{font:inherit}
+.shell{width:min(1180px,calc(100% - 40px));margin:auto}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(246,244,239,.88);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{font-weight:750;letter-spacing:-.07em;font-size:25px}
+.navlinks{display:flex;align-items:center;gap:24px;font-size:13px;color:var(--muted)}
+.navlinks a:hover{color:var(--ink)}
+.lang{border:1px solid var(--line);background:transparent;border-radius:999px;padding:9px 13px;cursor:pointer}
+.hero{padding:88px 0 68px;border-bottom:1px solid var(--line);background:radial-gradient(circle at 85% 20%,rgba(142,159,138,.18),transparent 34%),var(--paper)}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:70px;align-items:end}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:#59685a;margin:0 0 22px}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:400;font-size:clamp(50px,7vw,92px);line-height:.92;letter-spacing:-.055em;margin:0 0 28px}
+h1 em{font-weight:400;color:#5d6d5d}
+.lead{max-width:690px;color:var(--muted);font-size:19px;line-height:1.6;margin:0 0 30px}
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 30px}
+.pill{padding:9px 12px;border:1px solid var(--line);border-radius:999px;font-size:12px;background:rgba(255,255,255,.45)}
+.button{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:999px;background:var(--ink);color:#fff;padding:14px 20px;font-weight:650;font-size:14px;cursor:pointer}
+.button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.refcard{background:var(--white);border:1px solid var(--line);padding:30px;border-radius:28px;box-shadow:var(--shadow)}
+.refcard h2{font-family:Georgia,serif;font-size:31px;line-height:1.08;font-weight:400;letter-spacing:-.03em;margin:0 0 18px}
+.refcard p{color:var(--muted);line-height:1.65;font-size:14px}
+.refrow{display:flex;gap:14px;padding:16px 0;border-top:1px solid var(--line)}
+.refrow strong{min-width:34px;font-size:12px;letter-spacing:.12em;color:#5f705f}
+.main{padding:60px 0 90px}
+.intro-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:50px;align-items:start;margin-bottom:42px}
+.intro-grid h2{font-family:Georgia,serif;font-weight:400;font-size:42px;line-height:1.05;letter-spacing:-.04em;margin:0}
+.intro-grid p{font-size:16px;line-height:1.7;color:var(--muted);margin:0}
+.privacy{margin-top:20px;padding:18px 20px;background:var(--sage2);border-radius:18px;color:#485348!important;font-size:13px!important}
+.dashboard{position:sticky;top:92px;z-index:10;display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;background:#151612;color:#fff;border-radius:24px;padding:18px 22px;margin-bottom:22px;box-shadow:0 18px 45px rgba(0,0,0,.12)}
+.progressline{height:5px;background:rgba(255,255,255,.14);border-radius:10px;overflow:hidden;margin-top:8px}
+.progressline span{display:block;height:100%;width:0;background:#cbd6c8;transition:width .2s ease}
+.dashlabel{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:#aeb3aa}
+.dashvalue{font-size:23px;font-weight:700;letter-spacing:-.04em;margin-top:3px}
+.scorebig{font-size:34px;font-weight:750;letter-spacing:-.06em;min-width:92px;text-align:right}
+.question-groups{display:grid;gap:18px}
+.group{background:var(--white);border:1px solid var(--line);border-radius:26px;overflow:hidden}
+.group-head{padding:24px 26px 17px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;align-items:end}
+.group-head h3{font-family:Georgia,serif;font-size:27px;font-weight:400;letter-spacing:-.03em;margin:0}
+.group-head span{font-size:11px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase}
+.qrow{display:grid;grid-template-columns:54px 1fr 260px;gap:18px;align-items:center;padding:20px 26px;border-bottom:1px solid var(--line)}
+.qrow:last-child{border-bottom:0}
+.qnum{font-size:12px;color:#718171;letter-spacing:.1em;font-weight:700}
+.qtext{font-size:15px;line-height:1.5}
+.select-wrap{position:relative}
+select{appearance:none;width:100%;background:#faf9f6;border:1px solid rgba(17,18,15,.16);border-radius:13px;padding:12px 38px 12px 13px;color:var(--ink);outline:none;cursor:pointer}
+select:focus{border-color:#7d907e;box-shadow:0 0 0 3px rgba(125,144,126,.12)}
+.select-wrap:after{content:"⌄";position:absolute;right:14px;top:50%;transform:translateY(-58%);pointer-events:none;color:#687167}
+.result{margin-top:26px;border-radius:30px;padding:36px;background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow);display:none}
+.result.show{display:block}
+.result-top{display:grid;grid-template-columns:1fr auto;gap:30px;align-items:start}
+.result-kicker{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#617061;font-weight:700}
+.result h2{font-family:Georgia,serif;font-size:48px;font-weight:400;letter-spacing:-.045em;line-height:1;margin:8px 0 12px}
+.result p{color:var(--muted);line-height:1.65}
+.result-score{font-size:72px;font-weight:750;letter-spacing:-.07em;line-height:.9;text-align:right}
+.result-score small{display:block;font-size:12px;color:var(--muted);letter-spacing:.08em;margin-top:12px}
+.result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}
+.stagebar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:26px 0 0}
+.stagebar div{padding:12px;border-radius:14px;background:#f1efe9;font-size:11px;color:var(--muted)}
+.stagebar div.active{background:var(--sage2);color:#334334;font-weight:700}
+.notice{margin-top:26px;padding:22px 24px;border-left:3px solid #8d9f8d;background:#eeece6;color:#5f625d;font-size:13px;line-height:1.65;border-radius:0 18px 18px 0}
+.source{margin-top:32px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.65}
+.footer{border-top:1px solid var(--line);padding:30px 0 50px;color:var(--muted);font-size:12px}
+.footer-row{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+@media(max-width:840px){
+ .navlinks a:not(.keep){display:none}
+ .hero{padding:60px 0 50px} .hero-grid,.intro-grid{grid-template-columns:1fr;gap:28px}
+ .dashboard{grid-template-columns:1fr auto;top:82px} .dashboard .scorecell{grid-column:2;grid-row:1/3}
+ .qrow{grid-template-columns:42px 1fr;padding:18px} .qrow .select-wrap{grid-column:2}
+ .result-top{grid-template-columns:1fr} .result-score{text-align:left;font-size:60px}
+ .stagebar{grid-template-columns:1fr 1fr}
+}
+@media(max-width:520px){
+ .shell{width:min(100% - 24px,1180px)} .nav{height:68px} .hero{padding-top:48px}
+ h1{font-size:50px} .lead{font-size:17px} .refcard{padding:22px}
+ .dashboard{border-radius:18px;padding:15px 16px;gap:12px} .dashvalue{font-size:19px} .scorebig{font-size:29px}
+ .group{border-radius:20px} .group-head{padding:20px 18px 14px} .group-head h3{font-size:24px}
+ .qrow{grid-template-columns:34px 1fr;gap:10px} .qtext{font-size:14px}
+ .result{padding:26px 20px;border-radius:22px} .result h2{font-size:39px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+ <div class="shell nav">
+  <a class="brand" href="/">KŌMØ</a>
+  <nav class="navlinks" aria-label="Primary">
+   <a data-back href="/"></a>
+   <a data-locomotor href="/locomotor/"></a>
+   <a class="keep lang" data-lang href="/fr/check"></a>
+  </nav>
+ </div>
+</header>
+<main>
+<section class="hero">
+ <div class="shell hero-grid">
+  <div>
+   <p class="eyebrow" data-t="eyebrow"></p>
+   <h1 data-html="hero"></h1>
+   <p class="lead" data-t="lead"></p>
+   <div class="pills"><span class="pill" data-t="pill1"></span><span class="pill" data-t="pill2"></span><span class="pill" data-t="pill3"></span><span class="pill" data-t="pill4"></span></div>
+   <a class="button" href="#check" data-t="start"></a>
+  </div>
+  <aside class="refcard">
+   <p class="eyebrow">GLFS-25 · 2009</p>
+   <h2 data-t="aboutTitle"></h2>
+   <p data-t="aboutBody"></p>
+   <div class="refrow"><strong>0–6</strong><span data-stage-label="0"></span></div>
+   <div class="refrow"><strong>7–15</strong><span>LS Stage 1</span></div>
+   <div class="refrow"><strong>16–23</strong><span>LS Stage 2</span></div>
+   <div class="refrow"><strong>≥24</strong><span>LS Stage 3</span></div>
+  </aside>
+ </div>
+</section>
+
+<section class="main" id="check">
+ <div class="shell">
+  <div class="intro-grid">
+   <h2 data-t="period"></h2>
+   <div><p data-t="instruction"></p><p class="privacy"><strong data-t="privacyTitle"></strong><br><span data-t="privacyBody"></span></p></div>
+  </div>
+  <div class="dashboard" aria-live="polite">
+   <div>
+    <div class="dashlabel" data-t="progress"></div>
+    <div class="dashvalue"><span data-progress-count>0</span> / 25</div>
+    <div class="progressline"><span data-progress-bar></span></div>
+   </div>
+   <div class="scorecell">
+    <div class="dashlabel" data-t="score"></div>
+    <div class="scorebig"><span data-score>0</span><small>/100</small></div>
+   </div>
+  </div>
+  <form data-form class="question-groups" novalidate></form>
+  <section class="result" data-result tabindex="-1" aria-live="polite">
+   <div class="result-top">
+    <div><div class="result-kicker" data-t="score"></div><h2 data-result-title></h2><p data-result-body></p><p><strong data-next></strong></p></div>
+    <div class="result-score"><span data-result-score>0</span><small>/ 100</small></div>
+   </div>
+   <div class="stagebar">
+    <div data-stage="0">0–6 · <span data-stage-label="0"></span></div>
+    <div data-stage="1">7–15 · LS Stage 1</div>
+    <div data-stage="2">16–23 · LS Stage 2</div>
+    <div data-stage="3">≥24 · LS Stage 3</div>
+   </div>
+   <div class="result-actions">
+    <a class="button" data-clinical href="/clinical/" data-t="cta"></a>
+    <button type="button" class="button ghost" data-reset data-t="reset"></button>
+   </div>
+  </section>
+  <div class="notice" data-t="notice"></div>
+  <div class="source" data-t="source"></div>
+ </div>
+</section>
+</main>
+<footer class="footer"><div class="shell footer-row"><span>© 2026 KŌMØ · Longevity in Motion</span><span>Locomotor function · Prevention · Clinical continuity</span></div></footer>
+<script>
+const DATA = {"copy": {"en": {"title": "KŌMØ Check — GLFS-25 Locomotor Function Self-Check", "eyebrow": "KŌMØ CHECK · LOCOMOTOR PREVENTION", "hero": "Measure your locomotor function.<br><em>In less than 8 minutes.</em>", "lead": "Complete the 25-question Geriatric Locomotive Function Scale (GLFS-25) based on your experience during the past month. Your score is calculated instantly, without creating an account.", "pill1": "25 questions", "pill2": "0–100 points", "pill3": "Immediate result", "pill4": "No sign-up", "start": "Start the Check", "aboutTitle": "A validated 25-item functional scale.", "aboutBody": "GLFS-25 assesses pain, difficulty in daily activities, mobility, social participation and concerns related to falling or future walking ability. Each response is scored from 0 to 4; the total score ranges from 0 to 100.", "privacyTitle": "Private by design", "privacyBody": "Your answers are calculated locally in your browser. They are not transmitted to KŌMØ and are not stored by this page.", "period": "During the past month, have you experienced physical pain or difficulties in your daily activities?", "instruction": "Choose one response for every question. The score updates automatically.", "progress": "Questions answered", "score": "GLFS-25 score", "provisional": "Provisional score — complete all 25 questions for interpretation.", "complete": "Complete", "stage0": "Below the Stage 1 threshold", "stage0body": "Your GLFS-25 score is below 7. No locomotive syndrome stage threshold is reached by this questionnaire alone.", "stage1": "LS Stage 1", "stage1body": "Your mobility is starting to decline.", "stage2": "LS Stage 2", "stage2body": "The decline in your mobility is progressing.", "stage3": "LS Stage 3", "stage3body": "The decline in your mobility has progressed to the point that social participation may be limited.", "next0": "Maintain regular physical activity and reassess periodically.", "next1": "Use this result as a prompt to act early and consider discussing prevention with a health professional.", "next2": "A professional locomotor assessment is recommended to understand the contributing factors and define an appropriate plan.", "next3": "A clinical assessment is recommended, particularly if daily activities, walking or social participation are limited.", "cta": "Explore KŌMØ Clinical", "reset": "Restart", "source": "GLFS-25 © 2009 Department of Orthopaedic Surgery, Jichi Medical University. Reproduced with permission. Scoring thresholds: Stage 1 = 7–15; Stage 2 = 16–23; Stage 3 = 24 or more.", "notice": "This self-check is a functional screening tool and does not establish a medical diagnosis. Seek professional assessment for persistent pain, weakness, falls, neurological symptoms or any new limitation.", "back": "Back to KŌMØ", "locomotor": "Understand Locomotor Syndrome", "language": "FR"}, "fr": {"title": "KŌMØ Check — Auto-évaluation GLFS-25 de la fonction locomotrice", "eyebrow": "KŌMØ CHECK · PRÉVENTION LOCOMOTRICE", "hero": "Mesurez votre fonction locomotrice.<br><em>En moins de 8 minutes.</em>", "lead": "Répondez aux 25 questions de la Geriatric Locomotive Function Scale (GLFS-25) en pensant au mois écoulé. Votre score est calculé immédiatement, sans création de compte.", "pill1": "25 questions", "pill2": "0–100 points", "pill3": "Résultat immédiat", "pill4": "Sans inscription", "start": "Commencer le Check", "aboutTitle": "Une échelle fonctionnelle validée en 25 items.", "aboutBody": "La GLFS-25 explore la douleur, les difficultés dans les activités quotidiennes, la mobilité, la participation sociale et les inquiétudes liées aux chutes ou à la marche future. Chaque réponse vaut de 0 à 4 points ; le score total va de 0 à 100.", "privacyTitle": "Confidentiel par conception", "privacyBody": "Vos réponses sont calculées localement dans votre navigateur. Elles ne sont ni transmises à KŌMØ, ni enregistrées par cette page.", "period": "Au cours du mois écoulé, avez-vous ressenti des douleurs physiques ou des difficultés dans vos activités quotidiennes ?", "instruction": "Choisissez une réponse pour chaque question. Le score s’actualise automatiquement.", "progress": "Questions complétées", "score": "Score GLFS-25", "provisional": "Score provisoire — complétez les 25 questions pour obtenir l’interprétation.", "complete": "Complet", "stage0": "Sous le seuil du stade 1", "stage0body": "Votre score GLFS-25 est inférieur à 7. Aucun seuil de stade du syndrome locomoteur n’est atteint par ce questionnaire seul.", "stage1": "LS Stage 1", "stage1body": "Votre mobilité commence à diminuer.", "stage2": "LS Stage 2", "stage2body": "La diminution de votre mobilité progresse.", "stage3": "LS Stage 3", "stage3body": "La diminution de votre mobilité a progressé au point de pouvoir limiter la participation sociale.", "next0": "Conservez une activité physique régulière et réévaluez périodiquement votre fonction.", "next1": "Considérez ce résultat comme un signal pour agir tôt et discuter, si nécessaire, d’une stratégie de prévention avec un professionnel de santé.", "next2": "Une évaluation locomotrice professionnelle est recommandée afin de comprendre les facteurs contributifs et de définir un plan adapté.", "next3": "Une évaluation clinique est recommandée, en particulier si les activités quotidiennes, la marche ou la participation sociale sont limitées.", "cta": "Découvrir KŌMØ Clinical", "reset": "Recommencer", "source": "GLFS-25 © 2009 Department of Orthopaedic Surgery, Jichi Medical University. Reproduit avec autorisation. Seuils de cotation : Stage 1 = 7–15 ; Stage 2 = 16–23 ; Stage 3 = 24 ou plus.", "notice": "Cette auto-évaluation est un outil de dépistage fonctionnel et ne constitue pas un diagnostic médical. Demandez un avis professionnel en cas de douleur persistante, faiblesse, chute, symptôme neurologique ou limitation récente.", "back": "Retour à KŌMØ", "locomotor": "Comprendre le syndrome locomoteur", "language": "EN"}}, "questions": {"en": [["Did you have any pain (including numbness) in your neck, shoulders, arms, or hands?", ["No pain", "Slight pain", "Moderate pain", "Considerable pain", "Extreme pain"]], ["Did you have any pain in your back, lower back, or buttocks?", ["No pain", "Slight pain", "Moderate pain", "Considerable pain", "Extreme pain"]], ["Did you have any pain (including numbness) in your lower body (pelvic region, thighs, knees, calves, shins, ankles, or feet)?", ["No pain", "Slight pain", "Moderate pain", "Considerable pain", "Extreme pain"]], ["To what extent has it been painful to move your body in daily life?", ["Not painful", "Slightly painful", "Moderately painful", "Considerably painful", "Extremely painful"]], ["To what extent has it been difficult to get up from a bed or lie down?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to stand up from a sitting position?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to walk inside your residence?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to put on and take off shirts?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to put on and take off pants and underwear?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to use the toilet?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to wash your body in a bath?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to go up and down stairs?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to walk briskly?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["When going out, to what extent has it been difficult to keep yourself neat?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["How far can you keep walking without rest? (Select the closest answer.)", ["2 km or more", "About 1 km", "About 300 m", "About 100 m", "About 10 m"]], ["To what extent has it been difficult to go next door or around your neighborhood?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to carry objects weighing about two kilograms (roughly the weight of two one-liter milk cartons)?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to go out using trains or buses?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to perform light housework (such as preparing and cleaning dishes or simple housekeeping)?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to perform somewhat heavy housework (such as vacuuming or carrying mattresses and bedding)?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["To what extent has it been difficult to participate in sports or dances (such as jogging, swimming, or gateball)?", ["Not difficult", "Slightly difficult", "Moderately difficult", "Considerably difficult", "Extremely difficult"]], ["Have you had to refrain from meeting close friends and acquaintances?", ["Did not refrain", "Slightly refrained", "Moderately refrained", "Considerably refrained", "Completely refrained"]], ["Have you had to refrain from community activities or events?", ["Did not refrain", "Slightly refrained", "Moderately refrained", "Considerably refrained", "Completely refrained"]], ["Have you felt anxious about falling in your residence?", ["Not anxious", "Slightly anxious", "Moderately anxious", "Considerably anxious", "Extremely anxious"]], ["Have you felt anxious about being unable to walk in the future?", ["Not anxious", "Slightly anxious", "Moderately anxious", "Considerably anxious", "Extremely anxious"]]], "fr": [["Avez-vous ressenti une douleur (y compris un engourdissement) au niveau du cou, des épaules, des bras ou des mains ?", ["Aucune douleur", "Douleur légère", "Douleur modérée", "Douleur importante", "Douleur extrême"]], ["Avez-vous ressenti une douleur au niveau du dos, des lombaires ou des fesses ?", ["Aucune douleur", "Douleur légère", "Douleur modérée", "Douleur importante", "Douleur extrême"]], ["Avez-vous ressenti une douleur (y compris un engourdissement) dans la partie inférieure du corps (bassin, cuisses, genoux, mollets, tibias, chevilles ou pieds) ?", ["Aucune douleur", "Douleur légère", "Douleur modérée", "Douleur importante", "Douleur extrême"]], ["Dans quelle mesure le fait de bouger votre corps dans la vie quotidienne a-t-il été douloureux ?", ["Pas douloureux", "Légèrement douloureux", "Modérément douloureux", "Très douloureux", "Extrêmement douloureux"]], ["Dans quelle mesure a-t-il été difficile de vous lever d’un lit ou de vous y allonger ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile de vous lever d’une position assise ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile de marcher à l’intérieur de votre domicile ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile d’enfiler et de retirer une chemise ou un haut ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile d’enfiler et de retirer un pantalon et des sous-vêtements ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile d’utiliser les toilettes ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile de vous laver le corps dans le bain ou sous la douche ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile de monter et descendre les escaliers ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile de marcher rapidement ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Lorsque vous sortez, dans quelle mesure a-t-il été difficile de conserver une présentation soignée ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Quelle distance pouvez-vous parcourir à pied sans vous arrêter ? (Choisissez la réponse la plus proche.)", ["2 km ou plus", "Environ 1 km", "Environ 300 m", "Environ 100 m", "Environ 10 m"]], ["Dans quelle mesure a-t-il été difficile d’aller chez un voisin ou de vous déplacer dans votre quartier ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile de porter des objets pesant environ deux kilogrammes (environ deux bouteilles d’un litre) ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile de sortir en utilisant le train ou le bus ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile d’effectuer des tâches ménagères légères (préparer ou débarrasser la vaisselle, rangement simple) ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile d’effectuer des tâches ménagères plus lourdes (passer l’aspirateur, porter un matelas ou du linge de lit) ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Dans quelle mesure a-t-il été difficile de participer à des activités sportives ou dansées (jogging, natation, etc.) ?", ["Pas difficile", "Légèrement difficile", "Modérément difficile", "Très difficile", "Extrêmement difficile"]], ["Avez-vous dû renoncer à rencontrer des amis proches ou des connaissances ?", ["Pas du tout", "Un peu", "Modérément", "Beaucoup", "Complètement"]], ["Avez-vous dû renoncer à participer à des activités ou événements de votre communauté ?", ["Pas du tout", "Un peu", "Modérément", "Beaucoup", "Complètement"]], ["Avez-vous ressenti de l’inquiétude à l’idée de tomber dans votre domicile ?", ["Pas inquiet/inquiète", "Légèrement inquiet/inquiète", "Modérément inquiet/inquiète", "Très inquiet/inquiète", "Extrêmement inquiet/inquiète"]], ["Avez-vous ressenti de l’inquiétude à l’idée de ne plus pouvoir marcher à l’avenir ?", ["Pas inquiet/inquiète", "Légèrement inquiet/inquiète", "Modérément inquiet/inquiète", "Très inquiet/inquiète", "Extrêmement inquiet/inquiète"]]]}};
+const path = window.location.pathname;
+const locale = path.startsWith('/fr/') ? 'fr' : 'en';
+const C = DATA.copy[locale];
+const Q = DATA.questions[locale];
+document.documentElement.lang = locale;
+document.title = C.title;
+document.querySelector('meta[name="description"]').content = C.lead.replace(/<[^>]+>/g,'');
+document.querySelectorAll('[data-t]').forEach(el => el.textContent = C[el.dataset.t] || '');
+document.querySelectorAll('[data-html]').forEach(el => el.innerHTML = C[el.dataset.html] || '');
+document.querySelector('[data-back]').textContent = C.back;
+document.querySelector('[data-locomotor]').textContent = C.locomotor;
+document.querySelector('[data-stage-label="0"]').textContent = locale === 'fr' ? 'Sous le seuil du stade 1' : 'Below Stage 1 threshold';
+document.querySelectorAll('[data-stage-label="0"]').forEach(el => el.textContent = locale === 'fr' ? 'Sous le seuil du stade 1' : 'Below Stage 1 threshold');
+const lang = document.querySelector('[data-lang]');
+lang.textContent = C.language;
+lang.href = locale === 'fr' ? '/check' : '/fr/check';
+document.querySelector('[data-back]').href = locale === 'fr' ? '/fr/' : '/';
+document.querySelector('[data-locomotor]').href = locale === 'fr' ? '/fr/locomotor/' : '/locomotor/';
+document.querySelector('[data-clinical]').href = locale === 'fr' ? '/fr/clinical/' : '/clinical/';
+
+const groups = locale === 'fr'
+ ? [['Douleur & symptômes',0,4],['Vie quotidienne & mobilité',4,16],['Activités & participation',16,25]]
+ : [['Pain & symptoms',0,4],['Daily life & mobility',4,16],['Activities & participation',16,25]];
+
+const form = document.querySelector('[data-form]');
+groups.forEach(([title,start,end]) => {
+ const section = document.createElement('section');
+ section.className = 'group';
+ section.innerHTML = '<div class="group-head"><h3>'+title+'</h3><span>Q'+(start+1)+'–Q'+end+'</span></div>';
+ for(let i=start;i<end;i++){
+  const row = document.createElement('label');
+  row.className='qrow';
+  const opts = Q[i][1].map((o,score)=>'<option value="'+score+'">'+score+' · '+o+'</option>').join('');
+  row.innerHTML='<span class="qnum">Q'+(i+1)+'</span><span class="qtext">'+Q[i][0]+'</span><span class="select-wrap"><select name="q'+(i+1)+'" aria-label="Q'+(i+1)+'"><option value="">—</option>'+opts+'</select></span>';
+  section.appendChild(row);
+ }
+ form.appendChild(section);
+});
+
+const selects=[...form.querySelectorAll('select')];
+const result=document.querySelector('[data-result]');
+const scoreEl=document.querySelector('[data-score]');
+const countEl=document.querySelector('[data-progress-count]');
+const barEl=document.querySelector('[data-progress-bar]');
+function stageFor(score){ return score>=24?3:score>=16?2:score>=7?1:0; }
+function update(){
+ const answered=selects.filter(s=>s.value!=='');
+ const score=answered.reduce((sum,s)=>sum+Number(s.value),0);
+ scoreEl.textContent=score;
+ countEl.textContent=answered.length;
+ barEl.style.width=(answered.length/25*100)+'%';
+ if(answered.length<25){
+  result.classList.remove('show');
+  return;
+ }
+ const stage=stageFor(score);
+ const titles=[C.stage0,C.stage1,C.stage2,C.stage3];
+ const bodies=[C.stage0body,C.stage1body,C.stage2body,C.stage3body];
+ const nexts=[C.next0,C.next1,C.next2,C.next3];
+ document.querySelector('[data-result-title]').textContent=titles[stage];
+ document.querySelector('[data-result-body]').textContent=bodies[stage];
+ document.querySelector('[data-next]').textContent=nexts[stage];
+ document.querySelector('[data-result-score]').textContent=score;
+ document.querySelectorAll('[data-stage]').forEach(el=>el.classList.toggle('active',Number(el.dataset.stage)===stage));
+ result.classList.add('show');
+ setTimeout(()=>result.scrollIntoView({behavior:'smooth',block:'center'}),80);
+ }
+selects.forEach(s=>s.addEventListener('change',update));
+document.querySelector('[data-reset]').addEventListener('click',()=>{
+ form.reset(); update(); window.scrollTo({top:document.querySelector('#check').offsetTop-80,behavior:'smooth'});
+});
+update();
+</script>
+</body>
+</html>
