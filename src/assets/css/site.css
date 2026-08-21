@@ -573,7 +573,7 @@ img { max-width: 100%; display: block; }
 .case-hero-proof li::before { content: ''; width: 5px; height: 5px; margin-right: .45rem; border-radius: 50%; background: var(--sage-deep); }
 .case-hero-note { max-width: 600px; margin: 1.05rem 0 0; color: rgba(17,37,42,.64); font-size: .73rem; line-height: 1.5; }
 .case-hero-visual { position: relative; overflow: hidden; margin: 0; border: 1px solid rgba(6,60,66,.14); border-radius: min(2.25vw, 30px); background: #faf8f2; box-shadow: 0 32px 76px rgba(8,35,39,.17); }
-.case-hero-visual img { width: 100%; aspect-ratio: 1122 / 1402; object-fit: cover; object-position: center; }
+.case-hero-visual img { width: 100%; height: auto; aspect-ratio: 1122 / 1402; object-fit: cover; object-position: center; }
 .case-hero-visual figcaption { display: flex; justify-content: space-between; gap: .75rem; padding: .72rem .92rem; border-top: 1px solid rgba(6,60,66,.12); color: var(--ink-soft); background: rgba(255,255,255,.88); font: 500 .57rem/1.2 var(--mono); letter-spacing: .11em; text-transform: uppercase; }
 .case-check { background: #fffdfa; }
 .case-section-intro { display: grid; grid-template-columns: minmax(0,.92fr) minmax(0,1.08fr); gap: 2rem 9%; align-items: end; }
@@ -592,7 +592,7 @@ img { max-width: 100%; display: block; }
 .case-score-section { overflow: hidden; padding: clamp(4.7rem, 9vw, 9rem) 0; background: #e9e6dc; }
 .case-score-grid { display: grid; grid-template-columns: minmax(300px,.78fr) minmax(0,1.02fr); gap: clamp(2.8rem, 8vw, 9rem); align-items: center; }
 .case-score-visual { max-width: 560px; margin: 0; overflow: hidden; border: 1px solid rgba(17,37,42,.12); border-radius: var(--radius-xl); background: #f8f5ef; box-shadow: var(--shadow); }
-.case-score-visual img { width: 100%; aspect-ratio: 1122 / 1402; object-fit: cover; }
+.case-score-visual img { width: 100%; height: auto; aspect-ratio: 1122 / 1402; object-fit: cover; }
 .case-score-copy .section-lead { max-width: 595px; }
 .case-score-pillars { display: grid; gap: 0; margin-top: 2.4rem; border-top: 1px solid var(--line); }
 .case-score-pillars article { display: grid; grid-template-columns: 42px 1fr; gap: .7rem; padding: .92rem 0; border-bottom: 1px solid var(--line); }
@@ -605,8 +605,8 @@ img { max-width: 100%; display: block; }
 .case-technology { background: #fff; }
 .case-sensor-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: clamp(1.1rem, 2.5vw, 2rem); margin-top: clamp(2.5rem, 5vw, 4rem); }
 .case-sensor-card { display: grid; grid-template-columns: minmax(220px,.79fr) minmax(0,1fr); min-height: 365px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); background: #f7f5ef; }
-.case-sensor-card figure { margin: 0; background: #eee9df; }
-.case-sensor-card figure img { width: 100%; height: 100%; min-height: 365px; object-fit: cover; object-position: center; }
+.case-sensor-card figure { position: relative; min-height: 365px; margin: 0; overflow: hidden; background: #eee9df; }
+.case-sensor-card figure img { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; object-fit: cover; object-position: center; }
 .case-sensor-card > div { display: flex; flex-direction: column; justify-content: flex-end; padding: clamp(1.35rem, 2.5vw, 2.1rem); }
 .case-sensor-card h3 { max-width: 245px; margin: 0 0 .75rem; color: var(--ink); font: 500 clamp(1.55rem, 2.4vw, 2.25rem)/1.02 var(--display); letter-spacing: -.045em; }
 .case-sensor-card p { max-width: 300px; margin: 0; color: var(--ink-soft); font-size: .84rem; line-height: 1.55; }
@@ -630,7 +630,7 @@ img { max-width: 100%; display: block; }
   .case-measure-card { min-height: 260px; border-bottom: 1px solid var(--line); }
   .case-hero-grid { gap: clamp(2rem, 4vw, 4rem); }
   .case-sensor-card { grid-template-columns: 1fr; }
-  .case-sensor-card figure img { min-height: 290px; max-height: 390px; }
+  .case-sensor-card figure { min-height: 290px; max-height: 390px; }
 
   .primary-nav { gap: .9rem; }
   .primary-nav a { font-size: .73rem; }
@@ -738,7 +738,8 @@ img { max-width: 100%; display: block; }
   .case-technology-points { grid-template-columns: 1fr; gap: .9rem; }
   .case-technology-points article { padding: 0 0 .9rem; border-right: 0; border-bottom: 1px solid rgba(255,255,255,.18); }
   .case-technology-points article:last-child { padding-bottom: 0; border-bottom: 0; }
-  .case-sensor-card figure img { min-height: 0; max-height: none; aspect-ratio: 1122 / 1050; object-position: center top; }
+  .case-sensor-card figure { min-height: 0; max-height: none; aspect-ratio: 1122 / 1050; }
+  .case-sensor-card figure img { object-position: center top; }
   .case-closing p:not(.eyebrow) { font-size: .95rem; }
 
   .brand small { display: none; }

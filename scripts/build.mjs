@@ -9,7 +9,7 @@ const output = join(root, 'site');
 const sourceAssets = join(root, 'src', 'assets');
 // Static assets are served aggressively by the CDN. Bump this whenever a
 // shared stylesheet or script changes so visitors receive the matching UI.
-const assetVersion = '20260821-v9';
+const assetVersion = '20260821-v10';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
