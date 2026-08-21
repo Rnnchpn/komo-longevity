@@ -9,7 +9,7 @@ const output = join(root, 'site');
 const sourceAssets = join(root, 'src', 'assets');
 // Static assets are served aggressively by the CDN. Bump this whenever a
 // shared stylesheet or script changes so visitors receive the matching UI.
-const assetVersion = '20260821-v11';
+const assetVersion = '20260821-v12';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -1199,6 +1199,467 @@ const partnerCopy = {
   }
 };
 const caseCheckCopy = (locale) => komoCaseCopy[locale] || komoCaseCopy.en;
+const komoCheckCopy = {
+  "fr": {
+    "nav": "KŌMØ Check",
+    "headerCta": "Faire le Check",
+    "homeCta": "Faire le KŌMØ Check",
+    "homeNote": "Sans compte · sur votre appareil · résultat immédiat",
+    "metaTitle": "KŌMØ Check — Prévenir le syndrome locomoteur",
+    "metaDescription": "Une auto-évaluation anonyme et immédiate inspirée du référentiel japonais du syndrome locomoteur : lever de chaise, deux pas et contexte fonctionnel.",
+    "heroEyebrow": "KŌMØ CHECK · PRÉVENTION LOCOMOTRICE",
+    "heroTitle": "Comprendre votre mobilité.<br><em>Prévenir avant la limitation.</em>",
+    "heroLead": "KŌMØ Check propose un premier repère fonctionnel, à réaliser chez vous sans créer de compte. Il traduit deux tests simples et votre vécu quotidien en une lecture immédiate — à utiliser pour mieux décider de la suite, jamais pour s’auto-diagnostiquer.",
+    "heroPoints": [
+      "3 repères fonctionnels",
+      "Environ 5 minutes",
+      "Calcul local · aucune donnée envoyée"
+    ],
+    "heroCta": "Faire mon KŌMØ Check",
+    "heroSecondary": "Comprendre la méthode",
+    "heroPrivacy": "Aucune inscription. Les réponses restent dans votre navigateur et ne sont ni enregistrées ni transmises à KŌMØ.",
+    "referenceKicker": "Référentiel de départ",
+    "referenceTitle": "Le cadre japonais du syndrome locomoteur.",
+    "referenceBody": "La Japanese Orthopaedic Association relie la mobilité à la capacité de se lever, marcher et participer à la vie quotidienne. Son cadre associe le Stand-Up Test, le Two-Step Test et l’échelle GLFS-25.",
+    "referenceItems": [
+      [
+        "01",
+        "Lever de chaise",
+        "force des membres inférieurs"
+      ],
+      [
+        "02",
+        "Deux pas",
+        "longueur de pas fonctionnelle"
+      ],
+      [
+        "03",
+        "GLFS-25",
+        "symptômes et vie quotidienne"
+      ]
+    ],
+    "scopeEyebrow": "Avant de commencer",
+    "scopeTitle": "Un repère de prévention,<br>pas un diagnostic en ligne.",
+    "scopeLead": "Les seuils de lever de chaise et de deux pas sont repris du cadre JOA. Le questionnaire GLFS-25 est un instrument validé de 25 questions : KŌMØ ne le reproduit pas ici. Notre bref contexte fonctionnel est original, indicatif et ne remplace ni le GLFS-25, ni un examen clinique.",
+    "safetyTitle": "Ne réalisez pas les tests si vous avez une douleur, un vertige, une faiblesse nouvelle, une instabilité ou un risque de chute.",
+    "safetyBody": "Arrêtez immédiatement en cas de gêne. Utilisez une assise ferme, un sol non glissant et, si nécessaire, la présence d’un proche. En cas de traumatisme récent, d’impossibilité soudaine de marcher, de déficit neurologique nouveau ou de symptômes inquiétants, contactez sans attendre un professionnel ou les urgences locales.",
+    "sourceLabel": "Source et méthode",
+    "sourceText": "Les modalités et seuils présentés ici sont adaptés de la page LOCOMO ONLINE de la Japanese Orthopaedic Association. KŌMØ conserve sa propre interface, ses mots et ses règles de restitution.",
+    "sourceLink": "Consulter le référentiel LOCOMO ONLINE",
+    "appEyebrow": "Auto-évaluation guidée",
+    "appTitle": "Votre KŌMØ Check,<br><em>maintenant.</em>",
+    "appLead": "Répondez uniquement à ce que vous pouvez faire en sécurité. Vous recevez une lecture immédiatement sur cette page.",
+    "ready": "Je confirme que je peux réaliser ces mouvements sans douleur, vertige ni instabilité, et que j’arrêterai au moindre inconfort.",
+    "readyHelp": "Cette confirmation n’est pas enregistrée.",
+    "stand": {
+      "title": "Lever de chaise",
+      "lead": "Le test officiel utilise des assises de 40, 30, 20 et 10 cm. Bras croisés, sans prendre d’élan, levez-vous puis tenez 3 secondes. Indiquez le premier niveau qui correspond à votre résultat.",
+      "detailsTitle": "Voir les consignes de sécurité",
+      "details": [
+        "Choisissez une assise ferme et stable, sur un sol non glissant.",
+        "Ne prenez pas d’élan en penchant le tronc en arrière.",
+        "Arrêtez immédiatement si une douleur apparaît.",
+        "Ne faites pas ce test seul si vous vous sentez instable ou à risque de chute."
+      ],
+      "options": [
+        {
+          "value": "0",
+          "label": "Je réussis à me lever d’une assise de 40 cm sur une jambe, à droite puis à gauche."
+        },
+        {
+          "value": "1",
+          "label": "Je ne réussis pas sur une jambe à 40 cm, mais je réussis avec les deux jambes à 20 cm."
+        },
+        {
+          "value": "2",
+          "label": "Je ne réussis pas avec les deux jambes à 20 cm, mais je réussis avec les deux jambes à 30 cm."
+        },
+        {
+          "value": "3",
+          "label": "Je ne réussis pas avec les deux jambes à 30 cm."
+        },
+        {
+          "value": "na",
+          "label": "Je ne l’ai pas réalisé ou il n’était pas sûr de le faire."
+        }
+      ]
+    },
+    "twoStep": {
+      "title": "Test des deux pas",
+      "lead": "Après un léger échauffement, faites deux grands pas contrôlés, sans sauter, puis joignez les pieds. Effectuez deux essais et retenez la meilleure distance.",
+      "detailsTitle": "Voir les consignes de sécurité",
+      "details": [
+        "Faites le test sur un sol non glissant, idéalement avec un proche présent.",
+        "Partir pieds derrière une ligne ; mesurer jusqu’aux orteils à l’arrivée.",
+        "Allez aussi loin que possible sans perdre l’équilibre.",
+        "Ne sautez pas. En cas de perte d’équilibre, l’essai ne compte pas."
+      ],
+      "height": "Votre taille",
+      "heightHelp": "en cm, par exemple 172",
+      "distance": "Meilleure distance sur deux pas",
+      "distanceHelp": "en cm, par exemple 224",
+      "formulaTitle": "Formule JOA",
+      "formula": "distance des deux pas ÷ taille = score des deux pas",
+      "preview": "Votre score apparaîtra ici",
+      "resultLabel": "Calculer mon résultat immédiat"
+    },
+    "context": {
+      "title": "Contexte fonctionnel KŌMØ",
+      "lead": "Ces questions sont une lecture courte et originale du vécu quotidien. Elles ne sont pas le questionnaire GLFS-25 et ne produisent pas son score.",
+      "options": [
+        "Au cours des quatre dernières semaines, une douleur a limité ma marche, mes escaliers ou le lever d’une chaise.",
+        "Je me suis senti(e) moins sûr(e) de mon équilibre ou j’ai évité une activité par peur de tomber.",
+        "Mon état physique a limité une activité importante pour moi.",
+        "Je ressens une fatigue ou une faiblesse des jambes qui modifie mes habitudes.",
+        "J’ai eu une chute ou plusieurs quasi-chutes au cours des douze derniers mois."
+      ]
+    },
+    "submit": "Afficher mon résultat immédiat",
+    "error": "Pour afficher le résultat, confirmez les conditions de sécurité, choisissez une réponse au lever de chaise et renseignez votre taille ainsi que votre meilleure distance sur deux pas.",
+    "resultEyebrow": "Votre lecture KŌMØ Check",
+    "resultTitle": "Prêt à calculer",
+    "resultLead": "Votre résultat apparaîtra ici, sans création de compte.",
+    "resultTwoStep": "Score des deux pas",
+    "resultStand": "Lever de chaise",
+    "resultContext": "Contexte fonctionnel",
+    "resultDisclaimer": "Lecture indicative issue de mesures auto-déclarées ou auto-réalisées. Elle ne diagnostique ni une pathologie, ni un syndrome ; un bilan clinique peut être nécessaire même avec un résultat rassurant.",
+    "clinicalCta": "Découvrir le bilan clinique KŌMØ",
+    "reset": "Recommencer le Check",
+    "learnEyebrow": "Pour aller plus loin",
+    "learnTitle": "Du premier repère<br>au bilan instrumenté.",
+    "learnLead": "KŌMØ Check ouvre la conversation. Le bilan KŌMØ Clinical, réalisé avec un professionnel, peut ensuite intégrer la KŌMØ Case, ses six capteurs Myodev, l’analyse musculaire, de marche, de posture et le contexte médical.",
+    "learnCta": "Voir KŌMØ Clinical"
+  },
+  "en": {
+    "nav": "KŌMØ Check",
+    "headerCta": "Take the Check",
+    "homeCta": "Take the KŌMØ Check",
+    "homeNote": "No account · on your device · immediate result",
+    "metaTitle": "KŌMØ Check — Locomotive syndrome prevention",
+    "metaDescription": "An anonymous, immediate self-check informed by the Japanese locomotive syndrome framework: stand-up, two-step and functional context.",
+    "heroEyebrow": "KŌMØ CHECK · LOCOMOTOR PREVENTION",
+    "heroTitle": "Understand your mobility.<br><em>Act before limitation.</em>",
+    "heroLead": "KŌMØ Check offers a first functional reference point at home, without creating an account. It turns two simple tests and your day-to-day experience into an immediate reading — to inform the next step, never to self-diagnose.",
+    "heroPoints": [
+      "3 functional perspectives",
+      "About 5 minutes",
+      "Local calculation · no data sent"
+    ],
+    "heroCta": "Take my KŌMØ Check",
+    "heroSecondary": "Understand the method",
+    "heroPrivacy": "No sign-up. Your answers remain in your browser and are neither stored nor sent to KŌMØ.",
+    "referenceKicker": "Starting framework",
+    "referenceTitle": "The Japanese locomotive syndrome framework.",
+    "referenceBody": "The Japanese Orthopaedic Association links mobility with standing, walking and participating in daily life. Its framework combines the Stand-Up Test, Two-Step Test and GLFS-25.",
+    "referenceItems": [
+      [
+        "01",
+        "Stand-Up",
+        "lower-limb strength"
+      ],
+      [
+        "02",
+        "Two-Step",
+        "functional stride length"
+      ],
+      [
+        "03",
+        "GLFS-25",
+        "symptoms and daily life"
+      ]
+    ],
+    "scopeEyebrow": "Before you begin",
+    "scopeTitle": "A prevention reference,<br>not an online diagnosis.",
+    "scopeLead": "Stand-up and two-step thresholds follow the JOA framework. GLFS-25 is a validated 25-question instrument; KŌMØ does not reproduce it here. Our short functional context is original, indicative and not a replacement for GLFS-25 or a clinical examination.",
+    "safetyTitle": "Do not perform these tests if you have pain, dizziness, new weakness, instability or a risk of falling.",
+    "safetyBody": "Stop immediately if uncomfortable. Use a firm seat, a non-slip surface and, when useful, have another person present. After a recent injury, sudden inability to walk, new neurological deficit or concerning symptoms, contact a clinician or local emergency service without delay.",
+    "sourceLabel": "Source and method",
+    "sourceText": "The protocols and thresholds shown here are adapted from LOCOMO ONLINE, Japanese Orthopaedic Association. KŌMØ uses its own interface, wording and result rules.",
+    "sourceLink": "View the LOCOMO ONLINE framework",
+    "appEyebrow": "Guided self-check",
+    "appTitle": "Your KŌMØ Check,<br><em>now.</em>",
+    "appLead": "Answer only what you can do safely. Your reading appears immediately on this page.",
+    "ready": "I confirm I can perform these movements without pain, dizziness or instability, and that I will stop at the first sign of discomfort.",
+    "readyHelp": "This confirmation is not stored.",
+    "stand": {
+      "title": "Stand-Up Test",
+      "lead": "The official test uses 40, 30, 20 and 10 cm seats. With arms folded and no momentum, stand and hold for 3 seconds. Select the first level that matches your result.",
+      "detailsTitle": "View safety instructions",
+      "details": [
+        "Use a firm, stable seat on a non-slip surface.",
+        "Do not gain momentum by leaning backwards.",
+        "Stop immediately if pain occurs.",
+        "Do not test alone if you feel unsteady or at risk of falling."
+      ],
+      "options": [
+        {
+          "value": "0",
+          "label": "I can rise from a 40 cm seat on one leg, on the right and the left."
+        },
+        {
+          "value": "1",
+          "label": "I cannot rise on one leg at 40 cm, but I can rise on both legs at 20 cm."
+        },
+        {
+          "value": "2",
+          "label": "I cannot rise on both legs at 20 cm, but I can rise on both legs at 30 cm."
+        },
+        {
+          "value": "3",
+          "label": "I cannot rise on both legs at 30 cm."
+        },
+        {
+          "value": "na",
+          "label": "I did not perform it, or it was not safe to do so."
+        }
+      ]
+    },
+    "twoStep": {
+      "title": "Two-Step Test",
+      "lead": "After a brief warm-up, take two large controlled steps without jumping, then bring your feet together. Complete two trials and retain the best distance.",
+      "detailsTitle": "View safety instructions",
+      "details": [
+        "Use a non-slip surface and, ideally, have another person present.",
+        "Start with both toes behind a line; measure to the toes at the end.",
+        "Go as far as you safely can without losing balance.",
+        "Do not jump. A loss of balance invalidates the attempt."
+      ],
+      "height": "Your height",
+      "heightHelp": "in cm, for example 172",
+      "distance": "Best distance over two steps",
+      "distanceHelp": "in cm, for example 224",
+      "formulaTitle": "JOA formula",
+      "formula": "two-step distance ÷ height = two-step score",
+      "preview": "Your score will appear here",
+      "resultLabel": "Calculate my immediate result"
+    },
+    "context": {
+      "title": "KŌMØ functional context",
+      "lead": "These are original, short questions about daily life. They are not GLFS-25 and do not generate a GLFS-25 score.",
+      "options": [
+        "During the past four weeks, pain limited my walking, stair climbing or rising from a chair.",
+        "I felt less confident about balance or avoided an activity because I was afraid of falling.",
+        "My physical state limited an activity that is important to me.",
+        "Leg fatigue or weakness has changed my usual habits.",
+        "I have had a fall or multiple near-falls in the past twelve months."
+      ]
+    },
+    "submit": "Show my immediate result",
+    "error": "To show a result, confirm the safety conditions, select a stand-up response, and enter your height plus your best two-step distance.",
+    "resultEyebrow": "Your KŌMØ Check reading",
+    "resultTitle": "Ready to calculate",
+    "resultLead": "Your result will appear here without creating an account.",
+    "resultTwoStep": "Two-step score",
+    "resultStand": "Stand-Up Test",
+    "resultContext": "Functional context",
+    "resultDisclaimer": "An indicative reading based on self-reported or self-performed measurements. It does not diagnose a condition or syndrome; a clinical assessment may be useful even when the result appears reassuring.",
+    "clinicalCta": "Explore KŌMØ Clinical",
+    "reset": "Restart the Check",
+    "learnEyebrow": "When more is useful",
+    "learnTitle": "From a first reference<br>to an instrumented assessment.",
+    "learnLead": "KŌMØ Check starts the conversation. A professional KŌMØ Clinical assessment can then include the six-sensor Myodev-enabled KŌMØ Case, muscle, gait and posture analysis, plus clinical context.",
+    "learnCta": "See KŌMØ Clinical"
+  },
+  "es": {
+    "nav": "KŌMØ Check",
+    "headerCta": "Hacer el Check",
+    "homeCta": "Hacer el KŌMØ Check",
+    "homeNote": "Sin cuenta · en tu dispositivo · resultado inmediato",
+    "metaTitle": "KŌMØ Check — Prevención del síndrome locomotor",
+    "metaDescription": "Una autoevaluación anónima e inmediata, basada en el marco japonés del síndrome locomotor: levantarse, dos pasos y contexto funcional.",
+    "heroEyebrow": "KŌMØ CHECK · PREVENCIÓN LOCOMOTORA",
+    "heroTitle": "Entiende tu movilidad.<br><em>Actúa antes de la limitación.</em>",
+    "heroLead": "KŌMØ Check ofrece una primera referencia funcional desde casa y sin crear cuenta. Reúne dos pruebas sencillas y tu experiencia cotidiana en una lectura inmediata — para orientar el siguiente paso, nunca para autodiagnosticarse.",
+    "heroPoints": [
+      "3 perspectivas funcionales",
+      "Unos 5 minutos",
+      "Cálculo local · sin datos enviados"
+    ],
+    "heroCta": "Hacer mi KŌMØ Check",
+    "heroSecondary": "Comprender el método",
+    "heroPrivacy": "Sin registro. Tus respuestas permanecen en el navegador y no se guardan ni se envían a KŌMØ.",
+    "referenceKicker": "Marco de partida",
+    "referenceTitle": "El marco japonés del síndrome locomotor.",
+    "referenceBody": "La Japanese Orthopaedic Association relaciona la movilidad con levantarse, caminar y participar en la vida diaria. Su marco combina el Stand-Up Test, el Two-Step Test y GLFS-25.",
+    "referenceItems": [
+      [
+        "01",
+        "Levantarse",
+        "fuerza de miembros inferiores"
+      ],
+      [
+        "02",
+        "Dos pasos",
+        "longitud funcional de zancada"
+      ],
+      [
+        "03",
+        "GLFS-25",
+        "síntomas y vida diaria"
+      ]
+    ],
+    "scopeEyebrow": "Antes de empezar",
+    "scopeTitle": "Una referencia preventiva,<br>no un diagnóstico online.",
+    "scopeLead": "Los umbrales de levantarse y de dos pasos siguen el marco JOA. GLFS-25 es un instrumento validado de 25 preguntas; KŌMØ no lo reproduce aquí. Nuestro breve contexto funcional es original, indicativo y no sustituye GLFS-25 ni una exploración clínica.",
+    "safetyTitle": "No realices estas pruebas si tienes dolor, mareo, debilidad nueva, inestabilidad o riesgo de caída.",
+    "safetyBody": "Detente de inmediato ante cualquier molestia. Usa una silla firme, suelo antideslizante y, si conviene, la presencia de otra persona. Tras una lesión reciente, incapacidad súbita para caminar, déficit neurológico nuevo o síntomas preocupantes, consulta sin demora a un profesional o los servicios de urgencia locales.",
+    "sourceLabel": "Fuente y método",
+    "sourceText": "Los protocolos y umbrales se adaptan de LOCOMO ONLINE, Japanese Orthopaedic Association. KŌMØ utiliza su propia interfaz, redacción y reglas de resultado.",
+    "sourceLink": "Consultar el marco LOCOMO ONLINE",
+    "appEyebrow": "Autoevaluación guiada",
+    "appTitle": "Tu KŌMØ Check,<br><em>ahora.</em>",
+    "appLead": "Responde solo a aquello que puedas hacer con seguridad. La lectura aparece de inmediato en esta página.",
+    "ready": "Confirmo que puedo realizar estos movimientos sin dolor, mareo ni inestabilidad y que me detendré ante la primera molestia.",
+    "readyHelp": "Esta confirmación no se guarda.",
+    "stand": {
+      "title": "Prueba de levantarse",
+      "lead": "La prueba oficial utiliza asientos de 40, 30, 20 y 10 cm. Con brazos cruzados y sin impulso, levántate y mantén 3 segundos. Elige el primer nivel que corresponda a tu resultado.",
+      "detailsTitle": "Ver instrucciones de seguridad",
+      "details": [
+        "Usa un asiento firme y estable sobre suelo antideslizante.",
+        "No cojas impulso inclinándote hacia atrás.",
+        "Detente de inmediato si aparece dolor.",
+        "No hagas la prueba a solas si te sientes inestable o existe riesgo de caída."
+      ],
+      "options": [
+        {
+          "value": "0",
+          "label": "Puedo levantarme desde 40 cm a una pierna, derecha e izquierda."
+        },
+        {
+          "value": "1",
+          "label": "No puedo a una pierna a 40 cm, pero sí con las dos piernas a 20 cm."
+        },
+        {
+          "value": "2",
+          "label": "No puedo con las dos piernas a 20 cm, pero sí con las dos piernas a 30 cm."
+        },
+        {
+          "value": "3",
+          "label": "No puedo levantarme con las dos piernas a 30 cm."
+        },
+        {
+          "value": "na",
+          "label": "No lo hice o no era seguro hacerlo."
+        }
+      ]
+    },
+    "twoStep": {
+      "title": "Prueba de dos pasos",
+      "lead": "Tras un breve calentamiento, da dos pasos largos y controlados, sin saltar, y junta los pies. Haz dos intentos y conserva la mejor distancia.",
+      "detailsTitle": "Ver instrucciones de seguridad",
+      "details": [
+        "Usa suelo antideslizante e, idealmente, otra persona presente.",
+        "Empieza con ambos dedos detrás de una línea; mide hasta los dedos al final.",
+        "Llega todo lo lejos que puedas sin perder el equilibrio.",
+        "No saltes. Si pierdes el equilibrio, el intento no cuenta."
+      ],
+      "height": "Tu altura",
+      "heightHelp": "en cm, por ejemplo 172",
+      "distance": "Mejor distancia en dos pasos",
+      "distanceHelp": "en cm, por ejemplo 224",
+      "formulaTitle": "Fórmula JOA",
+      "formula": "distancia de dos pasos ÷ altura = puntuación de dos pasos",
+      "preview": "Tu puntuación aparecerá aquí",
+      "resultLabel": "Calcular mi resultado inmediato"
+    },
+    "context": {
+      "title": "Contexto funcional KŌMØ",
+      "lead": "Son preguntas breves y originales sobre la vida cotidiana. No son GLFS-25 ni generan su puntuación.",
+      "options": [
+        "En las últimas cuatro semanas, el dolor limitó mi marcha, escaleras o el levantarme de una silla.",
+        "Me sentí menos seguro/a con el equilibrio o evité una actividad por miedo a caer.",
+        "Mi estado físico limitó una actividad importante para mí.",
+        "La fatiga o debilidad de piernas ha cambiado mis hábitos.",
+        "He tenido una caída o varias casi-caídas en los últimos doce meses."
+      ]
+    },
+    "submit": "Mostrar mi resultado inmediato",
+    "error": "Para mostrar un resultado, confirma las condiciones de seguridad, elige una respuesta de levantarse e indica altura y mejor distancia de dos pasos.",
+    "resultEyebrow": "Tu lectura KŌMØ Check",
+    "resultTitle": "Listo para calcular",
+    "resultLead": "Tu resultado aparecerá aquí sin crear cuenta.",
+    "resultTwoStep": "Puntuación de dos pasos",
+    "resultStand": "Prueba de levantarse",
+    "resultContext": "Contexto funcional",
+    "resultDisclaimer": "Lectura indicativa basada en medidas auto-realizadas o auto-declaradas. No diagnostica una enfermedad o síndrome; una valoración clínica puede ser útil incluso con un resultado tranquilizador.",
+    "clinicalCta": "Descubrir KŌMØ Clinical",
+    "reset": "Repetir el Check",
+    "learnEyebrow": "Cuando haga falta más",
+    "learnTitle": "De una primera referencia<br>a una valoración instrumentada.",
+    "learnLead": "KŌMØ Check inicia la conversación. Una valoración KŌMØ Clinical con un profesional puede incluir la KŌMØ Case con seis sensores Myodev, análisis muscular, de marcha, de postura y contexto clínico.",
+    "learnCta": "Ver KŌMØ Clinical"
+  }
+};
+const checkCopy = (locale) => komoCheckCopy[locale] || komoCheckCopy.en;
+
+Object.assign(komoCheckCopy.fr, {
+  "action": {
+    "eyebrow": "Après le repère",
+    "title": "Agir tôt, sans<br><em>se mettre en danger.</em>",
+    "lead": "Le référentiel japonais rappelle que la mobilité peut évoluer favorablement avec des mesures adaptées. La force des membres inférieurs, l’équilibre, la marche et une alimentation suffisante constituent des leviers simples de prévention.",
+    "cards": [
+      [
+        "Équilibre",
+        "Un travail d’appui sur une jambe peut être envisagé près d’un support stable, uniquement si vous êtes en sécurité."
+      ],
+      [
+        "Force",
+        "Des squats peu profonds ou des levers-assis contrôlés peuvent entretenir les jambes ; ne bloquez pas votre respiration et n’allez jamais dans la douleur."
+      ],
+      [
+        "Habitudes",
+        "La régularité, la marche et un apport alimentaire équilibré — notamment en protéines et calcium — soutiennent la fonction au fil du temps."
+      ]
+    ],
+    "note": "Il ne s’agit pas d’une prescription. En présence de douleur, de pathologie connue, de chute ou de doute, demandez un programme individualisé à un professionnel."
+  }
+});
+Object.assign(komoCheckCopy.en, {
+  "action": {
+    "eyebrow": "After the reference",
+    "title": "Act early, without<br><em>taking unnecessary risks.</em>",
+    "lead": "The Japanese framework notes that mobility can improve with appropriate measures. Lower-limb strength, balance, walking and sufficient nutrition are practical prevention levers.",
+    "cards": [
+      [
+        "Balance",
+        "Single-leg balance work may be considered next to a stable support, only when you can do it safely."
+      ],
+      [
+        "Strength",
+        "Shallow squats or controlled sit-to-stands can support the legs; do not hold your breath and never work through pain."
+      ],
+      [
+        "Habits",
+        "Regular activity, walking and balanced nutrition — including adequate protein and calcium — support function over time."
+      ]
+    ],
+    "note": "This is not an exercise prescription. With pain, a known condition, falls or uncertainty, ask a professional for an individual programme."
+  }
+});
+Object.assign(komoCheckCopy.es, {
+  "action": {
+    "eyebrow": "Después de la referencia",
+    "title": "Actúa pronto, sin<br><em>asumir riesgos innecesarios.</em>",
+    "lead": "El marco japonés señala que la movilidad puede mejorar con medidas adaptadas. Fuerza de piernas, equilibrio, marcha y nutrición suficiente son palancas prácticas de prevención.",
+    "cards": [
+      [
+        "Equilibrio",
+        "Se puede considerar trabajar el apoyo a una pierna junto a un soporte estable, solo si es seguro."
+      ],
+      [
+        "Fuerza",
+        "Sentadillas poco profundas o levantarse-sentarse de forma controlada pueden mantener las piernas; no contengas la respiración ni trabajes con dolor."
+      ],
+      [
+        "Hábitos",
+        "Actividad regular, caminar y nutrición equilibrada — con proteína y calcio suficientes — sostienen la función a lo largo del tiempo."
+      ]
+    ],
+    "note": "No es una prescripción de ejercicio. Con dolor, una patología conocida, caídas o dudas, pide a un profesional un programa individualizado."
+  }
+});
+
 const partnerContent = (locale) => partnerCopy[locale] || partnerCopy.en;
 
 const journeyCopy = (locale) => pulseJourney[locale] || pulseJourney.en;
@@ -1216,6 +1677,7 @@ function pageAction(locale, page) {
   const c = translations[locale];
   const p = partnerContent(locale);
   const routeActions = {
+    check: { label: checkCopy(locale).headerCta, href: '#start-check' },
     clinical: { label: c.clinical.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
     partners: { label: p.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
     'motion-retreats': { label: p.hospitality.cta, href: pagePath(locale, 'partners') },
@@ -1224,7 +1686,7 @@ function pageAction(locale, page) {
     science: { label: c.science.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
     contact: { label: c.global.contactUs, href: 'mailto:contact@komolongevity.com', external: true }
   };
-  return routeActions[page] || (page === 'index' ? { label: caseCheckCopy(locale).heroPrimaryCta, href: '#komo-check' } : { label: journeyCopy(locale).navCta, href: scoreLink(locale) });
+  return routeActions[page] || (page === 'index' ? { label: checkCopy(locale).homeCta, href: pagePath(locale, 'check') } : { label: journeyCopy(locale).navCta, href: scoreLink(locale) });
 }
 
 function languageMenu(locale, page) {
@@ -1245,7 +1707,7 @@ function header(locale, page) {
   const c = translations[locale];
   const action = pageAction(locale, page);
   const navItems = [
-    ['pulse', c.nav.pulse], ['clinical', c.nav.clinical], ['locomotor', c.nav.locomotor], ['library', c.nav.library], ['partners', c.nav.partners]
+    ['check', checkCopy(locale).nav], ['pulse', c.nav.pulse], ['clinical', c.nav.clinical], ['locomotor', c.nav.locomotor], ['library', c.nav.library], ['partners', c.nav.partners]
   ];
   return `
     <a class="skip-link" href="#main">${text(c.global.skip)}</a>
@@ -1361,6 +1823,104 @@ function buttons(locale, first, second, secondHref) {
   return `<div class="hero-actions"><a class="button" href="${scoreLink(locale)}">${text(first)} <span aria-hidden="true">↗</span></a>${second ? `<a class="button button-outline" href="${secondHref || '#ecosystem'}">${text(second)}</a>` : ''}</div>`;
 }
 
+
+function checkPage(locale) {
+  const c = checkCopy(locale);
+  const externalSource = 'https://locomo-joa.jp/en';
+  return [
+    '<section class="check-hero">',
+      '<div class="shell check-hero-grid">',
+        '<div class="check-hero-copy">',
+          '<p class="eyebrow">' + text(c.heroEyebrow) + '</p>',
+          '<h1 class="case-hero-title">' + raw(c.heroTitle) + '</h1>',
+          '<p class="case-hero-lead">' + text(c.heroLead) + '</p>',
+          '<ul class="check-hero-points">' + c.heroPoints.map(function(item) { return '<li>' + text(item) + '</li>'; }).join('') + '</ul>',
+          '<div class="hero-actions case-hero-actions">',
+            '<a class="button" href="#start-check">' + text(c.heroCta) + ' <span aria-hidden="true">↓</span></a>',
+            '<a class="button button-outline" href="#method">' + text(c.heroSecondary) + '</a>',
+          '</div>',
+          '<p class="check-privacy">' + text(c.heroPrivacy) + '</p>',
+        '</div>',
+        '<aside class="check-reference-card reveal" aria-label="' + text(c.referenceKicker) + '">',
+          '<p class="eyebrow">' + text(c.referenceKicker) + '</p>',
+          '<h2>' + text(c.referenceTitle) + '</h2>',
+          '<p>' + text(c.referenceBody) + '</p>',
+          '<ol>' + c.referenceItems.map(function(item) { return '<li><span>' + text(item[0]) + '</span><strong>' + text(item[1]) + '</strong><small>' + text(item[2]) + '</small></li>'; }).join('') + '</ol>',
+        '</aside>',
+      '</div>',
+    '</section>',
+
+    '<section class="check-scope section" id="method">',
+      '<div class="shell check-scope-grid">',
+        '<div class="reveal"><p class="eyebrow">' + text(c.scopeEyebrow) + '</p><h2 class="section-heading">' + raw(c.scopeTitle) + '</h2></div>',
+        '<div class="check-scope-copy reveal"><p class="section-lead">' + text(c.scopeLead) + '</p>',
+          '<aside class="check-safety"><strong>' + text(c.safetyTitle) + '</strong><p>' + text(c.safetyBody) + '</p></aside>',
+          '<div class="check-source"><span>' + text(c.sourceLabel) + '</span><p>' + text(c.sourceText) + '</p><a href="' + externalSource + '" target="_blank" rel="noreferrer">' + text(c.sourceLink) + ' <span aria-hidden="true">↗</span></a></div>',
+        '</div>',
+      '</div>',
+    '</section>',
+
+    '<section class="check-app-section" id="start-check">',
+      '<div class="shell">',
+        '<div class="check-app-intro reveal"><div><p class="eyebrow">' + text(c.appEyebrow) + '</p><h2 class="section-heading">' + raw(c.appTitle) + '</h2></div><p class="section-lead">' + text(c.appLead) + '</p></div>',
+        '<form class="komo-check-form" data-komo-check data-locale="' + text(locale) + '" novalidate>',
+          '<div class="check-readiness"><label><input type="checkbox" name="ready" required><span>' + text(c.ready) + '</span></label><p>' + text(c.readyHelp) + '</p></div>',
+          '<fieldset class="check-fieldset">',
+            '<legend><span>01</span>' + text(c.stand.title) + '</legend>',
+            '<p>' + text(c.stand.lead) + '</p>',
+            '<details class="check-details"><summary>' + text(c.stand.detailsTitle) + '</summary><ul>' + c.stand.details.map(function(item) { return '<li>' + text(item) + '</li>'; }).join('') + '</ul></details>',
+            '<div class="check-choice-grid">' + c.stand.options.map(function(item, index) { var id = 'stand-' + item.value; return '<label class="check-choice" for="' + id + '"><input id="' + id + '" type="radio" name="standUp" value="' + text(item.value) + '"><span><b>' + String(index + 1).padStart(2, '0') + '</b>' + text(item.label) + '</span></label>'; }).join('') + '</div>',
+          '</fieldset>',
+          '<fieldset class="check-fieldset">',
+            '<legend><span>02</span>' + text(c.twoStep.title) + '</legend>',
+            '<p>' + text(c.twoStep.lead) + '</p>',
+            '<details class="check-details"><summary>' + text(c.twoStep.detailsTitle) + '</summary><ul>' + c.twoStep.details.map(function(item) { return '<li>' + text(item) + '</li>'; }).join('') + '</ul></details>',
+            '<div class="check-number-grid">',
+              '<label for="check-height"><span>' + text(c.twoStep.height) + '</span><input id="check-height" name="height" type="number" inputmode="decimal" min="120" max="230" step="0.1" required aria-describedby="check-height-help"><small id="check-height-help">' + text(c.twoStep.heightHelp) + '</small></label>',
+              '<label for="check-distance"><span>' + text(c.twoStep.distance) + '</span><input id="check-distance" name="distance" type="number" inputmode="decimal" min="40" max="500" step="0.1" required aria-describedby="check-distance-help"><small id="check-distance-help">' + text(c.twoStep.distanceHelp) + '</small></label>',
+            '</div>',
+            '<div class="check-formula"><span>' + text(c.twoStep.formulaTitle) + '</span><strong>' + text(c.twoStep.formula) + '</strong><output data-two-step-preview>' + text(c.twoStep.preview) + '</output></div>',
+          '</fieldset>',
+          '<fieldset class="check-fieldset check-context">',
+            '<legend><span>03</span>' + text(c.context.title) + '</legend>',
+            '<p>' + text(c.context.lead) + '</p>',
+            '<div class="check-context-list">' + c.context.options.map(function(item, index) { var id = 'context-' + index; return '<label for="' + id + '"><input id="' + id + '" type="checkbox" name="context" value="' + index + '"><span>' + text(item) + '</span></label>'; }).join('') + '</div>',
+          '</fieldset>',
+          '<p class="check-form-error" data-check-error role="alert" aria-live="polite"></p>',
+          '<button class="button check-submit" type="submit">' + text(c.submit) + ' <span aria-hidden="true">→</span></button>',
+        '</form>',
+        '<section class="check-result" data-check-result hidden tabindex="-1" aria-live="polite">',
+          '<div class="check-result-heading"><p class="eyebrow">' + text(c.resultEyebrow) + '</p><h2 data-check-result-title>' + text(c.resultTitle) + '</h2><p data-check-result-lead>' + text(c.resultLead) + '</p></div>',
+          '<div class="check-result-metrics">',
+            '<article><span>' + text(c.resultTwoStep) + '</span><strong data-check-two-step>—</strong><p data-check-two-step-note></p></article>',
+            '<article><span>' + text(c.resultStand) + '</span><strong data-check-stand>—</strong><p data-check-stand-note></p></article>',
+            '<article><span>' + text(c.resultContext) + '</span><strong data-check-context>—</strong><p data-check-context-note></p></article>',
+          '</div>',
+          '<div class="check-result-next" data-check-next></div>',
+          '<p class="check-result-disclaimer">' + text(c.resultDisclaimer) + '</p>',
+          '<div class="hero-actions"><a class="button" href="' + pagePath(locale, 'clinical') + '">' + text(c.clinicalCta) + ' <span aria-hidden="true">↗</span></a><button class="text-button" type="button" data-check-reset>' + text(c.reset) + '</button></div>',
+        '</section>',
+      '</div>',
+    '</section>',
+
+
+    '<section class="check-actions section">',
+      '<div class="shell">',
+        '<div class="check-actions-intro reveal"><p class="eyebrow">' + text(c.action.eyebrow) + '</p><h2 class="section-heading">' + raw(c.action.title) + '</h2><p class="section-lead">' + text(c.action.lead) + '</p></div>',
+        '<div class="check-action-grid">' + c.action.cards.map(function(card, index) { return '<article class="reveal"><span>0' + String(index + 1) + '</span><h3>' + text(card[0]) + '</h3><p>' + text(card[1]) + '</p></article>'; }).join('') + '</div>',
+        '<p class="check-action-note reveal"><strong>+</strong>' + text(c.action.note) + '</p>',
+      '</div>',
+    '</section>',
+
+    '<section class="check-learn section">',
+      '<div class="shell check-learn-grid reveal">',
+        '<div><p class="eyebrow">' + text(c.learnEyebrow) + '</p><h2 class="section-heading">' + raw(c.learnTitle) + '</h2></div>',
+        '<div><p class="section-lead">' + text(c.learnLead) + '</p><a class="button button-outline" href="' + pagePath(locale, 'clinical') + '">' + text(c.learnCta) + ' <span aria-hidden="true">↗</span></a></div>',
+      '</div>',
+    '</section>'
+  ].join('');
+}
+
 function homePage(locale) {
   const h = translations[locale].home;
   const j = journeyCopy(locale);
@@ -1374,9 +1934,10 @@ function homePage(locale) {
           <h1 class="case-hero-title">${raw(c.heroTitle)}</h1>
           <p class="case-hero-lead">${text(c.heroLead)}</p>
           <div class="hero-actions case-hero-actions">
-            <a class="button" href="#komo-check">${text(c.heroPrimaryCta)} <span aria-hidden="true">↓</span></a>
+            <a class="button" href="${pagePath(locale, 'check')}">${text(checkCopy(locale).homeCta)} <span aria-hidden="true">→</span></a>
             <a class="button button-outline" href="${link(locale, 'partners')}">${text(c.heroSecondaryCta)} <span aria-hidden="true">↗</span></a>
           </div>
+          <p class="case-hero-check-link">${text(checkCopy(locale).homeNote)}</p>
           <ul class="case-hero-proof" aria-label="KŌMØ Case proof points">
             ${c.heroProof.map((item) => `<li>${text(item)}</li>`).join('')}
           </ul>
@@ -1786,6 +2347,7 @@ function renderPage(locale, page) {
   const c = translations[locale];
   const body = {
     index: homePage,
+    check: checkPage,
     pulse: pulsePage,
     clinical: clinicalPage,
     partners: partnersPage,
@@ -1796,7 +2358,7 @@ function renderPage(locale, page) {
     science: sciencePage,
     contact: contactPage
   }[page](locale);
-  const data = page === 'locomotor' ? (locomotorCopy[locale] || locomotorCopy.en) : page === 'index' ? c.home : page === 'partners' ? partnerContent(locale) : page === 'motion-retreats' ? partnerContent(locale).hospitality : c[page];
+  const data = page === 'locomotor' ? (locomotorCopy[locale] || locomotorCopy.en) : page === 'check' ? checkCopy(locale) : page === 'index' ? c.home : page === 'partners' ? partnerContent(locale) : page === 'motion-retreats' ? partnerContent(locale).hospitality : c[page];
   return layout(locale, page, body, data);
 }
 
