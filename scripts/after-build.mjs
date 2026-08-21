@@ -10,15 +10,23 @@ const targets = [
   join(root, 'site', 'fr', 'check', 'index.html')
 ];
 
+const scripts = [
+  '<script defer src="/assets/check/complete.js?v=20260821-2"></script>',
+  '<script defer src="/assets/check/img-intro.js?v=20260821-seq1"></script>',
+  '<script defer src="/assets/check/img-stand.js?v=20260821-seq1"></script>',
+  '<script defer src="/assets/check/img-two.js?v=20260821-seq1"></script>',
+  '<script defer src="/assets/check/sequential.js?v=20260821-seq1"></script>'
+].join('\n');
+
 for (const target of targets) {
   await mkdir(dirname(target), { recursive: true });
   await copyFile(source, target);
   let html = await readFile(target, 'utf8');
   html = html
-    .replace('<title>KŌMØ Check — GLFS-25</title>', '<title>KŌMØ Check — Complete Locomotor Function Check</title>')
-    .replace('KŌMØ Check: complete the GLFS-25 online and receive your locomotor function score immediately, without sign-up.', 'KŌMØ Check combines GLFS-25, Stand-Up Test and Two-Step Test to provide an immediate overall locomotive syndrome stage, without sign-up.')
-    .replace('</body>', '<script defer src="/assets/check/complete.js?v=20260821-1"></script>\n</body>');
-  await writeFile(target, html);
+    .replace('<title>KŌMØ Check — GLFS-25</title>', '<title>KŌMØ Check — Locomotor Prevention</title>')
+    .replace('KŌMØ Check: complete the GLFS-25 online and receive your locomotor function score immediately, without sign-up.', 'KŌMØ Check combines GLFS-25, Stand-Up Test and Two-Step Test in a simple sequential prevention journey, with an immediate shareable result.')
+    .replace('</body>', `${scripts}\n</body>`);
+  await writeFile(target, html, 'utf8');
 }
 
-console.log('Applied complete KŌMØ Check with GLFS-25, Stand-Up and Two-Step tests.');
+console.log('Applied sequential KŌMØ Check with illustrations and PNG result.');
