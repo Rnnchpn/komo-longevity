@@ -1220,7 +1220,7 @@ const komoCheckCopy = {
     "heroPrivacy": "Aucune inscription. Les réponses restent dans votre navigateur et ne sont ni enregistrées ni transmises à KŌMØ.",
     "referenceKicker": "Référentiel de départ",
     "referenceTitle": "Le cadre japonais du syndrome locomoteur.",
-    "referenceBody": "La Japanese Orthopaedic Association relie la mobilité à la capacité de se lever, marcher et participer à la vie quotidienne. Son cadre associe le Stand-Up Test, le Two-Step Test et l’échelle GLFS-25.",
+    "referenceBody": "Le concept japonais de syndrome locomoteur décrit une diminution de mobilité liée à l’appareil locomoteur — os, articulations, muscles et nerfs. La Japanese Orthopaedic Association l’évalue par la capacité de se lever, marcher et participer à la vie quotidienne, avec le Stand-Up Test, le Two-Step Test et l’échelle GLFS-25.",
     "referenceItems": [
       [
         "01",
@@ -1350,7 +1350,7 @@ const komoCheckCopy = {
     "heroPrivacy": "No sign-up. Your answers remain in your browser and are neither stored nor sent to KŌMØ.",
     "referenceKicker": "Starting framework",
     "referenceTitle": "The Japanese locomotive syndrome framework.",
-    "referenceBody": "The Japanese Orthopaedic Association links mobility with standing, walking and participating in daily life. Its framework combines the Stand-Up Test, Two-Step Test and GLFS-25.",
+    "referenceBody": "Japan’s locomotive syndrome concept describes reduced mobility related to the locomotor system — bones, joints, muscles and nerves. The Japanese Orthopaedic Association evaluates standing, walking and daily-life participation through the Stand-Up Test, Two-Step Test and GLFS-25.",
     "referenceItems": [
       [
         "01",
@@ -1480,7 +1480,7 @@ const komoCheckCopy = {
     "heroPrivacy": "Sin registro. Tus respuestas permanecen en el navegador y no se guardan ni se envían a KŌMØ.",
     "referenceKicker": "Marco de partida",
     "referenceTitle": "El marco japonés del síndrome locomotor.",
-    "referenceBody": "La Japanese Orthopaedic Association relaciona la movilidad con levantarse, caminar y participar en la vida diaria. Su marco combina el Stand-Up Test, el Two-Step Test y GLFS-25.",
+    "referenceBody": "El concepto japonés de síndrome locomotor describe una disminución de movilidad ligada al aparato locomotor — huesos, articulaciones, músculos y nervios. La Japanese Orthopaedic Association valora levantarse, caminar y participar en la vida diaria con el Stand-Up Test, el Two-Step Test y GLFS-25.",
     "referenceItems": [
       [
         "01",
