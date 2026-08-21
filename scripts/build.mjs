@@ -9,7 +9,7 @@ const output = join(root, 'site');
 const sourceAssets = join(root, 'src', 'assets');
 // Static assets are served aggressively by the CDN. Bump this whenever a
 // shared stylesheet or script changes so visitors receive the matching UI.
-const assetVersion = '20260821-v10';
+const assetVersion = '20260821-v11';
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -130,40 +130,121 @@ const pulseJourney = {
 };
 
 const komoEntrances = {
-  en: {
-    eyebrow: 'CHOOSE YOUR KŌMØ',
-    title: 'What do you need<br><em>today?</em>',
-    lead: 'Your Motion Score. Your local network. Or your KŌMØ stay on the White Coast.',
-    continuity: 'One KŌMØ ecosystem: health, people and places.',
-    heroCta: 'Choose my starting point',
-    paths: [
-      { tone: 'pulse', number: '01', audience: 'KŌMØ PULSE · MEDICAL', title: 'Your Motion Score.', body: 'A medically informed score for your mobility, health and performance — with one clear next step.', cta: 'Get my Motion Score', note: 'Health · performance · profile', page: 'pulse' },
-      { tone: 'community', number: '02', audience: 'KŌMØ COMMUNITY · LOCAL', title: 'Your local network.', body: 'A personal concierge, trusted introductions and selected local experiences — so the White Coast opens up to you.', cta: 'Explore KŌMØ Community', note: 'Concierge · network · experiences', page: 'white-coast' },
-      { tone: 'coast', number: '03', audience: 'KŌMØ WHITE COAST · HOSPITALITY', title: 'Your KŌMØ stay.', body: 'Selected hotels, carefully designed stays and longevity experiences made for the way you want to live.', cta: 'Explore White Coast stays', note: 'Hospitality · stays · experiences', page: 'motion-retreats' }
+  "fr": {
+    "eyebrow": "DÉPLOYEZ KŌMØ DANS VOTRE LIEU",
+    "title": "Une même méthode.<br><em>Trois façons de l’accueillir.</em>",
+    "lead": "KŌMØ Case, six capteurs Myodev et Pulse donnent aux équipes médicales et aux opérateurs partenaires un cadre clair pour objectiver le mouvement.",
+    "continuity": "Une infrastructure KŌMØ : indication, acquisition supervisée, qualité des données, interprétation clinique et suivi.",
+    "heroCta": "Découvrir le déploiement KŌMØ",
+    "paths": [
+      {
+        "tone": "pulse",
+        "number": "01",
+        "audience": "CENTRES MÉDICAUX & LONGÉVITÉ",
+        "title": "Faire du bilan locomoteur un parcours de soin.",
+        "body": "Case, six capteurs Myodev, tests fonctionnels et Pulse dans un protocole tenu par votre équipe clinique.",
+        "cta": "Équiper mon centre",
+        "note": "Case · Pulse · cadre clinique",
+        "page": "partners"
+      },
+      {
+        "tone": "community",
+        "number": "02",
+        "audience": "CLUBS FITNESS & PERFORMANCE",
+        "title": "Objectiver le mouvement avec un cadre clair.",
+        "body": "Des repères fonctionnels pour vos membres, articulés à un partenaire clinique lorsque le contexte exige un bilan médical.",
+        "cta": "Voir les modèles partenaires",
+        "note": "Clubs · performance · gouvernance",
+        "page": "partners"
+      },
+      {
+        "tone": "coast",
+        "number": "03",
+        "audience": "HÔTELS, RETREATS & HOSPITALITY",
+        "title": "Accueillir un bilan de longévité médical.",
+        "body": "Une expérience de santé portée par une organisation médicale autorisée, sans confondre hospitalité, bien-être et soin.",
+        "cta": "Découvrir les implantations",
+        "note": "Hôtellerie · retreats · centres",
+        "page": "motion-retreats"
+      }
     ]
   },
-  fr: {
-    eyebrow: 'CHOISISSEZ VOTRE KŌMØ',
-    title: 'De quoi avez-vous besoin<br><em>aujourd’hui&nbsp;?</em>',
-    lead: 'Votre Motion Score. Votre réseau local. Ou votre séjour KŌMØ sur la White Coast.',
-    continuity: 'Un seul écosystème KŌMØ : santé, réseau et expériences.',
-    heroCta: 'Choisir mon point de départ',
-    paths: [
-      { tone: 'pulse', number: '01', audience: 'KŌMØ PULSE · MÉDICAL', title: 'Votre Motion Score.', body: 'Une lecture médicale de votre mobilité, de votre santé et de votre performance — avec une prochaine étape claire.', cta: 'Obtenir mon Motion Score', note: 'Santé · performance · profil', page: 'pulse' },
-      { tone: 'community', number: '02', audience: 'KŌMØ COMMUNITY · LOCAL', title: 'Votre réseau local.', body: 'Une conciergerie personnelle, des mises en relation de confiance et des expériences locales choisies — pour que la White Coast s’ouvre à vous.', cta: 'Découvrir KŌMØ Community', note: 'Conciergerie · réseau · expériences', page: 'white-coast' },
-      { tone: 'coast', number: '03', audience: 'KŌMØ WHITE COAST · HÔTELLERIE', title: 'Votre séjour KŌMØ.', body: 'Des hôtels sélectionnés, des séjours conçus avec soin et des expériences longévité pensées pour votre manière de vivre.', cta: 'Découvrir les séjours White Coast', note: 'Hôtellerie · séjours · expériences', page: 'motion-retreats' }
+  "en": {
+    "eyebrow": "DEPLOY KŌMØ IN YOUR SETTING",
+    "title": "One method.<br><em>Three ways to host it.</em>",
+    "lead": "KŌMØ Case, six Myodev sensors and Pulse give clinical teams and partner operators a clear framework for making movement measurable.",
+    "continuity": "One KŌMØ infrastructure: indication, supervised acquisition, data quality, clinical interpretation and follow-up.",
+    "heroCta": "Explore KŌMØ deployment",
+    "paths": [
+      {
+        "tone": "pulse",
+        "number": "01",
+        "audience": "MEDICAL & LONGEVITY CENTRES",
+        "title": "Make locomotor assessment part of care.",
+        "body": "Case, six Myodev sensors, functional testing and Pulse inside a protocol held by your clinical team.",
+        "cta": "Equip my centre",
+        "note": "Case · Pulse · clinical framework",
+        "page": "partners"
+      },
+      {
+        "tone": "community",
+        "number": "02",
+        "audience": "FITNESS & PERFORMANCE CLUBS",
+        "title": "Make movement measurable with clear governance.",
+        "body": "Functional references for members, connected to a clinical partner whenever the context requires medical assessment.",
+        "cta": "See partner models",
+        "note": "Clubs · performance · governance",
+        "page": "partners"
+      },
+      {
+        "tone": "coast",
+        "number": "03",
+        "audience": "HOTELS, RETREATS & HOSPITALITY",
+        "title": "Host a medical longevity assessment.",
+        "body": "A health experience delivered by an authorised medical organisation, without conflating hospitality, wellbeing and care.",
+        "cta": "Explore implementations",
+        "note": "Hospitality · retreats · centres",
+        "page": "motion-retreats"
+      }
     ]
   },
-  es: {
-    eyebrow: 'ELIGE TU KŌMØ',
-    title: '¿Qué necesitas<br><em>hoy?</em>',
-    lead: 'Tu Motion Score. Tu red local. O tu estancia KŌMØ en la White Coast.',
-    continuity: 'Un ecosistema KŌMØ: salud, red y experiencias.',
-    heroCta: 'Elegir mi punto de partida',
-    paths: [
-      { tone: 'pulse', number: '01', audience: 'KŌMØ PULSE · MÉDICO', title: 'Tu Motion Score.', body: 'Una lectura médica de tu movilidad, salud y rendimiento — con un siguiente paso claro.', cta: 'Obtener mi Motion Score', note: 'Salud · rendimiento · perfil', page: 'pulse' },
-      { tone: 'community', number: '02', audience: 'KŌMØ COMMUNITY · LOCAL', title: 'Tu red local.', body: 'Conserjería personal, conexiones de confianza y experiencias locales seleccionadas para que la White Coast se abra ante ti.', cta: 'Descubrir KŌMØ Community', note: 'Conserjería · red · experiencias', page: 'white-coast' },
-      { tone: 'coast', number: '03', audience: 'KŌMØ WHITE COAST · HOSPITALITY', title: 'Tu estancia KŌMØ.', body: 'Hoteles seleccionados, estancias cuidadosamente diseñadas y experiencias de longevidad pensadas para tu forma de vivir.', cta: 'Descubrir estancias White Coast', note: 'Hotelería · estancias · experiencias', page: 'motion-retreats' }
+  "es": {
+    "eyebrow": "DESPLIEGA KŌMØ EN TU CENTRO",
+    "title": "Un método.<br><em>Tres formas de acogerlo.</em>",
+    "lead": "KŌMØ Case, seis sensores Myodev y Pulse ofrecen a los equipos clínicos y operadores socios un marco claro para hacer medible el movimiento.",
+    "continuity": "Una infraestructura KŌMØ: indicación, adquisición supervisada, calidad de datos, interpretación clínica y seguimiento.",
+    "heroCta": "Descubrir el despliegue KŌMØ",
+    "paths": [
+      {
+        "tone": "pulse",
+        "number": "01",
+        "audience": "CENTROS MÉDICOS Y DE LONGEVIDAD",
+        "title": "Integrar el balance locomotor en la atención.",
+        "body": "Case, seis sensores Myodev, pruebas funcionales y Pulse dentro de un protocolo dirigido por tu equipo clínico.",
+        "cta": "Equipar mi centro",
+        "note": "Case · Pulse · marco clínico",
+        "page": "partners"
+      },
+      {
+        "tone": "community",
+        "number": "02",
+        "audience": "CLUBS FITNESS Y RENDIMIENTO",
+        "title": "Objetivar el movimiento con un marco claro.",
+        "body": "Referencias funcionales para los miembros, conectadas a un socio clínico cuando el contexto requiere una evaluación médica.",
+        "cta": "Ver modelos de socios",
+        "note": "Clubs · rendimiento · gobernanza",
+        "page": "partners"
+      },
+      {
+        "tone": "coast",
+        "number": "03",
+        "audience": "HOTELES, RETREATS Y HOSPITALITY",
+        "title": "Acoger una evaluación médica de longevidad.",
+        "body": "Una experiencia de salud prestada por una organización médica autorizada, sin confundir hospitalidad, bienestar y atención.",
+        "cta": "Descubrir implantaciones",
+        "note": "Hotelería · retreats · centros",
+        "page": "motion-retreats"
+      }
     ]
   }
 };
@@ -180,7 +261,7 @@ const komoCaseCopy = {
     "heroTitle": "One case.<br>Six sensors.<br><em>One score to make movement clear.</em>",
     "heroLead": "A clinician-led locomotor check-up that combines standardised functional tests with Myodev sensor data, then returns a KŌMØ Motion Score to discuss in context.",
     "heroPrimaryCta": "See the KŌMØ Check",
-    "heroSecondaryCta": "For clinicians",
+    "heroSecondaryCta": "Equip my centre",
     "heroProof": [
       "6 wireless Myodev sensors",
       "Standardised functional tests",
@@ -215,28 +296,28 @@ const komoCaseCopy = {
     ],
     "checkNotice": "Biology, imaging and any additional tests are only considered when a clinical question and the care setting make them appropriate.",
     "scoreEyebrow": "THE KŌMØ MOTION SCORE",
-    "scoreTitle": "A score, but never<br>just <em>a number.</em>",
-    "scoreLead": "The Motion Score organises the parts of the assessment that are meaningful to compare. It shows what was measured, how reliable the data are and what is worth discussing next.",
+    "scoreTitle": "A global reference for the locomotor system.<br><em>Never a verdict.</em>",
+    "scoreLead": "The KŌMØ Score organises the elements available in an assessment: daily life, functional tests, gait, muscle, posture and, where indicated, biological results. It makes priorities visible for discussion with the professional.",
     "scorePillars": [
       [
-        "Mobility",
-        "How you rise, walk and adapt to movement."
+        "Daily life & quality of life",
+        "Activity, sleep, pain, fatigue and perceived mobility."
       ],
       [
-        "Muscle",
-        "Activation and bilateral contribution on defined tasks."
+        "Biology, when indicated",
+        "Existing or prescribed results, always placed in medical context."
       ],
       [
-        "Balance & coordination",
-        "Control, symmetry and confidence in movement."
+        "Posture, muscle & gait",
+        "Observation, six Myodev sensors and a gait protocol on defined tasks."
       ],
       [
-        "Posture & context",
-        "Relevant clinical findings, only when indicated."
+        "Functional tests & age references",
+        "Chair rise, Two-Step, 4-metre walk and careful functional comparisons."
       ]
     ],
     "scoreNoteTitle": "A clear clinical boundary",
-    "scoreNote": "The score supports a clinical conversation. It does not diagnose a condition, replace an examination or make a care decision on its own.",
+    "scoreNote": "The score supports a clinical conversation and prevention strategy. It does not diagnose a condition, replace an examination or make a care decision on its own.",
     "scoreImageAlt": "Diagram of the KŌMØ Longevity Score around the portable KŌMØ Case",
     "technologyEyebrow": "MEASUREMENT, MADE VISIBLE",
     "technologyTitle": "Myodev technology.<br><em>KŌMØ clinical method.</em>",
@@ -272,15 +353,15 @@ const komoCaseCopy = {
     "technologyCta": "Discuss a clinical deployment",
     "closingEyebrow": "ONE PRODUCT · ONE TRAJECTORY",
     "closingTitle": "From the KŌMØ Case<br>to a plan <em>that continues.</em>",
-    "closingLead": "Pulse keeps the thread between a first reference, a clinician-led assessment and the next conversation. White Coast and the wider ecosystem add the conditions to live that trajectory well.",
-    "closingCta": "Explore the KŌMØ ecosystem"
+    "closingLead": "Pulse keeps the thread between a first reference, a clinician-led assessment and the next conversation. KŌMØ Clinical and partner sites provide the framework to carry that trajectory forward.",
+    "closingCta": "Discover the partner offer"
   },
   "fr": {
     "heroEyebrow": "KŌMØ CASE · POWERED BY MYODEV",
     "heroTitle": "Une valise.<br>Six capteurs.<br><em>Un score pour mieux comprendre votre mouvement.</em>",
     "heroLead": "Un bilan locomoteur réalisé avec un professionnel : des tests fonctionnels standardisés, des données issues des capteurs Myodev et un KŌMØ Motion Score à interpréter dans son contexte.",
     "heroPrimaryCta": "Découvrir le KŌMØ Check",
-    "heroSecondaryCta": "Pour les professionnels",
+    "heroSecondaryCta": "Équiper mon centre",
     "heroProof": [
       "6 capteurs sans fil Myodev",
       "Tests fonctionnels standardisés",
@@ -315,28 +396,28 @@ const komoCaseCopy = {
     ],
     "checkNotice": "Biologie, imagerie et examens complémentaires ne sont envisagés que lorsqu’une question clinique et le cadre de soin le justifient.",
     "scoreEyebrow": "LE KŌMØ MOTION SCORE",
-    "scoreTitle": "Un score, mais jamais<br>seulement <em>un chiffre.</em>",
-    "scoreLead": "Le Motion Score organise les éléments de l’évaluation qui peuvent être comparés avec sens. Il indique ce qui a été mesuré, la qualité des données et ce qui mérite d’être discuté ensuite.",
+    "scoreTitle": "Un repère global de l’appareil locomoteur.<br><em>Jamais un verdict.</em>",
+    "scoreLead": "Le KŌMØ Score organise les éléments disponibles dans une évaluation : vie quotidienne, tests fonctionnels, marche, muscle, posture et, lorsque cela est indiqué, les résultats biologiques. Il rend visibles les priorités à discuter avec le professionnel.",
     "scorePillars": [
       [
-        "Mobilité",
-        "La manière de se lever, marcher et s’adapter au mouvement."
+        "Vie quotidienne & qualité de vie",
+        "Activité, sommeil, douleur, fatigue et perception de la mobilité."
       ],
       [
-        "Muscle",
-        "Activation et contribution droite/gauche sur des tâches définies."
+        "Bilan biologique, lorsque indiqué",
+        "Des résultats existants ou prescrits, toujours remis dans leur contexte médical."
       ],
       [
-        "Équilibre & coordination",
-        "Contrôle, symétrie et confiance dans le mouvement."
+        "Posture, muscle & marche",
+        "Observation, six capteurs Myodev et protocole de marche sur des tâches définies."
       ],
       [
-        "Posture & contexte",
-        "Éléments cliniques pertinents, uniquement lorsqu’ils sont indiqués."
+        "Tests fonctionnels & repères d’âge",
+        "Lever de chaise, Two-Step, marche de 4 mètres et comparaisons fonctionnelles prudentes."
       ]
     ],
     "scoreNoteTitle": "Une frontière clinique claire",
-    "scoreNote": "Le score soutient une conversation clinique. Il ne pose pas de diagnostic, ne remplace pas l’examen et ne décide pas d’un soin à lui seul.",
+    "scoreNote": "Le score soutient une conversation clinique et une stratégie de prévention. Il ne pose pas de diagnostic, ne remplace pas l’examen et ne décide pas d’un soin à lui seul.",
     "scoreImageAlt": "Diagramme du KŌMØ Longevity Score autour de la KŌMØ Case portable",
     "technologyEyebrow": "LA MESURE, RENDUE VISIBLE",
     "technologyTitle": "Technologie Myodev.<br><em>Méthode clinique KŌMØ.</em>",
@@ -372,15 +453,15 @@ const komoCaseCopy = {
     "technologyCta": "Échanger sur un déploiement clinique",
     "closingEyebrow": "UN PRODUIT · UNE TRAJECTOIRE",
     "closingTitle": "De la KŌMØ Case<br>à un plan <em>qui se poursuit.</em>",
-    "closingLead": "Pulse garde le fil entre un premier repère, une évaluation menée par un professionnel et la conversation suivante. White Coast et le reste de l’écosystème ajoutent les conditions pour bien vivre cette trajectoire.",
-    "closingCta": "Explorer l’écosystème KŌMØ"
+    "closingLead": "Pulse garde le fil entre un premier repère, une évaluation menée par un professionnel et la conversation suivante. KŌMØ Clinical et les sites partenaires apportent le cadre pour déployer cette trajectoire.",
+    "closingCta": "Découvrir l’offre pour partenaires"
   },
   "es": {
     "heroEyebrow": "KŌMØ CASE · POWERED BY MYODEV",
     "heroTitle": "Una maleta.<br>Seis sensores.<br><em>Una puntuación para entender mejor tu movimiento.</em>",
     "heroLead": "Un chequeo locomotor realizado con un profesional: pruebas funcionales estandarizadas, datos de sensores Myodev y un KŌMØ Motion Score que se interpreta en su contexto.",
     "heroPrimaryCta": "Descubrir el KŌMØ Check",
-    "heroSecondaryCta": "Para profesionales",
+    "heroSecondaryCta": "Equipar mi centro",
     "heroProof": [
       "6 sensores inalámbricos Myodev",
       "Pruebas funcionales estandarizadas",
@@ -415,28 +496,28 @@ const komoCaseCopy = {
     ],
     "checkNotice": "Biología, imagen y pruebas adicionales solo se consideran cuando la pregunta clínica y el entorno asistencial lo justifican.",
     "scoreEyebrow": "EL KŌMØ MOTION SCORE",
-    "scoreTitle": "Una puntuación, pero nunca<br>solo <em>un número.</em>",
-    "scoreLead": "El Motion Score organiza las partes de la evaluación que tiene sentido comparar. Muestra qué se midió, la calidad de los datos y qué merece discutirse después.",
+    "scoreTitle": "Una referencia global del sistema locomotor.<br><em>Nunca un veredicto.</em>",
+    "scoreLead": "El KŌMØ Score organiza los elementos disponibles en una evaluación: vida cotidiana, pruebas funcionales, marcha, músculo, postura y, cuando está indicado, resultados biológicos. Hace visibles las prioridades para comentarlas con el profesional.",
     "scorePillars": [
       [
-        "Movilidad",
-        "La forma de levantarte, caminar y adaptarte al movimiento."
+        "Vida cotidiana y calidad de vida",
+        "Actividad, sueño, dolor, fatiga y percepción de la movilidad."
       ],
       [
-        "Músculo",
-        "Activación y contribución bilateral en tareas definidas."
+        "Biología, cuando está indicada",
+        "Resultados existentes o prescritos, siempre puestos en contexto médico."
       ],
       [
-        "Equilibrio y coordinación",
-        "Control, simetría y confianza en el movimiento."
+        "Postura, músculo y marcha",
+        "Observación, seis sensores Myodev y un protocolo de marcha en tareas definidas."
       ],
       [
-        "Postura y contexto",
-        "Hallazgos clínicos relevantes, solo cuando están indicados."
+        "Pruebas funcionales y referencias de edad",
+        "Levantarse de una silla, Two-Step, marcha de 4 metros y comparaciones funcionales prudentes."
       ]
     ],
     "scoreNoteTitle": "Un límite clínico claro",
-    "scoreNote": "La puntuación apoya una conversación clínica. No diagnostica una condición, no sustituye una exploración ni decide un tratamiento por sí sola.",
+    "scoreNote": "La puntuación apoya una conversación clínica y una estrategia de prevención. No diagnostica una condición, no sustituye una exploración ni decide un tratamiento por sí sola.",
     "scoreImageAlt": "Diagrama del KŌMØ Longevity Score alrededor de la KŌMØ Case portátil",
     "technologyEyebrow": "MEDICIÓN HECHA VISIBLE",
     "technologyTitle": "Tecnología Myodev.<br><em>Método clínico KŌMØ.</em>",
@@ -472,17 +553,658 @@ const komoCaseCopy = {
     "technologyCta": "Hablar de un despliegue clínico",
     "closingEyebrow": "UN PRODUCTO · UNA TRAYECTORIA",
     "closingTitle": "De la KŌMØ Case<br>a un plan <em>que continúa.</em>",
-    "closingLead": "Pulse mantiene el hilo entre una primera referencia, una evaluación realizada por un profesional y la siguiente conversación. White Coast y el resto del ecosistema añaden las condiciones para vivir bien esa trayectoria.",
-    "closingCta": "Explorar el ecosistema KŌMØ"
+    "closingLead": "Pulse mantiene el hilo entre una primera referencia, una evaluación realizada por un profesional y la siguiente conversación. KŌMØ Clinical y los centros socios aportan el marco para desarrollar esa trayectoria.",
+    "closingCta": "Descubrir la oferta para socios"
+  }
+};
+const partnerCopy = {
+  "fr": {
+    "metaTitle": "KŌMØ Case pour partenaires — bilan locomoteur clinique portable",
+    "metaDescription": "KŌMØ équipe les centres médicaux, longévité, fitness, hôtels et retreats avec une Case portable, six capteurs Myodev et KŌMØ Pulse dans un cadre clinique.",
+    "eyebrow": "KŌMØ CASE POUR PARTENAIRES",
+    "title": "La longévité locomotrice,<br><em>dans votre pratique.</em>",
+    "lead": "Une solution portable pour intégrer un bilan locomoteur complet à votre centre : KŌMØ Case, six capteurs Myodev, KŌMØ Pulse et un cadre clinique contrôlé par votre équipe.",
+    "cta": "Parler à l’équipe KŌMØ",
+    "note": "Acquisition ou location · déploiement en binôme · formation et contrôle qualité progressifs.",
+    "introEyebrow": "UNE OFFRE B2B CLINIQUE",
+    "introTitle": "La Case rend la mesure mobile.<br>La méthode garde le <em>soin au centre.</em>",
+    "introLead": "KŌMØ apporte la solution portable, la couche Pulse et le support de déploiement. L’indication, l’interprétation et les décisions de prise en charge restent entre les mains du professionnel et de l’organisation de soin.",
+    "cards": [
+      [
+        "Centres médicaux & longévité",
+        "Ajoutez un bilan locomoteur standardisé à votre parcours de prévention, avec une trace de la qualité des données et une restitution clinique."
+      ],
+      [
+        "Centres fitness & performance",
+        "Proposez des repères fonctionnels à vos membres dans un périmètre clair, relié à un partenaire clinique dès qu’une évaluation médicale est nécessaire."
+      ],
+      [
+        "Hôtels & retreats",
+        "Accueillez un bilan de longévité médical porté par une organisation autorisée : l’hospitalité élève l’expérience, elle ne remplace jamais le soin."
+      ],
+      [
+        "Réseaux multi-sites",
+        "Déployez une même Case, le même protocole et des règles de qualité partagées, site après site, avec une montée en autonomie documentée."
+      ]
+    ],
+    "offerEyebrow": "MODÈLE DE DÉPLOIEMENT",
+    "offerTitle": "Une Case. Une plateforme.<br>Un dispositif <em>opérationnel.</em>",
+    "offerLead": "KŌMØ ne vend pas seulement un appareil. Nous déployons une méthode, Pulse, le cadre de qualité et l’accompagnement nécessaires pour rendre la séance compréhensible et reproductible.",
+    "offerModes": [
+      [
+        "01",
+        "Acquérir la KŌMØ Case",
+        "Équipez durablement votre centre avec la valise, les six capteurs et l’accès au workflow KŌMØ Pulse."
+      ],
+      [
+        "02",
+        "Louer pour démarrer",
+        "Ouvrez un pilote maîtrisé, mesurez la demande et construisez votre organisation avant un déploiement plus large."
+      ],
+      [
+        "03",
+        "Déployer avec KŌMØ",
+        "Des professionnels KŌMØ certifiés peuvent réaliser les premières séances à vos côtés, former vos équipes et organiser le passage progressif vers l’autonomie."
+      ]
+    ],
+    "scoreEyebrow": "LE SCORE KŌMØ",
+    "scoreTitle": "Un portrait fonctionnel de l’appareil locomoteur.<br><em>Pas un chiffre isolé.</em>",
+    "scoreLead": "Le score composite organise les composantes disponibles dans le protocole. Il aide à rendre visibles les priorités de prévention et de suivi, sans se substituer à l’évaluation médicale.",
+    "scoreDomains": [
+      [
+        "01",
+        "Vie quotidienne & qualité de vie",
+        "Activité, sommeil, douleur, fatigue et perception de la mobilité."
+      ],
+      [
+        "02",
+        "Bilan biologique, lorsque indiqué",
+        "Des résultats existants ou prescrits, remis dans leur contexte médical ; jamais un prélèvement automatique."
+      ],
+      [
+        "03",
+        "Posture & alignement",
+        "Observation ou mesure pertinente selon l’indication clinique et le cadre disponible."
+      ],
+      [
+        "04",
+        "Analyse musculaire",
+        "Activation, contribution droite/gauche et contrôle sur des tâches définies avec les six capteurs Myodev."
+      ],
+      [
+        "05",
+        "Analyse de la marche",
+        "Vitesse, cadence, symétrie et stabilité dans un protocole de marche contrôlé."
+      ],
+      [
+        "06",
+        "Tests fonctionnels & repères d’âge",
+        "Lever de chaise, Two-Step, marche de 4 mètres et comparaisons fonctionnelles prudentes."
+      ]
+    ],
+    "scoreBoundary": "Le score est un outil d’interprétation structuré par la méthode KŌMØ. Sa validation clinique est progressive : il ne prédit pas un diagnostic et ne remplace pas l’avis médical.",
+    "governanceEyebrow": "LE CADRE MÉDICAL RESTE AU CENTRE",
+    "governanceTitle": "Mesurer, interpréter,<br><em>puis agir.</em>",
+    "governanceLead": "KŌMØ structure la séance et Pulse conserve le fil. L’indication, les actes complémentaires et la décision de prise en charge restent entre les mains du professionnel et de l’organisation autorisée.",
+    "governanceSteps": [
+      [
+        "01",
+        "KŌMØ Case",
+        "Acquisition encadrée, tests fonctionnels et contrôle de la qualité des données."
+      ],
+      [
+        "02",
+        "KŌMØ Pulse",
+        "Une plateforme intégrée pour regrouper les repères, le compte rendu et le suivi."
+      ],
+      [
+        "03",
+        "Restitution clinique",
+        "Une lecture contextualisée, des priorités et, si nécessaire, une orientation adaptée."
+      ]
+    ],
+    "territoryEyebrow": "DÉPLOIEMENT CIBLÉ",
+    "territoryTitle": "Le programme démarre en Europe du Sud.",
+    "territories": [
+      "Côte d’Azur · Cannes · Saint-Tropez · Monaco · Saint-Jean-Cap-Ferrat",
+      "Espagne",
+      "Ravenne · Italie"
+    ],
+    "territoryNote": "Territoires de déploiement ciblés ; disponibilité, cadre médical et conformité sont confirmés projet par projet.",
+    "ecosystemEyebrow": "L’ÉCOSYSTÈME KŌMØ",
+    "ecosystemTitle": "Une infrastructure clinique.<br>Un réseau <em>de lieux équipés.</em>",
+    "ecosystemLead": "La Case, Pulse, le déploiement et le réseau de partenaires se complètent pour faire de la longévité locomotrice une pratique suivie.",
+    "ecosystem": [
+      {
+        "num": "01",
+        "title": "KŌMØ Case",
+        "text": "Une valise portable avec six capteurs Myodev et un protocole de mesure défini.",
+        "link": "Voir la Case",
+        "page": "index"
+      },
+      {
+        "num": "02",
+        "title": "KŌMØ Pulse",
+        "text": "La plateforme intégrée qui relie le bilan, la restitution et le suivi.",
+        "link": "Découvrir Pulse",
+        "page": "pulse"
+      },
+      {
+        "num": "03",
+        "title": "Déploiement partenaire",
+        "text": "Vente, location, formation et contrôle qualité pour rendre l’offre opérante sur site.",
+        "link": "Voir l’offre partenaire",
+        "page": "partners"
+      },
+      {
+        "num": "04",
+        "title": "Méthode & validation",
+        "text": "Une approche documentée, des limites visibles et une validation clinique progressive.",
+        "link": "Lire la méthode",
+        "page": "science"
+      }
+    ],
+    "networkEyebrow": "RENCONTRER & APPRENDRE",
+    "networkTitle": "La conversation autour<br>de la <em>longévité locomotrice.</em>",
+    "networkLead": "KŌMØ s’inscrit dans un écosystème de cliniciens, d’opérateurs et de plateformes dédiées à la longévité.",
+    "networkLinks": [
+      {
+        "eyebrow": "CONGRÈS",
+        "title": "Locotech Longevity Summit",
+        "body": "Un rendez-vous consacré au mouvement, à la longévité et aux pratiques qui rapprochent la science de la vraie vie.",
+        "cta": "Découvrir le congrès",
+        "href": "https://locotechsummit.com/"
+      },
+      {
+        "eyebrow": "PLATEFORME LONGÉVITÉ",
+        "title": "Longevity Task",
+        "body": "Une plateforme de ressources et de conversations autour de la longévité.",
+        "cta": "Visiter Longevity Task",
+        "href": "https://longevitytask.com/"
+      }
+    ],
+    "finalTitle": "Équiper un lieu.<br>Créer une <em>référence.</em>",
+    "finalText": "Chaque déploiement commence par un échange sur votre cadre clinique, votre équipe, votre public et le rythme de montée en autonomie.",
+    "hospitality": {
+      "metaTitle": "KŌMØ pour hôtels, retreats et clubs — un cadre clinique portable",
+      "metaDescription": "KŌMØ aide les hôtels, retreats et clubs à accueillir une évaluation locomotrice médicale avec la Case, six capteurs Myodev et Pulse, sous gouvernance clinique.",
+      "eyebrow": "KŌMØ HOSPITALITY & CLUBS",
+      "title": "Accueillir la longévité médicale.<br><em>Sans diluer le soin.</em>",
+      "lead": "Pour les hôtels, retreats et clubs de sport qui souhaitent accueillir une évaluation locomotrice portée par une équipe clinique partenaire.",
+      "cta": "Échanger sur votre lieu",
+      "note": "L’hospitalité apporte l’accueil ; la pratique médicale reste opérée dans un cadre autorisé.",
+      "introEyebrow": "UNE EXPÉRIENCE, UN CADRE CLAIR",
+      "introTitle": "Le lieu accueille.<br>Le partenaire médical <em>prend soin.</em>",
+      "introLead": "La KŌMØ Case rend possible une présence mobile. Son utilisation dans un hôtel, un retreat ou un club est organisée avec le bon opérateur médical, les bonnes règles de confidentialité et une restitution appropriée.",
+      "rhythm": [
+        [
+          "01",
+          "Définir le bon modèle",
+          "Le lieu, l’équipe clinique, le public, la confidentialité et la disponibilité sont cadrés avant toute séance."
+        ],
+        [
+          "02",
+          "Accueillir une séance encadrée",
+          "La Case, les capteurs et Pulse sont utilisés dans un protocole supervisé ; l’hospitalité reste complémentaire au soin."
+        ],
+        [
+          "03",
+          "Créer une continuité",
+          "Le compte rendu, les orientations et le suivi restent organisés par la structure clinique compétente."
+        ]
+      ],
+      "operatorCards": [
+        [
+          "Hôtels & resorts",
+          "Une offre de prévention médicale que votre clientèle rencontre dans un environnement haut de gamme, sous responsabilité clinique."
+        ],
+        [
+          "Retreats longévité",
+          "Un bilan d’entrée ou de suivi qui relie les activités proposées à une lecture fonctionnelle contextualisée."
+        ],
+        [
+          "Clubs de sport",
+          "Un point de départ objectivé pour les membres, avec une passerelle nette vers un professionnel de santé si nécessaire."
+        ]
+      ],
+      "finalTitle": "Un lieu d’exception.<br>Un dispositif <em>responsable.</em>",
+      "finalText": "KŌMØ travaille avec les opérateurs qui veulent faire de la longévité une offre crédible, sans brouiller les frontières entre bien-être et médecine."
+    }
+  },
+  "en": {
+    "metaTitle": "KŌMØ Case for partners — portable clinical locomotor assessment",
+    "metaDescription": "KŌMØ equips medical, longevity, fitness, hotel and retreat partners with a portable Case, six Myodev sensors and KŌMØ Pulse inside a clinical framework.",
+    "eyebrow": "KŌMØ CASE FOR PARTNERS",
+    "title": "Locomotor longevity,<br><em>inside your practice.</em>",
+    "lead": "A portable solution for integrating a complete locomotor assessment into your centre: KŌMØ Case, six Myodev sensors, KŌMØ Pulse and a clinical framework held by your team.",
+    "cta": "Speak with the KŌMØ team",
+    "note": "Purchase or rental · paired deployment · progressive training and quality control.",
+    "introEyebrow": "A CLINICAL B2B OFFER",
+    "introTitle": "The Case makes measurement mobile.<br>The method keeps <em>care at the centre.</em>",
+    "introLead": "KŌMØ provides the portable solution, Pulse and deployment support. Indication, interpretation and care decisions remain with the professional and care organisation.",
+    "cards": [
+      [
+        "Medical & longevity centres",
+        "Add a standardised locomotor assessment to your prevention pathway, with data-quality visibility and clinical restitution."
+      ],
+      [
+        "Fitness & performance centres",
+        "Offer functional references to members within a clear remit, connected to a clinical partner whenever medical assessment is needed."
+      ],
+      [
+        "Hotels & retreats",
+        "Host a medical longevity assessment delivered by an authorised organisation: hospitality elevates the experience, never replaces care."
+      ],
+      [
+        "Multi-site networks",
+        "Deploy one Case, one protocol and shared quality rules site by site, with a documented path to autonomy."
+      ]
+    ],
+    "offerEyebrow": "DEPLOYMENT MODEL",
+    "offerTitle": "One Case. One platform.<br>An <em>operational system.</em>",
+    "offerLead": "KŌMØ does not sell a device alone. We deploy a method, Pulse, a quality framework and the support needed to make each session understandable and repeatable.",
+    "offerModes": [
+      [
+        "01",
+        "Purchase the KŌMØ Case",
+        "Equip your centre for the long term with the case, six sensors and access to the KŌMØ Pulse workflow."
+      ],
+      [
+        "02",
+        "Rent to start",
+        "Open a controlled pilot, measure demand and build your operating model before a wider rollout."
+      ],
+      [
+        "03",
+        "Deploy with KŌMØ",
+        "Certified KŌMØ professionals can run the first sessions alongside your team, train them and organise a progressive transition to autonomy."
+      ]
+    ],
+    "scoreEyebrow": "THE KŌMØ SCORE",
+    "scoreTitle": "A functional portrait of the locomotor system.<br><em>Not an isolated number.</em>",
+    "scoreLead": "The composite score organises the components available in the protocol. It helps make prevention and follow-up priorities visible without replacing medical assessment.",
+    "scoreDomains": [
+      [
+        "01",
+        "Daily life & quality of life",
+        "Activity, sleep, pain, fatigue and perceived mobility."
+      ],
+      [
+        "02",
+        "Biology, when indicated",
+        "Existing or prescribed results placed in medical context; never an automatic blood draw."
+      ],
+      [
+        "03",
+        "Posture & alignment",
+        "Observation or measurement that is relevant to the clinical indication and setting."
+      ],
+      [
+        "04",
+        "Muscle analysis",
+        "Activation, left/right contribution and control on defined tasks with six Myodev sensors."
+      ],
+      [
+        "05",
+        "Gait analysis",
+        "Speed, cadence, symmetry and stability inside a controlled walking protocol."
+      ],
+      [
+        "06",
+        "Functional tests & age references",
+        "Chair rise, Two-Step, 4-metre walk and careful comparisons with functional reference points."
+      ]
+    ],
+    "scoreBoundary": "The score is an interpretation tool structured by the KŌMØ method. Its clinical validation is progressive: it does not predict a diagnosis and never replaces medical judgement.",
+    "governanceEyebrow": "THE CLINICAL FRAMEWORK STAYS CENTRAL",
+    "governanceTitle": "Measure, interpret,<br><em>then act.</em>",
+    "governanceLead": "KŌMØ structures the session and Pulse keeps the thread. Indication, complementary acts and care decisions stay with the professional and authorised organisation.",
+    "governanceSteps": [
+      [
+        "01",
+        "KŌMØ Case",
+        "Supervised acquisition, functional testing and data-quality control."
+      ],
+      [
+        "02",
+        "KŌMØ Pulse",
+        "One integrated platform for reference points, report and follow-up."
+      ],
+      [
+        "03",
+        "Clinical restitution",
+        "Contextualised interpretation, priorities and, where needed, appropriate referral."
+      ]
+    ],
+    "territoryEyebrow": "TARGETED ROLLOUT",
+    "territoryTitle": "The programme starts in Southern Europe.",
+    "territories": [
+      "French Riviera · Cannes · Saint-Tropez · Monaco · Saint-Jean-Cap-Ferrat",
+      "Spain",
+      "Ravenna · Italy"
+    ],
+    "territoryNote": "Target rollout territories; availability, medical framework and compliance are confirmed project by project.",
+    "ecosystemEyebrow": "THE KŌMØ ECOSYSTEM",
+    "ecosystemTitle": "A clinical infrastructure.<br>A network <em>of equipped settings.</em>",
+    "ecosystemLead": "The Case, Pulse, deployment and partner network work together to make locomotor longevity an ongoing practice.",
+    "ecosystem": [
+      {
+        "num": "01",
+        "title": "KŌMØ Case",
+        "text": "A portable case with six Myodev sensors and a defined measurement protocol.",
+        "link": "See the Case",
+        "page": "index"
+      },
+      {
+        "num": "02",
+        "title": "KŌMØ Pulse",
+        "text": "The integrated platform linking assessment, restitution and follow-up.",
+        "link": "Discover Pulse",
+        "page": "pulse"
+      },
+      {
+        "num": "03",
+        "title": "Partner deployment",
+        "text": "Purchase, rental, training and quality control to make the offer work on site.",
+        "link": "See the partner offer",
+        "page": "partners"
+      },
+      {
+        "num": "04",
+        "title": "Method & validation",
+        "text": "A documented approach, visible limits and progressive clinical validation.",
+        "link": "Read the method",
+        "page": "science"
+      }
+    ],
+    "networkEyebrow": "MEET & LEARN",
+    "networkTitle": "The conversation around<br><em>locomotor longevity.</em>",
+    "networkLead": "KŌMØ sits in an ecosystem of clinicians, operators and platforms dedicated to longevity.",
+    "networkLinks": [
+      {
+        "eyebrow": "CONGRESS",
+        "title": "Locotech Longevity Summit",
+        "body": "A gathering around movement, longevity and practices that bring science closer to real life.",
+        "cta": "Discover the congress",
+        "href": "https://locotechsummit.com/"
+      },
+      {
+        "eyebrow": "LONGEVITY PLATFORM",
+        "title": "Longevity Task",
+        "body": "A platform for resources and conversations around longevity.",
+        "cta": "Visit Longevity Task",
+        "href": "https://longevitytask.com/"
+      }
+    ],
+    "finalTitle": "Equip a setting.<br>Create a <em>reference.</em>",
+    "finalText": "Every deployment begins with a conversation about your clinical framework, your team, your audience and the path to autonomy.",
+    "hospitality": {
+      "metaTitle": "KŌMØ for hotels, retreats and clubs — a portable clinical framework",
+      "metaDescription": "KŌMØ helps hotels, retreats and clubs host a medical locomotor assessment with the Case, six Myodev sensors and Pulse under clinical governance.",
+      "eyebrow": "KŌMØ HOSPITALITY & CLUBS",
+      "title": "Host medical longevity.<br><em>Without diluting care.</em>",
+      "lead": "For hotels, retreats and sports clubs that want to host a locomotor assessment delivered by a partner clinical team.",
+      "cta": "Discuss your setting",
+      "note": "Hospitality provides the welcome; medical practice remains operated in an authorised framework.",
+      "introEyebrow": "AN EXPERIENCE, A CLEAR FRAMEWORK",
+      "introTitle": "The setting hosts.<br>The medical partner <em>cares.</em>",
+      "introLead": "KŌMØ Case makes a mobile presence possible. Its use in a hotel, retreat or club is organised with the right medical operator, privacy rules and appropriate restitution.",
+      "rhythm": [
+        [
+          "01",
+          "Define the right model",
+          "Setting, clinical team, audience, privacy and availability are framed before any session."
+        ],
+        [
+          "02",
+          "Host a supervised session",
+          "Case, sensors and Pulse are used inside a supervised protocol; hospitality remains complementary to care."
+        ],
+        [
+          "03",
+          "Create continuity",
+          "The report, referrals and follow-up remain organised by the competent clinical structure."
+        ]
+      ],
+      "operatorCards": [
+        [
+          "Hotels & resorts",
+          "A medical prevention offer your guests encounter in a premium environment, under clinical responsibility."
+        ],
+        [
+          "Longevity retreats",
+          "An entry or follow-up assessment that connects the programme to contextualised functional insight."
+        ],
+        [
+          "Sports clubs",
+          "An objective starting point for members, with a clear bridge to a health professional where needed."
+        ]
+      ],
+      "finalTitle": "An exceptional setting.<br>A <em>responsible</em> system.",
+      "finalText": "KŌMØ works with operators who want longevity to be a credible offer without blurring wellbeing and medicine."
+    }
+  },
+  "es": {
+    "metaTitle": "KŌMØ Case para socios — evaluación clínica locomotora portátil",
+    "metaDescription": "KŌMØ equipa a socios médicos, de longevidad, fitness, hoteleros y retreats con una Case portátil, seis sensores Myodev y KŌMØ Pulse dentro de un marco clínico.",
+    "eyebrow": "KŌMØ CASE PARA SOCIOS",
+    "title": "Longevidad locomotora,<br><em>dentro de tu práctica.</em>",
+    "lead": "Una solución portátil para integrar una evaluación locomotora completa en tu centro: KŌMØ Case, seis sensores Myodev, KŌMØ Pulse y un marco clínico dirigido por tu equipo.",
+    "cta": "Hablar con el equipo KŌMØ",
+    "note": "Compra o alquiler · despliegue acompañado · formación y control de calidad progresivos.",
+    "introEyebrow": "UNA OFERTA B2B CLÍNICA",
+    "introTitle": "La Case hace móvil la medición.<br>El método mantiene <em>la atención en el centro.</em>",
+    "introLead": "KŌMØ aporta la solución portátil, Pulse y apoyo de despliegue. La indicación, interpretación y decisiones asistenciales permanecen con el profesional y la organización de atención.",
+    "cards": [
+      [
+        "Centros médicos y de longevidad",
+        "Añade una evaluación locomotora estandarizada a tu recorrido preventivo, con visibilidad de calidad de datos y devolución clínica."
+      ],
+      [
+        "Centros fitness y de rendimiento",
+        "Ofrece referencias funcionales a los miembros dentro de un perímetro claro, conectado a un socio clínico cuando se necesita evaluación médica."
+      ],
+      [
+        "Hoteles y retreats",
+        "Acoge una evaluación médica de longevidad prestada por una organización autorizada: la hospitalidad eleva la experiencia, nunca sustituye la atención."
+      ],
+      [
+        "Redes multisede",
+        "Despliega una misma Case, un mismo protocolo y reglas de calidad compartidas sitio por sitio, con una autonomía documentada."
+      ]
+    ],
+    "offerEyebrow": "MODELO DE DESPLIEGUE",
+    "offerTitle": "Una Case. Una plataforma.<br>Un sistema <em>operativo.</em>",
+    "offerLead": "KŌMØ no vende solo un dispositivo. Desplegamos un método, Pulse, un marco de calidad y el acompañamiento necesario para hacer cada sesión comprensible y repetible.",
+    "offerModes": [
+      [
+        "01",
+        "Comprar la KŌMØ Case",
+        "Equipa tu centro a largo plazo con la maleta, seis sensores y acceso al flujo de trabajo de KŌMØ Pulse."
+      ],
+      [
+        "02",
+        "Alquilar para empezar",
+        "Abre un piloto controlado, mide la demanda y construye tu modelo operativo antes de un despliegue más amplio."
+      ],
+      [
+        "03",
+        "Desplegar con KŌMØ",
+        "Profesionales KŌMØ certificados pueden realizar las primeras sesiones junto a tu equipo, formarlo y organizar una transición progresiva hacia la autonomía."
+      ]
+    ],
+    "scoreEyebrow": "EL SCORE KŌMØ",
+    "scoreTitle": "Un retrato funcional del sistema locomotor.<br><em>No un número aislado.</em>",
+    "scoreLead": "El score compuesto organiza los componentes disponibles en el protocolo. Ayuda a hacer visibles las prioridades de prevención y seguimiento sin sustituir la evaluación médica.",
+    "scoreDomains": [
+      [
+        "01",
+        "Vida cotidiana y calidad de vida",
+        "Actividad, sueño, dolor, fatiga y percepción de la movilidad."
+      ],
+      [
+        "02",
+        "Biología, cuando está indicada",
+        "Resultados existentes o prescritos puestos en contexto médico; nunca una extracción automática."
+      ],
+      [
+        "03",
+        "Postura y alineación",
+        "Observación o medida pertinente según la indicación clínica y el contexto disponible."
+      ],
+      [
+        "04",
+        "Análisis muscular",
+        "Activación, contribución izquierda/derecha y control en tareas definidas con seis sensores Myodev."
+      ],
+      [
+        "05",
+        "Análisis de la marcha",
+        "Velocidad, cadencia, simetría y estabilidad dentro de un protocolo de marcha controlado."
+      ],
+      [
+        "06",
+        "Tests funcionales y referencias de edad",
+        "Levantarse de una silla, Two-Step, marcha de 4 metros y comparaciones funcionales prudentes."
+      ]
+    ],
+    "scoreBoundary": "El score es una herramienta de interpretación estructurada por el método KŌMØ. Su validación clínica es progresiva: no predice un diagnóstico ni reemplaza el juicio médico.",
+    "governanceEyebrow": "EL MARCO CLÍNICO SIGUE SIENDO CENTRAL",
+    "governanceTitle": "Medir, interpretar,<br><em>después actuar.</em>",
+    "governanceLead": "KŌMØ estructura la sesión y Pulse mantiene el hilo. La indicación, los actos complementarios y las decisiones asistenciales siguen con el profesional y la organización autorizada.",
+    "governanceSteps": [
+      [
+        "01",
+        "KŌMØ Case",
+        "Adquisición supervisada, pruebas funcionales y control de la calidad de los datos."
+      ],
+      [
+        "02",
+        "KŌMØ Pulse",
+        "Una plataforma integrada para referencias, informe y seguimiento."
+      ],
+      [
+        "03",
+        "Devolución clínica",
+        "Interpretación contextualizada, prioridades y, cuando es necesario, derivación adecuada."
+      ]
+    ],
+    "territoryEyebrow": "DESPLIEGUE DIRIGIDO",
+    "territoryTitle": "El programa empieza en el sur de Europa.",
+    "territories": [
+      "Costa Azul · Cannes · Saint-Tropez · Mónaco · Saint-Jean-Cap-Ferrat",
+      "España",
+      "Rávena · Italia"
+    ],
+    "territoryNote": "Territorios de despliegue objetivo; disponibilidad, marco médico y cumplimiento se confirman proyecto por proyecto.",
+    "ecosystemEyebrow": "EL ECOSISTEMA KŌMØ",
+    "ecosystemTitle": "Una infraestructura clínica.<br>Una red <em>de lugares equipados.</em>",
+    "ecosystemLead": "La Case, Pulse, el despliegue y la red de socios se complementan para hacer de la longevidad locomotora una práctica continuada.",
+    "ecosystem": [
+      {
+        "num": "01",
+        "title": "KŌMØ Case",
+        "text": "Una maleta portátil con seis sensores Myodev y un protocolo de medición definido.",
+        "link": "Ver la Case",
+        "page": "index"
+      },
+      {
+        "num": "02",
+        "title": "KŌMØ Pulse",
+        "text": "La plataforma integrada que une evaluación, devolución y seguimiento.",
+        "link": "Descubrir Pulse",
+        "page": "pulse"
+      },
+      {
+        "num": "03",
+        "title": "Despliegue para socios",
+        "text": "Compra, alquiler, formación y control de calidad para hacer operativa la oferta in situ.",
+        "link": "Ver la oferta para socios",
+        "page": "partners"
+      },
+      {
+        "num": "04",
+        "title": "Método y validación",
+        "text": "Un enfoque documentado, límites visibles y validación clínica progresiva.",
+        "link": "Leer el método",
+        "page": "science"
+      }
+    ],
+    "networkEyebrow": "ENCONTRAR & APRENDER",
+    "networkTitle": "La conversación sobre<br>la <em>longevidad locomotora.</em>",
+    "networkLead": "KŌMØ se inscribe en un ecosistema de clínicos, operadores y plataformas dedicadas a la longevidad.",
+    "networkLinks": [
+      {
+        "eyebrow": "CONGRESO",
+        "title": "Locotech Longevity Summit",
+        "body": "Un encuentro dedicado al movimiento, la longevidad y las prácticas que acercan la ciencia a la vida real.",
+        "cta": "Descubrir el congreso",
+        "href": "https://locotechsummit.com/"
+      },
+      {
+        "eyebrow": "PLATAFORMA DE LONGEVIDAD",
+        "title": "Longevity Task",
+        "body": "Una plataforma de recursos y conversaciones sobre longevidad.",
+        "cta": "Visitar Longevity Task",
+        "href": "https://longevitytask.com/"
+      }
+    ],
+    "finalTitle": "Equipar un lugar.<br>Crear una <em>referencia.</em>",
+    "finalText": "Cada despliegue empieza con una conversación sobre tu marco clínico, equipo, público y la trayectoria hacia la autonomía.",
+    "hospitality": {
+      "metaTitle": "KŌMØ para hoteles, retreats y clubs — un marco clínico portátil",
+      "metaDescription": "KŌMØ ayuda a hoteles, retreats y clubs a acoger una evaluación locomotora médica con la Case, seis sensores Myodev y Pulse bajo gobernanza clínica.",
+      "eyebrow": "KŌMØ HOSPITALITY & CLUBS",
+      "title": "Acoger longevidad médica.<br><em>Sin diluir la atención.</em>",
+      "lead": "Para hoteles, retreats y clubs deportivos que desean acoger una evaluación locomotora realizada por un equipo clínico socio.",
+      "cta": "Hablar de tu lugar",
+      "note": "La hospitalidad aporta la acogida; la práctica médica se opera dentro de un marco autorizado.",
+      "introEyebrow": "UNA EXPERIENCIA, UN MARCO CLARO",
+      "introTitle": "El lugar acoge.<br>El socio médico <em>cuida.</em>",
+      "introLead": "KŌMØ Case permite una presencia móvil. Su uso en un hotel, retreat o club se organiza con el operador médico adecuado, reglas de privacidad y una devolución apropiada.",
+      "rhythm": [
+        [
+          "01",
+          "Definir el modelo adecuado",
+          "Lugar, equipo clínico, público, privacidad y disponibilidad se estructuran antes de cualquier sesión."
+        ],
+        [
+          "02",
+          "Acoger una sesión supervisada",
+          "Case, sensores y Pulse se utilizan dentro de un protocolo supervisado; la hospitalidad sigue siendo complementaria a la atención."
+        ],
+        [
+          "03",
+          "Crear continuidad",
+          "El informe, las derivaciones y el seguimiento permanecen organizados por la estructura clínica competente."
+        ]
+      ],
+      "operatorCards": [
+        [
+          "Hoteles y resorts",
+          "Una oferta de prevención médica que tus huéspedes encuentran en un entorno premium, bajo responsabilidad clínica."
+        ],
+        [
+          "Retreats de longevidad",
+          "Una evaluación de entrada o seguimiento que conecta el programa con una visión funcional contextualizada."
+        ],
+        [
+          "Clubs deportivos",
+          "Un punto de partida objetivo para los miembros, con un puente claro hacia un profesional de salud cuando es necesario."
+        ]
+      ],
+      "finalTitle": "Un lugar excepcional.<br>Un sistema <em>responsable.</em>",
+      "finalText": "KŌMØ trabaja con operadores que quieren que la longevidad sea una oferta creíble sin difuminar bienestar y medicina."
+    }
   }
 };
 const caseCheckCopy = (locale) => komoCaseCopy[locale] || komoCaseCopy.en;
+const partnerContent = (locale) => partnerCopy[locale] || partnerCopy.en;
 
 const journeyCopy = (locale) => pulseJourney[locale] || pulseJourney.en;
 const entranceCopy = (locale) => komoEntrances[locale] || komoEntrances.en;
 const canonical = (locale, page) => `${site.origin}${pagePath(locale, page)}`;
-const communityUrl = 'https://community.komolongevity.com/';
-const link = (locale, page) => page === 'white-coast' ? communityUrl : (/^https?:\/\//.test(page) || page.startsWith('mailto:') ? page : pagePath(locale, page));
+const link = (locale, page) => (/^https?:\/\//.test(page) || page.startsWith('mailto:') ? page : pagePath(locale, page));
 const pulseStartLink = (locale) => `${pagePath(locale, 'pulse')}#start-pulse`;
 const scoreLink = (locale) => pulseStartLink(locale);
 const article = (locale) => `${pagePath(locale, 'library')}#articles`;
@@ -492,10 +1214,11 @@ const text = (value = '') => escapeHtml(value);
 
 function pageAction(locale, page) {
   const c = translations[locale];
+  const p = partnerContent(locale);
   const routeActions = {
     clinical: { label: c.clinical.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
-    'white-coast': { label: c.whiteCoast.cta, href: 'https://community.komolongevity.com/', external: true },
-    'motion-retreats': { label: c.motionRetreats.cta, href: pagePath(locale, 'white-coast') },
+    partners: { label: p.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
+    'motion-retreats': { label: p.hospitality.cta, href: pagePath(locale, 'partners') },
     library: { label: c.library.cta, href: scoreLink(locale) },
     circle: { label: c.circle.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
     science: { label: c.science.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
@@ -522,7 +1245,7 @@ function header(locale, page) {
   const c = translations[locale];
   const action = pageAction(locale, page);
   const navItems = [
-    ['pulse', c.nav.pulse], ['clinical', c.nav.clinical], ['locomotor', c.nav.locomotor], ['library', c.nav.library], ['white-coast', c.nav.whiteCoast]
+    ['pulse', c.nav.pulse], ['clinical', c.nav.clinical], ['locomotor', c.nav.locomotor], ['library', c.nav.library], ['partners', c.nav.partners]
   ];
   return `
     <a class="skip-link" href="#main">${text(c.global.skip)}</a>
@@ -642,6 +1365,7 @@ function homePage(locale) {
   const h = translations[locale].home;
   const j = journeyCopy(locale);
   const c = caseCheckCopy(locale);
+  const p = partnerContent(locale);
   return `
     <section class="case-hero" aria-label="KŌMØ Case">
       <div class="shell case-hero-grid">
@@ -651,7 +1375,7 @@ function homePage(locale) {
           <p class="case-hero-lead">${text(c.heroLead)}</p>
           <div class="hero-actions case-hero-actions">
             <a class="button" href="#komo-check">${text(c.heroPrimaryCta)} <span aria-hidden="true">↓</span></a>
-            <a class="button button-outline" href="${link(locale, 'clinical')}">${text(c.heroSecondaryCta)} <span aria-hidden="true">↗</span></a>
+            <a class="button button-outline" href="${link(locale, 'partners')}">${text(c.heroSecondaryCta)} <span aria-hidden="true">↗</span></a>
           </div>
           <ul class="case-hero-proof" aria-label="KŌMØ Case proof points">
             ${c.heroProof.map((item) => `<li>${text(item)}</li>`).join('')}
@@ -668,6 +1392,8 @@ function homePage(locale) {
     ${caseCheckSection(locale)}
 
     ${komoEntranceSection(locale)}
+
+    ${partnerOfferSection(locale)}
 
     ${pulsePathSection(locale)}
 
@@ -688,9 +1414,9 @@ function homePage(locale) {
 
     <section class="section" id="ecosystem">
       <div class="shell">
-        <div class="intro-grid reveal"><div><p class="eyebrow">${text(h.introEyebrow)}</p><h2 class="section-heading">${raw(h.introTitle)}</h2></div><p class="section-lead">${text(h.introLead)}</p></div>
+        <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.ecosystemEyebrow)}</p><h2 class="section-heading">${raw(p.ecosystemTitle)}</h2></div><p class="section-lead">${text(p.ecosystemLead)}</p></div>
         <div class="ecosystem-grid">
-          ${h.wheel.map((item) => `<article class="ecosystem-card reveal"><span class="ecosystem-index">${text(item.num)}</span><h3>${text(item.title)}</h3><p>${text(item.text)}</p><a class="text-link" href="${link(locale, item.page)}">${text(item.link)}</a></article>`).join('')}
+          ${p.ecosystem.map((item) => `<article class="ecosystem-card reveal"><span class="ecosystem-index">${text(item.num)}</span><h3>${text(item.title)}</h3><p>${text(item.text)}</p><a class="text-link" href="${link(locale, item.page)}">${text(item.link)}</a></article>`).join('')}
         </div>
       </div>
     </section>
@@ -702,11 +1428,11 @@ function homePage(locale) {
       </div>
     </section>
 
-    <section class="chapter"><div class="shell chapter-inner"><div class="chapter-card reveal"><p class="eyebrow eyebrow-light">${text(h.chapterEyebrow)}</p><h2>${raw(h.chapterTitle)}</h2><p>${text(h.chapterText)}</p><div class="hero-actions"><a class="button button-light" href="${link(locale, 'white-coast')}">${text(h.chapterCta)}</a></div><div class="chapter-notes">${h.chapterNotes.map(([label, value]) => `<div><strong>${text(label)}</strong>${text(value)}</div>`).join('')}</div></div><p class="chapter-quote reveal">${raw(h.chapterQuote)}</p></div></section>
+    ${partnerNetworkSection(locale)}
 
     <section class="section"><div class="shell intro-grid reveal"><div><p class="eyebrow">${text(h.scienceEyebrow)}</p><h2 class="section-heading">${raw(h.scienceTitle)}</h2></div><div><p class="section-lead">${text(h.scienceLead)}</p><a class="text-link" href="${pagePath(locale, 'science')}">${text(h.scienceCta)}</a></div></div></section>
 
-    <section class="quote-band"><div class="shell"><blockquote class="reveal">${raw(h.finalTitle)}</blockquote><p class="section-lead" style="color:rgba(255,255,255,.72)">${text(h.finalText)}</p><div class="hero-actions"><a class="button button-light" href="${scoreLink(locale)}">${text(j.primaryCta)}</a></div></div></section>`;
+    <section class="quote-band"><div class="shell"><blockquote class="reveal">${raw(p.finalTitle)}</blockquote><p class="section-lead" style="color:rgba(255,255,255,.72)">${text(p.finalText)}</p><div class="hero-actions"><a class="button button-light" href="${pagePath(locale, 'contact')}#contact-form">${text(p.cta)}</a></div></div></section>`;
 }
 
 function caseCheckSection(locale) {
@@ -763,6 +1489,43 @@ function caseCheckSection(locale) {
       </div>
     </section>`;
 }
+function partnerOfferSection(locale) {
+  const p = partnerContent(locale);
+  return `
+    <section class="partner-offer section" id="partner-offer">
+      <div class="shell">
+        <div class="case-section-intro reveal">
+          <div><p class="eyebrow">${text(p.offerEyebrow)}</p><h2 class="section-heading">${raw(p.offerTitle)}</h2></div>
+          <p class="section-lead">${text(p.offerLead)}</p>
+        </div>
+        <div class="partner-model-grid">
+          ${p.offerModes.map(([number, title, body]) => `<article class="partner-model-card reveal"><span class="partner-model-index">${text(number)}</span><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}
+        </div>
+        <section class="partner-score-frame reveal" aria-label="${text(p.scoreEyebrow)}">
+          <div class="partner-score-intro"><p class="eyebrow">${text(p.scoreEyebrow)}</p><h3>${raw(p.scoreTitle)}</h3><p>${text(p.scoreLead)}</p><p class="partner-score-boundary">${text(p.scoreBoundary)}</p></div>
+          <ol class="partner-score-domains">${p.scoreDomains.map(([number, title, body]) => `<li><span>${text(number)}</span><div><h4>${text(title)}</h4><p>${text(body)}</p></div></li>`).join('')}</ol>
+        </section>
+        <section class="partner-governance reveal">
+          <div><p class="eyebrow eyebrow-light">${text(p.governanceEyebrow)}</p><h3>${raw(p.governanceTitle)}</h3><p>${text(p.governanceLead)}</p></div>
+          <ol class="partner-governance-steps">${p.governanceSteps.map(([number, title, body]) => `<li><span>${text(number)}</span><div><strong>${text(title)}</strong><p>${text(body)}</p></div></li>`).join('')}</ol>
+          <a class="button button-light" href="${pagePath(locale, 'contact')}#contact-form">${text(p.cta)} <span aria-hidden="true">↗</span></a>
+        </section>
+        <section class="partner-territories reveal"><p class="eyebrow">${text(p.territoryEyebrow)}</p><div><h3>${text(p.territoryTitle)}</h3><ul>${p.territories.map((territory) => `<li>${text(territory)}</li>`).join('')}</ul><p>${text(p.territoryNote)}</p></div></section>
+      </div>
+    </section>`;
+}
+
+function partnerNetworkSection(locale) {
+  const p = partnerContent(locale);
+  return `
+    <section class="partner-network section">
+      <div class="shell">
+        <div class="intro-grid reveal"><div><p class="eyebrow">${text(p.networkEyebrow)}</p><h2 class="section-heading">${raw(p.networkTitle)}</h2></div><p class="section-lead">${text(p.networkLead)}</p></div>
+        <div class="partner-link-grid">${p.networkLinks.map((item) => `<a class="partner-link-card reveal" href="${text(item.href)}" target="_blank" rel="noreferrer"><p class="eyebrow">${text(item.eyebrow)}</p><h3>${text(item.title)}</h3><p>${text(item.body)}</p><strong>${text(item.cta)} <span aria-hidden="true">↗</span></strong></a>`).join('')}</div>
+      </div>
+    </section>`;
+}
+
 function komoEntranceSection(locale) {
   const copy = entranceCopy(locale);
   return `<section class="section entry-choice" id="choose-your-entry">
@@ -775,7 +1538,7 @@ function komoEntranceSection(locale) {
         ${copy.paths.map((path) => `<article class="entry-choice-card entry-choice-card--${text(path.tone)} reveal">
           <div class="entry-choice-top"><span>${text(path.number)}</span><span>${text(path.audience)}</span></div>
           <div class="entry-choice-copy"><h3>${text(path.title)}</h3><p>${text(path.body)}</p></div>
-          <div class="entry-choice-action"><small>${text(path.note)}</small><a class="text-link" href="${link(locale, path.page)}" ${path.page === 'white-coast' ? 'target="_blank" rel="noreferrer"' : ''}>${text(path.cta)} <span aria-hidden="true">↗</span></a></div>
+          <div class="entry-choice-action"><small>${text(path.note)}</small><a class="text-link" href="${link(locale, path.page)}">${text(path.cta)} <span aria-hidden="true">↗</span></a></div>
         </article>`).join('')}
       </div>
       <p class="entry-choice-continuity reveal"><span aria-hidden="true">→</span>${text(copy.continuity)}</p>
@@ -808,15 +1571,14 @@ function pulsePathSection(locale) {
 function genericHero(locale, page, data) {
   const ctaTarget = {
     contact: '#contact-form',
-    'white-coast': 'https://community.komolongevity.com/',
+    partners: `${pagePath(locale, 'contact')}#contact-form`,
     clinical: pagePath(locale, 'contact'),
     science: pagePath(locale, 'contact'),
     circle: pagePath(locale, 'contact'),
-    'motion-retreats': link(locale, 'white-coast')
+    'motion-retreats': pagePath(locale, 'partners')
   }[page] || scoreLink(locale);
-  const external = page === 'white-coast';
   const ctaLabel = page === 'pulse' ? journeyCopy(locale).primaryCta : data.cta;
-  return `<section class="page-hero"><div class="shell"><p class="breadcrumb"><a href="${pagePath(locale)}">KŌMØ</a><span>/</span><span>${text(data.eyebrow)}</span></p><p class="eyebrow eyebrow-light reveal">${text(data.eyebrow)}</p><h1 class="display reveal">${raw(data.title)}</h1><p class="lede reveal">${text(data.lead)}</p><div class="hero-actions"><a class="button button-light" href="${ctaTarget}" ${external ? 'target="_blank" rel="noreferrer"' : ''}>${text(ctaLabel)} <span aria-hidden="true">↗</span></a></div><p class="hero-note">${text(data.note)}</p></div></section>`;
+  return `<section class="page-hero"><div class="shell"><p class="breadcrumb"><a href="${pagePath(locale)}">KŌMØ</a><span>/</span><span>${text(data.eyebrow)}</span></p><p class="eyebrow eyebrow-light reveal">${text(data.eyebrow)}</p><h1 class="display reveal">${raw(data.title)}</h1><p class="lede reveal">${text(data.lead)}</p><div class="hero-actions"><a class="button button-light" href="${ctaTarget}">${text(ctaLabel)} <span aria-hidden="true">↗</span></a></div><p class="hero-note">${text(data.note)}</p></div></section>`;
 }
 
 function introBlock(data) {
@@ -862,17 +1624,18 @@ function clinicalPage(locale) {
   <section class="section-tight" style="background:var(--paper-strong)"><div class="shell"><div class="intro-grid reveal"><div><p class="eyebrow">${text(p.contextsEyebrow)}</p><h2 class="section-heading">${raw(p.contextsTitle)}</h2></div></div><div class="article-grid">${p.contexts.map(([title, body]) => `<article class="article-card reveal"><span class="tag">KŌMØ Clinical</span><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div></div></section>${finalBand(locale, p.finalTitle, p.finalText, p.cta, 'contact')}`;
 }
 
-function whiteCoastPage(locale) {
-  const c = translations[locale]; const p = c.whiteCoast;
-  return `${genericHero(locale, 'white-coast', p)}${introBlock(p)}<div class="entry-cards">${p.cards.map(([title, body], i) => `<article class="entry-card reveal"><span class="entry-orb" aria-hidden="true"></span><p class="eyebrow">0${i + 1}</p><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div></div></section>
-  <section class="chapter"><div class="shell chapter-inner"><div class="chapter-card reveal"><p class="eyebrow eyebrow-light">${text(p.chapterEyebrow)}</p><h2>${raw(p.chapterTitle)}</h2><p>${text(p.chapterText)}</p><div class="hero-actions"><a class="button button-light" href="https://community.komolongevity.com/" target="_blank" rel="noreferrer">${text(p.chapterCta)}</a></div><div class="chapter-notes">${p.chapterNotes.map(([label,value]) => `<div><strong>${text(label)}</strong>${text(value)}</div>`).join('')}</div></div><p class="chapter-quote reveal">${raw(p.chapterQuote)}</p></div></section>
-  ${finalBand(locale, p.finalTitle, p.finalText, p.cta, 'https://community.komolongevity.com/')}`;
+function partnersPage(locale) {
+  const p = partnerContent(locale);
+  return `${genericHero(locale, 'partners', p)}${introBlock(p)}<div class="entry-cards">${p.cards.map(([title, body], i) => `<article class="entry-card reveal"><span class="entry-orb" aria-hidden="true"></span><p class="eyebrow">0${i + 1}</p><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div></div></section>
+  ${partnerOfferSection(locale)}
+  ${partnerNetworkSection(locale)}
+  ${finalBand(locale, p.finalTitle, p.finalText, p.cta, 'contact')}`;
 }
 
 function retreatsPage(locale) {
-  const c = translations[locale]; const p = c.motionRetreats;
-  return `${genericHero(locale, 'motion-retreats', p)}${introBlock(p)}<div class="steps reveal">${p.rhythm.map(([n,t,b], i) => `<article class="step"><span class="step-num">0${i + 1}</span><h3>${text(t)}</h3><p><strong>${text(n)}</strong><br>${text(b)}</p></article>`).join('')}</div></div></section>
-  <section class="section-tight" style="background:var(--paper-strong)"><div class="shell"><p class="eyebrow">${text(p.carouselEyebrow)}</p><h2 class="section-heading reveal">${raw(p.carouselTitle)}</h2><div class="carousel-wrap"><div class="carousel" id="retreat-carousel">${p.carousel.map(([title,body],i) => `<article class="carousel-card reveal"><p class="eyebrow">0${i+1} · KŌMØ Retreats</p><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div><div class="carousel-controls" data-carousel-controls="#retreat-carousel"><button type="button" data-direction="previous" aria-label="Previous">←</button><button type="button" data-direction="next" aria-label="Next">→</button></div></div></div></section>${finalBand(locale,p.finalTitle,p.finalText,p.cta,'white-coast')}`;
+  const p = partnerContent(locale).hospitality;
+  return `${genericHero(locale, 'motion-retreats', p)}${introBlock(p)}<div class="steps reveal">${p.rhythm.map(([n, t, b], i) => `<article class="step"><span class="step-num">0${i + 1}</span><h3>${text(t)}</h3><p><strong>${text(n)}</strong><br>${text(b)}</p></article>`).join('')}</div></div></section>
+  <section class="section-tight" style="background:var(--paper-strong)"><div class="shell"><p class="eyebrow">${text(p.eyebrow)}</p><h2 class="section-heading reveal">${raw(p.introTitle)}</h2><div class="entry-cards">${p.operatorCards.map(([title, body], i) => `<article class="entry-card reveal"><span class="entry-orb" aria-hidden="true"></span><p class="eyebrow">0${i + 1}</p><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div></div></section>${finalBand(locale, p.finalTitle, p.finalText, p.cta, 'partners')}`;
 }
 
 function libraryPage(locale) {
@@ -1025,7 +1788,7 @@ function renderPage(locale, page) {
     index: homePage,
     pulse: pulsePage,
     clinical: clinicalPage,
-    'white-coast': whiteCoastPage,
+    partners: partnersPage,
     'motion-retreats': retreatsPage,
     library: libraryPage,
     locomotor: locomotorPage,
@@ -1033,7 +1796,7 @@ function renderPage(locale, page) {
     science: sciencePage,
     contact: contactPage
   }[page](locale);
-  const data = page === 'locomotor' ? (locomotorCopy[locale] || locomotorCopy.en) : page === 'index' ? c.home : c[page === 'white-coast' ? 'whiteCoast' : page === 'motion-retreats' ? 'motionRetreats' : page];
+  const data = page === 'locomotor' ? (locomotorCopy[locale] || locomotorCopy.en) : page === 'index' ? c.home : page === 'partners' ? partnerContent(locale) : page === 'motion-retreats' ? partnerContent(locale).hospitality : c[page];
   return layout(locale, page, body, data);
 }
 
