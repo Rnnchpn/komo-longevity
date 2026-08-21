@@ -1,5 +1,5 @@
 export const site = {
-  origin: 'https://www.komolongevity.com',
+  origin: 'https://komolongevity.com',
   pages: ['index', 'pulse', 'clinical', 'white-coast', 'motion-retreats', 'library', 'locomotor', 'circle', 'science', 'contact'],
   locales: ['fr', 'en', 'es']
 };
