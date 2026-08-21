@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = join(root, 'src', 'assets', 'check', 'index.html');
 const targets = [
+  join(root, 'site', 'assets', 'check', 'index.html'),
   join(root, 'site', 'check', 'index.html'),
   join(root, 'site', 'fr', 'check', 'index.html')
 ];
