@@ -2,10 +2,32 @@
 command = "node scripts/build.mjs"
 publish = "site"
 
+[[redirects]]
+  from = "/check"
+  to = "/assets/check/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/fr/check"
+  to = "/assets/check/index.html"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/check"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/fr/check"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
   for = "/*.html"
