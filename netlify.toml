@@ -1,5 +1,5 @@
 [build]
-command = "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs && node scripts/masterclass-review-optin.mjs && node scripts/media-seo.mjs && node scripts/media-webp.mjs"
+command = "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs && node scripts/masterclass-review-optin.mjs && node scripts/seo-intent-articles.mjs && node scripts/media-seo.mjs && node scripts/library-intent-ui.mjs && node scripts/media-webp.mjs"
 publish = "site"
 
 [[redirects]]
@@ -95,6 +95,36 @@ publish = "site"
 [[redirects]]
   from = "/media/equilibre-vieillissement"
   to = "/assets/media/equilibre-vieillissement/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/marche-plus-lente"
+  to = "/assets/media/marche-plus-lente/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/difficulte-se-relever-chaise"
+  to = "/assets/media/difficulte-se-relever-chaise/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/marche-asymetrique"
+  to = "/assets/media/marche-asymetrique/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/tester-mobilite-chez-soi"
+  to = "/assets/media/tester-mobilite-chez-soi/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/posture-penchee-en-avant"
+  to = "/assets/media/posture-penchee-en-avant/index.html"
   status = 200
   force = true
 
