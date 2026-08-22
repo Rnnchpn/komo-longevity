@@ -11,7 +11,8 @@ const scripts = [
   'scripts/library-intent-ui.mjs',
   'scripts/library-hero-fix.mjs',
   'scripts/media-webp.mjs',
-  'scripts/legal-hardening.mjs'
+  'scripts/legal-hardening.mjs',
+  'scripts/production-qa.mjs'
 ];
 
 for (const script of scripts) {
