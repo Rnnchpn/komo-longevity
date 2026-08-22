@@ -3,6 +3,18 @@ command = "node scripts/build.mjs && node scripts/after-build.mjs && node script
 publish = "site"
 
 [[redirects]]
+  from = "/fr/library"
+  to = "/media"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/fr/library/*"
+  to = "/media"
+  status = 301
+  force = true
+
+[[redirects]]
   from = "/check"
   to = "/assets/check/index.html"
   status = 200
