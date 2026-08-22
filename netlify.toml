@@ -14,6 +14,18 @@ publish = "site"
   status = 200
   force = true
 
+[[redirects]]
+  from = "/masterclass"
+  to = "/assets/masterclass/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/fr/masterclass"
+  to = "/assets/masterclass/index.html"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
@@ -26,6 +38,16 @@ publish = "site"
 
 [[headers]]
   for = "/fr/check"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/masterclass"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/fr/masterclass"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
