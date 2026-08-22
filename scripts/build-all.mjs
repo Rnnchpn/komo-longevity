@@ -11,6 +11,7 @@ const scripts = [
   'scripts/library-intent-ui.mjs',
   'scripts/library-hero-fix.mjs',
   'scripts/seo-final-cluster.mjs',
+  'scripts/library-i18n-v2.mjs',
   'scripts/media-webp.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
