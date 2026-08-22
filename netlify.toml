@@ -1,5 +1,5 @@
 [build]
-command = "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs"
+command = "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs && node scripts/masterclass-review-optin.mjs && node scripts/media-seo.mjs"
 publish = "site"
 
 [[redirects]]
@@ -26,6 +26,42 @@ publish = "site"
   status = 200
   force = true
 
+[[redirects]]
+  from = "/review"
+  to = "/assets/review/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media"
+  to = "/assets/media/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/locomotive-syndrome"
+  to = "/assets/media/locomotive-syndrome/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/walking-is-data"
+  to = "/assets/media/walking-is-data/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/biomechanics-aging"
+  to = "/assets/media/biomechanics-aging/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/cone-of-economy"
+  to = "/assets/media/cone-of-economy/index.html"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
@@ -47,7 +83,12 @@ publish = "site"
     Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
-  for = "/fr/masterclass"
+  for = "/review"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/media*"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
 
