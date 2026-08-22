@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs && node scripts/masterclass-review-optin.mjs && node scripts/seo-intent-articles.mjs && node scripts/media-seo.mjs && node scripts/library-intent-ui.mjs && node scripts/media-webp.mjs",
+  "buildCommand": "node scripts/build-all.mjs",
   "outputDirectory": "site",
   "cleanUrls": true,
   "rewrites": [
