@@ -1,0 +1,32 @@
+name: Storybook
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.storybook/**'
+      - 'src/design-system/**'
+      - 'package.json'
+      - '.github/workflows/storybook.yml'
+
+jobs:
+  build-storybook:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package.json
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build Storybook
+        run: npm run build-storybook
