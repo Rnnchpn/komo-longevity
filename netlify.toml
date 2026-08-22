@@ -74,6 +74,30 @@ publish = "site"
   status = 200
   force = true
 
+[[redirects]]
+  from = "/media/sarcopenie-force-musculaire"
+  to = "/assets/media/sarcopenie-force-musculaire/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/test-lever-chaise"
+  to = "/assets/media/test-lever-chaise/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/puissance-musculaire-vieillissement"
+  to = "/assets/media/puissance-musculaire-vieillissement/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/equilibre-vieillissement"
+  to = "/assets/media/equilibre-vieillissement/index.html"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
