@@ -13,6 +13,7 @@ const scripts = [
   'scripts/seo-final-cluster.mjs',
   'scripts/library-i18n-v2.mjs',
   'scripts/media-webp.mjs',
+  'scripts/homepage-v1.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
   'scripts/production-qa.mjs'
