@@ -16,13 +16,13 @@ publish = "site"
 
 [[redirects]]
   from = "/masterclass"
-  to = "/assets/masterclass/index.html"
+  to = "/assets/masterclass-v2/index.html"
   status = 200
   force = true
 
 [[redirects]]
   from = "/fr/masterclass"
-  to = "/assets/masterclass/index.html"
+  to = "/assets/masterclass-v2/index.html"
   status = 200
   force = true
 
