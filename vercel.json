@@ -14,11 +14,11 @@
     },
     {
       "source": "/masterclass",
-      "destination": "/assets/masterclass/index.html"
+      "destination": "/assets/masterclass/"
     },
     {
       "source": "/fr/masterclass",
-      "destination": "/assets/masterclass/index.html"
+      "destination": "/assets/masterclass/"
     },
     {
       "source": "/",
