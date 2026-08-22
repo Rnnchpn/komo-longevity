@@ -38,6 +38,8 @@
   ],
   "redirects": [
     {"source":"/:path*","has":[{"type":"host","value":"www.komolongevity.com"}],"destination":"https://komolongevity.com/:path*","permanent":true},
+    {"source":"/fr/library","destination":"/media","permanent":true},
+    {"source":"/fr/library/:path*","destination":"/media","permanent":true},
     {"source":"/white-coast","destination":"/partners","permanent":true},
     {"source":"/white-coast/:path*","destination":"/partners","permanent":true},
     {"source":"/fr/white-coast","destination":"/fr/partners","permanent":true},
