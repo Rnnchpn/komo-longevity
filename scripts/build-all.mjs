@@ -16,6 +16,8 @@ const scripts = [
   'scripts/homepage-v1.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
+  'scripts/check-v2.mjs',
+  'scripts/check-seo-qa.mjs',
   'scripts/production-qa.mjs'
 ];
 
