@@ -1,5 +1,5 @@
 [build]
-command = "node scripts/build.mjs && node scripts/after-build.mjs"
+command = "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs"
 publish = "site"
 
 [[redirects]]
