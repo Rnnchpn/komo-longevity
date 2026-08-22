@@ -1,5 +1,5 @@
 [build]
-command = "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs && node scripts/masterclass-review-optin.mjs && node scripts/media-seo.mjs"
+command = "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs && node scripts/masterclass-review-optin.mjs && node scripts/media-seo.mjs && node scripts/media-webp.mjs"
 publish = "site"
 
 [[redirects]]
