@@ -6,7 +6,7 @@
   "rewrites": [
     {"source":"/check","destination":"/assets/check/index.html"},
     {"source":"/fr/check","destination":"/assets/check/index.html"},
-    {"source":"/pulsedemo","destination":"https://komo-pulse-demo-rnnchpns-projects.vercel.app"},
+    {"source":"/pulsedemo","destination":"/assets/pulsedemo/"},
     {"source":"/masterclass","destination":"/assets/masterclass-v2/"},
     {"source":"/fr/masterclass","destination":"/assets/masterclass-v2/"},
     {"source":"/","has":[{"type":"host","value":"locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
