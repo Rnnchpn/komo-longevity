@@ -12,6 +12,7 @@ const scripts = [
   'scripts/library-hero-fix.mjs',
   'scripts/media-webp.mjs',
   'scripts/legal-hardening.mjs',
+  'scripts/check-legal-links.mjs',
   'scripts/production-qa.mjs'
 ];
 
