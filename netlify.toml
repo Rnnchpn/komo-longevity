@@ -128,6 +128,48 @@ publish = "site"
   status = 200
   force = true
 
+[[redirects]]
+  from = "/media/pas-plus-courts"
+  to = "/assets/media/pas-plus-courts/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/escaliers-plus-difficiles"
+  to = "/assets/media/escaliers-plus-difficiles/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/moins-force-jambes"
+  to = "/assets/media/moins-force-jambes/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/utiliser-bras-pour-se-relever"
+  to = "/assets/media/utiliser-bras-pour-se-relever/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/vitesse-marche-normale-age"
+  to = "/assets/media/vitesse-marche-normale-age/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/trebuche-plus-souvent"
+  to = "/assets/media/trebuche-plus-souvent/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/media/ameliorer-mobilite-avec-age"
+  to = "/assets/media/ameliorer-mobilite-avec-age/index.html"
+  status = 200
+  force = true
+
 [[headers]]
   for = "/assets/*"
   [headers.values]
