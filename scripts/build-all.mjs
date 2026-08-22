@@ -9,6 +9,7 @@ const scripts = [
   'scripts/seo-intent-articles.mjs',
   'scripts/media-seo.mjs',
   'scripts/library-intent-ui.mjs',
+  'scripts/library-hero-fix.mjs',
   'scripts/media-webp.mjs'
 ];
 
