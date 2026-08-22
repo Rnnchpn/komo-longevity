@@ -1,189 +1,36 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/build.mjs && node scripts/after-build.mjs",
+  "buildCommand": "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs",
   "outputDirectory": "site",
   "cleanUrls": true,
   "rewrites": [
-    {
-      "source": "/check",
-      "destination": "/assets/check/index.html"
-    },
-    {
-      "source": "/fr/check",
-      "destination": "/assets/check/index.html"
-    },
-    {
-      "source": "/masterclass",
-      "destination": "/assets/masterclass-v2/"
-    },
-    {
-      "source": "/fr/masterclass",
-      "destination": "/assets/masterclass-v2/"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "locotechsummit.com"
-        }
-      ],
-      "destination": "/assets/locotech-summit/"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.locotechsummit.com"
-        }
-      ],
-      "destination": "/assets/locotech-summit/"
-    },
-    {
-      "source": "/locotech-summit",
-      "destination": "/assets/locotech-summit/"
-    },
-    {
-      "source": "/locotech-summit/:path*",
-      "destination": "/assets/locotech-summit/:path*"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "locomotor.komolongevity.com"
-        }
-      ],
-      "destination": "/locomotor/"
-    },
-    {
-      "source": "/fr",
-      "has": [
-        {
-          "type": "host",
-          "value": "locomotor.komolongevity.com"
-        }
-      ],
-      "destination": "/fr/locomotor/"
-    },
-    {
-      "source": "/es",
-      "has": [
-        {
-          "type": "host",
-          "value": "locomotor.komolongevity.com"
-        }
-      ],
-      "destination": "/es/locomotor/"
-    }
+    {"source":"/check","destination":"/assets/check/index.html"},
+    {"source":"/fr/check","destination":"/assets/check/index.html"},
+    {"source":"/masterclass","destination":"/assets/masterclass-v2/"},
+    {"source":"/fr/masterclass","destination":"/assets/masterclass-v2/"},
+    {"source":"/","has":[{"type":"host","value":"locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
+    {"source":"/","has":[{"type":"host","value":"www.locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
+    {"source":"/locotech-summit","destination":"/assets/locotech-summit/"},
+    {"source":"/locotech-summit/:path*","destination":"/assets/locotech-summit/:path*"},
+    {"source":"/","has":[{"type":"host","value":"locomotor.komolongevity.com"}],"destination":"/locomotor/"},
+    {"source":"/fr","has":[{"type":"host","value":"locomotor.komolongevity.com"}],"destination":"/fr/locomotor/"},
+    {"source":"/es","has":[{"type":"host","value":"locomotor.komolongevity.com"}],"destination":"/es/locomotor/"}
   ],
   "headers": [
-    {
-      "source": "/assets/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
-    {
-      "source": "/check",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/fr/check",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/masterclass",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/fr/masterclass",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    }
+    {"source":"/assets/(.*)","headers":[{"key":"Cache-Control","value":"public, max-age=31536000, immutable"}]},
+    {"source":"/check","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
+    {"source":"/fr/check","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
+    {"source":"/masterclass","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
+    {"source":"/fr/masterclass","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
+    {"source":"/(.*)","headers":[{"key":"X-Content-Type-Options","value":"nosniff"},{"key":"X-Frame-Options","value":"DENY"},{"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"}]}
   ],
   "redirects": [
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "www.komolongevity.com"
-        }
-      ],
-      "destination": "https://komolongevity.com/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/white-coast",
-      "destination": "/partners",
-      "permanent": true
-    },
-    {
-      "source": "/white-coast/:path*",
-      "destination": "/partners",
-      "permanent": true
-    },
-    {
-      "source": "/fr/white-coast",
-      "destination": "/fr/partners",
-      "permanent": true
-    },
-    {
-      "source": "/fr/white-coast/:path*",
-      "destination": "/fr/partners",
-      "permanent": true
-    },
-    {
-      "source": "/es/white-coast",
-      "destination": "/es/partners",
-      "permanent": true
-    },
-    {
-      "source": "/es/white-coast/:path*",
-      "destination": "/es/partners",
-      "permanent": true
-    }
+    {"source":"/:path*","has":[{"type":"host","value":"www.komolongevity.com"}],"destination":"https://komolongevity.com/:path*","permanent":true},
+    {"source":"/white-coast","destination":"/partners","permanent":true},
+    {"source":"/white-coast/:path*","destination":"/partners","permanent":true},
+    {"source":"/fr/white-coast","destination":"/fr/partners","permanent":true},
+    {"source":"/fr/white-coast/:path*","destination":"/fr/partners","permanent":true},
+    {"source":"/es/white-coast","destination":"/es/partners","permanent":true},
+    {"source":"/es/white-coast/:path*","destination":"/es/partners","permanent":true}
   ]
 }
