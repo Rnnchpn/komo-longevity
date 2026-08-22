@@ -13,6 +13,14 @@
       "destination": "/assets/check/index.html"
     },
     {
+      "source": "/masterclass",
+      "destination": "/assets/masterclass/index.html"
+    },
+    {
+      "source": "/fr/masterclass",
+      "destination": "/assets/masterclass/index.html"
+    },
+    {
       "source": "/",
       "has": [
         {
@@ -92,6 +100,24 @@
     },
     {
       "source": "/fr/check",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/masterclass",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/fr/masterclass",
       "headers": [
         {
           "key": "Cache-Control",
