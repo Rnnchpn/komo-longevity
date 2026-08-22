@@ -6,6 +6,14 @@
   "scripts": {
     "build": "node scripts/build-all.mjs",
     "build:core": "node scripts/build.mjs",
-    "preview": "python3 -m http.server 8080 --directory site"
+    "preview": "python3 -m http.server 8080 --directory site",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.5.10",
+    "@storybook/html-vite": "10.5.10",
+    "storybook": "10.5.10",
+    "vite": "8.2.2"
   }
 }
