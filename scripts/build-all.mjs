@@ -10,6 +10,7 @@ const scripts = [
   'scripts/media-seo.mjs',
   'scripts/library-intent-ui.mjs',
   'scripts/library-hero-fix.mjs',
+  'scripts/seo-final-cluster.mjs',
   'scripts/media-webp.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
