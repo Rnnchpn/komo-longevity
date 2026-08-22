@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs && node scripts/masterclass-review-optin.mjs && node scripts/media-seo.mjs && node scripts/media-webp.mjs",
+  "buildCommand": "node scripts/build.mjs && node scripts/after-build.mjs && node scripts/mobile-nav-fix.mjs && node scripts/remove-masterclass-visual.mjs && node scripts/masterclass-review-optin.mjs && node scripts/seo-intent-articles.mjs && node scripts/media-seo.mjs && node scripts/library-intent-ui.mjs && node scripts/media-webp.mjs",
   "outputDirectory": "site",
   "cleanUrls": true,
   "rewrites": [
@@ -20,6 +20,11 @@
     {"source":"/media/test-lever-chaise","destination":"/assets/media/test-lever-chaise/"},
     {"source":"/media/puissance-musculaire-vieillissement","destination":"/assets/media/puissance-musculaire-vieillissement/"},
     {"source":"/media/equilibre-vieillissement","destination":"/assets/media/equilibre-vieillissement/"},
+    {"source":"/media/marche-plus-lente","destination":"/assets/media/marche-plus-lente/"},
+    {"source":"/media/difficulte-se-relever-chaise","destination":"/assets/media/difficulte-se-relever-chaise/"},
+    {"source":"/media/marche-asymetrique","destination":"/assets/media/marche-asymetrique/"},
+    {"source":"/media/tester-mobilite-chez-soi","destination":"/assets/media/tester-mobilite-chez-soi/"},
+    {"source":"/media/posture-penchee-en-avant","destination":"/assets/media/posture-penchee-en-avant/"},
     {"source":"/","has":[{"type":"host","value":"locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
     {"source":"/","has":[{"type":"host","value":"www.locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
     {"source":"/locotech-summit","destination":"/assets/locotech-summit/"},
