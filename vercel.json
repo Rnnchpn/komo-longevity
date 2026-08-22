@@ -6,6 +6,7 @@
   "rewrites": [
     {"source":"/check","destination":"/assets/check/index.html"},
     {"source":"/fr/check","destination":"/assets/check/index.html"},
+    {"source":"/pulsedemo","destination":"https://komo-pulse-demo-rnnchpns-projects.vercel.app"},
     {"source":"/masterclass","destination":"/assets/masterclass-v2/"},
     {"source":"/fr/masterclass","destination":"/assets/masterclass-v2/"},
     {"source":"/","has":[{"type":"host","value":"locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
@@ -20,6 +21,7 @@
     {"source":"/assets/(.*)","headers":[{"key":"Cache-Control","value":"public, max-age=31536000, immutable"}]},
     {"source":"/check","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
     {"source":"/fr/check","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
+    {"source":"/pulsedemo","headers":[{"key":"Cache-Control","value":"private, no-store, max-age=0"},{"key":"X-Robots-Tag","value":"noindex, nofollow, noarchive"}]},
     {"source":"/masterclass","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
     {"source":"/fr/masterclass","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
     {"source":"/(.*)","headers":[{"key":"X-Content-Type-Options","value":"nosniff"},{"key":"X-Frame-Options","value":"DENY"},{"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"}]}
