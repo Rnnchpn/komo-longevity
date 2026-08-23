@@ -23,6 +23,7 @@ const scripts = [
   'scripts/network-nav-sync.mjs',
   'scripts/professional-case-v3.mjs',
   'scripts/professional-case-polish.mjs',
+  'scripts/professional-case-fr-polish.mjs',
   'scripts/homepage-case-qa.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
