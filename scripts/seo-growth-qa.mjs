@@ -30,7 +30,10 @@ for(const legacy of [
  'https://komolongevity.com/motion-retreats/','https://komolongevity.com/fr/motion-retreats/','https://komolongevity.com/es/motion-retreats/'
 ]) if(sitemap.includes(legacy)) throw new Error(`[seo-growth-qa] legacy URL still in sitemap: ${legacy}`);
 const article=await readFile(join(site,'assets','media','walking-is-data','index.html'),'utf8');
-if(!article.includes('media-motion-link') || !article.includes('/fr/motion/')) throw new Error('[seo-growth-qa] Library-to-Motion internal pathway missing');
+if(!article.includes('class="media-motion-link"') || !article.includes('/fr/motion/')) throw new Error('[seo-growth-qa] Library-to-Motion internal pathway missing');
 const caseFr=await readFile(join(site,'fr','case','index.html'),'utf8');
 if(caseFr.includes('· Measurement</small>') || caseFr.includes('· Follow-up</small>')) throw new Error('[seo-growth-qa] French discovery labels not localized');
+const polishedFiles=['fr/case/equipment/index.html','fr/case/workflow/index.html','fr/case/pulse/index.html','fr/partners/motion/index.html','fr/partners/clinical/index.html','fr/partners/deployment/index.html'];
+const forbidden=['Part of the KŌMØ portable ecosystem','integrated charging','Corporate mobility programs','Physicians authorized to practice','Medical organizations','Professional interpretation','Acquire a KŌMØ Case','Join KŌMØ Réseau when eligible','<em>Motion</em>','<em>Clinical</em>'];
+for(const rel of polishedFiles){const h=await readFile(join(site,rel),'utf8');for(const token of forbidden)if(h.includes(token))throw new Error(`[seo-growth-qa] fallback copy remains in ${rel}: ${token}`)}
 console.log('[seo-growth-qa] SEO architecture checks passed');
