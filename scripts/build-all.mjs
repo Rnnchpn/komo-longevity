@@ -21,6 +21,7 @@ const scripts = [
   'scripts/network-v1.mjs',
   'scripts/network-mobile-fix.mjs',
   'scripts/network-nav-sync.mjs',
+  'scripts/professional-case-v3.mjs',
   'scripts/homepage-case-qa.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
