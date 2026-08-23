@@ -51,6 +51,7 @@ const scripts = [
   'scripts/homepage-care-modes-v1.mjs',
   'scripts/method-science-v2.mjs',
   'scripts/method-science-polish-v1.mjs',
+  'scripts/method-score-clarity-v3.mjs',
   'scripts/seo-sitemap-v2.mjs',
   'scripts/seo-growth-qa.mjs',
   'scripts/production-qa.mjs'
