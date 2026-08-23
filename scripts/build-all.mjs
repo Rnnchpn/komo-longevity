@@ -28,7 +28,7 @@ const scripts = [
   'scripts/homepage-clarity-v4.mjs',
   'scripts/homepage-clarity-v4-polish.mjs',
   'scripts/homepage-seo-v6.mjs',
-  'scripts/professional-pulse-v1.mjs',
+  'scripts/professional-pulse-v2.mjs',
   'scripts/homepage-case-qa.mjs',
   'scripts/seo-growth-v1.mjs',
   'scripts/seo-subpages-v1.mjs',
