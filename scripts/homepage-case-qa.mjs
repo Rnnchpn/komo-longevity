@@ -5,9 +5,9 @@ import { fileURLToPath } from 'node:url';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const site = join(root, 'site');
 const configs = {
-  en: { file: join(site,'index.html'), clinical:'/clinical/', partners:'/partners/' },
-  fr: { file: join(site,'fr','index.html'), clinical:'/fr/clinical/', partners:'/fr/partners/' },
-  es: { file: join(site,'es','index.html'), clinical:'/es/clinical/', partners:'/es/partners/' }
+  en: { file: join(site,'index.html'), clinical:['/clinical/','/partners/#clinical'], partners:'/partners/', pulse:'/pulse/' },
+  fr: { file: join(site,'fr','index.html'), clinical:['/fr/clinical/','/fr/partners/#clinical'], partners:'/fr/partners/', pulse:'/fr/pulse/' },
+  es: { file: join(site,'es','index.html'), clinical:['/es/clinical/','/es/partners/#clinical'], partners:'/es/partners/', pulse:'/es/pulse/' }
 };
 const failures = [];
 for (const [locale, cfg] of Object.entries(configs)) {
@@ -20,8 +20,9 @@ for (const [locale, cfg] of Object.entries(configs)) {
   if (!/alt="[^"]*KŌMØ Case[^"]*"/.test(html)) failures.push(`${locale}: KŌMØ Case image alt missing`);
   if (!html.includes('KŌMØ Motion')) failures.push(`${locale}: KŌMØ Motion missing`);
   if (!html.includes('KŌMØ Clinical')) failures.push(`${locale}: KŌMØ Clinical missing`);
-  if (!html.includes(`href="${cfg.clinical}"`)) failures.push(`${locale}: localized Clinical link missing`);
-  if (!html.includes(`href="${cfg.partners}"`)) failures.push(`${locale}: localized professional/Case link missing`);
+  if (!cfg.clinical.some(x=>html.includes(`href="${x}"`))) failures.push(`${locale}: localized Clinical/Professional route missing`);
+  if (!html.includes(`href="${cfg.partners}"`)) failures.push(`${locale}: localized professional link missing`);
+  if (!html.includes(`href="${cfg.pulse}"`)) failures.push(`${locale}: Pulse entry missing`);
   const hero = html.indexOf('<section class="hp-hero">');
   const product = html.indexOf('id="komo-case"');
   if (hero < 0 || product < hero) failures.push(`${locale}: KŌMØ Case is not positioned after the hero`);
@@ -33,4 +34,4 @@ if (failures.length) {
   failures.forEach(x=>console.error(` - ${x}`));
   process.exit(1);
 }
-console.log('[homepage-case-qa] Case, Motion, Clinical, localized links and homepage SEO boundaries passed.');
+console.log('[homepage-case-qa] Case, Professional Motion/Clinical, Pulse and homepage SEO boundaries passed.');
