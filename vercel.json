@@ -30,6 +30,7 @@
     {"source":"/media/vitesse-marche-normale-age","destination":"/assets/media/vitesse-marche-normale-age/"},
     {"source":"/media/trebuche-plus-souvent","destination":"/assets/media/trebuche-plus-souvent/"},
     {"source":"/media/ameliorer-mobilite-avec-age","destination":"/assets/media/ameliorer-mobilite-avec-age/"},
+    {"source":"/media/:path*","destination":"/assets/media/:path*"},
     {"source":"/","has":[{"type":"host","value":"locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
     {"source":"/","has":[{"type":"host","value":"www.locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
     {"source":"/locotech-summit","destination":"/assets/locotech-summit/"},
