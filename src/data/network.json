@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "countries": [
+    {
+      "code": "FR",
+      "slug": "france",
+      "name": {"fr": "France", "en": "France", "es": "Francia"},
+      "center": [2.2137, 46.2276],
+      "zoom": 5.15,
+      "status": "founding"
+    }
+  ],
+  "locations": []
+}
