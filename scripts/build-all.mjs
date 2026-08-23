@@ -29,6 +29,7 @@ const scripts = [
   'scripts/homepage-case-qa.mjs',
   'scripts/seo-growth-v1.mjs',
   'scripts/seo-subpages-v1.mjs',
+  'scripts/fr-product-copy-polish-v2.mjs',
   'scripts/seo-growth-localize.mjs',
   'scripts/media-product-bridge-v1.mjs',
   'scripts/legal-hardening.mjs',
