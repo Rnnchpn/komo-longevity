@@ -37,6 +37,8 @@ for(const file of await walk(site)){
 const priority=(url)=>{
   const p=new URL(url).pathname;
   if(['/', '/fr/', '/es/'].includes(p)) return '1.0';
+  if(['/method/','/fr/methode/','/es/metodo/','/assessment/','/fr/bilan/','/es/evaluacion/'].includes(p)) return '0.9';
+  if(/^\/(?:fr\/methode|es\/metodo|method)\/[^/]+\/$/.test(p)) return '0.7';
   if(/\/(check|case|motion|clinical|partners|network|pulse|science)\/?$/.test(p)) return '0.8';
   if(p.includes('/media')) return '0.7';
   return '0.5';
