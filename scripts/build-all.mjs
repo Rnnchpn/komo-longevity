@@ -14,6 +14,8 @@ const scripts = [
   'scripts/library-i18n-v2.mjs',
   'scripts/media-webp.mjs',
   'scripts/homepage-v1.mjs',
+  'scripts/homepage-case.mjs',
+  'scripts/homepage-case-qa.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
   'scripts/check-v2.mjs',
