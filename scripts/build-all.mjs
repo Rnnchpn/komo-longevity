@@ -46,6 +46,7 @@ const scripts = [
   'scripts/check-seo-qa.mjs',
   'scripts/seo-sitemap-v2.mjs',
   'scripts/patient-vitrine-polish-v1.mjs',
+  'scripts/homepage-minimal-patient-v1.mjs',
   'scripts/seo-growth-qa.mjs',
   'scripts/production-qa.mjs'
 ];
