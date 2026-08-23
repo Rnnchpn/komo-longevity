@@ -37,6 +37,7 @@ const scripts = [
   'scripts/seo-growth-localize.mjs',
   'scripts/media-product-bridge-v1.mjs',
   'scripts/myocare-static-integration-v1.mjs',
+  'scripts/static-architecture-polish-v1.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
   'scripts/check-v2.mjs',
