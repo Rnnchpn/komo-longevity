@@ -7,7 +7,7 @@ const site=join(root,'site');
 
 const cfg={
  fr:{
-  file:join(site,'fr','index.html'),check:'/fr/check/',partners:'/fr/partners/',
+  file:join(site,'fr','index.html'),url:'https://komolongevity.com/fr/',check:'/fr/check/',partners:'/fr/partners/',
   title:'KŌMØ | Test de mobilité, bilan locomoteur & longévité',
   desc:'Testez votre mobilité gratuitement avec KŌMØ Check, puis approfondissez avec un bilan locomoteur mobile de la marche, du muscle, de l’équilibre et de la posture.',
   eyebrow:'LONGÉVITÉ LOCOMOTRICE · MESURE · PRÉVENTION',
@@ -23,7 +23,7 @@ const cfg={
   ]
  },
  en:{
-  file:join(site,'index.html'),check:'/check/',partners:'/partners/',
+  file:join(site,'index.html'),url:'https://komolongevity.com/',check:'/check/',partners:'/partners/',
   title:'KŌMØ | Mobility test, locomotor assessment & longevity',
   desc:'Test your mobility for free with KŌMØ Check, then go deeper with a portable locomotor assessment of gait, muscle function, balance and posture.',
   eyebrow:'LOCOMOTOR LONGEVITY · MEASUREMENT · PREVENTION',
@@ -39,7 +39,7 @@ const cfg={
   ]
  },
  es:{
-  file:join(site,'es','index.html'),check:'/es/check/',partners:'/es/partners/',
+  file:join(site,'es','index.html'),url:'https://komolongevity.com/es/',check:'/es/check/',partners:'/es/partners/',
   title:'KŌMØ | Test de movilidad, evaluación locomotora y longevidad',
   desc:'Evalúe su movilidad gratis con KŌMØ Check y profundice con una evaluación locomotora portátil de la marcha, función muscular, equilibrio y postura.',
   eyebrow:'LONGEVIDAD LOCOMOTORA · MEDICIÓN · PREVENCIÓN',
@@ -64,6 +64,8 @@ for(const [locale,c] of Object.entries(cfg)){
  let html=await readFile(c.file,'utf8');
  html=html.replace(/<title>[\s\S]*?<\/title>/i,`<title>${c.title}</title>`);
  html=meta(html,'description',c.desc);html=meta(html,'og:title',c.title,true);html=meta(html,'og:description',c.desc,true);
+ const pageSchema={'@context':'https://schema.org','@type':'WebPage',name:c.title,description:c.desc,url:c.url,inLanguage:locale,isPartOf:{'@type':'WebSite',name:'KŌMØ Longevity',url:'https://komolongevity.com/'},about:['locomotor longevity','mobility assessment','gait','functional mobility']};
+ html=html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/i,`<script type="application/ld+json">${JSON.stringify(pageSchema)}</script>`);
  html=html.replace(/<section class="hp-hero">[\s\S]*?<\/section>\s*(?=<section class="hp-product-gateway")/,hero(c));
  html=html.replace(/<style id="homepage-seo-v6-style">[\s\S]*?<\/style>/g,'').replace('</head>',`${style}</head>`);
  await writeFile(c.file,html,'utf8');console.log(`[homepage-seo-v6] ${locale}`);
