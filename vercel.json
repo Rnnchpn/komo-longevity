@@ -53,8 +53,12 @@
   ],
   "redirects": [
     {"source":"/:path*","has":[{"type":"host","value":"www.komolongevity.com"}],"destination":"https://komolongevity.com/:path*","permanent":true},
+    {"source":"/library","destination":"/en/media","permanent":true},
+    {"source":"/library/:path*","destination":"/en/media/:path*","permanent":true},
     {"source":"/fr/library","destination":"/media","permanent":true},
-    {"source":"/fr/library/:path*","destination":"/media","permanent":true},
+    {"source":"/fr/library/:path*","destination":"/media/:path*","permanent":true},
+    {"source":"/es/library","destination":"/es/media","permanent":true},
+    {"source":"/es/library/:path*","destination":"/es/media/:path*","permanent":true},
     {"source":"/white-coast","destination":"/partners","permanent":true},
     {"source":"/white-coast/:path*","destination":"/partners","permanent":true},
     {"source":"/fr/white-coast","destination":"/fr/partners","permanent":true},
