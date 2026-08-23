@@ -17,6 +17,7 @@ const scripts = [
   'scripts/homepage-case.mjs',
   'scripts/product-architecture-v2.mjs',
   'scripts/product-nav-sync-v2.mjs',
+  'scripts/landing-mobile-v3.mjs',
   'scripts/homepage-case-qa.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
