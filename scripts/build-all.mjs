@@ -19,6 +19,7 @@ const scripts = [
   'scripts/product-nav-sync-v2.mjs',
   'scripts/landing-mobile-v3.mjs',
   'scripts/network-v1.mjs',
+  'scripts/network-mobile-fix.mjs',
   'scripts/network-nav-sync.mjs',
   'scripts/homepage-case-qa.mjs',
   'scripts/legal-hardening.mjs',
