@@ -27,11 +27,14 @@ const scripts = [
   'scripts/homepage-clarity-v4.mjs',
   'scripts/homepage-clarity-v4-polish.mjs',
   'scripts/homepage-case-qa.mjs',
+  'scripts/seo-growth-v1.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
   'scripts/check-v2.mjs',
   'scripts/check-v2-legal-link.mjs',
   'scripts/check-seo-qa.mjs',
+  'scripts/seo-sitemap-v2.mjs',
+  'scripts/seo-growth-qa.mjs',
   'scripts/production-qa.mjs'
 ];
 
