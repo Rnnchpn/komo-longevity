@@ -15,6 +15,7 @@ const scripts = [
   'scripts/media-webp.mjs',
   'scripts/homepage-v1.mjs',
   'scripts/homepage-case.mjs',
+  'scripts/product-architecture-v2.mjs',
   'scripts/homepage-case-qa.mjs',
   'scripts/legal-hardening.mjs',
   'scripts/check-legal-links.mjs',
