@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
 
+// Production pipeline — Method score clarity V3 is applied after the scientific Method layer.
 const scripts = [
   'scripts/build.mjs',
   'scripts/after-build.mjs',
