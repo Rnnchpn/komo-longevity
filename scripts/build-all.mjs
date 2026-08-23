@@ -50,6 +50,7 @@ const scripts = [
   'scripts/homepage-patient-final-v2.mjs',
   'scripts/homepage-care-modes-v1.mjs',
   'scripts/method-science-v2.mjs',
+  'scripts/method-science-polish-v1.mjs',
   'scripts/seo-sitemap-v2.mjs',
   'scripts/seo-growth-qa.mjs',
   'scripts/production-qa.mjs'
