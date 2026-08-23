@@ -5,7 +5,12 @@ import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const site=join(root,'site');
 const ORIGIN='https://komolongevity.com';
-const legacy=new Set(['/library/','/fr/library/','/es/library/']);
+const legacy=new Set([
+  '/library/','/fr/library/','/es/library/',
+  '/check','/fr/check','/es/check',
+  '/circle/','/fr/circle/','/es/circle/',
+  '/motion-retreats/','/fr/motion-retreats/','/es/motion-retreats/'
+]);
 
 async function walk(dir,out=[]){
   for(const e of await readdir(dir,{withFileTypes:true})){
@@ -26,7 +31,7 @@ for(const file of await walk(site)){
   const u=new URL(canonical);
   if(legacy.has(u.pathname)) continue;
   if(u.pathname.startsWith('/assets/')) continue;
-  urls.add(u.origin+u.pathname.replace(/\/index\.html$/,'')+(u.pathname==='/'?'':u.pathname.endsWith('/')?'':'')+(u.search||''));
+  urls.add(u.origin+u.pathname+(u.search||''));
 }
 
 const priority=(url)=>{
