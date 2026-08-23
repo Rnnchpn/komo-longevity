@@ -1,0 +1,22 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root=dirname(dirname(fileURLToPath(import.meta.url)));const site=join(root,'site');
+const locales={en:{dir:'',pre:'',lang:'en'},fr:{dir:'fr',pre:'/fr',lang:'fr'},es:{dir:'es',pre:'/es',lang:'es'}};
+const groups={partners:['','motion','clinical','deployment'],case:['','equipment','workflow','pulse']};
+const titleMap={partners:'KŌMØ Professional',case:'KŌMØ Case'};
+for(const [group,slugs] of Object.entries(groups))for(const slug of slugs)for(const [loc,c] of Object.entries(locales)){
+  const parts=[site,c.dir,group,slug].filter(Boolean);const file=join(...parts,'index.html');let h;try{h=await readFile(file,'utf8')}catch{continue}
+  const suffix=slug?`/${slug}/`:'/';const en=`/${group}${suffix}`.replace('//','/');const fr=`/fr/${group}${suffix}`.replace('//','/');const es=`/es/${group}${suffix}`.replace('//','/');
+  const alternates=`<link rel="alternate" hreflang="en" href="https://komolongevity.com${en}"><link rel="alternate" hreflang="fr" href="https://komolongevity.com${fr}"><link rel="alternate" hreflang="es" href="https://komolongevity.com${es}"><link rel="alternate" hreflang="x-default" href="https://komolongevity.com${en}">`;
+  if(!h.includes('hreflang="en"'))h=h.replace(/(<link rel="canonical"[^>]+>)/,`$1${alternates}`);
+  const canonical=(h.match(/<link rel="canonical" href="([^"]+)"/)||[])[1]||`https://komolongevity.com${c.pre}/${group}${suffix}`;
+  const title=(h.match(/<title>([^<]+)<\/title>/)||[])[1]||titleMap[group];const desc=(h.match(/<meta name="description" content="([^"]*)"/)||[])[1]||'';
+  if(!h.includes('property="og:title"'))h=h.replace('</title>',`</title><meta property="og:type" content="website"><meta property="og:site_name" content="KŌMØ"><meta property="og:title" content="${title.replace(/"/g,'&quot;')}"><meta property="og:description" content="${desc.replace(/"/g,'&quot;')}"><meta property="og:url" content="${canonical}"><meta property="og:image" content="https://komolongevity.com/assets/og-komo.svg">`);
+  if(!h.includes('application/ld+json')){const ld=JSON.stringify({'@context':'https://schema.org','@type':'WebPage',name:title,description:desc,url:canonical,inLanguage:c.lang,isPartOf:{'@type':'WebSite',name:'KŌMØ',url:'https://komolongevity.com/'}});h=h.replace('</head>',`<script type="application/ld+json">${ld}</script></head>`)}
+  const langBlock=`<div class="lang"><a href="${en}" ${loc==='en'?'aria-current="page"':''}>EN</a><a href="${fr}" ${loc==='fr'?'aria-current="page"':''}>FR</a><a href="${es}" ${loc==='es'?'aria-current="page"':''}>ES</a></div>`;h=h.replace(/<div class="lang">[\s\S]*?<\/div><a class="mini"/,`${langBlock}<a class="mini"`);
+  if(loc==='fr')h=h.replaceAll('Hotels & hospitality','Hôtels & hôtellerie').replaceAll('Longevity centers','Centres de longévité').replaceAll('Fitness & performance','Fitness & performance').replaceAll('Corporate programs','Entreprises & prévention').replaceAll('Physician practices','Cabinets médicaux').replaceAll('Medical clinics','Cliniques médicales').replaceAll('Future KŌMØ Longevity Clinics','Futures KŌMØ Longevity Clinics').replaceAll('Clinical follow-up through Pulse','Suivi clinique via Pulse').replaceAll('THE KIT','LA CASE').replaceAll('Assessment','Bilan').replaceAll('Software','Plateforme').replaceAll('Access','Accès').replaceAll('Network','Réseau').replaceAll('Discover the Case →','Découvrir KŌMØ Case →').replaceAll('Explore Motion →','Découvrir Motion →').replaceAll('Explore Clinical →','Découvrir Clinical →').replaceAll('6 Myodev sensors · integrated charging · 2 tablets · tripod · portable clinical workflow.','6 capteurs Myodev · chargeurs intégrés · 2 tablettes · trépied · workflow portable.');
+  await writeFile(file,h,'utf8');
+}
+let sm=await readFile(join(site,'sitemap.xml'),'utf8');const urls=[];for(const group of Object.keys(groups))for(const slug of groups[group])for(const c of Object.values(locales)){const s=slug?`/${slug}/`:'/';urls.push(`https://komolongevity.com${c.pre}/${group}${s}`.replace(/([^:]\/)\/+?/g,'$1'))}for(const u of urls)if(!sm.includes(`<loc>${u}</loc>`))sm=sm.replace('</urlset>',`  <url><loc>${u}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n</urlset>`);await writeFile(join(site,'sitemap.xml'),sm,'utf8');
+console.log('[professional-case-polish] SEO, language routing, microcopy and sitemap polished');
