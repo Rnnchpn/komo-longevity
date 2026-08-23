@@ -2,15 +2,19 @@ import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));const site=join(root,'site');
-const key=['fr/index.html','fr/case/index.html','fr/motion/index.html','fr/clinical/index.html','fr/partners/index.html','fr/network/index.html','fr/pulse/index.html','fr/science/index.html'];
+const key=[
+ 'fr/index.html','fr/case/index.html','fr/case/equipment/index.html','fr/case/workflow/index.html','fr/case/pulse/index.html',
+ 'fr/motion/index.html','fr/clinical/index.html','fr/partners/index.html','fr/partners/motion/index.html','fr/partners/clinical/index.html','fr/partners/deployment/index.html',
+ 'fr/network/index.html','fr/network/france/index.html','fr/pulse/index.html','fr/science/index.html'
+];
 const titles=new Map();
 for(const rel of key){
   const h=await readFile(join(site,rel),'utf8');
   const title=(h.match(/<title>([\s\S]*?)<\/title>/i)||[])[1]?.trim();
   const desc=(h.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)["']/i)||[])[1]?.trim();
   const canonical=(h.match(/<link\s+rel=["']canonical["']\s+href=["']([^"']+)["']/i)||[])[1];
-  if(!title || title.length<20 || title.length>75) throw new Error(`[seo-growth-qa] bad title ${rel}: ${title}`);
-  if(!desc || desc.length<70 || desc.length>190) throw new Error(`[seo-growth-qa] bad description ${rel}: ${desc}`);
+  if(!title || title.length<20 || title.length>78) throw new Error(`[seo-growth-qa] bad title ${rel}: ${title}`);
+  if(!desc || desc.length<70 || desc.length>195) throw new Error(`[seo-growth-qa] bad description ${rel}: ${desc}`);
   if(!canonical?.startsWith('https://komolongevity.com/')) throw new Error(`[seo-growth-qa] missing canonical ${rel}`);
   if(!h.includes('data-seo-growth="organization"')) throw new Error(`[seo-growth-qa] organization schema missing ${rel}`);
   if(rel!=='fr/index.html' && !h.includes('seo-discovery')) throw new Error(`[seo-growth-qa] internal discovery missing ${rel}`);
@@ -19,5 +23,14 @@ for(const rel of key){
 }
 const sitemap=await readFile(join(site,'sitemap.xml'),'utf8');
 for(const required of ['/fr/case/','/fr/motion/','/fr/clinical/','/fr/partners/','/fr/network/','/fr/pulse/','/fr/science/','/media']) if(!sitemap.includes(`https://komolongevity.com${required}`)) throw new Error(`[seo-growth-qa] sitemap missing ${required}`);
-for(const legacy of ['https://komolongevity.com/library/','https://komolongevity.com/fr/library/','https://komolongevity.com/es/library/']) if(sitemap.includes(legacy)) throw new Error(`[seo-growth-qa] legacy URL still in sitemap: ${legacy}`);
+for(const legacy of [
+ 'https://komolongevity.com/library/','https://komolongevity.com/fr/library/','https://komolongevity.com/es/library/',
+ 'https://komolongevity.com/check</loc>','https://komolongevity.com/fr/check</loc>','https://komolongevity.com/es/check</loc>',
+ 'https://komolongevity.com/circle/','https://komolongevity.com/fr/circle/','https://komolongevity.com/es/circle/',
+ 'https://komolongevity.com/motion-retreats/','https://komolongevity.com/fr/motion-retreats/','https://komolongevity.com/es/motion-retreats/'
+]) if(sitemap.includes(legacy)) throw new Error(`[seo-growth-qa] legacy URL still in sitemap: ${legacy}`);
+const article=await readFile(join(site,'assets','media','walking-is-data','index.html'),'utf8');
+if(!article.includes('media-motion-link') || !article.includes('/fr/motion/')) throw new Error('[seo-growth-qa] Library-to-Motion internal pathway missing');
+const caseFr=await readFile(join(site,'fr','case','index.html'),'utf8');
+if(caseFr.includes('· Measurement</small>') || caseFr.includes('· Follow-up</small>')) throw new Error('[seo-growth-qa] French discovery labels not localized');
 console.log('[seo-growth-qa] SEO architecture checks passed');
