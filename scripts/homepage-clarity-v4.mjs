@@ -11,15 +11,20 @@ const cfg = {
     home:'/', check:'/check/', case:'/case/', motion:'/motion/', clinical:'/clinical/', network:'/network/', library:'/en/media', partners:'/partners/',
     oldTitle:'KŌMØ — Locomotor Longevity',
     oldDesc:'KŌMØ makes human mobility measurable through functional assessment, movement data, clinical interpretation and longitudinal follow-up.',
-    title:'KŌMØ Longevity — Mobility assessment & locomotor longevity',
-    desc:'KŌMØ combines gait, muscle function, balance, posture and functional testing to build a clear mobility reference and follow it over time.',
-    eyebrow:'LOCOMOTOR LONGEVITY',
-    heading:'Understand your mobility.<br><em>Follow its trajectory.</em>',
-    lead:'KŌMØ combines gait, muscle function, balance, posture and functional testing to build a clear mobility reference, then follow it over time.',
+    title:'KŌMØ Longevity — Mobile locomotor check-up & follow-up',
+    desc:'KŌMØ is a mobile locomotor check-up combining gait, muscle function, balance, posture and functional testing, with results and longitudinal follow-up in KŌMØ Pulse.',
+    eyebrow:'MOBILE HEALTH CHECK-UP · LOCOMOTOR LONGEVITY',
+    heading:'The mobile health check-up<br><em>for human movement.</em>',
+    lead:'KŌMØ is a connected, mobile locomotor assessment system. It brings together gait, muscle function, balance, posture and functional testing to identify functional vulnerabilities early, structure a clear result and follow mobility over time.',
     primary:'Take the KŌMØ Check', secondary:'For professionals',
-    trust:[['Public','Free KŌMØ Check'],['System','KŌMØ Case'],['Commercial','KŌMØ Motion'],['Medical','KŌMØ Clinical']],
+    flow:[
+      ['01','One case','KŌMØ Case makes the assessment portable.'],
+      ['02','One clinical assessment','Movement, muscle, balance, posture and functional tests.'],
+      ['03','One result','Key findings are brought together in KŌMØ Pulse.'],
+      ['04','One follow-up','Track the mobility trajectory over time.']
+    ],
     caseK:'KŌMØ CASE', caseTitle:'The locomotor assessment.<br><em>In one case.</em>',
-    caseLead:'One portable Case for acquisition, Motion for commercial mobility experiences, Clinical for medical use, and Pulse for continuity.',
+    caseLead:'One portable Case for acquisition, Motion for commercial mobility experiences, Clinical for medical use, and Pulse for results and continuity.',
     labels:['THE SYSTEM','COMMERCIAL','MEDICAL'], pro:'Professional deployment ↗'
   },
   fr: {
@@ -27,15 +32,20 @@ const cfg = {
     home:'/fr/', check:'/fr/check/', case:'/fr/case/', motion:'/fr/motion/', clinical:'/fr/clinical/', network:'/fr/network/', library:'/media', partners:'/fr/partners/',
     oldTitle:'KŌMØ — Longévité locomotrice',
     oldDesc:'KŌMØ rend la mobilité humaine mesurable grâce aux tests fonctionnels, aux données de mouvement, à l’interprétation clinique et au suivi longitudinal.',
-    title:'KŌMØ Longevity — Bilan de mobilité & longévité locomotrice',
-    desc:'KŌMØ réunit marche, fonction musculaire, équilibre, posture et tests fonctionnels pour construire un repère de mobilité clair et le suivre dans le temps.',
-    eyebrow:'LONGÉVITÉ LOCOMOTRICE',
-    heading:'Comprendre votre mobilité.<br><em>Suivre sa trajectoire.</em>',
-    lead:'KŌMØ réunit marche, fonction musculaire, équilibre, posture et tests fonctionnels pour construire un repère de mobilité clair, puis le suivre dans le temps.',
+    title:'KŌMØ Longevity — Check-up locomoteur mobile & suivi',
+    desc:'KŌMØ est un check-up locomoteur mobile réunissant marche, fonction musculaire, équilibre, posture et tests fonctionnels, avec résultats et suivi dans KŌMØ Pulse.',
+    eyebrow:'CHECK-UP SANTÉ MOBILE · LONGÉVITÉ LOCOMOTRICE',
+    heading:'Le check-up santé mobile<br><em>de la locomotion.</em>',
+    lead:'KŌMØ est un système de bilan locomoteur connecté et mobile, conçu comme une clinique de la locomotion transportable. Il réunit marche, fonction musculaire, équilibre, posture et tests fonctionnels pour repérer tôt les fragilités fonctionnelles, structurer un résultat clair et suivre la mobilité dans le temps.',
     primary:'Faire le KŌMØ Check', secondary:'Pour les professionnels',
-    trust:[['Public','KŌMØ Check gratuit'],['Système','KŌMØ Case'],['Commercial','KŌMØ Motion'],['Médical','KŌMØ Clinical']],
+    flow:[
+      ['01','Une valise','KŌMØ Case rend le bilan mobile.'],
+      ['02','Un bilan clinique','Marche, muscle, équilibre, posture et tests fonctionnels.'],
+      ['03','Un résultat','Les données essentielles sont réunies dans KŌMØ Pulse.'],
+      ['04','Un suivi','Comparer la trajectoire de mobilité dans le temps.']
+    ],
     caseK:'KŌMØ CASE', caseTitle:'Le bilan locomoteur.<br><em>Dans une valise.</em>',
-    caseLead:'Une Case portable pour l’acquisition, Motion pour les usages commerciaux, Clinical pour l’usage médical et Pulse pour la continuité.',
+    caseLead:'Une Case portable pour l’acquisition, Motion pour les usages commerciaux, Clinical pour l’usage médical et Pulse pour les résultats et la continuité.',
     labels:['LE SYSTÈME','COMMERCIAL','MÉDICAL'], pro:'Déploiement professionnel ↗'
   },
   es: {
@@ -43,56 +53,66 @@ const cfg = {
     home:'/es/', check:'/es/check/', case:'/es/case/', motion:'/es/motion/', clinical:'/es/clinical/', network:'/es/network/', library:'/es/media', partners:'/es/partners/',
     oldTitle:'KŌMØ — Longevidad locomotora',
     oldDesc:'KŌMØ hace medible la movilidad humana mediante pruebas funcionales, datos de movimiento, interpretación clínica y seguimiento longitudinal.',
-    title:'KŌMØ Longevity — Evaluación de movilidad y longevidad locomotora',
-    desc:'KŌMØ integra marcha, función muscular, equilibrio, postura y pruebas funcionales para crear una referencia clara de movilidad y seguirla en el tiempo.',
-    eyebrow:'LONGEVIDAD LOCOMOTORA',
-    heading:'Comprender su movilidad.<br><em>Seguir su trayectoria.</em>',
-    lead:'KŌMØ integra marcha, función muscular, equilibrio, postura y pruebas funcionales para crear una referencia clara de movilidad y seguirla en el tiempo.',
+    title:'KŌMØ Longevity — Check-up locomotor móvil y seguimiento',
+    desc:'KŌMØ es un check-up locomotor móvil que integra marcha, función muscular, equilibrio, postura y pruebas funcionales, con resultados y seguimiento en KŌMØ Pulse.',
+    eyebrow:'CHECK-UP DE SALUD MÓVIL · LONGEVIDAD LOCOMOTORA',
+    heading:'El check-up de salud móvil<br><em>de la locomoción.</em>',
+    lead:'KŌMØ es un sistema de evaluación locomotora conectado y móvil. Integra marcha, función muscular, equilibrio, postura y pruebas funcionales para detectar pronto vulnerabilidades funcionales, estructurar un resultado claro y seguir la movilidad en el tiempo.',
     primary:'Hacer el KŌMØ Check', secondary:'Para profesionales',
-    trust:[['Público','KŌMØ Check gratuito'],['Sistema','KŌMØ Case'],['Comercial','KŌMØ Motion'],['Médico','KŌMØ Clinical']],
+    flow:[
+      ['01','Una maleta','KŌMØ Case hace portátil la evaluación.'],
+      ['02','Una evaluación clínica','Marcha, músculo, equilibrio, postura y pruebas funcionales.'],
+      ['03','Un resultado','Los datos esenciales se reúnen en KŌMØ Pulse.'],
+      ['04','Un seguimiento','Comparar la trayectoria de movilidad en el tiempo.']
+    ],
     caseK:'KŌMØ CASE', caseTitle:'La evaluación locomotora.<br><em>En una sola maleta.</em>',
-    caseLead:'Una Case portátil para la adquisición, Motion para usos comerciales, Clinical para uso médico y Pulse para la continuidad.',
+    caseLead:'Una Case portátil para la adquisición, Motion para usos comerciales, Clinical para uso médico y Pulse para resultados y continuidad.',
     labels:['EL SISTEMA','COMERCIAL','MÉDICO'], pro:'Despliegue profesional ↗'
   }
 };
 
 const css = `<style>
-/* Homepage V4 — brand-first clarity, inspired by premium preventive-health information architecture */
+/* Homepage V5 — definition first: one case, one assessment, one result, one follow-up */
 .hp-brand span{margin-left:7px;font-family:var(--komo-font-display);font-weight:400;letter-spacing:-.02em;color:var(--komo-sage);text-transform:none}
-.hp-hero{padding:clamp(58px,8vw,104px) 0 52px}
+.hp-hero{padding:clamp(54px,7vw,92px) 0 46px}
 .hp-hero__brand{margin:0;font-family:var(--komo-font-sans)!important;font-size:clamp(92px,14vw,178px)!important;font-weight:850!important;line-height:.78!important;letter-spacing:-.075em!important;text-transform:uppercase;text-wrap:nowrap!important}
 .hp-hero__brand span{display:block;margin-top:clamp(26px,3.5vw,46px);font-family:var(--komo-font-display);font-size:clamp(42px,5.4vw,72px);font-weight:400;line-height:.9;letter-spacing:-.045em;text-transform:none;color:var(--komo-sage)}
-.hp-hero-v4__intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(340px,.82fr);gap:clamp(46px,8vw,116px);align-items:end;margin-top:clamp(58px,7vw,92px);padding-top:28px;border-top:1px solid var(--komo-ink)}
-.hp-hero-v4__intro h2{margin:0;font:400 clamp(42px,5.3vw,68px)/.95 var(--komo-font-display);letter-spacing:-.05em}
+.hp-hero-v4__intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,.88fr);gap:clamp(44px,7vw,104px);align-items:end;margin-top:clamp(50px,6vw,76px);padding-top:28px;border-top:1px solid var(--komo-ink)}
+.hp-hero-v4__intro h2{margin:0;font:400 clamp(45px,5.8vw,74px)/.93 var(--komo-font-display);letter-spacing:-.055em;text-wrap:balance}
 .hp-hero-v4__intro h2 em{font-style:normal;color:var(--komo-sage)}
-.hp-hero-v4__copy>p{margin:0;max-width:520px;color:#343934;font:400 18px/1.65 var(--komo-font-display)}
-.hp-hero-v4__trust{display:grid;grid-template-columns:repeat(4,1fr);margin-top:54px;border-top:1px solid var(--komo-line);border-bottom:1px solid var(--komo-line)}
-.hp-hero-v4__trust div{min-height:92px;padding:16px 18px 16px 0;border-right:1px solid var(--komo-line)}
+.hp-hero-v4__copy>p{margin:0;max-width:560px;color:#343934;font:400 18px/1.62 var(--komo-font-display)}
+.hp-hero-v4__trust{display:grid;grid-template-columns:repeat(4,1fr);margin-top:48px;border-top:1px solid var(--komo-ink);border-bottom:1px solid var(--komo-line)}
+.hp-hero-v4__trust div{min-height:154px;padding:18px 22px 20px 0;border-right:1px solid var(--komo-line)}
+.hp-hero-v4__trust div:not(:first-child){padding-left:22px}
 .hp-hero-v4__trust div:last-child{border-right:0}
-.hp-hero-v4__trust span{display:block;margin-bottom:16px;color:var(--komo-muted);font-size:8px;font-weight:800;letter-spacing:.11em;text-transform:uppercase}
-.hp-hero-v4__trust strong{font:400 21px/1.05 var(--komo-font-display);letter-spacing:-.02em}
-.hp-product-gateway{padding-top:clamp(68px,8vw,102px)}
+.hp-hero-v4__trust span{display:block;margin-bottom:28px;color:var(--komo-sage);font-size:8px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.hp-hero-v4__trust strong{display:block;font:400 clamp(24px,2.25vw,31px)/1 var(--komo-font-display);letter-spacing:-.035em}
+.hp-hero-v4__trust small{display:block;margin-top:10px;max-width:225px;color:var(--komo-muted);font-size:10px;line-height:1.5}
+.hp-product-gateway{padding-top:clamp(64px,8vw,96px)}
 .hp-product-gateway h2{font-size:clamp(46px,5.8vw,72px)}
 .hp-product-gateway__copy>div>p{font-size:17px;line-height:1.63}
-@media(max-width:900px){.hp-hero__brand{font-size:clamp(82px,16vw,138px)!important}.hp-hero-v4__intro{grid-template-columns:1fr;gap:26px}.hp-hero-v4__trust{grid-template-columns:1fr 1fr}.hp-hero-v4__trust div:nth-child(2){border-right:0}.hp-hero-v4__trust div:nth-child(-n+2){border-bottom:1px solid var(--komo-line)}}
+@media(max-width:900px){.hp-hero__brand{font-size:clamp(82px,16vw,138px)!important}.hp-hero-v4__intro{grid-template-columns:1fr;gap:24px}.hp-hero-v4__trust{grid-template-columns:1fr 1fr}.hp-hero-v4__trust div{min-height:132px}.hp-hero-v4__trust div:nth-child(2){border-right:0}.hp-hero-v4__trust div:nth-child(-n+2){border-bottom:1px solid var(--komo-line)}.hp-hero-v4__trust div:nth-child(3){padding-left:0}}
 @media(max-width:620px){
  .hp-brand span{display:none}
- .hp-hero{padding:42px 0 34px}
- .hp-hero .hp-eyebrow{margin-bottom:20px}
- .hp-hero__brand{font-size:clamp(62px,20vw,78px)!important;line-height:.82!important;letter-spacing:-.07em!important}
- .hp-hero__brand span{margin-top:21px;font-size:clamp(36px,11.5vw,44px);line-height:.92}
- .hp-hero-v4__intro{margin-top:42px;padding-top:22px;gap:20px}
- .hp-hero-v4__intro h2{font-size:39px;line-height:.96}
- .hp-hero-v4__copy>p{font-size:16px;line-height:1.56}
- .hp-hero-v4__copy .hp-actions{margin-top:21px}
+ .hp-hero{padding:38px 0 30px}
+ .hp-hero .hp-eyebrow{margin-bottom:18px;max-width:280px;line-height:1.45}
+ .hp-hero__brand{font-size:clamp(56px,18.5vw,72px)!important;line-height:.82!important;letter-spacing:-.075em!important;max-width:100%}
+ .hp-hero__brand span{margin-top:19px;font-size:clamp(34px,10.5vw,41px)!important;line-height:.92}
+ .hp-hero-v4__intro{margin-top:36px;padding-top:20px;gap:18px}
+ .hp-hero-v4__intro h2{font-size:40px;line-height:.95}
+ .hp-hero-v4__copy>p{font-size:16px;line-height:1.55}
+ .hp-hero-v4__copy .hp-actions{margin-top:20px}
  .hp-hero-v4__copy .hp-actions .hp-btn{min-height:50px}
- .hp-hero-v4__trust{margin-top:34px}
- .hp-hero-v4__trust div{min-height:76px;padding:13px 10px 13px 0}
- .hp-hero-v4__trust span{margin-bottom:11px;font-size:7px}
- .hp-hero-v4__trust strong{font-size:17px}
- .hp-product-gateway{padding-top:50px}
+ .hp-hero-v4__trust{grid-template-columns:1fr;margin-top:30px}
+ .hp-hero-v4__trust div,.hp-hero-v4__trust div:not(:first-child),.hp-hero-v4__trust div:nth-child(3){display:grid;grid-template-columns:36px 1fr;gap:0 12px;min-height:0;padding:16px 0;border-right:0;border-bottom:1px solid var(--komo-line)}
+ .hp-hero-v4__trust div:last-child{border-bottom:0}
+ .hp-hero-v4__trust span{grid-row:1 / span 2;margin:4px 0 0;font-size:8px}
+ .hp-hero-v4__trust strong{font-size:25px}
+ .hp-hero-v4__trust small{margin-top:6px;font-size:9px;line-height:1.45}
+ .hp-product-gateway{padding-top:46px}
  .hp-product-gateway h2{font-size:43px}
 }
+@media(max-width:380px){.hp-hero__brand{font-size:clamp(52px,17.5vw,62px)!important}.hp-hero__brand span{font-size:34px!important}.hp-hero-v4__intro h2{font-size:37px}}
 </style>`;
 
 function hero(c){
@@ -104,7 +124,7 @@ function hero(c){
         <h2>${c.heading}</h2>
         <div class="hp-hero-v4__copy"><p>${c.lead}</p><div class="hp-actions"><a class="hp-btn" href="${c.check}">${c.primary} →</a><a class="hp-text-link" href="${c.partners}">${c.secondary} ↗</a></div></div>
       </div>
-      <div class="hp-hero-v4__trust">${c.trust.map(x=>`<div><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join('')}</div>
+      <div class="hp-hero-v4__trust">${c.flow.map(x=>`<div><span>${x[0]}</span><strong>${x[1]}</strong><small>${x[2]}</small></div>`).join('')}</div>
     </div>
   </section>`;
 }
