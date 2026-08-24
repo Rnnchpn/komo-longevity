@@ -4,79 +4,462 @@
   "outputDirectory": "site",
   "cleanUrls": true,
   "rewrites": [
-    {"source":"/pulsedemo","destination":"/assets/pulsedemo/"},
-    {"source":"/masterclass","destination":"/assets/masterclass-v2/"},
-    {"source":"/fr/masterclass","destination":"/assets/masterclass-v2/"},
-    {"source":"/review","destination":"/assets/review/"},
-    {"source":"/fr/review","destination":"/assets/review/"},
-    {"source":"/media","destination":"/assets/media/"},
-    {"source":"/media/locomotive-syndrome","destination":"/assets/media/locomotive-syndrome/"},
-    {"source":"/media/walking-is-data","destination":"/assets/media/walking-is-data/"},
-    {"source":"/media/biomechanics-aging","destination":"/assets/media/biomechanics-aging/"},
-    {"source":"/media/cone-of-economy","destination":"/assets/media/cone-of-economy/"},
-    {"source":"/media/sarcopenie-force-musculaire","destination":"/assets/media/sarcopenie-force-musculaire/"},
-    {"source":"/media/test-lever-chaise","destination":"/assets/media/test-lever-chaise/"},
-    {"source":"/media/puissance-musculaire-vieillissement","destination":"/assets/media/puissance-musculaire-vieillissement/"},
-    {"source":"/media/equilibre-vieillissement","destination":"/assets/media/equilibre-vieillissement/"},
-    {"source":"/media/marche-plus-lente","destination":"/assets/media/marche-plus-lente/"},
-    {"source":"/media/difficulte-se-relever-chaise","destination":"/assets/media/difficulte-se-relever-chaise/"},
-    {"source":"/media/marche-asymetrique","destination":"/assets/media/marche-asymetrique/"},
-    {"source":"/media/tester-mobilite-chez-soi","destination":"/assets/media/tester-mobilite-chez-soi/"},
-    {"source":"/media/posture-penchee-en-avant","destination":"/assets/media/posture-penchee-en-avant/"},
-    {"source":"/media/pas-plus-courts","destination":"/assets/media/pas-plus-courts/"},
-    {"source":"/media/escaliers-plus-difficiles","destination":"/assets/media/escaliers-plus-difficiles/"},
-    {"source":"/media/moins-force-jambes","destination":"/assets/media/moins-force-jambes/"},
-    {"source":"/media/utiliser-bras-pour-se-relever","destination":"/assets/media/utiliser-bras-pour-se-relever/"},
-    {"source":"/media/vitesse-marche-normale-age","destination":"/assets/media/vitesse-marche-normale-age/"},
-    {"source":"/media/trebuche-plus-souvent","destination":"/assets/media/trebuche-plus-souvent/"},
-    {"source":"/media/ameliorer-mobilite-avec-age","destination":"/assets/media/ameliorer-mobilite-avec-age/"},
-    {"source":"/media/:path*","destination":"/assets/media/:path*"},
-    {"source":"/","has":[{"type":"host","value":"locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
-    {"source":"/","has":[{"type":"host","value":"www.locotechsummit.com"}],"destination":"/assets/locotech-summit/"},
-    {"source":"/locotech-summit","destination":"/assets/locotech-summit/"},
-    {"source":"/locotech-summit/:path*","destination":"/assets/locotech-summit/:path*"},
-    {"source":"/","has":[{"type":"host","value":"locomotor.komolongevity.com"}],"destination":"/locomotor/"},
-    {"source":"/fr","has":[{"type":"host","value":"locomotor.komolongevity.com"}],"destination":"/fr/locomotor/"},
-    {"source":"/es","has":[{"type":"host","value":"locomotor.komolongevity.com"}],"destination":"/es/locomotor/"}
+    {
+      "source": "/masterclass",
+      "destination": "/assets/masterclass-v2/"
+    },
+    {
+      "source": "/fr/masterclass",
+      "destination": "/assets/masterclass-v2/"
+    },
+    {
+      "source": "/review",
+      "destination": "/assets/review/"
+    },
+    {
+      "source": "/fr/review",
+      "destination": "/assets/review/"
+    },
+    {
+      "source": "/media",
+      "destination": "/assets/media/"
+    },
+    {
+      "source": "/media/locomotive-syndrome",
+      "destination": "/assets/media/locomotive-syndrome/"
+    },
+    {
+      "source": "/media/walking-is-data",
+      "destination": "/assets/media/walking-is-data/"
+    },
+    {
+      "source": "/media/biomechanics-aging",
+      "destination": "/assets/media/biomechanics-aging/"
+    },
+    {
+      "source": "/media/cone-of-economy",
+      "destination": "/assets/media/cone-of-economy/"
+    },
+    {
+      "source": "/media/sarcopenie-force-musculaire",
+      "destination": "/assets/media/sarcopenie-force-musculaire/"
+    },
+    {
+      "source": "/media/test-lever-chaise",
+      "destination": "/assets/media/test-lever-chaise/"
+    },
+    {
+      "source": "/media/puissance-musculaire-vieillissement",
+      "destination": "/assets/media/puissance-musculaire-vieillissement/"
+    },
+    {
+      "source": "/media/equilibre-vieillissement",
+      "destination": "/assets/media/equilibre-vieillissement/"
+    },
+    {
+      "source": "/media/marche-plus-lente",
+      "destination": "/assets/media/marche-plus-lente/"
+    },
+    {
+      "source": "/media/difficulte-se-relever-chaise",
+      "destination": "/assets/media/difficulte-se-relever-chaise/"
+    },
+    {
+      "source": "/media/marche-asymetrique",
+      "destination": "/assets/media/marche-asymetrique/"
+    },
+    {
+      "source": "/media/tester-mobilite-chez-soi",
+      "destination": "/assets/media/tester-mobilite-chez-soi/"
+    },
+    {
+      "source": "/media/posture-penchee-en-avant",
+      "destination": "/assets/media/posture-penchee-en-avant/"
+    },
+    {
+      "source": "/media/pas-plus-courts",
+      "destination": "/assets/media/pas-plus-courts/"
+    },
+    {
+      "source": "/media/escaliers-plus-difficiles",
+      "destination": "/assets/media/escaliers-plus-difficiles/"
+    },
+    {
+      "source": "/media/moins-force-jambes",
+      "destination": "/assets/media/moins-force-jambes/"
+    },
+    {
+      "source": "/media/utiliser-bras-pour-se-relever",
+      "destination": "/assets/media/utiliser-bras-pour-se-relever/"
+    },
+    {
+      "source": "/media/vitesse-marche-normale-age",
+      "destination": "/assets/media/vitesse-marche-normale-age/"
+    },
+    {
+      "source": "/media/trebuche-plus-souvent",
+      "destination": "/assets/media/trebuche-plus-souvent/"
+    },
+    {
+      "source": "/media/ameliorer-mobilite-avec-age",
+      "destination": "/assets/media/ameliorer-mobilite-avec-age/"
+    },
+    {
+      "source": "/media/:path*",
+      "destination": "/assets/media/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "locotechsummit.com"
+        }
+      ],
+      "destination": "/assets/locotech-summit/"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.locotechsummit.com"
+        }
+      ],
+      "destination": "/assets/locotech-summit/"
+    },
+    {
+      "source": "/locotech-summit",
+      "destination": "/assets/locotech-summit/"
+    },
+    {
+      "source": "/locotech-summit/:path*",
+      "destination": "/assets/locotech-summit/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "locomotor.komolongevity.com"
+        }
+      ],
+      "destination": "/locomotor/"
+    },
+    {
+      "source": "/fr",
+      "has": [
+        {
+          "type": "host",
+          "value": "locomotor.komolongevity.com"
+        }
+      ],
+      "destination": "/fr/locomotor/"
+    },
+    {
+      "source": "/es",
+      "has": [
+        {
+          "type": "host",
+          "value": "locomotor.komolongevity.com"
+        }
+      ],
+      "destination": "/es/locomotor/"
+    }
   ],
   "headers": [
-    {"source":"/assets/(.*)","headers":[{"key":"Cache-Control","value":"public, max-age=31536000, immutable"}]},
-    {"source":"/check","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
-    {"source":"/fr/check","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
-    {"source":"/es/check","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
-    {"source":"/pulsedemo","headers":[{"key":"Cache-Control","value":"private, no-store, max-age=0"},{"key":"X-Robots-Tag","value":"noindex, nofollow, noarchive"}]},
-    {"source":"/masterclass","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
-    {"source":"/fr/masterclass","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
-    {"source":"/review","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
-    {"source":"/media","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
-    {"source":"/media/(.*)","headers":[{"key":"Cache-Control","value":"public, max-age=0, must-revalidate"}]},
-    {"source":"/(.*)","headers":[{"key":"X-Content-Type-Options","value":"nosniff"},{"key":"X-Frame-Options","value":"DENY"},{"key":"Referrer-Policy","value":"strict-origin-when-cross-origin"}]}
+    {
+      "source": "/assets/check/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/assets/pulsedemo/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/pulsedemo",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/masterclass",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/fr/masterclass",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/review",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/media",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/media/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    }
   ],
   "redirects": [
-    {"source":"/:path*","has":[{"type":"host","value":"www.komolongevity.com"}],"destination":"https://komolongevity.com/:path*","permanent":true},
-    {"source":"/library","destination":"/en/media","permanent":true},
-    {"source":"/library/:path*","destination":"/en/media/:path*","permanent":true},
-    {"source":"/fr/library","destination":"/media","permanent":true},
-    {"source":"/fr/library/:path*","destination":"/media/:path*","permanent":true},
-    {"source":"/es/library","destination":"/es/media","permanent":true},
-    {"source":"/es/library/:path*","destination":"/es/media/:path*","permanent":true},
-    {"source":"/circle","destination":"/network/","permanent":true},
-    {"source":"/circle/:path*","destination":"/network/","permanent":true},
-    {"source":"/fr/circle","destination":"/fr/network/","permanent":true},
-    {"source":"/fr/circle/:path*","destination":"/fr/network/","permanent":true},
-    {"source":"/es/circle","destination":"/es/network/","permanent":true},
-    {"source":"/es/circle/:path*","destination":"/es/network/","permanent":true},
-    {"source":"/motion-retreats","destination":"/partners/motion/","permanent":true},
-    {"source":"/motion-retreats/:path*","destination":"/partners/motion/","permanent":true},
-    {"source":"/fr/motion-retreats","destination":"/fr/partners/motion/","permanent":true},
-    {"source":"/fr/motion-retreats/:path*","destination":"/fr/partners/motion/","permanent":true},
-    {"source":"/es/motion-retreats","destination":"/es/partners/motion/","permanent":true},
-    {"source":"/es/motion-retreats/:path*","destination":"/es/partners/motion/","permanent":true},
-    {"source":"/white-coast","destination":"/partners","permanent":true},
-    {"source":"/white-coast/:path*","destination":"/partners","permanent":true},
-    {"source":"/fr/white-coast","destination":"/fr/partners","permanent":true},
-    {"source":"/fr/white-coast/:path*","destination":"/fr/partners","permanent":true},
-    {"source":"/es/white-coast","destination":"/es/partners","permanent":true},
-    {"source":"/es/white-coast/:path*","destination":"/es/partners","permanent":true}
+    {
+      "source": "/check",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/check/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/es/check",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/es/check/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/pulsedemo",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/pulsedemo/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/assets/check/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/assets/pulsedemo/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.komolongevity.com"
+        }
+      ],
+      "destination": "https://komolongevity.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/library",
+      "destination": "/en/media",
+      "permanent": true
+    },
+    {
+      "source": "/library/:path*",
+      "destination": "/en/media/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/fr/library",
+      "destination": "/media",
+      "permanent": true
+    },
+    {
+      "source": "/fr/library/:path*",
+      "destination": "/media/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/es/library",
+      "destination": "/es/media",
+      "permanent": true
+    },
+    {
+      "source": "/es/library/:path*",
+      "destination": "/es/media/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/circle",
+      "destination": "/network/",
+      "permanent": true
+    },
+    {
+      "source": "/circle/:path*",
+      "destination": "/network/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/circle",
+      "destination": "/fr/network/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/circle/:path*",
+      "destination": "/fr/network/",
+      "permanent": true
+    },
+    {
+      "source": "/es/circle",
+      "destination": "/es/network/",
+      "permanent": true
+    },
+    {
+      "source": "/es/circle/:path*",
+      "destination": "/es/network/",
+      "permanent": true
+    },
+    {
+      "source": "/motion-retreats",
+      "destination": "/partners/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/motion-retreats/:path*",
+      "destination": "/partners/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/motion-retreats",
+      "destination": "/fr/partners/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/motion-retreats/:path*",
+      "destination": "/fr/partners/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/motion-retreats",
+      "destination": "/es/partners/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/motion-retreats/:path*",
+      "destination": "/es/partners/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/white-coast",
+      "destination": "/partners",
+      "permanent": true
+    },
+    {
+      "source": "/white-coast/:path*",
+      "destination": "/partners",
+      "permanent": true
+    },
+    {
+      "source": "/fr/white-coast",
+      "destination": "/fr/partners",
+      "permanent": true
+    },
+    {
+      "source": "/fr/white-coast/:path*",
+      "destination": "/fr/partners",
+      "permanent": true
+    },
+    {
+      "source": "/es/white-coast",
+      "destination": "/es/partners",
+      "permanent": true
+    },
+    {
+      "source": "/es/white-coast/:path*",
+      "destination": "/es/partners",
+      "permanent": true
+    }
   ]
 }
