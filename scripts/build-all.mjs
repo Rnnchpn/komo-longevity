@@ -55,7 +55,9 @@ const scripts = [
   'scripts/method-score-clarity-v3.mjs',
   'scripts/seo-sitemap-v2.mjs',
   'scripts/seo-growth-qa.mjs',
-  'scripts/production-qa.mjs'
+  'scripts/production-qa.mjs',
+  'scripts/pulse-platform-bridge-v1.mjs',
+  'scripts/pulse-platform-qa.mjs'
 ];
 
 for (const script of scripts) {
