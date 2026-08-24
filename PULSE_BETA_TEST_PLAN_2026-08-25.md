@@ -10,6 +10,13 @@ Date cible : 25 août 2026
 - Navigation patient et demande d'accès professionnel.
 - Aucun dossier clinique réel, import MyoCare réel, paiement réel ou donnée directement identifiante de santé.
 
+## Pré-requis avant une ouverture élargie
+
+- Activer dans Supabase Auth la **protection contre les mots de passe compromis**.
+- Activer **Vercel Web Analytics** pour rendre opérationnels les événements déjà intégrés au site public.
+- Vérifier que les URL de redirection Auth autorisées contiennent exactement `https://pulse.komolongevity.com`.
+- Conserver Motion, Clinical, MyoCare et les paiements en accès contrôlé jusqu'aux validations correspondantes.
+
 ## Matrice d'authentification
 
 Pour Gmail, Outlook et iCloud :
