@@ -5,7 +5,7 @@ const site = join(process.cwd(), 'site');
 const PULSE = 'https://pulse.komolongevity.com/';
 const COPY = {
   "en": {
-    "beta": "PRIVATE BETA · FIRST TESTERS",
+    "beta": "EARLY ACCESS BETA",
     "status": "Available now: account creation and the KŌMØ Loco Check. Motion and Clinical pathways are activated progressively with a professional.",
     "patient": "Create my free space",
     "professional": "I am a professional",
@@ -18,7 +18,7 @@ const COPY = {
     "medicalText": "The KŌMØ Loco Check is an educational mobility reference. It does not provide a diagnosis, medical advice or an emergency service."
   },
   "fr": {
-    "beta": "BÊTA PRIVÉE · PREMIERS TESTEURS",
+    "beta": "VERSION BÊTA · ACCÈS ANTICIPÉ",
     "status": "Disponible maintenant : création du compte et KŌMØ Loco Check. Les parcours Motion et Clinical sont activés progressivement avec un professionnel.",
     "patient": "Créer mon espace gratuit",
     "professional": "Je suis professionnel",
@@ -31,7 +31,7 @@ const COPY = {
     "medicalText": "Le KŌMØ Loco Check fournit un repère éducatif de mobilité. Il ne constitue ni un diagnostic, ni un avis médical, ni un service d’urgence."
   },
   "es": {
-    "beta": "BETA PRIVADA · PRIMEROS USUARIOS",
+    "beta": "VERSIÓN BETA · ACCESO ANTICIPADO",
     "status": "Disponible ahora: creación de cuenta y KŌMØ Loco Check. Los recorridos Motion y Clinical se activan progresivamente con un profesional.",
     "patient": "Crear mi espacio gratuito",
     "professional": "Soy profesional",
