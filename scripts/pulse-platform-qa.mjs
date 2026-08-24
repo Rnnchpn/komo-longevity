@@ -19,6 +19,8 @@ for (const item of homes) {
   if ((html.match(/https:\/\/pulse\.komolongevity\.com\//g) || []).length < 7) failures.push(lang + ': too few Pulse connections');
   if (!html.includes('id="komo-ecosystem-schema"') || !html.includes('"@type":"WebApplication"')) failures.push(lang + ': structured application data missing');
   if (!html.includes('rel="preconnect" href="' + PULSE + '"')) failures.push(lang + ': Pulse preconnect missing');
+  if (!html.includes('class="kp-mini" href="' + PULSE + '"')) failures.push(lang + ': header action does not lead to Pulse');
+  if (/"KŌMØ \| (?:Mobility test|Test de mobilité|Prueba de movilidad)/i.test(html)) failures.push(lang + ': stale test schema remains');
   if (/href=["']\/(?:(?:fr|es)\/)?(?:check|pulse)(?:\/|#)/i.test(html)) failures.push(lang + ': local interactive link remains');
 }
 
