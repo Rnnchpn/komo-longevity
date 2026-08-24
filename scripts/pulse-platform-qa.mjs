@@ -22,6 +22,11 @@ for (const item of homes) {
   if (!html.includes('class="kp-mini" href="' + PULSE + '"')) failures.push(lang + ': header action does not lead to Pulse');
   if (/"KŌMØ \| (?:Mobility test|Test de mobilité|Prueba de movilidad)/i.test(html)) failures.push(lang + ': stale test schema remains');
   if (/href=["']\/(?:(?:fr|es)\/)?(?:check|pulse)(?:\/|#)/i.test(html)) failures.push(lang + ': local interactive link remains');
+  if (!html.includes('id="komo-beta-status"')) failures.push(lang + ': beta status missing');
+  if (!html.includes('data-kp-destination="patient"')) failures.push(lang + ': patient entry missing');
+  if (!html.includes('data-kp-destination="professional"')) failures.push(lang + ': professional entry missing');
+  if (!html.includes('/_vercel/insights/script.js')) failures.push(lang + ': public analytics script missing');
+  if (/dossier longitudinal sécurisé|secure longitudinal space|espacio longitudinal seguro/i.test(html)) failures.push(lang + ': premature secure clinical claim remains');
 }
 
 const retired = [
