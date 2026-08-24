@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 
 // Production pipeline — Method score clarity V3 is applied after the scientific Method layer.
+// pulse-patient-home-v0 generates a synthetic-data-only prototype on the pulse-foundation branch.
 const scripts = [
   'scripts/build.mjs',
   'scripts/after-build.mjs',
@@ -53,6 +54,7 @@ const scripts = [
   'scripts/method-science-v2.mjs',
   'scripts/method-science-polish-v1.mjs',
   'scripts/method-score-clarity-v3.mjs',
+  'scripts/pulse-patient-home-v0.mjs',
   'scripts/seo-sitemap-v2.mjs',
   'scripts/seo-growth-qa.mjs',
   'scripts/production-qa.mjs'
