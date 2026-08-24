@@ -90,6 +90,18 @@ function rewriteAnchors(html, lang) {
   });
 }
 
+function promoteHeaderCta(html, lang) {
+  const copy = COPY[lang] || COPY.en;
+  const replacement = '<a class="kp-mini" href="' + PULSE + '" data-pulse-platform="true">' + copy.cta + ' →</a>';
+  html = html.replace(/<a class="kp-mini"[^>]*>[\s\S]*?<\/a>/gi, replacement);
+  html = html.replace(/<a class="hp-mini-cta"[^>]*>[\s\S]*?<\/a>/gi, replacement.replace('kp-mini', 'hp-mini-cta'));
+  return html;
+}
+
+function removeLegacySchema(html) {
+  return html.replace(/<script(?![^>]*id=["']komo-ecosystem-schema["'])[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '');
+}
+
 function setMeta(html, title, description) {
   html = html.replace(/<title>[\s\S]*?<\/title>/i, '<title>' + title + '</title>');
   html = html.replace(/<meta name="description" content="[^"]*">/i, '<meta name="description" content="' + description + '">');
@@ -161,12 +173,14 @@ for (const file of files) {
   const isPulsePage = rel === 'pulse/index.html' || rel === 'fr/pulse/index.html' || rel === 'es/pulse/index.html';
 
   html = rewriteAnchors(html, lang);
+  html = promoteHeaderCta(html, lang);
   if (!html.includes('rel="preconnect" href="' + PULSE + '"')) {
     html = html.replace('</head>', '<link rel="preconnect" href="' + PULSE + '"><link rel="dns-prefetch" href="//pulse.komolongevity.com"></head>');
   }
 
   if (isHome) {
     const meta = META[lang] || META.en;
+    html = removeLegacySchema(html);
     html = setMeta(html, meta.title, meta.description);
     if (!html.includes('pulse-platform-bridge-style')) html = html.replace('</head>', STYLE + '</head>');
     if (!html.includes('class="kpg"')) html = html.replace(/(<main[^>]*>[\s\S]*?<\/section>)/i, '$1' + banner(lang));
@@ -178,6 +192,7 @@ for (const file of files) {
 
   if (isPulsePage) {
     const meta = META[lang] || META.en;
+    html = removeLegacySchema(html);
     html = setMeta(html, meta.pulseTitle, meta.pulseDescription);
     if (!html.includes('id="komo-ecosystem-schema"')) {
       const pageUrl = lang === 'en' ? 'https://komolongevity.com/pulse/' : 'https://komolongevity.com/' + lang + '/pulse/';
