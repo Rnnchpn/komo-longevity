@@ -57,6 +57,7 @@ const scripts = [
   'scripts/seo-growth-qa.mjs',
   'scripts/production-qa.mjs',
   'scripts/pulse-platform-bridge-v1.mjs',
+  'scripts/pulse-beta-release-v1.mjs',
   'scripts/pulse-platform-qa.mjs'
 ];
 
