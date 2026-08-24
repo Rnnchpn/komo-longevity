@@ -1,3 +1,46 @@
+# Pulse is the only interactive entry point.
+[[redirects]]
+  from = "/check"
+  to = "https://pulse.komolongevity.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/check/*"
+  to = "https://pulse.komolongevity.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/fr/check*"
+  to = "https://pulse.komolongevity.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/es/check*"
+  to = "https://pulse.komolongevity.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/pulsedemo*"
+  to = "https://pulse.komolongevity.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/assets/check/*"
+  to = "https://pulse.komolongevity.com/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/assets/pulsedemo/*"
+  to = "https://pulse.komolongevity.com/"
+  status = 301
+  force = true
+
 [build]
 command = "node scripts/build-all.mjs"
 publish = "site"
