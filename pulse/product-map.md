@@ -9,7 +9,7 @@ No page moves to `VALIDATED` without explicit founder review. A `LOCKED` page ma
 | ID | Page | Purpose | Status |
 |---|---|---|---|
 | 00 | Access / Create profile | Enter Pulse, create account, consent/onboarding shell, start profile | PLANNED |
-| 01 | Home | Understand current mobility, next action and whole KŌMØ ecosystem in <30 seconds | DRAFT |
+| 01 | Home | Understand current mobility, next action and whole KŌMØ ecosystem in <30 seconds | REVIEW |
 | 02 | My Score | Motion result, domains, Muscle Signature, confidence and detail on demand | PLANNED |
 | 03 | My Progress | T0 → M3 → M6 → M12 trajectory and domain comparisons | PLANNED |
 | 04 | My Assessments | Upcoming/past assessments, preparation status, reports and follow-up | PLANNED |
