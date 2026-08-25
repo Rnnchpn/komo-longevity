@@ -10,7 +10,7 @@ const runtime = await readFile(join(root, 'pulse-app', 'runtime.js'), 'utf8');
 const resetHtml = await readFile(join(root, 'pulse-app', 'reset', 'index.html'), 'utf8');
 const resetJs = await readFile(join(root, 'pulse-app', 'reset', 'reset.js'), 'utf8');
 const healthApi = await readFile(join(root, 'api', 'pulse-health.js'), 'utf8');
-const emailApi = await readFile(join(root, 'api', 'pulse-email.js'), 'utf8');
+const notifyFn = await readFile(join(root, 'supabase', 'functions', 'pulse-notify', 'index.ts'), 'utf8');
 
 const required = [
   ['remember checkbox', html.includes('id="rememberInput"') && html.includes('Rester connecté')],
@@ -35,12 +35,13 @@ const required = [
   ['Responsive mobile nav', css.includes('@media(max-width:820px)') && css.includes('.mobile-nav')],
   ['Reduced motion support', css.includes('prefers-reduced-motion')],
   ['Preview noindex', html.includes('noindex,nofollow')],
-  ['health endpoint checks Resend without exposing secret', healthApi.includes('RESEND_API_KEY') && healthApi.includes('Boolean(process.env.RESEND_API_KEY)')],
-  ['email gateway authenticates Supabase user', emailApi.includes('/auth/v1/user') && emailApi.includes('Authorization: authorization')],
-  ['email gateway uses server-only Resend secret', emailApi.includes('process.env.RESEND_API_KEY') && emailApi.includes('api.resend.com/emails')],
-  ['email gateway idempotency', emailApi.includes("'Idempotency-Key': idempotencyKey")],
-  ['email templates avoid health payloads', emailApi.includes('aucune donnée de santé ni résultat clinique')],
-  ['no Resend secret committed', !/re_[A-Za-z0-9_-]{16,}/.test(`${runtime}\n${resetJs}\n${healthApi}\n${emailApi}`)]
+  ['Vercel health points to Supabase notification backend', healthApi.includes("notificationBackend: 'supabase-edge:pulse-notify'")],
+  ['notification function authenticates Supabase user', notifyFn.includes('supabase.auth.getUser()')],
+  ['notification function uses server-only Resend secret', notifyFn.includes('Deno.env.get("RESEND_API_KEY")') && notifyFn.includes('api.resend.com/emails')],
+  ['notification function idempotency', notifyFn.includes('"Idempotency-Key": idempotencyKey')],
+  ['notification templates avoid health payloads', notifyFn.includes('aucune donnée de santé ni résultat clinique')],
+  ['notification health action does not reveal secrets', notifyFn.includes('Boolean(resendKey)') && !notifyFn.includes('resendApiKey: resendKey')],
+  ['no Resend secret committed', !/re_[A-Za-z0-9_-]{16,}/.test(`${runtime}\n${resetJs}\n${healthApi}\n${notifyFn}`)]
 ];
 
 const failures = required.filter(([, ok]) => !ok).map(([label]) => label);
