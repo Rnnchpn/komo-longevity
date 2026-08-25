@@ -18,14 +18,12 @@
   <link rel="stylesheet" href="./clinical-motion-v1.css" />
   <link rel="stylesheet" href="./clinical-cockpit-v1.css" />
   <link rel="stylesheet" href="./professional-admin-v1.css" />
+  <link rel="stylesheet" href="./professional-application-v1.css" />
 </head>
 <body>
   <div id="appShell" class="app-shell" hidden>
     <aside class="sidebar" aria-label="Navigation principale">
-      <a class="brand" href="#home" aria-label="KŌMØ Pulse">
-        <span class="brand-mark">KŌMØ</span>
-        <span class="brand-product">Pulse</span>
-      </a>
+      <a class="brand" href="#home" aria-label="KŌMØ Pulse"><span class="brand-mark">KŌMØ</span><span class="brand-product">Pulse</span></a>
       <nav class="nav-stack" id="desktopNav"></nav>
       <div class="sidebar-foot">
         <a class="site-link" href="https://komolongevity.com/fr/" target="_blank" rel="noopener noreferrer"><span>Site KŌMØ</span><span aria-hidden="true">↗</span></a>
@@ -36,7 +34,7 @@
       <header class="topbar">
         <div><p class="eyebrow" id="pageEyebrow">KŌMØ PULSE</p><h1 id="pageTitle">Votre mobilité, dans le temps.</h1></div>
         <div class="topbar-actions">
-          <div class="mode-switch" id="modeSwitch" hidden><button type="button" data-mode="member" class="active">Membre</button><button type="button" data-mode="clinical">Clinical</button></div>
+          <div class="mode-switch" id="modeSwitch" hidden><button type="button" data-mode="member" class="active">Membre</button><button type="button" data-mode="clinical">Pro</button></div>
           <button class="icon-button" id="refreshButton" type="button" aria-label="Actualiser les données" title="Actualiser"><span aria-hidden="true">↻</span></button>
         </div>
       </header>
@@ -54,32 +52,14 @@
   <section id="authScreen" class="auth-screen">
     <div class="auth-brand">
       <a class="auth-logo" href="https://komolongevity.com/fr/" aria-label="Retour à KŌMØ"><span>KŌMØ</span><small>Longevity in Motion</small></a>
-      <div class="auth-manifesto">
-        <p class="eyebrow">KŌMØ PULSE</p>
-        <h1>Votre mobilité.<br><em>Une trajectoire à comprendre.</em></h1>
-        <p>Retrouvez vos repères, vos résultats et la prochaine étape de votre programme KŌMØ dans un seul espace.</p>
-      </div>
+      <div class="auth-manifesto"><p class="eyebrow">KŌMØ PULSE</p><h1>Votre mobilité.<br><em>Une trajectoire à comprendre.</em></h1><p>Retrouvez vos repères, vos résultats et la prochaine étape de votre programme KŌMØ dans un seul espace.</p></div>
       <div class="auth-visual" aria-hidden="true"><div class="visual-orbit orbit-one"></div><div class="visual-orbit orbit-two"></div><div class="visual-core"><span>Pulse</span></div></div>
       <p class="auth-note">KŌMØ Pulse ne remplace pas l'interprétation d'un professionnel de santé. Les résultats cliniques restent soumis à validation.</p>
     </div>
-    <div class="auth-panel-wrap">
-      <div class="auth-panel">
-        <div class="auth-heading"><span class="product-pill">Pulse</span><h2>Accédez à votre espace</h2><p>Vos résultats, votre trajectoire et vos prochaines étapes.</p></div>
-        <form id="loginForm" class="auth-form" novalidate>
-          <label><span>Adresse e-mail</span><input id="emailInput" name="email" type="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.com" required /></label>
-          <label><span>Mot de passe</span><div class="password-field"><input id="passwordInput" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="6" /><button id="togglePassword" class="password-toggle" type="button" aria-label="Afficher le mot de passe">Voir</button></div></label>
-          <div class="auth-options">
-            <label class="remember-row"><input id="rememberInput" type="checkbox" /><span class="custom-check" aria-hidden="true"></span><span>Rester connecté</span></label>
-            <button id="forgotPasswordButton" class="text-button" type="button">Mot de passe oublié ?</button>
-          </div>
-          <button id="loginButton" class="primary-button auth-submit" type="submit"><span>Se connecter</span><span aria-hidden="true">→</span></button>
-          <p id="authFeedback" class="auth-feedback" role="status"></p>
-        </form>
-        <div class="auth-divider"><span>Première visite ?</span></div>
-        <button id="signupButton" class="secondary-button" type="button">Créer mon espace Pulse</button>
-        <div class="auth-footer-links"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>
-      </div>
-    </div>
+    <div class="auth-panel-wrap"><div class="auth-panel"><div class="auth-heading"><span class="product-pill">Pulse</span><h2>Accédez à votre espace</h2><p>Vos résultats, votre trajectoire et vos prochaines étapes.</p></div>
+      <form id="loginForm" class="auth-form" novalidate><label><span>Adresse e-mail</span><input id="emailInput" name="email" type="email" autocomplete="email" inputmode="email" placeholder="vous@exemple.com" required /></label><label><span>Mot de passe</span><div class="password-field"><input id="passwordInput" name="password" type="password" autocomplete="current-password" placeholder="••••••••" required minlength="6" /><button id="togglePassword" class="password-toggle" type="button" aria-label="Afficher le mot de passe">Voir</button></div></label><div class="auth-options"><label class="remember-row"><input id="rememberInput" type="checkbox" /><span class="custom-check" aria-hidden="true"></span><span>Rester connecté</span></label><button id="forgotPasswordButton" class="text-button" type="button">Mot de passe oublié ?</button></div><button id="loginButton" class="primary-button auth-submit" type="submit"><span>Se connecter</span><span aria-hidden="true">→</span></button><p id="authFeedback" class="auth-feedback" role="status"></p></form>
+      <div class="auth-divider"><span>Première visite ?</span></div><button id="signupButton" class="secondary-button" type="button">Créer mon espace Pulse</button><div class="auth-footer-links"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>
+    </div></div>
   </section>
   <div id="toast" class="toast" role="status" hidden></div>
   <script src="./runtime.js"></script>
@@ -91,10 +71,12 @@
   <script src="./mobile-v1.js"></script>
   <script type="module" src="./patient-v4.js"></script>
   <script type="module" src="./pro-access-v1.js"></script>
+  <script type="module" src="./professional-application-v1.js"></script>
   <script type="module" src="./clinical-motion-v1.js"></script>
   <script type="module" src="./myocare-import-v1.js"></script>
   <script type="module" src="./clinical-cockpit-v1.js"></script>
   <script src="./clinical-cockpit-bridge-v1.js"></script>
   <script type="module" src="./professional-admin-v1.js"></script>
+  <script type="module" src="./professional-scope-v1.js"></script>
 </body>
 </html>
