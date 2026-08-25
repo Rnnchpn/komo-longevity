@@ -10,6 +10,9 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
+  "dependencies": {
+    "@vercel/functions": "3.9.5"
+  },
   "devDependencies": {
     "@storybook/addon-a11y": "10.5.10",
     "@storybook/html-vite": "10.5.10",
