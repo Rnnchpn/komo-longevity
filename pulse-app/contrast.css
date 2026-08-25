@@ -120,12 +120,143 @@
 .auth-footer-links a:hover{color:var(--auth-forest)}
 .auth-feedback{color:#8f554d}
 
+/* Member information architecture v2. */
+.patient-page-intro{
+  display:grid;
+  grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);
+  gap:clamp(32px,6vw,88px);
+  align-items:end;
+  padding:22px 4px 34px;
+  border-bottom:1px solid var(--line-strong);
+}
+.patient-page-intro h2{
+  margin:0;
+  max-width:760px;
+  font-size:clamp(34px,4.8vw,68px);
+  line-height:.96;
+  letter-spacing:-.055em;
+  font-weight:500;
+}
+.patient-page-intro>p{
+  margin:0;
+  max-width:570px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.75;
+}
+.patient-test-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  margin-top:18px;
+}
+.patient-action-card{
+  min-height:238px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.patient-action-card.featured{
+  background:linear-gradient(145deg,#f5f0e7 0%,#e5ece4 100%);
+  border-color:rgba(31,44,36,.16);
+}
+.patient-action-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+}
+.patient-action-card h3,
+.plan-priority-card h3,
+.plan-empty h3{
+  margin:38px 0 10px;
+  font-size:clamp(22px,2.4vw,34px);
+  letter-spacing:-.04em;
+  font-weight:500;
+}
+.patient-action-card p,
+.plan-priority-card p,
+.plan-empty p{
+  margin:0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.65;
+}
+.my-komo-hero{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:12px;
+  margin-top:18px;
+}
+.score-history{
+  display:grid;
+}
+.score-history-row{
+  display:grid;
+  grid-template-columns:1fr 90px 150px;
+  gap:20px;
+  align-items:center;
+  padding:15px 0;
+  border-top:1px solid var(--line);
+  font-size:11px;
+}
+.score-history-row span{color:var(--muted)}
+.score-history-row strong{font-size:22px;font-weight:500;letter-spacing:-.04em}
+.score-history-row small{text-align:right;color:var(--muted)}
+.plan-priority-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-top:18px;
+}
+.plan-priority-card{min-height:270px}
+.plan-state{
+  display:inline-flex;
+  margin-top:34px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+  color:var(--sage-deep);
+  font-size:10px;
+}
+.plan-empty{
+  grid-column:1/-1;
+  min-height:260px;
+  background:linear-gradient(145deg,#f9f7f1,#e9ede6);
+}
+.appointment-list{display:grid}
+.appointment-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:18px 2px;
+  border-top:1px solid var(--line);
+}
+.appointment-date strong,
+.appointment-date span{display:block}
+.appointment-date strong{font-size:13px;font-weight:500}
+.appointment-date span{margin-top:5px;color:var(--muted);font-size:11px}
+
+@media(max-width:1120px){
+  .patient-page-intro{grid-template-columns:1fr;gap:18px}
+  .my-komo-hero{grid-template-columns:1fr}
+  .plan-priority-grid{grid-template-columns:1fr 1fr}
+}
+
 @media(max-width:820px){
   .mobile-nav{
     background:rgba(32,40,32,.97);
     border-top-color:rgba(255,255,255,.08);
+    overflow-x:auto;
+    justify-content:flex-start;
+    scrollbar-width:none;
   }
-  .mobile-nav .nav-item{color:#b6beb6}
+  .mobile-nav::-webkit-scrollbar{display:none}
+  .mobile-nav .nav-item{
+    color:#b6beb6;
+    flex:0 0 74px;
+    min-width:74px;
+  }
   .mobile-nav .nav-item.active{color:var(--contrast-text)}
   .auth-brand{
     background:
@@ -133,4 +264,16 @@
       linear-gradient(150deg,#ebe4d8 0%,#f4f0e8 58%,#dfe5dc 100%);
   }
   .auth-panel-wrap{box-shadow:none}
+  .patient-page-intro{padding-top:6px}
+  .patient-page-intro h2{font-size:42px}
+  .patient-test-grid{grid-template-columns:1fr}
+  .plan-priority-grid{grid-template-columns:1fr}
+  .score-history-row{grid-template-columns:1fr 56px 100px}
+}
+
+@media(max-width:520px){
+  .patient-page-intro h2{font-size:36px}
+  .patient-action-card{min-height:210px}
+  .appointment-row{align-items:flex-start}
+  .appointment-meta{padding-top:2px}
 }
