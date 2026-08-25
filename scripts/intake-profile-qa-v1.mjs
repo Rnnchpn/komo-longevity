@@ -18,7 +18,7 @@ const checks=[
  ['patient Motion request CTA',intake.includes('Demander KŌMØ Motion')&&intake.includes("action:'submit'")],
  ['professional request queue',intake.includes("action:S.role==='admin'?'list_admin':'list_pro'")&&intake.includes('Demandes')],
  ['admin assignment',intake.includes("action:'assign'")&&intake.includes('organization_id')],
- ['professional accepts into Motion',intake.includes("action:'accept'")&&intake.includes('komo_clinical_assessment')&&intake.includes("'motion'"))],
+ ['professional accepts into Motion',intake.includes("action:'accept'")&&intake.includes('komo_clinical_assessment')&&intake.includes("'motion'")],
  ['server requires authenticated user',fn.includes('auth.getUser(token)')&&fn.includes('unauthorized')],
  ['server profile completeness gate',fn.includes('profile_incomplete')&&fn.includes('birth_date')&&fn.includes('sex_at_birth')],
  ['server patient creation and Motion assessment',fn.includes('from("patients")')&&fn.includes('create_pulse_assessment')],
