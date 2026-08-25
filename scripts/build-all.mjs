@@ -63,7 +63,8 @@ const scripts = [
   'scripts/pulse-platform-qa.mjs',
   'scripts/build-pulse-v12.mjs',
   'scripts/pulse-v12-qa.mjs',
-  'scripts/professional-admin-qa-v1.mjs'
+  'scripts/professional-admin-qa-v1.mjs',
+  'scripts/professional-scope-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
