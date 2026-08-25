@@ -29,6 +29,23 @@
 
   window.KOMO_PULSE_CONTENT = Object.freeze({ PUBLIC_LINKS, TEXT_REPLACEMENTS });
 
+  function loadEcosystemLayer() {
+    if (!document.querySelector('link[data-komo-ecosystem]')) {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = './ecosystem-v1.css';
+      css.dataset.komoEcosystem = '1';
+      document.head.appendChild(css);
+    }
+    if (!document.querySelector('script[data-komo-ecosystem]')) {
+      const js = document.createElement('script');
+      js.type = 'module';
+      js.src = './ecosystem-v1.js';
+      js.dataset.komoEcosystem = '1';
+      document.body.appendChild(js);
+    }
+  }
+
   function replaceTextInNode(node) {
     if (!node || node.nodeType !== Node.TEXT_NODE || !node.nodeValue) return;
     let next = node.nodeValue;
@@ -79,6 +96,7 @@
   });
 
   document.addEventListener('DOMContentLoaded', () => {
+    loadEcosystemLayer();
     applyAll(document);
     observer.observe(document.body, { subtree: true, childList: true, characterData: true });
     scheduleApply();
