@@ -13,6 +13,8 @@ const checks=[
  ['Pulse hides legacy Explorer primary nav',pulseCss.includes('[data-route="explore"]')],
  ['Pulse ecosystem links public Method Library Science Network', ['methode/','/media','science/','network/'].every(x=>pulseJs.includes(x))],
  ['Pulse supports contextual entry routes', ['tests','motion','clinical','professional'].every(x=>pulseJs.includes(x))],
+ ['Pulse honors professional mode deep links',pulseJs.includes("mode==='professional'")&&pulseJs.includes('komo_pulse_pro_intent')],
+ ['Pulse honors signup intent deep links',pulseJs.includes("intent==='signup'")&&pulseJs.includes('Créer votre espace Pulse')],
  ['Public site receives global ecosystem assets',homeFr.includes('ecosystem-public-v1.css')&&homeFr.includes('ecosystem-public-v1.js')],
  ['Public site contextual Pulse bridge',publicJs.includes('pulse.komolongevity.com/?entry=')&&publicJs.includes("path.includes('/motion')")&&publicJs.includes("path.includes('/clinical')")],
  ['Public switcher has mobile rules',publicCss.includes('@media(max-width:700px)')]
