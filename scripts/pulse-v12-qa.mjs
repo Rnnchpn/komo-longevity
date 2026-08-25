@@ -8,6 +8,10 @@ const app = await readFile(join(root, 'pulse-app', 'app.js'), 'utf8');
 const css = await readFile(join(root, 'pulse-app', 'styles.css'), 'utf8');
 const runtime = await readFile(join(root, 'pulse-app', 'runtime.js'), 'utf8');
 const contentConfig = await readFile(join(root, 'pulse-app', 'content-config.js'), 'utf8');
+const clinicalMotion = await readFile(join(root, 'pulse-app', 'clinical-motion-v1.js'), 'utf8');
+const clinicalMotionCss = await readFile(join(root, 'pulse-app', 'clinical-motion-v1.css'), 'utf8');
+const myocareImport = await readFile(join(root, 'pulse-app', 'myocare-import-v1.js'), 'utf8');
+const proAccess = await readFile(join(root, 'pulse-app', 'pro-access-v1.js'), 'utf8');
 const vercelRaw = await readFile(join(root, 'vercel.json'), 'utf8');
 const vercelConfig = JSON.parse(vercelRaw);
 const resetHtml = await readFile(join(root, 'pulse-app', 'reset', 'index.html'), 'utf8');
@@ -64,6 +68,15 @@ const required = [
   ['Responsive mobile nav', css.includes('@media(max-width:820px)') && css.includes('.mobile-nav')],
   ['Reduced motion support', css.includes('prefers-reduced-motion')],
   ['Preview noindex', html.includes('noindex,nofollow')],
+  ['professional role gate preserved', proAccess.includes("['admin','professional'].includes(role)") && html.includes('./pro-access-v1.js')],
+  ['Clinical Motion module loaded', html.includes('./clinical-motion-v1.js') && html.includes('./clinical-motion-v1.css') && clinicalMotionCss.includes('.clm-hero')],
+  ['Motion POC defaults to functional profile', clinicalMotion.includes('PROFILE_A_FUNCTIONAL') && clinicalMotion.includes('Myodev dans score global')],
+  ['Motion calculation uses server RPC', clinicalMotion.includes("rpc('calculate_motion_v04'") && clinicalMotion.includes("PROTOCOL='motion-v0.4'")],
+  ['Motion core captures v4 domains', ['M-FUN-01','M-FUN-02','M-FUN-03','M-FUN-04','M-FUN-05','M-FUN-06','M-FUN-07'].every((code) => clinicalMotion.includes(code))],
+  ['MyoCare importer loaded', html.includes('./myocare-import-v1.js') && myocareImport.includes("CONTRACT='myodev-contract-v0.1'")],
+  ['MyoCare supports Excel CSV JSON', myocareImport.includes("['xlsx','xls']") && myocareImport.includes("ext==='csv'") && myocareImport.includes("ext==='json'")],
+  ['MyoCare provenance and idempotency', myocareImport.includes("from('myodev_imports')") && myocareImport.includes('fileHash') && myocareImport.includes('row_hash')],
+  ['MyoCare metrics map to v4 indicators', ['M-MYO-01','M-MYO-02','M-MYO-03','M-MYO-04','M-MYO-05','M-MYO-06','M-MYO-07'].every((code) => myocareImport.includes(code))],
   ['Vercel health points to Supabase notification backend', healthApi.includes("notificationBackend: 'supabase-edge:pulse-notify'")],
   ['notification function authenticates Supabase user', notifyFn.includes('supabase.auth.getUser()')],
   ['notification function uses server-only Resend secret', notifyFn.includes('Deno.env.get("RESEND_API_KEY")') && notifyFn.includes('api.resend.com/emails')],
