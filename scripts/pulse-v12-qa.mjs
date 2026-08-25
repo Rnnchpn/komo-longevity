@@ -11,6 +11,9 @@ const contentConfig = await readFile(join(root, 'pulse-app', 'content-config.js'
 const clinicalMotion = await readFile(join(root, 'pulse-app', 'clinical-motion-v1.js'), 'utf8');
 const clinicalMotionCss = await readFile(join(root, 'pulse-app', 'clinical-motion-v1.css'), 'utf8');
 const myocareImport = await readFile(join(root, 'pulse-app', 'myocare-import-v1.js'), 'utf8');
+const clinicalCockpit = await readFile(join(root, 'pulse-app', 'clinical-cockpit-v1.js'), 'utf8');
+const clinicalCockpitCss = await readFile(join(root, 'pulse-app', 'clinical-cockpit-v1.css'), 'utf8');
+const clinicalCockpitBridge = await readFile(join(root, 'pulse-app', 'clinical-cockpit-bridge-v1.js'), 'utf8');
 const proAccess = await readFile(join(root, 'pulse-app', 'pro-access-v1.js'), 'utf8');
 const vercelRaw = await readFile(join(root, 'vercel.json'), 'utf8');
 const vercelConfig = JSON.parse(vercelRaw);
@@ -77,6 +80,14 @@ const required = [
   ['MyoCare supports Excel CSV JSON', myocareImport.includes("['xlsx','xls']") && myocareImport.includes("ext==='csv'") && myocareImport.includes("ext==='json'")],
   ['MyoCare provenance and idempotency', myocareImport.includes("from('myodev_imports')") && myocareImport.includes('fileHash') && myocareImport.includes('row_hash')],
   ['MyoCare metrics map to v4 indicators', ['M-MYO-01','M-MYO-02','M-MYO-03','M-MYO-04','M-MYO-05','M-MYO-06','M-MYO-07'].every((code) => myocareImport.includes(code))],
+  ['Clinical cockpit assets loaded', html.includes('./clinical-cockpit-v1.js') && html.includes('./clinical-cockpit-v1.css') && html.includes('./clinical-cockpit-bridge-v1.js')],
+  ['Clinical cockpit seven operator views', ['dashboard','patients','motion','myocare','validation','plans','agenda'].every((id) => clinicalCockpit.includes(`'${id}'`))],
+  ['Clinical cockpit uses canonical backend tables', ['patients','assessments','scores','myodev_imports','priorities','clinical_context','organization_appointments'].every((table) => clinicalCockpit.includes(`'${table}'`) || clinicalCockpit.includes(table))],
+  ['Clinical cockpit explicit score release gate', clinicalCockpit.includes("release_status:'clinician_reviewed'") && clinicalCockpit.includes("release_status:'released'")],
+  ['Clinical cockpit validates plan priorities', clinicalCockpit.includes("validation_status:'validated'") && clinicalCockpit.includes("validation_status:'draft'")],
+  ['Clinical cockpit creates organization appointments', clinicalCockpit.includes("from('organization_appointments').insert") && clinicalCockpit.includes("appointment_type")],
+  ['Clinical patient context synchronized with Motion', clinicalCockpitBridge.includes('komo:clinical-patient-changed') && clinicalCockpitBridge.includes('#clmPatient') && clinicalCockpitBridge.includes('#clmAssessment')],
+  ['Clinical cockpit responsive tablet mobile', clinicalCockpitCss.includes('@media(max-width:820px)') && clinicalCockpitCss.includes('@media(max-width:520px)')],
   ['Vercel health points to Supabase notification backend', healthApi.includes("notificationBackend: 'supabase-edge:pulse-notify'")],
   ['notification function authenticates Supabase user', notifyFn.includes('supabase.auth.getUser()')],
   ['notification function uses server-only Resend secret', notifyFn.includes('Deno.env.get("RESEND_API_KEY")') && notifyFn.includes('api.resend.com/emails')],
