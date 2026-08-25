@@ -5,6 +5,26 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        }
+      ],
+      "destination": "/pulse-v12/"
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        }
+      ],
+      "destination": "/pulse-v12/$1"
+    },
+    {
       "source": "/masterclass",
       "destination": "/assets/masterclass-v2/"
     },
@@ -183,6 +203,19 @@
     },
     {
       "source": "/assets/pulsedemo/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/pulse-v12/:path*",
       "headers": [
         {
           "key": "Cache-Control",
