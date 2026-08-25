@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f4f1eb" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>KŌMØ Pulse — Nouveau mot de passe</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../styles.css" />
+  <style>
+    .reset-page{min-height:100svh;background:#f4f1eb;display:grid;place-items:center;padding:24px}.reset-card{width:min(100%,520px);background:#fff;border:1px solid rgba(27,30,28,.09);border-radius:28px;padding:clamp(28px,5vw,48px);box-shadow:0 22px 70px rgba(27,30,28,.08)}.reset-brand{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:54px}.reset-brand strong{letter-spacing:.18em;font-size:20px}.reset-brand span{font-size:13px;color:#788078}.reset-card h1{font:500 clamp(30px,5vw,43px)/1.06 Manrope,sans-serif;letter-spacing:-.04em;margin:0 0 12px}.reset-card>p{color:#747a75;line-height:1.6;margin:0 0 32px}.reset-form{display:grid;gap:18px}.reset-form label{display:grid;gap:8px;font-size:13px;font-weight:600}.reset-form input{width:100%;border:1px solid rgba(27,30,28,.14);border-radius:14px;padding:15px 16px;font:inherit;background:#fbfaf7;outline:none}.reset-form input:focus{border-color:#7d8b80;box-shadow:0 0 0 3px rgba(125,139,128,.12)}.reset-form button{border:0;border-radius:14px;padding:16px 18px;background:#1f2421;color:white;font:600 14px Manrope,sans-serif;cursor:pointer}.reset-form button:disabled{opacity:.5;cursor:wait}.reset-status{min-height:22px;font-size:13px;color:#8b4b45}.reset-back{display:inline-block;margin-top:22px;color:#626b64;font-size:13px;text-decoration:none}.reset-back:hover{text-decoration:underline}
+  </style>
+</head>
+<body>
+  <main class="reset-page">
+    <section class="reset-card">
+      <div class="reset-brand"><strong>KŌMØ</strong><span>Pulse</span></div>
+      <h1>Choisissez votre nouveau mot de passe.</h1>
+      <p>Le changement est appliqué à votre compte KŌMØ Pulse existant. Vos données et votre historique restent inchangés.</p>
+      <form id="resetForm" class="reset-form">
+        <label>Nouveau mot de passe<input id="password" type="password" autocomplete="new-password" minlength="8" required /></label>
+        <label>Confirmer le mot de passe<input id="passwordConfirm" type="password" autocomplete="new-password" minlength="8" required /></label>
+        <button id="submitButton" type="submit">Enregistrer le nouveau mot de passe</button>
+        <p id="status" class="reset-status" role="status"></p>
+      </form>
+      <a class="reset-back" href="../">← Retour à KŌMØ Pulse</a>
+    </section>
+  </main>
+  <script type="module" src="./reset.js"></script>
+</body>
+</html>
