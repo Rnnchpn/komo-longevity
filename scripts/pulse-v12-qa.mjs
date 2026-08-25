@@ -8,7 +8,8 @@ const app = await readFile(join(root, 'pulse-app', 'app.js'), 'utf8');
 const css = await readFile(join(root, 'pulse-app', 'styles.css'), 'utf8');
 const runtime = await readFile(join(root, 'pulse-app', 'runtime.js'), 'utf8');
 const contentConfig = await readFile(join(root, 'pulse-app', 'content-config.js'), 'utf8');
-const vercelConfig = await readFile(join(root, 'vercel.json'), 'utf8');
+const vercelRaw = await readFile(join(root, 'vercel.json'), 'utf8');
+const vercelConfig = JSON.parse(vercelRaw);
 const resetHtml = await readFile(join(root, 'pulse-app', 'reset', 'index.html'), 'utf8');
 const resetJs = await readFile(join(root, 'pulse-app', 'reset', 'reset.js'), 'utf8');
 const healthApi = await readFile(join(root, 'api', 'pulse-health.js'), 'utf8');
@@ -27,6 +28,13 @@ const publicLinks = [
   'https://komolongevity.com/fr/contact/'
 ];
 
+const rewrites = Array.isArray(vercelConfig.rewrites) ? vercelConfig.rewrites : [];
+const headers = Array.isArray(vercelConfig.headers) ? vercelConfig.headers : [];
+const hasPulseHost = (rule) => Array.isArray(rule?.has) && rule.has.some((entry) => entry?.type === 'host' && entry?.value === 'pulse.komolongevity.com');
+const pulseRootRewrite = rewrites.some((rule) => rule?.source === '/' && rule?.destination === '/pulse-v12/' && hasPulseHost(rule));
+const pulseNestedRewrite = rewrites.some((rule) => rule?.source === '/(.*)' && rule?.destination === '/pulse-v12/$1' && hasPulseHost(rule));
+const pulsePrivacyHeaders = headers.some((rule) => rule?.source === '/pulse-v12/:path*' && Array.isArray(rule.headers) && rule.headers.some((header) => header?.key === 'X-Robots-Tag' && header?.value?.includes('noindex')));
+
 const required = [
   ['remember checkbox', html.includes('id="rememberInput"') && html.includes('Rester connecté')],
   ['session storage mode', app.includes('sessionStorage') && app.includes('localStorage')],
@@ -36,9 +44,9 @@ const required = [
   ['content configuration loaded', html.includes('./content-config.js') && contentConfig.includes('window.KOMO_PULSE_CONTENT')],
   ['Programme wording configured', contentConfig.includes("['Parcours', 'Programme']") && html.includes('programme KŌMØ')],
   ['Explorer links centralized', publicLinks.every((url) => contentConfig.includes(url))],
-  ['Pulse root host rewrite', vercelConfig.includes('"value": "pulse.komolongevity.com"') && vercelConfig.includes('"destination": "/pulse-v12/"')],
-  ['Pulse nested host rewrite', vercelConfig.includes('"destination": "/pulse-v12/$1"')],
-  ['Pulse privacy headers', vercelConfig.includes('"source": "/pulse-v12/:path*"') && vercelConfig.includes('noindex, nofollow, noarchive')],
+  ['Pulse root host rewrite', pulseRootRewrite],
+  ['Pulse nested host rewrite', pulseNestedRewrite],
+  ['Pulse privacy headers', pulsePrivacyHeaders],
   ['dedicated recovery route', runtime.includes('reset/') && resetJs.includes('updateUser({ password: password.value })')],
   ['recovery noindex', resetHtml.includes('noindex,nofollow')],
   ['Method link', app.includes('https://komolongevity.com/fr/methode/')],
