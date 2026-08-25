@@ -9,23 +9,15 @@ export default function handler(request, response) {
     return response.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
 
-  const checks = {
-    supabaseProject: true,
-    resendApiKey: Boolean(process.env.RESEND_API_KEY),
-    emailFrom: Boolean(process.env.PULSE_EMAIL_FROM),
-    emailReplyTo: Boolean(process.env.PULSE_EMAIL_REPLY_TO),
-    appOrigin: Boolean(process.env.PULSE_APP_ORIGIN)
-  };
-
-  const requiredReady = checks.supabaseProject && checks.resendApiKey && checks.emailFrom;
-
-  return response.status(requiredReady ? 200 : 503).json({
-    ok: requiredReady,
+  return response.status(200).json({
+    ok: true,
     service: 'komo-pulse',
     projectRef: PROJECT_REF,
-    checks,
-    note: requiredReady
-      ? 'Pulse infrastructure is ready for Supabase + Resend transactional email.'
-      : 'One or more server-side email variables are not configured. No secret value is exposed.'
+    identityBackend: 'supabase-auth',
+    dataBackend: 'supabase-postgres',
+    notificationBackend: 'supabase-edge:pulse-notify',
+    authEmailBackend: 'supabase-auth-custom-smtp',
+    productionOrigin: 'https://pulse.komolongevity.com/',
+    note: 'Server-side email secrets are held in Supabase configuration and are never exposed by this endpoint.'
   });
 }
