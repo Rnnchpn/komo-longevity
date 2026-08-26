@@ -9,17 +9,18 @@ const [html,booking,bookingCss,pro,proCss,follow,mig,rpc]=await Promise.all([
 const parseFiles=['booking-layer-v1.js','pro-architecture-v2.js','pro-followup-v1.js'];
 const syntax=parseFiles.map(f=>[f,spawnSync(process.execPath,['--check',join(root,'pulse-app',f)],{encoding:'utf8'})]);
 const hasPatientBookingLabel=/function\s+keepPatientBookingLabel\s*\(/.test(pro)&&/data-route=[\\"']documents[\\"']/.test(pro)&&/RDV/.test(pro);
-const proModeHidesPatientNav=/setHidden\(patientD,pro\)/.test(pro)&&/setHidden\(patientM,pro\)/.test(pro)&&/setHidden\(proD,!pro\)/.test(pro)&&/setHidden\(proM,!pro\)/.test(pro)&&proCss.includes('.komo-pro-mode .mobile-nav#mobileNav{display:none!important}');
+const centerModeHidesPatientNav=/setHidden\(patientD,centerMode\)/.test(pro)&&/setHidden\(patientM,centerMode\)/.test(pro)&&/setHidden\(proD,!centerMode\)/.test(pro)&&/setHidden\(proM,!centerMode\)/.test(pro)&&proCss.includes('.komo-pro-mode .mobile-nav#mobileNav{display:none!important}');
 const checks=[
  ['all new JavaScript parses',syntax.every(([,r])=>r.status===0)],
  ['planning assets loaded',html.includes('./booking-layer-v1.js')&&html.includes('./booking-layer-v1.css')],
- ['pro architecture assets loaded',html.includes('./pro-architecture-v2.js')&&html.includes('./pro-architecture-v2.css')],
- ['professional mode named Clinical Accès PRO',pro.includes('Clinical Accès PRO')&&pro.includes('CLINICAL ACCÈS PRO')],
- ['Pro navigation has Patients',pro.includes("navItem('patients','Patients'")],
- ['Pro navigation has Agenda',pro.includes("navItem('planning','Agenda'")],
+ ['center architecture assets loaded',html.includes('./pro-architecture-v2.js')&&html.includes('./pro-architecture-v2.css')],
+ ['professional mode presented as Espace centre',pro.includes('Espace centre')&&pro.includes('KŌMØ CENTRE')],
+ ['Center navigation has Centre',pro.includes("navItem('dashboard','Centre'")],
+ ['Center navigation has Patients',pro.includes("navItem('patients','Patients'")],
+ ['Center navigation has Agenda',pro.includes("navItem('planning','Agenda'")],
  ['patient navigation keeps RDV label',hasPatientBookingLabel],
- ['patient navigation hidden in Pro mode',proModeHidesPatientNav],
- ['legacy patient tabs absent from Pro navigation',!pro.includes("navItem('tests'")&&!pro.includes("navItem('plan'")&&!pro.includes("navItem('appointments'")],
+ ['patient navigation hidden in Center mode',centerModeHidesPatientNav],
+ ['legacy patient tabs absent from Center navigation',!pro.includes("navItem('tests'")&&!pro.includes("navItem('plan'")&&!pro.includes("navItem('appointments'")],
  ['patient selects center and service',booking.includes('kbookPatientOrg')&&booking.includes('data-kbook-service="motion"')&&booking.includes('data-kbook-service="clinical"')],
  ['patient availability uses canonical slots RPC',booking.includes("rpc('komo_booking_slots'")],
  ['patient booking is transactional RPC',booking.includes("rpc('book_komo_appointment'")],
@@ -35,7 +36,7 @@ const checks=[
  ['booking RPC links service request to center and professional',rpc.includes("status='scheduled'")&&rpc.includes('assigned_professional_user_id=prof')&&rpc.includes('assigned_organization_id=p_organization_id')],
  ['booking RPC uses advisory transaction lock',rpc.includes('pg_advisory_xact_lock')],
  ['booking styling responsive',bookingCss.includes('@media(max-width:900px)')],
- ['Pro internal tabs visually removed',proCss.includes('.komo-pro-mode .kcp-tabs{display:none!important}')]
+ ['Center internal tabs visually removed',proCss.includes('.komo-pro-mode .kcp-tabs{display:none!important}')]
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([n])=>n);
 if(failed.length){for(const [f,r] of syntax)if(r.status!==0)console.error(`[${f}] ${r.stderr||r.stdout}`);console.error('[booking-architecture-qa-v1] failed: '+failed.join(', '));process.exit(1)}
