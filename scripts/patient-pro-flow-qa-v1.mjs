@@ -13,11 +13,16 @@ const checks=[
  ['questionnaire is persisted in baseline response',tests.includes('questionnaire: readKomoQuestionnaire(event.currentTarget)')],
  ['Chair Stand timer is loaded',index.includes('./chair-timer-v1.js')&&index.includes('./chair-timer-v1.css')],
  ['Chair Stand timer is thirty seconds and gates submit',timer.includes('const DURATION = 30')&&timer.includes("form.dataset.chairTimerState = 'complete'")&&timer.includes('Lancez et terminez d’abord le minuteur')],
- ['patient cards explain when and how',scope.includes('Quand')&&scope.includes('Comment')&&scope.includes('Commencer le KŌMØ Check')],
+ ['patient guidance layer is loaded',index.includes('./patient-tests-scope-v2.js')&&index.includes('./patient-tests-scope-v2.css')],
+ ['patient cards explain exactly when and how to start',scope.includes('Quand démarrer')&&scope.includes('Comment faire')&&scope.includes('Dès votre inscription')&&scope.includes('appuyez sur Démarrer')],
+ ['free result is separated from Motion Score',scope.includes('PULSE FREE · PREMIER RÉSULTAT')&&scope.includes('ne correspond pas au KŌMØ Motion Score')],
+ ['free result routes to Motion professional booking',scope.includes('Je trouve un professionnel pour KŌMØ Motion')&&scope.includes("location.hash='documents'")],
+ ['Motion handoff includes deeper questionnaire and Myodev acquisition',scope.includes('Questionnaire approfondi')&&scope.includes('Acquisition Myodev')&&scope.includes('acquisition instrumentée Myodev')],
  ['patient scope has no body-wide mutation observer',!scope.includes('new MutationObserver')],
  ['Pro patient directory is searchable',pro.includes('kfollowSearch')&&pro.includes('filterRows')],
  ['Pro directory labels visibility scope',pro.includes('Tous les patients')&&pro.includes('Patients du centre')&&pro.includes('Mes patients')],
  ['professional dashboard preserves RLS patient boundary',proFn.includes("const pRes=await uc.from('patients')")&&proFn.includes("visibility=role==='admin'?'global':managedCenterIds.length?'center':'assigned'")],
+ ['professional preparation uses the same three free steps',proFn.includes("const keys=['baseline','chair_stand','two_step']")],
  ['all patient/pro flow JavaScript parses',syntax.every(([,r])=>r.status===0)]
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([n])=>n);if(failed.length){for(const [f,r] of syntax)if(r.status!==0)console.error(`[${f}] ${r.stderr||r.stdout}`);console.error('[patient-pro-flow-qa-v1] failed: '+failed.join(', ')+` (itemCount=${itemCount})`);process.exit(1)}console.log(`[patient-pro-flow-qa-v1] ${checks.length} checks passed.`);
