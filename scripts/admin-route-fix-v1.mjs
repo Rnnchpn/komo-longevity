@@ -1,7 +1,20 @@
 import { readFile, writeFile } from 'node:fs/promises';
 const path = 'pulse-app/app.js';
 let src = await readFile(path, 'utf8');
-src = src.replace("return['home','results','path','documents','explore','clinical','profile'].includes(route)?route:'home'", "if(route==='admin'&&state.role!=='admin')return'home';return['home','results','path','documents','explore','clinical','profile','admin'].includes(route)?route:'home'");
-src = src.replace("profile:['VOTRE COMPTE','Profil & accès.',renderProfile]};", "profile:['VOTRE COMPTE','Profil & accès.',renderProfile],admin:['KŌMØ · ADMIN','Console KŌMØ',()=>'<div data-admin-route-mount></div>']};");
+
+if(!src.includes("route==='admin'&&state.role!=='admin'")){
+  src = src.replace(
+    "return['home','results','path','documents','explore','clinical','profile'].includes(route)?route:'home'",
+    "if(route==='admin'&&state.role!=='admin')return'home';return['home','results','path','documents','explore','clinical','profile','admin'].includes(route)?route:'home'"
+  );
+}
+
+if(!src.includes('komo:admin-route-ready')){
+  src = src.replace(
+    'function renderRoute(route){renderNavigation();',
+    "function renderRoute(route){renderNavigation();if(route==='admin'){els.pageEyebrow.textContent='KŌMØ · ADMIN';els.pageTitle.textContent='Console KŌMØ';if(!els.viewRoot.querySelector('[data-admin-console-v2]')&&!els.viewRoot.querySelector('[data-admin-route-mount]'))els.viewRoot.innerHTML='<div data-admin-route-mount></div>';window.dispatchEvent(new CustomEvent('komo:admin-route-ready'));return}"
+  );
+}
+
 await writeFile(path, src);
-console.log('[admin-route-fix-v1] admin route enabled');
+console.log('[admin-route-fix-v1] native admin route hardened');
