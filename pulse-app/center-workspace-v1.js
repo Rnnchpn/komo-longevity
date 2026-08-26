@@ -40,8 +40,8 @@
     const head=document.querySelector('.kcp-head');
     if(head){
       setText(head.querySelector('.eyebrow'),'KŌMØ CENTRE');
-      setText(head.querySelector('h2'),'Pilotez votre activité KŌMØ.');
-      setText(head.querySelector('p'),'Patients, bilans, rendez-vous, équipe et messages réunis dans le même espace centre.');
+      setText(head.querySelector('h2'),'Votre centre, en un seul espace.');
+      setText(head.querySelector('p'),'Patients, bilans, rendez-vous, équipe et messages réunis autour du même centre.');
     }
   }
 
