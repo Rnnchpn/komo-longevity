@@ -10,7 +10,6 @@ let client=null;
 
 function storage(){return localStorage.getItem(REMEMBER_KEY)==='1'?localStorage:sessionStorage}
 function sb(){if(!client)client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return client}
-function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function authVisible(){const a=document.querySelector('#authScreen');return !!a&&!a.hidden}
 function getAudience(){const q=new URLSearchParams(location.search);if(q.get('mode')==='professional')return'professional';return sessionStorage.getItem(AUDIENCE_KEY)||'patient'}
 
@@ -52,19 +51,26 @@ function openCreate(){const m=modal();m.hidden=false;m.innerHTML=`<div class="pr
 }
 
 function payloadFrom(form){const fd=new FormData(form);return{action:'submit',access_scope:String(fd.get('access_scope')||''),professional_title:String(fd.get('professional_title')||'').trim(),organization_name:String(fd.get('organization_name')||'').trim(),territory:String(fd.get('territory')||'').trim(),website:String(fd.get('website')||'').trim(),registration_system:String(fd.get('registration_system')||'').trim(),registration_identifier:String(fd.get('registration_identifier')||'').trim(),message:String(fd.get('message')||'').trim()}}
+function signupMetadata(payload){return{komo_pro_application:true,komo_pro_access_scope:payload.access_scope,komo_pro_title:payload.professional_title,komo_pro_organization:payload.organization_name,komo_pro_territory:payload.territory,komo_pro_website:payload.website||'',komo_pro_registration_system:payload.registration_system||'',komo_pro_registration_identifier:payload.registration_identifier||'',komo_pro_message:payload.message||''}}
 async function submitApplication(c,payload){const {data,error}=await c.functions.invoke('professional-application',{body:payload});if(error)throw new Error(error.message||'Impossible d’envoyer la demande.');if(data?.error)throw new Error(data.detail||data.error);return data}
+async function ensureApplication(c,payload){
+  const {data:statusData,error:statusError}=await c.functions.invoke('professional-application',{body:{action:'status'}});
+  if(!statusError&&statusData?.applications?.some(a=>['submitted','under_review','approved'].includes(a.status)))return{ok:true,existing:true};
+  try{return await submitApplication(c,payload)}catch(err){const msg=String(err?.message||err);if(msg.includes('application_already_open'))return{ok:true,existing:true};throw err}
+}
 async function submitCreate(e){
   e.preventDefault();const f=e.currentTarget,out=document.querySelector('#proCreateFeedback'),btn=f.querySelector('button[type="submit"]');
   const fd=new FormData(f),email=String(fd.get('email')||'').trim(),password=String(fd.get('password')||''),payload=payloadFrom(f);
   if(password.length<6)return feedback(out,'Le mot de passe doit contenir au moins 6 caractères.');
-  btn.disabled=true;feedback(out,'Création du compte…');
+  btn.disabled=true;feedback(out,'Création du compte et enregistrement de la demande…');
   try{
     sessionStorage.setItem(PRO_INTENT,'1');sessionStorage.setItem(AUDIENCE_KEY,'professional');
-    const c=sb();const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:'https://pulse.komolongevity.com/?mode=professional'}});
+    localStorage.setItem(PENDING_KEY,JSON.stringify(payload));
+    const c=sb();const {data,error}=await c.auth.signUp({email,password,options:{emailRedirectTo:'https://pulse.komolongevity.com/?mode=professional',data:signupMetadata(payload)}});
     if(error)throw error;
-    if(data?.session){await submitApplication(c,payload);localStorage.removeItem(PENDING_KEY);feedback(out,'Compte créé. Votre demande professionnelle a été transmise.',true);setTimeout(()=>{location.href='https://pulse.komolongevity.com/?mode=professional'},900)}
-    else{localStorage.setItem(PENDING_KEY,JSON.stringify(payload));feedback(out,'Compte créé. Confirmez votre adresse e-mail : votre demande professionnelle sera transmise automatiquement à votre première connexion.',true)}
-  }catch(err){const msg=String(err?.message||err);feedback(out,msg.includes('already registered')?'Un compte existe déjà avec cette adresse. Fermez ce formulaire puis connectez-vous dans l’onglet Professionnel.':msg)}finally{btn.disabled=false}
+    if(data?.session){await ensureApplication(c,payload);localStorage.removeItem(PENDING_KEY);feedback(out,'Compte créé. Votre demande professionnelle est enregistrée et en attente de validation KŌMØ.',true);setTimeout(()=>{location.href='https://pulse.komolongevity.com/?mode=professional'},900)}
+    else{feedback(out,'Compte créé et demande enregistrée. Confirmez maintenant votre adresse e-mail ; votre accès professionnel restera bloqué jusqu’à validation KŌMØ.',true)}
+  }catch(err){const msg=String(err?.message||err);feedback(out,msg.includes('already registered')?'Un compte existe déjà avec cette adresse. Fermez ce formulaire puis connectez-vous dans l’onglet Professionnel pour finaliser votre demande.':msg)}finally{btn.disabled=false}
 }
 function feedback(el,msg,success=false){if(!el)return;el.textContent=msg;el.classList.toggle('success',success)}
 
@@ -72,7 +78,7 @@ async function attemptPending(){
   const raw=localStorage.getItem(PENDING_KEY);if(!raw)return;
   let payload;try{payload=JSON.parse(raw)}catch{localStorage.removeItem(PENDING_KEY);return}
   const c=sb(),{data:{session}}=await c.auth.getSession();if(!session?.user)return;
-  try{await submitApplication(c,payload);localStorage.removeItem(PENDING_KEY);sessionStorage.setItem(PRO_INTENT,'1');showToast('Votre demande de compte professionnel a été transmise à KŌMØ.')}catch(err){const msg=String(err?.message||err);if(msg.includes('application_already_open'))localStorage.removeItem(PENDING_KEY)}
+  try{await ensureApplication(c,payload);localStorage.removeItem(PENDING_KEY);sessionStorage.setItem(PRO_INTENT,'1');showToast('Votre demande de compte professionnel est bien enregistrée et en attente de validation KŌMØ.')}catch(err){console.error('[pro-application-recovery]',err)}
 }
 function showToast(msg){const t=document.querySelector('#toast');if(t){t.textContent=msg;t.hidden=false;setTimeout(()=>t.hidden=true,3800)}}
 
