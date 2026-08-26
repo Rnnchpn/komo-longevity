@@ -2,14 +2,15 @@ import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
-const [html,form,scope,admin,proAccess,submitFn,adminFn]=await Promise.all([
+const [html,form,scope,admin,proAccess,submitFn,adminFn,approvalMigration]=await Promise.all([
   readFile(join(root,'pulse-app','index.html'),'utf8'),
   readFile(join(root,'pulse-app','professional-application-v1.js'),'utf8'),
   readFile(join(root,'pulse-app','professional-scope-v1.js'),'utf8'),
   readFile(join(root,'pulse-app','professional-admin-v1.js'),'utf8'),
   readFile(join(root,'pulse-app','pro-access-v1.js'),'utf8'),
   readFile(join(root,'supabase','functions','professional-application','index.ts'),'utf8'),
-  readFile(join(root,'supabase','functions','professional-admin','index.ts'),'utf8')
+  readFile(join(root,'supabase','functions','professional-admin','index.ts'),'utf8'),
+  readFile(join(root,'supabase','migrations','202608260915_transactional_professional_approval_v1.sql'),'utf8')
 ]);
 const checks=[
  ['Pro label',html.includes('data-mode="clinical">Pro</button>')],
@@ -21,7 +22,8 @@ const checks=[
  ['email admin notification',submitFn.includes('RESEND_API_KEY')&&submitFn.includes('contact@komolongevity.com')],
  ['Motion offer enum used',submitFn.includes('pulse_motion')],
  ['admin lists access scope',adminFn.includes('access_scope')&&admin.includes('Motion Operator')&&admin.includes('Clinical Practitioner')],
- ['membership entitlement persisted',adminFn.includes('access_scope:scope')],
+ ['membership entitlement persisted transactionally',approvalMigration.includes('organization_members')&&approvalMigration.includes('access_scope=excluded.access_scope')&&approvalMigration.includes("'professional'::public.komo_role")],
+ ['approval function is role gated',approvalMigration.includes("role='admin'::public.komo_role")&&approvalMigration.includes('auth.uid()')],
  ['Motion-only hides Clinical functions',scope.includes("['validation','plans']")&&scope.includes("scope!=='motion'")],
  ['professional intent supports applicants',proAccess.includes('demander un accès Motion ou Clinical')&&!proAccess.includes('Ce compte ne dispose pas d’un accès professionnel')]
 ];
