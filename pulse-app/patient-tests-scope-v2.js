@@ -5,7 +5,7 @@
   function applyPatientScope(){
     if(location.hash.replace(/^#/,'')!=='results')return;
     const root=document.querySelector('.tests-v1-root');
-    if(!root)return;
+    if(!root||root.dataset.patientScopeV2==='1')return;
 
     for(const key of PROFESSIONAL_ONLY){
       root.querySelector(`[data-open-test="${key}"]`)?.closest('.test-v1-card')?.remove();
@@ -44,7 +44,27 @@
       <article><span>03</span><h4>Appui unipodal · gauche</h4><p>Temps d’appui unipodal gauche recueilli par le professionnel.</p><b>KŌMØ Motion</b></article>
       <article><span>04</span><h4>Appui unipodal · droit</h4><p>Temps d’appui unipodal droit recueilli par le professionnel.</p><b>KŌMØ Motion</b></article>
       <article><span>05</span><h4>Calf Raise · 30 s</h4><p>Mesure d’endurance fonctionnelle du mollet réalisée en enrichissement Motion.</p><b>KŌMØ Motion</b></article>`;
+    root.dataset.patientScopeV2='1';
   }
+
+  function applyMotionLabels(){
+    if(location.hash.replace(/^#/,'')!=='clinical')return;
+    const root=document.querySelector('.clm');
+    if(!root||root.dataset.motionLabelsV2==='1')return;
+    root.querySelectorAll('.clm-field > span').forEach(span=>{
+      const t=(span.textContent||'').trim();
+      if(t==='Marche 4 m · m/s')span.textContent='Vitesse 4 m · m/s';
+      if(t==='Gauche · s')span.textContent='Appui unipodal gauche · s';
+      if(t==='Droite · s')span.textContent='Appui unipodal droit · s';
+      if(t==='Calf Raise 30 s')span.textContent='Calf Raise · 30 s';
+    });
+    root.querySelectorAll('.clm-card p').forEach(p=>{
+      if((p.textContent||'').includes('30CST 55 % · marche 4 m 45 %.'))p.textContent='30CST 55 % · vitesse 4 m 45 %.';
+    });
+    root.dataset.motionLabelsV2='1';
+  }
+
+  function apply(){applyPatientScope();applyMotionLabels()}
 
   document.addEventListener('click',event=>{
     const b=event.target.closest('[data-open-test]');
@@ -54,9 +74,9 @@
     }
   },true);
 
-  window.addEventListener('hashchange',()=>setTimeout(applyPatientScope,120));
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(applyPatientScope,700));
-  const obs=new MutationObserver(()=>requestAnimationFrame(applyPatientScope));
+  window.addEventListener('hashchange',()=>setTimeout(apply,120));
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(apply,700));
+  const obs=new MutationObserver(()=>requestAnimationFrame(apply));
   obs.observe(document.body,{childList:true,subtree:true});
-  setTimeout(applyPatientScope,1100);
+  setTimeout(apply,1100);
 })();
