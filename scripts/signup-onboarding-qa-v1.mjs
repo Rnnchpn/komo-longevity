@@ -20,10 +20,10 @@ const checks=[
  ['professional captures complete common identity',common.every(k=>pro.includes(`name="${k}"`)||pro.includes(`${k}:`))],
  ['patient signup persists identity metadata',common.filter(k=>k!=='email').every(k=>patient.includes(`${k}:`))],
  ['professional signup persists identity metadata',common.filter(k=>k!=='email').every(k=>pro.includes(`${k}:`))],
- ['professional signup remains approval gated',pro.includes('komo_pro_application:true')&&pro.includes("komo_pro_access_scope")&&pro.includes("professional-application"))],
- ['patient signup redirects to KŌMØ Check handoff',patient.includes('?start=check')&&patient.includes('Commencer mon KŌMØ Check')&&patient.includes("location.hash='results'"))],
- ['patient handoff is one-time guarded',patient.includes('handoffShown')&&patient.includes('clearStart()')),
- ['profiles schema tracks address fields',mig.includes('address_line1')&&mig.includes('postal_code')),
+ ['professional signup remains approval gated',pro.includes('komo_pro_application:true')&&pro.includes('komo_pro_access_scope')&&pro.includes('professional-application')],
+ ['patient signup redirects to KŌMØ Check handoff',patient.includes('?start=check')&&patient.includes('Commencer mon KŌMØ Check')&&patient.includes("location.hash='results'")],
+ ['patient handoff is one-time guarded',patient.includes('handoffShown')&&patient.includes('clearStart()')],
+ ['profiles schema tracks address fields',mig.includes('address_line1')&&mig.includes('postal_code')],
  ['built Pulse HTML receives onboarding assets',html.includes('./patient-onboarding-v1.js')&&html.includes('./pro-signup-identity-v1.js')]
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([n])=>n);
