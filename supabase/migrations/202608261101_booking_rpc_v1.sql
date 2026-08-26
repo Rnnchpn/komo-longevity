@@ -4,7 +4,7 @@ create or replace function public.book_komo_appointment(
 ) returns uuid
 language plpgsql security definer set search_path=public,private,auth as $$
 declare
-  uid uuid:=auth.uid();prof uuid;pid uuid;appt uuid;prof_role text;org_status text;pr public.profiles%rowtype;em text;duration_min int;slot_ok boolean;req_id uuid;
+  uid uuid:=auth.uid();prof uuid;pid uuid;appt uuid;prof_role text;org_status text;pr public.profiles%rowtype;em text;duration_min int;slot_ok boolean;req_id uuid;patient_sex text;
 begin
   if uid is null then raise exception 'unauthorized'; end if;
   if p_service not in ('motion','clinical') then raise exception 'invalid_service'; end if;
@@ -13,7 +13,8 @@ begin
   into slot_ok,duration_min,org_status from public.organization_booking_services bs join public.organizations o on o.id=bs.organization_id where bs.organization_id=p_organization_id and bs.service_type=p_service and bs.enabled and o.status='active';
   if not coalesce(slot_ok,false) then raise exception 'slot_unavailable'; end if;
   select * into pr from public.profiles where id=uid;
-  if pr.first_name is null or pr.last_name is null or pr.birth_date is null or pr.sex_at_birth is null then raise exception 'profile_incomplete'; end if;
+  if pr.first_name is null or pr.last_name is null or pr.birth_date is null then raise exception 'profile_incomplete'; end if;
+  patient_sex:=case when pr.sex_at_birth='female' then 'female' when pr.sex_at_birth='male' then 'male' else 'not_stated' end;
   select email into em from auth.users where id=uid;
   select m.user_id,m.role into prof,prof_role from public.organization_members m where m.organization_id=p_organization_id and m.status='active'
     and ((p_service='motion' and m.role in ('owner','clinical_admin','physician','operator','coordinator') and m.access_scope in ('motion','clinical')) or (p_service='clinical' and m.role in ('owner','clinical_admin','physician') and m.access_scope='clinical'))
@@ -23,7 +24,7 @@ begin
   select id into pid from public.patients where organization_id=p_organization_id and patient_user_id=uid order by created_at limit 1;
   if pid is null then
     insert into public.patients(organization_id,patient_user_id,external_reference,first_name,last_name,preferred_name,birth_date,sex_at_birth,email,phone,locale,status,created_by,data_classification,synthetic_attested_at,synthetic_attested_by)
-    values(p_organization_id,uid,'PULSE-'||substr(uid::text,1,8)||'-'||substr(gen_random_uuid()::text,1,6),pr.first_name,pr.last_name,nullif(pr.display_name,''),pr.birth_date,pr.sex_at_birth,em,pr.phone,pr.locale,'active',uid,case when org_status='test_only' then 'synthetic' else 'health_data' end,case when org_status='test_only' then now() else null end,case when org_status='test_only' then uid else null end)
+    values(p_organization_id,uid,'PULSE-'||substr(uid::text,1,8)||'-'||substr(gen_random_uuid()::text,1,6),pr.first_name,pr.last_name,nullif(pr.display_name,''),pr.birth_date,patient_sex,em,pr.phone,pr.locale,'active',uid,case when org_status='test_only' then 'synthetic' else 'health_data' end,case when org_status='test_only' then now() else null end,case when org_status='test_only' then uid else null end)
     returning id into pid;
   end if;
   insert into public.organization_appointments(organization_id,patient_id,assigned_user_id,appointment_type,scheduled_start,scheduled_end,status,location_mode,service_code,payment_status,intake_status,created_by,booking_source,booked_by_user_id)
