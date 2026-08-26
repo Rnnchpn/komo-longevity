@@ -13,7 +13,7 @@ const [html,form,scope,admin,proAccess,submitFn,adminFn,approvalMigration]=await
   readFile(join(root,'supabase','migrations','202608260915_transactional_professional_approval_v1.sql'),'utf8')
 ]);
 const checks=[
- ['Pro label',html.includes('data-mode="clinical">Pro</button>')],
+ ['Center workspace label',html.includes('data-mode="clinical">Espace centre</button>')],
  ['application assets',html.includes('professional-application-v1.js')&&html.includes('professional-application-v1.css')],
  ['scope gate asset',html.includes('professional-scope-v1.js')],
  ['Motion option without RPPS copy',form.includes('KŌMØ Motion')&&form.includes('Aucun RPPS requis')],
