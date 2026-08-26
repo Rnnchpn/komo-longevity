@@ -12,12 +12,12 @@ const checks=[
  ['admin UI uses server function',ui.includes("functions.invoke('professional-admin'")],
  ['admin UI supports review approve decline',['review','approve','decline'].every(x=>ui.includes(`'${x}'`))],
  ['admin UI states test only boundary',ui.includes('test_only')&&css.includes('.kpa-security')],
- ['server requires authenticated admin',fn.includes('rr.data?.role!=="admin"')&&fn.includes('auth.getUser(token)')],
+ ['server requires authenticated admin',fn.includes('roleResult.data?.role !== "admin"')&&fn.includes('auth.getUser(token)')],
  ['server uses service role only server side',fn.includes('SUPABASE_SERVICE_ROLE_KEY')&&!ui.includes('SERVICE_ROLE')],
- ['approval provisions professional role and organization',['professional_applications','account_roles','organizations','organization_members'].every(x=>fn.includes(`"${x}"`))],
- ['approval audit trail',fn.includes('professional_application_events')&&fn.includes('event("approved"')],
- ['new organizations are test only',fn.includes('clinical_data_status:"test_only"')],
- ['scoped memberships',fn.includes('access_scope:scope')&&ui.includes('Motion Operator')&&ui.includes('Clinical Practitioner')],
+ ['approval uses transactional RPC',fn.includes('approve_professional_application_v1')&&fn.includes('uc.rpc')],
+ ['transaction receives organization role',fn.includes('p_organization_role')&&fn.includes('requestedRole')],
+ ['approval failure is surfaced',fn.includes('approval_failed')&&fn.includes('rpc.error.message')],
+ ['activation email remains server side',fn.includes('Votre accès KŌMØ Pro est activé')&&fn.includes('email_sent')],
  ['responsive admin interface',css.includes('@media(max-width:700px)')]
 ];
 const fail=checks.filter(([,ok])=>!ok).map(([n])=>n);if(fail.length){console.error('[professional-admin-qa-v1] failed: '+fail.join(', '));process.exit(1)}console.log(`[professional-admin-qa-v1] ${checks.length} checks passed.`);
