@@ -12,8 +12,12 @@ await patch('pulse-app/app.js',[
 ]);
 
 await patch('pulse-app/experience-v3.js',[
-  ["navButton('plan', 'Mon plan', planIcon)","navButton('plan', 'Mes priorités', planIcon)"],
-  ["navButton('plan','Mon plan',planIcon)","navButton('plan','Mes priorités',planIcon)"],
+  ["results: { label: 'Mes tests', icon: testIcon }","results: { label: 'Tests', icon: testIcon }"],
+  ["documents: { label: 'Rendez-vous', icon: calendarIcon }","documents: { label: 'RDV', icon: calendarIcon }"],
+  ["navButton('plan', 'Mon plan', planIcon)","navButton('plan', 'Priorités', planIcon)"],
+  ["navButton('plan','Mon plan',planIcon)","navButton('plan','Priorités',planIcon)"],
+  ["navButton('plan', 'Mes priorités', planIcon)","navButton('plan', 'Priorités', planIcon)"],
+  ["navButton('plan','Mes priorités',planIcon)","navButton('plan','Priorités',planIcon)"],
   ["el.textContent = 'Voir mon plan';","el.textContent = 'Voir mes priorités';"],
   ["<p class=\"eyebrow\">PLAN PERSONNALISÉ</p>","<p class=\"eyebrow\">MES PRIORITÉS</p>"],
   ['Votre plan transforme les résultats de l’évaluation en priorités simples à suivre entre deux consultations.','Vos priorités transforment les résultats de l’évaluation en actions simples à suivre entre deux consultations.'],
@@ -36,9 +40,15 @@ await patch('pulse-app/care-messaging-v1.js',[
   ["if(location.hash.replace(/^#/,'')==='documents'&&!isPro())injectMember()",""]
 ]);
 
+await patch('pulse-app/care-messaging-v2.js',[
+  ["x.textContent!=='Mes priorités'","x.textContent!=='Priorités'"],
+  ["x.textContent='Mes priorités'","x.textContent='Priorités'"],
+  ["b.setAttribute('aria-label','Mes priorités')","b.setAttribute('aria-label','Priorités')"]
+]);
+
 let html=await readFile('pulse-app/index.html','utf8');
 html=html.split('programme KŌMØ').join('parcours KŌMØ');
 if(!html.includes('./bottom-dock-v1.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./bottom-dock-v1.css" />\n</head>');
 if(!html.includes('./care-messaging-v2.js'))html=html.replace('</body>','  <script type="module" src="./care-messaging-v2.js"></script>\n  <script type="module" src="./admin-patient-routing-v2.js"></script>\n</body>');
 await writeFile('pulse-app/index.html',html);
-console.log('[pulse-experience-v5] bottom dock, patient priorities, dedicated booking and messaging wired');
+console.log('[pulse-experience-v5] balanced bottom dock, compact patient labels, dedicated booking and messaging wired');
