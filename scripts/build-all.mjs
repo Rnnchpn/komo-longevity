@@ -64,6 +64,7 @@ const scripts = [
   'scripts/clinical-multicenter-v1.mjs',
   'scripts/build-pulse-v12.mjs',
   'scripts/pulse-v12-qa.mjs',
+  'scripts/multicenter-access-qa-v1.mjs',
   'scripts/professional-admin-qa-v1.mjs',
   'scripts/professional-scope-qa-v1.mjs',
   'scripts/intake-profile-qa-v1.mjs',
