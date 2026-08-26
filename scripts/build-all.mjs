@@ -53,6 +53,7 @@ const scripts = [
   'scripts/method-science-v2.mjs',
   'scripts/method-science-polish-v1.mjs',
   'scripts/method-score-clarity-v3.mjs',
+  'scripts/commercial-legal-v1.mjs',
   'scripts/seo-sitemap-v2.mjs',
   'scripts/seo-growth-qa.mjs',
   'scripts/ecosystem-public-v1.mjs',
