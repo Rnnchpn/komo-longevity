@@ -1,7 +1,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
 const URL='https://uqlolefsiktbznnymriy.supabase.co';
-const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkQ_jmGG8w7n';
+const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const REM='komo_pulse_remember';
 const S={client:null,user:null,profile:null,free:null,patient:null,motionAssessment:null,motionScore:null,clinicalAssessment:null,loading:false,lastLoad:0};
 
@@ -15,7 +15,7 @@ function qLevel(score){if(score===null)return null;const d=100-score;if(d<7)retu
 function tLevel(ratio){if(ratio===null)return null;if(ratio>=1.3)return 0;if(ratio>=1.1)return 1;if(ratio>=0.9)return 2;return 3}
 function freeResult(a){if(!a)return null;const r=a.responses||{},qObj=r?.baseline?.questionnaire||{};let q=n(qObj.mobility_score_0_100);if(q===null){const d=n(qObj.difficulty_total);if(d!==null)q=Math.max(0,100-d)}const chair=n(r?.chair_stand?.repetitions),two=n(r?.two_step?.ratio);if(!r?.baseline?.completed_at||!r?.chair_stand?.completed_at||!r?.two_step?.completed_at)return null;const levels=[qLevel(q),tLevel(two)].filter(Number.isFinite),level=levels.length?Math.max(...levels):0;const titles=['Mobilité préservée','Mobilité à surveiller','Diminution fonctionnelle probable','Diminution fonctionnelle marquée'];return{q,chair,two,level,title:titles[level]||'Résultat disponible'}}
 function statusLabel(s){return({scheduled:'Planifié',collecting:'En cours',review:'En revue',validated:'Validé',released:'Disponible',completed:'Terminé'})[s]||'En attente'}
-function displayName(){const p=S.profile||{};return p.display_name?.trim()||`${p.first_name||''} ${p.last_name||''}`.trim()||S.user?.email?.split('@')[0]||'Votre profil'}
+function displayName(){const p=S.profile||{},full=`${p.first_name||''} ${p.last_name||''}`.trim();return full||p.display_name?.trim()||S.user?.email?.split('@')[0]||'Votre profil'}
 
 async function load(force=false){if(S.loading||(!force&&S.user&&Date.now()-S.lastLoad<10000))return;S.loading=true;try{const c=sb(),{data:{session}}=await c.auth.getSession();if(!session?.user)return;S.user=session.user;const [pr,fr,pa]=await Promise.all([
  c.from('profiles').select('display_name,first_name,last_name,city').eq('id',session.user.id).maybeSingle(),
