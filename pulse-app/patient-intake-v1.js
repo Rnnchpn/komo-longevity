@@ -13,7 +13,7 @@ let timer=null;
 
 function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
 function sb(){if(!S.client)S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return S.client}
-function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]))}
 function fmt(v){if(!v)return'—';const d=new Date(v);return new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d)}
 function status(v){return({submitted:'Demande reçue',assigned:'Attribuée',accepted:'Bilan préparé',scheduled:'Rendez-vous planifié',completed:'Terminé',declined:'Non poursuivie',cancelled:'Annulée'})[v]||v||'—'}
 function statusClass(v){return ['accepted','scheduled','completed'].includes(v)?'good':v==='assigned'?'warn':v==='declined'?'bad':''}
@@ -126,7 +126,8 @@ async function loadPro(){
 function updateProBadge(){
   const b=document.querySelector('[data-pir-tab]');if(!b)return;
   const n=S.proRequests.filter(x=>['submitted','assigned'].includes(x.status)).length;
-  b.innerHTML=`Demandes${n?` <span class="pir-badge">${n}</span>`:''}`;
+  const html=`Demandes${n?` <span class="pir-badge">${n}</span>`:''}`;
+  if(b.innerHTML!==html)b.innerHTML=html;
 }
 
 function activatePro(){
@@ -216,9 +217,9 @@ function toast(msg){
   e.textContent=msg;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,3500);
 }
 
-async function refresh(){try{await base();injectMember();ensureProTab()}catch(e){console.error('[patient-intake-ui]',e)}}
+async function refresh(){try{await base();await injectMember();ensureProTab()}catch(e){console.error('[patient-intake-ui]',e)}}
 function schedule(){clearTimeout(timer);timer=setTimeout(refresh,160)}
 window.addEventListener('hashchange',schedule);
-const obs=new MutationObserver(schedule);obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
+const obs=new MutationObserver(()=>ensureProTab());obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
 document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,900));
 setTimeout(refresh,1600);
