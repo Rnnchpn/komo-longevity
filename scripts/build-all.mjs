@@ -61,7 +61,6 @@ const scripts = [
   'scripts/pulse-platform-bridge-v1.mjs',
   'scripts/pulse-beta-release-v1.mjs',
   'scripts/pulse-platform-qa.mjs',
-  'scripts/center-team-ui-v1.mjs',
   'scripts/clinical-multicenter-v1.mjs',
   'scripts/build-pulse-v12.mjs',
   'scripts/pulse-v12-qa.mjs',
