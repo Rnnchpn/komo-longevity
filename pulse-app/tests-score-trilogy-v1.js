@@ -63,7 +63,9 @@ function render(){
   let section=root.querySelector('[data-k-score-trilogy]');
   if(!section){section=document.createElement('section');section.dataset.kScoreTrilogy='1';section.className='kst-wrap';const hero=root.querySelector('.tests-v1-hero');hero?.insertAdjacentElement('afterend',section)}
   if(!section)return;
-  section.innerHTML=`<div class="kst-head"><div><p class="eyebrow">VOS SCORES KŌMØ</p><h3>Votre parcours en trois scores.</h3></div><p>Start établit votre point de départ. Motion approfondit le mouvement. Clinical ajoute la lecture clinique lorsque celle-ci est indiquée.</p></div><div class="kst-grid">${startCard()}${scoreCard('motion',2,'Score KŌMØ Motion',S.motionAssessment,S.motionScore)}${scoreCard('clinical',3,'Score KŌMØ Clinical',S.clinicalAssessment,S.clinicalScore)}</div>`;
+  const html=`<div class="kst-head"><div><p class="eyebrow">VOS SCORES KŌMØ</p><h3>Votre parcours en trois scores.</h3></div><p>Start établit votre point de départ. Motion approfondit le mouvement. Clinical ajoute la lecture clinique lorsque celle-ci est indiquée.</p></div><div class="kst-grid">${startCard()}${scoreCard('motion',2,'Score KŌMØ Motion',S.motionAssessment,S.motionScore)}${scoreCard('clinical',3,'Score KŌMØ Clinical',S.clinicalAssessment,S.clinicalScore)}</div>`;
+  if(section.dataset.signature===html)return;
+  section.dataset.signature=html;section.innerHTML=html;
   section.querySelector('[data-kst-motion]')?.addEventListener('click',()=>{location.hash='documents'});
 }
 async function refresh(force=false){if(route()!=='results')return;await load(force);render()}
