@@ -5,7 +5,7 @@ const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const REM='komo_pulse_remember';
 const INTENT='komo_pulse_pro_intent';
 const P={client:null,session:null,role:'member',applications:[],open:false,loading:false,formScope:null,lastLoad:0};
-let refreshTimer=null;
+let refreshTimer=null,lifecycleBound=false;
 
 function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
 function sb(){if(!P.client)P.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return P.client}
@@ -134,6 +134,7 @@ async function refresh(force=false){
 
 function schedule(force=false){clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>refresh(force),120)}
 function bindLifecycle(){
+  if(lifecycleBound)return;lifecycleBound=true;
   const shell=document.querySelector('#appShell');
   if(shell){const obs=new MutationObserver(()=>{if(!shell.hidden)schedule(true)});obs.observe(shell,{attributes:true,attributeFilter:['hidden']})}
   document.querySelector('#accountButton')?.addEventListener('click',()=>schedule(false));
