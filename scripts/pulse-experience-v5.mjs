@@ -49,6 +49,8 @@ await patch('pulse-app/care-messaging-v2.js',[
 let html=await readFile('pulse-app/index.html','utf8');
 html=html.split('programme KŌMØ').join('parcours KŌMØ');
 if(!html.includes('./bottom-dock-v1.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./bottom-dock-v1.css" />\n</head>');
+if(!html.includes('./home-summary-v1.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./home-summary-v1.css" />\n</head>');
 if(!html.includes('./care-messaging-v2.js'))html=html.replace('</body>','  <script type="module" src="./care-messaging-v2.js"></script>\n  <script type="module" src="./admin-patient-routing-v2.js"></script>\n</body>');
+if(!html.includes('./home-summary-v1.js'))html=html.replace('</body>','  <script type="module" src="./home-summary-v1.js"></script>\n</body>');
 await writeFile('pulse-app/index.html',html);
-console.log('[pulse-experience-v5] balanced bottom dock, compact patient labels, dedicated booking and messaging wired');
+console.log('[pulse-experience-v5] balanced dock, patient summary, booking and messaging wired');
