@@ -31,8 +31,7 @@ await patch('pulse-app/experience-v3.js',[
   ['<p class="eyebrow">MY KŌMØ</p>','<p class="eyebrow">MY KŌMØ SCORE</p>'],
   ['My KŌMØ est votre mémoire de mobilité :','My KŌMØ Score rassemble vos scores et leur évolution :'],
   ["setPage('MY KŌMØ', 'Votre mobilité, dans le temps.', renderMyKomo())","setPage('MY KŌMØ SCORE', 'Vos scores, dans le temps.', renderMyKomo())"],
-  ['Ouvrir My KŌMØ →','Ouvrir My KŌMØ Score →'],
-  ['Ouvrir My KŌMØ','Ouvrir My KŌMØ Score']
+  ['Ouvrir My KŌMØ →','Ouvrir My KŌMØ Score →']
 ]);
 
 await patch('pulse-app/patient-v4.js',[
