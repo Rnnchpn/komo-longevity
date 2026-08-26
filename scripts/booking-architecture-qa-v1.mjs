@@ -8,6 +8,8 @@ const [html,booking,bookingCss,pro,proCss,follow,mig,rpc]=await Promise.all([
 ]);
 const parseFiles=['booking-layer-v1.js','pro-architecture-v2.js','pro-followup-v1.js'];
 const syntax=parseFiles.map(f=>[f,spawnSync(process.execPath,['--check',join(root,'pulse-app',f)],{encoding:'utf8'})]);
+const hasPatientPlanningRename=/function\s+renamePatientPlanning\s*\(/.test(pro)&&/data-route=[\\"']documents[\\"']/.test(pro)&&/Planning/.test(pro);
+const proModeHidesPatientNav=/patientD\)patientD\.hidden=pro/.test(pro)&&/patientM\)patientM\.hidden=pro/.test(pro)&&/\.komo-pro-mode\s+\.mobile-nav#mobileNav\{display:none!important\}/.test(proCss);
 const checks=[
  ['all new JavaScript parses',syntax.every(([,r])=>r.status===0)],
  ['planning assets loaded',html.includes('./booking-layer-v1.js')&&html.includes('./booking-layer-v1.css')],
@@ -15,8 +17,8 @@ const checks=[
  ['professional mode named Clinical Accès PRO',pro.includes('Clinical Accès PRO')&&pro.includes('CLINICAL ACCÈS PRO')],
  ['Pro navigation has patient management',pro.includes("navItem('patients','Gestion patients'")],
  ['Pro navigation has Planning',pro.includes("navItem('planning','Planning'")],
- ['patient navigation becomes Planning',pro.includes("textContent='Planning'")&&pro.includes('data-route=\\"documents\\"')],
- ['patient navigation hidden in Pro mode',pro.includes('patientD.hidden=pro')&&proCss.includes('.komo-pro-mode .mobile-nav#mobileNav')],
+ ['patient navigation becomes Planning',hasPatientPlanningRename],
+ ['patient navigation hidden in Pro mode',proModeHidesPatientNav],
  ['legacy patient tabs absent from Pro navigation',!pro.includes("navItem('tests'")&&!pro.includes("navItem('plan'")&&!pro.includes("navItem('appointments'")],
  ['patient selects center and service',booking.includes('kbookPatientOrg')&&booking.includes('data-kbook-service="motion"')&&booking.includes('data-kbook-service="clinical"')],
  ['patient availability uses canonical slots RPC',booking.includes("rpc('komo_booking_slots'")],
