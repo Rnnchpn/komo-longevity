@@ -1,427 +1,47 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
+const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
+const AUTH_KEY='sb-uqlolefsiktbznnymriy-auth-token';
 
-const URL = 'https://uqlolefsiktbznnymriy.supabase.co';
-const KEY = 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
-const REMEMBER = 'komo_pulse_remember';
+const S={tab:'patients',patients:[],registryCounts:{},applications:[],applicationCounts:{},requests:[],organizations:[],professionals:[],errors:{},search:'',selected:null,loading:false,authorized:true,busy:null,actionError:null};
+let openTimer=null;
 
-const state = {
-  client: null,
-  role: 'member',
-  tab: 'patients',
-  patients: [],
-  registryCounts: {},
-  applications: [],
-  applicationCounts: {},
-  requests: [],
-  organizations: [],
-  professionals: [],
-  errors: {},
-  search: '',
-  selectedApplication: null,
-  loading: false
-};
+function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function fmt(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d)}
+function nameOf(x){const p=x?.profile||{};return `${p.first_name||''} ${p.last_name||''}`.trim()||p.display_name||x?.email||'Patient Pulse'}
+function scopeLabel(v){return v==='motion'?'Motion Operator':'Clinical Practitioner'}
+function proStatus(v){return({submitted:'Nouvelle',under_review:'En revue',approved:'Approuvée',declined:'Refusée'})[v]||v||'—'}
+function requestStatus(v){return({submitted:'Nouvelle',assigned:'Assignée',accepted:'Motion préparé',scheduled:'Planifiée',completed:'Terminée',declined:'Non poursuivie',cancelled:'Annulée'})[v]||v||'—'}
+function stateClass(v){return['approved','accepted','scheduled','completed'].includes(v)?'good':['under_review','assigned'].includes(v)?'warn':['declined','cancelled'].includes(v)?'bad':''}
+function root(){return document.querySelector('#viewRoot')}
+function setHeading(){const e=document.querySelector('#pageEyebrow'),t=document.querySelector('#pageTitle');if(e)e.textContent='KŌMØ · ADMIN';if(t)t.textContent='Console KŌMØ'}
+function toast(msg){let n=document.querySelector('#kav2Toast');if(!n){n=document.createElement('div');n.id='kav2Toast';n.className='kav2-toast';document.body.appendChild(n)}n.textContent=msg;n.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>n.hidden=true,3600)}
 
-function storage() {
-  return localStorage.getItem(REMEMBER) === '1' ? localStorage : sessionStorage;
-}
+function parseToken(raw){if(!raw)return null;try{const x=JSON.parse(raw);if(typeof x==='string')return x;if(x?.access_token)return x.access_token;if(x?.currentSession?.access_token)return x.currentSession.access_token;if(x?.session?.access_token)return x.session.access_token;if(Array.isArray(x)){for(const y of x){if(y?.access_token)return y.access_token}}}catch{}return null}
+function readAccessToken(){for(const store of [sessionStorage,localStorage]){let token=parseToken(store.getItem(AUTH_KEY));if(token)return token;for(let i=0;i<store.length;i++){const k=store.key(i)||'';if(k.startsWith('sb-')&&k.endsWith('-auth-token')){token=parseToken(store.getItem(k));if(token)return token}}}return null}
+async function invoke(name,body){const token=readAccessToken();if(!token){const e=new Error('Session Pulse introuvable. Reconnectez-vous.');e.code='session_missing';throw e}const res=await fetch(`${SUPABASE_URL}/functions/v1/${name}`,{method:'POST',headers:{Authorization:`Bearer ${token}`,apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});let data={};try{data=await res.json()}catch{}if(!res.ok||data?.error){const e=new Error(data?.detail||data?.error||`Erreur serveur ${res.status}`);e.code=data?.error||String(res.status);e.status=res.status;throw e}return data}
 
-function sb() {
-  if (!state.client) {
-    state.client = createClient(URL, KEY, {
-      auth: { storage: storage(), persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-    });
-  }
-  return state.client;
-}
+function errorBox(key,label){const e=S.errors[key];return e?`<div class="kav2-empty"><strong>${esc(label)} indisponible.</strong><br>${esc(e)}</div>`:''}
+function render(){if(location.hash!=='#admin')return;const h=root();if(!h)return;setHeading();if(!S.authorized){h.innerHTML='<div class="kav2"><section class="kav2-denied"><h2>Accès administrateur requis.</h2><p>Cette console est réservée à l’administration globale KŌMØ.</p><button class="secondary-button" data-admin-home>Retour à Pulse</button></section></div>';return}const openPros=(S.applicationCounts.submitted||0)+(S.applicationCounts.under_review||0),openMotion=S.requests.filter(x=>['submitted','assigned'].includes(x.status)).length;h.innerHTML=`<div class="kav2" data-admin-console-v2><header class="kav2-hero"><div><p class="eyebrow">KŌMØ ADMINISTRATION</p><h2>Piloter KŌMØ, au même endroit.</h2><p>Patients Pulse, demandes professionnelles et demandes Motion sont centralisés ici.</p></div><div class="kav2-hero-actions"><button class="secondary-button" data-admin-pro>Ouvrir KŌMØ Pro</button><button class="secondary-button" data-admin-home>Retour Pulse</button></div></header><nav class="kav2-tabs"><button class="${S.tab==='patients'?'active':''}" data-admin-tab="patients">Patients <b>${S.patients.length}</b></button><button class="${S.tab==='pros'?'active':''}" data-admin-tab="pros">Demandes Pro${openPros?` <b>${openPros}</b>`:''}</button><button class="${S.tab==='motion'?'active':''}" data-admin-tab="motion">Demandes Motion${openMotion?` <b>${openMotion}</b>`:''}</button><button class="kav2-refresh" data-admin-refresh>${S.loading?'Chargement…':'Actualiser'}</button></nav><div data-admin-panel>${S.loading&&!S.patients.length&&!S.applications.length&&!S.requests.length?'<div class="kav2-loading">Chargement des données Admin…</div>':panel()}</div></div>`}
+function panel(){return S.tab==='pros'?prosView():S.tab==='motion'?motionView():patientsView()}
 
-function esc(value = '') {
-  return String(value ?? '').replace(/[&<>"']/g, char => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
-  }[char]));
-}
+function filteredPatients(){const q=S.search.trim().toLowerCase();return q?S.patients.filter(x=>{const p=x.profile||{};return[nameOf(x),x.email,p.city,p.country].filter(Boolean).join(' ').toLowerCase().includes(q)}):S.patients}
+function patientRows(){const rows=filteredPatients();if(!rows.length)return'<div class="kav2-empty">Aucun patient ne correspond à cette recherche.</div>';return rows.map(x=>{const p=x.profile||{},loc=[p.city,p.country].filter(Boolean).join(', ')||'Localisation non renseignée',records=Number(x.patient_record_count||0),reqs=Number(x.service_request_count||0),ok=!!x.email_confirmed_at;return`<article class="kav2-registry-row"><div class="kav2-registry-identity"><strong>${esc(nameOf(x))}</strong><span>${esc(x.email||'E-mail non renseigné')}</span><small>${esc(loc)}</small></div><div><span>Inscription</span><strong>${fmt(x.created_at)}</strong></div><div><span>Dernière connexion</span><strong>${x.last_sign_in_at?fmt(x.last_sign_in_at):'Jamais'}</strong></div><div><span>Parcours</span><strong>${records?`${records} dossier${records>1?'s':''} centre`:'Pulse uniquement'}</strong><small>${reqs?`${reqs} demande${reqs>1?'s':''}`:'Aucune demande Motion'}</small></div><i class="${ok?'good':'warn'}">${ok?'E-mail confirmé':'À confirmer'}</i></article>`}).join('')}
+function patientsView(){return`<section class="kav2-grid"><article class="kav2-card kav2-full"><div class="kav2-card-head kav2-registry-head"><div><span>Registre Pulse</span><h3>Tous les patients enregistrés</h3><p>Vue globale des comptes patients KŌMØ Pulse. Les professionnels restent isolés dans leur centre.</p></div><strong>${S.patients.length}</strong></div>${errorBox('patients','Registre patients')}<div class="kav2-registry-tools"><label><span>Rechercher</span><input type="search" data-admin-patient-search value="${esc(S.search)}" placeholder="Nom, e-mail, ville…"></label><div><small>Comptes patients</small><strong>${S.registryCounts.patients??S.patients.length}</strong></div><div><small>Dossiers centre</small><strong>${S.patients.reduce((n,x)=>n+Number(x.patient_record_count||0),0)}</strong></div></div><div class="kav2-registry-list" data-patient-registry-list>${patientRows()}</div></article></section>`}
 
-function fmt(value) {
-  if (!value) return '—';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-  }).format(date);
-}
+function proRow(x){return`<button class="kav2-row" data-pro-select="${esc(x.id)}"><div><strong>${esc(x.professional_title||x.email||'Professionnel')}</strong><span>${esc(x.email||'—')}</span></div><div><strong>${esc(scopeLabel(x.access_scope))}</strong><span>${esc(x.organization_name||'—')}</span></div><i class="${stateClass(x.status)}">${esc(proStatus(x.status))}</i><b>→</b></button>`}
+function proDetail(x){const motion=x.access_scope==='motion',role=motion?'operator':'physician',busy=S.busy===x.id,registration=motion?'Non requis':`${x.registration_system||''} ${x.registration_identifier||''}`.trim()||'À vérifier';return`<article class="kav2-card kav2-full kav2-detail"><div class="kav2-card-head"><div><span>Décision</span><h3>${esc(x.professional_title||x.email||'Professionnel')}</h3><p>${esc(x.email||'—')} · ${esc(scopeLabel(x.access_scope))}</p></div><button class="kav2-x" data-pro-close>×</button></div><div class="kav2-detail-grid"><div><span>Établissement</span><strong>${esc(x.organization_name||'—')}</strong></div><div><span>Territoire</span><strong>${esc(x.territory||'—')}</strong></div><div><span>Identifiant</span><strong>${esc(registration)}</strong></div><div><span>Habilitation</span><strong>${esc(scopeLabel(x.access_scope))}</strong></div></div>${S.actionError?`<div class="kav2-empty"><strong>Activation impossible.</strong><br>${esc(S.actionError)}</div>`:''}<div class="kav2-approve-box"><div><strong>${motion?'Activer Motion':'Activer Clinical'}</strong><p>${motion?'Rôle Operator par défaut. Accès Motion + MyoCare, sans validation Clinical.':'Rôle Physician par défaut. Vérifiez le registre avant activation.'}</p></div><button class="primary-button" data-pro-approve="${esc(x.id)}" data-pro-role="${role}" ${busy?'disabled':''}>${busy?'Activation en cours…':'Approuver & activer →'}</button></div><div class="kav2-secondary-actions">${x.status==='submitted'?`<button class="secondary-button" data-pro-review="${esc(x.id)}">Mettre en revue</button>`:''}<button class="secondary-button danger" data-pro-decline="${esc(x.id)}">Refuser</button></div></article>`}
+function prosView(){const open=S.applications.filter(x=>['submitted','under_review'].includes(x.status)),done=S.applications.filter(x=>!['submitted','under_review'].includes(x.status));return`<section class="kav2-grid"><article class="kav2-card kav2-wide"><div class="kav2-card-head"><div><span>À traiter</span><h3>Demandes professionnelles</h3><p>Motion sans RPPS ou Clinical avec identifiant professionnel vérifiable.</p></div><strong>${open.length}</strong></div>${errorBox('pros','Demandes Pro')}${open.length?open.map(proRow).join(''):'<div class="kav2-empty">Aucune demande professionnelle en attente.</div>'}</article><article class="kav2-card"><div class="kav2-card-head"><div><span>Historique</span><h3>Décisions récentes</h3></div></div>${done.slice(0,10).map(x=>`<div class="kav2-mini"><div><strong>${esc(x.professional_title||x.email||'Professionnel')}</strong><span>${esc(scopeLabel(x.access_scope))} · ${esc(x.organization_name||'—')}</span></div><i class="${stateClass(x.status)}">${esc(proStatus(x.status))}</i></div>`).join('')||'<div class="kav2-empty">Aucun historique.</div>'}</article>${S.selected?proDetail(S.selected):''}</section>`}
 
-function patientName(item) {
-  const p = item?.profile || {};
-  return `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.display_name || item?.email || 'Patient Pulse';
-}
+function motionRow(x){const p=x.profile||{},n=`${p.first_name||''} ${p.last_name||''}`.trim()||p.display_name||x.email||'Patient Pulse',orgs=['<option value="">Choisir un établissement</option>',...S.organizations.map(o=>`<option value="${esc(o.id)}" ${x.assigned_organization_id===o.id?'selected':''}>${esc(o.name)} · ${esc(o.clinical_data_status)}</option>`)].join(''),pros=['<option value="">Professionnel optionnel</option>',...S.professionals.filter(y=>!x.assigned_organization_id||y.organization_id===x.assigned_organization_id).map(y=>`<option value="${esc(y.user_id)}" ${x.assigned_professional_user_id===y.user_id?'selected':''}>${esc(y.email||y.user_id)} · ${esc(y.access_scope)}</option>`)].join('');return`<article class="kav2-patient-row" data-patient-request="${esc(x.id)}"><div><strong>${esc(n)}</strong><span>${esc(x.email||'—')} · ${esc(x.preferred_city||'Ville non précisée')}</span><small>${fmt(x.submitted_at)}</small></div><i class="${stateClass(x.status)}">${esc(requestStatus(x.status))}</i>${['submitted','assigned'].includes(x.status)?`<div class="kav2-assign"><select data-patient-org>${orgs}</select><select data-patient-pro>${pros}</select><button class="primary-button" data-patient-assign>Assigner →</button></div>`:'<div class="kav2-assigned">Dossier pris en charge par le centre.</div>'}</article>`}
+function motionView(){const active=S.requests.filter(x=>!['completed','declined','cancelled'].includes(x.status));return`<section class="kav2-grid"><article class="kav2-card kav2-full"><div class="kav2-card-head"><div><span>Motion intake</span><h3>Demandes Motion patients</h3><p>Orientez chaque demande vers le bon établissement. L’équipe du centre prend ensuite le relais.</p></div><strong>${active.filter(x=>['submitted','assigned'].includes(x.status)).length}</strong></div>${errorBox('motion','Demandes Motion')}${active.length?active.map(motionRow).join(''):'<div class="kav2-empty">Aucune demande Motion à traiter.</div>'}</article></section>`}
 
-function scopeLabel(scope) {
-  return scope === 'motion' ? 'Motion Operator' : 'Clinical Practitioner';
-}
+async function loadAll(){if(location.hash!=='#admin')return;S.loading=true;S.errors={};S.actionError=null;render();const results=await Promise.allSettled([invoke('admin-registry',{action:'list'}),invoke('professional-admin',{action:'list'}),invoke('patient-intake',{action:'list_admin'})]);const [a,b,c]=results;const denied=[a,b,c].find(r=>r.status==='rejected'&&(r.reason?.status===403||r.reason?.code==='admin_required'));if(denied){S.authorized=false;S.loading=false;render();return}if(a.status==='fulfilled'){S.patients=a.value.patients||[];S.registryCounts=a.value.counts||{}}else S.errors.patients=a.reason?.message||'Chargement impossible';if(b.status==='fulfilled'){S.applications=b.value.applications||[];S.applicationCounts=b.value.counts||{}}else S.errors.pros=b.reason?.message||'Chargement impossible';if(c.status==='fulfilled'){S.requests=c.value.requests||[];S.organizations=c.value.organizations||[];S.professionals=c.value.professionals||[]}else S.errors.motion=c.reason?.message||'Chargement impossible';if(S.selected)S.selected=S.applications.find(x=>x.id===S.selected.id)||null;S.loading=false;render()}
+async function proAction(action,id,role){const x=S.applications.find(y=>y.id===id);if(!x)return;if(action==='approve'&&!confirm(`Activer ${scopeLabel(x.access_scope)} pour ${x.professional_title||x.email||'ce professionnel'} ?`))return;if(action==='decline'&&!confirm('Refuser cette demande professionnelle ?'))return;S.busy=id;S.actionError=null;render();try{const body={action,application_id:id};if(action==='approve'){body.organization_name=x.organization_name;body.organization_role=role||(x.access_scope==='motion'?'operator':'physician')}await invoke('professional-admin',body);toast(action==='approve'?'Accès professionnel activé.':action==='review'?'Demande placée en revue.':'Demande refusée.');S.busy=null;S.selected=null;await loadAll()}catch(e){S.busy=null;S.actionError=e.message||'Action impossible';render();toast(S.actionError)}}
+async function assignMotion(row){const org=row.querySelector('[data-patient-org]'),pro=row.querySelector('[data-patient-pro]');if(!org?.value){toast('Choisissez un établissement.');return}try{await invoke('patient-intake',{action:'assign',request_id:row.dataset.patientRequest,organization_id:org.value,professional_user_id:pro?.value||null});toast('Demande Motion assignée.');await loadAll()}catch(e){toast(e.message||'Assignation impossible')}}
 
-function proStatus(status) {
-  return ({ submitted: 'Nouvelle', under_review: 'En revue', approved: 'Approuvée', declined: 'Refusée' })[status] || status || '—';
-}
+function click(e){if(location.hash!=='#admin')return;const tab=e.target.closest('[data-admin-tab]');if(tab){S.tab=tab.dataset.adminTab;S.selected=null;S.actionError=null;render();return}if(e.target.closest('[data-admin-refresh]')){loadAll();return}if(e.target.closest('[data-admin-home]')){location.hash='home';return}if(e.target.closest('[data-admin-pro]')){location.hash='clinical';return}const sel=e.target.closest('[data-pro-select]');if(sel){S.selected=S.applications.find(x=>x.id===sel.dataset.proSelect)||null;S.actionError=null;render();return}if(e.target.closest('[data-pro-close]')){S.selected=null;S.actionError=null;render();return}const ap=e.target.closest('[data-pro-approve]');if(ap){proAction('approve',ap.dataset.proApprove,ap.dataset.proRole);return}const rv=e.target.closest('[data-pro-review]');if(rv){proAction('review',rv.dataset.proReview);return}const de=e.target.closest('[data-pro-decline]');if(de){proAction('decline',de.dataset.proDecline);return}const as=e.target.closest('[data-patient-assign]');if(as){const row=as.closest('[data-patient-request]');if(row)assignMotion(row)}}
+function input(e){if(location.hash==='#admin'&&e.target.matches('[data-admin-patient-search]')){S.search=e.target.value;const l=document.querySelector('[data-patient-registry-list]');if(l)l.innerHTML=patientRows()}}
+function change(e){if(location.hash!=='#admin'||!e.target.matches('[data-patient-org]'))return;const row=e.target.closest('[data-patient-request]'),p=row?.querySelector('[data-patient-pro]');if(!p)return;p.innerHTML='<option value="">Professionnel optionnel</option>'+S.professionals.filter(x=>x.organization_id===e.target.value).map(x=>`<option value="${esc(x.user_id)}">${esc(x.email||x.user_id)} · ${esc(x.access_scope)}</option>`).join('')}
+function open(){if(location.hash!=='#admin')return;S.authorized=true;setHeading();render();clearTimeout(openTimer);openTimer=setTimeout(()=>loadAll().catch(e=>{S.loading=false;S.errors.patients=S.errors.pros=S.errors.motion=e.message||'Chargement impossible';render()}),20)}
 
-function requestStatus(status) {
-  return ({ submitted: 'Nouvelle', assigned: 'Assignée', accepted: 'Motion préparé', scheduled: 'Planifiée', completed: 'Terminée', declined: 'Non poursuivie', cancelled: 'Annulée' })[status] || status || '—';
-}
-
-function statusClass(status) {
-  if (['approved', 'accepted', 'scheduled', 'completed'].includes(status)) return 'good';
-  if (['under_review', 'assigned'].includes(status)) return 'warn';
-  if (['declined', 'cancelled'].includes(status)) return 'bad';
-  return '';
-}
-
-function root() {
-  return document.querySelector('#viewRoot');
-}
-
-function setHeading() {
-  const eyebrow = document.querySelector('#pageEyebrow');
-  const title = document.querySelector('#pageTitle');
-  if (eyebrow) eyebrow.textContent = 'KŌMØ · ADMIN';
-  if (title) title.textContent = 'Console KŌMØ';
-}
-
-function toast(message) {
-  let node = document.querySelector('#kav2Toast');
-  if (!node) {
-    node = document.createElement('div');
-    node.id = 'kav2Toast';
-    node.className = 'kav2-toast';
-    document.body.appendChild(node);
-  }
-  node.textContent = message;
-  node.hidden = false;
-  clearTimeout(toast.timer);
-  toast.timer = setTimeout(() => { node.hidden = true; }, 3500);
-}
-
-async function invoke(name, body) {
-  const { data, error } = await sb().functions.invoke(name, { body });
-  if (error) throw new Error(error.message || `Erreur ${name}`);
-  if (data?.error) throw new Error(data.detail || data.error);
-  return data || {};
-}
-
-function renderFrame() {
-  if (location.hash !== '#admin') return;
-  const host = root();
-  if (!host) return;
-  setHeading();
-
-  if (state.role !== 'admin') {
-    host.innerHTML = `<div class="kav2"><section class="kav2-denied"><h2>Accès administrateur requis.</h2><p>Cette console est réservée à l’administration globale KŌMØ.</p><button class="secondary-button" data-admin-home>Retour à Pulse</button></section></div>`;
-    return;
-  }
-
-  const openPros = (state.applicationCounts.submitted || 0) + (state.applicationCounts.under_review || 0);
-  const openMotion = state.requests.filter(item => ['submitted', 'assigned'].includes(item.status)).length;
-
-  host.innerHTML = `<div class="kav2" data-admin-console-v2>
-    <header class="kav2-hero">
-      <div>
-        <p class="eyebrow">KŌMØ ADMINISTRATION</p>
-        <h2>Piloter KŌMØ, au même endroit.</h2>
-        <p>Patients Pulse, demandes professionnelles et demandes Motion sont centralisés ici. Cette console est indépendante des centres.</p>
-      </div>
-      <div class="kav2-hero-actions">
-        <button class="secondary-button" data-admin-pro>Ouvrir KŌMØ Pro</button>
-        <button class="secondary-button" data-admin-home>Retour Pulse</button>
-      </div>
-    </header>
-    <nav class="kav2-tabs">
-      <button class="${state.tab === 'patients' ? 'active' : ''}" data-admin-tab="patients">Patients <b>${state.patients.length}</b></button>
-      <button class="${state.tab === 'pros' ? 'active' : ''}" data-admin-tab="pros">Demandes Pro${openPros ? ` <b>${openPros}</b>` : ''}</button>
-      <button class="${state.tab === 'motion' ? 'active' : ''}" data-admin-tab="motion">Demandes Motion${openMotion ? ` <b>${openMotion}</b>` : ''}</button>
-      <button class="kav2-refresh" data-admin-refresh>Actualiser</button>
-    </nav>
-    <div data-admin-panel>${state.loading ? '<div class="kav2-loading">Chargement de la console…</div>' : renderPanel()}</div>
-  </div>`;
-}
-
-function errorBox(key, label) {
-  const error = state.errors[key];
-  if (!error) return '';
-  return `<div class="kav2-empty"><strong>${esc(label)} indisponible.</strong><br>${esc(error)}</div>`;
-}
-
-function renderPanel() {
-  if (state.tab === 'pros') return professionalView();
-  if (state.tab === 'motion') return motionView();
-  return patientView();
-}
-
-function filteredPatients() {
-  const query = state.search.trim().toLowerCase();
-  if (!query) return state.patients;
-  return state.patients.filter(item => {
-    const p = item.profile || {};
-    return [patientName(item), item.email, p.city, p.country].filter(Boolean).join(' ').toLowerCase().includes(query);
-  });
-}
-
-function patientRows() {
-  const rows = filteredPatients();
-  if (!rows.length) return '<div class="kav2-empty">Aucun patient ne correspond à cette recherche.</div>';
-  return rows.map(item => {
-    const p = item.profile || {};
-    const location = [p.city, p.country].filter(Boolean).join(', ') || 'Localisation non renseignée';
-    const confirmed = Boolean(item.email_confirmed_at);
-    const records = Number(item.patient_record_count || 0);
-    const requests = Number(item.service_request_count || 0);
-    return `<article class="kav2-registry-row">
-      <div class="kav2-registry-identity"><strong>${esc(patientName(item))}</strong><span>${esc(item.email || 'E-mail non renseigné')}</span><small>${esc(location)}</small></div>
-      <div><span>Inscription</span><strong>${fmt(item.created_at)}</strong></div>
-      <div><span>Dernière connexion</span><strong>${item.last_sign_in_at ? fmt(item.last_sign_in_at) : 'Jamais'}</strong></div>
-      <div><span>Parcours</span><strong>${records ? `${records} dossier${records > 1 ? 's' : ''} centre` : 'Pulse uniquement'}</strong><small>${requests ? `${requests} demande${requests > 1 ? 's' : ''}` : 'Aucune demande Motion'}</small></div>
-      <i class="${confirmed ? 'good' : 'warn'}">${confirmed ? 'E-mail confirmé' : 'À confirmer'}</i>
-    </article>`;
-  }).join('');
-}
-
-function patientView() {
-  return `<section class="kav2-grid"><article class="kav2-card kav2-full">
-    <div class="kav2-card-head kav2-registry-head"><div><span>Registre Pulse</span><h3>Tous les patients enregistrés</h3><p>Vue globale des comptes patients KŌMØ Pulse. Les professionnels restent isolés dans leur centre.</p></div><strong>${state.patients.length}</strong></div>
-    ${errorBox('patients', 'Registre patients')}
-    <div class="kav2-registry-tools">
-      <label><span>Rechercher</span><input type="search" data-admin-patient-search value="${esc(state.search)}" placeholder="Nom, e-mail, ville…"></label>
-      <div><small>Comptes patients</small><strong>${state.registryCounts.patients ?? state.patients.length}</strong></div>
-      <div><small>Dossiers centre</small><strong>${state.patients.reduce((sum, item) => sum + Number(item.patient_record_count || 0), 0)}</strong></div>
-    </div>
-    <div class="kav2-registry-list" data-patient-registry-list>${patientRows()}</div>
-  </article></section>`;
-}
-
-function professionalView() {
-  const open = state.applications.filter(item => ['submitted', 'under_review'].includes(item.status));
-  const done = state.applications.filter(item => !['submitted', 'under_review'].includes(item.status));
-  return `<section class="kav2-grid">
-    <article class="kav2-card kav2-wide"><div class="kav2-card-head"><div><span>À traiter</span><h3>Demandes professionnelles</h3><p>Motion sans RPPS ou Clinical avec identifiant professionnel vérifiable.</p></div><strong>${open.length}</strong></div>${errorBox('pros', 'Demandes Pro')}${open.length ? open.map(proRow).join('') : '<div class="kav2-empty">Aucune demande professionnelle en attente.</div>'}</article>
-    <article class="kav2-card"><div class="kav2-card-head"><div><span>Historique</span><h3>Décisions récentes</h3></div></div>${done.slice(0, 10).map(item => `<div class="kav2-mini"><div><strong>${esc(item.professional_title || item.email || 'Professionnel')}</strong><span>${esc(scopeLabel(item.access_scope))} · ${esc(item.organization_name || '—')}</span></div><i class="${statusClass(item.status)}">${esc(proStatus(item.status))}</i></div>`).join('') || '<div class="kav2-empty">Aucun historique.</div>'}</article>
-    ${state.selectedApplication ? proDetail(state.selectedApplication) : ''}
-  </section>`;
-}
-
-function proRow(item) {
-  return `<button class="kav2-row" data-pro-select="${esc(item.id)}"><div><strong>${esc(item.professional_title || item.email || 'Professionnel')}</strong><span>${esc(item.email || '—')}</span></div><div><strong>${esc(scopeLabel(item.access_scope))}</strong><span>${esc(item.organization_name || '—')}</span></div><i class="${statusClass(item.status)}">${esc(proStatus(item.status))}</i><b>→</b></button>`;
-}
-
-function proDetail(item) {
-  const motion = item.access_scope === 'motion';
-  const defaultRole = motion ? 'operator' : 'physician';
-  const registration = motion ? 'Non requis' : `${item.registration_system || ''} ${item.registration_identifier || ''}`.trim() || 'À vérifier';
-  return `<article class="kav2-card kav2-full kav2-detail">
-    <div class="kav2-card-head"><div><span>Décision</span><h3>${esc(item.professional_title || item.email || 'Professionnel')}</h3><p>${esc(item.email || '—')} · ${esc(scopeLabel(item.access_scope))}</p></div><button class="kav2-x" data-pro-close>×</button></div>
-    <div class="kav2-detail-grid"><div><span>Établissement</span><strong>${esc(item.organization_name || '—')}</strong></div><div><span>Territoire</span><strong>${esc(item.territory || '—')}</strong></div><div><span>Identifiant</span><strong>${esc(registration)}</strong></div><div><span>Habilitation</span><strong>${esc(scopeLabel(item.access_scope))}</strong></div></div>
-    <div class="kav2-approve-box"><div><strong>${motion ? 'Activer Motion' : 'Activer Clinical'}</strong><p>${motion ? 'Rôle Operator par défaut. Accès Motion + MyoCare, sans validation Clinical.' : 'Rôle Physician par défaut. Vérifiez le registre avant activation.'}</p></div><button class="primary-button" data-pro-approve="${esc(item.id)}" data-pro-role="${defaultRole}">Approuver & activer →</button></div>
-    <div class="kav2-secondary-actions">${item.status === 'submitted' ? `<button class="secondary-button" data-pro-review="${esc(item.id)}">Mettre en revue</button>` : ''}<button class="secondary-button danger" data-pro-decline="${esc(item.id)}">Refuser</button></div>
-  </article>`;
-}
-
-function motionView() {
-  const active = state.requests.filter(item => !['completed', 'declined', 'cancelled'].includes(item.status));
-  return `<section class="kav2-grid"><article class="kav2-card kav2-full">
-    <div class="kav2-card-head"><div><span>Motion intake</span><h3>Demandes Motion patients</h3><p>Orientez chaque demande vers le bon établissement. L’équipe du centre prend ensuite le relais.</p></div><strong>${active.filter(item => ['submitted', 'assigned'].includes(item.status)).length}</strong></div>
-    ${errorBox('motion', 'Demandes Motion')}
-    ${active.length ? active.map(motionRow).join('') : '<div class="kav2-empty">Aucune demande Motion à traiter.</div>'}
-  </article></section>`;
-}
-
-function motionRow(item) {
-  const p = item.profile || {};
-  const name = `${p.first_name || ''} ${p.last_name || ''}`.trim() || p.display_name || item.email || 'Patient Pulse';
-  const orgOptions = ['<option value="">Choisir un établissement</option>', ...state.organizations.map(org => `<option value="${esc(org.id)}" ${item.assigned_organization_id === org.id ? 'selected' : ''}>${esc(org.name)} · ${esc(org.clinical_data_status)}</option>`)].join('');
-  const proOptions = ['<option value="">Professionnel optionnel</option>', ...state.professionals.filter(pro => !item.assigned_organization_id || pro.organization_id === item.assigned_organization_id).map(pro => `<option value="${esc(pro.user_id)}" ${item.assigned_professional_user_id === pro.user_id ? 'selected' : ''}>${esc(pro.email || pro.user_id)} · ${esc(pro.access_scope)}</option>`)].join('');
-  return `<article class="kav2-patient-row" data-patient-request="${esc(item.id)}"><div><strong>${esc(name)}</strong><span>${esc(item.email || '—')} · ${esc(item.preferred_city || 'Ville non précisée')}</span><small>${fmt(item.submitted_at)}</small></div><i class="${statusClass(item.status)}">${esc(requestStatus(item.status))}</i>${['submitted', 'assigned'].includes(item.status) ? `<div class="kav2-assign"><select data-patient-org>${orgOptions}</select><select data-patient-pro>${proOptions}</select><button class="primary-button" data-patient-assign>Assigner →</button></div>` : '<div class="kav2-assigned">Dossier pris en charge par le centre.</div>'}</article>`;
-}
-
-async function loadAll() {
-  state.loading = true;
-  state.errors = {};
-  renderFrame();
-
-  const results = await Promise.allSettled([
-    invoke('admin-registry', { action: 'list' }),
-    invoke('professional-admin', { action: 'list' }),
-    invoke('patient-intake', { action: 'list_admin' })
-  ]);
-
-  const [registryResult, proResult, motionResult] = results;
-
-  if (registryResult.status === 'fulfilled') {
-    state.patients = registryResult.value.patients || [];
-    state.registryCounts = registryResult.value.counts || {};
-  } else {
-    state.errors.patients = registryResult.reason?.message || 'Chargement impossible';
-  }
-
-  if (proResult.status === 'fulfilled') {
-    state.applications = proResult.value.applications || [];
-    state.applicationCounts = proResult.value.counts || {};
-  } else {
-    state.errors.pros = proResult.reason?.message || 'Chargement impossible';
-  }
-
-  if (motionResult.status === 'fulfilled') {
-    state.requests = motionResult.value.requests || [];
-    state.organizations = motionResult.value.organizations || [];
-    state.professionals = motionResult.value.professionals || [];
-  } else {
-    state.errors.motion = motionResult.reason?.message || 'Chargement impossible';
-  }
-
-  state.loading = false;
-  renderFrame();
-}
-
-async function authorizeAndOpen() {
-  if (location.hash !== '#admin') return;
-  setHeading();
-  const host = root();
-  if (!host) return;
-
-  host.innerHTML = '<div class="kav2"><div class="kav2-loading">Ouverture de la console Admin…</div></div>';
-
-  const { data: { session } } = await sb().auth.getSession();
-  if (!session?.user) {
-    state.role = 'member';
-    renderFrame();
-    return;
-  }
-
-  const { data, error } = await sb().from('account_roles').select('role').eq('user_id', session.user.id).maybeSingle();
-  if (error) {
-    host.innerHTML = `<div class="kav2"><section class="kav2-denied"><h2>Impossible de vérifier le rôle Admin.</h2><p>${esc(error.message)}</p></section></div>`;
-    return;
-  }
-
-  state.role = data?.role || 'member';
-  renderFrame();
-  if (state.role === 'admin') await loadAll();
-}
-
-async function proAction(action, id, role) {
-  const item = state.applications.find(app => app.id === id);
-  if (!item) return;
-  if (action === 'approve' && !confirm(`Activer ${scopeLabel(item.access_scope)} pour ${item.professional_title || item.email || 'ce professionnel'} ?`)) return;
-  if (action === 'decline' && !confirm('Refuser cette demande professionnelle ?')) return;
-  try {
-    const payload = { action, application_id: id };
-    if (action === 'approve') {
-      payload.organization_name = item.organization_name;
-      payload.organization_role = role || (item.access_scope === 'motion' ? 'operator' : 'physician');
-    }
-    await invoke('professional-admin', payload);
-    state.selectedApplication = null;
-    toast(action === 'approve' ? 'Accès professionnel activé.' : action === 'review' ? 'Demande placée en revue.' : 'Demande refusée.');
-    await loadAll();
-  } catch (error) {
-    toast(error.message || 'Action impossible.');
-  }
-}
-
-async function assignMotion(row) {
-  const org = row.querySelector('[data-patient-org]');
-  const pro = row.querySelector('[data-patient-pro]');
-  if (!org?.value) {
-    toast('Choisissez un établissement.');
-    return;
-  }
-  try {
-    await invoke('patient-intake', {
-      action: 'assign',
-      request_id: row.dataset.patientRequest,
-      organization_id: org.value,
-      professional_user_id: pro?.value || null
-    });
-    toast('Demande Motion assignée.');
-    await loadAll();
-  } catch (error) {
-    toast(error.message || 'Assignation impossible.');
-  }
-}
-
-function handleClick(event) {
-  if (location.hash !== '#admin') return;
-  const tab = event.target.closest('[data-admin-tab]');
-  if (tab) {
-    state.tab = tab.dataset.adminTab;
-    state.selectedApplication = null;
-    renderFrame();
-    return;
-  }
-  if (event.target.closest('[data-admin-refresh]')) { loadAll(); return; }
-  if (event.target.closest('[data-admin-home]')) { location.hash = 'home'; return; }
-  if (event.target.closest('[data-admin-pro]')) { location.hash = 'clinical'; return; }
-
-  const select = event.target.closest('[data-pro-select]');
-  if (select) {
-    state.selectedApplication = state.applications.find(app => app.id === select.dataset.proSelect) || null;
-    renderFrame();
-    return;
-  }
-  if (event.target.closest('[data-pro-close]')) {
-    state.selectedApplication = null;
-    renderFrame();
-    return;
-  }
-  const approve = event.target.closest('[data-pro-approve]');
-  if (approve) { proAction('approve', approve.dataset.proApprove, approve.dataset.proRole); return; }
-  const review = event.target.closest('[data-pro-review]');
-  if (review) { proAction('review', review.dataset.proReview); return; }
-  const decline = event.target.closest('[data-pro-decline]');
-  if (decline) { proAction('decline', decline.dataset.proDecline); return; }
-
-  const assign = event.target.closest('[data-patient-assign]');
-  if (assign) {
-    const row = assign.closest('[data-patient-request]');
-    if (row) assignMotion(row);
-  }
-}
-
-function handleInput(event) {
-  if (location.hash !== '#admin') return;
-  if (event.target.matches('[data-admin-patient-search]')) {
-    state.search = event.target.value;
-    const list = document.querySelector('[data-patient-registry-list]');
-    if (list) list.innerHTML = patientRows();
-  }
-}
-
-function handleChange(event) {
-  if (location.hash !== '#admin') return;
-  if (!event.target.matches('[data-patient-org]')) return;
-  const row = event.target.closest('[data-patient-request]');
-  const proSelect = row?.querySelector('[data-patient-pro]');
-  if (!proSelect) return;
-  const options = state.professionals
-    .filter(pro => pro.organization_id === event.target.value)
-    .map(pro => `<option value="${esc(pro.user_id)}">${esc(pro.email || pro.user_id)} · ${esc(pro.access_scope)}</option>`)
-    .join('');
-  proSelect.innerHTML = '<option value="">Professionnel optionnel</option>' + options;
-}
-
-let openTimer;
-function scheduleOpen() {
-  clearTimeout(openTimer);
-  openTimer = setTimeout(() => {
-    authorizeAndOpen().catch(error => {
-      console.error('[admin-console]', error);
-      const host = root();
-      if (location.hash === '#admin' && host) {
-        host.innerHTML = `<div class="kav2"><section class="kav2-denied"><h2>La console Admin n’a pas pu s’ouvrir.</h2><p>${esc(error.message || 'Erreur inconnue')}</p><button class="secondary-button" data-admin-refresh>Réessayer</button></section></div>`;
-      }
-    });
-  }, 40);
-}
-
-document.addEventListener('click', handleClick);
-document.addEventListener('input', handleInput);
-document.addEventListener('change', handleChange);
-window.addEventListener('hashchange', scheduleOpen);
-window.addEventListener('komo:admin-route-ready', scheduleOpen);
-window.addEventListener('komo:admin-open', scheduleOpen);
-document.addEventListener('DOMContentLoaded', scheduleOpen);
-setTimeout(scheduleOpen, 500);
+document.addEventListener('click',click);document.addEventListener('input',input);document.addEventListener('change',change);window.addEventListener('hashchange',open);window.addEventListener('komo:admin-route-ready',open);window.addEventListener('komo:admin-open',open);document.addEventListener('DOMContentLoaded',open);setTimeout(open,250);
