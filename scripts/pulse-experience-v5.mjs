@@ -17,16 +17,24 @@ await patch('pulse-app/experience-v3.js',[
   ["results: { label: 'Mes tests', icon: testIcon }","results: { label: 'Tests', icon: testIcon }"],
   ["documents: { label: 'Rendez-vous', icon: calendarIcon }","documents: { label: 'RDV', icon: calendarIcon }"],
   ["path: { label: 'My KŌMØ', icon: myKomoIcon }","path: { label: 'My KŌMØ Score', icon: myKomoIcon }"],
-  ["navButton('plan', 'Mon plan', planIcon)","navButton('plan', 'Priorités', planIcon)"],
-  ["navButton('plan','Mon plan',planIcon)","navButton('plan','Priorités',planIcon)"],
-  ["navButton('plan', 'Mes priorités', planIcon)","navButton('plan', 'Priorités', planIcon)"],
-  ["navButton('plan','Mes priorités',planIcon)","navButton('plan','Priorités',planIcon)"],
-  ["el.textContent = 'Voir mon plan';","el.textContent = 'Voir mes priorités';"],
-  ["<p class=\"eyebrow\">PLAN PERSONNALISÉ</p>","<p class=\"eyebrow\">MES PRIORITÉS</p>"],
-  ['Votre plan transforme les résultats de l’évaluation en priorités simples à suivre entre deux consultations.','Vos priorités transforment les résultats de l’évaluation en actions simples à suivre entre deux consultations.'],
-  ["<p class=\"eyebrow\">VOTRE PLAN</p>","<p class=\"eyebrow\">VOS PRIORITÉS</p>"],
-  ['Cette page accueillera progressivement l’adhérence au programme, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.','Cette page accueillera progressivement le suivi de vos priorités, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.'],
-  ["setPage('MON PLAN', 'Votre plan personnalisé.', renderPlan())","setPage('MES PRIORITÉS', 'Vos priorités actuelles.', renderPlan())"],
+  ["navButton('plan', 'Mon plan', planIcon)","navButton('plan', 'Suivi', planIcon)"],
+  ["navButton('plan','Mon plan',planIcon)","navButton('plan','Suivi',planIcon)"],
+  ["navButton('plan', 'Mes priorités', planIcon)","navButton('plan', 'Suivi', planIcon)"],
+  ["navButton('plan','Mes priorités',planIcon)","navButton('plan','Suivi',planIcon)"],
+  ["navButton('plan', 'Priorités', planIcon)","navButton('plan', 'Suivi', planIcon)"],
+  ["navButton('plan','Priorités',planIcon)","navButton('plan','Suivi',planIcon)"],
+  ["el.textContent = 'Voir mon plan';","el.textContent = 'Voir mon suivi';"],
+  ["el.textContent = 'Voir mes priorités';","el.textContent = 'Voir mon suivi';"],
+  ["<p class=\"eyebrow\">PLAN PERSONNALISÉ</p>","<p class=\"eyebrow\">MON SUIVI</p>"],
+  ["<p class=\"eyebrow\">MES PRIORITÉS</p>","<p class=\"eyebrow\">MON SUIVI</p>"],
+  ['Votre plan transforme les résultats de l’évaluation en priorités simples à suivre entre deux consultations.','Votre suivi transforme les résultats de l’évaluation en actions simples à suivre entre deux consultations.'],
+  ['Vos priorités transforment les résultats de l’évaluation en actions simples à suivre entre deux consultations.','Votre suivi rassemble les actions, objectifs et points à réévaluer entre deux consultations.'],
+  ["<p class=\"eyebrow\">VOTRE PLAN</p>","<p class=\"eyebrow\">VOTRE SUIVI</p>"],
+  ["<p class=\"eyebrow\">VOS PRIORITÉS</p>","<p class=\"eyebrow\">VOTRE SUIVI</p>"],
+  ['Cette page accueillera progressivement l’adhérence au programme, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.','Cette page accueillera progressivement votre suivi, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.'],
+  ['Cette page accueillera progressivement le suivi de vos priorités, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.','Cette page rassemble progressivement vos actions à suivre, vos objectifs intermédiaires et les ajustements décidés avec votre professionnel.'],
+  ["setPage('MON PLAN', 'Votre plan personnalisé.', renderPlan())","setPage('MON SUIVI', 'Votre suivi.', renderPlan())"],
+  ["setPage('MES PRIORITÉS', 'Vos priorités actuelles.', renderPlan())","setPage('MON SUIVI', 'Votre suivi.', renderPlan())"],
   ["else if (route === 'documents') setPage('AGENDA', 'Mes rendez-vous.', renderAppointments());","else if (route === 'documents') return;"],
   ['<p class="eyebrow">MY KŌMØ</p>','<p class="eyebrow">MY KŌMØ SCORE</p>'],
   ['My KŌMØ est votre mémoire de mobilité :','My KŌMØ Score rassemble vos scores et leur évolution :'],
@@ -37,10 +45,14 @@ await patch('pulse-app/experience-v3.js',[
 
 await patch('pulse-app/patient-v4.js',[
   ["const TARGETS=new Set(['path','plan','documents']);","const TARGETS=new Set(['path','plan']);"],
-  ['MON PLAN','MES PRIORITÉS'],
-  ['Votre plan personnalisé.','Vos priorités actuelles.'],
-  ['Votre plan traduit l’évaluation en priorités compréhensibles entre deux consultations. Pulse n’affiche ici que les éléments validés pour vous.','Vos priorités traduisent l’évaluation en actions compréhensibles entre deux consultations. Pulse n’affiche ici que les éléments validés pour vous.'],
-  ['Votre plan personnalisé apparaîtra après validation de vos priorités par votre professionnel.','Vos priorités apparaîtront ici après validation par votre professionnel.'],
+  ['MON PLAN','MON SUIVI'],
+  ['MES PRIORITÉS','MON SUIVI'],
+  ['Votre plan personnalisé.','Votre suivi.'],
+  ['Vos priorités actuelles.','Votre suivi.'],
+  ['Votre plan traduit l’évaluation en priorités compréhensibles entre deux consultations. Pulse n’affiche ici que les éléments validés pour vous.','Votre suivi traduit l’évaluation en actions compréhensibles entre deux consultations. Pulse n’affiche ici que les éléments validés pour vous.'],
+  ['Vos priorités traduisent l’évaluation en actions compréhensibles entre deux consultations. Pulse n’affiche ici que les éléments validés pour vous.','Votre suivi rassemble les actions et objectifs validés entre deux consultations.'],
+  ['Votre plan personnalisé apparaîtra après validation de vos priorités par votre professionnel.','Votre suivi apparaîtra ici après validation par votre professionnel.'],
+  ['Vos priorités apparaîtront ici après validation par votre professionnel.','Votre suivi apparaîtra ici après validation par votre professionnel.'],
   ['MY KŌMØ','MY KŌMØ SCORE'],
   ['My KŌMØ','My KŌMØ Score']
 ]);
@@ -51,9 +63,12 @@ await patch('pulse-app/care-messaging-v1.js',[
 ]);
 
 await patch('pulse-app/care-messaging-v2.js',[
-  ["x.textContent!=='Mes priorités'","x.textContent!=='Priorités'"],
-  ["x.textContent='Mes priorités'","x.textContent='Priorités'"],
-  ["b.setAttribute('aria-label','Mes priorités')","b.setAttribute('aria-label','Priorités')"]
+  ["x.textContent!=='Mes priorités'","x.textContent!=='Suivi'"],
+  ["x.textContent!=='Priorités'","x.textContent!=='Suivi'"],
+  ["x.textContent='Mes priorités'","x.textContent='Suivi'"],
+  ["x.textContent='Priorités'","x.textContent='Suivi'"],
+  ["b.setAttribute('aria-label','Mes priorités')","b.setAttribute('aria-label','Suivi')"],
+  ["b.setAttribute('aria-label','Priorités')","b.setAttribute('aria-label','Suivi')"]
 ]);
 
 let html=await readFile('pulse-app/index.html','utf8');
@@ -65,4 +80,4 @@ if(!html.includes('./care-messaging-v2.js'))html=html.replace('</body>','  <scri
 if(!html.includes('./home-summary-v1.js'))html=html.replace('</body>','  <script type="module" src="./home-summary-v1.js"></script>\n</body>');
 if(!html.includes('./results-polish-v1.js'))html=html.replace('</body>','  <script src="./results-polish-v1.js"></script>\n</body>');
 await writeFile('pulse-app/index.html',html);
-console.log('[pulse-experience-v5] My KŌMØ Score, refined results, premium booking, balanced dock and messaging wired');
+console.log('[pulse-experience-v5] My KŌMØ Score, patient follow-up, refined results, premium booking, balanced dock and messaging wired');
