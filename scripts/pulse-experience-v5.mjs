@@ -11,7 +11,14 @@ await patch('pulse-app/app.js',[
 
 await patch('pulse-app/experience-v3.js',[
   ["navButton('plan', 'Mon plan', planIcon)","navButton('plan', 'Mes priorités', planIcon)"],
-  ["navButton('plan','Mon plan',planIcon)","navButton('plan','Mes priorités',planIcon)"]
+  ["navButton('plan','Mon plan',planIcon)","navButton('plan','Mes priorités',planIcon)"],
+  ["el.textContent = 'Voir mon plan';","el.textContent = 'Voir mes priorités';"],
+  ["<p class=\"eyebrow\">PLAN PERSONNALISÉ</p>","<p class=\"eyebrow\">MES PRIORITÉS</p>"],
+  ['Votre plan transforme les résultats de l’évaluation en priorités simples à suivre entre deux consultations.','Vos priorités transforment les résultats de l’évaluation en actions simples à suivre entre deux consultations.'],
+  ["<p class=\"eyebrow\">VOTRE PLAN</p>","<p class=\"eyebrow\">VOS PRIORITÉS</p>"],
+  ['Une fois vos résultats relus, Pulse affichera ici les priorités retenues, les actions à suivre et les points à réévaluer lors de la prochaine consultation.','Une fois vos résultats relus, Pulse affichera ici les priorités retenues, les actions à suivre et les points à réévaluer lors de la prochaine consultation.'],
+  ['Cette page accueillera progressivement l’adhérence au programme, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.','Cette page accueillera progressivement le suivi de vos priorités, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.'],
+  ["setPage('MON PLAN', 'Votre plan personnalisé.', renderPlan())","setPage('MES PRIORITÉS', 'Vos priorités actuelles.', renderPlan())"]
 ]);
 
 await patch('pulse-app/patient-v4.js',[
@@ -28,6 +35,7 @@ await patch('pulse-app/care-messaging-v1.js',[
 ]);
 
 let html=await readFile('pulse-app/index.html','utf8');
+html=html.split('programme KŌMØ').join('parcours KŌMØ');
 if(!html.includes('./bottom-dock-v1.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./bottom-dock-v1.css" />\n</head>');
 if(!html.includes('./care-messaging-v2.js'))html=html.replace('</body>','  <script type="module" src="./care-messaging-v2.js"></script>\n  <script type="module" src="./admin-patient-routing-v2.js"></script>\n</body>');
 await writeFile('pulse-app/index.html',html);
