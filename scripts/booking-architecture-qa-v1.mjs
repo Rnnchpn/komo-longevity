@@ -8,16 +8,16 @@ const [html,booking,bookingCss,pro,proCss,follow,mig,rpc]=await Promise.all([
 ]);
 const parseFiles=['booking-layer-v1.js','pro-architecture-v2.js','pro-followup-v1.js'];
 const syntax=parseFiles.map(f=>[f,spawnSync(process.execPath,['--check',join(root,'pulse-app',f)],{encoding:'utf8'})]);
-const hasPatientPlanningRename=/function\s+renamePatientPlanning\s*\(/.test(pro)&&/data-route=[\\"']documents[\\"']/.test(pro)&&/Planning/.test(pro);
+const hasPatientBookingLabel=/function\s+keepPatientBookingLabel\s*\(/.test(pro)&&/data-route=[\\"']documents[\\"']/.test(pro)&&/RDV/.test(pro);
 const proModeHidesPatientNav=/setHidden\(patientD,pro\)/.test(pro)&&/setHidden\(patientM,pro\)/.test(pro)&&/setHidden\(proD,!pro\)/.test(pro)&&/setHidden\(proM,!pro\)/.test(pro)&&proCss.includes('.komo-pro-mode .mobile-nav#mobileNav{display:none!important}');
 const checks=[
  ['all new JavaScript parses',syntax.every(([,r])=>r.status===0)],
  ['planning assets loaded',html.includes('./booking-layer-v1.js')&&html.includes('./booking-layer-v1.css')],
  ['pro architecture assets loaded',html.includes('./pro-architecture-v2.js')&&html.includes('./pro-architecture-v2.css')],
  ['professional mode named Clinical Accès PRO',pro.includes('Clinical Accès PRO')&&pro.includes('CLINICAL ACCÈS PRO')],
- ['Pro navigation has patient management',pro.includes("navItem('patients','Gestion patients'")],
- ['Pro navigation has Planning',pro.includes("navItem('planning','Planning'")],
- ['patient navigation becomes Planning',hasPatientPlanningRename],
+ ['Pro navigation has Patients',pro.includes("navItem('patients','Patients'")],
+ ['Pro navigation has Agenda',pro.includes("navItem('planning','Agenda'")],
+ ['patient navigation keeps RDV label',hasPatientBookingLabel],
  ['patient navigation hidden in Pro mode',proModeHidesPatientNav],
  ['legacy patient tabs absent from Pro navigation',!pro.includes("navItem('tests'")&&!pro.includes("navItem('plan'")&&!pro.includes("navItem('appointments'")],
  ['patient selects center and service',booking.includes('kbookPatientOrg')&&booking.includes('data-kbook-service="motion"')&&booking.includes('data-kbook-service="clinical"')],
@@ -26,7 +26,7 @@ const checks=[
  ['patient cancellation uses canonical RPC',booking.includes("rpc('cancel_my_komo_appointment'")],
  ['30 minute UX explicit',booking.includes('DISPONIBILITÉS · 30 MIN')&&booking.includes('créneaux de 30 minutes')],
  ['professional weekly planning renders five workdays',booking.includes('Array.from({length:5}')&&bookingCss.includes('repeat(5')],
- ['professional Planning selects center',booking.includes('kbookProOrg')&&booking.includes("localStorage.setItem(ORG_KEY")],
+ ['professional Agenda selects center',booking.includes('kbookProOrg')&&booking.includes("localStorage.setItem(ORG_KEY")],
  ['patient management selects center',follow.includes('kfollowOrg')&&follow.includes('Mes patients')],
  ['patient management includes requests',follow.includes('kfollowRequests')&&follow.includes('[data-pir-tab]')],
  ['booking schema defines center services and hours',mig.includes('organization_booking_services')&&mig.includes('organization_booking_hours')],
