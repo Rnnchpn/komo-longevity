@@ -64,6 +64,7 @@ const scripts = [
   'scripts/admin-route-fix-v1.mjs',
   'scripts/auth-gateway-inject-v2.mjs',
   'scripts/clinical-multicenter-v1.mjs',
+  'scripts/global-patient-selector-v1.mjs',
   'scripts/patient-check-enhancements-v1.mjs',
   'scripts/pro-patient-directory-v2.mjs',
   'scripts/pulse-performance-hardening-v1.mjs',
