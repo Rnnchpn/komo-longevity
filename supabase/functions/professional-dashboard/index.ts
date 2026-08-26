@@ -7,7 +7,19 @@ const S=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'';
 const ORIGINS=new Set(['https://pulse.komolongevity.com','https://komolongevity.com']);
 function cors(req:Request){const o=req.headers.get('origin')??'';return{'Access-Control-Allow-Origin':ORIGINS.has(o)?o:'https://pulse.komolongevity.com','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'}}
 function json(req:Request,body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers:{...cors(req),'Content-Type':'application/json; charset=utf-8'}})}
-function prep(responses:any){const keys=['baseline','chair_stand','two_step'];const done=keys.filter(k=>responses?.[k]?.completed_at).length;return{completed:done,total:keys.length,percent:Math.round(done/keys.length*100),baseline:!!responses?.baseline?.completed_at,chair_stand:!!responses?.chair_stand?.completed_at,two_step:!!responses?.two_step?.completed_at,first_score:responses?.baseline?.questionnaire?.mobility_score_0_100??null}}
+function num(v:any){const n=Number(v);return Number.isFinite(n)?n:null}
+function qLevel(score:number|null){if(score===null)return null;const d=100-score;if(d<7)return 0;if(d<16)return 1;if(d<24)return 2;return 3}
+function tLevel(ratio:number|null){if(ratio===null)return null;if(ratio>=1.3)return 0;if(ratio>=1.1)return 1;if(ratio>=0.9)return 2;return 3}
+function prep(responses:any){
+  const keys=['baseline','chair_stand','two_step'];
+  const done=keys.filter(k=>responses?.[k]?.completed_at).length;
+  const q=num(responses?.baseline?.questionnaire?.mobility_score_0_100);
+  const chair=num(responses?.chair_stand?.repetitions);
+  const two=num(responses?.two_step?.ratio);
+  const levels=[qLevel(q),tLevel(two)].filter((x):x is number=>Number.isFinite(x));
+  const freeLevel=levels.length?Math.max(...levels):null;
+  return{completed:done,total:keys.length,percent:Math.round(done/keys.length*100),baseline:!!responses?.baseline?.completed_at,chair_stand:!!responses?.chair_stand?.completed_at,two_step:!!responses?.two_step?.completed_at,first_score:q,chair_repetitions:chair,two_step_ratio:two,free_level:done===keys.length?freeLevel:null,free_label:done===keys.length&&freeLevel!==null?['Mobilité préservée','Mobilité à surveiller','Diminution fonctionnelle probable','Diminution fonctionnelle marquée'][freeLevel]:null}
+}
 Deno.serve(async(req:Request)=>{
   if(req.method==='OPTIONS')return new Response('ok',{headers:cors(req)});
   if(req.method!=='POST')return json(req,{error:'method_not_allowed'},405);
