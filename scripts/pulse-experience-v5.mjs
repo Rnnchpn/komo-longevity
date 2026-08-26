@@ -82,4 +82,4 @@ if(!html.includes('./home-summary-v1.js'))html=html.replace('</body>','  <script
 if(!html.includes('./results-polish-v1.js'))html=html.replace('</body>','  <script src="./results-polish-v1.js"></script>\n</body>');
 if(!html.includes('./tests-score-trilogy-v1.js'))html=html.replace('</body>','  <script type="module" src="./tests-score-trilogy-v1.js"></script>\n</body>');
 await writeFile('pulse-app/index.html',html);
-console.log('[pulse-experience-v5] center-first workspace, shared center inbox, Start/Motion/Clinical score trilogy, My KŌMØ Score and visual polish wired');
+console.log('[pulse-experience-v5] stable score trilogy, center workspace, shared center inbox, My KŌMØ Score and refined dock wired');
