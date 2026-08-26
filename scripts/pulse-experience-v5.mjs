@@ -6,7 +6,9 @@ await patch('pulse-app/app.js',[
   ['ÉTAT DU PARCOURS','VOTRE PROGRESSION'],
   ['ÉTAT DU PROGRAMME','VOTRE PROGRESSION'],
   ["metricCard('Parcours',statusLabel(status)","metricCard('Progression',statusLabel(status)"],
-  ["adherence:'Étape du programme'","adherence:'Étape du suivi'"]
+  ["adherence:'Étape du programme'","adherence:'Étape du suivi'"],
+  ["return['home','results','path','documents','explore','clinical','profile','admin'].includes(route)?route:'home'","return['home','results','path','documents','explore','clinical','profile','admin','plan','messages'].includes(route)?route:'home'"],
+  ["function renderRoute(route){renderNavigation();if(route==='admin')","function renderRoute(route){renderNavigation();if(['documents','plan','messages'].includes(route)){els.viewRoot.innerHTML='<div class=\"empty-state\">Chargement de votre espace…</div>';return}if(route==='admin')"]
 ]);
 
 await patch('pulse-app/experience-v3.js',[
@@ -16,9 +18,9 @@ await patch('pulse-app/experience-v3.js',[
   ["<p class=\"eyebrow\">PLAN PERSONNALISÉ</p>","<p class=\"eyebrow\">MES PRIORITÉS</p>"],
   ['Votre plan transforme les résultats de l’évaluation en priorités simples à suivre entre deux consultations.','Vos priorités transforment les résultats de l’évaluation en actions simples à suivre entre deux consultations.'],
   ["<p class=\"eyebrow\">VOTRE PLAN</p>","<p class=\"eyebrow\">VOS PRIORITÉS</p>"],
-  ['Une fois vos résultats relus, Pulse affichera ici les priorités retenues, les actions à suivre et les points à réévaluer lors de la prochaine consultation.','Une fois vos résultats relus, Pulse affichera ici les priorités retenues, les actions à suivre et les points à réévaluer lors de la prochaine consultation.'],
   ['Cette page accueillera progressivement l’adhérence au programme, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.','Cette page accueillera progressivement le suivi de vos priorités, les objectifs intermédiaires et les ajustements décidés avec votre professionnel.'],
-  ["setPage('MON PLAN', 'Votre plan personnalisé.', renderPlan())","setPage('MES PRIORITÉS', 'Vos priorités actuelles.', renderPlan())"]
+  ["setPage('MON PLAN', 'Votre plan personnalisé.', renderPlan())","setPage('MES PRIORITÉS', 'Vos priorités actuelles.', renderPlan())"],
+  ["else if (route === 'documents') setPage('AGENDA', 'Mes rendez-vous.', renderAppointments());","else if (route === 'documents') return;"]
 ]);
 
 await patch('pulse-app/patient-v4.js',[
