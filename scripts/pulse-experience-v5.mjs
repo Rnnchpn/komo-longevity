@@ -57,11 +57,6 @@ await patch('pulse-app/patient-v4.js',[
   ['My KŌMØ','My KŌMØ Score']
 ]);
 
-await patch('pulse-app/care-messaging-v1.js',[
-  ["if(isPro()){ensureProTab()}else{await loadMemberRecords();injectMember()}","if(isPro()){ensureProTab()}"],
-  ["if(location.hash.replace(/^#/,'')==='documents'&&!isPro())injectMember()",""]
-]);
-
 await patch('pulse-app/care-messaging-v2.js',[
   ["x.textContent!=='Mes priorités'","x.textContent!=='Suivi'"],
   ["x.textContent!=='Priorités'","x.textContent!=='Suivi'"],
@@ -73,11 +68,16 @@ await patch('pulse-app/care-messaging-v2.js',[
 
 let html=await readFile('pulse-app/index.html','utf8');
 html=html.split('programme KŌMØ').join('parcours KŌMØ');
+html=html.replace('<script type="module" src="./care-messaging-v1.js"></script>','');
+html=html.replace('<button type="button" data-mode="member" class="active">Membre</button><button type="button" data-mode="clinical">Pro</button>','<button type="button" data-mode="member" class="active">Espace patient</button><button type="button" data-mode="clinical">Espace centre</button>');
 if(!html.includes('./bottom-dock-v1.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./bottom-dock-v1.css" />\n</head>');
 if(!html.includes('./home-summary-v1.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./home-summary-v1.css" />\n</head>');
 if(!html.includes('./results-polish-v1.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./results-polish-v1.css" />\n</head>');
+if(!html.includes('./center-messaging-v1.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./center-messaging-v1.css" />\n</head>');
+if(!html.includes('./visual-polish-v6.css'))html=html.replace('</head>','  <link rel="stylesheet" href="./visual-polish-v6.css" />\n</head>');
+if(!html.includes('./center-messaging-v1.js'))html=html.replace('<script type="module" src="./pro-architecture-v2.js"></script>','<script type="module" src="./pro-architecture-v2.js"></script>\n  <script src="./center-workspace-v1.js"></script>\n  <script type="module" src="./center-messaging-v1.js"></script>');
 if(!html.includes('./care-messaging-v2.js'))html=html.replace('</body>','  <script type="module" src="./care-messaging-v2.js"></script>\n  <script type="module" src="./admin-patient-routing-v2.js"></script>\n</body>');
 if(!html.includes('./home-summary-v1.js'))html=html.replace('</body>','  <script type="module" src="./home-summary-v1.js"></script>\n</body>');
 if(!html.includes('./results-polish-v1.js'))html=html.replace('</body>','  <script src="./results-polish-v1.js"></script>\n</body>');
 await writeFile('pulse-app/index.html',html);
-console.log('[pulse-experience-v5] My KŌMØ Score, patient follow-up, refined results, premium booking, balanced dock and messaging wired');
+console.log('[pulse-experience-v5] center-first workspace, shared center inbox, My KŌMØ Score, patient follow-up and visual polish wired');
