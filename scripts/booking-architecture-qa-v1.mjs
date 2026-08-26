@@ -9,7 +9,7 @@ const [html,booking,bookingCss,pro,proCss,follow,mig,rpc]=await Promise.all([
 const parseFiles=['booking-layer-v1.js','pro-architecture-v2.js','pro-followup-v1.js'];
 const syntax=parseFiles.map(f=>[f,spawnSync(process.execPath,['--check',join(root,'pulse-app',f)],{encoding:'utf8'})]);
 const hasPatientPlanningRename=/function\s+renamePatientPlanning\s*\(/.test(pro)&&/data-route=[\\"']documents[\\"']/.test(pro)&&/Planning/.test(pro);
-const proModeHidesPatientNav=/patientD\)patientD\.hidden=pro/.test(pro)&&/patientM\)patientM\.hidden=pro/.test(pro)&&/\.komo-pro-mode\s+\.mobile-nav#mobileNav\{display:none!important\}/.test(proCss);
+const proModeHidesPatientNav=/setHidden\(patientD,pro\)/.test(pro)&&/setHidden\(patientM,pro\)/.test(pro)&&/setHidden\(proD,!pro\)/.test(pro)&&/setHidden\(proM,!pro\)/.test(pro)&&proCss.includes('.komo-pro-mode .mobile-nav#mobileNav{display:none!important}');
 const checks=[
  ['all new JavaScript parses',syntax.every(([,r])=>r.status===0)],
  ['planning assets loaded',html.includes('./booking-layer-v1.js')&&html.includes('./booking-layer-v1.css')],
