@@ -8,10 +8,10 @@
     style.id='free-result-v2-style';
     style.textContent=`
       .pulse-free-result-v2{margin:26px 0;padding:0!important;overflow:hidden;border:1px solid rgba(34,45,36,.12)!important;border-radius:28px!important;background:#f7f4ed!important;box-shadow:0 24px 70px rgba(41,49,40,.08)}
-      .fr2-hero{display:grid;grid-template-columns:minmax(0,1fr) 138px;gap:28px;align-items:center;padding:34px;background:linear-gradient(135deg,#263228 0%,#334037 64%,#445148 100%);color:#fff}.fr2-hero .eyebrow{color:rgba(255,255,255,.62)}.fr2-hero h3{margin:5px 0 9px;font-size:34px;line-height:1.04;letter-spacing:-.045em}.fr2-hero p{margin:0;max-width:720px;color:rgba(255,255,255,.75);line-height:1.6}.fr2-level{width:124px;height:124px;border-radius:50%;display:grid;place-items:center;align-content:center;justify-self:end;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 0 0 8px rgba(255,255,255,.035)}.fr2-level small{font-size:9px;letter-spacing:.14em;color:rgba(255,255,255,.6)}.fr2-level strong{font-size:46px;line-height:.95}.fr2-level span{font-size:10px;color:rgba(255,255,255,.62)}
+      .fr2-hero{display:grid;grid-template-columns:124px minmax(0,1fr) 124px;gap:24px;align-items:center;padding:34px;background:linear-gradient(135deg,#263228 0%,#334037 64%,#445148 100%);color:#fff}.fr2-copy{grid-column:2;text-align:center;justify-self:center;width:100%;max-width:760px}.fr2-hero .eyebrow{color:rgba(255,255,255,.62);text-align:center}.fr2-hero h3{margin:6px 0 10px;font-size:34px;line-height:1.04;letter-spacing:-.045em;text-align:center}.fr2-hero p{margin:0 auto;max-width:720px;color:rgba(255,255,255,.75);line-height:1.6;text-align:center}.fr2-level{grid-column:3;width:124px;height:124px;border-radius:50%;display:grid;place-items:center;align-content:center;justify-self:end;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.2);box-shadow:inset 0 0 0 8px rgba(255,255,255,.035)}.fr2-level small{font-size:9px;letter-spacing:.14em;color:rgba(255,255,255,.6)}.fr2-level strong{font-size:46px;line-height:.95}.fr2-level span{font-size:10px;color:rgba(255,255,255,.62)}
       .fr2-body{padding:28px 30px 30px}.fr2-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.fr2-metric{padding:19px;border-radius:18px;background:#fff;border:1px solid rgba(39,48,40,.09)}.fr2-metric small{display:block;margin-bottom:9px;font-size:9px;font-weight:800;letter-spacing:.1em;color:#80867f;text-transform:uppercase}.fr2-metric strong{display:block;font-size:25px;letter-spacing:-.03em;color:#2d382f}.fr2-metric span{display:block;margin-top:7px;font-size:11px;line-height:1.45;color:#727a73}.fr2-metric.is-favorable{border-color:rgba(79,107,77,.22);background:#fbfcf9}.fr2-metric.is-favorable strong{color:#506950}
       .fr2-reading{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin-top:14px}.fr2-panel{padding:20px;border-radius:18px;background:#eee9df}.fr2-panel h4{margin:0 0 8px;font-size:16px}.fr2-panel p{margin:0;color:#677068;font-size:12px;line-height:1.58}.fr2-panel b{color:#39483b}.fr2-next{background:#fff}.fr2-next button{margin-top:13px;border:0;border-radius:999px;padding:11px 15px;background:#263228;color:#fff;font:inherit;font-size:11px;font-weight:700;cursor:pointer}.fr2-note{margin:14px 2px 0;color:#7b817b;font-size:10px;line-height:1.55}.fr2-note strong{color:#555f56}
-      @media(max-width:820px){.fr2-hero{grid-template-columns:1fr;padding:26px}.fr2-level{justify-self:start;width:100px;height:100px}.fr2-level strong{font-size:38px}.fr2-body{padding:20px}.fr2-metrics,.fr2-reading{grid-template-columns:1fr}.fr2-hero h3{font-size:28px}}
+      @media(max-width:820px){.fr2-hero{grid-template-columns:1fr;padding:26px}.fr2-copy,.fr2-level{grid-column:1}.fr2-copy{text-align:center}.fr2-level{justify-self:center;width:100px;height:100px;margin-top:8px}.fr2-level strong{font-size:38px}.fr2-body{padding:20px}.fr2-metrics,.fr2-reading{grid-template-columns:1fr}.fr2-hero h3{font-size:28px}}
     `;
     document.head.appendChild(style);
   }
@@ -48,7 +48,7 @@
   }
   function levelCopy(level){
     return [
-      ['Mobilité préservée.','Les données de dépistage sont favorables. Aucun signal de diminution de mobilité n’est détecté sur les composantes interprétables de Pulse Free.'],
+      ['Résultats KŌMØ Pulse · Level 1','Les données de dépistage sont favorables. Aucun signal de diminution de mobilité n’est détecté sur les composantes interprétables de Pulse Free.'],
       ['Mobilité à surveiller.','Un premier signal de diminution de mobilité apparaît. La prévention et le suivi deviennent particulièrement utiles.'],
       ['Diminution fonctionnelle probable.','Plusieurs éléments suggèrent une diminution de mobilité qui mérite une évaluation professionnelle plus complète.'],
       ['Diminution fonctionnelle marquée.','Le profil de dépistage justifie une évaluation professionnelle afin de préciser les causes et la stratégie de prise en charge.']
@@ -83,7 +83,7 @@
     section.className='pulse-free-result pulse-free-result-v2';
     section.innerHTML=`
       <div class="fr2-hero">
-        <div><p class="eyebrow">PULSE FREE · VOTRE RÉSULTAT</p><h3>${title}</h3><p>${copy}</p></div>
+        <div class="fr2-copy"><p class="eyebrow">VOTRE PREMIÈRE RÉFÉRENCE</p><h3>${title}</h3><p>${copy}</p></div>
         <div class="fr2-level"><small>NIVEAU KŌMØ FREE</small><strong>${level}</strong><span>sur 3</span></div>
       </div>
       <div class="fr2-body">
