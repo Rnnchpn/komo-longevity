@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
-const path='pulse-app/clinical-cockpit-v1.js';
-let src=await readFile(path,'utf8');
+const cockpitPath='pulse-app/clinical-cockpit-v1.js';
+const indexPath='pulse-app/index.html';
+let src=await readFile(cockpitPath,'utf8');
 const replacements=[
   ["const K={patient:'komo_clinical_patient',assessment:'komo_clinical_assessment',tab:'komo_clinical_tab'};","const K={patient:'komo_clinical_patient',assessment:'komo_clinical_assessment',tab:'komo_clinical_tab',org:'komo_clinical_org'};"],
   ["const s={client:null,session:null,role:'member',org:null,patients:[],assessments:[],scores:[],imports:[],priorities:[],contexts:[],appointments:[],patient:null,assessment:null,tab:localStorage.getItem(K.tab)||'dashboard',loaded:false};","const s={client:null,session:null,role:'member',org:null,membership:null,memberships:[],patients:[],assessments:[],scores:[],imports:[],priorities:[],contexts:[],appointments:[],patient:null,assessment:null,tab:localStorage.getItem(K.tab)||'dashboard',loaded:false};"],
@@ -10,5 +11,10 @@ const replacements=[
   ["<h3>Patients</h3><p>Dossier transversal relié à Motion, Clinical, plans et rendez-vous.</p>","<h3>${['owner','clinical_admin'].includes(s.membership?.role)?'Patients du centre':'Mes patients'}</h3><p>${['owner','clinical_admin'].includes(s.membership?.role)?'Tous les dossiers autorisés dans ce centre.':'Uniquement les patients qui vous sont explicitement affectés.'}</p>"]
 ];
 for(const [from,to] of replacements){if(!src.includes(from))throw new Error('[clinical-multicenter-v1] expected source fragment missing: '+from.slice(0,70));src=src.replace(from,to)}
-await writeFile(path,src);
-console.log('[clinical-multicenter-v1] multi-center organization and assignment context applied');
+await writeFile(cockpitPath,src);
+
+let html=await readFile(indexPath,'utf8');
+if(!html.includes('./center-context-v1.css')) html=html.replace('<link rel="stylesheet" href="./admin-console-v2.css" />','<link rel="stylesheet" href="./admin-console-v2.css" />\n  <link rel="stylesheet" href="./center-context-v1.css" />');
+if(!html.includes('./center-context-v1.js')) html=html.replace('<script type="module" src="./admin-console-v2.js"></script>','<script type="module" src="./admin-console-v2.js"></script>\n  <script src="./center-context-v1.js"></script>');
+await writeFile(indexPath,html);
+console.log('[clinical-multicenter-v1] multi-center organization, patient visibility and assets applied');
