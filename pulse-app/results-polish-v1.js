@@ -8,8 +8,10 @@
   function enhance(){
     if(!['home','results'].includes(route()))return;
     document.querySelectorAll('.kfree-v2').forEach(card=>{
-      // Remove every former interpretation layer so only one patient-facing reading remains.
-      card.querySelectorAll('.kfree-v2-meaning,.krp-summary,.krp-actions,.krp-note,.krp-overview,.krp-next,.krp-details').forEach(x=>x.remove());
+      // Legacy layers are removed once; the new layer is never rebuilt unless the card itself is recreated.
+      card.querySelectorAll('.kfree-v2-meaning,.krp-summary,.krp-actions,.krp-note').forEach(x=>x.remove());
+      if(card.dataset.krpEnhanced==='2'&&card.querySelector('.krp-overview')&&card.querySelector('.krp-next')&&card.querySelector('.krp-details'))return;
+      card.querySelectorAll('.krp-overview,.krp-next,.krp-details').forEach(x=>x.remove());
       const metrics=card.querySelector('.kfree-v2-metrics');
       if(!metrics)return;
 
@@ -60,7 +62,7 @@
 
       next.querySelector('[data-krp-action="motion"]')?.addEventListener('click',()=>{location.hash='documents'});
       next.querySelector('[data-krp-action="score"]')?.addEventListener('click',()=>{location.hash='path'});
-      next.querySelector('[data-krp-action="keep"]')?.addEventListener('click',()=>details.open=true);
+      next.querySelector('[data-krp-action="keep"]')?.addEventListener('click',()=>{details.open=true});
       details.addEventListener('toggle',()=>{const s=details.querySelector('summary span');if(s)s.textContent=details.open?'−':'+'});
       card.dataset.krpEnhanced='2';
     });
