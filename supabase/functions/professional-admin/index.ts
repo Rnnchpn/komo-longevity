@@ -59,6 +59,114 @@ Deno.serve(async (req: Request) => {
   try { body = await req.json(); } catch { return json(req, { error: "invalid_json" }, 400); }
   const action = String(body.action ?? "list");
 
+  if (action === "list_professionals") {
+    const roles = await svc.from("account_roles")
+      .select("user_id,role,approved_at")
+      .eq("role", "professional")
+      .order("approved_at", { ascending: false });
+    if (roles.error) return json(req, { error: "professionals_failed", detail: roles.error.message }, 500);
+
+    const professionals = await Promise.all((roles.data ?? []).map(async (role: any) => {
+      const [authUser, profile, memberships, applications] = await Promise.all([
+        svc.auth.admin.getUserById(role.user_id),
+        svc.from("profiles").select("display_name,first_name,last_name,phone,city,country").eq("id", role.user_id).maybeSingle(),
+        svc.from("organization_members")
+          .select("organization_id,role,status,access_scope,organizations(id,name,slug,clinical_data_status,status)")
+          .eq("user_id", role.user_id)
+          .eq("status", "active"),
+        svc.from("professional_applications")
+          .select("id,access_scope,registration_system,registration_identifier,professional_title,territory,status,reviewed_at")
+          .eq("user_id", role.user_id)
+          .order("submitted_at", { ascending: false })
+          .limit(1)
+      ]);
+      const app = applications.data?.[0] ?? null;
+      return {
+        user_id: role.user_id,
+        email: authUser.data?.user?.email ?? null,
+        email_confirmed_at: authUser.data?.user?.email_confirmed_at ?? null,
+        last_sign_in_at: authUser.data?.user?.last_sign_in_at ?? null,
+        approved_at: role.approved_at ?? null,
+        profile: profile.data ?? null,
+        professional_title: app?.professional_title ?? null,
+        registration_system: app?.registration_system ?? null,
+        registration_identifier: app?.registration_identifier ?? null,
+        territory: app?.territory ?? null,
+        memberships: memberships.data ?? []
+      };
+    }));
+    return json(req, { professionals, count: professionals.length });
+  }
+
+  if (action === "promote_clinical") {
+    const userId = String(body.user_id ?? "");
+    const organizationId = String(body.organization_id ?? "");
+    const registrationSystem = String(body.registration_system ?? "").trim().slice(0, 120);
+    const registrationIdentifier = String(body.registration_identifier ?? "").trim().slice(0, 160);
+    if (!userId || !organizationId) return json(req, { error: "professional_and_organization_required" }, 400);
+    if (!registrationSystem || !registrationIdentifier) return json(req, { error: "professional_registration_required", detail: "Un registre professionnel et un identifiant vérifiable sont requis pour Clinical." }, 400);
+
+    const [accountRole, membership, authUser] = await Promise.all([
+      svc.from("account_roles").select("role").eq("user_id", userId).maybeSingle(),
+      svc.from("organization_members").select("role,access_scope,status").eq("user_id", userId).eq("organization_id", organizationId).eq("status", "active").maybeSingle(),
+      svc.auth.admin.getUserById(userId)
+    ]);
+    if (accountRole.data?.role !== "professional") return json(req, { error: "professional_required" }, 409);
+    if (!membership.data) return json(req, { error: "active_membership_required" }, 409);
+
+    const previous = membership.data;
+    const nextRole = ["owner", "clinical_admin"].includes(previous.role) ? previous.role : "physician";
+    const updateMembership = await svc.from("organization_members")
+      .update({ role: nextRole, access_scope: "clinical" })
+      .eq("user_id", userId)
+      .eq("organization_id", organizationId)
+      .eq("status", "active");
+    if (updateMembership.error) return json(req, { error: "clinical_promotion_failed", detail: updateMembership.error.message }, 409);
+
+    const latestApp = await svc.from("professional_applications")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("status", "approved")
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (latestApp.data?.id) {
+      await svc.from("professional_applications").update({
+        access_scope: "clinical",
+        selected_offer: "clinical",
+        registration_system: registrationSystem,
+        registration_identifier: registrationIdentifier,
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: admin.id,
+        review_note: "Clinical access granted from KŌMØ Admin professional registry."
+      }).eq("id", latestApp.data.id);
+    }
+
+    await svc.from("audit_events").insert({
+      organization_id: organizationId,
+      actor_user_id: admin.id,
+      event_type: "professional_clinical_access_granted",
+      entity_type: "organization_member",
+      entity_id: userId,
+      event_detail: {
+        previous_role: previous.role,
+        previous_access_scope: previous.access_scope,
+        new_role: nextRole,
+        new_access_scope: "clinical",
+        registration_system: registrationSystem,
+        registration_identifier: registrationIdentifier
+      }
+    });
+
+    const email = authUser.data?.user?.email ?? null;
+    const emailSent = await mail(
+      email,
+      "Votre accès KŌMØ Clinical est activé",
+      "<p>Votre habilitation <strong>KŌMØ Clinical</strong> est maintenant active.</p><p>Reconnectez-vous à Pulse puis ouvrez l’espace <strong>Pro</strong> pour accéder aux fonctions Clinical autorisées.</p>"
+    );
+    return json(req, { ok: true, user_id: userId, organization_id: organizationId, role: nextRole, access_scope: "clinical", email_sent: emailSent });
+  }
+
   if (action === "list") {
     const result = await svc.from("professional_applications")
       .select("id,user_id,organization_name,professional_title,registration_identifier,registration_system,territory,website,selected_offer,access_scope,message,status,submitted_at,reviewed_at,review_note")
