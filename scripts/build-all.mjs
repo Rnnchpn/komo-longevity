@@ -67,6 +67,7 @@ const scripts = [
   'scripts/global-patient-selector-v1.mjs',
   'scripts/patient-check-enhancements-v1.mjs',
   'scripts/pro-patient-directory-v2.mjs',
+  'scripts/pulse-free-interpretation-v1.mjs',
   'scripts/pulse-performance-hardening-v1.mjs',
   'scripts/patient-pro-flow-qa-v1.mjs',
   'scripts/build-pulse-v12.mjs',
