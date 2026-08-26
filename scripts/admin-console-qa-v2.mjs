@@ -36,3 +36,4 @@ const checks=[
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([n])=>n);if(failed.length){if(syntax.status!==0)console.error(syntax.stderr||syntax.stdout);console.error('[admin-console-qa-v2] failed: '+failed.join(', '));process.exit(1)}console.log(`[admin-console-qa-v2] ${checks.length} checks passed.`);
 await import('./booking-architecture-qa-v1.mjs');
+await import('./signup-onboarding-qa-v1.mjs');
