@@ -17,7 +17,10 @@ const checks=[
   ['professional request creates Pulse account',auth.includes('auth.signUp')&&auth.includes('emailRedirectTo')],
   ['professional application fields',auth.includes('professional_title')&&auth.includes('organization_name')&&auth.includes('access_scope')],
   ['clinical registry gate',auth.includes('registration_system')&&auth.includes('registration_identifier')],
-  ['pending request resumes after confirmation',auth.includes('komo_pending_pro_application_v1')&&auth.includes('attemptPending')],
+  ['signup carries professional application marker',auth.includes('komo_pro_application')&&auth.includes('komo_pro_access_scope')],
+  ['signup carries organization and title metadata',auth.includes('komo_pro_organization')&&auth.includes('komo_pro_title')&&auth.includes('komo_pro_territory')],
+  ['signup carries clinical registration metadata',auth.includes('komo_pro_registration_system')&&auth.includes('komo_pro_registration_identifier')],
+  ['pending request resumes after confirmation',auth.includes('komo_pending_pro_application_v1')&&auth.includes('attemptPending')&&auth.includes('ensureApplication')],
   ['professional application endpoint used',auth.includes("functions.invoke('professional-application'")]
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([name])=>name);
