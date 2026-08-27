@@ -45,11 +45,14 @@ fs.writeFileSync(htmlPath,html);
 
 let app=fs.readFileSync(appPath,'utf8');
 const oldEnter="async function enterApp(session){state.session=session;state.user=session?.user||null;els.authScreen.hidden=true;els.appShell.hidden=false;await loadAppData();renderAccount();renderNavigation();if(!location.hash)location.hash='home';renderRoute(currentRoute())}";
+const runtimeEnter="async function enterApp(session){state.session=session;state.user=session?.user||null;window.KomoRuntime?.setContext?.(session);els.authScreen.hidden=true;els.appShell.hidden=false;await loadAppData();renderAccount();renderNavigation();if(!location.hash)location.hash='home';renderRoute(currentRoute())}";
 const previousFastEnter="async function enterApp(session){state.session=session;state.user=session?.user||null;state.profile=null;els.authScreen.hidden=true;els.appShell.hidden=false;if(!location.hash)history.replaceState(null,'','#home');const fullLoad=loadAppData();const identityReady=new Promise(resolve=>{const started=performance.now();const tick=()=>{if(state.profile!==null||performance.now()-started>900){resolve();return}setTimeout(tick,16)};tick()});await Promise.race([fullLoad,identityReady]);renderAccount();renderNavigation();renderRoute(currentRoute());if(state.loading)document.body.classList.add('komo-hydrating');await fullLoad;document.body.classList.remove('komo-hydrating');renderAccount();renderNavigation();renderRoute(currentRoute());window.dispatchEvent(new CustomEvent('komo:data-ready'))}";
 const stableEnter="async function enterApp(session){state.session=session;state.user=session?.user||null;state.profile=null;if(!location.hash)history.replaceState(null,'','#home');document.body.classList.add('komo-hydrating');await loadAppData();document.body.classList.remove('komo-hydrating');renderAccount();renderNavigation();renderRoute(currentRoute());els.authScreen.hidden=true;els.appShell.hidden=false;window.dispatchEvent(new CustomEvent('komo:data-ready'))}";
-if(app.includes(previousFastEnter))app=app.replace(previousFastEnter,stableEnter);
+const runtimeStableEnter="async function enterApp(session){state.session=session;state.user=session?.user||null;state.profile=null;window.KomoRuntime?.setContext?.(session);if(!location.hash)history.replaceState(null,'','#home');document.body.classList.add('komo-hydrating');await loadAppData();document.body.classList.remove('komo-hydrating');renderAccount();renderNavigation();renderRoute(currentRoute());els.authScreen.hidden=true;els.appShell.hidden=false;window.dispatchEvent(new CustomEvent('komo:data-ready'))}";
+if(app.includes(runtimeEnter))app=app.replace(runtimeEnter,runtimeStableEnter);
+else if(app.includes(previousFastEnter))app=app.replace(previousFastEnter,stableEnter);
 else if(app.includes(oldEnter))app=app.replace(oldEnter,stableEnter);
-else if(!app.includes(stableEnter)){
+else if(!app.includes(runtimeStableEnter)&&!app.includes(stableEnter)){
   console.error('[pulse-speed] enterApp contract changed; refusing unsafe patch');
   process.exit(1);
 }
