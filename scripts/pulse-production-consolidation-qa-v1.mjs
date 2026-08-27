@@ -57,3 +57,6 @@ let failed=0;
 for(const [label,ok] of checks){console.log(`[pulse-production-consolidation-qa] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)failed++}
 if(failed)process.exit(1);
 console.log(`[pulse-production-consolidation-qa] ${checks.length} checks passed · ${localAssets.length} local asset references locked to ${release}.`);
+
+// Final public-site pass: the product homepage is rebuilt only after Pulse production ownership is validated.
+await import('./homepage-whoop-product-v2.mjs');
