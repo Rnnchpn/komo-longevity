@@ -5,7 +5,7 @@ const pulse=join(process.cwd(),'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
 const cssPath=join(pulse,'pulse-ui-v1.css');
 const appPath=join(pulse,'app.js');
-const release='20260827-canonical-2';
+const release='20260827-canonical-3';
 
 let html=await readFile(htmlPath,'utf8');
 let css=await readFile(cssPath,'utf8');
@@ -15,6 +15,8 @@ let app=await readFile(appPath,'utf8');
 // - desktop shell: core sidebar/topbar + bottom-dock/frozen-navigation CSS
 // - phone/iPad shell: adaptive-shell-v4 only
 // - home: My KŌMØ only
+// - RDV patient (#documents): booking-layer-v1 only
+// - patient-motion-booking-v2: CTA bridge only, never a page renderer
 // - mobile-guided-v2: test-content guidance only, never navigation/home
 // These superseded shell/home runtimes are intentionally not shipped in production.
 for(const file of ['mobile-menu-v3.js','tablet-patient-v1.js','home-clarity-v1.js','home-summary-v1.js']){
@@ -55,7 +57,7 @@ await writeFile(appPath,app);
 // frame before adaptive-shell-v4 attaches. Desktop remains untouched.
 const ownership=`
 /* Canonical Pulse shell ownership */
-/* Desktop: core + bottom dock. Phone/iPad: adaptive-shell-v4. Home: My KŌMØ. */
+/* Desktop: core + bottom dock. Phone/iPad: adaptive-shell-v4. Home: My KŌMØ. RDV: booking-layer-v1. */
 @media(max-width:767px){
   #mobileNav,#proMobileNav,.sidebar{display:none!important}
   .topbar .mode-switch{display:none!important}
@@ -76,4 +78,4 @@ html=html.replace(/\s*<meta name="komo-pulse-release"[^>]*>/g,'');
 html=html.replace('</head>',`  <meta name="komo-pulse-release" content="${release}" />\n</head>`);
 await writeFile(htmlPath,html);
 
-console.log(`[pulse-production-consolidation] canonical shell + home locked · release ${release}`);
+console.log(`[pulse-production-consolidation] canonical shell + home + RDV locked · release ${release}`);
