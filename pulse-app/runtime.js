@@ -4,21 +4,70 @@
   const PROJECT_REF = 'uqlolefsiktbznnymriy';
   const LEGACY_AUTH_KEY = `sb-${PROJECT_REF}-auth-token`;
   const REMEMBER_KEY = 'komo_pulse_remember';
+  const StorageProto = window.Storage?.prototype;
+  const nativeGet = StorageProto?.getItem;
+  const nativeSet = StorageProto?.setItem;
+  const nativeRemove = StorageProto?.removeItem;
 
-  // Preserve existing Pulse sessions from the Work-era frontend when the
-  // standalone app takes over the same pulse.komolongevity.com origin.
-  // Supabase stores its persisted session under the project-scoped key.
-  if (localStorage.getItem(REMEMBER_KEY) === null && localStorage.getItem(LEGACY_AUTH_KEY)) {
-    localStorage.setItem(REMEMBER_KEY, '1');
+  // Preserve an existing persisted Pulse session before installing the dynamic
+  // storage adapter. This keeps older sessions compatible with the standalone app.
+  const existingRemember = nativeGet?.call(localStorage, REMEMBER_KEY);
+  const existingLegacySession = nativeGet?.call(localStorage, LEGACY_AUTH_KEY);
+  if (existingRemember === null && existingLegacySession) {
+    nativeSet?.call(localStorage, REMEMBER_KEY, '1');
+  }
+
+  // Supabase clients are created by several Pulse modules. Some of those clients
+  // are instantiated before the user changes "Rester connecté". A client that was
+  // originally bound to sessionStorage must therefore keep seeing the same session
+  // after the preference switches to localStorage (and vice versa). We route every
+  // Supabase auth-token read/write through the *current* selected storage instead
+  // of the storage object captured when the client was created.
+  if (StorageProto && nativeGet && nativeSet && nativeRemove && !StorageProto.__komoAuthStorageV2) {
+    const isAuthKey = (key) => /^sb-[a-z0-9]+-auth-token$/i.test(String(key || ''));
+    const preferredStore = () => nativeGet.call(localStorage, REMEMBER_KEY) === '1' ? localStorage : sessionStorage;
+    const fallbackStore = () => preferredStore() === localStorage ? sessionStorage : localStorage;
+
+    Object.defineProperty(StorageProto, '__komoAuthStorageV2', { value: true, configurable: false });
+
+    StorageProto.getItem = function(key) {
+      if (!isAuthKey(key)) return nativeGet.call(this, key);
+      const primary = preferredStore();
+      let value = nativeGet.call(primary, key);
+      if (value !== null) return value;
+      const secondary = fallbackStore();
+      value = nativeGet.call(secondary, key);
+      if (value !== null) {
+        try {
+          nativeSet.call(primary, key, value);
+          nativeRemove.call(secondary, key);
+        } catch {}
+      }
+      return value;
+    };
+
+    StorageProto.setItem = function(key, value) {
+      if (!isAuthKey(key)) return nativeSet.call(this, key, value);
+      const primary = preferredStore();
+      const secondary = primary === localStorage ? sessionStorage : localStorage;
+      nativeSet.call(primary, key, value);
+      try { nativeRemove.call(secondary, key); } catch {}
+    };
+
+    StorageProto.removeItem = function(key) {
+      if (!isAuthKey(key)) return nativeRemove.call(this, key);
+      try { nativeRemove.call(localStorage, key); } catch {}
+      try { nativeRemove.call(sessionStorage, key); } catch {}
+    };
   }
 
   const basePath = location.pathname.startsWith('/pulse-v12/') ? '/pulse-v12/' : '/';
   const resetUrl = new URL(`${basePath}reset/`, location.origin).href;
 
   window.__KOMO_PULSE_RUNTIME__ = Object.freeze({
-    version: '2026.08.25-infra1',
+    version: '2026.08.27-mobile-session-v2',
     projectRef: PROJECT_REF,
-    legacySessionDetected: Boolean(localStorage.getItem(LEGACY_AUTH_KEY)),
+    legacySessionDetected: Boolean(existingLegacySession),
     resetUrl
   });
 
