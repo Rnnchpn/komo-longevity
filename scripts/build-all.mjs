@@ -80,6 +80,7 @@ const scripts = [
   'scripts/pulse-tablet-patient-v1.mjs',
   'scripts/pulse-mobile-menu-v3.mjs',
   'scripts/pulse-adaptive-shell-v4.mjs',
+  'scripts/pulse-my-komo-v1.mjs',
   'scripts/build-pulse-v12.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
@@ -97,6 +98,7 @@ const scripts = [
   'scripts/pulse-flicker-stability-v1.mjs',
   'scripts/pulse-adaptive-shell-qa-v1.mjs',
   'scripts/pulse-speed-navigation-qa-v1.mjs',
+  'scripts/pulse-my-komo-qa-v1.mjs',
   'scripts/pulse-flicker-stability-qa-v1.mjs',
   'scripts/pulse-navigation-freeze-v1.mjs',
   'scripts/pulse-navigation-freeze-qa-v1.mjs'
