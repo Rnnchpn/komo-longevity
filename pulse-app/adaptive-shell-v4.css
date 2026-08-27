@@ -1,0 +1,94 @@
+/* KŌMØ Pulse — adaptive navigation shell v4 */
+html[data-adaptive-shell]{--kam-bottom:76px;--kam-gutter:14px}
+html[data-adaptive-shell],html[data-adaptive-shell] body{min-width:0;overflow-x:hidden;background:#f4f0e8}
+html[data-adaptive-shell] .sidebar,
+html[data-adaptive-shell] #mobileNav,
+html[data-adaptive-shell] #proMobileNav,
+html[data-adaptive-shell] .mobile-account-trigger,
+html[data-adaptive-shell] .tablet-account-trigger,
+html[data-adaptive-shell] .topbar .mode-switch,
+html[data-adaptive-shell] .topbar [data-admin-shortcut],
+html[data-adaptive-shell] .account-popover{display:none!important}
+html[data-adaptive-shell] .main-shell{margin-left:0!important;min-height:100dvh!important;padding:0 var(--kam-gutter) calc(var(--kam-bottom) + 34px + env(safe-area-inset-bottom))!important}
+html[data-adaptive-shell] .view-root{width:100%;max-width:1180px}
+html[data-adaptive-shell] .topbar{position:sticky!important;top:0!important;z-index:80!important;min-height:68px!important;margin:0 calc(var(--kam-gutter) * -1)!important;padding:12px var(--kam-gutter) 10px!important;display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:12px!important;background:rgba(244,240,232,.94)!important;border-bottom:1px solid rgba(32,40,32,.06)!important;backdrop-filter:blur(20px)!important;-webkit-backdrop-filter:blur(20px)!important}
+html[data-adaptive-shell] .topbar>div:first-child{min-width:0}
+html[data-adaptive-shell] .topbar .eyebrow{margin:0 0 4px!important;font-size:8px!important;line-height:1!important;letter-spacing:.13em!important}
+html[data-adaptive-shell] .topbar h1{margin:0!important;max-width:none!important;font-size:clamp(20px,4.8vw,29px)!important;line-height:1.05!important;letter-spacing:-.045em!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html[data-adaptive-shell] .topbar-actions{display:flex!important;align-items:center!important;gap:8px!important}
+html[data-adaptive-shell] .topbar-actions>:not(#kamTopMenu){display:none!important}
+.kam-top-menu{width:42px;height:42px;padding:0;border:1px solid rgba(31,42,34,.1);border-radius:14px;background:#263229;display:grid;place-content:center;gap:3px;box-shadow:0 8px 24px rgba(31,42,34,.12)}
+.kam-top-menu span{display:block;width:16px;height:1.5px;border-radius:99px;background:#fff}
+.kam-role-row{position:sticky;top:68px;z-index:72;margin:0 calc(var(--kam-gutter) * -1) 12px;padding:7px var(--kam-gutter) 8px;background:linear-gradient(to bottom,rgba(244,240,232,.97) 80%,rgba(244,240,232,.82));backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.kam-role-switch{width:100%;max-width:430px;margin:0 auto;padding:4px;border:1px solid rgba(32,40,32,.1);border-radius:15px;background:rgba(255,255,255,.62);display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;box-shadow:0 8px 24px rgba(32,40,32,.035)}
+.kam-role-switch button{min-height:38px;border:0;border-radius:11px;background:transparent;color:#717871;font:600 11px/1 'DM Sans',sans-serif;letter-spacing:.01em}
+.kam-role-switch button.active{background:#263229;color:#fff;box-shadow:0 6px 16px rgba(31,42,34,.13)}
+.kam-bottom{position:fixed;z-index:130;left:10px;right:10px;bottom:max(8px,env(safe-area-inset-bottom));height:var(--kam-bottom);padding:6px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;border:1px solid rgba(31,42,34,.1);border-radius:22px;background:rgba(252,250,246,.96);box-shadow:0 18px 50px rgba(27,34,29,.16);backdrop-filter:blur(22px) saturate(1.08);-webkit-backdrop-filter:blur(22px) saturate(1.08)}
+.kam-nav-item{min-width:0;border:0;border-radius:16px;background:transparent;color:#7b827c;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:5px 2px;font:600 9.5px/1 'DM Sans',sans-serif;touch-action:manipulation}
+.kam-nav-item svg{width:20px;height:20px;stroke-width:1.6}
+.kam-nav-item span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kam-nav-item.active{background:#263229;color:#fff}
+.kam-backdrop{position:fixed;z-index:149;inset:0;border:0;background:rgba(22,28,24,.26);opacity:0;pointer-events:none;transition:opacity .18s ease;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+.kam-backdrop.open{opacity:1;pointer-events:auto}
+.kam-sheet{position:fixed;z-index:150;left:8px;right:8px;bottom:8px;max-height:min(78dvh,660px);overflow:auto;padding:8px 14px calc(18px + env(safe-area-inset-bottom));border:1px solid rgba(31,42,34,.1);border-radius:26px;background:#fbf9f4;box-shadow:0 28px 90px rgba(25,31,27,.26);transform:translateY(calc(100% + 22px));transition:transform .22s ease}
+.kam-sheet.open{transform:translateY(0)}
+.kam-sheet-handle{width:38px;height:4px;margin:2px auto 11px;border-radius:99px;background:#d6d2c8}
+.kam-sheet-head{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:2px 2px 12px;border-bottom:1px solid rgba(31,42,34,.08)}
+.kam-sheet-head small,.kam-sheet-head strong{display:block}.kam-sheet-head small{margin-bottom:4px;color:#7a817a;font-size:8px;font-weight:700;letter-spacing:.13em}.kam-sheet-head strong{font:600 20px/1.05 Manrope,sans-serif;letter-spacing:-.035em}.kam-sheet-head button{width:38px;height:38px;border:1px solid rgba(31,42,34,.1);border-radius:50%;background:#fff;font-size:22px}
+.kam-sheet-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:12px 0}
+.kam-sheet-action{min-height:54px;padding:11px 12px;border:1px solid rgba(31,42,34,.09);border-radius:14px;background:#fff;color:#334039;display:flex;align-items:center;justify-content:space-between;text-align:left;font:600 11.5px/1.2 'DM Sans',sans-serif}.kam-sheet-action b{color:#8a918b;font-size:13px}
+.kam-sheet-links{border-top:1px solid rgba(31,42,34,.08);display:grid;padding-top:6px}.kam-sheet-links>a,.kam-sheet-links>button{min-height:44px;padding:0 4px;border:0;border-bottom:1px solid rgba(31,42,34,.06);background:transparent;color:#515b54;display:flex;align-items:center;justify-content:space-between;text-align:left;font:500 11px/1 'DM Sans',sans-serif}.kam-sheet-links .kam-logout{color:#8a554f;border-bottom:0}.kam-sheet-role{margin:12px 2px 0;color:#92978f;font-size:8px;text-transform:uppercase;letter-spacing:.1em}
+
+/* Patient mobile: preserve guided cards but remove stale reserved bottom-bar spacing. */
+html[data-adaptive-shell][data-adaptive-mode="patient"] #viewRoot.mg-home-guided .mg-home-hero{border-radius:22px!important}
+html[data-adaptive-shell][data-adaptive-mode="patient"] .tests-v1-root{padding-bottom:20px!important}
+html[data-adaptive-shell][data-adaptive-mode="patient"] .mobile-test-cta{bottom:calc(var(--kam-bottom) + 18px + env(safe-area-inset-bottom))!important}
+
+/* Professional mobile / tablet application surface. */
+html[data-adaptive-shell][data-adaptive-mode="pro"] .main-shell{padding-bottom:calc(var(--kam-bottom) + 34px + env(safe-area-inset-bottom))!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp{gap:12px!important;padding-bottom:22px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-head{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;align-items:start!important;padding:17px 18px!important;border-radius:20px!important;box-shadow:0 16px 42px rgba(32,40,32,.09)!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-head h2{font-size:clamp(27px,6vw,36px)!important;line-height:1!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-head p{margin-top:8px!important;font-size:10.5px!important;line-height:1.5!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-org{display:none!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-tabs{display:none!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-patientbar{grid-template-columns:1fr!important;gap:9px!important;padding:14px!important;border-radius:17px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-patient-select select{height:46px!important;font-size:12px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-patient-meta{gap:5px!important}.kcp-patient-meta span{font-size:8px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-patient-score{text-align:left!important;display:flex!important;align-items:baseline!important;gap:8px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-grid{grid-template-columns:1fr!important;gap:10px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-card,html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-card.wide,html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-card.full{grid-column:1!important;padding:16px!important;border-radius:18px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-card-head{margin-bottom:14px!important;gap:10px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-card h3{font-size:16px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important;border-radius:14px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-kpi{padding:13px!important}.kcp-kpi strong{font-size:24px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-row{grid-template-columns:minmax(0,1fr) auto!important;gap:8px 10px!important;padding:12px 0!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-row>span:not(.kcp-state){grid-column:1!important}.kcp-row .kcp-state{grid-column:2!important;grid-row:1!important}.kcp-row .kcp-btn{grid-column:2!important;grid-row:2!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-table-wrap{margin:0 -4px;padding:0 4px 4px;overflow-x:auto!important;scrollbar-width:none;-webkit-overflow-scrolling:touch}.kcp-table-wrap::-webkit-scrollbar{display:none}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-patient-table{min-width:620px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-fields{grid-template-columns:1fr!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-actions{gap:6px!important}.kcp-btn{min-height:40px!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-toast{left:12px!important;right:12px!important;bottom:calc(var(--kam-bottom) + 18px)!important;max-width:none!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .clm,html[data-adaptive-shell][data-adaptive-mode="pro"] .kpa{max-width:100%!important}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .kpa{gap:12px!important}.kpa-hero{grid-template-columns:1fr!important;padding:17px!important;border-radius:18px!important}.kpa-hero h2{font-size:30px!important}.kpa-detail{grid-template-columns:1fr!important}.kpa-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+
+/* Admin is treated as an application, not a squeezed desktop console. */
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2{gap:11px!important;padding-bottom:20px!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-hero{display:grid!important;grid-template-columns:1fr!important;gap:15px!important;padding:17px!important;border-radius:20px!important;align-items:start!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-hero h2{font-size:clamp(27px,6vw,34px)!important;line-height:1!important;margin:4px 0 8px!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-hero p{font-size:10.5px!important;line-height:1.5!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-hero-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important}.kav2-hero-actions .secondary-button{width:100%!important;min-height:42px!important;padding:0 10px!important;font-size:10px!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-tabs{position:sticky!important;top:116px!important;z-index:70!important;margin:0 -2px!important;padding:5px!important;border-radius:15px!important;overflow-x:auto!important;scrollbar-width:none!important}.kav2-tabs::-webkit-scrollbar{display:none}.kav2-tabs button{min-height:39px!important;padding:0 11px!important;font-size:10px!important}.kav2-tabs .kav2-refresh{margin-left:0!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-grid{grid-template-columns:1fr!important;gap:10px!important}.kav2-wide,.kav2-full,.kav2-card{grid-column:1!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-card{padding:15px!important;border-radius:17px!important}.kav2-card-head{gap:10px!important;margin-bottom:13px!important}.kav2-card-head h3{font-size:17px!important}.kav2-card-head>strong{font-size:25px!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-registry-tools{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;padding:10px!important}.kav2-registry-tools label{grid-column:1/-1!important}.kav2-registry-tools input{height:44px!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-registry-row{grid-template-columns:minmax(0,1fr) auto!important;gap:9px!important;margin-bottom:7px!important;padding:13px!important;border:1px solid rgba(23,29,25,.08)!important;border-radius:14px!important;background:#fffdf9!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-registry-row>div:nth-child(2),html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-registry-row>div:nth-child(3),html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-registry-row>div:nth-child(4){grid-column:1/-1!important;display:grid!important;grid-template-columns:100px minmax(0,1fr)!important;gap:8px!important;align-items:baseline!important}.kav2-registry-row>i{grid-column:2!important;grid-row:1!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-row{grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important;padding:13px 0!important}.kav2-row>div:nth-child(2){grid-column:1!important}.kav2-row>i{grid-column:2!important;grid-row:1!important}.kav2-row>b{grid-column:2!important;grid-row:2!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-patient-row{grid-template-columns:1fr!important;gap:8px!important}.kav2-assign{grid-template-columns:1fr!important;gap:7px!important}.kav2-assign select{min-height:44px!important}.kav2-assign .primary-button{width:100%!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-detail-grid{grid-template-columns:1fr!important}.kav2-approve-box{display:grid!important;gap:12px!important}.kav2-approve-box .primary-button{width:100%!important}.kav2-secondary-actions{display:grid!important;grid-template-columns:1fr!important}.kav2-secondary-actions button{width:100%!important}
+html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-toast{left:12px!important;right:12px!important;bottom:calc(var(--kam-bottom) + 18px)!important}
+
+@media(max-width:380px){html[data-adaptive-shell]{--kam-gutter:11px;--kam-bottom:72px}.kam-bottom{left:6px;right:6px}.kam-nav-item{font-size:8.7px}.kam-nav-item svg{width:19px;height:19px}.kam-sheet-grid{grid-template-columns:1fr}.kam-role-row{padding-left:11px;padding-right:11px}}
+
+@media(min-width:768px){html[data-adaptive-shell]{--kam-gutter:clamp(24px,4vw,52px);--kam-bottom:78px}.kam-bottom{left:50%;right:auto;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(720px,calc(100vw - 44px));border-radius:24px}.kam-nav-item{font-size:10px}.kam-sheet{left:50%;right:auto;width:min(560px,calc(100vw - 44px));transform:translate(-50%,calc(100% + 22px))}.kam-sheet.open{transform:translate(-50%,0)}.kam-role-row{top:72px}.kam-role-switch{max-width:480px}.kam-top-menu{width:46px;height:46px;border-radius:15px}html[data-adaptive-shell] .topbar{min-height:72px!important}html[data-adaptive-shell] .topbar h1{font-size:clamp(27px,3.2vw,38px)!important}html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-card{grid-column:auto!important}html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-card.wide,html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-card.full{grid-column:1/-1!important}html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-tabs{top:124px!important}html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-wide,html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-full{grid-column:1/-1!important}}
