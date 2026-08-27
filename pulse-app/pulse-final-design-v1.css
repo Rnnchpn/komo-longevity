@@ -1,17 +1,23 @@
-/* KŌMØ Pulse — final visual pass: mobile brand + KŌMØ Age */
+/* KŌMØ Pulse — final visual lock: mobile brand, KŌMØ Age and XP clarity */
 .kamo-age{display:grid;justify-items:center;gap:4px;margin:2px auto 18px;padding:4px 12px 2px;text-align:center}.kamo-age>span{color:#7b837c;font-size:8px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.kamo-age>strong{color:#243029;font:600 42px/.95 Manrope,'DM Sans',sans-serif;letter-spacing:-.065em}.kamo-age>strong small{margin-left:4px;color:#7f877f;font:600 12px/1 'DM Sans',sans-serif;letter-spacing:0}.kamo-age>small{max-width:250px;color:#848b85;font-size:8.5px;line-height:1.35}
 
 .kam-mobile-brand{display:none}
+.kamo-home-result-removed{display:none!important}
+
+/* XP: one clear visual hierarchy — level, progress, today's gain. */
+.mykomo-xp{padding:13px 14px 12px;border:1px solid rgba(31,42,34,.075);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.72),rgba(239,236,227,.82))}.mykomo-xp-head{align-items:center}.mykomo-xp-head strong{padding:6px 9px;border-radius:999px;background:#263229;color:#fff!important;font-size:11px!important;letter-spacing:-.01em}.mykomo-xp-track{position:relative;height:11px!important;margin:3px 0 1px;border:1px solid rgba(31,42,34,.04);background:#dedbd2!important;box-shadow:inset 0 1px 2px rgba(31,42,34,.05)}.mykomo-xp-track i{background:linear-gradient(90deg,#87998b 0%,#5f7465 48%,#263a2d 100%)!important;box-shadow:0 0 13px rgba(67,89,72,.18)}.mykomo-xp-foot{align-items:center;margin-top:3px}.mykomo-xp-foot span:first-child{font-weight:700;color:#4d5c52}.kamo-xp-spotlight{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-top:4px}.kamo-xp-stat{padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.7);text-align:center}.kamo-xp-stat span{display:block;margin-bottom:3px;color:#848b85;font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.kamo-xp-stat strong{display:block;color:#263229;font:600 15px/1 Manrope,'DM Sans',sans-serif;letter-spacing:-.03em}.kamo-xp-stat.gain strong{color:#536b59}.mykomo-xp-open{justify-self:center!important;margin-top:4px!important}.mykomo-achievements{justify-content:center}
+
 @media(max-width:767px){
-  html[data-adaptive-shell="phone"] .topbar{min-height:104px!important;padding:58px var(--kam-gutter) 10px!important;grid-template-columns:1fr!important;justify-items:center!important;align-items:end!important}
+  html[data-adaptive-shell="phone"] .topbar{min-height:118px!important;padding:67px var(--kam-gutter) 11px!important;grid-template-columns:1fr!important;justify-items:center!important;align-items:end!important}
   html[data-adaptive-shell="phone"] .topbar>div:first-child{width:100%!important;text-align:center!important}
   html[data-adaptive-shell="phone"] .topbar .eyebrow{display:none!important}
-  html[data-adaptive-shell="phone"] .topbar h1{font-size:17px!important;line-height:1.08!important;text-align:center!important;letter-spacing:-.035em!important}
-  html[data-adaptive-shell="phone"] .topbar-actions{position:absolute!important;right:var(--kam-gutter)!important;top:12px!important;z-index:3!important}
-  html[data-adaptive-shell="phone"] .kam-mobile-brand{position:absolute;left:50%;top:14px;transform:translateX(-50%);display:flex;align-items:baseline;justify-content:center;gap:7px;white-space:nowrap;color:#222d25;pointer-events:none;z-index:2}
-  html[data-adaptive-shell="phone"] .kam-mobile-brand strong{font:600 24px/.9 Manrope,'DM Sans',sans-serif;letter-spacing:.12em}
-  html[data-adaptive-shell="phone"] .kam-mobile-brand span{font:700 8.5px/1 'DM Sans',sans-serif;letter-spacing:.22em;color:#6d776f}
-  html[data-adaptive-shell="phone"] .kam-role-row{top:104px!important}
-  html[data-adaptive-shell="phone"] .kav2-tabs{top:152px!important}
-  .kamo-age{margin:0 auto 16px}.kamo-age>strong{font-size:38px}.kamo-age>span{font-size:7.5px}.kamo-age>small{font-size:8px}
+  html[data-adaptive-shell="phone"] .topbar h1{margin:0 auto!important;max-width:290px!important;font-size:15px!important;line-height:1.1!important;text-align:center!important;letter-spacing:-.025em!important}
+  html[data-adaptive-shell="phone"] .topbar-actions{position:absolute!important;right:var(--kam-gutter)!important;top:14px!important;z-index:3!important}
+  html[data-adaptive-shell="phone"] .kam-mobile-brand{position:absolute;left:50%;top:13px;transform:translateX(-50%);display:grid;justify-items:center;gap:5px;width:max-content;white-space:nowrap;color:#222d25;pointer-events:none;z-index:2;text-align:center}
+  html[data-adaptive-shell="phone"] .kam-mobile-brand strong{font:600 25px/.95 Manrope,'DM Sans',sans-serif;letter-spacing:.105em}
+  html[data-adaptive-shell="phone"] .kam-mobile-brand span{font:600 7.5px/1 'DM Sans',sans-serif;letter-spacing:.18em;color:#738078;text-transform:uppercase}
+  html[data-adaptive-shell="phone"] .kam-role-row{top:118px!important}
+  html[data-adaptive-shell="phone"] .kav2-tabs{top:166px!important}
+  .kamo-age{margin:0 auto 16px}.kamo-age>strong{font-size:40px}.kamo-age>span{font-size:7.5px}.kamo-age>small{font-size:8px}
+  .mykomo-xp{text-align:center;padding:14px 12px}.mykomo-xp-head{justify-content:center;flex-wrap:wrap}.mykomo-xp-head span{width:100%;text-align:center}.mykomo-xp-foot{justify-content:center;flex-wrap:wrap;gap:4px 10px}.mykomo-xp-track{height:12px!important}.kamo-xp-spotlight{max-width:300px;width:100%;margin:5px auto 0}
 }
