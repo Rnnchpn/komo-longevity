@@ -22,7 +22,9 @@ function ensureBrand(){
   const top=document.querySelector('.topbar');if(!top)return;
   if(!mobile()||!appVisible()){top.querySelector('.kam-mobile-brand')?.remove();return}
   let brand=top.querySelector('.kam-mobile-brand');
-  if(!brand){brand=document.createElement('div');brand.className='kam-mobile-brand';brand.setAttribute('aria-label','KŌMØ Pulse');brand.innerHTML='<strong>KŌMØ</strong><span>PULSE</span>';top.prepend(brand)}
+  if(!brand){brand=document.createElement('div');brand.className='kam-mobile-brand';brand.setAttribute('aria-label','KŌMØ Pulse — Longevity in motion');top.prepend(brand)}
+  const html='<strong>KŌMØ PULSE</strong><span>Longevity in motion.</span>';
+  if(brand.innerHTML!==html)brand.innerHTML=html;
 }
 async function readAge(force=false){
   if(busy||(!force&&Date.now()-lastRead<15000))return lastAge;
@@ -49,8 +51,34 @@ function drawAge(age){
   const html=`<span>KŌMØ AGE</span><strong>${value===null?'—':Math.round(value)}${value===null?'':'<small>ans</small>'}</strong><small>${value===null?'Disponible après calcul KŌMØ Motion':'Estimation issue de KŌMØ Motion'}</small>`;
   if(box.dataset.signature!==html){box.dataset.signature=html;box.innerHTML=html}
 }
-async function refresh(force=false){ensureBrand();if(route()!=='home')return;drawAge(lastAge);const age=await readAge(force);drawAge(age)}
-function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>refresh(force),90)}
+function enhanceXp(){
+  if(route()!=='home')return;
+  const xp=document.querySelector('[data-my-komo-home] .mykomo-xp');if(!xp)return;
+  const total=xp.querySelector('.mykomo-xp-foot span:first-child')?.textContent?.trim()||'0 XP';
+  const today=document.querySelector('[data-my-komo-home] .mykomo-today-xp strong')?.textContent?.trim()||'+0';
+  let spot=xp.querySelector('.kamo-xp-spotlight');if(!spot){spot=document.createElement('div');spot.className='kamo-xp-spotlight';const foot=xp.querySelector('.mykomo-xp-foot');foot?.insertAdjacentElement('afterend',spot)}
+  if(!spot)return;
+  const todayLabel=/xp/i.test(today)?today:`${today} XP`;
+  const html=`<div class="kamo-xp-stat gain"><span>Gagné aujourd’hui</span><strong>${todayLabel}</strong></div><div class="kamo-xp-stat"><span>Expérience totale</span><strong>${total}</strong></div>`;
+  if(spot.dataset.signature!==html){spot.dataset.signature=html;spot.innerHTML=html}
+}
+function declutterHome(){
+  const root=document.querySelector('#viewRoot');if(!root)return;
+  if(route()!=='home'){root.querySelectorAll('.kamo-home-result-removed').forEach(x=>x.classList.remove('kamo-home-result-removed'));return}
+  const targets=['profil fonctionnel','prochaines étapes','construire la suite à partir de cette référence','motion planifié','vos repères'];
+  const nodes=[...root.querySelectorAll('section,article,.card,.panel,[class*="result"],[class*="reference"],[class*="summary"]')];
+  for(const node of nodes){
+    if(node.closest('[data-my-komo-home]')||node.querySelector?.('[data-my-komo-home]'))continue;
+    const text=(node.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
+    if(targets.some(t=>text.includes(t)))node.classList.add('kamo-home-result-removed');
+  }
+}
+async function refresh(force=false){
+  ensureBrand();declutterHome();enhanceXp();
+  if(route()!=='home')return;
+  drawAge(lastAge);const age=await readAge(force);drawAge(age);enhanceXp();declutterHome();
+}
+function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>refresh(force),70)}
 ['hashchange','resize','orientationchange','pageshow','komo:route-ready','komo:session-ready','komo:data-ready'].forEach(x=>window.addEventListener(x,()=>schedule(x==='komo:session-ready'||x==='komo:data-ready')));
 new MutationObserver(()=>schedule(false)).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
-document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>refresh(true),850));setTimeout(()=>refresh(false),1600);
+document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>refresh(true),750));setTimeout(()=>refresh(false),1400);
