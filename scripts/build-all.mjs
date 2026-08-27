@@ -82,6 +82,7 @@ const scripts = [
   'scripts/build-pulse-v12.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
+  'scripts/pulse-stability-audit-v1.mjs',
   'scripts/pulse-v12-qa.mjs',
   'scripts/pulse-performance-qa-v1.mjs',
   'scripts/auth-admin-entry-qa-v2.mjs',
