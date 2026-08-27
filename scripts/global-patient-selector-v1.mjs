@@ -27,9 +27,11 @@ replaceOnce(
 );
 
 const helpers=`function pulseName(x){const p=x?.profile||{};return (String(p.first_name||'')+' '+String(p.last_name||'')).trim()||p.display_name||x?.email||'Patient Pulse'}
+function freePrep(x){const f=x?.free_preparation||{};const completed=Number(f.completed||0),level=Number(f.free_level),q=Number(f.first_score),chair=Number(f.chair_repetitions),two=Number(f.two_step_ratio);return{ready:completed>=3&&Number.isFinite(level),level:Number.isFinite(level)?Math.round(level):null,label:f.free_label||'Résultat disponible',q:Number.isFinite(q)?Math.round(q):null,chair:Number.isFinite(chair)?Math.round(chair):null,two:Number.isFinite(two)?two:null}}
+function freeLine(x){const f=freePrep(x);return f.ready?'KŌMØ Start · Niveau '+f.level+' · Q '+(f.q??'—')+'/100 · Chair '+(f.chair??'—')+' · Two-Step '+(f.two===null?'—':f.two.toFixed(2)):'KŌMØ Start · à compléter'}
 function patientSelectOptions(){const patientOptions=s.patients.map(p=>'<option value="'+p.id+'"'+(p.id===s.patient?.id?' selected':'')+'>'+esc(name(p))+(s.role==='admin'&&p.organizations?.name?' · '+esc(p.organizations.name):'')+'</option>').join('');const pulseOptions=s.role==='admin'?s.pulseAccounts.map(x=>'<option value="pulse:'+x.user_id+'"'+(x.user_id===s.pulseAccount?.user_id?' selected':'')+'>'+esc(pulseName(x))+' · Pulse · à orienter</option>').join(''):'';return (patientOptions?'<optgroup label="Dossiers Motion">'+patientOptions+'</optgroup>':'')+(pulseOptions?'<optgroup label="Comptes Pulse à orienter">'+pulseOptions+'</optgroup>':'')}
 function bindPatientSelect(){document.querySelector('#kcpPatientSelect')?.addEventListener('change',x=>selectAnyPatient(x.target.value))}
-function renderPulseAccountBar(e){if(!s.pulseAccount)return false;const x=s.pulseAccount,p=x.profile||{},loc=[p.city,p.country].filter(Boolean).join(', ')||'Centre à définir';e.innerHTML='<div class="kcp-patientbar"><div class="kcp-patient-select"><label>Patient actif</label><select id="kcpPatientSelect">'+patientSelectOptions()+'</select></div><div class="kcp-patient-meta"><span>Compte Pulse</span><span>'+esc(x.email||'—')+'</span><span>'+esc(loc)+'</span><span>À orienter vers un centre</span><span>Aucun dossier Motion</span></div><div class="kcp-patient-score"><span>Motion</span><strong>—</strong></div></div>';bindPatientSelect();return true}
+function renderPulseAccountBar(e){if(!s.pulseAccount)return false;const x=s.pulseAccount,p=x.profile||{},loc=[p.city,p.country].filter(Boolean).join(', ')||'Centre à définir',f=freePrep(x);e.innerHTML='<div class="kcp-patientbar"><div class="kcp-patient-select"><label>Patient actif</label><select id="kcpPatientSelect">'+patientSelectOptions()+'</select></div><div class="kcp-patient-meta"><span>Compte Pulse</span><span>'+esc(x.email||'—')+'</span><span>'+esc(loc)+'</span><span>'+esc(freeLine(x))+'</span><span>À orienter vers un centre</span></div><div class="kcp-patient-score"><span>KŌMØ Start</span><strong>'+(f.ready?'N'+f.level:'—')+'</strong></div></div>';bindPatientSelect();return true}
 `;
 replaceOnce('function patientBar(){',helpers+'function patientBar(){','patient selector helpers');
 
@@ -53,7 +55,7 @@ replaceOnce(
 
 replaceOnce(
   "function snapshot(){if(!s.patient)return empty('Aucun patient.');",
-  "function snapshot(){if(s.pulseAccount){const x=s.pulseAccount,p=x.profile||{},loc=[p.city,p.country].filter(Boolean).join(', ')||'Centre à définir';return '<div class=\"kcp-scorebox\"><div class=\"kcp-scorebig\">—<small>/100</small></div><div><strong>'+esc(pulseName(x))+'</strong><p>Compte Pulse · aucun dossier Motion</p><p>'+esc(x.email||'—')+' · '+esc(loc)+'</p></div></div>'}if(!s.patient)return empty('Aucun patient.');",
+  "function snapshot(){if(s.pulseAccount){const x=s.pulseAccount,p=x.profile||{},loc=[p.city,p.country].filter(Boolean).join(', ')||'Centre à définir',f=freePrep(x);return '<div class=\"kcp-scorebox\"><div class=\"kcp-scorebig\">'+(f.ready?'N'+f.level:'—')+'<small> Start</small></div><div><strong>'+esc(pulseName(x))+'</strong><p>'+esc(f.ready?(f.label+' · Q '+(f.q??'—')+'/100 · Chair '+(f.chair??'—')+' · Two-Step '+(f.two===null?'—':f.two.toFixed(2))):'KŌMØ Start à compléter')+'</p><p>'+esc(x.email||'—')+' · '+esc(loc)+'</p><p>Aucun dossier Motion · orientation vers un centre requise</p></div></div>'}if(!s.patient)return empty('Aucun patient.');",
   'pulse account dashboard snapshot'
 );
 
@@ -70,4 +72,4 @@ replaceOnce(
 );
 
 await writeFile(cockpitPath,src);
-console.log('[global-patient-selector-v1] Admin selector now includes Motion dossiers and Pulse-only accounts.');
+console.log('[global-patient-selector-v1] Admin selector includes Motion dossiers and Pulse-only KŌMØ Start results.');
