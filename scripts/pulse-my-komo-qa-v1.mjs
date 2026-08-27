@@ -10,7 +10,7 @@ const checks=[
  ['My Komo home script loaded',html.includes('./my-komo-home-v1.js')],
  ['profile avatar script loaded',html.includes('./profile-avatar-v1.js')],
  ['refined Plus script loaded',html.includes('./adaptive-plus-v1.js')],
- ['My Komo styles bundled',css.includes('MY KŌMØ home + profile avatar + Plus menu')],
+ ['My Komo styles bundled',css.includes('My KŌMØ home + profile avatar + Plus menu')],
  ['three circular score gauges',home.includes("ring('Start'")&&home.includes("ring('Motion'")&&home.includes("ring('Clinical'")],
  ['next appointment summary',home.includes('PROCHAIN RENDEZ-VOUS')&&home.includes('organization_appointments')],
  ['engagement XP is separate progression',home.includes('PROGRESSION KŌMØ')&&home.includes('XP')],
