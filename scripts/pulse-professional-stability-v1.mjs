@@ -11,7 +11,12 @@ if(!booking.includes('const mapKeep=root.querySelector')){
   booking=booking.replace("const root=document.querySelector('#viewRoot');if(!root)return;const c=","const root=document.querySelector('#viewRoot');if(!root)return;const mapKeep=root.querySelector('[data-kbd-shell][data-kbd-mounted=\"1\"]');const c=");
   booking=booking.replace('</section></div>`;bindPatient()}','</section></div>`;if(mapKeep){const nextMap=root.querySelector(\'[data-kbd-shell]\');if(nextMap)nextMap.replaceWith(mapKeep);window.dispatchEvent(new CustomEvent(\'komo:booking-map-restored\'))}bindPatient()}');
 }
+// Pro Agenda must use the same center-context event as Dashboard/Patients/Motion.
+booking=booking.replace("window.dispatchEvent(new CustomEvent('komo:center-changed',{detail:{organizationId:S.proOrg}}));await loadProWeek()","window.dispatchEvent(new CustomEvent('komo:center-context-changed',{detail:{organizationId:S.proOrg}}));await loadProWeek()");
+// If the patient-management owner is absent, still route to the patient workspace rather than doing nothing.
+booking=booking.replace("S.proActive=false;window.KomoPatientManagement?.open?.()","S.proActive=false;if(window.KomoPatientManagement?.open)window.KomoPatientManagement.open();else window.KomoProArchitecture?.open?.('patients')");
 if(!booking.includes('const mapKeep=root.querySelector')||!booking.includes('komo:booking-map-restored'))throw new Error('[pro-stability] booking map persistence patch failed');
+if(booking.includes("komo:center-changed',{detail:{organizationId:S.proOrg}"))throw new Error('[pro-stability] Pro Agenda still uses legacy center event');
 await writeFile(paths.booking,booking);
 
 // Directory: display the directory immediately; geocoding completes in the background.
@@ -57,7 +62,7 @@ pro=pro.replace(/document\.addEventListener\('DOMContentLoaded',\(\)=>setTimeout
 if(!pro.includes('let actionToken=0;')||pro.includes("obs.observe(document.body,{subtree:true,childList:true,attributes:true"))throw new Error('[pro-stability] professional nav observer patch failed');
 await writeFile(paths.pro,pro);
 
-let html=files.html;const release='20260827-pro-stable-3';
+let html=files.html;const release='20260827-pro-stable-4';
 for(const file of ['booking-layer-v1.js','booking-directory-map-v1.js','clinical-cockpit-v1.js','center-hub-v1.js','center-context-v1.js','pro-architecture-v2.js']){const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');html=html.replace(new RegExp(`\\./${escaped}(?:\\?v=[^\"']+)?`,'g'),`./${file}?v=${release}`)}
 await writeFile(paths.html,html);
-console.log('[pulse-professional-stability] canonical center context + persistent nonblocking RDV map applied');
+console.log('[pulse-professional-stability] canonical center context + persistent nonblocking RDV map + synchronized Pro Agenda applied');
