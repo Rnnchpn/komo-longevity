@@ -2,14 +2,20 @@ import { readFile } from 'node:fs/promises';
 import { dirname,join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
-const [html,app,auth]=await Promise.all([
+const [html,app,auth,adminShortcut,adaptive]=await Promise.all([
   readFile(join(root,'site','pulse-v12','index.html'),'utf8'),
   readFile(join(root,'site','pulse-v12','app.js'),'utf8'),
-  readFile(join(root,'site','pulse-v12','auth-gateway-v2.js'),'utf8')
+  readFile(join(root,'site','pulse-v12','auth-gateway-v2.js'),'utf8'),
+  readFile(join(root,'site','pulse-v12','admin-shortcut-v1.js'),'utf8'),
+  readFile(join(root,'site','pulse-v12','adaptive-shell-v4.js'),'utf8')
 ]);
 const checks=[
   ['admin route recognized',app.includes("'profile','admin'")&&app.includes("route==='admin'&&state.role!=='admin'")],
   ['admin route mount exists',app.includes('data-admin-route-mount')],
+  ['admin account shortcut exists',adminShortcut.includes("data.adminAccount='1'")||adminShortcut.includes("dataset.adminAccount='1'" )],
+  ['admin account shortcut survives polished menu',adminShortcut.includes("pop.querySelector('.kam-body')")&&adminShortcut.includes("classList.add('kam-link','kam-admin-account')")],
+  ['admin shortcut uses shared runtime role/client',adminShortcut.includes('window.KomoRuntime?.client')&&adminShortcut.includes("runtimeRole==='admin'")],
+  ['adaptive menu exposes administration',adaptive.includes("actionButton('Administration','admin')")&&adaptive.includes("data-kam-role=\"admin\"")],
   ['auth gateway assets loaded',html.includes('./auth-gateway-v2.css')&&html.includes('./auth-gateway-v2.js')],
   ['patient professional switch',auth.includes('Patient')&&auth.includes('Professionnel')&&auth.includes('data-auth-audience')],
   ['professional login copy',auth.includes('Se connecter à KŌMØ Pro')],
