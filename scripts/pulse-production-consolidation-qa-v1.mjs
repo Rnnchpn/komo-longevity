@@ -2,8 +2,8 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 
 const pulse=join(process.cwd(),'site','pulse-v12');
-const release='20260827-canonical-4';
-const [html,css,app,adaptive,mobile,guided,design,patientMotion,booking]=await Promise.all([
+const release='20260827-canonical-4p1';
+const [html,css,app,adaptive,mobile,guided,design,patientMotion,booking,performanceRuntime,middleware]=await Promise.all([
   readFile(join(pulse,'index.html'),'utf8'),
   readFile(join(pulse,'pulse-ui-v1.css'),'utf8'),
   readFile(join(pulse,'app.js'),'utf8'),
@@ -12,12 +12,15 @@ const [html,css,app,adaptive,mobile,guided,design,patientMotion,booking]=await P
   readFile(join(pulse,'mobile-guided-v2.js'),'utf8'),
   readFile(join(pulse,'pulse-final-design-v1.js'),'utf8'),
   readFile(join(pulse,'patient-motion-booking-v2.js'),'utf8'),
-  readFile(join(pulse,'booking-layer-v1.js'),'utf8')
+  readFile(join(pulse,'booking-layer-v1.js'),'utf8'),
+  readFile(join(pulse,'performance-runtime-v1.js'),'utf8'),
+  readFile(join(process.cwd(),'middleware.js'),'utf8')
 ]);
 
 const localAssets=[...html.matchAll(/(?:src|href)="\.\/([^"?#]+\.(?:js|css))(\?v=([^"#]+))?"/g)];
 const assetVersions=localAssets.map(x=>x[3]||'');
 const adaptiveCount=(html.match(/adaptive-shell-v4\.js/g)||[]).length;
+const corePreloads=(html.match(/data-komo-core-preload/g)||[]).length;
 
 const checks=[
   ['canonical release marker',html.includes(`<meta name="komo-pulse-release" content="${release}"`)],
@@ -41,6 +44,11 @@ const checks=[
   ['legacy Motion booking has no body-wide observer',!patientMotion.includes('observe(document.body')],
   ['booking-layer remains canonical RDV owner',booking.includes('data-kbook-patient')&&booking.includes("location.hash.replace(/^#/,'')!=='documents'")],
   ['external RDV refresh is session-aware',booking.includes('refreshPatient:refresh')&&!booking.includes('refreshPatient:loadPatient')],
+  ['core startup assets are preloaded once',corePreloads===3&&html.includes(`rel="preload" href="./runtime.js?v=${release}"`)&&html.includes(`rel="modulepreload" href="./app.js?v=${release}"`)&&html.includes(`rel="modulepreload" href="./performance-runtime-v1.js?v=${release}"`)],
+  ['route navigation does not reread auth session',performanceRuntime.includes("window.addEventListener('hashchange',()=>requestAnimationFrame(routeReady))")&&!performanceRuntime.includes("window.addEventListener('hashchange',()=>{refreshSession()")],
+  ['session refresh burst is throttled',performanceRuntime.includes('SESSION_SYNC_TTL=2000')&&performanceRuntime.includes('now-lastSyncAt<SESSION_SYNC_TTL')],
+  ['versioned assets are immutable',middleware.includes("max-age=31536000, immutable")&&middleware.includes("incomingUrl.searchParams.has('v')")],
+  ['HTML remains private no-store',middleware.includes("Cache-Control', 'private, no-store, max-age=0")],
   ['My KŌMØ remains canonical home presentation',design.includes('kamo-home-result-removed')],
   ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')&&css.includes('Home: My KŌMØ')&&css.includes('RDV: booking-layer-v1')]
 ];
@@ -48,4 +56,4 @@ const checks=[
 let failed=0;
 for(const [label,ok] of checks){console.log(`[pulse-production-consolidation-qa] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)failed++}
 if(failed)process.exit(1);
-console.log(`[pulse-production-consolidation-qa] ${checks.length} checks passed · ${localAssets.length} local assets locked to ${release}.`);
+console.log(`[pulse-production-consolidation-qa] ${checks.length} checks passed · ${localAssets.length} local asset references locked to ${release}.`);
