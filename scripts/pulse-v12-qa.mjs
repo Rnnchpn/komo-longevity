@@ -49,7 +49,7 @@ const required = [
   ['legacy session migration', runtime.includes('sb-${PROJECT_REF}-auth-token') && runtime.includes("localStorage.setItem(REMEMBER_KEY, '1')")],
   ['runtime loads before app', html.indexOf('./runtime.js') > -1 && html.indexOf('./runtime.js') < html.indexOf('./app.js')],
   ['content configuration loaded', html.includes('./content-config.js') && contentConfig.includes('window.KOMO_PULSE_CONTENT')],
-  ['Parcours wording configured', contentConfig.includes("['Parcours', 'Programme']") && html.includes('parcours KŌMØ')],
+  ['Programme wording configured', contentConfig.includes("['Parcours', 'Programme']") && html.includes('programme KŌMØ') && !html.includes('parcours KŌMØ')],
   ['Explorer links centralized', publicLinks.every((url) => contentConfig.includes(url))],
   ['Pulse root host rewrite', pulseRootRewrite],
   ['Pulse nested host rewrite', pulseNestedRewrite],
