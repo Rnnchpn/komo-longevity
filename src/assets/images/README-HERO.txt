@@ -1,0 +1,1 @@
+KŌMØ Case hero source asset managed as a binary Git blob. The homepage build should reference /assets/images/komo-case-hero-20260827.png.
