@@ -75,10 +75,18 @@ cockpit=cockpit.replace(
   "function sb(){if(!s.client)s.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return s.client}",
   "function sb(){return window.KomoRuntime?.client||(s.client||(s.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}"
 );
-cockpit=cockpit.replace(
-  "const memberships=om.data||[],m=memberships.find(x=>x.organizations?.slug==='komo-poc')||memberships[0];s.org=m?.organizations||null;",
-  "const memberships=om.data||[],wanted=localStorage.getItem('komo_clinical_org'),m=memberships.find(x=>x.organization_id===wanted)||memberships.find(x=>x.organizations?.slug==='komo-poc')||memberships[0];s.org=m?.organizations||null;if(m?.organization_id)localStorage.setItem('komo_clinical_org',m.organization_id);"
-);
+if(!cockpit.includes("wanted=localStorage.getItem('komo_clinical_org')")){
+  cockpit=cockpit.replace(
+    "const memberships=om.data||[],m=memberships.find(x=>x.organizations?.slug==='komo-poc')||memberships[0];s.org=m?.organizations||null;",
+    "const memberships=om.data||[],wanted=localStorage.getItem('komo_clinical_org'),m=memberships.find(x=>x.organization_id===wanted)||memberships.find(x=>x.organizations?.slug==='komo-poc')||memberships[0];s.org=m?.organizations||null;if(m?.organization_id)localStorage.setItem('komo_clinical_org',m.organization_id);"
+  );
+}
+if(!cockpit.includes("wanted=localStorage.getItem('komo_clinical_org')")){
+  cockpit=cockpit.replace(
+    /const memberships=om\.data\|\|\[\],(?:[^;]*,)?m=memberships\.find\(x=>x\.organizations\?\.slug==='komo-poc'\)\|\|memberships\[0\];s\.org=m\?\.organizations\|\|null;/,
+    "const memberships=om.data||[],wanted=localStorage.getItem('komo_clinical_org'),m=memberships.find(x=>x.organization_id===wanted)||memberships.find(x=>x.organizations?.slug==='komo-poc')||memberships[0];s.org=m?.organizations||null;if(m?.organization_id)localStorage.setItem('komo_clinical_org',m.organization_id);"
+  );
+}
 if(!cockpit.includes("komo:center-changed")){
   cockpit=cockpit.replace(
     "window.addEventListener('komo:myocare-imported',()=>setTimeout(refresh,150));",
