@@ -20,4 +20,74 @@
   html[data-adaptive-shell="phone"] .kav2-tabs{top:166px!important}
   .kamo-age{margin:0 auto 16px}.kamo-age>strong{font-size:40px}.kamo-age>span{font-size:7.5px}.kamo-age>small{font-size:8px}
   .mykomo-xp{text-align:center;padding:14px 12px}.mykomo-xp-head{justify-content:center;flex-wrap:wrap}.mykomo-xp-head span{width:100%;text-align:center}.mykomo-xp-foot{justify-content:center;flex-wrap:wrap;gap:4px 10px}.mykomo-xp-track{height:12px!important}.kamo-xp-spotlight{max-width:300px;width:100%;margin:5px auto 0}
+
+  /* Final mobile audit: one spacing and card system across every authenticated route. */
+  html[data-adaptive-shell="phone"] body{font-size:14px!important}
+  html[data-adaptive-shell="phone"] .view-root{width:100%!important;max-width:100%!important;min-width:0!important;margin:0 auto!important;padding-top:2px!important}
+  html[data-adaptive-shell="phone"] #viewRoot>*{max-width:100%!important;min-width:0!important}
+  html[data-adaptive-shell="phone"] .patient-v4,
+  html[data-adaptive-shell="phone"] .tests-v1-root,
+  html[data-adaptive-shell="phone"] .mykomo-home,
+  html[data-adaptive-shell="phone"] .kcp,
+  html[data-adaptive-shell="phone"] .kav2,
+  html[data-adaptive-shell="phone"] .booking-shell,
+  html[data-adaptive-shell="phone"] .profile-grid{width:100%!important;max-width:100%!important;min-width:0!important}
+  html[data-adaptive-shell="phone"] .card,
+  html[data-adaptive-shell="phone"] .pv4-section,
+  html[data-adaptive-shell="phone"] .pv4-primary,
+  html[data-adaptive-shell="phone"] .pv4-secondary,
+  html[data-adaptive-shell="phone"] .metric-card,
+  html[data-adaptive-shell="phone"] .test-v1-card{border-radius:18px!important}
+  html[data-adaptive-shell="phone"] .section-block{margin-top:14px!important}
+  html[data-adaptive-shell="phone"] .two-col,
+  html[data-adaptive-shell="phone"] .result-layout,
+  html[data-adaptive-shell="phone"] .path-grid,
+  html[data-adaptive-shell="phone"] .profile-grid,
+  html[data-adaptive-shell="phone"] .pv4-grid,
+  html[data-adaptive-shell="phone"] .pv4-plan-bottom{grid-template-columns:1fr!important;gap:10px!important}
+  html[data-adaptive-shell="phone"] .metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  html[data-adaptive-shell="phone"] input,
+  html[data-adaptive-shell="phone"] select,
+  html[data-adaptive-shell="phone"] textarea{max-width:100%!important;font-size:16px!important}
+  html[data-adaptive-shell="phone"] button,
+  html[data-adaptive-shell="phone"] a{touch-action:manipulation}
+  html[data-adaptive-shell="phone"] table{max-width:none!important}
+  html[data-adaptive-shell="phone"] [class*="table-wrap"],
+  html[data-adaptive-shell="phone"] [style*="overflow:auto"]{-webkit-overflow-scrolling:touch}
+  html[data-adaptive-shell="phone"] .kam-bottom{left:8px!important;right:8px!important;bottom:max(7px,env(safe-area-inset-bottom))!important;height:74px!important;padding:5px!important;border-radius:21px!important}
+  html[data-adaptive-shell="phone"] .kam-nav-item{gap:4px!important;font-size:9px!important}
+  html[data-adaptive-shell="phone"] .kam-nav-item svg{width:19px!important;height:19px!important}
+  html[data-adaptive-shell="phone"] .kam-sheet{left:7px!important;right:7px!important;bottom:7px!important;max-height:82dvh!important;border-radius:24px!important}
+  html[data-adaptive-shell="phone"] .kam-sheet-action{min-height:52px!important}
+  html[data-adaptive-shell="phone"] .kam-sheet-links>a,
+  html[data-adaptive-shell="phone"] .kam-sheet-links>button{min-height:46px!important}
+  html[data-adaptive-shell="phone"] .mykomo-card{padding:18px!important;border-radius:22px!important}
+  html[data-adaptive-shell="phone"] .mykomo-top{align-items:flex-start!important}
+  html[data-adaptive-shell="phone"] .mykomo-avatar{width:58px!important;height:58px!important;flex-basis:58px!important;border-radius:18px!important}
+  html[data-adaptive-shell="phone"] .mykomo-identity h2{font-size:25px!important}
+  html[data-adaptive-shell="phone"] .mykomo-profile-btn{min-height:40px!important}
+  html[data-adaptive-shell="phone"] .mykomo-grid{grid-template-columns:1fr!important;gap:10px!important;margin-top:16px!important}
+  html[data-adaptive-shell="phone"] .mykomo-score-card,
+  html[data-adaptive-shell="phone"] .mykomo-side{padding:15px!important;border-radius:18px!important}
+  html[data-adaptive-shell="phone"] .mykomo-rings{gap:6px!important}
+  html[data-adaptive-shell="phone"] .mykomo-ring{width:88px!important;height:88px!important}
+  html[data-adaptive-shell="phone"] .mykomo-ring strong{font-size:22px!important}
+  html[data-adaptive-shell="phone"] .mykomo-engagement{padding:17px!important;border-radius:22px!important}
+  html[data-adaptive-shell="phone"] .mykomo-engagement-head{display:grid!important;grid-template-columns:1fr auto!important;gap:10px!important}
+  html[data-adaptive-shell="phone"] .mykomo-engagement-head h3{font-size:22px!important}
+  html[data-adaptive-shell="phone"] .mykomo-engagement-grid{grid-template-columns:1fr!important;gap:9px!important}
+  html[data-adaptive-shell="phone"] .mykomo-challenges{grid-template-columns:1fr!important}
+  html[data-adaptive-shell="phone"] .mykomo-challenge p{min-height:0!important}
+  html[data-adaptive-shell="phone"][data-adaptive-mode="pro"] .kcp-head,
+  html[data-adaptive-shell="phone"][data-adaptive-mode="admin"] .kav2-hero{margin-top:0!important}
+  html[data-adaptive-shell="phone"][data-adaptive-mode="pro"] .kcp-card,
+  html[data-adaptive-shell="phone"][data-adaptive-mode="admin"] .kav2-card{box-shadow:none!important}
+  html[data-adaptive-shell="phone"][data-adaptive-mode="admin"] .kav2-tabs{max-width:100%!important}
+}
+
+@media(max-width:430px){
+  .kam-sheet-grid{grid-template-columns:1fr!important}
+  html[data-adaptive-shell="phone"] .mykomo-top{display:grid!important;grid-template-columns:1fr!important}
+  html[data-adaptive-shell="phone"] .mykomo-profile-btn{width:100%!important}
+  html[data-adaptive-shell="phone"] .mykomo-ring{width:82px!important;height:82px!important}
 }
