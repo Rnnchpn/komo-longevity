@@ -3,7 +3,7 @@ import {readFile,writeFile} from 'node:fs/promises';
 const indexPath='pulse-app/index.html';
 const appPath='pulse-app/app.js';
 
-function replaceRequired(src,from,to,label){if(!src.includes(from))throw new Error(`[pulse-performance] missing ${label}`);return src.replace(from,to)}
+function replaceRequired(src,from,to,label){if(src.includes(from))return src.replace(from,to);if(src.includes(to)){console.log(`[pulse-performance] already applied ${label}`);return src}throw new Error(`[pulse-performance] missing ${label}`)}
 function stripBodyObserver(src,label){const before=src;src=src.replace(/(?:let scheduled=false;)?const obs=new MutationObserver\([\s\S]*?obs\.observe\(document\.body,\{[^;]*?\}\);/,'');if(src===before)console.warn(`[pulse-performance] no body observer found in ${label}`);return src}
 
 let html=await readFile(indexPath,'utf8');
@@ -41,7 +41,6 @@ proAccess+="\nwindow.addEventListener('komo:session-ready',e=>{role=e.detail?.ro
 await writeFile('pulse-app/pro-access-v1.js',proAccess);
 
 let proIdentity=await readFile('pulse-app/pro-signup-identity-v1.js','utf8');
-// The generic pass above already patches this file; ensure the modal identity is mounted by click rather than DOM-wide observation.
 await writeFile('pulse-app/pro-signup-identity-v1.js',proIdentity);
 
 let adminUx=await readFile('pulse-app/admin-ux-v2.js','utf8');adminUx=stripBodyObserver(adminUx,'admin-ux-v2.js');adminUx+="\ndocument.addEventListener('click',e=>{if(location.hash==='#admin'&&e.target.closest?.('[data-pro-select],[data-admin-tab],[data-admin-professionals]'))setTimeout(schedule,100)},true);window.addEventListener('komo:admin-open',()=>setTimeout(schedule,120));window.addEventListener('komo:route-ready',()=>{if(location.hash==='#admin')setTimeout(schedule,120)});\n";await writeFile('pulse-app/admin-ux-v2.js',adminUx);
