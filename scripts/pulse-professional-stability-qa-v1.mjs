@@ -18,11 +18,11 @@ const checks=[
  ['clinical cockpit keeps saved center logic',cockpit.includes('savedOrg=localStorage.getItem(K.org)')&&cockpit.includes('memberships.find(x=>x.organization_id===savedOrg)')],
  ['clinical cockpit uses shared runtime client',cockpit.includes('window.KomoRuntime?.client')],
  ['center hub uses shared runtime client',hub.includes('window.KomoRuntime?.client')],
- ['center switching is event driven',hub.includes('komo:center-changed')&&!context.includes('location.reload()')],
- ['patient opening avoids page reload',hub.includes('komo:patient-changed')&&!hub.includes("localStorage.setItem('komo_clinical_patient',b.dataset.openPatient);localStorage.setItem(ORG_KEY,S.centerId);location.reload()")],
+ ['center switching uses canonical context event',hub.includes('komo:center-context-changed')&&context.includes('komo:center-context-changed')&&!context.includes('location.reload()')],
+ ['patient opening avoids page reload',hub.includes('komo:center-context-changed')&&!hub.includes("localStorage.setItem('komo_clinical_patient',b.dataset.openPatient);localStorage.setItem(ORG_KEY,S.centerId);location.reload()")],
  ['professional delayed actions cancel stale retries',pro.includes('let actionToken=0;')&&pro.includes('token!==actionToken')],
  ['professional nav no longer watches all body class mutations',!pro.includes("obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']})")],
- ['stabilized modules cache busted',html.includes('clinical-cockpit-v1.js?v=20260827-pro-stable-2')&&html.includes('booking-directory-map-v1.js?v=20260827-pro-stable-2')&&html.includes('pro-architecture-v2.js?v=20260827-pro-stable-2')]
+ ['stabilized modules cache busted',html.includes('clinical-cockpit-v1.js?v=20260827-pro-stable-3')&&html.includes('booking-directory-map-v1.js?v=20260827-pro-stable-3')&&html.includes('pro-architecture-v2.js?v=20260827-pro-stable-3')]
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([n])=>n);
 if(failed.length){console.error('[pulse-professional-stability-qa] failed: '+failed.join(', '));process.exit(1)}
