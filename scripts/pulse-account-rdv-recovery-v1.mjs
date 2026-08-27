@@ -20,9 +20,10 @@ booking=booking.replace(
 fs.writeFileSync(bookingPath,booking);
 
 let html=fs.readFileSync(htmlPath,'utf8');
-const release='20260827-rdv-admin-2';
-for(const file of ['admin-shortcut-v1.js','booking-layer-v1.js','booking-directory-map-v1.js','adaptive-shell-v4.js','pulse-my-komo-v1.js']){
-  const re=new RegExp(`\\./${file.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}(?:\\?v=[^\"']+)?`,'g');
+const release='20260827-rdv-admin-3';
+for(const file of ['admin-shortcut-v1.js','booking-layer-v1.js','booking-directory-map-v1.js','adaptive-shell-v4.js','adaptive-plus-v1.js','my-komo-home-v1.js','profile-avatar-v1.js']){
+  const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const re=new RegExp(`\\./${escaped}(?:\\?v=[^\"']+)?`,'g');
   html=html.replace(re,`./${file}?v=${release}`);
 }
 fs.writeFileSync(htmlPath,html);
