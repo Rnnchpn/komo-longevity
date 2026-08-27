@@ -93,8 +93,10 @@ const scripts = [
   'scripts/intake-profile-qa-v1.mjs',
   'scripts/admin-console-qa-v2.mjs',
   'scripts/pulse-speed-navigation-v1.mjs',
+  'scripts/pulse-flicker-stability-v1.mjs',
   'scripts/pulse-adaptive-shell-qa-v1.mjs',
-  'scripts/pulse-speed-navigation-qa-v1.mjs'
+  'scripts/pulse-speed-navigation-qa-v1.mjs',
+  'scripts/pulse-flicker-stability-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
