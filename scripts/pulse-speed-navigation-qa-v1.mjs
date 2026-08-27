@@ -15,7 +15,7 @@ const checks=[
   ['bundle preserves many source layers',bundledSources>=20],
   ['Supabase preconnect',html.includes('rel="preconnect" href="https://uqlolefsiktbznnymriy.supabase.co"')],
   ['ESM preconnect',html.includes('rel="preconnect" href="https://esm.sh"')],
-  ['identity-first app shell',app.includes('Promise.race([fullLoad,identityReady])')&&app.includes("history.replaceState(null,'','#home')")],
+  ['stable single-pass app reveal',app.includes("document.body.classList.add('komo-hydrating')")&&app.includes("await loadAppData();document.body.classList.remove('komo-hydrating')")&&app.includes("els.authScreen.hidden=true;els.appShell.hidden=false")&&app.includes("history.replaceState(null,'','#home')")],
   ['data-ready event',app.includes("new CustomEvent('komo:data-ready')")],
   ['hydration navigation state',app.includes("document.body.classList.add('komo-hydrating')")&&css.includes('body.komo-hydrating #refreshButton')],
   ['touch navigation optimized',css.includes('touch-action:manipulation')],
