@@ -78,6 +78,7 @@ const scripts = [
   'scripts/patient-pro-flow-qa-v1.mjs',
   'scripts/pulse-mobile-guided-v2.mjs',
   'scripts/pulse-tablet-patient-v1.mjs',
+  'scripts/pulse-mobile-menu-v3.mjs',
   'scripts/build-pulse-v12.mjs',
   'scripts/pulse-v12-qa.mjs',
   'scripts/pulse-performance-qa-v1.mjs',
