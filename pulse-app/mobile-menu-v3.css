@@ -1,140 +1,51 @@
-/* KŌMØ Pulse — mobile menu v3
+/* KŌMØ Pulse — mobile menu v3.1
    Phone patient surface: no persistent bottom navigation. Primary navigation moves into the top-right menu. */
 
 @media (max-width:767px){
-  html[data-mobile-surface="patient"] .app-shell{
-    padding-bottom:0!important;
-  }
+  html[data-mobile-surface="patient"] .app-shell{padding-bottom:0!important}
+  html[data-mobile-surface="patient"] .mobile-nav{display:none!important}
+  html[data-mobile-surface="patient"] .main-shell{padding-bottom:calc(26px + env(safe-area-inset-bottom))!important}
 
-  /* Remove the persistent bottom bar entirely on phones. */
-  html[data-mobile-surface="patient"] .mobile-nav{
-    display:none!important;
-  }
-
-  html[data-mobile-surface="patient"] .main-shell{
-    padding-bottom:calc(26px + env(safe-area-inset-bottom))!important;
-  }
-
-  /* The existing top-right account trigger becomes the single menu affordance. */
   html[data-mobile-surface="patient"] .mobile-account-trigger{
-    position:relative!important;
-    width:44px!important;
-    height:44px!important;
-    border:1px solid rgba(31,42,34,.12)!important;
-    border-radius:14px!important;
-    background:#263229!important;
-    color:transparent!important;
-    font-size:0!important;
+    position:relative!important;width:44px!important;height:44px!important;border:1px solid rgba(31,42,34,.12)!important;
+    border-radius:14px!important;background:#263229!important;color:transparent!important;font-size:0!important;
     box-shadow:0 8px 24px rgba(31,42,34,.11)!important;
   }
-  html[data-mobile-surface="patient"] .mobile-account-trigger::before{
-    content:'☰';
-    color:#fff;
-    font:500 19px/1 'DM Sans',sans-serif;
-    letter-spacing:0;
-  }
+  html[data-mobile-surface="patient"] .mobile-account-trigger::before{content:'☰';color:#fff;font:500 19px/1 'DM Sans',sans-serif;letter-spacing:0}
 
-  /* Full navigation lives inside the account/menu popover. */
   html[data-mobile-surface="patient"] .account-popover{
-    top:68px!important;
-    right:12px!important;
-    bottom:auto!important;
-    left:auto!important;
-    width:min(336px,calc(100vw - 24px))!important;
-    max-height:calc(100dvh - 88px)!important;
-    padding:10px!important;
-    overflow:auto!important;
-    border:1px solid rgba(31,42,34,.1)!important;
-    border-radius:22px!important;
-    background:rgba(251,249,244,.985)!important;
-    box-shadow:0 24px 70px rgba(30,37,31,.18)!important;
-    backdrop-filter:blur(24px)!important;
-    -webkit-backdrop-filter:blur(24px)!important;
+    top:68px!important;right:12px!important;bottom:auto!important;left:auto!important;width:min(336px,calc(100vw - 24px))!important;
+    max-height:calc(100dvh - 88px)!important;padding:10px!important;overflow:auto!important;border:1px solid rgba(31,42,34,.1)!important;
+    border-radius:22px!important;background:rgba(251,249,244,.985)!important;box-shadow:0 24px 70px rgba(30,37,31,.18)!important;
+    backdrop-filter:blur(24px)!important;-webkit-backdrop-filter:blur(24px)!important;
   }
+  html[data-mobile-surface="patient"] .account-popover .account-meta{margin:2px 2px 8px!important;padding:10px 10px 12px!important;border-bottom:1px solid rgba(31,42,34,.08)!important}
 
-  html[data-mobile-surface="patient"] .account-popover .account-meta{
-    margin:2px 2px 8px!important;
-    padding:10px 10px 12px!important;
-    border-bottom:1px solid rgba(31,42,34,.08)!important;
+  html[data-mobile-surface="patient"] .mg-mobile-menu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:0 0 8px;padding:0 0 9px;border-bottom:1px solid rgba(31,42,34,.08)}
+  html[data-mobile-surface="patient"] .mg-mobile-menu a,
+  html[data-mobile-surface="patient"] .mg-mobile-menu button{
+    min-width:0;min-height:50px!important;padding:10px 11px!important;border:1px solid rgba(31,42,34,.08)!important;border-radius:14px!important;
+    display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important;background:rgba(255,255,255,.56)!important;
+    color:#3d4840!important;text-decoration:none!important;font:600 12px/1.15 'DM Sans',sans-serif!important;text-align:left!important;cursor:pointer!important;
   }
+  html[data-mobile-surface="patient"] .mg-mobile-menu a::after,
+  html[data-mobile-surface="patient"] .mg-mobile-menu button::after{content:'→';flex:0 0 auto;color:#879088;font-size:13px}
+  html[data-mobile-surface="patient"] .mg-mobile-menu button.is-active{border-color:rgba(38,50,41,.17)!important;background:#263229!important;color:#fff!important}
+  html[data-mobile-surface="patient"] .mg-mobile-menu button.is-active::after{color:rgba(255,255,255,.72)}
+  html[data-mobile-surface="patient"] .mg-mobile-menu a[data-mobile-menu-link="site"]{grid-column:1 / -1;background:#eef1ea!important;color:#263229!important}
 
-  html[data-mobile-surface="patient"] .mg-mobile-menu{
-    display:grid;
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    gap:6px;
-    margin:0 0 8px;
-    padding:0 0 9px;
-    border-bottom:1px solid rgba(31,42,34,.08);
-  }
-
-  html[data-mobile-surface="patient"] .mg-mobile-menu a{
-    min-width:0;
-    min-height:50px!important;
-    padding:10px 11px!important;
-    border:1px solid rgba(31,42,34,.08)!important;
-    border-radius:14px!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:space-between!important;
-    gap:8px!important;
-    background:rgba(255,255,255,.56)!important;
-    color:#3d4840!important;
-    text-decoration:none!important;
-    font-size:12px!important;
-    font-weight:600!important;
-    line-height:1.15!important;
-  }
-
-  html[data-mobile-surface="patient"] .mg-mobile-menu a::after{
-    content:'→';
-    flex:0 0 auto;
-    color:#879088;
-    font-size:13px;
-  }
-
-  html[data-mobile-surface="patient"] .mg-mobile-menu a.is-active{
-    border-color:rgba(38,50,41,.17)!important;
-    background:#263229!important;
-    color:#fff!important;
-  }
-  html[data-mobile-surface="patient"] .mg-mobile-menu a.is-active::after{color:rgba(255,255,255,.72)}
-
-  html[data-mobile-surface="patient"] .mg-mobile-menu a[data-mobile-menu-link="site"]{
-    grid-column:1 / -1;
-    background:#eef1ea!important;
-    color:#263229!important;
-  }
-
-  /* Remove duplicate destinations injected by older mobile layers. */
   html[data-mobile-surface="patient"] .account-popover > [data-guided-account-link="appointments"],
   html[data-mobile-surface="patient"] .account-popover > [data-guided-account-link="messages"],
-  html[data-mobile-surface="patient"] .account-popover > a[href="https://komolongevity.com/fr/"]{
-    display:none!important;
-  }
-
+  html[data-mobile-surface="patient"] .account-popover > a[href="https://komolongevity.com/fr/"]{display:none!important}
   html[data-mobile-surface="patient"] .account-popover > a,
-  html[data-mobile-surface="patient"] .account-popover > button{
-    min-height:45px!important;
-    border-radius:12px!important;
-  }
+  html[data-mobile-surface="patient"] .account-popover > button{min-height:45px!important;border-radius:12px!important}
 
-  /* No reserved space for a bar that no longer exists. */
-  html[data-mobile-surface="patient"] .tests-v1-root{
-    padding-bottom:28px!important;
-  }
-  html[data-mobile-surface="patient"] .mobile-test-cta{
-    bottom:calc(14px + env(safe-area-inset-bottom))!important;
-  }
+  html[data-mobile-surface="patient"] .tests-v1-root{padding-bottom:28px!important}
+  html[data-mobile-surface="patient"] .mobile-test-cta{bottom:calc(14px + env(safe-area-inset-bottom))!important}
 }
 
 @media (max-width:380px){
-  html[data-mobile-surface="patient"] .account-popover{
-    right:8px!important;
-    width:calc(100vw - 16px)!important;
-  }
-  html[data-mobile-surface="patient"] .mg-mobile-menu a{
-    min-height:48px!important;
-    padding:9px 10px!important;
-    font-size:11.5px!important;
-  }
+  html[data-mobile-surface="patient"] .account-popover{right:8px!important;width:calc(100vw - 16px)!important}
+  html[data-mobile-surface="patient"] .mg-mobile-menu a,
+  html[data-mobile-surface="patient"] .mg-mobile-menu button{min-height:48px!important;padding:9px 10px!important;font-size:11.5px!important}
 }
