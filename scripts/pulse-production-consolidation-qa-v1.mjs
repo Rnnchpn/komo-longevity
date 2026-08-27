@@ -2,15 +2,17 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 
 const pulse=join(process.cwd(),'site','pulse-v12');
-const release='20260827-canonical-2';
-const [html,css,app,adaptive,mobile,guided,design]=await Promise.all([
+const release='20260827-canonical-3';
+const [html,css,app,adaptive,mobile,guided,design,patientMotion,booking]=await Promise.all([
   readFile(join(pulse,'index.html'),'utf8'),
   readFile(join(pulse,'pulse-ui-v1.css'),'utf8'),
   readFile(join(pulse,'app.js'),'utf8'),
   readFile(join(pulse,'adaptive-shell-v4.js'),'utf8'),
   readFile(join(pulse,'mobile-v1.js'),'utf8'),
   readFile(join(pulse,'mobile-guided-v2.js'),'utf8'),
-  readFile(join(pulse,'pulse-final-design-v1.js'),'utf8')
+  readFile(join(pulse,'pulse-final-design-v1.js'),'utf8'),
+  readFile(join(pulse,'patient-motion-booking-v2.js'),'utf8'),
+  readFile(join(pulse,'booking-layer-v1.js'),'utf8')
 ]);
 
 const localAssets=[...html.matchAll(/(?:src|href)="\.\/([^"?#]+\.(?:js|css))(\?v=([^"#]+))?"/g)];
@@ -34,8 +36,12 @@ const checks=[
   ['home is quiet-mounted by core router',app.includes("['home','path','documents','plan','messages','clinical'].includes(route)")&&app.includes("home:'[data-my-komo-home]'" )],
   ['My KŌMØ is sole shipped home owner',!html.includes('home-clarity-v1.js')&&!html.includes('home-summary-v1.js')&&html.includes('my-komo-home-v1.js')],
   ['legacy home summary CSS retired',!css.includes('/* FILE: home-summary-v1.css */')],
+  ['legacy Motion booking no longer renders RDV',!patientMotion.includes('root.innerHTML')&&!patientMotion.includes('data-kmb2')&&!patientMotion.includes('loadSlots')&&!patientMotion.includes('createClient')],
+  ['legacy Motion booking forwards to canonical RDV',patientMotion.includes('window.KomoBooking?.refreshPatient?.()')&&patientMotion.includes("location.hash='documents'" )],
+  ['legacy Motion booking has no body-wide observer',!patientMotion.includes('observe(document.body')],
+  ['booking-layer remains canonical RDV owner',booking.includes('data-kbook-patient')&&booking.includes("location.hash.replace(/^#/,'')!=='documents'")],
   ['My KŌMØ remains canonical home presentation',design.includes('kamo-home-result-removed')],
-  ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')&&css.includes('Home: My KŌMØ')]
+  ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')&&css.includes('Home: My KŌMØ')&&css.includes('RDV: booking-layer-v1')]
 ];
 
 let failed=0;
