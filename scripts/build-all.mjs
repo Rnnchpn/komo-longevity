@@ -110,7 +110,9 @@ const scripts = [
   'scripts/pulse-professional-stability-v1.mjs',
   'scripts/pulse-professional-stability-qa-v1.mjs',
   'scripts/pulse-center-directory-management-v1.mjs',
-  'scripts/pulse-center-directory-management-qa-v1.mjs'
+  'scripts/pulse-center-directory-management-qa-v1.mjs',
+  'scripts/pulse-mobile-stability-final-v2.mjs',
+  'scripts/pulse-mobile-stability-final-qa-v2.mjs'
 ];
 
 for (const script of scripts) {
