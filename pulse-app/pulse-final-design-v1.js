@@ -64,16 +64,22 @@ function enhanceXp(){
 }
 function declutterHome(){
   const root=document.querySelector('#viewRoot');if(!root)return;
-  if(route()!=='home'){root.querySelectorAll('.kamo-home-result-removed').forEach(x=>x.classList.remove('kamo-home-result-removed'));return}
-  const targets=['profil fonctionnel','prochaines étapes','construire la suite à partir de cette référence','motion planifié','vos repères'];
-  const nodes=[...root.querySelectorAll('section,article,.card,.panel,[class*="result"],[class*="reference"],[class*="summary"]')];
-  for(const node of nodes){
-    if(node.closest('[data-my-komo-home]')||node.querySelector?.('[data-my-komo-home]'))continue;
-    const text=(node.textContent||'').replace(/\s+/g,' ').trim().toLowerCase();
-    if(targets.some(t=>text.includes(t)))node.classList.add('kamo-home-result-removed');
+  if(route()!=='home'){
+    root.querySelectorAll('.kamo-home-result-removed').forEach(x=>x.classList.remove('kamo-home-result-removed'));
+    return;
   }
+  const myKomo=root.querySelector(':scope > [data-my-komo-home]');
+  if(!myKomo)return;
+  // The home route now belongs to My KŌMØ. Legacy score summaries, result cards,
+  // trajectory blocks and other desktop-era siblings stay available on their
+  // dedicated routes but are removed from the first screen.
+  [...root.children].forEach(node=>{
+    if(node===myKomo)return;
+    node.classList.add('kamo-home-result-removed');
+  });
 }
 async function refresh(force=false){
+  window.KomoRuntime?.syncSession?.();
   ensureBrand();declutterHome();enhanceXp();
   if(route()!=='home')return;
   drawAge(lastAge);const age=await readAge(force);drawAge(age);enhanceXp();declutterHome();
