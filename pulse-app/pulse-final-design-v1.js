@@ -3,7 +3,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const URL='https://uqlolefsiktbznnymriy.supabase.co';
 const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const REM='komo_pulse_remember';
-let client=null,lastAge=null,lastRead=0,busy=false,timer=null;
+let client=null,lastAge=null,lastRead=0,busy=false,timer=null,viewObserver=null;
 function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
 function sb(){return window.KomoRuntime?.client||(client||(client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}
 function route(){return location.hash.replace(/^#/,'')||'home'}
@@ -70,21 +70,30 @@ function declutterHome(){
   }
   const myKomo=root.querySelector(':scope > [data-my-komo-home]');
   if(!myKomo)return;
-  // The home route now belongs to My KŌMØ. Legacy score summaries, result cards,
-  // trajectory blocks and other desktop-era siblings stay available on their
-  // dedicated routes but are removed from the first screen.
   [...root.children].forEach(node=>{
     if(node===myKomo)return;
     node.classList.add('kamo-home-result-removed');
   });
 }
-async function refresh(force=false){
-  window.KomoRuntime?.syncSession?.();
+async function refresh(force=false,sync=false){
+  if(sync)await window.KomoRuntime?.syncSession?.();
   ensureBrand();declutterHome();enhanceXp();
   if(route()!=='home')return;
   drawAge(lastAge);const age=await readAge(force);drawAge(age);enhanceXp();declutterHome();
 }
-function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>refresh(force),70)}
-['hashchange','resize','orientationchange','pageshow','komo:route-ready','komo:session-ready','komo:data-ready'].forEach(x=>window.addEventListener(x,()=>schedule(x==='komo:session-ready'||x==='komo:data-ready')));
-new MutationObserver(()=>schedule(false)).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
-document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>refresh(true),750));setTimeout(()=>refresh(false),1400);
+function schedule(force=false,sync=false){clearTimeout(timer);timer=setTimeout(()=>refresh(force,sync),70)}
+function observeView(){
+  const root=document.querySelector('#viewRoot');if(!root||viewObserver)return;
+  viewObserver=new MutationObserver(()=>{if(route()==='home')schedule(false,false)});
+  viewObserver.observe(root,{childList:true,subtree:true});
+}
+window.addEventListener('hashchange',()=>schedule(false,false));
+window.addEventListener('resize',()=>schedule(false,false),{passive:true});
+window.addEventListener('orientationchange',()=>schedule(false,false));
+window.addEventListener('pageshow',()=>schedule(true,true));
+window.addEventListener('komo:route-ready',()=>schedule(false,false));
+window.addEventListener('komo:session-ready',()=>schedule(true,true));
+window.addEventListener('komo:data-ready',()=>schedule(true,true));
+document.addEventListener('DOMContentLoaded',()=>{observeView();setTimeout(()=>refresh(true,true),750)});
+observeView();
+setTimeout(()=>refresh(false,false),1400);
