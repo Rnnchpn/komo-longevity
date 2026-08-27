@@ -2,6 +2,7 @@ import { next } from '@vercel/functions';
 
 const PULSE_HOST = 'pulse.komolongevity.com';
 const STATIC_ORIGIN = 'https://komolongevity.com';
+const STATIC_ASSET_RE = /\.(?:css|js|mjs|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i;
 
 export const config = {
   matcher: '/:path*',
@@ -50,7 +51,18 @@ export default async function middleware(request) {
   });
 
   const responseHeaders = new Headers(upstream.headers);
-  responseHeaders.set('Cache-Control', 'private, no-store, max-age=0');
+  const isStaticAsset = STATIC_ASSET_RE.test(incomingUrl.pathname);
+
+  if (isStaticAsset) {
+    // Static application code contains no patient data. Cache briefly in the browser
+    // and much longer at the CDN edge; HTML and authenticated data remain no-store.
+    responseHeaders.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
+    responseHeaders.set('CDN-Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
+  } else {
+    responseHeaders.set('Cache-Control', 'private, no-store, max-age=0');
+    responseHeaders.delete('CDN-Cache-Control');
+  }
+
   responseHeaders.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
   responseHeaders.set('X-KOMO-Pulse-Route', 'middleware');
 
