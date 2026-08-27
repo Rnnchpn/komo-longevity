@@ -53,8 +53,14 @@ if(app.includes(runtimeEnter))app=app.replace(runtimeEnter,runtimeStableEnter);
 else if(app.includes(previousFastEnter))app=app.replace(previousFastEnter,stableEnter);
 else if(app.includes(oldEnter))app=app.replace(oldEnter,stableEnter);
 else if(!app.includes(runtimeStableEnter)&&!app.includes(stableEnter)){
-  console.error('[pulse-speed] enterApp contract changed; refusing unsafe patch');
-  process.exit(1);
+  const pattern=/async function enterApp\(session\)\{[\s\S]*?\}\n\nasync function loadAppData/;
+  if(pattern.test(app)){
+    const replacement=app.includes('window.KomoRuntime?.setContext?.(session)')?runtimeStableEnter:stableEnter;
+    app=app.replace(pattern,replacement+'\n\nasync function loadAppData');
+  }else{
+    console.error('[pulse-speed] enterApp contract changed; refusing unsafe patch');
+    process.exit(1);
+  }
 }
 fs.writeFileSync(appPath,app);
 
