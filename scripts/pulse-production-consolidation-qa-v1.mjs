@@ -2,10 +2,11 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 
 const pulse=join(process.cwd(),'site','pulse-v12');
-const release='20260827-canonical-1';
-const [html,css,adaptive,mobile,guided,design]=await Promise.all([
+const release='20260827-canonical-2';
+const [html,css,app,adaptive,mobile,guided,design]=await Promise.all([
   readFile(join(pulse,'index.html'),'utf8'),
   readFile(join(pulse,'pulse-ui-v1.css'),'utf8'),
+  readFile(join(pulse,'app.js'),'utf8'),
   readFile(join(pulse,'adaptive-shell-v4.js'),'utf8'),
   readFile(join(pulse,'mobile-v1.js'),'utf8'),
   readFile(join(pulse,'mobile-guided-v2.js'),'utf8'),
@@ -24,13 +25,17 @@ const checks=[
   ['desktop shell remains available',css.includes('/* FILE: bottom-dock-v1.css */')],
   ['adaptive shell CSS remains available',css.includes('/* FILE: adaptive-shell-v4.css */')],
   ['adaptive shell keeps frozen patient labels',adaptive.includes("'Accueil'")&&adaptive.includes("'Tests'")&&adaptive.includes("'Résultats'")&&adaptive.includes("'Suivi'")],
+  ['legacy mobile navigation is hidden before JS ownership',css.includes('#mobileNav,#proMobileNav,.sidebar{display:none!important}')&&css.includes('.topbar .mode-switch{display:none!important}')],
   ['mobile utility no longer mutates account navigation',!mobile.includes('ensureExplorerInAccount')&&!mobile.includes('observe(document.body')],
   ['guided mobile layer is content-only',!guided.includes('ensureAccountTrigger')&&!guided.includes('ensureAccountHub')&&!guided.includes('mg-mobile-menu')&&!guided.includes('observe(document.body')],
   ['guided mobile layer no longer owns home',!guided.includes('enhanceHome')&&guided.includes('enhanceTests')],
   ['final design avoids body-wide observer',!design.includes('observe(document.body')&&design.includes("observe(root,{childList:true,subtree:true})")],
   ['session sync is event driven in final design',design.includes('if(sync)await window.KomoRuntime?.syncSession?.()')],
+  ['home is quiet-mounted by core router',app.includes("['home','path','documents','plan','messages','clinical'].includes(route)")&&app.includes("home:'[data-my-komo-home]'"))],
+  ['My KŌMØ is sole shipped home owner',!html.includes('home-clarity-v1.js')&&!html.includes('home-summary-v1.js')&&html.includes('my-komo-home-v1.js'))],
+  ['legacy home summary CSS retired',!css.includes('/* FILE: home-summary-v1.css */')],
   ['My KŌMØ remains canonical home presentation',design.includes('kamo-home-result-removed')],
-  ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')]
+  ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')&&css.includes('Home: My KŌMØ')]
 ];
 
 let failed=0;
