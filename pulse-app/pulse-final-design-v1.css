@@ -1,0 +1,17 @@
+/* KŌMØ Pulse — final visual pass: mobile brand + KŌMØ Age */
+.kamo-age{display:grid;justify-items:center;gap:4px;margin:2px auto 18px;padding:4px 12px 2px;text-align:center}.kamo-age>span{color:#7b837c;font-size:8px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.kamo-age>strong{color:#243029;font:600 42px/.95 Manrope,'DM Sans',sans-serif;letter-spacing:-.065em}.kamo-age>strong small{margin-left:4px;color:#7f877f;font:600 12px/1 'DM Sans',sans-serif;letter-spacing:0}.kamo-age>small{max-width:250px;color:#848b85;font-size:8.5px;line-height:1.35}
+
+.kam-mobile-brand{display:none}
+@media(max-width:767px){
+  html[data-adaptive-shell="phone"] .topbar{min-height:104px!important;padding:58px var(--kam-gutter) 10px!important;grid-template-columns:1fr!important;justify-items:center!important;align-items:end!important}
+  html[data-adaptive-shell="phone"] .topbar>div:first-child{width:100%!important;text-align:center!important}
+  html[data-adaptive-shell="phone"] .topbar .eyebrow{display:none!important}
+  html[data-adaptive-shell="phone"] .topbar h1{font-size:17px!important;line-height:1.08!important;text-align:center!important;letter-spacing:-.035em!important}
+  html[data-adaptive-shell="phone"] .topbar-actions{position:absolute!important;right:var(--kam-gutter)!important;top:12px!important;z-index:3!important}
+  html[data-adaptive-shell="phone"] .kam-mobile-brand{position:absolute;left:50%;top:14px;transform:translateX(-50%);display:flex;align-items:baseline;justify-content:center;gap:7px;white-space:nowrap;color:#222d25;pointer-events:none;z-index:2}
+  html[data-adaptive-shell="phone"] .kam-mobile-brand strong{font:600 24px/.9 Manrope,'DM Sans',sans-serif;letter-spacing:.12em}
+  html[data-adaptive-shell="phone"] .kam-mobile-brand span{font:700 8.5px/1 'DM Sans',sans-serif;letter-spacing:.22em;color:#6d776f}
+  html[data-adaptive-shell="phone"] .kam-role-row{top:104px!important}
+  html[data-adaptive-shell="phone"] .kav2-tabs{top:152px!important}
+  .kamo-age{margin:0 auto 16px}.kamo-age>strong{font-size:38px}.kamo-age>span{font-size:7.5px}.kamo-age>small{font-size:8px}
+}
