@@ -1,0 +1,350 @@
+/* KŌMØ Pulse — guided mobile patient experience v2
+   Loaded last in production. Patient-only overrides; staff surfaces keep their existing navigation. */
+
+@media (max-width:767px){
+  html[data-mobile-surface="patient"]{
+    --guided-nav-h:66px;
+    --guided-gutter:16px;
+  }
+
+  html[data-mobile-surface="patient"],
+  html[data-mobile-surface="patient"] body{
+    min-width:0;
+    overflow-x:hidden;
+    background:#f4f0e8;
+  }
+
+  /* Patient shell: the desktop dock disappears. The native mobile tab bar becomes the only primary navigation. */
+  html[data-mobile-surface="patient"] .sidebar{display:none!important}
+  html[data-mobile-surface="patient"] .main-shell{
+    margin-left:0!important;
+    min-height:100dvh!important;
+    padding:0 var(--guided-gutter) calc(var(--guided-nav-h) + 34px + env(safe-area-inset-bottom))!important;
+  }
+
+  html[data-mobile-surface="patient"] .topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:80!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:12px!important;
+    min-height:76px!important;
+    padding:12px 0 10px!important;
+    background:linear-gradient(to bottom,rgba(244,240,232,.98) 76%,rgba(244,240,232,.88) 90%,rgba(244,240,232,0))!important;
+    backdrop-filter:blur(18px)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+  }
+  html[data-mobile-surface="patient"] .topbar>div:first-child{min-width:0;flex:1 1 auto}
+  html[data-mobile-surface="patient"] .topbar .eyebrow{
+    margin:0 0 4px!important;
+    font-size:8px!important;
+    line-height:1!important;
+    letter-spacing:.15em!important;
+  }
+  html[data-mobile-surface="patient"] .topbar h1{
+    margin:0!important;
+    max-width:290px!important;
+    font-size:27px!important;
+    line-height:1.02!important;
+    letter-spacing:-.045em!important;
+  }
+  html[data-mobile-surface="patient"] .topbar-actions{
+    flex:0 0 auto!important;
+    display:flex!important;
+    align-items:center!important;
+  }
+  html[data-mobile-surface="patient"] .topbar-actions>:not(.mobile-account-trigger){display:none!important}
+  html[data-mobile-surface="patient"] .mobile-account-trigger{
+    width:44px;
+    height:44px;
+    padding:0;
+    border:1px solid rgba(31,42,34,.12);
+    border-radius:15px;
+    background:#263229;
+    color:#fff;
+    display:grid;
+    place-items:center;
+    font:600 12px/1 'DM Sans',sans-serif;
+    letter-spacing:.04em;
+    box-shadow:0 8px 24px rgba(31,42,34,.12);
+  }
+
+  /* Edge-to-edge, four-item tab bar. No oversized dark capsule. */
+  html[data-mobile-surface="patient"] .mobile-nav{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    align-items:start!important;
+    position:fixed!important;
+    z-index:100!important;
+    left:0!important;
+    right:0!important;
+    bottom:0!important;
+    width:100%!important;
+    height:calc(var(--guided-nav-h) + env(safe-area-inset-bottom))!important;
+    padding:7px 10px calc(7px + env(safe-area-inset-bottom))!important;
+    border:0!important;
+    border-top:1px solid rgba(32,40,32,.09)!important;
+    border-radius:0!important;
+    background:rgba(249,247,242,.96)!important;
+    box-shadow:0 -12px 34px rgba(28,34,29,.06)!important;
+    backdrop-filter:blur(22px) saturate(1.08)!important;
+    -webkit-backdrop-filter:blur(22px) saturate(1.08)!important;
+  }
+  html[data-mobile-surface="patient"] .mobile-nav [data-route="documents"],
+  html[data-mobile-surface="patient"] .mobile-nav [data-route="explore"]{display:none!important}
+  html[data-mobile-surface="patient"] .mobile-nav .nav-item{
+    width:100%!important;
+    min-width:0!important;
+    min-height:52px!important;
+    margin:0!important;
+    padding:5px 2px!important;
+    border:0!important;
+    border-radius:14px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:4px!important;
+    background:transparent!important;
+    color:#7a817a!important;
+    box-shadow:none!important;
+  }
+  html[data-mobile-surface="patient"] .mobile-nav .nav-item svg{
+    width:20px!important;
+    height:20px!important;
+    stroke-width:1.7!important;
+  }
+  html[data-mobile-surface="patient"] .mobile-nav .nav-item span{
+    display:block!important;
+    max-width:100%!important;
+    overflow:visible!important;
+    font-size:10px!important;
+    line-height:1!important;
+    letter-spacing:-.01em!important;
+    white-space:nowrap!important;
+  }
+  html[data-mobile-surface="patient"] .mobile-nav .nav-item.active{
+    background:rgba(38,50,41,.075)!important;
+    color:#263229!important;
+  }
+  html[data-mobile-surface="patient"] .mobile-nav [data-route="path"] span{
+    font-size:0!important;
+  }
+  html[data-mobile-surface="patient"] .mobile-nav [data-route="path"] span::after{
+    content:'Résultats';
+    font-size:10px!important;
+    line-height:1!important;
+  }
+
+  /* Account becomes the secondary navigation hub. */
+  html[data-mobile-surface="patient"] .account-popover{
+    position:fixed!important;
+    z-index:150!important;
+    top:68px!important;
+    right:12px!important;
+    bottom:auto!important;
+    left:auto!important;
+    width:min(292px,calc(100vw - 24px))!important;
+    max-height:calc(100dvh - 92px)!important;
+    overflow:auto!important;
+    border-radius:20px!important;
+    box-shadow:0 22px 70px rgba(30,37,31,.18)!important;
+  }
+  html[data-mobile-surface="patient"] .account-popover a,
+  html[data-mobile-surface="patient"] .account-popover button{
+    min-height:46px;
+  }
+  html[data-mobile-surface="patient"] .account-popover [data-guided-account-link]{
+    width:100%;
+    border:0;
+    border-top:1px solid rgba(32,40,32,.08);
+    background:transparent;
+    color:inherit;
+    text-align:left;
+    font:inherit;
+    cursor:pointer;
+  }
+
+  /* Home: one next action, then a concise synthesis. */
+  html[data-mobile-surface="patient"] #viewRoot.mg-home-guided>.section-block{display:none!important}
+  html[data-mobile-surface="patient"] #viewRoot.mg-home-guided .hero-grid{
+    display:block!important;
+    margin:0!important;
+  }
+  html[data-mobile-surface="patient"] #viewRoot.mg-home-guided .mg-home-hero{
+    min-height:0!important;
+    padding:24px 20px 20px!important;
+    border-radius:24px!important;
+    background:linear-gradient(145deg,#f7f4ed 0%,#f0ebdf 100%)!important;
+    border:1px solid rgba(39,49,41,.1)!important;
+    box-shadow:0 16px 52px rgba(42,47,40,.06)!important;
+  }
+  .mg-home-copy{display:block}
+  .mg-home-kicker{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .mg-home-kicker .eyebrow{margin:0!important}
+  .mg-stage-pill{
+    flex:0 0 auto;
+    padding:7px 10px;
+    border-radius:999px;
+    background:rgba(38,50,41,.08);
+    color:#526057;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:.04em;
+  }
+  html[data-mobile-surface="patient"] .mg-home-hero h2{
+    margin:0 0 12px!important;
+    max-width:330px!important;
+    font-size:46px!important;
+    line-height:.94!important;
+    letter-spacing:-.058em!important;
+  }
+  html[data-mobile-surface="patient"] .mg-home-hero .mg-lead{
+    margin:0!important;
+    max-width:330px!important;
+    color:#697169!important;
+    font-size:13px!important;
+    line-height:1.55!important;
+  }
+  .mg-journey{
+    margin:22px 0 20px;
+    padding:14px 14px 12px;
+    border:1px solid rgba(39,49,41,.08);
+    border-radius:18px;
+    background:rgba(255,255,255,.52);
+  }
+  .mg-step{
+    position:relative;
+    display:grid;
+    grid-template-columns:30px minmax(0,1fr);
+    gap:10px;
+    min-height:48px;
+  }
+  .mg-step:not(:last-child)::after{
+    content:'';
+    position:absolute;
+    left:14px;
+    top:28px;
+    bottom:-4px;
+    width:1px;
+    background:rgba(38,50,41,.14);
+  }
+  .mg-step-index{
+    position:relative;
+    z-index:1;
+    width:29px;
+    height:29px;
+    border:1px solid rgba(38,50,41,.13);
+    border-radius:50%;
+    background:#f7f4ed;
+    color:#748078;
+    display:grid;
+    place-items:center;
+    font-size:10px;
+    font-weight:700;
+  }
+  .mg-step.is-active .mg-step-index,
+  .mg-step.is-done .mg-step-index{
+    background:#263229;
+    color:#fff;
+    border-color:#263229;
+  }
+  .mg-step-copy{padding:1px 0 12px}
+  .mg-step-copy strong{display:block;color:#29342c;font-size:12px;line-height:1.25}
+  .mg-step-copy span{display:block;margin-top:3px;color:#7a827b;font-size:10px;line-height:1.35}
+  .mg-home-cta{
+    width:100%!important;
+    min-height:56px!important;
+    padding:0 18px!important;
+    border:0!important;
+    border-radius:17px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    background:#263229!important;
+    color:#fff!important;
+    font:600 14px/1 'DM Sans',sans-serif!important;
+  }
+  html[data-mobile-surface="patient"] #viewRoot.mg-home-guided .side-summary{
+    margin-top:12px!important;
+    border-radius:22px!important;
+  }
+  html[data-mobile-surface="patient"] #viewRoot.mg-home-guided .khs-card{padding:18px!important}
+  html[data-mobile-surface="patient"] #viewRoot.mg-home-guided .khs-foot{display:none!important}
+  html[data-mobile-surface="patient"] #viewRoot.mg-home-guided .khs-stack{gap:7px!important}
+
+  /* Tests: instructions first, scores after the three free steps. */
+  html[data-mobile-surface="patient"] .tests-v1-root{
+    display:flex!important;
+    flex-direction:column!important;
+    padding-bottom:86px!important;
+  }
+  html[data-mobile-surface="patient"] .tests-v1-root>.tests-v1-hero{order:1}
+  html[data-mobile-surface="patient"] .tests-v1-root>.tests-v1-guidance{order:2}
+  html[data-mobile-surface="patient"] .tests-v1-root>.tests-v1-section-head{order:3}
+  html[data-mobile-surface="patient"] .tests-v1-root>.tests-v1-grid{order:4}
+  html[data-mobile-surface="patient"] .tests-v1-root>[data-pulse-free-result]{order:5}
+  html[data-mobile-surface="patient"] .tests-v1-root>.kst-wrap{order:6}
+  html[data-mobile-surface="patient"] .tests-v1-hero-main{
+    padding:22px 19px!important;
+    border-radius:22px!important;
+  }
+  html[data-mobile-surface="patient"] .tests-v1-hero-main h2{
+    margin:0 0 10px!important;
+    max-width:335px!important;
+    font-size:36px!important;
+    line-height:.98!important;
+    letter-spacing:-.055em!important;
+  }
+  html[data-mobile-surface="patient"] .tests-v1-hero-main>p:not(.eyebrow){
+    max-width:330px!important;
+    font-size:12px!important;
+    line-height:1.52!important;
+  }
+  html[data-mobile-surface="patient"] .tests-v1-progress-card{
+    min-height:0!important;
+    padding:15px 17px!important;
+    border-radius:18px!important;
+  }
+  html[data-mobile-surface="patient"] .tests-v1-section-head{margin:21px 2px 10px!important}
+  html[data-mobile-surface="patient"] .tests-v1-section-head h3{font-size:20px!important}
+  html[data-mobile-surface="patient"] .test-v1-card{
+    min-height:0!important;
+    padding:18px!important;
+    border-radius:19px!important;
+    transition:border-color .18s ease,box-shadow .18s ease,opacity .18s ease!important;
+  }
+  html[data-mobile-surface="patient"] .test-v1-card.mg-next-test{
+    border-color:rgba(38,50,41,.26)!important;
+    box-shadow:0 10px 32px rgba(38,50,41,.08)!important;
+  }
+  html[data-mobile-surface="patient"] .test-v1-card.is-done:not(.mg-next-test){opacity:.78}
+  html[data-mobile-surface="patient"] .pulse-free-result-v2{margin:18px 0 0!important}
+  html[data-mobile-surface="patient"] .kst-wrap{margin-top:20px!important}
+
+  /* The floating tests CTA sits directly above the tab bar. */
+  html[data-mobile-surface="patient"] .mobile-test-cta{
+    left:16px!important;
+    right:16px!important;
+    bottom:calc(var(--guided-nav-h) + 12px + env(safe-area-inset-bottom))!important;
+    min-height:52px!important;
+    border-radius:16px!important;
+  }
+}
+
+@media (max-width:380px){
+  html[data-mobile-surface="patient"]{--guided-gutter:12px}
+  html[data-mobile-surface="patient"] .topbar h1{font-size:25px!important;max-width:260px!important}
+  html[data-mobile-surface="patient"] .mg-home-hero h2{font-size:42px!important}
+  html[data-mobile-surface="patient"] .mobile-nav{padding-left:6px!important;padding-right:6px!important}
+  html[data-mobile-surface="patient"] .mobile-nav .nav-item span,
+  html[data-mobile-surface="patient"] .mobile-nav [data-route="path"] span::after{font-size:9.5px!important}
+}
