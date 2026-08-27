@@ -1,4 +1,4 @@
-/* KŌMØ Pulse — phone patient navigation menu v3 */
+/* KŌMØ Pulse — phone patient navigation menu v3.1 */
 (() => {
   const PHONE='(max-width: 767px)';
   let scheduled=0;
@@ -6,12 +6,39 @@
   function isPhone(){return window.matchMedia(PHONE).matches}
   function route(){return location.hash.replace(/^#/,'')||'home'}
   function isPatient(){return !['clinical','admin'].includes(route())}
+  function appVisible(){
+    const app=document.querySelector('#appShell');
+    const auth=document.querySelector('#authScreen');
+    return !!app && !app.hidden && (!auth || auth.hidden);
+  }
+
+  function closeMenu(pop,trigger){
+    pop.hidden=true;
+    trigger?.setAttribute('aria-expanded','false');
+  }
+
+  function navigate(target,pop,trigger){
+    closeMenu(pop,trigger);
+    const next=`#${target}`;
+    if(location.hash!==next){
+      location.hash=target;
+    }else{
+      window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:target}}));
+    }
+  }
 
   function ensureMenu(){
-    if(!isPhone()||!isPatient())return;
     const pop=document.querySelector('#accountPopover');
-    const meta=pop?.querySelector('.account-meta');
     const trigger=document.querySelector('.mobile-account-trigger');
+
+    if(!isPhone()||!isPatient()||!appVisible()){
+      if(pop?.querySelector('.mg-mobile-menu')) pop.querySelector('.mg-mobile-menu').remove();
+      if(pop && !appVisible()) pop.hidden=true;
+      trigger?.setAttribute('aria-expanded','false');
+      return;
+    }
+
+    const meta=pop?.querySelector('.account-meta');
     if(!pop||!meta)return;
 
     if(trigger){
@@ -26,19 +53,26 @@
       menu.className='mg-mobile-menu';
       menu.setAttribute('aria-label','Navigation KŌMØ Pulse');
       menu.innerHTML=`
-        <a href="#home" data-route="home" data-mobile-menu-link="home">Accueil</a>
-        <a href="#results" data-route="results" data-mobile-menu-link="tests">Tests</a>
-        <a href="#path" data-route="path" data-mobile-menu-link="results">Résultats</a>
-        <a href="#plan" data-route="plan" data-mobile-menu-link="followup">Suivi</a>
-        <a href="#documents" data-route="documents" data-mobile-menu-link="appointments">Rendez-vous</a>
-        <a href="#messages" data-route="messages" data-mobile-menu-link="messages">Messages</a>
+        <button type="button" data-mobile-nav-route="home">Accueil</button>
+        <button type="button" data-mobile-nav-route="results">Tests</button>
+        <button type="button" data-mobile-nav-route="path">Résultats</button>
+        <button type="button" data-mobile-nav-route="plan">Suivi</button>
+        <button type="button" data-mobile-nav-route="documents">Rendez-vous</button>
+        <button type="button" data-mobile-nav-route="messages">Messages</button>
         <a href="https://komolongevity.com/fr/" target="_blank" rel="noopener noreferrer" data-mobile-menu-link="site">Site principal KŌMØ</a>`;
       meta.insertAdjacentElement('afterend',menu);
-      menu.querySelectorAll('a').forEach(link=>link.addEventListener('click',()=>{pop.hidden=true;if(trigger)trigger.setAttribute('aria-expanded','false')}));
+      menu.querySelectorAll('[data-mobile-nav-route]').forEach(button=>{
+        button.addEventListener('click',event=>{
+          event.preventDefault();
+          event.stopPropagation();
+          navigate(button.dataset.mobileNavRoute,pop,trigger);
+        });
+      });
+      menu.querySelector('[data-mobile-menu-link="site"]')?.addEventListener('click',()=>closeMenu(pop,trigger));
     }
 
     const current=route();
-    menu.querySelectorAll('[data-route]').forEach(link=>link.classList.toggle('is-active',link.dataset.route===current));
+    menu.querySelectorAll('[data-mobile-nav-route]').forEach(button=>button.classList.toggle('is-active',button.dataset.mobileNavRoute===current));
   }
 
   function refresh(){
@@ -53,6 +87,7 @@
   window.addEventListener('orientationchange',()=>setTimeout(refresh,100));
   window.addEventListener('komo:route-ready',refresh);
   window.addEventListener('komo:session-ready',refresh);
+  window.addEventListener('komo:session-cleared',refresh);
   document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,250));
   setTimeout(refresh,700);
   setTimeout(refresh,1500);
