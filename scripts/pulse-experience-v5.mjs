@@ -67,7 +67,7 @@ await patch('pulse-app/care-messaging-v2.js',[
 ]);
 
 let html=await readFile('pulse-app/index.html','utf8');
-html=html.split('programme KŌMØ').join('parcours KŌMØ');
+html=html.split('parcours KŌMØ').join('programme KŌMØ');
 html=html.replace('<script type="module" src="./care-messaging-v1.js"></script>','');
 html=html.replace('<button type="button" data-mode="member" class="active">Membre</button><button type="button" data-mode="clinical">Pro</button>','<button type="button" data-mode="member" class="active">Espace patient</button><button type="button" data-mode="clinical">Espace centre</button>');
 html=html.replace('>Mon profil</a>','>Mon compte</a>');
