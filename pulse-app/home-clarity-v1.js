@@ -40,6 +40,7 @@
   function metric(card,index){const x=card.querySelectorAll('.kfree-v2-metric')[index];return{value:text(x?.querySelector('strong')),note:text(x?.querySelector('small'))}}
   function enhanceFree(){
     const card=document.querySelector('.kfree-v2[data-kfree-v2="home"]')||document.querySelector('.kfree-v2');if(!card)return;
+    if(card.dataset.khcFree==='1')return;
     const head=card.querySelector('.kfree-v2-head');if(!head)return;
     const q=metric(card,0),chair=metric(card,1),two=metric(card,2);
     const level=text(card.querySelector('.kfree-v2-level strong'))||'—';
