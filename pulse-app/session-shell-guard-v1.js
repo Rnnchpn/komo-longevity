@@ -1,4 +1,4 @@
-/* KŌMØ Pulse — authenticated shell guard v1 */
+/* KŌMØ Pulse — authenticated shell guard v2 */
 (() => {
   let raf=0;
 
@@ -9,32 +9,23 @@
       const auth=document.querySelector('#authScreen');
       if(!app||!auth)return;
 
-      const runtime=window.KomoRuntime;
-      const session=runtime?.session||runtime?.getContext?.()?.session||null;
-
-      if(!auth.hidden&&!app.hidden){
-        if(session?.user){
-          auth.hidden=true;
-        }else{
-          app.hidden=true;
-          document.documentElement.removeAttribute('data-mobile-surface');
-          document.documentElement.removeAttribute('data-tablet-surface');
-        }
-      }
+      // Once the authenticated application is visible, route changes must never
+      // resurrect the login screen. app.js remains the sole owner that may switch
+      // from app -> auth on an explicit logout or a genuinely missing startup session.
+      if(!app.hidden&&!auth.hidden)auth.hidden=true;
 
       if(!auth.hidden){
         document.querySelector('#accountPopover')?.setAttribute('hidden','');
+        document.querySelector('#kamSheet')?.classList.remove('open');
+        document.querySelector('#kamBackdrop')?.classList.remove('open');
       }
     });
   }
 
   const observer=new MutationObserver(reconcile);
   observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
-  window.addEventListener('komo:session-ready',reconcile);
-  window.addEventListener('komo:session-cleared',reconcile);
-  window.addEventListener('hashchange',reconcile);
-  window.addEventListener('pageshow',reconcile);
+  ['komo:session-ready','komo:session-cleared','hashchange','pageshow'].forEach(name=>window.addEventListener(name,reconcile));
   document.addEventListener('DOMContentLoaded',reconcile);
-  setTimeout(reconcile,300);
-  setTimeout(reconcile,1000);
+  setTimeout(reconcile,250);
+  setTimeout(reconcile,900);
 })();
