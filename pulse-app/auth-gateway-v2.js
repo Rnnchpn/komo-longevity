@@ -39,7 +39,7 @@ function setAudience(mode){
   if(copy)copy.textContent=pro?'Patients, Motion, Clinical et suivi dans un espace professionnel sécurisé.':'Vos résultats, votre trajectoire et vos prochaines étapes.';
   if(submit)submit.textContent=pro?'Se connecter à KŌMØ Pro':'Se connecter';
   const manifesto=auth.querySelector('.auth-manifesto');
-  if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.innerHTML=pro?'Votre centre.<br><em>Vos patients, clairement.</em>':'Votre mobilité.<br><em>Une trajectoire à comprendre.</em>';if(p)p.textContent=pro?'Pilotez les mesures, validations et suivis KŌMØ dans un même environnement.':'Retrouvez vos repères, vos résultats et la prochaine étape de votre programme KŌMØ dans un seul espace.'}
+  if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.innerHTML=pro?'Votre centre.<br><em>Vos patients, clairement.</em>':'Your mobility,<br><em>made visible.</em>';if(p)p.textContent=pro?'Pilotez les mesures, validations et suivis KŌMØ dans un même environnement.':'Retrouvez vos repères, vos résultats et la prochaine étape de votre programme KŌMØ dans un seul espace.'}
 }
 
 function modal(){let m=document.querySelector('#proCreateModal');if(m)return m;m=document.createElement('div');m.id='proCreateModal';m.className='pro-create-modal';m.hidden=true;document.body.appendChild(m);return m}
