@@ -20,7 +20,7 @@ const checks=[
  ['center hub uses shared runtime client',hub.includes('window.KomoRuntime?.client')],
  ['center switching uses canonical context event',hub.includes('komo:center-context-changed')&&context.includes('komo:center-context-changed')&&!context.includes('location.reload()')],
  ['patient opening avoids page reload',hub.includes('komo:center-context-changed')&&!hub.includes("localStorage.setItem('komo_clinical_patient',b.dataset.openPatient);localStorage.setItem(ORG_KEY,S.centerId);location.reload()")],
- ['Pro Agenda uses the same center context',booking.includes("komo:center-context-changed',{detail:{organizationId:S.proOrg}")&&!booking.includes("komo:center-changed',{detail:{organizationId:S.proOrg}"))],
+ ['Pro Agenda uses the same center context',booking.includes("komo:center-context-changed',{detail:{organizationId:S.proOrg}")&&!booking.includes("komo:center-changed',{detail:{organizationId:S.proOrg}")],
  ['Pro appointment patient has a safe fallback',booking.includes("else window.KomoProArchitecture?.open?.('patients')")],
  ['professional delayed actions cancel stale retries',pro.includes('let actionToken=0;')&&pro.includes('token!==actionToken')],
  ['professional nav no longer watches all body class mutations',!pro.includes("obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']})")],
