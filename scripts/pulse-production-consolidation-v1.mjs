@@ -6,7 +6,7 @@ const htmlPath=join(pulse,'index.html');
 const cssPath=join(pulse,'pulse-ui-v1.css');
 const appPath=join(pulse,'app.js');
 const bookingPath=join(pulse,'booking-layer-v1.js');
-const release='20260827-canonical-4';
+const release='20260827-canonical-4p1';
 
 let html=await readFile(htmlPath,'utf8');
 let css=await readFile(cssPath,'utf8');
@@ -75,9 +75,14 @@ css=css.replace(/\n\/\* Canonical Pulse shell ownership \*\/[\s\S]*$/,'');
 css+=ownership;
 await writeFile(cssPath,css);
 
+// One coherent release token keeps every local asset cache-safe. The three startup
+// files are discovered from <head> so authentication and the first route can begin
+// while the rest of the document is still being parsed. No feature module is made eager.
 html=html.replace(/(src|href)="\.\/([^"?#]+\.(?:js|css))(?:\?v=[^"#]+)?"/g,(_,attr,file)=>`${attr}="./${file}?v=${release}"`);
+html=html.replace(/\s*<link[^>]+data-komo-core-preload[^>]*>/g,'');
 html=html.replace(/\s*<meta name="komo-pulse-release"[^>]*>/g,'');
-html=html.replace('</head>',`  <meta name="komo-pulse-release" content="${release}" />\n</head>`);
+const preloads=`  <link rel="preload" href="./runtime.js?v=${release}" as="script" fetchpriority="high" data-komo-core-preload />\n  <link rel="modulepreload" href="./app.js?v=${release}" fetchpriority="high" data-komo-core-preload />\n  <link rel="modulepreload" href="./performance-runtime-v1.js?v=${release}" fetchpriority="high" data-komo-core-preload />\n`;
+html=html.replace('</head>',`${preloads}  <meta name="komo-pulse-release" content="${release}" />\n</head>`);
 await writeFile(htmlPath,html);
 
-console.log(`[pulse-production-consolidation] canonical shell + home + RDV locked · release ${release}`);
+console.log(`[pulse-production-consolidation] canonical shell + home + RDV locked · release ${release} · core startup preloaded`);
