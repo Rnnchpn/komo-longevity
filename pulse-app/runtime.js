@@ -14,7 +14,7 @@
   const existingRemember = nativeGet?.call(localStorage, REMEMBER_KEY);
   const existingLegacySession = nativeGet?.call(localStorage, LEGACY_AUTH_KEY);
   if (existingRemember === null && existingLegacySession) {
-    nativeSet?.call(localStorage, REMEMBER_KEY, '1');
+    localStorage.setItem(REMEMBER_KEY, '1');
   }
 
   // Supabase clients are created by several Pulse modules. Some of those clients
