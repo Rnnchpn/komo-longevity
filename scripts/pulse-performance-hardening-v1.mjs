@@ -11,8 +11,9 @@ if(!html.includes('./performance-runtime-v1.js'))html=html.replace('<script type
 await writeFile(indexPath,html);
 
 let app=await readFile(appPath,'utf8');
-app=replaceRequired(app,'function syncClient() { state.client = makeClient(selectedStorage()); return state.client; }',"function syncClient() { state.client = makeClient(selectedStorage()); window.KomoRuntime=window.KomoRuntime||{}; window.KomoRuntime.client=state.client; return state.client; }",'shared app client');
+app=replaceRequired(app,'function syncClient() { state.client = makeClient(selectedStorage()); return state.client; }',"function syncClient() { state.client = makeClient(selectedStorage()); window.KomoRuntime=window.KomoRuntime||{}; if(window.KomoRuntime.adoptClient)window.KomoRuntime.adoptClient(state.client);else window.KomoRuntime.client=state.client; return state.client; }",'shared app client');
 app=replaceRequired(app,"function showAuth(){els.authScreen.hidden=false;els.appShell.hidden=true}","function showAuth(){els.authScreen.hidden=false;els.appShell.hidden=true;window.KomoRuntime?.setContext?.(null,'member')}",'auth context clear');
+app=replaceRequired(app,"async function enterApp(session){state.session=session;state.user=session?.user||null;els.authScreen.hidden=true;els.appShell.hidden=false;await loadAppData();", "async function enterApp(session){state.session=session;state.user=session?.user||null;window.KomoRuntime?.setContext?.(session);els.authScreen.hidden=true;els.appShell.hidden=false;await loadAppData();",'early runtime session context');
 app=replaceRequired(app,"state.role=roleRes.data?.role||'member';state.mode=state.role==='professional'||state.role==='admin'?state.mode:'member';", "state.role=roleRes.data?.role||'member';window.KomoRuntime?.setContext?.(state.session,state.role);state.mode=state.role==='professional'||state.role==='admin'?state.mode:'member';",'runtime role context');
 await writeFile(appPath,app);
 
