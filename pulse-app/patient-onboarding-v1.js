@@ -11,33 +11,10 @@ function dataFrom(f){const d=new FormData(f);return{first_name:String(d.get('fir
 function metadata(x){return{first_name:x.first_name,last_name:x.last_name,full_name:`${x.first_name} ${x.last_name}`.trim(),birth_date:x.birth_date,phone:x.phone,address_line1:x.address_line1,postal_code:x.postal_code,city:x.city,country:x.country,locale:'fr-FR',komo_account_type:'patient',komo_onboarding_target:'check'}}
 function feedback(el,msg,ok=false){if(!el)return;el.textContent=msg;el.classList.toggle('success',ok)}
 async function submit(e){e.preventDefault();const f=e.currentTarget,x=dataFrom(f),out=f.querySelector('#patientCreateFeedback'),btn=f.querySelector('button[type="submit"]');if(x.password.length<6)return feedback(out,'Le mot de passe doit contenir au moins 6 caractères.');btn.disabled=true;feedback(out,'Création de votre espace…');try{sessionStorage.setItem('komo_auth_audience','patient');sessionStorage.setItem('komo_start_check_after_signup','1');const {data,error}=await sb().auth.signUp({email:x.email,password:x.password,options:{emailRedirectTo:'https://pulse.komolongevity.com/?start=check',data:metadata(x)}});if(error)throw error;if(data?.session)showCheckHandoff();else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; Pulse vous proposera ensuite de commencer votre KŌMØ Check.',true)}catch(err){const msg=String(err?.message||err);feedback(out,msg.includes('already registered')?'Un compte existe déjà avec cette adresse. Revenez à la connexion Patient.':msg)}finally{btn.disabled=false}}
-function closeHandoff(target='home'){
-  clearStart();
-  const m=document.querySelector('#patientCreateModal');
-  if(m){m.hidden=true;delete m.dataset.handoff}
-  handoffShown=true;
-  if(target)location.hash=target;
-}
-function openBaselineWhenReady(attempt=0){
-  const button=document.querySelector('[data-open-test="baseline"]');
-  if(button){button.click();return}
-  if(attempt<20)setTimeout(()=>openBaselineWhenReady(attempt+1),100);
-}
-function startKomoCheck(){
-  closeHandoff('results');
-  setTimeout(()=>openBaselineWhenReady(0),80);
-}
+function hideHandoff(){clearStart();const m=document.querySelector('#patientCreateModal');if(m){m.hidden=true;delete m.dataset.handoff}handoffShown=true}
+function openBaselineWhenReady(attempt=0){const button=document.querySelector('[data-open-test="baseline"]');if(button){button.click();return}if(attempt<20)setTimeout(()=>openBaselineWhenReady(attempt+1),100)}
+function startKomoCheck(){hideHandoff();location.hash='results';setTimeout(()=>openBaselineWhenReady(0),80)}
 function showCheckHandoff(){if(handoffShown)return;handoffShown=true;const m=modal();m.dataset.handoff='1';m.hidden=false;m.innerHTML=`<div class="patient-create-backdrop"></div><section class="patient-create-sheet patient-create-success" role="dialog" aria-modal="true" aria-labelledby="patientHandoffTitle"><p class="eyebrow">BIENVENUE DANS KŌMØ</p><h2 id="patientHandoffTitle">Votre espace est prêt.</h2><p>Vous pouvez maintenant établir votre premier point de départ avec le KŌMØ Check.</p><button type="button" class="primary-button" data-start-komo-check>Commencer mon KŌMØ Check →</button><button type="button" class="secondary-button" data-patient-later>Plus tard</button></section>`}
 async function maybeHandoff(){if(handoffShown)return;const q=new URLSearchParams(location.search);if(q.get('start')!=='check'&&sessionStorage.getItem('komo_start_check_after_signup')!=='1')return;const {data:{session}}=await sb().auth.getSession();if(!session?.user)return;const auth=document.querySelector('#authScreen');if(auth&&!auth.hidden)return;showCheckHandoff()}
-document.addEventListener('click',e=>{
-  const start=e.target.closest?.('[data-start-komo-check]');
-  if(start){e.preventDefault();e.stopImmediatePropagation();startKomoCheck();return}
-  const later=e.target.closest?.('[data-patient-later]');
-  if(later){e.preventDefault();e.stopImmediatePropagation();closeHandoff('home');return}
-  const signup=e.target.closest?.('#signupButton');
-  if(!signup)return;
-  const auth=document.querySelector('#authScreen');
-  if(auth?.dataset.authAudience==='professional')return;
-  e.preventDefault();e.stopImmediatePropagation();open();
-},true);
+document.addEventListener('click',e=>{const start=e.target.closest?.('[data-start-komo-check]');if(start){e.preventDefault();e.stopImmediatePropagation();startKomoCheck();return}const later=e.target.closest?.('[data-patient-later]');if(later){e.preventDefault();e.stopImmediatePropagation();hideHandoff();location.hash='home';return}const signup=e.target.closest?.('#signupButton');if(!signup)return;const auth=document.querySelector('#authScreen');if(auth?.dataset.authAudience==='professional')return;e.preventDefault();e.stopImmediatePropagation();open()},true);
 window.addEventListener('pageshow',()=>setTimeout(maybeHandoff,700));document.addEventListener('DOMContentLoaded',()=>setTimeout(maybeHandoff,1100));const obs=new MutationObserver(()=>{if(!handoffShown)setTimeout(maybeHandoff,120)});obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
