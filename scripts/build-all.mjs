@@ -105,6 +105,7 @@ const scripts = [
   'scripts/pulse-navigation-freeze-qa-v1.mjs',
   'scripts/pulse-booking-directory-map-qa-v1.mjs',
   'scripts/homepage-product-stepup-v1.mjs',
+  'scripts/homepage-hero-image-v2.mjs',
   'scripts/pulse-account-rdv-recovery-v1.mjs',
   'scripts/pulse-account-rdv-recovery-qa-v1.mjs',
   'scripts/pulse-professional-stability-v1.mjs',
