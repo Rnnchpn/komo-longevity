@@ -108,7 +108,9 @@ const scripts = [
   'scripts/pulse-account-rdv-recovery-v1.mjs',
   'scripts/pulse-account-rdv-recovery-qa-v1.mjs',
   'scripts/pulse-professional-stability-v1.mjs',
-  'scripts/pulse-professional-stability-qa-v1.mjs'
+  'scripts/pulse-professional-stability-qa-v1.mjs',
+  'scripts/pulse-center-directory-management-v1.mjs',
+  'scripts/pulse-center-directory-management-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
