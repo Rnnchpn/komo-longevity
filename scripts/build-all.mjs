@@ -79,6 +79,7 @@ const scripts = [
   'scripts/pulse-mobile-guided-v2.mjs',
   'scripts/pulse-tablet-patient-v1.mjs',
   'scripts/pulse-mobile-menu-v3.mjs',
+  'scripts/pulse-adaptive-shell-v4.mjs',
   'scripts/build-pulse-v12.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
@@ -92,13 +93,14 @@ const scripts = [
   'scripts/intake-profile-qa-v1.mjs',
   'scripts/admin-console-qa-v2.mjs',
   'scripts/pulse-speed-navigation-v1.mjs',
+  'scripts/pulse-adaptive-shell-qa-v1.mjs',
   'scripts/pulse-speed-navigation-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
   console.log(`[build-all] ${script}`);
   const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
-  if (run.status !== 0) process.exit(run.status ?? 1);
+  if (run.status !== 0) process.exit(run.status ?? 1;
 }
 
 console.log('[build-all] production build complete.');
