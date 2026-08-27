@@ -1,19 +1,11 @@
 /* KŌMØ Pulse — patient Motion booking bridge v2
-   The canonical RDV UI is booking-layer-v1. This file intentionally owns no
-   #documents rendering and only forwards existing Motion CTAs to that route. */
+   The canonical RDV UI and all RDV data loading are owned by booking-layer-v1.
+   This bridge only routes existing Motion CTAs to #documents. */
 (() => {
-  let timer=0;
-
   function route(){return location.hash.replace(/^#/,'')||'home'}
-  function canonicalRefresh(){
-    if(route()!=='documents')return;
-    window.KomoBooking?.refreshPatient?.();
-  }
   function openBooking(){
     document.querySelector('#modeSwitch button[data-mode="member"]')?.click();
     if(location.hash!=='#documents')location.hash='documents';
-    clearTimeout(timer);
-    timer=setTimeout(canonicalRefresh,80);
   }
   function setTextIfChanged(el,text){if(el&&el.textContent!==text)el.textContent=text}
   function bridge(){
@@ -36,12 +28,12 @@
     }
   },true);
 
-  function refresh(){bridge();if(route()==='documents')canonicalRefresh()}
+  function refresh(){bridge()}
   ['hashchange','pageshow','komo:route-ready','komo:data-ready','komo:session-ready'].forEach(name=>window.addEventListener(name,()=>setTimeout(refresh,40)));
   document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,240));
   const root=document.querySelector('#viewRoot');
   if(root)new MutationObserver(()=>bridge()).observe(root,{childList:true,subtree:true});
   setTimeout(refresh,700);
 
-  window.KomoPatientMotionBooking={open:openBooking,refresh:canonicalRefresh};
+  window.KomoPatientMotionBooking={open:openBooking};
 })();
