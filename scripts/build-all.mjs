@@ -103,7 +103,8 @@ const scripts = [
   'scripts/pulse-flicker-stability-qa-v1.mjs',
   'scripts/pulse-navigation-freeze-v1.mjs',
   'scripts/pulse-navigation-freeze-qa-v1.mjs',
-  'scripts/pulse-booking-directory-map-qa-v1.mjs'
+  'scripts/pulse-booking-directory-map-qa-v1.mjs',
+  'scripts/homepage-product-stepup-v1.mjs'
 ];
 
 for (const script of scripts) {
