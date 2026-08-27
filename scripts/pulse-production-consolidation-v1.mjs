@@ -5,20 +5,21 @@ const pulse=join(process.cwd(),'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
 const cssPath=join(pulse,'pulse-ui-v1.css');
 const appPath=join(pulse,'app.js');
-const release='20260827-canonical-3';
+const bookingPath=join(pulse,'booking-layer-v1.js');
+const release='20260827-canonical-4';
 
 let html=await readFile(htmlPath,'utf8');
 let css=await readFile(cssPath,'utf8');
 let app=await readFile(appPath,'utf8');
+let booking=await readFile(bookingPath,'utf8');
 
 // Canonical runtime ownership:
 // - desktop shell: core sidebar/topbar + bottom-dock/frozen-navigation CSS
 // - phone/iPad shell: adaptive-shell-v4 only
 // - home: My KŌMØ only
 // - RDV patient (#documents): booking-layer-v1 only
-// - patient-motion-booking-v2: CTA bridge only, never a page renderer
+// - patient-motion-booking-v2: CTA bridge only, never renderer/data loader
 // - mobile-guided-v2: test-content guidance only, never navigation/home
-// These superseded shell/home runtimes are intentionally not shipped in production.
 for(const file of ['mobile-menu-v3.js','tablet-patient-v1.js','home-clarity-v1.js','home-summary-v1.js']){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   html=html.replace(new RegExp(`\\s*<script(?: type="module")? src="\\./${escaped}(?:\\?v=[^\"']+)?"><\\/script>`,'g'),'');
@@ -34,8 +35,7 @@ function stripBundledFile(source,file){
 }
 for(const file of ['mobile-menu-v3.css','tablet-patient-v1.css','home-summary-v1.css'])css=stripBundledFile(css,file);
 
-// Do not paint the legacy Home before My KŌMØ mounts. The final router reserves
-// the route just like RDV/Progression/Clinical and leaves one visible owner.
+// Quiet-mount canonical Home/RDV/Progression/Clinical owners.
 if(!app.includes("['home','path','documents','plan','messages','clinical'].includes(route)")){
   const oldRoutes="['path','documents','plan','messages','clinical'].includes(route)";
   if(!app.includes(oldRoutes))throw new Error('[pulse-production-consolidation] dedicated route list changed');
@@ -53,8 +53,12 @@ if(!app.includes("const selectors={home:'[data-my-komo-home]',path:'[data-kpv2]'
 }
 await writeFile(appPath,app);
 
-// Pre-JS paint guard. Core mobile/tablet navigation never becomes visible for a
-// frame before adaptive-shell-v4 attaches. Desktop remains untouched.
+// External callers may request an RDV refresh, but must always go through the
+// session-aware/deduplicated refresh() entry point rather than raw loadPatient().
+booking=booking.replace('window.KomoBooking={openProPlanning:openPro,deactivatePro,refreshPatient:loadPatient};','window.KomoBooking={openProPlanning:openPro,deactivatePro,refreshPatient:refresh};');
+if(!booking.includes('refreshPatient:refresh'))throw new Error('[pulse-production-consolidation] safe RDV refresh contract missing');
+await writeFile(bookingPath,booking);
+
 const ownership=`
 /* Canonical Pulse shell ownership */
 /* Desktop: core + bottom dock. Phone/iPad: adaptive-shell-v4. Home: My KŌMØ. RDV: booking-layer-v1. */
@@ -71,8 +75,6 @@ css=css.replace(/\n\/\* Canonical Pulse shell ownership \*\/[\s\S]*$/,'');
 css+=ownership;
 await writeFile(cssPath,css);
 
-// Force one coherent release across every local JS/CSS asset so mobile and desktop
-// cannot keep a mixed cached generation after a deployment.
 html=html.replace(/(src|href)="\.\/([^"?#]+\.(?:js|css))(?:\?v=[^"#]+)?"/g,(_,attr,file)=>`${attr}="./${file}?v=${release}"`);
 html=html.replace(/\s*<meta name="komo-pulse-release"[^>]*>/g,'');
 html=html.replace('</head>',`  <meta name="komo-pulse-release" content="${release}" />\n</head>`);
