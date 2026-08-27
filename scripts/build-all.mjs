@@ -100,7 +100,7 @@ const scripts = [
 for (const script of scripts) {
   console.log(`[build-all] ${script}`);
   const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
-  if (run.status !== 0) process.exit(run.status ?? 1;
+  if (run.status !== 0) process.exit(run.status ?? 1);
 }
 
 console.log('[build-all] production build complete.');
