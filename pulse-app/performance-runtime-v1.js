@@ -5,7 +5,8 @@ const REM='komo_pulse_remember';
 const R=window.KomoRuntime=window.KomoRuntime||{};
 if(!R.client){const store=localStorage.getItem(REM)==='1'?localStorage:sessionStorage;R.client=createClient(URL,KEY,{auth:{storage:store,persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}
 R.session=R.session||null;R.role=R.role||'member';R.userId=R.userId||null;R.ready=!!R.session;
-let rolePromise=null,authSubscription=null,syncPromise=null;
+let rolePromise=null,authSubscription=null,syncPromise=null,lastSyncAt=0;
+const SESSION_SYNC_TTL=2000;
 
 async function hydrate(session,forcedRole=null){
   const previous=R.userId;
@@ -23,16 +24,19 @@ async function hydrate(session,forcedRole=null){
 function bindAuth(){
   try{authSubscription?.unsubscribe?.()}catch{}
   authSubscription=null;
-  const result=R.client?.auth?.onAuthStateChange?.((_event,session)=>{hydrate(session||null).catch(()=>{})});
+  const result=R.client?.auth?.onAuthStateChange?.((_event,session)=>{lastSyncAt=Date.now();hydrate(session||null).catch(()=>{})});
   authSubscription=result?.data?.subscription||result?.subscription||null;
 }
 
-async function syncSession(){
+async function syncSession(force=false){
   if(syncPromise)return syncPromise;
+  const now=Date.now();
+  if(!force&&R.ready&&now-lastSyncAt<SESSION_SYNC_TTL)return R.session||null;
   syncPromise=(async()=>{
     try{
       const {data}=await R.client.auth.getSession();
       const session=data?.session||null;
+      lastSyncAt=Date.now();
       if(session?.user?.id!==R.userId||(!R.session&&session))await hydrate(session);
       return session;
     }catch{return R.session||null}
@@ -40,19 +44,21 @@ async function syncSession(){
   return syncPromise;
 }
 
-R.setContext=(session,role=null)=>hydrate(session,role);
-R.adoptClient=(client)=>{if(client&&client!==R.client){R.client=client;bindAuth();syncSession().catch(()=>{})}return R.client};
+R.setContext=(session,role=null)=>{lastSyncAt=Date.now();return hydrate(session,role)};
+R.adoptClient=(client)=>{if(client&&client!==R.client){R.client=client;bindAuth();syncSession(true).catch(()=>{})}return R.client};
 R.getContext=()=>({client:R.client,session:R.session,role:R.role,ready:R.ready});
 R.route=()=>location.hash.replace(/^#/,'')||'home';
 R.syncSession=syncSession;
 
 function routeReady(){window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:R.route()}}))}
-function refreshSession(){syncSession().catch(()=>{})}
+function refreshSession(force=false){syncSession(force).catch(()=>{})}
 
 bindAuth();
-window.addEventListener('hashchange',()=>{refreshSession();requestAnimationFrame(routeReady)});
-window.addEventListener('pageshow',refreshSession);
-window.addEventListener('focus',refreshSession);
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshSession()});
-document.addEventListener('DOMContentLoaded',()=>{requestAnimationFrame(routeReady);refreshSession()});
-refreshSession();
+// Route changes do not require another auth read: Supabase auto-refresh and the auth
+// subscription own session changes. This keeps navigation local and immediate.
+window.addEventListener('hashchange',()=>requestAnimationFrame(routeReady));
+window.addEventListener('pageshow',()=>refreshSession(true));
+window.addEventListener('focus',()=>refreshSession(false));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshSession(false)});
+document.addEventListener('DOMContentLoaded',()=>{requestAnimationFrame(routeReady);refreshSession(false)});
+refreshSession(true);
