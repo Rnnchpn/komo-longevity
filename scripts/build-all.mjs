@@ -70,6 +70,7 @@ const scripts = [
   'scripts/pro-patient-directory-v2.mjs',
   'scripts/pulse-free-interpretation-v1.mjs',
   'scripts/pulse-experience-v5.mjs',
+  'scripts/motion-sva-ui-inject-v1.mjs',
   'scripts/pulse-performance-hardening-v1.mjs',
   'scripts/patient-pro-flow-qa-v1.mjs',
   'scripts/build-pulse-v12.mjs',
