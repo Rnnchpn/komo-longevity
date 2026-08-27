@@ -12,9 +12,9 @@ const checks=[
  ['published directory supports centers and professionals',map.includes('centers')&&map.includes('professionals')],
  ['map uses OpenStreetMap tiles',map.includes('tile.openstreetmap.org')],
  ['geocoding is cached',map.includes('komo_booking_geocodes_v1')],
- ['around me is opt-in geolocation',map.includes('navigator.geolocation.getCurrentPosition')),
- ['map selection drives existing center selector',map.includes("#kbookPatientOrg")&&map.includes("dispatchEvent(new Event('change'")),
- ['booking map styles bundled',css.includes('.kbd-shell')&&css.includes('.kbd-layout')),
+ ['around me is opt-in geolocation',map.includes('navigator.geolocation.getCurrentPosition')],
+ ['map selection drives existing center selector',map.includes('#kbookPatientOrg')&&map.includes("dispatchEvent(new Event('change'" )],
+ ['booking map styles bundled',css.includes('.kbd-shell')&&css.includes('.kbd-layout')],
  ['booking ownership remains stable',booking.includes('data-kbook-patient')]
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([n])=>n);if(failed.length){console.error('[pulse-booking-map-qa] failed: '+failed.join(', '));process.exit(1)}
