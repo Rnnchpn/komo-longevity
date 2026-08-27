@@ -52,10 +52,15 @@ export default async function middleware(request) {
 
   const responseHeaders = new Headers(upstream.headers);
   const isStaticAsset = STATIC_ASSET_RE.test(incomingUrl.pathname);
+  const isVersionedAsset = isStaticAsset && incomingUrl.searchParams.has('v');
 
-  if (isStaticAsset) {
-    // Static application code contains no patient data. Cache briefly in the browser
-    // and much longer at the CDN edge; HTML and authenticated data remain no-store.
+  if (isVersionedAsset) {
+    // Pulse assets use a release token in their URL. Once a release URL exists its
+    // bytes never change, so the browser and CDN can safely keep it for a year.
+    responseHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+    responseHeaders.set('CDN-Cache-Control', 'public, s-maxage=31536000, immutable');
+  } else if (isStaticAsset) {
+    // Unversioned assets stay conservative in case an external/public URL is reused.
     responseHeaders.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
     responseHeaders.set('CDN-Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
   } else {
