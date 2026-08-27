@@ -43,6 +43,7 @@ const motion=fs.readFileSync(motionDst,'utf8');
 const home=fs.readFileSync(homeSummaryPath,'utf8');
 const index=fs.readFileSync(indexPath,'utf8');
 const wrongKey='sb_publishable_3sUsinfJ_nMFI44OXozkQ_jmGG8w7n';
+const exactScriptCount=(file)=>(index.match(new RegExp(`<script[^>]+src=["']\\./${file.replaceAll('.','\\.')}["'][^>]*>`,`g`))||[]).length;
 const checks=[
   ['stable Motion Journey uses shared runtime',motion.includes('window.KomoRuntime?.client')],
   ['Motion Journey does not own Progression',!motion.includes("r==='path'")&&!motion.includes("'documents','path','clinical'")],
@@ -51,10 +52,10 @@ const checks=[
   ['Results uses shared runtime',results.includes('window.KomoRuntime?.client')],
   ['Home uses canonical Motion journey',home.includes("functions.invoke('motion-journey-status'")&&!home.includes("order('created_at',{ascending:false}).limit(1).maybeSingle()")],
   ['wrong Supabase key absent from critical journey output',![motion,progression,results,home].some(x=>x.includes(wrongKey))],
-  ['Motion Journey script unique',(index.match(/motion-journey-v1\.js/g)||[]).length===1],
-  ['Progression script unique',(index.match(/progression-v2\.js/g)||[]).length===1],
-  ['Results journey script unique',(index.match(/results-motion-journey-v1\.js/g)||[]).length===1],
-  ['Home summary script unique',(index.match(/home-summary-v1\.js/g)||[]).length===1]
+  ['Motion Journey script unique',exactScriptCount('motion-journey-v1.js')===1],
+  ['Progression script unique',exactScriptCount('progression-v2.js')===1],
+  ['Results journey script unique',exactScriptCount('results-motion-journey-v1.js')===1],
+  ['Home summary script unique',exactScriptCount('home-summary-v1.js')===1]
 ];
 for(const [label,ok] of checks){console.log(`[pulse-stability] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exit(1)}
 
