@@ -31,8 +31,8 @@ const checks=[
   ['guided mobile layer no longer owns home',!guided.includes('enhanceHome')&&guided.includes('enhanceTests')],
   ['final design avoids body-wide observer',!design.includes('observe(document.body')&&design.includes("observe(root,{childList:true,subtree:true})")],
   ['session sync is event driven in final design',design.includes('if(sync)await window.KomoRuntime?.syncSession?.()')],
-  ['home is quiet-mounted by core router',app.includes("['home','path','documents','plan','messages','clinical'].includes(route)")&&app.includes("home:'[data-my-komo-home]'"))],
-  ['My KŌMØ is sole shipped home owner',!html.includes('home-clarity-v1.js')&&!html.includes('home-summary-v1.js')&&html.includes('my-komo-home-v1.js'))],
+  ['home is quiet-mounted by core router',app.includes("['home','path','documents','plan','messages','clinical'].includes(route)")&&app.includes("home:'[data-my-komo-home]'" )],
+  ['My KŌMØ is sole shipped home owner',!html.includes('home-clarity-v1.js')&&!html.includes('home-summary-v1.js')&&html.includes('my-komo-home-v1.js')],
   ['legacy home summary CSS retired',!css.includes('/* FILE: home-summary-v1.css */')],
   ['My KŌMØ remains canonical home presentation',design.includes('kamo-home-result-removed')],
   ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')&&css.includes('Home: My KŌMØ')]
