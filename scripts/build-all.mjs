@@ -84,6 +84,7 @@ const scripts = [
   'scripts/build-pulse-v12.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
+  'scripts/pulse-booking-directory-map-v1.mjs',
   'scripts/pulse-stability-audit-v1.mjs',
   'scripts/pulse-v12-qa.mjs',
   'scripts/pulse-performance-qa-v1.mjs',
@@ -101,7 +102,8 @@ const scripts = [
   'scripts/pulse-my-komo-qa-v1.mjs',
   'scripts/pulse-flicker-stability-qa-v1.mjs',
   'scripts/pulse-navigation-freeze-v1.mjs',
-  'scripts/pulse-navigation-freeze-qa-v1.mjs'
+  'scripts/pulse-navigation-freeze-qa-v1.mjs',
+  'scripts/pulse-booking-directory-map-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
