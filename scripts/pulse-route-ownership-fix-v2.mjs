@@ -36,9 +36,9 @@ await writeFile(bookingPath,booking,'utf8');
 
 const checks=[
  ['app recognizes Motion',app.includes("'motion','mykomo','trajectory'")],
- ['app delegates modern patient routes',app.includes("source:'app-external-owner'"))],
+ ['app delegates modern patient routes',app.includes("source:'app-external-owner'")],
  ['Agenda follows patient mode',booking.includes(memberActive)],
- ['Agenda no longer blocks admin role in patient mode',!booking.includes("r==='documents'&&!['professional','admin'].includes(S.role)"))
+ ['Agenda no longer blocks admin role in patient mode',!booking.includes("r==='documents'&&!['professional','admin'].includes(S.role)")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-route-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
