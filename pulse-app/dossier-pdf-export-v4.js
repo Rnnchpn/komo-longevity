@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
-const URL='https://uqlolefsiktbznnymriy.supabase.co';
+const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const REM='komo_pulse_remember';
 const ENGINE_URLS=[
@@ -17,7 +17,7 @@ const IND={'M-POS-02':'SVA','M-FUN-01':'GLFS-25','M-FUN-02':'Stand-Up','M-FUN-03
 let client=null,enginePromise=null;
 
 function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
-function sb(){return client||(client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}))}
+function sb(){return client||(client=createClient(SUPABASE_URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}))}
 function toast(message){const el=document.querySelector('#toast');if(!el)return;el.textContent=message;el.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>{el.hidden=true},4500)}
 function n(v){const x=Number(v);return Number.isFinite(x)?x:null}
 function val(v,d=0){const x=n(v);return x==null?'—':x.toFixed(d)}
@@ -94,6 +94,6 @@ function buildPdf(jsPDF,d){
   return doc;
 }
 
-async function downloadPdf(button){const original=button.textContent;try{button.disabled=true;button.textContent='Génération du PDF…';toast('Génération vectorielle du compte-rendu…');const [jsPDF,d]=await Promise.all([ensureEngine(),loadDossier()]);const counts=(d.questionnaires?.length||0)+(d.measurements?.length||0)+(d.myodev_metrics?.length||0);if(counts<3)throw new Error('Dossier insuffisamment renseigné pour générer le rapport complet.');const doc=buildPdf(jsPDF,d);const blob=doc.output('blob');if(!blob||blob.size<12000)throw new Error(`PDF anormalement petit (${Math.round((blob?.size||0)/1024)} Ko). Export annulé.`);const filename=`KOMO_Motion_Report_${safeFile(name(d.patient||{}))}_${new Date().toISOString().slice(0,10)}.pdf`;const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);toast(`PDF exporté · ${Math.round(blob.size/1024)} Ko · ${doc.getNumberOfPages()} pages`)}catch(e){console.error('[dossier-pdf-export-v4]',e);toast(`Export PDF impossible : ${e?.message||'Erreur inconnue'}`)}finally{button.disabled=false;button.textContent=original}}
+async function downloadPdf(button){const original=button.textContent;try{button.disabled=true;button.textContent='Génération du PDF…';toast('Génération vectorielle du compte-rendu…');const [jsPDF,d]=await Promise.all([ensureEngine(),loadDossier()]);const counts=(d.questionnaires?.length||0)+(d.measurements?.length||0)+(d.myodev_metrics?.length||0);if(counts<3)throw new Error('Dossier insuffisamment renseigné pour générer le rapport complet.');const doc=buildPdf(jsPDF,d);const blob=doc.output('blob');if(!blob||blob.size<12000)throw new Error(`PDF anormalement petit (${Math.round((blob?.size||0)/1024)} Ko). Export annulé.`);const filename=`KOMO_Motion_Report_${safeFile(name(d.patient||{}))}_${new Date().toISOString().slice(0,10)}.pdf`;const url=globalThis.URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>globalThis.URL.revokeObjectURL(url),30000);toast(`PDF exporté · ${Math.round(blob.size/1024)} Ko · ${doc.getNumberOfPages()} pages`)}catch(e){console.error('[dossier-pdf-export-v4]',e);toast(`Export PDF impossible : ${e?.message||'Erreur inconnue'}`)}finally{button.disabled=false;button.textContent=original}}
 
 document.addEventListener('click',event=>{const button=event.target?.closest?.('#pdfBtn');if(!button)return;event.preventDefault();event.stopImmediatePropagation();downloadPdf(button)},true);
