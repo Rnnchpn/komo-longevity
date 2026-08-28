@@ -82,6 +82,7 @@ const scripts = [
   'scripts/pulse-adaptive-shell-v4.mjs',
   'scripts/pulse-my-komo-v1.mjs',
   'scripts/build-pulse-v12.mjs',
+  'scripts/pulse-key-cycle-inject-v1.mjs',
   'scripts/build-life-v1.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
@@ -124,6 +125,7 @@ const scripts = [
   'scripts/pulse-tests-status-cockpit-v1.mjs',
   'scripts/homepage-wow-v4.mjs',
   'scripts/homepage-brand-visual-v5.mjs',
+  'scripts/komo-key-public-page-v1.mjs',
   'scripts/life-v1-qa.mjs'
 ];
 
