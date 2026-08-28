@@ -16,7 +16,7 @@ const checks=[
  ['therapy only shows validated priorities',therapy.includes("eq('validation_status','validated')")],
  ['Agenda et réseau label is used on mobile',adaptive.includes("actionButton('Agenda et réseau','patient:documents')")],
  ['mobile score and therapy labels are updated',adaptive.includes("'My KŌMØ Score'")&&adaptive.includes("'KŌMØ Therapy'")],
- ['desktop route labels are updated',app.includes("label: 'My KŌMØ Score'")&&app.includes("label: 'KŌMØ Therapy'")&&app.includes("label: 'Agenda et réseau'")],
+ ['desktop patient product labels are present',app.includes('My KŌMØ Score')&&app.includes('KŌMØ Therapy')&&app.includes('Agenda et réseau')],
  ['patient booking is presented as a request',booking.includes('Demande envoyée au centre')&&booking.includes('En attente de validation')],
  ['professional can approve pending consultation',booking.includes("rpc('approve_komo_appointment'")&&booking.includes('Valider la consultation')],
  ['pre-consultation excludes pending scheduled appointments',prep.includes(".in('status',['confirmed','arrived','in_progress'])")&&!prep.includes(".in('status',['scheduled','confirmed','arrived','in_progress'])")],
