@@ -1,12 +1,13 @@
-/* KŌMØ Pulse — canonical patient dock v6.0.0
+/* KŌMØ Pulse — canonical patient dock v6.1.0
    Native hash links for primary routes; JS only owns the Motion / Clinical picker. */
 (() => {
 'use strict';
-const V='6.0.0';
+const V='6.1.0';
 const items=[
   ['home','Accueil','⌂','home',''],
   ['assessment','KŌMØ','↗','', 'Motion / Clinical'],
   ['mykomo','My KŌMØ','◉','mykomo',''],
+  ['club','Club','∞','club',''],
   ['trajectory','Trajectoire','⌁','trajectory',''],
   ['agenda','Agenda','□','documents','']
 ];
@@ -14,15 +15,16 @@ let raf=0;
 const nav=()=>window.KomoPatientNavigation;
 const route=()=>nav()?.route?.()||location.hash.replace(/^#/,'')||'home';
 const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)&&!['clinical','admin'].includes(route())};
-const active=()=>route()==='motion'?'assessment':route()==='mykomo'?'mykomo':route()==='trajectory'?'trajectory':route()==='documents'?'agenda':'home';
+const active=()=>route()==='motion'?'assessment':route()==='mykomo'?'mykomo':route()==='club'?'club':route()==='trajectory'?'trajectory':route()==='documents'?'agenda':'home';
 
 function css(){if(document.querySelector('#kpDock600'))return;const s=document.createElement('style');s.id='kpDock600';s.textContent=`
 #kpDock,#kpDockV5{display:none!important}
-#kpDockV6{position:fixed!important;z-index:10000!important;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(840px,calc(100vw - 28px));height:72px;padding:6px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;border:1px solid rgba(255,255,255,.13);border-radius:24px;background:linear-gradient(145deg,#262625,#35312e 58%,#4a433d);box-shadow:0 20px 60px rgba(31,28,25,.28);isolation:isolate;overflow:hidden;box-sizing:border-box;pointer-events:auto!important;touch-action:manipulation}#kpDockV6[hidden]{display:none!important}
+#kpDockV6{position:fixed!important;z-index:10000!important;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(920px,calc(100vw - 28px));height:72px;padding:6px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;border:1px solid rgba(255,255,255,.13);border-radius:24px;background:linear-gradient(145deg,#262625,#35312e 58%,#4a433d);box-shadow:0 20px 60px rgba(31,28,25,.28);isolation:isolate;overflow:hidden;box-sizing:border-box;pointer-events:auto!important;touch-action:manipulation}#kpDockV6[hidden]{display:none!important}
 #kpDockV6 .kp6-indicator{position:absolute;z-index:0;top:6px;left:6px;height:60px;border-radius:18px;background:linear-gradient(145deg,#fbf8f1,#e9e2d7);box-shadow:0 8px 24px rgba(24,21,18,.18);transition:transform .32s cubic-bezier(.2,.82,.22,1),width .22s ease;pointer-events:none}
 #kpDockV6 a,#kpDockV6 button{position:relative;z-index:2;height:60px;min-width:0;border:0;border-radius:18px;background:transparent;color:rgba(255,252,247,.68);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:3px;font-family:'DM Sans',sans-serif;text-decoration:none;cursor:pointer;transition:color .18s ease,transform .12s ease;pointer-events:auto!important;-webkit-tap-highlight-color:transparent}#kpDockV6 a:active,#kpDockV6 button:active{transform:scale(.965)}#kpDockV6 a.active,#kpDockV6 button.active{color:#292824}#kpDockV6 .kp6-icon{font-size:18px;line-height:1;transition:transform .2s ease}#kpDockV6 .active .kp6-icon{transform:translateY(-2px) scale(1.08)}#kpDockV6 b{max-width:100%;font-size:9px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#kpDockV6 small{font-size:5.7px;line-height:1;text-transform:uppercase;letter-spacing:.045em;opacity:.72;white-space:nowrap}
 #kpPickerV6Bg{position:fixed;z-index:10004;inset:0;border:0;background:rgba(32,29,26,.32);backdrop-filter:blur(5px);opacity:0;pointer-events:none;transition:.2s}#kpPickerV6Bg.open{opacity:1;pointer-events:auto}#kpPickerV6{position:fixed;z-index:10005;left:50%;bottom:96px;width:min(540px,calc(100vw - 24px));padding:14px;border-radius:26px;background:#fbf8f2;box-shadow:0 30px 92px rgba(27,24,21,.28);transform:translate(-50%,125%) scale(.98);opacity:0;pointer-events:none;transition:.3s cubic-bezier(.2,.82,.22,1)}#kpPickerV6.open{transform:translate(-50%,0) scale(1);opacity:1;pointer-events:auto}.kp6-picker-head{display:flex;justify-content:space-between;align-items:center;padding:5px 5px 12px}.kp6-picker-head small{display:block;font-size:7px;letter-spacing:.12em;color:#8b8278}.kp6-picker-head strong{display:block;margin-top:4px;font:600 21px/1 Manrope,sans-serif;color:#2a2926}.kp6-picker-head button{width:36px;height:36px;border:1px solid #e3ddd3;border-radius:50%;background:#fff}.kp6-picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kp6-choice{min-height:142px;padding:17px;border:1px solid rgba(45,40,35,.08);border-radius:20px;background:#efe8dd;text-align:left;color:#2d2b28}.kp6-choice.motion{background:linear-gradient(145deg,#2b2b29,#49423c);color:#fff}.kp6-choice small{display:block;font-size:7px;letter-spacing:.1em;text-transform:uppercase;opacity:.6}.kp6-choice strong{display:block;margin-top:8px;font:600 20px/1 Manrope,sans-serif}.kp6-choice p{font-size:9px;line-height:1.45;opacity:.65}
-@media(max-width:760px){#kpDockV6{left:7px;right:7px;width:auto;height:68px;bottom:max(7px,env(safe-area-inset-bottom));transform:none;border-radius:21px;padding:5px}#kpDockV6 .kp6-indicator{top:5px;left:5px;height:58px}#kpDockV6 a,#kpDockV6 button{height:58px;padding:2px 1px}#kpDockV6 b{font-size:7.8px}#kpDockV6 small{font-size:4.9px}#kpPickerV6{bottom:86px}.kp6-picker-grid{grid-template-columns:1fr}}
+@media(max-width:760px){#kpDockV6{left:7px;right:7px;width:auto;height:68px;bottom:max(7px,env(safe-area-inset-bottom));transform:none;border-radius:21px;padding:5px}#kpDockV6 .kp6-indicator{top:5px;left:5px;height:58px}#kpDockV6 a,#kpDockV6 button{height:58px;padding:2px 1px}#kpDockV6 .kp6-icon{font-size:16px}#kpDockV6 b{font-size:6.9px}#kpDockV6 small{font-size:4.5px}#kpPickerV6{bottom:86px}.kp6-picker-grid{grid-template-columns:1fr}}
+@media(max-width:390px){#kpDockV6 b{font-size:6.2px}#kpDockV6 .kp6-icon{font-size:15px}}
 @media(prefers-reduced-motion:reduce){#kpDockV6 .kp6-indicator,#kpPickerV6,#kpPickerV6Bg{transition:none!important}}
 `;document.head.appendChild(s)}
 
