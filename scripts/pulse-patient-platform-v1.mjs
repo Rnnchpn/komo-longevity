@@ -22,14 +22,23 @@ if(!html.includes('patient-assessment-trio-v1.js')){
   html=html.replace(/(<script[^>]+src="\.\/tests-v1\.js[^>]*><\/script>)/,`$1\n  <script type="module" src="./patient-assessment-trio-v1.js"></script>`);
 }
 
-// Desktop labels keep route ids stable while changing the product language.
+// Desktop labels keep the existing route ids. Add Therapy to desktop only because
+// the prior desktop dock had no plan entry while the phone/iPad shell already did.
 app=app.replace(/(\{\s*id:\s*'results',\s*label:\s*')[^']+(')/g,"$1Tests$2");
 app=app.replace(/(\{\s*id:\s*'path',\s*label:\s*')[^']+(')/g,"$1My KŌMØ Score$2");
-app=app.replace(/(\{\s*id:\s*'plan',\s*label:\s*')[^']+(')/g,"$1KŌMØ Therapy$2");
 app=app.replace(/(\{\s*id:\s*'documents',\s*label:\s*')[^']+(')/g,"$1Agenda et réseau$2");
-app=app.replace("documents:['RENDEZ-VOUS','Planifiez votre prochaine étape.']","documents:['AGENDA ET RÉSEAU','Planifiez votre prochaine étape et trouvez un centre.']");
-app=app.replace("path:['PROGRESSION','Votre parcours.']","path:['MY KŌMØ SCORE','Vos résultats, clairement.']");
-app=app.replace("plan:['SUIVI','Votre plan.']","plan:['KŌMØ THERAPY','Votre plan de soins et vos rappels.']");
+if(!/id:\s*'plan'\s*,\s*label:/.test(app)){
+  const pathRoute=/(\{\s*id:\s*'path'\s*,\s*label:\s*'My KŌMØ Score'\s*,\s*icon:\s*icons\.path\s*\}\s*,?)/;
+  if(!pathRoute.test(app))throw new Error('[pulse-patient-platform] path route contract changed');
+  app=app.replace(pathRoute,`$1\n  { id: 'plan', label: 'KŌMØ Therapy', icon: icons.path },`);
+}else{
+  app=app.replace(/(\{\s*id:\s*'plan',\s*label:\s*')[^']+(')/g,"$1KŌMØ Therapy$2");
+}
+// Quiet-route page copy and owner selectors are patched independent of prior wording.
+app=app.replace(/path:\s*\['[^']*','[^']*'\]/,"path:['MY KŌMØ SCORE','Vos résultats, clairement.']");
+app=app.replace(/documents:\s*\['[^']*','[^']*'\]/,"documents:['AGENDA ET RÉSEAU','Vos consultations et le réseau KŌMØ.']");
+app=app.replace(/plan:\s*\['[^']*','[^']*'\]/,"plan:['KŌMØ THERAPY','Votre plan de soins et vos rappels.']");
+app=app.replace(/plan:\s*'\[data-patient-v4="plan"\]'/,"plan:'[data-therapy-page]'");
 await writeFile(paths.app,app);
 
 // Phone/iPad shell: explicit user-requested labels, unchanged routes.
@@ -53,7 +62,6 @@ await writeFile(paths.booking,booking);
 
 // Pre-consultation questionnaires are genuinely gated by professional confirmation.
 prep=prep.replace(".in('status',['scheduled','confirmed','arrived','in_progress'])",".in('status',['confirmed','arrived','in_progress'])");
-prep=prep.replace("if(location.hash!=='#documents'||!memberMode()||busy)return;","if(location.hash!=='#documents'||!memberMode()||busy)return;");
 prep=prep.replace("wrap.querySelector('[data-kph2-next]')?.addEventListener('click',()=>d.appointments[0]?.appointment_type==='clinical'?openClinical(d.appointments[0]):openMotion())","wrap.querySelector('[data-kph2-next]')?.addEventListener('click',()=>d.appointments[0]?.appointment_type==='clinical'?openClinical(d.appointments[0]):openMotion());const requested=sessionStorage.getItem('komo_open_preparation');if(requested){sessionStorage.removeItem('komo_open_preparation');setTimeout(()=>requested==='clinical'?openClinical(d.clinical):openMotion(),120)}");
 await writeFile(paths.prep,prep);
 
