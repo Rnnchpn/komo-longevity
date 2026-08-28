@@ -11,9 +11,7 @@ if(!booking.includes('const mapKeep=root.querySelector')){
   booking=booking.replace("const root=document.querySelector('#viewRoot');if(!root)return;const c=","const root=document.querySelector('#viewRoot');if(!root)return;const mapKeep=root.querySelector('[data-kbd-shell][data-kbd-mounted=\"1\"]');const c=");
   booking=booking.replace('</section></div>`;bindPatient()}','</section></div>`;if(mapKeep){const nextMap=root.querySelector(\'[data-kbd-shell]\');if(nextMap)nextMap.replaceWith(mapKeep);window.dispatchEvent(new CustomEvent(\'komo:booking-map-restored\'))}bindPatient()}');
 }
-// Pro Agenda must use the same center-context event as Dashboard/Patients/Motion.
 booking=booking.replace("window.dispatchEvent(new CustomEvent('komo:center-changed',{detail:{organizationId:S.proOrg}}));await loadProWeek()","window.dispatchEvent(new CustomEvent('komo:center-context-changed',{detail:{organizationId:S.proOrg}}));await loadProWeek()");
-// If the patient-management owner is absent, still route to the patient workspace rather than doing nothing.
 booking=booking.replace("S.proActive=false;window.KomoPatientManagement?.open?.()","S.proActive=false;if(window.KomoPatientManagement?.open)window.KomoPatientManagement.open();else window.KomoProArchitecture?.open?.('patients')");
 if(!booking.includes('const mapKeep=root.querySelector')||!booking.includes('komo:booking-map-restored'))throw new Error('[pro-stability] booking map persistence patch failed');
 if(booking.includes("komo:center-changed',{detail:{organizationId:S.proOrg}"))throw new Error('[pro-stability] Pro Agenda still uses legacy center event');
@@ -41,10 +39,15 @@ if(!cockpit.includes('komo:center-context-changed'))cockpit=cockpit.replace("win
 if(!cockpit.includes("route()==='clinical'&&accountRole==='admin'?'professional':accountRole"))throw new Error('[pro-stability] admin-as-professional cockpit patch failed');
 await writeFile(paths.cockpit,cockpit);
 
-// Center Hub already owns the canonical komo:center-context-changed flow. Only consolidate runtime/API here.
+// Center Hub owns the canonical context flow. V2 center selection updates all Pro surfaces without a page reload.
 let hub=files.centerHub;
 hub=hub.replace("function sb(){if(!S.client)S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return S.client}","function sb(){return window.KomoRuntime?.client||(S.client||(S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}");
+if(!hub.includes('komo:center-context-changed')){
+  hub=hub.replace("localStorage.setItem(ORG_KEY,S.centerId);S.tab='overview';render()","localStorage.setItem(ORG_KEY,S.centerId);window.dispatchEvent(new CustomEvent('komo:center-context-changed',{detail:{organizationId:S.centerId}}));S.tab='overview';render()");
+  hub=hub.replace("localStorage.setItem(ORG_KEY,S.centerId);S.notice='Centre créé.","localStorage.setItem(ORG_KEY,S.centerId);window.dispatchEvent(new CustomEvent('komo:center-context-changed',{detail:{organizationId:S.centerId}}));S.notice='Centre créé.");
+}
 if(!hub.includes('window.KomoCenterHub='))hub+='\nwindow.KomoCenterHub={open:activate,refresh:load};\n';
+if(!hub.includes('komo:center-context-changed'))throw new Error('[pro-stability] center hub canonical context patch failed');
 await writeFile(paths.centerHub,hub);
 
 // The legacy center selector must no longer reload the entire SPA.
