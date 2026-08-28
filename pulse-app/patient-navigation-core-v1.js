@@ -3,9 +3,9 @@
    normalizes old route aliases, scrolls once, and exposes one go() API. */
 (() => {
   'use strict';
-  const V='1.0.0';
+  const V='1.1.0';
   const ALIAS={path:'trajectory',plan:'trajectory',agenda:'documents',rdv:'documents'};
-  const PATIENT_ROUTES=new Set(['home','motion','mykomo','trajectory','documents','profile','messages','results','tests']);
+  const PATIENT_ROUTES=new Set(['home','motion','mykomo','club','trajectory','documents','profile','messages','results','tests']);
   let current='';
   let seq=0;
 
