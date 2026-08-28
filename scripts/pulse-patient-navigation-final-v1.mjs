@@ -15,30 +15,35 @@ html=html
   .replace(/\s*<script(?: type="module")? src="\.\/agenda-hub-v3\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<script(?: type="module")? src="\.\/agenda-hub-v4\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<script(?: type="module")? src="\.\/agenda-hub-v5\.js(?:\?[^\"]*)?"><\/script>/g,'')
-  .replace(/\s*<script src="\.\/patient-route-runtime-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
+  .replace(/\s*<script src="\.\/agenda-clean-room-v1\.js(?:\?[^\"]*)?"><\/script>/g,'')
+  .replace(/\s*<script src="\.\/patient-route-runtime-v1\.js(?:\?[^\"]*)?"><\/script>/g,'')
+  .replace(/\s*<script src="\.\/patient-route-runtime-v2\.js(?:\?[^\"]*)?"><\/script>/g,'');
 
 html=html.replace('</body>',`  <script src="./patient-palette-balance-v1.js?v=${release}"></script>\n  <script src="./pulse-bottom-nav-v6.js?v=${release}"></script>\n</body>`);
 await writeFile(indexPath,html,'utf8');
 
-// Enforce canonical route ownership after every other Pulse post-build has finished.
 await import('./pulse-route-ownership-fix-v2.mjs');
 
-// Use a fresh bundle filename so browsers cannot keep an older immutable app.js.
 const appPath=join(pulseDir,'app.js');
 const cacheSafeApp='app-router-v2.js';
 await copyFile(appPath,join(pulseDir,cacheSafeApp));
 html=await readFile(indexPath,'utf8');
 html=html.replaceAll('./app.js',`./${cacheSafeApp}`);
 
-// Ship hero-only Agenda v5 as the sole patient owner of #documents.
-const agendaHub='agenda-hub-v5.js';
+// Full patient Agenda: compact calendar on the left, colored CARTO map on the right.
+const agendaHub='agenda-hub-v4.js';
 await copyFile(join(root,'pulse-app',agendaHub),join(pulseDir,agendaHub));
-html=html.replace('</body>',`  <script type="module" src="./${agendaHub}?v=20260829-agenda-v5-1"></script>\n</body>`);
+html=html.replace('</body>',`  <script type="module" src="./${agendaHub}?v=20260829-agenda-v4-final"></script>\n</body>`);
 
-// Ship the route activator explicitly and load it LAST.
-const routeRuntime='patient-route-runtime-v1.js';
+// Hide legacy Motion journey/report cards only on Agenda, without disabling them elsewhere.
+const cleanRoom='agenda-clean-room-v1.js';
+await copyFile(join(root,'pulse-app',cleanRoom),join(pulseDir,cleanRoom));
+html=html.replace('</body>',`  <script src="./${cleanRoom}?v=20260829-agenda-clean-1"></script>\n</body>`);
+
+// Final deterministic route activator.
+const routeRuntime='patient-route-runtime-v2.js';
 await copyFile(join(root,'pulse-app',routeRuntime),join(pulseDir,routeRuntime));
-html=html.replace('</body>',`  <script src="./${routeRuntime}?v=20260829-route-runtime-4"></script>\n</body>`);
+html=html.replace('</body>',`  <script src="./${routeRuntime}?v=20260829-route-runtime-v2"></script>\n</body>`);
 await writeFile(indexPath,html,'utf8');
 
 const finalHtml=await readFile(indexPath,'utf8');
@@ -47,6 +52,7 @@ const finalBooking=await readFile(join(pulseDir,'booking-layer-v1.js'),'utf8');
 const finalDock=await readFile(join(pulseDir,'pulse-bottom-nav-v6.js'),'utf8');
 const finalRuntime=await readFile(join(pulseDir,routeRuntime),'utf8');
 const finalAgenda=await readFile(join(pulseDir,agendaHub),'utf8');
+const finalClean=await readFile(join(pulseDir,cleanRoom),'utf8');
 const checks=[
   ['dock v6 shipped',finalHtml.includes('pulse-bottom-nav-v6.js')],
   ['dock v5 removed',!finalHtml.includes('pulse-bottom-nav-v5.js')],
@@ -56,17 +62,17 @@ const checks=[
   ['modern routes delegated to dedicated owners',finalApp.includes("source:'app-external-owner'")],
   ['Club is a native equal dock route',finalDock.includes("['club','Club','∞','club','']")&&finalDock.includes('repeat(6,minmax(0,1fr))')],
   ['legacy Booking remains available for professional planning',finalBooking.includes('window.KomoBooking')],
-  ['old Agenda hubs removed from final patient HTML',!finalHtml.includes('agenda-hub-v3.js')&&!finalHtml.includes('agenda-hub-v4.js')],
-  ['Agenda v5 shipped before final route runtime',finalHtml.includes(agendaHub)&&finalHtml.indexOf(agendaHub)<finalHtml.lastIndexOf(routeRuntime)],
-  ['Agenda v5 keeps legacy patient-owner sentinel',finalAgenda.includes('data-kbook-patient')&&finalAgenda.includes('data-agenda-hub-v5')],
-  ['Agenda v5 is hero-only',finalAgenda.includes('Planifier. Préparer.')&&!finalAgenda.includes('ag4-workspace')&&!finalAgenda.includes('ag4-map')],
-  ['Agenda v5 force-replaces viewRoot',finalAgenda.includes('root.innerHTML=hero()')],
-  ['final patient route runtime shipped last',finalHtml.lastIndexOf(routeRuntime)>finalHtml.lastIndexOf(agendaHub)],
-  ['runtime explicitly activates Motion',finalRuntime.includes('KomoMotionHubV3?.refresh')],
-  ['runtime explicitly activates Trajectoire',finalRuntime.includes('KomoTrajectoryV3?.refresh')],
-  ['runtime explicitly activates Agenda v5',finalRuntime.includes('KomoAgendaHubV5?.refresh')],
-  ['runtime clears hidden route guards',finalRuntime.includes("classList.remove('kmotion-route-pending','komo-trajectory-pending')")]
+  ['hero-only Agenda v5 removed',!finalHtml.includes('agenda-hub-v5.js')],
+  ['full Agenda v4 shipped',finalHtml.includes(agendaHub)&&finalAgenda.includes('ag4-workspace')&&finalAgenda.includes('ag4-map')],
+  ['Agenda keeps calendar and colored map',finalAgenda.includes('ag4-days')&&finalAgenda.includes('basemaps.cartocdn.com')],
+  ['Agenda clean-room shipped after Agenda',finalHtml.indexOf(cleanRoom)>finalHtml.indexOf(agendaHub)],
+  ['legacy Motion journey hidden on Agenda',finalClean.includes('[data-kmj1]')],
+  ['legacy canonical report hidden on Agenda',finalClean.includes('[data-kcanon-doc]')],
+  ['final runtime shipped last',finalHtml.lastIndexOf(routeRuntime)>finalHtml.lastIndexOf(cleanRoom)],
+  ['runtime activates Motion',finalRuntime.includes('KomoMotionHubV3?.refresh')],
+  ['runtime activates Trajectoire',finalRuntime.includes('KomoTrajectoryV3?.refresh')],
+  ['runtime activates Agenda v4',finalRuntime.includes('KomoAgendaHubV4?.refresh')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-nav-final] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log(`[pulse-nav-final] Motion · Trajectoire · Agenda v5 explicit activation locked · hero-only patient Agenda · ${release}`);
+console.log(`[pulse-nav-final] Agenda restored · hero + calendar + map · legacy Motion cards suppressed · ${release}`);
