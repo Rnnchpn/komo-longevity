@@ -121,7 +121,8 @@ const scripts = [
   'scripts/homepage-whoop-stepup-v2.mjs',
   'scripts/homepage-whoop-polish-v3.mjs',
   'scripts/pulse-tests-status-cockpit-v1.mjs',
-  'scripts/homepage-wow-v4.mjs'
+  'scripts/homepage-wow-v4.mjs',
+  'scripts/homepage-brand-visual-v5.mjs'
 ];
 
 for (const script of scripts) {
