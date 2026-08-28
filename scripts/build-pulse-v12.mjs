@@ -15,7 +15,8 @@ html=html.replace(/\s*<script type="module" src="\.\/first-test-entry-v1\.js(?:\
 html=html.replace(/\s*<script type="module" src="\.\/myocare-import-entry-v2\.js(?:\?[^\"]*)?"><\/script>/g,'');
 html=html.replace(/\s*<script type="module" src="\.\/center-two-tab-workspace-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
 html=html.replace(/\s*<script type="module" src="\.\/myocare-dossier-import-fix-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace('</body>','  <script type="module" src="./first-test-entry-v1.js?v=20260828-first-test-1"></script>\n  <script type="module" src="./myocare-import-entry-v2.js?v=20260828-myocare-entry-1"></script>\n  <script type="module" src="./center-two-tab-workspace-v1.js?v=20260828-center-two-tab-1"></script>\n  <script type="module" src="./myocare-dossier-import-fix-v1.js?v=20260828-myocare-dossier-fix-1"></script>\n</body>');
+html=html.replace(/\s*<script type="module" src="\.\/center-patient-polish-v2\.js(?:\?[^\"]*)?"><\/script>/g,'');
+html=html.replace('</body>','  <script type="module" src="./first-test-entry-v1.js?v=20260828-first-test-1"></script>\n  <script type="module" src="./myocare-import-entry-v2.js?v=20260828-myocare-entry-1"></script>\n  <script type="module" src="./center-two-tab-workspace-v1.js?v=20260828-center-two-tab-1"></script>\n  <script type="module" src="./myocare-dossier-import-fix-v1.js?v=20260828-myocare-dossier-fix-1"></script>\n  <script type="module" src="./center-patient-polish-v2.js?v=20260828-center-patient-polish-2"></script>\n</body>');
 await writeFile(indexPath,html,'utf8');
 
-console.log('[pulse-v12] standalone app copied to /pulse-v12/ with patient onboarding, direct dossier MyoCare import and two-tab center workspace');
+console.log('[pulse-v12] standalone app copied to /pulse-v12/ with patient onboarding, direct dossier MyoCare import, centered patient dossier and two-tab center workspace');
