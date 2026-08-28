@@ -36,7 +36,7 @@ function ageYears(birth){if(!birth)return null;const d=new Date(`${birth}T00:00:
 function sexKey(v){const s=String(v||'').toLowerCase();if(['m','male','man','homme','masculin'].includes(s))return'male';if(['f','female','woman','femme','féminin','feminin'].includes(s))return'female';return'total'}
 function measurement(d,code){return(d?.measurements||[]).filter(x=>x.indicator_code===code&&x.qc_status==='valid').sort((a,b)=>new Date(b.recorded_at||0)-new Date(a.recorded_at||0))[0]||null}
 function patientBirth(p){return p?.birth_date||p?.date_of_birth||p?.dob||null}
-function patientSex(p){return p?.sex||p?.gender||p?.biological_sex||null}
+function patientSex(p){return p?.sex_at_birth||p?.sex||p?.gender||p?.biological_sex||null}
 function equivalentAge(value,key,table){
   let best=null;
   for(const row of table){
