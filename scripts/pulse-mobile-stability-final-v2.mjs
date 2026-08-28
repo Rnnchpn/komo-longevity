@@ -21,5 +21,9 @@ for(const file of assets){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   html=html.replace(new RegExp(`\\./${escaped}(?:\\?v=[^\"']+)?`,'g'),`./${file}?v=${release}`);
 }
+
+const homeBrandHref='./mobile-home-brand-final-v1.css?v=20260828-home-brand-1';
+if(!html.includes(homeBrandHref))html=html.replace('</head>',`  <link rel="stylesheet" href="${homeBrandHref}" />\n</head>`);
+
 await writeFile(htmlPath,html);
-console.log('[pulse-mobile-stability-final-v2] coherent auth/navigation/design release cache-busted');
+console.log('[pulse-mobile-stability-final-v2] coherent auth/navigation/design release cache-busted + mobile home brand emphasized');
