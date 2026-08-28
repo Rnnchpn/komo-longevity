@@ -1,0 +1,10 @@
+{
+  "release": "20260828-pulse-home-hero-polish-v2",
+  "features": [
+    "larger-komo-pulse-lockup",
+    "remove-top-motion-shortcut",
+    "larger-komo-age",
+    "animated-header-band",
+    "animated-hero-score"
+  ]
+}
