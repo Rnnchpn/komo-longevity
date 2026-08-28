@@ -26,7 +26,7 @@ for(const p of pages){
   let html=await readFile(fp,'utf8');
   html=html.replace('<meta name="viewport" content="width=device-width,initial-scale=1">','<meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#060707"><meta name="color-scheme" content="dark"><style>html,body{background:#060707}</style>');
   html=html.replace('</head>',`${css}</head>`);
-  html=html.replace('</header><main>','</header><nav class="key-rail" aria-label="KŌMØ KEY"><div class="key-rail__in"><a href="#key">KEY</a><a href="#wear">${p.wear}</a><a href="#data">${p.data}</a><a href="#privacy">${p.privacy}</a></div></nav><main>`);
+  html=html.replace('</header><main>',`</header><nav class="key-rail" aria-label="KŌMØ KEY"><div class="key-rail__in"><a href="#key">KEY</a><a href="#wear">${p.wear}</a><a href="#data">${p.data}</a><a href="#privacy">${p.privacy}</a></div></nav><main>`);
   html=html.replace('<section class="hero">','<section class="hero" id="key">');
   let count=0;
   html=html.replace(/<section class="section">/g,()=>{count++;return `<section class="section" id="${count===1?'wear':count===2?'data':'privacy'}">`});
