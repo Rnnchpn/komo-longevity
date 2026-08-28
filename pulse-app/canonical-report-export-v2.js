@@ -1,7 +1,7 @@
 import { loadCanonicalResult } from './canonical-result-runtime.js';
 import { levelLabel } from './normative-engine-v1.js';
 
-const VERSION='2.1.0';
+const VERSION='2.2.0';
 const ENGINE_URLS=['https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js'];
 const C={ink:[36,51,42],muted:[108,117,110],line:[224,220,212],soft:[246,243,236],green:[39,57,47],green2:[91,119,99],greenPale:[235,243,236],gold:[181,141,74],goldPale:[255,247,232],red:[137,72,61],redPale:[252,238,235],gray:[140,145,141],grayPale:[244,244,241],white:[255,255,255],sand:[242,237,226],cream:[250,248,243]};
 let enginePromise=null,busy=false;
@@ -42,7 +42,7 @@ function scaleSpec(f){
 }
 
 function build(jsPDF,result){
-  const {dossier:d,score:s={},interpretation:r}=result,p=d.patient||{};
+  const {dossier:d,score:s={},interpretation:r}=result,p=d.patient||{},la=result.locomotorAge||{};
   const doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait',compress:true});
   const W=210,H=297,M=15,R=195,CW=180;let y=18;
   const setText=(c=C.ink)=>doc.setTextColor(...c),setFill=c=>doc.setFillColor(...c),setDraw=(c=C.line)=>doc.setDrawColor(...c),lines=(t,w=CW)=>doc.splitTextToSize(String(t??'—'),w);
@@ -71,17 +71,20 @@ function build(jsPDF,result){
     doc.setFontSize(13);setText(color(f.status));doc.text(String(f.displayValue||'—'),M+7,y+28);
     doc.setFontSize(8.2);setText(C.ink);doc.text(lines(expected(f),56),M+61,y+27);
     doc.setFontSize(7.3);setText(color(f.status));doc.text(shortStatus(f),M+125,y+27);
-    let textY=y+35;
-    if(hasScale){drawScale(f,M+7,y+34,CW-14);textY=y+48}
-    doc.setFont('helvetica','normal');doc.setFontSize(6.1);setText(C.muted);doc.text(lines(f.patientMessage||f.referenceLabel||'',CW-14),M+7,textY);
-    y+=h+4;
+    let textY=y+35;if(hasScale){drawScale(f,M+7,y+34,CW-14);textY=y+48}
+    doc.setFont('helvetica','normal');doc.setFontSize(6.1);setText(C.muted);doc.text(lines(f.patientMessage||f.referenceLabel||'',CW-14),M+7,textY);y+=h+4;
   }
   function insightBox(title,items,bg){if(!items.length)return;const content=items.slice(0,3);const h=12+content.length*11;ensure(h);setFill(bg);setDraw(C.line);doc.roundedRect(M,y,CW,h,4,4,'FD');doc.setFont('helvetica','bold');doc.setFontSize(8);setText(C.ink);doc.text(title,M+6,y+7);doc.setFont('helvetica','normal');doc.setFontSize(6.4);content.forEach((f,i)=>{setFill(color(f.status));doc.circle(M+8,y+14+i*10,1.3,'F');setText(C.ink);doc.text(`${f.title} · ${f.displayValue||'—'}`,M+12,y+15+i*10);setText(C.muted);doc.text(lines(f.patientMessage||shortStatus(f),122),M+58,y+15+i*10)});y+=h+4}
+  function locomotorAgeCard(){
+    const ok=la?.status==='available',h=ok?43:30;ensure(h);setFill(ok?C.greenPale:C.cream);setDraw(C.line);doc.roundedRect(M,y,CW,h,4,4,'FD');doc.setFont('helvetica','bold');doc.setFontSize(6);setText(C.green2);doc.text('KŌMØ LOCOMOTOR AGE · EXPÉRIMENTAL v0.1',M+6,y+7);
+    if(ok){doc.setFontSize(24);setText(C.ink);doc.text(`${Math.round(la.age)} ans`,M+6,y+20);doc.setFontSize(7);setText(C.muted);doc.text(`Âge réel ${la.chronologicalAge} ans · intervalle estimatif ${la.interval?.[0]}–${la.interval?.[1]} ans · confiance ${la.confidenceLabel}`,M+48,y+17);doc.text(la.interpretation||'',M+48,y+22);const bits=(la.inputs||[]).map(i=>`${i.label}: ≈${Math.round(i.age)} ans`);doc.setFontSize(5.8);doc.text(lines(bits.join('   ·   '),CW-12),M+6,y+30);doc.setFontSize(5.5);setText(C.muted);doc.text(lines(la.disclaimer||'',CW-12),M+6,y+37)}else{doc.setFontSize(14);setText(C.ink);doc.text('Non calculable',M+6,y+18);doc.setFont('helvetica','normal');doc.setFontSize(6.4);setText(C.muted);doc.text(lines(la?.reason||'Données insuffisantes ou non concordantes.',CW-55),M+48,y+14);doc.setFontSize(5.6);doc.text('Le moteur refuse volontairement de générer un âge lorsque les tests ne sont pas interprétables ensemble.',M+48,y+23)}y+=h+4;
+  }
   function footer(){const count=doc.getNumberOfPages();for(let i=1;i<=count;i++){doc.setPage(i);setDraw();doc.line(M,H-11,R,H-11);doc.setFont('helvetica','normal');doc.setFontSize(5.5);setText(C.muted);doc.text(`KŌMØ Pulse · PDF v${VERSION} · ${r.engineVersion} · ${r.referenceVersion}`,M,H-6.3);doc.text(`Page ${i}/${count}`,R,H-6.3,{align:'right'});if(p.data_classification==='synthetic'){doc.setFont('helvetica','bold');setText(C.gold);doc.text('DONNÉES SYNTHÉTIQUES - DÉMONSTRATION',W/2,H-6.3,{align:'center'})}else if(s.release_status!=='released'){doc.setFont('helvetica','bold');setText(C.red);doc.text('BROUILLON - À VALIDER PAR LE PROFESSIONNEL',W/2,H-6.3,{align:'center'})}}}
 
   header();doc.setFont('helvetica','bold');doc.setFontSize(6.5);setText(C.green2);doc.text('BILAN DE MOBILITÉ · ANALYSE FONCTIONNELLE · MYOCARE',M,22);doc.setFontSize(22);setText(C.ink);doc.text(name(p),M,31);doc.setFont('helvetica','normal');doc.setFontSize(7);setText(C.muted);doc.text(`${p.external_reference||'—'} · ${r.context.age??'—'} ans · ${p.organization_name||''}`,M,37);
   const motion=n(s.motion_score),mob=n(s.domain_scores?.mobility),sym=n(s.domain_scores?.myocare_symmetry),complete=n(s.completeness),conf=n(s.confidence);
   scoreCard(M,45,44,'Motion Score',motion===null?'—':`${Math.round(motion)}/100`,`${s.release_status||'brouillon'} · confiance ${conf===null?'—':Math.round(conf*100)+'%'}`,true);scoreCard(63,45,42,'Mobilité KŌMØ',mob===null?'—':`${Math.round(mob)}/100`,'Composante fonctionnelle');scoreCard(109,45,42,'Symétrie MyoCare',sym===null?'—':`${Math.round(sym)}/100`,'Benchmark LSI contextualisé');scoreCard(155,45,40,'Complétude',complete===null?'—':`${Math.round(complete)}%`,'Qualité des données');y=84;
+  locomotorAgeCard();
 
   section('Synthèse','Votre profil en un coup d’œil','Les repères sont appliqués uniquement lorsqu’ils correspondent au protocole mesuré.');
   if(r.consistencyIssues.length)paragraph(`REVUE NÉCESSAIRE · ${r.consistencyIssues.map(i=>i.message).join(' ')}`,C.redPale);
@@ -99,9 +102,8 @@ function build(jsPDF,result){
   if(codes.length){const labels={VL:'Quadriceps - vaste latéral',BF:'Ischio-jambiers - biceps fémoral',GM:'Mollet - gastrocnémien'};section('Activation','Comparaison gauche / droite','%MVC : mesure instrumentée descriptive, sans valeur normale populationnelle universelle.');table(['Groupe musculaire','Gauche','Droite','Repère'],codes.map(c=>{const l=acts.find(x=>x.muscle_code===c&&x.side==='left'),rr=acts.find(x=>x.muscle_code===c&&x.side==='right');return[labels[c]||c,l?`${Number(l.value).toFixed(1)} ${l.unit||''}`:'—',rr?`${Number(rr.value).toFixed(1)} ${rr.unit||''}`:'—','Suivi relatif / symétrie']}),[73,31,31,45])}
 
   newPage();section('Plan KŌMØ','Proposition de prise en charge','Issue des mêmes règles que Pulse - validation professionnelle obligatoire.');paragraph(r.carePlan.safetyGate,r.carePlan.status==='review_required'?C.redPale:C.greenPale);if(r.carePlan.priorities.length){r.carePlan.priorities.forEach((item,i)=>{ensure(34);setFill(C.soft);setDraw();doc.roundedRect(M,y,CW,30,3,3,'FD');doc.setFont('helvetica','bold');doc.setFontSize(6.3);setText(C.green2);doc.text(`PRIORITÉ ${i+1} · ${item.domain.toUpperCase()}`,M+5,y+6);doc.setFontSize(9);setText(C.ink);doc.text(lines(item.goal,CW-10),M+5,y+12);doc.setFont('helvetica','normal');doc.setFontSize(6);setText(C.muted);doc.text(lines(item.actions.map(a=>`• ${a}`).join('   '),CW-10),M+5,y+18);doc.text(`Contrôle proposé : ${item.recheck}`,M+5,y+27);y+=34})}else paragraph('Aucune priorité automatique n’est déclenchée par les règles actuelles. Le suivi reste à individualiser.',C.grayPale);
-  paragraph('Âge locomoteur KŌMØ : cette estimation ne sera affichée que lorsque les tests nécessaires seront réalisés selon des protocoles standardisés et suffisamment concordants. Elle sera présentée comme un âge fonctionnel estimé avec intervalle de confiance, jamais comme un âge biologique certain.',C.cream);
 
-  newPage();section('Références','Sources des repères','Chaque repère reste versionné dans le moteur KŌMØ.');table(['Source','Usage'],r.sources.map(x=>[x.title,x.use]),[82,98]);section('Traçabilité','Version et statut');table(['Élément','Valeur'],[['Motion Score',motion===null?'—':`${motion}/100`],['Algorithme',s.algorithm_version||'—'],['Moteur interprétation',r.engineVersion],['Références',r.referenceVersion],['PDF',`canonical-report-v${VERSION}`],['Statut',s.release_status||'—'],['Calculé le',fmtDate(s.calculated_at)]],[58,122]);paragraph('Ce document présente des seuils cliniques, moyennes publiées et mesures descriptives selon leur niveau de preuve et leur applicabilité. Une moyenne populationnelle ne doit pas être interprétée comme une plage individuelle de normalité. La prise en charge proposée doit être validée par un professionnel.',C.goldPale);
+  newPage();section('Références','Sources des repères','Chaque repère reste versionné dans le moteur KŌMØ.');const refs=[...(r.sources||[])];if(la?.source?.title)refs.push({title:la.source.title,use:'KŌMØ Locomotor Age v0.1 : âge-equivalent expérimental basé sur marche 4 m, Chair Stand 30 s et appui unipodal.'});table(['Source','Usage'],refs.map(x=>[x.title,x.use]),[82,98]);section('Traçabilité','Version et statut');table(['Élément','Valeur'],[['Motion Score',motion===null?'—':`${motion}/100`],['Algorithme',s.algorithm_version||'—'],['Moteur interprétation',r.engineVersion],['Âge locomoteur',la?.version||'—'],['Statut âge locomoteur',la?.status||'—'],['Références',r.referenceVersion],['PDF',`canonical-report-v${VERSION}`],['Statut',s.release_status||'—'],['Calculé le',fmtDate(s.calculated_at)]],[58,122]);paragraph('Ce document présente des seuils cliniques, moyennes publiées et mesures descriptives selon leur niveau de preuve et leur applicabilité. Une moyenne populationnelle ne doit pas être interprétée comme une plage individuelle de normalité. L’âge locomoteur est une estimation expérimentale de performance fonctionnelle, pas un âge biologique validé. La prise en charge proposée doit être validée par un professionnel.',C.goldPale);
   footer();return doc;
 }
 
