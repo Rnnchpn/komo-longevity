@@ -1,8 +1,8 @@
-/* KŌMØ Pulse — final patient route activation runtime v1.1
+/* KŌMØ Pulse — final patient route activation runtime v1.2
    Ensures the visible owner mounts after navigation regardless of listener/module timing. */
 (() => {
   'use strict';
-  const V='1.1.0';
+  const V='1.2.0';
   const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
   let seq=0;
 
@@ -17,7 +17,7 @@
   function mounted(r){
     if(r==='motion')return !!document.querySelector('[data-motion-hub-v3]');
     if(r==='trajectory')return !!document.querySelector('[data-trajectory-v3]');
-    if(r==='documents')return !!document.querySelector('[data-agenda-hub-v3]');
+    if(r==='documents')return !!document.querySelector('[data-agenda-hub-v4]');
     return true;
   }
 
@@ -26,7 +26,7 @@
     try{
       if(r==='motion')window.KomoMotionHubV3?.refresh?.();
       else if(r==='trajectory')window.KomoTrajectoryV3?.refresh?.();
-      else if(r==='documents')window.KomoAgendaHubV3?.refresh?.();
+      else if(r==='documents')window.KomoAgendaHubV4?.refresh?.();
     }catch(e){console.error('[patient-route-runtime]',r,e)}
   }
 
