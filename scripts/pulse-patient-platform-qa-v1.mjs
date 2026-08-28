@@ -19,9 +19,11 @@ const checks=[
  ['desktop patient product labels are present',/id:\s*'path'\s*,\s*label:\s*'My KŌMØ Score'/.test(app)&&/id:\s*'plan'\s*,\s*label:\s*'KŌMØ Therapy'/.test(app)&&/id:\s*'documents'\s*,\s*label:\s*'Agenda et réseau'/.test(app)],
  ['desktop Therapy uses canonical owner selector',/plan:\s*'\[data-therapy-page\]'/.test(app)],
  ['patient booking is presented as a request',booking.includes('Demande envoyée au centre')&&booking.includes('En attente de validation')],
+ ['Tests passes Motion or Clinical choice into Agenda',tests.includes("sessionStorage.setItem('komo_booking_service',type)")&&booking.includes("sessionStorage.getItem('komo_booking_service')")],
  ['professional can approve pending consultation',booking.includes("rpc('approve_komo_appointment'")&&booking.includes('Valider la consultation')],
  ['pre-consultation excludes pending scheduled appointments',prep.includes(".in('status',['confirmed','arrived','in_progress'])")&&!prep.includes(".in('status',['scheduled','confirmed','arrived','in_progress'])")],
  ['validated card can open the right preparation',prep.includes('komo_open_preparation')&&tests.includes("sessionStorage.setItem('komo_open_preparation',type)")],
+ ['preparation keeps Agenda et réseau product title',prep.includes("top.textContent='AGENDA ET RÉSEAU'")&&prep.includes("title.textContent='Vos consultations et le réseau KŌMØ.'")],
  ['public site explainer window exists',publicPulse.includes('KŌMØ assessment explainer v1')&&publicPulse.includes('komoAssessmentExplainer')],
  ['modern patient visual system is bundled',css.includes('KŌMØ Pulse patient platform v1')&&css.includes('.kpa-grid')&&css.includes('.kms-ring')&&css.includes('.kth-care-grid')]
 ];
