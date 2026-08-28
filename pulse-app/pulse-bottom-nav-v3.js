@@ -1,214 +1,29 @@
-/* KŌMØ Pulse — canonical patient dock v4
-   One independent five-tab dock. Legacy sidebar/mobile/adaptive bars are hidden in patient mode.
-   Professional/admin navigation remains untouched. */
+/* KŌMØ Pulse — canonical patient dock v4.0.1 */
 (() => {
-  const VERSION='4.0.0';
-  let timer=null,refreshing=false;
-
-  const route=()=>location.hash.replace(/^#/,'')||'home';
-  const appVisible=()=>{
-    const app=document.querySelector('#appShell');
-    const auth=document.querySelector('#authScreen');
-    return !!app&&!app.hidden&&(!auth||auth.hidden);
-  };
-  const patientMode=()=>{
-    const r=route();
-    if(r==='clinical'||r==='admin')return false;
-    const member=document.querySelector('#modeSwitch [data-mode="member"]');
-    return !member||member.classList.contains('active');
-  };
-
-  const I={
-    home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3.8 10.4 12 3.2l8.2 7.2"/><path d="M5.7 9.7v10.8h12.6V9.7"/><path d="M9.4 20.5v-5.8h5.2v5.8"/></svg>',
-    assessment:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3.5 16.5c3.2-5.5 5.2 2.6 8.2-2.8 3-5.3 5 2.5 8.8-5.8"/><circle cx="5.1" cy="16" r="1.6"/><circle cx="12" cy="12.9" r="1.6"/><circle cx="19.7" cy="7.9" r="1.6"/></svg>',
-    mykomo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8.5"/><path d="M12 12l4-3"/><path d="M7.3 16.6a6.5 6.5 0 0 1 9.4 0"/></svg>',
-    trajectory:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 17c3.2-5.4 5 2.2 8-2.7s5.1 2.1 8-5.4"/><circle cx="4" cy="17" r="1.5"/><circle cx="12" cy="14.3" r="1.5"/><circle cx="20" cy="8.9" r="1.5"/></svg>',
-    agenda:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3.5" y="5.5" width="17" height="15" rx="2"/><path d="M7 3.5v4M17 3.5v4M3.5 10h17M8 14h3M14 14h2.5M8 17h3"/></svg>',
-    motion:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 18.5c3.4 0 4.2-4.1 7-4.1s3.8-7.1 7-7.1"/><circle cx="5" cy="18.5" r="2"/><circle cx="12" cy="14.4" r="2"/><circle cx="19" cy="7.3" r="2"/></svg>',
-    clinical:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v10M7 12h10"/></svg>'
-  };
-
-  const ITEMS=[
-    {key:'home',label:'Accueil',route:'home',icon:I.home},
-    {key:'assessment',label:'KŌMØ',sub:'Motion / Clinical',icon:I.assessment},
-    {key:'mykomo',label:'My KŌMØ',route:'results',icon:I.mykomo},
-    {key:'trajectory',label:'Trajectoire',route:'path',icon:I.trajectory},
-    {key:'agenda',label:'Agenda',route:'documents',icon:I.agenda}
-  ];
-
-  function activeKey(){
-    const r=route();
-    if(r==='motion')return'assessment';
-    if(r==='results')return'mykomo';
-    if(r==='path'||r==='plan')return'trajectory';
-    if(r==='documents')return'agenda';
-    return'home';
-  }
-
-  function ensureStyle(){
-    if(document.querySelector('#kpulseCanonicalDockV4Style'))return;
-    const s=document.createElement('style');
-    s.id='kpulseCanonicalDockV4Style';
-    s.textContent=`
-      /* v4 owns patient navigation completely. Do not let old bottom-dock/adaptive/mobile bars participate. */
-      body.kpulse-patient-dock-active .sidebar,
-      body.kpulse-patient-dock-active #mobileNav,
-      body.kpulse-patient-dock-active #kamBottomBar,
-      body.kpulse-patient-dock-active #proMobileNav{display:none!important}
-      body.kpulse-patient-dock-active .app-shell{padding-bottom:0!important}
-      body.kpulse-patient-dock-active .main-shell{margin-left:0!important;padding-bottom:calc(104px + env(safe-area-inset-bottom))!important}
-
-      #kpulseCanonicalDock{
-        --kp-nav-index:0;
-        position:fixed!important;z-index:170!important;
-        left:50%!important;right:auto!important;
-        bottom:max(10px,env(safe-area-inset-bottom))!important;
-        transform:translateX(-50%)!important;
-        width:min(860px,calc(100vw - 30px))!important;height:72px!important;
-        padding:6px!important;box-sizing:border-box!important;
-        display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:3px!important;
-        border:1px solid rgba(255,255,255,.12)!important;border-radius:23px!important;
-        background:linear-gradient(145deg,rgba(31,45,36,.985),rgba(26,39,31,.985))!important;
-        box-shadow:0 20px 62px rgba(24,34,27,.24),inset 0 1px 0 rgba(255,255,255,.06)!important;
-        backdrop-filter:blur(24px) saturate(1.12)!important;-webkit-backdrop-filter:blur(24px) saturate(1.12)!important;
-        overflow:hidden!important;isolation:isolate!important;
-        animation:kpDockIn .58s cubic-bezier(.2,.78,.22,1) both
-      }
-      #kpulseCanonicalDock[hidden]{display:none!important}
-      #kpulseCanonicalDock:before{content:"";position:absolute;z-index:0;inset:0;pointer-events:none;background:linear-gradient(112deg,transparent 28%,rgba(255,255,255,.045) 47%,transparent 67%);transform:translateX(-110%);animation:kpDockSweep 8s 1.5s ease-in-out infinite}
-      #kpulseCanonicalDock .kpulse-nav-indicator{position:absolute;z-index:1;left:6px;top:6px;bottom:6px;width:calc((100% - 24px)/5);border-radius:17px;background:linear-gradient(145deg,#faf7f0,#ece8df);box-shadow:0 8px 24px rgba(6,15,9,.17),inset 0 1px 0 #fff;transform:translateX(calc(var(--kp-nav-index) * (100% + 3px)));transition:transform .42s cubic-bezier(.2,.82,.22,1);will-change:transform;pointer-events:none}
-      #kpulseCanonicalDock .kpulse-nav-item{position:relative;z-index:2;min-width:0!important;width:auto!important;height:60px!important;margin:0!important;padding:5px 3px!important;border:0!important;border-radius:17px!important;background:transparent!important;color:rgba(245,247,243,.60)!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;font-family:'DM Sans',sans-serif!important;cursor:pointer!important;box-shadow:none!important;transition:color .26s ease,transform .16s ease!important;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-      #kpulseCanonicalDock .kpulse-nav-item svg{display:block;width:19px!important;height:19px!important;flex:0 0 auto;stroke-width:1.55!important;transition:transform .30s cubic-bezier(.2,.82,.22,1),filter .30s ease!important}
-      #kpulseCanonicalDock .kpulse-nav-copy{display:grid!important;place-items:center!important;gap:1px!important;min-width:0!important;max-width:100%!important;line-height:1!important}
-      #kpulseCanonicalDock .kpulse-nav-copy>b{display:block;max-width:100%;font-size:9px!important;line-height:1!important;font-weight:650!important;letter-spacing:.005em!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-      #kpulseCanonicalDock .kpulse-nav-copy>small{display:block;font-size:5.8px!important;line-height:1!important;font-weight:750!important;letter-spacing:.045em!important;text-transform:uppercase!important;white-space:nowrap!important;opacity:.68!important}
-      #kpulseCanonicalDock .kpulse-nav-item.active{color:#21362a!important;background:transparent!important}
-      #kpulseCanonicalDock .kpulse-nav-item.active svg{transform:translateY(-2px) scale(1.06);filter:drop-shadow(0 4px 8px rgba(35,55,42,.12))}
-      #kpulseCanonicalDock .kpulse-nav-item.active .kpulse-nav-copy>b{font-weight:800!important}
-      #kpulseCanonicalDock .kpulse-nav-item:not(.active):hover{color:#fff!important;transform:translateY(-1px)}
-      #kpulseCanonicalDock .kpulse-nav-item:active{transform:scale(.965)!important;transition-duration:.08s!important}
-      #kpulseCanonicalDock .kpulse-nav-item.kpulse-tab-pop svg{animation:kpDockIconPop .4s cubic-bezier(.2,.82,.22,1)}
-
-      .kpulse-assessment-backdrop{position:fixed;z-index:174;inset:0;border:0;background:rgba(24,32,27,.30);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .22s ease}
-      .kpulse-assessment-backdrop.open{opacity:1;pointer-events:auto}
-      .kpulse-assessment-sheet{position:fixed;z-index:175;left:50%;bottom:96px;width:min(560px,calc(100vw - 24px));padding:14px;border:1px solid rgba(35,48,39,.10);border-radius:26px;background:#fbfaf7;box-shadow:0 30px 92px rgba(25,34,28,.26);transform:translate(-50%,calc(100% + 135px)) scale(.97);opacity:0;pointer-events:none;transition:transform .34s cubic-bezier(.2,.82,.22,1),opacity .22s ease}
-      .kpulse-assessment-sheet.open{transform:translate(-50%,0) scale(1);opacity:1;pointer-events:auto}
-      .kpulse-assessment-handle{width:38px;height:4px;margin:0 auto 12px;border-radius:999px;background:#d8d3c8}
-      .kpulse-assessment-head{display:flex;align-items:end;justify-content:space-between;gap:16px;padding:4px 5px 12px}.kpulse-assessment-head small{display:block;color:#778178;font-size:7px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.kpulse-assessment-head strong{display:block;margin-top:4px;color:#243229;font:600 21px/1.05 Manrope,sans-serif;letter-spacing:-.035em}.kpulse-assessment-close{width:36px;height:36px;border:1px solid rgba(35,48,39,.09);border-radius:50%;background:#fff;color:#35443a;font-size:18px;cursor:pointer}
-      .kpulse-assessment-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kpulse-assessment-card{min-height:150px;padding:16px;border:1px solid rgba(35,48,39,.08);border-radius:19px;background:#f3f0e8;color:#26372d;text-align:left;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}.kpulse-assessment-card.motion{background:linear-gradient(145deg,#23372b,#31503b);color:#fff}.kpulse-assessment-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(35,48,39,.09)}.kpulse-assessment-card span{width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.78);display:grid;place-items:center;color:#30483a}.kpulse-assessment-card.motion span{background:rgba(255,255,255,.12);color:#fff}.kpulse-assessment-card span svg{width:18px;height:18px}.kpulse-assessment-card small{display:block;margin-top:18px;font-size:6.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;opacity:.58}.kpulse-assessment-card strong{display:block;margin-top:5px;font:600 20px/1.05 Manrope,sans-serif;letter-spacing:-.035em}.kpulse-assessment-card p{margin:6px 0 0;font-size:8px;line-height:1.45;opacity:.62}
-
-      @keyframes kpDockIn{from{opacity:0;transform:translate(-50%,18px) scale(.99)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
-      @keyframes kpDockSweep{0%,75%{transform:translateX(-110%)}90%,100%{transform:translateX(110%)}}
-      @keyframes kpDockIconPop{0%{transform:translateY(0) scale(1)}46%{transform:translateY(-5px) scale(1.13)}100%{transform:translateY(-2px) scale(1.06)}}
-
-      @media(max-width:760px){
-        body.kpulse-patient-dock-active .main-shell{padding-bottom:calc(96px + env(safe-area-inset-bottom))!important}
-        #kpulseCanonicalDock{left:7px!important;right:7px!important;width:auto!important;height:68px!important;bottom:max(7px,env(safe-area-inset-bottom))!important;transform:none!important;border-radius:21px!important;padding:5px!important}
-        #kpulseCanonicalDock .kpulse-nav-indicator{left:5px;top:5px;bottom:5px;width:calc((100% - 22px)/5);border-radius:16px}
-        #kpulseCanonicalDock .kpulse-nav-item{height:58px!important;padding:4px 1px!important;border-radius:16px!important}
-        #kpulseCanonicalDock .kpulse-nav-item svg{width:18px!important;height:18px!important}
-        #kpulseCanonicalDock .kpulse-nav-copy>b{font-size:7.8px!important}
-        #kpulseCanonicalDock .kpulse-nav-copy>small{font-size:5.1px!important}
-        .kpulse-assessment-sheet{bottom:86px}.kpulse-assessment-grid{grid-template-columns:1fr}.kpulse-assessment-card{min-height:116px}
-        @keyframes kpDockIn{from{opacity:0;transform:translateY(18px) scale(.99)}to{opacity:1;transform:none}}
-      }
-      @media(max-width:390px){#kpulseCanonicalDock .kpulse-nav-copy>b{font-size:7.1px!important}#kpulseCanonicalDock .kpulse-nav-copy>small{font-size:4.6px!important}}
-      @media(prefers-reduced-motion:reduce){#kpulseCanonicalDock,#kpulseCanonicalDock:before,#kpulseCanonicalDock .kpulse-nav-item.kpulse-tab-pop svg{animation:none!important}#kpulseCanonicalDock .kpulse-nav-indicator,#kpulseCanonicalDock .kpulse-nav-item,#kpulseCanonicalDock .kpulse-nav-item svg,.kpulse-assessment-sheet,.kpulse-assessment-backdrop{transition:none!important}}
-    `;
-    document.head.appendChild(s);
-  }
-
-  function buttonHtml(item){
-    const aria=item.sub?`${item.label} ${item.sub}`:item.label;
-    return `<button type="button" class="kpulse-nav-item" data-kpulse-nav="${item.key}" aria-label="${aria}">${item.icon}<span class="kpulse-nav-copy"><b>${item.label}</b>${item.sub?`<small>${item.sub}</small>`:''}</span></button>`;
-  }
-  function navHtml(){return `<i class="kpulse-nav-indicator" aria-hidden="true"></i>${ITEMS.map(buttonHtml).join('')}`}
-
-  function ensureDock(){
-    const app=document.querySelector('#appShell');if(!app)return null;
-    let dock=document.querySelector('#kpulseCanonicalDock');
-    if(!dock){
-      dock=document.createElement('nav');
-      dock.id='kpulseCanonicalDock';
-      dock.setAttribute('aria-label','Navigation KŌMØ Pulse');
-      dock.innerHTML=navHtml();
-      app.appendChild(dock);
-    }
-    return dock;
-  }
-
-  function ensureAssessmentSheet(){
-    if(document.querySelector('#kpulseAssessmentSheet'))return;
-    const app=document.querySelector('#appShell')||document.body;
-    const back=document.createElement('button');back.type='button';back.id='kpulseAssessmentBackdrop';back.className='kpulse-assessment-backdrop';back.setAttribute('aria-label','Fermer le choix du bilan');
-    const sheet=document.createElement('aside');sheet.id='kpulseAssessmentSheet';sheet.className='kpulse-assessment-sheet';sheet.setAttribute('aria-label','Choisir KŌMØ Motion ou Clinical');
-    sheet.innerHTML=`<div class="kpulse-assessment-handle"></div><div class="kpulse-assessment-head"><div><small>KŌMØ PULSE · BILANS</small><strong>Choisissez votre parcours.</strong></div><button type="button" class="kpulse-assessment-close" data-kpulse-assessment-close aria-label="Fermer">×</button></div><div class="kpulse-assessment-grid"><button type="button" class="kpulse-assessment-card motion" data-kpulse-assessment="motion"><span>${I.motion}</span><div><small>Bilan fonctionnel</small><strong>KŌMØ Motion</strong><p>Préparation, tests, acquisition MyoCare et Motion Score.</p></div></button><button type="button" class="kpulse-assessment-card" data-kpulse-assessment="clinical"><span>${I.clinical}</span><div><small>Bilan approfondi</small><strong>KŌMØ Clinical</strong><p>Planifier l'évaluation clinique avec un professionnel.</p></div></button></div>`;
-    app.append(back,sheet);back.addEventListener('click',closeAssessment);
-  }
-  function openAssessment(){ensureAssessmentSheet();requestAnimationFrame(()=>{document.querySelector('#kpulseAssessmentBackdrop')?.classList.add('open');document.querySelector('#kpulseAssessmentSheet')?.classList.add('open')})}
-  function closeAssessment(){document.querySelector('#kpulseAssessmentBackdrop')?.classList.remove('open');document.querySelector('#kpulseAssessmentSheet')?.classList.remove('open')}
-
-  function go(target){
-    document.querySelector('#modeSwitch [data-mode="member"]')?.click();
-    closeAssessment();
-    if(location.hash!==`#${target}`)location.hash=target;
-    else window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:target}}));
-  }
-  function goClinical(){
-    sessionStorage.setItem('komo_home_booking_service','clinical');
-    go('documents');
-    let tries=0;
-    const t=setInterval(()=>{
-      tries++;
-      const b=document.querySelector('[data-kbook-service="clinical"]');
-      if(b){b.click();clearInterval(t)}else if(tries>35)clearInterval(t);
-    },100);
-  }
-
-  function updateActive(dock){
-    const key=activeKey();
-    const idx=Math.max(0,ITEMS.findIndex(x=>x.key===key));
-    dock.style.setProperty('--kp-nav-index',String(idx));
-    dock.querySelectorAll('[data-kpulse-nav]').forEach(b=>{
-      const on=b.dataset.kpulseNav===key;
-      b.classList.toggle('active',on);
-      if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');
-    });
-  }
-
-  function refresh(){
-    if(refreshing)return;refreshing=true;
-    requestAnimationFrame(()=>{
-      try{
-        ensureStyle();
-        const show=appVisible()&&patientMode();
-        document.body.classList.toggle('kpulse-patient-dock-active',show);
-        const dock=ensureDock();
-        if(dock){dock.hidden=!show;if(show)updateActive(dock)}
-        if(!show)closeAssessment();
-      }finally{refreshing=false}
-    });
-  }
-
-  document.addEventListener('click',e=>{
-    const nav=e.target.closest?.('#kpulseCanonicalDock [data-kpulse-nav]');
-    if(nav){
-      e.preventDefault();e.stopPropagation();
-      nav.classList.remove('kpulse-tab-pop');void nav.offsetWidth;nav.classList.add('kpulse-tab-pop');
-      const key=nav.dataset.kpulseNav;
-      if(key==='assessment')openAssessment();
-      else{const item=ITEMS.find(x=>x.key===key);if(item?.route)go(item.route)}
-      return;
-    }
-    const a=e.target.closest?.('[data-kpulse-assessment]');
-    if(a){e.preventDefault();e.stopPropagation();a.dataset.kpulseAssessment==='motion'?go('motion'):goClinical();return}
-    if(e.target.closest?.('[data-kpulse-assessment-close]')){e.preventDefault();closeAssessment()}
-  },true);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAssessment()});
-
-  ['hashchange','pageshow','resize','orientationchange','komo:route-ready','komo:session-ready','komo:session-cleared','komo:data-ready'].forEach(name=>window.addEventListener(name,()=>{clearTimeout(timer);timer=setTimeout(refresh,45)}));
-  new MutationObserver(()=>{clearTimeout(timer);timer=setTimeout(refresh,55)}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class']});
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,650));
-  setTimeout(refresh,1000);setTimeout(refresh,1800);
-  window.KomoBottomNav={version:VERSION,refresh};
+const V='4.0.1',R=()=>location.hash.replace(/^#/,'')||'home';let t=0,busy=false;
+const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)};
+const patient=()=>{const r=R();if(r==='clinical'||r==='admin')return false;const b=document.querySelector('#modeSwitch [data-mode="member"]');return !b||b.classList.contains('active')};
+const icons={home:'⌂',assessment:'↗',mykomo:'◉',trajectory:'⌁',agenda:'□'};
+const items=[['home','Accueil','home'],['assessment','KŌMØ',''],['mykomo','My KŌMØ','results'],['trajectory','Trajectoire','path'],['agenda','Agenda','documents']];
+const activeKey=()=>{const r=R();return r==='motion'?'assessment':r==='results'?'mykomo':(r==='path'||r==='plan')?'trajectory':r==='documents'?'agenda':'home'};
+function css(){if(document.querySelector('#kpDock401'))return;const s=document.createElement('style');s.id='kpDock401';s.textContent=`
+body.kp-dock-on .sidebar,body.kp-dock-on #mobileNav,body.kp-dock-on #kamBottomBar,body.kp-dock-on #proMobileNav{display:none!important}body.kp-dock-on .app-shell{padding-bottom:0!important}body.kp-dock-on .main-shell{margin-left:0!important;padding-bottom:110px!important}
+#kpDock{position:fixed!important;z-index:170;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(860px,calc(100vw - 30px));height:72px;padding:6px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;border:1px solid rgba(255,255,255,.12);border-radius:23px;background:linear-gradient(145deg,#203027,#19271f);box-shadow:0 20px 62px rgba(24,34,27,.24);overflow:hidden;isolation:isolate;box-sizing:border-box;animation:kpDockIn .55s cubic-bezier(.2,.78,.22,1) both}#kpDock[hidden]{display:none!important}
+#kpDock .kp-indicator{position:absolute;z-index:0;top:6px;left:6px;height:60px;border-radius:17px;background:linear-gradient(145deg,#faf7f0,#ece8df);box-shadow:0 8px 24px rgba(6,15,9,.17);transition:transform .4s cubic-bezier(.2,.82,.22,1),width .3s ease;pointer-events:none}
+#kpDock button{position:relative;z-index:1;height:60px;min-width:0;margin:0;padding:4px;border:0;border-radius:17px;background:transparent;color:rgba(247,248,245,.62);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:color .25s ease,transform .15s ease}#kpDock button .kp-icon{font-size:18px;line-height:1}#kpDock button b{font-size:9px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}#kpDock button small{font-size:5.6px;line-height:1;text-transform:uppercase;letter-spacing:.05em;opacity:.7;white-space:nowrap}#kpDock button.active{color:#20362a}#kpDock button.active .kp-icon{transform:translateY(-2px) scale(1.07)}#kpDock button:active{transform:scale(.965)}
+.kp-picker-bg{position:fixed;z-index:174;inset:0;border:0;background:rgba(24,32,27,.30);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:.2s}.kp-picker-bg.open{opacity:1;pointer-events:auto}.kp-picker{position:fixed;z-index:175;left:50%;bottom:96px;width:min(540px,calc(100vw - 24px));padding:14px;border-radius:26px;background:#fbfaf7;box-shadow:0 30px 92px rgba(25,34,28,.26);transform:translate(-50%,130%) scale(.97);opacity:0;pointer-events:none;transition:.32s cubic-bezier(.2,.82,.22,1)}.kp-picker.open{transform:translate(-50%,0) scale(1);opacity:1;pointer-events:auto}.kp-picker-head{display:flex;justify-content:space-between;align-items:center;padding:5px 5px 12px}.kp-picker-head small{display:block;font-size:7px;letter-spacing:.12em;color:#788078}.kp-picker-head strong{display:block;margin-top:4px;font:600 21px/1 Manrope,sans-serif}.kp-picker-head button{width:36px;height:36px;border:1px solid #e3dfd7;border-radius:50%;background:#fff}.kp-picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kp-choice{min-height:140px;padding:16px;border:1px solid rgba(35,48,39,.08);border-radius:19px;background:#f1eee6;text-align:left;color:#26372d}.kp-choice.motion{background:#263b2e;color:#fff}.kp-choice small{display:block;font-size:7px;letter-spacing:.1em;text-transform:uppercase;opacity:.6}.kp-choice strong{display:block;margin-top:8px;font:600 20px/1 Manrope,sans-serif}.kp-choice p{font-size:9px;line-height:1.45;opacity:.65}
+@keyframes kpDockIn{from{opacity:0;transform:translate(-50%,18px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(max-width:760px){body.kp-dock-on .main-shell{padding-bottom:98px!important}#kpDock{left:7px;right:7px;width:auto;height:68px;bottom:max(7px,env(safe-area-inset-bottom));transform:none;border-radius:21px;padding:5px}#kpDock .kp-indicator{top:5px;left:5px;height:58px}#kpDock button{height:58px;padding:2px 1px}#kpDock button b{font-size:7.7px}#kpDock button small{font-size:4.9px}.kp-picker{bottom:86px}.kp-picker-grid{grid-template-columns:1fr}@keyframes kpDockIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}}
+@media(prefers-reduced-motion:reduce){#kpDock,.kp-indicator,.kp-picker,.kp-picker-bg{animation:none!important;transition:none!important}}
+`;document.head.appendChild(s)}
+function markup(){return '<i class="kp-indicator"></i>'+items.map(([k,l])=>`<button type="button" data-kp="${k}"><span class="kp-icon">${icons[k]}</span><b>${l}</b>${k==='assessment'?'<small>Motion / Clinical</small>':''}</button>`).join('')}
+function dock(){const a=document.querySelector('#appShell');if(!a)return null;let d=document.querySelector('#kpDock');if(!d){d=document.createElement('nav');d.id='kpDock';d.setAttribute('aria-label','Navigation KŌMØ Pulse');d.innerHTML=markup();a.appendChild(d)}return d}
+function picker(){if(document.querySelector('#kpPicker'))return;const a=document.querySelector('#appShell')||document.body,b=document.createElement('button'),p=document.createElement('aside');b.id='kpPickerBg';b.className='kp-picker-bg';p.id='kpPicker';p.className='kp-picker';p.innerHTML='<div class="kp-picker-head"><div><small>KŌMØ PULSE · BILANS</small><strong>Choisissez votre parcours.</strong></div><button data-kp-close>×</button></div><div class="kp-picker-grid"><button class="kp-choice motion" data-kp-choice="motion"><small>Bilan fonctionnel</small><strong>KŌMØ Motion</strong><p>Préparation, tests, acquisition MyoCare et Motion Score.</p></button><button class="kp-choice" data-kp-choice="clinical"><small>Bilan approfondi</small><strong>KŌMØ Clinical</strong><p>Planifier l’évaluation clinique avec un professionnel.</p></button></div>';a.append(b,p);b.onclick=close}
+function open(){picker();requestAnimationFrame(()=>{document.querySelector('#kpPickerBg')?.classList.add('open');document.querySelector('#kpPicker')?.classList.add('open')})}function close(){document.querySelector('#kpPickerBg')?.classList.remove('open');document.querySelector('#kpPicker')?.classList.remove('open')}
+function go(r){document.querySelector('#modeSwitch [data-mode="member"]')?.click();close();if(location.hash!==`#${r}`)location.hash=r;else window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:r}}))}
+function goClinical(){sessionStorage.setItem('komo_home_booking_service','clinical');go('documents');let n=0,q=setInterval(()=>{n++;const b=document.querySelector('[data-kbook-service="clinical"]');if(b){b.click();clearInterval(q)}else if(n>30)clearInterval(q)},100)}
+function paint(d){const key=activeKey(),buttons=[...d.querySelectorAll('[data-kp]')];buttons.forEach(b=>b.classList.toggle('active',b.dataset.kp===key));const b=buttons.find(x=>x.dataset.kp===key),i=d.querySelector('.kp-indicator');if(b&&i){const pad=parseFloat(getComputedStyle(d).paddingLeft)||0;i.style.width=`${b.offsetWidth}px`;i.style.transform=`translateX(${Math.max(0,b.offsetLeft-pad)}px)`}}
+function refresh(){if(busy)return;busy=true;requestAnimationFrame(()=>{try{css();const show=visible()&&patient();document.body.classList.toggle('kp-dock-on',show);const d=dock();if(d){d.hidden=!show;if(show)requestAnimationFrame(()=>paint(d))}if(!show)close()}finally{busy=false}})}
+document.addEventListener('click',e=>{const n=e.target.closest?.('#kpDock [data-kp]');if(n){e.preventDefault();e.stopPropagation();const k=n.dataset.kp;if(k==='assessment')open();else{const x=items.find(i=>i[0]===k);if(x?.[2])go(x[2])}return}const c=e.target.closest?.('[data-kp-choice]');if(c){e.preventDefault();c.dataset.kpChoice==='motion'?go('motion'):goClinical();return}if(e.target.closest?.('[data-kp-close]'))close()},true);document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+['hashchange','pageshow','resize','orientationchange','komo:route-ready','komo:session-ready','komo:data-ready'].forEach(x=>window.addEventListener(x,()=>{clearTimeout(t);t=setTimeout(refresh,45)}));new MutationObserver(()=>{clearTimeout(t);t=setTimeout(refresh,60)}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,600));setTimeout(refresh,1100);window.KomoBottomNav={version:V,refresh};
 })();
