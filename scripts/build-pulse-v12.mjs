@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = join(root, 'pulse-app');
 const target = join(root, 'site', 'pulse-v12');
-const RELEASE='20260828-canonical-results-engine-1';
+const RELEASE='20260828-canonical-pdf-v2';
 
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true });
@@ -23,6 +23,7 @@ const remove=[
   /\s*<script type="module" src="\.\/patient-score-details-v1\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script type="module" src="\.\/score-report-pdf-v1\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script type="module" src="\.\/canonical-report-export\.js(?:\?[^\"]*)?"><\/script>/g,
+  /\s*<script type="module" src="\.\/canonical-report-export-v2\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script type="module" src="\.\/patient-canonical-results\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script type="module" src="\.\/myocare-import-v1\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script type="module" src="\.\/myocare-import\.js(?:\?[^\"]*)?"><\/script>/g,
@@ -37,7 +38,7 @@ const remove=[
 ];
 for(const re of remove) html=html.replace(re,'');
 html=html.replace(/(<script src="\.\/runtime\.js[^>]*><\/script>)/,`  <script src="./navigation-scroll-top.js?v=${RELEASE}"></script>\n  <script src="./auth-login-canonical.js?v=${RELEASE}"></script>\n  <script src="./center-patient-links.js?v=${RELEASE}"></script>\n  $1`);
-html=html.replace('</body>',`  <script type="module" src="./myocare-import.js?v=${RELEASE}"></script>\n  <script type="module" src="./motion-workflow.js?v=${RELEASE}"></script>\n  <script type="module" src="./first-test-entry-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./myocare-import-entry-v2.js?v=${RELEASE}"></script>\n  <script type="module" src="./center-two-tab-workspace-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./myocare-dossier-import-fix-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./center-patient-polish.js?v=${RELEASE}"></script>\n  <script src="./motion-entry-v1.js?v=${RELEASE}"></script>\n  <script src="./motion-tests-entry-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./canonical-report-export.js?v=${RELEASE}"></script>\n  <script type="module" src="./patient-canonical-results.js?v=${RELEASE}"></script>\n</body>`);
+html=html.replace('</body>',`  <script type="module" src="./myocare-import.js?v=${RELEASE}"></script>\n  <script type="module" src="./motion-workflow.js?v=${RELEASE}"></script>\n  <script type="module" src="./first-test-entry-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./myocare-import-entry-v2.js?v=${RELEASE}"></script>\n  <script type="module" src="./center-two-tab-workspace-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./myocare-dossier-import-fix-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./center-patient-polish.js?v=${RELEASE}"></script>\n  <script src="./motion-entry-v1.js?v=${RELEASE}"></script>\n  <script src="./motion-tests-entry-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./canonical-report-export-v2.js?v=${RELEASE}"></script>\n  <script type="module" src="./patient-canonical-results.js?v=${RELEASE}"></script>\n</body>`);
 await writeFile(indexPath,html,'utf8');
 
 const dossierPath=join(target,'dossier.html');
@@ -48,11 +49,12 @@ const dossierRemove=[
   /\s*<script type="module" src="\.\/dossier-pdf-export-v2\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script type="module" src="\.\/dossier-pdf-export\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script type="module" src="\.\/canonical-report-export\.js(?:\?[^\"]*)?"><\/script>/g,
+  /\s*<script type="module" src="\.\/canonical-report-export-v2\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script src="\.\/dossier-export-bridge\.js(?:\?[^\"]*)?"><\/script>/g,
   /\s*<script type="module" src="\.\/dossier-canonical-results\.js(?:\?[^\"]*)?"><\/script>/g
 ];
 for(const re of dossierRemove)dossier=dossier.replace(re,'');
-dossier=dossier.replace('</body>',`  <script src="./navigation-scroll-top.js?v=${RELEASE}"></script>\n  <script type="module" src="./canonical-report-export.js?v=${RELEASE}"></script>\n  <script src="./dossier-export-bridge.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-result-preview.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-canonical-results.js?v=${RELEASE}"></script>\n</body>`);
+dossier=dossier.replace('</body>',`  <script src="./navigation-scroll-top.js?v=${RELEASE}"></script>\n  <script type="module" src="./canonical-report-export-v2.js?v=${RELEASE}"></script>\n  <script src="./dossier-export-bridge.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-result-preview.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-canonical-results.js?v=${RELEASE}"></script>\n</body>`);
 await writeFile(dossierPath,dossier,'utf8');
 
-console.log('[pulse-v12] canonical normative engine owns patient/pro results and all Motion PDF exports');
+console.log('[pulse-v12] canonical normative engine owns patient/pro results; PDF exporter v2 exposes reference values');
