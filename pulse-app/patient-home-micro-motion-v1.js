@@ -1,13 +1,13 @@
 /* KŌMØ Pulse — patient home micro motion v1
    Subtle product motion for the light data wall. No data ownership here. */
 (() => {
-  const VERSION='1.0.0';
+  const VERSION='1.0.1';
   const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
   let runId=0;
 
   const easeOutCubic=t=>1-Math.pow(1-t,3);
   const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
-  const num=v=>{const n=Number(String(v??'').replace(/[^0-9.-]+/g,''));return Number.isFinite(n)?n:null};
+  const num=v=>{const raw=String(v??'').replace(/[^0-9.-]+/g,'');if(!raw||raw==='-'||raw==='.'||raw==='-.')return null;const n=Number(raw);return Number.isFinite(n)?n:null};
 
   function ensureStyle(){
     if(document.querySelector('#khomeMicroMotionStyle'))return;
@@ -129,7 +129,6 @@
     setTimeout(()=>animateNumber(root.querySelector('.kdw-exp-core strong'),{duration:680}),280);
 
     const bar=root.querySelector('.kdw-today-bar i');
-    const barTarget=num(bar?.style?.getPropertyValue('width')) ?? num(getComputedStyle(bar||document.body).width);
     if(bar){
       const parent=bar.parentElement;
       let pct=null;
