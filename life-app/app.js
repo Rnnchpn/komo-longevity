@@ -1,7 +1,5 @@
 const root=document.documentElement;
 const mobileMenu=document.querySelector('[data-mobile-menu]');
-async function hydrateLogo(name){try{const r=await fetch(`assets/${name}.b64`,{cache:'force-cache'});if(!r.ok)return;const data=(await r.text()).trim();const src=`data:image/webp;base64,${data}`;document.querySelectorAll(`img[src="assets/${name}.webp"]`).forEach(img=>{img.src=src})}catch(e){console.warn(`[KŌMØ Life] ${name} unavailable`,e)}}
-hydrateLogo('komo-life-wordmark');hydrateLogo('komo-life-mark');
 function initialLanguage(){const saved=localStorage.getItem('komo-life-language');if(saved==='en'||saved==='fr')return saved;return navigator.language?.toLowerCase().startsWith('fr')?'fr':'en'}
 function setLanguage(language){const lang=language==='fr'?'fr':'en';root.dataset.lang=lang;root.lang=lang;localStorage.setItem('komo-life-language',lang);document.querySelectorAll('[data-en][data-fr]').forEach(el=>{const value=lang==='fr'?el.dataset.fr:el.dataset.en;if(value!==undefined)el.textContent=value});document.querySelectorAll('[data-en-html][data-fr-html]').forEach(el=>{const value=lang==='fr'?el.dataset.frHtml:el.dataset.enHtml;if(value!==undefined)el.innerHTML=value});document.title=lang==='fr'?'KŌMØ Life — La longévité en mouvement':'KŌMØ Life — Longevity in Motion'}
 setLanguage(initialLanguage());document.querySelectorAll('[data-language-toggle]').forEach(btn=>btn.addEventListener('click',()=>setLanguage(root.dataset.lang==='fr'?'en':'fr')));
