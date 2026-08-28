@@ -32,8 +32,8 @@ const checks=[
  ['app recognizes Club',app.includes("'club'")],
  ['app recognizes Trajectoire',app.includes("'trajectory'")],
  ['app delegates modern patient routes',app.includes("source:'app-external-owner'")],
- ['Agenda owns documents route',booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;"))],
- ['Agenda refresh is documents based',booking.includes("location.hash.replace(/^#/,'')!=='documents'"))],
+ ['Agenda owns documents route',booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;")],
+ ['Agenda refresh is documents based',booking.includes("location.hash.replace(/^#/,'')!=='documents'")],
  ['Agenda has no patient role block',!booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents'||['professional','admin'].includes(S.role))return;")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-route-v2] ${ok?'OK':'FAIL'} · ${label}`);
