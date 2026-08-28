@@ -2,13 +2,14 @@ import {readFile,writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 
 await import('./pulse-score-flow-polish-v1.mjs');
+await import('./pulse-score-flow-finalize-v1.mjs');
 
 const pulse=join(process.cwd(),'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
 const cssPath=join(pulse,'pulse-ui-v1.css');
 const appPath=join(pulse,'app.js');
 const bookingPath=join(pulse,'booking-layer-v1.js');
-const release='20260828-canonical-4p3';
+const release='20260828-canonical-4p4';
 
 let html=await readFile(htmlPath,'utf8');
 let css=await readFile(cssPath,'utf8');
