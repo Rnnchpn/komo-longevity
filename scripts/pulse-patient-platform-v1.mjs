@@ -34,7 +34,6 @@ if(!/id:\s*'plan'\s*,\s*label:/.test(app)){
 }else{
   app=app.replace(/(\{\s*id:\s*'plan',\s*label:\s*')[^']+(')/g,"$1KŌMØ Therapy$2");
 }
-// Quiet-route page copy and owner selectors are patched independent of prior wording.
 app=app.replace(/path:\s*\['[^']*','[^']*'\]/,"path:['MY KŌMØ SCORE','Vos résultats, clairement.']");
 app=app.replace(/documents:\s*\['[^']*','[^']*'\]/,"documents:['AGENDA ET RÉSEAU','Vos consultations et le réseau KŌMØ.']");
 app=app.replace(/plan:\s*\['[^']*','[^']*'\]/,"plan:['KŌMØ THERAPY','Votre plan de soins et vos rappels.']");
@@ -49,7 +48,9 @@ await writeFile(paths.adaptive,adaptive);
 
 // Patient appointment requests become pending until a center professional confirms them.
 booking=booking.replace("scheduled:'Planifié'","scheduled:'En attente de validation'");
-booking=booking.replace("async function loadPatient(){S.patientLoading=true;S.patientError='';renderPatient();try{await Promise.all([loadCenters(),loadPatientAppointments()]);await loadPatientSlots()}","async function loadPatient(){const requested=sessionStorage.getItem('komo_booking_service');if(['motion','clinical'].includes(requested)){S.patientService=requested;sessionStorage.removeItem('komo_booking_service')}S.patientLoading=true;S.patientError='';renderPatient();try{await Promise.all([loadCenters(),loadPatientAppointments()]);await loadPatientSlots()}");
+if(!booking.includes("sessionStorage.getItem('komo_booking_service')")){
+  booking=booking.replace('async function loadPatient(){',"async function loadPatient(){const requested=sessionStorage.getItem('komo_booking_service');if(['motion','clinical'].includes(requested)){S.patientService=requested;sessionStorage.removeItem('komo_booking_service')}");
+}
 booking=booking.replace("document.querySelector('#pageEyebrow').textContent='PLANNING';document.querySelector('#pageTitle').textContent='Choisissez votre prochain rendez-vous.'","document.querySelector('#pageEyebrow').textContent='AGENDA ET RÉSEAU';document.querySelector('#pageTitle').textContent='Vos consultations et le réseau KŌMØ.'");
 booking=booking.replace('KŌMØ PULSE · PLANNING','KŌMØ PULSE · AGENDA ET RÉSEAU');
 booking=booking.replace('Réserver votre prochaine mesure.','Choisir un centre et demander un rendez-vous.');
@@ -63,6 +64,7 @@ await writeFile(paths.booking,booking);
 // Pre-consultation questionnaires are genuinely gated by professional confirmation.
 prep=prep.replace(".in('status',['scheduled','confirmed','arrived','in_progress'])",".in('status',['confirmed','arrived','in_progress'])");
 prep=prep.replace("wrap.querySelector('[data-kph2-next]')?.addEventListener('click',()=>d.appointments[0]?.appointment_type==='clinical'?openClinical(d.appointments[0]):openMotion())","wrap.querySelector('[data-kph2-next]')?.addEventListener('click',()=>d.appointments[0]?.appointment_type==='clinical'?openClinical(d.appointments[0]):openMotion());const requested=sessionStorage.getItem('komo_open_preparation');if(requested){sessionStorage.removeItem('komo_open_preparation');setTimeout(()=>requested==='clinical'?openClinical(d.clinical):openMotion(),120)}");
+prep=prep.replace("if(top)top.textContent='KŌMØ · RENDEZ-VOUS';if(title)title.textContent='Préparez et planifiez vos consultations.'","if(top)top.textContent='AGENDA ET RÉSEAU';if(title)title.textContent='Vos consultations et le réseau KŌMØ.'");
 await writeFile(paths.prep,prep);
 
 // Bundle the new visual system once, after old stylesheet layers.
