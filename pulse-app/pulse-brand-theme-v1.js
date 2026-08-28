@@ -1,7 +1,7 @@
 /* KŌMØ Pulse — brand identity + light palette v1
    Persistent product lock-up and unified organic light palette. */
 (() => {
-  const VERSION='1.2.0';
+  const VERSION='1.3.0';
 
   function ensureStyle(){
     if(document.querySelector('#kpulseBrandThemeStyle')) return;
@@ -119,6 +119,13 @@
       script.type='module';
       script.src='./wearable-patient-surfaces-v1.js?v=20260829';
       script.dataset.komoWearableSurfacesJs='1';
+      document.body.appendChild(script);
+    }
+    if(!document.querySelector('script[data-komo-wearable-poc]')){
+      const script=document.createElement('script');
+      script.type='module';
+      script.src='./wearable-poc-entry-v1.js?v=20260829';
+      script.dataset.komoWearablePoc='1';
       document.body.appendChild(script);
     }
   }
