@@ -1,12 +1,12 @@
-/* KŌMØ Pulse — canonical patient dock v4.0.1 */
+/* KŌMØ Pulse — canonical patient dock v4.1.0 */
 (() => {
-const V='4.0.1',R=()=>location.hash.replace(/^#/,'')||'home';let t=0,busy=false;
+const V='4.1.0',R=()=>location.hash.replace(/^#/,'')||'home';let t=0,busy=false;
 const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)};
 const patient=()=>{const r=R();if(r==='clinical'||r==='admin')return false;const b=document.querySelector('#modeSwitch [data-mode="member"]');return !b||b.classList.contains('active')};
 const icons={home:'⌂',assessment:'↗',mykomo:'◉',trajectory:'⌁',agenda:'□'};
-const items=[['home','Accueil','home'],['assessment','KŌMØ',''],['mykomo','My KŌMØ','results'],['trajectory','Trajectoire','path'],['agenda','Agenda','documents']];
-const activeKey=()=>{const r=R();return r==='motion'?'assessment':r==='results'?'mykomo':(r==='path'||r==='plan')?'trajectory':r==='documents'?'agenda':'home'};
-function css(){if(document.querySelector('#kpDock401'))return;const s=document.createElement('style');s.id='kpDock401';s.textContent=`
+const items=[['home','Accueil','home'],['assessment','KŌMØ',''],['mykomo','My KŌMØ','mykomo'],['trajectory','Trajectoire','path'],['agenda','Agenda','documents']];
+const activeKey=()=>{const r=R();return r==='motion'?'assessment':r==='mykomo'?'mykomo':(r==='path'||r==='plan')?'trajectory':r==='documents'?'agenda':'home'};
+function css(){if(document.querySelector('#kpDock410'))return;const s=document.createElement('style');s.id='kpDock410';s.textContent=`
 body.kp-dock-on .sidebar,body.kp-dock-on #mobileNav,body.kp-dock-on #kamBottomBar,body.kp-dock-on #proMobileNav{display:none!important}body.kp-dock-on .app-shell{padding-bottom:0!important}body.kp-dock-on .main-shell{margin-left:0!important;padding-bottom:110px!important}
 #kpDock{position:fixed!important;z-index:170;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(860px,calc(100vw - 30px));height:72px;padding:6px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;border:1px solid rgba(255,255,255,.12);border-radius:23px;background:linear-gradient(145deg,#203027,#19271f);box-shadow:0 20px 62px rgba(24,34,27,.24);overflow:hidden;isolation:isolate;box-sizing:border-box;animation:kpDockIn .55s cubic-bezier(.2,.78,.22,1) both}#kpDock[hidden]{display:none!important}
 #kpDock .kp-indicator{position:absolute;z-index:0;top:6px;left:6px;height:60px;border-radius:17px;background:linear-gradient(145deg,#faf7f0,#ece8df);box-shadow:0 8px 24px rgba(6,15,9,.17);transition:transform .4s cubic-bezier(.2,.82,.22,1),width .3s ease;pointer-events:none}
