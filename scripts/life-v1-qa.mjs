@@ -4,12 +4,17 @@ import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const app = join(root, 'life-app');
-const assetChunks = [
-  ...Array.from({ length: 5 }, (_, i) => `assets/hero.webp.${i}.b64`),
-  ...Array.from({ length: 2 }, (_, i) => `assets/varsity.webp.${i}.b64`),
-  ...Array.from({ length: 5 }, (_, i) => `assets/library.webp.${i}.b64`)
+const required = [
+  'index.html',
+  'styles.css',
+  'app.js',
+  'robots.txt',
+  'sitemap.xml',
+  'assets/social-preview.svg',
+  'assets/life-hero.webp',
+  'assets/life-varsity.webp',
+  'assets/life-library.webp'
 ];
-const required = ['index.html', 'styles.css', 'app.js', 'robots.txt', 'sitemap.xml', 'assets/social-preview.svg', ...assetChunks];
 for (const file of required) await access(join(app, file));
 
 const html = await readFile(join(app, 'index.html'), 'utf8');
@@ -21,8 +26,8 @@ const checks = [
   ['accessible main landmark', html.includes('id="main"')],
   ['bilingual EN/FR content', html.includes('data-en=') && html.includes('data-fr=') && js.includes('komo-life-language')],
   ['culture-first manifesto', html.includes('beyond medicine') && html.includes('au-delà de la médecine')],
-  ['three supplied campaign visuals', html.includes('data-asset="hero"') && html.includes('data-asset="varsity"') && html.includes('data-asset="library"')],
-  ['campaign asset hydration', js.includes('hero: { chunks: 5') && js.includes('varsity: { chunks: 2') && js.includes('library: { chunks: 5')],
+  ['three supplied campaign visuals', html.includes('src="assets/life-hero.webp"') && html.includes('src="assets/life-varsity.webp"') && html.includes('src="assets/life-library.webp"')],
+  ['hero is prioritized', html.includes('fetchpriority="high"') && html.includes('rel="preload" href="assets/life-hero.webp"')],
   ['no storefront grid or cart on homepage', !html.includes('product-grid') && !html.includes('cart-drawer') && !html.includes('checkout-button') && !html.includes('>Bag<')],
   ['no product catalogue dependency', !js.includes('products.js') && !js.includes('LIFE_PRODUCTS')],
   ['KŌMØ Points bridge', html.includes('KŌMØ Points') && html.includes('https://pulse.komolongevity.com/')],
