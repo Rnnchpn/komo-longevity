@@ -7,13 +7,21 @@ export default function handler(request, response) {
     return response.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
 
+  const stripe = Boolean(process.env.STRIPE_SECRET_KEY);
   return response.status(200).json({
     ok: true,
     service: 'komo-life',
     productionOrigin: 'https://life.komolongevity.com/',
     checkoutProvider: 'stripe-checkout',
-    checkoutConfigured: Boolean(process.env.STRIPE_SECRET_KEY),
-    pointsMode: 'preview-access-layer',
-    release: 'life-v1'
+    checkoutConfigured: stripe,
+    pointsMode: 'wallet-v1',
+    pointsCheckoutConfigured: stripe,
+    pointsPolicy: {
+      kpPerEuro: 100,
+      minimumRedemptionKp: 500,
+      verifiedXpThreshold: 500,
+      kpPerVerifiedThreshold: 250
+    },
+    release: 'life-wallet-v1'
   });
 }
