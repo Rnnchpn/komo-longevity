@@ -4,7 +4,7 @@ import { interpretDossier } from './normative-engine-v1.js';
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const REM='komo_pulse_remember';
-let client=null;
+let client=null,latestResult=null;
 const cache=new Map();
 
 function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
@@ -42,18 +42,23 @@ export async function loadCanonicalResult({patientId=null,force=false}={}){
     const dossier=q.data;
     const interpretation=interpretDossier(dossier);
     const score=dossier.score||null;
-    const identity={patientId:resolvedPatientId,assessmentId:dossier.motion?.id||score?.assessment_id||null,scoreId:score?.id||null,algorithmVersion:score?.algorithm_version||null,engineVersion:interpretation.engineVersion,referenceVersion:interpretation.referenceVersion};
-    return{patientId:resolvedPatientId,snapshot,dossier,score,interpretation,identity};
+    const identity={patientId:resolvedPatientId,assessmentId:dossier.motion?.id||null,scoreId:score?.id||null,algorithmVersion:score?.algorithm_version||null,engineVersion:interpretation.engineVersion,referenceVersion:interpretation.referenceVersion};
+    const result={patientId:resolvedPatientId,snapshot,dossier,score,interpretation,identity};
+    latestResult=result;
+    if(window.KomoCanonicalResultRuntime)window.KomoCanonicalResultRuntime.latest=result;
+    window.dispatchEvent(new CustomEvent('komo:canonical-result-ready',{detail:{identity,carePlan:interpretation.carePlan,summary:interpretation.summary,consistencyIssues:interpretation.consistencyIssues}}));
+    return result;
   })();
   cache.set(cacheKey,promise);
   try{return await promise}catch(e){cache.delete(cacheKey);throw e}
 }
 
-export function clearCanonicalResult(patientId=null){if(patientId)cache.delete(keyFor(patientId));else cache.clear()}
+export function clearCanonicalResult(patientId=null){if(patientId)cache.delete(keyFor(patientId));else cache.clear();if(!patientId){latestResult=null;if(window.KomoCanonicalResultRuntime)window.KomoCanonicalResultRuntime.latest=null}}
 export function getCanonicalClient(){return sb()}
+export function getLatestCanonicalResult(){return latestResult}
 
 function invalidate(){clearCanonicalResult();window.dispatchEvent(new CustomEvent('komo:canonical-result-invalidated'))}
 window.addEventListener('komo:motion-v05-release',invalidate);
 window.addEventListener('komo:manual-motion-saved',invalidate);
 window.addEventListener('komo:myocare-imported',invalidate);
-window.KomoCanonicalResultRuntime={version:'1.0.0',load:loadCanonicalResult,clear:clearCanonicalResult};
+window.KomoCanonicalResultRuntime={version:'1.1.0',load:loadCanonicalResult,clear:clearCanonicalResult,latest:null,getLatest:getLatestCanonicalResult};
