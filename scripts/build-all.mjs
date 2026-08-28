@@ -126,6 +126,7 @@ const scripts = [
   'scripts/homepage-wow-v4.mjs',
   'scripts/homepage-brand-visual-v5.mjs',
   'scripts/komo-key-public-page-v1.mjs',
+  'scripts/komo-key-polish-v2.mjs',
   'scripts/life-v1-qa.mjs'
 ];
 
