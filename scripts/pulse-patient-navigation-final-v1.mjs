@@ -11,7 +11,8 @@ const release=(html.match(/<meta name="komo-pulse-release" content="([^"]+)"/)||
 html=html
   .replace(/\s*<script src="\.\/pulse-bottom-nav-v5\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<script src="\.\/pulse-bottom-nav-v6\.js(?:\?[^\"]*)?"><\/script>/g,'')
-  .replace(/\s*<script src="\.\/patient-palette-balance-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
+  .replace(/\s*<script src="\.\/patient-palette-balance-v1\.js(?:\?[^\"]*)?"><\/script>/g,'')
+  .replace(/\s*<script src="\.\/patient-route-runtime-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
 
 html=html.replace('</body>',`  <script src="./patient-palette-balance-v1.js?v=${release}"></script>\n  <script src="./pulse-bottom-nav-v6.js?v=${release}"></script>\n</body>`);
 await writeFile(indexPath,html,'utf8');
@@ -25,12 +26,19 @@ const cacheSafeApp='app-router-v2.js';
 await copyFile(appPath,join(pulseDir,cacheSafeApp));
 html=await readFile(indexPath,'utf8');
 html=html.replaceAll('./app.js',`./${cacheSafeApp}`);
+
+// Ship the route activator explicitly and load it LAST. It is the final owner hand-off
+// for Motion, Trajectoire and Agenda and removes stale route-guard visibility locks.
+const routeRuntime='patient-route-runtime-v1.js';
+await copyFile(join(root,'pulse-app',routeRuntime),join(pulseDir,routeRuntime));
+html=html.replace('</body>',`  <script src="./${routeRuntime}?v=20260829-route-runtime-1"></script>\n</body>`);
 await writeFile(indexPath,html,'utf8');
 
 const finalHtml=await readFile(indexPath,'utf8');
 const finalApp=await readFile(join(pulseDir,cacheSafeApp),'utf8');
 const finalBooking=await readFile(join(pulseDir,'booking-layer-v1.js'),'utf8');
 const finalDock=await readFile(join(pulseDir,'pulse-bottom-nav-v6.js'),'utf8');
+const finalRuntime=await readFile(join(pulseDir,routeRuntime),'utf8');
 const checks=[
   ['dock v6 shipped',finalHtml.includes('pulse-bottom-nav-v6.js')],
   ['dock v5 removed',!finalHtml.includes('pulse-bottom-nav-v5.js')],
@@ -39,8 +47,13 @@ const checks=[
   ['Motion, My KŌMØ, Club and Trajectoire accepted by app core',finalApp.includes("'motion','mykomo','club','trajectory'")],
   ['modern routes delegated to dedicated owners',finalApp.includes("source:'app-external-owner'")],
   ['Club is a native equal dock route',finalDock.includes("['club','Club','∞','club','']")&&finalDock.includes('repeat(6,minmax(0,1fr))')],
-  ['Agenda owns documents route',finalBooking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;")]
+  ['Agenda owns documents route',finalBooking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;")],
+  ['final patient route runtime shipped last',finalHtml.lastIndexOf(routeRuntime)>finalHtml.lastIndexOf('pulse-bottom-nav-v6.js')],
+  ['runtime explicitly activates Motion',finalRuntime.includes('KomoMotionHubV3?.refresh')],
+  ['runtime explicitly activates Trajectoire',finalRuntime.includes('KomoTrajectoryV3?.refresh')],
+  ['runtime explicitly activates Agenda',finalRuntime.includes('KomoBooking?.refreshPatient')],
+  ['runtime clears hidden route guards',finalRuntime.includes("classList.remove('kmotion-route-pending','komo-trajectory-pending')")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-nav-final] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log(`[pulse-nav-final] Motion · My KŌMØ · Club · Trajectoire · Agenda ownership locked · cache-safe router · ${release}`);
+console.log(`[pulse-nav-final] Motion · Trajectoire · Agenda explicit activation locked · cache-safe router · ${release}`);
