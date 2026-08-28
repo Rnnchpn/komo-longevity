@@ -2,34 +2,11 @@ const root = document.documentElement;
 const header = document.getElementById('site-header');
 const mobileMenu = document.querySelector('[data-mobile-menu]');
 
-const ASSETS = {
-  hero: { chunks: 5, mime: 'image/webp' },
-  varsity: { chunks: 2, mime: 'image/webp' },
-  library: { chunks: 5, mime: 'image/webp' }
-};
-
-async function hydrateAsset(name, config) {
-  const targets = [...document.querySelectorAll(`[data-asset="${name}"]`)];
-  if (!targets.length) return;
-  try {
-    const requests = Array.from({ length: config.chunks }, (_, i) =>
-      fetch(`assets/${name}.webp.${i}.b64`, { cache: 'force-cache' }).then((response) => {
-        if (!response.ok) throw new Error(`${name} chunk ${i} unavailable`);
-        return response.text();
-      })
-    );
-    const chunks = await Promise.all(requests);
-    const source = `data:${config.mime};base64,${chunks.join('')}`;
-    targets.forEach((image) => {
-      image.addEventListener('load', () => image.classList.add('is-loaded'), { once: true });
-      image.src = source;
-    });
-  } catch (error) {
-    console.warn(`[KŌMØ Life] ${name} visual could not load.`, error);
-  }
-}
-
-Object.entries(ASSETS).forEach(([name, config]) => hydrateAsset(name, config));
+document.querySelectorAll('[data-asset]').forEach((image) => {
+  const markLoaded = () => image.classList.add('is-loaded');
+  if (image.complete && image.naturalWidth) markLoaded();
+  else image.addEventListener('load', markLoaded, { once: true });
+});
 
 function resolveInitialLanguage() {
   const stored = localStorage.getItem('komo-life-language');
