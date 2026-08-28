@@ -1,0 +1,22 @@
+/* KŌMØ Pulse — final mobile home brand emphasis */
+@media(max-width:767px){
+  html[data-adaptive-shell="phone"]:has(#viewRoot > [data-my-komo-home]) .kam-mobile-brand{
+    left:50%!important;
+    top:10px!important;
+    transform:translateX(-50%)!important;
+    width:max-content!important;
+    justify-items:center!important;
+    text-align:center!important;
+    gap:6px!important;
+  }
+  html[data-adaptive-shell="phone"]:has(#viewRoot > [data-my-komo-home]) .kam-mobile-brand strong{
+    font:600 34px/.94 Manrope,'DM Sans',sans-serif!important;
+    letter-spacing:.08em!important;
+    text-align:center!important;
+  }
+  html[data-adaptive-shell="phone"]:has(#viewRoot > [data-my-komo-home]) .kam-mobile-brand span{
+    font-size:8px!important;
+    letter-spacing:.19em!important;
+    text-align:center!important;
+  }
+}
