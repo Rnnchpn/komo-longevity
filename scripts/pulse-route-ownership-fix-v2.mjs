@@ -11,18 +11,16 @@ let app=await readFile(appPath,'utf8');
 const currentStart=app.indexOf('function currentRoute(){');
 const currentEnd=app.indexOf('function renderNavigation(){',currentStart);
 if(currentStart<0||currentEnd<0) throw new Error('Pulse app route boundaries not found');
-const currentFn=`function currentRoute(){const route=location.hash.replace(/^#/,'')||'home';if(route==='clinical'&&!['professional','admin'].includes(state.role))return'home';return['home','results','path','documents','explore','clinical','profile','motion','mykomo','trajectory','club'].includes(route)?route:'home'}\n`;
+const currentFn=`function currentRoute(){const route=location.hash.replace(/^#/,'')||'home';if(route==='clinical'&&!['professional','admin'].includes(state.role))return'home';return['home','results','path','documents','explore','clinical','profile','motion','mykomo','club','trajectory'].includes(route)?route:'home'}\n`;
 app=app.slice(0,currentStart)+currentFn+app.slice(currentEnd);
 
 const renderStart='function renderRoute(route){renderNavigation();';
-if(!app.includes(renderStart)) throw new Error('Pulse app renderRoute boundary not found');
-const delegated="function renderRoute(route){renderNavigation();if(['motion','mykomo','trajectory','club'].includes(route)){window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route,source:'app-external-owner'}}));return}";
-const idx=app.indexOf(renderStart);
-const after=idx+renderStart.length;
-const marker='const pages=';
-const pagesIdx=app.indexOf(marker,after);
+const renderIdx=app.indexOf(renderStart);
+if(renderIdx<0) throw new Error('Pulse app renderRoute boundary not found');
+const pagesIdx=app.indexOf('const pages=',renderIdx+renderStart.length);
 if(pagesIdx<0) throw new Error('Pulse app pages boundary not found');
-app=app.slice(0,idx)+delegated+app.slice(pagesIdx);
+const delegated="function renderRoute(route){renderNavigation();if(['motion','mykomo','club','trajectory'].includes(route)){window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route,source:'app-external-owner'}}));return}";
+app=app.slice(0,renderIdx)+delegated+app.slice(pagesIdx);
 await writeFile(appPath,app,'utf8');
 
 const bookingPath=join(pulse,'booking-layer-v1.js');
@@ -47,13 +45,13 @@ else if(!booking.includes(newObserver)) throw new Error('Agenda observer contrac
 await writeFile(bookingPath,booking,'utf8');
 
 const checks=[
- ['app recognizes Motion',app.includes("'motion'"))],
- ['app recognizes My KŌMØ',app.includes("'mykomo'"))],
- ['app recognizes Trajectoire',app.includes("'trajectory'"))],
- ['app recognizes Club',app.includes("'club'"))],
- ['app delegates modern patient routes',app.includes("source:'app-external-owner'"))],
+ ['app recognizes Motion',app.includes("'motion'" )],
+ ['app recognizes My KŌMØ',app.includes("'mykomo'" )],
+ ['app recognizes Club',app.includes("'club'" )],
+ ['app recognizes Trajectoire',app.includes("'trajectory'" )],
+ ['app delegates modern patient routes',app.includes("source:'app-external-owner'" )],
  ['Agenda follows patient mode',booking.includes(memberActive)],
- ['Agenda no longer blocks admin role in patient mode',!booking.includes("r==='documents'&&!['professional','admin'].includes(S.role)"))]
+ ['Agenda no longer blocks admin role in patient mode',!booking.includes("r==='documents'&&!['professional','admin'].includes(S.role)")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-route-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
