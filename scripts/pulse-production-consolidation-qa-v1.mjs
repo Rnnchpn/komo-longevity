@@ -2,7 +2,7 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 
 const pulse=join(process.cwd(),'site','pulse-v12');
-const release='20260828-canonical-4p2';
+const release='20260828-canonical-4p3';
 const [html,css,app,adaptive,mobile,guided,design,patientMotion,booking,performanceRuntime,middleware]=await Promise.all([
   readFile(join(pulse,'index.html'),'utf8'),
   readFile(join(pulse,'pulse-ui-v1.css'),'utf8'),
@@ -50,6 +50,7 @@ const checks=[
   ['versioned assets are immutable',middleware.includes("max-age=31536000, immutable")&&middleware.includes("incomingUrl.searchParams.has('v')")],
   ['HTML remains private no-store',middleware.includes("Cache-Control', 'private, no-store, max-age=0")],
   ['My KŌMØ remains canonical home presentation',design.includes('kamo-home-result-removed')],
+  ['score pathway polish shipped',css.includes('/* Score pathway polish · canonical-4p3 */')],
   ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')&&css.includes('Home: My KŌMØ')&&css.includes('RDV: booking-layer-v1')]
 ];
 
