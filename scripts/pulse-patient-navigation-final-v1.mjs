@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { copyFile, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,19 +19,28 @@ await writeFile(indexPath,html,'utf8');
 // Enforce canonical route ownership after every other Pulse post-build has finished.
 await import('./pulse-route-ownership-fix-v2.mjs');
 
+// Use a fresh bundle filename so browsers cannot keep an older immutable app.js.
+const appPath=join(pulseDir,'app.js');
+const cacheSafeApp='app-router-v2.js';
+await copyFile(appPath,join(pulseDir,cacheSafeApp));
+html=await readFile(indexPath,'utf8');
+html=html.replaceAll('./app.js',`./${cacheSafeApp}`);
+await writeFile(indexPath,html,'utf8');
+
 const finalHtml=await readFile(indexPath,'utf8');
-const finalApp=await readFile(join(pulseDir,'app.js'),'utf8');
+const finalApp=await readFile(join(pulseDir,cacheSafeApp),'utf8');
 const finalBooking=await readFile(join(pulseDir,'booking-layer-v1.js'),'utf8');
 const finalDock=await readFile(join(pulseDir,'pulse-bottom-nav-v6.js'),'utf8');
 const checks=[
   ['dock v6 shipped',finalHtml.includes('pulse-bottom-nav-v6.js')],
   ['dock v5 removed',!finalHtml.includes('pulse-bottom-nav-v5.js')],
   ['neutral patient palette shipped',finalHtml.includes('patient-palette-balance-v1.js')],
+  ['fresh router bundle shipped',finalHtml.includes(cacheSafeApp)&&!finalHtml.includes('./app.js')],
   ['Motion, My KŌMØ, Club and Trajectoire accepted by app core',finalApp.includes("'motion','mykomo','club','trajectory'")],
   ['modern routes delegated to dedicated owners',finalApp.includes("source:'app-external-owner'")],
   ['Club is a native equal dock route',finalDock.includes("['club','Club','∞','club','']")&&finalDock.includes('repeat(6,minmax(0,1fr))')],
-  ['Agenda patient surface remains bundled',finalBooking.includes('data-kbook-patient')&&finalBooking.includes("'documents'")]
+  ['Agenda owns documents route',finalBooking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-nav-final] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log(`[pulse-nav-final] Motion · My KŌMØ · Club · Trajectoire · Agenda ownership locked · ${release}`);
+console.log(`[pulse-nav-final] Motion · My KŌMØ · Club · Trajectoire · Agenda ownership locked · cache-safe router · ${release}`);
