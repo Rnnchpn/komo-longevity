@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = join(root, 'pulse-app');
 const target = join(root, 'site', 'pulse-v12');
-const RELEASE='20260828-pulse-bottom-nav-v3';
+const RELEASE='20260828-pulse-bottom-nav-v4';
 
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true });
@@ -64,4 +64,4 @@ for(const re of dossierRemove)dossier=dossier.replace(re,'');
 dossier=dossier.replace('</body>',`  <script src="./navigation-scroll-top.js?v=${RELEASE}"></script>\n  <script type="module" src="./canonical-report-export-v2.js?v=${RELEASE}"></script>\n  <script src="./dossier-export-bridge.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-result-preview.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-canonical-results.js?v=${RELEASE}"></script>\n  <script type="module" src="./locomotor-age-ui-v01.js?v=${RELEASE}"></script>\n</body>`);
 await writeFile(dossierPath,dossier,'utf8');
 
-console.log('[pulse-v12] patient shell = animated five-tab bottom nav: Accueil · KŌMØ Motion/Clinical · My KŌMØ · Trajectoire · Agenda');
+console.log('[pulse-v12] canonical patient dock v4 = independent five-tab navigation, legacy bars disabled in patient mode');
