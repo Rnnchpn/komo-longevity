@@ -82,6 +82,7 @@ const scripts = [
   'scripts/pulse-adaptive-shell-v4.mjs',
   'scripts/pulse-my-komo-v1.mjs',
   'scripts/build-pulse-v12.mjs',
+  'scripts/build-life-v1.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
   'scripts/pulse-booking-directory-map-v1.mjs',
@@ -122,7 +123,8 @@ const scripts = [
   'scripts/homepage-whoop-polish-v3.mjs',
   'scripts/pulse-tests-status-cockpit-v1.mjs',
   'scripts/homepage-wow-v4.mjs',
-  'scripts/homepage-brand-visual-v5.mjs'
+  'scripts/homepage-brand-visual-v5.mjs',
+  'scripts/life-v1-qa.mjs'
 ];
 
 for (const script of scripts) {

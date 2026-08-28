@@ -1,8 +1,15 @@
 import { next } from '@vercel/functions';
 
 const PULSE_HOST = 'pulse.komolongevity.com';
+const LIFE_HOST = 'life.komolongevity.com';
+const SHOP_HOST = 'shop.komolongevity.com';
 const STATIC_ORIGIN = 'https://komolongevity.com';
 const STATIC_ASSET_RE = /\.(?:css|js|mjs|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i;
+
+const HOST_APPS = {
+  [PULSE_HOST]: { prefix: '/pulse-v12', private: true, routeHeader: 'X-KOMO-Pulse-Route' },
+  [LIFE_HOST]: { prefix: '/life-v1', private: false, routeHeader: 'X-KOMO-Life-Route' },
+};
 
 export const config = {
   matcher: '/:path*',
@@ -14,11 +21,15 @@ export default async function middleware(request) {
     .split(':')[0]
     .toLowerCase();
 
-  if (hostname !== PULSE_HOST) {
-    return next();
+  if (hostname === SHOP_HOST) {
+    const destination = new URL(incomingUrl.pathname + incomingUrl.search, `https://${LIFE_HOST}`);
+    return Response.redirect(destination, 308);
   }
 
-  // Keep project APIs and Vercel internals on their native routes.
+  const app = HOST_APPS[hostname];
+  if (!app) return next();
+
+  // APIs and Vercel internals stay on native project routes for both Pulse and Life.
   if (
     incomingUrl.pathname.startsWith('/api/') ||
     incomingUrl.pathname.startsWith('/_vercel/')
@@ -26,16 +37,13 @@ export default async function middleware(request) {
     return next();
   }
 
-  // Proxy the public Pulse hostname to the already-built standalone Pulse files.
-  // The browser keeps https://pulse.komolongevity.com/... while the source files
-  // are served from the canonical production deployment under /pulse-v12/.
   let targetPath;
   if (incomingUrl.pathname === '/') {
-    targetPath = '/pulse-v12/';
-  } else if (incomingUrl.pathname.startsWith('/pulse-v12/')) {
+    targetPath = `${app.prefix}/`;
+  } else if (incomingUrl.pathname.startsWith(`${app.prefix}/`)) {
     targetPath = incomingUrl.pathname;
   } else {
-    targetPath = `/pulse-v12${incomingUrl.pathname}`;
+    targetPath = `${app.prefix}${incomingUrl.pathname}`;
   }
 
   const targetUrl = new URL(targetPath, STATIC_ORIGIN);
@@ -55,21 +63,26 @@ export default async function middleware(request) {
   const isVersionedAsset = isStaticAsset && incomingUrl.searchParams.has('v');
 
   if (isVersionedAsset) {
-    // Pulse assets use a release token in their URL. Once a release URL exists its
-    // bytes never change, so the browser and CDN can safely keep it for a year.
     responseHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
     responseHeaders.set('CDN-Cache-Control', 'public, s-maxage=31536000, immutable');
   } else if (isStaticAsset) {
-    // Unversioned assets stay conservative in case an external/public URL is reused.
     responseHeaders.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=3600');
     responseHeaders.set('CDN-Cache-Control', 'public, s-maxage=86400, stale-while-revalidate=604800');
-  } else {
+  } else if (app.private) {
     responseHeaders.set('Cache-Control', 'private, no-store, max-age=0');
     responseHeaders.delete('CDN-Cache-Control');
+  } else {
+    // Life is a public, indexable storefront. Keep HTML fresh while allowing short CDN caching.
+    responseHeaders.set('Cache-Control', 'public, max-age=0, must-revalidate');
+    responseHeaders.set('CDN-Cache-Control', 'public, s-maxage=300, stale-while-revalidate=3600');
   }
 
-  responseHeaders.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
-  responseHeaders.set('X-KOMO-Pulse-Route', 'middleware');
+  if (app.private) {
+    responseHeaders.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  } else {
+    responseHeaders.delete('X-Robots-Tag');
+  }
+  responseHeaders.set(app.routeHeader, 'middleware');
 
   return new Response(upstream.body, {
     status: upstream.status,
