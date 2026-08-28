@@ -47,11 +47,11 @@ for(const [oldValue,newValue] of replacements){if(booking.includes(oldValue))boo
 await writeFile(bookingPath,booking,'utf8');
 
 const checks=[
- ['app recognizes Motion',app.includes("'motion'" )],
- ['app recognizes My KŌMØ',app.includes("'mykomo'" )],
- ['app recognizes Club',app.includes("'club'" )],
- ['app recognizes Trajectoire',app.includes("'trajectory'" )],
- ['app delegates modern patient routes',app.includes("source:'app-external-owner'" ))
+ ['app recognizes Motion',app.includes("'motion'")],
+ ['app recognizes My KŌMØ',app.includes("'mykomo'")],
+ ['app recognizes Club',app.includes("'club'")],
+ ['app recognizes Trajectoire',app.includes("'trajectory'")],
+ ['app delegates modern patient routes',app.includes("source:'app-external-owner'")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-route-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
