@@ -2,7 +2,7 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 
 const pulse=join(process.cwd(),'site','pulse-v12');
-const release='20260828-canonical-4p5';
+const release='20260828-canonical-4p6';
 const [html,css,app,adaptive,mobile,guided,design,patientMotion,booking,performanceRuntime,middleware,score,therapy]=await Promise.all([
   readFile(join(pulse,'index.html'),'utf8'),
   readFile(join(pulse,'pulse-ui-v1.css'),'utf8'),
