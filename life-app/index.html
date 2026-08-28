@@ -15,6 +15,7 @@
   <meta property="og:url" content="https://life.komolongevity.com/">
   <meta property="og:image" content="https://life.komolongevity.com/assets/social-preview.svg">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="preload" href="assets/life-hero.webp" as="image" type="image/webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.css?v=life-002">
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"WebSite","name":"KŌMØ Life","url":"https://life.komolongevity.com/","description":"The cultural and physical expression of KŌMØ — clothing, objects, ideas and experiences for longevity in motion.","publisher":{"@type":"Organization","name":"KŌMØ","url":"https://komolongevity.com/"}}
@@ -45,7 +46,7 @@
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="hero-media" aria-hidden="true">
-        <img data-asset="hero" alt="" decoding="async">
+        <img data-asset="hero" src="assets/life-hero.webp" alt="" decoding="async" fetchpriority="high">
       </div>
       <div class="hero-shade"></div>
       <div class="hero-content">
@@ -82,7 +83,7 @@
 
     <section class="collection" id="collection">
       <div class="collection-media reveal">
-        <img data-asset="varsity" alt="KŌMØ Life founding varsity jacket" decoding="async">
+        <img data-asset="varsity" src="assets/life-varsity.webp" alt="KŌMØ Life founding varsity jacket" decoding="async" loading="lazy">
       </div>
       <div class="collection-copy section-dark">
         <div class="section-label light reveal"><span>02</span><p data-en="Founding Collection" data-fr="Collection fondatrice">Founding Collection</p></div>
@@ -97,7 +98,7 @@
 
     <section class="culture section-dark" id="culture">
       <div class="culture-media reveal">
-        <img data-asset="library" alt="KŌMØ Life culture in motion editorial in a library" decoding="async">
+        <img data-asset="library" src="assets/life-library.webp" alt="KŌMØ Life culture in motion editorial in a library" decoding="async" loading="lazy">
       </div>
       <div class="culture-copy reveal">
         <div class="section-label light"><span>03</span><p data-en="Culture in Motion" data-fr="Une culture du mouvement">Culture in Motion</p></div>
