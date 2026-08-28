@@ -5,13 +5,32 @@ const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const REM='komo_pulse_remember';
 const PENDING='komo_open_first_test_v1';
 let client=null;
-let baselineDone=null;
-let baselineCheckedAt=0;
+let freeState=null;
+let checkedAt=0;
 let checking=false;
 
 function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
 function sb(){return window.KomoRuntime?.client||(client||(client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}
 function route(){return location.hash.replace(/^#/,'')||'home'}
+function answered(v){return v!==undefined&&v!==null&&v!==''}
+function questionnaireCount(b){
+  const items=b?.questionnaire?.items||{};
+  let count=0;
+  for(let i=1;i<=25;i++){
+    const k=`kmq_${String(i).padStart(2,'0')}`;
+    if(answered(items[k]))count++;
+  }
+  return count;
+}
+function computeFreeState(row){
+  const r=row?.responses||{},b=r.baseline||{};
+  const qCount=questionnaireCount(b);
+  const legacyQuestionnaireDone=qCount===0&&Number.isFinite(Number(b?.questionnaire?.mobility_score_0_100));
+  const questionnaireDone=qCount>=25||legacyQuestionnaireDone;
+  const chairDone=Boolean(r?.chair_stand?.completed_at);
+  const twoDone=Boolean(r?.two_step?.completed_at);
+  return{questionnaireDone,chairDone,twoDone,qCount,complete:questionnaireDone&&chairDone&&twoDone};
+}
 
 function addStyles(){
   if(document.querySelector('#first-test-entry-v1-style'))return;
@@ -31,41 +50,67 @@ function addStyles(){
   document.head.appendChild(style);
 }
 
-async function getBaselineState(force=false){
-  if(checking)return baselineDone;
-  if(!force&&baselineDone!==null&&Date.now()-baselineCheckedAt<8000)return baselineDone;
+async function getFreeState(force=false){
+  if(checking)return freeState;
+  if(!force&&freeState&&Date.now()-checkedAt<5000)return freeState;
   checking=true;
   try{
     const c=sb(),runtime=window.KomoRuntime?.getContext?.(),session=runtime?.session||(await c.auth.getSession()).data?.session;
-    if(!session?.user){baselineDone=null;return null}
-    const {data,error}=await c.from('pulse_assessments').select('responses,updated_at').eq('user_id',session.user.id).eq('protocol_version','mobility-check-v1').order('updated_at',{ascending:false}).limit(1).maybeSingle();
+    if(!session?.user){freeState=null;return null}
+    const {data,error}=await c.from('pulse_assessments').select('responses,status,completed_at,updated_at').eq('user_id',session.user.id).eq('protocol_version','mobility-check-v1').order('updated_at',{ascending:false}).limit(1).maybeSingle();
     if(error)throw error;
-    baselineDone=Boolean(data?.responses?.baseline?.completed_at);
-    baselineCheckedAt=Date.now();
-    return baselineDone;
-  }catch(error){console.error('[first-test-entry-v1]',error);return baselineDone}finally{checking=false}
+    freeState=computeFreeState(data||null);
+    checkedAt=Date.now();
+    return freeState;
+  }catch(error){
+    console.error('[first-test-entry-v1]',error);
+    freeState=freeState||{questionnaireDone:false,chairDone:false,twoDone:false,qCount:0,complete:false};
+    return freeState;
+  }finally{checking=false}
+}
+
+function cardContent(state){
+  if(!state?.questionnaireDone)return{
+    eyebrow:'PREMIÈRE ÉTAPE · GRATUIT',
+    title:'Débuter le premier test',
+    copy:'Commencez votre bilan par le questionnaire KŌMØ. Il constitue la première étape de Pulse Free avant le Chair Stand et le Two-Step.',
+    meta:['Questionnaire KŌMØ','25 questions','5–7 min'],
+    button:'Commencer le questionnaire gratuit',
+    key:'baseline',
+    note:'Votre progression KŌMØ apparaîtra après votre bilan gratuit.'
+  };
+  if(!state.chairDone)return{
+    eyebrow:'DEUXIÈME ÉTAPE · GRATUIT',title:'Continuer avec le Chair Stand',copy:'Votre questionnaire est terminé. Réalisez maintenant le test de lever de chaise pour poursuivre votre bilan Pulse Free.',meta:['Chair Stand','30 secondes','Chaise stable'],button:'Commencer le Chair Stand',key:'chair_stand',note:'Il restera ensuite le Two-Step.'
+  };
+  return{
+    eyebrow:'DERNIÈRE ÉTAPE · GRATUIT',title:'Terminer avec le Two-Step',copy:'Vous avez terminé le questionnaire et le Chair Stand. Le Two-Step est la dernière étape avant votre premier résultat KŌMØ.',meta:['Two-Step','2 pas','Mètre ruban'],button:'Commencer le Two-Step',key:'two_step',note:'Votre premier résultat sera disponible après cette étape.'
+  };
 }
 
 function renderFirstTestCard(){
-  if(route()!=='home'||baselineDone!==false)return;
+  if(route()!=='home'||!freeState||freeState.complete)return;
   const box=document.querySelector('[data-my-komo-home] .mykomo-xp');
-  if(!box||box.dataset.firstTestEntry==='1')return;
+  if(!box)return;
+  const c=cardContent(freeState);
+  const signature=`${c.key}:${freeState.qCount}:${freeState.chairDone}:${freeState.twoDone}`;
+  if(box.dataset.firstTestSignature===signature)return;
   addStyles();
   box.dataset.firstTestEntry='1';
+  box.dataset.firstTestSignature=signature;
   box.classList.add('mykomo-first-test');
   box.innerHTML=`
-    <span class="mykomo-first-test__eyebrow">PREMIÈRE ÉTAPE · GRATUIT</span>
-    <h3>Débuter le premier test.</h3>
-    <p>Commencez votre bilan par le questionnaire KŌMØ. Il constitue la première étape de Pulse Free avant le Chair Stand et le Two-Step.</p>
-    <div class="mykomo-first-test__meta"><span>Questionnaire KŌMØ</span><span>25 questions</span><span>5–7 min</span></div>
-    <button type="button" class="mykomo-first-test__button" data-start-first-test-v1><span>Commencer le questionnaire gratuit</span><span aria-hidden="true">→</span></button>
-    <small class="mykomo-first-test__note">Votre progression KŌMØ apparaîtra après cette première étape.</small>`;
+    <span class="mykomo-first-test__eyebrow">${c.eyebrow}</span>
+    <h3>${c.title}</h3>
+    <p>${c.copy}</p>
+    <div class="mykomo-first-test__meta">${c.meta.map(x=>`<span>${x}</span>`).join('')}</div>
+    <button type="button" class="mykomo-first-test__button" data-start-free-step-v1="${c.key}"><span>${c.button}</span><span aria-hidden="true">→</span></button>
+    <small class="mykomo-first-test__note">${c.note}</small>`;
 }
 
 async function patchHome(force=false){
   if(route()!=='home')return;
-  const state=await getBaselineState(force);
-  if(state===false)renderFirstTestCard();
+  const state=await getFreeState(force);
+  if(state&&!state.complete)renderFirstTestCard();
 }
 
 function cleanSignupHandoff(){
@@ -76,23 +121,23 @@ function cleanSignupHandoff(){
   if(modal){modal.hidden=true;delete modal.dataset.handoff}
 }
 
-function openQuestionnaireWhenReady(attempt=0){
-  if(sessionStorage.getItem(PENDING)!=='1')return;
+function openFreeStepWhenReady(key,attempt=0){
   if(route()!=='results'){location.hash='results';return}
-  const button=document.querySelector('.tests-v1-root [data-open-test="baseline"]');
-  if(button){
-    sessionStorage.removeItem(PENDING);
-    button.click();
-    return;
-  }
-  if(attempt<150)setTimeout(()=>openQuestionnaireWhenReady(attempt+1),100);
+  const button=document.querySelector(`.tests-v1-root [data-open-test="${key}"]`);
+  if(button){sessionStorage.removeItem(PENDING);button.click();return}
+  if(attempt<180)setTimeout(()=>openFreeStepWhenReady(key,attempt+1),100);
 }
 
-function beginFirstTest(){
+function beginFreeStep(key='baseline'){
   cleanSignupHandoff();
-  sessionStorage.setItem(PENDING,'1');
+  sessionStorage.setItem(PENDING,key);
   if(route()!=='results')location.hash='results';
-  setTimeout(()=>openQuestionnaireWhenReady(0),40);
+  setTimeout(()=>openFreeStepWhenReady(key,0),40);
+}
+
+function resumePending(){
+  const key=sessionStorage.getItem(PENDING);
+  if(key)setTimeout(()=>openFreeStepWhenReady(key,0),60);
 }
 
 function patchWelcome(){
@@ -100,7 +145,7 @@ function patchWelcome(){
   const button=modal?.querySelector('[data-start-komo-check]');
   if(!button)return;
   button.removeAttribute('data-start-komo-check');
-  button.dataset.startFirstTestV1='1';
+  button.dataset.startFreeStepV1='baseline';
   button.textContent='Débuter le premier test gratuit →';
   const copy=modal.querySelector('.patient-create-success p:not(.eyebrow)');
   if(copy)copy.textContent='Votre compte est prêt. Commencez maintenant par le questionnaire KŌMØ gratuit, première étape de votre bilan Pulse Free.';
@@ -108,25 +153,27 @@ function patchWelcome(){
 
 function schedule(){
   patchWelcome();
-  if(route()==='home')setTimeout(()=>patchHome(false),60);
-  if(sessionStorage.getItem(PENDING)==='1')setTimeout(()=>openQuestionnaireWhenReady(0),60);
+  if(route()==='home')setTimeout(()=>patchHome(false),30);
+  resumePending();
 }
 
 document.addEventListener('click',event=>{
-  const button=event.target.closest?.('[data-start-first-test-v1]');
+  const button=event.target.closest?.('[data-start-free-step-v1]');
   if(!button)return;
   event.preventDefault();
   event.stopPropagation();
-  beginFirstTest();
+  beginFreeStep(button.dataset.startFreeStepV1||'baseline');
 },true);
 
 window.addEventListener('hashchange',()=>{
-  if(route()==='home'){baselineDone=null;baselineCheckedAt=0;setTimeout(()=>patchHome(true),180)}
-  if(route()==='results')setTimeout(()=>openQuestionnaireWhenReady(0),80);
+  if(route()==='home'){freeState=null;checkedAt=0;setTimeout(()=>patchHome(true),80)}
+  if(route()==='results')resumePending();
 });
 window.addEventListener('komo:route-ready',schedule);
-window.addEventListener('pageshow',()=>setTimeout(schedule,300));
-document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,650));
+window.addEventListener('komo:assessment-updated',()=>{freeState=null;checkedAt=0;setTimeout(()=>patchHome(true),80)});
+window.addEventListener('pageshow',()=>setTimeout(schedule,120));
+document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,250));
 const observer=new MutationObserver(()=>schedule());
-observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-handoff']});
-setTimeout(schedule,1100);
+observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-handoff','class']});
+setInterval(()=>{if(route()==='home')patchHome(false)},1200);
+setTimeout(schedule,400);
