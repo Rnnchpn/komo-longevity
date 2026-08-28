@@ -30,9 +30,9 @@ await copyFile(appPath,join(pulseDir,cacheSafeApp));
 html=await readFile(indexPath,'utf8');
 html=html.replaceAll('./app.js',`./${cacheSafeApp}`);
 
-// Cache-safe Centre cockpit v2. Old center helper modules remain harmless because v2 does not expose data-center-hub.
+// Cache-safe Centre cockpit v2, copied from the already stabilized generated bundle.
 const centerCockpit='center-command-cockpit-v2.js';
-await copyFile(join(root,'pulse-app','center-hub-v1.js'),join(pulseDir,centerCockpit));
+await copyFile(join(pulseDir,'center-hub-v1.js'),join(pulseDir,centerCockpit));
 html=html.replaceAll('./center-hub-v1.js',`./${centerCockpit}`);
 
 // Full patient Agenda: compact calendar on the left, colored CARTO map on the right.
@@ -76,6 +76,7 @@ const checks=[
   ['legacy Booking remains available for professional planning',finalBooking.includes('window.KomoBooking')],
   ['Centre cockpit v2 is cache-safe',finalHtml.includes(centerCockpit)&&!finalHtml.includes('./center-hub-v1.js')],
   ['Centre cockpit uses canonical command backend',finalCenter.includes("functions.invoke('center-command-v2'")],
+  ['Centre cockpit uses canonical center context',finalCenter.includes('komo:center-context-changed')],
   ['Centre cockpit owns overview, agenda, team and map profile',finalCenter.includes("['overview','Vue d’ensemble']")&&finalCenter.includes("['agenda'")&&finalCenter.includes("['team'")&&finalCenter.includes("['profile','Profil & carte']")],
   ['Centre cockpit validates appointments',finalCenter.includes("rpc('approve_komo_appointment'")&&finalCenter.includes("rpc('update_pulse_appointment'")],
   ['Centre cockpit manages professional affiliation',finalCenter.includes("action:'add_member'")&&finalCenter.includes("action:'update_member'")&&finalCenter.includes("action:'remove_member'")],
