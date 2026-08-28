@@ -23,36 +23,19 @@ const delegated="function renderRoute(route){renderNavigation();if(['motion','my
 app=app.slice(0,renderIdx)+delegated+app.slice(pagesIdx);
 await writeFile(appPath,app,'utf8');
 
-// Legacy Agenda rewrites are best-effort only. Multiple later build layers can
-// already own these contracts; route ownership for Club must never fail because
-// an unrelated Agenda string has changed shape.
-const bookingPath=join(pulse,'booking-layer-v1.js');
-let booking=await readFile(bookingPath,'utf8');
-const memberActive=`document.querySelector('#modeSwitch [data-mode="member"]')?.classList.contains('active')`;
-const replacements=[
-  [
-    `function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents'||['professional','admin'].includes(S.role))return;`,
-    `function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents'||!${memberActive})return;`
-  ],
-  [
-    `if(location.hash.replace(/^#/,'')==='documents'&&!['professional','admin'].includes(S.role))await loadPatient()`,
-    `if(location.hash.replace(/^#/,'')==='documents'&&${memberActive})await loadPatient()`
-  ],
-  [
-    `if(r==='documents'&&!['professional','admin'].includes(S.role)&&!document.querySelector('[data-kbook-patient]'))setTimeout(refresh,80)`,
-    `if(r==='documents'&&${memberActive}&&!document.querySelector('[data-kbook-patient]'))setTimeout(refresh,80)`
-  ]
-];
-for(const [oldValue,newValue] of replacements){if(booking.includes(oldValue))booking=booking.replace(oldValue,newValue)}
-await writeFile(bookingPath,booking,'utf8');
+// Agenda is already consolidated later in the production pipeline. Do not rewrite it here.
+const booking=await readFile(join(pulse,'booking-layer-v1.js'),'utf8');
 
 const checks=[
  ['app recognizes Motion',app.includes("'motion'")],
  ['app recognizes My KŌMØ',app.includes("'mykomo'")],
  ['app recognizes Club',app.includes("'club'")],
  ['app recognizes Trajectoire',app.includes("'trajectory'")],
- ['app delegates modern patient routes',app.includes("source:'app-external-owner'")]
+ ['app delegates modern patient routes',app.includes("source:'app-external-owner'")],
+ ['Agenda owns documents route',booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;"))],
+ ['Agenda refresh is documents based',booking.includes("location.hash.replace(/^#/,'')!=='documents'"))],
+ ['Agenda has no patient role block',!booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents'||['professional','admin'].includes(S.role))return;")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-route-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log('[pulse-route-v2] canonical ownership fixed for Motion · My KŌMØ · Club · Trajectoire; Agenda compatibility applied when applicable');
+console.log('[pulse-route-v2] canonical ownership fixed for Motion · My KŌMØ · Club · Trajectoire; Agenda preserved');
