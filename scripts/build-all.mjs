@@ -123,6 +123,7 @@ const scripts = [
   'scripts/homepage-whoop-polish-v3.mjs',
   'scripts/pulse-tests-status-cockpit-v1.mjs',
   'scripts/homepage-wow-v4.mjs',
+  'scripts/homepage-brand-visual-v5.mjs',
   'scripts/life-v1-qa.mjs'
 ];
 
