@@ -26,9 +26,9 @@ const checks=[
   ['dock v6 shipped',finalHtml.includes('pulse-bottom-nav-v6.js')],
   ['dock v5 removed',!finalHtml.includes('pulse-bottom-nav-v5.js')],
   ['neutral patient palette shipped',finalHtml.includes('patient-palette-balance-v1.js')],
-  ['Motion route accepted by app core',finalApp.includes("'motion','mykomo','trajectory'"))],
-  ['modern routes delegated to dedicated owners',finalApp.includes("source:'app-external-owner'"))],
-  ['Agenda follows visible patient mode',finalBooking.includes("#modeSwitch [data-mode=\"member\"]"))]
+  ['Motion route accepted by app core',finalApp.includes("'motion','mykomo','trajectory'")],
+  ['modern routes delegated to dedicated owners',finalApp.includes("source:'app-external-owner'")],
+  ['Agenda follows visible patient mode',finalBooking.includes("#modeSwitch [data-mode=\"member\"]")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-nav-final] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
