@@ -114,6 +114,8 @@ const scripts = [
   'scripts/pulse-center-directory-management-qa-v1.mjs',
   'scripts/pulse-mobile-stability-final-v2.mjs',
   'scripts/pulse-mobile-stability-final-qa-v2.mjs',
+  'scripts/pulse-daily-engagement-polish-v1.mjs',
+  'scripts/pulse-daily-engagement-polish-qa-v1.mjs',
   'scripts/pulse-production-consolidation-v1.mjs',
   'scripts/pulse-production-consolidation-qa-v1.mjs'
 ];
