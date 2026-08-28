@@ -119,7 +119,8 @@ const scripts = [
   'scripts/pulse-production-consolidation-v1.mjs',
   'scripts/pulse-production-consolidation-qa-v1.mjs',
   'scripts/homepage-whoop-stepup-v2.mjs',
-  'scripts/homepage-whoop-polish-v3.mjs'
+  'scripts/homepage-whoop-polish-v3.mjs',
+  'scripts/pulse-tests-status-cockpit-v1.mjs'
 ];
 
 for (const script of scripts) {
