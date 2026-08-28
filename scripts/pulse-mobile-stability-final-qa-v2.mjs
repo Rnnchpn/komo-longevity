@@ -3,8 +3,8 @@ import {join} from 'node:path';
 
 const pulse=join(process.cwd(),'site','pulse-v12');
 const read=name=>readFile(join(pulse,name),'utf8');
-const [html,runtime,perf,guard,css,design]=await Promise.all([
-  read('index.html'),read('runtime.js'),read('performance-runtime-v1.js'),read('session-shell-guard-v1.js'),read('pulse-final-design-v1.css'),read('pulse-final-design-v1.js')
+const [html,runtime,perf,guard,css,design,homeBrand]=await Promise.all([
+  read('index.html'),read('runtime.js'),read('performance-runtime-v1.js'),read('session-shell-guard-v1.js'),read('pulse-final-design-v1.css'),read('pulse-final-design-v1.js'),read('mobile-home-brand-final-v1.css')
 ]);
 const checks=[
   ['dynamic auth storage installed before Supabase modules',runtime.includes('__komoAuthStorageV2')&&runtime.includes('preferredStore')],
@@ -15,7 +15,9 @@ const checks=[
   ['home is owned only by My KŌMØ',design.includes('root.children')&&design.includes('node===myKomo')],
   ['final mobile CSS normalizes patient pro admin surfaces',css.includes('Final mobile audit')&&css.includes('data-adaptive-mode="pro"')&&css.includes('data-adaptive-mode="admin"')],
   ['final mobile navigation respects safe area',css.includes('env(safe-area-inset-bottom)')],
-  ['core assets share the same release token',html.includes('runtime.js?v=20260827-mobile-stable-2')&&html.includes('app.js?v=20260827-mobile-stable-2')&&html.includes('pulse-ui-v1.css?v=20260827-mobile-stable-2')&&html.includes('pulse-final-design-v1.js?v=20260827-mobile-stable-2')]
+  ['core assets share the same release token',html.includes('runtime.js?v=20260827-mobile-stable-2')&&html.includes('app.js?v=20260827-mobile-stable-2')&&html.includes('pulse-ui-v1.css?v=20260827-mobile-stable-2')&&html.includes('pulse-final-design-v1.js?v=20260827-mobile-stable-2')],
+  ['mobile home brand layer is published',html.includes('mobile-home-brand-final-v1.css?v=20260828-home-brand-1')],
+  ['home KŌMØ Pulse brand is enlarged and centered',homeBrand.includes('34px')&&homeBrand.includes('translateX(-50%)')&&homeBrand.includes('[data-my-komo-home]')]
 ];
 let failed=0;
 for(const [label,ok] of checks){console.log(`[pulse-mobile-final-qa] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)failed++}
