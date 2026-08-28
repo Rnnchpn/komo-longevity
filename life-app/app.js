@@ -4,7 +4,7 @@ const mobileMenu = document.querySelector('[data-mobile-menu]');
 const ASSETS = {
   hero: { chunks: 5, mime: 'image/webp' },
   varsity: { chunks: 2, mime: 'image/webp' },
-  library: { chunks: 5, mime: 'image/webp' }
+  library: { chunks: 1, mime: 'image/webp' }
 };
 
 async function hydrateAsset(name, config){
@@ -18,7 +18,7 @@ async function hydrateAsset(name, config){
       })
     ));
     const src=`data:${config.mime};base64,${chunks.join('')}`;
-    targets.forEach(img=>{img.src=src;img.classList.add('is-loaded')});
+    targets.forEach(img=>{img.addEventListener('load',()=>img.classList.add('is-loaded'),{once:true});img.src=src});
   }catch(error){console.warn(`[KŌMØ Life] ${name} visual could not load`,error)}
 }
 Object.entries(ASSETS).forEach(([name,config])=>hydrateAsset(name,config));
