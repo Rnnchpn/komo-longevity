@@ -5,25 +5,24 @@ import { fileURLToPath } from 'node:url';
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = join(root, 'pulse-app');
 const target = join(root, 'site', 'pulse-v12');
+const RELEASE='20260828-center-canonical-1';
 
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true });
 
 const indexPath=join(target,'index.html');
 let html=await readFile(indexPath,'utf8');
-html=html.replace(/\s*<script src="\.\/center-patient-click-gate-v5\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script src="\.\/center-patient-native-links-v6\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script src="\.\/center-patient-absolute-link-v7\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script src="\.\/center-patient-portal-links-v8\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script type="module" src="\.\/first-test-entry-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script type="module" src="\.\/myocare-import-entry-v2\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script type="module" src="\.\/center-two-tab-workspace-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script type="module" src="\.\/myocare-dossier-import-fix-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script type="module" src="\.\/center-patient-polish-v2\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script type="module" src="\.\/center-patient-polish-v3\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/\s*<script type="module" src="\.\/center-patient-open-v4\.js(?:\?[^\"]*)?"><\/script>/g,'');
-html=html.replace(/(<script src="\.\/runtime\.js[^>]*><\/script>)/,'  <script src="./center-patient-portal-links-v8.js?v=20260828-portal-dossier-8"></script>\n  $1');
-html=html.replace('</body>','  <script type="module" src="./first-test-entry-v1.js?v=20260828-first-test-1"></script>\n  <script type="module" src="./myocare-import-entry-v2.js?v=20260828-myocare-entry-1"></script>\n  <script type="module" src="./center-two-tab-workspace-v1.js?v=20260828-center-two-tab-1"></script>\n  <script type="module" src="./myocare-dossier-import-fix-v1.js?v=20260828-myocare-dossier-fix-1"></script>\n  <script type="module" src="./center-patient-polish-v3.js?v=20260828-center-patient-polish-3"></script>\n</body>');
+const remove=[
+  /\s*<script src="\.\/center-patient-links\.js(?:\?[^\"]*)?"><\/script>/g,
+  /\s*<script type="module" src="\.\/first-test-entry-v1\.js(?:\?[^\"]*)?"><\/script>/g,
+  /\s*<script type="module" src="\.\/myocare-import-entry-v2\.js(?:\?[^\"]*)?"><\/script>/g,
+  /\s*<script type="module" src="\.\/center-two-tab-workspace-v1\.js(?:\?[^\"]*)?"><\/script>/g,
+  /\s*<script type="module" src="\.\/myocare-dossier-import-fix-v1\.js(?:\?[^\"]*)?"><\/script>/g,
+  /\s*<script type="module" src="\.\/center-patient-polish\.js(?:\?[^\"]*)?"><\/script>/g
+];
+for(const re of remove) html=html.replace(re,'');
+html=html.replace(/(<script src="\.\/runtime\.js[^>]*><\/script>)/,`  <script src="./center-patient-links.js?v=${RELEASE}"></script>\n  $1`);
+html=html.replace('</body>',`  <script type="module" src="./first-test-entry-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./myocare-import-entry-v2.js?v=${RELEASE}"></script>\n  <script type="module" src="./center-two-tab-workspace-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./myocare-dossier-import-fix-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./center-patient-polish.js?v=${RELEASE}"></script>\n</body>`);
 await writeFile(indexPath,html,'utf8');
 
-console.log('[pulse-v12] standalone app copied to /pulse-v12/ with body-level patient dossier portal navigation, standalone dossier page, MyoCare import and two-tab center workspace');
+console.log('[pulse-v12] canonical center stack: patient links, two-tab workspace, dossier page, MyoCare import and patient polish');
