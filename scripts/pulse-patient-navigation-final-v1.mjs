@@ -30,10 +30,21 @@ await copyFile(appPath,join(pulseDir,cacheSafeApp));
 html=await readFile(indexPath,'utf8');
 html=html.replaceAll('./app.js',`./${cacheSafeApp}`);
 
+// Cache-safe Centre cockpit v2. Old center helper modules remain harmless because v2 does not expose data-center-hub.
+const centerCockpit='center-command-cockpit-v2.js';
+await copyFile(join(root,'pulse-app','center-hub-v1.js'),join(pulseDir,centerCockpit));
+html=html.replaceAll('./center-hub-v1.js',`./${centerCockpit}`);
+
 // Full patient Agenda: compact calendar on the left, colored CARTO map on the right.
 const agendaHub='agenda-hub-v4.js';
 await copyFile(join(root,'pulse-app',agendaHub),join(pulseDir,agendaHub));
-html=html.replace('</body>',`  <script type="module" src="./${agendaHub}?v=20260829-agenda-v4-final"></script>\n</body>`);
+let agendaSource=await readFile(join(pulseDir,agendaHub),'utf8');
+const oldGeo="let p=cache[locationQuery(x)];if(!p)p=await geocode(locationQuery(x));";
+const newGeo="let p=(Number.isFinite(Number(x.latitude))&&Number.isFinite(Number(x.longitude)))?{lat:Number(x.latitude),lng:Number(x.longitude)}:cache[locationQuery(x)];if(!p)p=await geocode(locationQuery(x));";
+if(!agendaSource.includes(oldGeo))throw new Error('Agenda map coordinate patch target not found');
+agendaSource=agendaSource.replace(oldGeo,newGeo);
+await writeFile(join(pulseDir,agendaHub),agendaSource,'utf8');
+html=html.replace('</body>',`  <script type="module" src="./${agendaHub}?v=20260829-agenda-v4-center-sync"></script>\n</body>`);
 
 // Hide legacy Motion journey/report cards only on Agenda, without disabling them elsewhere.
 const cleanRoom='agenda-clean-room-v1.js';
@@ -53,6 +64,7 @@ const finalDock=await readFile(join(pulseDir,'pulse-bottom-nav-v6.js'),'utf8');
 const finalRuntime=await readFile(join(pulseDir,routeRuntime),'utf8');
 const finalAgenda=await readFile(join(pulseDir,agendaHub),'utf8');
 const finalClean=await readFile(join(pulseDir,cleanRoom),'utf8');
+const finalCenter=await readFile(join(pulseDir,centerCockpit),'utf8');
 const checks=[
   ['dock v6 shipped',finalHtml.includes('pulse-bottom-nav-v6.js')],
   ['dock v5 removed',!finalHtml.includes('pulse-bottom-nav-v5.js')],
@@ -62,9 +74,15 @@ const checks=[
   ['modern routes delegated to dedicated owners',finalApp.includes("source:'app-external-owner'")],
   ['Club is a native equal dock route',finalDock.includes("['club','Club','∞','club','']")&&finalDock.includes('repeat(6,minmax(0,1fr))')],
   ['legacy Booking remains available for professional planning',finalBooking.includes('window.KomoBooking')],
+  ['Centre cockpit v2 is cache-safe',finalHtml.includes(centerCockpit)&&!finalHtml.includes('./center-hub-v1.js')],
+  ['Centre cockpit uses canonical command backend',finalCenter.includes("functions.invoke('center-command-v2'")],
+  ['Centre cockpit owns overview, agenda, team and map profile',finalCenter.includes("['overview','Vue d’ensemble']")&&finalCenter.includes("['agenda'")&&finalCenter.includes("['team'")&&finalCenter.includes("['profile','Profil & carte']")],
+  ['Centre cockpit validates appointments',finalCenter.includes("rpc('approve_komo_appointment'")&&finalCenter.includes("rpc('update_pulse_appointment'")],
+  ['Centre cockpit manages professional affiliation',finalCenter.includes("action:'add_member'")&&finalCenter.includes("action:'update_member'")&&finalCenter.includes("action:'remove_member'")],
   ['hero-only Agenda v5 removed',!finalHtml.includes('agenda-hub-v5.js')],
   ['full Agenda v4 shipped',finalHtml.includes(agendaHub)&&finalAgenda.includes('ag4-workspace')&&finalAgenda.includes('ag4-map')],
   ['Agenda keeps calendar and colored map',finalAgenda.includes('ag4-days')&&finalAgenda.includes('basemaps.cartocdn.com')],
+  ['Agenda prioritizes persisted center coordinates',finalAgenda.includes('Number.isFinite(Number(x.latitude))')&&finalAgenda.includes('Number(x.longitude)')],
   ['Agenda clean-room shipped after Agenda',finalHtml.indexOf(cleanRoom)>finalHtml.indexOf(agendaHub)],
   ['legacy Motion journey hidden on Agenda',finalClean.includes('[data-kmj1]')],
   ['legacy canonical report hidden on Agenda',finalClean.includes('[data-kcanon-doc]')],
@@ -75,4 +93,4 @@ const checks=[
 ];
 for(const [label,ok] of checks) console.log(`[pulse-nav-final] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log(`[pulse-nav-final] Agenda restored · hero + calendar + map · legacy Motion cards suppressed · ${release}`);
+console.log(`[pulse-nav-final] Centre v2 · Agenda synchronized · persisted map coordinates · ${release}`);
