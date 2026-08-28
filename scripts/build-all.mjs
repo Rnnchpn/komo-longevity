@@ -118,7 +118,8 @@ const scripts = [
   'scripts/pulse-daily-engagement-polish-qa-v1.mjs',
   'scripts/pulse-production-consolidation-v1.mjs',
   'scripts/pulse-production-consolidation-qa-v1.mjs',
-  'scripts/homepage-whoop-stepup-v2.mjs'
+  'scripts/homepage-whoop-stepup-v2.mjs',
+  'scripts/homepage-whoop-polish-v3.mjs'
 ];
 
 for (const script of scripts) {
