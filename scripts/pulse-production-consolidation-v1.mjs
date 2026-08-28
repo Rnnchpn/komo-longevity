@@ -11,7 +11,7 @@ const htmlPath=join(pulse,'index.html');
 const cssPath=join(pulse,'pulse-ui-v1.css');
 const appPath=join(pulse,'app.js');
 const bookingPath=join(pulse,'booking-layer-v1.js');
-const release='20260828-canonical-4p5';
+const release='20260828-canonical-4p6';
 
 let html=await readFile(htmlPath,'utf8');
 let css=await readFile(cssPath,'utf8');
