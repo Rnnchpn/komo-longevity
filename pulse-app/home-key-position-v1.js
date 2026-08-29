@@ -1,9 +1,9 @@
 /* KŌMØ Pulse — Home KEY priority placement v2.1
    Phone-only helper: the commercial desktop Home now renders its own KEY summary.
-   On phone, the full KEY panel remains directly above Motion Score + KŌMØ Age. */
+   On phone, CSS keeps the full KEY panel visually first while the DOM contract stays stable. */
 (()=>{
 'use strict';
-const V='2.1.0';
+const V='2.1.1';
 let timer=0,attempt=0,placing=false;
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const phone=()=>matchMedia('(max-width:767px)').matches;
@@ -25,7 +25,7 @@ async function place(){
     const age=grid.querySelector('.kdw-age'),score=grid.querySelector('.kdw-score');
     if(!age||!score){if(attempt<10)schedule(260);return}
     grid.classList.add('kdw-key-priority');
-    age.insertAdjacentElement('beforebegin',key);
+    age.insertAdjacentElement('afterend',key);
     attempt=0;
   }finally{placing=false}
 }
