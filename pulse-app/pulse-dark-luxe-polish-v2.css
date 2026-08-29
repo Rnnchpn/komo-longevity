@@ -1,0 +1,249 @@
+/* KŌMØ Pulse — Dark Luxe Polish v2
+   Visual hierarchy only. Black graphite canvas + porcelain / forest / warm accent surfaces.
+   No route, auth ownership, data, score or session behavior is changed. */
+
+:root{
+  --kdp-black:#050706;
+  --kdp-graphite:#0d100e;
+  --kdp-graphite-2:#141815;
+  --kdp-graphite-3:#1b201c;
+  --kdp-porcelain:#ece9e1;
+  --kdp-porcelain-2:#e3e0d7;
+  --kdp-sage:#a8b8a8;
+  --kdp-forest:#203429;
+  --kdp-forest-2:#314b3a;
+  --kdp-warm:#c8beb0;
+  --kdp-warm-dark:#29251f;
+  --kdp-white:#f4f1ea;
+  --kdp-muted:#909991;
+  --kdp-dark:#172019;
+  --kdp-line:rgba(244,241,234,.085);
+  --kdp-light-line:rgba(26,35,29,.09);
+  --kdp-shadow:0 24px 70px rgba(0,0,0,.34);
+}
+
+/* ========================================================================== 
+   CANVAS — one quiet black environment
+   ========================================================================== */
+html,body,#appShell,.main-shell{background-color:var(--kdp-black)!important}
+#appShell,.main-shell{
+  background:
+    radial-gradient(920px 570px at 91% -8%,rgba(137,161,141,.115),transparent 61%),
+    radial-gradient(680px 460px at -12% 88%,rgba(175,151,115,.045),transparent 64%),
+    linear-gradient(180deg,#080a09 0%,#050706 56%,#040605 100%)!important;
+}
+.main-shell:before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.44;
+  background:
+    radial-gradient(circle at 74% 21%,rgba(255,255,255,.022) 0 1px,transparent 1.4px) 0 0/26px 26px,
+    linear-gradient(115deg,transparent 0 48%,rgba(255,255,255,.012) 49%,transparent 50%);
+  mask-image:linear-gradient(145deg,rgba(0,0,0,.8),transparent 78%);
+}
+.main-shell:after{opacity:.20!important;background-size:68px 68px!important}
+.topbar{
+  background:linear-gradient(180deg,rgba(5,7,6,.97) 0%,rgba(5,7,6,.72) 72%,transparent 100%)!important;
+  border-bottom:1px solid rgba(255,255,255,.035)!important;
+}
+.topbar h1{font-weight:500!important;letter-spacing:-.04em!important}
+.topbar .eyebrow{color:#7e8981!important;letter-spacing:.16em!important}
+
+/* Subtle material edge used throughout. */
+.card,.section-block,.metric-card,.test-v1-card,.pv4-section,.pv4-primary,.pv4-secondary,
+.kcp-card,.kav2-card,.booking-card,.profile-card,.result-card,.trajectory-card,.path-card,
+.kdw-card,.kh2-stage-head,.kh2-stat,.kh2-quality,.kh2-trend,.kh2-data-head,.kh2-drop,.kh2-preview,.kh2-flow article,.kh2-empty,.mkv4-card{
+  position:relative;
+}
+.card:after,.section-block:after,.metric-card:after,.test-v1-card:after,.pv4-section:after,.pv4-primary:after,.pv4-secondary:after,
+.kcp-card:after,.kav2-card:after,.booking-card:after,.profile-card:after,.result-card:after,.trajectory-card:after,.path-card:after{
+  content:"";position:absolute;left:12%;right:12%;top:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);opacity:.58;
+}
+
+/* ========================================================================== 
+   DESKTOP NAVIGATION — almost invisible until needed
+   ========================================================================== */
+.sidebar{
+  background:linear-gradient(180deg,#080a09 0%,#060807 100%)!important;
+  border-right:1px solid rgba(255,255,255,.055)!important;
+  box-shadow:18px 0 70px rgba(0,0,0,.16)!important;
+}
+.brand-mark{font-weight:500!important;letter-spacing:.14em!important}
+.nav-stack a,.nav-stack button,.nav-stack [data-route]{border-radius:14px!important}
+.nav-stack .active,.nav-stack [aria-current="page"],.nav-stack [data-active="true"]{
+  background:linear-gradient(145deg,rgba(161,181,164,.13),rgba(255,255,255,.025))!important;
+  box-shadow:inset 0 0 0 1px rgba(186,201,188,.09),0 10px 28px rgba(0,0,0,.12)!important;
+}
+.icon-button,.avatar-button{backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+
+/* ========================================================================== 
+   HOME — deliberately mixed materials so the important boxes emerge
+   ========================================================================== */
+body.khome-v3 .kdw{gap:14px!important}
+body.khome-v3 .kdw-actions{gap:12px!important}
+body.khome-v3 .kdw-action{
+  border-color:var(--kdp-line)!important;border-radius:24px!important;
+  box-shadow:0 18px 46px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.035)!important;
+  background:linear-gradient(145deg,#151a16,#0c0f0d)!important;color:var(--kdp-white)!important;
+}
+body.khome-v3 .kdw-action.sand{background:linear-gradient(145deg,#171814,#0d100e)!important}
+body.khome-v3 .kdw-action.primary{
+  background:radial-gradient(circle at 90% 5%,rgba(166,193,169,.15),transparent 33%),linear-gradient(145deg,#203429,#314a39)!important;
+  border-color:rgba(186,207,189,.10)!important;
+}
+body.khome-v3 .kdw-action.soft{
+  background:linear-gradient(145deg,var(--kdp-porcelain),var(--kdp-porcelain-2))!important;color:var(--kdp-dark)!important;border-color:var(--kdp-light-line)!important;
+}
+body.khome-v3 .kdw-action.soft .kdw-action-icon{background:rgba(24,34,27,.07)!important;color:#27392e!important}
+body.khome-v3 .kdw-action.soft p,body.khome-v3 .kdw-action.soft small{color:#657068!important}
+body.khome-v3 .kdw-action-icon{background:rgba(255,255,255,.06)!important;color:#dbe2da!important;border:1px solid rgba(255,255,255,.055)!important}
+
+body.khome-v3 .kdw-card{
+  border-color:var(--kdp-line)!important;
+  box-shadow:0 24px 64px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+/* Score = porcelain instrument card. */
+body.khome-v3 .kdw-score{
+  background:radial-gradient(circle at 88% 4%,rgba(89,112,94,.08),transparent 31%),linear-gradient(145deg,#efede6,#e6e3da)!important;
+  color:var(--kdp-dark)!important;border-color:var(--kdp-light-line)!important;
+}
+body.khome-v3 .kdw-score .kdw-eyebrow,body.khome-v3 .kdw-score .kdw-ring-core span{color:#667168!important}
+body.khome-v3 .kdw-score h3,body.khome-v3 .kdw-score .kdw-ring-core strong,body.khome-v3 .kdw-score .kdw-mini strong{color:#172119!important}
+body.khome-v3 .kdw-score .kdw-ring{background:conic-gradient(#3c5d47 calc(var(--v)*1%),#d2d0c8 0)!important}
+body.khome-v3 .kdw-score .kdw-ring:after{background:#ece9e1!important;border-color:rgba(26,36,29,.055)!important}
+body.khome-v3 .kdw-score .kdw-mini{background:rgba(255,255,255,.42)!important;border:1px solid rgba(29,39,32,.045)!important}
+body.khome-v3 .kdw-score .kdw-mini small{color:#757d76!important}
+/* Age = muted sage mineral card. */
+body.khome-v3 .kdw-age{
+  background:radial-gradient(circle at 84% 10%,rgba(255,255,255,.24),transparent 31%),linear-gradient(145deg,#cbd4c8,#abbcad)!important;
+  color:#152019!important;border-color:rgba(22,34,26,.08)!important;
+}
+body.khome-v3 .kdw-age h3,body.khome-v3 .kdw-age .kdw-age-main strong{color:#152019!important}
+body.khome-v3 .kdw-age .kdw-eyebrow,body.khome-v3 .kdw-age .kdw-age-main span{color:#536259!important}
+body.khome-v3 .kdw-age .kdw-age-foot{background:rgba(245,246,240,.46)!important;color:#536159!important}
+body.khome-v3 .kdw-age .kdw-age-tag{background:rgba(245,246,240,.52)!important;color:#536159!important}
+body.khome-v3 .kdw-age .kdw-age-orbit{border-color:rgba(25,43,31,.12)!important;box-shadow:0 0 0 24px rgba(25,43,31,.035),0 0 0 48px rgba(25,43,31,.02)!important}
+/* Supporting cards return to graphite; Experience gets a forest signal. */
+body.khome-v3 .kdw-next,body.khome-v3 .kdw-connected{
+  background:radial-gradient(circle at 100% 0%,rgba(135,159,139,.07),transparent 31%),linear-gradient(145deg,#151a16,#0c0f0d)!important;color:var(--kdp-white)!important;
+}
+body.khome-v3 .kdw-today{background:linear-gradient(145deg,#29261f,#171511)!important;color:#f0ece4!important}
+body.khome-v3 .kdw-exp{background:radial-gradient(circle at 85% 0%,rgba(164,198,170,.14),transparent 31%),linear-gradient(145deg,#1b3024,#294534)!important;color:#f2f2eb!important}
+body.khome-v3 .kdw-next h3,body.khome-v3 .kdw-connected h3,body.khome-v3 .kdw-today h3,body.khome-v3 .kdw-exp h3{color:inherit!important}
+body.khome-v3 .kdw-next .kdw-eyebrow,body.khome-v3 .kdw-connected .kdw-eyebrow,body.khome-v3 .kdw-today .kdw-eyebrow,body.khome-v3 .kdw-exp .kdw-eyebrow{color:#8f9991!important}
+body.khome-v3 .kdw-next p,body.khome-v3 .kdw-connected p,body.khome-v3 .kdw-today span,body.khome-v3 .kdw-exp span,body.khome-v3 .kdw-today-meta,body.khome-v3 .kdw-exp-foot{color:#929b94!important}
+body.khome-v3 .kdw-link,body.khome-v3 .kdw-next button{color:#b6c7b8!important}
+body.khome-v3 .kdw-today-bar{background:#37332b!important}.kdw-today-bar i{background:#97ae9b!important}
+body.khome-v3 .kdw-exp-dial{background:conic-gradient(#d6e0d5 calc(var(--p)*1%),rgba(255,255,255,.10) 0)!important}
+body.khome-v3 .kdw-exp-dial:after{background:#22392b!important}.kdw-exp-core strong{color:#f1f2ed!important}.kdw-exp-core span{color:#98a79c!important}
+body.khome-v3 .kdw-device{background:#111512!important;border-color:rgba(255,255,255,.06)!important;color:#e5e9e3!important}
+body.khome-v3 .kdw-device-logo{background:#202821!important;color:#b6c8b8!important}.kdw-device small{color:#838d85!important}.kdw-device em{background:#20251f!important;color:#8f9991!important}
+
+/* ========================================================================== 
+   KEY — hero in forest, selected metric cards in porcelain
+   ========================================================================== */
+.keyhub.kh2-enhanced{gap:14px!important}
+.kh2-nav{border-radius:20px!important;background:rgba(12,15,13,.88)!important}
+.kh2-stage-head{background:linear-gradient(145deg,#161b17,#0d100e)!important}
+.kh2-today{border-radius:34px!important;background:radial-gradient(circle at 84% 0%,rgba(188,214,192,.17),transparent 33%),linear-gradient(145deg,#172a20,#2b4936)!important}
+.kh2-stat{background:linear-gradient(145deg,#151a16,#0c100d)!important}
+.kh2-stat:nth-child(1),.kh2-stat:nth-child(4){
+  background:linear-gradient(145deg,#ece9e1,#dfddd4)!important;color:var(--kdp-dark)!important;border-color:var(--kdp-light-line)!important;
+  box-shadow:0 22px 54px rgba(0,0,0,.23)!important;
+}
+.kh2-stat:nth-child(1) .kh2-value,.kh2-stat:nth-child(4) .kh2-value{color:#172019!important}
+.kh2-stat:nth-child(1)>small,.kh2-stat:nth-child(4)>small,.kh2-stat:nth-child(1) p,.kh2-stat:nth-child(4) p{color:#68726a!important}
+.kh2-quality,.kh2-trend,.kh2-data-head,.kh2-drop,.kh2-preview,.kh2-flow article,.kh2-empty{background:linear-gradient(145deg,#151a16,#0c0f0d)!important}
+.kh2-trend:nth-child(2){background:linear-gradient(145deg,#24231e,#131511)!important}
+.kh2-data-head aside{background:radial-gradient(circle at 90% 0%,rgba(184,211,189,.13),transparent 34%),linear-gradient(145deg,#1b3024,#2c4b38)!important}
+
+/* ========================================================================== 
+   MY KŌMØ — one green hero, one light stats surface, one warm daily surface
+   ========================================================================== */
+.mkv4{gap:18px!important}
+.mkv4-hero{background:radial-gradient(circle at 83% 8%,rgba(181,214,186,.17),transparent 29%),linear-gradient(138deg,#101a14 0%,#1b2e22 48%,#31533d 100%)!important}
+.mkv4-quests,.mkv4-build{background:radial-gradient(circle at 92% 0%,rgba(121,164,130,.13),transparent 30%),linear-gradient(145deg,#111713,#1b2d21)!important}
+.mkv4-stats{
+  background:radial-gradient(circle at 94% 0%,rgba(68,94,74,.07),transparent 30%),linear-gradient(145deg,#ece9e1,#dfddd5)!important;
+  color:#172019!important;border-color:var(--kdp-light-line)!important;
+}
+.mkv4-stats h3,.mkv4-stats .mkv4-stat strong{color:#172019!important}.mkv4-stats .mkv4-kicker,.mkv4-stats .mkv4-head p,.mkv4-stats .mkv4-stat small,.mkv4-stats .mkv4-stat span{color:#667168!important}
+.mkv4-stats .mkv4-count{background:rgba(35,51,40,.08)!important;color:#36513e!important}
+.mkv4-stats .mkv4-stat{background:rgba(255,255,255,.44)!important;border-color:rgba(25,35,28,.05)!important}
+.mkv4-stats .mkv4-stat.main{background:radial-gradient(circle at 92% 10%,rgba(173,204,178,.14),transparent 34%),linear-gradient(145deg,#1b3024,#2e4c39)!important;color:#f4f2eb!important}
+.mkv4-stats .mkv4-stat.main strong{color:#f4f2eb!important}.mkv4-stats .mkv4-stat.main small,.mkv4-stats .mkv4-stat.main span{color:#a5b0a7!important}
+.mkv4-daily{
+  background:radial-gradient(circle at 94% 0%,rgba(255,255,255,.055),transparent 31%),linear-gradient(145deg,#2b2822,#171612)!important;color:#f0ede6!important;
+}
+.mkv4-daily h3,.mkv4-daily .mkv4-steps strong,.mkv4-daily .mkv4-mini strong{color:#f0ede6!important}.mkv4-daily .mkv4-kicker,.mkv4-daily .mkv4-head p,.mkv4-daily .mkv4-steps span,.mkv4-daily .mkv4-mini small{color:#9b958b!important}.mkv4-daily .mkv4-mini{background:rgba(255,255,255,.045)!important;border-color:rgba(255,255,255,.055)!important}
+
+/* ========================================================================== 
+   RESULT / TRAJECTORY / FORMS — elevate rather than flatten
+   ========================================================================== */
+.result-card,.trajectory-card,.path-card,.profile-card,.booking-card{
+  border-radius:26px!important;background:radial-gradient(circle at 100% 0%,rgba(132,155,136,.065),transparent 30%),linear-gradient(145deg,#151a16,#0c0f0d)!important;
+}
+.result-card:first-child,.trajectory-card:first-child{border-color:rgba(177,198,181,.13)!important;box-shadow:0 30px 74px rgba(0,0,0,.29),inset 0 1px 0 rgba(255,255,255,.035)!important}
+#appShell input,#appShell select,#appShell textarea{border-radius:14px!important}
+.primary-button{background:linear-gradient(145deg,#ebe9e2,#d9ddd5)!important;color:#121a14!important}
+.secondary-button{background:#141915!important;border-color:rgba(255,255,255,.085)!important}
+
+/* ========================================================================== 
+   LOGIN — black environment, one porcelain panel. Layout is untouched.
+   ========================================================================== */
+#authScreen{background:radial-gradient(780px 500px at 14% -7%,rgba(130,158,135,.12),transparent 61%),linear-gradient(145deg,#080a09,#040605)!important}
+#authScreen .auth-brand{background:radial-gradient(circle at 24% 3%,rgba(145,173,149,.12),transparent 36%),linear-gradient(145deg,#090c0a,#111813)!important}
+#authScreen .auth-panel{
+  background:radial-gradient(circle at 100% 0%,rgba(91,115,96,.08),transparent 31%),linear-gradient(145deg,#efede6,#e5e2d9)!important;
+  color:#172019!important;border-color:rgba(25,35,28,.09)!important;
+  box-shadow:0 38px 92px rgba(0,0,0,.44),inset 0 1px 0 rgba(255,255,255,.62)!important;
+}
+#authScreen .auth-heading h2{color:#172019!important}#authScreen .auth-heading p,#authScreen .auth-form label>span,#authScreen .auth-divider,#authScreen .auth-footer-links a{color:#687168!important}
+#authScreen .product-pill{background:rgba(34,49,39,.085)!important;color:#36513e!important;border-color:rgba(31,43,35,.06)!important}
+#authScreen .auth-audience-switch{background:rgba(26,36,29,.055)!important;border-color:rgba(25,35,28,.07)!important}
+#authScreen .auth-audience-switch button{color:#657068!important}#authScreen .auth-audience-switch button.active{background:#1e3025!important;color:#f0f1ec!important}
+#authScreen input{background:rgba(255,255,255,.56)!important;color:#172019!important;border-color:rgba(25,35,28,.10)!important;box-shadow:none!important}#authScreen input::placeholder{color:#979b94!important}
+#authScreen .primary-button{background:#1d3025!important;color:#f2f1eb!important;border-color:#1d3025!important}#authScreen .secondary-button{background:rgba(255,255,255,.38)!important;color:#24342a!important;border-color:rgba(25,35,28,.10)!important}
+#authScreen .password-toggle,#authScreen .text-button{color:#53655a!important}
+
+/* ========================================================================== 
+   IPHONE — same materials, tighter and more app-like
+   ========================================================================== */
+@media(max-width:767px){
+  html.kamo-phone-app .main-shell,html.kamo-iphone-locked .main-shell{background:radial-gradient(520px 320px at 88% -2%,rgba(134,163,140,.12),transparent 63%),linear-gradient(180deg,#080a09,#040605)!important}
+  html.kamo-phone-app .main-shell:before,html.kamo-iphone-locked .main-shell:before{opacity:.28;background-size:24px 24px}
+  html[data-adaptive-shell="phone"] .topbar{background:linear-gradient(180deg,rgba(5,7,6,.99),rgba(5,7,6,.88),transparent)!important;border:0!important}
+  html[data-adaptive-shell="phone"] .kam-bottom{left:10px!important;right:10px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;height:70px!important;border-radius:24px!important;background:rgba(12,15,13,.92)!important;border-color:rgba(255,255,255,.095)!important;box-shadow:0 24px 58px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.035)!important}
+  html[data-adaptive-shell="phone"] .kam-nav-item{border-radius:18px!important}html[data-adaptive-shell="phone"] .kam-nav-item.active{background:rgba(153,180,158,.12)!important;color:#f1f2ed!important}
+  html[data-adaptive-shell="phone"] .view-root{padding-left:12px!important;padding-right:12px!important;padding-bottom:94px!important}
+
+  body.khome-v3 .kdw{gap:10px!important;margin-top:10px!important}
+  body.khome-v3 .kdw-actions{gap:9px!important}
+  body.khome-v3 .kdw-action{min-height:88px!important;padding:14px 15px!important;border-radius:20px!important}
+  body.khome-v3 .kdw-card{border-radius:22px!important}
+  body.khome-v3 .kdw-score,body.khome-v3 .kdw-age{min-height:248px!important;padding:18px!important}
+  body.khome-v3 .kdw-ring{width:146px!important;height:146px!important}.kdw-ring-core strong{font-size:42px!important}
+  body.khome-v3 .kdw-next,body.khome-v3 .kdw-today,body.khome-v3 .kdw-exp,body.khome-v3 .kdw-connected{padding:16px!important}
+  body.khome-v3 .kdw-connected-grid{gap:7px!important}.kdw-device{min-height:74px!important}
+
+  .kh2-nav{position:sticky!important;top:0!important;z-index:12!important;border-radius:18px!important;backdrop-filter:blur(18px)!important;-webkit-backdrop-filter:blur(18px)!important}
+  .kh2-today{border-radius:26px!important;padding:23px 20px!important}.kh2-stage-head,.kh2-data-head{border-radius:22px!important;padding:19px!important}
+  .kh2-stat,.kh2-quality,.kh2-trend,.kh2-drop,.kh2-preview,.kh2-flow article,.kh2-empty{border-radius:20px!important}
+  .kh2-stat-grid{gap:8px!important}
+
+  .mkv4{gap:11px!important}.mkv4-card{border-radius:22px!important}.mkv4-hero{border-radius:26px!important;padding:21px!important}.mkv4-section{padding:18px!important}
+
+  /* Login retains stable auth geometry; only colors/material change. */
+  html.kamo-phone-auth #authScreen{background:linear-gradient(180deg,#070908,#040605)!important}
+  html.kamo-phone-auth #authScreen .auth-brand{background:radial-gradient(circle at 50% 0%,rgba(151,181,156,.15),transparent 35%),linear-gradient(150deg,#080b09,#132019)!important}
+  html.kamo-phone-auth #authScreen .auth-panel{background:radial-gradient(circle at 100% 0%,rgba(83,108,89,.08),transparent 31%),linear-gradient(145deg,#efede6,#e3e0d7)!important;border-color:rgba(25,35,28,.09)!important;box-shadow:0 28px 72px rgba(0,0,0,.42)!important}
+  html.kamo-phone-auth #authScreen .auth-heading h2{color:#172019!important}html.kamo-phone-auth #authScreen .auth-heading p{color:#687168!important}
+  html.kamo-phone-auth #authScreen input{background:rgba(255,255,255,.58)!important;color:#172019!important;border-color:rgba(25,35,28,.10)!important}
+}
+
+@media(max-width:390px){
+  html[data-adaptive-shell="phone"] .view-root{padding-left:10px!important;padding-right:10px!important}
+  body.khome-v3 .kdw-score,body.khome-v3 .kdw-age{min-height:232px!important}
+  body.khome-v3 .kdw-ring{width:138px!important;height:138px!important}
+}
+
+@media(prefers-reduced-motion:reduce){.main-shell:before{display:none}}
