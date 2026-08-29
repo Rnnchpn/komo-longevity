@@ -36,9 +36,16 @@ const routePatches=[
   ['my-komo-home-v1.js',"function route(){return location.hash.replace(/^#/,'')||'home'}",`function route(){return ${phoneRoute}(location.hash.replace(/^#/,'')||'home')}`],
   ['patient-home-visual-v2.js',"function route(){return location.hash.replace(/^#/,'')||'home'}",`function route(){return ${phoneRoute}(location.hash.replace(/^#/,'')||'home')}`],
   ['patient-home-datawall-v3.js',"const route=()=>location.hash.replace(/^#/,'')||'home';",`const route=()=>${phoneRoute}(location.hash.replace(/^#/,'')||'home');`],
-  ['my-komo-dashboard-v2.js',"const route=()=>location.hash.replace(/^#/,'')||'home';",`const route=()=>${phoneRoute}(location.hash.replace(/^#/,'')||'home');`]
+  ['my-komo-dashboard-v2.js',"const route=()=>location.hash.replace(/^#/,'')||'home';",`const route=()=>${phoneRoute}(location.hash.replace(/^#/,'')||'home');`],
+  ['my-komo-key-home-v1.js',"const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';",`const route=()=>window.matchMedia('(max-width: 767px)').matches?'__kcm__':(window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home');`]
 ];
 for(const [file,from,to] of routePatches){await patch(join(pulse,file),from,to,`${file} phone home guard`,{optional:true})}
+
+// The legacy score-ring observer is desktop decoration; the canonical mobile score is rendered directly from canonical data.
+await patch(join(pulse,'my-komo-score-motion-v1.js'),
+  '  function mount(){\n    bindObserver();',
+  "  function mount(){\n    if(window.matchMedia('(max-width: 767px)').matches)return;\n    bindObserver();",
+  'score observer phone guard',{optional:true});
 
 let html=await readFile(htmlPath,'utf8');
 
