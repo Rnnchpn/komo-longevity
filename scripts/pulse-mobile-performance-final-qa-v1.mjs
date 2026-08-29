@@ -14,6 +14,7 @@ const [html,css,dock,adaptive,lobby,hero,micro,score]=await Promise.all([
   read('my-komo-score-motion-v1.js')
 ]);
 
+const scoreIsEfficient=!score.includes('setInterval(')&&(score.includes("if(!window.matchMedia('(max-width: 767px)').matches)new MutationObserver")||score.includes("observer.observe(root,{childList:true,subtree:true})"));
 const checks=[
   ['final mobile CSS shipped',html.includes('mobile-performance-final-v1.css?v=20260829-mobile-perf-final-1')],
   ['legacy bottom dock hidden on phone',css.includes('#kpDockV6')&&css.includes('display: none !important')],
@@ -29,7 +30,7 @@ const checks=[
   ['adaptive shell no longer observes full body mutations',!adaptive.includes("observer.observe(document.body,{subtree:true,childList:true,attributes:true")&&adaptive.includes("observer.observe(observedShell,{attributes:true,attributeFilter:['hidden']})")],
   ['hero replay animations are reduced on phone',hero.includes("'(max-width: 767px)'")&&hero.includes("if(!window.matchMedia('(max-width: 767px)').matches)new MutationObserver")],
   ['home micro-motion avoids body observer on phone',micro.includes("if(!window.matchMedia('(max-width: 767px)').matches)new MutationObserver")],
-  ['score count-up avoids polling on phone',score.includes("if(!window.matchMedia('(max-width: 767px)').matches)setInterval")],
+  ['score runtime is event-driven without permanent polling',scoreIsEfficient],
   ['Safari auth stability layer preserved',html.includes('mobile-safari-stability-v1.js')&&html.includes('pulseStartupGuard')],
   ['critical mobile runtimes share coherent cache token',html.includes('adaptive-shell-v4.js?v=20260829-mobile-perf-final-1')&&html.includes('my-komo-lobby-v3.js?v=20260829-mobile-perf-final-1')]
 ];
