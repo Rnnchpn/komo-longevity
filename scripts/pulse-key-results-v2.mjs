@@ -41,3 +41,5 @@ await import('./pulse-premium-detail-v1.mjs');
 await import('./pulse-home-key-position-v1.mjs');
 // Official PDF: append a consent-gated longitudinal KEY page without touching score calculation.
 await import('./pulse-key-pdf-report-v1.mjs');
+// iPhone is the final presentation owner: fixed viewport, safe areas and locked zoom.
+await import('./pulse-iphone-app-lock-v1.mjs');
