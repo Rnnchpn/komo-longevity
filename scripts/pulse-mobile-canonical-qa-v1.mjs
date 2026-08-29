@@ -13,18 +13,20 @@ const [html,css,js,adaptive,home,dashboard,datawall,nav,app]=await Promise.all([
   readFile(join(pulse,'patient-navigation-core-v1.js'),'utf8'),
   readFile(join(pulse,'app-router-v2.js'),'utf8')
 ]);
-const release='20260829-mobile-canonical-3';
+const release='20260829-mobile-canonical-4';
 const checks=[
   ['canonical CSS is final phone stylesheet',html.includes(`mobile-canonical-v1.css?v=${release}`)],
   ['canonical JS is final phone runtime',html.includes(`mobile-canonical-v1.js?v=${release}`)],
   ['document release marker matches canonical mobile release',html.includes(`<meta name="komo-pulse-release" content="${release}" />`)],
   ['patient route coordinator is cache-busted with mobile release',html.includes(`patient-navigation-core-v1.js?v=${release}`)],
+  ['app router is cache-busted with mobile release',html.includes(`app-router-v2.js?v=${release}`)],
+  ['legacy app Home yields immediately to canonical phone owner',app.includes("window.matchMedia('(max-width: 767px)').matches&&route==='home'")&&app.includes("source:'mobile-canonical-owner'")],
   ['old vertical app runtime removed',!html.includes('mobile-vertical-app-v1.js')&&!html.includes('mobile-vertical-app-v1.css')],
   ['old guided phone runtime removed',!html.includes('mobile-guided-v2.js')],
   ['old final performance CSS removed',!html.includes('mobile-performance-final-v1.css')],
   ['Safari auth/session stability preserved',html.includes('mobile-safari-stability-v1.js')&&html.includes('mobile-safari-stability-v1.css')],
   ['adaptive shell is tablet only',adaptive.includes("function adaptive(){return window.matchMedia(TABLET).matches")&&adaptive.includes("html.dataset.adaptiveShell='tablet'")],
-  ['phone home is owned by canonical runtime',home.includes("'__kcm__'")&&dashboard.includes("'__kcm__'")&&datawall.includes("'__kcm__'")],
+  ['legacy home modules cannot own phone home',home.includes("'__kcm__'")&&dashboard.includes("'__kcm__'")&&datawall.includes("'__kcm__'")],
   ['home begins with account and three clickable Komo universes',js.includes('MON ESPACE')&&js.includes('KŌMØ MOTION')&&js.includes('KŌMØ CLINICAL')&&js.includes('KŌMØ KEY')],
   ['home KEY shows only useful daily results',js.includes('Vos signaux du quotidien.')&&js.includes("['Pas'")&&js.includes("['Sommeil'")&&js.includes("['FC repos'")&&js.includes("['Activité'")],
   ['provider brands are not rendered by the home KEY card',!js.slice(js.indexOf('function keyCard'),js.indexOf('function xpCard')).includes('Garmin')],
