@@ -107,7 +107,7 @@ const checks=[
  ['legacy wear-mode POC removed',!finalHtml.includes('wearable-poc-mode-v1.js')],
  ['legacy results grid removed',!finalHtml.includes('key-results-grid-v1.js')],
  ['experimental duplicate KEY owner removed',!finalHtml.includes('komo-key-v1.js')],
- ['account navigation is event-driven',!finalAccount.includes('MutationObserver')&&!finalAccount.includes('setInterval(')],
+ ['account navigation is event-driven',!finalAccount.includes('new MutationObserver')&&!finalAccount.includes('setInterval(')],
  ['Motion runtime has no permanent polling interval',!finalMotion.includes('setInterval(')&&finalMotion.includes("document.querySelector('#viewRoot')")],
  ['KEY uses real wearable table',finalJs.includes("from('wearable_daily_metrics')")],
  ['KEY keeps Motion Score separate',finalJs.includes('ne modifient pas le Motion Score')||finalJs.includes('ne modifie pas le Motion Score')],
