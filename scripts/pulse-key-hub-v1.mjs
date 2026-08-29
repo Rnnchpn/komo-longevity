@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260829-key-data-v1';
+const release='20260829-key-data-v2';
 
 // Final canonical patient assets. Copy them again at the end so later build
 // layers can never leave Pulse with stale navigation/performance runtimes.
@@ -107,7 +107,7 @@ const checks=[
  ['legacy wear-mode POC removed',!finalHtml.includes('wearable-poc-mode-v1.js')],
  ['legacy results grid removed',!finalHtml.includes('key-results-grid-v1.js')],
  ['experimental duplicate KEY owner removed',!finalHtml.includes('komo-key-v1.js')],
- ['account observer no longer watches body classes',!finalAccount.includes('observe(document.body')&&!finalAccount.includes("attributeFilter:['class','hidden']")],
+ ['account navigation is event-driven',!finalAccount.includes('MutationObserver')&&!finalAccount.includes('setInterval(')],
  ['Motion runtime has no permanent polling interval',!finalMotion.includes('setInterval(')&&finalMotion.includes("document.querySelector('#viewRoot')")],
  ['KEY uses real wearable table',finalJs.includes("from('wearable_daily_metrics')")],
  ['KEY keeps Motion Score separate',finalJs.includes('ne modifient pas le Motion Score')||finalJs.includes('ne modifie pas le Motion Score')],
@@ -119,4 +119,4 @@ const checks=[
 ];
 for(const [label,ok] of checks) console.log(`[pulse-key-hub] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log(`[pulse-key-hub] PASS · canonical KEY + captured-data layer · governed import · ${scriptCount} scripts · ${release}`);
+console.log(`[pulse-key-hub] PASS · canonical KEY + captured-data layer · governed import · event-driven account · ${scriptCount} scripts · ${release}`);
