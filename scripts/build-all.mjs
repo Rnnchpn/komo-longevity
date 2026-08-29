@@ -135,7 +135,9 @@ const scripts = [
   'scripts/pulse-mobile-vertical-app-qa-v1.mjs',
   'scripts/pulse-key-hub-v1.mjs',
   'scripts/pulse-mobile-safari-stability-v1.mjs',
-  'scripts/pulse-mobile-safari-stability-qa-v1.mjs'
+  'scripts/pulse-mobile-safari-stability-qa-v1.mjs',
+  'scripts/pulse-mobile-performance-final-v1.mjs',
+  'scripts/pulse-mobile-performance-final-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
