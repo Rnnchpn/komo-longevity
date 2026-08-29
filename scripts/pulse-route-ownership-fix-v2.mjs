@@ -33,7 +33,7 @@ const checks=[
  ['app recognizes KEY',app.includes("'key'")],
  ['app recognizes KŌMØ Link',app.includes("'link'")],
  ['app normalizes legacy followup',app.includes("route==='followup'||route==='suivi'")],
- ['app normalizes connected to Link',app.includes("route==='connected')route='link'")),
+ ['app normalizes connected to Link',app.includes("if(route==='connected')route='link'" )],
  ['app recognizes Trajectoire',app.includes("'trajectory'")],
  ['app delegates modern patient routes',app.includes("source:'app-external-owner'")],
  ['Agenda owns documents route',booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;")],
