@@ -17,6 +17,15 @@ function renderEmail(template: Template, displayName: string, ctaUrl: string) {
   const safeName = escapeHtml(displayName || ""); const greeting = safeName ? `Bonjour ${safeName},` : "Bonjour,"; const safeUrl = escapeHtml(ctaUrl);
   return `<!doctype html><html><body style="margin:0;background:#f4f1eb;font-family:Arial,sans-serif;color:#202421"><table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:42px 18px"><table role="presentation" width="100%" style="max-width:620px;background:#ffffff;border-radius:24px;border:1px solid #e9e5de"><tr><td style="padding:42px"><div style="font-size:20px;letter-spacing:.18em;font-weight:700;margin-bottom:48px">KŌMØ</div><div style="font-size:11px;letter-spacing:.16em;color:#748078;margin-bottom:12px">${template.eyebrow}</div><h1 style="font-family:Georgia,serif;font-size:34px;line-height:1.08;font-weight:400;letter-spacing:-.03em;margin:0 0 24px">${template.title}</h1><p style="font-size:15px;line-height:1.7;color:#5f665f;margin:0 0 12px">${greeting}</p><p style="font-size:15px;line-height:1.7;color:#5f665f;margin:0 0 30px">${template.body}</p><a href="${safeUrl}" style="display:inline-block;background:#26372d;color:#ffffff;text-decoration:none;border-radius:12px;padding:14px 20px;font-size:14px;font-weight:600">${escapeHtml(template.cta || "Ouvrir KŌMØ Pulse")}</a><p style="font-size:12px;line-height:1.6;color:#8a8f8a;margin:38px 0 0">Pour protéger votre confidentialité, cet e-mail ne contient aucune donnée de santé ni résultat clinique.</p></td></tr></table></td></tr></table></body></html>`;
 }
+async function markReportDelivery(supabase: any, reportId: string | null, status: string, providerId: string | null = null, error: string | null = null) {
+  if (!reportId) return;
+  try {
+    const { error: rpcError } = await supabase.rpc("komo_mark_report_delivery", { p_report_id: reportId, p_status: status, p_provider_id: providerId, p_error: error });
+    if (rpcError) console.warn("[pulse-notify] report delivery status update failed", { reportId, status, code: rpcError.code });
+  } catch (rpcError) {
+    console.warn("[pulse-notify] report delivery status update exception", { reportId, status, message: String((rpcError as Error)?.message || rpcError) });
+  }
+}
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json({ ok: false, error: "method_not_allowed" }, 405);
@@ -40,7 +49,7 @@ Deno.serve(async (req: Request) => {
     if (!report || String(report.id) !== reportId || report.status !== "released") return json({ ok: false, error: "released_report_not_found" }, 409);
     targetEmail = String(report.patient?.email || "");
     if (!targetEmail) return json({ ok: false, error: "patient_email_missing" }, 409);
-    displayName = String(report.patient?.preferredName || report.patient?.firstName || ""); ctaUrl = appLink(appOrigin, "#documents"); idempotencySubject = reportId;
+    displayName = String(report.patient?.preferredName || report.patient?.firstName || ""); ctaUrl = appLink(appOrigin, "#results"); idempotencySubject = reportId;
   }
 
   const eventReference = String(body?.eventReference || reportId || new Date().toISOString().slice(0, 10)).replace(/[^a-zA-Z0-9._:-]/g, "").slice(0, 100);
@@ -49,9 +58,9 @@ Deno.serve(async (req: Request) => {
   const result = await resendResponse.json().catch(() => ({}));
   if (!resendResponse.ok) {
     console.error("[pulse-notify] delivery failed", { status: resendResponse.status, kind, userId: user.id, reportId });
-    if (reportId) await supabase.rpc("komo_mark_report_delivery", { p_report_id: reportId, p_status: "failed", p_provider_id: null, p_error: `resend_${resendResponse.status}` }).catch(() => null);
+    await markReportDelivery(supabase, reportId, "failed", null, `resend_${resendResponse.status}`);
     return json({ ok: false, error: "delivery_failed" }, 502);
   }
-  if (reportId) await supabase.rpc("komo_mark_report_delivery", { p_report_id: reportId, p_status: "sent", p_provider_id: result?.id || null, p_error: null }).catch(() => null);
+  await markReportDelivery(supabase, reportId, "sent", result?.id || null, null);
   return json({ ok: true, id: result?.id || null, kind, reportId });
 });
