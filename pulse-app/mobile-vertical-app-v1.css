@@ -1,151 +1,570 @@
-/* KŌMØ Pulse — app-like vertical mobile navigation v1 */
+/* KŌMØ Pulse — mobile app shell v2
+   One vertical navigation system, centered controls, app-like viewport and a true mobile auth experience. */
+
 @media (max-width: 767px) {
-  html[data-adaptive-shell="phone"],
-  html[data-adaptive-shell="phone"] body {
+  html.kamo-phone-app,
+  html.kamo-phone-auth,
+  html.kamo-phone-app body,
+  html.kamo-phone-auth body {
     width: 100%;
     max-width: 100%;
     height: 100%;
+    margin: 0;
     overflow: hidden !important;
     overscroll-behavior: none;
     background: #f4f0e8;
   }
 
-  html[data-adaptive-shell="phone"] body {
+  html.kamo-phone-app *,
+  html.kamo-phone-auth * {
+    box-sizing: border-box;
+  }
+
+  html.kamo-phone-app body,
+  html.kamo-phone-auth body {
     min-height: 100dvh;
+    min-height: var(--kamo-viewport-height, 100dvh);
     position: relative;
-    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
 
-  html[data-adaptive-shell="phone"] #appShell {
-    width: 100%;
-    max-width: 100%;
-    height: 100dvh;
-    min-height: 0 !important;
-    overflow: hidden !important;
-  }
-
-  html[data-adaptive-shell="phone"] .main-shell {
+  /* -----------------------------
+     AUTH / LOGIN — mobile edition
+     ----------------------------- */
+  html.kamo-phone-auth #authScreen {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 500 !important;
+    display: block !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: 100dvh !important;
+    height: var(--kamo-viewport-height, 100dvh) !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch;
+    background: #f4f0e8 !important;
+    scroll-behavior: smooth;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-brand {
+    position: relative !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    padding: max(30px, calc(env(safe-area-inset-top) + 18px)) 20px 54px !important;
+    display: grid !important;
+    justify-items: center !important;
+    align-content: start !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 0 32px 32px !important;
+    color: #f7f4ed !important;
+    text-align: center !important;
+    background:
+      radial-gradient(circle at 50% 9%, rgba(190,207,190,.18), transparent 25%),
+      radial-gradient(circle at 88% 78%, rgba(90,113,97,.18), transparent 33%),
+      linear-gradient(150deg, #10130f 0%, #171b16 52%, #232a23 100%) !important;
+    box-shadow: 0 22px 60px rgba(20,27,22,.14) !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-brand::before {
+    opacity: .27 !important;
+    background-size: 54px 54px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-brand::after {
+    width: 78vw !important;
+    max-width: 360px !important;
+    left: 50% !important;
+    top: -72px !important;
+    transform: translateX(-50%) !important;
+    opacity: .8 !important;
+    filter: blur(22px) !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-logo {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    display: grid !important;
+    justify-items: center !important;
+    gap: 7px !important;
+    color: #fff !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    animation: kamoAuthIn .42s cubic-bezier(.2,.76,.25,1) both;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-logo span {
+    font: 600 34px/.95 Manrope, 'DM Sans', sans-serif !important;
+    letter-spacing: .12em !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-logo small {
+    color: rgba(245,247,241,.58) !important;
+    font: 600 8px/1 'DM Sans', sans-serif !important;
+    letter-spacing: .22em !important;
+    text-transform: uppercase !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-logo::after {
+    content: "PULSE · MEMBER PLATFORM" !important;
+    width: max-content !important;
+    margin: 13px auto 0 !important;
+    padding: 7px 10px !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,.045) !important;
+    color: rgba(255,255,255,.55) !important;
+    font: 600 7px/1 'DM Sans', sans-serif !important;
+    letter-spacing: .13em !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-manifesto {
+    width: 100% !important;
+    max-width: 390px !important;
+    margin: 30px auto 0 !important;
+    display: grid !important;
+    justify-items: center !important;
+    text-align: center !important;
+    animation: kamoAuthIn .46s .04s cubic-bezier(.2,.76,.25,1) both;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-manifesto .eyebrow {
+    margin: 0 0 10px !important;
+    color: rgba(214,225,211,.68) !important;
+    font-size: 8px !important;
+    letter-spacing: .20em !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-manifesto h1 {
+    width: 100% !important;
+    max-width: 390px !important;
+    margin: 0 auto !important;
+    color: #f8f6ef !important;
+    font-size: clamp(38px, 10.8vw, 50px) !important;
+    line-height: .94 !important;
+    letter-spacing: -.06em !important;
+    text-align: center !important;
+    text-wrap: balance !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-manifesto > p:last-child {
+    max-width: 330px !important;
+    margin: 16px auto 0 !important;
+    color: rgba(244,242,235,.58) !important;
+    font-size: 11px !important;
+    line-height: 1.55 !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-visual {
+    display: none !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-signal {
+    position: relative !important;
+    inset: auto !important;
+    width: min(340px, 100%) !important;
+    max-width: 340px !important;
+    margin: 24px auto 0 !important;
+    padding: 12px 13px 10px !important;
+    border-radius: 16px !important;
+    background: rgba(10,14,11,.34) !important;
+    transform: none !important;
+    text-align: left !important;
+    animation: kamoAuthIn .48s .08s cubic-bezier(.2,.76,.25,1) both;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-wave {
+    height: 38px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-note {
+    position: relative !important;
+    inset: auto !important;
+    max-width: 330px !important;
+    margin: 20px auto 0 !important;
+    color: rgba(244,242,235,.38) !important;
+    font-size: 7.5px !important;
+    line-height: 1.45 !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-panel-wrap {
+    position: relative !important;
+    z-index: 4 !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: -24px auto 0 !important;
+    padding: 0 14px calc(28px + env(safe-area-inset-bottom)) !important;
+    display: block !important;
+    background: transparent !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-panel {
+    width: min(430px, 100%) !important;
+    max-width: 430px !important;
+    min-height: 0 !important;
+    margin: 0 auto !important;
+    padding: 24px 18px 20px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    overflow: visible !important;
+    border: 1px solid rgba(31,42,34,.08) !important;
+    border-radius: 26px !important;
+    background:
+      radial-gradient(circle at 92% 0%, rgba(209,218,207,.42), transparent 27%),
+      linear-gradient(145deg, #fbfaf6 0%, #f2eee6 100%) !important;
+    box-shadow: 0 22px 56px rgba(25,32,27,.12), inset 0 1px 0 rgba(255,255,255,.92) !important;
+    animation: kamoAuthPanelIn .42s .04s cubic-bezier(.2,.78,.22,1) both;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-panel::before {
+    inset: 10px !important;
+    border-radius: 19px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-audience-switch {
+    width: 100% !important;
+    margin: 0 auto 22px !important;
+    padding: 5px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 5px !important;
+    border-radius: 16px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-audience-switch button {
+    width: 100% !important;
+    min-height: 46px !important;
+    border-radius: 12px !important;
+    text-align: center !important;
+    font-size: 10px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-heading {
+    width: 100% !important;
+    margin: 0 auto 22px !important;
+    display: grid !important;
+    justify-items: center !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .product-pill {
+    width: max-content !important;
+    margin: 0 auto 13px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-heading h2 {
+    margin: 0 auto !important;
+    color: #1d241f !important;
+    font-size: 30px !important;
+    line-height: 1.02 !important;
+    letter-spacing: -.05em !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-heading p {
+    max-width: 300px !important;
+    margin: 10px auto 0 !important;
+    color: #74776f !important;
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-form {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-form label,
+  html.kamo-phone-auth #authScreen .password-field {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-form input[type="email"],
+  html.kamo-phone-auth #authScreen .auth-form input[type="password"],
+  html.kamo-phone-auth #authScreen .auth-form input[type="text"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 54px !important;
+    min-height: 54px !important;
+    padding: 0 46px 0 15px !important;
+    border-radius: 14px !important;
+    font-size: 16px !important;
+    line-height: 1 !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-form input[type="email"] {
+    padding-right: 15px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .password-toggle {
+    right: 10px !important;
+    min-width: 42px !important;
+    height: 38px !important;
+    font-size: 10px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-options {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    gap: 11px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .remember-row,
+  html.kamo-phone-auth #authScreen .text-button {
+    justify-self: center !important;
+    text-align: center !important;
+    font-size: 10px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-submit,
+  html.kamo-phone-auth #authScreen .auth-panel > .secondary-button,
+  html.kamo-phone-auth #authScreen .auth-pro-entry .secondary-button {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 54px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    border-radius: 15px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    touch-action: manipulation !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-submit:active,
+  html.kamo-phone-auth #authScreen .auth-panel > .secondary-button:active,
+  html.kamo-phone-auth #authScreen .auth-audience-switch button:active {
+    transform: scale(.985) !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-divider {
+    margin: 17px auto 13px !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-footer-links,
+  html.kamo-phone-auth #authScreen .auth-security-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-footer-links {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-footer-links a {
+    justify-self: center !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-security-row {
+    margin-top: 16px !important;
+  }
+
+  /* -----------------------------
+     AUTHENTICATED APP CANVAS
+     ----------------------------- */
+  html.kamo-phone-app #appShell {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kamo-viewport-height, 100dvh) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    background: #f4f0e8 !important;
+  }
+
+  html.kamo-phone-app .sidebar,
+  html.kamo-phone-app .mobile-nav {
+    display: none !important;
+  }
+
+  html.kamo-phone-app .main-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kamo-viewport-height, 100dvh) !important;
     min-height: 0 !important;
     margin: 0 !important;
-    padding: 0 14px calc(88px + env(safe-area-inset-bottom)) !important;
+    padding: 0 14px calc(30px + env(safe-area-inset-bottom)) !important;
     box-sizing: border-box !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    overscroll-behavior-x: none;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-x: none !important;
+    overscroll-behavior-y: contain !important;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     touch-action: pan-y;
+    scroll-behavior: smooth;
   }
-  html[data-adaptive-shell="phone"] .main-shell::-webkit-scrollbar { display: none; }
 
-  html[data-adaptive-shell="phone"] .view-root,
-  html[data-adaptive-shell="phone"] #viewRoot,
-  html[data-adaptive-shell="phone"] #viewRoot > * {
+  html.kamo-phone-app .main-shell::-webkit-scrollbar {
+    display: none;
+  }
+
+  html.kamo-phone-app .view-root,
+  html.kamo-phone-app #viewRoot,
+  html.kamo-phone-app #viewRoot > * {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
     box-sizing: border-box !important;
   }
 
-  /* One centered vertical header hierarchy. */
-  html[data-adaptive-shell="phone"] .topbar {
+  html.kamo-phone-app #viewRoot {
+    padding: 0 0 24px !important;
+    overflow: visible !important;
+  }
+
+  html.kamo-phone-app #viewRoot img,
+  html.kamo-phone-app #viewRoot svg,
+  html.kamo-phone-app #viewRoot canvas,
+  html.kamo-phone-app #viewRoot iframe,
+  html.kamo-phone-app #viewRoot video {
+    max-width: 100% !important;
+  }
+
+  html.kamo-phone-app #viewRoot [style*="min-width"] {
+    min-width: 0 !important;
+  }
+
+  html.kamo-phone-app #viewRoot [style*="width:"] {
+    max-width: 100% !important;
+  }
+
+  /* -----------------------------
+     CENTERED HEADER + SINGLE MENU
+     ----------------------------- */
+  html.kamo-phone-app .topbar {
     position: sticky !important;
     top: 0 !important;
-    z-index: 90 !important;
-    min-height: 154px !important;
+    z-index: 100 !important;
+    width: calc(100% + 28px) !important;
+    min-height: 140px !important;
     margin: 0 -14px 12px !important;
-    padding: max(12px, env(safe-area-inset-top)) 14px 12px !important;
+    padding: max(12px, calc(env(safe-area-inset-top) + 4px)) 14px 12px !important;
     display: grid !important;
     grid-template-columns: 1fr !important;
     grid-template-rows: auto auto auto !important;
     justify-items: center !important;
     align-items: center !important;
     gap: 7px !important;
-    background: rgba(244,240,232,.95) !important;
+    background: rgba(244,240,232,.955) !important;
     border-bottom: 1px solid rgba(31,42,34,.055) !important;
-    box-shadow: 0 8px 30px rgba(31,42,34,.035) !important;
-    backdrop-filter: blur(22px) saturate(1.05) !important;
-    -webkit-backdrop-filter: blur(22px) saturate(1.05) !important;
+    box-shadow: 0 10px 30px rgba(31,42,34,.025) !important;
+    backdrop-filter: blur(24px) saturate(1.05) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(1.05) !important;
   }
 
-  html[data-adaptive-shell="phone"] .kam-mobile-brand {
+  html.kamo-phone-app .kam-mobile-brand {
     position: static !important;
-    left: auto !important;
-    top: auto !important;
+    inset: auto !important;
     transform: none !important;
     grid-row: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
     display: grid !important;
     justify-items: center !important;
     align-items: center !important;
     gap: 5px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
     color: #222d25 !important;
     text-align: center !important;
     pointer-events: none !important;
-    animation: kamoBrandIn .34s cubic-bezier(.2,.72,.25,1) both;
+    animation: kamoBrandIn .36s cubic-bezier(.2,.72,.25,1) both;
   }
-  html[data-adaptive-shell="phone"] .kam-mobile-brand strong {
-    font: 600 30px/.96 Manrope,'DM Sans',sans-serif !important;
+
+  html.kamo-phone-app .kam-mobile-brand strong {
+    font: 600 30px/.96 Manrope, 'DM Sans', sans-serif !important;
     letter-spacing: .095em !important;
     text-align: center !important;
     white-space: nowrap !important;
   }
-  html[data-adaptive-shell="phone"] .kam-mobile-brand span {
-    font: 600 7.5px/1 'DM Sans',sans-serif !important;
-    letter-spacing: .19em !important;
+
+  html.kamo-phone-app .kam-mobile-brand span {
     color: #738078 !important;
-    text-transform: uppercase !important;
+    font: 600 7.5px/1 'DM Sans', sans-serif !important;
+    letter-spacing: .19em !important;
     text-align: center !important;
+    text-transform: uppercase !important;
   }
-  html[data-adaptive-shell="phone"]:has(#viewRoot > [data-my-komo-home]) .kam-mobile-brand strong {
+
+  html.kamo-phone-app:has(#viewRoot > [data-my-komo-home]) .kam-mobile-brand strong {
     font-size: 38px !important;
     letter-spacing: .075em !important;
   }
 
-  html[data-adaptive-shell="phone"] .topbar > div:first-of-type {
+  html.kamo-phone-app .topbar > div:first-of-type {
     grid-row: 2 !important;
     width: 100% !important;
     min-width: 0 !important;
-    text-align: center !important;
-  }
-  html[data-adaptive-shell="phone"] .topbar .eyebrow { display: none !important; }
-  html[data-adaptive-shell="phone"] .topbar h1 {
-    width: 100% !important;
-    max-width: 320px !important;
     margin: 0 auto !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    color: #354038 !important;
-    font-size: 14px !important;
-    line-height: 1.15 !important;
-    letter-spacing: -.025em !important;
     text-align: center !important;
   }
 
-  html[data-adaptive-shell="phone"] .topbar-actions {
+  html.kamo-phone-app .topbar .eyebrow {
+    display: none !important;
+  }
+
+  html.kamo-phone-app .topbar h1 {
+    width: 100% !important;
+    max-width: 325px !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    color: #354038 !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    letter-spacing: -.02em !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  html.kamo-phone-app .topbar-actions {
     position: static !important;
     grid-row: 3 !important;
     width: 100% !important;
+    margin: 0 auto !important;
     display: flex !important;
     justify-content: center !important;
     align-items: center !important;
-    gap: 0 !important;
-    margin: 1px auto 0 !important;
   }
-  html[data-adaptive-shell="phone"] .topbar-actions > :not(#kamTopMenu) { display: none !important; }
 
-  html[data-adaptive-shell="phone"] #kamTopMenu {
+  html.kamo-phone-app .topbar-actions > :not(#kamTopMenu) {
+    display: none !important;
+  }
+
+  html.kamo-phone-app #kamTopMenu {
     width: auto !important;
-    min-width: 116px !important;
-    height: 38px !important;
-    padding: 0 16px !important;
+    min-width: 124px !important;
+    height: 42px !important;
+    margin: 0 auto !important;
+    padding: 0 18px !important;
     border: 1px solid rgba(31,42,34,.10) !important;
     border-radius: 999px !important;
     background: #263229 !important;
@@ -154,72 +573,88 @@
     align-items: center !important;
     justify-content: center !important;
     gap: 5px !important;
-    box-shadow: 0 8px 24px rgba(31,42,34,.12) !important;
+    box-shadow: 0 9px 24px rgba(31,42,34,.12) !important;
     transition: transform .16s ease, box-shadow .16s ease, background .16s ease !important;
+    touch-action: manipulation !important;
   }
-  html[data-adaptive-shell="phone"] #kamTopMenu span {
+
+  html.kamo-phone-app #kamTopMenu > span:not(.kam-menu-label) {
     width: 3px !important;
     height: 3px !important;
     border-radius: 50% !important;
-    background: rgba(255,255,255,.9) !important;
+    background: rgba(255,255,255,.92) !important;
   }
-  html[data-adaptive-shell="phone"] #kamTopMenu .kam-menu-label {
-    margin-left: 5px;
-    color: #fff;
-    font: 600 11px/1 'DM Sans',sans-serif;
-    letter-spacing: .015em;
+
+  html.kamo-phone-app #kamTopMenu .kam-menu-label {
+    margin-left: 6px !important;
+    color: #fff !important;
+    font: 600 11px/1 'DM Sans', sans-serif !important;
+    letter-spacing: .015em !important;
   }
-  html[data-adaptive-shell="phone"] #kamTopMenu:active { transform: scale(.965) !important; }
 
-  /* Phone navigation has a single entry point: the centered Menu button. */
-  html[data-adaptive-shell="phone"] #kamBottomBar,
-  html[data-adaptive-shell="phone"] #kamRoleRow,
-  html[data-adaptive-shell="phone"] .kav2-tabs,
-  html[data-adaptive-shell="phone"] .kcp-tabs { display: none !important; }
+  html.kamo-phone-app #kamTopMenu:active {
+    transform: scale(.965) !important;
+  }
 
-  /* Full-screen vertical menu — no horizontal navigation. */
-  html[data-adaptive-shell="phone"] .kam-backdrop {
+  /* No horizontal dock or role strip on phone. */
+  html.kamo-phone-app #kamBottomBar,
+  html.kamo-phone-app #kamRoleRow,
+  html.kamo-phone-app .mobile-nav,
+  html.kamo-phone-app .tablet-nav {
+    display: none !important;
+  }
+
+  /* -----------------------------
+     FULL-SCREEN VERTICAL MENU
+     ----------------------------- */
+  html.kamo-phone-app .kam-backdrop {
     position: fixed !important;
     inset: 0 !important;
     z-index: 149 !important;
-    background: rgba(24,31,26,.28) !important;
+    background: rgba(24,31,26,.24) !important;
     opacity: 0 !important;
     pointer-events: none !important;
     backdrop-filter: blur(5px) !important;
     -webkit-backdrop-filter: blur(5px) !important;
-    transition: opacity .26s ease !important;
+    transition: opacity .25s ease !important;
   }
-  html[data-adaptive-shell="phone"] .kam-backdrop.open {
+
+  html.kamo-phone-app .kam-backdrop.open {
     opacity: 1 !important;
     pointer-events: auto !important;
   }
 
-  html[data-adaptive-shell="phone"] .kam-sheet {
+  html.kamo-phone-app .kam-sheet {
     position: fixed !important;
     inset: 0 !important;
     z-index: 150 !important;
-    width: 100vw !important;
-    max-width: 100vw !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kamo-viewport-height, 100dvh) !important;
+    max-height: var(--kamo-viewport-height, 100dvh) !important;
     margin: 0 !important;
-    padding: max(18px, env(safe-area-inset-top)) 16px calc(22px + env(safe-area-inset-bottom)) !important;
-    box-sizing: border-box !important;
+    padding: max(18px, calc(env(safe-area-inset-top) + 8px)) 16px calc(22px + env(safe-area-inset-bottom)) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: rgba(250,248,243,.985) !important;
-    box-shadow: none !important;
-    transform: translateY(102%) !important;
-    transition: transform .32s cubic-bezier(.2,.78,.22,1) !important;
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: rgba(250,248,243,.99) !important;
+    box-shadow: none !important;
+    transform: translateY(102%) !important;
+    transition: transform .31s cubic-bezier(.2,.78,.22,1) !important;
   }
-  html[data-adaptive-shell="phone"] .kam-sheet.open { transform: translateY(0) !important; }
-  html[data-adaptive-shell="phone"] .kam-sheet-handle { display: none !important; }
 
-  html[data-adaptive-shell="phone"] .kam-sheet-head {
+  html.kamo-phone-app .kam-sheet.open {
+    transform: translateY(0) !important;
+  }
+
+  html.kamo-phone-app .kam-sheet-handle {
+    display: none !important;
+  }
+
+  html.kamo-phone-app .kam-sheet-head {
     position: relative !important;
     width: min(360px, 100%) !important;
     min-height: 74px !important;
@@ -230,19 +665,25 @@
     border-bottom: 1px solid rgba(31,42,34,.07) !important;
     text-align: center !important;
   }
-  html[data-adaptive-shell="phone"] .kam-sheet-head > div { text-align: center !important; }
-  html[data-adaptive-shell="phone"] .kam-sheet-head small {
+
+  html.kamo-phone-app .kam-sheet-head > div {
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app .kam-sheet-head small {
     margin: 0 0 5px !important;
     color: #788179 !important;
     font-size: 8px !important;
     letter-spacing: .18em !important;
   }
-  html[data-adaptive-shell="phone"] .kam-sheet-head strong {
+
+  html.kamo-phone-app .kam-sheet-head strong {
     color: #253028 !important;
-    font: 600 25px/1 Manrope,'DM Sans',sans-serif !important;
+    font: 600 25px/1 Manrope, 'DM Sans', sans-serif !important;
     letter-spacing: -.04em !important;
   }
-  html[data-adaptive-shell="phone"] .kam-sheet-head [data-kam-close] {
+
+  html.kamo-phone-app .kam-sheet-head [data-kam-close] {
     position: absolute !important;
     top: 8px !important;
     right: 0 !important;
@@ -256,13 +697,17 @@
     place-items: center !important;
     font-size: 22px !important;
     transition: transform .16s ease !important;
+    touch-action: manipulation !important;
   }
-  html[data-adaptive-shell="phone"] .kam-sheet-head [data-kam-close]:active { transform: scale(.94) !important; }
 
-  html[data-adaptive-shell="phone"] .kam-vertical-primary,
-  html[data-adaptive-shell="phone"] .kam-plus-spaces,
-  html[data-adaptive-shell="phone"] .kam-sheet-grid,
-  html[data-adaptive-shell="phone"] .kam-sheet-links {
+  html.kamo-phone-app .kam-sheet-head [data-kam-close]:active {
+    transform: scale(.94) !important;
+  }
+
+  html.kamo-phone-app .kam-vertical-primary,
+  html.kamo-phone-app .kam-plus-spaces,
+  html.kamo-phone-app .kam-sheet-grid,
+  html.kamo-phone-app .kam-sheet-links {
     width: min(360px, 100%) !important;
     max-width: 360px !important;
     margin-left: auto !important;
@@ -271,13 +716,28 @@
     grid-template-columns: 1fr !important;
     gap: 8px !important;
   }
-  html[data-adaptive-shell="phone"] .kam-vertical-primary { margin-top: 10px !important; margin-bottom: 22px !important; }
-  html[data-adaptive-shell="phone"] .kam-plus-spaces { margin-bottom: 20px !important; }
-  html[data-adaptive-shell="phone"] .kam-sheet-grid { padding: 0 !important; margin-bottom: 18px !important; }
-  html[data-adaptive-shell="phone"] .kam-sheet-links { padding-top: 8px !important; border-top: 1px solid rgba(31,42,34,.07) !important; }
 
-  html[data-adaptive-shell="phone"] .kam-vertical-title,
-  html[data-adaptive-shell="phone"] .kam-plus-title {
+  html.kamo-phone-app .kam-vertical-primary {
+    margin-top: 8px !important;
+    margin-bottom: 22px !important;
+  }
+
+  html.kamo-phone-app .kam-plus-spaces {
+    margin-bottom: 18px !important;
+  }
+
+  html.kamo-phone-app .kam-sheet-grid {
+    padding: 0 !important;
+    margin-bottom: 18px !important;
+  }
+
+  html.kamo-phone-app .kam-sheet-links {
+    padding-top: 8px !important;
+    border-top: 1px solid rgba(31,42,34,.07) !important;
+  }
+
+  html.kamo-phone-app .kam-vertical-title,
+  html.kamo-phone-app .kam-plus-title {
     width: min(360px, 100%) !important;
     margin: 16px auto 9px !important;
     color: #8a918b !important;
@@ -288,87 +748,518 @@
     text-transform: uppercase !important;
   }
 
-  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item,
-  html[data-adaptive-shell="phone"] .kam-plus-spaces button,
-  html[data-adaptive-shell="phone"] .kam-sheet-action,
-  html[data-adaptive-shell="phone"] .kam-sheet-links > a,
-  html[data-adaptive-shell="phone"] .kam-sheet-links > button {
+  html.kamo-phone-app .kam-vertical-primary .kam-nav-item,
+  html.kamo-phone-app .kam-plus-spaces button,
+  html.kamo-phone-app .kam-sheet-action,
+  html.kamo-phone-app .kam-sheet-links > a,
+  html.kamo-phone-app .kam-sheet-links > button {
     position: relative !important;
     width: 100% !important;
     min-height: 54px !important;
     padding: 12px 18px !important;
     border: 1px solid rgba(31,42,34,.085) !important;
     border-radius: 16px !important;
-    background: rgba(255,255,255,.82) !important;
+    background: rgba(255,255,255,.84) !important;
     color: #344038 !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
     justify-content: center !important;
     gap: 9px !important;
-    box-sizing: border-box !important;
     box-shadow: 0 8px 24px rgba(31,42,34,.025) !important;
     text-align: center !important;
-    font: 600 12px/1.2 'DM Sans',sans-serif !important;
+    font: 600 12px/1.2 'DM Sans', sans-serif !important;
     text-decoration: none !important;
     transition: transform .16s ease, background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+    touch-action: manipulation !important;
   }
-  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item svg {
+
+  html.kamo-phone-app .kam-vertical-primary .kam-nav-item svg {
     width: 19px !important;
     height: 19px !important;
     flex: 0 0 19px !important;
   }
-  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item span { overflow: visible !important; }
-  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item.active,
-  html[data-adaptive-shell="phone"] .kam-plus-spaces button.active {
+
+  html.kamo-phone-app .kam-sheet-action b,
+  html.kamo-phone-app .kam-sheet-links > a > span,
+  html.kamo-phone-app .kam-sheet-links > button > span:last-child {
+    display: none !important;
+  }
+
+  html.kamo-phone-app .kam-vertical-primary .kam-nav-item.active,
+  html.kamo-phone-app .kam-plus-spaces button.active,
+  html.kamo-phone-app .kam-sheet-action.admin-entry {
     background: #263229 !important;
     border-color: #263229 !important;
     color: #fff !important;
     box-shadow: 0 12px 28px rgba(31,42,34,.13) !important;
   }
-  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item:active,
-  html[data-adaptive-shell="phone"] .kam-plus-spaces button:active,
-  html[data-adaptive-shell="phone"] .kam-sheet-action:active,
-  html[data-adaptive-shell="phone"] .kam-sheet-links > a:active,
-  html[data-adaptive-shell="phone"] .kam-sheet-links > button:active {
-    transform: scale(.985) !important;
+
+  html.kamo-phone-app .kam-vertical-primary .kam-nav-item:active,
+  html.kamo-phone-app .kam-plus-spaces button:active,
+  html.kamo-phone-app .kam-sheet-action:active,
+  html.kamo-phone-app .kam-sheet-links > a:active,
+  html.kamo-phone-app .kam-sheet-links > button:active {
+    transform: scale(.982) !important;
   }
-  html[data-adaptive-shell="phone"] .kam-sheet-action b,
-  html[data-adaptive-shell="phone"] .kam-sheet-links span { position: absolute !important; right: 16px !important; color: #89918a !important; }
-  html[data-adaptive-shell="phone"] .kam-sheet-role { width: min(360px,100%) !important; margin: 14px auto 0 !important; text-align: center !important; }
 
-  html[data-adaptive-shell="phone"].kamo-menu-open .main-shell { overflow: hidden !important; }
+  html.kamo-phone-app .kam-sheet-role {
+    width: 100% !important;
+    margin: 18px auto 0 !important;
+    color: #9a9f9a !important;
+    text-align: center !important;
+    font-size: 8px !important;
+  }
 
-  /* No component may force the phone canvas wider than the viewport. */
-  html[data-adaptive-shell="phone"] img,
-  html[data-adaptive-shell="phone"] svg,
-  html[data-adaptive-shell="phone"] canvas { max-width: 100%; }
-  html[data-adaptive-shell="phone"] input,
-  html[data-adaptive-shell="phone"] select,
-  html[data-adaptive-shell="phone"] textarea { min-width: 0 !important; max-width: 100% !important; font-size: 16px !important; }
-  html[data-adaptive-shell="phone"] .card,
-  html[data-adaptive-shell="phone"] [class*="grid"],
-  html[data-adaptive-shell="phone"] [class*="panel"],
-  html[data-adaptive-shell="phone"] [class*="shell"] { min-width: 0; max-width: 100%; }
+  /* -----------------------------
+     ALL IN-APP NAVIGATION IS VERTICAL
+     ----------------------------- */
+  html.kamo-phone-app #viewRoot .kcp-tabs,
+  html.kamo-phone-app #viewRoot .kav2-tabs,
+  html.kamo-phone-app #viewRoot .pro-tabs,
+  html.kamo-phone-app #viewRoot .center-tabs,
+  html.kamo-phone-app #viewRoot .booking-tabs,
+  html.kamo-phone-app #viewRoot .account-tabs,
+  html.kamo-phone-app #viewRoot [data-mobile-stack-tabs="1"] {
+    position: static !important;
+    top: auto !important;
+    width: min(360px, 100%) !important;
+    max-width: 360px !important;
+    margin: 10px auto 16px !important;
+    padding: 6px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 5px !important;
+    overflow: visible !important;
+    border-radius: 17px !important;
+    background: rgba(255,253,248,.94) !important;
+    box-shadow: none !important;
+  }
 
-  html[data-adaptive-shell="phone"] #viewRoot > * {
-    animation: kamoRouteIn .22s cubic-bezier(.2,.72,.25,1) both;
+  html.kamo-phone-app #viewRoot .kcp-tabs > *,
+  html.kamo-phone-app #viewRoot .kav2-tabs > *,
+  html.kamo-phone-app #viewRoot .pro-tabs > *,
+  html.kamo-phone-app #viewRoot .center-tabs > *,
+  html.kamo-phone-app #viewRoot .booking-tabs > *,
+  html.kamo-phone-app #viewRoot .account-tabs > *,
+  html.kamo-phone-app #viewRoot [data-mobile-stack-tabs="1"] > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    justify-content: center !important;
+    text-align: center !important;
+    white-space: normal !important;
+  }
+
+  /* -----------------------------
+     CONTENT NORMALIZATION
+     Desktop features, mobile hierarchy
+     ----------------------------- */
+  html.kamo-phone-app #viewRoot .two-col,
+  html.kamo-phone-app #viewRoot .result-layout,
+  html.kamo-phone-app #viewRoot .path-grid,
+  html.kamo-phone-app #viewRoot .profile-grid,
+  html.kamo-phone-app #viewRoot .pv4-grid,
+  html.kamo-phone-app #viewRoot .pv4-plan-bottom,
+  html.kamo-phone-app #viewRoot .kcp-grid,
+  html.kamo-phone-app #viewRoot .kav2-grid,
+  html.kamo-phone-app #viewRoot .kcp-fields,
+  html.kamo-phone-app #viewRoot .kav2-detail-grid,
+  html.kamo-phone-app #viewRoot .mykomo-grid,
+  html.kamo-phone-app #viewRoot .mykomo-engagement-grid,
+  html.kamo-phone-app #viewRoot .mykomo-challenges,
+  html.kamo-phone-app #viewRoot .booking-grid,
+  html.kamo-phone-app #viewRoot .agenda-grid,
+  html.kamo-phone-app #viewRoot .center-grid,
+  html.kamo-phone-app #viewRoot .club-grid,
+  html.kamo-phone-app #viewRoot .trajectory-grid {
+    grid-template-columns: 1fr !important;
+    gap: 11px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .metric-grid,
+  html.kamo-phone-app #viewRoot .kcp-kpis {
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    gap: 8px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp,
+  html.kamo-phone-app #viewRoot .kav2,
+  html.kamo-phone-app #viewRoot .patient-v4,
+  html.kamo-phone-app #viewRoot .tests-v1-root,
+  html.kamo-phone-app #viewRoot .mykomo-home,
+  html.kamo-phone-app #viewRoot .booking-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    gap: 12px !important;
+    padding-bottom: 24px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp-head,
+  html.kamo-phone-app #viewRoot .kav2-hero {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 20px 17px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    gap: 12px !important;
+    border-radius: 21px !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp-head h2,
+  html.kamo-phone-app #viewRoot .kav2-hero h2,
+  html.kamo-phone-app #viewRoot .kcp-head p,
+  html.kamo-phone-app #viewRoot .kav2-hero p {
+    margin-left: auto !important;
+    margin-right: auto !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp-head h2,
+  html.kamo-phone-app #viewRoot .kav2-hero h2 {
+    font-size: 30px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp-org {
+    min-width: 0 !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kav2-hero-actions,
+  html.kamo-phone-app #viewRoot .kcp-actions,
+  html.kamo-phone-app #viewRoot .kav2-secondary-actions {
+    width: min(340px, 100%) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    justify-items: stretch !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kav2-hero-actions > *,
+  html.kamo-phone-app #viewRoot .kcp-actions > *,
+  html.kamo-phone-app #viewRoot .kav2-secondary-actions > * {
+    width: 100% !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp-patientbar,
+  html.kamo-phone-app #viewRoot .kav2-registry-tools,
+  html.kamo-phone-app #viewRoot .kav2-assign,
+  html.kamo-phone-app #viewRoot .kav2-patient-row,
+  html.kamo-phone-app #viewRoot .kav2-registry-row {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 10px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp-patient-score,
+  html.kamo-phone-app #viewRoot .kav2-card-head,
+  html.kamo-phone-app #viewRoot .kcp-card-head {
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kav2-card-head,
+  html.kamo-phone-app #viewRoot .kcp-card-head {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    gap: 8px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp-card,
+  html.kamo-phone-app #viewRoot .kcp-card.wide,
+  html.kamo-phone-app #viewRoot .kcp-card.full,
+  html.kamo-phone-app #viewRoot .kav2-card,
+  html.kamo-phone-app #viewRoot .kav2-wide,
+  html.kamo-phone-app #viewRoot .kav2-full {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 17px !important;
+    border-radius: 19px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .card,
+  html.kamo-phone-app #viewRoot .pv4-section,
+  html.kamo-phone-app #viewRoot .pv4-primary,
+  html.kamo-phone-app #viewRoot .pv4-secondary,
+  html.kamo-phone-app #viewRoot .metric-card,
+  html.kamo-phone-app #viewRoot .test-v1-card,
+  html.kamo-phone-app #viewRoot .mykomo-card,
+  html.kamo-phone-app #viewRoot .mykomo-engagement {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    border-radius: 20px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-top {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    gap: 12px !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-identity,
+  html.kamo-phone-app #viewRoot .mykomo-identity * {
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-profile-btn {
+    width: min(320px, 100%) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    justify-content: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-rings {
+    width: 100% !important;
+    max-width: 330px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0,1fr)) !important;
+    justify-items: center !important;
+    gap: 5px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-ring {
+    width: min(84px, 25vw) !important;
+    height: min(84px, 25vw) !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-engagement-head {
+    grid-template-columns: 1fr !important;
+    justify-items: center !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-engagement-head > * {
+    text-align: center !important;
+  }
+
+  /* Forms: no Safari auto-zoom and no desktop multi-column leftovers. */
+  html.kamo-phone-app #viewRoot input,
+  html.kamo-phone-app #viewRoot select,
+  html.kamo-phone-app #viewRoot textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    font-size: 16px !important;
+  }
+
+  html.kamo-phone-app #viewRoot form,
+  html.kamo-phone-app #viewRoot fieldset {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  html.kamo-phone-app #viewRoot button,
+  html.kamo-phone-app #viewRoot a {
+    touch-action: manipulation !important;
+  }
+
+  html.kamo-phone-app #viewRoot .primary-button,
+  html.kamo-phone-app #viewRoot .secondary-button,
+  html.kamo-phone-app #viewRoot .kcp-btn {
+    min-height: 44px !important;
+  }
+
+  /* Desktop tables become readable mobile cards: zero horizontal scrolling. */
+  html.kamo-phone-app #viewRoot .kamo-mobile-table,
+  html.kamo-phone-app #viewRoot .kamo-mobile-table tbody {
+    display: grid !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    gap: 10px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kamo-mobile-table thead {
+    display: none !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kamo-mobile-table tr {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 12px 13px !important;
+    border: 1px solid rgba(31,42,34,.08) !important;
+    border-radius: 15px !important;
+    background: #fffdf8 !important;
+    box-shadow: 0 7px 20px rgba(31,42,34,.025) !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kamo-mobile-table td {
+    display: grid !important;
+    grid-template-columns: minmax(92px,.85fr) minmax(0,1.15fr) !important;
+    align-items: baseline !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 8px 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(31,42,34,.055) !important;
+    text-align: right !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kamo-mobile-table td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kamo-mobile-table td::before {
+    content: attr(data-mobile-label);
+    color: #828982 !important;
+    font-size: 8px !important;
+    font-weight: 700 !important;
+    letter-spacing: .08em !important;
+    text-align: left !important;
+    text-transform: uppercase !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kamo-mobile-table td[data-mobile-label=""]::before {
+    display: none !important;
+  }
+
+  html.kamo-phone-app #viewRoot .kcp-table-wrap,
+  html.kamo-phone-app #viewRoot [class*="table-wrap"],
+  html.kamo-phone-app #viewRoot [data-table-wrap] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* Maps and rich surfaces must stay inside the phone canvas. */
+  html.kamo-phone-app #viewRoot .leaflet-container,
+  html.kamo-phone-app #viewRoot [class*="map"] {
+    max-width: 100% !important;
+  }
+
+  html.kamo-phone-app #viewRoot .leaflet-container {
+    min-height: 270px !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+  }
+
+  /* Modals / dialogs stay centered and never exceed the device width. */
+  html.kamo-phone-app dialog,
+  html.kamo-phone-app [role="dialog"],
+  html.kamo-phone-app .modal,
+  html.kamo-phone-app .dialog {
+    max-width: calc(100vw - 24px) !important;
+    max-height: calc(var(--kamo-viewport-height, 100dvh) - 24px) !important;
+    margin: auto !important;
+    overflow-x: hidden !important;
+  }
+
+  html.kamo-phone-app.kamo-menu-open .main-shell {
+    overflow: hidden !important;
+  }
+
+  /* Route motion: subtle, fast, no layout shift. */
+  html.kamo-phone-app #viewRoot.kamo-route-enter > * {
+    animation: kamoRouteIn .24s cubic-bezier(.2,.75,.24,1) both;
+  }
+
+  html.kamo-phone-app #viewRoot.kamo-route-changing {
+    opacity: .985;
   }
 
   @keyframes kamoBrandIn {
-    from { opacity: 0; transform: translateY(-5px); }
+    from { opacity: 0; transform: translateY(-4px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
   @keyframes kamoRouteIn {
-    from { opacity: .15; transform: translateY(7px); }
+    from { opacity: .25; transform: translateY(7px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes kamoAuthIn {
+    from { opacity: 0; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes kamoAuthPanelIn {
+    from { opacity: 0; transform: translateY(12px) scale(.992); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+}
+
+@media (max-width: 390px) {
+  html.kamo-phone-app .topbar {
+    min-height: 136px !important;
+  }
+
+  html.kamo-phone-app .kam-mobile-brand strong {
+    font-size: 28px !important;
+  }
+
+  html.kamo-phone-app:has(#viewRoot > [data-my-komo-home]) .kam-mobile-brand strong {
+    font-size: 34px !important;
+  }
+
+  html.kamo-phone-app #viewRoot .metric-grid,
+  html.kamo-phone-app #viewRoot .kcp-kpis {
+    grid-template-columns: 1fr !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-manifesto h1 {
+    font-size: 38px !important;
+  }
+}
+
+@media (max-width: 767px) and (max-height: 700px) {
+  html.kamo-phone-auth #authScreen .auth-brand {
+    padding-bottom: 42px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-manifesto {
+    margin-top: 22px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-manifesto h1 {
+    font-size: 38px !important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-signal {
+    margin-top: 18px !important;
+  }
+
+  html.kamo-phone-app .topbar {
+    min-height: 130px !important;
+    gap: 5px !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .kam-mobile-brand,
+  #viewRoot.kamo-route-enter > *,
+  #authScreen .auth-logo,
+  #authScreen .auth-manifesto,
+  #authScreen .auth-signal,
+  #authScreen .auth-panel {
+    animation: none !important;
+  }
+
   .kam-sheet,
   .kam-backdrop,
   #kamTopMenu,
-  #viewRoot > *,
-  .kam-mobile-brand { animation: none !important; transition: none !important; }
+  .kam-sheet-action,
+  .kam-nav-item,
+  .auth-submit,
+  .secondary-button {
+    transition-duration: .01ms !important;
+  }
 }
