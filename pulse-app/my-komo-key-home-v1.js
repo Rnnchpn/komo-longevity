@@ -1,7 +1,7 @@
 /* KŌMØ KEY — premium home panel · essential wearable state only */
 (()=>{
 'use strict';
-const V='2.0.0';
+const V='2.0.1';
 let timer=0;
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const client=()=>window.KomoRuntime?.client||null;
@@ -63,7 +63,7 @@ async function run(){
  const s=await readState();
  const wrap=document.createElement('div');wrap.innerHTML=panel(s);const fresh=wrap.firstElementChild;
  if(current)current.replaceWith(fresh);else{const engagement=host.querySelector('.mykomo-engagement');engagement?.insertAdjacentElement('beforebegin',fresh)||host.appendChild(fresh)}
- fresh.querySelector('[data-key-open]')?.addEventListener('click',()=>window.KomoPatientNavigation?.go?.('key')||(location.hash='key'))
+ fresh.querySelector('[data-key-open]')?.addEventListener('click',()=>{if(window.KomoPatientNavigation?.go)window.KomoPatientNavigation.go('key');else location.hash='key'})
 }
 function schedule(ms=120){clearTimeout(timer);timer=setTimeout(run,ms)}
 ['hashchange','komo:route-ready','komo:data-ready','komo:wearable-data-updated'].forEach(e=>addEventListener(e,()=>schedule()));
