@@ -14,17 +14,16 @@ const [html,nested,keyHub,keyData,mobile]=await Promise.all([
 let dock='';if(await exists('pulse-bottom-nav-v6.js'))dock=await read('pulse-bottom-nav-v6.js');
 
 const checks=[
-  ['nested runtime is final patient navigation layer',html.includes('key-nested-navigation-v2.js?v=20260829-key-nested-v2')],
-  ['home KEY preview remains available',html.includes('my-komo-key-home-v1.js')||mobile.includes('SUIVI CONNECTÉ · KŌMØ KEY')],
+  ['nested runtime remains available for desktop compatibility',html.includes('key-nested-navigation-v2.js?v=20260829-key-nested-v2')],
+  ['nested runtime exits immediately on phone',nested.includes("if(window.matchMedia('(max-width:767px)').matches)return;")],
   ['KEY stays a dedicated canonical route',keyHub.includes("route()!=='key'")&&keyHub.includes("data-kh-go=\"key\"")],
-  ['My KŌMØ / My Key switch is explicit',nested.includes('MY KŌMØ')&&nested.includes('MY KEY')&&nested.includes("data-kns-go=\"mykomo\"")&&nested.includes("data-kns-go=\"key\"")],
-  ['KEY tabs are redirected to My KŌMØ rather than Home',nested.includes("my.dataset.khGo='mykomo'")],
-  ['Home never gets the nested switch',nested.includes("document.querySelectorAll('[data-key-nested-switch],[data-kh-home-tabs]').forEach(x=>x.remove())")],
-  ['phone primary menu no longer exposes KEY as first-level route',!mobile.includes("routeButton('key','Suivi montre · KEY','⌁')")],
-  ['captured-data layer remains available from My Key',keyData.includes('CAPTURED DATA')&&keyData.includes('Importer des données')&&keyData.includes('Flux de données')],
+  ['desktop My KŌMØ / My Key switch remains explicit',nested.includes('MY KŌMØ')&&nested.includes('MY KEY')&&nested.includes("data-kns-go=\"mykomo\"")&&nested.includes("data-kns-go=\"key\"")],
+  ['phone canonical menu keeps KŌMØ Key first-level',mobile.includes("routeButton('key','KŌMØ Key','K')")],
+  ['phone canonical menu keeps KŌMØ Link first-level',mobile.includes("routeButton('link','KŌMØ Link','↗')")],
+  ['captured-data layer remains available from KŌMØ Key',keyData.includes('CAPTURED DATA')&&keyData.includes('Importer des données')&&keyData.includes('Flux de données')],
   ['personal import remains CSV Excel JSON capable',keyData.includes('accept=\".csv,.xlsx,.xls,.json\"')],
   ['Motion Score remains separated from KEY data',keyHub.includes('Motion Score')],
-  ['legacy v6 dock is six-column if present',!dock||(!dock.includes("['key','KŌMØ Key'")&&dock.includes('repeat(6,minmax(0,1fr))'))]
+  ['legacy dock does not affect canonical phone menu',!dock||dock.includes('repeat(6,minmax(0,1fr))')||!dock.includes('grid-template-columns')]
 ];
 let failed=0;
 for(const [label,ok] of checks){console.log(`[pulse-key-nested-navigation-qa] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)failed++}
