@@ -1,0 +1,13 @@
+/* KŌMØ Pulse — iPhone no-topbar v1
+   Phone-only layout override. Removes the web-style top banner so content starts at the top of the app surface.
+   Visual/layout only. */
+
+@media (max-width:767px){
+  html[data-adaptive-shell="phone"] .topbar{display:none!important}
+  html[data-adaptive-shell="phone"] .main-shell{padding-top:0!important}
+  html[data-adaptive-shell="phone"] .view-root,
+  html[data-adaptive-shell="phone"] #viewRoot{padding-top:8px!important}
+  html[data-adaptive-shell="phone"] .kam-role-row{top:0!important;margin-top:0!important}
+  html[data-adaptive-shell="phone"] #viewRoot>[data-my-komo-home]:first-child,
+  html[data-adaptive-shell="phone"] #viewRoot>.mykomo-home:first-child{margin-top:0!important}
+}
