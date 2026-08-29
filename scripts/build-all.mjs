@@ -139,7 +139,9 @@ const scripts = [
   'scripts/pulse-mobile-performance-final-v1.mjs',
   'scripts/pulse-mobile-performance-final-qa-v1.mjs',
   'scripts/pulse-mobile-canonical-v1.mjs',
-  'scripts/pulse-mobile-canonical-qa-v1.mjs'
+  'scripts/pulse-mobile-canonical-qa-v1.mjs',
+  'scripts/pulse-key-nested-navigation-v2.mjs',
+  'scripts/pulse-key-nested-navigation-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
