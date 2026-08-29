@@ -39,3 +39,5 @@ await import('./pulse-my-komo-stability-v4.mjs');
 await import('./pulse-premium-detail-v1.mjs');
 // Home hierarchy: Motion Score + Locomotor Age first, KEY immediately below.
 await import('./pulse-home-key-position-v1.mjs');
+// Official PDF: append a consent-gated longitudinal KEY page without touching score calculation.
+await import('./pulse-key-pdf-report-v1.mjs');
