@@ -26,7 +26,7 @@ const checks=[
  ['single owner has no permanent polling',!js.includes('setInterval(')],
  ['shared Pulse client is reused',js.includes('window.KomoRuntime?.client')&&!js.includes('createClient(')],
  ['route guard is fail-open',css.includes('body.mykomo-route-pending #viewRoot{visibility:visible!important')],
- ['My KŌMØ still exposes score and progression',js.includes('Motion Score')&&js.includes('KŌMØ Points')&&js.includes('Défis du jour'))
+ ['My KŌMØ still exposes score and progression',js.includes('Motion Score')&&js.includes('KŌMØ Points')&&js.includes('Défis du jour')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-my-komo-stability-v4] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
