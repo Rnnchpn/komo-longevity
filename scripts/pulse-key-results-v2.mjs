@@ -43,5 +43,7 @@ await import('./pulse-home-key-position-v1.mjs');
 await import('./pulse-key-pdf-report-v1.mjs');
 // iPhone is the final presentation owner: fixed viewport, safe areas and locked zoom.
 await import('./pulse-iphone-app-lock-v1.mjs');
-// Authentication is the final visual/session boundary: no login resurfacing or mobile layout jumps.
+// Authentication is the final session boundary: no login resurfacing or mobile layout jumps.
 await import('./pulse-auth-stability-v1.mjs');
+// Dark Luxe is visual-only and runs last so desktop and iPhone share one premium visual language.
+await import('./pulse-dark-luxe-v1.mjs');
