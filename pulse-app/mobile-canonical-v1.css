@@ -1,0 +1,148 @@
+/* KŌMØ Pulse — canonical phone UI v1
+   One mobile owner: scores + connected follow-up first. */
+@media (max-width: 767px) {
+  html.kcm-phone,
+  html.kcm-phone body {
+    width:100%;
+    max-width:100%;
+    height:100%;
+    margin:0;
+    overflow:hidden!important;
+    overscroll-behavior:none;
+    background:#f3f0e9;
+    -webkit-text-size-adjust:100%;
+    text-size-adjust:100%;
+  }
+
+  html.kcm-phone *,html.kcm-phone *:before,html.kcm-phone *:after{box-sizing:border-box}
+  html.kcm-phone #appShell{width:100%!important;max-width:100%!important;height:100dvh!important;overflow:hidden!important;background:#f3f0e9!important}
+  html.kcm-phone .sidebar,
+  html.kcm-phone #mobileNav,
+  html.kcm-phone #kamBottomBar,
+  html.kcm-phone #kamRoleRow,
+  html.kcm-phone #kamTopMenu,
+  html.kcm-phone #kamSheet,
+  html.kcm-phone #kamBackdrop,
+  html.kcm-phone #kpDock,
+  html.kcm-phone #kpDockV5,
+  html.kcm-phone #kpDockV6,
+  html.kcm-phone #kpPickerV6,
+  html.kcm-phone #kpPickerV6Bg{display:none!important}
+
+  html.kcm-phone .main-shell{
+    position:relative!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:100dvh!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior-y:contain;
+    -webkit-overflow-scrolling:touch;
+    scroll-behavior:auto!important;
+    background:#f3f0e9!important;
+  }
+
+  html.kcm-phone .topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:120!important;
+    width:100%!important;
+    min-height:112px!important;
+    margin:0!important;
+    padding:max(14px,calc(env(safe-area-inset-top) + 7px)) 16px 13px!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    justify-items:center!important;
+    align-content:start!important;
+    gap:10px!important;
+    background:rgba(243,240,233,.97)!important;
+    border:0!important;
+    box-shadow:0 1px 0 rgba(34,49,39,.055)!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+  html.kcm-phone .topbar>div:first-child,
+  html.kcm-phone .topbar-actions,
+  html.kcm-phone #pageEyebrow,
+  html.kcm-phone #pageTitle,
+  html.kcm-phone .kpulse-lockup,
+  html.kcm-phone .kpulse-header-sweep{display:none!important}
+
+  .kcm-brand{display:grid;justify-items:center;text-align:center;gap:4px;width:100%}
+  .kcm-brand strong{color:#20362a;font:600 31px/.96 Manrope,'DM Sans',sans-serif;letter-spacing:.075em;white-space:nowrap}
+  .kcm-brand span{color:#7c857e;font:700 7px/1 'DM Sans',sans-serif;letter-spacing:.21em;text-transform:uppercase}
+  .kcm-menu-button{height:42px;min-width:132px;padding:0 18px;border:0;border-radius:999px;background:#243a2d;color:#fff;box-shadow:0 7px 18px rgba(32,54,42,.13);display:inline-flex;align-items:center;justify-content:center;gap:9px;font:700 10px/1 'DM Sans',sans-serif;letter-spacing:.02em;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .kcm-menu-button i{width:4px;height:4px;border-radius:50%;background:currentColor;box-shadow:8px 0 currentColor,-8px 0 currentColor}
+  .kcm-menu-button:active{transform:scale(.975)}
+
+  html.kcm-phone #viewRoot{width:100%!important;max-width:100%!important;min-width:0!important;padding:15px 14px calc(28px + env(safe-area-inset-bottom))!important;margin:0!important;overflow:visible!important}
+  html.kcm-phone #viewRoot>*{max-width:100%!important}
+  html.kcm-phone input,html.kcm-phone select,html.kcm-phone textarea{font-size:16px!important;max-width:100%!important}
+
+  /* Canonical mobile home */
+  .kcm-home{display:grid;gap:12px;width:100%;max-width:520px;margin:0 auto;padding-bottom:8px;color:#23372b}
+  .kcm-home-intro{text-align:center;padding:4px 10px 2px}
+  .kcm-home-intro small{display:block;color:#7b847e;font:800 7px/1 'DM Sans',sans-serif;letter-spacing:.15em;text-transform:uppercase}
+  .kcm-home-intro h1{margin:7px auto 0;max-width:320px;color:#20352a;font:500 28px/1 Manrope,'DM Sans',sans-serif;letter-spacing:-.055em;text-wrap:balance}
+
+  .kcm-score-card,.kcm-watch-card{position:relative;overflow:hidden;border:1px solid rgba(37,55,43,.08);border-radius:24px;background:#fbfaf6;box-shadow:0 12px 32px rgba(31,49,38,.05)}
+  .kcm-score-card{padding:19px 17px 17px;background:linear-gradient(145deg,#faf9f5,#eef1ea)}
+  .kcm-score-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .kcm-score-top small,.kcm-watch-head small{color:#7c857f;font:800 6.5px/1 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase}
+  .kcm-state{display:inline-flex;align-items:center;gap:6px;padding:6px 8px;border-radius:999px;background:#e4ebe3;color:#506559;font:800 6px/1 'DM Sans',sans-serif;letter-spacing:.07em;text-transform:uppercase}
+  .kcm-state:before{content:"";width:5px;height:5px;border-radius:50%;background:#708d77}
+  .kcm-state.off{background:#ede8df;color:#877f75}.kcm-state.off:before{background:#aaa096}
+
+  .kcm-score-main{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:center;margin-top:17px}
+  .kcm-score-ring{--kcm-score:0;position:relative;width:min(142px,37vw);height:min(142px,37vw);margin:auto;border-radius:50%;display:grid;place-items:center;background:conic-gradient(from -90deg,#44604e calc(var(--kcm-score)*1%),#dfe3dc 0);box-shadow:0 14px 30px rgba(48,72,56,.09)}
+  .kcm-score-ring:after{content:"";position:absolute;inset:11px;border-radius:50%;background:#fbfaf6;box-shadow:inset 0 0 0 1px rgba(42,59,48,.05)}
+  .kcm-score-core{position:relative;z-index:1;text-align:center}.kcm-score-core strong{display:block;color:#20352a;font:600 39px/.92 Manrope,'DM Sans',sans-serif;letter-spacing:-.07em}.kcm-score-core strong small{font-size:10px;letter-spacing:0;color:#7d867f}.kcm-score-core span{display:block;margin-top:6px;color:#78837b;font:800 6px/1 'DM Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase}
+  .kcm-age{text-align:center;padding:12px 8px}.kcm-age small{display:block;color:#718078;font:800 7px/1 'DM Sans',sans-serif;letter-spacing:.14em;text-transform:uppercase}.kcm-age strong{display:block;margin-top:7px;color:#20352a;font:500 41px/.94 Manrope,'DM Sans',sans-serif;letter-spacing:-.065em}.kcm-age span{display:block;margin-top:7px;color:#7b847d;font-size:8px;line-height:1.4}
+
+  .kcm-mini-scores{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:15px}.kcm-mini{padding:10px 11px;border-radius:14px;background:rgba(255,255,255,.68);border:1px solid rgba(39,57,45,.055)}.kcm-mini small{display:block;color:#858c86;font:800 6px/1 'DM Sans',sans-serif;letter-spacing:.09em;text-transform:uppercase}.kcm-mini strong{display:block;margin-top:5px;color:#2a3d31;font:600 16px/1 Manrope,sans-serif}.kcm-mini span{display:block;margin-top:4px;color:#818983;font-size:6.7px}
+  .kcm-primary{width:100%;min-height:46px;margin-top:13px;border:0;border-radius:14px;background:#253b2e;color:#fff;font:800 9px/1 'DM Sans',sans-serif;touch-action:manipulation}.kcm-primary:active{transform:scale(.987)}
+
+  .kcm-watch-card{padding:18px 17px;background:linear-gradient(150deg,#20362a,#2d4a37);color:#fff}
+  .kcm-watch-card:after{content:"";position:absolute;width:220px;height:220px;border:1px solid rgba(255,255,255,.08);border-radius:50%;right:-112px;top:-112px;pointer-events:none}
+  .kcm-watch-head{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.kcm-watch-head small{color:rgba(255,255,255,.55)}.kcm-watch-head h2{margin:6px 0 0;font:600 21px/1.02 Manrope,sans-serif;letter-spacing:-.04em}.kcm-watch-head .kcm-state{background:rgba(255,255,255,.09);color:rgba(255,255,255,.76)}.kcm-watch-head .kcm-state.off{background:rgba(255,255,255,.075);color:rgba(255,255,255,.55)}
+  .kcm-watch-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:17px}.kcm-watch-stat{min-width:0;padding:11px 8px;border-radius:14px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.06);text-align:center}.kcm-watch-stat small{display:block;color:rgba(255,255,255,.48);font:700 5.7px/1 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase}.kcm-watch-stat strong{display:block;margin-top:7px;color:#fff;font:600 16px/1 Manrope,sans-serif;white-space:nowrap}.kcm-watch-stat span{display:block;margin-top:4px;color:rgba(255,255,255,.46);font-size:6px;white-space:nowrap}
+  .kcm-watch-copy{position:relative;z-index:1;margin:13px 2px 0;color:rgba(255,255,255,.58);font-size:8px;line-height:1.5}.kcm-watch-button{position:relative;z-index:1;width:100%;min-height:45px;margin-top:13px;border:1px solid rgba(255,255,255,.11);border-radius:14px;background:rgba(255,255,255,.10);color:#fff;font:800 9px/1 'DM Sans',sans-serif;touch-action:manipulation}.kcm-watch-button:active{transform:scale(.987)}
+
+  /* Canonical menu: one vertical, centered destination list. */
+  .kcm-menu-backdrop{position:fixed;z-index:990;inset:0;border:0;background:rgba(23,31,26,.30);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .14s ease}
+  .kcm-menu-backdrop.open{opacity:1;visibility:visible;pointer-events:auto}
+  .kcm-menu{position:fixed;z-index:1000;inset:0;display:grid;grid-template-rows:auto 1fr auto;padding:max(18px,calc(env(safe-area-inset-top) + 12px)) 16px calc(18px + env(safe-area-inset-bottom));background:#f7f4ed;transform:translateY(8px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .14s ease,transform .16s ease;overflow-y:auto;overflow-x:hidden}
+  .kcm-menu.open{transform:none;opacity:1;visibility:visible;pointer-events:auto}
+  .kcm-menu-head{display:grid;justify-items:center;text-align:center;gap:8px}.kcm-menu-head strong{font:600 24px/.98 Manrope,sans-serif;letter-spacing:.07em;color:#20362a}.kcm-menu-head span{font:700 6.5px/1 'DM Sans',sans-serif;letter-spacing:.17em;text-transform:uppercase;color:#838a84}.kcm-menu-close{position:absolute;right:16px;top:max(17px,calc(env(safe-area-inset-top) + 11px));width:40px;height:40px;border:1px solid rgba(39,55,44,.08);border-radius:50%;background:#fff;color:#283b2f;font-size:20px}
+  .kcm-menu-nav{width:100%;max-width:420px;margin:auto;display:grid;gap:8px;align-content:center}.kcm-menu-nav button{width:100%;min-height:55px;padding:0 15px;border:1px solid rgba(39,55,44,.075);border-radius:17px;background:#fff;color:#26392e;display:flex;align-items:center;justify-content:center;gap:11px;font:700 12px/1 'DM Sans',sans-serif;text-align:center;box-shadow:0 6px 18px rgba(35,49,40,.035);touch-action:manipulation}.kcm-menu-nav button.active{background:#263b2e;color:#fff;border-color:#263b2e}.kcm-menu-nav button:active{transform:scale(.987)}.kcm-menu-nav i{width:24px;height:24px;border-radius:8px;background:#eef1eb;display:grid;place-items:center;color:#405548;font-style:normal;font-size:11px}.kcm-menu-nav button.active i{background:rgba(255,255,255,.12);color:#fff}
+  .kcm-menu-secondary{width:100%;max-width:420px;margin:14px auto 0;padding-top:13px;border-top:1px solid rgba(40,55,45,.08);display:grid;gap:7px}.kcm-menu-secondary button{min-height:43px;border:0;border-radius:12px;background:transparent;color:#657168;font:700 9px/1 'DM Sans',sans-serif;text-align:center}.kcm-menu-secondary button.kcm-admin{background:#263b2e;color:#fff}.kcm-menu-secondary button.kcm-logout{color:#8d675f}
+
+  html.kcm-menu-open .main-shell{overflow:hidden!important}
+
+  /* Existing dedicated routes stay vertical and lightweight. */
+  html.kcm-phone body.mykomo-v3 .mkv3,
+  html.kcm-phone .keyhub,
+  html.kcm-phone .trajectory,
+  html.kcm-phone .profile-shell,
+  html.kcm-phone .booking-shell{max-width:100%!important;overflow-x:hidden!important}
+  html.kcm-phone body.mykomo-v3 .mkv3-grid,
+  html.kcm-phone body.mykomo-v3 .mkv3-lower,
+  html.kcm-phone .kh-hero-grid,
+  html.kcm-phone .kh-primary,
+  html.kcm-phone .kh-metric-grid,
+  html.kcm-phone .kh-trends{grid-template-columns:1fr!important}
+  html.kcm-phone .kh-tabs{display:grid!important;grid-template-columns:1fr!important;gap:6px!important;overflow:visible!important}
+  html.kcm-phone .kh-tab{width:100%!important;min-height:44px!important}
+  html.kcm-phone .kh-ring{max-width:150px!important;max-height:150px!important}
+
+  @media (max-width:390px){
+    .kcm-brand strong{font-size:28px}.kcm-score-main{gap:6px}.kcm-score-ring{width:126px;height:126px}.kcm-age strong{font-size:36px}.kcm-watch-stat strong{font-size:14px}
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .kcm-menu,.kcm-menu-backdrop{transition:none!important}
+}
