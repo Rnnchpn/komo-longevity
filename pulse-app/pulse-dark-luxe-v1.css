@@ -1,0 +1,264 @@
+/* KŌMØ Pulse — Dark Luxe v1
+   Final visual layer only. No route, auth, score or data behavior is changed. */
+
+:root{
+  --kd-bg:#070908;
+  --kd-bg-2:#0b0e0c;
+  --kd-panel:#101411;
+  --kd-panel-2:#151a16;
+  --kd-panel-soft:rgba(19,24,20,.88);
+  --kd-line:rgba(238,240,232,.095);
+  --kd-line-strong:rgba(219,226,214,.16);
+  --kd-text:#f2efe8;
+  --kd-muted:#98a099;
+  --kd-faint:#697169;
+  --kd-sage:#9faf9f;
+  --kd-sage-deep:#365241;
+  --kd-forest:#1e3126;
+  --kd-warm:#d8d0c2;
+  --kd-shadow:0 26px 72px rgba(0,0,0,.34);
+}
+
+html,body{background:var(--kd-bg)!important;color:var(--kd-text)}
+body{accent-color:var(--kd-sage)}
+
+/* ---------- GLOBAL APP SURFACE ---------- */
+#appShell,
+.main-shell{
+  background:
+    radial-gradient(900px 520px at 88% -8%,rgba(118,145,122,.12),transparent 58%),
+    radial-gradient(760px 480px at -8% 88%,rgba(165,143,108,.055),transparent 62%),
+    linear-gradient(180deg,#090b0a 0%,#070908 52%,#060807 100%)!important;
+  color:var(--kd-text)!important;
+}
+.main-shell{
+  background-attachment:fixed!important;
+}
+.main-shell:after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  opacity:.42;
+  background-image:
+    linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);
+  background-size:54px 54px;
+  mask-image:linear-gradient(135deg,rgba(0,0,0,.7),transparent 72%);
+}
+.topbar,.view-root{position:relative;z-index:1}
+.view-root{color:var(--kd-text)!important}
+.topbar{
+  background:linear-gradient(180deg,rgba(7,9,8,.94),rgba(7,9,8,.62),transparent)!important;
+  border-color:rgba(255,255,255,.05)!important;
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+}
+.topbar h1,.topbar .eyebrow{color:var(--kd-text)!important}
+.topbar .eyebrow{opacity:.48}
+.icon-button,.avatar-button{
+  border-color:var(--kd-line)!important;
+  background:rgba(255,255,255,.045)!important;
+  color:var(--kd-text)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+
+/* ---------- SIDEBAR / NAV ---------- */
+.sidebar{
+  background:
+    radial-gradient(circle at 30% 0%,rgba(129,154,132,.11),transparent 32%),
+    linear-gradient(180deg,#0b0e0c,#080a09)!important;
+  border-color:rgba(255,255,255,.065)!important;
+  color:var(--kd-text)!important;
+}
+.brand,.brand-mark,.brand-product{color:var(--kd-text)!important}
+.brand-product{opacity:.46}
+.nav-stack a,.nav-stack button,.nav-stack [data-route],.site-link{
+  color:#9aa29b!important;
+}
+.nav-stack a:hover,.nav-stack button:hover,.nav-stack [data-route]:hover{
+  color:#f1eee8!important;background:rgba(255,255,255,.045)!important;
+}
+.nav-stack .active,.nav-stack [aria-current="page"],.nav-stack [data-active="true"]{
+  color:#f4f1ea!important;
+  background:linear-gradient(145deg,rgba(111,139,116,.19),rgba(255,255,255,.035))!important;
+  box-shadow:inset 0 0 0 1px rgba(172,194,175,.11)!important;
+}
+.sidebar-foot{border-color:rgba(255,255,255,.06)!important}
+.account-popover{
+  background:#111512!important;border:1px solid var(--kd-line)!important;color:var(--kd-text)!important;box-shadow:var(--kd-shadow)!important;
+}
+.account-popover a,.account-popover button{color:#c8cdc7!important;border-color:rgba(255,255,255,.06)!important}
+.account-meta span{color:var(--kd-muted)!important}
+
+/* ---------- GENERIC CARDS ---------- */
+.card,.section-block,.metric-card,.test-v1-card,
+.pv4-section,.pv4-primary,.pv4-secondary,
+.kcp-card,.kav2-card,.booking-card,.profile-card,
+.result-card,.trajectory-card,.path-card,
+[class*="panel-card"]{
+  color:var(--kd-text)!important;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(126,151,129,.06),transparent 30%),
+    linear-gradient(145deg,rgba(21,26,22,.96),rgba(13,16,14,.97))!important;
+  border-color:var(--kd-line)!important;
+  box-shadow:0 20px 54px rgba(0,0,0,.23),inset 0 1px 0 rgba(255,255,255,.03)!important;
+}
+.card h1,.card h2,.card h3,.card h4,
+.section-block h1,.section-block h2,.section-block h3,.section-block h4,
+.pv4-section h1,.pv4-section h2,.pv4-section h3,.pv4-section h4,
+.kcp-card h1,.kcp-card h2,.kcp-card h3,.kcp-card h4,
+.kav2-card h1,.kav2-card h2,.kav2-card h3,.kav2-card h4{
+  color:var(--kd-text)!important;
+}
+.card p,.card small,.section-block p,.section-block small,
+.pv4-section p,.pv4-section small,.kcp-card p,.kcp-card small,.kav2-card p,.kav2-card small{
+  color:var(--kd-muted)!important;
+}
+
+/* ---------- HOME / SCORE / AGE ---------- */
+.kamo-age>span,.kamo-age>small{color:#8f9890!important}
+.kamo-age>strong{color:#f1eee7!important}
+.mykomo-xp{
+  border-color:var(--kd-line)!important;
+  background:linear-gradient(145deg,rgba(25,31,26,.94),rgba(14,17,15,.98))!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.22)!important;
+}
+.mykomo-xp-head strong{background:#d9dfd5!important;color:#142018!important}
+.mykomo-xp-track{background:#252b27!important;border-color:rgba(255,255,255,.045)!important}
+.kamo-xp-stat{background:rgba(255,255,255,.045)!important;border:1px solid rgba(255,255,255,.045)!important}
+.kamo-xp-stat span{color:#8e978f!important}.kamo-xp-stat strong{color:#edf0e9!important}.kamo-xp-stat.gain strong{color:#a9c0ad!important}
+
+/* ---------- KEY ---------- */
+.keyhub.kh2-enhanced{--kh2-deep:#dfe8df;--kh2-green:#9cb39f;--kh2-sage:#819b86;--kh2-line:rgba(235,239,231,.09);color:var(--kd-text)!important}
+.kh2-nav{
+  background:rgba(17,21,18,.82)!important;border-color:var(--kd-line)!important;box-shadow:0 16px 46px rgba(0,0,0,.22)!important;
+}
+.kh2-nav button{color:#828b84!important}.kh2-nav button:hover{background:rgba(255,255,255,.045)!important;color:#dfe4dd!important}
+.kh2-nav button.active{background:#dce3d9!important;color:#152018!important;box-shadow:none!important}
+.kh2-nav button.active:after{background:#496654!important}.kh2-nav button i{background:#253029!important;color:#aab9ac!important}
+.kh2-stage-head,.kh2-stat,.kh2-quality,.kh2-trend,.kh2-data-head,.kh2-drop,.kh2-preview,.kh2-flow article,.kh2-empty{
+  color:var(--kd-text)!important;
+  background:
+    radial-gradient(circle at 96% 0%,rgba(110,140,116,.08),transparent 31%),
+    linear-gradient(145deg,rgba(20,25,21,.96),rgba(12,15,13,.98))!important;
+  border-color:var(--kd-line)!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+.kh2-stage-head h3,.kh2-data-head h3,.kh2-empty h3,.kh2-quality h4,.kh2-preview h4,.kh2-drop>strong,.kh2-value{color:var(--kd-text)!important}
+.kh2-stage-head p,.kh2-data-head p,.kh2-stat p,.kh2-quality p,.kh2-trend p,.kh2-drop>span,.kh2-flow p,.kh2-note,.kh2-preview header>span{color:var(--kd-muted)!important}
+.kh2-stage-head small,.kh2-today small,.kh2-data-head small,.kh2-quality small,.kh2-empty small,.kh2-preview small,.kh2-stat>small,.kh2-trend>small{color:#8d978f!important}
+.kh2-today{
+  background:
+    radial-gradient(circle at 85% 3%,rgba(174,205,179,.16),transparent 34%),
+    linear-gradient(145deg,#142219,#23372a)!important;
+  border:1px solid rgba(196,216,198,.095)!important;
+  box-shadow:0 30px 84px rgba(0,0,0,.32)!important;
+}
+.kh2-wear{background:radial-gradient(circle,#26392d 58%,transparent 59%),conic-gradient(from -90deg,#dce9dd var(--p,0%),rgba(255,255,255,.09) 0)!important}
+.kh2-quality>div:last-child{background:#222823!important}
+.kh2-trend>span{background:#27332b!important;color:#a9baac!important}.kh2-trend>span.down{background:#312a24!important;color:#c6b29e!important}
+.kh2-data-head aside{background:linear-gradient(145deg,#203328,#31483a)!important}
+.kh2-drop{border-style:dashed!important}.kh2-drop>b{background:#dbe2d7!important;color:#152019!important;box-shadow:none!important}.kh2-drop>i{background:#253029!important;color:#afbeb1!important}
+.kh2-table{border-color:var(--kd-line)!important}.kh2-table>div{background:rgba(255,255,255,.025)!important;border-color:rgba(255,255,255,.05)!important;color:#c7cdc7!important}.kh2-table .head{background:#171c18!important;color:#858f87!important}
+.kh2-preview footer button,.kh2-empty button{background:#1a211c!important;color:#c7d0c8!important;border-color:var(--kd-line)!important}.kh2-preview footer button.primary,.kh2-empty button{background:#dce2d8!important;color:#152018!important}
+
+/* ---------- MY KŌMØ ---------- */
+body.mykomo-v5 .main-shell{background:radial-gradient(900px 500px at 88% 0%,rgba(100,133,106,.11),transparent 57%),linear-gradient(180deg,#090c0a,#060807)!important}
+.mkv4{--ink:#f0eee8;--muted:#929b94;--forest:#9ab09d;--forest2:#7e9a84;--sage:#a7b8a7;--cream:#171c18;--sand:#25231f;--line:rgba(238,240,232,.09);color:var(--kd-text)!important}
+.mkv4-card,
+.mkv4>.mkv4-card.mkv4-section:not(.mkv4-quests):not(.mkv4-stats):not(.mkv4-daily):not(.mkv4-build),
+.mkv4-stats,.mkv4-daily{
+  color:var(--kd-text)!important;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(116,145,120,.075),transparent 29%),
+    linear-gradient(145deg,#151a16,#0d100e)!important;
+  border-color:var(--kd-line)!important;
+  box-shadow:0 22px 58px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.025)!important;
+}
+.mkv4 h3,.mkv4-stat strong,.mkv4-mini strong,.mkv4-steps strong{color:var(--kd-text)!important}
+.mkv4-kicker,.mkv4-head p,.mkv4-stat small,.mkv4-stat span,.mkv4-steps span,.mkv4-mini small{color:var(--kd-muted)!important}
+.mkv4-count{background:#222a24!important;color:#a8b9aa!important}
+.mkv4-stat,.mkv4-mini,.mkv4-build-box{background:rgba(255,255,255,.04)!important;border-color:rgba(255,255,255,.055)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.02)!important}
+.mkv4-stat.main,.mkv4-hero,.mkv4-quests,.mkv4-build{background:radial-gradient(circle at 90% 0%,rgba(119,166,128,.16),transparent 32%),linear-gradient(145deg,#132219,#22372a)!important}
+.mkv4-step-track{background:#252a26!important}.mkv4-step input{background:#111512!important;border-color:var(--kd-line)!important;color:#f1eee8!important}
+.mkv4-btn{background:#171c18!important;color:#d4dbd4!important;border-color:var(--kd-line)!important}.mkv4-btn.primary{background:#dce2d8!important;color:#142018!important;border-color:#dce2d8!important}
+
+/* ---------- FORMS / TABLES / ACTIONS ---------- */
+#appShell input,#appShell select,#appShell textarea{
+  color:var(--kd-text)!important;background:#0f1310!important;border-color:var(--kd-line)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.018)!important;
+}
+#appShell input::placeholder,#appShell textarea::placeholder{color:#606961!important}
+#appShell input:focus,#appShell select:focus,#appShell textarea:focus{border-color:rgba(159,183,163,.34)!important;box-shadow:0 0 0 3px rgba(127,159,134,.09)!important}
+#appShell table{color:#c8cec8!important}.table-wrap,[class*="table-wrap"]{border-color:var(--kd-line)!important;background:rgba(12,15,13,.8)!important}
+#appShell th{color:#8c958e!important;background:#121713!important;border-color:rgba(255,255,255,.055)!important}#appShell td{border-color:rgba(255,255,255,.045)!important}
+.primary-button{background:#e0e4dc!important;color:#111713!important;border-color:#e0e4dc!important;box-shadow:0 10px 28px rgba(0,0,0,.22)!important}
+.secondary-button{background:#151a16!important;color:#d6dbd5!important;border-color:var(--kd-line)!important}
+
+/* ---------- AUTH ---------- */
+#authScreen{
+  background:
+    radial-gradient(900px 560px at 12% -10%,rgba(126,153,130,.13),transparent 60%),
+    radial-gradient(700px 500px at 100% 100%,rgba(169,144,106,.055),transparent 62%),
+    linear-gradient(145deg,#090b0a,#060807)!important;
+  color:var(--kd-text)!important;
+}
+#authScreen .auth-brand{background:radial-gradient(circle at 20% 0%,rgba(140,166,144,.13),transparent 35%),linear-gradient(145deg,#0b0e0c,#111712)!important;color:var(--kd-text)!important;border-color:rgba(255,255,255,.06)!important}
+#authScreen .auth-logo,#authScreen .auth-manifesto h1{color:#f4f0e9!important}#authScreen .auth-manifesto p,#authScreen .auth-note{color:#929b94!important}
+#authScreen .auth-panel-wrap{background:transparent!important}
+#authScreen .auth-panel{
+  color:var(--kd-text)!important;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(132,157,136,.08),transparent 30%),
+    linear-gradient(145deg,#151a16,#0d100e)!important;
+  border-color:var(--kd-line)!important;
+  box-shadow:0 34px 88px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035)!important;
+}
+#authScreen .auth-heading h2{color:#f2efe8!important}#authScreen .auth-heading p,#authScreen .auth-form label>span,#authScreen .auth-divider,#authScreen .auth-footer-links a{color:#929b94!important}
+#authScreen .product-pill{background:#233029!important;color:#b8c6ba!important;border-color:rgba(255,255,255,.07)!important}
+#authScreen .auth-audience-switch{background:#0b0f0c!important;border:1px solid var(--kd-line)!important}#authScreen .auth-audience-switch button{color:#89928b!important;background:transparent!important}#authScreen .auth-audience-switch button.active{background:#dce2d8!important;color:#142018!important}
+#authScreen input{background:#0b0f0c!important;color:#f3f0e9!important;border-color:var(--kd-line)!important}#authScreen input::placeholder{color:#555e57!important}
+#authScreen .primary-button{background:#e2e5de!important;color:#111713!important}#authScreen .secondary-button{background:#171c18!important;color:#d8ddd7!important;border-color:var(--kd-line)!important}
+#authScreen .password-toggle,#authScreen .text-button{color:#a8b2aa!important}
+
+/* ---------- PHONE ---------- */
+@media(max-width:767px){
+  html.kamo-phone-app body,html.kamo-phone-auth body,
+  html.kamo-iphone-locked body{background:#070908!important}
+  html.kamo-phone-app .main-shell,html.kamo-iphone-locked .main-shell{
+    background:
+      radial-gradient(520px 320px at 86% 0%,rgba(118,151,124,.12),transparent 62%),
+      linear-gradient(180deg,#090c0a 0%,#060807 100%)!important;
+  }
+  html.kamo-phone-app .topbar,html.kamo-iphone-locked .topbar{background:linear-gradient(180deg,rgba(7,9,8,.98),rgba(7,9,8,.78),transparent)!important}
+  html[data-adaptive-shell="phone"] .kam-mobile-brand{color:#f2efe8!important}html[data-adaptive-shell="phone"] .kam-mobile-brand span{color:#7e8981!important}
+  html[data-adaptive-shell="phone"] .kam-bottom{
+    background:rgba(14,18,15,.92)!important;
+    border:1px solid rgba(255,255,255,.09)!important;
+    box-shadow:0 20px 52px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.035)!important;
+    backdrop-filter:blur(22px)!important;-webkit-backdrop-filter:blur(22px)!important;
+  }
+  html[data-adaptive-shell="phone"] .kam-nav-item{color:#747e76!important}html[data-adaptive-shell="phone"] .kam-nav-item.active{color:#eef1eb!important;background:rgba(138,166,143,.11)!important}
+  html[data-adaptive-shell="phone"] .kam-sheet{background:#111512!important;border-color:var(--kd-line)!important;color:var(--kd-text)!important;box-shadow:0 -24px 70px rgba(0,0,0,.48)!important}
+  html[data-adaptive-shell="phone"] .kam-sheet-action,html[data-adaptive-shell="phone"] .kam-sheet-links>a,html[data-adaptive-shell="phone"] .kam-sheet-links>button{background:#161b17!important;color:#d7ddd7!important;border-color:rgba(255,255,255,.06)!important}
+  html.kamo-phone-auth #authScreen{background:linear-gradient(180deg,#090b0a,#060807)!important}
+  html.kamo-phone-auth #authScreen .auth-brand{background:radial-gradient(circle at 50% 0%,rgba(149,176,153,.16),transparent 33%),linear-gradient(150deg,#090d0a,#142018)!important;box-shadow:0 22px 60px rgba(0,0,0,.28)!important}
+  html.kamo-phone-auth #authScreen .auth-panel{
+    background:radial-gradient(circle at 100% 0%,rgba(130,156,134,.08),transparent 30%),linear-gradient(145deg,#151a16,#0d100e)!important;
+    border-color:var(--kd-line)!important;
+    box-shadow:0 26px 68px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.03)!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-heading h2{color:#f2efe8!important}html.kamo-phone-auth #authScreen .auth-heading p{color:#929b94!important}
+  html.kamo-phone-auth #authScreen .auth-panel-wrap{background:transparent!important}
+  html[data-adaptive-shell="phone"] .card,
+  html[data-adaptive-shell="phone"] .pv4-section,
+  html[data-adaptive-shell="phone"] .metric-card,
+  html[data-adaptive-shell="phone"] .test-v1-card,
+  html[data-adaptive-shell="phone"] .mkv4-card{
+    box-shadow:0 16px 38px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.025)!important;
+    border-color:rgba(255,255,255,.085)!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){.main-shell:after{display:none}}
