@@ -1,0 +1,176 @@
+/* KŌMØ Pulse — final mobile performance/layout guard v1
+   Phone only: one centered header, one vertical menu, no legacy dock, no horizontal surfaces. */
+@media (max-width: 767px) {
+  /* Legacy desktop/patient dock must never coexist with the vertical mobile menu. */
+  #kpDock,
+  #kpDockV5,
+  #kpDockV6,
+  #kpPickerV6,
+  #kpPickerV6Bg {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  html,
+  body,
+  #appShell,
+  .main-shell,
+  #viewRoot {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  /* The phone header has exactly two rows: KŌMØ PULSE, then Menu. */
+  html.kamo-phone-app .topbar {
+    min-height: 116px !important;
+    grid-template-rows: auto auto !important;
+    gap: 10px !important;
+    padding-top: max(13px, calc(env(safe-area-inset-top) + 4px)) !important;
+    padding-bottom: 13px !important;
+    background: #f4f0e8 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 1px 0 rgba(31,42,34,.055) !important;
+  }
+
+  /* Hide the old web page heading/lockup which caused the clipped text seen on iPhone. */
+  html.kamo-phone-app .topbar > div:first-of-type,
+  html.kamo-phone-app .kpulse-lockup,
+  html.kamo-phone-app .kpulse-header-sweep,
+  html.kamo-phone-app #pageTitle,
+  html.kamo-phone-app #pageEyebrow {
+    display: none !important;
+  }
+
+  html.kamo-phone-app .kam-mobile-brand {
+    grid-row: 1 !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+
+  html.kamo-phone-app .kam-mobile-brand strong {
+    font-size: 34px !important;
+    line-height: .96 !important;
+    letter-spacing: .075em !important;
+  }
+
+  html.kamo-phone-app .kam-mobile-brand span {
+    margin-top: 2px !important;
+    font-size: 7.5px !important;
+    letter-spacing: .20em !important;
+  }
+
+  html.kamo-phone-app .topbar-actions {
+    grid-row: 2 !important;
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  html.kamo-phone-app #kamTopMenu {
+    min-width: 142px !important;
+    height: 44px !important;
+    margin: 0 auto !important;
+    box-shadow: 0 8px 20px rgba(31,42,34,.10) !important;
+  }
+
+  /* Opaque sheets are considerably smoother than nested Safari backdrop filters. */
+  html.kamo-phone-app .kam-sheet {
+    background: #faf8f3 !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+  html.kamo-phone-app .kam-backdrop {
+    background: rgba(24,31,26,.28) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* The three score circles remain visible together, but never create horizontal scroll. */
+  html.kamo-phone-app #viewRoot .mykomo-rings {
+    width: 100% !important;
+    max-width: 340px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    scroll-snap-type: none !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-ring-item,
+  html.kamo-phone-app #viewRoot .mykomo-ring-item:nth-child(2) {
+    min-width: 0 !important;
+    min-height: 142px !important;
+    padding: 13px 4px 10px !important;
+    border-radius: 18px !important;
+    transform: none !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-ring,
+  html.kamo-phone-app #viewRoot .mykomo-ring-item:nth-child(2) .mykomo-ring {
+    width: min(78px, 22vw) !important;
+    height: min(78px, 22vw) !important;
+  }
+
+  html.kamo-phone-app #viewRoot .mykomo-ring-item:nth-child(2) .mykomo-ring strong {
+    font-size: 22px !important;
+  }
+
+  /* Expensive continuous decorative effects are desktop-only. */
+  html.kamo-phone-app .mykomo-live-dot,
+  html.kamo-phone-app .kdw-age-orbit,
+  html.kamo-phone-app .kdw-age-tag,
+  html.kamo-phone-app .kdw-device em::after {
+    animation: none !important;
+  }
+
+  html.kamo-phone-app .mykomo-card::before {
+    transition: none !important;
+    background: linear-gradient(145deg, rgba(255,255,255,.30), transparent 58%) !important;
+  }
+
+  html.kamo-phone-app .mykomo-command-cell,
+  html.kamo-phone-app .mykomo-ring-item,
+  html.kamo-phone-app .mykomo-profile-btn,
+  html.kamo-phone-app .kdw-card,
+  html.kamo-phone-app .kdw-action,
+  html.kamo-phone-app .kdw-device {
+    transition-duration: .08s !important;
+  }
+
+  /* Long home sections are isolated so Safari does not repaint the entire page. */
+  html.kamo-phone-app #viewRoot .mykomo-card,
+  html.kamo-phone-app #viewRoot .mykomo-engagement,
+  html.kamo-phone-app #viewRoot .khome-section,
+  html.kamo-phone-app #viewRoot .kdw-card {
+    contain: layout paint style;
+  }
+
+  html.kamo-phone-app #viewRoot table,
+  html.kamo-phone-app #viewRoot .kamo-mobile-table,
+  html.kamo-phone-app #viewRoot [class*="table-wrap"] {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+}
+
+@media (max-width: 390px) {
+  html.kamo-phone-app .kam-mobile-brand strong { font-size: 31px !important; }
+  html.kamo-phone-app #viewRoot .mykomo-ring,
+  html.kamo-phone-app #viewRoot .mykomo-ring-item:nth-child(2) .mykomo-ring {
+    width: 72px !important;
+    height: 72px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.kamo-phone-app *,
+  html.kamo-phone-auth * {
+    scroll-behavior: auto !important;
+  }
+}
