@@ -31,7 +31,7 @@ const checks=[
   ['mobile auth no longer depends on visual viewport height variable',css.includes('height:100dvh!important')&&css.includes('min-height:100svh!important')],
   ['fragile auth transforms and animations are neutralized',css.includes('transform:none!important')&&css.includes('animation:none!important')],
   ['Safari inputs stay at 16px',css.includes('font-size:16px!important')],
-  ['visibility observer is scoped to auth and app only',js.includes("observer.observe(auth")&&js.includes("observer.observe(app")&&!js.includes('observe(document.body'))],
+  ['visibility observer is scoped to auth and app only',js.includes('observer.observe(auth')&&js.includes('observer.observe(app')&&!js.includes('observe(document.body')],
   ['authenticated app always wins over late auth mutations',js.includes('if(appVisible)')&&js.includes('auth.hidden=true')],
   ['stale session bootstrap falls back to guest',js.includes('bootFallback')&&js.includes("resolved('guest')")]
 ];
