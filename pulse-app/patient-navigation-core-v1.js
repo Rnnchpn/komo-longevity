@@ -1,17 +1,27 @@
 /* KŌMØ Pulse — canonical patient navigation core v1
    Single patient route coordinator. Keeps legacy surfaces visually silent,
-   normalizes old route aliases, scrolls once, and exposes one go() API. */
+   normalizes old route aliases before downstream renderers run, scrolls once,
+   and exposes one go() API. */
 (() => {
   'use strict';
-  const V='1.1.0';
-  const ALIAS={path:'trajectory',plan:'trajectory',agenda:'documents',rdv:'documents'};
-  const PATIENT_ROUTES=new Set(['home','motion','mykomo','club','trajectory','documents','profile','messages','results','tests']);
+  const V='1.3.0';
+  const ALIAS={path:'trajectory',plan:'trajectory',agenda:'documents',rdv:'documents',followup:'key',suivi:'key',connected:'link'};
+  const PATIENT_ROUTES=new Set(['home','motion','mykomo','club','key','trajectory','documents','profile','messages','results','tests','link']);
   let current='';
   let seq=0;
 
   const rawRoute=()=>location.hash.replace(/^#/,'')||'home';
   const canonical=r=>ALIAS[r]||r||'home';
   const patientRoute=r=>PATIENT_ROUTES.has(canonical(r));
+
+  // Canonicalize legacy links synchronously. This file is loaded before the
+  // patient feature runtimes, so #followup never becomes a renderable frame.
+  function canonicalizeBoot(){
+    const raw=rawRoute(),next=canonical(raw);
+    if(raw!==next)history.replaceState(null,'',`${location.pathname}${location.search}#${next}`);
+    return next;
+  }
+  canonicalizeBoot();
 
   function installCss(){
     if(document.querySelector('#kpNavCoreStyle'))return;
@@ -55,19 +65,6 @@
     requestAnimationFrame(()=>requestAnimationFrame(()=>announce(route,token)));
   }
 
-  function normalizeHash(){
-    const raw=rawRoute(),next=canonical(raw);
-    setMode();
-    if(raw!==next){
-      history.replaceState(null,'',`${location.pathname}${location.search}#${next}`);
-      settle(next);
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-      return next;
-    }
-    settle(next);
-    return next;
-  }
-
   function go(target,{replace=false}={}){
     const next=canonical(target);
     if(!next)return;
@@ -76,6 +73,7 @@
     document.documentElement.classList.add('kp-route-changing');
     resetScroll();
     if(canonical(rawRoute())===next){
+      if(rawRoute()!==next)history.replaceState(null,'',`${location.pathname}${location.search}#${next}`);
       settle(next);
       window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:next,source:'canonical-nav'}}));
       return;
@@ -86,16 +84,15 @@
 
   installCss();
   setMode();
-  if(ALIAS[rawRoute()]) queueMicrotask(normalizeHash);
 
   window.addEventListener('hashchange',()=>{
     const raw=rawRoute(),next=canonical(raw);
+    if(raw!==next)history.replaceState(null,'',`${location.pathname}${location.search}#${next}`);
     setMode();
-    if(raw!==next){history.replaceState(null,'',`${location.pathname}${location.search}#${next}`)}
     settle(next);
   },true);
-  window.addEventListener('pageshow',()=>{setMode();settle(canonical(rawRoute()))});
-  window.addEventListener('popstate',()=>{setMode();settle(canonical(rawRoute()))});
+  window.addEventListener('pageshow',()=>{canonicalizeBoot();setMode();settle(canonical(rawRoute()))});
+  window.addEventListener('popstate',()=>{canonicalizeBoot();setMode();settle(canonical(rawRoute()))});
 
   window.KomoPatientNavigation={version:V,go,route:()=>canonical(rawRoute()),resetScroll,canonical,isPatientRoute:patientRoute};
 })();
