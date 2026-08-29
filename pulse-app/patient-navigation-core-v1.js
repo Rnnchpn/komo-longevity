@@ -4,9 +4,9 @@
    and exposes one go() API. */
 (() => {
   'use strict';
-  const V='1.2.0';
-  const ALIAS={path:'trajectory',plan:'trajectory',agenda:'documents',rdv:'documents',followup:'key',suivi:'key'};
-  const PATIENT_ROUTES=new Set(['home','motion','mykomo','club','key','trajectory','documents','profile','messages','results','tests']);
+  const V='1.3.0';
+  const ALIAS={path:'trajectory',plan:'trajectory',agenda:'documents',rdv:'documents',followup:'key',suivi:'key',connected:'link'};
+  const PATIENT_ROUTES=new Set(['home','motion','mykomo','club','key','trajectory','documents','profile','messages','results','tests','link']);
   let current='';
   let seq=0;
 
