@@ -5,7 +5,7 @@ const root=process.cwd();
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
 const routerPath=join(pulse,'app-router-v2.js');
-const release='20260829-safari-stable-1';
+const release='20260829-safari-stable-2';
 
 for(const file of ['mobile-safari-stability-v1.css','mobile-safari-stability-v1.js']){
   await copyFile(join(root,'pulse-app',file),join(pulse,file));
@@ -13,8 +13,6 @@ for(const file of ['mobile-safari-stability-v1.css','mobile-safari-stability-v1.
 
 let router=await readFile(routerPath,'utf8');
 
-// Mobile first visit defaults to persistent auth, while an explicit unchecked
-// "Rester connecté" remains respected through the sentinel value "0".
 router=router.replace(
   "async function initialize(){els.rememberInput.checked=localStorage.getItem(REMEMBER_KEY)==='1';syncClient();bindEvents();const {data:{session}}=await state.client.auth.getSession();if(session)await enterApp(session);else showAuth()}",
   "async function initialize(){const mobile=isPhoneViewport();if(mobile&&localStorage.getItem(REMEMBER_KEY)===null)localStorage.setItem(REMEMBER_KEY,'1');els.rememberInput.checked=localStorage.getItem(REMEMBER_KEY)==='1';syncClient();bindEvents();resetViewportTop();const {data:{session}}=await state.client.auth.getSession();if(session)await enterApp(session);else showAuth()}"
@@ -61,4 +59,4 @@ html=html.replace('<body>',`<body>\n  <div id="pulseStartup" aria-hidden="true">
 html=html.replace('</body>',`  <script src="./mobile-safari-stability-v1.js?v=${release}"></script>\n</body>`);
 await writeFile(htmlPath,html,'utf8');
 
-console.log('[pulse-mobile-safari-stability-v1] Safari auth flash removed, mobile session persistence hardened, startup/top reset locked');
+console.log('[pulse-mobile-safari-stability-v1] Safari auth flash removed, persistent session hardened, BFCache stale-page reload enabled');
