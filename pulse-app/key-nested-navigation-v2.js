@@ -1,9 +1,10 @@
 /* KŌMØ Pulse — nested My KŌMØ / My Key navigation v2
-   KEY stays visible on Home as a data preview, but is no longer a primary app tab.
-   The full KEY data space lives one level deeper next to My KŌMØ. */
+   Desktop/tablet compatibility layer only.
+   Phone navigation is owned exclusively by mobile-canonical-v1. */
 (()=>{
 'use strict';
-const V='2.0.0';
+if(window.matchMedia('(max-width:767px)').matches)return;
+const V='2.1.0';
 let timers=[];
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const go=target=>window.KomoPatientNavigation?.go?.(target)||(location.hash=target);
@@ -19,8 +20,7 @@ function style(){
   .kns-switch button.active{background:linear-gradient(145deg,#28352d,#202a24);color:#fff;box-shadow:0 8px 20px rgba(31,42,34,.14)}
   [data-kh-tabs]{width:min(520px,100%);margin-left:auto!important;margin-right:auto!important}
   .mykomo-key-home .mkh-action,.kcm-watch-card .kcm-watch-button{letter-spacing:.01em}
-  #kpDockV6 [data-kp6="key"],#kcmMenu [data-kcm-route="key"],#desktopNav [data-route="key"],#mobileNav [data-route="key"],.nav-stack [href="#key"],.kam-bottom [data-route="key"]{display:none!important}
-  @media(max-width:767px){.kns-switch{margin:0 0 18px;border-radius:16px}.kns-switch button{min-height:46px;font-size:8px}}
+  #kpDockV6 [data-kp6="key"],#desktopNav [data-route="key"],#mobileNav [data-route="key"],.nav-stack [href="#key"],.kam-bottom [data-route="key"]{display:none!important}
   @media(prefers-reduced-motion:reduce){.kns-switch button{transition:none!important}}
   `;
   document.head.appendChild(s);
@@ -74,14 +74,11 @@ function patchHome(){
   document.querySelectorAll('[data-key-nested-switch],[data-kh-home-tabs]').forEach(x=>x.remove());
   const desktop=document.querySelector('[data-key-home] [data-key-open]');
   if(desktop)desktop.textContent='Ouvrir My Key →';
-  const mobile=document.querySelector('.kcm-watch-card [data-kcm-route="key"]');
-  if(mobile)mobile.textContent='Ouvrir My Key →';
 }
 
 function patchPrimaryNavigation(){
   const keySelectors=[
     '#kpDockV6 [data-kp6="key"]',
-    '#kcmMenu .kcm-menu-nav [data-kcm-route="key"]',
     '#desktopNav [data-route="key"]',
     '#mobileNav [data-route="key"]',
     '.nav-stack [href="#key"]',
@@ -89,7 +86,7 @@ function patchPrimaryNavigation(){
   ];
   document.querySelectorAll(keySelectors.join(',')).forEach(x=>x.remove());
   if(route()==='key'){
-    document.querySelectorAll('#kpDockV6 [data-kp6="mykomo"],#kcmMenu [data-kcm-route="mykomo"],#desktopNav [data-route="mykomo"],#mobileNav [data-route="mykomo"],.nav-stack [href="#mykomo"],.kam-bottom [data-route="mykomo"]').forEach(x=>x.classList.add('active'));
+    document.querySelectorAll('#kpDockV6 [data-kp6="mykomo"],#desktopNav [data-route="mykomo"],#mobileNav [data-route="mykomo"],.nav-stack [href="#mykomo"],.kam-bottom [data-route="mykomo"]').forEach(x=>x.classList.add('active'));
   }
 }
 
@@ -110,8 +107,7 @@ function schedule(){
 
 document.addEventListener('click',e=>{
   const b=e.target.closest?.('[data-kns-go]');
-  if(b){e.preventDefault();go(b.dataset.knsGo);return}
-  if(e.target.closest?.('#kcmMenuButton'))setTimeout(patchPrimaryNavigation,0);
+  if(b){e.preventDefault();go(b.dataset.knsGo)}
 },true);
 ['hashchange','pageshow','popstate','komo:route-ready','komo:canonical-route','komo:data-ready','komo:wearable-data-updated','komo:session-ready'].forEach(name=>window.addEventListener(name,schedule,{passive:true}));
 document.addEventListener('DOMContentLoaded',schedule,{once:true});
