@@ -31,7 +31,7 @@ const checks=[
  ['app recognizes My KŌMØ',app.includes("'mykomo'")],
  ['app recognizes Club',app.includes("'club'")],
  ['app recognizes KEY',app.includes("'key'")],
- ['app normalizes legacy followup',app.includes("route==='followup'||route==='suivi'"))],
+ ['app normalizes legacy followup',app.includes("route==='followup'||route==='suivi'")],
  ['app recognizes Trajectoire',app.includes("'trajectory'")],
  ['app delegates modern patient routes',app.includes("source:'app-external-owner'")],
  ['Agenda owns documents route',booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;")],
