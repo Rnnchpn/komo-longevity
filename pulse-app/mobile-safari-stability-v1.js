@@ -1,4 +1,4 @@
-/* KŌMØ Pulse — Safari/mobile stability runtime v1 */
+/* KŌMØ Pulse — Safari/mobile stability runtime v2 */
 (() => {
   'use strict';
 
@@ -21,8 +21,6 @@
   function reconcile(){
     if(!phone())return;
     const a=app(),login=auth();
-    // If the application is already visible, the login surface may never coexist
-    // with it. This is especially important on Safari/BFCache restores.
     if(a&&!a.hidden&&login&&!login.hidden)login.hidden=true;
     document.documentElement.classList.toggle('kamo-phone-app',!!a&&!a.hidden&&(!login||login.hidden));
     document.documentElement.classList.toggle('kamo-phone-auth',!!login&&!login.hidden);
@@ -35,7 +33,14 @@
     setTimeout(topNow,160);
   }
 
-  window.addEventListener('pageshow',()=>{
+  window.addEventListener('pageshow',event=>{
+    if(phone()&&event.persisted){
+      // Safari may restore an entire obsolete Pulse DOM from BFCache instead of
+      // requesting the current no-store HTML. Reload once so the active release
+      // and its cache-busted assets are guaranteed to be used.
+      location.reload();
+      return;
+    }
     reconcile();
     hardTop();
   },{passive:true});
