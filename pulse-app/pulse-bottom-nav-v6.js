@@ -1,45 +1,43 @@
-/* KŌMØ Pulse — canonical patient dock v6.1.0
-   Native hash links for primary routes; JS only owns the Motion / Clinical picker. */
+/* KŌMØ Pulse — canonical patient dock v7.0.0
+   Final patient navigation: six destinations, no product picker, no Club in primary chrome. */
 (() => {
 'use strict';
-const V='6.1.0';
+const V='7.0.0';
 const items=[
-  ['home','Accueil','⌂','home',''],
-  ['assessment','KŌMØ','↗','', 'Motion / Clinical'],
-  ['mykomo','My KŌMØ','◉','mykomo',''],
-  ['club','Club','∞','club',''],
-  ['trajectory','Trajectoire','⌁','trajectory',''],
-  ['agenda','Agenda','□','documents','']
+  ['home','Accueil','⌂','home'],
+  ['key','KEY','◌','key'],
+  ['results','Résultats','◎','results'],
+  ['trajectory','Trajectoire','⌁','trajectory'],
+  ['agenda','Rendez-vous','□','documents'],
+  ['mykomo','My KŌMØ','◉','mykomo']
 ];
 let raf=0;
 const nav=()=>window.KomoPatientNavigation;
 const route=()=>nav()?.route?.()||location.hash.replace(/^#/,'')||'home';
 const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)&&!['clinical','admin'].includes(route())};
-const active=()=>route()==='motion'?'assessment':route()==='mykomo'?'mykomo':route()==='club'?'club':route()==='trajectory'?'trajectory':route()==='documents'?'agenda':'home';
-
+function active(){
+ const r=route();
+ if(r==='key')return'key';
+ if(['results','motion','tests'].includes(r))return'results';
+ if(['trajectory','path','plan'].includes(r))return'trajectory';
+ if(['documents','agenda','rdv'].includes(r))return'agenda';
+ if(['mykomo','club','profile'].includes(r))return'mykomo';
+ return'home';
+}
 function css(){if(document.querySelector('#kpDock600'))return;const s=document.createElement('style');s.id='kpDock600';s.textContent=`
 #kpDock,#kpDockV5{display:none!important}
-#kpDockV6{position:fixed!important;z-index:10000!important;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(920px,calc(100vw - 28px));height:72px;padding:6px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;border:1px solid rgba(255,255,255,.13);border-radius:24px;background:linear-gradient(145deg,#262625,#35312e 58%,#4a433d);box-shadow:0 20px 60px rgba(31,28,25,.28);isolation:isolate;overflow:hidden;box-sizing:border-box;pointer-events:auto!important;touch-action:manipulation}#kpDockV6[hidden]{display:none!important}
-#kpDockV6 .kp6-indicator{position:absolute;z-index:0;top:6px;left:6px;height:60px;border-radius:18px;background:linear-gradient(145deg,#fbf8f1,#e9e2d7);box-shadow:0 8px 24px rgba(24,21,18,.18);transition:transform .32s cubic-bezier(.2,.82,.22,1),width .22s ease;pointer-events:none}
-#kpDockV6 a,#kpDockV6 button{position:relative;z-index:2;height:60px;min-width:0;border:0;border-radius:18px;background:transparent;color:rgba(255,252,247,.68);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:3px;font-family:'DM Sans',sans-serif;text-decoration:none;cursor:pointer;transition:color .18s ease,transform .12s ease;pointer-events:auto!important;-webkit-tap-highlight-color:transparent}#kpDockV6 a:active,#kpDockV6 button:active{transform:scale(.965)}#kpDockV6 a.active,#kpDockV6 button.active{color:#292824}#kpDockV6 .kp6-icon{font-size:18px;line-height:1;transition:transform .2s ease}#kpDockV6 .active .kp6-icon{transform:translateY(-2px) scale(1.08)}#kpDockV6 b{max-width:100%;font-size:9px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#kpDockV6 small{font-size:5.7px;line-height:1;text-transform:uppercase;letter-spacing:.045em;opacity:.72;white-space:nowrap}
-#kpPickerV6Bg{position:fixed;z-index:10004;inset:0;border:0;background:rgba(32,29,26,.32);backdrop-filter:blur(5px);opacity:0;pointer-events:none;transition:.2s}#kpPickerV6Bg.open{opacity:1;pointer-events:auto}#kpPickerV6{position:fixed;z-index:10005;left:50%;bottom:96px;width:min(540px,calc(100vw - 24px));padding:14px;border-radius:26px;background:#fbf8f2;box-shadow:0 30px 92px rgba(27,24,21,.28);transform:translate(-50%,125%) scale(.98);opacity:0;pointer-events:none;transition:.3s cubic-bezier(.2,.82,.22,1)}#kpPickerV6.open{transform:translate(-50%,0) scale(1);opacity:1;pointer-events:auto}.kp6-picker-head{display:flex;justify-content:space-between;align-items:center;padding:5px 5px 12px}.kp6-picker-head small{display:block;font-size:7px;letter-spacing:.12em;color:#8b8278}.kp6-picker-head strong{display:block;margin-top:4px;font:600 21px/1 Manrope,sans-serif;color:#2a2926}.kp6-picker-head button{width:36px;height:36px;border:1px solid #e3ddd3;border-radius:50%;background:#fff}.kp6-picker-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kp6-choice{min-height:142px;padding:17px;border:1px solid rgba(45,40,35,.08);border-radius:20px;background:#efe8dd;text-align:left;color:#2d2b28}.kp6-choice.motion{background:linear-gradient(145deg,#2b2b29,#49423c);color:#fff}.kp6-choice small{display:block;font-size:7px;letter-spacing:.1em;text-transform:uppercase;opacity:.6}.kp6-choice strong{display:block;margin-top:8px;font:600 20px/1 Manrope,sans-serif}.kp6-choice p{font-size:9px;line-height:1.45;opacity:.65}
-@media(max-width:760px){#kpDockV6{left:7px;right:7px;width:auto;height:68px;bottom:max(7px,env(safe-area-inset-bottom));transform:none;border-radius:21px;padding:5px}#kpDockV6 .kp6-indicator{top:5px;left:5px;height:58px}#kpDockV6 a,#kpDockV6 button{height:58px;padding:2px 1px}#kpDockV6 .kp6-icon{font-size:16px}#kpDockV6 b{font-size:6.9px}#kpDockV6 small{font-size:4.5px}#kpPickerV6{bottom:86px}.kp6-picker-grid{grid-template-columns:1fr}}
-@media(max-width:390px){#kpDockV6 b{font-size:6.2px}#kpDockV6 .kp6-icon{font-size:15px}}
-@media(prefers-reduced-motion:reduce){#kpDockV6 .kp6-indicator,#kpPickerV6,#kpPickerV6Bg{transition:none!important}}
+#kpDockV6{position:fixed!important;z-index:10000!important;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(900px,calc(100vw - 28px));height:70px;padding:5px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;border:1px solid rgba(244,241,234,.105);border-radius:23px;background:rgba(12,15,13,.96);box-shadow:0 22px 68px rgba(0,0,0,.40),inset 0 1px rgba(255,255,255,.025);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);isolation:isolate;overflow:hidden;box-sizing:border-box;pointer-events:auto!important;touch-action:manipulation}#kpDockV6[hidden]{display:none!important}
+#kpDockV6 .kp6-indicator{position:absolute;z-index:0;top:5px;left:5px;height:60px;border-radius:18px;background:linear-gradient(145deg,#efede6,#e3dfd6);box-shadow:0 10px 28px rgba(0,0,0,.20),inset 0 1px rgba(255,255,255,.70);transition:transform .30s cubic-bezier(.2,.82,.22,1),width .20s ease;pointer-events:none}
+#kpDockV6 a{position:relative;z-index:2;height:60px;min-width:0;border:0;border-radius:18px;background:transparent;color:#818b83;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:3px;font-family:'DM Sans',sans-serif;text-decoration:none;cursor:pointer;transition:color .18s ease,transform .12s ease;pointer-events:auto!important;-webkit-tap-highlight-color:transparent}#kpDockV6 a:active{transform:scale(.97)}#kpDockV6 a.active{color:#172019}#kpDockV6 .kp6-icon{font-size:17px;line-height:1;transition:transform .2s ease}#kpDockV6 .active .kp6-icon{transform:translateY(-1px) scale(1.06)}#kpDockV6 b{max-width:100%;font-size:8.5px;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+@media(max-width:760px){#kpDockV6{left:8px!important;right:8px!important;width:auto!important;height:64px!important;bottom:max(7px,env(safe-area-inset-bottom))!important;transform:none!important;border-radius:21px!important;padding:4px!important}#kpDockV6 .kp6-indicator{top:4px!important;left:4px!important;height:56px!important;border-radius:17px!important}#kpDockV6 a{height:56px!important;padding:2px 1px!important;gap:4px!important}#kpDockV6 .kp6-icon{font-size:16px!important}#kpDockV6 b{font-size:6.9px!important}}
+@media(max-width:390px){#kpDockV6 b{font-size:6.1px!important}#kpDockV6 .kp6-icon{font-size:15px!important}}
+@media(prefers-reduced-motion:reduce){#kpDockV6 .kp6-indicator{transition:none!important}}
 `;document.head.appendChild(s)}
-
-function markup(){return '<i class="kp6-indicator"></i>'+items.map(([k,l,ic,r,sub])=>k==='assessment'?`<button type="button" data-kp6="${k}" aria-label="${l}"><span class="kp6-icon">${ic}</span><b>${l}</b><small>${sub}</small></button>`:`<a href="#${r}" data-kp6="${k}" data-kp6-route="${r}" aria-label="${l}"><span class="kp6-icon">${ic}</span><b>${l}</b></a>`).join('')}
-function ensureDock(){const app=document.querySelector('#appShell');if(!app)return null;let d=document.querySelector('#kpDockV6');if(!d){d=document.createElement('nav');d.id='kpDockV6';d.setAttribute('aria-label','Navigation KŌMØ Pulse');d.innerHTML=markup();app.appendChild(d)}return d}
-function ensurePicker(){if(document.querySelector('#kpPickerV6'))return;const app=document.querySelector('#appShell')||document.body;const bg=document.createElement('button'),p=document.createElement('aside');bg.id='kpPickerV6Bg';bg.setAttribute('aria-label','Fermer');p.id='kpPickerV6';p.innerHTML='<div class="kp6-picker-head"><div><small>KŌMØ PULSE · BILANS</small><strong>Choisissez votre parcours.</strong></div><button type="button" data-kp6-close>×</button></div><div class="kp6-picker-grid"><button type="button" class="kp6-choice motion" data-kp6-choice="motion"><small>Bilan fonctionnel</small><strong>KŌMØ Motion</strong><p>Questionnaires, tests, MyoCare et Motion Score.</p></button><button type="button" class="kp6-choice" data-kp6-choice="clinical"><small>Bilan approfondi</small><strong>KŌMØ Clinical</strong><p>Planifier l’évaluation clinique avec un professionnel.</p></button></div>';app.append(bg,p);bg.addEventListener('click',closePicker)}
-function openPicker(){ensurePicker();requestAnimationFrame(()=>{document.querySelector('#kpPickerV6Bg')?.classList.add('open');document.querySelector('#kpPickerV6')?.classList.add('open')})}
-function closePicker(){document.querySelector('#kpPickerV6Bg')?.classList.remove('open');document.querySelector('#kpPickerV6')?.classList.remove('open')}
-function paint(){const d=document.querySelector('#kpDockV6');if(!d||d.hidden)return;const key=active();const bs=[...d.querySelectorAll('[data-kp6]')];bs.forEach(b=>b.classList.toggle('active',b.dataset.kp6===key));const b=bs.find(x=>x.dataset.kp6===key),i=d.querySelector('.kp6-indicator');if(b&&i){const pad=parseFloat(getComputedStyle(d).paddingLeft)||0;i.style.width=`${b.offsetWidth}px`;i.style.transform=`translateX(${Math.max(0,b.offsetLeft-pad)}px)`}}
-function refresh(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{css();const d=ensureDock();if(!d)return;const show=visible();d.hidden=!show;if(show)requestAnimationFrame(paint);else closePicker()})}
-function go(r){closePicker();if(location.hash!==`#${r}`)location.hash=r;else window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:r,source:'dock-v6'}}))}
-function clinical(){sessionStorage.setItem('komo_home_booking_service','clinical');go('documents');let n=0;const q=setInterval(()=>{n++;const b=document.querySelector('[data-kbook-service="clinical"]');if(b){b.click();clearInterval(q)}else if(n>24)clearInterval(q)},100)}
-
-document.addEventListener('click',e=>{const assessment=e.target.closest?.('#kpDockV6 [data-kp6="assessment"]');if(assessment){e.preventDefault();e.stopPropagation();openPicker();return}const native=e.target.closest?.('#kpDockV6 a[data-kp6-route]');if(native){closePicker();requestAnimationFrame(()=>window.KomoPatientNavigation?.resetScroll?.());return}const c=e.target.closest?.('[data-kp6-choice]');if(c){e.preventDefault();c.dataset.kp6Choice==='motion'?go('motion'):clinical();return}if(e.target.closest?.('[data-kp6-close]')){e.preventDefault();closePicker()}},true);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closePicker()});
+function markup(){return '<i class="kp6-indicator"></i>'+items.map(([k,l,ic,r])=>`<a href="#${r}" data-kp6="${k}" data-kp6-route="${r}" aria-label="${l}"><span class="kp6-icon">${ic}</span><b>${l}</b></a>`).join('')}
+function ensureDock(){const app=document.querySelector('#appShell');if(!app)return null;let d=document.querySelector('#kpDockV6');if(!d){d=document.createElement('nav');d.id='kpDockV6';d.setAttribute('aria-label','Navigation KŌMØ Pulse');d.innerHTML=markup();app.appendChild(d)}else if(d.dataset.version!==V){d.innerHTML=markup()}d.dataset.version=V;return d}
+function paint(){const d=document.querySelector('#kpDockV6');if(!d||d.hidden)return;const key=active(),bs=[...d.querySelectorAll('[data-kp6]')];bs.forEach(b=>{const on=b.dataset.kp6===key;b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});const b=bs.find(x=>x.dataset.kp6===key),i=d.querySelector('.kp6-indicator');if(b&&i){const pad=parseFloat(getComputedStyle(d).paddingLeft)||0;i.style.width=`${b.offsetWidth}px`;i.style.transform=`translateX(${Math.max(0,b.offsetLeft-pad)}px)`}}
+function refresh(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{css();const d=ensureDock();if(!d)return;d.hidden=!visible();if(!d.hidden)requestAnimationFrame(paint)})}
+document.addEventListener('click',e=>{const native=e.target.closest?.('#kpDockV6 a[data-kp6-route]');if(native)requestAnimationFrame(()=>window.KomoPatientNavigation?.resetScroll?.())},true);
 ['hashchange','pageshow','resize','orientationchange','komo:canonical-route','komo:session-ready','komo:session-cleared'].forEach(x=>window.addEventListener(x,refresh));
 document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,220));setTimeout(refresh,650);
 window.KomoBottomNav={version:V,refresh};
