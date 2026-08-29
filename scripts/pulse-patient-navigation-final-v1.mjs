@@ -15,6 +15,7 @@ html=html
   .replace(/\s*<script(?: type="module")? src="\.\/agenda-hub-v3\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<script(?: type="module")? src="\.\/agenda-hub-v4\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<script(?: type="module")? src="\.\/agenda-hub-v5\.js(?:\?[^\"]*)?"><\/script>/g,'')
+  .replace(/\s*<script(?: type="module")? src="\.\/agenda-premium-map-v1\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<script src="\.\/agenda-clean-room-v1\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<script src="\.\/patient-route-runtime-v1\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<script src="\.\/patient-route-runtime-v2\.js(?:\?[^\"]*)?"><\/script>/g,'');
@@ -35,7 +36,7 @@ const centerCockpit='center-command-cockpit-v2.js';
 await copyFile(join(pulseDir,'center-hub-v1.js'),join(pulseDir,centerCockpit));
 html=html.replaceAll('./center-hub-v1.js',`./${centerCockpit}`);
 
-// Full patient Agenda: compact calendar on the left, colored CARTO map on the right.
+// Full patient Agenda: calendar + booking logic remain canonical.
 const agendaHub='agenda-hub-v4.js';
 await copyFile(join(root,'pulse-app',agendaHub),join(pulseDir,agendaHub));
 let agendaSource=await readFile(join(pulseDir,agendaHub),'utf8');
@@ -44,7 +45,7 @@ const newGeo="let p=(Number.isFinite(Number(x.latitude))&&Number.isFinite(Number
 if(!agendaSource.includes(oldGeo))throw new Error('Agenda map coordinate patch target not found');
 agendaSource=agendaSource.replace(oldGeo,newGeo);
 
-// Public center content entered in Centre > Profil & carte is visible on the patient map/list.
+// Public center content entered in Centre > Profil & carte remains visible in the fallback directory.
 const oldPlace='<strong>${esc(x.name)}</strong><div class="ag4-tags">${serviceTags(x)}</div></article>';
 const newPlace='<strong>${esc(x.name)}</strong>${x.public_description?`<p class="ag4-place-copy">${esc(String(x.public_description).slice(0,120))}</p>`:\'\'}<div class="ag4-tags">${serviceTags(x)}</div></article>';
 if(!agendaSource.includes(oldPlace))throw new Error('Agenda center content list patch target not found');
@@ -55,8 +56,16 @@ if(!agendaSource.includes(oldPopup))throw new Error('Agenda center content popup
 agendaSource=agendaSource.replace(oldPopup,newPopup);
 agendaSource=agendaSource.replace('.ag4-place strong{display:block;margin-top:3px;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}', '.ag4-place strong{display:block;margin-top:3px;font-size:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ag4-place-copy{margin:4px 0 0!important;font-size:5.8px!important;line-height:1.3!important;color:#858078!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}');
 agendaSource=agendaSource.replace("window.addEventListener('pageshow',()=>{if(route()==='documents')setTimeout(()=>refresh(),70)});", "window.addEventListener('pageshow',()=>{if(route()==='documents')setTimeout(()=>refresh(),70)});window.addEventListener('komo:center-directory-updated',()=>{if(route()==='documents')setTimeout(()=>refresh(),40)});");
+// When the premium map owner is present, the fallback layer must not create a second Leaflet map.
+agendaSource=agendaSource.replaceAll("setTimeout(()=>renderMap().catch(e=>console.warn('[agenda-v4:map]',e)),25)","if(!window.KomoAgendaPremiumMap)setTimeout(()=>renderMap().catch(e=>console.warn('[agenda-v4:map]',e)),25)");
+agendaSource=agendaSource.replaceAll("setTimeout(()=>renderMap().catch(()=>{}),20)","if(!window.KomoAgendaPremiumMap)setTimeout(()=>renderMap().catch(()=>{}),20)");
 await writeFile(join(pulseDir,agendaHub),agendaSource,'utf8');
 html=html.replace('</body>',`  <script type="module" src="./${agendaHub}?v=20260829-agenda-v4-center-content"></script>\n</body>`);
+
+// Premium RDV map: one marker per center, selected-center detail card, professionals inside the card.
+const premiumMap='agenda-premium-map-v1.js';
+await copyFile(join(root,'pulse-app',premiumMap),join(pulseDir,premiumMap));
+html=html.replace('</body>',`  <script type="module" src="./${premiumMap}?v=20260829-agenda-map-premium-1"></script>\n</body>`);
 
 // Hide legacy Motion journey/report cards only on Agenda, without disabling them elsewhere.
 const cleanRoom='agenda-clean-room-v1.js';
@@ -75,6 +84,7 @@ const finalBooking=await readFile(join(pulseDir,'booking-layer-v1.js'),'utf8');
 const finalDock=await readFile(join(pulseDir,'pulse-bottom-nav-v6.js'),'utf8');
 const finalRuntime=await readFile(join(pulseDir,routeRuntime),'utf8');
 const finalAgenda=await readFile(join(pulseDir,agendaHub),'utf8');
+const finalPremium=await readFile(join(pulseDir,premiumMap),'utf8');
 const finalClean=await readFile(join(pulseDir,cleanRoom),'utf8');
 const finalCenter=await readFile(join(pulseDir,centerCockpit),'utf8');
 const checks=[
@@ -93,12 +103,18 @@ const checks=[
   ['Centre cockpit validates appointments',finalCenter.includes("rpc('approve_komo_appointment'")&&finalCenter.includes("rpc('update_pulse_appointment'")],
   ['Centre cockpit manages professional affiliation',finalCenter.includes("action:'add_member'")&&finalCenter.includes("action:'update_member'")&&finalCenter.includes("action:'remove_member'")],
   ['hero-only Agenda v5 removed',!finalHtml.includes('agenda-hub-v5.js')],
-  ['full Agenda v4 shipped',finalHtml.includes(agendaHub)&&finalAgenda.includes('ag4-workspace')&&finalAgenda.includes('ag4-map')],
-  ['Agenda keeps calendar and colored map',finalAgenda.includes('ag4-days')&&finalAgenda.includes('basemaps.cartocdn.com')],
+  ['full Agenda v4 shipped',finalHtml.includes(agendaHub)&&finalAgenda.includes('ag4-workspace')&&finalAgenda.includes('ag4-days')],
   ['Agenda prioritizes persisted center coordinates',finalAgenda.includes('Number.isFinite(Number(x.latitude))')&&finalAgenda.includes('Number(x.longitude)')],
   ['Agenda displays center public description',finalAgenda.includes('ag4-place-copy')&&finalAgenda.includes('x.public_description')],
   ['Agenda refreshes after center directory update',finalAgenda.includes("komo:center-directory-updated")],
-  ['Agenda clean-room shipped after Agenda',finalHtml.indexOf(cleanRoom)>finalHtml.indexOf(agendaHub)],
+  ['premium RDV map shipped after Agenda',finalHtml.includes(premiumMap)&&finalHtml.indexOf(premiumMap)>finalHtml.indexOf(agendaHub)],
+  ['premium map is center-first',finalPremium.includes("const centers=()=>")&&finalPremium.includes("const team=()=>")&&finalPremium.includes('Choisissez votre centre.')],
+  ['premium map has a clean light basemap',finalPremium.includes('basemaps.cartocdn.com/light_all')],
+  ['premium map synchronizes center selection to booking',finalPremium.includes("select.dispatchEvent(new Event('change'")&&finalPremium.includes('Voir les créneaux')],
+  ['premium map keeps professionals out of marker layer',finalPremium.includes('professionals().filter')&&!finalPremium.includes("entity_type==='professional'?'P'")],
+  ['premium map offers explicit nearby action',finalPremium.includes('Autour de moi')&&finalPremium.includes('navigator.geolocation')],
+  ['fallback Agenda does not spawn a second map',finalAgenda.includes('if(!window.KomoAgendaPremiumMap)setTimeout(()=>renderMap()')],
+  ['Agenda clean-room shipped after premium map',finalHtml.indexOf(cleanRoom)>finalHtml.indexOf(premiumMap)],
   ['legacy Motion journey hidden on Agenda',finalClean.includes('[data-kmj1]')],
   ['legacy canonical report hidden on Agenda',finalClean.includes('[data-kcanon-doc]')],
   ['final runtime shipped last',finalHtml.lastIndexOf(routeRuntime)>finalHtml.lastIndexOf(cleanRoom)],
@@ -108,4 +124,4 @@ const checks=[
 ];
 for(const [label,ok] of checks) console.log(`[pulse-nav-final] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log(`[pulse-nav-final] Centre v2 · Agenda synchronized · persisted map coordinates · public center content · ${release}`);
+console.log(`[pulse-nav-final] Centre v2 · Agenda synchronized · premium center-first RDV map · ${release}`);
