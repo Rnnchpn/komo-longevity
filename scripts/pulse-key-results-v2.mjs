@@ -45,5 +45,7 @@ await import('./pulse-key-pdf-report-v1.mjs');
 await import('./pulse-iphone-app-lock-v1.mjs');
 // Authentication is the final session boundary: no login resurfacing or mobile layout jumps.
 await import('./pulse-auth-stability-v1.mjs');
-// Dark Luxe is visual-only and runs last so desktop and iPhone share one premium visual language.
+// Dark Luxe establishes the shared black visual language.
 await import('./pulse-dark-luxe-v1.mjs');
+// Final material hierarchy: graphite canvas with porcelain, forest and warm focal surfaces.
+await import('./pulse-dark-luxe-polish-v2.mjs');
