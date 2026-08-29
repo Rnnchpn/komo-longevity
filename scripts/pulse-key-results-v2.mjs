@@ -37,3 +37,5 @@ console.log('[pulse-key-results-v2] PASS · premium KEY views + animated numbers
 await import('./pulse-my-komo-stability-v4.mjs');
 // Fine-detail styling is visual-only and always applied after the stable owner.
 await import('./pulse-premium-detail-v1.mjs');
+// Home hierarchy: Motion Score + Locomotor Age first, KEY immediately below.
+await import('./pulse-home-key-position-v1.mjs');
