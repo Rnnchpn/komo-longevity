@@ -2,8 +2,8 @@
    Patient navigation only: account remains a first-class destination on desktop, phone and iPad. */
 (() => {
   'use strict';
-  const V='1.1.0';
-  let raf=0,observer=null;
+  const V='1.2.0';
+  let raf=0;
   const accountIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="3.25"/><path d="M5.5 20c.55-4.15 2.7-6.15 6.5-6.15s5.95 2 6.5 6.15"/><path d="M18.2 5.7l.9-.9M5.8 5.7l-.9-.9"/></svg>';
 
   function route(){return window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home'}
@@ -34,7 +34,7 @@
   function patchDesktop(){
     if(!patientSurface()) return;
     const dock=document.querySelector('#kpDockV6');
-    if(!dock) return;
+    if(!dock) return false;
     let account=dock.querySelector('[data-kp6="account"]');
     if(!account){
       account=document.createElement('a');
@@ -57,6 +57,7 @@
         indicator.style.transform=`translateX(${Math.max(0,account.offsetLeft-pad)}px)`;
       }
     } else account.classList.remove('active');
+    return true;
   }
 
   function patchAccountPage(){
@@ -67,19 +68,13 @@
 
   function refresh(){
     cancelAnimationFrame(raf);
-    raf=requestAnimationFrame(()=>{patchAdaptive();patchDesktop();patchAccountPage();bindObserver()});
+    raf=requestAnimationFrame(()=>{patchAdaptive();patchDesktop();patchAccountPage()});
   }
 
-  function bindObserver(){
-    if(observer)return;
-    const app=document.querySelector('#appShell');
-    if(!app)return;
-    observer=new MutationObserver(()=>refresh());
-    observer.observe(app,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
-  }
-
-  ['hashchange','pageshow','resize','orientationchange','komo:route-ready','komo:canonical-route','komo:session-ready','komo:data-ready'].forEach(evt=>window.addEventListener(evt,()=>setTimeout(refresh,20),{passive:true}));
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,180),{once:true});
-  setTimeout(refresh,500);
+  // Navigation owners emit lifecycle events; no persistent MutationObserver is
+  // needed. A few bounded startup retries cover dock creation order.
+  ['hashchange','pageshow','resize','orientationchange','komo:route-ready','komo:canonical-route','komo:session-ready','komo:data-ready'].forEach(evt=>window.addEventListener(evt,()=>setTimeout(refresh,16),{passive:true}));
+  document.addEventListener('DOMContentLoaded',()=>{[120,320,700].forEach(ms=>setTimeout(refresh,ms))},{once:true});
+  if(document.readyState!=='loading')[0,220,600].forEach(ms=>setTimeout(refresh,ms));
   window.KomoAccountTab={version:V,refresh};
 })();
