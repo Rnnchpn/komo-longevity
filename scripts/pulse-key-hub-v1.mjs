@@ -5,13 +5,15 @@ import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260829-key-perf-v2';
+const release='20260829-key-data-v1';
 
 // Final canonical patient assets. Copy them again at the end so later build
 // layers can never leave Pulse with stale navigation/performance runtimes.
 for(const file of [
   'key-hub-v1.css',
   'key-hub-v1.js',
+  'key-data-layer-v1.css',
+  'key-data-layer-v1.js',
   'patient-navigation-core-v1.js',
   'account-tab-restore-v1.js',
   'my-komo-score-motion-v1.js'
@@ -40,17 +42,23 @@ await writeFile(homeKeyPath,homeKey,'utf8');
 
 let html=await readFile(htmlPath,'utf8');
 
-// Retire all obsolete wearable presentation owners. The data tables remain;
-// only the competing UI runtimes are removed.
-const legacy=['wearable-followup-v2.js','wearable-cycle-v1.js','wearable-poc-mode-v1.js','key-results-grid-v1.js'];
+// Retire obsolete wearable / experimental KEY presentation owners. Data tables
+// remain; only competing UI runtimes are removed so #key has one canonical owner.
+const legacy=['wearable-followup-v2.js','wearable-cycle-v1.js','wearable-poc-mode-v1.js','key-results-grid-v1.js','komo-key-v1.js'];
 for(const name of legacy){
   const escaped=name.replaceAll('.','\\.');
   html=html.replace(new RegExp(`\\s*<script(?: type="module")? src="\\./${escaped}(?:\\?[^\\"]*)?"><\\/script>`,'g'),'');
 }
 
-// Ship KEY once, last.
-html=html.replace(/\s*<link rel="stylesheet" href="\.\/key-hub-v1\.css(?:\?[^\"]*)?"\s*\/?>/g,'');
-html=html.replace(/\s*<script src="\.\/key-hub-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
+// Ship the canonical KEY hub plus its captured-data extension exactly once, last.
+for(const name of ['key-hub-v1.css','key-data-layer-v1.css']){
+  const escaped=name.replaceAll('.','\\.');
+  html=html.replace(new RegExp(`\\s*<link rel="stylesheet" href="\\./${escaped}(?:\\?[^\\"]*)?"\\s*\\/?>`,'g'),'');
+}
+for(const name of ['key-hub-v1.js','key-data-layer-v1.js']){
+  const escaped=name.replaceAll('.','\\.');
+  html=html.replace(new RegExp(`\\s*<script(?: type="module")? src="\\./${escaped}(?:\\?[^\\"]*)?"><\\/script>`,'g'),'');
+}
 
 const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function bumpScript(name){
@@ -64,8 +72,8 @@ function bumpHref(name){
 for(const name of ['patient-navigation-core-v1.js','app-router-v2.js','my-komo-key-home-v1.js','account-tab-restore-v1.js','my-komo-score-motion-v1.js']) bumpScript(name);
 bumpHref('app-router-v2.js');
 
-html=html.replace('</head>',`  <link rel="stylesheet" href="./key-hub-v1.css?v=${release}" />\n</head>`);
-html=html.replace('</body>',`  <script src="./key-hub-v1.js?v=${release}"></script>\n</body>`);
+html=html.replace('</head>',`  <link rel="stylesheet" href="./key-hub-v1.css?v=${release}" />\n  <link rel="stylesheet" href="./key-data-layer-v1.css?v=${release}" />\n</head>`);
+html=html.replace('</body>',`  <script src="./key-hub-v1.js?v=${release}"></script>\n  <script src="./key-data-layer-v1.js?v=${release}"></script>\n</body>`);
 await writeFile(htmlPath,html,'utf8');
 
 const finalHtml=await readFile(htmlPath,'utf8');
@@ -76,10 +84,14 @@ const finalAccount=await readFile(join(pulse,'account-tab-restore-v1.js'),'utf8'
 const finalMotion=await readFile(join(pulse,'my-komo-score-motion-v1.js'),'utf8');
 const finalCss=await readFile(join(pulse,'key-hub-v1.css'),'utf8');
 const finalJs=await readFile(join(pulse,'key-hub-v1.js'),'utf8');
+const dataCss=await readFile(join(pulse,'key-data-layer-v1.css'),'utf8');
+const dataJs=await readFile(join(pulse,'key-data-layer-v1.js'),'utf8');
 const scriptCount=(finalHtml.match(/<script\b/g)||[]).length;
 const checks=[
  ['KEY CSS shipped last',finalHtml.includes(`key-hub-v1.css?v=${release}`)],
  ['KEY runtime shipped last',finalHtml.includes(`key-hub-v1.js?v=${release}`)],
+ ['captured-data CSS shipped',finalHtml.includes(`key-data-layer-v1.css?v=${release}`)],
+ ['captured-data runtime shipped after hub',finalHtml.indexOf(`key-data-layer-v1.js?v=${release}`)>finalHtml.indexOf(`key-hub-v1.js?v=${release}`)],
  ['navigation core cache-busted',finalHtml.includes(`patient-navigation-core-v1.js?v=${release}`)],
  ['app router cache-busted',finalHtml.includes(`app-router-v2.js?v=${release}`)],
  ['home KEY card cache-busted',finalHtml.includes(`my-komo-key-home-v1.js?v=${release}`)],
@@ -94,12 +106,17 @@ const checks=[
  ['legacy wearable cycle removed',!finalHtml.includes('wearable-cycle-v1.js')],
  ['legacy wear-mode POC removed',!finalHtml.includes('wearable-poc-mode-v1.js')],
  ['legacy results grid removed',!finalHtml.includes('key-results-grid-v1.js')],
+ ['experimental duplicate KEY owner removed',!finalHtml.includes('komo-key-v1.js')],
  ['account observer no longer watches body classes',!finalAccount.includes('observe(document.body')&&!finalAccount.includes("attributeFilter:['class','hidden']")],
  ['Motion runtime has no permanent polling interval',!finalMotion.includes('setInterval(')&&finalMotion.includes("document.querySelector('#viewRoot')")],
  ['KEY uses real wearable table',finalJs.includes("from('wearable_daily_metrics')")],
  ['KEY keeps Motion Score separate',finalJs.includes('ne modifient pas le Motion Score')||finalJs.includes('ne modifie pas le Motion Score')],
- ['animated premium rings shipped',finalCss.includes('.kh-ring')&&finalJs.includes('requestAnimationFrame')]
+ ['animated premium rings shipped',finalCss.includes('.kh-ring')&&finalJs.includes('requestAnimationFrame')],
+ ['captured layer reads canonical measurements',dataJs.includes("from('measurements')")&&dataJs.includes("from('questionnaire_sessions')")],
+ ['captured layer supports personal file import',dataJs.includes("accept=\".csv,.xlsx,.xls,.json\"")&&dataJs.includes("upsert(payload")],
+ ['clinical imports remain governed',dataJs.includes('MyoCare reste une acquisition instrumentée')&&dataJs.includes('Biologie et imagerie : couche Clinical')],
+ ['captured layer has technological data vault',dataCss.includes('.kdl-vault')&&dataCss.includes('@keyframes kdlScan')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-key-hub] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log(`[pulse-key-hub] PASS · #followup → #key before render · 4 legacy runtimes retired · ${scriptCount} scripts in final Pulse HTML · ${release}`);
+console.log(`[pulse-key-hub] PASS · canonical KEY + captured-data layer · governed import · ${scriptCount} scripts · ${release}`);
