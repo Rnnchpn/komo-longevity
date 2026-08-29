@@ -29,3 +29,7 @@ for(const [label,ok] of checks)console.log(`[pulse-route-lazy-qa] ${ok?'OK':'FAI
 if(checks.some(([,ok])=>!ok))process.exit(1);
 const total=Object.values(manifest.groups).reduce((n,x)=>n+x.length,0);
 console.log(`[pulse-route-lazy-qa] PASS · ${total} deferred modules · ${(html.match(/<script\b/g)||[]).length} boot script tags`);
+
+// Final patient consolidation deliberately runs after every historical build/QA layer.
+await import('./pulse-patient-clean-room-v1.mjs');
+await import('./pulse-patient-clean-room-qa-v1.mjs');
