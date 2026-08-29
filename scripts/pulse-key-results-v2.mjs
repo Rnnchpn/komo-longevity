@@ -49,3 +49,5 @@ await import('./pulse-auth-stability-v1.mjs');
 await import('./pulse-dark-luxe-v1.mjs');
 // Final material hierarchy: graphite canvas with porcelain, forest and warm focal surfaces.
 await import('./pulse-dark-luxe-polish-v2.mjs');
+// Real-device iPhone QA: compact header, edge-to-edge content, aligned copy and compact dock.
+await import('./pulse-iphone-density-v1.mjs');
