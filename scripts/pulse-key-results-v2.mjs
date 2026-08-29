@@ -51,3 +51,5 @@ await import('./pulse-dark-luxe-v1.mjs');
 await import('./pulse-dark-luxe-polish-v2.mjs');
 // Real-device iPhone QA: compact header, edge-to-edge content, aligned copy and compact dock.
 await import('./pulse-iphone-density-v1.mjs');
+// Desktop web login is a single page-specific owner, applied after every shared visual layer.
+await import('./pulse-auth-web-v1.mjs');
