@@ -12,3 +12,4 @@ html=html.replace('</body>','  <script src="./my-komo-dashboard-v2.js?v=20260829
 if(!html.includes('my-komo-dashboard-v2.css')||!html.includes('my-komo-dashboard-v2.js'))throw new Error('[pulse-my-komo-dashboard-v2] injection failed');
 await writeFile(path,html,'utf8');
 console.log('[pulse-my-komo-dashboard-v2] PASS · premium wearable hierarchy + Today command strip + primary Motion card');
+await import('./pulse-home-key-trajectory-v1.mjs');
