@@ -1,0 +1,223 @@
+/* KŌMØ Pulse — Watch Luxe Colors v1
+   iPhone-only material palette for the KEY companion experience.
+   Obsidian canvas, warm ivory, muted forest, champagne metal. No neon wearable colors.
+   Visual only: no route, auth, score, data or session behavior. */
+
+@media (max-width:767px){
+  html[data-adaptive-shell="phone"]{
+    --kw-obsidian:#080907;
+    --kw-black:#0c0d0b;
+    --kw-graphite:#131512;
+    --kw-graphite-2:#191b17;
+    --kw-forest:#18231b;
+    --kw-forest-2:#223027;
+    --kw-ivory:#eee9df;
+    --kw-ivory-soft:#ded8cc;
+    --kw-champagne:#b9aa8d;
+    --kw-champagne-soft:#d0c3aa;
+    --kw-sage:#97a393;
+    --kw-text:#f4f0e8;
+    --kw-muted:#8f958d;
+  }
+
+  html[data-adaptive-shell="phone"] body,
+  html[data-adaptive-shell="phone"] .main-shell,
+  html[data-adaptive-shell="phone"] body.khome-v3 #viewRoot{
+    background:
+      radial-gradient(circle at 85% -12%,rgba(185,170,141,.055),transparent 28%),
+      radial-gradient(circle at -12% 42%,rgba(53,72,59,.10),transparent 34%),
+      var(--kw-obsidian)!important;
+    color:var(--kw-text)!important;
+  }
+
+  /* KEY hero — black lacquer + dark forest + champagne edge. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-key-home{
+    background:
+      radial-gradient(circle at 92% 2%,rgba(185,170,141,.13),transparent 27%),
+      radial-gradient(circle at 8% 110%,rgba(65,88,72,.17),transparent 38%),
+      linear-gradient(148deg,#10130f 0%,#151b16 42%,#18251d 72%,#0d100d 100%)!important;
+    border:1px solid rgba(198,181,149,.19)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035),0 20px 54px rgba(0,0,0,.20)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-key-home:before{
+    opacity:.16!important;
+    background-size:56px 56px!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-kicker{
+    color:var(--kw-champagne-soft)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-kicker>i{
+    background:var(--kw-champagne)!important;
+    box-shadow:0 0 0 5px rgba(185,170,141,.07)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-kicker span{
+    color:#d7cbb4!important;
+    background:rgba(185,170,141,.09)!important;
+    border-color:rgba(198,181,149,.14)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-status,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-live-head small,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-trend small,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-trend>span{
+    color:var(--kw-muted)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-live-pill{
+    background:rgba(185,170,141,.08)!important;
+    color:#d0c6b4!important;
+    border-color:rgba(185,170,141,.14)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-live-pill i{
+    background:var(--kw-champagne)!important;
+    box-shadow:0 0 0 4px rgba(185,170,141,.07)!important;
+  }
+
+  /* Daily tiles — one warm ivory focal tile, remaining tiles smoked graphite. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric{
+    background:linear-gradient(150deg,#171916,#111310)!important;
+    border:1px solid rgba(255,255,255,.055)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.022)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric.primary{
+    background:linear-gradient(145deg,#f1ece2,#ded7ca)!important;
+    color:#181914!important;
+    border:1px solid rgba(255,255,255,.34)!important;
+    box-shadow:0 12px 28px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.65)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric>small{
+    color:#81887f!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric.primary>small{
+    color:#696a61!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric strong{
+    color:var(--kw-text)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric.primary strong{
+    color:#171813!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric p,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric-value span{
+    color:#858c83!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric.primary p,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric.primary .mkh-metric-value span{
+    color:#6f7169!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-trend{
+    border-top-color:rgba(201,183,150,.11)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-trend strong{
+    color:#c9c0ae!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-spark i{
+    background:linear-gradient(180deg,#d2c5aa,#8f826d)!important;
+    opacity:.52!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-spark i:last-child{
+    opacity:1!important;
+    box-shadow:0 0 15px rgba(185,170,141,.15)!important;
+  }
+
+  /* Clinical context — dark satin, not green dashboard cards. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-score,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age{
+    background:linear-gradient(150deg,#171815,#10110f)!important;
+    border:1px solid rgba(198,181,149,.10)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age{
+    background:
+      radial-gradient(circle at 86% 12%,rgba(185,170,141,.10),transparent 33%),
+      linear-gradient(150deg,#181a16,#11120f)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-eyebrow{
+    color:#98988e!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-card h3,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring-core strong,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age-main strong{
+    color:var(--kw-text)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring{
+    background:conic-gradient(var(--kw-champagne) calc(var(--v)*1%),#292a25 0)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring:after{
+    background:#11120f!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age-main span{
+    color:#999c93!important;
+  }
+
+  /* XP — discreet forest leather tone with warm metal accent. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp{
+    background:
+      radial-gradient(circle at 88% 10%,rgba(185,170,141,.09),transparent 30%),
+      linear-gradient(145deg,#19241c,#111512)!important;
+    border:1px solid rgba(198,181,149,.11)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp-dial{
+    background:conic-gradient(var(--kw-champagne) calc(var(--p)*1%),#2a302a 0)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp-dial:after{
+    background:#151b16!important;
+  }
+
+  /* Dedicated KEY route — same material family. */
+  html[data-adaptive-shell="phone"] .keyhub.kh2-enhanced,
+  html[data-adaptive-shell="phone"] .kh2-stage,
+  html[data-adaptive-shell="phone"] .kh2-data{
+    color:var(--kw-text)!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-nav{
+    background:#11120f!important;
+    border-color:rgba(198,181,149,.10)!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-nav button{
+    color:#8f938b!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-nav button.active{
+    background:#ece6da!important;
+    color:#171813!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-stage-head,
+  html[data-adaptive-shell="phone"] .kh2-data-head,
+  html[data-adaptive-shell="phone"] .kh2-today{
+    background:
+      radial-gradient(circle at 90% 0%,rgba(185,170,141,.10),transparent 30%),
+      linear-gradient(150deg,#171b16,#10120f)!important;
+    border-color:rgba(198,181,149,.11)!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-stat{
+    background:linear-gradient(145deg,#eee8dd,#dcd4c7)!important;
+    color:#191a15!important;
+    border:0!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-stat:nth-child(2n){
+    background:linear-gradient(150deg,#181a17,#11120f)!important;
+    color:var(--kw-text)!important;
+    border:1px solid rgba(198,181,149,.08)!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-stat>small{color:#6f746d!important}
+  html[data-adaptive-shell="phone"] .kh2-stat:nth-child(2n)>small{color:#8d938b!important}
+  html[data-adaptive-shell="phone"] .kh2-stat p{color:#777c75!important}
+  html[data-adaptive-shell="phone"] .kh2-stat:nth-child(2n) p{color:#8d938b!important}
+
+  /* Dock — smoked glass + ivory active plaque. */
+  html[data-adaptive-shell="phone"] #kpDockV6{
+    background:linear-gradient(145deg,rgba(15,16,14,.97),rgba(22,23,20,.96))!important;
+    border:1px solid rgba(198,181,149,.14)!important;
+    box-shadow:0 18px 48px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.025)!important;
+  }
+  html[data-adaptive-shell="phone"] #kpDockV6 .kp6-indicator{
+    background:linear-gradient(145deg,#f0ebe1,#dcd4c7)!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.16)!important;
+  }
+  html[data-adaptive-shell="phone"] #kpDockV6 a,
+  html[data-adaptive-shell="phone"] #kpDockV6 button{
+    color:#969890!important;
+  }
+  html[data-adaptive-shell="phone"] #kpDockV6 a.active,
+  html[data-adaptive-shell="phone"] #kpDockV6 button.active{
+    color:#171813!important;
+  }
+}
