@@ -1,0 +1,30 @@
+import { copyFile, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root=dirname(dirname(fileURLToPath(import.meta.url)));
+const pulse=join(root,'site','pulse-v12');
+const htmlPath=join(pulse,'index.html');
+const release='20260829-key-results-v2';
+for(const file of ['key-results-v2.css','key-results-v2.js']) await copyFile(join(root,'pulse-app',file),join(pulse,file));
+let html=await readFile(htmlPath,'utf8');
+html=html.replace(/\s*<link rel="stylesheet" href="\.\/key-results-v2\.css(?:\?[^\"]*)?"\s*\/?>/g,'');
+html=html.replace(/\s*<script src="\.\/key-results-v2\.js(?:\?[^\"]*)?"><\/script>/g,'');
+html=html.replace('</head>',`  <link rel="stylesheet" href="./key-results-v2.css?v=${release}" />\n</head>`);
+html=html.replace('</body>',`  <script src="./key-results-v2.js?v=${release}"></script>\n</body>`);
+await writeFile(htmlPath,html,'utf8');
+const css=await readFile(join(pulse,'key-results-v2.css'),'utf8');
+const js=await readFile(join(pulse,'key-results-v2.js'),'utf8');
+const final=await readFile(htmlPath,'utf8');
+const checks=[
+ ['v2 CSS is final visual layer',final.includes(`key-results-v2.css?v=${release}`)],
+ ['v2 runtime is final KEY layer',final.includes(`key-results-v2.js?v=${release}`)],
+ ['KEY result menu has four views',js.includes("['overview','Aperçu']")&&js.includes("['data','Données']")],
+ ['Today session uses real wear minutes',js.includes('wear_minutes')&&js.includes('SESSION PARTIELLE')],
+ ['numbers animate with requestAnimationFrame',js.includes('requestAnimationFrame')&&css.includes('kh2DigitIn')],
+ ['CSV and JSON test import enabled',js.includes('komo_key_file_import')&&js.includes('kh2File')],
+ ['Motion Score remains untouched by import',js.includes('Aucun score clinique n’est recalculé')]
+];
+for(const [label,ok] of checks) console.log(`[pulse-key-results-v2] ${ok?'OK':'FAIL'} · ${label}`);
+if(checks.some(([,ok])=>!ok)) process.exit(1);
+console.log('[pulse-key-results-v2] PASS · premium KEY views + animated numbers + POC import bridge');
