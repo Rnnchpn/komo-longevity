@@ -12,7 +12,7 @@ for(const file of ['iphone-app-lock-v1.css','iphone-app-lock-v1.js']){
 }
 
 let html=await readFile(htmlPath,'utf8');
-html=html.replace(/<meta name="viewport" content="[^"]*"\s*\/?>/,'<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />');
+html=html.replace(/<meta name="viewport" content="[^"]*"\s*\/?>/,'<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />');
 html=html.replace(/\s*<link rel="stylesheet" href="\.\/iphone-app-lock-v1\.css(?:\?v=[^"]+)?"\s*\/?>/g,'');
 html=html.replace(/\s*<script src="\.\/iphone-app-lock-v1\.js(?:\?v=[^"]+)?"><\/script>/g,'');
 html=html.replace('</head>',`  <link rel="stylesheet" href="./iphone-app-lock-v1.css?v=${release}" />\n</head>`);
@@ -28,8 +28,8 @@ const [css,js,final]=await Promise.all([
 const checks=[
   ['iPhone lock CSS is loaded last',final.includes(`iphone-app-lock-v1.css?v=${release}`)],
   ['iPhone lock runtime is loaded last',final.includes(`iphone-app-lock-v1.js?v=${release}`)],
-  ['viewport disables user zoom',final.includes('maximum-scale=1')&&final.includes('user-scalable=no')],
-  ['viewport keeps safe areas and keyboard resizing',final.includes('viewport-fit=cover')&&final.includes('interactive-widget=resizes-content')],
+  ['base viewport keeps safe areas and keyboard resizing',final.includes('viewport-fit=cover')&&final.includes('interactive-widget=resizes-content')],
+  ['zoom lock is scoped to iPhone runtime',js.includes('maximum-scale=1')&&js.includes('user-scalable=no')&&js.includes('const IOS=')],
   ['phone shell is fixed to viewport',css.includes('position: fixed !important')&&css.includes('kamo-iphone-locked')],
   ['app content owns vertical scroll',css.includes('.main-shell')&&css.includes('overflow-y: auto !important')],
   ['horizontal page drift is blocked',css.includes('overflow-x: hidden !important')&&css.includes('touch-action: pan-y !important')],
