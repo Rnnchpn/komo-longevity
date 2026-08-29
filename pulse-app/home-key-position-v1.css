@@ -1,0 +1,17 @@
+/* KŌMØ Pulse — Home KEY priority placement v1 */
+body.khome-v3 .kdw-grid.kdw-key-priority{align-items:stretch}
+body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-score,
+body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-age{grid-column:span 6!important;grid-row:auto!important;min-height:292px}
+body.khome-v3 .kdw-grid.kdw-key-priority>.mykomo-key-home{grid-column:1/-1!important;margin:2px 0 2px!important;min-width:0;width:100%;align-self:stretch}
+body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-next{grid-column:span 6!important}
+body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-today,
+body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-exp{grid-column:span 3!important}
+@media(max-width:760px){
+ body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-score,
+ body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-age,
+ body.khome-v3 .kdw-grid.kdw-key-priority>.mykomo-key-home,
+ body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-next,
+ body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-today,
+ body.khome-v3 .kdw-grid.kdw-key-priority>.kdw-exp{grid-column:1!important}
+ body.khome-v3 .kdw-grid.kdw-key-priority>.mykomo-key-home{margin:0!important}
+}
