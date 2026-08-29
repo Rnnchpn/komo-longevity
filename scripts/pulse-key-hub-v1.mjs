@@ -32,6 +32,7 @@ await writeFile(homeKeyPath,homeKey,'utf8');
 let html=await readFile(htmlPath,'utf8');
 html=html.replace(/\s*<link rel="stylesheet" href="\.\/key-hub-v1\.css(?:\?[^\"]*)?"\s*\/?>/g,'');
 html=html.replace(/\s*<script src="\.\/key-hub-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
+html=html.replace(/\.\/my-komo-score-motion-v1\.js\?v=[^\"]+/g,`./my-komo-score-motion-v1.js?v=${release}`);
 html=html.replace('</head>',`  <link rel="stylesheet" href="./key-hub-v1.css?v=${release}" />\n</head>`);
 html=html.replace('</body>',`  <script src="./key-hub-v1.js?v=${release}"></script>\n</body>`);
 await writeFile(htmlPath,html,'utf8');
@@ -45,6 +46,7 @@ const finalJs=await readFile(join(pulse,'key-hub-v1.js'),'utf8');
 const checks=[
  ['KEY CSS shipped last',finalHtml.includes(`key-hub-v1.css?v=${release}`)],
  ['KEY runtime shipped last',finalHtml.includes(`key-hub-v1.js?v=${release}`)],
+ ['Motion score runtime cache-busted',finalHtml.includes(`my-komo-score-motion-v1.js?v=${release}`)],
  ['app recognizes KEY',finalApp.includes("'key'")],
  ['app delegates KEY',finalApp.includes("'club','key','trajectory'")],
  ['canonical patient navigation accepts KEY',finalNav.includes("'club','key','trajectory'")],
