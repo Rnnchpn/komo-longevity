@@ -45,8 +45,7 @@ await patchFile('patient-home-micro-motion-v1.js',[
 ]);
 
 await patchFile('my-komo-score-motion-v1.js',[
-  ["const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;","const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||window.matchMedia?.('(max-width: 767px)').matches;",'score ring mobile reduced mode'],
-  ["  new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"] )'))schedule()}).observe(document.body,{childList:true,subtree:true});","  if(!window.matchMedia('(max-width: 767px)').matches)new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"] )'))schedule()}).observe(document.body,{childList:true,subtree:true});",'score body observer optional']
+  ["const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;","const reduced=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||window.matchMedia?.('(max-width: 767px)').matches;",'score ring mobile reduced mode']
 ]);
 
 // The lobby should share the canonical Supabase client and avoid several full hydrations during the same startup burst.
@@ -58,16 +57,14 @@ await patchFile('my-komo-lobby-v3.js',[
   ["setTimeout(()=>mount(true),300);","setTimeout(()=>mount(false),1200);",'lobby duplicate startup load']
 ]);
 
-// Some generated versions already contain the phone-aware score runtime. If the exact legacy observer signature differs,
-// disable its remaining interval separately without making the build fragile.
+// Score-ring visibility polling is unnecessary on phones because the canonical state already owns the displayed value.
 {
   const p=join(pulse,'my-komo-score-motion-v1.js');
   let src=await readFile(p,'utf8');
-  src=src.replace("setInterval(()=>{if((location.hash.replace(/^#/,'')||'home')==='home')guardVisible()},3500);","if(!window.matchMedia('(max-width: 767px)').matches)setInterval(()=>{if((location.hash.replace(/^#/,'')||'home')==='home')guardVisible()},3500);");
-  src=src.replace("new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"] )'))schedule()}).observe(document.body,{childList:true,subtree:true});","if(!window.matchMedia('(max-width: 767px)').matches)new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"] )'))schedule()}).observe(document.body,{childList:true,subtree:true});");
-  src=src.replace("new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"] )'))schedule()}).observe(document.body,{childList:true,subtree:true});","if(!window.matchMedia('(max-width: 767px)').matches)new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"] )'))schedule()}).observe(document.body,{childList:true,subtree:true});");
-  // Current canonical source has no space before the closing selector parenthesis.
-  src=src.replace("new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"])'))schedule()}).observe(document.body,{childList:true,subtree:true});","if(!window.matchMedia('(max-width: 767px)').matches)new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"])'))schedule()}).observe(document.body,{childList:true,subtree:true});");
+  const observer="new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"])'))schedule()}).observe(document.body,{childList:true,subtree:true});";
+  if(src.includes(observer))src=src.replace(observer,`if(!window.matchMedia('(max-width: 767px)').matches)${observer}`);
+  const interval="setInterval(()=>{if((location.hash.replace(/^#/,'')||'home')==='home')guardVisible()},3500);";
+  if(src.includes(interval))src=src.replace(interval,`if(!window.matchMedia('(max-width: 767px)').matches)${interval}`);
   await writeFile(p,src,'utf8');
 }
 
