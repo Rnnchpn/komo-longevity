@@ -132,18 +132,7 @@ const scripts = [
   'scripts/pulse-account-logout-v1.mjs',
   'scripts/pulse-my-komo-dashboard-v2.mjs',
   'scripts/pulse-mobile-vertical-app-v1.mjs',
-  'scripts/pulse-mobile-vertical-app-qa-v1.mjs',
-  'scripts/pulse-key-hub-v1.mjs',
-  'scripts/pulse-mobile-safari-stability-v1.mjs',
-  'scripts/pulse-mobile-safari-stability-qa-v1.mjs',
-  'scripts/pulse-mobile-performance-final-v1.mjs',
-  'scripts/pulse-mobile-performance-final-qa-v1.mjs',
-  'scripts/pulse-mobile-canonical-v1.mjs',
-  'scripts/pulse-mobile-canonical-qa-v1.mjs',
-  'scripts/pulse-key-nested-navigation-v2.mjs',
-  'scripts/pulse-key-nested-navigation-qa-v1.mjs',
-  'scripts/pulse-route-lazy-load-v1.mjs',
-  'scripts/pulse-route-lazy-load-qa-v1.mjs'
+  'scripts/pulse-mobile-vertical-app-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
