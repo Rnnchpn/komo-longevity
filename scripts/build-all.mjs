@@ -133,7 +133,8 @@ const scripts = [
   'scripts/pulse-my-komo-dashboard-v2.mjs',
   'scripts/pulse-mobile-vertical-app-v1.mjs',
   'scripts/pulse-mobile-vertical-app-qa-v1.mjs',
-  'scripts/pulse-key-hub-v1.mjs'
+  'scripts/pulse-key-hub-v1.mjs',
+  'scripts/pulse-key-results-v2.mjs'
 ];
 
 for (const script of scripts) {
