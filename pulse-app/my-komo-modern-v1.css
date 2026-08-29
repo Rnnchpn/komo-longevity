@@ -1,0 +1,104 @@
+/* KŌMØ Pulse — My KŌMØ modern surface v1 */
+@property --komo-ring-value{syntax:'<number>';inherits:false;initial-value:0}
+
+.mykomo-home{
+  position:relative;
+  isolation:isolate;
+  padding:2px 2px 22px;
+}
+.mykomo-home:before{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  inset:-42px -52px -72px;
+  border-radius:44px;
+  background:
+    radial-gradient(circle at 12% 10%,rgba(173,190,169,.30),transparent 30%),
+    radial-gradient(circle at 86% 4%,rgba(214,199,177,.36),transparent 34%),
+    radial-gradient(circle at 78% 78%,rgba(151,173,161,.20),transparent 32%),
+    linear-gradient(135deg,#f4f1e9 0%,#ebe7dd 40%,#eef1ea 70%,#e5e9e2 100%);
+  background-size:120% 120%,120% 120%,120% 120%,100% 100%;
+  animation:komoSurfaceDrift 18s ease-in-out infinite alternate;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.65);
+}
+.mykomo-home:after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-30px -40px -54px;
+  border-radius:38px;
+  opacity:.5;
+  pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.08) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(to bottom,rgba(0,0,0,.28),transparent 78%);
+}
+
+.mykomo-card,
+.mykomo-engagement{
+  border-color:rgba(55,66,57,.10)!important;
+  background:linear-gradient(135deg,rgba(252,250,245,.88),rgba(239,241,235,.76))!important;
+  -webkit-backdrop-filter:blur(18px) saturate(112%);
+  backdrop-filter:blur(18px) saturate(112%);
+  box-shadow:0 24px 70px rgba(46,54,48,.09),inset 0 1px 0 rgba(255,255,255,.78)!important;
+}
+.mykomo-card:before{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  border-radius:inherit;
+  background:linear-gradient(120deg,rgba(255,255,255,.42),transparent 30%,transparent 72%,rgba(158,177,163,.11));
+}
+.mykomo-score-card,
+.mykomo-side,
+.mykomo-steps,
+.mykomo-daily,
+.mykomo-points{
+  background:rgba(255,255,255,.48)!important;
+  border-color:rgba(52,66,56,.085)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.64),0 12px 32px rgba(48,57,50,.045);
+}
+
+.mykomo-ring{
+  --komo-ring-value:var(--value,0);
+  background:conic-gradient(from -90deg,#53685a calc(var(--komo-ring-value) * 1%),rgba(211,216,207,.68) 0)!important;
+  box-shadow:0 16px 34px rgba(62,80,67,.10),inset 0 0 0 1px rgba(255,255,255,.55);
+  transition:transform .25s ease,box-shadow .25s ease;
+}
+.mykomo-ring:after{
+  content:"";
+  position:absolute;
+  inset:-5px;
+  border-radius:50%;
+  border:1px solid rgba(91,111,97,.10);
+  opacity:.55;
+  transform:scale(.98);
+}
+.mykomo-ring:before{background:linear-gradient(145deg,rgba(253,252,248,.98),rgba(241,242,236,.96))!important;box-shadow:inset 0 1px 0 #fff}
+.mykomo-ring-item:hover .mykomo-ring{transform:translateY(-2px) scale(1.025);box-shadow:0 20px 42px rgba(62,80,67,.14),inset 0 0 0 1px rgba(255,255,255,.68)}
+.mykomo-ring.is-animating{animation:komoRingPulse 1.05s cubic-bezier(.22,.78,.25,1) both}
+.mykomo-ring strong{font-variant-numeric:tabular-nums}
+
+.mykomo-xp-track i,.mykomo-step-track i,.mykomo-point-track i{
+  transform-origin:left center;
+  animation:komoTrackIn .9s cubic-bezier(.22,.78,.25,1) both;
+}
+.mykomo-score-card{animation:komoCardIn .62s cubic-bezier(.22,.78,.25,1) both}
+.mykomo-side{animation:komoCardIn .62s .08s cubic-bezier(.22,.78,.25,1) both}
+.mykomo-engagement{animation:komoCardIn .62s .14s cubic-bezier(.22,.78,.25,1) both}
+
+@keyframes komoSurfaceDrift{0%{background-position:0% 0%,100% 0%,70% 100%,0 0}100%{background-position:12% 8%,88% 12%,82% 88%,0 0}}
+@keyframes komoRingPulse{0%{transform:scale(.94);filter:saturate(.78)}55%{transform:scale(1.025);filter:saturate(1.08)}100%{transform:scale(1);filter:saturate(1)}}
+@keyframes komoTrackIn{from{transform:scaleX(0);opacity:.45}to{transform:scaleX(1);opacity:1}}
+@keyframes komoCardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:760px){
+  .mykomo-home:before{inset:-24px -12px -50px;border-radius:30px;background:radial-gradient(circle at 20% 5%,rgba(173,190,169,.28),transparent 30%),radial-gradient(circle at 88% 18%,rgba(214,199,177,.30),transparent 35%),linear-gradient(150deg,#f3efe7,#e8ebe4 72%,#e3e8e0)}
+  .mykomo-home:after{inset:-18px -8px -40px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .mykomo-home:before,.mykomo-ring.is-animating,.mykomo-xp-track i,.mykomo-step-track i,.mykomo-point-track i,.mykomo-score-card,.mykomo-side,.mykomo-engagement{animation:none!important}
+  .mykomo-ring{transition:none!important}
+}
