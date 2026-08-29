@@ -1,0 +1,360 @@
+/* KŌMØ Pulse — iPhone Density v1
+   Phone-only layout correction from real-device QA.
+   Goal: use the full viewport, remove redundant mobile hero/header space, align copy, and keep one compact app dock.
+   Visual/layout only: no auth, route, score, data or session behavior. */
+
+@media (max-width:767px){
+  html[data-adaptive-shell="phone"]{
+    --kam-gutter:0px!important;
+    --kam-bottom:62px!important;
+  }
+
+  /* One compact native-like header. The previous page title + duplicated mobile wordmark
+     consumed ~1/4 of the iPhone viewport on Home. */
+  html[data-adaptive-shell="phone"] .main-shell{
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:0 0 calc(68px + env(safe-area-inset-bottom))!important;
+  }
+  html[data-adaptive-shell="phone"] .topbar{
+    position:sticky!important;
+    top:0!important;
+    z-index:90!important;
+    width:100%!important;
+    min-height:54px!important;
+    height:54px!important;
+    margin:0!important;
+    padding:7px 9px!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) 42px!important;
+    gap:8px!important;
+    align-items:center!important;
+    background:linear-gradient(180deg,rgba(5,7,6,.99),rgba(5,7,6,.93))!important;
+    border-bottom:1px solid rgba(255,255,255,.045)!important;
+    box-sizing:border-box!important;
+  }
+  html[data-adaptive-shell="phone"] .topbar>div:first-child{
+    min-width:0!important;
+    width:auto!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .topbar>div:first-child::before{
+    content:"KŌMØ  ·  PULSE";
+    color:#f2efe8;
+    font:600 14px/1 Manrope,'DM Sans',sans-serif;
+    letter-spacing:.12em;
+    white-space:nowrap;
+  }
+  html[data-adaptive-shell="phone"] .topbar #pageTitle,
+  html[data-adaptive-shell="phone"] .topbar #pageEyebrow,
+  html[data-adaptive-shell="phone"] .topbar .eyebrow,
+  html[data-adaptive-shell="phone"] .kpulse-lockup,
+  html[data-adaptive-shell="phone"] .kam-mobile-brand,
+  html[data-adaptive-shell="phone"] .kpulse-header-sweep{
+    display:none!important;
+  }
+  html[data-adaptive-shell="phone"] .topbar-actions{
+    position:static!important;
+    inset:auto!important;
+    width:42px!important;
+    height:42px!important;
+    margin:0!important;
+    padding:0!important;
+    display:grid!important;
+    place-items:center!important;
+    justify-self:end!important;
+  }
+  html[data-adaptive-shell="phone"] #kamTopMenu,
+  html[data-adaptive-shell="phone"] .kam-top-menu{
+    width:42px!important;
+    min-width:42px!important;
+    max-width:42px!important;
+    height:42px!important;
+    min-height:42px!important;
+    padding:0!important;
+    margin:0!important;
+    border-radius:14px!important;
+    font-size:0!important;
+    line-height:0!important;
+    background:linear-gradient(145deg,#203429,#2f4938)!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:0 8px 22px rgba(0,0,0,.24)!important;
+  }
+  html[data-adaptive-shell="phone"] #kamTopMenu span,
+  html[data-adaptive-shell="phone"] .kam-top-menu span{
+    width:15px!important;
+    height:1.5px!important;
+    margin:1.6px auto!important;
+    border-radius:99px!important;
+    background:#eef1eb!important;
+    display:block!important;
+  }
+  html[data-adaptive-shell="phone"] .mobile-account-trigger,
+  html[data-adaptive-shell="phone"] .mobile-nav,
+  html[data-adaptive-shell="phone"] #mobileNav,
+  html[data-adaptive-shell="phone"] #kamBottomBar{
+    display:none!important;
+  }
+
+  /* Role switch, when present for Pro/Admin accounts, starts immediately below compact header. */
+  html[data-adaptive-shell="phone"] .kam-role-row{top:54px!important;margin:0 0 6px!important;padding:5px 8px 6px!important}
+  html[data-adaptive-shell="phone"] .kam-role-switch{max-width:none!important}
+
+  /* Content occupies almost the whole iPhone width. Eliminate stacked shell + view gutters. */
+  html[data-adaptive-shell="phone"] .view-root,
+  html[data-adaptive-shell="phone"] #viewRoot{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:6px 7px 72px!important;
+    box-sizing:border-box!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] #viewRoot>*{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    box-sizing:border-box!important;
+  }
+
+  /* Home/profile: align identity and copy to a common left edge. */
+  html[data-adaptive-shell="phone"] [data-my-komo-home],
+  html[data-adaptive-shell="phone"] .mykomo-home{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:0!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-card{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:13px 12px!important;
+    border-radius:20px!important;
+    box-sizing:border-box!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-top{
+    width:100%!important;
+    padding:0 0 7px!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-identity{
+    min-width:0!important;
+    flex:1 1 auto!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:10px!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-identity>div,
+  html[data-adaptive-shell="phone"] .mykomo-identity>span,
+  html[data-adaptive-shell="phone"] .mykomo-identity>section{
+    min-width:0!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-avatar{
+    width:54px!important;
+    height:54px!important;
+    flex:0 0 54px!important;
+    border-radius:17px!important;
+    margin:0!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-identity small{
+    justify-content:flex-start!important;
+    margin:0 0 4px!important;
+    font-size:7px!important;
+    letter-spacing:.13em!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-identity h2{
+    margin:0!important;
+    font-size:24px!important;
+    line-height:.98!important;
+    letter-spacing:-.05em!important;
+    text-align:left!important;
+    white-space:normal!important;
+    overflow-wrap:anywhere!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-identity p{
+    margin:5px 0 0!important;
+    font-size:9px!important;
+    line-height:1.3!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-profile-btn{
+    min-height:36px!important;
+    height:36px!important;
+    padding:0 11px!important;
+    margin:0!important;
+    flex:0 0 auto!important;
+    font-size:8px!important;
+  }
+
+  /* Dashboard cells become denser without sacrificing tap targets. */
+  html[data-adaptive-shell="phone"] .mykomo-command-strip{
+    width:100%!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:6px!important;
+    margin:8px 0 5px!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-command-cell{
+    min-height:72px!important;
+    padding:10px 11px!important;
+    border-radius:15px!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-command-cell small{font-size:6px!important;text-align:left!important}
+  html[data-adaptive-shell="phone"] .mykomo-command-cell strong{margin-top:5px!important;font-size:14px!important;text-align:left!important}
+  html[data-adaptive-shell="phone"] .mykomo-command-cell span{margin-top:3px!important;font-size:7px!important;text-align:left!important}
+
+  html[data-adaptive-shell="phone"] .mykomo-grid{gap:7px!important;margin-top:7px!important}
+  html[data-adaptive-shell="phone"] .mykomo-score-card,
+  html[data-adaptive-shell="phone"] .mykomo-side,
+  html[data-adaptive-shell="phone"] .mykomo-engagement{
+    width:100%!important;
+    max-width:none!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    padding:12px!important;
+    border-radius:18px!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-section-label{
+    margin:0 0 7px!important;
+    align-items:center!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-section-label span{text-align:left!important}
+  html[data-adaptive-shell="phone"] .kpulse-age-zone{
+    min-width:0!important;
+    padding:2px 6px 7px!important;
+    margin:0!important;
+  }
+  html[data-adaptive-shell="phone"] .kpulse-age-label{margin:0 0 5px!important;font-size:8px!important}
+  html[data-adaptive-shell="phone"] .kpulse-age-value{font-size:25px!important;min-height:22px!important}
+  html[data-adaptive-shell="phone"] .kpulse-age-note{margin-top:4px!important;font-size:6.5px!important}
+
+  /* Three score instruments fit on one screen instead of a 73%-wide horizontal carousel. */
+  html[data-adaptive-shell="phone"] .mykomo-rings{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:5px!important;
+    overflow:visible!important;
+    padding:0!important;
+    scroll-snap-type:none!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-ring-item,
+  html[data-adaptive-shell="phone"] .mykomo-ring-item:nth-child(2){
+    width:auto!important;
+    min-width:0!important;
+    flex:none!important;
+    min-height:118px!important;
+    padding:18px 4px 8px!important;
+    border-radius:16px!important;
+    scroll-snap-align:none!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-ring,
+  html[data-adaptive-shell="phone"] .mykomo-ring-item:nth-child(2) .mykomo-ring{
+    width:72px!important;
+    height:72px!important;
+    margin:0 auto!important;
+  }
+  html[data-adaptive-shell="phone"] .mykomo-ring strong,
+  html[data-adaptive-shell="phone"] .mykomo-ring-item:nth-child(2) .mykomo-ring strong{font-size:19px!important}
+  html[data-adaptive-shell="phone"] .mykomo-ring-item>strong{font-size:8px!important;line-height:1.2!important}
+  html[data-adaptive-shell="phone"] .mykomo-ring-item>small{font-size:5.8px!important;line-height:1.25!important}
+  html[data-adaptive-shell="phone"] .mykomo-ring-state{left:6px!important;top:6px!important;padding:3px 4px!important;font-size:4.8px!important}
+  html[data-adaptive-shell="phone"] .mykomo-ring-item:nth-child(2):after{right:6px!important;top:6px!important;padding:3px 4px!important;font-size:4.5px!important}
+
+  /* Data-wall cards and all primary mobile copy share a left baseline. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw{margin:7px 0 0!important;gap:7px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-actions{gap:6px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-action{
+    min-height:76px!important;
+    padding:11px 12px!important;
+    border-radius:17px!important;
+    text-align:left!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-card{border-radius:18px!important;text-align:left!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-score,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age{min-height:218px!important;padding:14px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring{width:124px!important;height:124px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-next,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-today,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-connected{padding:13px!important}
+  html[data-adaptive-shell="phone"] .kdw-action small,
+  html[data-adaptive-shell="phone"] .kdw-action strong,
+  html[data-adaptive-shell="phone"] .kdw-action p,
+  html[data-adaptive-shell="phone"] .kdw-card h3,
+  html[data-adaptive-shell="phone"] .kdw-eyebrow,
+  html[data-adaptive-shell="phone"] .kdw-next p,
+  html[data-adaptive-shell="phone"] .kdw-connected-head p{text-align:left!important}
+
+  /* Keep the canonical patient dock, but make it a compact iOS tab bar. */
+  html[data-adaptive-shell="phone"] #kpDockV6{
+    left:4px!important;
+    right:4px!important;
+    bottom:max(4px,env(safe-area-inset-bottom))!important;
+    width:auto!important;
+    height:60px!important;
+    padding:4px!important;
+    border-radius:19px!important;
+    grid-template-columns:none!important;
+    grid-auto-flow:column!important;
+    grid-auto-columns:minmax(0,1fr)!important;
+    gap:2px!important;
+    background:rgba(12,15,13,.94)!important;
+    box-shadow:0 18px 44px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.035)!important;
+  }
+  html[data-adaptive-shell="phone"] #kpDockV6 .kp6-indicator{top:4px!important;left:4px!important;height:52px!important;border-radius:15px!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 a,
+  html[data-adaptive-shell="phone"] #kpDockV6 button{
+    height:52px!important;
+    min-height:52px!important;
+    gap:3px!important;
+    padding:2px 1px!important;
+    border-radius:15px!important;
+  }
+  html[data-adaptive-shell="phone"] #kpDockV6 .kp6-icon{font-size:15px!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 b{font-size:6.5px!important;line-height:1!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 small{font-size:4px!important}
+
+  /* Generic mobile text alignment: cards read like an app, not centered marketing blocks. */
+  html[data-adaptive-shell="phone"] .card,
+  html[data-adaptive-shell="phone"] .section-block,
+  html[data-adaptive-shell="phone"] .pv4-section,
+  html[data-adaptive-shell="phone"] .result-card,
+  html[data-adaptive-shell="phone"] .trajectory-card,
+  html[data-adaptive-shell="phone"] .path-card,
+  html[data-adaptive-shell="phone"] .profile-card,
+  html[data-adaptive-shell="phone"] .booking-card{
+    text-align:left!important;
+  }
+}
+
+@media(max-width:390px){
+  html[data-adaptive-shell="phone"] .view-root,
+  html[data-adaptive-shell="phone"] #viewRoot{padding-left:5px!important;padding-right:5px!important}
+  html[data-adaptive-shell="phone"] .mykomo-card{padding-left:10px!important;padding-right:10px!important}
+  html[data-adaptive-shell="phone"] .mykomo-avatar{width:50px!important;height:50px!important;flex-basis:50px!important}
+  html[data-adaptive-shell="phone"] .mykomo-identity h2{font-size:22px!important}
+  html[data-adaptive-shell="phone"] .mykomo-ring,
+  html[data-adaptive-shell="phone"] .mykomo-ring-item:nth-child(2) .mykomo-ring{width:66px!important;height:66px!important}
+}
