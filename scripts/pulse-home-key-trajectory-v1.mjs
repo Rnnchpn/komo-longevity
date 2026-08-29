@@ -1,0 +1,12 @@
+import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+const path=join(process.cwd(),'site','pulse-v12','index.html');
+let html=await readFile(path,'utf8');
+for(const file of ['my-komo-key-home-v1.css','trajectory-color-v4.css'])html=html.replace(new RegExp(`\\s*<link rel="stylesheet" href="\\./${file.replaceAll('.','\\.')}(?:\\?[^\"]*)?" \\/>`,'g'),'');
+html=html.replace(/\s*<script src="\.\/my-komo-key-home-v1\.js(?:\?[^\"]*)?"><\/script>/g,'');
+const release='20260829-key-home-trajectory-v1';
+html=html.replace('</head>',`  <link rel="stylesheet" href="./my-komo-key-home-v1.css?v=${release}" />\n  <link rel="stylesheet" href="./trajectory-color-v4.css?v=${release}" />\n</head>`);
+html=html.replace('</body>',`  <script src="./my-komo-key-home-v1.js?v=${release}"></script>\n</body>`);
+if(!html.includes('my-komo-key-home-v1.js')||!html.includes('trajectory-color-v4.css'))throw new Error('[pulse-home-key-trajectory] injection failed');
+await writeFile(path,html,'utf8');
+console.log('[pulse-home-key-trajectory] PASS · KŌMØ KEY restored on home + Trajectoire palette refreshed');
