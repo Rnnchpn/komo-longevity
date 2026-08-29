@@ -92,7 +92,7 @@ const checks=[
   ['dock v5 removed',!finalHtml.includes('pulse-bottom-nav-v5.js')],
   ['neutral patient palette shipped',finalHtml.includes('patient-palette-balance-v1.js')],
   ['fresh router bundle shipped',finalHtml.includes(cacheSafeApp)&&!finalHtml.includes('./app.js')],
-  ['Motion, My KŌMØ, Club and Trajectoire accepted by app core',finalApp.includes("'motion','mykomo','club','trajectory'")],
+  ['Motion, My KŌMØ, Club, KEY and Trajectoire accepted by app core',finalApp.includes("'motion','mykomo','club','key','trajectory'")],
   ['modern routes delegated to dedicated owners',finalApp.includes("source:'app-external-owner'")],
   ['Club is a native equal dock route',finalDock.includes("['club','Club','∞','club','']")&&finalDock.includes('repeat(6,minmax(0,1fr))')],
   ['legacy Booking remains available for professional planning',finalBooking.includes('window.KomoBooking')],
