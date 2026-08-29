@@ -6,23 +6,27 @@ const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
 const release='20260830-home-web-v1';
+const navRelease='20260830-patient-nav-v7';
 const cssFile='patient-home-command-v1.css';
 const jsFile='patient-home-command-v1.js';
+const navFile='pulse-bottom-nav-v6.js';
 
-for(const file of [cssFile,jsFile])await copyFile(join(root,'pulse-app',file),join(pulse,file));
+for(const file of [cssFile,jsFile,navFile])await copyFile(join(root,'pulse-app',file),join(pulse,file));
 
 let html=await readFile(htmlPath,'utf8');
 // Retire the historical home data-wall renderer: one Home route, one final renderer.
 html=html.replace(/\s*<script type="module" src="\.\/patient-home-datawall-v3\.js(?:\?v=[^"]+)?"><\/script>/g,'');
 html=html.replace(/\s*<link rel="stylesheet" href="\.\/patient-home-command-v1\.css(?:\?v=[^"]+)?"\s*\/?>/g,'');
 html=html.replace(/\s*<script type="module" src="\.\/patient-home-command-v1\.js(?:\?v=[^"]+)?"><\/script>/g,'');
+html=html.replace(/(<script src="\.\/pulse-bottom-nav-v6\.js)(?:\?v=[^"]+)?("><\/script>)/g,`$1?v=${navRelease}$2`);
 html=html.replace('</head>',`  <link rel="stylesheet" href="./${cssFile}?v=${release}" />\n</head>`);
 html=html.replace('</body>',`  <script type="module" src="./${jsFile}?v=${release}"></script>\n</body>`);
 await writeFile(htmlPath,html,'utf8');
 
-const [css,js,final]=await Promise.all([
+const [css,js,nav,final]=await Promise.all([
   readFile(join(pulse,cssFile),'utf8'),
   readFile(join(pulse,jsFile),'utf8'),
+  readFile(join(pulse,navFile),'utf8'),
   readFile(htmlPath,'utf8')
 ]);
 const checks=[
@@ -36,8 +40,11 @@ const checks=[
   ['KEY averages use observed days only',js.includes('currentDays')&&js.includes('Aucun jour manquant n’est extrapolé')],
   ['stable event-driven renderer has no body observer or polling loop',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
   ['status vocabulary distinguishes LIVE CALCULATED VALIDATED',js.includes("label:'CALCULÉ'")&&js.includes("label:'VALIDÉ'")&&js.includes("'LIVE'")],
-  ['home exposes essential routes',js.includes("go('key')")&&js.includes("go('results')")&&js.includes("go('trajectory')")&&js.includes("go('documents')")&&js.includes("go('tests')")]
+  ['home exposes essential routes',js.includes("go('key')")&&js.includes("go('results')")&&js.includes("go('trajectory')")&&js.includes("go('documents')")&&js.includes("go('tests')")],
+  ['final patient dock is cache-busted',final.includes(`${navFile}?v=${navRelease}`)],
+  ['dock uses final six destinations',nav.includes("['home','Accueil'")&&nav.includes("['key','KEY'")&&nav.includes("['results','Résultats'")&&nav.includes("['trajectory','Trajectoire'")&&nav.includes("['agenda','Rendez-vous'")&&nav.includes("['mykomo','My KŌMØ'")],
+  ['Club and Motion Clinical picker removed from primary dock',!nav.includes("['club','Club'")&&!nav.includes("['assessment','KŌMØ'")&&!nav.includes('kpPickerV6')]
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log('[pulse-home-web-v1] PASS · one final Home renderer · Motion + Age + KEY + next action + Clinical + report + trajectory');
+console.log('[pulse-home-web-v1] PASS · final Home cockpit + simplified patient navigation');
