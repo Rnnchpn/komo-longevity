@@ -19,3 +19,8 @@ const checks=[
  ['Sources focuses integrity/provenance',tabCss.includes('data-kvt-panel="sources"')&&tabCss.includes('.kdl-grid>aside.kdl-card')]
 ];
 let failed=0;for(const [label,ok] of checks){console.log(`[pulse-patient-clean-room-qa] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)failed++}if(failed)throw new Error(`[pulse-patient-clean-room-qa] ${failed} check(s) failed`);console.log(`[pulse-patient-clean-room-qa] ${checks.length} checks passed.`);
+
+// This QA is the final Pulse step in production. Fingerprint only after all clean-room checks pass,
+// so browsers cannot retain an older versioned JS/CSS bundle under an immutable cache entry.
+await import('./pulse-asset-fingerprint-v1.mjs');
+await import('./pulse-asset-fingerprint-qa-v1.mjs');
