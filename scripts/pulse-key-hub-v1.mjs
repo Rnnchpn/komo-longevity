@@ -45,14 +45,14 @@ const finalJs=await readFile(join(pulse,'key-hub-v1.js'),'utf8');
 const checks=[
  ['KEY CSS shipped last',finalHtml.includes(`key-hub-v1.css?v=${release}`)],
  ['KEY runtime shipped last',finalHtml.includes(`key-hub-v1.js?v=${release}`)],
- ['app recognizes KEY',finalApp.includes("'key'"))],
- ['app delegates KEY',finalApp.includes("'club','key','trajectory'"))],
- ['canonical patient navigation accepts KEY',finalNav.includes("'club','key','trajectory'"))],
- ['home KEY card opens dedicated route',finalHome.includes("go('key')")&&!finalHome.includes("go('followup')"))],
- ['KEY uses real wearable table',finalJs.includes("from('wearable_daily_metrics')"))],
- ['KEY keeps Motion Score separate',finalJs.includes('ne modifient pas le Motion Score')||finalJs.includes('ne modifie pas le Motion Score')),
- ['animated premium rings shipped',finalCss.includes('.kh-ring')&&finalJs.includes('requestAnimationFrame')),
- ['home Motion number visibility guard shipped',finalCss.includes('Final home Motion score visibility guard'))
+ ['app recognizes KEY',finalApp.includes("'key'")],
+ ['app delegates KEY',finalApp.includes("'club','key','trajectory'")],
+ ['canonical patient navigation accepts KEY',finalNav.includes("'club','key','trajectory'")],
+ ['home KEY card opens dedicated route',finalHome.includes("go('key')")&&!finalHome.includes("go('followup')")],
+ ['KEY uses real wearable table',finalJs.includes("from('wearable_daily_metrics')")],
+ ['KEY keeps Motion Score separate',finalJs.includes('ne modifient pas le Motion Score')||finalJs.includes('ne modifie pas le Motion Score')],
+ ['animated premium rings shipped',finalCss.includes('.kh-ring')&&finalJs.includes('requestAnimationFrame')],
+ ['home Motion number visibility guard shipped',finalCss.includes('Final home Motion score visibility guard')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-key-hub] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
