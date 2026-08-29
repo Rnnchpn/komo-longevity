@@ -21,7 +21,7 @@ await writeFile(centerPath,center,'utf8');
 
 const agenda=await readFile(agendaPath,'utf8');
 const checks=[
- ['Centre reads through role-aware v3',center.includes("functions.invoke('center-command-v3'")&&!center.includes("functions.invoke('center-command-v2'"))],
+ ['Centre reads through role-aware v3',center.includes("functions.invoke('center-command-v3'")&&!center.includes("functions.invoke('center-command-v2'")],
  ['Centre marks read-only staff',center.includes('data-kcc-readonly="${c&&!c.can_manage')],
  ['read-only staff cannot see manager tabs',center.includes('[data-kcc-tab="team"]')&&center.includes('[data-kcc-tab="profile"]')],
  ['read-only staff cannot reassign professionals',center.includes('[data-kcc-assign]')],
