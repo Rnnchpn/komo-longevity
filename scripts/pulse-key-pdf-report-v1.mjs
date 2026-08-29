@@ -24,14 +24,14 @@ const pdf=await readFile(join(pulse,'mobility-report-key-v1.js'),'utf8');
 const final=await readFile(deliveryPath,'utf8');
 const checks=[
  ['official report uses KEY-aware PDF wrapper',final.includes("from './mobility-report-key-v1.js'")],
- ['official payload snapshots KEY before archive',final.includes('loadKeyReportSnapshot(id,{force})')&&final.includes('payload.key=key')),
- ['legacy official report is versioned once for KEY format',final.includes("report_format==='mobility-report-key-v1'" )],
+ ['official payload snapshots KEY before archive',final.includes('loadKeyReportSnapshot(id,{force})')&&final.includes('payload.key=key')],
+ ['legacy official report is versioned once for KEY format',final.includes("report_format==='mobility-report-key-v1'")],
  ['snapshot uses consent-gated RPC',snap.includes("rpc('komo_key_report_snapshot'")],
  ['snapshot never exposes raw wearable payload',!snap.includes('raw_payload')&&!pdf.includes('raw_payload')],
  ['PDF contains weekly averages',pdf.includes('SEMAINE ANALYSÉE')&&pdf.includes('PAS / JOUR')&&pdf.includes('SOMMEIL / NUIT')],
  ['PDF compares week over week only when reliable',pdf.includes('comparison_reliable')&&pdf.includes('vs 7 j préc.')],
  ['PDF includes 14-day trend and 30-day context',pdf.includes('14 DERNIERS JOURS')&&pdf.includes('REPÈRE 30 J')],
- ['KEY remains outside Motion and Clinical score calculation',pdf.includes('sans recalculer leurs scores')&&snap.includes("clinical_score_effect:'none'"))
+ ['KEY remains outside Motion and Clinical score calculation',pdf.includes('sans recalculer leurs scores')&&snap.includes("clinical_score_effect:'none'")]
 ];
 for(const [label,ok] of checks)console.log(`[pulse-key-pdf-report-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
