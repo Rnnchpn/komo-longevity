@@ -16,6 +16,6 @@ const checks=[
  ['My Key focused tabs shipped',html.includes('key-view-tabs-v1.js?v=20260829-patient-clean-room-v1')&&tabs.includes('Overview')&&tabs.includes('Data')&&tabs.includes('Sources')],
  ['Overview hides captured data wall',tabCss.includes('data-kvt-panel="overview"')&&tabCss.includes('>[data-kdl]{display:none!important}')],
  ['Data hides summary and focuses domains/stream',tabCss.includes('data-kvt-panel="data"')&&tabCss.includes('.kdl-vault')&&tabCss.includes('.kdl-grid')],
- ['Sources focuses integrity/provenance',tabCss.includes('data-kvt-panel="sources"')&&tabCss.includes('.kdl-grid>aside.kdl-card'))
+ ['Sources focuses integrity/provenance',tabCss.includes('data-kvt-panel="sources"')&&tabCss.includes('.kdl-grid>aside.kdl-card')]
 ];
 let failed=0;for(const [label,ok] of checks){console.log(`[pulse-patient-clean-room-qa] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)failed++}if(failed)throw new Error(`[pulse-patient-clean-room-qa] ${failed} check(s) failed`);console.log(`[pulse-patient-clean-room-qa] ${checks.length} checks passed.`);
