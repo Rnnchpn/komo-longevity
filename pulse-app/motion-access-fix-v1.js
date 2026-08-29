@@ -32,7 +32,6 @@
     let tries=0;
     const timer=setInterval(()=>{
       tries++;
-      const cards=[...document.querySelectorAll('.test-v1-card')];
       const key=['baseline','chair_stand','two_step'].find(k=>{
         const b=document.querySelector(`[data-open-test="${k}"]`);
         const card=b?.closest?.('.test-v1-card');
@@ -84,3 +83,5 @@
   setTimeout(schedule,1200);
   window.KomoMotionAccess={version:V,open:goMotion,startFree};
 })();
+
+import('./report-bootstrap-v1.js').catch(error=>console.warn('[KŌMØ report bootstrap]',error));
