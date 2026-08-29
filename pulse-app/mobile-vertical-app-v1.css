@@ -1,0 +1,374 @@
+/* KŌMØ Pulse — app-like vertical mobile navigation v1 */
+@media (max-width: 767px) {
+  html[data-adaptive-shell="phone"],
+  html[data-adaptive-shell="phone"] body {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+    background: #f4f0e8;
+  }
+
+  html[data-adaptive-shell="phone"] body {
+    min-height: 100dvh;
+    position: relative;
+    touch-action: manipulation;
+  }
+
+  html[data-adaptive-shell="phone"] #appShell {
+    width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-adaptive-shell="phone"] .main-shell {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 14px calc(88px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    touch-action: pan-y;
+  }
+  html[data-adaptive-shell="phone"] .main-shell::-webkit-scrollbar { display: none; }
+
+  html[data-adaptive-shell="phone"] .view-root,
+  html[data-adaptive-shell="phone"] #viewRoot,
+  html[data-adaptive-shell="phone"] #viewRoot > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  /* One centered vertical header hierarchy. */
+  html[data-adaptive-shell="phone"] .topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 90 !important;
+    min-height: 154px !important;
+    margin: 0 -14px 12px !important;
+    padding: max(12px, env(safe-area-inset-top)) 14px 12px !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto !important;
+    justify-items: center !important;
+    align-items: center !important;
+    gap: 7px !important;
+    background: rgba(244,240,232,.95) !important;
+    border-bottom: 1px solid rgba(31,42,34,.055) !important;
+    box-shadow: 0 8px 30px rgba(31,42,34,.035) !important;
+    backdrop-filter: blur(22px) saturate(1.05) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.05) !important;
+  }
+
+  html[data-adaptive-shell="phone"] .kam-mobile-brand {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    grid-row: 1 !important;
+    display: grid !important;
+    justify-items: center !important;
+    align-items: center !important;
+    gap: 5px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    color: #222d25 !important;
+    text-align: center !important;
+    pointer-events: none !important;
+    animation: kamoBrandIn .34s cubic-bezier(.2,.72,.25,1) both;
+  }
+  html[data-adaptive-shell="phone"] .kam-mobile-brand strong {
+    font: 600 30px/.96 Manrope,'DM Sans',sans-serif !important;
+    letter-spacing: .095em !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-mobile-brand span {
+    font: 600 7.5px/1 'DM Sans',sans-serif !important;
+    letter-spacing: .19em !important;
+    color: #738078 !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+  }
+  html[data-adaptive-shell="phone"]:has(#viewRoot > [data-my-komo-home]) .kam-mobile-brand strong {
+    font-size: 38px !important;
+    letter-spacing: .075em !important;
+  }
+
+  html[data-adaptive-shell="phone"] .topbar > div:first-of-type {
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: center !important;
+  }
+  html[data-adaptive-shell="phone"] .topbar .eyebrow { display: none !important; }
+  html[data-adaptive-shell="phone"] .topbar h1 {
+    width: 100% !important;
+    max-width: 320px !important;
+    margin: 0 auto !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    color: #354038 !important;
+    font-size: 14px !important;
+    line-height: 1.15 !important;
+    letter-spacing: -.025em !important;
+    text-align: center !important;
+  }
+
+  html[data-adaptive-shell="phone"] .topbar-actions {
+    position: static !important;
+    grid-row: 3 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 0 !important;
+    margin: 1px auto 0 !important;
+  }
+  html[data-adaptive-shell="phone"] .topbar-actions > :not(#kamTopMenu) { display: none !important; }
+
+  html[data-adaptive-shell="phone"] #kamTopMenu {
+    width: auto !important;
+    min-width: 116px !important;
+    height: 38px !important;
+    padding: 0 16px !important;
+    border: 1px solid rgba(31,42,34,.10) !important;
+    border-radius: 999px !important;
+    background: #263229 !important;
+    color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    box-shadow: 0 8px 24px rgba(31,42,34,.12) !important;
+    transition: transform .16s ease, box-shadow .16s ease, background .16s ease !important;
+  }
+  html[data-adaptive-shell="phone"] #kamTopMenu span {
+    width: 3px !important;
+    height: 3px !important;
+    border-radius: 50% !important;
+    background: rgba(255,255,255,.9) !important;
+  }
+  html[data-adaptive-shell="phone"] #kamTopMenu .kam-menu-label {
+    margin-left: 5px;
+    color: #fff;
+    font: 600 11px/1 'DM Sans',sans-serif;
+    letter-spacing: .015em;
+  }
+  html[data-adaptive-shell="phone"] #kamTopMenu:active { transform: scale(.965) !important; }
+
+  /* Phone navigation has a single entry point: the centered Menu button. */
+  html[data-adaptive-shell="phone"] #kamBottomBar,
+  html[data-adaptive-shell="phone"] #kamRoleRow,
+  html[data-adaptive-shell="phone"] .kav2-tabs,
+  html[data-adaptive-shell="phone"] .kcp-tabs { display: none !important; }
+
+  /* Full-screen vertical menu — no horizontal navigation. */
+  html[data-adaptive-shell="phone"] .kam-backdrop {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 149 !important;
+    background: rgba(24,31,26,.28) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+    transition: opacity .26s ease !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-backdrop.open {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+  }
+
+  html[data-adaptive-shell="phone"] .kam-sheet {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 150 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: max(18px, env(safe-area-inset-top)) 16px calc(22px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: rgba(250,248,243,.985) !important;
+    box-shadow: none !important;
+    transform: translateY(102%) !important;
+    transition: transform .32s cubic-bezier(.2,.78,.22,1) !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-sheet.open { transform: translateY(0) !important; }
+  html[data-adaptive-shell="phone"] .kam-sheet-handle { display: none !important; }
+
+  html[data-adaptive-shell="phone"] .kam-sheet-head {
+    position: relative !important;
+    width: min(360px, 100%) !important;
+    min-height: 74px !important;
+    margin: 0 auto 12px !important;
+    padding: 8px 48px 14px !important;
+    display: grid !important;
+    place-items: center !important;
+    border-bottom: 1px solid rgba(31,42,34,.07) !important;
+    text-align: center !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-sheet-head > div { text-align: center !important; }
+  html[data-adaptive-shell="phone"] .kam-sheet-head small {
+    margin: 0 0 5px !important;
+    color: #788179 !important;
+    font-size: 8px !important;
+    letter-spacing: .18em !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-sheet-head strong {
+    color: #253028 !important;
+    font: 600 25px/1 Manrope,'DM Sans',sans-serif !important;
+    letter-spacing: -.04em !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-sheet-head [data-kam-close] {
+    position: absolute !important;
+    top: 8px !important;
+    right: 0 !important;
+    width: 40px !important;
+    height: 40px !important;
+    border: 1px solid rgba(31,42,34,.09) !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    color: #344038 !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: 22px !important;
+    transition: transform .16s ease !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-sheet-head [data-kam-close]:active { transform: scale(.94) !important; }
+
+  html[data-adaptive-shell="phone"] .kam-vertical-primary,
+  html[data-adaptive-shell="phone"] .kam-plus-spaces,
+  html[data-adaptive-shell="phone"] .kam-sheet-grid,
+  html[data-adaptive-shell="phone"] .kam-sheet-links {
+    width: min(360px, 100%) !important;
+    max-width: 360px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-vertical-primary { margin-top: 10px !important; margin-bottom: 22px !important; }
+  html[data-adaptive-shell="phone"] .kam-plus-spaces { margin-bottom: 20px !important; }
+  html[data-adaptive-shell="phone"] .kam-sheet-grid { padding: 0 !important; margin-bottom: 18px !important; }
+  html[data-adaptive-shell="phone"] .kam-sheet-links { padding-top: 8px !important; border-top: 1px solid rgba(31,42,34,.07) !important; }
+
+  html[data-adaptive-shell="phone"] .kam-vertical-title,
+  html[data-adaptive-shell="phone"] .kam-plus-title {
+    width: min(360px, 100%) !important;
+    margin: 16px auto 9px !important;
+    color: #8a918b !important;
+    font-size: 8px !important;
+    font-weight: 700 !important;
+    letter-spacing: .15em !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+  }
+
+  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item,
+  html[data-adaptive-shell="phone"] .kam-plus-spaces button,
+  html[data-adaptive-shell="phone"] .kam-sheet-action,
+  html[data-adaptive-shell="phone"] .kam-sheet-links > a,
+  html[data-adaptive-shell="phone"] .kam-sheet-links > button {
+    position: relative !important;
+    width: 100% !important;
+    min-height: 54px !important;
+    padding: 12px 18px !important;
+    border: 1px solid rgba(31,42,34,.085) !important;
+    border-radius: 16px !important;
+    background: rgba(255,255,255,.82) !important;
+    color: #344038 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 9px !important;
+    box-sizing: border-box !important;
+    box-shadow: 0 8px 24px rgba(31,42,34,.025) !important;
+    text-align: center !important;
+    font: 600 12px/1.2 'DM Sans',sans-serif !important;
+    text-decoration: none !important;
+    transition: transform .16s ease, background .18s ease, color .18s ease, border-color .18s ease, box-shadow .18s ease !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item svg {
+    width: 19px !important;
+    height: 19px !important;
+    flex: 0 0 19px !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item span { overflow: visible !important; }
+  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item.active,
+  html[data-adaptive-shell="phone"] .kam-plus-spaces button.active {
+    background: #263229 !important;
+    border-color: #263229 !important;
+    color: #fff !important;
+    box-shadow: 0 12px 28px rgba(31,42,34,.13) !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-vertical-primary .kam-nav-item:active,
+  html[data-adaptive-shell="phone"] .kam-plus-spaces button:active,
+  html[data-adaptive-shell="phone"] .kam-sheet-action:active,
+  html[data-adaptive-shell="phone"] .kam-sheet-links > a:active,
+  html[data-adaptive-shell="phone"] .kam-sheet-links > button:active {
+    transform: scale(.985) !important;
+  }
+  html[data-adaptive-shell="phone"] .kam-sheet-action b,
+  html[data-adaptive-shell="phone"] .kam-sheet-links span { position: absolute !important; right: 16px !important; color: #89918a !important; }
+  html[data-adaptive-shell="phone"] .kam-sheet-role { width: min(360px,100%) !important; margin: 14px auto 0 !important; text-align: center !important; }
+
+  html[data-adaptive-shell="phone"].kamo-menu-open .main-shell { overflow: hidden !important; }
+
+  /* No component may force the phone canvas wider than the viewport. */
+  html[data-adaptive-shell="phone"] img,
+  html[data-adaptive-shell="phone"] svg,
+  html[data-adaptive-shell="phone"] canvas { max-width: 100%; }
+  html[data-adaptive-shell="phone"] input,
+  html[data-adaptive-shell="phone"] select,
+  html[data-adaptive-shell="phone"] textarea { min-width: 0 !important; max-width: 100% !important; font-size: 16px !important; }
+  html[data-adaptive-shell="phone"] .card,
+  html[data-adaptive-shell="phone"] [class*="grid"],
+  html[data-adaptive-shell="phone"] [class*="panel"],
+  html[data-adaptive-shell="phone"] [class*="shell"] { min-width: 0; max-width: 100%; }
+
+  html[data-adaptive-shell="phone"] #viewRoot > * {
+    animation: kamoRouteIn .22s cubic-bezier(.2,.72,.25,1) both;
+  }
+
+  @keyframes kamoBrandIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes kamoRouteIn {
+    from { opacity: .15; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kam-sheet,
+  .kam-backdrop,
+  #kamTopMenu,
+  #viewRoot > *,
+  .kam-mobile-brand { animation: none !important; transition: none !important; }
+}
