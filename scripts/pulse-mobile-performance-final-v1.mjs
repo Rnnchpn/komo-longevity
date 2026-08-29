@@ -20,13 +20,25 @@ async function patchFile(file,patches){
 }
 
 // The desktop patient dock must not even mount on phones: the vertical shell is the sole phone navigator.
-await patchFile('pulse-bottom-nav-v6.js',[
-  ["const V='6.1.0';","const V='6.2.0';",'dock version'],
-  ["const nav=()=>window.KomoPatientNavigation;","const phone=()=>window.matchMedia('(max-width: 767px)').matches;\nconst nav=()=>window.KomoPatientNavigation;",'phone guard'],
-  ["const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)&&!['clinical','admin'].includes(route())};","const visible=()=>{if(phone())return false;const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)&&!['clinical','admin'].includes(route())};",'phone visibility'],
-  ["function ensureDock(){const app=document.querySelector('#appShell');if(!app)return null;","function ensureDock(){if(phone())return null;const app=document.querySelector('#appShell');if(!app)return null;",'dock mount guard'],
-  ["function refresh(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{css();const d=ensureDock();if(!d)return;","function refresh(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{if(phone()){document.querySelector('#kpDockV6')?.remove();document.querySelector('#kpPickerV6')?.remove();document.querySelector('#kpPickerV6Bg')?.remove();return}css();const d=ensureDock();if(!d)return;",'dock refresh guard']
-]);
+{
+  const path=join(pulse,'pulse-bottom-nav-v6.js');
+  let src=await readFile(path,'utf8');
+  if(!src.includes("const phone=()=>window.matchMedia('(max-width: 767px)').matches;")){
+    src=src.replace("const nav=()=>window.KomoPatientNavigation;","const phone=()=>window.matchMedia('(max-width: 767px)').matches;\nconst nav=()=>window.KomoPatientNavigation;");
+  }
+  if(src.includes("const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');")){
+    src=src.replace("const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)&&!['clinical','admin'].includes(route())};","const visible=()=>{if(phone())return false;const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)&&!['clinical','admin'].includes(route())};");
+  }
+  if(src.includes("function ensureDock(){const app=document.querySelector('#appShell');if(!app)return null;")){
+    src=src.replace("function ensureDock(){const app=document.querySelector('#appShell');if(!app)return null;","function ensureDock(){if(phone())return null;const app=document.querySelector('#appShell');if(!app)return null;");
+  }
+  if(src.includes("function refresh(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{css();const d=ensureDock();if(!d)return;")){
+    src=src.replace("function refresh(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{css();const d=ensureDock();if(!d)return;","function refresh(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{if(phone()){document.querySelector('#kpDockV6')?.remove();document.querySelector('#kpPickerV6')?.remove();document.querySelector('#kpPickerV6Bg')?.remove();return}css();const d=ensureDock();if(!d)return;");
+  }
+  const safe=src.includes("if(phone())return null")&&(src.includes("removePhoneDock()")||src.includes("document.querySelector('#kpDockV6')?.remove()"));
+  if(!safe)throw new Error('[pulse-mobile-performance] pulse-bottom-nav-v6.js is not phone-safe');
+  await writeFile(path,src,'utf8');
+}
 
 // Adaptive shell previously observed every class mutation in the whole application, a major Safari repaint trigger.
 await patchFile('adaptive-shell-v4.js',[
