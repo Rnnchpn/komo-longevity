@@ -1,0 +1,336 @@
+/* KŌMØ Pulse — auth stability v1
+   Final login presentation owner. Keeps hidden semantics absolute, removes fragile mobile transforms,
+   and gives Safari a simple app-like authentication surface. */
+
+#authScreen[hidden],#appShell[hidden]{display:none!important}
+html[data-komo-auth-bootstrap="session"] #authScreen:not([data-komo-auth-resolved="guest"]){visibility:hidden!important}
+
+@media (max-width:767px){
+  html.kamo-phone-auth body,
+  html.kamo-iphone-locked body:has(#authScreen:not([hidden])){
+    background:#f3efe7!important;
+  }
+
+  html.kamo-phone-auth #authScreen,
+  html.kamo-iphone-locked #authScreen:not([hidden]){
+    position:fixed!important;
+    inset:0!important;
+    z-index:500!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:100dvh!important;
+    min-height:100svh!important;
+    max-height:none!important;
+    margin:0!important;
+    padding:0!important;
+    display:block!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior-y:contain!important;
+    overscroll-behavior-x:none!important;
+    -webkit-overflow-scrolling:touch!important;
+    touch-action:pan-y!important;
+    scroll-behavior:auto!important;
+    background:#f3efe7!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-brand,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-brand{
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:238px!important;
+    height:auto!important;
+    margin:0!important;
+    padding:max(36px,calc(env(safe-area-inset-top) + 20px)) 22px 34px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:0!important;
+    overflow:hidden!important;
+    border:0!important;
+    border-radius:0!important;
+    text-align:center!important;
+    color:#f8f6ef!important;
+    background:radial-gradient(circle at 50% 0%,rgba(180,201,183,.14),transparent 34%),linear-gradient(145deg,#111711 0%,#18231a 52%,#27382c 100%)!important;
+    box-shadow:none!important;
+    transform:none!important;
+    animation:none!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-brand::before,
+  html.kamo-phone-auth #authScreen .auth-brand::after,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-brand::before,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-brand::after{
+    pointer-events:none!important;
+    animation:none!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-logo,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-logo{
+    position:relative!important;
+    inset:auto!important;
+    width:auto!important;
+    margin:0!important;
+    display:grid!important;
+    place-items:center!important;
+    gap:7px!important;
+    color:#fff!important;
+    text-decoration:none!important;
+    transform:none!important;
+    animation:none!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-logo span,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-logo span{
+    font:600 34px/.95 Manrope,'DM Sans',sans-serif!important;
+    letter-spacing:.115em!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-logo small,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-logo small{
+    color:rgba(255,255,255,.54)!important;
+    font:600 8px/1 'DM Sans',sans-serif!important;
+    letter-spacing:.21em!important;
+    text-transform:uppercase!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-logo::after,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-logo::after{
+    content:'PULSE'!important;
+    margin:15px auto 0!important;
+    padding:7px 11px!important;
+    width:max-content!important;
+    border:1px solid rgba(255,255,255,.11)!important;
+    border-radius:999px!important;
+    background:rgba(255,255,255,.045)!important;
+    color:rgba(255,255,255,.58)!important;
+    font:700 8px/1 'DM Sans',sans-serif!important;
+    letter-spacing:.16em!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-manifesto,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-manifesto{
+    width:100%!important;
+    max-width:340px!important;
+    margin:25px auto 0!important;
+    display:block!important;
+    text-align:center!important;
+    transform:none!important;
+    animation:none!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-manifesto .eyebrow,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-manifesto .eyebrow{display:none!important}
+  html.kamo-phone-auth #authScreen .auth-manifesto h1,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-manifesto h1{
+    margin:0!important;
+    color:#f8f6ef!important;
+    font:500 31px/1.02 Manrope,'DM Sans',sans-serif!important;
+    letter-spacing:-.055em!important;
+    text-align:center!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-manifesto>p:last-child,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-manifesto>p:last-child{
+    max-width:300px!important;
+    margin:12px auto 0!important;
+    color:rgba(255,255,255,.52)!important;
+    font-size:11px!important;
+    line-height:1.45!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-visual,
+  html.kamo-phone-auth #authScreen .auth-signal,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-visual,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-signal{display:none!important}
+
+  html.kamo-phone-auth #authScreen .auth-note,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-note{
+    position:static!important;
+    inset:auto!important;
+    max-width:320px!important;
+    margin:18px auto 0!important;
+    color:rgba(255,255,255,.35)!important;
+    font-size:8px!important;
+    line-height:1.4!important;
+    text-align:center!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-panel-wrap,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-panel-wrap{
+    position:relative!important;
+    inset:auto!important;
+    z-index:2!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:14px 14px calc(24px + env(safe-area-inset-bottom))!important;
+    display:block!important;
+    background:#f3efe7!important;
+    transform:none!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-panel,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-panel{
+    position:relative!important;
+    width:min(430px,100%)!important;
+    max-width:430px!important;
+    min-height:0!important;
+    height:auto!important;
+    margin:0 auto!important;
+    padding:22px 18px 20px!important;
+    display:block!important;
+    overflow:visible!important;
+    border:1px solid rgba(31,42,34,.075)!important;
+    border-radius:24px!important;
+    background:#fbfaf6!important;
+    box-shadow:0 14px 38px rgba(30,39,32,.08)!important;
+    transform:none!important;
+    animation:none!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-panel::before,
+  html.kamo-phone-auth #authScreen .auth-panel::after,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-panel::before,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-panel::after{animation:none!important}
+
+  html.kamo-phone-auth #authScreen .auth-audience-switch,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-audience-switch{
+    width:100%!important;
+    margin:0 0 20px!important;
+    padding:4px!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:4px!important;
+    border:1px solid rgba(31,42,34,.08)!important;
+    border-radius:15px!important;
+    background:#f0ede6!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-audience-switch button,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-audience-switch button{
+    min-height:44px!important;
+    border:0!important;
+    border-radius:11px!important;
+    font-size:11px!important;
+    touch-action:manipulation!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-heading,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-heading{
+    width:100%!important;
+    margin:0 0 20px!important;
+    display:block!important;
+    text-align:left!important;
+  }
+  html.kamo-phone-auth #authScreen .product-pill,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .product-pill{display:none!important}
+  html.kamo-phone-auth #authScreen .auth-heading h2,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-heading h2{
+    margin:0!important;
+    color:#202b23!important;
+    font:600 27px/1.02 Manrope,'DM Sans',sans-serif!important;
+    letter-spacing:-.05em!important;
+    text-align:left!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-heading p,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-heading p{
+    max-width:330px!important;
+    margin:8px 0 0!important;
+    color:#747d76!important;
+    font-size:11px!important;
+    line-height:1.45!important;
+    text-align:left!important;
+  }
+
+  html.kamo-phone-auth #authScreen .auth-form,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-form{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:14px!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-form label>span,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-form label>span{
+    font-size:11px!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-form input[type="email"],
+  html.kamo-phone-auth #authScreen .auth-form input[type="password"],
+  html.kamo-phone-auth #authScreen .auth-form input[type="text"],
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-form input[type="email"],
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-form input[type="password"],
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-form input[type="text"]{
+    width:100%!important;
+    height:54px!important;
+    min-height:54px!important;
+    max-width:100%!important;
+    padding-top:0!important;
+    padding-bottom:0!important;
+    border-radius:14px!important;
+    font-size:16px!important;
+  }
+  html.kamo-phone-auth #authScreen .password-toggle,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .password-toggle{
+    min-width:44px!important;
+    min-height:40px!important;
+    font-size:10px!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-options,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-options{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  html.kamo-phone-auth #authScreen .remember-row,
+  html.kamo-phone-auth #authScreen .text-button,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .remember-row,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .text-button{
+    font-size:10px!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-submit,
+  html.kamo-phone-auth #authScreen .auth-panel>.secondary-button,
+  html.kamo-phone-auth #authScreen .auth-pro-entry .secondary-button,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-submit,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-panel>.secondary-button,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-pro-entry .secondary-button{
+    width:100%!important;
+    min-height:52px!important;
+    border-radius:14px!important;
+    font-size:12px!important;
+    touch-action:manipulation!important;
+  }
+  html.kamo-phone-auth #authScreen .auth-divider,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-divider{margin:18px 0 13px!important}
+  html.kamo-phone-auth #authScreen .auth-footer-links,
+  html.kamo-iphone-locked #authScreen:not([hidden]) .auth-footer-links{
+    display:flex!important;
+    justify-content:center!important;
+    flex-wrap:wrap!important;
+    gap:12px!important;
+    margin-top:16px!important;
+  }
+
+  html.kamo-phone-auth #authScreen input:focus,
+  html.kamo-phone-auth #authScreen textarea:focus,
+  html.kamo-phone-auth #authScreen select:focus,
+  html.kamo-iphone-locked #authScreen:not([hidden]) input:focus,
+  html.kamo-iphone-locked #authScreen:not([hidden]) textarea:focus,
+  html.kamo-iphone-locked #authScreen:not([hidden]) select:focus{
+    scroll-margin-top:20px!important;
+  }
+}
+
+@media (max-width:380px){
+  html.kamo-phone-auth #authScreen .auth-brand{min-height:218px!important;padding-left:18px!important;padding-right:18px!important}
+  html.kamo-phone-auth #authScreen .auth-manifesto h1{font-size:28px!important}
+  html.kamo-phone-auth #authScreen .auth-panel-wrap{padding-left:10px!important;padding-right:10px!important}
+  html.kamo-phone-auth #authScreen .auth-panel{padding-left:15px!important;padding-right:15px!important;border-radius:21px!important}
+  html.kamo-phone-auth #authScreen .auth-options{align-items:flex-start!important;flex-direction:column!important}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #authScreen,#authScreen *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
