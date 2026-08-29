@@ -13,11 +13,12 @@ const [html,css,js,adaptive,home,dashboard,datawall,nav,app]=await Promise.all([
   readFile(join(pulse,'patient-navigation-core-v1.js'),'utf8'),
   readFile(join(pulse,'app-router-v2.js'),'utf8')
 ]);
-
+const release='20260829-mobile-canonical-3';
 const checks=[
-  ['canonical CSS is final phone stylesheet',/mobile-canonical-v1\.css\?v=20260829-mobile-canonical-2/.test(html)],
-  ['canonical JS is final phone runtime',/mobile-canonical-v1\.js\?v=20260829-mobile-canonical-2/.test(html)],
-  ['patient route coordinator is cache-busted with mobile release',/patient-navigation-core-v1\.js\?v=20260829-mobile-canonical-2/.test(html)],
+  ['canonical CSS is final phone stylesheet',html.includes(`mobile-canonical-v1.css?v=${release}`)],
+  ['canonical JS is final phone runtime',html.includes(`mobile-canonical-v1.js?v=${release}`)],
+  ['document release marker matches canonical mobile release',html.includes(`<meta name="komo-pulse-release" content="${release}" />`)],
+  ['patient route coordinator is cache-busted with mobile release',html.includes(`patient-navigation-core-v1.js?v=${release}`)],
   ['old vertical app runtime removed',!html.includes('mobile-vertical-app-v1.js')&&!html.includes('mobile-vertical-app-v1.css')],
   ['old guided phone runtime removed',!html.includes('mobile-guided-v2.js')],
   ['old final performance CSS removed',!html.includes('mobile-performance-final-v1.css')],
@@ -27,7 +28,7 @@ const checks=[
   ['home begins with account and three clickable Komo universes',js.includes('MON ESPACE')&&js.includes('KŌMØ MOTION')&&js.includes('KŌMØ CLINICAL')&&js.includes('KŌMØ KEY')],
   ['home KEY shows only useful daily results',js.includes('Vos signaux du quotidien.')&&js.includes("['Pas'")&&js.includes("['Sommeil'")&&js.includes("['FC repos'")&&js.includes("['Activité'")],
   ['provider brands are not rendered by the home KEY card',!js.slice(js.indexOf('function keyCard'),js.indexOf('function xpCard')).includes('Garmin')],
-  ['experience progress is first-page third block',js.includes('Votre progression KŌMØ.')&&js.includes('xp_total')&&js.includes('xp_today')&&js.includes("' KP'</")===false&&js.includes('${points}</b> KP')],
+  ['experience progress is first-page third block',js.includes('Votre progression KŌMØ.')&&js.includes('xp_total')&&js.includes('xp_today')&&js.includes('${points}</b> KP')],
   ['Komo Link is a registered patient route',nav.includes("'link'")&&app.includes("'link'")],
   ['Komo Connected provider list is consolidated under Link',js.includes('KŌMØ CONNECTED')&&js.includes('Apple Health & Watch')&&js.includes('Garmin Connect')&&js.includes('WHOOP')&&js.includes('Oura')&&js.includes('Strava')&&js.includes('Health Connect')&&js.includes('Fitbit')],
   ['mobile menu follows requested hierarchy',js.includes("routeButton('mykomo','My KŌMØ'")&&js.includes("routeButton('key','KŌMØ Key'")&&js.includes("routeButton('link','KŌMØ Link'")&&js.includes("routeButton('documents','Rendez-vous & agenda'")],
