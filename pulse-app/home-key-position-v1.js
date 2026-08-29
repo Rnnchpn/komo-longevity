@@ -1,30 +1,51 @@
-/* KŌMØ Pulse — Home KEY priority placement v1
-   Event-driven only: keeps KEY directly below Motion Score + Locomotor Age. */
+/* KŌMØ Pulse — Home KEY priority placement v2
+   Event-driven only: keeps KEY directly below Motion Score + Locomotor Age,
+   including after the asynchronous home data wall rebuilds. */
 (()=>{
 'use strict';
-const V='1.0.0';
-let timer=0,retry=0;
+const V='2.0.0';
+let timer=0,attempt=0,placing=false;
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
-function place(){
-  if(route()!=='home'){retry=0;return}
-  const home=document.querySelector('[data-my-komo-home]');
-  const grid=home?.querySelector('[data-khome-datawall] .kdw-grid');
-  if(!home||!grid){if(retry<4){retry++;schedule(260)}return}
-  let key=home.querySelector('[data-key-home]');
-  if(!key){
-    if(retry<4){retry++;window.KomoKeyHome?.refresh?.();schedule(260)}
-    return;
-  }
-  const age=grid.querySelector('.kdw-age');
-  if(!age)return;
-  grid.classList.add('kdw-key-priority');
-  if(key.parentElement!==grid||key.previousElementSibling!==age) age.insertAdjacentElement('afterend',key);
-  retry=0;
+function schedule(ms=120){
+  clearTimeout(timer);
+  timer=setTimeout(()=>{attempt++;place();},ms);
 }
-function schedule(ms=120){clearTimeout(timer);timer=setTimeout(place,ms)}
-function settle(){schedule(140);setTimeout(place,420);setTimeout(place,820)}
+async function place(){
+  if(placing)return;
+  if(route()!=='home'){attempt=0;return}
+  placing=true;
+  try{
+    const home=document.querySelector('[data-my-komo-home]');
+    const grid=home?.querySelector('[data-khome-datawall] .kdw-grid');
+    if(!home||!grid){if(attempt<10)schedule(260);return}
+
+    let key=home.querySelector('[data-key-home]');
+    if(!key&&window.KomoKeyHome?.refresh){
+      try{await window.KomoKeyHome.refresh()}catch(e){console.warn('[home-key-position-v2] KEY refresh failed',e)}
+      key=home.querySelector('[data-key-home]');
+    }
+    if(!key){if(attempt<10)schedule(360);return}
+
+    const age=grid.querySelector('.kdw-age');
+    const score=grid.querySelector('.kdw-score');
+    if(!age||!score){if(attempt<10)schedule(260);return}
+
+    grid.classList.add('kdw-key-priority');
+    age.insertAdjacentElement('afterend',key);
+    attempt=0;
+  }finally{
+    placing=false;
+  }
+}
+function settle(){
+  attempt=0;
+  schedule(100);
+  setTimeout(()=>{attempt=0;place()},420);
+  setTimeout(()=>{attempt=0;place()},900);
+  setTimeout(()=>{attempt=0;place()},1700);
+}
 ['hashchange','pageshow','komo:route-ready','komo:canonical-route','komo:data-ready','komo:canonical-result-ready','komo:wearable-data-updated'].forEach(e=>addEventListener(e,settle));
-document.addEventListener('DOMContentLoaded',()=>{setTimeout(place,1100);setTimeout(place,1900)});
-setTimeout(place,2200);
+document.addEventListener('DOMContentLoaded',()=>{setTimeout(settle,700);setTimeout(settle,1900)});
+setTimeout(settle,2400);
 window.KomoHomeKeyPosition={version:V,refresh:place};
 })();
