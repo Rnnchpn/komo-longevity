@@ -1,0 +1,146 @@
+/* KŌMØ Pulse — Wearable Mobile v3
+   Mobile visual hierarchy inspired by the clarity of leading wearable apps.
+   Large primary signals, dark graphite canvas, restrained sage accents, progressive disclosure.
+   Visual/layout only: no auth, route, score, data, consent or session behavior. */
+
+@media (max-width:767px){
+  html[data-adaptive-shell="phone"] body{background:#080b0a!important;color:#f4f3ee!important}
+  html[data-adaptive-shell="phone"] .main-shell{background:#080b0a!important}
+  html[data-adaptive-shell="phone"] .view-root,
+  html[data-adaptive-shell="phone"] #viewRoot{padding:12px 14px 92px!important;background:#080b0a!important}
+
+  /* Header: product-like, not website-like */
+  html[data-adaptive-shell="phone"] .topbar{height:58px!important;min-height:58px!important;padding:7px 14px!important;background:rgba(8,11,10,.96)!important;border-bottom:1px solid rgba(255,255,255,.045)!important;backdrop-filter:blur(18px)!important}
+  html[data-adaptive-shell="phone"] .topbar>div:first-child::before{content:"KŌMØ"!important;font:600 18px/1 Manrope,'DM Sans',sans-serif!important;letter-spacing:.14em!important;color:#f5f3ec!important}
+  html[data-adaptive-shell="phone"] .topbar>div:first-child::after{content:"PULSE";margin-left:8px;color:#8fa493;font:700 10px/1 'DM Sans',sans-serif;letter-spacing:.18em}
+  html[data-adaptive-shell="phone"] #kamTopMenu,
+  html[data-adaptive-shell="phone"] .kam-top-menu{width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;border-radius:14px!important;background:#161c19!important;border:1px solid rgba(255,255,255,.08)!important;box-shadow:none!important}
+
+  /* Home identity sits directly on the canvas */
+  html[data-adaptive-shell="phone"] [data-my-komo-home],
+  html[data-adaptive-shell="phone"] .mykomo-home{background:transparent!important}
+  html[data-adaptive-shell="phone"] .mykomo-card{padding:10px 0 4px!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
+  html[data-adaptive-shell="phone"] .mykomo-top{padding:0 2px 14px!important}
+  html[data-adaptive-shell="phone"] .mykomo-avatar{width:48px!important;height:48px!important;flex-basis:48px!important;border-radius:16px!important;box-shadow:0 0 0 1px rgba(255,255,255,.08)!important}
+  html[data-adaptive-shell="phone"] .mykomo-identity small{font-size:10px!important;color:#8e9991!important;letter-spacing:.14em!important;margin-bottom:6px!important}
+  html[data-adaptive-shell="phone"] .mykomo-identity h2{font-size:29px!important;line-height:.98!important;letter-spacing:-.05em!important;color:#f6f4ef!important}
+  html[data-adaptive-shell="phone"] .mykomo-identity p{font-size:12.5px!important;line-height:1.45!important;color:#909b94!important;max-width:250px!important}
+  html[data-adaptive-shell="phone"] .mykomo-profile-btn{height:42px!important;min-height:42px!important;border-radius:14px!important;background:#171d1a!important;color:#e9ece7!important;border:1px solid rgba(255,255,255,.07)!important}
+
+  /* Remove duplicate summary strips when the canonical data wall is present. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-command-strip,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-score-card{display:none!important}
+
+  /* WHOOP-like first read: two dominant circular signals */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw{margin-top:2px!important;gap:12px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;grid-auto-rows:auto!important;gap:10px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-card{border-radius:22px!important;border:1px solid rgba(255,255,255,.065)!important;background:#121714!important;color:#f4f3ee!important;box-shadow:none!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-card:before{background:linear-gradient(145deg,rgba(255,255,255,.025),transparent 42%)!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-score,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age{grid-column:span 1!important;grid-row:auto!important;min-height:214px!important;padding:15px 12px!important;align-content:space-between!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-score{background:#101512!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age{background:radial-gradient(circle at 82% 12%,rgba(104,137,113,.20),transparent 34%),#111713!important}
+  html[data-adaptive-shell="phone"] .kdw-eyebrow{font-size:9.5px!important;line-height:1.15!important;color:#8f9b93!important;letter-spacing:.13em!important}
+  html[data-adaptive-shell="phone"] .kdw-card h3{font-size:16px!important;line-height:1.05!important;color:#f2f1ec!important;margin-top:5px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring{width:112px!important;height:112px!important;background:conic-gradient(#a9d85e calc(var(--v)*1%),#26302a 0)!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring:after{inset:9px!important;background:#101512!important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.035)!important}
+  html[data-adaptive-shell="phone"] .kdw-ring-core strong{font-size:36px!important;line-height:.92!important;color:#f8f7f2!important}
+  html[data-adaptive-shell="phone"] .kdw-ring-core strong small{font-size:10px!important;color:#8b968e!important}
+  html[data-adaptive-shell="phone"] .kdw-ring-core span{margin-top:6px!important;font-size:8px!important;color:#95a199!important}
+  html[data-adaptive-shell="phone"] .kdw-score-foot{gap:5px!important}
+  html[data-adaptive-shell="phone"] .kdw-mini{padding:8px!important;border-radius:12px!important;background:#1a211d!important}
+  html[data-adaptive-shell="phone"] .kdw-mini small{font-size:8px!important;color:#7f8a83!important}
+  html[data-adaptive-shell="phone"] .kdw-mini strong{font-size:12px!important;color:#eef0eb!important}
+  html[data-adaptive-shell="phone"] .kdw-age-main{padding:8px 0!important}
+  html[data-adaptive-shell="phone"] .kdw-age-main strong{font-size:40px!important;color:#f8f7f2!important}
+  html[data-adaptive-shell="phone"] .kdw-age-main strong small{font-size:11px!important}
+  html[data-adaptive-shell="phone"] .kdw-age-main span{font-size:9.5px!important;color:#8f9b93!important}
+  html[data-adaptive-shell="phone"] .kdw-age-foot{padding:8px 9px!important;border-radius:12px!important;background:#19211c!important;color:#a7b0aa!important;font-size:9.5px!important;line-height:1.35!important}
+  html[data-adaptive-shell="phone"] .kdw-age-tag{font-size:7.5px!important;background:#1e2821!important;color:#a6b4a9!important}
+  html[data-adaptive-shell="phone"] .kdw-age-orbit{opacity:.45!important}
+
+  /* Secondary cards: readable, calm, progressive disclosure */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-next,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-connected{grid-column:1/-1!important;padding:17px!important;background:#131916!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-today,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp{grid-column:span 1!important;padding:15px!important;min-height:154px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-today{background:#171b18!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp{background:#172019!important}
+  html[data-adaptive-shell="phone"] .kdw-next strong.big{font-size:23px!important;line-height:1.03!important;color:#f4f3ee!important;margin-top:14px!important}
+  html[data-adaptive-shell="phone"] .kdw-next p,
+  html[data-adaptive-shell="phone"] .kdw-connected-head p{font-size:12px!important;line-height:1.45!important;color:#8e9992!important}
+  html[data-adaptive-shell="phone"] .kdw-link,
+  html[data-adaptive-shell="phone"] .kdw-next button{font-size:11px!important;color:#b4dd79!important}
+  html[data-adaptive-shell="phone"] .kdw-today-value strong{font-size:31px!important;color:#f7f6f1!important}
+  html[data-adaptive-shell="phone"] .kdw-today-value span,
+  html[data-adaptive-shell="phone"] .kdw-today-meta,
+  html[data-adaptive-shell="phone"] .kdw-exp-foot{font-size:10px!important;color:#8f9993!important}
+  html[data-adaptive-shell="phone"] .kdw-today-bar{height:7px!important;background:#27302b!important}
+  html[data-adaptive-shell="phone"] .kdw-today-bar i{background:#a9d85e!important}
+  html[data-adaptive-shell="phone"] .kdw-exp-dial{width:92px!important;height:92px!important;background:conic-gradient(#a9d85e calc(var(--p)*1%),#29322d 0)!important}
+  html[data-adaptive-shell="phone"] .kdw-exp-dial:after{background:#172019!important}
+  html[data-adaptive-shell="phone"] .kdw-exp-core strong{font-size:26px!important;color:#f4f3ee!important}
+  html[data-adaptive-shell="phone"] .kdw-exp-core span{font-size:8px!important;color:#8f9b93!important}
+
+  /* Actions become bold rows, not tiny dashboard tiles */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-actions{grid-template-columns:1fr!important;gap:8px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-action{min-height:96px!important;padding:14px 15px!important;border-radius:20px!important;background:#121714!important;color:#f3f2ed!important;border:1px solid rgba(255,255,255,.06)!important;box-shadow:none!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-action.primary{background:#203529!important;border-color:#2b4937!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-action.soft{background:#171d1a!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-action.sand{background:#1b1b18!important}
+  html[data-adaptive-shell="phone"] .kdw-action-icon{width:34px!important;height:34px!important;border-radius:12px!important;background:#202824!important;color:#dce7df!important}
+  html[data-adaptive-shell="phone"] .kdw-action.primary .kdw-action-icon{background:rgba(255,255,255,.09)!important}
+  html[data-adaptive-shell="phone"] .kdw-action small{font-size:9px!important;color:#95a098!important}
+  html[data-adaptive-shell="phone"] .kdw-action strong{font-size:17px!important;color:#f6f4ef!important;margin-top:4px!important}
+  html[data-adaptive-shell="phone"] .kdw-action p{font-size:11.5px!important;line-height:1.4!important;color:#8f9993!important;margin-top:5px!important}
+
+  /* Connected data is visually secondary */
+  html[data-adaptive-shell="phone"] .kdw-connected-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+  html[data-adaptive-shell="phone"] .kdw-device{min-height:72px!important;padding:10px!important;border-radius:15px!important;background:#1a201d!important;border:1px solid rgba(255,255,255,.05)!important;color:#eef0eb!important}
+  html[data-adaptive-shell="phone"] .kdw-device-logo{width:34px!important;height:34px!important;border-radius:11px!important;background:#232c27!important;color:#dfe6e0!important}
+  html[data-adaptive-shell="phone"] .kdw-device strong{font-size:11px!important;color:#f0f0ec!important}
+  html[data-adaptive-shell="phone"] .kdw-device small{font-size:9px!important;color:#89938d!important}
+  html[data-adaptive-shell="phone"] .kdw-device em{font-size:7.5px!important;background:#232823!important;color:#8f9993!important}
+
+  /* KEY: daily wearable metrics are the hero */
+  html[data-adaptive-shell="phone"] .keyhub.kh2-enhanced{gap:10px!important}
+  html[data-adaptive-shell="phone"] .kh2-nav{padding:3px!important;border-radius:15px!important;background:#121714!important;border:1px solid rgba(255,255,255,.055)!important}
+  html[data-adaptive-shell="phone"] .kh2-nav button{min-height:40px!important;border-radius:12px!important;font-size:11px!important;color:#8e9992!important}
+  html[data-adaptive-shell="phone"] .kh2-nav button.active{background:#263c2f!important;color:#f6f5ef!important}
+  html[data-adaptive-shell="phone"] .kh2-stage-head,
+  html[data-adaptive-shell="phone"] .kh2-data-head{padding:17px!important;border-radius:21px!important;background:#121714!important;border:1px solid rgba(255,255,255,.055)!important}
+  html[data-adaptive-shell="phone"] .kh2-stage-head h3,
+  html[data-adaptive-shell="phone"] .kh2-data-head h3,
+  html[data-adaptive-shell="phone"] .kh2-empty h3{font-size:24px!important;color:#f4f3ee!important;letter-spacing:-.035em!important}
+  html[data-adaptive-shell="phone"] .kh2-stage-head p,
+  html[data-adaptive-shell="phone"] .kh2-data-head p,
+  html[data-adaptive-shell="phone"] .kh2-empty p{font-size:12.5px!important;color:#909b94!important}
+  html[data-adaptive-shell="phone"] .kh2-today{padding:18px!important;border-radius:23px!important;background:linear-gradient(155deg,#1f3829 0%,#15231b 68%,#101612 100%)!important;border:1px solid rgba(171,216,94,.12)!important;box-shadow:none!important}
+  html[data-adaptive-shell="phone"] .kh2-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  html[data-adaptive-shell="phone"] .kh2-stat{min-height:118px!important;padding:14px!important;border-radius:18px!important;background:#f2f0e8!important;color:#182019!important;border:0!important}
+  html[data-adaptive-shell="phone"] .kh2-stat:nth-child(2n){background:#171d1a!important;color:#f3f2ed!important;border:1px solid rgba(255,255,255,.055)!important}
+  html[data-adaptive-shell="phone"] .kh2-stat>small{font-size:9.5px!important;color:#758078!important}
+  html[data-adaptive-shell="phone"] .kh2-stat:nth-child(2n)>small{color:#8f9993!important}
+  html[data-adaptive-shell="phone"] .kh2-value{font-size:34px!important;line-height:.96!important;letter-spacing:-.05em!important}
+  html[data-adaptive-shell="phone"] .kh2-stat p{font-size:11px!important;line-height:1.35!important}
+
+  /* Bottom navigation behaves like a real wearable app tab bar */
+  html[data-adaptive-shell="phone"] #kpDockV6{height:68px!important;min-height:68px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;left:10px!important;right:10px!important;width:auto!important;border-radius:22px!important;background:rgba(16,21,18,.96)!important;border:1px solid rgba(255,255,255,.07)!important;box-shadow:0 14px 36px rgba(0,0,0,.34)!important;backdrop-filter:blur(22px)!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 button{min-height:58px!important;color:#808b84!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 button.active{color:#eaf3e9!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 button.active:before{background:#a9d85e!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 svg{width:20px!important;height:20px!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 strong{font-size:9.5px!important;font-weight:700!important;letter-spacing:0!important}
+
+  /* General text floor: no microscopic app copy */
+  html[data-adaptive-shell="phone"] button,
+  html[data-adaptive-shell="phone"] input,
+  html[data-adaptive-shell="phone"] select,
+  html[data-adaptive-shell="phone"] textarea{font-size:max(12px,1em)}
+}
+
+@media (max-width:374px){
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring{width:102px!important;height:102px!important}
+  html[data-adaptive-shell="phone"] .kdw-ring-core strong{font-size:33px!important}
+  html[data-adaptive-shell="phone"] .mykomo-identity h2{font-size:27px!important}
+}
