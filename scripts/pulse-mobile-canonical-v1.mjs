@@ -4,7 +4,7 @@ import {join} from 'node:path';
 const root=process.cwd();
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260829-mobile-canonical-1';
+const release='20260829-mobile-canonical-2';
 
 await copyFile(join(root,'pulse-app','mobile-canonical-v1.css'),join(pulse,'mobile-canonical-v1.css'));
 await copyFile(join(root,'pulse-app','mobile-canonical-v1.js'),join(pulse,'mobile-canonical-v1.js'));
@@ -62,8 +62,9 @@ for(const re of stripPatterns)html=html.replace(re,'');
 html=html.replace('</head>',`  <link rel="stylesheet" href="./mobile-canonical-v1.css?v=${release}" />\n</head>`);
 html=html.replace('</body>',`  <script type="module" src="./mobile-canonical-v1.js?v=${release}"></script>\n</body>`);
 
-// Keep the tablet adaptive bundle coherent with the canonical release after its phone path is disabled.
+// Keep the tablet adaptive bundle and route coordinator coherent with the mobile release.
 html=html.replace(/\.\/adaptive-shell-v4\.js(?:\?v=[^"']+)?/g,`./adaptive-shell-v4.js?v=${release}`);
+html=html.replace(/\.\/patient-navigation-core-v1\.js(?:\?v=[^"']+)?/g,`./patient-navigation-core-v1.js?v=${release}`);
 await writeFile(htmlPath,html,'utf8');
 
-console.log('[pulse-mobile-canonical-v1] one phone owner shipped: scores + KŌMØ KEY + vertical menu; legacy phone runtimes removed');
+console.log('[pulse-mobile-canonical-v1] one phone owner shipped: account + KŌMØ KEY + experience + KŌMØ Link; legacy phone runtimes removed');
