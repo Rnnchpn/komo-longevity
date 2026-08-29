@@ -94,7 +94,7 @@ const checks=[
   ['fresh router bundle shipped',finalHtml.includes(cacheSafeApp)&&!finalHtml.includes('./app.js')],
   ['Motion, My KŌMØ, Club, KEY and Trajectoire accepted by app core',finalApp.includes("'motion','mykomo','club','key','trajectory'")],
   ['modern routes delegated to dedicated owners',finalApp.includes("source:'app-external-owner'")],
-  ['Club is a native equal dock route',finalDock.includes("['club','Club','∞','club','']")&&finalDock.includes('repeat(6,minmax(0,1fr))')],
+  ['Club and KEY are native equal dock routes',finalDock.includes("['club','Club','∞','club','']")&&finalDock.includes("['key','KŌMØ Key','⌁','key','']")&&finalDock.includes('repeat(7,minmax(0,1fr))')],
   ['legacy Booking remains available for professional planning',finalBooking.includes('window.KomoBooking')],
   ['Centre cockpit v2 is cache-safe',finalHtml.includes(centerCockpit)&&!finalHtml.includes('./center-hub-v1.js')],
   ['Centre cockpit uses canonical command backend',finalCenter.includes("functions.invoke('center-command-v2'")],
