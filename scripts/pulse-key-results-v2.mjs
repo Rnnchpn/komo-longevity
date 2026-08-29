@@ -37,7 +37,7 @@ console.log('[pulse-key-results-v2] PASS · premium KEY views + animated numbers
 await import('./pulse-my-komo-stability-v4.mjs');
 // Fine-detail styling is visual-only and always applied after the stable owner.
 await import('./pulse-premium-detail-v1.mjs');
-// Home hierarchy: Motion Score + Locomotor Age first, KEY immediately below.
+// Home hierarchy helper remains available for the iPhone KEY-first presentation.
 await import('./pulse-home-key-position-v1.mjs');
 // Official PDF: append a consent-gated longitudinal KEY page without touching score calculation.
 await import('./pulse-key-pdf-report-v1.mjs');
@@ -53,3 +53,5 @@ await import('./pulse-dark-luxe-polish-v2.mjs');
 await import('./pulse-iphone-density-v1.mjs');
 // Desktop web login is a single page-specific owner, applied after every shared visual layer.
 await import('./pulse-auth-web-v1.mjs');
+// Commercial Home is the final route owner: one cockpit for Motion, Age, KEY, next action, Clinical and trajectory.
+await import('./pulse-home-web-v1.mjs');
