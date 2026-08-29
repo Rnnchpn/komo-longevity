@@ -1,0 +1,144 @@
+/* KŌMØ Pulse — iPhone app lock v1
+   Final phone-only surface: fixed viewport, vertical-only gesture model, safe areas and no page chrome drift. */
+
+@media (max-width: 767px) {
+  html.kamo-iphone-locked,
+  html.kamo-iphone-locked body {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    -webkit-overflow-scrolling: auto !important;
+    background: #f4f0e8 !important;
+  }
+
+  html.kamo-iphone-locked {
+    touch-action: pan-y !important;
+    -webkit-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
+  }
+
+  html.kamo-iphone-locked body {
+    touch-action: pan-y !important;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html.kamo-iphone-locked #appShell,
+  html.kamo-iphone-locked #authScreen {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kamo-viewport-height, 100dvh) !important;
+    max-height: var(--kamo-viewport-height, 100dvh) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+  }
+
+  html.kamo-iphone-locked #appShell:not([hidden]) {
+    display: block !important;
+  }
+
+  html.kamo-iphone-locked .main-shell {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: var(--kamo-viewport-height, 100dvh) !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain !important;
+    overscroll-behavior-x: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    touch-action: pan-y !important;
+  }
+
+  html.kamo-iphone-locked .main-shell::-webkit-scrollbar,
+  html.kamo-iphone-locked #authScreen::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  html.kamo-iphone-locked #authScreen {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+  }
+
+  html.kamo-iphone-locked #viewRoot,
+  html.kamo-iphone-locked #viewRoot > *,
+  html.kamo-iphone-locked #viewRoot section,
+  html.kamo-iphone-locked #viewRoot article,
+  html.kamo-iphone-locked #viewRoot form,
+  html.kamo-iphone-locked #viewRoot fieldset {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  html.kamo-iphone-locked #viewRoot img,
+  html.kamo-iphone-locked #viewRoot svg,
+  html.kamo-iphone-locked #viewRoot canvas,
+  html.kamo-iphone-locked #viewRoot video {
+    max-width: 100% !important;
+  }
+
+  html.kamo-iphone-locked input,
+  html.kamo-iphone-locked select,
+  html.kamo-iphone-locked textarea {
+    max-width: 100% !important;
+    font-size: 16px !important;
+  }
+
+  html.kamo-iphone-locked button,
+  html.kamo-iphone-locked [role="button"],
+  html.kamo-iphone-locked input,
+  html.kamo-iphone-locked select,
+  html.kamo-iphone-locked textarea {
+    touch-action: manipulation !important;
+  }
+
+  html.kamo-iphone-locked .topbar {
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+  }
+
+  html.kamo-iphone-locked .kam-sheet {
+    height: var(--kamo-viewport-height, 100dvh) !important;
+    max-height: var(--kamo-viewport-height, 100dvh) !important;
+    overscroll-behavior: contain !important;
+    touch-action: pan-y !important;
+  }
+
+  html.kamo-iphone-locked .toast,
+  html.kamo-iphone-locked .kcp-toast,
+  html.kamo-iphone-locked .kav2-toast {
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  html.kamo-iphone-locked * {
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 380px) {
+  html.kamo-iphone-locked .main-shell {
+    width: 100vw !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.kamo-iphone-locked .main-shell {
+    scroll-behavior: auto !important;
+  }
+}
