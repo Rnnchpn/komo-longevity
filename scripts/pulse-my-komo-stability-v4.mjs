@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const cssRelease='20260829-mykomo-stable-v4';
+const cssRelease='20260829-mykomo-visual-v6';
 const release='20260829-mykomo-stable-v5';
 for(const file of ['my-komo-stable-v4.css','my-komo-stable-v5.js']) await copyFile(join(root,'pulse-app',file),join(pulse,file));
 let html=await readFile(htmlPath,'utf8');
@@ -34,4 +34,4 @@ const checks=[
 ];
 for(const [label,ok] of checks) console.log(`[pulse-my-komo-stability-v5] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log('[pulse-my-komo-stability-v5] PASS · one route owner · shared client · fail-open · resolved hydration');
+console.log('[pulse-my-komo-stability-v5] PASS · one route owner · shared client · fail-open · premium visual v6');
