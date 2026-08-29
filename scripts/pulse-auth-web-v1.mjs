@@ -30,9 +30,9 @@ const checks=[
   ['desktop-only visual ownership',css.includes('@media (min-width:768px)')&&js.includes("matchMedia('(min-width:768px)')")],
   ['hidden semantics preserved',css.includes('#authScreen[data-auth-web="1"][hidden]{display:none!important}')],
   ['solid split-screen geometry',css.includes('grid-template-columns:minmax(0,1.08fr) minmax(430px,.92fr)')],
-  ['private-access status detail present',js.includes('ACCÈS PRIVÉ')&&css.includes('.kaw-panel-status')),
-  ['platform layers detail present',js.includes('MOTION')&&js.includes('CLINICAL')&&js.includes('KEY')),
-  ['loading state is visual only',css.includes('html.komo-auth-submitting')&&!js.includes('signInWithPassword')&&!js.includes('supabase')),
+  ['private-access status detail present',js.includes('ACCÈS PRIVÉ')&&css.includes('.kaw-panel-status')],
+  ['platform layers detail present',js.includes('MOTION')&&js.includes('CLINICAL')&&js.includes('KEY')],
+  ['loading state is visual only',css.includes('html.komo-auth-submitting')&&!js.includes('signInWithPassword')&&!js.includes('supabase')],
   ['no mobile auth ownership',!css.includes('@media (max-width:767px)')&&!js.includes('max-width:767px')],
   ['no score or route behavior',!js.includes('location.hash')&&!js.includes('motion_score')&&!js.includes('fetch(')]
 ];
