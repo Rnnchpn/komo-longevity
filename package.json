@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "node scripts/build-all.mjs && node scripts/komo-key-marketing-v1.mjs && node scripts/booking-architecture-qa-v1.mjs && node scripts/pulse-patient-clean-room-v1.mjs && node scripts/pulse-patient-clean-room-qa-v1.mjs",
+    "build": "node scripts/build-all.mjs && node scripts/komo-key-marketing-v1.mjs && node scripts/booking-architecture-qa-v1.mjs && node scripts/pulse-patient-clean-room-v1.mjs && node scripts/pulse-patient-clean-room-qa-v1.mjs && node scripts/pulse-asset-fingerprint-v1.mjs && node scripts/pulse-asset-fingerprint-qa-v1.mjs",
     "build:core": "node scripts/build.mjs",
     "preview": "python3 -m http.server 8080 --directory site",
     "storybook": "storybook dev -p 6006",
