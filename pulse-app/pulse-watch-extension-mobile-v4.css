@@ -1,0 +1,287 @@
+/* KŌMØ Pulse — Watch Extension Mobile v4
+   iPhone only. Pulse should feel like the larger screen of KŌMØ KEY:
+   daily signals first, clinical context second, no dashboard clutter.
+   Visual/layout only: no auth, route, score, data, consent or session behavior. */
+
+@media (max-width:767px){
+  html[data-adaptive-shell="phone"] body.khome-v3 #viewRoot{
+    padding:6px 10px 84px!important;
+    background:#080b0a!important;
+  }
+
+  /* The phone is not a profile dashboard. Start with the signals. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-card{
+    padding:0!important;
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-top,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-command-strip,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-score-card,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-actions{
+    display:none!important;
+  }
+
+  /* One glance: KEY first, then Motion + Age, then XP. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw{
+    margin:0!important;
+    gap:10px!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-flow:row!important;
+    gap:10px!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-key-home{
+    order:-20!important;
+    grid-column:1/-1!important;
+    width:100%!important;
+    margin:0!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-score{order:-10!important;grid-column:span 1!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age{order:-9!important;grid-column:span 1!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp{order:-8!important;grid-column:1/-1!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-today,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-next,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-connected{
+    display:none!important;
+  }
+
+  /* KEY becomes the main watch companion surface. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-key-home{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+    padding:14px!important;
+    border-radius:24px!important;
+    background:
+      radial-gradient(circle at 88% 0%,rgba(169,216,94,.12),transparent 30%),
+      linear-gradient(150deg,#17251c 0%,#101713 62%,#0d120f 100%)!important;
+    border:1px solid rgba(169,216,94,.12)!important;
+    box-shadow:none!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-key-home:before{opacity:.25!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .mykomo-key-home:after,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-orbit{display:none!important}
+
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-copy{
+    min-height:0!important;
+    padding:0 2px!important;
+    display:flex!important;
+    flex-direction:row!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-copy h3,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-copy>p,
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-action{
+    display:none!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-kicker{
+    margin:0!important;
+    font-size:10px!important;
+    line-height:1!important;
+    letter-spacing:.14em!important;
+    color:#dce9de!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-kicker span{
+    padding:4px 6px!important;
+    font-size:7px!important;
+    color:#bddd91!important;
+    background:rgba(169,216,94,.08)!important;
+    border-color:rgba(169,216,94,.12)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-actions{
+    margin:0!important;
+    display:block!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-status{
+    display:block!important;
+    max-width:132px!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    font-size:9.5px!important;
+    color:#8fa097!important;
+  }
+
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-live{
+    padding:0!important;
+    background:transparent!important;
+    border:0!important;
+    box-shadow:none!important;
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-live-head{
+    padding:9px 2px 10px!important;
+    align-items:flex-end!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-live-head small{
+    font-size:8.5px!important;
+    color:#7f9187!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-live-head strong{
+    margin-top:4px!important;
+    font-size:17px!important;
+    color:#f6f5ef!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-live-pill{
+    padding:6px 8px!important;
+    font-size:8.5px!important;
+    background:#1c2b21!important;
+    color:#b8d9bc!important;
+    border-color:rgba(169,216,94,.10)!important;
+  }
+
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metrics{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric{
+    min-height:112px!important;
+    padding:13px!important;
+    border-radius:19px!important;
+    background:#121916!important;
+    border:1px solid rgba(255,255,255,.055)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric.primary{
+    background:#eef2e8!important;
+    color:#172019!important;
+    border:0!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric>small{
+    font-size:9.5px!important;
+    color:#829087!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric.primary>small{color:#66736a!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric strong{
+    font-size:34px!important;
+    line-height:.92!important;
+    color:inherit!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric-value span{
+    font-size:10px!important;
+    color:#849087!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-metric p{
+    margin-top:7px!important;
+    font-size:10.5px!important;
+    line-height:1.3!important;
+    color:#7f8c84!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-trend{
+    margin-top:8px!important;
+    padding:10px 2px 0!important;
+    gap:8px!important;
+    border-top:1px solid rgba(255,255,255,.055)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-trend small{font-size:8px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-trend strong{font-size:9.5px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-trend>span{font-size:8px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .mkh-spark{height:24px!important}
+
+  /* Motion + Age are context, not the hero on a phone. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-score,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age{
+    min-height:154px!important;
+    padding:13px!important;
+    border-radius:21px!important;
+    background:#121714!important;
+    border:1px solid rgba(255,255,255,.055)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-score-foot,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age-foot,
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age-tag{
+    display:none!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring-wrap{margin:5px 0 0!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring{
+    width:88px!important;
+    height:88px!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring:after{inset:7px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring-core strong{font-size:30px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-ring-core span{display:none!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age-main{
+    min-height:82px!important;
+    padding:4px 0!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age-main strong{font-size:35px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-age-main span{font-size:9px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-eyebrow{font-size:9px!important}
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-card h3{font-size:15px!important}
+
+  /* One simple engagement card below the health signals. */
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp{
+    min-height:118px!important;
+    padding:14px 16px!important;
+    border-radius:21px!important;
+    background:linear-gradient(145deg,#17251c,#111814)!important;
+    border:1px solid rgba(169,216,94,.08)!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp-dial{
+    width:76px!important;
+    height:76px!important;
+    margin:6px auto 0!important;
+  }
+  html[data-adaptive-shell="phone"] body.khome-v3 .kdw-exp-core strong{font-size:23px!important}
+
+  /* The dedicated KEY route uses the same visual grammar as the watch. */
+  html[data-adaptive-shell="phone"] .keyhub.kh2-enhanced{gap:9px!important}
+  html[data-adaptive-shell="phone"] .kh2-stage-head,
+  html[data-adaptive-shell="phone"] .kh2-data-head{
+    padding:15px!important;
+    border-radius:20px!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-stage-head p,
+  html[data-adaptive-shell="phone"] .kh2-data-head p{
+    display:none!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-stat-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-stat{
+    min-height:112px!important;
+    padding:13px!important;
+    border-radius:19px!important;
+  }
+  html[data-adaptive-shell="phone"] .kh2-value{font-size:34px!important}
+
+  /* Keep the tab bar as the only persistent navigation chrome. */
+  html[data-adaptive-shell="phone"] #kpDockV6{
+    left:8px!important;
+    right:8px!important;
+    width:auto!important;
+    height:64px!important;
+    padding:4px!important;
+    bottom:max(7px,env(safe-area-inset-bottom))!important;
+    border-radius:21px!important;
+    background:rgba(18,22,20,.96)!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:0 14px 38px rgba(0,0,0,.32)!important;
+    backdrop-filter:blur(20px)!important;
+    -webkit-backdrop-filter:blur(20px)!important;
+  }
+  html[data-adaptive-shell="phone"] #kpDockV6 .kp6-indicator{
+    top:4px!important;
+    left:4px!important;
+    height:56px!important;
+    border-radius:17px!important;
+    background:#e9ede5!important;
+    box-shadow:none!important;
+  }
+  html[data-adaptive-shell="phone"] #kpDockV6 a,
+  html[data-adaptive-shell="phone"] #kpDockV6 button{
+    height:56px!important;
+    gap:3px!important;
+  }
+  html[data-adaptive-shell="phone"] #kpDockV6 .kp6-icon{font-size:18px!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 b{font-size:8px!important}
+  html[data-adaptive-shell="phone"] #kpDockV6 small{display:none!important}
+}
