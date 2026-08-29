@@ -4,7 +4,7 @@ import {join} from 'node:path';
 const root=process.cwd();
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260829-mobile-canonical-3';
+const release='20260829-mobile-canonical-4';
 
 await copyFile(join(root,'pulse-app','mobile-canonical-v1.css'),join(pulse,'mobile-canonical-v1.css'));
 await copyFile(join(root,'pulse-app','mobile-canonical-v1.js'),join(pulse,'mobile-canonical-v1.js'));
@@ -44,6 +44,19 @@ await patch(join(pulse,'my-komo-score-motion-v1.js'),
   "  function mount(){\n    if(window.matchMedia('(max-width: 767px)').matches)return;\n    bindObserver();",
   'score observer phone guard',{optional:true});
 
+// The legacy app router used to paint the historical desktop Home before the
+// canonical phone runtime could replace it. On phones it now yields Home
+// immediately to mobile-canonical-v1, eliminating the old-screen flash/stale UI.
+const routerPath=join(pulse,'app-router-v2.js');
+let router=await readFile(routerPath,'utf8');
+const routerAnchor='function renderRoute(route){renderNavigation();';
+const phoneHomeGuard="function renderRoute(route){renderNavigation();if(window.matchMedia('(max-width: 767px)').matches&&route==='home'){window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:'home',source:'mobile-canonical-owner'}}));return;}";
+if(!router.includes("source:'mobile-canonical-owner'")){
+  if(!router.includes(routerAnchor)) throw new Error('[pulse-mobile-canonical] app router renderRoute anchor missing');
+  router=router.replace(routerAnchor,phoneHomeGuard);
+  await writeFile(routerPath,router,'utf8');
+}
+
 let html=await readFile(htmlPath,'utf8');
 const stripPatterns=[
   /\s*<link rel="stylesheet" href="\.\/mobile-vertical-app-v1\.css(?:\?v=[^"]+)?"\s*\/?>/g,
@@ -59,6 +72,7 @@ html=html.replace('</head>',`  <link rel="stylesheet" href="./mobile-canonical-v
 html=html.replace('</body>',`  <script type="module" src="./mobile-canonical-v1.js?v=${release}"></script>\n</body>`);
 html=html.replace(/\.\/adaptive-shell-v4\.js(?:\?v=[^"']+)?/g,`./adaptive-shell-v4.js?v=${release}`);
 html=html.replace(/\.\/patient-navigation-core-v1\.js(?:\?v=[^"']+)?/g,`./patient-navigation-core-v1.js?v=${release}`);
+html=html.replace(/\.\/app-router-v2\.js(?:\?v=[^"']+)?/g,`./app-router-v2.js?v=${release}`);
 await writeFile(htmlPath,html,'utf8');
 
-console.log('[pulse-mobile-canonical-v1] fresh phone release shipped: account + KŌMØ KEY + experience + KŌMØ Link');
+console.log('[pulse-mobile-canonical-v1] canonical phone owner shipped without legacy Home renderer: account + KŌMØ KEY + experience + KŌMØ Link');
