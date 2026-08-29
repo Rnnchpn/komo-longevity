@@ -23,7 +23,7 @@ const checks=[
   ['primary menu is centered and vertical',css.includes('.kam-vertical-primary')&&css.includes('grid-template-columns: 1fr !important')&&css.includes('max-width: 360px !important')],
   ['professional tabs are vertical on phone',css.includes('.kcp-tabs')&&css.includes('[data-mobile-stack-tabs="1"]')],
   ['admin tabs are vertical on phone',css.includes('.kav2-tabs')],
-  ['desktop tables become mobile cards',css.includes('.kamo-mobile-table td::before')&&js.includes('annotateTables')&&js.includes('data-mobile-label')],
+  ['desktop tables become mobile cards',css.includes('.kamo-mobile-table td::before')&&js.includes('annotateTables')&&js.includes('dataset.mobileLabel')],
   ['mobile canvas explicitly blocks horizontal overflow',css.includes('overflow-x: hidden !important')&&css.includes('max-width: 100% !important')],
   ['forms stack and inputs stay device width',css.includes('#viewRoot input')&&css.includes('grid-template-columns: 1fr !important')],
   ['centered KŌMØ brand and menu button remain',css.includes('.kam-mobile-brand')&&css.includes('#kamTopMenu')&&css.includes('justify-content: center !important')],
