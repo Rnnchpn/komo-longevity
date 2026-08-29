@@ -128,7 +128,8 @@ const scripts = [
   'scripts/komo-key-public-page-v1.mjs',
   'scripts/komo-key-polish-v2.mjs',
   'scripts/life-v1-qa.mjs',
-  'scripts/pulse-account-tab-restore-v1.mjs'
+  'scripts/pulse-account-tab-restore-v1.mjs',
+  'scripts/pulse-account-logout-v1.mjs'
 ];
 
 for (const script of scripts) {
