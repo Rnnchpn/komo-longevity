@@ -28,5 +28,6 @@ const failed=checks.filter(([,ok])=>!ok);
 for(const [label,ok] of checks) console.log(`[life-qa] ${ok?'PASS':'FAIL'} ${label}`);
 if(failed.length) process.exit(1);
 console.log(`[life-qa] KŌMØ Life light minimal V5 passed ${checks.length} checks.`);
+await import('./komo-key-marketing-v1.mjs');
 await import('./pulse-patient-navigation-final-v1.mjs');
 await import('./pulse-center-role-final-v1.mjs');
