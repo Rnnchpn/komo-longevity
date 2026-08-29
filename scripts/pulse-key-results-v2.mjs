@@ -35,3 +35,5 @@ console.log('[pulse-key-results-v2] PASS · premium KEY views + animated numbers
 
 // My KŌMØ is forced into a single, event-driven route owner after every KEY build.
 await import('./pulse-my-komo-stability-v4.mjs');
+// Fine-detail styling is visual-only and always applied after the stable owner.
+await import('./pulse-premium-detail-v1.mjs');
