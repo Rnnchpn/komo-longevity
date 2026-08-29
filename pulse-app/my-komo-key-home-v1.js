@@ -1,7 +1,7 @@
 /* KŌMØ KEY — premium home panel · essential wearable state only */
 (()=>{
 'use strict';
-const V='2.0.1';
+const V='2.0.2';
 let timer=0;
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const client=()=>window.KomoRuntime?.client||null;
@@ -18,10 +18,10 @@ async function readState(){
   if(!session?.user)return{ready:true,active:false,rows:[]};
   const from=new Date();from.setDate(from.getDate()-14);
   const [consent,data]=await Promise.all([
-   sb.from('wearable_consents').select('status').eq('user_id',session.user.id).eq('purpose','connected_followup').order('accepted_at',{ascending:false}).limit(1).maybeSingle(),
+   sb.from('wearable_consents').select('status,consented_at').eq('user_id',session.user.id).eq('purpose','connected_followup').order('consented_at',{ascending:false}).limit(1).maybeSingle(),
    sb.from('wearable_daily_metrics').select('metric_date,steps,active_minutes,sleep_minutes,resting_hr').eq('user_id',session.user.id).gte('metric_date',dayKey(from)).order('metric_date',{ascending:false})
   ]);
-  return{ready:true,active:consent.data?.status==='active',rows:data.error?[]:(data.data||[])};
+  return{ready:true,active:!consent.error&&consent.data?.status==='active',rows:data.error?[]:(data.data||[])};
  }catch(e){console.error('[key-home-v2 data]',e);return{ready:true,active:false,rows:[],error:true}}
 }
 function metric(label,value,unit,sub,accent=''){
@@ -50,7 +50,7 @@ function panel(s){
     ${metric('PAS',steps===null?'—':fmt(steps),'',avgSteps===null?'Mouvement quotidien':`${fmt(avgSteps)} / j · moyenne 7 j`,'primary')}
     ${metric('ACTIF',active===null?'—':fmt(active),'min','Temps actif enregistré')}
     ${metric('SOMMEIL',sleep===null?'—':fmt(sleep/60,1),'h','Dernière nuit disponible')}
-    ${metric('FC REPOS',rhr===null?'—':fmt(rhr),'bpm','Physiologie compatible')}
+    ${metric('FC REPOS',rhr===null?'—':fmt(rhr),'bpm','Dernière valeur disponible')}
    </div>
    <footer class="mkh-trend"><div><small>CONTINUITÉ · 7 JOURS</small><strong>${has?`${coverage}% de couverture`:'Baseline en construction'}</strong></div>${spark(r)}<span>7 · 30 · 90 j</span></footer>
   </section>
