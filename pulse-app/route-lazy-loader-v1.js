@@ -1,8 +1,8 @@
-/* KŌMØ Pulse — route-aware lazy runtime v1.0.0
-   Loads heavy professional/centre/admin modules only when that workspace is requested. */
+/* KŌMØ Pulse — route-aware lazy runtime v1.1.0
+   Loads secondary patient and professional workspaces only when requested. */
 (()=>{
   'use strict';
-  const V='1.0.0';
+  const V='1.1.0';
   const manifestNode=document.querySelector('#komoLazyRouteManifest');
   let manifest={groups:{}};
   try{manifest=JSON.parse(manifestNode?.textContent||'{"groups":{}}')}catch(e){console.error('[pulse-lazy] invalid manifest',e)}
@@ -23,16 +23,30 @@
     });
   }
 
+  function wake(name,r){
+    try{
+      if(name==='club')window.KomoClub?.refresh?.();
+      else if(name==='trajectory')window.KomoTrajectoryV3?.refresh?.();
+      else if(name==='agenda'){
+        window.KomoAgendaHubV4?.refresh?.();
+        setTimeout(()=>window.KomoAgendaCleanRoom?.enforce?.(),20);
+      }
+    }catch(error){console.warn('[pulse-lazy:wake]',name,error)}
+    window.KomoPatientRouteRuntimeV2?.activate?.();
+  }
+
   function signal(name,reason){
-    const detail={group:name,route:route(),reason,version:V};
+    const r=route();
+    const detail={group:name,route:r,reason,version:V};
     window.dispatchEvent(new CustomEvent('komo:lazy-route-ready',{detail}));
-    window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:detail.route,source:'lazy-route-runtime'}}));
+    window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:r,source:'lazy-route-runtime'}}));
     setTimeout(()=>window.dispatchEvent(new CustomEvent('komo:data-ready',{detail:{source:'lazy-route-runtime',group:name}})),0);
+    wake(name,r);
   }
 
   function load(name,reason='route'){
     if(!name)return Promise.resolve(false);
-    if(loaded.has(name))return Promise.resolve(true);
+    if(loaded.has(name)){wake(name,route());return Promise.resolve(true)}
     if(jobs.has(name))return jobs.get(name);
     const items=(manifest.groups?.[name]||[]).map(x=>({...x,group:name}));
     if(!items.length){loaded.add(name);return Promise.resolve(false)}
@@ -59,15 +73,24 @@
     return job;
   }
 
-  function groupForRoute(r){return r==='clinical'||r==='admin'?'professional':null}
+  function groupForRoute(r){
+    if(r==='clinical'||r==='admin')return'professional';
+    if(r==='club')return'club';
+    if(r==='trajectory')return'trajectory';
+    if(r==='documents')return'agenda';
+    return null;
+  }
   function check(reason='route'){const g=groupForRoute(route());if(g)load(g,reason).catch(()=>{})}
 
   ['hashchange','pageshow','popstate','komo:canonical-route','komo:session-ready'].forEach(evt=>window.addEventListener(evt,()=>check(evt),{passive:true}));
   document.addEventListener('click',event=>{
-    const clinical=event.target.closest?.('#modeSwitch [data-mode="clinical"],a[href="#clinical"],[data-route="clinical"],[data-mode="clinical"]');
-    const admin=event.target.closest?.('a[href="#admin"],[data-route="admin"]');
-    if(clinical||admin)load('professional','intent').catch(()=>{});
+    const target=event.target.closest?.('[href^="#"],[data-route],[data-kp6-route],[data-ag4-route],#modeSwitch [data-mode]');
+    if(!target)return;
+    const href=target.getAttribute?.('href')||'';
+    const intended=(target.dataset?.route||target.dataset?.kp6Route||target.dataset?.ag4Route||target.dataset?.mode||href.replace(/^#/,''));
+    const group=groupForRoute(intended);
+    if(group)load(group,'intent').catch(()=>{});
   },true);
   queueMicrotask(()=>check('boot'));
-  window.KomoLazyRoutes={version:V,load,isLoaded:name=>loaded.has(name),manifest:()=>manifest};
+  window.KomoLazyRoutes={version:V,load,isLoaded:name=>loaded.has(name),manifest:()=>manifest,groupForRoute};
 })();
