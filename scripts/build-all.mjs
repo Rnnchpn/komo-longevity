@@ -134,7 +134,8 @@ const scripts = [
   'scripts/pulse-mobile-vertical-app-v1.mjs',
   'scripts/pulse-mobile-vertical-app-qa-v1.mjs',
   'scripts/pulse-key-hub-v1.mjs',
-  'scripts/pulse-key-results-v2.mjs'
+  'scripts/pulse-key-results-v2.mjs',
+  'scripts/pulse-report-visual-v2.mjs'
 ];
 
 for (const script of scripts) {
