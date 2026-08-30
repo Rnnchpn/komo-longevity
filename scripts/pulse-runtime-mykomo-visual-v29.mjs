@@ -42,3 +42,5 @@ const finalBundle=await readFile(root+bundle,'utf8');
 for(const signature of ['komoAnimated','mykomo-command-strip','KomoHomeDashboardV2'])if(!finalBundle.includes(signature))throw new Error(`[pulse-mykomo-v29] visual behavior missing: ${signature}`);
 if(finalBundle.includes('setInterval('))throw new Error('[pulse-mykomo-v29] My KŌMØ visual polling was not fully retired');
 console.log('[pulse-mykomo-v29] two My KŌMØ visual overlays bundled · persistent polling retired · event-driven behavior preserved');
+
+await import('./pulse-runtime-polling-v30.mjs');

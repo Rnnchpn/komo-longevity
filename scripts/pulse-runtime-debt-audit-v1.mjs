@@ -85,9 +85,10 @@ const exactViewInserters=metrics.filter(x=>x.viewInsertWrites>0);
 const legacyViewFalsePositives=legacyViewOwners.filter(x=>x.viewWritesExact===0);
 const loadedBytes=metrics.reduce((a,b)=>a+b.bytes,0);
 const observerCount=metrics.reduce((a,b)=>a+b.observers,0);
+const intervalCount=metrics.reduce((a,b)=>a+b.intervals,0);
 
 console.log(`[pulse-runtime-debt-v1] direct scripts=${scripts.length} · unique=${scriptCounts.size} · reachable=${reachable.size}/${jsFiles.length}`);
-console.log(`[pulse-runtime-debt-v1] loaded bytes=${loadedBytes} · MutationObserver=${observerCount} · whole-body observers=${wholeBody.length} · intervals=${metrics.reduce((a,b)=>a+b.intervals,0)} · createClient=${directClients.length} modules (${isolatedClients.length} isolated from KomoRuntime) · route writers=${routeWriters.length} · view proxy=${legacyViewOwners.length} · exact view mutators=${exactViewMutators.length} (${exactViewReplacers.length} replace / ${exactViewInserters.length} insert)`);
+console.log(`[pulse-runtime-debt-v1] loaded bytes=${loadedBytes} · MutationObserver=${observerCount} · whole-body observers=${wholeBody.length} · intervals=${intervalCount} · createClient=${directClients.length} modules (${isolatedClients.length} isolated from KomoRuntime) · route writers=${routeWriters.length} · view proxy=${legacyViewOwners.length} · exact view mutators=${exactViewMutators.length} (${exactViewReplacers.length} replace / ${exactViewInserters.length} insert)`);
 if(duplicateScriptTags.length)console.log('[pulse-runtime-debt-v1] duplicate tags',duplicateScriptTags);
 console.log('[pulse-runtime-debt-v1] top risk modules');
 for(const m of ranked.slice(0,20))console.log(`  ${String(m.risk).padStart(3)} · ${m.file} · obs=${m.observers}/${m.bodyObservers} int=${m.intervals} timeout=${m.timeouts} sb=${m.createClients}${m.createClients?(m.sharedRuntime?'/shared':'/isolated'):''} route=${m.routeWrites} view=${m.viewWritesExact}[${m.viewReplaceWrites}r/${m.viewInsertWrites}i] bytes=${m.bytes}`);
@@ -104,7 +105,7 @@ for(const [surface,candidates] of Object.entries(owners)){
   console.log(`[pulse-runtime-debt-v1] surface ${surface}: ${loaded.length} candidates · ${loaded.join(', ')||'none'}`);
 }
 
-const report={generated_at:new Date().toISOString(),direct_scripts:scripts.length,unique_script_tags:scriptCounts.size,reachable_modules:reachable.size,total_js_modules:jsFiles.length,loaded_bytes:loadedBytes,mutation_observers:observerCount,whole_body_observers:wholeBody.map(x=>x.file),interval_modules:metrics.filter(x=>x.intervals>0).map(x=>({file:x.file,count:x.intervals})),direct_supabase_clients:directClients.map(x=>x.file),isolated_supabase_clients:isolatedClients.map(x=>x.file),route_writers:routeWriters.map(x=>x.file),view_writers_legacy_proxy:legacyViewOwners.map(x=>x.file),view_mutators_exact:exactViewMutators.map(x=>x.file),view_replacers_exact:exactViewReplacers.map(x=>x.file),view_inserters_exact:exactViewInserters.map(x=>x.file),view_proxy_false_positives:legacyViewFalsePositives.map(x=>x.file),duplicate_script_tags:duplicateScriptTags,top_risk:ranked.slice(0,30),surface_candidates:Object.fromEntries(Object.entries(owners).map(([k,v])=>[k,v.filter(x=>reachable.has(x))]))};
+const report={generated_at:new Date().toISOString(),direct_scripts:scripts.length,unique_script_tags:scriptCounts.size,reachable_modules:reachable.size,total_js_modules:jsFiles.length,loaded_bytes:loadedBytes,mutation_observers:observerCount,interval_count:intervalCount,whole_body_observers:wholeBody.map(x=>x.file),interval_modules:metrics.filter(x=>x.intervals>0).map(x=>({file:x.file,count:x.intervals})),direct_supabase_clients:directClients.map(x=>x.file),isolated_supabase_clients:isolatedClients.map(x=>x.file),route_writers:routeWriters.map(x=>x.file),view_writers_legacy_proxy:legacyViewOwners.map(x=>x.file),view_mutators_exact:exactViewMutators.map(x=>x.file),view_replacers_exact:exactViewReplacers.map(x=>x.file),view_inserters_exact:exactViewInserters.map(x=>x.file),view_proxy_false_positives:legacyViewFalsePositives.map(x=>x.file),duplicate_script_tags:duplicateScriptTags,top_risk:ranked.slice(0,30),surface_candidates:Object.fromEntries(Object.entries(owners).map(([k,v])=>[k,v.filter(x=>reachable.has(x))]))};
 console.log('[pulse-runtime-debt-v1] REPORT_JSON '+JSON.stringify(report));
 
 const BASELINE=JSON.parse(await readFile(baselinePath,'utf8'));
@@ -112,6 +113,7 @@ const regressions=[];
 if(scripts.length>BASELINE.scripts)regressions.push(`direct scripts ${scripts.length}>${BASELINE.scripts}`);
 if(loadedBytes>BASELINE.bytes)regressions.push(`loaded bytes ${loadedBytes}>${BASELINE.bytes}`);
 if(observerCount>BASELINE.observers)regressions.push(`MutationObserver ${observerCount}>${BASELINE.observers}`);
+if(intervalCount>BASELINE.intervals)regressions.push(`setInterval occurrences ${intervalCount}>${BASELINE.intervals}`);
 if(wholeBody.length>BASELINE.wholeBody)regressions.push(`whole-body observers ${wholeBody.length}>${BASELINE.wholeBody}`);
 if(directClients.length>BASELINE.directClients)regressions.push(`createClient modules ${directClients.length}>${BASELINE.directClients}`);
 if(isolatedClients.length>BASELINE.isolatedClients)regressions.push(`isolated Supabase clients ${isolatedClients.length}>${BASELINE.isolatedClients}`);
@@ -122,4 +124,4 @@ if(exactViewReplacers.length>BASELINE.viewReplacersExact)regressions.push(`exact
 if(exactViewInserters.length>BASELINE.viewInsertersExact)regressions.push(`exact view inserters ${exactViewInserters.length}>${BASELINE.viewInsertersExact}`);
 if(duplicateScriptTags.length)regressions.push('duplicate direct script tags detected');
 if(regressions.length){console.error('[pulse-runtime-debt-v1] FAILED · '+regressions.join(' | '));process.exit(1)}
-console.log('[pulse-runtime-debt-v1] PASS · versioned runtime debt baseline locked; exact view ownership measured separately from legacy proxy');
+console.log('[pulse-runtime-debt-v1] PASS · versioned runtime debt baseline locked; exact view ownership and interval budget measured separately');
