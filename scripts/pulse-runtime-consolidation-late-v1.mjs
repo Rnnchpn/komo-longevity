@@ -37,4 +37,15 @@ if(homeMotion.includes('.observe(document.body'))throw new Error('[pulse-runtime
 const hero=await patch('site/pulse-v12/pulse-home-hero-polish-v2.js',[["new MutationObserver(()=>schedule(false)).observe(document.body,{childList:true,subtree:true});","new MutationObserver(()=>schedule(false)).observe(document.querySelector('#appShell'),{childList:true,subtree:true});"]],'Home Hero Polish',{stripHeader:true});
 if(hero.includes('.observe(document.body'))throw new Error('[pulse-runtime-late] Home Hero body observer remains');
 
-console.log('[pulse-runtime-late] all legacy whole-body observers eliminated; modern Home preserved on canonical roots');
+const html=await readFile('site/pulse-v12/index.html','utf8');
+const perfAt=html.indexOf('./performance-runtime-v1.js'),motionAt=html.indexOf('./motion-hub-v3.js');
+if(perfAt<0||motionAt<0||perfAt>motionAt)throw new Error('[pulse-runtime-late] shared runtime must load before Motion Hub');
+const motion=await patch('site/pulse-v12/motion-hub-v3.js',[
+["import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';\n\n",''],
+["const URL='https://uqlolefsiktbznnymriy.supabase.co';\nconst KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';\nconst REM='komo_pulse_remember';\n",''],
+["const S={client:null,user:null,patient:null,assessment:null,registry:{},sessions:{},responses:{},loading:false,openCode:null,message:'',kind:''};","const S={user:null,patient:null,assessment:null,registry:{},sessions:{},responses:{},loading:false,openCode:null,message:'',kind:''};"],
+["const storage=()=>localStorage.getItem(REM)==='1'?localStorage:sessionStorage;\nconst sb=()=>S.client||(S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));","const sb=()=>window.KomoRuntime.client;"]
+],'Motion Hub');
+if(motion.includes('createClient')||motion.includes('S.client'))throw new Error('[pulse-runtime-late] Motion Hub still owns a Supabase client');
+
+console.log('[pulse-runtime-late] zero whole-body observers retained; Motion Hub adopted canonical Supabase runtime');
