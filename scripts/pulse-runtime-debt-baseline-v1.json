@@ -7,7 +7,7 @@
   "isolatedClients": 1,
   "routeWriters": 29,
   "viewWriters": 10,
-  "viewMutatorsExact": 20,
+  "viewMutatorsExact": 21,
   "viewReplacersExact": 13,
-  "viewInsertersExact": 8
+  "viewInsertersExact": 9
 }
