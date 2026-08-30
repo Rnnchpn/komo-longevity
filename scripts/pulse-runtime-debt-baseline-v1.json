@@ -1,14 +1,14 @@
 {
-  "scripts": 121,
-  "bytes": 1285393,
-  "observers": 73,
+  "scripts": 120,
+  "bytes": 1276046,
+  "observers": 72,
   "intervals": 3,
   "wholeBody": 0,
-  "directClients": 45,
+  "directClients": 44,
   "isolatedClients": 1,
   "routeWriters": 28,
   "viewWriters": 8,
-  "viewMutatorsExact": 19,
-  "viewReplacersExact": 13,
+  "viewMutatorsExact": 18,
+  "viewReplacersExact": 12,
   "viewInsertersExact": 7
 }
