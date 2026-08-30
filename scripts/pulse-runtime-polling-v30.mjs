@@ -20,3 +20,4 @@ for(const [file,target]of Object.entries(contracts)){
 }
 
 console.log('[pulse-polling-v30] four persistent polling loops retired · refresh now event/observer driven');
+await import('./pulse-runtime-results-consolidation-v31.mjs');
