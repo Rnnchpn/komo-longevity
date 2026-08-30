@@ -4,9 +4,12 @@ import { fileURLToPath } from 'node:url';
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const source=join(root,'pulse-app','pulse-functional-rc1.js');
+const ownerGuardSource=join(root,'pulse-app','center-owner-ui-guard-v1.js');
+const centerCommandSource=join(root,'supabase','functions','center-command-v2','index.ts');
 const navSource=join(root,'pulse-app','patient-navigation-core-v1.js');
 const targetDir=join(root,'site','pulse-v12');
 const target=join(targetDir,'pulse-functional-rc1.js');
+const ownerGuardTarget=join(targetDir,'center-owner-ui-guard-v1.js');
 const indexPath=join(targetDir,'index.html');
 const appRouterPath=join(targetDir,'app-router-v2.js');
 const appPath=join(targetDir,'app.js');
@@ -14,14 +17,15 @@ const runtimePath=join(targetDir,'runtime.js');
 const profilePath=join(targetDir,'profile-v2.js');
 const resetIndexPath=join(targetDir,'reset','index.html');
 const resetJsPath=join(targetDir,'reset','reset.js');
-const RELEASE='20260830-rc1-functional-v4';
+const RELEASE='20260830-rc1-functional-v5';
+const ownerTag=`<script src="./center-owner-ui-guard-v1.js?v=${RELEASE}"></script>`;
 const tag=`<script src="./pulse-functional-rc1.js?v=${RELEASE}"></script>`;
 
 await Promise.all([
-  access(source),access(indexPath),access(navSource),access(appRouterPath),
+  access(source),access(ownerGuardSource),access(centerCommandSource),access(indexPath),access(navSource),access(appRouterPath),
   access(appPath),access(runtimePath),access(profilePath),access(resetIndexPath),access(resetJsPath)
 ]);
-await copyFile(source,target);
+await Promise.all([copyFile(source,target),copyFile(ownerGuardSource,ownerGuardTarget)]);
 
 // Messages and Admin are dedicated route owners. The base router must not briefly
 // render Home before their dedicated modules take over.
@@ -36,12 +40,15 @@ await writeFile(appRouterPath,appRouter,'utf8');
 
 let html=await readFile(indexPath,'utf8');
 html=html.replace(/\s*<script[^>]+src="\.\/pulse-functional-rc1\.js(?:\?[^\"]*)?"[^>]*><\/script>/g,'');
-html=html.replace('</body>',`  ${tag}\n</body>`);
+html=html.replace(/\s*<script[^>]+src="\.\/center-owner-ui-guard-v1\.js(?:\?[^\"]*)?"[^>]*><\/script>/g,'');
+html=html.replace('</body>',`  ${ownerTag}\n  ${tag}\n</body>`);
 await writeFile(indexPath,html,'utf8');
 
-const [finalHtml,rc1,nav,finalRouter,app,runtime,profile,resetIndex,resetJs]=await Promise.all([
+const [finalHtml,rc1,ownerGuard,centerCommand,nav,finalRouter,app,runtime,profile,resetIndex,resetJs]=await Promise.all([
   readFile(indexPath,'utf8'),
   readFile(target,'utf8'),
+  readFile(ownerGuardTarget,'utf8'),
+  readFile(centerCommandSource,'utf8'),
   readFile(navSource,'utf8'),
   readFile(appRouterPath,'utf8'),
   readFile(appPath,'utf8'),
@@ -54,8 +61,10 @@ const [finalHtml,rc1,nav,finalRouter,app,runtime,profile,resetIndex,resetJs]=awa
 const failures=[];
 const ok=(label,value)=>{if(!value)failures.push(label);else console.log(`[pulse-functional-rc1] OK · ${label}`)};
 
+const scripts=[...finalHtml.matchAll(/<script[^>]+src="([^"]+)"[^>]*><\/script>/g)].map(x=>x[1]);
 ok('RC1 runtime copied',rc1.includes("const VERSION='1.1.0'"));
-ok('RC1 runtime loaded last', [...finalHtml.matchAll(/<script[^>]+src="([^"]+)"[^>]*><\/script>/g)].at(-1)?.[1]?.startsWith('./pulse-functional-rc1.js'));
+ok('RC1 runtime loaded last',scripts.at(-1)?.startsWith('./pulse-functional-rc1.js'));
+ok('center owner UI guard is loaded immediately before RC1',scripts.at(-2)?.startsWith('./center-owner-ui-guard-v1.js'));
 ok('legacy tests route converges to Results',nav.includes("tests:'results'"));
 ok('KEY is a canonical patient route',nav.includes("'key'"));
 ok('Messages is recognized by base router',finalRouter.includes("'messages','admin'"));
@@ -71,6 +80,14 @@ ok('center-created appointment is confirmed',rc1.includes("client.rpc('approve_k
 ok('Motion episode opens after center booking',rc1.includes("client.rpc('ensure_motion_appointment_episode'"));
 ok('Clinical episode opens after center booking',rc1.includes("client.rpc('ensure_clinical_appointment_episode'"));
 ok('visible-button diagnostics exposed',rc1.includes('window.KomoFunctionalRC1'));
+
+// Ownership is a backend boundary, not a visual convention. Clinical admins may
+// manage a center but cannot promote, modify or remove an owner membership.
+ok('center backend defines explicit ownership permission',centerCommand.includes('canManageOwnership'));
+ok('center backend rejects unauthorized owner mutation',centerCommand.includes('owner_role_required'));
+ok('center backend protects owner on update and removal',centerCommand.includes('current.data.role==="owner"||role==="owner"')&&centerCommand.includes('current.data.role==="owner"&&!(await canManageOwnership(oid))'));
+ok('center creation cleans partial setup failures',centerCommand.includes('center_services_failed')&&centerCommand.includes('center_hours_failed')&&centerCommand.includes('await cleanup()'));
+ok('center UI removes owner escalation from non-owner managers',ownerGuard.includes("o.value==='owner'")&&ownerGuard.includes('targetOwner')&&ownerGuard.includes('canOwn'));
 
 // Auth/account contracts: these checks prevent a visually working login/reset/profile
 // surface from shipping without the actual Supabase actions behind it.
@@ -109,7 +126,7 @@ if(missingImports.length)failures.push(...missingImports.map(x=>`missing JS impo
 ok('all relative JS imports resolve',missingImports.length===0);
 
 // Core route owners required for RC1.
-for(const asset of ['patient-navigation-core-v1.js','motion-hub-v3.js','key-hub-v1.js','trajectory-v3.js','agenda-hub-v4.js','profile-v2.js','patient-canonical-results.js','report-bootstrap-v1.js','pulse-bottom-nav-v6.js','clinical-cockpit-v1.js','center-two-tab-workspace-v1.js','care-messaging-v2.js','admin-console-v2.js']){
+for(const asset of ['patient-navigation-core-v1.js','motion-hub-v3.js','key-hub-v1.js','trajectory-v3.js','agenda-hub-v4.js','profile-v2.js','patient-canonical-results.js','report-bootstrap-v1.js','pulse-bottom-nav-v6.js','clinical-cockpit-v1.js','center-two-tab-workspace-v1.js','care-messaging-v2.js','admin-console-v2.js','center-owner-ui-guard-v1.js']){
   ok(`core asset loaded: ${asset}`,finalHtml.includes(`./${asset}`));
 }
 
@@ -117,4 +134,4 @@ if(failures.length){
   console.error(`[pulse-functional-rc1] FAILED · ${failures.join(' | ')}`);
   process.exit(1);
 }
-console.log(`[pulse-functional-rc1] PASS · ${unique.length} local assets checked · ${jsFiles.length} JS modules scanned · patient/booking/center/messages/admin/auth/profile routing guarded`);
+console.log(`[pulse-functional-rc1] PASS · ${unique.length} local assets checked · ${jsFiles.length} JS modules scanned · patient/booking/center/ownership/messages/admin/auth/profile routing guarded`);
