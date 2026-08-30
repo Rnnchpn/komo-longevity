@@ -31,3 +31,5 @@ if((finalHtml.match(new RegExp(bundle,'g'))||[]).length!==1)throw new Error('[pu
 const finalBundle=await readFile(root+bundle,'utf8');
 for(const signature of ['mobile-test-cta','mobileSurface','kamo-phone-app'])if(!finalBundle.includes(signature))throw new Error(`[pulse-mobile-v28] bundled behavior missing: ${signature}`);
 console.log('[pulse-mobile-v28] three auxiliary mobile runtimes bundled into one · behavior preserved without separator overhead');
+
+await import('./pulse-runtime-mykomo-visual-v29.mjs');
