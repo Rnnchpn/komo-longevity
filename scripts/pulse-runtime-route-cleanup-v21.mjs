@@ -1,4 +1,5 @@
 import{readFile,writeFile,readdir}from'node:fs/promises';
+await import('./pulse-runtime-agenda-cleanup-v27.mjs');
 const root='site/pulse-v12/';
 const writer=/location\.hash\s*=(?!=)|history\.(?:pushState|replaceState)\s*\(/;
 async function patch(file,changes){const path=root+file;let s=await readFile(path,'utf8');for(const[a,b]of changes){if(s.includes(a))s=s.replace(a,b);else if(!s.includes(b))throw new Error(`[pulse-route] ${file} contract changed`)}await writeFile(path,s);return s}
