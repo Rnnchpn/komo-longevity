@@ -73,16 +73,17 @@ for(const [surface,candidates] of Object.entries(owners)){
 const report={generated_at:new Date().toISOString(),direct_scripts:scripts.length,unique_script_tags:scriptCounts.size,reachable_modules:reachable.size,total_js_modules:jsFiles.length,loaded_bytes:loadedBytes,mutation_observers:observerCount,whole_body_observers:wholeBody.map(x=>x.file),interval_modules:metrics.filter(x=>x.intervals>0).map(x=>({file:x.file,count:x.intervals})),direct_supabase_clients:directClients.map(x=>x.file),isolated_supabase_clients:isolatedClients.map(x=>x.file),route_writers:routeWriters.map(x=>x.file),view_writers:viewOwners.map(x=>x.file),duplicate_script_tags:duplicateScriptTags,top_risk:ranked.slice(0,30),surface_candidates:Object.fromEntries(Object.entries(owners).map(([k,v])=>[k,v.filter(x=>reachable.has(x))]))};
 console.log('[pulse-runtime-debt-v1] REPORT_JSON '+JSON.stringify(report));
 
-// Baseline from production commit 049c150. These ceilings may only move down.
-const BASELINE={scripts:131,bytes:1340976,observers:79,wholeBody:51,directClients:64,routeWriters:48,viewWriters:11};
+// Baseline after runtime consolidation wave 2. These ceilings may only move down.
+const BASELINE={scripts:131,bytes:1340075,observers:79,wholeBody:46,directClients:59,isolatedClients:15,routeWriters:48,viewWriters:11};
 const regressions=[];
 if(scripts.length>BASELINE.scripts)regressions.push(`direct scripts ${scripts.length}>${BASELINE.scripts}`);
 if(loadedBytes>BASELINE.bytes)regressions.push(`loaded bytes ${loadedBytes}>${BASELINE.bytes}`);
 if(observerCount>BASELINE.observers)regressions.push(`MutationObserver ${observerCount}>${BASELINE.observers}`);
 if(wholeBody.length>BASELINE.wholeBody)regressions.push(`whole-body observers ${wholeBody.length}>${BASELINE.wholeBody}`);
 if(directClients.length>BASELINE.directClients)regressions.push(`createClient modules ${directClients.length}>${BASELINE.directClients}`);
+if(isolatedClients.length>BASELINE.isolatedClients)regressions.push(`isolated Supabase clients ${isolatedClients.length}>${BASELINE.isolatedClients}`);
 if(routeWriters.length>BASELINE.routeWriters)regressions.push(`route writers ${routeWriters.length}>${BASELINE.routeWriters}`);
 if(viewOwners.length>BASELINE.viewWriters)regressions.push(`view writers ${viewOwners.length}>${BASELINE.viewWriters}`);
 if(duplicateScriptTags.length)regressions.push('duplicate direct script tags detected');
 if(regressions.length){console.error('[pulse-runtime-debt-v1] FAILED · '+regressions.join(' | '));process.exit(1)}
-console.log('[pulse-runtime-debt-v1] PASS · production debt baseline locked; no deletion performed');
+console.log('[pulse-runtime-debt-v1] PASS · wave 2 runtime debt baseline locked; ceilings may only move down');
