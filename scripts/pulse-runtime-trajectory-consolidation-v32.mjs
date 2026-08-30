@@ -24,3 +24,4 @@ const finalHtml=await readFile(htmlPath,'utf8');
 if(finalHtml.includes(legacy))throw new Error('[pulse-trajectory-v32] legacy path renderer remains direct');
 if(!finalHtml.includes(canonical))throw new Error('[pulse-trajectory-v32] canonical trajectory owner removed unexpectedly');
 console.log('[pulse-trajectory-v32] legacy #path renderer retired · #trajectory remains the single trajectory owner');
+await import('./pulse-runtime-home-consolidation-v33.mjs');
