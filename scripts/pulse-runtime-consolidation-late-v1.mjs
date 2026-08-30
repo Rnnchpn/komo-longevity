@@ -1,6 +1,6 @@
 import{readFile,writeFile}from'node:fs/promises';
 
-async function patch(path,changes,label){let s=await readFile(path,'utf8');for(const[from,to]of changes){if(s.includes(from))s=s.replace(from,to);else if(!s.includes(to))throw new Error(`[pulse-runtime-late] ${label} contract changed`)}await writeFile(path,s);return s}
+async function patch(path,changes,label,{stripHeader=false}={}){let s=await readFile(path,'utf8');for(const[from,to]of changes){if(s.includes(from))s=s.replace(from,to);else if(!s.includes(to))throw new Error(`[pulse-runtime-late] ${label} contract changed`)}if(stripHeader)s=s.replace(/^\/\*[\s\S]*?\*\/\n/,'');await writeFile(path,s);return s}
 
 const center=await patch('site/pulse-v12/center-command-cockpit-v2.js',[["obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});","obs.observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});"]],'Center Command');
 if(center.includes('obs.observe(document.body'))throw new Error('[pulse-runtime-late] Center Command body observer remains');
@@ -18,11 +18,23 @@ if(first.includes('observer.observe(document.body'))throw new Error('[pulse-runt
 const myocare=await patch('site/pulse-v12/myocare-import-entry-v2.js',[["observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});","observer.observe(document.querySelector('#viewRoot'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});"]],'MyoCare Import');
 if(myocare.includes('observer.observe(document.body'))throw new Error('[pulse-runtime-late] MyoCare body observer remains');
 
-let adaptive=await readFile('site/pulse-v12/adaptive-shell-v4.js','utf8');
-const adaptiveFrom="observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});",adaptiveTo="observer.observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});";
-if(adaptive.includes(adaptiveFrom))adaptive=adaptive.replace(adaptiveFrom,adaptiveTo);else if(!adaptive.includes(adaptiveTo))throw new Error('[pulse-runtime-late] Adaptive Shell contract changed');
-adaptive=adaptive.replace(/^\/\*[\s\S]*?\*\/\n/,'');
-await writeFile('site/pulse-v12/adaptive-shell-v4.js',adaptive);
+const adaptive=await patch('site/pulse-v12/adaptive-shell-v4.js',[["observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});","observer.observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});"]],'Adaptive Shell',{stripHeader:true});
 if(adaptive.includes('observer.observe(document.body'))throw new Error('[pulse-runtime-late] Adaptive Shell body observer remains');
 
-console.log('[pulse-runtime-late] Center, Results, First Test, MyoCare and Adaptive Shell observers scoped');
+const free=await patch('site/pulse-v12/pulse-free-continuity-v2.js',[
+["function sb(){if(!S.client)S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return S.client}","function sb(){return window.KomoRuntime?.client||(S.client||(S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}"],
+["obs.observe(document.body,{childList:true,subtree:true});","obs.observe(document.querySelector('#viewRoot'),{childList:true,subtree:true});"]
+],'Pulse Free Continuity');
+if(free.includes('obs.observe(document.body'))throw new Error('[pulse-runtime-late] Pulse Free body observer remains');
+if(!free.includes('window.KomoRuntime?.client'))throw new Error('[pulse-runtime-late] Pulse Free shared client missing');
+
+const homeVisual=await patch('site/pulse-v12/patient-home-visual-v2.js',[["new MutationObserver(patch).observe(document.body,{childList:true,subtree:true});","new MutationObserver(patch).observe(document.querySelector('#viewRoot'),{childList:true,subtree:true});"]],'Home Visual',{stripHeader:true});
+if(homeVisual.includes('.observe(document.body'))throw new Error('[pulse-runtime-late] Home Visual body observer remains');
+
+const homeMotion=await patch('site/pulse-v12/patient-home-micro-motion-v1.js',[["}).observe(document.body,{childList:true,subtree:true});","}).observe(document.querySelector('#viewRoot'),{childList:true,subtree:true});"]],'Home Micro Motion',{stripHeader:true});
+if(homeMotion.includes('.observe(document.body'))throw new Error('[pulse-runtime-late] Home Micro Motion body observer remains');
+
+const hero=await patch('site/pulse-v12/pulse-home-hero-polish-v2.js',[["new MutationObserver(()=>schedule(false)).observe(document.body,{childList:true,subtree:true});","new MutationObserver(()=>schedule(false)).observe(document.querySelector('#appShell'),{childList:true,subtree:true});"]],'Home Hero Polish',{stripHeader:true});
+if(hero.includes('.observe(document.body'))throw new Error('[pulse-runtime-late] Home Hero body observer remains');
+
+console.log('[pulse-runtime-late] all legacy whole-body observers eliminated; modern Home preserved on canonical roots');
