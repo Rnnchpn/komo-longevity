@@ -26,6 +26,9 @@ Deno.serve(async(req:Request)=>{
   let body:any={};try{body=await req.json()}catch{return json(req,{error:"invalid_json"},400)}
   const action=String(body.action??"status");
 
+  const role=async()=>{const r=await svc.from("account_roles").select("role").eq("user_id",user.id).maybeSingle();return r.data?.role??"member"};
+  const requireAdmin=async()=>{if(await role()!=="admin")return false;return true};
+
   if(action==="status"){
     const [requests,consents]=await Promise.all([
       svc.from("account_privacy_requests").select("id,request_type,status,request_note,resolution_note,requested_at,updated_at,resolved_at").eq("user_id",user.id).order("requested_at",{ascending:false}).limit(20),
@@ -73,6 +76,50 @@ Deno.serve(async(req:Request)=>{
     const up=await svc.from("wearable_consents").update({status:"withdrawn",withdrawn_at:now,updated_at:now}).eq("user_id",user.id).eq("purpose","connected_followup").eq("status","active").select("id,status,withdrawn_at");
     if(up.error)return json(req,{error:"wearable_withdraw_failed",detail:up.error.message},500);
     return json(req,{ok:true,withdrawn:(up.data??[]).length,consents:up.data??[]});
+  }
+
+  if(action==="list_admin"){
+    if(!await requireAdmin())return json(req,{error:"admin_required"},403);
+    const q=await svc.from("account_privacy_requests").select("id,user_id,request_type,status,request_note,resolution_note,requested_at,updated_at,resolved_at,handled_by").order("requested_at",{ascending:false}).limit(250);
+    if(q.error)return json(req,{error:"privacy_admin_list_failed",detail:q.error.message},500);
+    const rows=await Promise.all((q.data??[]).map(async(x:any)=>{
+      const [p,a]=await Promise.all([
+        svc.from("profiles").select("display_name,first_name,last_name").eq("id",x.user_id).maybeSingle(),
+        svc.auth.admin.getUserById(x.user_id)
+      ]);
+      const profile=p.data??{};
+      const display=[profile.first_name,profile.last_name].filter(Boolean).join(" ")||profile.display_name||a.data?.user?.email||"Compte Pulse";
+      return{...x,display_name:display,email:a.data?.user?.email??null};
+    }));
+    const counts=rows.reduce((m:any,x:any)=>{m[x.status]=(m[x.status]??0)+1;return m},{});
+    return json(req,{requests:rows,counts});
+  }
+
+  if(action==="admin_update"){
+    if(!await requireAdmin())return json(req,{error:"admin_required"},403);
+    const id=String(body.request_id??"");
+    const next=String(body.status??"");
+    const note=String(body.resolution_note??"").trim().slice(0,1500)||null;
+    if(!id)return json(req,{error:"request_id_required"},400);
+    if(!["in_review","completed","declined"].includes(next))return json(req,{error:"invalid_admin_status"},400);
+    const lookup=await svc.from("account_privacy_requests").select("id,user_id,request_type,status").eq("id",id).maybeSingle();
+    if(lookup.error)return json(req,{error:"request_lookup_failed",detail:lookup.error.message},500);
+    const current=lookup.data;
+    if(!current)return json(req,{error:"request_not_found"},404);
+    const allowed=current.status==="submitted"?["in_review","completed","declined"]:current.status==="in_review"?["completed","declined"]:[];
+    if(!allowed.includes(next))return json(req,{error:"invalid_status_transition",status:current.status},409);
+    if(["completed","declined"].includes(next)&&!note)return json(req,{error:"resolution_note_required"},400);
+    if(next==="completed"&&body.execution_confirmed!==true)return json(req,{error:"execution_confirmation_required"},400);
+    const now=new Date().toISOString();
+    const terminal=["completed","declined"].includes(next);
+    const up=await svc.from("account_privacy_requests").update({status:next,resolution_note:note,handled_by:user.id,updated_at:now,resolved_at:terminal?now:null}).eq("id",id).eq("status",current.status).select("id,user_id,request_type,status,resolution_note,updated_at,resolved_at,handled_by").maybeSingle();
+    if(up.error)return json(req,{error:"privacy_admin_update_failed",detail:up.error.message},500);
+    if(!up.data)return json(req,{error:"privacy_request_changed",detail:"La demande a été modifiée. Rechargez la file."},409);
+    const target=await svc.auth.admin.getUserById(current.user_id);
+    const label=current.request_type==="data_export"?"copie de vos données":"fermeture de votre compte";
+    const message=next==="in_review"?`<p>Votre demande concernant la <strong>${label}</strong> est maintenant prise en charge par l’équipe KŌMØ.</p>`:next==="completed"?`<p>Le traitement de votre demande concernant la <strong>${label}</strong> est indiqué comme terminé dans KŌMØ Pulse.</p>`:`<p>Le traitement de votre demande concernant la <strong>${label}</strong> est clôturé. Consultez votre espace Pulse ou contactez KŌMØ si vous avez besoin d’un complément.</p>`;
+    await mail(target.data?.user?.email,"Mise à jour de votre demande · KŌMØ Pulse",message);
+    return json(req,{ok:true,request:up.data});
   }
 
   return json(req,{error:"unknown_action"},400);
