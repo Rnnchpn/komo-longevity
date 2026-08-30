@@ -23,5 +23,8 @@ await patch('dossier.html',[
 
 console.log(`[pulse-report-visual-v2] editorial Mobility Report pinned · ${RELEASE}`);
 
+// Align generated MyoCare provenance with the registered Motion protocol before final QA.
+await import('./pulse-myocare-contract-alignment-v1.mjs');
+
 // Final RC1 functional guard and smoke checks. This must stay last in the Pulse build.
 await import('./pulse-functional-rc1.mjs');
