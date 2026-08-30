@@ -9,8 +9,8 @@ const canonical=await patch('site/pulse-v12/patient-canonical-results.js',[["}).
 if(canonical.includes('.observe(document.body'))throw new Error('[pulse-runtime-late] Canonical Results body observer remains');
 
 const first=await patch('site/pulse-v12/first-test-entry-v1.js',[
-["const URL='https://uqlolefsiktbznnymriy.supabase.co';\nconst KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';\nconst REM='komo_pulse_remember';\nconst PENDING='komo_open_first_test_v1';\nlet client=null;\nlet freeState=null;\nlet checkedAt=0;\nlet checking=false;","const URL='https://uqlolefsiktbznnymriy.supabase.co',KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n',REM='komo_pulse_remember',PENDING='komo_open_first_test_v1';let client=null,freeState=null,checkedAt=0,checking=false;"],
-["  if(!button)return;","  if(!button){if(event.target.closest?.('#signupButton'))setTimeout(schedule);return}"],
+["const URL='https://uqlolefsiktbznnymriy.supabase.co';\nconst KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';\nconst REM='komo_pulse_remember';\nconst PENDING='komo_open_first_test_v1';\nlet client=null;\nlet freeState=null;\nlet checkedAt=0;\nlet checking=false;","const URL='https://uqlolefsiktbznnymriy.supabase.co',KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n',REM='komo_pulse_remember',PENDING='komo_open_first_test_v1';let client,freeState,checkedAt=0,checking=false;"],
+["  if(!button)return;","  if(!button){event.target.closest?.('#signupButton')&&setTimeout(schedule);return}"],
 ["observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','data-handoff','class']});","observer.observe(document.querySelector('#viewRoot'),{subtree:true,childList:true});"]
 ],'First Test');
 if(first.includes('observer.observe(document.body'))throw new Error('[pulse-runtime-late] First Test body observer remains');
