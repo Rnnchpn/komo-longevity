@@ -1,8 +1,8 @@
 {
   "scripts": 131,
-  "bytes": 1337162,
+  "bytes": 1337145,
   "observers": 79,
-  "wholeBody": 16,
+  "wholeBody": 12,
   "directClients": 48,
   "isolatedClients": 4,
   "routeWriters": 48,
