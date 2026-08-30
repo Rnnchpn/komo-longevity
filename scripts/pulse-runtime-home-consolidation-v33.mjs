@@ -13,13 +13,13 @@ const renderTail="if(host.dataset.signature===html)return;host.dataset.signature
 if(!home.includes(renderTail))throw new Error('[pulse-home-v33] canonical Home render contract changed');
 home=home.replace(renderTail,`${renderTail}window.dispatchEvent(new CustomEvent('komo:home-rendered'));`);
 
-const patientObserver="new MutationObserver(patch).observe(document.body,{childList:true,subtree:true});";
-if(!patientVisual.includes(patientObserver))throw new Error('[pulse-home-v33] patient Home visual observer contract changed');
+const patientObserver=/new MutationObserver\(patch\)\.observe\((?:document\.body|document\.querySelector\('#viewRoot'\)),\{childList:true,subtree:true\}\);/;
+if(!patientObserver.test(patientVisual))throw new Error('[pulse-home-v33] patient Home visual observer contract changed');
 patientVisual=patientVisual.replace(patientObserver,"window.addEventListener('komo:home-rendered',patch);");
 
-const ringObserver="new MutationObserver(()=>{if(document.querySelector('.mykomo-home .mykomo-ring:not([data-komo-animated=\"1\"])'))schedule()}).observe(document.body,{childList:true,subtree:true});";
-const dashboardObserver="new MutationObserver(()=>{if(route()==='home')schedule(90)}).observe(document.body,{childList:true,subtree:true,characterData:true});";
-if(!visualBundle.includes(ringObserver)||!visualBundle.includes(dashboardObserver))throw new Error('[pulse-home-v33] My KŌMØ visual observer contract changed');
+const ringObserver=/new MutationObserver\(\(\)=>\{if\(document\.querySelector\('\.mykomo-home \.mykomo-ring:not\(\[data-komo-animated=\"1\"\]\)'\)\)schedule\(\)\}\)\.observe\([^;]+;/;
+const dashboardObserver=/new MutationObserver\(\(\)=>\{if\(route\(\)==='home'\)schedule\(90\)\}\)\.observe\([^;]+;/;
+if(!ringObserver.test(visualBundle)||!dashboardObserver.test(visualBundle))throw new Error('[pulse-home-v33] My KŌMØ visual observer contract changed');
 visualBundle=visualBundle.replace(ringObserver,"window.addEventListener('komo:home-rendered',schedule);");
 visualBundle=visualBundle.replace(dashboardObserver,"window.addEventListener('komo:home-rendered',()=>schedule(0));");
 
