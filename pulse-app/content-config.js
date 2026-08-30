@@ -1,6 +1,3 @@
-// KŌMØ Pulse production content configuration.
-// This file is intentionally separate from design and Supabase logic so copy and public links
-// can be updated safely without changing the visual system or authentication layer.
 (() => {
   const PUBLIC_LINKS = Object.freeze({
     'Méthode KŌMØ': 'https://komolongevity.com/fr/methode/',
@@ -54,16 +51,14 @@
   }
 
   function applyCopy(root = document.body) {
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    const nodes = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT),nodes=[];
     while (walker.nextNode()) nodes.push(walker.currentNode);
     nodes.forEach(replaceTextInNode);
   }
 
   function applyExplorerLinks(root = document) {
     root.querySelectorAll?.('.explorer-card').forEach((card) => {
-      const title = card.querySelector('h3')?.textContent?.trim();
-      const href = PUBLIC_LINKS[title];
+      const title = card.querySelector('h3')?.textContent?.trim(),href = PUBLIC_LINKS[title];
       if (!href) return;
       card.setAttribute('href', href);
       card.setAttribute('target', '_blank');
@@ -76,29 +71,24 @@
     applyExplorerLinks(root === document ? document : root);
   }
 
-  function scheduleApply() {
-    requestAnimationFrame(() => applyAll(document));
-  }
-
   const observer = new MutationObserver((mutations) => {
-    let needsExplorerRefresh = false;
+    let refresh = false;
     for (const mutation of mutations) {
       if (mutation.type === 'characterData') replaceTextInNode(mutation.target);
       for (const node of mutation.addedNodes) {
         if (node.nodeType === Node.TEXT_NODE) replaceTextInNode(node);
         if (node.nodeType === Node.ELEMENT_NODE) {
           applyCopy(node);
-          if (node.matches?.('.explorer-card') || node.querySelector?.('.explorer-card')) needsExplorerRefresh = true;
+          if (node.matches?.('.explorer-card') || node.querySelector?.('.explorer-card')) refresh = true;
         }
       }
     }
-    if (needsExplorerRefresh) applyExplorerLinks(document);
+    if (refresh) applyExplorerLinks(document);
   });
 
   document.addEventListener('DOMContentLoaded', () => {
-    loadEcosystemLayer();
-    applyAll(document);
-    observer.observe(document.body, { subtree: true, childList: true, characterData: true });
-    scheduleApply();
+    loadEcosystemLayer();applyAll(document);
+    const host=document.querySelector('#appShell');if(host)observer.observe(host,{subtree:true,childList:true,characterData:true});
+    requestAnimationFrame(() => applyAll(document));
   });
 })();
