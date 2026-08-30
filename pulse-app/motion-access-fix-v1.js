@@ -1,6 +1,3 @@
-/* KŌMØ Pulse — Motion access fix v1
-   Keeps Motion entry clickable and hands members without a professional Motion dossier
-   to the canonical Pulse Free test flow instead of leaving disabled controls. */
 (() => {
   'use strict';
   const V='1.0.0';
