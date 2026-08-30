@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const target=join(root,'site','pulse-v12');
-const RELEASE='20260830-report-visual-v2';
+const RELEASE='20260830-report-live-v3';
 
 async function patch(name,replacements){
   const path=join(target,name);
@@ -21,4 +21,4 @@ await patch('dossier.html',[
   [/dossier-pdf-export-v2\.js\?v=[^\"]+/g,`dossier-pdf-export-v2.js?v=${RELEASE}`]
 ]);
 
-console.log(`[pulse-report-visual-v2] editorial Mobility Report pinned · ${RELEASE}`);
+console.log(`[pulse-report-visual-v2] identity Mobility Report + live download pinned · ${RELEASE}`);

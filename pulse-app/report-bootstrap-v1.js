@@ -1,3 +1,3 @@
-import './report-patient-ui-v1.js';
-import './mobility-report-pdf-v1.js?v=20260830-report-visual-v2';
-window.KomoReportBootstrap={version:'2.0.0',visualSystem:'komo-editorial-2026'};
+import './report-patient-ui-v2.js?v=20260830-report-live-v3';
+import './mobility-report-pdf-v2.js?v=20260830-report-live-v3';
+window.KomoReportBootstrap={version:'3.0.0',visualSystem:'komo-identity-editorial-2026',downloadMode:'latest-released'};
