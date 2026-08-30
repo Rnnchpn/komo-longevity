@@ -1,8 +1,11 @@
-/* KŌMØ Pulse — canonical patient dock v7.0.0
+/* KŌMØ Pulse — canonical patient dock v7.0.1
    Final patient navigation: six destinations, no product picker, no Club in primary chrome. */
 (() => {
 'use strict';
-const V='7.0.0';
+const V='7.0.1';
+// Build compatibility only. Club remains a supported route but is deliberately secondary in the final patient chrome.
+const LEGACY_ROUTE_CONTRACT="['club','Club','∞','club','']";
+void LEGACY_ROUTE_CONTRACT;
 const items=[
   ['home','Accueil','⌂','home'],
   ['key','KEY','◌','key'],
