@@ -9,8 +9,8 @@ const targetDir = join(root, 'site', 'pulse-v12');
 const target = join(targetDir, 'patient-home-final-v1.js');
 const stabilityTarget = join(targetDir, 'patient-home-stability-v1.js');
 const indexPath = join(targetDir, 'index.html');
-const VERSION = '20260830-patient-home-final-v1-1';
-const STABILITY_VERSION = '20260830-patient-home-stability-v1';
+const VERSION = '20260830-patient-home-final-v1-2';
+const STABILITY_VERSION = '20260830-patient-home-stability-v1-1';
 const STABILITY_TAG = `<script defer src="./patient-home-stability-v1.js?v=${STABILITY_VERSION}"></script>`;
 const TAG = `<script defer src="./patient-home-final-v1.js?v=${VERSION}"></script>`;
 
@@ -24,10 +24,22 @@ await Promise.all([
 
 let html = await readFile(indexPath, 'utf8');
 
-// Remove the two historical Home owners. They both re-render after route/data events
-// and one also watches #viewRoot, which can re-insert the old dashboard after the
-// definitive Home has already rendered. Other route-specific modules remain intact.
-for (const legacy of ['my-komo-home-v1.js', 'patient-home-command-v1.js']) {
+// Clean-room Home ownership. These files are historical Home renderers/decorators only.
+// Keeping them loaded causes delayed timers, body-wide MutationObservers, mobile retries
+// and topbar animations to continue after the definitive Home has rendered.
+const legacyHomeScripts = [
+  'my-komo-home-v1.js',
+  'patient-home-command-v1.js',
+  'patient-home-visual-v2.js',
+  'patient-home-micro-motion-v1.js',
+  'pulse-home-hero-polish-v2.js',
+  'my-komo-dashboard-v2.js',
+  'my-komo-key-home-v1.js',
+  'my-komo-score-motion-v1.js',
+  'home-key-position-v1.js'
+];
+
+for (const legacy of legacyHomeScripts) {
   const escaped = legacy.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   html = html.replace(new RegExp(`\\s*<script[^>]+src="\\.\\/${escaped}(?:\\?[^\"]*)?"[^>]*><\\/script>`, 'g'), '');
 }
@@ -45,12 +57,14 @@ const [checkHtml, checkJs, checkStability] = await Promise.all([
 
 if (!checkHtml.includes(TAG)) throw new Error('[pulse-patient-home-final] final Home runtime not injected');
 if (!checkHtml.includes(STABILITY_TAG)) throw new Error('[pulse-patient-home-final] stability runtime not injected');
-if (checkHtml.includes('my-komo-home-v1.js')) throw new Error('[pulse-patient-home-final] legacy My KŌMØ Home owner still present');
-if (checkHtml.includes('patient-home-command-v1.js')) throw new Error('[pulse-patient-home-final] legacy command Home owner still present');
+for (const legacy of legacyHomeScripts) {
+  if (checkHtml.includes(legacy)) throw new Error(`[pulse-patient-home-final] legacy Home runtime still present: ${legacy}`);
+}
 if (!checkJs.includes("patient-home-final-v1.0.0")) throw new Error('[pulse-patient-home-final] unexpected Home runtime source');
 if (!checkJs.includes('MOTION AGE') || !checkJs.includes('MOTION SCORE')) throw new Error('[pulse-patient-home-final] core hierarchy missing');
 if (!checkJs.toLocaleLowerCase('fr').includes('aucune valeur n’est inventée')) throw new Error('[pulse-patient-home-final] missing-data safeguard missing');
-if (!checkStability.includes('KomoPatientHomeStability')) throw new Error('[pulse-patient-home-final] stability runtime invalid');
+if (!checkStability.includes("VERSION = '1.1.0'")) throw new Error('[pulse-patient-home-final] stability runtime invalid');
+if (!checkStability.includes('data-adaptive-shell="phone"')) throw new Error('[pulse-patient-home-final] phone canvas override missing');
 
 const scripts = [...checkHtml.matchAll(/<script[^>]+src="([^"]+)"[^>]*><\/script>/g)].map((m) => m[1]);
 const lastScript = scripts.at(-1) || '';
@@ -62,4 +76,4 @@ if (!penultimateScript.startsWith('./patient-home-stability-v1.js')) {
   throw new Error(`[pulse-patient-home-final] stability runtime must load immediately before final Home, got ${penultimateScript || 'none'}`);
 }
 
-console.log('[pulse-patient-home-final] PASS · single Home owner · legacy renderers removed · Motion Age → Motion Score → dimensions → priority → trajectory → assessment/report');
+console.log(`[pulse-patient-home-final] PASS · clean-room Home · ${legacyHomeScripts.length} legacy runtimes removed · desktop + phone canvas isolated · Motion Age → Motion Score → dimensions → priority → trajectory → assessment/report`);
