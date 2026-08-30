@@ -2,7 +2,7 @@
    Narrow, deterministic fixes only. No visual ownership, no score ownership. */
 (() => {
   'use strict';
-  const VERSION='1.2.0';
+  const VERSION='1.1.0';
   const BOOKING_SERVICE_KEY='komo_agenda_service_v4';
   const BOOKING_SESSION_KEY='komo_home_booking_service';
   const FOCUS_BOOKING_KEY='komo_rc1_focus_booking';
