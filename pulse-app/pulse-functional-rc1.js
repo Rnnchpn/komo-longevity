@@ -175,13 +175,16 @@
     if(names.some(n=>[
       'data-route','data-kp6-route','data-kh-go','data-kmv3-route','data-kmv3-open','data-kmv3-close','data-kmv3-chapter','data-kmv3-draft','data-kmv3-finish',
       'data-kts-action','data-ag4-route','data-ag4-scroll','data-ag4-service','data-ag4-slot','data-ag4-cancel','data-ag4-filter','data-ag4-place',
-      'data-komo-export-report','data-krpatient-download','data-krpatient-results','data-mkv5-route','data-mkv5-challenge','data-mkv5-save',
+      'data-komo-export-report','data-krpatient-download','data-krpatient-results','data-mkv5-route','data-mkv5-challenge','data-mkv5-save','data-mkv5-refresh',
       'data-open-test','data-close-test','data-kqe-open','data-kph2-motion','data-kph2-clinical','data-kph2-next',
       'data-pro-nav','data-kcp-tab','data-switch','data-open-import','data-review-score','data-release-score','data-approve-import','data-validate-priority','data-motion-new','data-center-hub-tab','data-kfollow-tab','data-kmsg-tab',
       'data-k2tw-nav','data-k2tw-open','data-k2tw-close','data-k2tw-import','data-k2tw-message','data-k2tw-approve',
-      'data-admin-tab','data-admin-refresh','data-admin-home','data-admin-pro','data-pro-select','data-pro-close','data-pro-approve','data-pro-review','data-pro-decline','data-patient-assign'
+      'data-admin-tab','data-admin-refresh','data-admin-home','data-admin-pro','data-pro-select','data-pro-close','data-pro-approve','data-pro-review','data-pro-decline','data-patient-assign',
+      'data-kap-submit','data-kap-cancel','data-kap-withdraw','data-kap-download','data-admin-privacy-tab','data-kapq-review','data-kapq-generate-export','data-kapq-execute-closure','data-kapq-decline',
+      'data-kam-nav','data-kam-action','data-kam-role','data-kam-close','data-agp-select','data-agp-center','data-agp-near','data-agp-filter','data-agp-popup',
+      'data-kbook-service','data-kbook-slot','data-kbook-cancel','data-kbook-open','data-kbook-prev','data-kbook-next'
     ].includes(n)))return true;
-    if(button.id&&['refreshButton','accountButton','logoutButton','loginButton','signupButton','forgotPasswordButton','togglePassword','kpvChangeEmail','kpvResetPassword','k2twRefresh'].includes(button.id))return true;
+    if(button.id&&['refreshButton','accountButton','logoutButton','loginButton','signupButton','forgotPasswordButton','togglePassword','kpvChangeEmail','kpvResetPassword','k2twRefresh','kbookPatientPrev','kbookPatientNext','kwfRegister','kwfTemplate','kwfImport'].includes(button.id))return true;
     return false;
   }
 
