@@ -41,3 +41,4 @@ const finalHtml=await readFile(htmlPath,'utf8');
 for(const file of overlays)if(finalHtml.includes(file))throw new Error(`[pulse-home-v33] retired Home overlay remains direct: ${file}`);
 for(const signature of ['komo:home-rendered','data-khome-actions','mykomo-command-strip','KomoHomeDashboardV2'])if(!finalHome.includes(signature))throw new Error(`[pulse-home-v33] consolidated Home behavior missing: ${signature}`);
 console.log('[pulse-home-v33] Home data + presentation consolidated · three presentation observers retired · one canonical Home runtime retained');
+await import('./pulse-runtime-auth-consolidation-v34.mjs');
