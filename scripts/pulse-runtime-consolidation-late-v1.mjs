@@ -1,6 +1,7 @@
 import{readFile,writeFile}from'node:fs/promises';
 
 async function patch(path,changes,label,{stripHeader=false}={}){let s=await readFile(path,'utf8');for(const[from,to]of changes){if(s.includes(from))s=s.replace(from,to);else if(!s.includes(to))throw new Error(`[pulse-runtime-late] ${label} contract changed`)}if(stripHeader)s=s.replace(/^\/\*[\s\S]*?\*\/\n/,'');await writeFile(path,s);return s}
+const hasRouteWrite=s=>/location\.hash\s*=|history\.(?:pushState|replaceState)\s*\(/.test(s);
 
 const center=await patch('site/pulse-v12/center-command-cockpit-v2.js',[["obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});","obs.observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});"]],'Center Command');
 if(center.includes('obs.observe(document.body'))throw new Error('[pulse-runtime-late] Center Command body observer remains');
@@ -55,10 +56,31 @@ if(!trajectory.includes("komo:route-ready',()=>enter(false)"))throw new Error('[
 const agenda=await patch('site/pulse-v12/agenda-hub-v4.js',[["window.addEventListener('pageshow',()=>{if(route()==='documents')setTimeout(()=>refresh(),70)});","window.addEventListener('pageshow',()=>{if(route()==='documents')setTimeout(()=>refresh(),70)});window.addEventListener('komo:route-ready',()=>{if(route()==='documents')setTimeout(()=>refresh(),30)});window.addEventListener('komo:session-ready',()=>{if(route()==='documents')setTimeout(()=>refresh(),30)});"]],'Agenda owner');
 if(!agenda.includes("komo:route-ready',()=>{if(route()==='documents')"))throw new Error('[pulse-runtime-late] Agenda route-ready ownership missing');
 
+const clubEntry=await patch('site/pulse-v12/my-komo-club-entry-v1.js',[["    if(window.KomoPatientNavigation?.go)window.KomoPatientNavigation.go('club');\n    else location.hash='club';","    window.KomoPatientNavigation?.go?.('club');"]],'Club entry');
+if(hasRouteWrite(clubEntry))throw new Error('[pulse-runtime-late] Club entry still writes routes directly');
+
+const patientReport=await patch('site/pulse-v12/report-patient-ui-v1.js',[["function go(r){if(window.KomoPatientNavigation?.go)window.KomoPatientNavigation.go(r);else location.hash=r}","function go(r){window.KomoPatientNavigation?.go?.(r)}"]],'Patient report');
+if(hasRouteWrite(patientReport))throw new Error('[pulse-runtime-late] Patient report still writes routes directly');
+
+const motionAccess=await patch('site/pulse-v12/motion-access-fix-v1.js',[
+["    if(window.KomoPatientNavigation?.go) window.KomoPatientNavigation.go('motion');\n    else if(location.hash!=='#motion') location.hash='motion';\n    else window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:'motion',source:'motion-access-fix'}}));","    window.KomoPatientNavigation?.go?.('motion');"],
+["    location.hash='results';","    window.KomoPatientNavigation?.go?.('results');"]
+],'Motion access');
+if(hasRouteWrite(motionAccess))throw new Error('[pulse-runtime-late] Motion access still writes routes directly');
+
+const resultsPolish=await patch('site/pulse-v12/results-polish-v1.js',[
+["      next.querySelector('[data-krp-action=\"motion\"]')?.addEventListener('click',()=>{location.hash='documents'});","      next.querySelector('[data-krp-action=\"motion\"]')?.addEventListener('click',()=>window.KomoPatientNavigation?.go?.('documents'));"],
+["      next.querySelector('[data-krp-action=\"score\"]')?.addEventListener('click',()=>{location.hash='path'});","      next.querySelector('[data-krp-action=\"score\"]')?.addEventListener('click',()=>window.KomoPatientNavigation?.go?.('trajectory'));"],
+],'Results polish');
+if(hasRouteWrite(resultsPolish))throw new Error('[pulse-runtime-late] Results polish still writes routes directly');
+
+const logoutVisible=await patch('site/pulse-v12/account-logout-visible-v1.js',[["    location.hash='home';","    window.KomoPatientNavigation?.go?.('home');"]],'Visible logout');
+if(hasRouteWrite(logoutVisible))throw new Error('[pulse-runtime-late] Visible logout still writes routes directly');
+
 const legacyRouteScript=/\s*<script(?: type="module")? src="\.\/patient-route-runtime-v2\.js(?:\?v=[^\"']+)?"><\/script>/g;
 if(!legacyRouteScript.test(html))throw new Error('[pulse-runtime-late] patient-route-runtime-v2 script tag missing before retirement');
 html=html.replace(legacyRouteScript,'');
 if(html.includes('patient-route-runtime-v2.js'))throw new Error('[pulse-runtime-late] retired patient route runtime still loaded');
 await writeFile('site/pulse-v12/index.html',html);
 
-console.log('[pulse-runtime-late] zero whole-body observers retained; Motion uses shared Supabase; patient-route-runtime-v2 retired into canonical owners');
+console.log('[pulse-runtime-late] zero whole-body observers retained; Motion shared Supabase; five low-risk route writers centralized; patient-route-runtime-v2 retired');
