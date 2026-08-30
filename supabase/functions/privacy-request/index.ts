@@ -179,7 +179,7 @@ Deno.serve(async(req:Request)=>{
     if(!done.data)return json(req,{error:"privacy_request_changed",detail:"La demande a changé pendant l’exécution."},409);
 
     await Promise.allSettled([
-      mail(targetEmail,"Votre compte KŌMØ Pulse est fermé","<p>Votre accès KŌMØ Pulse a été fermé à la suite de votre demande.</p><p>Les données devant être conservées pour des obligations légales, de traçabilité ou de soins peuvent rester archivées selon le cadre applicable.</p>"),
+      mail(targetEmail,"Votre compte KŌMØ Pulse est fermé",`<p>Votre accès KŌMØ Pulse a été fermé à la suite de votre demande.</p><p>Les données devant être conservées pour des obligations légales, de traçabilité ou de soins peuvent rester archivées selon le cadre applicable.</p>`),
       mail(ADMIN,"Compte Pulse fermé · KŌMØ",`<p>La fermeture d’un compte Pulse a été exécutée.</p><p>Référence : <strong>${safe(id)}</strong></p><p>Aucune donnée de santé n’est incluse.</p>`)
     ]);
     return json(req,{ok:true,idempotent:false,status:"closed",closed_at:closedAt});
