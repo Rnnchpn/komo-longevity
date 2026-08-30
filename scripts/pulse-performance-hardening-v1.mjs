@@ -4,6 +4,7 @@ const indexPath='pulse-app/index.html';
 const appPath='pulse-app/app.js';
 
 function replaceRequired(src,from,to,label){if(src.includes(from))return src.replace(from,to);if(src.includes(to)){console.log(`[pulse-performance] already applied ${label}`);return src}throw new Error(`[pulse-performance] missing ${label}`)}
+function removeExact(src,from,label){if(src.includes(from))return src.replace(from,'');console.log(`[pulse-performance] already absent ${label}`);return src}
 function stripBodyObserver(src,label){const before=src;src=src.replace(/(?:let scheduled=false;)?const obs=new MutationObserver\([\s\S]*?obs\.observe\(document\.body,\{[^;]*?\}\);/,'');if(src===before)console.warn(`[pulse-performance] no body observer found in ${label}`);return src}
 
 let html=await readFile(indexPath,'utf8');
@@ -47,5 +48,25 @@ await writeFile('pulse-app/pro-signup-identity-v1.js',proIdentity);
 let adminUx=await readFile('pulse-app/admin-ux-v2.js','utf8');adminUx=stripBodyObserver(adminUx,'admin-ux-v2.js');adminUx+="\ndocument.addEventListener('click',e=>{if(location.hash==='#admin'&&e.target.closest?.('[data-pro-select],[data-admin-tab],[data-admin-professionals]'))setTimeout(schedule,100)},true);window.addEventListener('komo:admin-open',()=>setTimeout(schedule,120));window.addEventListener('komo:route-ready',()=>{if(location.hash==='#admin')setTimeout(schedule,120)});\n";await writeFile('pulse-app/admin-ux-v2.js',adminUx);
 
 let adminPros=await readFile('pulse-app/admin-professionals-v1.js','utf8');adminPros=stripBodyObserver(adminPros,'admin-professionals-v1.js');adminPros=adminPros.replace("window.addEventListener('hashchange',()=>{if(location.hash!=='#admin')state.active=false;else setTimeout(injectTab,80)});","window.addEventListener('hashchange',()=>{if(location.hash!=='#admin')state.active=false;else setTimeout(injectTab,80)});document.addEventListener('click',e=>{if(location.hash==='#admin'&&e.target.closest?.('[data-admin-tab],[data-admin-refresh]'))setTimeout(injectTab,120)},true);");await writeFile('pulse-app/admin-professionals-v1.js',adminPros);
+
+// Patient questionnaire engine: one shared session owner, no module-level Supabase client,
+// and observation limited to the canonical route container.
+let questionnaire=await readFile('pulse-app/questionnaire-engine-v1.js','utf8');
+questionnaire=removeExact(questionnaire,"import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';\n\n",'questionnaire-engine Supabase import');
+questionnaire=replaceRequired(questionnaire,sClientOld,"function sb(){return window.KomoRuntime?.client||null}",'questionnaire-engine shared client');
+questionnaire=replaceRequired(questionnaire,"async function identity(){const {data:{session}}=await sb().auth.getSession();S.session=session;if(!session?.user)return false;return true}","async function identity(){const c=sb();if(!c)return false;const {data:{session}}=await c.auth.getSession();S.session=session;if(!session?.user)return false;return true}",'questionnaire-engine runtime guard');
+questionnaire=replaceRequired(questionnaire,"const observer=new MutationObserver(()=>{if(currentRoute()==='documents'&&document.querySelector('[data-kmb2]')&&!document.querySelector('[data-kqe-card]'))schedule()});observer.observe(document.body,{childList:true,subtree:true});","const host=document.querySelector('#viewRoot');if(host){const observer=new MutationObserver(()=>{if(currentRoute()==='documents'&&document.querySelector('[data-kmb2]')&&!document.querySelector('[data-kqe-card]'))schedule()});observer.observe(host,{childList:true,subtree:true})}",'questionnaire-engine targeted observer');
+questionnaire+="\nwindow.addEventListener('komo:session-ready',()=>setTimeout(schedule,40));window.addEventListener('komo:route-ready',()=>{if(currentRoute()==='documents')setTimeout(schedule,60)});\n";
+await writeFile('pulse-app/questionnaire-engine-v1.js',questionnaire);
+
+// Pulse self-tests: keep the existing Results behavior, but consume the canonical
+// authenticated runtime instead of instantiating a fresh client on every sb() call.
+let tests=await readFile('pulse-app/tests-v1.js','utf8');
+tests=removeExact(tests,"import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';\n\n",'tests Supabase import');
+tests=replaceRequired(tests,"function sb() {\n  return createClient(SUPABASE_URL, SUPABASE_KEY, {\n    auth: { storage: storage(), persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }\n  });\n}","function sb() {\n  return window.KomoRuntime?.client || null;\n}",'tests shared client');
+tests=replaceRequired(tests,"  const client = sb();\n  const { data: { session } } = await client.auth.getSession();","  const client = sb();\n  if (!client) return null;\n  const { data: { session } } = await client.auth.getSession();",'tests runtime guard');
+tests=replaceRequired(tests,"observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});","const testsHost=document.querySelector('#viewRoot');if(testsHost)observer.observe(testsHost,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});",'tests targeted observer');
+tests+="\nwindow.addEventListener('komo:session-ready',()=>setTimeout(()=>renderTestsPage(true),40));window.addEventListener('komo:route-ready',()=>{if(location.hash.replace(/^#/,'')==='results')setTimeout(()=>renderTestsPage(false),60)});\n";
+await writeFile('pulse-app/tests-v1.js',tests);
 
 console.log('[pulse-performance-hardening-v1] shared client + event-driven UI applied');
