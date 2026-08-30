@@ -3,6 +3,7 @@ import{readFile,writeFile,rm}from'node:fs/promises';
 const root='site/pulse-v12/';
 const read=file=>readFile(root+file,'utf8');
 const write=(file,content)=>writeFile(root+file,content,'utf8');
+const context=(src,needle)=>{const i=src.indexOf(needle);return i<0?'absent':src.slice(Math.max(0,i-120),Math.min(src.length,i+needle.length+180)).replace(/\s+/g,' ')};
 
 // Agenda is owned exclusively by agenda-hub-v4 + premium map.
 let motion=await read('motion-journey-v1.js');
@@ -11,9 +12,10 @@ const proStart=motion.indexOf('function mountPro(j){');
 if(patientStart<0||proStart<patientStart)throw new Error('[pulse-agenda-v27] Motion Journey patient mount contract changed');
 const pathOnlyMount="function mountPatient(j){if(!j||route()!=='path')return;const root=document.querySelector('#viewRoot'),intro=root?.querySelector('.patient-v4 .pv4-intro');if(!root||!intro)return;document.querySelectorAll('[data-kmj1]').forEach(x=>x.remove());const el=document.createElement('div');el.innerHTML=card(j,false);intro.insertAdjacentElement('afterend',el.firstElementChild)}\n";
 motion=motion.slice(0,patientStart)+pathOnlyMount+motion.slice(proStart);
-motion=motion.replace("if(!['documents','path','clinical'].includes(r))return;","if(!['path','clinical'].includes(r))return;");
-motion=motion.replace("if(['documents','path','clinical'].includes(r)&&!document.querySelector('[data-kmj1]'))schedule()","if(['path','clinical'].includes(r)&&!document.querySelector('[data-kmj1]'))schedule()");
-if(motion.includes("r==='documents'")||motion.includes("['documents','path','clinical']")||motion.includes('patchPreparation(j)'))throw new Error('[pulse-agenda-v27] Motion Journey still owns Agenda');
+motion=motion.replaceAll("['documents','path','clinical']","['path','clinical']");
+motion=motion.replaceAll('"documents","path","clinical"','"path","clinical"');
+const leftovers=["r==='documents'","['documents','path','clinical']",'patchPreparation(j)'].filter(x=>motion.includes(x));
+if(leftovers.length){console.error('[pulse-agenda-v27] remaining Motion Agenda contexts',leftovers.map(x=>`${x}: ${context(motion,x)}`).join(' || '));throw new Error('[pulse-agenda-v27] Motion Journey still owns Agenda')}
 await write('motion-journey-v1.js',motion);
 
 let canonical=await read('patient-canonical-results.js');
