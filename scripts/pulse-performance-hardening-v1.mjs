@@ -89,4 +89,12 @@ const motionScoped=[
 ];
 for(const [path,from,target] of motionScoped){let src=await readFile(path,'utf8');src=replaceRequired(src,from,from.replace('document.body',target),`${path} Motion scoped observer`);if(path.endsWith('motion-access-fix-v1.js'))src=src.replace(/^\/\*[\s\S]*?\*\/\s*/,'');await writeFile(path,src)}
 
+const myKomoScoped=[
+ ['pulse-app/my-komo-dashboard-v2.js','.observe(document.body,{childList:true,subtree:true,characterData:true});'],
+ ['pulse-app/my-komo-economy-v1.js','observer.observe(document.body,{childList:true,subtree:true});'],
+ ['pulse-app/my-komo-score-motion-v1.js','.observe(document.body,{childList:true,subtree:true});'],
+ ['pulse-app/my-komo-wallet-home-v2.js','.observe(document.body,{childList:true,subtree:true});']
+];
+for(const [path,from] of myKomoScoped){let src=await readFile(path,'utf8');src=replaceRequired(src,from,from.replace('document.body',"document.querySelector('#viewRoot')"),`${path} My KOMO scoped observer`);if(path.endsWith('my-komo-dashboard-v2.js')||path.endsWith('my-komo-score-motion-v1.js'))src=src.replace(/^\/\*[\s\S]*?\*\/\s*/,'');await writeFile(path,src)}
+
 console.log('[pulse-performance-hardening-v1] shared client + event-driven UI applied');
