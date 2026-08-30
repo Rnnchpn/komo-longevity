@@ -15,3 +15,5 @@ if(js.includes(old)) throw new Error('[pulse-myocare-contract-alignment-v1] stal
 
 await writeFile(path,js,'utf8');
 console.log('[pulse-myocare-contract-alignment-v1] PASS · MyoCare metrics are stamped motion-v0.5, matching the assessment protocol registry');
+
+await import('./pulse-club-connections-qa-v1.mjs');
