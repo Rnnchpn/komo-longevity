@@ -14,6 +14,8 @@ const pathOnlyMount="function mountPatient(j){if(!j||route()!=='path')return;con
 motion=motion.slice(0,patientStart)+pathOnlyMount+motion.slice(proStart);
 motion=motion.replaceAll("['documents','path','clinical']","['path','clinical']");
 motion=motion.replaceAll('"documents","path","clinical"','"path","clinical"');
+motion=motion.replaceAll("(r==='documents'||r==='clinical')","(r==='path'||r==='clinical')");
+motion=motion.replaceAll("(r==='clinical'||r==='documents')","(r==='clinical'||r==='path')");
 const leftovers=["r==='documents'","['documents','path','clinical']",'patchPreparation(j)'].filter(x=>motion.includes(x));
 if(leftovers.length){console.error('[pulse-agenda-v27] remaining Motion Agenda contexts',leftovers.map(x=>`${x}: ${context(motion,x)}`).join(' || '));throw new Error('[pulse-agenda-v27] Motion Journey still owns Agenda')}
 await write('motion-journey-v1.js',motion);
