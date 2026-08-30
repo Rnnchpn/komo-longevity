@@ -29,3 +29,4 @@ if(after!==1)throw new Error(`[pulse-mobile-v36] expected one shared mobile obse
 for(const signature of ['mobile-test-cta','mobileSurface','kamo-phone-app','komo:mobile-dom-change'])if(!source.includes(signature))throw new Error(`[pulse-mobile-v36] mobile behavior missing: ${signature}`);
 await writeFile(path,source,'utf8');
 console.log('[pulse-mobile-v36] five bundled mobile observers consolidated into one shared app-shell observer');
+await import('./pulse-runtime-patient-v4-retirement-v37.mjs');
