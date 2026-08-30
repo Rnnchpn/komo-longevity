@@ -8,7 +8,7 @@ const navSource=join(root,'pulse-app','patient-navigation-core-v1.js');
 const targetDir=join(root,'site','pulse-v12');
 const target=join(targetDir,'pulse-functional-rc1.js');
 const indexPath=join(targetDir,'index.html');
-const RELEASE='20260830-rc1-functional-v1';
+const RELEASE='20260830-rc1-functional-v2';
 const tag=`<script src="./pulse-functional-rc1.js?v=${RELEASE}"></script>`;
 
 await Promise.all([access(source),access(indexPath),access(navSource)]);
@@ -28,7 +28,7 @@ const [finalHtml,rc1,nav]=await Promise.all([
 const failures=[];
 const ok=(label,value)=>{if(!value)failures.push(label);else console.log(`[pulse-functional-rc1] OK · ${label}`)};
 
-ok('RC1 runtime copied',rc1.includes("const VERSION='1.0.0'"));
+ok('RC1 runtime copied',rc1.includes("const VERSION='1.1.0'"));
 ok('RC1 runtime loaded last', [...finalHtml.matchAll(/<script[^>]+src="([^"]+)"[^>]*><\/script>/g)].at(-1)?.[1]?.startsWith('./pulse-functional-rc1.js'));
 ok('legacy tests route converges to Results',nav.includes("tests:'results'"));
 ok('KEY is a canonical patient route',nav.includes("'key'"));
@@ -37,6 +37,11 @@ ok('Motion preparation CTA repaired',rc1.includes('[data-kts-action="prep-motion
 ok('booking CTA pins Motion service',rc1.includes("prepareBooking('motion')")&&rc1.includes("own(event,'documents')"));
 ok('canonical result CTAs repaired',rc1.includes('[data-kcanon-home] [data-route="path"]'));
 ok('patient report hidden outside Results/Compte',rc1.includes("['results','profile'].includes(route())"));
+ok('center appointment form is intercepted',rc1.includes("form.id!=='kcpAppointmentForm'"));
+ok('center appointment uses scoped RPC',rc1.includes("client.rpc('create_pulse_appointment'"));
+ok('center-created appointment is confirmed',rc1.includes("client.rpc('approve_komo_appointment'"));
+ok('Motion episode opens after center booking',rc1.includes("client.rpc('ensure_motion_appointment_episode'"));
+ok('Clinical episode opens after center booking',rc1.includes("client.rpc('ensure_clinical_appointment_episode'"));
 ok('visible-button diagnostics exposed',rc1.includes('window.KomoFunctionalRC1'));
 
 // Every local script/link referenced by the final Pulse HTML must exist in the build output.
@@ -64,7 +69,7 @@ if(missingImports.length)failures.push(...missingImports.map(x=>`missing JS impo
 ok('all relative JS imports resolve',missingImports.length===0);
 
 // Core route owners required for RC1.
-for(const asset of ['patient-navigation-core-v1.js','motion-hub-v3.js','key-hub-v1.js','trajectory-v3.js','agenda-hub-v4.js','profile-v2.js','patient-canonical-results.js','report-bootstrap-v1.js','pulse-bottom-nav-v6.js']){
+for(const asset of ['patient-navigation-core-v1.js','motion-hub-v3.js','key-hub-v1.js','trajectory-v3.js','agenda-hub-v4.js','profile-v2.js','patient-canonical-results.js','report-bootstrap-v1.js','pulse-bottom-nav-v6.js','clinical-cockpit-v1.js','center-two-tab-workspace-v1.js','admin-console-v2.js']){
   ok(`core asset loaded: ${asset}`,finalHtml.includes(`./${asset}`));
 }
 
@@ -72,4 +77,4 @@ if(failures.length){
   console.error(`[pulse-functional-rc1] FAILED · ${failures.join(' | ')}`);
   process.exit(1);
 }
-console.log(`[pulse-functional-rc1] PASS · ${unique.length} local assets checked · ${jsFiles.length} JS modules scanned · navigation/actions/booking handoff guarded`);
+console.log(`[pulse-functional-rc1] PASS · ${unique.length} local assets checked · ${jsFiles.length} JS modules scanned · patient/booking/center navigation guarded`);
