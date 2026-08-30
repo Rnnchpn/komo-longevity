@@ -1,6 +1,6 @@
-import{readFile,writeFile}from'node:fs/promises';
+import{readFile,writeFile,readdir}from'node:fs/promises';
 const root='site/pulse-v12/';
-const writer=/location\.hash\s*=|history\.(?:pushState|replaceState)\s*\(/;
+const writer=/location\.hash\s*=(?!=)|history\.(?:pushState|replaceState)\s*\(/;
 async function patch(file,changes){const path=root+file;let s=await readFile(path,'utf8');for(const[a,b]of changes){if(s.includes(a))s=s.replace(a,b);else if(!s.includes(b))throw new Error(`[pulse-route-v21] ${file} contract changed`)}await writeFile(path,s);return s}
 const sva=await patch('motion-sva-ui-v1.js',[["location.hash==='#clinical'","location.hash.slice(1)==='clinical'"]]);
 if(writer.test(sva))throw new Error('[pulse-route-v21] motion SVA still classified as writer');
@@ -14,4 +14,8 @@ const key=await patch('my-komo-key-home-v1.js',[["fresh.querySelector('[data-key
 const compact=key.replace(/^\/\*[^\n]*\*\/\n/,'').replace("'use strict';\n",'');
 await writeFile(root+'my-komo-key-home-v1.js',compact);
 if(writer.test(compact))throw new Error('[pulse-route-v21] KEY Home still writes routes directly');
-console.log('[pulse-route-v21] five non-owner route writers retired');
+const files=(await readdir(root)).filter(x=>x.endsWith('.js'));
+const actual=[];
+for(const file of files){const text=await readFile(root+file,'utf8');if(writer.test(text))actual.push(file)}
+console.log(`[pulse-route-v21] five non-owner route writers retired · actual route writers=${actual.length}`);
+console.log('[pulse-route-v21] actual writers '+(actual.join(', ')||'none'));
