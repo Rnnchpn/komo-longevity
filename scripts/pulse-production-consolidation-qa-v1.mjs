@@ -28,6 +28,8 @@ const checks=[
   ['canonical release marker',html.includes(`<meta name="komo-pulse-release" content="${release}"`)],
   ['all local JS/CSS share one release',localAssets.length>20&&assetVersions.every(v=>v===release)],
   ['adaptive shell is the only phone/iPad shell runtime',adaptiveCount===1&&!html.includes('mobile-menu-v3.js')&&!html.includes('tablet-patient-v1.js')],
+  ['duplicate Plus renderer retired',!html.includes('adaptive-plus-v1.js')&&adaptive.includes('function sheetContent()')&&adaptive.includes('data-kam-action')],
+  ['legacy multi-route experience renderer retired',!html.includes('experience-v3.js')],
   ['retired shell CSS removed from bundle',!css.includes('/* FILE: mobile-menu-v3.css */')&&!css.includes('/* FILE: tablet-patient-v1.css */')],
   ['desktop shell remains available',css.includes('/* FILE: bottom-dock-v1.css */')],
   ['adaptive shell CSS remains available',css.includes('/* FILE: adaptive-shell-v4.css */')],
