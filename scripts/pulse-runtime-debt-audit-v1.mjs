@@ -21,33 +21,6 @@ const reachable=new Set();const queue=[];
 for(const s of scripts){if(textByFile.has(s)&&!reachable.has(s)){reachable.add(s);queue.push(s)}}
 while(queue.length){const file=queue.shift(),text=textByFile.get(file)||'';const deps=[];for(const m of text.matchAll(/(?:from\s*|import\s*)["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']/g))deps.push(m[1]);for(const m of text.matchAll(/import\s*\(\s*["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']\s*\)/g))deps.push(m[1]);for(const dep of deps){if(textByFile.has(dep)&&!reachable.has(dep)){reachable.add(dep);queue.push(dep)}}}
 
-function codeOnly(src){
-  let out='',i=0,mode='code',quote='';
-  while(i<src.length){
-    const c=src[i],n=src[i+1];
-    if(mode==='code'){
-      if(c==='/'&&n==='/'){
-        out+='  ';i+=2;
-        while(i<src.length&&src[i]!=='\n'){out+=' ';i++}
-        continue;
-      }
-      if(c==='/'&&n==='*'){
-        out+='  ';i+=2;
-        while(i<src.length){
-          if(src[i]==='*'&&src[i+1]==='/'){out+='  ';i+=2;break}
-          out+=src[i]==='\n'?'\n':' ';i++;
-        }
-        continue;
-      }
-      if(c==="'"||c==='"'||c==='`'){quote=c;mode='string';out+=' ';i++;continue}
-      out+=c;i++;continue;
-    }
-    if(c==='\\'){out+='  ';i+=2;continue}
-    if(c===quote){out+=' ';i++;mode='code';continue}
-    out+=c==='\n'?'\n':' ';i++;
-  }
-  return out;
-}
 const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function exactViewRootMutations(text){
   const aliases=new Set();
@@ -57,7 +30,7 @@ function exactViewRootMutations(text){
   for(const m of text.matchAll(direct))aliases.add(m[1]);
   for(const m of text.matchAll(fallback))aliases.add(m[1]);
 
-  const code=codeOnly(text);
+  const code=text;
   let replace=0,insert=0;
   for(const alias of aliases){
     const a=reEsc(alias);
