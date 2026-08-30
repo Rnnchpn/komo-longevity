@@ -15,4 +15,14 @@ const first=await patch('site/pulse-v12/first-test-entry-v1.js',[
 ],'First Test');
 if(first.includes('observer.observe(document.body'))throw new Error('[pulse-runtime-late] First Test body observer remains');
 
-console.log('[pulse-runtime-late] Center, Results and First Test observers scoped to canonical roots');
+const myocare=await patch('site/pulse-v12/myocare-import-entry-v2.js',[["observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});","observer.observe(document.querySelector('#viewRoot'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});"]],'MyoCare Import');
+if(myocare.includes('observer.observe(document.body'))throw new Error('[pulse-runtime-late] MyoCare body observer remains');
+
+let adaptive=await readFile('site/pulse-v12/adaptive-shell-v4.js','utf8');
+const adaptiveFrom="observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});",adaptiveTo="observer.observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});";
+if(adaptive.includes(adaptiveFrom))adaptive=adaptive.replace(adaptiveFrom,adaptiveTo);else if(!adaptive.includes(adaptiveTo))throw new Error('[pulse-runtime-late] Adaptive Shell contract changed');
+adaptive=adaptive.replace(/^\/\*[\s\S]*?\*\/\n/,'');
+await writeFile('site/pulse-v12/adaptive-shell-v4.js',adaptive);
+if(adaptive.includes('observer.observe(document.body'))throw new Error('[pulse-runtime-late] Adaptive Shell body observer remains');
+
+console.log('[pulse-runtime-late] Center, Results, First Test, MyoCare and Adaptive Shell observers scoped');
