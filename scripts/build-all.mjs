@@ -139,7 +139,8 @@ const scripts = [
   'scripts/pulse-admin-privacy-queue-v1.mjs',
   'scripts/pulse-account-closure-execution-v1.mjs',
   'scripts/pulse-privacy-export-v1.mjs',
-  'scripts/pulse-report-visual-v2.mjs'
+  'scripts/pulse-report-visual-v2.mjs',
+  'scripts/pulse-runtime-debt-audit-v1.mjs'
 ];
 
 for (const script of scripts) {
