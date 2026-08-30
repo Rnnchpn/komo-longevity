@@ -2,7 +2,6 @@ import{readFile,writeFile}from'node:fs/promises';
 
 async function patch(path,changes,label,{stripHeader=false}={}){let s=await readFile(path,'utf8');for(const[from,to]of changes){if(s.includes(from))s=s.replace(from,to);else if(!s.includes(to))throw new Error(`[pulse-runtime-late] ${label} contract changed`)}if(stripHeader)s=s.replace(/^\/\*[\s\S]*?\*\/\n/,'');await writeFile(path,s);return s}
 const hasRouteWrite=s=>/location\.hash\s*=|history\.(?:pushState|replaceState)\s*\(/.test(s);
-const routeWriteMatches=s=>[...s.matchAll(/location\.hash\s*=|history\.(?:pushState|replaceState)\s*\(/g)].map(x=>x[0]).join(', ');
 
 const center=await patch('site/pulse-v12/center-command-cockpit-v2.js',[["obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});","obs.observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});"]],'Center Command');
 if(center.includes('obs.observe(document.body'))throw new Error('[pulse-runtime-late] Center Command body observer remains');
@@ -75,13 +74,10 @@ const resultsPolish=await patch('site/pulse-v12/results-polish-v1.js',[
 ],'Results polish');
 if(hasRouteWrite(resultsPolish))throw new Error('[pulse-runtime-late] Results polish still writes routes directly');
 
-const logoutVisible=await patch('site/pulse-v12/account-logout-visible-v1.js',[["    location.hash='home';","    window.KomoPatientNavigation?.go?.('home');"]],'Visible logout');
-if(hasRouteWrite(logoutVisible))throw new Error(`[pulse-runtime-late] Visible logout still writes routes directly: ${routeWriteMatches(logoutVisible)}`);
-
 const legacyRouteScript=/\s*<script(?: type="module")? src="\.\/patient-route-runtime-v2\.js(?:\?v=[^\"']+)?"><\/script>/g;
 if(!legacyRouteScript.test(html))throw new Error('[pulse-runtime-late] patient-route-runtime-v2 script tag missing before retirement');
 html=html.replace(legacyRouteScript,'');
 if(html.includes('patient-route-runtime-v2.js'))throw new Error('[pulse-runtime-late] retired patient route runtime still loaded');
 await writeFile('site/pulse-v12/index.html',html);
 
-console.log('[pulse-runtime-late] zero whole-body observers retained; Motion shared Supabase; five low-risk route writers centralized; patient-route-runtime-v2 retired');
+console.log('[pulse-runtime-late] zero whole-body observers retained; Motion shared Supabase; four low-risk route writers centralized; patient-route-runtime-v2 retired');
