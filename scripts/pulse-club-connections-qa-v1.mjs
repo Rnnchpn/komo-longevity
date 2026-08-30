@@ -33,7 +33,9 @@ ok('decision mutation is constrained to recipient and pending state',club.includ
 ok('Club supports accept and decline',club.includes("'accepted','declined'")&&club.includes('data-kci-action="accept"')&&club.includes('data-kci-action="decline"'));
 ok('Club incoming runtime has no persistent observer or polling loop',!club.includes('MutationObserver')&&!club.includes('setInterval('));
 ok('Mobility Report notifier uses current pulse-notify contract',reportRuntime.includes("kind:'mobility_report_ready'")&&reportRuntime.includes('patientId,reportId,eventReference'));
-ok('official report release is persisted before notification',delivery.includes("action:'release'")&&delivery.indexOf("action:'release'")<delivery.indexOf('await notifyReport'));
+const newRelease=delivery.indexOf('const saved=await saveReport');
+const newReleaseTail=newRelease>=0?delivery.slice(newRelease):'';
+ok('new official report is persisted before notification',newRelease>=0&&newReleaseTail.includes("action:'release'")&&newReleaseTail.indexOf('await notifyReport')>newReleaseTail.indexOf('const saved=await saveReport'));
 ok('professional dossier owns Report Delivery v2',dossierEntry.includes("import './report-delivery-v2.js"));
 if(failures.length){console.error(`[pulse-club-connections-qa-v1] FAILED · ${failures.join(' | ')}`);process.exit(1)}
 console.log('[pulse-club-connections-qa-v1] PASS · incoming Club decisions + Mobility Report delivery contract guarded');
