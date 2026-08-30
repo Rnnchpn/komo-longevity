@@ -22,3 +22,7 @@ await patch('dossier.html',[
 ]);
 
 console.log(`[pulse-report-visual-v2] editorial Mobility Report pinned · ${RELEASE}`);
+
+// This script is the final Pulse build stage in build-all.mjs.
+// Install the definitive patient Home after every legacy Home polish has run.
+await import('./pulse-patient-home-final-v1.mjs');
