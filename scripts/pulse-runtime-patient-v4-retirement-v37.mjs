@@ -7,8 +7,8 @@ let html=await readFile(htmlPath,'utf8');
 const source=await readFile(root+legacy,'utf8');
 const trajectoryGuard=await readFile(root+'trajectory-route-guard-v1.js','utf8');
 
-for(const signature of ["const TARGETS=new Set(['path','plan','documents'])","if(r==='path')","else if(r==='plan')","else if(r==='documents')"])if(!source.includes(signature))throw new Error(`[pulse-patient-v37] legacy patient renderer contract changed: ${signature}`);
-if(source.includes("TARGETS=new Set(['home'"))throw new Error('[pulse-patient-v37] patient-v4 unexpectedly owns Home');
+for(const signature of ["const TARGETS=new Set(['path','plan'])","if(r==='path')","else if(r==='plan')"])if(!source.includes(signature))throw new Error(`[pulse-patient-v37] legacy patient renderer contract changed: ${signature}`);
+if(source.includes("TARGETS=new Set(['home'")||source.includes("TARGETS=new Set(['results'")||source.includes("TARGETS=new Set(['trajectory'"))throw new Error('[pulse-patient-v37] patient-v4 unexpectedly owns a canonical surface');
 if(!trajectoryGuard.includes("KomoPatientNavigation?.go?.('trajectory'"))throw new Error('[pulse-patient-v37] path/plan convergence guard missing');
 if(!html.includes('trajectory-v3.js')||!html.includes('agenda-hub-v4.js')||!html.includes('booking-layer-v1.js'))throw new Error('[pulse-patient-v37] canonical replacement owners missing');
 
@@ -21,4 +21,4 @@ await rm(root+legacy,{force:true});
 
 const finalHtml=await readFile(htmlPath,'utf8');
 if(finalHtml.includes(legacy))throw new Error('[pulse-patient-v37] retired patient-v4 remains direct');
-console.log('[pulse-patient-v37] legacy path/plan/documents renderer retired · canonical Trajectory and Agenda owners preserved');
+console.log('[pulse-patient-v37] legacy path/plan renderer retired · canonical Trajectory and Agenda owners preserved');
