@@ -51,3 +51,4 @@ for(const file of [micro,key,hero])if(finalHtml.includes(file))throw new Error(`
 for(const signature of ['komo:home-command-rendered','KomoHomeMicroMotion'])if(!finalCommand.includes(signature))throw new Error(`[pulse-home-v35] Home command extension missing: ${signature}`);
 for(const signature of ['KomoKeyHome','KomoPulseHeroPolish','komo:home-rendered'])if(!finalHome.includes(signature))throw new Error(`[pulse-home-v35] canonical Home extension missing: ${signature}`);
 console.log('[pulse-home-v35] KEY + micro-motion + hero polish consolidated into canonical Home runtimes · two presentation observers retired');
+await import('./pulse-runtime-mobile-observer-v36.mjs');
