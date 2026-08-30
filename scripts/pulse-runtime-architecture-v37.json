@@ -32,6 +32,11 @@
       "controllers": [],
       "extensions": []
     },
+    "therapy": {
+      "owner": "patient-v4.js",
+      "controllers": [],
+      "extensions": []
+    },
     "documents": {
       "owner": "agenda-hub-v4.js",
       "controllers": ["booking-layer-v1.js", "patient-intake-v1.js", "pulse-free-continuity-v2.js", "questionnaire-engine-v1.js"],
