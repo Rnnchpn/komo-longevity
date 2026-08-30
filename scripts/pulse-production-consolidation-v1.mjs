@@ -11,12 +11,14 @@ const htmlPath=join(pulse,'index.html');
 const cssPath=join(pulse,'pulse-ui-v1.css');
 const appPath=join(pulse,'app.js');
 const bookingPath=join(pulse,'booking-layer-v1.js');
+const centerCommandPath=join(pulse,'center-command-cockpit-v2.js');
 const release='20260828-canonical-4p6';
 
 let html=await readFile(htmlPath,'utf8');
 let css=await readFile(cssPath,'utf8');
 let app=await readFile(appPath,'utf8');
 let booking=await readFile(bookingPath,'utf8');
+let centerCommand=await readFile(centerCommandPath,'utf8');
 
 // Canonical runtime ownership:
 // - desktop shell: core sidebar/topbar + bottom-dock/frozen-navigation CSS
@@ -63,11 +65,15 @@ if(!app.includes("const selectors={home:'[data-my-komo-home]',path:'[data-kpv2]'
 }
 await writeFile(appPath,app);
 
-// External callers may request an Agenda refresh, but must always go through the
-// session-aware/deduplicated refresh() entry point rather than raw loadPatient().
 booking=booking.replace('window.KomoBooking={openProPlanning:openPro,deactivatePro,refreshPatient:loadPatient};','window.KomoBooking={openProPlanning:openPro,deactivatePro,refreshPatient:refresh};');
 if(!booking.includes('refreshPatient:refresh'))throw new Error('[pulse-production-consolidation] safe Agenda refresh contract missing');
 await writeFile(bookingPath,booking);
+
+const centerObserver="obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});";
+const scopedCenterObserver="obs.observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});";
+if(centerCommand.includes(centerObserver))centerCommand=centerCommand.replace(centerObserver,scopedCenterObserver);
+else if(!centerCommand.includes(scopedCenterObserver))throw new Error('[pulse-production-consolidation] Center Command observer contract changed');
+await writeFile(centerCommandPath,centerCommand);
 
 const ownership=`
 /* Canonical Pulse shell ownership */
@@ -85,9 +91,6 @@ css=css.replace(/\n\/\* Canonical Pulse shell ownership \*\/[\s\S]*$/,'');
 css+=ownership;
 await writeFile(cssPath,css);
 
-// One coherent release token keeps every local asset cache-safe. The three startup
-// files are discovered from <head> so authentication and the first route can begin
-// while the rest of the document is still being parsed. No feature module is made eager.
 html=html.replace(/(src|href)="\.\/([^"?#]+\.(?:js|css))(?:\?v=[^"#]+)?"/g,(_,attr,file)=>`${attr}="./${file}?v=${release}"`);
 html=html.replace(/\s*<link[^>]+data-komo-core-preload[^>]*>/g,'');
 html=html.replace(/\s*<meta name="komo-pulse-release"[^>]*>/g,'');
