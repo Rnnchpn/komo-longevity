@@ -1,5 +1,3 @@
-/* KŌMØ Pulse — restore persistent Account / Settings access v1
-   Patient navigation only: account remains a first-class destination on desktop, phone and iPad. */
 (() => {
   'use strict';
   const V='1.0.0';
@@ -76,8 +74,7 @@
     });
   }
 
-  const observer=new MutationObserver(()=>refresh());
-  observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});
+  new MutationObserver(refresh).observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});
   ['hashchange','pageshow','resize','orientationchange','komo:route-ready','komo:canonical-route','komo:session-ready','komo:data-ready'].forEach(evt=>window.addEventListener(evt,()=>setTimeout(refresh,20)));
   document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,350));
   setTimeout(refresh,800);

@@ -1,5 +1,3 @@
-/* KŌMØ Pulse — visible account logout v1
-   Keeps sign-out immediately accessible from Compte & paramètres. */
 (() => {
   'use strict';
   const STYLE_ID='kalLogoutStyleV1';
@@ -60,6 +58,6 @@
   function schedule(){clearTimeout(timer);timer=setTimeout(mount,100)}
   ['hashchange','pageshow','komo:route-ready','komo:session-ready'].forEach(x=>window.addEventListener(x,schedule));
   document.addEventListener('DOMContentLoaded',()=>setTimeout(mount,500));
-  new MutationObserver(()=>{if(location.hash==='#profile'&&!document.getElementById(CARD_ID))schedule()}).observe(document.body,{childList:true,subtree:true});
+  new MutationObserver(()=>{if(location.hash==='#profile'&&!document.getElementById(CARD_ID))schedule()}).observe(document.querySelector('#viewRoot'),{childList:true,subtree:true});
   setTimeout(mount,1000);
 })();
