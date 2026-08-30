@@ -34,14 +34,14 @@ function exactViewRootMutations(text){
   let replace=0,insert=0;
   for(const alias of aliases){
     const a=reEsc(alias);
-    replace+=(code.match(new RegExp(String.raw`\b${a}\.innerHTML\s*=`,'g'))||[]).length;
-    replace+=(code.match(new RegExp(String.raw`\b${a}\.replaceChildren\s*\(`,'g'))||[]).length;
-    insert+=(code.match(new RegExp(String.raw`\b${a}\.(?:appendChild|append|prepend|insertBefore|insertAdjacentElement)\s*\(`,'g'))||[]).length;
+    replace+=(code.match(new RegExp(String.raw`\b${a}\.(?:innerHTML|outerHTML|textContent|innerText)\s*(?:\+?=)`,'g'))||[]).length;
+    replace+=(code.match(new RegExp(String.raw`\b${a}\.(?:replaceChildren|replaceWith|remove)\s*\(`,'g'))||[]).length;
+    insert+=(code.match(new RegExp(String.raw`\b${a}\.(?:appendChild|append|prepend|insertBefore|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|before|after)\s*\(`,'g'))||[]).length;
   }
   const directTarget=String.raw`(?:document\.)?(?:querySelector\(\s*['"]#viewRoot['"]\s*\)|getElementById\(\s*['"]viewRoot['"]\s*\))`;
-  replace+=(text.match(new RegExp(String.raw`${directTarget}\s*\.innerHTML\s*=`,'g'))||[]).length;
-  replace+=(text.match(new RegExp(String.raw`${directTarget}\s*\.replaceChildren\s*\(`,'g'))||[]).length;
-  insert+=(text.match(new RegExp(String.raw`${directTarget}\s*\.(?:appendChild|append|prepend|insertBefore|insertAdjacentElement)\s*\(`,'g'))||[]).length;
+  replace+=(text.match(new RegExp(String.raw`${directTarget}\s*\.(?:innerHTML|outerHTML|textContent|innerText)\s*(?:\+?=)`,'g'))||[]).length;
+  replace+=(text.match(new RegExp(String.raw`${directTarget}\s*\.(?:replaceChildren|replaceWith|remove)\s*\(`,'g'))||[]).length;
+  insert+=(text.match(new RegExp(String.raw`${directTarget}\s*\.(?:appendChild|append|prepend|insertBefore|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|before|after)\s*\(`,'g'))||[]).length;
   return{aliases:[...aliases].sort(),replace,insert,total:replace+insert};
 }
 
