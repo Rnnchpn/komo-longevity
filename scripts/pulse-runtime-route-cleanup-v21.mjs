@@ -29,11 +29,23 @@ const trio=await patch('patient-assessment-trio-v1.js',[
 ["function goPrep(type){sessionStorage.setItem('komo_open_preparation',type);location.hash='documents'}","function goPrep(type){sessionStorage.setItem('komo_open_preparation',type);window.KomoPatientNavigation?.go?.('documents')}"]
 ]);
 if(writer.test(trio))throw new Error('[pulse-route-v22] Assessment Trio still writes routes directly');
+const validation=await patch('admin-motion-validation-v1.js',[["localStorage.setItem('komo_clinical_org',b.dataset.org);location.hash='clinical'","localStorage.setItem('komo_clinical_org',b.dataset.org);window.KomoPatientNavigation?.go?.('clinical')"]]);
+if(writer.test(validation))throw new Error('[pulse-route-v23] Admin Motion Validation still writes routes directly');
+const messaging=await patch('center-messaging-v1.js',[["if(location.hash!=='#clinical')location.hash='clinical';setTimeout(openModal,160)","if(location.hash!=='#clinical')window.KomoPatientNavigation?.go?.('clinical');setTimeout(openModal,160)"]]);
+if(writer.test(messaging))throw new Error('[pulse-route-v23] Center Messaging still writes routes directly');
+const cockpit=await patch('tests-status-cockpit-v1.js',[
+["if(a==='score'){location.hash='path';return}","if(a==='score'){window.KomoPatientNavigation?.go?.('trajectory');return}"],
+["if(a==='book-motion'){sessionStorage.setItem('komo_booking_service','motion');location.hash='documents';return}","if(a==='book-motion'){sessionStorage.setItem('komo_booking_service','motion');window.KomoPatientNavigation?.go?.('documents');return}"],
+["if(a==='prep-motion'){sessionStorage.setItem('komo_open_preparation','motion');location.hash='documents';return}","if(a==='prep-motion'){sessionStorage.setItem('komo_open_preparation','motion');window.KomoPatientNavigation?.go?.('documents');return}"],
+["location.hash='documents'})","window.KomoPatientNavigation?.go?.('documents')})"]
+]);
+if(writer.test(cockpit))throw new Error('[pulse-route-v23] Tests Status Cockpit still writes routes directly');
+for(const file of ['pulse-functional-rc1.js','trajectory-route-guard-v1.js']){const path=root+file,s=await readFile(path,'utf8');await writeFile(path,s.replace(/^\/\*[\s\S]*?\*\/\n/,''))}
 const files=(await readdir(root)).filter(x=>x.endsWith('.js')),texts=new Map();for(const f of files)texts.set(f,await readFile(root+f,'utf8'));
 const html=await readFile(root+'index.html','utf8'),direct=[...html.matchAll(/<script[^>]+src=["']\.\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*><\/script>/g)].map(x=>x[1]);
 const reachable=new Set(),q=[];for(const f of direct)if(texts.has(f)&&!reachable.has(f)){reachable.add(f);q.push(f)}
 while(q.length){const t=texts.get(q.shift())||'';for(const m of t.matchAll(/(?:from\s*|import\s*)["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']|import\s*\(\s*["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']\s*\)/g)){const d=m[1]||m[2];if(texts.has(d)&&!reachable.has(d)){reachable.add(d);q.push(d)}}}
 const actual=[...reachable].filter(f=>writer.test(texts.get(f)||'')).sort();
-if(actual.length>23)throw new Error(`[pulse-route-v22] actual route writers regression ${actual.length}>23`);
-console.log(`[pulse-route-v22] four non-owner route writers centralized · reachable actual route writers=${actual.length}`);
-console.log('[pulse-route-v22] reachable actual writers '+(actual.join(', ')||'none'));
+if(actual.length>20)throw new Error(`[pulse-route-v23] actual route writers regression ${actual.length}>20`);
+console.log(`[pulse-route-v23] three secondary route writers centralized · reachable actual route writers=${actual.length}`);
+console.log('[pulse-route-v23] reachable actual writers '+(actual.join(', ')||'none'));
