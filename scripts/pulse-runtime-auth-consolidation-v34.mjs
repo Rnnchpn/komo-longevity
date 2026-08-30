@@ -29,3 +29,4 @@ if((finalHtml.match(new RegExp(canonical,'g'))||[]).length!==1)throw new Error('
 if(!finalHtml.includes('auth-gateway-v2.js'))throw new Error('[pulse-auth-v34] professional gateway must remain separate');
 for(const signature of ['KomoCanonicalLogin','authPremiumV3','komoAuthBootstrap','authWebVersion'])if(!finalAuth.includes(signature))throw new Error(`[pulse-auth-v34] consolidated Auth behavior missing: ${signature}`);
 console.log('[pulse-auth-v34] login + premium/stability/web presentation consolidated · professional gateway remains separate');
+await import('./pulse-runtime-home-extensions-v35.mjs');
