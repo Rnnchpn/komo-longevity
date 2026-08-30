@@ -67,7 +67,10 @@ function handlerEvidence(attr){
   const selector=new RegExp(`${call}\\(\\s*['\"][^'\"]*\\[${escaped}(?:[=\\]\\s])`);
   const getter=new RegExp(`getAttribute(?:\\?\\.)?\\(\\s*['\"]${escaped}['\"]`);
   const dataset=new RegExp(`dataset(?:\\?\\.)?\\.${c}\\b|dataset\\[['\"]${c}['\"]\\]`);
-  return selector.test(combined)||getter.test(combined)||dataset.test(combined);
+  const templateSelector=[
+    `querySelector(\`[${attr}`,`querySelectorAll(\`[${attr}`,`closest(\`[${attr}`,`closest?.(\`[${attr}`,`matches(\`[${attr}`,`matches?.(\`[${attr}`
+  ].some(x=>combined.includes(x));
+  return selector.test(combined)||getter.test(combined)||dataset.test(combined)||templateSelector;
 }
 
 const nonActionData=new Set([
@@ -105,8 +108,6 @@ for(const b of buttons){
 }
 const orphanAttrs=[];
 for(const [attr,owners] of actionAttrs){
-  // Fail only for attributes that are semantically action-like. Other data-* fields
-  // may simply carry an id/status consumed by a sibling action handler.
   const semantic=attr.replace(/^data-/,'').split('-').at(-1)||'';
   if(actionWord.test(semantic)&&!handlerEvidence(attr))orphanAttrs.push({attr,owners:[...owners]});
 }
@@ -122,14 +123,17 @@ function classEvidence(cls){
   const esc=cls.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   return new RegExp(`(?:closest|matches|querySelector|querySelectorAll)(?:\\?\\.)?\\(\\s*['\"][^'\"]*\\.${esc}(?:[^a-zA-Z0-9_-]|$)`).test(combined);
 }
+function delegatedButtonEvidence(file){
+  const text=textByFile.get(file)||'';
+  return /querySelectorAll(?:\?\.)?\(\s*['"`][^'"`]*button[^'"`]*['"`]\s*\)/.test(text)&&/addEventListener\(\s*['"]click['"]/.test(text);
+}
 const hardOwnerless=[];
 for(const b of buttons){
   if(b.inline||b.type==='submit'||(!b.type&&b.value))continue;
   if(b.data.some(a=>routeAttrs.includes(a)||handlerEvidence(a)))continue;
   if(b.id&&(knownIds.has(b.id)||idEvidence(b.id)))continue;
   const classes=(b.raw.match(/\bclass=["']([^"']+)["']/i)?.[1]||'').split(/\s+/).filter(Boolean);
-  if(classes.some(classEvidence)){warnings.push(`class-bound button in ${b.file}`);continue}
-  // Buttons carrying only data payload are owned by another action selector on the same element/template.
+  if(classes.some(classEvidence)||delegatedButtonEvidence(b.file)){warnings.push(`delegated/class-bound button in ${b.file}`);continue}
   if(b.data.length&&!b.data.some(a=>actionWord.test((a.replace(/^data-/,'').split('-').at(-1)||''))))continue;
   hardOwnerless.push(b);
 }
@@ -146,6 +150,6 @@ for(const [routeName,asset] of Object.entries(requiredOwners)){
 const rc1=await readFile(join(target,'pulse-functional-rc1.js'),'utf8');
 for(const attr of ['data-kap-submit','data-kap-cancel','data-kap-withdraw','data-kap-download','data-admin-privacy-tab','data-kapq-review','data-kapq-generate-export','data-kapq-execute-closure','data-kapq-decline'])ok(`runtime button diagnostics recognize ${attr}`,rc1.includes(`'${attr}'`));
 
-if(warnings.length)console.log(`[pulse-interactions-v1] INFO · ${warnings.length} dynamic/class/payload contracts intentionally resolved outside literal selector scan`);
+if(warnings.length)console.log(`[pulse-interactions-v1] INFO · ${warnings.length} dynamic/delegated/class/payload contracts intentionally resolved outside literal selector scan`);
 if(failures.length){console.error(`[pulse-interactions-v1] FAILED · ${failures.join(' | ')}`);process.exit(1)}
 console.log(`[pulse-interactions-v1] PASS · ${reachable.size}/${jsFiles.length} reachable JS modules · ${buttons.length} literal buttons · ${actionAttrs.size} semantic action attributes · ${routeTargets.length} route targets · primary owners locked`);
