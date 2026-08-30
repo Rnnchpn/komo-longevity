@@ -88,7 +88,7 @@ const scripts = [
   'scripts/account-booking-privacy-v1.mjs',
   'scripts/pulse-booking-directory-map-v1.mjs',
   'scripts/pulse-stability-audit-v1.mjs',
-  'scripts/pulse-v12-qa-v1.mjs',
+  'scripts/pulse-v12-qa.mjs',
   'scripts/pulse-performance-qa-v1.mjs',
   'scripts/auth-admin-entry-qa-v2.mjs',
   'scripts/multicenter-access-qa-v1.mjs',
