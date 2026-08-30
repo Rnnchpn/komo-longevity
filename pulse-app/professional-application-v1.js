@@ -1,14 +1,8 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-
-const URL='https://uqlolefsiktbznnymriy.supabase.co';
-const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
-const REM='komo_pulse_remember';
 const INTENT='komo_pulse_pro_intent';
-const P={client:null,session:null,role:'member',applications:[],open:false,loading:false,formScope:null,lastLoad:0};
-let refreshTimer=null,lifecycleBound=false;
+const P={session:null,role:'member',applications:[],open:false,loading:false,formScope:null,lastLoad:0};
+let refreshTimer=null,lifecycleBound=false,authBound=false;
 
-function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
-function sb(){if(!P.client)P.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return P.client}
+function sb(){return window.KomoRuntime?.client||null}
 function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function statusLabel(v){return({submitted:'Demande reçue',under_review:'En cours de revue',approved:'Accès approuvé',declined:'Demande refusée'})[v]||v||'—'}
 function scopeLabel(v){return v==='motion'?'KŌMØ Motion Operator':'KŌMØ Clinical Practitioner'}
@@ -17,7 +11,8 @@ function openApplication(){return P.applications.find(x=>['submitted','under_rev
 function latestApproved(){return P.applications.find(x=>x.status==='approved')||null}
 
 async function invoke(body){
-  const {data,error}=await sb().functions.invoke('professional-application',{body});
+  const c=sb();if(!c)throw new Error('Runtime Pulse indisponible.');
+  const {data,error}=await c.functions.invoke('professional-application',{body});
   if(error)throw new Error(error.message||'Erreur serveur');
   if(data?.error){
     const map={clinical_registration_required:'Un identifiant professionnel est requis pour KŌMØ Clinical.',application_already_open:'Une demande est déjà en cours.',missing_required_fields:'Complétez les champs obligatoires.',invalid_access_scope:'Choisissez Motion ou Clinical.'};
@@ -27,13 +22,14 @@ async function invoke(body){
 }
 
 async function load(force=false){
-  const now=Date.now();
+  const now=Date.now(),c=sb();
+  if(!c)return false;
   if(!force&&P.session&&now-P.lastLoad<8000)return true;
-  const {data:{session}}=await sb().auth.getSession();
+  const {data:{session}}=await c.auth.getSession();
   P.session=session;
   if(!session?.user)return false;
   const [rr,r]=await Promise.all([
-    sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle(),
+    c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle(),
     invoke({action:'status'})
   ]);
   P.role=rr.data?.role||'member';
@@ -133,6 +129,7 @@ async function refresh(force=false){
 }
 
 function schedule(force=false){clearTimeout(refreshTimer);refreshTimer=setTimeout(()=>refresh(force),120)}
+function bindAuth(){if(authBound)return;const c=sb();if(!c)return;authBound=true;c.auth.onAuthStateChange(()=>schedule(true))}
 function bindLifecycle(){
   if(lifecycleBound)return;lifecycleBound=true;
   const shell=document.querySelector('#appShell');
@@ -140,7 +137,8 @@ function bindLifecycle(){
   document.querySelector('#accountButton')?.addEventListener('click',()=>schedule(false));
   document.querySelector('#refreshButton')?.addEventListener('click',()=>schedule(true));
   window.addEventListener('hashchange',()=>schedule(false));
-  sb().auth.onAuthStateChange(()=>schedule(true));
+  window.addEventListener('komo:session-ready',()=>{bindAuth();schedule(true)});
+  bindAuth();
 }
 
 document.addEventListener('DOMContentLoaded',()=>{bindLifecycle();setTimeout(()=>refresh(true),500)});
