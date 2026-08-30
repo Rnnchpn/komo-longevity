@@ -28,7 +28,9 @@ let booking=await readFile(bookingPath,'utf8');
 // - Agenda et réseau (#documents): booking-layer-v1 only
 // - patient-motion-booking-v2: CTA bridge only, never renderer/data loader
 // - mobile-guided-v2: test-content guidance only, never navigation/home
-for(const file of ['mobile-menu-v3.js','tablet-patient-v1.js','home-clarity-v1.js','home-summary-v1.js']){
+// - experience-v3: retired legacy multi-route renderer
+// - adaptive-plus-v1: retired duplicate menu renderer; adaptive-shell-v4 owns Plus
+for(const file of ['mobile-menu-v3.js','tablet-patient-v1.js','home-clarity-v1.js','home-summary-v1.js','experience-v3.js','adaptive-plus-v1.js']){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   html=html.replace(new RegExp(`\\s*<script(?: type="module")? src="\\./${escaped}(?:\\?v=[^\"']+)?"><\\/script>`,'g'),'');
 }
