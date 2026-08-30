@@ -22,3 +22,6 @@ await patch('dossier.html',[
 ]);
 
 console.log(`[pulse-report-visual-v2] editorial Mobility Report pinned · ${RELEASE}`);
+
+// Final RC1 functional guard and smoke checks. This must stay last in the Pulse build.
+await import('./pulse-functional-rc1.mjs');
