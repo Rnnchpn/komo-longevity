@@ -1,18 +1,11 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-
-const URL='https://uqlolefsiktbznnymriy.supabase.co';
-const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
-const REM='komo_pulse_remember';
-let client=null;
-
-function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
-function sb(){if(!client)client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return client}
+function sb(){return window.KomoRuntime?.client||null}
 function message(text){const el=document.querySelector('#clmMessage');if(el)el.textContent=text}
 
 async function resolveOrganization(){
-  const {data:{session}}=await sb().auth.getSession();
+  const c=sb();if(!c)throw new Error('Session indisponible.');
+  const {data:{session}}=await c.auth.getSession();
   if(!session?.user)throw new Error('Session expirée. Reconnectez-vous.');
-  const result=await sb().from('organization_members')
+  const result=await c.from('organization_members')
     .select('organization_id,role,status,access_scope,organizations(id,name,slug,clinical_data_status,status)')
     .eq('user_id',session.user.id)
     .eq('status','active');
@@ -33,6 +26,7 @@ async function submitPatient(event){
   if(button){button.disabled=true;button.textContent='Création…'}
   message('Création sécurisée du patient…');
   try{
+    const c=sb();if(!c)throw new Error('Session indisponible.');
     const fd=new FormData(form);
     const membership=await resolveOrganization();
     const payload={
@@ -43,7 +37,7 @@ async function submitPatient(event){
       birth_date:String(fd.get('birth_date')||''),
       sex_at_birth:String(fd.get('sex_at_birth')||'')
     };
-    const {data,error}=await sb().functions.invoke('professional-patient',{body:payload});
+    const {data,error}=await c.functions.invoke('professional-patient',{body:payload});
     if(error)throw new Error(error.message||'Erreur serveur lors de la création du patient.');
     if(data?.error)throw new Error(data.detail||data.error);
     if(!data?.patient?.id)throw new Error('Le patient a été créé mais son identifiant est indisponible.');
@@ -66,7 +60,8 @@ function bind(){
   form.addEventListener('submit',submitPatient,true);
 }
 
-const observer=new MutationObserver(()=>bind());
-observer.observe(document.body,{childList:true,subtree:true});
+const host=document.querySelector('#viewRoot');if(host){const observer=new MutationObserver(()=>bind());observer.observe(host,{childList:true,subtree:true})}
+window.addEventListener('komo:session-ready',bind);
+window.addEventListener('komo:route-ready',bind);
 document.addEventListener('DOMContentLoaded',bind);
 setTimeout(bind,600);

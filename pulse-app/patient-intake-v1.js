@@ -1,25 +1,20 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-
-const URL='https://uqlolefsiktbznnymriy.supabase.co';
-const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
-const REM='komo_pulse_remember';
 const ORG_KEY='komo_clinical_org';
 const PATIENT_KEY='komo_clinical_patient';
 const ASSESSMENT_KEY='komo_clinical_assessment';
 const TAB_KEY='komo_clinical_tab';
 
-const S={client:null,session:null,role:'member',requests:[],proRequests:[],organizations:[],professionals:[],active:false,loading:false};
+const S={session:null,role:'member',requests:[],proRequests:[],organizations:[],professionals:[],active:false,loading:false};
 let timer=null;
 
-function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
-function sb(){if(!S.client)S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return S.client}
+function sb(){return window.KomoRuntime?.client||null}
 function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]))}
 function fmt(v){if(!v)return'—';const d=new Date(v);return new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).format(d)}
 function status(v){return({submitted:'Demande reçue',assigned:'Attribuée',accepted:'Bilan préparé',scheduled:'Rendez-vous planifié',completed:'Terminé',declined:'Non poursuivie',cancelled:'Annulée'})[v]||v||'—'}
 function statusClass(v){return ['accepted','scheduled','completed'].includes(v)?'good':v==='assigned'?'warn':v==='declined'?'bad':''}
 
 async function invoke(body){
-  const {data,error}=await sb().functions.invoke('patient-intake',{body});
+  const c=sb();if(!c)throw new Error('Session indisponible');
+  const {data,error}=await c.functions.invoke('patient-intake',{body});
   if(error)throw new Error(error.message||'Erreur serveur');
   if(data?.error){
     const messages={
@@ -35,16 +30,18 @@ async function invoke(body){
 
 async function loadCenterTeam(){
   if(S.role==='admin')return [];
-  const {data,error}=await sb().functions.invoke('center-team',{body:{action:'list'}});
+  const c=sb();if(!c)return [];
+  const {data,error}=await c.functions.invoke('center-team',{body:{action:'list'}});
   if(error||data?.error)return [];
   return data?.professionals||[];
 }
 
 async function base(){
-  const {data:{session}}=await sb().auth.getSession();
+  const c=sb();if(!c)return false;
+  const {data:{session}}=await c.auth.getSession();
   S.session=session;
   if(!session?.user)return false;
-  const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();
+  const r=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();
   S.role=r.data?.role||'member';
   const x=await invoke({action:'status'});
   S.requests=x.requests||[];
@@ -54,8 +51,8 @@ async function base(){
 function latest(){return S.requests.find(x=>['submitted','assigned','accepted','scheduled'].includes(x.status))||S.requests[0]||null}
 
 async function profileComplete(){
-  if(!S.session?.user)return false;
-  const p=await sb().from('profiles').select('first_name,last_name,birth_date,sex_at_birth,city').eq('id',S.session.user.id).maybeSingle();
+  const c=sb();if(!c||!S.session?.user)return false;
+  const p=await c.from('profiles').select('first_name,last_name,birth_date,sex_at_birth,city').eq('id',S.session.user.id).maybeSingle();
   const x=p.data;
   return{ok:!!(x?.first_name&&x?.last_name&&x?.birth_date&&x?.sex_at_birth),profile:x||{}};
 }
@@ -219,7 +216,7 @@ function toast(msg){
 
 async function refresh(){try{await base();await injectMember();ensureProTab()}catch(e){console.error('[patient-intake-ui]',e)}}
 function schedule(){clearTimeout(timer);timer=setTimeout(refresh,160)}
-window.addEventListener('hashchange',schedule);
-const obs=new MutationObserver(()=>ensureProTab());obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
+window.addEventListener('hashchange',schedule);window.addEventListener('komo:session-ready',schedule);window.addEventListener('komo:route-ready',schedule);
+const host=document.querySelector('#viewRoot');if(host){const obs=new MutationObserver(()=>ensureProTab());obs.observe(host,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']})}
 document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,900));
 setTimeout(refresh,1600);
