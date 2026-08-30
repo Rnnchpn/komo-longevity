@@ -27,7 +27,7 @@ Deno.serve(async(req:Request)=>{
   const action=String(body.action??"status");
 
   const role=async()=>{const r=await svc.from("account_roles").select("role").eq("user_id",user.id).maybeSingle();return r.data?.role??"member"};
-  const requireAdmin=async()=>{if(await role()!=="admin")return false;return true};
+  const requireAdmin=async()=>await role()==="admin";
 
   if(action==="status"){
     const [requests,consents]=await Promise.all([
@@ -83,13 +83,14 @@ Deno.serve(async(req:Request)=>{
     const q=await svc.from("account_privacy_requests").select("id,user_id,request_type,status,request_note,resolution_note,requested_at,updated_at,resolved_at,handled_by").order("requested_at",{ascending:false}).limit(250);
     if(q.error)return json(req,{error:"privacy_admin_list_failed",detail:q.error.message},500);
     const rows=await Promise.all((q.data??[]).map(async(x:any)=>{
-      const [p,a]=await Promise.all([
+      const [p,a,access]=await Promise.all([
         svc.from("profiles").select("display_name,first_name,last_name").eq("id",x.user_id).maybeSingle(),
-        svc.auth.admin.getUserById(x.user_id)
+        svc.auth.admin.getUserById(x.user_id),
+        svc.from("account_access_controls").select("status,closure_mode,closed_at,updated_at").eq("user_id",x.user_id).maybeSingle()
       ]);
       const profile=p.data??{};
       const display=[profile.first_name,profile.last_name].filter(Boolean).join(" ")||profile.display_name||a.data?.user?.email||"Compte Pulse";
-      return{...x,display_name:display,email:a.data?.user?.email??null};
+      return{...x,display_name:display,email:a.data?.user?.email??null,access_control:access.data??null};
     }));
     const counts=rows.reduce((m:any,x:any)=>{m[x.status]=(m[x.status]??0)+1;return m},{});
     return json(req,{requests:rows,counts});
@@ -106,6 +107,7 @@ Deno.serve(async(req:Request)=>{
     if(lookup.error)return json(req,{error:"request_lookup_failed",detail:lookup.error.message},500);
     const current=lookup.data;
     if(!current)return json(req,{error:"request_not_found"},404);
+    if(current.request_type==="account_closure"&&next==="completed")return json(req,{error:"closure_requires_execution_action",detail:"Utilisez l’action serveur de fermeture du compte."},409);
     const allowed=current.status==="submitted"?["in_review","completed","declined"]:current.status==="in_review"?["completed","declined"]:[];
     if(!allowed.includes(next))return json(req,{error:"invalid_status_transition",status:current.status},409);
     if(["completed","declined"].includes(next)&&!note)return json(req,{error:"resolution_note_required"},400);
@@ -120,6 +122,69 @@ Deno.serve(async(req:Request)=>{
     const message=next==="in_review"?`<p>Votre demande concernant la <strong>${label}</strong> est maintenant prise en charge par l’équipe KŌMØ.</p>`:next==="completed"?`<p>Le traitement de votre demande concernant la <strong>${label}</strong> est indiqué comme terminé dans KŌMØ Pulse.</p>`:`<p>Le traitement de votre demande concernant la <strong>${label}</strong> est clôturé. Consultez votre espace Pulse ou contactez KŌMØ si vous avez besoin d’un complément.</p>`;
     await mail(target.data?.user?.email,"Mise à jour de votre demande · KŌMØ Pulse",message);
     return json(req,{ok:true,request:up.data});
+  }
+
+  if(action==="admin_execute_closure"){
+    if(!await requireAdmin())return json(req,{error:"admin_required"},403);
+    const id=String(body.request_id??"");
+    const note=String(body.resolution_note??"").trim().slice(0,1500)||null;
+    const confirmation=String(body.closure_confirmation??"");
+    if(!id)return json(req,{error:"request_id_required"},400);
+    if(!note)return json(req,{error:"resolution_note_required"},400);
+    if(confirmation!=="FERMER")return json(req,{error:"closure_confirmation_required",detail:"La confirmation FERMER est requise."},400);
+
+    const lookup=await svc.from("account_privacy_requests").select("id,user_id,request_type,status").eq("id",id).maybeSingle();
+    if(lookup.error)return json(req,{error:"request_lookup_failed",detail:lookup.error.message},500);
+    const current=lookup.data;
+    if(!current)return json(req,{error:"request_not_found"},404);
+    if(current.request_type!=="account_closure")return json(req,{error:"not_account_closure"},409);
+
+    const existing=await svc.from("account_access_controls").select("user_id,status,privacy_request_id,closed_at").eq("user_id",current.user_id).maybeSingle();
+    if(existing.error)return json(req,{error:"access_control_lookup_failed",detail:existing.error.message},500);
+    if(existing.data?.status==="closed"&&existing.data?.privacy_request_id===id){
+      if(current.status!=="completed")await svc.from("account_privacy_requests").update({status:"completed",resolution_note:note,handled_by:user.id,updated_at:new Date().toISOString(),resolved_at:new Date().toISOString()}).eq("id",id);
+      return json(req,{ok:true,idempotent:true,status:"closed"});
+    }
+    if(current.status!=="in_review")return json(req,{error:"closure_requires_review",detail:"La demande doit être en cours de traitement avant exécution."},409);
+
+    const target=await svc.auth.admin.getUserById(current.user_id);
+    const targetEmail=target.data?.user?.email??null;
+    if(target.error&&!existing.data)return json(req,{error:"auth_user_lookup_failed",detail:target.error.message},409);
+
+    const now=new Date().toISOString();
+    const pre=await svc.from("account_access_controls").upsert({user_id:current.user_id,status:"closing",privacy_request_id:id,closure_mode:"auth_soft_delete",resolution_note:note,last_error:null,closed_by:user.id,closed_at:null,updated_at:now},{onConflict:"user_id"});
+    if(pre.error)return json(req,{error:"access_control_prepare_failed",detail:pre.error.message},500);
+
+    const consent=await svc.from("wearable_consents").update({status:"withdrawn",withdrawn_at:now,updated_at:now}).eq("user_id",current.user_id).eq("purpose","connected_followup").eq("status","active");
+    if(consent.error){
+      await svc.from("account_access_controls").update({status:"closure_failed",last_error:consent.error.message,updated_at:new Date().toISOString()}).eq("user_id",current.user_id);
+      return json(req,{error:"wearable_withdraw_failed",detail:consent.error.message},500);
+    }
+
+    if(!target.error){
+      const deleted=await svc.auth.admin.deleteUser(current.user_id,true);
+      if(deleted.error){
+        await svc.from("account_access_controls").update({status:"closure_failed",last_error:deleted.error.message,updated_at:new Date().toISOString()}).eq("user_id",current.user_id);
+        return json(req,{error:"auth_soft_delete_failed",detail:deleted.error.message},500);
+      }
+    }else if(existing.data?.status!=="closing"&&existing.data?.status!=="closure_failed"){
+      await svc.from("account_access_controls").update({status:"closure_failed",last_error:target.error.message,updated_at:new Date().toISOString()}).eq("user_id",current.user_id);
+      return json(req,{error:"auth_user_missing_unverified",detail:target.error.message},409);
+    }
+
+    const closedAt=new Date().toISOString();
+    const access=await svc.from("account_access_controls").update({status:"closed",resolution_note:note,last_error:null,closed_by:user.id,closed_at:closedAt,updated_at:closedAt}).eq("user_id",current.user_id).eq("privacy_request_id",id);
+    if(access.error)return json(req,{error:"access_control_finalize_failed",detail:access.error.message},500);
+
+    const done=await svc.from("account_privacy_requests").update({status:"completed",resolution_note:note,handled_by:user.id,updated_at:closedAt,resolved_at:closedAt}).eq("id",id).eq("status","in_review").select("id,status,resolved_at").maybeSingle();
+    if(done.error)return json(req,{error:"closure_request_finalize_failed",detail:done.error.message},500);
+    if(!done.data)return json(req,{error:"privacy_request_changed",detail:"La demande a changé pendant l’exécution."},409);
+
+    await Promise.allSettled([
+      mail(targetEmail,"Votre compte KŌMØ Pulse est fermé","<p>Votre accès KŌMØ Pulse a été fermé à la suite de votre demande.</p><p>Cette fermeture désactive votre compte d’accès. Les données devant être conservées pour des obligations légales, de traçabilité ou de soins peuvent rester archivées selon le cadre applicable.</p>"),
+      mail(ADMIN,"Compte Pulse fermé · KŌMØ",`<p>La fermeture d’un compte Pulse a été exécutée.</p><p>Référence de demande : <strong>${safe(id)}</strong></p><p>Aucune donnée de santé n’est incluse dans cet e-mail.</p>`)
+    ]);
+    return json(req,{ok:true,idempotent:false,status:"closed",closed_at:closedAt});
   }
 
   return json(req,{error:"unknown_action"},400);
