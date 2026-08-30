@@ -8,7 +8,8 @@ let html=await readFile(htmlPath,'utf8');
 const legacySource=await readFile(root+legacy,'utf8');
 const guardSource=await readFile(root+'trajectory-route-guard-v1.js','utf8');
 
-if(!legacySource.includes("location.hash.slice(1)!=='path'"))throw new Error('[pulse-trajectory-v32] legacy progression path contract changed');
+if(!legacySource.includes("location.hash!=='#path'")&&!legacySource.includes("location.hash.slice(1)!=='path'"))throw new Error('[pulse-trajectory-v32] legacy progression is no longer path-scoped');
+if(legacySource.includes("route()!=='trajectory'")||legacySource.includes("location.hash!=='#trajectory'"))throw new Error('[pulse-trajectory-v32] legacy progression unexpectedly owns trajectory');
 if(!guardSource.includes("KomoPatientNavigation?.go?.('trajectory'"))throw new Error('[pulse-trajectory-v32] path convergence guard missing');
 if(!html.includes(canonical))throw new Error('[pulse-trajectory-v32] canonical trajectory runtime missing');
 
