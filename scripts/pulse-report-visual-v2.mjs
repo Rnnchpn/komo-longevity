@@ -22,3 +22,7 @@ await patch('dossier.html',[
 ]);
 
 console.log(`[pulse-report-visual-v2] editorial Mobility Report pinned · ${RELEASE}`);
+
+// Final production stage: all earlier Home experiments may exist in source,
+// but only the modern patient-home-command is allowed to own #home at runtime.
+await import('./pulse-home-owner-v3.mjs');
