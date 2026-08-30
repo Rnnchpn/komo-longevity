@@ -1,7 +1,8 @@
 {
   "scripts": 122,
-  "bytes": 1285611,
+  "bytes": 1285393,
   "observers": 74,
+  "intervals": 3,
   "wholeBody": 0,
   "directClients": 45,
   "isolatedClients": 1,
