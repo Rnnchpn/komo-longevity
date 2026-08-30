@@ -37,7 +37,7 @@ document.addEventListener('click', event => {
   baseline?.focus();
 }, true);
 
-const observer = new MutationObserver(() => requestAnimationFrame(applyOrderGate));
-observer.observe(document.body,{subtree:true,childList:true});
+const testsHost=document.querySelector('#viewRoot');
+if(testsHost){const observer = new MutationObserver(() => requestAnimationFrame(applyOrderGate));observer.observe(testsHost,{subtree:true,childList:true})}
 window.addEventListener('hashchange',()=>setTimeout(applyOrderGate,240));
 document.addEventListener('DOMContentLoaded',()=>setTimeout(applyOrderGate,650));
