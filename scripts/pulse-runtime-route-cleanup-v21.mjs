@@ -14,8 +14,10 @@ const key=await patch('my-komo-key-home-v1.js',[["fresh.querySelector('[data-key
 const compact=key.replace(/^\/\*[^\n]*\*\/\n/,'').replace("'use strict';\n",'');
 await writeFile(root+'my-komo-key-home-v1.js',compact);
 if(writer.test(compact))throw new Error('[pulse-route-v21] KEY Home still writes routes directly');
-const files=(await readdir(root)).filter(x=>x.endsWith('.js'));
-const actual=[];
-for(const file of files){const text=await readFile(root+file,'utf8');if(writer.test(text))actual.push(file)}
-console.log(`[pulse-route-v21] five non-owner route writers retired · actual route writers=${actual.length}`);
-console.log('[pulse-route-v21] actual writers '+(actual.join(', ')||'none'));
+const files=(await readdir(root)).filter(x=>x.endsWith('.js')),texts=new Map();for(const f of files)texts.set(f,await readFile(root+f,'utf8'));
+const html=await readFile(root+'index.html','utf8'),direct=[...html.matchAll(/<script[^>]+src=["']\.\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*><\/script>/g)].map(x=>x[1]);
+const reachable=new Set(),q=[];for(const f of direct)if(texts.has(f)&&!reachable.has(f)){reachable.add(f);q.push(f)}
+while(q.length){const t=texts.get(q.shift())||'';for(const m of t.matchAll(/(?:from\s*|import\s*)["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']|import\s*\(\s*["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']\s*\)/g)){const d=m[1]||m[2];if(texts.has(d)&&!reachable.has(d)){reachable.add(d);q.push(d)}}}
+const actual=[...reachable].filter(f=>writer.test(texts.get(f)||'')).sort();
+console.log(`[pulse-route-v21] five non-owner route writers retired · reachable actual route writers=${actual.length}`);
+console.log('[pulse-route-v21] reachable actual writers '+(actual.join(', ')||'none'));
