@@ -37,15 +37,28 @@ if(homeMotion.includes('.observe(document.body'))throw new Error('[pulse-runtime
 const hero=await patch('site/pulse-v12/pulse-home-hero-polish-v2.js',[["new MutationObserver(()=>schedule(false)).observe(document.body,{childList:true,subtree:true});","new MutationObserver(()=>schedule(false)).observe(document.querySelector('#appShell'),{childList:true,subtree:true});"]],'Home Hero Polish',{stripHeader:true});
 if(hero.includes('.observe(document.body'))throw new Error('[pulse-runtime-late] Home Hero body observer remains');
 
-const html=await readFile('site/pulse-v12/index.html','utf8');
+let html=await readFile('site/pulse-v12/index.html','utf8');
 const perfAt=html.indexOf('./performance-runtime-v1.js'),motionAt=html.indexOf('./motion-hub-v3.js');
 if(perfAt<0||motionAt<0||perfAt>motionAt)throw new Error('[pulse-runtime-late] shared runtime must load before Motion Hub');
 const motion=await patch('site/pulse-v12/motion-hub-v3.js',[
 ["import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';\n\n",''],
 ["const URL='https://uqlolefsiktbznnymriy.supabase.co';\nconst KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';\nconst REM='komo_pulse_remember';\n",''],
 ["const S={client:null,user:null,patient:null,assessment:null,registry:{},sessions:{},responses:{},loading:false,openCode:null,message:'',kind:''};","const S={user:null,patient:null,assessment:null,registry:{},sessions:{},responses:{},loading:false,openCode:null,message:'',kind:''};"],
-["const storage=()=>localStorage.getItem(REM)==='1'?localStorage:sessionStorage;\nconst sb=()=>S.client||(S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));","const sb=()=>window.KomoRuntime.client;"]
+["const storage=()=>localStorage.getItem(REM)==='1'?localStorage:sessionStorage;\nconst sb=()=>S.client||(S.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}));","const sb=()=>window.KomoRuntime.client;"],
+["window.addEventListener('hashchange',()=>enter(false));window.addEventListener('pageshow',()=>enter(false));window.addEventListener('komo:questionnaire-saved',()=>{if(route()==='motion')setTimeout(load,120)});","window.addEventListener('hashchange',()=>enter(false));window.addEventListener('pageshow',()=>enter(false));window.addEventListener('komo:route-ready',()=>enter(false));window.addEventListener('komo:session-ready',()=>{if(route()==='motion')setTimeout(load,30)});window.addEventListener('komo:questionnaire-saved',()=>{if(route()==='motion')setTimeout(load,120)});"],
 ],'Motion Hub');
 if(motion.includes('createClient')||motion.includes('S.client'))throw new Error('[pulse-runtime-late] Motion Hub still owns a Supabase client');
 
-console.log('[pulse-runtime-late] zero whole-body observers retained; Motion Hub adopted canonical Supabase runtime');
+const trajectory=await patch('site/pulse-v12/trajectory-v3.js',[["window.addEventListener('hashchange',()=>enter(false));window.addEventListener('pageshow',()=>enter(false));window.addEventListener('komo:canonical-result-invalidated',()=>{if(route()==='trajectory')hydrate(true)});","window.addEventListener('hashchange',()=>enter(false));window.addEventListener('pageshow',()=>enter(false));window.addEventListener('komo:route-ready',()=>enter(false));window.addEventListener('komo:session-ready',()=>{if(route()==='trajectory')setTimeout(()=>hydrate(false),30)});window.addEventListener('komo:canonical-result-invalidated',()=>{if(route()==='trajectory')hydrate(true)});"]],'Trajectory owner');
+if(!trajectory.includes("komo:route-ready',()=>enter(false)"))throw new Error('[pulse-runtime-late] Trajectory route-ready ownership missing');
+
+const agenda=await patch('site/pulse-v12/agenda-hub-v4.js',[["window.addEventListener('pageshow',()=>{if(route()==='documents')setTimeout(()=>refresh(),70)});","window.addEventListener('pageshow',()=>{if(route()==='documents')setTimeout(()=>refresh(),70)});window.addEventListener('komo:route-ready',()=>{if(route()==='documents')setTimeout(()=>refresh(),30)});window.addEventListener('komo:session-ready',()=>{if(route()==='documents')setTimeout(()=>refresh(),30)});"]],'Agenda owner');
+if(!agenda.includes("komo:route-ready',()=>{if(route()==='documents')"))throw new Error('[pulse-runtime-late] Agenda route-ready ownership missing');
+
+const legacyRouteScript=/\s*<script(?: type="module")? src="\.\/patient-route-runtime-v2\.js(?:\?v=[^\"']+)?"><\/script>/g;
+if(!legacyRouteScript.test(html))throw new Error('[pulse-runtime-late] patient-route-runtime-v2 script tag missing before retirement');
+html=html.replace(legacyRouteScript,'');
+if(html.includes('patient-route-runtime-v2.js'))throw new Error('[pulse-runtime-late] retired patient route runtime still loaded');
+await writeFile('site/pulse-v12/index.html',html);
+
+console.log('[pulse-runtime-late] zero whole-body observers retained; Motion uses shared Supabase; patient-route-runtime-v2 retired into canonical owners');
