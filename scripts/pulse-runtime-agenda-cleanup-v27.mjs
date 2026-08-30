@@ -53,3 +53,5 @@ for(const retired of ['agenda-clean-room-v1.js','patient-motion-booking-v2.js','
 }
 if(!direct.includes('agenda-hub-v4.js')||!direct.includes('agenda-premium-map-v1.js'))throw new Error('[pulse-agenda-v27] canonical Agenda owners missing');
 console.log('[pulse-agenda-v27] Agenda exclusive ownership locked · Motion/report document producers retired · clean-room removed');
+
+await import('./pulse-runtime-mobile-bundle-v28.mjs');
