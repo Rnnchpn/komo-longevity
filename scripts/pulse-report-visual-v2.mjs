@@ -22,3 +22,6 @@ await patch('dossier.html',[
 ]);
 
 console.log(`[pulse-report-visual-v2] identity Mobility Report + live download pinned · ${RELEASE}`);
+
+// Run Home ownership hardening after every report and late Pulse visual stage.
+await import('./pulse-home-owner-v3.mjs');

@@ -1,0 +1,80 @@
+/* KŌMØ Pulse — topbar roles v1 */
+@media (min-width:768px){
+  .topbar[data-role-bar="1"]{
+    min-height:68px!important;
+    height:68px!important;
+    padding:12px 24px!important;
+    border-bottom:1px solid rgba(255,255,255,.055)!important;
+    background:rgba(6,8,7,.92)!important;
+    backdrop-filter:blur(22px)!important;
+    -webkit-backdrop-filter:blur(22px)!important;
+  }
+  .topbar[data-role-bar="1"]>div:first-child{display:flex!important;align-items:baseline!important;gap:12px!important}
+  .topbar[data-role-bar="1"] #pageEyebrow{margin:0!important;font-size:8px!important;letter-spacing:.16em!important;color:#737d75!important}
+  .topbar[data-role-bar="1"] #pageTitle{margin:0!important;font-size:18px!important;font-weight:600!important;letter-spacing:-.035em!important;color:#f3f0e9!important}
+  .topbar-actions[data-role-bar-actions="1"]{display:flex!important;align-items:center!important;gap:8px!important}
+
+  .topbar-actions[data-role-bar-actions="1"] #modeSwitch,
+  .topbar-actions[data-role-bar-actions="1"] .admin-shortcut{
+    min-height:38px!important;
+  }
+  .topbar-actions[data-role-bar-actions="1"] #modeSwitch{
+    display:flex!important;
+    align-items:center!important;
+    gap:2px!important;
+    padding:3px!important;
+    border:1px solid rgba(255,255,255,.075)!important;
+    border-radius:13px!important;
+    background:#0d100e!important;
+    box-shadow:none!important;
+  }
+  .topbar-actions[data-role-bar-actions="1"] #modeSwitch[hidden]{display:none!important}
+  .topbar-actions[data-role-bar-actions="1"] #modeSwitch button{
+    min-width:76px!important;
+    min-height:32px!important;
+    padding:0 13px!important;
+    border:0!important;
+    border-radius:10px!important;
+    background:transparent!important;
+    color:#818b83!important;
+    font-size:9px!important;
+    font-weight:750!important;
+    letter-spacing:.01em!important;
+    text-transform:none!important;
+  }
+  .topbar-actions[data-role-bar-actions="1"] #modeSwitch button.active{
+    background:#edeae2!important;
+    color:#172019!important;
+    box-shadow:none!important;
+  }
+  .topbar-actions[data-role-bar-actions="1"] .admin-shortcut{
+    min-width:76px!important;
+    padding:0 14px!important;
+    border:1px solid rgba(177,195,181,.15)!important;
+    border-radius:12px!important;
+    background:rgba(50,74,58,.42)!important;
+    color:#c8d5ca!important;
+    font-size:9px!important;
+    font-weight:800!important;
+    letter-spacing:.01em!important;
+    box-shadow:none!important;
+  }
+  .topbar-actions[data-role-bar-actions="1"] .admin-shortcut:hover{background:rgba(60,88,68,.58)!important;color:#fff!important}
+  .topbar-actions[data-role-bar-actions="1"] #refreshButton{
+    width:38px!important;height:38px!important;min-width:38px!important;border-radius:12px!important;
+    border:1px solid rgba(255,255,255,.07)!important;background:#0d100e!important;color:#858f87!important
+  }
+}
+
+@media (max-width:767px){
+  .topbar[data-role-bar="1"]{padding:10px 14px!important}
+  .topbar[data-role-bar="1"]>div:first-child{min-width:0!important}
+  .topbar[data-role-bar="1"] #pageEyebrow{font-size:7px!important}
+  .topbar[data-role-bar="1"] #pageTitle{font-size:16px!important}
+  .topbar-actions[data-role-bar-actions="1"]{gap:6px!important}
+  .topbar-actions[data-role-bar-actions="1"] #modeSwitch{display:none!important}
+  .topbar-actions[data-role-bar-actions="1"] .admin-shortcut{
+    min-height:34px!important;padding:0 11px!important;border-radius:11px!important;border:1px solid rgba(177,195,181,.16)!important;background:rgba(50,74,58,.45)!important;color:#d0dbd2!important;font-size:8px!important;font-weight:800!important
+  }
+  .topbar-actions[data-role-bar-actions="1"] #refreshButton{width:34px!important;height:34px!important;min-width:34px!important}
+}
