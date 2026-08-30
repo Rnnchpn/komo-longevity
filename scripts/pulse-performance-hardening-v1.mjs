@@ -56,7 +56,6 @@ questionnaire=removeExact(questionnaire,"import { createClient } from 'https://e
 questionnaire=replaceRequired(questionnaire,sClientOld,"function sb(){return window.KomoRuntime?.client||null}",'questionnaire-engine shared client');
 questionnaire=replaceRequired(questionnaire,"async function identity(){const {data:{session}}=await sb().auth.getSession();S.session=session;if(!session?.user)return false;return true}","async function identity(){const c=sb();if(!c)return false;const {data:{session}}=await c.auth.getSession();S.session=session;if(!session?.user)return false;return true}",'questionnaire-engine runtime guard');
 questionnaire=replaceRequired(questionnaire,"const observer=new MutationObserver(()=>{if(currentRoute()==='documents'&&document.querySelector('[data-kmb2]')&&!document.querySelector('[data-kqe-card]'))schedule()});observer.observe(document.body,{childList:true,subtree:true});","const host=document.querySelector('#viewRoot');if(host){const observer=new MutationObserver(()=>{if(currentRoute()==='documents'&&document.querySelector('[data-kmb2]')&&!document.querySelector('[data-kqe-card]'))schedule()});observer.observe(host,{childList:true,subtree:true})}",'questionnaire-engine targeted observer');
-questionnaire+="\nwindow.addEventListener('komo:session-ready',()=>setTimeout(schedule,40));window.addEventListener('komo:route-ready',()=>{if(currentRoute()==='documents')setTimeout(schedule,60)});\n";
 await writeFile('pulse-app/questionnaire-engine-v1.js',questionnaire);
 
 // Pulse self-tests: keep the existing Results behavior, but consume the canonical
@@ -66,7 +65,6 @@ tests=removeExact(tests,"import { createClient } from 'https://esm.sh/@supabase/
 tests=replaceRequired(tests,"function sb() {\n  return createClient(SUPABASE_URL, SUPABASE_KEY, {\n    auth: { storage: storage(), persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }\n  });\n}","function sb() {\n  return window.KomoRuntime?.client || null;\n}",'tests shared client');
 tests=replaceRequired(tests,"  const client = sb();\n  const { data: { session } } = await client.auth.getSession();","  const client = sb();\n  if (!client) return null;\n  const { data: { session } } = await client.auth.getSession();",'tests runtime guard');
 tests=replaceRequired(tests,"observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});","const testsHost=document.querySelector('#viewRoot');if(testsHost)observer.observe(testsHost,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});",'tests targeted observer');
-tests+="\nwindow.addEventListener('komo:session-ready',()=>setTimeout(()=>renderTestsPage(true),40));window.addEventListener('komo:route-ready',()=>{if(location.hash.replace(/^#/,'')==='results')setTimeout(()=>renderTestsPage(false),60)});\n";
 await writeFile('pulse-app/tests-v1.js',tests);
 
 console.log('[pulse-performance-hardening-v1] shared client + event-driven UI applied');
