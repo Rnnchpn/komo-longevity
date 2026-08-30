@@ -37,7 +37,9 @@ html=html.replace(cleanTag,'');
 if(html.includes('agenda-clean-room-v1.js'))throw new Error('[pulse-agenda-v27] Agenda clean-room still loaded');
 await write('index.html',html);
 
-for(const file of ['agenda-clean-room-v1.js','patient-motion-booking-v2.js','patient-preparation-hub-v2.js']){
+// Keep patient-motion-booking-v2.js on disk until the later compatibility patcher has read it;
+// it is already unloaded since wave 26 and remains asserted absent from direct runtime.
+for(const file of ['agenda-clean-room-v1.js','patient-preparation-hub-v2.js']){
   await rm(root+file,{force:true});
 }
 
