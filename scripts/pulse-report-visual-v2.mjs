@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const target=join(root,'site','pulse-v12');
-const RELEASE='20260830-report-export-hardfix-v5';
+const RELEASE='20260830-report-export-hardfix-v6';
 
 async function patch(name,replacements){
   const path=join(target,name);
@@ -22,29 +22,27 @@ await patch('report-bootstrap-v1.js',[
 ]);
 
 // Professional dossier: remove every legacy owner of #pdfBtn.
-// The old bridge called KomoCanonicalReport before the new module had a chance
-// to execute, which is why users could still receive the historical PDF.
 await patch('dossier.html',[
   [/\s*<script[^>]+src="\.\/(?:canonical-report-export-v2|canonical-report-export|dossier-export-bridge)\.js(?:\?[^\"]*)?"[^>]*><\/script>/g,''],
   [/dossier-page\.js\?v=[^\"]+/g,`dossier-page.js?v=${RELEASE}`],
   [/dossier-pdf-export-v2\.js\?v=[^\"]+/g,`dossier-pdf-export-v2.js?v=${RELEASE}`]
 ]);
 
-// Remove the historical print fallback from the generated dossier runtime.
+// Remove the historical browser-print fallback from the generated dossier runtime.
 await patch('dossier-page.js',[
   [/\s*document\.querySelector\('#pdfBtn'\)\?\.addEventListener\('click',\(\)=>window\.print\(\)\);?/g,"\n  // PDF export is exclusively owned by dossier-pdf-export-v2 / report-delivery."
   ]
 ]);
 
-// Keep the full delivery/versioning/email workflow, but force it to render v2.
+// Keep versioning, clinical release and email workflow, but force the current renderer.
 await patch('report-delivery-v1.js',[
-  [/from '\.\/mobility-report-pdf-v1\.js(?:\?v=[^']+)?';/g,`from './mobility-report-pdf-v2.js?v=${RELEASE}';`]
+  [/mobility-report-pdf-v1\.js(?:\?v=[^'\"]+)?/g,`mobility-report-pdf-v2.js?v=${RELEASE}`]
 ]);
 await patch('dossier-pdf-export-v2.js',[
-  [/report-delivery-v1\.js\?v=[^'\"]+/g,`report-delivery-v1.js?v=${RELEASE}`]
+  [/report-delivery-v1\.js(?:\?v=[^'\"]+)?/g,`report-delivery-v1.js?v=${RELEASE}`]
 ]);
 
-// Build-time regression guard: production must have one PDF owner and v2 renderer.
+// Build-time regression guard: production must have one PDF owner and the v2 renderer.
 const dossier=await readFile(join(target,'dossier.html'),'utf8');
 const dossierPage=await readFile(join(target,'dossier-page.js'),'utf8');
 const delivery=await readFile(join(target,'report-delivery-v1.js'),'utf8');
