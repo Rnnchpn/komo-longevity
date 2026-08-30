@@ -11,6 +11,7 @@ const stabilityTarget = join(targetDir, 'patient-home-stability-v1.js');
 const indexPath = join(targetDir, 'index.html');
 const VERSION = '20260830-patient-home-final-v1-2';
 const STABILITY_VERSION = '20260830-patient-home-stability-v1-1';
+const HOME_DEPENDENCY_VERSION = '20260830-home-runtime-stability-v1';
 const STABILITY_TAG = `<script defer src="./patient-home-stability-v1.js?v=${STABILITY_VERSION}"></script>`;
 const TAG = `<script defer src="./patient-home-final-v1.js?v=${VERSION}"></script>`;
 
@@ -44,6 +45,19 @@ for (const legacy of legacyHomeScripts) {
   html = html.replace(new RegExp(`\\s*<script[^>]+src="\\.\\/${escaped}(?:\\?[^\"]*)?"[^>]*><\\/script>`, 'g'), '');
 }
 
+// These modules remain useful outside Home, but their route guards were tightened in
+// the Home stability release. Their historical URLs are immutable for one year, so a
+// new query token is mandatory or returning devices can keep executing the old code.
+const stabilizedDependencies = [
+  'patient-canonical-results.js',
+  'locomotor-age-ui-v01.js',
+  'my-komo-wallet-home-v2.js'
+];
+for (const asset of stabilizedDependencies) {
+  const escaped = asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  html = html.replace(new RegExp(`(\\.\\/${escaped})\\?v=[^\"]+`, 'g'), `$1?v=${HOME_DEPENDENCY_VERSION}`);
+}
+
 html = html.replace(/\s*<script(?:\s+defer)?\s+src="\.\/patient-home-stability-v1\.js(?:\?[^\"]*)?"><\/script>/g, '');
 html = html.replace(/\s*<script(?:\s+defer)?\s+src="\.\/patient-home-final-v1\.js(?:\?[^\"]*)?"><\/script>/g, '');
 html = html.replace('</body>', `  ${STABILITY_TAG}\n  ${TAG}\n</body>`);
@@ -59,6 +73,10 @@ if (!checkHtml.includes(TAG)) throw new Error('[pulse-patient-home-final] final 
 if (!checkHtml.includes(STABILITY_TAG)) throw new Error('[pulse-patient-home-final] stability runtime not injected');
 for (const legacy of legacyHomeScripts) {
   if (checkHtml.includes(legacy)) throw new Error(`[pulse-patient-home-final] legacy Home runtime still present: ${legacy}`);
+}
+for (const asset of stabilizedDependencies) {
+  const expected = `./${asset}?v=${HOME_DEPENDENCY_VERSION}`;
+  if (!checkHtml.includes(expected)) throw new Error(`[pulse-patient-home-final] stabilized dependency not cache-busted: ${asset}`);
 }
 if (!checkJs.includes("patient-home-final-v1.0.0")) throw new Error('[pulse-patient-home-final] unexpected Home runtime source');
 if (!checkJs.includes('MOTION AGE') || !checkJs.includes('MOTION SCORE')) throw new Error('[pulse-patient-home-final] core hierarchy missing');
@@ -76,4 +94,4 @@ if (!penultimateScript.startsWith('./patient-home-stability-v1.js')) {
   throw new Error(`[pulse-patient-home-final] stability runtime must load immediately before final Home, got ${penultimateScript || 'none'}`);
 }
 
-console.log(`[pulse-patient-home-final] PASS · clean-room Home · ${legacyHomeScripts.length} legacy runtimes removed · desktop + phone canvas isolated · Motion Age → Motion Score → dimensions → priority → trajectory → assessment/report`);
+console.log(`[pulse-patient-home-final] PASS · clean-room Home · ${legacyHomeScripts.length} legacy runtimes removed · 3 stabilized dependencies cache-busted · desktop + phone canvas isolated · Motion Age → Motion Score → dimensions → priority → trajectory → assessment/report`);
