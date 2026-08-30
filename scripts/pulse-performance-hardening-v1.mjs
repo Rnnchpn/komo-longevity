@@ -69,8 +69,17 @@ for(const path of ['pulse-app/center-two-tab-workspace-v1.js','pulse-app/center-
   await writeFile(path,src);
 }
 
+const scopedView=[
+ ['pulse-app/club-connections-v1.js','.observe(document.body,{subtree:true,childList:true});'],
+ ['pulse-app/club-hub-v1.js','.observe(document.body,{childList:true,subtree:true});'],
+ ['pulse-app/my-komo-avatar-runtime-v1.js','.observe(document.body,{childList:true,subtree:true});'],
+ ['pulse-app/my-komo-economy-policy-v2.js','.observe(document.body,{childList:true,subtree:true});']
+];
+for(const [path,from] of scopedView){let src=await readFile(path,'utf8');src=replaceRequired(src,from,from.replace('document.body',"document.querySelector('#viewRoot')"),`${path} scoped observer`);await writeFile(path,src)}
+
 let brand=await readFile('pulse-app/pulse-brand-theme-v1.js','utf8');
-brand=brand.replace(/^\/\*[\s\S]*?\*\/\s*/,'');
+brand=replaceRequired(brand,'.observe(document.body,{childList:true,subtree:true,characterData:true});',".observe(document.querySelector('#appShell'),{childList:true,subtree:true,characterData:true});",'brand scoped observer');
+brand=brand.replace(/\/\*[\s\S]*?\*\//g,'');
 await writeFile('pulse-app/pulse-brand-theme-v1.js',brand);
 
 console.log('[pulse-performance-hardening-v1] shared client + event-driven UI applied');
