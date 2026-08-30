@@ -17,7 +17,7 @@ if(!polish.includes(observer))throw new Error('[pulse-results-v31] results polis
 polish=polish.replace(observer,"window.addEventListener('komo:results-rendered',schedule);");
 if(polish.includes('new MutationObserver('))throw new Error('[pulse-results-v31] results polish observer remains');
 
-canonical=`${canonical.trim()}\n${polish.trim()}\n`;
+canonical=`${canonical.trim()}\n${polish.trim()}`;
 await writeFile(root+canonicalFile,canonical,'utf8');
 
 const polishTag=new RegExp(`\\s*<script([^>]*)src=[\"']\\./${polishFile.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}(?:\\?[^\"']*)?[\"']([^>]*)><\\/script>`,'g');
