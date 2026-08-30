@@ -89,3 +89,4 @@ console.log(`[pulse-report-visual-v2] PASS · warm beige editorial 10-page repor
 
 await import('./pulse-myocare-contract-alignment-v1.mjs');
 await import('./pulse-functional-rc1.mjs');
+await import('./pulse-global-interaction-contract-v1.mjs');
