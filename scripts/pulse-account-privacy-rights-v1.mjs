@@ -29,6 +29,8 @@ ok('official account hub is loaded',finalHtml.includes(`account-hub-v2.js?v=${RE
 ok('privacy rights runtime is loaded',finalHtml.includes(`account-privacy-v1.js?v=${RELEASE}`));
 ok('preparatory pseudo-contract copy is removed',!hub.includes('Version non contractuelle')&&!hub.includes('Préparatoire ·')&&!hub.includes('Première base contractuelle'));
 ok('official legal documents remain linked',hub.includes("legalUrl('privacy')")&&hub.includes("legalUrl('terms')")&&hub.includes("legalUrl('medical-information')")&&hub.includes("legalUrl('legal')"));
+ok('French Method route uses live /fr/methode/ slug',hub.includes('https://komolongevity.com/fr/methode/')&&!hub.includes('https://komolongevity.com/fr/method/'));
+ok('Library link uses live /media route',hub.includes('https://komolongevity.com/media')&&!hub.includes('https://komolongevity.com/fr/media'));
 ok('account hub has no persistent DOM observer or polling',!hub.includes('MutationObserver')&&!hub.includes('setInterval('));
 ok('privacy UI exposes data copy and account closure',privacy.includes("'data_export'")&&privacy.includes("'account_closure'"));
 ok('privacy UI exposes explicit KEY consent withdrawal',privacy.includes("action:'withdraw_wearables'")&&privacy.includes('Retirer mon consentement KEY'));
@@ -42,4 +44,4 @@ ok('KEY migration replaces stale consented_at contract',keyMigration.includes("r
 ok('privacy request table is RLS protected',privacyMigration.includes('enable row level security')&&privacyMigration.includes('privacy_requests_select_own'));
 
 if(failures.length){console.error(`[pulse-account-privacy-v1] FAILED · ${failures.join(' | ')}`);process.exit(1)}
-console.log('[pulse-account-privacy-v1] PASS · official Account + traceable privacy rights + KEY consent contract');
+console.log('[pulse-account-privacy-v1] PASS · official Account + traceable privacy rights + KEY consent contract + live route guards');
