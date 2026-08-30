@@ -141,6 +141,7 @@ const scripts = [
   'scripts/pulse-privacy-export-v1.mjs',
   'scripts/pulse-report-visual-v2.mjs',
   'scripts/pulse-runtime-consolidation-late-v1.mjs',
+  'scripts/pulse-runtime-route-cleanup-v21.mjs',
   'scripts/pulse-runtime-debt-audit-v1.mjs'
 ];
 
