@@ -1,5 +1,4 @@
 (() => {
-  'use strict';
   const STYLE_ID='kalLogoutStyleV1';
   const CARD_ID='kalLogoutCardV1';
   let timer=0;
