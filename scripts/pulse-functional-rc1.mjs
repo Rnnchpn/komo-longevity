@@ -76,12 +76,12 @@ ok('visible-button diagnostics exposed',rc1.includes('window.KomoFunctionalRC1')
 // surface from shipping without the actual Supabase actions behind it.
 ok('login submits to Supabase password auth',app.includes('auth.signInWithPassword'));
 ok('signup submits to Supabase Auth',app.includes('auth.signUp'));
-ok('forgot password is routed to dedicated reset screen',runtime.includes('resetPasswordForEmail')&&runtime.includes("resetUrl"));
+ok('forgot password is routed to dedicated reset screen',runtime.includes('resetPasswordForEmail')&&runtime.includes('resetUrl'));
 ok('reset page exists and loads recovery runtime',resetIndex.includes('./reset.js'));
 ok('reset runtime requires an authenticated recovery session',resetJs.includes('auth.getSession()'));
 ok('reset runtime writes the new password',resetJs.includes('auth.updateUser({ password: password.value })'));
-ok('profile persists to profiles table',profile.includes("from('profiles').upsert"));
-ok('profile email change uses Supabase Auth',profile.includes('auth.updateUser({email:nextEmail})'));
+ok('profile persists to profiles table',profile.includes("from('profiles').update"));
+ok('profile email change uses Supabase Auth',profile.includes('auth.updateUser({email:next})'));
 ok('profile password reset returns to dedicated reset screen',profile.includes('resetPasswordForEmail')&&profile.includes('resetUrl'));
 
 // Every local script/link referenced by the final Pulse HTML must exist in the build output.
