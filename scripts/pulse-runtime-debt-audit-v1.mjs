@@ -21,6 +21,57 @@ const reachable=new Set();const queue=[];
 for(const s of scripts){if(textByFile.has(s)&&!reachable.has(s)){reachable.add(s);queue.push(s)}}
 while(queue.length){const file=queue.shift(),text=textByFile.get(file)||'';const deps=[];for(const m of text.matchAll(/(?:from\s*|import\s*)["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']/g))deps.push(m[1]);for(const m of text.matchAll(/import\s*\(\s*["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']\s*\)/g))deps.push(m[1]);for(const dep of deps){if(textByFile.has(dep)&&!reachable.has(dep)){reachable.add(dep);queue.push(dep)}}}
 
+function codeOnly(src){
+  let out='',i=0,mode='code',quote='';
+  while(i<src.length){
+    const c=src[i],n=src[i+1];
+    if(mode==='code'){
+      if(c==='/'&&n==='/'){
+        out+='  ';i+=2;
+        while(i<src.length&&src[i]!=='\n'){out+=' ';i++}
+        continue;
+      }
+      if(c==='/'&&n==='*'){
+        out+='  ';i+=2;
+        while(i<src.length){
+          if(src[i]==='*'&&src[i+1]==='/'){out+='  ';i+=2;break}
+          out+=src[i]==='\n'?'\n':' ';i++;
+        }
+        continue;
+      }
+      if(c==="'"||c==='"'||c==='`'){quote=c;mode='string';out+=' ';i++;continue}
+      out+=c;i++;continue;
+    }
+    if(c==='\\'){out+='  ';i+=2;continue}
+    if(c===quote){out+=' ';i++;mode='code';continue}
+    out+=c==='\n'?'\n':' ';i++;
+  }
+  return out;
+}
+const reEsc=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+function exactViewRootMutations(text){
+  const aliases=new Set();
+  const selector=String.raw`(?:document\.)?(?:querySelector\(\s*['"]#viewRoot['"]\s*\)|getElementById\(\s*['"]viewRoot['"]\s*\))`;
+  const direct=new RegExp(String.raw`\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*${selector}`,'g');
+  const fallback=new RegExp(String.raw`\b([A-Za-z_$][\w$]*)\s*=\s*(?:document\.)?querySelector\([^;\n)]*\)\s*\|\|\s*${selector}`,'g');
+  for(const m of text.matchAll(direct))aliases.add(m[1]);
+  for(const m of text.matchAll(fallback))aliases.add(m[1]);
+
+  const code=codeOnly(text);
+  let replace=0,insert=0;
+  for(const alias of aliases){
+    const a=reEsc(alias);
+    replace+=(code.match(new RegExp(String.raw`\b${a}\.innerHTML\s*=`,'g'))||[]).length;
+    replace+=(code.match(new RegExp(String.raw`\b${a}\.replaceChildren\s*\(`,'g'))||[]).length;
+    insert+=(code.match(new RegExp(String.raw`\b${a}\.(?:appendChild|append|prepend|insertBefore|insertAdjacentElement)\s*\(`,'g'))||[]).length;
+  }
+  const directTarget=String.raw`(?:document\.)?(?:querySelector\(\s*['"]#viewRoot['"]\s*\)|getElementById\(\s*['"]viewRoot['"]\s*\))`;
+  replace+=(text.match(new RegExp(String.raw`${directTarget}\s*\.innerHTML\s*=`,'g'))||[]).length;
+  replace+=(text.match(new RegExp(String.raw`${directTarget}\s*\.replaceChildren\s*\(`,'g'))||[]).length;
+  insert+=(text.match(new RegExp(String.raw`${directTarget}\s*\.(?:appendChild|append|prepend|insertBefore|insertAdjacentElement)\s*\(`,'g'))||[]).length;
+  return{aliases:[...aliases].sort(),replace,insert,total:replace+insert};
+}
+
 const metrics=[];
 for(const file of [...reachable].sort()){
   const text=textByFile.get(file)||'';
@@ -31,10 +82,11 @@ for(const file of [...reachable].sort()){
   const timeouts=(text.match(/setTimeout\s*\(/g)||[]).length;
   const createClients=(text.match(/createClient\s*\(/g)||[]).length;
   const sharedRuntime=text.includes('KomoRuntime');
-  const viewWrites=(text.match(/(?:#viewRoot|querySelector\(['\"]#viewRoot['\"]\)|getElementById\(['\"]viewRoot['\"]\))[\s\S]{0,220}(?:innerHTML|replaceChildren|appendChild|append\()/g)||[]).length;
+  const viewWritesLegacy=(text.match(/(?:#viewRoot|querySelector\(['"]#viewRoot['"]\)|getElementById\(['"]viewRoot['"]\))[\s\S]{0,220}(?:innerHTML|replaceChildren|appendChild|append\()/g)||[]).length;
+  const exactView=exactViewRootMutations(text);
   const bodyObservers=/observe\(document\.body\s*,\s*\{[^}]*subtree\s*:\s*true/i.test(text)?1:0;
   const globals=[...text.matchAll(/window\.([A-Z][A-Za-z0-9_]+)\s*=/g)].map(m=>m[1]);
-  metrics.push({file,bytes:st.size,observers,bodyObservers,intervals,timeouts,createClients,sharedRuntime,routeWrites,viewWrites,globals});
+  metrics.push({file,bytes:st.size,observers,bodyObservers,intervals,timeouts,createClients,sharedRuntime,routeWrites,viewWritesLegacy,viewReplaceWrites:exactView.replace,viewInsertWrites:exactView.insert,viewWritesExact:exactView.total,viewRootAliases:exactView.aliases,globals});
 }
 
 const owners={
@@ -47,31 +99,39 @@ const owners={
   navigation:['patient-navigation-core-v1.js','adaptive-shell-v4.js','pulse-bottom-nav-v6.js','mobile-v1.js','mobile-guided-v2.js','mobile-vertical-app-v1.js','patient-route-runtime-v2.js']
 };
 
-function score(m){return m.observers*8+m.bodyObservers*12+m.intervals*10+m.routeWrites*5+m.viewWrites*6+(m.createClients&&!m.sharedRuntime?8:m.createClients?2:0)+Math.min(8,Math.floor(m.timeouts/4));}
+function score(m){return m.observers*8+m.bodyObservers*12+m.intervals*10+m.routeWrites*5+m.viewWritesExact*6+(m.createClients&&!m.sharedRuntime?8:m.createClients?2:0)+Math.min(8,Math.floor(m.timeouts/4));}
 const ranked=metrics.map(m=>({...m,risk:score(m)})).sort((a,b)=>b.risk-a.risk||b.bytes-a.bytes);
 const directClients=metrics.filter(x=>x.createClients>0);
 const isolatedClients=directClients.filter(x=>!x.sharedRuntime);
 const routeWriters=metrics.filter(x=>x.routeWrites>0);
 const wholeBody=metrics.filter(x=>x.bodyObservers>0);
-const viewOwners=metrics.filter(x=>x.viewWrites>0);
+const legacyViewOwners=metrics.filter(x=>x.viewWritesLegacy>0);
+const exactViewMutators=metrics.filter(x=>x.viewWritesExact>0);
+const exactViewReplacers=metrics.filter(x=>x.viewReplaceWrites>0);
+const exactViewInserters=metrics.filter(x=>x.viewInsertWrites>0);
+const legacyViewFalsePositives=legacyViewOwners.filter(x=>x.viewWritesExact===0);
 const loadedBytes=metrics.reduce((a,b)=>a+b.bytes,0);
 const observerCount=metrics.reduce((a,b)=>a+b.observers,0);
 
 console.log(`[pulse-runtime-debt-v1] direct scripts=${scripts.length} · unique=${scriptCounts.size} · reachable=${reachable.size}/${jsFiles.length}`);
-console.log(`[pulse-runtime-debt-v1] loaded bytes=${loadedBytes} · MutationObserver=${observerCount} · whole-body observers=${wholeBody.length} · intervals=${metrics.reduce((a,b)=>a+b.intervals,0)} · createClient=${directClients.length} modules (${isolatedClients.length} isolated from KomoRuntime) · route writers=${routeWriters.length} · view writers=${viewOwners.length}`);
+console.log(`[pulse-runtime-debt-v1] loaded bytes=${loadedBytes} · MutationObserver=${observerCount} · whole-body observers=${wholeBody.length} · intervals=${metrics.reduce((a,b)=>a+b.intervals,0)} · createClient=${directClients.length} modules (${isolatedClients.length} isolated from KomoRuntime) · route writers=${routeWriters.length} · view proxy=${legacyViewOwners.length} · exact view mutators=${exactViewMutators.length} (${exactViewReplacers.length} replace / ${exactViewInserters.length} insert)`);
 if(duplicateScriptTags.length)console.log('[pulse-runtime-debt-v1] duplicate tags',duplicateScriptTags);
 console.log('[pulse-runtime-debt-v1] top risk modules');
-for(const m of ranked.slice(0,20))console.log(`  ${String(m.risk).padStart(3)} · ${m.file} · obs=${m.observers}/${m.bodyObservers} int=${m.intervals} timeout=${m.timeouts} sb=${m.createClients}${m.createClients?(m.sharedRuntime?'/shared':'/isolated'):''} route=${m.routeWrites} view=${m.viewWrites} bytes=${m.bytes}`);
+for(const m of ranked.slice(0,20))console.log(`  ${String(m.risk).padStart(3)} · ${m.file} · obs=${m.observers}/${m.bodyObservers} int=${m.intervals} timeout=${m.timeouts} sb=${m.createClients}${m.createClients?(m.sharedRuntime?'/shared':'/isolated'):''} route=${m.routeWrites} view=${m.viewWritesExact}[${m.viewReplaceWrites}r/${m.viewInsertWrites}i] bytes=${m.bytes}`);
 console.log('[pulse-runtime-debt-v1] isolated Supabase clients',isolatedClients.map(x=>x.file).join(', ')||'none');
 console.log('[pulse-runtime-debt-v1] whole-body observers',wholeBody.map(x=>x.file).join(', ')||'none');
 console.log('[pulse-runtime-debt-v1] route writers',routeWriters.map(x=>x.file).join(', ')||'none');
-console.log('[pulse-runtime-debt-v1] view writers',viewOwners.map(x=>x.file).join(', ')||'none');
+console.log('[pulse-runtime-debt-v1] view proxy legacy',legacyViewOwners.map(x=>x.file).join(', ')||'none');
+console.log('[pulse-runtime-debt-v1] exact view mutators',exactViewMutators.map(x=>x.file).join(', ')||'none');
+console.log('[pulse-runtime-debt-v1] exact view replacers',exactViewReplacers.map(x=>x.file).join(', ')||'none');
+console.log('[pulse-runtime-debt-v1] exact view inserters',exactViewInserters.map(x=>x.file).join(', ')||'none');
+console.log('[pulse-runtime-debt-v1] view proxy false positives',legacyViewFalsePositives.map(x=>x.file).join(', ')||'none');
 for(const [surface,candidates] of Object.entries(owners)){
   const loaded=candidates.filter(x=>reachable.has(x));
   console.log(`[pulse-runtime-debt-v1] surface ${surface}: ${loaded.length} candidates · ${loaded.join(', ')||'none'}`);
 }
 
-const report={generated_at:new Date().toISOString(),direct_scripts:scripts.length,unique_script_tags:scriptCounts.size,reachable_modules:reachable.size,total_js_modules:jsFiles.length,loaded_bytes:loadedBytes,mutation_observers:observerCount,whole_body_observers:wholeBody.map(x=>x.file),interval_modules:metrics.filter(x=>x.intervals>0).map(x=>({file:x.file,count:x.intervals})),direct_supabase_clients:directClients.map(x=>x.file),isolated_supabase_clients:isolatedClients.map(x=>x.file),route_writers:routeWriters.map(x=>x.file),view_writers:viewOwners.map(x=>x.file),duplicate_script_tags:duplicateScriptTags,top_risk:ranked.slice(0,30),surface_candidates:Object.fromEntries(Object.entries(owners).map(([k,v])=>[k,v.filter(x=>reachable.has(x))]))};
+const report={generated_at:new Date().toISOString(),direct_scripts:scripts.length,unique_script_tags:scriptCounts.size,reachable_modules:reachable.size,total_js_modules:jsFiles.length,loaded_bytes:loadedBytes,mutation_observers:observerCount,whole_body_observers:wholeBody.map(x=>x.file),interval_modules:metrics.filter(x=>x.intervals>0).map(x=>({file:x.file,count:x.intervals})),direct_supabase_clients:directClients.map(x=>x.file),isolated_supabase_clients:isolatedClients.map(x=>x.file),route_writers:routeWriters.map(x=>x.file),view_writers_legacy_proxy:legacyViewOwners.map(x=>x.file),view_mutators_exact:exactViewMutators.map(x=>x.file),view_replacers_exact:exactViewReplacers.map(x=>x.file),view_inserters_exact:exactViewInserters.map(x=>x.file),view_proxy_false_positives:legacyViewFalsePositives.map(x=>x.file),duplicate_script_tags:duplicateScriptTags,top_risk:ranked.slice(0,30),surface_candidates:Object.fromEntries(Object.entries(owners).map(([k,v])=>[k,v.filter(x=>reachable.has(x))]))};
 console.log('[pulse-runtime-debt-v1] REPORT_JSON '+JSON.stringify(report));
 
 const BASELINE=JSON.parse(await readFile(baselinePath,'utf8'));
@@ -83,7 +143,10 @@ if(wholeBody.length>BASELINE.wholeBody)regressions.push(`whole-body observers ${
 if(directClients.length>BASELINE.directClients)regressions.push(`createClient modules ${directClients.length}>${BASELINE.directClients}`);
 if(isolatedClients.length>BASELINE.isolatedClients)regressions.push(`isolated Supabase clients ${isolatedClients.length}>${BASELINE.isolatedClients}`);
 if(routeWriters.length>BASELINE.routeWriters)regressions.push(`route writers ${routeWriters.length}>${BASELINE.routeWriters}`);
-if(viewOwners.length>BASELINE.viewWriters)regressions.push(`view writers ${viewOwners.length}>${BASELINE.viewWriters}`);
+if(legacyViewOwners.length>BASELINE.viewWriters)regressions.push(`legacy view proxy ${legacyViewOwners.length}>${BASELINE.viewWriters}`);
+if(exactViewMutators.length>BASELINE.viewMutatorsExact)regressions.push(`exact view mutators ${exactViewMutators.length}>${BASELINE.viewMutatorsExact}`);
+if(exactViewReplacers.length>BASELINE.viewReplacersExact)regressions.push(`exact view replacers ${exactViewReplacers.length}>${BASELINE.viewReplacersExact}`);
+if(exactViewInserters.length>BASELINE.viewInsertersExact)regressions.push(`exact view inserters ${exactViewInserters.length}>${BASELINE.viewInsertersExact}`);
 if(duplicateScriptTags.length)regressions.push('duplicate direct script tags detected');
 if(regressions.length){console.error('[pulse-runtime-debt-v1] FAILED · '+regressions.join(' | '));process.exit(1)}
-console.log('[pulse-runtime-debt-v1] PASS · versioned runtime debt baseline locked; ceilings may only move down');
+console.log('[pulse-runtime-debt-v1] PASS · versioned runtime debt baseline locked; exact view ownership measured separately from legacy proxy');
