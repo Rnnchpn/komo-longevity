@@ -31,4 +31,4 @@ async function render(){if(route()!=='profile')return;const form=document.queryS
  form.insertAdjacentElement('beforebegin',panel);draw();
 }
 function schedule(){clearTimeout(timer);timer=setTimeout(()=>render().catch(console.error),120)}
-window.addEventListener('hashchange',schedule);window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:data-ready',schedule);document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,900));new MutationObserver(()=>{if(route()==='profile'&&!document.querySelector('[data-profile-identity]'))schedule()}).observe(document.body,{childList:true,subtree:true});
+window.addEventListener('hashchange',schedule);window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:data-ready',schedule);document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,900));const profileHost=document.querySelector('#viewRoot');if(profileHost){new MutationObserver(()=>{if(route()==='profile'&&!document.querySelector('[data-profile-identity]'))schedule()}).observe(profileHost,{childList:true,subtree:true})}
