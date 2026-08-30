@@ -1,10 +1,10 @@
 {
   "scripts": 131,
-  "bytes": 1339298,
+  "bytes": 1338259,
   "observers": 79,
-  "wholeBody": 44,
-  "directClients": 55,
-  "isolatedClients": 11,
+  "wholeBody": 40,
+  "directClients": 50,
+  "isolatedClients": 6,
   "routeWriters": 48,
   "viewWriters": 11
 }
