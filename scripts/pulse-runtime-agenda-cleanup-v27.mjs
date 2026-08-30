@@ -3,7 +3,7 @@ import{readFile,writeFile,rm}from'node:fs/promises';
 const root='site/pulse-v12/';
 const read=file=>readFile(root+file,'utf8');
 const write=(file,content)=>writeFile(root+file,content,'utf8');
-const context=(src,needle)=>{const i=src.indexOf(needle);return i<0?'absent':src.slice(Math.max(0,i-120),Math.min(src.length,i+needle.length+180)).replace(/\s+/g,' ')};
+const context=(src,needle)=>{const i=src.indexOf(needle);return i<0?'absent':src.slice(Math.max(0,i-140),Math.min(src.length,i+needle.length+220)).replace(/\s+/g,' ')};
 
 // Agenda is owned exclusively by agenda-hub-v4 + premium map.
 let motion=await read('motion-journey-v1.js');
@@ -28,7 +28,8 @@ canonical=canonical.slice(0,docRenderStart)+canonical.slice(renderStart);
 const docCall="if(hash==='#documents')renderDocuments(result)";
 if(!canonical.includes(docCall))throw new Error('[pulse-agenda-v27] Canonical documents call contract changed');
 canonical=canonical.replace(docCall,'');
-if(canonical.includes('data-kcanon-doc')||canonical.includes('renderDocuments(result)'))throw new Error('[pulse-agenda-v27] Canonical Results still renders into Agenda');
+const canonicalLeftovers=['data-kcanon-doc','renderDocuments(result)'].filter(x=>canonical.includes(x));
+if(canonicalLeftovers.length){console.error('[pulse-agenda-v27] remaining canonical Agenda contexts',canonicalLeftovers.map(x=>`${x}: ${context(canonical,x)}`).join(' || '));throw new Error('[pulse-agenda-v27] Canonical Results still renders into Agenda')}
 await write('patient-canonical-results.js',canonical);
 
 let html=await read('index.html');
