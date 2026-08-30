@@ -31,7 +31,7 @@ const [checkHtml, checkJs] = await Promise.all([
 if (!checkHtml.includes(TAG)) throw new Error('[pulse-patient-home-final] final Home runtime not injected');
 if (!checkJs.includes("patient-home-final-v1.0.0")) throw new Error('[pulse-patient-home-final] unexpected Home runtime source');
 if (!checkJs.includes('MOTION AGE') || !checkJs.includes('MOTION SCORE')) throw new Error('[pulse-patient-home-final] core hierarchy missing');
-if (!checkJs.includes('Aucune valeur n’est inventée')) throw new Error('[pulse-patient-home-final] missing-data safeguard missing');
+if (!checkJs.toLocaleLowerCase('fr').includes('aucune valeur n’est inventée')) throw new Error('[pulse-patient-home-final] missing-data safeguard missing');
 
 const lastScript = [...checkHtml.matchAll(/<script[^>]+src="([^"]+)"[^>]*><\/script>/g)].at(-1)?.[1] || '';
 if (!lastScript.startsWith('./patient-home-final-v1.js')) {
