@@ -49,8 +49,6 @@ let adminUx=await readFile('pulse-app/admin-ux-v2.js','utf8');adminUx=stripBodyO
 
 let adminPros=await readFile('pulse-app/admin-professionals-v1.js','utf8');adminPros=stripBodyObserver(adminPros,'admin-professionals-v1.js');adminPros=adminPros.replace("window.addEventListener('hashchange',()=>{if(location.hash!=='#admin')state.active=false;else setTimeout(injectTab,80)});","window.addEventListener('hashchange',()=>{if(location.hash!=='#admin')state.active=false;else setTimeout(injectTab,80)});document.addEventListener('click',e=>{if(location.hash==='#admin'&&e.target.closest?.('[data-admin-tab],[data-admin-refresh]'))setTimeout(injectTab,120)},true);");await writeFile('pulse-app/admin-professionals-v1.js',adminPros);
 
-// Patient questionnaire engine: one shared session owner, no module-level Supabase client,
-// and observation limited to the canonical route container.
 let questionnaire=await readFile('pulse-app/questionnaire-engine-v1.js','utf8');
 questionnaire=removeExact(questionnaire,"import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';\n\n",'questionnaire-engine Supabase import');
 questionnaire=replaceRequired(questionnaire,sClientOld,"function sb(){return window.KomoRuntime?.client||null}",'questionnaire-engine shared client');
@@ -58,13 +56,21 @@ questionnaire=replaceRequired(questionnaire,"async function identity(){const {da
 questionnaire=replaceRequired(questionnaire,"const observer=new MutationObserver(()=>{if(currentRoute()==='documents'&&document.querySelector('[data-kmb2]')&&!document.querySelector('[data-kqe-card]'))schedule()});observer.observe(document.body,{childList:true,subtree:true});","const host=document.querySelector('#viewRoot');if(host){const observer=new MutationObserver(()=>{if(currentRoute()==='documents'&&document.querySelector('[data-kmb2]')&&!document.querySelector('[data-kqe-card]'))schedule()});observer.observe(host,{childList:true,subtree:true})}",'questionnaire-engine targeted observer');
 await writeFile('pulse-app/questionnaire-engine-v1.js',questionnaire);
 
-// Pulse self-tests: keep the existing Results behavior, but consume the canonical
-// authenticated runtime instead of instantiating a fresh client on every sb() call.
 let tests=await readFile('pulse-app/tests-v1.js','utf8');
 tests=removeExact(tests,"import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';\n\n",'tests Supabase import');
 tests=replaceRequired(tests,"function sb() {\n  return createClient(SUPABASE_URL, SUPABASE_KEY, {\n    auth: { storage: storage(), persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }\n  });\n}","function sb() {\n  return window.KomoRuntime?.client || null;\n}",'tests shared client');
 tests=replaceRequired(tests,"  const client = sb();\n  const { data: { session } } = await client.auth.getSession();","  const client = sb();\n  if (!client) return null;\n  const { data: { session } } = await client.auth.getSession();",'tests runtime guard');
 tests=replaceRequired(tests,"observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});","const testsHost=document.querySelector('#viewRoot');if(testsHost)observer.observe(testsHost,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});",'tests targeted observer');
 await writeFile('pulse-app/tests-v1.js',tests);
+
+for(const path of ['pulse-app/center-two-tab-workspace-v1.js','pulse-app/center-workspace-v1.js','pulse-app/center-patient-polish.js','pulse-app/clinical-cockpit-v1.js','pulse-app/clinical-motion-v1.js']){
+  let src=await readFile(path,'utf8');
+  src=replaceRequired(src,'obs.observe(document.body,{',"obs.observe(document.querySelector('#appShell'),{",`${path} scoped observer`);
+  await writeFile(path,src);
+}
+
+let brand=await readFile('pulse-app/pulse-brand-theme-v1.js','utf8');
+brand=brand.replace(/^\/\*[\s\S]*?\*\/\s*/,'');
+await writeFile('pulse-app/pulse-brand-theme-v1.js',brand);
 
 console.log('[pulse-performance-hardening-v1] shared client + event-driven UI applied');
