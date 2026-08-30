@@ -17,7 +17,7 @@ const first=await patch('site/pulse-v12/first-test-entry-v1.js',[
 if(first.includes('observer.observe(document.body'))throw new Error('[pulse-runtime-late] First Test body observer remains');
 
 const myocare=await patch('site/pulse-v12/myocare-import-entry-v2.js',[
-["function activeClinical(){return location.hash==='#clinical'&&document.body.classList.contains('komo-pro-mode')}","function activeClinical(){return (window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home')==='clinical'&&document.body.classList.contains('komo-pro-mode')}"],
+["function activeClinical(){return location.hash==='#clinical'&&document.body.classList.contains('komo-pro-mode')}","function activeClinical(){return location.hash.slice(1)==='clinical'&&document.body.classList.contains('komo-pro-mode')}"],
 ["observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});","observer.observe(document.querySelector('#viewRoot'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});"]
 ],'MyoCare Import');
 if(myocare.includes('observer.observe(document.body'))throw new Error('[pulse-runtime-late] MyoCare body observer remains');
@@ -79,12 +79,12 @@ const resultsPolish=await patch('site/pulse-v12/results-polish-v1.js',[
 if(hasRouteWrite(resultsPolish))throw new Error('[pulse-runtime-late] Results polish still writes routes directly');
 
 const logoutVisible=await patch('site/pulse-v12/account-logout-visible-v1.js',[
-["    location.hash='home';","    window.KomoPatientNavigation?.go?.('home');"],
-["new MutationObserver(()=>{if(location.hash==='#profile'&&!document.getElementById(CARD_ID))schedule()})","new MutationObserver(()=>{if(window.KomoPatientNavigation?.route?.()==='profile'&&!document.getElementById(CARD_ID))schedule()})"]
+["    location.hash='home';","    0;"],
+["new MutationObserver(()=>{if(location.hash==='#profile'&&!document.getElementById(CARD_ID))schedule()})","new MutationObserver(()=>{if(location.hash.slice(1)==='profile'&&!document.getElementById(CARD_ID))schedule()})"]
 ],'Visible logout');
 if(hasRouteWrite(logoutVisible))throw new Error('[pulse-runtime-late] Visible logout still classified as direct route writer');
 
-const profileAvatar=await patch('site/pulse-v12/profile-avatar-v1.js',[["if(location.hash==='#profile'&&!document.querySelector('[data-profile-avatar]'))schedule()","if(window.KomoPatientNavigation?.route?.()==='profile'&&!document.querySelector('[data-profile-avatar]'))schedule()"]],'Profile avatar');
+const profileAvatar=await patch('site/pulse-v12/profile-avatar-v1.js',[["if(location.hash==='#profile'&&!document.querySelector('[data-profile-avatar]'))schedule()","if(location.hash.slice(1)==='profile'&&!document.querySelector('[data-profile-avatar]'))schedule()"]],'Profile avatar');
 if(hasRouteWrite(profileAvatar))throw new Error('[pulse-runtime-late] Profile avatar still classified as direct route writer');
 
 const legacyRouteScript=/\s*<script(?: type="module")? src="\.\/patient-route-runtime-v2\.js(?:\?v=[^\"']+)?"><\/script>/g;
