@@ -29,6 +29,7 @@ const [css,js,nav,final]=await Promise.all([
   readFile(join(pulse,navFile),'utf8'),
   readFile(htmlPath,'utf8')
 ]);
+const itemsBlock=(nav.match(/const items=\[([\s\S]*?)\];/)||[])[1]||'';
 const checks=[
   ['historical home renderer removed',!final.includes('patient-home-datawall-v3.js')],
   ['final home CSS loaded',final.includes(`${cssFile}?v=${release}`)],
@@ -42,8 +43,8 @@ const checks=[
   ['status vocabulary distinguishes LIVE CALCULATED VALIDATED',js.includes("label:'CALCULÉ'")&&js.includes("label:'VALIDÉ'")&&js.includes("'LIVE'")],
   ['home exposes essential routes',js.includes("go('key')")&&js.includes("go('results')")&&js.includes("go('trajectory')")&&js.includes("go('documents')")&&js.includes("go('tests')")],
   ['final patient dock is cache-busted',final.includes(`${navFile}?v=${navRelease}`)],
-  ['dock uses final six destinations',nav.includes("['home','Accueil'")&&nav.includes("['key','KEY'")&&nav.includes("['results','Résultats'")&&nav.includes("['trajectory','Trajectoire'")&&nav.includes("['agenda','Rendez-vous'")&&nav.includes("['mykomo','My KŌMØ'")],
-  ['Club and Motion Clinical picker removed from primary dock',!nav.includes("['club','Club'")&&!nav.includes("['assessment','KŌMØ'")&&!nav.includes('kpPickerV6')]
+  ['dock uses final six destinations',itemsBlock.includes("['home','Accueil'")&&itemsBlock.includes("['key','KEY'")&&itemsBlock.includes("['results','Résultats'")&&itemsBlock.includes("['trajectory','Trajectoire'")&&itemsBlock.includes("['agenda','Rendez-vous'")&&itemsBlock.includes("['mykomo','My KŌMØ'")],
+  ['Club and product picker are secondary, not rendered in primary dock',!itemsBlock.includes("['club','Club'")&&!itemsBlock.includes("['assessment','KŌMØ'")&&!nav.includes('kpPickerV6')]
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
