@@ -98,7 +98,8 @@
   document.addEventListener('DOMContentLoaded', () => {
     loadEcosystemLayer();
     applyAll(document);
-    observer.observe(document.body, { subtree: true, childList: true, characterData: true });
+    const contentHost=document.querySelector('#appShell');
+    if(contentHost)observer.observe(contentHost, { subtree: true, childList: true, characterData: true });
     scheduleApply();
   });
 })();
