@@ -2,7 +2,7 @@
    Daily utility: movement, verified K Points, Walk Club, Komo insight. */
 (() => {
   'use strict';
-  const VERSION='2.0.1';
+  const VERSION='2.0.2';
   let timer=0;
   let loading=false;
   let lastSignature='';
@@ -12,9 +12,7 @@
   const num=v=>{const x=Number(v);return Number.isFinite(x)?x:0};
   const fmt=v=>new Intl.NumberFormat('fr-FR').format(Math.round(num(v)));
 
-  function go(target){
-    window.KomoPatientNavigation?.go?.(target);
-  }
+  function go(target){window.KomoPatientNavigation?.go?.(target)}
 
   function openKomo(){
     const launcher=document.querySelector('#komoPatientGuideLauncher')||document.querySelector('#komoOperatorLauncher');
@@ -24,22 +22,22 @@
 
   async function load(){
     const sb=window.KomoRuntime?.client;
-    if(!sb) return null;
+    if(!sb)return null;
     const session=window.KomoRuntime?.getContext?.()?.session||(await sb.auth.getSession()).data?.session;
-    if(!session?.user) return null;
+    if(!session?.user)return null;
     const {data,error}=await sb.rpc('komo_walk_summary');
-    if(error) throw error;
+    if(error)throw error;
     return data||null;
   }
 
   function insight(s){
-    if(!s?.connected) return {title:'Connectez KEY pour suivre votre mouvement.',copy:'Vos pas restent privés et ne génèrent des K Points que lorsque le suivi connecté est activé.'};
+    if(!s?.connected)return{title:'Connectez KEY pour suivre votre mouvement.',copy:'Vos pas restent privés et ne génèrent des K Points que lorsque le suivi connecté est activé.'};
     const steps=num(s.steps_today),goal=Math.max(1,num(s.daily_goal)||8000),left=Math.max(0,goal-steps),kp=num(s.k_points_today);
     const club=s.walk_club||{};
     const rank=club.joined&&club.rank?` Vous êtes #${club.rank}${club.member_count?` sur ${club.member_count}`:''} au Walk Club cette semaine.`:'';
-    if(steps<=0) return {title:'Votre journée commence ici.',copy:'Aucun pas vérifié reçu aujourd’hui pour le moment. Komo mettra cet écran à jour dès la prochaine synchronisation.'};
-    if(steps<goal) return {title:`Encore ${fmt(left)} pas pour votre repère du jour.`,copy:`Vous avez déjà marché ${fmt(steps)} pas et gagné ${fmt(kp)} K Points aujourd’hui.${rank}`};
-    return {title:'Repère du jour atteint.',copy:`${fmt(steps)} pas vérifiés aujourd’hui · +${fmt(kp)} K Points.${rank}`};
+    if(steps<=0)return{title:'Votre journée commence ici.',copy:'Aucun pas vérifié reçu aujourd’hui pour le moment. Komo mettra cet écran à jour dès la prochaine synchronisation.'};
+    if(steps<goal)return{title:`Encore ${fmt(left)} pas pour votre repère du jour.`,copy:`Vous avez déjà marché ${fmt(steps)} pas et gagné ${fmt(kp)} K Points aujourd’hui.${rank}`};
+    return{title:'Repère du jour atteint.',copy:`${fmt(steps)} pas vérifiés aujourd’hui · +${fmt(kp)} K Points.${rank}`};
   }
 
   function markup(s){
@@ -53,10 +51,7 @@
     const club=s?.walk_club||{};
     const text=insight(s);
     const clubValue=club.joined&&club.rank?`#${club.rank}`:'—';
-    const clubCopy=club.joined
-      ? `${fmt(weekSteps)} pas cette semaine${club.member_count?` · ${club.member_count} membres`:''}`
-      : 'Participation volontaire. Votre profil peut rester privé.';
-
+    const clubCopy=club.joined?`${fmt(weekSteps)} pas cette semaine${club.member_count?` · ${club.member_count} membres`:''}`:'Participation volontaire. Votre profil peut rester privé.';
     return `<section class="kday" data-kday-v2>
       <div class="kday-top">
         <div class="kday-title"><span>AUJOURD’HUI · KEY</span><h3>Votre mouvement, maintenant.</h3></div>
@@ -96,22 +91,21 @@
   }
 
   async function render(force=false){
-    if(route()!=='home') return;
+    if(route()!=='home')return;
     const home=document.querySelector('[data-my-komo-home]');
     const wall=home?.querySelector('[data-khome-datawall]');
-    if(!wall||loading) return;
+    if(!wall||loading)return;
     loading=true;
     try{
       const s=await load();
-      if(!s) return;
-      const html=markup(s);
+      if(!s)return;
       const signature=JSON.stringify(s);
-      if(!force&&signature===lastSignature&&wall.querySelector('[data-kday-v2]')) return;
+      if(!force&&signature===lastSignature&&wall.querySelector('[data-kday-v2]'))return;
       wall.querySelector('[data-kday-v2]')?.remove();
-      const wrap=document.createElement('div');wrap.innerHTML=html;
+      const wrap=document.createElement('div');wrap.innerHTML=markup(s);
       const node=wrap.firstElementChild;
       const head=wall.querySelector('.khv-head');
-      if(head) head.insertAdjacentElement('afterend',node); else wall.prepend(node);
+      if(head)head.insertAdjacentElement('afterend',node);else wall.prepend(node);
       bind(node);
       wall.classList.add('khv-daily-v2');
       lastSignature=signature;
@@ -119,9 +113,8 @@
   }
 
   function schedule(force=false,ms=120){clearTimeout(timer);timer=setTimeout(()=>render(force),ms)}
-  ['hashchange','pageshow','komo:route-ready','komo:data-ready','komo:wearable-data-updated','komo:session-ready'].forEach(name=>window.addEventListener(name,()=>schedule(name==='komo:data-ready'||name==='komo:wearable-data-updated')));
-  const observer=new MutationObserver(()=>{if(route()==='home'&&!document.querySelector('[data-kday-v2]'))schedule(false,80)});
-  function boot(){observer.observe(document.body,{subtree:true,childList:true});schedule(true,700);setTimeout(()=>render(true),1600)}
+  ['hashchange','pageshow','komo:route-ready','komo:data-ready','komo:wearable-data-updated','komo:session-ready'].forEach(name=>window.addEventListener(name,()=>schedule(['komo:data-ready','komo:wearable-data-updated'].includes(name),80)));
+  function boot(){schedule(true,180);setTimeout(()=>render(true),650);setTimeout(()=>render(true),1500)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
   window.KomoPatientHomeDaily={version:VERSION,refresh:()=>schedule(true,20)};
 })();
