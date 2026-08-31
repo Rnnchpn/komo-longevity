@@ -8,6 +8,11 @@ const htmlPath=join(pulse,'index.html');
 const release='20260829-key-results-v2';
 const appleRelease='20260831-key-apple-health-v2';
 for(const file of ['key-results-v2.css','key-results-v2.js','key-apple-health-import-v1.js']) await copyFile(join(root,'pulse-app',file),join(pulse,file));
+// The Apple Health action menu delegates route changes to the canonical Pulse router only.
+const applePath=join(pulse,'key-apple-health-import-v1.js');
+let appleBuild=await readFile(applePath,'utf8');
+appleBuild=appleBuild.replace("window.KomoPatientNavigation?.go?.('key')||(location.hash='key');","window.KomoPatientNavigation?.go?.('key');");
+await writeFile(applePath,appleBuild,'utf8');
 let html=await readFile(htmlPath,'utf8');
 html=html.replace(/\s*<link rel="stylesheet" href="\.\/key-results-v2\.css(?:\?[^\"]*)?"\s*\/?>/g,'');
 html=html.replace(/\s*<script src="\.\/key-results-v2\.js(?:\?[^\"]*)?"><\/script>/g,'');
@@ -30,6 +35,7 @@ const checks=[
  ['Apple Health import is available from KŌMØ Agent',apple.includes('KŌMØ AGENT · KEY')&&apple.includes('Importer Apple Health')&&apple.includes('data-kka-open')],
  ['raw Apple Health file is not retained',apple.includes('raw_file_retained:false')&&apple.includes('lecture locale')],
  ['Apple Health reimport deduplicates matching dates',apple.includes("wearable_daily_metrics').delete()")&&apple.includes("apple_health_mi_fitness")],
+ ['agent navigation stays canonical',!apple.includes("location.hash='key'")&&apple.includes("KomoPatientNavigation?.go?.('key')")],
  ['Motion Score remains untouched by import',js.includes('Aucun score clinique n’est recalculé')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-key-results-v2] ${ok?'OK':'FAIL'} · ${label}`);
