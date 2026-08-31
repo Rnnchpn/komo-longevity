@@ -26,7 +26,7 @@ for(const [lang,[rel,title,lead,href,cta]] of Object.entries(partner)){
   const next=h.indexOf('<section class="close"',start+1);
   if(start>=0&&next>start) h=h.slice(0,start)+section+h.slice(next);
   else h=h.replace(/<section class="formsec" id="info">[\s\S]*?<\/section>/,section);
-  h=h.replace(/<script[^>]*>[\s\S]*?(?:proForm|getElementById\(['"]proForm['"]\))[\s\S]*?<\/script>/g,'');
+  h=h.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:proForm|getElementById\(['"]proForm['"]\))(?:(?!<\/script>)[\s\S])*?<\/script>/g,'');
   await writeFile(p,h);
 }
 
