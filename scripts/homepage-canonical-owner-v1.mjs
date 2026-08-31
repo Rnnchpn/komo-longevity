@@ -102,6 +102,7 @@ async function finalize() {
     }
 
     console.log(`[home-owner] PASS · ${file} · ${html.length} bytes · ${styleIds.length} named style blocks`);
+    console.log(`[home-owner] styles · ${styleIds.join(' | ')}`);
   }
 }
 
