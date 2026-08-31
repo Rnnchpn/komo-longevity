@@ -5,42 +5,44 @@ import {fileURLToPath} from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260831-home-mobile-v1';
+const release='20260831-home-mobile-v2';
 const navRelease='20260830-patient-nav-v7';
 const cssFile='patient-home-command-v1.css';
 const heroCssFile='patient-home-hero-v2.css';
 const dailyCssFile='patient-home-daily-v2.css';
 const mobileCssFile='patient-mobile-v1.css';
+const entryFile='patient-home-entry-v1.js';
 const jsFile='patient-home-command-v1.js';
 const dailyJsFile='patient-home-daily-v2.js';
 const mobileJsFile='patient-mobile-v1.js';
+const clarityJsFile='patient-v1-clarity.js';
 const navFile='pulse-bottom-nav-v6.js';
 
-for(const file of [cssFile,heroCssFile,dailyCssFile,mobileCssFile,jsFile,dailyJsFile,mobileJsFile,navFile]){
+for(const file of [cssFile,heroCssFile,dailyCssFile,mobileCssFile,entryFile,jsFile,dailyJsFile,mobileJsFile,navFile]){
   await copyFile(join(root,'pulse-app',file),join(pulse,file));
 }
 
 let html=await readFile(htmlPath,'utf8');
-// One final Home renderer plus its daily movement and mobile presentation layers.
 html=html.replace(/\s*<script type="module" src="\.\/patient-home-datawall-v3\.js(?:\?v=[^"]+)?"><\/script>/g,'');
 for(const file of [cssFile,heroCssFile,dailyCssFile,mobileCssFile]){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   html=html.replace(new RegExp(`\\s*<link rel="stylesheet" href="\\./${escaped}(?:\\?v=[^\"]+)?"\\s*\\/?>`,'g'),'');
 }
-for(const file of [jsFile,dailyJsFile,mobileJsFile]){
+for(const file of [entryFile,jsFile,dailyJsFile,mobileJsFile,clarityJsFile]){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   html=html.replace(new RegExp(`\\s*<script(?: type="module")? src="\\./${escaped}(?:\\?v=[^\"]+)?"><\\/script>`,'g'),'');
 }
 html=html.replace(/(<script src="\.\/pulse-bottom-nav-v6\.js)(?:\?v=[^"]+)?("><\/script>)/g,`$1?v=${navRelease}$2`);
 html=html.replace('</head>',`  <link rel="stylesheet" href="./${cssFile}?v=${release}" />\n  <link rel="stylesheet" href="./${heroCssFile}?v=${release}" />\n  <link rel="stylesheet" href="./${dailyCssFile}?v=${release}" />\n  <link rel="stylesheet" href="./${mobileCssFile}?v=${release}" />\n</head>`);
-html=html.replace('</body>',`  <script type="module" src="./${jsFile}?v=${release}"></script>\n  <script src="./${dailyJsFile}?v=${release}"></script>\n  <script src="./${mobileJsFile}?v=${release}"></script>\n</body>`);
+html=html.replace('</body>',`  <script type="module" src="./${entryFile}?v=${release}"></script>\n</body>`);
 await writeFile(htmlPath,html,'utf8');
 
-const [css,heroCss,dailyCss,mobileCss,js,dailyJs,mobileJs,nav,final]=await Promise.all([
+const [css,heroCss,dailyCss,mobileCss,entry,js,dailyJs,mobileJs,nav,final]=await Promise.all([
   readFile(join(pulse,cssFile),'utf8'),
   readFile(join(pulse,heroCssFile),'utf8'),
   readFile(join(pulse,dailyCssFile),'utf8'),
   readFile(join(pulse,mobileCssFile),'utf8'),
+  readFile(join(pulse,entryFile),'utf8'),
   readFile(join(pulse,jsFile),'utf8'),
   readFile(join(pulse,dailyJsFile),'utf8'),
   readFile(join(pulse,mobileJsFile),'utf8'),
@@ -48,15 +50,19 @@ const [css,heroCss,dailyCss,mobileCss,js,dailyJs,mobileJs,nav,final]=await Promi
   readFile(htmlPath,'utf8')
 ]);
 const itemsBlock=(nav.match(/const items=\[([\s\S]*?)\];/)||[])[1]||'';
+const directScript=file=>new RegExp(`<script[^>]+src=["']\\./${file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?:\\?[^"']*)?["']`).test(final);
 const checks=[
   ['historical home renderer removed',!final.includes('patient-home-datawall-v3.js')],
   ['final home CSS loaded',final.includes(`${cssFile}?v=${release}`)],
   ['hero v2 visual layer loaded after home CSS',final.includes(`${heroCssFile}?v=${release}`)&&final.indexOf(heroCssFile)>final.indexOf(cssFile)],
   ['daily movement CSS loaded',final.includes(`${dailyCssFile}?v=${release}`)&&dailyCss.includes('.kday-steps')],
   ['mobile V1 CSS loaded last',final.includes(`${mobileCssFile}?v=${release}`)&&final.indexOf(mobileCssFile)>final.indexOf(dailyCssFile)],
-  ['final home renderer loaded',final.includes(`${jsFile}?v=${release}`)],
-  ['daily movement renderer loaded',final.includes(`${dailyJsFile}?v=${release}`)&&dailyJs.includes("rpc('komo_walk_summary')")],
-  ['mobile runtime loaded',final.includes(`${mobileJsFile}?v=${release}`)&&mobileJs.includes("title.textContent='Bienvenue.'")],
+  ['single Home entry loaded',directScript(entryFile)],
+  ['Home renderers are imported by entry',entry.includes(`'./${jsFile}'`)&&entry.includes(`'./${dailyJsFile}'`)&&entry.includes(`'./${mobileJsFile}'`)],
+  ['Home sub-runtimes are not direct scripts',!directScript(jsFile)&&!directScript(dailyJsFile)&&!directScript(mobileJsFile)],
+  ['legacy clarity runtime is no longer direct',!directScript(clarityJsFile)],
+  ['daily movement runtime is event-driven',dailyJs.includes("rpc('komo_walk_summary')")&&!dailyJs.includes('MutationObserver')],
+  ['mobile runtime is event-driven',mobileJs.includes("title.textContent='Bienvenue.'")&&!mobileJs.includes('MutationObserver')],
   ['current Home cockpit uses khv surfaces',css.includes('.khv-grid')&&css.includes('.khv-motion')&&css.includes('@media (max-width:767px)')],
   ['mobile is edge-to-edge and removes nested chrome',mobileCss.includes('.mobile-nav')&&mobileCss.includes('width:100%!important')&&mobileCss.includes('body.khome-final-v1 .topbar{display:none!important}')],
   ['mobile removes avatar and enlarges movement',mobileCss.includes('.avatar-button{display:none!important}')&&mobileCss.includes('.kday-steps strong')&&mobileCss.includes('font-size:78px!important')],
@@ -73,4 +79,4 @@ const checks=[
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log('[pulse-home-web-v1] PASS · current Home + daily movement + edge-to-edge mobile V1');
+console.log('[pulse-home-web-v1] PASS · one Home entry · daily movement · edge-to-edge mobile V1');
