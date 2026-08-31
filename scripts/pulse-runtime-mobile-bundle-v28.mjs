@@ -6,9 +6,10 @@ const bundle='mobile-runtime-v3.js';
 const htmlPath=root+'index.html';
 let html=await readFile(htmlPath,'utf8');
 
+const exactScript=file=>new RegExp(`<script([^>]*)src=["']\\./${file.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}(?:\\?[^"']*)?["']([^>]*)><\\/script>`,'g');
 const entries=[];
 for(const file of sources){
-  const re=new RegExp(`<script([^>]*)src=["']\\./${file.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}(?:\\?[^"']*)?["']([^>]*)><\\/script>`,'g');
+  const re=exactScript(file);
   const matches=[...html.matchAll(re)];
   if(matches.length!==1)throw new Error(`[pulse-mobile-v28] expected one direct ${file} tag, found ${matches.length}`);
   entries.push({file,index:matches[0].index,tag:matches[0][0],source:await readFile(root+file,'utf8')});
@@ -26,7 +27,10 @@ await writeFile(htmlPath,html,'utf8');
 for(const {file} of entries)await rm(root+file,{force:true});
 
 const finalHtml=await readFile(htmlPath,'utf8');
-for(const file of sources)if(finalHtml.includes(file))throw new Error(`[pulse-mobile-v28] retired direct mobile layer remains: ${file}`);
+for(const file of sources){
+  const exactRemaining=new RegExp(`src=["']\\./${file.replace(/[.*+?^${}()|[\\]\\]/g,'\\$&')}(?:\\?[^"']*)?["']`);
+  if(exactRemaining.test(finalHtml))throw new Error(`[pulse-mobile-v28] retired direct mobile layer remains: ${file}`);
+}
 if((finalHtml.match(new RegExp(bundle,'g'))||[]).length!==1)throw new Error('[pulse-mobile-v28] consolidated mobile runtime must be loaded exactly once');
 const finalBundle=await readFile(root+bundle,'utf8');
 for(const signature of ['mobile-test-cta','mobileSurface','kamo-phone-app'])if(!finalBundle.includes(signature))throw new Error(`[pulse-mobile-v28] bundled behavior missing: ${signature}`);
