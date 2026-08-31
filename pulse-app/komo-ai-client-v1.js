@@ -1,4 +1,5 @@
-const VERSION='1.3.0';
+const VERSION='1.3.1-run-preview';
+const RUN_PREVIEW_HOST='komo-longevity-git-feat-founder-run-v1-rnnchpns-projects.vercel.app';
 
 function client(){
   const runtime=window.KomoRuntime?.client||window.KomoRuntime?.getContext?.()?.client;
@@ -13,7 +14,11 @@ async function invoke(body){
   const sb=client();
   const {data:{session}}=await sb.auth.getSession();
   if(!session?.user)throw new Error('session_required');
-  const {data,error}=await sb.functions.invoke('komo-operator-v1',{body});
+  const usePreview=location.hostname===RUN_PREVIEW_HOST;
+  const result=usePreview
+    ?await sb.functions.invoke('komo-operator-preview-v1',{body})
+    :await sb.functions.invoke('komo-operator-v1',{body});
+  const {data,error}=result;
   if(error){
     let code=error?.message||'komo_api_failed';
     try{const payload=await error.context?.json?.();if(payload?.error)code=payload.error}catch{}
