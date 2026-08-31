@@ -17,7 +17,9 @@ for(const p of await walk(site)){
   let h=await readFile(p,'utf8'),b=h;
   h=h.replace(/<script[^>]+src=["']\/_vercel\/insights\/script\.js["'][^>]*><\/script>/g,'').replace(/<script id=["']komo-public-analytics["']>[\s\S]*?<\/script>/g,'');
   for(const [r,v] of replacements)h=h.replace(r,v);
-  h=h.replace(/\b(href|src)="(\/assets\/[^"]+\.(?:css|js))(?:\?[^"#]*)?"/g,(_,attr,url)=>`${attr}="${url}?v=${assetVersion}"`);
+  // All mutable local CSS/JS receive the current build id. This covers both
+  // public /assets/* files and Pulse's host-rewritten ./file.css / ./file.js files.
+  h=h.replace(/\b(href|src)="((?:\/assets\/|\.\/)[^"?#]+\.(?:css|js))(?:\?[^"#]*)?"/g,(_,attr,url)=>`${attr}="${url}?v=${assetVersion}"`);
   h=h.replace(/<meta name="komo-build" content="[^"]*">/g,'');
   if(h.includes('</head>'))h=h.replace('</head>',`<meta name="komo-build" content="${assetVersion}"></head>`);
   if(h!==b){await writeFile(p,h);patched++}
@@ -57,4 +59,4 @@ async function alias(rel,target,lang='fr'){const d=join(site,...rel.split('/').f
 await alias('fr/confidentialite','/fr/privacy/');await alias('fr/mentions-legales','/fr/legal/');await alias('fr/cgv','/fr/terms/');await alias('fr/method','/fr/methode/');await alias('confidentialite','/privacy/','en');await alias('mentions-legales','/legal/','en');await alias('cgv','/terms/','en');await alias('legal/conditions-generales-utilisation','/terms/');await alias('media','/media','en');
 
 const sm=join(site,'sitemap.xml');let s=await readFile(sm,'utf8');for(const [u,p] of [['https://komolongevity.com/','1.0'],['https://komolongevity.com/fr/','1.0'],['https://komolongevity.com/es/','1.0'],['https://komolongevity.com/contact/','0.7'],['https://komolongevity.com/es/contact/','0.7'],['https://komolongevity.com/locomotor/','0.8'],['https://komolongevity.com/es/locomotor/','0.8']])if(!s.includes(`<loc>${u}</loc>`))s=s.replace('</urlset>',`  <url><loc>${u}</loc><priority>${p}</priority></url>\n</urlset>`);await writeFile(sm,s);
-console.log(`[public-site-final-hardening] ${patched} HTML files normalized; legacy partner form removed; assets busted with ${assetVersion}; robots, aliases and sitemap repaired.`);
+console.log(`[public-site-final-hardening] ${patched} HTML files normalized; legacy partner form removed; public and Pulse CSS/JS busted with ${assetVersion}; robots, aliases and sitemap repaired.`);
