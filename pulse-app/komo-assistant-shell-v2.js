@@ -1,7 +1,7 @@
-/* KŌMØ Pulse — Komo Assistant Shell V2 */
+/* KŌMØ Pulse — Komo Assistant Shell V2.1 */
 (() => {
   'use strict';
-  const VERSION='2.0.0';
+  const VERSION='2.1.0';
   let history=[];
   let loading=false;
 
@@ -32,7 +32,7 @@
   function intro(){
     if(isAdmin())return{eyebrow:'KŌMØ PRO',title:'Je suis Komo.',copy:'Je vous aide à prioriser le centre, préparer les dossiers et retrouver immédiatement ce qui demande votre attention.'};
     if(isPro())return{eyebrow:'KŌMØ PRO',title:'Je suis Komo.',copy:'Je vous aide à préparer vos consultations, comprendre les dossiers et organiser les prochaines actions.'};
-    return{eyebrow:'VOTRE ASSISTANT KŌMØ',title:'Je suis Komo.',copy:'Je vous aide à comprendre vos données, suivre votre progression et savoir quoi faire ensuite.'};
+    return{eyebrow:'VOTRE ASSISTANT KŌMØ',title:'Je suis Komo.',copy:'Je m’appuie sur votre contexte Pulse pour vous expliquer ce qui compte, suivre votre progression et vous proposer la prochaine action utile.'};
   }
   function quickActions(){
     if(isAdmin())return[['Que dois-je traiter en priorité ?','Quelles sont les priorités du centre aujourd’hui ?'],['Dossiers incomplets','Quels dossiers patients sont incomplets ?'],['Bilans à revoir','Quels bilans Motion attendent une revue ?']];
@@ -111,7 +111,7 @@
       pending.className='ka2-message assistant';
       pending.innerHTML=`${r.headline?`<strong>${esc(r.headline)}</strong>`:''}<p>${esc(r.answer||'Je n’ai pas assez de données pour répondre précisément.')}</p>${actionHtml(r.suggested_actions)}`;
       history=[...history,{role:'user',content:message},{role:'assistant',content:r.answer||''}].slice(-8);
-    }catch(e){pending.className='ka2-message assistant error';pending.innerHTML='<strong>Je ne peux pas répondre pour le moment.</strong><p>Réessayez dans quelques secondes. Si le problème persiste, Pulse conservera vos données sans les envoyer ailleurs.</p>';console.error('[komo-assistant-v2]',e)}finally{setBusy(false)}
+    }catch(e){pending.className='ka2-message assistant error';pending.innerHTML='<strong>Je reste disponible.</strong><p>Je n’ai pas pu charger votre contexte à cet instant. Vos données restent dans Pulse ; réessayez dans quelques secondes.</p>';console.error('[komo-assistant-v2]',e)}finally{setBusy(false)}
   }
   function runAction(el){
     const action=el.dataset.action,routeName=el.dataset.route,patient=el.dataset.patient;
