@@ -9,7 +9,3 @@ if(!target.test(src)){console.error('[pulse-flicker-normalize] TARGETS contract 
 src=src.replace(target,"const TARGETS=new Set(['plan','documents']);");
 fs.writeFileSync(file,src);
 console.log('[pulse-flicker-normalize] patient route ownership normalized');
-
-// Current app.js uses the modern pages map. Normalize only its intermediate
-// build shape so the historical flicker guard can complete its QA pass.
-await import('./pulse-flicker-compat-freeze-v1.mjs');
