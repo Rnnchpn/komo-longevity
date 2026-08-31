@@ -54,7 +54,25 @@ function runLegacy(step) {
   if (run.status !== 0) process.exit(run.status ?? 1);
 }
 
+async function assertPipelineOwnership() {
+  const buildAll = await readFile(join(root, 'scripts', 'build-all.mjs'), 'utf8');
+  const directHomeEntries = [...buildAll.matchAll(/['"](scripts\/homepage-[^'"]+\.mjs)['"]/g)]
+    .map((match) => match[1])
+    .filter((path) => path !== 'scripts/homepage-canonical-owner-v1.mjs');
+  if (directHomeEntries.length) {
+    console.error(`[home-owner] FAIL · direct Home writers in build-all: ${directHomeEntries.join(', ')}`);
+    process.exit(1);
+  }
+  const finalizeCount = (buildAll.match(/['"]home:finalize['"]/g) || []).length;
+  if (finalizeCount !== 1) {
+    console.error(`[home-owner] FAIL · expected exactly one home:finalize, found ${finalizeCount}`);
+    process.exit(1);
+  }
+}
+
 async function finalize() {
+  await assertPipelineOwnership();
+
   for (const file of pages) {
     const html = await readFile(file, 'utf8');
     const missing = requiredMarkers.filter((marker) => !html.includes(marker));
