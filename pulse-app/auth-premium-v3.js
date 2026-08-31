@@ -2,6 +2,23 @@
 (() => {
   'use strict';
 
+  function ensureOperator() {
+    if (!document.querySelector('link[data-komo-operator-css]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = './komo-operator-v1.css?v=20260831-v1';
+      link.dataset.komoOperatorCss = '1';
+      document.head.appendChild(link);
+    }
+    if (!document.querySelector('script[data-komo-operator-js]')) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = './komo-operator-v1.js?v=20260831-v1';
+      script.dataset.komoOperatorJs = '1';
+      document.body.appendChild(script);
+    }
+  }
+
   function mount() {
     const auth = document.querySelector('#authScreen');
     if (!auth) return;
@@ -23,6 +40,7 @@
 
     auth.dataset.authPremiumV3 = '1';
     auth.classList.add('auth-launch-ready');
+    ensureOperator();
   }
 
   document.addEventListener('DOMContentLoaded', mount);
