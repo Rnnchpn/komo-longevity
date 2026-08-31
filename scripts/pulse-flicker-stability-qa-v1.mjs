@@ -17,7 +17,7 @@ const checks=[
   ['dedicated routes use quiet mounts',app.includes("['path','documents','plan','messages','clinical'].includes(route)")&&app.includes('data-route-loading')],
   ['Progression has one owner',patient.includes("const TARGETS=new Set(['plan','documents']);")&&!patient.includes("const TARGETS=new Set(['path','plan','documents']);")],
   ['patient v4 prevents duplicate fallback renders',patient.includes('root?.querySelector(`[data-patient-v4="${r}"]`)')],
-  ['Progression prevents duplicate fallback renders',progression.includes("!force&&document.querySelector('[data-kpv2]')")],
+  ['Progression prevents duplicate fallback renders',progression.includes("key===lastKey&&root.querySelector('[data-ktrajectory-v1]')")&&progression.includes("!document.querySelector('[data-ktrajectory-v1]')")],
   ['Results journey prevents duplicate prepend',results.includes("!force&&document.querySelector('[data-krmj]')")],
   ['Clinical cockpit owns the visible clinical shell',cockpit.includes("new CustomEvent('komo:clinical-cockpit-ready')")&&!cockpit.includes("if(!motion)return")],
   ['Clinical Motion renders inside cockpit host',motion.includes("const cockpitHost=document.querySelector('#kcpMotionHost')")&&motion.includes('const root=cockpitHost||document.querySelector(\'#viewRoot\')')],
