@@ -6,7 +6,7 @@ const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
 const release='20260831-home-mobile-v4-komo-ai';
-const navRelease='20260830-patient-nav-v7';
+const navRelease='20260831-patient-nav-v7-club';
 const cssFile='patient-home-command-v1.css';
 const heroCssFile='patient-home-hero-v2.css';
 const dailyCssFile='patient-home-daily-v2.css';
@@ -85,9 +85,9 @@ const checks=[
   ['home exposes essential patient routes',js.includes('data-khv-route="results"')&&js.includes('data-khv-route="trajectory"')&&js.includes('data-khv-route="key"')&&js.includes('data-khv-route="agenda"')],
   ['daily layer exposes steps K Points and Komo',dailyJs.includes('steps_today')&&dailyJs.includes('k_points_today')&&dailyJs.includes('KOMO · INSIGHT')],
   ['final patient dock is cache-busted',final.includes(`${navFile}?v=${navRelease}`)],
-  ['dock uses final six destinations',itemsBlock.includes("['home','Accueil'")&&itemsBlock.includes("['key','KEY'")&&itemsBlock.includes("['results','Résultats'")&&itemsBlock.includes("['trajectory','Trajectoire'")&&itemsBlock.includes("['agenda','Rendez-vous'")&&itemsBlock.includes("['mykomo','My KŌMØ'")],
-  ['Club and product picker are secondary, not rendered in primary dock',!itemsBlock.includes("['club','Club'")&&!itemsBlock.includes("['assessment','KŌMØ'")&&!nav.includes('kpPickerV6')]
+  ['dock uses seven primary destinations including Club',itemsBlock.includes("['home','Accueil'")&&itemsBlock.includes("['key','KEY'")&&itemsBlock.includes("['results','Résultats'")&&itemsBlock.includes("['trajectory','Trajectoire'")&&itemsBlock.includes("['agenda','Rendez-vous'")&&itemsBlock.includes("['club','Club'")&&itemsBlock.includes("['mykomo','My KŌMØ'")],
+  ['Club is primary and product picker remains retired',itemsBlock.includes("['club','Club'")&&!itemsBlock.includes("['assessment','KŌMØ'")&&!nav.includes('kpPickerV6')]
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log('[pulse-home-web-v1] PASS · canonical Home owner + Komo AI + imported daily/mobile layers');
+console.log('[pulse-home-web-v1] PASS · canonical Home owner + Komo AI + imported daily/mobile layers + Club');
