@@ -6,7 +6,7 @@ const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
 const release='20260829-key-results-v2';
-const appleRelease='20260829-key-apple-health-v1';
+const appleRelease='20260831-key-apple-health-v2';
 for(const file of ['key-results-v2.css','key-results-v2.js','key-apple-health-import-v1.js']) await copyFile(join(root,'pulse-app',file),join(pulse,file));
 let html=await readFile(htmlPath,'utf8');
 html=html.replace(/\s*<link rel="stylesheet" href="\.\/key-results-v2\.css(?:\?[^\"]*)?"\s*\/?>/g,'');
@@ -26,12 +26,15 @@ const checks=[
  ['Today session uses real wear minutes',js.includes('wear_minutes')&&js.includes('SESSION PARTIELLE')],
  ['numbers animate with requestAnimationFrame',js.includes('requestAnimationFrame')&&css.includes('kh2DigitIn')],
  ['CSV and JSON test import enabled',js.includes('komo_key_file_import')&&js.includes('kh2File')],
- ['Apple Health XML adapter shipped',final.includes(`key-apple-health-import-v1.js?v=${appleRelease}`)&&apple.includes('apple_health_mi_fitness')&&apple.includes('Smart Band 9 Active')],
+ ['Apple Health ZIP/XML adapter shipped',final.includes(`key-apple-health-import-v1.js?v=${appleRelease}`)&&apple.includes("fflate@0.8.2")&&apple.includes("export.xml")&&apple.includes("apple_health_key_import")],
+ ['Apple Health import is available from KŌMØ Agent',apple.includes('KŌMØ AGENT · KEY')&&apple.includes('Importer Apple Health')&&apple.includes('data-kka-open')],
+ ['raw Apple Health file is not retained',apple.includes('raw_file_retained:false')&&apple.includes('lecture locale')],
+ ['Apple Health reimport deduplicates matching dates',apple.includes("wearable_daily_metrics').delete()")&&apple.includes("apple_health_mi_fitness")],
  ['Motion Score remains untouched by import',js.includes('Aucun score clinique n’est recalculé')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-key-results-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log('[pulse-key-results-v2] PASS · premium KEY views + animated numbers + CSV/JSON + Apple Health XML POC import');
+console.log('[pulse-key-results-v2] PASS · premium KEY views + CSV/JSON + Apple Health ZIP/XML + KŌMØ Agent import');
 
 // My KŌMØ is forced into a single, event-driven route owner after every KEY build.
 await import('./pulse-my-komo-stability-v4.mjs');
