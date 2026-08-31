@@ -4,7 +4,7 @@
       sending: 'Envoi de votre demande…',
       successTitle: 'Votre demande a bien été transmise.',
       successText: 'L’équipe KŌMØ reviendra vers vous pour qualifier le format le plus adapté à votre structure.',
-      invalid: 'Merci de vérifier les champs obligatoires avant l’envoi.',
+      invalid: 'Merci de compléter les informations requises avant de continuer.',
       error: 'L’envoi direct est momentanément indisponible.',
       fallback: 'Vous pouvez envoyer la demande par e-mail à contact@komolongevity.com.',
       button: 'Envoyer ma demande professionnelle'
@@ -13,7 +13,7 @@
       sending: 'Sending your enquiry…',
       successTitle: 'Your enquiry has been sent.',
       successText: 'The KŌMØ team will come back to you to qualify the most relevant deployment model for your organisation.',
-      invalid: 'Please check the required fields before sending.',
+      invalid: 'Please complete the required information before continuing.',
       error: 'Direct submission is temporarily unavailable.',
       fallback: 'You can send the enquiry by email to contact@komolongevity.com.',
       button: 'Send my professional enquiry'
@@ -22,7 +22,7 @@
       sending: 'Enviando tu solicitud…',
       successTitle: 'Tu solicitud ha sido enviada.',
       successText: 'El equipo KŌMØ se pondrá en contacto contigo para definir el modelo de despliegue más adecuado para tu organización.',
-      invalid: 'Revisa los campos obligatorios antes de enviar.',
+      invalid: 'Completa la información obligatoria antes de continuar.',
       error: 'El envío directo no está disponible temporalmente.',
       fallback: 'Puedes enviar la solicitud por correo a contact@komolongevity.com.',
       button: 'Enviar mi solicitud profesional'
@@ -59,6 +59,9 @@
     const status = form.querySelector('[data-professional-status]');
     const panel = form.closest('.professional-form-panel');
     const success = panel?.querySelector('[data-professional-success]');
+    const steps = [...form.querySelectorAll('[data-pro-step]')];
+    const progress = [...panel?.querySelectorAll('[data-pro-progress]') || []];
+    let currentStep = 0;
 
     const query = new URLSearchParams(window.location.search);
     const setHidden = (name, value) => {
@@ -70,17 +73,89 @@
     setHidden('utmMedium', query.get('utm_medium'));
     setHidden('utmCampaign', query.get('utm_campaign'));
 
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      status?.classList.remove('is-error', 'is-success');
+    const focusStep = () => {
+      const target = steps[currentStep]?.querySelector('input:not([type="hidden"]), textarea, button');
+      target?.focus({ preventScroll: true });
+    };
 
-      if (!form.checkValidity()) {
-        form.reportValidity();
+    const renderStep = ({ focus = false, scroll = false } = {}) => {
+      steps.forEach((step, index) => {
+        step.hidden = index !== currentStep;
+        step.setAttribute('aria-hidden', String(index !== currentStep));
+      });
+      progress.forEach((item, index) => {
+        item.classList.toggle('is-active', index === currentStep);
+        item.classList.toggle('is-complete', index < currentStep);
+        item.setAttribute('aria-current', index === currentStep ? 'step' : 'false');
+      });
+      if (scroll) panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (focus) requestAnimationFrame(focusStep);
+    };
+
+    const validateStep = (index) => {
+      const step = steps[index];
+      if (!step) return true;
+      const controls = [...step.querySelectorAll('input, textarea, select')].filter((control) => !control.disabled && control.type !== 'hidden');
+      const invalid = controls.find((control) => !control.checkValidity());
+      if (invalid) {
+        invalid.reportValidity();
+        invalid.focus({ preventScroll: true });
         if (status) {
           status.textContent = copy.invalid;
           status.classList.add('is-error');
         }
-        return;
+        return false;
+      }
+      if (status) {
+        status.textContent = '';
+        status.classList.remove('is-error');
+      }
+      return true;
+    };
+
+    panel?.querySelectorAll('[data-pro-next]').forEach((control) => {
+      control.addEventListener('click', () => {
+        if (!validateStep(currentStep)) return;
+        currentStep = Math.min(steps.length - 1, currentStep + 1);
+        renderStep({ focus: true, scroll: true });
+      });
+    });
+
+    panel?.querySelectorAll('[data-pro-back]').forEach((control) => {
+      control.addEventListener('click', () => {
+        currentStep = Math.max(0, currentStep - 1);
+        if (status) {
+          status.textContent = '';
+          status.classList.remove('is-error');
+        }
+        renderStep({ focus: true, scroll: true });
+      });
+    });
+
+    progress.forEach((control, index) => {
+      control.addEventListener('click', () => {
+        if (index > currentStep) return;
+        currentStep = index;
+        renderStep({ focus: true, scroll: true });
+      });
+    });
+
+    const intent = query.get('intent');
+    if (intent === 'demo') {
+      const pilot = form.querySelector('input[name="interest"][value="pilot"]');
+      if (pilot) pilot.checked = true;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      status?.classList.remove('is-error', 'is-success');
+
+      for (let index = 0; index < steps.length; index += 1) {
+        if (!validateStep(index)) {
+          currentStep = index;
+          renderStep({ focus: true, scroll: true });
+          return;
+        }
       }
 
       const data = new FormData(form);
@@ -132,7 +207,8 @@
           status.textContent = '';
           status.classList.add('is-success');
         }
-        if (form) form.hidden = true;
+        form.hidden = true;
+        panel?.querySelector('.professional-progress')?.setAttribute('hidden', '');
         if (success) {
           success.hidden = false;
           success.querySelector('h3').textContent = copy.successTitle;
@@ -153,5 +229,7 @@
         }
       }
     });
+
+    renderStep();
   });
 })();
