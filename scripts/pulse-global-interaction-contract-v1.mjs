@@ -36,8 +36,8 @@ const failures=[];
 const warnings=[];
 const ok=(label,value)=>{if(!value)failures.push(label);else console.log(`[pulse-interactions-v1] OK · ${label}`)};
 
-const canonicalRoutes=new Set(['home','results','documents','clinical','profile','motion','mykomo','club','key','trajectory','messages','admin','explore']);
-const aliases=new Map([['path','trajectory'],['plan','trajectory'],['followup','key'],['agenda','documents'],['rdv','documents'],['tests','results']]);
+const canonicalRoutes=new Set(['home','results','documents','clinical','profile','motion','mykomo','club','key','trajectory','plan','messages','admin','explore']);
+const aliases=new Map([['path','trajectory'],['followup','key'],['agenda','documents'],['rdv','documents'],['tests','results']]);
 const allowedRoutes=new Set([...canonicalRoutes,...aliases.keys()]);
 const routeAttrs=['data-route','data-kp6-route','data-kh-go','data-kmv3-route','data-ag4-route','data-mkv5-route'];
 const routeTargets=[];
@@ -58,6 +58,7 @@ const navCore=textByFile.get('patient-navigation-core-v1.js')||'';
 for(const [alias,targetRoute] of aliases){
   if(routeTargets.some(x=>x.value===alias))ok(`legacy route ${alias} converges to ${targetRoute}`,navCore.includes(`${alias}:'${targetRoute}'`));
 }
+ok('canonical route plan is owned by KŌMØ Therapy',routeTargets.some(x=>x.value==='plan')&&(textByFile.get('patient-v4.js')||'').includes('data-therapy-page'));
 
 function camel(attr){return attr.replace(/^data-/,'').replace(/-([a-z0-9])/g,(_,c)=>c.toUpperCase())}
 function handlerEvidence(attr){
@@ -141,7 +142,7 @@ if(hardOwnerless.length)failures.push(...hardOwnerless.slice(0,30).map(b=>`reach
 ok('all reachable literal non-submit buttons have an interaction owner',hardOwnerless.length===0);
 
 const index=await readFile(join(target,'index.html'),'utf8');
-const requiredOwners={home:'patient-home-command-v1.js',results:'patient-canonical-results.js',motion:'motion-hub-v3.js',key:'key-hub-v1.js',trajectory:'trajectory-v3.js',documents:'agenda-hub-v4.js',profile:'profile-v2.js',messages:'care-messaging-v2.js',admin:'admin-console-v2.js',clinical:'clinical-cockpit-v1.js'};
+const requiredOwners={home:'patient-home-command-v1.js',results:'patient-canonical-results.js',motion:'motion-hub-v3.js',key:'key-hub-v1.js',trajectory:'trajectory-v3.js',therapy:'patient-v4.js',documents:'agenda-hub-v4.js',profile:'profile-v2.js',messages:'care-messaging-v2.js',admin:'admin-console-v2.js',clinical:'clinical-cockpit-v1.js'};
 for(const [routeName,asset] of Object.entries(requiredOwners)){
   try{await access(join(target,asset));ok(`${routeName} owner exists: ${asset}`,true)}catch{failures.push(`${routeName} owner missing: ${asset}`)}
   ok(`${routeName} owner is loaded`,index.includes(`./${asset}`));
