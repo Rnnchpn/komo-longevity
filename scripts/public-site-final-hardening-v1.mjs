@@ -21,12 +21,18 @@ const partner={
 };
 for(const [lang,[rel,title,lead,href,cta]] of Object.entries(partner)){
   const p=join(site,rel);let h=await readFile(p,'utf8');
-  const section=`<section class="formsec" id="info"><div class="sh" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end"><div><p class="k">KŌMØ PRO · NEXT STEP</p><h2 class="h2">${title}</h2></div><div><p class="formintro">${lead}</p><p style="margin:24px 0 0"><a href="${href}" style="display:inline-flex;min-height:50px;align-items:center;padding:0 20px;border-radius:10px;background:#ded0b9;color:#090a0a;text-decoration:none;font-size:10px;font-weight:850;text-transform:uppercase">${cta}</a></p><p class="note" style="margin-top:16px">contact@komolongevity.com</p></div></div></section>`;
-  const start=h.indexOf('<section class="formsec" id="info">');
-  const next=h.indexOf('<section class="close"',start+1);
-  if(start>=0&&next>start) h=h.slice(0,start)+section+h.slice(next);
-  else h=h.replace(/<section class="formsec" id="info">[\s\S]*?<\/section>/,section);
-  h=h.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:proForm|getElementById\(['"]proForm['"]\))(?:(?!<\/script>)[\s\S])*?<\/script>/g,'');
+  const section=`<section class="formsec" id="info"><div class="sh" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end"><div><p class="ey">KŌMØ PRO · NEXT STEP</p><h2 class="title">${title}</h2></div><div><p class="lead" style="color:rgba(255,255,255,.68)">${lead}</p><p style="margin:24px 0 0"><a href="${href}" style="display:inline-flex;min-height:50px;align-items:center;padding:0 20px;border-radius:10px;background:#ded0b9;color:#090a0a;text-decoration:none;font-size:10px;font-weight:850;text-transform:uppercase">${cta}</a></p><p class="note" style="margin-top:16px">contact@komolongevity.com</p></div></div></section>`;
+  const formIndex=h.indexOf('id="proForm"');
+  if(formIndex>=0){
+    const start=h.lastIndexOf('<section class="formsec"',formIndex);
+    const scriptStart=h.indexOf('<script',formIndex);
+    const scriptEnd=scriptStart>=0?h.indexOf('</script>',scriptStart):-1;
+    if(start>=0&&scriptEnd>=0) h=h.slice(0,start)+section+h.slice(scriptEnd+'</script>'.length);
+    else throw new Error(`[public-site-final-hardening] unable to isolate legacy partner form in ${rel}`);
+  } else if(!h.includes('intent=partner')) {
+    const start=h.indexOf('<section class="formsec"');
+    if(start>=0){const end=h.indexOf('</section>',start);if(end>=0)h=h.slice(0,start)+section+h.slice(end+'</section>'.length)}
+  }
   await writeFile(p,h);
 }
 
