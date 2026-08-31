@@ -24,8 +24,9 @@ function replaceRequired(text,oldValue,newValue,label){
 // legacy screen first. A quiet mount state is preferable to a visible swap.
 let app=fs.readFileSync(files.app,'utf8');
 const oldRouter="function renderRoute(route){renderNavigation();if(['documents','plan','messages'].includes(route)){els.viewRoot.innerHTML='<div class=\"empty-state\">Chargement de votre espace…</div>';return}if(route==='admin')";
-const newRouter="function renderRoute(route){renderNavigation();if(['path','documents','plan','messages','clinical'].includes(route)){const labels={path:['KŌMØ · PROGRESSION','Votre trajectoire locomotrice.'],documents:['RENDEZ-VOUS','Votre agenda KŌMØ.'],plan:['MON PLAN','Votre plan personnalisé.'],messages:['MESSAGES','Votre messagerie KŌMØ.'],clinical:['KŌMØ CENTRE','Votre centre, en un seul espace.']};const selectors={path:'[data-kpv2]',documents:'[data-patient-v4=\"documents\"]',plan:'[data-patient-v4=\"plan\"]',clinical:'[data-clinical-cockpit-v1]'};const stable=selectors[route]&&els.viewRoot.querySelector(selectors[route]);if(stable)return;els.pageEyebrow.textContent=labels[route]?.[0]||'KŌMØ PULSE';els.pageTitle.textContent=labels[route]?.[1]||'Chargement';els.viewRoot.innerHTML=`<div class=\"komo-route-loading\" data-route-loading=\"${route}\" role=\"status\">Chargement de votre espace…</div>`;return}if(route==='admin')";
-app=replaceRequired(app,oldRouter,newRouter,'dedicated route ownership');
+const legacyStableRouter="function renderRoute(route){renderNavigation();if(['path','documents','plan','messages','clinical'].includes(route)){const labels={path:['KŌMØ · PROGRESSION','Votre trajectoire locomotrice.'],documents:['RENDEZ-VOUS','Votre agenda KŌMØ.'],plan:['MON PLAN','Votre plan personnalisé.'],messages:['MESSAGES','Votre messagerie KŌMØ.'],clinical:['KŌMØ CENTRE','Votre centre, en un seul espace.']};const selectors={path:'[data-kpv2]',documents:'[data-patient-v4=\"documents\"]',plan:'[data-patient-v4=\"plan\"]',clinical:'[data-clinical-cockpit-v1]'};const stable=selectors[route]&&els.viewRoot.querySelector(selectors[route]);if(stable)return;els.pageEyebrow.textContent=labels[route]?.[0]||'KŌMØ PULSE';els.pageTitle.textContent=labels[route]?.[1]||'Chargement';els.viewRoot.innerHTML=`<div class=\"komo-route-loading\" data-route-loading=\"${route}\" role=\"status\">Chargement de votre espace…</div>`;return}if(route==='admin')";
+const newRouter="function renderRoute(route){renderNavigation();if(['path','documents','plan','messages','clinical'].includes(route)){const labels={path:['KŌMØ PULSE · TRAJECTOIRE','Votre évolution'],documents:['RENDEZ-VOUS','Votre agenda KŌMØ.'],plan:['MON PLAN','Votre plan personnalisé.'],messages:['MESSAGES','Votre messagerie KŌMØ.'],clinical:['KŌMØ CENTRE','Votre centre, en un seul espace.']};const selectors={path:'[data-ktrajectory-v1]',documents:'[data-patient-v4=\"documents\"]',plan:'[data-patient-v4=\"plan\"]',clinical:'[data-clinical-cockpit-v1]'};const stable=selectors[route]&&els.viewRoot.querySelector(selectors[route]);if(stable)return;els.pageEyebrow.textContent=labels[route]?.[0]||'KŌMØ PULSE';els.pageTitle.textContent=labels[route]?.[1]||'Chargement';els.viewRoot.innerHTML=`<div class=\"komo-route-loading\" data-route-loading=\"${route}\" role=\"status\">Chargement de votre espace…</div>`;return}if(route==='admin')";
+if(app.includes(legacyStableRouter))app=app.replace(legacyStableRouter,newRouter);else app=replaceRequired(app,oldRouter,newRouter,'dedicated route ownership');
 fs.writeFileSync(files.app,app);
 
 // Patient v4 no longer owns #path. Progression v2 is the only renderer there.
@@ -36,23 +37,34 @@ patient=replaceRequired(patient,"function schedule(force=false){clearTimeout(sch
 if(!patient.includes("window.addEventListener('komo:data-ready',()=>schedule(false));"))patient=patient.replace("window.addEventListener('hashchange',()=>schedule(false));","window.addEventListener('hashchange',()=>schedule(false));window.addEventListener('komo:data-ready',()=>schedule(false));");
 fs.writeFileSync(files.patient,patient);
 
-// Progression should mount once per navigation, not again from fallback timers.
+// Progression: preserve the current Trajectory owner when present; only patch
+// the historical renderer on older builds.
 let progression=fs.readFileSync(files.progression,'utf8');
-progression=replaceRequired(progression,"async function mount(){if(location.hash!=='#path'||!memberMode()||busy)return;","async function mount(force=false){if(location.hash!=='#path'||!memberMode()||busy||(!force&&document.querySelector('[data-kpv2]')))return;",'progression mount guard');
-progression=replaceRequired(progression,"function schedule(){clearTimeout(timer);timer=setTimeout(mount,170)}","function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>mount(force),120)}",'progression schedule guard');
-progression=progression.replace("document.querySelector('#refreshButton')?.addEventListener('click',()=>setTimeout(schedule,300));","document.querySelector('#refreshButton')?.addEventListener('click',()=>setTimeout(()=>schedule(true),300));");
-if(!progression.includes("window.addEventListener('komo:data-ready',schedule);"))progression=progression.replace("window.addEventListener('komo:route-ready',schedule);","window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:data-ready',schedule);");
+if(progression.includes('[data-ktrajectory-v1]')){
+  const stableCurrent=progression.includes("key===lastKey&&root.querySelector('[data-ktrajectory-v1]')")&&progression.includes("!document.querySelector('[data-ktrajectory-v1]')");
+  if(!stableCurrent){console.error('[pulse-flicker] current trajectory is missing its mount guard');process.exit(1)}
+}else{
+  progression=replaceRequired(progression,"async function mount(){if(location.hash!=='#path'||!memberMode()||busy)return;","async function mount(force=false){if(location.hash!=='#path'||!memberMode()||busy||(!force&&document.querySelector('[data-kpv2]')))return;",'progression mount guard');
+  progression=replaceRequired(progression,"function schedule(){clearTimeout(timer);timer=setTimeout(mount,170)}","function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>mount(force),120)}",'progression schedule guard');
+  progression=progression.replace("document.querySelector('#refreshButton')?.addEventListener('click',()=>setTimeout(schedule,300));","document.querySelector('#refreshButton')?.addEventListener('click',()=>setTimeout(()=>schedule(true),300));");
+  if(!progression.includes("window.addEventListener('komo:data-ready',schedule);"))progression=progression.replace("window.addEventListener('komo:route-ready',schedule);","window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:data-ready',schedule);");
+}
 fs.writeFileSync(files.progression,progression);
 
-// Results journey is an additive block. Do not tear it down and prepend it again
-// when DOMContentLoaded/route-ready fallback events arrive later.
+// Results: preserve the current patient-results owner when present; only patch
+// the historical additive renderer on older builds.
 let results=fs.readFileSync(files.results,'utf8');
-results=replaceRequired(results,"async function mount(){if(busy||route()!=='results'||!memberMode())return;","async function mount(force=false){if(busy||route()!=='results'||!memberMode()||(!force&&document.querySelector('[data-krmj]')))return;",'results mount guard');
-results=replaceRequired(results,"function schedule(){clearTimeout(timer);timer=setTimeout(()=>mount(),160)}","function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>mount(force),120)}",'results schedule guard');
-results=results.replace("window.addEventListener('komo:questionnaire-saved',schedule);","window.addEventListener('komo:questionnaire-saved',()=>schedule(true));");
-results=results.replace("window.addEventListener('komo:myocare-imported',schedule);","window.addEventListener('komo:myocare-imported',()=>schedule(true));");
-results=results.replace("window.addEventListener('komo:motion-v05-release',schedule);","window.addEventListener('komo:motion-v05-release',()=>schedule(true));");
-if(!results.includes("window.addEventListener('komo:data-ready',schedule);"))results=results.replace("window.addEventListener('komo:route-ready',schedule);","window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:data-ready',schedule);");
+if(results.includes('[data-kresults-v1]')){
+  const stableCurrent=results.includes("key===lastKey&&root.querySelector('[data-kresults-v1]')")&&results.includes("!document.querySelector('[data-kresults-v1]')");
+  if(!stableCurrent){console.error('[pulse-flicker] current results view is missing its mount guard');process.exit(1)}
+}else{
+  results=replaceRequired(results,"async function mount(){if(busy||route()!=='results'||!memberMode())return;","async function mount(force=false){if(busy||route()!=='results'||!memberMode()||(!force&&document.querySelector('[data-krmj]')))return;",'results mount guard');
+  results=replaceRequired(results,"function schedule(){clearTimeout(timer);timer=setTimeout(()=>mount(),160)}","function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>mount(force),120)}",'results schedule guard');
+  results=results.replace("window.addEventListener('komo:questionnaire-saved',schedule);","window.addEventListener('komo:questionnaire-saved',()=>schedule(true));");
+  results=results.replace("window.addEventListener('komo:myocare-imported',schedule);","window.addEventListener('komo:myocare-imported',()=>schedule(true));");
+  results=results.replace("window.addEventListener('komo:motion-v05-release',schedule);","window.addEventListener('komo:motion-v05-release',()=>schedule(true));");
+  if(!results.includes("window.addEventListener('komo:data-ready',schedule);"))results=results.replace("window.addEventListener('komo:route-ready',schedule);","window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:data-ready',schedule);");
+}
 fs.writeFileSync(files.results,results);
 
 // Clinical cockpit becomes the visible owner immediately. Motion renders inside
