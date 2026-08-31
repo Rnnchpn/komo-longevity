@@ -1,4 +1,4 @@
-const VERSION='1.2.0';
+const VERSION='1.3.0';
 
 function client(){
   const runtime=window.KomoRuntime?.client||window.KomoRuntime?.getContext?.()?.client;
@@ -30,30 +30,30 @@ function safeFallback(data){
   const counts=data?.counts||{};
   const role=data?.role||data?.mode||'member';
   const pro=['admin','professional'].includes(role)||['admin','professional'].includes(data?.mode);
-  let headline='Voici ce qui compte maintenant.';
-  let answer='Je suis bien connecté à votre espace Pulse. Je peux vous guider à partir des informations disponibles.';
+  let headline='Mode Pulse vérifié.';
+  let answer='Je n’ai pas pu générer une réponse conversationnelle complète. Je peux néanmoins vous montrer uniquement les informations vérifiées actuellement disponibles dans Pulse.';
   let actions=[];
   const used=[];
   if(summary){
     const parts=[];
-    if(Number.isFinite(Number(summary.preparation_percent))){parts.push(`Votre préparation Motion est complétée à ${Math.round(Number(summary.preparation_percent))} %.`);used.push('préparation Motion')}
-    if(summary.score_release_status&&['released','published'].includes(String(summary.score_release_status).toLowerCase())&&Number.isFinite(Number(summary.motion_score))){parts.push(`Votre Motion Score publié est de ${Math.round(Number(summary.motion_score))}/100.`);used.push('Motion Score publié')}
-    else if(summary.motion_status&&summary.motion_status!=='not_started'){parts.push('Votre bilan Motion est en cours de traitement ou de validation.');used.push('statut Motion')}
-    const ap=summary.next_appointment?.scheduled_start||summary.next_appointment?.scheduled_at;const when=fmtDate(ap);if(when){parts.push(`Votre prochain rendez-vous est prévu ${when}.`);used.push('rendez-vous')}
-    const key=summary.key||{};if(key.connected){const days=Number(key.days_7);parts.push(Number.isFinite(days)?`KEY a reçu des données sur ${days}/7 jours.`:'KEY est connecté.');used.push('KEY')}
-    if(priorities[0]?.title){parts.push(`Priorité : ${priorities[0].title}${priorities[0].detail?` — ${priorities[0].detail}`:''}.`);used.push('priorités Pulse')}
-    if(parts.length)answer=parts.join(' ');
+    if(Number.isFinite(Number(summary.preparation_percent))){parts.push(`Préparation Motion : ${Math.round(Number(summary.preparation_percent))} %.`);used.push('préparation Motion')}
+    if(summary.score_release_status&&['released','published'].includes(String(summary.score_release_status).toLowerCase())&&Number.isFinite(Number(summary.motion_score))){parts.push(`Motion Score publié : ${Math.round(Number(summary.motion_score))}/100.`);used.push('Motion Score publié')}
+    else if(summary.motion_status&&summary.motion_status!=='not_started'){parts.push('Bilan Motion en cours de traitement ou de validation.');used.push('statut Motion')}
+    const ap=summary.next_appointment?.scheduled_start||summary.next_appointment?.scheduled_at;const when=fmtDate(ap);if(when){parts.push(`Prochain rendez-vous : ${when}.`);used.push('rendez-vous')}
+    const key=summary.key||{};if(key.connected){const days=Number(key.days_7);parts.push(Number.isFinite(days)?`KEY : ${days}/7 jours reçus.`:'KEY connecté.');used.push('KEY')}
+    if(priorities[0]?.title){parts.push(`Priorité vérifiée : ${priorities[0].title}${priorities[0].detail?` — ${priorities[0].detail}`:''}.`);used.push('priorités Pulse')}
+    if(parts.length)answer=`Réponse conversationnelle indisponible pour le moment. ${parts.join(' ')}`;
     actions=[routeAction('Voir mes résultats','results'),routeAction('Voir ma trajectoire','trajectory'),routeAction('Voir mon rendez-vous','documents')];
   }else if(pro){
     const parts=[];
     if(Number.isFinite(Number(counts.patients)))parts.push(`${Math.round(Number(counts.patients))} dossier(s) dans le périmètre.`);
     if(Number.isFinite(Number(counts.incomplete))&&Number(counts.incomplete)>0)parts.push(`${Math.round(Number(counts.incomplete))} préparation(s) incomplète(s).`);
     if(Number.isFinite(Number(counts.motion_review))&&Number(counts.motion_review)>0)parts.push(`${Math.round(Number(counts.motion_review))} bilan(s) Motion à revoir.`);
-    if(priorities[0]?.title)parts.push(`Priorité : ${priorities[0].title}${priorities[0].detail?` — ${priorities[0].detail}`:''}.`);
-    if(parts.length)answer=parts.join(' ');
+    if(priorities[0]?.title)parts.push(`Priorité vérifiée : ${priorities[0].title}${priorities[0].detail?` — ${priorities[0].detail}`:''}.`);
+    if(parts.length)answer=`Réponse conversationnelle indisponible pour le moment. ${parts.join(' ')}`;
     actions=[routeAction('Ouvrir les dossiers','clinical'),routeAction('Voir l’agenda','agenda'),routeAction('Ouvrir Admin','admin')];used.push('priorités opérationnelles');
   }else if(priorities[0]?.title){
-    answer=`Votre prochaine priorité est : ${priorities[0].title}${priorities[0].detail?` — ${priorities[0].detail}`:''}.`;
+    answer=`Réponse conversationnelle indisponible pour le moment. Priorité vérifiée : ${priorities[0].title}${priorities[0].detail?` — ${priorities[0].detail}`:''}.`;
     actions=[routeAction('Voir mes résultats','results'),routeAction('Ouvrir KEY','key'),routeAction('Voir mon rendez-vous','documents')];used.push('priorités Pulse');
   }
   return{role,mode:data?.mode||role,generated_at:new Date().toISOString(),fallback:true,reply:{headline,answer,suggested_actions:actions.slice(0,3),needs_professional_review:false,urgent:false,data_used:used}};
@@ -65,7 +65,7 @@ async function ask(message,{patientId=null,history=[]}={}){
   if(!value)throw new Error('message_required');
   try{return await invoke({action:'chat',message:value.slice(0,2500),patient_id:patientId||undefined,history:cleanHistory(history)})}
   catch(chatError){
-    console.warn('[KomoAI] chat unavailable, using Pulse fallback',chatError?.message||chatError);
+    console.warn('[KomoAI] chat unavailable, using verified Pulse mode',chatError?.message||chatError);
     try{return safeFallback(await overview({patientId}))}
     catch(overviewError){console.error('[KomoAI] fallback unavailable',overviewError);throw chatError}
   }
