@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260831-home-app-v7';
+const release='20260831-home-app-v8';
 const navRelease='20260831-patient-nav-v721';
 const cssFile='patient-home-command-v1.css';
 const heroCssFile='patient-home-hero-v2.css';
@@ -21,6 +21,7 @@ const resultsOwnerFile='patient-results-ownership-v2.js';
 const agendaMapFile='agenda-map-resilience-v1.js';
 const clarityJsFile='patient-v1-clarity.js';
 const legacyBootstrapFile='home-clarity-v1.js';
+const legacyMyKomoHomeFile='my-komo-home-v1.js';
 const entryFile='patient-home-entry-v1.js';
 const navFile='pulse-bottom-nav-v6.js';
 
@@ -46,7 +47,7 @@ for(const file of [cssFile,heroCssFile,dailyCssFile,mobileCssFile,assistantCssFi
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   html=html.replace(new RegExp(`\\s*<link rel="stylesheet" href="\\./${escaped}(?:\\?v[^\"]+)?"\\s*\\/?>`,'g'),'');
 }
-for(const file of [entryFile,jsFile,dailyJsFile,mobileJsFile,aiClientFile,assistantJsFile,resultsOwnerFile,agendaMapFile,clarityJsFile,legacyBootstrapFile]){
+for(const file of [entryFile,jsFile,dailyJsFile,mobileJsFile,aiClientFile,assistantJsFile,resultsOwnerFile,agendaMapFile,clarityJsFile,legacyBootstrapFile,legacyMyKomoHomeFile]){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   html=html.replace(new RegExp(`\\s*<script(?: type="module")? src="\\./${escaped}(?:\\?v=[^\"]+)?"><\\/script>`,'g'),'');
 }
@@ -73,12 +74,14 @@ const directScript=file=>new RegExp(`<script[^>]+src=["']\\./${file.replace(/[.*
 const checks=[
   ['historical home renderer removed',!final.includes('patient-home-datawall-v3.js')],
   ['legacy Home bootstrap removed',!directScript(legacyBootstrapFile)],
+  ['legacy My KŌMØ Home owner removed',!directScript(legacyMyKomoHomeFile)],
   ['legacy Home visual layers removed',!final.includes(heroCssFile)&&!final.includes(dailyCssFile)&&!directScript(dailyJsFile)],
   ['final Home V3 CSS loaded',final.includes(`${cssFile}?v=${release}`)],
   ['Home greeting is forest green and readable',css.includes('--kh3-heading:#385744')&&css.includes('.kh3-head h2')&&css.includes('color:var(--kh3-heading)!important')],
   ['Home identifies KŌMØ Pulse immediately',js.includes('kh3-brand')&&js.includes('KŌMØ PULSE')&&css.includes('kh3-brand-dot')],
   ['Home is a fixed one-screen cockpit',css.includes('height:100dvh!important')&&css.includes('overflow:hidden!important')&&css.includes('.kh3-movement')&&css.includes('.kh3-strip')&&css.includes('.kh3-next')],
   ['Home exclusively owns its DOM',js.includes('host.replaceChildren(node)')&&js.includes("host.dataset.khomeOwner='v3'")],
+  ['Home appointment no longer depends on legacy DOM',js.includes('pulseOverview()')&&js.includes('overview?.records')&&!js.includes("document.querySelector('.mykomo-next')")],
   ['assistant CSS is shipped with Home',final.includes(`${assistantCssFile}?v=${release}`)&&assistantCss.includes('#komoAssistantRail')&&assistantCss.includes('#komoAssistantDrawer')],
   ['mobile V1 CSS remains final patient presentation layer',final.includes(`${mobileCssFile}?v=${release}`)],
   ['canonical Home owner is loaded directly',directScript(jsFile)],
@@ -101,7 +104,7 @@ const checks=[
   ['Home uses canonical consent-aware walk summary',js.includes("rpc('komo_walk_summary')")&&!js.includes("from('wearable_daily_metrics')")],
   ['Motion Score is shown only after release',js.includes("['released','published']")&&js.includes('released(result)')&&js.includes("copy:has?'En validation':'À établir'")],
   ['stable Home renderer has no body observer or polling loop',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
-  ['Home paints an immediate loading shell before data resolves',js.includes('homeMarkup(null,null,true)')&&js.includes('aria-busy')],
+  ['Home paints an immediate loading shell before data resolves',js.includes('homeMarkup(null,null,null,true)')&&js.includes('aria-busy')],
   ['Home exposes essential patient destinations',js.includes("route:'results'")&&js.includes("route:'key'")&&js.includes("route:'documents'")&&js.includes('data-kh3-route="mykomo"')],
   ['Home exposes steps K Points and Walk Club',js.includes('steps_today')&&js.includes('k_points_today')&&js.includes('WALK CLUB')],
   ['final patient dock is cache-busted',final.includes(`${navFile}?v=${navRelease}`)],
