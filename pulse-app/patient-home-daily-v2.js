@@ -2,7 +2,7 @@
    Daily utility: movement, verified K Points, Walk Club, Komo insight. */
 (() => {
   'use strict';
-  const VERSION='2.0.0';
+  const VERSION='2.0.1';
   let timer=0;
   let loading=false;
   let lastSignature='';
@@ -13,8 +13,7 @@
   const fmt=v=>new Intl.NumberFormat('fr-FR').format(Math.round(num(v)));
 
   function go(target){
-    if(window.KomoPatientNavigation?.go) window.KomoPatientNavigation.go(target);
-    else location.hash=target;
+    window.KomoPatientNavigation?.go?.(target);
   }
 
   function openKomo(){
