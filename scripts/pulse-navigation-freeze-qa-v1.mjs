@@ -16,7 +16,7 @@ const checks=[
   ['booking slot refresh uses stable busy state',booking.includes("function setPatientBusy(flag)")&&booking.includes("setPatientBusy(true);try{const q=await sb().rpc('komo_booking_slots'")],
   ['booking route mount is deduplicated',booking.includes("document.querySelector('[data-kbook-patient]')||S.patientLoading")],
   ['booking uses shared runtime client',booking.includes('window.KomoRuntime?.client')],
-  ['menu structure remains unchanged',adaptive.includes("navItem('patient:home','Accueil'")&&adaptive.includes("navItem('patient:results','Tests'")&&adaptive.includes("navItem('patient:path','Résultats'")&&adaptive.includes("navItem('patient:plan','Suivi'")],
+  ['patient menu uses canonical route contract',adaptive.includes("navItem('patient:home','Accueil'")&&adaptive.includes("navItem('patient:key','KEY'")&&adaptive.includes("navItem('patient:results','Résultats'")&&adaptive.includes("navItem('patient:trajectory','Trajectoire'")&&!adaptive.includes("navItem('patient:path'")&&!adaptive.includes("navItem('patient:plan'")],
   ['menu polish is CSS-only',css.includes('/* Frozen navigation polish */')&&css.includes('.kam-nav-item.active')&&css.includes('@media(min-width:821px)')],
   ['menu transitions avoid geometry changes',css.includes('transition:background-color .14s ease,color .14s ease,border-color .14s ease,box-shadow .14s ease!important')&&css.includes('transform:none!important')],
   ['reduced motion supported',css.includes('@media(prefers-reduced-motion:reduce)')]
