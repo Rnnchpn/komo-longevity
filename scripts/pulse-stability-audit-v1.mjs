@@ -43,7 +43,7 @@ const motion=fs.readFileSync(motionDst,'utf8');
 const home=fs.readFileSync(homeSummaryPath,'utf8');
 const index=fs.readFileSync(indexPath,'utf8');
 const wrongKey='sb_publishable_3sUsinfJ_nMFI44OXozkQ_jmGG8w7n';
-const exactScriptCount=(file)=>(index.match(new RegExp(`<script[^>]+src=["']\\./${file.replaceAll('.','\\.')}["'][^>]*>`,`g`))||[]).length;
+const exactScriptCount=(file)=>(index.match(new RegExp(`<script[^>]+src=["']\\./${file.replaceAll('.','\\.')}(?:\\?[^"']*)?["'][^>]*>`,`g`))||[]).length;
 const checks=[
   ['stable Motion Journey uses shared runtime',motion.includes('window.KomoRuntime?.client')],
   ['Motion Journey does not own Progression',!motion.includes("r==='path'")&&!motion.includes("'documents','path','clinical'")],
