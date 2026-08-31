@@ -104,3 +104,8 @@ for (const [locale, c] of Object.entries(configs)) {
   await writeFile(c.path, html, 'utf8');
   console.log(`[professional-header] ${locale} contact header synced with homepage`);
 }
+
+// This script is intentionally the final writer in build-all.mjs.
+// Run public hardening and the true final QA after every preceding mutation.
+await import('./public-site-final-hardening-v1.mjs');
+await import('./public-site-final-qa-v1.mjs');
