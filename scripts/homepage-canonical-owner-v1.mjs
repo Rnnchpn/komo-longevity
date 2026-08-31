@@ -43,7 +43,7 @@ const requiredMarkers = [
   'class="kw-final"'
 ];
 
-const deadStyleIds = [
+const provenDeadStyleIds = [
   'homepage-seo-v6-style',
   'kmx-myocare-style',
   'homepage-minimal-patient-v1-style',
@@ -51,6 +51,19 @@ const deadStyleIds = [
   'method-science-v2-style',
   'homepage-product-stepup-v1-style'
 ];
+
+const absorbedStyleIds = [
+  'homepage-patient-final-v2-style',
+  'pulse-platform-bridge-style',
+  'pulse-beta-release-v1-style',
+  'komo-key-navigation-smooth'
+];
+
+const canonicalRootCss = `.kpf{background:#f5f1e9!important;color:#161b2a!important}`;
+
+const canonicalDisclaimerCss = `.kb-disclaimer{padding:26px 0;border-top:1px solid rgba(255,255,255,.12)!important;background:#0b0c0b!important;color:#fff!important}.kb-disclaimer__inner{width:min(calc(100% - 40px),1160px);margin:auto;display:grid;grid-template-columns:.35fr 1fr;gap:24px}.kb-disclaimer strong{color:#ded0b9!important;font-size:9px;letter-spacing:.12em;text-transform:uppercase}.kb-disclaimer p{margin:0;color:rgba(255,255,255,.48)!important;font-size:11px;line-height:1.6}@media(max-width:760px){.kb-disclaimer__inner{width:min(calc(100% - 28px),1160px);grid-template-columns:1fr;gap:9px}}`;
+
+const canonicalKeyHomeCss = `*{box-sizing:border-box}html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}body{margin:0;background:#070808;color:#f4f1e9;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.home-key{margin:0;background:#0a0b0b;color:#fff;padding:70px 0}.home-key-inner{width:min(calc(100% - 48px),1360px);margin:auto;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end}.home-key p{margin:0 0 8px;color:#b8aa94;font-size:8px;font-weight:850;letter-spacing:.17em;text-transform:uppercase}.home-key h2{margin:0;max-width:800px;font-size:clamp(38px,5vw,68px);line-height:.94;letter-spacing:-.055em}.home-key h2 em{color:#91aa9f;font-style:normal}.home-key a{display:inline-flex;align-items:center;min-height:50px;padding:0 20px;border-radius:10px;background:#ded0b9;color:#090a0a!important;text-decoration:none;font-size:9px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;transition:transform .18s ease,filter .18s ease}.home-key a:hover{transform:translateY(-1px);filter:brightness(1.03)}.home-key a:active{transform:none}@media(max-width:900px){.home-key-inner{grid-template-columns:1fr}}@media(max-width:600px){.home-key-inner{width:min(calc(100% - 28px),1360px)}}`;
 
 function runLegacy(step) {
   if (!legacySteps.has(step)) {
@@ -108,16 +121,62 @@ function auditStyleUsage(html) {
   return layers;
 }
 
-function removeDeadStyles(html) {
-  let next = html;
-  for (const id of deadStyleIds) {
-    const before = next;
-    next = next.replace(new RegExp(`<style\\s+id=["']${id}["'][^>]*>[\\s\\S]*?<\\/style>`, 'gi'), '');
-    if (before === next) {
-      console.error(`[home-owner] FAIL · expected dead style ${id} was not present`);
+function removeStyle(html, id) {
+  const before = html;
+  const next = html.replace(new RegExp(`<style\\s+id=["']${id}["'][^>]*>[\\s\\S]*?<\\/style>`, 'gi'), '');
+  if (before === next) {
+    console.error(`[home-owner] FAIL · expected style ${id} was not present`);
+    process.exit(1);
+  }
+  return next;
+}
+
+function appendCssToStyle(html, id, css) {
+  const pattern = new RegExp(`(<style\\s+id=["']${id}["'][^>]*>)([\\s\\S]*?)(<\\/style>)`, 'i');
+  if (!pattern.test(html)) {
+    console.error(`[home-owner] FAIL · target style ${id} missing`);
+    process.exit(1);
+  }
+  return html.replace(pattern, `$1$2${css}$3`);
+}
+
+function replaceStyleContent(html, id, css) {
+  const pattern = new RegExp(`(<style\\s+id=["']${id}["'][^>]*>)[\\s\\S]*?(<\\/style>)`, 'i');
+  if (!pattern.test(html)) {
+    console.error(`[home-owner] FAIL · target style ${id} missing`);
+    process.exit(1);
+  }
+  return html.replace(pattern, `$1${css}$2`);
+}
+
+function assertSafeAbsorption(layers) {
+  const expected = new Map([
+    ['homepage-patient-final-v2-style', ['kpf']],
+    ['pulse-platform-bridge-style', ['kpf']],
+    ['pulse-beta-release-v1-style', ['kb-disclaimer', 'kb-disclaimer__inner']],
+    ['komo-key-navigation-smooth', ['home-key']]
+  ]);
+  for (const [id, expectedClasses] of expected) {
+    const layer = layers.find((entry) => entry.id === id);
+    if (!layer || layer.idUsed !== 0) {
+      console.error(`[home-owner] FAIL · ${id} ownership changed; refusing absorption`);
+      process.exit(1);
+    }
+    const actual = [...layer.classes].sort().join('|');
+    const wanted = [...expectedClasses].sort().join('|');
+    if (actual !== wanted) {
+      console.error(`[home-owner] FAIL · ${id} now owns [${actual}] instead of [${wanted}]`);
       process.exit(1);
     }
   }
+}
+
+function consolidateStyles(html) {
+  let next = html;
+  next = appendCssToStyle(next, 'homepage-whoop-product-v2-style', canonicalRootCss);
+  next = appendCssToStyle(next, 'homepage-whoop-polish-v3-style', canonicalDisclaimerCss);
+  next = replaceStyleContent(next, 'komo-key-home-style', canonicalKeyHomeCss);
+  for (const id of [...provenDeadStyleIds, ...absorbedStyleIds]) next = removeStyle(next, id);
   return next;
 }
 
@@ -126,19 +185,20 @@ async function finalize() {
 
   for (const file of pages) {
     let html = await readFile(file, 'utf8');
+    const beforeLayers = auditStyleUsage(html);
 
     if (file.endsWith('/fr/index.html')) {
-      const beforeLayers = auditStyleUsage(html);
-      for (const id of deadStyleIds) {
+      for (const id of provenDeadStyleIds) {
         const layer = beforeLayers.find((entry) => entry.id === id);
         if (!layer || layer.classUsed !== 0 || layer.idUsed !== 0) {
           console.error(`[home-owner] FAIL · ${id} is no longer safely dead; refusing removal`);
           process.exit(1);
         }
       }
+      assertSafeAbsorption(beforeLayers);
     }
 
-    html = removeDeadStyles(html);
+    html = consolidateStyles(html);
 
     const missing = requiredMarkers.filter((marker) => !html.includes(marker));
     if (missing.length) {
@@ -158,9 +218,16 @@ async function finalize() {
       console.error(`[home-owner] FAIL · ${file} duplicate style ids: ${[...new Set(duplicateStyleIds)].join(', ')}`);
       process.exit(1);
     }
-    if (styleIds.length > 11) {
-      console.error(`[home-owner] FAIL · ${file} has ${styleIds.length} named style layers; budget is 11`);
+    if (styleIds.length > 7) {
+      console.error(`[home-owner] FAIL · ${file} has ${styleIds.length} named style layers; budget is 7`);
       process.exit(1);
+    }
+
+    for (const retired of [...provenDeadStyleIds, ...absorbedStyleIds]) {
+      if (styleIds.includes(retired)) {
+        console.error(`[home-owner] FAIL · retired style ${retired} survived finalization`);
+        process.exit(1);
+      }
     }
 
     const hasPhoneBreakpoint = html.includes('@media(max-width:620px)') || html.includes('@media (max-width: 620px)');
