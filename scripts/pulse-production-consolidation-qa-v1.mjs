@@ -40,8 +40,8 @@ const checks=[
   ['guided mobile layer no longer owns home',!guided.includes('enhanceHome')&&guided.includes('enhanceTests')],
   ['final design avoids body-wide observer',!design.includes('observe(document.body')&&design.includes("observe(root,{childList:true,subtree:true})")],
   ['session sync is event driven in final design',design.includes('if(sync)await window.KomoRuntime?.syncSession?.()')],
-  ['home is quiet-mounted by core router',app.includes("['home','path','documents','plan','messages','clinical'].includes(route)")&&app.includes("home:'[data-my-komo-home]'" )],
-  ['My KŌMØ is sole shipped home owner',!html.includes('home-clarity-v1.js')&&!html.includes('home-summary-v1.js')&&html.includes('my-komo-home-v1.js')],
+  ['home bypasses quiet mount and keeps canonical host',!app.includes("['home','path','documents','plan','messages','clinical'].includes(route)")&&app.includes("['path','documents','plan','messages','clinical'].includes(route)")&&app.includes('data-home-owner="patient-home-command-v1"')],
+  ['legacy duplicate home renderers retired',!html.includes('home-clarity-v1.js')&&!html.includes('home-summary-v1.js')],
   ['legacy home summary CSS retired',!css.includes('/* FILE: home-summary-v1.css */')],
   ['legacy Motion booking no longer renders Agenda',!patientMotion.includes('root.innerHTML')&&!patientMotion.includes('data-kmb2')&&!patientMotion.includes('loadSlots')&&!patientMotion.includes('createClient')],
   ['legacy Motion booking only routes to canonical Agenda',patientMotion.includes("location.hash='documents'")&&!patientMotion.includes('refreshPatient')&&!patientMotion.includes('loadPatient')],
@@ -53,12 +53,11 @@ const checks=[
   ['session refresh burst is throttled',performanceRuntime.includes('SESSION_SYNC_TTL=2000')&&performanceRuntime.includes('now-lastSyncAt<SESSION_SYNC_TTL')],
   ['versioned assets are immutable',middleware.includes("max-age=31536000, immutable")&&middleware.includes("incomingUrl.searchParams.has('v')")],
   ['HTML remains private no-store',middleware.includes("Cache-Control', 'private, no-store, max-age=0")],
-  ['My KŌMØ remains canonical home presentation',design.includes('kamo-home-result-removed')],
   ['patient assessment trio is shipped',html.includes('patient-assessment-trio-v1.js')&&css.includes('KŌMØ Pulse patient platform v1')],
   ['My KŌMØ Score is canonical results owner',score.includes('MY KŌMØ SCORE')&&score.includes("rpc('komo_score_benchmark'")],
   ['KŌMØ Therapy is canonical plan owner',therapy.includes('KŌMØ THERAPY')&&therapy.includes("location.hash!=='#plan'")],
   ['patient booking requires professional approval UI',booking.includes("rpc('approve_komo_appointment'")&&booking.includes('En attente de validation')],
-  ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')&&css.includes('Home: My KŌMØ')&&css.includes('Agenda et réseau: booking-layer-v1')]
+  ['canonical ownership note emitted',css.includes('/* Canonical Pulse shell ownership */')&&css.includes('Home: patient-home-command-v1')&&css.includes('Agenda et réseau: booking-layer-v1')]
 ];
 
 let failed=0;
