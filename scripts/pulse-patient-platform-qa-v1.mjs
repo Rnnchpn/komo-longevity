@@ -15,7 +15,7 @@ const checks=[
  ['Komo Therapy owns plan route',therapy.includes("location.hash!=='#plan'")&&therapy.includes('KŌMØ THERAPY')&&therapy.includes('PLAN DE SOINS')],
  ['therapy only shows validated priorities',therapy.includes("eq('validation_status','validated')")],
  ['Agenda et réseau label is used on mobile',adaptive.includes("actionButton('Agenda et réseau','patient:documents')")],
- ['mobile score and therapy labels are updated',adaptive.includes("'My KŌMØ Score'")&&adaptive.includes("'KŌMØ Therapy'")],
+ ['mobile patient labels use canonical routes',adaptive.includes("'patient:key'")&&adaptive.includes("'patient:results'")&&adaptive.includes("'patient:trajectory'")&&!adaptive.includes("'patient:path'")&&!adaptive.includes("'patient:plan'")],
  ['desktop patient product labels are present',/id:\s*'path'\s*,\s*label:\s*'My KŌMØ Score'/.test(app)&&/id:\s*'plan'\s*,\s*label:\s*'KŌMØ Therapy'/.test(app)&&/id:\s*'documents'\s*,\s*label:\s*'Agenda et réseau'/.test(app)],
  ['desktop Therapy uses canonical owner selector',/plan:\s*'\[data-therapy-page\]'/.test(app)],
  ['patient booking is presented as a request',booking.includes('Demande envoyée au centre')&&booking.includes('En attente de validation')],

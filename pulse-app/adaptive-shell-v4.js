@@ -1,5 +1,6 @@
-/* KŌMØ Pulse — adaptive navigation shell v4
-   Unified authenticated navigation for phone + iPad, with patient / professional / admin modes. */
+/* KŌMØ Pulse — adaptive navigation shell v4.1
+   Unified authenticated navigation for phone + iPad, with patient / professional / admin modes.
+   Patient destinations use the canonical route contract only. */
 (() => {
   const PHONE='(max-width: 767px)';
   const TABLET='(min-width: 768px) and (max-width: 1366px) and (hover: none) and (pointer: coarse)';
@@ -20,7 +21,7 @@
     pro:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20V8l8-4 8 4v12"/><path d="M8 20v-6h8v6M9 9h6"/></svg>'
   };
 
-  function route(){return location.hash.replace(/^#/,'')||'home'}
+  function route(){return window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home'}
   function isIPad(){return /iPad/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}
   function adaptive(){return window.matchMedia(PHONE).matches||window.matchMedia(TABLET).matches||(isIPad()&&innerWidth>=768&&innerWidth<=1366)}
   function appVisible(){const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)}
@@ -49,7 +50,10 @@
 
   function patient(target='home'){
     document.querySelector('#modeSwitch [data-mode="member"]')?.click();
-    requestAnimationFrame(()=>fireRoute(target));
+    requestAnimationFrame(()=>{
+      if(window.KomoPatientNavigation?.go)window.KomoPatientNavigation.go(target);
+      else fireRoute(target);
+    });
   }
 
   function professional(section='dashboard'){
@@ -95,7 +99,7 @@
     const m=mode(),r=role();
     let primary='';
     if(m==='patient'){
-      primary=actionButton('Rendez-vous','patient:documents')+actionButton('Messages','patient:messages');
+      primary=actionButton('Rendez-vous','patient:documents')+actionButton('My KŌMØ','patient:mykomo')+actionButton('Messages','patient:messages');
       if(allowedPro()) primary+=actionButton('Espace professionnel','pro:dashboard');
       if(allowedAdmin()) primary+=actionButton('Administration','admin');
     }else if(m==='pro'){
@@ -155,7 +159,7 @@
       return navItem('admin:patients','Patients',I.patients,a==='patients')+navItem('admin:pros','Accès Pro',I.pro,a==='pros')+navItem('admin:motion','Demandes',I.motion,a==='motion')+navItem('pro:dashboard','Pro',I.center,false)+navItem('more','Plus',I.more,false);
     }
     const r=route();
-    return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:results','Tests',I.tests,r==='results')+navItem('patient:path','Résultats',I.results,r==='path')+navItem('patient:plan','Suivi',I.follow,r==='plan')+navItem('more','Plus',I.more,false);
+    return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:key','KEY',I.follow,r==='key')+navItem('patient:results','Résultats',I.tests,r==='results')+navItem('patient:trajectory','Trajectoire',I.results,r==='trajectory')+navItem('more','Plus',I.more,false);
   }
 
   function ensureBottom(){
