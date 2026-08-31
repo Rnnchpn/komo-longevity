@@ -27,7 +27,7 @@ const checks=[
   ['canonical Home styles shipped',final.includes(`patient-home-command-v1.css?v=${release}`)],
   ['legacy KEY reparent runtime absent',!final.includes('home-key-position-v1.js')],
   ['legacy KEY position stylesheet absent',!final.includes('home-key-position-v1.css')],
-  ['Home owns KEY in native markup',home.includes("signalCard('KEY · QUOTIDIEN'"))],
+  ['Home owns KEY in native markup',home.includes("signalCard('KEY · QUOTIDIEN'")],
   ['Home has no delayed retry ladder',!home.includes('[80,260,800,1800]')&&!home.includes('1700')],
   ['Home animation respects reduced motion',css.includes('@media(prefers-reduced-motion:reduce)')],
   ['Home score animation is finite',home.includes('duration=620')&&!css.includes('infinite')]
