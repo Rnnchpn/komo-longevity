@@ -18,7 +18,7 @@ const checks=[
   ['Progression has one owner',patient.includes("const TARGETS=new Set(['plan','documents']);")&&!patient.includes("const TARGETS=new Set(['path','plan','documents']);")],
   ['patient v4 prevents duplicate fallback renders',patient.includes('root?.querySelector(`[data-patient-v4="${r}"]`)')],
   ['Progression prevents duplicate fallback renders',progression.includes("key===lastKey&&root.querySelector('[data-ktrajectory-v1]')")&&progression.includes("!document.querySelector('[data-ktrajectory-v1]')")],
-  ['Results journey prevents duplicate prepend',results.includes("!force&&document.querySelector('[data-krmj]')")],
+  ['Results journey prevents duplicate prepend',results.includes("key===lastKey&&root.querySelector('[data-kresults-v1]')")&&results.includes("!document.querySelector('[data-kresults-v1]')")],
   ['Clinical cockpit owns the visible clinical shell',cockpit.includes("new CustomEvent('komo:clinical-cockpit-ready')")&&!cockpit.includes("if(!motion)return")],
   ['Clinical Motion renders inside cockpit host',motion.includes("const cockpitHost=document.querySelector('#kcpMotionHost')")&&motion.includes('const root=cockpitHost||document.querySelector(\'#viewRoot\')')],
   ['Clinical Motion avoids duplicate host rerender',motion.includes("!force&&document.querySelector('#kcpMotionHost [data-clinical-motion-v1]')")],
