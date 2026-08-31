@@ -2,8 +2,8 @@ import './komo-ai-client-v1.js';
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='4.0.0';
-const WALK_CLUB_LABEL='KŌMØ WALK CLUB';
+const VERSION='5.0.0';
+const RELEASED=new Set(['released','published']);
 let timer=0;
 let rendering=false;
 let lastSignature='';
@@ -13,6 +13,7 @@ const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','
 const num=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
 const fmt=v=>v===null||v===undefined?'—':new Intl.NumberFormat('fr-FR').format(Math.round(Number(v)));
 const pick=(obj,keys=[])=>{for(const key of keys){const value=obj?.[key];if(value!==undefined&&value!==null&&value!=='')return value}return null};
+const released=status=>RELEASED.has(String(status||'').toLowerCase());
 
 function go(target){window.KomoPatientNavigation?.go?.(target)}
 function firstName(){
@@ -23,124 +24,242 @@ function firstName(){
   const account=document.querySelector('#accountName')?.textContent?.trim()||'';
   return account&&account!=='Compte KŌMØ'?account.split(/\s+/)[0]:'';
 }
+function shortDate(value){
+  if(!value)return'';
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return'';
+  return new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short'}).format(d).replace('.','');
+}
+function dayDistance(value){
+  if(!value)return null;
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return null;
+  return Math.max(0,Math.floor((Date.now()-d.getTime())/86400000));
+}
+function freshness(value){
+  const days=dayDistance(value);
+  if(days===null)return'Dernière mesure disponible';
+  if(days===0)return'Mesuré aujourd’hui';
+  if(days===1)return'Mesuré hier';
+  if(days<14)return`Mesuré il y a ${days} jours`;
+  const date=shortDate(value);
+  return date?`Dernière mesure · ${date}`:'Dernière mesure disponible';
+}
 async function pulseOverview(){
-  try{return await window.KomoAI?.overview?.()||null}catch(e){console.warn('[home-v4 overview]',e);return null}
+  try{return await window.KomoAI?.overview?.()||null}catch(e){console.warn('[home-v5 overview]',e);return null}
 }
 async function walkSummary(){
   const sb=window.KomoRuntime?.client;if(!sb)return null;
-  try{const {data,error}=await sb.rpc('komo_walk_summary');if(error)throw error;return data||null}catch(e){console.warn('[home-v4 walk]',e);return null}
+  try{const {data,error}=await sb.rpc('komo_walk_summary');if(error)throw error;return data||null}catch(e){console.warn('[home-v5 walk]',e);return null}
+}
+async function legacyMotionHistory(){
+  const sb=window.KomoRuntime?.client;if(!sb)return[];
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session?.user?.id)return[];
+    const {data,error}=await sb.from('pulse_score_runs').select('overall_score,motion_age,status,computed_at,created_at').eq('user_id',session.user.id).order('created_at',{ascending:false}).limit(6);
+    if(error)throw error;
+    return Array.isArray(data)?data:[];
+  }catch(e){console.warn('[home-v5 history]',e);return[]}
+}
+function currentRecord(overview){return Array.isArray(overview?.records)?overview.records[0]||null:overview?.record||null}
+function motionState(overview,history=[]){
+  const record=currentRecord(overview);
+  const canonical=record?.score||null;
+  const status=canonical?.release_status||canonical?.status||'';
+  const canonicalScore=released(status)?num(canonical?.motion_score):null;
+  const currentLegacy=history.find(row=>{
+    const score=num(row?.overall_score);
+    if(score===null)return false;
+    return released(row?.status)||(canonicalScore!==null&&Math.abs(score-canonicalScore)<0.01);
+  })||null;
+  const visibleHistory=history.filter(row=>released(row?.status)).map(row=>({
+    score:num(row?.overall_score),
+    age:num(row?.motion_age),
+    date:row?.computed_at||row?.created_at||null
+  })).filter(row=>row.score!==null);
+  let score=canonicalScore;
+  if(score===null&&visibleHistory[0])score=visibleHistory[0].score;
+  const age=num(canonical?.motion_age)??(currentLegacy?num(currentLegacy.motion_age):null)??visibleHistory[0]?.age??null;
+  const date=canonical?.calculated_at||currentLegacy?.computed_at||currentLegacy?.created_at||visibleHistory[0]?.date||record?.motion?.updated_at||record?.motion?.created_at||null;
+  let delta=null;
+  if(score!==null&&visibleHistory.length>=2&&Math.abs(visibleHistory[0].score-score)<0.01)delta=Math.round((visibleHistory[0].score-visibleHistory[1].score)*10)/10;
+  const pending=Boolean(record?.motion)&&score===null;
+  return{score,age,date,delta,pending,hasMotion:Boolean(record?.motion),record};
 }
 function currentAppointment(overview){
+  const record=currentRecord(overview);
   const records=Array.isArray(overview?.records)?overview.records:[];
   const fromRecords=records.map(x=>x?.next_appointment).find(Boolean);
-  const fromList=Array.isArray(overview?.appointments)?overview.appointments.find(Boolean):null;
-  const ap=fromRecords||overview?.record?.next_appointment||overview?.summary?.next_appointment||fromList||null;
-  if(!ap)return{exists:false,date:'Aucun rendez-vous',time:'',title:'Rien de planifié pour le moment',location:'',route:'documents'};
+  const ap=fromRecords||record?.next_appointment||overview?.summary?.next_appointment||null;
+  if(!ap)return{exists:false,date:'Aucun rendez-vous prévu',time:'',title:'Votre prochaine mesure apparaîtra ici.',location:'',route:'agenda',hours:null};
   const raw=ap.scheduled_start||ap.scheduled_at||ap.start_at||ap.start;
-  let date='Prochaine consultation',time='';
+  let date='Prochaine consultation',time='',hours=null;
   if(raw){
     const d=new Date(raw);
     if(!Number.isNaN(d.getTime())){
-      date=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'}).format(d);
+      date=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'}).format(d).replace('.','');
       time=new Intl.DateTimeFormat('fr-FR',{hour:'2-digit',minute:'2-digit'}).format(d);
+      hours=(d.getTime()-Date.now())/36e5;
     }
   }
   const title=ap.appointment_type||ap.title||ap.type||'Consultation KŌMØ';
   const location=ap.center_name||ap.location_name||ap.center?.name||ap.location||ap.address||'';
-  return{exists:true,date,time,title,location,route:'documents'};
+  return{exists:true,date,time,title,location,route:'agenda',hours};
 }
 function coverageValue(walk){
   let value=num(pick(walk,['coverage_7d','coverage_pct','coverage','data_coverage','key_coverage']));
   if(value!==null&&value<=1)value*=100;
   return value===null?null:Math.max(0,Math.min(100,Math.round(value)));
 }
-function keyInsight(walk,loading=false){
-  if(loading)return{title:'KEY se synchronise',copy:'Lecture de votre rythme quotidien…',meta:'',route:'key'};
-  if(!walk?.connected)return{title:'Activez KEY',copy:'Reliez votre activité quotidienne à votre parcours KŌMØ.',meta:'Continuité non active',route:'key'};
-  const steps=num(walk.steps_today);
+function dailyDelta(walk){
+  const steps=num(walk?.steps_today);
   const average=num(pick(walk,['steps_avg_7d','average_steps_7d','baseline_steps_7d','avg_steps_7d']));
-  const coverage=coverageValue(walk);
+  if(steps===null||average===null||average<=0)return null;
+  return Math.round(((steps-average)/average)*100);
+}
+function keySignal(walk,loading=false){
+  if(loading)return{value:'Synchronisation',copy:'Votre rythme quotidien arrive…',meta:'KEY',route:'key'};
+  if(!walk?.connected)return{value:'Activer KEY',copy:'Reliez votre quotidien à votre trajectoire.',meta:'Continuité quotidienne',route:'key'};
+  const steps=num(walk.steps_today);
   const active=num(walk.active_minutes_today??walk.active_minutes);
-  const sleep=num(pick(walk,['sleep_hours','sleep_hours_last','sleep_duration_hours']));
-  if(average!==null&&steps!==null&&average>0){
-    const delta=Math.round(((steps-average)/average)*100);
-    const abs=Math.abs(delta);
-    if(delta>=15)return{title:'Vous bougez plus que d’habitude',copy:`+${abs}% par rapport à votre moyenne des 7 derniers jours.`,meta:coverage!==null?`${coverage}% de couverture KEY`:'Tendance du jour',route:'key'};
-    if(delta<=-15)return{title:'Journée plus calme que votre rythme',copy:`${abs}% sous votre moyenne récente pour le moment.`,meta:coverage!==null?`${coverage}% de couverture KEY`:'Tendance du jour',route:'key'};
-    return{title:'Votre activité est dans votre rythme',copy:'Votre journée reste proche de votre moyenne récente.',meta:coverage!==null?`${coverage}% de couverture KEY`:'Tendance du jour',route:'key'};
+  const coverage=coverageValue(walk);
+  const delta=dailyDelta(walk);
+  if(delta!==null&&delta>=15)return{value:`+${Math.abs(delta)}% aujourd’hui`,copy:'Au-dessus de votre rythme récent.',meta:steps===null?'KEY':`${fmt(steps)} pas`,route:'key'};
+  if(delta!==null&&delta<=-15)return{value:`${Math.abs(delta)}% sous votre rythme`,copy:'Une journée plus calme pour le moment.',meta:steps===null?'KEY':`${fmt(steps)} pas`,route:'key'};
+  if(steps!==null)return{value:`${fmt(steps)} pas`,copy:delta===null?'Votre activité du jour.':'Dans votre rythme récent.',meta:active===null?(coverage===null?'KEY':`${coverage}% de couverture`):`${fmt(active)} min actives`,route:'key'};
+  if(coverage!==null)return{value:`${coverage}% couvert`,copy:'KEY construit votre référence quotidienne.',meta:'7 derniers jours',route:'key'};
+  return{value:'KEY connecté',copy:'Votre quotidien complète la mesure Motion.',meta:'Continuité active',route:'key'};
+}
+function motionInterpretation(motion){
+  if(motion.score===null){
+    if(motion.pending)return'Votre mesure Motion existe et attend sa restitution. Pulse affichera ici votre repère dès qu’il sera publié.';
+    return'Votre première mesure Motion créera la référence à partir de laquelle votre trajectoire pourra être suivie.';
   }
-  if(coverage!==null&&coverage<50)return{title:'KEY apprend encore votre rythme',copy:'Continuez à porter votre dispositif pour rendre les tendances plus fiables.',meta:`${coverage}% de couverture sur la période`,route:'key'};
-  if(active!==null)return{title:`${fmt(active)} min actives aujourd’hui`,copy:'KEY replace votre activité du jour dans votre continuité.',meta:coverage!==null?`${coverage}% de couverture KEY`:'Donnée quotidienne vérifiée',route:'key'};
-  if(sleep!==null)return{title:`${sleep.toFixed(1).replace('.',',')} h de sommeil`,copy:'Votre récupération complète progressivement votre lecture quotidienne.',meta:coverage!==null?`${coverage}% de couverture KEY`:'Dernière nuit disponible',route:'key'};
-  return{title:'Votre quotidien devient lisible',copy:'KEY construit votre continuité à partir des données disponibles.',meta:coverage!==null?`${coverage}% de couverture KEY`:'Données en cours de consolidation',route:'key'};
+  if(motion.delta===null)return'Votre dernier repère locomoteur est disponible. Sa valeur devient surtout utile lorsqu’elle est suivie dans le temps.';
+  if(motion.delta>0)return`Votre Motion Score a progressé de ${String(motion.delta).replace('.',',')} point${motion.delta>1?'s':''} depuis la mesure précédente.`;
+  if(motion.delta<0)return`Votre Motion Score a varié de ${String(motion.delta).replace('.',',')} point${Math.abs(motion.delta)>1?'s':''} depuis la mesure précédente. La trajectoire compte davantage qu’une mesure isolée.`;
+  return'Votre Motion Score est stable par rapport à la mesure précédente. La continuité permettra de confirmer cette tendance.';
 }
-function clubState(walk,loading=false){
+function priorityState(walk,motion,appointment){
+  if(appointment.exists&&appointment.hours!==null&&appointment.hours>=0&&appointment.hours<=72)return{eyebrow:'KOMO · PRIORITÉ',title:'Préparez votre prochaine mesure.',copy:'Votre rendez-vous approche. Gardez vos informations Pulse à jour pour faciliter la lecture de votre trajectoire.',label:'Voir mon rendez-vous',route:'agenda'};
+  if(!motion.hasMotion&&!motion.pending&&motion.score===null)return{eyebrow:'KOMO · PRIORITÉ',title:'Créez votre point de départ.',copy:'Une première mesure Motion transforme votre mobilité actuelle en repère que Pulse pourra suivre dans le temps.',label:'Découvrir Motion',route:'motion'};
+  if(!walk?.connected)return{eyebrow:'KOMO · PRIORITÉ',title:'Reliez votre quotidien à vos mesures.',copy:'Activez KEY pour replacer vos journées entre deux évaluations Motion et rendre la continuité plus lisible.',label:'Activer KEY',route:'key'};
+  const delta=dailyDelta(walk);
+  if(delta!==null&&delta<=-15)return{eyebrow:'KOMO · AUJOURD’HUI',title:'Remettez un peu de mouvement dans la journée.',copy:'Votre activité est sous votre rythme récent pour le moment. Une marche active suffit à recréer de la continuité.',label:'Voir ma journée',route:'key'};
+  if(delta!==null&&delta>=15)return{eyebrow:'KOMO · AUJOURD’HUI',title:'Conservez ce rythme.',copy:'Votre activité est au-dessus de votre moyenne récente. L’objectif est la régularité, pas la surenchère.',label:'Voir KEY',route:'key'};
+  return{eyebrow:'KOMO · PRIORITÉ',title:'Protégez la continuité.',copy:'Vos données du jour sont cohérentes avec votre rythme récent. Continuez à mesurer, comprendre et agir sans multiplier les objectifs.',label:'Voir ma trajectoire',route:'trajectory'};
+}
+function trajectorySignal(motion){
+  if(motion.score===null)return{value:'À construire',copy:'Votre trajectoire commencera avec une mesure publiée.',meta:'Trajectoire',route:'trajectory'};
+  if(motion.delta===null)return{value:'1 repère actif',copy:'Une nouvelle mesure rendra l’évolution comparable.',meta:freshness(motion.date),route:'trajectory'};
+  const sign=motion.delta>0?'+':'';
+  return{value:`${sign}${String(motion.delta).replace('.',',')} pt`,copy:motion.delta===0?'Stable depuis la mesure précédente.':'Depuis la mesure précédente.',meta:freshness(motion.date),route:'trajectory'};
+}
+function appointmentSignal(appointment){
+  if(!appointment.exists)return{value:'Prochaine étape',copy:'Planifiez votre prochaine mesure quand elle devient utile.',meta:'Agenda KŌMØ',route:'agenda'};
+  const when=appointment.time?`${appointment.date} · ${appointment.time}`:appointment.date;
+  return{value:when,copy:appointment.title,meta:appointment.location||'Agenda KŌMØ',route:'agenda'};
+}
+function communityLine(walk){
+  if(!walk?.connected)return'';
   const club=walk?.walk_club||walk?.club||{};
-  if(loading)return{rank:'…',label:WALK_CLUB_LABEL,copy:'Classement en cours de synchronisation',points:'',joined:false,route:'club'};
-  const joined=Boolean(club.joined??club.is_member??club.member??club.rank);
   const rank=num(pick(club,['rank','week_rank','weekly_rank','position']));
-  const members=num(pick(club,['total_members','member_count','members']));
-  const weekSteps=num(pick(club,['weekly_steps','steps_week','week_steps']))??num(pick(walk,['steps_week','weekly_steps','steps_7d']));
-  const gap=num(pick(club,['gap_to_next_steps','steps_to_next','gap_to_next','next_rank_gap']));
   const points=num(walk?.k_points_week);
-  if(!walk?.connected)return{rank:'—',label:WALK_CLUB_LABEL,copy:'Connectez KEY pour participer au classement.',points:'',joined:false,route:'club'};
-  if(!joined)return{rank:'Rejoindre',label:WALK_CLUB_LABEL,copy:'Votre activité peut alimenter le classement hebdomadaire.',points:points===null?'':`+${fmt(points)} K Points cette semaine`,joined:false,route:'club'};
-  let copy=weekSteps!==null?`${fmt(weekSteps)} pas cette semaine`:'Classement hebdomadaire actif';
-  if(gap!==null&&rank!==null&&rank>1)copy=`${fmt(gap)} pas de la place #${rank-1}`;
-  if(members!==null&&rank!==null)copy+=` · ${fmt(members)} membres`;
-  return{rank:rank===null?'—':`#${rank}`,label:WALK_CLUB_LABEL,copy,points:points===null?'':`+${fmt(points)} K Points cette semaine`,joined:true,route:'club'};
+  if(rank===null&&points===null)return'';
+  const parts=[];
+  if(rank!==null)parts.push(`Walk Club #${fmt(rank)}`);
+  if(points!==null)parts.push(`+${fmt(points)} K Points cette semaine`);
+  return `<button class="kh5-community" type="button" data-kh5-route="club"><span>${esc(parts.join(' · '))}</span><b aria-hidden="true">→</b></button>`;
 }
-function homeMarkup(walk,overview,loading=false){
+function signalCard(label,signal,extraClass=''){
+  return `<button class="kh5-signal ${extraClass}" type="button" data-kh5-route="${esc(signal.route)}"><span>${esc(label)}</span><strong>${esc(signal.value)}</strong><small>${esc(signal.copy)}</small><em>${esc(signal.meta)}</em><b aria-hidden="true">→</b></button>`;
+}
+function homeMarkup(walk,overview,history,loading=false){
   const name=firstName();
-  const steps=!loading&&walk?.connected?num(walk.steps_today):null;
-  const activeMinutes=!loading&&walk?.connected?num(walk.active_minutes_today??walk.active_minutes):null;
-  const goal=Math.max(1,num(walk?.daily_goal)||8000);
-  const pct=steps===null?0:Math.max(0,Math.min(100,Math.round((steps/goal)*100)));
-  const kp=!loading&&walk?.connected?num(walk.k_points_today):null;
-  const key=keyInsight(walk,loading);
-  const club=clubState(walk,loading);
-  const appt=currentAppointment(overview);
-  const movementCopy=loading?'Synchronisation de votre journée…':walk?.connected?`${pct}% de votre repère du jour`:'Connectez KEY pour afficher votre activité quotidienne.';
-  const movementMeta=activeMinutes===null?'pas aujourd’hui':`pas · ${fmt(activeMinutes)} min actives`;
-  const pointBadge=kp===null?'':`<span class="kh3-points-badge">+${fmt(kp)} K aujourd’hui</span>`;
-  const appointmentWhen=appt.time?`${appt.date} · ${appt.time}`:appt.date;
-  return `<section class="kh3${loading?' is-loading':''}" data-khome-datawall data-khome-v3 aria-busy="${loading?'true':'false'}">
-    <div class="kh3-brand-rail" aria-hidden="true"><strong>KŌMØ</strong><small>PULSE</small></div>
-    <header class="kh3-head"><div class="kh3-brand"><span class="kh3-brand-dot" aria-hidden="true"></span><strong>KŌMØ PULSE</strong><small>LONGEVITY IN MOTION</small></div><span>AUJOURD’HUI</span><h2>Bonjour${name?` ${esc(name)}`:''}.</h2><p>Votre mouvement, votre rythme, votre communauté.</p></header>
+  const motion=motionState(overview,history);
+  const appointment=currentAppointment(overview);
+  const priority=priorityState(walk,motion,appointment);
+  const key=keySignal(walk,loading);
+  const trajectory=trajectorySignal(motion);
+  const next=appointmentSignal(appointment);
+  const score=loading?null:motion.score;
+  const age=loading?null:motion.age;
+  const scoreText=score===null?'—':String(Math.round(score));
+  const ageText=age===null?'—':`${Math.round(age)} ans`;
+  const statusText=loading?'Synchronisation…':freshness(motion.date);
+  const interpretation=loading?'Pulse rassemble vos dernières données utiles…':motionInterpretation(motion);
+  const meter=score===null?0:Math.max(0,Math.min(100,Math.round(score)));
+  return `<section class="kh5${loading?' is-loading':''}" data-khome-v5 aria-busy="${loading?'true':'false'}">
+    <header class="kh5-head kh5-enter" style="--kh5-delay:0ms">
+      <div><span class="kh5-kicker">AUJOURD’HUI</span><h2>Bonjour${name?` ${esc(name)}`:''}.</h2><p>Voici ce qui compte pour votre mobilité maintenant.</p></div>
+      <div class="kh5-wordmark" aria-label="KŌMØ Pulse"><strong>KŌMØ</strong><small>PULSE</small></div>
+    </header>
 
-    <section class="kh3-movement" aria-label="Votre journée en mouvement">
-      <div class="kh3-movement-top"><div><span>VOTRE JOURNÉE EN MOUVEMENT</span><h3>${steps===null?'—':fmt(steps)}</h3><small>${esc(movementMeta)}</small></div><div class="kh3-movement-side">${pointBadge}<button type="button" data-kh3-route="key">Voir KEY <b>→</b></button></div></div>
-      <div class="kh3-progress"><i style="width:${pct}%"></i></div>
-      <p>${esc(movementCopy)}</p>
+    <section class="kh5-hero kh5-enter" style="--kh5-delay:55ms" aria-label="Votre mouvement aujourd’hui">
+      <div class="kh5-motion">
+        <span class="kh5-label">VOTRE MOUVEMENT AUJOURD’HUI</span>
+        <div class="kh5-scoreline">
+          <div class="kh5-score"><strong data-kh5-score="${score===null?'':Math.round(score)}">${esc(scoreText)}</strong><small>/100<br>MOTION SCORE</small></div>
+          <div class="kh5-age"><span>MOTION AGE</span><strong>${esc(ageText)}</strong></div>
+        </div>
+        <div class="kh5-meter" aria-hidden="true"><i style="--kh5-meter:${meter}%"></i></div>
+        <p class="kh5-interpretation">${esc(interpretation)}</p>
+        <button class="kh5-detail-link" type="button" data-kh5-route="results"><span>${esc(statusText)}</span><b>Voir mes résultats →</b></button>
+      </div>
+      <aside class="kh5-komo">
+        <span>${esc(priority.eyebrow)}</span>
+        <h3>${esc(priority.title)}</h3>
+        <p>${esc(priority.copy)}</p>
+        <button type="button" data-kh5-route="${esc(priority.route)}">${esc(priority.label)} <b aria-hidden="true">→</b></button>
+      </aside>
     </section>
 
-    <section class="kh3-strip" aria-label="Votre quotidien et votre club">
-      <button class="kh3-score-card" type="button" data-kh3-route="${key.route}"><span>KEY · VOTRE QUOTIDIEN</span><strong>${esc(key.title)}</strong><small>${esc(key.copy)}</small><em>${esc(key.meta)}</em></button>
-      <button class="kh3-points-card" type="button" data-kh3-route="${club.route}"><span>${esc(club.label)}</span><strong>${esc(club.rank)}</strong><small>${esc(club.copy)}</small>${club.points?`<em>${esc(club.points)}</em>`:''}</button>
+    <section class="kh5-signals kh5-enter" style="--kh5-delay:110ms" aria-label="À surveiller">
+      ${signalCard('KEY · QUOTIDIEN',key,'kh5-signal-key')}
+      ${signalCard('TRAJECTOIRE',trajectory,'kh5-signal-trajectory')}
+      ${signalCard('PROCHAINE ÉTAPE',next,'kh5-signal-next')}
     </section>
 
-    <section class="kh3-next"><div><span>PROCHAINE CONSULTATION</span><h3>${esc(appointmentWhen)}</h3><p>${esc(appt.title)}${appt.location?` · ${esc(appt.location)}`:''}</p></div><button type="button" data-kh3-route="${appt.route}">${appt.exists?'Préparer':'Rendez-vous'} <b>→</b></button></section>
+    <footer class="kh5-foot kh5-enter" style="--kh5-delay:165ms">
+      <p><strong>Measure → Understand → Act.</strong><span>Pulse organise votre trajectoire. KŌMØ l’interprète quand cela est nécessaire.</span></p>
+      ${communityLine(walk)}
+    </footer>
   </section>`;
 }
 function bind(root){
-  root.querySelectorAll('[data-kh3-route]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.kh3Route)));
+  root.querySelectorAll('[data-kh5-route]').forEach(button=>button.addEventListener('click',()=>go(button.dataset.kh5Route)));
 }
-function mount(host,markup){
+function animateScore(root){
+  const node=root.querySelector('[data-kh5-score]');
+  const target=num(node?.dataset?.kh5Score);
+  if(!node||target===null)return;
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){node.textContent=String(Math.round(target));return}
+  const start=performance.now(),duration=620;
+  const tick=now=>{
+    const t=Math.min(1,(now-start)/duration);
+    const eased=1-Math.pow(1-t,3);
+    node.textContent=String(Math.round(target*eased));
+    if(t<1)requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+function mount(host,markup,animate=false){
   const wrap=document.createElement('div');wrap.innerHTML=markup;
   const node=wrap.firstElementChild;
   host.replaceChildren(node);
-  host.dataset.khomeOwner='v4';
+  host.dataset.khomeOwner='patient-home-command-v1@5';
   bind(node);
-  document.body.classList.add('khome-final-v1','kpulse-home-mode');
+  if(animate)animateScore(node);
+  document.body.classList.add('khome-final-v1');
   return node;
 }
 function tuneChrome(){
   const home=route()==='home';
   document.body.classList.toggle('khome-final-v1',home);
-  document.body.classList.toggle('kpulse-home-mode',home);
   if(!home)return;
-  const ey=document.querySelector('#pageEyebrow'),title=document.querySelector('#pageTitle');
-  if(ey)ey.textContent='KŌMØ PULSE';
+  const eyebrow=document.querySelector('#pageEyebrow'),title=document.querySelector('#pageTitle');
+  if(eyebrow)eyebrow.textContent='KŌMØ PULSE';
   if(title)title.textContent='';
 }
 async function render(force=false){
@@ -150,21 +269,19 @@ async function render(force=false){
   rendering=true;
   try{
     tuneChrome();
-    if(!host.querySelector('[data-khome-v3]'))mount(host,homeMarkup(null,null,true));
-    const [walk,overview]=await Promise.all([walkSummary(),pulseOverview()]);
-    const markup=homeMarkup(walk,overview,false);
-    if(!force&&markup===lastSignature&&host.querySelector('[data-khome-v3]:not(.is-loading)'))return;
-    mount(host,markup);lastSignature=markup;
+    if(!host.querySelector('[data-khome-v5]'))mount(host,homeMarkup(null,null,[],true));
+    const [walk,overview,history]=await Promise.all([walkSummary(),pulseOverview(),legacyMotionHistory()]);
+    if(route()!=='home'||!host.isConnected)return;
+    const markup=homeMarkup(walk,overview,history,false);
+    if(!force&&markup===lastSignature&&host.querySelector('[data-khome-v5]:not(.is-loading)'))return;
+    mount(host,markup,true);
+    lastSignature=markup;
     window.KomoAssistantV2?.refresh?.();
-    window.dispatchEvent(new CustomEvent('komo:home-command-rendered'));
-  }catch(e){console.error('[patient-home-v4]',e)}finally{rendering=false}
+    window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION}}));
+  }catch(e){console.error('[patient-home-v5]',e)}finally{rendering=false}
 }
-function schedule(force=false,ms=50){clearTimeout(timer);timer=setTimeout(()=>render(force),ms)}
-['hashchange','pageshow','komo:route-ready','komo:canonical-route','komo:data-ready','komo:wearable-data-updated','komo:session-ready'].forEach(name=>window.addEventListener(name,()=>{tuneChrome();schedule(['komo:data-ready','komo:wearable-data-updated'].includes(name),30)}));
-function boot(){
-  tuneChrome();
-  schedule(true,0);
-  [80,260,800,1800].forEach(ms=>setTimeout(()=>render(true),ms));
-}
+function schedule(force=false,ms=0){clearTimeout(timer);timer=setTimeout(()=>render(force),ms)}
+['hashchange','pageshow','komo:route-ready','komo:data-ready','komo:wearable-data-updated'].forEach(name=>window.addEventListener(name,()=>{tuneChrome();schedule(['komo:data-ready','komo:wearable-data-updated'].includes(name),20)}));
+function boot(){tuneChrome();schedule(true,0)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-window.KomoPatientHomeCommand={version:VERSION,refresh:()=>schedule(true,10)};
+window.KomoPatientHomeCommand={version:VERSION,refresh:()=>schedule(true,0)};
