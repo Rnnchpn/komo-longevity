@@ -1,0 +1,48 @@
+name: Home Browser QA
+
+on:
+  push:
+    branches:
+      - audit/home-canonical-owner-v1
+  workflow_dispatch:
+
+jobs:
+  home-browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install browser test dependency
+        run: npm install --no-save playwright@1.55.0
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build production output
+        run: npm run build
+
+      - name: Start static server
+        run: |
+          python3 -m http.server 4173 --directory site > /tmp/komo-home-http.log 2>&1 &
+          echo $! > /tmp/komo-home-http.pid
+          sleep 2
+          curl --fail --silent http://127.0.0.1:4173/fr/ > /dev/null
+
+      - name: Run Home viewport QA
+        run: node scripts/home-browser-qa.mjs
+
+      - name: Upload viewport screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: home-browser-qa-screenshots
+          path: artifacts/home-visual/*.png
+          if-no-files-found: warn
+          retention-days: 7
