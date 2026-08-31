@@ -2,8 +2,8 @@
    Replaces the historical Home DOM patcher. Modern patient surfaces own their rendering. */
 (() => {
   'use strict';
-  const VERSION='2.0.0';
-  const stamp='20260831-patient-v12';
+  const VERSION='2.1.0';
+  const stamp='20260831-patient-v13';
 
   function css(href,id){
     if(document.querySelector(`#${id}`))return;
@@ -16,9 +16,11 @@
   function boot(){
     css('./patient-home-command-v1.css','patientHomeV1Css');
     css('./patient-home-stability-v1.css','patientHomeStabilityCss');
+    css('./patient-home-daily-v2.css','patientHomeDailyV2Css');
     css('./komo-patient-guide-v1.css','komoPatientGuideCss');
     script('./patient-home-stability-v1.js','patientHomeStabilityJs');
     script('./patient-home-command-v1.js','patientHomeV1Js',{module:true});
+    script('./patient-home-daily-v2.js','patientHomeDailyV2Js');
     script('./komo-patient-guide-v1.js','komoPatientGuideJs');
     document.documentElement.dataset.patientV1Bootstrap=VERSION;
   }
