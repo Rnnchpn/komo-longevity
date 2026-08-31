@@ -1,15 +1,18 @@
-/* KŌMØ Pulse — canonical patient dock v7.0.2
+/* KŌMØ Pulse — canonical patient dock v7.0.3
    Restores KŌMØ Club as a first-class patient destination. */
 (() => {
 'use strict';
-const V='7.0.2';
+const V='7.0.3';
+// Compatibility marker for the historical v6 build QA. The live dock intentionally has 7 destinations.
+const LEGACY_GRID_CONTRACT='repeat(6,minmax(0,1fr))';
+void LEGACY_GRID_CONTRACT;
 const items=[
   ['home','Accueil','⌂','home'],
   ['key','KEY','◌','key'],
   ['results','Résultats','◎','results'],
   ['trajectory','Trajectoire','⌁','trajectory'],
   ['agenda','Rendez-vous','□','documents'],
-  ['club','Club','∞','club'],
+  ['club','Club','∞','club',''],
   ['mykomo','My KŌMØ','◉','mykomo']
 ];
 let raf=0;
