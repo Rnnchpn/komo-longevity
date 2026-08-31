@@ -60,8 +60,8 @@ function bindRun(){
   input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form?.requestSubmit()}});renderPanel('Drive')
 }
 function qsAll(s,r=document){return [...r.querySelectorAll(s)]}
-function mount(){if(location.hash!==RUN_HASH)return;if(!canRun()){if(previewHost())console.warn('[KOMO RUN] access denied for role',runtimeRole());location.hash='home';return}const root=qs('#viewRoot');if(!root)return;setHeader();root.innerHTML=shell();bindRun();window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:'run'}}))}
-function ensureShortcut(){const top=qs('.topbar-actions');if(!top)return;let btn=qs('[data-founder-run]');if(!canRun()){btn?.remove();return}if(!btn){btn=document.createElement('button');btn.type='button';btn.className='admin-shortcut';btn.dataset.founderRun='1';btn.textContent='RUN';btn.setAttribute('aria-label','Ouvrir KŌMŌ RUN');btn.addEventListener('click',()=>{location.hash='run'});top.prepend(btn)}}
+function mount(){if(location.hash!==RUN_HASH)return;if(!canRun()){if(previewHost())console.warn('[KOMO RUN] access denied for role',runtimeRole());window.KomoPatientNavigation?.go?.('home');return}const root=qs('#viewRoot');if(!root)return;setHeader();root.innerHTML=shell();bindRun();window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:'run'}}))}
+function ensureShortcut(){const top=qs('.topbar-actions');if(!top)return;let btn=qs('[data-founder-run]');if(!canRun()){btn?.remove();return}if(!btn){btn=document.createElement('button');btn.type='button';btn.className='admin-shortcut';btn.dataset.founderRun='1';btn.textContent='RUN';btn.setAttribute('aria-label','Ouvrir KŌMŌ RUN');btn.addEventListener('click',()=>window.KomoPatientNavigation?.go?.('run'));top.prepend(btn)}}
 function schedule(){setTimeout(()=>{ensureShortcut();if(location.hash===RUN_HASH)mount()},40)}
 ['hashchange','pageshow','komo:session-ready','komo:data-ready','komo:route-ready'].forEach(evt=>window.addEventListener(evt,schedule));document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,450));setTimeout(schedule,1000);
 window.KomoFounderRun={mount,canRun};
