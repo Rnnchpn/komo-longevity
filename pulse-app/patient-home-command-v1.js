@@ -3,7 +3,7 @@ import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 import { loadCanonicalResult } from './canonical-result-runtime.js';
 
-const VERSION='3.2.0';
+const VERSION='3.3.0';
 const WALK_CLUB_LABEL='WALK CLUB';
 let timer=0;
 let rendering=false;
@@ -86,9 +86,11 @@ function bind(root){
   root.querySelector('[data-kh3-action]')?.addEventListener('click',()=>{const a=root.querySelector('[data-kh3-action]').dataset.kh3Action;if(a==='komo')window.KomoAssistantV2?.open?.();else go(a)});
 }
 function mount(host,markup){
-  host.querySelector('[data-khome-v3]')?.remove();
   const wrap=document.createElement('div');wrap.innerHTML=markup;
-  const node=wrap.firstElementChild;host.appendChild(node);bind(node);
+  const node=wrap.firstElementChild;
+  host.replaceChildren(node);
+  host.dataset.khomeOwner='v3';
+  bind(node);
   document.body.classList.add('khome-final-v1','kpulse-home-mode');
   return node;
 }
@@ -123,7 +125,7 @@ function schedule(force=false,ms=50){clearTimeout(timer);timer=setTimeout(()=>re
 function boot(){
   tuneChrome();
   schedule(true,0);
-  [70,220,650,1400].forEach(ms=>setTimeout(()=>render(true),ms));
+  [70,220,650,1400,2800].forEach(ms=>setTimeout(()=>render(true),ms));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 window.KomoPatientHomeCommand={version:VERSION,refresh:()=>schedule(true,10)};
