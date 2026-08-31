@@ -1,5 +1,5 @@
 {
-  "version": "2026-08-31-v37",
+  "version": "2026-08-31-v38-home-v3",
   "principles": [
     "one render owner per declared surface",
     "controllers may orchestrate data, navigation, and bounded subflows",
@@ -8,8 +8,8 @@
   ],
   "surfaces": {
     "home": {
-      "owner": "my-komo-home-v1.js",
-      "controllers": ["patient-home-command-v1.js"],
+      "owner": "patient-home-command-v1.js",
+      "controllers": [],
       "extensions": []
     },
     "results": {
