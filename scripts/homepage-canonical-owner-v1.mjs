@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -41,6 +41,17 @@ const requiredMarkers = [
   'class="kw-pro-wow"',
   'class="kw-proof',
   'class="kw-final"'
+];
+
+// Proven dead against the final EN/FR/ES Home DOM on the production-equivalent
+// preview. These blocks are fully superseded by later canonical visual layers.
+const deadStyleIds = [
+  'homepage-seo-v6-style',
+  'kmx-myocare-style',
+  'homepage-minimal-patient-v1-style',
+  'homepage-care-modes-v1-style',
+  'method-science-v2-style',
+  'homepage-product-stepup-v1-style'
 ];
 
 function runLegacy(step) {
@@ -91,11 +102,38 @@ function auditStyleUsage(html) {
   return layers;
 }
 
+function removeDeadStyles(html) {
+  let next = html;
+  for (const id of deadStyleIds) {
+    const before = next;
+    next = next.replace(new RegExp(`<style\\s+id=["']${id}["'][^>]*>[\\s\\S]*?<\\/style>`, 'gi'), '');
+    if (before === next) {
+      console.error(`[home-owner] FAIL · expected dead style ${id} was not present`);
+      process.exit(1);
+    }
+  }
+  return next;
+}
+
 async function finalize() {
   await assertPipelineOwnership();
 
   for (const file of pages) {
-    const html = await readFile(file, 'utf8');
+    let html = await readFile(file, 'utf8');
+
+    if (file.endsWith('/fr/index.html')) {
+      const beforeLayers = auditStyleUsage(html);
+      for (const id of deadStyleIds) {
+        const layer = beforeLayers.find((entry) => entry.id === id);
+        if (!layer || layer.classUsed !== 0 || layer.idUsed !== 0) {
+          console.error(`[home-owner] FAIL · ${id} is no longer safely dead; refusing removal`);
+          process.exit(1);
+        }
+      }
+    }
+
+    html = removeDeadStyles(html);
+
     const missing = requiredMarkers.filter((marker) => !html.includes(marker));
     if (missing.length) {
       console.error(`[home-owner] FAIL · ${file} missing ${missing.join(', ')}`);
@@ -114,6 +152,10 @@ async function finalize() {
       console.error(`[home-owner] FAIL · ${file} duplicate style ids: ${[...new Set(duplicateStyleIds)].join(', ')}`);
       process.exit(1);
     }
+    if (styleIds.length > 11) {
+      console.error(`[home-owner] FAIL · ${file} has ${styleIds.length} named style layers; budget is 11`);
+      process.exit(1);
+    }
 
     const hasPhoneBreakpoint = html.includes('@media(max-width:620px)') || html.includes('@media (max-width: 620px)');
     const hasTabletBreakpoint = /@media[^\{]*(?:980|1024|1100|1180|1200|1280|1366)px/i.test(html);
@@ -122,6 +164,7 @@ async function finalize() {
       process.exit(1);
     }
 
+    await writeFile(file, html, 'utf8');
     console.log(`[home-owner] PASS · ${file} · ${html.length} bytes · ${styleIds.length} named style blocks`);
     if (file.endsWith('/fr/index.html')) {
       for (const layer of auditStyleUsage(html)) {
