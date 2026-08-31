@@ -30,6 +30,23 @@ npm run preview
 
 Le contenu est centralisé dans `src/content.mjs`; les pages sont générées par `scripts/build.mjs`. Le répertoire `site/` est généré et directement publiable.
 
+## Formulaire professionnel
+
+Les routes `/contact/`, `/fr/contact/` et `/es/contact/` sont les pages de qualification professionnelle KŌMØ. Le build applique `scripts/professional-contact-v1.mjs` après la génération du site afin de conserver les routes historiques utilisées par les CTA partenaires.
+
+Le formulaire envoie les demandes vers `POST /api/professional-contact`. Le destinataire par défaut est `contact@komolongevity.com`.
+
+Variables Vercel :
+
+- `BREVO_API_KEY` — provider prioritaire si présent ;
+- ou `RESEND_API_KEY` — provider de secours ;
+- `KOMO_CONTACT_TO_EMAIL` — optionnel, défaut `contact@komolongevity.com` ;
+- `KOMO_CONTACT_FROM_EMAIL` — optionnel, défaut `contact@komolongevity.com` ; l’adresse d’expédition doit être validée chez le provider utilisé.
+
+Si aucun provider d’e-mail n’est configuré, l’interface affiche un lien de secours `mailto:` vers `contact@komolongevity.com` au lieu de perdre la demande silencieusement.
+
+Le formulaire est réservé aux demandes professionnelles. Il demande explicitement de ne transmettre aucune donnée médicale ou donnée de santé de patient.
+
 ## KŌMØ Design System · Storybook
 
 Storybook est installé avec le renderer HTML/Vite afin de faire évoluer le design sans introduire React dans le site de production.
@@ -62,4 +79,4 @@ Le build Storybook est validé séparément par GitHub Actions et n’est pas in
 - KŌMØ Locomo Check est présenté comme une orientation éducative, et non comme un diagnostic en ligne.
 - Les services cliniques ne sont jamais annoncés en dehors de structures et de professionnels autorisés.
 - White Coast est présenté comme un chapitre communautaire local et dirige vers `https://community.komolongevity.com/`.
-- Le formulaire de contact ouvre directement un e-mail vers `contact@komolongevity.com` tant qu’un endpoint Brevo ou Supabase n’est pas connecté.
+- Les demandes professionnelles passent par la page Contact et sont adressées à `contact@komolongevity.com`; un fallback e-mail reste disponible si le provider transactionnel n’est pas configuré.
