@@ -107,7 +107,7 @@ const checks=[
   ['stable Home renderer has no body observer or polling loop',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
   ['Home has no historical delayed retry ladder',!js.includes('[80,260,800,1800]')&&!js.includes('1700')],
   ['Home paints an immediate loading shell before data resolves',js.includes('homeMarkup(null,null,[],true)')&&js.includes('aria-busy')],
-  ['Home exposes essential patient destinations',js.includes("route:'key'")&&js.includes("route:'trajectory'")&&js.includes("route:'agenda'")&&js.includes("route:'results'")],
+  ['Home exposes essential patient destinations',js.includes("route:'key'")&&js.includes("route:'trajectory'")&&js.includes("route:'agenda'")&&js.includes('data-kh5-route="results"')],
   ['Home keeps Club and K Points secondary',js.includes('communityLine(walk)')&&js.includes('k_points_week')&&js.includes('Walk Club')],
   ['Home exposes next consultation context',js.includes('currentAppointment')&&js.includes('appointment_type')&&js.includes('center_name')],
   ['Home animations are finite and accessible',css.includes('kh5Enter .35s')&&js.includes('duration=620')&&css.includes('@media(prefers-reduced-motion:reduce)')&&!css.includes('infinite')],
