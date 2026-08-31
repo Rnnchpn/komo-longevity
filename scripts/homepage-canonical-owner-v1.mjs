@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
@@ -43,15 +43,6 @@ const requiredMarkers = [
   'class="kw-final"'
 ];
 
-const deadStyleIds = [
-  'homepage-seo-v6-style',
-  'kmx-myocare-style',
-  'homepage-minimal-patient-v1-style',
-  'homepage-care-modes-v1-style',
-  'method-science-v2-style',
-  'homepage-product-stepup-v1-style'
-];
-
 function runLegacy(step) {
   if (!legacySteps.has(step)) {
     console.error(`[home-owner] REFUSED · unknown Home step ${step}`);
@@ -65,18 +56,7 @@ function runLegacy(step) {
 
 async function finalize() {
   for (const file of pages) {
-    let html = await readFile(file, 'utf8');
-
-    for (const id of deadStyleIds) {
-      const pattern = new RegExp(`<style\\s+id=["']${id}["'][^>]*>[\\s\\S]*?<\\/style>`, 'gi');
-      html = html.replace(pattern, '');
-    }
-
-    html = html.replace('<main class="kpf">', '<main class="komo-public-home">');
-    if (!html.includes('id="homepage-canonical-root-style"')) {
-      html = html.replace('</head>', '<style id="homepage-canonical-root-style">.komo-public-home{background:#f5f1e9;color:#151716}</style></head>');
-    }
-
+    const html = await readFile(file, 'utf8');
     const missing = requiredMarkers.filter((marker) => !html.includes(marker));
     if (missing.length) {
       console.error(`[home-owner] FAIL · ${file} missing ${missing.join(', ')}`);
@@ -89,13 +69,21 @@ async function finalize() {
       process.exit(1);
     }
 
-    if (!html.includes('@media(max-width:620px)') && !html.includes('@media (max-width: 620px)')) {
-      console.error(`[home-owner] FAIL · ${file} has no canonical mobile breakpoint`);
+    const styleIds = [...html.matchAll(/<style\s+id=["']([^"']+)["']/gi)].map((match) => match[1]);
+    const duplicateStyleIds = styleIds.filter((id, index) => styleIds.indexOf(id) !== index);
+    if (duplicateStyleIds.length) {
+      console.error(`[home-owner] FAIL · ${file} duplicate style ids: ${[...new Set(duplicateStyleIds)].join(', ')}`);
       process.exit(1);
     }
 
-    await writeFile(file, html, 'utf8');
-    console.log(`[home-owner] finalized · ${file}`);
+    const hasPhoneBreakpoint = html.includes('@media(max-width:620px)') || html.includes('@media (max-width: 620px)');
+    const hasTabletBreakpoint = /@media[^\{]*(?:980|1024|1100|1180|1200|1280|1366)px/i.test(html);
+    if (!hasPhoneBreakpoint || !hasTabletBreakpoint) {
+      console.error(`[home-owner] FAIL · ${file} responsive contract incomplete`);
+      process.exit(1);
+    }
+
+    console.log(`[home-owner] PASS · ${file} · ${html.length} bytes · ${styleIds.length} named style blocks`);
   }
 }
 
