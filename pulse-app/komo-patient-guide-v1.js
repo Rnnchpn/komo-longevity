@@ -2,7 +2,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '1.1.0-zero-token';
+  const VERSION = '1.1.1-zero-token';
   let observer = null;
 
   const route = () => window.KomoPatientNavigation?.route?.() || location.hash.replace(/^#/, '') || 'home';
@@ -117,7 +117,7 @@
 
   function go(target) {
     if (window.KomoPatientNavigation?.go) window.KomoPatientNavigation.go(target);
-    else location.hash = target;
+    else document.querySelector(`[data-route="${target}"], a[href="#${target}"]`)?.click();
     closePanel();
   }
 
