@@ -1,183 +1,388 @@
-/* KŌMØ Pulse — Home hero refinement v2
-   Visual-only refinement for the canonical desktop Home renderer.
-   No route, score, auth or data ownership. */
+/* KŌMØ Pulse — Home visual system v38
+   Existing Home visual owner, redesigned in place.
+   Visual-only: no route, score, auth, permission or data ownership. */
 
 @media (min-width:768px){
+  body.khome-final-v1{
+    --kh38-canvas:#070908;
+    --kh38-panel:#101411;
+    --kh38-panel-soft:#151a16;
+    --kh38-line:rgba(241,239,232,.075);
+    --kh38-line-soft:rgba(241,239,232,.045);
+    --kh38-text:#f3f0e9;
+    --kh38-muted:#8d978f;
+    --kh38-sage:#9eb2a2;
+    --kh38-forest:#1a2d21;
+    --kh38-forest-2:#294535;
+    --kh38-ivory:#ece9e1;
+    --kh38-ink:#182019;
+    --kh38-warm:#c8b99f;
+    background:var(--kh38-canvas)!important;
+  }
+
+  body.khome-final-v1 #appShell,
+  body.khome-final-v1 .main-shell{
+    background:
+      radial-gradient(980px 560px at 84% -12%,rgba(123,151,130,.085),transparent 64%),
+      linear-gradient(180deg,#090b0a 0%,#070908 46%,#060807 100%)!important;
+  }
+
+  /* Product chrome: quieter, flatter, more app-like. */
+  body.khome-final-v1 .topbar{
+    min-height:68px!important;
+    height:68px!important;
+    padding:12px 26px!important;
+    border-bottom:1px solid rgba(255,255,255,.04)!important;
+    background:rgba(7,9,8,.84)!important;
+    box-shadow:none!important;
+    backdrop-filter:blur(24px) saturate(118%)!important;
+    -webkit-backdrop-filter:blur(24px) saturate(118%)!important;
+  }
+  body.khome-final-v1 .topbar h1{
+    font-size:20px!important;
+    font-weight:620!important;
+    letter-spacing:-.045em!important;
+  }
+  body.khome-final-v1 .topbar .eyebrow{opacity:.76!important}
+  body.khome-final-v1 .mode-switch{
+    min-height:40px!important;
+    border-radius:13px!important;
+    background:rgba(255,255,255,.025)!important;
+    border-color:rgba(255,255,255,.055)!important;
+  }
+  body.khome-final-v1 .mode-switch button.active{
+    background:#e7e4dc!important;
+    color:#172019!important;
+  }
+  body.khome-final-v1 .icon-button{
+    width:40px!important;
+    height:40px!important;
+    border-radius:12px!important;
+  }
+
+  body.khome-final-v1 .view-root,
+  body.khome-final-v1 #viewRoot{
+    width:min(calc(100% - 48px),1420px)!important;
+    max-width:1420px!important;
+    padding-top:22px!important;
+  }
+  body.khome-final-v1 .kdw-final{gap:12px!important}
+
+  /* One quiet welcome surface, not a marketing hero. */
   body.khome-final-v1 .khc-overview-head{
     position:relative!important;
     isolation:isolate!important;
     overflow:hidden!important;
-    min-height:238px!important;
+    min-height:202px!important;
     margin:0 0 2px!important;
-    padding:34px 36px 32px!important;
-    border:1px solid rgba(239,237,230,.085)!important;
-    border-radius:30px!important;
-    background:
-      radial-gradient(620px 360px at 86% 18%,rgba(145,170,151,.16),transparent 63%),
-      radial-gradient(420px 280px at 12% 110%,rgba(205,189,164,.055),transparent 66%),
-      linear-gradient(145deg,#101512 0%,#0a0d0b 52%,#070908 100%)!important;
-    box-shadow:0 30px 86px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.025)!important;
+    padding:30px 32px!important;
+    display:flex!important;
     align-items:flex-end!important;
+    justify-content:space-between!important;
+    gap:34px!important;
+    border:1px solid var(--kh38-line)!important;
+    border-radius:26px!important;
+    background:
+      radial-gradient(560px 290px at 92% 10%,rgba(137,162,143,.12),transparent 68%),
+      linear-gradient(145deg,#111512 0%,#0b0e0c 55%,#080a09 100%)!important;
+    box-shadow:0 22px 64px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.02)!important;
   }
-
   body.khome-final-v1 .khc-overview-head:before{
     content:'KŌMØ'!important;
     position:absolute!important;
     z-index:-1!important;
-    right:30px!important;
-    top:17px!important;
-    color:#edf0e9!important;
-    font:600 clamp(78px,8.8vw,136px)/.78 Manrope,'DM Sans',sans-serif!important;
+    right:26px!important;
+    top:21px!important;
+    color:#eef1ea!important;
+    font:610 clamp(72px,7.8vw,118px)/.8 Manrope,'DM Sans',sans-serif!important;
     letter-spacing:-.09em!important;
-    opacity:.035!important;
+    opacity:.028!important;
     white-space:nowrap!important;
     pointer-events:none!important;
   }
-
   body.khome-final-v1 .khc-overview-head:after{
     content:''!important;
     position:absolute!important;
     z-index:-1!important;
-    right:-108px!important;
-    top:-178px!important;
+    right:-94px!important;
+    top:-212px!important;
     width:430px!important;
     height:430px!important;
     border-radius:50%!important;
-    border:1px solid rgba(199,215,201,.055)!important;
-    box-shadow:
-      0 0 0 44px rgba(199,215,201,.018),
-      0 0 0 88px rgba(199,215,201,.012)!important;
+    border:1px solid rgba(197,214,200,.04)!important;
+    box-shadow:0 0 0 54px rgba(197,214,200,.012),0 0 0 108px rgba(197,214,200,.008)!important;
     pointer-events:none!important;
   }
-
   body.khome-final-v1 .khc-overview-head>div:first-child{
     position:relative!important;
     z-index:2!important;
-    max-width:min(780px,62vw)!important;
-    padding-right:24px!important;
+    max-width:min(760px,61vw)!important;
   }
-
   body.khome-final-v1 .khc-overview-head>div:first-child>span{
     display:inline-flex!important;
     align-items:center!important;
     gap:9px!important;
-    color:#9eaaa1!important;
-    font-size:8px!important;
+    color:#98a49b!important;
+    font-size:7.5px!important;
     font-weight:850!important;
-    letter-spacing:.17em!important;
+    letter-spacing:.18em!important;
   }
   body.khome-final-v1 .khc-overview-head>div:first-child>span:before{
     content:''!important;
-    width:7px!important;
-    height:7px!important;
+    width:6px!important;
+    height:6px!important;
     border-radius:50%!important;
-    background:#9ab09f!important;
-    box-shadow:0 0 0 5px rgba(154,176,159,.06)!important;
+    background:#93aa99!important;
+    box-shadow:0 0 0 5px rgba(147,170,153,.055)!important;
   }
-
   body.khome-final-v1 .khc-overview-head h2{
-    max-width:760px!important;
-    margin:17px 0 0!important;
-    color:#f3f0e9!important;
-    font:600 clamp(44px,4.35vw,68px)/.91 Manrope,'DM Sans',sans-serif!important;
-    letter-spacing:-.072em!important;
+    max-width:720px!important;
+    margin:15px 0 0!important;
+    color:var(--kh38-text)!important;
+    font:610 clamp(40px,4vw,60px)/.92 Manrope,'DM Sans',sans-serif!important;
+    letter-spacing:-.068em!important;
     text-wrap:balance!important;
   }
-
   body.khome-final-v1 .khc-overview-head p{
-    max-width:600px!important;
-    margin:16px 0 0!important;
-    color:#969f98!important;
-    font-size:12px!important;
+    max-width:580px!important;
+    margin:14px 0 0!important;
+    color:#8e9891!important;
+    font-size:11px!important;
     line-height:1.55!important;
-    letter-spacing:-.01em!important;
   }
 
+  /* Sync becomes a small instrument, not a competing card. */
   body.khome-final-v1 .khc-sync{
     position:relative!important;
     z-index:3!important;
-    min-width:315px!important;
-    max-width:360px!important;
-    padding:13px 15px!important;
-    border:1px solid rgba(25,34,28,.08)!important;
-    border-radius:18px!important;
-    background:linear-gradient(145deg,#efede6,#e4e1d8)!important;
-    color:#172019!important;
-    box-shadow:0 18px 48px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.66)!important;
+    min-width:290px!important;
+    max-width:330px!important;
+    padding:11px 13px!important;
+    border:1px solid rgba(255,255,255,.06)!important;
+    border-radius:16px!important;
+    background:rgba(255,255,255,.035)!important;
+    color:var(--kh38-text)!important;
+    box-shadow:none!important;
+    backdrop-filter:blur(12px)!important;
+    -webkit-backdrop-filter:blur(12px)!important;
     align-items:center!important;
-    gap:14px!important;
+    gap:12px!important;
   }
-
   body.khome-final-v1 .khc-sync .khc-status{
-    flex:0 0 auto!important;
-    min-height:32px!important;
-    padding:0 11px!important;
-    border-color:rgba(26,42,31,.08)!important;
-    background:rgba(27,48,36,.07)!important;
-    color:#405346!important;
-    font-size:7px!important;
-  }
-  body.khome-final-v1 .khc-sync .khc-status i{
-    background:#708a77!important;
-    box-shadow:0 0 0 4px rgba(112,138,119,.09)!important;
+    min-height:29px!important;
+    padding:0 10px!important;
+    background:rgba(142,168,148,.08)!important;
+    border-color:rgba(163,187,168,.10)!important;
+    color:#a9b9ad!important;
+    font-size:6.5px!important;
   }
   body.khome-final-v1 .khc-sync>div:last-child{
     min-width:0!important;
-    padding-left:13px!important;
-    border-left:1px solid rgba(24,33,27,.08)!important;
+    padding-left:12px!important;
+    border-left:1px solid rgba(255,255,255,.06)!important;
   }
-  body.khome-final-v1 .khc-sync small{
-    color:#727a73!important;
-    font-size:6.5px!important;
-    letter-spacing:.12em!important;
-  }
+  body.khome-final-v1 .khc-sync small{color:#69746c!important;font-size:6px!important}
   body.khome-final-v1 .khc-sync strong{
-    max-width:190px!important;
-    color:#233029!important;
-    font-size:10px!important;
-    font-weight:700!important;
+    max-width:182px!important;
+    color:#cbd2cc!important;
+    font-size:9.5px!important;
     white-space:nowrap!important;
     overflow:hidden!important;
     text-overflow:ellipsis!important;
   }
 
-  body.khome-final-v1 .khc-grid{margin-top:1px!important}
+  /* Cockpit rhythm. */
+  body.khome-final-v1 .khc-grid{
+    gap:12px!important;
+    margin-top:0!important;
+  }
+  body.khome-final-v1 .khc-card{
+    border-radius:22px!important;
+    border-color:var(--kh38-line)!important;
+    box-shadow:0 18px 52px rgba(0,0,0,.20),inset 0 1px rgba(255,255,255,.018)!important;
+    transition:transform .24s ease,border-color .24s ease,box-shadow .24s ease!important;
+  }
+  body.khome-final-v1 .khc-card:before{opacity:.30!important}
+  body.khome-final-v1 .khc-card h3{
+    font-size:18px!important;
+    font-weight:620!important;
+    letter-spacing:-.043em!important;
+  }
+  body.khome-final-v1 .khc-card p{color:#89938b!important}
 
-  @media (max-width:1100px){
-    body.khome-final-v1 .khc-overview-head{
-      min-height:224px!important;
-      padding:30px!important;
-      gap:24px!important;
+  @media (hover:hover) and (pointer:fine){
+    body.khome-final-v1 .khc-card:hover{
+      transform:translateY(-2px)!important;
+      border-color:rgba(241,239,232,.105)!important;
+      box-shadow:0 24px 64px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.022)!important;
     }
-    body.khome-final-v1 .khc-overview-head>div:first-child{max-width:58%!important;padding-right:0!important}
-    body.khome-final-v1 .khc-overview-head h2{font-size:clamp(40px,5vw,56px)!important}
-    body.khome-final-v1 .khc-sync{min-width:290px!important}
+  }
+
+  /* Motion stays the brightest instrument. */
+  body.khome-final-v1 .khc-grid>.kdw-score,
+  body.khome-final-v1 .khc-grid.kdw-key-priority>.kdw-score{
+    min-height:272px!important;
+    padding:21px!important;
+    border-radius:22px!important;
+    background:
+      radial-gradient(340px 200px at 100% 0%,rgba(92,115,98,.07),transparent 68%),
+      linear-gradient(145deg,#f0ede6 0%,#e5e1d8 100%)!important;
+    box-shadow:0 24px 66px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.72)!important;
+  }
+  body.khome-final-v1 .khc-motion-main{margin:20px 0 10px!important}
+  body.khome-final-v1 .khc-motion-main strong{
+    font-size:clamp(64px,5.6vw,86px)!important;
+    font-weight:610!important;
+  }
+
+  /* Age is calmer and visually secondary to Motion. */
+  body.khome-final-v1 .khc-grid>.kdw-age,
+  body.khome-final-v1 .khc-grid.kdw-key-priority>.kdw-age{
+    min-height:272px!important;
+    padding:21px!important;
+    color:#e9ece7!important;
+    border-color:rgba(188,207,192,.09)!important;
+    background:
+      radial-gradient(300px 190px at 100% 0%,rgba(170,195,175,.12),transparent 67%),
+      linear-gradient(145deg,#1b241e 0%,#121713 100%)!important;
+    box-shadow:0 20px 58px rgba(0,0,0,.22)!important;
+  }
+  body.khome-final-v1 .khc-age .khc-label{color:#8fa096!important}
+  body.khome-final-v1 .khc-age h3{color:#eef0eb!important}
+  body.khome-final-v1 .khc-age-badge{
+    border-color:rgba(210,221,212,.08)!important;
+    background:rgba(255,255,255,.035)!important;
+    color:#89998f!important;
+  }
+  body.khome-final-v1 .khc-age-main strong{color:#eef0eb!important}
+  body.khome-final-v1 .khc-age-main>span,
+  body.khome-final-v1 .khc-age p{color:#8f9b93!important}
+  body.khome-final-v1 .khc-age>button{color:#a9b9ad!important}
+
+  /* KEY is the deep-green live signal, visually rich but not louder than Motion. */
+  body.khome-final-v1 .khc-key{
+    min-height:272px!important;
+    padding:21px!important;
+    border-color:rgba(190,211,195,.09)!important;
+    background:
+      radial-gradient(390px 230px at 100% -6%,rgba(191,215,196,.12),transparent 67%),
+      linear-gradient(145deg,#182b20 0%,#243e2f 100%)!important;
+    box-shadow:0 24px 66px rgba(0,0,0,.25)!important;
+  }
+  body.khome-final-v1 .khc-key-grid{gap:7px!important;margin:18px 0 13px!important}
+  body.khome-final-v1 .khc-key-metric{
+    min-height:96px!important;
+    padding:11px!important;
+    border-radius:15px!important;
+    border-color:rgba(255,255,255,.055)!important;
+    background:rgba(5,9,6,.15)!important;
+  }
+  body.khome-final-v1 .khc-key-metric.focus{
+    background:linear-gradient(145deg,#ece9e1,#ded9cf)!important;
+  }
+  body.khome-final-v1 .khc-key-metric strong{margin-top:13px!important}
+
+  /* Secondary modules share one dark material system. */
+  body.khome-final-v1 .khc-week,
+  body.khome-final-v1 .khc-next,
+  body.khome-final-v1 .khc-clinical,
+  body.khome-final-v1 .khc-report,
+  body.khome-final-v1 .khc-life{
+    border-color:var(--kh38-line)!important;
+    background:linear-gradient(145deg,#121613 0%,#0d100e 100%)!important;
+    box-shadow:0 17px 48px rgba(0,0,0,.18)!important;
+  }
+  body.khome-final-v1 .khc-next{
+    background:
+      radial-gradient(300px 200px at 100% 0%,rgba(200,185,159,.075),transparent 70%),
+      linear-gradient(145deg,#171713,#111411)!important;
+  }
+  body.khome-final-v1 .khc-next h3{
+    font-size:26px!important;
+    line-height:1.01!important;
+    letter-spacing:-.055em!important;
+  }
+  body.khome-final-v1 .khc-primary{
+    min-height:48px!important;
+    border-radius:12px!important;
+    border-color:#ebe8df!important;
+    background:#ebe8df!important;
+    color:#182019!important;
+    box-shadow:none!important;
+  }
+  body.khome-final-v1 .khc-next-links button{
+    background:rgba(255,255,255,.018)!important;
+    border-color:rgba(255,255,255,.055)!important;
+  }
+
+  body.khome-final-v1 .khc-week-metric{
+    border-radius:16px!important;
+    border-color:rgba(255,255,255,.055)!important;
+    background:rgba(255,255,255,.018)!important;
+  }
+  body.khome-final-v1 .khc-spark i{
+    background:linear-gradient(180deg,#aebfb1,#607665)!important;
+  }
+
+  /* Clinical/report are supportive, not dashboard primaries. */
+  body.khome-final-v1 .khc-clinical,
+  body.khome-final-v1 .khc-report{
+    min-height:236px!important;
+  }
+  body.khome-final-v1 .khc-clinical>strong{font-size:28px!important}
+
+  /* Motion hierarchy is immediate: primary row, next action, then evidence. */
+  body.khome-final-v1 .khc-status{
+    font-size:6.5px!important;
+    letter-spacing:.11em!important;
+  }
+  body.khome-final-v1 .khc-label{
+    font-size:7px!important;
+    letter-spacing:.17em!important;
+  }
+
+  @media (max-width:1180px){
+    body.khome-final-v1 .view-root,
+    body.khome-final-v1 #viewRoot{width:min(calc(100% - 32px),1420px)!important}
+    body.khome-final-v1 .khc-overview-head{min-height:190px!important;padding:28px!important}
+    body.khome-final-v1 .khc-overview-head>div:first-child{max-width:58%!important}
+    body.khome-final-v1 .khc-overview-head h2{font-size:clamp(38px,4.8vw,54px)!important}
+    body.khome-final-v1 .khc-sync{min-width:270px!important}
   }
 
   @media (max-width:900px){
+    body.khome-final-v1 .topbar{padding-left:20px!important;padding-right:20px!important}
+    body.khome-final-v1 .view-root,
+    body.khome-final-v1 #viewRoot{width:min(calc(100% - 28px),1420px)!important}
     body.khome-final-v1 .khc-overview-head{
       min-height:0!important;
-      padding:28px!important;
+      padding:26px!important;
       display:grid!important;
       grid-template-columns:1fr!important;
       align-items:stretch!important;
+      gap:24px!important;
     }
     body.khome-final-v1 .khc-overview-head>div:first-child{max-width:100%!important}
-    body.khome-final-v1 .khc-overview-head h2{max-width:620px!important;font-size:46px!important}
+    body.khome-final-v1 .khc-overview-head h2{max-width:620px!important;font-size:44px!important}
     body.khome-final-v1 .khc-sync{width:100%!important;max-width:none!important;min-width:0!important;justify-content:flex-start!important}
   }
 
   @media (prefers-reduced-motion:no-preference){
     body.khome-final-v1 .khc-overview-head{
-      animation:khcHeroIn .48s cubic-bezier(.22,1,.36,1) both!important;
+      animation:kh38HeroIn .42s cubic-bezier(.22,1,.36,1) both!important;
     }
-    @keyframes khcHeroIn{
-      from{opacity:.01;transform:translateY(7px)}
-      to{opacity:1;transform:none}
+    body.khome-final-v1 .khc-card{
+      animation:kh38CardIn .36s cubic-bezier(.22,1,.36,1) both!important;
     }
+    body.khome-final-v1 .khc-grid>.khc-card:nth-child(2){animation-delay:.025s!important}
+    body.khome-final-v1 .khc-grid>.khc-card:nth-child(3){animation-delay:.05s!important}
+    body.khome-final-v1 .khc-grid>.khc-card:nth-child(n+4){animation-delay:.075s!important}
+    @keyframes kh38HeroIn{from{opacity:.01;transform:translateY(6px)}to{opacity:1;transform:none}}
+    @keyframes kh38CardIn{from{opacity:.01;transform:translateY(5px)}to{opacity:1;transform:none}}
   }
 
   @media (prefers-reduced-motion:reduce){
-    body.khome-final-v1 .khc-overview-head{animation:none!important}
+    body.khome-final-v1 .khc-overview-head,
+    body.khome-final-v1 .khc-card{animation:none!important;transition:none!important}
   }
 }
