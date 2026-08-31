@@ -143,7 +143,8 @@ const scripts = [
   'scripts/pulse-runtime-consolidation-late-v1.mjs',
   'scripts/pulse-runtime-route-cleanup-v21.mjs',
   'scripts/pulse-runtime-debt-audit-v1.mjs',
-  'scripts/pulse-runtime-architecture-audit-v37.mjs'
+  'scripts/pulse-runtime-architecture-audit-v37.mjs',
+  'scripts/professional-header-sync-v1.mjs'
 ];
 
 for (const script of scripts) {
