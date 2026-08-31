@@ -1,0 +1,23 @@
+/* KŌMØ Pulse — patient Home stability guard
+   The legacy/base Home stays visible until the V1 Home has mounted successfully. */
+
+body.khome-final-v1:not(.home-v1-mounted) [data-my-komo-home] > .mykomo-card,
+body.khome-final-v1:not(.home-v1-mounted) [data-my-komo-home] > .mykomo-engagement,
+body.khome-final-v1:not(.home-v1-mounted) [data-my-komo-home] > [data-key-home]{
+  display:revert!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+body.khome-final-v1.home-v1-mounted [data-khome-datawall]{
+  animation:khv-safe-in .22s ease-out both;
+}
+
+@keyframes khv-safe-in{
+  from{opacity:0;transform:translateY(4px)}
+  to{opacity:1;transform:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  body.khome-final-v1.home-v1-mounted [data-khome-datawall]{animation:none!important}
+}
