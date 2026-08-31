@@ -5,9 +5,19 @@ import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260829-key-hub-v1';
+const release='20260831-key-single-owner-v1';
 
 for(const file of ['key-hub-v1.css','key-hub-v1.js']) await copyFile(join(root,'pulse-app',file),join(pulse,file));
+
+// KEY V2 owns the visible route after bootstrap. The original hub may fetch/render once,
+// but it must never wipe the enhanced V2 surface after later runtime events.
+const keyHubPath=join(pulse,'key-hub-v1.js');
+let keyHub=await readFile(keyHubPath,'utf8');
+const ownerNeedle="async function render(force=false){if(route()==='home'){homeTabs();return}if(route()!=='key')return;const root=document.querySelector('#viewRoot');if(!root)return;setChrome();";
+const ownerReplacement="async function render(force=false){if(route()==='home'){homeTabs();return}if(route()!=='key')return;const root=document.querySelector('#viewRoot');if(!root)return;const mounted=root.querySelector('[data-keyhub]');if(mounted?.classList.contains('kh2-enhanced')&&window.KomoKeyResultsV2){window.KomoKeyResultsV2.refresh?.();return}setChrome();";
+if(keyHub.includes(ownerNeedle))keyHub=keyHub.replace(ownerNeedle,ownerReplacement);
+else if(!keyHub.includes(ownerReplacement))throw new Error('[pulse-key-hub] KEY owner contract changed');
+await writeFile(keyHubPath,keyHub,'utf8');
 
 // KEY is a canonical patient route, owned by the dedicated hub.
 const appPath=join(pulse,'app-router-v2.js');
@@ -42,7 +52,7 @@ const finalApp=await readFile(appPath,'utf8');
 const finalNav=await readFile(navPath,'utf8');
 const finalHome=await readFile(homeKeyPath,'utf8');
 const finalCss=await readFile(join(pulse,'key-hub-v1.css'),'utf8');
-const finalJs=await readFile(join(pulse,'key-hub-v1.js'),'utf8');
+const finalJs=await readFile(keyHubPath,'utf8');
 const checks=[
  ['KEY CSS shipped last',finalHtml.includes(`key-hub-v1.css?v=${release}`)],
  ['KEY runtime shipped last',finalHtml.includes(`key-hub-v1.js?v=${release}`)],
@@ -52,10 +62,11 @@ const checks=[
  ['canonical patient navigation accepts KEY',finalNav.includes("'club','key','trajectory'")],
  ['home KEY card opens dedicated route',finalHome.includes("go('key')")&&!finalHome.includes("go('followup')")],
  ['KEY uses real wearable table',finalJs.includes("from('wearable_daily_metrics')")],
+ ['KEY base hub yields to V2 after enhancement',finalJs.includes("classList.contains('kh2-enhanced')")&&finalJs.includes('KomoKeyResultsV2.refresh')],
  ['KEY keeps Motion Score separate',finalJs.includes('ne modifient pas le Motion Score')||finalJs.includes('ne modifie pas le Motion Score')],
  ['animated premium rings shipped',finalCss.includes('.kh-ring')&&finalJs.includes('requestAnimationFrame')],
  ['home Motion number visibility guard shipped',finalCss.includes('Final home Motion score visibility guard')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-key-hub] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log('[pulse-key-hub] PASS · dedicated KEY route + 7/30/90 longitudinal rings + Motion score visibility guard');
+console.log('[pulse-key-hub] PASS · dedicated KEY route + single visible V2 owner + longitudinal rings');
