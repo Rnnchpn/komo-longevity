@@ -3,7 +3,8 @@ import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 import { loadCanonicalResult } from './canonical-result-runtime.js';
 
-const VERSION='3.1.0';
+const VERSION='3.2.0';
+const WALK_CLUB_LABEL='WALK CLUB';
 let timer=0;
 let rendering=false;
 let lastSignature='';
@@ -35,45 +36,49 @@ async function walkSummary(){
 }
 function motionState(result,loading=false){
   if(loading)return{value:'…',label:'Motion Score',copy:'Synchronisation',route:'results'};
-  if(released(result)&&num(result?.score?.motion_score)!==null)return{value:Math.round(Number(result.score.motion_score)),label:'Motion Score',copy:'Dernier résultat publié',route:'results'};
+  if(released(result)&&num(result?.score?.motion_score)!==null)return{value:Math.round(Number(result.score.motion_score)),label:'Motion Score',copy:'Référence actuelle',route:'results'};
   const has=num(result?.score?.motion_score)!==null;
   return{value:has?'…':'—',label:'Motion Score',copy:has?'En validation':'À établir',route:'results'};
 }
 function nextAction(result,walk,appt,loading=false){
-  if(loading)return{title:'Préparation de votre espace',copy:'KŌMØ Pulse synchronise vos données sans déplacer l’interface.',label:'Voir mon bilan',route:'results'};
-  if(!released(result))return{title:'Finaliser votre référence Motion',copy:'Votre résultat apparaîtra ici uniquement après validation pour restitution.',label:'Voir mon bilan',route:'results'};
-  if(!walk?.connected)return{title:'Activer votre continuité KEY',copy:'Ajoutez vos données quotidiennes pour relier le bilan à votre vie réelle.',label:'Ouvrir KEY',route:'key'};
+  if(loading)return{title:'Préparation de votre espace',copy:'Pulse synchronise les informations utiles.',label:'Voir mon bilan',route:'results'};
+  if(!released(result))return{title:'Finaliser votre référence Motion',copy:'Votre résultat apparaîtra ici après validation pour restitution.',label:'Voir mon bilan',route:'results'};
+  if(!walk?.connected)return{title:'Activer votre continuité KEY',copy:'Reliez votre bilan à votre activité quotidienne.',label:'Ouvrir KEY',route:'key'};
   if(appt.exists)return{title:'Préparer votre prochaine étape',copy:appt.meta||appt.title,label:'Voir mon rendez-vous',route:'documents'};
-  return{title:'Continuer votre progression',copy:'Votre bilan est disponible. Komo peut vous aider à choisir la prochaine action utile.',label:'Demander à Komo',route:'komo'};
+  return{title:'Continuer votre progression',copy:'Komo peut vous aider à choisir la prochaine action utile.',label:'Demander à Komo',route:'komo'};
 }
 function homeMarkup(result,walk,loading=false){
   const name=firstName();
   const motion=motionState(result,loading);
   const steps=!loading&&walk?.connected?num(walk.steps_today):null;
+  const activeMinutes=!loading&&walk?.connected?num(walk.active_minutes_today??walk.active_minutes):null;
   const goal=Math.max(1,num(walk?.daily_goal)||8000);
   const pct=steps===null?0:Math.max(0,Math.min(100,Math.round((steps/goal)*100)));
   const kp=!loading&&walk?.connected?num(walk.k_points_today):null;
+  const kpWeek=!loading&&walk?.connected?num(walk.k_points_week):null;
   const club=walk?.walk_club||{};
-  const rank=!loading&&club.joined&&club.rank?`#${club.rank}`:'—';
+  const rank=!loading&&club.joined&&club.rank?`#${club.rank}`:'';
+  const clubCopy=rank?`${rank} ${WALK_CLUB_LABEL}`:club.joined?WALK_CLUB_LABEL:'cette semaine';
   const action=nextAction(result,walk,currentAppointment(),loading);
   const movementCopy=loading?'Synchronisation de votre journée…':walk?.connected?`${pct}% de votre repère du jour · données vérifiées`:'Connectez KEY pour afficher votre activité quotidienne.';
+  const movementMeta=activeMinutes===null?'pas aujourd’hui':`pas · ${fmt(activeMinutes)} min actives`;
+  const pointsCopy=kpWeek===null?clubCopy:`${fmt(kpWeek)} cette semaine · ${clubCopy}`;
   return `<section class="kh3${loading?' is-loading':''}" data-khome-datawall data-khome-v3 aria-busy="${loading?'true':'false'}">
     <div class="kh3-brand" aria-label="KŌMØ Pulse"><span class="kh3-brand-dot" aria-hidden="true"></span><strong>KŌMØ PULSE</strong><small>LONGEVITY IN MOTION</small></div>
-    <header class="kh3-head"><span>VOTRE ESPACE LONGÉVITÉ</span><h2>Bonjour${name?` ${esc(name)}`:''}.</h2></header>
+    <header class="kh3-head"><span>VOTRE ESPACE LONGÉVITÉ</span><h2>Bonjour${name?` ${esc(name)}`:''}.</h2><p>Voici ce qui compte aujourd’hui.</p></header>
 
     <section class="kh3-movement" aria-label="Votre journée en mouvement">
-      <div class="kh3-movement-top"><div><span>VOTRE JOURNÉE EN MOUVEMENT</span><h3>${steps===null?'—':fmt(steps)}</h3><small>pas aujourd’hui</small></div><button type="button" data-kh3-route="key">KEY <b>→</b></button></div>
+      <div class="kh3-movement-top"><div><span>VOTRE JOURNÉE EN MOUVEMENT</span><h3>${steps===null?'—':fmt(steps)}</h3><small>${esc(movementMeta)}</small></div><button type="button" data-kh3-route="key">Voir KEY <b>→</b></button></div>
       <div class="kh3-progress"><i style="width:${pct}%"></i></div>
       <p>${esc(movementCopy)}</p>
     </section>
 
-    <section class="kh3-strip" aria-label="Vos repères essentiels">
-      <button type="button" data-kh3-route="mykomo"><span>K POINTS</span><strong>${kp===null?'—':`+${fmt(kp)}`}</strong><small>aujourd’hui</small></button>
-      <button type="button" data-kh3-route="${motion.route}"><span>${esc(motion.label)}</span><strong>${esc(motion.value)}</strong><small>${esc(motion.copy)}</small></button>
-      <button type="button" data-kh3-route="mykomo"><span>WALK CLUB</span><strong>${esc(rank)}</strong><small>${club.joined?'cette semaine':'à rejoindre'}</small></button>
+    <section class="kh3-strip" aria-label="Vos deux repères essentiels">
+      <button class="kh3-score-card" type="button" data-kh3-route="${motion.route}"><span>${esc(motion.label)}</span><strong>${esc(motion.value)}</strong><small>${esc(motion.copy)}</small></button>
+      <button class="kh3-points-card" type="button" data-kh3-route="mykomo"><span>K POINTS</span><strong>${kp===null?'—':`+${fmt(kp)}`}</strong><small>${esc(pointsCopy)}</small></button>
     </section>
 
-    <section class="kh3-next"><div><span>PROCHAINE ACTION</span><h3>${esc(action.title)}</h3><p>${esc(action.copy)}</p></div><button type="button" data-kh3-action="${esc(action.route)}">${esc(action.label)} <b>→</b></button></section>
+    <section class="kh3-next"><div><span>VOTRE PROCHAINE ÉTAPE</span><h3>${esc(action.title)}</h3><p>${esc(action.copy)}</p></div><button type="button" data-kh3-action="${esc(action.route)}">${esc(action.label)} <b>→</b></button></section>
   </section>`;
 }
 function bind(root){
