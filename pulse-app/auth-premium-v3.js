@@ -17,6 +17,13 @@
       script.dataset.komoOperatorJs = '1';
       document.body.appendChild(script);
     }
+    if (!document.querySelector('script[data-komo-operator-session]')) {
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = './komo-operator-session-v1.js?v=20260831-v1';
+      script.dataset.komoOperatorSession = '1';
+      document.body.appendChild(script);
+    }
   }
 
   function mount() {
