@@ -1,5 +1,5 @@
 const RUN_HASH='#run';
-const AI_SRC='./komo-ai-client-v1.js?v=20260831-run-ai-v1';
+const AI_SRC='./komo-ai-client-v1.js?v=20260831-run-founder-v1';
 const previewHost=()=>location.hostname.endsWith('.vercel.app')||location.hostname==='localhost'||location.hostname==='127.0.0.1';
 const runtimeRole=()=>window.KomoRuntime?.role||window.KomoRuntime?.getContext?.()?.role||'member';
 const canRun=()=>runtimeRole()==='founder'||(previewHost()&&runtimeRole()==='admin');
@@ -41,7 +41,7 @@ function shell(){
     </aside>
     <div class="kfr-chat">
       <div class="kfr-chat-head"><div><h2>KŌMŌ AI</h2><p data-kfr-context-label>Command Center · Business workspace</p></div><span class="kfr-status"><span class="kfr-status-dot"></span><span data-kfr-status-label>AI ready</span></span></div>
-      <div class="kfr-thread" data-kfr-thread><article class="kfr-message agent"><p><strong>RUN est prêt.</strong><br>KŌMŌ AI est connecté au moteur conversationnel Pulse. Drive, Mail, Calendar et Web restent désactivés tant que leurs connecteurs sécurisés ne sont pas branchés.</p><span class="kfr-meta">KŌMŌ AI · preview</span></article></div>
+      <div class="kfr-thread" data-kfr-thread><article class="kfr-message agent"><p><strong>RUN est prêt.</strong><br>KŌMŌ AI est connecté au moteur Founder dédié. Drive, Mail, Calendar et Web restent désactivés tant que leurs connecteurs sécurisés ne sont pas branchés.</p><span class="kfr-meta">KŌMŌ AI · founder preview</span></article></div>
       <div class="kfr-composer-wrap">
         <div class="kfr-tools">${['Drive','Mail','Calendar','Pulse','Web'].map((x,i)=>`<button class="kfr-tool${i===0?' active':''}" type="button" data-kfr-tool="${x}">${icons[x.toLowerCase()]||''} ${x}</button>`).join('')}</div>
         <form class="kfr-composer" data-kfr-form><textarea class="kfr-input" rows="1" maxlength="2500" placeholder="Demandez à KŌMŌ AI…" data-kfr-input></textarea><button class="kfr-send" type="submit" aria-label="Envoyer">↑</button></form>
@@ -54,7 +54,7 @@ function renderPanel(name='Drive'){const panel=qs('[data-kfr-panel]');if(!panel)
 function addMessage(text,kind='user',meta=''){const thread=qs('[data-kfr-thread]');if(!thread)return null;const article=document.createElement('article');article.className=`kfr-message ${kind}`;const p=document.createElement('p');p.textContent=String(text||'');article.appendChild(p);if(meta){const span=document.createElement('span');span.className='kfr-meta';span.textContent=meta;article.appendChild(span)}thread.appendChild(article);thread.scrollTop=thread.scrollHeight;return article}
 function setBusy(on){busy=on;const input=qs('[data-kfr-input]'),send=qs('.kfr-send'),status=qs('[data-kfr-status-label]');if(input)input.disabled=on;if(send)send.disabled=on;if(status)status.textContent=on?'KŌMŌ AI réfléchit…':'AI ready'}
 function selectContext(btn){qsAll('[data-kfr-context]').forEach(x=>x.classList.toggle('active',x===btn));const label=btn.dataset.kfrContext||'Command Center';const contextLabel=qs('[data-kfr-context-label]');if(contextLabel)contextLabel.textContent=`${label} · Business workspace`;addMessage(`Contexte actif : ${label}.`,'agent')}
-function resetConversation(){history=[];const thread=qs('[data-kfr-thread]');if(!thread)return;thread.innerHTML='<article class="kfr-message agent"><p><strong>Nouvelle conversation RUN.</strong><br>Demandez directement quelque chose à KŌMŌ AI.</p><span class="kfr-meta">KŌMŌ AI · preview</span></article>';qs('[data-kfr-input]')?.focus()}
+function resetConversation(){history=[];const thread=qs('[data-kfr-thread]');if(!thread)return;thread.innerHTML='<article class="kfr-message agent"><p><strong>Nouvelle conversation RUN.</strong><br>Demandez directement quelque chose à KŌMŌ AI.</p><span class="kfr-meta">KŌMŌ AI · founder preview</span></article>';qs('[data-kfr-input]')?.focus()}
 function ensureAI(){
   if(window.KomoAI?.ask)return Promise.resolve(window.KomoAI);
   if(aiLoader)return aiLoader;
@@ -75,7 +75,7 @@ function connectorGuard(message){
 }
 function connectorReply(name){return`${name} n’est pas encore activé sur cette preview. Le bot KŌMŌ AI fonctionne, mais cette action externe restera bloquée jusqu’au branchement sécurisé du connecteur.`}
 function answerFrom(data){const r=data?.reply||data||{};const headline=String(r?.headline||'').trim(),answer=String(r?.answer||'').trim();return headline&&answer?`${headline}\n${answer}`:(answer||headline||'Je n’ai pas reçu de réponse exploitable.')}
-function errorMessage(error){const code=String(error?.message||error||'');if(code.includes('session_required'))return'Votre session Pulse doit être active pour utiliser KŌMŌ AI.';if(code.includes('ai_not_configured'))return'KŌMŌ AI n’est pas configuré sur cette preview.';if(code.includes('runtime_client_unavailable'))return'Le client Pulse n’est pas disponible dans cette session.';return'KŌMŌ AI est momentanément indisponible. La conversation reste ouverte : vous pouvez réessayer sans recharger la page.'}
+function errorMessage(error){const code=String(error?.message||error||'');if(code.includes('session_required'))return'Votre session Pulse doit être active pour utiliser KŌMŌ AI.';if(code.includes('founder_forbidden'))return'RUN est réservé au compte Founder / Admin.';if(code.includes('ai_not_configured'))return'KŌMŌ AI n’est pas configuré sur cette preview.';if(code.includes('runtime_client_unavailable'))return'Le client Pulse n’est pas disponible dans cette session.';if(code.includes('ai_upstream_'))return'Le moteur Founder a bien été contacté mais la génération IA a échoué. Aucun fallback clinique n’est affiché.';return'KŌMŌ AI est momentanément indisponible. La conversation reste ouverte : vous pouvez réessayer sans recharger la page.'}
 async function submitRunCommand(raw){
   const value=String(raw||'').trim();if(!value||busy)return;
   addMessage(value,'user');
@@ -86,7 +86,7 @@ async function submitRunCommand(raw){
     const ai=await ensureAI();
     const data=await ai.ask(value,{history});
     const text=answerFrom(data);
-    if(pending){pending.querySelector('p').textContent=text;const meta=pending.querySelector('.kfr-meta');if(meta)meta.textContent=data?.fallback?'KŌMŌ AI · verified fallback':'KŌMŌ AI'}
+    if(pending){pending.querySelector('p').textContent=text;const meta=pending.querySelector('.kfr-meta');if(meta)meta.textContent=data?.fallback?'KŌMŌ AI · verified fallback':'KŌMŌ AI · founder'}
     history=[...history,{role:'user',content:value},{role:'assistant',content:text}].slice(-8)
   }catch(error){if(pending){pending.classList.add('error');pending.querySelector('p').textContent=errorMessage(error);const meta=pending.querySelector('.kfr-meta');if(meta)meta.textContent='KŌMŌ AI · error'}console.error('[KOMO RUN AI]',error)}finally{setBusy(false);qs('[data-kfr-input]')?.focus()}
 }
