@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260831-home-app-v4';
+const release='20260831-home-app-v5';
 const navRelease='20260831-patient-nav-v710';
 const cssFile='patient-home-command-v1.css';
 const heroCssFile='patient-home-hero-v2.css';
@@ -78,7 +78,8 @@ const directScript=file=>new RegExp(`<script[^>]+src=["']\\./${file.replace(/[.*
 const checks=[
   ['historical home renderer removed',!final.includes('patient-home-datawall-v3.js')],
   ['final Home V3 CSS loaded',final.includes(`${cssFile}?v=${release}`)],
-  ['Home greeting is dark and readable',css.includes('--kh3-ink:#172019')&&css.includes('.kh3-head h2')&&css.includes('color:var(--kh3-ink)!important')],
+  ['Home greeting is forest green and readable',css.includes('--kh3-heading:#385744')&&css.includes('.kh3-head h2')&&css.includes('color:var(--kh3-heading)!important')],
+  ['Home adds breathing room before primary cards',css.includes('.kh3-head{padding:0 4px 6px}')&&css.includes('.kh3-head{padding:0 0 4px}')],
   ['Home identifies KŌMØ Pulse immediately',js.includes('kh3-brand')&&js.includes('KŌMØ PULSE')&&css.includes('kh3-brand-dot')],
   ['Home is a fixed one-screen cockpit',css.includes('height:100dvh!important')&&css.includes('overflow:hidden!important')&&css.includes('grid-template-rows:auto auto minmax(190px,1fr) 108px 92px')],
   ['assistant CSS is shipped with Home',final.includes(`${assistantCssFile}?v=${release}`)&&assistantCss.includes('#komoAssistantRail')&&assistantCss.includes('#komoAssistantDrawer')],
@@ -116,4 +117,4 @@ const checks=[
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log('[pulse-home-web-v1] PASS · fixed app Home + persistent navigation + stable first paint');
+console.log('[pulse-home-web-v1] PASS · patient V1 Home/nav/Results/map/Komo release');
