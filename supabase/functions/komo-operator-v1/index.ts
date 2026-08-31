@@ -5,134 +5,52 @@ const U = Deno.env.get('SUPABASE_URL') ?? '';
 const A = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 const S = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 const ORIGINS = new Set(['https://pulse.komolongevity.com','https://komolongevity.com','http://localhost:3000','http://localhost:5173']);
+function cors(req: Request){const o=req.headers.get('origin')??'';return{'Access-Control-Allow-Origin':ORIGINS.has(o)?o:'https://pulse.komolongevity.com','Access-Control-Allow-Headers':'authorization, x-client-info, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'}}
+function json(req: Request,body:unknown,status=200){return new Response(JSON.stringify(body),{status,headers:{...cors(req),'Content-Type':'application/json; charset=utf-8'}})}
+function safeDate(v:unknown){const d=new Date(String(v??''));return Number.isNaN(d.getTime())?null:d}
+function hoursUntil(v:unknown){const d=safeDate(v);return d?(d.getTime()-Date.now())/36e5:null}
+function patientName(p:any){return`${p?.preferred_name||p?.first_name||''} ${p?.last_name||''}`.trim()||p?.email||'Patient KŌMØ'}
+function prep(responses:any){const steps=[['baseline','questionnaire locomoteur'],['chair_stand','observation de lever'],['two_step','observation de deux pas']] as const;const missing=steps.filter(([k])=>!responses?.[k]?.completed_at).map(([,l])=>l);const completed=steps.length-missing.length;return{completed,total:steps.length,percent:Math.round(completed/steps.length*100),missing}}
+function priorityRank(p:string){return p==='high'?0:p==='medium'?1:2}
+function reminderText(name:string,missing:string[],appointment:any){const first=name.split(' ')[0]||'';const parts=missing.length?`Il reste à compléter : ${missing.join(', ')}.`:'Votre dossier est presque prêt.';const ap=appointment?.scheduled_start?' Votre prochain rendez-vous approche ; merci de finaliser ces éléments avant la consultation.':'';return`Bonjour ${first}, KŌMØ vous informe que certains éléments de votre suivi Motion restent à finaliser. ${parts}${ap}`.replace(/\s+/g,' ').trim()}
+function dayKey(d:Date){return d.toISOString().slice(0,10)}
+function avg(rows:any[],key:string){const vals=rows.map(x=>Number(x?.[key])).filter(Number.isFinite);return vals.length?Math.round((vals.reduce((a,b)=>a+b,0)/vals.length)*10)/10:null}
 
-function cors(req: Request) {
-  const origin = req.headers.get('origin') ?? '';
-  return {
-    'Access-Control-Allow-Origin': ORIGINS.has(origin) ? origin : 'https://pulse.komolongevity.com',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Vary': 'Origin'
-  };
-}
-function json(req: Request, body: unknown, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { ...cors(req), 'Content-Type': 'application/json; charset=utf-8' } });
-}
-function safeDate(v: unknown) { const d = new Date(String(v ?? '')); return Number.isNaN(d.getTime()) ? null : d; }
-function hoursUntil(v: unknown) { const d = safeDate(v); return d ? (d.getTime() - Date.now()) / 36e5 : null; }
-function patientName(p: any) { return `${p?.preferred_name || p?.first_name || ''} ${p?.last_name || ''}`.trim() || p?.email || 'Patient KŌMØ'; }
-function prep(responses: any) {
-  const steps = [
-    ['baseline','questionnaire locomoteur'],
-    ['chair_stand','observation de lever'],
-    ['two_step','observation de deux pas']
-  ] as const;
-  const missing = steps.filter(([k]) => !responses?.[k]?.completed_at).map(([,label]) => label);
-  const completed = steps.length - missing.length;
-  return { completed, total: steps.length, percent: Math.round(completed / steps.length * 100), missing };
-}
-function priorityRank(p: string) { return p === 'high' ? 0 : p === 'medium' ? 1 : 2; }
-function reminderText(name: string, missing: string[], appointment: any) {
-  const first = name.split(' ')[0] || '';
-  const parts = missing.length ? `Il reste à compléter : ${missing.join(', ')}.` : 'Votre dossier est presque prêt.';
-  const ap = appointment?.scheduled_start ? ' Votre prochain rendez-vous approche ; merci de finaliser ces éléments avant la consultation.' : '';
-  return `Bonjour ${first}, KŌMØ vous informe que certains éléments de votre suivi Motion restent à finaliser. ${parts}${ap}`.replace(/\s+/g,' ').trim();
-}
-
-Deno.serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: cors(req) });
-  if (req.method !== 'POST') return json(req, { error: 'method_not_allowed' }, 405);
-  const token = (req.headers.get('Authorization') ?? '').replace(/^Bearer\s+/i, '');
-  if (!token) return json(req, { error: 'unauthorized' }, 401);
-
-  const uc = createClient(U, A, { global: { headers: { Authorization: `Bearer ${token}` } }, auth: { persistSession: false } });
-  const svc = createClient(U, S, { auth: { persistSession: false } });
-  const ur = await uc.auth.getUser(token);
-  const user = ur.data?.user;
-  if (ur.error || !user) return json(req, { error: 'unauthorized' }, 401);
-
-  const roleRes = await svc.from('account_roles').select('role').eq('user_id', user.id).maybeSingle();
-  const role = roleRes.data?.role ?? 'member';
-  const isPro = ['professional','admin'].includes(role);
-  let body: any = {};
-  try { body = await req.json(); } catch { body = {}; }
-  const action = String(body?.action || 'overview');
-  const requestedPatientId = body?.patient_id ? String(body.patient_id) : null;
-
-  let patients: any[] = [];
-  if (isPro) {
-    const p = await uc.from('patients').select('id,organization_id,patient_user_id,first_name,last_name,preferred_name,email,external_reference,status,organizations(id,name)').order('updated_at', { ascending: false }).limit(1000);
-    if (p.error) return json(req, { error: 'patients_failed', detail: p.error.message }, 500);
-    patients = p.data ?? [];
-  } else {
-    const p = await svc.from('patients').select('id,organization_id,patient_user_id,first_name,last_name,preferred_name,email,external_reference,status,organizations(id,name)').eq('patient_user_id', user.id).order('updated_at', { ascending: false }).limit(20);
-    if (p.error) return json(req, { error: 'patient_failed', detail: p.error.message }, 500);
-    patients = p.data ?? [];
-  }
-
-  if (requestedPatientId && !patients.some((p:any) => p.id === requestedPatientId)) return json(req, { error: 'patient_forbidden' }, 403);
-  const selectedPatients = requestedPatientId ? patients.filter((p:any) => p.id === requestedPatientId) : patients;
-  const pids = selectedPatients.map((p:any) => p.id);
-  const uids = selectedPatients.map((p:any) => p.patient_user_id).filter(Boolean);
-  const db = isPro ? uc : svc;
-
-  const [apRes, assRes, prepRes, reqRes] = await Promise.all([
-    pids.length ? db.from('organization_appointments').select('id,patient_id,appointment_type,scheduled_start,scheduled_end,status,location_mode,assigned_user_id').in('patient_id', pids).order('scheduled_start', { ascending: true }) : Promise.resolve({data:[],error:null}),
-    pids.length ? db.from('assessments').select('id,patient_id,product_mode,status,protocol_version,created_at,updated_at').in('patient_id', pids).order('created_at', { ascending: false }) : Promise.resolve({data:[],error:null}),
-    uids.length ? svc.from('pulse_assessments').select('id,user_id,status,responses,updated_at,completed_at,protocol_version').in('user_id', uids).eq('protocol_version','mobility-check-v1').order('updated_at', { ascending: false }) : Promise.resolve({data:[],error:null}),
-    uids.length ? svc.from('patient_service_requests').select('id,user_id,service,status,submitted_at,assigned_at,accepted_at,scheduled_at,patient_id,assessment_id').in('user_id', uids).order('submitted_at', { ascending: false }) : Promise.resolve({data:[],error:null})
+Deno.serve(async(req:Request)=>{
+  if(req.method==='OPTIONS')return new Response('ok',{headers:cors(req)});
+  if(req.method!=='POST')return json(req,{error:'method_not_allowed'},405);
+  const token=(req.headers.get('Authorization')??'').replace(/^Bearer\s+/i,'');if(!token)return json(req,{error:'unauthorized'},401);
+  const uc=createClient(U,A,{global:{headers:{Authorization:`Bearer ${token}`}},auth:{persistSession:false}}),svc=createClient(U,S,{auth:{persistSession:false}});
+  const ur=await uc.auth.getUser(token),user=ur.data?.user;if(ur.error||!user)return json(req,{error:'unauthorized'},401);
+  const rr=await svc.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();const role=rr.data?.role??'member',isPro=['professional','admin'].includes(role);
+  let body:any={};try{body=await req.json()}catch{}const action=String(body?.action||'overview'),requestedPatientId=body?.patient_id?String(body.patient_id):null;
+  let patients:any[]=[];
+  if(isPro){const p=await uc.from('patients').select('id,organization_id,patient_user_id,first_name,last_name,preferred_name,email,external_reference,status,organizations(id,name)').order('updated_at',{ascending:false}).limit(1000);if(p.error)return json(req,{error:'patients_failed',detail:p.error.message},500);patients=p.data??[]}
+  else{const p=await svc.from('patients').select('id,organization_id,patient_user_id,first_name,last_name,preferred_name,email,external_reference,status,organizations(id,name)').eq('patient_user_id',user.id).order('updated_at',{ascending:false}).limit(20);if(p.error)return json(req,{error:'patient_failed',detail:p.error.message},500);patients=p.data??[]}
+  if(requestedPatientId&&!patients.some((p:any)=>p.id===requestedPatientId))return json(req,{error:'patient_forbidden'},403);
+  const selectedPatients=requestedPatientId?patients.filter((p:any)=>p.id===requestedPatientId):patients,pids=selectedPatients.map((p:any)=>p.id),uids=selectedPatients.map((p:any)=>p.patient_user_id).filter(Boolean),db=isPro?uc:svc;
+  const cutoff=new Date();cutoff.setUTCDate(cutoff.getUTCDate()-6);const cutoffKey=dayKey(cutoff);
+  const [apRes,assRes,prepRes,reqRes,devRes,dailyRes]=await Promise.all([
+    pids.length?db.from('organization_appointments').select('id,patient_id,appointment_type,scheduled_start,scheduled_end,status,location_mode,assigned_user_id').in('patient_id',pids).order('scheduled_start',{ascending:true}):Promise.resolve({data:[],error:null}),
+    pids.length?db.from('assessments').select('id,patient_id,product_mode,status,protocol_version,created_at,updated_at').in('patient_id',pids).order('created_at',{ascending:false}):Promise.resolve({data:[],error:null}),
+    uids.length?svc.from('pulse_assessments').select('id,user_id,status,responses,updated_at,completed_at,protocol_version').in('user_id',uids).eq('protocol_version','mobility-check-v1').order('updated_at',{ascending:false}):Promise.resolve({data:[],error:null}),
+    uids.length?svc.from('patient_service_requests').select('id,user_id,service,status,submitted_at,assigned_at,accepted_at,scheduled_at,patient_id,assessment_id').in('user_id',uids).order('submitted_at',{ascending:false}):Promise.resolve({data:[],error:null}),
+    uids.length?svc.from('wearable_devices').select('id,user_id,status,provider,model,display_name,last_sync_at').in('user_id',uids).order('created_at',{ascending:false}):Promise.resolve({data:[],error:null}),
+    uids.length?svc.from('wearable_daily_metrics').select('user_id,metric_date,steps,active_minutes,sleep_minutes,resting_hr,wear_minutes').in('user_id',uids).gte('metric_date',cutoffKey).order('metric_date',{ascending:true}):Promise.resolve({data:[],error:null})
   ] as any);
-
-  const assessments: any[] = assRes.data ?? [];
-  const assessmentIds = assessments.map((x:any) => x.id);
-  const scoresRes = assessmentIds.length ? await db.from('scores').select('assessment_id,motion_score,status,release_status,calculated_at').in('assessment_id', assessmentIds).order('calculated_at',{ascending:false}) : {data:[],error:null};
-  const scores: any[] = scoresRes.data ?? [];
-  const appointments: any[] = apRes.data ?? [];
-  const preps: any[] = prepRes.data ?? [];
-  const requests: any[] = reqRes.data ?? [];
-
-  const records = selectedPatients.map((p:any) => {
-    const prepRow = preps.find((x:any) => x.user_id === p.patient_user_id) || null;
-    const preparation = prep(prepRow?.responses || {});
-    const motion = assessments.find((x:any) => x.patient_id === p.id && x.product_mode === 'motion') || null;
-    const score = motion ? scores.find((x:any) => x.assessment_id === motion.id) || null : null;
-    const appointment = appointments.find((x:any) => x.patient_id === p.id && (hoursUntil(x.scheduled_start) ?? -1) >= 0 && !['cancelled','completed','no_show'].includes(x.status)) || null;
-    const request = requests.find((x:any) => x.user_id === p.patient_user_id && ['motion','clinical'].includes(x.service)) || null;
-    return { patient:p, preparation, preparation_status: prepRow?.status || 'not_started', preparation_updated_at: prepRow?.updated_at || null, motion, score, next_appointment: appointment, request };
-  });
-
-  const priorities: any[] = [];
-  for (const r of records) {
-    const p = r.patient;
-    const name = patientName(p);
-    const h = hoursUntil(r.next_appointment?.scheduled_start);
-    if (r.preparation.percent < 100) {
-      const prio = h !== null && h <= 72 ? 'high' : 'medium';
-      priorities.push({ id:`prep:${p.id}`, patient_id:p.id, patient_user_id:p.patient_user_id, patient_name:name, kind:'missing_items', priority:prio, title:'Préparation incomplète', detail:`${r.preparation.completed}/${r.preparation.total} étapes terminées · ${r.preparation.missing.join(', ')}`, action:'send_patient_reminder', route:'clinical', draft: reminderText(name, r.preparation.missing, r.next_appointment) });
-    }
-    if (h !== null && h >= 0 && h <= 72) {
-      priorities.push({ id:`appointment:${r.next_appointment.id}`, patient_id:p.id, patient_user_id:p.patient_user_id, patient_name:name, kind:'upcoming_appointment', priority:h <= 24 ? 'high' : 'medium', title:h <= 24 ? 'Rendez-vous dans les 24 h' : 'Rendez-vous dans les 72 h', detail:new Intl.DateTimeFormat('fr-FR',{dateStyle:'medium',timeStyle:'short'}).format(new Date(r.next_appointment.scheduled_start)), action:'prepare_next_visit', route:'agenda' });
-    }
-    if (r.motion?.status === 'review') {
-      priorities.push({ id:`motion:${r.motion.id}`, patient_id:p.id, patient_user_id:p.patient_user_id, patient_name:name, kind:'motion_review', priority:'high', title:'Bilan Motion prêt à relire', detail:r.score?.motion_score != null ? `Motion Score calculé : ${Math.round(Number(r.score.motion_score))}/100 · validation requise` : 'Mesures disponibles · validation professionnelle requise', action:'flag_chart_for_review', route:'clinical' });
-    }
+  const assessments:any[]=assRes.data??[],assessmentIds=assessments.map((x:any)=>x.id);const scoresRes=assessmentIds.length?await db.from('scores').select('assessment_id,motion_score,status,release_status,calculated_at').in('assessment_id',assessmentIds).order('calculated_at',{ascending:false}):{data:[],error:null};
+  const scores:any[]=scoresRes.data??[],appointments:any[]=apRes.data??[],preps:any[]=prepRes.data??[],requests:any[]=reqRes.data??[],devices:any[]=devRes.data??[],daily:any[]=dailyRes.data??[];
+  const records=selectedPatients.map((p:any)=>{const prepRow=preps.find((x:any)=>x.user_id===p.patient_user_id)||null,preparation=prep(prepRow?.responses||{}),motion=assessments.find((x:any)=>x.patient_id===p.id&&x.product_mode==='motion')||null,score=motion?scores.find((x:any)=>x.assessment_id===motion.id)||null:null,appointment=appointments.find((x:any)=>x.patient_id===p.id&&(hoursUntil(x.scheduled_start)??-1)>=0&&!['cancelled','completed','no_show'].includes(x.status))||null,request=requests.find((x:any)=>x.user_id===p.patient_user_id&&['motion','clinical'].includes(x.service))||null;const userDaily=daily.filter((x:any)=>x.user_id===p.patient_user_id),activeDevice=devices.find((x:any)=>x.user_id===p.patient_user_id&&x.status==='active')||devices.find((x:any)=>x.user_id===p.patient_user_id)||null,days7=new Set(userDaily.map((x:any)=>x.metric_date)).size,key={connected:!!activeDevice||userDaily.length>0,device:activeDevice,days_7:days7,coverage_7:Math.round(days7/7*100),sufficient:days7>=5,last_date:userDaily.at(-1)?.metric_date||null,steps_avg:avg(userDaily,'steps'),active_minutes_avg:avg(userDaily,'active_minutes'),sleep_minutes_avg:avg(userDaily,'sleep_minutes'),resting_hr_avg:avg(userDaily,'resting_hr')};return{patient:p,preparation,preparation_status:prepRow?.status||'not_started',preparation_updated_at:prepRow?.updated_at||null,motion,score,next_appointment:appointment,request,key}});
+  const priorities:any[]=[];
+  for(const r of records){const p=r.patient,name=patientName(p),h=hoursUntil(r.next_appointment?.scheduled_start);
+    if(r.preparation.percent<100){const prio=h!==null&&h<=72?'high':'medium';priorities.push({id:`prep:${p.id}`,patient_id:p.id,patient_user_id:p.patient_user_id,patient_name:name,kind:'missing_items',priority:prio,title:'Préparation incomplète',detail:`${r.preparation.completed}/${r.preparation.total} étapes terminées · ${r.preparation.missing.join(', ')}`,action:'send_patient_reminder',route:'clinical',draft:reminderText(name,r.preparation.missing,r.next_appointment)})}
+    if(h!==null&&h>=0&&h<=72)priorities.push({id:`appointment:${r.next_appointment.id}`,patient_id:p.id,patient_user_id:p.patient_user_id,patient_name:name,kind:'upcoming_appointment',priority:h<=24?'high':'medium',title:h<=24?'Rendez-vous dans les 24 h':'Rendez-vous dans les 72 h',detail:new Intl.DateTimeFormat('fr-FR',{dateStyle:'medium',timeStyle:'short'}).format(new Date(r.next_appointment.scheduled_start)),action:'prepare_next_visit',route:'agenda'});
+    if(r.motion?.status==='review')priorities.push({id:`motion:${r.motion.id}`,patient_id:p.id,patient_user_id:p.patient_user_id,patient_name:name,kind:'motion_review',priority:'high',title:'Bilan Motion prêt à relire',detail:r.score?.motion_score!=null?`Motion Score calculé : ${Math.round(Number(r.score.motion_score))}/100 · validation requise`:'Mesures disponibles · validation professionnelle requise',action:'flag_chart_for_review',route:'clinical'});
+    if(r.key.connected&&!r.key.sufficient)priorities.push({id:`key:${p.id}`,patient_id:p.id,patient_user_id:p.patient_user_id,patient_name:name,kind:'key_insufficient',priority:'medium',title:'Collecte KEY insuffisante',detail:`${r.key.days_7}/7 jours reçus sur la dernière semaine · seuil opérationnel V1 : 5 jours`,action:'summarize_wearable_data',route:'followup'});
   }
-  priorities.sort((a,b) => priorityRank(a.priority) - priorityRank(b.priority));
-
-  const capabilities = { summarize_patient_status:true, list_missing_items:true, send_patient_reminder:'confirm_in_client', prepare_next_visit:true, summarize_motion_results:true, summarize_wearable_data:false, flag_chart_for_review:'navigation_only', open_relevant_pulse_section:true, wearable_source:'not_connected', document_source:'not_connected' };
-
-  if (action === 'patient_status' || action === 'prepare_next_visit' || action === 'summarize_motion_results') {
-    const r = records[0];
-    if (!r) return json(req, { role, record:null, capabilities });
-    const h = hoursUntil(r.next_appointment?.scheduled_start);
-    return json(req, { role, record:r, summary:{ patient_name:patientName(r.patient), preparation_percent:r.preparation.percent, missing_items:r.preparation.missing, motion_status:r.motion?.status || 'not_started', motion_score:r.score?.motion_score ?? null, score_release_status:r.score?.release_status ?? null, next_appointment:r.next_appointment, hours_to_appointment:h, request_status:r.request?.status ?? null }, priorities:priorities.filter((x:any) => x.patient_id === r.patient.id), capabilities });
-  }
-
-  if (action === 'draft_reminder') {
-    const r = records[0];
-    if (!r) return json(req, { error:'patient_not_found' }, 404);
-    return json(req, { role, patient_id:r.patient.id, draft:reminderText(patientName(r.patient), r.preparation.missing, r.next_appointment), capabilities });
-  }
-
-  return json(req, { role, mode:isPro ? 'professional' : 'member', generated_at:new Date().toISOString(), counts:{ patients:records.length, incomplete:records.filter((r:any) => r.preparation.percent < 100).length, motion_review:records.filter((r:any) => r.motion?.status === 'review').length, appointments_72h:records.filter((r:any) => { const h=hoursUntil(r.next_appointment?.scheduled_start); return h !== null && h >= 0 && h <= 72; }).length, key_insufficient:null }, priorities:priorities.slice(0,50), records:isPro ? records.slice(0,250) : records, capabilities });
+  priorities.sort((a,b)=>priorityRank(a.priority)-priorityRank(b.priority));
+  const capabilities={summarize_patient_status:true,list_missing_items:true,send_patient_reminder:'confirm_in_client',prepare_next_visit:true,summarize_motion_results:true,summarize_wearable_data:true,flag_chart_for_review:'navigation_only',open_relevant_pulse_section:true,wearable_source:'wearable_daily_metrics',document_source:'not_connected'};
+  if(['patient_status','prepare_next_visit','summarize_motion_results','summarize_wearable_data'].includes(action)){const r=records[0];if(!r)return json(req,{role,record:null,capabilities});const h=hoursUntil(r.next_appointment?.scheduled_start);return json(req,{role,record:r,summary:{patient_name:patientName(r.patient),preparation_percent:r.preparation.percent,missing_items:r.preparation.missing,motion_status:r.motion?.status||'not_started',motion_score:r.score?.motion_score??null,score_release_status:r.score?.release_status??null,next_appointment:r.next_appointment,hours_to_appointment:h,request_status:r.request?.status??null,key:r.key},priorities:priorities.filter((x:any)=>x.patient_id===r.patient.id),capabilities})}
+  if(action==='draft_reminder'){const r=records[0];if(!r)return json(req,{error:'patient_not_found'},404);return json(req,{role,patient_id:r.patient.id,draft:reminderText(patientName(r.patient),r.preparation.missing,r.next_appointment),capabilities})}
+  return json(req,{role,mode:isPro?'professional':'member',generated_at:new Date().toISOString(),counts:{patients:records.length,incomplete:records.filter((r:any)=>r.preparation.percent<100).length,motion_review:records.filter((r:any)=>r.motion?.status==='review').length,appointments_72h:records.filter((r:any)=>{const h=hoursUntil(r.next_appointment?.scheduled_start);return h!==null&&h>=0&&h<=72}).length,key_insufficient:records.filter((r:any)=>r.key.connected&&!r.key.sufficient).length},priorities:priorities.slice(0,50),records:isPro?records.slice(0,250):records,capabilities});
 });
