@@ -12,10 +12,11 @@ const [html,shortcut,consoleJs,consoleCss,routeFix,registryFn]=await Promise.all
   readFile(join(root,'supabase','functions','admin-registry','index.ts'),'utf8')
 ]);
 const syntax=spawnSync(process.execPath,['--check',join(root,'pulse-app','admin-console-v2.js')],{encoding:'utf8'});
+const canonicalAdminRoute=shortcut.includes("KomoPatientNavigation?.go?.('admin')")||shortcut.includes("KomoPatientNavigation.go('admin')");
 const checks=[
  ['admin console JavaScript parses',syntax.status===0],
  ['standalone admin assets loaded',html.includes('./admin-console-v2.js')&&html.includes('./admin-console-v2.css')],
- ['shortcut routes directly to admin',shortcut.includes("location.hash='admin'")&&!shortcut.includes('data-kcp-admin-tab')],
+ ['shortcut routes through canonical Pulse navigation',canonicalAdminRoute&&!shortcut.includes('data-kcp-admin-tab')],
  ['shortcut re-announces admin open',shortcut.includes('komo:admin-open')],
  ['native admin route is role gated',routeFix.includes("route==='admin'&&state.role!=='admin'")],
  ['native admin route preserves console',routeFix.includes('data-admin-console-v2')&&routeFix.includes('komo:admin-route-ready')],
