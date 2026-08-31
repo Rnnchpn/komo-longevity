@@ -146,8 +146,9 @@ const scripts = [
   'scripts/pulse-runtime-route-cleanup-v21.mjs',
   'scripts/pulse-runtime-debt-audit-v1.mjs',
   'scripts/pulse-runtime-architecture-audit-v37.mjs',
-  'scripts/professional-header-sync-v1.mjs',
+  // Canonical public Home must be finalized before the final public hardening + QA pass.
   'home:finalize',
+  'scripts/professional-header-sync-v1.mjs',
   // Release freeze: runs after every historical/public mutation and is re-audited.
   'scripts/pulse-freeze-runtime-v1.mjs',
   'scripts/pulse-freeze-final-manifest-v1.mjs',
