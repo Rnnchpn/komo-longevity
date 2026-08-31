@@ -1,4 +1,4 @@
-const VERSION='1.3.1-run-preview';
+const VERSION='1.4.0-run-founder';
 const RUN_PREVIEW_HOST='komo-longevity-git-feat-founder-run-v1-rnnchpns-projects.vercel.app';
 
 function client(){
@@ -6,18 +6,18 @@ function client(){
   if(runtime)return runtime;
   throw new Error('runtime_client_unavailable');
 }
+function isRunPreview(){return location.hostname===RUN_PREVIEW_HOST}
 function cleanHistory(history){
   if(!Array.isArray(history))return[];
-  return history.slice(-6).map(x=>({role:x?.role==='assistant'?'assistant':'user',content:String(x?.content||'').trim().slice(0,1200)})).filter(x=>x.content);
+  return history.slice(-8).map(x=>({role:x?.role==='assistant'?'assistant':'user',content:String(x?.content||'').trim().slice(0,1800)})).filter(x=>x.content);
 }
-async function invoke(body){
+async function sessionClient(){
   const sb=client();
   const {data:{session}}=await sb.auth.getSession();
   if(!session?.user)throw new Error('session_required');
-  const usePreview=location.hostname===RUN_PREVIEW_HOST;
-  const result=usePreview
-    ?await sb.functions.invoke('komo-operator-preview-v1',{body})
-    :await sb.functions.invoke('komo-operator-v1',{body});
+  return sb;
+}
+async function decodeResult(result){
   const {data,error}=result;
   if(error){
     let code=error?.message||'komo_api_failed';
@@ -26,6 +26,14 @@ async function invoke(body){
   }
   if(data?.error)throw new Error(data.error);
   return data;
+}
+async function invokePulse(body){
+  const sb=await sessionClient();
+  return decodeResult(await sb.functions.invoke('komo-operator-v1',{body}));
+}
+async function invokeFounder(body){
+  const sb=await sessionClient();
+  return decodeResult(await sb.functions.invoke('komo-founder-run-v1',{body}));
 }
 function fmtDate(v){if(!v)return'';const d=new Date(v);if(Number.isNaN(d.getTime()))return'';return new Intl.DateTimeFormat('fr-FR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(d)}
 function routeAction(label,route){return{label,action:'open_route',route,patient_id:''}}
@@ -63,19 +71,21 @@ function safeFallback(data){
   }
   return{role,mode:data?.mode||role,generated_at:new Date().toISOString(),fallback:true,reply:{headline,answer,suggested_actions:actions.slice(0,3),needs_professional_review:false,urgent:false,data_used:used}};
 }
-async function overview({patientId=null}={}){return invoke({action:'overview',patient_id:patientId||undefined})}
-async function patientStatus(patientId=null){return invoke({action:'patient_status',patient_id:patientId||undefined})}
+async function overview({patientId=null}={}){return invokePulse({action:'overview',patient_id:patientId||undefined})}
+async function patientStatus(patientId=null){return invokePulse({action:'patient_status',patient_id:patientId||undefined})}
 async function ask(message,{patientId=null,history=[]}={}){
   const value=String(message||'').trim();
   if(!value)throw new Error('message_required');
-  try{return await invoke({action:'chat',message:value.slice(0,2500),patient_id:patientId||undefined,history:cleanHistory(history)})}
+  const compact=cleanHistory(history);
+  if(isRunPreview())return invokeFounder({message:value.slice(0,4000),history:compact});
+  try{return await invokePulse({action:'chat',message:value.slice(0,2500),patient_id:patientId||undefined,history:compact})}
   catch(chatError){
     console.warn('[KomoAI] chat unavailable, using verified Pulse mode',chatError?.message||chatError);
     try{return safeFallback(await overview({patientId}))}
     catch(overviewError){console.error('[KomoAI] fallback unavailable',overviewError);throw chatError}
   }
 }
-async function draftReminder(patientId){if(!patientId)throw new Error('patient_id_required');return invoke({action:'draft_reminder',patient_id:patientId})}
+async function draftReminder(patientId){if(!patientId)throw new Error('patient_id_required');return invokePulse({action:'draft_reminder',patient_id:patientId})}
 
 window.KomoAI=Object.freeze({version:VERSION,ask,overview,patientStatus,draftReminder});
 window.dispatchEvent(new CustomEvent('komo:ai-ready',{detail:{version:VERSION}}));
