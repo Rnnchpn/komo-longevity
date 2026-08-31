@@ -43,8 +43,6 @@ const requiredMarkers = [
   'class="kw-final"'
 ];
 
-// Proven dead against the final EN/FR/ES Home DOM on the production-equivalent
-// preview. These blocks are fully superseded by later canonical visual layers.
 const deadStyleIds = [
   'homepage-seo-v6-style',
   'kmx-myocare-style',
@@ -97,7 +95,15 @@ function auditStyleUsage(html) {
     const selectorIds = new Set([...css.matchAll(/#([a-zA-Z_][\w-]*)/g)].map((m) => m[1]));
     const matchedClasses = [...selectorClasses].filter((name) => markupClasses.has(name));
     const matchedIds = [...selectorIds].filter((name) => markupIds.has(name));
-    layers.push({ id, classTotal: selectorClasses.size, classUsed: matchedClasses.length, idTotal: selectorIds.size, idUsed: matchedIds.length });
+    layers.push({
+      id,
+      classTotal: selectorClasses.size,
+      classUsed: matchedClasses.length,
+      classes: matchedClasses,
+      idTotal: selectorIds.size,
+      idUsed: matchedIds.length,
+      ids: matchedIds
+    });
   }
   return layers;
 }
@@ -168,7 +174,8 @@ async function finalize() {
     console.log(`[home-owner] PASS · ${file} · ${html.length} bytes · ${styleIds.length} named style blocks`);
     if (file.endsWith('/fr/index.html')) {
       for (const layer of auditStyleUsage(html)) {
-        console.log(`[home-owner] css-usage · ${layer.id} · classes ${layer.classUsed}/${layer.classTotal} · ids ${layer.idUsed}/${layer.idTotal}`);
+        const owned = layer.classes.length ? ` · used ${layer.classes.join(',')}` : '';
+        console.log(`[home-owner] css-usage · ${layer.id} · classes ${layer.classUsed}/${layer.classTotal} · ids ${layer.idUsed}/${layer.idTotal}${owned}`);
       }
     }
   }
