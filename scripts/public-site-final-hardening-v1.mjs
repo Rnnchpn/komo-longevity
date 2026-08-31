@@ -19,7 +19,16 @@ const partner={
   fr:['fr/partners/index.html','Prêt à déployer KŌMØ ?','Utilisez l’onboarding professionnel guidé : nous qualifierons votre structure, le volume envisagé et le bon modèle avant une démonstration ou une proposition.','/fr/contact/?intent=partner','Démarrer mon projet KŌMØ →'],
   es:['es/partners/index.html','¿Listo para desplegar KŌMØ?','Utiliza el onboarding profesional guiado para que podamos cualificar tu organización, volumen y modelo antes de una demostración o propuesta.','/es/contact/?intent=partner','Empezar mi proyecto KŌMØ →']
 };
-for(const [lang,[rel,title,lead,href,cta]] of Object.entries(partner)){const p=join(site,rel);let h=await readFile(p,'utf8');const section=`<section class="formsec" id="info"><div class="sh" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end"><div><p class="k">KŌMØ PRO · NEXT STEP</p><h2 class="h2">${title}</h2></div><div><p class="formintro">${lead}</p><p style="margin:24px 0 0"><a href="${href}" style="display:inline-flex;min-height:50px;align-items:center;padding:0 20px;border-radius:10px;background:#ded0b9;color:#090a0a;text-decoration:none;font-size:10px;font-weight:850;text-transform:uppercase">${cta}</a></p><p class="note" style="margin-top:16px">contact@komolongevity.com</p></div></div></section>`;h=h.replace(/<section class="formsec" id="info">[\s\S]*?<\/section>/,section).replace(/<script>[\s\S]*?proForm[\s\S]*?<\/script>/g,'');await writeFile(p,h)}
+for(const [lang,[rel,title,lead,href,cta]] of Object.entries(partner)){
+  const p=join(site,rel);let h=await readFile(p,'utf8');
+  const section=`<section class="formsec" id="info"><div class="sh" style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:end"><div><p class="k">KŌMØ PRO · NEXT STEP</p><h2 class="h2">${title}</h2></div><div><p class="formintro">${lead}</p><p style="margin:24px 0 0"><a href="${href}" style="display:inline-flex;min-height:50px;align-items:center;padding:0 20px;border-radius:10px;background:#ded0b9;color:#090a0a;text-decoration:none;font-size:10px;font-weight:850;text-transform:uppercase">${cta}</a></p><p class="note" style="margin-top:16px">contact@komolongevity.com</p></div></div></section>`;
+  const start=h.indexOf('<section class="formsec" id="info">');
+  const next=h.indexOf('<section class="close"',start+1);
+  if(start>=0&&next>start) h=h.slice(0,start)+section+h.slice(next);
+  else h=h.replace(/<section class="formsec" id="info">[\s\S]*?<\/section>/,section);
+  h=h.replace(/<script[^>]*>[\s\S]*?(?:proForm|getElementById\(['"]proForm['"]\))[\s\S]*?<\/script>/g,'');
+  await writeFile(p,h);
+}
 
 const contact={
   en:['contact/index.html','KŌMØ for Professionals — Partner enquiry','Tell KŌMØ about your clinic, longevity centre, fitness club, hotel, corporate or multi-site project.'],
