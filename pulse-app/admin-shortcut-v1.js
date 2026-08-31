@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import './admin-myocare-v1.js';
 const URL='https://uqlolefsiktbznnymriy.supabase.co',KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n',REM='komo_pulse_remember';
 let client=null,role=null,userId=null,timer=null;
 function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
