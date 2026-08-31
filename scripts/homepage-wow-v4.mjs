@@ -94,7 +94,28 @@ const JS = `<script id="homepage-wow-v4-js">
   }
   if(!reduced){
     let raf=0;
-    const onScroll=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;const y=window.scrollY||0;const hero=q('.kwo-logo');if(hero){hero.style.setProperty('--wow-hero-y',Math.min(34,y*.055)+'px');hero.style.setProperty('--wow-hero-s',String(Math.max(.965,1-y*.000035)))}const ss=q('.kw-sensors');if(ss){const r=ss.getBoundingClientRect(),vh=innerHeight||800,p=Math.max(-1,Math.min(1,(vh*.5-(r.top+r.height*.5))/vh));const img=q('.kw-sensors__image',ss),halo=q('.kw-sensors__halo',ss);if(img){img.style.setProperty('--wow-sensor-y',(p*-24)+'px');img.style.setProperty('--wow-sensor-r',(p*1.2)+'deg')}if(halo)halo.style.setProperty('--wow-sensor-scale',String(1+p*.025))}})});};
+    const onScroll=()=>{
+      if(raf)return;
+      raf=requestAnimationFrame(()=>{
+        raf=0;
+        const y=window.scrollY||0;
+        const hero=q('.kwo-logo');
+        if(hero){
+          hero.style.setProperty('--wow-hero-y',Math.min(34,y*.055)+'px');
+          hero.style.setProperty('--wow-hero-s',String(Math.max(.965,1-y*.000035)));
+        }
+        const ss=q('.kw-sensors');
+        if(ss){
+          const r=ss.getBoundingClientRect(),vh=innerHeight||800,p=Math.max(-1,Math.min(1,(vh*.5-(r.top+r.height*.5))/vh));
+          const img=q('.kw-sensors__image',ss),halo=q('.kw-sensors__halo',ss);
+          if(img){
+            img.style.setProperty('--wow-sensor-y',(p*-24)+'px');
+            img.style.setProperty('--wow-sensor-r',(p*1.2)+'deg');
+          }
+          if(halo)halo.style.setProperty('--wow-sensor-scale',String(1+p*.025));
+        }
+      });
+    };
     addEventListener('scroll',onScroll,{passive:true});onScroll();
     const pulse=q('.kw-pulse-ui');
     if(pulse&&matchMedia('(pointer:fine)').matches){const host=q('.kw-pulse-v3');host?.addEventListener('pointermove',e=>{const r=pulse.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;pulse.style.setProperty('--wow-tilt-y',(x*4)+'deg');pulse.style.setProperty('--wow-tilt-x',(-y*4)+'deg')});host?.addEventListener('pointerleave',()=>{pulse.style.setProperty('--wow-tilt-y','0deg');pulse.style.setProperty('--wow-tilt-x','0deg')});}
