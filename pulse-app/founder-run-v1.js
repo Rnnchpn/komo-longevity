@@ -3,6 +3,8 @@ const previewHost=()=>location.hostname.endsWith('.vercel.app')||location.hostna
 const runtimeRole=()=>window.KomoRuntime?.role||window.KomoRuntime?.getContext?.()?.role||'member';
 const canRun=()=>runtimeRole()==='founder'||(previewHost()&&runtimeRole()==='admin');
 const qs=(s,r=document)=>r.querySelector(s);
+const qsAll=(s,r=document)=>[...r.querySelectorAll(s)];
+let mounted=false,scheduled=0;
 
 const icons={drive:'▦',mail:'✉',calendar:'◷',pulse:'P',web:'↗'};
 const workspaceCopy={
@@ -59,9 +61,20 @@ function bindRun(){
   form?.addEventListener('submit',e=>{e.preventDefault();const value=input?.value.trim();if(!value)return;addMessage(value,'user');input.value='';setTimeout(()=>addMessage('Le shell RUN fonctionne. La prochaine étape est de connecter cette commande au registre d’actions sécurisé (Drive, Mail, Calendar, Pulse).','agent'),120)});
   input?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form?.requestSubmit()}});renderPanel('Drive')
 }
-function qsAll(s,r=document){return [...r.querySelectorAll(s)]}
-function mount(){if(location.hash!==RUN_HASH)return;if(!canRun()){if(previewHost())console.warn('[KOMO RUN] access denied for role',runtimeRole());window.KomoPatientNavigation?.go?.('home');return}const root=qs('#viewRoot');if(!root)return;setHeader();root.innerHTML=shell();bindRun();window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:'run'}}))}
+function mount(){
+  if(location.hash!==RUN_HASH){mounted=false;return}
+  if(!canRun()){if(previewHost())console.warn('[KOMO RUN] access denied for role',runtimeRole());window.KomoPatientNavigation?.go?.('home');return}
+  const root=qs('#viewRoot');if(!root)return;
+  setHeader();
+  if(mounted&&root.querySelector('[data-kfr]'))return;
+  root.innerHTML=shell();bindRun();mounted=true;
+  window.dispatchEvent(new CustomEvent('komo:run-ready',{detail:{route:'run'}}));
+}
 function ensureShortcut(){const top=qs('.topbar-actions');if(!top)return;let btn=qs('[data-founder-run]');if(!canRun()){btn?.remove();return}if(!btn){btn=document.createElement('button');btn.type='button';btn.className='admin-shortcut';btn.dataset.founderRun='1';btn.textContent='RUN';btn.setAttribute('aria-label','Ouvrir KŌMŌ RUN');btn.addEventListener('click',()=>window.KomoPatientNavigation?.go?.('run'));top.prepend(btn)}}
-function schedule(){setTimeout(()=>{ensureShortcut();if(location.hash===RUN_HASH)mount()},40)}
-['hashchange','pageshow','komo:session-ready','komo:data-ready','komo:route-ready'].forEach(evt=>window.addEventListener(evt,schedule));document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,450));setTimeout(schedule,1000);
+function schedule(delay=40){clearTimeout(scheduled);scheduled=setTimeout(()=>{ensureShortcut();mount()},delay)}
+window.addEventListener('hashchange',()=>schedule(20));
+window.addEventListener('pageshow',()=>schedule(80));
+['komo:session-ready','komo:data-ready'].forEach(evt=>window.addEventListener(evt,()=>schedule(50)));
+document.addEventListener('DOMContentLoaded',()=>schedule(450));
+setTimeout(()=>schedule(0),1000);
 window.KomoFounderRun={mount,canRun};
