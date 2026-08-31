@@ -14,13 +14,22 @@ if(currentStart<0||currentEnd<0) throw new Error('Pulse app route boundaries not
 const currentFn=`function currentRoute(){const route=location.hash.replace(/^#/,'')||'home';if(route==='clinical'&&!['professional','admin'].includes(state.role))return'home';return['home','results','path','documents','explore','clinical','profile','motion','mykomo','club','trajectory'].includes(route)?route:'home'}\n`;
 app=app.slice(0,currentStart)+currentFn+app.slice(currentEnd);
 
-const renderStart='function renderRoute(route){renderNavigation();';
-const renderIdx=app.indexOf(renderStart);
-if(renderIdx<0) throw new Error('Pulse app renderRoute boundary not found');
-const pagesIdx=app.indexOf('const pages=',renderIdx+renderStart.length);
-if(pagesIdx<0) throw new Error('Pulse app pages boundary not found');
-const delegated="function renderRoute(route){renderNavigation();if(['motion','mykomo','club','trajectory'].includes(route)){window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route,source:'app-external-owner'}}));return}";
-app=app.slice(0,renderIdx)+delegated+app.slice(pagesIdx);
+// Modern patient destinations have dedicated owners. Inject delegation directly
+// after renderNavigation without replacing the rest of renderRoute: this keeps
+// Home's canonical host and all existing quiet-mount safeguards intact.
+if(!app.includes("source:'app-external-owner'")){
+  const renderStart=/function renderRoute\(route\)\{\s*renderNavigation\(\);/;
+  if(!renderStart.test(app)) throw new Error('Pulse app renderRoute boundary not found');
+  const delegated=`function renderRoute(route){
+  renderNavigation();
+  if(['motion','mykomo','club','trajectory'].includes(route)){
+    window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route,source:'app-external-owner'}}));
+    return;
+  }`;
+  app=app.replace(renderStart,delegated);
+}
+
+if(!app.includes('data-home-owner="patient-home-command-v1"')) throw new Error('Canonical patient Home owner missing after route pass');
 await writeFile(appPath,app,'utf8');
 
 // Agenda is already consolidated later in the production pipeline. Do not rewrite it here.
@@ -32,10 +41,11 @@ const checks=[
  ['app recognizes Club',app.includes("'club'")],
  ['app recognizes Trajectoire',app.includes("'trajectory'")],
  ['app delegates modern patient routes',app.includes("source:'app-external-owner'")],
+ ['Home keeps canonical owner',app.includes('data-home-owner="patient-home-command-v1"')],
  ['Agenda owns documents route',booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents')return;")],
  ['Agenda refresh is documents based',booking.includes("location.hash.replace(/^#/,'')!=='documents'")],
  ['Agenda has no patient role block',!booking.includes("function renderPatient(){if(location.hash.replace(/^#/,'')!=='documents'||['professional','admin'].includes(S.role))return;")]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-route-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log('[pulse-route-v2] canonical ownership fixed for Motion · My KŌMØ · Club · Trajectoire; Agenda preserved');
+console.log('[pulse-route-v2] canonical ownership preserved for Home · Motion · My KŌMØ · Club · Trajectoire; Agenda preserved');
