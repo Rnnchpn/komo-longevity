@@ -1,10 +1,11 @@
 {
-  "version": "2026-08-31-v38-home-v3",
+  "version": "2026-08-31-freeze-runtime-v1",
   "principles": [
     "one render owner per declared surface",
     "controllers may orchestrate data, navigation, and bounded subflows",
     "extensions are presentation-only and must not write routes or mutate #viewRoot",
-    "all reachable structural route/view writers must be classified before redesign"
+    "all reachable structural route/view writers must be classified before release",
+    "desktop, tablet and mobile share the same canonical content contract"
   ],
   "surfaces": {
     "home": {
@@ -32,11 +33,6 @@
       "controllers": [],
       "extensions": []
     },
-    "therapy": {
-      "owner": "patient-v4.js",
-      "controllers": [],
-      "extensions": []
-    },
     "documents": {
       "owner": "agenda-hub-v4.js",
       "controllers": ["booking-layer-v1.js", "patient-intake-v1.js", "pulse-free-continuity-v2.js", "questionnaire-engine-v1.js"],
@@ -55,7 +51,7 @@
     "profile": {
       "owner": "profile-v2.js",
       "controllers": [],
-      "extensions": []
+      "extensions": ["account-hub-v2.js", "account-privacy-v1.js"]
     },
     "messages": {
       "owner": "care-messaging-v2.js",
