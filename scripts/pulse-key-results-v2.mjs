@@ -90,3 +90,40 @@ await import('./pulse-iphone-density-v1.mjs');
 await import('./pulse-auth-web-v1.mjs');
 // Commercial Home is the final route owner: one cockpit for Motion, Age, KEY, next action, Clinical and trajectory.
 await import('./pulse-home-web-v1.mjs');
+
+// Results single-owner consolidation. The dedicated Results runtime is the only renderer allowed on #results.
+const homeOwnerPath=join(pulse,'patient-home-command-v1.js');
+let homeOwner=await readFile(homeOwnerPath,'utf8');
+homeOwner=homeOwner.replace(/import\s+['"]\.\/patient-results-ownership-v2\.js(?:\?v=[^'"]+)?['"];?\s*/g,'');
+await writeFile(homeOwnerPath,homeOwner,'utf8');
+
+const canonicalResultsPath=join(pulse,'patient-canonical-results.js');
+let canonicalResults=await readFile(canonicalResultsPath,'utf8');
+canonicalResults=canonicalResults.replace("if(!['#path','#results'].includes(location.hash))return;","if(location.hash!=='#path')return;");
+canonicalResults=canonicalResults.replace("if(hash==='#path'||hash==='#results')renderPath(result);","if(hash==='#path')renderPath(result);");
+if(canonicalResults.includes("['#path','#results']")||canonicalResults.includes("hash==='#path'||hash==='#results'"))throw new Error('[pulse-key-results-v2] legacy canonical Results owner still active');
+await writeFile(canonicalResultsPath,canonicalResults,'utf8');
+
+const currentResultsPath=join(pulse,'results-motion-journey-v1.js');
+let currentResults=await readFile(currentResultsPath,'utf8');
+currentResults=currentResults.replace("const go=r=>{location.hash=`#${r}`};","const go=r=>window.KomoPatientNavigation?.go?.(r);");
+currentResults=currentResults.replace("const obs=new MutationObserver(()=>{if(route()==='results'&&memberMode()&&!document.querySelector('[data-kresults-v1]'))schedule(false,120)});obs.observe(document.body,{childList:true,subtree:true});\n",'');
+if(currentResults.includes('obs.observe(document.body'))throw new Error('[pulse-key-results-v2] Results body observer remains');
+if(!currentResults.includes('window.KomoPatientResultsV1'))throw new Error('[pulse-key-results-v2] dedicated Results owner missing');
+await writeFile(currentResultsPath,currentResults,'utf8');
+
+let resultsHtml=await readFile(htmlPath,'utf8');
+resultsHtml=resultsHtml.replace(/\s*<script(?: type="module")? src="\.\/patient-results-ownership-v2\.js(?:\?v=[^"]+)?"><\/script>/g,'');
+await writeFile(htmlPath,resultsHtml,'utf8');
+
+const resultsOwnerChecks=[
+  ['Home no longer imports Results guard',!homeOwner.includes('patient-results-ownership-v2.js')],
+  ['legacy canonical renderer no longer owns #results',!canonicalResults.includes("['#path','#results']")&&!canonicalResults.includes("hash==='#path'||hash==='#results'")],
+  ['dedicated Results runtime remains owner',currentResults.includes('window.KomoPatientResultsV1')&&currentResults.includes("route()!=='results'")],
+  ['dedicated Results uses canonical navigation',currentResults.includes('KomoPatientNavigation?.go?.(r)')],
+  ['dedicated Results has no whole-body observer',!currentResults.includes('obs.observe(document.body')],
+  ['Results guard is not a direct script',!resultsHtml.includes('patient-results-ownership-v2.js')]
+];
+for(const [label,ok] of resultsOwnerChecks)console.log(`[pulse-results-single-owner] ${ok?'OK':'FAIL'} · ${label}`);
+if(resultsOwnerChecks.some(([,ok])=>!ok))process.exit(1);
+console.log('[pulse-results-single-owner] PASS · #results has one visible renderer and one event-driven owner');
