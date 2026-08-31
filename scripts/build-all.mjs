@@ -1,6 +1,7 @@
 import { spawnSync } from 'node:child_process';
 
 // Production pipeline — Method score clarity V3 is applied after the scientific Method layer.
+// Public Home mutations use one canonical entrypoint while their historical order is preserved.
 const scripts = [
   'scripts/build.mjs',
   'scripts/after-build.mjs',
@@ -15,8 +16,8 @@ const scripts = [
   'scripts/library-i18n-v2.mjs',
   'scripts/seo-authority-cluster-v1.mjs',
   'scripts/media-webp.mjs',
-  'scripts/homepage-v1.mjs',
-  'scripts/homepage-case.mjs',
+  'home:homepage-v1.mjs',
+  'home:homepage-case.mjs',
   'scripts/product-architecture-v2.mjs',
   'scripts/product-nav-sync-v2.mjs',
   'scripts/landing-mobile-v3.mjs',
@@ -26,12 +27,12 @@ const scripts = [
   'scripts/professional-case-v3.mjs',
   'scripts/professional-case-polish.mjs',
   'scripts/professional-case-fr-polish.mjs',
-  'scripts/homepage-clarity-v4.mjs',
-  'scripts/homepage-clarity-v4-polish.mjs',
-  'scripts/homepage-seo-v6.mjs',
+  'home:homepage-clarity-v4.mjs',
+  'home:homepage-clarity-v4-polish.mjs',
+  'home:homepage-seo-v6.mjs',
   'scripts/professional-pulse-v2.mjs',
   'scripts/pulse-professional-clarity-v1.mjs',
-  'scripts/homepage-case-qa.mjs',
+  'home:homepage-case-qa.mjs',
   'scripts/seo-growth-v1.mjs',
   'scripts/seo-subpages-v1.mjs',
   'scripts/fr-product-copy-polish-v2.mjs',
@@ -47,9 +48,9 @@ const scripts = [
   'scripts/check-seo-qa.mjs',
   'scripts/seo-sitemap-v2.mjs',
   'scripts/patient-vitrine-polish-v1.mjs',
-  'scripts/homepage-minimal-patient-v1.mjs',
-  'scripts/homepage-patient-final-v2.mjs',
-  'scripts/homepage-care-modes-v1.mjs',
+  'home:homepage-minimal-patient-v1.mjs',
+  'home:homepage-patient-final-v2.mjs',
+  'home:homepage-care-modes-v1.mjs',
   'scripts/method-science-v2.mjs',
   'scripts/method-science-polish-v1.mjs',
   'scripts/method-score-clarity-v3.mjs',
@@ -62,7 +63,7 @@ const scripts = [
   'scripts/pulse-platform-bridge-v1.mjs',
   'scripts/pulse-beta-release-v1.mjs',
   'scripts/pulse-platform-qa.mjs',
-  'scripts/homepage-hero-message-v1.mjs',
+  'home:homepage-hero-message-v1.mjs',
   'scripts/admin-route-fix-v1.mjs',
   'scripts/auth-gateway-inject-v2.mjs',
   'scripts/clinical-multicenter-v1.mjs',
@@ -106,8 +107,8 @@ const scripts = [
   'scripts/pulse-navigation-freeze-v1.mjs',
   'scripts/pulse-navigation-freeze-qa-v1.mjs',
   'scripts/pulse-booking-directory-map-qa-v1.mjs',
-  'scripts/homepage-product-stepup-v1.mjs',
-  'scripts/homepage-hero-image-v2.mjs',
+  'home:homepage-product-stepup-v1.mjs',
+  'home:homepage-hero-image-v2.mjs',
   'scripts/pulse-account-rdv-recovery-v1.mjs',
   'scripts/pulse-account-rdv-recovery-qa-v1.mjs',
   'scripts/pulse-professional-stability-v1.mjs',
@@ -120,11 +121,11 @@ const scripts = [
   'scripts/pulse-daily-engagement-polish-qa-v1.mjs',
   'scripts/pulse-production-consolidation-v1.mjs',
   'scripts/pulse-production-consolidation-qa-v1.mjs',
-  'scripts/homepage-whoop-stepup-v2.mjs',
-  'scripts/homepage-whoop-polish-v3.mjs',
+  'home:homepage-whoop-stepup-v2.mjs',
+  'home:homepage-whoop-polish-v3.mjs',
   'scripts/pulse-tests-status-cockpit-v1.mjs',
-  'scripts/homepage-wow-v4.mjs',
-  'scripts/homepage-brand-visual-v5.mjs',
+  'home:homepage-wow-v4.mjs',
+  'home:homepage-brand-visual-v5.mjs',
   'scripts/komo-key-public-page-v1.mjs',
   'scripts/komo-key-polish-v2.mjs',
   'scripts/life-v1-qa.mjs',
@@ -145,6 +146,7 @@ const scripts = [
   'scripts/pulse-runtime-debt-audit-v1.mjs',
   'scripts/pulse-runtime-architecture-audit-v37.mjs',
   'scripts/professional-header-sync-v1.mjs',
+  'home:finalize',
   // Release freeze: runs after every historical/public mutation and is re-audited.
   'scripts/pulse-freeze-runtime-v1.mjs',
   'scripts/pulse-freeze-final-manifest-v1.mjs',
@@ -152,9 +154,14 @@ const scripts = [
   'scripts/pulse-runtime-architecture-audit-v37.mjs'
 ];
 
-for (const script of scripts) {
-  console.log(`[build-all] ${script}`);
-  const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
+for (const entry of scripts) {
+  const isHome = entry.startsWith('home:');
+  const script = isHome ? 'scripts/homepage-canonical-owner-v1.mjs' : entry;
+  const homeStep = isHome ? entry.slice('home:'.length) : null;
+  const args = !isHome ? [] : homeStep === 'finalize' ? ['finalize'] : ['legacy', homeStep];
+  const label = isHome ? `${script} ${args.join(' ')}` : script;
+  console.log(`[build-all] ${label}`);
+  const run = spawnSync(process.execPath, [script, ...args], { stdio: 'inherit' });
   if (run.status !== 0) process.exit(run.status ?? 1);
 }
 
