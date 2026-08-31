@@ -23,7 +23,7 @@ let booking=await readFile(bookingPath,'utf8');
 // - phone/iPad shell: adaptive-shell-v4 only
 // - home: My KŌMØ only
 // - patient Tests: tests-v1 + patient-assessment-trio-v1
-// - My KŌMØ Score: progression-v2 route owner, replaced by patient score page
+// - Trajectory: progression-v2 / data-ktrajectory-v1
 // - KŌMØ Therapy: patient-v4 route owner, replaced by therapy page
 // - Agenda et réseau (#documents): booking-layer-v1 only
 // - patient-motion-booking-v2: CTA bridge only, never renderer/data loader
@@ -45,7 +45,7 @@ function stripBundledFile(source,file){
 }
 for(const file of ['mobile-menu-v3.css','tablet-patient-v1.css','home-summary-v1.css'])css=stripBundledFile(css,file);
 
-// Quiet-mount canonical Home/Score/Agenda/Therapy/Clinical owners.
+// Quiet-mount canonical Home/Trajectory/Agenda/Therapy/Clinical owners.
 if(!app.includes("['home','path','documents','plan','messages','clinical'].includes(route)")){
   const oldRoutes="['path','documents','plan','messages','clinical'].includes(route)";
   if(!app.includes(oldRoutes))throw new Error('[pulse-production-consolidation] dedicated route list changed');
@@ -56,10 +56,12 @@ if(!app.includes("const labels={home:['MY KŌMØ','Votre espace personnel.'],pat
   if(!app.includes(oldLabels))throw new Error('[pulse-production-consolidation] route labels contract changed');
   app=app.replace(oldLabels,"const labels={home:['MY KŌMØ','Votre espace personnel.'],path:");
 }
-if(!app.includes("const selectors={home:'[data-my-komo-home]',path:'[data-kpv2]'")){
-  const oldSelectors="const selectors={path:'[data-kpv2]'";
-  if(!app.includes(oldSelectors))throw new Error('[pulse-production-consolidation] route selectors contract changed');
-  app=app.replace(oldSelectors,"const selectors={home:'[data-my-komo-home]',path:'[data-kpv2]'");
+if(!app.includes("const selectors={home:'[data-my-komo-home]',path:'[data-ktrajectory-v1]'")){
+  const currentSelectors="const selectors={path:'[data-ktrajectory-v1]'";
+  const legacySelectors="const selectors={path:'[data-kpv2]'";
+  if(app.includes(currentSelectors))app=app.replace(currentSelectors,"const selectors={home:'[data-my-komo-home]',path:'[data-ktrajectory-v1]'");
+  else if(app.includes(legacySelectors))app=app.replace(legacySelectors,"const selectors={home:'[data-my-komo-home]',path:'[data-ktrajectory-v1]'");
+  else throw new Error('[pulse-production-consolidation] route selectors contract changed');
 }
 await writeFile(appPath,app);
 
