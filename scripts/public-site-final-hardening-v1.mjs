@@ -2,6 +2,7 @@ import { readdir, readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url))), site=join(root,'site');
+const assetVersion=(process.env.VERCEL_GIT_COMMIT_SHA||Date.now().toString(36)).slice(0,12);
 
 async function walk(dir,out=[]){for(const e of await readdir(dir,{withFileTypes:true})){const p=join(dir,e.name);if(e.isDirectory())await walk(p,out);else if(e.name.endsWith('.html'))out.push(p)}return out}
 const replacements=[
@@ -12,7 +13,15 @@ const replacements=[
   [/href="\/confidentialite\/?"/g,'href="/privacy/"'],[/href="\/mentions-legales\/?"/g,'href="/legal/"'],[/href="\/legal\/conditions-generales-utilisation\/?"/g,'href="/terms/"']
 ];
 let patched=0;
-for(const p of await walk(site)){let h=await readFile(p,'utf8'),b=h;h=h.replace(/<script[^>]+src=["']\/_vercel\/insights\/script\.js["'][^>]*><\/script>/g,'').replace(/<script id=["']komo-public-analytics["']>[\s\S]*?<\/script>/g,'');for(const [r,v] of replacements)h=h.replace(r,v);if(h!==b){await writeFile(p,h);patched++}}
+for(const p of await walk(site)){
+  let h=await readFile(p,'utf8'),b=h;
+  h=h.replace(/<script[^>]+src=["']\/_vercel\/insights\/script\.js["'][^>]*><\/script>/g,'').replace(/<script id=["']komo-public-analytics["']>[\s\S]*?<\/script>/g,'');
+  for(const [r,v] of replacements)h=h.replace(r,v);
+  h=h.replace(/\b(href|src)="(\/assets\/[^"]+\.(?:css|js))(?:\?[^"#]*)?"/g,(_,attr,url)=>`${attr}="${url}?v=${assetVersion}"`);
+  h=h.replace(/<meta name="komo-build" content="[^"]*">/g,'');
+  if(h.includes('</head>'))h=h.replace('</head>',`<meta name="komo-build" content="${assetVersion}"></head>`);
+  if(h!==b){await writeFile(p,h);patched++}
+}
 
 const partner={
   en:['partners/index.html','Ready to deploy KŌMØ?','Use the guided professional onboarding so we can qualify your organisation, volume and deployment model before a demonstration or proposal.','/contact/?intent=partner','Start my KŌMØ project →'],
@@ -44,8 +53,8 @@ const contact={
 for(const [lang,[rel,title,desc]] of Object.entries(contact)){const p=join(site,rel);let h=await readFile(p,'utf8');h=h.replace(/<meta property="og:title" content="[^"]*">/,`<meta property="og:title" content="${title}">`).replace(/<meta property="og:description" content="[^"]*">/,`<meta property="og:description" content="${desc}">`);await writeFile(p,h)}
 
 await writeFile(join(site,'robots.txt'),'User-agent: *\nAllow: /\nSitemap: https://komolongevity.com/sitemap.xml\n');await mkdir(join(site,'pulse-v12'),{recursive:true});await writeFile(join(site,'pulse-v12','robots.txt'),'User-agent: *\nDisallow: /\n');
-async function alias(rel,target,lang='fr'){const d=join(site,...rel.split('/').filter(Boolean));await mkdir(d,{recursive:true});await writeFile(join(d,'index.html'),`<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${target}"><link rel="canonical" href="https://komolongevity.com${target}"><title>KŌMØ</title></head><body><a href="${target}">Continue →</a><script>location.replace(${JSON.stringify(target)});</script></body></html>`)}
+async function alias(rel,target,lang='fr'){const d=join(site,...rel.split('/').filter(Boolean));await mkdir(d,{recursive:true});await writeFile(join(d,'index.html'),`<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${target}"><link rel="canonical" href="https://komolongevity.com${target}"><meta name="komo-build" content="${assetVersion}"><title>KŌMØ</title></head><body><a href="${target}">Continue →</a><script>location.replace(${JSON.stringify(target)});</script></body></html>`)}
 await alias('fr/confidentialite','/fr/privacy/');await alias('fr/mentions-legales','/fr/legal/');await alias('fr/cgv','/fr/terms/');await alias('fr/method','/fr/methode/');await alias('confidentialite','/privacy/','en');await alias('mentions-legales','/legal/','en');await alias('cgv','/terms/','en');await alias('legal/conditions-generales-utilisation','/terms/');await alias('media','/media','en');
 
 const sm=join(site,'sitemap.xml');let s=await readFile(sm,'utf8');for(const [u,p] of [['https://komolongevity.com/','1.0'],['https://komolongevity.com/fr/','1.0'],['https://komolongevity.com/es/','1.0'],['https://komolongevity.com/contact/','0.7'],['https://komolongevity.com/es/contact/','0.7'],['https://komolongevity.com/locomotor/','0.8'],['https://komolongevity.com/es/locomotor/','0.8']])if(!s.includes(`<loc>${u}</loc>`))s=s.replace('</urlset>',`  <url><loc>${u}</loc><priority>${p}</priority></url>\n</urlset>`);await writeFile(sm,s);
-console.log(`[public-site-final-hardening] ${patched} HTML files normalized; legacy partner form removed; robots, aliases and sitemap repaired.`);
+console.log(`[public-site-final-hardening] ${patched} HTML files normalized; legacy partner form removed; assets busted with ${assetVersion}; robots, aliases and sitemap repaired.`);
