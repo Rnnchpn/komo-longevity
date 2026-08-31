@@ -1,17 +1,9 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const VERSION='1.1.0';
 
-const VERSION='1.0.0';
-const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
-const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
-const REMEMBER_KEY='komo_pulse_remember';
-let fallbackClient=null;
-
-function storage(){return localStorage.getItem(REMEMBER_KEY)==='1'?localStorage:sessionStorage}
 function client(){
   const runtime=window.KomoRuntime?.client||window.KomoRuntime?.getContext?.()?.client;
   if(runtime)return runtime;
-  if(!fallbackClient)fallbackClient=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-  return fallbackClient;
+  throw new Error('runtime_client_unavailable');
 }
 function cleanHistory(history){
   if(!Array.isArray(history))return[];
