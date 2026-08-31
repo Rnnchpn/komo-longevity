@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260831-home-mobile-v3';
+const release='20260831-home-mobile-v4-komo-ai';
 const navRelease='20260830-patient-nav-v7';
 const cssFile='patient-home-command-v1.css';
 const heroCssFile='patient-home-hero-v2.css';
@@ -14,29 +14,31 @@ const mobileCssFile='patient-mobile-v1.css';
 const jsFile='patient-home-command-v1.js';
 const dailyJsFile='patient-home-daily-v2.js';
 const mobileJsFile='patient-mobile-v1.js';
+const aiClientFile='komo-ai-client-v1.js';
 const clarityJsFile='patient-v1-clarity.js';
 const entryFile='patient-home-entry-v1.js';
 const navFile='pulse-bottom-nav-v6.js';
 
-for(const file of [cssFile,heroCssFile,dailyCssFile,mobileCssFile,jsFile,dailyJsFile,mobileJsFile,navFile]){
+for(const file of [cssFile,heroCssFile,dailyCssFile,mobileCssFile,jsFile,dailyJsFile,mobileJsFile,aiClientFile,navFile]){
   await copyFile(join(root,'pulse-app',file),join(pulse,file));
 }
 
-// The canonical Home owner stays direct for interaction ownership. Daily and
-// mobile presentation are side-effect imports, so they add no extra script tags.
+// The canonical Home owner stays direct for interaction ownership. Daily,
+// mobile presentation and Komo AI are side-effect imports, so they add no
+// extra direct script tags to the final Pulse shell.
 const jsPath=join(pulse,jsFile);
 let homeJs=await readFile(jsPath,'utf8');
-const sideEffects=`import './${dailyJsFile}';\nimport './${mobileJsFile}';\n`;
-if(!homeJs.includes(`import './${dailyJsFile}'`))homeJs=sideEffects+homeJs;
+const sideEffects=`import './${aiClientFile}';\nimport './${dailyJsFile}';\nimport './${mobileJsFile}';\n`;
+if(!homeJs.includes(`import './${aiClientFile}'`))homeJs=sideEffects+homeJs;
 await writeFile(jsPath,homeJs,'utf8');
 
 let html=await readFile(htmlPath,'utf8');
 html=html.replace(/\s*<script type="module" src="\.\/patient-home-datawall-v3\.js(?:\?v=[^"]+)?"><\/script>/g,'');
 for(const file of [cssFile,heroCssFile,dailyCssFile,mobileCssFile]){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  html=html.replace(new RegExp(`\\s*<link rel="stylesheet" href="\\./${escaped}(?:\\?v=[^\"]+)?"\\s*\\/?>`,'g'),'');
+  html=html.replace(new RegExp(`\\s*<link rel="stylesheet" href="\\./${escaped}(?:\\?v[^\"]+)?"\\s*\\/?>`,'g'),'');
 }
-for(const file of [entryFile,jsFile,dailyJsFile,mobileJsFile,clarityJsFile]){
+for(const file of [entryFile,jsFile,dailyJsFile,mobileJsFile,aiClientFile,clarityJsFile]){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   html=html.replace(new RegExp(`\\s*<script(?: type="module")? src="\\./${escaped}(?:\\?v=[^\"]+)?"><\\/script>`,'g'),'');
 }
@@ -45,7 +47,7 @@ html=html.replace('</head>',`  <link rel="stylesheet" href="./${cssFile}?v=${rel
 html=html.replace('</body>',`  <script type="module" src="./${jsFile}?v=${release}"></script>\n</body>`);
 await writeFile(htmlPath,html,'utf8');
 
-const [css,heroCss,dailyCss,mobileCss,js,dailyJs,mobileJs,nav,final]=await Promise.all([
+const [css,heroCss,dailyCss,mobileCss,js,dailyJs,mobileJs,aiClient,nav,final]=await Promise.all([
   readFile(join(pulse,cssFile),'utf8'),
   readFile(join(pulse,heroCssFile),'utf8'),
   readFile(join(pulse,dailyCssFile),'utf8'),
@@ -53,6 +55,7 @@ const [css,heroCss,dailyCss,mobileCss,js,dailyJs,mobileJs,nav,final]=await Promi
   readFile(join(pulse,jsFile),'utf8'),
   readFile(join(pulse,dailyJsFile),'utf8'),
   readFile(join(pulse,mobileJsFile),'utf8'),
+  readFile(join(pulse,aiClientFile),'utf8'),
   readFile(join(pulse,navFile),'utf8'),
   readFile(htmlPath,'utf8')
 ]);
@@ -65,8 +68,9 @@ const checks=[
   ['daily movement CSS loaded',final.includes(`${dailyCssFile}?v=${release}`)&&dailyCss.includes('.kday-steps')],
   ['mobile V1 CSS loaded last',final.includes(`${mobileCssFile}?v=${release}`)&&final.indexOf(mobileCssFile)>final.indexOf(dailyCssFile)],
   ['canonical Home owner is loaded directly',directScript(jsFile)],
-  ['Home owner imports daily and mobile runtimes',js.includes(`import './${dailyJsFile}'`)&&js.includes(`import './${mobileJsFile}'`)],
-  ['daily and mobile runtimes are not direct scripts',!directScript(dailyJsFile)&&!directScript(mobileJsFile)],
+  ['Home owner imports AI daily and mobile runtimes',js.includes(`import './${aiClientFile}'`)&&js.includes(`import './${dailyJsFile}'`)&&js.includes(`import './${mobileJsFile}'`)],
+  ['AI daily and mobile runtimes are not direct scripts',!directScript(aiClientFile)&&!directScript(dailyJsFile)&&!directScript(mobileJsFile)],
+  ['Komo AI client calls authenticated operator chat',aiClient.includes("functions.invoke('komo-operator-v1'")&&aiClient.includes("action:'chat'")&&aiClient.includes('window.KomoAI')],
   ['legacy clarity runtime is no longer direct',!directScript(clarityJsFile)],
   ['daily movement runtime is event-driven',dailyJs.includes("rpc('komo_walk_summary')")&&!dailyJs.includes('MutationObserver')],
   ['mobile runtime is event-driven',mobileJs.includes("title.textContent='Bienvenue.'")&&!mobileJs.includes('MutationObserver')],
@@ -86,4 +90,4 @@ const checks=[
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log('[pulse-home-web-v1] PASS · canonical Home owner + imported daily/mobile layers');
+console.log('[pulse-home-web-v1] PASS · canonical Home owner + Komo AI + imported daily/mobile layers');
