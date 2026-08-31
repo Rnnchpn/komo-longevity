@@ -5,8 +5,8 @@ import {fileURLToPath} from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260831-home-app-v5';
-const navRelease='20260831-patient-nav-v710';
+const release='20260831-home-app-v6';
+const navRelease='20260831-patient-nav-v720';
 const cssFile='patient-home-command-v1.css';
 const heroCssFile='patient-home-hero-v2.css';
 const dailyCssFile='patient-home-daily-v2.css';
@@ -27,9 +27,6 @@ for(const file of [cssFile,heroCssFile,dailyCssFile,mobileCssFile,jsFile,dailyJs
   await copyFile(join(root,'pulse-app',file),join(pulse,file));
 }
 
-// Home V3 stays the single patient Home owner. The imported runtimes are
-// non-owners or narrowly scoped guards: Komo, mobile presentation, Results
-// ownership and Agenda map resilience. All imports are cache-busted together.
 const jsPath=join(pulse,jsFile);
 let homeJs=await readFile(jsPath,'utf8');
 const requiredImports=[aiClientFile,assistantJsFile,resultsOwnerFile,agendaMapFile,mobileJsFile];
