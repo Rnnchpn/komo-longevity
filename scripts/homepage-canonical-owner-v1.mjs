@@ -70,6 +70,27 @@ async function assertPipelineOwnership() {
   }
 }
 
+function auditStyleUsage(html) {
+  const markup = html
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+  const markupClasses = new Set(
+    [...markup.matchAll(/class=["']([^"']*)["']/gi)]
+      .flatMap((match) => match[1].split(/\s+/).filter(Boolean))
+  );
+  const markupIds = new Set([...markup.matchAll(/id=["']([^"']+)["']/gi)].map((match) => match[1]));
+  const layers = [];
+  for (const match of html.matchAll(/<style\s+id=["']([^"']+)["'][^>]*>([\s\S]*?)<\/style>/gi)) {
+    const [, id, css] = match;
+    const selectorClasses = new Set([...css.matchAll(/\.([a-zA-Z_][\w-]*)/g)].map((m) => m[1]));
+    const selectorIds = new Set([...css.matchAll(/#([a-zA-Z_][\w-]*)/g)].map((m) => m[1]));
+    const matchedClasses = [...selectorClasses].filter((name) => markupClasses.has(name));
+    const matchedIds = [...selectorIds].filter((name) => markupIds.has(name));
+    layers.push({ id, classTotal: selectorClasses.size, classUsed: matchedClasses.length, idTotal: selectorIds.size, idUsed: matchedIds.length });
+  }
+  return layers;
+}
+
 async function finalize() {
   await assertPipelineOwnership();
 
@@ -102,7 +123,11 @@ async function finalize() {
     }
 
     console.log(`[home-owner] PASS · ${file} · ${html.length} bytes · ${styleIds.length} named style blocks`);
-    console.log(`[home-owner] styles · ${styleIds.join(' | ')}`);
+    if (file.endsWith('/fr/index.html')) {
+      for (const layer of auditStyleUsage(html)) {
+        console.log(`[home-owner] css-usage · ${layer.id} · classes ${layer.classUsed}/${layer.classTotal} · ids ${layer.idUsed}/${layer.idTotal}`);
+      }
+    }
   }
 }
 
