@@ -1,9 +1,8 @@
-/* KŌMØ Pulse — canonical patient dock v7.0.1
-   Final patient navigation: six destinations, no product picker, no Club in primary chrome. */
+/* KŌMØ Pulse — canonical patient dock v7.0.2
+   Final patient navigation: six destinations, deterministic after auth/Home mount. */
 (() => {
 'use strict';
-const V='7.0.1';
-// Build compatibility only. Club remains a supported route but is deliberately secondary in the final patient chrome.
+const V='7.0.2';
 const LEGACY_ROUTE_CONTRACT="['club','Club','∞','club','']";
 void LEGACY_ROUTE_CONTRACT;
 const items=[
@@ -14,10 +13,11 @@ const items=[
   ['agenda','Rendez-vous','□','documents'],
   ['mykomo','My KŌMØ','◉','mykomo']
 ];
-let raf=0;
+let raf=0,retries=[];
 const nav=()=>window.KomoPatientNavigation;
 const route=()=>nav()?.route?.()||location.hash.replace(/^#/,'')||'home';
-const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)&&!['clinical','admin'].includes(route())};
+const shown=el=>{if(!el||el.hidden)return false;const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'};
+const visible=()=>{const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return shown(a)&&(!x||!shown(x))&&!['clinical','admin'].includes(route())};
 function active(){
  const r=route();
  if(r==='key')return'key';
@@ -40,8 +40,10 @@ function markup(){return '<i class="kp6-indicator"></i>'+items.map(([k,l,ic,r])=
 function ensureDock(){const app=document.querySelector('#appShell');if(!app)return null;let d=document.querySelector('#kpDockV6');if(!d){d=document.createElement('nav');d.id='kpDockV6';d.setAttribute('aria-label','Navigation KŌMØ Pulse');d.innerHTML=markup();app.appendChild(d)}else if(d.dataset.version!==V){d.innerHTML=markup()}d.dataset.version=V;return d}
 function paint(){const d=document.querySelector('#kpDockV6');if(!d||d.hidden)return;const key=active(),bs=[...d.querySelectorAll('[data-kp6]')];bs.forEach(b=>{const on=b.dataset.kp6===key;b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});const b=bs.find(x=>x.dataset.kp6===key),i=d.querySelector('.kp6-indicator');if(b&&i){const pad=parseFloat(getComputedStyle(d).paddingLeft)||0;i.style.width=`${b.offsetWidth}px`;i.style.transform=`translateX(${Math.max(0,b.offsetLeft-pad)}px)`}}
 function refresh(){cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{css();const d=ensureDock();if(!d)return;d.hidden=!visible();if(!d.hidden)requestAnimationFrame(paint)})}
+function settle(){retries.forEach(clearTimeout);retries=[];refresh();[120,380,850,1600].forEach(ms=>retries.push(setTimeout(refresh,ms)))}
 document.addEventListener('click',e=>{const native=e.target.closest?.('#kpDockV6 a[data-kp6-route]');if(native)requestAnimationFrame(()=>window.KomoPatientNavigation?.resetScroll?.())},true);
-['hashchange','pageshow','resize','orientationchange','komo:canonical-route','komo:session-ready','komo:session-cleared'].forEach(x=>window.addEventListener(x,refresh));
-document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,220));setTimeout(refresh,650);
-window.KomoBottomNav={version:V,refresh};
+['hashchange','pageshow','resize','orientationchange','komo:canonical-route','komo:route-ready','komo:session-ready','komo:session-cleared','komo:home-command-rendered','komo:data-ready'].forEach(x=>window.addEventListener(x,settle));
+document.addEventListener('DOMContentLoaded',settle,{once:true});
+if(document.readyState!=='loading')settle();
+window.KomoBottomNav={version:V,refresh:settle};
 })();
