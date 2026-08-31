@@ -5,9 +5,18 @@ import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260829-key-results-v2';
+const release='20260831-key-results-single-owner-v2';
 const appleRelease='20260831-key-apple-health-v2';
 for(const file of ['key-results-v2.css','key-results-v2.js','key-apple-health-import-v1.js']) await copyFile(join(root,'pulse-app',file),join(pulse,file));
+
+// Make V2 the refresh target used by the bootstrap hub. No extra runtime owner is added.
+const keyResultsPath=join(pulse,'key-results-v2.js');
+let keyResultsBuild=await readFile(keyResultsPath,'utf8');
+const apiNeedle='window.KomoKeyResultsV2={version:V,openImport:()=>{';
+const apiReplacement='window.KomoKeyResultsV2={version:V,refresh:()=>schedule(0),openImport:()=>{';
+if(keyResultsBuild.includes(apiNeedle))keyResultsBuild=keyResultsBuild.replace(apiNeedle,apiReplacement);
+else if(!keyResultsBuild.includes(apiReplacement))throw new Error('[pulse-key-results-v2] V2 API contract changed');
+await writeFile(keyResultsPath,keyResultsBuild,'utf8');
 
 // Apple Health stays outside the initial Pulse runtime: it is loaded only after an explicit user action.
 const applePath=join(pulse,'key-apple-health-import-v1.js');
@@ -35,13 +44,14 @@ html=html.replace('</body>',`  <script src="./key-results-v2.js?v=${release}"></
 await writeFile(htmlPath,html,'utf8');
 
 const css=await readFile(join(pulse,'key-results-v2.css'),'utf8');
-const js=await readFile(join(pulse,'key-results-v2.js'),'utf8');
+const js=await readFile(keyResultsPath,'utf8');
 const apple=await readFile(applePath,'utf8');
 const operatorFinal=await readFile(operatorPath,'utf8');
 const final=await readFile(htmlPath,'utf8');
 const checks=[
  ['v2 CSS is final visual layer',final.includes(`key-results-v2.css?v=${release}`)],
  ['v2 runtime is final KEY layer',final.includes(`key-results-v2.js?v=${release}`)],
+ ['V2 exposes canonical refresh API',js.includes('refresh:()=>schedule(0)')],
  ['KEY result menu has four views',js.includes("['overview','Aperçu']")&&js.includes("['data','Données']")],
  ['Today session uses real wear minutes',js.includes('wear_minutes')&&js.includes('SESSION PARTIELLE')],
  ['numbers animate with requestAnimationFrame',js.includes('requestAnimationFrame')&&css.includes('kh2DigitIn')],
@@ -56,7 +66,7 @@ const checks=[
 ];
 for(const [label,ok] of checks) console.log(`[pulse-key-results-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log('[pulse-key-results-v2] PASS · KEY views + Apple Health ZIP/XML lazy import in canonical KŌMØ operator');
+console.log('[pulse-key-results-v2] PASS · KEY V2 single-owner views + lazy Apple Health import');
 
 // My KŌMØ is forced into a single, event-driven route owner after every KEY build.
 await import('./pulse-my-komo-stability-v4.mjs');
