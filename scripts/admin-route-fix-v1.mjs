@@ -10,10 +10,14 @@ if(!src.includes("route==='admin'&&state.role!=='admin'")){
 }
 
 if(!src.includes('komo:admin-route-ready')){
-  src = src.replace(
-    'function renderRoute(route){renderNavigation();',
-    "function renderRoute(route){renderNavigation();if(route==='admin'){els.pageEyebrow.textContent='KŌMØ · ADMIN';els.pageTitle.textContent='Console KŌMØ';if(!els.viewRoot.querySelector('[data-admin-console-v2]')&&!els.viewRoot.querySelector('[data-admin-route-mount]'))els.viewRoot.innerHTML='<div data-admin-route-mount></div>';window.dispatchEvent(new CustomEvent('komo:admin-route-ready'));return}"
-  );
+  const adminMount = "if(route==='admin'){els.pageEyebrow.textContent='KŌMØ · ADMIN';els.pageTitle.textContent='Console KŌMØ';if(!els.viewRoot.querySelector('[data-admin-console-v2]')&&!els.viewRoot.querySelector('[data-admin-route-mount]'))els.viewRoot.innerHTML='<div data-admin-route-mount></div>';window.dispatchEvent(new CustomEvent('komo:admin-route-ready'));return}";
+  if(src.includes('function renderRoute(route){renderNavigation();')){
+    src = src.replace('function renderRoute(route){renderNavigation();', `function renderRoute(route){renderNavigation();${adminMount}`);
+  } else if(src.includes('function renderRoute(route){\n  renderNavigation();')){
+    src = src.replace('function renderRoute(route){\n  renderNavigation();', `function renderRoute(route){\n  renderNavigation();\n  ${adminMount}`);
+  } else {
+    throw new Error('[admin-route-fix-v1] renderRoute anchor not found');
+  }
 }
 
 await writeFile(path, src);
