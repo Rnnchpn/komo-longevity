@@ -3,7 +3,7 @@ import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 import { loadCanonicalResult } from './canonical-result-runtime.js';
 
-const VERSION='3.3.0';
+const VERSION='3.4.0';
 const WALK_CLUB_LABEL='WALK CLUB';
 let timer=0;
 let rendering=false;
@@ -24,11 +24,16 @@ function firstName(){
   const account=document.querySelector('#accountName')?.textContent?.trim()||'';
   return account&&account!=='Compte KŌMØ'?account.split(/\s+/)[0]:'';
 }
-function currentAppointment(){
-  const box=document.querySelector('.mykomo-next');
-  const title=box?.querySelector('strong')?.textContent?.trim()||'';
-  const meta=box?.querySelector('small')?.textContent?.trim()||'';
-  return title?{exists:true,title,meta}:{exists:false,title:'Aucun rendez-vous planifié',meta:''};
+async function pulseOverview(){
+  try{return await window.KomoAI?.overview?.()||null}catch(e){console.warn('[home-v3 overview]',e);return null}
+}
+function currentAppointment(overview){
+  const rec=Array.isArray(overview?.records)?overview.records[0]:null;
+  const ap=rec?.next_appointment||overview?.record?.next_appointment||overview?.summary?.next_appointment||null;
+  if(!ap)return{exists:false,title:'Aucun rendez-vous planifié',meta:''};
+  const raw=ap.scheduled_start||ap.scheduled_at;
+  const when=raw?new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(raw)):'';
+  return{exists:true,title:ap.appointment_type||'Prochain rendez-vous',meta:when};
 }
 async function walkSummary(){
   const sb=window.KomoRuntime?.client;if(!sb)return null;
@@ -47,7 +52,7 @@ function nextAction(result,walk,appt,loading=false){
   if(appt.exists)return{title:'Préparer votre prochaine étape',copy:appt.meta||appt.title,label:'Voir mon rendez-vous',route:'documents'};
   return{title:'Continuer votre progression',copy:'Komo peut vous aider à choisir la prochaine action utile.',label:'Demander à Komo',route:'komo'};
 }
-function homeMarkup(result,walk,loading=false){
+function homeMarkup(result,walk,overview,loading=false){
   const name=firstName();
   const motion=motionState(result,loading);
   const steps=!loading&&walk?.connected?num(walk.steps_today):null;
@@ -59,7 +64,7 @@ function homeMarkup(result,walk,loading=false){
   const club=walk?.walk_club||{};
   const rank=!loading&&club.joined&&club.rank?`#${club.rank}`:'';
   const clubCopy=rank?`${rank} ${WALK_CLUB_LABEL}`:club.joined?WALK_CLUB_LABEL:'cette semaine';
-  const action=nextAction(result,walk,currentAppointment(),loading);
+  const action=nextAction(result,walk,currentAppointment(overview),loading);
   const movementCopy=loading?'Synchronisation de votre journée…':walk?.connected?`${pct}% de votre repère du jour · données vérifiées`:'Connectez KEY pour afficher votre activité quotidienne.';
   const movementMeta=activeMinutes===null?'pas aujourd’hui':`pas · ${fmt(activeMinutes)} min actives`;
   const pointsCopy=kpWeek===null?clubCopy:`${fmt(kpWeek)} cette semaine · ${clubCopy}`;
@@ -110,9 +115,9 @@ async function render(force=false){
   rendering=true;
   try{
     tuneChrome();
-    if(!host.querySelector('[data-khome-v3]'))mount(host,homeMarkup(null,null,true));
-    const [result,walk]=await Promise.all([loadCanonicalResult({force}),walkSummary()]);
-    const markup=homeMarkup(result,walk,false);
+    if(!host.querySelector('[data-khome-v3]'))mount(host,homeMarkup(null,null,null,true));
+    const [result,walk,overview]=await Promise.all([loadCanonicalResult({force}),walkSummary(),pulseOverview()]);
+    const markup=homeMarkup(result,walk,overview,false);
     const signature=markup;
     if(!force&&signature===lastSignature&&host.querySelector('[data-khome-v3]:not(.is-loading)'))return;
     mount(host,markup);lastSignature=signature;
