@@ -33,7 +33,7 @@ const checks=[
   ['retired shell CSS removed from bundle',!css.includes('/* FILE: mobile-menu-v3.css */')&&!css.includes('/* FILE: tablet-patient-v1.css */')],
   ['desktop shell remains available',css.includes('/* FILE: bottom-dock-v1.css */')],
   ['adaptive shell CSS remains available',css.includes('/* FILE: adaptive-shell-v4.css */')],
-  ['adaptive shell uses requested patient labels',adaptive.includes("'Accueil'")&&adaptive.includes("'Tests'")&&adaptive.includes("'My KŌMØ Score'")&&adaptive.includes("'KŌMØ Therapy'")],
+  ['adaptive shell uses canonical patient labels',adaptive.includes("'Accueil'")&&adaptive.includes("'KEY'")&&adaptive.includes("'Résultats'")&&adaptive.includes("'Trajectoire'")&&!adaptive.includes("'patient:path'")&&!adaptive.includes("'patient:plan'")],
   ['legacy mobile navigation is hidden before JS ownership',css.includes('#mobileNav,#proMobileNav,.sidebar{display:none!important}')&&css.includes('.topbar .mode-switch{display:none!important}')],
   ['mobile utility no longer mutates account navigation',!mobile.includes('ensureExplorerInAccount')&&!mobile.includes('observe(document.body')],
   ['guided mobile layer is content-only',!guided.includes('ensureAccountTrigger')&&!guided.includes('ensureAccountHub')&&!guided.includes('mg-mobile-menu')&&!guided.includes('observe(document.body')],
