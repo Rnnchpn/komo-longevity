@@ -20,13 +20,29 @@ function replaceRequired(text,oldValue,newValue,label){
   return text.replace(oldValue,newValue);
 }
 
-// Core router: routes with a dedicated renderer must never paint a competing
-// legacy screen first. A quiet mount state is preferable to a visible swap.
+// Core router: Home has one canonical owner. Other dedicated routes receive a
+// quiet mount so their renderer can take over without painting a legacy view.
 let app=fs.readFileSync(files.app,'utf8');
-const oldRouter="function renderRoute(route){renderNavigation();if(['documents','plan','messages'].includes(route)){els.viewRoot.innerHTML='<div class=\"empty-state\">Chargement de votre espace…</div>';return}if(route==='admin')";
-const legacyStableRouter="function renderRoute(route){renderNavigation();if(['path','documents','plan','messages','clinical'].includes(route)){const labels={path:['KŌMØ · PROGRESSION','Votre trajectoire locomotrice.'],documents:['RENDEZ-VOUS','Votre agenda KŌMØ.'],plan:['MON PLAN','Votre plan personnalisé.'],messages:['MESSAGES','Votre messagerie KŌMØ.'],clinical:['KŌMØ CENTRE','Votre centre, en un seul espace.']};const selectors={path:'[data-kpv2]',documents:'[data-patient-v4=\"documents\"]',plan:'[data-patient-v4=\"plan\"]',clinical:'[data-clinical-cockpit-v1]'};const stable=selectors[route]&&els.viewRoot.querySelector(selectors[route]);if(stable)return;els.pageEyebrow.textContent=labels[route]?.[0]||'KŌMØ PULSE';els.pageTitle.textContent=labels[route]?.[1]||'Chargement';els.viewRoot.innerHTML=`<div class=\"komo-route-loading\" data-route-loading=\"${route}\" role=\"status\">Chargement de votre espace…</div>`;return}if(route==='admin')";
-const newRouter="function renderRoute(route){renderNavigation();if(['path','documents','plan','messages','clinical'].includes(route)){const labels={path:['KŌMØ PULSE · TRAJECTOIRE','Votre évolution'],documents:['RENDEZ-VOUS','Votre agenda KŌMØ.'],plan:['MON PLAN','Votre plan personnalisé.'],messages:['MESSAGES','Votre messagerie KŌMØ.'],clinical:['KŌMØ CENTRE','Votre centre, en un seul espace.']};const selectors={path:'[data-ktrajectory-v1]',documents:'[data-patient-v4=\"documents\"]',plan:'[data-patient-v4=\"plan\"]',clinical:'[data-clinical-cockpit-v1]'};const stable=selectors[route]&&els.viewRoot.querySelector(selectors[route]);if(stable)return;els.pageEyebrow.textContent=labels[route]?.[0]||'KŌMØ PULSE';els.pageTitle.textContent=labels[route]?.[1]||'Chargement';els.viewRoot.innerHTML=`<div class=\"komo-route-loading\" data-route-loading=\"${route}\" role=\"status\">Chargement de votre espace…</div>`;return}if(route==='admin')";
-if(app.includes(legacyStableRouter))app=app.replace(legacyStableRouter,newRouter);else app=replaceRequired(app,oldRouter,newRouter,'dedicated route ownership');
+const canonicalHomeOwner=app.includes('data-home-owner="patient-home-command-v1"')&&app.includes('KomoPatientHomeCommand?.refresh?.()');
+if(!canonicalHomeOwner){console.error('[pulse-flicker] missing canonical Home ownership');process.exit(1)}
+const quietRoutesToken="['path','documents','plan','messages','clinical'].includes(route)";
+if(!app.includes(quietRoutesToken)||!app.includes('data-route-loading')){
+  const routeStart=/function renderRoute\(route\)\{\s*renderNavigation\(\);/;
+  if(!routeStart.test(app)){console.error('[pulse-flicker] missing renderRoute mount point');process.exit(1)}
+  const quietMount=`function renderRoute(route){
+  renderNavigation();
+  if(['path','documents','plan','messages','clinical'].includes(route)){
+    const labels={path:['KŌMØ PULSE · TRAJECTOIRE','Votre évolution'],documents:['RENDEZ-VOUS','Votre agenda KŌMØ.'],plan:['MON PLAN','Votre plan personnalisé.'],messages:['MESSAGES','Votre messagerie KŌMØ.'],clinical:['KŌMØ CENTRE','Votre centre, en un seul espace.']};
+    const selectors={path:'[data-ktrajectory-v1]',documents:'[data-patient-v4="documents"]',plan:'[data-patient-v4="plan"]',clinical:'[data-clinical-cockpit-v1]'};
+    const stable=selectors[route]&&els.viewRoot.querySelector(selectors[route]);
+    if(stable)return;
+    els.pageEyebrow.textContent=labels[route]?.[0]||'KŌMØ PULSE';
+    els.pageTitle.textContent=labels[route]?.[1]||'Chargement';
+    els.viewRoot.innerHTML=\`<div class="komo-route-loading" data-route-loading="\${route}" role="status">Chargement de votre espace…</div>\`;
+    return;
+  }`;
+  app=app.replace(routeStart,quietMount);
+}
 fs.writeFileSync(files.app,app);
 
 // Patient v4 no longer owns #path. Progression v2 is the only renderer there.
@@ -95,4 +111,4 @@ let css=fs.readFileSync(files.css,'utf8');
 if(!css.includes('/* Route stability */'))css+=`\n/* Route stability */\n.komo-route-loading{min-height:260px;display:grid;place-items:center;padding:32px;border:1px solid rgba(37,48,40,.08);border-radius:24px;background:rgba(255,255,255,.42);color:#7b817b;font-size:11px;letter-spacing:.02em}\n@media(max-width:767px){.komo-route-loading{min-height:180px;border-radius:20px}}\n`;
 fs.writeFileSync(files.css,css);
 
-console.log('[pulse-flicker] single-owner route rendering and stable clinical mounting applied');
+console.log('[pulse-flicker] canonical Home ownership and stable route mounting applied');
