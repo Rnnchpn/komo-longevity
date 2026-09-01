@@ -13,7 +13,8 @@ const motionV4Count=(finalHtml.match(/motion-hub-v4\.js/g)||[]).length;
 const motionV3Count=(finalHtml.match(/motion-hub-v3\.js/g)||[]).length;
 if(motionV4Count!==1)throw new Error(`Expected exactly one Motion V4 runtime, found ${motionV4Count}`);
 if(motionV3Count!==0)throw new Error(`Legacy Motion V3 is still loaded (${motionV3Count})`);
-if(!finalApp.includes("'profile','motion'].includes(route)"))throw new Error('Base router does not recognize #motion explicitly');
+const currentRouteBlock=finalApp.match(/function\s+currentRoute\s*\(\)\s*\{[\s\S]*?\n\}/)?.[0]||'';
+if(!/["']motion["']/.test(currentRouteBlock)||!/\.includes\(route\)\s*\?\s*route\s*:/.test(currentRouteBlock))throw new Error('Base router does not recognize #motion explicitly');
 if(!finalApp.includes('data-motion-host-v4'))throw new Error('Base router Motion host is missing');
 
 const styles=[...finalHtml.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]+href=["']([^"']+)["'][^>]*>/gi)].map(m=>m[1]);
