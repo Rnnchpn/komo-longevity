@@ -17,7 +17,7 @@ const runtimePath=join(targetDir,'runtime.js');
 const profilePath=join(targetDir,'profile-v2.js');
 const resetIndexPath=join(targetDir,'reset','index.html');
 const resetJsPath=join(targetDir,'reset','reset.js');
-const RELEASE='20260830-rc1-functional-v5';
+const RELEASE='20260901-motion-v4-functional';
 const ownerTag=`<script src="./center-owner-ui-guard-v1.js?v=${RELEASE}"></script>`;
 const tag=`<script src="./pulse-functional-rc1.js?v=${RELEASE}"></script>`;
 
@@ -125,10 +125,11 @@ for(const file of jsFiles){
 if(missingImports.length)failures.push(...missingImports.map(x=>`missing JS import: ${x}`));
 ok('all relative JS imports resolve',missingImports.length===0);
 
-// Core route owners required for RC1.
-for(const asset of ['patient-navigation-core-v1.js','motion-hub-v3.js','key-hub-v1.js','trajectory-v3.js','agenda-hub-v4.js','profile-v2.js','patient-canonical-results.js','report-bootstrap-v1.js','pulse-bottom-nav-v6.js','clinical-cockpit-v1.js','center-two-tab-workspace-v1.js','care-messaging-v2.js','admin-console-v2.js','center-owner-ui-guard-v1.js']){
+// Core route owners required for RC1. Motion V4 is the frozen canonical Motion owner.
+for(const asset of ['patient-navigation-core-v1.js','motion-hub-v4.js','key-hub-v1.js','trajectory-v3.js','agenda-hub-v4.js','profile-v2.js','patient-canonical-results.js','report-bootstrap-v1.js','pulse-bottom-nav-v6.js','clinical-cockpit-v1.js','center-two-tab-workspace-v1.js','care-messaging-v2.js','admin-console-v2.js','center-owner-ui-guard-v1.js']){
   ok(`core asset loaded: ${asset}`,finalHtml.includes(`./${asset}`));
 }
+ok('legacy Motion V3 owner is not loaded',!finalHtml.includes('./motion-hub-v3.js'));
 
 if(failures.length){
   console.error(`[pulse-functional-rc1] FAILED · ${failures.join(' | ')}`);
