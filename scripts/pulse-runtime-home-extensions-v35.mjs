@@ -8,11 +8,11 @@ const retired=['patient-home-micro-motion-v1.js','my-komo-key-home-v1.js','pulse
 const commandSource=await readFile(root+command,'utf8');
 let html=await readFile(htmlPath,'utf8');
 
-const canonicalHome=commandSource.includes("const VERSION='5.0.0'")||commandSource.includes('data-khome-v5')||commandSource.includes("const VERSION='3.0.0'")||commandSource.includes('data-khome-v3');
+const isV6=commandSource.includes("const VERSION='6.0.0'")||commandSource.includes('data-khome-v6');
+const canonicalHome=isV6||commandSource.includes("const VERSION='5.0.0'")||commandSource.includes('data-khome-v5')||commandSource.includes("const VERSION='3.0.0'")||commandSource.includes('data-khome-v3');
 if(!canonicalHome)throw new Error('[pulse-home-v35] canonical Home contract not recognized');
 
-// The canonical Home owns presentation, KEY placement, micro-motion and hero hierarchy.
-// Historical extension runtimes are retired instead of being merged into or run after it.
+// The canonical Home owns presentation. Historical Home overlays stay retired.
 for(const file of retired){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   const re=new RegExp(`\\s*<script([^>]*)src=[\"']\\./${escaped}(?:\\?[^\"']*)?[\"']([^>]*)><\\/script>`,'g');
@@ -29,15 +29,14 @@ if(!commandSource.includes('komo:home-command-rendered'))throw new Error('[pulse
 if(!commandSource.includes('KomoAssistantV2'))throw new Error('[pulse-home-v35] canonical Komo assistant bridge missing');
 if(commandSource.includes('MutationObserver')||commandSource.includes('setInterval('))throw new Error('[pulse-home-v35] canonical Home regained persistent observation');
 
-if(commandSource.includes("const VERSION='5.0.0'")){
-  if(!commandSource.includes("signalCard('KEY · QUOTIDIEN'"))throw new Error('[pulse-home-v35] V5 native KEY signal missing');
-  if(!commandSource.includes('kh5-motion')||!commandSource.includes('kh5-komo')||!commandSource.includes('kh5-signals'))throw new Error('[pulse-home-v35] V5 decision hierarchy changed');
-  for(const legacySignature of ['KomoHomeMicroMotion','KomoKeyHome','KomoPulseHeroPolish']){
-    if(commandSource.includes(legacySignature))throw new Error(`[pulse-home-v35] retired extension merged into V5 owner: ${legacySignature}`);
-  }
-  console.log('[pulse-home-v35] Home V5 detected · legacy KEY/micro-motion/hero overlays retired · single canonical owner preserved');
+if(isV6){
+  if(!commandSource.includes('MOTION TODAY')||!commandSource.includes("metricCard('steps'")||!commandSource.includes("metricCard('sleep'")||!commandSource.includes("metricCard('resting_hr'"))throw new Error('[pulse-home-v35] V6 daily signal hierarchy changed');
+  if(commandSource.includes('kh5-komo')||commandSource.includes('kh5-signals'))throw new Error('[pulse-home-v35] retired V5 dashboard hierarchy merged into V6 owner');
+  console.log('[pulse-home-v35] Home V6 detected · legacy Home overlays retired · single canonical owner preserved');
+}else if(commandSource.includes("const VERSION='5.0.0'")){
+  console.log('[pulse-home-v35] Home V5 detected · legacy Home overlays retired · single canonical owner preserved');
 }else{
-  console.log('[pulse-home-v35] Home V3 detected · legacy KEY/micro-motion/hero overlays retired · single canonical owner preserved');
+  console.log('[pulse-home-v35] Home V3 detected · legacy Home overlays retired · single canonical owner preserved');
 }
 
 await import('./pulse-runtime-mobile-observer-v36.mjs');
