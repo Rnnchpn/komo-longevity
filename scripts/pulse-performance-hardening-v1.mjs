@@ -83,11 +83,10 @@ brand=brand.replace(/\/\*[\s\S]*?\*\//g,'');
 await writeFile('pulse-app/pulse-brand-theme-v1.js',brand);
 
 const motionScoped=[
- ['pulse-app/motion-access-fix-v1.js','.observe(document.body,{subtree:true,childList:true});',"document.querySelector('#viewRoot')"],
  ['pulse-app/motion-workflow.js','.observe(document.body,{subtree:true,childList:true});',"document.querySelector('#viewRoot')"],
  ['pulse-app/muscle-analysis-v1.js','obs.observe(document.body,{childList:true,subtree:true});',"document.querySelector('#appShell')"]
 ];
-for(const [path,from,target] of motionScoped){let src=await readFile(path,'utf8');src=replaceRequired(src,from,from.replace('document.body',target),`${path} Motion scoped observer`);if(path.endsWith('motion-access-fix-v1.js'))src=src.replace(/^\/\*[\s\S]*?\*\/\s*/,'');await writeFile(path,src)}
+for(const [path,from,target] of motionScoped){let src=await readFile(path,'utf8');src=replaceRequired(src,from,from.replace('document.body',target),`${path} Motion scoped observer`);await writeFile(path,src)}
 
 const myKomoScoped=[
  ['pulse-app/my-komo-dashboard-v2.js','.observe(document.body,{childList:true,subtree:true,characterData:true});'],
