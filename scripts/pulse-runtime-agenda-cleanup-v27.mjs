@@ -25,9 +25,10 @@ const docRenderStart=canonical.indexOf('function renderDocuments(result){');
 const renderStart=canonical.indexOf('async function render(force=false){');
 if(docRenderStart<0||renderStart<docRenderStart)throw new Error('[pulse-agenda-v27] Canonical document renderer contract changed');
 canonical=canonical.slice(0,docRenderStart)+canonical.slice(renderStart);
-const docCall="if(hash==='#documents')renderDocuments(result)";
-if(!canonical.includes(docCall))throw new Error('[pulse-agenda-v27] Canonical documents call contract changed');
-canonical=canonical.replace(docCall,'');
+const docCalls=["if(hash==='#documents')renderDocuments(result)","if(r==='documents')renderDocuments(result);","if(r==='documents')renderDocuments(result)"];
+let removedDocCall=false;
+for(const docCall of docCalls){if(canonical.includes(docCall)){canonical=canonical.replace(docCall,'');removedDocCall=true}}
+if(!removedDocCall&&canonical.includes('renderDocuments(result)'))throw new Error('[pulse-agenda-v27] Canonical documents call contract changed');
 canonical=canonical.replace("if(h==='#documents'&&!document.querySelector('[data-kcanon-doc]'))schedule(false)",'');
 const canonicalLeftovers=['data-kcanon-doc','renderDocuments(result)'].filter(x=>canonical.includes(x));
 if(canonicalLeftovers.length){console.error('[pulse-agenda-v27] remaining canonical Agenda contexts',canonicalLeftovers.map(x=>`${x}: ${context(canonical,x)}`).join(' || '));throw new Error('[pulse-agenda-v27] Canonical Results still renders into Agenda')}
