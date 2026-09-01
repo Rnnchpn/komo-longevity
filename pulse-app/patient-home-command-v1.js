@@ -115,12 +115,13 @@ function homeMarkup(data,loading=false){
   const ready=!loading&&(canonicalReady||estimated)&&num(active?.score)!==null;
   const score=ready?String(Math.round(Number(active.score))):'—';
   const scoreProgress=ready?clampScore(active.score):0;
+  const scoreOffset=100-scoreProgress;
   const state=loading?'loading':String(active?.status||data?.status||'incomplete');
   const message=loading?'Syncing your data':String(active?.message||data?.message||'Sync your wearable');
   const badge=estimated?'<span class="kh6-estimate">Estimation</span>':'';
   return `<section class="kh6${loading?' is-loading':''}${estimated?' is-estimated':''}" data-khome-v6 data-motion-state="${esc(state)}" data-estimated="${estimated?'true':'false'}" aria-busy="${loading?'true':'false'}">
     <div class="kh6-core" aria-label="Motion Today">
-      <div class="kh6-orbit" style="--kh6-progress:${scoreProgress}" aria-label="${ready?`${esc(score)} out of 100`:'Score unavailable'}">
+      <div class="kh6-orbit" style="--kh6-progress:${scoreProgress};--kh6-offset:${scoreOffset}" aria-label="${ready?`${esc(score)} out of 100`:'Score unavailable'}">
         <svg class="kh6-ring" viewBox="0 0 200 200" aria-hidden="true">
           <circle class="kh6-ring-track" cx="100" cy="100" r="84" pathLength="100"></circle>
           <circle class="kh6-ring-progress" cx="100" cy="100" r="84" pathLength="100"></circle>
