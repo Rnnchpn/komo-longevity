@@ -29,8 +29,9 @@ for(const dir of dirs){
   await patch(dir,'my-komo-stable-v5.js',src=>{
     let js=src
       .replace("if(pe)pe.textContent='MY KŌMØ · LOBBY';if(pt)pt.textContent='Votre progression, en mouvement.';","if(pe)pe.textContent='MY KŌMØ';if(pt)pt.textContent='Votre KŌMØ, au même endroit.';")
-      .replace('data-mkv5-route="path">Voir ma trajectoire →','data-mkv5-route="results">Voir tous mes résultats →')
-      .replace('data-mkv5-route="path">Ouvrir ma trajectoire','data-mkv5-route="trajectory">Mes consultations')
+      .replace(/data-mkv5-route="(?:path|trajectory)">Voir ma trajectoire →/,'data-mkv5-route="results">Voir tous mes résultats →')
+      .replace(/data-mkv5-route="(?:path|trajectory)">Ouvrir ma trajectoire/,'data-mkv5-route="trajectory">Mes consultations')
+      .replaceAll('data-mkv5-route="trajectory">Voir ma trajectoire →','data-mkv5-route="trajectory">Mes consultations →')
       .replaceAll('data-mkv5-route="path">Voir ma trajectoire →','data-mkv5-route="trajectory">Mes consultations →')
       .replace('<div class="mkv4-kicker" style="color:rgba(255,255,255,.55)">TRAJECTOIRE</div><h3>Votre histoire continue.</h3><p>Comparez vos résultats dans le temps et voyez ce qui progresse réellement.</p>','<div class="mkv4-kicker" style="color:rgba(255,255,255,.55)">MES CONSULTATIONS</div><h3>Votre suivi continue.</h3><p>Retrouvez vos consultations, votre plan de soin et les prochaines actions décidées avec KŌMØ.</p>');
     if(!js.includes('data-myk-control')){
