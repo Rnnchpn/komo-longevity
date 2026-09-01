@@ -3,46 +3,50 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
-const pulse=join(root,'pulse-app');
-const adminPath=join(pulse,'admin-console-v2.js');
-const myoPath=join(pulse,'admin-myocare-v1.js');
+const targets=[join(root,'site','pulse-v12')];
 
-let admin=await readFile(adminPath,'utf8');
-let myo=await readFile(myoPath,'utf8');
+async function patchDir(pulse){
+  const adminPath=join(pulse,'admin-console-v2.js');
+  const myoPath=join(pulse,'admin-myocare-v1.js');
+  let admin=await readFile(adminPath,'utf8');
+  let myo=await readFile(myoPath,'utf8');
 
-if(!admin.includes("window.dispatchEvent(new CustomEvent('komo:admin-rendered'))")){
-  admin=admin.replace(
-    "if(location.hash!=='#admin')return;const h=root();if(!h)return;setHeading();",
-    "if(location.hash!=='#admin')return;const h=root();if(!h)return;setHeading();"
-  );
-  admin=admin.replace(
-    "h.innerHTML=`<div class=\"kav2\" data-admin-console-v2>",
-    "h.innerHTML=`<div class=\"kav2\" data-admin-console-v2>"
-  );
-  admin=admin.replace(
-    "</div></div>`}",
-    "</div></div>`;queueMicrotask(()=>window.dispatchEvent(new CustomEvent('komo:admin-rendered')))}"
-  );
+  if(!admin.includes("function announceAdminRendered()")){
+    admin=admin.replace(
+      "function setHeading(){const e=document.querySelector('#pageEyebrow'),t=document.querySelector('#pageTitle');if(e)e.textContent='KŌMØ · ADMIN';if(t)t.textContent='Console KŌMØ'}",
+      "function setHeading(){const e=document.querySelector('#pageEyebrow'),t=document.querySelector('#pageTitle');if(e)e.textContent='KŌMØ · ADMIN';if(t)t.textContent='Console KŌMØ'}\nfunction announceAdminRendered(){queueMicrotask(()=>window.dispatchEvent(new CustomEvent('komo:admin-rendered')))}"
+    );
+  }
+
+  if(!admin.includes("announceAdminRendered()")) throw new Error('Unable to install Admin render announcer');
+  if(!admin.includes(";announceAdminRendered()}")){
+    const marker="</div></div>`}";
+    if(!admin.includes(marker)) throw new Error('Unable to locate canonical Admin render tail');
+    admin=admin.replace(marker,"</div></div>`;announceAdminRendered()}");
+  }
+
+  const oldObserve="function kmcObserve(){kmcStyles();const o=new MutationObserver(()=>kmcMountTab());o.observe(document.body,{subtree:true,childList:true});document.addEventListener('click',kmcResetOnNativeTab,true);window.addEventListener('hashchange',()=>{if(location.hash!=='#admin')K.active=false;setTimeout(kmcMountTab,80)});window.addEventListener('komo:admin-open',()=>setTimeout(kmcMountTab,100));setTimeout(kmcMountTab,700)}";
+  const newObserve="function kmcObserve(){kmcStyles();document.addEventListener('click',kmcResetOnNativeTab,true);window.addEventListener('hashchange',()=>{if(location.hash!=='#admin')K.active=false;else requestAnimationFrame(kmcMountTab)});window.addEventListener('komo:admin-open',()=>requestAnimationFrame(kmcMountTab));window.addEventListener('komo:admin-rendered',()=>requestAnimationFrame(kmcMountTab));document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(kmcMountTab));requestAnimationFrame(kmcMountTab)}";
+  if(myo.includes(oldObserve)) myo=myo.replace(oldObserve,newObserve);
+
+  const oldBadge="const n=K.data?.summary?.acts_month??0;b.querySelector('b').textContent=String(n);b.classList.toggle('active',K.active);if(K.active)kmcRender()";
+  const newBadge="const n=String(K.data?.summary?.acts_month??0),badge=b.querySelector('b');if(badge&&badge.textContent!==n)badge.textContent=n;b.classList.toggle('active',K.active);if(K.active)kmcRender()";
+  if(myo.includes(oldBadge)) myo=myo.replace(oldBadge,newBadge);
+
+  const checks=[
+    ['no body-wide MyoCare observer',!myo.includes("observe(document.body")],
+    ['no MyoCare MutationObserver constructor',!myo.includes('new MutationObserver')],
+    ['MyoCare listens to explicit Admin render event',myo.includes("komo:admin-rendered")],
+    ['MyoCare mounts once on load',myo.includes('requestAnimationFrame(kmcMountTab)')],
+    ['MyoCare tab badge updates only on value change',myo.includes('badge.textContent!==n')],
+    ['Admin announces completed render',admin.includes("komo:admin-rendered")&&admin.includes('announceAdminRendered()')]
+  ];
+  for(const [label,ok] of checks){console.log(`[pulse-admin-myocare-loop-v7] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
+  if(process.exitCode)throw new Error('Admin MyoCare loop guard failed');
+
+  await writeFile(adminPath,admin,'utf8');
+  await writeFile(myoPath,myo,'utf8');
 }
 
-myo=myo.replace(
-  "function kmcObserve(){kmcStyles();const o=new MutationObserver(()=>kmcMountTab());o.observe(document.body,{subtree:true,childList:true});document.addEventListener('click',kmcResetOnNativeTab,true);window.addEventListener('hashchange',()=>{if(location.hash!=='#admin')K.active=false;setTimeout(kmcMountTab,80)});window.addEventListener('komo:admin-open',()=>setTimeout(kmcMountTab,100));setTimeout(kmcMountTab,700)}",
-  "function kmcObserve(){kmcStyles();document.addEventListener('click',kmcResetOnNativeTab,true);window.addEventListener('hashchange',()=>{if(location.hash!=='#admin')K.active=false;else requestAnimationFrame(kmcMountTab)});window.addEventListener('komo:admin-open',()=>requestAnimationFrame(kmcMountTab));window.addEventListener('komo:admin-rendered',()=>requestAnimationFrame(kmcMountTab));document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(kmcMountTab))}"
-);
-
-myo=myo.replace(
-  "const n=K.data?.summary?.acts_month??0;b.querySelector('b').textContent=String(n);b.classList.toggle('active',K.active);if(K.active)kmcRender()",
-  "const n=String(K.data?.summary?.acts_month??0),badge=b.querySelector('b');if(badge&&badge.textContent!==n)badge.textContent=n;b.classList.toggle('active',K.active);if(K.active)kmcRender()"
-);
-
-const checks=[
-  ['no body-wide MyoCare observer',!myo.includes("observe(document.body")],
-  ['MyoCare listens to explicit Admin render event',myo.includes("komo:admin-rendered")],
-  ['MyoCare tab badge updates only on value change',myo.includes("badge.textContent!==n")],
-  ['Admin announces completed render',admin.includes("komo:admin-rendered")]
-];
-for(const [label,ok] of checks){console.log(`[pulse-admin-myocare-loop-v7] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
-if(process.exitCode)throw new Error('Admin MyoCare loop guard failed');
-await writeFile(adminPath,admin,'utf8');
-await writeFile(myoPath,myo,'utf8');
-console.log('[pulse-admin-myocare-loop-v7] PASS · MyoCare is event-driven and cannot self-trigger a body MutationObserver loop');
+for(const pulse of targets)await patchDir(pulse);
+console.log('[pulse-admin-myocare-loop-v7] PASS · MyoCare is event-driven and cannot self-trigger a DOM MutationObserver loop');
