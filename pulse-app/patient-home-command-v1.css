@@ -102,7 +102,7 @@ body.khome-final-v1 [data-my-komo-home]{
   stroke-width:2.8;
   stroke-linecap:round;
   stroke-dasharray:100;
-  stroke-dashoffset:calc(100 - (var(--kh6-progress) * 1));
+  stroke-dashoffset:var(--kh6-offset,100);
   animation:kh6-ring-draw 1.15s .08s cubic-bezier(.16,1,.3,1) both;
 }
 .kh6-score{
@@ -264,7 +264,7 @@ body.khome-final-v1 [data-my-komo-home]{
 }
 @keyframes kh6-ring-draw{
   from{stroke-dashoffset:100;opacity:.3}
-  to{stroke-dashoffset:calc(100 - (var(--kh6-progress) * 1));opacity:1}
+  to{stroke-dashoffset:var(--kh6-offset,100);opacity:1}
 }
 @keyframes kh6-score-rise{
   from{opacity:0;transform:translateX(-.025em) translateY(8px) scale(.97)}
