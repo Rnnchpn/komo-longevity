@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const manifest={
-  version:'2026-08-31-freeze-runtime-v1',
+  version:'2026-09-01-motion-v4-freeze',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
@@ -15,13 +15,13 @@ const manifest={
   surfaces:{
     home:{owner:'patient-home-command-v1.js',controllers:[],extensions:[]},
     results:{owner:'patient-canonical-results.js',controllers:['tests-v1.js'],extensions:[]},
-    motion:{owner:'motion-hub-v3.js',controllers:['motion-workflow.js','motion-route-guard-v4.js','motion-access-fix-v1.js'],extensions:[]},
+    motion:{owner:'motion-hub-v4.js',controllers:['motion-workflow.js','motion-route-guard-v4.js','motion-access-fix-v1.js'],extensions:[]},
     key:{owner:'key-hub-v1.js',controllers:[],extensions:[]},
     trajectory:{owner:'trajectory-v3.js',controllers:[],extensions:[]},
     documents:{owner:'agenda-hub-v4.js',controllers:['booking-layer-v1.js','patient-intake-v1.js','pulse-free-continuity-v2.js','questionnaire-engine-v1.js'],extensions:['agenda-premium-map-v1.js']},
-    mykomo:{owner:'my-komo-stable-v5.js',controllers:[],extensions:[]},
+    mykomo:{owner:'my-komo-stable-v5.js',controllers:[],extensions:['account-hub-v2.js','account-privacy-v1.js']},
     club:{owner:'club-hub-v1.js',controllers:[],extensions:[]},
-    profile:{owner:'profile-v2.js',controllers:[],extensions:['account-hub-v2.js','account-privacy-v1.js']},
+    profile:{owner:'profile-v2.js',controllers:[],extensions:[]},
     messages:{owner:'care-messaging-v2.js',controllers:[],extensions:[]},
     clinical:{owner:'clinical-cockpit-v1.js',controllers:['clinical-motion-v1.js','patient-assessment-trio-v1.js','pro-agenda-dossier-v1.js','pro-followup-v1.js','tests-status-cockpit-v1.js','booking-layer-v1.js'],extensions:[]},
     admin:{owner:'admin-console-v2.js',controllers:['admin-motion-validation-v1.js','admin-patient-manager-v1.js','admin-professionals-v1.js','admin-shortcut-v1.js','admin-ux-v2.js'],extensions:[]},
@@ -31,4 +31,4 @@ const manifest={
   global_controllers:['app-router-v2.js','first-test-entry-v1.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Therapy removed · account extensions declared`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Motion V4 frozen · account extensions declared`);
