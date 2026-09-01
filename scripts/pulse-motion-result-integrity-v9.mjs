@@ -24,12 +24,13 @@ for(const dir of [source,built]){
   let js=await readFile(path,'utf8');
   js=js.replace(".eq('algorithm_version','motion-functional-index-v0.5-poc')",".eq('profile_code','motion_integrated')");
   js=js.replaceAll('Motion v0.5','Motion v0.5.1');
-  js=js.replaceAll('épisode Motion v0.5','épisode Motion v0.5.1');
+  js=js.replaceAll('Motion v0.5.1.1','Motion v0.5.1');
   await writeFile(path,js,'utf8');
   const checks=[
     ['Admin no longer filters obsolete v0.5 algorithm',!js.includes("motion-functional-index-v0.5-poc")],
     ['Admin uses stable Motion profile contract',js.includes(".eq('profile_code','motion_integrated')")],
-    ['Admin labels current Motion v0.5.1',js.includes('Motion v0.5.1')]
+    ['Admin labels current Motion v0.5.1',js.includes('Motion v0.5.1')],
+    ['Admin has no duplicated v0.5.1.1 label',!js.includes('Motion v0.5.1.1')]
   ];
   for(const [label,ok] of checks){console.log(`[pulse-motion-result-v9] ${ok?'OK':'FAIL'} · ${label} · ${dir.endsWith('pulse-app')?'source':'build'}`);if(!ok)process.exitCode=1}
 }
