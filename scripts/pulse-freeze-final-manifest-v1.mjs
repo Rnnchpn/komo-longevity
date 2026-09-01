@@ -3,11 +3,11 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 await import('./pulse-admin-professional-runtime-stability-v1.mjs');
-await import('./pulse-admin-pro-single-owner-v2.mjs');
+await import('./pulse-admin-pro-single-owner-v3.mjs');
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const manifest={
-  version:'2026-09-01-admin-pro-single-owner-v2',
+  version:'2026-09-01-admin-pro-single-owner-v3',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
