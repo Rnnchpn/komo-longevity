@@ -1,1 +1,0 @@
-KŌMØ Pulse visual canon v13: Home + Club palette is the single color reference across Pulse. Legacy beige patient palette is retired at build time.
