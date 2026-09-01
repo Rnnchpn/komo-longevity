@@ -42,7 +42,7 @@ fs.writeFileSync(resultsPath,results);
 const motion=fs.readFileSync(motionDst,'utf8');
 const home=fs.readFileSync(homeSummaryPath,'utf8');
 const index=fs.readFileSync(indexPath,'utf8');
-const wrongKey='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
+const wrongKey='sb_publishable_3sUsinfJ_nMFI44OXozkQ_jmGG8w7n';
 const exactScriptCount=(file)=>(index.match(new RegExp(`<script[^>]+src=["']\\./${file.replaceAll('.','\\.')}(?:\\?[^"']*)?["'][^>]*>`,`g`))||[]).length;
 const resultsUsesSharedRuntime=results.includes('window.KomoRuntime?.client')||(
   results.includes("getCanonicalClient } from './canonical-result-runtime.js'")&&results.includes('getCanonicalClient()')
