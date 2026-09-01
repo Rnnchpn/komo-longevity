@@ -18,17 +18,18 @@ await import('./pulse-admin-myocare-loop-guard-v7.mjs');
 await import('./pulse-motion-result-integrity-v9.mjs');
 await import('./pulse-information-architecture-v11.mjs');
 await import('./pulse-connected-consultations-single-layer-v12.mjs');
-await import('./pulse-canonical-dark-theme-v13.mjs');
+await import('./pulse-canonical-theme-v14.mjs');
 
 const manifest={
-  version:'2026-09-01-motion-v4-result-integrity-v9-club-v2-information-architecture-v11-single-layer-v12-canonical-theme-v13',
+  version:'2026-09-01-motion-v4-result-integrity-v9-club-v2-information-architecture-v11-single-layer-v12-canonical-theme-v14-final',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
     'extensions are presentation-only and must not write routes or mutate #viewRoot',
     'all reachable structural route/view writers must be classified before release',
     'desktop, tablet and mobile share the same canonical content contract',
-    'Home and Club define the canonical Pulse color system across patient, professional, admin and auth surfaces'
+    'Home and Club define the canonical Pulse color system across patient, professional, admin and auth surfaces',
+    'canonical contrast, authentication card geometry and motion timing are frozen across Pulse'
   ],
   surfaces:{
     home:{owner:'patient-home-command-v1.js',controllers:[],extensions:[]},
@@ -49,4 +50,4 @@ const manifest={
   global_controllers:['app-router-v2.js','first-test-entry-v1.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Club V2 canonical owner restored · Motion V4 frozen · Home/Club canonical theme v13 enforced across Pulse · score/report contracts guarded`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Club V2 canonical owner restored · Motion V4 frozen · Home/Club canonical theme v14 final · contrast/Auth/motion frozen · score/report contracts guarded`);
