@@ -7,10 +7,11 @@ await import('./pulse-admin-pro-single-owner-v3.mjs');
 await import('./pulse-admin-pro-route-v4.mjs');
 await import('./pulse-pro-event-driven-v5.mjs');
 await import('./pulse-workspace-clickability-v6.mjs');
+await import('./pulse-admin-myocare-loop-guard-v7.mjs');
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const manifest={
-  version:'2026-09-01-motion-v4-admin-pro-clickable-v6',
+  version:'2026-09-01-motion-v4-admin-pro-loopfree-v7',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
@@ -37,4 +38,4 @@ const manifest={
   global_controllers:['app-router-v2.js','first-test-entry-v1.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Motion V4 frozen · Admin/Clinical workspaces stay clickable · Professional lifecycle event-driven`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Motion V4 frozen · Admin/Clinical clickable · MyoCare loop removed · Professional lifecycle event-driven`);
