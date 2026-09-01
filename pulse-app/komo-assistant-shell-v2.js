@@ -1,7 +1,7 @@
-/* KŌMØ Pulse — Komo Assistant Shell V2.2 */
+/* KŌMØ Pulse — Komo Assistant Shell V2.3 */
 (() => {
   'use strict';
-  const VERSION='2.2.0';
+  const VERSION='2.3.0';
   let history=[];
   let loading=false;
 
@@ -14,14 +14,34 @@
   const normalize=v=>String(v||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[!?.,;:]+$/g,'').trim();
 
   function ensureStyle(){
-    if(document.querySelector('#komoAssistantV2Style'))return;
-    const link=document.createElement('link');
-    link.id='komoAssistantV2Style';
-    link.rel='stylesheet';
-    link.href='./komo-assistant-shell-v2.css';
-    document.head.appendChild(link);
+    const existing=document.querySelector('link[href*="komo-assistant-shell-v2.css"]');
+    if(existing){if(!existing.id)existing.id='komoAssistantV2Style'}
+    else{
+      const link=document.createElement('link');
+      link.id='komoAssistantV2Style';
+      link.rel='stylesheet';
+      link.href='./komo-assistant-shell-v2.css';
+      document.head.appendChild(link);
+    }
+    if(!document.querySelector('#komoAssistantVisibilityV23')){
+      const guard=document.createElement('style');
+      guard.id='komoAssistantVisibilityV23';
+      guard.textContent='#komoAssistantRail:not([hidden]){visibility:visible!important;opacity:1!important;pointer-events:auto!important}#komoAssistantDrawer{pointer-events:none}#komoAssistantDrawer:not([hidden]) .ka2-shell{pointer-events:auto}';
+      document.head.appendChild(guard);
+    }
   }
-  function appVisible(){const app=document.querySelector('#appShell');return !!app&&!app.hidden}
+  function appVisible(){
+    const app=document.querySelector('#appShell');
+    if(!app||app.hidden)return false;
+    const s=getComputedStyle(app);
+    if(s.display==='none'||s.visibility==='hidden')return false;
+    const auth=document.querySelector('#authScreen');
+    if(auth&&!auth.hidden){
+      const a=getComputedStyle(auth);
+      if(a.display!=='none'&&a.visibility!=='hidden')return false;
+    }
+    return true;
+  }
   function hideLegacy(){
     document.querySelector('#komoOperatorLauncher')?.setAttribute('hidden','');
     document.querySelector('#komoPatientGuideLauncher')?.setAttribute('hidden','');
@@ -42,6 +62,8 @@
     if(r==='results')return[['Comprendre mon bilan','Explique-moi simplement mon dernier bilan publié.'],['Ce qui compte','Quels sont les deux éléments à retenir ?'],['Et maintenant ?','Quelle est ma prochaine étape ?']];
     if(r==='trajectory')return[['Mon évolution','Qu’est-ce qui a changé depuis ma dernière référence ?'],['Ce qui progresse','Qu’est-ce qui s’améliore ?'],['Prochaine étape','Que dois-je faire maintenant ?']];
     if(r==='key')return[['Ma journée','Que racontent mes données du jour ?'],['Ma régularité','Comment évolue mon activité cette semaine ?'],['Objectif du jour','Que me reste-t-il à faire aujourd’hui ?']];
+    if(r==='club')return[['Komo Club','Que puis-je faire dans Komo Club ?'],['Mes points','Explique-moi mes K Points et mon niveau.'],['Ma prochaine action','Que puis-je faire aujourd’hui dans KŌMØ ?']];
+    if(r==='documents')return[['Préparer ma consultation','Que dois-je préparer avant ma prochaine consultation ?'],['Mon prochain rendez-vous','Résume mon prochain rendez-vous KŌMØ.'],['Questions utiles','Quelles questions devrais-je préparer ?']];
     return[['Ma journée','Résume-moi ce qui compte aujourd’hui.'],['Mon bilan','Explique-moi mon dernier résultat disponible.'],['Que faire maintenant ?','Quelle est ma prochaine action utile ?']];
   }
   function conversationalShortcut(message){
@@ -57,24 +79,28 @@
   function ensureShell(){
     ensureStyle();
     hideLegacy();
+    const rail=document.querySelector('#komoAssistantRail');
+    const drawer=document.querySelector('#komoAssistantDrawer');
     if(!appVisible()){
-      document.querySelector('#komoAssistantRail')?.remove();
-      document.querySelector('#komoAssistantDrawer')?.remove();
+      if(rail)rail.hidden=true;
+      if(drawer)drawer.hidden=true;
+      document.body.classList.remove('ka2-open');
       return;
     }
-    let rail=document.querySelector('#komoAssistantRail');
-    if(!rail){
-      rail=document.createElement('button');
-      rail.id='komoAssistantRail';
-      rail.type='button';
-      rail.setAttribute('aria-controls','komoAssistantDrawer');
-      rail.setAttribute('aria-expanded','false');
-      rail.innerHTML='<span class="ka2-peek" aria-hidden="true"><b>ō</b><b>ø</b></span><span class="ka2-rail-copy"><strong>Je suis Komo</strong><small>Écrivez-moi</small></span>';
-      rail.addEventListener('click',open);
-      document.body.appendChild(rail);
+    let currentRail=rail;
+    if(!currentRail){
+      currentRail=document.createElement('button');
+      currentRail.id='komoAssistantRail';
+      currentRail.type='button';
+      currentRail.setAttribute('aria-controls','komoAssistantDrawer');
+      currentRail.setAttribute('aria-expanded','false');
+      currentRail.innerHTML='<span class="ka2-peek" aria-hidden="true"><b>ō</b><b>ø</b></span><span class="ka2-rail-copy"><strong>Je suis Komo</strong><small>Écrivez-moi</small></span>';
+      currentRail.addEventListener('click',open);
+      document.body.appendChild(currentRail);
     }
-    rail.querySelector('strong').textContent=isPro()?'Komo Pro':'Je suis Komo';
-    rail.querySelector('small').textContent=isPro()?'Votre copilote':'Écrivez-moi';
+    currentRail.hidden=false;
+    currentRail.querySelector('strong').textContent=isPro()?'Komo Pro':'Je suis Komo';
+    currentRail.querySelector('small').textContent=isPro()?'Votre copilote':'Écrivez-moi';
     if(!document.querySelector('#komoAssistantDrawer'))createDrawer();
   }
   function createDrawer(){
@@ -139,9 +165,9 @@
     close();
   }
   function refresh(){ensureShell();renderIntro()}
-  ['hashchange','pageshow','komo:route-ready','komo:session-ready','komo:session-cleared','komo:admin-open'].forEach(name=>window.addEventListener(name,()=>setTimeout(refresh,30)));
-  document.addEventListener('DOMContentLoaded',()=>{setTimeout(refresh,250);setTimeout(refresh,900)});
-  if(document.readyState!=='loading'){setTimeout(refresh,80);setTimeout(refresh,700)}
+  ['hashchange','pageshow','komo:canonical-route','komo:route-ready','komo:home-command-rendered','komo:data-ready','komo:session-ready','komo:session-cleared','komo:admin-open'].forEach(name=>window.addEventListener(name,()=>setTimeout(refresh,30)));
+  document.addEventListener('DOMContentLoaded',()=>{setTimeout(refresh,120);setTimeout(refresh,420)});
+  if(document.readyState!=='loading'){setTimeout(refresh,40);setTimeout(refresh,240)}
   window.addEventListener('komo:operator-open',open);
   window.KomoAssistantV2={version:VERSION,open,close,refresh,ask:send};
 })();

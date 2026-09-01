@@ -2,7 +2,7 @@ import './komo-ai-client-v1.js';
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='6.2.0';
+const VERSION='6.3.0';
 let timer=0;
 let rendering=false;
 let lastSignature='';
@@ -13,6 +13,28 @@ const num=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
 const fmtInt=v=>v===null||v===undefined?'—':new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(Math.round(Number(v)));
 const minus='−';
 const clampScore=v=>Math.max(0,Math.min(100,Math.round(Number(v)||0)));
+
+function installEnhancementStyle(){
+  if(document.querySelector('#kh6HomeEnhancements'))return;
+  const style=document.createElement('style');
+  style.id='kh6HomeEnhancements';
+  style.textContent=`
+    .kh6-lower{display:grid;gap:10px}
+    .kh6-shortcuts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+    .kh6-shortcut{min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 16px;border:1px solid rgba(255,255,255,.085);border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.035),rgba(255,255,255,.016));color:#dce2dd;text-decoration:none;font:650 .72rem/1 'DM Sans',sans-serif;letter-spacing:-.01em;box-shadow:inset 0 1px rgba(255,255,255,.025);-webkit-tap-highlight-color:transparent;transition:transform .18s ease,border-color .18s ease,background .18s ease}
+    .kh6-shortcut small{display:block;margin-top:4px;color:#6f7b73;font-size:.55rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+    .kh6-shortcut b{flex:none;color:#90aa97;font-size:.92rem;font-weight:500}
+    @media(hover:hover){.kh6-shortcut:hover{transform:translateY(-1px);border-color:rgba(127,165,138,.24);background:linear-gradient(145deg,rgba(127,165,138,.07),rgba(255,255,255,.018))}}
+    body.khome-final-v1 #komoAssistantRail{z-index:11000!important;right:clamp(14px,2vw,28px)!important;top:auto!important;bottom:106px!important;width:56px!important;height:56px!important;padding:6px!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:18px!important;display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:center!important;visibility:visible!important;opacity:1!important;transform:none!important;box-shadow:0 18px 48px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.12)!important}
+    body.khome-final-v1 #komoAssistantRail .ka2-peek{width:42px!important;height:42px!important;flex:0 0 42px!important;border-radius:13px!important}
+    body.khome-final-v1 #komoAssistantRail .ka2-rail-copy{display:none!important}
+    body.khome-final-v1 #komoAssistantDrawer{z-index:12000!important}
+    @media(max-width:640px){.kh6-lower{gap:7px}.kh6-shortcuts{gap:7px}.kh6-shortcut{min-height:39px;padding:0 11px;border-radius:11px;font-size:.61rem}.kh6-shortcut small{display:none}.kh6-shortcut b{font-size:.78rem}body.khome-final-v1 #komoAssistantRail{right:12px!important;bottom:83px!important;width:48px!important;height:48px!important;border-radius:16px!important}body.khome-final-v1 #komoAssistantRail .ka2-peek{width:36px!important;height:36px!important;flex-basis:36px!important;border-radius:11px!important}body.khome-final-v1 #komoAssistantRail .ka2-peek b{font-size:18px!important}}
+    @media(max-width:370px){.kh6-shortcut{padding:0 9px;font-size:.56rem}}
+    @media(prefers-reduced-motion:reduce){.kh6-shortcut{transition:none!important}}
+  `;
+  document.head.appendChild(style);
+}
 
 function formatSleep(minutes){
   const value=num(minutes);
@@ -104,11 +126,11 @@ function hudMarkup(identity,loading=false){
   const level=loading?null:num(identity?.engagement?.level);
   const profileName=loading?'Profile':firstName(identity);
   return `<nav class="kh6-hud" aria-label="Profile and experience">
-    <a class="kh6-profile" href="#mykomo" data-route="mykomo" aria-label="Open My KŌMØ profile">
+    <a class="kh6-profile" href="#mykomo" data-route="mykomo" data-kh6-route="mykomo" aria-label="Open My KŌMØ profile">
       <span class="kh6-avatar" aria-hidden="true">${loading?'<span>K</span>':avatarMarkup(identity)}</span>
       <span class="kh6-profile-copy"><small>PROFILE</small><strong>${esc(profileName)}</strong></span>
     </a>
-    <a class="kh6-xp" href="#mykomo" data-route="mykomo" aria-label="Open experience and progression">
+    <a class="kh6-xp" href="#mykomo" data-route="mykomo" data-kh6-route="mykomo" aria-label="Open experience and progression">
       <span class="kh6-xp-copy"><small>EXPERIENCE</small><strong>${xp===null?'—':esc(fmtInt(xp))} <em>XP</em></strong></span>
       <span class="kh6-level">LV. ${level===null?'—':esc(fmtInt(level))}</span>
     </a>
@@ -162,6 +184,13 @@ function metricCard(type,data,loading=false,estimated=false,index=0){
   </article>`;
 }
 
+function shortcutsMarkup(){
+  return `<nav class="kh6-shortcuts" aria-label="Quick access">
+    <a class="kh6-shortcut" href="#documents" data-kh6-route="documents"><span>Préparez votre consultation<small>Agenda & préparation</small></span><b aria-hidden="true">→</b></a>
+    <a class="kh6-shortcut" href="#club" data-kh6-route="club"><span>Komo Club<small>Communauté KŌMØ</small></span><b aria-hidden="true">→</b></a>
+  </nav>`;
+}
+
 function homeMarkup(data,identity={},loading=false){
   const canonicalReady=!loading&&Boolean(data?.ready)&&num(data?.score)!==null;
   const preview=!loading&&!canonicalReady&&Boolean(data?.preview?.available)&&num(data?.preview?.score)!==null?data.preview:null;
@@ -187,11 +216,14 @@ function homeMarkup(data,identity={},loading=false){
       <div class="kh6-kicker"><span class="kh6-label">MOTION TODAY</span>${badge}</div>
       <p class="kh6-message">${esc(message)}</p>
     </div>
-    <section class="kh6-metrics" aria-label="Daily movement signals">
-      ${metricCard('steps',active?.steps,loading,estimated,0)}
-      ${metricCard('sleep',active?.sleep,loading,estimated,1)}
-      ${metricCard('resting_hr',active?.resting_hr,loading,estimated,2)}
-    </section>
+    <div class="kh6-lower">
+      <section class="kh6-metrics" aria-label="Daily movement signals">
+        ${metricCard('steps',active?.steps,loading,estimated,0)}
+        ${metricCard('sleep',active?.sleep,loading,estimated,1)}
+        ${metricCard('resting_hr',active?.resting_hr,loading,estimated,2)}
+      </section>
+      ${shortcutsMarkup()}
+    </div>
   </section>`;
 }
 
@@ -215,6 +247,10 @@ function tuneChrome(){
   if(title)title.textContent='';
 }
 
+function refreshAssistant(){
+  requestAnimationFrame(()=>window.KomoAssistantV2?.refresh?.());
+}
+
 async function render(force=false){
   if(rendering||route()!=='home')return;
   const host=document.querySelector('[data-my-komo-home]');
@@ -229,7 +265,7 @@ async function render(force=false){
     if(!force&&markup===lastSignature&&host.querySelector('[data-khome-v6]:not(.is-loading)'))return;
     mount(host,markup);
     lastSignature=markup;
-    window.KomoAssistantV2?.refresh?.();
+    refreshAssistant();
     window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,algorithm:data?.algorithm_version||null,estimated:Boolean(data?.preview?.available&&!data?.ready),xp:num(identity?.engagement?.xp_total),level:num(identity?.engagement?.level)}}));
   }catch(e){
     console.error('[patient-home-v6]',e);
@@ -238,10 +274,21 @@ async function render(force=false){
 }
 
 function schedule(force=false,ms=0){clearTimeout(timer);timer=setTimeout(()=>render(force),ms)}
-['hashchange','pageshow','komo:route-ready','komo:data-ready','komo:wearable-data-updated','komo:profile-identity-updated'].forEach(name=>window.addEventListener(name,()=>{
+
+document.addEventListener('click',event=>{
+  const link=event.target.closest?.('[data-kh6-route]');
+  if(!link)return;
+  const target=link.getAttribute('data-kh6-route');
+  if(!target||!window.KomoPatientNavigation?.go)return;
+  event.preventDefault();
+  window.KomoPatientNavigation.go(target);
+},true);
+
+['hashchange','pageshow','komo:route-ready','komo:canonical-route','komo:data-ready','komo:wearable-data-updated','komo:profile-identity-updated','komo:session-ready'].forEach(name=>window.addEventListener(name,()=>{
   tuneChrome();
+  refreshAssistant();
   schedule(['komo:data-ready','komo:wearable-data-updated','komo:profile-identity-updated'].includes(name),20);
 }));
-function boot(){tuneChrome();schedule(true,0)}
+function boot(){installEnhancementStyle();tuneChrome();refreshAssistant();schedule(true,0);setTimeout(refreshAssistant,240)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 window.KomoPatientHomeCommand={version:VERSION,refresh:()=>schedule(true,0)};
