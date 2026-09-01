@@ -66,6 +66,7 @@ admin=replaceRequired(
   "document.addEventListener('click',click);document.addEventListener('input',input);document.addEventListener('change',change);window.addEventListener('hashchange',open);window.addEventListener('komo:admin-route-ready',open);window.addEventListener('komo:admin-open',open);document.addEventListener('DOMContentLoaded',open);",
   'Admin redundant startup timer removal'
 );
+admin=admin.replaceAll('setTimeout(open,250);','');
 await write('admin',admin);
 
 // Admin / Professionnels tab — one request at a time and no unconditional late
