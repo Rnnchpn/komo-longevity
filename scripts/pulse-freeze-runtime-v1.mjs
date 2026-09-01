@@ -28,7 +28,7 @@ await patch('patient-canonical-results.js',src=>src
   .replace("if(hash==='#profile')renderAccount(result);",'')
   .replace("if(h==='#profile'&&!document.querySelector('[data-kcanon-account]'))schedule(false);",''));
 
-// 3. Trajectory + My KŌMØ: one product vocabulary and no emitted legacy aliases.
+// 3. Mes consultations + My KŌMØ: keep canonical vocabulary without forcing score concepts into the consultation surface.
 await patch('trajectory-v3.js',src=>src
   .replaceAll('KŌMØ Age','Motion Age')
   .replaceAll('estimation fonctionnelle v0.1','estimation fonctionnelle de l’âge locomoteur'));
@@ -97,7 +97,7 @@ const checks=[
   ['obsolete My KŌMØ Club injector removed',!index.includes('my-komo-club-entry-v1.js')],
   ['Results emits no path alias',!results.includes('data-route="path"')],
   ['Results no longer injects profile result duplicate',!results.includes("if(hash==='#profile')renderAccount(result)")],
-  ['Motion Age naming is canonical',trajectory.includes('Motion Age')&&mykomo.includes('Motion Age')&&!trajectory.includes('KŌMØ Age')&&!mykomo.includes('Âge locomoteur')],
+  ['Motion Age naming remains canonical where used',mykomo.includes('Motion Age')&&!trajectory.includes('KŌMØ Age')&&!mykomo.includes('Âge locomoteur')],
   ['My KŌMØ emits trajectory directly',!mykomo.includes('data-mkv5-route="path"')&&mykomo.includes('data-mkv5-route="trajectory"')],
   ['KEY does not mutate Home',!key.includes('homeTabs(')],
   ['adaptive patient navigation emits no path/plan',!adaptive.includes("patient:path")&&!adaptive.includes("patient:plan")&&!adaptive.includes('KŌMØ Therapy')],

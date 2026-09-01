@@ -16,9 +16,10 @@ await import('./pulse-pro-event-driven-v5.mjs');
 await import('./pulse-workspace-clickability-v6.mjs');
 await import('./pulse-admin-myocare-loop-guard-v7.mjs');
 await import('./pulse-motion-result-integrity-v9.mjs');
+await import('./pulse-information-architecture-v11.mjs');
 
 const manifest={
-  version:'2026-09-01-motion-v4-result-integrity-v9-club-v2',
+  version:'2026-09-01-motion-v4-result-integrity-v9-club-v2-information-architecture-v11',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
@@ -45,4 +46,4 @@ const manifest={
   global_controllers:['app-router-v2.js','first-test-entry-v1.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Club V2 canonical owner restored · Motion V4 frozen · score/report contracts guarded`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Club V2 canonical owner restored · Motion V4 frozen · Connected/Results/Consultations/My KŌMØ roles aligned · score/report contracts guarded`);
