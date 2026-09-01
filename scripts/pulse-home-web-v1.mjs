@@ -77,6 +77,8 @@ const checks=[
   ['Home renderer has no persistent observer or polling',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
   ['Home paints an immediate loading shell',js.includes('homeMarkup(null,{},true)')&&js.includes('aria-busy')],
   ['Home neutral black canvas uses green as accent',css.includes('--kh6-bg:#050706')&&css.includes('--kh6-green:#7fa58a')&&css.includes('--kh6-green-core:#315b41')&&css.includes('.kh6-score')],
+  ['Home shell is black full bleed',css.includes('body.khome-final-v1 .main-shell')&&css.includes('body.khome-final-v1 .view-root')&&css.includes('max-width:none!important')&&css.includes('padding-left:0!important')&&css.includes('padding-right:0!important')],
+  ['KŌMØ Pulse is integrated in the Home chrome',css.includes('.kh6-hud::before')&&css.includes('content:"KŌMØ · PULSE"')],
   ['desktop iPad mobile share one metric contract',css.includes('grid-template-columns:repeat(3,minmax(0,1fr))')&&css.includes('@media(max-width:900px)')&&css.includes('@media(max-width:640px)')],
   ['one-screen Home prevents lateral and vertical canvas drift',css.includes('overflow:hidden')],
   ['reduced motion supported',css.includes('@media(prefers-reduced-motion:reduce)')],
