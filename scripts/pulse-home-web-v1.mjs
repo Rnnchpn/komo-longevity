@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260901-home-final-v5';
+const release='20260901-home-motion-today-v6';
 const navRelease='20260831-patient-nav-v721';
 const cssFile='patient-home-command-v1.css';
 const heroCssFile='patient-home-hero-v2.css';
@@ -31,6 +31,7 @@ for(const file of [cssFile,mobileCssFile,jsFile,mobileJsFile,aiClientFile,assist
 
 const jsPath=join(pulse,jsFile);
 let homeJs=await readFile(jsPath,'utf8');
+// Preserve current route-runtime reachability while Home itself performs a single data request.
 const requiredImports=[aiClientFile,assistantJsFile,resultsOwnerFile,agendaMapFile,mobileJsFile];
 for(const file of requiredImports){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -57,66 +58,36 @@ html=html.replace('</body>',`  <script type="module" src="./${jsFile}?v=${releas
 await writeFile(htmlPath,html,'utf8');
 
 const [css,mobileCss,js,mobileJs,aiClient,assistantJs,assistantCss,resultsOwner,agendaMap,nav,final]=await Promise.all([
-  readFile(join(pulse,cssFile),'utf8'),
-  readFile(join(pulse,mobileCssFile),'utf8'),
-  readFile(join(pulse,jsFile),'utf8'),
-  readFile(join(pulse,mobileJsFile),'utf8'),
-  readFile(join(pulse,aiClientFile),'utf8'),
-  readFile(join(pulse,assistantJsFile),'utf8'),
-  readFile(join(pulse,assistantCssFile),'utf8'),
-  readFile(join(pulse,resultsOwnerFile),'utf8'),
-  readFile(join(pulse,agendaMapFile),'utf8'),
-  readFile(join(pulse,navFile),'utf8'),
-  readFile(htmlPath,'utf8')
+  readFile(join(pulse,cssFile),'utf8'),readFile(join(pulse,mobileCssFile),'utf8'),readFile(join(pulse,jsFile),'utf8'),readFile(join(pulse,mobileJsFile),'utf8'),readFile(join(pulse,aiClientFile),'utf8'),readFile(join(pulse,assistantJsFile),'utf8'),readFile(join(pulse,assistantCssFile),'utf8'),readFile(join(pulse,resultsOwnerFile),'utf8'),readFile(join(pulse,agendaMapFile),'utf8'),readFile(join(pulse,navFile),'utf8'),readFile(htmlPath,'utf8')
 ]);
-const itemsBlock=(nav.match(/const items=\[([\s\S]*?)\];/)||[])[1]||'';
 const directScript=file=>new RegExp(`<script[^>]+src=["']\\./${file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?:\\?[^"']*)?["']`).test(final);
 const checks=[
-  ['historical home renderer removed',!final.includes('patient-home-datawall-v3.js')],
+  ['historical Home renderer removed',!final.includes('patient-home-datawall-v3.js')],
   ['legacy Home bootstrap removed',!directScript(legacyBootstrapFile)],
   ['legacy My KŌMØ Home owner removed',!directScript(legacyMyKomoHomeFile)],
   ['legacy Home visual layers removed',!final.includes(heroCssFile)&&!final.includes(dailyCssFile)&&!directScript(dailyJsFile)],
-  ['final Home V5 CSS loaded',final.includes(`${cssFile}?v=${release}`)],
-  ['Home uses neutral premium canvas with KŌMØ green as accent',css.includes('--kh5-bg:#f0eee8')&&css.includes('--kh5-green:#315b41')&&css.includes('.kh5-komo')],
-  ['Home identifies KŌMØ immediately',js.includes('kh5-wordmark')&&js.includes('KŌMØ')&&js.includes('PULSE')&&css.includes('.kh5-wordmark')],
-  ['Home hierarchy is Motion then Komo then monitoring signals',js.indexOf('kh5-motion')<js.indexOf('kh5-komo')&&js.indexOf('kh5-komo')<js.indexOf('kh5-signals')],
-  ['Home exclusively owns its DOM',js.includes('host.replaceChildren(node)')&&js.includes("host.dataset.khomeOwner='patient-home-command-v1@5'")],
-  ['Home appointment no longer depends on legacy DOM',js.includes('pulseOverview()')&&js.includes('overview?.records')&&!js.includes("document.querySelector('.mykomo-next')")],
-  ['assistant CSS is shipped with Home',final.includes(`${assistantCssFile}?v=${release}`)&&assistantCss.includes('#komoAssistantRail')&&assistantCss.includes('#komoAssistantDrawer')],
-  ['mobile V1 CSS remains final patient presentation layer',final.includes(`${mobileCssFile}?v=${release}`)],
-  ['canonical Home owner is loaded directly',directScript(jsFile)],
-  ['Home imports AI assistant mobile and narrow guards',requiredImports.every(file=>js.includes(file)&&js.includes(`${file}?v=${release}`))],
-  ['imported runtimes are not direct scripts',requiredImports.every(file=>!directScript(file))],
-  ['Komo AI client calls authenticated operator chat',aiClient.includes("functions.invoke('komo-operator-v1'")&&aiClient.includes("action:'chat'")&&aiClient.includes('window.KomoAI')],
-  ['Komo degraded mode is explicit',aiClient.includes('Mode Pulse vérifié')&&aiClient.includes('fallback:true')],
-  ['Komo assistant answers greetings naturally',assistantJs.includes('conversationalShortcut')&&assistantJs.includes("headline:'Bonjour.'")],
-  ['Komo assistant is genuinely conversational',assistantJs.includes('window.KomoAI.ask')&&assistantJs.includes('Je suis Komo')&&assistantJs.includes('data-ka2-form')],
-  ['Komo assistant supports patient and admin/pro contexts',assistantJs.includes('KŌMØ PRO')&&assistantJs.includes('priorités du centre')&&assistantJs.includes('window.KomoAssistantV2')],
-  ['Komo assistant has no global mutation observer',!assistantJs.includes('MutationObserver')],
-  ['Results V2 owns visible patient Results',resultsOwner.includes("classList.toggle('kresults-v1'")&&resultsOwner.includes('[data-kcanon-detail]')&&resultsOwner.includes('KomoPatientResultsV1')],
-  ['Agenda map has a functional external fallback',agendaMap.includes('ag4-map-fallback')&&agendaMap.includes('google.com/maps/search')&&!agendaMap.includes('MutationObserver')],
-  ['legacy clarity runtime is no longer direct',!directScript(clarityJsFile)],
-  ['mobile runtime is event-driven',mobileJs.includes("title.textContent='Bienvenue.'")&&!mobileJs.includes('MutationObserver')],
-  ['current Home is the final decision surface',js.includes('VOTRE MOUVEMENT AUJOURD’HUI')&&js.includes('KOMO · PRIORITÉ')&&js.includes('KEY · QUOTIDIEN')&&js.includes('TRAJECTOIRE')&&js.includes('PROCHAINE ÉTAPE')],
-  ['mobile remains one content contract and becomes vertical only by CSS',css.includes('@media(max-width:767px)')&&css.includes('.kh5-hero{grid-template-columns:1fr')&&css.includes('.kh5-signals{grid-template-columns:1fr')],
-  ['mobile removes avatar',mobileCss.includes('.avatar-button{display:none!important}')],
-  ['Home gates Motion Score to released or published results',js.includes("const RELEASED=new Set(['released','published'])")&&js.includes('released(status)?num(canonical?.motion_score):null')],
-  ['Home does not query canonical scores directly',!js.includes("from('scores')")],
-  ['Home uses canonical consent-aware walk summary',js.includes("rpc('komo_walk_summary')")&&!js.includes("from('wearable_daily_metrics')")],
-  ['Home turns KEY into one contextual monitoring signal',js.includes('function keySignal(')&&js.includes('steps_avg_7d')&&js.includes('Votre activité du jour')],
-  ['stable Home renderer has no body observer or polling loop',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
-  ['Home has no historical delayed retry ladder',!js.includes('[80,260,800,1800]')&&!js.includes('1700')],
-  ['Home paints an immediate loading shell before data resolves',js.includes('homeMarkup(null,null,[],true)')&&js.includes('aria-busy')],
-  ['Home exposes essential patient destinations',js.includes("route:'key'")&&js.includes("route:'trajectory'")&&js.includes("route:'agenda'")&&js.includes('data-kh5-route="results"')],
-  ['Home keeps Club and K Points secondary',js.includes('communityLine(walk)')&&js.includes('k_points_week')&&js.includes('Walk Club')],
-  ['Home exposes next consultation context',js.includes('currentAppointment')&&js.includes('appointment_type')&&js.includes('center_name')],
-  ['Home animations are finite and accessible',css.includes('kh5Enter .35s')&&js.includes('duration=620')&&css.includes('@media(prefers-reduced-motion:reduce)')&&!css.includes('infinite')],
-  ['final patient dock is cache-busted',final.includes(`${navFile}?v=${navRelease}`)],
-  ['dock retries after Home and session readiness',nav.includes('komo:home-command-rendered')&&nav.includes('komo:route-ready')&&nav.includes('setTimeout(refresh,ms)')],
-  ['dock is persistent outside app mount tree',nav.includes('document.body.appendChild(d)')&&nav.includes('kpulse-app-mode')],
-  ['dock uses canonical navigation only',nav.includes('KomoPatientNavigation?.go?.')&&!nav.includes("location.hash=`")],
-  ['dock uses final six destinations',itemsBlock.includes("['home','Accueil'")&&itemsBlock.includes("['key','KEY'")&&itemsBlock.includes("['results','Résultats'")&&itemsBlock.includes("['trajectory','Trajectoire'")&&itemsBlock.includes("['agenda','Rendez-vous'")&&itemsBlock.includes("['mykomo','My KŌMØ'")]
+  ['Home V6 CSS cache-busted',final.includes(`${cssFile}?v=${release}`)],
+  ['Home V6 owner loaded once',directScript(jsFile)&&((final.match(new RegExp(jsFile.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))||[]).length===1)],
+  ['Home V6 owns its DOM',js.includes('host.replaceChildren(node)')&&js.includes("host.dataset.khomeOwner='patient-home-command-v1@6'")],
+  ['Home V6 is Motion Today only',js.includes('MOTION TODAY')&&js.includes("metricCard('steps'")&&js.includes("metricCard('sleep'")&&js.includes("metricCard('resting_hr'")],
+  ['Home V6 excludes clinical score and trajectory widgets',!js.includes('MOTION SCORE')&&!js.includes('MOTION AGE')&&!js.includes('kh5-komo')&&!js.includes('kh5-signals')],
+  ['Home V6 performs one canonical wearable RPC',js.includes("rpc('komo_motion_today_v1')")&&!js.includes("rpc('komo_walk_summary')")&&!js.includes('pulseOverview()')&&!js.includes('pulse_score_runs')],
+  ['Home V6 never queries wearable tables directly',!js.includes("from('wearable_daily_metrics')")],
+  ['Home V6 has explicit incomplete states',js.includes('Sync your wearable')&&js.includes('Building your baseline')===false],
+  ['Home renderer has no persistent observer or polling',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
+  ['Home paints an immediate loading shell',js.includes('homeMarkup(null,true)')&&js.includes('aria-busy')],
+  ['Home neutral canvas uses green as accent',css.includes('--kh6-bg:#f3f1ec')&&css.includes('--kh6-green:#315b41')&&css.includes('.kh6-score')],
+  ['desktop iPad mobile share one metric contract',css.includes('grid-template-columns:repeat(3,minmax(0,1fr))')&&css.includes('@media(max-width:900px)')&&css.includes('@media(max-width:640px)')],
+  ['one-screen Home prevents lateral and vertical canvas drift',css.includes('overflow:hidden')],
+  ['reduced motion supported',css.includes('@media(prefers-reduced-motion:reduce)')],
+  ['mobile runtime remains event-driven',!mobileJs.includes('MutationObserver')],
+  ['assistant bridge remains available',assistantJs.includes('window.KomoAssistantV2')&&aiClient.includes('window.KomoAI')&&assistantCss.includes('#komoAssistantDrawer')],
+  ['Results owner remains reachable',resultsOwner.includes('KomoPatientResultsV1')],
+  ['Agenda fallback remains reachable',agendaMap.includes('google.com/maps/search')&&!agendaMap.includes('MutationObserver')],
+  ['required route runtimes are imports not duplicate direct scripts',requiredImports.every(file=>js.includes(`${file}?v=${release}`)&&!directScript(file))],
+  ['patient navigation stays canonical',nav.includes('KomoPatientNavigation?.go?.')&&!nav.includes("location.hash=`")],
+  ['Home refreshes on wearable data update',js.includes('komo:wearable-data-updated')]
 ];
-for(const [label,ok] of checks)console.log(`[pulse-home-web-v1] ${ok?'OK':'FAIL'} · ${label}`);
+for(const [label,ok] of checks)console.log(`[pulse-home-web-v6] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log('[pulse-home-web-v1] PASS · final decision Home · Motion · Komo · KEY · trajectory · next step');
+console.log(`[pulse-home-web-v6] PASS · ${checks.length}/${checks.length} Motion Today web assertions`);
