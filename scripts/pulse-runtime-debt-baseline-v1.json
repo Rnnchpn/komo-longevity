@@ -9,6 +9,6 @@
   "routeWriters": 28,
   "viewWriters": 8,
   "viewMutatorsExact": 18,
-  "viewReplacersExact": 12,
+  "viewReplacersExact": 13,
   "viewInsertersExact": 7
 }

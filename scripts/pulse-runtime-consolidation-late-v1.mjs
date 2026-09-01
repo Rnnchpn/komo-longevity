@@ -6,7 +6,13 @@ const hasRouteWrite=s=>/location\.hash\s*=|history\.(?:pushState|replaceState)\s
 const center=await patch('site/pulse-v12/center-command-cockpit-v2.js',[["obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});","obs.observe(document.querySelector('#appShell'),{subtree:true,childList:true,attributes:true,attributeFilter:['class','hidden']});"]],'Center Command');
 if(center.includes('obs.observe(document.body'))throw new Error('[pulse-runtime-late] Center Command body observer remains');
 
-const canonical=await patch('site/pulse-v12/patient-canonical-results.js',[["}).observe(document.body,{childList:true,subtree:true});","}).observe(document.querySelector('#viewRoot'),{childList:true,subtree:true});"]],'Canonical Results');
+let canonical=await readFile('site/pulse-v12/patient-canonical-results.js','utf8');
+const canonicalBodyObserver="}).observe(document.body,{childList:true,subtree:true});";
+const canonicalBoundedObserver="}).observe(document.querySelector('#viewRoot'),{childList:true,subtree:true});";
+if(canonical.includes(canonicalBodyObserver)){
+  canonical=canonical.replace(canonicalBodyObserver,canonicalBoundedObserver);
+  await writeFile('site/pulse-v12/patient-canonical-results.js',canonical,'utf8');
+}
 if(canonical.includes('.observe(document.body'))throw new Error('[pulse-runtime-late] Canonical Results body observer remains');
 
 const first=await patch('site/pulse-v12/first-test-entry-v1.js',[
@@ -93,7 +99,7 @@ if(hasRouteWrite(logoutVisible))throw new Error('[pulse-runtime-late] Visible lo
 const profileAvatar=await patch('site/pulse-v12/profile-avatar-v1.js',[["if(location.hash==='#profile'&&!document.querySelector('[data-profile-avatar]'))schedule()","if(location.hash.slice(1)==='profile'&&!document.querySelector('[data-profile-avatar]'))schedule()"]],'Profile avatar');
 if(hasRouteWrite(profileAvatar))throw new Error('[pulse-runtime-late] Profile avatar still classified as direct route writer');
 
-const legacyRouteScript=/\s*<script(?: type="module")? src="\.\/patient-route-runtime-v2\.js(?:\?v=[^\"']+)?"><\/script>/g;
+const legacyRouteScript=/\s*<script(?: type="module")? src="\.\/patient-route-runtime-v2\.js(?:\?v[^\"']+)?"><\/script>/g;
 if(!legacyRouteScript.test(html))throw new Error('[pulse-runtime-late] patient-route-runtime-v2 script tag missing before retirement');
 html=html.replace(legacyRouteScript,'');
 if(html.includes('patient-route-runtime-v2.js'))throw new Error('[pulse-runtime-late] retired patient route runtime still loaded');
