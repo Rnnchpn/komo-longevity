@@ -72,7 +72,8 @@ for(const vp of viewports){
     const cards=qa('.kr3-card').map(el=>({kind:el.querySelector('.kr3-kicker')?.textContent?.trim(),open:el.open,rect:el.getBoundingClientRect().toJSON(),text:el.innerText.replace(/\s+/g,' ').trim()}));
     const daily=qa('.kr3-card.daily .kr3-dm strong').map(x=>x.textContent.trim());
     const root=q('[data-kresults-v1]')?.getBoundingClientRect();
-    return {width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,bodyBg:getComputedStyle(document.body).backgroundColor,grid:getComputedStyle(q('.kr3-grid')).gridTemplateColumns,title:q('.kr3-head h2')?.textContent?.trim(),cards,daily,root:root?.toJSON(),text:norm(q('[data-kresults-v1]')?.innerText),visible:{root:visible('[data-kresults-v1]'),daily:visible('.kr3-card.daily'),komo:visible('.kr3-komo')},legacyHero:!!q('.krv-hero'),scoreHero:!!q('.krv-score-value')};
+    const text=(q('[data-kresults-v1]')?.innerText||'').replace(/\s+/g,' ').trim();
+    return {width:innerWidth,height:innerHeight,scrollWidth:document.documentElement.scrollWidth,bodyBg:getComputedStyle(document.body).backgroundColor,grid:getComputedStyle(q('.kr3-grid')).gridTemplateColumns,title:q('.kr3-head h2')?.textContent?.trim(),cards,daily,root:root?.toJSON(),text,visible:{root:visible('[data-kresults-v1]'),daily:visible('.kr3-card.daily'),komo:visible('.kr3-komo')},legacyHero:!!q('.krv-hero'),scoreHero:!!q('.krv-score-value')};
   });
   const errors=[];
   if(state.scrollWidth>state.width+1)errors.push(`horizontal overflow ${state.scrollWidth}>${state.width}`);
