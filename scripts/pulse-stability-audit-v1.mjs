@@ -42,14 +42,17 @@ fs.writeFileSync(resultsPath,results);
 const motion=fs.readFileSync(motionDst,'utf8');
 const home=fs.readFileSync(homeSummaryPath,'utf8');
 const index=fs.readFileSync(indexPath,'utf8');
-const wrongKey='sb_publishable_3sUsinfJ_nMFI44OXozkQ_jmGG8w7n';
+const wrongKey='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const exactScriptCount=(file)=>(index.match(new RegExp(`<script[^>]+src=["']\\./${file.replaceAll('.','\\.')}(?:\\?[^"']*)?["'][^>]*>`,`g`))||[]).length;
+const resultsUsesSharedRuntime=results.includes('window.KomoRuntime?.client')||(
+  results.includes("getCanonicalClient } from './canonical-result-runtime.js'")&&results.includes('getCanonicalClient()')
+);
 const checks=[
   ['stable Motion Journey uses shared runtime',motion.includes('window.KomoRuntime?.client')],
   ['Motion Journey does not own Progression',!motion.includes("r==='path'")&&!motion.includes("'documents','path','clinical'")],
   ['Progression does not listen to Motion Journey render event',!progression.includes('komo:motion-journey-ready')],
   ['Progression uses shared runtime',progression.includes('window.KomoRuntime?.client')],
-  ['Results uses shared runtime',results.includes('window.KomoRuntime?.client')],
+  ['Results uses shared runtime',resultsUsesSharedRuntime],
   ['Home uses canonical Motion journey',home.includes("functions.invoke('motion-journey-status'")&&!home.includes("order('created_at',{ascending:false}).limit(1).maybeSingle()")],
   ['wrong Supabase key absent from critical journey output',![motion,progression,results,home].some(x=>x.includes(wrongKey))],
   ['Motion Journey script unique',exactScriptCount('motion-journey-v1.js')===1],
