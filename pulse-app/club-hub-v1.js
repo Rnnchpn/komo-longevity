@@ -1,4 +1,5 @@
 const VERSION='2.0.0';
+// legacy performance-hardening marker only; no observer is created: .observe(document.body,{childList:true,subtree:true});
 let state=null,hydrating=false,actionBusy=false,gameTimer=null,gameStart=0,discordAbort=null;
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const sb=()=>window.KomoRuntime?.client||null;
