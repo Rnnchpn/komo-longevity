@@ -1,7 +1,8 @@
 /* KŌMØ Pulse — Patient Home V6.2
-   Black clinical surface + real profile / experience chrome. */
+   Full-bleed black clinical surface + real profile / experience chrome. */
 body.khome-final-v1{
   --kh6-bg:#050706;
+  --kh6-shell:#070a08;
   --kh6-surface:#0a0e0c;
   --kh6-paper:#101512;
   --kh6-ink:#f2f4f1;
@@ -11,50 +12,95 @@ body.khome-final-v1{
   --kh6-green-core:#315b41;
   --kh6-amber:#c6a15e;
   --kh6-red:#c87972;
+  margin:0!important;
   background:var(--kh6-bg)!important;
   color:var(--kh6-ink)!important;
   overflow:hidden;
 }
-body.khome-final-v1 .main-shell,
+
+/* Home owns the whole visible canvas. This explicitly neutralises the beige
+   product shell only while the canonical Home route is mounted. */
+body.khome-final-v1 .app-shell{
+  min-height:100dvh!important;
+  background:var(--kh6-bg)!important;
+}
+body.khome-final-v1 .main-shell{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding-left:0!important;
+  padding-right:0!important;
+  background:var(--kh6-bg)!important;
+}
 body.khome-final-v1 .view-root{
+  width:100%!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0!important;
   background:var(--kh6-bg)!important;
 }
 body.khome-final-v1 .topbar{
-  min-height:26px;
-  height:26px;
-  padding-top:0;
-  padding-bottom:0;
-  border-bottom:0;
-  background:transparent;
+  position:relative!important;
+  top:auto!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:0!important;
+  height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+  border:0!important;
+  background:var(--kh6-bg)!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
 }
 body.khome-final-v1 .topbar>*{
-  opacity:0;
-  pointer-events:none;
+  opacity:0!important;
+  pointer-events:none!important;
 }
 body.khome-final-v1 #pageTitle,
-body.khome-final-v1 #pageEyebrow{display:none}
+body.khome-final-v1 #pageEyebrow{display:none!important}
+
 body.khome-final-v1 [data-my-komo-home]{
   position:relative;
   width:100%;
+  max-width:none!important;
   min-height:calc(100dvh - 104px);
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:26px clamp(24px,4vw,60px) 42px;
+  padding:clamp(30px,4vh,52px) clamp(28px,5vw,76px) 46px;
   box-sizing:border-box;
+  overflow:hidden;
   background:
-    radial-gradient(circle at 50% 38%,rgba(49,91,65,.10) 0%,rgba(49,91,65,.035) 27%,transparent 56%),
-    var(--kh6-bg);
+    radial-gradient(ellipse at 50% 34%,rgba(49,91,65,.12) 0%,rgba(49,91,65,.042) 30%,transparent 58%),
+    radial-gradient(ellipse at 50% 105%,rgba(127,165,138,.035),transparent 38%),
+    linear-gradient(180deg,var(--kh6-shell) 0%,var(--kh6-bg) 16%,var(--kh6-bg) 100%);
+  box-shadow:inset 0 1px rgba(255,255,255,.025);
 }
+body.khome-final-v1 [data-my-komo-home]::after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  top:0;
+  left:8vw;
+  right:8vw;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(127,165,138,.12),transparent);
+  pointer-events:none;
+}
+
 .kh6{
   --kh6-state:#a8b0ab;
   position:relative;
+  z-index:1;
   isolation:isolate;
   width:min(920px,100%);
   display:grid;
   gap:clamp(34px,5.7vh,62px);
   margin:auto;
-  padding-top:46px;
+  padding-top:50px;
   color:var(--kh6-ink);
   animation:kh6-enter .55s cubic-bezier(.22,1,.36,1) both;
 }
@@ -77,6 +123,9 @@ body.khome-final-v1 [data-my-komo-home]{
   pointer-events:none;
   animation:kh6-bloom 1s cubic-bezier(.22,1,.36,1) both;
 }
+
+/* Profile — KŌMØ · PULSE — Experience. The wordmark is presentation-only;
+   both interactive ends continue to route through the existing My KŌMØ links. */
 .kh6-hud{
   position:absolute;
   z-index:3;
@@ -89,8 +138,36 @@ body.khome-final-v1 [data-my-komo-home]{
   gap:20px;
   animation:kh6-hud-enter .5s .05s cubic-bezier(.22,1,.36,1) both;
 }
+.kh6-hud::before{
+  content:"KŌMØ · PULSE";
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  white-space:nowrap;
+  pointer-events:none;
+  font-family:"DM Sans",sans-serif;
+  font-size:.58rem;
+  line-height:1;
+  font-weight:600;
+  letter-spacing:.24em;
+  color:rgba(235,240,236,.30);
+  text-shadow:0 0 28px rgba(127,165,138,.06);
+}
+.kh6-hud::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:calc(100% + 13px);
+  width:1px;
+  height:18px;
+  background:linear-gradient(to bottom,rgba(127,165,138,.16),transparent);
+  pointer-events:none;
+}
 .kh6-profile,
 .kh6-xp{
+  position:relative;
+  z-index:1;
   color:var(--kh6-ink);
   text-decoration:none;
   -webkit-tap-highlight-color:transparent;
@@ -119,17 +196,9 @@ body.khome-final-v1 [data-my-komo-home]{
   color:#e9ede9;
 }
 .kh6-avatar .komo-avatar-svg,
-.kh6-avatar>svg{
-  width:100%;
-  height:100%;
-  display:block;
-}
+.kh6-avatar>svg{width:100%;height:100%;display:block}
 .kh6-profile-copy,
-.kh6-xp-copy{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-}
+.kh6-xp-copy{display:flex;flex-direction:column;min-width:0}
 .kh6-profile-copy small,
 .kh6-xp-copy small{
   font-family:"DM Sans",sans-serif;
@@ -204,6 +273,7 @@ body.khome-final-v1 [data-my-komo-home]{
   .kh6-profile:hover{opacity:.78;transform:translateY(-1px)}
   .kh6-xp:hover{transform:translateY(-1px);border-color:rgba(127,165,138,.28)}
 }
+
 .kh6-core{
   display:flex;
   flex-direction:column;
@@ -228,11 +298,7 @@ body.khome-final-v1 [data-my-komo-home]{
   transform:rotate(-90deg);
   filter:drop-shadow(0 0 18px color-mix(in srgb,var(--kh6-state) 12%,transparent));
 }
-.kh6-ring-track,
-.kh6-ring-progress{
-  fill:none;
-  stroke-width:1.6;
-}
+.kh6-ring-track,.kh6-ring-progress{fill:none;stroke-width:1.6}
 .kh6-ring-track{stroke:rgba(255,255,255,.085)}
 .kh6-ring-progress{
   stroke:var(--kh6-state);
@@ -298,12 +364,13 @@ body.khome-final-v1 [data-my-komo-home]{
   color:var(--kh6-state);
   animation:kh6-copy-rise .52s .28s cubic-bezier(.22,1,.36,1) both;
 }
+
 .kh6-metrics{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   border-top:1px solid var(--kh6-line);
   border-bottom:1px solid var(--kh6-line);
-  background:rgba(255,255,255,.018);
+  background:linear-gradient(180deg,rgba(255,255,255,.024),rgba(255,255,255,.012));
   backdrop-filter:blur(12px);
   -webkit-backdrop-filter:blur(12px);
 }
@@ -316,12 +383,7 @@ body.khome-final-v1 [data-my-komo-home]{
   animation:kh6-metric-rise .58s calc(.34s + (var(--kh6-stagger) * .09s)) cubic-bezier(.22,1,.36,1) forwards;
 }
 .kh6-metric+.kh6-metric{border-left:1px solid var(--kh6-line)}
-.kh6-value{
-  display:flex;
-  align-items:baseline;
-  gap:8px;
-  white-space:nowrap;
-}
+.kh6-value{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
 .kh6-value strong{
   min-width:0;
   overflow:hidden;
@@ -391,61 +453,46 @@ body.khome-final-v1 [data-my-komo-home]{
 .kh6.is-loading .kh6-metric p,
 .kh6.is-loading .kh6-delta{color:#59605c}
 
-@keyframes kh6-enter{
-  from{opacity:0;transform:translateY(8px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@keyframes kh6-hud-enter{
-  from{opacity:0;transform:translateY(-6px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@keyframes kh6-bloom{
-  from{opacity:0;transform:translate(-50%,-50%) scale(.82)}
-  to{opacity:.9;transform:translate(-50%,-50%) scale(1)}
-}
-@keyframes kh6-ring-draw{
-  from{stroke-dashoffset:100;opacity:.3}
-  to{stroke-dashoffset:var(--kh6-offset,100);opacity:1}
-}
-@keyframes kh6-score-rise{
-  from{opacity:0;transform:translateX(-.025em) translateY(8px) scale(.97)}
-  to{opacity:1;transform:translateX(-.025em) translateY(0) scale(1)}
-}
-@keyframes kh6-copy-rise{
-  from{opacity:0;transform:translateY(5px)}
-  to{opacity:1;transform:translateY(0)}
-}
-@keyframes kh6-metric-rise{
-  from{opacity:0;transform:translateY(7px)}
-  to{opacity:1;transform:translateY(0)}
-}
+@keyframes kh6-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes kh6-hud-enter{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes kh6-bloom{from{opacity:0;transform:translate(-50%,-50%) scale(.82)}to{opacity:.9;transform:translate(-50%,-50%) scale(1)}}
+@keyframes kh6-ring-draw{from{stroke-dashoffset:100;opacity:.3}to{stroke-dashoffset:var(--kh6-offset,100);opacity:1}}
+@keyframes kh6-score-rise{from{opacity:0;transform:translateX(-.025em) translateY(8px) scale(.97)}to{opacity:1;transform:translateX(-.025em) translateY(0) scale(1)}}
+@keyframes kh6-copy-rise{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes kh6-metric-rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
 
 @media(max-width:900px){
   body.khome-final-v1 [data-my-komo-home]{
     min-height:calc(100dvh - 102px);
-    padding:20px 26px 38px;
+    padding:26px 26px 38px;
   }
-  .kh6{gap:clamp(30px,5vh,48px);padding-top:46px}
+  .kh6{gap:clamp(30px,5vh,48px);padding-top:50px}
   .kh6-core{min-height:275px}
   .kh6-orbit{width:clamp(202px,34vw,258px)}
   .kh6-score{font-size:clamp(5.8rem,15vw,7.8rem)}
   .kh6-metric{padding:24px 22px 26px}
 }
+
+@media(max-width:700px){
+  .kh6-hud::before,.kh6-hud::after{display:none}
+}
+
 @media(max-width:640px){
+  body.khome-final-v1 .main-shell{
+    padding-left:0!important;
+    padding-right:0!important;
+  }
   body.khome-final-v1 .topbar{
-    min-height:max(10px,env(safe-area-inset-top));
-    height:max(10px,env(safe-area-inset-top));
-    padding:0;
+    min-height:0!important;
+    height:0!important;
+    margin:0!important;
+    padding:0!important;
   }
   body.khome-final-v1 [data-my-komo-home]{
-    min-height:calc(100dvh - 92px - env(safe-area-inset-bottom));
+    min-height:calc(100dvh - 82px - env(safe-area-inset-bottom));
     padding:18px 18px calc(18px + env(safe-area-inset-bottom));
   }
-  .kh6{
-    width:100%;
-    gap:clamp(20px,3.5vh,30px);
-    padding-top:48px;
-  }
+  .kh6{width:100%;gap:clamp(20px,3.5vh,30px);padding-top:48px}
   .kh6::before{top:38%;width:96vw}
   .kh6-hud{top:0}
   .kh6-avatar{width:38px;height:38px}
@@ -457,10 +504,7 @@ body.khome-final-v1 [data-my-komo-home]{
   .kh6-level{height:26px;min-width:38px;padding:0 7px;font-size:.54rem}
   .kh6-core{min-height:246px}
   .kh6-orbit{width:clamp(188px,55vw,218px)}
-  .kh6-score{
-    font-size:clamp(5.05rem,22vw,6.35rem);
-    letter-spacing:-.08em;
-  }
+  .kh6-score{font-size:clamp(5.05rem,22vw,6.35rem);letter-spacing:-.08em}
   .kh6-kicker{margin-top:9px;gap:8px}
   .kh6-label{font-size:.65rem;letter-spacing:.18em}
   .kh6-estimate{height:20px;padding:0 8px;font-size:.58rem}
@@ -470,16 +514,14 @@ body.khome-final-v1 [data-my-komo-home]{
   .kh6-metric:first-child{padding-left:2px;padding-right:14px}
   .kh6-metric:last-child{padding-left:14px;padding-right:2px}
   .kh6-value{gap:5px}
-  .kh6-value strong{
-    font-size:clamp(1.04rem,4.6vw,1.3rem);
-    letter-spacing:-.035em;
-  }
+  .kh6-value strong{font-size:clamp(1.04rem,4.6vw,1.3rem);letter-spacing:-.035em}
   .kh6-value span{font-size:.88rem}
   .kh6-metric h3{margin-top:9px;font-size:.66rem}
   .kh6-metric p{margin-top:5px;font-size:.6rem;white-space:nowrap}
   .kh6-delta{gap:5px;margin-top:8px;font-size:.61rem;white-space:nowrap}
   .kh6-delta i{width:6px;height:6px;box-shadow:none}
 }
+
 @media(max-width:370px){
   body.khome-final-v1 [data-my-komo-home]{padding-left:12px;padding-right:12px}
   .kh6-profile-copy strong{display:none}
@@ -492,6 +534,7 @@ body.khome-final-v1 [data-my-komo-home]{
   .kh6-value strong{font-size:.98rem}
   .kh6-metric h3,.kh6-metric p,.kh6-delta{font-size:.57rem}
 }
+
 @media(prefers-reduced-motion:reduce){
   .kh6,.kh6::before,.kh6-hud,.kh6-ring-progress,.kh6-score,.kh6-kicker,.kh6-message,.kh6-metric{
     animation:none!important;
