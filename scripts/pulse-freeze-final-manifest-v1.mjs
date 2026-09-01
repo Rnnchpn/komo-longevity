@@ -3,10 +3,11 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 await import('./pulse-admin-professional-runtime-stability-v1.mjs');
+await import('./pulse-admin-pro-single-owner-v2.mjs');
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const manifest={
-  version:'2026-09-01-admin-pro-stability-v1',
+  version:'2026-09-01-admin-pro-single-owner-v2',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
@@ -26,11 +27,11 @@ const manifest={
     profile:{owner:'profile-v2.js',controllers:[],extensions:['account-hub-v2.js','account-privacy-v1.js']},
     messages:{owner:'care-messaging-v2.js',controllers:[],extensions:[]},
     clinical:{owner:'clinical-cockpit-v1.js',controllers:['clinical-motion-v1.js','patient-assessment-trio-v1.js','pro-agenda-dossier-v1.js','pro-followup-v1.js','tests-status-cockpit-v1.js','booking-layer-v1.js'],extensions:[]},
-    admin:{owner:'admin-console-v2.js',controllers:['admin-motion-validation-v1.js','admin-patient-manager-v1.js','admin-professionals-v1.js','admin-shortcut-v1.js','admin-ux-v2.js'],extensions:[]},
+    admin:{owner:'admin-console-v2.js',controllers:['admin-motion-validation-v1.js','admin-patient-manager-v1.js','admin-professionals-v1.js','admin-centers-v1.js','admin-privacy-queue-v1.js','admin-shortcut-v1.js'],extensions:[]},
     auth:{owner:'auth-login-canonical.js',controllers:['auth-gateway-v2.js'],extensions:[]},
     navigation:{owner:'patient-navigation-core-v1.js',controllers:['adaptive-shell-v4.js','pulse-bottom-nav-v6.js'],extensions:['mobile-runtime-v3.js']}
   },
   global_controllers:['app-router-v2.js','first-test-entry-v1.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Admin/Pro lifecycle stabilized · canonical owners unchanged`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Admin first paint stable · single professional surface`);
