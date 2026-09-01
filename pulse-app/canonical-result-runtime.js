@@ -11,16 +11,30 @@ const cache=new Map();
 function storage(){return localStorage.getItem(REM)==='1'?localStorage:sessionStorage}
 function sb(){return window.KomoRuntime?.client||(client||(client=createClient(SUPABASE_URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}
 function keyFor(patientId){return patientId?`patient:${patientId}`:'self'}
+async function patientIdForAssessment(assessmentId){
+  if(!assessmentId)return null;
+  const q=await sb().from('assessments').select('patient_id').eq('id',assessmentId).maybeSingle();
+  if(q.error)throw q.error;
+  return q.data?.patient_id||null;
+}
 async function resolveOwnPatientId(){
   const snap=await sb().rpc('komo_result_snapshot',{p_patient_id:null});
   if(snap.error)throw snap.error;
   const motion=snap.data?.motion||{};
-  const assessmentId=motion.calculated?.assessmentId||motion.published?.assessmentId||motion.currentAssessmentId||null;
-  if(assessmentId){
-    const q=await sb().from('assessments').select('patient_id').eq('id',assessmentId).maybeSingle();
-    if(q.error)throw q.error;
-    if(q.data?.patient_id)return{patientId:q.data.patient_id,snapshot:snap.data};
+
+  // Patient-facing Motion must prefer the last officially published result.
+  // If nothing has been published yet, keep the latest calculated score in its
+  // validation state. A merely scheduled future episode must never erase a
+  // previous scored episode from the canonical dossier selection.
+  let assessmentId=motion.published?.assessmentId||motion.calculated?.assessmentId||null;
+  if(!assessmentId){
+    const display=await sb().rpc('komo_motion_display_assessment',{p_patient_id:null});
+    if(!display.error)assessmentId=display.data?.assessmentId||null;
   }
+  assessmentId=assessmentId||motion.currentAssessmentId||null;
+  const linkedPatientId=await patientIdForAssessment(assessmentId);
+  if(linkedPatientId)return{patientId:linkedPatientId,snapshot:snap.data};
+
   const sess=await sb().auth.getSession();
   const uid=sess.data.session?.user?.id;
   if(!uid)throw new Error('Session Pulse expirée.');
@@ -63,4 +77,4 @@ function invalidate(){clearCanonicalResult();window.dispatchEvent(new CustomEven
 window.addEventListener('komo:motion-v05-release',invalidate);
 window.addEventListener('komo:manual-motion-saved',invalidate);
 window.addEventListener('komo:myocare-imported',invalidate);
-window.KomoCanonicalResultRuntime={version:'1.2.0',load:loadCanonicalResult,clear:clearCanonicalResult,latest:null,getLatest:getLatestCanonicalResult};
+window.KomoCanonicalResultRuntime={version:'1.3.0',load:loadCanonicalResult,clear:clearCanonicalResult,latest:null,getLatest:getLatestCanonicalResult};
