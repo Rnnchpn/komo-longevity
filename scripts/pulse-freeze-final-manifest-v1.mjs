@@ -2,9 +2,11 @@ import { writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+await import('./pulse-admin-professional-runtime-stability-v1.mjs');
+
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const manifest={
-  version:'2026-08-31-freeze-runtime-v1',
+  version:'2026-09-01-admin-pro-stability-v1',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
@@ -31,4 +33,4 @@ const manifest={
   global_controllers:['app-router-v2.js','first-test-entry-v1.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Therapy removed · account extensions declared`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Admin/Pro lifecycle stabilized · canonical owners unchanged`);
