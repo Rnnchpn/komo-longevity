@@ -80,7 +80,7 @@ const checks=[
   ['Home uses neutral premium canvas with KŌMØ green as accent',css.includes('--kh5-bg:#f0eee8')&&css.includes('--kh5-green:#315b41')&&css.includes('.kh5-komo')],
   ['Home identifies KŌMØ immediately',js.includes('kh5-wordmark')&&js.includes('KŌMØ')&&js.includes('PULSE')&&css.includes('.kh5-wordmark')],
   ['Home hierarchy is Motion then Komo then monitoring signals',js.indexOf('kh5-motion')<js.indexOf('kh5-komo')&&js.indexOf('kh5-komo')<js.indexOf('kh5-signals')],
-  ['Home exclusively owns its DOM',js.includes('host.replaceChildren(node)')&&js.includes("host.dataset.khomeOwner='patient-home-command-v1@5'")],
+  ['Home exclusively owns its DOM',js.includes('host.replaceChildren(node)')&&js.includes("host.dataset.khomeOwner='patient-home-command-v1@5.1'")],
   ['Home appointment no longer depends on legacy DOM',js.includes('pulseOverview()')&&js.includes('overview?.records')&&!js.includes("document.querySelector('.mykomo-next')")],
   ['assistant CSS is shipped with Home',final.includes(`${assistantCssFile}?v=${release}`)&&assistantCss.includes('#komoAssistantRail')&&assistantCss.includes('#komoAssistantDrawer')],
   ['mobile V1 CSS remains final patient presentation layer',final.includes(`${mobileCssFile}?v=${release}`)],
@@ -97,19 +97,21 @@ const checks=[
   ['Agenda map has a functional external fallback',agendaMap.includes('ag4-map-fallback')&&agendaMap.includes('google.com/maps/search')&&!agendaMap.includes('MutationObserver')],
   ['legacy clarity runtime is no longer direct',!directScript(clarityJsFile)],
   ['mobile runtime is event-driven',mobileJs.includes("title.textContent='Bienvenue.'")&&!mobileJs.includes('MutationObserver')],
-  ['current Home is the final decision surface',js.includes('VOTRE MOUVEMENT AUJOURD’HUI')&&js.includes('KOMO · PRIORITÉ')&&js.includes('KEY · QUOTIDIEN')&&js.includes('TRAJECTOIRE')&&js.includes('PROCHAINE ÉTAPE')],
+  ['current Home is the Motion Today decision surface',js.includes('MOTION TODAY')&&js.includes('MOTION CAPACITY')&&js.includes("'STEPS'")&&js.includes("'SLEEP'")&&js.includes("'RESTING HR'")&&js.includes('KOMO ·')],
   ['mobile remains one content contract and becomes vertical only by CSS',css.includes('@media(max-width:767px)')&&css.includes('.kh5-hero{grid-template-columns:1fr')&&css.includes('.kh5-signals{grid-template-columns:1fr')],
   ['mobile removes avatar',mobileCss.includes('.avatar-button{display:none!important}')],
   ['Home gates Motion Score to released or published results',js.includes("const RELEASED=new Set(['released','published'])")&&js.includes('released(status)?num(canonical?.motion_score):null')],
   ['Home does not query canonical scores directly',!js.includes("from('scores')")],
-  ['Home uses canonical consent-aware walk summary',js.includes("rpc('komo_walk_summary')")&&!js.includes("from('wearable_daily_metrics')")],
-  ['Home turns KEY into one contextual monitoring signal',js.includes('function keySignal(')&&js.includes('steps_avg_7d')&&js.includes('Votre activité du jour')],
+  ['Home reads consent-aware wearable daily metrics',js.includes("from('wearable_daily_metrics')")&&js.includes("from('wearable_consents')")&&js.includes("eq('purpose','connected_followup')")],
+  ['Home keeps Club summary on canonical walk RPC',js.includes("rpc('komo_walk_summary')")],
+  ['Home turns KEY into three contextual monitoring signals',js.includes("dailySignal('steps','STEPS'")&&js.includes("dailySignal('sleep','SLEEP'")&&js.includes("dailySignal('rhr','RESTING HR'")&&js.includes('baselineFor(')],
+  ['Home computes daily readiness then Motion Today',js.includes('function dailyState(')&&js.includes('.20*s1+.45*s2+.35*s3')&&js.includes('.60*motion.score+.40*daily.readiness')],
   ['stable Home renderer has no body observer or polling loop',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
   ['Home has no historical delayed retry ladder',!js.includes('[80,260,800,1800]')&&!js.includes('1700')],
-  ['Home paints an immediate loading shell before data resolves',js.includes('homeMarkup(null,null,[],true)')&&js.includes('aria-busy')],
+  ['Home paints an immediate loading shell before data resolves',js.includes('homeMarkup(null,null,[],null,null,true)')&&js.includes('aria-busy')],
   ['Home exposes essential patient destinations',js.includes("route:'key'")&&js.includes("route:'trajectory'")&&js.includes("route:'agenda'")&&js.includes('data-kh5-route="results"')],
   ['Home keeps Club and K Points secondary',js.includes('communityLine(walk)')&&js.includes('k_points_week')&&js.includes('Walk Club')],
-  ['Home exposes next consultation context',js.includes('currentAppointment')&&js.includes('appointment_type')&&js.includes('center_name')],
+  ['Home exposes next consultation context',js.includes('currentAppointment')&&js.includes('scheduled_start')&&js.includes("route:'agenda'")],
   ['Home animations are finite and accessible',css.includes('kh5Enter .35s')&&js.includes('duration=620')&&css.includes('@media(prefers-reduced-motion:reduce)')&&!css.includes('infinite')],
   ['final patient dock is cache-busted',final.includes(`${navFile}?v=${navRelease}`)],
   ['dock retries after Home and session readiness',nav.includes('komo:home-command-rendered')&&nav.includes('komo:route-ready')&&nav.includes('setTimeout(refresh,ms)')],
@@ -119,4 +121,4 @@ const checks=[
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log('[pulse-home-web-v1] PASS · final decision Home · Motion · Komo · KEY · trajectory · next step');
+console.log('[pulse-home-web-v1] PASS · desktop Home V5.1 · Motion Today + Motion Capacity + daily signals');
