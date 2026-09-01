@@ -1,0 +1,184 @@
+/* KŌMØ Pulse — Home palette for Connected + Consultations v12
+   Presentation only. Reuses the canonical Home color system without changing data or routes. */
+
+body.connected-v2,
+body.consultations-v4{
+  --kp12-bg:#050706;
+  --kp12-shell:#070a08;
+  --kp12-surface:#0a0e0c;
+  --kp12-paper:#101512;
+  --kp12-ink:#f2f4f1;
+  --kp12-muted:#808983;
+  --kp12-line:rgba(255,255,255,.10);
+  --kp12-green:#7fa58a;
+  --kp12-green-core:#315b41;
+  --kp12-amber:#c6a15e;
+  --kp12-red:#c87972;
+  background:var(--kp12-bg)!important;
+  color:var(--kp12-ink)!important;
+}
+body.connected-v2 .app-shell,
+body.consultations-v4 .app-shell,
+body.connected-v2 .main-shell,
+body.consultations-v4 .main-shell,
+body.connected-v2 #viewRoot,
+body.consultations-v4 #viewRoot{
+  background:var(--kp12-bg)!important;
+  color:var(--kp12-ink)!important;
+}
+body.connected-v2 .topbar,
+body.consultations-v4 .topbar{
+  border-bottom:1px solid var(--kp12-line)!important;
+  background:linear-gradient(180deg,var(--kp12-shell),var(--kp12-bg))!important;
+  box-shadow:none!important;
+}
+body.connected-v2 #pageEyebrow,
+body.consultations-v4 #pageEyebrow{color:#6f7872!important}
+body.connected-v2 #pageTitle,
+body.consultations-v4 #pageTitle{color:var(--kp12-ink)!important}
+
+/* CONNECTED */
+body.connected-v2 .kcv2{
+  --ink:var(--kp12-ink);
+  --muted:var(--kp12-muted);
+  --line:var(--kp12-line);
+  --green:var(--kp12-green);
+  --green-bg:rgba(127,165,138,.10);
+  --red:var(--kp12-red);
+  --red-bg:rgba(200,121,114,.10);
+  color:var(--kp12-ink)!important;
+}
+body.connected-v2 .kcv2-card{
+  border-color:var(--kp12-line)!important;
+  background:var(--kp12-surface)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025),0 18px 48px rgba(0,0,0,.16)!important;
+}
+body.connected-v2 .kcv2-hero{
+  color:var(--kp12-ink)!important;
+  border-color:rgba(127,165,138,.12)!important;
+  background:
+    radial-gradient(520px 280px at 88% 0%,rgba(49,91,65,.20),transparent 70%),
+    linear-gradient(145deg,var(--kp12-surface),var(--kp12-shell))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.03)!important;
+}
+body.connected-v2 .kcv2-hero .kcv2-kicker{color:#6f7872!important}
+body.connected-v2 .kcv2-hero p{color:var(--kp12-muted)!important}
+body.connected-v2 .kcv2-live small{color:#6f7872!important;opacity:1!important}
+body.connected-v2 .kcv2-live strong{color:var(--kp12-ink)!important}
+body.connected-v2 .kcv2-live span{color:var(--kp12-green)!important;opacity:1!important}
+body.connected-v2 .kcv2-kicker{color:#6f7872!important}
+body.connected-v2 .kcv2 h2,
+body.connected-v2 .kcv2 h3,
+body.connected-v2 .kcv2-metric strong,
+body.connected-v2 .kcv2-panel strong{color:var(--kp12-ink)!important}
+body.connected-v2 .kcv2 p,
+body.connected-v2 .kcv2-metric span,
+body.connected-v2 .kcv2-panel p{color:var(--kp12-muted)!important}
+body.connected-v2 .kcv2-metric,
+body.connected-v2 .kcv2-panel,
+body.connected-v2 .kcv2-empty{
+  border-color:var(--kp12-line)!important;
+  background:var(--kp12-paper)!important;
+  color:var(--kp12-ink)!important;
+}
+body.connected-v2 .kcv2-panel.good{
+  border-color:rgba(127,165,138,.20)!important;
+  background:linear-gradient(145deg,rgba(127,165,138,.12),rgba(49,91,65,.07))!important;
+}
+body.connected-v2 .kcv2-panel.good strong{color:#a8c3ae!important}
+body.connected-v2 .kcv2-btn{
+  border-color:rgba(255,255,255,.12)!important;
+  background:rgba(255,255,255,.035)!important;
+  color:#dce2dd!important;
+}
+body.connected-v2 .kcv2-btn.primary{
+  border-color:rgba(127,165,138,.26)!important;
+  background:var(--kp12-green-core)!important;
+  color:#f2f4f1!important;
+}
+
+/* CONSULTATIONS */
+body.consultations-v4 .kc4{
+  --ink:var(--kp12-ink);
+  --muted:var(--kp12-muted);
+  --line:var(--kp12-line);
+  --green:var(--kp12-green);
+  --green-bg:rgba(127,165,138,.10);
+  --dark:var(--kp12-surface);
+  color:var(--kp12-ink)!important;
+}
+body.consultations-v4 .kc4-card{
+  border-color:var(--kp12-line)!important;
+  background:var(--kp12-surface)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.025),0 18px 48px rgba(0,0,0,.16)!important;
+}
+body.consultations-v4 .kc4-hero{
+  color:var(--kp12-ink)!important;
+  border-color:rgba(127,165,138,.12)!important;
+  background:
+    radial-gradient(520px 280px at 88% 0%,rgba(49,91,65,.20),transparent 70%),
+    linear-gradient(145deg,var(--kp12-surface),var(--kp12-shell))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.03)!important;
+}
+body.consultations-v4 .kc4-kicker,
+body.consultations-v4 .kc4-hero .kc4-kicker,
+body.consultations-v4 .kc4-next-date small{color:#6f7872!important}
+body.consultations-v4 .kc4 h2,
+body.consultations-v4 .kc4 h3,
+body.consultations-v4 .kc4 h4,
+body.consultations-v4 .kc4-next-date strong,
+body.consultations-v4 .kc4-appt strong,
+body.consultations-v4 .kc4-plan-item h4,
+body.consultations-v4 .kc4-control strong{color:var(--kp12-ink)!important}
+body.consultations-v4 .kc4 p,
+body.consultations-v4 .kc4-hero p,
+body.consultations-v4 .kc4-next-date span,
+body.consultations-v4 .kc4-appt span,
+body.consultations-v4 .kc4-appt small,
+body.consultations-v4 .kc4-plan-item ul,
+body.consultations-v4 .kc4-control p{color:var(--kp12-muted)!important}
+body.consultations-v4 .kc4-appt,
+body.consultations-v4 .kc4-plan-item,
+body.consultations-v4 .kc4-control,
+body.consultations-v4 .kc4-empty{
+  border-color:var(--kp12-line)!important;
+  background:var(--kp12-paper)!important;
+  color:var(--kp12-ink)!important;
+}
+body.consultations-v4 .kc4-appt.upcoming{
+  border-color:rgba(127,165,138,.20)!important;
+  background:linear-gradient(145deg,rgba(127,165,138,.12),rgba(49,91,65,.07))!important;
+}
+body.consultations-v4 .kc4-status{
+  background:rgba(255,255,255,.055)!important;
+  color:#9da69f!important;
+}
+body.consultations-v4 .kc4-appt.upcoming .kc4-status{
+  background:rgba(127,165,138,.16)!important;
+  color:#a8c3ae!important;
+}
+body.consultations-v4 .kc4-plan-note{
+  border:1px solid rgba(127,165,138,.14)!important;
+  background:rgba(49,91,65,.09)!important;
+  color:#9eaca2!important;
+}
+body.consultations-v4 .kc4-btn{
+  border-color:rgba(255,255,255,.12)!important;
+  background:rgba(255,255,255,.035)!important;
+  color:#dce2dd!important;
+}
+body.consultations-v4 .kc4-btn.primary{
+  border-color:rgba(127,165,138,.26)!important;
+  background:var(--kp12-green-core)!important;
+  color:#f2f4f1!important;
+}
+
+@media(hover:hover) and (pointer:fine){
+  body.connected-v2 .kcv2-btn:hover,
+  body.consultations-v4 .kc4-btn:hover{
+    border-color:rgba(127,165,138,.28)!important;
+    background:rgba(127,165,138,.07)!important;
+  }
+  body.connected-v2 .kcv2-btn.primary:hover,
+  body.consultations-v4 .kc4-btn.primary:hover{background:#3a6849!important}
+}
