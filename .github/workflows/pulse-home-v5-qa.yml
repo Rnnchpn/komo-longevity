@@ -1,13 +1,13 @@
-name: Pulse Home V5 Browser QA
+name: Pulse Home V6 Browser QA
 
 on:
   push:
     branches:
-      - feat/pulse-home-final-v5
+      - pulse/home-motion-today-v1
   workflow_dispatch:
 
 jobs:
-  pulse-home-v5-browser-qa:
+  pulse-home-v6-browser-qa:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -32,19 +32,19 @@ jobs:
 
       - name: Start local production server
         run: |
-          python3 -m http.server 4173 --directory site > /tmp/komo-pulse-home-v5-http.log 2>&1 &
-          echo $! > /tmp/komo-pulse-home-v5-http.pid
+          python3 -m http.server 4173 --directory site > /tmp/komo-pulse-home-v6-http.log 2>&1 &
+          echo $! > /tmp/komo-pulse-home-v6-http.pid
           sleep 2
           curl --fail --silent http://127.0.0.1:4173/pulse-v12/ > /dev/null
 
-      - name: Validate Home V5 desktop iPad mobile
+      - name: Validate Home V6 desktop iPad mobile
         run: node scripts/pulse-home-v5-browser-qa.mjs
 
-      - name: Upload Home V5 screenshots
+      - name: Upload Home V6 screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pulse-home-v5-browser-qa
-          path: artifacts/pulse-home-v5/*.png
+          name: pulse-home-v6-browser-qa
+          path: artifacts/pulse-home-v6/*.png
           if-no-files-found: warn
           retention-days: 7
