@@ -53,7 +53,7 @@ const checks=[
  ['home connected card opens dedicated route',finalHome.includes("go('key')")&&!finalHome.includes("go('followup')")],
  ['Connected uses real wearable table',finalJs.includes("from('wearable_daily_metrics')")],
  ['Connected stays separate from Motion scoring',finalJs.includes('ne crée pas un score médical parallèle')],
- ['Connected patient-facing name shipped',finalJs.includes('KŌMØ Connected.')&&finalJs.includes("eyebrow.textContent='KŌMØ CONNECTED'"))],
+ ['Connected patient-facing name shipped',finalJs.includes('KŌMØ Connected.')&&finalJs.includes("eyebrow.textContent='KŌMØ CONNECTED'")],
  ['home Motion number visibility guard shipped',finalCss.includes('Final home Motion score visibility guard')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-connected] ${ok?'OK':'FAIL'} · ${label}`);
