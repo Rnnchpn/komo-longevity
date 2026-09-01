@@ -5,7 +5,7 @@ import {fileURLToPath} from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260901-home-motion-today-v6';
+const release='20260901-home-motion-today-v6-2-black';
 const navRelease='20260831-patient-nav-v721';
 const cssFile='patient-home-command-v1.css';
 const heroCssFile='patient-home-hero-v2.css';
@@ -66,17 +66,17 @@ const checks=[
   ['legacy Home bootstrap removed',!directScript(legacyBootstrapFile)],
   ['legacy My KŌMØ Home owner removed',!directScript(legacyMyKomoHomeFile)],
   ['legacy Home visual layers removed',!final.includes(heroCssFile)&&!final.includes(dailyCssFile)&&!directScript(dailyJsFile)],
-  ['Home V6 CSS cache-busted',final.includes(`${cssFile}?v=${release}`)],
-  ['Home V6 owner loaded once',directScript(jsFile)&&((final.match(new RegExp(jsFile.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))||[]).length===1)],
-  ['Home V6 owns its DOM',js.includes('host.replaceChildren(node)')&&js.includes("host.dataset.khomeOwner='patient-home-command-v1@6'")],
-  ['Home V6 is Motion Today only',js.includes('MOTION TODAY')&&js.includes("metricCard('steps'")&&js.includes("metricCard('sleep'")&&js.includes("metricCard('resting_hr'")],
-  ['Home V6 excludes clinical score and trajectory widgets',!js.includes('MOTION SCORE')&&!js.includes('MOTION AGE')&&!js.includes('kh5-komo')&&!js.includes('kh5-signals')],
-  ['Home V6 performs one canonical wearable RPC',js.includes("rpc('komo_motion_today_v1')")&&!js.includes("rpc('komo_walk_summary')")&&!js.includes('pulseOverview()')&&!js.includes('pulse_score_runs')],
-  ['Home V6 never queries wearable tables directly',!js.includes("from('wearable_daily_metrics')")],
-  ['Home V6 has explicit incomplete states',js.includes('Sync your wearable')&&js.includes('Building your baseline')===false],
+  ['Home V6.2 CSS cache-busted',final.includes(`${cssFile}?v=${release}`)],
+  ['Home V6.2 owner loaded once',directScript(jsFile)&&((final.match(new RegExp(jsFile.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'g'))||[]).length===1)],
+  ['Home V6.2 owns its DOM',js.includes('host.replaceChildren(node)')&&js.includes("host.dataset.khomeOwner='patient-home-command-v1@6'")],
+  ['Home V6.2 is Motion Today only',js.includes('MOTION TODAY')&&js.includes("metricCard('steps'")&&js.includes("metricCard('sleep'")&&js.includes("metricCard('resting_hr'")],
+  ['Home V6.2 excludes clinical score and trajectory widgets',!js.includes('MOTION SCORE')&&!js.includes('MOTION AGE')&&!js.includes('kh5-komo')&&!js.includes('kh5-signals')],
+  ['Home V6.2 performs one canonical wearable RPC',js.includes("rpc('komo_motion_today_v1')")&&!js.includes("rpc('komo_walk_summary')")&&!js.includes('pulseOverview()')&&!js.includes('pulse_score_runs')],
+  ['Home V6.2 never queries wearable tables directly',!js.includes("from('wearable_daily_metrics')")],
+  ['Home V6.2 has explicit incomplete states',js.includes('Sync your wearable')&&js.includes('Building your baseline')===false],
   ['Home renderer has no persistent observer or polling',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
-  ['Home paints an immediate loading shell',js.includes('homeMarkup(null,true)')&&js.includes('aria-busy')],
-  ['Home neutral canvas uses green as accent',css.includes('--kh6-bg:#f3f1ec')&&css.includes('--kh6-green:#315b41')&&css.includes('.kh6-score')],
+  ['Home paints an immediate loading shell',js.includes('homeMarkup(null,{},true)')&&js.includes('aria-busy')],
+  ['Home neutral black canvas uses green as accent',css.includes('--kh6-bg:#050706')&&css.includes('--kh6-green:#7fa58a')&&css.includes('--kh6-green-core:#315b41')&&css.includes('.kh6-score')],
   ['desktop iPad mobile share one metric contract',css.includes('grid-template-columns:repeat(3,minmax(0,1fr))')&&css.includes('@media(max-width:900px)')&&css.includes('@media(max-width:640px)')],
   ['one-screen Home prevents lateral and vertical canvas drift',css.includes('overflow:hidden')],
   ['reduced motion supported',css.includes('@media(prefers-reduced-motion:reduce)')],
@@ -86,7 +86,8 @@ const checks=[
   ['Agenda fallback remains reachable',agendaMap.includes('google.com/maps/search')&&!agendaMap.includes('MutationObserver')],
   ['required route runtimes are imports not duplicate direct scripts',requiredImports.every(file=>js.includes(`${file}?v=${release}`)&&!directScript(file))],
   ['patient navigation stays canonical',nav.includes('KomoPatientNavigation?.go?.')&&!nav.includes("location.hash=`")],
-  ['Home refreshes on wearable data update',js.includes('komo:wearable-data-updated')]
+  ['Home refreshes on wearable data update',js.includes('komo:wearable-data-updated')],
+  ['Profile and experience reuse canonical sources',js.includes("from('profiles')")&&js.includes("rpc('komo_engagement_summary')")&&js.includes('xp_total')&&js.includes('level')]
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v6] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
