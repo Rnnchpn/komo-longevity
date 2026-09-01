@@ -17,14 +17,21 @@ html=html.replace('</body>',`  <script type="module" src="./motion-hub-v4.js?v=$
 await writeFile(indexPath,html,'utf8');
 
 let app=await readFile(appPath,'utf8');
-const oldRoutes="return['home','results','path','documents','explore','clinical','profile'].includes(route)?route:'home'";
-const newRoutes="return['home','results','path','documents','explore','clinical','profile','motion'].includes(route)?route:'home'";
-if(app.includes(oldRoutes))app=app.replace(oldRoutes,newRoutes);
-else if(!app.includes(newRoutes))throw new Error('Base router route whitelist changed; Motion host cannot be installed safely');
-const oldPages='const pages={home:';
-const newPages="const pages={motion:['KŌMØ PULSE · MOTION','Motion',()=>'<div data-motion-host-v4></div>'],home:";
-if(app.includes(oldPages))app=app.replace(oldPages,newPages);
-else if(!app.includes(newPages))throw new Error('Base router page registry changed; Motion host cannot be installed safely');
+const currentRouteBlock=()=>app.match(/function\s+currentRoute\s*\(\)\s*\{[\s\S]*?\n\}/)?.[0]||'';
+if(!/[\"']motion[\"']/.test(currentRouteBlock())){
+  const routeList=/return\s*\[([^\]]+)\]\.includes\(route\)\s*\?\s*route\s*:\s*['\"]home['\"]/;
+  const match=currentRouteBlock().match(routeList);
+  if(!match)throw new Error('Base router route whitelist changed; Motion host cannot be installed safely');
+  const expanded=match[1].trim().replace(/,\s*$/,'')+",'motion'";
+  const patched=currentRouteBlock().replace(routeList,`return[${expanded}].includes(route)?route:'home'`);
+  app=app.replace(currentRouteBlock(),patched);
+}
+
+if(!app.includes('data-motion-host-v4')){
+  const pagesStart='const pages={';
+  if(!app.includes(pagesStart))throw new Error('Base router page registry changed; Motion host cannot be installed safely');
+  app=app.replace(pagesStart,`${pagesStart}motion:['KŌMØ PULSE · MOTION','Motion',()=>'<div data-motion-host-v4></div>'],`);
+}
 await writeFile(appPath,app,'utf8');
 
 const v3=(html.match(/motion-hub-v3\.js/g)||[]).length;
@@ -32,7 +39,6 @@ const v4=(html.match(/motion-hub-v4\.js/g)||[]).length;
 if(v3!==0)throw new Error(`Motion V3 runtime still present (${v3})`);
 if(v4!==1)throw new Error(`Expected one Motion V4 runtime owner, found ${v4}`);
 if(!html.includes('motion-route-guard-v4.js'))throw new Error('Motion route guard v4 missing');
-if(!app.includes(newRoutes)||!app.includes('data-motion-host-v4'))throw new Error('Motion base-router host missing');
-if(/pages\[route\]\|\|pages\.home/.test(app)&&!app.includes("'motion'].includes(route)"))throw new Error('Motion can still fall through to Home');
+if(!/[\"']motion[\"']/.test(currentRouteBlock())||!app.includes('data-motion-host-v4'))throw new Error('Motion base-router host missing');
 
-console.log('[pulse-motion-v4-final] canonical Motion interpretation hub active · explicit base-router host · legacy Motion hub removed from runtime');
+console.log('[pulse-motion-v4-final] canonical Motion interpretation hub active · explicit base-router host · idempotent after route transforms · legacy Motion hub removed from runtime');
