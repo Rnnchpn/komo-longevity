@@ -95,7 +95,7 @@ for(const {file,text} of sources){
     const inline=/\bonclick\s*=/i.test(attrs);
     const label=(attrs.match(/\baria-label=["']([^"']+)["']/i)?.[1]||'').slice(0,80);
     const value=attrs.match(/\bvalue=["']([^"']+)["']/i)?.[1]||'';
-    buttons.push({file,data,id,type,inline,label,value,raw:attrs.slice(0,240)});
+    buttons.push({file,index:m.index,data,id,type,inline,label,value,raw:attrs.slice(0,240)});
   }
 }
 
@@ -128,9 +128,15 @@ function delegatedButtonEvidence(file){
   const text=textByFile.get(file)||'';
   return /querySelectorAll(?:\?\.)?\(\s*['"`][^'"`]*button[^'"`]*['"`]\s*\)/.test(text)&&/addEventListener\(\s*['"]click['"]/.test(text);
 }
+function defaultSubmitEvidence(button){
+  if(button.type)return button.type==='submit';
+  const text=textByFile.get(button.file)||'';
+  const before=text.slice(0,button.index);
+  return before.lastIndexOf('<form')>before.lastIndexOf('</form>');
+}
 const hardOwnerless=[];
 for(const b of buttons){
-  if(b.inline||b.type==='submit'||(!b.type&&b.value))continue;
+  if(b.inline||defaultSubmitEvidence(b)||(!b.type&&b.value))continue;
   if(b.data.some(a=>routeAttrs.includes(a)||handlerEvidence(a)))continue;
   if(b.id&&(knownIds.has(b.id)||idEvidence(b.id)))continue;
   const classes=(b.raw.match(/\bclass=["']([^"']+)["']/i)?.[1]||'').split(/\s+/).filter(Boolean);
@@ -142,7 +148,7 @@ if(hardOwnerless.length)failures.push(...hardOwnerless.slice(0,30).map(b=>`reach
 ok('all reachable literal non-submit buttons have an interaction owner',hardOwnerless.length===0);
 
 const index=await readFile(join(target,'index.html'),'utf8');
-const requiredOwners={home:'patient-home-command-v1.js',results:'patient-canonical-results.js',motion:'motion-hub-v3.js',key:'key-hub-v1.js',trajectory:'trajectory-v3.js',therapy:'patient-v4.js',documents:'agenda-hub-v4.js',profile:'profile-v2.js',messages:'care-messaging-v2.js',admin:'admin-console-v2.js',clinical:'clinical-cockpit-v1.js'};
+const requiredOwners={home:'patient-home-command-v1.js',results:'patient-canonical-results.js',motion:'motion-hub-v4.js',key:'key-hub-v1.js',trajectory:'trajectory-v3.js',therapy:'patient-v4.js',documents:'agenda-hub-v4.js',profile:'profile-v2.js',messages:'care-messaging-v2.js',admin:'admin-console-v2.js',clinical:'clinical-cockpit-v1.js'};
 for(const [routeName,asset] of Object.entries(requiredOwners)){
   try{await access(join(target,asset));ok(`${routeName} owner exists: ${asset}`,true)}catch{failures.push(`${routeName} owner missing: ${asset}`)}
   ok(`${routeName} owner is loaded`,index.includes(`./${asset}`));

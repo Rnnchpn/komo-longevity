@@ -1,0 +1,50 @@
+name: Pulse Motion V4 Browser QA
+
+on:
+  push:
+    branches:
+      - feat/pulse-motion-v4-final
+  workflow_dispatch:
+
+jobs:
+  pulse-motion-v4-browser-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Build canonical production output
+        run: npm run build
+
+      - name: Start local production server
+        run: |
+          python3 -m http.server 4173 --directory site > /tmp/komo-pulse-motion-v4-http.log 2>&1 &
+          echo $! > /tmp/komo-pulse-motion-v4-http.pid
+          sleep 2
+          curl --fail --silent http://127.0.0.1:4173/pulse-v12/ > /dev/null
+
+      - name: Validate Motion V4 desktop iPad mobile
+        run: node scripts/pulse-motion-v4-browser-qa.mjs
+
+      - name: Upload Motion V4 screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-motion-v4-browser-qa
+          path: artifacts/pulse-motion-v4/*
+          if-no-files-found: warn
+          retention-days: 7

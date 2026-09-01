@@ -1,11 +1,11 @@
 /* KŌMØ Pulse — canonical Motion route guard v4
-   Guarantees a single visual owner for #motion and blocks the legacy Motion renderer. */
+   Guarantees a single visual owner for #motion and blocks legacy Motion renderers. */
 (() => {
-  const route=()=>location.hash.replace(/^#/,'')||'home';
+  const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
   const style=document.createElement('style');
   style.id='komoMotionRouteGuardV4Style';
   style.textContent=`
-    body.kmotion-route-pending #viewRoot{visibility:hidden!important;min-height:620px!important}
+    body.kmotion-route-pending #viewRoot{visibility:hidden!important;min-height:420px!important}
     body.kmotion-route-pending #pageEyebrow,body.kmotion-route-pending #pageTitle{visibility:hidden!important}
     [data-komo-motion-legacy-sentinel]{display:none!important}
   `;
@@ -15,10 +15,10 @@
     if(route()!=='motion')return;
     const root=document.querySelector('#viewRoot');
     if(!root)return;
-    const canonical=root.querySelector('[data-motion-hub-v3]');
+    const canonical=root.querySelector('[data-motion-hub-v4]');
     if(canonical){
-      canonical.setAttribute('data-komo-motion-hub','canonical-v3');
-      root.querySelectorAll('[data-komo-motion-legacy-sentinel]').forEach(x=>x.remove());
+      canonical.setAttribute('data-komo-motion-hub','canonical-v4');
+      root.querySelectorAll('[data-komo-motion-legacy-sentinel],[data-motion-hub-v3]').forEach(x=>x.remove());
       return;
     }
     if(!root.querySelector('[data-komo-motion-hub]')){
@@ -42,7 +42,7 @@
   observer.observe(document.documentElement,{subtree:true,childList:true});
 
   window.KomoMotionRouteGuard={
-    version:'4.0.0',
+    version:'4.1.0',
     hold,
     mark:markCanonicalOwner,
     release(){markCanonicalOwner();document.body.classList.remove('kmotion-route-pending')}
