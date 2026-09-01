@@ -2,6 +2,7 @@ import { writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+await import('./pulse-club-community-v2-qa.mjs');
 await import('./pulse-admin-professional-runtime-stability-v1.mjs');
 await import('./pulse-admin-pro-single-owner-v3.mjs');
 await import('./pulse-admin-pro-route-v4.mjs');
