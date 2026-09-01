@@ -5,10 +5,11 @@ import { fileURLToPath } from 'node:url';
 await import('./pulse-admin-professional-runtime-stability-v1.mjs');
 await import('./pulse-admin-pro-single-owner-v3.mjs');
 await import('./pulse-admin-pro-route-v4.mjs');
+await import('./pulse-pro-event-driven-v5.mjs');
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const manifest={
-  version:'2026-09-01-motion-v4-admin-pro-route-v4',
+  version:'2026-09-01-motion-v4-admin-pro-event-v5',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
@@ -35,4 +36,4 @@ const manifest={
   global_controllers:['app-router-v2.js','first-test-entry-v1.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Motion V4 frozen · Admin canonical route fixed · Professional navigation single-pass`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Motion V4 frozen · Admin canonical route fixed · Professional lifecycle event-driven`);
