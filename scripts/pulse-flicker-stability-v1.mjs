@@ -71,7 +71,7 @@ fs.writeFileSync(files.progression,progression);
 // the historical additive renderer on older builds.
 let results=fs.readFileSync(files.results,'utf8');
 if(results.includes('[data-kresults-v1]')){
-  const stableCurrent=results.includes("key===lastKey&&root.querySelector('[data-kresults-v1]')")&&results.includes("!document.querySelector('[data-kresults-v1]')");
+  const stableCurrent=results.includes("key===lastKey&&root.querySelector('[data-kresults-v1]')")&&(results.includes("!document.querySelector('[data-kresults-v1]')")||results.includes("!root.querySelector('[data-kresults-v1]')"));
   if(!stableCurrent){console.error('[pulse-flicker] current results view is missing its mount guard');process.exit(1)}
 }else{
   results=replaceRequired(results,"async function mount(){if(busy||route()!=='results'||!memberMode())return;","async function mount(force=false){if(busy||route()!=='results'||!memberMode()||(!force&&document.querySelector('[data-krmj]')))return;",'results mount guard');
