@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const V='2.0.0';
+  const V='2.1.0';
 
   function closePickers(){
     document.querySelector('#kpPicker')?.classList.remove('open');
@@ -12,9 +12,7 @@
   function goMotion(){
     closePickers();
     document.querySelector('#modeSwitch [data-mode="member"]')?.click();
-    if(window.KomoPatientNavigation?.go) window.KomoPatientNavigation.go('motion');
-    else if(location.hash!=='#motion') location.hash='motion';
-    else window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:'motion',source:'motion-access'}}));
+    window.KomoPatientNavigation?.go?.('motion');
   }
 
   function startFree(){
@@ -24,8 +22,7 @@
       window.KomoMotionTestsEntry.start();
       return;
     }
-    if(window.KomoPatientNavigation?.go) window.KomoPatientNavigation.go('results');
-    else location.hash='results';
+    window.KomoPatientNavigation?.go?.('results');
     let tries=0;
     const openNext=()=>{
       tries++;
