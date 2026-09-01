@@ -3,7 +3,7 @@
    normalizes old route aliases, scrolls once, and exposes one go() API. */
 (() => {
   'use strict';
-  const V='1.3.0';
+  const V='1.4.0';
   const ALIAS={path:'trajectory',plan:'trajectory',followup:'key',agenda:'documents',rdv:'documents',tests:'results'};
   const PATIENT_ROUTES=new Set(['home','motion','mykomo','club','key','trajectory','documents','profile','messages','results']);
   let current='';
@@ -22,7 +22,6 @@
       html[data-kp-nav-mode="patient"] #proMobileNav{display:none!important}
       html[data-kp-nav-mode="patient"] .main-shell{margin-left:0!important;padding-bottom:104px!important}
       html[data-kp-nav-mode="patient"] body{overscroll-behavior-y:none}
-      html.kp-route-changing #viewRoot{pointer-events:none}
       @media(max-width:760px){html[data-kp-nav-mode="patient"] .main-shell{padding-bottom:92px!important}}
     `;document.head.appendChild(s);
   }
@@ -31,6 +30,7 @@
     const r=canonical(rawRoute());
     const m=(r==='clinical'||r==='admin')?'work':'patient';
     document.documentElement.dataset.kpNavMode=m;
+    if(m==='work')document.documentElement.classList.remove('kp-route-changing');
     return m;
   }
 
@@ -50,7 +50,8 @@
 
   function settle(route){
     const token=++seq;
-    document.documentElement.classList.add('kp-route-changing');
+    if(patientRoute(route))document.documentElement.classList.add('kp-route-changing');
+    else document.documentElement.classList.remove('kp-route-changing');
     resetScroll();
     requestAnimationFrame(()=>requestAnimationFrame(()=>announce(route,token)));
   }
@@ -71,6 +72,20 @@
   function go(target,{replace=false}={}){
     const next=canonical(target);
     if(!next)return;
+
+    if(!patientRoute(next)){
+      document.documentElement.dataset.kpNavMode='work';
+      document.documentElement.classList.remove('kp-route-changing');
+      resetScroll();
+      if(canonical(rawRoute())===next){
+        window.dispatchEvent(new CustomEvent('komo:route-ready',{detail:{route:next,source:'canonical-nav'}}));
+        return;
+      }
+      if(replace)history.replaceState(null,'',`${location.pathname}${location.search}#${next}`);
+      else location.hash=next;
+      return;
+    }
+
     document.querySelector('#modeSwitch [data-mode="member"]')?.click();
     document.documentElement.dataset.kpNavMode='patient';
     document.documentElement.classList.add('kp-route-changing');
