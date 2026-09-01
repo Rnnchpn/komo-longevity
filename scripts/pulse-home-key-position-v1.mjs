@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260901-home-final-v5';
+const release='20260901-home-motion-today-v51';
 
 let html=await readFile(htmlPath,'utf8');
 
