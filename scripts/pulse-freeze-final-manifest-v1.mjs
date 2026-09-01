@@ -1,7 +1,14 @@
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const root=dirname(dirname(fileURLToPath(import.meta.url)));
+// The historical freeze still normalizes the old Club navigation shape. Club V2 is already
+// route-safe and observer-free, so restore the canonical owner source before final QA.
+const canonicalClub=await readFile(join(root,'pulse-app','club-hub-v1.js'),'utf8');
+await writeFile(join(root,'site','pulse-v12','club-hub-v1.js'),canonicalClub,'utf8');
+
+await import('./pulse-club-community-v2-qa.mjs');
 await import('./pulse-admin-professional-runtime-stability-v1.mjs');
 await import('./pulse-admin-pro-single-owner-v3.mjs');
 await import('./pulse-admin-pro-route-v4.mjs');
@@ -10,9 +17,8 @@ await import('./pulse-workspace-clickability-v6.mjs');
 await import('./pulse-admin-myocare-loop-guard-v7.mjs');
 await import('./pulse-motion-result-integrity-v9.mjs');
 
-const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const manifest={
-  version:'2026-09-01-motion-v4-result-integrity-v9',
+  version:'2026-09-01-motion-v4-result-integrity-v9-club-v2',
   principles:[
     'one render owner per declared surface',
     'controllers may orchestrate data, navigation, and bounded subflows',
@@ -39,4 +45,4 @@ const manifest={
   global_controllers:['app-router-v2.js','first-test-entry-v1.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Motion V4 frozen · canonical result selection fixed · score v0.5.1 + PDF contracts guarded`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Club V2 canonical owner restored · Motion V4 frozen · score/report contracts guarded`);
