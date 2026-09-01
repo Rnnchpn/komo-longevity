@@ -5,12 +5,12 @@ import { fileURLToPath } from 'node:url';
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
-const release='20260901-home-motion-today-v6-1';
+const release='20260901-home-motion-today-v6-2-black';
 
 let html=await readFile(htmlPath,'utf8');
 
 // Historical stage kept in the production pipeline as a cleanup + cache guard only.
-// Home V6.1 owns one daily Motion Today surface. KEY remains a dedicated route and must not be reparented into Home.
+// Home V6.2 owns one daily Motion Today surface. KEY remains a dedicated route and must not be reparented into Home.
 html=html
   .replace(/\s*<link rel="stylesheet" href="\.\/home-key-position-v1\.css(?:\?[^\"]*)?"\s*\/?>/g,'')
   .replace(/\s*<script src="\.\/home-key-position-v1\.js(?:\?[^\"]*)?"><\/script>/g,'')
@@ -27,8 +27,11 @@ const checks=[
   ['canonical Home styles shipped',final.includes(`patient-home-command-v1.css?v=${release}`)],
   ['legacy KEY reparent runtime absent',!final.includes('home-key-position-v1.js')],
   ['legacy KEY position stylesheet absent',!final.includes('home-key-position-v1.css')],
-  ['Home V6.1 owns Motion Today',home.includes("const VERSION='6.1.0'")&&home.includes('data-khome-v6')&&home.includes('MOTION TODAY')],
+  ['Home V6.2 owns Motion Today',home.includes("const VERSION='6.2.0'")&&home.includes('data-khome-v6')&&home.includes('MOTION TODAY')],
   ['Home reads one canonical Motion Today RPC',home.includes("rpc('komo_motion_today_v1')")&&!home.includes("rpc('komo_walk_summary')")&&!home.includes('pulseOverview()')],
+  ['Home reads existing engagement summary',home.includes("rpc('komo_engagement_summary')")&&home.includes('xp_total')&&home.includes('level')],
+  ['Home reads existing profile avatar',home.includes("from('profiles')")&&home.includes('avatar_config')&&home.includes('kh6-avatar')],
+  ['Home profile and experience route to My KOMO',home.includes('kh6-profile')&&home.includes('kh6-xp')&&home.includes('href="#mykomo"')],
   ['Home exposes exactly the three daily signal types',home.includes("metricCard('steps'")&&home.includes("metricCard('sleep'")&&home.includes("metricCard('resting_hr'")],
   ['Home keeps clinical Motion Score off the daily surface',!home.includes('MOTION SCORE')&&!home.includes('MOTION AGE')&&!home.includes('pulse_score_runs')],
   ['Home has no delayed retry ladder or polling',!home.includes('[80,260,800,1800]')&&!home.includes('1700')&&!home.includes('setInterval(')],
@@ -36,7 +39,7 @@ const checks=[
   ['Home respects reduced motion',css.includes('@media(prefers-reduced-motion:reduce)')],
   ['Home uses one-screen overflow guard',css.includes('overflow:hidden')],
   ['Home has responsive desktop iPad mobile breakpoints',css.includes('@media(max-width:900px)')&&css.includes('@media(max-width:640px)')&&css.includes('@media(max-width:370px)')],
-  ['Home keeps green as accent',css.includes('--kh6-green:#315b41')&&css.includes('--kh6-bg:#f3f1ec')],
+  ['Home is black clinical, green accent only',css.includes('--kh6-bg:#050706')&&css.includes('--kh6-green-core:#315b41')&&css.includes('--kh6-green:#7fa58a')],
   ['estimated preview is explicit',home.includes('kh6-estimate')&&home.includes('Estimation')&&home.includes('data-estimated')],
   ['score ring is motion-safe',css.includes('kh6-ring-draw')&&css.includes('prefers-reduced-motion:reduce')]
 ];

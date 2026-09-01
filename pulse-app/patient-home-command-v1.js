@@ -2,7 +2,7 @@ import './komo-ai-client-v1.js';
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='6.1.0';
+const VERSION='6.2.0';
 let timer=0;
 let rendering=false;
 let lastSignature='';
@@ -60,6 +60,61 @@ async function motionToday(){
   }
 }
 
+async function homeIdentity(){
+  const sb=window.KomoRuntime?.client;
+  if(!sb)return{};
+  try{
+    const runtime=window.KomoRuntime?.getContext?.();
+    const session=runtime?.session||(await sb.auth.getSession()).data?.session;
+    if(!session?.user)return{};
+    const [profileResult,engagementResult]=await Promise.all([
+      sb.from('profiles').select('avatar_config,first_name,last_name,display_name').eq('id',session.user.id).maybeSingle(),
+      sb.rpc('komo_engagement_summary')
+    ]);
+    if(profileResult.error)console.warn('[home-profile]',profileResult.error);
+    if(engagementResult.error)console.warn('[home-experience]',engagementResult.error);
+    return{user:session.user,profile:profileResult.data||{},engagement:engagementResult.data||{}};
+  }catch(e){
+    console.warn('[home-identity]',e);
+    return{};
+  }
+}
+
+function initials(identity){
+  const p=identity?.profile||{};
+  const u=identity?.user||{};
+  const name=`${p.first_name||''} ${p.last_name||''}`.trim()||p.display_name||u.email?.split('@')[0]||'K';
+  const parts=name.trim().split(/\s+/).filter(Boolean);
+  return(parts.length>1?`${parts[0][0]}${parts[parts.length-1][0]}`:parts[0]?.slice(0,2)||'K').toUpperCase();
+}
+function firstName(identity){
+  const p=identity?.profile||{};
+  return String(p.first_name||p.display_name||'My KŌMØ').trim().split(/\s+/)[0]||'My KŌMØ';
+}
+function avatarMarkup(identity){
+  const p=identity?.profile||{};
+  const cfg=window.KomoAvatar?.normalize?.(p.avatar_config||{})||{};
+  if(cfg.mode==='avatar'&&window.KomoAvatar?.render){
+    return window.KomoAvatar.render(cfg,{label:'Profil KŌMØ'})||`<span>${esc(initials(identity))}</span>`;
+  }
+  return `<span>${esc(initials(identity))}</span>`;
+}
+function hudMarkup(identity,loading=false){
+  const xp=loading?null:num(identity?.engagement?.xp_total);
+  const level=loading?null:num(identity?.engagement?.level);
+  const profileName=loading?'Profile':firstName(identity);
+  return `<nav class="kh6-hud" aria-label="Profile and experience">
+    <a class="kh6-profile" href="#mykomo" data-route="mykomo" aria-label="Open My KŌMØ profile">
+      <span class="kh6-avatar" aria-hidden="true">${loading?'<span>K</span>':avatarMarkup(identity)}</span>
+      <span class="kh6-profile-copy"><small>PROFILE</small><strong>${esc(profileName)}</strong></span>
+    </a>
+    <a class="kh6-xp" href="#mykomo" data-route="mykomo" aria-label="Open experience and progression">
+      <span class="kh6-xp-copy"><small>EXPERIENCE</small><strong>${xp===null?'—':esc(fmtInt(xp))} <em>XP</em></strong></span>
+      <span class="kh6-level">LV. ${level===null?'—':esc(fmtInt(level))}</span>
+    </a>
+  </nav>`;
+}
+
 function metricCard(type,data,loading=false,estimated=false,index=0){
   const metric=data||{};
   const ready=!loading&&baselineReady(metric,estimated);
@@ -107,7 +162,7 @@ function metricCard(type,data,loading=false,estimated=false,index=0){
   </article>`;
 }
 
-function homeMarkup(data,loading=false){
+function homeMarkup(data,identity={},loading=false){
   const canonicalReady=!loading&&Boolean(data?.ready)&&num(data?.score)!==null;
   const preview=!loading&&!canonicalReady&&Boolean(data?.preview?.available)&&num(data?.preview?.score)!==null?data.preview:null;
   const active=preview||data||{};
@@ -120,6 +175,7 @@ function homeMarkup(data,loading=false){
   const message=loading?'Syncing your data':String(active?.message||data?.message||'Sync your wearable');
   const badge=estimated?'<span class="kh6-estimate">Estimation</span>':'';
   return `<section class="kh6${loading?' is-loading':''}${estimated?' is-estimated':''}" data-khome-v6 data-motion-state="${esc(state)}" data-estimated="${estimated?'true':'false'}" aria-busy="${loading?'true':'false'}">
+    ${hudMarkup(identity,loading)}
     <div class="kh6-core" aria-label="Motion Today">
       <div class="kh6-orbit" style="--kh6-progress:${scoreProgress};--kh6-offset:${scoreOffset}" aria-label="${ready?`${esc(score)} out of 100`:'Score unavailable'}">
         <svg class="kh6-ring" viewBox="0 0 200 200" aria-hidden="true">
@@ -155,7 +211,7 @@ function tuneChrome(){
   if(!home)return;
   const eyebrow=document.querySelector('#pageEyebrow');
   const title=document.querySelector('#pageTitle');
-  if(eyebrow)eyebrow.textContent='HOME';
+  if(eyebrow)eyebrow.textContent='';
   if(title)title.textContent='';
 }
 
@@ -166,25 +222,25 @@ async function render(force=false){
   rendering=true;
   try{
     tuneChrome();
-    if(!host.querySelector('[data-khome-v6]'))mount(host,homeMarkup(null,true));
-    const data=await motionToday();
+    if(!host.querySelector('[data-khome-v6]'))mount(host,homeMarkup(null,{},true));
+    const [data,identity]=await Promise.all([motionToday(),homeIdentity()]);
     if(route()!=='home'||!host.isConnected)return;
-    const markup=homeMarkup(data,false);
+    const markup=homeMarkup(data,identity,false);
     if(!force&&markup===lastSignature&&host.querySelector('[data-khome-v6]:not(.is-loading)'))return;
     mount(host,markup);
     lastSignature=markup;
     window.KomoAssistantV2?.refresh?.();
-    window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,algorithm:data?.algorithm_version||null,estimated:Boolean(data?.preview?.available&&!data?.ready)}}));
+    window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,algorithm:data?.algorithm_version||null,estimated:Boolean(data?.preview?.available&&!data?.ready),xp:num(identity?.engagement?.xp_total),level:num(identity?.engagement?.level)}}));
   }catch(e){
     console.error('[patient-home-v6]',e);
-    if(host?.isConnected)mount(host,homeMarkup({status:'incomplete',message:'Sync your wearable'},false));
+    if(host?.isConnected)mount(host,homeMarkup({status:'incomplete',message:'Sync your wearable'},{},false));
   }finally{rendering=false}
 }
 
 function schedule(force=false,ms=0){clearTimeout(timer);timer=setTimeout(()=>render(force),ms)}
-['hashchange','pageshow','komo:route-ready','komo:data-ready','komo:wearable-data-updated'].forEach(name=>window.addEventListener(name,()=>{
+['hashchange','pageshow','komo:route-ready','komo:data-ready','komo:wearable-data-updated','komo:profile-identity-updated'].forEach(name=>window.addEventListener(name,()=>{
   tuneChrome();
-  schedule(['komo:data-ready','komo:wearable-data-updated'].includes(name),20);
+  schedule(['komo:data-ready','komo:wearable-data-updated','komo:profile-identity-updated'].includes(name),20);
 }));
 function boot(){tuneChrome();schedule(true,0)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
