@@ -2,283 +2,229 @@ import './komo-ai-client-v1.js';
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='5.0.0';
+const VERSION='6.0.0';
 const RELEASED=new Set(['released','published']);
+const DAILY_DAYS=45;
 let timer=0;
 let rendering=false;
 let lastSignature='';
 
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
+const client=()=>window.KomoRuntime?.client||null;
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const num=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
-const fmt=v=>v===null||v===undefined?'—':new Intl.NumberFormat('fr-FR').format(Math.round(Number(v)));
-const pick=(obj,keys=[])=>{for(const key of keys){const value=obj?.[key];if(value!==undefined&&value!==null&&value!=='')return value}return null};
+const clamp=(v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+const fmtInt=v=>v===null||v===undefined?'—':new Intl.NumberFormat('en-US').format(Math.round(Number(v)));
 const released=status=>RELEASED.has(String(status||'').toLowerCase());
+const dayKey=value=>{const d=value instanceof Date?value:new Date(value);if(Number.isNaN(d.getTime()))return'';const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${day}`};
+const todayKey=()=>dayKey(new Date());
 
 function go(target){window.KomoPatientNavigation?.go?.(target)}
-function firstName(){
-  const c=window.KomoRuntime?.getContext?.()||{};
-  const p=c.profile||{};
-  const direct=p.preferred_name||p.first_name||'';
-  if(direct)return String(direct).trim().split(/\s+/)[0];
-  const account=document.querySelector('#accountName')?.textContent?.trim()||'';
-  return account&&account!=='Compte KŌMØ'?account.split(/\s+/)[0]:'';
+function context(){return window.KomoRuntime?.getContext?.()||{}}
+function identity(){
+  const c=context(),p=c.profile||{},u=c.session?.user||{};
+  const meta=u.user_metadata||{};
+  const first=String(p.preferred_name||p.first_name||meta.given_name||meta.first_name||'').trim().split(/\s+/)[0];
+  const full=String(p.display_name||[p.first_name,p.last_name].filter(Boolean).join(' ')||meta.full_name||u.email?.split('@')[0]||'My KŌMØ').trim();
+  const initials=full.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'K';
+  const avatar=String(p.avatar_url||p.photo_url||meta.avatar_url||meta.picture||'').trim();
+  return{first,full,initials,avatar};
 }
-function shortDate(value){
-  if(!value)return'';
-  const d=new Date(value);
-  if(Number.isNaN(d.getTime()))return'';
-  return new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short'}).format(d).replace('.','');
-}
-function dayDistance(value){
-  if(!value)return null;
-  const d=new Date(value);
-  if(Number.isNaN(d.getTime()))return null;
-  return Math.max(0,Math.floor((Date.now()-d.getTime())/86400000));
-}
-function freshness(value){
-  const days=dayDistance(value);
-  if(days===null)return'Dernière mesure disponible';
-  if(days===0)return'Mesuré aujourd’hui';
-  if(days===1)return'Mesuré hier';
-  if(days<14)return`Mesuré il y a ${days} jours`;
-  const date=shortDate(value);
-  return date?`Dernière mesure · ${date}`:'Dernière mesure disponible';
-}
+function avatarMarkup(i){return i.avatar?`<img src="${esc(i.avatar)}" alt="" loading="eager" decoding="async">`:`<span>${esc(i.initials)}</span>`}
+
 async function pulseOverview(){
-  try{return await window.KomoAI?.overview?.()||null}catch(e){console.warn('[home-v5 overview]',e);return null}
-}
-async function walkSummary(){
-  const sb=window.KomoRuntime?.client;if(!sb)return null;
-  try{const {data,error}=await sb.rpc('komo_walk_summary');if(error)throw error;return data||null}catch(e){console.warn('[home-v5 walk]',e);return null}
+  try{return await window.KomoAI?.overview?.()||null}catch(e){console.warn('[home-v6 overview]',e);return null}
 }
 async function legacyMotionHistory(){
-  const sb=window.KomoRuntime?.client;if(!sb)return[];
+  const sb=client();if(!sb)return[];
   try{
-    const {data:{session}}=await sb.auth.getSession();
+    const session=context().session||(await sb.auth.getSession()).data?.session;
     if(!session?.user?.id)return[];
     const {data,error}=await sb.from('pulse_score_runs').select('overall_score,motion_age,status,computed_at,created_at').eq('user_id',session.user.id).order('created_at',{ascending:false}).limit(6);
     if(error)throw error;
     return Array.isArray(data)?data:[];
-  }catch(e){console.warn('[home-v5 history]',e);return[]}
+  }catch(e){console.warn('[home-v6 history]',e);return[]}
 }
+async function engagementSummary(){
+  const sb=client();if(!sb)return null;
+  try{const {data,error}=await sb.rpc('komo_engagement_summary');if(error)throw error;return data||null}catch(e){console.warn('[home-v6 engagement]',e);return null}
+}
+async function wearableDaily(){
+  const sb=client();if(!sb)return{connected:false,rows:[]};
+  try{
+    const session=context().session||(await sb.auth.getSession()).data?.session;
+    if(!session?.user?.id)return{connected:false,rows:[]};
+    const from=new Date();from.setDate(from.getDate()-DAILY_DAYS);
+    const [metrics,consent]=await Promise.all([
+      sb.from('wearable_daily_metrics').select('metric_date,steps,sleep_minutes,resting_hr,night_worn,day_wear_mode').eq('user_id',session.user.id).gte('metric_date',dayKey(from)).order('metric_date',{ascending:true}),
+      sb.from('wearable_consents').select('status,accepted_at,withdrawn_at').eq('user_id',session.user.id).eq('purpose','connected_followup').order('accepted_at',{ascending:false}).limit(1).maybeSingle()
+    ]);
+    if(metrics.error)throw metrics.error;
+    if(consent.error)throw consent.error;
+    return{connected:consent.data?.status==='active',rows:Array.isArray(metrics.data)?metrics.data:[]};
+  }catch(e){console.warn('[home-v6 wearable]',e);return{connected:false,rows:[]}}
+}
+
 function currentRecord(overview){return Array.isArray(overview?.records)?overview.records[0]||null:overview?.record||null}
 function motionState(overview,history=[]){
   const record=currentRecord(overview);
   const canonical=record?.score||null;
   const status=canonical?.release_status||canonical?.status||'';
   const canonicalScore=released(status)?num(canonical?.motion_score):null;
-  const currentLegacy=history.find(row=>{
-    const score=num(row?.overall_score);
-    if(score===null)return false;
-    return released(row?.status)||(canonicalScore!==null&&Math.abs(score-canonicalScore)<0.01);
-  })||null;
-  const visibleHistory=history.filter(row=>released(row?.status)).map(row=>({
-    score:num(row?.overall_score),
-    age:num(row?.motion_age),
-    date:row?.computed_at||row?.created_at||null
-  })).filter(row=>row.score!==null);
+  const visibleHistory=history.filter(row=>released(row?.status)).map(row=>({score:num(row?.overall_score),date:row?.computed_at||row?.created_at||null})).filter(row=>row.score!==null);
   let score=canonicalScore;
   if(score===null&&visibleHistory[0])score=visibleHistory[0].score;
-  const age=num(canonical?.motion_age)??(currentLegacy?num(currentLegacy.motion_age):null)??visibleHistory[0]?.age??null;
-  const date=canonical?.calculated_at||currentLegacy?.computed_at||currentLegacy?.created_at||visibleHistory[0]?.date||record?.motion?.updated_at||record?.motion?.created_at||null;
-  let delta=null;
-  if(score!==null&&visibleHistory.length>=2&&Math.abs(visibleHistory[0].score-score)<0.01)delta=Math.round((visibleHistory[0].score-visibleHistory[1].score)*10)/10;
+  const date=canonical?.calculated_at||visibleHistory[0]?.date||record?.motion?.updated_at||record?.motion?.created_at||null;
   const pending=Boolean(record?.motion)&&score===null;
-  return{score,age,date,delta,pending,hasMotion:Boolean(record?.motion),record};
+  return{score,date,pending,hasMotion:Boolean(record?.motion)};
 }
-function currentAppointment(overview){
-  const record=currentRecord(overview);
-  const records=Array.isArray(overview?.records)?overview.records:[];
-  const fromRecords=records.map(x=>x?.next_appointment).find(Boolean);
-  const ap=fromRecords||record?.next_appointment||overview?.summary?.next_appointment||null;
-  if(!ap)return{exists:false,date:'Aucun rendez-vous prévu',time:'',title:'Votre prochaine mesure apparaîtra ici.',location:'',route:'agenda',hours:null};
-  const raw=ap.scheduled_start||ap.scheduled_at||ap.start_at||ap.start;
-  let date='Prochaine consultation',time='',hours=null;
-  if(raw){
-    const d=new Date(raw);
-    if(!Number.isNaN(d.getTime())){
-      date=new Intl.DateTimeFormat('fr-FR',{weekday:'short',day:'numeric',month:'short'}).format(d).replace('.','');
-      time=new Intl.DateTimeFormat('fr-FR',{hour:'2-digit',minute:'2-digit'}).format(d);
-      hours=(d.getTime()-Date.now())/36e5;
-    }
-  }
-  const title=ap.appointment_type||ap.title||ap.type||'Consultation KŌMØ';
-  const location=ap.center_name||ap.location_name||ap.center?.name||ap.location||ap.address||'';
-  return{exists:true,date,time,title,location,route:'agenda',hours};
+
+function validRows(rows,key){return rows.filter(r=>r?.metric_date&&num(r[key])!==null).sort((a,b)=>String(a.metric_date).localeCompare(String(b.metric_date)))}
+function latestMetric(rows,key,{excludeToday=false}={}){
+  const today=todayKey();
+  const list=validRows(rows,key).filter(r=>!excludeToday||r.metric_date<today);
+  return list.at(-1)||null;
 }
-function coverageValue(walk){
-  let value=num(pick(walk,['coverage_7d','coverage_pct','coverage','data_coverage','key_coverage']));
-  if(value!==null&&value<=1)value*=100;
-  return value===null?null:Math.max(0,Math.min(100,Math.round(value)));
+function baselineFor(rows,key,selected,{median=false}={}){
+  if(!selected)return null;
+  const before=validRows(rows,key).filter(r=>r.metric_date<selected.metric_date).slice(-28).map(r=>num(r[key])).filter(v=>v!==null);
+  if(before.length<3)return null;
+  if(median){const s=[...before].sort((a,b)=>a-b),m=Math.floor(s.length/2);return s.length%2?s[m]:(s[m-1]+s[m])/2}
+  return before.reduce((a,b)=>a+b,0)/before.length;
 }
-function dailyDelta(walk){
-  const steps=num(walk?.steps_today);
-  const average=num(pick(walk,['steps_avg_7d','average_steps_7d','baseline_steps_7d','avg_steps_7d']));
-  if(steps===null||average===null||average<=0)return null;
-  return Math.round(((steps-average)/average)*100);
+function interpolate(value,points){
+  const x=num(value);if(x===null)return null;
+  if(x<=points[0][0])return points[0][1];
+  for(let i=1;i<points.length;i++)if(x<=points[i][0]){const[a,sa]=points[i-1],[b,sb]=points[i],t=(x-a)/(b-a||1);return sa+(sb-sa)*t}
+  return points.at(-1)[1];
 }
-function keySignal(walk,loading=false){
-  if(loading)return{value:'Synchronisation',copy:'Votre rythme quotidien arrive…',meta:'KEY',route:'key'};
-  if(!walk?.connected)return{value:'Activer KEY',copy:'Reliez votre quotidien à votre trajectoire.',meta:'Continuité quotidienne',route:'key'};
-  const steps=num(walk.steps_today);
-  const active=num(walk.active_minutes_today??walk.active_minutes);
-  const coverage=coverageValue(walk);
-  const delta=dailyDelta(walk);
-  if(delta!==null&&delta>=15)return{value:`+${Math.abs(delta)}% aujourd’hui`,copy:'Au-dessus de votre rythme récent.',meta:steps===null?'KEY':`${fmt(steps)} pas`,route:'key'};
-  if(delta!==null&&delta<=-15)return{value:`${Math.abs(delta)}% sous votre rythme`,copy:'Une journée plus calme pour le moment.',meta:steps===null?'KEY':`${fmt(steps)} pas`,route:'key'};
-  if(steps!==null)return{value:`${fmt(steps)} pas`,copy:delta===null?'Votre activité du jour.':'Dans votre rythme récent.',meta:active===null?(coverage===null?'KEY':`${coverage}% de couverture`):`${fmt(active)} min actives`,route:'key'};
-  if(coverage!==null)return{value:`${coverage}% couvert`,copy:'KEY construit votre référence quotidienne.',meta:'7 derniers jours',route:'key'};
-  return{value:'KEY connecté',copy:'Votre quotidien complète la mesure Motion.',meta:'Continuité active',route:'key'};
+function stepsScore(v){return interpolate(v,[[0,10],[1500,20],[2000,30],[3000,45],[4000,60],[5000,75],[6000,85],[7000,95],[9000,100],[12000,100]])}
+function sleepScore(v){return interpolate(v,[[0,0],[300,30],[360,70],[390,85],[420,100],[540,100],[600,80],[660,55],[720,40]])}
+function rhrScore(v,baseline){
+  const x=num(v);if(x===null)return null;
+  if(x<40)return70;
+  if(baseline!==null){const d=x-baseline;if(d<=3)return100;if(d<=6)return85;if(d<=10)return65;return40}
+  if(x<=60)return100;if(x<=70)return90;if(x<=80)return75;if(x<=90)return55;return35;
 }
-function motionInterpretation(motion){
-  if(motion.score===null){
-    if(motion.pending)return'Votre mesure Motion existe et attend sa restitution. Pulse affichera ici votre repère dès qu’il sera publié.';
-    return'Votre première mesure Motion créera la référence à partir de laquelle votre trajectoire pourra être suivie.';
-  }
-  if(motion.delta===null)return'Votre dernier repère locomoteur est disponible. Sa valeur devient surtout utile lorsqu’elle est suivie dans le temps.';
-  if(motion.delta>0)return`Votre Motion Score a progressé de ${String(motion.delta).replace('.',',')} point${motion.delta>1?'s':''} depuis la mesure précédente.`;
-  if(motion.delta<0)return`Votre Motion Score a varié de ${String(motion.delta).replace('.',',')} point${Math.abs(motion.delta)>1?'s':''} depuis la mesure précédente. La trajectoire compte davantage qu’une mesure isolée.`;
-  return'Votre Motion Score est stable par rapport à la mesure précédente. La continuité permettra de confirmer cette tendance.';
+function dailyState(wearable){
+  const rows=wearable?.rows||[];
+  const stepRow=latestMetric(rows,'steps',{excludeToday:true});
+  const sleepRow=latestMetric(rows,'sleep_minutes');
+  const rhrRow=latestMetric(rows,'resting_hr');
+  const steps=num(stepRow?.steps),sleep=num(sleepRow?.sleep_minutes),rhr=num(rhrRow?.resting_hr);
+  const stepsBase=baselineFor(rows,'steps',stepRow),sleepBase=baselineFor(rows,'sleep_minutes',sleepRow),rhrBase=baselineFor(rows,'resting_hr',rhrRow,{median:true});
+  const s1=stepsScore(steps),s2=sleepScore(sleep),s3=rhrScore(rhr,rhrBase);
+  const readiness=[s1,s2,s3].every(v=>v!==null)?Math.round(.20*s1+.45*s2+.35*s3):null;
+  return{connected:Boolean(wearable?.connected),steps,sleep,rhr,stepsBase,sleepBase,rhrBase,readiness};
 }
-function priorityState(walk,motion,appointment){
-  if(appointment.exists&&appointment.hours!==null&&appointment.hours>=0&&appointment.hours<=72)return{eyebrow:'KOMO · PRIORITÉ',title:'Préparez votre prochaine mesure.',copy:'Votre rendez-vous approche. Gardez vos informations Pulse à jour pour faciliter la lecture de votre trajectoire.',label:'Voir mon rendez-vous',route:'agenda'};
-  if(!motion.hasMotion&&!motion.pending&&motion.score===null)return{eyebrow:'KOMO · PRIORITÉ',title:'Créez votre point de départ.',copy:'Une première mesure Motion transforme votre mobilité actuelle en repère que Pulse pourra suivre dans le temps.',label:'Découvrir Motion',route:'motion'};
-  if(!walk?.connected)return{eyebrow:'KOMO · PRIORITÉ',title:'Reliez votre quotidien à vos mesures.',copy:'Activez KEY pour replacer vos journées entre deux évaluations Motion et rendre la continuité plus lisible.',label:'Activer KEY',route:'key'};
-  const delta=dailyDelta(walk);
-  if(delta!==null&&delta<=-15)return{eyebrow:'KOMO · AUJOURD’HUI',title:'Remettez un peu de mouvement dans la journée.',copy:'Votre activité est sous votre rythme récent pour le moment. Une marche active suffit à recréer de la continuité.',label:'Voir ma journée',route:'key'};
-  if(delta!==null&&delta>=15)return{eyebrow:'KOMO · AUJOURD’HUI',title:'Conservez ce rythme.',copy:'Votre activité est au-dessus de votre moyenne récente. L’objectif est la régularité, pas la surenchère.',label:'Voir KEY',route:'key'};
-  return{eyebrow:'KOMO · PRIORITÉ',title:'Protégez la continuité.',copy:'Vos données du jour sont cohérentes avec votre rythme récent. Continuez à mesurer, comprendre et agir sans multiplier les objectifs.',label:'Voir ma trajectoire',route:'trajectory'};
+function motionToday(motion,daily){
+  if(motion.score===null||daily.readiness===null)return null;
+  return Math.round(clamp(.60*motion.score+.40*daily.readiness));
 }
-function trajectorySignal(motion){
-  if(motion.score===null)return{value:'À construire',copy:'Votre trajectoire commencera avec une mesure publiée.',meta:'Trajectoire',route:'trajectory'};
-  if(motion.delta===null)return{value:'1 repère actif',copy:'Une nouvelle mesure rendra l’évolution comparable.',meta:freshness(motion.date),route:'trajectory'};
-  const sign=motion.delta>0?'+':'';
-  return{value:`${sign}${String(motion.delta).replace('.',',')} pt`,copy:motion.delta===0?'Stable depuis la mesure précédente.':'Depuis la mesure précédente.',meta:freshness(motion.date),route:'trajectory'};
+function toneState(score,motion,daily){
+  if(motion.score===null)return{tone:'setup',copy:motion.pending?'Your Motion baseline is waiting to be released.':'Create your Motion baseline',detail:'Your daily locomotor status starts after the initial Motion assessment.',route:'motion',action:motion.pending?'View results':'Start Motion'};
+  if(!daily.connected||daily.readiness===null)return{tone:'setup',copy:'Connect your daily signals',detail:'Sleep, resting heart rate and daily movement are needed for Motion Today.',route:'key',action:'Open My Health'};
+  if(motion.score<60)return{tone:'bad',copy:'Your plan is active',detail:'Your daily signals are updated, but your locomotor baseline still needs work.',route:'trajectory',action:'Open Plan'};
+  if(motion.score<75)return{tone:'warn',copy:'Ready to progress',detail:'Your daily signals are available. Keep working on your locomotor baseline.',route:'trajectory',action:'Open Plan'};
+  if(score>=75)return{tone:'good',copy:'You’re moving well',detail:'Everything is on track. Keep moving.',route:'trajectory',action:''};
+  if(score>=60)return{tone:'warn',copy:'A little below your usual',detail:'One or more daily signals are below your usual range.',route:'trajectory',action:'Open Plan'};
+  return{tone:'bad',copy:'Your usual pattern has changed',detail:'Your daily signals are meaningfully different from your usual range.',route:'trajectory',action:'Open Plan'};
 }
-function appointmentSignal(appointment){
-  if(!appointment.exists)return{value:'Prochaine étape',copy:'Planifiez votre prochaine mesure quand elle devient utile.',meta:'Agenda KŌMØ',route:'agenda'};
-  const when=appointment.time?`${appointment.date} · ${appointment.time}`:appointment.date;
-  return{value:when,copy:appointment.title,meta:appointment.location||'Agenda KŌMØ',route:'agenda'};
+function arrow(value,baseline,inverse=false){
+  if(value===null||baseline===null)return'→';
+  const diff=value-baseline;
+  if(Math.abs(diff)<0.5)return'→';
+  if(inverse)return diff<0?'↓':'↑';
+  return diff>0?'↑':'↓';
 }
-function communityLine(walk){
-  if(!walk?.connected)return'';
-  const club=walk?.walk_club||walk?.club||{};
-  const rank=num(pick(club,['rank','week_rank','weekly_rank','position']));
-  const points=num(walk?.k_points_week);
-  if(rank===null&&points===null)return'';
-  const parts=[];
-  if(rank!==null)parts.push(`Walk Club #${fmt(rank)}`);
-  if(points!==null)parts.push(`+${fmt(points)} K Points cette semaine`);
-  return `<button class="kh5-community" type="button" data-kh5-route="club"><span>${esc(parts.join(' · '))}</span><b aria-hidden="true">→</b></button>`;
+function signalTone(kind,value,baseline){
+  if(value===null)return'neutral';
+  if(kind==='sleep')return value>=420&&value<=540?'good':(value>=360&&value<600?'warn':'bad');
+  if(baseline===null)return'neutral';
+  const d=value-baseline;
+  if(kind==='steps'){const pct=baseline>0?d/baseline*100:0;return pct>=-5?'good':pct>=-20?'warn':'bad'}
+  if(kind==='rhr'){if(value<40)return'warn';return d<=3?'good':d<=7?'warn':'bad'}
+  return'neutral';
 }
-function signalCard(label,signal,extraClass=''){
-  return `<button class="kh5-signal ${extraClass}" type="button" data-kh5-route="${esc(signal.route)}"><span>${esc(label)}</span><strong>${esc(signal.value)}</strong><small>${esc(signal.copy)}</small><em>${esc(signal.meta)}</em><b aria-hidden="true">→</b></button>`;
+function duration(minutes){if(minutes===null)return'—';const h=Math.floor(minutes/60),m=Math.round(minutes%60);return`${h}h ${String(m).padStart(2,'0')}`}
+function durationDelta(value,baseline){if(value===null||baseline===null)return'Baseline building';const d=Math.round(value-baseline);if(Math.abs(d)<5)return'≈ usual';const sign=d>0?'+':'−';return`${sign}${Math.floor(Math.abs(d)/60)?`${Math.floor(Math.abs(d)/60)}h `:''}${String(Math.abs(d)%60).padStart(2,'0')} min`}
+function stepDelta(value,baseline){if(value===null||baseline===null||baseline<=0)return'Baseline building';const p=Math.round((value-baseline)/baseline*100);return`${p>0?'+':''}${p}%`}
+function rhrDelta(value,baseline){if(value===null||baseline===null)return'Baseline building';const d=Math.round(value-baseline);return`${d>0?'+':d<0?'−':''}${Math.abs(d)} bpm`}
+function metricMarkup({kind,label,rawValue,displayValue,unit,baseline,baselineText,delta,inverse=false}){
+  const tone=signalTone(kind,rawValue,baseline),arr=arrow(rawValue,baseline,inverse);
+  return `<button class="kh6-metric signal-${tone}" type="button" data-kh6-route="key" aria-label="Open ${esc(label.toLowerCase())} details">
+    <span class="kh6-metric-label">${esc(label)}</span>
+    <span class="kh6-metric-main"><strong>${esc(displayValue===null?'—':displayValue)}</strong>${unit?`<small>${esc(unit)}</small>`:''}<i aria-hidden="true">${arr}</i></span>
+    <span class="kh6-usual">Usual ${esc(baselineText)}</span>
+    <b>${esc(delta)}</b>
+  </button>`;
 }
-function homeMarkup(walk,overview,history,loading=false){
-  const name=firstName();
-  const motion=motionState(overview,history);
-  const appointment=currentAppointment(overview);
-  const priority=priorityState(walk,motion,appointment);
-  const key=keySignal(walk,loading);
-  const trajectory=trajectorySignal(motion);
-  const next=appointmentSignal(appointment);
-  const score=loading?null:motion.score;
-  const age=loading?null:motion.age;
-  const scoreText=score===null?'—':String(Math.round(score));
-  const ageText=age===null?'—':`${Math.round(age)} ans`;
-  const statusText=loading?'Synchronisation…':freshness(motion.date);
-  const interpretation=loading?'Pulse rassemble vos dernières données utiles…':motionInterpretation(motion);
-  const meter=score===null?0:Math.max(0,Math.min(100,Math.round(score)));
-  return `<section class="kh5${loading?' is-loading':''}" data-khome-v5 aria-busy="${loading?'true':'false'}">
-    <header class="kh5-head kh5-enter" style="--kh5-delay:0ms">
-      <div><span class="kh5-kicker">AUJOURD’HUI</span><h2>Bonjour${name?` ${esc(name)}`:''}.</h2><p>Voici ce qui compte pour votre mobilité maintenant.</p></div>
-      <div class="kh5-wordmark" aria-label="KŌMØ Pulse"><strong>KŌMØ</strong><small>PULSE</small></div>
+function metricsMarkup(d){
+  return metricMarkup({kind:'steps',label:'STEPS',rawValue:d.steps,displayValue:d.steps===null?null:fmtInt(d.steps),unit:'',baseline:d.stepsBase,baselineText:d.stepsBase===null?'—':fmtInt(d.stepsBase),delta:stepDelta(d.steps,d.stepsBase)})+
+    metricMarkup({kind:'sleep',label:'SLEEP',rawValue:d.sleep,displayValue:d.sleep===null?null:duration(d.sleep),unit:'',baseline:d.sleepBase,baselineText:d.sleepBase===null?'—':duration(d.sleepBase),delta:durationDelta(d.sleep,d.sleepBase)})+
+    metricMarkup({kind:'rhr',label:'RESTING HR',rawValue:d.rhr,displayValue:d.rhr===null?null:String(Math.round(d.rhr)),unit:d.rhr===null?'':'bpm',baseline:d.rhrBase,baselineText:d.rhrBase===null?'—':`${Math.round(d.rhrBase)} bpm`,delta:rhrDelta(d.rhr,d.rhrBase),inverse:true});
+}
+function homeMarkup(wearable,overview,history,engagement,loading=false){
+  const who=identity(),motion=motionState(overview,history),daily=loading?{connected:false,steps:null,sleep:null,rhr:null,stepsBase:null,sleepBase:null,rhrBase:null,readiness:null}:dailyState(wearable);
+  const today=loading?null:motionToday(motion,daily),state=toneState(today,motion,daily);
+  const level=Math.max(1,Math.round(num(engagement?.level)||1)),points=Math.max(0,Math.round(num(engagement?.points)||0));
+  const scoreText=today===null?'—':String(today);
+  const baselineText=motion.score===null?'Motion baseline —':`Motion baseline ${Math.round(motion.score)}`;
+  return `<section class="kh6 tone-${state.tone}${loading?' is-loading':''}" data-khome-v6 aria-busy="${loading?'true':'false'}">
+    <header class="kh6-top">
+      <button class="kh6-profile" type="button" data-kh6-route="mykomo" aria-label="Open My KŌMØ">
+        <span class="kh6-avatar">${avatarMarkup(who)}</span>
+        <span class="kh6-profile-copy"><strong>${esc(who.first||'My KŌMØ')}</strong><small>My KŌMØ</small></span>
+      </button>
+      <button class="kh6-progress" type="button" data-kh6-route="mykomo" aria-label="Open KŌMØ level and points">
+        <span><small>LVL</small><strong>${level}</strong></span><i></i><span><strong>${fmtInt(points)}</strong><small>K</small></span>
+      </button>
     </header>
 
-    <section class="kh5-hero kh5-enter" style="--kh5-delay:55ms" aria-label="Votre mouvement aujourd’hui">
-      <div class="kh5-motion">
-        <span class="kh5-label">VOTRE MOUVEMENT AUJOURD’HUI</span>
-        <div class="kh5-scoreline">
-          <div class="kh5-score"><strong data-kh5-score="${score===null?'':Math.round(score)}">${esc(scoreText)}</strong><small>/100<br>MOTION SCORE</small></div>
-          <div class="kh5-age"><span>MOTION AGE</span><strong>${esc(ageText)}</strong></div>
-        </div>
-        <div class="kh5-meter" aria-hidden="true"><i style="--kh5-meter:${meter}%"></i></div>
-        <p class="kh5-interpretation">${esc(interpretation)}</p>
-        <button class="kh5-detail-link" type="button" data-kh5-route="results"><span>${esc(statusText)}</span><b>Voir mes résultats →</b></button>
-      </div>
-      <aside class="kh5-komo">
-        <span>${esc(priority.eyebrow)}</span>
-        <h3>${esc(priority.title)}</h3>
-        <p>${esc(priority.copy)}</p>
-        <button type="button" data-kh5-route="${esc(priority.route)}">${esc(priority.label)} <b aria-hidden="true">→</b></button>
-      </aside>
+    <main class="kh6-hero" aria-label="Motion Today">
+      <strong class="kh6-score" data-kh6-score="${today===null?'':today}">${esc(scoreText)}</strong>
+      <span class="kh6-title">MOTION TODAY</span>
+      <p>${esc(state.copy)}</p>
+    </main>
+
+    <section class="kh6-metrics" aria-label="Daily health signals">
+      ${metricsMarkup(daily)}
     </section>
 
-    <section class="kh5-signals kh5-enter" style="--kh5-delay:110ms" aria-label="À surveiller">
-      ${signalCard('KEY · QUOTIDIEN',key,'kh5-signal-key')}
-      ${signalCard('TRAJECTOIRE',trajectory,'kh5-signal-trajectory')}
-      ${signalCard('PROCHAINE ÉTAPE',next,'kh5-signal-next')}
-    </section>
-
-    <footer class="kh5-foot kh5-enter" style="--kh5-delay:165ms">
-      <p><strong>Measure → Understand → Act.</strong><span>Pulse organise votre trajectoire. KŌMØ l’interprète quand cela est nécessaire.</span></p>
-      ${communityLine(walk)}
+    <footer class="kh6-status">
+      <span><small>${esc(baselineText)}</small><strong>${esc(state.detail)}</strong></span>
+      ${state.action?`<button type="button" data-kh6-route="${esc(state.route)}">${esc(state.action)} <b aria-hidden="true">→</b></button>`:'<i class="kh6-status-dot" aria-hidden="true"></i>'}
     </footer>
   </section>`;
 }
-function bind(root){
-  root.querySelectorAll('[data-kh5-route]').forEach(button=>button.addEventListener('click',()=>go(button.dataset.kh5Route)));
-}
+function bind(root){root.querySelectorAll('[data-kh6-route]').forEach(el=>el.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();go(el.dataset.kh6Route)}))}
 function animateScore(root){
-  const node=root.querySelector('[data-kh5-score]');
-  const target=num(node?.dataset?.kh5Score);
-  if(!node||target===null)return;
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){node.textContent=String(Math.round(target));return}
-  const start=performance.now(),duration=620;
-  const tick=now=>{
-    const t=Math.min(1,(now-start)/duration);
-    const eased=1-Math.pow(1-t,3);
-    node.textContent=String(Math.round(target*eased));
-    if(t<1)requestAnimationFrame(tick);
-  };
+  const node=root.querySelector('[data-kh6-score]'),target=num(node?.dataset?.kh6Score);
+  if(!node||target===null||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  const start=performance.now(),duration=440;
+  const tick=now=>{const t=Math.min(1,(now-start)/duration),e=1-Math.pow(1-t,3);node.textContent=String(Math.round(target*e));if(t<1)requestAnimationFrame(tick)};
   requestAnimationFrame(tick);
 }
 function mount(host,markup,animate=false){
-  const wrap=document.createElement('div');wrap.innerHTML=markup;
-  const node=wrap.firstElementChild;
-  host.replaceChildren(node);
-  host.dataset.khomeOwner='patient-home-command-v1@5';
-  bind(node);
-  if(animate)animateScore(node);
-  document.body.classList.add('khome-final-v1');
-  return node;
+  const wrap=document.createElement('div');wrap.innerHTML=markup;const node=wrap.firstElementChild;
+  host.replaceChildren(node);host.dataset.khomeOwner='patient-home-command-v1@6';bind(node);if(animate)animateScore(node);document.body.classList.add('khome-final-v1');return node;
 }
-function tuneChrome(){
-  const home=route()==='home';
-  document.body.classList.toggle('khome-final-v1',home);
-  if(!home)return;
-  const eyebrow=document.querySelector('#pageEyebrow'),title=document.querySelector('#pageTitle');
-  if(eyebrow)eyebrow.textContent='KŌMØ PULSE';
-  if(title)title.textContent='';
-}
+function tuneChrome(){const home=route()==='home';document.body.classList.toggle('khome-final-v1',home);if(!home)return;const eyebrow=document.querySelector('#pageEyebrow'),title=document.querySelector('#pageTitle');if(eyebrow)eyebrow.textContent='KŌMØ PULSE';if(title)title.textContent=''}
 async function render(force=false){
   if(rendering||route()!=='home')return;
-  const host=document.querySelector('[data-my-komo-home]');
-  if(!host)return;
+  const host=document.querySelector('[data-my-komo-home]');if(!host)return;
   rendering=true;
   try{
     tuneChrome();
-    if(!host.querySelector('[data-khome-v5]'))mount(host,homeMarkup(null,null,[],true));
-    const [walk,overview,history]=await Promise.all([walkSummary(),pulseOverview(),legacyMotionHistory()]);
+    if(!host.querySelector('[data-khome-v6]'))mount(host,homeMarkup(null,null,[],null,true));
+    const [wearable,overview,history,engagement]=await Promise.all([wearableDaily(),pulseOverview(),legacyMotionHistory(),engagementSummary()]);
     if(route()!=='home'||!host.isConnected)return;
-    const markup=homeMarkup(walk,overview,history,false);
-    if(!force&&markup===lastSignature&&host.querySelector('[data-khome-v5]:not(.is-loading)'))return;
-    mount(host,markup,true);
-    lastSignature=markup;
+    const markup=homeMarkup(wearable,overview,history,engagement,false);
+    if(!force&&markup===lastSignature&&host.querySelector('[data-khome-v6]:not(.is-loading)'))return;
+    mount(host,markup,true);lastSignature=markup;
     window.KomoAssistantV2?.refresh?.();
     window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION}}));
-  }catch(e){console.error('[patient-home-v5]',e)}finally{rendering=false}
+  }catch(e){console.error('[patient-home-v6]',e)}finally{rendering=false}
 }
 function schedule(force=false,ms=0){clearTimeout(timer);timer=setTimeout(()=>render(force),ms)}
 ['hashchange','pageshow','komo:route-ready','komo:data-ready','komo:wearable-data-updated'].forEach(name=>window.addEventListener(name,()=>{tuneChrome();schedule(['komo:data-ready','komo:wearable-data-updated'].includes(name),20)}));
