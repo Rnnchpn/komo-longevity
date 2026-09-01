@@ -2,7 +2,7 @@ import './komo-ai-client-v1.js';
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='6.0.0';
+const VERSION='6.1.0';
 let timer=0;
 let rendering=false;
 let lastSignature='';
@@ -12,6 +12,7 @@ const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','
 const num=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
 const fmtInt=v=>v===null||v===undefined?'—':new Intl.NumberFormat('en-US',{maximumFractionDigits:0}).format(Math.round(Number(v)));
 const minus='−';
+const clampScore=v=>Math.max(0,Math.min(100,Math.round(Number(v)||0)));
 
 function formatSleep(minutes){
   const value=num(minutes);
@@ -40,7 +41,11 @@ function tone(value,inverse=false){
   const favorable=inverse?n<0:n>0;
   return favorable?'positive':'negative';
 }
-function baselineReady(metric){return num(metric?.baseline_days)!==null&&Number(metric.baseline_days)>=14}
+function baselineReady(metric,estimated=false){
+  const days=num(metric?.baseline_days);
+  if(days===null)return false;
+  return estimated?days>=1:days>=14;
+}
 
 async function motionToday(){
   const sb=window.KomoRuntime?.client;
@@ -55,9 +60,9 @@ async function motionToday(){
   }
 }
 
-function metricCard(type,data,loading=false){
+function metricCard(type,data,loading=false,estimated=false,index=0){
   const metric=data||{};
-  const ready=!loading&&baselineReady(metric);
+  const ready=!loading&&baselineReady(metric,estimated);
   let value='—',usual='Usual —',delta='—',direction='→',deltaTone='neutral';
 
   if(type==='steps'){
@@ -94,8 +99,8 @@ function metricCard(type,data,loading=false){
   }
 
   const labels={steps:'Steps',sleep:'Sleep',resting_hr:'Resting HR'};
-  return `<article class="kh6-metric" data-metric="${esc(type)}">
-    <div class="kh6-value"><strong>${esc(value)}</strong><span aria-hidden="true">${esc(direction)}</span></div>
+  return `<article class="kh6-metric" data-metric="${esc(type)}" style="--kh6-stagger:${index}">
+    <div class="kh6-value"><strong>${esc(value)}</strong><span class="is-${esc(deltaTone)}" aria-hidden="true">${esc(direction)}</span></div>
     <h3>${esc(labels[type])}</h3>
     <p>${esc(usual)}</p>
     <div class="kh6-delta is-${esc(deltaTone)}"><span>${esc(delta)}</span>${ready&&delta!=='—'?'<i aria-hidden="true"></i>':''}</div>
@@ -103,20 +108,33 @@ function metricCard(type,data,loading=false){
 }
 
 function homeMarkup(data,loading=false){
-  const ready=!loading&&Boolean(data?.ready)&&num(data?.score)!==null;
-  const score=ready?String(Math.round(Number(data.score))):'—';
-  const state=loading?'loading':String(data?.status||'incomplete');
-  const message=loading?'Syncing your data':String(data?.message||'Sync your wearable');
-  return `<section class="kh6${loading?' is-loading':''}" data-khome-v6 data-motion-state="${esc(state)}" aria-busy="${loading?'true':'false'}">
+  const canonicalReady=!loading&&Boolean(data?.ready)&&num(data?.score)!==null;
+  const preview=!loading&&!canonicalReady&&Boolean(data?.preview?.available)&&num(data?.preview?.score)!==null?data.preview:null;
+  const active=preview||data||{};
+  const estimated=Boolean(preview);
+  const ready=!loading&&(canonicalReady||estimated)&&num(active?.score)!==null;
+  const score=ready?String(Math.round(Number(active.score))):'—';
+  const scoreProgress=ready?clampScore(active.score):0;
+  const scoreOffset=100-scoreProgress;
+  const state=loading?'loading':String(active?.status||data?.status||'incomplete');
+  const message=loading?'Syncing your data':String(active?.message||data?.message||'Sync your wearable');
+  const badge=estimated?'<span class="kh6-estimate">Estimation</span>':'';
+  return `<section class="kh6${loading?' is-loading':''}${estimated?' is-estimated':''}" data-khome-v6 data-motion-state="${esc(state)}" data-estimated="${estimated?'true':'false'}" aria-busy="${loading?'true':'false'}">
     <div class="kh6-core" aria-label="Motion Today">
-      <strong class="kh6-score">${esc(score)}</strong>
-      <span class="kh6-label">MOTION TODAY</span>
+      <div class="kh6-orbit" style="--kh6-progress:${scoreProgress};--kh6-offset:${scoreOffset}" aria-label="${ready?`${esc(score)} out of 100`:'Score unavailable'}">
+        <svg class="kh6-ring" viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="kh6-ring-track" cx="100" cy="100" r="84" pathLength="100"></circle>
+          <circle class="kh6-ring-progress" cx="100" cy="100" r="84" pathLength="100"></circle>
+        </svg>
+        <strong class="kh6-score">${esc(score)}</strong>
+      </div>
+      <div class="kh6-kicker"><span class="kh6-label">MOTION TODAY</span>${badge}</div>
       <p class="kh6-message">${esc(message)}</p>
     </div>
     <section class="kh6-metrics" aria-label="Daily movement signals">
-      ${metricCard('steps',data?.steps,loading)}
-      ${metricCard('sleep',data?.sleep,loading)}
-      ${metricCard('resting_hr',data?.resting_hr,loading)}
+      ${metricCard('steps',active?.steps,loading,estimated,0)}
+      ${metricCard('sleep',active?.sleep,loading,estimated,1)}
+      ${metricCard('resting_hr',active?.resting_hr,loading,estimated,2)}
     </section>
   </section>`;
 }
@@ -156,7 +174,7 @@ async function render(force=false){
     mount(host,markup);
     lastSignature=markup;
     window.KomoAssistantV2?.refresh?.();
-    window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,algorithm:data?.algorithm_version||null}}));
+    window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,algorithm:data?.algorithm_version||null,estimated:Boolean(data?.preview?.available&&!data?.ready)}}));
   }catch(e){
     console.error('[patient-home-v6]',e);
     if(host?.isConnected)mount(host,homeMarkup({status:'incomplete',message:'Sync your wearable'},false));
