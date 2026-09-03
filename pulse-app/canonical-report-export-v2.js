@@ -1,117 +1,71 @@
 import { loadCanonicalResult } from './canonical-result-runtime.js';
-import { levelLabel } from './normative-engine-v1.js';
 
-const VERSION='2.2.0';
+const VERSION='3.0.0-sensor';
 const ENGINE_URLS=['https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js','https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js'];
-const C={ink:[36,51,42],muted:[108,117,110],line:[224,220,212],soft:[246,243,236],green:[39,57,47],green2:[91,119,99],greenPale:[235,243,236],gold:[181,141,74],goldPale:[255,247,232],red:[137,72,61],redPale:[252,238,235],gray:[140,145,141],grayPale:[244,244,241],white:[255,255,255],sand:[242,237,226],cream:[250,248,243]};
+const C={ink:[31,46,37],muted:[108,119,111],line:[222,220,214],paper:[250,248,243],soft:[243,245,242],green:[37,57,47],green2:[86,115,95],greenPale:[234,241,235],gold:[169,128,67],goldPale:[255,247,231],red:[145,78,68],redPale:[250,236,233],white:[255,255,255]};
 let enginePromise=null,busy=false;
-function n(v){const x=Number(v);return Number.isFinite(x)?x:null}
-function clamp(v,a,b){return Math.min(b,Math.max(a,v))}
-function fmtDate(v){if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'short',year:'numeric'}).format(d).replace('.','')}
-function safe(v){return String(v||'patient').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,72)||'patient'}
-function name(p){return`${p?.preferred_name||p?.first_name||''} ${p?.last_name||''}`.trim()||p?.email||'Patient KŌMØ'}
-function color(s){return s==='favorable'?C.green2:s==='watch'?C.gold:s==='priority'||s==='review'?C.red:C.gray}
-function pale(s){return s==='favorable'?C.greenPale:s==='watch'?C.goldPale:s==='priority'||s==='review'?C.redPale:C.grayPale}
-function refType(f){return f?.referenceType==='clinical_threshold'?'Seuil clinique':f?.referenceType==='normative_mean'?'Moyenne publiée':'Mesure descriptive'}
-function expected(f){
-  const r=f?.reference||{};
-  if(f?.id==='glfs25')return'< 7 points';
-  if(f?.id==='two_step')return'≥ 1,30';
-  if(f?.id==='chair_stand'&&n(r.cutoff)!==null)return`≥ ${Math.round(r.cutoff)} répétitions`;
-  if(f?.id==='gait_speed'&&n(r.mean)!==null)return`≈ ${Number(r.mean).toFixed(2).replace('.',',')} m/s*`;
-  if(f?.id==='lsi')return'≥ 90 %*';
-  if(f?.id==='sva'&&Array.isArray(r.bands))return'Zone SRS-Schwab contextualisée';
-  if(f?.referenceType==='clinical_threshold')return f.referenceLabel||'Seuil clinique contextualisé';
-  if(f?.referenceType==='normative_mean')return f.referenceLabel||'Moyenne publiée contextualisée';
-  return'Pas de norme robuste - suivi relatif';
-}
-function shortStatus(f){return f?.status==='favorable'?'Dans le repère':f?.status==='watch'?'À surveiller':f?.status==='priority'?'Prioritaire':f?.status==='review'?'À vérifier':'Descriptif'}
-function loadScript(src){return new Promise((resolve,reject)=>{if(window.jspdf?.jsPDF)return resolve();const s=document.createElement('script');s.src=src;s.async=true;s.crossOrigin='anonymous';s.onload=resolve;s.onerror=()=>reject(new Error('script_load_failed'));document.head.appendChild(s)})}
-async function ensurePdf(){if(window.jspdf?.jsPDF)return window.jspdf.jsPDF;if(enginePromise)return enginePromise;enginePromise=(async()=>{let last;for(const u of ENGINE_URLS){try{await loadScript(u);if(window.jspdf?.jsPDF)return window.jspdf.jsPDF}catch(e){last=e}}throw last||new Error('Moteur PDF indisponible')})();try{return await enginePromise}catch(e){enginePromise=null;throw e}}
-function toast(m){const t=document.querySelector('#toast');if(!t)return;t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,5000)}
-
-function scaleSpec(f){
-  const x=n(f?.rawValue),r=f?.reference||{};
-  if(x===null)return null;
-  if(f.id==='glfs25')return{min:0,max:40,value:x,zones:[{a:0,b:7,c:C.greenPale},{a:7,b:16,c:C.goldPale},{a:16,b:24,c:C.redPale},{a:24,b:40,c:[239,220,216]}],ticks:[0,7,16,24,40],labels:['0','7','16','24','40+']};
-  if(f.id==='two_step')return{min:.5,max:2,value:x,zones:[{a:.5,b:.9,c:[239,220,216]},{a:.9,b:1.1,c:C.redPale},{a:1.1,b:1.3,c:C.goldPale},{a:1.3,b:2,c:C.greenPale}],ticks:[.5,.9,1.1,1.3,2],labels:['0,5','0,9','1,1','1,3','2,0']};
-  if(f.id==='chair_stand'&&n(r.cutoff)!==null){const cut=n(r.cutoff),max=Math.max(30,cut*2.2,x*1.15);return{min:0,max,value:x,zones:[{a:0,b:cut,c:C.goldPale},{a:cut,b:max,c:C.greenPale}],ticks:[0,cut,max],labels:['0',String(Math.round(cut)),String(Math.round(max))]}}
-  if(f.id==='gait_speed'&&n(r.mean)!==null){const mean=n(r.mean),min=Math.max(0,Math.min(x,mean)-.45),max=Math.max(x,mean)+.45;return{min,max,value:x,zones:[{a:min,b:max,c:C.grayPale}],ticks:[min,mean,max],labels:[min.toFixed(1).replace('.',','),`moy. ${mean.toFixed(2).replace('.',',')}`,max.toFixed(1).replace('.',',')],reference:mean}}
-  if(f.id==='lsi'){return{min:0,max:100,value:x,zones:[{a:0,b:90,c:C.goldPale},{a:90,b:100,c:C.greenPale}],ticks:[0,50,90,100],labels:['0','50','90','100'],reference:90}}
-  return null;
-}
-
+const n=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
+const safe=v=>String(v||'patient').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,72)||'patient';
+const fmtDate=v=>{if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'long',year:'numeric'}).format(d)};
+const person=p=>`${p?.preferred_name||p?.first_name||''} ${p?.last_name||''}`.trim()||'Patient KŌMØ';
+const tone=s=>s==='favorable'?C.green2:s==='watch'?C.gold:s==='priority'||s==='review'?C.red:C.muted;
+const pale=s=>s==='favorable'?C.greenPale:s==='watch'?C.goldPale:s==='priority'||s==='review'?C.redPale:C.soft;
+function toast(m){const t=document.querySelector('#toast');if(!t)return;t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,4500)}
+function loadScript(src){return new Promise((resolve,reject)=>{if(window.jspdf?.jsPDF)return resolve();const s=document.createElement('script');s.src=src;s.async=true;s.crossOrigin='anonymous';s.onload=resolve;s.onerror=()=>reject(new Error('pdf_engine_load_failed'));document.head.appendChild(s)})}
+async function ensurePdf(){if(window.jspdf?.jsPDF)return window.jspdf.jsPDF;if(enginePromise)return enginePromise;enginePromise=(async()=>{for(const u of ENGINE_URLS){try{await loadScript(u);if(window.jspdf?.jsPDF)return window.jspdf.jsPDF}catch{}}throw new Error('Moteur PDF indisponible')})();try{return await enginePromise}catch(e){enginePromise=null;throw e}}
+function metricRows(d,code,muscle='',side=''){return(d?.myodev_metrics||[]).filter(x=>x.metric_code===code&&x.qc_status==='valid'&&(!muscle||x.muscle_code===muscle)&&(!side||x.side===side))}
+function mean(rows){const v=rows.map(x=>n(x.value)).filter(x=>x!==null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
+function metric(d,code,muscle='',side=''){return mean(metricRows(d,code,muscle,side))}
+function findings(result){return result?.interpretation?.findings||[]}
+function finding(result,id){return findings(result).find(x=>x.id===id)||null}
+function activationRows(result){const d=result.dossier||{},labels={VL:'Quadriceps',BF:'Ischio-jambiers',GM:'Gastrocnémiens'};return['VL','BF','GM'].map(code=>({code,label:labels[code],left:metric(d,'activation_pctMVC',code,'left'),right:metric(d,'activation_pctMVC',code,'right'),lsi:n(result.score?.muscle_signature?.symmetry?.per_muscle_score_0_100?.[code])??metric(d,'LSI_pct',code)}))}
+function statusText(s){return s==='favorable'?'Favorable':s==='watch'?'À surveiller':s==='priority'?'Priorité':s==='review'?'À vérifier':'Mesuré'}
 function build(jsPDF,result){
-  const {dossier:d,score:s={},interpretation:r}=result,p=d.patient||{},la=result.locomotorAge||{};
-  const doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait',compress:true});
-  const W=210,H=297,M=15,R=195,CW=180;let y=18;
-  const setText=(c=C.ink)=>doc.setTextColor(...c),setFill=c=>doc.setFillColor(...c),setDraw=(c=C.line)=>doc.setDrawColor(...c),lines=(t,w=CW)=>doc.splitTextToSize(String(t??'—'),w);
-  function header(){setFill(C.green);doc.rect(0,0,W,11,'F');doc.setFont('helvetica','bold');doc.setFontSize(7);setText(C.white);doc.text('KŌMØ PULSE  |  MOTION REPORT',M,7.2);doc.setFont('helvetica','normal');doc.text(p.external_reference||'',R,7.2,{align:'right'})}
+  const d=result.dossier||{},s=result.score||{},r=result.interpretation||{},p=d.patient||{},imports=d.myocare_imports||[],metrics=d.myodev_metrics||[],score=n(s.motion_score),sym=n(s.domain_scores?.neuromuscular_symmetry),confidence=n(s.confidence),completeness=n(s.completeness),assessed=s.released_at||s.calculated_at||d.motion?.completed_at||d.motion?.created_at||new Date().toISOString(),isDemo=p.data_classification==='synthetic';
+  const sessions=[...new Set(metrics.map(x=>x.external_session_id).filter(Boolean))],priority=r.summary?.priorities?.[0]||null,strength=r.summary?.strengths?.[0]||null,activation=activationRows(result),sensorFindings=findings(result).filter(x=>!String(x.id||'').startsWith('activation_')).slice(0,10);
+  const doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait',compress:true}),W=210,H=297,M=16,R=194,CW=178;let y=18;
+  const text=(c=C.ink)=>doc.setTextColor(...c),fill=c=>doc.setFillColor(...c),draw=(c=C.line)=>doc.setDrawColor(...c),lines=(t,w=CW)=>doc.splitTextToSize(String(t??'—'),w);
+  function header(){fill(C.green);doc.rect(0,0,W,11,'F');doc.setFont('helvetica','bold');doc.setFontSize(6.4);text(C.white);doc.text('KŌMØ PULSE  |  MOTION REPORT',M,7.2);doc.setFont('helvetica','normal');doc.text(isDemo?'DEMONSTRATION':fmtDate(assessed),R,7.2,{align:'right'})}
+  function footer(){const pages=doc.getNumberOfPages();for(let i=1;i<=pages;i++){doc.setPage(i);draw();doc.line(M,H-13,R,H-13);doc.setFont('helvetica','normal');doc.setFontSize(5.2);text(C.muted);doc.text('KŌMØ Motion - mesure fonctionnelle instrumentée, non diagnostique.',M,H-8);doc.text(String(i).padStart(2,'0'),R,H-8,{align:'right'})}}
   function newPage(){doc.addPage();header();y=19}
-  function ensure(h){if(y+h>H-18)newPage()}
-  function section(kicker,title,note=''){ensure(18);doc.setFont('helvetica','bold');doc.setFontSize(6.2);setText(C.green2);doc.text(String(kicker).toUpperCase(),M,y);doc.setFontSize(15);setText(C.ink);doc.text(title,M,y+6);if(note){doc.setFont('helvetica','normal');doc.setFontSize(6.2);setText(C.muted);doc.text(lines(note,76),R,y,{align:'right'})}y+=12;setDraw();doc.line(M,y,R,y);y+=5}
-  function paragraph(text,bg=null){doc.setFont('helvetica','normal');doc.setFontSize(7.1);const l=lines(text,CW-(bg?10:0)),h=l.length*3.7+(bg?8:0);ensure(h);if(bg){setFill(bg);setDraw();doc.roundedRect(M,y,CW,h,3,3,'FD');doc.text(l,M+5,y+5)}else doc.text(l,M,y);y+=h+3}
-  function scoreCard(x,yy,w,label,value,sub,dark=false){setFill(dark?C.green:C.soft);setDraw(dark?C.green:C.line);doc.roundedRect(x,yy,w,31,4,4,'FD');doc.setFont('helvetica','bold');doc.setFontSize(6);setText(dark?[195,209,200]:C.muted);doc.text(label.toUpperCase(),x+4,yy+6);doc.setFontSize(dark?27:16);setText(dark?C.white:C.ink);doc.text(String(value),x+4,yy+20);doc.setFont('helvetica','normal');doc.setFontSize(5.3);setText(dark?[210,219,212]:C.muted);doc.text(lines(sub,w-8),x+4,yy+26)}
-  function table(headers,rows,widths,{font=5.7,headerFill=C.green,rowFills=[]}={}){const lh=4.05,pad=2.3;const draw=(cells,head=false,rowIndex=-1)=>{const ls=cells.map((c,i)=>lines(c,widths[i]-pad*2)),rh=Math.max(...ls.map(a=>a.length))*lh+pad*2;ensure(rh);let x=M;for(let i=0;i<cells.length;i++){setFill(head?headerFill:(rowFills[rowIndex]||C.white));setDraw();doc.rect(x,y,widths[i],rh,'FD');doc.setFont('helvetica',head?'bold':'normal');doc.setFontSize(head?6:font);setText(head?C.white:C.ink);doc.text(ls[i],x+pad,y+pad+3);x+=widths[i]}y+=rh};draw(headers,true);rows.forEach((rr,i)=>draw(rr,false,i));y+=4}
-  function drawScale(f,x0,yy,w){
-    const sp=scaleSpec(f);if(!sp)return false;
-    const h=5;for(const z of sp.zones){const a=x0+(clamp(z.a,sp.min,sp.max)-sp.min)/(sp.max-sp.min)*w;const b=x0+(clamp(z.b,sp.min,sp.max)-sp.min)/(sp.max-sp.min)*w;setFill(z.c);doc.rect(a,yy,Math.max(.6,b-a),h,'F')}
-    setDraw(C.line);doc.rect(x0,yy,w,h);
-    (sp.ticks||[]).forEach((t,i)=>{const tx=x0+(clamp(t,sp.min,sp.max)-sp.min)/(sp.max-sp.min)*w;setDraw(C.muted);doc.line(tx,yy+h,tx,yy+h+2);doc.setFont('helvetica','normal');doc.setFontSize(4.5);setText(C.muted);const lab=(sp.labels||[])[i]??String(t);doc.text(lab,tx,yy+h+5,{align:i===0?'left':i===sp.ticks.length-1?'right':'center'})});
-    if(n(sp.reference)!==null){const rx=x0+(clamp(sp.reference,sp.min,sp.max)-sp.min)/(sp.max-sp.min)*w;setDraw(C.green2);doc.setLineWidth(.6);doc.line(rx,yy-1,rx,yy+h+1);doc.setLineWidth(.2)}
-    const vx=x0+(clamp(sp.value,sp.min,sp.max)-sp.min)/(sp.max-sp.min)*w;setFill(color(f.status));doc.circle(vx,yy+h/2,2.1,'F');setFill(C.white);doc.circle(vx,yy+h/2,.7,'F');
-    return true;
-  }
-  function referenceCard(f){
-    const hasScale=!!scaleSpec(f),h=hasScale?56:44;ensure(h);setFill(C.white);setDraw(C.line);doc.roundedRect(M,y,CW,h,4,4,'FD');
-    setFill(pale(f.status));doc.roundedRect(M,y,3,h,2,2,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(9);setText(C.ink);doc.text(f.title,M+7,y+7);
-    doc.setFontSize(5.6);setText(C.muted);doc.text(refType(f).toUpperCase(),M+7,y+12);
-    doc.setFontSize(6);doc.setFont('helvetica','bold');setText(C.muted);doc.text('VOTRE VALEUR',M+7,y+19);doc.text('REPÈRE ATTENDU',M+61,y+19);doc.text('POSITION',M+125,y+19);
-    doc.setFontSize(13);setText(color(f.status));doc.text(String(f.displayValue||'—'),M+7,y+28);
-    doc.setFontSize(8.2);setText(C.ink);doc.text(lines(expected(f),56),M+61,y+27);
-    doc.setFontSize(7.3);setText(color(f.status));doc.text(shortStatus(f),M+125,y+27);
-    let textY=y+35;if(hasScale){drawScale(f,M+7,y+34,CW-14);textY=y+48}
-    doc.setFont('helvetica','normal');doc.setFontSize(6.1);setText(C.muted);doc.text(lines(f.patientMessage||f.referenceLabel||'',CW-14),M+7,textY);y+=h+4;
-  }
-  function insightBox(title,items,bg){if(!items.length)return;const content=items.slice(0,3);const h=12+content.length*11;ensure(h);setFill(bg);setDraw(C.line);doc.roundedRect(M,y,CW,h,4,4,'FD');doc.setFont('helvetica','bold');doc.setFontSize(8);setText(C.ink);doc.text(title,M+6,y+7);doc.setFont('helvetica','normal');doc.setFontSize(6.4);content.forEach((f,i)=>{setFill(color(f.status));doc.circle(M+8,y+14+i*10,1.3,'F');setText(C.ink);doc.text(`${f.title} · ${f.displayValue||'—'}`,M+12,y+15+i*10);setText(C.muted);doc.text(lines(f.patientMessage||shortStatus(f),122),M+58,y+15+i*10)});y+=h+4}
-  function locomotorAgeCard(){
-    const ok=la?.status==='available',h=ok?43:30;ensure(h);setFill(ok?C.greenPale:C.cream);setDraw(C.line);doc.roundedRect(M,y,CW,h,4,4,'FD');doc.setFont('helvetica','bold');doc.setFontSize(6);setText(C.green2);doc.text('KŌMØ LOCOMOTOR AGE · EXPÉRIMENTAL v0.1',M+6,y+7);
-    if(ok){doc.setFontSize(24);setText(C.ink);doc.text(`${Math.round(la.age)} ans`,M+6,y+20);doc.setFontSize(7);setText(C.muted);doc.text(`Âge réel ${la.chronologicalAge} ans · intervalle estimatif ${la.interval?.[0]}–${la.interval?.[1]} ans · confiance ${la.confidenceLabel}`,M+48,y+17);doc.text(la.interpretation||'',M+48,y+22);const bits=(la.inputs||[]).map(i=>`${i.label}: ≈${Math.round(i.age)} ans`);doc.setFontSize(5.8);doc.text(lines(bits.join('   ·   '),CW-12),M+6,y+30);doc.setFontSize(5.5);setText(C.muted);doc.text(lines(la.disclaimer||'',CW-12),M+6,y+37)}else{doc.setFontSize(14);setText(C.ink);doc.text('Non calculable',M+6,y+18);doc.setFont('helvetica','normal');doc.setFontSize(6.4);setText(C.muted);doc.text(lines(la?.reason||'Données insuffisantes ou non concordantes.',CW-55),M+48,y+14);doc.setFontSize(5.6);doc.text('Le moteur refuse volontairement de générer un âge lorsque les tests ne sont pas interprétables ensemble.',M+48,y+23)}y+=h+4;
-  }
-  function footer(){const count=doc.getNumberOfPages();for(let i=1;i<=count;i++){doc.setPage(i);setDraw();doc.line(M,H-11,R,H-11);doc.setFont('helvetica','normal');doc.setFontSize(5.5);setText(C.muted);doc.text(`KŌMØ Pulse · PDF v${VERSION} · ${r.engineVersion} · ${r.referenceVersion}`,M,H-6.3);doc.text(`Page ${i}/${count}`,R,H-6.3,{align:'right'});if(p.data_classification==='synthetic'){doc.setFont('helvetica','bold');setText(C.gold);doc.text('DONNÉES SYNTHÉTIQUES - DÉMONSTRATION',W/2,H-6.3,{align:'center'})}else if(s.release_status!=='released'){doc.setFont('helvetica','bold');setText(C.red);doc.text('BROUILLON - À VALIDER PAR LE PROFESSIONNEL',W/2,H-6.3,{align:'center'})}}}
+  function ensure(h){if(y+h>H-20)newPage()}
+  function section(kicker,title,note=''){ensure(20);doc.setFont('helvetica','bold');doc.setFontSize(5.8);text(C.green2);doc.text(kicker.toUpperCase(),M,y);doc.setFontSize(15);text(C.ink);doc.text(title,M,y+6);if(note){doc.setFont('helvetica','normal');doc.setFontSize(5.7);text(C.muted);doc.text(lines(note,72),R,y,{align:'right'})}y+=12;draw();doc.line(M,y,R,y);y+=5}
+  function para(t,bg=null){doc.setFont('helvetica','normal');doc.setFontSize(7);const ls=lines(t,CW-(bg?10:0)),h=ls.length*3.7+(bg?8:0);ensure(h);if(bg){fill(bg);draw();doc.roundedRect(M,y,CW,h,3,3,'FD');doc.text(ls,M+5,y+5)}else doc.text(ls,M,y);y+=h+3}
+  function stat(x,w,label,value,sub='',dark=false){fill(dark?C.green:C.soft);draw(dark?C.green:C.line);doc.roundedRect(x,y,w,32,4,4,'FD');doc.setFont('helvetica','bold');doc.setFontSize(5.5);text(dark?[198,211,202]:C.muted);doc.text(label.toUpperCase(),x+4,y+6);doc.setFontSize(dark?25:16);text(dark?C.white:C.ink);doc.text(String(value),x+4,y+20);doc.setFont('helvetica','normal');doc.setFontSize(5.2);text(dark?[210,219,213]:C.muted);doc.text(lines(sub,w-8),x+4,y+26)}
+  function findingCard(f){ensure(28);fill(pale(f.status));draw();doc.roundedRect(M,y,CW,25,3.5,3.5,'FD');fill(tone(f.status));doc.roundedRect(M,y,3,25,2,2,'F');doc.setFont('helvetica','bold');doc.setFontSize(8);text(C.ink);doc.text(f.title||'Mesure',M+7,y+7);doc.setFontSize(11);text(tone(f.status));doc.text(f.displayValue||'—',R-5,y+8,{align:'right'});doc.setFont('helvetica','normal');doc.setFontSize(5.8);text(C.muted);doc.text(statusText(f.status),M+7,y+12);doc.text(lines(f.patientMessage||f.referenceLabel||'Mesure descriptive suivie dans le temps.',CW-14),M+7,y+17);y+=29}
+  function table(headers,rows,widths){const lh=3.8,pad=2;const drawRow=(cells,head=false)=>{const ll=cells.map((c,i)=>lines(c,widths[i]-pad*2)),rh=Math.max(...ll.map(a=>a.length))*lh+pad*2;ensure(rh);let x=M;for(let i=0;i<cells.length;i++){fill(head?C.green:C.white);draw();doc.rect(x,y,widths[i],rh,'FD');doc.setFont('helvetica',head?'bold':'normal');doc.setFontSize(head?5.7:5.9);text(head?C.white:C.ink);doc.text(ll[i],x+pad,y+pad+2.8);x+=widths[i]}y+=rh};drawRow(headers,true);rows.forEach(r=>drawRow(r));y+=4}
 
-  header();doc.setFont('helvetica','bold');doc.setFontSize(6.5);setText(C.green2);doc.text('BILAN DE MOBILITÉ · ANALYSE FONCTIONNELLE · MYOCARE',M,22);doc.setFontSize(22);setText(C.ink);doc.text(name(p),M,31);doc.setFont('helvetica','normal');doc.setFontSize(7);setText(C.muted);doc.text(`${p.external_reference||'—'} · ${r.context.age??'—'} ans · ${p.organization_name||''}`,M,37);
-  const motion=n(s.motion_score),mob=n(s.domain_scores?.mobility),sym=n(s.domain_scores?.myocare_symmetry),complete=n(s.completeness),conf=n(s.confidence);
-  scoreCard(M,45,44,'Motion Score',motion===null?'—':`${Math.round(motion)}/100`,`${s.release_status||'brouillon'} · confiance ${conf===null?'—':Math.round(conf*100)+'%'}`,true);scoreCard(63,45,42,'Mobilité KŌMØ',mob===null?'—':`${Math.round(mob)}/100`,'Composante fonctionnelle');scoreCard(109,45,42,'Symétrie MyoCare',sym===null?'—':`${Math.round(sym)}/100`,'Benchmark LSI contextualisé');scoreCard(155,45,40,'Complétude',complete===null?'—':`${Math.round(complete)}%`,'Qualité des données');y=84;
-  locomotorAgeCard();
+  header();
+  doc.setFont('helvetica','bold');doc.setFontSize(6);text(C.green2);doc.text('RAPPORT MOTION',M,y);doc.setFontSize(26);text(C.ink);doc.text('Votre mouvement,',M,y+11);doc.text('en un regard.',M,y+22);doc.setFont('helvetica','normal');doc.setFontSize(7);text(C.muted);doc.text(`${person(p)} · bilan du ${fmtDate(assessed)}`,M,y+30);y+=39;
+  stat(M,72,'Motion Score',score===null?'—':Math.round(score),'Synthèse des mesures capteurs validées.',true);stat(M+76,49,'Symétrie',sym===null?'—':`${sym.toFixed(1)} %`,'Neuromusculaire');stat(M+129,49,'Confiance',confidence===null?'—':`${Math.round(confidence*100)} %`,'Qualité du calcul');y+=39;
+  para('Le Motion Score est calculé uniquement à partir des données neuromusculaires Myodev validées. Le GLFS‑25 et les autres questionnaires décrivent le contexte du patient mais ne modifient pas le score.',C.greenPale);
+  if(isDemo)para('Rapport de démonstration : dossier synthétique, sans valeur clinique individuelle.',C.goldPale);
+  section('À retenir','Ce que montre ce bilan');
+  if(priority)findingCard(priority);if(strength&&strength.id!==priority?.id)findingCard(strength);if(!priority&&!strength)para('Aucune priorité automatique ne ressort actuellement des mesures validées. Ce bilan constitue surtout une référence pour la prochaine mesure.');
+  section('Traçabilité','Une mesure, une source, une trajectoire');
+  table(['Source','Sessions','Mesures','Complétude'],[['Myodev / MyoLab',String(sessions.length||imports.length||'—'),String(metrics.length||'—'),completeness===null?'—':`${Math.round(completeness)} %`]], [52,35,40,51]);
 
-  section('Synthèse','Votre profil en un coup d’œil','Les repères sont appliqués uniquement lorsqu’ils correspondent au protocole mesuré.');
-  if(r.consistencyIssues.length)paragraph(`REVUE NÉCESSAIRE · ${r.consistencyIssues.map(i=>i.message).join(' ')}`,C.redPale);
-  insightBox('Points forts',r.summary?.strengths||[],C.greenPale);insightBox('Priorités à discuter',r.summary?.priorities||[],C.goldPale);
-  const coreIds=['glfs25','two_step','stand_up','chair_stand','gait_speed','sva','lsi'];const core=r.findings.filter(f=>coreIds.includes(f.id));
-  if(core.length){section('Repères','Vos principales mesures','Lecture type bilan biologique : valeur, repère et position.');table(['Test','Votre valeur','Repère attendu','Position'],core.map(f=>[f.title,f.displayValue||'—',expected(f),shortStatus(f)]),[48,35,61,36],{font:5.5,rowFills:core.map(f=>pale(f.status))})}
-  paragraph('* Une moyenne publiée ou un benchmark n’est pas un intervalle individuel de normalité. Les mesures sans norme robuste sont présentées comme descriptives et servent au suivi longitudinal.',C.sand);
+  newPage();section('Neuromusculaire','Symétrie et activation','Les valeurs d’activation sont descriptives ; la symétrie constitue la base du score actuel.');
+  table(['Groupe','Activation G','Activation D','Symétrie'],activation.map(x=>[x.label,x.left===null?'—':`${x.left.toFixed(1)} %MVC`,x.right===null?'—':`${x.right.toFixed(1)} %MVC`,x.lsi===null?'—':`${x.lsi.toFixed(1)} %`]),[55,41,41,41]);
+  const symFind=finding(result,'neuromuscular_symmetry');if(symFind)findingCard(symFind);
+  para('Les valeurs %MVC décrivent le recrutement musculaire pendant les acquisitions. Elles ne doivent pas être assimilées isolément à une mesure de force. Leur intérêt principal est la comparaison avec le même protocole lors d’un re-test.',C.soft);
+  section('Autres signaux','Données capteurs disponibles');
+  if(sensorFindings.length)sensorFindings.forEach(findingCard);else para('Aucune autre métrique capteur interprétable n’est disponible dans cet export. Pulse n’invente pas de vitesse, cadence ou paramètre de marche absent de la source.');
 
-  newPage();section('Détail clinique','Où se situe chaque résultat ?','Le point représente votre mesure. Les zones colorées n’apparaissent que lorsqu’un repère publiable est disponible.');
-  r.findings.filter(f=>!['emg_activation','emg_cci','emg_fatigue'].includes(f.id)).forEach(referenceCard);
-
-  newPage();section('MyoCare & marche','Signature musculaire instrumentée','Comparaison droite/gauche et benchmarks réellement applicables.');
-  r.findings.filter(f=>['emg_activation','emg_cci','emg_fatigue','lsi','gait_speed'].includes(f.id)).forEach(referenceCard);
-  const acts=(d.myodev_metrics||[]).filter(x=>x.metric_code==='activation_pctMVC'&&x.qc_status==='valid');const codes=[...new Set(acts.map(x=>x.muscle_code))];
-  if(codes.length){const labels={VL:'Quadriceps - vaste latéral',BF:'Ischio-jambiers - biceps fémoral',GM:'Mollet - gastrocnémien'};section('Activation','Comparaison gauche / droite','%MVC : mesure instrumentée descriptive, sans valeur normale populationnelle universelle.');table(['Groupe musculaire','Gauche','Droite','Repère'],codes.map(c=>{const l=acts.find(x=>x.muscle_code===c&&x.side==='left'),rr=acts.find(x=>x.muscle_code===c&&x.side==='right');return[labels[c]||c,l?`${Number(l.value).toFixed(1)} ${l.unit||''}`:'—',rr?`${Number(rr.value).toFixed(1)} ${rr.unit||''}`:'—','Suivi relatif / symétrie']}),[73,31,31,45])}
-
-  newPage();section('Plan KŌMØ','Proposition de prise en charge','Issue des mêmes règles que Pulse - validation professionnelle obligatoire.');paragraph(r.carePlan.safetyGate,r.carePlan.status==='review_required'?C.redPale:C.greenPale);if(r.carePlan.priorities.length){r.carePlan.priorities.forEach((item,i)=>{ensure(34);setFill(C.soft);setDraw();doc.roundedRect(M,y,CW,30,3,3,'FD');doc.setFont('helvetica','bold');doc.setFontSize(6.3);setText(C.green2);doc.text(`PRIORITÉ ${i+1} · ${item.domain.toUpperCase()}`,M+5,y+6);doc.setFontSize(9);setText(C.ink);doc.text(lines(item.goal,CW-10),M+5,y+12);doc.setFont('helvetica','normal');doc.setFontSize(6);setText(C.muted);doc.text(lines(item.actions.map(a=>`• ${a}`).join('   '),CW-10),M+5,y+18);doc.text(`Contrôle proposé : ${item.recheck}`,M+5,y+27);y+=34})}else paragraph('Aucune priorité automatique n’est déclenchée par les règles actuelles. Le suivi reste à individualiser.',C.grayPale);
-
-  newPage();section('Références','Sources des repères','Chaque repère reste versionné dans le moteur KŌMØ.');const refs=[...(r.sources||[])];if(la?.source?.title)refs.push({title:la.source.title,use:'KŌMØ Locomotor Age v0.1 : âge-equivalent expérimental basé sur marche 4 m, Chair Stand 30 s et appui unipodal.'});table(['Source','Usage'],refs.map(x=>[x.title,x.use]),[82,98]);section('Traçabilité','Version et statut');table(['Élément','Valeur'],[['Motion Score',motion===null?'—':`${motion}/100`],['Algorithme',s.algorithm_version||'—'],['Moteur interprétation',r.engineVersion],['Âge locomoteur',la?.version||'—'],['Statut âge locomoteur',la?.status||'—'],['Références',r.referenceVersion],['PDF',`canonical-report-v${VERSION}`],['Statut',s.release_status||'—'],['Calculé le',fmtDate(s.calculated_at)]],[58,122]);paragraph('Ce document présente des seuils cliniques, moyennes publiées et mesures descriptives selon leur niveau de preuve et leur applicabilité. Une moyenne populationnelle ne doit pas être interprétée comme une plage individuelle de normalité. L’âge locomoteur est une estimation expérimentale de performance fonctionnelle, pas un âge biologique validé. La prise en charge proposée doit être validée par un professionnel.',C.goldPale);
+  newPage();section('Plan','Comprendre, agir, re-mesurer');
+  const priorities=r.carePlan?.priorities||[];
+  if(priorities.length){priorities.slice(0,3).forEach((p0,i)=>{ensure(31);fill(C.soft);draw();doc.roundedRect(M,y,CW,27,4,4,'FD');doc.setFont('helvetica','bold');doc.setFontSize(6);text(C.green2);doc.text(`PRIORITÉ ${i+1}`,M+5,y+6);doc.setFontSize(9);text(C.ink);doc.text(lines(p0.goal||p0.domain||'Priorité Motion',CW-10),M+5,y+12);doc.setFont('helvetica','normal');doc.setFontSize(5.8);text(C.muted);doc.text(lines((p0.actions||[]).slice(0,3).join(' · ')||'À préciser avec le professionnel.',CW-10),M+5,y+18);doc.text(`Re-test : ${p0.recheck||'selon le plan de suivi'}`,M+5,y+24);y+=32})}else para('Aucune priorité corrective automatique n’est déclenchée. Le professionnel peut utiliser ce bilan comme point zéro puis répéter le même protocole pour objectiver l’évolution.',C.greenPale);
+  section('Trajectoire','La valeur du prochain bilan');
+  para('Le résultat le plus utile n’est pas un chiffre isolé : c’est l’évolution mesurée dans les mêmes conditions. KŌMØ Pulse conserve le bilan afin de comparer les prochains re-tests, montrer ce qui progresse et ajuster les actions.');
+  para('Questionnaires : contexte patient uniquement. Tests manuels historiques : hors Motion Score. Données capteurs : source instrumentée de la restitution Motion.',C.soft);
+  section('Limites','À interpréter dans son contexte');
+  para('KŌMØ Motion est une évaluation fonctionnelle instrumentée non diagnostique. Une valeur isolée ne remplace ni l’examen clinique ni une décision médicale lorsqu’ils sont indiqués. Les mesures doivent être interprétées selon la qualité d’acquisition, le protocole utilisé et le contexte individuel.');
   footer();return doc;
 }
 
 export async function exportCanonicalMotionReport({patientId=null,button=null}={}){
-  if(busy)return;busy=true;const old=button?.textContent;if(button){button.disabled=true;button.textContent='Génération du PDF…'}
-  try{toast('Génération du compte-rendu KŌMØ…');const[jsPDF,result]=await Promise.all([ensurePdf(),loadCanonicalResult({patientId,force:true})]);const doc=build(jsPDF,result);const blob=doc.output('blob');if(!blob||blob.size<12000)throw new Error(`PDF anormalement petit (${Math.round((blob?.size||0)/1024)} Ko)`);const filename=`KOMO_Motion_Report_${safe(name(result.dossier.patient))}_${new Date().toISOString().slice(0,10)}.pdf`;const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=filename;a.style.display='none';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);toast(`PDF v${VERSION} exporté · ${Math.round(blob.size/1024)} Ko · ${doc.getNumberOfPages()} pages`);return{filename,size:blob.size,pages:doc.getNumberOfPages(),identity:result.identity,version:VERSION}}
-  catch(e){console.error('[canonical-report-export-v2]',e);toast(`Export impossible : ${e?.message||e}`);throw e}
-  finally{busy=false;if(button){button.disabled=false;button.textContent=old}}
+  if(busy)return;busy=true;const old=button?.textContent;if(button){button.disabled=true;button.textContent='Génération…'}
+  try{toast('Préparation du rapport KŌMØ…');const [jsPDF,result]=await Promise.all([ensurePdf(),loadCanonicalResult({patientId,force:true})]);if(n(result?.score?.motion_score)===null)throw new Error('Motion Score indisponible pour ce bilan.');const doc=build(jsPDF,result),p=result.dossier?.patient||{},date=(result.score?.released_at||result.score?.calculated_at||new Date().toISOString()).slice(0,10),filename=`KOMO_Motion_${safe(person(p))}_${date}.pdf`;doc.save(filename);toast('Rapport Motion généré.');window.dispatchEvent(new CustomEvent('komo:motion-report-exported',{detail:{patientId:result.patientId,assessmentId:result.identity?.assessmentId,scoreId:result.identity?.scoreId,version:VERSION}}))}catch(e){console.error('[canonical-report-export]',e);toast(`Rapport indisponible : ${e.message||e}`);throw e}finally{busy=false;if(button){button.disabled=false;button.textContent=old||'Exporter le rapport'}}
 }
 
 document.addEventListener('click',e=>{const b=e.target.closest?.('[data-komo-export-report]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();exportCanonicalMotionReport({patientId:b.dataset.patientId||null,button:b}).catch(()=>{})},true);
