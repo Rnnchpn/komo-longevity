@@ -20,7 +20,23 @@ const retired=[
   'booking-directory-map-v1.js',
   'agenda-hub-v4.css',
   'agenda-premium-map-v1.css',
-  'booking-directory-map-v1.css'
+  'booking-directory-map-v1.css',
+  'center-patient-links.js',
+  'center-context-v1.js',
+  'center-command-cockpit-v2.js',
+  'center-profile-v1.js',
+  'center-workspace-v1.js',
+  'center-messaging-v1.js',
+  'center-patient-polish.js',
+  'center-owner-ui-guard-v1.js',
+  'center-patient-links.css',
+  'center-context-v1.css',
+  'center-command-cockpit-v2.css',
+  'center-profile-v1.css',
+  'center-workspace-v1.css',
+  'center-messaging-v1.css',
+  'center-patient-polish.css',
+  'center-owner-ui-guard-v1.css'
 ];
 for(const file of retired)if(html.includes(file))throw new Error('[consultation-final-qa] legacy asset still loaded: '+file);
 
@@ -45,9 +61,12 @@ const checks=[
   ['authenticated instant route before full data hydration',app.includes("const instant=['home','documents'" )],
   ['consultation loading CSS is present',html.includes('id="kpConsultationLoadV1"')],
   ['final Motion consultation CSS is present',html.includes('id="kpMotionConsultationFinalV1"')],
+  ['canonical Centre runtime remains loaded',html.includes('center-two-tab-workspace-v1.js')],
   ['Centre title is Myodev',center.includes("textContent='Myodev'")],
   ['Centre assignment CTA',center.includes('Attribuer consultation')],
   ['professional assignment RPC',center.includes('komo_assign_motion_consultation')],
+  ['Centre patient search remains interactive',center.includes("addEventListener('input'")&&center.includes('setSelectionRange(pos,pos)')],
+  ['Centre readable light-surface contrast',html.includes('body.komo-pro-mode #kcpView .k2tw-patients')&&html.includes('-webkit-text-fill-color:#18241d!important')],
   ['Centre has no mutation observer render loop',!center.includes('new MutationObserver')],
   ['Centre navigation writes are idempotent',center.includes("nav.dataset.k2twOwner==='consultations'")],
   ['Centre dashboard requests are deduplicated',center.includes('rowsLoadPromise')],
@@ -56,4 +75,4 @@ const checks=[
   ['legacy cockpit chrome is hidden in Centre consultation mode',center.includes('.kcp-head,body.komo-pro-mode .kcp-tabs')]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[consultation-final-qa] failed: '+label);
-console.log('[consultation-final-qa] PASS · Centre Myodev → patient assignment → Débuter consultation Motion → questionnaires');
+console.log('[consultation-final-qa] PASS · single Centre owner · readable Myodev · functional patient list · Motion handoff');
