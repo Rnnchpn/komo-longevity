@@ -44,3 +44,7 @@ console.log('[consultation-prune] valid consultation runtime · agenda, agenda m
 // Final UX/performance pass: runs after raw-template normalization and before
 // the final consultation QA, so production cannot ship the blocking loader.
 await import('./pulse-consultation-load-performance-v1.mjs');
+
+// Absolute final product flow: same existing Centre/booking owners, clarified
+// as Myodev → attribution → patient starts Motion questionnaires.
+await import('./pulse-consultation-flow-final-v1.mjs');
