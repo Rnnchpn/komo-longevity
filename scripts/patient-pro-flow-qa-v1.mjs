@@ -28,7 +28,7 @@ const checks=[
   ['Clinical workspace labels questionnaire contribution as zero',clinical.includes('Questionnaires')&&clinical.includes('0 % du score')],
   ['Motion workflow uses sensor v0.6 directly',workflow.includes("ALG='motion-sensor-index-v0.6.0'")&&workflow.includes("rpc('calculate_motion_v06'")],
   ['Motion workflow does not gate on questionnaire or SVA',!workflow.includes('Pré-bilan KŌMØ incomplet')&&!workflow.includes('SVA non enregistrée')],
-  ['legacy manual Motion input surface is retired',manual.includes('retired-v2')&&!manual.includes('data-metric='))],
+  ['legacy manual Motion input surface is retired',manual.includes('retired-v2')&&!manual.includes('data-metric=')],
   ['interpretation engine is sensor-only',engine.includes("scorePolicy:'sensor_only'")&&!engine.includes('function glfs(')&&!engine.includes('function twoStep(')&&!engine.includes('function standUp(')&&!engine.includes('function chair(')],
   ['locomotor age legacy manual model is retired',age.includes('retired:true')&&!age.includes("measurement(dossier,'M-FUN-05')")],
   ['patient scope has no body-wide mutation observer',!scope.includes('new MutationObserver')],
