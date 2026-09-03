@@ -16,15 +16,37 @@ async function patch(dir,file,fn){
 for(const dir of dirs){
   await patch(dir,'pulse-bottom-nav-v6.js',src=>{
     let js=src
-      .replace("['key','KEY','◌','key']","['key','KŌMØ Connected','◌','key']")
-      .replace("['trajectory','Trajectoire','⌁','trajectory']","['trajectory','Mes consultations','⌁','trajectory']");
-    js=js.replace(/body\.kpulse-app-mode\.kpulse-home-mode \.main-shell\{background:[^}]+\}/,"body.kpulse-app-mode.kpulse-home-mode .main-shell{background:#f6f7f5!important}");
+      .replace("['home','Accueil','⌂','home']","['home','Home','⌂','home']")
+      .replace("['key','KEY','◌','key']","['key','Connected','◌','key']")
+      .replace("['key','KŌMØ Connected','◌','key']","['key','Connected','◌','key']")
+      .replace("  ['trajectory','Trajectoire','⌁','trajectory'],\n",'')
+      .replace("  ['trajectory','Mes consultations','⌁','trajectory'],\n",'')
+      .replace("['agenda','Rendez-vous','□','documents']","['agenda','Consultations & rendez-vous','□','documents']")
+      .replace('grid-template-columns:repeat(6,minmax(0,1fr))','grid-template-columns:repeat(5,minmax(0,1fr))')
+      .replace("if(['trajectory','path','plan'].includes(r))return'trajectory';","if(['trajectory','path','plan'].includes(r))return'mykomo';");
+    js=js.replace(/body\.kpulse-app-mode\.kpulse-home-mode \.main-shell\{background:[^}]+\}/,"body.kpulse-app-mode.kpulse-home-mode .main-shell{background:#050706!important}");
     return js;
   });
 
-  await patch(dir,'adaptive-shell-v4.js',src=>src
-    .replace("navItem('patient:key','KEY',I.follow,r==='key')","navItem('patient:key','Connected',I.follow,r==='key')")
-    .replace("navItem('patient:trajectory','Trajectoire',I.results,r==='trajectory')","navItem('patient:trajectory','Consultations',I.results,r==='trajectory')"));
+  await patch(dir,'adaptive-shell-v4.js',src=>{
+    let js=src;
+    if(!js.includes("mykomo:'<svg")){
+      js=js.replace("    center:'<svg", "    mykomo:'<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\"><circle cx=\"12\" cy=\"8\" r=\"3.2\"/><path d=\"M5.5 20c.6-4 2.7-6 6.5-6s5.9 2 6.5 6\"/></svg>',\n    center:'<svg");
+    }
+    js=js.replace(
+      /const r=route\(\);\s*return navItem\('patient:home'[\s\S]*?navItem\('more','Plus',I\.more,false\);/,
+      "const r=route();\n    return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo');"
+    );
+    js=js.replace(
+      "primary=actionButton('Rendez-vous','patient:documents')+actionButton('My KŌMØ','patient:mykomo')+actionButton('Messages','patient:messages');",
+      "primary=actionButton('Consultations & rendez-vous','patient:documents')+actionButton('My KŌMØ','patient:mykomo');"
+    );
+    js=js.replace(
+      "primary=actionButton('Agenda et réseau','patient:documents')+actionButton('My KŌMØ','patient:mykomo')+actionButton('Messages','patient:messages');",
+      "primary=actionButton('Consultations & rendez-vous','patient:documents')+actionButton('My KŌMØ','patient:mykomo');"
+    );
+    return js;
+  });
 
   await patch(dir,'my-komo-stable-v5.js',src=>{
     let js=src
@@ -58,10 +80,13 @@ const [dock,adaptive,myk,mycss,results,connected,consultations]=await Promise.al
   readFile(join(built,'trajectory-v3.js'),'utf8')
 ]);
 const checks=[
-  ['desktop dock says KŌMØ Connected',dock.includes("['key','KŌMØ Connected'")],
-  ['desktop dock says Mes consultations',dock.includes("['trajectory','Mes consultations'")],
-  ['adaptive navigation says Connected',adaptive.includes("patient:key','Connected'")],
-  ['adaptive navigation says Consultations',adaptive.includes("patient:trajectory','Consultations'")],
+  ['desktop dock has five patient destinations',(dock.match(/^\s*\['(?:home|key|results|agenda|mykomo)'/gm)||[]).length===5],
+  ['desktop dock says Home',dock.includes("['home','Home'" )],
+  ['desktop dock says Connected',dock.includes("['key','Connected'" )],
+  ['desktop dock says Consultations & rendez-vous',dock.includes("['agenda','Consultations & rendez-vous'" )],
+  ['desktop dock says My KŌMØ',dock.includes("['mykomo','My KŌMØ'" )],
+  ['adaptive navigation has exact five patient destinations',adaptive.includes("patient:home','Home'")&&adaptive.includes("patient:results','Résultats'")&&adaptive.includes("patient:key','Connected'")&&adaptive.includes("patient:documents','Consultations & rendez-vous'")&&adaptive.includes("patient:mykomo','My KŌMØ'")&&!adaptive.includes("navItem('patient:trajectory'")],
+  ['patient Messages removed from adaptive primary menu',!adaptive.includes("actionButton('Messages','patient:messages')")],
   ['My KŌMØ exposes Club',myk.includes('data-myk-control')&&myk.includes('data-mkv5-route="club"')],
   ['My KŌMØ routes core score to Results',myk.includes('data-mkv5-route="results">Voir tous mes résultats')],
   ['My KŌMØ outer beige removed',mycss.includes('body.mykomo-v5 .main-shell{background:#f6f7f5!important}')],
@@ -74,4 +99,4 @@ const checks=[
 ];
 for(const [label,ok] of checks){console.log(`[pulse-ia-v11] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
 if(process.exitCode)throw new Error('Pulse information architecture v11 guard failed');
-console.log('[pulse-ia-v11] PASS · Motion, KEY, Clinical, consultations and My KŌMØ roles aligned');
+console.log('[pulse-ia-v11] PASS · five-item patient navigation frozen across desktop, iPad and mobile');
