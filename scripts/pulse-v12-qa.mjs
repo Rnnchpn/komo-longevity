@@ -4,13 +4,18 @@ import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const html = await readFile(join(root, 'pulse-app', 'index.html'), 'utf8');
+const builtHtml = await readFile(join(root, 'site', 'pulse-v12', 'index.html'), 'utf8');
 const app = await readFile(join(root, 'pulse-app', 'app.js'), 'utf8');
 const css = await readFile(join(root, 'pulse-app', 'styles.css'), 'utf8');
 const runtime = await readFile(join(root, 'pulse-app', 'runtime.js'), 'utf8');
 const contentConfig = await readFile(join(root, 'pulse-app', 'content-config.js'), 'utf8');
 const clinicalMotion = await readFile(join(root, 'pulse-app', 'clinical-motion-v1.js'), 'utf8');
 const clinicalMotionCss = await readFile(join(root, 'pulse-app', 'clinical-motion-v1.css'), 'utf8');
-const myocareImport = await readFile(join(root, 'pulse-app', 'myocare-import-v1.js'), 'utf8');
+const myodevImport = await readFile(join(root, 'pulse-app', 'myocare-import.js'), 'utf8');
+const motionWorkflow = await readFile(join(root, 'pulse-app', 'motion-workflow.js'), 'utf8');
+const interpretation = await readFile(join(root, 'pulse-app', 'normative-engine-v1.js'), 'utf8');
+const patientScope = await readFile(join(root, 'pulse-app', 'patient-tests-scope-v2.js'), 'utf8');
+const report = await readFile(join(root, 'pulse-app', 'canonical-report-export-v2.js'), 'utf8');
 const clinicalCockpit = await readFile(join(root, 'pulse-app', 'clinical-cockpit-v1.js'), 'utf8');
 const clinicalCockpitCss = await readFile(join(root, 'pulse-app', 'clinical-cockpit-v1.css'), 'utf8');
 const clinicalCockpitBridge = await readFile(join(root, 'pulse-app', 'clinical-cockpit-bridge-v1.js'), 'utf8');
@@ -41,6 +46,7 @@ const hasPulseHost = (rule) => Array.isArray(rule?.has) && rule.has.some((entry)
 const pulseRootRewrite = rewrites.some((rule) => rule?.source === '/' && rule?.destination === '/pulse-v12/' && hasPulseHost(rule));
 const pulseNestedRewrite = rewrites.some((rule) => rule?.source === '/(.*)' && rule?.destination === '/pulse-v12/$1' && hasPulseHost(rule));
 const pulsePrivacyHeaders = headers.some((rule) => rule?.source === '/pulse-v12/:path*' && Array.isArray(rule.headers) && rule.headers.some((header) => header?.key === 'X-Robots-Tag' && header?.value?.includes('noindex')));
+const legacyMotionInputs = ['M-FUN-01','M-FUN-02','M-FUN-03','M-FUN-04','M-FUN-05','M-FUN-06','M-FUN-07'];
 
 const required = [
   ['remember checkbox', html.includes('id="rememberInput"') && html.includes('Rester connecté')],
@@ -72,20 +78,30 @@ const required = [
   ['Reduced motion support', css.includes('prefers-reduced-motion')],
   ['Preview noindex', html.includes('noindex,nofollow')],
   ['professional role gate preserved', proAccess.includes("['admin','professional'].includes(role)") && html.includes('./pro-access-v1.js')],
-  ['Clinical Motion module loaded', html.includes('./clinical-motion-v1.js') && html.includes('./clinical-motion-v1.css') && clinicalMotionCss.includes('.clm-hero')],
-  ['Motion POC defaults to functional profile', clinicalMotion.includes('PROFILE_A_FUNCTIONAL') && clinicalMotion.includes('Myodev dans score global')],
-  ['Motion calculation uses server RPC', clinicalMotion.includes("rpc('calculate_motion_v04'") && clinicalMotion.includes("PROTOCOL='motion-v0.4'")],
-  ['Motion core captures v4 domains', ['M-FUN-01','M-FUN-02','M-FUN-03','M-FUN-04','M-FUN-05','M-FUN-06','M-FUN-07'].every((code) => clinicalMotion.includes(code))],
-  ['MyoCare importer loaded', html.includes('./myocare-import-v1.js') && myocareImport.includes("CONTRACT='myodev-contract-v0.1'")],
-  ['MyoCare supports Excel CSV JSON', myocareImport.includes("['xlsx','xls']") && myocareImport.includes("ext==='csv'") && myocareImport.includes("ext==='json'")],
-  ['MyoCare provenance and idempotency', myocareImport.includes("from('myodev_imports')") && myocareImport.includes('fileHash') && myocareImport.includes('row_hash')],
-  ['MyoCare metrics map to v4 indicators', ['M-MYO-01','M-MYO-02','M-MYO-03','M-MYO-04','M-MYO-05','M-MYO-06','M-MYO-07'].every((code) => myocareImport.includes(code))],
+  ['Clinical Motion module loaded', builtHtml.includes('./clinical-motion-v1.js') && builtHtml.includes('./clinical-motion-v1.css') && clinicalMotionCss.includes('.clm-hero')],
+
+  ['built Pulse has one canonical Myodev importer', builtHtml.includes('./myocare-import.js?v=') && !builtHtml.includes('./myocare-import-v1.js')],
+  ['built Pulse has one canonical Motion workflow', builtHtml.includes('./motion-workflow.js?v=') && !builtHtml.includes('./motion-v05-workflow-v1.js')],
+  ['Motion workspace is sensor-only v0.6', clinicalMotion.includes("SCORE_ALG='motion-sensor-index-v0.6.0'") && clinicalMotion.includes('100 % capteurs Myodev')],
+  ['questionnaires are context only', clinicalMotion.includes('Contexte · 0 % du score') && clinicalMotion.includes('Aucun questionnaire n’entre dans le Motion Score')],
+  ['Clinical workspace has no legacy manual functional inputs', legacyMotionInputs.every((code) => !clinicalMotion.includes(code))],
+  ['Motion calculation uses v0.6 server RPC', motionWorkflow.includes("ALG='motion-sensor-index-v0.6.0'") && motionWorkflow.includes("rpc('calculate_motion_v06'")],
+  ['Motion workflow has no questionnaire or SVA scoring gate', !motionWorkflow.includes('Pré-bilan KŌMØ incomplet') && !motionWorkflow.includes('SVA non enregistrée')],
+  ['interpretation engine is sensor-only', interpretation.includes("scorePolicy:'sensor_only'") && !interpretation.includes('function glfs(') && !interpretation.includes('function twoStep(') && !interpretation.includes('function standUp(') && !interpretation.includes('function chair(')],
+  ['patient preparation retires manual physical tests from Motion', patientScope.includes("RETIRED=new Set(['chair_stand','two_step','gait_4m','balance','stand_up','single_leg_stance'])") && patientScope.includes('ne modifient jamais le Motion Score')],
+  ['Myodev importer uses current contract', myodevImport.includes("CONTRACT='myodev-contract-v0.3'") && myodevImport.includes("PROTOCOL='motion-clinical-v0.6'")],
+  ['Myodev importer recognizes definitive global workbook', myodevImport.includes('04_MYODEV_IMPORT') && myodevImport.includes('sourceSessionCount') && myodevImport.includes('sourceSessionIds')],
+  ['Myodev importer supports Excel CSV JSON', myodevImport.includes("['xlsx','xls']") && myodevImport.includes("ext==='csv'") && myodevImport.includes("ext==='json'")],
+  ['Myodev importer calculates sensor Motion v0.6', myodevImport.includes("rpc('calculate_motion_v06'") && myodevImport.includes("scorePolicy:'sensor_only_v0.6'") && myodevImport.includes('questionnaireContribution:0')],
+  ['Myodev importer preserves provenance and idempotency', myodevImport.includes('fileHash') && myodevImport.includes('rowHash') && myodevImport.includes('target_import_hash')],
+  ['PDF report no longer explains legacy 60/40 score', !report.includes('60 % mobilité') && !report.includes('40 % symétrie') && !report.includes('Stand-Up Test') && !report.includes('Two-Step Test')],
+
   ['Clinical cockpit assets loaded', html.includes('./clinical-cockpit-v1.js') && html.includes('./clinical-cockpit-v1.css') && html.includes('./clinical-cockpit-bridge-v1.js')],
   ['Clinical cockpit seven operator views', ['dashboard','patients','motion','myocare','validation','plans','agenda'].every((id) => clinicalCockpit.includes(`'${id}'`))],
   ['Clinical cockpit uses canonical backend tables', ['patients','assessments','scores','myodev_imports','priorities','clinical_context','organization_appointments'].every((table) => clinicalCockpit.includes(`'${table}'`) || clinicalCockpit.includes(table))],
   ['Clinical cockpit explicit score release gate', clinicalCockpit.includes("release_status:'clinician_reviewed'") && clinicalCockpit.includes("release_status:'released'")],
   ['Clinical cockpit validates plan priorities', clinicalCockpit.includes("validation_status:'validated'") && clinicalCockpit.includes("validation_status:'draft'")],
-  ['Clinical cockpit creates organization appointments', clinicalCockpit.includes("from('organization_appointments').insert") && clinicalCockpit.includes("appointment_type")],
+  ['Clinical cockpit creates organization appointments', clinicalCockpit.includes("from('organization_appointments').insert") && clinicalCockpit.includes('appointment_type')],
   ['Clinical patient context synchronized with Motion', clinicalCockpitBridge.includes('komo:clinical-patient-changed') && clinicalCockpitBridge.includes('#clmPatient') && clinicalCockpitBridge.includes('#clmAssessment')],
   ['Clinical cockpit responsive tablet mobile', clinicalCockpitCss.includes('@media(max-width:820px)') && clinicalCockpitCss.includes('@media(max-width:520px)')],
   ['Vercel health points to Supabase notification backend', healthApi.includes("notificationBackend: 'supabase-edge:pulse-notify'")],
@@ -103,4 +119,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`[pulse-v12-qa] ${required.length} checks passed.`);
+console.log(`[pulse-v12-qa] ${required.length} checks passed · sensor-only Motion v0.6 protected.`);
