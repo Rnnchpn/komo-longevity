@@ -69,7 +69,7 @@ for (const file of pages) {
   console.log(`[homepage-hero-image-v2] production hero fixed in ${file}`);
 }
 
-// Replace the remaining generic Case/sensor placeholders by the same verified real
+// Replace the remaining generic Case/sensor placeholders by the verified real
 // KŌMØ Case photograph. The gait image is kept because it is already a true capture.
 const productPhotoStyle = `<style id="komo-real-product-photo-style">
 .case-score-visual,.case-sensor-card figure{background:#eeeae1!important;overflow:hidden!important}
@@ -144,11 +144,24 @@ for (const item of Object.values(demoBands)) {
   html = html.replace('</head>', `${demoStyle}</head>`);
   html = html.replace(/<section class="riviera-demo-band"[\s\S]*?<\/section>/g, '');
   const band = `<section class="riviera-demo-band" aria-label="${item.eyebrow}"><div class="shell"><div><p class="eyebrow">${item.eyebrow}</p><h2>${item.title}</h2><p>${item.lead}</p></div><div class="demo-action"><a class="button button-light" href="${item.href}">${item.cta} <span aria-hidden="true">↗</span></a><span class="demo-note">${item.note}</span></div></div></section>`;
+
+  // Public partner pages are transformed by several post-build passes. Prefer the
+  // original page hero when present; otherwise place the band immediately inside <main>.
   const heroStart = html.indexOf('<section class="page-hero"');
   const heroEndAt = heroStart >= 0 ? html.indexOf('</section>', heroStart) : -1;
-  if (heroEndAt < 0) throw new Error(`[homepage-hero-image-v2] partner hero missing in ${item.file}`);
-  const heroEnd = heroEndAt + '</section>'.length;
-  html = html.slice(0, heroEnd) + band + html.slice(heroEnd);
+  if (heroEndAt >= 0) {
+    const heroEnd = heroEndAt + '</section>'.length;
+    html = html.slice(0, heroEnd) + band + html.slice(heroEnd);
+  } else {
+    const mainMatch = html.match(/<main\b[^>]*>/i);
+    if (!mainMatch || mainMatch.index == null) {
+      console.warn(`[homepage-hero-image-v2] no insertion point for Riviera band in ${item.file}`);
+      continue;
+    }
+    const insertAt = mainMatch.index + mainMatch[0].length;
+    html = html.slice(0, insertAt) + band + html.slice(insertAt);
+  }
+
   await writeFile(item.file, html);
   console.log(`[homepage-hero-image-v2] Riviera demo band added in ${item.file}`);
 }
