@@ -39,7 +39,7 @@ const checks=[
   ['no calendar grid renderer',!booking.includes('kbook-calendar')],
   ['documents route gets instant consultation shell',app.includes('data-kbook-prime')],
   ['blocking grey loader is not used for documents',app.includes("if(route==='documents')")&&app.includes("source:'instant-consultation-shell'")],
-  ['authenticated instant route before full data hydration',app.includes("const instant=['home','documents'")) ,
+  ['authenticated instant route before full data hydration',app.includes("const instant=['home','documents'" )],
   ['consultation loading CSS is present',html.includes('id="kpConsultationLoadV1"')],
   ['professional consultation title',center.includes('Consultations Motion')],
   ['professional assignment RPC',center.includes('komo_assign_motion_consultation')],
