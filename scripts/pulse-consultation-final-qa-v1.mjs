@@ -1,0 +1,34 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+const pulse=path.join(process.cwd(),'site','pulse-v12');
+const indexPath=path.join(pulse,'index.html');
+const bookingPath=path.join(pulse,'booking-layer-v1.js');
+const centerPath=path.join(pulse,'center-two-tab-workspace-v1.js');
+for(const file of [indexPath,bookingPath,centerPath])if(!fs.existsSync(file))throw new Error('[consultation-final-qa] missing '+file);
+
+const html=fs.readFileSync(indexPath,'utf8');
+const booking=fs.readFileSync(bookingPath,'utf8');
+const center=fs.readFileSync(centerPath,'utf8');
+
+const retired=[
+  'agenda-hub-v4.js',
+  'agenda-premium-map-v1.js',
+  'pro-agenda-dossier-v1.js',
+  'booking-directory-map-v1.js',
+  'agenda-hub-v4.css',
+  'agenda-premium-map-v1.css',
+  'booking-directory-map-v1.css'
+];
+for(const file of retired)if(html.includes(file))throw new Error('[consultation-final-qa] legacy asset still loaded: '+file);
+
+const checks=[
+  ['patient consultation owner',booking.includes('Votre consultation Motion.')],
+  ['patient assigned consultation RPC',booking.includes('komo_my_motion_consultations')],
+  ['no patient map shell',!booking.includes('data-kbd-shell')],
+  ['professional consultation title',center.includes('Consultations Motion')],
+  ['professional assignment RPC',center.includes('komo_assign_motion_consultation')],
+  ['explicit no-map no-agenda contract',center.includes('Pas de carte, pas d’agenda.')]
+];
+for(const [label,ok] of checks)if(!ok)throw new Error('[consultation-final-qa] failed: '+label);
+console.log('[consultation-final-qa] PASS · consultation only · no centre map · no agenda runtime');
