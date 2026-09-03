@@ -144,7 +144,7 @@ const checks=[
   ['Centre loads questionnaire progress',center.includes("from('questionnaire_sessions')")&&center.includes('loadSelfMotionProgress')],
   ['Centre uses authenticated self-start RPC',center.includes("rpc('komo_start_self_motion_assessment'")],
   ['Centre decorates existing owner only',center.includes('decoratePatients()')&&center.includes('data-k2tw-self-card')],
-  ['Centre readability contract applied',center.includes('Centre patient workspace — readable premium clinical surface')&&center.includes('#f3f0e8'))
+  ['Centre readability contract applied',center.includes('Centre patient workspace — readable premium clinical surface')&&center.includes('#f3f0e8')]
 ];
 for(const [label,ok] of checks){console.log(`[pulse-center-self-motion-v1] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
 if(process.exitCode)throw new Error('Centre self Motion consolidation failed');
