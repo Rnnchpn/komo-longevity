@@ -154,7 +154,11 @@ const scripts = [
   'scripts/pulse-runtime-architecture-audit-v37.mjs',
   // Final public-surface pass: it runs after every historical rewrite so the
   // published home, professional landing and contact flow have one owner.
-  'scripts/riviera-commercial-v1.mjs'
+  'scripts/riviera-commercial-v1.mjs',
+  // Absolute last Pulse pass: prevent retired appointment/calendar/map owners
+  // from reappearing after historical build layers.
+  'scripts/pulse-consultation-runtime-prune-v1.mjs',
+  'scripts/pulse-consultation-final-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
