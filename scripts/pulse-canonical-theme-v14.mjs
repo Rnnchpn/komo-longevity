@@ -8,7 +8,7 @@ const cssPath=join(root,'site','pulse-v12','pulse-canonical-theme-v14.css');
 let html=await readFile(index,'utf8');
 const css=await readFile(cssPath,'utf8');
 
-// v14 is the only transverse visual owner. Keep structural/component CSS, retire broad historical polish layers.
+// v14 is the only transverse visual owner. Keep structural/component CSS, retire broad or dead historical polish layers.
 html=html
   .replace(/\s*<script src="\.\/patient-palette-balance-v1\.js(?:\?[^\"]*)?"><\/script>/g,'')
   .replace(/\s*<link rel="stylesheet" href="\.\/pulse-home-palette-surfaces-v12\.css(?:\?[^\"]*)?"\s*\/>/g,'')
@@ -16,6 +16,9 @@ html=html
   .replace(/\s*<link rel="stylesheet" href="\.\/pulse-dark-luxe-v1\.css(?:\?[^\"]*)?"\s*\/>/g,'')
   .replace(/\s*<link rel="stylesheet" href="\.\/pulse-dark-luxe-polish-v2\.css(?:\?[^\"]*)?"\s*\/>/g,'')
   .replace(/\s*<link rel="stylesheet" href="\.\/pulse-premium-detail-v1\.css(?:\?[^\"]*)?"\s*\/>/g,'')
+  .replace(/\s*<link rel="stylesheet" href="\.\/my-komo-modern-v1\.css(?:\?[^\"]*)?"\s*\/>/g,'')
+  .replace(/\s*<link rel="stylesheet" href="\.\/my-komo-dashboard-v2\.css(?:\?[^\"]*)?"\s*\/>/g,'')
+  .replace(/\s*<link rel="stylesheet" href="\.\/mobile-home-brand-final-v1\.css(?:\?[^\"]*)?"\s*\/>/g,'')
   .replace(/\s*<style id="kpCanonicalThemePriorityV13">[\s\S]*?<\/style>/g,'')
   .replace(/\s*<link rel="stylesheet" href="\.\/pulse-canonical-theme-v14\.css(?:\?[^\"]*)?"\s*\/>/g,'')
   .replace(/\s*<style id="kpCanonicalThemePriorityV14">[\s\S]*?<\/style>/g,'');
@@ -80,6 +83,9 @@ const checks=[
   ['dark luxe base retired',!html.includes('pulse-dark-luxe-v1.css')],
   ['dark luxe polish retired',!html.includes('pulse-dark-luxe-polish-v2.css')],
   ['premium detail overlay retired',!html.includes('pulse-premium-detail-v1.css')],
+  ['legacy My KŌMØ modern skin retired',!html.includes('my-komo-modern-v1.css')],
+  ['legacy My KŌMØ dashboard skin retired',!html.includes('my-komo-dashboard-v2.css')],
+  ['dead mobile Home brand skin retired',!html.includes('mobile-home-brand-final-v1.css')],
   ['v13 priority retired',!html.includes('kpCanonicalThemePriorityV13')],
   ['v14 loaded exactly once',(html.match(/pulse-canonical-theme-v14\.css/g)||[]).length===1],
   ['v14 priority loaded exactly once',(html.match(/kpCanonicalThemePriorityV14/g)||[]).length===1],
