@@ -25,7 +25,10 @@ const retired=[
 for(const file of retired)if(html.includes(file))throw new Error('[consultation-final-qa] legacy asset still loaded: '+file);
 
 const checks=[
-  ['patient consultation owner',booking.includes('Votre consultation Motion.')],
+  ['patient consultation owner',booking.includes('Votre consultation Motion est prête.')],
+  ['patient start CTA',booking.includes('Débuter consultation Motion')],
+  ['six questionnaire labels visible before start',booking.includes('Profil & sécurité')&&booking.includes('GLFS-25')&&booking.includes('Sommeil & récupération')&&booking.includes('Bien-être')&&booking.includes('Mode de vie')&&booking.includes('Antécédents')],
+  ['assigned assessment opens questionnaire engine',booking.includes('KomoQuestionnaireEngine')&&booking.includes('openAssessment(id)')],
   ['patient assigned consultation RPC',booking.includes('komo_my_motion_consultations')],
   ['patient mode follows active workspace instead of account role',booking.includes('function patientMode()')],
   ['consultation cache is session scoped',booking.includes("PATIENT_CACHE='komo_consultations_cache_v1'")&&booking.includes('sessionStorage.setItem(patientCacheKey')],
@@ -41,15 +44,16 @@ const checks=[
   ['blocking grey loader is not used for documents',app.includes("if(route==='documents')")&&app.includes("source:'instant-consultation-shell'")],
   ['authenticated instant route before full data hydration',app.includes("const instant=['home','documents'" )],
   ['consultation loading CSS is present',html.includes('id="kpConsultationLoadV1"')],
-  ['professional consultation title',center.includes('Consultations Motion')],
+  ['final Motion consultation CSS is present',html.includes('id="kpMotionConsultationFinalV1"')],
+  ['Centre title is Myodev',center.includes("textContent='Myodev'")],
+  ['Centre assignment CTA',center.includes('Attribuer consultation')],
   ['professional assignment RPC',center.includes('komo_assign_motion_consultation')],
   ['Centre has no mutation observer render loop',!center.includes('new MutationObserver')],
   ['Centre navigation writes are idempotent',center.includes("nav.dataset.k2twOwner==='consultations'")],
   ['Centre dashboard requests are deduplicated',center.includes('rowsLoadPromise')],
   ['Centre activation is guarded',center.includes('activating=true')],
   ['Centre resynchronizes after cockpit shell',center.includes('komo:clinical-cockpit-ready')],
-  ['legacy cockpit chrome is hidden in Centre consultation mode',center.includes('.kcp-head,body.komo-pro-mode .kcp-tabs')],
-  ['explicit no-map no-agenda contract',center.includes('Pas de carte, pas d’agenda.')]
+  ['legacy cockpit chrome is hidden in Centre consultation mode',center.includes('.kcp-head,body.komo-pro-mode .kcp-tabs')]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[consultation-final-qa] failed: '+label);
-console.log('[consultation-final-qa] PASS · patient loading optimized · Centre loop retired · duplicate loads blocked · consultation owner stable');
+console.log('[consultation-final-qa] PASS · Centre Myodev → patient assignment → Débuter consultation Motion → questionnaires');
