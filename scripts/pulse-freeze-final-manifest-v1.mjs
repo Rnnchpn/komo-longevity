@@ -43,7 +43,7 @@ const manifest={
     club:{owner:'club-hub-v1.js',controllers:[],extensions:[]},
     profile:{owner:'profile-v2.js',controllers:[],extensions:['account-hub-v2.js','account-privacy-v1.js']},
     messages:{owner:'care-messaging-v2.js',controllers:[],extensions:[]},
-    clinical:{owner:'clinical-cockpit-v1.js',controllers:['clinical-motion-v1.js','myocare-import.js','patient-assessment-trio-v1.js','pro-agenda-dossier-v1.js','pro-followup-v1.js','tests-status-cockpit-v1.js','booking-layer-v1.js'],extensions:[]},
+    clinical:{owner:'clinical-cockpit-v1.js',controllers:['center-two-tab-workspace-v1.js','clinical-motion-v1.js','myocare-import.js','patient-assessment-trio-v1.js','pro-agenda-dossier-v1.js','pro-followup-v1.js','tests-status-cockpit-v1.js','booking-layer-v1.js'],extensions:[]},
     admin:{owner:'admin-console-v2.js',controllers:['admin-motion-validation-v1.js','admin-patient-manager-v1.js','admin-professionals-v1.js','admin-centers-v1.js','admin-privacy-queue-v1.js','admin-shortcut-v1.js'],extensions:[]},
     auth:{owner:'auth-login-canonical.js',controllers:['auth-gateway-v2.js'],extensions:[]},
     navigation:{owner:'patient-navigation-core-v1.js',controllers:['adaptive-shell-v4.js','pulse-bottom-nav-v6.js'],extensions:['mobile-runtime-v3.js']}
