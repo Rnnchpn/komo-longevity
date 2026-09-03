@@ -2,6 +2,7 @@ import { access, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const roots=['pulse-app',join('site','pulse-v12')];
+const LIBRARY_ORIGIN='https://komolongevity.com';
 const articles=[
   ['test-two-step','Two-Step Test : que mesure réellement le test des deux pas ?'],
   ['test-stand-up','Stand-Up Test : pourquoi la hauteur de siège change tout'],
@@ -26,27 +27,27 @@ for(const [slug] of articles){
 
 const injection=`
 const KOMO_LIBRARY_TRAJECTORY=[
-  {keys:['two-step','two step','m-fun-03'],href:'/media/test-two-step',title:'Two-Step Test : que mesure réellement le test des deux pas ?'},
-  {keys:['stand-up','stand up'],href:'/media/test-stand-up',title:'Stand-Up Test : pourquoi la hauteur de siège change tout'},
-  {keys:['chair stand','lever de chaise','m-fun-04'],href:'/media/test-lever-chaise',title:'Le test de lever de chaise'},
-  {keys:['vitesse de marche','gait speed','m-fun-05'],href:'/media/test-vitesse-marche-10-metres',title:'Comment mesurer sa vitesse de marche sur 10 mètres ?'},
-  {keys:['cadence'],href:'/media/cadence-marche-normale',title:'Cadence de marche : que signifie le nombre de pas par minute ?'},
-  {keys:['double appui','double support'],href:'/media/double-appui-marche',title:'Double appui : pourquoi gardons-nous parfois les deux pieds au sol plus longtemps ?'},
-  {keys:['longueur de pas','step length','stride length'],href:'/media/pas-plus-courts',title:'Pourquoi mes pas deviennent-ils plus courts ?'},
-  {keys:['equilibre','équilibre','appui unipodal','single leg','chute','fall'],href:'/media/equilibre-vieillissement',title:'Équilibre : un système multisensoriel'},
-  {keys:['gastroc','mollet','cheville','propulsion','push off'],href:'/media/puissance-cheville-vieillissement',title:'Propulsion de cheville : ce qui pousse réellement le corps vers l’avant'},
-  {keys:['puissance','fatigabilite','fatigabilité','fatigue'],href:'/media/puissance-musculaire-vieillissement',title:'Puissance musculaire : pourquoi la vitesse compte'},
-  {keys:['quadriceps','ischio','biceps femoral','biceps fémoral','force','activation','coactivation','symetrie neuromusculaire','symétrie neuromusculaire','lsi','muscle'],href:'/media/moins-force-jambes',title:'Pourquoi ai-je moins de force dans les jambes ?'},
-  {keys:['posture','sva','alignement','cone of economy'],href:'/media/cone-of-economy',title:'Cone of Economy'},
-  {keys:['glfs','locomotive syndrome','locomotive'],href:'/media/locomotive-syndrome',title:'Locomotive Syndrome'},
-  {keys:['marche','gait','temps d appui','temps d’appui','pas'],href:'/media/walking-is-data',title:'Walking is data'},
-  {keys:['mobilite','mobilité','fonction','motion score','motion'],href:'/media/bilan-mobilite-complet',title:'Que mesure réellement un bilan de mobilité complet ?'}
+  {keys:['two-step','two step','m-fun-03'],href:'https://komolongevity.com/media/test-two-step',title:'Two-Step Test : que mesure réellement le test des deux pas ?'},
+  {keys:['stand-up','stand up'],href:'https://komolongevity.com/media/test-stand-up',title:'Stand-Up Test : pourquoi la hauteur de siège change tout'},
+  {keys:['chair stand','lever de chaise','m-fun-04'],href:'https://komolongevity.com/media/test-lever-chaise',title:'Le test de lever de chaise'},
+  {keys:['vitesse de marche','gait speed','m-fun-05'],href:'https://komolongevity.com/media/test-vitesse-marche-10-metres',title:'Comment mesurer sa vitesse de marche sur 10 mètres ?'},
+  {keys:['cadence'],href:'https://komolongevity.com/media/cadence-marche-normale',title:'Cadence de marche : que signifie le nombre de pas par minute ?'},
+  {keys:['double appui','double support'],href:'https://komolongevity.com/media/double-appui-marche',title:'Double appui : pourquoi gardons-nous parfois les deux pieds au sol plus longtemps ?'},
+  {keys:['longueur de pas','step length','stride length'],href:'https://komolongevity.com/media/pas-plus-courts',title:'Pourquoi mes pas deviennent-ils plus courts ?'},
+  {keys:['equilibre','équilibre','appui unipodal','single leg','chute','fall'],href:'https://komolongevity.com/media/equilibre-vieillissement',title:'Équilibre : un système multisensoriel'},
+  {keys:['gastroc','mollet','cheville','propulsion','push off'],href:'https://komolongevity.com/media/puissance-cheville-vieillissement',title:'Propulsion de cheville : ce qui pousse réellement le corps vers l’avant'},
+  {keys:['puissance','fatigabilite','fatigabilité','fatigue'],href:'https://komolongevity.com/media/puissance-musculaire-vieillissement',title:'Puissance musculaire : pourquoi la vitesse compte'},
+  {keys:['quadriceps','ischio','biceps femoral','biceps fémoral','force','activation','coactivation','symetrie neuromusculaire','symétrie neuromusculaire','lsi','muscle'],href:'https://komolongevity.com/media/moins-force-jambes',title:'Pourquoi ai-je moins de force dans les jambes ?'},
+  {keys:['posture','sva','alignement','cone of economy'],href:'https://komolongevity.com/media/cone-of-economy',title:'Cone of Economy'},
+  {keys:['glfs','locomotive syndrome','locomotive'],href:'https://komolongevity.com/media/locomotive-syndrome',title:'Locomotive Syndrome'},
+  {keys:['marche','gait','temps d appui','temps d’appui','pas'],href:'https://komolongevity.com/media/walking-is-data',title:'Walking is data'},
+  {keys:['mobilite','mobilité','fonction','motion score','motion'],href:'https://komolongevity.com/media/bilan-mobilite-complet',title:'Que mesure réellement un bilan de mobilité complet ?'}
 ];
 function normalizeLibraryText(v=''){return String(v||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim()}
 function trajectoryArticleFor(text=''){
   const hay=normalizeLibraryText(text);
   for(const a of KOMO_LIBRARY_TRAJECTORY){if(a.keys.some(k=>hay.includes(normalizeLibraryText(k))))return a}
-  return {href:'/media/bilan-mobilite-complet',title:'Que mesure réellement un bilan de mobilité complet ?'};
+  return {href:'https://komolongevity.com/media/bilan-mobilite-complet',title:'Que mesure réellement un bilan de mobilité complet ?'};
 }
 function trajectoryLink(article,compact=false){
   if(!article?.href)return'';
@@ -97,7 +98,8 @@ const final=await readFile(join('site','pulse-v12','patient-canonical-results.js
 const checks=[
   ['Results keeps one V4 owner',final.includes("4.0.0-motion-report")&&final.includes('data-kresults-v4')],
   ['trajectory CTA is wired',final.includes('Corriger ma trajectoire →')&&final.includes('installTrajectoryLinks(root)')],
-  ['Library mapping is contextual',final.includes('/media/test-two-step')&&final.includes('/media/cadence-marche-normale')&&final.includes('/media/equilibre-vieillissement')&&final.includes('/media/moins-force-jambes')],
+  ['Library mapping is contextual',final.includes(`${LIBRARY_ORIGIN}/media/test-two-step`)&&final.includes(`${LIBRARY_ORIGIN}/media/cadence-marche-normale`)&&final.includes(`${LIBRARY_ORIGIN}/media/equilibre-vieillissement`)&&final.includes(`${LIBRARY_ORIGIN}/media/moins-force-jambes`)],
+  ['Library links leave Pulse for the public host',!final.includes("href:'/media/")&&final.includes('https://komolongevity.com/media/')],
   ['raw technical markers are not spammed with CTAs',!final.includes("querySelectorAll('.kr4-tech-row')")]
 ];
 for(const [label,ok] of checks){console.log(`[pulse-results-library] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
