@@ -91,7 +91,14 @@ for (const file of productPages) {
     .replaceAll('/assets/images/komo-case-muscle.jpeg', publicSrc)
     .replaceAll('Illustration de six capteurs portables utilisés pour observer l’activation musculaire des membres inférieurs', 'Photographie de la KŌMØ Case ouverte avec ses six capteurs Myodev')
     .replaceAll('Illustration of six wearable sensors used to observe lower-limb muscle activation', 'Photograph of the open KŌMØ Case with its six Myodev sensors')
-    .replaceAll('Ilustración de seis sensores portátiles utilizados para observar la activación muscular de las extremidades inferiores', 'Fotografía de la KŌMØ Case abierta con sus seis sensores Myodev');
+    .replaceAll('Ilustración de seis sensores portátiles utilizados para observar la activación muscular de las extremidades inferiores', 'Fotografía de la KŌMØ Case abierta con sus seis sensores Myodev')
+    // Remove obsolete pre-launch wording from rendered commercial surfaces.
+    .replaceAll('Programme en préparation', 'Démonstrations privées · Riviera')
+    .replaceAll('Programme en cours de préparation', 'Démonstrations privées · Riviera')
+    .replaceAll('Program in preparation', 'Private demonstrations · Riviera')
+    .replaceAll('Programme in preparation', 'Private demonstrations · Riviera')
+    .replaceAll('Program in development', 'Private demonstrations · Riviera')
+    .replaceAll('Programa en preparación', 'Demostraciones privadas · Riviera');
   if (!html.includes('id="komo-real-product-photo-style"')) html = html.replace('</head>', `${productPhotoStyle}</head>`);
   await writeFile(file, html);
 }
