@@ -84,17 +84,26 @@ for(const dir of dirs){
   await patch(dir,'my-komo-stable-v4.css',src=>src
     .replace(/body\.mykomo-v5 \.main-shell\{background:[^}]+\}/,"body.mykomo-v5 .main-shell{background:#f6f7f5!important}")
     .replace(/\.mkv4-daily\{background:[^}]+\}/,".mkv4-daily{background:#fff}"));
+
+  // Results is restitution only. The legacy self-test controller remains available
+  // for an explicit self-tests route but can never replace the Results owner.
+  await patch(dir,'tests-v1.js',src=>{
+    let js=src.replaceAll("if (location.hash.replace(/^#/,'') !== 'results') return;","if (location.hash.replace(/^#/,'') !== 'self-tests') return;");
+    js=js.replace(/\nconst observer = new MutationObserver\([\s\S]*?observer\.observe\(document\.body,\{subtree:true,childList:true,attributes:true,attributeFilter:\['hidden'\]\}\);\n/,'\n');
+    return js;
+  });
 }
 
 const built=dirs[1];
-const [dock,adaptive,myk,mycss,results,connected,consultations]=await Promise.all([
+const [dock,adaptive,myk,mycss,results,connected,consultations,tests]=await Promise.all([
   readFile(join(built,'pulse-bottom-nav-v6.js'),'utf8'),
   readFile(join(built,'adaptive-shell-v4.js'),'utf8'),
   readFile(join(built,'my-komo-stable-v5.js'),'utf8'),
   readFile(join(built,'my-komo-stable-v4.css'),'utf8'),
   readFile(join(built,'patient-canonical-results.js'),'utf8'),
   readFile(join(built,'key-hub-v1.js'),'utf8'),
-  readFile(join(built,'trajectory-v3.js'),'utf8')
+  readFile(join(built,'trajectory-v3.js'),'utf8'),
+  readFile(join(built,'tests-v1.js'),'utf8')
 ]);
 const exactDock=`const items=[
   ['home','Home','⌂','home'],
@@ -116,13 +125,15 @@ const checks=[
   ['My KŌMØ routes core score to Results',myk.includes('data-mkv5-route="results">Voir tous mes résultats')],
   ['My KŌMØ has one consultations destination',myk.includes('data-mkv5-route="documents">Consultations & rendez-vous')&&!myk.includes('data-mkv5-route="trajectory">Mes consultations')],
   ['My KŌMØ outer beige removed',mycss.includes('body.mykomo-v5 .main-shell{background:#f6f7f5!important}')],
-  ['Results contains Motion KEY Clinical',results.includes('KŌMØ MOTION')&&results.includes('KEY · QUOTIDIEN')&&results.includes('CLINICAL')],
-  ['Results states questionnaires do not modify Motion Score',results.includes('GLFS‑25')&&results.includes('sans modifier le score')],
-  ['Results uses green red neutral semantics',results.includes("'good'")&&results.includes("'bad'")&&results.includes("'neutral'")],
+  ['Results contains Motion then Clinical',results.includes('RÉSULTAT MOTION')&&results.includes('RÉSULTAT CLINICAL')&&!results.includes('KEY · QUOTIDIEN')],
+  ['Results mirrors complete Motion Report payload',results.includes('report-payload-v1.js')&&results.includes('RÉSULTATS FONCTIONNELS')&&results.includes('QUESTIONNAIRES')&&results.includes('Données Myodev')&&results.includes('TOUTES LES MESURES')],
+  ['Results exports the canonical complete report',results.includes('data-komo-export-report')&&results.includes('Exporter le rapport complet')],
+  ['Results uses green red amber neutral semantics',results.includes("'good'")&&results.includes("'bad'")&&results.includes("'watch'")&&results.includes("'neutral'")],
+  ['legacy self-tests cannot own Results',!tests.includes("!== 'results'")&&!tests.includes('const observer = new MutationObserver')],
   ['Connected is single key owner',connected.includes('KŌMØ Connected.')&&connected.includes("route()!=='key'")],
   ['Consultations owns care plan',consultations.includes('PLAN DE SOIN')&&consultations.includes('Mes prochaines consultations.')],
   ['Consultations no longer owns score charts',!consultations.includes('Motion Score au fil des bilans')]
 ];
 for(const [label,ok] of checks){console.log(`[pulse-ia-v11] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
 if(process.exitCode)throw new Error('Pulse information architecture v11 guard failed');
-console.log('[pulse-ia-v11] PASS · exact five-item patient navigation frozen across desktop, iPad and mobile');
+console.log('[pulse-ia-v11] PASS · exact five-item patient navigation frozen · Results is Motion Report restitution only');
