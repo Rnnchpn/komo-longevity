@@ -161,7 +161,7 @@ const checks=[
   ['no 900ms route boot delay',!finalBooking.includes('setTimeout(refresh,900)')],
   ['no 1400ms route boot delay',!finalBooking.includes('setTimeout(refresh,1400)')],
   ['instant documents shell',finalApp.includes('data-kbook-prime')],
-  ['authenticated shell can render before full app data',finalApp.includes("const instant=['home','documents'"))
+  ['authenticated shell can render before full app data',finalApp.includes("const instant=['home','documents'" )]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[consultation-load-v1] failed: '+label);
 console.log('[consultation-load-v1] PASS · instant shell · patient mode aware · cached-first · parallel consultation sync · blocking grey loader retired');
