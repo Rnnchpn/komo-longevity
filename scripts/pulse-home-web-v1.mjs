@@ -50,6 +50,7 @@ const [css,js,mobileJs,nav,navCore,final]=await Promise.all([
 ]);
 const finalScript=file=>new RegExp(`<script[^>]+src=["']\\./${esc(file)}(?:\\?[^"']*)?["']`).test(final);
 const finalDock=['home','results','key','documents','mykomo'];
+const primaryDockRows=nav.match(/^\s*\['(?:home|key|results|trajectory|agenda|mykomo)'/gm)||[];
 const checks=[
   ['historical Home data renderer removed',!final.includes('patient-home-datawall-v3.js')],
   ['legacy Home bootstrap removed',!finalScript('home-clarity-v1.js')],
@@ -68,7 +69,8 @@ const checks=[
   ['Home renderer has no persistent observer or polling',!js.includes('MutationObserver')&&!js.includes('setInterval(')],
   ['Home loads no Results or Agenda data runtime',!js.includes('patient-results-ownership-v2.js')&&!js.includes('agenda-map-resilience-v1.js')],
   ['Home keeps assistant and responsive runtime as imports',js.includes("import './komo-assistant-shell-v2.js'")&&js.includes("import './patient-mobile-v1.js'")&&!finalScript(mobileJsFile)],
-  ['desktop dock has the exact five approved destinations',finalDock.every(r=>nav.includes(`'${r}'`))&&!/\['trajectory','/.test(nav)&&!/["']club["']\s*,\s*["'](?:Club|KŌMØ Club)/.test(nav)],
+  ['desktop dock has exactly five primary rows',primaryDockRows.length===5],
+  ['desktop dock uses approved labels',nav.includes("['home','Home'")&&nav.includes("['results','Résultats'")&&nav.includes("['key','Connected'")&&nav.includes("['agenda','Consultations & rendez-vous'")&&nav.includes("['mykomo','My KŌMØ'")&&!nav.includes("['trajectory','Trajectoire'")],
   ['five destinations stay canonical routes',finalDock.every(r=>navCore.includes(`'${r}'`))],
   ['desktop dock uses five columns',nav.includes('grid-template-columns:repeat(5,minmax(0,1fr))')],
   ['Home neutral black canvas uses green only as accent',css.includes('--kh7-bg:#050706')&&css.includes('--kh7-green:#7fa58a')&&css.includes('--kh7-green-core:#315b41')],
