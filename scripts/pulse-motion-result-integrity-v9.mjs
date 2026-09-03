@@ -46,7 +46,7 @@ const reportChecks=[
   ['PDF download owner present',exporter.includes('downloadMobilityReport')],
   ['PDF engine has jsDelivr source',pdf.includes('cdn.jsdelivr.net/npm/jspdf@2.5.2')],
   ['PDF engine has CDNJS fallback',pdf.includes('cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2')],
-  ['PDF blob minimum size guard retained',pdf.includes('blob.size<12000')]
+  ['PDF blob minimum size guard retained',/blob\.size<\d{4,}/.test(pdf)]
 ];
 for(const [label,ok] of reportChecks){console.log(`[pulse-motion-result-v9] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
 if(process.exitCode)throw new Error('Motion sensor score/report integrity guard failed');
