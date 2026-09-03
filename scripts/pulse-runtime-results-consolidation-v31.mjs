@@ -53,3 +53,5 @@ if(isResultsV4){
   for(const signature of ['komo:results-rendered','krp-overview','data-kcanon-detail'])if(!finalCanonical.includes(signature))throw new Error(`[pulse-results-v31] consolidated results behavior missing: ${signature}`);
   console.log('[pulse-results-v31] canonical results + polish consolidated · view observer retired · one results runtime retained');
 }
+
+if(isResultsV4)await import('./pulse-results-library-links-v1.mjs');
