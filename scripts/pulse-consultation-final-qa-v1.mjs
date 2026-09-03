@@ -43,7 +43,13 @@ const checks=[
   ['consultation loading CSS is present',html.includes('id="kpConsultationLoadV1"')],
   ['professional consultation title',center.includes('Consultations Motion')],
   ['professional assignment RPC',center.includes('komo_assign_motion_consultation')],
+  ['Centre has no mutation observer render loop',!center.includes('new MutationObserver')],
+  ['Centre navigation writes are idempotent',center.includes("nav.dataset.k2twOwner==='consultations'")],
+  ['Centre dashboard requests are deduplicated',center.includes('rowsLoadPromise')],
+  ['Centre activation is guarded',center.includes('activating=true')],
+  ['Centre resynchronizes after cockpit shell',center.includes('komo:clinical-cockpit-ready')],
+  ['legacy cockpit chrome is hidden in Centre consultation mode',center.includes('.kcp-head,body.komo-pro-mode .kcp-tabs')],
   ['explicit no-map no-agenda contract',center.includes('Pas de carte, pas d’agenda.')]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[consultation-final-qa] failed: '+label);
-console.log('[consultation-final-qa] PASS · instant consultation shell · cached-first parallel sync · patient/admin mode safe · no map/agenda loader');
+console.log('[consultation-final-qa] PASS · patient loading optimized · Centre loop retired · duplicate loads blocked · consultation owner stable');
