@@ -8,3 +8,4 @@ html=html.replace(/\s*<script src="\.\/key-results-grid-v1\.js(?:\?[^\"]*)?"><\/
 html=html.replace('</body>','  <script type="module" src="./wearable-cycle-v1.js?v=20260829-day-night-v1"></script>\n  <script type="module" src="./wearable-poc-mode-v1.js?v=20260829-poc-mode-v1"></script>\n  <script src="./key-results-grid-v1.js?v=20260829-results-v1"></script>\n</body>');
 await writeFile(file,html,'utf8');
 console.log('[pulse-key-cycle-inject-v1] loaded KŌMØ KEY day/night/trajectory, wear-mode and results grid layers');
+await import('./pulse-motion-result-domains-v1.mjs');
