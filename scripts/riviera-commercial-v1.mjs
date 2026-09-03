@@ -209,6 +209,8 @@ function replaceMain(html, next) {
 function addStyle(html) {
   html = html
     .replace(/<style id="riviera-commercial-v1-style">[\s\S]*?<\/style>/gi, '')
+    .replace(/<style id="homepage-wow-v4-style">[\s\S]*?<\/style>/gi, '')
+    .replace(/<script id="homepage-wow-v4-js">[\s\S]*?<\/script>/gi, '')
     .replaceAll('komo-case-hero-final.avif', 'real-case/komo-case-angle.jpeg')
     .replaceAll('komo-case-hero-fallback.jpeg', 'real-case/komo-case-angle.jpeg')
     .replaceAll('komo-case-overview.jpeg', 'real-case/komo-case-open.jpeg')
