@@ -14,6 +14,9 @@ for(const name of ['booking-layer-v1.js','center-two-tab-workspace-v1.js']){
   if(!fs.existsSync(file))throw new Error('[consultation-prune] missing runtime: '+name);
   let src=fs.readFileSync(file,'utf8');
   src=src.replace(/\\`/g,'`').replace(/\\\$\{/g,'${');
+  if(name==='booking-layer-v1.js'){
+    src=src.replace(";if(S.proActive&&!S.proLoading)loadProWeek().catch(console.error)",'');
+  }
   fs.writeFileSync(file,src);
   const check=spawnSync(process.execPath,['--check',file],{encoding:'utf8'});
   if(check.status!==0)throw new Error(`[consultation-prune] invalid ${name}: ${check.stderr||check.stdout}`);
