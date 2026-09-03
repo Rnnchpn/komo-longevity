@@ -75,7 +75,15 @@ const scopedView=[
  ['pulse-app/my-komo-avatar-runtime-v1.js','.observe(document.body,{childList:true,subtree:true});'],
  ['pulse-app/my-komo-economy-policy-v2.js','.observe(document.body,{childList:true,subtree:true});']
 ];
-for(const [path,from] of scopedView){let src=await readFile(path,'utf8');src=replaceRequired(src,from,from.replace('document.body',"document.querySelector('#viewRoot')"),`${path} scoped observer`);await writeFile(path,src)}
+for(const [path,from] of scopedView){
+  let src=await readFile(path,'utf8');
+  if(path.endsWith('my-komo-avatar-runtime-v1.js')&&src.includes('window.KomoSharedAvatar')&&!src.includes('MutationObserver')){
+    console.log('[pulse-performance] already event-driven pulse-app/my-komo-avatar-runtime-v1.js');
+    continue;
+  }
+  src=replaceRequired(src,from,from.replace('document.body',"document.querySelector('#viewRoot')"),`${path} scoped observer`);
+  await writeFile(path,src)
+}
 
 let brand=await readFile('pulse-app/pulse-brand-theme-v1.js','utf8');
 brand=replaceRequired(brand,'.observe(document.body,{childList:true,subtree:true,characterData:true});',".observe(document.querySelector('#appShell'),{childList:true,subtree:true,characterData:true});",'brand scoped observer');
@@ -94,6 +102,15 @@ const myKomoScoped=[
  ['pulse-app/my-komo-score-motion-v1.js','.observe(document.body,{childList:true,subtree:true});'],
  ['pulse-app/my-komo-wallet-home-v2.js','.observe(document.body,{childList:true,subtree:true});']
 ];
-for(const [path,from] of myKomoScoped){let src=await readFile(path,'utf8');src=replaceRequired(src,from,from.replace('document.body',"document.querySelector('#viewRoot')"),`${path} My KOMO scoped observer`);if(path.endsWith('my-komo-dashboard-v2.js')||path.endsWith('my-komo-score-motion-v1.js'))src=src.replace(/^\/\*[\s\S]*?\*\/\s*/,'');await writeFile(path,src)}
+for(const [path,from] of myKomoScoped){
+  let src=await readFile(path,'utf8');
+  if(path.endsWith('my-komo-wallet-home-v2.js')&&src.includes("version:'2.1.0-home-only'")&&!src.includes('MutationObserver')&&!src.includes('setInterval')){
+    console.log('[pulse-performance] already event-driven pulse-app/my-komo-wallet-home-v2.js');
+    continue;
+  }
+  src=replaceRequired(src,from,from.replace('document.body',"document.querySelector('#viewRoot')"),`${path} My KOMO scoped observer`);
+  if(path.endsWith('my-komo-dashboard-v2.js')||path.endsWith('my-komo-score-motion-v1.js'))src=src.replace(/^\/\*[\s\S]*?\*\/\s*/,'');
+  await writeFile(path,src)
+}
 
 console.log('[pulse-performance-hardening-v1] shared client + event-driven UI applied');
