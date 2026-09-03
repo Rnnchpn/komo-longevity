@@ -65,7 +65,8 @@ const checks=[
   ['My KŌMØ exposes Club',myk.includes('data-myk-control')&&myk.includes('data-mkv5-route="club"')],
   ['My KŌMØ routes core score to Results',myk.includes('data-mkv5-route="results">Voir tous mes résultats')],
   ['My KŌMØ outer beige removed',mycss.includes('body.mykomo-v5 .main-shell{background:#f6f7f5!important}')],
-  ['Results contains Connected Motion Clinical',results.includes('KŌMØ CONNECTED')&&results.includes('KŌMØ MOTION')&&results.includes('KŌMØ CLINICAL')],
+  ['Results contains Motion KEY Clinical',results.includes('KŌMØ MOTION')&&results.includes('KEY · QUOTIDIEN')&&results.includes('CLINICAL')],
+  ['Results states questionnaires do not modify Motion Score',results.includes('GLFS‑25')&&results.includes('sans modifier le score')],
   ['Results uses green red neutral semantics',results.includes("'good'")&&results.includes("'bad'")&&results.includes("'neutral'")],
   ['Connected is single key owner',connected.includes('KŌMØ Connected.')&&connected.includes("route()!=='key'")],
   ['Consultations owns care plan',consultations.includes('PLAN DE SOIN')&&consultations.includes('Mes prochaines consultations.')],
@@ -73,4 +74,4 @@ const checks=[
 ];
 for(const [label,ok] of checks){console.log(`[pulse-ia-v11] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
 if(process.exitCode)throw new Error('Pulse information architecture v11 guard failed');
-console.log('[pulse-ia-v11] PASS · Connected, Results, Mes consultations and My KŌMØ roles aligned without changing Motion V4');
+console.log('[pulse-ia-v11] PASS · Motion, KEY, Clinical, consultations and My KŌMØ roles aligned');
