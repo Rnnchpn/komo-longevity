@@ -5,11 +5,13 @@ const pulse=path.join(process.cwd(),'site','pulse-v12');
 const indexPath=path.join(pulse,'index.html');
 const bookingPath=path.join(pulse,'booking-layer-v1.js');
 const centerPath=path.join(pulse,'center-two-tab-workspace-v1.js');
-for(const file of [indexPath,bookingPath,centerPath])if(!fs.existsSync(file))throw new Error('[consultation-final-qa] missing '+file);
+const appPath=path.join(pulse,'app-router-v2.js');
+for(const file of [indexPath,bookingPath,centerPath,appPath])if(!fs.existsSync(file))throw new Error('[consultation-final-qa] missing '+file);
 
 const html=fs.readFileSync(indexPath,'utf8');
 const booking=fs.readFileSync(bookingPath,'utf8');
 const center=fs.readFileSync(centerPath,'utf8');
+const app=fs.readFileSync(appPath,'utf8');
 
 const retired=[
   'agenda-hub-v4.js',
@@ -25,13 +27,23 @@ for(const file of retired)if(html.includes(file))throw new Error('[consultation-
 const checks=[
   ['patient consultation owner',booking.includes('Votre consultation Motion.')],
   ['patient assigned consultation RPC',booking.includes('komo_my_motion_consultations')],
+  ['patient mode follows active workspace instead of account role',booking.includes('function patientMode()')],
+  ['consultation cache is session scoped',booking.includes("PATIENT_CACHE='komo_consultations_cache_v1'")&&booking.includes('sessionStorage.setItem(patientCacheKey')],
+  ['consultation requests are deduplicated',booking.includes('patientLoadPromise')],
+  ['role and consultation data load in parallel',booking.includes('const [roleRes,q]=await Promise.all')],
+  ['no delayed patient boot',!booking.includes('setTimeout(refresh,900)')&&!booking.includes('setTimeout(refresh,1400)')&&!booking.includes('setTimeout(refresh,120)')],
+  ['compact consultation sync state',booking.includes('kbook-sync-dot')],
   ['no patient map shell',!booking.includes('data-kbd-shell')],
   ['no weekly agenda callback',!booking.includes('loadProWeek')],
   ['no weekly planning renderer',!booking.includes('Planning hebdomadaire')],
   ['no calendar grid renderer',!booking.includes('kbook-calendar')],
+  ['documents route gets instant consultation shell',app.includes('data-kbook-prime')],
+  ['blocking grey loader is not used for documents',app.includes("if(route==='documents')")&&app.includes("source:'instant-consultation-shell'")],
+  ['authenticated instant route before full data hydration',app.includes("const instant=['home','documents'")) ,
+  ['consultation loading CSS is present',html.includes('id="kpConsultationLoadV1"')],
   ['professional consultation title',center.includes('Consultations Motion')],
   ['professional assignment RPC',center.includes('komo_assign_motion_consultation')],
   ['explicit no-map no-agenda contract',center.includes('Pas de carte, pas d’agenda.')]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[consultation-final-qa] failed: '+label);
-console.log('[consultation-final-qa] PASS · consultation only · no centre map · no agenda/calendar runtime');
+console.log('[consultation-final-qa] PASS · instant consultation shell · cached-first parallel sync · patient/admin mode safe · no map/agenda loader');
