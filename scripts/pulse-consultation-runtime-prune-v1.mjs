@@ -40,3 +40,7 @@ for(const file of ['agenda-hub-v4.css','agenda-premium-map-v1.css','booking-dire
 fs.writeFileSync(htmlPath,html);
 for(const file of retired)if(html.includes(file))throw new Error('[consultation-prune] legacy runtime still loaded: '+file);
 console.log('[consultation-prune] valid consultation runtime · agenda, agenda map and pro agenda retired');
+
+// Final UX/performance pass: runs after raw-template normalization and before
+// the final consultation QA, so production cannot ship the blocking loader.
+await import('./pulse-consultation-load-performance-v1.mjs');
