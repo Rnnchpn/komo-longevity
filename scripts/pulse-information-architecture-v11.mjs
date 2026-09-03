@@ -129,7 +129,7 @@ const checks=[
   ['Results mirrors complete Motion Report payload',results.includes('report-payload-v1.js')&&results.includes('RÉSULTATS FONCTIONNELS')&&results.includes('QUESTIONNAIRES')&&results.includes('Données Myodev')&&results.includes('TOUTES LES MESURES')],
   ['Results exports the canonical complete report',results.includes('data-komo-export-report')&&results.includes('Exporter le rapport complet')],
   ['Results uses green red amber neutral semantics',results.includes("'good'")&&results.includes("'bad'")&&results.includes("'watch'")&&results.includes("'neutral'")],
-  ['legacy self-tests cannot own Results',!tests.includes("!== 'results'")&&!tests.includes('const observer = new MutationObserver')],
+  ['legacy self-tests cannot own Results',tests.includes("!== 'self-tests'")&&!tests.includes("!== 'results'")],
   ['Connected is single key owner',connected.includes('KŌMØ Connected.')&&connected.includes("route()!=='key'")],
   ['Consultations owns care plan',consultations.includes('PLAN DE SOIN')&&consultations.includes('Mes prochaines consultations.')],
   ['Consultations no longer owns score charts',!consultations.includes('Motion Score au fil des bilans')]
