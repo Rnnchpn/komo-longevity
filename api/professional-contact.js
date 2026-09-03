@@ -12,6 +12,7 @@ const escapeHtml = (value = '') => String(value)
 const isEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 const interestLabels = {
+  demo: 'Request a private KŌMØ demonstration',
   case_purchase: 'KŌMØ Case — purchase / installation',
   pilot: 'Founding pilot / operated session',
   multisite: 'Multi-site deployment',

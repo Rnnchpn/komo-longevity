@@ -140,13 +140,18 @@ for (const p of pages) {
   if (!html.includes('class="kpf-hero"')) throw new Error(`[homepage-whoop-product-v2] ${p.lang}: hero not found`);
   const heroMarker = html.indexOf('class="kpf-hero"');
   const heroEnd = html.indexOf('</section>', heroMarker) + '</section>'.length;
+  // The product-home pass can run after either the historical compact home or
+  // the current Riviera hero.  The compact home carried a disclaimer section;
+  // the latter does not.  In that case the rest of <main> is the safe boundary
+  // for this legacy rebuild.
   const disclaimerAt = html.indexOf('<section class="kb-disclaimer"', heroEnd);
-  if (heroEnd < '</section>'.length || disclaimerAt < 0) throw new Error(`[homepage-whoop-product-v2] ${p.lang}: boundaries not found`);
+  const storyEnd = disclaimerAt >= 0 ? disclaimerAt : html.indexOf('</main>', heroEnd);
+  if (heroEnd < '</section>'.length || storyEnd < 0) throw new Error(`[homepage-whoop-product-v2] ${p.lang}: boundaries not found`);
   let hero = html.slice(html.lastIndexOf('<section', heroMarker), heroEnd);
   hero = hero.replace(/<aside class="kb-status"[\s\S]*?<\/aside>/i, '');
   hero = hero.replace(/<div class="kpf-actions kb-hero-actions">[\s\S]*?<\/div>/i, `<div class="kpf-actions"><a class="kpf-btn" href="#case">${p.finalCase}</a><a class="kpf-link" href="https://pulse.komolongevity.com/">${p.finalPulse} →</a></div>`);
   const heroStart = html.lastIndexOf('<section', heroMarker);
-  html = html.slice(0, heroStart) + hero + story(p) + html.slice(disclaimerAt);
+  html = html.slice(0, heroStart) + hero + story(p) + html.slice(storyEnd);
   html = html.replace(/<nav class="kp-nav">[\s\S]*?<\/nav>/i, `<nav class="kp-nav">${navHtml(p)}</nav>`);
   html = html.replace(/(<details class="kp-menu">[\s\S]*?<nav>)[\s\S]*?(<\/nav>[\s\S]*?<\/details>)/i, `$1${navHtml(p)}$2`);
   if (!html.includes('homepage-whoop-product-v2-style')) html = html.replace('</head>', `${CSS}</head>`);

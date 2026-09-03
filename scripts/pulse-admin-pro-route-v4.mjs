@@ -10,12 +10,17 @@ function req(src,from,to,label){
   return src.replace(from,to);
 }
 
-router=req(
-  router,
-  "if(['motion','mykomo','club','key','trajectory','messages','admin'].includes(route)){",
-  "if(['motion','mykomo','club','key','trajectory','messages'].includes(route)){",
-  'Admin must reach its canonical route-ready branch'
-);
+// Current builds may already use the smaller external-owner route set.  Both
+// shapes are valid as long as Admin remains outside that early return.
+const currentExternalOwnerSet="if(['motion','mykomo','club','trajectory'].includes(route)){";
+if(!router.includes(currentExternalOwnerSet)){
+  router=req(
+    router,
+    "if(['motion','mykomo','club','key','trajectory','messages','admin'].includes(route)){",
+    "if(['motion','mykomo','club','key','trajectory','messages'].includes(route)){",
+    'Admin must reach its canonical route-ready branch'
+  );
+}
 
 const oldModeSwitch="els.modeSwitch.addEventListener('click',event=>{const button=event.target.closest('button[data-mode]');if(!button)return;state.mode=button.dataset.mode;[...els.modeSwitch.querySelectorAll('button')].forEach(btn=>btn.classList.toggle('active',btn===button));if(state.mode==='clinical')location.hash='clinical';else if(currentRoute()==='clinical')location.hash='home';renderNavigation();renderRoute(currentRoute())});";
 const newModeSwitch="els.modeSwitch.addEventListener('click',event=>{const button=event.target.closest('button[data-mode]');if(!button)return;state.mode=button.dataset.mode;[...els.modeSwitch.querySelectorAll('button')].forEach(btn=>btn.classList.toggle('active',btn===button));const routeBefore=currentRoute();if(state.mode==='clinical'){if(routeBefore!=='clinical'){location.hash='clinical';return}}else if(routeBefore==='clinical'){location.hash='home';return}renderNavigation();renderRoute(currentRoute())});";

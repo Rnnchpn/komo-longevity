@@ -142,8 +142,8 @@
 
     const intent = query.get('intent');
     if (intent === 'demo') {
-      const pilot = form.querySelector('input[name="interest"][value="pilot"]');
-      if (pilot) pilot.checked = true;
+      const demo = form.querySelector('input[name="interest"][value="demo"]');
+      if (demo) demo.checked = true;
     }
 
     form.addEventListener('submit', async (event) => {

@@ -15,7 +15,27 @@ const replacements=[
   ["<div class=\"kcp-table-wrap\"><table class=\"kcp-patient-table\"><thead><tr><th>Patient</th><th>Dernier bilan</th><th>Motion</th><th>Prochain RDV</th><th>État</th></tr></thead><tbody id=\"kcpPatientsBody\">${patientRows(s.patients)}</tbody></table></div></article></div>`}","<div class=\"kcp-table-wrap\"><table class=\"kcp-patient-table\"><thead><tr><th>Patient</th><th>Dernier bilan</th><th>Motion</th><th>Prochain RDV</th><th>État</th></tr></thead><tbody id=\"kcpPatientsBody\">${patientRows(s.patients)}</tbody></table></div>${s.role==='admin'&&s.pulseAccounts.length?`<div class=\"kcp-card-head\" style=\"margin-top:22px\"><div><h3>Comptes Pulse sans dossier</h3><p>Inscrits dans Pulse, pas encore orientés vers un centre.</p></div><strong>${s.pulseAccounts.length}</strong></div><div class=\"kcp-list\">${s.pulseAccounts.map(x=>{const p=x.profile||{},n=`${p.first_name||''} ${p.last_name||''}`.trim()||p.display_name||x.email||'Patient Pulse';return`<div class=\"kcp-row\"><div class=\"kcp-row-main\"><strong>${esc(n)}</strong><span>${esc(x.email||'—')} · ${esc([p.city,p.country].filter(Boolean).join(', ')||'Localisation non renseignée')}</span></div><span>Pulse uniquement</span>${statePill('à orienter')}<button class=\"kcp-btn\" data-open-global-admin=\"1\">Orienter</button></div>`}).join('')}</div>`:''}</article></div>`}"],
   ["document.querySelectorAll('[data-switch]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.switch)));","document.querySelectorAll('[data-switch]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.switch)));document.querySelectorAll('[data-open-global-admin]').forEach(b=>b.addEventListener('click',()=>{location.hash='admin';setTimeout(()=>window.dispatchEvent(new CustomEvent('komo:admin-open')),40)}));"]
 ];
-for(const [from,to] of replacements){if(!src.includes(from))throw new Error('[clinical-multicenter-v1] expected source fragment missing: '+from.slice(0,90));src=src.replace(from,to)}
+// Several later Pulse hardening passes extend these same expressions.  Treat an
+// extended target as already migrated instead of making the full production build
+// depend on an exact historic source snapshot.
+const migratedMarkers=[
+  "org:'komo_clinical_org'",
+  "membership:null,memberships:[],patients:[],pulseAccounts:",
+  ".select('organization_id,role,access_scope,status,organizations",
+  "const savedOrg=localStorage.getItem(K.org)",
+  "let patientQuery=c.from('patients')",
+  "let appointmentQuery=c.from('organization_appointments')",
+  "s.role==='admin'?'Vue globale':'Centre actif'",
+  "s.patients.length+(s.role==='admin'?s.pulseAccounts.length:0)",
+  "s.role==='admin'?'Tous les patients'",
+  "Comptes Pulse sans dossier",
+  "data-open-global-admin"
+];
+for(const [[from,to],marker] of replacements.map((item,index)=>[item,migratedMarkers[index]])){
+  if(src.includes(from)){src=src.replace(from,to);continue}
+  if(marker&&src.includes(marker))continue;
+  throw new Error('[clinical-multicenter-v1] expected source fragment missing: '+from.slice(0,90));
+}
 await writeFile(cockpitPath,src);
 
 let html=await readFile(indexPath,'utf8');

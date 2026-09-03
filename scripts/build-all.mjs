@@ -149,7 +149,10 @@ const scripts = [
   'scripts/pulse-freeze-runtime-v1.mjs',
   'scripts/pulse-freeze-final-manifest-v1.mjs',
   'scripts/pulse-runtime-debt-audit-v1.mjs',
-  'scripts/pulse-runtime-architecture-audit-v37.mjs'
+  'scripts/pulse-runtime-architecture-audit-v37.mjs',
+  // Final public-surface pass: it runs after every historical rewrite so the
+  // published home, professional landing and contact flow have one owner.
+  'scripts/riviera-commercial-v1.mjs'
 ];
 
 for (const script of scripts) {

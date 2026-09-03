@@ -27,7 +27,7 @@ clinical=req(
 );
 clinical=req(clinical,"document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,900));","document.addEventListener('DOMContentLoaded',schedule);",'clinical 900ms fallback must be removed');
 clinical=clinical.replace(";setTimeout(schedule,180)",';');
-clinical=clinical.replace("location.hash='admin';setTimeout(()=>window.dispatchEvent(new CustomEvent('komo:admin-open')),40)","location.hash='admin'");
+clinical=clinical.replaceAll("location.hash='admin';setTimeout(()=>window.dispatchEvent(new CustomEvent('komo:admin-open')),40)","location.hash='admin'");
 await write('clinical',clinical);
 
 const checks=[
