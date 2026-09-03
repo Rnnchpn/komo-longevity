@@ -21,25 +21,26 @@ if(leftovers.length){console.error('[pulse-agenda-v27] remaining Motion Agenda c
 await write('motion-journey-v1.js',motion);
 
 let canonical=await read('patient-canonical-results.js');
+const resultsV4=canonical.includes("const VERSION='4.0.0-motion-report'")&&canonical.includes('data-kresults-v4');
 const docRenderStart=canonical.indexOf('function renderDocuments(result){');
+const v4Next=canonical.indexOf('async function reportPayload(',docRenderStart);
 const v2Next=canonical.indexOf('function connectedStatus(',docRenderStart);
 const legacyNext=canonical.indexOf('async function render(force=false){',docRenderStart);
-const candidates=[v2Next,legacyNext].filter(i=>i>docRenderStart);
+const candidates=[v4Next,v2Next,legacyNext].filter(i=>i>docRenderStart);
 const docRenderEnd=candidates.length?Math.min(...candidates):-1;
 if(docRenderStart<0||docRenderEnd<0)throw new Error('[pulse-agenda-v27] Canonical document renderer contract changed');
 canonical=canonical.slice(0,docRenderStart)+canonical.slice(docRenderEnd);
 const docCalls=["if(hash==='#documents')renderDocuments(result)","if(r==='documents')renderDocuments(result);","if(r==='documents')renderDocuments(result)","renderDocuments(result);"];
 let removedDocCall=false;
 for(const docCall of docCalls){if(canonical.includes(docCall)){canonical=canonical.replace(docCall,'');removedDocCall=true}}
-// Build transforms can compact the call into an expression without a trailing semicolon.
-// The renderer has already been removed above, so replace any residual call with a no-op
-// rather than leaving a runtime ReferenceError or failing on formatting-only drift.
 if(canonical.includes('renderDocuments(result)')){canonical=canonical.replaceAll('renderDocuments(result)','void 0');removedDocCall=true}
 if(!removedDocCall&&canonical.includes('renderDocuments(result)'))throw new Error('[pulse-agenda-v27] Canonical documents call contract changed');
 canonical=canonical.replace("if(h==='#documents'&&!document.querySelector('[data-kcanon-doc]'))schedule(false)",'');
 const canonicalLeftovers=['data-kcanon-doc','renderDocuments(result)'].filter(x=>canonical.includes(x));
 if(canonicalLeftovers.length){console.error('[pulse-agenda-v27] remaining canonical Agenda contexts',canonicalLeftovers.map(x=>`${x}: ${context(canonical,x)}`).join(' || '));throw new Error('[pulse-agenda-v27] Canonical Results still renders into Agenda')}
-if(v2Next>0&&!canonical.includes('data-kresults-v2'))throw new Error('[pulse-agenda-v27] Results V2 was damaged while retiring document renderer');
+if(resultsV4){
+  for(const signature of ['4.0.0-motion-report','data-kresults-v4','RÉSULTAT MOTION','RÉSULTATS FONCTIONNELS','RÉSULTAT CLINICAL'])if(!canonical.includes(signature))throw new Error(`[pulse-agenda-v27] Results V4 damaged while retiring documents renderer: ${signature}`);
+}else if(v2Next>0&&!canonical.includes('data-kresults-v2'))throw new Error('[pulse-agenda-v27] Results V2 was damaged while retiring document renderer');
 await write('patient-canonical-results.js',canonical);
 
 let html=await read('index.html');
@@ -59,6 +60,6 @@ for(const retired of ['agenda-clean-room-v1.js','patient-motion-booking-v2.js','
   if(direct.includes(retired))throw new Error(`[pulse-agenda-v27] retired layer still direct: ${retired}`);
 }
 if(!direct.includes('agenda-hub-v4.js')||!direct.includes('agenda-premium-map-v1.js'))throw new Error('[pulse-agenda-v27] canonical Agenda owners missing');
-console.log('[pulse-agenda-v27] Agenda exclusive ownership locked · Motion/report document producers retired · Results sensor v3 preserved · clean-room removed');
+console.log(`[pulse-agenda-v27] Agenda exclusive ownership locked · Motion/report document producers retired · Results ${resultsV4?'Motion Report v4':'sensor v3'} preserved · clean-room removed`);
 
 await import('./pulse-runtime-mobile-bundle-v28.mjs');
