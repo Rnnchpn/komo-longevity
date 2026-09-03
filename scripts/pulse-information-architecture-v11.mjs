@@ -53,6 +53,13 @@ for(const dir of dirs){
       "primary=actionButton('Agenda et réseau','patient:documents')+actionButton('My KŌMØ','patient:mykomo')+actionButton('Messages','patient:messages');",
       "primary=actionButton('Consultations & rendez-vous','patient:documents')+actionButton('My KŌMØ','patient:mykomo');"
     );
+    const patientBottomGuard="if(mode()==='patient'){document.querySelector('#kamBottomBar')?.remove();return;}";
+    if(!js.includes(patientBottomGuard)){
+      js=js.replace(
+        "  function ensureBottom(){\n    const app=document.querySelector('#appShell');if(!app)return;",
+        `  function ensureBottom(){\n    ${patientBottomGuard}\n    const app=document.querySelector('#appShell');if(!app)return;`
+      );
+    }
     return js;
   });
 
@@ -97,11 +104,13 @@ const exactDock=`const items=[
   ['mykomo','My KŌMØ','◉','mykomo']
 ];`;
 const exactAdaptive="navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo')";
+const patientBottomGuard="if(mode()==='patient'){document.querySelector('#kamBottomBar')?.remove();return;}";
 const checks=[
   ['desktop dock has exactly five patient destinations',(dock.match(/^\s*\['(?:home|key|results|agenda|mykomo)'/gm)||[]).length===5],
   ['desktop dock exact approved order',dock.includes(exactDock)],
   ['desktop dock routes trajectory aliases into Consultations',dock.includes("if(['trajectory','path','plan'].includes(r))return'agenda';")],
   ['adaptive navigation exact approved order',adaptive.includes(exactAdaptive)&&!adaptive.includes("navItem('patient:trajectory'")],
+  ['adaptive shell does not create a patient bottom bar',adaptive.includes(patientBottomGuard)],
   ['patient Messages removed from adaptive primary menu',!adaptive.includes("actionButton('Messages','patient:messages')")],
   ['My KŌMØ exposes Club',myk.includes('data-myk-control')&&myk.includes('data-mkv5-route="club"')],
   ['My KŌMØ routes core score to Results',myk.includes('data-mkv5-route="results">Voir tous mes résultats')],
