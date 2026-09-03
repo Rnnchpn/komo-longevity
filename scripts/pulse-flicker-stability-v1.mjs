@@ -20,8 +20,8 @@ function replaceRequired(text,oldValue,newValue,label){
   return text.replace(oldValue,newValue);
 }
 
-// Core router: Home has one canonical owner. Other dedicated routes receive a
-// quiet mount so their renderer can take over without painting a legacy view.
+// Core router: Home has one canonical owner. Dedicated routes receive a quiet
+// mount so their canonical renderer can take over without painting legacy UI.
 let app=fs.readFileSync(files.app,'utf8');
 const canonicalHomeOwner=app.includes('data-home-owner="patient-home-command-v1"')&&app.includes('KomoPatientHomeCommand?.refresh?.()');
 if(!canonicalHomeOwner){console.error('[pulse-flicker] missing canonical Home ownership');process.exit(1)}
@@ -45,7 +45,7 @@ if(!app.includes(quietRoutesToken)||!app.includes('data-route-loading')){
 }
 fs.writeFileSync(files.app,app);
 
-// Patient v4 no longer owns #path. Progression v2 is the only renderer there.
+// Patient v4 no longer owns #path. Progression is the sole trajectory renderer.
 let patient=fs.readFileSync(files.patient,'utf8');
 patient=replaceRequired(patient,"const TARGETS=new Set(['path','plan','documents']);","const TARGETS=new Set(['plan','documents']);",'patient-v4 path ownership');
 patient=replaceRequired(patient,"function client(){return createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}","function client(){return window.KomoRuntime?.client||createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}",'patient-v4 shared client');
@@ -53,8 +53,7 @@ patient=replaceRequired(patient,"function schedule(force=false){clearTimeout(sch
 if(!patient.includes("window.addEventListener('komo:data-ready',()=>schedule(false));"))patient=patient.replace("window.addEventListener('hashchange',()=>schedule(false));","window.addEventListener('hashchange',()=>schedule(false));window.addEventListener('komo:data-ready',()=>schedule(false));");
 fs.writeFileSync(files.patient,patient);
 
-// Progression: preserve the current Trajectory owner when present; only patch
-// the historical renderer on older builds.
+// Preserve the current Trajectory owner when present; only patch old builds.
 let progression=fs.readFileSync(files.progression,'utf8');
 if(progression.includes('[data-ktrajectory-v1]')){
   const stableCurrent=progression.includes("key===lastKey&&root.querySelector('[data-ktrajectory-v1]')")&&progression.includes("!document.querySelector('[data-ktrajectory-v1]')");
@@ -67,8 +66,7 @@ if(progression.includes('[data-ktrajectory-v1]')){
 }
 fs.writeFileSync(files.progression,progression);
 
-// Results: preserve the current patient-results owner when present; only patch
-// the historical additive renderer on older builds.
+// Preserve current Results ownership when present; patch historical renderer only.
 let results=fs.readFileSync(files.results,'utf8');
 if(results.includes('[data-kresults-v1]')){
   const stableCurrent=results.includes("key===lastKey&&root.querySelector('[data-kresults-v1]')")&&(results.includes("!document.querySelector('[data-kresults-v1]')")||results.includes("!root.querySelector('[data-kresults-v1]')"));
@@ -83,8 +81,7 @@ if(results.includes('[data-kresults-v1]')){
 }
 fs.writeFileSync(files.results,results);
 
-// Clinical cockpit becomes the visible owner immediately. Motion renders inside
-// its host instead of painting a full temporary page and being wrapped later.
+// Clinical cockpit is the visible owner. Motion renders inside #kcpMotionHost.
 let cockpit=fs.readFileSync(files.cockpit,'utf8');
 cockpit=cockpit.replace("function sb(){if(!s.client)s.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return s.client}","function sb(){return window.KomoRuntime?.client||(s.client||(s.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}");
 const wrapPattern=/async function wrap\(\)\{.*?\}\nasync function refresh\(\)/s;
@@ -98,11 +95,11 @@ if(!cockpit.includes("window.addEventListener('komo:data-ready',schedule);"))coc
 fs.writeFileSync(files.cockpit,cockpit);
 
 let motion=fs.readFileSync(files.motion,'utf8');
-motion=motion.replace("function sb(){if(!st.client)st.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return st.client}","function sb(){return window.KomoRuntime?.client||(st.client||(st.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}");
-const oldRenderPrefix="function render(){const root=document.querySelector('#viewRoot');if(!root)return;document.querySelector('#pageEyebrow').textContent='KŌMØ CLINICAL · PRO';document.querySelector('#pageTitle').textContent='Motion workspace';";
-const newRenderPrefix="function render(){const cockpitHost=document.querySelector('#kcpMotionHost');const root=cockpitHost||document.querySelector('#viewRoot');if(!root)return;if(!cockpitHost){document.querySelector('#pageEyebrow').textContent='KŌMØ CLINICAL · PRO';document.querySelector('#pageTitle').textContent='Motion workspace'}";
-motion=replaceRequired(motion,oldRenderPrefix,newRenderPrefix,'clinical motion host ownership');
-motion=replaceRequired(motion,"async function refresh(){if(route()!=='clinical'||rendering)return;","async function refresh(force=false){if(route()!=='clinical'||rendering||(!force&&document.querySelector('#kcpMotionHost [data-clinical-motion-v1]')))return;",'clinical motion render guard');
+motion=motion.replace("function sb(){return st.client||(st.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}))}","function sb(){return window.KomoRuntime?.client||(st.client||(st.client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})))}");
+const currentRenderPrefix="function render(){\n  const root=document.querySelector('#viewRoot');if(!root)return;\n  document.querySelector('#pageEyebrow').textContent='KŌMØ CLINICAL · PRO';document.querySelector('#pageTitle').textContent='Motion';";
+const hostedRenderPrefix="function render(){\n  const cockpitHost=document.querySelector('#kcpMotionHost');const root=cockpitHost||document.querySelector('#viewRoot');if(!root)return;\n  if(!cockpitHost){document.querySelector('#pageEyebrow').textContent='KŌMØ CLINICAL · PRO';document.querySelector('#pageTitle').textContent='Motion';}";
+if(!motion.includes("const cockpitHost=document.querySelector('#kcpMotionHost')"))motion=replaceRequired(motion,currentRenderPrefix,hostedRenderPrefix,'clinical motion host ownership');
+motion=replaceRequired(motion,"async function refresh(){if(route()!=='clinical'||rendering)return;const shell=document.querySelector('#appShell');","async function refresh(force=false){if(route()!=='clinical'||rendering||(!force&&document.querySelector('#kcpMotionHost [data-clinical-motion-v1]')))return;const shell=document.querySelector('#appShell');",'clinical motion render guard');
 motion=replaceRequired(motion,"function schedule(){clearTimeout(timer);timer=setTimeout(refresh,50)}","function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>refresh(force),80)}",'clinical motion schedule');
 if(!motion.includes("window.addEventListener('komo:data-ready',schedule);"))motion=motion.replace("window.addEventListener('hashchange',schedule);","window.addEventListener('hashchange',schedule);window.addEventListener('komo:data-ready',schedule);");
 fs.writeFileSync(files.motion,motion);
@@ -111,4 +108,4 @@ let css=fs.readFileSync(files.css,'utf8');
 if(!css.includes('/* Route stability */'))css+=`\n/* Route stability */\n.komo-route-loading{min-height:260px;display:grid;place-items:center;padding:32px;border:1px solid rgba(37,48,40,.08);border-radius:24px;background:rgba(255,255,255,.42);color:#7b817b;font-size:11px;letter-spacing:.02em}\n@media(max-width:767px){.komo-route-loading{min-height:180px;border-radius:20px}}\n`;
 fs.writeFileSync(files.css,css);
 
-console.log('[pulse-flicker] canonical Home ownership and stable route mounting applied');
+console.log('[pulse-flicker] canonical Home, Clinical Motion and stable route ownership applied');
