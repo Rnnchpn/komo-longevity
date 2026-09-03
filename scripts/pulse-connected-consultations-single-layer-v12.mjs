@@ -41,7 +41,7 @@ const [css,key,consultations]=await Promise.all([
 
 const homeTokens=['#050706','#070a08','#0a0e0c','#101512','#f2f4f1','#808983','#7fa58a','#315b41','#c6a15e','#c87972'];
 const checks=[
-  ['Connected canonical v3 owner remains loaded',html.includes('./key-hub-v1.js')&&key.includes('data-connected-v3')&&key.includes("const V='3.0.0'")],
+  ['Connected canonical v3 owner remains loaded',html.includes('./key-hub-v1.js')&&key.includes('data-connected-v3')&&key.includes("const V='3.1.0'")],
   ['Consultations canonical owner remains loaded',html.includes('./trajectory-v3.js')&&consultations.includes('data-consultations-v4')],
   ['legacy KEY prototype retired',!html.includes('key-results-grid-v1.js')],
   ['legacy KEY enhancer retired',!html.includes('key-results-v2.js')],
@@ -61,4 +61,4 @@ for(const [label,ok] of checks){
   if(!ok)process.exitCode=1;
 }
 if(process.exitCode)throw new Error('Connected / Consultations single-layer v12 guard failed');
-console.log('[pulse-single-layer-v12] PASS · one visible owner per surface · Connected v3 owns its route · legacy KEY/Trajectory presentation layers retired');
+console.log('[pulse-single-layer-v12] PASS · one visible owner per surface · Connected v3.1 owns its route · legacy KEY/Trajectory presentation layers retired');
