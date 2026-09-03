@@ -1,8 +1,24 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
-const htmlPath=path.join(process.cwd(),'site','pulse-v12','index.html');
+const pulse=path.join(process.cwd(),'site','pulse-v12');
+const htmlPath=path.join(pulse,'index.html');
 if(!fs.existsSync(htmlPath))throw new Error('[consultation-prune] Pulse index missing');
+
+// The final consultation patch is generated through a raw template. Normalize
+// the escaping needed by the generator so the emitted browser modules contain
+// real template literals/interpolations, then syntax-check them before deploy.
+for(const name of ['booking-layer-v1.js','center-two-tab-workspace-v1.js']){
+  const file=path.join(pulse,name);
+  if(!fs.existsSync(file))throw new Error('[consultation-prune] missing runtime: '+name);
+  let src=fs.readFileSync(file,'utf8');
+  src=src.replace(/\\`/g,'`').replace(/\\\$\{/g,'${');
+  fs.writeFileSync(file,src);
+  const check=spawnSync(process.execPath,['--check',file],{encoding:'utf8'});
+  if(check.status!==0)throw new Error(`[consultation-prune] invalid ${name}: ${check.stderr||check.stdout}`);
+}
+
 let html=fs.readFileSync(htmlPath,'utf8');
 const retired=[
   'agenda-hub-v4.js',
@@ -20,4 +36,4 @@ for(const file of ['agenda-hub-v4.css','agenda-premium-map-v1.css','booking-dire
 }
 fs.writeFileSync(htmlPath,html);
 for(const file of retired)if(html.includes(file))throw new Error('[consultation-prune] legacy runtime still loaded: '+file);
-console.log('[consultation-prune] agenda, agenda map and pro agenda runtimes retired from production HTML');
+console.log('[consultation-prune] valid consultation runtime · agenda, agenda map and pro agenda retired');
