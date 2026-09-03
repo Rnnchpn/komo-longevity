@@ -1,15 +1,16 @@
 {
-  "version": "2026-09-01-motion-v4-freeze",
+  "version": "2026-09-03-motion-sensor-v06-freeze",
   "principles": [
     "one render owner per declared surface",
     "controllers may orchestrate data, navigation, and bounded subflows",
     "extensions are presentation-only and must not write routes or mutate #viewRoot",
     "all reachable structural route/view writers must be classified before release",
-    "desktop, tablet and mobile share the same canonical content contract"
+    "desktop, tablet and mobile share the same canonical content contract",
+    "Motion Score is sensor-only; questionnaires are contextual and legacy manual Motion tests are retired"
   ],
   "surfaces": {
     "home": {"owner":"patient-home-command-v1.js","controllers":[],"extensions":[]},
-    "results": {"owner":"patient-canonical-results.js","controllers":["tests-v1.js"],"extensions":[]},
+    "results": {"owner":"patient-canonical-results.js","controllers":["tests-v1.js","patient-tests-scope-v2.js"],"extensions":[]},
     "motion": {"owner":"motion-hub-v4.js","controllers":["motion-workflow.js","motion-route-guard-v4.js","motion-access-fix-v1.js"],"extensions":[]},
     "key": {"owner":"key-hub-v1.js","controllers":[],"extensions":[]},
     "trajectory": {"owner":"trajectory-v3.js","controllers":[],"extensions":[]},
@@ -19,10 +20,10 @@
     "club": {"owner":"club-hub-v1.js","controllers":[],"extensions":[]},
     "profile": {"owner":"profile-v2.js","controllers":[],"extensions":["account-hub-v2.js","account-privacy-v1.js"]},
     "messages": {"owner":"care-messaging-v2.js","controllers":[],"extensions":[]},
-    "clinical": {"owner":"clinical-cockpit-v1.js","controllers":["clinical-motion-v1.js","patient-assessment-trio-v1.js","pro-agenda-dossier-v1.js","pro-followup-v1.js","tests-status-cockpit-v1.js","booking-layer-v1.js"],"extensions":[]},
+    "clinical": {"owner":"clinical-cockpit-v1.js","controllers":["clinical-motion-v1.js","myocare-import.js","patient-assessment-trio-v1.js","pro-agenda-dossier-v1.js","pro-followup-v1.js","tests-status-cockpit-v1.js","booking-layer-v1.js"],"extensions":[]},
     "admin": {"owner":"admin-console-v2.js","controllers":["admin-motion-validation-v1.js","admin-patient-manager-v1.js","admin-professionals-v1.js","admin-shortcut-v1.js","admin-ux-v2.js"],"extensions":[]},
     "auth": {"owner":"auth-login-canonical.js","controllers":["auth-gateway-v2.js"],"extensions":[]},
     "navigation": {"owner":"patient-navigation-core-v1.js","controllers":["adaptive-shell-v4.js","pulse-bottom-nav-v6.js"],"extensions":["mobile-runtime-v3.js"]}
   },
-  "global_controllers":["app-router-v2.js","first-test-entry-v1.js","patient-onboarding-v1.js","pro-architecture-v2.js"]
+  "global_controllers":["app-router-v2.js","patient-onboarding-v1.js","pro-architecture-v2.js"]
 }
