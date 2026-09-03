@@ -40,12 +40,14 @@ const oldTail=`window.addEventListener('hashchange',schedule);window.addEventLis
 const newTail=`function refreshChrome(){if(navRefreshQueued||!isPro())return;navRefreshQueued=true;requestAnimationFrame(()=>{navRefreshQueued=false;rebuildNav();hideCockpitChrome()})}\nwindow.addEventListener('hashchange',schedule);window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:data-ready',schedule);window.addEventListener('komo:clinical-cockpit-ready',()=>{refreshChrome();schedule()});window.addEventListener('komo:myocare-imported',()=>{rowsLoadedAt=0;if(S.selected)setTimeout(()=>openDossier(S.selected),120);else schedule()});document.addEventListener('DOMContentLoaded',schedule);schedule();`;
 replace(oldTail,newTail,'observer retirement');
 
-// Centre is consultation-first. Keep the legacy cockpit as a structural host only;
-// do not let its header/tabs compete with the consultation owner.
 replace(
 `body.komo-pro-mode .kcp-tabs{display:none!important}`,
 `body.komo-pro-mode .kcp-head,body.komo-pro-mode .kcp-tabs,body.komo-pro-mode #kcpPatientBar{display:none!important}`,
 'cockpit chrome cleanup');
+
+// The consultation workflow emits this owner through a raw build template.
+// Normalize it here so all subsequent architecture/debt checks see valid browser JS.
+src=src.replace(/\\`/g,'`').replace(/\\\$\{/g,'${');
 
 fs.writeFileSync(centerPath,src);
 const check=spawnSync(process.execPath,['--check',centerPath],{encoding:'utf8'});
