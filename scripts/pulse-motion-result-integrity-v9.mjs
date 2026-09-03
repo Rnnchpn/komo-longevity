@@ -11,26 +11,29 @@ const canonicalChecks=[
   ['canonical selector RPC',canonicalSource.includes("komo_motion_display_assessment")],
   ['exact episode hydration RPC',canonicalSource.includes("komo_result_assessment_detail")],
   ['published result wins for patient',canonicalSource.includes("motion.published?.assessmentId||motion.calculated?.assessmentId")],
-  ['canonical runtime version 1.3',canonicalSource.includes("version:'1.3.0'")]
+  ['canonical runtime version 1.4',canonicalSource.includes("version:'1.4.0'")],
+  ['sensor v0.6 invalidates canonical cache',canonicalSource.includes("komo:motion-v06-calculated")]
 ];
 for(const [label,ok] of canonicalChecks){console.log(`[pulse-motion-result-v9] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
 if(process.exitCode)throw new Error('Canonical Motion result contract failed');
 
-// Keep the generated runtime byte-for-byte aligned with its source owner.
 await writeFile(join(built,'canonical-result-runtime.js'),canonicalSource,'utf8');
 
+// Normalize the Admin validation selector to the current sensor score. This is
+// a compatibility mutation only; it must never restore legacy v0.5 labels.
 for(const dir of [source,built]){
   const path=join(dir,'admin-motion-validation-v1.js');
   let js=await readFile(path,'utf8');
-  js=js.replace(".eq('algorithm_version','motion-functional-index-v0.5-poc')",".eq('profile_code','motion_integrated')");
-  js=js.replaceAll('Motion v0.5','Motion v0.5.1');
-  js=js.replaceAll('Motion v0.5.1.1','Motion v0.5.1');
+  js=js.replace(".eq('algorithm_version','motion-functional-index-v0.5-poc')",".eq('algorithm_version','motion-sensor-index-v0.6.0')");
+  js=js.replaceAll('Motion v0.5.1.1','Motion sensor v0.6');
+  js=js.replaceAll('Motion v0.5.1','Motion sensor v0.6');
+  js=js.replaceAll('Motion v0.5','Motion sensor v0.6');
   await writeFile(path,js,'utf8');
   const checks=[
-    ['Admin no longer filters obsolete v0.5 algorithm',!js.includes("motion-functional-index-v0.5-poc")],
-    ['Admin uses stable Motion profile contract',js.includes(".eq('profile_code','motion_integrated')")],
-    ['Admin labels current Motion v0.5.1',js.includes('Motion v0.5.1')],
-    ['Admin has no duplicated v0.5.1.1 label',!js.includes('Motion v0.5.1.1')]
+    ['Admin no longer filters obsolete functional algorithm',!js.includes('motion-functional-index-v0.5-poc')],
+    ['Admin selects sensor v0.6 score',js.includes("motion-sensor-index-v0.6.0")],
+    ['Admin labels sensor v0.6',js.includes('Motion sensor v0.6')],
+    ['Admin has no legacy Motion v0.5 label',!js.includes('Motion v0.5')]
   ];
   for(const [label,ok] of checks){console.log(`[pulse-motion-result-v9] ${ok?'OK':'FAIL'} · ${label} · ${dir.endsWith('pulse-app')?'source':'build'}`);if(!ok)process.exitCode=1}
 }
@@ -46,6 +49,6 @@ const reportChecks=[
   ['PDF blob minimum size guard retained',pdf.includes('blob.size<12000')]
 ];
 for(const [label,ok] of reportChecks){console.log(`[pulse-motion-result-v9] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
-if(process.exitCode)throw new Error('Motion score/report integrity guard failed');
+if(process.exitCode)throw new Error('Motion sensor score/report integrity guard failed');
 
-console.log('[pulse-motion-result-v9] PASS · canonical Motion selection, v0.5.1 validation and PDF generation contracts aligned');
+console.log('[pulse-motion-result-v9] PASS · canonical Motion selection, sensor v0.6 scoring and PDF generation contracts aligned');
