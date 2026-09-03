@@ -26,9 +26,12 @@ const checks=[
   ['patient consultation owner',booking.includes('Votre consultation Motion.')],
   ['patient assigned consultation RPC',booking.includes('komo_my_motion_consultations')],
   ['no patient map shell',!booking.includes('data-kbd-shell')],
+  ['no weekly agenda callback',!booking.includes('loadProWeek')],
+  ['no weekly planning renderer',!booking.includes('Planning hebdomadaire')],
+  ['no calendar grid renderer',!booking.includes('kbook-calendar')],
   ['professional consultation title',center.includes('Consultations Motion')],
   ['professional assignment RPC',center.includes('komo_assign_motion_consultation')],
   ['explicit no-map no-agenda contract',center.includes('Pas de carte, pas d’agenda.')]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[consultation-final-qa] failed: '+label);
-console.log('[consultation-final-qa] PASS · consultation only · no centre map · no agenda runtime');
+console.log('[consultation-final-qa] PASS · consultation only · no centre map · no agenda/calendar runtime');
