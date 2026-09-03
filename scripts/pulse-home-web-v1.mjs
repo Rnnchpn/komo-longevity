@@ -2,6 +2,10 @@ import {copyFile,readFile,writeFile} from 'node:fs/promises';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
+// Re-apply the approved patient IA after every historical Pulse layer, immediately
+// before the final Home/navigation package is copied into production output.
+await import('./pulse-information-architecture-v11.mjs');
+
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const pulse=join(root,'site','pulse-v12');
 const htmlPath=join(pulse,'index.html');
@@ -24,7 +28,6 @@ for(const file of [cssFile,mobileCssFile,jsFile,mobileJsFile,assistantCssFile,na
 
 let html=await readFile(htmlPath,'utf8');
 const esc=file=>file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-const directScript=file=>new RegExp(`<script[^>]+src=["']\\./${esc(file)}(?:\\?[^"']*)?["']`).test(html);
 
 for(const file of [cssFile,mobileCssFile,assistantCssFile,...legacyCss]){
   html=html.replace(new RegExp(`\\s*<link rel="stylesheet" href="\\./${esc(file)}(?:\\?[^\"]*)?"\\s*\\/?>`,'g'),'');
