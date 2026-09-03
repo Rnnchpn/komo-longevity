@@ -41,7 +41,7 @@ const [css,key,consultations]=await Promise.all([
 
 const homeTokens=['#050706','#070a08','#0a0e0c','#101512','#f2f4f1','#808983','#7fa58a','#315b41','#c6a15e','#c87972'];
 const checks=[
-  ['Connected canonical owner remains loaded',html.includes('./key-hub-v1.js')&&key.includes('data-connected-v2')],
+  ['Connected canonical v3 owner remains loaded',html.includes('./key-hub-v1.js')&&key.includes('data-connected-v3')&&key.includes("const V='3.0.0'")],
   ['Consultations canonical owner remains loaded',html.includes('./trajectory-v3.js')&&consultations.includes('data-consultations-v4')],
   ['legacy KEY prototype retired',!html.includes('key-results-grid-v1.js')],
   ['legacy KEY enhancer retired',!html.includes('key-results-v2.js')],
@@ -52,7 +52,7 @@ const checks=[
   ['legacy Trajectory style retired',!html.includes('trajectory-color-v4.css')],
   ['Home palette stylesheet loaded once',(html.match(new RegExp(palette,'g'))||[]).length===1],
   ['Home palette tokens reused',homeTokens.every(token=>css.includes(token))],
-  ['Connected palette scoped',css.includes('body.connected-v2')],
+  ['Connected shell palette scoped',css.includes('body.connected-v2')],
   ['Consultations palette scoped',css.includes('body.consultations-v4')],
   ['no light shell in palette',!css.includes('#f6f7f5')&&!css.includes('background:#fff')]
 ];
@@ -61,4 +61,4 @@ for(const [label,ok] of checks){
   if(!ok)process.exitCode=1;
 }
 if(process.exitCode)throw new Error('Connected / Consultations single-layer v12 guard failed');
-console.log('[pulse-single-layer-v12] PASS · one visible owner per surface · Home palette applied · legacy KEY/Trajectory presentation layers retired');
+console.log('[pulse-single-layer-v12] PASS · one visible owner per surface · Connected v3 owns its route · legacy KEY/Trajectory presentation layers retired');
