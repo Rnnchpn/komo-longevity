@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const target=join(root,'site','pulse-v12');
-const RELEASE='20260903-motion-report-final-v6';
+const RELEASE='20260903-motion-report-complete-v7';
 
 async function patch(name,replacements){
   const path=join(target,name);
@@ -13,7 +13,7 @@ async function patch(name,replacements){
   await writeFile(path,text,'utf8');
 }
 
-// Patient side: every report entry point resolves to the same final Motion Report renderer.
+// Patient side: every report entry point resolves to the same complete Motion Report renderer.
 await patch('index.html',[
   [/canonical-report-export-v[23]\.js\?v=[^\"]+/g,`canonical-report-export-v3.js?v=${RELEASE}`],
   [/report-bootstrap-v1\.js\?v=[^\"]+/g,`report-bootstrap-v1.js?v=${RELEASE}`]
@@ -35,7 +35,6 @@ await patch('dossier-page.js',[[/\s*document\.querySelector\('#pdfBtn'\)\?\.addE
 await patch('dossier-pdf-export-v2.js',[[/report-delivery-v[12]\.js(?:\?v=[^'\"]+)?/g,`report-delivery-v2.js?v=${RELEASE}`]]);
 await patch('report-delivery-v2.js',[[/mobility-report-pdf-v[123]\.js(?:\?v=[^'\"]+)?/g,`mobility-report-pdf-v3.js?v=${RELEASE}`]]);
 
-// Build-time regression guards. Do not mutate the canonical renderer here.
 const index=await readFile(join(target,'index.html'),'utf8');
 const patientUi=await readFile(join(target,'report-patient-ui-v1.js'),'utf8');
 const canonical=await readFile(join(target,'canonical-report-export-v3.js'),'utf8');
@@ -52,15 +51,17 @@ const checks=[
   ['patient card uses one Motion renderer',patientUi.includes(`mobility-report-pdf-v3.js?v=${RELEASE}`)],
   ['canonical export uses one Motion renderer',canonical.includes(`mobility-report-pdf-v3.js?v=${RELEASE}`)],
   ['Motion report schema + sensor algorithm required',payload.includes("SCHEMA_VERSION='komo-motion-report-payload-v2'")&&payload.includes("ALG='motion-sensor-index-v0.6.0'")],
-  ['payload remains sensor-only',payload.includes("scorePolicy:'sensor_only'")&&payload.includes('questionnaireContribution:0')&&payload.includes('gaitContribution:0')&&payload.includes('postureContribution:0')],
-  ['payload exposes full gait family',payload.includes('scalarCountExpected:15')&&payload.includes("['step_count','Nombre de pas'")&&payload.includes("['step_length_m','Longueur de pas'")],
+  ['payload remains sensor-only',payload.includes("scorePolicy:'sensor_only'")&&payload.includes('questionnaireContribution:0')&&payload.includes('functionalContribution:0')&&payload.includes('gaitContribution:0')&&payload.includes('postureContribution:0')],
+  ['payload exposes functional context M-FUN-01 to M-FUN-07',payload.includes("['M-FUN-01','GLFS-25'")&&payload.includes("['M-FUN-07','Appui unipodal droit'")&&payload.includes('functional_context_incomplete')],
+  ['payload exposes full gait family',payload.includes('scalarCountExpected:15')&&payload.includes("['step_count','Nombre de pas'")&&payload.includes("['step_length_m','Longueur de pas'")&&payload.includes('globalAsymmetry')&&payload.includes('variability')],
+  ['payload exposes muscle QC and calibration',payload.includes('activationMean')&&payload.includes('coactivationMean')&&payload.includes('fatigabilityMean')&&payload.includes('suspectCount')&&payload.includes('calibrationCount')],
   ['payload carries full context and appendices',payload.includes('questionnaireResponses')&&payload.includes('sensorMetrics:rawSensor')&&payload.includes('measurements:rawMeasurements')&&payload.includes('completedQuestionnaireCount')],
-  ['payload does not revive legacy manual score inputs',!payload.includes("measurement(d,'M-FUN-03')")&&!payload.includes("measurement(d,'M-FUN-04')")],
-  ['renderer is final Motion Report v6',renderer.includes("VERSION='6.0.0-final'")&&renderer.includes("VISUAL_SYSTEM='komo-motion-report-final-2026'")],
-  ['renderer has eight premium core sections',renderer.includes('// 3 — LSI')&&renderer.includes('// 4 — Activation')&&renderer.includes('// 5 — Full gait')&&renderer.includes('// 6 — Posture, questionnaires and acquisition')&&renderer.includes('// 7 — Questionnaire detail')&&renderer.includes('// 8 — Act, method and provenance')],
-  ['renderer includes technical appendices',renderer.includes('ANNEXE TECHNIQUE')&&renderer.includes('Réponses questionnaires.')&&renderer.includes('Métriques Myodev.')&&renderer.includes('Mesures Pulse complémentaires.')],
-  ['renderer explains score separation',renderer.includes('Questionnaires, marche et posture = contexte descriptif, contribution numérique 0')],
-  ['renderer has no legacy manual test cards',!renderer.includes('Stand-Up Test')&&!renderer.includes('Two-Step Test')&&!renderer.includes('ESTIMATION FONCTIONNELLE')],
+  ['renderer is complete Motion Report v7',renderer.includes("VERSION='7.0.0-complete'")&&renderer.includes("VISUAL_SYSTEM='komo-motion-report-complete-2026'")],
+  ['renderer includes requested core sections',renderer.includes('// 3 — Fonction')&&renderer.includes('// 4 — Marche')&&renderer.includes('// 5 — Posture')&&renderer.includes('// 6 — Muscle')&&renderer.includes('// 7 — Questionnaires')&&renderer.includes('// 8 — Agir')],
+  ['renderer includes full technical appendices',renderer.includes('Données Myodev · détail complet')&&renderer.includes('Mesures cliniques · source')&&renderer.includes('Réponses questionnaires')&&renderer.includes('Provenance & validation')],
+  ['renderer renders source + QC for functional tests',renderer.includes("['TEST','RÉSULTAT','SOURCE','QC','DATE']")&&renderer.includes('Non recueilli')],
+  ['renderer renders muscle QC',renderer.includes('Activation moyenne')&&renderer.includes('Coactivation CCI')&&renderer.includes('Fatigabilité')&&renderer.includes('QC suspect')&&renderer.includes('QC invalide')&&renderer.includes('Calibration')],
+  ['renderer explains score separation',renderer.includes('Le Motion Score v0.6 utilise uniquement les LSI musculaires valides')&&renderer.includes('leur contribution numérique au score est 0')],
   ['renderer keeps resilient PDF engine',renderer.includes('cdn.jsdelivr.net/npm/jspdf@2.5.2')&&renderer.includes('cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2')&&renderer.includes('blob.size<16000')],
   ['renderer uses dynamic total page count',renderer.includes('doc.getNumberOfPages()')&&renderer.includes('KŌMØ · ${p}/${total}')],
   ['dossier legacy interceptors retired',!/dossier-export-bridge|canonical-report-export(?:-v2)?/.test(dossier)],
@@ -73,7 +74,7 @@ const failed=checks.filter(([,ok])=>!ok).map(([label])=>label);
 for(const[label,ok]of checks)console.log(`[pulse-report-visual-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(failed.length)throw new Error(`[pulse-report-visual-v2] failed: ${failed.join(', ')}`);
 
-console.log(`[pulse-report-visual-v2] PASS · final Motion Report v6 · full gait + context + technical appendix · patient + professional routes unified · ${RELEASE}`);
+console.log(`[pulse-report-visual-v2] PASS · complete Motion Report v7 · functional + gait + posture + muscle + questionnaires + full technical traceability · ${RELEASE}`);
 
 await import('./pulse-myocare-contract-alignment-v1.mjs');
 await import('./pulse-functional-rc1.mjs');
