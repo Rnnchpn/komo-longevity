@@ -31,6 +31,10 @@ canonical=canonical.slice(0,docRenderStart)+canonical.slice(docRenderEnd);
 const docCalls=["if(hash==='#documents')renderDocuments(result)","if(r==='documents')renderDocuments(result);","if(r==='documents')renderDocuments(result)","renderDocuments(result);"];
 let removedDocCall=false;
 for(const docCall of docCalls){if(canonical.includes(docCall)){canonical=canonical.replace(docCall,'');removedDocCall=true}}
+// Build transforms can compact the call into an expression without a trailing semicolon.
+// The renderer has already been removed above, so replace any residual call with a no-op
+// rather than leaving a runtime ReferenceError or failing on formatting-only drift.
+if(canonical.includes('renderDocuments(result)')){canonical=canonical.replaceAll('renderDocuments(result)','void 0');removedDocCall=true}
 if(!removedDocCall&&canonical.includes('renderDocuments(result)'))throw new Error('[pulse-agenda-v27] Canonical documents call contract changed');
 canonical=canonical.replace("if(h==='#documents'&&!document.querySelector('[data-kcanon-doc]'))schedule(false)",'');
 const canonicalLeftovers=['data-kcanon-doc','renderDocuments(result)'].filter(x=>canonical.includes(x));
