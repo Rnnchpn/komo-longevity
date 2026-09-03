@@ -52,7 +52,7 @@ const checks=[
  ['home Connected card opens dedicated route',finalHome.includes("go('key')")&&!finalHome.includes("go('followup')")],
  ['Connected uses real wearable table',finalJs.includes("from('wearable_daily_metrics')")],
  ['Connected daily score is explicitly non-clinical',finalJs.includes('Signal quotidien non clinique')&&finalJs.includes('Motion Myodev reste votre mesure de référence')],
- ['Connected score requires movement sleep and resting HR',finalJs.includes('parts.length===3')&&finalJs.includes("build(sleepRow,'sleep_minutes'")&&finalJs.includes("build(heartRow,'resting_hr'"))],
+ ['Connected score requires movement sleep and resting HR',finalJs.includes('parts.length===3')&&finalJs.includes("build(sleepRow,'sleep_minutes'")&&finalJs.includes("build(heartRow,'resting_hr'")],
  ['Connected exposes 7 and 30 day trajectory',finalJs.includes('data-kcn-period="7"')&&finalJs.includes('data-kcn-period="30"')],
  ['Connected compares steps sleep and resting HR',finalJs.includes("periodComparison('Pas / jour'")&&finalJs.includes("periodComparison('Sommeil / nuit'")&&finalJs.includes("periodComparison('FC repos'"))],
  ['Connected patient-facing name shipped',finalJs.includes("eyebrow.textContent='KŌMØ CONNECTED'")&&finalJs.includes('MOTION TODAY · CONNECTED')]
