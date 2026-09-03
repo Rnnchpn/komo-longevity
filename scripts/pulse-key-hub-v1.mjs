@@ -41,7 +41,7 @@ const finalHome=await readFile(homeKeyPath,'utf8');
 const finalJs=await readFile(join(pulse,'key-hub-v1.js'),'utf8');
 
 const scoreInputsPresent = finalJs.includes('parts.length===3') && finalJs.includes("build(sleepRow,'sleep_minutes'") && finalJs.includes("build(heartRow,'resting_hr'");
-const trajectoryMetricsPresent = finalJs.includes("periodComparison('Pas / jour'") && finalJs.includes("periodComparison('Sommeil / nuit'") && finalJs.includes("periodComparison('FC repos'");
+const trajectoryMetricsPresent = finalJs.includes("'Pas / jour'") && finalJs.includes("'Sommeil / nuit'") && finalJs.includes("'FC repos / nocturne'");
 
 const checks=[
  ['Connected runtime shipped once',finalHtml.includes(`key-hub-v1.js?v=${release}`)&&(finalHtml.match(/key-hub-v1\.js/g)||[]).length===1],
@@ -54,9 +54,10 @@ const checks=[
  ['Connected daily score is explicitly non-clinical',finalJs.includes('Signal quotidien non clinique')&&finalJs.includes('Motion Myodev reste votre mesure de référence')],
  ['Connected score requires movement sleep and resting HR',scoreInputsPresent],
  ['Connected exposes 7 and 30 day trajectory',finalJs.includes('data-kcn-period="7"')&&finalJs.includes('data-kcn-period="30"')],
- ['Connected compares steps sleep and resting HR',trajectoryMetricsPresent],
+ ['Connected compares steps sleep and resting HR/nocturnal HR',trajectoryMetricsPresent],
+ ['Connected provisional Mi Fitness values remain labeled',finalJs.includes('Estimation provisoire')&&finalJs.includes('provisoire Mi Fitness')],
  ['Connected patient-facing name shipped',finalJs.includes("eyebrow.textContent='KŌMØ CONNECTED'")&&finalJs.includes('MOTION TODAY · CONNECTED')]
 ];
 for(const [label,ok] of checks) console.log(`[pulse-connected] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
-console.log('[pulse-connected] PASS · one Connected owner · daily non-clinical Motion signal · 7/30 day trajectory · real wearable data');
+console.log('[pulse-connected] PASS · one Connected owner · daily non-clinical Motion signal · 7/30 day trajectory · provisional Mi Fitness clearly labeled');
