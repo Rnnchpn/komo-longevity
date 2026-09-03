@@ -148,6 +148,8 @@ const scripts = [
   // Release freeze: runs after every historical/public mutation and is re-audited.
   'scripts/pulse-freeze-runtime-v1.mjs',
   'scripts/pulse-freeze-final-manifest-v1.mjs',
+  // Final Centre pass patches the existing Centre/questionnaire owners only.
+  'scripts/pulse-center-self-motion-v1.mjs',
   'scripts/pulse-runtime-debt-audit-v1.mjs',
   'scripts/pulse-runtime-architecture-audit-v37.mjs',
   // Final public-surface pass: it runs after every historical rewrite so the
