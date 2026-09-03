@@ -8,8 +8,8 @@ const retired=['patient-home-micro-motion-v1.js','my-komo-key-home-v1.js','pulse
 const commandSource=await readFile(root+command,'utf8');
 let html=await readFile(htmlPath,'utf8');
 
-const isV6=commandSource.includes("const VERSION='6.0.0'")||commandSource.includes('data-khome-v6');
-const canonicalHome=isV6||commandSource.includes("const VERSION='5.0.0'")||commandSource.includes('data-khome-v5')||commandSource.includes("const VERSION='3.0.0'")||commandSource.includes('data-khome-v3');
+const isV7=commandSource.includes("const VERSION='7.0.0'")||commandSource.includes('data-khome-v7');
+const canonicalHome=isV7||commandSource.includes("const VERSION='6.0.0'")||commandSource.includes('data-khome-v6')||commandSource.includes("const VERSION='5.0.0'")||commandSource.includes('data-khome-v5')||commandSource.includes("const VERSION='3.0.0'")||commandSource.includes('data-khome-v3');
 if(!canonicalHome)throw new Error('[pulse-home-v35] canonical Home contract not recognized');
 
 // The canonical Home owns presentation. Historical Home overlays stay retired.
@@ -29,14 +29,16 @@ if(!commandSource.includes('komo:home-command-rendered'))throw new Error('[pulse
 if(!commandSource.includes('KomoAssistantV2'))throw new Error('[pulse-home-v35] canonical Komo assistant bridge missing');
 if(commandSource.includes('MutationObserver')||commandSource.includes('setInterval('))throw new Error('[pulse-home-v35] canonical Home regained persistent observation');
 
-if(isV6){
-  if(!commandSource.includes('MOTION TODAY')||!commandSource.includes("metricCard('steps'")||!commandSource.includes("metricCard('sleep'")||!commandSource.includes("metricCard('resting_hr'"))throw new Error('[pulse-home-v35] V6 daily signal hierarchy changed');
-  if(commandSource.includes('kh5-komo')||commandSource.includes('kh5-signals'))throw new Error('[pulse-home-v35] retired V5 dashboard hierarchy merged into V6 owner');
-  console.log('[pulse-home-v35] Home V6 detected · legacy Home overlays retired · single canonical owner preserved');
+if(isV7){
+  if(!commandSource.includes('dataFree:true')||commandSource.includes("rpc('")||commandSource.includes("from('")||commandSource.includes('MOTION TODAY')||commandSource.includes('Motion Score'))throw new Error('[pulse-home-v35] V7 data-free contract changed');
+  for(const route of ['results','key','documents','mykomo'])if(!commandSource.includes(`data-kh7-route="${route}"`))throw new Error(`[pulse-home-v35] V7 route missing: ${route}`);
+  console.log('[pulse-home-v35] Home V7 detected · data-free orientation surface · legacy overlays retired · single canonical owner preserved');
+}else if(commandSource.includes("const VERSION='6.0.0'")){
+  console.log('[pulse-home-v35] legacy Home V6 detected · legacy overlays retired · single canonical owner preserved');
 }else if(commandSource.includes("const VERSION='5.0.0'")){
-  console.log('[pulse-home-v35] Home V5 detected · legacy Home overlays retired · single canonical owner preserved');
+  console.log('[pulse-home-v35] legacy Home V5 detected · legacy overlays retired · single canonical owner preserved');
 }else{
-  console.log('[pulse-home-v35] Home V3 detected · legacy Home overlays retired · single canonical owner preserved');
+  console.log('[pulse-home-v35] legacy Home V3 detected · legacy overlays retired · single canonical owner preserved');
 }
 
 await import('./pulse-runtime-mobile-observer-v36.mjs');
