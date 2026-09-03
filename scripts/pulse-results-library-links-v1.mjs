@@ -98,7 +98,7 @@ const checks=[
   ['Results keeps one V4 owner',final.includes("4.0.0-motion-report")&&final.includes('data-kresults-v4')],
   ['trajectory CTA is wired',final.includes('Corriger ma trajectoire →')&&final.includes('installTrajectoryLinks(root)')],
   ['Library mapping is contextual',final.includes('/media/test-two-step')&&final.includes('/media/cadence-marche-normale')&&final.includes('/media/equilibre-vieillissement')&&final.includes('/media/moins-force-jambes')],
-  ['raw technical markers are not spammed with CTAs',!final.includes("querySelectorAll('.kr4-tech-row')"))
+  ['raw technical markers are not spammed with CTAs',!final.includes("querySelectorAll('.kr4-tech-row')")]
 ];
 for(const [label,ok] of checks){console.log(`[pulse-results-library] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
 if(process.exitCode)throw new Error('[pulse-results-library] QA failed');
