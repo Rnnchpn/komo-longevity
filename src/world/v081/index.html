@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#cfc9b9" />
+  <title>KŌMØ World · V0.8.1</title>
+  <meta name="description" content="KŌMØ World V0.8.1 — clean Atrium runtime, Functional Digital Twin and KŌMØ Arena." />
+  <link rel="stylesheet" href="../v08/world-v08.css" />
+  <link rel="stylesheet" href="./world-v081.css" />
+</head>
+<body>
+<main id="app" class="world-shell">
+  <canvas id="world-canvas" aria-label="KŌMØ World V0.8.1"></canvas>
+
+  <header class="hud glass">
+    <div class="brand"><strong>KŌMØ</strong><span>WORLD</span><i>V0.8.1</i></div>
+    <div class="vitals">
+      <div><span data-i18n="motion">Motion</span><b id="hud-motion">84</b></div>
+      <div><span data-i18n="level">Niveau</span><b>12</b></div>
+      <div><span data-i18n="points">Points</span><b id="hud-points">2,480</b></div>
+    </div>
+    <button id="language-toggle" class="lang" aria-label="Changer de langue">FR</button>
+    <button id="settings-open" class="round" aria-label="Contrôles">⚙</button>
+  </header>
+
+  <section id="intro" class="intro glass">
+    <span class="eyebrow" data-i18n="season">ÎLE CENTRALE · SAISON 01</span>
+    <h1><span data-i18n="yourBody">Votre corps.</span><br><em data-i18n="yourWorld">Votre monde.</em></h1>
+    <p data-i18n="introCopy">Rejoignez le Desk, explorez votre jumeau fonctionnel, puis découvrez l’Arena.</p>
+    <div class="quest"><i></i><span id="quest-copy">01 · Rejoindre le KŌMØ Desk</span></div>
+    <button id="intro-enter" data-i18n="enterWorld">Entrer dans KŌMØ World</button>
+  </section>
+
+  <div class="location glass"><span id="location-name">ARRIVAL PLAZA</span><b id="heading">N</b></div>
+  <div id="interaction" class="interaction glass"><span id="interaction-key">E</span><div><b id="interaction-title">Interagir</b><small id="interaction-copy">Approchez-vous d’un point d’intérêt</small></div></div>
+
+  <section id="panel" class="panel glass"><div class="panel-head"><div><span class="eyebrow" id="panel-kicker">KŌMØ WORLD</span><h2 id="panel-title">Bienvenue</h2></div><button id="panel-close">×</button></div><div id="panel-body"></div></section>
+
+  <section id="twin-hud" class="twin-cockpit">
+    <div class="twin-top glass">
+      <div class="twin-identity"><span class="eyebrow">KŌMØ FUNCTIONAL DIGITAL TWIN</span><div><strong id="twin-snapshot">AUJOURD’HUI</strong><small id="twin-date">02 SEP 2026 · 16:17</small></div></div>
+      <div class="twin-mode-tabs"><button class="active" data-twin-view="overview" data-i18n="overview">Vue d’ensemble</button><button data-twin-view="body" data-i18n="body">Corps</button><button data-twin-view="compare" data-i18n="compare">Comparer</button><button data-twin-view="sources">Sources</button></div>
+      <button id="twin-exit" class="leave-lab" data-i18n="leaveLab">Quitter le Lab</button>
+    </div>
+    <aside class="twin-left glass">
+      <div class="motion-hero"><span>MOTION SCORE</span><div class="score-line"><strong id="twin-score-large">84</strong><i>/100</i></div><div class="delta good" id="twin-score-delta">+12 depuis baseline</div></div>
+      <div class="age-row"><span>Motion Age</span><b id="twin-age-large">39</b><small id="twin-age-delta">−3 ans</small></div>
+      <div class="priority-card"><div class="priority-head"><span data-i18n="priority">PRIORITÉ ACTUELLE</span><b id="priority-state">WATCH</b></div><h3 id="priority-title">Quadriceps gauche</h3><p id="priority-copy">Une asymétrie résiduelle persiste, avec une nette amélioration longitudinale.</p><div class="priority-value"><strong id="priority-value">86%</strong><span data-i18n="symmetry">symétrie</span><small id="priority-delta">+14 pts</small></div></div>
+      <button id="compare-now" class="twin-primary" data-i18n="compareBaseline">Comparer à la baseline</button>
+      <button id="go-arena" class="twin-secondary" data-i18n="continueArena">Continuer vers l’Arena</button>
+    </aside>
+    <aside class="twin-right glass"><div class="twin-section-title"><span data-i18n="domains">DOMAINES FONCTIONNELS</span><small data-i18n="currentDelta">Actuel · Δ baseline</small></div><div id="domain-bars" class="domain-bars"></div><div class="twin-section-title metrics-title"><span data-i18n="signals">SIGNAUX CLÉS</span><small data-i18n="measuredDerived">Mesuré / dérivé</small></div><div id="key-signals" class="key-signals"></div></aside>
+    <section class="body-overlay-layer"><button class="body-callout left-thigh active" data-region="left_thigh"><i></i><span data-i18n="leftQuad">QUADRICEPS GAUCHE</span><b id="callout-quad">86%</b><small data-i18n="symmetry">symétrie</small></button><button class="body-callout gait" data-region="gait"><i></i><span data-i18n="gait">MARCHE</span><b id="callout-gait">1.21</b><small>m/s</small></button><button class="body-callout posture" data-region="trunk"><i></i><span>POSTURE</span><b id="callout-posture">88</b><small>index</small></button><button class="body-callout strength" data-region="strength"><i></i><span data-i18n="strength">FORCE</span><b id="callout-strength">82</b><small>index</small></button></section>
+    <section id="compare-layer" class="compare-layer glass"><div class="compare-head"><div><span class="eyebrow" data-i18n="longCompare">COMPARAISON LONGITUDINALE</span><h3>Baseline → <span data-i18n="today">Aujourd’hui</span></h3></div><button id="compare-close">×</button></div><div id="compare-grid" class="compare-grid"></div></section>
+    <section id="source-inspector" class="source-inspector glass"><div class="source-inspector-head"><div><span class="eyebrow" data-i18n="provenance">PROVENANCE DES DONNÉES</span><h3 id="source-title">Myodev</h3></div><button id="source-close">×</button></div><div id="source-content"></div></section>
+    <div class="twin-bottom glass"><div class="timeline-caption"><span data-i18n="longTime">TEMPS LONGITUDINAL</span><b id="timeline-current-label">AUJOURD’HUI</b></div><div class="timeline-nodes"><button data-time="0"><i></i><span>Baseline</span><small>02 Jun</small></button><button data-time="1"><i></i><span>J30</span><small>02 Jul</small></button><button class="active" data-time="2"><i></i><span data-i18n="today">Aujourd’hui</span><small>02 Sep</small></button></div><div id="twin-sources" class="source-strip"></div></div>
+  </section>
+
+  <section id="arena-hud" class="arena-hud">
+    <div class="arena-top glass"><div><span class="eyebrow">KŌMØ ARENA · SAISON 01</span><h2 data-i18n="arenaTag">Bougez. Jouez. Progressez.</h2></div><div class="arena-summary"><div><span data-i18n="dailyBest">Meilleur du jour</span><b id="arena-best">948 pts</b></div><div><span data-i18n="streak">Votre série</span><b id="arena-streak">0 jours</b></div><div><span>Arena XP</span><b id="arena-xp">0</b></div></div><button id="arena-exit" data-i18n="leaveArena">Quitter l’Arena</button></div>
+    <aside class="arena-left glass"><span class="eyebrow" data-i18n="dailyChallenge">DÉFI DU JOUR</span><h3>Balance Hold</h3><p data-i18n="challengeCopy">Gardez le point dans la zone de stabilité. Les petites corrections rapportent davantage.</p><div class="challenge-meta"><div><span data-i18n="target">Objectif</span><b>60 sec</b></div><div><span data-i18n="reward">Récompense</span><b>+85 pts</b></div><div><span>Mode</span><b data-i18n="daily">Quotidien</b></div></div><button id="challenge-start" class="arena-primary" data-i18n="startChallenge">Lancer le défi</button></aside>
+    <aside class="arena-right glass"><div class="leaderboard-head"><span class="eyebrow" data-i18n="leaderboard">CLASSEMENT DU JOUR</span><small data-i18n="safeRanking">Score du défi uniquement · aucun classement santé</small></div><div id="leaderboard" class="leaderboard"></div></aside>
+    <div class="arena-floor-label glass"><span data-i18n="yourBest">VOTRE RECORD</span><b id="your-best">—</b><i id="your-rank">Non classé</i></div>
+  </section>
+
+  <section id="challenge" class="challenge-overlay"><div class="challenge-stage glass"><div class="challenge-topline"><span>KŌMØ ARENA · BALANCE HOLD</span><b id="challenge-time">60.0</b></div><div class="balance-board" id="balance-board"><div class="target-ring"></div><div id="balance-marker" class="balance-marker"></div><div class="axis axis-x"></div><div class="axis axis-y"></div></div><div class="challenge-stats"><div><span data-i18n="stability">Stabilité</span><b id="stability-score">100</b></div><div><span>Corrections</span><b id="corrections">0</b></div><div><span data-i18n="liveScore">Score live</span><b id="live-score">0</b></div></div><p data-i18n="challengeControls">Desktop : gauche/droite. Mobile : joystick.</p><button id="challenge-cancel" data-i18n="endChallenge">Terminer le défi</button></div></section>
+  <section id="result" class="result-modal glass"><span class="eyebrow" data-i18n="challengeComplete">DÉFI TERMINÉ</span><h2 id="result-title">Nouveau record personnel.</h2><div class="result-score"><strong id="result-score">0</strong><span>ARENA SCORE</span></div><div class="result-grid"><div><span data-i18n="balanceTime">Temps</span><b id="result-time">0s</b></div><div><span data-i18n="stability">Stabilité</span><b id="result-stability">0%</b></div><div><span data-i18n="points">Points</span><b id="result-points">+0</b></div><div><span data-i18n="rank">Rang</span><b id="result-rank">—</b></div></div><button id="result-close" data-i18n="backArena">Retour à l’Arena</button></section>
+
+  <section id="settings" class="settings glass"><div class="panel-head"><div><span class="eyebrow" data-i18n="playerControls">CONTRÔLES JOUEUR</span><h2 data-i18n="moveYourWay">Déplacez-vous comme vous voulez.</h2></div><button id="settings-close">×</button></div><div class="presets"><button data-preset="wasd">WASD</button><button data-preset="zqsd">ZQSD</button><button data-preset="arrows" data-i18n="arrows">Flèches</button></div><div class="settings-scroll"><section><span class="group-title" data-i18n="bindings">TOUCHES</span><div id="bindings" class="bindings"></div></section><section><span class="group-title" data-i18n="camera">CAMÉRA</span><label><span data-i18n="hSens">Sensibilité horizontale</span><input id="sens-x" type="range" min="0.35" max="2.2" step="0.05"></label><label><span data-i18n="vSens">Sensibilité verticale</span><input id="sens-y" type="range" min="0.35" max="2.2" step="0.05"></label><label><span data-i18n="camDistance">Distance caméra</span><input id="camera-distance" type="range" min="12" max="32" step="1"></label><label class="toggle"><span data-i18n="invertY">Inverser l’axe vertical</span><input id="invert-y" type="checkbox"></label></section></div><div class="settings-foot"><button id="reset-controls" data-i18n="reset">Réinitialiser</button><small data-i18n="savedDevice">Sauvegardé sur cet appareil</small></div></section>
+
+  <div id="mobile-controls" class="mobile-controls"><div id="joystick-zone" class="joystick-zone"><div class="joystick-base"><div id="joystick-knob" class="joystick-knob"></div></div></div><div id="look-zone" class="look-zone"><span>LOOK</span></div><button id="mobile-action" class="mobile-action">ACTION</button></div>
+  <div id="toast" class="toast"></div>
+</main>
+<script type="module" src="./world-v081.js"></script>
+</body>
+</html>
