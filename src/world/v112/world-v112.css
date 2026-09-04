@@ -1,0 +1,44 @@
+:root{--v112-fitness:#ddb871;--v112-fitness-soft:rgba(221,184,113,.16);--v112-rehab:#9fb7a0;--v112-rehab-soft:rgba(159,183,160,.17);--v112-surface:#111912;--v112-surface2:#182119;--v112-line:rgba(246,241,231,.12)}
+.v112-boot{position:fixed;inset:0;display:grid;place-items:center;background:#101710;color:#f3eee4;font:650 9px Arial;letter-spacing:.22em}
+
+/* Make the redesign visibly different even without hover */
+.center-hub-card{border-radius:34px;background:linear-gradient(180deg,rgba(21,30,23,.97),rgba(9,14,10,.98));border-color:rgba(246,241,231,.14)}
+.center-choice-grid{gap:16px}.center-choice{min-height:300px;border-radius:28px;padding:24px;border-color:rgba(246,241,231,.14)}
+.center-choice.fitness{background:radial-gradient(circle at 82% 24%,rgba(221,184,113,.2),transparent 30%),linear-gradient(155deg,rgba(61,49,28,.44),rgba(18,24,17,.96) 58%)}
+.center-choice.rehab{background:radial-gradient(circle at 82% 24%,rgba(159,183,160,.22),transparent 30%),linear-gradient(155deg,rgba(35,55,42,.52),rgba(15,24,18,.97) 58%)}
+.center-choice h3{font-size:34px}.center-choice p{font-size:10px;line-height:1.65}.center-choice b{font-size:9px;padding:8px 11px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(255,255,255,.035)}
+
+.room-shell{background:#0e150f}.room-head{min-height:92px;padding:20px 24px}.room-head h2{font-size:34px}.room-body{padding:18px 22px 32px}
+.v112-room-hero{position:relative;overflow:hidden;display:grid;grid-template-columns:1.25fr .75fr;gap:18px;align-items:end;min-height:210px;margin-bottom:14px;padding:24px;border:1px solid var(--v112-line);border-radius:28px;background:linear-gradient(150deg,rgba(255,255,255,.055),rgba(255,255,255,.013));box-shadow:0 24px 70px rgba(0,0,0,.2)}
+.v112-room-hero:before{content:"";position:absolute;width:320px;height:320px;border-radius:50%;right:-60px;top:-100px;filter:blur(10px);opacity:.5;pointer-events:none}
+.v112-room-hero.fitness:before{background:radial-gradient(circle,var(--v112-fitness-soft),transparent 66%)}
+.v112-room-hero.rehab:before{background:radial-gradient(circle,var(--v112-rehab-soft),transparent 66%)}
+.v112-room-hero .eyebrow{display:block;font:700 7px Arial;letter-spacing:.18em;color:rgba(244,239,229,.52)}
+.v112-room-hero h3{margin:10px 0 9px;font:400 34px/1.02 Georgia,serif;letter-spacing:-.03em}.v112-room-hero p{max-width:620px;margin:0;color:rgba(244,239,229,.62);font:400 9px/1.65 Arial}
+.v112-hero-metric{position:relative;z-index:2;justify-self:end;min-width:180px;padding:18px;border:1px solid rgba(255,255,255,.1);border-radius:22px;background:rgba(8,13,9,.48);backdrop-filter:blur(18px)}
+.v112-hero-metric span{display:block;font:700 6px Arial;letter-spacing:.14em;color:rgba(244,239,229,.46)}.v112-hero-metric strong{display:block;margin-top:7px;font:400 42px/.95 Georgia,serif}.v112-hero-metric small{display:block;margin-top:7px;color:rgba(244,239,229,.52);font:600 7px Arial}
+
+.room-summary{position:relative;top:auto;background:none;backdrop-filter:none;grid-template-columns:1.3fr repeat(3,.7fr);gap:10px}.room-summary>div{border-radius:18px;padding:14px;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.015))}.room-summary strong{font-size:27px}
+.station-grid{gap:12px}.station{min-height:268px;border-radius:24px;padding:17px;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.013));border-color:rgba(246,241,231,.11)}
+.station:nth-child(1){background:radial-gradient(circle at 82% 18%,rgba(221,184,113,.13),transparent 30%),linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.013))}.station:nth-child(2){background:radial-gradient(circle at 82% 18%,rgba(174,192,171,.11),transparent 30%),linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.013))}
+.station h3{font-size:24px}.station p{font-size:8.5px}.station-icon{width:46px;height:46px;border-radius:15px;font-size:20px}.record-line{margin-top:18px;padding:10px}.station-actions button{padding:11px 9px;border-radius:12px;font-size:7.5px}.station-actions button:first-child{background:rgba(255,255,255,.05)}.station-actions button.max{background:rgba(221,184,113,.11);border-color:rgba(221,184,113,.22)}
+
+.rehab-layout{gap:14px}.rehab-primary,.rehab-side{border-radius:24px;padding:18px}.rehab-primary{background:radial-gradient(circle at 92% 10%,rgba(159,183,160,.12),transparent 28%),linear-gradient(165deg,rgba(255,255,255,.04),rgba(255,255,255,.013))}.rehab-side{background:linear-gradient(165deg,rgba(255,255,255,.034),rgba(255,255,255,.01))}.rehab-primary h3{font-size:30px}.rehab-station{border-radius:20px;padding:15px}.rehab-main-action{padding:11px;background:rgba(159,183,160,.13);border-color:rgba(159,183,160,.24)}.rehab-track{height:8px}.review-card{padding:14px;border-radius:18px}
+
+.v112-section-label{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 2px 10px}.v112-section-label span{font:700 7px Arial;letter-spacing:.16em;color:rgba(244,239,229,.52)}.v112-section-label i{display:block;height:1px;flex:1;background:linear-gradient(90deg,rgba(244,239,229,.1),transparent)}
+
+/* iPhone / mobile is intentionally much more different than V0.11.1 */
+@media(max-width:640px){
+  .center-hub{align-items:end;background:linear-gradient(180deg,rgba(4,7,5,.22),rgba(4,7,5,.94) 38%)}
+  .center-hub-card{width:100%;max-height:90dvh;padding:18px 14px calc(22px + env(safe-area-inset-bottom));border-radius:32px 32px 0 0;background:linear-gradient(180deg,#172119 0%,#0d140f 100%)}
+  .center-hub-head h2{font-size:29px}.center-choice-grid{gap:10px;margin-top:16px}.center-choice{min-height:188px;padding:18px;border-radius:24px}.center-choice h3{font-size:28px;margin-top:10px}.center-choice p{font-size:8.5px;max-width:76%}.center-choice b{bottom:16px;left:18px}.center-choice:before{opacity:.25}.center-choice.fitness,.center-choice.rehab{background-position:center}
+
+  .room-shell{width:100%;height:100dvh;border:0;border-radius:0;background:#0b120d}.movement-room[data-room="fitness"] .room-shell{background:linear-gradient(180deg,#211c13 0,#11150f 26%,#0b100c 100%)}.movement-room[data-room="rehab"] .room-shell{background:linear-gradient(180deg,#17251c 0,#101912 26%,#0a100c 100%)}
+  .room-head{min-height:78px;padding:calc(12px + env(safe-area-inset-top)) 14px 11px;background:linear-gradient(180deg,rgba(7,11,8,.9),rgba(7,11,8,.62));border-bottom-color:rgba(255,255,255,.08)}.room-head h2{font-size:25px}.room-head span{font-size:6px}.room-close{width:38px;height:38px;padding:0;border-radius:14px}.room-body{height:calc(100dvh - 78px);padding:12px 11px calc(120px + env(safe-area-inset-bottom))}
+  .v112-room-hero{display:block;min-height:190px;margin-bottom:10px;padding:18px;border-radius:24px}.v112-room-hero h3{max-width:88%;font-size:31px}.v112-room-hero p{max-width:82%;font-size:8.5px}.v112-hero-metric{position:absolute;right:14px;bottom:14px;min-width:102px;padding:11px;border-radius:16px;text-align:right}.v112-hero-metric span{font-size:5px}.v112-hero-metric strong{font-size:30px}.v112-hero-metric small{display:none}
+
+  .room-summary{display:flex;overflow-x:auto;gap:7px;padding:0 0 3px;scroll-snap-type:x proximity}.room-summary>div{min-width:126px;flex:0 0 auto;border-radius:16px;padding:11px;scroll-snap-align:start}.room-summary>div:first-child{min-width:214px}.room-summary strong{font-size:21px}.room-summary p{font-size:7px}
+  .v112-section-label{margin:15px 2px 8px}
+  .station-grid{display:grid;grid-template-columns:1fr;gap:9px}.station{min-height:0;padding:15px;border-radius:21px}.station-top{align-items:center}.station h3{font-size:23px;margin:7px 0 4px}.station p{font-size:8px;max-width:72%}.station-icon{width:44px;height:44px}.record-line{margin:13px 0 9px;padding:9px}.station-actions{gap:7px}.station-actions button{min-height:42px;font-size:7.5px}.tier{position:absolute;right:14px;top:67px}
+  .rehab-layout{display:block;margin-top:9px}.rehab-primary,.rehab-side{padding:14px;border-radius:21px}.rehab-primary h3{font-size:26px}.rehab-progress-row{grid-template-columns:1fr 70px auto}.rehab-stations{grid-template-columns:1fr;gap:8px}.rehab-station{padding:13px}.rehab-side{margin-top:9px}.history-mini{gap:5px}.history-mini-row{padding:9px}
+}
