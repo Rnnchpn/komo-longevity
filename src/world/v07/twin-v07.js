@@ -126,5 +126,24 @@ $('#timeline')?.addEventListener('input',e=>{if(!syncingTimeline)updateCockpit(N
 const openObserver=new MutationObserver(()=>{if(cockpit.classList.contains('open')){updateCockpit(Number($('#timeline')?.value??2));selectView('overview');}});
 openObserver.observe(cockpit,{attributes:true,attributeFilter:['class']});
 
+// Invert camera direction on both axes for V0.7. The V0.6 movement engine multiplies
+// pointer deltas by these sensitivities, so negative values reverse mouse and touch look.
+function applyInvertedCameraDirection(){
+  const sx=$('#sens-x');
+  const sy=$('#sens-y');
+  if(!sx||!sy)return;
+
+  let saved={};
+  try{saved=JSON.parse(localStorage.getItem('komo_world_controls_v06')||'{}')||{};}catch{}
+  const magX=Math.max(.35,Math.min(2.2,Math.abs(Number(saved?.camera?.sensX)||1)));
+  const magY=Math.max(.35,Math.min(2.2,Math.abs(Number(saved?.camera?.sensY)||1)));
+
+  sx.min='-2.2'; sx.max='-0.35'; sx.step='.05'; sx.value=String(-magX);
+  sy.min='-2.2'; sy.max='-0.35'; sy.step='.05'; sy.value=String(-magY);
+  sx.dispatchEvent(new Event('input',{bubbles:true}));
+  sy.dispatchEvent(new Event('input',{bubbles:true}));
+}
+applyInvertedCameraDirection();
+
 updateCockpit(2);
 selectView('overview');
