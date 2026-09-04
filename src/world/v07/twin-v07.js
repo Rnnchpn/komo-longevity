@@ -5,6 +5,7 @@ const $$=(s)=>[...document.querySelectorAll(s)];
 const core=new TwinCore();
 const baseline=core.snapshots[0];
 const cockpit=$('#twin-hud');
+let syncingTimeline=false;
 
 const fmtSigned=(value,digits=0,suffix='')=>`${value>0?'+':''}${Number(value).toFixed(digits)}${suffix}`;
 const formatDate=(iso)=>new Date(iso).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}).toUpperCase();
@@ -69,7 +70,7 @@ function renderSource(id){
   $('#source-content').innerHTML=`<div class="source-meta"><div><span>Current value</span><b>${sourceValue(id,s)}</b></div><div><span>Snapshot</span><b>${s.label}</b></div><div><span>Quality</span><b>${meta.quality?Math.round(meta.quality*100)+'%':'—'}</b></div><div><span>Status</span><b>${meta.status||'available'}</b></div><div><span>Method</span><b>${meta.method||'—'}</b></div><div><span>Version</span><b>${s.provenance_version}</b></div></div><p class="source-note">This value belongs to the dated Twin snapshot. The AI layer may explain or navigate it, but cannot silently rewrite the underlying measurement.</p>`;
 }
 
-function updateCockpit(index){
+function updateCockpit(index,{relayTo3D=false}={}){
   core.setTimeIndex(index,'v07-ui');
   const s=core.current(); const c=core.compare(baseline.snapshot_id,s.snapshot_id,'v07-ui'); const p=priorityFor(s);
   $('#twin-score-large').textContent=s.motion_score; $('#twin-age-large').textContent=s.motion_age;
@@ -84,6 +85,11 @@ function updateCockpit(index){
   if($('#timeline'))$('#timeline').value=index;
   if($('#twin-snapshot'))$('#twin-snapshot').textContent=s.label.toUpperCase();
   if($('#hud-motion'))$('#hud-motion').textContent=s.motion_score; if($('#hud-age'))$('#hud-age').textContent=s.motion_age;
+  if(relayTo3D && $('#timeline') && !syncingTimeline){
+    syncingTimeline=true;
+    $('#timeline').dispatchEvent(new Event('input',{bubbles:true}));
+    syncingTimeline=false;
+  }
 }
 
 function selectView(view){
@@ -93,14 +99,21 @@ function selectView(view){
 }
 
 $$('[data-twin-view]').forEach(b=>b.addEventListener('click',()=>selectView(b.dataset.twinView)));
-$$('[data-time]').forEach(b=>b.addEventListener('click',()=>updateCockpit(Number(b.dataset.time))));
+$$('[data-time]').forEach(b=>b.addEventListener('click',()=>updateCockpit(Number(b.dataset.time),{relayTo3D:true})));
 $('#compare-now')?.addEventListener('click',()=>selectView('compare'));
 $('#compare-close')?.addEventListener('click',()=>selectView('overview'));
 $('#source-close')?.addEventListener('click',()=>selectView('overview'));
 
 function wireSourceButtons(){
   setTimeout(()=>{
-    $$('#twin-sources [data-source]').forEach(b=>b.addEventListener('click',()=>{renderSource(b.dataset.source);selectView('sources');}));
+    $$('#twin-sources [data-source]').forEach(b=>{
+      if(b.dataset.v07wired)return;
+      b.dataset.v07wired='1';
+      b.addEventListener('click',()=>{
+        renderSource(b.dataset.source);selectView('sources');
+        requestAnimationFrame(()=>$('#panel')?.classList.remove('open'));
+      });
+    });
   },0);
 }
 
@@ -108,9 +121,9 @@ const observer=new MutationObserver(()=>wireSourceButtons());
 observer.observe($('#twin-sources'),{childList:true});
 wireSourceButtons();
 
-// Keep the richer cockpit synchronized with the legacy V0.6 slider and lab state.
-$('#timeline')?.addEventListener('input',e=>updateCockpit(Number(e.target.value)));
-const openObserver=new MutationObserver(()=>{if(cockpit.classList.contains('open')){updateCockpit(core.activeIndex);selectView('overview');}});
+// The V0.6 engine still owns the actual 3D Twin. Reading its timeline event keeps both layers aligned.
+$('#timeline')?.addEventListener('input',e=>{if(!syncingTimeline)updateCockpit(Number(e.target.value));});
+const openObserver=new MutationObserver(()=>{if(cockpit.classList.contains('open')){updateCockpit(Number($('#timeline')?.value??2));selectView('overview');}});
 openObserver.observe(cockpit,{attributes:true,attributeFilter:['class']});
 
 updateCockpit(2);
