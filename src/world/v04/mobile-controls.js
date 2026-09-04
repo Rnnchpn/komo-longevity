@@ -7,6 +7,13 @@
   const canvas = document.querySelector('#world-canvas');
   if (!app || !canvas) return;
 
+  const nativeCanvasCapture = canvas.setPointerCapture?.bind(canvas);
+  if (nativeCanvasCapture) {
+    canvas.setPointerCapture = (pointerId) => {
+      try { nativeCanvasCapture(pointerId); } catch { /* synthetic mobile look pointer */ }
+    };
+  }
+
   const controls = document.createElement('div');
   controls.className = 'mobile-game-controls';
   controls.innerHTML = `
@@ -32,7 +39,6 @@
 
   const heldKeys = new Set();
   const keyMap = { forward: 'w', back: 's', left: 'a', right: 'd' };
-  const activeDirs = new Set();
   let movePointerId = null;
   let joystickRect = null;
 
@@ -45,8 +51,6 @@
 
   const syncDirections = (nextDirs) => {
     Object.entries(keyMap).forEach(([dir, key]) => dispatchKey(key, nextDirs.has(dir)));
-    activeDirs.clear();
-    nextDirs.forEach((d) => activeDirs.add(d));
   };
 
   const updateJoystick = (clientX, clientY) => {
@@ -86,7 +90,7 @@
   joystick.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     movePointerId = e.pointerId;
-    joystick.setPointerCapture?.(e.pointerId);
+    try { joystick.setPointerCapture?.(e.pointerId); } catch {}
     joystickRect = joystick.getBoundingClientRect();
     updateJoystick(e.clientX, e.clientY);
   });
@@ -103,7 +107,6 @@
   });
 
   let lookPointerId = null;
-  let lastLook = null;
 
   const relayPointer = (type, e) => {
     const init = {
@@ -123,17 +126,14 @@
   lookZone.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     lookPointerId = e.pointerId;
-    lastLook = { x: e.clientX, y: e.clientY };
-    lookZone.setPointerCapture?.(e.pointerId);
+    try { lookZone.setPointerCapture?.(e.pointerId); } catch {}
     relayPointer('pointerdown', e);
     lookZone.classList.add('active');
   });
   lookZone.addEventListener('pointermove', (e) => {
     if (e.pointerId !== lookPointerId) return;
     e.preventDefault();
-    if (!lastLook) lastLook = { x: e.clientX, y: e.clientY };
     relayPointer('pointermove', e);
-    lastLook = { x: e.clientX, y: e.clientY };
   });
   ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => {
     lookZone.addEventListener(type, (e) => {
@@ -141,7 +141,6 @@
       e.preventDefault();
       relayPointer(type === 'lostpointercapture' ? 'pointerup' : type, e);
       lookPointerId = null;
-      lastLook = null;
       lookZone.classList.remove('active');
     });
   });
