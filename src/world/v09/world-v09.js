@@ -68,33 +68,41 @@ app.appendChild(cameraUI);
 const video=$('#motion-video'),overlay=$('#motion-overlay'),ctx=overlay.getContext('2d');
 let currentExercise=EXERCISES.squat10;
 let launchMode='game';
+let challengeConfig={mode:'default',targetReps:null,targetSeconds:null,maxSeconds:null};
 let stream=null,landmarker=null,PoseLandmarkerClass=null,raf=0,lastVideoTime=-1;
 let session=null;
 
 const copy={
-  fr:{activate:'Activer la caméra',ready:'Caméra prête',loading:'Chargement du suivi du mouvement…',tracking:'CORPS DÉTECTÉ',noPose:'PLACEZ-VOUS EN ENTIER DANS LE CADRE',start:'Lancer la session',stop:'Arrêter la session',success:'Défi réussi.',rehabDone:'Session terminée.',cameraDenied:'Accès caméra impossible',recommend:'KŌMØ TWIN · RECOMMANDATION',game:'CAMERA CHALLENGE',rehab:'REHAB · GUIDÉ PAR LE TWIN',continue:'Continuer dans World'},
-  en:{activate:'Enable camera',ready:'Camera ready',loading:'Loading movement tracking…',tracking:'BODY DETECTED',noPose:'KEEP YOUR FULL BODY IN FRAME',start:'Start session',stop:'Stop session',success:'Challenge complete.',rehabDone:'Session complete.',cameraDenied:'Camera access unavailable',recommend:'KŌMØ TWIN · RECOMMENDATION',game:'CAMERA CHALLENGE',rehab:'REHAB · TWIN-GUIDED',continue:'Continue in World'}
+  fr:{activate:'Activer la caméra',ready:'Caméra prête',loading:'Chargement du suivi du mouvement…',tracking:'CORPS DÉTECTÉ',noPose:'PLACEZ-VOUS EN ENTIER DANS LE CADRE',start:'Lancer la session',stop:'Arrêter la session',success:'Défi réussi.',rehabDone:'Session terminée.',cameraDenied:'Accès caméra impossible',recommend:'KŌMØ TWIN · RECOMMANDATION',game:'CAMERA CHALLENGE',rehab:'REHAB · GUIDÉ PAR LE TWIN',continue:'Continuer dans World',max:'MAXIMUM'},
+  en:{activate:'Enable camera',ready:'Camera ready',loading:'Loading movement tracking…',tracking:'BODY DETECTED',noPose:'KEEP YOUR FULL BODY IN FRAME',start:'Start session',stop:'Stop session',success:'Challenge complete.',rehabDone:'Session complete.',cameraDenied:'Camera access unavailable',recommend:'KŌMØ TWIN · RECOMMENDATION',game:'CAMERA CHALLENGE',rehab:'REHAB · TWIN-GUIDED',continue:'Continue in World',max:'MAX'}
 };
 const tx=(k)=>copy[locale()][k]||k;
 const exTitle=(ex)=>ex.title[locale()]||ex.title.en;
 const exShort=(ex)=>ex.short[locale()]||ex.short.en;
 const cameraText=(mode)=>({front45_or_side:locale()==='fr'?'30–45° ou profil':'30–45° or side',side:locale()==='fr'?'Profil':'Side',side_or_front45:locale()==='fr'?'Profil ou 30–45°':'Side or 30–45°',front:locale()==='fr'?'Face':'Front'}[mode]||mode);
 const analysisText=(ex)=>ex.metrics.slice(0,3).map(x=>x.replaceAll('_',' ')).join(' · ');
+const sanitizeOptions=(o={})=>({mode:o.mode==='max'?'max':o.mode==='fixed'?'fixed':'default',targetReps:Number.isFinite(Number(o.targetReps))?Math.max(1,Number(o.targetReps)):null,targetSeconds:Number.isFinite(Number(o.targetSeconds))?Math.max(5,Number(o.targetSeconds)):null,maxSeconds:Number.isFinite(Number(o.maxSeconds))?Math.max(10,Number(o.maxSeconds)):null});
 
+function configuredTitle(){
+  if(challengeConfig.mode==='max')return `${exTitle(currentExercise)} · ${tx('max')} ${challengeConfig.maxSeconds||60}s`;
+  if(challengeConfig.targetReps)return `${exTitle(currentExercise).replace(/\s\d+$/,'')} · ${challengeConfig.targetReps}`;
+  if(challengeConfig.targetSeconds)return `${exTitle(currentExercise).replace(/\s\d+\s?s$/i,'')} · ${challengeConfig.targetSeconds}s`;
+  return exTitle(currentExercise);
+}
 function renderExerciseChoices(){
   const grid=$('#exercise-grid');
   grid.innerHTML=Object.values(EXERCISES).map(ex=>`<button class="exercise-choice ${ex.id===currentExercise.id?'active':''}" data-exercise="${ex.id}"><b>${exTitle(ex)}</b><span>${exShort(ex)}</span></button>`).join('');
-  grid.querySelectorAll('[data-exercise]').forEach(b=>b.onclick=()=>selectExercise(b.dataset.exercise));
+  grid.querySelectorAll('[data-exercise]').forEach(b=>b.onclick=()=>{challengeConfig={mode:'default',targetReps:null,targetSeconds:null,maxSeconds:null};selectExercise(b.dataset.exercise)});
 }
 function selectExercise(id){
   currentExercise=EXERCISES[id]||EXERCISES.squat10;
   if(session?.active)stopSession(false);
   renderExerciseChoices();
-  $('#motion-exercise-title').textContent=exTitle(currentExercise);
-  $('#motion-exercise-copy').textContent=locale()==='fr'?'Posez votre téléphone assez loin pour voir le corps en entier. La caméra estime le mouvement ; elle ne remplace pas une mesure clinique.':'Place your phone far enough away to see your full body. The camera estimates movement; it does not replace a clinical measurement.';
+  $('#motion-exercise-title').textContent=configuredTitle();
+  $('#motion-exercise-copy').textContent=challengeConfig.mode==='max'?(locale()==='fr'?`Faites le maximum de répétitions validées en ${challengeConfig.maxSeconds||60} secondes. Le score concerne uniquement ce défi de jeu.`:`Complete as many valid repetitions as possible in ${challengeConfig.maxSeconds||60} seconds. The score applies only to this game challenge.`):(locale()==='fr'?'Posez votre téléphone assez loin pour voir le corps en entier. La caméra estime le mouvement ; elle ne remplace pas une mesure clinique.':'Place your phone far enough away to see your full body. The camera estimates movement; it does not replace a clinical measurement.');
   $('#camera-position').textContent=cameraText(currentExercise.camera);
   $('#camera-analysis').textContent=analysisText(currentExercise);
-  const isRehab=currentExercise.kind==='rehab'||launchMode==='rehab';
+  const isRehab=currentExercise.kind==='rehab'&&launchMode==='rehab';
   $('#readiness-wrap').style.display=isRehab?'block':'none';
   $('#readiness-check').checked=false;
   resetMetrics();
@@ -125,8 +133,9 @@ function addLaunchButtons(){
   }).observe(panel,{attributes:true,attributeFilter:['class']});}
 }
 
-function openMotion(mode='game',exerciseId='squat10'){
+function openMotion(mode='game',exerciseId='squat10',options={}){
   launchMode=mode;
+  challengeConfig=sanitizeOptions(options);
   selectExercise(exerciseId);
   cameraUI.classList.add('open');
   app.dataset.motionCamera='open';
@@ -154,7 +163,7 @@ function resetMetrics(){
   $('#metric4-label').textContent='QUALITÉ EST.';$('#metric4').textContent='—';
 }
 function updateStartState(){
-  const rehab=currentExercise.kind==='rehab'||launchMode==='rehab';
+  const rehab=currentExercise.kind==='rehab'&&launchMode==='rehab';
   $('#motion-session-start').disabled=!stream||!landmarker||(rehab&&!$('#readiness-check').checked);
 }
 
@@ -205,10 +214,13 @@ function drawPose(landmarks){
 function newSession(){return{active:false,startedAt:0,reps:0,phase:'ready',angles:[],repTimes:[],quality:[],stability:[],baselineCenter:null,lastRepAt:0}}
 function resetSession(){session=newSession();resetMetrics()}
 resetSession();
+const configuredTargetReps=()=>challengeConfig.targetReps||currentExercise.targetReps||null;
+const configuredTargetSeconds=()=>challengeConfig.targetSeconds||currentExercise.targetSeconds||null;
 
 function processExercise(lm,now){
   if(!session?.active)return;
   const elapsed=(now-session.startedAt)/1000;
+  if(challengeConfig.mode==='max'&&challengeConfig.maxSeconds&&elapsed>=challengeConfig.maxSeconds){finishSession(true);return}
   if(currentExercise.id==='balance30'){
     const needed=[11,12,23,24];if(!needed.every(i=>landmarkVisible(lm,i)))return;
     const shoulderWidth=Math.max(.04,Math.abs(lm[11].x-lm[12].x));
@@ -217,7 +229,7 @@ function processExercise(lm,now){
     const sway=Math.abs(center-session.baselineCenter)/shoulderWidth;
     const stability=Math.max(0,Math.min(100,100-sway*145));session.stability.push(stability);
     $('#metric1').textContent=elapsed.toFixed(1);$('#metric2').textContent=`${Math.round(stability)}%`;$('#metric3').textContent=sway.toFixed(2);$('#metric4').textContent=`${Math.round(avg(session.stability))}%`;
-    if(elapsed>=currentExercise.targetSeconds)finishSession(true);return;
+    const target=configuredTargetSeconds();if(target&&elapsed>=target)finishSession(true);return;
   }
   if(currentExercise.id==='pushup10'){
     const s=bestSide(lm,'arm');if(!s.every(i=>landmarkVisible(lm,i)))return;
@@ -239,7 +251,7 @@ function processExercise(lm,now){
 }
 function acceptRep(now){
   session.reps++;session.lastRepAt=now;session.repTimes.push((now-session.startedAt)/1000);
-  if(session.reps>=currentExercise.targetReps)finishSession(true)
+  const target=configuredTargetReps();if(challengeConfig.mode!=='max'&&target&&session.reps>=target)finishSession(true)
 }
 function updateRepMetrics(currentAngle,quality,elapsed){
   $('#metric1').textContent=session.reps;$('#metric2').textContent=`${Math.round(currentAngle)}°`;
@@ -252,25 +264,36 @@ async function countdown(){
 }
 async function startSession(){
   if(session?.active){stopSession(true);return}
-  const rehab=currentExercise.kind==='rehab'||launchMode==='rehab';if(rehab&&!$('#readiness-check').checked)return;
+  const rehab=currentExercise.kind==='rehab'&&launchMode==='rehab';if(rehab&&!$('#readiness-check').checked)return;
   resetSession();await countdown();session.active=true;session.startedAt=performance.now();$('#motion-session-start').textContent=tx('stop');
 }
 function stopSession(show=true){if(!session?.active)return;session.active=false;$('#motion-session-start').textContent=tx('start');if(show)finishSession(false)}
 $('#motion-session-start').onclick=startSession;
 
+function arenaPoints(event){
+  if(event.kind!=='game'||!event.completed)return 0;
+  const qualityBonus=event.quality_estimate>=85?20:event.quality_estimate>=70?10:0;
+  if(event.exercise_id==='balance30')return Math.min(220,20+Math.round(event.time_seconds*2)+qualityBonus);
+  const perRep=challengeConfig.mode==='max'?6:4;
+  const completionBonus=challengeConfig.mode==='max'?20:40;
+  return Math.min(240,completionBonus+event.reps*perRep+qualityBonus);
+}
 function derivedResult(success){
   const elapsed=session.startedAt?(performance.now()-session.startedAt)/1000:0;
   const minA=session.angles.length?Math.min(...session.angles):null,maxA=session.angles.length?Math.max(...session.angles):null;
   const rom=minA!==null&&maxA!==null?Math.round(maxA-minA):null;
   const quality=currentExercise.id==='balance30'?avg(session.stability):avg(session.quality);
-  return{event_id:`motion_${Date.now()}`,exercise_id:currentExercise.id,kind:currentExercise.kind,completed:success,reps:session.reps,time_seconds:Number(elapsed.toFixed(1)),quality_estimate:Math.round(quality||0),rom_estimate_deg:rom,created_at:new Date().toISOString(),source:'browser_pose_estimation_v1',video_stored:false};
+  const e={event_id:`motion_${Date.now()}`,exercise_id:currentExercise.id,kind:launchMode==='game'?'game':currentExercise.kind,completed:success,reps:session.reps,time_seconds:Number(elapsed.toFixed(1)),quality_estimate:Math.round(quality||0),rom_estimate_deg:rom,challenge_mode:challengeConfig.mode,target_reps:configuredTargetReps(),target_seconds:configuredTargetSeconds(),max_seconds:challengeConfig.maxSeconds||null,created_at:new Date().toISOString(),source:'browser_pose_estimation_v1',video_stored:false};
+  e.arena_points=arenaPoints(e);return e;
 }
-function persistResult(event){try{const key='komo_motion_camera_events_v1',arr=JSON.parse(localStorage.getItem(key)||'[]');arr.push(event);localStorage.setItem(key,JSON.stringify(arr.slice(-50)))}catch{}
-  if(event.completed&&currentExercise.publicScore){try{const key='komo_arena_v081',a=JSON.parse(localStorage.getItem(key)||'{}');a.points=(a.points||2480)+85;a.xp=(a.xp||0)+40;localStorage.setItem(key,JSON.stringify(a));$('#hud-points').textContent=a.points.toLocaleString(locale()==='fr'?'fr-FR':'en-US')}catch{}}
+function persistResult(event){
+  try{const key='komo_motion_camera_events_v1',arr=JSON.parse(localStorage.getItem(key)||'[]');arr.push(event);localStorage.setItem(key,JSON.stringify(arr.slice(-50)))}catch{}
+  if(event.completed&&event.kind==='game'&&event.arena_points>0){try{const key='komo_arena_v081',a=JSON.parse(localStorage.getItem(key)||'{}');a.points=(a.points||2480)+event.arena_points;a.xp=(a.xp||0)+Math.max(10,Math.round(event.arena_points/3));localStorage.setItem(key,JSON.stringify(a));$('#hud-points').textContent=a.points.toLocaleString(locale()==='fr'?'fr-FR':'en-US')}catch{}}
 }
 function finishSession(success){
   if(!session)return;session.active=false;const e=derivedResult(success);persistResult(e);
-  $('#motion-session-start').textContent=tx('start');$('#motion-result-title').textContent=currentExercise.kind==='rehab'?tx('rehabDone'):tx('success');
+  $('#motion-session-start').textContent=tx('start');
+  const baseTitle=e.kind==='rehab'?tx('rehabDone'):tx('success');$('#motion-result-title').textContent=e.arena_points?`${baseTitle} +${e.arena_points} pts`:baseTitle;
   $('#motion-result-score').textContent=currentExercise.id==='balance30'?e.time_seconds.toFixed(1):e.reps;$('#motion-result-unit').textContent=currentExercise.id==='balance30'?'SECONDS':(locale()==='fr'?'RÉPÉTITIONS':'REPETITIONS');
   $('#result-time').textContent=`${e.time_seconds.toFixed(1)}s`;$('#result-quality').textContent=`${e.quality_estimate}%`;$('#result-rom').textContent=e.rom_estimate_deg!==null?`${e.rom_estimate_deg}°`:'—';$('#motion-result').classList.add('open');
 }
@@ -298,7 +321,8 @@ addLaunchButtons();renderExerciseChoices();updateLanguage();
 $('#motion-recommend p').textContent=recommendation.reason[locale()]||recommendation.reason.en;
 
 window.KomoMotionCamera={
-  open:(exerciseId='squat10',mode='game')=>openMotion(mode,exerciseId),
+  open:(exerciseId='squat10',mode='game',options={})=>openMotion(mode,exerciseId,options),
+  configure:(options={})=>{challengeConfig=sanitizeOptions(options);selectExercise(currentExercise.id);return{...challengeConfig}},
   recommend:()=>({exercise_id:recommendation.exercise.id,rule_id:recommendation.ruleId,reason:recommendation.reason[locale()]||recommendation.reason.en}),
   listExercises:()=>Object.values(EXERCISES).map(({id,kind,targetReps,targetSeconds,camera,metrics})=>({id,kind,targetReps,targetSeconds,camera,metrics}))
 };
