@@ -66,7 +66,7 @@
   </section>
 
   <section id="arena-hud" class="arena-hud">
-    <div class="arena-top glass"><div><span class="eyebrow">KŌMØ ARENA · SEASON 01</span><h2>Move. Compete. Progress.</h2></div><div class="arena-summary"><div><span>Daily best</span><b id="arena-best">48.2s</b></div><div><span>Your streak</span><b id="arena-streak">0 days</b></div><div><span>Arena XP</span><b id="arena-xp">0</b></div></div><button id="arena-exit">Leave Arena</button></div>
+    <div class="arena-top glass"><div><span class="eyebrow">KŌMØ ARENA · SEASON 01</span><h2>Move. Compete. Progress.</h2></div><div class="arena-summary"><div><span>Daily best</span><b id="arena-best">948 pts</b></div><div><span>Your streak</span><b id="arena-streak">0 days</b></div><div><span>Arena XP</span><b id="arena-xp">0</b></div></div><button id="arena-exit">Leave Arena</button></div>
     <aside class="arena-left glass"><span class="eyebrow">TODAY'S CHALLENGE</span><h3>Balance Hold</h3><p>Keep the marker inside the stability zone. Small corrections score better than large corrections.</p><div class="challenge-meta"><div><span>Target</span><b>60 sec</b></div><div><span>Reward</span><b>+85 pts</b></div><div><span>Mode</span><b>Daily</b></div></div><button id="challenge-start" class="arena-primary">Start challenge</button></aside>
     <aside class="arena-right glass"><div class="leaderboard-head"><span class="eyebrow">DAILY LEADERBOARD</span><small>Challenge score only · no health ranking</small></div><div id="leaderboard" class="leaderboard"></div></aside>
     <div class="arena-floor-label glass"><span>YOUR BEST</span><b id="your-best">—</b><i id="your-rank">Unranked</i></div>
@@ -77,7 +77,7 @@
       <div class="challenge-topline"><span>KŌMØ ARENA · BALANCE HOLD</span><b id="challenge-time">60.0</b></div>
       <div class="balance-board" id="balance-board"><div class="target-ring"></div><div id="balance-marker" class="balance-marker"></div><div class="axis axis-x"></div><div class="axis axis-y"></div></div>
       <div class="challenge-stats"><div><span>Stability</span><b id="stability-score">100</b></div><div><span>Corrections</span><b id="corrections">0</b></div><div><span>Live score</span><b id="live-score">0</b></div></div>
-      <p>Desktop: use A/D or ←/→. Mobile: use the movement joystick.</p>
+      <p>Desktop: use your Left/Right bindings. Mobile: use the movement joystick.</p>
       <button id="challenge-cancel">End challenge</button>
     </div>
   </section>
@@ -90,5 +90,6 @@
   <div id="toast" class="toast"></div>
 </main>
 <script type="module" src="./world-v08-safe.js"></script>
+<script type="module" src="./controls-v08.js"></script>
 </body>
 </html>
