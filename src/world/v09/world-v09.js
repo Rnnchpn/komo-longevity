@@ -134,11 +134,13 @@ function openMotion(mode='game',exerciseId='squat10'){
 }
 function closeMotion(){
   stopSession(false);
+  stopCamera();
+  $('#motion-result').classList.remove('open');
   cameraUI.classList.remove('open');
   delete app.dataset.motionCamera;
 }
 $('#motion-close').onclick=closeMotion;
-$('#motion-result-close').onclick=()=>{$('#motion-result').classList.remove('open');closeMotion()};
+$('#motion-result-close').onclick=closeMotion;
 $('#readiness-check').onchange=updateStartState;
 
 document.querySelector('#language-toggle')?.addEventListener('click',()=>requestAnimationFrame(updateLanguage));
@@ -176,7 +178,7 @@ async function startCamera(){
     setStatus(tx('noPose'));
     updateStartState();
     cancelAnimationFrame(raf);raf=requestAnimationFrame(poseLoop);
-  }catch(err){console.error('[KOMO motion camera]',err);setStatus(tx('cameraDenied'));stream?.getTracks?.().forEach(t=>t.stop());stream=null;updateStartState()}
+  }catch(err){console.error('[KOMO motion camera]',err);setStatus(tx('cameraDenied'));stream?.getTracks?.().forEach(t=>t.stop());stream=null;video.srcObject=null;updateStartState()}
 }
 $('#motion-camera-start').onclick=startCamera;
 
@@ -274,7 +276,7 @@ function finishSession(success){
 }
 
 function poseLoop(now){
-  if(!stream||!landmarker){raf=requestAnimationFrame(poseLoop);return}
+  if(!stream||!landmarker)return;
   if(video.readyState>=2&&video.currentTime!==lastVideoTime){
     lastVideoTime=video.currentTime;
     try{const result=landmarker.detectForVideo(video,now);const lm=result.landmarks?.[0];drawPose(lm);if(lm){setStatus(tx('tracking'),true);processExercise(lm,now)}else setStatus(tx('noPose'),false)}catch(err){console.warn('[KOMO pose frame]',err)}
@@ -282,13 +284,19 @@ function poseLoop(now){
   raf=requestAnimationFrame(poseLoop)
 }
 
-function stopCamera(){cancelAnimationFrame(raf);stream?.getTracks?.().forEach(t=>t.stop());stream=null;video.srcObject=null;ctx.clearRect(0,0,overlay.width,overlay.height);$('#motion-camera-start').disabled=false;$('#motion-camera-start').textContent=tx('activate');setStatus(tx('noPose'));updateStartState()}
+function stopCamera(){
+  cancelAnimationFrame(raf);raf=0;
+  stream?.getTracks?.().forEach(t=>t.stop());stream=null;lastVideoTime=-1;
+  video.pause();video.srcObject=null;
+  ctx.clearRect(0,0,overlay.width,overlay.height);
+  $('#motion-camera-start').disabled=false;$('#motion-camera-start').textContent=tx('activate');
+  setStatus(locale()==='fr'?'CAMÉRA DÉSACTIVÉE':'CAMERA OFF');updateStartState();
+}
 window.addEventListener('pagehide',stopCamera);
 
 addLaunchButtons();renderExerciseChoices();updateLanguage();
 $('#motion-recommend p').textContent=recommendation.reason[locale()]||recommendation.reason.en;
 
-// Expose a narrow, future-agent-ready interface without giving the agent access to raw video.
 window.KomoMotionCamera={
   open:(exerciseId='squat10',mode='game')=>openMotion(mode,exerciseId),
   recommend:()=>({exercise_id:recommendation.exercise.id,rule_id:recommendation.ruleId,reason:recommendation.reason[locale()]||recommendation.reason.en}),
