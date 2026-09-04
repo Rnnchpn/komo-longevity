@@ -66,4 +66,4 @@ async function render(){
  }catch(e){console.error('[account-hub-v2]',e)}finally{running=false}
 }
 function schedule(){if(location.hash!=='#profile')return;for(const ms of [80,350,950])setTimeout(()=>{if(!document.querySelector('[data-account-hub-v2]')&&Date.now()-lastRender>250)render()},ms)}
-window.addEventListener('hashchange',schedule);window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:appointment-updated',()=>{if(location.hash==='#profile'){document.querySelector('[data-account-hub-v2]')?.remove();lastRender=0;render()}});document.addEventListener('DOMContentLoaded',schedule);schedule();
+window.addEventListener('hashchange',schedule);window.addEventListener('komo:route-ready',schedule);window.addEventListener('komo:appointment-updated',()=>{if(location.hash!=='#profile')return;document.querySelector('[data-account-hub-v2]')?.remove();lastRender=0;render()});document.addEventListener('DOMContentLoaded',schedule);schedule();
