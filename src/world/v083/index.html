@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#cfc9b9" />
+  <title>KŌMØ World · V0.8.3</title>
+  <meta name="description" content="KŌMØ World V0.8.3 — contextual camera director, refined room staging, Functional Digital Twin and KŌMØ Arena." />
+  <link rel="stylesheet" href="../v08/world-v08.css" />
+  <link rel="stylesheet" href="../v081/world-v081.css" />
+  <link rel="stylesheet" href="../v082/world-v082.css" />
+  <link rel="stylesheet" href="./world-v083.css" />
+</head>
+<body>
+  <div id="v083-boot" class="v083-boot">KŌMØ WORLD · DIRECTING CAMERA</div>
+  <script type="module">
+    const response = await fetch('../v081/index.html', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Unable to load V0.8.1 shell: ${response.status}`);
+    const html = await response.text();
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    const sourceApp = parsed.querySelector('#app');
+    if (!sourceApp) throw new Error('KŌMØ World shell missing');
+    const app = document.importNode(sourceApp, true);
+    const version = app.querySelector('.brand i');
+    if (version) version.textContent = 'V0.8.3';
+    const canvas = app.querySelector('#world-canvas');
+    if (canvas) canvas.setAttribute('aria-label', 'KŌMØ World V0.8.3');
+    document.body.insertBefore(app, document.querySelector('#v083-boot'));
+    document.querySelector('#v083-boot')?.remove();
+    await import('../v081/world-v081.js');
+    await import('./world-v083.js');
+  </script>
+</body>
+</html>
