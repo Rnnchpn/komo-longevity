@@ -6,12 +6,14 @@ const indexPath=path.join(pulse,'index.html');
 const bookingPath=path.join(pulse,'booking-layer-v1.js');
 const centerPath=path.join(pulse,'center-two-tab-workspace-v1.js');
 const appPath=path.join(pulse,'app-router-v2.js');
-for(const file of [indexPath,bookingPath,centerPath,appPath])if(!fs.existsSync(file))throw new Error('[consultation-final-qa] missing '+file);
+const dockPath=path.join(pulse,'pulse-bottom-nav-v6.js');
+for(const file of [indexPath,bookingPath,centerPath,appPath,dockPath])if(!fs.existsSync(file))throw new Error('[consultation-final-qa] missing '+file);
 
 const html=fs.readFileSync(indexPath,'utf8');
 const booking=fs.readFileSync(bookingPath,'utf8');
 const center=fs.readFileSync(centerPath,'utf8');
 const app=fs.readFileSync(appPath,'utf8');
+const dock=fs.readFileSync(dockPath,'utf8');
 
 const retired=[
   'agenda-hub-v4.js',
@@ -36,7 +38,8 @@ const retired=[
   'center-workspace-v1.css',
   'center-messaging-v1.css',
   'center-patient-polish.css',
-  'center-owner-ui-guard-v1.css'
+  'center-owner-ui-guard-v1.css',
+  'account-tab-restore-v1.js'
 ];
 for(const file of retired)if(html.includes(file))throw new Error('[consultation-final-qa] legacy asset still loaded: '+file);
 
@@ -72,7 +75,9 @@ const checks=[
   ['Centre dashboard requests are deduplicated',center.includes('rowsLoadPromise')],
   ['Centre activation is guarded',center.includes('activating=true')],
   ['Centre resynchronizes after cockpit shell',center.includes('komo:clinical-cockpit-ready')],
-  ['legacy cockpit chrome is hidden in Centre consultation mode',center.includes('.kcp-head,body.komo-pro-mode .kcp-tabs')]
+  ['legacy cockpit chrome is hidden in Centre consultation mode',center.includes('.kcp-head,body.komo-pro-mode .kcp-tabs')],
+  ['patient dock keeps five canonical destinations',dock.includes("['home','Home'")&&dock.includes("['results','Résultats'")&&dock.includes("['key','Connected'")&&dock.includes("['agenda','Consultations & rendez-vous'")&&dock.includes("['mykomo','My KŌMØ'")],
+  ['account is not a patient dock destination',!dock.includes("['account'")&&!html.includes('account-tab-restore-v1.js')]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[consultation-final-qa] failed: '+label);
-console.log('[consultation-final-qa] PASS · single Centre owner · readable Myodev · functional patient list · Motion handoff');
+console.log('[consultation-final-qa] PASS · single Centre owner · five-tab patient dock · account kept outside bottom navigation');
