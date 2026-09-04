@@ -54,26 +54,20 @@ function translateText(text){
   const trimmed=text.trim();
   return fr[trimmed]||text;
 }
+function translateTextNode(child){
+  if(!child||child.nodeType!==3||!child.nodeValue||!child.nodeValue.trim())return;
+  if(!child.__komoOriginal)child.__komoOriginal=child.nodeValue;
+  const original=child.__komoOriginal;
+  const next=locale==='fr'?translateText(original):original;
+  if(child.nodeValue!==next)child.nodeValue=next;
+}
 function translateElement(node){
   if(!node||node.nodeType!==1)return;
-  const tag=node.tagName;
-  if(['SCRIPT','STYLE','CANVAS','INPUT'].includes(tag))return;
-  for(const child of node.childNodes){
-    if(child.nodeType===3&&child.nodeValue&&child.nodeValue.trim()){
-      if(!child.__komoOriginal) child.__komoOriginal=child.nodeValue;
-      const original=child.__komoOriginal;
-      child.nodeValue=locale==='fr'?translateText(original):original;
-    }
-  }
+  if(['SCRIPT','STYLE','CANVAS','INPUT'].includes(node.tagName))return;
+  Array.from(node.childNodes).forEach(translateTextNode);
   node.querySelectorAll?.('*').forEach(el=>{
     if(['SCRIPT','STYLE','CANVAS','INPUT'].includes(el.tagName))return;
-    for(const child of el.childNodes){
-      if(child.nodeType===3&&child.nodeValue&&child.nodeValue.trim()){
-        if(!child.__komoOriginal) child.__komoOriginal=child.nodeValue;
-        const original=child.__komoOriginal;
-        child.nodeValue=locale==='fr'?translateText(original):original;
-      }
-    }
+    Array.from(el.childNodes).forEach(translateTextNode);
   });
 }
 function applyLocale(){
