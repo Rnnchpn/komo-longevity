@@ -27,6 +27,9 @@ let html=fs.readFileSync(htmlPath,'utf8');
 // One final owner per consultation surface. These historical Centre/Agenda
 // layers used to mutate the same Clinical DOM after the canonical workspace,
 // which caused stacked builds, click interception and theme conflicts.
+// The retired account-tab runtime is also removed here: the canonical patient
+// dock is Home / Résultats / Connected / Consultations / My KŌMØ. Account and
+// settings stay accessible from My KŌMØ / the account menu, never as a 6th tab.
 const retired=[
   'agenda-hub-v4.js',
   'agenda-premium-map-v1.js',
@@ -39,7 +42,8 @@ const retired=[
   'center-workspace-v1.js',
   'center-messaging-v1.js',
   'center-patient-polish.js',
-  'center-owner-ui-guard-v1.js'
+  'center-owner-ui-guard-v1.js',
+  'account-tab-restore-v1.js'
 ];
 for(const file of retired){
   const escaped=file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -67,7 +71,7 @@ for(const file of retiredCss){
 fs.writeFileSync(htmlPath,html);
 for(const file of [...retired,...retiredCss])if(html.includes(file))throw new Error('[consultation-prune] legacy asset still loaded: '+file);
 if(!html.includes('center-two-tab-workspace-v1.js'))throw new Error('[consultation-prune] canonical Centre workspace missing');
-console.log('[consultation-prune] PASS · one Centre owner · legacy Centre/agenda layers retired');
+console.log('[consultation-prune] PASS · one Centre owner · legacy Centre/agenda layers retired · account removed from patient dock');
 
 // Final UX/performance pass: runs after raw-template normalization and before
 // the final consultation QA, so production cannot ship the blocking loader.
