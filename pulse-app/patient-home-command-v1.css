@@ -3,7 +3,7 @@
    Same owner, same content contract across desktop / tablet / mobile. */
 body.khome-final-v1{
   --kh8-bg:#050706;--kh8-panel:#0a0e0b;--kh8-panel2:#0d120f;--kh8-ink:#f2f4f1;--kh8-muted:#87918a;--kh8-soft:#a8b4ab;--kh8-line:rgba(255,255,255,.10);--kh8-green:#8fb39a;--kh8-green-soft:rgba(143,179,154,.11);--kh8-warm:#d5c59d;
-  margin:0!important;background:var(--kh8-bg)!important;color:var(--kh8-ink)!important;overflow:auto!important
+  margin:0!important;background:var(--kh8-bg)!important;color:var(--kh8-ink)!important;overflow:auto!important;overflow-x:hidden!important
 }
 body.khome-final-v1 .app-shell,body.khome-final-v1 .main-shell,body.khome-final-v1 .view-root{background:var(--kh8-bg)!important}
 body.khome-final-v1 .main-shell{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}
