@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#17271f" />
+  <title>KŌMØ World · V0.13.3 Hall Walls</title>
+  <meta name="description" content="KŌMØ World V0.13.3 — natural horizontal first-person camera and Hall wall material pass." />
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17271f}
+    #v133-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#17271f;color:#eee6d7;font:700 10px/1 system-ui,sans-serif;letter-spacing:.18em}
+  </style>
+</head>
+<body>
+  <div id="v133-loader">KŌMØ WORLD · HALL WALLS</div>
+  <script type="module">
+    const loader=document.querySelector('#v133-loader');
+    try{
+      const r=await fetch('../v13/index.html',{cache:'no-store'});
+      if(!r.ok)throw new Error(`V0.13 shell ${r.status}`);
+      const html=await r.text();
+      const doc=new DOMParser().parseFromString(html,'text/html');
+      const base=new URL('../v13/',location.href);
+
+      doc.head.querySelectorAll('link[rel="stylesheet"]').forEach(link=>{
+        const el=document.createElement('link');el.rel='stylesheet';el.href=new URL(link.getAttribute('href'),base).href;document.head.appendChild(el);
+      });
+      doc.head.querySelectorAll('style').forEach(style=>{const el=document.createElement('style');el.textContent=style.textContent;document.head.appendChild(el)});
+      [...doc.body.children].filter(n=>n.tagName!=='SCRIPT').forEach(n=>document.body.insertBefore(document.importNode(n,true),loader));
+
+      let source=doc.body.querySelector('script[type="module"]')?.textContent;
+      if(!source)throw new Error('V0.13 runtime script missing');
+
+      // Natural FPS horizontal look: finger right -> view right, finger left -> view left.
+      const desktopYaw='yaw+=dx*.0032*settings.camera.sensX';
+      const mobileYaw='yaw+=dx*.0038*settings.camera.sensX';
+      if(!source.includes(desktopYaw)||!source.includes(mobileYaw))throw new Error('V0.13 horizontal camera patch target missing');
+      source=source.replace(desktopYaw,'yaw-=dx*.0032*settings.camera.sensX');
+      source=source.replace(mobileYaw,'yaw-=dx*.0038*settings.camera.sensX');
+
+      const run=document.createElement('script');run.type='module';run.textContent=source;document.body.appendChild(run);
+
+      let attaching=false;
+      const wait=setInterval(async()=>{
+        if(attaching||!window.KomoWorldRuntime)return;
+        attaching=true;clearInterval(wait);
+        try{
+          await import('../v131/world-v131-design.js');
+          await import('../v132/world-v132-floor.js');
+          await import('./world-v133-walls.js');
+          loader?.remove();
+        }catch(e){
+          console.error('[V0.13.3] enhancement pass failed',e);
+          loader.textContent='KŌMØ WORLD · RETOUR V0.13.2…';
+          setTimeout(()=>location.replace('../v132/'),900);
+        }
+      },50);
+
+      setTimeout(()=>{if(document.body.contains(loader)&&!window.KomoWorldRuntime)loader.textContent='KŌMØ WORLD · CHARGEMENT…'},7000);
+    }catch(e){
+      console.error('[V0.13.3] boot error',e);
+      loader.textContent='KŌMØ WORLD · V0.13.3 INDISPONIBLE';
+      setTimeout(()=>location.replace('../v132/'),1000);
+    }
+  </script>
+</body>
+</html>
