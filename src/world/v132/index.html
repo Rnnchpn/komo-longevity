@@ -16,28 +16,62 @@
   <script type="module">
     const loader=document.querySelector('#v132-loader');
     try{
-      const r=await fetch('../v131/index.html',{cache:'no-store'});
-      if(!r.ok)throw new Error(`V0.13.1 shell ${r.status}`);
+      // Boot directly from the stable V0.13 FPS shell. Do not nest the V0.13.1 loader.
+      const r=await fetch('../v13/index.html',{cache:'no-store'});
+      if(!r.ok)throw new Error(`V0.13 shell ${r.status}`);
       const html=await r.text();
       const doc=new DOMParser().parseFromString(html,'text/html');
-      const base=new URL('../v131/',location.href);
-      doc.head.querySelectorAll('link[rel="stylesheet"]').forEach(link=>{
-        const el=document.createElement('link');el.rel='stylesheet';el.href=new URL(link.getAttribute('href'),base).href;document.head.appendChild(el);
-      });
-      doc.head.querySelectorAll('style').forEach(style=>{const el=document.createElement('style');el.textContent=style.textContent;document.head.appendChild(el)});
-      [...doc.body.children].filter(n=>n.tagName!=='SCRIPT').forEach(n=>document.body.insertBefore(document.importNode(n,true),loader));
-      const source=doc.body.querySelector('script[type="module"]')?.textContent;
-      if(!source)throw new Error('V0.13.1 runtime script missing');
-      const run=document.createElement('script');run.type='module';run.textContent=source;document.body.appendChild(run);
+      const base=new URL('../v13/',location.href);
 
+      doc.head.querySelectorAll('link[rel="stylesheet"]').forEach(link=>{
+        const el=document.createElement('link');
+        el.rel='stylesheet';
+        el.href=new URL(link.getAttribute('href'),base).href;
+        document.head.appendChild(el);
+      });
+      doc.head.querySelectorAll('style').forEach(style=>{
+        const el=document.createElement('style');
+        el.textContent=style.textContent;
+        document.head.appendChild(el);
+      });
+      [...doc.body.children].filter(n=>n.tagName!=='SCRIPT').forEach(n=>{
+        document.body.insertBefore(document.importNode(n,true),loader);
+      });
+
+      const source=doc.body.querySelector('script[type="module"]')?.textContent;
+      if(!source)throw new Error('V0.13 runtime script missing');
+      const run=document.createElement('script');
+      run.type='module';
+      run.textContent=source;
+      document.body.appendChild(run);
+
+      let attaching=false;
       const wait=setInterval(async()=>{
-        if(!window.KomoWorldRuntime||!window.KomoV131Design)return;
+        if(attaching||!window.KomoWorldRuntime)return;
+        attaching=true;
         clearInterval(wait);
-        try{await import('./world-v132-floor.js')}catch(e){console.error('[V0.13.2] Hall floor pass failed',e)}
-        loader?.remove();
+        try{
+          // Explicit parent paths keep imports correct from /v132/.
+          await import('../v131/world-v131-design.js');
+          await import('./world-v132-floor.js');
+          loader?.remove();
+        }catch(e){
+          console.error('[V0.13.2] enhancement pass failed',e);
+          loader.textContent='KŌMØ WORLD · RETOUR V0.13.1…';
+          setTimeout(()=>location.replace('../v131/'),900);
+        }
       },50);
-      setTimeout(()=>{if(document.body.contains(loader)){clearInterval(wait);loader.textContent='KŌMØ WORLD · CHARGEMENT…'}},8000);
-    }catch(e){console.error('[V0.13.2] boot error',e);loader.textContent='KŌMØ WORLD · V0.13.2 INDISPONIBLE';setTimeout(()=>location.replace('../v131/'),1000)}
+
+      setTimeout(()=>{
+        if(document.body.contains(loader)&&!window.KomoWorldRuntime){
+          loader.textContent='KŌMØ WORLD · CHARGEMENT…';
+        }
+      },7000);
+    }catch(e){
+      console.error('[V0.13.2] boot error',e);
+      loader.textContent='KŌMØ WORLD · V0.13.2 INDISPONIBLE';
+      setTimeout(()=>location.replace('../v131/'),1000);
+    }
   </script>
 </body>
 </html>
