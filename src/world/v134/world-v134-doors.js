@@ -29,21 +29,17 @@ const doors={};
 function buildDoor({id,x,z,rot=0,width=6.4,height=5.1,title,subtitle,variant='sage'}){
   const g=new THREE.Group();g.name=`KOMO_V134_${id.toUpperCase()}_DOOR`;g.position.set(x,0,z);g.rotation.y=rot;scene.add(g);
   const main=variant==='light'?stone:(variant==='arena'?sageDark:sage);
-  // Real architectural surround.
   box(g,.62,height+1.05,.78,stone,-width/2-.31,(height+1.05)/2,0);
   box(g,.62,height+1.05,.78,stone,width/2+.31,(height+1.05)/2,0);
   box(g,width+.62,.62,.78,stone,0,height+.72,0);
   box(g,width+.88,.12,.88,bronze,0,.18,0);
   box(g,.07,height+.2,.10,warm,-width/2-.01,height/2+.18,.46);
   box(g,.07,height+.2,.10,warm,width/2+.01,height/2+.18,.46);
-  // Two substantial closed leaves.
   const leafW=width/2-.06;
   const left=box(g,leafW,height,.46,main,-leafW/2-.03,height/2+.22,.43);
   const right=box(g,leafW,height,.46,main,leafW/2+.03,height/2+.22,.43);
-  // Inset smoked panels and bronze handles.
-  const insetMat=variant==='light'?glass:glass;
-  box(left,leafW*.64,height*.55,.08,insetMat,0,.25,.27);
-  box(right,leafW*.64,height*.55,.08,insetMat,0,.25,.27);
+  box(left,leafW*.64,height*.55,.08,glass,0,.25,.27);
+  box(right,leafW*.64,height*.55,.08,glass,0,.25,.27);
   box(left,.08,.72,.12,bronze,leafW*.36,-.05,.31);
   box(right,.08,.72,.12,bronze,-leafW*.36,-.05,.31);
   sign(g,title,subtitle,height+1.95,Math.max(6.1,width+.4));
@@ -79,7 +75,6 @@ async function openAndEnter(id,enter){
   setTimeout(async()=>{await animateDoor(d,false,360);d.busy=false},id==='rehab'?2100:900);
 }
 
-// Approximate collision in world coordinates while doors are shut.
 function blocked(p,mode){
   if(mode!=='world')return false;
   for(const d of Object.values(doors)){
@@ -92,8 +87,32 @@ function blocked(p,mode){
   return false;
 }
 
-// Keep old prototype-like destination groups hidden if any late material pass revives them.
+// Robust cleanup: the legacy Concierge humanoid may be reintroduced by a late visual pass.
+// Detect the actual humanoid by its capsule geometry rather than relying on an object name.
+function relocateLegacyConcierge(){
+  let movedAvatar=false;
+  for(const o of scene.children){
+    const nearLegacy=Math.abs(o.position.x)<1.0&&Math.abs(o.position.z+4.7)<1.0;
+    if(!nearLegacy)continue;
+    if(o.isGroup){
+      let capsules=0;
+      o.traverse?.(c=>{if(c.geometry?.type==='CapsuleGeometry')capsules++});
+      if(capsules>=3){
+        o.position.set(-8.15,0,-1.2);
+        o.rotation.y=.22;
+        o.name='KOMO_V134_CONCIERGE_AVATAR';
+        movedAvatar=true;
+      }
+    }else if(o.isSprite&&o.position.y>3){
+      o.position.set(-8.15,o.position.y,-1.2);
+      o.name='KOMO_V134_CONCIERGE_LABEL';
+    }
+  }
+  return movedAvatar;
+}
+
 function suppressLegacy(){
+  relocateLegacyConcierge();
   for(const o of scene.children){
     if(!o?.isGroup)continue;
     const n=o.name||'';
@@ -104,6 +123,9 @@ function suppressLegacy(){
     }
   }
 }
-suppressLegacy();setTimeout(suppressLegacy,800);
 
-window.KomoV134Doors={version:'0.13.4',doors,openAndEnter,blocked,axisClear:true};
+// Run several times because some older passes attach asynchronously after boot.
+suppressLegacy();
+[120,450,900,1600,3000].forEach(ms=>setTimeout(suppressLegacy,ms));
+
+window.KomoV134Doors={version:'0.13.4',doors,openAndEnter,blocked,axisClear:true,relocateLegacyConcierge};
