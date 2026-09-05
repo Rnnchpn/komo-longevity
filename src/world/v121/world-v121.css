@@ -1,0 +1,7 @@
+.v121-boot{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;gap:10px;background:linear-gradient(160deg,#d9d1be,#aeb9ad);color:#26362e;font-family:Arial,sans-serif;letter-spacing:.18em}.v121-boot span{font-family:Georgia,serif;font-size:25px;letter-spacing:.14em}.v121-boot b{font-size:9px;font-weight:600}
+#app[data-world-version="v121"] #world-canvas{transition:filter .8s ease}
+#app[data-world-version="v121"][data-hall-entered] #world-canvas{filter:contrast(1.045) saturate(1.025) brightness(.99)}
+#app[data-world-version="v121"] .location{backdrop-filter:blur(18px) saturate(1.08)}
+#app[data-world-version="v121"] .hud{box-shadow:0 14px 34px rgba(36,47,39,.10)}
+@media(max-width:800px){#app[data-world-version="v121"] .hud{background:rgba(42,57,48,.9)}#app[data-world-version="v121"] .location{top:103px;transform:translateX(-50%) scale(.92)}#app[data-world-version="v121"] .v112-today-pill{transform:scale(.94);transform-origin:right center}}
+@media(prefers-reduced-motion:reduce){#app[data-world-version="v121"] #world-canvas{transition:none}}
