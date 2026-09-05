@@ -8,6 +8,19 @@ Pulse iOS is **not** a WebView wrapper around `pulse.komolongevity.com`.
 
 The iOS app must reuse the existing KOMO Pulse Supabase project as the source of truth for identity, permissions, assessments, scores, reports and wearable data. The web application remains a first-class client of the same backend.
 
+## UX doctrine
+
+The mobile interface is intentionally simpler than the web product. The permanent bottom navigation is frozen to exactly four destinations:
+
+1. **Home** — Motion Today, the dominant daily score and the few metrics needed to understand it.
+2. **Résultats** — longitudinal results, Motion Score, Motion Age and assessment detail.
+3. **Plan** — the user's current movement plan and actionable priorities.
+4. **KŌMØ World** — Arena, Daily Challenge, clubs, rankings, streaks, XP/level and K-points.
+
+`MyKomo` is **not** a fifth tab. It is reached from the profile/avatar entry point in the top bar and contains account, privacy, connections and membership settings.
+
+The interface should follow a score-first, data-dense, low-friction interaction model inspired by best-in-class wearable apps without visually cloning another product. Avoid secondary navigation, dashboard clutter and duplicated metrics.
+
 ## Initial native architecture
 
 - SwiftUI application shell
@@ -34,6 +47,8 @@ The current KOMO Pulse Supabase schema already exposes the principal entities ne
 - `wearable_consents`
 
 Existing RPCs include `komo_motion_today_v1`, `komo_result_snapshot`, `komo_report_snapshot`, `komo_walk_summary` and other product flows. Prefer these server contracts over duplicating business logic in Swift.
+
+KŌMØ World should also reuse the existing engagement backend (`komo_challenges`, challenge completions, clubs, leaderboards, game scores, XP ledger and points ledger) rather than introducing a second identity or game database.
 
 ## HealthKit MVP
 
@@ -87,8 +102,9 @@ Never commit production secret keys.
 4. Render the native Home from `komo_motion_today_v1`.
 5. Add HealthKit permission + local daily read.
 6. Map the normalized HealthKit snapshot to `wearable_daily_metrics` through a controlled backend contract.
-7. Add native Results, Plan and MyKomo tabs.
-8. Add APNs/notifications, widgets and background refresh after core sync is validated.
+7. Build native Résultats and Plan on the existing Pulse server contracts.
+8. Connect KŌMØ World to the existing challenge/club/leaderboard/XP/K-points backend.
+9. Add APNs/notifications, widgets and background refresh after core sync is validated.
 
 ## Current status
 
