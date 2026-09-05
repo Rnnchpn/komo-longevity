@@ -18,15 +18,17 @@ await write('index.html',html);
 
 let nav=await read('pulse-bottom-nav-v6.js');
 nav=nav
-  .replace("['mykomo','My KŌMŌ','◉','mykomo']","['mykomo','My World','◉','mykomo']")
-  .replaceAll('My KŌMŌ','My World');
+  .replaceAll('My KŌMŌ','My World')
+  .replaceAll('MY KŌMŌ','MY WORLD')
+  .replaceAll('Mon KŌMŌ','My World');
 await write('pulse-bottom-nav-v6.js',nav);
 
 let home=await read('patient-home-command-v1.js');
 home=home
   .replaceAll('Ouvrir My KŌMŌ','Ouvrir My World')
-  .replaceAll('<small>MY KŌMŌ</small>','<small>MY WORLD</small>')
-  .replaceAll('<h3>My KŌMŌ</h3><p>Votre profil, Club et communauté</p>','<h3>My World</h3><p>Votre univers personnel KŌMŌ</p>')
+  .replaceAll('MY KŌMŌ','MY WORLD')
+  .replaceAll('My KŌMŌ','My World')
+  .replaceAll('Votre profil, Club et communauté','Votre univers personnel KŌMŌ')
   .replaceAll('Profil social · réglages · Club','Monde personnel · avatar · Club');
 await write('patient-home-command-v1.js',home);
 
@@ -42,8 +44,8 @@ const finalHome=await read('patient-home-command-v1.js');
 const checks=[
   ['My World owner injected',finalHtml.includes(`my-world-v1.js?v=${RELEASE}`)],
   ['legacy My KŌMŌ owner removed',!finalHtml.includes('my-komo-stable-v5.js')&&!finalHtml.includes('my-komo-lobby-v3.js')],
-  ['dock label is My World',finalNav.includes("['mykomo','My World','◉','mykomo']")],
-  ['Home entry is My World',finalHome.includes('<h3>My World</h3>')&&finalHome.includes('<small>MY WORLD</small>')],
+  ['dock label is My World',finalNav.includes('My World')&&!finalNav.includes('My KŌMŌ')],
+  ['Home entry is My World',finalHome.includes('My World')&&!finalHome.includes('My KŌMŌ')],
   ['architecture owner is My World',manifest.surfaces.mykomo?.owner==='my-world-v1.js']
 ];
 for(const [label,ok] of checks)console.log(`[pulse-my-world-v1] ${ok?'OK':'FAIL'} · ${label}`);
