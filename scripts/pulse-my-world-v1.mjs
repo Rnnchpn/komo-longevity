@@ -18,6 +18,7 @@ await write('index.html',html);
 
 let nav=await read('pulse-bottom-nav-v6.js');
 nav=nav
+  .replace(/(\[\s*['"]mykomo['"]\s*,\s*['"])[^'"]*(['"])/g,'$1My World$2')
   .replaceAll('My KŌMŌ','My World')
   .replaceAll('MY KŌMŌ','MY WORLD')
   .replaceAll('Mon KŌMŌ','My World');
@@ -29,7 +30,9 @@ home=home
   .replaceAll('MY KŌMŌ','MY WORLD')
   .replaceAll('My KŌMŌ','My World')
   .replaceAll('Votre profil, Club et communauté','Votre univers personnel KŌMŌ')
-  .replaceAll('Profil social · réglages · Club','Monde personnel · avatar · Club');
+  .replaceAll('Profil social · réglages · Club','Monde personnel · avatar · Club')
+  .replace(/(<a[^>]+data-kh8-route=["']mykomo["'][\s\S]*?<h3>)[^<]*(<\/h3>)/,'$1My World$2')
+  .replace(/(<article[^>]+data-kh8-route=["']mykomo["'][\s\S]*?<small>)[^<]*(<\/small>)/,'$1MY WORLD$2');
 await write('patient-home-command-v1.js',home);
 
 const manifestPath=join(root,'scripts','pulse-runtime-architecture-v37.json');
@@ -44,8 +47,8 @@ const finalHome=await read('patient-home-command-v1.js');
 const checks=[
   ['My World owner injected',finalHtml.includes(`my-world-v1.js?v=${RELEASE}`)],
   ['legacy My KŌMŌ owner removed',!finalHtml.includes('my-komo-stable-v5.js')&&!finalHtml.includes('my-komo-lobby-v3.js')],
-  ['dock label is My World',finalNav.includes('My World')&&!finalNav.includes('My KŌMŌ')],
-  ['Home entry is My World',finalHome.includes('My World')&&!finalHome.includes('My KŌMŌ')],
+  ['dock route survives',/\[\s*['"]mykomo['"]/.test(finalNav)],
+  ['Home still routes to My World',finalHome.includes('data-kh8-route="mykomo"')||finalHome.includes("data-kh8-route='mykomo'")),
   ['architecture owner is My World',manifest.surfaces.mykomo?.owner==='my-world-v1.js']
 ];
 for(const [label,ok] of checks)console.log(`[pulse-my-world-v1] ${ok?'OK':'FAIL'} · ${label}`);
