@@ -25,49 +25,67 @@
 <body>
   <div id="v122-boot" class="v122-boot"><span>KŌMØ WORLD</span><b>MATERIAL PASS · V0.12.2</b></div>
   <script type="module">
-    const source = await fetch('../v121/index.html', { cache:'no-store' });
-    if (!source.ok) throw new Error(`Unable to load V0.12.1 shell: ${source.status}`);
-    const html = await source.text();
-    const parsed = new DOMParser().parseFromString(html,'text/html');
-    const sourceApp = parsed.querySelector('#app');
-    if (!sourceApp) throw new Error('KŌMØ World shell missing');
-    const app = document.importNode(sourceApp,true);
-    const version = app.querySelector('.brand i');
-    if (version) version.textContent='V0.12.2';
-    app.dataset.worldVersion='v122';
-    const canvas=app.querySelector('#world-canvas');
-    if(canvas) canvas.setAttribute('aria-label','KŌMØ World V0.12.2 premium material pass');
-    document.body.insertBefore(app,document.querySelector('#v122-boot'));
+    const boot = document.querySelector('#v122-boot');
+    try {
+      const source = await fetch('../v121/index.html', { cache:'no-store' });
+      if (!source.ok) throw new Error(`Unable to load V0.12.1 shell: ${source.status}`);
+      const html = await source.text();
+      const parsed = new DOMParser().parseFromString(html,'text/html');
+      const sourceApp = parsed.querySelector('#app');
+      if (!sourceApp) throw new Error('KŌMØ World shell missing');
+      const app = document.importNode(sourceApp,true);
+      const version = app.querySelector('.brand i');
+      if (version) version.textContent='V0.12.2';
+      app.dataset.worldVersion='v122';
+      const canvas=app.querySelector('#world-canvas');
+      if(canvas) canvas.setAttribute('aria-label','KŌMØ World V0.12.2 premium material pass');
+      document.body.insertBefore(app,boot);
 
-    let engine = await (await fetch('../v081/world-v081.js',{cache:'no-store'})).text();
-    const twinCoreUrl=new URL('../v04/twin-core.js',location.href).href;
-    engine=engine.replace("'../v04/twin-core.js'",JSON.stringify(twinCoreUrl));
-    const oldSpeed="speed=keys.has(settings.bindings.sprint)?7.1:4.35";
-    if(!engine.includes(oldSpeed)) throw new Error('V0.12.2 locomotion patch target missing');
-    engine=engine.replace(oldSpeed,"speed=keys.has(settings.bindings.sprint)?11.4:6.25");
-    engine=engine.replace("Math.sin(performance.now()*.012)*.42","Math.sin(performance.now()*.0165)*.48");
-    engine=engine.replace("renderer.toneMappingExposure=1.04","renderer.toneMappingExposure=1.12");
-    engine=engine.replace("toast('KŌMØ World · V0.8.1')","toast('KŌMØ World · V0.12.2')");
-    const exposeAt='function animate(){';
-    if(!engine.includes(exposeAt)) throw new Error('V0.12.2 runtime exposure target missing');
-    engine=engine.replace(exposeAt,`window.KomoWorldRuntime={THREE,scene,camera,renderer,player,hall,water,sun,fill,spawnRing,top,island,plaza,hallFloor,leftWall,rightWall,backWall,deskBase,deskTop,tree,box,cyl,mat,C};\n${exposeAt}`);
-    const blobUrl=URL.createObjectURL(new Blob([engine],{type:'text/javascript'}));
-    try{await import(blobUrl)}finally{URL.revokeObjectURL(blobUrl)}
+      let engine = await (await fetch('../v081/world-v081.js',{cache:'no-store'})).text();
+      const twinCoreUrl=new URL('../v04/twin-core.js',location.href).href;
+      engine=engine.replace("'../v04/twin-core.js'",JSON.stringify(twinCoreUrl));
+      const oldSpeed="speed=keys.has(settings.bindings.sprint)?7.1:4.35";
+      if(!engine.includes(oldSpeed)) throw new Error('V0.12.2 locomotion patch target missing');
+      engine=engine.replace(oldSpeed,"speed=keys.has(settings.bindings.sprint)?11.4:6.25");
+      engine=engine.replace("Math.sin(performance.now()*.012)*.42","Math.sin(performance.now()*.0165)*.48");
+      engine=engine.replace("renderer.toneMappingExposure=1.04","renderer.toneMappingExposure=1.12");
+      engine=engine.replace("toast('KŌMØ World · V0.8.1')","toast('KŌMØ World · V0.12.2')");
+      const exposeAt='function animate(){';
+      if(!engine.includes(exposeAt)) throw new Error('V0.12.2 runtime exposure target missing');
+      engine=engine.replace(exposeAt,`window.KomoWorldRuntime={THREE,scene,camera,renderer,player,hall,water,sun,fill,spawnRing,top,island,plaza,hallFloor,leftWall,rightWall,backWall,deskBase,deskTop,tree,box,cyl,mat,C};\n${exposeAt}`);
+      const blobUrl=URL.createObjectURL(new Blob([engine],{type:'text/javascript'}));
+      try{await import(blobUrl)}finally{URL.revokeObjectURL(blobUrl)}
 
-    await import('../v083/world-v083.js');
-    await import('../v084/world-v084.js');
-    await import('../v09/world-v09.js');
-    await import('../v10/world-v10.js');
-    await import('../v101/world-v101.js');
-    await import('../v102/world-v102.js');
-    await import('../v11/world-v11.js');
-    await import('../v111/world-v111.js');
-    await import('../v112/world-v112.js');
-    await import('../v12/world-v12.js');
-    await import('../v12/world-v12-spatial.js');
-    await import('../v121/world-v121.js');
-    await import('./world-v122.js');
-    document.querySelector('#v122-boot')?.remove();
+      await import('../v083/world-v083.js');
+      await import('../v084/world-v084.js');
+      await import('../v09/world-v09.js');
+      await import('../v10/world-v10.js');
+      await import('../v101/world-v101.js');
+      await import('../v102/world-v102.js');
+      await import('../v11/world-v11.js');
+      await import('../v111/world-v111.js');
+      await import('../v112/world-v112.js');
+      await import('../v12/world-v12.js');
+      await import('../v12/world-v12-spatial.js');
+      await import('../v121/world-v121.js');
+      try {
+        await import('./world-v122.js');
+      } catch (materialError) {
+        console.error('[KŌMØ V0.12.2] Material pass disabled:', materialError);
+        document.querySelector('#toast')?.classList.add('show');
+        const toast=document.querySelector('#toast');
+        if(toast){toast.textContent='Mode graphique compatible activé';setTimeout(()=>toast.classList.remove('show'),2200);}
+      }
+    } catch (error) {
+      console.error('[KŌMØ V0.12.2] Boot error:', error);
+      if (boot) {
+        boot.innerHTML='<span>KŌMØ WORLD</span><b>RECHARGEMENT DU MONDE…</b>';
+        setTimeout(()=>location.replace('../v121/'),900);
+        return;
+      }
+    } finally {
+      boot?.remove();
+    }
   </script>
 </body>
 </html>
