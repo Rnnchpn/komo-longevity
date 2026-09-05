@@ -158,7 +158,11 @@ const scripts = [
   // Absolute last Pulse pass: prevent retired appointment/calendar/map owners
   // from reappearing after historical build layers.
   'scripts/pulse-consultation-runtime-prune-v1.mjs',
-  'scripts/pulse-consultation-final-qa-v1.mjs'
+  'scripts/pulse-consultation-final-qa-v1.mjs',
+  // My World becomes the final personal surface only after all legacy/freeze passes.
+  'scripts/pulse-my-world-v1.mjs',
+  'scripts/pulse-runtime-debt-audit-v1.mjs',
+  'scripts/pulse-runtime-architecture-audit-v37.mjs'
 ];
 
 for (const script of scripts) {
