@@ -11,9 +11,9 @@ on:
 
 jobs:
   build:
-    name: Build native Pulse for iPhone Simulator
+    name: Build and archive native Pulse
     runs-on: macos-26
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout
@@ -40,11 +40,21 @@ jobs:
             -project ios/Pulse.xcodeproj \
             -scheme Pulse \
             -configuration Debug \
-            > /tmp/pulse-build-settings.txt
-          grep -F 'SUPABASE_URL = https://uqlolefsiktbznnymriy.supabase.co' /tmp/pulse-build-settings.txt
-          grep -F 'PULSE_AUTH_REDIRECT_URL = com.komolongevity.pulse://auth/callback' /tmp/pulse-build-settings.txt
+            > /tmp/pulse-debug-build-settings.txt
+          grep -F 'SUPABASE_URL = https://uqlolefsiktbznnymriy.supabase.co' /tmp/pulse-debug-build-settings.txt
+          grep -F 'PULSE_AUTH_REDIRECT_URL = com.komolongevity.pulse://auth/callback' /tmp/pulse-debug-build-settings.txt
 
-      - name: Build Pulse
+          xcodebuild \
+            -showBuildSettings \
+            -project ios/Pulse.xcodeproj \
+            -scheme Pulse \
+            -configuration Release \
+            > /tmp/pulse-release-build-settings.txt
+          grep -F 'PRODUCT_BUNDLE_IDENTIFIER = com.komolongevity.pulse' /tmp/pulse-release-build-settings.txt
+          grep -F 'SUPABASE_URL = https://uqlolefsiktbznnymriy.supabase.co' /tmp/pulse-release-build-settings.txt
+          grep -F 'PULSE_AUTH_REDIRECT_URL = com.komolongevity.pulse://auth/callback' /tmp/pulse-release-build-settings.txt
+
+      - name: Build Pulse for iPhone Simulator
         run: |
           xcodebuild \
             -project ios/Pulse.xcodeproj \
@@ -57,7 +67,28 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build
 
-      - name: Upload build result
+      - name: Archive Release for generic iPhone
+        run: |
+          xcodebuild \
+            -project ios/Pulse.xcodeproj \
+            -scheme Pulse \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -archivePath .build/Pulse.xcarchive \
+            -clonedSourcePackagesDirPath .build/SourcePackages \
+            CODE_SIGNING_ALLOWED=NO \
+            archive
+
+      - name: Validate unsigned archive payload
+        run: |
+          APP_PATH='.build/Pulse.xcarchive/Products/Applications/Pulse.app'
+          test -d "$APP_PATH"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP_PATH/Info.plist" | grep -Fx 'com.komolongevity.pulse'
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$APP_PATH/Info.plist" | grep -Fx 'KŌMØ Pulse'
+          /usr/libexec/PlistBuddy -c 'Print :NSHealthShareUsageDescription' "$APP_PATH/Info.plist" | grep -F 'KŌMØ Pulse reads selected activity, sleep and cardiovascular metrics'
+
+      - name: Upload build diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -65,3 +96,12 @@ jobs:
           path: .build/PulseDerivedData/Logs/Build
           if-no-files-found: warn
           retention-days: 7
+
+      - name: Upload unsigned archive checkpoint
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-ios-unsigned-xcarchive
+          path: .build/Pulse.xcarchive
+          if-no-files-found: error
+          retention-days: 3
