@@ -33,6 +33,17 @@ jobs:
             -scheme Pulse \
             -clonedSourcePackagesDirPath .build/SourcePackages
 
+      - name: Validate resolved Pulse client config
+        run: |
+          xcodebuild \
+            -showBuildSettings \
+            -project ios/Pulse.xcodeproj \
+            -scheme Pulse \
+            -configuration Debug \
+            > /tmp/pulse-build-settings.txt
+          grep -F 'SUPABASE_URL = https://uqlolefsiktbznnymriy.supabase.co' /tmp/pulse-build-settings.txt
+          grep -F 'PULSE_AUTH_REDIRECT_URL = com.komolongevity.pulse://auth/callback' /tmp/pulse-build-settings.txt
+
       - name: Build Pulse
         run: |
           xcodebuild \
