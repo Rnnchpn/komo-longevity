@@ -31,18 +31,18 @@
       let source=doc.body.querySelector('script[type="module"]')?.textContent;
       if(!source)throw new Error('V0.13 runtime script missing');
 
-      // Preserve the validated natural FPS horizontal look.
       const desktopYaw='yaw+=dx*.0032*settings.camera.sensX';
       const mobileYaw='yaw+=dx*.0038*settings.camera.sensX';
       if(!source.includes(desktopYaw)||!source.includes(mobileYaw))throw new Error('V0.13 horizontal camera patch target missing');
       source=source.replace(desktopYaw,'yaw-=dx*.0032*settings.camera.sensX');
       source=source.replace(mobileYaw,'yaw-=dx*.0038*settings.camera.sensX');
 
-      // Patch the underlying engine after V0.13 applies its own interaction changes.
       const exposeMarker="const exposeAt='function animate(){';";
       if(!source.includes(exposeMarker))throw new Error('V0.13 engine extension marker missing');
       source=source.replace(exposeMarker,`
-      // V0.13.4 — clear the Hall axis: move the Concierge into the left hospitality alcove.
+      // V0.13.4 — closed doors participate in the existing movement collision system.
+      engine=engine.replace("function blocked(p){if(Math.hypot(p.x,p.z)>58)return true;","function blocked(p){if(window.KomoV134Doors?.blocked?.(p,mode))return true;if(Math.hypot(p.x,p.z)>58)return true;");
+      // Clear the Hall axis by moving the Concierge into the left hospitality alcove.
       engine=engine.replace("const concierge=humanoid({body:0x6e7465,scale:.9});concierge.position.set(0,0,-4.7);concierge.rotation.y=0;scene.add(concierge);const conciergeLabel=label('KŌMØ CONCIERGE',{sx:2.0,sy:.36,font:17});conciergeLabel.position.set(0,4.65,-4.7);scene.add(conciergeLabel);","const concierge=humanoid({body:0x6e7465,scale:.9});concierge.position.set(-8.15,0,-1.2);concierge.rotation.y=.22;scene.add(concierge);const conciergeLabel=label('KŌMØ CONCIERGE',{sx:2.0,sy:.36,font:17});conciergeLabel.position.set(-8.15,4.65,-1.2);scene.add(conciergeLabel);");
       // Route the three core destinations through the physical door controller.
       engine=engine.replace("addI('twin',-11,-21.8,5.0,'Entrer dans le Twin Lab','Enter Twin Lab','Découvrir votre jumeau fonctionnel','Explore your Functional Digital Twin',enterTwin);","addI('twin',-11,-21.8,5.0,'Ouvrir le Twin Lab','Open Twin Lab','Porte du jumeau fonctionnel','Functional Twin door',()=>window.KomoV134Doors?.openAndEnter('twin',enterTwin));");
