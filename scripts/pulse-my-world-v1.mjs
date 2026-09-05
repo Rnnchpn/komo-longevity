@@ -35,10 +35,21 @@ home=home
   .replace(/(<article[^>]+data-kh8-route=["']mykomo["'][\s\S]*?<small>)[^<]*(<\/small>)/,'$1MY WORLD$2');
 await write('patient-home-command-v1.js',home);
 
+// Reconcile the final architecture after the late consultation pruning pass.
+// At this stage booking-layer-v1 is the patient-facing Consultations owner;
+// the retired Agenda and professional dossier runtimes are intentionally absent.
 const manifestPath=join(root,'scripts','pulse-runtime-architecture-v37.json');
 const manifest=JSON.parse(await readFile(manifestPath,'utf8'));
 manifest.version='2026-09-05-my-world-v1';
 manifest.surfaces.mykomo={owner:'my-world-v1.js',controllers:[],extensions:[]};
+manifest.surfaces.documents={
+  owner:'booking-layer-v1.js',
+  controllers:['patient-intake-v1.js','pulse-free-continuity-v2.js','questionnaire-engine-v1.js'],
+  extensions:[]
+};
+if(manifest.surfaces.clinical){
+  manifest.surfaces.clinical.controllers=(manifest.surfaces.clinical.controllers||[]).filter(file=>file!=='pro-agenda-dossier-v1.js');
+}
 await writeFile(manifestPath,JSON.stringify(manifest,null,2)+'\n','utf8');
 
 const finalHtml=await read('index.html');
@@ -49,7 +60,9 @@ const checks=[
   ['legacy My KŌMŌ owner removed',!finalHtml.includes('my-komo-stable-v5.js')&&!finalHtml.includes('my-komo-lobby-v3.js')],
   ['dock route survives',/\[\s*['"]mykomo['"]/.test(finalNav)],
   ['Home still routes to My World',finalHome.includes('data-kh8-route="mykomo"')||finalHome.includes("data-kh8-route='mykomo'")],
-  ['architecture owner is My World',manifest.surfaces.mykomo?.owner==='my-world-v1.js']
+  ['architecture owner is My World',manifest.surfaces.mykomo?.owner==='my-world-v1.js'],
+  ['Consultations owner matches final runtime',manifest.surfaces.documents?.owner==='booking-layer-v1.js'],
+  ['retired Agenda controllers absent',!(manifest.surfaces.clinical?.controllers||[]).includes('pro-agenda-dossier-v1.js')]
 ];
 for(const [label,ok] of checks)console.log(`[pulse-my-world-v1] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
