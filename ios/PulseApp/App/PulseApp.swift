@@ -48,7 +48,7 @@ private struct PulseRootView: View {
                     }
 
                     NavigationStack {
-                        PlaceholderView(title: "Plan", systemImage: "checklist")
+                        PulsePlanView()
                     }
                     .tabItem {
                         Label("Plan", systemImage: "checklist")
