@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#cfc9b9" />
   <title>KŌMØ World · V0.11.2</title>
-  <meta name="description" content="KŌMØ World V0.11.2 — premium Functional Twin, Movement Center and Arena spatial experience." />
+  <meta name="description" content="KŌMØ World V0.11.2 — mobile-first visual redesign for the Fitness Floor and Rehab Lab." />
   <link rel="stylesheet" href="../v08/world-v08.css" />
   <link rel="stylesheet" href="../v081/world-v081.css" />
   <link rel="stylesheet" href="../v082/world-v082.css" />
@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="./world-v112.css" />
 </head>
 <body>
-  <div id="v112-boot" class="v112-boot">KŌMØ WORLD · FUNCTIONAL TWIN + ARENA</div>
+  <div id="v112-boot" class="v112-boot">KŌMØ WORLD · V0.11.2</div>
   <script type="module">
     const response = await fetch('../v081/index.html', { cache: 'no-store' });
     if (!response.ok) throw new Error(`Unable to load KŌMØ World shell: ${response.status}`);
@@ -32,13 +32,10 @@
     const version = app.querySelector('.brand i');
     if (version) version.textContent = 'V0.11.2';
     const canvas = app.querySelector('#world-canvas');
-    if (canvas) canvas.setAttribute('aria-label', 'KŌMØ World V0.11.2 Functional Twin and Arena');
+    if (canvas) canvas.setAttribute('aria-label', 'KŌMØ World V0.11.2');
     document.body.insertBefore(app, document.querySelector('#v112-boot'));
     document.querySelector('#v112-boot')?.remove();
 
-    // Capture the existing Three.js scene before V0.8.1 constructs it. This is
-    // used only by V0.11.2 visual polish and does not fork the world runtime.
-    await import('./world-v112-scene-hook.js');
     await import('../v081/world-v081.js');
     await import('../v083/world-v083.js');
     await import('../v084/world-v084.js');
@@ -49,7 +46,6 @@
     await import('../v11/world-v11.js');
     await import('../v111/world-v111.js');
     await import('./world-v112.js');
-    await import('./world-v112-spatial.js');
   </script>
 </body>
 </html>
