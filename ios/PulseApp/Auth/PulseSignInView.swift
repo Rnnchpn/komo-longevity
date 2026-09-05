@@ -52,7 +52,12 @@ struct PulseSignInView: View {
                 .disabled(auth.isSendingMagicLink || email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
-            if let feedback {
+            if let callbackError = auth.authErrorMessage {
+                Text(callbackError)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else if let feedback {
                 Text(feedback)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
