@@ -1,0 +1,128 @@
+.mobile-game-controls{display:none}
+
+@media (max-width:850px){
+  html.komo-mobile,html.komo-mobile body{overscroll-behavior:none;touch-action:none;-webkit-user-select:none;user-select:none}
+  html.komo-mobile .mobile-game-controls{display:block}
+  html.komo-mobile #world-canvas{touch-action:none}
+
+  html.komo-mobile .topbar{
+    top:max(8px,env(safe-area-inset-top));left:8px;right:8px;min-height:58px;
+    display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:17px;
+  }
+  html.komo-mobile .brand{min-width:0;flex:0 0 auto}
+  html.komo-mobile .brand strong{font-size:21px}
+  html.komo-mobile .brand span{display:none}
+  html.komo-mobile .metrics{display:flex;order:initial;width:auto;margin-left:auto;gap:4px}
+  html.komo-mobile .metrics>div{display:block!important;min-width:54px;padding:6px 7px;border-radius:10px}
+  html.komo-mobile .metrics>div:nth-child(n+3){display:none!important}
+  html.komo-mobile .metrics span{font-size:6px}
+  html.komo-mobile .metrics b{font-size:13px}
+  html.komo-mobile .safe-chip{grid-row:auto;justify-self:auto;padding:6px 8px;border-radius:11px}
+  html.komo-mobile .safe-chip span{display:none}
+  html.komo-mobile .safe-chip b{font-size:8px}
+
+  html.komo-mobile .hero{
+    top:92px;left:10px;width:218px;padding:11px 12px;border-radius:16px;
+    transition:opacity .2s ease,transform .2s ease;
+  }
+  html.komo-mobile .hero h1{margin:5px 0 0;font-size:19px;line-height:1.03}
+  html.komo-mobile .hero p,html.komo-mobile .hero .domains,html.komo-mobile .hero .primary{display:none}
+  html.komo-mobile[data-mobile-panel="data"] .hero,
+  html.komo-mobile[data-mobile-panel="ai"] .hero,
+  html.komo-mobile[data-mobile-panel="time"] .hero{opacity:0;pointer-events:none;transform:translateY(-8px)}
+
+  html.komo-mobile .sources,
+  html.komo-mobile .agent,
+  html.komo-mobile .timeline{display:none}
+
+  html.komo-mobile .sources.mobile-open{
+    display:block;top:134px;left:10px;right:10px;width:auto;max-height:48dvh;padding:13px;border-radius:18px;z-index:45;
+  }
+  html.komo-mobile .sources.mobile-open .source-list{max-height:calc(48dvh - 48px);grid-template-columns:1fr 1fr}
+  html.komo-mobile .sources.mobile-open .source-button{padding:9px 8px}
+  html.komo-mobile .sources.mobile-open .source-button small{display:none}
+
+  html.komo-mobile .agent.mobile-open{
+    display:block;left:10px;right:10px;bottom:calc(162px + env(safe-area-inset-bottom));width:auto;max-width:none;padding:12px;border-radius:18px;z-index:46;
+  }
+  html.komo-mobile .agent.mobile-open .quick-actions{display:flex}
+  html.komo-mobile .agent-response{max-height:88px;overflow:auto}
+  html.komo-mobile .agent-form input{font-size:16px}
+
+  html.komo-mobile .timeline.mobile-open{
+    display:block;left:10px;right:10px;bottom:calc(170px + env(safe-area-inset-bottom));transform:none;width:auto;min-width:0;padding:12px 14px;border-radius:18px;z-index:46;
+  }
+
+  html.komo-mobile .detail{
+    left:10px;right:10px;top:auto;bottom:calc(162px + env(safe-area-inset-bottom));width:auto;max-width:none;max-height:47dvh;border-radius:18px;z-index:52;
+  }
+  html.komo-mobile .audit,html.komo-mobile .rooms,html.komo-mobile .player{display:none}
+
+  html.komo-mobile .mobile-world-tabs{
+    position:absolute;z-index:55;top:calc(76px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+    display:flex;gap:3px;padding:4px;border-radius:999px;pointer-events:auto;touch-action:manipulation;
+  }
+  html.komo-mobile .mobile-world-tabs button{
+    border:0;background:transparent;color:rgba(242,239,230,.58);padding:6px 9px;border-radius:999px;font-size:8px;font-weight:600;letter-spacing:.03em;
+  }
+  html.komo-mobile .mobile-world-tabs button.active{background:rgba(216,198,170,.16);color:#f2efe6}
+
+  html.komo-mobile .camera-look-zone{
+    position:absolute;z-index:5;top:116px;right:0;bottom:0;left:47%;touch-action:none;pointer-events:auto;
+  }
+  html.komo-mobile .camera-look-hint{
+    position:absolute;right:18px;bottom:calc(42px + env(safe-area-inset-bottom));display:flex;align-items:center;gap:7px;
+    opacity:.28;font-size:8px;letter-spacing:.18em;color:#f2efe6;transition:opacity .18s ease;pointer-events:none;
+  }
+  html.komo-mobile .camera-look-hint i{font-style:normal;font-size:17px;letter-spacing:0}
+  html.komo-mobile .camera-look-zone.active .camera-look-hint{opacity:.7}
+
+  html.komo-mobile .mobile-joystick{
+    position:absolute;z-index:60;left:18px;bottom:calc(22px + env(safe-area-inset-bottom));width:126px;height:126px;
+    border-radius:50%;touch-action:none;pointer-events:auto;
+  }
+  html.komo-mobile .joystick-ring{
+    position:absolute;inset:0;border-radius:50%;border:1px solid rgba(242,239,230,.18);
+    background:radial-gradient(circle at 50% 50%,rgba(168,180,159,.13),rgba(9,13,10,.22) 60%,rgba(9,13,10,.48));
+    box-shadow:inset 0 0 30px rgba(0,0,0,.24),0 12px 32px rgba(0,0,0,.2);
+    backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  }
+  html.komo-mobile .joystick-ring:before,html.komo-mobile .joystick-ring:after{
+    content:"";position:absolute;left:50%;top:50%;background:rgba(242,239,230,.08);transform:translate(-50%,-50%);pointer-events:none;
+  }
+  html.komo-mobile .joystick-ring:before{width:1px;height:68%}
+  html.komo-mobile .joystick-ring:after{height:1px;width:68%}
+  html.komo-mobile .joystick-knob{
+    position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;
+    border:1px solid rgba(242,239,230,.26);background:linear-gradient(145deg,rgba(216,198,170,.3),rgba(145,161,140,.2));
+    box-shadow:0 8px 24px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.1);will-change:transform;transition:box-shadow .12s ease;
+  }
+  html.komo-mobile .mobile-joystick.active .joystick-knob{box-shadow:0 0 26px rgba(168,197,157,.3),0 8px 24px rgba(0,0,0,.34)}
+  html.komo-mobile .joystick-label{
+    position:absolute;left:50%;bottom:-15px;transform:translateX(-50%);font-size:7px;letter-spacing:.2em;color:rgba(242,239,230,.38);pointer-events:none;
+  }
+
+  html.komo-mobile .toast{top:calc(136px + env(safe-area-inset-top));white-space:nowrap;max-width:86vw;overflow:hidden;text-overflow:ellipsis}
+}
+
+@media (max-width:430px){
+  html.komo-mobile .metrics>div{min-width:50px;padding:5px 6px}
+  html.komo-mobile .safe-chip{padding:5px 7px}
+  html.komo-mobile .safe-chip b{display:none}
+  html.komo-mobile .mobile-world-tabs button{padding:6px 7px;font-size:7px}
+  html.komo-mobile .mobile-joystick{width:118px;height:118px;left:14px}
+  html.komo-mobile .sources.mobile-open .source-list{grid-template-columns:1fr}
+}
+
+@media (orientation:landscape) and (max-height:520px){
+  html.komo-mobile .topbar{min-height:48px;padding:6px 9px}
+  html.komo-mobile .brand strong{font-size:18px}
+  html.komo-mobile .mobile-world-tabs{top:58px}
+  html.komo-mobile .hero{top:92px;width:195px}
+  html.komo-mobile .mobile-joystick{width:104px;height:104px;bottom:14px}
+  html.komo-mobile .joystick-knob{width:44px;height:44px;margin:-22px 0 0 -22px}
+  html.komo-mobile .camera-look-zone{top:56px}
+  html.komo-mobile .sources.mobile-open{top:96px;bottom:12px;max-height:none;width:44vw;right:auto}
+  html.komo-mobile .agent.mobile-open{left:auto;right:10px;top:96px;bottom:12px;width:46vw;overflow:auto}
+  html.komo-mobile .timeline.mobile-open{left:auto;right:10px;bottom:14px;width:44vw}
+}

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#101411" />
+  <title>KŌMØ World · Prototype V0</title>
+  <meta name="description" content="KŌMØ World prototype — a spatial interface for your functional digital twin, Motion Lab, rehabilitation and KŌMØ Network." />
+  <link rel="stylesheet" href="./world.css" />
+</head>
+<body>
+  <div id="world-app" class="world-shell">
+    <canvas id="world-canvas" aria-label="Interactive KŌMØ World prototype"></canvas>
+
+    <header class="topbar glass">
+      <a class="brand" href="/" aria-label="KŌMØ home">
+        <span class="brand-mark">KŌMØ</span>
+        <span class="brand-sub">WORLD <b>V0</b></span>
+      </a>
+      <div class="pulse-strip" aria-label="Personal KŌMØ indicators">
+        <div><span>Motion</span><strong id="motion-score">84</strong></div>
+        <div><span>Level</span><strong id="komo-level">12</strong></div>
+        <button class="points-chip" id="points-chip" type="button" aria-label="Open KŌMØ Points wallet">
+          <span>KŌMØ Points</span><strong id="komo-points">2,480</strong>
+        </button>
+      </div>
+      <button class="profile-button" type="button" id="profile-button" aria-label="Open My KŌMØ">RC</button>
+    </header>
+
+    <aside class="mission glass" aria-live="polite">
+      <span class="eyebrow">YOUR WORLD TODAY</span>
+      <h1 id="zone-title">The Atrium</h1>
+      <p id="zone-copy">Your spatial starting point. Walk toward a room or use the room navigator.</p>
+      <div class="mission-row">
+        <span class="status-dot"></span>
+        <span id="mission-text">Twin synced · Last assessment 2 Sep</span>
+      </div>
+    </aside>
+
+    <nav class="room-nav glass" aria-label="KŌMØ World rooms">
+      <button class="room-button active" type="button" data-room="atrium"><span>00</span><b>Atrium</b></button>
+      <button class="room-button" type="button" data-room="twin"><span>01</span><b>My Twin</b></button>
+      <button class="room-button" type="button" data-room="motion"><span>02</span><b>Motion Lab</b></button>
+      <button class="room-button" type="button" data-room="rehab"><span>03</span><b>Rehab</b></button>
+      <button class="room-button" type="button" data-room="network"><span>04</span><b>Network</b></button>
+    </nav>
+
+    <section class="context-panel glass" id="context-panel" aria-live="polite">
+      <div class="context-head">
+        <span class="eyebrow" id="panel-eyebrow">KŌMØ WORLD</span>
+        <button id="close-panel" type="button" aria-label="Close detail panel">×</button>
+      </div>
+      <div id="panel-content"></div>
+    </section>
+
+    <div class="controls glass">
+      <span class="desktop-hint"><b>WASD</b> move · <b>drag</b> look · <b>shift</b> faster</span>
+      <div class="mobile-pad" aria-label="Movement controls">
+        <button type="button" data-move="forward">↑</button>
+        <button type="button" data-move="left">←</button>
+        <button type="button" data-move="back">↓</button>
+        <button type="button" data-move="right">→</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+  </div>
+
+  <script type="module" src="./world.js"></script>
+</body>
+</html>

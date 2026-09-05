@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#d6d0c0" />
+  <title>KŌMØ World · Functional Twin V0.7</title>
+  <meta name="description" content="KŌMØ World V0.7 — immersive longitudinal Functional Digital Twin presentation." />
+  <link rel="stylesheet" href="./world-v07.css" />
+</head>
+<body>
+<main id="app" class="world-shell">
+  <canvas id="world-canvas" aria-label="KŌMØ World"></canvas>
+
+  <header class="hud glass">
+    <div class="brand"><strong>KŌMØ</strong><span>WORLD</span><i>V0.7</i></div>
+    <div class="vitals">
+      <div><span>Motion</span><b id="hud-motion">84</b></div>
+      <div><span>Motion Age</span><b id="hud-age">39</b></div>
+      <div><span>Points</span><b>2,480</b></div>
+    </div>
+    <button id="settings-open" class="round" aria-label="Controls">⚙</button>
+  </header>
+
+  <section id="intro" class="intro glass">
+    <span class="eyebrow">CORE ISLAND · ARRIVAL PLAZA</span>
+    <h1>Your body has<br><em>a place in the world.</em></h1>
+    <p>Enter the KŌMØ Hall. Start at the Desk. Your Functional Digital Twin is the first destination.</p>
+    <div class="quest"><i></i><span id="quest-copy">01 · Reach the KŌMØ Desk</span></div>
+    <button id="intro-enter">Enter KŌMØ World</button>
+  </section>
+
+  <div class="location glass"><span id="location-name">ARRIVAL PLAZA</span><b id="heading">N</b></div>
+
+  <div id="interaction" class="interaction glass">
+    <span id="interaction-key">E</span>
+    <div><b id="interaction-title">Interact</b><small id="interaction-copy">Approach a destination</small></div>
+  </div>
+
+  <section id="panel" class="panel glass">
+    <div class="panel-head"><div><span class="eyebrow" id="panel-kicker">KŌMØ WORLD</span><h2 id="panel-title">Welcome</h2></div><button id="panel-close">×</button></div>
+    <div id="panel-body"></div>
+  </section>
+
+  <section id="twin-hud" class="twin-hud twin-cockpit">
+    <div class="twin-top glass">
+      <div class="twin-identity">
+        <span class="eyebrow">KŌMØ FUNCTIONAL DIGITAL TWIN</span>
+        <div><strong id="twin-snapshot">TODAY</strong><small id="twin-date">02 SEP 2026 · 16:17</small></div>
+      </div>
+      <div class="twin-mode-tabs" role="tablist">
+        <button class="active" data-twin-view="overview">Overview</button>
+        <button data-twin-view="body">Body</button>
+        <button data-twin-view="compare">Compare</button>
+        <button data-twin-view="sources">Sources</button>
+      </div>
+      <button id="twin-exit" class="leave-lab">Leave Lab</button>
+    </div>
+
+    <aside class="twin-left glass">
+      <div class="motion-hero">
+        <span>MOTION SCORE</span>
+        <div class="score-line"><strong id="twin-score-large">84</strong><i>/100</i></div>
+        <div class="delta good" id="twin-score-delta">+12 since baseline</div>
+      </div>
+      <div class="age-row"><span>Motion Age</span><b id="twin-age-large">39</b><small id="twin-age-delta">−3 years</small></div>
+      <div class="priority-card">
+        <div class="priority-head"><span>CURRENT PRIORITY</span><b id="priority-state">ATTENTION</b></div>
+        <h3 id="priority-title">Left quadriceps</h3>
+        <p id="priority-copy">Residual activation asymmetry remains the main modifiable limitation.</p>
+        <div class="priority-value"><strong id="priority-value">86%</strong><span>symmetry</span><small id="priority-delta">+14 pts</small></div>
+      </div>
+      <button id="compare-now" class="twin-primary">Compare with baseline</button>
+    </aside>
+
+    <aside class="twin-right glass">
+      <div class="twin-section-title"><span>FUNCTIONAL DOMAINS</span><small>Current · change vs baseline</small></div>
+      <div id="domain-bars" class="domain-bars"></div>
+      <div class="twin-section-title metrics-title"><span>KEY SIGNALS</span><small>Measured / derived</small></div>
+      <div id="key-signals" class="key-signals"></div>
+    </aside>
+
+    <section class="body-overlay-layer" aria-label="Twin body data overlay">
+      <div class="body-callout left-thigh active" data-region="left_thigh"><i></i><span>LEFT QUADRICEPS</span><b id="callout-quad">86%</b><small>symmetry</small></div>
+      <div class="body-callout gait" data-region="gait"><i></i><span>GAIT</span><b id="callout-gait">1.21</b><small>m/s</small></div>
+      <div class="body-callout posture" data-region="trunk"><i></i><span>POSTURE</span><b id="callout-posture">88</b><small>index</small></div>
+      <div class="body-callout strength" data-region="strength"><i></i><span>STRENGTH</span><b id="callout-strength">82</b><small>index</small></div>
+    </section>
+
+    <section id="compare-layer" class="compare-layer glass">
+      <div class="compare-head"><div><span class="eyebrow">LONGITUDINAL COMPARISON</span><h3>Baseline → Today</h3></div><button id="compare-close">×</button></div>
+      <div id="compare-grid" class="compare-grid"></div>
+    </section>
+
+    <section id="source-inspector" class="source-inspector glass">
+      <div class="source-inspector-head"><div><span class="eyebrow">DATA PROVENANCE</span><h3 id="source-title">Myodev</h3></div><button id="source-close">×</button></div>
+      <div id="source-content"></div>
+    </section>
+
+    <div class="twin-bottom glass">
+      <div class="timeline-caption"><span>LONGITUDINAL TIME</span><b id="timeline-current-label">TODAY</b></div>
+      <div class="timeline-nodes"><button data-time="0"><i></i><span>Baseline</span><small>02 Jun</small></button><button data-time="1"><i></i><span>Day 30</span><small>02 Jul</small></button><button class="active" data-time="2"><i></i><span>Today</span><small>02 Sep</small></button></div>
+      <input id="timeline" class="sr-timeline" type="range" min="0" max="2" step="1" value="2" aria-label="Twin timeline" />
+      <div id="twin-sources" class="source-strip"></div>
+    </div>
+
+    <div class="twin-domains legacy-domains" aria-hidden="true">
+      <div><span>Muscle</span><b id="twin-muscle">82</b></div>
+      <div><span>Mobility</span><b id="twin-mobility">76</b></div>
+      <div><span>Balance</span><b id="twin-balance">91</b></div>
+      <div><span>Posture</span><b id="twin-posture">88</b></div>
+    </div>
+  </section>
+
+  <section id="world-map-panel" class="map-panel glass">
+    <div class="panel-head"><div><span class="eyebrow">KŌMØ WORLD MAP</span><h2>One world. Growing with the network.</h2></div><button id="map-close">×</button></div>
+    <div class="map-grid">
+      <button class="node active"><i></i><b>Core Island</b><span>OPEN</span></button>
+      <button class="node locked"><i></i><b>Riviera</b><span>LOCKED · PARTNERS</span></button>
+      <button class="node locked"><i></i><b>Paris</b><span>FUTURE</span></button>
+      <button class="node locked"><i></i><b>Jávea</b><span>FUTURE</span></button>
+      <button class="node locked"><i></i><b>Dubai</b><span>FUTURE</span></button>
+    </div>
+  </section>
+
+  <section id="settings" class="settings glass">
+    <div class="panel-head"><div><span class="eyebrow">PLAYER CONTROLS</span><h2>Move your way.</h2></div><button id="settings-close">×</button></div>
+    <div class="presets"><button data-preset="wasd">WASD</button><button data-preset="zqsd">ZQSD</button><button data-preset="arrows">Arrows</button><button data-preset="custom">Custom</button></div>
+    <div class="settings-scroll">
+      <section><span class="group-title">KEY BINDINGS</span><div id="bindings" class="bindings"></div></section>
+      <section><span class="group-title">CAMERA</span>
+        <label><span>Horizontal sensitivity</span><input id="sens-x" type="range" min="0.35" max="2.2" step="0.05"></label>
+        <label><span>Vertical sensitivity</span><input id="sens-y" type="range" min="0.35" max="2.2" step="0.05"></label>
+        <label><span>Camera distance</span><input id="camera-distance" type="range" min="10" max="30" step="1"></label>
+        <label class="toggle"><span>Invert vertical axis</span><input id="invert-y" type="checkbox"></label>
+      </section>
+      <section class="mobile-setting"><span class="group-title">MOBILE</span>
+        <label><span>Joystick size</span><input id="joy-size" type="range" min="88" max="150" step="2"></label>
+        <label><span>Joystick opacity</span><input id="joy-opacity" type="range" min="0.25" max="0.95" step="0.05"></label>
+        <label class="toggle"><span>Left-handed layout</span><input id="left-handed" type="checkbox"></label>
+      </section>
+    </div>
+    <div class="settings-foot"><button id="reset-controls">Reset defaults</button><small>Saved automatically on this device</small></div>
+  </section>
+
+  <aside class="world-status glass"><div><span>WORLD</span><b>CORE ISLAND · ONLINE</b></div><div><span>RIVIERA</span><b class="locked-text">FRONTIER LOCKED</b></div></aside>
+
+  <div id="mobile-controls" class="mobile-controls">
+    <div id="joystick-zone" class="joystick-zone"><div class="joystick-base"><div id="joystick-knob" class="joystick-knob"></div></div></div>
+    <div id="look-zone" class="look-zone"><span>LOOK</span></div>
+    <button id="mobile-action" class="mobile-action">ACTION</button>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</main>
+<script type="module" src="../v06/world-v06.js"></script>
+<script type="module" src="./twin-v07.js"></script>
+</body>
+</html>

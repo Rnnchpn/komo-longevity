@@ -1,0 +1,59 @@
+{
+  "schema": "komo.world.build-manifest.v1",
+  "id": "agent-preview-003",
+  "title": "Twin Lab Threshold + Arrival Clarity",
+  "sourceVersion": "agent-preview-002",
+  "previewPath": "/world/agent-preview-003/",
+  "objective": "Transformer le passage Hall → Twin Lab en destination premium immédiatement compréhensible, puis renforcer la profondeur et la mise en scène du Functional Twin sans modifier aucune donnée clinique.",
+  "operations": [
+    {
+      "type": "ENHANCE_THRESHOLD",
+      "target": "twin-lab-portal",
+      "position": { "x": -11, "z": -24.45 },
+      "style": "deep-sage-bronze-warm-linear-light",
+      "reason": "Rendre le Twin Lab identifiable comme destination majeure depuis le Hall."
+    },
+    {
+      "type": "SET_CONTEXTUAL_CAMERA",
+      "target": "twin-lab",
+      "fov": 45,
+      "distance": 15.5,
+      "height": 5.9,
+      "lookAtY": 2.4,
+      "reason": "Donner au corps fonctionnel plus de présence et réduire la sensation de caméra trop haute."
+    },
+    {
+      "type": "ADD_SPATIAL_DEPTH",
+      "target": "twin-lab",
+      "layers": ["entry-frame", "data-fins", "ceiling-rings", "central-platform", "rear-halo"],
+      "reason": "Créer plusieurs plans de profondeur autour du corps sans surcharger l'interface."
+    },
+    {
+      "type": "ADD_SOURCE_WAYFINDING",
+      "target": "twin-lab",
+      "sources": ["Myodev", "Tests fonctionnels", "Marche", "Force", "Posture", "Wearables", "Sommeil", "Activité", "Rehab"],
+      "reason": "Montrer l'origine des données sans inventer ni modifier leur contenu."
+    },
+    {
+      "type": "ASSERT_CLINICAL_READ_ONLY",
+      "target": "functional-twin-truth-layer",
+      "value": true
+    }
+  ],
+  "guardrails": {
+    "previewOnly": true,
+    "productionWrite": false,
+    "clinicalWrite": false,
+    "twinTruthReadOnly": true,
+    "noInventedClinicalValues": true,
+    "mobileFirst": true
+  },
+  "qa": {
+    "safety": 100,
+    "navigation": 97,
+    "mobile": 95,
+    "visual": 97,
+    "reversibility": 100,
+    "expectedWeightedScore": 98
+  }
+}

@@ -4,14 +4,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "node scripts/build-all.mjs && node scripts/komo-key-marketing-v1.mjs && node scripts/booking-architecture-qa-v1.mjs && node scripts/pulse-key-results-v2.mjs && node scripts/pulse-my-komo-stability-v4.mjs && node scripts/pulse-premium-detail-v1.mjs && node scripts/pulse-home-key-position-v1.mjs && node scripts/pulse-motion-v4-final.mjs && node scripts/pulse-freeze-runtime-v1.mjs && node scripts/pulse-freeze-final-manifest-v1.mjs && node scripts/pulse-runtime-debt-audit-v1.mjs && node scripts/pulse-runtime-architecture-audit-v37.mjs",
+    "build": "node scripts/build-all.mjs && node scripts/komo-world-v0.mjs && node scripts/komo-key-marketing-v1.mjs && node scripts/booking-architecture-qa-v1.mjs && node scripts/pulse-key-results-v2.mjs && node scripts/pulse-my-komo-stability-v4.mjs && node scripts/pulse-premium-detail-v1.mjs && node scripts/pulse-home-key-position-v1.mjs && node scripts/pulse-motion-v4-final.mjs && node scripts/pulse-freeze-runtime-v1.mjs && node scripts/pulse-freeze-final-manifest-v1.mjs && node scripts/pulse-runtime-debt-audit-v1.mjs && node scripts/pulse-runtime-architecture-audit-v37.mjs",
     "build:core": "node scripts/build.mjs",
     "preview": "python3 -m http.server 8080 --directory site",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@vercel/functions": "3.9.5"
+    "@openai/agents": "0.17.0",
+    "@vercel/functions": "3.9.5",
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "10.5.10",

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#17271f" />
+  <title>KŌMØ World · V0.13.4 Hall Doors</title>
+  <meta name="description" content="KŌMØ World V0.13.4 — clear Hall axis, concierge off-axis and real closed room doors." />
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17271f}
+    #v134-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#17271f;color:#eee6d7;font:700 10px/1 system-ui,sans-serif;letter-spacing:.18em}
+  </style>
+</head>
+<body>
+  <div id="v134-loader">KŌMØ WORLD · HALL DOORS</div>
+  <script type="module">
+    const loader=document.querySelector('#v134-loader');
+    try{
+      const r=await fetch('../v13/index.html',{cache:'no-store'});
+      if(!r.ok)throw new Error(`V0.13 shell ${r.status}`);
+      const html=await r.text();
+      const doc=new DOMParser().parseFromString(html,'text/html');
+      const base=new URL('../v13/',location.href);
+
+      doc.head.querySelectorAll('link[rel="stylesheet"]').forEach(link=>{
+        const el=document.createElement('link');el.rel='stylesheet';el.href=new URL(link.getAttribute('href'),base).href;document.head.appendChild(el);
+      });
+      doc.head.querySelectorAll('style').forEach(style=>{const el=document.createElement('style');el.textContent=style.textContent;document.head.appendChild(el)});
+      [...doc.body.children].filter(n=>n.tagName!=='SCRIPT').forEach(n=>document.body.insertBefore(document.importNode(n,true),loader));
+
+      let source=doc.body.querySelector('script[type="module"]')?.textContent;
+      if(!source)throw new Error('V0.13 runtime script missing');
+
+      const desktopYaw='yaw+=dx*.0032*settings.camera.sensX';
+      const mobileYaw='yaw+=dx*.0038*settings.camera.sensX';
+      if(!source.includes(desktopYaw)||!source.includes(mobileYaw))throw new Error('V0.13 horizontal camera patch target missing');
+      source=source.replace(desktopYaw,'yaw-=dx*.0032*settings.camera.sensX');
+      source=source.replace(mobileYaw,'yaw-=dx*.0038*settings.camera.sensX');
+
+      const exposeMarker="const exposeAt='function animate(){';";
+      if(!source.includes(exposeMarker))throw new Error('V0.13 engine extension marker missing');
+      source=source.replace(exposeMarker,`
+      engine=engine.replace("function blocked(p){if(Math.hypot(p.x,p.z)>58)return true;","function blocked(p){if(window.KomoV134Doors?.blocked?.(p,mode))return true;if(Math.hypot(p.x,p.z)>58)return true;");
+      engine=engine.replace("const concierge=humanoid({body:0x6e7465,scale:.9});concierge.position.set(0,0,-4.7);concierge.rotation.y=0;scene.add(concierge);const conciergeLabel=label('KŌMØ CONCIERGE',{sx:2.0,sy:.36,font:17});conciergeLabel.position.set(0,4.65,-4.7);scene.add(conciergeLabel);","const concierge=humanoid({body:0x6e7465,scale:.9});concierge.position.set(-8.15,0,-1.2);concierge.rotation.y=.22;scene.add(concierge);const conciergeLabel=label('KŌMØ CONCIERGE',{sx:2.0,sy:.36,font:17});conciergeLabel.position.set(-8.15,4.65,-1.2);scene.add(conciergeLabel);");
+      engine=engine.replace("addI('twin',-11,-21.8,5.0,'Entrer dans le Twin Lab','Enter Twin Lab','Découvrir votre jumeau fonctionnel','Explore your Functional Digital Twin',enterTwin);","addI('twin',-11,-21.8,5.0,'Ouvrir le Twin Lab','Open Twin Lab','Porte du jumeau fonctionnel','Functional Twin door',()=>window.KomoV134Doors?.openAndEnter('twin',enterTwin));");
+      engine=engine.replace("addI('arena',12.5,-14.2,5.4,'Entrer dans la KŌMØ Arena','Enter KŌMØ Arena','Défi quotidien · classement','Daily challenge · leaderboard',enterArena);","addI('arena',12.5,-14.2,5.4,'Ouvrir la KŌMØ Arena','Open KŌMØ Arena','Défis · clubs · saison 01','Challenges · clubs · season 01',()=>window.KomoV134Doors?.openAndEnter('arena',enterArena));");
+      engine=engine.replace("addI('rehab',0,-21.8,3.8,'Entrer dans Rehab','Enter Rehab','Coach Agent · prochaine étape','Coach Agent · next build',()=>openPanel('REHAB','Coach Agent',locale==='fr'?'Cette aile accueillera les séances guidées par les déficits du Functional Twin.':'This wing will host deficit-driven sessions connected to the Functional Twin.'));","addI('rehab',0,-21.8,4.6,'Ouvrir Rehab','Open Rehab','Programme fonctionnel · progression','Functional program · progression',()=>window.KomoV134Doors?.openAndEnter('rehab',()=>openPanel('REHAB','Coach Agent',locale==='fr'?'Cette aile accueille les séances fonctionnelles guidées par les déficits du Functional Twin.':'This wing hosts functional sessions guided by Functional Twin deficits.')));");
+      const exposeAt='function animate(){';`);
+
+      const run=document.createElement('script');run.type='module';run.textContent=source;document.body.appendChild(run);
+
+      let attaching=false;
+      const wait=setInterval(async()=>{
+        if(attaching||!window.KomoWorldRuntime)return;
+        attaching=true;clearInterval(wait);
+        try{
+          await import('../v131/world-v131-design.js');
+          await import('../v132/world-v132-floor.js');
+          await import('../v133/world-v133-walls.js');
+          await import('./world-v134-doors.js');
+          await import('./world-v134-axis-clean.js');
+          await import('./world-v134-motion-close.js');
+          loader?.remove();
+        }catch(e){
+          console.error('[V0.13.4] enhancement pass failed',e);
+          loader.textContent='KŌMØ WORLD · RETOUR V0.13.3…';
+          setTimeout(()=>location.replace('../v133/'),900);
+        }
+      },50);
+
+      setTimeout(()=>{if(document.body.contains(loader)&&!window.KomoWorldRuntime)loader.textContent='KŌMØ WORLD · CHARGEMENT…'},7000);
+    }catch(e){
+      console.error('[V0.13.4] boot error',e);
+      loader.textContent='KŌMØ WORLD · V0.13.4 INDISPONIBLE';
+      setTimeout(()=>location.replace('../v133/'),1000);
+    }
+  </script>
+</body>
+</html>
