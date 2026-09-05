@@ -1,12 +1,12 @@
 # Pulse iOS — native foundation
 
-This directory starts the native iOS client for KŌMØ Pulse.
+This directory contains the native iOS client for KŌMØ Pulse.
 
 ## Product rule
 
 Pulse iOS is **not** a WebView wrapper around `pulse.komolongevity.com`.
 
-The iOS app must reuse the existing KOMO Pulse Supabase project as the source of truth for identity, permissions, assessments, scores, reports and wearable data. The web application remains a first-class client of the same backend.
+The iOS app reuses the existing KOMO Pulse Supabase project as the source of truth for identity, permissions, assessments, scores, reports and wearable data. The web application remains a first-class client of the same backend.
 
 ## UX doctrine
 
@@ -70,7 +70,7 @@ HealthKit authorization must be requested per data type and only when useful. Do
 2. Use only the project's publishable client key and let RLS enforce row access.
 3. Keep client configuration in build settings / `.xcconfig`, not committed Swift source.
 4. Health data is sensitive. HealthKit-derived data must not be repurposed for advertising or marketing.
-5. The first HealthKit pipeline should require explicit in-app wearable consent before uploading derived daily metrics.
+5. The first HealthKit pipeline requires explicit in-app wearable consent before uploading derived daily metrics.
 6. Clinical and patient data must continue to respect the backend's existing role and care-assignment boundaries.
 
 ## Native target included
@@ -81,10 +81,10 @@ HealthKit authorization must be requested per data type and only when useful. Do
 - Minimum target: iOS 17+
 - Package dependency: Supabase Swift `2.41.1` (pinned in `Pulse.xcodeproj`)
 - Capabilities: HealthKit (read only initially)
+- Current marketing version: `0.1.0`
+- Current build number: `1`
 
-`Pulse.xcodeproj` is now the single native target. It contains the HealthKit entitlement,
-the Info.plist purpose text, the Supabase Swift package dependency, Debug/Release build
-settings and a shared `Pulse` scheme. No web route or web deployment is owned by this target.
+`Pulse.xcodeproj` is the single native target. It contains the HealthKit entitlement, the Info.plist purpose text, the Supabase Swift package dependency, Debug/Release build settings and a shared `Pulse` scheme. No web route or web deployment is owned by this target.
 
 Required purpose string for the first HealthKit build:
 
@@ -94,62 +94,79 @@ Do not add `NSHealthUpdateUsageDescription` until Pulse intentionally writes to 
 
 ## Configuration
 
-Create a local `Secrets.xcconfig` from `Config/Secrets.xcconfig.example`. It is included by both
-Debug and Release settings and maps the values into Info.plist at build time.
+KŌMØ Pulse production is now the default client environment in `Config/Base.xcconfig` so a clean checkout can build against the real backend. Only the public/publishable Supabase client key is present; no server secret belongs in the app.
 
-Never commit production secret keys.
-
-Only the Supabase publishable/anon client key belongs in this file. Never add a
-`service_role` key to the iOS application.
+`Secrets.xcconfig` remains an optional local override for another environment and stays gitignored.
 
 ### Supabase Auth redirect
 
-Before testing sign-in, add this exact redirect URL in the Supabase project's Auth redirect URL
-allow-list:
+Before testing sign-in, add this exact redirect URL in the Supabase project's Auth redirect URL allow-list:
 
 `com.komolongevity.pulse://auth/callback`
 
-Pulse uses the existing account by email magic link with PKCE and does not create a separate iOS
-identity. The app deliberately requests `shouldCreateUser: false`; a user must already have a
-Pulse account or complete the approved web onboarding path first.
+Pulse uses the existing account by email magic link and does not create a separate iOS identity. The app deliberately requests `shouldCreateUser: false`; a user must already have a Pulse account or complete the approved web onboarding path first.
 
-### First iPhone build
+## Fastest path to see the app on a real iPhone
 
-1. Open `ios/Pulse.xcodeproj` in Xcode 15.3+.
-2. Copy `ios/Config/Secrets.xcconfig.example` to `ios/Config/Secrets.xcconfig` and supply the
-   project URL and publishable key.
-3. Select the `Pulse` scheme and a signed physical iPhone. HealthKit cannot be validated from a
-   simulator with real user data.
-4. In Signing & Capabilities, select the Apple Developer team that owns
-   `com.komolongevity.pulse`. HealthKit is already declared in `Pulse.entitlements`.
-5. Build and run. Sign in with an existing Pulse account, open the emailed magic link on that same
-   iPhone, then connect Apple Santé from Home.
+1. Open `ios/Pulse.xcodeproj` in a current Xcode version.
+2. Sign in to Xcode with the Apple Developer account that will own KŌMØ Pulse.
+3. Select the `Pulse` target → **Signing & Capabilities** → choose the correct Apple Developer team.
+4. Keep **Automatically manage signing** enabled.
+5. Confirm the bundle ID is exactly `com.komolongevity.pulse`.
+6. Confirm the HealthKit capability is enabled for that App ID/profile. The entitlement is already in the project.
+7. Connect a physical iPhone, select it as the run destination, and press Run.
+8. Sign in with an existing Pulse account, open the Magic Link on that same iPhone, and return to Pulse.
+9. From Home, connect Apple Santé and validate the first 29-day normalized read/sync.
 
-The first sync reads the preceding 29 metric days (not raw Health records), upserts normalized
-daily totals through the existing wearable tables and refreshes `komo_motion_today_v1`. This gives
-the backend enough history to build the existing 14-day minimum baseline when the selected Apple
-Santé categories are available. Subsequent refreshes are idempotent for the same iPhone/day/source.
+A physical device is the meaningful HealthKit checkpoint. Simulator builds are useful for UI and compilation, but they do not validate the real personal HealthKit data path.
 
-The GitHub workflow `Pulse iOS Build` builds the target for an iPhone Simulator on every push to
-`feat/pulse-ios-foundation`; it validates compilation and package resolution without production
-credentials or code signing.
+## Fastest path to TestFlight
+
+Use TestFlight as the first real distribution target before the public App Store.
+
+1. Join/confirm the Apple Developer Program account that will publish KŌMØ Pulse.
+2. Register or let Xcode create the App ID `com.komolongevity.pulse`, with HealthKit enabled.
+3. Create the KŌMØ Pulse app record in App Store Connect using that exact bundle ID.
+4. Add the required App Store metadata progressively: app name, primary language, category, privacy policy URL and App Privacy declarations.
+5. In Xcode, select **Any iOS Device (arm64)** / generic iOS device and choose **Product → Archive**.
+6. In Organizer, validate the archive.
+7. Choose **Distribute App → TestFlight & App Store** (or **TestFlight Internal Only** for the first team-only build).
+8. Upload the archive to App Store Connect.
+9. Once Apple finishes processing it, add internal testers in TestFlight.
+10. Install the public **TestFlight** app from the App Store on the iPhone, accept the invitation, then install KŌMØ Pulse from TestFlight.
+
+For the first internal TestFlight build, a public App Store release is not required. The PR remains in draft until the physical-device Auth + HealthKit + Motion Today path is validated.
+
+## CI / archive checkpoint
+
+The GitHub workflow `Pulse iOS Build` runs on every iOS change in `feat/pulse-ios-foundation` and now validates both development and distribution readiness without possessing Apple signing credentials:
+
+- resolves Supabase Swift 2.41.1;
+- validates the resolved production Supabase URL and native auth callback;
+- builds Debug for an iPhone Simulator;
+- creates an unsigned **Release `.xcarchive`** for a generic iPhone;
+- verifies the archived app bundle identifier, display name and HealthKit usage description;
+- uploads the build diagnostics and unsigned archive as short-lived CI artifacts.
+
+The unsigned archive is intentionally not an installable/TestFlight build. Apple signing and App Store Connect upload remain tied to the Apple Developer account.
 
 ## First implementation sequence
 
 1. ✅ Create the Xcode app target and add the Supabase Swift package.
 2. ✅ Wire `PulseConfiguration` and `PulseSupabase`.
-3. ✅ Reuse the existing Pulse authentication session model through secure magic links.
+3. ✅ Reuse the existing Pulse authentication session model through secure Magic Links.
 4. ✅ Render native Home from `komo_motion_today_v1`.
 5. ✅ Add read-only HealthKit permission and a 29-day normalized local read.
-6. ✅ Persist normalized HealthKit daily totals through the existing RLS-protected wearable contract,
-   after explicit in-app consent.
-7. Build native Résultats and Plan on the existing Pulse server contracts.
-8. Connect KŌMØ World to the existing challenge/club/leaderboard/XP/K-points backend.
-9. Add APNs/notifications, widgets and background refresh after the core sync is validated on a
-   signed iPhone.
+6. ✅ Persist normalized HealthKit daily totals through the existing RLS-protected wearable contract after explicit in-app consent.
+7. ✅ Validate Debug build + Release archive structure in CI.
+8. ⏳ Validate signed physical-iPhone launch, Magic Link return and HealthKit sync.
+9. ⏳ Upload first internal build to TestFlight.
+10. Build native Résultats and Plan on the existing Pulse server contracts.
+11. Connect KŌMØ World to the existing challenge/club/leaderboard/XP/K-points backend.
+12. Add APNs/notifications, widgets and background refresh after the core sync is validated on a signed iPhone.
 
 ## Current status
 
-The iPhone foundation now has a concrete first-build path: Supabase session → Apple Santé consent
-and read → wearable daily sync → server-owned Motion Today. Results, Plan and World remain native
-shells only; no production web deployment is changed by this directory.
+The iPhone foundation now has a concrete distribution path: Supabase session → Apple Santé consent/read → wearable daily sync → server-owned Motion Today → Release archive → Apple signing → TestFlight.
+
+Results, Plan and World remain native shells only. No production web deployment is changed by this directory.
