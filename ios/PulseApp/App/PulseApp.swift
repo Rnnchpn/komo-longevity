@@ -22,7 +22,7 @@ private struct PulseRootView: View {
                 PulseHomeView()
             }
             .tabItem {
-                Label("Home", systemImage: "house")
+                Label("Home", systemImage: "house.fill")
             }
 
             NavigationStack {
@@ -40,10 +40,10 @@ private struct PulseRootView: View {
             }
 
             NavigationStack {
-                PlaceholderView(title: "MyKomo", systemImage: "person.crop.circle")
+                KomoWorldView()
             }
             .tabItem {
-                Label("MyKomo", systemImage: "person.crop.circle")
+                Label("World", systemImage: "globe.europe.africa.fill")
             }
         }
     }
