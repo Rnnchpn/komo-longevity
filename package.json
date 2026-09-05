@@ -11,7 +11,9 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
-    "@vercel/functions": "3.9.5"
+    "@openai/agents": "0.17.0",
+    "@vercel/functions": "3.9.5",
+    "zod": "4.5.4"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "10.5.10",
