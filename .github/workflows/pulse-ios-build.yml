@@ -1,0 +1,50 @@
+name: Pulse iOS Build
+
+on:
+  push:
+    branches:
+      - feat/pulse-ios-foundation
+    paths:
+      - 'ios/**'
+      - '.github/workflows/pulse-ios-build.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build native Pulse for iPhone Simulator
+    runs-on: macos-14
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve Supabase package
+        run: |
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project ios/Pulse.xcodeproj \
+            -scheme Pulse \
+            -clonedSourcePackagesDirPath .build/SourcePackages
+
+      - name: Build Pulse
+        run: |
+          xcodebuild \
+            -project ios/Pulse.xcodeproj \
+            -scheme Pulse \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath .build/PulseDerivedData \
+            -clonedSourcePackagesDirPath .build/SourcePackages \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Upload build result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pulse-ios-xcresult
+          path: .build/PulseDerivedData/Logs/Build
+          if-no-files-found: warn
+          retention-days: 7

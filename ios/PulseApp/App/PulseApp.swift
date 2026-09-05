@@ -2,48 +2,61 @@ import SwiftUI
 
 @main
 struct PulseApp: App {
+    @StateObject private var auth = PulseAuthSession()
     @StateObject private var healthKit = HealthKitService()
 
     var body: some Scene {
         WindowGroup {
             PulseRootView()
+                .environmentObject(auth)
                 .environmentObject(healthKit)
                 .onOpenURL { url in
-                    PulseSupabase.client.auth.handle(url)
+                    PulseSupabase.client.handle(url)
                 }
         }
     }
 }
 
 private struct PulseRootView: View {
+    @EnvironmentObject private var auth: PulseAuthSession
+
     var body: some View {
-        TabView {
-            NavigationStack {
-                PulseHomeView()
-            }
-            .tabItem {
-                Label("Home", systemImage: "house.fill")
-            }
+        Group {
+            if auth.isRestoring {
+                ProgressView()
+                    .controlSize(.large)
+            } else if auth.session == nil {
+                PulseSignInView()
+            } else {
+                TabView {
+                    NavigationStack {
+                        PulseHomeView()
+                    }
+                    .tabItem {
+                        Label("Home", systemImage: "house.fill")
+                    }
 
-            NavigationStack {
-                PlaceholderView(title: "Résultats", systemImage: "waveform.path.ecg")
-            }
-            .tabItem {
-                Label("Résultats", systemImage: "chart.xyaxis.line")
-            }
+                    NavigationStack {
+                        PlaceholderView(title: "Résultats", systemImage: "waveform.path.ecg")
+                    }
+                    .tabItem {
+                        Label("Résultats", systemImage: "chart.xyaxis.line")
+                    }
 
-            NavigationStack {
-                PlaceholderView(title: "Plan", systemImage: "checklist")
-            }
-            .tabItem {
-                Label("Plan", systemImage: "checklist")
-            }
+                    NavigationStack {
+                        PlaceholderView(title: "Plan", systemImage: "checklist")
+                    }
+                    .tabItem {
+                        Label("Plan", systemImage: "checklist")
+                    }
 
-            NavigationStack {
-                KomoWorldView()
-            }
-            .tabItem {
-                Label("World", systemImage: "globe.europe.africa.fill")
+                    NavigationStack {
+                        KomoWorldView()
+                    }
+                    .tabItem {
+                        Label("World", systemImage: "globe.europe.africa.fill")
+                    }
+                }
             }
         }
     }

@@ -73,14 +73,18 @@ HealthKit authorization must be requested per data type and only when useful. Do
 5. The first HealthKit pipeline should require explicit in-app wearable consent before uploading derived daily metrics.
 6. Clinical and patient data must continue to respect the backend's existing role and care-assignment boundaries.
 
-## Suggested Xcode target
+## Native target included
 
 - Product name: `Pulse`
 - Bundle identifier: `com.komolongevity.pulse`
 - UI: SwiftUI
 - Minimum target: iOS 17+
-- Package dependency: `https://github.com/supabase/supabase-swift`
+- Package dependency: Supabase Swift `2.41.1` (pinned in `Pulse.xcodeproj`)
 - Capabilities: HealthKit (read only initially)
+
+`Pulse.xcodeproj` is now the single native target. It contains the HealthKit entitlement,
+the Info.plist purpose text, the Supabase Swift package dependency, Debug/Release build
+settings and a shared `Pulse` scheme. No web route or web deployment is owned by this target.
 
 Required purpose string for the first HealthKit build:
 
@@ -90,22 +94,62 @@ Do not add `NSHealthUpdateUsageDescription` until Pulse intentionally writes to 
 
 ## Configuration
 
-Create a local `Secrets.xcconfig` from `Config/Secrets.xcconfig.example` and map the values into the app target's Info.plist/build settings.
+Create a local `Secrets.xcconfig` from `Config/Secrets.xcconfig.example`. It is included by both
+Debug and Release settings and maps the values into Info.plist at build time.
 
 Never commit production secret keys.
 
+Only the Supabase publishable/anon client key belongs in this file. Never add a
+`service_role` key to the iOS application.
+
+### Supabase Auth redirect
+
+Before testing sign-in, add this exact redirect URL in the Supabase project's Auth redirect URL
+allow-list:
+
+`com.komolongevity.pulse://auth/callback`
+
+Pulse uses the existing account by email magic link with PKCE and does not create a separate iOS
+identity. The app deliberately requests `shouldCreateUser: false`; a user must already have a
+Pulse account or complete the approved web onboarding path first.
+
+### First iPhone build
+
+1. Open `ios/Pulse.xcodeproj` in Xcode 15.3+.
+2. Copy `ios/Config/Secrets.xcconfig.example` to `ios/Config/Secrets.xcconfig` and supply the
+   project URL and publishable key.
+3. Select the `Pulse` scheme and a signed physical iPhone. HealthKit cannot be validated from a
+   simulator with real user data.
+4. In Signing & Capabilities, select the Apple Developer team that owns
+   `com.komolongevity.pulse`. HealthKit is already declared in `Pulse.entitlements`.
+5. Build and run. Sign in with an existing Pulse account, open the emailed magic link on that same
+   iPhone, then connect Apple Santé from Home.
+
+The first sync reads the preceding 29 metric days (not raw Health records), upserts normalized
+daily totals through the existing wearable tables and refreshes `komo_motion_today_v1`. This gives
+the backend enough history to build the existing 14-day minimum baseline when the selected Apple
+Santé categories are available. Subsequent refreshes are idempotent for the same iPhone/day/source.
+
+The GitHub workflow `Pulse iOS Build` builds the target for an iPhone Simulator on every push to
+`feat/pulse-ios-foundation`; it validates compilation and package resolution without production
+credentials or code signing.
+
 ## First implementation sequence
 
-1. Create the Xcode app target and add the Supabase Swift package.
-2. Wire `PulseConfiguration` and `PulseSupabase`.
-3. Reuse the existing Pulse authentication session model.
-4. Render the native Home from `komo_motion_today_v1`.
-5. Add HealthKit permission + local daily read.
-6. Map the normalized HealthKit snapshot to `wearable_daily_metrics` through a controlled backend contract.
+1. ✅ Create the Xcode app target and add the Supabase Swift package.
+2. ✅ Wire `PulseConfiguration` and `PulseSupabase`.
+3. ✅ Reuse the existing Pulse authentication session model through secure magic links.
+4. ✅ Render native Home from `komo_motion_today_v1`.
+5. ✅ Add read-only HealthKit permission and a 29-day normalized local read.
+6. ✅ Persist normalized HealthKit daily totals through the existing RLS-protected wearable contract,
+   after explicit in-app consent.
 7. Build native Résultats and Plan on the existing Pulse server contracts.
 8. Connect KŌMØ World to the existing challenge/club/leaderboard/XP/K-points backend.
-9. Add APNs/notifications, widgets and background refresh after core sync is validated.
+9. Add APNs/notifications, widgets and background refresh after the core sync is validated on a
+   signed iPhone.
 
 ## Current status
 
-Foundation branch only. No production web deployment is changed by this directory.
+The iPhone foundation now has a concrete first-build path: Supabase session → Apple Santé consent
+and read → wearable daily sync → server-owned Motion Today. Results, Plan and World remain native
+shells only; no production web deployment is changed by this directory.

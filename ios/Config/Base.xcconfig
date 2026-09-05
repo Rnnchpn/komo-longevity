@@ -1,0 +1,14 @@
+// Shared Pulse iOS build settings.
+// Credentials remain in Secrets.xcconfig, which is intentionally gitignored.
+
+PRODUCT_BUNDLE_IDENTIFIER = com.komolongevity.pulse
+PRODUCT_NAME = Pulse
+MARKETING_VERSION = 0.1.0
+CURRENT_PROJECT_VERSION = 1
+IPHONEOS_DEPLOYMENT_TARGET = 17.0
+PULSE_URL_SCHEME = com.komolongevity.pulse
+PULSE_AUTH_REDIRECT_URL = $(PULSE_URL_SCHEME)://auth/callback
+
+// Safe build-time placeholders. Secrets.xcconfig overrides these locally before an app is run.
+SUPABASE_URL = https://YOUR_PROJECT_REF.supabase.co
+SUPABASE_PUBLISHABLE_KEY = sb_publishable_REPLACE_ME
