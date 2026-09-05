@@ -11,11 +11,11 @@ const CANDIDATES = [
   {
     id: 'agent-preview-003',
     title: 'Twin Lab Threshold + Arrival Clarity',
-    status: 'proposed',
-    previewPath: null,
-    dimensions: { safety: 100, navigation: 95, mobile: 96, visual: 92, reversibility: 100 },
-    scope: ['Twin threshold', 'Spatial framing', 'Entry guidance'],
-    guardrails: ['preview-only', 'twin-truth-read-only', 'no-clinical-value-change']
+    status: 'compiled',
+    previewPath: '/world/agent-preview-003/',
+    dimensions: { safety: 100, navigation: 97, mobile: 95, visual: 97, reversibility: 100 },
+    scope: ['Twin threshold', 'Contextual Twin camera', 'Spatial depth', 'Source provenance wayfinding'],
+    guardrails: ['preview-only', 'twin-truth-read-only', 'no-clinical-value-change', 'no-invented-clinical-values']
   },
   {
     id: 'agent-preview-004',
