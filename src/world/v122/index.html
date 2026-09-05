@@ -23,38 +23,51 @@
   <link rel="stylesheet" href="./world-v122.css" />
 </head>
 <body>
-  <div id="v122-boot" class="v122-boot"><span>KŌMØ WORLD</span><b>MATERIAL PASS · V0.12.2</b></div>
+  <div id="v122-boot" class="v122-boot"><span>KŌMØ WORLD</span><b>OUVERTURE DU MONDE · V0.12.2</b></div>
   <script type="module">
     const boot = document.querySelector('#v122-boot');
+    let bootFailed = false;
     try {
-      const source = await fetch('../v121/index.html', { cache:'no-store' });
-      if (!source.ok) throw new Error(`Unable to load V0.12.1 shell: ${source.status}`);
-      const html = await source.text();
-      const parsed = new DOMParser().parseFromString(html,'text/html');
+      const shellResponse = await fetch('../v081/index.html', { cache: 'no-store' });
+      if (!shellResponse.ok) throw new Error(`Unable to load KŌMØ World shell: ${shellResponse.status}`);
+      const shellHtml = await shellResponse.text();
+      const parsed = new DOMParser().parseFromString(shellHtml, 'text/html');
       const sourceApp = parsed.querySelector('#app');
       if (!sourceApp) throw new Error('KŌMØ World shell missing');
-      const app = document.importNode(sourceApp,true);
+      const app = document.importNode(sourceApp, true);
       const version = app.querySelector('.brand i');
-      if (version) version.textContent='V0.12.2';
-      app.dataset.worldVersion='v122';
-      const canvas=app.querySelector('#world-canvas');
-      if(canvas) canvas.setAttribute('aria-label','KŌMØ World V0.12.2 premium material pass');
-      document.body.insertBefore(app,boot);
+      if (version) version.textContent = 'V0.12.2';
+      app.dataset.worldVersion = 'v122';
+      const canvas = app.querySelector('#world-canvas');
+      if (canvas) canvas.setAttribute('aria-label', 'KŌMØ World V0.12.2 premium material pass');
+      document.body.insertBefore(app, boot);
 
-      let engine = await (await fetch('../v081/world-v081.js',{cache:'no-store'})).text();
-      const twinCoreUrl=new URL('../v04/twin-core.js',location.href).href;
-      engine=engine.replace("'../v04/twin-core.js'",JSON.stringify(twinCoreUrl));
-      const oldSpeed="speed=keys.has(settings.bindings.sprint)?7.1:4.35";
-      if(!engine.includes(oldSpeed)) throw new Error('V0.12.2 locomotion patch target missing');
-      engine=engine.replace(oldSpeed,"speed=keys.has(settings.bindings.sprint)?11.4:6.25");
-      engine=engine.replace("Math.sin(performance.now()*.012)*.42","Math.sin(performance.now()*.0165)*.48");
-      engine=engine.replace("renderer.toneMappingExposure=1.04","renderer.toneMappingExposure=1.12");
-      engine=engine.replace("toast('KŌMØ World · V0.8.1')","toast('KŌMØ World · V0.12.2')");
-      const exposeAt='function animate(){';
-      if(!engine.includes(exposeAt)) throw new Error('V0.12.2 runtime exposure target missing');
-      engine=engine.replace(exposeAt,`window.KomoWorldRuntime={THREE,scene,camera,renderer,player,hall,water,sun,fill,spawnRing,top,island,plaza,hallFloor,leftWall,rightWall,backWall,deskBase,deskTop,tree,box,cyl,mat,C};\n${exposeAt}`);
-      const blobUrl=URL.createObjectURL(new Blob([engine],{type:'text/javascript'}));
-      try{await import(blobUrl)}finally{URL.revokeObjectURL(blobUrl)}
+      try {
+        if (!localStorage.getItem('komo_v12_camera_migrated')) {
+          const key = 'komo_world_controls_v081';
+          const saved = JSON.parse(localStorage.getItem(key) || 'null');
+          if (saved?.camera && Number(saved.camera.distance) === 26) {
+            saved.camera.distance = 21;
+            localStorage.setItem(key, JSON.stringify(saved));
+          }
+          localStorage.setItem('komo_v12_camera_migrated', '1');
+        }
+      } catch {}
+
+      let engine = await (await fetch('../v081/world-v081.js', { cache: 'no-store' })).text();
+      const twinCoreUrl = new URL('../v04/twin-core.js', location.href).href;
+      engine = engine.replace("'../v04/twin-core.js'", JSON.stringify(twinCoreUrl));
+      const oldSpeed = "speed=keys.has(settings.bindings.sprint)?7.1:4.35";
+      if (!engine.includes(oldSpeed)) throw new Error('V0.12.2 locomotion patch target missing');
+      engine = engine.replace(oldSpeed, "speed=keys.has(settings.bindings.sprint)?11.4:6.25");
+      engine = engine.replace("Math.sin(performance.now()*.012)*.42", "Math.sin(performance.now()*.0165)*.48");
+      engine = engine.replace("renderer.toneMappingExposure=1.04", "renderer.toneMappingExposure=1.12");
+      engine = engine.replace("toast('KŌMØ World · V0.8.1')", "toast('KŌMØ World · V0.12.2')");
+      const exposeAt = 'function animate(){';
+      if (!engine.includes(exposeAt)) throw new Error('V0.12.2 runtime exposure target missing');
+      engine = engine.replace(exposeAt, `window.KomoWorldRuntime={THREE,scene,camera,renderer,player,hall,water,sun,fill,spawnRing,top,island,plaza,hallFloor,leftWall,rightWall,backWall,deskBase,deskTop,tree,box,cyl,mat,C};\n${exposeAt}`);
+      const blobUrl = URL.createObjectURL(new Blob([engine], { type: 'text/javascript' }));
+      try { await import(blobUrl); } finally { URL.revokeObjectURL(blobUrl); }
 
       await import('../v083/world-v083.js');
       await import('../v084/world-v084.js');
@@ -68,23 +81,27 @@
       await import('../v12/world-v12.js');
       await import('../v12/world-v12-spatial.js');
       await import('../v121/world-v121.js');
-      try {
-        await import('./world-v122.js');
-      } catch (materialError) {
-        console.error('[KŌMØ V0.12.2] Material pass disabled:', materialError);
-        document.querySelector('#toast')?.classList.add('show');
-        const toast=document.querySelector('#toast');
-        if(toast){toast.textContent='Mode graphique compatible activé';setTimeout(()=>toast.classList.remove('show'),2200);}
-      }
-    } catch (error) {
-      console.error('[KŌMØ V0.12.2] Boot error:', error);
-      if (boot) {
-        boot.innerHTML='<span>KŌMØ WORLD</span><b>RECHARGEMENT DU MONDE…</b>';
-        setTimeout(()=>location.replace('../v121/'),900);
-        return;
-      }
-    } finally {
+
       boot?.remove();
+
+      setTimeout(() => {
+        import('./world-v122.js').catch((materialError) => {
+          console.error('[KŌMØ V0.12.2] Material pass disabled:', materialError);
+          const toast = document.querySelector('#toast');
+          if (toast) {
+            toast.textContent = 'Mode graphique compatible activé';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2200);
+          }
+        });
+      }, 350);
+    } catch (error) {
+      bootFailed = true;
+      console.error('[KŌMØ V0.12.2] Boot error:', error);
+      if (boot) boot.innerHTML = '<span>KŌMØ WORLD</span><b>RETOUR À LA VERSION STABLE…</b>';
+      setTimeout(() => location.replace('../v121/'), 700);
+    } finally {
+      if (!bootFailed) boot?.remove();
     }
   </script>
 </body>
