@@ -9,10 +9,14 @@ struct MotionTodaySnapshot: Decodable, Equatable {
     let score: Int?
     let status: String
     let message: String
-    let steps: Steps
-    let sleep: Sleep
-    let restingHeartRate: RestingHeartRate
+    let steps: Steps?
+    let sleep: Sleep?
+    let restingHeartRate: RestingHeartRate?
     let preview: Preview?
+    let weights: Weights?
+    let baselineWindowDays: Int?
+    let minimumBaselineDays: Int?
+    let algorithmVersion: String?
 
     enum CodingKeys: String, CodingKey {
         case connected
@@ -25,17 +29,25 @@ struct MotionTodaySnapshot: Decodable, Equatable {
         case sleep
         case restingHeartRate = "resting_hr"
         case preview
+        case weights
+        case baselineWindowDays = "baseline_window_days"
+        case minimumBaselineDays = "minimum_baseline_days"
+        case algorithmVersion = "algorithm_version"
     }
 
     struct Steps: Decodable, Equatable {
         let value: Int?
         let usual: Int?
         let deltaPercent: Int?
+        let baselineDays: Int?
+        let score: Double?
 
         enum CodingKeys: String, CodingKey {
             case value
             case usual
             case deltaPercent = "delta_pct"
+            case baselineDays = "baseline_days"
+            case score
         }
     }
 
@@ -43,11 +55,15 @@ struct MotionTodaySnapshot: Decodable, Equatable {
         let valueMinutes: Int?
         let usualMinutes: Int?
         let deltaMinutes: Int?
+        let baselineDays: Int?
+        let score: Double?
 
         enum CodingKeys: String, CodingKey {
             case valueMinutes = "value_minutes"
             case usualMinutes = "usual_minutes"
             case deltaMinutes = "delta_minutes"
+            case baselineDays = "baseline_days"
+            case score
         }
     }
 
@@ -55,6 +71,16 @@ struct MotionTodaySnapshot: Decodable, Equatable {
         let value: Double?
         let usual: Double?
         let delta: Double?
+        let baselineDays: Int?
+        let score: Double?
+
+        enum CodingKeys: String, CodingKey {
+            case value
+            case usual
+            case delta
+            case baselineDays = "baseline_days"
+            case score
+        }
     }
 
     struct Preview: Decodable, Equatable {
@@ -63,6 +89,32 @@ struct MotionTodaySnapshot: Decodable, Equatable {
         let score: Int?
         let status: String?
         let message: String?
+        let steps: Steps?
+        let sleep: Sleep?
+        let restingHeartRate: RestingHeartRate?
+
+        enum CodingKeys: String, CodingKey {
+            case available
+            case estimated
+            case score
+            case status
+            case message
+            case steps
+            case sleep
+            case restingHeartRate = "resting_hr"
+        }
+    }
+
+    struct Weights: Decodable, Equatable {
+        let steps: Double?
+        let sleep: Double?
+        let restingHeartRate: Double?
+
+        enum CodingKeys: String, CodingKey {
+            case steps
+            case sleep
+            case restingHeartRate = "resting_hr"
+        }
     }
 
     var displayScore: Int? {
@@ -75,6 +127,18 @@ struct MotionTodaySnapshot: Decodable, Equatable {
 
     var displayMessage: String {
         message == "Building your baseline" && isEstimated ? (preview?.message ?? message) : message
+    }
+
+    var displaySteps: Steps? {
+        steps ?? (isEstimated ? preview?.steps : nil)
+    }
+
+    var displaySleep: Sleep? {
+        sleep ?? (isEstimated ? preview?.sleep : nil)
+    }
+
+    var displayRestingHeartRate: RestingHeartRate? {
+        restingHeartRate ?? (isEstimated ? preview?.restingHeartRate : nil)
     }
 }
 
@@ -108,6 +172,9 @@ final class MotionTodayStore: ObservableObject {
             snapshot = response
             errorMessage = nil
         } catch {
+            #if DEBUG
+            print("Motion Today refresh failed:", error)
+            #endif
             errorMessage = "Motion Today could not be refreshed. Pull down to try again."
         }
     }
