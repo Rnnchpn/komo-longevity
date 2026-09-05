@@ -48,7 +48,7 @@ const checks=[
   ['My World owner injected',finalHtml.includes(`my-world-v1.js?v=${RELEASE}`)],
   ['legacy My KŌMŌ owner removed',!finalHtml.includes('my-komo-stable-v5.js')&&!finalHtml.includes('my-komo-lobby-v3.js')],
   ['dock route survives',/\[\s*['"]mykomo['"]/.test(finalNav)],
-  ['Home still routes to My World',finalHome.includes('data-kh8-route="mykomo"')||finalHome.includes("data-kh8-route='mykomo'")),
+  ['Home still routes to My World',finalHome.includes('data-kh8-route="mykomo"')||finalHome.includes("data-kh8-route='mykomo'")],
   ['architecture owner is My World',manifest.surfaces.mykomo?.owner==='my-world-v1.js']
 ];
 for(const [label,ok] of checks)console.log(`[pulse-my-world-v1] ${ok?'OK':'FAIL'} · ${label}`);
