@@ -1,5 +1,7 @@
 // Shared Pulse iOS build settings.
-// Credentials remain in Secrets.xcconfig, which is intentionally gitignored.
+// KŌMØ Pulse uses the production Supabase project by default so a clean checkout can launch.
+// The publishable key below is a client-side key by design; never place service_role or secret keys here.
+// Secrets.xcconfig can still override these values locally for another environment.
 
 PRODUCT_BUNDLE_IDENTIFIER = com.komolongevity.pulse
 PRODUCT_NAME = Pulse
@@ -9,6 +11,5 @@ IPHONEOS_DEPLOYMENT_TARGET = 17.0
 PULSE_URL_SCHEME = com.komolongevity.pulse
 PULSE_AUTH_REDIRECT_URL = $(PULSE_URL_SCHEME)://auth/callback
 
-// Safe build-time placeholders. Secrets.xcconfig overrides these locally before an app is run.
-SUPABASE_URL = https://YOUR_PROJECT_REF.supabase.co
-SUPABASE_PUBLISHABLE_KEY = sb_publishable_REPLACE_ME
+SUPABASE_URL = https://uqlolefsiktbznnymriy.supabase.co
+SUPABASE_PUBLISHABLE_KEY = sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n
