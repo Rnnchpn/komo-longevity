@@ -64,7 +64,7 @@ const checks=[
   ['bridge uses URL fragment',bridge.includes('#pulse=')&&bridge.includes('encodeBase64Url')],
   ['legacy My KŌMŌ owner removed',!finalHtml.includes('my-komo-stable-v5.js')&&!finalHtml.includes('my-komo-lobby-v3.js')],
   ['dock route survives',/\[\s*['"]mykomo['"]/.test(finalNav)],
-  ['Home still routes to My World',finalHome.includes('data-kh8-route="mykomo"')||finalHome.includes("data-kh8-route='mykomo'")),
+  ['Home still routes to My World',finalHome.includes('data-kh8-route="mykomo"')||finalHome.includes("data-kh8-route='mykomo'")],
   ['architecture owner is My World',manifest.surfaces.mykomo?.owner==='my-world-v1.js'],
   ['identity bridge is declared controller',(manifest.surfaces.mykomo?.controllers||[]).includes('my-world-pulse-bridge-v1.js')],
   ['Consultations owner matches final runtime',manifest.surfaces.documents?.owner==='booking-layer-v1.js'],
