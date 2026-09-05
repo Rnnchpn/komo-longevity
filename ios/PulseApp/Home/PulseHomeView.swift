@@ -114,26 +114,26 @@ struct PulseHomeView: View {
         HStack(spacing: 10) {
             DailyMetricCard(
                 title: "Steps",
-                value: formattedInteger(motionToday.snapshot?.steps.value),
+                value: formattedInteger(motionToday.snapshot?.displaySteps?.value),
                 baseline: usualSteps,
-                delta: percentDelta(motionToday.snapshot?.steps.deltaPercent),
-                direction: movementDirection(motionToday.snapshot?.steps.deltaPercent),
+                delta: percentDelta(motionToday.snapshot?.displaySteps?.deltaPercent),
+                direction: movementDirection(motionToday.snapshot?.displaySteps?.deltaPercent),
                 systemImage: "figure.walk"
             )
             DailyMetricCard(
                 title: "Sleep",
-                value: formattedDuration(motionToday.snapshot?.sleep.valueMinutes),
+                value: formattedDuration(motionToday.snapshot?.displaySleep?.valueMinutes),
                 baseline: usualSleep,
-                delta: minuteDelta(motionToday.snapshot?.sleep.deltaMinutes),
-                direction: movementDirection(motionToday.snapshot?.sleep.deltaMinutes),
+                delta: minuteDelta(motionToday.snapshot?.displaySleep?.deltaMinutes),
+                direction: movementDirection(motionToday.snapshot?.displaySleep?.deltaMinutes),
                 systemImage: "bed.double.fill"
             )
             DailyMetricCard(
                 title: "Resting HR",
-                value: formattedHeartRate(motionToday.snapshot?.restingHeartRate.value),
+                value: formattedHeartRate(motionToday.snapshot?.displayRestingHeartRate?.value),
                 baseline: usualHeartRate,
-                delta: heartRateDelta(motionToday.snapshot?.restingHeartRate.delta),
-                direction: recoveryDirection(motionToday.snapshot?.restingHeartRate.delta),
+                delta: heartRateDelta(motionToday.snapshot?.displayRestingHeartRate?.delta),
+                direction: recoveryDirection(motionToday.snapshot?.displayRestingHeartRate?.delta),
                 systemImage: "heart.fill"
             )
         }
@@ -214,7 +214,13 @@ struct PulseHomeView: View {
     }
 
     private var connectionDescription: String {
-        if motionToday.snapshot?.connected == true {
+        guard let snapshot = motionToday.snapshot else {
+            return "Checking your connected movement data…"
+        }
+        if snapshot.connected, snapshot.date == nil {
+            return "Apple Santé is connected. Sync now to import your recent daily totals."
+        }
+        if snapshot.connected {
             return "Your selected daily totals are ready to refresh from Apple Santé."
         }
         return "Connect selected movement, sleep and cardiovascular metrics to build your daily baseline."
@@ -228,17 +234,17 @@ struct PulseHomeView: View {
     }
 
     private var usualSteps: String {
-        guard let value = motionToday.snapshot?.steps.usual else { return "Usual —" }
+        guard let value = motionToday.snapshot?.displaySteps?.usual else { return "Usual —" }
         return "Usual \(formattedInteger(value))"
     }
 
     private var usualSleep: String {
-        guard let value = motionToday.snapshot?.sleep.usualMinutes else { return "Usual —" }
+        guard let value = motionToday.snapshot?.displaySleep?.usualMinutes else { return "Usual —" }
         return "Usual \(formattedDuration(value))"
     }
 
     private var usualHeartRate: String {
-        guard let value = motionToday.snapshot?.restingHeartRate.usual else { return "Usual —" }
+        guard let value = motionToday.snapshot?.displayRestingHeartRate?.usual else { return "Usual —" }
         return "Usual \(formattedHeartRate(value))"
     }
 
