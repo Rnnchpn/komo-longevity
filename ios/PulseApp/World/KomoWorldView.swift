@@ -3,63 +3,362 @@ import Supabase
 import SwiftUI
 
 struct KomoWorldView: View {
+    @State private var summary: EngagementSummary?
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    @State private var challengeToComplete: DailyChallenge?
+    @State private var busyChallengeSlug: String?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                HStack(alignment: .firstTextBaseline) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("KŌMØ WORLD")
-                            .font(.caption.weight(.semibold))
-                            .tracking(1.8)
-                            .foregroundStyle(.secondary)
-                        Text("Move. Compete. Progress.")
-                            .font(.title2.weight(.semibold))
+                worldHeader
+
+                if isLoading, summary == nil {
+                    ProgressView("Loading KŌMØ World…")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 44)
+                } else if let errorMessage, summary == nil {
+                    ContentUnavailableView {
+                        Label("World unavailable", systemImage: "globe.europe.africa")
+                    } description: {
+                        Text(errorMessage)
+                    } actions: {
+                        Button("Try again") {
+                            Task { await refresh() }
+                        }
                     }
-
-                    Spacer()
-
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("LEVEL —")
-                            .font(.caption.weight(.semibold))
-                        Text("— K")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                WorldHeroCard()
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Today")
-                        .font(.headline)
-
-                    WorldRow(
-                        title: "Daily Challenge",
-                        subtitle: "A short movement challenge that contributes to your progression.",
-                        systemImage: "bolt.fill"
-                    )
-
-                    WorldRow(
-                        title: "Arena",
-                        subtitle: "Compete on movement-based challenges and compare your progression.",
-                        systemImage: "trophy.fill"
-                    )
-                }
-
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Community")
-                        .font(.headline)
-
-                    HStack(spacing: 12) {
-                        WorldCompactCard(title: "Clubs", value: "—", systemImage: "person.3.fill")
-                        WorldCompactCard(title: "Rank", value: "—", systemImage: "chart.bar.fill")
-                        WorldCompactCard(title: "Streak", value: "—", systemImage: "flame.fill")
-                    }
+                } else if let summary {
+                    WorldHeroCard(summary: summary)
+                    challengeSection(summary.challenges)
+                    communitySection(summary)
+                    progressionNote
                 }
             }
             .padding(20)
         }
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
+        .refreshable {
+            await refresh()
+        }
+        .task {
+            await refresh()
+        }
+        .confirmationDialog(
+            "Complete this challenge?",
+            isPresented: Binding(
+                get: { challengeToComplete != nil },
+                set: { if !$0 { challengeToComplete = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            if let challengeToComplete {
+                Button("Mark as completed · +\(challengeToComplete.xpReward) XP") {
+                    let challenge = challengeToComplete
+                    self.challengeToComplete = nil
+                    Task { await complete(challenge) }
+                }
+            }
+
+            Button("Cancel", role: .cancel) {
+                challengeToComplete = nil
+            }
+        } message: {
+            if let challengeToComplete {
+                Text(challengeToComplete.safetyCopy ?? "Only validate the challenge after you have completed it safely.")
+            }
+        }
+    }
+
+    private var worldHeader: some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("KŌMØ WORLD")
+                    .font(.caption.weight(.semibold))
+                    .tracking(1.8)
+                    .foregroundStyle(.secondary)
+                Text("Move. Compete. Progress.")
+                    .font(.title2.weight(.semibold))
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text(summary.map { "LEVEL \($0.level)" } ?? "LEVEL —")
+                    .font(.caption.weight(.semibold))
+                Text(summary.map { "\($0.points.formatted()) K" } ?? "— K")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func challengeSection(_ challenges: [DailyChallenge]) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Today")
+                    .font(.headline)
+                Spacer()
+                if let summary {
+                    Text("+\(summary.xpToday) XP today")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if challenges.isEmpty {
+                ContentUnavailableView(
+                    "No Daily Challenge",
+                    systemImage: "bolt",
+                    description: Text("Your next movement challenges will appear here.")
+                )
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 10)
+            } else {
+                ForEach(challenges) { challenge in
+                    DailyChallengeCard(
+                        challenge: challenge,
+                        isBusy: busyChallengeSlug == challenge.slug,
+                        onComplete: {
+                            challengeToComplete = challenge
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    private func communitySection(_ summary: EngagementSummary) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Progress")
+                .font(.headline)
+
+            HStack(spacing: 12) {
+                WorldCompactCard(title: "XP", value: summary.xpTotal.formatted(), systemImage: "sparkles")
+                WorldCompactCard(title: "K-points", value: summary.points.formatted(), systemImage: "k.circle.fill")
+                WorldCompactCard(title: "Streak", value: "\(summary.streakDays)d", systemImage: "flame.fill")
+            }
+        }
+    }
+
+    private var progressionNote: some View {
+        Text("Daily Challenges award XP. K-points remain governed by the verified server-side rules; completing a manual challenge does not make it K-point eligible.")
+            .font(.caption2)
+            .foregroundStyle(.tertiary)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.bottom, 8)
+    }
+
+    @MainActor
+    private func refresh() async {
+        guard !isLoading else { return }
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let response: EngagementSummary = try await PulseSupabase.client
+                .rpc("komo_engagement_summary")
+                .execute()
+                .value
+            summary = response
+            errorMessage = nil
+        } catch {
+            #if DEBUG
+            print("KOMO World refresh failed:", error)
+            #endif
+            errorMessage = "Your KŌMØ progression could not be refreshed. Pull down or try again."
+        }
+    }
+
+    @MainActor
+    private func complete(_ challenge: DailyChallenge) async {
+        guard !challenge.completed, busyChallengeSlug == nil else { return }
+        busyChallengeSlug = challenge.slug
+        defer { busyChallengeSlug = nil }
+
+        do {
+            let response: EngagementSummary = try await PulseSupabase.client
+                .rpc("komo_complete_daily_challenge", params: ["p_slug": challenge.slug])
+                .execute()
+                .value
+            summary = response
+            errorMessage = nil
+        } catch {
+            #if DEBUG
+            print("KOMO challenge completion failed:", error)
+            #endif
+            errorMessage = "The challenge could not be validated. Refresh KŌMØ World and try again."
+        }
+    }
+}
+
+private struct EngagementSummary: Decodable, Equatable {
+    let date: String
+    let steps: Int
+    let stepXP: Int
+    let xpTotal: Int
+    let xpToday: Int
+    let verifiedXP: Int
+    let level: Int
+    let levelPercent: Int
+    let xpToNextLevel: Int
+    let levelFloorXP: Int
+    let levelCeilingXP: Int
+    let streakDays: Int
+    let points: Int
+    let challenges: [DailyChallenge]
+
+    enum CodingKeys: String, CodingKey {
+        case date
+        case steps
+        case stepXP = "step_xp"
+        case xpTotal = "xp_total"
+        case xpToday = "xp_today"
+        case verifiedXP = "verified_xp"
+        case level
+        case levelPercent = "level_pct"
+        case xpToNextLevel = "xp_to_next_level"
+        case levelFloorXP = "level_floor_xp"
+        case levelCeilingXP = "level_ceiling_xp"
+        case streakDays = "streak_days"
+        case points
+        case challenges
+    }
+}
+
+private struct DailyChallenge: Decodable, Equatable, Identifiable {
+    let slug: String
+    let title: String
+    let description: String
+    let category: String
+    let targetValue: Int?
+    let unit: String?
+    let xpReward: Int
+    let safetyCopy: String?
+    let completed: Bool
+
+    var id: String { slug }
+
+    enum CodingKeys: String, CodingKey {
+        case slug
+        case title
+        case description
+        case category
+        case targetValue = "target_value"
+        case unit
+        case xpReward = "xp_reward"
+        case safetyCopy = "safety_copy"
+        case completed
+    }
+}
+
+private struct WorldHeroCard: View {
+    let summary: EngagementSummary
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                Image(systemName: "globe.europe.africa.fill")
+                    .font(.title2)
+                Spacer()
+                Text("LEVEL \(summary.level)")
+                    .font(.caption.weight(.semibold))
+                    .tracking(1.2)
+            }
+
+            Text("Your movement becomes your progress.")
+                .font(.title3.weight(.semibold))
+
+            ProgressView(value: Double(summary.levelPercent), total: 100)
+
+            HStack {
+                Text("\(summary.xpTotal.formatted()) XP")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Text("\(summary.xpToNextLevel.formatted()) XP to next level")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider()
+
+            HStack(spacing: 16) {
+                Label(summary.steps.formatted(), systemImage: "figure.walk")
+                Label("\(summary.streakDays)d", systemImage: "flame.fill")
+                Label(summary.points.formatted(), systemImage: "k.circle.fill")
+            }
+            .font(.caption.weight(.semibold))
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 22))
+    }
+}
+
+private struct DailyChallengeCard: View {
+    let challenge: DailyChallenge
+    let isBusy: Bool
+    let onComplete: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: challenge.completed ? "checkmark.circle.fill" : "bolt.fill")
+                    .font(.title3)
+                    .foregroundStyle(challenge.completed ? .green : .secondary)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(challenge.title)
+                            .font(.headline)
+                        Spacer()
+                        Text("+\(challenge.xpReward) XP")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Text(challenge.description)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            if let target = challenge.targetValue {
+                Text(targetText(target))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            if let safetyCopy = challenge.safetyCopy, !safetyCopy.isEmpty {
+                Text(safetyCopy)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Button(action: onComplete) {
+                HStack {
+                    if isBusy {
+                        ProgressView()
+                    }
+                    Text(challenge.completed ? "Completed" : "Complete challenge")
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .buttonStyle(challenge.completed ? .bordered : .borderedProminent)
+            .disabled(challenge.completed || isBusy)
+        }
+        .padding(16)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 20))
+    }
+
+    private func targetText(_ target: Int) -> String {
+        guard let unit = challenge.unit, !unit.isEmpty else {
+            return "Target · \(target)"
+        }
+        return "Target · \(target) \(unit)"
     }
 }
 
@@ -313,60 +612,6 @@ private struct PlanPriorityCard: View {
 
     private func categoryLabel(_ value: String) -> String {
         value.replacingOccurrences(of: "_", with: " ")
-    }
-}
-
-private struct WorldHeroCard: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Image(systemName: "globe.europe.africa.fill")
-                    .font(.title2)
-                Spacer()
-                Text("KŌMØ ARENA")
-                    .font(.caption.weight(.semibold))
-                    .tracking(1.2)
-            }
-
-            Text("Your movement becomes your progress.")
-                .font(.title3.weight(.semibold))
-
-            Text("Challenges, clubs, rankings and K-points use the same Pulse identity and activity data. No second account, no parallel profile.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-        }
-        .padding(18)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 22))
-    }
-}
-
-private struct WorldRow: View {
-    let title: String
-    let subtitle: String
-    let systemImage: String
-
-    var body: some View {
-        HStack(spacing: 14) {
-            Image(systemName: systemImage)
-                .frame(width: 32, height: 32)
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.headline)
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.tertiary)
-        }
-        .padding(16)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 18))
     }
 }
 
