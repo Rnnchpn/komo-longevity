@@ -11,7 +11,9 @@ struct PulseApp: App {
                 .environmentObject(auth)
                 .environmentObject(healthKit)
                 .onOpenURL { url in
-                    PulseSupabase.client.auth.handle(url)
+                    Task {
+                        await auth.handleIncomingURL(url)
+                    }
                 }
         }
     }
