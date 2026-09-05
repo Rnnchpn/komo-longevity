@@ -81,3 +81,6 @@ if(!install()){
 window.addEventListener('keydown',e=>{if(e.key==='Escape'&&getCamera()?.classList.contains('open'))forceVisualClose()});
 
 window.KomoV134MotionClose={version:'0.13.4',close:forceVisualClose,collapseSetup};
+
+// Final functional bridge: imports only game identity from Pulse. Health and clinical data never enter World.
+import('./world-v134-pulse-bridge.js').catch(e=>console.warn('[V0.13.4] Pulse identity bridge skipped',e));
