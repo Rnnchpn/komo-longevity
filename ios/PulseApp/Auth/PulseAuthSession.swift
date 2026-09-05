@@ -8,6 +8,7 @@ final class PulseAuthSession: ObservableObject {
     @Published private(set) var isRestoring = true
     @Published private(set) var pendingEmail: String?
     @Published private(set) var isSendingMagicLink = false
+    @Published private(set) var authErrorMessage: String?
 
     private let client: SupabaseClient
     private var authEventsTask: Task<Void, Never>?
@@ -37,6 +38,7 @@ final class PulseAuthSession: ObservableObject {
         }
 
         isSendingMagicLink = true
+        authErrorMessage = nil
         defer { isSendingMagicLink = false }
 
         try await client.auth.signInWithOTP(
@@ -47,9 +49,31 @@ final class PulseAuthSession: ObservableObject {
         pendingEmail = normalizedEmail
     }
 
+    func handleIncomingURL(_ url: URL) async {
+        guard isExpectedAuthCallback(url) else { return }
+
+        do {
+            _ = try await client.auth.session(from: url)
+            authErrorMessage = nil
+        } catch {
+            #if DEBUG
+            print("Pulse auth callback failed:", error)
+            #endif
+            authErrorMessage = "This sign-in link could not be completed. Request a new secure link and try again."
+        }
+    }
+
     func signOut() async throws {
         try await client.auth.signOut()
         pendingEmail = nil
+        authErrorMessage = nil
+    }
+
+    private func isExpectedAuthCallback(_ url: URL) -> Bool {
+        let expected = PulseConfiguration.authRedirectURL
+        return url.scheme?.lowercased() == expected.scheme?.lowercased()
+            && url.host?.lowercased() == expected.host?.lowercased()
+            && url.path == expected.path
     }
 
     private func consume(event: AuthChangeEvent, session: Session?) {
@@ -62,6 +86,7 @@ final class PulseAuthSession: ObservableObject {
 
         if session != nil {
             pendingEmail = nil
+            authErrorMessage = nil
         }
     }
 }
