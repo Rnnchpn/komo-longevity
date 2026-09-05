@@ -5,6 +5,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.m
 if (!window.__KOMO_WORLD_SCENE_HOOK__) {
   const objects = new Set();
   const originalAdd = THREE.Object3D.prototype.add;
+  let restored = false;
 
   THREE.Object3D.prototype.add = function (...children) {
     objects.add(this);
@@ -27,6 +28,11 @@ if (!window.__KOMO_WORLD_SCENE_HOOK__) {
         if (Math.abs(object.position.x - x) <= tolerance && Math.abs(object.position.z - z) <= tolerance) match = object;
       });
       return match;
+    },
+    restore() {
+      if (restored) return;
+      THREE.Object3D.prototype.add = originalAdd;
+      restored = true;
     }
   };
 }
