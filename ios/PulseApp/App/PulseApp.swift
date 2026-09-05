@@ -11,7 +11,7 @@ struct PulseApp: App {
                 .environmentObject(auth)
                 .environmentObject(healthKit)
                 .onOpenURL { url in
-                    PulseSupabase.client.handle(url)
+                    PulseSupabase.client.auth.handle(url)
                 }
         }
     }
