@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#18231d" />
+  <title>KŌMØ World · Agent Control Room</title>
+  <style>
+    :root{--ink:#17231d;--sage:#2f493b;--sage2:#6f826f;--stone:#e8dfcf;--paper:#f4efe6;--bronze:#a98559;--line:rgba(27,40,33,.14);--glass:rgba(246,241,232,.82)}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#d8d0c1 0,#eee8dc 36%,#f5f1e9 100%);color:var(--ink)}
+    body:before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 18% 8%,rgba(255,255,255,.72),transparent 34%),radial-gradient(circle at 88% 18%,rgba(108,129,111,.18),transparent 30%);pointer-events:none}
+    main{position:relative;max-width:1180px;margin:auto;padding:24px 18px 56px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:22px}.brand{display:flex;align-items:baseline;gap:10px}.brand b{font-family:Georgia,serif;font-size:29px;letter-spacing:.08em}.brand span{font-size:11px;letter-spacing:.21em;color:#536358}.pill{padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.48);font-size:11px;font-weight:700;letter-spacing:.08em}
+    .hero{padding:28px;border:1px solid rgba(255,255,255,.64);border-radius:28px;background:linear-gradient(135deg,rgba(244,239,230,.92),rgba(221,226,215,.72));box-shadow:0 24px 80px rgba(34,42,36,.10);display:grid;grid-template-columns:1.35fr .65fr;gap:26px}.eyebrow{font-size:11px;font-weight:800;letter-spacing:.18em;color:#66766a}.hero h1{font-family:Georgia,serif;font-weight:500;font-size:clamp(36px,7vw,72px);line-height:.95;margin:12px 0 18px}.hero p{max-width:690px;color:#526058;font-size:15px;line-height:1.6}.governance{align-self:stretch;border-radius:22px;background:rgba(23,35,29,.92);color:#f3ede2;padding:20px}.governance h3{margin:0 0 14px;font-size:13px;letter-spacing:.14em}.rule{display:flex;gap:9px;align-items:flex-start;margin:10px 0;font-size:12px;line-height:1.45}.dot{width:9px;height:9px;border-radius:50%;background:#9cb58f;margin-top:4px;flex:none}.dot.no{background:#c88775}
+    .controls{display:grid;grid-template-columns:1fr auto;gap:12px;margin:20px 0}.controls textarea{width:100%;min-height:94px;resize:vertical;border:1px solid var(--line);border-radius:20px;padding:16px;background:rgba(255,255,255,.64);font:inherit;color:var(--ink);outline:none}.controls button{border:0;border-radius:20px;background:var(--ink);color:#fff;padding:0 26px;font-weight:800;letter-spacing:.06em;cursor:pointer;min-height:54px}.controls button:disabled{opacity:.5;cursor:wait}
+    .status{display:flex;gap:9px;align-items:center;margin:8px 2px 18px;color:#5a685f;font-size:12px}.status i{width:8px;height:8px;border-radius:50%;background:#b58b62}.status.ok i{background:#72906f}.status.bad i{background:#b66b60}
+    .flow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.agent{min-height:250px;border:1px solid var(--line);border-radius:24px;background:var(--glass);padding:18px;box-shadow:0 16px 40px rgba(38,48,40,.06)}.agent header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.agent header b{font-size:13px}.agent header span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#24382e;color:#fff;font-weight:800}.agent small{display:block;color:#6d796f;font-size:10px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px}.output{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.58;white-space:pre-wrap;color:#34443a;max-height:330px;overflow:auto}.empty{color:#89938c;font-family:inherit}
+    .foot{margin-top:18px;border:1px solid var(--line);border-radius:22px;padding:16px 18px;background:rgba(255,255,255,.42);display:flex;justify-content:space-between;gap:14px;align-items:center;font-size:11px;color:#637067}.foot a{color:var(--ink);font-weight:800;text-decoration:none}
+    @media(max-width:800px){main{padding:16px 12px 36px}.hero{grid-template-columns:1fr;padding:22px;border-radius:22px}.hero h1{font-size:45px}.controls{grid-template-columns:1fr}.controls button{height:58px}.flow{grid-template-columns:1fr}.agent{min-height:190px}.top{align-items:flex-start}.pill{font-size:9px}.foot{align-items:flex-start;flex-direction:column}}
+  </style>
+</head>
+<body>
+<main>
+  <div class="top"><div class="brand"><b>KŌMØ</b><span>WORLD · AGENTS</span></div><div class="pill">AUTONOMY LEVEL 01 · PREVIEW ONLY</div></div>
+  <section class="hero">
+    <div><span class="eyebrow">WORLD INTELLIGENCE LAYER</span><h1>Agent Control Room</h1><p>La première équipe autonome de KŌMØ World observe le monde, conçoit une amélioration ciblée, la challenge techniquement puis décide si elle mérite une preview. Aucun agent ne peut écrire en production ou modifier les données cliniques.</p></div>
+    <aside class="governance"><h3>GOUVERNANCE ACTIVE</h3><div class="rule"><i class="dot"></i><span>Observer et proposer : autorisé</span></div><div class="rule"><i class="dot"></i><span>Valider une preview : autorisé</span></div><div class="rule"><i class="dot no"></i><span>Écriture production : interdite</span></div><div class="rule"><i class="dot no"></i><span>Données cliniques / Twin truth : interdites</span></div></aside>
+  </section>
+
+  <section class="controls"><textarea id="mission">Améliorer la compréhension de l’arrivée dans KŌMØ World et la progression Arrival Plaza → Hall → Twin / Arena, sans toucher aux données cliniques.</textarea><button id="run">LANCER UN CYCLE</button></section>
+  <div id="status" class="status"><i></i><span>Vérification du runtime agents…</span></div>
+
+  <section class="flow">
+    <article class="agent"><header><b>Observer</b><span>1</span></header><small>Détecte le problème prioritaire</small><div class="output empty" id="o1">En attente d’un cycle.</div></article>
+    <article class="agent"><header><b>Architecte</b><span>2</span></header><small>Produit le build spec preview</small><div class="output empty" id="o2">En attente de l’Observer.</div></article>
+    <article class="agent"><header><b>QA</b><span>3</span></header><small>Challenge jouabilité et technique</small><div class="output empty" id="o3">En attente de l’Architecte.</div></article>
+    <article class="agent"><header><b>World Supervisor</b><span>4</span></header><small>Approuve, révise ou rejette</small><div class="output empty" id="o4">En attente du QA.</div></article>
+  </section>
+
+  <div class="foot"><span>Sandbox gouvernée · pas de mutation silencieuse du World</span><a href="../v126/">← Retour à KŌMØ World</a></div>
+</main>
+<script>
+const statusEl=document.querySelector('#status'),button=document.querySelector('#run'),mission=document.querySelector('#mission');
+const outs=['#o1','#o2','#o3','#o4'].map(x=>document.querySelector(x));
+function status(text,kind=''){statusEl.className=`status ${kind}`;statusEl.querySelector('span').textContent=text}
+async function health(){try{const r=await fetch('/api/world-agents-run',{cache:'no-store'});const j=await r.json();if(j.ok&&j.apiKeyConfigured)status(`Runtime prêt · ${j.agents.length} agents · ${j.model}`,'ok');else if(j.ok)status('Runtime installé, mais OPENAI_API_KEY non visible sur ce déploiement','bad');else status('Runtime agents indisponible','bad')}catch(e){status('Impossible de joindre le runtime agents','bad')}}
+button.onclick=async()=>{button.disabled=true;outs.forEach((o,i)=>{o.textContent=i?'En attente…':'Observation en cours…';o.classList.add('empty')});status('Cycle autonome en cours…');try{const r=await fetch('/api/world-agents-run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mission:mission.value,worldState:{version:'v0.12.6',zone:'Arrival Plaza → KŌMŌ Hall',knownIssues:['Hall nouvellement traversable','Concierge à positionner latéralement dans le Hall'],performanceNotes:['Priorité iPhone et rendu stable','Éviter le z-fighting déjà corrigé'],navigationNotes:['Axe central du Hall doit rester libre'],visualNotes:['Cible premium architectural wellness méditerranéen']}})});const j=await r.json();if(!j.ok)throw new Error(j.message||j.error||'cycle_failed');j.cycle.forEach((c,i)=>{outs[i].textContent=c.output;outs[i].classList.remove('empty')});status(`Cycle terminé · ${j.completedAt} · ${j.governance.previewOnly?'preview only':'mode inconnu'}`,'ok')}catch(e){status(`Échec du cycle : ${e.message}`,'bad')}finally{button.disabled=false}};
+health();
+</script>
+</body>
+</html>
