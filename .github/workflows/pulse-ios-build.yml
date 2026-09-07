@@ -55,8 +55,10 @@ jobs:
           grep -F 'PULSE_AUTH_REDIRECT_URL = com.komolongevity.pulse://auth/callback' /tmp/pulse-release-build-settings.txt
 
       - name: Build Pulse for iPhone Simulator
+        shell: bash
         run: |
-          xcodebuild \
+          set -o pipefail
+          if ! xcodebuild \
             -project ios/Pulse.xcodeproj \
             -scheme Pulse \
             -configuration Debug \
@@ -65,11 +67,18 @@ jobs:
             -derivedDataPath .build/PulseDerivedData \
             -clonedSourcePackagesDirPath .build/SourcePackages \
             CODE_SIGNING_ALLOWED=NO \
-            build
+            build > /tmp/pulse-simulator-build.log 2>&1; then
+            echo '--- Xcode compile errors ---'
+            grep -n -C 4 -E '(^|[[:space:]])error:|fatal error:' /tmp/pulse-simulator-build.log || tail -n 120 /tmp/pulse-simulator-build.log
+            exit 1
+          fi
+          tail -n 30 /tmp/pulse-simulator-build.log
 
       - name: Archive Release for generic iPhone
+        shell: bash
         run: |
-          xcodebuild \
+          set -o pipefail
+          if ! xcodebuild \
             -project ios/Pulse.xcodeproj \
             -scheme Pulse \
             -configuration Release \
@@ -78,7 +87,12 @@ jobs:
             -archivePath .build/Pulse.xcarchive \
             -clonedSourcePackagesDirPath .build/SourcePackages \
             CODE_SIGNING_ALLOWED=NO \
-            archive
+            archive > /tmp/pulse-archive.log 2>&1; then
+            echo '--- Xcode archive errors ---'
+            grep -n -C 4 -E '(^|[[:space:]])error:|fatal error:' /tmp/pulse-archive.log || tail -n 120 /tmp/pulse-archive.log
+            exit 1
+          fi
+          tail -n 30 /tmp/pulse-archive.log
 
       - name: Validate unsigned archive payload
         run: |
@@ -93,7 +107,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pulse-ios-xcresult
-          path: .build/PulseDerivedData/Logs/Build
+          path: |
+            .build/PulseDerivedData/Logs/Build
+            /tmp/pulse-simulator-build.log
+            /tmp/pulse-archive.log
           if-no-files-found: warn
           retention-days: 7
 
