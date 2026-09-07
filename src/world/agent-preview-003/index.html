@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#d8cfbb" />
+  <title>KŌMØ World · Agent Preview 003</title>
+  <meta name="description" content="KŌMØ World Agent Preview 003 — premium Twin Lab threshold and arrival." />
+  <link rel="stylesheet" href="../v08/world-v08.css" />
+  <link rel="stylesheet" href="../v081/world-v081.css" />
+  <link rel="stylesheet" href="../v082/world-v082.css" />
+  <link rel="stylesheet" href="../v083/world-v083.css" />
+  <link rel="stylesheet" href="../v084/world-v084.css" />
+  <link rel="stylesheet" href="../v09/world-v09.css" />
+  <link rel="stylesheet" href="../v10/world-v10.css" />
+  <link rel="stylesheet" href="../v101/world-v101.css" />
+  <link rel="stylesheet" href="../v102/world-v102.css" />
+  <link rel="stylesheet" href="../v11/world-v11.css" />
+  <link rel="stylesheet" href="../v111/world-v111.css" />
+  <link rel="stylesheet" href="../v112/world-v112.css" />
+  <link rel="stylesheet" href="../v12/world-v12.css" />
+  <link rel="stylesheet" href="../v121/world-v121.css" />
+  <link rel="stylesheet" href="../v122/world-v122.css" />
+  <link rel="stylesheet" href="../v123/world-v123.css" />
+  <style>
+    #agent-preview-badge{position:fixed;z-index:120;top:max(76px,calc(env(safe-area-inset-top) + 62px));left:50%;transform:translateX(-50%);padding:8px 12px;border:1px solid rgba(255,255,255,.36);border-radius:999px;background:rgba(20,33,27,.72);backdrop-filter:blur(16px);color:#f1eadf;font:700 9px/1 system-ui,sans-serif;letter-spacing:.14em;pointer-events:none;box-shadow:0 8px 28px rgba(19,29,24,.14)}
+  </style>
+</head>
+<body>
+  <div id="agent003-boot" class="v123-boot"><span>KŌMØ WORLD</span><b>TWIN LAB · AGENT PREVIEW 003</b></div>
+  <div id="agent-preview-badge">AGENT PREVIEW 003 · QA 98/100 · SANDBOX</div>
+  <script type="module">
+    const boot=document.querySelector('#agent003-boot');
+    let failed=false;
+    try{
+      const shellResponse=await fetch('../v081/index.html',{cache:'no-store'});
+      if(!shellResponse.ok) throw new Error(`Unable to load KŌMØ World shell: ${shellResponse.status}`);
+      const shellHtml=await shellResponse.text();
+      const parsed=new DOMParser().parseFromString(shellHtml,'text/html');
+      const sourceApp=parsed.querySelector('#app');
+      if(!sourceApp) throw new Error('KŌMØ World shell missing');
+      const app=document.importNode(sourceApp,true);
+      const version=app.querySelector('.brand i');
+      if(version) version.textContent='AGENT 003';
+      app.dataset.worldVersion='agent-preview-003';
+      const canvas=app.querySelector('#world-canvas');
+      if(canvas) canvas.setAttribute('aria-label','KŌMØ World Agent Preview 003 Twin Lab');
+      document.body.insertBefore(app,boot);
+
+      let engine=await (await fetch('../v081/world-v081.js',{cache:'no-store'})).text();
+      const twinCoreUrl=new URL('../v04/twin-core.js',location.href).href;
+      engine=engine.replace("'../v04/twin-core.js'",JSON.stringify(twinCoreUrl));
+
+      const oldSpeed="speed=keys.has(settings.bindings.sprint)?7.1:4.35";
+      if(!engine.includes(oldSpeed)) throw new Error('Agent 003 locomotion patch target missing');
+      engine=engine.replace(oldSpeed,"speed=keys.has(settings.bindings.sprint)?11.4:6.25");
+      engine=engine.replace("Math.sin(performance.now()*.012)*.42","Math.sin(performance.now()*.0165)*.48");
+      engine=engine.replace("renderer.toneMappingExposure=1.04","renderer.toneMappingExposure=1.14");
+      engine=engine.replace("new THREE.PerspectiveCamera(42,1,.1,320)","new THREE.PerspectiveCamera(45,1,.1,320)");
+      engine=engine.replace("toast('KŌMØ World · V0.8.1')","toast('AGENT PREVIEW 003 · TWIN LAB')");
+
+      const oldObstacles="const obstacles=[{x1:-4.9,x2:4.9,z1:-3.55,z2:-1.7},{x1:-24.2,x2:-23.1,z1:-25,z2:9},{x1:23.1,x2:24.2,z1:-25,z2:9},{x1:-24.2,x2:24.2,z1:-25.2,z2:-24.0}];";
+      const newObstacles="const obstacles=[{x1:-24.2,x2:-23.1,z1:-43,z2:9},{x1:23.1,x2:24.2,z1:-43,z2:9},{x1:-24.2,x2:24.2,z1:-43.4,z2:-42.3}];";
+      if(!engine.includes(oldObstacles)) throw new Error('Agent 003 collision patch target missing');
+      engine=engine.replace(oldObstacles,newObstacles);
+
+      const oldDeskInteraction="addI('desk',0,-1.6,5.2,'Parler au concierge KŌMØ','Talk to KŌMØ Concierge','Orientation · Twin · Arena','Orientation · Twin · Arena',openDesk);";
+      const newDeskInteraction="addI('desk',-8.15,-1.2,4.8,'Parler au concierge KŌMØ','Talk to KŌMØ Concierge','Orientation · Twin · Arena','Orientation · Twin · Arena',openDesk);";
+      if(engine.includes(oldDeskInteraction)) engine=engine.replace(oldDeskInteraction,newDeskInteraction);
+
+      const oldTwinInteraction="addI('twin',-11,-21.8,4.2,'Entrer dans le Twin Lab','Enter Twin Lab','Votre corps à travers le temps','Your body across time',enterTwin);";
+      const newTwinInteraction="addI('twin',-11,-21.8,5.0,'Entrer dans le Twin Lab','Enter Twin Lab','Découvrir votre jumeau fonctionnel','Explore your Functional Digital Twin',enterTwin);";
+      if(!engine.includes(oldTwinInteraction)) throw new Error('Agent 003 Twin interaction patch target missing');
+      engine=engine.replace(oldTwinInteraction,newTwinInteraction);
+
+      const oldOccluders="const desired=new THREE.Vector3(),target=new THREE.Vector3(),ray=new THREE.Raycaster();const cameraOccluders=[leftWall,rightWall,backWall,deskBase,deskTop];";
+      const newOccluders="const desired=new THREE.Vector3(),target=new THREE.Vector3(),ray=new THREE.Raycaster();const cameraOccluders=[leftWall,rightWall];";
+      if(!engine.includes(oldOccluders)) throw new Error('Agent 003 camera occluder patch target missing');
+      engine=engine.replace(oldOccluders,newOccluders);
+
+      const oldCamera="const distance=mode==='world'?settings.camera.distance:Math.min(settings.camera.distance,21),height=mode==='world'?8.1:7.2;desired.set(player.position.x+Math.sin(yaw)*distance,height+pitch*8.5,player.position.z+Math.cos(yaw)*distance);target.set(player.position.x,2.75,player.position.z);";
+      const newCamera="const hallCamera=mode==='world'&&player.position.z<20;const twinCamera=mode==='twin';const distance=mode==='world'?(hallCamera?Math.min(settings.camera.distance,18.5):Math.min(settings.camera.distance,21.5)):(twinCamera?Math.min(settings.camera.distance,15.5):Math.min(settings.camera.distance,21));const height=mode==='world'?(hallCamera?6.25:7.35):(twinCamera?5.9:7.2);desired.set(player.position.x+Math.sin(yaw)*distance,height+pitch*(twinCamera?5.8:(hallCamera?6.2:7.6)),player.position.z+Math.cos(yaw)*distance);target.set(player.position.x,twinCamera?2.4:(hallCamera?2.25:2.55),player.position.z);";
+      if(!engine.includes(oldCamera)) throw new Error('Agent 003 contextual camera patch target missing');
+      engine=engine.replace(oldCamera,newCamera);
+
+      const exposeAt='function animate(){';
+      if(!engine.includes(exposeAt)) throw new Error('Agent 003 runtime exposure target missing');
+      engine=engine.replace(exposeAt,`window.KomoWorldRuntime={THREE,scene,camera,renderer,player,hall,water,sun,fill,spawnRing,top,island,plaza,hallFloor,leftWall,rightWall,backWall,deskBase,deskTop,tree,box,cyl,mat,C};\n${exposeAt}`);
+
+      const blobUrl=URL.createObjectURL(new Blob([engine],{type:'text/javascript'}));
+      try{await import(blobUrl)}finally{URL.revokeObjectURL(blobUrl)}
+
+      await import('../v083/world-v083.js');
+      await import('../v084/world-v084.js');
+      await import('../v09/world-v09.js');
+      await import('../v10/world-v10.js');
+      await import('../v101/world-v101.js');
+      await import('../v102/world-v102.js');
+      await import('../v11/world-v11.js');
+      await import('../v111/world-v111.js');
+      await import('../v112/world-v112.js');
+      await import('../v12/world-v12.js');
+      await import('../v12/world-v12-spatial.js');
+      await import('../v121/world-v121.js');
+      await import('./world-agent-preview-003.js');
+
+      boot?.remove();
+      setTimeout(()=>import('../v122/world-v122.js').catch(e=>console.warn('[AGENT 003] Material pass skipped',e)),60);
+      setTimeout(()=>import('../v123/world-v123.js').catch(e=>console.warn('[AGENT 003] Forecourt pass skipped',e)),100);
+      setTimeout(()=>import('../v124/world-v124.js').catch(e=>console.warn('[AGENT 003] Terrain pass skipped',e)),140);
+      setTimeout(()=>import('../v125/world-v125.js').catch(e=>console.error('[AGENT 003] Hall pass failed',e)),190);
+    }catch(error){
+      failed=true;
+      console.error('[KŌMØ Agent Preview 003] Boot error:',error);
+      if(boot) boot.innerHTML='<span>KŌMØ WORLD</span><b>PREVIEW 003 INDISPONIBLE · RETOUR PREVIEW 002…</b>';
+      setTimeout(()=>location.replace('../agent-preview-002/'),850);
+    }finally{
+      if(!failed) boot?.remove();
+    }
+  </script>
+</body>
+</html>
