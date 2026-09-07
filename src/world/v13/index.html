@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#17271f" />
+  <title>KŌMØ World · V0.13 FPS</title>
+  <meta name="description" content="KŌMØ World V0.13 — first-person Arrival Plaza, Hall and Twin Lab." />
+  <link rel="stylesheet" href="../v08/world-v08.css" />
+  <link rel="stylesheet" href="../v081/world-v081.css" />
+  <link rel="stylesheet" href="../v082/world-v082.css" />
+  <link rel="stylesheet" href="../v083/world-v083.css" />
+  <link rel="stylesheet" href="../v084/world-v084.css" />
+  <link rel="stylesheet" href="../v09/world-v09.css" />
+  <link rel="stylesheet" href="../v10/world-v10.css" />
+  <link rel="stylesheet" href="../v101/world-v101.css" />
+  <link rel="stylesheet" href="../v102/world-v102.css" />
+  <link rel="stylesheet" href="../v11/world-v11.css" />
+  <link rel="stylesheet" href="../v111/world-v111.css" />
+  <link rel="stylesheet" href="../v112/world-v112.css" />
+  <link rel="stylesheet" href="../v12/world-v12.css" />
+  <link rel="stylesheet" href="../v121/world-v121.css" />
+  <link rel="stylesheet" href="../v122/world-v122.css" />
+  <link rel="stylesheet" href="../v123/world-v123.css" />
+  <style>
+    #fps-reticle{position:fixed;z-index:68;left:50%;top:50%;width:18px;height:18px;transform:translate(-50%,-50%);pointer-events:none;opacity:.72;filter:drop-shadow(0 2px 8px rgba(0,0,0,.28))}
+    #fps-reticle:before,#fps-reticle:after{content:"";position:absolute;background:rgba(245,239,226,.92);border-radius:999px}
+    #fps-reticle:before{width:1px;height:14px;left:8.5px;top:2px}#fps-reticle:after{width:14px;height:1px;left:2px;top:8.5px}
+    #fps-reticle i{position:absolute;width:4px;height:4px;left:7px;top:7px;border:1px solid rgba(225,197,151,.88);border-radius:50%;background:rgba(27,42,34,.4)}
+    #fps-tip{position:fixed;z-index:67;left:50%;top:calc(50% + 27px);transform:translateX(-50%);padding:6px 9px;border-radius:999px;background:rgba(20,31,26,.55);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(10px);color:rgba(245,239,226,.78);font:650 8px/1 system-ui,sans-serif;letter-spacing:.09em;pointer-events:none;animation:fpsTip 5s forwards}
+    @keyframes fpsTip{0%,55%{opacity:1}100%{opacity:0}}
+    #app[data-zone="arena"]~#fps-reticle,#app[data-zone="arena"]~#fps-tip{display:none}
+    #world-canvas{filter:saturate(.97) contrast(1.035)}
+    @media(max-width:800px){
+      .hud{left:8px!important;right:8px!important;padding-right:92px!important}.hud .brand span,.hud .brand i{display:none}.vitals>div:nth-child(n+2){display:none}.vitals>div{min-width:60px!important}.location{max-width:190px}
+      #look-zone span{opacity:.18!important}.mobile-action{box-shadow:0 12px 34px rgba(0,0,0,.2)}
+      .twin-top{top:67px!important;left:8px!important;right:8px!important;min-height:48px!important;padding:7px 9px!important}.twin-identity small,.twin-mode-tabs{display:none!important}.twin-identity strong{font-size:13px!important}.leave-lab{padding:7px 9px!important}
+      .twin-left{left:8px!important;right:8px!important;top:122px!important;bottom:auto!important;width:auto!important;max-height:94px!important;padding:8px 10px!important;display:grid!important;grid-template-columns:94px 1fr!important;gap:9px!important;overflow:hidden!important}
+      .motion-hero>span{font-size:6px!important}.motion-hero .score-line strong{font-size:38px!important}.motion-hero .score-line i{font-size:8px!important;padding-bottom:4px!important}.motion-hero .delta,.age-row,.twin-primary,.twin-secondary{display:none!important}
+      .priority-card{margin:0!important;padding:7px 9px!important;min-height:0!important}.priority-head,.priority-card p{display:none!important}.priority-card h3{font-size:14px!important;margin:0 0 4px!important}.priority-value{margin-top:0!important}.priority-value strong{font-size:18px!important}.priority-value span,.priority-value small{font-size:6px!important}
+      .twin-right{display:none!important}.body-overlay-layer{inset:224px 7px 116px 7px!important}.body-callout{min-width:92px!important;padding:6px 7px!important;transform:scale(.92);transform-origin:center}.body-callout span{font-size:5.5px!important}.body-callout b{font-size:10px!important}
+      .twin-bottom{left:8px!important;right:8px!important;bottom:max(6px,env(safe-area-inset-bottom))!important;min-height:84px!important;padding:8px 9px!important}.timeline-caption{display:none!important}.timeline-nodes{margin-top:3px!important}.source-strip{display:none!important}
+      .twin-cockpit.open~.mobile-controls{opacity:.72!important}.interaction{max-width:calc(100vw - 118px)!important}
+      #fps-reticle{width:16px;height:16px}#fps-reticle:before{height:12px;left:7.5px}#fps-reticle:after{width:12px;top:7.5px}#fps-reticle i{left:6px;top:6px}
+    }
+  </style>
+</head>
+<body>
+  <div id="v13-boot" class="v123-boot"><span>KŌMØ WORLD</span><b>V0.13 · FIRST PERSON</b></div>
+  <div id="fps-reticle"><i></i></div><div id="fps-tip">GLISSER POUR REGARDER · ACTION POUR INTERAGIR</div>
+  <script type="module">
+    const boot=document.querySelector('#v13-boot');
+    let failed=false;
+    try{
+      const shellResponse=await fetch('../v081/index.html',{cache:'no-store'});
+      if(!shellResponse.ok) throw new Error(`Unable to load KŌMØ World shell: ${shellResponse.status}`);
+      const shellHtml=await shellResponse.text();
+      const parsed=new DOMParser().parseFromString(shellHtml,'text/html');
+      const sourceApp=parsed.querySelector('#app');
+      if(!sourceApp) throw new Error('KŌMØ World shell missing');
+      const app=document.importNode(sourceApp,true);
+      const version=app.querySelector('.brand i');if(version)version.textContent='V0.13 FPS';
+      app.dataset.worldVersion='v0.13';
+      const canvas=app.querySelector('#world-canvas');if(canvas)canvas.setAttribute('aria-label','KŌMØ World V0.13 first-person');
+      document.body.insertBefore(app,boot);
+
+      let engine=await (await fetch('../v081/world-v081.js',{cache:'no-store'})).text();
+      const twinCoreUrl=new URL('../v04/twin-core.js',location.href).href;
+      engine=engine.replace("'../v04/twin-core.js'",JSON.stringify(twinCoreUrl));
+      const oldSpeed="speed=keys.has(settings.bindings.sprint)?7.1:4.35";
+      if(!engine.includes(oldSpeed))throw new Error('V0.13 locomotion patch target missing');
+      engine=engine.replace(oldSpeed,"speed=keys.has(settings.bindings.sprint)?11.4:6.25");
+      engine=engine.replace("Math.sin(performance.now()*.012)*.42","Math.sin(performance.now()*.0165)*.48");
+      engine=engine.replace("renderer.toneMappingExposure=1.04","renderer.toneMappingExposure=1.14");
+      engine=engine.replace("new THREE.PerspectiveCamera(42,1,.1,320)","new THREE.PerspectiveCamera(68,1,.08,320)");
+      engine=engine.replace("toast('KŌMØ World · V0.8.1')","toast('KŌMØ WORLD · FIRST PERSON')");
+
+      const oldObstacles="const obstacles=[{x1:-4.9,x2:4.9,z1:-3.55,z2:-1.7},{x1:-24.2,x2:-23.1,z1:-25,z2:9},{x1:23.1,x2:24.2,z1:-25,z2:9},{x1:-24.2,x2:24.2,z1:-25.2,z2:-24.0}];";
+      const newObstacles="const obstacles=[{x1:-24.2,x2:-23.1,z1:-43,z2:9},{x1:23.1,x2:24.2,z1:-43,z2:9},{x1:-24.2,x2:24.2,z1:-43.4,z2:-42.3}];";
+      if(!engine.includes(oldObstacles))throw new Error('V0.13 collision patch target missing');
+      engine=engine.replace(oldObstacles,newObstacles);
+
+      const oldDeskInteraction="addI('desk',0,-1.6,5.2,'Parler au concierge KŌMØ','Talk to KŌMØ Concierge','Orientation · Twin · Arena','Orientation · Twin · Arena',openDesk);";
+      const newDeskInteraction="addI('desk',-8.15,-1.2,4.8,'Parler au concierge KŌMØ','Talk to KŌMØ Concierge','Orientation · Twin · Arena','Orientation · Twin · Arena',openDesk);";
+      if(engine.includes(oldDeskInteraction))engine=engine.replace(oldDeskInteraction,newDeskInteraction);
+      const oldTwinInteraction="addI('twin',-11,-21.8,4.2,'Entrer dans le Twin Lab','Enter Twin Lab','Votre corps à travers le temps','Your body across time',enterTwin);";
+      const newTwinInteraction="addI('twin',-11,-21.8,5.0,'Entrer dans le Twin Lab','Enter Twin Lab','Découvrir votre jumeau fonctionnel','Explore your Functional Digital Twin',enterTwin);";
+      if(!engine.includes(oldTwinInteraction))throw new Error('V0.13 Twin interaction patch target missing');
+      engine=engine.replace(oldTwinInteraction,newTwinInteraction);
+
+      engine=engine.replace("pitch=THREE.MathUtils.clamp(pitch+sign*dy*.0021*settings.camera.sensY,-.08,.46)","pitch=THREE.MathUtils.clamp(pitch+sign*dy*.0021*settings.camera.sensY,-.58,.58)");
+      engine=engine.replace("pitch=THREE.MathUtils.clamp(pitch+sign*dy*.0026*settings.camera.sensY,-.08,.46)","pitch=THREE.MathUtils.clamp(pitch+sign*dy*.0026*settings.camera.sensY,-.58,.58)");
+      engine=engine.replace("player.position.set(-42,0,-8.5);","player.position.set(-42,0,-8.5);yaw=0;pitch=.02;");
+      engine=engine.replace("player.position.set(-11,0,-20.6);","player.position.set(-11,0,-20.6);yaw=0;pitch=.02;");
+
+      const oldOccluders="const desired=new THREE.Vector3(),target=new THREE.Vector3(),ray=new THREE.Raycaster();const cameraOccluders=[leftWall,rightWall,backWall,deskBase,deskTop];";
+      const newOccluders="const desired=new THREE.Vector3(),target=new THREE.Vector3(),ray=new THREE.Raycaster();const cameraOccluders=[leftWall,rightWall];";
+      if(!engine.includes(oldOccluders))throw new Error('V0.13 occluder patch target missing');
+      engine=engine.replace(oldOccluders,newOccluders);
+
+      const oldCamera="const distance=mode==='world'?settings.camera.distance:Math.min(settings.camera.distance,21),height=mode==='world'?8.1:7.2;desired.set(player.position.x+Math.sin(yaw)*distance,height+pitch*8.5,player.position.z+Math.cos(yaw)*distance);target.set(player.position.x,2.75,player.position.z);const dir=desired.clone().sub(target),len=dir.length();dir.normalize();ray.set(target,dir);ray.far=len;const hits=ray.intersectObjects(mode==='world'?cameraOccluders:[],false);if(hits.length){const safe=Math.max(5,hits[0].distance-1.0);desired.copy(target).addScaledVector(dir,safe)}camera.position.lerp(desired,1-Math.pow(.0028,dt));camera.lookAt(target);";
+      const newCamera="const fps=mode==='world'||mode==='twin';player.visible=!fps;if(fps){const eye=mode==='twin'?4.08:4.12,cp=Math.cos(pitch),sp=Math.sin(pitch),look=14;desired.set(player.position.x,eye,player.position.z);target.set(player.position.x-Math.sin(yaw)*cp*look,eye-sp*look,player.position.z-Math.cos(yaw)*cp*look);camera.position.copy(desired);camera.lookAt(target)}else{const distance=Math.min(settings.camera.distance,21),height=7.2;desired.set(player.position.x+Math.sin(yaw)*distance,height+pitch*8.5,player.position.z+Math.cos(yaw)*distance);target.set(player.position.x,2.75,player.position.z);const dir=desired.clone().sub(target),len=dir.length();dir.normalize();ray.set(target,dir);ray.far=len;const hits=ray.intersectObjects([],false);if(hits.length){const safe=Math.max(5,hits[0].distance-1.0);desired.copy(target).addScaledVector(dir,safe)}camera.position.lerp(desired,1-Math.pow(.0028,dt));camera.lookAt(target)};";
+      if(!engine.includes(oldCamera))throw new Error('V0.13 FPS camera patch target missing');
+      engine=engine.replace(oldCamera,newCamera);
+      engine=engine.replace("camera.position.set(0,8.6,68);camera.lookAt(0,2.75,42);","camera.position.set(0,4.12,42);camera.lookAt(0,4.12,28);");
+
+      const exposeAt='function animate(){';
+      if(!engine.includes(exposeAt))throw new Error('V0.13 runtime exposure target missing');
+      engine=engine.replace(exposeAt,`window.KomoWorldRuntime={THREE,scene,camera,renderer,player,hall,water,sun,fill,spawnRing,top,island,plaza,hallFloor,leftWall,rightWall,backWall,deskBase,deskTop,tree,box,cyl,mat,C};\n${exposeAt}`);
+
+      const blobUrl=URL.createObjectURL(new Blob([engine],{type:'text/javascript'}));
+      try{await import(blobUrl)}finally{URL.revokeObjectURL(blobUrl)}
+
+      await import('../v083/world-v083.js');await import('../v084/world-v084.js');await import('../v09/world-v09.js');await import('../v10/world-v10.js');await import('../v101/world-v101.js');await import('../v102/world-v102.js');await import('../v11/world-v11.js');await import('../v111/world-v111.js');await import('../v112/world-v112.js');await import('../v12/world-v12.js');await import('../v12/world-v12-spatial.js');await import('../v121/world-v121.js');await import('../agent-preview-003/world-agent-preview-003.js');
+      boot?.remove();
+      setTimeout(()=>import('../v122/world-v122.js').catch(e=>console.warn('[V0.13] Material pass skipped',e)),60);
+      setTimeout(()=>import('../v123/world-v123.js').catch(e=>console.warn('[V0.13] Forecourt pass skipped',e)),100);
+      setTimeout(()=>import('../v124/world-v124.js').catch(e=>console.warn('[V0.13] Terrain pass skipped',e)),140);
+      setTimeout(()=>import('../v125/world-v125.js').catch(e=>console.error('[V0.13] Hall pass failed',e)),190);
+    }catch(error){failed=true;console.error('[KŌMØ V0.13] Boot error:',error);if(boot)boot.innerHTML='<span>KŌMØ WORLD</span><b>V0.13 INDISPONIBLE · RETOUR PREVIEW 003…</b>';setTimeout(()=>location.replace('../agent-preview-003/'),850)}finally{if(!failed)boot?.remove()}
+  </script>
+</body>
+</html>

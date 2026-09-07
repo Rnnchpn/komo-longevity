@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#cfc9b9" />
+  <title>KŌMØ World · V0.11.1</title>
+  <meta name="description" content="KŌMØ World V0.11.1 — polished Fitness Floor and Twin-guided Rehab Lab." />
+  <link rel="stylesheet" href="../v08/world-v08.css" />
+  <link rel="stylesheet" href="../v081/world-v081.css" />
+  <link rel="stylesheet" href="../v082/world-v082.css" />
+  <link rel="stylesheet" href="../v083/world-v083.css" />
+  <link rel="stylesheet" href="../v084/world-v084.css" />
+  <link rel="stylesheet" href="../v09/world-v09.css" />
+  <link rel="stylesheet" href="../v10/world-v10.css" />
+  <link rel="stylesheet" href="../v101/world-v101.css" />
+  <link rel="stylesheet" href="../v102/world-v102.css" />
+  <link rel="stylesheet" href="../v11/world-v11.css" />
+  <link rel="stylesheet" href="./world-v111.css" />
+</head>
+<body>
+  <div id="v111-boot" class="v111-boot">KŌMØ MOVEMENT CENTER · POLISH</div>
+  <script type="module">
+    const response = await fetch('../v081/index.html', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`Unable to load KŌMØ World shell: ${response.status}`);
+    const html = await response.text();
+    const parsed = new DOMParser().parseFromString(html, 'text/html');
+    const sourceApp = parsed.querySelector('#app');
+    if (!sourceApp) throw new Error('KŌMØ World shell missing');
+    const app = document.importNode(sourceApp, true);
+    const version = app.querySelector('.brand i');
+    if (version) version.textContent = 'V0.11.1';
+    const canvas = app.querySelector('#world-canvas');
+    if (canvas) canvas.setAttribute('aria-label', 'KŌMØ World V0.11.1 Movement Center');
+    document.body.insertBefore(app, document.querySelector('#v111-boot'));
+    document.querySelector('#v111-boot')?.remove();
+    await import('../v081/world-v081.js');
+    await import('../v083/world-v083.js');
+    await import('../v084/world-v084.js');
+    await import('../v09/world-v09.js');
+    await import('../v10/world-v10.js');
+    await import('../v101/world-v101.js');
+    await import('../v102/world-v102.js');
+    await import('../v11/world-v11.js');
+    await import('./world-v111.js');
+  </script>
+</body>
+</html>
