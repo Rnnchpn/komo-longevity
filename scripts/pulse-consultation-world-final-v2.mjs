@@ -106,9 +106,67 @@ center=center.replace(
 );
 
 // MY KŌMØ — KŌMØ World becomes a first-class visible destination, not another route owner.
+// Questionnaire reading belongs to the existing consultation drawer. Queries use
+// the authenticated client and existing assessment-level RLS, never admin keys.
+center=center.replace('function bindDossier(){', `function bindDossier(){
+document.querySelector('[data-consultation-answers]')?.addEventListener('click',loadConsultationAnswers);
+document.querySelector('[data-consultation-refresh]')?.addEventListener('click',()=>openDossier(S.selected));`);
+center=center.replace('<p class="eyebrow">02 · QUESTIONNAIRES PATIENT</p>', '<p class="eyebrow">02 · QUESTIONNAIRES PATIENT</p><button type="button" class="k2tw-btn" data-consultation-refresh>Actualiser</button>');
+center=center.replace('<article class="k2tw-card"><p class="eyebrow">03 · ACQUISITION MOTION</p>', '<article class="k2tw-card full"><h3>Réponses du patient</h3><button type="button" class="k2tw-btn" data-consultation-answers>Consulter les réponses</button><div data-consultation-answers-host aria-live="polite"></div></article><article class="k2tw-card"><p class="eyebrow">03 · ACQUISITION MOTION</p>');
+center += `
+function consultationAnswerLabel(reg,item,value){
+  if(value==null||value==='')return'—';
+  if(value===true)return'Oui';if(value===false)return'Non';
+  if(Array.isArray(value))return value.map(v=>consultationAnswerLabel(reg,item,v)).join(', ');
+  const cfg=reg?.configuration||{},question=cfg.items?.[item]||{};
+  for(const choices of [question.options,cfg.response_scale,cfg.frequency_options,cfg.difficulty_options,cfg.impact_options,cfg.default_options]){
+    if(!Array.isArray(choices))continue;
+    const option=choices.find(x=>String(x.value)===String(value));if(option)return option.label;
+  }
+  return typeof value==='object'?JSON.stringify(value):String(value);
+}
+async function loadConsultationAnswers(){
+  const host=document.querySelector('[data-consultation-answers-host]'),button=document.querySelector('[data-consultation-answers]'),assessmentId=S.dossier?.motion?.id;
+  if(!host||!assessmentId)return;
+  host.textContent='Chargement des réponses…';if(button)button.disabled=true;
+  const current=()=>host.isConnected&&S.dossier?.motion?.id===assessmentId;
+  try{
+    const sessions=await sb().from('questionnaire_sessions').select('id,instrument_code,status,completeness,completed_at,score').eq('assessment_id',assessmentId).order('created_at');
+    if(sessions.error)throw sessions.error;
+    if(!current())return;
+    if(!sessions.data?.length){host.textContent='Aucune réponse enregistrée pour cette consultation.';return}
+    const [registry,answers]=await Promise.all([
+      sb().from('instrument_registry').select('code,label,configuration').in('code',[...new Set(sessions.data.map(x=>x.instrument_code))]),
+      sb().from('questionnaire_responses').select('questionnaire_session_id,item_code,raw_value,updated_at').in('questionnaire_session_id',sessions.data.map(x=>x.id))
+    ]);
+    if(registry.error)throw registry.error;if(answers.error)throw answers.error;
+    if(!current())return;
+    const regs=Object.fromEntries((registry.data||[]).map(x=>[x.code,x]));
+    host.innerHTML=sessions.data.map(session=>{
+      const reg=regs[session.instrument_code]||{},cfg=reg.configuration||{},rows=(answers.data||[]).filter(x=>x.questionnaire_session_id===session.id),order=cfg.item_order||rows.map(x=>x.item_code);
+      const date=session.completed_at?' · '+fmt(session.completed_at,true):'';
+      const safety=session.instrument_code==='KOMO_BASELINE_CORE'&&rows.some(x=>['S01','S02','S03','S04','S05'].includes(x.item_code)&&x.raw_value===true);
+      return '<details class="k2tw-answers"><summary>'+esc(cfg.display_label||reg.label||'Questionnaire')+' · '+Math.round(Number(session.completeness||0))+'%'+esc(date)+'</summary>'+(safety?'<p role="status">Une réponse de sécurité nécessite une vérification avant les tests.</p>':'')+'<dl>'+order.map(item=>{
+        const row=rows.find(x=>x.item_code===item);if(!row)return'';
+        return '<div><dt>'+esc(cfg.items?.[item]?.prompt||item)+'</dt><dd>'+esc(consultationAnswerLabel(reg,item,row.raw_value))+'</dd></div>';
+      }).join('')+'</dl>'+(!rows.length?'<p>Aucune réponse enregistrée.</p>':'')+'</details>';
+    }).join('');
+  }catch(error){if(current())host.textContent='Impossible de charger les réponses. Réessayez ou vérifiez votre accès à ce dossier.'}
+  finally{if(button?.isConnected)button.disabled=false}
+}
+`;
+booking += `
+window.addEventListener('komo:questionnaire-saved',e=>{
+  if(!patientMode())return;
+  if(patientDetail?.motion?.id===e.detail?.assessmentId)openConsultationDetail(e.detail.assessmentId).catch(console.error);
+  else if(location.hash.replace(/^#/,'')==='documents')loadPatient().catch(console.error);
+});
+window.addEventListener('komo:session-cleared',()=>{patientDetail=null;patientDetailLoading=false});
+`;
+
 mykomo=mykomo.replace(
   '<div class="mks-grid">\n    <article class="mks-card mks-community primary">',
-  '<div class="mks-grid">\n    <article class="mks-card mks-community primary mks-world"><div><div class="mks-icon">◎</div><h3>KŌMØ World</h3><p>Entrez dans votre univers locomoteur : Functional Twin, Arena, Rehab et Fitness Floor.</p></div><div class="mks-card-foot"><span>V0.13.5 · LIVE</span><button class="mks-link" type="button" data-mkv5-world>Entrer dans World →</button></div></article>\n    <article class="mks-card mks-community">'
+  '<div class="mks-grid">\n    <article class="mks-card mks-community primary mks-world"><div><div class="mks-icon">◎</div><h3>KŌMØ World</h3><p>Entrez dans votre univers locomoteur : Functional Twin, Arena, Rehab et Fitness Floor.</p></div><div class="mks-card-foot"><span>Votre espace World</span><button class="mks-link" type="button" data-mkv5-world>Entrer dans World →</button></div></article>\n    <article class="mks-card mks-community">'
 );
 mykomo=mykomo.replace(
   "document.querySelector('[data-mkv5-refresh]')?.addEventListener('click',()=>load(true))",
@@ -123,6 +181,11 @@ center=center.replace(/\\`/g,'`').replace(/\\\$\{/g,'${');
 if(!html.includes('id="kpConsultationDetailV2"')){
   html=html.replace('</head>',`<style id="kpConsultationDetailV2">
   #viewRoot .kbook-detail{display:grid;gap:14px;max-width:1180px;margin:0 auto}
+  #k2twDrawer .k2tw-answers{margin-top:12px;border-top:1px solid #ccd3ce;padding-top:12px;font-size:14px;line-height:1.5}
+  #k2twDrawer .k2tw-answers summary{cursor:pointer;font-weight:600;overflow-wrap:anywhere}
+  #k2twDrawer .k2tw-answers dl>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid #ccd3ce}
+  #k2twDrawer .k2tw-answers dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+  @media(max-width:600px){#k2twDrawer .k2tw-answers dl>div{grid-template-columns:1fr;gap:4px}}
   #viewRoot .kbook-detail-back{width:max-content;border:0;background:transparent;color:#aeb8b1;font:inherit;font-size:11px;cursor:pointer;padding:4px 0}
   #viewRoot .kbook-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
   #viewRoot .kbook-detail-card{display:flex;flex-direction:column;gap:8px;min-height:190px;padding:22px;border:1px solid rgba(255,255,255,.09);border-radius:20px;background:#0a0e0b;color:#f3f5f2}
