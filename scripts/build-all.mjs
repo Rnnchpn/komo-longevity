@@ -155,9 +155,14 @@ const scripts = [
   // Final public-surface pass: it runs after every historical rewrite so the
   // published home, professional landing and contact flow have one owner.
   'scripts/riviera-commercial-v1.mjs',
+  // Ship the stable KŌMØ World V0.13.5 tree as a normal public surface.
+  'scripts/komo-world-v0.mjs',
   // Absolute last Pulse pass: prevent retired appointment/calendar/map owners
   // from reappearing after historical build layers.
   'scripts/pulse-consultation-runtime-prune-v1.mjs',
+  // Build-time only: mutates the canonical patient consultation, Centre and My KŌMØ owners.
+  // No extra browser runtime is introduced.
+  'scripts/pulse-consultation-world-final-v2.mjs',
   'scripts/pulse-consultation-final-qa-v1.mjs'
 ];
 

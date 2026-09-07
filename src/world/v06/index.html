@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#d6d0c0" />
+  <title>KŌMØ World · Vertical Slice V0.6</title>
+  <meta name="description" content="KŌMØ World V0.6 — Arrival Island, Hall, Desk, Functional Digital Twin Lab and locked Riviera frontier." />
+  <link rel="stylesheet" href="./world-v06.css" />
+</head>
+<body>
+<main id="app" class="world-shell">
+  <canvas id="world-canvas" aria-label="KŌMØ World"></canvas>
+
+  <header class="hud glass">
+    <div class="brand"><strong>KŌMØ</strong><span>WORLD</span><i>V0.6</i></div>
+    <div class="vitals">
+      <div><span>Motion</span><b id="hud-motion">84</b></div>
+      <div><span>Motion Age</span><b id="hud-age">39</b></div>
+      <div><span>Points</span><b>2,480</b></div>
+    </div>
+    <button id="settings-open" class="round" aria-label="Controls">⚙</button>
+  </header>
+
+  <section id="intro" class="intro glass">
+    <span class="eyebrow">CORE ISLAND · ARRIVAL PLAZA</span>
+    <h1>Your body has<br><em>a place in the world.</em></h1>
+    <p>Enter the KŌMØ Hall. Start at the Desk. Your Functional Digital Twin is the first destination.</p>
+    <div class="quest"><i></i><span id="quest-copy">01 · Reach the KŌMØ Desk</span></div>
+    <button id="intro-enter">Enter KŌMØ World</button>
+  </section>
+
+  <div class="location glass"><span id="location-name">ARRIVAL PLAZA</span><b id="heading">N</b></div>
+
+  <div id="interaction" class="interaction glass">
+    <span id="interaction-key">E</span>
+    <div><b id="interaction-title">Interact</b><small id="interaction-copy">Approach a destination</small></div>
+  </div>
+
+  <section id="panel" class="panel glass">
+    <div class="panel-head"><div><span class="eyebrow" id="panel-kicker">KŌMØ WORLD</span><h2 id="panel-title">Welcome</h2></div><button id="panel-close">×</button></div>
+    <div id="panel-body"></div>
+  </section>
+
+  <section id="twin-hud" class="twin-hud glass">
+    <div class="twin-head"><div><span class="eyebrow">FUNCTIONAL DIGITAL TWIN</span><strong id="twin-snapshot">TODAY</strong></div><button id="twin-exit">Leave Lab</button></div>
+    <div class="twin-domains">
+      <div><span>Muscle</span><b id="twin-muscle">82</b></div>
+      <div><span>Mobility</span><b id="twin-mobility">76</b></div>
+      <div><span>Balance</span><b id="twin-balance">91</b></div>
+      <div><span>Posture</span><b id="twin-posture">88</b></div>
+    </div>
+    <div class="timeline-wrap"><span>BASELINE</span><input id="timeline" type="range" min="0" max="2" step="1" value="2"><span>TODAY</span></div>
+    <div id="twin-sources" class="source-strip"></div>
+  </section>
+
+  <section id="world-map-panel" class="map-panel glass">
+    <div class="panel-head"><div><span class="eyebrow">KŌMØ WORLD MAP</span><h2>One world. Growing with the network.</h2></div><button id="map-close">×</button></div>
+    <div class="map-grid">
+      <button class="node active"><i></i><b>Core Island</b><span>OPEN</span></button>
+      <button class="node locked"><i></i><b>Riviera</b><span>LOCKED · PARTNERS</span></button>
+      <button class="node locked"><i></i><b>Paris</b><span>FUTURE</span></button>
+      <button class="node locked"><i></i><b>Jávea</b><span>FUTURE</span></button>
+      <button class="node locked"><i></i><b>Dubai</b><span>FUTURE</span></button>
+    </div>
+  </section>
+
+  <section id="settings" class="settings glass">
+    <div class="panel-head"><div><span class="eyebrow">PLAYER CONTROLS</span><h2>Move your way.</h2></div><button id="settings-close">×</button></div>
+    <div class="presets"><button data-preset="wasd">WASD</button><button data-preset="zqsd">ZQSD</button><button data-preset="arrows">Arrows</button><button data-preset="custom">Custom</button></div>
+    <div class="settings-scroll">
+      <section><span class="group-title">KEY BINDINGS</span><div id="bindings" class="bindings"></div></section>
+      <section><span class="group-title">CAMERA</span>
+        <label><span>Horizontal sensitivity</span><input id="sens-x" type="range" min="0.35" max="2.2" step="0.05"></label>
+        <label><span>Vertical sensitivity</span><input id="sens-y" type="range" min="0.35" max="2.2" step="0.05"></label>
+        <label><span>Camera distance</span><input id="camera-distance" type="range" min="10" max="30" step="1"></label>
+        <label class="toggle"><span>Invert vertical axis</span><input id="invert-y" type="checkbox"></label>
+      </section>
+      <section class="mobile-setting"><span class="group-title">MOBILE</span>
+        <label><span>Joystick size</span><input id="joy-size" type="range" min="88" max="150" step="2"></label>
+        <label><span>Joystick opacity</span><input id="joy-opacity" type="range" min="0.25" max="0.95" step="0.05"></label>
+        <label class="toggle"><span>Left-handed layout</span><input id="left-handed" type="checkbox"></label>
+      </section>
+    </div>
+    <div class="settings-foot"><button id="reset-controls">Reset defaults</button><small>Saved automatically on this device</small></div>
+  </section>
+
+  <aside class="world-status glass"><div><span>WORLD</span><b>CORE ISLAND · ONLINE</b></div><div><span>RIVIERA</span><b class="locked-text">FRONTIER LOCKED</b></div></aside>
+
+  <div id="mobile-controls" class="mobile-controls">
+    <div id="joystick-zone" class="joystick-zone"><div class="joystick-base"><div id="joystick-knob" class="joystick-knob"></div></div></div>
+    <div id="look-zone" class="look-zone"><span>LOOK</span></div>
+    <button id="mobile-action" class="mobile-action">ACTION</button>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</main>
+<script type="module" src="./world-v06.js"></script>
+</body>
+</html>

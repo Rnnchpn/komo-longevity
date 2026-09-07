@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b100d" />
+  <title>KŌMØ Functional Digital Twin · Core V0.4</title>
+  <meta name="description" content="Agent-ready KŌMØ Functional Digital Twin prototype." />
+  <link rel="stylesheet" href="./world-v04.css" />
+  <link rel="stylesheet" href="./mobile-v04.css" />
+</head>
+<body>
+  <main class="shell" id="app">
+    <canvas id="world-canvas" aria-label="KŌMØ Functional Digital Twin"></canvas>
+
+    <header class="topbar glass">
+      <div class="brand"><strong>KŌMØ</strong><span>WORLD · TWIN CORE <b>V0.4</b></span></div>
+      <div class="metrics">
+        <div><span>Motion</span><b id="motion-score">84</b></div>
+        <div><span>Motion Age</span><b id="motion-age">39</b></div>
+        <div><span>Snapshot</span><b id="snapshot-label">TODAY</b></div>
+        <div><span>Provenance</span><b>V1</b></div>
+      </div>
+      <div class="safe-chip"><i></i><span>AGENT PROTOCOL</span><b>GOVERNED</b></div>
+    </header>
+
+    <aside class="hero glass">
+      <span class="eyebrow">KŌMØ FUNCTIONAL DIGITAL TWIN</span>
+      <h1>The body is the state.<br><em>Time is the dimension.</em></h1>
+      <p>Measured signals become dated, auditable Twin snapshots. AI can navigate and explain them — never silently rewrite them.</p>
+      <div class="domains">
+        <div><span>Muscle</span><strong id="d-muscle">82</strong></div>
+        <div><span>Mobility</span><strong id="d-mobility">76</strong></div>
+        <div><span>Balance</span><strong id="d-balance">91</strong></div>
+        <div><span>Posture</span><strong id="d-posture">88</strong></div>
+      </div>
+      <button id="compare-button" class="primary">Compare with baseline</button>
+    </aside>
+
+    <aside class="sources glass">
+      <div class="panel-head"><span class="eyebrow">TRUTH LAYER</span><small>10 streams</small></div>
+      <div id="source-list" class="source-list"></div>
+    </aside>
+
+    <section class="agent glass">
+      <div class="agent-head">
+        <div><span class="eyebrow">KŌMØ AI · AGENT ADAPTER</span><strong>Protocol simulator</strong></div>
+        <span class="agent-state"><i></i> read-only</span>
+      </div>
+      <div class="agent-response" id="agent-response">Ask: “What changed?”, “Show my main limitation”, “Why is my Motion Score 84?”, or “Open Rehab”.</div>
+      <form id="agent-form" class="agent-form">
+        <input id="agent-input" autocomplete="off" placeholder="Ask KŌMØ about your Twin…" />
+        <button type="submit">Ask</button>
+      </form>
+      <div class="quick-actions">
+        <button data-prompt="Compare with baseline">Compare</button>
+        <button data-prompt="Show my main limitation">Priority</button>
+        <button data-prompt="Why is my Motion Score 84?">Explain score</button>
+        <button data-prompt="Open Rehab">Rehab</button>
+      </div>
+    </section>
+
+    <section class="detail glass" id="detail-panel">
+      <div class="detail-head"><span class="eyebrow" id="detail-title">SOURCE PROVENANCE</span><button id="detail-close">×</button></div>
+      <div id="detail-content"></div>
+    </section>
+
+    <section class="audit glass">
+      <div class="panel-head"><span class="eyebrow">AUDIT TRAIL</span><small>append-only</small></div>
+      <div id="audit-list" class="audit-list"></div>
+    </section>
+
+    <section class="timeline glass">
+      <div class="timeline-top"><span class="eyebrow">LONGITUDINAL TIME</span><strong id="timeline-name">TODAY · 02 SEP 2026</strong></div>
+      <input id="timeline" type="range" min="0" max="2" step="1" value="2" />
+      <div class="timeline-labels"><span>Baseline</span><span>Day 30</span><span>Today</span></div>
+    </section>
+
+    <nav class="rooms glass">
+      <button class="active"><span>01</span><b>Twin Core</b></button>
+      <button id="motion-room"><span>02</span><b>Motion Lab</b></button>
+      <button id="rehab-room"><span>03</span><b>Rehab</b></button>
+      <button id="network-room"><span>04</span><b>Network</b></button>
+    </nav>
+
+    <div class="player glass"><i></i><strong id="player-name">Renan</strong><span>WASD move · drag camera · Shift run</span></div>
+    <div class="toast" id="toast"></div>
+  </main>
+  <script src="./mobile-controls.js" defer></script>
+  <script type="module" src="./world-v04.js"></script>
+</body>
+</html>

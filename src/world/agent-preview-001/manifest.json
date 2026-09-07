@@ -1,0 +1,45 @@
+{
+  "schema": "komo.world.build-manifest.v1",
+  "id": "agent-preview-001",
+  "sourceVersion": "v0.12.6",
+  "title": "Hall Concierge Alignment",
+  "generatedBy": "KŌMØ Deterministic Builder",
+  "operations": [
+    {
+      "type": "MOVE_INTERACTION",
+      "target": "desk",
+      "from": { "x": 0, "z": -1.6, "radius": 5.2 },
+      "to": { "x": -8.15, "z": -1.2, "radius": 4.8 }
+    },
+    {
+      "type": "PRESERVE_CLEAR_AXIS",
+      "target": "hall-central-axis",
+      "bounds": { "x1": -4.6, "x2": 4.6, "z1": -40, "z2": 9 }
+    },
+    {
+      "type": "SET_WAYFINDING",
+      "target": "hall-entry",
+      "labels": [
+        { "text": "← TWIN LAB", "x": -12.8, "y": 5, "z": -10.5 },
+        { "text": "ARENA →", "x": 12.8, "y": 5, "z": -10.5 }
+      ]
+    },
+    {
+      "type": "CAMERA_OCCLUDER_REMOVE",
+      "target": "legacy-hidden-objects",
+      "objects": ["legacyDesk", "legacyBackWall"]
+    },
+    {
+      "type": "ASSERT_CLINICAL_READ_ONLY",
+      "target": "functional-twin-truth-layer",
+      "value": true
+    }
+  ],
+  "guardrails": {
+    "previewOnly": true,
+    "productionWrite": false,
+    "clinicalWrite": false,
+    "twinTruthReadOnly": true,
+    "mobileFirst": true
+  }
+}

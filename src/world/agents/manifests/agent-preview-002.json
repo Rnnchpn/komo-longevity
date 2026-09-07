@@ -1,0 +1,60 @@
+{
+  "schema": "komo.world.build-manifest.v1",
+  "id": "agent-preview-002",
+  "title": "Premium Hall Camera + Concierge Alcove",
+  "sourceVersion": "v0.12.6",
+  "previewPath": "/world/agent-preview-002/",
+  "generatedBy": "KŌMØ Deterministic Builder",
+  "autonomyLevel": 3,
+  "operations": [
+    {
+      "type": "SET_CONTEXT_CAMERA",
+      "zone": "hall",
+      "fov": 46,
+      "maxDistance": 18.5,
+      "height": 6.25,
+      "targetHeight": 2.25,
+      "reason": "Donner une lecture plus basse, plus plate et plus monumentale du Hall."
+    },
+    {
+      "type": "MOVE_INTERACTION",
+      "target": "desk",
+      "to": { "x": -8.15, "z": -1.2, "radius": 4.8 },
+      "reason": "Aligner ACTION avec le Concierge latéral."
+    },
+    {
+      "type": "ADD_ENVIRONMENT_GROUP",
+      "target": "concierge-alcove",
+      "bounds": { "x1": -12.0, "x2": -4.9, "z1": -3.2, "z2": 0.8 },
+      "style": "pale-stone + deep-sage + restrained-bronze + warm-linear-light",
+      "reason": "Transformer le desk en conciergerie premium intégrée à l'architecture."
+    },
+    {
+      "type": "PRESERVE_CLEAR_AXIS",
+      "target": "hall-central-axis",
+      "bounds": { "x1": -4.6, "x2": 4.6, "z1": -40, "z2": 9 },
+      "reason": "Préserver la profondeur et la navigation Arrival Plaza → Atrium."
+    },
+    {
+      "type": "ASSERT_CLINICAL_READ_ONLY",
+      "target": "functional-twin-truth-layer",
+      "value": true
+    }
+  ],
+  "qa": {
+    "safety": 100,
+    "navigation": 98,
+    "mobile": 94,
+    "visual": 96,
+    "reversibility": 100,
+    "weightedScore": 97,
+    "verdict": "APPROVE_PREVIEW"
+  },
+  "guardrails": {
+    "previewOnly": true,
+    "productionWrite": false,
+    "clinicalWrite": false,
+    "twinTruthReadOnly": true,
+    "mobileFirst": true
+  }
+}

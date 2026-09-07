@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#17271f" />
+  <title>KŌMØ World · V0.13.1 Design Pass</title>
+  <meta name="description" content="KŌMØ World V0.13.1 — first-person Hall architectural signage and material refinement." />
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17271f}
+    #v131-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#17271f;color:#eee6d7;font:700 10px/1 system-ui,sans-serif;letter-spacing:.18em}
+  </style>
+</head>
+<body>
+  <div id="v131-loader">KŌMØ WORLD · DESIGN PASS 01</div>
+  <script type="module">
+    const loader=document.querySelector('#v131-loader');
+    try{
+      const r=await fetch('../v13/index.html',{cache:'no-store'});
+      if(!r.ok)throw new Error(`V0.13 shell ${r.status}`);
+      const html=await r.text();
+      const doc=new DOMParser().parseFromString(html,'text/html');
+      const base=new URL('../v13/',location.href);
+      doc.head.querySelectorAll('link[rel="stylesheet"]').forEach(link=>{
+        const el=document.createElement('link');el.rel='stylesheet';el.href=new URL(link.getAttribute('href'),base).href;document.head.appendChild(el);
+      });
+      doc.head.querySelectorAll('style').forEach(style=>{const el=document.createElement('style');el.textContent=style.textContent;document.head.appendChild(el)});
+      [...doc.body.children].filter(n=>n.tagName!=='SCRIPT').forEach(n=>document.body.insertBefore(document.importNode(n,true),loader));
+      const source=doc.body.querySelector('script[type="module"]')?.textContent;
+      if(!source)throw new Error('V0.13 runtime script missing');
+      const run=document.createElement('script');run.type='module';run.textContent=source;document.body.appendChild(run);
+
+      const wait=setInterval(async()=>{
+        if(!window.KomoWorldRuntime)return;
+        clearInterval(wait);
+        try{await import('./world-v131-design.js')}catch(e){console.error('[V0.13.1] design pass failed',e)}
+        loader?.remove();
+      },50);
+      setTimeout(()=>{if(document.body.contains(loader)){clearInterval(wait);loader.textContent='KŌMØ WORLD · CHARGEMENT…'}},7000);
+    }catch(e){console.error('[V0.13.1] boot error',e);loader.textContent='KŌMØ WORLD · V0.13.1 INDISPONIBLE';setTimeout(()=>location.replace('../v13/'),1000)}
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+.v084-boot{position:fixed;inset:0;display:grid;place-items:center;background:#101611;color:#efe9dc;font:600 11px/1 Arial;letter-spacing:.22em;z-index:9999}
+.camera-grammar-chip{position:fixed;left:18px;bottom:18px;z-index:72;display:flex;gap:8px;align-items:center;padding:9px 12px;border:1px solid rgba(255,255,255,.1);border-radius:999px;background:rgba(16,23,18,.58);backdrop-filter:blur(18px);color:#f0eade;font:600 8px/1 Arial;letter-spacing:.15em;pointer-events:none;opacity:.76;transition:.35s ease}.camera-grammar-chip i{width:6px;height:6px;border-radius:50%;background:#b9c9b6;box-shadow:0 0 14px rgba(185,201,182,.65)}
+#app[data-camera-profile="desk"] .camera-grammar-chip i{background:#dcc59e}#app[data-camera-profile="twin"] .camera-grammar-chip i,#app[data-camera-profile="body"] .camera-grammar-chip i,#app[data-camera-profile="compare"] .camera-grammar-chip i{background:#a8c3ad}#app[data-camera-profile="arena"] .camera-grammar-chip i,#app[data-camera-profile="challenge"] .camera-grammar-chip i{background:#d7b16d}
+#app[data-camera-profile="desk"]::after,#app[data-camera-profile="twin"]::after,#app[data-camera-profile="arena"]::after,#app[data-camera-profile="challenge"]::after{content:"";position:fixed;inset:0;z-index:7;pointer-events:none;opacity:0;animation:grammarFade .85s ease both}
+#app[data-camera-profile="desk"]::after{background:radial-gradient(circle at 50% 55%,transparent 38%,rgba(23,20,15,.10) 100%)}
+#app[data-camera-profile="twin"]::after{background:linear-gradient(90deg,rgba(91,121,102,.06),transparent 28%,transparent 72%,rgba(91,121,102,.06))}
+#app[data-camera-profile="arena"]::after{background:radial-gradient(circle at 50% 55%,rgba(220,178,99,.045),transparent 48%,rgba(20,13,7,.14) 100%)}
+#app[data-camera-profile="challenge"]::after{background:radial-gradient(circle at 50% 50%,transparent 32%,rgba(14,10,6,.18) 100%)}
+@keyframes grammarFade{0%{opacity:0}100%{opacity:1}}
+#app[data-camera-profile="twin"] .twin-left,#app[data-camera-profile="twin"] .twin-right{transform:translateY(0);transition:opacity .35s ease,transform .45s cubic-bezier(.2,.78,.2,1)}
+#app[data-camera-profile="body"] .twin-left,#app[data-camera-profile="body"] .twin-right{opacity:.76}
+#app[data-camera-profile="compare"] .body-overlay-layer{opacity:.18;transition:opacity .3s ease}
+#app[data-camera-profile="challenge"] .arena-top,#app[data-camera-profile="challenge"] .arena-left,#app[data-camera-profile="challenge"] .arena-right,#app[data-camera-profile="challenge"] .arena-floor-label{opacity:.16;transition:opacity .28s ease}
+#app[data-camera-profile="challenge"] .challenge-overlay{backdrop-filter:blur(2px)}
+#app[data-camera-profile="arena"] #world-canvas{filter:contrast(1.1) saturate(1.07) brightness(.93)}
+#app[data-camera-profile="twin"] #world-canvas,#app[data-camera-profile="body"] #world-canvas,#app[data-camera-profile="compare"] #world-canvas{filter:contrast(1.08) saturate(.89) brightness(.95)}
+@media(max-width:800px){.camera-grammar-chip{left:10px;bottom:92px;padding:8px 10px;font-size:7px}.camera-shot-chip{display:none}}
+@media(prefers-reduced-motion:reduce){#app[data-camera-profile]::after{animation:none}.camera-grammar-chip{transition:none!important}}
