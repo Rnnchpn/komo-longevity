@@ -163,7 +163,9 @@ const scripts = [
   // Build-time only: mutates the canonical patient consultation, Centre and My KŌMØ owners.
   // No extra browser runtime is introduced.
   'scripts/pulse-consultation-world-final-v2.mjs',
-  'scripts/pulse-consultation-final-qa-v1.mjs'
+  'scripts/pulse-consultation-final-qa-v1.mjs',
+  // Last production mutation: make the existing World destination explicit and cache-fresh.
+  'scripts/pulse-world-entry-hotfix-v1.mjs'
 ];
 
 for (const script of scripts) {
