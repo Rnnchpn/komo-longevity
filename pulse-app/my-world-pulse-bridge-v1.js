@@ -3,8 +3,8 @@
    appointment, Motion Score or clinical data is transferred to World. */
 (()=>{
 'use strict';
-const VERSION='1.0.0';
-const WORLD_URL='https://komo-longevity-orepe8fq6-rnnchpns-projects.vercel.app/world/v134/?_vercel_share=XiEy6QPhLPVwlvlGvloNICC4NOQj90gA';
+const VERSION='1.1.0';
+const WORLD_WEB_URL='https://komo-longevity-git-prototype-komo-world-v0-rnnchpns-projects.vercel.app/world/';
 let entering=false;
 const safe=async query=>{try{const r=await query;return r?.error?null:r?.data??null}catch{return null}};
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,Number(n)||0));
@@ -43,6 +43,9 @@ async function identity(){
     avatar
   };
 }
+function worldHref(payload){
+  return `${WORLD_WEB_URL}#pulse=${encodeBase64Url(payload)}`;
+}
 function setBusy(on){
   document.querySelectorAll('[data-kmw-enter]').forEach(btn=>{
     btn.disabled=on;btn.setAttribute('aria-busy',on?'true':'false');
@@ -54,11 +57,10 @@ async function enter(){
   if(entering)return;entering=true;setBusy(true);
   try{
     const payload=await identity();
-    const href=`${WORLD_URL}#pulse=${encodeBase64Url(payload)}`;
-    location.assign(href);
+    location.assign(worldHref(payload));
   }catch(err){
     console.warn('[my-world-pulse-bridge]',err);
-    location.assign(WORLD_URL);
+    location.assign(WORLD_WEB_URL);
   }finally{setTimeout(()=>{entering=false;setBusy(false)},1800)}
 }
 document.addEventListener('click',e=>{
@@ -67,7 +69,7 @@ document.addEventListener('click',e=>{
 },true);
 function installApi(){
   if(window.KomoMyWorld)window.KomoMyWorld.enter=enter;
-  window.KomoMyWorldPulseBridge={version:VERSION,enter,identity};
+  window.KomoMyWorldPulseBridge={version:VERSION,enter,identity,worldHref};
 }
 installApi();
 window.addEventListener('komo:my-world-rendered',installApi);
