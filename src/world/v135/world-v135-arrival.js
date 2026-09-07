@@ -81,7 +81,7 @@ style.id='komo-v135-arrival-style';
 style.textContent=`
 :root{--komo-world-safe-top:max(8px,env(safe-area-inset-top));--komo-world-safe-bottom:max(8px,env(safe-area-inset-bottom))}
 @media(max-width:800px){
-  .hud{top:var(--komo-world-safe-top)!important;left:8px!important;right:8px!important;height:58px!important;min-height:58px!important;padding:8px 9px 8px 13px!important;grid-template-columns:minmax(0,1fr) auto auto!important;gap:8px!important;border-radius:22px!important}
+  .hud{top:var(--komo-world-safe-top)!important;left:8px!important;right:8px!important;height:58px!important;min-height:58px!important;padding:8px 9px 8px 13px!important;grid-template-columns:minmax(0,1fr) auto auto auto!important;gap:8px!important;border-radius:22px!important}
   .hud .brand{min-width:0!important}.hud .brand strong{font-size:25px!important;line-height:1!important}.hud .brand span,.hud .brand i{display:none!important}
   .hud .vitals{justify-self:end!important}.hud .vitals>div{min-width:58px!important;padding:6px 8px!important}.hud .vitals>div:nth-child(n+2){display:none!important}.hud .vitals span{font-size:6px!important}.hud .vitals b{font-size:14px!important}
   .hud .round{width:34px!important;height:34px!important}.hud .lang{font-size:8px!important;min-width:30px!important}
