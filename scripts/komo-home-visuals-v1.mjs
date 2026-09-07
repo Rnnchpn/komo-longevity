@@ -22,7 +22,14 @@ const copy = {
     founderBody: 'Dr Renan Chapon is a physician whose hospital path has focused on neurosurgery, spine surgery and functional movement assessment across Dijon, Strasbourg and Montpellier. His academic work has included gait analysis in lumbar spinal stenosis, with a consistent interest in the relationship between movement, function and long-term autonomy.',
     founderVision: 'KŌMØ Longevity grew from a simple conviction: longevity is not only a biological number. It is also the ability to keep walking, standing, recovering, adapting and living independently. KŌMØ makes that functional trajectory measurable, understandable and followable over time.',
     founderMeta: ['Former president · AJCR', 'Founder · KŌMØ Longevity', 'President · Locotech Lab'],
-    founderQuote: 'Measure movement before mobility becomes a limitation.'
+    founderQuote: 'Measure movement before mobility becomes a limitation.',
+    caseAlt: 'Open KŌMØ Case with six sensors, tablet and tripod',
+    sensorAlt: 'Six KŌMØ sensors powered by Myodev',
+    pulseAlt: 'KŌMØ Pulse dashboard showing Motion Score and functional trajectory',
+    pulseCaption: 'KŌMØ Pulse · Motion Score · functional age · longitudinal follow-up.',
+    pulseEyebrow: 'KŌMØ PULSE · THE RESULT',
+    pulseTitle: 'The measurement becomes visible.<br><em>The trajectory becomes followable.</em>',
+    pulseLead: 'Pulse brings the Motion Score, functional references and longitudinal follow-up into one premium interface designed to make the result immediately understandable.'
   },
   fr: {
     founderEyebrow: 'FONDATEUR · VISION MÉDICALE & SCIENTIFIQUE',
@@ -31,7 +38,14 @@ const copy = {
     founderBody: 'Le Dr Renan Chapon est médecin, avec un parcours hospitalier centré sur la neurochirurgie, la chirurgie du rachis et l’analyse fonctionnelle du mouvement à Dijon, Strasbourg et Montpellier. Ses travaux académiques ont notamment porté sur l’analyse de la marche dans la sténose lombaire, avec un intérêt constant pour le lien entre mouvement, fonction et autonomie à long terme.',
     founderVision: 'KŌMØ Longevity est né d’une conviction simple : la longévité ne se résume pas à un âge biologique. Elle se lit aussi dans la capacité à marcher, se relever, récupérer, s’adapter et rester autonome. KŌMØ rend cette trajectoire fonctionnelle mesurable, compréhensible et suivie dans le temps.',
     founderMeta: ['Ancien président · AJCR', 'Fondateur · KŌMØ Longevity', 'Président · Locotech Lab'],
-    founderQuote: 'Mesurer le mouvement avant que la mobilité ne devienne une limitation.'
+    founderQuote: 'Mesurer le mouvement avant que la mobilité ne devienne une limitation.',
+    caseAlt: 'KŌMØ Case ouverte avec six capteurs, tablette et trépied',
+    sensorAlt: 'Les six capteurs KŌMØ powered by Myodev',
+    pulseAlt: 'KŌMØ Pulse affichant le Motion Score et la trajectoire fonctionnelle',
+    pulseCaption: 'KŌMØ Pulse · Motion Score · âge fonctionnel · suivi longitudinal.',
+    pulseEyebrow: 'KŌMØ PULSE · LE RÉSULTAT',
+    pulseTitle: 'La mesure devient visible.<br><em>La trajectoire devient suivable.</em>',
+    pulseLead: 'Pulse réunit le Motion Score, les repères fonctionnels et le suivi longitudinal dans une interface premium conçue pour rendre le résultat immédiatement compréhensible.'
   },
   es: {
     founderEyebrow: 'FUNDADOR · VISIÓN MÉDICA Y CIENTÍFICA',
@@ -40,7 +54,14 @@ const copy = {
     founderBody: 'El Dr Renan Chapon es médico, con una trayectoria hospitalaria centrada en neurocirugía, cirugía de columna y análisis funcional del movimiento en Dijon, Estrasburgo y Montpellier. Su trabajo académico ha incluido el análisis de la marcha en la estenosis lumbar, con un interés constante por la relación entre movimiento, función y autonomía a largo plazo.',
     founderVision: 'KŌMØ Longevity nace de una convicción sencilla: la longevidad no es solo una edad biológica. También se expresa en la capacidad de caminar, levantarse, recuperarse, adaptarse y conservar la autonomía. KŌMØ convierte esa trayectoria funcional en algo medible, comprensible y seguido en el tiempo.',
     founderMeta: ['Ex presidente · AJCR', 'Fundador · KŌMØ Longevity', 'Presidente · Locotech Lab'],
-    founderQuote: 'Medir el movimiento antes de que la movilidad se convierta en una limitación.'
+    founderQuote: 'Medir el movimiento antes de que la movilidad se convierta en una limitación.',
+    caseAlt: 'KŌMØ Case abierta con seis sensores, tableta y trípode',
+    sensorAlt: 'Los seis sensores KŌMØ powered by Myodev',
+    pulseAlt: 'KŌMØ Pulse mostrando Motion Score y trayectoria funcional',
+    pulseCaption: 'KŌMØ Pulse · Motion Score · edad funcional · seguimiento longitudinal.',
+    pulseEyebrow: 'KŌMØ PULSE · EL RESULTADO',
+    pulseTitle: 'La medición se hace visible.<br><em>La trayectoria se puede seguir.</em>',
+    pulseLead: 'Pulse reúne Motion Score, referencias funcionales y seguimiento longitudinal en una interfaz premium diseñada para hacer el resultado inmediatamente comprensible.'
   }
 };
 
@@ -50,26 +71,27 @@ const style = `
   .case-hero-visual{max-width:none!important;margin:0!important}
   .case-hero-visual img{display:block;width:100%!important;height:auto!important;aspect-ratio:5/4;object-fit:cover;object-position:center;border-radius:2px;background:#111;box-shadow:0 30px 80px rgba(0,0,0,.18)}
   .case-score-visual img,.case-sensor-card img{display:block;width:100%;height:100%;object-fit:cover}
-  .case-score-visual img{aspect-ratio:1/1}
-  .case-sensor-card img{aspect-ratio:1/1}
+  .case-score-visual img{aspect-ratio:1/1}.case-sensor-card img{aspect-ratio:1/1}
+  .rvc-photo--hero{aspect-ratio:5/4!important;background:#111!important}
+  .rvc-photo--hero img{object-fit:cover!important;object-position:center!important;filter:none!important}
+  .rvc-kit-photo{aspect-ratio:1/1!important;background:#111!important}
+  .rvc-kit-photo img{object-fit:cover!important;object-position:center!important;filter:none!important}
+  .rvc-session-photo{aspect-ratio:1/1!important;background:#050606!important}
+  .rvc-session-photo img{object-fit:cover!important;object-position:center!important;filter:none!important}
   .komo-founder{padding:clamp(72px,9vw,132px) 0;background:#0b1511;color:#f5f3ec;overflow:hidden}
   .komo-founder-grid{display:grid;grid-template-columns:minmax(300px,.72fr) minmax(0,1.28fr);gap:clamp(42px,7vw,110px);align-items:center}
-  .komo-founder-portrait{margin:0;position:relative}
-  .komo-founder-portrait:after{content:'';position:absolute;inset:auto -18px -18px 18px;height:42%;border:1px solid rgba(201,218,207,.35);z-index:0}
+  .komo-founder-portrait{margin:0;position:relative}.komo-founder-portrait:after{content:'';position:absolute;inset:auto -18px -18px 18px;height:42%;border:1px solid rgba(201,218,207,.35);z-index:0}
   .komo-founder-portrait img{display:block;position:relative;z-index:1;width:100%;aspect-ratio:1/1;object-fit:cover;object-position:center top;background:#17324c}
-  .komo-founder-copy .eyebrow{color:#a9c1b2}
-  .komo-founder-copy h2{font-size:clamp(2.7rem,5.7vw,5.8rem);line-height:.93;letter-spacing:-.055em;margin:.25em 0 .18em;color:#fff}
-  .komo-founder-role{font-size:clamp(1rem,1.35vw,1.25rem);color:#c9d8cf;margin:0 0 2rem}
-  .komo-founder-body{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,42px);margin:0 0 2rem}
-  .komo-founder-body p{margin:0;color:rgba(245,243,236,.74);font-size:clamp(1rem,1.18vw,1.12rem);line-height:1.65}
-  .komo-founder-meta{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 2.2rem;padding:0;list-style:none}
-  .komo-founder-meta li{border:1px solid rgba(201,218,207,.27);padding:9px 13px;border-radius:999px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:#dce7e0}
-  .komo-founder-quote{margin:0;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.13);font-size:clamp(1.45rem,2.5vw,2.4rem);line-height:1.12;letter-spacing:-.03em;color:#fff;max-width:21ch}
+  .komo-founder-copy .eyebrow{color:#a9c1b2}.komo-founder-copy h2{font-size:clamp(2.7rem,5.7vw,5.8rem);line-height:.93;letter-spacing:-.055em;margin:.25em 0 .18em;color:#fff}
+  .komo-founder-role{font-size:clamp(1rem,1.35vw,1.25rem);color:#c9d8cf;margin:0 0 2rem}.komo-founder-body{display:grid;grid-template-columns:1fr 1fr;gap:clamp(20px,3vw,42px);margin:0 0 2rem}
+  .komo-founder-body p{margin:0;color:rgba(245,243,236,.74);font-size:clamp(1rem,1.18vw,1.12rem);line-height:1.65}.komo-founder-meta{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 2.2rem;padding:0;list-style:none}
+  .komo-founder-meta li{border:1px solid rgba(201,218,207,.27);padding:9px 13px;border-radius:999px;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:#dce7e0}.komo-founder-quote{margin:0;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,.13);font-size:clamp(1.45rem,2.5vw,2.4rem);line-height:1.12;letter-spacing:-.03em;color:#fff;max-width:21ch}
   @media(max-width:900px){.case-hero-grid{grid-template-columns:1fr!important}.case-hero-visual{order:-1}.komo-founder-grid{grid-template-columns:1fr}.komo-founder-portrait{max-width:560px}.komo-founder-body{grid-template-columns:1fr}}
+  @media(max-width:640px){.rvc-photo--hero,.rvc-kit-photo,.rvc-session-photo{aspect-ratio:1/1!important}.komo-founder{padding:64px 0}.komo-founder-grid{gap:30px}.komo-founder-copy h2{font-size:clamp(2.6rem,13vw,4rem)}}
 </style>`;
 
 function imageTag(src, alt, width, height, priority = false) {
-  return `<img src="${src}" alt="${alt}" width="${width}" height="${height}" ${priority ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
+  return `<img src="${src}" alt="${alt}" width="${width}" height="${height}" ${priority ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 }
 
 function founderSection(c) {
@@ -96,21 +118,38 @@ async function decodeAssets() {
   }
 }
 
+function replaceImage(html, candidates, tag) {
+  for (const candidate of candidates) {
+    const escaped = candidate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`<img\\s+src="${escaped}"[^>]*>`);
+    if (re.test(html)) return html.replace(re, tag);
+  }
+  return html;
+}
+
 async function patchHome(locale, relativePath) {
   const file = join(siteDir, relativePath);
   let html = await readFile(file, 'utf8');
   const c = copy[locale];
 
-  html = html.replace(/<img\s+src="\/assets\/images\/komo-case-score\.jpeg"[^>]*>/, imageTag('/assets/images/komo-case-premium-v2.webp', locale === 'fr' ? 'KŌMØ Case ouverte avec six capteurs et système de capture' : locale === 'es' ? 'KŌMØ Case abierta con seis sensores y sistema de captura' : 'Open KŌMØ Case with six sensors and capture system', 800, 640, true));
-  html = html.replace(/<img\s+src="\/assets\/images\/komo-case-overview\.jpeg"[^>]*>/, imageTag('/assets/images/komo-pulse-dashboard-v2.webp', locale === 'fr' ? 'KŌMØ Pulse affichant Motion Score et trajectoire fonctionnelle' : locale === 'es' ? 'KŌMØ Pulse mostrando Motion Score y trayectoria funcional' : 'KŌMØ Pulse showing Motion Score and functional trajectory', 800, 800));
-  html = html.replace(/<img\s+src="\/assets\/images\/komo-case-muscle\.jpeg"[^>]*>/, imageTag('/assets/images/komo-six-sensors-v2.webp', locale === 'fr' ? 'Les six capteurs KŌMØ powered by Myodev' : locale === 'es' ? 'Los seis sensores KŌMØ powered by Myodev' : 'Six KŌMØ sensors powered by Myodev', 800, 800));
+  html = replaceImage(html, ['/assets/images/real-case/komo-case-angle.jpeg','/assets/images/komo-case-score.jpeg'], imageTag('/assets/images/komo-case-premium-v2.webp', c.caseAlt, 800, 640, true));
+  html = replaceImage(html, ['/assets/images/real-case/komo-six-myodev-sensors.jpeg','/assets/images/komo-case-muscle.jpeg'], imageTag('/assets/images/komo-six-sensors-v2.webp', c.sensorAlt, 800, 800));
+  html = replaceImage(html, ['/assets/images/real-case/komo-motion-tablet.jpeg','/assets/images/komo-case-overview.jpeg'], imageTag('/assets/images/komo-pulse-dashboard-v2.webp', c.pulseAlt, 800, 800));
+
+  html = html.replace(/<section class="rvc-session">[\s\S]*?<div><p class="rvc-ey">[\s\S]*?<\/div><figure class="rvc-photo rvc-session-photo">/, `<section class="rvc-session"><div class="rvc-shell rvc-session-grid"><div><p class="rvc-ey">${c.pulseEyebrow}</p><h2 class="rvc-title">${c.pulseTitle}</h2><p class="rvc-copy" style="margin-top:23px">${c.pulseLead}</p></div><figure class="rvc-photo rvc-session-photo">`);
+  html = html.replace(/<figure class="rvc-photo rvc-session-photo">([\s\S]*?)<figcaption>[\s\S]*?<\/figcaption><\/figure>/, `<figure class="rvc-photo rvc-session-photo">$1<figcaption>${c.pulseCaption}</figcaption></figure>`);
 
   const founder = founderSection(c);
+  const existingFounder = /<section class="komo-founder"[\s\S]*?<\/section>/;
   const oldPulseBand = /<section class="section-tight pulse-portrait-band">[\s\S]*?<\/section>/;
-  if (oldPulseBand.test(html)) html = html.replace(oldPulseBand, founder);
+  if (existingFounder.test(html)) html = html.replace(existingFounder, founder);
+  else if (oldPulseBand.test(html)) html = html.replace(oldPulseBand, founder);
   else html = html.replace('</main>', `${founder}\n</main>`);
 
-  if (!html.includes('komo-visuals-v2')) html = html.replace('</head>', `<link rel="preload" as="image" href="/assets/images/komo-case-premium-v2.webp" type="image/webp" fetchpriority="high">${style}\n</head>`);
+  if (html.includes('komo-visuals-v2')) html = html.replace(/<style id="komo-visuals-v2">[\s\S]*?<\/style>/, style.trim());
+  else html = html.replace('</head>', `<link rel="preload" as="image" href="/assets/images/komo-case-premium-v2.webp" type="image/webp" fetchpriority="high">${style}\n</head>`);
+
+  if (!html.includes('href="/assets/images/komo-case-premium-v2.webp"')) html = html.replace('</head>', `<link rel="preload" as="image" href="/assets/images/komo-case-premium-v2.webp" type="image/webp" fetchpriority="high">\n</head>`);
 
   await writeFile(file, html);
 }
@@ -119,4 +158,4 @@ await decodeAssets();
 await patchHome('en', 'index.html');
 await patchHome('fr', join('fr', 'index.html'));
 await patchHome('es', join('es', 'index.html'));
-console.log('KŌMØ home visuals v2 applied.');
+console.log('KŌMØ home visuals v3 applied: supplied Case, sensors, Pulse and founder portrait are live-bound.');
