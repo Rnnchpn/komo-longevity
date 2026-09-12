@@ -1,34 +1,110 @@
 (()=>{
-const H=document.getElementById('case-atelier');if(!H)return;
-const T=(a,b)=>document.documentElement.lang==='fr'?a:b,E=n=>new Intl.NumberFormat(document.documentElement.lang==='fr'?'fr-FR':'en-GB',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n),X=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const C={silver:['Argent','Silver','#c9cbc8','#858986'],titanium:['Titane','Titanium','#918c83','#615e59'],black:['Noir','Black','#242624','#111'],slate:['Gris Slate','Slate Grey','#69706c','#424845'],green:['Vert','Green','#39584b','#1e352c'],orange:['Orange','Orange','#c45c35','#84391e'],olive:['Olive & or','Olive & Gold','#55553b','#ad9152'],navy:['Marine & cuir','Navy & Leather','#263845','#9f8154'],ivory:['Ivoire & cuir','Ivory & Leather','#d7d0bd','#98795d'],blackgold:['Noir & or','Black & Gold','#202221','#b39755'],greycaramel:['Gris & caramel','Grey & Caramel','#6b6e6a','#a9784d']};
-const I={pearl:['Perle','Pearl','#ded8cb'],graphite:['Graphite','Graphite','#454846'],sage:['Sauge','Sage','#aeb7a7'],sand:['Sable','Sand','#c7b69e']};
-const S={graphite:['Graphite','Graphite','#303432','#f3f1ea',0],sage:['Sauge','Sage','#788676','#fff',180],ivory:['Ivoire','Ivory','#d8d0be','#252927',220],navy:['Marine','Navy','#223947','#fff',220]};
-const P={
-classicCabin:['RIMOWA Classic Cabin','RIMOWA · Germany','1 280 €','55 × 40 × 23 cm','ribbed',['titanium','silver','black'],'https://www.rimowa.com/fr/fr/luggage/colour/titanium/cabin/97353044.html'],
-originalCabin:['RIMOWA Original Cabin Plus','RIMOWA · Germany','1 300 €','57 × 44 × 25 cm','ribbed',['titanium','silver','black'],'https://www.rimowa.com/fr/fr/luggage/colour/titanium/cabin-plus/92656044.html'],
-essential:['RIMOWA Essential Check-In M','RIMOWA · Germany','880 €','67 × 43 × 24 cm','smooth',['black','slate','green','orange'],'https://www.rimowa.com/fr/fr/luggage/colour/black/check-in-m/83263631.html'],
-globeM:['Globe-Trotter Centenary Medium Check-In','Globe-Trotter · England','£2,195','71 × 44 × 24 cm','fibre',['olive','blackgold','greycaramel'],'https://www.globe-trotter.com/products/centenary-2-wheels-medium-check-in-olive-black-gold'],
-originalTrunk:['RIMOWA Original Trunk','RIMOWA · Germany','1 850 €','73 × 44 × 36,5 cm','deep ribbed',['silver','black'],'https://www.rimowa.com/be/fr/luggage/colour/silver/trunk/92575004.html'],
-classicTrunk:['RIMOWA Classic Trunk','RIMOWA · Germany','1 900 €','75 × 47 × 36 cm','deep ribbed',['titanium','silver','black'],'https://www.rimowa.com/be/fr/luggage/colour/black/trunk/97375014.html'],
-globeL:['Globe-Trotter Centenary Large Check-In','Globe-Trotter · England','£2,495','82 × 48 × 25 cm','fibre',['olive','blackgold','greycaramel'],'https://www.globe-trotter.com/products/centenary-2-wheels-large-check-in-olive-black-gold']};
-const M=[
-['clinical','Clinical','Cabinet & clinique','Practice & clinic',16500,['classicCabin','originalCabin'],['integrated','clinical']],
-['travel','Travel','Mobile','Mobile',15000,['essential','originalCabin','globeM'],['integrated']],
-['hotel','Hotel & Wellness','Hôtel · spa · club','Hotel · spa · club',17500,['originalTrunk','classicTrunk','globeM'],['integrated','hospitality']],
-['yacht','Yacht','Marine & private','Marine & private',18500,['globeL','classicTrunk'],['integrated','marine']]];
-const D={integrated:['Integrated Dock','Integrated Dock',0],clinical:['Clinical Dock','Clinical Dock',650],hospitality:['Hospitality Dock','Hospitality Dock',900],marine:['Marine Dock','Marine Dock',1200]};
-const A={m:'clinical',p:'classicCabin',c:'titanium',i:'pearl',s:'graphite',d:'clinical',g:'',v:'config'},R={sensor:'',case:''};
-const m=()=>M.find(x=>x[0]===A.m),p=()=>P[A.p];
-function norm(){let q=m();if(!q[5].includes(A.p))A.p=q[5][0];if(!p()[5].includes(A.c))A.c=p()[5][0];if(!q[6].includes(A.d))A.d=q[6][q[6].length-1]}
-function price(){return m()[4]+S[A.s][4]+D[A.d][2]}
-function sum(){return `KŌMØ Case Atelier V3 — ${m()[1]}\n${T('Valise','Case')}: ${p()[0]} · ${p()[2]}\n${T('Couleur','Colour')}: ${T(C[A.c][0],C[A.c][1])}\n${T('Intérieur','Interior')}: ${T(I[A.i][0],I[A.i][1])}\nMicro-straps KŌMØ: ${T(S[A.s][0],S[A.s][1])}\n${T('Recharge','Charging')}: ${T(D[A.d][0],D[A.d][1])}\n${T('Gravure','Engraving')}: ${A.g||'—'}\n6 ${T('capteurs','sensors')} · 2 iPads · 1 ${T('trépied','tripod')}\n${T('Budget KŌMØ indicatif','Indicative KŌMØ budget')}: ${E(price())} HT`}
-function mail(){let a=H.querySelector('[data-mail]');if(a)a.href='mailto:contact@komolongevity.com?subject='+encodeURIComponent('KŌMØ Life — Case Atelier V3 — '+m()[1])+'&body='+encodeURIComponent(sum())}
-function asset(path,key){if(R[key])return;fetch(path).then(r=>r.text()).then(x=>{R[key]='data:image/webp;base64,'+x.trim();fill()}).catch(()=>{})}function fill(){H.querySelectorAll('[data-sensor]').forEach(x=>R.sensor&&(x.src=R.sensor));H.querySelectorAll('[data-case]').forEach(x=>R.case&&(x.src=R.case))}
-function stage(){let q=p(),c=C[A.c],i=I[A.i],s=S[A.s];return `<div class="v3-stage ${q[4].replace(' ','-')}" style="--shell:${c[2]};--edge:${c[3]};--insert:${i[2]};--strap:${s[2]};--strapText:${s[3]}"><div class="v3-top"><span>${q[1]}</span><span>${q[0]}</span></div><div class="v3-tabs"><button type="button" data-v="config" class="${A.v==='config'?'on':''}">${T('Configuration','Configuration')}</button><button type="button" data-v="real" class="${A.v==='real'?'on':''}">${T('Équipement réel','Real equipment')}</button></div><div class="v3-panel ${A.v==='config'?'on':''}"><div class="v3-lid"><div class="ipad">iPad 01</div><div class="ipad">iPad 02</div><b>KŌMØ</b></div><div class="v3-base"><div class="sensors">${[1,2,3,4,5,6].map(n=>`<div class="slot"><div class="sensor"><i></i></div><span class="strap">KŌMØ</span><small>0${n}</small></div>`).join('')}</div><div class="tripod"><i></i><span>${T('TRÉPIED','TRIPOD')}</span></div></div></div><div class="v3-panel real ${A.v==='real'?'on':''}"><figure><img data-case alt="KŌMØ Case"><figcaption>KŌMØ Case · ${T('visuel fourni','supplied visual')}</figcaption></figure><figure><img data-sensor alt="KŌMØ sensors"><figcaption>${T('Capteurs réels · référence produit','Real sensors · product reference')}</figcaption></figure></div><div class="v3-bottom"><span>${q[3]}</span><b>6 SENSORS · 2 iPADS · 1 TRIPOD · 6 STRAPS</b></div></div>`}
-function render(){norm();let Q=m(),q=p();H.innerHTML=`<div class="atelier-heading"><p class="eyebrow">KŌMØ LIFE · CASE ATELIER V3</p><h2>${T('Quatre usages. Un système KŌMØ.','Four settings. One KŌMØ system.')}</h2><p>${T('Choisissez une valise réellement commercialisée, puis configurez la couleur, l’insert, les micro-straps KŌMØ et la recharge. Le rendu évolue instantanément.','Choose a genuine retail case, then configure colour, insert, KŌMØ micro-straps and charging. The visual updates instantly.')}</p></div><div class="atelier-grid"><div class="atelier-visual">${stage()}<div class="v3-price"><span>${T('Projet KŌMØ à partir de','KŌMØ project from')}</span><strong>${E(price())} ${T('HT','excl. VAT')}</strong><small>${T('Coque fabricant vendue séparément au prix public affiché.','Manufacturer shell sold separately at the displayed public price.')}</small></div></div><form class="atelier-controls" onsubmit="return false"><fieldset><legend>01 — ${T('Univers','Setting')}</legend><div class="atelier-models four">${M.map(x=>`<label class="atelier-choice"><input name="m" type="radio" value="${x[0]}" ${x[0]===A.m?'checked':''}><span><b>${x[1]}</b><small>${T(x[2],x[3])}</small></span></label>`).join('')}</div></fieldset><fieldset><legend>02 — ${T('Valise réelle','Retail case')}</legend><div class="atelier-platforms">${Q[5].map(k=>{let x=P[k];return `<label class="atelier-platform"><input name="p" type="radio" value="${k}" ${k===A.p?'checked':''}><span><em>${x[1]}</em><b>${x[0]}</b><small>${x[3]} · ${x[2]}</small></span></label>`}).join('')}</div><a class="maker-link" href="${q[6]}" target="_blank" rel="noopener noreferrer">${T('Voir le produit fabricant ↗','View manufacturer product ↗')}</a></fieldset><fieldset><legend>03 — ${T('Couleur de coque','Shell colour')}</legend><div class="colors">${q[5].map(k=>`<label><input name="c" type="radio" value="${k}" ${k===A.c?'checked':''}><i style="--sw:${C[k][2]};--rim:${C[k][3]}"></i><small>${T(C[k][0],C[k][1])}</small></label>`).join('')}</div></fieldset><fieldset><legend>04 — ${T('Intérieur KŌMØ','KŌMØ interior')}</legend><div class="colors">${Object.keys(I).map(k=>`<label><input name="i" type="radio" value="${k}" ${k===A.i?'checked':''}><i style="--sw:${I[k][2]};--rim:${I[k][2]}"></i><small>${T(I[k][0],I[k][1])}</small></label>`).join('')}</div></fieldset><fieldset><legend>05 — KŌMØ MICRO-STRAPS</legend><div class="strap-picks">${Object.keys(S).map(k=>`<label><input name="s" type="radio" value="${k}" ${k===A.s?'checked':''}><span style="--ss:${S[k][2]};--st:${S[k][3]}"><b>KŌMØ</b><small>${T(S[k][0],S[k][1])}${S[k][4]?` · +${E(S[k][4])}`:''}</small></span></label>`).join('')}</div><p class="atelier-small">${T('Textile technique dense, bords doux, logo micro-tissé et boucle plate. Prototype à valider sur le capteur réel.','Dense technical textile, soft edges, micro-woven logo and low-profile buckle. Prototype subject to validation on the real sensor.')}</p></fieldset><fieldset><legend>06 — ${T('Recharge intégrée','Integrated charging')}</legend><div class="atelier-platforms">${Q[6].map(k=>`<label class="atelier-platform"><input name="d" type="radio" value="${k}" ${k===A.d?'checked':''}><span><em>${k==='integrated'?T('Standard','Standard'):T('Option','Option')}</em><b>${T(D[k][0],D[k][1])}</b><small>${D[k][2]?`+ ${E(D[k][2])}`:T('Inclus','Included')}</small></span></label>`).join('')}</div></fieldset><label class="atelier-engraving">07 — ${T('Signature','Signature')}<input name="g" maxlength="32" value="${X(A.g)}" placeholder="${T('Cabinet, hôtel, yacht ou initiales','Practice, hotel, yacht or initials')}"></label><div class="atelier-summary"><p>${T('Votre configuration','Your configuration')}</p><pre data-summary>${sum()}</pre><a class="atelier-cta" data-mail>${T('Demander l’étude & le devis','Request engineering & quotation')}</a><button type="button" class="atelier-copy">${T('Copier la configuration','Copy configuration')}</button><span data-status></span><p class="atelier-small">${T('RIMOWA et Globe-Trotter sont des références de coques disponibles à la vente. Aucun partenariat n’est sous-entendu. Toute modification, recharge intégrée, utilisation médicale ou marine doit être validée avant production. Prix publics relevés en septembre 2026.','RIMOWA and Globe-Trotter are retail shell references. No partnership is implied. Any modification, integrated charging, medical or marine use requires validation before production. Public prices observed in September 2026.')}</p></div></form></div>`;mail();fill();asset('assets/sensors-real.webp.b64','sensor');asset('assets/case-real.webp.b64','case')}
-H.addEventListener('change',e=>{let n=e.target.name,v=e.target.value;if(n==='m'){A.m=v;A.p=m()[5][0];A.c=P[A.p][5][0];A.d=m()[6][m()[6].length-1]}else if(n==='p'){A.p=v;A.c=p()[5][0]}else if(n==='c')A.c=v;else if(n==='i')A.i=v;else if(n==='s')A.s=v;else if(n==='d')A.d=v;render()});
-H.addEventListener('input',e=>{if(e.target.name==='g'){A.g=e.target.value;let x=H.querySelector('[data-summary]');if(x)x.textContent=sum();mail()}});
-H.addEventListener('click',async e=>{let v=e.target.closest('[data-v]');if(v){A.v=v.dataset.v;render();return}if(e.target.closest('.atelier-copy'))try{await navigator.clipboard.writeText(sum());H.querySelector('[data-status]').textContent=T('Configuration copiée.','Configuration copied.')}catch{}});
-new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});render()
+  const H=document.getElementById('case-atelier'); if(!H)return;
+  const T=(fr,en)=>document.documentElement.lang==='fr'?fr:en;
+  const E=n=>new Intl.NumberFormat(document.documentElement.lang==='fr'?'fr-FR':'en-GB',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n);
+  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  const RETAIL={
+    clinical:[
+      {name:'RIMOWA Classic Cabin',maker:'RIMOWA',price:'1 280 €',dims:'55 × 40 × 23 cm',url:'https://www.rimowa.com/fr/fr/luggage/colour/titanium/cabin/97353044.html',noteFr:'Coque aluminium compacte pour cabinet et démonstration clinique.',noteEn:'Compact aluminium shell for practice and clinical demonstrations.'},
+      {name:'RIMOWA Original Cabin Plus',maker:'RIMOWA',price:'1 300 €',dims:'57 × 44 × 25 cm',url:'https://www.rimowa.com/fr/fr/luggage/colour/titanium/cabin-plus/92656044.html',noteFr:'Un peu plus de volume pour l’insert, les docks et les accessoires.',noteEn:'A little more volume for the insert, docks and accessories.'}
+    ],
+    travel:[
+      {name:'RIMOWA Essential Check-In M',maker:'RIMOWA',price:'880 €',dims:'67 × 43 × 24 cm',url:'https://www.rimowa.com/fr/fr/luggage/colour/black/check-in-m/83263631.html',noteFr:'Polycarbonate léger, adapté au transport fréquent.',noteEn:'Lightweight polycarbonate, suited to frequent travel.'},
+      {name:'RIMOWA Original Cabin Plus',maker:'RIMOWA',price:'1 300 €',dims:'57 × 44 × 25 cm',url:'https://www.rimowa.com/fr/fr/luggage/colour/titanium/cabin-plus/92656044.html',noteFr:'Version aluminium plus statutaire pour les déplacements premium.',noteEn:'More premium aluminium option for travel.'}
+    ],
+    hotel:[
+      {name:'RIMOWA Original Trunk',maker:'RIMOWA',price:'1 850 €',dims:'73 × 44 × 36,5 cm',url:'https://www.rimowa.com/be/fr/luggage/colour/silver/trunk/92575004.html',noteFr:'Grand volume, intéressant pour un déploiement hôtel / spa.',noteEn:'Large volume, well suited to hotel / spa deployment.'},
+      {name:'Globe-Trotter Centenary Medium Check-In',maker:'Globe-Trotter',price:'£2,195',dims:'71 × 44 × 24 cm',url:'https://www.globe-trotter.com/products/centenary-2-wheels-medium-check-in-olive-black-gold',noteFr:'Expression plus lifestyle et hospitality.',noteEn:'A more lifestyle-led hospitality expression.'}
+    ],
+    yacht:[
+      {name:'Globe-Trotter Centenary Large Check-In',maker:'Globe-Trotter',price:'£2,495',dims:'82 × 48 × 25 cm',url:'https://www.globe-trotter.com/products/centenary-2-wheels-large-check-in-olive-black-gold',noteFr:'Base mobile premium pour usage privé / yacht.',noteEn:'Premium mobile base for private / yacht use.'},
+      {name:'RIMOWA Classic Trunk',maker:'RIMOWA',price:'1 900 €',dims:'75 × 47 × 36 cm',url:'https://www.rimowa.com/be/fr/luggage/colour/black/trunk/97375014.html',noteFr:'Volume généreux et présence très statutaire.',noteEn:'Generous volume with a strong premium presence.'}
+    ]
+  };
+
+  const USES={
+    clinical:{name:'Clinical',fr:'Cabinet & clinique',en:'Practice & clinic',base:16500},
+    travel:{name:'Travel',fr:'Mobile',en:'Mobile',base:15000},
+    hotel:{name:'Hotel & Wellness',fr:'Hôtel · spa · club',en:'Hotel · spa · club',base:17500},
+    yacht:{name:'Yacht',fr:'Marine & privé',en:'Marine & private',base:18500}
+  };
+
+  const WOOD={
+    walnut:{fr:'Noyer verni',en:'Gloss walnut',sw:'#6b4631',tint:'transparent',opacity:0,delta:0},
+    oak:{fr:'Chêne ciré',en:'Waxed oak',sw:'#c9a879',tint:'#d2b486',opacity:.32,delta:900},
+    teak:{fr:'Teck miel',en:'Honey teak',sw:'#a7612d',tint:'#c97931',opacity:.22,delta:1200},
+    navy:{fr:'Laque marine',en:'Marine lacquer',sw:'#24384c',tint:'#17334f',opacity:.48,delta:1600}
+  };
+
+  const STRAPS={
+    graphite:{fr:'Graphite',en:'Graphite',sw:'#303432',delta:0},
+    sage:{fr:'Sauge',en:'Sage',sw:'#788676',delta:180},
+    ivory:{fr:'Ivoire',en:'Ivory',sw:'#d8d0be',delta:220},
+    navy:{fr:'Marine',en:'Navy',sw:'#223947',delta:220}
+  };
+
+  const A={family:'bespoke',use:'hotel',wood:'walnut',strap:'graphite',retailIndex:0,engraving:''};
+  const R={case:'',sensor:''};
+  const selectedRetail=()=>RETAIL[A.use][A.retailIndex]||RETAIL[A.use][0];
+  const total=()=>USES[A.use].base + WOOD[A.wood].delta + STRAPS[A.strap].delta;
+
+  function specLine(){return `6 ${T('capteurs réels','real sensors')} · 6 straps · 2 iPads · 1 ${T('trépied','tripod')} · 6 ${T('docks de charge','charging docks')}`}
+  function summary(){
+    const u=USES[A.use], w=WOOD[A.wood], s=STRAPS[A.strap], r=selectedRetail();
+    return `KŌMØ Case Atelier V4 — ${u.name}\n${T('Famille','Family')}: ${A.family==='bespoke'?T('Wood Edition sur mesure','Bespoke Wood Edition'):T('Coque achetable','Retail shell')}\n${A.family==='bespoke'?`${T('Finition','Finish')}: ${T(w.fr,w.en)}`:`${T('Référence','Reference')}: ${r.name} · ${r.price}`}\nMicro-straps KŌMØ: ${T(s.fr,s.en)}\n${specLine()}\n${T('Gravure','Engraving')}: ${A.engraving||'—'}\n${T('Budget indicatif KŌMØ','Indicative KŌMØ budget')}: ${E(total())} ${T('HT','excl. VAT')}`;
+  }
+  function mail(){const a=H.querySelector('[data-mail]'); if(a)a.href='mailto:contact@komolongevity.com?subject='+encodeURIComponent('KŌMØ Life — Case Atelier V4 — '+USES[A.use].name)+'&body='+encodeURIComponent(summary())}
+
+  function loadAsset(path,key){if(R[key])return;fetch(path).then(r=>r.text()).then(x=>{R[key]='data:image/webp;base64,'+x.trim();fillAssets()}).catch(()=>{})}
+  function fillAssets(){H.querySelectorAll('[data-case-photo]').forEach(x=>R.case&&(x.src=R.case));H.querySelectorAll('[data-sensor-photo]').forEach(x=>R.sensor&&(x.src=R.sensor))}
+
+  function photo(){
+    const w=WOOD[A.wood];
+    const woods={walnut:['#3d2418','#8b5a37'],oak:['#cbb38c','#e8d8bb'],teak:['#7d3f18','#c77b38'],navy:['#152b3d','#294c68']};
+    const wc=woods[A.wood];
+    return `<div class="v4-photo-frame" style="--woodA:${wc[0]};--woodB:${wc[1]}">
+      <div class="v4-material-label"><span>${T('Finition extérieure','Exterior finish')}</span><b>${T(w.fr,w.en)}</b></div>
+      <div class="v4-photo"><img data-case-photo alt="KŌMØ Case real product architecture"></div>
+      <div class="v4-badge"><b>06</b><span>${T('capteurs réels','real sensors')}</span></div>
+      <small>${T('Architecture intérieure réelle KŌMØ. La Wood Edition concerne la coque extérieure sur mesure.','Real KŌMØ interior architecture. The Wood Edition applies to the bespoke outer shell.')}</small>
+    </div>`;
+  }
+
+  function retailCards(){return RETAIL[A.use].map((x,i)=>`<label class="retail-card"><input type="radio" name="retail" value="${i}" ${i===A.retailIndex?'checked':''}><span><em>${x.maker}</em><b>${x.name}</b><small>${x.dims} · ${x.price}</small><p>${T(x.noteFr,x.noteEn)}</p><a href="${x.url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">${T('Voir chez le fabricant ↗','View manufacturer ↗')}</a></span></label>`).join('')}
+
+  function render(){
+    if(A.retailIndex>=RETAIL[A.use].length)A.retailIndex=0;
+    const u=USES[A.use], r=selectedRetail();
+    H.innerHTML=`
+      <div class="v4-head">
+        <p class="eyebrow">KŌMØ LIFE · CASE ATELIER V4</p>
+        <h2>${T('Des coques réelles. Des éditions bois sur mesure.','Real shells. Bespoke wood editions.')}</h2>
+        <p>${T('Deux offres clairement séparées : des valises réellement commercialisées à sourcer chez le fabricant, et des Wood Editions KŌMØ fabriquées sur mesure pour les hôtels, spas, yachts et lieux privés.','Two clearly separated offers: genuine retail cases sourced from the manufacturer, and bespoke KŌMØ Wood Editions for hotels, spas, yachts and private settings.')}</p>
+        <div class="family-tabs"><button type="button" data-family="bespoke" class="${A.family==='bespoke'?'on':''}">${T('Wood Editions sur mesure','Bespoke Wood Editions')}</button><button type="button" data-family="retail" class="${A.family==='retail'?'on':''}">${T('Coques achetables','Retail shells')}</button></div>
+      </div>
+      <div class="v4-layout">
+        <div class="v4-visual">
+          ${A.family==='bespoke'?photo():`<div class="retail-hero"><p>${r.maker}</p><h3>${r.name}</h3><div><span>${r.dims}</span><strong>${r.price}</strong></div><p>${T(r.noteFr,r.noteEn)}</p><a href="${r.url}" target="_blank" rel="noopener noreferrer">${T('Ouvrir la fiche fabricant ↗','Open manufacturer product ↗')}</a><small>${T('Cette carte utilise la référence commerciale exacte ; aucun rendu KŌMØ ne prétend être une photographie fabricant.','This card uses the exact commercial reference; no KŌMØ rendering is presented as manufacturer photography.')}</small></div>`}
+          <div class="spec-strip"><span><b>06</b>${T('capteurs','sensors')}</span><span><b>06</b>straps</span><span><b>02</b>iPads</span><span><b>01</b>${T('trépied','tripod')}</span><span><b>06</b>${T('docks','docks')}</span></div>
+          <div class="sensor-proof"><img data-sensor-photo alt="Real Myodev sensor reference"><div><span>${T('Référence capteur réel','Real sensor reference')}</span><b>${T('Plaque latérale + module central','Side plate + central module')}</b><p>${T('Le standard d’intégration V4 reprend cette géométrie : 6 capteurs identiques dans chaque Case.','V4 integration standard uses this geometry: 6 identical sensors in every Case.')}</p></div></div>
+        </div>
+        <form class="v4-controls" onsubmit="return false">
+          <fieldset><legend>01 — ${T('Usage','Setting')}</legend><div class="use-grid">${Object.keys(USES).map(k=>{const x=USES[k];return `<label><input type="radio" name="use" value="${k}" ${k===A.use?'checked':''}><span><b>${x.name}</b><small>${T(x.fr,x.en)}</small></span></label>`}).join('')}</div></fieldset>
+          ${A.family==='bespoke'?`<fieldset><legend>02 — ${T('Finition bois','Wood finish')}</legend><div class="finish-grid">${Object.keys(WOOD).map(k=>{const x=WOOD[k];return `<label><input type="radio" name="wood" value="${k}" ${k===A.wood?'checked':''}><i style="--sw:${x.sw}"></i><span>${T(x.fr,x.en)}<small>${x.delta?`+ ${E(x.delta)}`:T('Inclus','Included')}</small></span></label>`}).join('')}</div><p class="micro-note">${T('Échantillon de matière autour de l’architecture intérieure réelle : la finition bois concerne la coque extérieure fabriquée sur mesure.','Material sample shown around the real interior architecture; the wood finish applies to the bespoke outer shell.')}</p></fieldset>`:`<fieldset><legend>02 — ${T('Référence achetable','Retail reference')}</legend><div class="retail-list">${retailCards()}</div></fieldset>`}
+          <fieldset><legend>03 — KŌMØ MICRO-STRAPS</legend><div class="strap-grid">${Object.keys(STRAPS).map(k=>{const x=STRAPS[k];return `<label><input type="radio" name="strap" value="${k}" ${k===A.strap?'checked':''}><span style="--strap:${x.sw}"><b>KŌMØ</b><small>${T(x.fr,x.en)}${x.delta?` · +${E(x.delta)}`:''}</small></span></label>`}).join('')}</div></fieldset>
+          <fieldset><legend>04 — ${T('Architecture fixe','Fixed architecture')}</legend><div class="arch-card"><b>6 × ${T('capteurs','sensors')}</b><span>6 × KŌMØ straps</span><span>2 × iPads</span><span>1 × ${T('trépied','tripod')}</span><span>6 × ${T('docks de charge','charging docks')}</span><small>${T('Aucun rendu ou devis ne doit être validé s’il ne respecte pas ce contenu.', 'No rendering or quotation should be validated unless it respects this content.')}</small></div></fieldset>
+          <label class="engrave">05 — ${T('Signature / établissement','Signature / venue')}<input name="engraving" maxlength="32" value="${esc(A.engraving)}" placeholder="${T('Cabinet, hôtel, yacht ou initiales','Practice, hotel, yacht or initials')}"></label>
+          <div class="quote-box"><span>${T('Projet KŌMØ indicatif','Indicative KŌMØ project')}</span><strong>${E(total())} ${T('HT','excl. VAT')}</strong><small>${A.family==='retail'?T('Hors achat de la coque fabricant affichée ci-dessus.','Manufacturer shell purchase excluded.') : T('Wood Edition sur mesure ; prix final après étude, matériaux et fabrication.','Bespoke Wood Edition; final price after engineering, materials and fabrication.')}</small><pre data-summary>${summary()}</pre><a data-mail>${T('Demander l’étude & le devis','Request engineering & quotation')}</a></div>
+          <p class="legal-note">${T('RIMOWA et Globe-Trotter sont cités uniquement comme références de coques réellement commercialisées. Aucun partenariat n’est sous-entendu. Toute modification de coque doit être validée avant production.','RIMOWA and Globe-Trotter are cited only as genuine retail shell references. No partnership is implied. Any shell modification requires validation before production.')}</p>
+        </form>
+      </div>`;
+    mail(); fillAssets(); loadAsset('assets/case-real.webp.b64','case'); loadAsset('assets/sensors-real.webp.b64','sensor');
+  }
+
+  H.addEventListener('click',e=>{const b=e.target.closest('[data-family]');if(b){A.family=b.dataset.family;render();}});
+  H.addEventListener('change',e=>{const n=e.target.name,v=e.target.value;if(n==='use'){A.use=v;A.retailIndex=0}else if(n==='wood')A.wood=v;else if(n==='strap')A.strap=v;else if(n==='retail')A.retailIndex=Number(v);render();});
+  H.addEventListener('input',e=>{if(e.target.name==='engraving'){A.engraving=e.target.value;const p=H.querySelector('[data-summary]');if(p)p.textContent=summary();mail();}});
+  new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
+  render();
 })();
