@@ -1,0 +1,387 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000101 /* PulseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000201 /* PulseApp.swift */; };
+		A10000000000000000000102 /* PulseConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000202 /* PulseConfiguration.swift */; };
+		A10000000000000000000103 /* PulseSupabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000203 /* PulseSupabase.swift */; };
+		A10000000000000000000104 /* PulseAuthSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000204 /* PulseAuthSession.swift */; };
+		A10000000000000000000105 /* PulseSignInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000205 /* PulseSignInView.swift */; };
+		A10000000000000000000106 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000206 /* HealthKitService.swift */; };
+		A10000000000000000000107 /* PulseWearableRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000207 /* PulseWearableRepository.swift */; };
+		A10000000000000000000108 /* MotionTodayStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000208 /* MotionTodayStore.swift */; };
+		A10000000000000000000109 /* PulseHomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000209 /* PulseHomeView.swift */; };
+		A10000000000000000000110 /* MyKomoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000210 /* MyKomoView.swift */; };
+		A10000000000000000000111 /* KomoWorldView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000211 /* KomoWorldView.swift */; };
+		A10000000000000000000112 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A10000000000000000000220 /* HealthKit.framework */; };
+		A10000000000000000000113 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000502 /* Supabase */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A10000000000000000000201 /* PulseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseApp.swift; sourceTree = "<group>"; };
+		A10000000000000000000202 /* PulseConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseConfiguration.swift; sourceTree = "<group>"; };
+		A10000000000000000000203 /* PulseSupabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseSupabase.swift; sourceTree = "<group>"; };
+		A10000000000000000000204 /* PulseAuthSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseAuthSession.swift; sourceTree = "<group>"; };
+		A10000000000000000000205 /* PulseSignInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseSignInView.swift; sourceTree = "<group>"; };
+		A10000000000000000000206 /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		A10000000000000000000207 /* PulseWearableRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseWearableRepository.swift; sourceTree = "<group>"; };
+		A10000000000000000000208 /* MotionTodayStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionTodayStore.swift; sourceTree = "<group>"; };
+		A10000000000000000000209 /* PulseHomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PulseHomeView.swift; sourceTree = "<group>"; };
+		A10000000000000000000210 /* MyKomoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyKomoView.swift; sourceTree = "<group>"; };
+		A10000000000000000000211 /* KomoWorldView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KomoWorldView.swift; sourceTree = "<group>"; };
+		A10000000000000000000212 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000000000000000000213 /* Pulse.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pulse.entitlements; sourceTree = "<group>"; };
+		A10000000000000000000214 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
+		A10000000000000000000215 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		A10000000000000000000216 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		A10000000000000000000217 /* Secrets.xcconfig.example */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig.example; sourceTree = "<group>"; };
+		A10000000000000000000220 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		A10000000000000000000230 /* Pulse.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pulse.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A10000000000000000000301 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000112 /* HealthKit.framework in Frameworks */,
+				A10000000000000000000113 /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A10000000000000000000400 = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000401 /* PulseApp */,
+				A10000000000000000000410 /* Config */,
+				A10000000000000000000420 /* Frameworks */,
+				A10000000000000000000430 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A10000000000000000000401 /* PulseApp */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000402 /* App */,
+				A10000000000000000000403 /* Core */,
+				A10000000000000000000404 /* Auth */,
+				A10000000000000000000405 /* Health */,
+				A10000000000000000000406 /* Home */,
+				A10000000000000000000407 /* Profile */,
+				A10000000000000000000408 /* World */,
+				A10000000000000000000409 /* Resources */,
+			);
+			path = PulseApp;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000402 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000201 /* PulseApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000403 /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000202 /* PulseConfiguration.swift */,
+				A10000000000000000000203 /* PulseSupabase.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000404 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000204 /* PulseAuthSession.swift */,
+				A10000000000000000000205 /* PulseSignInView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000405 /* Health */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000206 /* HealthKitService.swift */,
+				A10000000000000000000207 /* PulseWearableRepository.swift */,
+			);
+			path = Health;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000406 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000208 /* MotionTodayStore.swift */,
+				A10000000000000000000209 /* PulseHomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000407 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000210 /* MyKomoView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000408 /* World */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000211 /* KomoWorldView.swift */,
+			);
+			path = World;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000409 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000212 /* Info.plist */,
+				A10000000000000000000213 /* Pulse.entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000410 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000214 /* Base.xcconfig */,
+				A10000000000000000000215 /* Debug.xcconfig */,
+				A10000000000000000000216 /* Release.xcconfig */,
+				A10000000000000000000217 /* Secrets.xcconfig.example */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000420 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000220 /* HealthKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000430 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000230 /* Pulse.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A10000000000000000000002 /* Pulse */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000601 /* Build configuration list for PBXNativeTarget "Pulse" */;
+			buildPhases = (
+				A10000000000000000000300 /* Sources */,
+				A10000000000000000000301 /* Frameworks */,
+				A10000000000000000000302 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Pulse;
+			packageProductDependencies = (
+				A10000000000000000000502 /* Supabase */,
+			);
+			productName = Pulse;
+			productReference = A10000000000000000000230 /* Pulse.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A10000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					A10000000000000000000002 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = A10000000000000000000600 /* Build configuration list for PBXProject "Pulse" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A10000000000000000000400;
+			packageReferences = (
+				A10000000000000000000501 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			productRefGroup = A10000000000000000000430 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A10000000000000000000002 /* Pulse */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A10000000000000000000302 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A10000000000000000000300 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000101 /* PulseApp.swift in Sources */,
+				A10000000000000000000102 /* PulseConfiguration.swift in Sources */,
+				A10000000000000000000103 /* PulseSupabase.swift in Sources */,
+				A10000000000000000000104 /* PulseAuthSession.swift in Sources */,
+				A10000000000000000000105 /* PulseSignInView.swift in Sources */,
+				A10000000000000000000106 /* HealthKitService.swift in Sources */,
+				A10000000000000000000107 /* PulseWearableRepository.swift in Sources */,
+				A10000000000000000000108 /* MotionTodayStore.swift in Sources */,
+				A10000000000000000000109 /* PulseHomeView.swift in Sources */,
+				A10000000000000000000110 /* MyKomoView.swift in Sources */,
+				A10000000000000000000111 /* KomoWorldView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A10000000000000000000700 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A10000000000000000000701 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A10000000000000000000710 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A10000000000000000000215 /* Debug.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PulseApp/Resources/Pulse.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = PulseApp/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A10000000000000000000711 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = A10000000000000000000216 /* Release.xcconfig */;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = PulseApp/Resources/Pulse.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = PulseApp/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A10000000000000000000600 /* Build configuration list for PBXProject "Pulse" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000700 /* Debug */,
+				A10000000000000000000701 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000000000000000000601 /* Build configuration list for PBXNativeTarget "Pulse" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000710 /* Debug */,
+				A10000000000000000000711 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A10000000000000000000501 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = 2.41.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A10000000000000000000502 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000000000000000000501 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A10000000000000000000001 /* Project object */;
+}
