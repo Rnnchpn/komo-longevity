@@ -4,15 +4,15 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#17271f" />
-  <title>KŌMØ World · V0.13.5 Twin + Arena</title>
-  <meta name="description" content="KŌMØ World V0.13.5 — premium Functional Twin, stronger Arena and compact spawn." />
+  <title>KŌMØ World · V0.13.5</title>
+  <meta name="description" content="KŌMØ World V0.13.5 — premium Arrival Plaza, Functional Twin and Arena." />
   <style>
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#17271f}
     #v135-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#17271f;color:#eee6d7;font:700 10px/1 system-ui,sans-serif;letter-spacing:.18em}
   </style>
 </head>
 <body>
-  <div id="v135-loader">KŌMØ WORLD · TWIN + ARENA</div>
+  <div id="v135-loader">KŌMØ WORLD · ARRIVAL</div>
   <script type="module">
     const loader=document.querySelector('#v135-loader');
     try{
@@ -45,6 +45,23 @@
       engine=engine.replace("addI('twin',-11,-21.8,5.0,'Entrer dans le Twin Lab','Enter Twin Lab','Découvrir votre jumeau fonctionnel','Explore your Functional Digital Twin',enterTwin);","addI('twin',-11,-21.8,5.0,'Ouvrir le Twin Lab','Open Twin Lab','Porte du jumeau fonctionnel','Functional Twin door',()=>window.KomoV134Doors?.openAndEnter('twin',enterTwin));");
       engine=engine.replace("addI('arena',12.5,-14.2,5.4,'Entrer dans la KŌMØ Arena','Enter KŌMØ Arena','Défi quotidien · classement','Daily challenge · leaderboard',enterArena);","addI('arena',12.5,-14.2,5.4,'Ouvrir la KŌMØ Arena','Open KŌMØ Arena','Défis · clubs · saison 01','Challenges · clubs · season 01',()=>window.KomoV134Doors?.openAndEnter('arena',enterArena));");
       engine=engine.replace("addI('rehab',0,-21.8,3.8,'Entrer dans Rehab','Enter Rehab','Coach Agent · prochaine étape','Coach Agent · next build',()=>openPanel('REHAB','Coach Agent',locale==='fr'?'Cette aile accueillera les séances guidées par les déficits du Functional Twin.':'This wing will host deficit-driven sessions connected to the Functional Twin.'));","addI('rehab',0,-21.8,4.6,'Ouvrir Rehab','Open Rehab','Programme fonctionnel · progression','Functional program · progression',()=>window.KomoV134Doors?.openAndEnter('rehab',()=>openPanel('REHAB','Coach Agent',locale==='fr'?'Cette aile accueille les séances fonctionnelles guidées par les déficits du Functional Twin.':'This wing hosts functional sessions guided by Functional Twin deficits.')));");
+
+      // Sprint 1 — arrival framing and locomotion feel. Keep the same engine and data model.
+      const motionDecl="const desired=new THREE.Vector3(),target=new THREE.Vector3(),ray=new THREE.Raycaster();const cameraOccluders=[leftWall,rightWall];function updateMovement(dt){";
+      const motionDeclNext="const desired=new THREE.Vector3(),target=new THREE.Vector3(),ray=new THREE.Raycaster();const cameraOccluders=[leftWall,rightWall];const moveVelocity=new THREE.Vector3();function updateMovement(dt){";
+      if(!engine.includes(motionDecl))throw new Error('V0.13.5 movement declaration target missing');
+      engine=engine.replace(motionDecl,motionDeclNext);
+      const motionStep="const moving=m.lengthSq()>.002,speed=keys.has(settings.bindings.sprint)?11.4:6.25;if(moving){m.normalize();moveCandidate(m.x*speed*dt,m.z*speed*dt);player.rotation.y=Math.atan2(m.x,m.z)}";
+      const motionStepNext="const moving=m.lengthSq()>.002,speed=keys.has(settings.bindings.sprint)?8.8:5.2;if(moving)m.normalize().multiplyScalar(speed);const response=moving?10.5:7.0;moveVelocity.lerp(m,1-Math.exp(-response*dt));if(moveVelocity.lengthSq()>.0008){moveCandidate(moveVelocity.x*dt,moveVelocity.z*dt);player.rotation.y=Math.atan2(moveVelocity.x,moveVelocity.z)}";
+      if(!engine.includes(motionStep))throw new Error('V0.13.5 movement response target missing');
+      engine=engine.replace(motionStep,motionStepNext);
+      engine=engine.replace("let yaw=0,pitch=.16,mouseDrag=false","let yaw=0,pitch=-.035,mouseDrag=false");
+      engine=engine.replace("new THREE.PerspectiveCamera(68,1,.08,320)","new THREE.PerspectiveCamera(64,1,.08,320)");
+      const fpsEye="if(fps){const eye=mode==='twin'?4.08:4.12,cp=Math.cos(pitch),sp=Math.sin(pitch),look=14;";
+      const fpsEyeNext="if(fps){const locomotion=Math.min(1,moveVelocity.length()/5.2),bob=locomotion*Math.sin(performance.now()*.011)*.025,eye=(mode==='twin'?4.08:4.12)+bob,cp=Math.cos(pitch),sp=Math.sin(pitch),look=14;";
+      if(!engine.includes(fpsEye))throw new Error('V0.13.5 FPS eye target missing');
+      engine=engine.replace(fpsEye,fpsEyeNext);
+
       const exposeAt='function animate(){';`);
 
       const run=document.createElement('script');run.type='module';run.textContent=source;document.body.appendChild(run);
@@ -61,6 +78,7 @@
           await import('../v134/world-v134-axis-clean.js');
           await import('../v134/world-v134-motion-close.js');
           await import('../v134/world-v134-web.js');
+          await import('./world-v135-arrival.js');
           await import('./world-v135-twin-arena.js');
           loader?.remove();
         }catch(e){
