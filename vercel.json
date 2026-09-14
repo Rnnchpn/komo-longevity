@@ -5,6 +5,18 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/experience",
+      "destination": "/assets/riviera-experience/index.html"
+    },
+    {
+      "source": "/experience/",
+      "destination": "/assets/riviera-experience/index.html"
+    },
+    {
+      "source": "/experience/:path*",
+      "destination": "/assets/riviera-experience/:path*"
+    },
+    {
       "source": "/",
       "has": [
         {
