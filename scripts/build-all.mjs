@@ -167,7 +167,9 @@ const scripts = [
   // Make the existing World destination explicit and cache-fresh.
   'scripts/pulse-world-entry-hotfix-v1.mjs',
   // Absolute final public-home pass: real KŌMØ product imagery + founder section.
-  'scripts/komo-home-visuals-v1.mjs'
+  'scripts/komo-home-visuals-v1.mjs',
+  // Copy the independent Riviera surface after every global KŌMØ mutation.
+  'scripts/riviera-experience-copy.mjs'
 ];
 
 for (const script of scripts) {
