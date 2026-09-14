@@ -1,0 +1,168 @@
+/* KŌMØ Experience — editorial / painterly art direction v2 */
+:root{
+  --e-ink:#18393e;
+  --e-night:#12353d;
+  --e-blue:#4f86a7;
+  --e-sky:#86b6cf;
+  --e-sunset:#eaa16f;
+  --e-gold:#f0c58d;
+  --e-cream:#f8f0e3;
+  --e-paper:#f3ecdf;
+  --e-line:rgba(24,57,62,.16);
+}
+
+body{background:var(--e-paper)}
+body:before{content:"";position:fixed;z-index:999;inset:0;pointer-events:none;opacity:.045;mix-blend-mode:multiply;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E")}
+
+/* Navigation: lighter, gallery-like */
+.nav-shell{height:78px;padding-inline:clamp(20px,4vw,70px);border-bottom:1px solid rgba(255,255,255,.18)}
+.brand span{font-size:18px;letter-spacing:.22em}.brand small{font-size:7px;letter-spacing:.22em}
+.site-nav{gap:24px;font-size:9px;letter-spacing:.03em}
+
+/* HOME — editorial cover */
+.experience-hub .hub-hero{min-height:90svh;background:#658fab;isolation:isolate}
+.experience-hub .hub-hero:before{content:"";position:absolute;inset:-8%;z-index:0;background:
+  radial-gradient(ellipse at 79% 32%,rgba(255,230,161,.95) 0 4%,rgba(255,185,116,.58) 5%,transparent 22%),
+  radial-gradient(ellipse at 70% 45%,rgba(244,161,111,.9),transparent 35%),
+  radial-gradient(ellipse at 28% 17%,rgba(116,165,196,.98),transparent 40%),
+  radial-gradient(ellipse at 12% 58%,rgba(74,121,151,.95),transparent 38%),
+  linear-gradient(180deg,#6f9fc0 0%,#8bb7cb 34%,#efb07b 68%,#d37d5c 100%);
+  filter:saturate(.92) contrast(1.02)}
+.experience-hub .hub-hero:after{content:"";position:absolute;z-index:1;inset:0;background:
+  linear-gradient(90deg,rgba(13,45,54,.62) 0%,rgba(13,45,54,.20) 51%,rgba(13,45,54,.04) 100%),
+  linear-gradient(0deg,rgba(13,45,54,.26),transparent 36%)}
+.experience-hub .hub-sky{z-index:1;opacity:.68;mix-blend-mode:soft-light;filter:blur(.5px)}
+.experience-hub .hub-sky:before,.experience-hub .hub-sky:after{height:90px;background:repeating-linear-gradient(168deg,rgba(255,216,174,.52) 0 12px,transparent 12px 30px);filter:blur(2px)}
+.experience-hub .hub-horizon{z-index:1;height:20%;bottom:-3%;opacity:.7;filter:blur(1.2px);background:linear-gradient(180deg,rgba(45,101,123,.15),#255f79)}
+.experience-hub .hub-hero-inner{z-index:3;min-height:90svh;justify-content:flex-end;padding:150px clamp(24px,6.4vw,108px) 58px;background:none}
+.experience-hub .hub-hero-inner:before{content:"PRIVATE LONGEVITY EXPERIENCES";position:absolute;top:48%;right:clamp(22px,5vw,80px);writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;letter-spacing:.28em;color:rgba(255,255,255,.62)}
+.experience-hub .hub-hero h1{max-width:1120px;font-size:clamp(68px,8.8vw,142px);line-height:.79;letter-spacing:-.067em;text-wrap:balance}
+.experience-hub .hub-hero h1 em{font-style:italic;color:#fff6e9}
+.experience-hub .hub-lead{max-width:560px;margin:30px 0 23px;font-size:14px;line-height:1.8;color:rgba(255,255,255,.82)}
+.experience-hub .quiet-cta{font-size:9px;letter-spacing:.09em;text-transform:uppercase}
+
+/* Collection reads like three magazine covers */
+.experience-hub .choice-section{padding:125px clamp(18px,4.4vw,70px) 145px;background:#f4ede1}
+.experience-hub .section-heading{max-width:1320px;grid-template-columns:1.15fr .65fr;gap:120px;margin-bottom:58px}
+.experience-hub .section-heading h2{font-size:clamp(55px,6.1vw,95px);line-height:.84}
+.experience-hub .experience-grid{max-width:1380px;gap:10px}
+.experience-hub .experience-card{min-height:660px;background:#244f5a;box-shadow:none;transform:none}
+.experience-hub .experience-card:hover{transform:translateY(-4px);box-shadow:0 24px 55px rgba(16,52,61,.13)}
+.experience-hub .card-art{position:absolute;inset:0;height:100%;filter:saturate(.88) contrast(.96)}
+.experience-hub .card-art:after{content:"";position:absolute;inset:0;z-index:15;background:
+ linear-gradient(180deg,rgba(11,39,47,.02) 25%,rgba(11,39,47,.26) 60%,rgba(11,39,47,.92) 100%),
+ radial-gradient(ellipse at 72% 21%,rgba(255,229,177,.32),transparent 24%)}
+.experience-hub .card-art>*{filter:blur(.6px);opacity:.72}
+.experience-hub .card-copy{position:absolute;z-index:20;left:0;right:0;bottom:0;padding:34px 30px 30px;color:#fff;background:transparent}
+.experience-hub .card-copy>span{color:rgba(255,245,226,.65);font-size:8px;letter-spacing:.17em}
+.experience-hub .card-copy h3{max-width:330px;font-size:42px;line-height:.9;color:#fff7eb}
+.experience-hub .card-copy p{min-height:0;max-width:360px;margin-bottom:24px;color:rgba(255,255,255,.72);font-size:11px;line-height:1.72}
+.experience-hub .card-copy strong{border-color:rgba(255,255,255,.24);font-size:9px;letter-spacing:.09em;text-transform:uppercase}
+.experience-hub .experience-card:nth-child(2){transform:translateY(36px)}
+.experience-hub .experience-card:nth-child(2):hover{transform:translateY(30px)}
+
+/* Make the existing vector compositions feel painted */
+.experience-hub .art-cannes,.retreat-page .art-cannes{background:
+ radial-gradient(circle at 84% 24%,#ffe4a6 0 3%,transparent 10%),
+ radial-gradient(ellipse at 71% 62%,rgba(233,157,102,.66),transparent 34%),
+ linear-gradient(180deg,#70a6c8 0%,#a9c7cf 42%,#efb375 71%,#b6654f 100%)}
+.experience-hub .art-spain,.retreat-page .art-spain{background:
+ radial-gradient(circle at 84% 22%,#ffe4a0 0 3%,transparent 11%),
+ radial-gradient(ellipse at 50% 70%,rgba(235,145,89,.5),transparent 40%),
+ linear-gradient(180deg,#75a5c4 0%,#9fc2c3 43%,#f0bc79 68%,#bf7556 100%)}
+.experience-hub .art-yacht,.retreat-page .art-yacht{background:
+ radial-gradient(circle at 77% 25%,#ffe9af 0 3.5%,transparent 12%),
+ radial-gradient(ellipse at 76% 54%,rgba(241,159,99,.48),transparent 34%),
+ linear-gradient(180deg,#6ca0c4 0%,#95bace 43%,#f3b170 69%,#c16f54 100%)}
+.experience-hub .card-art:before,.retreat-page .retreat-art:before{content:"";position:absolute;z-index:12;inset:-3%;opacity:.18;mix-blend-mode:overlay;background:repeating-linear-gradient(165deg,transparent 0 12px,rgba(255,255,255,.42) 13px 15px,transparent 16px 29px);transform:rotate(-1deg)}
+
+/* Method becomes quieter and more editorial */
+.experience-hub .method-section{grid-template-columns:1.04fr .96fr;min-height:650px;background:#173d45}
+.experience-hub .method-copy{padding:110px clamp(34px,7vw,118px)}
+.experience-hub .method-copy h2{font-size:clamp(54px,5.7vw,90px);line-height:.86}
+.experience-hub .method-steps{background:#204954}
+.experience-hub .method-steps article{min-height:300px;padding:42px;border-color:rgba(255,255,255,.10)}
+.experience-hub .method-steps h3{margin-top:42px;font-size:34px}
+
+/* Trajectory: more like a gallery caption */
+.trajectory{background:#eee4d5}
+.trajectory-line{border-color:rgba(24,57,62,.45)}
+.trajectory-line div:before{background:#234f56}
+
+/* RETREAT pages */
+.retreat-page .retreat-hero{min-height:92svh}
+.retreat-page .retreat-art{filter:saturate(.9) contrast(.98)}
+.retreat-page .retreat-hero-shade{background:linear-gradient(90deg,rgba(15,48,56,.60),rgba(15,48,56,.18) 55%,transparent 82%),linear-gradient(0deg,rgba(15,48,56,.30),transparent 45%)}
+.retreat-page .retreat-hero-copy{max-width:1000px;padding-bottom:65px}
+.retreat-page .retreat-hero-copy h1{font-size:clamp(64px,7.3vw,118px);line-height:.82;letter-spacing:-.06em;text-wrap:balance}
+.retreat-page .retreat-hero-copy>p:not(.kicker){max-width:560px;font-size:14px;line-height:1.75}
+.retreat-page .retreat-intro{padding-top:125px;padding-bottom:120px}
+.retreat-page .retreat-intro h2{font-size:clamp(54px,5.7vw,92px)}
+.retreat-page .facts-band{background:#173c45}
+.retreat-page .programme{padding-top:135px;padding-bottom:145px}
+.retreat-page .schedule article{transition:background .25s ease;padding-left:14px;padding-right:14px}
+.retreat-page .schedule article:hover{background:rgba(255,255,255,.28)}
+
+/* YACHTING — turn it into an art-book experience */
+.yacht-page .yacht-hero .retreat-art{background:
+ radial-gradient(circle at 76% 24%,#ffdfa0 0 3%,transparent 11%),
+ radial-gradient(ellipse at 73% 57%,rgba(239,145,83,.55),transparent 30%),
+ radial-gradient(ellipse at 20% 25%,rgba(88,143,179,.62),transparent 40%),
+ linear-gradient(180deg,#6b9ec0 0%,#83afc7 40%,#ecae76 70%,#b86650 100%)}
+.yacht-page .yacht-hero .retreat-art>*{filter:blur(.75px) saturate(.9)}
+.yacht-page .yacht-hero .case{left:8%;bottom:7%;width:28%;height:11%;background:#f3ead9;border:0;border-radius:4px;transform:rotate(-3deg);box-shadow:0 12px 20px rgba(17,45,54,.15),inset 0 -8px 0 #243e59,inset 0 -12px 0 #f3ead9,inset 0 -17px 0 #243e59}
+.yacht-page .yacht-hero .case:after{content:"";position:absolute;inset:12% 14%;background:repeating-linear-gradient(170deg,rgba(255,255,255,.34) 0 3px,transparent 4px 9px);opacity:.8}
+.yacht-page .retreat-hero-copy{max-width:1050px}
+.yacht-page .retreat-hero-copy h1{max-width:1000px;color:#fff8eb}
+.yacht-page .science-copy{background:#173d46}
+.yacht-page .assessment-grid{background:#f2eadf;gap:1px}
+.yacht-page .assessment-grid article{background:#f7f1e7;padding-top:42px;padding-bottom:42px}
+.yacht-page .assessment-grid h3{font-size:30px}
+.yacht-page .yacht-programme{background:#f3ecdf}
+.yacht-page .yacht-modules{padding-top:130px;background:#153942}
+.yacht-page .module-heading{max-width:1180px}
+.yacht-page .module-heading h2{font-size:clamp(56px,6vw,94px)}
+.yacht-page .poster-grid{gap:10px;align-items:stretch}
+.yacht-page .poster-card{min-height:590px;padding:0;overflow:hidden;background:#244f5b;display:flex;flex-direction:column;justify-content:flex-end;position:relative;color:#fff}
+.yacht-page .poster-card .poster-scene{position:absolute;inset:0;height:auto;min-height:100%;filter:saturate(.84) contrast(.96)}
+.yacht-page .poster-card .poster-scene:before{content:"";position:absolute;inset:0;z-index:8;background:linear-gradient(180deg,rgba(16,50,58,.02) 27%,rgba(16,50,58,.22) 57%,rgba(16,50,58,.94) 100%),radial-gradient(circle at 76% 23%,rgba(255,226,166,.42),transparent 24%)}
+.yacht-page .poster-card .poster-scene:after{content:"";position:absolute;z-index:9;inset:0;opacity:.15;background:repeating-linear-gradient(163deg,transparent 0 11px,rgba(255,255,255,.42) 12px 14px,transparent 15px 27px)}
+.yacht-page .poster-card>span,.yacht-page .poster-card>h3,.yacht-page .poster-card>p{position:relative;z-index:20;margin-left:28px;margin-right:28px}
+.yacht-page .poster-card>span{margin-bottom:14px;color:#eed5ad;font-size:9px;letter-spacing:.16em}
+.yacht-page .poster-card h3{margin-bottom:12px;color:#fff8ed;font-size:39px;line-height:.92}
+.yacht-page .poster-card p{margin-bottom:30px;color:rgba(255,255,255,.7);font-size:11px;line-height:1.7}
+.yacht-page .poster-iv .poster-scene{background:linear-gradient(180deg,#6ca2c5 0%,#efad74 55%,#c97556 100%)}
+.yacht-page .poster-yoga .poster-scene{background:linear-gradient(180deg,#6798bd 0%,#e5a36d 59%,#c76d53 100%)}
+.yacht-page .poster-paint .poster-scene{background:linear-gradient(180deg,#73a9c6 0%,#f0bb79 58%,#b96a52 100%)}
+.yacht-page .poster-fitness .poster-scene{background:linear-gradient(180deg,#608fac 0%,#eca46a 56%,#a85f4a 100%)}
+.yacht-page .poster-sea .poster-scene{background:linear-gradient(180deg,#6fa7c6 0%,#efb078 45%,#2f7b98 74%,#185d77 100%)}
+.yacht-page .poster-card i{opacity:.64;filter:blur(.5px)}
+.yacht-page .yacht-trajectory{background:#e8dece}
+.yacht-page .retreat-cta{background:#173c45}
+
+/* Application is intentionally quiet */
+.apply{background:#173c45;gap:120px;padding-top:120px;padding-bottom:120px}
+.application-form{max-width:720px}.field input,.field select,.field textarea{background:rgba(255,255,255,.02)}
+.submit-button{letter-spacing:.05em;text-transform:uppercase;font-size:10px}
+
+/* Micro-interactions */
+@media (prefers-reduced-motion:no-preference){
+  .experience-card .card-art{transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .8s ease}
+  .experience-card:hover .card-art{transform:scale(1.025);filter:saturate(.94) contrast(1)}
+  .quiet-cta span{transition:transform .25s ease}.quiet-cta:hover span{transform:translate(3px,-2px)}
+}
+
+@media(max-width:900px){
+  .experience-hub .hub-hero-inner:before{display:none}
+  .experience-hub .section-heading{display:block}.experience-hub .section-heading>p:last-child{margin-top:28px}
+  .experience-hub .experience-grid{grid-template-columns:1fr;gap:12px}.experience-hub .experience-card{min-height:570px}.experience-hub .experience-card:nth-child(2){transform:none}.experience-hub .experience-card:nth-child(2):hover{transform:translateY(-4px)}
+  .experience-hub .method-section{grid-template-columns:1fr}.experience-hub .method-steps{grid-template-columns:1fr 1fr}
+  .yacht-page .poster-grid{grid-template-columns:1fr 1fr}.yacht-page .poster-card{min-height:540px}
+}
+@media(max-width:620px){
+  .experience-hub .hub-hero{min-height:82svh}.experience-hub .hub-hero-inner{min-height:82svh;padding-bottom:38px}.experience-hub .hub-hero h1{font-size:clamp(56px,16vw,84px)}
+  .experience-hub .choice-section{padding-top:92px}.experience-hub .experience-card{min-height:520px}.experience-hub .card-copy h3{font-size:38px}
+  .experience-hub .method-steps{grid-template-columns:1fr}.experience-hub .method-steps article{min-height:220px}
+  .retreat-page .retreat-hero{min-height:82svh}.retreat-page .retreat-hero-copy h1{font-size:clamp(52px,15vw,80px)}
+  .yacht-page .poster-grid{grid-template-columns:1fr}.yacht-page .poster-card{min-height:500px}
+}
