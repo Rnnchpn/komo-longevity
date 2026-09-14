@@ -1,4 +1,12 @@
 (() => {
+  if (!document.querySelector('link[data-komo-editorial-v2]')) {
+    const editorial = document.createElement('link');
+    editorial.rel = 'stylesheet';
+    editorial.href = 'editorial-v2.css?v=2';
+    editorial.dataset.komoEditorialV2 = 'true';
+    document.head.appendChild(editorial);
+  }
+
   const navToggle = document.querySelector(".nav-toggle");
   const nav = document.querySelector(".site-nav");
 
