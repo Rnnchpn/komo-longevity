@@ -24,6 +24,16 @@
   });
 
   const editionField = document.querySelector("#edition");
+  const params = new URLSearchParams(window.location.search);
+  const requestedEdition = params.get("edition");
+
+  if (editionField && requestedEdition) {
+    const matchingOption = Array.from(editionField.options).find(
+      (option) => option.value === requestedEdition
+    );
+    if (matchingOption) editionField.value = requestedEdition;
+  }
+
   document.querySelectorAll("[data-edition]").forEach((link) => {
     link.addEventListener("click", () => {
       if (editionField && link.dataset.edition) editionField.value = link.dataset.edition;
@@ -35,7 +45,6 @@
   const status = document.querySelector("#form-status");
 
   function readUtm() {
-    const params = new URLSearchParams(window.location.search);
     return {
       source: params.get("utm_source") || "",
       medium: params.get("utm_medium") || "",
@@ -100,7 +109,7 @@
 
       window.location.assign("thank-you.html");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "We could not send your request. Please try again.");
+      setStatus(error instanceof Error ? error.message : "We could not send your request. Please try again.", "error");
       submitButton.disabled = false;
       submitButton.innerHTML = "Request an invitation <span>↗</span>";
     }
