@@ -5,38 +5,6 @@
   "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/experience",
-      "destination": "/assets/riviera-experience/index.html"
-    },
-    {
-      "source": "/experience/",
-      "destination": "/assets/riviera-experience/index.html"
-    },
-    {
-      "source": "/experience/:path*",
-      "destination": "/assets/riviera-experience/:path*"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "experience.komolongevity.com"
-        }
-      ],
-      "destination": "/assets/riviera-experience/index.html"
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "experience.komolongevity.com"
-        }
-      ],
-      "destination": "/assets/riviera-experience/:path*"
-    },
-    {
       "source": "/",
       "has": [
         {
@@ -340,36 +308,6 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
-        }
-      ]
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
-          "value": "experience.komolongevity.com"
-        }
-      ],
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/:path*",
-      "has": [
-        {
-          "type": "host",
-          "value": "experience.komolongevity.com"
-        }
-      ],
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
