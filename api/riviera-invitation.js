@@ -36,13 +36,27 @@ function selected(value, options, fallback) {
   return options.includes(value) ? value : fallback;
 }
 
+const EDITIONS = [
+  'Signature Stay · €2,790',
+  'The Weekend · €1,950',
+  'Private Edition · from €3,450',
+  'I would like guidance first'
+];
+
+const PROFILES = [
+  'An individual guest',
+  'A pair',
+  'A private group',
+  'A partner or host'
+];
+
 function leadFrom(input) {
   const utm = input && typeof input.utm === 'object' ? input.utm : {};
   return {
     firstName: clean(input.firstName, 80),
     email: cleanEmail(input.email),
-    edition: selected(clean(input.edition, 40), ['weekend', 'signature_stay', 'private_edition', 'undecided'], 'undecided'),
-    profile: selected(clean(input.profile, 40), ['guest', 'guest_pair', 'private_group', 'partner'], 'guest'),
+    edition: clean(input.edition, 80),
+    profile: clean(input.profile, 80),
     area: clean(input.area, 100),
     message: clean(input.message, 800),
     language: selected(clean(input.language, 5), ['en', 'fr', 'es'], 'en'),
@@ -149,7 +163,7 @@ export default async function handler(request, response) {
   // Honeypot: silently accept automated submissions without delivering mail.
   if (lead.website) return responseJson(response, 202, { status: 'request_received' }, origin);
 
-  if (!lead.firstName || !isEmail(lead.email) || !lead.area || !lead.consent || !lead.medicalNotice) {
+  if (!lead.firstName || !isEmail(lead.email) || !EDITIONS.includes(lead.edition) || !PROFILES.includes(lead.profile) || !lead.area || !lead.consent || !lead.medicalNotice) {
     return responseJson(response, 422, { message: 'Please complete the required fields.' }, origin);
   }
 
