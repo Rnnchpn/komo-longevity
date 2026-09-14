@@ -3,12 +3,14 @@ import { next } from '@vercel/functions';
 const PULSE_HOST = 'pulse.komolongevity.com';
 const LIFE_HOST = 'life.komolongevity.com';
 const SHOP_HOST = 'shop.komolongevity.com';
+const EXPERIENCE_HOST = 'experience.komolongevity.com';
 const STATIC_ORIGIN = 'https://komolongevity.com';
 const STATIC_ASSET_RE = /\.(?:css|js|mjs|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i;
 
 const HOST_APPS = {
   [PULSE_HOST]: { prefix: '/pulse-v12', private: true, routeHeader: 'X-KOMO-Pulse-Route' },
   [LIFE_HOST]: { prefix: '/life-v1', private: false, routeHeader: 'X-KOMO-Life-Route' },
+  [EXPERIENCE_HOST]: { prefix: '/experience', private: false, routeHeader: 'X-KOMO-Experience-Route' },
 };
 
 export const config = {
