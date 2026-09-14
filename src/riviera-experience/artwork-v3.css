@@ -1,0 +1,19 @@
+/* KŌMØ Experience — artwork placement v3 */
+.experience-hub .card-yacht .card-art,
+.yacht-page .yacht-hero .retreat-art{
+  background-image:url('yacht-impressionist.svg');
+  background-repeat:no-repeat;
+  background-size:cover;
+  background-position:center 48%;
+}
+.experience-hub .card-yacht .card-art>*,
+.yacht-page .yacht-hero .retreat-art>*{display:none!important}
+.experience-hub .card-yacht .card-art:before,
+.yacht-page .yacht-hero .retreat-art:before{content:"";position:absolute;inset:0;z-index:3;background:linear-gradient(180deg,rgba(12,40,48,.04),rgba(12,40,48,.08) 50%,rgba(12,40,48,.32));opacity:1;mix-blend-mode:multiply;transform:none}
+.experience-hub .card-yacht .card-art:after{z-index:4}
+.yacht-page .yacht-hero .retreat-art:after{content:"";position:absolute;inset:0;z-index:4;background:linear-gradient(90deg,rgba(10,37,45,.62) 0%,rgba(10,37,45,.27) 44%,rgba(10,37,45,.06) 73%),linear-gradient(0deg,rgba(10,37,45,.30),transparent 44%)}
+.yacht-page .yacht-hero .retreat-hero-shade{background:none}
+@media(max-width:700px){
+  .yacht-page .yacht-hero .retreat-art{background-position:54% center}
+  .experience-hub .card-yacht .card-art{background-position:56% center}
+}
