@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1250" role="img" aria-label="Impressionist Mediterranean yacht longevity scene">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f9fbe"/><stop offset=".48" stop-color="#91b4c9"/><stop offset=".72" stop-color="#efad73"/><stop offset="1" stop-color="#cf7656"/></linearGradient>
+  <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4d83a0"/><stop offset=".58" stop-color="#2d6e8c"/><stop offset="1" stop-color="#204f6f"/></linearGradient>
+  <linearGradient id="deck" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e0aa75"/><stop offset=".5" stop-color="#c68158"/><stop offset="1" stop-color="#8f5b47"/></linearGradient>
+  <radialGradient id="sun"><stop offset="0" stop-color="#fff2bb"/><stop offset=".6" stop-color="#ffd77d"/><stop offset="1" stop-color="#f4a55f" stop-opacity="0"/></radialGradient>
+  <filter id="paint" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency=".012" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="7" xChannelSelector="R" yChannelSelector="G"/><feGaussianBlur stdDeviation=".25"/></filter>
+  <filter id="paper"><feTurbulence type="fractalNoise" baseFrequency=".7" numOctaves="2" seed="4"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 .09"/></feComponentTransfer></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="4"/></filter>
+</defs>
+<rect width="1000" height="1250" fill="url(#sky)"/>
+<circle cx="755" cy="330" r="130" fill="url(#sun)" opacity=".9"/>
+<!-- expressive cloud strokes -->
+<g fill="none" stroke-linecap="round" filter="url(#paint)" opacity=".72">
+  <path d="M-40 145 C150 95 270 165 430 120 S740 105 1030 165" stroke="#ffd09a" stroke-width="34"/>
+  <path d="M-30 205 C170 160 350 245 525 182 S820 180 1030 238" stroke="#f49777" stroke-width="27"/>
+  <path d="M45 265 C200 225 315 280 450 244 S720 212 910 266" stroke="#f7c18b" stroke-width="20"/>
+  <path d="M20 85 C180 55 350 120 515 70 S785 75 980 96" stroke="#9ac0d4" stroke-width="24"/>
+</g>
+<!-- mountains -->
+<path d="M0 435 L110 350 215 420 345 325 475 430 610 348 740 410 860 360 1000 405 1000 570 0 570Z" fill="#355d75" opacity=".94" filter="url(#paint)"/>
+<path d="M0 470 L105 410 215 485 330 400 450 492 585 422 700 492 835 420 1000 460 1000 595 0 595Z" fill="#5d6f80" opacity=".76" filter="url(#paint)"/>
+<!-- right cliff and village -->
+<path d="M775 280 C860 250 915 220 1000 190 L1000 610 760 610 C800 540 770 450 775 280Z" fill="#2b5061" filter="url(#paint)"/>
+<g fill="#d9a56d" opacity=".96" filter="url(#paint)">
+  <rect x="820" y="320" width="58" height="38" rx="3"/><rect x="886" y="295" width="66" height="44" rx="4"/><rect x="850" y="375" width="73" height="46" rx="3"/><rect x="932" y="354" width="52" height="40" rx="3"/><rect x="792" y="405" width="54" height="38" rx="3"/><rect x="900" y="438" width="74" height="42" rx="3"/>
+</g>
+<g stroke="#26493d" stroke-width="11" stroke-linecap="round" opacity=".86"><path d="M808 300l0 100"/><path d="M875 265l0 122"/><path d="M958 240l0 112"/><path d="M934 398l0 110"/></g>
+<!-- sea -->
+<rect x="0" y="520" width="1000" height="330" fill="url(#sea)"/>
+<g fill="none" stroke-linecap="round" opacity=".8" filter="url(#paint)">
+  <path d="M0 575 C140 548 220 603 355 580 S650 550 1000 586" stroke="#8ab6c7" stroke-width="13"/>
+  <path d="M0 625 C130 600 265 650 395 622 S675 600 1000 635" stroke="#d9b56f" stroke-width="15"/>
+  <path d="M0 682 C160 650 310 710 460 678 S780 655 1000 690" stroke="#6ca5b8" stroke-width="12"/>
+  <path d="M450 520 C585 555 650 604 742 724" stroke="#ffd58a" stroke-width="34" opacity=".65"/>
+  <path d="M500 535 C610 585 665 625 735 748" stroke="#fff0b0" stroke-width="12" opacity=".75"/>
+</g>
+<!-- distant sailboats -->
+<g fill="#f8e8cf" stroke="#3c6577" stroke-width="3" filter="url(#paint)"><path d="M115 532 l28 -92 10 92z"/><path d="M165 536 l32 -110 10 110z"/><path d="M300 552 l36 -118 10 118z"/></g>
+<!-- distant yacht -->
+<path d="M650 525 h135 l46 28 -24 35 H670z" fill="#f0e7d8" stroke="#3c5c6a" stroke-width="4" filter="url(#paint)"/><path d="M706 500 h65 l30 26 h-112z" fill="#e8e1d5"/>
+<!-- deck -->
+<path d="M0 800 L1000 740 1000 1250 0 1250Z" fill="url(#deck)" filter="url(#paint)"/>
+<g stroke="#efc08d" stroke-width="5" opacity=".45"><path d="M30 850l920 350"/><path d="M0 920l840 330"/><path d="M170 790l830 300"/><path d="M360 780l640 228"/></g>
+<!-- lounge -->
+<path d="M0 760 h300 v210 H0z" fill="#efe7d9" filter="url(#paint)"/><path d="M22 786 h258 v98 H22z" fill="#faf4e8"/><path d="M40 805 h80 v60 H40z" fill="#6385a1" opacity=".72"/><path d="M145 805 h90 v60 H145z" fill="#f5efe5"/>
+<path d="M800 730 h200 v250 H835z" fill="#f0e7dc" filter="url(#paint)"/>
+<!-- railing -->
+<g stroke="#dbd3c7" stroke-width="8" fill="none" opacity=".9"><path d="M0 742 C270 735 520 730 1000 690"/><path d="M95 740v110M280 735v105M475 722v110M690 708v105M880 698v110"/></g>
+<!-- woman -->
+<g filter="url(#paint)">
+  <ellipse cx="515" cy="488" rx="28" ry="33" fill="#d28f66"/>
+  <path d="M492 456 C502 420 548 422 555 455 C544 445 526 441 492 456Z" fill="#6a4c3a"/>
+  <path d="M515 515 C480 558 480 665 505 720 L558 718 C570 645 567 558 542 515Z" fill="#1d2b35"/>
+  <path d="M507 705 L499 880 522 880 540 720Z" fill="#d18d63"/>
+  <path d="M542 720 L550 880 573 880 566 705Z" fill="#d18d63"/>
+  <rect x="485" y="618" width="83" height="20" rx="8" fill="#151d23"/><rect x="496" y="742" width="34" height="17" rx="6" fill="#131a20"/><rect x="542" y="742" width="34" height="17" rx="6" fill="#131a20"/><rect x="498" y="820" width="35" height="17" rx="6" fill="#131a20"/><rect x="545" y="820" width="35" height="17" rx="6" fill="#131a20"/>
+  <path d="M500 877 h38 l12 18 h-60z" fill="#f4f1ea"/><path d="M548 877 h38 l14 18 h-61z" fill="#f4f1ea"/>
+  <rect x="491" y="530" width="17" height="56" rx="7" fill="#18242c"/><rect x="548" y="530" width="17" height="56" rx="7" fill="#18242c"/>
+</g>
+<!-- tripod + tablet -->
+<g filter="url(#paint)"><rect x="790" y="485" width="96" height="140" rx="12" fill="#12191e"/><rect x="802" y="498" width="72" height="112" rx="7" fill="#7395a9"/><path d="M836 625v250M836 705l-74 190M836 705l82 184" stroke="#151b20" stroke-width="10" fill="none"/><path d="M824 538 C840 520 853 548 850 575 C846 594 831 592 823 571Z" fill="#d69b70"/></g>
+<!-- folded towel in foreground -->
+<g transform="translate(85 1000) rotate(-6)" filter="url(#paint)"><rect x="0" y="0" width="245" height="130" rx="12" fill="#f0e7d7"/><rect x="0" y="20" width="245" height="20" fill="#26415d" opacity=".82"/><rect x="0" y="93" width="245" height="20" fill="#26415d" opacity=".82"/><path d="M18 8 C60 25 105 2 150 18 S220 7 240 25" stroke="#ffffff" stroke-width="5" opacity=".35" fill="none"/></g>
+<!-- plants / framing -->
+<g fill="#355742" opacity=".92" filter="url(#paint)"><path d="M0 650 C60 560 90 610 115 730 C60 700 35 690 0 710Z"/><path d="M960 930 C900 840 875 895 850 1040 C915 995 945 980 1000 990Z"/></g>
+<!-- painterly highlight strokes -->
+<g stroke-linecap="round" fill="none" filter="url(#paint)" opacity=".38"><path d="M10 1080 C200 1040 290 1100 420 1065" stroke="#ffd092" stroke-width="16"/><path d="M310 930 C470 885 635 900 770 850" stroke="#f8d8a5" stroke-width="11"/><path d="M520 388 C590 350 690 350 780 370" stroke="#f9bd83" stroke-width="10"/></g>
+<rect width="1000" height="1250" filter="url(#paper)" opacity=".55"/>
+</svg>
