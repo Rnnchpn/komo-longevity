@@ -1,6 +1,6 @@
 export const site = {
   origin: 'https://komolongevity.com',
-  pages: ['index', 'check', 'pulse', 'clinical', 'partners', 'motion-retreats', 'library', 'locomotor', 'circle', 'science', 'contact'],
+  pages: ['index', 'check', 'pulse', 'clinical', 'partners', 'riviera', 'motion-retreats', 'library', 'locomotor', 'circle', 'science', 'contact'],
   locales: ['fr', 'en', 'es']
 };
 

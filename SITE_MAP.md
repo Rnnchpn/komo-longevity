@@ -8,7 +8,8 @@
 | `/pulse/` | KŌMØ Locomo Check, Clinical Assessment and Follow | Explore the patient pathway |
 | `/clinical/` | Professional and place-based deployment | Start a professional conversation |
 | `/white-coast/` | First local community chapter | Visit `community.komolongevity.com` |
-| `/motion-retreats/` | Longitudinal retreat concept | Discover White Coast |
+| `/motion-retreats/` | Hospitality and retreat deployment | Explore KŌMØ settings |
+| `/riviera/` | KŌMØ Experiences / Cannes Signature Weekend | Explore the Riviera invitation pathway |
 | `/library/` | Evidence-led public knowledge | Read and understand |
 | `/locomotor/` | Public, evidence-led reference on locomotive syndrome | Understand the framework / explore Pulse |
 | `/circle/` | Events, announcements and introductions | Receive relevant updates |

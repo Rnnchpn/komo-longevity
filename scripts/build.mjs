@@ -10,6 +10,89 @@ const sourceAssets = join(root, 'src', 'assets');
 // Static assets are served aggressively by the CDN. Bump this whenever a
 // shared stylesheet or script changes so visitors receive the matching UI.
 const assetVersion = '20260821-v12';
+const rivieraExperienceUrl = 'https://komo-riviera-signature-weekend.netlify.app/';
+
+const rivieraCopy = {
+  en: {
+    nav: 'Riviera',
+    footer: 'KŌMØ Riviera',
+    metaTitle: 'KŌMØ Riviera — Signature Weekend in Cannes',
+    metaDescription: 'A KŌMØ Experience in Cannes: two nights of movement, art and a practical, personal continuity through KŌMØ.',
+    eyebrow: 'KŌMØ EXPERIENCES · CANNES',
+    title: 'One Riviera weekend.<br><em>One KŌMØ trajectory.</em>',
+    lead: 'KŌMØ Riviera is a small-group Signature Weekend: 48 hours in Cannes to experience movement, art and Mediterranean hosting, then leave with a clearer personal motion roadmap.',
+    cta: 'Discover the Signature Weekend',
+    secondaryCta: 'Visit KŌMØ Riviera',
+    bridgeEyebrow: 'ONE KŌMØ JOURNEY',
+    bridgeTitle: 'The weekend is the beginning.<br><em>The thread continues.</em>',
+    bridgeLead: 'The Signature Weekend translates KŌMØ into a lived experience. A Motion Session creates a useful reference; Pulse can preserve the next steps after the weekend.',
+    steps: [
+      ['01', 'Arrive', 'A two-night small-group experience in Cannes, shaped around movement, art and conversation.'],
+      ['02', 'Understand', 'A KŌMØ Motion Session to notice functional mobility, balance, strength and coordination.'],
+      ['03', 'Continue', 'A practical roadmap and an optional bridge to KŌMØ Pulse and the wider network.']
+    ],
+    cards: [
+      ['8–10 guests', 'An intentionally small group, hosted from Friday evening to Sunday noon.'],
+      ['KŌMØ Motion', 'Educational, non-diagnostic functional movement observation and individual debrief.'],
+      ['Cannes', 'Private venues, artist-led creation and Mediterranean hospitality.']
+    ],
+    finalTitle: 'Move well.<br><em>Keep the thread.</em>',
+    finalText: 'Explore the full programme, the limited editions and the personal invitation pathway.'
+  },
+  fr: {
+    nav: 'Riviera',
+    footer: 'KŌMØ Riviera',
+    metaTitle: 'KŌMØ Riviera — Signature Weekend à Cannes',
+    metaDescription: 'Une expérience KŌMØ à Cannes : deux nuits de mouvement, d’art et de continuité personnelle avec KŌMØ.',
+    eyebrow: 'KŌMØ EXPERIENCES · CANNES',
+    title: 'Un week-end Riviera.<br><em>Une trajectoire KŌMØ.</em>',
+    lead: 'KŌMØ Riviera est un Signature Weekend en petit groupe : 48 heures à Cannes pour vivre le mouvement, l’art et l’hospitalité méditerranéenne, puis repartir avec une feuille de route locomotrice personnelle plus claire.',
+    cta: 'Découvrir le Signature Weekend',
+    secondaryCta: 'Visiter KŌMØ Riviera',
+    bridgeEyebrow: 'UN PARCOURS KŌMØ',
+    bridgeTitle: 'Le week-end est un début.<br><em>La continuité reste.</em>',
+    bridgeLead: 'Le Signature Weekend traduit KŌMØ dans une expérience vécue. La session Motion crée un repère utile ; Pulse peut garder le fil après le week-end.',
+    steps: [
+      ['01', 'Arriver', 'Une expérience de deux nuits à Cannes, en petit groupe, autour du mouvement, de l’art et de la conversation.'],
+      ['02', 'Comprendre', 'Une session KŌMØ Motion pour observer mobilité fonctionnelle, équilibre, force et coordination.'],
+      ['03', 'Continuer', 'Une feuille de route concrète et une passerelle facultative vers KŌMØ Pulse et le réseau.']
+    ],
+    cards: [
+      ['8–10 invités', 'Un groupe volontairement restreint, accueilli du vendredi soir au dimanche midi.'],
+      ['KŌMØ Motion', 'Une observation fonctionnelle éducative et non diagnostique, suivie d’un échange individuel.'],
+      ['Cannes', 'Lieux privés, création guidée par une artiste et hospitalité méditerranéenne.']
+    ],
+    finalTitle: 'Bien bouger.<br><em>Garder le fil.</em>',
+    finalText: 'Découvrir le programme complet, les éditions limitées et le parcours d’invitation personnalisé.'
+  },
+  es: {
+    nav: 'Riviera',
+    footer: 'KŌMØ Riviera',
+    metaTitle: 'KŌMØ Riviera — Signature Weekend en Cannes',
+    metaDescription: 'Una experiencia KŌMØ en Cannes: dos noches de movimiento, arte y continuidad personal con KŌMØ.',
+    eyebrow: 'KŌMØ EXPERIENCES · CANNES',
+    title: 'Un fin de semana Riviera.<br><em>Una trayectoria KŌMØ.</em>',
+    lead: 'KŌMØ Riviera es un Signature Weekend para grupos pequeños: 48 horas en Cannes para vivir movimiento, arte y hospitalidad mediterránea, y salir con una hoja de ruta personal más clara.',
+    cta: 'Descubrir el Signature Weekend',
+    secondaryCta: 'Visitar KŌMØ Riviera',
+    bridgeEyebrow: 'UN RECORRIDO KŌMØ',
+    bridgeTitle: 'El fin de semana es el inicio.<br><em>La continuidad permanece.</em>',
+    bridgeLead: 'El Signature Weekend traduce KŌMØ en una experiencia vivida. La sesión Motion crea una referencia útil; Pulse puede mantener el hilo después del fin de semana.',
+    steps: [
+      ['01', 'Llegar', 'Una experiencia de dos noches en Cannes, en grupo reducido, alrededor del movimiento, el arte y la conversación.'],
+      ['02', 'Comprender', 'Una sesión KŌMØ Motion para observar movilidad funcional, equilibrio, fuerza y coordinación.'],
+      ['03', 'Continuar', 'Una hoja de ruta práctica y un puente opcional hacia KŌMØ Pulse y la red.']
+    ],
+    cards: [
+      ['8–10 invitados', 'Un grupo intencionadamente reducido, desde el viernes por la tarde hasta el domingo al mediodía.'],
+      ['KŌMØ Motion', 'Observación funcional educativa y no diagnóstica con conversación individual.'],
+      ['Cannes', 'Lugares privados, creación guiada por una artista y hospitalidad mediterránea.']
+    ],
+    finalTitle: 'Moverse bien.<br><em>Mantener el hilo.</em>',
+    finalText: 'Descubre el programa completo, las ediciones limitadas y el proceso de invitación personal.'
+  }
+};
+
 
 const escapeHtml = (value = '') => String(value)
   .replaceAll('&', '&amp;')
@@ -1681,6 +1764,7 @@ function pageAction(locale, page) {
     clinical: { label: c.clinical.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
     partners: { label: p.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
     'motion-retreats': { label: p.hospitality.cta, href: pagePath(locale, 'partners') },
+    riviera: { label: rivieraCopy[locale].cta, href: rivieraExperienceUrl, external: true },
     library: { label: c.library.cta, href: scoreLink(locale) },
     circle: { label: c.circle.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
     science: { label: c.science.cta, href: `${pagePath(locale, 'contact')}#contact-form` },
@@ -1732,6 +1816,7 @@ function header(locale, page) {
 
 function footer(locale) {
   const c = translations[locale];
+  const resources = [...c.footer.links2, [rivieraCopy[locale].footer, 'riviera']];
   const group = (title, rows) => `
     <div><h3>${text(title)}</h3>${rows.map(([label, target]) => `<a href="${link(locale, target)}" ${target.startsWith('http') ? 'target="_blank" rel="noreferrer"' : ''}>${text(label)}</a>`).join('')}</div>`;
   return `
@@ -1743,7 +1828,7 @@ function footer(locale) {
             <p class="footer-copy">${text(c.global.footerCopy)}</p>
           </div>
           ${group(c.footer.ecosystem, c.footer.links1)}
-          ${group(c.footer.resources, c.footer.links2)}
+          ${group(c.footer.resources, resources)}
           ${group(c.footer.company, c.footer.links3)}
         </div>
         <div class="footer-bottom"><span>${text(c.global.allRights)}</span><span>${text(c.global.madeBy)}</span></div>
@@ -2193,10 +2278,25 @@ function partnersPage(locale) {
   ${finalBand(locale, p.finalTitle, p.finalText, p.cta, 'contact')}`;
 }
 
+
+function rivieraTeaser(locale) {
+  const p = rivieraCopy[locale] || rivieraCopy.en;
+  return `<section class="quote-band" id="riviera-signature-weekend"><div class="shell"><p class="eyebrow eyebrow-light">${text(p.eyebrow)}</p><blockquote class="reveal">${raw(p.title)}</blockquote><p class="section-lead" style="color:rgba(255,255,255,.72)">${text(p.lead)}</p><div class="hero-actions"><a class="button button-light" href="${rivieraExperienceUrl}" target="_blank" rel="noreferrer">${text(p.cta)} <span aria-hidden="true">↗</span></a><a class="button button-ghost-light" href="${pagePath(locale, 'riviera')}">${text(p.nav)}</a></div></div></section>`;
+}
+
 function retreatsPage(locale) {
   const p = partnerContent(locale).hospitality;
-  return `${genericHero(locale, 'motion-retreats', p)}${introBlock(p)}<div class="steps reveal">${p.rhythm.map(([n, t, b], i) => `<article class="step"><span class="step-num">0${i + 1}</span><h3>${text(t)}</h3><p><strong>${text(n)}</strong><br>${text(b)}</p></article>`).join('')}</div></div></section>
+  return `${genericHero(locale, 'motion-retreats', p)}${introBlock(p)}${rivieraTeaser(locale)}<div class="steps reveal">${p.rhythm.map(([n, t, b], i) => `<article class="step"><span class="step-num">0${i + 1}</span><h3>${text(t)}</h3><p><strong>${text(n)}</strong><br>${text(b)}</p></article>`).join('')}</div></div></section>
   <section class="section-tight" style="background:var(--paper-strong)"><div class="shell"><p class="eyebrow">${text(p.eyebrow)}</p><h2 class="section-heading reveal">${raw(p.introTitle)}</h2><div class="entry-cards">${p.operatorCards.map(([title, body], i) => `<article class="entry-card reveal"><span class="entry-orb" aria-hidden="true"></span><p class="eyebrow">0${i + 1}</p><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div></div></section>${finalBand(locale, p.finalTitle, p.finalText, p.cta, 'partners')}`;
+}
+
+
+function rivieraPage(locale) {
+  const p = rivieraCopy[locale] || rivieraCopy.en;
+  return `<section class="page-hero"><div class="shell"><p class="breadcrumb"><a href="${pagePath(locale)}">KŌMØ</a><span>/</span><span>${text(p.nav)}</span></p><p class="eyebrow eyebrow-light reveal">${text(p.eyebrow)}</p><h1 class="display reveal">${raw(p.title)}</h1><p class="lede reveal">${text(p.lead)}</p><div class="hero-actions reveal"><a class="button button-light" href="${rivieraExperienceUrl}" target="_blank" rel="noreferrer">${text(p.cta)} <span aria-hidden="true">↗</span></a></div></div></section>
+  <section class="section"><div class="shell"><div class="intro-grid reveal"><div><p class="eyebrow">${text(p.bridgeEyebrow)}</p><h2 class="section-heading">${raw(p.bridgeTitle)}</h2></div><p class="section-lead">${text(p.bridgeLead)}</p></div><div class="steps reveal">${p.steps.map(([number, title, body]) => `<article class="step"><span class="step-num">${text(number)}</span><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div></div></section>
+  <section class="section-tight" style="background:var(--paper-strong)"><div class="shell"><div class="entry-cards">${p.cards.map(([title, body], index) => `<article class="entry-card reveal"><span class="entry-orb" aria-hidden="true"></span><p class="eyebrow">0${index + 1}</p><h3>${text(title)}</h3><p>${text(body)}</p></article>`).join('')}</div></div></section>
+  <section class="quote-band"><div class="shell"><blockquote class="reveal">${raw(p.finalTitle)}</blockquote><p class="section-lead" style="color:rgba(255,255,255,.72)">${text(p.finalText)}</p><div class="hero-actions"><a class="button button-light" href="${rivieraExperienceUrl}" target="_blank" rel="noreferrer">${text(p.secondaryCta)} <span aria-hidden="true">↗</span></a></div></div></section>`;
 }
 
 function libraryPage(locale) {
@@ -2352,13 +2452,14 @@ function renderPage(locale, page) {
     clinical: clinicalPage,
     partners: partnersPage,
     'motion-retreats': retreatsPage,
+    riviera: rivieraPage,
     library: libraryPage,
     locomotor: locomotorPage,
     circle: circlePage,
     science: sciencePage,
     contact: contactPage
   }[page](locale);
-  const data = page === 'locomotor' ? (locomotorCopy[locale] || locomotorCopy.en) : page === 'check' ? checkCopy(locale) : page === 'index' ? c.home : page === 'partners' ? partnerContent(locale) : page === 'motion-retreats' ? partnerContent(locale).hospitality : c[page];
+  const data = page === 'locomotor' ? (locomotorCopy[locale] || locomotorCopy.en) : page === 'check' ? checkCopy(locale) : page === 'index' ? c.home : page === 'partners' ? partnerContent(locale) : page === 'motion-retreats' ? partnerContent(locale).hospitality : page === 'riviera' ? (rivieraCopy[locale] || rivieraCopy.en) : c[page];
   return layout(locale, page, body, data);
 }
 
