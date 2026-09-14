@@ -9,6 +9,26 @@
       "has": [
         {
           "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ],
+      "destination": "/assets/riviera-experience/"
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ],
+      "destination": "/assets/riviera-experience/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
           "value": "pulse.komolongevity.com"
         }
       ],
@@ -494,5 +514,8 @@
       "destination": "/es/partners",
       "permanent": true
     }
+  ],
+  "alias": [
+    "experience.komolongevity.com"
   ]
 }
