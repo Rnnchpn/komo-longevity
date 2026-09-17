@@ -173,7 +173,9 @@ const scripts = [
   // Absolute last production pass: Safari/iPad auth hand-off must run after app-router-v2 is generated.
   'scripts/pulse-ipad-auth-hotfix-v1.mjs',
   // Remove the external esm.sh dependency from the Pulse auth/application path.
-  'scripts/pulse-supabase-local-v1.mjs'
+  'scripts/pulse-supabase-local-v1.mjs',
+  // Final Pro Motion hand-off: patient-scoped PDF export after all audits/hotfixes.
+  'scripts/pulse-pro-motion-final-v1.mjs'
 ];
 
 for (const script of scripts) {
