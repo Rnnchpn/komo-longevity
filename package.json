@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "2.57.4",
-    "@vercel/functions": "3.9.5"
+    "@vercel/functions": "3.9.5",
+    "xlsx": "0.18.5"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "10.5.10",
