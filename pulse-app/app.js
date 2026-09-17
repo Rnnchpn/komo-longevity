@@ -107,6 +107,17 @@ async function logout(){await state.client.auth.signOut();if(localStorage.getIte
 function showAuth(){els.authScreen.hidden=false;els.appShell.hidden=true}
 async function enterApp(session){state.session=session;state.user=session?.user||null;els.authScreen.hidden=true;els.appShell.hidden=false;await loadAppData();renderAccount();renderNavigation();if(!location.hash)location.hash='home';renderRoute(currentRoute())}
 
+async function adoptExternalSession(session){
+  if(!session?.access_token||!session?.refresh_token)throw new Error('Session Supabase incomplète.');
+  syncClient();
+  const {data,error}=await state.client.auth.setSession({access_token:session.access_token,refresh_token:session.refresh_token});
+  if(error)throw error;
+  const active=data?.session||session;
+  await enterApp(active);
+  return active;
+}
+window.KomoPulseApp=Object.assign(window.KomoPulseApp||{},{acceptSession:adoptExternalSession});
+
 async function loadAppData(){
   if(!state.user)return;setLoading(true);const userId=state.user.id;
   const [profileRes,roleRes]=await Promise.all([state.client.from('profiles').select('*').eq('id',userId).maybeSingle(),state.client.from('account_roles').select('role').eq('user_id',userId).maybeSingle()]);
