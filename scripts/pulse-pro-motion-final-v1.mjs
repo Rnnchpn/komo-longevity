@@ -115,6 +115,11 @@ const clinicalNew=`<p>Le score synthétise uniquement la symétrie neuromusculai
 if(!clinical.includes(clinicalOld))throw new Error('[pulse-pro-motion-final] clinical score anchor missing');
 clinical=clinical.replace(clinicalOld,clinicalNew);
 
+const resetOld=`async function resetDemo(){if(!isOwnDemo())return;const ok=confirm('Réinitialiser votre démonstration Motion ? Le dossier live sera recréé vide. Emma et Marc ne seront pas modifiés.');if(!ok)return;setMsg('Réinitialisation de la démo…');const r=await sb().rpc('reset_my_demo_v1');if(r.error)return setMsg(\`Reset impossible : \${r.error.message}\`);localStorage.setItem(key('patient'),r.data.patientId);localStorage.setItem(key('assessment'),r.data.assessmentId);await load();render();setMsg('Démo réinitialisée. Vous pouvez démarrer une nouvelle consultation.')}`;
+const resetNew=`async function resetDemo(){if(!isOwnDemo())return;const ok=confirm('Réinitialiser votre démonstration Motion ? Le dossier live sera recréé vide. Emma et Marc ne seront pas modifiés.');if(!ok)return;setMsg('Réinitialisation de la démo…');const r=await sb().rpc('reset_my_demo_v1');if(r.error)return setMsg(\`Reset impossible : \${r.error.message}\`);const n=await sb().from('assessments').update({protocol_version:'motion-clinical-v0.6',context_class:'A',updated_at:new Date().toISOString()}).eq('id',r.data.assessmentId);if(n.error)console.warn('[demo protocol normalization]',n.error);localStorage.setItem(key('patient'),r.data.patientId);localStorage.setItem(key('assessment'),r.data.assessmentId);await load();render();setMsg(n.error?'Démo réinitialisée. Vérifiez le protocole avant import.':'Démo v0.6 prête. Vous pouvez démarrer la consultation.')}`;
+if(!clinical.includes(resetOld))throw new Error('[pulse-pro-motion-final] demo reset anchor missing');
+clinical=clinical.replace(resetOld,resetNew);
+
 await writeFile(clinicalPath,clinical,'utf8');
 
 /* 3. Operator styling — compact, readable on iPad */
@@ -194,6 +199,7 @@ const checks=[
   ['professional snapshot routing',finalReport.includes('loadReportSnapshot({patientId,force:true})')],
   ['professional PDF CTA',finalClinical.includes('Exporter le Motion Report PDF')&&finalClinical.includes('data-komo-export-report')],
   ['single next-action guide',finalClinical.includes('data-pro-motion-next-action')&&finalClinical.includes('workflowGuide(p,a,imp,s)')],
+  ['demo protocol normalization',finalClinical.includes("protocol_version:'motion-clinical-v0.6'")&&finalClinical.includes("context_class:'A'")],
   ['sensor-only operator stages',finalClinical.includes("['02','Acquisition'")&&finalClinical.includes("['03','Motion Score'")],
   ['review hand-off',finalMotion.includes('Revoir et valider le score')&&finalMotion.includes('Le Motion Report est prêt.')],
   ['import hand-off',finalImport.includes(".clm-score-shell,[data-pro-motion-next]")],
