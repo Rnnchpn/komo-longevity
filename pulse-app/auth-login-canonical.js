@@ -57,9 +57,21 @@
       }
       const expiresAt=data.expires_at||Math.floor(Date.now()/1000)+Number(data.expires_in||3600);
       const session={...data,expires_at:expiresAt};
+
+      // Prefer a live session hand-off. This avoids the storage -> reload -> rehydrate
+      // cycle that is fragile on iPad Safari / WKWebView when sessionStorage is used.
+      if(window.KomoPulseApp?.acceptSession){
+        await window.KomoPulseApp.acceptSession(session);
+        feedback('Connexion réussie.',true);
+        window.dispatchEvent(new CustomEvent('komo:session-ready',{detail:{session,source:'canonical-login-live'}}));
+        running=false;buttonState(false);
+        return;
+      }
+
+      // Conservative fallback for very early submits before the module app is ready.
       targetStorage(remember).setItem(AUTH_KEY,JSON.stringify(session));
       feedback('Connexion réussie…',true);
-      window.dispatchEvent(new CustomEvent('komo:session-ready',{detail:{source:'canonical-login'}}));
+      window.dispatchEvent(new CustomEvent('komo:session-ready',{detail:{session,source:'canonical-login-fallback'}}));
       setTimeout(()=>location.reload(),90);
     }catch(error){
       const raw=String(error?.message||error||'Connexion impossible.');
