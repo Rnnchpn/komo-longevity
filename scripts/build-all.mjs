@@ -175,7 +175,9 @@ const scripts = [
   // Remove the external esm.sh dependency from the Pulse auth/application path.
   'scripts/pulse-supabase-local-v1.mjs',
   // Final Pro Motion hand-off: patient-scoped PDF export after all audits/hotfixes.
-  'scripts/pulse-pro-motion-final-v1.mjs'
+  'scripts/pulse-pro-motion-final-v1.mjs',
+  // Absolute last iPad Centre pass: keep assignment + consultation drawer directly connected.
+  'scripts/pulse-ipad-center-connect-v1.mjs'
 ];
 
 for (const script of scripts) {
