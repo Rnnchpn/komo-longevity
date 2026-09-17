@@ -6,6 +6,8 @@ const clinicalPath=root+'clinical-motion-v1.js';
 const clinicalCssPath=root+'clinical-motion-v1.css';
 const motionWorkflowPath=root+'motion-workflow.js';
 const importPath=root+'myocare-import.js';
+const authWebCssPath=root+'auth-web-v1.css';
+const adaptiveCssPath=root+'adaptive-shell-v4.css';
 
 /* 1. Patient-scoped PDF export for the professional workspace */
 let report=await readFile(reportPath,'utf8');
@@ -154,12 +156,39 @@ if(!importer.includes(importOld))throw new Error('[pulse-pro-motion-final] impor
 importer=importer.replace(importOld,importNew);
 await writeFile(importPath,importer,'utf8');
 
-/* 6. Final assertions */
+/* 6. iPad touch-target hardening — tablet only */
+let authCss=await readFile(authWebCssPath,'utf8');
+const authTabletTouch=`
+@media (min-width:768px) and (max-width:1366px) and (pointer:coarse){
+  #authScreen[data-auth-web="1"] .auth-audience-switch button{min-height:46px!important}
+  #authScreen[data-auth-web="1"] .password-toggle{min-height:44px!important}
+  #authScreen[data-auth-web="1"] .remember-row,
+  #authScreen[data-auth-web="1"] .text-button{min-height:44px!important;display:inline-flex!important;align-items:center!important}
+  #authScreen[data-auth-web="1"] .auth-footer-links a{min-height:44px!important;display:inline-flex!important;align-items:center!important}
+}
+`;
+if(!authCss.includes('iPad touch-target hardening'))authCss+='\n/* iPad touch-target hardening */\n'+authTabletTouch;
+await writeFile(authWebCssPath,authCss,'utf8');
+
+let adaptiveCss=await readFile(adaptiveCssPath,'utf8');
+const adaptiveTabletTouch=`
+@media (min-width:768px) and (max-width:1366px) and (pointer:coarse){
+  .kam-role-switch button{min-height:44px!important}
+  html[data-adaptive-shell][data-adaptive-mode="pro"] .kcp-btn{min-height:44px!important}
+  html[data-adaptive-shell][data-adaptive-mode="admin"] .kav2-tabs button{min-height:44px!important}
+}
+`;
+if(!adaptiveCss.includes('iPad professional touch-target hardening'))adaptiveCss+='\n/* iPad professional touch-target hardening */\n'+adaptiveTabletTouch;
+await writeFile(adaptiveCssPath,adaptiveCss,'utf8');
+
+/* 7. Final assertions */
 const finalReport=await readFile(reportPath,'utf8');
 const finalClinical=await readFile(clinicalPath,'utf8');
 const finalMotion=await readFile(motionWorkflowPath,'utf8');
 const finalImport=await readFile(importPath,'utf8');
 const finalCss=await readFile(clinicalCssPath,'utf8');
+const finalAuthCss=await readFile(authWebCssPath,'utf8');
+const finalAdaptiveCss=await readFile(adaptiveCssPath,'utf8');
 const checks=[
   ['professional patient routing',finalReport.includes('professionalPatientId(button)')&&finalReport.includes('loadCanonicalResult({patientId,force:true})')],
   ['professional snapshot routing',finalReport.includes('loadReportSnapshot({patientId,force:true})')],
@@ -168,7 +197,9 @@ const checks=[
   ['sensor-only operator stages',finalClinical.includes("['02','Acquisition'")&&finalClinical.includes("['03','Motion Score'")],
   ['review hand-off',finalMotion.includes('Revoir et valider le score')&&finalMotion.includes('Le Motion Report est prêt.')],
   ['import hand-off',finalImport.includes(".clm-score-shell,[data-pro-motion-next]")],
-  ['iPad operator styling',finalCss.includes('.clm-next{')&&finalCss.includes('.clm-flow-step.current')]
+  ['iPad operator styling',finalCss.includes('.clm-next{')&&finalCss.includes('.clm-flow-step.current')],
+  ['iPad auth touch targets',finalAuthCss.includes('min-height:46px!important')&&finalAuthCss.includes('.password-toggle{min-height:44px!important}')],
+  ['iPad pro touch targets',finalAdaptiveCss.includes('.kam-role-switch button{min-height:44px!important}')&&finalAdaptiveCss.includes('.kcp-btn{min-height:44px!important}')]
 ];
 for(const [label,ok] of checks)console.log(`[pulse-pro-motion-final] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
