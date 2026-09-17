@@ -169,7 +169,9 @@ const scripts = [
   // Absolute final public-home pass: real KŌMØ product imagery + founder section.
   'scripts/komo-home-visuals-v1.mjs',
   // Copy the independent Riviera surface after every global KŌMØ mutation.
-  'scripts/riviera-experience-copy.mjs'
+  'scripts/riviera-experience-copy.mjs',
+  // Absolute last production pass: Safari/iPad auth hand-off must run after app-router-v2 is generated.
+  'scripts/pulse-ipad-auth-hotfix-v1.mjs'
 ];
 
 for (const script of scripts) {
