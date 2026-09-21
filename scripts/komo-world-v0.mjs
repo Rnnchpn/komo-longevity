@@ -22,8 +22,10 @@ const checks=[
   ['avatar presence V2.0+ present',runtime.includes('function npcNameTag')&&runtime.includes('lastFarUpdate')],
   ['avatar LOD V2.0 present',runtime.includes('lastFarUpdate')&&runtime.includes('distToCamera')],
   ['floor polish V2.0 present',runtime.includes('V2.0 floor polish')],
-  ['smooth UX V2.1 present',runtime.includes("version:'2.1.0-smooth-ux'")&&runtime.includes('function fastTravel')],
-  ['adaptive performance V2.1 present',runtime.includes('function updatePerformance')&&runtime.includes('applyRenderScale')]
+  ['smooth UX V2.1+ present',runtime.includes('function fastTravel')&&runtime.includes('world-menu')],
+  ['adaptive performance V2.1+ present',runtime.includes('function updatePerformance')&&runtime.includes('applyRenderScale')],
+  ['performance rescue V2.2 present',runtime.includes("version:'2.2.1-performance-rescue'")&&runtime.includes('function applyEmergencyPerformance')&&runtime.includes('function freezeStaticScene')],
+  ['low-power lights disabled',runtime.includes('l.visible=false;l.intensity=0')&&runtime.includes("antialias:!lowPower")]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);

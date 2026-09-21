@@ -167,6 +167,35 @@ button{border:0}
 body.ui-open .world-reticle{opacity:0}.world-hud,.location-chip,.world-quick-nav,.desktop-help{transition:opacity .2s ease,transform .2s ease}
 body.ui-open .world-quick-nav{opacity:.22;pointer-events:none}
 
+
+/* V2.2 performance rescue — Safari/iPad: avoid expensive compositing over WebGL. */
+.low-power .world-hud,
+.low-power .location-chip,
+.low-power .intro-card,
+.low-power .interaction-card,
+.low-power .world-panel,
+.low-power .world-menu,
+.low-power .world-quick-nav,
+.low-power .desktop-help,
+.low-power .joystick-base,
+.low-power .mobile-action,
+.low-power .toast{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+.low-power .world-hud{background:rgba(24,38,31,.96)}
+.low-power .location-chip{background:rgba(27,42,34,.95)}
+.low-power .world-quick-nav{background:rgba(20,33,26,.94)}
+.low-power .world-menu,.low-power .world-panel{background:rgba(20,34,27,.98)}
+.low-power .intro-card{background:rgba(24,40,32,.98)}
+.low-power .interaction-card{background:rgba(18,31,24,.96)}
+.low-power .joystick-base,.low-power .mobile-action{background:rgba(20,34,27,.82)}
+.low-power *{text-shadow:none!important}
+.performance-rescue .world-reticle{transition:none}
+.performance-rescue .world-hud,
+.performance-rescue .location-chip,
+.performance-rescue .world-quick-nav{box-shadow:none}
+
 @media(max-width:900px),(pointer:coarse){
   .world-hud{left:8px;right:8px;height:58px;grid-template-columns:auto auto 1fr auto;padding:7px 8px 7px 12px;gap:7px;border-radius:20px}
   .world-brand strong{font-size:23px}.world-brand span{display:none}
