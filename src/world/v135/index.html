@@ -41,10 +41,12 @@
       if(!source.includes(exposeMarker))throw new Error('V0.13 engine extension marker missing');
       source=source.replace(exposeMarker,`
       engine=engine.replace("function blocked(p){if(Math.hypot(p.x,p.z)>58)return true;","function blocked(p){if(window.KomoV134Doors?.blocked?.(p,mode))return true;if(Math.hypot(p.x,p.z)>58)return true;");
-      engine=engine.replace("const concierge=humanoid({body:0x6e7465,scale:.9});concierge.position.set(0,0,-4.7);concierge.rotation.y=0;scene.add(concierge);const conciergeLabel=label('KŌMØ CONCIERGE',{sx:2.0,sy:.36,font:17});conciergeLabel.position.set(0,4.65,-4.7);scene.add(conciergeLabel);","const concierge=humanoid({body:0x6e7465,scale:.9});concierge.position.set(-8.15,0,-1.2);concierge.rotation.y=.22;scene.add(concierge);const conciergeLabel=label('KŌMØ CONCIERGE',{sx:2.0,sy:.36,font:17});conciergeLabel.position.set(-8.15,4.65,-1.2);scene.add(conciergeLabel);");
+      engine=engine.replace("const concierge=humanoid({body:0x6e7465,scale:.9});concierge.position.set(0,0,-4.7);concierge.rotation.y=0;scene.add(concierge);const conciergeLabel=label('KŌMØ CONCIERGE',{sx:2.0,sy:.36,font:17});conciergeLabel.position.set(0,4.65,-4.7);scene.add(conciergeLabel);","const concierge=new THREE.Group();concierge.name='KOMO_CONCIERGE_REMOVED';const conciergeLabel=new THREE.Object3D();conciergeLabel.visible=false;");
       engine=engine.replace("addI('twin',-11,-21.8,5.0,'Entrer dans le Twin Lab','Enter Twin Lab','Découvrir votre jumeau fonctionnel','Explore your Functional Digital Twin',enterTwin);","addI('twin',-11,-21.8,5.0,'Ouvrir le Twin Lab','Open Twin Lab','Porte du jumeau fonctionnel','Functional Twin door',()=>window.KomoV134Doors?.openAndEnter('twin',enterTwin));");
       engine=engine.replace("addI('arena',12.5,-14.2,5.4,'Entrer dans la KŌMØ Arena','Enter KŌMØ Arena','Défi quotidien · classement','Daily challenge · leaderboard',enterArena);","addI('arena',12.5,-14.2,5.4,'Ouvrir la KŌMØ Arena','Open KŌMØ Arena','Défis · clubs · saison 01','Challenges · clubs · season 01',()=>window.KomoV134Doors?.openAndEnter('arena',enterArena));");
       engine=engine.replace("addI('rehab',0,-21.8,3.8,'Entrer dans Rehab','Enter Rehab','Coach Agent · prochaine étape','Coach Agent · next build',()=>openPanel('REHAB','Coach Agent',locale==='fr'?'Cette aile accueillera les séances guidées par les déficits du Functional Twin.':'This wing will host deficit-driven sessions connected to the Functional Twin.'));","addI('rehab',0,-21.8,4.6,'Ouvrir Rehab','Open Rehab','Programme fonctionnel · progression','Functional program · progression',()=>window.KomoV134Doors?.openAndEnter('rehab',()=>openPanel('REHAB','Coach Agent',locale==='fr'?'Cette aile accueille les séances fonctionnelles guidées par les déficits du Functional Twin.':'This wing hosts functional sessions guided by Functional Twin deficits.')));");
+      engine=engine.replace("addI('desk',-8.15,-1.2,4.8,'Parler au concierge KŌMØ','Talk to KŌMØ Concierge','Orientation · Twin · Arena','Orientation · Twin · Arena',openDesk);","addI('desk',-8.15,-1.2,4.8,'Ouvrir le KŌMØ Desk','Open KŌMØ Desk','Orientation · trajectoire · espaces','Orientation · trajectory · spaces',openDesk);");
+      engine=engine.replace("openPanel('KŌMØ CONCIERGE',","openPanel('KŌMØ DESK',");
 
       const motionDecl="const desired=new THREE.Vector3(),target=new THREE.Vector3(),ray=new THREE.Raycaster();const cameraOccluders=[leftWall,rightWall];function updateMovement(dt){";
       const motionDeclNext="const desired=new THREE.Vector3(),target=new THREE.Vector3(),ray=new THREE.Raycaster();const cameraOccluders=[leftWall,rightWall];const moveVelocity=new THREE.Vector3();function updateMovement(dt){";
@@ -77,9 +79,10 @@
           await import('../v132/world-v132-floor.js');
           await import('../v133/world-v133-walls.js');
           await import('../v134/world-v134-doors.js');
-          await import('../v134/world-v134-axis-clean.js');
           await import('../v134/world-v134-motion-close.js');
           await import('../v134/world-v134-web.js');
+          await import('./world-v135-main-building.js');
+          await import('./world-v135-axis-clean.js');
           await import('./world-v135-arrival.js');
           await import('./world-v135-twin-arena.js');
           loader?.remove();
