@@ -34,9 +34,11 @@ const checks=[
   ['living journey V2.5+ present',runtime.includes('KOMO_JOURNEY_GUIDE_V25')&&runtime.includes('function updateJourneyGuide')],
   ['NPC conversations V2.5 present',runtime.includes('function showNpcConversation')&&runtime.includes("id:'social'")],
   ['smart third-person camera V2.5 present',runtime.includes('thirdPersonDistance')&&runtime.includes('Cheap camera collision clamp')],
-  ['Twin Lab V2.6 present',runtime.includes("version:'2.6.0-twin-rehab'")&&runtime.includes('KOMO_TWIN_LAB_V26')&&runtime.includes('const twinInteractions')],
-  ['Rehab Lab V2.6 present',runtime.includes('KOMO_REHAB_LAB_V26')&&runtime.includes('const rehabInteractions')&&runtime.includes('function runRehabDemo')],
-  ['Twin/Rehab room interactions V2.6 present',runtime.includes("mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions")&&runtime.includes('function updateTwinVisuals')]
+  ['Twin Lab V2.6+ present',runtime.includes('KOMO_TWIN_LAB_V26')&&runtime.includes('const twinInteractions')],
+  ['Rehab Lab V2.6+ present',runtime.includes('KOMO_REHAB_LAB_V26')&&runtime.includes('const rehabInteractions')&&runtime.includes('function runRehabDemo')],
+  ['Twin/Rehab room interactions V2.6 present',runtime.includes("mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions")&&runtime.includes('function updateTwinVisuals')],
+  ['Biomechanical Twin V2.7 present',runtime.includes("version:'2.7.1-biomech-coach'")&&runtime.includes('KOMO_BIOMECH_TWIN_V27')&&runtime.includes('function updateBiomechTwin')],
+  ['Rehab Coach V2.7 present',runtime.includes('KOMO_REHAB_COACH_V27')&&runtime.includes('function animateRehabCoach')&&runtime.includes("id:'rehab_coach'")]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
