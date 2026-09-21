@@ -41,6 +41,16 @@
     <b id="location-heading">N</b>
   </div>
 
+  <button id="journey-hud" class="journey-hud" type="button" aria-label="Ouvrir ma progression KŌMØ World">
+    <span class="journey-level"><small>WORLD LEVEL</small><strong id="journey-level">01</strong></span>
+    <span class="journey-main">
+      <b id="journey-title">ARRIVAL</b>
+      <i><em id="journey-progress"></em></i>
+      <small id="journey-next">Explore the Hall · +20 XP</small>
+    </span>
+    <span class="journey-xp"><b id="journey-xp">0</b><small>XP</small></span>
+  </button>
+
   <div id="world-reticle" class="world-reticle" aria-hidden="true"><i></i></div>
 
   <section id="intro" class="intro-card" aria-labelledby="intro-title">
@@ -54,6 +64,7 @@
       <span><b>01</b> SE DÉPLACER <kbd>WASD</kbd></span>
       <span><b>02</b> REGARDER <em>GLISSER</em></span>
       <span><b>03</b> INTERAGIR <kbd>E</kbd></span>
+      <span><b>04</b> CAMÉRA <kbd>V</kbd></span>
     </div>
     <button id="intro-enter" type="button">ENTRER DANS MON WORLD</button>
   </section>
@@ -98,16 +109,28 @@
       <button type="button" data-fast-travel="life"><span>LIFE</span><b>Découvrir</b></button>
       <button type="button" data-fast-travel="upper"><span>LEVEL 2</span><b>Galeries</b></button>
     </div>
+    <section class="journey-menu">
+      <div class="journey-menu-head">
+        <div><span>WORLD JOURNEY</span><b id="journey-menu-level">LEVEL 01 · ARRIVAL</b></div>
+        <strong id="journey-menu-xp">0 XP</strong>
+      </div>
+      <div class="journey-menu-bar"><i id="journey-menu-progress"></i></div>
+      <p id="journey-menu-next">Explorez le Hall pour poursuivre votre parcours.</p>
+      <div id="journey-missions" class="journey-missions"></div>
+      <small class="journey-rule">XP = exploration & engagement. Les données de santé ne sont jamais classées.</small>
+    </section>
+
     <div class="world-menu-status">
       <div><span>QUALITÉ</span><b id="quality-status">AUTO</b></div>
       <div><span>PERFORMANCE</span><b id="fps-status">— FPS</b></div>
     </div>
     <div class="world-menu-actions">
+      <button id="camera-toggle" type="button">CAMERA · 3RD</button>
       <button id="quality-toggle" type="button">AUTO QUALITY</button>
       <button id="reset-position" type="button">RESET POSITION</button>
     </div>
     <div class="world-menu-controls">
-      <span><kbd>WASD</kbd> MOVE</span><span><kbd>SHIFT</kbd> SPRINT</span><span><kbd>E</kbd> ACTION</span><span><kbd>M</kbd> MENU</span>
+      <span><kbd>WASD</kbd> MOVE</span><span><kbd>SHIFT</kbd> SPRINT</span><span><kbd>E</kbd> ACTION</span><span><kbd>V</kbd> CAMERA</span><span><kbd>M</kbd> MENU</span>
     </div>
   </aside>
 
@@ -117,6 +140,7 @@
     <span><kbd>WASD</kbd> / <kbd>ZQSD</kbd> SE DÉPLACER</span>
     <span><kbd>SHIFT</kbd> ACCÉLÉRER</span>
     <span>GLISSER POUR REGARDER</span>
+    <span><kbd>V</kbd> CAMÉRA</span>
     <span><kbd>M</kbd> MENU</span>
   </div>
 
