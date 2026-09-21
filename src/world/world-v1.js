@@ -533,7 +533,16 @@ function updateNpc(npc,t,index){
   if(far&&t-d.lastFarUpdate<(lowPower?.10:.065))return;
   if(far)d.lastFarUpdate=t;
 
-  let routeDist=(t*d.speed+d.phase*d.total)%d.total,segIndex=0;
+  if(d.routeClock==null){d.routeClock=(d.phase*d.total)%d.total;d.routeLastT=t}
+  const stepDt=THREE.MathUtils.clamp(t-d.routeLastT,0,.12);d.routeLastT=t;
+  const poiSlow=(Math.abs(npc.position.x)<4.5&&npc.position.z>13&&npc.position.z<20)
+    ||(npc.position.x>6.4&&npc.position.z>-1&&npc.position.z<7)
+    ||(Math.abs(npc.position.x)<5&&npc.position.z<-6&&npc.position.z>-11);
+  const idlePulse=poiSlow?(.5+.5*Math.sin(t*.66+d.phase*9+index*.7)):0;
+  const pace=poiSlow&&idlePulse>.76?THREE.MathUtils.lerp(.08,.34,(1-idlePulse)/.24):1;
+  d.routeClock=(d.routeClock+stepDt*d.speed*pace)%d.total;
+  const routeDist=d.routeClock;
+  let segIndex=0;
   while(segIndex<d.seg.length-1&&routeDist>d.cum[segIndex+1])segIndex++;
   const a=d.points[segIndex],b=d.points[(segIndex+1)%d.points.length],len=Math.max(.001,d.seg[segIndex]);
   const u=(routeDist-d.cum[segIndex])/len;
@@ -541,14 +550,14 @@ function updateNpc(npc,t,index){
   const dx=b.x-a.x,dz=b.z-a.z;
   const desired=Math.atan2(dx,dz);
   npc.rotation.y=desired;
-  // Micro-behaviour: some visitors slow down around the entrance / Life / atrium.
-  const poiSlow=(Math.abs(npc.position.x)<4.5&&npc.position.z>13&&npc.position.z<20)
-    ||(npc.position.x>6.4&&npc.position.z>-1&&npc.position.z<7)
-    ||(Math.abs(npc.position.x)<5&&npc.position.z<-6&&npc.position.z>-11);
-  const idlePulse=poiSlow?(.5+.5*Math.sin(t*.72+d.phase*8)):0;
-  if(poiSlow&&idlePulse>.82){
-    d.head.rotation.y=Math.sin(t*.85+index)*.18;
-    d.torso.rotation.y=Math.sin(t*.34+index)*.025;
+  if(poiSlow&&idlePulse>.76){
+    d.head.rotation.y=Math.sin(t*.95+index)*.22;
+    d.torso.rotation.y=Math.sin(t*.38+index)*.035;
+    d.leftArm.rotation.z=Math.sin(t*.72+index)*.055;
+    if(d.role==='staff')d.rightArm.rotation.x=-.20;
+  }else{
+    d.leftArm.rotation.z*=.82;
+    d.torso.rotation.y*=.82;
   }
 
   if(far){
@@ -557,7 +566,7 @@ function updateNpc(npc,t,index){
   }
 
   const cadence=t*d.speed*5.25+index*.72;
-  const stride=Math.sin(cadence),half=Math.sin(cadence+Math.PI*.5);
+  const stride=Math.sin(cadence)*pace,half=Math.sin(cadence+Math.PI*.5);
   d.leftLeg.rotation.x=stride*.38;d.rightLeg.rotation.x=-stride*.38;
   d.leftKnee.rotation.x=Math.max(0,-stride)*.30;d.rightKnee.rotation.x=Math.max(0,stride)*.30;
   d.leftArm.rotation.x=-stride*.29;d.rightArm.rotation.x=stride*.29;
@@ -2130,7 +2139,7 @@ window.KomoWorld={
   version:'2.4.0-third-person-journey',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
-  getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),
+  getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
   getLocale:()=>locale,
   getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale}),
   getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
