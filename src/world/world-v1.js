@@ -33,6 +33,7 @@ const resetPosition=$('#reset-position');
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
 const lowPower=coarse||isiOS;
+document.documentElement.classList.toggle('low-power',lowPower);
 
 const core=new TwinCore();
 const baseline=core.snapshots[0];
@@ -88,6 +89,7 @@ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 let qualityMode=lowPower?'performance':'auto';
 let renderScale=lowPower?.68:1.45;
 let fpsEMA=60,lastPerfSample=performance.now(),perfFrames=0;
+let emergencyPerformance=lowPower;
 function maxPixelRatio(){return qualityMode==='performance'?(lowPower?.72:1.15):qualityMode==='high'?(lowPower?1.0:1.8):(lowPower?.86:1.55)}
 function applyRenderScale(){
   const ratio=Math.min(window.devicePixelRatio||1,renderScale,maxPixelRatio());
@@ -335,7 +337,7 @@ function plaque(parent,title,subtitle,w,h,x,y,z,{rotY=0,dark=true,titleSize=90}=
   const p=mesh(parent,new THREE.PlaneGeometry(w,h),mat,x,y,z,{receive:false});p.rotation.y=rotY;p.userData.texture=tx;return p;
 }
 function glow(parent,color,intensity,distance,x,y,z){
-  const l=new THREE.PointLight(color,intensity,distance,2);l.position.set(x,y,z);
+  const l=new THREE.PointLight(color,intensity,distance,2);l.position.set(x,y,z);l.userData.decorative=true;
   if(lowPower){l.visible=false;l.intensity=0}
   parent.add(l);return l;
 }
@@ -1708,12 +1710,25 @@ window.addEventListener('resize',()=>{
 });
 
 let last=performance.now(),raf=0;
+function applyEmergencyPerformance(){
+  if(!emergencyPerformance)emergencyPerformance=true;
+  qualityMode='performance';
+  renderScale=lowPower?.55:.72;
+  living.lights.forEach(l=>{l.visible=false;if('intensity' in l)l.intensity=0});
+  if(living.dust)living.dust.visible=false;
+  living.clouds.forEach(c=>c.visible=false);
+  // Keep only the first two ambient NPCs under emergency load.
+  living.npcs.forEach((npc,i)=>{npc.visible=i<2});
+  applyRenderScale();
+  document.documentElement.classList.add('performance-rescue');
+}
 function updatePerformance(now){
   perfFrames++;
   if(now-lastPerfSample<1000)return;
   const fps=perfFrames*1000/(now-lastPerfSample);fpsEMA=fpsEMA*.72+fps*.28;perfFrames=0;lastPerfSample=now;
   if(fpsStatus)fpsStatus.textContent=Math.round(fpsEMA)+' FPS';
-  if(qualityMode==='auto'){
+  if(fpsEMA<18&&!emergencyPerformance){applyEmergencyPerformance();notify(locale==='fr'?'Mode performance activé':'Performance mode enabled')}
+  if(qualityMode==='auto'&&!emergencyPerformance){
     const min=lowPower?.55:.90,max=lowPower?.78:1.55;
     let next=renderScale;
     if(fpsEMA<28)next=Math.max(min,renderScale-.14);
@@ -1812,12 +1827,24 @@ raf=requestAnimationFrame(animate);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){velocity.set(0,0,0);keys.clear()}});
 window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(daylightTimer)},{once:true});
 
+function freezeStaticScene(){
+  if(!lowPower)return;
+  const dynamicMeshes=new Set([doorLeft,doorRight,scanRing,living.skyDome].filter(Boolean));
+  scene.traverse(o=>{
+    if(o.isMesh&&!dynamicMeshes.has(o)){
+      o.updateMatrix();
+      o.matrixAutoUpdate=false;
+    }
+  });
+}
+freezeStaticScene();
+if(lowPower)applyEmergencyPerformance();
 syncPlayerElevation();
 applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.2.0-performance-rescue',
+  version:'2.2.1-performance-rescue',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),
