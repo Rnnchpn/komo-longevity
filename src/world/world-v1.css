@@ -138,7 +138,7 @@ button{border:0}
 .toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
 
 /* V2.1 Smooth UX */
-.intro-controls{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:0 0 14px}
+.intro-controls{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:0 0 14px}
 .intro-controls span{display:grid;gap:4px;padding:9px 10px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(255,255,255,.025);font-size:6px;font-weight:760;letter-spacing:.08em;color:rgba(242,236,226,.48)}
 .intro-controls b{font-size:7px;color:#d5b477}.intro-controls kbd,.intro-controls em{font:760 7px/1 ui-monospace,monospace;color:rgba(242,236,226,.82);font-style:normal}
 .world-reticle{position:fixed;z-index:58;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%);pointer-events:none;opacity:.38;transition:.16s ease}
@@ -168,8 +168,27 @@ body.ui-open .world-reticle{opacity:0}.world-hud,.location-chip,.world-quick-nav
 body.ui-open .world-quick-nav{opacity:.22;pointer-events:none}
 
 
+
+/* V2.4 World Journey + third-person UX */
+.journey-hud{position:fixed;z-index:68;left:18px;top:96px;width:340px;min-height:66px;display:grid;grid-template-columns:58px 1fr 48px;align-items:center;gap:10px;padding:9px 12px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:rgba(20,34,27,.76);backdrop-filter:blur(16px);box-shadow:0 14px 36px rgba(6,14,10,.14);color:#efe9df;text-align:left;cursor:pointer;transition:.18s ease}
+.journey-hud:hover{border-color:rgba(216,185,132,.30);transform:translateY(-1px)}
+.journey-level{display:grid;place-items:center;height:46px;border-right:1px solid rgba(255,255,255,.08)}.journey-level small{font-size:5px;letter-spacing:.12em;color:rgba(240,234,224,.38)}.journey-level strong{font:500 25px/1 Georgia,serif;color:#d8b984}
+.journey-main{min-width:0}.journey-main>b{display:block;font-size:9px;letter-spacing:.08em}.journey-main>i{display:block;height:4px;margin:8px 0 6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}.journey-main>i>em{display:block;width:0;height:100%;background:linear-gradient(90deg,#b38a56,#dfc58f);border-radius:4px;transition:width .35s ease}.journey-main>small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:6px;letter-spacing:.04em;color:rgba(240,234,224,.48)}
+.journey-xp{text-align:right}.journey-xp b{display:block;font-size:13px}.journey-xp small{font-size:6px;letter-spacing:.12em;color:#d8b984}
+.journey-menu{margin:14px 0;padding:14px;border:1px solid rgba(216,185,132,.14);border-radius:17px;background:rgba(216,185,132,.035)}
+.journey-menu-head{display:flex;justify-content:space-between;align-items:end;gap:10px}.journey-menu-head span{display:block;font-size:6px;font-weight:800;letter-spacing:.14em;color:#d5b477}.journey-menu-head b{display:block;margin-top:5px;font-size:11px}.journey-menu-head strong{font-size:10px;color:#d8b984}
+.journey-menu-bar{height:5px;margin:12px 0 9px;border-radius:5px;background:rgba(255,255,255,.07);overflow:hidden}.journey-menu-bar i{display:block;width:0;height:100%;background:linear-gradient(90deg,#aa8254,#e0c996);transition:width .35s ease}
+.journey-menu>p{margin:0 0 10px!important;font-size:8px!important;color:rgba(240,234,224,.58)!important}
+.journey-missions{display:grid;gap:6px}.journey-mission{display:grid;grid-template-columns:23px 1fr auto;align-items:center;gap:8px;padding:8px 9px;border-radius:11px;background:rgba(255,255,255,.028);border:1px solid rgba(255,255,255,.05)}.journey-mission.done{opacity:.48}.journey-mission i{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;border:1px solid rgba(216,185,132,.32);font-style:normal;font-size:8px}.journey-mission.done i{background:rgba(216,185,132,.14);color:#d8b984}.journey-mission span b{display:block;font-size:8px}.journey-mission span small{display:block;margin-top:2px;font-size:6px;color:rgba(240,234,224,.40)}.journey-mission>small{font-size:7px;font-weight:800;color:#d8b984}
+.journey-rule{display:block;margin-top:10px;padding-top:9px;border-top:1px solid rgba(255,255,255,.055);font-size:6px;line-height:1.45;color:rgba(240,234,224,.32)}
+.world-menu-actions{flex-wrap:wrap}.world-menu-actions button{min-width:30%}
+body.camera-third .world-reticle{opacity:.22}
+body.camera-third .interaction-card{bottom:112px}
+.player-status{position:fixed;z-index:67;right:18px;top:96px;padding:7px 10px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(20,34,27,.68);font-size:6px;font-weight:800;letter-spacing:.10em;color:rgba(239,233,223,.55);pointer-events:none}
+
 /* V2.2 performance rescue — Safari/iPad: avoid expensive compositing over WebGL. */
 .low-power .world-hud,
+.low-power .journey-hud,
 .low-power .location-chip,
 .low-power .intro-card,
 .low-power .interaction-card,
@@ -185,6 +204,7 @@ body.ui-open .world-quick-nav{opacity:.22;pointer-events:none}
 }
 .low-power .world-hud{background:rgba(24,38,31,.96)}
 .low-power .location-chip{background:rgba(27,42,34,.95)}
+.low-power .journey-hud{background:rgba(20,34,27,.95)}
 .low-power .world-quick-nav{background:rgba(20,33,26,.94)}
 .low-power .world-menu,.low-power .world-panel{background:rgba(20,34,27,.98)}
 .low-power .intro-card{background:rgba(24,40,32,.98)}
@@ -197,6 +217,9 @@ body.ui-open .world-quick-nav{opacity:.22;pointer-events:none}
 .performance-rescue .world-quick-nav{box-shadow:none}
 
 @media(max-width:900px),(pointer:coarse){
+  .journey-hud{left:8px;top:74px;width:230px;min-height:54px;grid-template-columns:42px 1fr 34px;padding:7px 9px;border-radius:14px}
+  .journey-level{height:38px}.journey-level strong{font-size:19px}.journey-main>b{font-size:7px}.journey-main>small{font-size:5px}.journey-xp b{font-size:10px}
+
   .world-hud{left:8px;right:8px;height:58px;grid-template-columns:auto auto 1fr auto;padding:7px 8px 7px 12px;gap:7px;border-radius:20px}
   .world-brand strong{font-size:23px}.world-brand span{display:none}
   .world-metrics>div{min-width:55px;padding:6px 8px}.world-metrics>div:nth-child(2){display:none}.world-metrics span{font-size:6px}.world-metrics b{font-size:15px}
@@ -216,6 +239,7 @@ body.ui-open .world-quick-nav{opacity:.22;pointer-events:none}
   .toast{top:78px}
 }
 @media(max-width:520px){
+  .journey-hud{width:190px}.journey-xp{display:none}.journey-hud{grid-template-columns:38px 1fr}.intro-controls{grid-template-columns:1fr 1fr}
   .world-quick-nav{display:none}.intro-controls{grid-template-columns:1fr 1fr}.intro-controls span:nth-child(3){grid-column:1/-1}
   .world-today{display:none}.world-hud{grid-template-columns:auto 1fr auto}.world-metrics{justify-self:end}
   .intro-card{top:112px}.intro-card h1{font-size:33px}.intro-path span:nth-of-type(2){display:none}.intro-path i:nth-of-type(1){display:none}
