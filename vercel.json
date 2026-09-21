@@ -9,6 +9,26 @@
       "has": [
         {
           "type": "host",
+          "value": "life.komolongevity.com"
+        }
+      ],
+      "destination": "/life-v1/"
+    },
+    {
+      "source": "/:path((?!api/).*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "life.komolongevity.com"
+        }
+      ],
+      "destination": "/life-v1/:path*"
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
           "value": "pulse.komolongevity.com"
         }
       ],
