@@ -1430,6 +1430,32 @@ bodySegment(body,[.34,1.18,.02],[.34,.25,.04],.14,M.twinGlow);
 mesh(body,new THREE.TorusGeometry(2.5,.045,10,96),M.bronze,0,3.0,.15).rotation.x=Math.PI/2;
 const scanRing=mesh(body,new THREE.RingGeometry(1.55,1.62,72),new THREE.MeshBasicMaterial({color:0xc5dbc9,transparent:true,opacity:.25,side:THREE.DoubleSide}),0,1.0,.1);
 scanRing.rotation.x=-Math.PI/2;
+
+// V2.7 Biomechanical Twin overlay — low-cost joints + functional zones.
+const biomech=new THREE.Group();biomech.name='KOMO_BIOMECH_TWIN_V27';biomech.position.copy(body.position);twinRoom.add(biomech);
+const biomechZones={};
+function bioMat(color,opacity=.58){return new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false})}
+function joint(name,x,y,z,r=.085,color=0xd7c08e){
+  const m=mesh(biomech,new THREE.SphereGeometry(r,lowPower?8:12,lowPower?6:9),bioMat(color,.70),x,y,z,{cast:false,receive:false});
+  m.userData.dynamic=true;biomechZones[name]=biomechZones[name]||[];biomechZones[name].push(m);return m;
+}
+function zoneRing(name,x,y,z,r=.28,color=0xb9cfbf,rot='x'){
+  const m=mesh(biomech,new THREE.RingGeometry(r*.78,r,lowPower?18:28),bioMat(color,.36),x,y,z,{cast:false,receive:false});
+  m.rotation[rot]=Math.PI/2;m.userData.dynamic=true;biomechZones[name]=biomechZones[name]||[];biomechZones[name].push(m);return m;
+}
+// posture / spine
+[-.05,.45,.95,1.45,1.95,2.45,2.95,3.45].forEach((off,i)=>joint('posture',0,1.05+off,.12,.055,i%2?0xd7c08e:0xb9cfbf));
+// shoulders + hips = mobility
+[[-.62,3.58,.05],[.62,3.58,.05],[-.30,2.18,.05],[.30,2.18,.05]].forEach(p=>zoneRing('mobility',...p,.22,0xb9cfbf,'y'));
+// thighs = muscle
+[[-.34,1.68,.08],[.34,1.68,.08],[-.34,1.22,.08],[.34,1.22,.08]].forEach(p=>zoneRing('muscle',...p,.21,0xd9b977,'y'));
+// feet / base = balance
+[[-.34,.34,.10],[.34,.34,.10]].forEach(p=>zoneRing('balance',...p,.25,0xaec8b6,'x'));
+const balancePlatform=mesh(biomech,new THREE.RingGeometry(.66,.78,40),bioMat(0xaec8b6,.30),0,.08,.10,{cast:false,receive:false});balancePlatform.rotation.x=-Math.PI/2;balancePlatform.userData.dynamic=true;(biomechZones.balance||(biomechZones.balance=[])).push(balancePlatform);
+// chest / breathing capacity = endurance
+[.72,.92,1.12].forEach((r,i)=>{const m=mesh(biomech,new THREE.TorusGeometry(r,.022,8,lowPower?28:44),bioMat(0xd7c08e,.20),0,3.15,.12,{cast:false,receive:false});m.scale.y=.62;m.userData.dynamic=true;(biomechZones.endurance||(biomechZones.endurance=[])).push(m)});
+let twinActiveDomain='all';
+
 plaque(twinRoom,'CURRENT','MOTION SCORE · MOTION AGE',4.4,1.25,-6.7,4.2,-8.0,{dark:true,titleSize:78});
 plaque(twinRoom,'LONGITUDINAL','BASELINE → TODAY',4.4,1.25,6.7,4.2,-8.0,{dark:true,titleSize:74});
 glow(twinRoom,0xc9d7c9,2.0,12,0,5.5,-3);
@@ -1505,6 +1531,40 @@ const rehabStationVisuals={};
 });
 plaque(rehabRoom,'GUIDED DEMO','CHOOSE A STATION · PRESS E',6.8,.72,0,1.05,8.9,{dark:false,titleSize:58});
 
+// V2.7 Rehab Coach — one lightweight demonstrator shared across all stations.
+function makeRehabCoach(){
+  const g=new THREE.Group();g.name='KOMO_REHAB_COACH_V27';g.position.set(0,0,-6.3);rehabRoom.add(g);
+  const skin=new THREE.MeshStandardMaterial({color:0xb98463,roughness:.82});
+  const cloth=new THREE.MeshStandardMaterial({color:0x2e493d,roughness:.76});
+  const trouser=new THREE.MeshStandardMaterial({color:0x343b37,roughness:.82});
+  const hair=new THREE.MeshStandardMaterial({color:0x2b2521,roughness:.92});
+  const shoe=new THREE.MeshStandardMaterial({color:0x222220,roughness:.70});
+  const cast=!lowPower;
+  const hips=new THREE.Group();hips.position.y=.92;g.add(hips);
+  box(hips,.50,.28,.30,trouser,0,0,0,{cast});
+  const torso=new THREE.Group();torso.position.y=1.33;g.add(torso);
+  mesh(torso,new THREE.CylinderGeometry(.23,.30,.72,lowPower?10:14),cloth,0,0,0,{cast});
+  const head=new THREE.Group();head.position.y=1.90;g.add(head);
+  mesh(head,new THREE.SphereGeometry(.205,lowPower?10:16,lowPower?8:12),skin,0,0,0,{cast});
+  const cap=mesh(head,new THREE.SphereGeometry(.212,lowPower?10:14,lowPower?6:9,0,Math.PI*2,0,Math.PI*.5),hair,0,.07,-.005,{cast});cap.scale.set(.94,.88,.96);
+  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.13,.88,0);rightLeg.position.set(.13,.88,0);g.add(leftLeg,rightLeg);
+  const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();leftKnee.position.y=-.31;rightKnee.position.y=-.31;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  cyl(leftLeg,.07,.078,.34,trouser,0,-.17,0,lowPower?7:10,{cast});cyl(rightLeg,.07,.078,.34,trouser,0,-.17,0,lowPower?7:10,{cast});
+  cyl(leftKnee,.06,.068,.32,trouser,0,-.17,0,lowPower?7:10,{cast});cyl(rightKnee,.06,.068,.32,trouser,0,-.17,0,lowPower?7:10,{cast});
+  box(leftKnee,.15,.09,.29,shoe,0,-.37,.06,{cast});box(rightKnee,.15,.09,.29,shoe,0,-.37,.06,{cast});
+  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.33,1.52,0);rightArm.position.set(.33,1.52,0);g.add(leftArm,rightArm);
+  const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();leftElbow.position.y=-.28;rightElbow.position.y=-.28;leftArm.add(leftElbow);rightArm.add(rightElbow);
+  cyl(leftArm,.05,.058,.30,cloth,0,-.15,0,lowPower?7:10,{cast});cyl(rightArm,.05,.058,.30,cloth,0,-.15,0,lowPower?7:10,{cast});
+  cyl(leftElbow,.045,.052,.27,skin,0,-.14,0,lowPower?7:10,{cast});cyl(rightElbow,.045,.052,.27,skin,0,-.14,0,lowPower?7:10,{cast});
+  const tag=npcNameTag('ALEX','REHAB COACH');tag.position.y=2.48;tag.scale.set(1.62,.46,1);g.add(tag);
+  g.userData.dynamic=true;
+  g.userData.coach={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag};
+  return g;
+}
+const rehabCoach=makeRehabCoach();
+const rehabCoachState={station:'control',running:false,phase:0};
+plaque(rehabRoom,'COACH','LIVE MOVEMENT DEMO',3.4,.62,0,3.05,-9.15,{dark:true,titleSize:52});
+
 // Arena room.
 arenaRoom.position.set(45,0,0);
 mesh(arenaRoom,new THREE.CircleGeometry(14.2,96),M.arena,0,.01,-2).rotation.x=-Math.PI/2;
@@ -1571,6 +1631,12 @@ const rehabInteractions=[
   desc:()=>locale==='fr'?'Ouvrir la station guidée':'Open guided station',
   action:()=>showRehabStation(it.station)
 }));
+rehabInteractions.push({
+  id:'rehab_coach',x:0,z:-61.3,r:2.15,
+  title:()=>locale==='fr'?'Alex · Rehab Coach':'Alex · Rehab Coach',
+  desc:()=>locale==='fr'?'Voir le rôle du coach virtuel':'Learn about the virtual coach',
+  action:()=>showRehabCoach()
+});
 
 function notify(message){
   toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(notify.t);
@@ -1793,6 +1859,25 @@ function twinDomainName(id){
   };
   return names[id]?.[locale]||id;
 }
+function updateBiomechTwin(){
+  const d=current().domains||{};
+  Object.entries(biomechZones).forEach(([id,parts])=>{
+    const value=THREE.MathUtils.clamp(Number(d[id])||0,0,100);
+    const active=twinActiveDomain==='all'||twinActiveDomain===id;
+    parts.forEach((part,i)=>{
+      part.visible=active||twinActiveDomain==='all';
+      if(part.material){
+        part.userData.baseOpacity=(active?.26:.07)+(value/100)*(active?.48:.10);
+        part.material.opacity=part.userData.baseOpacity;
+        if(part.material.color){
+          const color=value>=75?0xbdd3c4:value>=55?0xd5b878:0xc68f6a;
+          part.material.color.setHex(color);
+        }
+      }
+      part.scale.setScalar(active?1:0.92);
+    });
+  });
+}
 function updateTwinVisuals(){
   const d=current().domains||{};
   Object.entries(twinDomainVisuals).forEach(([id,v])=>{
@@ -1802,6 +1887,7 @@ function updateTwinVisuals(){
     v.fill.material.opacity=.46+value/100*.34;
     v.ring.material.opacity=.12+value/100*.30;
   });
+  updateBiomechTwin();
 }
 function twinDomainHtml(id){
   const s=current(),value=Number(s.domains?.[id])||0,base=Number(baseline.domains?.[id])||0,delta=value-base;
@@ -1822,16 +1908,59 @@ function twinDomainHtml(id){
       <div><span>SOURCE</span><b>TWIN</b></div>
     </div>
     <p>${explanations[id]?.[locale]||''}</p>
+    <div class="priority-card"><b>BODY MAP</b>${locale==='fr'?'La zone correspondante est mise en évidence sur le jumeau biomécanique dans la salle.':'The corresponding zone is highlighted on the biomechanical twin in the room.'}</div>
     <div class="data-note">${locale==='fr'?'Valeurs de démonstration TwinCore tant que la session Pulse personnelle n’est pas connectée.':'TwinCore demo values until the personal Pulse session is connected.'}</div>`;
 }
 function showTwinDomain(id){
-  updateTwinVisuals();
+  twinActiveDomain=id;updateTwinVisuals();
   openPanel(twinDomainName(id).toUpperCase(),locale==='fr'?'Explorer un domaine du Functional Twin.':'Explore a Functional Twin domain.',twinDomainHtml(id),[
     {label:locale==='fr'?'VUE TWIN':'TWIN OVERVIEW',onClick:showTwin},
     {label:copy[locale].openRehab,primary:true,onClick:enterRehab}
   ]);
 }
 
+function resetRehabCoach(){
+  const a=rehabCoach.userData.coach;if(!a)return;
+  rehabCoach.position.set(0,0,-6.3);rehabCoach.rotation.set(0,0,0);
+  a.hips.position.y=.92;a.hips.rotation.set(0,0,0);
+  a.torso.position.y=1.33;a.torso.rotation.set(0,0,0);
+  a.head.rotation.set(0,0,0);
+  [a.leftLeg,a.rightLeg,a.leftArm,a.rightArm,a.leftKnee,a.rightKnee,a.leftElbow,a.rightElbow].forEach(g=>g.rotation.set(0,0,0));
+}
+function setRehabCoachStation(id,running=false){
+  rehabCoachState.station=id||'control';rehabCoachState.running=!!running;rehabCoachState.phase=0;resetRehabCoach();
+}
+function animateRehabCoach(now,dt){
+  if(mode!=='rehab'||!rehabCoach.visible)return;
+  const a=rehabCoach.userData.coach,t=now*.001;
+  rehabCoachState.phase+=dt*(rehabCoachState.running?1:0.45);
+  const p=rehabCoachState.phase;
+  resetRehabCoach();
+  if(rehabCoachState.station==='control'){
+    const lift=.5+.5*Math.sin(p*2.0);
+    a.leftArm.rotation.z=-.72;a.rightArm.rotation.z=.72;
+    a.rightLeg.rotation.x=-.34*lift;a.rightKnee.rotation.x=.72*lift;
+    a.hips.rotation.z=Math.sin(p*1.5)*.055;
+    a.torso.rotation.z=-a.hips.rotation.z*.65;
+    a.head.rotation.y=Math.sin(p*.72)*.10;
+  }else if(rehabCoachState.station==='strength'){
+    const squat=.5+.5*Math.sin(p*2.15);
+    a.hips.position.y=.92-.28*squat;a.torso.position.y=1.33-.28*squat;
+    a.leftLeg.rotation.x=.48*squat;a.rightLeg.rotation.x=.48*squat;
+    a.leftKnee.rotation.x=-.92*squat;a.rightKnee.rotation.x=-.92*squat;
+    a.torso.rotation.x=-.12*squat;
+    a.leftArm.rotation.x=-.42*squat;a.rightArm.rotation.x=-.42*squat;
+  }else{
+    const stride=Math.sin(p*3.1);
+    a.leftLeg.rotation.x=stride*.54;a.rightLeg.rotation.x=-stride*.54;
+    a.leftKnee.rotation.x=Math.max(0,-stride)*.58;a.rightKnee.rotation.x=Math.max(0,stride)*.58;
+    a.leftArm.rotation.x=-stride*.42;a.rightArm.rotation.x=stride*.42;
+    rehabCoach.position.y=Math.abs(stride)*.025;
+  }
+  const intensity=rehabCoachState.running?1:.55;
+  a.leftLeg.rotation.x*=intensity;a.rightLeg.rotation.x*=intensity;
+  a.leftArm.rotation.x*=intensity;a.rightArm.rotation.x*=intensity;
+}
 const REHAB_KEY='komo_world_rehab_v1';
 let rehabSessionTimer=null;
 function loadRehabProgress(){
@@ -1867,6 +1996,7 @@ function rehabStationHtml(id,running=false,pct=0,remaining=null){
 }
 function stopRehabSession(){
   if(rehabSessionTimer){clearInterval(rehabSessionTimer);rehabSessionTimer=null}
+  rehabCoachState.running=false;
 }
 function completeRehabStation(id){
   stopRehabSession();rehabProgress[id]=(rehabProgress[id]||0)+1;rehabProgress.total++;saveRehabProgress();
@@ -1875,7 +2005,7 @@ function completeRehabStation(id){
   showRehabStation(id,true);
 }
 function runRehabDemo(id){
-  stopRehabSession();
+  stopRehabSession();setRehabCoachStation(id,true);
   const c=rehabStationCopy(id),start=performance.now(),duration=c.duration*1000;
   openPanel(c.title[locale],'REHAB · LIVE',rehabStationHtml(id,true,0,c.duration),[
     {label:locale==='fr'?'ARRÊTER':'STOP',onClick:()=>{stopRehabSession();showRehabStation(id)}}
@@ -1888,7 +2018,7 @@ function runRehabDemo(id){
   },250);
 }
 function showRehabStation(id,completed=false){
-  stopRehabSession();
+  stopRehabSession();setRehabCoachStation(id,false);
   const c=rehabStationCopy(id);
   openPanel(c.title[locale],locale==='fr'?'Station Rehab guidée.':'Guided Rehab station.',rehabStationHtml(id,false,completed?100:0),[
     {label:locale==='fr'?'RETOUR REHAB':'REHAB OVERVIEW',onClick:showRehab},
@@ -1915,7 +2045,7 @@ function bindTimeline(){
   panelBody.querySelectorAll('[data-domain]').forEach(btn=>btn.addEventListener('click',()=>showTwinDomain(btn.dataset.domain)));
 }
 function showTwin(){
-  updateTwinVisuals();
+  twinActiveDomain='all';updateTwinVisuals();
   openPanel('FUNCTIONAL TWIN',locale==='fr'?'Votre corps à travers le temps.':'Your body across time.',twinHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
     {label:locale==='fr'?'EXPLORER LA SALLE':'EXPLORE ROOM',primary:true,onClick:closePanel},
@@ -1926,7 +2056,7 @@ function rehabHtml(){
   const s=current();const entries=Object.entries(s.domains);entries.sort((a,b)=>a[1]-b[1]);const [lowest,val]=entries[0];
   const names={muscle:'Muscle',mobility:locale==='fr'?'Mobilité':'Mobility',balance:locale==='fr'?'Équilibre':'Balance',posture:'Posture',endurance:'Endurance'};
   return `
-    <p>${locale==='fr'?'Rehab transforme les signaux du Twin en séquences d’action simples et suivies. Les trois stations peuvent être explorées physiquement dans la salle.':'Rehab turns Twin signals into simple trackable action sequences. All three stations can be explored spatially in the room.'}</p>
+    <p>${locale==='fr'?'Rehab transforme les signaux du Twin en séquences d’action simples et suivies. Les trois stations peuvent être explorées physiquement dans la salle. Le coach virtuel montre le mouvement de démonstration associé.':'Rehab turns Twin signals into simple trackable action sequences. All three stations can be explored spatially in the room. The virtual coach demonstrates the associated movement.'}</p>
     <div class="priority-card"><b>${locale==='fr'?'FOCUS DE DÉMONSTRATION':'DEMO FOCUS'}</b>${names[lowest]} · ${val}/100</div>
     <div class="rehab-station-grid">
       ${['control','strength','capacity'].map(id=>{const c=rehabStationCopy(id);return `<button data-rehab="${id}"><span>${c.title[locale]}</span><b>${c.focus[locale]}</b><small>${rehabProgress[id]?'✓ '+rehabProgress[id]+' session'+(rehabProgress[id]>1?'s':''):'READY · '+c.duration+'s'}</small></button>`}).join('')}
@@ -1935,7 +2065,7 @@ function rehabHtml(){
     <div class="data-note">${locale==='fr'?'Les séquences Rehab montrées dans World sont des démonstrations d’engagement. Elles ne constituent pas une prescription médicale autonome et doivent être adaptées au contexte utilisateur lorsque nécessaire.':'Rehab sequences shown in World are engagement demonstrations. They are not autonomous medical prescriptions and should be adapted to user context when needed.'}</div>`;
 }
 function showRehab(){
-  stopRehabSession();
+  stopRehabSession();setRehabCoachStation('control',false);
   openPanel('REHAB',locale==='fr'?'De l’insight à l’action.':'From insight to action.',rehabHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
     {label:locale==='fr'?'EXPLORER LES STATIONS':'EXPLORE STATIONS',primary:true,onClick:closePanel},
@@ -1991,6 +2121,18 @@ function showLifeStore(){
   ]);
 }
 
+function showRehabCoach(){
+  const html=`
+    <p>${locale==='fr'?'Alex démontre visuellement la séquence choisie dans Rehab : contrôle, force ou capacité. Le rôle du coach ici est pédagogique et spatial.':'Alex visually demonstrates the selected Rehab sequence: control, strength or capacity. The coach role here is educational and spatial.'}</p>
+    <div class="panel-grid"><div><span>CONTROL</span><b>BALANCE</b></div><div><span>STRENGTH</span><b>SQUAT</b></div><div><span>CAPACITY</span><b>MARCH</b></div><div><span>MODE</span><b>DEMO</b></div></div>
+    <div class="data-note">${locale==='fr'?'Les mouvements sont des démonstrations génériques de l’interface World, pas une prescription personnalisée.':'Movements are generic World-interface demonstrations, not personalised prescriptions.'}</div>`;
+  openPanel('ALEX · REHAB COACH',locale==='fr'?'Démonstrateur de mouvement.':'Movement demonstrator.',html,[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:locale==='fr'?'CONTROL':'CONTROL',onClick:()=>showRehabStation('control')},
+    {label:locale==='fr'?'STRENGTH':'STRENGTH',primary:true,onClick:()=>showRehabStation('strength')}
+  ]);
+}
+
 function showNpcConversation(npc){
   const d=npc?.userData?.npc;if(!d)return;
   completeJourney('social');
@@ -2007,7 +2149,7 @@ function showNpcConversation(npc){
 }
 function setMode(next){
   if(next!=='rehab')stopRehabSession();
-  mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';
+  mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';rehabCoach.visible=next==='rehab';
 }
 function enterTwin(){
   completeJourney('twin');
@@ -2238,8 +2380,17 @@ function updateTwinScan(now){
       v.ring.rotation.z=now*.00035+i*.37;
       v.ring.scale.setScalar(.96+.05*Math.sin(now*.0014+i));
     });
+    const bt=now*.001;
+    body.rotation.y=Math.sin(bt*.23)*.16;
+    biomech.rotation.y=body.rotation.y;
+    if(!lowPower){
+      Object.values(biomechZones).flat().forEach((part,i)=>{
+        if(part.material)part.material.opacity=(part.userData.baseOpacity??part.material.opacity)*(.94+.06*Math.sin(bt*1.4+i*.33));
+      });
+    }
   }
   if(mode==='rehab'){
+    animateRehabCoach(now,Math.min(.05,(now-(updateTwinScan.lastNow||now))/1000||.016));updateTwinScan.lastNow=now;
     Object.values(rehabStationVisuals).forEach((v,i)=>{
       if(!rehabSessionTimer)v.pulse.scale.setScalar(.95+.06*Math.sin(now*.0016+i*.9));
       v.ring.rotation.z=now*.00022*(i%2?1:-1);
@@ -2463,7 +2614,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.6.0-twin-rehab',
+  version:'2.7.1-biomech-coach',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
