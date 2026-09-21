@@ -212,7 +212,7 @@ window.KomoV135Arrival={
   version:'0.13.5-sprint2',
   threshold:true,
   wayfinding:true,
-  journey:'measure-understand-act-live',
+  journey:'measure-understand-act-live-engage-reward-measure-again',
   mobileHud:true,
   locomotion:'inertial'
 };
