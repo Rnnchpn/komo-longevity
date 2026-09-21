@@ -732,10 +732,22 @@ function animateLiving(now){
   }
   sun.position.x=-24+Math.sin(t*.025)*3.5;
 }
+let livingAnimationFailed=false;
 function animate(now){
   const dt=Math.min(.05,(now-last)/1000||.016);last=now;
-  updateMovement(dt);updateCamera(now);updateDoors();updateLocation();updateHeading();updateInteraction();updateTwinScan(now);updateLiving(now);
-  renderer.render(scene,camera);raf=requestAnimationFrame(animate);
+  updateMovement(dt);
+  updateCamera(now);
+  updateDoors();
+  updateLocation();
+  updateHeading();
+  updateInteraction();
+  updateTwinScan(now);
+  if(!livingAnimationFailed){
+    try{animateLiving(now)}
+    catch(err){livingAnimationFailed=true;console.warn('[KŌMØ World] living animation disabled after runtime error',err)}
+  }
+  renderer.render(scene,camera);
+  raf=requestAnimationFrame(animate);
 }
 raf=requestAnimationFrame(animate);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){velocity.set(0,0,0);keys.clear()}});
@@ -745,7 +757,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.2.0-multiplayer-foundation',
+  version:'1.3.0-render-stable',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode}),
