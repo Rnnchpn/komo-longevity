@@ -29,6 +29,18 @@ const qualityStatus=$('#quality-status');
 const fpsStatus=$('#fps-status');
 const qualityToggle=$('#quality-toggle');
 const resetPosition=$('#reset-position');
+const cameraToggle=$('#camera-toggle');
+const journeyHud=$('#journey-hud');
+const journeyLevelEl=$('#journey-level');
+const journeyTitleEl=$('#journey-title');
+const journeyProgressEl=$('#journey-progress');
+const journeyNextEl=$('#journey-next');
+const journeyXpEl=$('#journey-xp');
+const journeyMenuLevel=$('#journey-menu-level');
+const journeyMenuXp=$('#journey-menu-xp');
+const journeyMenuProgress=$('#journey-menu-progress');
+const journeyMenuNext=$('#journey-menu-next');
+const journeyMissionsEl=$('#journey-missions');
 
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
@@ -555,6 +567,38 @@ function updateNpc(npc,t,index){
   d.head.rotation.y=Math.sin(t*.62+index*.73)*.09;
   npc.position.y+=Math.abs(stride)*.015;
 }
+function makePlayerAvatar(){
+  const g=new THREE.Group();g.name='KOMO_PLAYER_AVATAR_V24';g.userData.dynamic=true;scene.add(g);
+  const skin=new THREE.MeshStandardMaterial({color:0xc99673,roughness:.82});
+  const cloth=new THREE.MeshStandardMaterial({color:0x263f34,roughness:.72});
+  const trouser=new THREE.MeshStandardMaterial({color:0x303733,roughness:.82});
+  const shoe=new THREE.MeshStandardMaterial({color:0x211f1d,roughness:.68});
+  const hair=new THREE.MeshStandardMaterial({color:0x2a2420,roughness:.90});
+  const cast=!lowPower;
+
+  const torsoGroup=new THREE.Group();torsoGroup.position.y=1.23;g.add(torsoGroup);
+  const torso=mesh(torsoGroup,new THREE.CylinderGeometry(.245,.30,.72,lowPower?10:16),cloth,0,0,0,{cast});
+  box(torsoGroup,.70,.15,.24,cloth,0,.25,0,{cast});
+  const headGroup=new THREE.Group();headGroup.position.y=1.87;g.add(headGroup);
+  const head=mesh(headGroup,new THREE.SphereGeometry(.205,lowPower?12:18,lowPower?8:14),skin,0,0,0,{cast});head.scale.set(.92,1.05,.94);
+  const hairCap=mesh(headGroup,new THREE.SphereGeometry(.211,lowPower?10:16,lowPower?7:10,0,Math.PI*2,0,Math.PI*.50),hair,0,.07,-.005,{cast});hairCap.scale.set(.94,.88,.96);
+
+  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.13,.90,0);rightLeg.position.set(.13,.90,0);g.add(leftLeg,rightLeg);
+  const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();leftKnee.position.y=-.31;rightKnee.position.y=-.31;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  cyl(leftLeg,.072,.078,.34,trouser,0,-.17,0,lowPower?7:10,{cast});cyl(rightLeg,.072,.078,.34,trouser,0,-.17,0,lowPower?7:10,{cast});
+  cyl(leftKnee,.060,.068,.32,trouser,0,-.17,0,lowPower?7:10,{cast});cyl(rightKnee,.060,.068,.32,trouser,0,-.17,0,lowPower?7:10,{cast});
+  box(leftKnee,.15,.09,.30,shoe,0,-.37,.065,{cast});box(rightKnee,.15,.09,.30,shoe,0,-.37,.065,{cast});
+
+  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.34,1.52,0);rightArm.position.set(.34,1.52,0);g.add(leftArm,rightArm);
+  cyl(leftArm,.050,.058,.56,cloth,0,-.28,0,lowPower?7:10,{cast});cyl(rightArm,.050,.058,.56,cloth,0,-.28,0,lowPower?7:10,{cast});
+
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.34,.38,32),new THREE.MeshBasicMaterial({color:0xc49a62,transparent:true,opacity:.28,depthWrite:false}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=.015;g.add(ring);
+
+  const tag=npcNameTag('YOU','KŌMØ WORLD');tag.position.y=2.46;tag.scale.set(1.45,.41,1);g.add(tag);
+  g.userData.avatar={torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,tag,phase:0,facing:0};
+  return g;
+}
 function loungeCluster(parent,x,z,rot=0,scale=1){
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
   box(g,4.35*scale,.035,3.05*scale,M.stoneDeep,0,.19,0);
@@ -942,6 +986,14 @@ const arrivalConsole=new THREE.Group();arrivalConsole.position.set(-5.7,0,13.0);
 box(arrivalConsole,1.18,.80,.58,MAT.travertine,0,.42,0);
 box(arrivalConsole,.96,.055,.44,MAT.brass,0,.84,0);
 plaque(arrivalConsole,'ARRIVAL','PULSE · WORLD',1.0,.38,0,1.20,-.30,{dark:true,titleSize:38});
+
+// V2.4 World Journey station — explains progression inside the spatial experience.
+const journeyStation=new THREE.Group();journeyStation.name='KOMO_WORLD_JOURNEY_V24';journeyStation.position.set(4.8,0,8.5);building.add(journeyStation);
+box(journeyStation,1.35,.22,1.35,MAT.travertine,0,.12,0);
+box(journeyStation,.92,1.72,.34,MAT.blackened,0,1.05,0,{cast:true});
+box(journeyStation,.74,.05,.22,MAT.brass,0,1.78,.16);
+plaque(journeyStation,'WORLD JOURNEY','EXPLORE · UNDERSTAND · ACT',1.25,.48,0,1.28,.20,{dark:true,titleSize:37});
+const journeyRing=mesh(journeyStation,new THREE.TorusGeometry(.27,.028,8,30),MAT.brass,0,2.14,0,{cast:false});journeyRing.rotation.x=Math.PI/2;
 
 // Hall shell.
 box(building,23.8,.28,46,M.stoneLight,0,.13,-7.0);
@@ -1390,6 +1442,10 @@ glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 const player=new THREE.Vector3(0,0,31.5);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
+let cameraMode='third';
+const playerAvatar=makePlayerAvatar();
+let playerFacing=0;
+const cameraDesired=new THREE.Vector3(),cameraLook=new THREE.Vector3();
 let yaw=0,pitch=-.045;
 let targetYaw=yaw,targetPitch=pitch;
 let mode='world';
@@ -1406,13 +1462,103 @@ const interactions=[
   {id:'arena',x:6.8,z:-26.7,r:4.0,title:()=>copy[locale].arenaTitle,desc:()=>copy[locale].arenaCopy,action:enterArena},
   {id:'library',x:-10.7,z:-10,r:3.2,title:()=>copy[locale].libraryTitle,desc:()=>copy[locale].libraryCopy,action:showLibrary},
   {id:'talks',x:10.7,z:-10,r:3.2,title:()=>copy[locale].talksTitle,desc:()=>copy[locale].talksCopy,action:showTalks},
-  {id:'life',x:8.6,z:2.6,r:3.4,title:()=>copy[locale].storeTitle,desc:()=>copy[locale].storeCopy,action:showLifeStore}
+  {id:'life',x:8.6,z:2.6,r:3.4,title:()=>copy[locale].storeTitle,desc:()=>copy[locale].storeCopy,action:showLifeStore},
+  {id:'journey',x:4.8,z:8.5,r:3.0,title:()=>locale==='fr'?'World Journey':'World Journey',desc:()=>locale==='fr'?'Voir votre niveau, vos XP et les prochaines étapes.':'View your level, XP and next steps.',action:showJourneyPanel}
 ];
 
 function notify(message){
   toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(notify.t);
   notify.t=setTimeout(()=>toastEl.classList.remove('show'),1800);
 }
+const JOURNEY_KEY='komo_world_journey_v1';
+const JOURNEY_LEVELS=[
+  {level:1,min:0,title:{fr:'ARRIVAL',en:'ARRIVAL'}},
+  {level:2,min:35,title:{fr:'EXPLORER',en:'EXPLORER'}},
+  {level:3,min:85,title:{fr:'NAVIGATOR',en:'NAVIGATOR'}},
+  {level:4,min:150,title:{fr:'MOVER',en:'MOVER'}},
+  {level:5,min:220,title:{fr:'PIONEER',en:'PIONEER'}}
+];
+const JOURNEY_MISSIONS=[
+  {id:'arrival',xp:10,title:{fr:'Entrer dans KŌMØ World',en:'Enter KŌMØ World'},sub:{fr:'Commencer votre parcours',en:'Start your journey'}},
+  {id:'hall',xp:20,title:{fr:'Découvrir le Hall',en:'Discover the Hall'},sub:{fr:'Franchir l’entrée principale',en:'Cross the main entrance'}},
+  {id:'journey',xp:15,title:{fr:'Comprendre le World Journey',en:'Understand World Journey'},sub:{fr:'Ouvrir la station de progression',en:'Open the progression station'}},
+  {id:'twin',xp:35,title:{fr:'Explorer le Functional Twin',en:'Explore Functional Twin'},sub:{fr:'Comprendre votre espace de données',en:'Understand your data space'}},
+  {id:'rehab',xp:35,title:{fr:'Passer de l’insight à l’action',en:'Move from insight to action'},sub:{fr:'Découvrir Rehab',en:'Discover Rehab'}},
+  {id:'arena',xp:35,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir les challenges',en:'Discover challenges'}},
+  {id:'life',xp:25,title:{fr:'Visiter KŌMØ Life',en:'Visit KŌMØ Life'},sub:{fr:'Relier World au réel',en:'Connect World to real life'}},
+  {id:'upper',xp:30,title:{fr:'Atteindre le Level 2',en:'Reach Level 2'},sub:{fr:'Explorer les galeries hautes',en:'Explore the upper galleries'}},
+  {id:'library',xp:20,title:{fr:'Ouvrir Science Library',en:'Open Science Library'},sub:{fr:'Voir la méthode et les sources',en:'See method and sources'}},
+  {id:'talks',xp:20,title:{fr:'Découvrir Talks',en:'Discover Talks'},sub:{fr:'Experts et événements',en:'Experts and events'}}
+];
+function loadJourney(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(JOURNEY_KEY)||'{}');
+    return {done:raw.done&&typeof raw.done==='object'?raw.done:{},xp:Number(raw.xp)||0};
+  }catch{return {done:{},xp:0}}
+}
+const journey=loadJourney();
+function saveJourney(){try{localStorage.setItem(JOURNEY_KEY,JSON.stringify(journey))}catch{}}
+function journeyLevelForXp(xp){
+  let result=JOURNEY_LEVELS[0];
+  for(const l of JOURNEY_LEVELS)if(xp>=l.min)result=l;
+  return result;
+}
+function journeyNextLevel(level){
+  return JOURNEY_LEVELS.find(l=>l.level===level.level+1)||null;
+}
+function journeyNextMission(){
+  return JOURNEY_MISSIONS.find(m=>!journey.done[m.id])||null;
+}
+function updateJourneyUI(){
+  const level=journeyLevelForXp(journey.xp),nextLevel=journeyNextLevel(level),nextMission=journeyNextMission();
+  const floor=level.min,ceil=nextLevel?nextLevel.min:Math.max(level.min+1,journey.xp);
+  const pct=nextLevel?THREE.MathUtils.clamp((journey.xp-floor)/(ceil-floor)*100,0,100):100;
+  journeyLevelEl.textContent=String(level.level).padStart(2,'0');
+  journeyTitleEl.textContent=level.title[locale];
+  journeyXpEl.textContent=journey.xp;
+  journeyProgressEl.style.width=pct+'%';
+  journeyNextEl.textContent=nextMission?(nextMission.title[locale]+' · +'+nextMission.xp+' XP'):(locale==='fr'?'Journey complété':'Journey complete');
+  journeyMenuLevel.textContent='LEVEL '+String(level.level).padStart(2,'0')+' · '+level.title[locale];
+  journeyMenuXp.textContent=journey.xp+' XP';
+  journeyMenuProgress.style.width=pct+'%';
+  journeyMenuNext.textContent=nextMission?(locale==='fr'?'Prochaine étape : ':'Next step: ')+nextMission.title[locale]:(locale==='fr'?'Vous avez exploré le parcours actuel.':'You explored the current journey.');
+  journeyMissionsEl.innerHTML=JOURNEY_MISSIONS.map((m,i)=>`
+    <div class="journey-mission ${journey.done[m.id]?'done':''}">
+      <i>${journey.done[m.id]?'✓':String(i+1).padStart(2,'0')}</i>
+      <span><b>${m.title[locale]}</b><small>${m.sub[locale]}</small></span>
+      <small>+${m.xp} XP</small>
+    </div>`).join('');
+}
+function completeJourney(id,{silent=false}={}){
+  const mission=JOURNEY_MISSIONS.find(m=>m.id===id);if(!mission||journey.done[id])return false;
+  const before=journeyLevelForXp(journey.xp);
+  journey.done[id]=Date.now();journey.xp+=mission.xp;saveJourney();updateJourneyUI();
+  const after=journeyLevelForXp(journey.xp);
+  if(!silent){
+    notify(after.level>before.level
+      ?(locale==='fr'?'LEVEL '+after.level+' · '+after.title.fr:'LEVEL '+after.level+' · '+after.title.en)
+      :'+'+mission.xp+' XP · '+mission.title[locale]);
+  }
+  return true;
+}
+function journeyHtml(){
+  const level=journeyLevelForXp(journey.xp),next=journeyNextMission();
+  return `
+    <div class="metric-hero"><div><span>WORLD LEVEL</span><strong>${String(level.level).padStart(2,'0')}</strong></div><div><span>EXPERIENCE</span><strong>${journey.xp}<em> XP</em></strong></div></div>
+    <div class="priority-card"><b>${locale==='fr'?'NIVEAU ACTUEL':'CURRENT LEVEL'}</b>${level.title[locale]}</div>
+    <div class="panel-grid">${JOURNEY_MISSIONS.slice(0,8).map(m=>`<div><span>${journey.done[m.id]?'✓ DONE':'+'+m.xp+' XP'}</span><b>${m.title[locale]}</b></div>`).join('')}</div>
+    <div class="data-note">${locale==='fr'?'Les XP récompensent l’exploration et l’engagement dans World. Aucun score de santé, Motion Score ou Motion Age n’entre dans ce niveau.':'XP rewards exploration and engagement in World. No health score, Motion Score or Motion Age contributes to this level.'}</div>
+    ${next?`<div class="priority-card"><b>${locale==='fr'?'PROCHAINE ÉTAPE':'NEXT STEP'}</b>${next.title[locale]} · +${next.xp} XP</div>`:''}`;
+}
+function showJourneyPanel(){
+  completeJourney('journey');
+  openPanel('WORLD JOURNEY',locale==='fr'?'Votre progression dans KŌMØ World.':'Your progression through KŌMØ World.',journeyHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:locale==='fr'?'PROCHAINE ÉTAPE':'NEXT STEP',primary:true,onClick:()=>{const n=journeyNextMission();closePanel();if(n&&travelPoints[n.id])fastTravel(n.id)}}
+  ]);
+}
+journeyHud.addEventListener('click',showJourneyPanel);
+
 function syncUiOpen(){
   document.body.classList.toggle('ui-open',worldMenu.classList.contains('open')||panel.classList.contains('open'));
 }
@@ -1423,6 +1569,14 @@ function openWorldMenu(){
   closePanel();worldMenu.classList.add('open');worldMenu.setAttribute('aria-hidden','false');velocity.set(0,0,0);syncUiOpen();
 }
 function toggleWorldMenu(){worldMenu.classList.contains('open')?closeWorldMenu():openWorldMenu()}
+function setCameraMode(next){
+  cameraMode=next==='first'?'first':'third';
+  document.body.classList.toggle('camera-third',cameraMode==='third');
+  playerAvatar.visible=cameraMode==='third';
+  cameraToggle.textContent='CAMERA · '+(cameraMode==='third'?'3RD':'1ST');
+}
+function toggleCamera(){setCameraMode(cameraMode==='third'?'first':'third')}
+setCameraMode('third');
 const travelPoints={
   arrival:{mode:'world',x:0,y:0,z:31.5,yaw:0,level:0},
   hall:{mode:'world',x:0,y:0,z:5.5,yaw:0,level:0},
@@ -1436,7 +1590,7 @@ function fastTravel(id){
   const p=travelPoints[id];if(!p)return;
   closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
   setTimeout(()=>{
-    setMode(p.mode);playerLevel=p.level;player.set(p.x,p.y,p.z);yaw=targetYaw=p.yaw;pitch=targetPitch=-.035;syncPlayerElevation();updateLocation();
+    setMode(p.mode);playerLevel=p.level;player.set(p.x,p.y,p.z);yaw=targetYaw=p.yaw;pitch=targetPitch=-.035;syncPlayerElevation();updateLocation();if(id==='upper')completeJourney('upper');else if(['twin','rehab','arena','life'].includes(id))completeJourney(id);
     setTimeout(()=>travelFade.classList.remove('active'),110);
   },180);
 }
@@ -1464,6 +1618,7 @@ function deskHtml(){
     <div class="priority-card"><b>NEXT STEP</b>Start with Functional Twin to review your current state and progression from baseline.</div>`;
 }
 function showDesk(){
+  completeJourney('hall',{silent:true});
   openPanel('KŌMØ DESK',locale==='fr'?'Votre prochaine étape.':'Your next move.',deskHtml(),[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
     {label:locale==='fr'?'ALLER AU TWIN':'GO TO TWIN',primary:true,onClick:()=>{closePanel();player.set(-6.8,0,-23.0);yaw=0}}
@@ -1521,12 +1676,14 @@ function showArena(){
   ]);
 }
 function showLibrary(){
+  completeJourney('library');
   const html=locale==='fr'
     ?'<p>La Library rassemble la méthode KŌMØ, les sources, la littérature et la provenance des mesures utilisées dans votre parcours.</p><div class="panel-grid"><div><span>SOURCES</span><b>Mesuré</b></div><div><span>METHOD</span><b>Traçable</b></div><div><span>TIME</span><b>Longitudinal</b></div><div><span>DATA</span><b>Privé</b></div></div>'
     :'<p>Library brings together KŌMØ methodology, sources, literature and measurement provenance used across your journey.</p><div class="panel-grid"><div><span>SOURCES</span><b>Measured</b></div><div><span>METHOD</span><b>Traceable</b></div><div><span>TIME</span><b>Longitudinal</b></div><div><span>DATA</span><b>Private</b></div></div>';
   openPanel('LIBRARY',locale==='fr'?'Science & méthode.':'Science & method.',html,[{label:copy[locale].close,onClick:closePanel}]);
 }
 function showTalks(){
+  completeJourney('talks');
   const html=locale==='fr'
     ?'<p>Talks accueille les conférences, experts et événements KŌMØ. Cet espace sera connecté aux contenus de la plateforme.</p>'
     :'<p>Talks hosts KŌMØ conferences, experts and events. This space will connect to platform content.</p>';
@@ -1534,6 +1691,7 @@ function showTalks(){
 }
 
 function showLifeStore(){
+  completeJourney('life');
   const html=locale==='fr'
     ?`<p>KŌMØ Life prolonge World dans le réel : objets, équipements et éditions conçus autour du mouvement et de la longévité.</p>
       <div class="store-products">
@@ -1557,12 +1715,15 @@ function setMode(next){
   mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';
 }
 function enterTwin(){
+  completeJourney('twin');
   playerLevel=0;setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';
 }
 function enterRehab(){
+  completeJourney('rehab');
   playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='REHAB';
 }
 function enterArena(){
+  completeJourney('arena');
   playerLevel=0;setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';
 }
 function returnToHall(){
@@ -1630,7 +1791,7 @@ function updateMovement(dt){
   x+=joyX;z+=-joyY;
   const input=new THREE.Vector2(x,z);
   const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight');
-  const speed=sprint?5.35:3.35;
+  const speed=sprint?7.15:4.35;
   const target=new THREE.Vector3();
   if(input.lengthSq()>.002){
     input.normalize();
@@ -1638,20 +1799,52 @@ function updateMovement(dt){
     const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
     target.addScaledVector(right,input.x).addScaledVector(forward,input.y).normalize().multiplyScalar(speed);
   }
-  velocity.lerp(target,1-Math.exp(-(input.lengthSq()>.002?8.2:10.5)*dt));
+  velocity.lerp(target,1-Math.exp(-(input.lengthSq()>.002?10.2:12.5)*dt));
   if(velocity.lengthSq()>.0004)tryMove(velocity.x*dt,velocity.z*dt);
 }
-function updateCamera(now){
-  const smooth=1-Math.exp(-16*Math.min(.05,(now-last)/1000||.016));
+function updatePlayerAvatar(now,dt){
+  playerAvatar.position.set(player.x,player.y,player.z);
+  const av=playerAvatar.userData.avatar;
+  const speed=velocity.length();
+  if(speed>.08){
+    const desired=Math.atan2(velocity.x,velocity.z);
+    let d=((desired-playerFacing+Math.PI)%(Math.PI*2))-Math.PI;
+    playerFacing+=d*(1-Math.exp(-12*dt));
+    av.phase+=dt*(5.2+speed*1.25);
+  }
+  playerAvatar.rotation.y=playerFacing;
+  const stride=Math.sin(av.phase)*Math.min(1,speed/4.2);
+  av.leftLeg.rotation.x=stride*.46;av.rightLeg.rotation.x=-stride*.46;
+  av.leftKnee.rotation.x=Math.max(0,-stride)*.30;av.rightKnee.rotation.x=Math.max(0,stride)*.30;
+  av.leftArm.rotation.x=-stride*.32;av.rightArm.rotation.x=stride*.32;
+  av.torsoGroup.rotation.z=Math.cos(av.phase*.5)*.018*Math.min(1,speed/3);
+  av.headGroup.rotation.y=Math.sin(now*.00055)*.05;
+  av.tag.visible=cameraMode==='third'&&mode==='world'&&!lowPower;
+}
+function updateCamera(now,dt){
+  const smooth=1-Math.exp(-16*dt);
   yaw+=((targetYaw-yaw+Math.PI)%(Math.PI*2)-Math.PI)*smooth;
   pitch+=(targetPitch-pitch)*smooth;
-  const move=Math.min(1,velocity.length()/3.35);
-  const bob=move*Math.sin(now*.0102)*.008;
-  const eyeY=player.y+1.72+bob;
-  camera.position.set(player.x,eyeY,player.z);
-  const cp=Math.cos(pitch),sp=Math.sin(pitch);
-  const look=18;
-  camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
+  if(cameraMode==='third'){
+    const distance=lowPower?4.2:4.8;
+    const height=lowPower?2.45:2.72;
+    cameraDesired.set(
+      player.x+Math.sin(yaw)*distance,
+      player.y+height+pitch*1.25,
+      player.z+Math.cos(yaw)*distance
+    );
+    camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
+    cameraLook.set(player.x,player.y+1.28+pitch*.55,player.z);
+    camera.lookAt(cameraLook);
+  }else{
+    const move=Math.min(1,velocity.length()/4.35);
+    const bob=move*Math.sin(now*.0102)*.006;
+    const eyeY=player.y+1.72+bob;
+    camera.position.set(player.x,eyeY,player.z);
+    const cp=Math.cos(pitch),sp=Math.sin(pitch),look=18;
+    camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
+  }
+  updatePlayerAvatar(now,dt);
 }
 function updateDoors(now,dt){
   let approach=mode==='world'&&player.z<25.8&&player.z>9.0&&Math.abs(player.x)<4.8;
@@ -1683,14 +1876,15 @@ function updateLocation(){
   if(mode==='rehab'){locationName.textContent='REHAB';return}
   if(mode==='arena'){locationName.textContent='ARENA';return}
   if(playerLevel===1){
+    completeJourney('upper',{silent:true});
     if(player.z<-18.8)locationName.textContent='UPPER OBSERVATORY';
     else if(player.x<0)locationName.textContent='SCIENCE LIBRARY · LEVEL 2';
     else locationName.textContent='LIFE LOUNGE · LEVEL 2';
     return;
   }
   if(player.z>23)locationName.textContent='ARRIVAL PLAZA';
-  else if(player.x>6.8&&player.z>-2&&player.z<7)locationName.textContent='KŌMØ LIFE';
-  else if(player.z>-7)locationName.textContent='KŌMØ HALL';
+  else if(player.x>6.8&&player.z>-2&&player.z<7){locationName.textContent='KŌMØ LIFE';completeJourney('life',{silent:true})}
+  else if(player.z>-7){locationName.textContent='KŌMØ HALL';completeJourney('hall',{silent:true})}
   else locationName.textContent='MOTION ATRIUM';
 }
 function updateHeading(){
@@ -1714,7 +1908,10 @@ function updateInteraction(){
     interactionTitle.textContent=best.title();interactionCopy.textContent=best.desc();
   }
 }
-function triggerAction(){currentInteraction?.action?.()}
+function triggerAction(){
+  if(currentInteraction&&JOURNEY_MISSIONS.some(m=>m.id===currentInteraction.id))completeJourney(currentInteraction.id);
+  currentInteraction?.action?.();
+}
 function updateTwinScan(now){
   if(mode!=='twin')return;
   scanRing.position.y=.85+(Math.sin(now*.0012)*.5+.5)*3.7;
@@ -1725,6 +1922,7 @@ window.addEventListener('keydown',e=>{
   if(['KeyW','KeyA','KeyS','KeyD','KeyZ','KeyQ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code)){keys.add(e.code);e.preventDefault()}
   if(e.code==='KeyE'&&!worldMenu.classList.contains('open')){triggerAction();e.preventDefault()}
   if(e.code==='KeyM'){toggleWorldMenu();e.preventDefault()}
+  if(e.code==='KeyV'){toggleCamera();e.preventDefault()}
   if(e.code==='Escape'){if(worldMenu.classList.contains('open'))closeWorldMenu();else if(panel.classList.contains('open'))closePanel();else if(mode!=='world')returnToHall()}
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
@@ -1756,10 +1954,11 @@ function resetJoy(e){if(joyPointer!==null&&e.pointerId!==joyPointer)return;joyPo
 joystickZone.addEventListener('pointerup',resetJoy);joystickZone.addEventListener('pointercancel',resetJoy);
 mobileAction.addEventListener('click',triggerAction);
 
-$('#intro-enter').addEventListener('click',()=>{intro.classList.add('hidden');targetYaw=yaw;targetPitch=pitch;notify(locale==='fr'?'Bienvenue dans KŌMØ World':'Welcome to KŌMØ World')});
+$('#intro-enter').addEventListener('click',()=>{intro.classList.add('hidden');targetYaw=yaw;targetPitch=pitch;completeJourney('arrival');notify(locale==='fr'?'Bienvenue dans KŌMØ World':'Welcome to KŌMØ World')});
 $('#panel-close').addEventListener('click',closePanel);
 worldMenuToggle.addEventListener('click',toggleWorldMenu);
 worldMenuClose.addEventListener('click',closeWorldMenu);
+cameraToggle.addEventListener('click',toggleCamera);
 qualityToggle.addEventListener('click',()=>{
   qualityMode=qualityMode==='auto'?'performance':qualityMode==='performance'?'high':'auto';
   renderScale=qualityMode==='performance'?(lowPower?.62:1.10):qualityMode==='high'?(lowPower?.90:1.75):(lowPower?.72:1.45);
@@ -1778,6 +1977,7 @@ function applyLocale(){
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
   $('#world-menu-copy').textContent=locale==='fr'?'Choisissez un espace ou ajustez votre expérience.':'Choose a space or adjust your experience.';
+  updateJourneyUI();
   if(currentInteraction){interactionTitle.textContent=currentInteraction.title();interactionCopy.textContent=currentInteraction.desc()}
   if(panel.classList.contains('open')){
     if(mode==='twin')showTwin();else if(mode==='rehab')showRehab();else if(mode==='arena')showArena();
@@ -1820,6 +2020,7 @@ function updatePerformance(now){
 }
 function animateLiving(now){
   const t=now*.001;
+  if(!lowPower){journeyRing.rotation.z=t*.18;journeyRing.rotation.y=t*.10;}
   if(!lowPower)living.trees.forEach((tree,i)=>{
     const sway=Math.sin(t*.42+tree.userData.swayPhase+i*.17);
     tree.rotation.z=sway*.008;tree.rotation.x=Math.cos(t*.36+tree.userData.swayPhase)*.004;
@@ -1891,7 +2092,7 @@ let livingAnimationFailed=false;
 function animate(now){
   const dt=Math.min(.05,(now-last)/1000||.016);last=now;updatePerformance(now);
   updateMovement(dt);
-  updateCamera(now);
+  updateCamera(now,dt);
   updateDoors(now,dt);
   updateLocation();
   updateHeading();
@@ -1910,7 +2111,7 @@ window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(
 
 function freezeStaticScene(){
   if(!lowPower)return;
-  const dynamicMeshes=new Set([scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB].filter(Boolean));
+  const dynamicMeshes=new Set([scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB,journeyRing].filter(Boolean));
   scene.traverse(o=>{
     if(o.isMesh&&!dynamicMeshes.has(o)){
       o.updateMatrix();
@@ -1921,16 +2122,19 @@ function freezeStaticScene(){
 freezeStaticScene();
 if(lowPower)applyEmergencyPerformance();
 syncPlayerElevation();
+updateJourneyUI();
 applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.3.0-living-entrance',
+  version:'2.4.0-third-person-journey',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),
   getLocale:()=>locale,
   getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale}),
+  getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
+  getCameraMode:()=>cameraMode,
   fastTravel,
   notify
 };
