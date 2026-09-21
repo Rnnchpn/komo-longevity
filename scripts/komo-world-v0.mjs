@@ -24,8 +24,10 @@ const checks=[
   ['floor polish V2.0 present',runtime.includes('V2.0 floor polish')],
   ['smooth UX V2.1+ present',runtime.includes('function fastTravel')&&runtime.includes('world-menu')],
   ['adaptive performance V2.1+ present',runtime.includes('function updatePerformance')&&runtime.includes('applyRenderScale')],
-  ['performance rescue V2.2 present',runtime.includes("version:'2.2.1-performance-rescue'")&&runtime.includes('function applyEmergencyPerformance')&&runtime.includes('function freezeStaticScene')],
-  ['low-power lights disabled',runtime.includes('l.visible=false;l.intensity=0')&&runtime.includes("antialias:!lowPower")]
+  ['performance rescue V2.2+ present',runtime.includes('function applyEmergencyPerformance')&&runtime.includes('function freezeStaticScene')],
+  ['low-power lights disabled',runtime.includes('l.visible=false;l.intensity=0')&&runtime.includes("antialias:!lowPower")],
+  ['living entrance V2.3 present',runtime.includes("version:'2.3.0-living-entrance'")&&runtime.includes('KOMO_LIVING_ENTRANCE_V23')&&runtime.includes('function updateDoors(now,dt)')],
+  ['arrival life cues V2.3 present',runtime.includes('KOMO_ARRIVAL_DETAILS_V23')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
