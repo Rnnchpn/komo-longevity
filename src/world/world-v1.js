@@ -1430,6 +1430,32 @@ bodySegment(body,[.34,1.18,.02],[.34,.25,.04],.14,M.twinGlow);
 mesh(body,new THREE.TorusGeometry(2.5,.045,10,96),M.bronze,0,3.0,.15).rotation.x=Math.PI/2;
 const scanRing=mesh(body,new THREE.RingGeometry(1.55,1.62,72),new THREE.MeshBasicMaterial({color:0xc5dbc9,transparent:true,opacity:.25,side:THREE.DoubleSide}),0,1.0,.1);
 scanRing.rotation.x=-Math.PI/2;
+
+// V2.7 Biomechanical Twin overlay — low-cost joints + functional zones.
+const biomech=new THREE.Group();biomech.name='KOMO_BIOMECH_TWIN_V27';biomech.position.copy(body.position);twinRoom.add(biomech);
+const biomechZones={};
+function bioMat(color,opacity=.58){return new THREE.MeshBasicMaterial({color,transparent:true,opacity,depthWrite:false})}
+function joint(name,x,y,z,r=.085,color=0xd7c08e){
+  const m=mesh(biomech,new THREE.SphereGeometry(r,lowPower?8:12,lowPower?6:9),bioMat(color,.70),x,y,z,{cast:false,receive:false});
+  m.userData.dynamic=true;biomechZones[name]=biomechZones[name]||[];biomechZones[name].push(m);return m;
+}
+function zoneRing(name,x,y,z,r=.28,color=0xb9cfbf,rot='x'){
+  const m=mesh(biomech,new THREE.RingGeometry(r*.78,r,lowPower?18:28),bioMat(color,.36),x,y,z,{cast:false,receive:false});
+  m.rotation[rot]=Math.PI/2;m.userData.dynamic=true;biomechZones[name]=biomechZones[name]||[];biomechZones[name].push(m);return m;
+}
+// posture / spine
+[-.05,.45,.95,1.45,1.95,2.45,2.95,3.45].forEach((off,i)=>joint('posture',0,1.05+off,.12,.055,i%2?0xd7c08e:0xb9cfbf));
+// shoulders + hips = mobility
+[[-.62,3.58,.05],[.62,3.58,.05],[-.30,2.18,.05],[.30,2.18,.05]].forEach(p=>zoneRing('mobility',...p,.22,0xb9cfbf,'y'));
+// thighs = muscle
+[[-.34,1.68,.08],[.34,1.68,.08],[-.34,1.22,.08],[.34,1.22,.08]].forEach(p=>zoneRing('muscle',...p,.21,0xd9b977,'y'));
+// feet / base = balance
+[[-.34,.34,.10],[.34,.34,.10]].forEach(p=>zoneRing('balance',...p,.25,0xaec8b6,'x'));
+const balancePlatform=mesh(biomech,new THREE.RingGeometry(.66,.78,40),bioMat(0xaec8b6,.30),0,.08,.10,{cast:false,receive:false});balancePlatform.rotation.x=-Math.PI/2;balancePlatform.userData.dynamic=true;(biomechZones.balance||(biomechZones.balance=[])).push(balancePlatform);
+// chest / breathing capacity = endurance
+[.72,.92,1.12].forEach((r,i)=>{const m=mesh(biomech,new THREE.TorusGeometry(r,.022,8,lowPower?28:44),bioMat(0xd7c08e,.20),0,3.15,.12,{cast:false,receive:false});m.scale.y=.62;m.userData.dynamic=true;(biomechZones.endurance||(biomechZones.endurance=[])).push(m)});
+let twinActiveDomain='all';
+
 plaque(twinRoom,'CURRENT','MOTION SCORE · MOTION AGE',4.4,1.25,-6.7,4.2,-8.0,{dark:true,titleSize:78});
 plaque(twinRoom,'LONGITUDINAL','BASELINE → TODAY',4.4,1.25,6.7,4.2,-8.0,{dark:true,titleSize:74});
 glow(twinRoom,0xc9d7c9,2.0,12,0,5.5,-3);
@@ -1504,6 +1530,40 @@ const rehabStationVisuals={};
   }
 });
 plaque(rehabRoom,'GUIDED DEMO','CHOOSE A STATION · PRESS E',6.8,.72,0,1.05,8.9,{dark:false,titleSize:58});
+
+// V2.7 Rehab Coach — one lightweight demonstrator shared across all stations.
+function makeRehabCoach(){
+  const g=new THREE.Group();g.name='KOMO_REHAB_COACH_V27';g.position.set(0,0,-6.3);rehabRoom.add(g);
+  const skin=new THREE.MeshStandardMaterial({color:0xb98463,roughness:.82});
+  const cloth=new THREE.MeshStandardMaterial({color:0x2e493d,roughness:.76});
+  const trouser=new THREE.MeshStandardMaterial({color:0x343b37,roughness:.82});
+  const hair=new THREE.MeshStandardMaterial({color:0x2b2521,roughness:.92});
+  const shoe=new THREE.MeshStandardMaterial({color:0x222220,roughness:.70});
+  const cast=!lowPower;
+  const hips=new THREE.Group();hips.position.y=.92;g.add(hips);
+  box(hips,.50,.28,.30,trouser,0,0,0,{cast});
+  const torso=new THREE.Group();torso.position.y=1.33;g.add(torso);
+  mesh(torso,new THREE.CylinderGeometry(.23,.30,.72,lowPower?10:14),cloth,0,0,0,{cast});
+  const head=new THREE.Group();head.position.y=1.90;g.add(head);
+  mesh(head,new THREE.SphereGeometry(.205,lowPower?10:16,lowPower?8:12),skin,0,0,0,{cast});
+  const cap=mesh(head,new THREE.SphereGeometry(.212,lowPower?10:14,lowPower?6:9,0,Math.PI*2,0,Math.PI*.5),hair,0,.07,-.005,{cast});cap.scale.set(.94,.88,.96);
+  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.13,.88,0);rightLeg.position.set(.13,.88,0);g.add(leftLeg,rightLeg);
+  const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();leftKnee.position.y=-.31;rightKnee.position.y=-.31;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  cyl(leftLeg,.07,.078,.34,trouser,0,-.17,0,lowPower?7:10,{cast});cyl(rightLeg,.07,.078,.34,trouser,0,-.17,0,lowPower?7:10,{cast});
+  cyl(leftKnee,.06,.068,.32,trouser,0,-.17,0,lowPower?7:10,{cast});cyl(rightKnee,.06,.068,.32,trouser,0,-.17,0,lowPower?7:10,{cast});
+  box(leftKnee,.15,.09,.29,shoe,0,-.37,.06,{cast});box(rightKnee,.15,.09,.29,shoe,0,-.37,.06,{cast});
+  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.33,1.52,0);rightArm.position.set(.33,1.52,0);g.add(leftArm,rightArm);
+  const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();leftElbow.position.y=-.28;rightElbow.position.y=-.28;leftArm.add(leftElbow);rightArm.add(rightElbow);
+  cyl(leftArm,.05,.058,.30,cloth,0,-.15,0,lowPower?7:10,{cast});cyl(rightArm,.05,.058,.30,cloth,0,-.15,0,lowPower?7:10,{cast});
+  cyl(leftElbow,.045,.052,.27,skin,0,-.14,0,lowPower?7:10,{cast});cyl(rightElbow,.045,.052,.27,skin,0,-.14,0,lowPower?7:10,{cast});
+  const tag=npcNameTag('ALEX','REHAB COACH');tag.position.y=2.48;tag.scale.set(1.62,.46,1);g.add(tag);
+  g.userData.dynamic=true;
+  g.userData.coach={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag};
+  return g;
+}
+const rehabCoach=makeRehabCoach();
+const rehabCoachState={station:'control',running:false,phase:0};
+plaque(rehabRoom,'COACH','LIVE MOVEMENT DEMO',3.4,.62,0,3.05,-9.15,{dark:true,titleSize:52});
 
 // Arena room.
 arenaRoom.position.set(45,0,0);
