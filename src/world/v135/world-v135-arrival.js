@@ -2,19 +2,34 @@ const runtime=window.KomoWorldRuntime;
 if(!runtime?.THREE||!runtime?.scene)throw new Error('KŌMØ V0.13.5 Arrival runtime unavailable');
 
 const {THREE,scene,spawnRing}=runtime;
-scene.getObjectByName('KOMO_V135_ARRIVAL_SPRINT2')?.removeFromParent?.();
+
+function disposeMaterial(material){
+  const list=Array.isArray(material)?material:[material];
+  list.forEach(mat=>{
+    if(!mat)return;
+    ['map','alphaMap','bumpMap','normalMap','roughnessMap','metalnessMap','emissiveMap'].forEach(k=>mat[k]?.dispose?.());
+    mat.dispose?.();
+  });
+}
+function disposeGroup(group){
+  if(!group)return;
+  group.traverse?.(o=>{o.geometry?.dispose?.();disposeMaterial(o.material)});
+  group.removeFromParent?.();
+}
+
+window.KomoV135Arrival?.dispose?.();
+['KOMO_V135_ARRIVAL_SPRINT1','KOMO_V135_ARRIVAL_SPRINT2','KOMO_V135_ARRIVAL_FORECOURT'].forEach(name=>disposeGroup(scene.getObjectByName(name)));
 document.querySelector('#komo-v135-arrival-style')?.remove();
 
 const layer=new THREE.Group();
-layer.name='KOMO_V135_ARRIVAL_SPRINT2';
+layer.name='KOMO_V135_ARRIVAL_FORECOURT';
 scene.add(layer);
 
-const stone=new THREE.MeshStandardMaterial({color:0xe9dfcf,roughness:.77,metalness:.01});
 const stoneDeep=new THREE.MeshStandardMaterial({color:0xc8baa4,roughness:.84,metalness:.01});
 const sage=new THREE.MeshStandardMaterial({color:0x263b31,roughness:.61,metalness:.03});
 const sageDeep=new THREE.MeshStandardMaterial({color:0x182a22,roughness:.56,metalness:.05});
 const bronze=new THREE.MeshStandardMaterial({color:0x9c754e,roughness:.37,metalness:.55});
-const warm=new THREE.MeshBasicMaterial({color:0xf0c98e,transparent:true,opacity:.68,depthWrite:false});
+const warm=new THREE.MeshStandardMaterial({color:0xf0c98e,roughness:.34,metalness:.06,emissive:0x8c5d2c,emissiveIntensity:.42});
 
 function box(w,h,d,material,x,y,z){
   const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),material);
@@ -25,117 +40,50 @@ function box(w,h,d,material,x,y,z){
   return mesh;
 }
 
-function panelTexture(draw,{w=1600,h=320}={}){
-  const canvas=document.createElement('canvas');
-  canvas.width=w;canvas.height=h;
-  const ctx=canvas.getContext('2d');
-  draw(ctx,w,h);
-  const texture=new THREE.CanvasTexture(canvas);
-  texture.colorSpace=THREE.SRGBColorSpace;
-  texture.anisotropy=4;
-  return texture;
-}
+// Forecourt only: the building itself is owned exclusively by world-v135-main-building.js.
+[-12.8,12.8].forEach((x,i)=>{
+  box(6.2,.44,1.72,stoneDeep,x,.28,35.0);
+  box(5.45,.10,1.24,sage,x,.55,35.0);
+  box(4.60,.22,.82,sageDeep,x,.71,35.0);
+  box(.08,.86,1.02,bronze,x+(i?-2.25:2.25),1.00,35.0);
 
-function plane(texture,w,h,x,y,z){
-  const material=new THREE.MeshBasicMaterial({map:texture,side:THREE.DoubleSide,transparent:true});
-  const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),material);
-  mesh.position.set(x,y,z);
-  mesh.userData.texture=texture;
-  layer.add(mesh);
-  return mesh;
-}
-
-function plaque(){
-  const texture=panelTexture((ctx,w,h)=>{
-    ctx.fillStyle='#1b3026';ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle='rgba(220,190,142,.38)';ctx.lineWidth=4;ctx.strokeRect(4,4,w-8,h-8);
-    ctx.fillStyle='#efe7db';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='500 94px Georgia';ctx.fillText('KŌMØ WORLD',w/2,126);
-    ctx.fillStyle='#d6b27a';ctx.font='650 29px Arial';ctx.fillText('LONGEVITY IN MOTION',w/2,234);
-  });
-  return plane(texture,6.6,1.32,0,7.02,34.38);
-}
-
-function journeyStrip(){
-  const texture=panelTexture((ctx,w,h)=>{
-    ctx.clearRect(0,0,w,h);
-    ctx.fillStyle='rgba(24,42,33,.94)';ctx.fillRect(0,0,w,h);
-    ctx.fillStyle='#d9b77e';ctx.fillRect(28,h-18,w-56,3);
-    ctx.fillStyle='#eee6d8';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.font='650 32px Arial';ctx.fillText('MEASURE   ·   UNDERSTAND   ·   ACT   ·   LIVE',w/2,h/2-2);
-  },{w:1800,h:190});
-  return plane(texture,7.4,.78,0,5.82,34.40);
-}
-
-function wayfinding(){
-  const texture=panelTexture((ctx,w,h)=>{
-    ctx.fillStyle='rgba(24,42,33,.95)';ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle='rgba(213,178,122,.36)';ctx.lineWidth=3;ctx.strokeRect(4,4,w-8,h-8);
-    ctx.textBaseline='middle';
-    const cells=[
-      {x:w*.18,title:'FUNCTIONAL TWIN',sub:'UNDERSTAND',arrow:'←'},
-      {x:w*.50,title:'REHAB',sub:'ACT',arrow:'↑'},
-      {x:w*.82,title:'ARENA',sub:'ENGAGE',arrow:'→'}
-    ];
-    cells.forEach((cell,i)=>{
-      if(i){ctx.fillStyle='rgba(231,220,204,.18)';ctx.fillRect(w*(i/3),34,2,h-68)}
-      ctx.fillStyle='#eee6d8';ctx.textAlign='center';ctx.font='650 31px Arial';ctx.fillText(`${cell.arrow}  ${cell.title}`,cell.x,78);
-      ctx.fillStyle='#c3b49d';ctx.font='650 20px Arial';ctx.fillText(cell.sub,cell.x,133);
-    });
-  },{w:1900,h:190});
-  return plane(texture,10.8,1.08,0,1.28,30.72);
-}
-
-// Arrival threshold: architectural, wide, and deliberately outside the circulation axis.
-[-7.75,7.75].forEach((x,i)=>{
-  box(1.05,6.75,1.05,stone,x,3.42,33.85);
-  box(.13,5.45,.08,bronze,x+(i?-.38:.38),3.47,34.40);
-  box(.72,5.15,.18,sage,x,3.38,33.30);
-  box(1.44,.18,1.32,stoneDeep,x,.17,33.85);
-
-  const light=new THREE.PointLight(0xf0c486,2.8,9,2);
-  light.position.set(x,5.55,35.0);
+  const light=new THREE.PointLight(0xe9c48d,1.55,7,2);
+  light.position.set(x,1.8,34.6);
   layer.add(light);
 });
 
-box(16.55,.56,1.02,stone,0,6.73,33.85);
-box(14.55,.075,.09,bronze,0,6.42,34.40);
-box(5.10,.11,.10,warm,0,6.42,34.47);
-plaque();
-journeyStrip();
+// Long, restrained approach lines point to the central entrance without becoming a game path.
+box(.055,.024,8.4,bronze,-4.35,.335,38.2);
+box(.055,.024,8.4,bronze,4.35,.335,38.2);
+box(8.75,.026,.08,bronze,0,.336,34.05);
 
-[-12.35,12.35].forEach(x=>{
-  box(6.3,.44,1.72,stoneDeep,x,.28,34.12);
-  box(5.55,.10,1.25,sage,x,.55,34.12);
-  box(4.75,.26,.86,sageDeep,x,.73,34.12);
+// Two low light markers define the threshold from the spawn.
+[-5.65,5.65].forEach(x=>{
+  box(.13,.72,.13,warm,x,.70,36.15);
+  box(.42,.09,.42,stoneDeep,x,.14,36.15);
 });
 
-box(15.15,.025,.12,bronze,0,.335,34.02);
-box(.055,.025,7.35,bronze,-6.55,.336,37.72);
-box(.055,.025,7.35,bronze,6.55,.336,37.72);
-wayfinding();
-
 if(spawnRing){
-  spawnRing.material.opacity=.18;
+  spawnRing.material.opacity=.15;
   spawnRing.material.transparent=true;
 }
 
 const copy={
   fr:{
-    eyebrow:'KŌMØ WORLD · VOTRE ESPACE LONGÉVITÉ',
+    eyebrow:'KŌMØ WORLD · SPATIAL LONGEVITY',
     line1:'Votre corps.',
     line2:'Votre trajectoire.',
-    body:'Entrez dans votre espace personnel : comprenez votre mouvement, choisissez une action, progressez dans le temps.',
-    quest:'01 · Explorer votre KŌMØ World',
+    body:'Entrez dans un espace personnel conçu pour mesurer, comprendre et faire évoluer votre mouvement dans le temps.',
+    quest:'01 · Entrer dans votre KŌMØ World',
     enter:'ENTRER DANS MON WORLD',
     tip:'GLISSER POUR REGARDER · ACTION POUR INTERAGIR'
   },
   en:{
-    eyebrow:'KŌMØ WORLD · YOUR LONGEVITY SPACE',
+    eyebrow:'KŌMØ WORLD · SPATIAL LONGEVITY',
     line1:'Your body.',
     line2:'Your trajectory.',
-    body:'Enter your personal space: understand your movement, choose an action and progress over time.',
-    quest:'01 · Explore your KŌMØ World',
+    body:'Enter a personal space designed to measure, understand and evolve your movement over time.',
+    quest:'01 · Enter your KŌMØ World',
     enter:'ENTER MY WORLD',
     tip:'DRAG TO LOOK · ACTION TO INTERACT'
   }
@@ -168,7 +116,9 @@ function applyCopy(){
 }
 
 applyCopy();
-document.querySelector('#language-toggle')?.addEventListener('click',()=>setTimeout(applyCopy,0));
+const languageToggle=document.querySelector('#language-toggle');
+const onLanguage=()=>setTimeout(applyCopy,0);
+languageToggle?.addEventListener('click',onLanguage);
 
 const style=document.createElement('style');
 style.id='komo-v135-arrival-style';
@@ -208,11 +158,18 @@ style.textContent=`
 `;
 document.head.appendChild(style);
 
+function dispose(){
+  languageToggle?.removeEventListener('click',onLanguage);
+  document.querySelector('#komo-v135-arrival-style')?.remove();
+  disposeGroup(layer);
+}
+
 window.KomoV135Arrival={
-  version:'0.13.5-sprint2',
-  threshold:true,
-  wayfinding:true,
+  version:'0.13.5-forecourt',
+  forecourt:true,
+  mainBuildingOwner:'world-v135-main-building.js',
   journey:'measure-understand-act-live-engage-reward-measure-again',
   mobileHud:true,
-  locomotion:'inertial'
+  locomotion:'inertial',
+  dispose
 };
