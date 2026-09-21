@@ -42,7 +42,8 @@ const copy={
     arenaTitle:'Entrer dans Arena',arenaCopy:'Performance · défis · communauté',
     libraryTitle:'Ouvrir la Library',libraryCopy:'Science · méthode · provenance',
     talksTitle:'Voir Talks',talksCopy:'Experts · événements · contenus',
-    back:'RETOUR AU HALL',close:'FERMER',openRehab:'OUVRIR REHAB'
+    storeTitle:'Entrer dans KŌMØ Life',storeCopy:'Objets · Case 01 · éditions',
+    back:'RETOUR AU HALL',close:'FERMER',openRehab:'OUVRIR REHAB',openLife:'OUVRIR KŌMØ LIFE',configureCase:'CONFIGURER CASE 01'
   },
   en:{
     today:'TODAY · EXPLORE YOUR TWIN',
@@ -57,7 +58,8 @@ const copy={
     arenaTitle:'Enter Arena',arenaCopy:'Performance · challenges · community',
     libraryTitle:'Open Library',libraryCopy:'Science · method · provenance',
     talksTitle:'View Talks',talksCopy:'Experts · events · content',
-    back:'BACK TO HALL',close:'CLOSE',openRehab:'OPEN REHAB'
+    storeTitle:'Enter KŌMØ Life',storeCopy:'Objects · Case 01 · editions',
+    back:'BACK TO HALL',close:'CLOSE',openRehab:'OPEN REHAB',openLife:'OPEN KŌMØ LIFE',configureCase:'CONFIGURE CASE 01'
   }
 };
 let locale='fr';
@@ -96,6 +98,21 @@ scene.add(sun);
 const fill=new THREE.DirectionalLight(0xdde8de,1.1);
 fill.position.set(28,18,-30);scene.add(fill);
 
+function applyDaylight(){
+  const d=new Date(),h=d.getHours()+d.getMinutes()/60;
+  let bg=0xcbd2c8,fog=0xcbd2c8,sunColor=0xffe5bd,sunPower=3.3,hemiPower=2.25,exposure=.92,state='day';
+  if(h<7||h>=21){
+    bg=0x8e9a92;fog=0x8e9a92;sunColor=0xe8d5bc;sunPower=1.65;hemiPower=1.55;exposure=.78;state='evening';
+  }else if(h<9){
+    bg=0xbfc9bf;fog=0xbfc9bf;sunColor=0xffcc91;sunPower=2.75;hemiPower=2.0;exposure=.88;state='morning';
+  }else if(h>=17.5){
+    bg=0xc5c6b8;fog=0xc5c6b8;sunColor=0xffc37f;sunPower=3.05;hemiPower=1.95;exposure=.88;state='golden';
+  }
+  scene.background.setHex(bg);scene.fog.color.setHex(fog);sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
+}
+applyDaylight();
+const daylightTimer=setInterval(applyDaylight,60000);
+
 const M={
   ground:new THREE.MeshStandardMaterial({color:0x9ca793,roughness:.98,metalness:0}),
   stone:new THREE.MeshStandardMaterial({color:0xe8dfd2,roughness:.78,metalness:.01}),
@@ -117,6 +134,16 @@ const M={
   attention:new THREE.MeshStandardMaterial({color:0xcf9f65,roughness:.34,metalness:.08,emissive:0x8c5627,emissiveIntensity:.48}),
   arena:new THREE.MeshStandardMaterial({color:0x2a241b,roughness:.65,metalness:.08}),
   arenaGold:new THREE.MeshStandardMaterial({color:0xb9935c,roughness:.36,metalness:.48})
+};
+
+const living={
+  trees:[],
+  water:[],
+  shimmers:[],
+  lights:[],
+  dust:null,
+  lifeDisplay:null,
+  daylight:'day'
 };
 
 function mesh(parent,geometry,material,x=0,y=0,z=0,{cast=false,receive=true}={}){
@@ -143,7 +170,7 @@ function line(parent,w,d,x,z,material=M.bronze,y=.075){
   return box(parent,w,.018,d,material,x,y,z,{cast:false,receive:true});
 }
 function tree(parent,x,z,s=.8){
-  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  const g=new THREE.Group();g.position.set(x,0,z);g.userData.swayPhase=(x*1.73+z*.91);parent.add(g);living.trees.push(g);
   cyl(g,.10*s,.15*s,1.8*s,M.trunk,0,.9*s,0,10,{cast:true});
   [[0,2.08,0,.72],[.47,2.06,.03,.48],[-.46,2.1,-.02,.46],[.08,2.48,0,.39]].forEach(([a,b,c,r])=>{
     const f=mesh(g,new THREE.SphereGeometry(r*s,18,12),M.sageSoft,a*s,b*s,c*s,{cast:true});
@@ -170,9 +197,15 @@ box(world,13.2,.18,48,M.stoneLight,0,.07,39,{receive:true});
 [-6.5,6.5].forEach(x=>line(world,.05,47.5,x,39,M.bronze,.17));
 [20,30,40,50,60].forEach(z=>line(world,13,.04,0,z,M.bronzeSoft,.17));
 
-[-12.3,12.3].forEach(x=>{
+const shimmerMat=new THREE.MeshBasicMaterial({color:0xdce9df,transparent:true,opacity:.10,depthWrite:false});
+[-12.3,12.3].forEach((x,side)=>{
   box(world,8.2,.26,30,M.stoneDeep,x,.10,40);
-  box(world,7.5,.08,29.2,M.water,x,.28,40,{cast:false,receive:false});
+  const pool=box(world,7.5,.08,29.2,M.water,x,.28,40,{cast:false,receive:false});
+  living.water.push(pool);
+  for(let i=0;i<3;i++){
+    const q=box(world,5.9,.012,.055,shimmerMat,x,.33,27+i*7,{cast:false,receive:false});
+    q.userData.phase=(i*.29)+(side*.17);living.shimmers.push(q);
+  }
 });
 [-17.4,17.4].forEach((x,i)=>{
   box(world,5.4,.46,4.6,M.stoneDeep,x,.22,47);
@@ -232,6 +265,71 @@ glow(desk,0xe9c48e,2.2,8,0,3.1,1.4);
   tree(building,x+.18*m,z,.46);
 });
 
+// Living atmosphere — subtle, non-game-like movement.
+const dustCount=lowPower?34:78;
+const dustPositions=new Float32Array(dustCount*3);
+for(let i=0;i<dustCount;i++){
+  dustPositions[i*3]=(Math.random()-.5)*20;
+  dustPositions[i*3+1]=.8+Math.random()*6.2;
+  dustPositions[i*3+2]=-25+Math.random()*39;
+}
+const dustGeometry=new THREE.BufferGeometry();
+dustGeometry.setAttribute('position',new THREE.BufferAttribute(dustPositions,3));
+const dustMaterial=new THREE.PointsMaterial({color:0xf3dfbb,size:lowPower?.025:.032,transparent:true,opacity:.20,depthWrite:false});
+living.dust=new THREE.Points(dustGeometry,dustMaterial);
+living.dust.name='KOMO_AMBIENT_DUST';
+building.add(living.dust);
+
+// KŌMØ Life Store — a physical boutique inside the World.
+const lifeStore=new THREE.Group();
+lifeStore.name='KOMO_LIFE_STORE_V1';
+lifeStore.position.set(9.15,0,2.6);
+building.add(lifeStore);
+
+box(lifeStore,4.45,.22,8.2,M.stoneDeep,0,.12,0);
+box(lifeStore,4.25,6.25,.30,M.sageDeep,1.55,3.25,0);
+box(lifeStore,.22,6.25,8.0,M.stoneLight,-2.02,3.25,0);
+box(lifeStore,4.05,.18,8.0,M.stoneLight,0,6.20,0);
+box(lifeStore,.08,5.55,7.45,M.glass,-1.88,3.18,0);
+[-3.55,0,3.55].forEach(z=>box(lifeStore,.08,5.45,.10,M.bronze,-1.80,3.18,z));
+plaque(lifeStore,'KŌMØ LIFE','OBJECTS · CASE 01 · EDITIONS',3.75,1.04,-1.72,5.55,0,{rotY:Math.PI/2,dark:true,titleSize:65});
+
+// Display plinths.
+[-2.55,0,2.55].forEach((z,i)=>{
+  box(lifeStore,1.45,.68,1.45,i===1?M.stone:M.stoneLight,-.35,.36,z);
+  box(lifeStore,1.22,.06,1.22,M.bronze,-.35,.73,z);
+});
+
+// CASE 01 miniature.
+const caseDisplay=new THREE.Group();caseDisplay.position.set(-.35,.82,-2.55);lifeStore.add(caseDisplay);
+const caseMat=new THREE.MeshStandardMaterial({color:0x5a4a3d,roughness:.52,metalness:.02});
+const caseLeather=new THREE.MeshStandardMaterial({color:0x8b765f,roughness:.74,metalness:0});
+box(caseDisplay,1.25,.68,.30,caseMat,0,.37,0,{cast:true});
+box(caseDisplay,1.16,.57,.32,caseLeather,0,.37,.01,{cast:true});
+box(caseDisplay,.52,.12,.10,M.bronze,0,.79,0);
+box(caseDisplay,.08,.20,.08,M.bronze,-.27,.71,0);
+box(caseDisplay,.08,.20,.08,M.bronze,.27,.71,0);
+line(caseDisplay,1.08,.025,0,.17,M.bronze,.37);
+
+// KŌMŌ Life object / orbit sculpture.
+const orbitDisplay=new THREE.Group();orbitDisplay.position.set(-.35,1.35,0);lifeStore.add(orbitDisplay);
+const globe=mesh(orbitDisplay,new THREE.SphereGeometry(.34,24,18),M.sage,0,.24,0,{cast:true});
+const orbitA=mesh(orbitDisplay,new THREE.TorusGeometry(.61,.025,8,64),M.bronze,0,.24,0);orbitA.rotation.x=Math.PI/2.4;
+const orbitB=mesh(orbitDisplay,new THREE.TorusGeometry(.61,.025,8,64),M.bronze,0,.24,0);orbitB.rotation.y=Math.PI/2.7;
+
+// Folded textile / varsity-inspired object.
+const textile=new THREE.Group();textile.position.set(-.35,.84,2.55);lifeStore.add(textile);
+const textileMat=new THREE.MeshStandardMaterial({color:0x1f342c,roughness:.86,metalness:0});
+box(textile,1.12,.34,.82,textileMat,0,.18,0,{cast:true});
+box(textile,.96,.08,.70,M.stoneLight,0,.39,0);
+box(textile,.72,.018,.05,M.bronze,0,.435,.34);
+
+glow(lifeStore,0xf2d29d,2.5,8,-.65,4.8,-2.55);
+glow(lifeStore,0xf2d29d,2.5,8,-.65,4.8,0);
+glow(lifeStore,0xf2d29d,2.5,8,-.65,4.8,2.55);
+living.lights.push(...lifeStore.children.filter(o=>o.isLight));
+living.lifeDisplay={group:lifeStore,orbitA,orbitB,globe};
+
 // Destination wall.
 box(building,22.7,7.2,.42,M.sageDeep,0,4.0,-30.0);
 box(building,21.8,.07,.10,M.bronze,0,7.05,-29.73);
@@ -249,6 +347,7 @@ portals.forEach(({x,title,sub,dark})=>{
 });
 plaque(building,'LIBRARY','SCIENCE · METHOD',3.5,.84,-11.45,4.3,-10,{rotY:Math.PI/2,dark:false,titleSize:68});
 plaque(building,'TALKS','EXPERTS · EVENTS',3.5,.84,11.45,4.3,-10,{rotY:-Math.PI/2,dark:true,titleSize:68});
+plaque(building,'KŌMØ LIFE','STORE · CASE 01',3.8,.88,11.35,4.45,2.6,{rotY:-Math.PI/2,dark:true,titleSize:62});
 glow(building,0xf0cd9d,2.6,13,-8.0,5.6,6);
 glow(building,0xf0cd9d,2.6,13,8.0,5.6,6);
 glow(building,0xecc492,3.7,16,0,5.4,-25);
@@ -326,7 +425,8 @@ const interactions=[
   {id:'rehab',x:0,z:-26.7,r:4.0,title:()=>copy[locale].rehabTitle,desc:()=>copy[locale].rehabCopy,action:enterRehab},
   {id:'arena',x:6.8,z:-26.7,r:4.0,title:()=>copy[locale].arenaTitle,desc:()=>copy[locale].arenaCopy,action:enterArena},
   {id:'library',x:-10.7,z:-10,r:3.2,title:()=>copy[locale].libraryTitle,desc:()=>copy[locale].libraryCopy,action:showLibrary},
-  {id:'talks',x:10.7,z:-10,r:3.2,title:()=>copy[locale].talksTitle,desc:()=>copy[locale].talksCopy,action:showTalks}
+  {id:'talks',x:10.7,z:-10,r:3.2,title:()=>copy[locale].talksTitle,desc:()=>copy[locale].talksCopy,action:showTalks},
+  {id:'life',x:8.6,z:2.6,r:3.4,title:()=>copy[locale].storeTitle,desc:()=>copy[locale].storeCopy,action:showLifeStore}
 ];
 
 function notify(message){
@@ -425,6 +525,26 @@ function showTalks(){
   openPanel('TALKS',locale==='fr'?'Experts & événements.':'Experts & events.',html,[{label:copy[locale].close,onClick:closePanel}]);
 }
 
+function showLifeStore(){
+  const html=locale==='fr'
+    ?`<p>KŌMØ Life prolonge World dans le réel : objets, équipements et éditions conçus autour du mouvement et de la longévité.</p>
+      <div class="store-products">
+        <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>La valise KŌMØ configurable, présentée ici comme objet signature.</small></article>
+        <article><span>02 · ORIGINALS</span><b>KŌMØ Life</b><small>Pièces, objets et culture du mouvement.</small></article>
+        <article><span>03 · EDITIONS</span><b>Selected drops</b><small>Collaborations et séries limitées à venir.</small></article>
+      </div>`
+    :`<p>KŌMØ Life extends World into real life: objects, equipment and editions designed around movement and longevity.</p>
+      <div class="store-products">
+        <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>The configurable KŌMØ case, presented here as a signature object.</small></article>
+        <article><span>02 · ORIGINALS</span><b>KŌMØ Life</b><small>Pieces, objects and movement culture.</small></article>
+        <article><span>03 · EDITIONS</span><b>Selected drops</b><small>Collaborations and limited editions to come.</small></article>
+      </div>`;
+  openPanel('KŌMØ LIFE',locale==='fr'?'La boutique du World.':'The World store.',html,[
+    {label:copy[locale].openLife,onClick:()=>{location.href='https://life.komolongevity.com/'}},
+    {label:copy[locale].configureCase,primary:true,onClick:()=>{location.href='https://life.komolongevity.com/#case-atelier'}}
+  ]);
+}
+
 function setMode(next){
   mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';
 }
@@ -499,6 +619,7 @@ function updateLocation(){
   if(mode==='rehab'){locationName.textContent='REHAB';return}
   if(mode==='arena'){locationName.textContent='ARENA';return}
   if(player.z>19)locationName.textContent='ARRIVAL PLAZA';
+  else if(player.x>6.8&&player.z>-2&&player.z<7)locationName.textContent='KŌMØ LIFE';
   else if(player.z>-7)locationName.textContent='KŌMØ HALL';
   else locationName.textContent='MOTION ATRIUM';
 }
@@ -588,16 +709,39 @@ window.addEventListener('resize',()=>{
 });
 
 let last=performance.now(),raf=0;
+function animateLiving(now){
+  const t=now*.001;
+  living.trees.forEach((tree,i)=>{
+    const sway=Math.sin(t*.42+tree.userData.swayPhase+i*.17);
+    tree.rotation.z=sway*.008;tree.rotation.x=Math.cos(t*.36+tree.userData.swayPhase)*.004;
+  });
+  living.shimmers.forEach((q,i)=>{
+    const travel=((t*.045+q.userData.phase)%1);
+    q.position.z=25.5+travel*29.0;
+    q.material.opacity=.045+.045*(.5+.5*Math.sin(t*.7+i));
+  });
+  if(living.dust){
+    living.dust.rotation.y=Math.sin(t*.04)*.035;
+    living.dust.position.y=Math.sin(t*.18)*.04;
+    living.dust.material.opacity=.14+.06*(.5+.5*Math.sin(t*.23));
+  }
+  if(living.lifeDisplay){
+    living.lifeDisplay.orbitA.rotation.z=t*.16;
+    living.lifeDisplay.orbitB.rotation.x=t*.11;
+    living.lifeDisplay.globe.rotation.y=t*.10;
+  }
+  sun.position.x=-24+Math.sin(t*.025)*3.5;
+}
 function animate(now){
   const dt=Math.min(.05,(now-last)/1000||.016);last=now;
-  updateMovement(dt);updateCamera(now);updateDoors();updateLocation();updateHeading();updateInteraction();updateTwinScan(now);
+  updateMovement(dt);updateCamera(now);updateDoors();updateLocation();updateHeading();updateInteraction();updateTwinScan(now);updateLiving(now);
   renderer.render(scene,camera);raf=requestAnimationFrame(animate);
 }
 raf=requestAnimationFrame(animate);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){velocity.set(0,0,0);keys.clear()}});
-window.addEventListener('pagehide',()=>cancelAnimationFrame(raf),{once:true});
+window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(daylightTimer)},{once:true});
 
 applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
-window.KomoWorld={version:'1.0.0',scene,camera,renderer,core,enterTwin,enterRehab,enterArena,returnToHall};
+window.KomoWorld={version:'1.1.0-life-living',scene,camera,renderer,core,enterTwin,enterRehab,enterArena,returnToHall};
