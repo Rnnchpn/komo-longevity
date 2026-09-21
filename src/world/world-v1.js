@@ -744,6 +744,107 @@ box(hallArchitecture,.46,7.25,1.15,MAT.travertine,10.55,3.75,-27.2,{cast:true});
 box(hallArchitecture,21.55,.50,1.15,MAT.travertine,0,7.14,-27.2,{cast:true});
 box(hallArchitecture,19.9,.06,.12,M.warm,0,6.84,-26.60);
 
+// V1.8 second floor — an actual accessible upper gallery.
+const upperLevel=new THREE.Group();upperLevel.name='KOMO_UPPER_LEVEL_V18';building.add(upperLevel);
+const UPPER_Y=4.25;
+
+// West gallery reaches the grand stair; east gallery starts beyond the Life flagship volume.
+box(upperLevel,4.75,.28,30.2,MAT.travertine,-8.72,UPPER_Y,-8.10,{cast:true});
+box(upperLevel,4.75,.28,22.0,MAT.travertine,8.72,UPPER_Y,-12.15,{cast:true});
+box(upperLevel,17.45,.28,4.2,MAT.travertine,0,UPPER_Y,-21.20,{cast:true});
+
+// Bronze datum at the gallery edges.
+line(upperLevel,4.20,.05,-8.72,6.72,MAT.brass,UPPER_Y+.16);
+line(upperLevel,4.20,.05,8.72,-1.08,MAT.brass,UPPER_Y+.16);
+
+// Inner glass balustrades, segmented so the atrium remains transparent.
+[-1,1].forEach(side=>{
+  const x=side*6.28;
+  const zStart=side<0?5.6:-1.0;
+  for(let z=zStart;z>-19.25;z-=3.65){
+    box(upperLevel,.075,1.06,3.22,MAT.smokedGlass,x,UPPER_Y+.70,z);
+    box(upperLevel,.09,.065,3.34,MAT.brass,x,UPPER_Y+1.25,z);
+  }
+});
+// Rear skywalk rails.
+[-19.05,-23.35].forEach(z=>{
+  for(let x=-4.5;x<=4.5;x+=3.0){
+    box(upperLevel,2.70,1.02,.075,MAT.smokedGlass,x,UPPER_Y+.69,z);
+    box(upperLevel,2.82,.065,.09,MAT.brass,x,UPPER_Y+1.22,z);
+  }
+});
+
+// Grand sculptural stair on the west side.
+const stair=new THREE.Group();stair.name='KOMO_GRAND_STAIR_V18';upperLevel.add(stair);
+const stairX=-8.72,stairBottomZ=13.20,stairTopZ=7.00,stairSteps=15;
+for(let i=0;i<stairSteps;i++){
+  const t=(i+1)/stairSteps;
+  const h=UPPER_Y*t;
+  const z=stairBottomZ-(i+.5)*(stairBottomZ-stairTopZ)/stairSteps;
+  box(stair,3.48,h,.50,i%2?MAT.travertine:MAT.limestone,stairX,h/2,z,{cast:true});
+  if(i%3===0)box(stair,3.10,.025,.10,MAT.brass,stairX,h+.018,z-.18);
+}
+const railMat=MAT.brass;
+bodySegment(stair,[-10.38,.58,13.05],[-10.38,5.25,6.95],.035,railMat);
+bodySegment(stair,[-7.06,.58,13.05],[-7.06,5.25,6.95],.035,railMat);
+for(let i=0;i<6;i++){
+  const t=i/5,z=THREE.MathUtils.lerp(13.05,6.95,t),y=THREE.MathUtils.lerp(.48,4.98,t);
+  cyl(stair,.022,.026,.90,MAT.brass,-10.38,y-.25,z,10);
+  cyl(stair,.022,.026,.90,MAT.brass,-7.06,y-.25,z,10);
+}
+box(stair,4.10,.28,2.25,MAT.travertine,stairX,UPPER_Y,6.25,{cast:true});
+plaque(stair,'UPPER GALLERY','SCIENCE · LIFE · TALKS',3.15,.72,-10.42,UPPER_Y+2.05,7.05,{rotY:Math.PI/2,dark:true,titleSize:52});
+
+// Upper Library / Science zone.
+const upperWest=new THREE.Group();upperWest.name='KOMO_UPPER_LIBRARY_V18';upperLevel.add(upperWest);
+upperWest.position.set(-8.72,UPPER_Y+.16,-5.1);
+box(upperWest,3.75,.08,5.10,MAT.walnut,0,.08,0);
+box(upperWest,3.45,.06,4.82,MAT.fabricLight,0,.16,0);
+const upperWestLounge=new THREE.Group();upperWestLounge.position.set(0,.02,0);upperWest.add(upperWestLounge);
+box(upperWestLounge,2.20,.30,.72,MAT.fabric,-.40,.36,.95,{cast:true});
+box(upperWestLounge,2.20,.58,.18,MAT.fabric,-.40,.64,1.27,{cast:true});
+cyl(upperWestLounge,.52,.52,.07,MAT.walnut,.55,.38,-.15,24,{cast:true});
+cyl(upperWestLounge,.04,.055,.34,MAT.brass,.55,.20,-.15,12,{cast:true});
+plaque(upperLevel,'SCIENCE LIBRARY','READ · COMPARE · UNDERSTAND',3.65,.74,-11.43,6.38,-5.2,{rotY:Math.PI/2,dark:false,titleSize:49});
+[-8.95,-7.75].forEach(x=>{
+  box(upperLevel,.84,1.85,.22,MAT.walnut,x,5.38,-12.7,{cast:true});
+  [4.78,5.35,5.92].forEach(y=>box(upperLevel,.72,.045,.42,MAT.brass,x,y,-12.55));
+});
+
+// Upper Life Lounge / executive zone.
+const upperEast=new THREE.Group();upperEast.name='KOMO_UPPER_LIFE_LOUNGE_V18';upperLevel.add(upperEast);
+upperEast.position.set(8.72,UPPER_Y+.16,-6.2);
+box(upperEast,3.70,.08,5.3,MAT.walnut,0,.08,0);
+box(upperEast,3.38,.05,5.0,MAT.fabricLight,0,.16,0);
+box(upperEast,2.28,.32,.76,MAT.fabric,.38,.38,.90,{cast:true});
+box(upperEast,2.28,.58,.18,MAT.fabric,.38,.66,1.22,{cast:true});
+box(upperEast,.88,.36,.82,MAT.ivory,-1.12,.40,-.35,{cast:true});
+cyl(upperEast,.46,.46,.07,MAT.walnut,.35,.40,-.45,24,{cast:true});
+plaque(upperLevel,'LIFE LOUNGE','OBJECTS · PARTNERS · PRIVATE',3.65,.74,11.43,6.38,-6.2,{rotY:-Math.PI/2,dark:true,titleSize:49});
+
+// Rear observatory / talks bridge.
+box(upperLevel,5.8,.075,2.55,MAT.walnut,0,UPPER_Y+.18,-21.2);
+[-1.8,0,1.8].forEach(x=>cyl(upperLevel,.40,.40,.06,MAT.brass,x,UPPER_Y+.32,-21.2,24));
+plaque(upperLevel,'OBSERVATORY','TALKS · WORLD · COMMUNITY',5.2,.82,0,6.30,-23.48,{dark:true,titleSize:54});
+
+// Upper floor planting and warm pools of light.
+[-9.7,9.7].forEach((x,i)=>{
+  box(upperLevel,1.35,.34,1.35,MAT.limestone,x,UPPER_Y+.18,-17.0);
+  box(upperLevel,1.12,.06,1.12,M.soil,x,UPPER_Y+.39,-17.0);
+  const tg=new THREE.Group();tg.position.set(0,UPPER_Y+.38,0);upperLevel.add(tg);tree(tg,x,-17.0,.34);
+});
+[
+  [-8.7,6.9,-4.8,1.15],[8.7,6.9,-5.5,1.15],[0,6.8,-21.2,1.35]
+].forEach(([x,y,z,intensity])=>{
+  const l=glow(upperLevel,0xf2d4a3,intensity,6,x,y,z);living.lights.push(l);
+});
+
+// Exterior second-floor expression on the front facade.
+box(outerFrame,5.4,.10,.72,MAT.brass,-9.55,5.05,18.78);
+box(outerFrame,5.4,.10,.72,MAT.brass,9.55,5.05,18.78);
+box(outerFrame,5.1,2.05,.08,MAT.smokedGlass,-9.55,6.12,18.82);
+box(outerFrame,5.1,2.05,.08,MAT.smokedGlass,9.55,6.12,18.82);
+
 // Hall axis.
 box(building,9.8,.035,43,M.stoneDeep,0,.31,-6.5);
 [-4.84,4.84].forEach(x=>line(building,.05,42.6,x,-6.5,M.bronze,.35));
@@ -767,7 +868,6 @@ glow(desk,0xe9c48e,2.2,8,0,3.1,1.4);
 });
 
 // Hospitality moments: enough density to feel inhabited, kept outside the main circulation line.
-loungeCluster(building,-8.1,10.0,.08,.86);
 loungeCluster(building,7.95,-7.7,Math.PI+.05,.82);
 loungeCluster(building,-8.0,-14.2,-.05,.76);
 
