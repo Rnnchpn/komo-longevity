@@ -1631,6 +1631,12 @@ const rehabInteractions=[
   desc:()=>locale==='fr'?'Ouvrir la station guidée':'Open guided station',
   action:()=>showRehabStation(it.station)
 }));
+rehabInteractions.push({
+  id:'rehab_coach',x:0,z:-61.3,r:2.15,
+  title:()=>locale==='fr'?'Alex · Rehab Coach':'Alex · Rehab Coach',
+  desc:()=>locale==='fr'?'Voir le rôle du coach virtuel':'Learn about the virtual coach',
+  action:()=>showRehabCoach()
+});
 
 function notify(message){
   toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(notify.t);
@@ -1861,7 +1867,8 @@ function updateBiomechTwin(){
     parts.forEach((part,i)=>{
       part.visible=active||twinActiveDomain==='all';
       if(part.material){
-        part.material.opacity=(active?.26:.07)+(value/100)*(active?.48:.10);
+        part.userData.baseOpacity=(active?.26:.07)+(value/100)*(active?.48:.10);
+        part.material.opacity=part.userData.baseOpacity;
         if(part.material.color){
           const color=value>=75?0xbdd3c4:value>=55?0xd5b878:0xc68f6a;
           part.material.color.setHex(color);
@@ -2111,6 +2118,18 @@ function showLifeStore(){
   openPanel('KŌMØ LIFE',locale==='fr'?'La boutique du World.':'The World store.',html,[
     {label:copy[locale].openLife,onClick:()=>{location.href='https://life.komolongevity.com/'}},
     {label:copy[locale].configureCase,primary:true,onClick:()=>{location.href='https://life.komolongevity.com/#case-atelier'}}
+  ]);
+}
+
+function showRehabCoach(){
+  const html=`
+    <p>${locale==='fr'?'Alex démontre visuellement la séquence choisie dans Rehab : contrôle, force ou capacité. Le rôle du coach ici est pédagogique et spatial.':'Alex visually demonstrates the selected Rehab sequence: control, strength or capacity. The coach role here is educational and spatial.'}</p>
+    <div class="panel-grid"><div><span>CONTROL</span><b>BALANCE</b></div><div><span>STRENGTH</span><b>SQUAT</b></div><div><span>CAPACITY</span><b>MARCH</b></div><div><span>MODE</span><b>DEMO</b></div></div>
+    <div class="data-note">${locale==='fr'?'Les mouvements sont des démonstrations génériques de l’interface World, pas une prescription personnalisée.':'Movements are generic World-interface demonstrations, not personalised prescriptions.'}</div>`;
+  openPanel('ALEX · REHAB COACH',locale==='fr'?'Démonstrateur de mouvement.':'Movement demonstrator.',html,[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:locale==='fr'?'CONTROL':'CONTROL',onClick:()=>showRehabStation('control')},
+    {label:locale==='fr'?'STRENGTH':'STRENGTH',primary:true,onClick:()=>showRehabStation('strength')}
   ]);
 }
 
@@ -2366,7 +2385,7 @@ function updateTwinScan(now){
     biomech.rotation.y=body.rotation.y;
     if(!lowPower){
       Object.values(biomechZones).flat().forEach((part,i)=>{
-        if(part.material)part.material.opacity*=.94+.06*Math.sin(bt*1.4+i*.33);
+        if(part.material)part.material.opacity=(part.userData.baseOpacity??part.material.opacity)*(.94+.06*Math.sin(bt*1.4+i*.33));
       });
     }
   }
@@ -2595,7 +2614,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.7.0-biomech-coach',
+  version:'2.7.1-biomech-coach',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
