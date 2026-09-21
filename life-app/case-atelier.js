@@ -15,6 +15,19 @@
     navy:{fr:'Mediterranean Navy',en:'Mediterranean Navy',hex:'#26384d'},cognac:{fr:'Cognac',en:'Cognac',hex:'#95572f'},
     bordeaux:{fr:'Bordeaux',en:'Bordeaux',hex:'#6f2f2f'},ivory:{fr:'Ivory',en:'Ivory',hex:'#e5dfd4'}
   };
+  const CASE_IMAGES={
+    obsidian:'assets/case01/obsidian.webp',
+    graphite:'assets/case01/graphite.webp',
+    sand:'assets/case01/riviera-sand.webp',
+    sage:'assets/case01/sage.webp',
+    navy:'assets/case01/navy.webp',
+    cognac:'assets/case01/cognac.webp',
+    bordeaux:'assets/case01/bordeaux.webp',
+    ivory:'assets/case01/ivory.webp'
+  };
+  const preloadCaseImages=()=>Object.values(CASE_IMAGES).forEach(src=>{const img=new Image();img.decoding='async';img.src=src;});
+  if('requestIdleCallback' in window) requestIdleCallback(preloadCaseImages); else setTimeout(preloadCaseImages,120);
+
   const INTERIORS={
     sand:{fr:'Sand',en:'Sand',hex:'#c8b9a5'},graphite:{fr:'Graphite',en:'Graphite',hex:'#4e514e'},
     sage:{fr:'Sage',en:'Sage',hex:'#899388'},navy:{fr:'Navy',en:'Navy',hex:'#253648'},cognac:{fr:'Cognac',en:'Cognac',hex:'#9a6847'}
@@ -62,9 +75,14 @@
     }).join('');
   }
   function visual(){
-    const stitch=A.stitching==='contrast'?'#e8dfcf':A.stitching==='signature'?'#839284':'rgba(255,255,255,.22)';
-    let sensors=''; for(let i=1;i<=6;i++)sensors+='<div class="case01-sensor"><span>KŌMØ</span><small>0'+i+'</small></div>';
-    return '<div class="case01-stage" style="--case:'+COLORS[A.exterior].hex+';--inside:'+INTERIORS[A.interior].hex+';--stitch:'+stitch+'"><div class="case01-shadow"></div><div class="case01-object"><div class="case01-lid"><div class="case01-lid-inner"><div class="case01-tablet"><span>KŌMØ</span><small>MOTION</small></div><div class="case01-tablet"><span>CASE 01</span><small>'+T('Configurée par vous','Configured by you')+'</small></div></div></div><div class="case01-base"><div class="case01-sensors">'+sensors+'</div><div class="case01-tripod"><i></i><i></i><i></i><span>'+T('TRÉPIED','TRIPOD')+'</span></div><div class="case01-accessories"><span>KŌMØ</span><small>'+T('ACCESSOIRES','ACCESSORIES')+'</small></div></div><div class="case01-handle"></div><div class="case01-lock lock-a"></div><div class="case01-lock lock-b"></div></div><div class="case01-caption"><span>KŌMØ CASE 01</span><b>'+T(LEATHERS[A.leather].fr,LEATHERS[A.leather].en)+' · '+T(COLORS[A.exterior].fr,COLORS[A.exterior].en)+'</b></div></div>';
+    const colour=COLORS[A.exterior]||COLORS.obsidian;
+    const src=CASE_IMAGES[A.exterior]||CASE_IMAGES.obsidian;
+    const alt='KŌMØ CASE 01 — '+T(colour.fr,colour.en);
+    return '<div class="case01-stage case01-stage-real">'+
+      '<img class="case01-hero-image" src="'+src+'" alt="'+esc(alt)+'" width="550" height="412" decoding="async" fetchpriority="high">'+
+      '<span class="case01-render-chip">'+T('APERÇU EXTÉRIEUR','EXTERIOR PREVIEW')+'</span>'+
+      '<div class="case01-caption"><span>KŌMØ CASE 01</span><b>'+T(LEATHERS[A.leather].fr,LEATHERS[A.leather].en)+' · '+T(colour.fr,colour.en)+'</b></div>'+
+    '</div>';
   }
   function summary(){
     const p=total();
