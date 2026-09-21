@@ -13,7 +13,10 @@ const checks=[
   ['living animation owner present',runtime.includes('function animateLiving(now)')],
   ['living animation invoked safely',runtime.includes('try{animateLiving(now)}')],
   ['retired undefined updateLiving call absent',!runtime.includes('updateLiving(now)')],
-  ['multiplayer remains optional',runtime.includes("import('./world-multiplayer-v1.js')")&&runtime.includes('.catch(err=>console.warn')]
+  ['multiplayer remains optional',runtime.includes("import('./world-multiplayer-v1.js')")&&runtime.includes('.catch(err=>console.warn')],
+  ['true sky V1.8 present',runtime.includes('KOMO_TRUE_SKY_V18')&&runtime.includes('KOMO_CLOUD_FIELD_V18')],
+  ['second floor V1.8 present',runtime.includes('KOMO_UPPER_LEVEL_V18')&&runtime.includes('KOMO_GRAND_STAIR_V18')],
+  ['upper-floor navigation present',runtime.includes('syncPlayerElevation')&&runtime.includes('isUpperWalkable')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
