@@ -3,21 +3,84 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#17271f" />
-  <title>KŌMØ World</title>
-  <meta name="description" content="KŌMØ World — explorez votre univers personnel, le Functional Twin, Rehab et l’Arena depuis mobile ou ordinateur." />
-  <style>
-    html,body{margin:0;width:100%;height:100%;background:#17271f;color:#eee6d7;font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-    body{display:grid;place-items:center;overflow:hidden}
-    .launch{display:grid;gap:12px;text-align:center;padding:28px}.launch strong{font:500 clamp(36px,7vw,76px)/.9 Georgia,serif;letter-spacing:.04em}.launch span{font:700 9px/1 system-ui,sans-serif;letter-spacing:.2em;opacity:.64}.launch a{margin-top:8px;color:#eee6d7;font:700 10px/1 system-ui,sans-serif;letter-spacing:.08em;text-decoration:none;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:12px 16px}
-  </style>
+  <meta name="theme-color" content="#18271f" />
+  <meta name="color-scheme" content="dark" />
+  <title>KŌMØ World · Longevity in Motion</title>
+  <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
+  <link rel="stylesheet" href="./world-v1.css" />
 </head>
 <body>
-  <main class="launch" aria-live="polite"><strong>KŌMØ</strong><span>WORLD · MOBILE + WEB</span><a id="fallback" href="./v135/">ENTRER DANS KŌMØ WORLD →</a></main>
-  <script>
-    const target='./v135/'+location.search+location.hash;
-    document.querySelector('#fallback').href=target;
-    location.replace(target);
-  </script>
+  <canvas id="world-canvas" aria-label="KŌMØ World"></canvas>
+
+  <div id="world-loader" class="loader" aria-live="polite">
+    <div class="loader-mark">KŌMØ</div>
+    <div class="loader-copy">WORLD · LONGEVITY IN MOTION</div>
+  </div>
+
+  <header class="world-hud" aria-label="KŌMØ World">
+    <a class="world-brand" href="/" aria-label="KŌMØ">
+      <strong>KŌMØ</strong>
+      <span>WORLD</span>
+    </a>
+    <div class="world-metrics" aria-label="Indicateurs personnels">
+      <div><span>MOTION</span><b id="hud-motion">—</b></div>
+      <div><span>MOTION AGE</span><b id="hud-age">—</b></div>
+    </div>
+    <div class="world-today">
+      <i></i>
+      <span id="hud-today">AUJOURD'HUI · EXPLORER VOTRE TWIN</span>
+    </div>
+    <a class="hud-link" href="/pulse/">PULSE</a>
+    <button class="hud-button" id="language-toggle" type="button" aria-label="Changer de langue">EN</button>
+  </header>
+
+  <div class="location-chip" aria-live="polite">
+    <span id="location-name">ARRIVAL PLAZA</span>
+    <b id="location-heading">N</b>
+  </div>
+
+  <section id="intro" class="intro-card" aria-labelledby="intro-title">
+    <div class="intro-kicker">KŌMØ WORLD · SPATIAL LONGEVITY</div>
+    <h1 id="intro-title"><span>Votre corps.</span><em>Votre trajectoire.</em></h1>
+    <p>Entrez dans un espace personnel conçu pour comprendre votre mouvement, choisir une action et suivre votre progression dans le temps.</p>
+    <div class="intro-path">
+      <span>MEASURE</span><i></i><span>UNDERSTAND</span><i></i><span>ACT</span>
+    </div>
+    <button id="intro-enter" type="button">ENTRER DANS MON WORLD</button>
+  </section>
+
+  <aside id="interaction" class="interaction-card" aria-live="polite">
+    <div class="interaction-key">E</div>
+    <div>
+      <strong id="interaction-title"></strong>
+      <span id="interaction-copy"></span>
+    </div>
+  </aside>
+
+  <aside id="world-panel" class="world-panel" aria-hidden="true">
+    <button id="panel-close" class="panel-close" type="button" aria-label="Fermer">×</button>
+    <div id="panel-kicker" class="panel-kicker"></div>
+    <h2 id="panel-title"></h2>
+    <div id="panel-body" class="panel-body"></div>
+    <div id="panel-actions" class="panel-actions"></div>
+  </aside>
+
+  <div class="desktop-help" aria-hidden="true">
+    <span><kbd>WASD</kbd> / <kbd>ZQSD</kbd> SE DÉPLACER</span>
+    <span><kbd>SHIFT</kbd> ACCÉLÉRER</span>
+    <span>GLISSER POUR REGARDER</span>
+  </div>
+
+  <div class="mobile-controls" aria-hidden="true">
+    <div id="joystick-zone" class="joystick-zone">
+      <div class="joystick-base"><div id="joystick-stick" class="joystick-stick"></div></div>
+    </div>
+    <button id="mobile-action" class="mobile-action" type="button">ACTION</button>
+  </div>
+
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <noscript>KŌMØ World nécessite JavaScript.</noscript>
+  <script type="module" src="./world-v1.js"></script>
 </body>
 </html>
