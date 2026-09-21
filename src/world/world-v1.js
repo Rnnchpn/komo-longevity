@@ -1434,6 +1434,33 @@ plaque(twinRoom,'CURRENT','MOTION SCORE · MOTION AGE',4.4,1.25,-6.7,4.2,-8.0,{d
 plaque(twinRoom,'LONGITUDINAL','BASELINE → TODAY',4.4,1.25,6.7,4.2,-8.0,{dark:true,titleSize:74});
 glow(twinRoom,0xc9d7c9,2.0,12,0,5.5,-3);
 
+// V2.6 Twin Lab — spatial domain readout around the body.
+const twinLab=new THREE.Group();twinLab.name='KOMO_TWIN_LAB_V26';twinRoom.add(twinLab);
+const twinDomainVisuals={};
+const twinDomainLayout=[
+  ['muscle',-5.15,1.4,-2.2,'MUSCLE'],
+  ['mobility',5.15,1.4,-2.2,'MOBILITY'],
+  ['balance',-5.15,1.4,2.9,'BALANCE'],
+  ['posture',5.15,1.4,2.9,'POSTURE'],
+  ['endurance',0,1.4,5.1,'ENDURANCE']
+];
+twinDomainLayout.forEach(([id,x,y,z,label],i)=>{
+  const g=new THREE.Group();g.position.set(x,0,z);twinLab.add(g);
+  box(g,2.25,.16,1.55,MAT.travertine,0,.08,0);
+  const well=box(g,.52,2.45,.52,MAT.blackened,0,1.34,0);
+  const fillMat=new THREE.MeshBasicMaterial({color:i%2?0xb8cbbf:0xd1b57c,transparent:true,opacity:.72});
+  const fill=box(g,.38,1.0,.38,fillMat,0,.62,.29,{cast:false,receive:false});fill.userData.dynamic=true;
+  const ring=mesh(g,new THREE.RingGeometry(.48,.54,28),new THREE.MeshBasicMaterial({color:0xd3b77f,transparent:true,opacity:.26,depthWrite:false}),0,.19,.30,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;ring.userData.dynamic=true;
+  plaque(g,label,'LIVE DOMAIN',1.95,.54,0,2.94,.32,{dark:true,titleSize:48});
+  twinDomainVisuals[id]={group:g,fill,ring,label};
+});
+const twinTimeRail=new THREE.Group();twinTimeRail.name='KOMO_TWIN_TIMELINE_V26';twinRoom.add(twinTimeRail);
+[-4.8,-2.4,0,2.4,4.8].forEach((x,i)=>{
+  const dot=mesh(twinTimeRail,new THREE.RingGeometry(.15,.22,24),new THREE.MeshBasicMaterial({color:i===4?0xd4b77b:0x81958a,transparent:true,opacity:i===4?.70:.28,depthWrite:false}),x,.035,7.1,{cast:false,receive:false});dot.rotation.x=-Math.PI/2;
+});
+line(twinTimeRail,9.6,.035,0,7.1,M.bronze,.04);
+plaque(twinRoom,'EXPLORE','APPROACH A DOMAIN · PRESS E',6.6,.72,0,1.05,8.7,{dark:false,titleSize:58});
+
 // Rehab room.
 rehabRoom.position.set(0,0,-55);
 box(rehabRoom,22,.24,24,M.stoneLight,0,.10,0);
@@ -1449,6 +1476,34 @@ plaque(rehabRoom,'01','CONTROL',3.2,.90,-5.3,4.6,-8.0,{dark:false,titleSize:74})
 plaque(rehabRoom,'02','STRENGTH',3.2,.90,0,4.6,-8.0,{dark:true,titleSize:74});
 plaque(rehabRoom,'03','CAPACITY',3.2,.90,5.3,4.6,-8.0,{dark:false,titleSize:74});
 glow(rehabRoom,0xf0d2a7,3.5,15,0,5.4,-6);
+
+// V2.6 Rehab Lab — three tangible stations, no extra dynamic lights.
+const rehabLab=new THREE.Group();rehabLab.name='KOMO_REHAB_LAB_V26';rehabRoom.add(rehabLab);
+const rehabStationVisuals={};
+[
+  ['control',-5.3,-3.2,0xb7c9be],
+  ['strength',0,-3.2,0xd3b77f],
+  ['capacity',5.3,-3.2,0xb7c9be]
+].forEach(([id,x,z,color],i)=>{
+  const g=new THREE.Group();g.position.set(x,0,z);rehabLab.add(g);
+  const ringMat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.26,depthWrite:false});
+  const ring=mesh(g,new THREE.RingGeometry(1.45,1.56,40),ringMat,0,.29,0,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;ring.userData.dynamic=true;
+  const pulse=mesh(g,new THREE.RingGeometry(.88,.94,34),ringMat.clone(),0,.30,0,{cast:false,receive:false});pulse.rotation.x=-Math.PI/2;pulse.userData.dynamic=true;
+  rehabStationVisuals[id]={group:g,ring,pulse};
+  if(id==='control'){
+    box(g,1.55,.12,1.55,MAT.fabricLight,0,.36,0);
+    line(g,1.30,.04,0,0,MAT.brass,.45);
+    const marker=mesh(g,new THREE.RingGeometry(.22,.27,24),MAT.brass,0,.46,0);marker.rotation.x=-Math.PI/2;
+  }else if(id==='strength'){
+    box(g,1.90,.42,.62,MAT.walnut,0,.56,.20,{cast:true});
+    box(g,1.90,.62,.18,MAT.fabric,0,.86,.48,{cast:true});
+    [-.70,.70].forEach(px=>box(g,.12,.58,.12,MAT.brass,px,.29,.20));
+  }else{
+    for(let k=-2;k<=2;k++)box(g,.08,.018,1.55,MAT.brass,k*.38,.35,0,{cast:false,receive:false});
+    box(g,2.20,.035,1.75,MAT.fabricLight,0,.31,0);
+  }
+});
+plaque(rehabRoom,'GUIDED DEMO','CHOOSE A STATION · PRESS E',6.8,.72,0,1.05,8.9,{dark:false,titleSize:58});
 
 // Arena room.
 arenaRoom.position.set(45,0,0);
