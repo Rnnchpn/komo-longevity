@@ -69,7 +69,7 @@ const checks=[
   ['patient dock keeps five canonical destinations',dock.includes("['home','Home'")&&dock.includes("['results','Résultats'")&&dock.includes("['key','Connected'")&&dock.includes("['agenda','Consultations & rendez-vous'")&&dock.includes("['mykomo','My KŌMØ'")],
   ['account is not a patient dock destination',!dock.includes("['account'")&&!html.includes('account-tab-restore-v1.js')],
   ['KŌMØ World visible in My KŌMØ',mykomo.includes('data-mkv5-world')&&mykomo.includes('KŌMØ World')],
-  ['KŌMØ World canonical entry targets v0.13.5',world.includes('./v135/')],
+  ['KŌMØ World canonical V1 shell',world.includes('./world-v1.js')&&world.includes('./world-v1.css')&&!world.includes('./v135/')],
   ['single consultation runtime owner',!html.includes('pro-agenda-dossier-v1.js')&&!html.includes('booking-directory-map-v1.js')],
   ['single Centre runtime owner',html.includes('center-two-tab-workspace-v1.js')&&!html.includes('center-workspace-v1.js')&&!html.includes('center-command-cockpit-v2.js')]
 ];
