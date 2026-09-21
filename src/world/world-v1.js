@@ -107,6 +107,7 @@ const living={
   lifeDisplay:null,
   kinetic:null,
   motionScreens:[],
+  exteriorSculptures:[],
   daylight:'day'
 };
 
@@ -191,6 +192,40 @@ function tree(parent,x,z,s=.8){
     f.scale.set(1,.72,1);
   });
   return g;
+}
+function exteriorBench(parent,x,z,rot=0,scale=1){
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
+  box(g,2.20*scale,.16,.62*scale,MAT.walnut,0,.52,0,{cast:true});
+  box(g,2.32*scale,.07,.76*scale,MAT.brass,0,.39,0);
+  [-.92,.92].forEach(xx=>{
+    box(g,.10*scale,.42,.10*scale,MAT.brass,xx,.21,-.18*scale,{cast:true});
+    box(g,.10*scale,.42,.10*scale,MAT.brass,xx,.21,.18*scale,{cast:true});
+  });
+  return g;
+}
+function exteriorBollard(parent,x,z,height=.78){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  cyl(g,.07,.10,height,MAT.blackened,0,height/2,0,14,{cast:true});
+  cyl(g,.11,.11,.05,MAT.brass,0,height+.03,0,16,{cast:true});
+  const l=glow(g,0xf1d2a0,.85,4.5,0,height+.10,0);living.lights.push(l);
+  return g;
+}
+function exteriorPlanter(parent,x,z,w=3.2,d=2.0,treeScale=.62){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  box(g,w,.34,d,M.stoneDeep,0,.17,0);
+  box(g,w-.34,.08,d-.28,M.soil,0,.39,0);
+  tree(g,0,0,treeScale);
+  return g;
+}
+function sculptureGarden(parent,x,z,scale=1){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  box(g,1.55*scale,.42,1.55*scale,MAT.limestone,0,.21,0,{cast:true});
+  box(g,1.35*scale,.05,1.35*scale,MAT.brass,0,.45,0);
+  const a=mesh(g,new THREE.TorusGeometry(.46*scale,.045*scale,10,52),MAT.brass,0,1.02,0,{cast:true});
+  const b=mesh(g,new THREE.TorusGeometry(.30*scale,.026*scale,8,40),M.bronzeSoft,0,1.02,0,{cast:true});
+  a.rotation.x=1.05;b.rotation.y=.75;
+  const core=mesh(g,new THREE.SphereGeometry(.08*scale,16,12),M.warm,0,1.02,0,{cast:true});
+  return {group:g,a,b,core};
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
@@ -350,6 +385,81 @@ pedestalObject(world,-8.6,35.0,'ring');
 pedestalObject(world,8.6,35.0,'dark');
 plaque(world,'ARRIVAL','LONGEVITY IN MOTION',4.1,.98,-8.3,3.7,31.8,{rotY:Math.PI/2,dark:true,titleSize:66});
 plaque(world,'KŌMØ LIFE','OBJECTS · EQUIPMENT',4.1,.98,8.3,3.7,31.8,{rotY:-Math.PI/2,dark:true,titleSize:62});
+
+// V1.6 exterior environment — a landscaped Riviera forecourt around the main building.
+const exterior=new THREE.Group();exterior.name='KOMO_EXTERIOR_V16';world.add(exterior);
+
+// Larger mineral forecourt that visually connects Arrival with the architecture.
+box(exterior,20.8,.055,30.5,MAT.travertine,0,.055,40.7);
+box(exterior,9.2,.030,28.0,M.stoneLight,0,.092,40.7);
+[-5.10,5.10].forEach(x=>line(exterior,.05,27.6,x,40.7,M.bronze,.115));
+[28,34,40,46,52].forEach(z=>line(exterior,9.0,.04,0,z,M.bronzeSoft,.118));
+
+// Landscape carpets and low stone edges.
+[-1,1].forEach(side=>{
+  box(exterior,6.6,.07,31.0,M.ground,side*13.55,.032,40.8);
+  box(exterior,.22,.46,28.0,MAT.limestone,side*18.15,.23,40.8,{cast:true});
+});
+
+// Secondary reflecting basins closer to the building.
+[-1,1].forEach(side=>{
+  box(exterior,3.25,.18,16.5,M.stoneLight,side*8.75,.11,41.0);
+  const pool=box(exterior,2.88,.07,15.9,M.water,side*8.75,.205,41.0,{cast:false,receive:false});
+  living.water.push(pool);
+  for(let i=0;i<2;i++){
+    const q=box(exterior,2.30,.010,.045,shimmerMat,side*8.75,.255,35.4+i*7.2,{cast:false,receive:false});
+    q.userData.phase=.18+i*.37+(side>0?.22:0);living.shimmers.push(q);
+  }
+});
+
+// Trees create a strong arrival axis without hiding the facade.
+[-1,1].forEach(side=>{
+  [26.5,32.5,38.5,44.5,50.5].forEach((z,i)=>{
+    tree(exterior,side*15.2,z,.60+(i%2)*.05);
+  });
+});
+
+// Hospitality benches outside the circulation spine.
+exteriorBench(exterior,-12.2,33.8,Math.PI/2,.92);
+exteriorBench(exterior,12.2,33.8,-Math.PI/2,.92);
+exteriorBench(exterior,-12.2,48.0,Math.PI/2,.92);
+exteriorBench(exterior,12.2,48.0,-Math.PI/2,.92);
+
+// Integrated planters near the corners of the forecourt.
+exteriorPlanter(exterior,-16.0,24.8,3.4,2.25,.60);
+exteriorPlanter(exterior,16.0,24.8,3.4,2.25,.60);
+exteriorPlanter(exterior,-16.0,56.5,3.4,2.25,.60);
+exteriorPlanter(exterior,16.0,56.5,3.4,2.25,.60);
+
+// Low lighting: hospitality rather than runway.
+[-1,1].forEach(side=>{
+  [29.5,36.0,42.5,49.0].forEach(z=>exteriorBollard(exterior,side*11.3,z,.74));
+});
+
+// Two sculptural markers announce KŌMØ before the entrance.
+const exteriorSculptureL=sculptureGarden(exterior,-6.8,27.2,.96);
+const exteriorSculptureR=sculptureGarden(exterior,6.8,27.2,.96);
+living.exteriorSculptures.push(exteriorSculptureL,exteriorSculptureR);
+
+// Shallow terraces frame the forecourt and prevent the building from floating in open space.
+[-1,1].forEach(side=>{
+  box(exterior,4.2,.34,7.2,MAT.limestone,side*16.0,.17,31.0,{cast:true});
+  box(exterior,4.2,.34,7.2,MAT.limestone,side*16.0,.17,50.6,{cast:true});
+  line(exterior,3.45,.04,side*16.0,27.65,M.bronze,.36);
+  line(exterior,3.45,.04,side*16.0,54.0,M.bronze,.36);
+});
+
+// Warm facade wash and garden pools of light.
+[
+  [-6.7,3.8,23.0,1.65],[6.7,3.8,23.0,1.65],
+  [-12.6,3.2,27.0,1.15],[12.6,3.2,27.0,1.15],
+  [-12.8,2.4,46.5,.95],[12.8,2.4,46.5,.95]
+].forEach(([x,y,z,intensity])=>{
+  const l=glow(exterior,0xf2cf98,intensity,8,x,y,z);living.lights.push(l);
+});
+
+// One discreet landscape identity marker, leaving the building as the hero.
+plaque(exterior,'KŌMØ','ARRIVAL COURT',3.4,.75,-17.70,2.30,39.0,{rotY:Math.PI/2,dark:true,titleSize:57});
 
 // Main building — one continuous architectural object, no reception avatar.
 const building=new THREE.Group();building.name='KOMO_MAIN_BUILDING_V1';world.add(building);
@@ -679,9 +789,9 @@ plaque(arenaRoom,'STAND UP','CAPACITY',3.6,.94,5.2,4.7,-8.1,{dark:true,titleSize
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 
 // Runtime state.
-const player=new THREE.Vector3(0,0,57);
+const player=new THREE.Vector3(0,0,31.5);
 const velocity=new THREE.Vector3();
-let yaw=0,pitch=-.035;
+let yaw=0,pitch=-.045;
 let mode='world';
 let currentInteraction=null;
 let doorProgress=0;
@@ -888,7 +998,7 @@ function updateLocation(){
   if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';return}
   if(mode==='rehab'){locationName.textContent='REHAB';return}
   if(mode==='arena'){locationName.textContent='ARENA';return}
-  if(player.z>19)locationName.textContent='ARRIVAL PLAZA';
+  if(player.z>23)locationName.textContent='ARRIVAL PLAZA';
   else if(player.x>6.8&&player.z>-2&&player.z<7)locationName.textContent='KŌMØ LIFE';
   else if(player.z>-7)locationName.textContent='KŌMØ HALL';
   else locationName.textContent='MOTION ATRIUM';
@@ -1007,6 +1117,13 @@ function animateLiving(now){
     living.kinetic.c.rotation.y=t*.073;
     living.kinetic.group.position.y=5.25+Math.sin(t*.32)*.045;
   }
+  if(living.exteriorSculptures?.length){
+    living.exteriorSculptures.forEach((sculpture,i)=>{
+      sculpture.a.rotation.z=t*.045+i*.32;
+      sculpture.b.rotation.x=t*.038+i*.21;
+      sculpture.core.position.y=Math.sin(t*.42+i)*.025;
+    });
+  }
   if(!lowPower&&Math.floor(t*8)%2===0)living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));
   sun.position.x=-24+Math.sin(t*.025)*3.5;
 }
@@ -1035,7 +1152,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.5.0-architecture-life',
+  version:'1.6.0-exterior-spawn',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode}),
