@@ -99,17 +99,32 @@ renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=.92;
-renderer.shadowMap.enabled=!lowPower;
+renderer.shadowMap.enabled=false;
+renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 let qualityMode=lowPower?'performance':'auto';
-let renderScale=lowPower?.68:1.45;
+let renderScale=lowPower?.62:1.15;
 let fpsEMA=60,lastPerfSample=performance.now(),perfFrames=0;
 let emergencyPerformance=lowPower;
-function maxPixelRatio(){return qualityMode==='performance'?(lowPower?.72:1.15):qualityMode==='high'?(lowPower?1.0:1.8):(lowPower?.86:1.55)}
+let lastBudgetUpdate=0,lastVisibilityUpdate=0,lastUiUpdate=0,lastDecorUpdate=0,lastRoomFxUpdate=0;
+let activeLightBudget=0;
+function maxPixelRatio(){return qualityMode==='performance'?(lowPower?.64:.90):qualityMode==='high'?(lowPower?.90:1.55):(lowPower?.76:1.25)}
 function applyRenderScale(){
   const ratio=Math.min(window.devicePixelRatio||1,renderScale,maxPixelRatio());
   renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight,false);
   if(qualityStatus)qualityStatus.textContent=(qualityMode==='auto'?'AUTO':qualityMode.toUpperCase())+' · '+ratio.toFixed(2)+'×';
+}
+function applyQualityProfile(){
+  // Shadows are the most expensive duplicate draw pass: HIGH only.
+  const shadows=qualityMode==='high'&&!lowPower&&!emergencyPerformance;
+  renderer.shadowMap.enabled=shadows;
+  if(shadows){
+    sun.shadow.mapSize.set(1024,1024);
+    renderer.shadowMap.needsUpdate=true;
+  }
+  fill.intensity=qualityMode==='high'&&!lowPower?1.0:0;
+  activeLightBudget=emergencyPerformance||lowPower?0:(qualityMode==='high'?6:qualityMode==='performance'?2:4);
+  applyRenderScale();
 }
 applyRenderScale();
 
@@ -117,16 +132,16 @@ const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xcbd2c8);
 scene.fog=new THREE.Fog(0xcbd2c8,82,215);
 
-const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.12,480);
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.12,260);
 camera.position.set(0,1.72,58);
 
 const hemi=new THREE.HemisphereLight(0xe5eadf,0x596354,2.25);
 scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe5bd,3.3);
 sun.position.set(-24,38,32);
-sun.castShadow=!lowPower;
+sun.castShadow=true;
 if(sun.castShadow){
-  sun.shadow.mapSize.set(2048,2048);
+  sun.shadow.mapSize.set(1024,1024);
   sun.shadow.camera.left=-45;sun.shadow.camera.right=45;sun.shadow.camera.top=55;sun.shadow.camera.bottom=-45;
   sun.shadow.camera.near=1;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;
 }
@@ -250,6 +265,7 @@ function applyDaylight(){
   }
   scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=82;scene.fog.far=215;
   sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
+  if(renderer.shadowMap.enabled)renderer.shadowMap.needsUpdate=true;
   const dayT=THREE.MathUtils.clamp((h-6)/15,0,1);
   const arc=Math.PI*dayT;
   const dir=new THREE.Vector3(-Math.cos(arc)*.82,Math.max(.08,Math.sin(arc)*.88),.42).normalize();
@@ -352,8 +368,9 @@ function plaque(parent,title,subtitle,w,h,x,y,z,{rotY=0,dark=true,titleSize=90}=
   const p=mesh(parent,new THREE.PlaneGeometry(w,h),mat,x,y,z,{receive:false});p.rotation.y=rotY;p.userData.texture=tx;return p;
 }
 function glow(parent,color,intensity,distance,x,y,z){
-  const l=new THREE.PointLight(color,intensity,distance,2);l.position.set(x,y,z);l.userData.decorative=true;
-  if(lowPower){l.visible=false;l.intensity=0}
+  const l=new THREE.PointLight(color,intensity,distance,2);l.position.set(x,y,z);
+  l.userData.decorative=true;l.userData.baseIntensity=intensity;l.userData.baseDistance=distance;
+  l.visible=false;
   parent.add(l);return l;
 }
 function line(parent,w,d,x,z,material=M.bronze,y=.075){
@@ -2447,8 +2464,8 @@ cameraToggle.addEventListener('click',toggleCamera);
 guideToggle.addEventListener('click',toggleGuide);
 qualityToggle.addEventListener('click',()=>{
   qualityMode=qualityMode==='auto'?'performance':qualityMode==='performance'?'high':'auto';
-  renderScale=qualityMode==='performance'?(lowPower?.62:1.10):qualityMode==='high'?(lowPower?.90:1.75):(lowPower?.72:1.45);
-  applyRenderScale();notify('QUALITY · '+qualityMode.toUpperCase());
+  renderScale=qualityMode==='performance'?(lowPower?.55:.82):qualityMode==='high'?(lowPower?.82:1.35):(lowPower?.62:1.10);
+  applyQualityProfile();notify('QUALITY · '+qualityMode.toUpperCase());
 });
 resetPosition.addEventListener('click',()=>fastTravel('arrival'));
 
@@ -2477,10 +2494,60 @@ window.addEventListener('resize',()=>{
 });
 
 let last=performance.now(),raf=0;
+function updateLightBudget(now){
+  if(now-lastBudgetUpdate<280)return;
+  lastBudgetUpdate=now;
+  const candidates=[];
+  for(const l of living.lights){
+    if(!l||!l.parent)continue;
+    l.visible=false;l.intensity=0;
+    if(activeLightBudget<=0||mode!=='world')continue;
+    const wp=new THREE.Vector3();l.getWorldPosition(wp);
+    const d=wp.distanceTo(camera.position);
+    if(d<16)candidates.push({l,d});
+  }
+  candidates.sort((a,b)=>a.d-b.d);
+  candidates.slice(0,activeLightBudget).forEach(({l,d})=>{
+    l.visible=true;
+    l.intensity=(l.userData.baseIntensity||1)*THREE.MathUtils.clamp(1-d/20,.28,1);
+  });
+}
+function updateVisibilityBudget(now){
+  if(now-lastVisibilityUpdate<420)return;
+  lastVisibilityUpdate=now;
+  if(mode!=='world')return;
+  // Coarse occlusion/distance budget: do not draw whole zones when they cannot contribute.
+  const deepHall=player.z<7;
+  exterior.visible=player.z>5;
+  upperLevel.visible=playerLevel===1||player.z<16;
+  lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
+  arrivalDetails.visible=player.z>1&&player.z<26;
+  npcRoot.visible=true;
+  living.trees.forEach(tree=>{
+    const wp=new THREE.Vector3();tree.getWorldPosition(wp);
+    tree.visible=wp.distanceTo(camera.position)<(lowPower?30:46);
+  });
+  living.npcs.forEach(npc=>{
+    const sameLevel=Math.abs(npc.position.y-player.y)<2;
+    const dist=Math.hypot(npc.position.x-player.x,npc.position.z-player.z);
+    npc.visible=sameLevel&&dist<(lowPower?20:34);
+  });
+  living.banners.forEach(banner=>{
+    const wp=new THREE.Vector3();banner.getWorldPosition(wp);
+    banner.visible=wp.distanceTo(camera.position)<42;
+  });
+  living.motionScreens.forEach(screen=>{
+    const mesh=screen.mesh||screen;
+    if(mesh?.getWorldPosition){
+      const wp=new THREE.Vector3();mesh.getWorldPosition(wp);mesh.visible=wp.distanceTo(camera.position)<28;
+    }
+  });
+}
 function applyEmergencyPerformance(){
   if(!emergencyPerformance)emergencyPerformance=true;
   qualityMode='performance';
-  renderScale=lowPower?.55:.72;
+  renderScale=lowPower?.52:.68;
+  activeLightBudget=0;renderer.shadowMap.enabled=false;fill.intensity=0;
   living.lights.forEach(l=>{l.visible=false;if('intensity' in l)l.intensity=0});
   if(living.dust)living.dust.visible=false;
   living.clouds.forEach(c=>c.visible=false);
@@ -2493,14 +2560,15 @@ function updatePerformance(now){
   perfFrames++;
   if(now-lastPerfSample<1000)return;
   const fps=perfFrames*1000/(now-lastPerfSample);fpsEMA=fpsEMA*.72+fps*.28;perfFrames=0;lastPerfSample=now;
-  if(fpsStatus)fpsStatus.textContent=Math.round(fpsEMA)+' FPS';
+  if(fpsStatus)fpsStatus.textContent=Math.round(fpsEMA)+' FPS · '+renderer.info.render.calls+' DC';
   if(fpsEMA<18&&!emergencyPerformance){applyEmergencyPerformance();notify(locale==='fr'?'Mode performance activé':'Performance mode enabled')}
   if(qualityMode==='auto'&&!emergencyPerformance){
-    const min=lowPower?.55:.90,max=lowPower?.78:1.55;
+    const min=lowPower?.50:.70,max=lowPower?.72:1.25;
     let next=renderScale;
-    if(fpsEMA<28)next=Math.max(min,renderScale-.14);
-    else if(fpsEMA<45)next=Math.max(min,renderScale-.07);
-    else if(fpsEMA>57)next=Math.min(max,renderScale+.03);
+    if(fpsEMA<24)next=Math.max(min,renderScale-.16);
+    else if(fpsEMA<40)next=Math.max(min,renderScale-.09);
+    else if(fpsEMA<52)next=Math.max(min,renderScale-.04);
+    else if(fpsEMA>58)next=Math.min(max,renderScale+.025);
     if(Math.abs(next-renderScale)>.01){renderScale=next;applyRenderScale()}
   }
 }
@@ -2580,15 +2648,29 @@ function animate(now){
   updateMovement(dt);
   updateCamera(now,dt);
   updateDoors(now,dt);
-  updateLocation();
-  updateHeading();
-  updateInteraction();
-  updateJourneyGuide(now);
-  updateTwinScan(now);
-  if(!livingAnimationFailed){
-    try{animateLiving(now)}
-    catch(err){livingAnimationFailed=true;console.warn('[KŌMØ World] living animation disabled after runtime error',err)}
+
+  // UI / proximity logic does not need 60 Hz.
+  if(now-lastUiUpdate>(lowPower?100:66)){
+    lastUiUpdate=now;
+    updateLocation();updateHeading();updateInteraction();updateJourneyGuide(now);
   }
+
+  // Room effects/coach stay smooth enough at 30 Hz; 20 Hz on low power.
+  if(now-lastRoomFxUpdate>(lowPower?50:33)){
+    lastRoomFxUpdate=now;updateTwinScan(now);
+  }
+
+  // Decorative environment at 20–30 Hz is visually identical but much cheaper.
+  if(now-lastDecorUpdate>(lowPower?66:40)){
+    lastDecorUpdate=now;
+    if(!livingAnimationFailed){
+      try{animateLiving(now)}
+      catch(err){livingAnimationFailed=true;console.warn('[KŌMØ World] living animation disabled after runtime error',err)}
+    }
+  }
+
+  updateLightBudget(now);
+  updateVisibilityBudget(now);
   renderer.render(scene,camera);
   raf=requestAnimationFrame(animate);
 }
@@ -2597,7 +2679,6 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){velocity.s
 window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(daylightTimer)},{once:true});
 
 function freezeStaticScene(){
-  if(!lowPower)return;
   const dynamicMeshes=new Set([scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB,journeyRing,waypointRing,waypointStem,waypointCap,...guideDots.flatMap(g=>g.children)].filter(Boolean));
   scene.traverse(o=>{
     if(o.isMesh&&!dynamicMeshes.has(o)&&!o.userData.dynamic){
@@ -2607,6 +2688,7 @@ function freezeStaticScene(){
   });
 }
 freezeStaticScene();
+applyQualityProfile();
 if(lowPower)applyEmergencyPerformance();
 syncPlayerElevation();
 updateJourneyUI();
@@ -2614,12 +2696,12 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.7.1-biomech-coach',
+  version:'2.8.0-fps-budget',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
   getLocale:()=>locale,
-  getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale}),
+  getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale,drawCalls:renderer.info.render.calls,activeLightBudget,shadows:renderer.shadowMap.enabled}),
   getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
   getCameraMode:()=>cameraMode,
   fastTravel,
