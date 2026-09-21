@@ -411,66 +411,116 @@ function bannerTotem(parent,x,z,title,subtitle,rotY=0){
   fabricBanner(g,0,5.30,.07,1.45,4.45,title,subtitle,{dark:true});
   return g;
 }
-function makeNpc(parent,{role='visitor',x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
+function npcNameTag(text,sub=''){
+  const c=document.createElement('canvas');c.width=512;c.height=144;const x=c.getContext('2d');
+  x.clearRect(0,0,512,144);
+  x.fillStyle='rgba(20,31,25,.82)';x.fillRect(28,20,456,98);
+  x.strokeStyle='rgba(211,177,120,.55)';x.lineWidth=2;x.strokeRect(29,21,454,96);
+  x.fillStyle='#f4ede2';x.font='600 34px Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(String(text).slice(0,22),256,59);
+  if(sub){x.fillStyle='rgba(224,194,143,.88)';x.font='700 17px Arial';x.fillText(String(sub).toUpperCase().slice(0,24),256,91)}
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
+  sp.scale.set(2.05,.58,1);sp.position.y=2.48;sp.renderOrder=25;return sp;
+}
+function makeNpc(parent,{role='visitor',label='Guest',x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
   const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);g.name='KOMO_NPC_'+role.toUpperCase();parent.add(g);
-  const skinColors=[0xe1c0a4,0xc99572,0x9e6f51,0x6c4a3e];
-  const skin=new THREE.MeshStandardMaterial({color:skinColors[Math.abs(Math.floor((x*13+z*7+phase*17)))%skinColors.length],roughness:.82});
-  const outfits={
-    sage:0x324b3e,cream:0xd8d0c3,charcoal:0x2c312f,sand:0xaa9277,bronze:0x705747
-  };
+  const seed=Math.abs(Math.floor(x*31+z*17+phase*101));
+  const skinColors=[0xe8c9ad,0xd0a27f,0xb27b58,0x7b543f,0x513a31];
+  const hairColors=[0x2d2521,0x5b4637,0x8a6f58,0x201d1b];
+  const skin=new THREE.MeshStandardMaterial({color:skinColors[seed%skinColors.length],roughness:.82});
+  const hair=new THREE.MeshStandardMaterial({color:hairColors[(seed+2)%hairColors.length],roughness:.90});
+  const outfits={sage:0x324b3e,cream:0xd8d0c3,charcoal:0x2c312f,sand:0xaa9277,bronze:0x705747};
   const cloth=new THREE.MeshStandardMaterial({color:outfits[outfit]||outfits.sage,roughness:.76});
   const trouser=new THREE.MeshStandardMaterial({color:role==='staff'?0x222b27:0x4a4d49,roughness:.82});
-  const shoe=new THREE.MeshStandardMaterial({color:0x272522,roughness:.66});
+  const shoe=new THREE.MeshStandardMaterial({color:0x242220,roughness:.64});
+  const metal=MAT.brass;
+  const cast=!lowPower;
 
-  // torso/head
-  const torso=mesh(g,new THREE.CylinderGeometry(.23,.29,.70,16),cloth,0,1.24,0,{cast:true});
-  const neck=cyl(g,.075,.085,.11,skin,0,1.64,0,12,{cast:true});
-  const head=mesh(g,new THREE.SphereGeometry(.205,18,14),skin,0,1.82,0,{cast:true});
-  head.scale.set(.92,1.05,.94);
+  // hips + torso + shoulders
+  const hips=mesh(g,new THREE.CylinderGeometry(.235,.25,.28,14),trouser,0,.93,0,{cast});
+  const torso=mesh(g,new THREE.CylinderGeometry(.24,.30,.72,16),cloth,0,1.31,0,{cast});
+  const shoulder=box(g,.68,.16,.24,cloth,0,1.56,0,{cast});
+  const neck=cyl(g,.075,.085,.12,skin,0,1.70,0,12,{cast});
+  const head=mesh(g,new THREE.SphereGeometry(.205,18,14),skin,0,1.88,0,{cast});head.scale.set(.92,1.05,.94);
+  // hair cap + subtle face detail
+  const hairCap=mesh(g,new THREE.SphereGeometry(.211,16,10,0,Math.PI*2,0,Math.PI*.50),hair,0,1.95,-.005,{cast});
+  hairCap.scale.set(.94,.88,.96);
+  const nose=mesh(g,new THREE.SphereGeometry(.030,8,6),skin,0,1.88,.195,{cast:false});nose.scale.set(.72,.72,1.05);
 
-  // legs as pivot groups
-  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.13,.92,0);rightLeg.position.set(.13,.92,0);g.add(leftLeg,rightLeg);
-  cyl(leftLeg,.065,.075,.64,trouser,0,-.32,0,10,{cast:true});cyl(rightLeg,.065,.075,.64,trouser,0,-.32,0,10,{cast:true});
-  box(leftLeg,.14,.09,.28,shoe,0,-.67,.055,{cast:true});box(rightLeg,.14,.09,.28,shoe,0,-.67,.055,{cast:true});
+  // legs with upper/lower segments
+  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.13,.90,0);rightLeg.position.set(.13,.90,0);g.add(leftLeg,rightLeg);
+  const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();leftKnee.position.y=-.31;rightKnee.position.y=-.31;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  cyl(leftLeg,.072,.078,.34,trouser,0,-.17,0,10,{cast});cyl(rightLeg,.072,.078,.34,trouser,0,-.17,0,10,{cast});
+  cyl(leftKnee,.060,.068,.32,trouser,0,-.17,0,10,{cast});cyl(rightKnee,.060,.068,.32,trouser,0,-.17,0,10,{cast});
+  box(leftKnee,.15,.09,.30,shoe,0,-.37,.065,{cast});box(rightKnee,.15,.09,.30,shoe,0,-.37,.065,{cast});
 
-  // arms as pivots
-  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.30,1.50,0);rightArm.position.set(.30,1.50,0);g.add(leftArm,rightArm);
-  cyl(leftArm,.050,.058,.56,role==='staff'?cloth:skin,0,-.28,0,10,{cast:true});
-  cyl(rightArm,.050,.058,.56,role==='staff'?cloth:skin,0,-.28,0,10,{cast:true});
+  // arms with elbows, forearms and hands
+  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.34,1.54,0);rightArm.position.set(.34,1.54,0);g.add(leftArm,rightArm);
+  const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();leftElbow.position.y=-.28;rightElbow.position.y=-.28;leftArm.add(leftElbow);rightArm.add(rightElbow);
+  cyl(leftArm,.052,.060,.30,role==='staff'?cloth:skin,0,-.15,0,10,{cast});cyl(rightArm,.052,.060,.30,role==='staff'?cloth:skin,0,-.15,0,10,{cast});
+  cyl(leftElbow,.045,.052,.27,skin,0,-.14,0,10,{cast});cyl(rightElbow,.045,.052,.27,skin,0,-.14,0,10,{cast});
+  mesh(leftElbow,new THREE.SphereGeometry(.055,10,8),skin,0,-.31,0,{cast});mesh(rightElbow,new THREE.SphereGeometry(.055,10,8),skin,0,-.31,0,{cast});
 
-  // staff badge / visitor accessory
+  // accessories
   if(role==='staff'){
-    box(g,.12,.16,.025,MAT.brass,.16,1.42,.255);
+    box(g,.12,.16,.025,metal,.17,1.43,.265);
+    const tablet=box(g,.25,.34,.035,MAT.blackened,-.21,1.22,.28,{cast:false});tablet.rotation.z=.12;
   }else if(role==='coach'){
-    const band=mesh(g,new THREE.TorusGeometry(.13,.025,8,24),MAT.brass,0,1.39,.255);band.rotation.x=Math.PI/2;
+    const band=mesh(g,new THREE.TorusGeometry(.13,.025,8,24),metal,0,1.40,.255);band.rotation.x=Math.PI/2;
+  }else if(seed%2===0){
+    const bag=box(g,.26,.34,.12,MAT.walnut,.31,1.02,-.12,{cast});bag.rotation.z=-.08;
   }
 
-  // subtle contact shadow
-  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.34,24),new THREE.MeshBasicMaterial({color:0x27352d,transparent:true,opacity:.12,depthWrite:false}));
+  // label + contact shadow
+  const tag=npcNameTag(label,role==='staff'?'KŌMØ STAFF':role==='coach'?'COACH':'GUEST');g.add(tag);
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.34,20),new THREE.MeshBasicMaterial({color:0x27352d,transparent:true,opacity:.11,depthWrite:false}));
   shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;g.add(shadow);
 
   const points=route.length?route.map(p=>new THREE.Vector3(p[0],p[1]??y,p[2])):[new THREE.Vector3(x,y,z)];
   const seg=[],cum=[0];let total=0;
-  for(let i=0;i<points.length;i++){
-    const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total);
-  }
-  g.userData.npc={role,leftLeg,rightLeg,leftArm,rightArm,points,seg,cum,total,speed,phase,baseY:y};
+  for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total)}
+  g.userData.npc={role,label,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
   living.npcs.push(g);return g;
 }
 function updateNpc(npc,t,index){
   const d=npc.userData.npc;if(!d||!d.total)return;
-  let dist=(t*d.speed+d.phase*d.total)%d.total,segIndex=0;
-  while(segIndex<d.seg.length-1&&dist>d.cum[segIndex+1])segIndex++;
+  const distToCamera=camera.position.distanceTo(npc.position);
+  const sameLevel=Math.abs(camera.position.y-(npc.position.y+1.7))<4.6;
+  d.tag.visible=distToCamera<22&&sameLevel;
+  if(d.tag.visible){
+    const k=THREE.MathUtils.clamp(1+distToCamera*.012,1,1.22);
+    d.tag.scale.set(2.05*k,.58*k,1);
+  }
+
+  // On low-power devices, far characters move at 10 Hz and don't animate limbs.
+  const far=distToCamera>(lowPower?13:22);
+  if(far&&t-d.lastFarUpdate<(lowPower?.10:.065))return;
+  if(far)d.lastFarUpdate=t;
+
+  let routeDist=(t*d.speed+d.phase*d.total)%d.total,segIndex=0;
+  while(segIndex<d.seg.length-1&&routeDist>d.cum[segIndex+1])segIndex++;
   const a=d.points[segIndex],b=d.points[(segIndex+1)%d.points.length],len=Math.max(.001,d.seg[segIndex]);
-  const u=(dist-d.cum[segIndex])/len;
+  const u=(routeDist-d.cum[segIndex])/len;
   npc.position.lerpVectors(a,b,u);
   const dx=b.x-a.x,dz=b.z-a.z;
-  npc.rotation.y=Math.atan2(dx,dz);
-  const stride=Math.sin((t*d.speed*5.1)+index*.72);
-  d.leftLeg.rotation.x=stride*.34;d.rightLeg.rotation.x=-stride*.34;
-  d.leftArm.rotation.x=-stride*.26;d.rightArm.rotation.x=stride*.26;
-  const lift=Math.abs(Math.sin((t*d.speed*5.1)+index*.72))*.014;
-  npc.position.y+=lift;
+  const desired=Math.atan2(dx,dz);
+  npc.rotation.y=desired;
+
+  if(far){
+    d.leftLeg.rotation.x=d.rightLeg.rotation.x=d.leftArm.rotation.x=d.rightArm.rotation.x=0;
+    return;
+  }
+
+  const cadence=t*d.speed*5.25+index*.72;
+  const stride=Math.sin(cadence),half=Math.sin(cadence+Math.PI*.5);
+  d.leftLeg.rotation.x=stride*.38;d.rightLeg.rotation.x=-stride*.38;
+  d.leftKnee.rotation.x=Math.max(0,-stride)*.30;d.rightKnee.rotation.x=Math.max(0,stride)*.30;
+  d.leftArm.rotation.x=-stride*.29;d.rightArm.rotation.x=stride*.29;
+  d.leftElbow.rotation.x=Math.max(0,stride)*.16;d.rightElbow.rotation.x=Math.max(0,-stride)*.16;
+  d.torso.rotation.z=Math.cos(cadence*.5)*.018;
+  d.hips.rotation.y=Math.sin(cadence*.5)*.028;
+  d.head.rotation.y=Math.sin(t*.62+index*.73)*.09;
+  npc.position.y+=Math.abs(stride)*.015;
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
@@ -982,6 +1032,12 @@ box(floorV19,7.7,.020,1.58,MAT.brass,0,.370,13.0);
 box(floorV19,7.25,.024,1.16,FLOOR.promenade,0,.384,13.0);
 const medallion=mesh(floorV19,new THREE.RingGeometry(1.38,1.48,72),MAT.brass,0,.372,-8.6,{receive:false});medallion.rotation.x=-Math.PI/2;
 const medallion2=mesh(floorV19,new THREE.RingGeometry(.78,.82,64),M.bronzeSoft,0,.374,-8.6,{receive:false});medallion2.rotation.x=-Math.PI/2;
+// V2.0 floor polish: stair landing + lounge islands.
+box(floorV19,4.45,.035,6.55,FLOOR.life,-8.72,.368,10.05);
+[-10.20,-7.24].forEach(x=>line(floorV19,.035,6.05,x,10.05,MAT.brass,.392));
+for(let z=7.6;z<=12.5;z+=1.22)line(floorV19,3.95,.026,-8.72,z,M.bronzeSoft,.394);
+box(floorV19,4.25,.026,3.15,FLOOR.side,7.95,.369,-7.7);
+box(floorV19,4.10,.026,3.00,FLOOR.side,-8.0,.369,-14.2);
 
 // Life store gets its own darker gallery floor.
 box(floorV19,5.65,.045,9.85,FLOOR.life,8.45,.344,3.8);
@@ -1042,26 +1098,26 @@ glow(kinetic,0xf0c98d,1.7,7,0,0,0);
 
 // V1.9 ambient people — anonymous social life, separate from real Pulse members.
 const npcRoot=new THREE.Group();npcRoot.name='KOMO_AMBIENT_PEOPLE_V19';world.add(npcRoot);
-makeNpc(npcRoot,{role:'staff',x:-2.8,y:0,z:11.2,outfit:'sage',speed:.34,phase:.12,route:[
+makeNpc(npcRoot,{role:'staff',label:'Maya',x:-2.8,y:0,z:11.2,outfit:'sage',speed:.34,phase:.12,route:[
   [-2.8,0,11.2],[-2.8,0,5.8],[-1.6,0,1.8],[-3.2,0,-2.5],[-4.0,0,4.2]
 ]});
-makeNpc(npcRoot,{role:'visitor',x:3.6,y:0,z:27.8,outfit:'cream',speed:.54,phase:.36,route:[
+makeNpc(npcRoot,{role:'visitor',label:'Noah',x:3.6,y:0,z:27.8,outfit:'cream',speed:.54,phase:.36,route:[
   [3.6,0,27.8],[2.5,0,18.7],[2.8,0,10.8],[3.6,0,2.5],[4.2,0,-6.2],[3.0,0,-14.4]
 ]});
-makeNpc(npcRoot,{role:'visitor',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
+makeNpc(npcRoot,{role:'visitor',label:'Elena',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
   [-3.8,0,-4.5],[-3.2,0,-12.0],[-4.8,0,-20.4],[-1.4,0,-24.2],[1.8,0,-19.2],[.8,0,-8.0]
 ]});
-makeNpc(npcRoot,{role:'coach',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
+makeNpc(npcRoot,{role:'coach',label:'Leo',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
   [5.4,0,-18.4],[5.2,0,-10.0],[4.8,0,-2.2],[3.7,0,5.2],[5.5,0,9.0]
 ]});
 if(!lowPower){
-  makeNpc(npcRoot,{role:'visitor',x:7.0,y:0,z:5.8,outfit:'bronze',speed:.28,phase:.22,route:[
+  makeNpc(npcRoot,{role:'visitor',label:'Sofia',x:7.0,y:0,z:5.8,outfit:'bronze',speed:.28,phase:.22,route:[
     [7.0,0,5.8],[9.2,0,4.2],[9.0,0,1.2],[7.2,0,.4],[7.4,0,3.0]
   ]});
-  makeNpc(npcRoot,{role:'staff',x:-8.72,y:UPPER_Y,z:4.8,outfit:'sage',speed:.30,phase:.48,route:[
+  makeNpc(npcRoot,{role:'staff',label:'Alex',x:-8.72,y:UPPER_Y,z:4.8,outfit:'sage',speed:.30,phase:.48,route:[
     [-8.72,UPPER_Y,4.8],[-8.72,UPPER_Y,-4.8],[-8.72,UPPER_Y,-14.8],[-4.2,UPPER_Y,-21.2]
   ]});
-  makeNpc(npcRoot,{role:'visitor',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
+  makeNpc(npcRoot,{role:'visitor',label:'Mila',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
     [8.72,UPPER_Y,-3.0],[8.72,UPPER_Y,-10.5],[8.72,UPPER_Y,-18.0],[3.6,UPPER_Y,-21.2],[.4,UPPER_Y,-21.2]
   ]});
 }
@@ -1678,7 +1734,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.9.0-people-flooring',
+  version:'2.0.0-avatar-presence',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),
