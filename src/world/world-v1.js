@@ -1853,6 +1853,24 @@ function twinDomainName(id){
   };
   return names[id]?.[locale]||id;
 }
+function updateBiomechTwin(){
+  const d=current().domains||{};
+  Object.entries(biomechZones).forEach(([id,parts])=>{
+    const value=THREE.MathUtils.clamp(Number(d[id])||0,0,100);
+    const active=twinActiveDomain==='all'||twinActiveDomain===id;
+    parts.forEach((part,i)=>{
+      part.visible=active||twinActiveDomain==='all';
+      if(part.material){
+        part.material.opacity=(active?.26:.07)+(value/100)*(active?.48:.10);
+        if(part.material.color){
+          const color=value>=75?0xbdd3c4:value>=55?0xd5b878:0xc68f6a;
+          part.material.color.setHex(color);
+        }
+      }
+      part.scale.setScalar(active?1:0.92);
+    });
+  });
+}
 function updateTwinVisuals(){
   const d=current().domains||{};
   Object.entries(twinDomainVisuals).forEach(([id,v])=>{
@@ -1862,6 +1880,7 @@ function updateTwinVisuals(){
     v.fill.material.opacity=.46+value/100*.34;
     v.ring.material.opacity=.12+value/100*.30;
   });
+  updateBiomechTwin();
 }
 function twinDomainHtml(id){
   const s=current(),value=Number(s.domains?.[id])||0,base=Number(baseline.domains?.[id])||0,delta=value-base;
@@ -1882,16 +1901,59 @@ function twinDomainHtml(id){
       <div><span>SOURCE</span><b>TWIN</b></div>
     </div>
     <p>${explanations[id]?.[locale]||''}</p>
+    <div class="priority-card"><b>BODY MAP</b>${locale==='fr'?'La zone correspondante est mise en évidence sur le jumeau biomécanique dans la salle.':'The corresponding zone is highlighted on the biomechanical twin in the room.'}</div>
     <div class="data-note">${locale==='fr'?'Valeurs de démonstration TwinCore tant que la session Pulse personnelle n’est pas connectée.':'TwinCore demo values until the personal Pulse session is connected.'}</div>`;
 }
 function showTwinDomain(id){
-  updateTwinVisuals();
+  twinActiveDomain=id;updateTwinVisuals();
   openPanel(twinDomainName(id).toUpperCase(),locale==='fr'?'Explorer un domaine du Functional Twin.':'Explore a Functional Twin domain.',twinDomainHtml(id),[
     {label:locale==='fr'?'VUE TWIN':'TWIN OVERVIEW',onClick:showTwin},
     {label:copy[locale].openRehab,primary:true,onClick:enterRehab}
   ]);
 }
 
+function resetRehabCoach(){
+  const a=rehabCoach.userData.coach;if(!a)return;
+  rehabCoach.position.set(0,0,-6.3);rehabCoach.rotation.set(0,0,0);
+  a.hips.position.y=.92;a.hips.rotation.set(0,0,0);
+  a.torso.position.y=1.33;a.torso.rotation.set(0,0,0);
+  a.head.rotation.set(0,0,0);
+  [a.leftLeg,a.rightLeg,a.leftArm,a.rightArm,a.leftKnee,a.rightKnee,a.leftElbow,a.rightElbow].forEach(g=>g.rotation.set(0,0,0));
+}
+function setRehabCoachStation(id,running=false){
+  rehabCoachState.station=id||'control';rehabCoachState.running=!!running;rehabCoachState.phase=0;resetRehabCoach();
+}
+function animateRehabCoach(now,dt){
+  if(mode!=='rehab'||!rehabCoach.visible)return;
+  const a=rehabCoach.userData.coach,t=now*.001;
+  rehabCoachState.phase+=dt*(rehabCoachState.running?1:0.45);
+  const p=rehabCoachState.phase;
+  resetRehabCoach();
+  if(rehabCoachState.station==='control'){
+    const lift=.5+.5*Math.sin(p*2.0);
+    a.leftArm.rotation.z=-.72;a.rightArm.rotation.z=.72;
+    a.rightLeg.rotation.x=-.34*lift;a.rightKnee.rotation.x=.72*lift;
+    a.hips.rotation.z=Math.sin(p*1.5)*.055;
+    a.torso.rotation.z=-a.hips.rotation.z*.65;
+    a.head.rotation.y=Math.sin(p*.72)*.10;
+  }else if(rehabCoachState.station==='strength'){
+    const squat=.5+.5*Math.sin(p*2.15);
+    a.hips.position.y=.92-.28*squat;a.torso.position.y=1.33-.28*squat;
+    a.leftLeg.rotation.x=.48*squat;a.rightLeg.rotation.x=.48*squat;
+    a.leftKnee.rotation.x=-.92*squat;a.rightKnee.rotation.x=-.92*squat;
+    a.torso.rotation.x=-.12*squat;
+    a.leftArm.rotation.x=-.42*squat;a.rightArm.rotation.x=-.42*squat;
+  }else{
+    const stride=Math.sin(p*3.1);
+    a.leftLeg.rotation.x=stride*.54;a.rightLeg.rotation.x=-stride*.54;
+    a.leftKnee.rotation.x=Math.max(0,-stride)*.58;a.rightKnee.rotation.x=Math.max(0,stride)*.58;
+    a.leftArm.rotation.x=-stride*.42;a.rightArm.rotation.x=stride*.42;
+    rehabCoach.position.y=Math.abs(stride)*.025;
+  }
+  const intensity=rehabCoachState.running?1:.55;
+  a.leftLeg.rotation.x*=intensity;a.rightLeg.rotation.x*=intensity;
+  a.leftArm.rotation.x*=intensity;a.rightArm.rotation.x*=intensity;
+}
 const REHAB_KEY='komo_world_rehab_v1';
 let rehabSessionTimer=null;
 function loadRehabProgress(){
@@ -1927,6 +1989,7 @@ function rehabStationHtml(id,running=false,pct=0,remaining=null){
 }
 function stopRehabSession(){
   if(rehabSessionTimer){clearInterval(rehabSessionTimer);rehabSessionTimer=null}
+  rehabCoachState.running=false;
 }
 function completeRehabStation(id){
   stopRehabSession();rehabProgress[id]=(rehabProgress[id]||0)+1;rehabProgress.total++;saveRehabProgress();
@@ -1935,7 +1998,7 @@ function completeRehabStation(id){
   showRehabStation(id,true);
 }
 function runRehabDemo(id){
-  stopRehabSession();
+  stopRehabSession();setRehabCoachStation(id,true);
   const c=rehabStationCopy(id),start=performance.now(),duration=c.duration*1000;
   openPanel(c.title[locale],'REHAB · LIVE',rehabStationHtml(id,true,0,c.duration),[
     {label:locale==='fr'?'ARRÊTER':'STOP',onClick:()=>{stopRehabSession();showRehabStation(id)}}
@@ -1948,7 +2011,7 @@ function runRehabDemo(id){
   },250);
 }
 function showRehabStation(id,completed=false){
-  stopRehabSession();
+  stopRehabSession();setRehabCoachStation(id,false);
   const c=rehabStationCopy(id);
   openPanel(c.title[locale],locale==='fr'?'Station Rehab guidée.':'Guided Rehab station.',rehabStationHtml(id,false,completed?100:0),[
     {label:locale==='fr'?'RETOUR REHAB':'REHAB OVERVIEW',onClick:showRehab},
@@ -1975,7 +2038,7 @@ function bindTimeline(){
   panelBody.querySelectorAll('[data-domain]').forEach(btn=>btn.addEventListener('click',()=>showTwinDomain(btn.dataset.domain)));
 }
 function showTwin(){
-  updateTwinVisuals();
+  twinActiveDomain='all';updateTwinVisuals();
   openPanel('FUNCTIONAL TWIN',locale==='fr'?'Votre corps à travers le temps.':'Your body across time.',twinHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
     {label:locale==='fr'?'EXPLORER LA SALLE':'EXPLORE ROOM',primary:true,onClick:closePanel},
@@ -1986,7 +2049,7 @@ function rehabHtml(){
   const s=current();const entries=Object.entries(s.domains);entries.sort((a,b)=>a[1]-b[1]);const [lowest,val]=entries[0];
   const names={muscle:'Muscle',mobility:locale==='fr'?'Mobilité':'Mobility',balance:locale==='fr'?'Équilibre':'Balance',posture:'Posture',endurance:'Endurance'};
   return `
-    <p>${locale==='fr'?'Rehab transforme les signaux du Twin en séquences d’action simples et suivies. Les trois stations peuvent être explorées physiquement dans la salle.':'Rehab turns Twin signals into simple trackable action sequences. All three stations can be explored spatially in the room.'}</p>
+    <p>${locale==='fr'?'Rehab transforme les signaux du Twin en séquences d’action simples et suivies. Les trois stations peuvent être explorées physiquement dans la salle. Le coach virtuel montre le mouvement de démonstration associé.':'Rehab turns Twin signals into simple trackable action sequences. All three stations can be explored spatially in the room. The virtual coach demonstrates the associated movement.'}</p>
     <div class="priority-card"><b>${locale==='fr'?'FOCUS DE DÉMONSTRATION':'DEMO FOCUS'}</b>${names[lowest]} · ${val}/100</div>
     <div class="rehab-station-grid">
       ${['control','strength','capacity'].map(id=>{const c=rehabStationCopy(id);return `<button data-rehab="${id}"><span>${c.title[locale]}</span><b>${c.focus[locale]}</b><small>${rehabProgress[id]?'✓ '+rehabProgress[id]+' session'+(rehabProgress[id]>1?'s':''):'READY · '+c.duration+'s'}</small></button>`}).join('')}
@@ -1995,7 +2058,7 @@ function rehabHtml(){
     <div class="data-note">${locale==='fr'?'Les séquences Rehab montrées dans World sont des démonstrations d’engagement. Elles ne constituent pas une prescription médicale autonome et doivent être adaptées au contexte utilisateur lorsque nécessaire.':'Rehab sequences shown in World are engagement demonstrations. They are not autonomous medical prescriptions and should be adapted to user context when needed.'}</div>`;
 }
 function showRehab(){
-  stopRehabSession();
+  stopRehabSession();setRehabCoachStation('control',false);
   openPanel('REHAB',locale==='fr'?'De l’insight à l’action.':'From insight to action.',rehabHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
     {label:locale==='fr'?'EXPLORER LES STATIONS':'EXPLORE STATIONS',primary:true,onClick:closePanel},
@@ -2067,7 +2130,7 @@ function showNpcConversation(npc){
 }
 function setMode(next){
   if(next!=='rehab')stopRehabSession();
-  mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';
+  mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';rehabCoach.visible=next==='rehab';
 }
 function enterTwin(){
   completeJourney('twin');
@@ -2298,8 +2361,17 @@ function updateTwinScan(now){
       v.ring.rotation.z=now*.00035+i*.37;
       v.ring.scale.setScalar(.96+.05*Math.sin(now*.0014+i));
     });
+    const bt=now*.001;
+    body.rotation.y=Math.sin(bt*.23)*.16;
+    biomech.rotation.y=body.rotation.y;
+    if(!lowPower){
+      Object.values(biomechZones).flat().forEach((part,i)=>{
+        if(part.material)part.material.opacity*=.94+.06*Math.sin(bt*1.4+i*.33);
+      });
+    }
   }
   if(mode==='rehab'){
+    animateRehabCoach(now,Math.min(.05,(now-(updateTwinScan.lastNow||now))/1000||.016));updateTwinScan.lastNow=now;
     Object.values(rehabStationVisuals).forEach((v,i)=>{
       if(!rehabSessionTimer)v.pulse.scale.setScalar(.95+.06*Math.sin(now*.0016+i*.9));
       v.ring.rotation.z=now*.00022*(i%2?1:-1);
@@ -2523,7 +2595,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.6.0-twin-rehab',
+  version:'2.7.0-biomech-coach',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
