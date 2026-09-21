@@ -32,6 +32,7 @@
     </div>
     <a class="hud-link" href="/pulse/">PULSE</a>
     <a class="hud-link hud-life" href="https://life.komolongevity.com/">LIFE</a>
+    <button class="hud-button" id="world-menu-toggle" type="button" aria-label="Ouvrir le menu KŌMØ World">MENU</button>
     <button class="hud-button" id="language-toggle" type="button" aria-label="Changer de langue">EN</button>
   </header>
 
@@ -40,12 +41,19 @@
     <b id="location-heading">N</b>
   </div>
 
+  <div id="world-reticle" class="world-reticle" aria-hidden="true"><i></i></div>
+
   <section id="intro" class="intro-card" aria-labelledby="intro-title">
     <div class="intro-kicker">KŌMØ WORLD · SPATIAL LONGEVITY</div>
     <h1 id="intro-title"><span>Votre corps.</span><em>Votre trajectoire.</em></h1>
     <p>Entrez dans un espace personnel conçu pour comprendre votre mouvement, choisir une action et suivre votre progression dans le temps.</p>
     <div class="intro-path">
       <span>MEASURE</span><i></i><span>UNDERSTAND</span><i></i><span>ACT</span><i></i><span>LIVE</span>
+    </div>
+    <div class="intro-controls" aria-label="Commandes">
+      <span><b>01</b> SE DÉPLACER <kbd>WASD</kbd></span>
+      <span><b>02</b> REGARDER <em>GLISSER</em></span>
+      <span><b>03</b> INTERAGIR <kbd>E</kbd></span>
     </div>
     <button id="intro-enter" type="button">ENTRER DANS MON WORLD</button>
   </section>
@@ -66,10 +74,50 @@
     <div id="panel-actions" class="panel-actions"></div>
   </aside>
 
-  <div class="desktop-help" aria-hidden="true">
+  <nav id="world-quick-nav" class="world-quick-nav" aria-label="Navigation rapide">
+    <button type="button" data-fast-travel="hall"><span>HALL</span><small>HOME</small></button>
+    <button type="button" data-fast-travel="twin"><span>TWIN</span><small>UNDERSTAND</small></button>
+    <button type="button" data-fast-travel="rehab"><span>REHAB</span><small>ACT</small></button>
+    <button type="button" data-fast-travel="arena"><span>ARENA</span><small>ENGAGE</small></button>
+    <button type="button" data-fast-travel="life"><span>LIFE</span><small>DISCOVER</small></button>
+    <button type="button" data-fast-travel="upper"><span>LEVEL 2</span><small>EXPLORE</small></button>
+  </nav>
+
+  <aside id="world-menu" class="world-menu" aria-hidden="true">
+    <div class="world-menu-head">
+      <div><span>KŌMØ WORLD</span><strong>Explorer</strong></div>
+      <button id="world-menu-close" type="button" aria-label="Fermer le menu">×</button>
+    </div>
+    <p id="world-menu-copy">Choisissez un espace ou ajustez votre expérience.</p>
+    <div class="world-menu-grid">
+      <button type="button" data-fast-travel="arrival"><span>ARRIVAL</span><b>Extérieur</b></button>
+      <button type="button" data-fast-travel="hall"><span>HALL</span><b>Centre</b></button>
+      <button type="button" data-fast-travel="twin"><span>TWIN</span><b>Comprendre</b></button>
+      <button type="button" data-fast-travel="rehab"><span>REHAB</span><b>Agir</b></button>
+      <button type="button" data-fast-travel="arena"><span>ARENA</span><b>Progresser</b></button>
+      <button type="button" data-fast-travel="life"><span>LIFE</span><b>Découvrir</b></button>
+      <button type="button" data-fast-travel="upper"><span>LEVEL 2</span><b>Galeries</b></button>
+    </div>
+    <div class="world-menu-status">
+      <div><span>QUALITÉ</span><b id="quality-status">AUTO</b></div>
+      <div><span>PERFORMANCE</span><b id="fps-status">— FPS</b></div>
+    </div>
+    <div class="world-menu-actions">
+      <button id="quality-toggle" type="button">AUTO QUALITY</button>
+      <button id="reset-position" type="button">RESET POSITION</button>
+    </div>
+    <div class="world-menu-controls">
+      <span><kbd>WASD</kbd> MOVE</span><span><kbd>SHIFT</kbd> SPRINT</span><span><kbd>E</kbd> ACTION</span><span><kbd>M</kbd> MENU</span>
+    </div>
+  </aside>
+
+  <div id="travel-fade" class="travel-fade" aria-hidden="true"><span>KŌMØ</span></div>
+
+    <div class="desktop-help" aria-hidden="true">
     <span><kbd>WASD</kbd> / <kbd>ZQSD</kbd> SE DÉPLACER</span>
     <span><kbd>SHIFT</kbd> ACCÉLÉRER</span>
     <span>GLISSER POUR REGARDER</span>
+    <span><kbd>M</kbd> MENU</span>
   </div>
 
   <div class="mobile-controls" aria-hidden="true">

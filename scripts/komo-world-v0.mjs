@@ -19,9 +19,11 @@ const checks=[
   ['upper-floor navigation present',runtime.includes('syncPlayerElevation')&&runtime.includes('isUpperWalkable')],
   ['premium flooring V1.9 present',runtime.includes('KOMO_FLOORING_V19')&&runtime.includes('KOMO_EXTERIOR_FLOOR_V19')],
   ['ambient people V1.9 present',runtime.includes('KOMO_AMBIENT_PEOPLE_V19')&&runtime.includes('function updateNpc')],
-  ['avatar presence V2.0 present',runtime.includes("version:'2.0.0-avatar-presence'")&&runtime.includes('function npcNameTag')],
+  ['avatar presence V2.0+ present',runtime.includes('function npcNameTag')&&runtime.includes('lastFarUpdate')],
   ['avatar LOD V2.0 present',runtime.includes('lastFarUpdate')&&runtime.includes('distToCamera')],
-  ['floor polish V2.0 present',runtime.includes('V2.0 floor polish')]
+  ['floor polish V2.0 present',runtime.includes('V2.0 floor polish')],
+  ['smooth UX V2.1 present',runtime.includes("version:'2.1.0-smooth-ux'")&&runtime.includes('function fastTravel')],
+  ['adaptive performance V2.1 present',runtime.includes('function updatePerformance')&&runtime.includes('applyRenderScale')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);

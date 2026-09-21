@@ -20,6 +20,15 @@ const toastEl=$('#toast');
 const mobileAction=$('#mobile-action');
 const joystickZone=$('#joystick-zone');
 const joystickStick=$('#joystick-stick');
+const worldMenu=$('#world-menu');
+const worldMenuToggle=$('#world-menu-toggle');
+const worldMenuClose=$('#world-menu-close');
+const worldReticle=$('#world-reticle');
+const travelFade=$('#travel-fade');
+const qualityStatus=$('#quality-status');
+const fpsStatus=$('#fps-status');
+const qualityToggle=$('#quality-toggle');
+const resetPosition=$('#reset-position');
 
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
@@ -76,6 +85,16 @@ renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=.92;
 renderer.shadowMap.enabled=!lowPower;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+let qualityMode='auto';
+let renderScale=lowPower?1.12:1.45;
+let fpsEMA=60,lastPerfSample=performance.now(),perfFrames=0;
+function maxPixelRatio(){return qualityMode==='performance'?(lowPower?1.0:1.15):qualityMode==='high'?(lowPower?1.35:1.8):(lowPower?1.20:1.55)}
+function applyRenderScale(){
+  const ratio=Math.min(window.devicePixelRatio||1,renderScale,maxPixelRatio());
+  renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight,false);
+  if(qualityStatus)qualityStatus.textContent=(qualityMode==='auto'?'AUTO':qualityMode.toUpperCase())+' · '+ratio.toFixed(2)+'×';
+}
+applyRenderScale();
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xcbd2c8);
@@ -1306,11 +1325,12 @@ const player=new THREE.Vector3(0,0,31.5);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
 let yaw=0,pitch=-.045;
+let targetYaw=yaw,targetPitch=pitch;
 let mode='world';
 let currentInteraction=null;
 let doorProgress=0;
 let dragging=false,lastX=0,lastY=0;
-let joyX=0,joyY=0,joyPointer=null;
+let joyX=0,joyY=0,joyTargetX=0,joyTargetY=0,joyPointer=null;
 const keys=new Set();
 
 const interactions=[
@@ -1327,8 +1347,36 @@ function notify(message){
   toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(notify.t);
   notify.t=setTimeout(()=>toastEl.classList.remove('show'),1800);
 }
+function syncUiOpen(){
+  document.body.classList.toggle('ui-open',worldMenu.classList.contains('open')||panel.classList.contains('open'));
+}
+function closeWorldMenu(){
+  worldMenu.classList.remove('open');worldMenu.setAttribute('aria-hidden','true');syncUiOpen();
+}
+function openWorldMenu(){
+  closePanel();worldMenu.classList.add('open');worldMenu.setAttribute('aria-hidden','false');velocity.set(0,0,0);syncUiOpen();
+}
+function toggleWorldMenu(){worldMenu.classList.contains('open')?closeWorldMenu():openWorldMenu()}
+const travelPoints={
+  arrival:{mode:'world',x:0,y:0,z:31.5,yaw:0,level:0},
+  hall:{mode:'world',x:0,y:0,z:5.5,yaw:0,level:0},
+  twin:{mode:'world',x:-5.9,y:0,z:-22.2,yaw:0,level:0},
+  rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
+  arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
+  life:{mode:'world',x:5.4,y:0,z:3.6,yaw:-1.15,level:0},
+  upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
+};
+function fastTravel(id){
+  const p=travelPoints[id];if(!p)return;
+  closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
+  setTimeout(()=>{
+    setMode(p.mode);playerLevel=p.level;player.set(p.x,p.y,p.z);yaw=targetYaw=p.yaw;pitch=targetPitch=-.035;syncPlayerElevation();updateLocation();
+    setTimeout(()=>travelFade.classList.remove('active'),110);
+  },180);
+}
+document.querySelectorAll('[data-fast-travel]').forEach(btn=>btn.addEventListener('click',()=>fastTravel(btn.dataset.fastTravel)));
 function closePanel(){
-  panel.classList.remove('open');panel.setAttribute('aria-hidden','true');panelActions.innerHTML='';
+  panel.classList.remove('open');panel.setAttribute('aria-hidden','true');panelActions.innerHTML='';syncUiOpen();
 }
 function openPanel(kicker,title,html,actions=[]){
   panelKicker.textContent=kicker;panelTitle.textContent=title;panelBody.innerHTML=html;panelActions.innerHTML='';
@@ -1336,7 +1384,7 @@ function openPanel(kicker,title,html,actions=[]){
     const b=document.createElement('button');b.type='button';b.textContent=a.label;if(a.primary)b.classList.add('primary');
     b.addEventListener('click',a.onClick);panelActions.appendChild(b);
   });
-  panel.classList.add('open');panel.setAttribute('aria-hidden','false');
+  panel.classList.add('open');panel.setAttribute('aria-hidden','false');worldMenu.classList.remove('open');worldMenu.setAttribute('aria-hidden','true');velocity.set(0,0,0);syncUiOpen();
 }
 function deskHtml(){
   const s=current();
@@ -1503,6 +1551,11 @@ function tryMove(dx,dz){
 }
 
 function updateMovement(dt){
+  joyX+= (joyTargetX-joyX)*(1-Math.exp(-14*dt));
+  joyY+= (joyTargetY-joyY)*(1-Math.exp(-14*dt));
+  if(worldMenu.classList.contains('open')||panel.classList.contains('open')||!intro.classList.contains('hidden')){
+    velocity.lerp(new THREE.Vector3(),1-Math.exp(-12*dt));return;
+  }
   let x=0,z=0;
   if(keys.has('KeyW')||keys.has('KeyZ')||keys.has('ArrowUp'))z+=1;
   if(keys.has('KeyS')||keys.has('ArrowDown'))z-=1;
@@ -1511,7 +1564,7 @@ function updateMovement(dt){
   x+=joyX;z+=-joyY;
   const input=new THREE.Vector2(x,z);
   const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight');
-  const speed=sprint?5.6:3.45;
+  const speed=sprint?5.35:3.35;
   const target=new THREE.Vector3();
   if(input.lengthSq()>.002){
     input.normalize();
@@ -1519,12 +1572,15 @@ function updateMovement(dt){
     const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
     target.addScaledVector(right,input.x).addScaledVector(forward,input.y).normalize().multiplyScalar(speed);
   }
-  velocity.lerp(target,1-Math.exp(-(input.lengthSq()>.002?10:7)*dt));
+  velocity.lerp(target,1-Math.exp(-(input.lengthSq()>.002?8.2:10.5)*dt));
   if(velocity.lengthSq()>.0004)tryMove(velocity.x*dt,velocity.z*dt);
 }
 function updateCamera(now){
-  const move=Math.min(1,velocity.length()/3.45);
-  const bob=move*Math.sin(now*.0105)*.012;
+  const smooth=1-Math.exp(-16*Math.min(.05,(now-last)/1000||.016));
+  yaw+=((targetYaw-yaw+Math.PI)%(Math.PI*2)-Math.PI)*smooth;
+  pitch+=(targetPitch-pitch)*smooth;
+  const move=Math.min(1,velocity.length()/3.35);
+  const bob=move*Math.sin(now*.0102)*.008;
   const eyeY=player.y+1.72+bob;
   camera.position.set(player.x,eyeY,player.z);
   const cp=Math.cos(pitch),sp=Math.sin(pitch);
@@ -1558,7 +1614,7 @@ function updateHeading(){
   headingEl.textContent=dirs[Math.round(a/(Math.PI/4))%8];
 }
 function updateInteraction(){
-  if(mode!=='world'){currentInteraction=null;interactionEl.classList.remove('show');return}
+  if(mode!=='world'){currentInteraction=null;interactionEl.classList.remove('show');worldReticle.classList.remove('active');return}
   let best=null,bestD=Infinity;
   for(const it of interactions){
     if(playerLevel===1&&it.level!==1)continue;
@@ -1567,8 +1623,8 @@ function updateInteraction(){
   }
   if(best!==currentInteraction){
     currentInteraction=best;
-    if(best){interactionTitle.textContent=best.title();interactionCopy.textContent=best.desc();interactionEl.classList.add('show')}
-    else interactionEl.classList.remove('show');
+    if(best){interactionTitle.textContent=best.title();interactionCopy.textContent=best.desc();interactionEl.classList.add('show');worldReticle.classList.add('active')}
+    else{interactionEl.classList.remove('show');worldReticle.classList.remove('active')}
   }else if(best){
     interactionTitle.textContent=best.title();interactionCopy.textContent=best.desc();
   }
@@ -1582,8 +1638,9 @@ function updateTwinScan(now){
 
 window.addEventListener('keydown',e=>{
   if(['KeyW','KeyA','KeyS','KeyD','KeyZ','KeyQ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code)){keys.add(e.code);e.preventDefault()}
-  if(e.code==='KeyE'){triggerAction();e.preventDefault()}
-  if(e.code==='Escape'){if(mode!=='world')returnToHall();else closePanel()}
+  if(e.code==='KeyE'&&!worldMenu.classList.contains('open')){triggerAction();e.preventDefault()}
+  if(e.code==='KeyM'){toggleWorldMenu();e.preventDefault()}
+  if(e.code==='Escape'){if(worldMenu.classList.contains('open'))closeWorldMenu();else if(panel.classList.contains('open'))closePanel();else if(mode!=='world')returnToHall()}
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>keys.clear());
@@ -1595,7 +1652,7 @@ canvas.addEventListener('pointerdown',e=>{
 canvas.addEventListener('pointermove',e=>{
   if(!dragging)return;
   const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;
-  yaw-=dx*(coarse ? .0040 : .0032);pitch=THREE.MathUtils.clamp(pitch-dy*(coarse ? .0032 : .0025),-.46,.46);
+  targetYaw-=dx*(coarse ? .0035 : .0028);targetPitch=THREE.MathUtils.clamp(targetPitch-dy*(coarse ? .0028 : .0022),-.46,.46);
 });
 const endLook=e=>{dragging=false;try{canvas.releasePointerCapture?.(e.pointerId)}catch{}};
 canvas.addEventListener('pointerup',endLook);canvas.addEventListener('pointercancel',endLook);
@@ -1604,16 +1661,26 @@ function updateJoystick(e){
   const r=joystickZone.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
   let dx=e.clientX-cx,dy=e.clientY-cy;const max=42,len=Math.hypot(dx,dy)||1;
   if(len>max){dx=dx/len*max;dy=dy/len*max}
-  joyX=dx/max;joyY=dy/max;joystickStick.style.transform=`translate(${dx}px,${dy}px)`;
+  const nx=dx/max,ny=dy/max,dead=.12,mag=Math.hypot(nx,ny);
+  if(mag<dead){joyTargetX=joyTargetY=0}else{const k=(mag-dead)/(1-dead)/mag;joyTargetX=nx*k;joyTargetY=ny*k}
+  joystickStick.style.transform=`translate(${dx}px,${dy}px)`;
 }
 joystickZone.addEventListener('pointerdown',e=>{e.stopPropagation();joyPointer=e.pointerId;joystickZone.setPointerCapture?.(e.pointerId);updateJoystick(e)});
 joystickZone.addEventListener('pointermove',e=>{if(e.pointerId===joyPointer)updateJoystick(e)});
-function resetJoy(e){if(joyPointer!==null&&e.pointerId!==joyPointer)return;joyPointer=null;joyX=joyY=0;joystickStick.style.transform='translate(0,0)'}
+function resetJoy(e){if(joyPointer!==null&&e.pointerId!==joyPointer)return;joyPointer=null;joyTargetX=joyTargetY=0;joystickStick.style.transform='translate(0,0)'}
 joystickZone.addEventListener('pointerup',resetJoy);joystickZone.addEventListener('pointercancel',resetJoy);
 mobileAction.addEventListener('click',triggerAction);
 
-$('#intro-enter').addEventListener('click',()=>{intro.classList.add('hidden');notify(locale==='fr'?'Bienvenue dans KŌMØ World':'Welcome to KŌMØ World')});
+$('#intro-enter').addEventListener('click',()=>{intro.classList.add('hidden');targetYaw=yaw;targetPitch=pitch;notify(locale==='fr'?'Bienvenue dans KŌMØ World':'Welcome to KŌMØ World')});
 $('#panel-close').addEventListener('click',closePanel);
+worldMenuToggle.addEventListener('click',toggleWorldMenu);
+worldMenuClose.addEventListener('click',closeWorldMenu);
+qualityToggle.addEventListener('click',()=>{
+  qualityMode=qualityMode==='auto'?'performance':qualityMode==='performance'?'high':'auto';
+  renderScale=qualityMode==='performance'?(lowPower?.95:1.10):qualityMode==='high'?(lowPower?1.30:1.75):(lowPower?1.12:1.45);
+  applyRenderScale();notify('QUALITY · '+qualityMode.toUpperCase());
+});
+resetPosition.addEventListener('click',()=>fastTravel('arrival'));
 
 function applyLocale(){
   document.documentElement.lang=locale;
@@ -1625,6 +1692,7 @@ function applyLocale(){
   $('#intro-enter').textContent=c.introButton;
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
+  $('#world-menu-copy').textContent=locale==='fr'?'Choisissez un espace ou ajustez votre expérience.':'Choose a space or adjust your experience.';
   if(currentInteraction){interactionTitle.textContent=currentInteraction.title();interactionCopy.textContent=currentInteraction.desc()}
   if(panel.classList.contains('open')){
     if(mode==='twin')showTwin();else if(mode==='rehab')showRehab();else if(mode==='arena')showArena();
@@ -1634,11 +1702,23 @@ languageToggle.addEventListener('click',()=>{locale=locale==='fr'?'en':'fr';appl
 
 window.addEventListener('resize',()=>{
   camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
-  renderer.setSize(innerWidth,innerHeight,false);
+  applyRenderScale();
 });
 
 let last=performance.now(),raf=0;
+function updatePerformance(now){
+  perfFrames++;
+  if(now-lastPerfSample<1000)return;
+  const fps=perfFrames*1000/(now-lastPerfSample);fpsEMA=fpsEMA*.72+fps*.28;perfFrames=0;lastPerfSample=now;
+  if(fpsStatus)fpsStatus.textContent=Math.round(fpsEMA)+' FPS';
+  if(qualityMode==='auto'){
+    const min=lowPower?.82:1.0,max=lowPower?1.20:1.55;
+    let next=renderScale;
+    if(fpsEMA<43)next=Math.max(min,renderScale-.08);
+    else if(fpsEMA>56)next=Math.min(max,renderScale+.035);
+    if(Math.abs(next-renderScale)>.01){renderScale=next;applyRenderScale()}
+  }
+}
 function animateLiving(now){
   const t=now*.001;
   living.trees.forEach((tree,i)=>{
@@ -1677,7 +1757,7 @@ function animateLiving(now){
   if(living.npcs?.length){
     living.npcs.forEach((npc,i)=>updateNpc(npc,t,i));
   }
-    if(living.banners?.length){
+    if(living.banners?.length&&(!lowPower||Math.floor(t*15)%2===0)){
     living.banners.forEach((banner,i)=>{
       const pos=banner.geometry.attributes.position,arr=pos.array,base=banner.userData.base,h=banner.userData.height||4;
       for(let k=0;k<arr.length;k+=3){
@@ -1690,7 +1770,7 @@ function animateLiving(now){
       pos.needsUpdate=true;
     });
   }
-    if(!lowPower&&Math.floor(t*8)%2===0)living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));
+  if(!lowPower&&Math.floor(t*8)!==animateLiving.lastScreenBucket){animateLiving.lastScreenBucket=Math.floor(t*8);living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));}
   if(living.skyDome){
     living.skyDome.position.copy(camera.position);
   }
@@ -1710,7 +1790,7 @@ function animateLiving(now){
 }
 let livingAnimationFailed=false;
 function animate(now){
-  const dt=Math.min(.05,(now-last)/1000||.016);last=now;
+  const dt=Math.min(.05,(now-last)/1000||.016);last=now;updatePerformance(now);
   updateMovement(dt);
   updateCamera(now);
   updateDoors();
@@ -1734,11 +1814,13 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.0.0-avatar-presence',
+  version:'2.1.0-smooth-ux',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),
   getLocale:()=>locale,
+  getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale}),
+  fastTravel,
   notify
 };
 import('./world-multiplayer-v1.js')
