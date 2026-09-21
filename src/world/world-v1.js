@@ -124,6 +124,7 @@ function applyQualityProfile(){
   }
   fill.intensity=qualityMode==='high'&&!lowPower?1.0:0;
   activeLightBudget=emergencyPerformance||lowPower?0:(qualityMode==='high'?6:qualityMode==='performance'?2:4);
+  living.lights.forEach(l=>{if(l){l.visible=false;l.intensity=0}});
   applyRenderScale();
 }
 applyRenderScale();
@@ -371,7 +372,7 @@ function glow(parent,color,intensity,distance,x,y,z){
   const l=new THREE.PointLight(color,intensity,distance,2);l.position.set(x,y,z);
   l.userData.decorative=true;l.userData.baseIntensity=intensity;l.userData.baseDistance=distance;
   l.visible=false;
-  parent.add(l);return l;
+  parent.add(l);living.lights.push(l);return l;
 }
 function line(parent,w,d,x,z,material=M.bronze,y=.075){
   return box(parent,w,.018,d,material,x,y,z,{cast:false,receive:true});
@@ -2498,13 +2499,16 @@ function updateLightBudget(now){
   if(now-lastBudgetUpdate<280)return;
   lastBudgetUpdate=now;
   const candidates=[];
-  for(const l of living.lights){
+  for(const l of new Set(living.lights)){
     if(!l||!l.parent)continue;
     l.visible=false;l.intensity=0;
-    if(activeLightBudget<=0||mode!=='world')continue;
+    if(activeLightBudget<=0)continue;
+    let p=l.parent,shown=true;
+    while(p){if(p.visible===false){shown=false;break}p=p.parent}
+    if(!shown)continue;
     const wp=new THREE.Vector3();l.getWorldPosition(wp);
     const d=wp.distanceTo(camera.position);
-    if(d<16)candidates.push({l,d});
+    if(d<18)candidates.push({l,d});
   }
   candidates.sort((a,b)=>a.d-b.d);
   candidates.slice(0,activeLightBudget).forEach(({l,d})=>{
@@ -2679,7 +2683,17 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){velocity.s
 window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(daylightTimer)},{once:true});
 
 function freezeStaticScene(){
-  const dynamicMeshes=new Set([scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB,journeyRing,waypointRing,waypointStem,waypointCap,...guideDots.flatMap(g=>g.children)].filter(Boolean));
+  const dynamicMeshes=new Set([
+    scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB,journeyRing,waypointRing,waypointStem,waypointCap,
+    ...guideDots.flatMap(g=>g.children),
+    ...living.shimmers,
+    ...living.clouds,
+    ...(living.lifeDisplay?[living.lifeDisplay.orbitA,living.lifeDisplay.orbitB,living.lifeDisplay.globe,living.lifeDisplay.flagshipCase]:[]),
+    ...(living.kinetic?[living.kinetic.a,living.kinetic.b,living.kinetic.c]:[]),
+    ...living.exteriorSculptures.flatMap(s=>[s.a,s.b,s.core]),
+    ...Object.values(biomechZones).flat(),
+    ...Object.values(rehabStationVisuals).flatMap(v=>[v.ring,v.pulse])
+  ].filter(Boolean));
   scene.traverse(o=>{
     if(o.isMesh&&!dynamicMeshes.has(o)&&!o.userData.dynamic){
       o.updateMatrix();
@@ -2696,7 +2710,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.8.0-fps-budget',
+  version:'2.8.1-fps-budget',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
