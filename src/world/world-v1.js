@@ -153,7 +153,11 @@ const MAT={
   walnut:new THREE.MeshStandardMaterial({color:0x6b513a,roughness:.76,metalness:.01}),
   charcoal:new THREE.MeshStandardMaterial({color:0x222a25,roughness:.68,metalness:.03}),
   brass:new THREE.MeshStandardMaterial({color:0xb18a56,roughness:.30,metalness:.66}),
-  ivory:new THREE.MeshStandardMaterial({color:0xf1eadf,roughness:.88,metalness:0})
+  ivory:new THREE.MeshStandardMaterial({color:0xf1eadf,roughness:.88,metalness:0}),
+  smokedGlass:new THREE.MeshPhysicalMaterial({color:0x718177,roughness:.17,metalness:.02,transparent:true,opacity:.24,transmission:lowPower?.05:.28,depthWrite:false}),
+  limestone:new THREE.MeshStandardMaterial({color:0xdccfba,roughness:.90,metalness:0}),
+  travertine:new THREE.MeshStandardMaterial({color:0xe5d8c5,roughness:.84,metalness:.01}),
+  blackened:new THREE.MeshStandardMaterial({color:0x151d18,roughness:.48,metalness:.10})
 };
 
 function mesh(parent,geometry,material,x=0,y=0,z=0,{cast=false,receive=true}={}){
@@ -248,6 +252,53 @@ function drawMotionScreen(rec,t){
   ctx.fillStyle='rgba(238,231,219,.52)';ctx.font='600 19px Arial';ctx.fillText('MOVE · MEASURE · UNDERSTAND · ACT',55,460);
   tx.needsUpdate=true;
 }
+function architecturalBay(parent,x,z,side=1,label='',sub=''){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  box(g,3.45,.18,5.25,MAT.travertine,0,.12,0);
+  box(g,.26,5.9,5.0,MAT.limestone,side*1.56,3.0,0,{cast:true});
+  box(g,3.1,.24,5.0,MAT.limestone,0,5.86,0,{cast:true});
+  box(g,.08,5.15,4.5,MAT.smokedGlass,-side*1.44,2.85,0);
+  [-1.85,0,1.85].forEach(zz=>box(g,.075,5.1,.10,MAT.brass,-side*1.38,2.88,zz));
+  box(g,2.5,.08,.18,M.warm,0,5.47,-2.12);
+  if(label)plaque(g,label,sub,3.35,.84,-side*1.36,4.65,0,{rotY:side>0?-Math.PI/2:Math.PI/2,dark:true,titleSize:58});
+  return g;
+}
+function ceilingRaft(parent,x,z,w=5.2,d=5.8){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  box(g,w,.18,d,MAT.travertine,0,7.64,0,{cast:true});
+  box(g,w-.45,.035,d-.40,MAT.walnut,0,7.51,0);
+  [-1,1].forEach(side=>box(g,w-.70,.035,.055,M.warm,0,7.42,side*(d/2-.35)));
+  return g;
+}
+function caseObject(parent,x,y,z,scale=1,open=false){
+  const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);parent.add(g);
+  const shell=new THREE.MeshStandardMaterial({color:0x4e4036,roughness:.52,metalness:.03});
+  const leather=new THREE.MeshStandardMaterial({color:0x8c755d,roughness:.72,metalness:0});
+  box(g,1.42,.76,.38,shell,0,.38,0,{cast:true});
+  box(g,1.31,.64,.40,leather,0,.38,.01,{cast:true});
+  box(g,.60,.12,.12,MAT.brass,0,.83,0);
+  box(g,.07,.23,.08,MAT.brass,-.30,.74,0);
+  box(g,.07,.23,.08,MAT.brass,.30,.74,0);
+  if(open){
+    const lid=box(g,1.34,.09,.74,leather,0,1.15,-.26,{cast:true});
+    lid.rotation.x=-.58;
+    for(let i=0;i<6;i++){
+      const cx=(i%3-1)*.30,cz=-.05+Math.floor(i/3)*.24;
+      cyl(g,.075,.075,.24,M.sageDeep,cx,.90,cz,14,{cast:true});
+      box(g,.12,.05,.12,M.bronze,cx,.78,cz);
+    }
+  }
+  return g;
+}
+function productNiche(parent,x,y,z,title,subtitle,rotY=0){
+  const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=rotY;parent.add(g);
+  box(g,2.65,2.55,.24,MAT.blackened,0,0,0);
+  box(g,2.33,2.18,.08,MAT.smokedGlass,0,0,.15);
+  box(g,1.55,.08,.62,MAT.brass,0,-.77,.40);
+  plaque(g,title,subtitle,2.10,.48,0,.77,.20,{dark:true,titleSize:42});
+  const light=glow(g,0xf2d5a4,1.25,4,0,.30,.70);living.lights.push(light);
+  return g;
+}
 function bodySegment(parent,a,b,r,material){
   const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),d=B.clone().sub(A);
   const m=mesh(parent,new THREE.CylinderGeometry(r*.82,r,d.length(),16),material);
@@ -314,6 +365,31 @@ box(building,10.6,.24,2.6,M.stone,0,5.55,17.7,{cast:true});
 box(building,9.3,.06,2.0,M.bronze,0,5.38,18.05);
 plaque(building,'KŌMØ WORLD','LONGEVITY IN MOTION',7.0,1.65,0,8.67,17.85,{dark:true,titleSize:94});
 
+// V1.5 architectural envelope — deeper Riviera / gallery composition.
+const outerFrame=new THREE.Group();outerFrame.name='KOMO_ARCHITECTURE_V15';building.add(outerFrame);
+[-8.45,8.45].forEach((x,sideIndex)=>{
+  const side=sideIndex?1:-1;
+  box(outerFrame,.62,9.45,3.0,MAT.limestone,x,4.72,16.0,{cast:true});
+  box(outerFrame,4.85,.40,3.0,MAT.limestone,side*8.0,9.18,16.0,{cast:true});
+  box(outerFrame,.09,7.1,2.35,MAT.smokedGlass,side*6.76,4.20,16.36);
+  [-.86,0,.86].forEach(off=>box(outerFrame,.075,7.25,.12,MAT.brass,side*6.70+off*side,4.20,17.52));
+});
+box(outerFrame,17.2,.46,2.85,MAT.travertine,0,9.34,15.9,{cast:true});
+box(outerFrame,15.8,.055,2.10,M.warm,0,9.06,16.22);
+box(outerFrame,15.7,.10,.12,MAT.brass,0,8.82,17.46);
+[-5.8,-3.9,3.9,5.8].forEach(x=>box(outerFrame,.16,7.3,1.75,MAT.travertine,x,4.25,16.55,{cast:true}));
+plaque(outerFrame,'KŌMØ','WORLD · LONGEVITY IN MOTION',5.6,1.25,0,8.55,17.52,{dark:true,titleSize:86});
+
+// Side lantern volumes create an inhabited facade rather than a flat front.
+[-1,1].forEach(side=>{
+  const g=new THREE.Group();g.position.set(side*10.4,0,18.0);outerFrame.add(g);
+  box(g,4.2,.28,5.5,MAT.limestone,0,.14,0);
+  box(g,4.2,6.5,.24,M.sageDeep,side*1.75,3.35,0);
+  box(g,.08,5.7,4.75,MAT.smokedGlass,-side*1.78,3.15,0);
+  box(g,3.7,.18,5.0,MAT.travertine,0,6.36,0);
+  glow(g,0xf2cf98,2.0,8,-side*.6,4.3,0);
+});
+
 // Glass entrance leaves, animated by proximity.
 const doorLeft=box(building,2.45,5.15,.10,M.glass,-1.27,3.05,17.35);
 const doorRight=box(building,2.45,5.15,.10,M.glass,1.27,3.05,17.35);
@@ -328,6 +404,43 @@ box(building,6.7,.34,46,M.wall,-8.15,8.0,-7.0,{cast:true});
 box(building,6.7,.34,46,M.wall,8.15,8.0,-7.0,{cast:true});
 [-25,-17,-9,-1,7,13].forEach(z=>box(building,10.1,.09,.12,M.bronze,0,7.86,z));
 [-10.9,10.9].forEach(x=>[-22,-12,-2,8].forEach(z=>box(building,.13,6.8,.18,M.bronze,x,4.1,z)));
+
+// V1.5 interior architecture: galleries, balcony datum and layered ceiling.
+const hallArchitecture=new THREE.Group();hallArchitecture.name='KOMO_HALL_ARCHITECTURE_V15';building.add(hallArchitecture);
+
+// Continuous upper gallery lines make the Hall read as a designed volume.
+[-1,1].forEach(side=>{
+  box(hallArchitecture,.28,1.15,41.5,MAT.limestone,side*10.48,5.55,-6.8,{cast:true});
+  box(hallArchitecture,.10,.10,41.2,MAT.brass,side*10.22,5.05,-6.8);
+  box(hallArchitecture,.10,.10,41.2,MAT.brass,side*10.22,6.08,-6.8);
+  for(let z=-24;z<=10;z+=5.7)box(hallArchitecture,.08,.90,.10,MAT.brass,side*10.18,5.56,z);
+});
+
+// Side bays create depth and glimpses of different programs.
+architecturalBay(hallArchitecture,-9.25,6.0,-1,'LIBRARY','SCIENCE · METHOD');
+architecturalBay(hallArchitecture,9.25,6.0,1,'KŌMØ LIFE','OBJECTS · CASE 01');
+architecturalBay(hallArchitecture,-9.25,-8.5,-1,'MOTION','MEASURE · COMPARE');
+architecturalBay(hallArchitecture,9.25,-8.5,1,'TALKS','EXPERTS · EVENTS');
+architecturalBay(hallArchitecture,-9.25,-20.0,-1,'RECOVERY','RESTORE · RETURN');
+architecturalBay(hallArchitecture,9.25,-20.0,1,'PERFORMANCE','TRAIN · ENGAGE');
+
+// Floating ceiling rafts frame the central skylight without closing it.
+[-18,-9,0,9].forEach((z,i)=>{
+  ceilingRaft(hallArchitecture,-8.05,z,5.6,5.7);
+  ceilingRaft(hallArchitecture,8.05,z,5.6,5.7);
+});
+// Central skylight spine.
+box(hallArchitecture,9.6,.055,41.2,MAT.smokedGlass,0,7.78,-6.8);
+[-22,-16,-10,-4,2,8].forEach(z=>{
+  box(hallArchitecture,10.0,.12,.12,MAT.brass,0,7.70,z);
+  const l=glow(hallArchitecture,0xffd9a1,.72,5,0,7.2,z);living.lights.push(l);
+});
+
+// Portal frame before destination wall adds depth at the far end.
+box(hallArchitecture,.46,7.25,1.15,MAT.travertine,-10.55,3.75,-27.2,{cast:true});
+box(hallArchitecture,.46,7.25,1.15,MAT.travertine,10.55,3.75,-27.2,{cast:true});
+box(hallArchitecture,21.55,.50,1.15,MAT.travertine,0,7.14,-27.2,{cast:true});
+box(hallArchitecture,19.9,.06,.12,M.warm,0,6.84,-26.60);
 
 // Hall axis.
 box(building,9.8,.035,43,M.stoneDeep,0,.31,-6.5);
@@ -400,66 +513,95 @@ living.dust=new THREE.Points(dustGeometry,dustMaterial);
 living.dust.name='KOMO_AMBIENT_DUST';
 building.add(living.dust);
 
-// KŌMØ Life Store — a physical boutique inside the World.
+// KŌMØ Life Flagship — gallery retail, open to the Hall.
 const lifeStore=new THREE.Group();
-lifeStore.name='KOMO_LIFE_STORE_V1';
-lifeStore.position.set(9.15,0,2.6);
+lifeStore.name='KOMO_LIFE_FLAGSHIP_V15';
+lifeStore.position.set(8.45,0,3.8);
 building.add(lifeStore);
-const lifeThreshold=new THREE.Group();lifeThreshold.name='KOMO_LIFE_THRESHOLD_V14';lifeThreshold.position.set(6.85,0,2.6);building.add(lifeThreshold);
-box(lifeThreshold,1.55,.16,5.8,M.stoneDeep,0,.10,0);
-box(lifeThreshold,.08,4.7,5.3,M.glass,.68,2.45,0);
-box(lifeThreshold,.10,4.85,.12,M.bronze,.58,2.45,-2.45);
-box(lifeThreshold,.10,4.85,.12,M.bronze,.58,2.45,2.45);
-plaque(lifeThreshold,'KŌMØ LIFE','ENTER · CASE 01',3.9,.92,.59,4.75,0,{rotY:-Math.PI/2,dark:true,titleSize:61});
-const heroCase=pedestalObject(lifeThreshold,-.18,-1.55,'dark');
-heroCase.scale.set(.84,.84,.84);
 
-box(lifeStore,4.45,.22,8.2,M.stoneDeep,0,.12,0);
-box(lifeStore,4.25,6.25,.30,M.sageDeep,1.55,3.25,0);
-box(lifeStore,.22,6.25,8.0,M.stoneLight,-2.02,3.25,0);
-box(lifeStore,4.05,.18,8.0,M.stoneLight,0,6.20,0);
-box(lifeStore,.08,5.55,7.45,M.glass,-1.88,3.18,0);
-[-3.55,0,3.55].forEach(z=>box(lifeStore,.08,5.45,.10,M.bronze,-1.80,3.18,z));
-plaque(lifeStore,'KŌMØ LIFE','OBJECTS · CASE 01 · EDITIONS',3.75,1.04,-1.72,5.55,0,{rotY:Math.PI/2,dark:true,titleSize:65});
+// Travertine portal and transparent facade.
+box(lifeStore,5.65,.22,10.2,MAT.travertine,0,.11,0);
+box(lifeStore,.30,6.85,10.0,MAT.limestone,2.55,3.48,0,{cast:true});
+box(lifeStore,5.45,.26,10.0,MAT.travertine,0,6.68,0,{cast:true});
+box(lifeStore,.08,5.95,9.35,MAT.smokedGlass,-2.40,3.25,0);
+[-4.2,-1.4,1.4,4.2].forEach(z=>box(lifeStore,.075,5.80,.12,MAT.brass,-2.33,3.25,z));
 
-// Display plinths.
-[-2.55,0,2.55].forEach((z,i)=>{
-  box(lifeStore,1.45,.68,1.45,i===1?M.stone:M.stoneLight,-.35,.36,z);
-  box(lifeStore,1.22,.06,1.22,M.bronze,-.35,.73,z);
+// Projecting entrance arch visible from the central promenade.
+box(lifeStore,.36,6.35,1.05,MAT.travertine,-2.15,3.22,-4.45,{cast:true});
+box(lifeStore,3.95,.36,1.05,MAT.travertine,-.35,6.18,-4.45,{cast:true});
+box(lifeStore,.08,5.35,.10,MAT.brass,-1.90,3.25,-3.92);
+plaque(lifeStore,'KŌMØ LIFE','FLAGSHIP · OBJECTS · EQUIPMENT',4.25,.96,-2.25,5.62,-2.15,{rotY:Math.PI/2,dark:true,titleSize:62});
+
+// Warm timber back wall with product niches.
+box(lifeStore,4.85,5.65,.32,MAT.walnut,.10,3.10,4.62,{cast:true});
+productNiche(lifeStore,-1.25,3.55,4.39,'CASE 01','EQUIPMENT',0);
+productNiche(lifeStore,1.25,3.55,4.39,'LIFE','ORIGINALS',0);
+
+// Hero Case 01 island.
+const heroIsland=new THREE.Group();heroIsland.position.set(-.20,0,-.90);lifeStore.add(heroIsland);
+box(heroIsland,3.20,.22,2.75,MAT.limestone,0,.12,0);
+box(heroIsland,2.65,.08,2.25,MAT.brass,0,.28,0);
+box(heroIsland,2.45,.52,2.05,MAT.blackened,0,.55,0);
+const flagshipCase=caseObject(heroIsland,0,.83,0,1.35,true);
+plaque(heroIsland,'CASE 01','CONFIGURE · COLOUR · LEATHER',2.55,.65,0,2.35,1.07,{dark:true,titleSize:48});
+const caseSpot=glow(heroIsland,0xffd8a3,3.1,7,0,4.2,0);living.lights.push(caseSpot);
+
+// Material library / configurator table.
+const configTable=new THREE.Group();configTable.position.set(.45,0,1.90);lifeStore.add(configTable);
+box(configTable,3.55,.18,1.20,MAT.travertine,0,.92,0,{cast:true});
+box(configTable,.16,.82,.90,MAT.brass,-1.35,.48,0);
+box(configTable,.16,.82,.90,MAT.brass,1.35,.48,0);
+[-1.1,-.55,0,.55,1.1].forEach((x,i)=>{
+  const swatchMat=[
+    new THREE.MeshStandardMaterial({color:0x2d3e34,roughness:.78}),
+    new THREE.MeshStandardMaterial({color:0xb3a58e,roughness:.82}),
+    new THREE.MeshStandardMaterial({color:0x6f4f3d,roughness:.80}),
+    new THREE.MeshStandardMaterial({color:0x24272a,roughness:.72}),
+    new THREE.MeshStandardMaterial({color:0xd7d0c3,roughness:.86})
+  ][i];
+  box(configTable,.34,.08,.52,swatchMat,x,1.07,0);
+});
+plaque(configTable,'ATELIER','CONFIGURE CASE 01',2.9,.52,0,1.72,.62,{dark:false,titleSize:44});
+
+// Fashion / objects table.
+const originals=new THREE.Group();originals.position.set(.10,0,-3.30);lifeStore.add(originals);
+box(originals,3.4,.16,1.45,MAT.walnut,0,.88,0,{cast:true});
+box(originals,.13,.82,1.00,MAT.brass,-1.30,.46,0);
+box(originals,.13,.82,1.00,MAT.brass,1.30,.46,0);
+const folded=new THREE.Group();folded.position.set(-.75,1.04,0);originals.add(folded);
+box(folded,1.08,.24,.72,MAT.fabric,0,.14,0,{cast:true});
+box(folded,.90,.06,.58,MAT.ivory,0,.31,0);
+const lifeOrbit=new THREE.Group();lifeOrbit.position.set(.78,1.36,0);originals.add(lifeOrbit);
+const globe=mesh(lifeOrbit,new THREE.SphereGeometry(.28,22,16),M.sage,0,0,0,{cast:true});
+const orbitA=mesh(lifeOrbit,new THREE.TorusGeometry(.52,.024,8,60),MAT.brass,0,0,0);orbitA.rotation.x=.72;
+const orbitB=mesh(lifeOrbit,new THREE.TorusGeometry(.42,.020,8,54),M.bronzeSoft,0,0,0);orbitB.rotation.y=.88;
+
+// Discreet checkout / service bar at the back.
+box(lifeStore,3.70,.88,.78,M.sageDeep,.20,.47,3.65,{cast:true});
+box(lifeStore,3.88,.08,.92,MAT.brass,.20,.94,3.65);
+plaque(lifeStore,'LIFE','SELECT · CONFIGURE · ORDER',3.20,.58,.20,1.55,4.06,{dark:true,titleSize:50});
+
+// Lighting hierarchy.
+[
+  [-1.40,5.10,-.90,2.5],
+  [.95,5.10,-.90,2.2],
+  [-.90,4.60,-3.20,1.7],
+  [1.10,4.60,1.80,1.7],
+  [0,5.20,3.70,1.5]
+].forEach(([x,y,z,intensity])=>{
+  const l=glow(lifeStore,0xf2cf9a,intensity,7,x,y,z);living.lights.push(l);
 });
 
-// CASE 01 miniature.
-const caseDisplay=new THREE.Group();caseDisplay.position.set(-.35,.82,-2.55);lifeStore.add(caseDisplay);
-const caseMat=new THREE.MeshStandardMaterial({color:0x5a4a3d,roughness:.52,metalness:.02});
-const caseLeather=new THREE.MeshStandardMaterial({color:0x8b765f,roughness:.74,metalness:0});
-box(caseDisplay,1.25,.68,.30,caseMat,0,.37,0,{cast:true});
-box(caseDisplay,1.16,.57,.32,caseLeather,0,.37,.01,{cast:true});
-box(caseDisplay,.52,.12,.10,M.bronze,0,.79,0);
-box(caseDisplay,.08,.20,.08,M.bronze,-.27,.71,0);
-box(caseDisplay,.08,.20,.08,M.bronze,.27,.71,0);
-line(caseDisplay,1.08,.025,0,.17,M.bronze,.37);
+living.lifeDisplay={group:lifeStore,orbitA,orbitB,globe,flagshipCase};
 
-// KŌMŌ Life object / orbit sculpture.
-const orbitDisplay=new THREE.Group();orbitDisplay.position.set(-.35,1.35,0);lifeStore.add(orbitDisplay);
-const globe=mesh(orbitDisplay,new THREE.SphereGeometry(.34,24,18),M.sage,0,.24,0,{cast:true});
-const orbitA=mesh(orbitDisplay,new THREE.TorusGeometry(.61,.025,8,64),M.bronze,0,.24,0);orbitA.rotation.x=Math.PI/2.4;
-const orbitB=mesh(orbitDisplay,new THREE.TorusGeometry(.61,.025,8,64),M.bronze,0,.24,0);orbitB.rotation.y=Math.PI/2.7;
-
-// Folded textile / varsity-inspired object.
-const textile=new THREE.Group();textile.position.set(-.35,.84,2.55);lifeStore.add(textile);
-const textileMat=new THREE.MeshStandardMaterial({color:0x1f342c,roughness:.86,metalness:0});
-box(textile,1.12,.34,.82,textileMat,0,.18,0,{cast:true});
-box(textile,.96,.08,.70,M.stoneLight,0,.39,0);
-box(textile,.72,.018,.05,M.bronze,0,.435,.34);
-
-glow(lifeStore,0xf2d29d,2.5,8,-.65,4.8,-2.55);
-glow(lifeStore,0xf2d29d,2.5,8,-.65,4.8,0);
-glow(lifeStore,0xf2d29d,2.5,8,-.65,4.8,2.55);
-living.lights.push(...lifeStore.children.filter(o=>o.isLight));
-living.lifeDisplay={group:lifeStore,orbitA,orbitB,globe};
-
-// Destination wall.
+// Destination wall — three monumental thresholds rather than flat doors.
 box(building,22.7,7.2,.42,M.sageDeep,0,4.0,-30.0);
+[-7.0,0,7.0].forEach((x,i)=>{
+  box(building,.24,6.45,.78,i===1?MAT.travertine:MAT.limestone,x-2.40,3.48,-29.30,{cast:true});
+  box(building,.24,6.45,.78,i===1?MAT.travertine:MAT.limestone,x+2.40,3.48,-29.30,{cast:true});
+  box(building,5.05,.28,.78,i===1?MAT.travertine:MAT.limestone,x,6.58,-29.30,{cast:true});
+  box(building,4.55,.055,.10,M.warm,x,6.35,-28.86);
+});
 box(building,21.8,.07,.10,M.bronze,0,7.05,-29.73);
 const portals=[
   {x:-6.8,title:'FUNCTIONAL TWIN',sub:'UNDERSTAND',dark:true},
@@ -857,6 +999,7 @@ function animateLiving(now){
     living.lifeDisplay.orbitA.rotation.z=t*.16;
     living.lifeDisplay.orbitB.rotation.x=t*.11;
     living.lifeDisplay.globe.rotation.y=t*.10;
+    if(living.lifeDisplay.flagshipCase)living.lifeDisplay.flagshipCase.rotation.y=Math.sin(t*.18)*.08;
   }
   if(living.kinetic){
     living.kinetic.a.rotation.z=t*.055;
@@ -892,7 +1035,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.4.0-lived-in',
+  version:'1.5.0-architecture-life',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode}),
