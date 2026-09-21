@@ -12,6 +12,16 @@ const CATALOG = {
   'KL-SWEAT-001': { priceEnv: 'LIFE_STRIPE_PRICE_SWEATSHIRT', sizes: ['XS','S','M','L','XL'] }
 };
 
+const CASE01 = Object.freeze({
+  sku: 'KL-CASE01-001',
+  leather: Object.freeze({ signature: 1500000, heritage: 1650000, atelier: 1850000 }),
+  exterior: Object.freeze(['obsidian','graphite','sand','sage','navy','cognac','bordeaux','ivory']),
+  interior: Object.freeze(['sand','graphite','sage','navy','cognac']),
+  stitching: Object.freeze({ tonal: 0, contrast: 18000, signature: 25000 }),
+  hardware: Object.freeze({ silver: 0, champagne: 25000, black: 25000, titanium: 35000 }),
+  personalisation: Object.freeze({ none: 0, initials: 18000, name: 24000 })
+});
+
 function reply(response, status, payload) {
   response.setHeader('Cache-Control', 'no-store, max-age=0');
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -28,6 +38,74 @@ function isSameOrigin(request) {
 function bearer(request) {
   const raw = String(request.headers.authorization || '');
   return raw.startsWith('Bearer ') ? raw.slice(7).trim() : '';
+}
+
+function oneOf(value, allowed) {
+  return allowed.includes(value);
+}
+
+function validateCase01(raw) {
+  if (raw?.sku !== CASE01.sku || raw?.size !== 'Configured' || Number(raw?.quantity) !== 1) {
+    return { ok: false, error: 'invalid_case01_line' };
+  }
+
+  const cfg = raw?.configuration && typeof raw.configuration === 'object' ? raw.configuration : {};
+  const leather = String(cfg.leather || '');
+  const exterior = String(cfg.exterior || '');
+  const interior = String(cfg.interior || '');
+  const stitching = String(cfg.stitching || '');
+  const hardware = String(cfg.hardware || '');
+  const personalisation = String(cfg.personalisation || '');
+  const inscription = String(cfg.inscription || '').trim();
+
+  if (leather === 'bespoke' || personalisation === 'custom') {
+    return { ok: false, error: 'bespoke_requires_quote' };
+  }
+  if (!Object.hasOwn(CASE01.leather, leather) ||
+      !oneOf(exterior, CASE01.exterior) ||
+      !oneOf(interior, CASE01.interior) ||
+      !Object.hasOwn(CASE01.stitching, stitching) ||
+      !Object.hasOwn(CASE01.hardware, hardware) ||
+      !Object.hasOwn(CASE01.personalisation, personalisation)) {
+    return { ok: false, error: 'invalid_case01_configuration' };
+  }
+  if (inscription.length > 40 || (personalisation !== 'none' && !inscription) || (personalisation === 'none' && inscription)) {
+    return { ok: false, error: 'invalid_case01_inscription' };
+  }
+
+  const unitAmount =
+    CASE01.leather[leather] +
+    CASE01.stitching[stitching] +
+    CASE01.hardware[hardware] +
+    CASE01.personalisation[personalisation];
+
+  const configuration = { leather, exterior, interior, stitching, hardware, personalisation, inscription };
+  return {
+    ok: true,
+    line: {
+      sku: CASE01.sku,
+      size: 'Configured',
+      quantity: 1,
+      dynamic: true,
+      unitAmount,
+      configuration,
+      productName: `KŌMØ CASE 01 — ${leather.charAt(0).toUpperCase() + leather.slice(1)}`
+    }
+  };
+}
+
+function compactCaseMetadata(configuration) {
+  if (!configuration) return '';
+  const data = {
+    l: configuration.leather,
+    e: configuration.exterior,
+    i: configuration.interior,
+    s: configuration.stitching,
+    h: configuration.hardware,
+    p: configuration.personalisation,
+    n: configuration.inscription || ''
+  };
+  return JSON.stringify(data).slice(0, 490);
 }
 
 async function supabaseRpc(name, args, token) {
@@ -72,6 +150,10 @@ async function cartSubtotal(secret, validated) {
   const cache = new Map();
   let total = 0;
   for (const line of validated) {
+    if (line.dynamic) {
+      total += line.unitAmount * line.quantity;
+      continue;
+    }
     let price = cache.get(line.priceId);
     if (!price) {
       price = await stripeForm(secret, `prices/${encodeURIComponent(line.priceId)}`, null, 'GET');
@@ -119,18 +201,32 @@ export default async function handler(request, response) {
 
   const validated = [];
   const sizeMetadata = [];
+  const caseLines = [];
+
   for (let index = 0; index < items.length; index += 1) {
     const raw = items[index];
-    const config = CATALOG[raw?.sku];
     const quantity = Number(raw?.quantity);
+
+    if (raw?.sku === CASE01.sku) {
+      const checked = validateCase01(raw);
+      if (!checked.ok) return reply(response, 400, { ok: false, error: checked.error });
+      validated.push(checked.line);
+      caseLines.push(checked.line);
+      sizeMetadata.push(`${CASE01.sku}:Configuredx1`);
+      continue;
+    }
+
+    const config = CATALOG[raw?.sku];
     if (!config || !Number.isInteger(quantity) || quantity < 1 || quantity > 5 || !config.sizes.includes(raw?.size)) {
       return reply(response, 400, { ok: false, error: 'invalid_line_item' });
     }
     const priceId = process.env[config.priceEnv];
     if (!priceId) return reply(response, 503, { ok: false, error: 'catalog_not_configured', sku: raw.sku });
-    validated.push({ sku: raw.sku, size: raw.size, quantity, priceId });
+    validated.push({ sku: raw.sku, size: raw.size, quantity, priceId, dynamic: false });
     sizeMetadata.push(`${raw.sku}:${raw.size}x${quantity}`);
   }
+
+  if (caseLines.length > 1) return reply(response, 400, { ok: false, error: 'case01_quantity_limit' });
 
   let redemption = null;
   let session = null;
@@ -138,7 +234,7 @@ export default async function handler(request, response) {
     let subtotal = 0;
     if (requestedPoints > 0) {
       subtotal = await cartSubtotal(secret, validated);
-      const maxRedeemable = Math.max(0, subtotal - 100); // Keep at least EUR 1 payable through Stripe.
+      const maxRedeemable = Math.max(0, subtotal - 100);
       if (requestedPoints > maxRedeemable) {
         return reply(response, 400, { ok: false, error: 'points_exceed_cart', max_points: Math.floor(maxRedeemable / 100) * 100 });
       }
@@ -152,13 +248,26 @@ export default async function handler(request, response) {
     params.set('billing_address_collection', 'auto');
     ['FR','BE','LU','NL','DE','ES','IT','PT'].forEach((country, index) => params.set(`shipping_address_collection[allowed_countries][${index}]`, country));
     params.set('automatic_tax[enabled]', 'true');
-    params.set('phone_number_collection[enabled]', 'false');
+    params.set('phone_number_collection[enabled]', caseLines.length ? 'true' : 'false');
     params.set('metadata[storefront]', 'komo-life-v1');
     params.set('metadata[sizes]', sizeMetadata.join('|').slice(0, 490));
+    if (caseLines[0]) {
+      params.set('metadata[product]', 'KOMO_CASE_01');
+      params.set('metadata[case_configuration]', compactCaseMetadata(caseLines[0].configuration));
+    }
 
     validated.forEach((line, index) => {
-      params.set(`line_items[${index}][price]`, line.priceId);
-      params.set(`line_items[${index}][quantity]`, String(line.quantity));
+      if (line.dynamic) {
+        params.set(`line_items[${index}][price_data][currency]`, 'eur');
+        params.set(`line_items[${index}][price_data][unit_amount]`, String(line.unitAmount));
+        params.set(`line_items[${index}][price_data][tax_behavior]`, 'exclusive');
+        params.set(`line_items[${index}][price_data][product_data][name]`, line.productName);
+        params.set(`line_items[${index}][price_data][product_data][description]`, 'Configured leather attaché-case · 2 iPads · 6 sensors · tripod · accessories');
+        params.set(`line_items[${index}][quantity]`, '1');
+      } else {
+        params.set(`line_items[${index}][price]`, line.priceId);
+        params.set(`line_items[${index}][quantity]`, String(line.quantity));
+      }
     });
 
     if (redemption?.id) {
