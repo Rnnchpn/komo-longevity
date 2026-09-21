@@ -529,6 +529,15 @@ function updateNpc(npc,t,index){
   const dx=b.x-a.x,dz=b.z-a.z;
   const desired=Math.atan2(dx,dz);
   npc.rotation.y=desired;
+  // Micro-behaviour: some visitors slow down around the entrance / Life / atrium.
+  const poiSlow=(Math.abs(npc.position.x)<4.5&&npc.position.z>13&&npc.position.z<20)
+    ||(npc.position.x>6.4&&npc.position.z>-1&&npc.position.z<7)
+    ||(Math.abs(npc.position.x)<5&&npc.position.z<-6&&npc.position.z>-11);
+  const idlePulse=poiSlow?(.5+.5*Math.sin(t*.72+d.phase*8)):0;
+  if(poiSlow&&idlePulse>.82){
+    d.head.rotation.y=Math.sin(t*.85+index)*.18;
+    d.torso.rotation.y=Math.sin(t*.34+index)*.025;
+  }
 
   if(far){
     d.leftLeg.rotation.x=d.rightLeg.rotation.x=d.leftArm.rotation.x=d.rightArm.rotation.x=0;
@@ -875,11 +884,64 @@ fabricBanner(building,12.65,7.55,18.55,1.22,4.65,'KŌMØ LIFE','CASE 01',{dark:t
   const l=glow(building,0xf2cf98,intensity,5.5,x,y,z);living.lights.push(l);
 });
 
-// Glass entrance leaves, animated by proximity.
-const doorLeft=box(building,2.45,5.15,.10,M.glass,-1.27,3.05,17.35);
-const doorRight=box(building,2.45,5.15,.10,M.glass,1.27,3.05,17.35);
-box(building,.07,5.3,.10,M.bronze,-2.50,3.05,17.42);
-box(building,.07,5.3,.10,M.bronze,2.50,3.05,17.42);
+// V2.3 Living Entrance — framed automatic sliding doors with sensor + threshold.
+const entrance=new THREE.Group();entrance.name='KOMO_LIVING_ENTRANCE_V23';building.add(entrance);
+
+// Recessed bronze track and side pockets.
+box(entrance,5.55,.16,.22,MAT.brass,0,5.72,17.38);
+box(entrance,5.55,.12,.46,MAT.blackened,0,.48,17.30);
+box(entrance,.26,5.55,.48,MAT.blackened,-3.15,3.15,17.30);
+box(entrance,.26,5.55,.48,MAT.blackened,3.15,3.15,17.30);
+box(entrance,.08,5.30,.12,MAT.brass,-2.60,3.05,17.44);
+box(entrance,.08,5.30,.12,MAT.brass,2.60,3.05,17.44);
+
+// Each moving leaf is a group: cheap to animate even when child matrices are frozen on iPad.
+function entranceLeaf(side){
+  const g=new THREE.Group();g.position.set(side*1.29,0,0);entrance.add(g);
+  box(g,2.42,5.12,.075,M.glass,0,3.05,17.35);
+  box(g,2.44,.065,.11,MAT.brass,0,.52,17.42);
+  box(g,2.44,.065,.11,MAT.brass,0,5.58,17.42);
+  box(g,.065,5.05,.11,MAT.brass,-side*1.17,3.05,17.42);
+  box(g,.055,5.05,.10,M.bronzeSoft,side*1.17,3.05,17.42);
+  // Discreet handle/edge marker.
+  box(g,.055,.78,.13,MAT.brass,-side*.94,2.95,17.47);
+  return g;
+}
+const doorLeft=entranceLeaf(-1);
+const doorRight=entranceLeaf(1);
+
+// Sensor canopy + status lamp.
+const doorSensor=new THREE.Group();doorSensor.name='KOMO_DOOR_SENSOR_V23';entrance.add(doorSensor);
+box(doorSensor,1.18,.16,.38,MAT.blackened,0,5.95,17.05);
+const sensorEye=mesh(doorSensor,new THREE.CircleGeometry(.075,20),new THREE.MeshBasicMaterial({color:0xd9b777}),0,5.88,17.24,{receive:false});
+sensorEye.rotation.x=Math.PI/2;
+const sensorGlow=new THREE.MeshBasicMaterial({color:0xd9b777,transparent:true,opacity:.18,depthWrite:false});
+const sensorHalo=mesh(doorSensor,new THREE.RingGeometry(.12,.18,28),sensorGlow,0,5.875,17.235,{receive:false});
+sensorHalo.rotation.x=Math.PI/2;
+
+// Low-cost luminous threshold lines — emissive materials, no PointLight.
+const thresholdMat=new THREE.MeshBasicMaterial({color:0xd6b47b,transparent:true,opacity:.22,depthWrite:false});
+const thresholdA=box(entrance,4.85,.018,.055,thresholdMat,0,.425,18.18,{receive:false});
+const thresholdB=box(entrance,4.85,.018,.055,thresholdMat,0,.425,16.66,{receive:false});
+const doorSign=plaque(entrance,'WELCOME','KŌMØ WORLD',2.35,.46,0,5.22,17.48,{dark:true,titleSize:45});
+
+// V2.3 entrance life cues — static, cheap objects that make the threshold inhabited.
+const arrivalDetails=new THREE.Group();arrivalDetails.name='KOMO_ARRIVAL_DETAILS_V23';building.add(arrivalDetails);
+const trolley=new THREE.Group();trolley.position.set(5.55,0,13.4);arrivalDetails.add(trolley);
+box(trolley,1.05,.10,.68,MAT.brass,0,.30,0);
+box(trolley,.08,1.55,.08,MAT.brass,-.46,1.02,-.24);
+box(trolley,.08,1.55,.08,MAT.brass,.46,1.02,-.24);
+box(trolley,1.00,.08,.08,MAT.brass,0,1.76,-.24);
+[-.42,.42].forEach(x=>[-.22,.22].forEach(z=>{
+  const wheel=mesh(trolley,new THREE.TorusGeometry(.10,.026,6,16),MAT.blackened,x,.12,z);wheel.rotation.y=Math.PI/2;
+}));
+box(trolley,.70,.48,.42,MAT.walnut,0,.57,0,{cast:true});
+box(trolley,.62,.07,.34,MAT.brass,0,.84,0);
+
+const arrivalConsole=new THREE.Group();arrivalConsole.position.set(-5.7,0,13.0);arrivalDetails.add(arrivalConsole);
+box(arrivalConsole,1.18,.80,.58,MAT.travertine,0,.42,0);
+box(arrivalConsole,.96,.055,.44,MAT.brass,0,.84,0);
+plaque(arrivalConsole,'ARRIVAL','PULSE · WORLD',1.0,.38,0,1.20,-.30,{dark:true,titleSize:38});
 
 // Hall shell.
 box(building,23.8,.28,46,M.stoneLight,0,.13,-7.0);
@@ -1332,7 +1394,7 @@ let yaw=0,pitch=-.045;
 let targetYaw=yaw,targetPitch=pitch;
 let mode='world';
 let currentInteraction=null;
-let doorProgress=0;
+let doorProgress=0,doorTarget=0,doorHoldUntil=0,doorLastOpen=false;
 let dragging=false,lastX=0,lastY=0;
 let joyX=0,joyY=0,joyTargetX=0,joyTargetY=0,joyPointer=null;
 const keys=new Set();
@@ -1591,11 +1653,30 @@ function updateCamera(now){
   const look=18;
   camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
 }
-function updateDoors(){
-  const target=mode==='world'&&player.z<26&&player.z>8&&Math.abs(player.x)<5?1:0;
-  doorProgress+=(target-doorProgress)*.10;
-  doorLeft.position.x=THREE.MathUtils.lerp(-1.27,-3.05,doorProgress);
-  doorRight.position.x=THREE.MathUtils.lerp(1.27,3.05,doorProgress);
+function updateDoors(now,dt){
+  let approach=mode==='world'&&player.z<25.8&&player.z>9.0&&Math.abs(player.x)<4.8;
+  // Ambient people can also trigger the entrance, making it feel like a real place.
+  if(!approach&&living.npcs?.length){
+    approach=living.npcs.some(n=>n.visible&&Math.abs(n.position.x)<4.4&&n.position.z<23.5&&n.position.z>12.0&&Math.abs(n.position.y)<.8);
+  }
+  if(approach)doorHoldUntil=now+1350;
+  doorTarget=(approach||now<doorHoldUntil)?1:0;
+  // Smooth exponential motion, faster opening than closing.
+  const response=doorTarget?7.8:4.2;
+  doorProgress+=(doorTarget-doorProgress)*(1-Math.exp(-response*dt));
+  const eased=doorProgress*doorProgress*(3-2*doorProgress);
+  doorLeft.position.x=THREE.MathUtils.lerp(-1.29,-3.08,eased);
+  doorRight.position.x=THREE.MathUtils.lerp(1.29,3.08,eased);
+  const active=doorProgress>.08;
+  sensorEye.material.color.setHex(active?0xe9c989:0x8f7653);
+  sensorGlow.opacity=.10+.42*doorProgress;
+  sensorHalo.scale.setScalar(1+doorProgress*.32);
+  thresholdMat.opacity=.10+.28*doorProgress;
+  doorSign.visible=doorProgress<.82;
+  if(active!==doorLastOpen){
+    doorLastOpen=active;
+    entrance.userData.state=active?'open':'closed';
+  }
 }
 function updateLocation(){
   if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';return}
@@ -1811,7 +1892,7 @@ function animate(now){
   const dt=Math.min(.05,(now-last)/1000||.016);last=now;updatePerformance(now);
   updateMovement(dt);
   updateCamera(now);
-  updateDoors();
+  updateDoors(now,dt);
   updateLocation();
   updateHeading();
   updateInteraction();
@@ -1829,7 +1910,7 @@ window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(
 
 function freezeStaticScene(){
   if(!lowPower)return;
-  const dynamicMeshes=new Set([doorLeft,doorRight,scanRing,living.skyDome].filter(Boolean));
+  const dynamicMeshes=new Set([scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB].filter(Boolean));
   scene.traverse(o=>{
     if(o.isMesh&&!dynamicMeshes.has(o)){
       o.updateMatrix();
@@ -1844,7 +1925,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.2.1-performance-rescue',
+  version:'2.3.0-living-entrance',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),
