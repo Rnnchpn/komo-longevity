@@ -1549,6 +1549,29 @@ const interactions=[
   {id:'journey',x:4.8,z:8.5,r:3.0,title:()=>locale==='fr'?'World Journey':'World Journey',desc:()=>locale==='fr'?'Voir votre niveau, vos XP et les prochaines étapes.':'View your level, XP and next steps.',action:showJourneyPanel}
 ];
 
+const twinInteractions=[
+  {id:'twin_muscle',domain:'muscle',x:-50.15,z:-2.2,r:2.0},
+  {id:'twin_mobility',domain:'mobility',x:-39.85,z:-2.2,r:2.0},
+  {id:'twin_balance',domain:'balance',x:-50.15,z:2.9,r:2.0},
+  {id:'twin_posture',domain:'posture',x:-39.85,z:2.9,r:2.0},
+  {id:'twin_endurance',domain:'endurance',x:-45,z:5.1,r:2.0}
+].map(it=>({
+  ...it,
+  title:()=>twinDomainName(it.domain),
+  desc:()=>locale==='fr'?'Explorer ce domaine du Twin':'Explore this Twin domain',
+  action:()=>showTwinDomain(it.domain)
+}));
+const rehabInteractions=[
+  {id:'rehab_control',station:'control',x:-5.3,z:-58.2,r:2.35},
+  {id:'rehab_strength',station:'strength',x:0,z:-58.2,r:2.35},
+  {id:'rehab_capacity',station:'capacity',x:5.3,z:-58.2,r:2.35}
+].map(it=>({
+  ...it,
+  title:()=>rehabStationCopy(it.station).title[locale],
+  desc:()=>locale==='fr'?'Ouvrir la station guidée':'Open guided station',
+  action:()=>showRehabStation(it.station)
+}));
+
 function notify(message){
   toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(notify.t);
   notify.t=setTimeout(()=>toastEl.classList.remove('show'),1800);
@@ -1567,6 +1590,7 @@ const JOURNEY_MISSIONS=[
   {id:'journey',xp:15,title:{fr:'Comprendre le World Journey',en:'Understand World Journey'},sub:{fr:'Ouvrir la station de progression',en:'Open the progression station'}},
   {id:'twin',xp:35,title:{fr:'Explorer le Functional Twin',en:'Explore Functional Twin'},sub:{fr:'Comprendre votre espace de données',en:'Understand your data space'}},
   {id:'rehab',xp:35,title:{fr:'Passer de l’insight à l’action',en:'Move from insight to action'},sub:{fr:'Découvrir Rehab',en:'Discover Rehab'}},
+  {id:'rehab_session',xp:25,title:{fr:'Compléter une session Rehab',en:'Complete a Rehab session'},sub:{fr:'Valider une station guidée',en:'Complete one guided station'}},
   {id:'arena',xp:35,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir les challenges',en:'Discover challenges'}},
   {id:'life',xp:25,title:{fr:'Visiter KŌMØ Life',en:'Visit KŌMØ Life'},sub:{fr:'Relier World au réel',en:'Connect World to real life'}},
   {id:'upper',xp:30,title:{fr:'Atteindre le Level 2',en:'Reach Level 2'},sub:{fr:'Explorer les galeries hautes',en:'Explore the upper galleries'}},
@@ -1579,6 +1603,7 @@ const JOURNEY_BADGES=[
   {id:'explorer',label:{fr:'EXPLORER',en:'EXPLORER'},test:()=>['hall','journey','life'].every(id=>journey.done[id])},
   {id:'insight',label:{fr:'INSIGHT',en:'INSIGHT'},test:()=>!!journey.done.twin},
   {id:'mover',label:{fr:'MOVER',en:'MOVER'},test:()=>journey.done.rehab&&journey.done.arena},
+  {id:'activated',label:{fr:'ACTIVATED',en:'ACTIVATED'},test:()=>!!journey.done.rehab_session},
   {id:'connector',label:{fr:'CONNECTED',en:'CONNECTED'},test:()=>!!journey.done.social},
   {id:'pioneer',label:{fr:'PIONEER',en:'PIONEER'},test:()=>JOURNEY_MISSIONS.filter(m=>m.id!=='social').every(m=>journey.done[m.id])}
 ];
@@ -1686,7 +1711,7 @@ const travelPoints={
 };
 const journeyTargets={
   arrival:{x:0,y:0,z:31.5},hall:{x:0,y:0,z:5.5},journey:{x:4.8,y:0,z:8.5},
-  twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},arena:{x:6.8,y:0,z:-26.0},
+  twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
   life:{x:8.4,y:0,z:3.4},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
 function setGuideEnabled(value){
@@ -1757,25 +1782,139 @@ function showDesk(){
     {label:locale==='fr'?'ALLER AU TWIN':'GO TO TWIN',primary:true,onClick:()=>{closePanel();player.set(-6.8,0,-23.0);yaw=0}}
   ]);
 }
+function twinDomainName(id){
+  const names={
+    muscle:{fr:'Muscle',en:'Muscle'},
+    mobility:{fr:'Mobilité',en:'Mobility'},
+    balance:{fr:'Équilibre',en:'Balance'},
+    posture:{fr:'Posture',en:'Posture'},
+    endurance:{fr:'Endurance',en:'Endurance'}
+  };
+  return names[id]?.[locale]||id;
+}
+function updateTwinVisuals(){
+  const d=current().domains||{};
+  Object.entries(twinDomainVisuals).forEach(([id,v])=>{
+    const value=THREE.MathUtils.clamp(Number(d[id])||0,0,100);
+    const h=.18+value/100*2.05;
+    v.fill.scale.y=h;v.fill.position.y=.34+h/2;
+    v.fill.material.opacity=.46+value/100*.34;
+    v.ring.material.opacity=.12+value/100*.30;
+  });
+}
+function twinDomainHtml(id){
+  const s=current(),value=Number(s.domains?.[id])||0,base=Number(baseline.domains?.[id])||0,delta=value-base;
+  const explanations={
+    muscle:{fr:'Lecture des capacités musculaires observées dans le bilan et leur évolution temporelle.',en:'View muscular capability signals from the assessment and their change over time.'},
+    mobility:{fr:'Lecture de la mobilité fonctionnelle et de la qualité de déplacement.',en:'View functional mobility and movement quality.'},
+    balance:{fr:'Lecture de l’équilibre et du contrôle fonctionnel.',en:'View balance and functional control.'},
+    posture:{fr:'Lecture des indicateurs de posture intégrés au Twin.',en:'View posture indicators integrated into the Twin.'},
+    endurance:{fr:'Lecture de la capacité fonctionnelle et de sa trajectoire.',en:'View functional capacity and its trajectory.'}
+  };
+  return `
+    <div class="twin-domain-hero"><span>${twinDomainName(id).toUpperCase()}</span><strong>${value}<em>/100</em></strong></div>
+    <div class="twin-domain-track"><i style="width:${value}%"></i></div>
+    <div class="panel-grid">
+      <div><span>BASELINE</span><b>${base}</b></div>
+      <div><span>${locale==='fr'?'AUJOURD’HUI':'TODAY'}</span><b>${value}</b></div>
+      <div><span>DELTA</span><b>${delta>=0?'+':''}${delta}</b></div>
+      <div><span>SOURCE</span><b>TWIN</b></div>
+    </div>
+    <p>${explanations[id]?.[locale]||''}</p>
+    <div class="data-note">${locale==='fr'?'Valeurs de démonstration TwinCore tant que la session Pulse personnelle n’est pas connectée.':'TwinCore demo values until the personal Pulse session is connected.'}</div>`;
+}
+function showTwinDomain(id){
+  updateTwinVisuals();
+  openPanel(twinDomainName(id).toUpperCase(),locale==='fr'?'Explorer un domaine du Functional Twin.':'Explore a Functional Twin domain.',twinDomainHtml(id),[
+    {label:locale==='fr'?'VUE TWIN':'TWIN OVERVIEW',onClick:showTwin},
+    {label:copy[locale].openRehab,primary:true,onClick:enterRehab}
+  ]);
+}
+
+const REHAB_KEY='komo_world_rehab_v1';
+let rehabSessionTimer=null;
+function loadRehabProgress(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(REHAB_KEY)||'{}');
+    return {control:Number(raw.control)||0,strength:Number(raw.strength)||0,capacity:Number(raw.capacity)||0,total:Number(raw.total)||0};
+  }catch{return {control:0,strength:0,capacity:0,total:0}}
+}
+const rehabProgress=loadRehabProgress();
+function saveRehabProgress(){try{localStorage.setItem(REHAB_KEY,JSON.stringify(rehabProgress))}catch{}}
+function rehabStationCopy(id){
+  const data={
+    control:{title:{fr:'CONTROL',en:'CONTROL'},duration:15,focus:{fr:'Contrôle · précision · stabilité',en:'Control · precision · stability'},demo:{fr:'Séquence guidée de contrôle moteur.',en:'Guided motor-control sequence.'}},
+    strength:{title:{fr:'STRENGTH',en:'STRENGTH'},duration:18,focus:{fr:'Force · activation · répétition',en:'Strength · activation · repetition'},demo:{fr:'Séquence guidée d’activation et de force.',en:'Guided activation and strength sequence.'}},
+    capacity:{title:{fr:'CAPACITY',en:'CAPACITY'},duration:20,focus:{fr:'Capacité · rythme · endurance',en:'Capacity · pace · endurance'},demo:{fr:'Séquence guidée de capacité fonctionnelle.',en:'Guided functional-capacity sequence.'}}
+  };
+  return data[id]||data.control;
+}
+function rehabStationHtml(id,running=false,pct=0,remaining=null){
+  const c=rehabStationCopy(id),count=rehabProgress[id]||0;
+  return `
+    <div class="rehab-station-hero"><span>${c.title[locale]}</span><strong>${running?(remaining+'s'):(count?'✓ '+count:'READY')}</strong></div>
+    <div class="rehab-progress"><i style="width:${pct}%"></i></div>
+    <div class="priority-card"><b>${locale==='fr'?'OBJECTIF DE DÉMO':'DEMO FOCUS'}</b>${c.focus[locale]}</div>
+    <p>${c.demo[locale]}</p>
+    <div class="panel-grid">
+      <div><span>DURATION</span><b>${c.duration}s</b></div>
+      <div><span>SESSIONS</span><b>${count}</b></div>
+      <div><span>MODE</span><b>GUIDED</b></div>
+      <div><span>XP</span><b>+25</b></div>
+    </div>
+    <div class="data-note">${locale==='fr'?'Démonstration d’engagement dans World. Ce module ne constitue pas une prescription médicale autonome et ne remplace pas une adaptation au contexte de l’utilisateur.':'World engagement demonstration. This module is not an autonomous medical prescription and does not replace adaptation to user context.'}</div>`;
+}
+function stopRehabSession(){
+  if(rehabSessionTimer){clearInterval(rehabSessionTimer);rehabSessionTimer=null}
+}
+function completeRehabStation(id){
+  stopRehabSession();rehabProgress[id]=(rehabProgress[id]||0)+1;rehabProgress.total++;saveRehabProgress();
+  completeJourney('rehab_session');
+  notify((locale==='fr'?'SESSION VALIDÉE · ':'SESSION COMPLETE · ')+rehabStationCopy(id).title[locale]);
+  showRehabStation(id,true);
+}
+function runRehabDemo(id){
+  stopRehabSession();
+  const c=rehabStationCopy(id),start=performance.now(),duration=c.duration*1000;
+  openPanel(c.title[locale],'REHAB · LIVE',rehabStationHtml(id,true,0,c.duration),[
+    {label:locale==='fr'?'ARRÊTER':'STOP',onClick:()=>{stopRehabSession();showRehabStation(id)}}
+  ]);
+  rehabSessionTimer=setInterval(()=>{
+    const elapsed=performance.now()-start,pct=THREE.MathUtils.clamp(elapsed/duration*100,0,100),left=Math.max(0,Math.ceil((duration-elapsed)/1000));
+    panelBody.innerHTML=rehabStationHtml(id,true,pct,left);
+    const vis=rehabStationVisuals[id];if(vis){vis.pulse.material.opacity=.18+.48*(pct/100);vis.pulse.scale.setScalar(1+.18*(pct/100))}
+    if(elapsed>=duration)completeRehabStation(id);
+  },250);
+}
+function showRehabStation(id,completed=false){
+  stopRehabSession();
+  const c=rehabStationCopy(id);
+  openPanel(c.title[locale],locale==='fr'?'Station Rehab guidée.':'Guided Rehab station.',rehabStationHtml(id,false,completed?100:0),[
+    {label:locale==='fr'?'RETOUR REHAB':'REHAB OVERVIEW',onClick:showRehab},
+    {label:completed?(locale==='fr'?'REJOUER':'REPLAY'):(locale==='fr'?'DÉMARRER':'START'),primary:true,onClick:()=>runRehabDemo(id)}
+  ]);
+}
+
 function twinHtml(){
   const s=current(),cmp=core.compare(baseline.snapshot_id,s.snapshot_id,'world-v1');
   const d=s.domains;
+  const domains=['muscle','mobility','balance','posture','endurance'];
   return `
+    <p>${locale==='fr'?'Le Functional Twin organise vos mesures dans le temps pour rendre la trajectoire lisible. Approchez-vous aussi des 5 domaines dans la salle pour les explorer en 3D.':'Functional Twin organises measurements over time to make the trajectory understandable. You can also approach the 5 domains in the room to explore them spatially.'}</p>
     <div class="metric-hero"><div><span>MOTION SCORE</span><strong>${s.motion_score}<em>/100</em></strong></div><div><span>MOTION AGE</span><strong>${s.motion_age}</strong></div></div>
-    <div class="panel-grid">
-      <div><span>MUSCLE</span><b>${d.muscle}</b></div><div><span>MOBILITY</span><b>${d.mobility}</b></div>
-      <div><span>BALANCE</span><b>${d.balance}</b></div><div><span>POSTURE</span><b>${d.posture}</b></div>
-    </div>
+    <div class="twin-domain-list">${domains.map(id=>`<button data-domain="${id}"><span>${twinDomainName(id)}</span><b>${Number(d[id])||0}</b><i><em style="width:${Number(d[id])||0}%"></em></i></button>`).join('')}</div>
     <div class="priority-card"><b>${locale==='fr'?'ÉVOLUTION':'PROGRESSION'}</b>${cmp.motion_score_delta>=0?'+':''}${cmp.motion_score_delta} Motion Score · quadriceps ${baseline.metrics.quadriceps_symmetry} → ${s.metrics.quadriceps_symmetry}% · gait ${baseline.metrics.gait_speed.toFixed(2)} → ${s.metrics.gait_speed.toFixed(2)} m/s.</div>
     <div class="timeline">${core.snapshots.map((q,i)=>`<button data-time="${i}" class="${i===core.activeIndex?'active':''}">${q.label}</button>`).join('')}</div>
     <div class="data-note">${locale==='fr'?'Prototype World : les valeurs affichées ici utilisent le jeu de données de démonstration TwinCore tant que la session Pulse personnelle n’est pas reliée.':'World prototype: values shown here use the TwinCore demo dataset until the personal Pulse session is connected.'}</div>`;
 }
 function bindTimeline(){
   panelBody.querySelectorAll('[data-time]').forEach(btn=>btn.addEventListener('click',()=>{
-    core.setTimeIndex(+btn.dataset.time,'world-v1');$('#hud-motion').textContent=current().motion_score;$('#hud-age').textContent=current().motion_age;showTwin();
+    core.setTimeIndex(+btn.dataset.time,'world-v1');$('#hud-motion').textContent=current().motion_score;$('#hud-age').textContent=current().motion_age;updateTwinVisuals();showTwin();
   }));
+  panelBody.querySelectorAll('[data-domain]').forEach(btn=>btn.addEventListener('click',()=>showTwinDomain(btn.dataset.domain)));
 }
 function showTwin(){
+  updateTwinVisuals();
   openPanel('FUNCTIONAL TWIN',locale==='fr'?'Votre corps à travers le temps.':'Your body across time.',twinHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
     {label:copy[locale].openRehab,primary:true,onClick:enterRehab}
@@ -1785,16 +1924,21 @@ function rehabHtml(){
   const s=current();const entries=Object.entries(s.domains);entries.sort((a,b)=>a[1]-b[1]);const [lowest,val]=entries[0];
   const names={muscle:'Muscle',mobility:locale==='fr'?'Mobilité':'Mobility',balance:locale==='fr'?'Équilibre':'Balance',posture:'Posture',endurance:'Endurance'};
   return `
-    <p>${locale==='fr'?'Rehab transforme les signaux du Twin en actions simples et suivies. Il ne s’agit pas ici d’une prescription médicale autonome.':'Rehab turns Twin signals into simple, trackable actions. This is not an autonomous medical prescription.'}</p>
-    <div class="priority-card"><b>${locale==='fr'?'PRIORITÉ FONCTIONNELLE':'FUNCTIONAL PRIORITY'}</b>${names[lowest]} · ${val}/100</div>
-    <div class="panel-grid"><div><span>01</span><b>${locale==='fr'?'Contrôle':'Control'}</b></div><div><span>02</span><b>${locale==='fr'?'Force':'Strength'}</b></div><div><span>03</span><b>${locale==='fr'?'Capacité':'Capacity'}</b></div><div><span>FOLLOW-UP</span><b>${s.metrics.rehab_adherence}%</b></div></div>
-    <div class="data-note">${locale==='fr'?'Les recommandations finales doivent rester cohérentes avec le contexte utilisateur et, lorsque nécessaire, avec un professionnel de santé.':'Final recommendations should remain consistent with user context and, when needed, a healthcare professional.'}</div>`;
+    <p>${locale==='fr'?'Rehab transforme les signaux du Twin en séquences d’action simples et suivies. Les trois stations peuvent être explorées physiquement dans la salle.':'Rehab turns Twin signals into simple trackable action sequences. All three stations can be explored spatially in the room.'}</p>
+    <div class="priority-card"><b>${locale==='fr'?'FOCUS DE DÉMONSTRATION':'DEMO FOCUS'}</b>${names[lowest]} · ${val}/100</div>
+    <div class="rehab-station-grid">
+      ${['control','strength','capacity'].map(id=>{const c=rehabStationCopy(id);return `<button data-rehab="${id}"><span>${c.title[locale]}</span><b>${c.focus[locale]}</b><small>${rehabProgress[id]?'✓ '+rehabProgress[id]+' session'+(rehabProgress[id]>1?'s':''):'READY · '+c.duration+'s'}</small></button>`}).join('')}
+    </div>
+    <div class="panel-grid"><div><span>CONTROL</span><b>${rehabProgress.control}</b></div><div><span>STRENGTH</span><b>${rehabProgress.strength}</b></div><div><span>CAPACITY</span><b>${rehabProgress.capacity}</b></div><div><span>TOTAL</span><b>${rehabProgress.total}</b></div></div>
+    <div class="data-note">${locale==='fr'?'Les séquences Rehab montrées dans World sont des démonstrations d’engagement. Elles ne constituent pas une prescription médicale autonome et doivent être adaptées au contexte utilisateur lorsque nécessaire.':'Rehab sequences shown in World are engagement demonstrations. They are not autonomous medical prescriptions and should be adapted to user context when needed.'}</div>`;
 }
 function showRehab(){
+  stopRehabSession();
   openPanel('REHAB',locale==='fr'?'De l’insight à l’action.':'From insight to action.',rehabHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
     {label:locale==='fr'?'VOIR LE TWIN':'VIEW TWIN',primary:true,onClick:enterTwin}
   ]);
+  panelBody.querySelectorAll('[data-rehab]').forEach(btn=>btn.addEventListener('click',()=>showRehabStation(btn.dataset.rehab)));
 }
 function arenaHtml(){
   return `
@@ -1859,6 +2003,7 @@ function showNpcConversation(npc){
   ]);
 }
 function setMode(next){
+  if(next!=='rehab')stopRehabSession();
   mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';
 }
 function enterTwin(){
@@ -2052,20 +2197,22 @@ function updateHeading(){
   headingEl.textContent=dirs[Math.round(a/(Math.PI/4))%8];
 }
 function updateInteraction(){
-  if(mode!=='world'){currentInteraction=null;interactionEl.classList.remove('show');worldReticle.classList.remove('active');return}
+  let pool=mode==='world'?interactions:mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions:[];
   let best=null,bestD=Infinity;
-  for(const it of interactions){
-    if(playerLevel===1&&it.level!==1)continue;
+  for(const it of pool){
+    if(mode==='world'&&playerLevel===1&&it.level!==1)continue;
     const d=Math.hypot(player.x-it.x,player.z-it.z);
     if(d<it.r&&d<bestD){best=it;bestD=d}
   }
-  for(const npc of living.npcs){
-    if(!npc.visible||Math.abs(npc.position.y-player.y)>1.1)continue;
-    const d=Math.hypot(player.x-npc.position.x,player.z-npc.position.z);
-    if(d<2.25&&d<bestD){
-      const data=npc.userData.npc;
-      best={id:'social',npc,title:()=>data.label||'KŌMØ Member',desc:()=>locale==='fr'?'Parler · découvrir · +15 XP':'Talk · discover · +15 XP',action:()=>showNpcConversation(npc)};
-      bestD=d;
+  if(mode==='world'){
+    for(const npc of living.npcs){
+      if(!npc.visible||Math.abs(npc.position.y-player.y)>1.1)continue;
+      const d=Math.hypot(player.x-npc.position.x,player.z-npc.position.z);
+      if(d<2.25&&d<bestD){
+        const data=npc.userData.npc;
+        best={id:'social',npc,title:()=>data.label||'KŌMØ Member',desc:()=>locale==='fr'?'Parler · découvrir · +15 XP':'Talk · discover · +15 XP',action:()=>showNpcConversation(npc)};
+        bestD=d;
+      }
     }
   }
   if((best?.id)!==(currentInteraction?.id)||(best?.npc)!==(currentInteraction?.npc)){
@@ -2081,9 +2228,20 @@ function triggerAction(){
   currentInteraction?.action?.();
 }
 function updateTwinScan(now){
-  if(mode!=='twin')return;
-  scanRing.position.y=.85+(Math.sin(now*.0012)*.5+.5)*3.7;
-  scanRing.material.opacity=.16+(Math.sin(now*.0012)*.5+.5)*.18;
+  if(mode==='twin'){
+    scanRing.position.y=.85+(Math.sin(now*.0012)*.5+.5)*3.7;
+    scanRing.material.opacity=.16+(Math.sin(now*.0012)*.5+.5)*.18;
+    Object.values(twinDomainVisuals).forEach((v,i)=>{
+      v.ring.rotation.z=now*.00035+i*.37;
+      v.ring.scale.setScalar(.96+.05*Math.sin(now*.0014+i));
+    });
+  }
+  if(mode==='rehab'){
+    Object.values(rehabStationVisuals).forEach((v,i)=>{
+      if(!rehabSessionTimer)v.pulse.scale.setScalar(.95+.06*Math.sin(now*.0016+i*.9));
+      v.ring.rotation.z=now*.00022*(i%2?1:-1);
+    });
+  }
 }
 
 window.addEventListener('keydown',e=>{
@@ -2288,7 +2446,7 @@ function freezeStaticScene(){
   if(!lowPower)return;
   const dynamicMeshes=new Set([scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB,journeyRing,waypointRing,waypointStem,waypointCap,...guideDots.flatMap(g=>g.children)].filter(Boolean));
   scene.traverse(o=>{
-    if(o.isMesh&&!dynamicMeshes.has(o)){
+    if(o.isMesh&&!dynamicMeshes.has(o)&&!o.userData.dynamic){
       o.updateMatrix();
       o.matrixAutoUpdate=false;
     }
@@ -2302,7 +2460,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.5.0-living-journey',
+  version:'2.6.0-twin-rehab',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
