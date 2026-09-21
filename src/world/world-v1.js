@@ -108,6 +108,7 @@ const living={
   kinetic:null,
   motionScreens:[],
   exteriorSculptures:[],
+  banners:[],
   daylight:'day'
 };
 
@@ -226,6 +227,53 @@ function sculptureGarden(parent,x,z,scale=1){
   a.rotation.x=1.05;b.rotation.y=.75;
   const core=mesh(g,new THREE.SphereGeometry(.08*scale,16,12),M.warm,0,1.02,0,{cast:true});
   return {group:g,a,b,core};
+}
+function bannerTexture(title,subtitle,{w=720,h=1800,dark=true,accent='#d5b477'}={}){
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  x.fillStyle=dark?'#163126':'#efe6d9';x.fillRect(0,0,w,h);
+  x.strokeStyle=dark?'rgba(218,187,136,.28)':'rgba(42,64,51,.14)';x.lineWidth=6;x.strokeRect(10,10,w-20,h-20);
+  x.fillStyle=dark?'#f0eadf':'#20352a';x.font='600 82px Georgia';x.textAlign='center';x.textBaseline='middle';x.fillText(title,w/2,h*.34);
+  x.fillStyle=accent;x.font='700 28px Arial';x.fillText(subtitle.toUpperCase(),w/2,h*.44);
+  x.strokeStyle='rgba(213,180,119,.45)';x.lineWidth=2;x.beginPath();x.moveTo(w*.18,h*.52);x.lineTo(w*.82,h*.52);x.stroke();
+  x.fillStyle=dark?'rgba(240,234,223,.85)':'rgba(32,53,42,.78)';x.font='500 22px Arial';x.fillText('LONGEVITY IN MOTION',w/2,h*.60);
+  x.fillStyle=dark?'rgba(240,234,223,.42)':'rgba(32,53,42,.42)';x.font='600 17px Arial';x.fillText('KŌMØ · RIVIERA',w/2,h*.82);
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return t;
+}
+function fabricBanner(parent,x,y,z,w=1.35,h=4.2,title='KŌMØ',subtitle='WORLD',{rotY=0,dark=true}={}){
+  const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=rotY;parent.add(g);
+  const tx=bannerTexture(title,subtitle,{dark});
+  const geo=new THREE.PlaneGeometry(w,h,12,22);
+  const mat=new THREE.MeshStandardMaterial({map:tx,side:THREE.DoubleSide,roughness:.92,metalness:0});
+  const cloth=mesh(g,geo,mat,0,-h/2,0,{cast:false,receive:false});
+  cloth.userData.base=Float32Array.from(geo.attributes.position.array);
+  cloth.userData.height=h;cloth.userData.phase=(x*.31+z*.17+h)%6.2;living.banners.push(cloth);
+  box(g,w+.10,.055,.055,MAT.brass,0,.02,.025,{cast:true});
+  box(g,w+.10,.045,.045,MAT.brass,0,-h+.02,.025,{cast:true});
+  box(g,.07,.28,.07,MAT.brass,-w/2,.13,.025,{cast:true});
+  box(g,.07,.28,.07,MAT.brass,w/2,.13,.025,{cast:true});
+  return g;
+}
+function shrubCluster(parent,x,z,scale=.65){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  [[0,.26,0,.58],[.42,.22,.18,.32],[-.38,.24,-.12,.28],[.18,.18,-.34,.24]].forEach(([a,b,c,r])=>{
+    const shrub=mesh(g,new THREE.SphereGeometry(r*scale,14,10),M.sageSoft,a*scale,b*scale,c*scale,{cast:true});
+    shrub.scale.set(1,.62,1);
+  });
+  return g;
+}
+function gravelIsland(parent,x,z,w=4.2,d=2.7){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  box(g,w,.16,d,MAT.limestone,0,.08,0);
+  box(g,w-.30,.05,d-.26,M.soil,0,.19,0);
+  shrubCluster(g,-.9,-.2,.70);shrubCluster(g,.65,.25,.58);
+  return g;
+}
+function bannerTotem(parent,x,z,title,subtitle,rotY=0){
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rotY;parent.add(g);
+  box(g,1.18,.22,1.18,MAT.travertine,0,.11,0,{cast:true});
+  box(g,.18,5.55,.18,MAT.blackened,0,2.78,0,{cast:true});
+  fabricBanner(g,0,5.30,.07,1.45,4.45,title,subtitle,{dark:true});
+  return g;
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
@@ -461,6 +509,42 @@ living.exteriorSculptures.push(exteriorSculptureL,exteriorSculptureR);
 // One discreet landscape identity marker, leaving the building as the hero.
 plaque(exterior,'KŌMØ','ARRIVAL COURT',3.4,.75,-17.70,2.30,39.0,{rotY:Math.PI/2,dark:true,titleSize:57});
 
+// V1.7 campus identity — freestanding banners and denser Riviera landscaping.
+bannerTotem(exterior,-14.25,25.9,'KŌMØ','WORLD',.12);
+bannerTotem(exterior,14.25,25.9,'KŌMØ LIFE','FLAGSHIP',-.12);
+bannerTotem(exterior,-18.65,46.0,'MOTION','MEASURE',Math.PI/2);
+bannerTotem(exterior,18.65,46.0,'ARENA','ENGAGE',-Math.PI/2);
+
+gravelIsland(exterior,-17.25,35.4,4.25,2.85);
+gravelIsland(exterior,17.25,35.4,4.25,2.85);
+gravelIsland(exterior,-17.25,45.7,4.25,2.85);
+gravelIsland(exterior,17.25,45.7,4.25,2.85);
+
+[
+  [-19.0,29.3],[-19.0,52.2],[19.0,29.3],[19.0,52.2],
+  [-10.7,57.2],[10.7,57.2],[-10.8,23.4],[10.8,23.4]
+].forEach(([x,z],i)=>shrubCluster(exterior,x,z,.72+(i%3)*.05));
+
+[
+  [-22.4,27],[-22.4,35],[-22.4,45],[-22.4,54],
+  [22.4,27],[22.4,35],[22.4,45],[22.4,54]
+].forEach(([x,z],i)=>tree(exterior,x,z,.55+(i%2)*.04));
+
+box(exterior,1.05,.18,34.0,MAT.limestone,-20.8,.09,40.7,{cast:true});
+box(exterior,1.05,.18,34.0,MAT.limestone,20.8,.09,40.7,{cast:true});
+box(exterior,18.2,.14,.92,MAT.limestone,0,.07,23.8,{cast:true});
+box(exterior,18.2,.14,.92,MAT.limestone,0,.07,57.3,{cast:true});
+
+exteriorBench(exterior,16.1,30.3,-Math.PI/2,.80);
+exteriorBench(exterior,-16.1,30.3,Math.PI/2,.80);
+
+[
+  [-14.25,5.7,25.9,1.05],[14.25,5.7,25.9,1.05],
+  [-18.65,5.7,46.0,.85],[18.65,5.7,46.0,.85]
+].forEach(([x,y,z,intensity])=>{
+  const l=glow(exterior,0xf2cf98,intensity,6,x,y,z);living.lights.push(l);
+});
+
 // Main building — one continuous architectural object, no reception avatar.
 const building=new THREE.Group();building.name='KOMO_MAIN_BUILDING_V1';world.add(building);
 box(building,8.3,8.6,3.3,M.stone,-10.2,4.3,16.1,{cast:true});
@@ -498,6 +582,18 @@ plaque(outerFrame,'KŌMØ','WORLD · LONGEVITY IN MOTION',5.6,1.25,0,8.55,17.52,
   box(g,.08,5.7,4.75,MAT.smokedGlass,-side*1.78,3.15,0);
   box(g,3.7,.18,5.0,MAT.travertine,0,6.36,0);
   glow(g,0xf2cf98,2.0,8,-side*.6,4.3,0);
+});
+
+// V1.7 facade banners — institutional, vertical and visible from the closer spawn.
+fabricBanner(building,-12.65,7.55,18.55,1.22,4.65,'TWIN','UNDERSTAND',{dark:true});
+fabricBanner(building,-10.75,7.55,18.75,1.22,4.65,'REHAB','ACT',{dark:false});
+fabricBanner(building,10.75,7.55,18.75,1.22,4.65,'ARENA','ENGAGE',{dark:false});
+fabricBanner(building,12.65,7.55,18.55,1.22,4.65,'KŌMØ LIFE','CASE 01',{dark:true});
+[
+  [-12.65,7.7,19.1,1.05],[-10.75,7.7,19.1,.95],
+  [10.75,7.7,19.1,.95],[12.65,7.7,19.1,1.05]
+].forEach(([x,y,z,intensity])=>{
+  const l=glow(building,0xf2cf98,intensity,5.5,x,y,z);living.lights.push(l);
 });
 
 // Glass entrance leaves, animated by proximity.
@@ -1124,7 +1220,20 @@ function animateLiving(now){
       sculpture.core.position.y=Math.sin(t*.42+i)*.025;
     });
   }
-  if(!lowPower&&Math.floor(t*8)%2===0)living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));
+  if(living.banners?.length){
+    living.banners.forEach((banner,i)=>{
+      const pos=banner.geometry.attributes.position,arr=pos.array,base=banner.userData.base,h=banner.userData.height||4;
+      for(let k=0;k<arr.length;k+=3){
+        const bx=base[k],by=base[k+1],bz=base[k+2];
+        const slack=THREE.MathUtils.clamp((h/2-by)/h,0,1);
+        const wave=Math.sin(t*1.12+by*1.38+i*.61+banner.userData.phase)*.045*slack
+          +Math.sin(t*1.73+bx*3.1+i*.27)*.015*slack;
+        arr[k]=bx+wave*.12;arr[k+1]=by;arr[k+2]=bz+wave;
+      }
+      pos.needsUpdate=true;
+    });
+  }
+    if(!lowPower&&Math.floor(t*8)%2===0)living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));
   sun.position.x=-24+Math.sin(t*.025)*3.5;
 }
 let livingAnimationFailed=false;
@@ -1152,7 +1261,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.6.0-exterior-spawn',
+  version:'1.7.0-banners-landscape',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode}),
