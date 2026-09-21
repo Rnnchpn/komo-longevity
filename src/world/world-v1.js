@@ -1083,6 +1083,7 @@ glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 // Runtime state.
 const player=new THREE.Vector3(0,0,31.5);
 const velocity=new THREE.Vector3();
+let playerLevel=0;
 let yaw=0,pitch=-.045;
 let mode='world';
 let currentInteraction=null;
@@ -1221,20 +1222,45 @@ function setMode(next){
   mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';
 }
 function enterTwin(){
-  setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';
+  playerLevel=0;setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';
 }
 function enterRehab(){
-  setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='REHAB';
+  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='REHAB';
 }
 function enterArena(){
-  setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';
+  playerLevel=0;setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';
 }
 function returnToHall(){
-  setMode('world');player.set(0,0,-22.5);velocity.set(0,0,0);yaw=0;pitch=-.03;closePanel();updateLocation();notify(locale==='fr'?'KŌMØ HALL':'KŌMØ HALL');
+  playerLevel=0;setMode('world');player.set(0,0,-22.5);velocity.set(0,0,0);yaw=0;pitch=-.03;closePanel();updateLocation();notify(locale==='fr'?'KŌMØ HALL':'KŌMØ HALL');
 }
 
+function isStairPosition(p){
+  return p.x>-10.45&&p.x<-6.98&&p.z>6.90&&p.z<13.28;
+}
+function stairElevationAt(z){
+  const t=THREE.MathUtils.clamp((13.20-z)/(13.20-7.00),0,1);
+  return UPPER_Y*t;
+}
+function isUpperWalkable(p){
+  const west=p.x>-11.05&&p.x<-6.12&&p.z>-23.45&&p.z<7.18;
+  const east=p.x>6.12&&p.x<11.05&&p.z>-23.45&&p.z<-1.00;
+  const rear=p.x>-10.98&&p.x<10.98&&p.z>-23.45&&p.z<-18.95;
+  return west||east||rear;
+}
+function syncPlayerElevation(){
+  if(mode!=='world'){playerLevel=0;player.y=0;return}
+  if(isStairPosition(player)){
+    player.y=stairElevationAt(player.z);
+    if(player.y>UPPER_Y-.42)playerLevel=1;
+    else if(player.y<.28)playerLevel=0;
+    return;
+  }
+  player.y=playerLevel===1?UPPER_Y:0;
+}
 function canMove(p){
   if(mode==='world'){
+    if(isStairPosition(p))return true;
+    if(playerLevel===1||player.y>UPPER_Y-.70)return isUpperWalkable(p);
     if(p.z>63||p.z<-28.6||Math.abs(p.x)>20)return false;
     if(p.z<16.5&&Math.abs(p.x)>11.15)return false;
     if(p.z>=14.1&&p.z<=18.8&&Math.abs(p.x)>4.35)return false;
@@ -1246,10 +1272,13 @@ function canMove(p){
   if(mode==='rehab')return p.x>-10&&p.x<10&&p.z>-66&&p.z<-43;
   return true;
 }
+function commitMove(next){
+  player.copy(next);syncPlayerElevation();
+}
 function tryMove(dx,dz){
-  const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){player.copy(n);return}
-  const nx=player.clone();nx.x+=dx;if(canMove(nx)){player.copy(nx);return}
-  const nz=player.clone();nz.z+=dz;if(canMove(nz))player.copy(nz);
+  const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){commitMove(n);return}
+  const nx=player.clone();nx.x+=dx;if(canMove(nx)){commitMove(nx);return}
+  const nz=player.clone();nz.z+=dz;if(canMove(nz))commitMove(nz);
 }
 
 function updateMovement(dt){
@@ -1275,10 +1304,11 @@ function updateMovement(dt){
 function updateCamera(now){
   const move=Math.min(1,velocity.length()/3.45);
   const bob=move*Math.sin(now*.0105)*.012;
-  camera.position.set(player.x,1.72+bob,player.z);
+  const eyeY=player.y+1.72+bob;
+  camera.position.set(player.x,eyeY,player.z);
   const cp=Math.cos(pitch),sp=Math.sin(pitch);
   const look=18;
-  camera.lookAt(player.x-Math.sin(yaw)*cp*look,1.72+sp*look,player.z-Math.cos(yaw)*cp*look);
+  camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
 }
 function updateDoors(){
   const target=mode==='world'&&player.z<26&&player.z>8&&Math.abs(player.x)<5?1:0;
@@ -1290,6 +1320,12 @@ function updateLocation(){
   if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';return}
   if(mode==='rehab'){locationName.textContent='REHAB';return}
   if(mode==='arena'){locationName.textContent='ARENA';return}
+  if(playerLevel===1){
+    if(player.z<-18.8)locationName.textContent='UPPER OBSERVATORY';
+    else if(player.x<0)locationName.textContent='SCIENCE LIBRARY · LEVEL 2';
+    else locationName.textContent='LIFE LOUNGE · LEVEL 2';
+    return;
+  }
   if(player.z>23)locationName.textContent='ARRIVAL PLAZA';
   else if(player.x>6.8&&player.z>-2&&player.z<7)locationName.textContent='KŌMØ LIFE';
   else if(player.z>-7)locationName.textContent='KŌMØ HALL';
@@ -1304,6 +1340,7 @@ function updateInteraction(){
   if(mode!=='world'){currentInteraction=null;interactionEl.classList.remove('show');return}
   let best=null,bestD=Infinity;
   for(const it of interactions){
+    if(playerLevel===1&&it.level!==1)continue;
     const d=Math.hypot(player.x-it.x,player.z-it.z);
     if(d<it.r&&d<bestD){best=it;bestD=d}
   }
@@ -1430,7 +1467,22 @@ function animateLiving(now){
     });
   }
     if(!lowPower&&Math.floor(t*8)%2===0)living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));
-  sun.position.x=-24+Math.sin(t*.025)*3.5;
+  if(living.skyDome){
+    living.skyDome.position.copy(camera.position);
+  }
+  if(living.clouds?.length){
+    living.clouds.forEach((cloud,i)=>{
+      let x=cloud.userData.baseX+(t*cloud.userData.speed*1.8);
+      while(x>105)x-=210;
+      cloud.position.x=x;
+      cloud.position.z+=Math.sin(t*.035+i)*.0015;
+      cloud.material.opacity=(lowPower?.075:.105)+.035*(.5+.5*Math.sin(t*.08+i*.8));
+    });
+  }
+  if(living.sunSprite&&living.skyUniforms){
+    const d=living.skyUniforms.sunDir.value;
+    living.sunSprite.position.set(camera.position.x+d.x*178,camera.position.y+d.y*178,camera.position.z+d.z*178);
+  }
 }
 let livingAnimationFailed=false;
 function animate(now){
@@ -1453,14 +1505,15 @@ raf=requestAnimationFrame(animate);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){velocity.set(0,0,0);keys.clear()}});
 window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(daylightTimer)},{once:true});
 
+syncPlayerElevation();
 applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.7.0-banners-landscape',
+  version:'1.8.0-second-floor-sky',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
-  getState:()=>({position:player.clone(),yaw,mode}),
+  getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),
   getLocale:()=>locale,
   notify
 };
