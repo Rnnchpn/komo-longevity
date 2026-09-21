@@ -132,7 +132,7 @@ function panelTexture(title,subtitle,{dark=true,accent='#d5b477',w=1400,h=360,ti
   x.fillStyle=dark?accent:'#7c674e';x.font='650 27px Arial';x.fillText(subtitle.toUpperCase(),w/2,h*.72);
   const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return t;
 }
-function panel(parent,title,subtitle,w,h,x,y,z,{rotY=0,dark=true,titleSize=90}={}){
+function plaque(parent,title,subtitle,w,h,x,y,z,{rotY=0,dark=true,titleSize=90}={}){
   const tx=panelTexture(title,subtitle,{dark,titleSize});const mat=new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide,transparent:false});
   const p=mesh(parent,new THREE.PlaneGeometry(w,h),mat,x,y,z,{receive:false});p.rotation.y=rotY;p.userData.texture=tx;return p;
 }
@@ -193,7 +193,7 @@ box(building,11.4,.72,1.4,M.stoneLight,0,7.62,16.2,{cast:true});
 box(building,10.0,.07,.08,M.warm,0,7.18,16.95);
 box(building,10.6,.24,2.6,M.stone,0,5.55,17.7,{cast:true});
 box(building,9.3,.06,2.0,M.bronze,0,5.38,18.05);
-panel(building,'KŌMØ WORLD','LONGEVITY IN MOTION',7.0,1.65,0,8.67,17.85,{dark:true,titleSize:94});
+plaque(building,'KŌMØ WORLD','LONGEVITY IN MOTION',7.0,1.65,0,8.67,17.85,{dark:true,titleSize:94});
 
 // Glass entrance leaves, animated by proximity.
 const doorLeft=box(building,2.45,5.15,.10,M.glass,-1.27,3.05,17.35);
@@ -222,7 +222,7 @@ box(desk,4.9,.20,2.2,M.stoneDeep,0,.12,0);
 box(desk,4.55,.88,1.02,M.stone,0,.62,.10);
 box(desk,4.2,.42,.86,M.sageDeep,0,.82,.16);
 box(desk,4.75,.10,1.12,M.bronze,0,1.17,.10);
-panel(desk,'KŌMØ DESK','ORIENTATION · TRAJECTORY',3.7,.88,0,2.85,-.58,{dark:true,titleSize:74});
+plaque(desk,'KŌMØ DESK','ORIENTATION · TRAJECTORY',3.7,.88,0,2.85,-.58,{dark:true,titleSize:74});
 glow(desk,0xe9c48e,2.2,8,0,3.1,1.4);
 
 // Minimal planting, kept out of central axis.
@@ -245,10 +245,10 @@ portals.forEach(({x,title,sub,dark})=>{
   box(building,4.15,4.65,.10,dark?M.glass:M.stoneLight,x,2.85,-29.38);
   box(building,.08,4.9,.10,M.bronze,x-2.16,2.95,-29.29);
   box(building,.08,4.9,.10,M.bronze,x+2.16,2.95,-29.29);
-  panel(building,title,sub,4.2,1.05,x,6.28,-29.25,{dark,titleSize:title==='FUNCTIONAL TWIN'?58:70});
+  plaque(building,title,sub,4.2,1.05,x,6.28,-29.25,{dark,titleSize:title==='FUNCTIONAL TWIN'?58:70});
 });
-panel(building,'LIBRARY','SCIENCE · METHOD',3.5,.84,-11.45,4.3,-10,{rotY:Math.PI/2,dark:false,titleSize:68});
-panel(building,'TALKS','EXPERTS · EVENTS',3.5,.84,11.45,4.3,-10,{rotY:-Math.PI/2,dark:true,titleSize:68});
+plaque(building,'LIBRARY','SCIENCE · METHOD',3.5,.84,-11.45,4.3,-10,{rotY:Math.PI/2,dark:false,titleSize:68});
+plaque(building,'TALKS','EXPERTS · EVENTS',3.5,.84,11.45,4.3,-10,{rotY:-Math.PI/2,dark:true,titleSize:68});
 glow(building,0xf0cd9d,2.6,13,-8.0,5.6,6);
 glow(building,0xf0cd9d,2.6,13,8.0,5.6,6);
 glow(building,0xecc492,3.7,16,0,5.4,-25);
@@ -258,7 +258,7 @@ twinRoom.position.set(-45,0,0);
 mesh(twinRoom,new THREE.CircleGeometry(13,96),M.sageDeep,0,.01,-2).rotation.x=-Math.PI/2;
 mesh(twinRoom,new THREE.RingGeometry(7.8,8.0,96),M.bronze,0,.025,-2).rotation.x=-Math.PI/2;
 box(twinRoom,22,7.8,.38,M.sage,0,4.0,-13.1);
-panel(twinRoom,'FUNCTIONAL TWIN','YOUR BODY · ACROSS TIME',7.8,1.55,0,7.25,-12.86,{dark:true,titleSize:84});
+plaque(twinRoom,'FUNCTIONAL TWIN','YOUR BODY · ACROSS TIME',7.8,1.55,0,7.25,-12.86,{dark:true,titleSize:84});
 const body=new THREE.Group();body.position.set(0,0,-4.2);twinRoom.add(body);
 mesh(body,new THREE.SphereGeometry(.40,24,18),M.twinGlass,0,4.65,0);
 const torso=mesh(body,new THREE.SphereGeometry(1,28,22),M.twinGlass,0,3.25,0);torso.scale.set(.72,1.05,.42);
@@ -274,8 +274,8 @@ bodySegment(body,[.34,1.18,.02],[.34,.25,.04],.14,M.twinGlow);
 mesh(body,new THREE.TorusGeometry(2.5,.045,10,96),M.bronze,0,3.0,.15).rotation.x=Math.PI/2;
 const scanRing=mesh(body,new THREE.RingGeometry(1.55,1.62,72),new THREE.MeshBasicMaterial({color:0xc5dbc9,transparent:true,opacity:.25,side:THREE.DoubleSide}),0,1.0,.1);
 scanRing.rotation.x=-Math.PI/2;
-panel(twinRoom,'CURRENT','MOTION SCORE · MOTION AGE',4.4,1.25,-6.7,4.2,-8.0,{dark:true,titleSize:78});
-panel(twinRoom,'LONGITUDINAL','BASELINE → TODAY',4.4,1.25,6.7,4.2,-8.0,{dark:true,titleSize:74});
+plaque(twinRoom,'CURRENT','MOTION SCORE · MOTION AGE',4.4,1.25,-6.7,4.2,-8.0,{dark:true,titleSize:78});
+plaque(twinRoom,'LONGITUDINAL','BASELINE → TODAY',4.4,1.25,6.7,4.2,-8.0,{dark:true,titleSize:74});
 glow(twinRoom,0xc9d7c9,2.0,12,0,5.5,-3);
 
 // Rehab room.
@@ -284,14 +284,14 @@ box(rehabRoom,22,.24,24,M.stoneLight,0,.10,0);
 box(rehabRoom,.36,7.6,24,M.wall,-10.8,3.8,0);
 box(rehabRoom,.36,7.6,24,M.wall,10.8,3.8,0);
 box(rehabRoom,22,7.6,.36,M.sage,0,3.8,-11.8);
-panel(rehabRoom,'REHAB','FROM INSIGHT TO ACTION',7.2,1.45,0,6.7,-11.55,{dark:true,titleSize:88});
+plaque(rehabRoom,'REHAB','FROM INSIGHT TO ACTION',7.2,1.45,0,6.7,-11.55,{dark:true,titleSize:88});
 [-5.3,0,5.3].forEach((x,i)=>{
   box(rehabRoom,4.0,.24,4.8,i===1?M.stoneDeep:M.stone,x,.12,-3.2);
   line(rehabRoom,3.5,.04,x,-3.2,M.bronze,.26);
 });
-panel(rehabRoom,'01','CONTROL',3.2,.90,-5.3,4.6,-8.0,{dark:false,titleSize:74});
-panel(rehabRoom,'02','STRENGTH',3.2,.90,0,4.6,-8.0,{dark:true,titleSize:74});
-panel(rehabRoom,'03','CAPACITY',3.2,.90,5.3,4.6,-8.0,{dark:false,titleSize:74});
+plaque(rehabRoom,'01','CONTROL',3.2,.90,-5.3,4.6,-8.0,{dark:false,titleSize:74});
+plaque(rehabRoom,'02','STRENGTH',3.2,.90,0,4.6,-8.0,{dark:true,titleSize:74});
+plaque(rehabRoom,'03','CAPACITY',3.2,.90,5.3,4.6,-8.0,{dark:false,titleSize:74});
 glow(rehabRoom,0xf0d2a7,3.5,15,0,5.4,-6);
 
 // Arena room.
@@ -299,14 +299,14 @@ arenaRoom.position.set(45,0,0);
 mesh(arenaRoom,new THREE.CircleGeometry(14.2,96),M.arena,0,.01,-2).rotation.x=-Math.PI/2;
 mesh(arenaRoom,new THREE.RingGeometry(8.7,8.9,96),M.arenaGold,0,.025,-2).rotation.x=-Math.PI/2;
 box(arenaRoom,22,7.8,.38,M.sageDeep,0,4.0,-13.1);
-panel(arenaRoom,'ARENA','PERFORMANCE · COMMUNITY',7.2,1.45,0,7.05,-12.85,{dark:true,titleSize:94});
+plaque(arenaRoom,'ARENA','PERFORMANCE · COMMUNITY',7.2,1.45,0,7.05,-12.85,{dark:true,titleSize:94});
 [-5.2,0,5.2].forEach((x,i)=>{
   box(arenaRoom,3.7,.28,3.7,i===1?M.arenaGold:M.stoneDeep,x,.14,-4.0);
   box(arenaRoom,3.2,.16,3.2,M.arena,x,.43,-4.0);
 });
-panel(arenaRoom,'BALANCE','DAILY · 60 S',3.6,.94,-5.2,4.7,-8.1,{dark:true,titleSize:68});
-panel(arenaRoom,'SQUAT 10','CONTROL',3.6,.94,0,4.7,-8.1,{dark:true,titleSize:68});
-panel(arenaRoom,'STAND UP','CAPACITY',3.6,.94,5.2,4.7,-8.1,{dark:true,titleSize:68});
+plaque(arenaRoom,'BALANCE','DAILY · 60 S',3.6,.94,-5.2,4.7,-8.1,{dark:true,titleSize:68});
+plaque(arenaRoom,'SQUAT 10','CONTROL',3.6,.94,0,4.7,-8.1,{dark:true,titleSize:68});
+plaque(arenaRoom,'STAND UP','CAPACITY',3.6,.94,5.2,4.7,-8.1,{dark:true,titleSize:68});
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 
 // Runtime state.
@@ -544,7 +544,7 @@ canvas.addEventListener('pointerdown',e=>{
 canvas.addEventListener('pointermove',e=>{
   if(!dragging)return;
   const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;
-  yaw-=dx*(coarse?.0040:.0032);pitch=THREE.MathUtils.clamp(pitch-dy*(coarse?.0032:.0025),-.46,.46);
+  yaw-=dx*(coarse ? .0040 : .0032);pitch=THREE.MathUtils.clamp(pitch-dy*(coarse ? .0032 : .0025),-.46,.46);
 });
 const endLook=e=>{dragging=false;try{canvas.releasePointerCapture?.(e.pointerId)}catch{}};
 canvas.addEventListener('pointerup',endLook);canvas.addEventListener('pointercancel',endLook);
