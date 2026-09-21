@@ -113,6 +113,7 @@ const living={
   skyUniforms:null,
   sunSprite:null,
   clouds:[],
+  npcs:[],
   daylight:'day'
 };
 
@@ -258,6 +259,45 @@ const MAT={
   blackened:new THREE.MeshStandardMaterial({color:0x151d18,roughness:.48,metalness:.10})
 };
 
+function makeStoneTexture(base='#ddd1bf',vein='#b9aa94',joint='#8f806d',seed=1){
+  const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');
+  x.fillStyle=base;x.fillRect(0,0,512,512);
+  // large slab joints
+  x.strokeStyle=joint;x.globalAlpha=.20;x.lineWidth=2;
+  [0,256,512].forEach(v=>{x.beginPath();x.moveTo(v,0);x.lineTo(v,512);x.stroke();x.beginPath();x.moveTo(0,v);x.lineTo(512,v);x.stroke()});
+  x.globalAlpha=1;
+  // deterministic travertine-like veins
+  for(let i=0;i<22;i++){
+    const yy=(i*23+seed*17)%512;
+    x.strokeStyle=i%4===0?'rgba(117,101,82,.14)':'rgba(255,255,255,.12)';
+    x.lineWidth=i%5===0?2.2:1.1;x.beginPath();
+    for(let px=0;px<=512;px+=16){
+      const py=yy+Math.sin(px*.021+i*1.73+seed)*5+Math.sin(px*.008+i)*3;
+      if(px===0)x.moveTo(px,py);else x.lineTo(px,py);
+    }
+    x.stroke();
+  }
+  // mineral speckle
+  for(let i=0;i<150;i++){
+    const px=(i*83+seed*37)%512,py=(i*151+seed*53)%512;
+    x.fillStyle=i%3===0?'rgba(255,255,255,.08)':'rgba(77,66,55,.045)';
+    x.fillRect(px,py,1.5,1.5);
+  }
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;
+  tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.repeat.set(1.7,4.8);
+  tx.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+  return tx;
+}
+const FLOOR={
+  hall:new THREE.MeshStandardMaterial({map:makeStoneTexture('#d8cbb8','#b8a88f','#9a876f',3),color:0xffffff,roughness:.62,metalness:.01}),
+  promenade:new THREE.MeshStandardMaterial({map:makeStoneTexture('#eee4d5','#cabba5','#a78c6c',7),color:0xffffff,roughness:.54,metalness:.015}),
+  side:new THREE.MeshStandardMaterial({map:makeStoneTexture('#c9bca9','#aa9a84','#8f7d69',11),color:0xffffff,roughness:.70,metalness:.01}),
+  exterior:new THREE.MeshStandardMaterial({map:makeStoneTexture('#dfd2bf','#b8a58d','#8d7c68',15),color:0xffffff,roughness:.76,metalness:.005}),
+  life:new THREE.MeshStandardMaterial({map:makeStoneTexture('#b9aa94','#8d7962','#705e4c',19),color:0xffffff,roughness:.52,metalness:.025}),
+  upper:new THREE.MeshStandardMaterial({map:makeStoneTexture('#e4d9c8','#bbaa94','#8f7b64',23),color:0xffffff,roughness:.60,metalness:.01})
+};
+
+
 function mesh(parent,geometry,material,x=0,y=0,z=0,{cast=false,receive=true}={}){
   const o=new THREE.Mesh(geometry,material);o.position.set(x,y,z);o.castShadow=cast&&!lowPower;o.receiveShadow=receive;parent.add(o);return o;
 }
@@ -370,6 +410,67 @@ function bannerTotem(parent,x,z,title,subtitle,rotY=0){
   box(g,.18,5.55,.18,MAT.blackened,0,2.78,0,{cast:true});
   fabricBanner(g,0,5.30,.07,1.45,4.45,title,subtitle,{dark:true});
   return g;
+}
+function makeNpc(parent,{role='visitor',x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
+  const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);g.name='KOMO_NPC_'+role.toUpperCase();parent.add(g);
+  const skinColors=[0xe1c0a4,0xc99572,0x9e6f51,0x6c4a3e];
+  const skin=new THREE.MeshStandardMaterial({color:skinColors[Math.abs(Math.floor((x*13+z*7+phase*17)))%skinColors.length],roughness:.82});
+  const outfits={
+    sage:0x324b3e,cream:0xd8d0c3,charcoal:0x2c312f,sand:0xaa9277,bronze:0x705747
+  };
+  const cloth=new THREE.MeshStandardMaterial({color:outfits[outfit]||outfits.sage,roughness:.76});
+  const trouser=new THREE.MeshStandardMaterial({color:role==='staff'?0x222b27:0x4a4d49,roughness:.82});
+  const shoe=new THREE.MeshStandardMaterial({color:0x272522,roughness:.66});
+
+  // torso/head
+  const torso=mesh(g,new THREE.CylinderGeometry(.23,.29,.70,16),cloth,0,1.24,0,{cast:true});
+  const neck=cyl(g,.075,.085,.11,skin,0,1.64,0,12,{cast:true});
+  const head=mesh(g,new THREE.SphereGeometry(.205,18,14),skin,0,1.82,0,{cast:true});
+  head.scale.set(.92,1.05,.94);
+
+  // legs as pivot groups
+  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.13,.92,0);rightLeg.position.set(.13,.92,0);g.add(leftLeg,rightLeg);
+  cyl(leftLeg,.065,.075,.64,trouser,0,-.32,0,10,{cast:true});cyl(rightLeg,.065,.075,.64,trouser,0,-.32,0,10,{cast:true});
+  box(leftLeg,.14,.09,.28,shoe,0,-.67,.055,{cast:true});box(rightLeg,.14,.09,.28,shoe,0,-.67,.055,{cast:true});
+
+  // arms as pivots
+  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.30,1.50,0);rightArm.position.set(.30,1.50,0);g.add(leftArm,rightArm);
+  cyl(leftArm,.050,.058,.56,role==='staff'?cloth:skin,0,-.28,0,10,{cast:true});
+  cyl(rightArm,.050,.058,.56,role==='staff'?cloth:skin,0,-.28,0,10,{cast:true});
+
+  // staff badge / visitor accessory
+  if(role==='staff'){
+    box(g,.12,.16,.025,MAT.brass,.16,1.42,.255);
+  }else if(role==='coach'){
+    const band=mesh(g,new THREE.TorusGeometry(.13,.025,8,24),MAT.brass,0,1.39,.255);band.rotation.x=Math.PI/2;
+  }
+
+  // subtle contact shadow
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.34,24),new THREE.MeshBasicMaterial({color:0x27352d,transparent:true,opacity:.12,depthWrite:false}));
+  shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;g.add(shadow);
+
+  const points=route.length?route.map(p=>new THREE.Vector3(p[0],p[1]??y,p[2])):[new THREE.Vector3(x,y,z)];
+  const seg=[],cum=[0];let total=0;
+  for(let i=0;i<points.length;i++){
+    const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total);
+  }
+  g.userData.npc={role,leftLeg,rightLeg,leftArm,rightArm,points,seg,cum,total,speed,phase,baseY:y};
+  living.npcs.push(g);return g;
+}
+function updateNpc(npc,t,index){
+  const d=npc.userData.npc;if(!d||!d.total)return;
+  let dist=(t*d.speed+d.phase*d.total)%d.total,segIndex=0;
+  while(segIndex<d.seg.length-1&&dist>d.cum[segIndex+1])segIndex++;
+  const a=d.points[segIndex],b=d.points[(segIndex+1)%d.points.length],len=Math.max(.001,d.seg[segIndex]);
+  const u=(dist-d.cum[segIndex])/len;
+  npc.position.lerpVectors(a,b,u);
+  const dx=b.x-a.x,dz=b.z-a.z;
+  npc.rotation.y=Math.atan2(dx,dz);
+  const stride=Math.sin((t*d.speed*5.1)+index*.72);
+  d.leftLeg.rotation.x=stride*.34;d.rightLeg.rotation.x=-stride*.34;
+  d.leftArm.rotation.x=-stride*.26;d.rightArm.rotation.x=stride*.26;
+  const lift=Math.abs(Math.sin((t*d.speed*5.1)+index*.72))*.014;
+  npc.position.y+=lift;
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
@@ -605,6 +706,14 @@ living.exteriorSculptures.push(exteriorSculptureL,exteriorSculptureR);
 // One discreet landscape identity marker, leaving the building as the hero.
 plaque(exterior,'KŌMØ','ARRIVAL COURT',3.4,.75,-17.70,2.30,39.0,{rotY:Math.PI/2,dark:true,titleSize:57});
 
+// V1.9 exterior paving hierarchy.
+const exteriorFloor=new THREE.Group();exteriorFloor.name='KOMO_EXTERIOR_FLOOR_V19';exterior.add(exteriorFloor);
+box(exteriorFloor,18.8,.025,31.4,FLOOR.exterior,0,.118,40.7);
+box(exteriorFloor,7.9,.030,30.3,FLOOR.promenade,0,.136,40.7);
+[-4.10,4.10].forEach(x=>line(exteriorFloor,.045,29.8,x,40.7,MAT.brass,.154));
+for(let z=27.0;z<=54.0;z+=3.85)line(exteriorFloor,7.62,.028,0,z,M.bronzeSoft,.156);
+
+
 // V1.7 campus identity — freestanding banners and denser Riviera landscaping.
 bannerTotem(exterior,-14.25,25.9,'KŌMØ','WORLD',.12);
 bannerTotem(exterior,14.25,25.9,'KŌMØ LIFE','FLAGSHIP',-.12);
@@ -748,6 +857,13 @@ box(hallArchitecture,19.9,.06,.12,M.warm,0,6.84,-26.60);
 const upperLevel=new THREE.Group();upperLevel.name='KOMO_UPPER_LEVEL_V18';building.add(upperLevel);
 const UPPER_Y=4.25;
 
+// Fine finish layer above the structural slabs.
+const upperFloorFinish=new THREE.Group();upperFloorFinish.name='KOMO_UPPER_FLOOR_V19';upperLevel.add(upperFloorFinish);
+box(upperFloorFinish,4.48,.035,29.7,FLOOR.upper,-8.72,UPPER_Y+.165,-8.05);
+box(upperFloorFinish,4.48,.035,21.5,FLOOR.upper,8.72,UPPER_Y+.165,-12.15);
+box(upperFloorFinish,16.95,.035,3.82,FLOOR.promenade,0,UPPER_Y+.165,-21.20);
+
+
 // West gallery reaches the grand stair; east gallery starts beyond the Life flagship volume.
 box(upperLevel,4.75,.28,30.2,MAT.travertine,-8.72,UPPER_Y,-8.10,{cast:true});
 box(upperLevel,4.75,.28,22.0,MAT.travertine,8.72,UPPER_Y,-12.15,{cast:true});
@@ -845,10 +961,34 @@ box(outerFrame,5.4,.10,.72,MAT.brass,9.55,5.05,18.78);
 box(outerFrame,5.1,2.05,.08,MAT.smokedGlass,-9.55,6.12,18.82);
 box(outerFrame,5.1,2.05,.08,MAT.smokedGlass,9.55,6.12,18.82);
 
+// V1.9 flooring — layered travertine, bronze inlays and differentiated circulation.
+const floorV19=new THREE.Group();floorV19.name='KOMO_FLOORING_V19';building.add(floorV19);
+box(floorV19,22.65,.035,45.6,FLOOR.hall,0,.305,-7.0);
+box(floorV19,8.85,.038,43.8,FLOOR.promenade,0,.329,-6.55);
+box(floorV19,5.95,.040,43.6,FLOOR.side,-8.20,.331,-6.55);
+box(floorV19,5.95,.040,43.6,FLOOR.side,8.20,.331,-6.55);
+
+// Long bronze rails and rhythmic cross-joints make the hall feel constructed, not flat.
+[-4.54,4.54].forEach(x=>line(floorV19,.055,43.2,x,-6.55,MAT.brass,.356));
+for(let z=-25.8;z<=13.4;z+=3.6){
+  line(floorV19,8.55,.035,0,z,M.bronzeSoft,.357);
+}
+// Fine perimeter lines.
+[-11.15,11.15].forEach(x=>line(floorV19,.035,44.4,x,-6.7,M.bronze,.354));
+
+// Entry threshold and atrium medallion.
+box(floorV19,8.4,.045,2.2,FLOOR.life,0,.342,13.0);
+box(floorV19,7.7,.020,1.58,MAT.brass,0,.370,13.0);
+box(floorV19,7.25,.024,1.16,FLOOR.promenade,0,.384,13.0);
+const medallion=mesh(floorV19,new THREE.RingGeometry(1.38,1.48,72),MAT.brass,0,.372,-8.6,{receive:false});medallion.rotation.x=-Math.PI/2;
+const medallion2=mesh(floorV19,new THREE.RingGeometry(.78,.82,64),M.bronzeSoft,0,.374,-8.6,{receive:false});medallion2.rotation.x=-Math.PI/2;
+
+// Life store gets its own darker gallery floor.
+box(floorV19,5.65,.045,9.85,FLOOR.life,8.45,.344,3.8);
+line(floorV19,5.30,.045,8.45,-.90,MAT.brass,.373);
+line(floorV19,5.30,.045,8.45,8.50,MAT.brass,.373);
+
 // Hall axis.
-box(building,9.8,.035,43,M.stoneDeep,0,.31,-6.5);
-[-4.84,4.84].forEach(x=>line(building,.05,42.6,x,-6.5,M.bronze,.35));
-[-22,-12,-2,8].forEach(z=>line(building,9.6,.04,0,z,M.bronzeSoft,.35));
 
 // Desk as architecture only.
 const desk=new THREE.Group();desk.name='KOMO_DESK_V1';building.add(desk);
@@ -900,6 +1040,31 @@ glow(kinetic,0xf0c98d,1.7,7,0,0,0);
   living.lights.push(l1,l2);
 });
 
+// V1.9 ambient people — anonymous social life, separate from real Pulse members.
+const npcRoot=new THREE.Group();npcRoot.name='KOMO_AMBIENT_PEOPLE_V19';world.add(npcRoot);
+makeNpc(npcRoot,{role:'staff',x:-2.8,y:0,z:11.2,outfit:'sage',speed:.34,phase:.12,route:[
+  [-2.8,0,11.2],[-2.8,0,5.8],[-1.6,0,1.8],[-3.2,0,-2.5],[-4.0,0,4.2]
+]});
+makeNpc(npcRoot,{role:'visitor',x:3.6,y:0,z:27.8,outfit:'cream',speed:.54,phase:.36,route:[
+  [3.6,0,27.8],[2.5,0,18.7],[2.8,0,10.8],[3.6,0,2.5],[4.2,0,-6.2],[3.0,0,-14.4]
+]});
+makeNpc(npcRoot,{role:'visitor',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
+  [-3.8,0,-4.5],[-3.2,0,-12.0],[-4.8,0,-20.4],[-1.4,0,-24.2],[1.8,0,-19.2],[.8,0,-8.0]
+]});
+makeNpc(npcRoot,{role:'coach',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
+  [5.4,0,-18.4],[5.2,0,-10.0],[4.8,0,-2.2],[3.7,0,5.2],[5.5,0,9.0]
+]});
+if(!lowPower){
+  makeNpc(npcRoot,{role:'visitor',x:7.0,y:0,z:5.8,outfit:'bronze',speed:.28,phase:.22,route:[
+    [7.0,0,5.8],[9.2,0,4.2],[9.0,0,1.2],[7.2,0,.4],[7.4,0,3.0]
+  ]});
+  makeNpc(npcRoot,{role:'staff',x:-8.72,y:UPPER_Y,z:4.8,outfit:'sage',speed:.30,phase:.48,route:[
+    [-8.72,UPPER_Y,4.8],[-8.72,UPPER_Y,-4.8],[-8.72,UPPER_Y,-14.8],[-4.2,UPPER_Y,-21.2]
+  ]});
+  makeNpc(npcRoot,{role:'visitor',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
+    [8.72,UPPER_Y,-3.0],[8.72,UPPER_Y,-10.5],[8.72,UPPER_Y,-18.0],[3.6,UPPER_Y,-21.2],[.4,UPPER_Y,-21.2]
+  ]});
+}
 // Living atmosphere — subtle, non-game-like movement.
 const dustCount=lowPower?34:78;
 const dustPositions=new Float32Array(dustCount*3);
@@ -1453,7 +1618,10 @@ function animateLiving(now){
       sculpture.core.position.y=Math.sin(t*.42+i)*.025;
     });
   }
-  if(living.banners?.length){
+  if(living.npcs?.length){
+    living.npcs.forEach((npc,i)=>updateNpc(npc,t,i));
+  }
+    if(living.banners?.length){
     living.banners.forEach((banner,i)=>{
       const pos=banner.geometry.attributes.position,arr=pos.array,base=banner.userData.base,h=banner.userData.height||4;
       for(let k=0;k<arr.length;k+=3){
@@ -1510,7 +1678,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.8.0-second-floor-sky',
+  version:'1.9.0-people-flooring',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),

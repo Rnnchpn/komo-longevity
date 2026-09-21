@@ -16,7 +16,9 @@ const checks=[
   ['multiplayer remains optional',runtime.includes("import('./world-multiplayer-v1.js')")&&runtime.includes('.catch(err=>console.warn')],
   ['true sky V1.8 present',runtime.includes('KOMO_TRUE_SKY_V18')&&runtime.includes('KOMO_CLOUD_FIELD_V18')],
   ['second floor V1.8 present',runtime.includes('KOMO_UPPER_LEVEL_V18')&&runtime.includes('KOMO_GRAND_STAIR_V18')],
-  ['upper-floor navigation present',runtime.includes('syncPlayerElevation')&&runtime.includes('isUpperWalkable')]
+  ['upper-floor navigation present',runtime.includes('syncPlayerElevation')&&runtime.includes('isUpperWalkable')],
+  ['premium flooring V1.9 present',runtime.includes('KOMO_FLOORING_V19')&&runtime.includes('KOMO_EXTERIOR_FLOOR_V19')],
+  ['ambient people V1.9 present',runtime.includes('KOMO_AMBIENT_PEOPLE_V19')&&runtime.includes('function updateNpc')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
