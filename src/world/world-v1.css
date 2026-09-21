@@ -194,6 +194,21 @@ body.camera-third .world-reticle{opacity:.22}
 body.camera-third .interaction-card{bottom:112px}
 .player-status{position:fixed;z-index:67;right:18px;top:96px;padding:7px 10px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(20,34,27,.68);font-size:6px;font-weight:800;letter-spacing:.10em;color:rgba(239,233,223,.55);pointer-events:none}
 
+
+/* V2.6 Twin + Rehab experience */
+.twin-domain-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:12px 0}
+.twin-domain-list button{display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center;padding:10px 11px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:rgba(255,255,255,.026);color:#eee7dc;text-align:left;cursor:pointer}
+.twin-domain-list button:hover{border-color:rgba(216,185,132,.28);background:rgba(216,185,132,.055)}
+.twin-domain-list span{font-size:7px;font-weight:800;letter-spacing:.08em}.twin-domain-list b{font-size:12px;color:#e2c590}
+.twin-domain-list i{grid-column:1/-1;height:4px;border-radius:4px;background:rgba(255,255,255,.07);overflow:hidden}.twin-domain-list em{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#819b8b,#d6b77c)}
+.twin-domain-hero,.rehab-station-hero{display:flex;align-items:end;justify-content:space-between;gap:14px;margin:4px 0 12px;padding:14px 15px;border:1px solid rgba(216,185,132,.15);border-radius:15px;background:rgba(216,185,132,.038)}
+.twin-domain-hero span,.rehab-station-hero span{font-size:8px;font-weight:850;letter-spacing:.12em;color:#d7b980}.twin-domain-hero strong,.rehab-station-hero strong{font:500 31px/1 Georgia,serif}.twin-domain-hero em{font:600 10px/1 Inter,Arial,sans-serif;color:rgba(239,232,220,.46)}
+.twin-domain-track,.rehab-progress{height:6px;margin:-3px 0 13px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden}.twin-domain-track i,.rehab-progress i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#789483,#d9bd84);transition:width .25s linear}
+.rehab-station-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:12px 0}
+.rehab-station-grid button{padding:12px 10px;border:1px solid rgba(255,255,255,.065);border-radius:13px;background:rgba(255,255,255,.026);color:#ede6da;text-align:left;cursor:pointer}
+.rehab-station-grid button:hover{border-color:rgba(216,185,132,.28);background:rgba(216,185,132,.055)}.rehab-station-grid span{display:block;font-size:7px;font-weight:850;letter-spacing:.10em;color:#d7b980}.rehab-station-grid b{display:block;margin-top:7px;font-size:8px;line-height:1.35}.rehab-station-grid small{display:block;margin-top:8px;font-size:6px;color:rgba(239,232,220,.40)}
+.low-power .twin-domain-list button,.low-power .rehab-station-grid button,.low-power .twin-domain-hero,.low-power .rehab-station-hero{box-shadow:none}
+
 /* V2.2 performance rescue — Safari/iPad: avoid expensive compositing over WebGL. */
 .low-power .world-hud,
 .low-power .journey-hud,
@@ -247,6 +262,7 @@ body.camera-third .interaction-card{bottom:112px}
   .toast{top:78px}
 }
 @media(max-width:520px){
+  .rehab-station-grid{grid-template-columns:1fr}.twin-domain-list{grid-template-columns:1fr}
   .journey-hud{width:190px}.journey-xp{display:none}.journey-hud{grid-template-columns:38px 1fr}.intro-controls{grid-template-columns:1fr 1fr}
   .world-quick-nav{display:none}.intro-controls{grid-template-columns:1fr 1fr}.intro-controls span:nth-child(3){grid-column:1/-1}
   .world-today{display:none}.world-hud{grid-template-columns:auto 1fr auto}.world-metrics{justify-self:end}
