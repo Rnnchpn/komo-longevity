@@ -105,6 +105,8 @@ const living={
   lights:[],
   dust:null,
   lifeDisplay:null,
+  kinetic:null,
+  motionScreens:[],
   daylight:'day'
 };
 
@@ -145,6 +147,14 @@ const M={
   arena:new THREE.MeshStandardMaterial({color:0x2a241b,roughness:.65,metalness:.08}),
   arenaGold:new THREE.MeshStandardMaterial({color:0xb9935c,roughness:.36,metalness:.48})
 };
+const MAT={
+  fabric:new THREE.MeshStandardMaterial({color:0x415347,roughness:.96,metalness:0}),
+  fabricLight:new THREE.MeshStandardMaterial({color:0xb8b2a5,roughness:.98,metalness:0}),
+  walnut:new THREE.MeshStandardMaterial({color:0x6b513a,roughness:.76,metalness:.01}),
+  charcoal:new THREE.MeshStandardMaterial({color:0x222a25,roughness:.68,metalness:.03}),
+  brass:new THREE.MeshStandardMaterial({color:0xb18a56,roughness:.30,metalness:.66}),
+  ivory:new THREE.MeshStandardMaterial({color:0xf1eadf,roughness:.88,metalness:0})
+};
 
 function mesh(parent,geometry,material,x=0,y=0,z=0,{cast=false,receive=true}={}){
   const o=new THREE.Mesh(geometry,material);o.position.set(x,y,z);o.castShadow=cast&&!lowPower;o.receiveShadow=receive;parent.add(o);return o;
@@ -177,6 +187,66 @@ function tree(parent,x,z,s=.8){
     f.scale.set(1,.72,1);
   });
   return g;
+}
+function loungeCluster(parent,x,z,rot=0,scale=1){
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
+  box(g,4.35*scale,.035,3.05*scale,M.stoneDeep,0,.19,0);
+  line(g,3.9*scale,.035,0,-1.34*scale,M.bronze,.225);
+  line(g,3.9*scale,.035,0,1.34*scale,M.bronze,.225);
+  box(g,2.50*scale,.34,.82*scale,MAT.fabric,-.58*scale,.46,.66*scale,{cast:true});
+  box(g,2.50*scale,.66,.20*scale,MAT.fabric,-.58*scale,.78,1.02*scale,{cast:true});
+  box(g,.88*scale,.38,.82*scale,MAT.fabricLight,1.28*scale,.48,-.42*scale,{cast:true});
+  box(g,.88*scale,.65,.18*scale,MAT.fabricLight,1.28*scale,.79,-.77*scale,{cast:true});
+  cyl(g,.55*scale,.55*scale,.08*scale,MAT.walnut,.45*scale,.48,.05*scale,28,{cast:true});
+  cyl(g,.045*scale,.065*scale,.44*scale,MAT.brass,.45*scale,.24,.05*scale,12,{cast:true});
+  const lamp=new THREE.Group();lamp.position.set(-1.62*scale,0,-.55*scale);g.add(lamp);
+  cyl(lamp,.03*scale,.04*scale,1.75*scale,MAT.brass,0,.88,0,12,{cast:true});
+  mesh(lamp,new THREE.ConeGeometry(.34*scale,.48*scale,24,1,true),MAT.ivory,0,1.82,0,{cast:false});
+  glow(lamp,0xf2d7aa,1.2,5,0,1.72,0);
+  return g;
+}
+function pedestalObject(parent,x,z,type='stone'){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  box(g,1.2,.72,1.2,type==='dark'?M.sageDeep:M.stone,0,.37,0,{cast:true});
+  box(g,1.02,.05,1.02,M.bronze,0,.76,0);
+  if(type==='ring'){
+    const a=mesh(g,new THREE.TorusGeometry(.42,.04,10,48),MAT.brass,0,1.45,0,{cast:true});a.rotation.y=.45;
+    const b=mesh(g,new THREE.TorusGeometry(.29,.025,8,40),MAT.brass,0,1.45,0,{cast:true});b.rotation.x=.9;
+  }else{
+    const o=mesh(g,new THREE.IcosahedronGeometry(.42,1),type==='dark'?M.stoneLight:M.sage,0,1.32,0,{cast:true});
+    o.rotation.set(.35,.65,.15);
+  }
+  return g;
+}
+function motionScreen(parent,x,y,z,rotY=0,label='MOTION'){
+  const c=document.createElement('canvas');c.width=1024;c.height=520;const ctx=c.getContext('2d');
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+  const mat=new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide});
+  const m=mesh(parent,new THREE.PlaneGeometry(3.55,1.8),mat,x,y,z,{receive:false});m.rotation.y=rotY;
+  const rec={ctx,tx,label,phase:Math.random()*10};living.motionScreens.push(rec);
+  return m;
+}
+function drawMotionScreen(rec,t){
+  const {ctx,tx,label}=rec,w=1024,h=520;
+  ctx.fillStyle='#17281f';ctx.fillRect(0,0,w,h);
+  ctx.strokeStyle='rgba(211,180,126,.22)';ctx.lineWidth=2;ctx.strokeRect(12,12,w-24,h-24);
+  ctx.fillStyle='#efe8dc';ctx.font='600 50px Georgia';ctx.fillText(label,54,78);
+  ctx.fillStyle='rgba(216,184,128,.78)';ctx.font='700 20px Arial';ctx.fillText('LONGITUDINAL SIGNAL',55,116);
+  ctx.strokeStyle='rgba(238,231,219,.11)';ctx.lineWidth=1;
+  for(let i=0;i<5;i++){const yy=175+i*58;ctx.beginPath();ctx.moveTo(55,yy);ctx.lineTo(968,yy);ctx.stroke()}
+  ctx.strokeStyle='#d5b477';ctx.lineWidth=4;ctx.beginPath();
+  for(let x=55;x<=968;x+=8){
+    const p=(x-55)/913;
+    const y=320-Math.sin(p*10+rec.phase+t*.35)*32-Math.sin(p*24+t*.18)*12-p*54;
+    if(x===55)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+  const dotX=55+((t*.035+rec.phase*.03)%1)*913;
+  const p=(dotX-55)/913;
+  const dotY=320-Math.sin(p*10+rec.phase+t*.35)*32-Math.sin(p*24+t*.18)*12-p*54;
+  ctx.fillStyle='#f0d4a2';ctx.beginPath();ctx.arc(dotX,dotY,8,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(238,231,219,.52)';ctx.font='600 19px Arial';ctx.fillText('MOVE · MEASURE · UNDERSTAND · ACT',55,460);
+  tx.needsUpdate=true;
 }
 function bodySegment(parent,a,b,r,material){
   const A=new THREE.Vector3(...a),B=new THREE.Vector3(...b),d=B.clone().sub(A);
@@ -213,6 +283,22 @@ const shimmerMat=new THREE.MeshBasicMaterial({color:0xdce9df,transparent:true,op
   tree(world,x+(i?-.3:.3),47,.86);
 });
 tree(world,-15.2,28,.66);tree(world,15.2,28,.66);
+
+// Arrival terraces: quiet hospitality before the Hall.
+[-1,1].forEach(side=>{
+  const x=side*9.25;
+  box(world,3.9,.34,5.0,M.stoneDeep,x,.17,56.0);
+  box(world,3.45,.05,4.55,M.stoneLight,x,.37,56.0);
+  box(world,2.35,.32,.76,MAT.fabric,x-side*.22,.58,56.75,{cast:true});
+  box(world,2.35,.62,.18,MAT.fabric,x-side*.22,.88,57.05,{cast:true});
+  cyl(world,.48,.48,.07,MAT.walnut,x+side*1.18,.59,55.40,24,{cast:true});
+  tree(world,x-side*.95,54.75,.54);
+  const l=glow(world,0xf2d19c,1.35,7,x,2.4,55.9);living.lights.push(l);
+});
+pedestalObject(world,-8.6,35.0,'ring');
+pedestalObject(world,8.6,35.0,'dark');
+plaque(world,'ARRIVAL','LONGEVITY IN MOTION',4.1,.98,-8.3,3.7,31.8,{rotY:Math.PI/2,dark:true,titleSize:66});
+plaque(world,'KŌMØ LIFE','OBJECTS · EQUIPMENT',4.1,.98,8.3,3.7,31.8,{rotY:-Math.PI/2,dark:true,titleSize:62});
 
 // Main building — one continuous architectural object, no reception avatar.
 const building=new THREE.Group();building.name='KOMO_MAIN_BUILDING_V1';world.add(building);
@@ -265,6 +351,40 @@ glow(desk,0xe9c48e,2.2,8,0,3.1,1.4);
   tree(building,x+.18*m,z,.46);
 });
 
+// Hospitality moments: enough density to feel inhabited, kept outside the main circulation line.
+loungeCluster(building,-8.1,10.0,.08,.86);
+loungeCluster(building,7.95,-7.7,Math.PI+.05,.82);
+loungeCluster(building,-8.0,-14.2,-.05,.76);
+
+// Motion gallery along the left wall.
+motionScreen(building,-11.42,4.75,5.4,Math.PI/2,'MOTION');
+motionScreen(building,-11.42,4.75,-3.3,Math.PI/2,'MUSCLE');
+motionScreen(building,-11.42,4.75,-12.0,Math.PI/2,'BALANCE');
+
+// Object gallery around the central promenade.
+pedestalObject(building,-7.2,-2.0,'ring');
+pedestalObject(building,7.2,-18.9,'dark');
+pedestalObject(building,-7.15,-22.0,'stone');
+
+// Suspended kinetic sculpture above the atrium.
+const kinetic=new THREE.Group();kinetic.name='KOMO_KINETIC_ATRIUM';kinetic.position.set(0,5.25,-8.6);building.add(kinetic);
+const kineticA=mesh(kinetic,new THREE.TorusGeometry(1.72,.045,10,72),MAT.brass,0,0,0,{cast:true});
+const kineticB=mesh(kinetic,new THREE.TorusGeometry(1.18,.035,10,64),M.bronzeSoft,0,0,0,{cast:true});
+const kineticC=mesh(kinetic,new THREE.TorusGeometry(.68,.026,8,56),MAT.brass,0,0,0,{cast:true});
+kineticA.rotation.x=1.10;kineticB.rotation.y=.90;kineticC.rotation.set(.5,.6,.2);
+mesh(kinetic,new THREE.SphereGeometry(.12,18,12),M.warm,0,0,0,{cast:true});
+living.kinetic={group:kinetic,a:kineticA,b:kineticB,c:kineticC};
+glow(kinetic,0xf0c98d,1.7,7,0,0,0);
+
+// Thin architectural light shelves create depth without adding walls.
+[-20,-11,-2,7].forEach((z,i)=>{
+  box(building,3.8,.07,.52,M.stoneDeep,-9.3,2.15,z);
+  box(building,3.8,.07,.52,M.stoneDeep,9.3,2.15,z);
+  const l1=glow(building,0xf2d6ab,1.15,5,-9.3,2.35,z);
+  const l2=glow(building,0xf2d6ab,1.15,5,9.3,2.35,z);
+  living.lights.push(l1,l2);
+});
+
 // Living atmosphere — subtle, non-game-like movement.
 const dustCount=lowPower?34:78;
 const dustPositions=new Float32Array(dustCount*3);
@@ -285,6 +405,14 @@ const lifeStore=new THREE.Group();
 lifeStore.name='KOMO_LIFE_STORE_V1';
 lifeStore.position.set(9.15,0,2.6);
 building.add(lifeStore);
+const lifeThreshold=new THREE.Group();lifeThreshold.name='KOMO_LIFE_THRESHOLD_V14';lifeThreshold.position.set(6.85,0,2.6);building.add(lifeThreshold);
+box(lifeThreshold,1.55,.16,5.8,M.stoneDeep,0,.10,0);
+box(lifeThreshold,.08,4.7,5.3,M.glass,.68,2.45,0);
+box(lifeThreshold,.10,4.85,.12,M.bronze,.58,2.45,-2.45);
+box(lifeThreshold,.10,4.85,.12,M.bronze,.58,2.45,2.45);
+plaque(lifeThreshold,'KŌMØ LIFE','ENTER · CASE 01',3.9,.92,.59,4.75,0,{rotY:-Math.PI/2,dark:true,titleSize:61});
+const heroCase=pedestalObject(lifeThreshold,-.18,-1.55,'dark');
+heroCase.scale.set(.84,.84,.84);
 
 box(lifeStore,4.45,.22,8.2,M.stoneDeep,0,.12,0);
 box(lifeStore,4.25,6.25,.30,M.sageDeep,1.55,3.25,0);
@@ -730,6 +858,13 @@ function animateLiving(now){
     living.lifeDisplay.orbitB.rotation.x=t*.11;
     living.lifeDisplay.globe.rotation.y=t*.10;
   }
+  if(living.kinetic){
+    living.kinetic.a.rotation.z=t*.055;
+    living.kinetic.b.rotation.x=t*.041;
+    living.kinetic.c.rotation.y=t*.073;
+    living.kinetic.group.position.y=5.25+Math.sin(t*.32)*.045;
+  }
+  if(!lowPower&&Math.floor(t*8)%2===0)living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));
   sun.position.x=-24+Math.sin(t*.025)*3.5;
 }
 let livingAnimationFailed=false;
@@ -757,7 +892,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.3.0-render-stable',
+  version:'1.4.0-lived-in',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw,mode}),
