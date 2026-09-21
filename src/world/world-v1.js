@@ -1754,6 +1754,7 @@ function fastTravel(id){
 }
 document.querySelectorAll('[data-fast-travel]').forEach(btn=>btn.addEventListener('click',()=>fastTravel(btn.dataset.fastTravel)));
 function closePanel(){
+  if(typeof rehabSessionTimer!=='undefined'&&rehabSessionTimer)stopRehabSession();
   panel.classList.remove('open');panel.setAttribute('aria-hidden','true');panelActions.innerHTML='';syncUiOpen();
 }
 function openPanel(kicker,title,html,actions=[]){
@@ -1917,7 +1918,8 @@ function showTwin(){
   updateTwinVisuals();
   openPanel('FUNCTIONAL TWIN',locale==='fr'?'Votre corps à travers le temps.':'Your body across time.',twinHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
-    {label:copy[locale].openRehab,primary:true,onClick:enterRehab}
+    {label:locale==='fr'?'EXPLORER LA SALLE':'EXPLORE ROOM',primary:true,onClick:closePanel},
+    {label:copy[locale].openRehab,onClick:enterRehab}
   ]);bindTimeline();
 }
 function rehabHtml(){
@@ -1936,7 +1938,8 @@ function showRehab(){
   stopRehabSession();
   openPanel('REHAB',locale==='fr'?'De l’insight à l’action.':'From insight to action.',rehabHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
-    {label:locale==='fr'?'VOIR LE TWIN':'VIEW TWIN',primary:true,onClick:enterTwin}
+    {label:locale==='fr'?'EXPLORER LES STATIONS':'EXPLORE STATIONS',primary:true,onClick:closePanel},
+    {label:locale==='fr'?'VOIR LE TWIN':'VIEW TWIN',onClick:enterTwin}
   ]);
   panelBody.querySelectorAll('[data-rehab]').forEach(btn=>btn.addEventListener('click',()=>showRehabStation(btn.dataset.rehab)));
 }
