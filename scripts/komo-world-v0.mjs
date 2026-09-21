@@ -37,8 +37,11 @@ const checks=[
   ['Twin Lab V2.6+ present',runtime.includes('KOMO_TWIN_LAB_V26')&&runtime.includes('const twinInteractions')],
   ['Rehab Lab V2.6+ present',runtime.includes('KOMO_REHAB_LAB_V26')&&runtime.includes('const rehabInteractions')&&runtime.includes('function runRehabDemo')],
   ['Twin/Rehab room interactions V2.6 present',runtime.includes("mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions")&&runtime.includes('function updateTwinVisuals')],
-  ['Biomechanical Twin V2.7 present',runtime.includes("version:'2.7.1-biomech-coach'")&&runtime.includes('KOMO_BIOMECH_TWIN_V27')&&runtime.includes('function updateBiomechTwin')],
-  ['Rehab Coach V2.7 present',runtime.includes('KOMO_REHAB_COACH_V27')&&runtime.includes('function animateRehabCoach')&&runtime.includes("id:'rehab_coach'")]
+  ['Biomechanical Twin V2.7+ present',runtime.includes('KOMO_BIOMECH_TWIN_V27')&&runtime.includes('function updateBiomechTwin')],
+  ['Rehab Coach V2.7 present',runtime.includes('KOMO_REHAB_COACH_V27')&&runtime.includes('function animateRehabCoach')&&runtime.includes("id:'rehab_coach'")],
+  ['FPS budget V2.8 present',runtime.includes("version:'2.8.1-fps-budget'")&&runtime.includes('function updateLightBudget')&&runtime.includes('function updateVisibilityBudget')],
+  ['shadow budget V2.8 present',runtime.includes('renderer.shadowMap.enabled=false')&&runtime.includes("qualityMode==='high'")],
+  ['draw-call telemetry V2.8 present',runtime.includes('renderer.info.render.calls')&&runtime.includes('activeLightBudget')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
