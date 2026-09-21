@@ -98,6 +98,16 @@ scene.add(sun);
 const fill=new THREE.DirectionalLight(0xdde8de,1.1);
 fill.position.set(28,18,-30);scene.add(fill);
 
+const living={
+  trees:[],
+  water:[],
+  shimmers:[],
+  lights:[],
+  dust:null,
+  lifeDisplay:null,
+  daylight:'day'
+};
+
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
   let bg=0xcbd2c8,fog=0xcbd2c8,sunColor=0xffe5bd,sunPower=3.3,hemiPower=2.25,exposure=.92,state='day';
@@ -134,16 +144,6 @@ const M={
   attention:new THREE.MeshStandardMaterial({color:0xcf9f65,roughness:.34,metalness:.08,emissive:0x8c5627,emissiveIntensity:.48}),
   arena:new THREE.MeshStandardMaterial({color:0x2a241b,roughness:.65,metalness:.08}),
   arenaGold:new THREE.MeshStandardMaterial({color:0xb9935c,roughness:.36,metalness:.48})
-};
-
-const living={
-  trees:[],
-  water:[],
-  shimmers:[],
-  lights:[],
-  dust:null,
-  lifeDisplay:null,
-  daylight:'day'
 };
 
 function mesh(parent,geometry,material,x=0,y=0,z=0,{cast=false,receive=true}={}){
@@ -744,4 +744,14 @@ window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(
 applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
-window.KomoWorld={version:'1.1.0-life-living',scene,camera,renderer,core,enterTwin,enterRehab,enterArena,returnToHall};
+window.KomoWorld={
+  version:'1.2.0-multiplayer-foundation',
+  THREE,scene,camera,renderer,core,
+  enterTwin,enterRehab,enterArena,returnToHall,
+  getState:()=>({position:player.clone(),yaw,mode}),
+  getLocale:()=>locale,
+  notify
+};
+import('./world-multiplayer-v1.js')
+  .then(mod=>mod.mount?.(window.KomoWorld))
+  .catch(err=>console.warn('[KŌMØ World multiplayer] optional layer unavailable',err));
