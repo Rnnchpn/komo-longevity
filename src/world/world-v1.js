@@ -79,9 +79,9 @@ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xcbd2c8);
-scene.fog=new THREE.Fog(0xcbd2c8,72,150);
+scene.fog=new THREE.Fog(0xcbd2c8,82,215);
 
-const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.12,220);
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.12,480);
 camera.position.set(0,1.72,58);
 
 const hemi=new THREE.HemisphereLight(0xe5eadf,0x596354,2.25);
@@ -109,22 +109,118 @@ const living={
   motionScreens:[],
   exteriorSculptures:[],
   banners:[],
+  skyDome:null,
+  skyUniforms:null,
+  sunSprite:null,
+  clouds:[],
   daylight:'day'
 };
 
+// V1.8 true sky — atmospheric dome, visible sun and slow cloud field.
+const skyUniforms={
+  topColor:{value:new THREE.Color(0x6f9fbd)},
+  horizonColor:{value:new THREE.Color(0xdce7e3)},
+  lowColor:{value:new THREE.Color(0xf2e2c8)},
+  sunDir:{value:new THREE.Vector3(-.45,.58,.42).normalize()},
+  sunColor:{value:new THREE.Color(0xffddb0)},
+  sunStrength:{value:.72}
+};
+const skyMaterial=new THREE.ShaderMaterial({
+  uniforms:skyUniforms,
+  side:THREE.BackSide,
+  depthWrite:false,
+  depthTest:false,
+  vertexShader:`
+    varying vec3 vWorldPosition;
+    void main(){
+      vec4 worldPosition=modelMatrix*vec4(position,1.0);
+      vWorldPosition=worldPosition.xyz;
+      gl_Position=projectionMatrix*viewMatrix*worldPosition;
+    }
+  `,
+  fragmentShader:`
+    varying vec3 vWorldPosition;
+    uniform vec3 topColor;
+    uniform vec3 horizonColor;
+    uniform vec3 lowColor;
+    uniform vec3 sunDir;
+    uniform vec3 sunColor;
+    uniform float sunStrength;
+    void main(){
+      vec3 dir=normalize(vWorldPosition-cameraPosition);
+      float y=clamp(dir.y,-1.0,1.0);
+      float up=smoothstep(-0.02,.72,y);
+      vec3 base=mix(horizonColor,topColor,up);
+      float low=smoothstep(.16,-.28,y);
+      base=mix(base,lowColor,low*.64);
+      float sunCore=pow(max(dot(dir,normalize(sunDir)),0.0),850.0);
+      float sunGlow=pow(max(dot(dir,normalize(sunDir)),0.0),34.0);
+      base+=sunColor*(sunCore*1.55+sunGlow*.18)*sunStrength;
+      gl_FragColor=vec4(base,1.0);
+    }
+  `
+});
+const skyDome=new THREE.Mesh(new THREE.SphereGeometry(300,48,28),skyMaterial);
+skyDome.name='KOMO_TRUE_SKY_V18';skyDome.renderOrder=-1000;scene.add(skyDome);
+living.skyDome=skyDome;living.skyUniforms=skyUniforms;
+
+function makeCloudTexture(){
+  const c=document.createElement('canvas');c.width=1024;c.height=512;const x=c.getContext('2d');
+  x.clearRect(0,0,c.width,c.height);
+  const blobs=[[.20,.55,.22],[.36,.43,.28],[.52,.50,.31],[.68,.43,.25],[.80,.57,.18]];
+  blobs.forEach(([px,py,r],i)=>{
+    const gx=px*c.width,gy=py*c.height,rr=r*c.width;
+    const g=x.createRadialGradient(gx,gy,0,gx,gy,rr);
+    g.addColorStop(0,'rgba(255,255,255,.72)');g.addColorStop(.48,'rgba(255,255,255,.38)');g.addColorStop(1,'rgba(255,255,255,0)');
+    x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
+  });
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;return tx;
+}
+const cloudTexture=makeCloudTexture();
+const cloudGroup=new THREE.Group();cloudGroup.name='KOMO_CLOUD_FIELD_V18';scene.add(cloudGroup);
+const cloudCount=lowPower?5:9;
+for(let i=0;i<cloudCount;i++){
+  const mat=new THREE.MeshBasicMaterial({map:cloudTexture,transparent:true,opacity:lowPower?.10:.14,depthWrite:false,side:THREE.DoubleSide});
+  const cloud=new THREE.Mesh(new THREE.PlaneGeometry(34+(i%3)*8,13+(i%2)*4),mat);
+  cloud.rotation.x=-Math.PI/2;
+  cloud.position.set(-85+i*22,42+(i%3)*4,-68+(i%4)*38);
+  cloud.userData.baseX=cloud.position.x;cloud.userData.speed=.34+(i%4)*.07;cloud.userData.phase=i*.83;
+  cloudGroup.add(cloud);living.clouds.push(cloud);
+}
+const sunCanvas=document.createElement('canvas');sunCanvas.width=sunCanvas.height=256;
+const sunCtx=sunCanvas.getContext('2d');
+const sunGrad=sunCtx.createRadialGradient(128,128,8,128,128,124);
+sunGrad.addColorStop(0,'rgba(255,248,220,1)');sunGrad.addColorStop(.16,'rgba(255,224,165,.95)');
+sunGrad.addColorStop(.50,'rgba(255,204,130,.24)');sunGrad.addColorStop(1,'rgba(255,204,130,0)');
+sunCtx.fillStyle=sunGrad;sunCtx.fillRect(0,0,256,256);
+const sunTx=new THREE.CanvasTexture(sunCanvas);sunTx.colorSpace=THREE.SRGBColorSpace;
+const sunSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:sunTx,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.90}));
+sunSprite.scale.set(34,34,1);sunSprite.name='KOMO_SKY_SUN_V18';scene.add(sunSprite);living.sunSprite=sunSprite;
+
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
-  let bg=0xcbd2c8,fog=0xcbd2c8,sunColor=0xffe5bd,sunPower=3.3,hemiPower=2.25,exposure=.92,state='day';
+  let bg=0xdce7e3,fog=0xd7e1dc,sunColor=0xffe5bd,sunPower=3.3,hemiPower=2.25,exposure=.94,state='day';
+  let top=0x6f9fbd,horizon=0xdce7e3,low=0xf2e2c8,skySun=0xffddb0,skyStrength=.72;
   if(h<7||h>=21){
-    bg=0x8e9a92;fog=0x8e9a92;sunColor=0xe8d5bc;sunPower=1.65;hemiPower=1.55;exposure=.78;state='evening';
+    bg=0x71818a;fog=0x89938f;sunColor=0xd9c9bb;sunPower=1.25;hemiPower=1.32;exposure=.72;state='evening';
+    top=0x405865;horizon=0x87908d;low=0xaa8068;skySun=0xe2c5ae;skyStrength=.10;
   }else if(h<9){
-    bg=0xbfc9bf;fog=0xbfc9bf;sunColor=0xffcc91;sunPower=2.75;hemiPower=2.0;exposure=.88;state='morning';
+    bg=0xd9ded7;fog=0xd5d9d1;sunColor=0xffca8e;sunPower=2.65;hemiPower=1.95;exposure=.89;state='morning';
+    top=0x7fa8bd;horizon=0xe7d8c7;low=0xf2b77b;skySun=0xffc27e;skyStrength=.88;
   }else if(h>=17.5){
-    bg=0xc5c6b8;fog=0xc5c6b8;sunColor=0xffc37f;sunPower=3.05;hemiPower=1.95;exposure=.88;state='golden';
+    bg=0xd8d3c6;fog=0xd2cbbd;sunColor=0xffbd75;sunPower=2.85;hemiPower=1.82;exposure=.87;state='golden';
+    top=0x8098a7;horizon=0xe5ccb0;low=0xee9f66;skySun=0xffb66a;skyStrength=1.0;
   }
-  scene.background.setHex(bg);scene.fog.color.setHex(fog);sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
-}
-applyDaylight();
+  scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=82;scene.fog.far=215;
+  sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
+  const dayT=THREE.MathUtils.clamp((h-6)/15,0,1);
+  const arc=Math.PI*dayT;
+  const dir=new THREE.Vector3(-Math.cos(arc)*.82,Math.max(.08,Math.sin(arc)*.88),.42).normalize();
+  skyUniforms.topColor.value.setHex(top);skyUniforms.horizonColor.value.setHex(horizon);skyUniforms.lowColor.value.setHex(low);
+  skyUniforms.sunDir.value.copy(dir);skyUniforms.sunColor.value.setHex(skySun);skyUniforms.sunStrength.value=skyStrength;
+  sun.position.set(dir.x*48,Math.max(16,dir.y*56),dir.z*48);
+  if(living.sunSprite){living.sunSprite.material.opacity=state==='evening'?.28:.88}
+}applyDaylight();
 const daylightTimer=setInterval(applyDaylight,60000);
 
 const M={
@@ -648,6 +744,107 @@ box(hallArchitecture,.46,7.25,1.15,MAT.travertine,10.55,3.75,-27.2,{cast:true});
 box(hallArchitecture,21.55,.50,1.15,MAT.travertine,0,7.14,-27.2,{cast:true});
 box(hallArchitecture,19.9,.06,.12,M.warm,0,6.84,-26.60);
 
+// V1.8 second floor — an actual accessible upper gallery.
+const upperLevel=new THREE.Group();upperLevel.name='KOMO_UPPER_LEVEL_V18';building.add(upperLevel);
+const UPPER_Y=4.25;
+
+// West gallery reaches the grand stair; east gallery starts beyond the Life flagship volume.
+box(upperLevel,4.75,.28,30.2,MAT.travertine,-8.72,UPPER_Y,-8.10,{cast:true});
+box(upperLevel,4.75,.28,22.0,MAT.travertine,8.72,UPPER_Y,-12.15,{cast:true});
+box(upperLevel,17.45,.28,4.2,MAT.travertine,0,UPPER_Y,-21.20,{cast:true});
+
+// Bronze datum at the gallery edges.
+line(upperLevel,4.20,.05,-8.72,6.72,MAT.brass,UPPER_Y+.16);
+line(upperLevel,4.20,.05,8.72,-1.08,MAT.brass,UPPER_Y+.16);
+
+// Inner glass balustrades, segmented so the atrium remains transparent.
+[-1,1].forEach(side=>{
+  const x=side*6.28;
+  const zStart=side<0?5.6:-1.0;
+  for(let z=zStart;z>-19.25;z-=3.65){
+    box(upperLevel,.075,1.06,3.22,MAT.smokedGlass,x,UPPER_Y+.70,z);
+    box(upperLevel,.09,.065,3.34,MAT.brass,x,UPPER_Y+1.25,z);
+  }
+});
+// Rear skywalk rails.
+[-19.05,-23.35].forEach(z=>{
+  for(let x=-4.5;x<=4.5;x+=3.0){
+    box(upperLevel,2.70,1.02,.075,MAT.smokedGlass,x,UPPER_Y+.69,z);
+    box(upperLevel,2.82,.065,.09,MAT.brass,x,UPPER_Y+1.22,z);
+  }
+});
+
+// Grand sculptural stair on the west side.
+const stair=new THREE.Group();stair.name='KOMO_GRAND_STAIR_V18';upperLevel.add(stair);
+const stairX=-8.72,stairBottomZ=13.20,stairTopZ=7.00,stairSteps=15;
+for(let i=0;i<stairSteps;i++){
+  const t=(i+1)/stairSteps;
+  const h=UPPER_Y*t;
+  const z=stairBottomZ-(i+.5)*(stairBottomZ-stairTopZ)/stairSteps;
+  box(stair,3.48,h,.50,i%2?MAT.travertine:MAT.limestone,stairX,h/2,z,{cast:true});
+  if(i%3===0)box(stair,3.10,.025,.10,MAT.brass,stairX,h+.018,z-.18);
+}
+const railMat=MAT.brass;
+bodySegment(stair,[-10.38,.58,13.05],[-10.38,5.25,6.95],.035,railMat);
+bodySegment(stair,[-7.06,.58,13.05],[-7.06,5.25,6.95],.035,railMat);
+for(let i=0;i<6;i++){
+  const t=i/5,z=THREE.MathUtils.lerp(13.05,6.95,t),y=THREE.MathUtils.lerp(.48,4.98,t);
+  cyl(stair,.022,.026,.90,MAT.brass,-10.38,y-.25,z,10);
+  cyl(stair,.022,.026,.90,MAT.brass,-7.06,y-.25,z,10);
+}
+box(stair,4.10,.28,2.25,MAT.travertine,stairX,UPPER_Y,6.25,{cast:true});
+plaque(stair,'UPPER GALLERY','SCIENCE · LIFE · TALKS',3.15,.72,-10.42,UPPER_Y+2.05,7.05,{rotY:Math.PI/2,dark:true,titleSize:52});
+
+// Upper Library / Science zone.
+const upperWest=new THREE.Group();upperWest.name='KOMO_UPPER_LIBRARY_V18';upperLevel.add(upperWest);
+upperWest.position.set(-8.72,UPPER_Y+.16,-5.1);
+box(upperWest,3.75,.08,5.10,MAT.walnut,0,.08,0);
+box(upperWest,3.45,.06,4.82,MAT.fabricLight,0,.16,0);
+const upperWestLounge=new THREE.Group();upperWestLounge.position.set(0,.02,0);upperWest.add(upperWestLounge);
+box(upperWestLounge,2.20,.30,.72,MAT.fabric,-.40,.36,.95,{cast:true});
+box(upperWestLounge,2.20,.58,.18,MAT.fabric,-.40,.64,1.27,{cast:true});
+cyl(upperWestLounge,.52,.52,.07,MAT.walnut,.55,.38,-.15,24,{cast:true});
+cyl(upperWestLounge,.04,.055,.34,MAT.brass,.55,.20,-.15,12,{cast:true});
+plaque(upperLevel,'SCIENCE LIBRARY','READ · COMPARE · UNDERSTAND',3.65,.74,-11.43,6.38,-5.2,{rotY:Math.PI/2,dark:false,titleSize:49});
+[-8.95,-7.75].forEach(x=>{
+  box(upperLevel,.84,1.85,.22,MAT.walnut,x,5.38,-12.7,{cast:true});
+  [4.78,5.35,5.92].forEach(y=>box(upperLevel,.72,.045,.42,MAT.brass,x,y,-12.55));
+});
+
+// Upper Life Lounge / executive zone.
+const upperEast=new THREE.Group();upperEast.name='KOMO_UPPER_LIFE_LOUNGE_V18';upperLevel.add(upperEast);
+upperEast.position.set(8.72,UPPER_Y+.16,-6.2);
+box(upperEast,3.70,.08,5.3,MAT.walnut,0,.08,0);
+box(upperEast,3.38,.05,5.0,MAT.fabricLight,0,.16,0);
+box(upperEast,2.28,.32,.76,MAT.fabric,.38,.38,.90,{cast:true});
+box(upperEast,2.28,.58,.18,MAT.fabric,.38,.66,1.22,{cast:true});
+box(upperEast,.88,.36,.82,MAT.ivory,-1.12,.40,-.35,{cast:true});
+cyl(upperEast,.46,.46,.07,MAT.walnut,.35,.40,-.45,24,{cast:true});
+plaque(upperLevel,'LIFE LOUNGE','OBJECTS · PARTNERS · PRIVATE',3.65,.74,11.43,6.38,-6.2,{rotY:-Math.PI/2,dark:true,titleSize:49});
+
+// Rear observatory / talks bridge.
+box(upperLevel,5.8,.075,2.55,MAT.walnut,0,UPPER_Y+.18,-21.2);
+[-1.8,0,1.8].forEach(x=>cyl(upperLevel,.40,.40,.06,MAT.brass,x,UPPER_Y+.32,-21.2,24));
+plaque(upperLevel,'OBSERVATORY','TALKS · WORLD · COMMUNITY',5.2,.82,0,6.30,-23.48,{dark:true,titleSize:54});
+
+// Upper floor planting and warm pools of light.
+[-9.7,9.7].forEach((x,i)=>{
+  box(upperLevel,1.35,.34,1.35,MAT.limestone,x,UPPER_Y+.18,-17.0);
+  box(upperLevel,1.12,.06,1.12,M.soil,x,UPPER_Y+.39,-17.0);
+  const tg=new THREE.Group();tg.position.set(0,UPPER_Y+.38,0);upperLevel.add(tg);tree(tg,x,-17.0,.34);
+});
+[
+  [-8.7,6.9,-4.8,1.15],[8.7,6.9,-5.5,1.15],[0,6.8,-21.2,1.35]
+].forEach(([x,y,z,intensity])=>{
+  const l=glow(upperLevel,0xf2d4a3,intensity,6,x,y,z);living.lights.push(l);
+});
+
+// Exterior second-floor expression on the front facade.
+box(outerFrame,5.4,.10,.72,MAT.brass,-9.55,5.05,18.78);
+box(outerFrame,5.4,.10,.72,MAT.brass,9.55,5.05,18.78);
+box(outerFrame,5.1,2.05,.08,MAT.smokedGlass,-9.55,6.12,18.82);
+box(outerFrame,5.1,2.05,.08,MAT.smokedGlass,9.55,6.12,18.82);
+
 // Hall axis.
 box(building,9.8,.035,43,M.stoneDeep,0,.31,-6.5);
 [-4.84,4.84].forEach(x=>line(building,.05,42.6,x,-6.5,M.bronze,.35));
@@ -671,7 +868,6 @@ glow(desk,0xe9c48e,2.2,8,0,3.1,1.4);
 });
 
 // Hospitality moments: enough density to feel inhabited, kept outside the main circulation line.
-loungeCluster(building,-8.1,10.0,.08,.86);
 loungeCluster(building,7.95,-7.7,Math.PI+.05,.82);
 loungeCluster(building,-8.0,-14.2,-.05,.76);
 
@@ -887,6 +1083,7 @@ glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 // Runtime state.
 const player=new THREE.Vector3(0,0,31.5);
 const velocity=new THREE.Vector3();
+let playerLevel=0;
 let yaw=0,pitch=-.045;
 let mode='world';
 let currentInteraction=null;
@@ -1025,20 +1222,45 @@ function setMode(next){
   mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';
 }
 function enterTwin(){
-  setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';
+  playerLevel=0;setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';
 }
 function enterRehab(){
-  setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='REHAB';
+  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='REHAB';
 }
 function enterArena(){
-  setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';
+  playerLevel=0;setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';
 }
 function returnToHall(){
-  setMode('world');player.set(0,0,-22.5);velocity.set(0,0,0);yaw=0;pitch=-.03;closePanel();updateLocation();notify(locale==='fr'?'KŌMØ HALL':'KŌMØ HALL');
+  playerLevel=0;setMode('world');player.set(0,0,-22.5);velocity.set(0,0,0);yaw=0;pitch=-.03;closePanel();updateLocation();notify(locale==='fr'?'KŌMØ HALL':'KŌMØ HALL');
 }
 
+function isStairPosition(p){
+  return p.x>-10.45&&p.x<-6.98&&p.z>6.90&&p.z<13.28;
+}
+function stairElevationAt(z){
+  const t=THREE.MathUtils.clamp((13.20-z)/(13.20-7.00),0,1);
+  return UPPER_Y*t;
+}
+function isUpperWalkable(p){
+  const west=p.x>-11.05&&p.x<-6.12&&p.z>-23.45&&p.z<7.18;
+  const east=p.x>6.12&&p.x<11.05&&p.z>-23.45&&p.z<-1.00;
+  const rear=p.x>-10.98&&p.x<10.98&&p.z>-23.45&&p.z<-18.95;
+  return west||east||rear;
+}
+function syncPlayerElevation(){
+  if(mode!=='world'){playerLevel=0;player.y=0;return}
+  if(isStairPosition(player)){
+    player.y=stairElevationAt(player.z);
+    if(player.y>UPPER_Y-.42)playerLevel=1;
+    else if(player.y<.28)playerLevel=0;
+    return;
+  }
+  player.y=playerLevel===1?UPPER_Y:0;
+}
 function canMove(p){
   if(mode==='world'){
+    if(isStairPosition(p))return true;
+    if(playerLevel===1||player.y>UPPER_Y-.70)return isUpperWalkable(p);
     if(p.z>63||p.z<-28.6||Math.abs(p.x)>20)return false;
     if(p.z<16.5&&Math.abs(p.x)>11.15)return false;
     if(p.z>=14.1&&p.z<=18.8&&Math.abs(p.x)>4.35)return false;
@@ -1050,10 +1272,13 @@ function canMove(p){
   if(mode==='rehab')return p.x>-10&&p.x<10&&p.z>-66&&p.z<-43;
   return true;
 }
+function commitMove(next){
+  player.copy(next);syncPlayerElevation();
+}
 function tryMove(dx,dz){
-  const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){player.copy(n);return}
-  const nx=player.clone();nx.x+=dx;if(canMove(nx)){player.copy(nx);return}
-  const nz=player.clone();nz.z+=dz;if(canMove(nz))player.copy(nz);
+  const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){commitMove(n);return}
+  const nx=player.clone();nx.x+=dx;if(canMove(nx)){commitMove(nx);return}
+  const nz=player.clone();nz.z+=dz;if(canMove(nz))commitMove(nz);
 }
 
 function updateMovement(dt){
@@ -1079,10 +1304,11 @@ function updateMovement(dt){
 function updateCamera(now){
   const move=Math.min(1,velocity.length()/3.45);
   const bob=move*Math.sin(now*.0105)*.012;
-  camera.position.set(player.x,1.72+bob,player.z);
+  const eyeY=player.y+1.72+bob;
+  camera.position.set(player.x,eyeY,player.z);
   const cp=Math.cos(pitch),sp=Math.sin(pitch);
   const look=18;
-  camera.lookAt(player.x-Math.sin(yaw)*cp*look,1.72+sp*look,player.z-Math.cos(yaw)*cp*look);
+  camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
 }
 function updateDoors(){
   const target=mode==='world'&&player.z<26&&player.z>8&&Math.abs(player.x)<5?1:0;
@@ -1094,6 +1320,12 @@ function updateLocation(){
   if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';return}
   if(mode==='rehab'){locationName.textContent='REHAB';return}
   if(mode==='arena'){locationName.textContent='ARENA';return}
+  if(playerLevel===1){
+    if(player.z<-18.8)locationName.textContent='UPPER OBSERVATORY';
+    else if(player.x<0)locationName.textContent='SCIENCE LIBRARY · LEVEL 2';
+    else locationName.textContent='LIFE LOUNGE · LEVEL 2';
+    return;
+  }
   if(player.z>23)locationName.textContent='ARRIVAL PLAZA';
   else if(player.x>6.8&&player.z>-2&&player.z<7)locationName.textContent='KŌMØ LIFE';
   else if(player.z>-7)locationName.textContent='KŌMØ HALL';
@@ -1108,6 +1340,7 @@ function updateInteraction(){
   if(mode!=='world'){currentInteraction=null;interactionEl.classList.remove('show');return}
   let best=null,bestD=Infinity;
   for(const it of interactions){
+    if(playerLevel===1&&it.level!==1)continue;
     const d=Math.hypot(player.x-it.x,player.z-it.z);
     if(d<it.r&&d<bestD){best=it;bestD=d}
   }
@@ -1234,7 +1467,22 @@ function animateLiving(now){
     });
   }
     if(!lowPower&&Math.floor(t*8)%2===0)living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));
-  sun.position.x=-24+Math.sin(t*.025)*3.5;
+  if(living.skyDome){
+    living.skyDome.position.copy(camera.position);
+  }
+  if(living.clouds?.length){
+    living.clouds.forEach((cloud,i)=>{
+      let x=cloud.userData.baseX+(t*cloud.userData.speed*1.8);
+      while(x>105)x-=210;
+      cloud.position.x=x;
+      cloud.position.z+=Math.sin(t*.035+i)*.0015;
+      cloud.material.opacity=(lowPower?.075:.105)+.035*(.5+.5*Math.sin(t*.08+i*.8));
+    });
+  }
+  if(living.sunSprite&&living.skyUniforms){
+    const d=living.skyUniforms.sunDir.value;
+    living.sunSprite.position.set(camera.position.x+d.x*178,camera.position.y+d.y*178,camera.position.z+d.z*178);
+  }
 }
 let livingAnimationFailed=false;
 function animate(now){
@@ -1257,14 +1505,15 @@ raf=requestAnimationFrame(animate);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){velocity.set(0,0,0);keys.clear()}});
 window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(daylightTimer)},{once:true});
 
+syncPlayerElevation();
 applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'1.7.0-banners-landscape',
+  version:'1.8.0-second-floor-sky',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
-  getState:()=>({position:player.clone(),yaw,mode}),
+  getState:()=>({position:player.clone(),yaw,mode,level:playerLevel}),
   getLocale:()=>locale,
   notify
 };

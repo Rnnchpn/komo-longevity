@@ -67,7 +67,7 @@ function presenceAvatar(runtime,record){
   [-.37,.37].forEach(x=>{const arm=new THREE.Mesh(new THREE.CylinderGeometry(.06,.065,.60,10),matSkin);arm.position.set(x,1.28,0);arm.rotation.z=x<0?-.12:.12;g.add(arm)});
   const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.46,40),accent);ring.rotation.x=-Math.PI/2;ring.position.y=.015;g.add(ring);
   g.add(labelSprite(THREE,record.display_name));
-  g.userData.target=new THREE.Vector3(record.x||0,0,record.z||0);g.userData.targetYaw=record.yaw||0;g.userData.zone=record.zone||'world';g.position.copy(g.userData.target);
+  g.userData.target=new THREE.Vector3(Number(record.x)||0,Number(record.y)||0,Number(record.z)||0);g.userData.targetYaw=record.yaw||0;g.userData.zone=record.zone||'world';g.position.copy(g.userData.target);
   runtime.scene.add(g);return g;
 }
 export async function mount(runtime){
@@ -100,7 +100,7 @@ export async function mount(runtime){
       if(!fresh(row)){state.rows.delete(id);const p=state.peers.get(id);if(p){p.removeFromParent();state.peers.delete(id)};continue}
       if(id===own)continue;count++;
       let peer=state.peers.get(id);if(!peer){peer=presenceAvatar(runtime,row);state.peers.set(id,peer)}
-      peer.userData.target.set(Number(row.x)||0,0,Number(row.z)||0);peer.userData.targetYaw=Number(row.yaw)||0;peer.userData.zone=row.zone||'world';
+      peer.userData.target.set(Number(row.x)||0,Number(row.y)||0,Number(row.z)||0);peer.userData.targetYaw=Number(row.yaw)||0;peer.userData.zone=row.zone||'world';
     }
     U.people.textContent='PEOPLE · '+count;
   };
@@ -125,7 +125,7 @@ export async function mount(runtime){
       display_name:escText(state.profile?.display_name||'KŌMØ Member',60)||'KŌMØ Member',
       avatar_config:state.profile?.avatar_config&&typeof state.profile.avatar_config==='object'?state.profile.avatar_config:{},
       zone:['world','twin','rehab','arena'].includes(st.mode)?st.mode:'world',
-      x:+st.position.x.toFixed(3),y:0,z:+st.position.z.toFixed(3),yaw:+st.yaw.toFixed(4),updated_at:new Date().toISOString()
+      x:+st.position.x.toFixed(3),y:+(st.position.y||0).toFixed(3),z:+st.position.z.toFixed(3),yaw:+st.yaw.toFixed(4),updated_at:new Date().toISOString()
     }};
   const heartbeat=async()=>{
     if(!state.connected||!state.session?.user)return;
@@ -197,5 +197,5 @@ export async function mount(runtime){
   };
   window.addEventListener('pagehide',cleanup,{once:true});
 
-  window.KomoWorldMultiplayer={version:'0.1.0',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.2.0-elevation',connect:openPulse,state};
 }
