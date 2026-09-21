@@ -2531,10 +2531,11 @@ function updateVisibilityBudget(now){
     const wp=new THREE.Vector3();tree.getWorldPosition(wp);
     tree.visible=wp.distanceTo(camera.position)<(lowPower?30:46);
   });
-  living.npcs.forEach(npc=>{
+  living.npcs.forEach((npc,i)=>{
     const sameLevel=Math.abs(npc.position.y-player.y)<2;
     const dist=Math.hypot(npc.position.x-player.x,npc.position.z-player.z);
-    npc.visible=sameLevel&&dist<(lowPower?20:34);
+    const allowed=!emergencyPerformance||i<2;
+    npc.visible=allowed&&sameLevel&&dist<(lowPower?20:34);
   });
   living.banners.forEach(banner=>{
     const wp=new THREE.Vector3();banner.getWorldPosition(wp);
