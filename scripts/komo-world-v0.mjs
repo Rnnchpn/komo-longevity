@@ -31,9 +31,12 @@ const checks=[
   ['third-person V2.4+ present',runtime.includes('KOMO_PLAYER_AVATAR_V24')&&runtime.includes("cameraMode='third'")],
   ['World Journey V2.4+ present',runtime.includes('KOMO_WORLD_JOURNEY_V24')&&runtime.includes('const JOURNEY_MISSIONS')&&runtime.includes('function completeJourney')],
   ['faster gameplay V2.4 present',runtime.includes('const speed=sprint?7.15:4.35')],
-  ['living journey V2.5 present',runtime.includes("version:'2.5.0-living-journey'")&&runtime.includes('KOMO_JOURNEY_GUIDE_V25')&&runtime.includes('function updateJourneyGuide')],
+  ['living journey V2.5+ present',runtime.includes('KOMO_JOURNEY_GUIDE_V25')&&runtime.includes('function updateJourneyGuide')],
   ['NPC conversations V2.5 present',runtime.includes('function showNpcConversation')&&runtime.includes("id:'social'")],
-  ['smart third-person camera V2.5 present',runtime.includes('thirdPersonDistance')&&runtime.includes('Cheap camera collision clamp')]
+  ['smart third-person camera V2.5 present',runtime.includes('thirdPersonDistance')&&runtime.includes('Cheap camera collision clamp')],
+  ['Twin Lab V2.6 present',runtime.includes("version:'2.6.0-twin-rehab'")&&runtime.includes('KOMO_TWIN_LAB_V26')&&runtime.includes('const twinInteractions')],
+  ['Rehab Lab V2.6 present',runtime.includes('KOMO_REHAB_LAB_V26')&&runtime.includes('const rehabInteractions')&&runtime.includes('function runRehabDemo')],
+  ['Twin/Rehab room interactions V2.6 present',runtime.includes("mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions")&&runtime.includes('function updateTwinVisuals')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
