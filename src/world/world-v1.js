@@ -497,7 +497,7 @@ function npcNameTag(text,sub=''){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
   sp.scale.set(2.05,.58,1);sp.position.y=2.48;sp.renderOrder=25;return sp;
 }
-function makeNpc(parent,{role='visitor',label='Guest',x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
+function makeNpc(parent,{role='visitor',label='Guest',quest=null,x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
   const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);g.name='KOMO_NPC_'+role.toUpperCase();parent.add(g);
   const seed=Math.abs(Math.floor(x*31+z*17+phase*101));
   const skinColors=[0xe8c9ad,0xd0a27f,0xb27b58,0x7b543f,0x513a31];
@@ -554,7 +554,7 @@ function makeNpc(parent,{role='visitor',label='Guest',x=0,y=0,z=0,scale=1,route=
   const points=route.length?route.map(p=>new THREE.Vector3(p[0],p[1]??y,p[2])):[new THREE.Vector3(x,y,z)];
   const seg=[],cum=[0];let total=0;
   for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total)}
-  g.userData.npc={role,label,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
+  g.userData.npc={role,label,quest,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
   living.npcs.push(g);return g;
 }
 function updateNpc(npc,t,index){
@@ -1540,13 +1540,13 @@ if(!lowPower){
   makeNpc(npcRoot,{role:'visitor',label:'Elena',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
   [-3.8,0,-4.5],[-3.2,0,-12.0],[-4.8,0,-20.4],[-1.4,0,-24.2],[1.8,0,-19.2],[.8,0,-8.0]
 ]});
-makeNpc(npcRoot,{role:'coach',label:'Leo',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
+makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'fitness',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
   [5.4,0,-18.4],[5.2,0,-10.0],[4.8,0,-2.2],[3.7,0,5.2],[5.5,0,9.0]
 ]});
   makeNpc(npcRoot,{role:'visitor',label:'Sofia',x:7.0,y:0,z:5.8,outfit:'bronze',speed:.28,phase:.22,route:[
     [7.0,0,5.8],[9.2,0,4.2],[9.0,0,1.2],[7.2,0,.4],[7.4,0,3.0]
   ]});
-  makeNpc(npcRoot,{role:'staff',label:'Camille',x:-6.3,y:0,z:6.7,outfit:'sage',speed:.24,phase:.43,route:[
+  makeNpc(npcRoot,{role:'staff',label:'Camille',quest:'twin',x:-6.3,y:0,z:6.7,outfit:'sage',speed:.24,phase:.43,route:[
     [-6.3,0,6.7],[-7.1,0,4.2],[-5.7,0,2.5],[-4.8,0,6.0],[-6.3,0,7.2]
   ]});
   makeNpc(npcRoot,{role:'visitor',label:'Lina',x:5.5,y:0,z:-11.8,outfit:'cream',speed:.25,phase:.67,route:[
@@ -1558,7 +1558,10 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',x:5.4,y:0,z:-18.4,outfit:'charcoal',sp
   makeNpc(npcRoot,{role:'visitor',label:'Mila',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
     [8.72,UPPER_Y,-3.0],[8.72,UPPER_Y,-10.5],[8.72,UPPER_Y,-18.0],[3.6,UPPER_Y,-21.2],[.4,UPPER_Y,-21.2]
   ]});
-  makeNpc(npcRoot,{role:'coach',label:'Nora',x:-7.5,y:0,z:55.5,outfit:'sage',speed:.36,phase:.35,route:[
+  makeNpc(npcRoot,{role:'coach',label:'Théo',quest:'arena',x:6.0,y:0,z:-20.5,outfit:'bronze',speed:.26,phase:.15,route:[
+    [6.0,0,-20.5],[7.4,0,-17.8],[6.2,0,-14.6],[4.8,0,-17.2],[6.0,0,-20.5]
+  ]});
+  makeNpc(npcRoot,{role:'coach',label:'Nora',quest:'district',x:-7.5,y:0,z:55.5,outfit:'sage',speed:.36,phase:.35,route:[
     [-7.5,0,55.5],[-3.0,0,60.5],[0,0,62.5],[3.0,0,60.5],[7.5,0,55.5],[0,0,58.0]
   ]});
   makeNpc(npcRoot,{role:'visitor',label:'Jules',x:10.5,y:0,z:64.0,outfit:'sand',speed:.31,phase:.58,route:[
@@ -2202,7 +2205,10 @@ const challengeDefs=[
   {id:'distance',reward:20,target:120,title:{fr:'Explorer le World',en:'Explore the World'},sub:{fr:'Parcourir 120 m dans le campus',en:'Move 120 m through the campus'}},
   {id:'twin',reward:20,target:1,title:{fr:'Lire votre Twin',en:'Read your Twin'},sub:{fr:'Entrer dans Functional Twin',en:'Enter Functional Twin'}},
   {id:'fitness',reward:25,target:1,title:{fr:'Bouger aujourd’hui',en:'Move today'},sub:{fr:'Valider la séance KŌMØ Fitness Club',en:'Complete today’s KŌMØ Fitness Club session'}},
-  {id:'fountain',reward:15,target:1,title:{fr:'Découvrir la grande fontaine',en:'Discover the Grand Fountain'},sub:{fr:'Explorer le nouveau KŌMØ District',en:'Explore the new KŌMØ District'}}
+  {id:'fountain',reward:15,target:1,title:{fr:'Découvrir la grande fontaine',en:'Discover the Grand Fountain'},sub:{fr:'Explorer le nouveau KŌMØ District',en:'Explore the new KŌMØ District'}},
+  {id:'coach',reward:10,target:1,title:{fr:'Parler à un coach',en:'Meet a coach'},sub:{fr:'Demander une quête Fitness à Leo ou Nora',en:'Ask Leo or Nora for a Fitness quest'}},
+  {id:'life_item',reward:10,target:1,title:{fr:'Découvrir un objet Life',en:'Discover a Life object'},sub:{fr:'Explorer un produit directement dans le flagship',en:'Explore a product directly in the flagship'}},
+  {id:'arena_visit',reward:15,target:1,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir le Challenge Board',en:'Discover the Challenge Board'}}
 ];
 function loadChallengeState(){
   const today=localDateKey();
@@ -2869,7 +2875,7 @@ function showFountain(){
   ]);
 }
 function showLifeItem(id){
-  completeJourney('life',{silent:true});
+  completeJourney('life',{silent:true});completeChallenge('life_item');
   const items={
     strap:{name:'MOTION STRAP',cat:'MOVE',fr:'Un objet textile KŌMØ pensé autour du mouvement, des capteurs et de l’entraînement.',en:'A KŌMØ textile object built around movement, sensors and training.'},
     bottle:{name:'KŌMØ BOTTLE',cat:'HYDRATE',fr:'Objet quotidien KŌMØ Life, simple et durable, intégré à la routine.',en:'A simple durable KŌMØ Life daily object integrated into the routine.'},
@@ -2934,15 +2940,46 @@ function showNpcConversation(npc){
   const d=npc?.userData?.npc;if(!d)return;
   completeJourney('social');
   const t=fitnessToday();
-  const lines={
-    staff:{fr:'Bienvenue. Commencez par l’aperçu santé puis le Functional Twin pour comprendre votre trajectoire.',en:'Welcome. Start with the health snapshot and Functional Twin to understand your trajectory.'},
-    coach:{fr:t?'Votre séance du jour est prête : '+t.activity.title.fr+' · '+t.title+' · '+t.duration+' min.':'Choisissez une pratique dans KŌMØ Fitness Club et je vous proposerai une séance chaque jour.',en:t?'Today’s session is ready: '+t.activity.title.en+' · '+t.title+' · '+t.duration+' min.':'Choose an activity in KŌMØ Fitness Club and I will give you a daily session.'},
-    visitor:{fr:'Je découvre aussi le World. KŌMØ Life relie l’expérience numérique aux objets et équipements du monde réel.',en:'I am exploring the World too. KŌMØ Life connects the digital experience with real-world objects and equipment.'}
+  const quest=d.quest;
+  if(quest==='fitness'||quest==='district')completeChallenge('coach');
+
+  const questCopy={
+    fitness:{
+      title:{fr:'QUÊTE FITNESS',en:'FITNESS QUEST'},
+      body:{fr:t?'Ta séance du jour est prête : '+t.activity.title.fr+' · '+t.title+' · '+t.duration+' min. Termine-la pour valider le défi Fitness.':'Choisis ton activité dans KŌMØ Fit. Je construirai ensuite une séance différente chaque jour.',en:t?'Today’s session is ready: '+t.activity.title.en+' · '+t.title+' · '+t.duration+' min. Complete it to clear the Fitness challenge.':'Choose your activity in KŌMØ Fit. I will then build a different session every day.'},
+      button:()=>t?(locale==='fr'?'LANCER MA SÉANCE':'START SESSION'):'KŌMØ FIT',
+      action:()=>t?showFitnessToday():showRehab()
+    },
+    twin:{
+      title:{fr:'QUÊTE TWIN',en:'TWIN QUEST'},
+      body:{fr:'Commence par ton aperçu santé à l’entrée, puis ouvre Functional Twin. Le but est de comprendre quels domaines composent ta trajectoire de mouvement.',en:'Start with your health snapshot at the entrance, then open Functional Twin. The goal is to understand the domains that make up your movement trajectory.'},
+      button:()=>locale==='fr'?'OUVRIR LE TWIN':'OPEN TWIN',
+      action:enterTwin
+    },
+    arena:{
+      title:{fr:'QUÊTE ARENA',en:'ARENA QUEST'},
+      body:{fr:'Arena regroupe les défis d’engagement du World. Consulte le Challenge Board et complète les objectifs du jour.',en:'Arena brings together World engagement challenges. Check the Challenge Board and complete today’s objectives.'},
+      button:()=>locale==='fr'?'ALLER À ARENA':'GO TO ARENA',
+      action:enterArena
+    },
+    district:{
+      title:{fr:'QUÊTE DISTRICT',en:'DISTRICT QUEST'},
+      body:{fr:'Sors vers la grande fontaine, explore les pavillons et reviens avec le défi Fontaine validé.',en:'Head outside to the Grand Fountain, explore the pavilions and return with the Fountain challenge cleared.'},
+      button:()=>locale==='fr'?'ALLER À LA FONTAINE':'GO TO FOUNTAIN',
+      action:()=>fastTravel('arrival')
+    }
   };
+  const q=questCopy[quest];
+  const defaultLines={
+    staff:{fr:'Bienvenue. L’aperçu santé et le Functional Twin sont le meilleur point de départ.',en:'Welcome. The health snapshot and Functional Twin are the best place to start.'},
+    coach:{fr:'Le KŌMØ Fitness Club propose un programme différent chaque jour.',en:'KŌMØ Fitness Club offers a different program every day.'},
+    visitor:{fr:'Je découvre aussi le World. KŌMØ Life relie l’expérience numérique aux objets du monde réel.',en:'I am exploring the World too. KŌMØ Life connects the digital experience with real-world objects.'}
+  };
+  const body=q?q.body[locale]:defaultLines[d.role]?.[locale]||defaultLines.visitor[locale];
   const actions=[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}];
-  if(d.role==='coach')actions.push({label:t?(locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION'):(locale==='fr'?'FITNESS CLUB':'FITNESS CLUB'),primary:true,onClick:t?showFitnessToday:showRehab});
+  if(q)actions.push({label:q.button(),primary:true,onClick:q.action});
   else actions.push({label:locale==='fr'?'VOIR LE JOURNEY':'VIEW JOURNEY',primary:true,onClick:showJourneyPanel});
-  openPanel(d.label||'KŌMØ MEMBER',d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'FITNESS COACH':'WORLD GUEST',`<p>${lines[d.role]?.[locale]||lines.visitor[locale]}</p><div class="priority-card"><b>WORLD JOURNEY</b>${locale==='fr'?'Échange social · +15 XP':'Social interaction · +15 XP'}</div>`,actions);
+  openPanel(d.label||'KŌMØ MEMBER',q?q.title[locale]:(d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'FITNESS COACH':'WORLD GUEST'),`<p>${body}</p><div class="priority-card"><b>${q?q.title[locale]:'WORLD JOURNEY'}</b>${q?(locale==='fr'?'Objectif disponible · récompense XP':'Objective available · XP reward'):(locale==='fr'?'Échange social · +15 XP':'Social interaction · +15 XP')}</div>`,actions);
 }
 function setMode(next){
   if(next!=='rehab')stopRehabSession();
@@ -2957,7 +2994,7 @@ function enterRehab(){
   playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='KŌMØ FITNESS CLUB';
 }
 function enterArena(){
-  completeJourney('arena');
+  completeJourney('arena');completeChallenge('arena_visit');
   playerLevel=0;setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';
 }
 function returnToHall(){
@@ -3531,7 +3568,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.3.2-life-retail',
+  version:'3.3.3-quests',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
