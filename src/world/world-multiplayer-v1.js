@@ -82,7 +82,7 @@ function ui(){
   document.body.appendChild(drawer);
   return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:dock.querySelector('[data-kwmp-voice]'),social:dock.querySelector('[data-kwmp-social]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
 }
-function labelSpritefunction labelSprite(THREE,text,subtitle='PULSE MEMBER'){
+function labelSprite(THREE,text,subtitle='PULSE MEMBER'){
   const c=document.createElement('canvas');c.width=512;c.height=144;const x=c.getContext('2d');
   x.clearRect(0,0,512,144);
   x.fillStyle='rgba(19,31,24,.84)';x.fillRect(24,18,464,104);
@@ -207,7 +207,7 @@ export async function mount(runtime){
     U.target.title=row?'Cliquer pour revenir au chat World':'Chat World';
     U.input.focus();
   };
-  const zoneLabel=  const zoneLabel=z=>({world:'WORLD',twin:'TWIN',rehab:'KŌMØ FIT',arena:'ARENA'}[z]||'WORLD');
+  const zoneLabel=z=>({world:'WORLD',twin:'TWIN',rehab:'KŌMØ FIT',arena:'ARENA'}[z]||'WORLD');
   const renderRoster=()=>{
     if(!U.roster)return;
     U.roster.innerHTML='';
@@ -243,7 +243,7 @@ export async function mount(runtime){
       U.roster.appendChild(item);
     }
   };
-  const timestampPlausible=  const timestampPlausible=(row)=>{
+  const timestampPlausible=(row)=>{
     const t=new Date(row?.updated_at||0).getTime();
     if(!Number.isFinite(t)||!t)return true;
     const age=Date.now()-t;
@@ -280,7 +280,7 @@ export async function mount(runtime){
     for(const role of roles||[])if(role?.user_id)state.roles.set(role.user_id,role);
     (presence||[]).forEach(consumePresence);state.messages=(messages||[]).reverse();renderMessages();setOnlineUI();syncPeers();
   };
-  const refreshPresence=async()=>{  const refreshPresence=async()=>{
+  const refreshPresence=async()=>{
     if(!state.session?.user)return false;
     try{
       const {data,error}=await client.from('world_presence')
@@ -555,7 +555,7 @@ export async function mount(runtime){
     awardSocial(recipient_id?'dm':'chat',recipient_id?10:5);
   });
 
-  function animatePeers(){  function animatePeers(){
+  function animatePeers(){
     const local=runtime.getState(),cam=runtime.camera;updateVoiceProximity();
     for(const peer of state.peers.values()){
       const localZone=local.mode==='rehab'?'rehab':local.mode;
