@@ -530,3 +530,127 @@ body.camera-third .interaction-card{bottom:112px}
   .health-hud{right:14px;width:420px}
   .world-quick-nav button{min-width:118px;padding-left:12px;padding-right:12px}
 }
+
+
+/* V3.7 One World — immersive desktop HUD + readable results */
+@media(min-width:901px) and (pointer:fine){
+  .world-hud{
+    top:18px;left:auto;right:24px;width:auto;height:auto;
+    display:flex!important;align-items:center;gap:0;padding:0;
+    border:0!important;background:transparent!important;
+    -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+    box-shadow:none!important
+  }
+  .world-hud .world-brand,
+  .world-hud .world-metrics,
+  .world-hud .world-today,
+  .world-hud .hud-link,
+  #language-toggle{display:none!important}
+  #world-menu-toggle{
+    display:grid!important;width:58px;height:38px;min-width:58px;padding:0;
+    border:1px solid rgba(255,255,255,.10);border-radius:13px;
+    background:rgba(15,30,22,.78);color:rgba(246,239,228,.78);
+    -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+    box-shadow:0 10px 28px rgba(5,13,9,.12);font-size:6px;letter-spacing:.12em
+  }
+
+  .journey-hud,.health-hud,.world-quick-nav{display:none!important}
+
+  .location-chip{
+    top:22px;left:50%;height:42px;min-width:180px;
+    justify-content:center;padding:0 20px;
+    border:1px solid rgba(237,211,165,.18);border-radius:999px;
+    background:rgba(13,28,20,.88);
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+    box-shadow:0 14px 36px rgba(5,13,9,.15);
+    font-size:8px;letter-spacing:.17em;color:#f6efe4;
+    opacity:0;visibility:hidden;pointer-events:none;
+    transform:translate(-50%,-8px) scale(.98);
+    transition:opacity .22s ease,transform .22s ease,visibility .22s ease
+  }
+  .location-chip.show{opacity:1;visibility:visible;transform:translate(-50%,0) scale(1)}
+  .location-chip b,.location-chip:after{display:none!important}
+
+  .world-panel:has(.results-dashboard),
+  .world-panel:has(.domain-result){width:min(590px,calc(100vw - 48px))}
+}
+
+/* Results dashboard */
+.results-dashboard{display:grid;gap:14px}
+.results-hero{
+  display:grid;grid-template-columns:1.25fr .9fr .9fr;gap:9px;
+  padding:9px;border:1px solid rgba(226,195,135,.15);border-radius:18px;
+  background:linear-gradient(145deg,rgba(216,185,132,.055),rgba(255,255,255,.022))
+}
+.results-hero>div{
+  min-height:118px;padding:14px;border:1px solid rgba(255,255,255,.065);border-radius:14px;
+  background:rgba(255,255,255,.025)
+}
+.results-hero span,.results-context span,.result-domain span,.domain-result span{
+  display:block;font-size:6px;font-weight:850;letter-spacing:.13em;color:rgba(242,236,226,.44)
+}
+.results-score strong,.results-age strong{
+  display:block;margin-top:9px;font:500 44px/1 Georgia,serif;color:#f4ecdf
+}
+.results-score strong small{font:700 10px/1 Inter,sans-serif;color:rgba(242,236,226,.40)}
+.results-score em{
+  display:inline-block;margin-top:11px;padding:6px 8px;border-radius:999px;
+  background:rgba(128,157,136,.13);color:#cfe1d3;font-size:6px;font-style:normal;font-weight:850;letter-spacing:.10em
+}
+.results-age small,.results-change small{display:block;margin-top:9px;font-size:7px;color:rgba(242,236,226,.42)}
+.results-change strong{
+  display:block;margin-top:12px;font:600 31px/1 Inter,sans-serif;color:#d7bd8d
+}
+.positive{color:#b9d6c0!important}.negative{color:#ddb39d!important}
+
+.results-context{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.results-context>div{
+  padding:12px 13px;border:1px solid rgba(255,255,255,.06);border-radius:13px;background:rgba(255,255,255,.024)
+}
+.results-context b{display:block;margin-top:6px;font-size:11px;color:#efe5d6}
+
+.results-domains{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.result-domain{
+  padding:12px 11px;border:1px solid rgba(255,255,255,.065);border-radius:14px;background:rgba(255,255,255,.025)
+}
+.result-domain>div{display:flex;justify-content:space-between;gap:7px;align-items:center}
+.result-domain>div em{
+  font-size:5px;font-style:normal;font-weight:850;letter-spacing:.06em;color:rgba(242,236,226,.38)
+}
+.result-domain strong{display:block;margin:10px 0 9px;font:500 23px/1 Georgia,serif}
+.result-domain strong small{font:700 7px/1 Inter,sans-serif;color:rgba(242,236,226,.35)}
+.result-domain>i{
+  display:block;height:5px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden
+}
+.result-domain>i>b{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,#789483,#d8bd84)}
+.result-domain footer{display:flex;justify-content:space-between;gap:6px;margin-top:9px;align-items:center}
+.result-domain footer span{font-size:5px;letter-spacing:.02em}
+.result-domain footer b{font-size:7px}
+
+.results-reading{
+  padding:13px 14px;border-left:2px solid rgba(216,185,132,.52);
+  border-radius:0 13px 13px 0;background:rgba(216,185,132,.045)
+}
+.results-reading>b{display:block;font-size:7px;letter-spacing:.12em;color:#ddc18f}
+.results-reading p{margin:6px 0 0!important;font-size:9px!important;line-height:1.5!important;color:rgba(242,236,226,.62)!important}
+
+.domain-result{display:grid;gap:14px}
+.domain-result-head{display:flex;align-items:end;justify-content:space-between;gap:15px}
+.domain-result-head>div em{
+  display:inline-block;margin-top:8px;padding:6px 8px;border-radius:999px;
+  background:rgba(128,157,136,.12);color:#cfe1d3;font-size:6px;font-style:normal;font-weight:850;letter-spacing:.08em
+}
+.domain-result-head>strong{font:500 46px/1 Georgia,serif}
+.domain-result-head>strong small{font:700 9px/1 Inter,sans-serif;color:rgba(242,236,226,.36)}
+.domain-result-track{height:7px;border-radius:8px;background:rgba(255,255,255,.07);overflow:hidden}
+.domain-result-track i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#789483,#d9bd84)}
+.domain-result-comparison{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.domain-result-comparison>div{
+  padding:12px;border:1px solid rgba(255,255,255,.06);border-radius:13px;background:rgba(255,255,255,.024)
+}
+.domain-result-comparison b{display:block;margin-top:6px;font-size:14px}
+.domain-result>p{margin:0!important;font-size:10px!important;line-height:1.55!important;color:rgba(242,236,226,.68)!important}
+
+@media(max-width:1180px) and (min-width:901px) and (pointer:fine){
+  .results-domains{grid-template-columns:repeat(3,1fr)}
+}
