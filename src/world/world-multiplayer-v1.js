@@ -99,6 +99,60 @@ function css(){
       background:rgba(23,42,32,.82)!important;
       box-shadow:none!important
     }
+    .kwmp-chat-launcher{
+      min-width:176px!important;height:52px!important;padding:0 16px!important;
+      border-radius:16px!important;color:rgba(245,239,230,.72)!important;
+    }
+    .kwmp-chat-launcher i{opacity:.52!important}
+    .kwmp-chat-launcher span{font-size:6px!important;letter-spacing:.13em!important}
+    .kwmp-chat-launcher b{
+      width:20px!important;height:20px!important;border-radius:999px!important;
+      background:rgba(218,187,132,.10)!important;color:#e4c893!important
+    }
+    .kwmp-chat{
+      width:min(420px,calc(100vw - 48px))!important;
+      border-radius:19px!important;
+    }
+    .kwmp-head{
+      padding:11px 12px 9px!important;border-bottom-color:rgba(255,255,255,.04)!important
+    }
+    .kwmp-head span{color:rgba(215,183,127,.74)!important}
+    .kwmp-head strong{font:500 16px/1.1 Georgia,serif!important;letter-spacing:-.02em}
+    .kwmp-messages{padding:10px 11px!important;gap:5px!important}
+    .kwmp-msg{
+      padding:5px 7px!important;border-radius:9px!important;
+      background:rgba(255,255,255,.012)!important;text-shadow:none!important
+    }
+    .kwmp-msg.mine{background:rgba(218,187,132,.022)!important}
+    .kwmp-msg.dm{border-left-color:rgba(218,187,132,.40)!important}
+    .kwmp-msg b{font-size:7px!important;color:rgba(245,239,230,.88)!important}
+    .kwmp-msg p{font-size:8px!important;color:rgba(245,239,230,.68)!important}
+    .kwmp-compose{padding:8px!important;border-top-color:rgba(255,255,255,.04)!important}
+    .kwmp-compose input{
+      border-color:rgba(255,255,255,.045)!important;
+      background:rgba(255,255,255,.014)!important;
+      border-radius:10px!important;
+    }
+    .kwmp-compose button[type="submit"]{
+      border-radius:10px!important;background:linear-gradient(135deg,#ead3a5,#caa26b)!important;color:#182820!important
+    }
+    .kwmp-voicebox{
+      border-radius:16px!important;padding:5px!important;gap:5px!important
+    }
+    .kwmp-talk{
+      height:46px!important;min-width:174px!important;border-radius:12px!important;
+      background:rgba(20,38,29,.76)!important;
+      font-size:6px!important;letter-spacing:.10em!important;color:rgba(245,239,230,.80)!important
+    }
+    .kwmp-talk[data-state="talking"]{
+      background:rgba(105,52,43,.82)!important;
+      border-color:rgba(227,159,138,.28)!important;
+      color:#fff0e9!important
+    }
+    .kwmp-voice-toggle,.kwmp-voice-collapse{
+      height:46px!important;border-color:rgba(255,255,255,.04)!important;
+      background:rgba(255,255,255,.010)!important;color:rgba(245,239,230,.50)!important
+    }
     .kwmp-chat{
       left:22px;bottom:22px;width:430px;max-height:min(390px,50vh);
       border-radius:18px;background:linear-gradient(150deg,rgba(14,27,20,.94),rgba(26,41,31,.88));
