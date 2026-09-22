@@ -106,15 +106,15 @@ renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 let qualityMode=lowPower?'auto':'auto';
-let renderScale=lowPower?(retinaMobile?.90:.82):1.15;
+let renderScale=lowPower?(retinaMobile?1.02:.86):1.15;
 let fpsEMA=60,lastPerfSample=performance.now(),perfFrames=0;
 let emergencyPerformance=false;
 let lastBudgetUpdate=0,lastVisibilityUpdate=0,lastUiUpdate=0,lastDecorUpdate=0,lastRoomFxUpdate=0;
 let activeLightBudget=0;
 function maxPixelRatio(){
-  if(qualityMode==='performance')return lowPower?(retinaMobile?.78:.72):.90;
-  if(qualityMode==='high')return lowPower?(retinaMobile?1.05:.95):1.55;
-  return lowPower?(retinaMobile?.98:.88):1.25;
+  if(qualityMode==='performance')return lowPower?(retinaMobile?.82:.74):.90;
+  if(qualityMode==='high')return lowPower?(retinaMobile?1.16:.98):1.55;
+  return lowPower?(retinaMobile?1.10:.90):1.25;
 }
 function applyRenderScale(){
   const ratio=Math.min(window.devicePixelRatio||1,renderScale,maxPixelRatio());
@@ -605,35 +605,62 @@ function updateNpc(npc,t,index){
   npc.position.y+=Math.abs(stride)*.015;
 }
 function makePlayerAvatar(){
-  const g=new THREE.Group();g.name='KOMO_PLAYER_AVATAR_V24';g.userData.dynamic=true;scene.add(g);
-  const skin=new THREE.MeshStandardMaterial({color:0xc99673,roughness:.82});
-  const cloth=new THREE.MeshStandardMaterial({color:0x263f34,roughness:.72});
+  const g=new THREE.Group();g.name='KOMO_PLAYER_AVATAR_V31';g.userData.dynamic=true;scene.add(g);
+  const skin=new THREE.MeshStandardMaterial({color:0xc99673,roughness:.80});
+  const skinWarm=new THREE.MeshStandardMaterial({color:0xb87958,roughness:.84});
+  const cloth=new THREE.MeshStandardMaterial({color:0x24483a,roughness:.68});
+  const clothDark=new THREE.MeshStandardMaterial({color:0x19372d,roughness:.72});
   const trouser=new THREE.MeshStandardMaterial({color:0x303733,roughness:.82});
-  const shoe=new THREE.MeshStandardMaterial({color:0x211f1d,roughness:.68});
+  const shoe=new THREE.MeshStandardMaterial({color:0x1f211f,roughness:.62});
   const hair=new THREE.MeshStandardMaterial({color:0x2a2420,roughness:.90});
+  const bronze=new THREE.MeshStandardMaterial({color:0xb18a58,roughness:.48,metalness:.22});
   const cast=!lowPower;
 
-  const torsoGroup=new THREE.Group();torsoGroup.position.y=1.23;g.add(torsoGroup);
-  const torso=mesh(torsoGroup,new THREE.CylinderGeometry(.245,.30,.72,lowPower?10:16),cloth,0,0,0,{cast});
-  box(torsoGroup,.70,.15,.24,cloth,0,.25,0,{cast});
-  const headGroup=new THREE.Group();headGroup.position.y=1.87;g.add(headGroup);
-  const head=mesh(headGroup,new THREE.SphereGeometry(.205,lowPower?12:18,lowPower?8:14),skin,0,0,0,{cast});head.scale.set(.92,1.05,.94);
-  const hairCap=mesh(headGroup,new THREE.SphereGeometry(.211,lowPower?10:16,lowPower?7:10,0,Math.PI*2,0,Math.PI*.50),hair,0,.07,-.005,{cast});hairCap.scale.set(.94,.88,.96);
+  // pelvis + torso: less blocky silhouette.
+  const hipsGroup=new THREE.Group();hipsGroup.position.y=.93;g.add(hipsGroup);
+  mesh(hipsGroup,new THREE.CylinderGeometry(.225,.255,.28,lowPower?10:14),trouser,0,0,0,{cast});
 
-  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.13,.90,0);rightLeg.position.set(.13,.90,0);g.add(leftLeg,rightLeg);
-  const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();leftKnee.position.y=-.31;rightKnee.position.y=-.31;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
-  cyl(leftLeg,.072,.078,.34,trouser,0,-.17,0,lowPower?7:10,{cast});cyl(rightLeg,.072,.078,.34,trouser,0,-.17,0,lowPower?7:10,{cast});
-  cyl(leftKnee,.060,.068,.32,trouser,0,-.17,0,lowPower?7:10,{cast});cyl(rightKnee,.060,.068,.32,trouser,0,-.17,0,lowPower?7:10,{cast});
-  box(leftKnee,.15,.09,.30,shoe,0,-.37,.065,{cast});box(rightKnee,.15,.09,.30,shoe,0,-.37,.065,{cast});
+  const torsoGroup=new THREE.Group();torsoGroup.position.y=1.30;g.add(torsoGroup);
+  const torso=mesh(torsoGroup,new THREE.CylinderGeometry(.235,.29,.73,lowPower?12:18),cloth,0,0,0,{cast});
+  torso.scale.z=.88;
+  box(torsoGroup,.68,.14,.225,clothDark,0,.26,0,{cast});
+  // jacket front panels + subtle bronze zip line.
+  box(torsoGroup,.27,.54,.018,clothDark,-.145,-.02,.215,{cast:false});
+  box(torsoGroup,.27,.54,.018,cloth,.145,-.02,.215,{cast:false});
+  box(torsoGroup,.018,.53,.024,bronze,0,-.02,.229,{cast:false});
 
-  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.34,1.52,0);rightArm.position.set(.34,1.52,0);g.add(leftArm,rightArm);
-  cyl(leftArm,.050,.058,.56,cloth,0,-.28,0,lowPower?7:10,{cast});cyl(rightArm,.050,.058,.56,cloth,0,-.28,0,lowPower?7:10,{cast});
+  const neck=cyl(g,.072,.082,.13,skin,0,1.70,0,lowPower?8:12,{cast});
+  const headGroup=new THREE.Group();headGroup.position.y=1.91;g.add(headGroup);
+  const head=mesh(headGroup,new THREE.SphereGeometry(.205,lowPower?14:20,lowPower?10:16),skin,0,0,0,{cast});head.scale.set(.91,1.07,.94);
+  const hairCap=mesh(headGroup,new THREE.SphereGeometry(.213,lowPower?12:18,lowPower?8:12,0,Math.PI*2,0,Math.PI*.52),hair,0,.074,-.006,{cast});hairCap.scale.set(.95,.88,.97);
+  // face landmarks: deliberately subtle.
+  const nose=mesh(headGroup,new THREE.SphereGeometry(.029,lowPower?6:9,lowPower?5:7),skinWarm,0,-.005,.195,{cast:false});nose.scale.set(.68,.72,1.08);
+  const eyeMat=new THREE.MeshBasicMaterial({color:0x241f1c});
+  [-.066,.066].forEach(x=>{const eye=mesh(headGroup,new THREE.SphereGeometry(.010,6,4),eyeMat,x,.026,.188,{cast:false,receive:false});eye.scale.z=.52});
 
-  const ring=new THREE.Mesh(new THREE.RingGeometry(.34,.38,32),new THREE.MeshBasicMaterial({color:0xc49a62,transparent:true,opacity:.28,depthWrite:false}));
-  ring.rotation.x=-Math.PI/2;ring.position.y=.015;g.add(ring);
+  // segmented legs.
+  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.135,.89,0);rightLeg.position.set(.135,.89,0);g.add(leftLeg,rightLeg);
+  const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();leftKnee.position.y=-.315;rightKnee.position.y=-.315;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  cyl(leftLeg,.073,.082,.35,trouser,0,-.175,0,lowPower?8:11,{cast});cyl(rightLeg,.073,.082,.35,trouser,0,-.175,0,lowPower?8:11,{cast});
+  cyl(leftKnee,.060,.069,.32,trouser,0,-.17,0,lowPower?8:11,{cast});cyl(rightKnee,.060,.069,.32,trouser,0,-.17,0,lowPower?8:11,{cast});
+  box(leftKnee,.16,.095,.31,shoe,0,-.375,.072,{cast});box(rightKnee,.16,.095,.31,shoe,0,-.375,.072,{cast});
 
-  const tag=npcNameTag('YOU','KŌMØ WORLD');tag.position.y=2.46;tag.scale.set(1.45,.41,1);g.add(tag);
-  g.userData.avatar={torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,tag,phase:0,facing:0};
+  // segmented arms + visible hands.
+  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.34,1.55,0);rightArm.position.set(.34,1.55,0);g.add(leftArm,rightArm);
+  const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();leftElbow.position.y=-.285;rightElbow.position.y=-.285;leftArm.add(leftElbow);rightArm.add(rightElbow);
+  cyl(leftArm,.052,.061,.31,cloth,0,-.155,0,lowPower?8:11,{cast});cyl(rightArm,.052,.061,.31,cloth,0,-.155,0,lowPower?8:11,{cast});
+  cyl(leftElbow,.045,.052,.26,skin,0,-.135,0,lowPower?8:11,{cast});cyl(rightElbow,.045,.052,.26,skin,0,-.135,0,lowPower?8:11,{cast});
+  mesh(leftElbow,new THREE.SphereGeometry(.056,lowPower?7:10,lowPower?5:8),skin,0,-.31,0,{cast});
+  mesh(rightElbow,new THREE.SphereGeometry(.056,lowPower?7:10,lowPower?5:8),skin,0,-.31,0,{cast});
+
+  // Grounding: contact shadow is far cheaper than real shadow mapping.
+  const shadow=new THREE.Mesh(new THREE.CircleGeometry(.36,lowPower?18:28),new THREE.MeshBasicMaterial({color:0x17251e,transparent:true,opacity:.16,depthWrite:false}));
+  shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;g.add(shadow);
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.38,.415,lowPower?26:40),new THREE.MeshBasicMaterial({color:0xc49a62,transparent:true,opacity:.22,depthWrite:false}));
+  ring.rotation.x=-Math.PI/2;ring.position.y=.016;g.add(ring);
+
+  const tag=npcNameTag('YOU','KŌMØ WORLD');tag.position.y=2.49;tag.scale.set(1.40,.40,1);g.add(tag);
+  g.userData.avatar={hipsGroup,torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,phase:0,facing:0};
   return g;
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
@@ -1351,6 +1378,18 @@ instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.walnut,displayCubes,
 plaque(hallLiving,'TWIN','UNDERSTAND',2.35,.58,-4.6,2.25,-25.9,{dark:true,titleSize:46});
 plaque(hallLiving,'FITNESS CLUB','TRAIN DAILY',2.55,.58,0,2.25,-25.9,{dark:false,titleSize:42});
 plaque(hallLiving,'ARENA','ENGAGE',2.35,.58,4.6,2.25,-25.9,{dark:true,titleSize:46});
+
+// V3.1 lightweight Hall Host — visible human presence at negligible draw cost.
+const hallHost=new THREE.Group();hallHost.name='KOMO_HALL_HOST_V31';hallHost.position.set(-3.95,0,9.3);building.add(hallHost);
+const hostCloth=new THREE.MeshStandardMaterial({color:0x314f40,roughness:.76});
+const hostSkin=new THREE.MeshStandardMaterial({color:0xc79370,roughness:.84});
+mesh(hallHost,new THREE.CylinderGeometry(.22,.28,.70,lowPower?8:12),hostCloth,0,1.28,0,{cast:false});
+mesh(hallHost,new THREE.SphereGeometry(.19,lowPower?9:14,lowPower?7:10),hostSkin,0,1.86,0,{cast:false});
+[-.12,.12].forEach(x=>cyl(hallHost,.055,.065,.72,MAT.blackened,x,.58,0,lowPower?6:8,{cast:false}));
+[-.31,.31].forEach(x=>cyl(hallHost,.043,.052,.60,hostSkin,x,1.27,0,lowPower?6:8,{cast:false}));
+const hostShadow=new THREE.Mesh(new THREE.CircleGeometry(.32,16),new THREE.MeshBasicMaterial({color:0x1b2a23,transparent:true,opacity:.12,depthWrite:false}));
+hostShadow.rotation.x=-Math.PI/2;hostShadow.position.y=.012;hallHost.add(hostShadow);
+hallHost.userData.dynamic=true;
 
 // Minimal planting, kept out of central axis.
 [[-8.3,-5.5,1],[8.3,-5.5,-1],[-8.3,-17,-1],[8.3,-17,1]].forEach(([x,z,m])=>{
@@ -2613,20 +2652,27 @@ function updateMovement(dt){
 function updatePlayerAvatar(now,dt){
   playerAvatar.position.set(player.x,player.y,player.z);
   const av=playerAvatar.userData.avatar;
-  const speed=velocity.length();
-  if(speed>.08){
+  const speed=velocity.length(),moving=speed>.08;
+  if(moving){
     const desired=Math.atan2(velocity.x,velocity.z);
     let d=((desired-playerFacing+Math.PI)%(Math.PI*2))-Math.PI;
     playerFacing+=d*(1-Math.exp(-12*dt));
-    av.phase+=dt*(5.2+speed*1.25);
+    av.phase+=dt*(5.1+speed*1.18);
+  }else{
+    av.phase+=dt*.75;
   }
   playerAvatar.rotation.y=playerFacing;
-  const stride=Math.sin(av.phase)*Math.min(1,speed/4.2);
+  const moveAmount=Math.min(1,speed/4.2);
+  const stride=Math.sin(av.phase)*moveAmount;
   av.leftLeg.rotation.x=stride*.46;av.rightLeg.rotation.x=-stride*.46;
-  av.leftKnee.rotation.x=Math.max(0,-stride)*.30;av.rightKnee.rotation.x=Math.max(0,stride)*.30;
-  av.leftArm.rotation.x=-stride*.32;av.rightArm.rotation.x=stride*.32;
-  av.torsoGroup.rotation.z=Math.cos(av.phase*.5)*.018*Math.min(1,speed/3);
-  av.headGroup.rotation.y=Math.sin(now*.00055)*.05;
+  av.leftKnee.rotation.x=Math.max(0,-stride)*.34;av.rightKnee.rotation.x=Math.max(0,stride)*.34;
+  av.leftArm.rotation.x=-stride*.31;av.rightArm.rotation.x=stride*.31;
+  av.leftElbow.rotation.x=Math.max(0,stride)*.12;av.rightElbow.rotation.x=Math.max(0,-stride)*.12;
+  av.torsoGroup.rotation.z=Math.cos(av.phase*.5)*.015*moveAmount;
+  av.torsoGroup.position.y=1.30+Math.sin(now*.0017)*.006*(1-moveAmount);
+  av.headGroup.rotation.y=Math.sin(now*.00055)*.045;
+  av.headGroup.rotation.x=Math.sin(now*.00041)*.012;
+  av.shadow.material.opacity=.12+.05*(1-moveAmount);
   av.tag.visible=cameraMode==='third'&&mode==='world'&&!lowPower;
 }
 function updateCamera(now,dt){
@@ -2818,7 +2864,7 @@ cameraToggle.addEventListener('click',toggleCamera);
 guideToggle.addEventListener('click',toggleGuide);
 qualityToggle.addEventListener('click',()=>{
   qualityMode=qualityMode==='auto'?'performance':qualityMode==='performance'?'high':'auto';
-  renderScale=qualityMode==='performance'?(lowPower?(retinaMobile?.78:.72):.82):qualityMode==='high'?(lowPower?(retinaMobile?1.02:.94):1.35):(lowPower?(retinaMobile?.92:.84):1.10);
+  renderScale=qualityMode==='performance'?(lowPower?(retinaMobile?.82:.74):.82):qualityMode==='high'?(lowPower?(retinaMobile?1.14:.98):1.35):(lowPower?(retinaMobile?1.04:.88):1.10);
   applyQualityProfile();notify('QUALITY · '+qualityMode.toUpperCase());
 });
 resetPosition.addEventListener('click',()=>fastTravel('arrival'));
@@ -2877,7 +2923,7 @@ function updateVisibilityBudget(now){
   const deepHall=player.z<7;
   exterior.visible=player.z>5;
   upperLevel.visible=playerLevel===1||player.z<16;
-  hallLiving.visible=player.z<19&&player.z>-29;
+  hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
   arrivalDetails.visible=player.z>1&&player.z<26;
   npcRoot.visible=true;
@@ -2905,7 +2951,7 @@ function updateVisibilityBudget(now){
 function applyEmergencyPerformance(){
   if(!emergencyPerformance)emergencyPerformance=true;
   qualityMode='performance';
-  renderScale=lowPower?(retinaMobile?.72:.66):.68;
+  renderScale=lowPower?(retinaMobile?.78:.68):.68;
   activeLightBudget=0;renderer.shadowMap.enabled=false;fill.intensity=0;
   living.lights.forEach(l=>{l.visible=false;if('intensity' in l)l.intensity=0});
   if(living.dust)living.dust.visible=false;
@@ -2922,8 +2968,8 @@ function updatePerformance(now){
   if(fpsStatus)fpsStatus.textContent=Math.round(fpsEMA)+' FPS · '+renderer.info.render.calls+' DC';
   if(fpsEMA<18&&!emergencyPerformance){applyEmergencyPerformance();notify(locale==='fr'?'Mode performance activé':'Performance mode enabled')}
   if(qualityMode==='auto'&&!emergencyPerformance){
-    const min=lowPower?(retinaMobile?.72:.66):.70;
-    const max=lowPower?(retinaMobile?.98:.88):1.25;
+    const min=lowPower?(retinaMobile?.78:.68):.70;
+    const max=lowPower?(retinaMobile?1.10:.90):1.25;
     let next=renderScale;
     if(fpsEMA<22)next=Math.max(min,renderScale-(lowPower?.07:.16));
     else if(fpsEMA<36)next=Math.max(min,renderScale-(lowPower?.045:.09));
@@ -2934,6 +2980,10 @@ function updatePerformance(now){
 }
 function animateLiving(now){
   const t=now*.001;
+  if(hallHost?.visible){
+    hallHost.rotation.y=-.38+Math.sin(t*.38)*.08;
+    hallHost.position.y=Math.sin(t*.72)*.006;
+  }
   if(!lowPower){journeyRing.rotation.z=t*.18;journeyRing.rotation.y=t*.10;}
   if(!lowPower)living.trees.forEach((tree,i)=>{
     const sway=Math.sin(t*.42+tree.userData.swayPhase+i*.17);
@@ -3065,7 +3115,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.0.2-retina-sharp',
+  version:'3.1.0-visual-polish',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
