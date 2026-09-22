@@ -52,8 +52,17 @@ function css(){
   .kwmp-talk[data-state="talking"]{background:linear-gradient(180deg,rgba(128,55,49,.98),rgba(83,35,31,.98));border-color:rgba(255,190,171,.62);box-shadow:0 0 0 5px rgba(180,85,70,.10),0 12px 34px rgba(7,12,9,.26)}
   .kwmp-talk:disabled{opacity:.42;cursor:not-allowed}
   @media(min-width:901px) and (pointer:fine){
-    .kwmp-dock{top:104px;right:22px;gap:6px;max-width:620px;flex-wrap:nowrap}
-    .kwmp-pill{height:34px;padding:0 12px;border-radius:999px;background:rgba(18,34,26,.82);border-color:rgba(255,255,255,.085);font-size:6px;letter-spacing:.10em;box-shadow:0 10px 26px rgba(8,16,11,.08)}
+    .kwmp-dock{
+      top:108px;right:24px;gap:5px;max-width:720px;flex-wrap:nowrap;
+      padding:5px;border:1px solid rgba(241,222,188,.12);border-radius:18px;
+      background:linear-gradient(145deg,rgba(14,29,22,.90),rgba(29,45,35,.80));
+      -webkit-backdrop-filter:blur(18px) saturate(1.05);backdrop-filter:blur(18px) saturate(1.05);
+      box-shadow:0 15px 40px rgba(5,13,9,.13),inset 0 1px 0 rgba(255,255,255,.035)
+    }
+    .kwmp-pill{
+      height:34px;padding:0 12px;border-radius:12px;background:transparent;border-color:transparent;
+      color:rgba(246,239,228,.78);font-size:6px;letter-spacing:.10em;box-shadow:none
+    }
     .kwmp-pill:hover{background:rgba(255,255,255,.055);border-color:rgba(216,186,134,.22)}
     .kwmp-pill[data-kwmp-voice]{display:none}
     .kwmp-chat{
@@ -68,7 +77,7 @@ function css(){
     .kwmp-head strong{font-size:17px}.kwmp-head span{font-size:6px}
     .kwmp-chat-close{width:28px;height:28px;border:1px solid rgba(255,255,255,.07);border-radius:50%;background:rgba(255,255,255,.035);color:#efe7da;cursor:pointer}
     .kwmp-chat-launcher{
-      position:fixed;z-index:93;left:22px;bottom:22px;height:58px;min-width:190px;
+      position:fixed;z-index:93;left:24px;bottom:18px;height:60px;min-width:206px;
       display:flex;align-items:center;gap:11px;padding:0 16px;border:1px solid rgba(255,255,255,.09);border-radius:18px;
       background:linear-gradient(145deg,rgba(21,37,29,.84),rgba(28,43,35,.76));
       -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
@@ -80,18 +89,18 @@ function css(){
     .kwmp-chat-launcher b{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#dfbd80;color:#203027;font-size:7px}
     .kwmp-chat.open+.kwmp-chat-launcher{display:none}
     .kwmp-voicebox{
-      display:flex;position:fixed;z-index:94;right:22px;bottom:22px;display:flex;align-items:center;gap:8px;
+      display:flex;position:fixed;z-index:94;right:24px;bottom:18px;align-items:center;gap:8px;
       padding:6px;border:1px solid rgba(255,255,255,.09);border-radius:19px;
       background:linear-gradient(145deg,rgba(21,37,29,.88),rgba(28,43,35,.80));
       -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
       box-shadow:0 18px 44px rgba(8,16,11,.15),inset 0 1px 0 rgba(255,255,255,.025)
     }
     .kwmp-talk{
-      position:static;transform:none;height:48px;min-width:172px;padding:0 17px;border-radius:14px;
+      position:static;transform:none;height:50px;min-width:188px;padding:0 18px;border-radius:14px;
       box-shadow:none;background:linear-gradient(180deg,rgba(35,57,45,.96),rgba(24,40,31,.96));font-size:7px
     }
     .kwmp-talk:hover{transform:none}
-    .kwmp-voice-toggle{display:block;height:48px;min-width:72px;padding:0 10px;border-left:1px solid rgba(255,255,255,.065);background:transparent;color:rgba(242,236,226,.62);font-size:6px;font-weight:850;letter-spacing:.08em;cursor:pointer}
+    .kwmp-voice-toggle{display:block;height:50px;min-width:74px;padding:0 11px;border-left:1px solid rgba(255,255,255,.065);background:transparent;color:rgba(242,236,226,.62);font-size:6px;font-weight:850;letter-spacing:.08em;cursor:pointer}
     .kwmp-voice-collapse{display:block;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.035);color:#e8dfd1;cursor:pointer}
     .kwmp-voicebox.collapsed .kwmp-talk{min-width:48px;width:48px;padding:0;font-size:0}
     .kwmp-voicebox.collapsed .kwmp-talk:before{content:"🎙";font-size:16px}
@@ -144,7 +153,7 @@ function ui(){
   const drawer=document.createElement('aside');drawer.id='kwmpChat';drawer.className='kwmp-chat';drawer.setAttribute('aria-hidden','true');
   drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · SOCIAL</span><strong>World Chat</strong></div><div style="display:flex;gap:6px"><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button><button type="button" class="kwmp-chat-close" data-kwmp-chat-close aria-label="Fermer le chat">×</button></div></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget" data-kwmp-target>WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">Les données de santé ne sont jamais partagées dans World.</div>';
   document.body.appendChild(drawer);
-  const chatLauncher=document.createElement('button');chatLauncher.type='button';chatLauncher.id='kwmpChatLauncher';chatLauncher.className='kwmp-chat-launcher';chatLauncher.innerHTML='<i>◯</i><span>WORLD CHAT</span><b data-kwmp-unread>0</b>';document.body.appendChild(chatLauncher);
+  const chatLauncher=document.createElement('button');chatLauncher.type='button';chatLauncher.id='kwmpChatLauncher';chatLauncher.className='kwmp-chat-launcher';chatLauncher.innerHTML='<i>◔</i><span>WORLD CHAT</span><b data-kwmp-unread>0</b>';document.body.appendChild(chatLauncher);
   return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:voicebox.querySelector('[data-kwmp-voice]'),talk,voicebox,voiceCollapse:voicebox.querySelector('[data-kwmp-voice-collapse]'),chatLauncher,social:dock.querySelector('[data-kwmp-social]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
 }
 function labelSprite(THREE,text,subtitle='PULSE MEMBER'){
@@ -679,12 +688,6 @@ export async function mount(runtime){
     if(tag==='INPUT'||tag==='TEXTAREA'||a?.isContentEditable)return;
     e.preventDefault();openChat();
   });
-  document.addEventListener('keydown',e=>{
-    if(e.code!=='KeyT'||e.repeat||e.metaKey||e.ctrlKey||e.altKey)return;
-    const a=document.activeElement,tag=a?.tagName;if(tag==='INPUT'||tag==='TEXTAREA'||a?.isContentEditable)return;
-    e.preventDefault();startTalking();
-  });
-  document.addEventListener('keyup',e=>{if(e.code==='KeyT'){e.preventDefault();stopTalking()}});
 
   U.form.addEventListener('submit',async e=>{
     e.preventDefault();if(!state.presenceLive||!state.session?.user)return;
@@ -765,5 +768,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.7.0-desktop-hud',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.7.1-desktop-clarity',connect:openPulse,state};
 }
