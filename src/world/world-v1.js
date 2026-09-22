@@ -1518,6 +1518,12 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',x:5.4,y:0,z:-18.4,outfit:'charcoal',sp
   makeNpc(npcRoot,{role:'visitor',label:'Mila',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
     [8.72,UPPER_Y,-3.0],[8.72,UPPER_Y,-10.5],[8.72,UPPER_Y,-18.0],[3.6,UPPER_Y,-21.2],[.4,UPPER_Y,-21.2]
   ]});
+  makeNpc(npcRoot,{role:'coach',label:'Nora',x:-7.5,y:0,z:55.5,outfit:'sage',speed:.36,phase:.35,route:[
+    [-7.5,0,55.5],[-3.0,0,60.5],[0,0,62.5],[3.0,0,60.5],[7.5,0,55.5],[0,0,58.0]
+  ]});
+  makeNpc(npcRoot,{role:'visitor',label:'Jules',x:10.5,y:0,z:64.0,outfit:'sand',speed:.31,phase:.58,route:[
+    [10.5,0,64.0],[15.0,0,68.0],[10.5,0,72.5],[4.2,0,70.0],[3.5,0,64.0]
+  ]});
 }
 // Living atmosphere — subtle, non-game-like movement.
 const dustCount=lowPower?0:78;
