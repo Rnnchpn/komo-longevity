@@ -745,27 +745,30 @@ export async function mount(runtime){
         const near=distance<28;
         av.tag.visible=distance<90;
         if(av.tag.visible){
-          const k=Math.max(1,Math.min(1.85,1+distance*.014));
-          av.tag.scale.set(2.25*k,.64*k,1);
+          const k=Math.max(1,Math.min(1.48,1+distance*.008));
+          av.tag.scale.set(1.72*k,.43*k,1);
         }
         if(av.beacon){
-          av.beacon.visible=distance>7&&distance<90;
-          av.beacon.material.opacity=THREE.MathUtils.clamp(.34-distance*.0025,.12,.32);
+          av.beacon.visible=distance>15&&distance<90;
+          av.beacon.material.opacity=THREE.MathUtils.clamp(.18-distance*.0012,.06,.16);
         }
         if(av.beaconTop){
-          av.beaconTop.visible=distance>5&&distance<90;
-          const pulse=1+.12*Math.sin(performance.now()*.004);
+          av.beaconTop.visible=distance>15&&distance<90;
+          const pulse=1+.07*Math.sin(performance.now()*.0032);
           av.beaconTop.scale.setScalar(pulse);
         }
-        if(av.ring)av.ring.material.opacity=distance<30?.56:.34;
+        if(av.ring)av.ring.material.opacity=distance<18?.18:.10;
         if(near&&speed>.002){
-          av.leftLeg.rotation.x=stride*.38;av.rightLeg.rotation.x=-stride*.38;
-          av.leftKnee.rotation.x=Math.max(0,-stride)*.28;av.rightKnee.rotation.x=Math.max(0,stride)*.28;
-          av.leftArm.rotation.x=-stride*.28;av.rightArm.rotation.x=stride*.28;
-          av.leftElbow.rotation.x=Math.max(0,stride)*.14;av.rightElbow.rotation.x=Math.max(0,-stride)*.14;
-          av.torso.rotation.z=Math.cos(av.walkPhase*.5)*.017;
-          av.hips.rotation.y=Math.sin(av.walkPhase*.5)*.025;
-          av.head.rotation.y=Math.sin(av.walkPhase*.24)*.06;
+          av.leftLeg.rotation.x=stride*.34;av.rightLeg.rotation.x=-stride*.34;
+          av.leftKnee.rotation.x=Math.max(0,-stride)*.36;av.rightKnee.rotation.x=Math.max(0,stride)*.36;
+          av.leftArm.rotation.x=-stride*.23;av.rightArm.rotation.x=stride*.23;
+          av.leftElbow.rotation.x=Math.max(0,stride)*.12;av.rightElbow.rotation.x=Math.max(0,-stride)*.12;
+          av.torso.rotation.z=Math.cos(av.walkPhase*.5)*.012;
+          av.torso.rotation.y=Math.sin(av.walkPhase*.5)*.016;
+          av.hips.rotation.y=Math.sin(av.walkPhase*.5)*.026;
+          av.head.rotation.y=Math.sin(av.walkPhase*.24)*.045;
+          if(av.leftShoe)av.leftShoe.rotation.x=-Math.max(0,-stride)*.10;
+          if(av.rightShoe)av.rightShoe.rotation.x=-Math.max(0,stride)*.10;
         }else{
           av.leftLeg.rotation.x*=.78;av.rightLeg.rotation.x*=.78;
           av.leftArm.rotation.x*=.78;av.rightArm.rotation.x*=.78;
