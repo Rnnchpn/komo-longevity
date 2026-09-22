@@ -6,6 +6,7 @@ const canvas=$('#world-canvas');
 const loader=$('#world-loader');
 const intro=$('#intro');
 const languageToggle=$('#language-toggle');
+const locationChip=$('.location-chip');
 const locationName=$('#location-name');
 const headingEl=$('#location-heading');
 const interactionEl=$('#interaction');
@@ -784,9 +785,9 @@ function bodySegment(parent,a,b,r,material){
 }
 
 const world=new THREE.Group();world.name='KOMO_WORLD_V1';scene.add(world);
-const twinRoom=new THREE.Group();twinRoom.name='KOMO_TWIN_V1';twinRoom.visible=false;scene.add(twinRoom);
-const rehabRoom=new THREE.Group();rehabRoom.name='KOMO_FITNESS_CLUB_V29';rehabRoom.visible=false;scene.add(rehabRoom);
-const arenaRoom=new THREE.Group();arenaRoom.name='KOMO_ARENA_V1';arenaRoom.visible=false;scene.add(arenaRoom);
+const twinRoom=new THREE.Group();twinRoom.name='KOMO_TWIN_V1';twinRoom.visible=true;scene.add(twinRoom);
+const rehabRoom=new THREE.Group();rehabRoom.name='KOMO_FITNESS_CLUB_V29';rehabRoom.visible=true;scene.add(rehabRoom);
+const arenaRoom=new THREE.Group();arenaRoom.name='KOMO_ARENA_V1';arenaRoom.visible=true;scene.add(arenaRoom);
 
 // Landscape + arrival.
 mesh(world,new THREE.PlaneGeometry(150,170),M.ground,0,-.04,8,{receive:true}).rotation.x=-Math.PI/2;
@@ -1839,6 +1840,27 @@ glow(building,0xf0cd9d,2.6,13,-8.0,5.6,6);
 glow(building,0xf0cd9d,2.6,13,8.0,5.6,6);
 glow(building,0xecc492,3.7,16,0,5.4,-25);
 
+// V3.7 One World — physical circulation links every zone into a single continuous campus.
+const oneWorldLinks=new THREE.Group();oneWorldLinks.name='KOMO_ONE_WORLD_LINKS_V37';world.add(oneWorldLinks);
+function campusPath(w,d,x,z){
+  box(oneWorldLinks,w,.10,d,MAT.travertine,x,.045,z,{receive:true});
+  if(w>d){
+    line(oneWorldLinks,w-.5,.035,x,z-d*.28,M.bronzeSoft,.105);
+    line(oneWorldLinks,w-.5,.035,x,z+d*.28,M.bronzeSoft,.105);
+  }else{
+    const a=box(oneWorldLinks,.035,.018,d-.5,M.bronzeSoft,x-w*.28,.108,z,{cast:false,receive:false});
+    const b=box(oneWorldLinks,.035,.018,d-.5,M.bronzeSoft,x+w*.28,.108,z,{cast:false,receive:false});
+  }
+}
+campusPath(25,5.2,-22.0,-24.0);
+campusPath(5.2,22.5,-32.1,-13.0);
+campusPath(25,5.2,22.0,-24.0);
+campusPath(5.2,22.5,32.1,-13.0);
+campusPath(8.0,16.0,0,-35.5);
+plaque(oneWorldLinks,'TWIN','UNDERSTAND',3.3,.72,-26.8,2.15,-23.85,{dark:true,titleSize:55});
+plaque(oneWorldLinks,'FITNESS','MOVE',3.3,.72,0,2.15,-31.2,{dark:true,titleSize:55});
+plaque(oneWorldLinks,'ARENA','ENGAGE',3.3,.72,26.8,2.15,-23.85,{dark:true,titleSize:55});
+
 // Functional Twin room.
 twinRoom.position.set(-45,0,0);
 mesh(twinRoom,new THREE.CircleGeometry(13,96),M.sageDeep,0,.01,-2).rotation.x=-Math.PI/2;
@@ -2288,15 +2310,58 @@ function updateHealthHUD(){
 }
 function healthOverviewHtml(){
   const snap=current(),d=snap.domains||{};
-  const rows=[
-    ['MUSCLE',d.muscle], [locale==='fr'?'MOBILITÉ':'MOBILITY',d.mobility],
-    [locale==='fr'?'ÉQUILIBRE':'BALANCE',d.balance],['POSTURE',d.posture],['CAPACITY',d.endurance]
+  const score=Math.round(Number(snap.motion_score)||0),age=Math.round(Number(snap.motion_age)||0);
+  const baseScore=Math.round(Number(baseline.motion_score)||0),baseAge=Math.round(Number(baseline.motion_age)||0);
+  const scoreDelta=score-baseScore,ageDelta=age-baseAge;
+  const domains=[
+    ['muscle','MUSCLE',d.muscle],['mobility',locale==='fr'?'MOBILITÉ':'MOBILITY',d.mobility],
+    ['balance',locale==='fr'?'ÉQUILIBRE':'BALANCE',d.balance],['posture','POSTURE',d.posture],
+    ['endurance',locale==='fr'?'CAPACITÉ':'CAPACITY',d.endurance]
   ];
+  const weakest=[...domains].sort((a,b)=>(Number(a[2])||0)-(Number(b[2])||0))[0];
+  const strongest=[...domains].sort((a,b)=>(Number(b[2])||0)-(Number(a[2])||0))[0];
+  const trend=scoreDelta>1?(locale==='fr'?'EN PROGRESSION':'IMPROVING'):scoreDelta<-1?(locale==='fr'?'À SUIVRE':'WATCH'):(locale==='fr'?'STABLE':'STABLE');
+  const domainCards=domains.map(([id,label,val])=>{
+    const v=Math.round(Number(val)||0),base=Math.round(Number(baseline.domains?.[id])||0),delta=v-base;
+    const tone=v>=80?'high':v>=65?'mid':'watch';
+    const status=v>=80?(locale==='fr'?'POINT FORT':'STRONG'):v>=65?(locale==='fr'?'SOLIDE':'SOLID'):(locale==='fr'?'À EXPLORER':'EXPLORE');
+    return `<article class="result-domain ${tone}">
+      <div><span>${label}</span><em>${status}</em></div>
+      <strong>${v}<small>/100</small></strong>
+      <i><b style="width:${THREE.MathUtils.clamp(v,0,100)}%"></b></i>
+      <footer><span>Baseline ${base}</span><b class="${delta>=0?'positive':'negative'}">${delta>=0?'+':''}${delta}</b></footer>
+    </article>`;
+  }).join('');
   return `
-    <div class="metric-hero"><div><span>MOTION SCORE</span><strong>${snap.motion_score}<em>/100</em></strong></div><div><span>MOTION AGE</span><strong>${snap.motion_age}</strong></div></div>
-    <div class="health-overview">${rows.map(([label,val])=>`<div class="health-row"><span>${label}</span><i><em style="width:${THREE.MathUtils.clamp(Number(val)||0,0,100)}%"></em></i><b>${Math.round(Number(val)||0)}</b></div>`).join('')}</div>
-    <div class="priority-card"><b>${locale==='fr'?'COMMENT LIRE CET APERÇU':'HOW TO READ THIS'}</b>${locale==='fr'?'Il résume les domaines de mouvement suivis dans le Functional Twin. Ouvrez le Twin pour comprendre chaque domaine et son évolution dans le temps.':'It summarises movement domains tracked in Functional Twin. Open Twin to understand each domain and its change over time.'}</div>
-    <div class="data-note">${locale==='fr'?'Aperçu informatif du mouvement, pas un diagnostic. Les valeurs sont actuellement celles du jeu de démonstration TwinCore tant que Pulse personnel n’est pas connecté.':'Informational movement overview, not a diagnosis. Values currently use the TwinCore demo dataset until a personal Pulse session is connected.'}</div>`;
+    <section class="results-dashboard">
+      <div class="results-hero">
+        <div class="results-score">
+          <span>MOTION SCORE</span>
+          <strong>${score}<small>/100</small></strong>
+          <em>${trend}</em>
+        </div>
+        <div class="results-age">
+          <span>MOTION AGE</span>
+          <strong>${age}</strong>
+          <small>${locale==='fr'?'Baseline':'Baseline'} ${baseAge} · ${ageDelta===0?'—':(ageDelta>0?'+':'')+ageDelta}</small>
+        </div>
+        <div class="results-change">
+          <span>${locale==='fr'?'DEPUIS LA BASELINE':'SINCE BASELINE'}</span>
+          <strong class="${scoreDelta>=0?'positive':'negative'}">${scoreDelta>=0?'+':''}${scoreDelta}</strong>
+          <small>Motion Score</small>
+        </div>
+      </div>
+      <div class="results-context">
+        <div><span>${locale==='fr'?'POINT FORT ACTUEL':'CURRENT STRENGTH'}</span><b>${strongest[1]} · ${Math.round(Number(strongest[2])||0)}</b></div>
+        <div><span>${locale==='fr'?'À EXPLORER':'EXPLORE NEXT'}</span><b>${weakest[1]} · ${Math.round(Number(weakest[2])||0)}</b></div>
+      </div>
+      <div class="results-domains">${domainCards}</div>
+      <div class="results-reading">
+        <b>${locale==='fr'?'COMMENT LIRE VOS RÉSULTATS':'HOW TO READ YOUR RESULTS'}</b>
+        <p>${locale==='fr'?'Le Motion Score synthétise votre profil de mouvement. Les cinq domaines permettent de comprendre ce qui contribue au score et comment votre profil évolue dans le temps.':'Motion Score summarises your movement profile. The five domains show what contributes to the score and how your profile changes over time.'}</p>
+      </div>
+      <div class="data-note">${locale==='fr'?'Aperçu informatif du mouvement, pas un diagnostic. Les valeurs affichées restent des données de démonstration tant que Pulse personnel n’est pas connecté.':'Informational movement overview, not a diagnosis. Values remain demo data until a personal Pulse session is connected.'}</div>
+    </section>`;
 }
 function showHealthOverview(){
   openPanel(locale==='fr'?'VOTRE SANTÉ · MOUVEMENT':'YOUR HEALTH · MOVEMENT',locale==='fr'?'Comprendre votre état en un coup d’œil.':'Understand your movement status at a glance.',healthOverviewHtml(),[
@@ -2443,7 +2508,7 @@ function guideTarget(){
   return journeyTargets[m.id]||null;
 }
 function updateJourneyGuide(now){
-  if(!guideEnabled||mode!=='world'){guideRoot.visible=false;return}
+  if(!guideEnabled){guideRoot.visible=false;return}
   const target=guideTarget();if(!target){guideRoot.visible=false;return}
   guideRoot.visible=true;
   if(now-guideLastUpdate<90)return;guideLastUpdate=now;
@@ -2523,11 +2588,11 @@ function openPanel(kicker,title,html,actions=[]){
 function deskHtml(){
   const s=current();
   if(locale==='fr')return `
-    <p>Votre World organise votre parcours autour de trois espaces. Aucun personnage d'accueil : le Desk est simplement votre point d'orientation.</p>
+    <p>KŌMØ World est désormais un campus continu : marchez librement entre Functional Twin, Fitness Club, Arena, Life et les espaces de découverte.</p>
     <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>ÉTAT ACTUEL</span><b>Motion ${s.motion_score}</b></div></div>
     <div class="priority-card"><b>PROCHAINE ÉTAPE</b>Commencez par le Functional Twin pour voir votre état actuel et votre progression depuis la baseline.</div>`;
   return `
-    <p>Your World is organised around three spaces. There is no reception avatar: the Desk is simply your orientation point.</p>
+    <p>KŌMØ World is one continuous campus: move freely between Functional Twin, Fitness Club, Arena, Life and discovery spaces.</p>
     <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>CURRENT STATE</span><b>Motion ${s.motion_score}</b></div></div>
     <div class="priority-card"><b>NEXT STEP</b>Start with Functional Twin to review your current state and progression from baseline.</div>`;
 }
@@ -2579,26 +2644,31 @@ function updateTwinVisuals(){
   updateBiomechTwin();
 }
 function twinDomainHtml(id){
-  const s=current(),value=Number(s.domains?.[id])||0,base=Number(baseline.domains?.[id])||0,delta=value-base;
+  const s=current(),value=Math.round(Number(s.domains?.[id])||0),base=Math.round(Number(baseline.domains?.[id])||0),delta=value-base;
   const explanations={
-    muscle:{fr:'Lecture des capacités musculaires observées dans le bilan et leur évolution temporelle.',en:'View muscular capability signals from the assessment and their change over time.'},
-    mobility:{fr:'Lecture de la mobilité fonctionnelle et de la qualité de déplacement.',en:'View functional mobility and movement quality.'},
-    balance:{fr:'Lecture de l’équilibre et du contrôle fonctionnel.',en:'View balance and functional control.'},
-    posture:{fr:'Lecture des indicateurs de posture intégrés au Twin.',en:'View posture indicators integrated into the Twin.'},
-    endurance:{fr:'Lecture de la capacité fonctionnelle et de sa trajectoire.',en:'View functional capacity and its trajectory.'}
+    muscle:{fr:'Capacités musculaires observées dans le bilan et évolution depuis la baseline.',en:'Muscular capability signals and change from baseline.'},
+    mobility:{fr:'Mobilité fonctionnelle et qualité de déplacement.',en:'Functional mobility and movement quality.'},
+    balance:{fr:'Équilibre et contrôle fonctionnel.',en:'Balance and functional control.'},
+    posture:{fr:'Indicateurs de posture intégrés à votre trajectoire.',en:'Posture indicators within your trajectory.'},
+    endurance:{fr:'Capacité fonctionnelle et évolution dans le temps.',en:'Functional capacity and change over time.'}
   };
+  const status=value>=80?(locale==='fr'?'POINT FORT':'STRONG'):value>=65?(locale==='fr'?'SOLIDE':'SOLID'):(locale==='fr'?'À EXPLORER':'EXPLORE');
   return `
-    <div class="twin-domain-hero"><span>${twinDomainName(id).toUpperCase()}</span><strong>${value}<em>/100</em></strong></div>
-    <div class="twin-domain-track"><i style="width:${value}%"></i></div>
-    <div class="panel-grid">
-      <div><span>BASELINE</span><b>${base}</b></div>
-      <div><span>${locale==='fr'?'AUJOURD’HUI':'TODAY'}</span><b>${value}</b></div>
-      <div><span>DELTA</span><b>${delta>=0?'+':''}${delta}</b></div>
-      <div><span>SOURCE</span><b>TWIN</b></div>
-    </div>
-    <p>${explanations[id]?.[locale]||''}</p>
-    <div class="priority-card"><b>BODY MAP</b>${locale==='fr'?'La zone correspondante est mise en évidence sur le jumeau biomécanique dans la salle.':'The corresponding zone is highlighted on the biomechanical twin in the room.'}</div>
-    <div class="data-note">${locale==='fr'?'Valeurs de démonstration TwinCore tant que la session Pulse personnelle n’est pas connectée.':'TwinCore demo values until the personal Pulse session is connected.'}</div>`;
+    <section class="domain-result">
+      <div class="domain-result-head">
+        <div><span>${twinDomainName(id).toUpperCase()}</span><em>${status}</em></div>
+        <strong>${value}<small>/100</small></strong>
+      </div>
+      <div class="domain-result-track"><i style="width:${THREE.MathUtils.clamp(value,0,100)}%"></i></div>
+      <div class="domain-result-comparison">
+        <div><span>BASELINE</span><b>${base}</b></div>
+        <div><span>${locale==='fr'?'AUJOURD’HUI':'TODAY'}</span><b>${value}</b></div>
+        <div><span>DELTA</span><b class="${delta>=0?'positive':'negative'}">${delta>=0?'+':''}${delta}</b></div>
+      </div>
+      <p>${explanations[id]?.[locale]||''}</p>
+      <div class="results-reading"><b>BODY MAP</b><p>${locale==='fr'?'La zone correspondante est mise en évidence directement sur votre jumeau biomécanique dans le Functional Twin.':'The corresponding area is highlighted directly on your biomechanical twin in Functional Twin.'}</p></div>
+      <div class="data-note">${locale==='fr'?'Valeurs de démonstration TwinCore tant que Pulse personnel n’est pas connecté.':'TwinCore demo values until personal Pulse is connected.'}</div>
+    </section>`;
 }
 function showTwinDomain(id){
   twinActiveDomain=id;updateTwinVisuals();
@@ -2620,7 +2690,7 @@ function setRehabCoachStation(id,running=false){
   rehabCoachState.station=id||'control';rehabCoachState.running=!!running;rehabCoachState.phase=0;resetRehabCoach();
 }
 function animateRehabCoach(now,dt){
-  if(mode!=='rehab'||!rehabCoach.visible)return;
+  if(!rehabCoach.visible||!inFitnessZone())return;
   const a=rehabCoach.userData.coach,t=now*.001;
   rehabCoachState.phase+=dt*(rehabCoachState.running?1:0.45);
   const p=rehabCoachState.phase;
@@ -3128,24 +3198,24 @@ function showNpcConversation(npc){
   else actions.push({label:locale==='fr'?'VOIR LE JOURNEY':'VIEW JOURNEY',primary:true,onClick:showJourneyPanel});
   openPanel(d.label||'KŌMØ MEMBER',q?q.title[locale]:(d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'FITNESS COACH':'WORLD GUEST'),`<p>${body}</p><div class="priority-card"><b>${q?q.title[locale]:'WORLD JOURNEY'}</b>${q?(locale==='fr'?'Objectif disponible · récompense XP':'Objective available · XP reward'):(locale==='fr'?'Échange social · +15 XP':'Social interaction · +15 XP')}</div>`,actions);
 }
-function setMode(next){
-  if(next!=='rehab')stopRehabSession();
-  mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';rehabCoach.visible=next==='rehab';
+function setMode(){
+  mode='world';
+  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true;rehabCoach.visible=true;
 }
 function enterTwin(){
   completeJourney('twin');completeChallenge('twin');
-  playerLevel=0;setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';syncQuickNav('twin');
+  playerLevel=0;setMode();player.set(-45,0,8.7);velocity.set(0,0,0);yaw=targetYaw=0;pitch=targetPitch=-.03;updateLocation();
 }
 function enterRehab(){
   completeJourney('rehab');
-  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='KŌMØ FITNESS CLUB';syncQuickNav('');
+  playerLevel=0;setMode();player.set(0,0,-44.5);velocity.set(0,0,0);yaw=targetYaw=0;pitch=targetPitch=-.03;updateLocation();
 }
 function enterArena(){
   completeJourney('arena');completeChallenge('arena_visit');
-  playerLevel=0;setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';syncQuickNav('');
+  playerLevel=0;setMode();player.set(45,0,8.8);velocity.set(0,0,0);yaw=targetYaw=0;pitch=targetPitch=-.03;updateLocation();
 }
 function returnToHall(){
-  playerLevel=0;setMode('world');player.set(0,0,-22.5);velocity.set(0,0,0);yaw=0;pitch=-.03;closePanel();updateLocation();notify(locale==='fr'?'KŌMØ HALL':'KŌMØ HALL');
+  playerLevel=0;setMode();player.set(0,0,-22.5);velocity.set(0,0,0);yaw=targetYaw=0;pitch=targetPitch=-.03;closePanel();updateLocation();
 }
 
 function isStairPosition(p){
@@ -3171,19 +3241,20 @@ function syncPlayerElevation(){
   }
   player.y=playerLevel===1?UPPER_Y:0;
 }
+function inTwinZone(p=player){return p.x>-56&&p.x<-33.5&&p.z>-12.5&&p.z<11.5}
+function inFitnessZone(p=player){return p.x>-10.5&&p.x<10.5&&p.z>-67&&p.z<-43}
+function inArenaZone(p=player){return p.x>33.5&&p.x<56&&p.z>-12.5&&p.z<11.5}
+function inTwinLink(p=player){return ((p.x>-34.5&&p.x<-10.4&&p.z>-27.8&&p.z<-20.8)||(p.x>-34.5&&p.x<-29.5&&p.z>-24.8&&p.z<-1.0))}
+function inArenaLink(p=player){return ((p.x>10.4&&p.x<34.5&&p.z>-27.8&&p.z<-20.8)||(p.x>29.5&&p.x<34.5&&p.z>-24.8&&p.z<-1.0))}
+function inFitnessLink(p=player){return p.x>-4.4&&p.x<4.4&&p.z>-44.2&&p.z<-27.4}
 function canMove(p){
-  if(mode==='world'){
-    if(isStairPosition(p))return true;
-    if(playerLevel===1||player.y>UPPER_Y-.70)return isUpperWalkable(p);
-    if(p.z>81||p.z<-28.6||Math.abs(p.x)>24)return false;
-    if(p.z<16.5&&Math.abs(p.x)>11.15)return false;
-    if(p.z>=14.1&&p.z<=18.8&&Math.abs(p.x)>4.35)return false;
-    if(p.x>-10.1&&p.x<-4.7&&p.z>1.9&&p.z<6.1)return false;
-    return true;
-  }
-  if(mode==='twin')return p.x>-56&&p.x<-34&&p.z>-12&&p.z<11;
-  if(mode==='arena')return p.x>34&&p.x<56&&p.z>-12&&p.z<11;
-  if(mode==='rehab')return p.x>-10&&p.x<10&&p.z>-66&&p.z<-43;
+  if(isStairPosition(p))return true;
+  if(playerLevel===1||player.y>UPPER_Y-.70)return isUpperWalkable(p);
+  if(inTwinZone(p)||inFitnessZone(p)||inArenaZone(p)||inTwinLink(p)||inArenaLink(p)||inFitnessLink(p))return true;
+  if(p.z>81||p.z<-28.6||Math.abs(p.x)>24)return false;
+  if(p.z<16.5&&Math.abs(p.x)>11.15)return false;
+  if(p.z>=14.1&&p.z<=18.8&&Math.abs(p.x)>4.35)return false;
+  if(p.x>-10.1&&p.x<-4.7&&p.z>1.9&&p.z<6.1)return false;
   return true;
 }
 function commitMove(next){
@@ -3261,15 +3332,15 @@ function updateCamera(now,dt){
       player.z+Math.cos(yaw)*distance-Math.sin(yaw)*shoulder
     );
     // Cheap camera collision clamp for major architectural volumes.
-    if(mode==='world'&&player.z<17.2&&player.z>-28){
+    if(Math.abs(player.x)<12&&player.z<17.2&&player.z>-28){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,-10.9,10.9);
       cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-27.2,16.8);
       cameraDesired.y=THREE.MathUtils.clamp(cameraDesired.y,player.y+1.75,player.y+(playerLevel===1?3.2:6.5));
-    }else if(mode==='twin'){
+    }else if(inTwinZone()){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,-55.2,-34.8);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
-    }else if(mode==='rehab'){
+    }else if(inFitnessZone()){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,-9.2,9.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-65.2,-43.8);
-    }else if(mode==='arena'){
+    }else if(inArenaZone()){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
@@ -3288,7 +3359,7 @@ function updateCamera(now,dt){
 function updateDestinationDoors(now,dt){
   if(!living.destinationDoors?.length)return;
   living.destinationDoors.forEach((d,i)=>{
-    const near=mode==='world'&&player.z<-21.5&&player.z>-29&&Math.abs(player.x-d.x)<3.2;
+    const near=player.z<-21.5&&player.z>-29&&Math.abs(player.x-d.x)<3.2;
     const target=near?1:0;
     d.progress+=(target-d.progress)*(1-Math.exp(-(target?8.5:5.0)*dt));
     const e=d.progress*d.progress*(3-2*d.progress);
@@ -3333,23 +3404,31 @@ function syncQuickNav(zone){
     if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
   });
 }
+let lastWorldZone='';
+function showWorldZone(label){
+  if(label===lastWorldZone)return;
+  lastWorldZone=label;locationName.textContent=label;
+  locationChip?.classList.remove('show');void locationChip?.offsetWidth;locationChip?.classList.add('show');
+  clearTimeout(showWorldZone.t);showWorldZone.t=setTimeout(()=>locationChip?.classList.remove('show'),2200);
+}
 function updateLocation(){
-  if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';syncQuickNav('twin');return}
-  if(mode==='rehab'){locationName.textContent='KŌMØ FITNESS CLUB';syncQuickNav('');return}
-  if(mode==='arena'){locationName.textContent='ARENA';syncQuickNav('');return}
-  if(playerLevel===1){
-    syncQuickNav('upper');completeJourney('upper',{silent:true});
-    if(player.z<-18.8)locationName.textContent='UPPER OBSERVATORY';
-    else if(player.x<0)locationName.textContent='SCIENCE LIBRARY · LEVEL 2';
-    else locationName.textContent='LIFE LOUNGE · LEVEL 2';
-    return;
-  }
-  if(player.z>57){locationName.textContent='KŌMØ DISTRICT';syncQuickNav('hall')}
-  else if(player.z>23){locationName.textContent='ARRIVAL COURT';syncQuickNav('hall')}
-  else if(player.z>11.8){locationName.textContent='WORLD ENTRANCE';syncQuickNav('hall')}
-  else if(player.x>6.8&&player.z>-2&&player.z<7){locationName.textContent='KŌMØ LIFE';syncQuickNav('life');completeJourney('life',{silent:true})}
-  else if(player.z>-7){locationName.textContent='KŌMØ HALL';syncQuickNav('hall');completeJourney('hall',{silent:true})}
-  else{locationName.textContent='MOTION ATRIUM';syncQuickNav('hall')}
+  let label='KŌMØ HALL',nav='hall';
+  if(inTwinZone()){label='FUNCTIONAL TWIN';nav='twin';completeJourney('twin',{silent:true})}
+  else if(inFitnessZone()){label='KŌMØ FITNESS CLUB';nav='';completeJourney('rehab',{silent:true})}
+  else if(inArenaZone()){label='ARENA';nav='';completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
+  else if(playerLevel===1){
+    nav='upper';completeJourney('upper',{silent:true});
+    label=player.z<-18.8?'UPPER OBSERVATORY':player.x<0?'SCIENCE LIBRARY · LEVEL 2':'LIFE LOUNGE · LEVEL 2';
+  }else if(player.z>57)label='KŌMØ DISTRICT';
+  else if(player.z>23)label='ARRIVAL COURT';
+  else if(player.z>11.8)label='WORLD ENTRANCE';
+  else if(player.x>6.8&&player.z>-2&&player.z<7){label='KŌMØ LIFE';nav='life';completeJourney('life',{silent:true})}
+  else if(player.z>-7){label='KŌMØ HALL';completeJourney('hall',{silent:true})}
+  else if(inTwinLink())label='TWIN WALK';
+  else if(inArenaLink())label='ARENA WALK';
+  else if(inFitnessLink())label='FITNESS WALK';
+  else label='MOTION ATRIUM';
+  syncQuickNav(nav);showWorldZone(label);
 }
 function updateHeading(){
   const a=((yaw%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
@@ -3357,7 +3436,7 @@ function updateHeading(){
   headingEl.textContent=dirs[Math.round(a/(Math.PI/4))%8];
 }
 function updateInteraction(){
-  let pool=mode==='world'?interactions:mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions:mode==='arena'?arenaInteractions:[];
+  const pool=[...interactions,...twinInteractions,...rehabInteractions,...arenaInteractions];
   let best=null,bestD=Infinity;
   for(const it of pool){
     if(mode==='world'&&playerLevel===1&&it.level!==1)continue;
@@ -3388,7 +3467,7 @@ function triggerAction(){
   currentInteraction?.action?.();
 }
 function updateTwinScan(now){
-  if(mode==='twin'){
+  if(inTwinZone()){
     scanRing.position.y=.85+(Math.sin(now*.0012)*.5+.5)*3.7;
     scanRing.material.opacity=.16+(Math.sin(now*.0012)*.5+.5)*.18;
     Object.values(twinDomainVisuals).forEach((v,i)=>{
@@ -3404,7 +3483,7 @@ function updateTwinScan(now){
       });
     }
   }
-  if(mode==='rehab'){
+  if(inFitnessZone()){
     animateRehabCoach(now,Math.min(.05,(now-(updateTwinScan.lastNow||now))/1000||.016));updateTwinScan.lastNow=now;
     Object.values(rehabStationVisuals).forEach((v,i)=>{
       if(!rehabSessionTimer)v.pulse.scale.setScalar(.95+.06*Math.sin(now*.0016+i*.9));
@@ -3741,7 +3820,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.3.4-district',
+  version:'3.7.0-one-world',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
