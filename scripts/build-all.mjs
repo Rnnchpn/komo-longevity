@@ -186,7 +186,10 @@ const scripts = [
   'scripts/homepage-patient-clarity-v1.mjs',
   // Make KŌMØ Experience and the complete patient-facing continuum visible
   // before the technical product detail begins.
-  'scripts/homepage-experience-clarity-v1.mjs'
+  'scripts/homepage-experience-clarity-v1.mjs',
+  // Final home-only visual pass: add joyful Riviera colour while preserving
+  // the premium, patient-first hierarchy.
+  'scripts/homepage-colour-balance-v1.mjs'
 ];
 
 for (const script of scripts) {
