@@ -279,57 +279,57 @@ function presenceAvatar(runtime,record){
   };
 
   const hips=new THREE.Group();hips.position.y=1.04;g.add(hips);
-  let q=new THREE.Mesh(new THREE.SphereGeometry(.215,18,12),matTrouser);q.scale.set(1.06,.62,.76);hips.add(q);
+  let q=new THREE.Mesh(new THREE.SphereGeometry(.225,18,12),matTrouser);q.scale.set(1.14,.68,.82);hips.add(q);
 
   const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();
-  leftLeg.position.set(-.135,1.03,0);rightLeg.position.set(.135,1.03,0);g.add(leftLeg,rightLeg);
+  leftLeg.position.set(-.14,1.07,0);rightLeg.position.set(.14,1.07,0);g.add(leftLeg,rightLeg);
   const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();
-  leftKnee.position.y=-.46;rightKnee.position.y=-.46;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
-  q=capsule(.069,.32,matTrouser,leftLeg,-.255);q.scale.set(1.02,1,.92);
-  q=capsule(.069,.32,matTrouser,rightLeg,-.255);q.scale.set(1.02,1,.92);
-  q=capsule(.053,.30,matTrouser,leftKnee,-.235);q.scale.set(.96,1,.90);
-  q=capsule(.053,.30,matTrouser,rightKnee,-.235);q.scale.set(.96,1,.90);
+  leftKnee.position.y=-.54;rightKnee.position.y=-.54;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  q=capsule(.073,.37,matTrouser,leftLeg,-.285);q.scale.set(1.05,1,.94);
+  q=capsule(.073,.37,matTrouser,rightLeg,-.285);q.scale.set(1.05,1,.94);
+  q=capsule(.056,.35,matTrouser,leftKnee,-.275);q.scale.set(.98,1,.92);
+  q=capsule(.056,.35,matTrouser,rightKnee,-.275);q.scale.set(.98,1,.92);
 
   const makeShoe=(parent)=>{
-    const group=new THREE.Group();group.position.set(0,-.49,.075);parent.add(group);
-    const upper=new THREE.Mesh(new THREE.CapsuleGeometry(.070,.17,5,12),matShoe);upper.position.set(0,.005,.025);upper.rotation.x=Math.PI/2;upper.scale.set(.90,.82,1);group.add(upper);
-    const toe=new THREE.Mesh(new THREE.SphereGeometry(.082,14,9),matShoe);toe.position.set(0,-.006,.112);toe.scale.set(.88,.54,1.06);group.add(toe);
-    q=new THREE.Mesh(new THREE.BoxGeometry(.135,.027,.305),matSole);q.position.set(0,-.055,.045);group.add(q);
-    q=new THREE.Mesh(new THREE.BoxGeometry(.125,.038,.105),matSole);q.position.set(0,-.047,-.062);group.add(q);
+    const group=new THREE.Group();group.position.set(0,-.49,.086);parent.add(group);
+    const upper=new THREE.Mesh(new THREE.CapsuleGeometry(.078,.20,5,12),matShoe);upper.position.set(0,.008,.03);upper.rotation.x=Math.PI/2;upper.scale.set(.96,.86,1.08);group.add(upper);
+    const toe=new THREE.Mesh(new THREE.SphereGeometry(.092,14,9),matShoe);toe.position.set(0,-.008,.126);toe.scale.set(.96,.58,1.12);group.add(toe);
+    q=new THREE.Mesh(new THREE.BoxGeometry(.155,.03,.33),matSole);q.position.set(0,-.062,.05);group.add(q);
+    q=new THREE.Mesh(new THREE.BoxGeometry(.142,.042,.115),matSole);q.position.set(0,-.052,-.072);group.add(q);
     return group;
   };
   const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee);
 
-  const torso=new THREE.Group();torso.position.y=1.50;g.add(torso);
-  q=new THREE.Mesh(new THREE.CapsuleGeometry(.202,.40,7,16),matOut);q.position.y=-.01;q.scale.set(1.03,1,.76);torso.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.275,18,12),matOut);q.position.y=.155;q.scale.set(1.22,.46,.69);torso.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.205,14,9),matOutDark);q.position.y=-.305;q.scale.set(1,.24,.72);torso.add(q);
-  const shoulderGeo=new THREE.SphereGeometry(.105,14,9);
-  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(-.292,.185,0);q.scale.set(.92,.64,.82);torso.add(q);
-  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(.292,.185,0);q.scale.set(.92,.64,.82);torso.add(q);
+  const torso=new THREE.Group();torso.position.y=1.57;g.add(torso);
+  q=new THREE.Mesh(new THREE.CapsuleGeometry(.214,.45,7,16),matOut);q.position.y=-.015;q.scale.set(1.08,1,.79);torso.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.292,18,12),matOut);q.position.y=.17;q.scale.set(1.28,.50,.72);torso.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.215,14,9),matOutDark);q.position.y=-.34;q.scale.set(1.04,.25,.74);torso.add(q);
+  const shoulderGeo=new THREE.SphereGeometry(.074,14,9);
+  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(-.248,.162,0);q.scale.set(.78,.46,.64);torso.add(q);
+  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(.248,.162,0);q.scale.set(.78,.46,.64);torso.add(q);
   q=new THREE.Mesh(new THREE.BoxGeometry(.010,.50,.014),accent);q.position.set(0,-.015,.188);torso.add(q);
   q=new THREE.Mesh(new THREE.BoxGeometry(.175,.155,.022),matOutDark);q.position.set(-.086,.295,.178);q.rotation.z=-.34;torso.add(q);
   q=new THREE.Mesh(new THREE.BoxGeometry(.175,.155,.022),matOutDark);q.position.set(.086,.295,.178);q.rotation.z=.34;torso.add(q);
   q=new THREE.Mesh(new THREE.BoxGeometry(.37,.025,.018),matOutSoft);q.position.set(0,-.355,.160);torso.add(q);
 
-  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.058,.064,.145,12),matSkin);neck.position.y=1.93;g.add(neck);
-  const head=new THREE.Group();head.position.y=2.115;g.add(head);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.160,22,16),matSkin);q.scale.set(.91,1.07,.95);head.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.112,14,10),matSkin);q.position.set(0,-.098,.014);q.scale.set(.90,.60,.87);head.add(q);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.064,.070,.125,12),matSkin);neck.position.y=2.00;g.add(neck);
+  const head=new THREE.Group();head.position.y=2.14;g.add(head);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.153,22,16),matSkin);q.scale.set(.90,1.05,.94);head.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.106,14,10),matSkin);q.position.set(0,-.093,.014);q.scale.set(.89,.59,.86);head.add(q);
   q=new THREE.Mesh(new THREE.SphereGeometry(.166,18,12,0,Math.PI*2,0,Math.PI*.55),matHair);q.position.set(0,.062,-.008);q.scale.set(.93,.84,.97);head.add(q);
   q=new THREE.Mesh(new THREE.SphereGeometry(.022,8,6),matSkinWarm);q.position.set(0,-.004,.160);q.scale.set(.58,.72,1.06);head.add(q);
 
   const leftArm=new THREE.Group(),rightArm=new THREE.Group();
-  leftArm.position.set(-.326,1.70,0);rightArm.position.set(.326,1.70,0);leftArm.rotation.z=-.042;rightArm.rotation.z=.042;g.add(leftArm,rightArm);
+  leftArm.position.set(-.305,1.73,0);rightArm.position.set(.305,1.73,0);leftArm.rotation.z=-.042;rightArm.rotation.z=.042;g.add(leftArm,rightArm);
   const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();
-  leftElbow.position.y=-.34;rightElbow.position.y=-.34;leftArm.add(leftElbow);rightArm.add(rightElbow);
-  capsule(.050,.245,matOut,leftArm,-.188);capsule(.050,.245,matOut,rightArm,-.188);
+  leftElbow.position.y=-.355;rightElbow.position.y=-.355;leftArm.add(leftElbow);rightArm.add(rightElbow);
+  capsule(.054,.255,matOut,leftArm,-.195);capsule(.054,.255,matOut,rightArm,-.195);
   q=new THREE.Mesh(new THREE.CylinderGeometry(.051,.048,.040,10),matOutSoft);q.position.y=-.337;leftArm.add(q);
   q=q.clone();rightArm.add(q);
-  capsule(.039,.215,matSkin,leftElbow,-.165);capsule(.039,.215,matSkin,rightElbow,-.165);
+  capsule(.043,.225,matSkin,leftElbow,-.175);capsule(.043,.225,matSkin,rightElbow,-.175);
 
   const makeHand=(parent)=>{
-    const h=new THREE.Mesh(new THREE.CapsuleGeometry(.032,.066,5,10),matSkin);h.position.set(0,-.365,.006);h.scale.set(.92,1.04,.64);parent.add(h);return h;
+    const h=new THREE.Mesh(new THREE.CapsuleGeometry(.038,.078,5,10),matSkin);h.position.set(0,-.39,.008);h.scale.set(.96,1.08,.72);parent.add(h);return h;
   };
   const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow);
 
@@ -867,9 +867,9 @@ export async function mount(runtime){
         if(av.ring)av.ring.material.opacity=distance<16?.075:.038;
         const idle=Math.sin(performance.now()*.0013);
         if(near&&speed>.002){
-          av.leftLeg.rotation.x=stride*.31;av.rightLeg.rotation.x=-stride*.31;
-          av.leftKnee.rotation.x=Math.max(0,-stride)*.43;av.rightKnee.rotation.x=Math.max(0,stride)*.43;
-          av.leftArm.rotation.x=-stride*.19;av.rightArm.rotation.x=stride*.19;
+          av.leftLeg.rotation.x=stride*.29;av.rightLeg.rotation.x=-stride*.29;
+          av.leftKnee.rotation.x=Math.max(0,-stride)*.40;av.rightKnee.rotation.x=Math.max(0,stride)*.40;
+          av.leftArm.rotation.x=-stride*.17;av.rightArm.rotation.x=stride*.17;
           av.leftElbow.rotation.x=.035+Math.max(0,stride)*.09;av.rightElbow.rotation.x=.035+Math.max(0,-stride)*.09;
           av.torso.rotation.z=Math.cos(av.walkPhase*.5)*.008;
           av.torso.rotation.y=Math.sin(av.walkPhase*.5)*.014;
@@ -884,7 +884,7 @@ export async function mount(runtime){
           av.torso.rotation.z*=.80;av.torso.rotation.y*=.80;
           av.hips.rotation.y*=.80;
           av.head.rotation.y=Math.sin(performance.now()*.00043)*.018;
-          av.torso.position.y=1.50+idle*.0025;
+          av.torso.position.y=1.57+idle*.0025;
         }
       }
     }
@@ -909,5 +909,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.8.1-v42-avatar-realism',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.8.2-v421-proportions',connect:openPulse,state};
 }
