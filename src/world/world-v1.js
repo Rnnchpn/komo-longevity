@@ -266,7 +266,7 @@ sunGrad.addColorStop(.50,'rgba(255,204,130,.24)');sunGrad.addColorStop(1,'rgba(2
 sunCtx.fillStyle=sunGrad;sunCtx.fillRect(0,0,256,256);
 const sunTx=new THREE.CanvasTexture(sunCanvas);sunTx.colorSpace=THREE.SRGBColorSpace;
 const sunSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:sunTx,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.90}));
-sunSprite.scale.set(34,34,1);sunSprite.name='KOMO_SKY_SUN_V18';scene.add(sunSprite);living.sunSprite=sunSprite;
+sunSprite.scale.set(lowPower?38:44,lowPower?38:44,1);sunSprite.name='KOMO_SKY_SUN_V18';scene.add(sunSprite);living.sunSprite=sunSprite;
 
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
@@ -951,6 +951,52 @@ exteriorBench(exterior,-16.1,30.3,Math.PI/2,.80);
 ].forEach(([x,y,z,intensity])=>{
   const l=glow(exterior,0xf2cf98,intensity,6,x,y,z);living.lights.push(l);
 });
+
+// V3.2 KŌMØ District — fountain, pavilions and a wider living campus.
+const worldDistrict=new THREE.Group();worldDistrict.name='KOMO_WORLD_DISTRICT_V32';world.add(worldDistrict);living.district=worldDistrict;
+box(worldDistrict,31.5,.045,23.0,MAT.travertine,0,.07,68.0);
+box(worldDistrict,9.0,.025,22.0,M.stoneLight,0,.10,68.0);
+[-4.65,4.65].forEach(x=>line(worldDistrict,.045,21.4,x,68.0,MAT.brass,.125));
+[58.5,63.0,67.5,72.0,76.5].forEach(z=>line(worldDistrict,8.7,.032,0,z,M.bronzeSoft,.128));
+
+// Grand fountain — low-cost animated jets, no dynamic lights.
+const grandFountain=new THREE.Group();grandFountain.name='KOMO_GRAND_FOUNTAIN_V32';grandFountain.position.set(0,0,68.2);worldDistrict.add(grandFountain);
+cyl(grandFountain,5.35,5.35,.36,MAT.limestone,0,.18,0,64,{cast:false});
+cyl(grandFountain,4.72,4.72,.18,M.water,0,.38,0,64,{cast:false});
+mesh(grandFountain,new THREE.RingGeometry(4.85,5.18,72),MAT.brass,0,.39,0,{cast:false}).rotation.x=-Math.PI/2;
+cyl(grandFountain,.72,.95,2.15,MAT.travertine,0,1.36,0,28,{cast:true});
+mesh(grandFountain,new THREE.SphereGeometry(.48,20,14),MAT.brass,0,2.62,0,{cast:true});
+const fountainWaterMat=new THREE.MeshBasicMaterial({color:0xc8ded5,transparent:true,opacity:.40,depthWrite:false});
+for(let i=0;i<(lowPower?6:12);i++){
+  const a=i/(lowPower?6:12)*Math.PI*2,r=3.35;
+  const jet=mesh(grandFountain,new THREE.CylinderGeometry(.025,.038,1.0,6),fountainWaterMat,Math.cos(a)*r,.95,Math.sin(a)*r,{cast:false,receive:false});
+  jet.userData.phase=i*.63;jet.userData.baseY=.95;jet.userData.dynamic=true;living.fountainJets.push(jet);
+}
+plaque(worldDistrict,'GRAND FOUNTAIN','KŌMØ DISTRICT · COMMUNITY',4.8,.92,0,2.45,61.9,{dark:true,titleSize:61});
+
+// Three exterior pavilions establish a visible district around the flagship.
+function districtPavilion(x,z,w,d,title,sub,dark=false){
+  const g=new THREE.Group();g.position.set(x,0,z);worldDistrict.add(g);
+  box(g,w,.20,d,MAT.travertine,0,.10,0);
+  box(g,w,4.8,.22,dark?M.sageDeep:MAT.smokedGlass,0,2.55,-d/2+.10);
+  box(g,.26,5.15,d,MAT.limestone,-w/2+.13,2.58,0,{cast:true});
+  box(g,.26,5.15,d,MAT.limestone,w/2-.13,2.58,0,{cast:true});
+  box(g,w,.28,d,MAT.limestone,0,5.05,0,{cast:true});
+  box(g,w-.55,.04,d-.45,M.warm,0,4.82,0);
+  plaque(g,title,sub,Math.min(w-1,5.2),.82,0,4.25,-d/2-.05,{dark,titleSize:52});
+  return g;
+}
+districtPavilion(-14.6,68.0,7.2,8.8,'MOVEMENT HOUSE','COMMUNITY · EVENTS',false);
+districtPavilion(14.6,68.0,7.2,8.8,'LIFE LAB','OBJECTS · RECOVERY',true);
+districtPavilion(0,77.0,9.0,5.2,'PERFORMANCE PAVILION','CHALLENGES · TALKS',true);
+
+[-1,1].forEach(side=>{
+  exteriorBench(worldDistrict,side*7.2,61.0,side>0?-Math.PI/2:Math.PI/2,.82);
+  tree(worldDistrict,side*9.0,75.0,.62);
+  tree(worldDistrict,side*19.2,61.0,.56);
+});
+bannerTotem(worldDistrict,-10.8,58.5,'WORLD','CHALLENGES',.05);
+bannerTotem(worldDistrict,10.8,58.5,'KŌMØ LIFE','DISTRICT',-.05);
 
 // Main building — one continuous architectural object, no reception avatar.
 const building=new THREE.Group();building.name='KOMO_MAIN_BUILDING_V1';world.add(building);
@@ -2082,7 +2128,7 @@ function setCameraMode(next){
 function toggleCamera(){setCameraMode(cameraMode==='third'?'first':'third')}
 setCameraMode('third');
 const travelPoints={
-  arrival:{mode:'world',x:0,y:0,z:66.0,yaw:Math.PI,level:0},
+  arrival:{mode:'world',x:0,y:0,z:58.5,yaw:Math.PI,level:0},
   hall:{mode:'world',x:0,y:0,z:13.8,yaw:0,level:0},
   twin:{mode:'world',x:-5.9,y:0,z:-22.2,yaw:0,level:0},
   rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
@@ -2091,7 +2137,7 @@ const travelPoints={
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
 };
 const journeyTargets={
-  arrival:{x:0,y:0,z:66.0},hall:{x:0,y:0,z:13.8},journey:{x:4.8,y:0,z:8.5},
+  arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:13.8},journey:{x:4.8,y:0,z:8.5},
   twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
   life:{x:8.4,y:0,z:3.4},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
@@ -3057,6 +3103,7 @@ function updateVisibilityBudget(now){
   // Coarse occlusion/distance budget: do not draw whole zones when they cannot contribute.
   const deepHall=player.z<7;
   exterior.visible=player.z>5;
+  if(living.district)living.district.visible=player.z>35;
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
@@ -3173,13 +3220,20 @@ function animateLiving(now){
   if(living.skyDome){
     living.skyDome.position.copy(camera.position);
   }
-  if(!lowPower&&living.clouds?.length){
+  if(living.clouds?.length){
     living.clouds.forEach((cloud,i)=>{
       let x=cloud.userData.baseX+(t*cloud.userData.speed*1.8);
       while(x>105)x-=210;
       cloud.position.x=x;
       cloud.position.z+=Math.sin(t*.035+i)*.0015;
       cloud.material.opacity=(lowPower?.075:.105)+.035*(.5+.5*Math.sin(t*.08+i*.8));
+    });
+  }
+  if(living.fountainJets?.length){
+    living.fountainJets.forEach((jet,i)=>{
+      const h=.72+.52*(.5+.5*Math.sin(t*1.25+jet.userData.phase));
+      jet.scale.y=h;jet.position.y=jet.userData.baseY+(h-.72)*.38;
+      jet.material.opacity=.30+.16*(.5+.5*Math.sin(t*.9+i*.4));
     });
   }
   if(living.sunSprite&&living.skyUniforms){
