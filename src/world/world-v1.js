@@ -671,7 +671,7 @@ function makePlayerAvatar(){
   ring.rotation.x=-Math.PI/2;ring.position.y=.016;g.add(ring);
 
   const tag=npcNameTag('YOU','KŌMØ WORLD');tag.position.y=2.49;tag.scale.set(1.40,.40,1);g.add(tag);
-  g.userData.avatar={hipsGroup,torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,phase:0,facing:0};
+  g.userData.avatar={hipsGroup,torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,phase:0,facing:0,materials:{skin,skinWarm,cloth,clothDark,trouser,shoe,hair,bronze}};
   return g;
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
@@ -1941,6 +1941,128 @@ function showJourneyPanel(){
 }
 journeyHud.addEventListener('click',showJourneyPanel);
 
+// V3.2 Health Snapshot — movement-oriented overview, separate from World XP.
+function updateHealthHUD(){
+  const snap=current(),d=snap.domains||{};
+  const score=Number(snap.motion_score)||0;
+  const cmp=core.compare?.(baseline.snapshot_id,snap.snapshot_id,'world-v1');
+  const delta=Number(cmp?.motion_score_delta)||0;
+  const trend=delta>1?(locale==='fr'?'EN HAUSSE':'UP'):delta<-1?(locale==='fr'?'À SUIVRE':'WATCH'):(locale==='fr'?'STABLE':'STABLE');
+  healthStatusEl.textContent=score+' · '+trend;
+  healthMuscleEl.textContent=Math.round(Number(d.muscle)||0);
+  healthBalanceEl.textContent=Math.round(Number(d.balance)||0);
+  healthCapacityEl.textContent=Math.round(Number(d.endurance)||0);
+  healthSourceEl.textContent='DEMO';
+}
+function healthOverviewHtml(){
+  const snap=current(),d=snap.domains||{};
+  const rows=[
+    ['MUSCLE',d.muscle], [locale==='fr'?'MOBILITÉ':'MOBILITY',d.mobility],
+    [locale==='fr'?'ÉQUILIBRE':'BALANCE',d.balance],['POSTURE',d.posture],['CAPACITY',d.endurance]
+  ];
+  return `
+    <div class="metric-hero"><div><span>MOTION SCORE</span><strong>${snap.motion_score}<em>/100</em></strong></div><div><span>MOTION AGE</span><strong>${snap.motion_age}</strong></div></div>
+    <div class="health-overview">${rows.map(([label,val])=>`<div class="health-row"><span>${label}</span><i><em style="width:${THREE.MathUtils.clamp(Number(val)||0,0,100)}%"></em></i><b>${Math.round(Number(val)||0)}</b></div>`).join('')}</div>
+    <div class="priority-card"><b>${locale==='fr'?'COMMENT LIRE CET APERÇU':'HOW TO READ THIS'}</b>${locale==='fr'?'Il résume les domaines de mouvement suivis dans le Functional Twin. Ouvrez le Twin pour comprendre chaque domaine et son évolution dans le temps.':'It summarises movement domains tracked in Functional Twin. Open Twin to understand each domain and its change over time.'}</div>
+    <div class="data-note">${locale==='fr'?'Aperçu informatif du mouvement, pas un diagnostic. Les valeurs sont actuellement celles du jeu de démonstration TwinCore tant que Pulse personnel n’est pas connecté.':'Informational movement overview, not a diagnosis. Values currently use the TwinCore demo dataset until a personal Pulse session is connected.'}</div>`;
+}
+function showHealthOverview(){
+  openPanel(locale==='fr'?'VOTRE SANTÉ · MOUVEMENT':'YOUR HEALTH · MOVEMENT',locale==='fr'?'Comprendre votre état en un coup d’œil.':'Understand your movement status at a glance.',healthOverviewHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:locale==='fr'?'OUVRIR LE TWIN':'OPEN TWIN',primary:true,onClick:enterTwin}
+  ]);
+}
+healthHud.addEventListener('click',showHealthOverview);
+updateHealthHUD();
+
+// V3.2 Daily World Challenges — engagement only, never health rankings.
+const CHALLENGE_KEY='komo_world_challenges_v1';
+const challengeDefs=[
+  {id:'distance',reward:20,target:120,title:{fr:'Explorer le World',en:'Explore the World'},sub:{fr:'Parcourir 120 m dans le campus',en:'Move 120 m through the campus'}},
+  {id:'twin',reward:20,target:1,title:{fr:'Lire votre Twin',en:'Read your Twin'},sub:{fr:'Entrer dans Functional Twin',en:'Enter Functional Twin'}},
+  {id:'fitness',reward:25,target:1,title:{fr:'Bouger aujourd’hui',en:'Move today'},sub:{fr:'Valider la séance KŌMØ Fitness Club',en:'Complete today’s KŌMØ Fitness Club session'}},
+  {id:'fountain',reward:15,target:1,title:{fr:'Découvrir la grande fontaine',en:'Discover the Grand Fountain'},sub:{fr:'Explorer le nouveau KŌMØ District',en:'Explore the new KŌMØ District'}}
+];
+function loadChallengeState(){
+  const today=localDateKey();
+  try{
+    const raw=JSON.parse(localStorage.getItem(CHALLENGE_KEY)||'{}');
+    if(raw.date===today)return {date:today,progress:raw.progress||{},done:raw.done||{},points:Number(raw.points)||0};
+  }catch{}
+  return {date:today,progress:{},done:{},points:0};
+}
+const challenges=loadChallengeState();
+function saveChallenges(){try{localStorage.setItem(CHALLENGE_KEY,JSON.stringify(challenges))}catch{}}
+function challengeProgress(id){return Number(challenges.progress[id])||0}
+function completeChallenge(id){
+  const d=challengeDefs.find(x=>x.id===id);if(!d||challenges.done[id])return false;
+  challenges.progress[id]=d.target;challenges.done[id]=Date.now();challenges.points+=d.reward;saveChallenges();
+  journey.xp+=d.reward;saveJourney();updateJourneyUI();
+  notify('+'+d.reward+' XP · '+d.title[locale]);return true;
+}
+function addChallengeProgress(id,amount){
+  const d=challengeDefs.find(x=>x.id===id);if(!d||challenges.done[id])return;
+  challenges.progress[id]=Math.min(d.target,challengeProgress(id)+amount);saveChallenges();
+  if(challenges.progress[id]>=d.target)completeChallenge(id);
+}
+function challengesHtml(){
+  return `
+    <div class="panel-grid"><div><span>DAILY</span><b>${challengeDefs.filter(d=>challenges.done[d.id]).length}/${challengeDefs.length}</b></div><div><span>CHALLENGE XP</span><b>${challenges.points}</b></div></div>
+    <div class="challenge-grid">${challengeDefs.map(d=>{const p=Math.min(d.target,challengeProgress(d.id)),pct=d.target?p/d.target*100:0;return `
+      <div class="challenge-card ${challenges.done[d.id]?'done':''}">
+        <span><em>+${d.reward} XP</em><em>${challenges.done[d.id]?'✓ DONE':Math.round(p)+' / '+d.target}</em></span>
+        <b>${d.title[locale]}</b><small>${d.sub[locale]}</small>
+        <i><em style="width:${pct}%"></em></i>
+      </div>`}).join('')}</div>
+    <div class="data-note">${locale==='fr'?'Les défis récompensent l’exploration et l’activité. Ils ne comparent ni Motion Score ni données de santé entre utilisateurs.':'Challenges reward exploration and activity. They never compare Motion Score or health data between users.'}</div>`;
+}
+function showChallenges(){
+  openPanel('WORLD CHALLENGES',locale==='fr'?'Vos défis du jour.':'Your challenges for today.',challengesHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:locale==='fr'?'ALLER À L’ARENA':'GO TO ARENA',primary:true,onClick:()=>fastTravel('arena')}
+  ]);
+}
+challengesToggle.addEventListener('click',()=>{closeWorldMenu();showChallenges()});
+
+// V3.2 lightweight Avatar Studio.
+const AVATAR_KEY='komo_world_avatar_v1';
+const avatarPalettes={
+  outfit:{sage:[0x24483a,0x19372d,0x303733],sand:[0xa69379,0x756451,0x423d36],black:[0x282d2a,0x171b19,0x242624]},
+  skin:{light:[0xd4a17d,0xbd805f],medium:[0xb87e59,0x9d6548],deep:[0x7c4f38,0x653b29]},
+  hair:{dark:0x2a2420,brown:0x5a3c2d,grey:0x6b6a65}
+};
+function loadAvatarConfig(){try{return {...{outfit:'sage',skin:'medium',hair:'dark'},...JSON.parse(localStorage.getItem(AVATAR_KEY)||'{}')}}catch{return {outfit:'sage',skin:'medium',hair:'dark'}}}
+const avatarConfig=loadAvatarConfig();
+function applyAvatarConfig(){
+  const mats=playerAvatar.userData.avatar.materials;if(!mats)return;
+  const o=avatarPalettes.outfit[avatarConfig.outfit]||avatarPalettes.outfit.sage;
+  const sk=avatarPalettes.skin[avatarConfig.skin]||avatarPalettes.skin.medium;
+  mats.cloth.color.setHex(o[0]);mats.clothDark.color.setHex(o[1]);mats.trouser.color.setHex(o[2]);
+  mats.skin.color.setHex(sk[0]);mats.skinWarm.color.setHex(sk[1]);
+  mats.hair.color.setHex(avatarPalettes.hair[avatarConfig.hair]||avatarPalettes.hair.dark);
+}
+function saveAvatarConfig(){try{localStorage.setItem(AVATAR_KEY,JSON.stringify(avatarConfig))}catch{}applyAvatarConfig()}
+function avatarStudioHtml(){
+  const row=(key,label,opts)=>`<div class="avatar-option-row"><span>${label}</span><div class="avatar-swatches">${opts.map(([id,name])=>`<button data-avatar-key="${key}" data-avatar-value="${id}" class="${avatarConfig[key]===id?'selected':''}">${name}</button>`).join('')}</div></div>`;
+  return `<div class="avatar-options">
+    ${row('outfit',locale==='fr'?'TENUE':'OUTFIT',[['sage','KŌMØ SAGE'],['sand','RIVIERA SAND'],['black','MIDNIGHT']])}
+    ${row('skin',locale==='fr'?'TEINTE':'SKIN',[['light','LIGHT'],['medium','MEDIUM'],['deep','DEEP']])}
+    ${row('hair',locale==='fr'?'CHEVEUX':'HAIR',[['dark','DARK'],['brown','BROWN'],['grey','GREY']])}
+  </div><div class="data-note">${locale==='fr'?'Personnalisation locale de votre avatar World. La synchronisation complète avec Pulse pourra reprendre cette configuration.':'Local World avatar customisation. Full Pulse sync can reuse this configuration.'}</div>`;
+}
+function bindAvatarStudio(){
+  panelBody.querySelectorAll('[data-avatar-key]').forEach(btn=>btn.addEventListener('click',()=>{
+    avatarConfig[btn.dataset.avatarKey]=btn.dataset.avatarValue;saveAvatarConfig();showAvatarStudio();
+  }));
+}
+function showAvatarStudio(){
+  openPanel('AVATAR STUDIO',locale==='fr'?'Personnalisez votre présence dans KŌMØ World.':'Customise your presence in KŌMØ World.',avatarStudioHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}
+  ]);bindAvatarStudio();
+}
+avatarToggle.addEventListener('click',()=>{closeWorldMenu();showAvatarStudio()});
+applyAvatarConfig();
+
 function syncUiOpen(){
   document.body.classList.toggle('ui-open',worldMenu.classList.contains('open')||panel.classList.contains('open'));
 }
@@ -2436,7 +2558,7 @@ function twinHtml(){
 }
 function bindTimeline(){
   panelBody.querySelectorAll('[data-time]').forEach(btn=>btn.addEventListener('click',()=>{
-    core.setTimeIndex(+btn.dataset.time,'world-v1');$('#hud-motion').textContent=current().motion_score;$('#hud-age').textContent=current().motion_age;updateTwinVisuals();showTwin();
+    core.setTimeIndex(+btn.dataset.time,'world-v1');$('#hud-motion').textContent=current().motion_score;$('#hud-age').textContent=current().motion_age;updateTwinVisuals();updateHealthHUD();showTwin();
   }));
   panelBody.querySelectorAll('[data-domain]').forEach(btn=>btn.addEventListener('click',()=>showTwinDomain(btn.dataset.domain)));
 }
@@ -2893,7 +3015,7 @@ function applyLocale(){
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
   $('#world-menu-copy').textContent=locale==='fr'?'Choisissez un espace ou ajustez votre expérience.':'Choose a space or adjust your experience.';
-  updateJourneyUI();
+  updateJourneyUI();updateHealthHUD();
   if(currentInteraction){interactionTitle.textContent=currentInteraction.title();interactionCopy.textContent=currentInteraction.desc()}
   if(panel.classList.contains('open')){
     if(mode==='twin')showTwin();else if(mode==='rehab')showRehab();else if(mode==='arena')showArena();
