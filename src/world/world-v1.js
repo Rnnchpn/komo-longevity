@@ -1720,6 +1720,32 @@ portals.forEach(({x,title,sub,dark})=>{
   const beacon=mesh(g,new THREE.RingGeometry(.20,.27,24),mat,0,5.60,.12,{cast:false,receive:false});beacon.rotation.x=Math.PI/2;beacon.userData.dynamic=true;
   living.destinationDoors.push({id:cfg.id,x:cfg.x,left,right,threshold,beacon,mat,progress:0});
 });
+
+// V3.3 Destination architecture — each portal has its own visual language.
+[
+  {x:-6.8,title:'FUNCTIONAL TWIN',sub:'UNDERSTAND',accent:0xb9cfbf,dark:true},
+  {x:0,title:'KŌMØ FIT',sub:'TRAIN DAILY',accent:0xd7b777,dark:false},
+  {x:6.8,title:'ARENA',sub:'CHALLENGE',accent:0xb9935c,dark:true}
+].forEach((p,i)=>{
+  const g=new THREE.Group();g.name='KOMO_PORTAL_ARCH_V33_'+i;g.position.set(p.x,0,-28.55);building.add(g);
+  // Deep limestone portal frame.
+  box(g,5.20,.34,1.05,MAT.limestone,0,5.55,0,{cast:true});
+  box(g,.36,5.45,1.05,MAT.limestone,-2.42,2.92,0,{cast:true});
+  box(g,.36,5.45,1.05,MAT.limestone,2.42,2.92,0,{cast:true});
+  // Bronze reveal and low-cost emissive-like strip.
+  box(g,4.55,.08,.11,MAT.brass,0,5.17,.56);
+  const glowMat=new THREE.MeshBasicMaterial({color:p.accent,transparent:true,opacity:.22,depthWrite:false});
+  box(g,4.20,.025,.10,glowMat,0,.43,.58,{cast:false,receive:false});
+  // Flanking fins give depth without additional lights.
+  [-1,1].forEach(side=>{
+    box(g,.10,4.25,.48,p.dark?MAT.blackened:MAT.brass,side*2.10,2.72,.36,{cast:false});
+    box(g,.055,3.80,.30,glowMat,side*1.92,2.72,.58,{cast:false,receive:false});
+  });
+  plaque(g,p.title,p.sub,4.25,.86,0,6.07,.58,{dark:p.dark,titleSize:p.title==='FUNCTIONAL TWIN'?46:58});
+  // Floor icon/medallion in front of each portal.
+  const ring=mesh(g,new THREE.RingGeometry(.58,.70,36),glowMat,0,.205,3.05,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;
+  const inner=mesh(g,new THREE.CircleGeometry(.48,32),new THREE.MeshBasicMaterial({color:p.accent,transparent:true,opacity:.08,depthWrite:false}),0,.208,3.05,{cast:false,receive:false});inner.rotation.x=-Math.PI/2;
+});
 plaque(building,'LIBRARY','SCIENCE · METHOD',3.5,.84,-11.45,4.3,-10,{rotY:Math.PI/2,dark:false,titleSize:68});
 plaque(building,'TALKS','EXPERTS · EVENTS',3.5,.84,11.45,4.3,-10,{rotY:-Math.PI/2,dark:true,titleSize:68});
 plaque(building,'KŌMØ LIFE','STORE · CASE 01',3.8,.88,11.35,4.45,2.6,{rotY:-Math.PI/2,dark:true,titleSize:62});
@@ -3041,7 +3067,9 @@ function updateDestinationDoors(now,dt){
     d.right.position.x=THREE.MathUtils.lerp(1.08,2.00,e);
     d.mat.opacity=.10+.34*e;
     d.beacon.rotation.z=now*.0011*(i%2?1:-1);
-    d.beacon.scale.setScalar(.92+.10*e+.04*Math.sin(now*.004+i));
+    d.beacon.scale.setScalar(.92+.14*e+.045*Math.sin(now*.004+i));
+    d.beacon.material.opacity=.12+.36*e;
+    d.threshold.material.opacity=.10+.30*e;
   });
 }
 function updateDoors(now,dt){
@@ -3458,7 +3486,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.3.0-entry-health',
+  version:'3.3.1-portals',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
