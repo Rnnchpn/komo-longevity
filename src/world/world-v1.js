@@ -119,7 +119,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=.92;
+renderer.toneMappingExposure=1.02;
 renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -161,9 +161,9 @@ scene.fog=new THREE.Fog(0xcbd2c8,82,215);
 const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.12,260);
 camera.position.set(0,1.72,58);
 
-const hemi=new THREE.HemisphereLight(0xe5eadf,0x596354,2.25);
+const hemi=new THREE.HemisphereLight(0xf0f0e8,0x667064,2.45);
 scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffe5bd,3.3);
+const sun=new THREE.DirectionalLight(0xffe3b8,3.05);
 sun.position.set(-24,38,32);
 sun.castShadow=true;
 if(sun.castShadow){
@@ -172,8 +172,21 @@ if(sun.castShadow){
   sun.shadow.camera.near=1;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;
 }
 scene.add(sun);
-const fill=new THREE.DirectionalLight(0xdde8de,lowPower?0:1.1);
+const fill=new THREE.DirectionalLight(0xe6ece5,lowPower?.18:.92);
 fill.position.set(28,18,-30);scene.add(fill);
+const hallAmbient=new THREE.AmbientLight(0xfff3e4,lowPower?.18:.30);scene.add(hallAmbient);
+const hallLightGroup=new THREE.Group();hallLightGroup.name='KOMO_HALL_LIGHTING_V41';scene.add(hallLightGroup);
+const hallLights=[];
+if(!lowPower){
+  [
+    {p:[0,6.6,8],c:0xffd9a6,i:20,d:24},
+    {p:[-8.2,5.4,-4],c:0xffe6c5,i:12,d:18},
+    {p:[8.2,5.4,-4],c:0xffe6c5,i:12,d:18},
+    {p:[0,4.8,-18],c:0xdde8df,i:8,d:18}
+  ].forEach(cfg=>{
+    const l=new THREE.PointLight(cfg.c,cfg.i,cfg.d,2.0);l.position.set(...cfg.p);hallLightGroup.add(l);hallLights.push(l);
+  });
+}
 
 const living={
   trees:[],
@@ -273,20 +286,22 @@ living.sunSprite=null;
 
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
-  let bg=0xdce7e3,fog=0xd7e1dc,sunColor=0xffe5bd,sunPower=3.3,hemiPower=2.25,exposure=.94,state='day';
+  let bg=0xdfe7e0,fog=0xd9e1da,sunColor=0xffe3b8,sunPower=3.05,hemiPower=2.45,exposure=1.03,state='day';
   let top=0x6f9fbd,horizon=0xdce7e3,low=0xf2e2c8,skySun=0xffddb0,skyStrength=.72;
   if(h<7||h>=21){
-    bg=0x71818a;fog=0x89938f;sunColor=0xd9c9bb;sunPower=1.25;hemiPower=1.32;exposure=.72;state='evening';
+    bg=0x74848c;fog=0x8d9793;sunColor=0xddcdc0;sunPower=1.35;hemiPower=1.48;exposure=.80;state='evening';
     top=0x405865;horizon=0x87908d;low=0xaa8068;skySun=0xe2c5ae;skyStrength=.10;
   }else if(h<9){
-    bg=0xd9ded7;fog=0xd5d9d1;sunColor=0xffca8e;sunPower=2.65;hemiPower=1.95;exposure=.89;state='morning';
+    bg=0xdde3dd;fog=0xd8ddd6;sunColor=0xffcf96;sunPower=2.55;hemiPower=2.15;exposure=.98;state='morning';
     top=0x7fa8bd;horizon=0xe7d8c7;low=0xf2b77b;skySun=0xffc27e;skyStrength=.88;
   }else if(h>=17.5){
-    bg=0xd8d3c6;fog=0xd2cbbd;sunColor=0xffbd75;sunPower=2.85;hemiPower=1.82;exposure=.87;state='golden';
+    bg=0xdcd7ca;fog=0xd6cfc3;sunColor=0xffc482;sunPower=2.75;hemiPower=2.02;exposure=.95;state='golden';
     top=0x8098a7;horizon=0xe5ccb0;low=0xee9f66;skySun=0xffb66a;skyStrength=1.0;
   }
   scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=82;scene.fog.far=215;
   sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
+  hallAmbient.intensity=state==='evening'?.36:state==='golden'?.32:.30;
+  hallLights.forEach((l,i)=>{l.intensity=(state==='evening'?[22,14,14,7]:state==='golden'?[18,12,12,7]:[20,12,12,8])[i]||l.intensity});
   if(renderer.shadowMap.enabled)renderer.shadowMap.needsUpdate=true;
   const dayT=THREE.MathUtils.clamp((h-6)/15,0,1);
   const arc=Math.PI*dayT;
@@ -519,7 +534,7 @@ function makeNpc(parent,{role='visitor',label='Guest',quest=null,x=0,y=0,z=0,sca
   const torso=mesh(g,new THREE.CylinderGeometry(.24,.30,.72,16),cloth,0,1.31,0,{cast});
   const shoulder=box(g,.68,.16,.24,cloth,0,1.56,0,{cast});
   const neck=cyl(g,.075,.085,.12,skin,0,1.70,0,12,{cast});
-  const head=mesh(g,new THREE.SphereGeometry(.205,18,14),skin,0,1.88,0,{cast});head.scale.set(.92,1.05,.94);
+  const head=mesh(g,new THREE.SphereGeometry(.184,18,14),skin,0,1.88,0,{cast});head.scale.set(.92,1.05,.94);
   // hair cap + subtle face detail
   const hairCap=mesh(g,new THREE.SphereGeometry(.211,16,10,0,Math.PI*2,0,Math.PI*.50),hair,0,1.95,-.005,{cast});
   hairCap.scale.set(.94,.88,.96);
@@ -619,7 +634,7 @@ function updateNpc(npc,t,index){
   npc.position.y+=Math.abs(stride)*.015;
 }
 function makePlayerAvatar(){
-  const g=new THREE.Group();g.name='KOMO_PLAYER_AVATAR_V39';g.userData.dynamic=true;scene.add(g);
+  const g=new THREE.Group();g.name='KOMO_PLAYER_AVATAR_V41';g.userData.dynamic=true;scene.add(g);
   const skin=new THREE.MeshStandardMaterial({color:0xc99673,roughness:.72,metalness:0});
   const skinWarm=new THREE.MeshStandardMaterial({color:0xb87958,roughness:.78,metalness:0});
   const cloth=new THREE.MeshStandardMaterial({color:0x24483a,roughness:.58,metalness:.015});
@@ -637,29 +652,29 @@ function makePlayerAvatar(){
   };
 
   // Lower body — longer, cleaner proportions.
-  const hipsGroup=new THREE.Group();hipsGroup.position.y=.91;g.add(hipsGroup);
+  const hipsGroup=new THREE.Group();hipsGroup.position.y=.98;g.add(hipsGroup);
   const hips=mesh(hipsGroup,new THREE.SphereGeometry(.24,lowPower?12:18,lowPower?8:12),trouser,0,0,0,{cast});
   hips.scale.set(1.0,.72,.80);
 
   const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();
-  leftLeg.position.set(-.135,.84,0);rightLeg.position.set(.135,.84,0);g.add(leftLeg,rightLeg);
+  leftLeg.position.set(-.14,.93,0);rightLeg.position.set(.14,.93,0);g.add(leftLeg,rightLeg);
   const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();
-  leftKnee.position.y=-.355;rightKnee.position.y=-.355;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
-  capsule(.078,.22,trouser,leftLeg,-.185);capsule(.078,.22,trouser,rightLeg,-.185);
-  capsule(.061,.20,trouser,leftKnee,-.18);capsule(.061,.20,trouser,rightKnee,-.18);
-  const leftShoe=mesh(leftKnee,new THREE.SphereGeometry(.12,lowPower?10:16,lowPower?7:10),shoe,0,-.39,.065,{cast});
+  leftKnee.position.y=-.405;rightKnee.position.y=-.405;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  capsule(.074,.28,trouser,leftLeg,-.215);capsule(.074,.28,trouser,rightLeg,-.215);
+  capsule(.058,.25,trouser,leftKnee,-.205);capsule(.058,.25,trouser,rightKnee,-.205);
+  const leftShoe=mesh(leftKnee,new THREE.SphereGeometry(.12,lowPower?10:16,lowPower?7:10),shoe,0,-.445,.070,{cast});
   const rightShoe=mesh(rightKnee,new THREE.SphereGeometry(.12,lowPower?10:16,lowPower?7:10),shoe,0,-.39,.065,{cast});
   leftShoe.scale.set(.72,.42,1.28);rightShoe.scale.set(.72,.42,1.28);
-  const leftSole=mesh(leftKnee,new THREE.SphereGeometry(.117,lowPower?8:14,lowPower?6:9),sole,0,-.425,.078,{cast:false});
+  const leftSole=mesh(leftKnee,new THREE.SphereGeometry(.117,lowPower?8:14,lowPower?6:9),sole,0,-.485,.082,{cast:false});
   const rightSole=mesh(rightKnee,new THREE.SphereGeometry(.117,lowPower?8:14,lowPower?6:9),sole,0,-.425,.078,{cast:false});
   leftSole.scale.set(.70,.19,1.24);rightSole.scale.set(.70,.19,1.24);
 
   // Torso — softly tailored KŌMØ jacket, no rectangular shoulder block.
-  const torsoGroup=new THREE.Group();torsoGroup.position.y=1.31;g.add(torsoGroup);
-  const torso=mesh(torsoGroup,new THREE.CapsuleGeometry(.225,.34,lowPower?5:8,lowPower?10:18),cloth,0,0,0,{cast});
+  const torsoGroup=new THREE.Group();torsoGroup.position.y=1.42;g.add(torsoGroup);
+  const torso=mesh(torsoGroup,new THREE.CapsuleGeometry(.215,.42,lowPower?5:8,lowPower?10:18),cloth,0,0,0,{cast});
   torso.scale.set(1.04,1.0,.80);
   const chest=mesh(torsoGroup,new THREE.SphereGeometry(.30,lowPower?12:18,lowPower?8:12),cloth,0,.14,0,{cast});
-  chest.scale.set(1.12,.52,.72);
+  chest.scale.set(1.17,.48,.70);
   const waist=mesh(torsoGroup,new THREE.SphereGeometry(.235,lowPower?10:16,lowPower?7:10),clothDark,0,-.29,0,{cast});
   waist.scale.set(1.00,.26,.76);
 
@@ -673,11 +688,11 @@ function makePlayerAvatar(){
   chestPin.rotation.x=Math.PI/2;
 
   // Neck + head: softer jaw and readable face at gameplay distance.
-  cyl(g,.068,.076,.13,skin,0,1.70,0,lowPower?8:12,{cast});
-  const headGroup=new THREE.Group();headGroup.position.y=1.91;g.add(headGroup);
-  const head=mesh(headGroup,new THREE.SphereGeometry(.198,lowPower?14:24,lowPower?10:18),skin,0,0,0,{cast});
-  head.scale.set(.88,1.06,.93);
-  const jaw=mesh(headGroup,new THREE.SphereGeometry(.145,lowPower?10:16,lowPower?7:12),skin,0,-.105,.015,{cast});
+  cyl(g,.064,.071,.16,skin,0,1.84,0,lowPower?8:12,{cast});
+  const headGroup=new THREE.Group();headGroup.position.y=2.055;g.add(headGroup);
+  const head=mesh(headGroup,new THREE.SphereGeometry(.178,lowPower?14:24,lowPower?10:18),skin,0,0,0,{cast});
+  head.scale.set(.90,1.08,.94);
+  const jaw=mesh(headGroup,new THREE.SphereGeometry(.130,lowPower?10:16,lowPower?7:12),skin,0,-.105,.015,{cast});
   jaw.scale.set(.90,.60,.88);
   const earGeo=new THREE.SphereGeometry(.031,lowPower?7:10,lowPower?5:8);
   [-.184,.184].forEach(x=>{const e=mesh(headGroup,earGeo,skin,x,-.004,0,{cast:false});e.scale.set(.55,1.0,.58)});
@@ -695,14 +710,14 @@ function makePlayerAvatar(){
 
   // Arms — jacket sleeve, cuff, natural forearm and hand.
   const leftArm=new THREE.Group(),rightArm=new THREE.Group();
-  leftArm.position.set(-.305,1.53,0);rightArm.position.set(.305,1.53,0);g.add(leftArm,rightArm);
+  leftArm.position.set(-.335,1.66,0);rightArm.position.set(.335,1.66,0);g.add(leftArm,rightArm);
   leftArm.rotation.z=-.055;rightArm.rotation.z=.055;
   const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();
-  leftElbow.position.y=-.285;rightElbow.position.y=-.285;leftArm.add(leftElbow);rightArm.add(rightElbow);
-  capsule(.058,.18,cloth,leftArm,-.15);capsule(.058,.18,cloth,rightArm,-.15);
+  leftElbow.position.y=-.315;rightElbow.position.y=-.315;leftArm.add(leftElbow);rightArm.add(rightElbow);
+  capsule(.055,.22,cloth,leftArm,-.175);capsule(.055,.22,cloth,rightArm,-.175);
   const lc=mesh(leftArm,new THREE.CylinderGeometry(.060,.057,.045,10),clothSoft,0,-.29,0,{cast});const rc=mesh(rightArm,new THREE.CylinderGeometry(.060,.057,.045,10),clothSoft,0,-.29,0,{cast});
-  capsule(.047,.15,skin,leftElbow,-.13);capsule(.047,.15,skin,rightElbow,-.13);
-  const leftHand=mesh(leftElbow,new THREE.SphereGeometry(.054,lowPower?8:12,lowPower?6:9),skin,0,-.285,.006,{cast});
+  capsule(.044,.19,skin,leftElbow,-.15);capsule(.044,.19,skin,rightElbow,-.15);
+  const leftHand=mesh(leftElbow,new THREE.SphereGeometry(.054,lowPower?8:12,lowPower?6:9),skin,0,-.33,.006,{cast});
   const rightHand=mesh(rightElbow,new THREE.SphereGeometry(.054,lowPower?8:12,lowPower?6:9),skin,0,-.285,.006,{cast});
   leftHand.scale.set(.84,1.05,.68);rightHand.scale.set(.84,1.05,.68);
 
@@ -2404,21 +2419,25 @@ function healthOverviewHtml(){
   const captured=new Date(snap.captured_at).toLocaleString(locale==='fr'?'fr-FR':'en-GB',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
   return `
     <section class="results-dashboard">
-      <div class="results-hero">
-        <div class="results-score">
+      <div class="results-hero results-hero-v41">
+        <div class="results-score results-score-v41">
+          <div class="score-orbit" style="--score:${THREE.MathUtils.clamp(score,0,100)}">
+            <div><strong>${score}</strong><small>/100</small></div>
+          </div>
           <span>MOTION SCORE</span>
-          <strong>${score}<small>/100</small></strong>
           <em>${trend}</em>
         </div>
-        <div class="results-age">
-          <span>MOTION AGE</span>
-          <strong>${age}</strong>
-          <small>Baseline ${baseAge} · ${ageDelta===0?'—':(ageDelta>0?'+':'')+ageDelta}</small>
-        </div>
-        <div class="results-change">
-          <span>${locale==='fr'?'DEPUIS LA BASELINE':'SINCE BASELINE'}</span>
-          <strong class="${scoreDelta>=0?'positive':'negative'}">${scoreDelta>=0?'+':''}${scoreDelta}</strong>
-          <small>Motion Score</small>
+        <div class="results-side-v41">
+          <div class="results-age">
+            <span>MOTION AGE</span>
+            <strong>${age}</strong>
+            <small>Baseline ${baseAge} · ${ageDelta===0?'—':(ageDelta>0?'+':'')+ageDelta}</small>
+          </div>
+          <div class="results-change">
+            <span>${locale==='fr'?'DEPUIS LA BASELINE':'SINCE BASELINE'}</span>
+            <strong class="${scoreDelta>=0?'positive':'negative'}">${scoreDelta>=0?'+':''}${scoreDelta}</strong>
+            <small>Motion Score</small>
+          </div>
         </div>
       </div>
 
@@ -3444,7 +3463,7 @@ function updatePlayerAvatar(now,dt){
   av.hipsGroup.rotation.z=Math.cos(av.phase)*.010*moveAmount;
   av.torsoGroup.rotation.z=Math.cos(av.phase*.5)*.012*moveAmount-THREE.MathUtils.clamp(turnDelta,-.5,.5)*.055;
   av.torsoGroup.rotation.y=Math.sin(av.phase*.5)*.018*moveAmount;
-  av.torsoGroup.position.y=1.31+Math.abs(Math.sin(av.phase))*0.012*moveAmount+Math.sin(now*.0015)*.005*(1-moveAmount);
+  av.torsoGroup.position.y=1.42+Math.abs(Math.sin(av.phase))*0.012*moveAmount+Math.sin(now*.0015)*.005*(1-moveAmount);
   av.headGroup.rotation.y=Math.sin(now*.00048)*.035+THREE.MathUtils.clamp(turnDelta,-.5,.5)*.10;
   av.headGroup.rotation.x=Math.sin(now*.00037)*.009;
   av.leftHand.rotation.z=Math.sin(av.phase*.5)*.04*moveAmount;
@@ -3961,7 +3980,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.9.0-visual-refinement',
+  version:'4.1.0-sprint',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
