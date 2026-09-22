@@ -60,6 +60,10 @@ const script = `<script id="komo-homepage-premium-motion-v1-script">
     '.komo-patient-clarity-card',
     '.komo-experience-home-intro>*',
     '.komo-experience-home-card',
+    '.komo-home-offers-head>*',
+    '.komo-home-offer-card',
+    '.komo-home-trajectory-head>*',
+    '.komo-home-trajectory-step',
     '.komo-patient-founder-grid>*',
     '.rvc-section-head>*',
     '.rvc-path-step',
@@ -80,7 +84,7 @@ const script = `<script id="komo-homepage-premium-motion-v1-script">
     const observer=new IntersectionObserver((entries)=>entries.forEach((entry)=>{if(entry.isIntersecting){show(entry.target);observer.unobserve(entry.target)}}),{threshold:.12,rootMargin:'0px 0px -7% 0px'});
     reveals.forEach((el)=>observer.observe(el));
   }else reveals.forEach(show);
-  const hoverSelector='.komo-patient-clarity-card,.komo-experience-home-card,.rvc-path-step,.rvc-boundary-card,.komo-world-home-orbit-card,.rvc-photo';
+  const hoverSelector='.komo-patient-clarity-card,.komo-experience-home-card,.komo-home-offer-card,.komo-home-trajectory-step,.rvc-path-step,.rvc-boundary-card,.komo-world-home-orbit-card,.rvc-photo';
   home.querySelectorAll(hoverSelector).forEach((el)=>el.classList.add('komo-premium-hover'));
   const fine=window.matchMedia&&window.matchMedia('(hover:hover) and (pointer:fine)').matches;
   if(fine){

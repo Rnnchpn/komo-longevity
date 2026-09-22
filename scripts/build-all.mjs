@@ -193,6 +193,9 @@ const scripts = [
   // French is the primary public entry point; keep a complete English route
   // available at /en/ and align language switchers across all homes.
   'scripts/homepage-french-default-v1.mjs',
+  // Patient-facing offer cards: make consultation scope, reference pricing
+  // and the next step explicit before the premium interaction layer runs.
+  'scripts/homepage-consultation-offers-v1.mjs',
   // Final interaction layer: restrained motion, depth and tactile feedback
   // for the premium patient-facing home without changing the content flow.
   'scripts/homepage-premium-motion-v1.mjs'
