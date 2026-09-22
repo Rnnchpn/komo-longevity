@@ -65,7 +65,7 @@ const checks=[
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub V3.3 quests present',runtime.includes("quest:'fitness'")&&runtime.includes("quest:'arena'")&&runtime.includes("id:'coach'")],
   ['Immersive Hub V3.3 district detail present',runtime.includes('KOMO_DISTRICT_DETAILS_V33')&&runtime.includes('HEALTH PAVILION')&&runtime.includes('CLUB HOUSE')],
-  ['multiplayer reliable presence V0.4+ present',multiplayer.includes("version:'0.5.0-join-friend'")&&multiplayer.includes("persistSession:true")&&multiplayer.includes("komo-world-auth-v1")],
+  ['multiplayer reliable presence V0.4+ present',multiplayer.includes("version:'0.5.1-live-motion'")&&multiplayer.includes("persistSession:true")&&multiplayer.includes("komo-world-auth-v1")],
   ['multiplayer heartbeat verifies writes',multiplayer.includes("const {error}=await client.from('world_presence').upsert")&&multiplayer.includes("state.presenceLive=true")],
   ['multiplayer mobile presence tolerance',multiplayer.includes('const STALE_MS=45000')&&multiplayer.includes('const HEARTBEAT_MS=2200')],
   ['multiplayer roster present',multiplayer.includes('const renderRoster=()=>')&&multiplayer.includes('kwmpRoster')],
@@ -76,7 +76,9 @@ const checks=[
   ['multiplayer distance roster present',multiplayer.includes("Math.round(distance)+' m away'")&&multiplayer.includes("join.textContent='JOIN'")],
   ['multiplayer long-range beacon present',multiplayer.includes('distance<90')&&multiplayer.includes('beaconTop')&&multiplayer.includes('depthTest:false')],
   ['configurable keyboard controls present',runtime.includes("const KEYBIND_KEY='komo_world_keybinds_v1'")&&runtime.includes('function showControlsPanel')&&runtime.includes("controlsToggle.addEventListener")],
-  ['movement uses configured controls',runtime.includes("if(isPressed('forward'))")&&runtime.includes("keyHas('action',e.code)")&&runtime.includes("keyHas('menu',e.code)")]
+  ['movement uses configured controls',runtime.includes("if(isPressed('forward'))")&&runtime.includes("keyHas('action',e.code)")&&runtime.includes("keyHas('menu',e.code)")],
+  ['multiplayer live motion V0.5.1 present',multiplayer.includes('const POSE_MS=125')&&multiplayer.includes("event:'pose'")&&multiplayer.includes(".on('broadcast',{event:'pose'}")],
+  ['multiplayer live interpolation present',multiplayer.includes('lerp(peer.userData.target,.28)')&&multiplayer.includes('peer.rotation.y+=d*.26')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
