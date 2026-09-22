@@ -44,10 +44,15 @@ function css(){
   .kwmp-target{height:34px;padding:0 8px;border:1px solid rgba(216,186,134,.20);border-radius:9px;background:rgba(216,186,134,.08);color:#ead9ba;font-size:6px;font-weight:900;letter-spacing:.07em;cursor:pointer;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .kwmp-compose input{min-width:0;height:34px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.04);color:#f0e8da;padding:0 10px;font-size:9px;outline:none}.kwmp-compose button[type="submit"]{height:34px;padding:0 10px;border-radius:9px;background:#d8ba86;color:#1d2d25;font-size:7px;font-weight:850;cursor:pointer}.kwmp-compose button:disabled,.kwmp-compose input:disabled{opacity:.42}
   .kwmp-note{padding:0 9px 7px;color:rgba(242,236,226,.28);font-size:6px;line-height:1.35}
+  .kwmp-talk{position:fixed;z-index:94;left:50%;bottom:22px;transform:translateX(-50%);height:54px;min-width:210px;padding:0 22px;border:1px solid rgba(216,186,134,.32);border-radius:999px;background:linear-gradient(180deg,rgba(38,58,47,.96),rgba(21,35,28,.96));box-shadow:0 12px 34px rgba(7,12,9,.24);color:#f1e7d7;font-size:8px;font-weight:900;letter-spacing:.12em;cursor:pointer;user-select:none;touch-action:none;transition:.16s ease}
+  .kwmp-talk:hover{transform:translateX(-50%) translateY(-1px);border-color:rgba(216,186,134,.50)}
+  .kwmp-talk[data-state="talking"]{background:linear-gradient(180deg,rgba(128,55,49,.98),rgba(83,35,31,.98));border-color:rgba(255,190,171,.62);box-shadow:0 0 0 5px rgba(180,85,70,.10),0 12px 34px rgba(7,12,9,.26)}
+  .kwmp-talk:disabled{opacity:.42;cursor:not-allowed}
   @media(max-width:900px),(pointer:coarse){
     .kwmp-dock{top:63px;right:8px;gap:4px;max-width:calc(100vw - 16px)}
     .kwmp-pill{height:25px;padding:0 8px;font-size:5px;letter-spacing:.07em;background:rgba(22,37,29,.90);backdrop-filter:none}
     .kwmp-chat{left:8px;bottom:74px;width:min(420px,calc(100vw - 16px));max-height:34vh;background:linear-gradient(150deg,rgba(11,18,14,.66),rgba(18,28,22,.52));backdrop-filter:none}
+    .kwmp-talk{bottom:12px;height:50px;min-width:190px;padding:0 18px;font-size:7px}
   }
   @media(max-width:520px){
     .kwmp-dock{top:109px}.kwmp-pill{height:24px;padding:0 7px}
@@ -65,6 +70,7 @@ function ui(){
     people:dock.querySelector('[data-kwmp-people]'),
     chat:dock.querySelector('[data-kwmp-chat]'),
     voice:dock.querySelector('[data-kwmp-voice]'),
+    talk:document.querySelector('#kwmpTalk'),
     social:dock.querySelector('[data-kwmp-social]'),
     drawer:document.querySelector('#kwmpChat'),
     roster:document.querySelector('#kwmpRoster'),
@@ -77,10 +83,11 @@ function ui(){
   dock=document.createElement('div');dock.id='kwmpDock';dock.className='kwmp-dock';
   dock.innerHTML='<button type="button" class="kwmp-pill" data-kwmp-connect data-state="offline">CONNECT WORLD</button><button type="button" class="kwmp-pill" data-kwmp-people>PEOPLE · 0</button><button type="button" class="kwmp-pill" data-kwmp-chat>CHAT</button><button type="button" class="kwmp-pill" data-kwmp-voice data-state="off">VOICE · OFF</button><button type="button" class="kwmp-pill" data-kwmp-social>SOCIAL · 0</button>';
   document.body.appendChild(dock);
+  const talk=document.createElement('button');talk.type='button';talk.id='kwmpTalk';talk.className='kwmp-talk';talk.dataset.state='idle';talk.disabled=true;talk.textContent='🎙  MAINTENIR POUR PARLER';talk.setAttribute('aria-label','Maintenir pour parler aux joueurs proches');document.body.appendChild(talk);
   const drawer=document.createElement('aside');drawer.id='kwmpChat';drawer.className='kwmp-chat open';drawer.setAttribute('aria-hidden','false');
-  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · LIVE</span><strong>World Chat</strong></div><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget" data-kwmp-target>WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">ENTER · écrire · PEOPLE → MP · VOICE = vocal de proximité. Les données de santé ne sont jamais partagées.</div>';
+  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · LIVE</span><strong>World Chat</strong></div><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget" data-kwmp-target>WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">ENTER · écrire · PEOPLE → MP · maintenir PARLER (ou T) = vocal de proximité. Les données de santé ne sont jamais partagées.</div>';
   document.body.appendChild(drawer);
-  return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:dock.querySelector('[data-kwmp-voice]'),social:dock.querySelector('[data-kwmp-social]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
+  return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:dock.querySelector('[data-kwmp-voice]'),talk,social:dock.querySelector('[data-kwmp-social]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
 }
 function labelSprite(THREE,text,subtitle='PULSE MEMBER'){
   const c=document.createElement('canvas');c.width=512;c.height=144;const x=c.getContext('2d');
@@ -146,7 +153,7 @@ export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
   const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,social:loadSocial(),voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set()}};
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,social:loadSocial(),voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set(),talking:false,pttHeld:false}};
   const roleFor=id=>state.roles.get(id)||null;
   const decoratePresence=row=>row?{...row,role_title:roleFor(row.user_id)?.display_title||''}:row;
   const saveSocial=()=>{try{localStorage.setItem(SOCIAL_KEY,JSON.stringify(state.social))}catch{}};
@@ -176,12 +183,15 @@ export async function mount(runtime){
       U.connect.dataset.state='offline';
     }
     U.input.disabled=!state.presenceLive;U.form.querySelector('button[type="submit"]').disabled=!state.presenceLive;
-    updateSocialUI();
+    updateSocialUI();updateVoiceUI();
   };
   const updateVoiceUI=()=>{
     const n=state.voice.connected.size;
     U.voice.dataset.state=state.voice.enabled?'on':'off';
-    U.voice.textContent=state.voice.enabled?('VOICE · ON'+(n?' · '+n:'')):'VOICE · OFF';
+    U.voice.textContent=state.voice.enabled?('VOICE · READY'+(n?' · '+n:'')):'VOICE · OFF';
+    U.talk.disabled=!state.presenceLive;
+    U.talk.dataset.state=state.voice.talking?'talking':'idle';
+    U.talk.textContent=state.voice.talking?'●  VOUS PARLEZ':'🎙  MAINTENIR POUR PARLER';
   };
   const displayNameFor=id=>state.rows.get(id)?.display_name||roleFor(id)?.display_title||'Member';
   const renderMessages=()=>{
@@ -417,19 +427,43 @@ export async function mount(runtime){
       }
     }
   };
+  const setTransmit=active=>{
+    state.voice.talking=!!active&&state.voice.enabled&&!!state.voice.stream;
+    if(state.voice.stream)for(const track of state.voice.stream.getAudioTracks())track.enabled=state.voice.talking;
+    updateVoiceUI();
+  };
   const disableVoice=async()=>{
-    state.voice.enabled=false;for(const id of [...state.voice.peers.keys()])closeVoicePeer(id,{signal:true});
+    state.voice.pttHeld=false;setTransmit(false);state.voice.enabled=false;
+    for(const id of [...state.voice.peers.keys()])closeVoicePeer(id,{signal:true});
     if(state.voice.stream){for(const t of state.voice.stream.getTracks())t.stop();state.voice.stream=null}
     updateVoiceUI();await heartbeat();await sendPose(true);
   };
-  const toggleVoice=async()=>{
-    if(state.voice.enabled){await disableVoice();runtime.notify?.('VOICE PROXIMITY · OFF');return}
-    if(!navigator.mediaDevices?.getUserMedia){runtime.notify?.('Microphone non disponible');return}
+  const enableVoice=async()=>{
+    if(state.voice.enabled&&state.voice.stream)return true;
+    if(!navigator.mediaDevices?.getUserMedia){runtime.notify?.('Microphone non disponible');return false}
     try{
       state.voice.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
-      state.voice.enabled=true;updateVoiceUI();await heartbeat();await sendPose(true);runtime.notify?.('VOICE PROXIMITY · ON · 11 m');
-      updateVoiceProximity();
-    }catch(err){state.voice.enabled=false;state.voice.stream=null;updateVoiceUI();runtime.notify?.('Autorisez le microphone pour le vocal');console.warn('[World voice permission]',err)}
+      for(const track of state.voice.stream.getAudioTracks())track.enabled=false;
+      state.voice.enabled=true;updateVoiceUI();await heartbeat();await sendPose(true);updateVoiceProximity();
+      runtime.notify?.('VOCAL DE PROXIMITÉ PRÊT · maintenez PARLER');
+      return true;
+    }catch(err){
+      state.voice.enabled=false;state.voice.stream=null;setTransmit(false);runtime.notify?.('Autorisez le microphone pour parler');console.warn('[World voice permission]',err);return false
+    }
+  };
+  const toggleVoice=async()=>{
+    if(state.voice.enabled){await disableVoice();runtime.notify?.('VOICE PROXIMITY · OFF');return}
+    await enableVoice();
+  };
+  const startTalking=async()=>{
+    if(!state.presenceLive||!state.session?.user)return;
+    state.voice.pttHeld=true;
+    const ready=await enableVoice();
+    if(ready&&state.voice.pttHeld){setTransmit(true);runtime.notify?.('Vous parlez aux joueurs proches')}
+  };
+  const stopTalking=()=>{
+    state.voice.pttHeld=false;
+    if(state.voice.talking)setTransmit(false);
   };
 
   const heartbeat=async()=>{
@@ -537,6 +571,10 @@ export async function mount(runtime){
   U.people.addEventListener('click',async()=>{await refreshPresence();U.drawer.classList.toggle('people-open');renderRoster()});
   U.chat.addEventListener('click',()=>U.input.focus());
   U.voice.addEventListener('click',()=>toggleVoice());
+  U.talk.addEventListener('pointerdown',e=>{e.preventDefault();try{U.talk.setPointerCapture(e.pointerId)}catch{};startTalking()});
+  U.talk.addEventListener('pointerup',e=>{e.preventDefault();stopTalking()});
+  U.talk.addEventListener('pointercancel',stopTalking);
+  window.addEventListener('pointerup',stopTalking);
   U.worldBtn.addEventListener('click',()=>setDmTarget(null));
   U.target.addEventListener('click',()=>{if(state.dmTarget)setDmTarget(null);else U.input.focus()});
   document.addEventListener('keydown',e=>{
@@ -545,6 +583,13 @@ export async function mount(runtime){
     if(tag==='INPUT'||tag==='TEXTAREA'||a?.isContentEditable)return;
     e.preventDefault();U.input.focus();
   });
+  document.addEventListener('keydown',e=>{
+    if(e.code!=='KeyT'||e.repeat||e.metaKey||e.ctrlKey||e.altKey)return;
+    const a=document.activeElement,tag=a?.tagName;if(tag==='INPUT'||tag==='TEXTAREA'||a?.isContentEditable)return;
+    e.preventDefault();startTalking();
+  });
+  document.addEventListener('keyup',e=>{if(e.code==='KeyT'){e.preventDefault();stopTalking()}});
+
   U.form.addEventListener('submit',async e=>{
     e.preventDefault();if(!state.presenceLive||!state.session?.user)return;
     const body=escText(U.input.value,500);if(!body)return;U.input.value='';
@@ -612,7 +657,7 @@ export async function mount(runtime){
   });
 
   const cleanup=()=>{
-    clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);for(const id of [...state.voice.peers.keys()])closeVoicePeer(id);if(state.voice.stream)for(const t of state.voice.stream.getTracks())t.stop();
+    clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);stopTalking();for(const id of [...state.voice.peers.keys()])closeVoicePeer(id);if(state.voice.stream)for(const t of state.voice.stream.getTracks())t.stop();
     if(state.channel)client.removeChannel(state.channel);
     if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
@@ -624,5 +669,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.6.0-social-voice',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.6.1-push-to-talk',connect:openPulse,state};
 }
