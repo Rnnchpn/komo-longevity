@@ -67,7 +67,7 @@ function labelSprite(THREE,text){
   x.fillText(escText(text,24)||'KŌMØ Member',256,59);
   x.fillStyle='rgba(216,185,132,.92)';x.font='700 16px Arial';x.fillText('PULSE MEMBER',256,92);
   const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=2;
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:false}));
   sp.scale.set(2.25,.64,1);sp.position.y=2.52;sp.renderOrder=30;return sp;
 }
 function presenceAvatar(runtime,record){
@@ -105,12 +105,17 @@ function presenceAvatar(runtime,record){
   q=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.27,10),matSkin);q.position.y=-.14;leftElbow.add(q);
   q=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.27,10),matSkin);q.position.y=-.14;rightElbow.add(q);
 
-  const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.46,40),accent);ring.rotation.x=-Math.PI/2;ring.position.y=.015;g.add(ring);
+  const ringMat=new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.48,depthWrite:false});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.50,40),ringMat);ring.rotation.x=-Math.PI/2;ring.position.y=.018;ring.renderOrder=28;g.add(ring);
+  const beacon=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,3.3,6),new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.20,depthWrite:false,depthTest:false}));
+  beacon.position.y=1.65;beacon.renderOrder=27;g.add(beacon);
+  const beaconTop=new THREE.Mesh(new THREE.RingGeometry(.12,.18,24),new THREE.MeshBasicMaterial({color:0xf0d4a0,transparent:true,opacity:.58,depthWrite:false,depthTest:false}));
+  beaconTop.position.y=3.28;beaconTop.rotation.x=-Math.PI/2;beaconTop.renderOrder=29;g.add(beaconTop);
   const tag=labelSprite(THREE,record.display_name);g.add(tag);
 
   g.userData.target=new THREE.Vector3(Number(record.x)||0,Number(record.y)||0,Number(record.z)||0);
   g.userData.targetYaw=record.yaw||0;g.userData.zone=record.zone||'world';g.position.copy(g.userData.target);
-  g.userData.avatar={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,lastPosition:g.position.clone(),walkPhase:0};
+  g.userData.avatar={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,ring,beacon,beaconTop,lastPosition:g.position.clone(),walkPhase:0};
   runtime.scene.add(g);return g;
 }
 export async function mount(runtime){
@@ -302,7 +307,8 @@ export async function mount(runtime){
   function animatePeers(){
     const local=runtime.getState(),cam=runtime.camera;
     for(const peer of state.peers.values()){
-      peer.visible=peer.userData.zone===local.mode;
+      const localZone=local.mode==='rehab'?'rehab':local.mode;
+      peer.visible=peer.userData.zone===localZone;
       if(!peer.visible)continue;
       const av=peer.userData.avatar;
       const beforeX=peer.position.x,beforeZ=peer.position.z;
@@ -315,12 +321,22 @@ export async function mount(runtime){
         av.walkPhase+=Math.min(.22,speed*7.0);
         const stride=Math.sin(av.walkPhase);
         const distance=cam?cam.position.distanceTo(peer.position):0;
-        const near=distance<24;
-        av.tag.visible=distance<26;
+        const near=distance<28;
+        av.tag.visible=distance<90;
         if(av.tag.visible){
-          const k=Math.max(1,Math.min(1.24,1+distance*.011));
+          const k=Math.max(1,Math.min(1.85,1+distance*.014));
           av.tag.scale.set(2.25*k,.64*k,1);
         }
+        if(av.beacon){
+          av.beacon.visible=distance>7&&distance<90;
+          av.beacon.material.opacity=THREE.MathUtils.clamp(.34-distance*.0025,.12,.32);
+        }
+        if(av.beaconTop){
+          av.beaconTop.visible=distance>5&&distance<90;
+          const pulse=1+.12*Math.sin(performance.now()*.004);
+          av.beaconTop.scale.setScalar(pulse);
+        }
+        if(av.ring)av.ring.material.opacity=distance<30?.56:.34;
         if(near&&speed>.002){
           av.leftLeg.rotation.x=stride*.38;av.rightLeg.rotation.x=-stride*.38;
           av.leftKnee.rotation.x=Math.max(0,-stride)*.28;av.rightKnee.rotation.x=Math.max(0,stride)*.28;
