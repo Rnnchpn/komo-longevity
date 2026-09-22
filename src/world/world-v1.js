@@ -1986,7 +1986,9 @@ function animateRehabCoach(now,dt){
   a.leftArm.rotation.x*=intensity;a.rightArm.rotation.x*=intensity;
 }
 const REHAB_KEY='komo_world_rehab_v1';
+const FITNESS_KEY='komo_world_fitness_club_v1';
 let rehabSessionTimer=null;
+
 function loadRehabProgress(){
   try{
     const raw=JSON.parse(localStorage.getItem(REHAB_KEY)||'{}');
@@ -1995,11 +1997,213 @@ function loadRehabProgress(){
 }
 const rehabProgress=loadRehabProgress();
 function saveRehabProgress(){try{localStorage.setItem(REHAB_KEY,JSON.stringify(rehabProgress))}catch{}}
+
+const FITNESS_ACTIVITIES={
+  strength:{
+    title:{fr:'Force',en:'Strength'},code:'STRENGTH',coach:'strength',base:20,
+    promise:{fr:'Construire force, contrôle et régularité.',en:'Build strength, control and consistency.'},
+    days:[
+      ['FOUNDATION',['Activation','Squat & hinge','Core']],
+      ['LOWER BODY',['Mobility warm-up','Lower-body strength','Balance finisher']],
+      ['UPPER + CORE',['Shoulder prep','Push / pull pattern','Core control']],
+      ['RESET',['Mobility','Easy strength','Breathing']],
+      ['TOTAL BODY',['Warm-up','Full-body circuit','Core']],
+      ['CONTROL',['Tempo strength','Single-leg control','Mobility']],
+      ['RECOVERY STRENGTH',['Easy activation','Mobility flow','Walk / reset']]
+    ]
+  },
+  mobility:{
+    title:{fr:'Mobilité',en:'Mobility'},code:'MOBILITY',coach:'control',base:16,
+    promise:{fr:'Bouger avec plus d’amplitude et de contrôle.',en:'Move with more range and control.'},
+    days:[
+      ['FULL BODY FLOW',['Breathing','Global mobility','Easy flow']],
+      ['HIPS',['Hip mobility','Rotation','Controlled range']],
+      ['SPINE',['Thoracic mobility','Rotation','Core control']],
+      ['SHOULDERS',['Shoulder mobility','Scapular control','Breathing']],
+      ['ANKLES + HIPS',['Ankle mobility','Hip flow','Balance']],
+      ['DYNAMIC FLOW',['Warm-up flow','Dynamic mobility','Easy capacity']],
+      ['RESET',['Gentle mobility','Breathing','Walk']]
+    ]
+  },
+  balance:{
+    title:{fr:'Équilibre',en:'Balance'},code:'BALANCE',coach:'control',base:15,
+    promise:{fr:'Développer stabilité, coordination et confiance.',en:'Build stability, coordination and confidence.'},
+    days:[
+      ['FOUNDATION',['Stable stance','Weight shifts','Easy single-leg']],
+      ['SINGLE LEG',['Warm-up','Single-leg control','Step control']],
+      ['DYNAMIC',['Direction changes','Reach patterns','Walk line']],
+      ['MOBILITY + BALANCE',['Hip mobility','Ankle control','Balance flow']],
+      ['COORDINATION',['Cross-body patterns','Step sequence','Reset']],
+      ['FLOW',['Balance circuit','Controlled walk','Breathing']],
+      ['RESET',['Easy stance','Mobility','Recovery walk']]
+    ]
+  },
+  cardio:{
+    title:{fr:'Cardio',en:'Cardio'},code:'CARDIO',coach:'capacity',base:22,
+    promise:{fr:'Développer progressivement votre capacité d’effort.',en:'Progressively build your exercise capacity.'},
+    days:[
+      ['BASE',['Easy warm-up','Steady effort','Cooldown']],
+      ['INTERVALS',['Warm-up','Short intervals','Recovery']],
+      ['TEMPO',['Progressive warm-up','Tempo block','Cooldown']],
+      ['RECOVERY',['Easy walk','Mobility','Breathing']],
+      ['AEROBIC MIX',['Warm-up','Mixed pace','Easy finish']],
+      ['SHORT INTERVALS',['Warm-up','Short efforts','Cooldown']],
+      ['EASY CAPACITY',['Comfortable pace','Mobility','Reset']]
+    ]
+  },
+  recovery:{
+    title:{fr:'Recovery',en:'Recovery'},code:'RECOVERY',coach:'control',base:14,
+    promise:{fr:'Créer une routine quotidienne légère et récupératrice.',en:'Create a light daily recovery routine.'},
+    days:[
+      ['BREATH + MOBILITY',['Breathing','Gentle mobility','Easy walk']],
+      ['LOWER BODY RESET',['Ankles','Hips','Leg mobility']],
+      ['SPINE RESET',['Breathing','Spine mobility','Easy core']],
+      ['UPPER BODY RESET',['Shoulders','Thoracic mobility','Breathing']],
+      ['WALK + FLOW',['Easy walk','Mobility flow','Breathing']],
+      ['FULL RESET',['Full-body mobility','Easy balance','Breathing']],
+      ['RESTORE',['Gentle flow','Long exhale breathing','Easy walk']]
+    ]
+  }
+};
+const FITNESS_ORDER=['strength','mobility','balance','cardio','recovery'];
+
+function localDateKey(date=new Date()){
+  const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function dateFromKey(key){
+  const [y,m,d]=String(key).split('-').map(Number);return new Date(y,m-1,d);
+}
+function daysBetweenLocal(a,b){
+  const A=dateFromKey(a),B=dateFromKey(b);
+  return Math.floor((Date.UTC(B.getFullYear(),B.getMonth(),B.getDate())-Date.UTC(A.getFullYear(),A.getMonth(),A.getDate()))/86400000);
+}
+function loadFitnessProfile(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(FITNESS_KEY)||'{}');
+    return {
+      activity:FITNESS_ORDER.includes(raw.activity)?raw.activity:null,
+      startDate:raw.startDate||null,
+      completed:raw.completed&&typeof raw.completed==='object'?raw.completed:{},
+      points:Number(raw.points)||0
+    };
+  }catch{return {activity:null,startDate:null,completed:{},points:0}}
+}
+const fitnessProfile=loadFitnessProfile();
+function saveFitnessProfile(){try{localStorage.setItem(FITNESS_KEY,JSON.stringify(fitnessProfile))}catch{}}
+
+function fitnessStreak(){
+  let streak=0,d=new Date();
+  // If today is not completed, allow the streak to continue from yesterday.
+  if(!fitnessProfile.completed[localDateKey(d)])d.setDate(d.getDate()-1);
+  for(let i=0;i<365;i++){
+    const key=localDateKey(d);
+    if(!fitnessProfile.completed[key])break;
+    streak++;d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+function fitnessToday(){
+  if(!fitnessProfile.activity)return null;
+  if(!fitnessProfile.startDate)fitnessProfile.startDate=localDateKey();
+  const activity=FITNESS_ACTIVITIES[fitnessProfile.activity];
+  const elapsed=Math.max(0,daysBetweenLocal(fitnessProfile.startDate,localDateKey()));
+  const dayIndex=elapsed%7,week=Math.floor(elapsed/7)+1,phase=Math.min(4,week);
+  const def=activity.days[dayIndex];
+  const duration=activity.base+Math.min(6,(phase-1)*2)+(dayIndex===3||dayIndex===6?-4:0);
+  return {
+    activityId:fitnessProfile.activity,activity,
+    elapsed,day:elapsed+1,dayIndex,week,phase,
+    title:def[0],blocks:def[1],duration:Math.max(10,duration),
+    date:localDateKey(),completed:!!fitnessProfile.completed[localDateKey()]
+  };
+}
+function selectFitnessActivity(id){
+  if(!FITNESS_ORDER.includes(id))return;
+  if(fitnessProfile.activity!==id){
+    fitnessProfile.activity=id;fitnessProfile.startDate=localDateKey();
+  }else if(!fitnessProfile.startDate)fitnessProfile.startDate=localDateKey();
+  saveFitnessProfile();
+  setRehabCoachStation(FITNESS_ACTIVITIES[id].coach,false);
+  notify((locale==='fr'?'PROGRAMME · ':'PROGRAM · ')+FITNESS_ACTIVITIES[id].title[locale]);
+  showFitnessToday();
+}
+function fitnessActivityCards(){
+  return `<div class="fitness-activity-grid">${FITNESS_ORDER.map(id=>{
+    const a=FITNESS_ACTIVITIES[id],selected=fitnessProfile.activity===id;
+    return `<button data-fitness="${id}" class="${selected?'selected':''}">
+      <span>${a.code}</span><b>${a.title[locale]}</b><small>${a.promise[locale]}</small>
+    </button>`;
+  }).join('')}</div>`;
+}
+function fitnessWeekStrip(){
+  const t=fitnessToday();if(!t)return '';
+  return `<div class="fitness-week">${t.activity.days.map((d,i)=>{
+    const offset=i-t.dayIndex,date=new Date();date.setDate(date.getDate()+offset);
+    const key=localDateKey(date),done=!!fitnessProfile.completed[key];
+    return `<div class="${i===t.dayIndex?'today':''} ${done?'done':''}"><span>D${i+1}</span><b>${d[0]}</b><small>${done?'✓':i===t.dayIndex?(locale==='fr'?'Aujourd’hui':'Today'):''}</small></div>`;
+  }).join('')}</div>`;
+}
+function fitnessTodayHtml(previewPct=0,previewRemaining=null){
+  const t=fitnessToday();if(!t)return '';
+  const streak=fitnessStreak();
+  return `
+    <div class="fitness-today-hero">
+      <div><span>${t.activity.code} · WEEK ${t.week}</span><strong>${locale==='fr'?'Jour':'Day'} ${t.day}</strong><small>${t.title}</small></div>
+      <div><b>${t.duration}</b><small>MIN</small></div>
+    </div>
+    ${previewRemaining!==null?`<div class="rehab-progress"><i style="width:${previewPct}%"></i></div><div class="fitness-preview-label">COACH PREVIEW · ${previewRemaining}s</div>`:''}
+    <div class="fitness-blocks">${t.blocks.map((b,i)=>`<div><span>0${i+1}</span><b>${b}</b><small>${i===0?'PREP':i===t.blocks.length-1?'FINISH':'MAIN'}</small></div>`).join('')}</div>
+    <div class="panel-grid">
+      <div><span>STREAK</span><b>${streak} day${streak===1?'':'s'}</b></div>
+      <div><span>CLUB POINTS</span><b>${fitnessProfile.points}</b></div>
+      <div><span>PHASE</span><b>${t.phase}/4</b></div>
+      <div><span>STATUS</span><b>${t.completed?'✓ DONE':'TODAY'}</b></div>
+    </div>
+    ${fitnessWeekStrip()}
+    <div class="data-note">${locale==='fr'?'Programme fitness générique d’engagement. Adaptez l’intensité à votre situation et interrompez l’exercice en cas de douleur ou symptôme inhabituel.':'General fitness engagement program. Adjust intensity to your situation and stop if you experience pain or unusual symptoms.'}</div>`;
+}
+function showFitnessToday(previewed=false){
+  const t=fitnessToday();if(!t){showRehab();return}
+  stopRehabSession();setRehabCoachStation(t.activity.coach,false);
+  openPanel('KŌMØ FITNESS CLUB',t.activity.title[locale]+' · '+(locale==='fr'?'séance du jour':'today’s session'),fitnessTodayHtml(),[
+    {label:locale==='fr'?'CHANGER D’ACTIVITÉ':'CHANGE ACTIVITY',onClick:showRehab},
+    {label:locale==='fr'?'APERÇU COACH':'COACH PREVIEW',onClick:runFitnessCoachPreview},
+    {label:t.completed?(locale==='fr'?'✓ TERMINÉ AUJOURD’HUI':'✓ DONE TODAY'):(locale==='fr'?'J’AI TERMINÉ':'MARK COMPLETE'),primary:!t.completed,onClick:markFitnessTodayComplete}
+  ]);
+}
+function runFitnessCoachPreview(){
+  const t=fitnessToday();if(!t)return;
+  stopRehabSession();setRehabCoachStation(t.activity.coach,true);
+  const start=performance.now(),duration=15000;
+  openPanel('ALEX · FITNESS COACH',t.activity.title[locale]+' · '+(locale==='fr'?'aperçu du mouvement':'movement preview'),fitnessTodayHtml(0,15),[
+    {label:locale==='fr'?'ARRÊTER':'STOP',onClick:showFitnessToday}
+  ]);
+  rehabSessionTimer=setInterval(()=>{
+    const elapsed=performance.now()-start,pct=THREE.MathUtils.clamp(elapsed/duration*100,0,100),left=Math.max(0,Math.ceil((duration-elapsed)/1000));
+    panelBody.innerHTML=fitnessTodayHtml(pct,left);
+    if(elapsed>=duration){stopRehabSession();showFitnessToday(true)}
+  },250);
+}
+function markFitnessTodayComplete(){
+  const t=fitnessToday();if(!t)return;
+  if(t.completed){notify(locale==='fr'?'Séance déjà validée aujourd’hui':'Today’s session is already complete');return}
+  fitnessProfile.completed[t.date]={activity:t.activityId,at:Date.now()};
+  fitnessProfile.points+=20;
+  saveFitnessProfile();
+  const coachId=t.activity.coach;
+  rehabProgress[coachId]=(rehabProgress[coachId]||0)+1;rehabProgress.total++;saveRehabProgress();
+  completeJourney('rehab_session');
+  setRehabCoachStation(coachId,false);
+  notify((locale==='fr'?'+20 CLUB POINTS · STREAK ':'+20 CLUB POINTS · STREAK ')+fitnessStreak());
+  showFitnessToday(true);
+}
+
 function rehabStationCopy(id){
   const data={
-    control:{title:{fr:'CONTROL',en:'CONTROL'},duration:15,focus:{fr:'Contrôle · précision · stabilité',en:'Control · precision · stability'},demo:{fr:'Séquence guidée de contrôle moteur.',en:'Guided motor-control sequence.'}},
-    strength:{title:{fr:'STRENGTH',en:'STRENGTH'},duration:18,focus:{fr:'Force · activation · répétition',en:'Strength · activation · repetition'},demo:{fr:'Séquence guidée d’activation et de force.',en:'Guided activation and strength sequence.'}},
-    capacity:{title:{fr:'CAPACITY',en:'CAPACITY'},duration:20,focus:{fr:'Capacité · rythme · endurance',en:'Capacity · pace · endurance'},demo:{fr:'Séquence guidée de capacité fonctionnelle.',en:'Guided functional-capacity sequence.'}}
+    control:{title:{fr:'BALANCE / CONTROL',en:'BALANCE / CONTROL'},duration:15,focus:{fr:'Équilibre · contrôle · mobilité',en:'Balance · control · mobility'},demo:{fr:'Aperçu coach de contrôle et stabilité.',en:'Coach preview for control and stability.'}},
+    strength:{title:{fr:'STRENGTH',en:'STRENGTH'},duration:18,focus:{fr:'Force · activation · répétition',en:'Strength · activation · repetition'},demo:{fr:'Aperçu coach de force fonctionnelle.',en:'Coach preview for functional strength.'}},
+    capacity:{title:{fr:'CARDIO / CAPACITY',en:'CARDIO / CAPACITY'},duration:20,focus:{fr:'Rythme · capacité · endurance',en:'Pace · capacity · endurance'},demo:{fr:'Aperçu coach de capacité et cardio.',en:'Coach preview for capacity and cardio.'}}
   };
   return data[id]||data.control;
 }
@@ -2008,15 +2212,15 @@ function rehabStationHtml(id,running=false,pct=0,remaining=null){
   return `
     <div class="rehab-station-hero"><span>${c.title[locale]}</span><strong>${running?(remaining+'s'):(count?'✓ '+count:'READY')}</strong></div>
     <div class="rehab-progress"><i style="width:${pct}%"></i></div>
-    <div class="priority-card"><b>${locale==='fr'?'OBJECTIF DE DÉMO':'DEMO FOCUS'}</b>${c.focus[locale]}</div>
+    <div class="priority-card"><b>COACH MODE</b>${c.focus[locale]}</div>
     <p>${c.demo[locale]}</p>
     <div class="panel-grid">
-      <div><span>DURATION</span><b>${c.duration}s</b></div>
+      <div><span>PREVIEW</span><b>${c.duration}s</b></div>
       <div><span>SESSIONS</span><b>${count}</b></div>
-      <div><span>MODE</span><b>GUIDED</b></div>
-      <div><span>XP</span><b>+25</b></div>
+      <div><span>COACH</span><b>ALEX</b></div>
+      <div><span>MODE</span><b>FITNESS</b></div>
     </div>
-    <div class="data-note">${locale==='fr'?'Démonstration d’engagement dans World. Ce module ne constitue pas une prescription médicale autonome et ne remplace pas une adaptation au contexte de l’utilisateur.':'World engagement demonstration. This module is not an autonomous medical prescription and does not replace adaptation to user context.'}</div>`;
+    <div class="data-note">${locale==='fr'?'Ces démonstrations servent à découvrir les mouvements du Fitness Club. Elles ne constituent pas une prescription médicale personnalisée.':'These demonstrations introduce Fitness Club movements. They are not personalised medical prescriptions.'}</div>`;
 }
 function stopRehabSession(){
   if(rehabSessionTimer){clearInterval(rehabSessionTimer);rehabSessionTimer=null}
@@ -2024,14 +2228,13 @@ function stopRehabSession(){
 }
 function completeRehabStation(id){
   stopRehabSession();rehabProgress[id]=(rehabProgress[id]||0)+1;rehabProgress.total++;saveRehabProgress();
-  completeJourney('rehab_session');
-  notify((locale==='fr'?'SESSION VALIDÉE · ':'SESSION COMPLETE · ')+rehabStationCopy(id).title[locale]);
+  notify((locale==='fr'?'APERÇU TERMINÉ · ':'PREVIEW COMPLETE · ')+rehabStationCopy(id).title[locale]);
   showRehabStation(id,true);
 }
 function runRehabDemo(id){
   stopRehabSession();setRehabCoachStation(id,true);
   const c=rehabStationCopy(id),start=performance.now(),duration=c.duration*1000;
-  openPanel(c.title[locale],'REHAB · LIVE',rehabStationHtml(id,true,0,c.duration),[
+  openPanel(c.title[locale],'FITNESS CLUB · COACH',rehabStationHtml(id,true,0,c.duration),[
     {label:locale==='fr'?'ARRÊTER':'STOP',onClick:()=>{stopRehabSession();showRehabStation(id)}}
   ]);
   rehabSessionTimer=setInterval(()=>{
@@ -2044,9 +2247,9 @@ function runRehabDemo(id){
 function showRehabStation(id,completed=false){
   stopRehabSession();setRehabCoachStation(id,false);
   const c=rehabStationCopy(id);
-  openPanel(c.title[locale],locale==='fr'?'Station Rehab guidée.':'Guided Rehab station.',rehabStationHtml(id,false,completed?100:0),[
-    {label:locale==='fr'?'RETOUR REHAB':'REHAB OVERVIEW',onClick:showRehab},
-    {label:completed?(locale==='fr'?'REJOUER':'REPLAY'):(locale==='fr'?'DÉMARRER':'START'),primary:true,onClick:()=>runRehabDemo(id)}
+  openPanel(c.title[locale],locale==='fr'?'Station coach du KŌMØ Fitness Club.':'KŌMØ Fitness Club coach station.',rehabStationHtml(id,false,completed?100:0),[
+    {label:locale==='fr'?'FITNESS CLUB':'FITNESS CLUB',onClick:showRehab},
+    {label:completed?(locale==='fr'?'REJOUER':'REPLAY'):(locale==='fr'?'VOIR LE MOUVEMENT':'PREVIEW MOVEMENT'),primary:true,onClick:()=>runRehabDemo(id)}
   ]);
 }
 
