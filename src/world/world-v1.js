@@ -249,7 +249,7 @@ function makeCloudTexture(){
 }
 const cloudTexture=makeCloudTexture();
 const cloudGroup=new THREE.Group();cloudGroup.name='KOMO_CLOUD_FIELD_V18';scene.add(cloudGroup);
-const cloudCount=lowPower?2:9;
+const cloudCount=lowPower?3:11;
 for(let i=0;i<cloudCount;i++){
   const mat=new THREE.MeshBasicMaterial({map:cloudTexture,transparent:true,opacity:lowPower?.10:.14,depthWrite:false,side:THREE.DoubleSide});
   const cloud=new THREE.Mesh(new THREE.PlaneGeometry(34+(i%3)*8,13+(i%2)*4),mat);
@@ -497,7 +497,7 @@ function npcNameTag(text,sub=''){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
   sp.scale.set(2.05,.58,1);sp.position.y=2.48;sp.renderOrder=25;return sp;
 }
-function makeNpc(parent,{role='visitor',label='Guest',x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
+function makeNpc(parent,{role='visitor',label='Guest',quest=null,x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
   const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);g.name='KOMO_NPC_'+role.toUpperCase();parent.add(g);
   const seed=Math.abs(Math.floor(x*31+z*17+phase*101));
   const skinColors=[0xe8c9ad,0xd0a27f,0xb27b58,0x7b543f,0x513a31];
@@ -554,7 +554,7 @@ function makeNpc(parent,{role='visitor',label='Guest',x=0,y=0,z=0,scale=1,route=
   const points=route.length?route.map(p=>new THREE.Vector3(p[0],p[1]??y,p[2])):[new THREE.Vector3(x,y,z)];
   const seg=[],cum=[0];let total=0;
   for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total)}
-  g.userData.npc={role,label,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
+  g.userData.npc={role,label,quest,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
   living.npcs.push(g);return g;
 }
 function updateNpc(npc,t,index){
@@ -998,6 +998,54 @@ districtPavilion(0,77.0,9.0,5.2,'PERFORMANCE PAVILION','CHALLENGES · TALKS',tru
 bannerTotem(worldDistrict,-10.8,58.5,'WORLD','CHALLENGES',.05);
 bannerTotem(worldDistrict,10.8,58.5,'KŌMØ LIFE','DISTRICT',-.05);
 
+// V3.3 District detail pass — more urban depth, seating and a stronger fountain.
+const districtDetails=new THREE.Group();districtDetails.name='KOMO_DISTRICT_DETAILS_V33';worldDistrict.add(districtDetails);
+
+// Secondary buildings make the district feel inhabited rather than like three isolated boxes.
+districtPavilion(-18.2,77.0,6.0,5.6,'HEALTH PAVILION','CHECK · UNDERSTAND',true);
+districtPavilion(18.2,77.0,6.0,5.6,'CLUB HOUSE','MEET · MOVE',false);
+
+// Arc promenade around fountain.
+for(let i=0;i<18;i++){
+  const a=(i/18)*Math.PI*2,r=7.15;
+  const tile=box(districtDetails,.85,.025,.24,i%2?MAT.brass:M.bronzeSoft,Math.cos(a)*r,.13,68.2+Math.sin(a)*r,{cast:false,receive:false});
+  tile.rotation.y=-a;
+}
+
+// Street furniture and low-cost lantern markers (emissive-looking geometry, no PointLights).
+const lanternMat=new THREE.MeshBasicMaterial({color:0xe2c18a,transparent:true,opacity:.55});
+[-1,1].forEach(side=>{
+  [59.0,64.0,72.4,77.0].forEach((z,idx)=>{
+    const x=side*(idx%2?11.5:8.7);
+    cyl(districtDetails,.055,.070,2.2,MAT.blackened,x,1.15,z,8,{cast:false});
+    mesh(districtDetails,new THREE.SphereGeometry(.105,8,6),lanternMat,x,2.30,z,{cast:false,receive:false});
+  });
+  exteriorBench(districtDetails,side*11.2,72.2,side>0?-Math.PI/2:Math.PI/2,.78);
+  exteriorBench(districtDetails,side*12.0,63.8,side>0?-Math.PI/2:Math.PI/2,.78);
+});
+
+// Tree avenue toward the Performance Pavilion.
+[-1,1].forEach(side=>{
+  [60.5,65.2,70.0,74.8].forEach((z,idx)=>tree(districtDetails,side*(12.4+idx*.85),z,.48+idx*.025));
+});
+
+// Fountain central plume + concentric ripples.
+const centralJet=mesh(grandFountain,new THREE.CylinderGeometry(.055,.075,2.35,8),fountainWaterMat,0,3.58,0,{cast:false,receive:false});
+centralJet.userData.phase=1.7;centralJet.userData.baseY=3.58;centralJet.userData.dynamic=true;living.fountainJets.push(centralJet);
+[1.55,2.35,3.20].forEach((r,i)=>{
+  const ripple=mesh(grandFountain,new THREE.RingGeometry(r,r+.045,48),new THREE.MeshBasicMaterial({color:0xd7e5de,transparent:true,opacity:.16-i*.025,depthWrite:false}),0,.495,0,{cast:false,receive:false});
+  ripple.rotation.x=-Math.PI/2;ripple.userData.dynamic=true;ripple.userData.ripplePhase=i*.8;living.fountainJets.push(ripple);
+});
+
+// Distant skyline blocks add depth without expensive detail.
+[
+  [-22,82,7,8],[-12,84,5.5,6.5],[12,84,5.5,6.5],[22,82,7,8]
+].forEach(([x,z,w,h],i)=>{
+  box(districtDetails,w,h,3.6,i%2?MAT.limestone:M.sageDeep,x,h/2,z,{cast:false});
+  box(districtDetails,w-.45,.035,3.15,M.warm,x,h-.28,z-.10,{cast:false,receive:false});
+});
+plaque(districtDetails,'KŌMØ DISTRICT','MOVE · CONNECT · LIVE',6.4,.86,0,4.15,80.0,{dark:true,titleSize:60});
+
 // Main building — one continuous architectural object, no reception avatar.
 const building=new THREE.Group();building.name='KOMO_MAIN_BUILDING_V1';world.add(building);
 box(building,8.3,8.6,3.3,M.stone,-10.2,4.3,16.1,{cast:true});
@@ -1130,6 +1178,46 @@ const waypointRing=new THREE.Mesh(new THREE.TorusGeometry(.42,.035,8,30),guideMa
 const waypointStem=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,1.45,6),guideMat.clone());waypointStem.position.y=.78;waypointStem.userData.dynamic=true;waypoint.add(waypointStem);
 const waypointCap=new THREE.Mesh(new THREE.SphereGeometry(.075,8,6),guideMat.clone());waypointCap.position.y=1.52;waypointCap.userData.dynamic=true;waypoint.add(waypointCap);
 
+
+// V3.3 Entry Guide — immediate orientation + movement health snapshot.
+const entryGuide=new THREE.Group();entryGuide.name='KOMO_ENTRY_GUIDE_V33';building.add(entryGuide);
+
+// Bronze arrival medallion directly under the spawn.
+const entryMedallion=mesh(entryGuide,new THREE.RingGeometry(1.18,1.28,48),MAT.brass,0,.205,14.55,{cast:false,receive:false});
+entryMedallion.rotation.x=-Math.PI/2;
+const entryCore=mesh(entryGuide,new THREE.CircleGeometry(.82,40),new THREE.MeshBasicMaterial({color:0x314b3d,transparent:true,opacity:.12,depthWrite:false}),0,.208,14.55,{cast:false,receive:false});
+entryCore.rotation.x=-Math.PI/2;
+plaque(entryGuide,'YOUR WORLD','UNDERSTAND · TRAIN · ENGAGE',4.6,.72,0,3.35,12.75,{dark:true,titleSize:52});
+
+// Three floor cues point immediately toward the core destinations.
+[
+  [-2.35,-24.8,0xb9cfbf],
+  [0,-24.8,0xd7b777],
+  [2.35,-24.8,0xb9935c]
+].forEach(([x,z,color],i)=>{
+  const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.28,depthWrite:false});
+  box(entryGuide,.055,.012,34.0,mat,x,.205,-5.7,{cast:false,receive:false});
+});
+
+// Physical Health Station at the left side of arrival, outside central walk axis.
+const healthStation=new THREE.Group();healthStation.name='KOMO_HEALTH_STATION_V33';healthStation.position.set(-5.25,0,10.55);building.add(healthStation);
+box(healthStation,3.75,.18,1.45,MAT.travertine,0,.10,0);
+box(healthStation,3.15,2.45,.26,MAT.blackened,0,1.48,-.53,{cast:true});
+plaque(healthStation,'YOUR HEALTH','MOVEMENT SNAPSHOT',2.85,.60,0,2.62,-.36,{dark:true,titleSize:44});
+const healthStationBars={};
+[
+  ['muscle',-1.12,0xb9cfbf],
+  ['mobility',-.56,0xb9cfbf],
+  ['balance',0,0xd7b777],
+  ['posture',.56,0xb9cfbf],
+  ['endurance',1.12,0xd7b777]
+].forEach(([id,x,color])=>{
+  const track=box(healthStation,.30,1.38,.12,new THREE.MeshBasicMaterial({color:0x39473f,transparent:true,opacity:.72}),x,1.32,-.33,{cast:false,receive:false});
+  const fillMat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.74});
+  const fill=box(healthStation,.20,.70,.14,fillMat,x,.98,-.24,{cast:false,receive:false});
+  fill.userData.dynamic=true;healthStationBars[id]=fill;
+});
+plaque(healthStation,'OPEN','PRESS E · SEE DETAILS',2.55,.42,0,.56,.78,{dark:false,titleSize:34});
 
 // Hall shell.
 box(building,23.8,.28,46,M.stoneLight,0,.13,-7.0);
@@ -1500,13 +1588,13 @@ if(!lowPower){
   makeNpc(npcRoot,{role:'visitor',label:'Elena',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
   [-3.8,0,-4.5],[-3.2,0,-12.0],[-4.8,0,-20.4],[-1.4,0,-24.2],[1.8,0,-19.2],[.8,0,-8.0]
 ]});
-makeNpc(npcRoot,{role:'coach',label:'Leo',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
+makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'fitness',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
   [5.4,0,-18.4],[5.2,0,-10.0],[4.8,0,-2.2],[3.7,0,5.2],[5.5,0,9.0]
 ]});
   makeNpc(npcRoot,{role:'visitor',label:'Sofia',x:7.0,y:0,z:5.8,outfit:'bronze',speed:.28,phase:.22,route:[
     [7.0,0,5.8],[9.2,0,4.2],[9.0,0,1.2],[7.2,0,.4],[7.4,0,3.0]
   ]});
-  makeNpc(npcRoot,{role:'staff',label:'Camille',x:-6.3,y:0,z:6.7,outfit:'sage',speed:.24,phase:.43,route:[
+  makeNpc(npcRoot,{role:'staff',label:'Camille',quest:'twin',x:-6.3,y:0,z:6.7,outfit:'sage',speed:.24,phase:.43,route:[
     [-6.3,0,6.7],[-7.1,0,4.2],[-5.7,0,2.5],[-4.8,0,6.0],[-6.3,0,7.2]
   ]});
   makeNpc(npcRoot,{role:'visitor',label:'Lina',x:5.5,y:0,z:-11.8,outfit:'cream',speed:.25,phase:.67,route:[
@@ -1518,7 +1606,10 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',x:5.4,y:0,z:-18.4,outfit:'charcoal',sp
   makeNpc(npcRoot,{role:'visitor',label:'Mila',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
     [8.72,UPPER_Y,-3.0],[8.72,UPPER_Y,-10.5],[8.72,UPPER_Y,-18.0],[3.6,UPPER_Y,-21.2],[.4,UPPER_Y,-21.2]
   ]});
-  makeNpc(npcRoot,{role:'coach',label:'Nora',x:-7.5,y:0,z:55.5,outfit:'sage',speed:.36,phase:.35,route:[
+  makeNpc(npcRoot,{role:'coach',label:'Théo',quest:'arena',x:6.0,y:0,z:-20.5,outfit:'bronze',speed:.26,phase:.15,route:[
+    [6.0,0,-20.5],[7.4,0,-17.8],[6.2,0,-14.6],[4.8,0,-17.2],[6.0,0,-20.5]
+  ]});
+  makeNpc(npcRoot,{role:'coach',label:'Nora',quest:'district',x:-7.5,y:0,z:55.5,outfit:'sage',speed:.36,phase:.35,route:[
     [-7.5,0,55.5],[-3.0,0,60.5],[0,0,62.5],[3.0,0,60.5],[7.5,0,55.5],[0,0,58.0]
   ]});
   makeNpc(npcRoot,{role:'visitor',label:'Jules',x:10.5,y:0,z:64.0,outfit:'sand',speed:.31,phase:.58,route:[
@@ -1620,6 +1711,47 @@ const recoveryRoll=cyl(recoveryPed,.22,.22,.78,MAT.fabricLight,0,.90,0,18,{cast:
 const travelPed=lifePedestal(1.35,-2.55,'TRAVEL KIT','RIVIERA');
 box(travelPed,.72,.42,.42,MAT.walnut,0,.83,0,{cast:true});box(travelPed,.55,.035,.30,MAT.brass,0,1.06,0);
 
+// V3.3 Life Retail Wall — products are arranged like a real flagship.
+const lifeRetailWall=new THREE.Group();lifeRetailWall.name='KOMO_LIFE_RETAIL_WALL_V33';lifeStore.add(lifeRetailWall);
+lifeRetailWall.position.set(1.72,0,.10);
+box(lifeRetailWall,.22,4.45,6.2,MAT.walnut,0,2.36,0,{cast:true});
+[-2.30,-.76,.78,2.32].forEach(z=>{
+  box(lifeRetailWall,1.42,.055,.34,MAT.brass,-.18,1.12,z);
+  box(lifeRetailWall,1.42,.055,.34,MAT.brass,-.18,2.22,z);
+});
+plaque(lifeRetailWall,'LIFE WALL','WEAR · MOVE · RECOVER',3.7,.62,-.18,4.55,-2.55,{rotY:Math.PI/2,dark:true,titleSize:42});
+
+// Jacket / overshirt represented as a structured hanging silhouette.
+const jacketDisplay=new THREE.Group();jacketDisplay.position.set(-.42,2.12,-1.55);lifeRetailWall.add(jacketDisplay);
+box(jacketDisplay,.86,.92,.18,MAT.fabric,0,0,0,{cast:true});
+box(jacketDisplay,.22,.74,.16,MAT.fabric,-.55,-.02,0,{cast:true});
+box(jacketDisplay,.22,.74,.16,MAT.fabric,.55,-.02,0,{cast:true});
+box(jacketDisplay,.018,.72,.20,MAT.brass,0,0,.11);
+plaque(lifeRetailWall,'KŌMØ JACKET','MOVE WELL · LIVE LONG',2.1,.40,-.18,3.08,-1.55,{rotY:Math.PI/2,dark:false,titleSize:30});
+
+// Mobility band + compact pouch.
+const bandDisplay=new THREE.Group();bandDisplay.position.set(-.40,1.28,.05);lifeRetailWall.add(bandDisplay);
+const band=mesh(bandDisplay,new THREE.TorusGeometry(.34,.045,8,30),MAT.fabricLight,0,0,0,{cast:true});band.rotation.y=.85;band.rotation.x=.38;
+box(bandDisplay,.52,.30,.20,MAT.blackened,.02,-.48,0,{cast:true});
+plaque(lifeRetailWall,'MOBILITY BAND','TRAIN ANYWHERE',1.95,.40,-.18,2.20,.05,{rotY:Math.PI/2,dark:true,titleSize:31});
+
+// Small recovery / travel objects give depth to the wall.
+[-2.30,.78,2.32].forEach((z,i)=>{
+  const mat=i===0?MAT.charcoal:i===1?MAT.fabricLight:MAT.travertine;
+  box(lifeRetailWall,.52,.28,.24,mat,-.30,1.35,z,{cast:true});
+  box(lifeRetailWall,.36,.055,.18,MAT.brass,-.30,1.53,z);
+});
+
+// Central discovery table for tactile items.
+const discoveryTable=new THREE.Group();discoveryTable.name='KOMO_LIFE_DISCOVERY_TABLE_V33';discoveryTable.position.set(-.25,0,.45);lifeStore.add(discoveryTable);
+box(discoveryTable,2.45,.16,1.02,MAT.travertine,0,.83,0,{cast:true});
+box(discoveryTable,.12,.76,.72,MAT.brass,-.92,.42,0);
+box(discoveryTable,.12,.76,.72,MAT.brass,.92,.42,0);
+const miniStrap=mesh(discoveryTable,new THREE.TorusGeometry(.20,.040,8,24),MAT.fabric,-.62,1.00,0,{cast:true});miniStrap.rotation.x=.55;
+cyl(discoveryTable,.10,.12,.42,MAT.charcoal,.12,1.04,0,14,{cast:true});
+box(discoveryTable,.42,.22,.28,MAT.walnut,.64,1.00,0,{cast:true});
+plaque(discoveryTable,'DISCOVER','TOUCH · EXPLORE · CONFIGURE',2.20,.42,0,1.54,.54,{dark:false,titleSize:31});
+
 // Discreet checkout / service bar at the back.
 box(lifeStore,3.70,.88,.78,M.sageDeep,.20,.47,3.65,{cast:true});
 box(lifeStore,3.88,.08,.92,MAT.brass,.20,.94,3.65);
@@ -1679,6 +1811,32 @@ portals.forEach(({x,title,sub,dark})=>{
   const threshold=box(g,4.05,.018,.11,mat,0,.43,.42,{cast:false,receive:false});
   const beacon=mesh(g,new THREE.RingGeometry(.20,.27,24),mat,0,5.60,.12,{cast:false,receive:false});beacon.rotation.x=Math.PI/2;beacon.userData.dynamic=true;
   living.destinationDoors.push({id:cfg.id,x:cfg.x,left,right,threshold,beacon,mat,progress:0});
+});
+
+// V3.3 Destination architecture — each portal has its own visual language.
+[
+  {x:-6.8,title:'FUNCTIONAL TWIN',sub:'UNDERSTAND',accent:0xb9cfbf,dark:true},
+  {x:0,title:'KŌMØ FIT',sub:'TRAIN DAILY',accent:0xd7b777,dark:false},
+  {x:6.8,title:'ARENA',sub:'CHALLENGE',accent:0xb9935c,dark:true}
+].forEach((p,i)=>{
+  const g=new THREE.Group();g.name='KOMO_PORTAL_ARCH_V33_'+i;g.position.set(p.x,0,-28.55);building.add(g);
+  // Deep limestone portal frame.
+  box(g,5.20,.34,1.05,MAT.limestone,0,5.55,0,{cast:true});
+  box(g,.36,5.45,1.05,MAT.limestone,-2.42,2.92,0,{cast:true});
+  box(g,.36,5.45,1.05,MAT.limestone,2.42,2.92,0,{cast:true});
+  // Bronze reveal and low-cost emissive-like strip.
+  box(g,4.55,.08,.11,MAT.brass,0,5.17,.56);
+  const glowMat=new THREE.MeshBasicMaterial({color:p.accent,transparent:true,opacity:.22,depthWrite:false});
+  box(g,4.20,.025,.10,glowMat,0,.43,.58,{cast:false,receive:false});
+  // Flanking fins give depth without additional lights.
+  [-1,1].forEach(side=>{
+    box(g,.10,4.25,.48,p.dark?MAT.blackened:MAT.brass,side*2.10,2.72,.36,{cast:false});
+    box(g,.055,3.80,.30,glowMat,side*1.92,2.72,.58,{cast:false,receive:false});
+  });
+  plaque(g,p.title,p.sub,4.25,.86,0,6.07,.58,{dark:p.dark,titleSize:p.title==='FUNCTIONAL TWIN'?46:58});
+  // Floor icon/medallion in front of each portal.
+  const ring=mesh(g,new THREE.RingGeometry(.58,.70,36),glowMat,0,.205,3.05,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;
+  const inner=mesh(g,new THREE.CircleGeometry(.48,32),new THREE.MeshBasicMaterial({color:p.accent,transparent:true,opacity:.08,depthWrite:false}),0,.208,3.05,{cast:false,receive:false});inner.rotation.x=-Math.PI/2;
 });
 plaque(building,'LIBRARY','SCIENCE · METHOD',3.5,.84,-11.45,4.3,-10,{rotY:Math.PI/2,dark:false,titleSize:68});
 plaque(building,'TALKS','EXPERTS · EVENTS',3.5,.84,11.45,4.3,-10,{rotY:-Math.PI/2,dark:true,titleSize:68});
@@ -1869,11 +2027,11 @@ plaque(arenaChallengeBoard,'WORLD CHALLENGES','DAILY · XP · COMMUNITY',4.7,.82
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 
 // Runtime state.
-const player=new THREE.Vector3(0,0,13.8);
+const player=new THREE.Vector3(0,0,14.55);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
 let cameraMode='third';
-let thirdPersonDistance=lowPower?3.75:4.25;
+let thirdPersonDistance=lowPower?3.55:4.05;
 const playerAvatar=makePlayerAvatar();
 let playerFacing=0;
 const cameraDesired=new THREE.Vector3(),cameraLook=new THREE.Vector3();
@@ -1888,6 +2046,7 @@ const keys=new Set();
 
 const interactions=[
   {id:'desk',x:-7.3,z:4.0,r:3.6,title:()=>copy[locale].deskTitle,desc:()=>copy[locale].deskCopy,action:showDesk},
+  {id:'health',x:-5.25,z:10.55,r:2.7,title:()=>locale==='fr'?'Votre santé · mouvement':'Your health · movement',desc:()=>locale==='fr'?'Comprendre les 5 domaines en un coup d’œil':'Understand the 5 domains at a glance',action:showHealthOverview},
   {id:'twin',x:-6.8,z:-26.7,r:4.0,title:()=>copy[locale].twinTitle,desc:()=>copy[locale].twinCopy,action:enterTwin},
   {id:'rehab',x:0,z:-26.7,r:4.0,title:()=>copy[locale].rehabTitle,desc:()=>copy[locale].rehabCopy,action:enterRehab},
   {id:'arena',x:6.8,z:-26.7,r:4.0,title:()=>copy[locale].arenaTitle,desc:()=>copy[locale].arenaCopy,action:enterArena},
@@ -1899,7 +2058,9 @@ const interactions=[
   {id:'life_strap',x:7.10,z:6.45,r:1.35,title:()=> 'Motion Strap',desc:()=>locale==='fr'?'KŌMØ Life · objet mouvement':'KŌMØ Life · movement object',action:()=>showLifeItem('strap')},
   {id:'life_bottle',x:9.80,z:6.45,r:1.35,title:()=> 'KŌMØ Bottle',desc:()=>locale==='fr'?'KŌMØ Life · hydratation':'KŌMØ Life · hydration',action:()=>showLifeItem('bottle')},
   {id:'life_recovery',x:7.10,z:1.25,r:1.35,title:()=> 'Recovery Roll',desc:()=>locale==='fr'?'KŌMØ Life · récupération':'KŌMØ Life · recovery',action:()=>showLifeItem('recovery')},
-  {id:'life_travel',x:9.80,z:1.25,r:1.35,title:()=> 'Travel Kit',desc:()=>locale==='fr'?'KŌMØ Life · Riviera':'KŌMØ Life · Riviera',action:()=>showLifeItem('travel')}
+  {id:'life_travel',x:9.80,z:1.25,r:1.35,title:()=> 'Travel Kit',desc:()=>locale==='fr'?'KŌMØ Life · Riviera':'KŌMØ Life · Riviera',action:()=>showLifeItem('travel')},
+  {id:'life_jacket',x:10.15,z:2.25,r:1.30,title:()=> 'KŌMØ Jacket',desc:()=>locale==='fr'?'KŌMØ Life · textile':'KŌMØ Life · apparel',action:()=>showLifeItem('jacket')},
+  {id:'life_band',x:10.15,z:3.85,r:1.30,title:()=> 'Mobility Band',desc:()=>locale==='fr'?'KŌMØ Life · entraînement':'KŌMØ Life · training',action:()=>showLifeItem('band')}
 ];
 
 const arenaInteractions=[
@@ -2057,6 +2218,13 @@ function updateHealthHUD(){
   healthBalanceEl.textContent=Math.round(Number(d.balance)||0);
   healthCapacityEl.textContent=Math.round(Number(d.endurance)||0);
   healthSourceEl.textContent='DEMO';
+  if(typeof healthStationBars!=='undefined'){
+    Object.entries(healthStationBars).forEach(([id,fill])=>{
+      const v=THREE.MathUtils.clamp(Number(d[id])||0,0,100),h=.20+(v/100)*1.12;
+      fill.scale.y=h;fill.position.y=.50+h/2;
+      fill.material.opacity=.48+(v/100)*.34;
+    });
+  }
 }
 function healthOverviewHtml(){
   const snap=current(),d=snap.domains||{};
@@ -2085,7 +2253,10 @@ const challengeDefs=[
   {id:'distance',reward:20,target:120,title:{fr:'Explorer le World',en:'Explore the World'},sub:{fr:'Parcourir 120 m dans le campus',en:'Move 120 m through the campus'}},
   {id:'twin',reward:20,target:1,title:{fr:'Lire votre Twin',en:'Read your Twin'},sub:{fr:'Entrer dans Functional Twin',en:'Enter Functional Twin'}},
   {id:'fitness',reward:25,target:1,title:{fr:'Bouger aujourd’hui',en:'Move today'},sub:{fr:'Valider la séance KŌMØ Fitness Club',en:'Complete today’s KŌMØ Fitness Club session'}},
-  {id:'fountain',reward:15,target:1,title:{fr:'Découvrir la grande fontaine',en:'Discover the Grand Fountain'},sub:{fr:'Explorer le nouveau KŌMØ District',en:'Explore the new KŌMØ District'}}
+  {id:'fountain',reward:15,target:1,title:{fr:'Découvrir la grande fontaine',en:'Discover the Grand Fountain'},sub:{fr:'Explorer le nouveau KŌMØ District',en:'Explore the new KŌMØ District'}},
+  {id:'coach',reward:10,target:1,title:{fr:'Parler à un coach',en:'Meet a coach'},sub:{fr:'Demander une quête Fitness à Leo ou Nora',en:'Ask Leo or Nora for a Fitness quest'}},
+  {id:'life_item',reward:10,target:1,title:{fr:'Découvrir un objet Life',en:'Discover a Life object'},sub:{fr:'Explorer un produit directement dans le flagship',en:'Explore a product directly in the flagship'}},
+  {id:'arena_visit',reward:15,target:1,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir le Challenge Board',en:'Discover the Challenge Board'}}
 ];
 function loadChallengeState(){
   const today=localDateKey();
@@ -2187,7 +2358,7 @@ function toggleCamera(){setCameraMode(cameraMode==='third'?'first':'third')}
 setCameraMode('third');
 const travelPoints={
   arrival:{mode:'world',x:0,y:0,z:58.5,yaw:Math.PI,level:0},
-  hall:{mode:'world',x:0,y:0,z:13.8,yaw:0,level:0},
+  hall:{mode:'world',x:0,y:0,z:14.55,yaw:0,level:0},
   twin:{mode:'world',x:-5.9,y:0,z:-22.2,yaw:0,level:0},
   rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
   arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
@@ -2195,7 +2366,7 @@ const travelPoints={
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
 };
 const journeyTargets={
-  arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:13.8},journey:{x:4.8,y:0,z:8.5},
+  arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:14.55},journey:{x:4.8,y:0,z:8.5},
   twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
   life:{x:8.4,y:0,z:3.4},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
@@ -2752,12 +2923,14 @@ function showFountain(){
   ]);
 }
 function showLifeItem(id){
-  completeJourney('life',{silent:true});
+  completeJourney('life',{silent:true});completeChallenge('life_item');
   const items={
     strap:{name:'MOTION STRAP',cat:'MOVE',fr:'Un objet textile KŌMØ pensé autour du mouvement, des capteurs et de l’entraînement.',en:'A KŌMØ textile object built around movement, sensors and training.'},
     bottle:{name:'KŌMØ BOTTLE',cat:'HYDRATE',fr:'Objet quotidien KŌMØ Life, simple et durable, intégré à la routine.',en:'A simple durable KŌMØ Life daily object integrated into the routine.'},
     recovery:{name:'RECOVERY ROLL',cat:'RESET',fr:'Accessoire de mobilité et de récupération présenté directement dans le flagship.',en:'A mobility and recovery accessory displayed directly in the flagship.'},
-    travel:{name:'TRAVEL KIT',cat:'RIVIERA',fr:'Kit compact pensé pour prolonger la routine KŌMØ en déplacement.',en:'A compact kit designed to extend the KŌMØ routine while travelling.'}
+    travel:{name:'TRAVEL KIT',cat:'RIVIERA',fr:'Kit compact pensé pour prolonger la routine KŌMØ en déplacement.',en:'A compact kit designed to extend the KŌMØ routine while travelling.'},
+    jacket:{name:'KŌMØ JACKET',cat:'WEAR',fr:'Une pièce KŌMØ Life pensée comme uniforme quotidien du mouvement : sobre, premium et fonctionnelle.',en:'A KŌMØ Life piece designed as a daily movement uniform: understated, premium and functional.'},
+    band:{name:'MOBILITY BAND',cat:'TRAIN',fr:'Un accessoire compact pour intégrer quelques minutes de mobilité et d’activation dans la journée.',en:'A compact accessory for integrating a few minutes of mobility and activation into the day.'}
   };
   const it=items[id]||items.strap;
   openPanel('KŌMØ LIFE · '+it.cat,it.name,`
@@ -2777,13 +2950,13 @@ function showLifeStore(){
     ?`<p>KŌMØ Life prolonge World dans le réel : objets, équipements et éditions conçus autour du mouvement et de la longévité.</p>
       <div class="store-products">
         <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>La valise KŌMØ configurable, présentée ici comme objet signature.</small></article>
-        <article><span>02 · OBJECTS</span><b>Motion Strap · Bottle · Recovery Roll</b><small>Les objets sont désormais disposés physiquement dans le flagship World.</small></article>
+        <article><span>02 · LIFE WALL</span><b>Jacket · Mobility Band · Motion Strap</b><small>Un mur produit et une table découverte permettent désormais d’explorer les objets directement dans World.</small></article>
         <article><span>03 · EDITIONS</span><b>Travel Kit · Selected drops</b><small>Collaborations, séries limitées et objets Riviera.</small></article>
       </div>`
     :`<p>KŌMØ Life extends World into real life: objects, equipment and editions designed around movement and longevity.</p>
       <div class="store-products">
         <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>The configurable KŌMØ case, presented here as a signature object.</small></article>
-        <article><span>02 · OBJECTS</span><b>Motion Strap · Bottle · Recovery Roll</b><small>Objects are now physically placed inside the World flagship.</small></article>
+        <article><span>02 · LIFE WALL</span><b>Jacket · Mobility Band · Motion Strap</b><small>A product wall and discovery table now let you explore objects directly inside World.</small></article>
         <article><span>03 · EDITIONS</span><b>Travel Kit · Selected drops</b><small>Collaborations, limited editions and Riviera objects.</small></article>
       </div>`;
   openPanel('KŌMØ LIFE',locale==='fr'?'La boutique du World.':'The World store.',html,[
@@ -2815,15 +2988,46 @@ function showNpcConversation(npc){
   const d=npc?.userData?.npc;if(!d)return;
   completeJourney('social');
   const t=fitnessToday();
-  const lines={
-    staff:{fr:'Bienvenue. Commencez par l’aperçu santé puis le Functional Twin pour comprendre votre trajectoire.',en:'Welcome. Start with the health snapshot and Functional Twin to understand your trajectory.'},
-    coach:{fr:t?'Votre séance du jour est prête : '+t.activity.title.fr+' · '+t.title+' · '+t.duration+' min.':'Choisissez une pratique dans KŌMØ Fitness Club et je vous proposerai une séance chaque jour.',en:t?'Today’s session is ready: '+t.activity.title.en+' · '+t.title+' · '+t.duration+' min.':'Choose an activity in KŌMØ Fitness Club and I will give you a daily session.'},
-    visitor:{fr:'Je découvre aussi le World. KŌMØ Life relie l’expérience numérique aux objets et équipements du monde réel.',en:'I am exploring the World too. KŌMØ Life connects the digital experience with real-world objects and equipment.'}
+  const quest=d.quest;
+  if(quest==='fitness'||quest==='district')completeChallenge('coach');
+
+  const questCopy={
+    fitness:{
+      title:{fr:'QUÊTE FITNESS',en:'FITNESS QUEST'},
+      body:{fr:t?'Ta séance du jour est prête : '+t.activity.title.fr+' · '+t.title+' · '+t.duration+' min. Termine-la pour valider le défi Fitness.':'Choisis ton activité dans KŌMØ Fit. Je construirai ensuite une séance différente chaque jour.',en:t?'Today’s session is ready: '+t.activity.title.en+' · '+t.title+' · '+t.duration+' min. Complete it to clear the Fitness challenge.':'Choose your activity in KŌMØ Fit. I will then build a different session every day.'},
+      button:()=>t?(locale==='fr'?'LANCER MA SÉANCE':'START SESSION'):'KŌMØ FIT',
+      action:()=>t?showFitnessToday():showRehab()
+    },
+    twin:{
+      title:{fr:'QUÊTE TWIN',en:'TWIN QUEST'},
+      body:{fr:'Commence par ton aperçu santé à l’entrée, puis ouvre Functional Twin. Le but est de comprendre quels domaines composent ta trajectoire de mouvement.',en:'Start with your health snapshot at the entrance, then open Functional Twin. The goal is to understand the domains that make up your movement trajectory.'},
+      button:()=>locale==='fr'?'OUVRIR LE TWIN':'OPEN TWIN',
+      action:enterTwin
+    },
+    arena:{
+      title:{fr:'QUÊTE ARENA',en:'ARENA QUEST'},
+      body:{fr:'Arena regroupe les défis d’engagement du World. Consulte le Challenge Board et complète les objectifs du jour.',en:'Arena brings together World engagement challenges. Check the Challenge Board and complete today’s objectives.'},
+      button:()=>locale==='fr'?'ALLER À ARENA':'GO TO ARENA',
+      action:enterArena
+    },
+    district:{
+      title:{fr:'QUÊTE DISTRICT',en:'DISTRICT QUEST'},
+      body:{fr:'Sors vers la grande fontaine, explore les pavillons et reviens avec le défi Fontaine validé.',en:'Head outside to the Grand Fountain, explore the pavilions and return with the Fountain challenge cleared.'},
+      button:()=>locale==='fr'?'ALLER À LA FONTAINE':'GO TO FOUNTAIN',
+      action:()=>fastTravel('arrival')
+    }
   };
+  const q=questCopy[quest];
+  const defaultLines={
+    staff:{fr:'Bienvenue. L’aperçu santé et le Functional Twin sont le meilleur point de départ.',en:'Welcome. The health snapshot and Functional Twin are the best place to start.'},
+    coach:{fr:'Le KŌMØ Fitness Club propose un programme différent chaque jour.',en:'KŌMØ Fitness Club offers a different program every day.'},
+    visitor:{fr:'Je découvre aussi le World. KŌMØ Life relie l’expérience numérique aux objets du monde réel.',en:'I am exploring the World too. KŌMØ Life connects the digital experience with real-world objects.'}
+  };
+  const body=q?q.body[locale]:defaultLines[d.role]?.[locale]||defaultLines.visitor[locale];
   const actions=[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}];
-  if(d.role==='coach')actions.push({label:t?(locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION'):(locale==='fr'?'FITNESS CLUB':'FITNESS CLUB'),primary:true,onClick:t?showFitnessToday:showRehab});
+  if(q)actions.push({label:q.button(),primary:true,onClick:q.action});
   else actions.push({label:locale==='fr'?'VOIR LE JOURNEY':'VIEW JOURNEY',primary:true,onClick:showJourneyPanel});
-  openPanel(d.label||'KŌMØ MEMBER',d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'FITNESS COACH':'WORLD GUEST',`<p>${lines[d.role]?.[locale]||lines.visitor[locale]}</p><div class="priority-card"><b>WORLD JOURNEY</b>${locale==='fr'?'Échange social · +15 XP':'Social interaction · +15 XP'}</div>`,actions);
+  openPanel(d.label||'KŌMØ MEMBER',q?q.title[locale]:(d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'FITNESS COACH':'WORLD GUEST'),`<p>${body}</p><div class="priority-card"><b>${q?q.title[locale]:'WORLD JOURNEY'}</b>${q?(locale==='fr'?'Objectif disponible · récompense XP':'Objective available · XP reward'):(locale==='fr'?'Échange social · +15 XP':'Social interaction · +15 XP')}</div>`,actions);
 }
 function setMode(next){
   if(next!=='rehab')stopRehabSession();
@@ -2838,7 +3042,7 @@ function enterRehab(){
   playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='KŌMØ FITNESS CLUB';
 }
 function enterArena(){
-  completeJourney('arena');
+  completeJourney('arena');completeChallenge('arena_visit');
   playerLevel=0;setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';
 }
 function returnToHall(){
@@ -2950,11 +3154,12 @@ function updateCamera(now,dt){
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
     const distance=thirdPersonDistance;
-    const height=lowPower?2.08:2.30;
+    const height=lowPower?1.88:2.08;
+    const shoulder=lowPower?.24:.34;
     cameraDesired.set(
-      player.x+Math.sin(yaw)*distance,
-      player.y+height+pitch*1.25,
-      player.z+Math.cos(yaw)*distance
+      player.x+Math.sin(yaw)*distance+Math.cos(yaw)*shoulder,
+      player.y+height+pitch*1.08,
+      player.z+Math.cos(yaw)*distance-Math.sin(yaw)*shoulder
     );
     // Cheap camera collision clamp for major architectural volumes.
     if(mode==='world'&&player.z<17.2&&player.z>-28){
@@ -2969,7 +3174,7 @@ function updateCamera(now,dt){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
-    cameraLook.set(player.x,player.y+1.12+pitch*.48,player.z);
+    cameraLook.set(player.x,player.y+1.03+pitch*.42,player.z);
     camera.lookAt(cameraLook);
   }else{
     const move=Math.min(1,velocity.length()/4.35);
@@ -2992,7 +3197,9 @@ function updateDestinationDoors(now,dt){
     d.right.position.x=THREE.MathUtils.lerp(1.08,2.00,e);
     d.mat.opacity=.10+.34*e;
     d.beacon.rotation.z=now*.0011*(i%2?1:-1);
-    d.beacon.scale.setScalar(.92+.10*e+.04*Math.sin(now*.004+i));
+    d.beacon.scale.setScalar(.92+.14*e+.045*Math.sin(now*.004+i));
+    d.beacon.material.opacity=.12+.36*e;
+    d.threshold.material.opacity=.10+.30*e;
   });
 }
 function updateDoors(now,dt){
@@ -3335,9 +3542,17 @@ function animateLiving(now){
   }
   if(living.fountainJets?.length){
     living.fountainJets.forEach((jet,i)=>{
-      const h=.72+.52*(.5+.5*Math.sin(t*1.25+jet.userData.phase));
-      jet.scale.y=h;jet.position.y=jet.userData.baseY+(h-.72)*.38;
-      jet.material.opacity=.30+.16*(.5+.5*Math.sin(t*.9+i*.4));
+      if(jet.geometry?.type==='RingGeometry'){
+        const pulse=.96+.08*Math.sin(t*.75+(jet.userData.ripplePhase||0));
+        jet.scale.set(pulse,pulse,pulse);
+        jet.material.opacity=.10+.08*(.5+.5*Math.sin(t*.8+i*.55));
+      }else{
+        const base=jet===centralJet?1.0:.72;
+        const amp=jet===centralJet?.78:.52;
+        const h=base+amp*(.5+.5*Math.sin(t*1.25+(jet.userData.phase||0)));
+        jet.scale.y=h;jet.position.y=(jet.userData.baseY||.95)+(h-base)*.38;
+        jet.material.opacity=.30+.16*(.5+.5*Math.sin(t*.9+i*.4));
+      }
     });
   }
   if(living.sunSprite&&living.skyUniforms){
@@ -3409,7 +3624,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.2.0-world-hub',
+  version:'3.3.4-district',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
