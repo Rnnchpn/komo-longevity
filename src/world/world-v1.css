@@ -401,3 +401,132 @@ body.camera-third .interaction-card{bottom:112px}
   }
   .world-panel{top:96px;right:22px;bottom:22px;border-radius:22px}
 }
+
+
+/* V3.6 Desktop clarity — single-glance information architecture */
+@media(min-width:901px) and (pointer:fine){
+  :root{
+    --hud-deep:rgba(13,27,20,.91);
+    --hud-mid:rgba(24,40,31,.82);
+    --hud-line:rgba(241,222,188,.13);
+    --hud-gold:#e2c387;
+    --hud-text:#f6efe4;
+    --hud-muted:rgba(246,239,228,.54);
+  }
+
+  .world-hud{
+    top:16px;left:24px;right:24px;height:74px;
+    grid-template-columns:auto auto minmax(360px,1fr) auto auto auto 42px;
+    gap:12px;padding:9px 11px 9px 20px;
+    border-radius:25px;border-color:var(--hud-line);
+    background:linear-gradient(135deg,rgba(13,28,21,.94),rgba(24,40,31,.84));
+    box-shadow:0 18px 50px rgba(5,13,9,.17),inset 0 1px 0 rgba(255,255,255,.045)
+  }
+  .world-brand{gap:12px;padding-right:2px}
+  .world-brand strong{font-size:31px;letter-spacing:.09em}
+  .world-brand span{font-size:6px;letter-spacing:.34em;color:rgba(246,239,228,.46)}
+  .world-metrics{gap:8px}
+  .world-metrics>div{
+    min-width:92px;padding:8px 13px;border-radius:14px;
+    border-color:rgba(255,255,255,.09);background:rgba(255,255,255,.032)
+  }
+  .world-metrics span{font-size:6px;letter-spacing:.14em;color:rgba(246,239,228,.50)}
+  .world-metrics b{margin-top:3px;font-size:20px;color:var(--hud-text)}
+  .world-today{
+    height:50px;border-radius:999px;
+    border-color:rgba(226,195,135,.15);
+    background:linear-gradient(180deg,rgba(5,17,11,.68),rgba(14,29,21,.60));
+    color:rgba(250,245,237,.90);font-size:8px;letter-spacing:.15em;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.035)
+  }
+  .world-today i{width:7px;height:7px;background:#efc36f}
+  .hud-link,.hud-button{
+    height:42px;padding:0 15px;border-radius:13px;
+    font-size:7px;letter-spacing:.13em;color:rgba(246,239,228,.78);
+    border-color:rgba(255,255,255,.10);background:rgba(255,255,255,.025)
+  }
+  #language-toggle{width:42px;min-width:42px;padding:0;border-radius:50%;color:#f1dfbd;border-color:rgba(226,195,135,.22)}
+
+  .location-chip{
+    top:108px;height:36px;padding:0 16px 0 18px;gap:10px;
+    border-radius:999px;border-color:rgba(255,255,255,.10);
+    background:rgba(18,34,26,.86);font-size:7px;letter-spacing:.17em;
+    color:rgba(246,239,228,.82);box-shadow:0 12px 34px rgba(5,13,9,.12)
+  }
+  .location-chip:after{content:"⌄";font-size:10px;color:rgba(246,239,228,.72);margin-left:1px}
+  .location-chip b{font-size:8px;color:#f8f1e6}
+
+  .journey-hud{
+    left:24px;top:108px;width:420px;min-height:92px;
+    grid-template-columns:78px minmax(0,1fr) 62px;gap:14px;padding:13px 16px;
+    border-radius:21px;border-color:var(--hud-line);
+    background:linear-gradient(145deg,rgba(14,29,22,.91),rgba(29,45,35,.79));
+    box-shadow:0 18px 50px rgba(5,13,9,.14),inset 0 1px 0 rgba(255,255,255,.035)
+  }
+  .journey-level{height:64px}
+  .journey-level small{font-size:6px;letter-spacing:.15em;color:rgba(246,239,228,.48)}
+  .journey-level strong{font-size:34px;color:#e6c88d}
+  .journey-main>b{font-size:10px;letter-spacing:.11em;color:#f5ede1}
+  .journey-main>i{height:6px;margin:10px 0 8px;background:rgba(255,255,255,.10)}
+  .journey-main>small{font-size:7px;letter-spacing:.035em;color:rgba(246,239,228,.58)}
+  .journey-xp b{font-size:15px}.journey-xp small{font-size:6px}
+
+  .health-hud{
+    right:24px;top:158px;width:470px;min-height:82px;
+    grid-template-columns:1.12fr 1.55fr auto;gap:14px;padding:12px 14px;
+    border-radius:20px;border-color:var(--hud-line);
+    background:linear-gradient(145deg,rgba(14,29,22,.92),rgba(29,45,35,.80));
+    box-shadow:0 18px 50px rgba(5,13,9,.14),inset 0 1px 0 rgba(255,255,255,.035)
+  }
+  .health-hud>span:first-child{padding-right:12px;border-right:1px solid rgba(255,255,255,.08)}
+  .health-hud>span:first-child small{font-size:6px;letter-spacing:.15em;color:rgba(246,239,228,.46)}
+  .health-hud>span:first-child strong{margin-top:7px;font-size:24px;color:#e7ca8d}
+  .health-domains{gap:7px}
+  .health-domains i{padding:8px 7px;border-radius:10px;background:rgba(255,255,255,.028);border-color:rgba(255,255,255,.06)}
+  .health-domains b{font-size:6px;color:rgba(246,239,228,.49)}
+  .health-domains em{margin-top:5px;font-size:11px}
+  .health-hud u{padding:7px 9px;font-size:6px;border:1px solid rgba(226,195,135,.18);background:rgba(226,195,135,.08)}
+
+  .world-quick-nav{
+    bottom:18px;gap:0;padding:6px;border-radius:20px;
+    border-color:rgba(255,255,255,.10);
+    background:linear-gradient(145deg,rgba(15,31,23,.90),rgba(28,44,34,.82));
+    box-shadow:0 18px 48px rgba(5,13,9,.18),inset 0 1px 0 rgba(255,255,255,.04)
+  }
+  .world-quick-nav button{
+    min-width:142px;height:58px;padding:0 18px 0 15px;
+    display:grid;grid-template-columns:28px 1fr;grid-template-rows:1fr 1fr;
+    align-items:center;column-gap:9px;text-align:left;border-radius:14px;
+    color:rgba(246,239,228,.66)
+  }
+  .world-quick-nav button i{
+    grid-row:1/3;display:grid;place-items:center;width:28px;height:28px;
+    font-style:normal;font-size:17px;color:rgba(246,239,228,.62)
+  }
+  .world-quick-nav button span{align-self:end;font-size:8px;letter-spacing:.12em}
+  .world-quick-nav button small{align-self:start;margin-top:3px;font-size:5px;letter-spacing:.13em;color:rgba(226,195,135,.62)}
+  .world-quick-nav button+button:before{top:12px;bottom:12px}
+  .world-quick-nav button.active{
+    background:linear-gradient(145deg,rgba(54,77,61,.78),rgba(32,55,42,.72));
+    color:#fff7e9;box-shadow:inset 0 0 0 1px rgba(226,195,135,.18)
+  }
+  .world-quick-nav button.active i,.world-quick-nav button.active small{color:#edcd8f}
+  .world-quick-nav button:hover{background:rgba(255,255,255,.055)}
+
+  .interaction-card{bottom:92px}
+  .desktop-help{display:none!important}
+
+  .world-panel{top:104px;right:24px;bottom:24px}
+  .world-menu{top:100px;right:24px;max-height:calc(100vh - 124px)}
+}
+
+@media(min-width:901px) and (max-width:1260px) and (pointer:fine){
+  .world-hud{left:14px;right:14px;grid-template-columns:auto auto minmax(250px,1fr) auto auto auto 38px;gap:8px;padding-left:15px}
+  .world-brand strong{font-size:27px}.world-brand span{display:none}
+  .world-metrics>div{min-width:76px;padding:7px 9px}.world-metrics b{font-size:18px}
+  .world-today{font-size:7px;padding:0 12px}
+  .hud-link,.hud-button{padding:0 11px}
+  .journey-hud{left:14px;width:360px}
+  .health-hud{right:14px;width:420px}
+  .world-quick-nav button{min-width:118px;padding-left:12px;padding-right:12px}
+}
