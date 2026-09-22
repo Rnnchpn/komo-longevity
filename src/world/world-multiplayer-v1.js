@@ -9,8 +9,8 @@ const HEARTBEAT_MS=2200;
 const POSE_MS=125;
 const PRESENCE_REFRESH_MS=4000;
 const CHAT_LIMIT=50;
-const VOICE_ENTER_M=11;
-const VOICE_EXIT_M=14;
+const VOICE_ENTER_M=18;
+const VOICE_EXIT_M=22;
 const SOCIAL_KEY='komo_world_social_v1';
 function dayKey(d=new Date()){return d.toISOString().slice(0,10)}
 function loadSocial(){
@@ -85,7 +85,7 @@ function ui(){
   document.body.appendChild(dock);
   const talk=document.createElement('button');talk.type='button';talk.id='kwmpTalk';talk.className='kwmp-talk';talk.dataset.state='idle';talk.disabled=true;talk.textContent='🎙  MAINTENIR POUR PARLER';talk.setAttribute('aria-label','Maintenir pour parler aux joueurs proches');document.body.appendChild(talk);
   const drawer=document.createElement('aside');drawer.id='kwmpChat';drawer.className='kwmp-chat open';drawer.setAttribute('aria-hidden','false');
-  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · LIVE</span><strong>World Chat</strong></div><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget" data-kwmp-target>WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">ENTER · écrire · PEOPLE → MP · maintenir PARLER (ou T) = vocal de proximité. Les données de santé ne sont jamais partagées.</div>';
+  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · LIVE</span><strong>World Chat</strong></div><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget" data-kwmp-target>WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">ENTER · écrire · PEOPLE → MP · maintenir PARLER (ou T) = vocal de proximité ≤18 m. Les données de santé ne sont jamais partagées.</div>';
   document.body.appendChild(drawer);
   return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:dock.querySelector('[data-kwmp-voice]'),talk,social:dock.querySelector('[data-kwmp-social]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
 }
@@ -153,7 +153,7 @@ export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
   const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,social:loadSocial(),voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set(),talking:false,pttHeld:false}};
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,social:loadSocial(),voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set(),talking:false,pttHeld:false,signalPollTimer:null,seenSignals:new Set()}};
   const roleFor=id=>state.roles.get(id)||null;
   const decoratePresence=row=>row?{...row,role_title:roleFor(row.user_id)?.display_title||''}:row;
   const saveSocial=()=>{try{localStorage.setItem(SOCIAL_KEY,JSON.stringify(state.social))}catch{}};
@@ -188,7 +188,7 @@ export async function mount(runtime){
   const updateVoiceUI=()=>{
     const n=state.voice.connected.size;
     U.voice.dataset.state=state.voice.enabled?'on':'off';
-    U.voice.textContent=state.voice.enabled?('VOICE · READY'+(n?' · '+n:'')):'VOICE · OFF';
+    U.voice.textContent=state.voice.enabled?(n?('VOICE · LINKED · '+n):'VOICE · READY'):'VOICE · OFF';
     U.talk.disabled=!state.presenceLive;
     U.talk.dataset.state=state.voice.talking?'talking':'idle';
     U.talk.textContent=state.voice.talking?'●  VOUS PARLEZ':'🎙  MAINTENIR POUR PARLER';
@@ -393,26 +393,47 @@ export async function mount(runtime){
     return peer;
   };
   const handleVoiceSignal=async(row)=>{
-    if(!row?.id||row.recipient_id!==state.session?.user?.id)return;
+    if(!row?.id||row.recipient_id!==state.session?.user?.id||state.voice.seenSignals.has(row.id))return false;
+    state.voice.seenSignals.add(row.id);
+    let handled=false;
     try{
       const sender=state.rows.get(row.sender_id);
-      if(row.signal_type==='hangup'){closeVoicePeer(row.sender_id);return}
-      if(!state.voice.enabled||!state.voice.stream||!sender?.voice_enabled)return;
-      const peer=await ensureVoicePeer(sender,{offer:false});if(!peer)return;
+      if(row.signal_type==='hangup'){closeVoicePeer(row.sender_id);handled=true;return true}
+      if(!state.voice.enabled||!state.voice.stream||!sender?.voice_enabled){state.voice.seenSignals.delete(row.id);return false}
+      const peer=await ensureVoicePeer(sender,{offer:false});if(!peer){state.voice.seenSignals.delete(row.id);return false}
       const pc=peer.pc,p=row.payload||{};
       if(row.signal_type==='offer'&&p.sdp){
         await pc.setRemoteDescription(new RTCSessionDescription(p.sdp));
         for(const cand of peer.pending.splice(0))await pc.addIceCandidate(cand);
         const answer=await pc.createAnswer();await pc.setLocalDescription(answer);
-        await sendVoiceSignal(row.sender_id,'answer',{sdp:pc.localDescription});
+        await sendVoiceSignal(row.sender_id,'answer',{sdp:pc.localDescription});handled=true;
       }else if(row.signal_type==='answer'&&p.sdp){
         if(!pc.currentRemoteDescription){await pc.setRemoteDescription(new RTCSessionDescription(p.sdp));for(const cand of peer.pending.splice(0))await pc.addIceCandidate(cand)}
+        handled=true;
       }else if(row.signal_type==='candidate'&&p.candidate){
         const cand=new RTCIceCandidate(p.candidate);
         if(pc.remoteDescription)await pc.addIceCandidate(cand);else peer.pending.push(cand);
+        handled=true;
       }
-    }catch(err){console.warn('[World voice receive]',err)}
-    finally{client.from('world_voice_signals').delete().eq('id',row.id).then(()=>{})}
+      if(handled)client.from('world_voice_signals').delete().eq('id',row.id).then(()=>{});
+      return handled;
+    }catch(err){
+      state.voice.seenSignals.delete(row.id);
+      console.warn('[World voice receive]',err);return false;
+    }
+  };
+  const pollVoiceSignals=async()=>{
+    if(!state.voice.enabled||!state.session?.user)return false;
+    try{
+      const {data,error}=await client.from('world_voice_signals')
+        .select('id,sender_id,recipient_id,signal_type,payload,created_at')
+        .eq('recipient_id',state.session.user.id)
+        .order('created_at',{ascending:true})
+        .limit(40);
+      if(error)throw error;
+      for(const row of data||[])await handleVoiceSignal(row);
+      return true;
+    }catch(err){console.warn('[World voice fallback]',err);return false}
   };
   const updateVoiceProximity=(now=performance.now())=>{
     if(!state.voice.enabled||now-state.voice.lastSweep<320)return;state.voice.lastSweep=now;
@@ -434,6 +455,8 @@ export async function mount(runtime){
   };
   const disableVoice=async()=>{
     state.voice.pttHeld=false;setTransmit(false);state.voice.enabled=false;
+    if(state.voice.signalPollTimer){clearInterval(state.voice.signalPollTimer);state.voice.signalPollTimer=null}
+    state.voice.seenSignals.clear();
     for(const id of [...state.voice.peers.keys()])closeVoicePeer(id,{signal:true});
     if(state.voice.stream){for(const t of state.voice.stream.getTracks())t.stop();state.voice.stream=null}
     updateVoiceUI();await heartbeat();await sendPose(true);
@@ -445,7 +468,9 @@ export async function mount(runtime){
       state.voice.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
       for(const track of state.voice.stream.getAudioTracks())track.enabled=false;
       state.voice.enabled=true;updateVoiceUI();await heartbeat();await sendPose(true);updateVoiceProximity();
-      runtime.notify?.('VOCAL DE PROXIMITÉ PRÊT · maintenez PARLER');
+      await pollVoiceSignals();
+      if(!state.voice.signalPollTimer)state.voice.signalPollTimer=setInterval(()=>pollVoiceSignals(),350);
+      runtime.notify?.('VOCAL PRÊT · 18 m · maintenez PARLER');
       return true;
     }catch(err){
       state.voice.enabled=false;state.voice.stream=null;setTransmit(false);runtime.notify?.('Autorisez le microphone pour parler');console.warn('[World voice permission]',err);return false
@@ -657,7 +682,7 @@ export async function mount(runtime){
   });
 
   const cleanup=()=>{
-    clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);stopTalking();for(const id of [...state.voice.peers.keys()])closeVoicePeer(id);if(state.voice.stream)for(const t of state.voice.stream.getTracks())t.stop();
+    clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);if(state.voice.signalPollTimer)clearInterval(state.voice.signalPollTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);stopTalking();for(const id of [...state.voice.peers.keys()])closeVoicePeer(id);if(state.voice.stream)for(const t of state.voice.stream.getTracks())t.stop();
     if(state.channel)client.removeChannel(state.channel);
     if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
@@ -669,5 +694,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.6.1-push-to-talk',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.6.2-voice-fallback',connect:openPulse,state};
 }
