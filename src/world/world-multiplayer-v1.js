@@ -18,7 +18,7 @@ function css(){
   .kwmp-chat.open{opacity:1;visibility:visible;transform:none}
   .kwmp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 16px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
   .kwmp-head span{display:block;color:#d6b67f;font-size:7px;font-weight:800;letter-spacing:.16em}.kwmp-head strong{display:block;margin-top:4px;font:500 23px/1 Georgia,serif}.kwmp-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.055);color:#eee5d8;font-size:18px;cursor:pointer}
-  .kwmp-roster{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:grid;gap:6px}.kwmp-person{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:7px 9px;border:1px solid rgba(255,255,255,.055);border-radius:10px;background:rgba(255,255,255,.025)}.kwmp-person b{font-size:7px;letter-spacing:.04em}.kwmp-person span{font-size:6px;color:#d8ba86;letter-spacing:.09em}.kwmp-person.mine{border-color:rgba(216,186,134,.14)}
+  .kwmp-roster{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:grid;gap:6px}.kwmp-person{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:7px 9px;border:1px solid rgba(255,255,255,.055);border-radius:10px;background:rgba(255,255,255,.025)}.kwmp-person b{font-size:7px;letter-spacing:.04em}.kwmp-person span{font-size:6px;color:#d8ba86;letter-spacing:.09em;white-space:nowrap}.kwmp-person small{display:block;margin-top:3px;font-size:5px;color:rgba(240,234,224,.42);letter-spacing:.05em}.kwmp-person button{height:24px;padding:0 8px;border:1px solid rgba(216,186,134,.22);border-radius:8px;background:rgba(216,186,134,.09);color:#ead9ba;font-size:5px;font-weight:850;letter-spacing:.08em;cursor:pointer}.kwmp-person button:hover{background:rgba(216,186,134,.16)}.kwmp-person.mine{border-color:rgba(216,186,134,.14)}
   .kwmp-messages{overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}.kwmp-msg{max-width:86%;padding:9px 11px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.035)}.kwmp-msg.mine{align-self:flex-end;background:rgba(210,179,126,.09);border-color:rgba(210,179,126,.13)}.kwmp-msg b{display:block;margin-bottom:4px;font-size:8px}.kwmp-msg p{margin:0;font-size:9px;line-height:1.45;color:rgba(242,236,226,.72);white-space:pre-wrap;word-break:break-word}.kwmp-msg small{display:block;margin-top:5px;font-size:7px;color:rgba(242,236,226,.34)}
   .kwmp-empty{margin:auto;color:rgba(242,236,226,.40);font-size:9px;text-align:center;line-height:1.5;padding:18px}
   .kwmp-compose{display:flex;gap:7px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.07)}.kwmp-compose input{flex:1;min-width:0;height:38px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.045);color:#f0e8da;padding:0 11px;font-size:9px;outline:none}.kwmp-compose button{height:38px;padding:0 12px;border-radius:12px;background:#d8ba86;color:#1d2d25;font-size:8px;font-weight:850;cursor:pointer}.kwmp-compose button:disabled,.kwmp-compose input:disabled{opacity:.42}
@@ -148,19 +148,39 @@ export async function mount(runtime){
   const renderRoster=()=>{
     if(!U.roster)return;
     U.roster.innerHTML='';
-    const now=Date.now(),own=state.session?.user?.id;
+    const now=Date.now(),own=state.session?.user?.id,local=runtime.getState();
     const active=[...state.rows.values()].filter(row=>now-new Date(row.updated_at||0).getTime()<STALE_MS);
     if(state.presenceLive&&own&&!active.some(r=>r.user_id===own)){
       const st=runtime.getState();
-      active.unshift({user_id:own,display_name:state.profile?.display_name||'You',zone:st.mode||'world',updated_at:new Date().toISOString()});
+      active.unshift({user_id:own,display_name:state.profile?.display_name||'You',zone:st.mode||'world',x:st.position.x,y:st.position.y,z:st.position.z,updated_at:new Date().toISOString()});
     }
     active.sort((a,b)=>(a.user_id===own?-1:b.user_id===own?1:String(a.display_name||'').localeCompare(String(b.display_name||''))));
     if(!active.length){const e=document.createElement('div');e.className='kwmp-empty';e.textContent=state.session?.user?'Synchronisation de la présence…':'Connectez World pour voir les personnes présentes.';U.roster.appendChild(e);return}
     for(const row of active){
-      const item=document.createElement('div');item.className='kwmp-person'+(row.user_id===own?' mine':'');
-      const n=document.createElement('b');n.textContent=(row.user_id===own?'YOU · ':'')+(escText(row.display_name,40)||'KŌMØ Member');
+      const mine=row.user_id===own;
+      const item=document.createElement('div');item.className='kwmp-person'+(mine?' mine':'');
+      const copy=document.createElement('div');
+      const n=document.createElement('b');n.textContent=(mine?'YOU · ':'')+(escText(row.display_name,40)||'KŌMØ Member');
+      const meta=document.createElement('small');
+      const sameZone=(row.zone||'world')===local.mode;
+      const distance=sameZone?Math.hypot((Number(row.x)||0)-local.position.x,(Number(row.z)||0)-local.position.z):null;
+      meta.textContent=mine?'CURRENT POSITION':sameZone?(Math.round(distance)+' m away'):'Different space';
+      copy.append(n,meta);
       const z=document.createElement('span');z.textContent=zoneLabel(row.zone);
-      item.append(n,z);U.roster.appendChild(item);
+      item.append(copy,z);
+      if(!mine){
+        const join=document.createElement('button');join.type='button';join.textContent='JOIN';
+        join.addEventListener('click',()=>{
+          const ok=runtime.joinPresence?.(row);
+          if(ok){
+            U.drawer.classList.remove('open');U.drawer.setAttribute('aria-hidden','true');
+            runtime.notify?.('Joining '+(escText(row.display_name,28)||'member'));
+            setTimeout(()=>heartbeat(),320);
+          }
+        });
+        item.append(join);
+      }
+      U.roster.appendChild(item);
     }
   };
   const fresh=(row)=>Date.now()-new Date(row.updated_at||0).getTime()<STALE_MS;
@@ -332,5 +352,5 @@ export async function mount(runtime){
   window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup()});
   window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);heartbeat();syncPeers()}});
 
-  window.KomoWorldMultiplayer={version:'0.4.1-cross-tab-bridge',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.5.0-join-friend',connect:openPulse,state};
 }
