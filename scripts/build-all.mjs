@@ -180,7 +180,10 @@ const scripts = [
   'scripts/pulse-ipad-center-connect-v1.mjs',
   // Public home hand-off: keep KŌMØ World visible as the virtual-rehabilitation
   // and network layer after every historical home mutation.
-  'scripts/world-public-home-v1.mjs'
+  'scripts/world-public-home-v1.mjs',
+  // Absolute last public-home pass: explain KŌMØ, its medical founder and World
+  // to a first-time patient before the deeper product detail begins.
+  'scripts/homepage-patient-clarity-v1.mjs'
 ];
 
 for (const script of scripts) {
