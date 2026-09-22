@@ -2735,20 +2735,50 @@ function showTalks(){
   openPanel('TALKS',locale==='fr'?'Experts & événements.':'Experts & events.',html,[{label:copy[locale].close,onClick:closePanel}]);
 }
 
+function showFountain(){
+  completeChallenge('fountain');
+  openPanel('GRAND FOUNTAIN',locale==='fr'?'Le cœur du KŌMØ District.':'The heart of KŌMØ District.',`
+    <p>${locale==='fr'?'La grande fontaine devient le point central du campus extérieur : Movement House, Life Lab et Performance Pavilion entourent cette nouvelle place.':'The Grand Fountain is the centre of the exterior campus: Movement House, Life Lab and Performance Pavilion surround the new square.'}</p>
+    <div class="panel-grid"><div><span>MOVEMENT HOUSE</span><b>Community</b></div><div><span>LIFE LAB</span><b>Objects</b></div><div><span>PERFORMANCE</span><b>Challenges</b></div><div><span>DISTRICT</span><b>Explore</b></div></div>
+    <div class="priority-card"><b>WORLD CHALLENGE</b>${challenges.done.fountain?(locale==='fr'?'✓ Fontaine découverte':'✓ Fountain discovered'):(locale==='fr'?'Approchez-vous de la fontaine pour débloquer +15 XP.':'Approach the fountain to unlock +15 XP.')}</div>`,[
+    {label:locale==='fr'?'VOIR LES DÉFIS':'VIEW CHALLENGES',onClick:showChallenges},
+    {label:locale==='fr'?'RETOUR AU HALL':'BACK TO HALL',primary:true,onClick:()=>fastTravel('hall')}
+  ]);
+}
+function showLifeItem(id){
+  completeJourney('life',{silent:true});
+  const items={
+    strap:{name:'MOTION STRAP',cat:'MOVE',fr:'Un objet textile KŌMØ pensé autour du mouvement, des capteurs et de l’entraînement.',en:'A KŌMØ textile object built around movement, sensors and training.'},
+    bottle:{name:'KŌMØ BOTTLE',cat:'HYDRATE',fr:'Objet quotidien KŌMØ Life, simple et durable, intégré à la routine.',en:'A simple durable KŌMØ Life daily object integrated into the routine.'},
+    recovery:{name:'RECOVERY ROLL',cat:'RESET',fr:'Accessoire de mobilité et de récupération présenté directement dans le flagship.',en:'A mobility and recovery accessory displayed directly in the flagship.'},
+    travel:{name:'TRAVEL KIT',cat:'RIVIERA',fr:'Kit compact pensé pour prolonger la routine KŌMØ en déplacement.',en:'A compact kit designed to extend the KŌMØ routine while travelling.'}
+  };
+  const it=items[id]||items.strap;
+  openPanel('KŌMØ LIFE · '+it.cat,it.name,`
+    <p>${it[locale]}</p>
+    <div class="life-item-grid">
+      <article><span>WORLD</span><b>Displayed in 3D</b><small>${locale==='fr'?'Approchez-vous de chaque objet pour le découvrir.':'Walk up to each object to discover it.'}</small></article>
+      <article><span>LIFE</span><b>Physical object</b><small>${locale==='fr'?'La boutique Life relie l’objet virtuel au produit réel.':'Life links the virtual object to the real product.'}</small></article>
+    </div>`,[
+    {label:locale==='fr'?'CONTINUER À EXPLORER':'KEEP EXPLORING',onClick:closePanel},
+    {label:copy[locale].openLife,primary:true,onClick:()=>{location.href='https://life.komolongevity.com/'}}
+  ]);
+}
+
 function showLifeStore(){
   completeJourney('life');
   const html=locale==='fr'
     ?`<p>KŌMØ Life prolonge World dans le réel : objets, équipements et éditions conçus autour du mouvement et de la longévité.</p>
       <div class="store-products">
         <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>La valise KŌMØ configurable, présentée ici comme objet signature.</small></article>
-        <article><span>02 · ORIGINALS</span><b>KŌMØ Life</b><small>Pièces, objets et culture du mouvement.</small></article>
-        <article><span>03 · EDITIONS</span><b>Selected drops</b><small>Collaborations et séries limitées à venir.</small></article>
+        <article><span>02 · OBJECTS</span><b>Motion Strap · Bottle · Recovery Roll</b><small>Les objets sont désormais disposés physiquement dans le flagship World.</small></article>
+        <article><span>03 · EDITIONS</span><b>Travel Kit · Selected drops</b><small>Collaborations, séries limitées et objets Riviera.</small></article>
       </div>`
     :`<p>KŌMØ Life extends World into real life: objects, equipment and editions designed around movement and longevity.</p>
       <div class="store-products">
         <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>The configurable KŌMØ case, presented here as a signature object.</small></article>
-        <article><span>02 · ORIGINALS</span><b>KŌMØ Life</b><small>Pieces, objects and movement culture.</small></article>
-        <article><span>03 · EDITIONS</span><b>Selected drops</b><small>Collaborations and limited editions to come.</small></article>
+        <article><span>02 · OBJECTS</span><b>Motion Strap · Bottle · Recovery Roll</b><small>Objects are now physically placed inside the World flagship.</small></article>
+        <article><span>03 · EDITIONS</span><b>Travel Kit · Selected drops</b><small>Collaborations, limited editions and Riviera objects.</small></article>
       </div>`;
   openPanel('KŌMØ LIFE',locale==='fr'?'La boutique du World.':'The World store.',html,[
     {label:copy[locale].openLife,onClick:()=>{location.href='https://life.komolongevity.com/'}},
@@ -2778,16 +2808,16 @@ function showRehabCoach(){
 function showNpcConversation(npc){
   const d=npc?.userData?.npc;if(!d)return;
   completeJourney('social');
+  const t=fitnessToday();
   const lines={
-    staff:{fr:'Bienvenue. Le meilleur point de départ est le Functional Twin : il vous montre comment KŌMØ organise votre parcours.',en:'Welcome. The best place to start is Functional Twin: it shows how KŌMØ organises your journey.'},
-    coach:{fr:'Arena transforme l’engagement en challenges. Seuls les scores de challenge peuvent être comparés — jamais les données de santé.',en:'Arena turns engagement into challenges. Only challenge scores may be compared — never health data.'},
+    staff:{fr:'Bienvenue. Commencez par l’aperçu santé puis le Functional Twin pour comprendre votre trajectoire.',en:'Welcome. Start with the health snapshot and Functional Twin to understand your trajectory.'},
+    coach:{fr:t?'Votre séance du jour est prête : '+t.activity.title.fr+' · '+t.title+' · '+t.duration+' min.':'Choisissez une pratique dans KŌMØ Fitness Club et je vous proposerai une séance chaque jour.',en:t?'Today’s session is ready: '+t.activity.title.en+' · '+t.title+' · '+t.duration+' min.':'Choose an activity in KŌMØ Fitness Club and I will give you a daily session.'},
     visitor:{fr:'Je découvre aussi le World. KŌMØ Life relie l’expérience numérique aux objets et équipements du monde réel.',en:'I am exploring the World too. KŌMØ Life connects the digital experience with real-world objects and equipment.'}
   };
-  const body=`<p>${lines[d.role]?.[locale]||lines.visitor[locale]}</p><div class="priority-card"><b>WORLD JOURNEY</b>${locale==='fr'?'Échange social débloqué · +15 XP':'Social interaction unlocked · +15 XP'}</div>`;
-  openPanel(d.label||'KŌMØ MEMBER',d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'COACH':'WORLD GUEST',body,[
-    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
-    {label:locale==='fr'?'VOIR LE JOURNEY':'VIEW JOURNEY',primary:true,onClick:showJourneyPanel}
-  ]);
+  const actions=[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}];
+  if(d.role==='coach')actions.push({label:t?(locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION'):(locale==='fr'?'FITNESS CLUB':'FITNESS CLUB'),primary:true,onClick:t?showFitnessToday:showRehab});
+  else actions.push({label:locale==='fr'?'VOIR LE JOURNEY':'VIEW JOURNEY',primary:true,onClick:showJourneyPanel});
+  openPanel(d.label||'KŌMØ MEMBER',d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'FITNESS COACH':'WORLD GUEST',`<p>${lines[d.role]?.[locale]||lines.visitor[locale]}</p><div class="priority-card"><b>WORLD JOURNEY</b>${locale==='fr'?'Échange social · +15 XP':'Social interaction · +15 XP'}</div>`,actions);
 }
 function setMode(next){
   if(next!=='rehab')stopRehabSession();
