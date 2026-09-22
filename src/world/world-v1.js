@@ -1660,6 +1660,47 @@ const recoveryRoll=cyl(recoveryPed,.22,.22,.78,MAT.fabricLight,0,.90,0,18,{cast:
 const travelPed=lifePedestal(1.35,-2.55,'TRAVEL KIT','RIVIERA');
 box(travelPed,.72,.42,.42,MAT.walnut,0,.83,0,{cast:true});box(travelPed,.55,.035,.30,MAT.brass,0,1.06,0);
 
+// V3.3 Life Retail Wall — products are arranged like a real flagship.
+const lifeRetailWall=new THREE.Group();lifeRetailWall.name='KOMO_LIFE_RETAIL_WALL_V33';lifeStore.add(lifeRetailWall);
+lifeRetailWall.position.set(1.72,0,.10);
+box(lifeRetailWall,.22,4.45,6.2,MAT.walnut,0,2.36,0,{cast:true});
+[-2.30,-.76,.78,2.32].forEach(z=>{
+  box(lifeRetailWall,1.42,.055,.34,MAT.brass,-.18,1.12,z);
+  box(lifeRetailWall,1.42,.055,.34,MAT.brass,-.18,2.22,z);
+});
+plaque(lifeRetailWall,'LIFE WALL','WEAR · MOVE · RECOVER',3.7,.62,-.18,4.55,-2.55,{rotY:Math.PI/2,dark:true,titleSize:42});
+
+// Jacket / overshirt represented as a structured hanging silhouette.
+const jacketDisplay=new THREE.Group();jacketDisplay.position.set(-.42,2.12,-1.55);lifeRetailWall.add(jacketDisplay);
+box(jacketDisplay,.86,.92,.18,MAT.fabric,0,0,0,{cast:true});
+box(jacketDisplay,.22,.74,.16,MAT.fabric,-.55,-.02,0,{cast:true});
+box(jacketDisplay,.22,.74,.16,MAT.fabric,.55,-.02,0,{cast:true});
+box(jacketDisplay,.018,.72,.20,MAT.brass,0,0,.11);
+plaque(lifeRetailWall,'KŌMØ JACKET','MOVE WELL · LIVE LONG',2.1,.40,-.18,3.08,-1.55,{rotY:Math.PI/2,dark:false,titleSize:30});
+
+// Mobility band + compact pouch.
+const bandDisplay=new THREE.Group();bandDisplay.position.set(-.40,1.28,.05);lifeRetailWall.add(bandDisplay);
+const band=mesh(bandDisplay,new THREE.TorusGeometry(.34,.045,8,30),MAT.fabricLight,0,0,0,{cast:true});band.rotation.y=.85;band.rotation.x=.38;
+box(bandDisplay,.52,.30,.20,MAT.blackened,.02,-.48,0,{cast:true});
+plaque(lifeRetailWall,'MOBILITY BAND','TRAIN ANYWHERE',1.95,.40,-.18,2.20,.05,{rotY:Math.PI/2,dark:true,titleSize:31});
+
+// Small recovery / travel objects give depth to the wall.
+[-2.30,.78,2.32].forEach((z,i)=>{
+  const mat=i===0?MAT.charcoal:i===1?MAT.fabricLight:MAT.travertine;
+  box(lifeRetailWall,.52,.28,.24,mat,-.30,1.35,z,{cast:true});
+  box(lifeRetailWall,.36,.055,.18,MAT.brass,-.30,1.53,z);
+});
+
+// Central discovery table for tactile items.
+const discoveryTable=new THREE.Group();discoveryTable.name='KOMO_LIFE_DISCOVERY_TABLE_V33';discoveryTable.position.set(-.25,0,.45);lifeStore.add(discoveryTable);
+box(discoveryTable,2.45,.16,1.02,MAT.travertine,0,.83,0,{cast:true});
+box(discoveryTable,.12,.76,.72,MAT.brass,-.92,.42,0);
+box(discoveryTable,.12,.76,.72,MAT.brass,.92,.42,0);
+const miniStrap=mesh(discoveryTable,new THREE.TorusGeometry(.20,.040,8,24),MAT.fabric,-.62,1.00,0,{cast:true});miniStrap.rotation.x=.55;
+cyl(discoveryTable,.10,.12,.42,MAT.charcoal,.12,1.04,0,14,{cast:true});
+box(discoveryTable,.42,.22,.28,MAT.walnut,.64,1.00,0,{cast:true});
+plaque(discoveryTable,'DISCOVER','TOUCH · EXPLORE · CONFIGURE',2.20,.42,0,1.54,.54,{dark:false,titleSize:31});
+
 // Discreet checkout / service bar at the back.
 box(lifeStore,3.70,.88,.78,M.sageDeep,.20,.47,3.65,{cast:true});
 box(lifeStore,3.88,.08,.92,MAT.brass,.20,.94,3.65);
@@ -1966,7 +2007,9 @@ const interactions=[
   {id:'life_strap',x:7.10,z:6.45,r:1.35,title:()=> 'Motion Strap',desc:()=>locale==='fr'?'KŌMØ Life · objet mouvement':'KŌMØ Life · movement object',action:()=>showLifeItem('strap')},
   {id:'life_bottle',x:9.80,z:6.45,r:1.35,title:()=> 'KŌMØ Bottle',desc:()=>locale==='fr'?'KŌMØ Life · hydratation':'KŌMØ Life · hydration',action:()=>showLifeItem('bottle')},
   {id:'life_recovery',x:7.10,z:1.25,r:1.35,title:()=> 'Recovery Roll',desc:()=>locale==='fr'?'KŌMØ Life · récupération':'KŌMØ Life · recovery',action:()=>showLifeItem('recovery')},
-  {id:'life_travel',x:9.80,z:1.25,r:1.35,title:()=> 'Travel Kit',desc:()=>locale==='fr'?'KŌMØ Life · Riviera':'KŌMØ Life · Riviera',action:()=>showLifeItem('travel')}
+  {id:'life_travel',x:9.80,z:1.25,r:1.35,title:()=> 'Travel Kit',desc:()=>locale==='fr'?'KŌMØ Life · Riviera':'KŌMØ Life · Riviera',action:()=>showLifeItem('travel')},
+  {id:'life_jacket',x:10.15,z:2.25,r:1.30,title:()=> 'KŌMØ Jacket',desc:()=>locale==='fr'?'KŌMØ Life · textile':'KŌMØ Life · apparel',action:()=>showLifeItem('jacket')},
+  {id:'life_band',x:10.15,z:3.85,r:1.30,title:()=> 'Mobility Band',desc:()=>locale==='fr'?'KŌMØ Life · entraînement':'KŌMØ Life · training',action:()=>showLifeItem('band')}
 ];
 
 const arenaInteractions=[
@@ -2831,7 +2874,9 @@ function showLifeItem(id){
     strap:{name:'MOTION STRAP',cat:'MOVE',fr:'Un objet textile KŌMØ pensé autour du mouvement, des capteurs et de l’entraînement.',en:'A KŌMØ textile object built around movement, sensors and training.'},
     bottle:{name:'KŌMØ BOTTLE',cat:'HYDRATE',fr:'Objet quotidien KŌMØ Life, simple et durable, intégré à la routine.',en:'A simple durable KŌMØ Life daily object integrated into the routine.'},
     recovery:{name:'RECOVERY ROLL',cat:'RESET',fr:'Accessoire de mobilité et de récupération présenté directement dans le flagship.',en:'A mobility and recovery accessory displayed directly in the flagship.'},
-    travel:{name:'TRAVEL KIT',cat:'RIVIERA',fr:'Kit compact pensé pour prolonger la routine KŌMØ en déplacement.',en:'A compact kit designed to extend the KŌMØ routine while travelling.'}
+    travel:{name:'TRAVEL KIT',cat:'RIVIERA',fr:'Kit compact pensé pour prolonger la routine KŌMØ en déplacement.',en:'A compact kit designed to extend the KŌMØ routine while travelling.'},
+    jacket:{name:'KŌMØ JACKET',cat:'WEAR',fr:'Une pièce KŌMØ Life pensée comme uniforme quotidien du mouvement : sobre, premium et fonctionnelle.',en:'A KŌMØ Life piece designed as a daily movement uniform: understated, premium and functional.'},
+    band:{name:'MOBILITY BAND',cat:'TRAIN',fr:'Un accessoire compact pour intégrer quelques minutes de mobilité et d’activation dans la journée.',en:'A compact accessory for integrating a few minutes of mobility and activation into the day.'}
   };
   const it=items[id]||items.strap;
   openPanel('KŌMØ LIFE · '+it.cat,it.name,`
@@ -2851,13 +2896,13 @@ function showLifeStore(){
     ?`<p>KŌMØ Life prolonge World dans le réel : objets, équipements et éditions conçus autour du mouvement et de la longévité.</p>
       <div class="store-products">
         <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>La valise KŌMØ configurable, présentée ici comme objet signature.</small></article>
-        <article><span>02 · OBJECTS</span><b>Motion Strap · Bottle · Recovery Roll</b><small>Les objets sont désormais disposés physiquement dans le flagship World.</small></article>
+        <article><span>02 · LIFE WALL</span><b>Jacket · Mobility Band · Motion Strap</b><small>Un mur produit et une table découverte permettent désormais d’explorer les objets directement dans World.</small></article>
         <article><span>03 · EDITIONS</span><b>Travel Kit · Selected drops</b><small>Collaborations, séries limitées et objets Riviera.</small></article>
       </div>`
     :`<p>KŌMØ Life extends World into real life: objects, equipment and editions designed around movement and longevity.</p>
       <div class="store-products">
         <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>The configurable KŌMØ case, presented here as a signature object.</small></article>
-        <article><span>02 · OBJECTS</span><b>Motion Strap · Bottle · Recovery Roll</b><small>Objects are now physically placed inside the World flagship.</small></article>
+        <article><span>02 · LIFE WALL</span><b>Jacket · Mobility Band · Motion Strap</b><small>A product wall and discovery table now let you explore objects directly inside World.</small></article>
         <article><span>03 · EDITIONS</span><b>Travel Kit · Selected drops</b><small>Collaborations, limited editions and Riviera objects.</small></article>
       </div>`;
   openPanel('KŌMØ LIFE',locale==='fr'?'La boutique du World.':'The World store.',html,[
@@ -3486,7 +3531,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.3.1-portals',
+  version:'3.3.2-life-retail',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
