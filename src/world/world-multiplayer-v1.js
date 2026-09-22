@@ -22,7 +22,17 @@ function css(){
   .kwmp-empty{margin:auto;color:rgba(242,236,226,.40);font-size:9px;text-align:center;line-height:1.5;padding:18px}
   .kwmp-compose{display:flex;gap:7px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.07)}.kwmp-compose input{flex:1;min-width:0;height:38px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.045);color:#f0e8da;padding:0 11px;font-size:9px;outline:none}.kwmp-compose button{height:38px;padding:0 12px;border-radius:12px;background:#d8ba86;color:#1d2d25;font-size:8px;font-weight:850;cursor:pointer}.kwmp-compose button:disabled,.kwmp-compose input:disabled{opacity:.42}
   .kwmp-note{padding:0 13px 12px;color:rgba(242,236,226,.34);font-size:7px;line-height:1.45}
-  @media(max-width:900px),(pointer:coarse){.kwmp-dock{top:78px;right:8px}.kwmp-pill{height:29px;padding:0 9px;font-size:6px}.kwmp-chat{right:8px;top:115px;width:min(360px,calc(100vw - 16px));height:min(500px,calc(100vh - 125px))}}
+  @media(max-width:900px),(pointer:coarse){
+    .kwmp-dock{top:63px;right:8px;gap:4px;align-items:center}
+    .kwmp-pill{height:25px;padding:0 8px;font-size:5px;letter-spacing:.08em;background:rgba(22,37,29,.90);backdrop-filter:none}
+    .kwmp-chat{right:8px;top:96px;width:min(360px,calc(100vw - 16px));height:min(500px,calc(100vh - 106px))}
+  }
+  @media(max-width:520px){
+    .kwmp-dock{top:109px;right:8px}
+    .kwmp-pill{height:24px;padding:0 7px}
+    .kwmp-pill[data-kwmp-connect]{max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .kwmp-chat{top:140px;height:min(500px,calc(100vh - 150px))}
+  }
   `;document.head.appendChild(s);
 }
 function ui(){
@@ -54,7 +64,7 @@ function labelSprite(THREE,text){
   x.fillStyle='#f3ede3';x.font='600 35px Arial';x.textAlign='center';x.textBaseline='middle';
   x.fillText(escText(text,24)||'KŌMØ Member',256,59);
   x.fillStyle='rgba(216,185,132,.92)';x.font='700 16px Arial';x.fillText('PULSE MEMBER',256,92);
-  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=4;
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=2;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
   sp.scale.set(2.25,.64,1);sp.position.y=2.52;sp.renderOrder=30;return sp;
 }
@@ -256,5 +266,5 @@ export async function mount(runtime){
   };
   window.addEventListener('pagehide',cleanup,{once:true});
 
-  window.KomoWorldMultiplayer={version:'0.3.0-avatar-presence',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.3.1-mobile-polish',connect:openPulse,state};
 }
