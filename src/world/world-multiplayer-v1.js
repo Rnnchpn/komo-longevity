@@ -5,6 +5,7 @@ const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const PULSE_ORIGIN='https://pulse.komolongevity.com';
 const STALE_MS=45000;
 const HEARTBEAT_MS=2200;
+const POSE_MS=125;
 const CHAT_LIMIT=50;
 
 function escText(v,max=500){return String(v??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max)}
@@ -122,7 +123,7 @@ export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
   const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0};
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0};
 
   const setOnlineUI=()=>{
     if(state.presenceLive){
@@ -180,7 +181,7 @@ export async function mount(runtime){
           if(ok){
             U.drawer.classList.remove('open');U.drawer.setAttribute('aria-hidden','true');
             runtime.notify?.('Joining '+(escText(row.display_name,28)||'member'));
-            setTimeout(()=>heartbeat(),320);
+            setTimeout(()=>{heartbeat();sendPose(true)},320);
           }
         });
         item.append(join);
@@ -222,6 +223,25 @@ export async function mount(runtime){
       zone:['world','twin','rehab','arena'].includes(st.mode)?st.mode:'world',
       x:+st.position.x.toFixed(3),y:+(st.position.y||0).toFixed(3),z:+st.position.z.toFixed(3),yaw:+st.yaw.toFixed(4),updated_at:new Date().toISOString()
     }};
+  const posePayload=()=>{
+    const p=presencePayload();
+    return {user_id:p.user_id,display_name:p.display_name,avatar_config:p.avatar_config,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,updated_at:p.updated_at};
+  };
+  const poseChanged=(a,b)=>{
+    if(!a||!b)return true;
+    return a.zone!==b.zone||Math.abs(a.x-b.x)>.015||Math.abs(a.y-b.y)>.015||Math.abs(a.z-b.z)>.015||Math.abs(a.yaw-b.yaw)>.008;
+  };
+  const sendPose=async(force=false)=>{
+    if(!state.presenceLive||!state.subscribed||!state.channel||!state.session?.user)return false;
+    const payload=posePayload(),now=Date.now();
+    if(!force&&!poseChanged(payload,state.lastPose)&&now-state.lastPoseSentAt<900)return false;
+    state.lastPose=payload;state.lastPoseSentAt=now;
+    try{
+      const status=await state.channel.send({type:'broadcast',event:'pose',payload});
+      return status==='ok'||status==='timed out'?status==='ok':true;
+    }catch(err){console.warn('[World pose broadcast]',err);return false}
+  };
+
   const heartbeat=async()=>{
     if(!state.session?.user)return false;
     try{
@@ -246,7 +266,11 @@ export async function mount(runtime){
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'world_presence'},({new:row})=>consumePresence(row))
       .on('postgres_changes',{event:'DELETE',schema:'public',table:'world_presence'},({old:row})=>removePresence(row))
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'world_chat_messages'},({new:row})=>{if(!row?.id||state.messages.some(x=>x.id===row.id))return;state.messages.push(row);if(state.messages.length>CHAT_LIMIT)state.messages.shift();renderMessages()})
-      .subscribe(status=>{if(status==='SUBSCRIBED'){state.subscribed=true;setOnlineUI();heartbeat()}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){state.subscribed=false;state.presenceLive=false;state.connected=false;setOnlineUI();syncPeers()}});
+      .on('broadcast',{event:'pose'},({payload})=>{
+        if(!payload?.user_id||payload.user_id===state.session?.user?.id)return;
+        consumePresence(payload);
+      })
+      .subscribe(status=>{if(status==='SUBSCRIBED'){state.subscribed=true;setOnlineUI();heartbeat().then(()=>sendPose(true))}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){state.subscribed=false;state.presenceLive=false;state.connected=false;setOnlineUI();syncPeers()}});
   };
   const loadProfile=async(profileHint={})=>{
     let profile={};
@@ -263,6 +287,7 @@ export async function mount(runtime){
     if(!state.started){
       state.started=true;await loadInitial();subscribe();
       state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);
+      state.poseTimer=setInterval(()=>sendPose(false),POSE_MS);
     }
     const live=await heartbeat();syncPeers();return !!live;
   };
@@ -312,9 +337,9 @@ export async function mount(runtime){
       if(!peer.visible)continue;
       const av=peer.userData.avatar;
       const beforeX=peer.position.x,beforeZ=peer.position.z;
-      peer.position.lerp(peer.userData.target,.18);
+      peer.position.lerp(peer.userData.target,.28);
       let d=((peer.userData.targetYaw-peer.rotation.y+Math.PI)%(Math.PI*2))-Math.PI;
-      peer.rotation.y+=d*.18;
+      peer.rotation.y+=d*.26;
 
       if(av){
         const speed=Math.hypot(peer.position.x-beforeX,peer.position.z-beforeZ);
@@ -361,12 +386,12 @@ export async function mount(runtime){
   });
 
   const cleanup=()=>{
-    clearInterval(state.timer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);
+    clearInterval(state.timer);clearInterval(state.poseTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);
     if(state.channel)client.removeChannel(state.channel);
     if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
   window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup()});
-  window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);heartbeat();syncPeers()}});
+  window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);if(!state.poseTimer)state.poseTimer=setInterval(()=>sendPose(false),POSE_MS);heartbeat();sendPose(true);syncPeers()}});
 
-  window.KomoWorldMultiplayer={version:'0.5.0-join-friend',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.5.1-live-motion',connect:openPulse,state};
 }
