@@ -7,6 +7,7 @@ const source = join(root, 'src', 'world');
 const target = join(root, 'site', 'world');
 
 const runtime=await readFile(join(source,'world-v1.js'),'utf8');
+const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const checks=[
   ['canonical World V1 runtime',runtime.includes("window.KomoWorld={")],
   ['render loop present',runtime.includes('renderer.render(scene,camera)')],
@@ -62,7 +63,12 @@ const checks=[
   ['Immersive Hub V3.3 portals present',runtime.includes('KOMO_PORTAL_ARCH_V33_')&&runtime.includes('function updateDestinationDoors')],
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub V3.3 quests present',runtime.includes("quest:'fitness'")&&runtime.includes("quest:'arena'")&&runtime.includes("id:'coach'")],
-  ['Immersive Hub V3.3 district detail present',runtime.includes('KOMO_DISTRICT_DETAILS_V33')&&runtime.includes('HEALTH PAVILION')&&runtime.includes('CLUB HOUSE')]
+  ['Immersive Hub V3.3 district detail present',runtime.includes('KOMO_DISTRICT_DETAILS_V33')&&runtime.includes('HEALTH PAVILION')&&runtime.includes('CLUB HOUSE')],
+  ['multiplayer reliable presence V0.4 present',multiplayer.includes("version:'0.4.0-reliable-presence'")&&multiplayer.includes("persistSession:true")&&multiplayer.includes("komo-world-auth-v1")],
+  ['multiplayer heartbeat verifies writes',multiplayer.includes("const {error}=await client.from('world_presence').upsert")&&multiplayer.includes("state.presenceLive=true")],
+  ['multiplayer mobile presence tolerance',multiplayer.includes('const STALE_MS=45000')&&multiplayer.includes('const HEARTBEAT_MS=2200')],
+  ['multiplayer roster present',multiplayer.includes('const renderRoster=()=>')&&multiplayer.includes('kwmpRoster')],
+  ['multiplayer Safari restore present',multiplayer.includes('client.auth.getSession().then')&&multiplayer.includes('event.persisted')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
