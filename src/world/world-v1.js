@@ -44,6 +44,14 @@ const journeyMissionsEl=$('#journey-missions');
 const journeyLevelLadder=$('#journey-level-ladder');
 const journeyBadgesEl=$('#journey-badges');
 const guideToggle=$('#guide-toggle');
+const healthHud=$('#health-hud');
+const healthStatusEl=$('#health-status');
+const healthMuscleEl=$('#health-muscle');
+const healthBalanceEl=$('#health-balance');
+const healthCapacityEl=$('#health-capacity');
+const healthSourceEl=$('#health-source');
+const avatarToggle=$('#avatar-toggle');
+const challengesToggle=$('#challenges-toggle');
 
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
@@ -173,6 +181,9 @@ const living={
   sunSprite:null,
   clouds:[],
   npcs:[],
+  destinationDoors:[],
+  fountainJets:[],
+  district:null,
   daylight:'day'
 };
 
@@ -238,7 +249,7 @@ function makeCloudTexture(){
 }
 const cloudTexture=makeCloudTexture();
 const cloudGroup=new THREE.Group();cloudGroup.name='KOMO_CLOUD_FIELD_V18';scene.add(cloudGroup);
-const cloudCount=lowPower?0:9;
+const cloudCount=lowPower?2:9;
 for(let i=0;i<cloudCount;i++){
   const mat=new THREE.MeshBasicMaterial({map:cloudTexture,transparent:true,opacity:lowPower?.10:.14,depthWrite:false,side:THREE.DoubleSide});
   const cloud=new THREE.Mesh(new THREE.PlaneGeometry(34+(i%3)*8,13+(i%2)*4),mat);
@@ -1763,11 +1774,11 @@ plaque(arenaRoom,'STAND UP','CAPACITY',3.6,.94,5.2,4.7,-8.1,{dark:true,titleSize
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 
 // Runtime state.
-const player=new THREE.Vector3(0,0,31.5);
+const player=new THREE.Vector3(0,0,13.8);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
 let cameraMode='third';
-let thirdPersonDistance=lowPower?4.0:4.8;
+let thirdPersonDistance=lowPower?3.75:4.25;
 const playerAvatar=makePlayerAvatar();
 let playerFacing=0;
 const cameraDesired=new THREE.Vector3(),cameraLook=new THREE.Vector3();
@@ -1949,8 +1960,8 @@ function setCameraMode(next){
 function toggleCamera(){setCameraMode(cameraMode==='third'?'first':'third')}
 setCameraMode('third');
 const travelPoints={
-  arrival:{mode:'world',x:0,y:0,z:31.5,yaw:0,level:0},
-  hall:{mode:'world',x:0,y:0,z:5.5,yaw:0,level:0},
+  arrival:{mode:'world',x:0,y:0,z:66.0,yaw:Math.PI,level:0},
+  hall:{mode:'world',x:0,y:0,z:13.8,yaw:0,level:0},
   twin:{mode:'world',x:-5.9,y:0,z:-22.2,yaw:0,level:0},
   rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
   arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
@@ -1958,7 +1969,7 @@ const travelPoints={
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
 };
 const journeyTargets={
-  arrival:{x:0,y:0,z:31.5},hall:{x:0,y:0,z:5.5},journey:{x:4.8,y:0,z:8.5},
+  arrival:{x:0,y:0,z:66.0},hall:{x:0,y:0,z:13.8},journey:{x:4.8,y:0,z:8.5},
   twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
   life:{x:8.4,y:0,z:3.4},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
@@ -2604,7 +2615,7 @@ function canMove(p){
   if(mode==='world'){
     if(isStairPosition(p))return true;
     if(playerLevel===1||player.y>UPPER_Y-.70)return isUpperWalkable(p);
-    if(p.z>63||p.z<-28.6||Math.abs(p.x)>20)return false;
+    if(p.z>81||p.z<-28.6||Math.abs(p.x)>24)return false;
     if(p.z<16.5&&Math.abs(p.x)>11.15)return false;
     if(p.z>=14.1&&p.z<=18.8&&Math.abs(p.x)>4.35)return false;
     if(p.x>-10.1&&p.x<-4.7&&p.z>1.9&&p.z<6.1)return false;
@@ -2681,7 +2692,7 @@ function updateCamera(now,dt){
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
     const distance=thirdPersonDistance;
-    const height=lowPower?2.45:2.72;
+    const height=lowPower?2.08:2.30;
     cameraDesired.set(
       player.x+Math.sin(yaw)*distance,
       player.y+height+pitch*1.25,
@@ -2700,7 +2711,7 @@ function updateCamera(now,dt){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
-    cameraLook.set(player.x,player.y+1.28+pitch*.55,player.z);
+    cameraLook.set(player.x,player.y+1.12+pitch*.48,player.z);
     camera.lookAt(cameraLook);
   }else{
     const move=Math.min(1,velocity.length()/4.35);
@@ -2748,7 +2759,9 @@ function updateLocation(){
     else locationName.textContent='LIFE LOUNGE · LEVEL 2';
     return;
   }
-  if(player.z>23)locationName.textContent='ARRIVAL PLAZA';
+  if(player.z>57)locationName.textContent='KŌMØ DISTRICT';
+  else if(player.z>23)locationName.textContent='ARRIVAL COURT';
+  else if(player.z>11.8)locationName.textContent='WORLD ENTRANCE';
   else if(player.x>6.8&&player.z>-2&&player.z<7){locationName.textContent='KŌMØ LIFE';completeJourney('life',{silent:true})}
   else if(player.z>-7){locationName.textContent='KŌMØ HALL';completeJourney('hall',{silent:true})}
   else locationName.textContent='MOTION ATRIUM';
