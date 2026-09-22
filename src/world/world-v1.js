@@ -63,12 +63,12 @@ const copy={
     action:'ACTION',
     deskTitle:'Ouvrir le KŌMØ Desk',deskCopy:'Orientation · trajectoire · espaces',
     twinTitle:'Entrer dans Functional Twin',twinCopy:'Comprendre votre mouvement dans le temps',
-    rehabTitle:'Entrer dans Rehab',rehabCopy:'Transformer les données en actions',
+    rehabTitle:'Entrer dans KŌMØ Fitness Club',rehabCopy:'Choisir une activité · programme quotidien · coach',
     arenaTitle:'Entrer dans Arena',arenaCopy:'Performance · défis · communauté',
     libraryTitle:'Ouvrir la Library',libraryCopy:'Science · méthode · provenance',
     talksTitle:'Voir Talks',talksCopy:'Experts · événements · contenus',
     storeTitle:'Entrer dans KŌMØ Life',storeCopy:'Objets · Case 01 · éditions',
-    back:'RETOUR AU HALL',close:'FERMER',openRehab:'OUVRIR REHAB',openLife:'OUVRIR KŌMØ LIFE',configureCase:'CONFIGURER CASE 01'
+    back:'RETOUR AU HALL',close:'FERMER',openRehab:'OUVRIR FITNESS CLUB',openLife:'OUVRIR KŌMØ LIFE',configureCase:'CONFIGURER CASE 01'
   },
   en:{
     today:'TODAY · EXPLORE YOUR TWIN',
@@ -79,12 +79,12 @@ const copy={
     action:'ACTION',
     deskTitle:'Open KŌMØ Desk',deskCopy:'Orientation · trajectory · spaces',
     twinTitle:'Enter Functional Twin',twinCopy:'Understand your movement over time',
-    rehabTitle:'Enter Rehab',rehabCopy:'Turn data into action',
+    rehabTitle:'Enter KŌMØ Fitness Club',rehabCopy:'Choose an activity · daily program · coach',
     arenaTitle:'Enter Arena',arenaCopy:'Performance · challenges · community',
     libraryTitle:'Open Library',libraryCopy:'Science · method · provenance',
     talksTitle:'View Talks',talksCopy:'Experts · events · content',
     storeTitle:'Enter KŌMØ Life',storeCopy:'Objects · Case 01 · editions',
-    back:'BACK TO HALL',close:'CLOSE',openRehab:'OPEN REHAB',openLife:'OPEN KŌMØ LIFE',configureCase:'CONFIGURE CASE 01'
+    back:'BACK TO HALL',close:'CLOSE',openRehab:'OPEN FITNESS CLUB',openLife:'OPEN KŌMØ LIFE',configureCase:'CONFIGURE CASE 01'
   }
 };
 let locale='fr';
@@ -746,7 +746,7 @@ function bodySegment(parent,a,b,r,material){
 
 const world=new THREE.Group();world.name='KOMO_WORLD_V1';scene.add(world);
 const twinRoom=new THREE.Group();twinRoom.name='KOMO_TWIN_V1';twinRoom.visible=false;scene.add(twinRoom);
-const rehabRoom=new THREE.Group();rehabRoom.name='KOMO_REHAB_V1';rehabRoom.visible=false;scene.add(rehabRoom);
+const rehabRoom=new THREE.Group();rehabRoom.name='KOMO_FITNESS_CLUB_V29';rehabRoom.visible=false;scene.add(rehabRoom);
 const arenaRoom=new THREE.Group();arenaRoom.name='KOMO_ARENA_V1';arenaRoom.visible=false;scene.add(arenaRoom);
 
 // Landscape + arrival.
@@ -1511,7 +1511,7 @@ box(rehabRoom,22,.24,24,M.stoneLight,0,.10,0);
 box(rehabRoom,.36,7.6,24,M.wall,-10.8,3.8,0);
 box(rehabRoom,.36,7.6,24,M.wall,10.8,3.8,0);
 box(rehabRoom,22,7.6,.36,M.sage,0,3.8,-11.8);
-plaque(rehabRoom,'REHAB','FROM INSIGHT TO ACTION',7.2,1.45,0,6.7,-11.55,{dark:true,titleSize:88});
+plaque(rehabRoom,'KŌMØ FITNESS CLUB','MOVE · TRAIN · PROGRESS',7.2,1.45,0,6.7,-11.55,{dark:true,titleSize:88});
 [-5.3,0,5.3].forEach((x,i)=>{
   box(rehabRoom,4.0,.24,4.8,i===1?M.stoneDeep:M.stone,x,.12,-3.2);
   line(rehabRoom,3.5,.04,x,-3.2,M.bronze,.26);
@@ -1547,7 +1547,7 @@ const rehabStationVisuals={};
     box(g,2.20,.035,1.75,MAT.fabricLight,0,.31,0);
   }
 });
-plaque(rehabRoom,'GUIDED DEMO','CHOOSE A STATION · PRESS E',6.8,.72,0,1.05,8.9,{dark:false,titleSize:58});
+plaque(rehabRoom,'COACH FLOOR','CHOOSE A STATION · PRESS E',6.8,.72,0,1.05,8.9,{dark:false,titleSize:58});
 
 // V2.7 Rehab Coach — one lightweight demonstrator shared across all stations.
 function makeRehabCoach(){
@@ -1574,14 +1574,20 @@ function makeRehabCoach(){
   const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();leftElbow.position.y=-.28;rightElbow.position.y=-.28;leftArm.add(leftElbow);rightArm.add(rightElbow);
   cyl(leftArm,.05,.058,.30,cloth,0,-.15,0,lowPower?7:10,{cast});cyl(rightArm,.05,.058,.30,cloth,0,-.15,0,lowPower?7:10,{cast});
   cyl(leftElbow,.045,.052,.27,skin,0,-.14,0,lowPower?7:10,{cast});cyl(rightElbow,.045,.052,.27,skin,0,-.14,0,lowPower?7:10,{cast});
-  const tag=npcNameTag('ALEX','REHAB COACH');tag.position.y=2.48;tag.scale.set(1.62,.46,1);g.add(tag);
+  const tag=npcNameTag('ALEX','FITNESS COACH');tag.position.y=2.48;tag.scale.set(1.62,.46,1);g.add(tag);
   g.userData.dynamic=true;
   g.userData.coach={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag};
   return g;
 }
 const rehabCoach=makeRehabCoach();
 const rehabCoachState={station:'control',running:false,phase:0};
-plaque(rehabRoom,'COACH','LIVE MOVEMENT DEMO',3.4,.62,0,3.05,-9.15,{dark:true,titleSize:52});
+plaque(rehabRoom,'COACH ALEX','DAILY MOVEMENT DEMO',3.4,.62,0,3.05,-9.15,{dark:true,titleSize:52});
+const fitnessProgramWall=new THREE.Group();fitnessProgramWall.name='KOMO_FITNESS_PROGRAM_WALL_V29';rehabRoom.add(fitnessProgramWall);
+[
+  ['STRENGTH',-7.8],['MOBILITY',-3.9],['BALANCE',0],['CARDIO',3.9],['RECOVERY',7.8]
+].forEach(([label,x],i)=>{
+  plaque(fitnessProgramWall,String(i+1).padStart(2,'0'),label,2.6,.66,x,5.50,7.9,{dark:i%2===1,titleSize:43});
+});
 
 // Arena room.
 arenaRoom.position.set(45,0,0);
@@ -1651,7 +1657,7 @@ const rehabInteractions=[
 }));
 rehabInteractions.push({
   id:'rehab_coach',x:0,z:-61.3,r:2.15,
-  title:()=>locale==='fr'?'Alex · Rehab Coach':'Alex · Rehab Coach',
+  title:()=>locale==='fr'?'Alex · Fitness Coach':'Alex · Rehab Coach',
   desc:()=>locale==='fr'?'Voir le rôle du coach virtuel':'Learn about the virtual coach',
   action:()=>showRehabCoach()
 });
@@ -1673,8 +1679,8 @@ const JOURNEY_MISSIONS=[
   {id:'hall',xp:20,title:{fr:'Découvrir le Hall',en:'Discover the Hall'},sub:{fr:'Franchir l’entrée principale',en:'Cross the main entrance'}},
   {id:'journey',xp:15,title:{fr:'Comprendre le World Journey',en:'Understand World Journey'},sub:{fr:'Ouvrir la station de progression',en:'Open the progression station'}},
   {id:'twin',xp:35,title:{fr:'Explorer le Functional Twin',en:'Explore Functional Twin'},sub:{fr:'Comprendre votre espace de données',en:'Understand your data space'}},
-  {id:'rehab',xp:35,title:{fr:'Passer de l’insight à l’action',en:'Move from insight to action'},sub:{fr:'Découvrir Rehab',en:'Discover Rehab'}},
-  {id:'rehab_session',xp:25,title:{fr:'Compléter une session Rehab',en:'Complete a Rehab session'},sub:{fr:'Valider une station guidée',en:'Complete one guided station'}},
+  {id:'rehab',xp:35,title:{fr:'Entrer au KŌMØ Fitness Club',en:'Enter KŌMØ Fitness Club'},sub:{fr:'Choisir votre pratique',en:'Choose your activity'}},
+  {id:'rehab_session',xp:25,title:{fr:'Compléter votre séance du jour',en:'Complete today’s session'},sub:{fr:'Construire votre régularité',en:'Build your consistency'}},
   {id:'arena',xp:35,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir les challenges',en:'Discover challenges'}},
   {id:'life',xp:25,title:{fr:'Visiter KŌMØ Life',en:'Visit KŌMØ Life'},sub:{fr:'Relier World au réel',en:'Connect World to real life'}},
   {id:'upper',xp:30,title:{fr:'Atteindre le Level 2',en:'Reach Level 2'},sub:{fr:'Explorer les galeries hautes',en:'Explore the upper galleries'}},
@@ -1853,11 +1859,11 @@ function deskHtml(){
   const s=current();
   if(locale==='fr')return `
     <p>Votre World organise votre parcours autour de trois espaces. Aucun personnage d'accueil : le Desk est simplement votre point d'orientation.</p>
-    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>Rehab</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>ÉTAT ACTUEL</span><b>Motion ${s.motion_score}</b></div></div>
+    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>ÉTAT ACTUEL</span><b>Motion ${s.motion_score}</b></div></div>
     <div class="priority-card"><b>PROCHAINE ÉTAPE</b>Commencez par le Functional Twin pour voir votre état actuel et votre progression depuis la baseline.</div>`;
   return `
     <p>Your World is organised around three spaces. There is no reception avatar: the Desk is simply your orientation point.</p>
-    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>Rehab</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>CURRENT STATE</span><b>Motion ${s.motion_score}</b></div></div>
+    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>CURRENT STATE</span><b>Motion ${s.motion_score}</b></div></div>
     <div class="priority-card"><b>NEXT STEP</b>Start with Functional Twin to review your current state and progression from baseline.</div>`;
 }
 function showDesk(){
@@ -2144,7 +2150,7 @@ function showRehabCoach(){
     <p>${locale==='fr'?'Alex démontre visuellement la séquence choisie dans Rehab : contrôle, force ou capacité. Le rôle du coach ici est pédagogique et spatial.':'Alex visually demonstrates the selected Rehab sequence: control, strength or capacity. The coach role here is educational and spatial.'}</p>
     <div class="panel-grid"><div><span>CONTROL</span><b>BALANCE</b></div><div><span>STRENGTH</span><b>SQUAT</b></div><div><span>CAPACITY</span><b>MARCH</b></div><div><span>MODE</span><b>DEMO</b></div></div>
     <div class="data-note">${locale==='fr'?'Les mouvements sont des démonstrations génériques de l’interface World, pas une prescription personnalisée.':'Movements are generic World-interface demonstrations, not personalised prescriptions.'}</div>`;
-  openPanel('ALEX · REHAB COACH',locale==='fr'?'Démonstrateur de mouvement.':'Movement demonstrator.',html,[
+  openPanel('ALEX · FITNESS COACH',locale==='fr'?'Démonstrateur de mouvement.':'Movement demonstrator.',html,[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
     {label:locale==='fr'?'CONTROL':'CONTROL',onClick:()=>showRehabStation('control')},
     {label:locale==='fr'?'STRENGTH':'STRENGTH',primary:true,onClick:()=>showRehabStation('strength')}
