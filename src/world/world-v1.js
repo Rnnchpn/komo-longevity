@@ -654,47 +654,47 @@ function makePlayerAvatar(){
 
   // Adult proportions: longer lower body, smaller head, cleaner stance.
   const hipsGroup=new THREE.Group();hipsGroup.position.y=1.04;g.add(hipsGroup);
-  const hips=mesh(hipsGroup,new THREE.SphereGeometry(.215,lowPower?12:20,lowPower?8:14),trouser,0,0,0,{cast});
-  hips.scale.set(1.06,.62,.76);
+  const hips=mesh(hipsGroup,new THREE.SphereGeometry(.225,lowPower?12:20,lowPower?8:14),trouser,0,0,0,{cast});
+  hips.scale.set(1.14,.68,.82);
 
   const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();
-  leftLeg.position.set(-.135,1.03,0);rightLeg.position.set(.135,1.03,0);g.add(leftLeg,rightLeg);
+  leftLeg.position.set(-.14,1.07,0);rightLeg.position.set(.14,1.07,0);g.add(leftLeg,rightLeg);
   const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();
-  leftKnee.position.y=-.46;rightKnee.position.y=-.46;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  leftKnee.position.y=-.54;rightKnee.position.y=-.54;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
 
-  const leftThigh=capsule(.069,.32,trouser,leftLeg,-.255);
-  const rightThigh=capsule(.069,.32,trouser,rightLeg,-.255);
-  leftThigh.scale.set(1.02,1,.92);rightThigh.scale.copy(leftThigh.scale);
-  const leftShin=capsule(.053,.30,trouser,leftKnee,-.235);
-  const rightShin=capsule(.053,.30,trouser,rightKnee,-.235);
-  leftShin.scale.set(.96,1,.90);rightShin.scale.copy(leftShin.scale);
+  const leftThigh=capsule(.073,.37,trouser,leftLeg,-.285);
+  const rightThigh=capsule(.073,.37,trouser,rightLeg,-.285);
+  leftThigh.scale.set(1.05,1,.94);rightThigh.scale.copy(leftThigh.scale);
+  const leftShin=capsule(.056,.35,trouser,leftKnee,-.275);
+  const rightShin=capsule(.056,.35,trouser,rightKnee,-.275);
+  leftShin.scale.set(.98,1,.92);rightShin.scale.copy(leftShin.scale);
 
   const makeShoe=(parent)=>{
-    const group=new THREE.Group();group.position.set(0,-.49,.075);parent.add(group);
-    const upper=mesh(group,new THREE.CapsuleGeometry(.070,.17,lowPower?4:6,lowPower?8:14),shoe,0,.005,.025,{cast});
-    upper.rotation.x=Math.PI/2;upper.scale.set(.90,.82,1.0);
-    const toe=mesh(group,new THREE.SphereGeometry(.082,lowPower?10:16,lowPower?7:10),shoe,0,-.006,.112,{cast});
-    toe.scale.set(.88,.54,1.06);
-    const outsole=mesh(group,new THREE.BoxGeometry(.135,.027,.305),sole,0,-.055,.045,{cast:false});
-    const heel=mesh(group,new THREE.BoxGeometry(.125,.038,.105),sole,0,-.047,-.062,{cast:false});
+    const group=new THREE.Group();group.position.set(0,-.49,.086);parent.add(group);
+    const upper=mesh(group,new THREE.CapsuleGeometry(.078,.20,lowPower?4:6,lowPower?8:14),shoe,0,.008,.03,{cast});
+    upper.rotation.x=Math.PI/2;upper.scale.set(.96,.86,1.08);
+    const toe=mesh(group,new THREE.SphereGeometry(.092,lowPower?10:16,lowPower?7:10),shoe,0,-.008,.126,{cast});
+    toe.scale.set(.96,.58,1.12);
+    const outsole=mesh(group,new THREE.BoxGeometry(.155,.03,.33),sole,0,-.062,.05,{cast:false});
+    const heel=mesh(group,new THREE.BoxGeometry(.142,.042,.115),sole,0,-.052,-.072,{cast:false});
     return group;
   };
   const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee);
 
   // Tailored KŌMØ jacket: elongated torso with real shoulder structure.
-  const torsoGroup=new THREE.Group();torsoGroup.position.y=1.50;g.add(torsoGroup);
-  const torso=mesh(torsoGroup,new THREE.CapsuleGeometry(.202,.40,lowPower?5:8,lowPower?10:18),cloth,0,-.01,0,{cast});
-  torso.scale.set(1.03,1,.76);
-  const chest=mesh(torsoGroup,new THREE.SphereGeometry(.275,lowPower?12:20,lowPower?8:14),cloth,0,.155,0,{cast});
-  chest.scale.set(1.22,.46,.69);
-  const waist=mesh(torsoGroup,new THREE.SphereGeometry(.205,lowPower?10:16,lowPower?7:10),clothDark,0,-.305,0,{cast});
-  waist.scale.set(1.00,.24,.72);
+  const torsoGroup=new THREE.Group();torsoGroup.position.y=1.57;g.add(torsoGroup);
+  const torso=mesh(torsoGroup,new THREE.CapsuleGeometry(.214,.45,lowPower?5:8,lowPower?10:18),cloth,0,-.015,0,{cast});
+  torso.scale.set(1.08,1,.79);
+  const chest=mesh(torsoGroup,new THREE.SphereGeometry(.292,lowPower?12:20,lowPower?8:14),cloth,0,.17,0,{cast});
+  chest.scale.set(1.28,.50,.72);
+  const waist=mesh(torsoGroup,new THREE.SphereGeometry(.215,lowPower?10:16,lowPower?7:10),clothDark,0,-.34,0,{cast});
+  waist.scale.set(1.04,.25,.74);
 
   // Shoulder caps soften the transition to arms and create an adult silhouette.
-  const shoulderGeo=new THREE.SphereGeometry(.105,lowPower?10:16,lowPower?7:10);
-  const shoulderL=mesh(torsoGroup,shoulderGeo,cloth,-.292,.185,0,{cast});
-  const shoulderR=mesh(torsoGroup,shoulderGeo,cloth,.292,.185,0,{cast});
-  shoulderL.scale.set(.92,.64,.82);shoulderR.scale.copy(shoulderL.scale);
+  const shoulderGeo=new THREE.SphereGeometry(.074,lowPower?10:16,lowPower?7:10);
+  const shoulderL=mesh(torsoGroup,shoulderGeo,cloth,-.248,.162,0,{cast});
+  const shoulderR=mesh(torsoGroup,shoulderGeo,cloth,.248,.162,0,{cast});
+  shoulderL.scale.set(.78,.46,.64);shoulderR.scale.copy(shoulderL.scale);
 
   // Jacket lapels, zipper, waistband and small KŌMØ hardware.
   const collarL=mesh(torsoGroup,new THREE.BoxGeometry(.175,.155,.022),clothDark,-.086,.295,.178,{cast:false});
@@ -707,12 +707,12 @@ function makePlayerAvatar(){
   chestPin.rotation.x=Math.PI/2;
 
   // Neck and smaller adult head.
-  cyl(g,.058,.064,.145,skin,0,1.93,0,lowPower?8:12,{cast});
-  const headGroup=new THREE.Group();headGroup.position.y=2.115;g.add(headGroup);
-  const head=mesh(headGroup,new THREE.SphereGeometry(.160,lowPower?14:24,lowPower?10:18),skin,0,0,0,{cast});
-  head.scale.set(.91,1.07,.95);
-  const jaw=mesh(headGroup,new THREE.SphereGeometry(.112,lowPower?10:16,lowPower?7:12),skin,0,-.098,.014,{cast});
-  jaw.scale.set(.90,.60,.87);
+  cyl(g,.064,.070,.125,skin,0,2.00,0,lowPower?8:12,{cast});
+  const headGroup=new THREE.Group();headGroup.position.y=2.14;g.add(headGroup);
+  const head=mesh(headGroup,new THREE.SphereGeometry(.153,lowPower?14:24,lowPower?10:18),skin,0,0,0,{cast});
+  head.scale.set(.90,1.05,.94);
+  const jaw=mesh(headGroup,new THREE.SphereGeometry(.106,lowPower?10:16,lowPower?7:12),skin,0,-.093,.014,{cast});
+  jaw.scale.set(.89,.59,.86);
   const earGeo=new THREE.SphereGeometry(.027,lowPower?7:10,lowPower?5:8);
   [-.149,.149].forEach(x=>{const e=mesh(headGroup,earGeo,skin,x,-.004,0,{cast:false});e.scale.set(.52,1.0,.56)});
   const hairCap=mesh(headGroup,new THREE.SphereGeometry(.166,lowPower?14:22,lowPower?8:14,0,Math.PI*2,0,Math.PI*.55),hair,0,.062,-.008,{cast});
@@ -729,18 +729,18 @@ function makePlayerAvatar(){
 
   // Slimmer arms and hands.
   const leftArm=new THREE.Group(),rightArm=new THREE.Group();
-  leftArm.position.set(-.326,1.70,0);rightArm.position.set(.326,1.70,0);g.add(leftArm,rightArm);
+  leftArm.position.set(-.305,1.73,0);rightArm.position.set(.305,1.73,0);g.add(leftArm,rightArm);
   leftArm.rotation.z=-.042;rightArm.rotation.z=.042;
   const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();
-  leftElbow.position.y=-.34;rightElbow.position.y=-.34;leftArm.add(leftElbow);rightArm.add(rightElbow);
-  capsule(.050,.245,cloth,leftArm,-.188);capsule(.050,.245,cloth,rightArm,-.188);
+  leftElbow.position.y=-.355;rightElbow.position.y=-.355;leftArm.add(leftElbow);rightArm.add(rightElbow);
+  capsule(.054,.255,cloth,leftArm,-.195);capsule(.054,.255,cloth,rightArm,-.195);
   const cuffL=mesh(leftArm,new THREE.CylinderGeometry(.051,.048,.040,10),clothSoft,0,-.337,0,{cast});
   const cuffR=mesh(rightArm,new THREE.CylinderGeometry(.051,.048,.040,10),clothSoft,0,-.337,0,{cast});
-  capsule(.039,.215,skin,leftElbow,-.165);capsule(.039,.215,skin,rightElbow,-.165);
+  capsule(.043,.225,skin,leftElbow,-.175);capsule(.043,.225,skin,rightElbow,-.175);
 
   const makeHand=(parent)=>{
-    const hand=mesh(parent,new THREE.CapsuleGeometry(.032,.066,5,10),skin,0,-.365,.006,{cast});
-    hand.scale.set(.92,1.04,.64);
+    const hand=mesh(parent,new THREE.CapsuleGeometry(.038,.078,5,10),skin,0,-.39,.008,{cast});
+    hand.scale.set(.96,1.08,.72);
     return hand;
   };
   const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow);
@@ -3492,14 +3492,14 @@ function updatePlayerAvatar(now,dt){
   av.hipsGroup.rotation.z=Math.cos(av.phase)*.007*moveAmount;
   av.torsoGroup.rotation.z=Math.cos(av.phase*.5)*.008*moveAmount-turn*.045;
   av.torsoGroup.rotation.y=Math.sin(av.phase*.5)*.014*moveAmount+turn*.07;
-  av.torsoGroup.rotation.x=-.008*moveAmount;
-  av.torsoGroup.position.y=1.50+Math.abs(Math.sin(av.phase))*0.008*moveAmount+Math.sin(now*.00135)*.0032*(1-moveAmount);
+  av.torsoGroup.rotation.x=-.014-.004*moveAmount;
+  av.torsoGroup.position.y=1.57+Math.abs(Math.sin(av.phase))*0.007*moveAmount+Math.sin(now*.00135)*.0028*(1-moveAmount);
 
   // Adult idle posture: open chest, subtle breathing and attention.
   const breathe=Math.sin(now*.00135);
   av.headGroup.rotation.y=Math.sin(now*.00042)*.022+turn*.075;
   av.headGroup.rotation.x=Math.sin(now*.00031)*.006;
-  av.headGroup.position.y=2.115+breathe*.0022*(1-moveAmount);
+  av.headGroup.position.y=2.14+breathe*.0018*(1-moveAmount);
   av.leftHand.rotation.z=Math.sin(av.phase*.5)*.025*moveAmount;
   av.rightHand.rotation.z=-Math.sin(av.phase*.5)*.025*moveAmount;
 
@@ -3514,8 +3514,8 @@ function updateCamera(now,dt){
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
     const distance=thirdPersonDistance;
-    const height=lowPower?1.94:2.16;
-    const shoulder=lowPower?.22:.31;
+    const height=lowPower?2.00:2.24;
+    const shoulder=lowPower?.23:.32;
     cameraDesired.set(
       player.x+Math.sin(yaw)*distance+Math.cos(yaw)*shoulder,
       player.y+height+pitch*1.08,
@@ -3534,12 +3534,12 @@ function updateCamera(now,dt){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
-    cameraLook.set(player.x,player.y+1.18+pitch*.40,player.z);
+    cameraLook.set(player.x,player.y+1.24+pitch*.39,player.z);
     camera.lookAt(cameraLook);
   }else{
     const move=Math.min(1,velocity.length()/4.35);
     const bob=move*Math.sin(now*.0102)*.006;
-    const eyeY=player.y+1.96+bob;
+    const eyeY=player.y+2.03+bob;
     camera.position.set(player.x,eyeY,player.z);
     const cp=Math.cos(pitch),sp=Math.sin(pitch),look=18;
     camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
@@ -4015,7 +4015,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'4.2.0-avatar-realism',
+  version:'4.2.1-proportions',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
