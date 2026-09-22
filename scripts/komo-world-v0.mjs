@@ -73,7 +73,10 @@ const checks=[
   ['Pulse cross-tab World bridge present',pulseAuth.includes('WORLD_BRIDGE_CHANNEL')&&pulseAuth.includes("type:'komo:pulse-world-session-request'")&&pulseAuth.includes("type:'komo:pulse-world-session-response'")],
   ['World bridge ACK present',pulseAuth.includes("type!=='komo:world-bridge-ack'")&&multiplayer.includes("type:'komo:world-bridge-ack'")],
   ['multiplayer join friend V0.5 present',runtime.includes('function joinPresence(target)')&&runtime.includes('joinPresence,')&&multiplayer.includes('runtime.joinPresence?.(row)')],
-  ['multiplayer distance roster present',multiplayer.includes("Math.round(distance)+' m away'")&&multiplayer.includes("join.textContent='JOIN'")]
+  ['multiplayer distance roster present',multiplayer.includes("Math.round(distance)+' m away'")&&multiplayer.includes("join.textContent='JOIN'")],
+  ['multiplayer long-range beacon present',multiplayer.includes('distance<90')&&multiplayer.includes('beaconTop')&&multiplayer.includes('depthTest:false')],
+  ['configurable keyboard controls present',runtime.includes("const KEYBIND_KEY='komo_world_keybinds_v1'")&&runtime.includes('function showControlsPanel')&&runtime.includes("controlsToggle.addEventListener")],
+  ['movement uses configured controls',runtime.includes("if(isPressed('forward'))")&&runtime.includes("keyHas('action',e.code)")&&runtime.includes("keyHas('menu',e.code)")]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
