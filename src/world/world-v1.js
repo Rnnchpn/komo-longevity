@@ -524,6 +524,10 @@ const M={
   arena:new THREE.MeshStandardMaterial({color:0x2a241b,roughness:.61,metalness:.08}),
   arenaGold:new THREE.MeshStandardMaterial({...S_BRASS,color:0xc8a36d,roughness:.25,metalness:.70,bumpScale:lowPower?0:.006})
 };
+const wallWarm=M.wall.clone();wallWarm.color.setHex(0xfffbf3);wallWarm.roughness=.74;
+const wallShade=M.wall.clone();wallShade.color.setHex(0xe8e2d9);wallShade.roughness=.82;
+const stoneWarm=M.stoneLight.clone();stoneWarm.color.setHex(0xf2e8d9);stoneWarm.roughness=.66;
+
 const MAT={
   fabric:new THREE.MeshStandardMaterial({...S_FABRIC,color:0xffffff,roughness:.92,metalness:0,bumpScale:lowPower?0:.018}),
   fabricLight:new THREE.MeshStandardMaterial({...S_FABRIC_LIGHT,color:0xffffff,roughness:.94,metalness:0,bumpScale:lowPower?0:.016}),
@@ -1511,6 +1515,32 @@ box(building,6.7,.34,46,M.wall,-8.15,8.0,-7.0,{cast:true});
 box(building,6.7,.34,46,M.wall,8.15,8.0,-7.0,{cast:true});
 [-25,-17,-9,-1,7,13].forEach(z=>box(building,10.1,.09,.12,M.bronze,0,7.86,z));
 [-10.9,10.9].forEach(x=>[-22,-12,-2,8].forEach(z=>box(building,.13,6.8,.18,M.bronze,x,4.1,z)));
+
+// V4.4 material articulation — panel reveals and mineral skirting make the hall surfaces read as built finishes.
+const hallMaterialFinish=new THREE.Group();hallMaterialFinish.name='KOMO_HALL_MATERIAL_FINISH_V44';building.add(hallMaterialFinish);
+[-1,1].forEach(side=>{
+  const x=side*11.475;
+  [-21.0,-16.4,-11.8,-7.2,-2.6,2.0,6.6,11.2].forEach((z,i)=>{
+    const mat=i%3===0?wallWarm:i%3===1?M.wall:wallShade;
+    box(hallMaterialFinish,.024,4.90,4.28,mat,x,3.15,z,{cast:false,receive:true});
+    // 10 mm shadow-reveal between panels.
+    box(hallMaterialFinish,.030,4.98,.020,MAT.blackened,x-side*.006,3.15,z+2.16,{cast:false,receive:false});
+  });
+  // Limestone skirting and a floating bronze datum line.
+  box(hallMaterialFinish,.045,.34,42.9,MAT.limestone,x-side*.012,.31,-6.4,{cast:false,receive:true});
+  box(hallMaterialFinish,.035,.030,42.6,MAT.brass,x-side*.018,2.58,-6.4,{cast:false,receive:false});
+});
+
+// A few book-matched stone portals create visible variation in the material language.
+[
+  [-11.44,3.65,7.0],[11.44,3.65,2.8],[-11.44,3.65,-12.8],[11.44,3.65,-17.2]
+].forEach(([x,y,z],i)=>{
+  const side=x<0?-1:1;
+  box(hallMaterialFinish,.032,3.70,2.55,i%2?stoneWarm:MAT.travertine,x-side*.014,y,z,{cast:false,receive:true});
+  box(hallMaterialFinish,.038,3.78,.024,MAT.brass,x-side*.018,y,z-1.30,{cast:false,receive:false});
+  box(hallMaterialFinish,.038,3.78,.024,MAT.brass,x-side*.018,y,z+1.30,{cast:false,receive:false});
+});
+
 
 // V1.5 interior architecture: galleries, balcony datum and layered ceiling.
 const hallArchitecture=new THREE.Group();hallArchitecture.name='KOMO_HALL_ARCHITECTURE_V15';building.add(hallArchitecture);
