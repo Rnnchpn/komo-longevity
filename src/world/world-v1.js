@@ -3203,15 +3203,15 @@ function setMode(){
   world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true;rehabCoach.visible=true;
 }
 function enterTwin(){
-  completeJourney('twin');completeChallenge('twin');
+  closePanel();closeWorldMenu();completeJourney('twin');completeChallenge('twin');
   playerLevel=0;setMode();player.set(-45,0,8.7);velocity.set(0,0,0);yaw=targetYaw=0;pitch=targetPitch=-.03;updateLocation();
 }
 function enterRehab(){
-  completeJourney('rehab');
+  closePanel();closeWorldMenu();completeJourney('rehab');
   playerLevel=0;setMode();player.set(0,0,-44.5);velocity.set(0,0,0);yaw=targetYaw=0;pitch=targetPitch=-.03;updateLocation();
 }
 function enterArena(){
-  completeJourney('arena');completeChallenge('arena_visit');
+  closePanel();closeWorldMenu();completeJourney('arena');completeChallenge('arena_visit');
   playerLevel=0;setMode();player.set(45,0,8.8);velocity.set(0,0,0);yaw=targetYaw=0;pitch=targetPitch=-.03;updateLocation();
 }
 function returnToHall(){
@@ -3419,14 +3419,14 @@ function updateLocation(){
   else if(playerLevel===1){
     nav='upper';completeJourney('upper',{silent:true});
     label=player.z<-18.8?'UPPER OBSERVATORY':player.x<0?'SCIENCE LIBRARY · LEVEL 2':'LIFE LOUNGE · LEVEL 2';
-  }else if(player.z>57)label='KŌMØ DISTRICT';
+  }else if(inTwinLink())label='TWIN WALK';
+  else if(inArenaLink())label='ARENA WALK';
+  else if(inFitnessLink())label='FITNESS WALK';
+  else if(player.z>57)label='KŌMØ DISTRICT';
   else if(player.z>23)label='ARRIVAL COURT';
   else if(player.z>11.8)label='WORLD ENTRANCE';
   else if(player.x>6.8&&player.z>-2&&player.z<7){label='KŌMØ LIFE';nav='life';completeJourney('life',{silent:true})}
   else if(player.z>-7){label='KŌMØ HALL';completeJourney('hall',{silent:true})}
-  else if(inTwinLink())label='TWIN WALK';
-  else if(inArenaLink())label='ARENA WALK';
-  else if(inFitnessLink())label='FITNESS WALK';
   else label='MOTION ATRIUM';
   syncQuickNav(nav);showWorldZone(label);
 }
