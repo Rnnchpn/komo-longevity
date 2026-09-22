@@ -48,8 +48,10 @@ const checks=[
   ['Hall Living V3+ present',runtime.includes('KOMO_HALL_LIVING_V30')&&runtime.includes('function instancedStatic')],
   ['Hall Living social layer present',runtime.includes("label:'Camille'")&&runtime.includes("label:'Lina'")&&runtime.includes('TODAY AT KŌMØ')],
   ['Hall Living culling present',runtime.includes('hallLiving.visible=player.z<19&&player.z>-29')&&runtime.includes('mesh:m')],
-  ['Retina sharpness V3.0.2 present',runtime.includes("version:'3.0.2-retina-sharp'")&&runtime.includes('const retinaMobile=lowPower&&deviceDpr>=2')&&runtime.includes('pixelRatio:renderer.getPixelRatio()')],
-  ['mobile no forced rescue V3.0.2 present',!runtime.includes('if(lowPower)applyEmergencyPerformance();')&&runtime.includes('retinaMobile?.90:.82')&&runtime.includes('retinaMobile?.72:.66')]
+  ['Retina sharpness V3.0.2+ present',runtime.includes('const retinaMobile=lowPower&&deviceDpr>=2')&&runtime.includes('pixelRatio:renderer.getPixelRatio()')],
+  ['mobile no forced rescue V3.0.2+ present',!runtime.includes('if(lowPower)applyEmergencyPerformance();')&&runtime.includes('retinaMobile?1.02:.86')&&runtime.includes('retinaMobile?.78:.68')],
+  ['Visual polish V3.1 present',runtime.includes("version:'3.1.0-visual-polish'")&&runtime.includes('KOMO_PLAYER_AVATAR_V31')&&runtime.includes('KOMO_HALL_HOST_V31')],
+  ['player grounding V3.1 present',runtime.includes('Grounding: contact shadow')&&runtime.includes('leftElbow')&&runtime.includes('rightElbow')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
