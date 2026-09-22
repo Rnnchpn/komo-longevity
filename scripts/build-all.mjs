@@ -177,7 +177,10 @@ const scripts = [
   // Final Pro Motion hand-off: patient-scoped PDF export after all audits/hotfixes.
   'scripts/pulse-pro-motion-final-v1.mjs',
   // Absolute last iPad Centre pass: keep assignment + consultation drawer directly connected.
-  'scripts/pulse-ipad-center-connect-v1.mjs'
+  'scripts/pulse-ipad-center-connect-v1.mjs',
+  // Public home hand-off: keep KŌMØ World visible as the virtual-rehabilitation
+  // and network layer after every historical home mutation.
+  'scripts/world-public-home-v1.mjs'
 ];
 
 for (const script of scripts) {
