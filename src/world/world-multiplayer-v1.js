@@ -64,7 +64,17 @@ function css(){
       color:rgba(246,239,228,.78);font-size:6px;letter-spacing:.10em;box-shadow:none
     }
     .kwmp-pill:hover{background:rgba(255,255,255,.055);border-color:rgba(216,186,134,.22)}
+    .kwmp-pill[data-kwmp-chat],.kwmp-pill[data-kwmp-social]{display:none}
     .kwmp-pill[data-kwmp-voice]{display:none}
+    .kwmp-dock{
+      top:64px;right:24px;padding:0;border:0;background:transparent;
+      -webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none
+    }
+    .kwmp-pill{
+      height:30px;padding:0 10px;border:1px solid rgba(255,255,255,.09);
+      border-radius:11px;background:rgba(15,30,22,.70);font-size:5px;
+      -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)
+    }
     .kwmp-chat{
       left:22px;bottom:22px;width:430px;max-height:min(390px,50vh);
       border-radius:18px;background:linear-gradient(150deg,rgba(14,27,20,.94),rgba(26,41,31,.88));
@@ -768,5 +778,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.7.1-desktop-clarity',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.7.2-one-world-ui',connect:openPulse,state};
 }
