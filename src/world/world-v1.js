@@ -3134,15 +3134,15 @@ function setMode(next){
 }
 function enterTwin(){
   completeJourney('twin');completeChallenge('twin');
-  playerLevel=0;setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';
+  playerLevel=0;setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';syncQuickNav('twin');
 }
 function enterRehab(){
   completeJourney('rehab');
-  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='KŌMØ FITNESS CLUB';
+  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='KŌMØ FITNESS CLUB';syncQuickNav('');
 }
 function enterArena(){
   completeJourney('arena');completeChallenge('arena_visit');
-  playerLevel=0;setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';
+  playerLevel=0;setMode('arena');player.set(45,0,8.8);velocity.set(0,0,0);yaw=0;pitch=-.03;showArena();locationName.textContent='ARENA';syncQuickNav('');
 }
 function returnToHall(){
   playerLevel=0;setMode('world');player.set(0,0,-22.5);velocity.set(0,0,0);yaw=0;pitch=-.03;closePanel();updateLocation();notify(locale==='fr'?'KŌMØ HALL':'KŌMØ HALL');
@@ -3326,23 +3326,30 @@ function updateDoors(now,dt){
     entrance.userData.state=active?'open':'closed';
   }
 }
+function syncQuickNav(zone){
+  document.querySelectorAll('#world-quick-nav [data-nav-zone]').forEach(btn=>{
+    const active=btn.dataset.navZone===zone;
+    btn.classList.toggle('active',active);
+    if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
+  });
+}
 function updateLocation(){
-  if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';return}
-  if(mode==='rehab'){locationName.textContent='KŌMØ FITNESS CLUB';return}
-  if(mode==='arena'){locationName.textContent='ARENA';return}
+  if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';syncQuickNav('twin');return}
+  if(mode==='rehab'){locationName.textContent='KŌMØ FITNESS CLUB';syncQuickNav('');return}
+  if(mode==='arena'){locationName.textContent='ARENA';syncQuickNav('');return}
   if(playerLevel===1){
-    completeJourney('upper',{silent:true});
+    syncQuickNav('upper');completeJourney('upper',{silent:true});
     if(player.z<-18.8)locationName.textContent='UPPER OBSERVATORY';
     else if(player.x<0)locationName.textContent='SCIENCE LIBRARY · LEVEL 2';
     else locationName.textContent='LIFE LOUNGE · LEVEL 2';
     return;
   }
-  if(player.z>57)locationName.textContent='KŌMØ DISTRICT';
-  else if(player.z>23)locationName.textContent='ARRIVAL COURT';
-  else if(player.z>11.8)locationName.textContent='WORLD ENTRANCE';
-  else if(player.x>6.8&&player.z>-2&&player.z<7){locationName.textContent='KŌMØ LIFE';completeJourney('life',{silent:true})}
-  else if(player.z>-7){locationName.textContent='KŌMØ HALL';completeJourney('hall',{silent:true})}
-  else locationName.textContent='MOTION ATRIUM';
+  if(player.z>57){locationName.textContent='KŌMØ DISTRICT';syncQuickNav('hall')}
+  else if(player.z>23){locationName.textContent='ARRIVAL COURT';syncQuickNav('hall')}
+  else if(player.z>11.8){locationName.textContent='WORLD ENTRANCE';syncQuickNav('hall')}
+  else if(player.x>6.8&&player.z>-2&&player.z<7){locationName.textContent='KŌMØ LIFE';syncQuickNav('life');completeJourney('life',{silent:true})}
+  else if(player.z>-7){locationName.textContent='KŌMØ HALL';syncQuickNav('hall');completeJourney('hall',{silent:true})}
+  else{locationName.textContent='MOTION ATRIUM';syncQuickNav('hall')}
 }
 function updateHeading(){
   const a=((yaw%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
