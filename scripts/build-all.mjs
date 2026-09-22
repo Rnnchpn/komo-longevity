@@ -183,7 +183,10 @@ const scripts = [
   'scripts/world-public-home-v1.mjs',
   // Absolute last public-home pass: explain KŌMØ, its medical founder and World
   // to a first-time patient before the deeper product detail begins.
-  'scripts/homepage-patient-clarity-v1.mjs'
+  'scripts/homepage-patient-clarity-v1.mjs',
+  // Make KŌMØ Experience and the complete patient-facing continuum visible
+  // before the technical product detail begins.
+  'scripts/homepage-experience-clarity-v1.mjs'
 ];
 
 for (const script of scripts) {
