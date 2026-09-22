@@ -6,6 +6,7 @@ const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = join(root, 'src', 'world');
 const target = join(root, 'site', 'world');
 
+const html=await readFile(join(source,'index.html'),'utf8');
 const runtime=await readFile(join(source,'world-v1.js'),'utf8');
 const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
