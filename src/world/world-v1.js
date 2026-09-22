@@ -438,6 +438,22 @@ function makeSurfaceCanvases(kind,{seed=1,base='#ddd1bf',accent='#aa9578',dark='
       hx.beginPath();hx.moveTo(0,i);hx.lineTo(size,i);hx.stroke();
     }
     rx.fillStyle='rgba(215,215,215,.54)';rx.fillRect(0,0,size,size);
+  }else if(kind==='leather'){
+    cx.fillStyle=base;cx.fillRect(0,0,size,size);
+    for(let y=0;y<size;y+=3){
+      for(let x=0;x<size;x+=3){
+        const n=hash2(x,y,seed),n2=hash2(x+9,y+21,seed);
+        const alpha=.025+n*.055;
+        cx.fillStyle=n>.52?`rgba(255,255,255,${alpha})`:`rgba(40,25,18,${alpha*.72})`;
+        cx.fillRect(x,y,2,2);
+        const h=Math.floor(110+n2*38);hx.fillStyle=`rgb(${h},${h},${h})`;hx.fillRect(x,y,2,2);
+        const r=Math.floor(148+n*52);rx.fillStyle=`rgb(${r},${r},${r})`;rx.fillRect(x,y,2,2);
+      }
+    }
+    for(let i=0;i<24;i++){
+      const px=hash2(i,seed,31)*size,py=hash2(i,seed,33)*size;
+      cx.strokeStyle='rgba(35,20,14,.045)';cx.lineWidth=.7;cx.beginPath();cx.arc(px,py,8+hash2(i,seed,35)*18,0,Math.PI*1.35);cx.stroke();
+    }
   }else if(kind==='brushed'){
     cx.fillStyle=base;cx.fillRect(0,0,size,size);
     for(let y=0;y<size;y+=2){
@@ -477,6 +493,8 @@ const S_FABRIC=makeSurface('fabric',{seed:29,base:'#435449'},[8,8]);
 const S_FABRIC_LIGHT=makeSurface('fabric',{seed:31,base:'#bbb5aa'},[8,8]);
 const S_BRASS=makeSurface('brushed',{seed:37,base:'#b28b57'},[1,3]);
 const S_BRONZE=makeSurface('brushed',{seed:41,base:'#9f754b'},[1,3]);
+const S_LEATHER=makeSurface('leather',{seed:43,base:'#8c755d'},[4,4]);
+const S_LEATHER_DARK=makeSurface('leather',{seed:47,base:'#4d4036'},[4,4]);
 
 const M={
   ground:new THREE.MeshStandardMaterial({color:0x9ba690,roughness:.98,metalness:0}),
@@ -518,11 +536,13 @@ const MAT={
     new THREE.MeshPhysicalMaterial({color:0x708178,roughness:.095,metalness:.01,transparent:true,opacity:.20,transmission:.50,ior:1.46,thickness:.14,clearcoat:.20,clearcoatRoughness:.10,depthWrite:false,side:THREE.DoubleSide}),
   limestone:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xf0e8db,roughness:.74,metalness:0,bumpScale:lowPower?0:.025}),
   travertine:new THREE.MeshStandardMaterial({...S_TRAVERTINE,color:0xf5e9d7,roughness:.61,metalness:.008,bumpScale:lowPower?0:.032}),
-  blackened:new THREE.MeshStandardMaterial({color:0x151d18,roughness:.42,metalness:.16})
+  blackened:new THREE.MeshStandardMaterial({color:0x151d18,roughness:.42,metalness:.16}),
+  leather:new THREE.MeshStandardMaterial({...S_LEATHER,color:0xffffff,roughness:.66,metalness:0,bumpScale:lowPower?0:.020}),
+  leatherDark:new THREE.MeshStandardMaterial({...S_LEATHER_DARK,color:0xffffff,roughness:.58,metalness:.01,bumpScale:lowPower?0:.018})
 };
 
 // Blackened metal uses the brushed bronze texture family but neutral color.
-MAT.blackened.map=S_BRASS.map;MAT.blackened.roughnessMap=S_BRASS.roughnessMap;MAT.blackened.bumpMap=S_BRASS.bumpMap;MAT.blackened.bumpScale=lowPower?0:.006;
+MAT.blackened.map=S_BRASS.map;MAT.blackened.roughnessMap=S_BRASS.roughnessMap;MAT.blackened.bumpMap=S_BRASS.bumpMap;MAT.blackened.bumpScale=lowPower?0:.006;MAT.blackened.needsUpdate=true;
 
 function makeStoneTexture(base='#ddd1bf',vein='#b9aa94',joint='#8f806d',seed=1){
   // Legacy-compatible floor texture, upgraded with mineral variation and deterministic joints.
@@ -533,12 +553,12 @@ function makeStoneTexture(base='#ddd1bf',vein='#b9aa94',joint='#8f806d',seed=1){
   x.globalAlpha=1;
   for(let i=0;i<30;i++){
     const yy=(i*23+seed*17)%TEX_SIZE;
-    x.strokeStyle=i%5===0?'rgba(112,93,72,.16)':'rgba(255,255,255,.085)';
+    x.strokeStyle=i%5===0?vein:'rgba(255,255,255,.085)';x.globalAlpha=i%5===0?.18:1;
     x.lineWidth=i%6===0?2:1;x.beginPath();
     for(let px=0;px<=TEX_SIZE;px+=10){
       const py=yy+Math.sin(px*.021+i*1.73+seed)*5+Math.sin(px*.008+i)*3;
       if(px===0)x.moveTo(px,py);else x.lineTo(px,py);
-    }x.stroke();
+    }x.stroke();x.globalAlpha=1;
   }
   for(let i=0;i<260;i++){
     const px=hash2(i,seed,11)*TEX_SIZE,py=hash2(i,seed,17)*TEX_SIZE;
@@ -549,9 +569,11 @@ function makeStoneTexture(base='#ddd1bf',vein='#b9aa94',joint='#8f806d',seed=1){
 }
 function floorMaterial(base,vein,joint,seed,roughness,bump=.018){
   const color=makeStoneTexture(base,vein,joint,seed);
-  const h=makeSurface('travertine',{seed,base},[1.7,4.8]);
+  const raw=makeSurfaceCanvases('travertine',{seed,base});
+  const roughnessMap=canvasTexture(raw.rough,{repeat:[1.7,4.8]});
+  const bumpMap=canvasTexture(raw.height,{repeat:[1.7,4.8]});
   return new THREE.MeshStandardMaterial({
-    map:color,roughnessMap:h.roughnessMap,bumpMap:h.bumpMap,
+    map:color,roughnessMap,bumpMap,
     color:0xffffff,roughness,metalness:.008,bumpScale:lowPower?0:bump
   });
 }
@@ -1016,8 +1038,8 @@ function ceilingRaft(parent,x,z,w=5.2,d=5.8){
 }
 function caseObject(parent,x,y,z,scale=1,open=false){
   const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);parent.add(g);
-  const shell=new THREE.MeshStandardMaterial({color:0x4e4036,roughness:.52,metalness:.03});
-  const leather=new THREE.MeshStandardMaterial({color:0x8c755d,roughness:.72,metalness:0});
+  const shell=MAT.leatherDark;
+  const leather=MAT.leather;
   box(g,1.42,.76,.38,shell,0,.38,0,{cast:true});
   box(g,1.31,.64,.40,leather,0,.38,.01,{cast:true});
   box(g,.60,.12,.12,MAT.brass,0,.83,0);
