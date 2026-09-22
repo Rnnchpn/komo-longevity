@@ -1239,6 +1239,114 @@ box(desk,4.75,.10,1.12,M.bronze,0,1.17,.10);
 plaque(desk,'KŌMØ DESK','ORIENTATION · TRAJECTORY',3.7,.88,0,2.85,-.58,{dark:true,titleSize:74});
 glow(desk,0xe9c48e,2.2,8,0,3.1,1.4);
 
+// V3.0 Hall Living — denser premium flagship without breaking the FPS budget.
+const hallLiving=new THREE.Group();hallLiving.name='KOMO_HALL_LIVING_V30';building.add(hallLiving);
+
+function instancedStatic(parent,geometry,material,items,name){
+  const inst=new THREE.InstancedMesh(geometry,material,items.length);inst.name=name;inst.castShadow=false;inst.receiveShadow=false;
+  const dummy=new THREE.Object3D();
+  items.forEach((it,i)=>{
+    dummy.position.set(it.x||0,it.y||0,it.z||0);
+    dummy.rotation.set(it.rx||0,it.ry||0,it.rz||0);
+    dummy.scale.set(it.sx||1,it.sy||1,it.sz||1);
+    dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix);
+  });
+  inst.instanceMatrix.needsUpdate=true;parent.add(inst);return inst;
+}
+
+// Travertine hospitality islands break up the long central corridor.
+[
+  [0,.195,8.35,6.2,.024,3.15],
+  [0,.195,-5.4,5.6,.024,3.55],
+  [0,.195,-18.25,5.8,.024,3.15]
+].forEach(([x,y,z,w,h,d],i)=>{
+  box(hallLiving,w,h,d,i===1?FLOOR.side:FLOOR.promenade,x,y,z,{cast:false,receive:false});
+  line(hallLiving,w-.45,.025,x,z-d/2+.18,MAT.brass,y+.018);
+  line(hallLiving,w-.45,.025,x,z+d/2-.18,MAT.brass,y+.018);
+});
+
+// Fluted wall ribs: high visual detail, one draw call.
+const wallRibs=[];
+[-1,1].forEach(side=>{
+  for(let z=10.0;z>=-23;z-=3.1)wallRibs.push({x:side*11.43,y:3.30,z,sx:.055,sy:3.05,sz:.12});
+});
+instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.brass,wallRibs,'KOMO_HALL_BRASS_RIBS_V30');
+
+// Warm ceiling blades create a richer ceiling without any extra PointLight.
+const bladeMat=new THREE.MeshBasicMaterial({color:0xd8b47b});
+const ceilingBlades=[];
+for(let z=10;z>=-23;z-=4.7){
+  ceilingBlades.push({x:-5.1,y:7.42,z,sx:3.9,sy:.022,sz:.045});
+  ceilingBlades.push({x:5.1,y:7.42,z,sx:3.9,sy:.022,sz:.045});
+}
+instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),bladeMat,ceilingBlades,'KOMO_HALL_LIGHT_BLADES_V30');
+
+// Indoor Riviera planters — instanced trunks/crowns/bases for density at low draw-call cost.
+const plantSites=[
+  [-5.85,10.4,.78],[5.85,10.4,.74],[-5.95,-4.4,.68],[5.95,-4.4,.72],
+  [-5.75,-16.1,.64],[5.75,-16.1,.66]
+];
+const plantBases=plantSites.map(([x,z,s])=>({x,y:.34,z,sx:1.25*s,sy:.54,sz:1.25*s}));
+const plantSoil=plantSites.map(([x,z,s])=>({x,y:.63,z,sx:1.03*s,sy:.08,sz:1.03*s}));
+const trunks=plantSites.map(([x,z,s])=>({x,y:1.48,z,sx:.11*s,sy:1.55*s,sz:.11*s}));
+const crowns=[];
+plantSites.forEach(([x,z,s],i)=>{
+  crowns.push({x:x-.22*s,y:2.62*s+.25,z:z+.04,sx:.70*s,sy:.52*s,sz:.70*s});
+  crowns.push({x:x+.23*s,y:2.72*s+.25,z:z-.02,sx:.62*s,sy:.47*s,sz:.62*s});
+});
+instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.travertine,plantBases,'KOMO_HALL_PLANTERS_V30');
+instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),M.soil,plantSoil,'KOMO_HALL_PLANTER_SOIL_V30');
+instancedStatic(hallLiving,new THREE.CylinderGeometry(1,1,1,8),M.trunk,trunks,'KOMO_HALL_TREE_TRUNKS_V30');
+instancedStatic(hallLiving,new THREE.SphereGeometry(1,lowPower?7:10,lowPower?5:7),M.sageSoft,crowns,'KOMO_HALL_TREE_CROWNS_V30');
+
+// Social café / conversation furniture, all repeated through instancing.
+const tableSites=[[-5.2,7.9],[5.6,7.7],[-5.1,-9.1],[5.2,-13.0]];
+const tableTops=tableSites.map(([x,z])=>({x,y:.67,z,sx:.68,sy:.06,sz:.68}));
+const tableBases=tableSites.map(([x,z])=>({x,y:.35,z,sx:.055,sy:.62,sz:.055}));
+const seats=[];
+tableSites.forEach(([x,z],i)=>{
+  seats.push({x:x-1.00,y:.35,z,ry:Math.PI/2,sx:.62,sy:.38,sz:.62});
+  seats.push({x:x+1.00,y:.35,z,ry:-Math.PI/2,sx:.62,sy:.38,sz:.62});
+});
+instancedStatic(hallLiving,new THREE.CylinderGeometry(1,1,1,20),MAT.walnut,tableTops,'KOMO_HALL_CAFE_TOPS_V30');
+instancedStatic(hallLiving,new THREE.CylinderGeometry(1,1,1,10),MAT.brass,tableBases,'KOMO_HALL_CAFE_BASES_V30');
+instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.fabric,seats,'KOMO_HALL_CAFE_SEATS_V30');
+
+// Sculptural plinths and art frames add gallery detail along both sides.
+const artFrames=[
+  {x:-11.43,y:3.55,z:1.2,ry:Math.PI/2,sx:2.0,sy:2.75,sz:.055},
+  {x:11.43,y:3.55,z:-4.2,ry:-Math.PI/2,sx:2.0,sy:2.75,sz:.055},
+  {x:-11.43,y:3.55,z:-18.2,ry:Math.PI/2,sx:2.0,sy:2.75,sz:.055}
+];
+instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.blackened,artFrames,'KOMO_HALL_ART_FRAMES_V30');
+const artInner=artFrames.map((it,i)=>({...it,x:it.x+(i===1?-.06:.06),sx:1.72,sy:2.43,sz:.018}));
+
+// Explicit art interiors, only three meshes.
+const artColors=[0x809484,0xc2a477,0x566c60];
+artFrames.forEach((it,i)=>{
+  const m=box(hallLiving,1.72,2.43,.025,new THREE.MeshBasicMaterial({color:artColors[i]}),it.x+(i===1?-.065:.065),it.y,it.z,{cast:false,receive:false});
+  m.rotation.y=it.ry;
+});
+
+// Brand / culture walls.
+plaque(hallLiving,'LONGEVITY IN MOTION','MEASURE · UNDERSTAND · TRAIN · LIVE',5.15,1.05,-11.32,5.78,7.4,{rotY:Math.PI/2,dark:true,titleSize:63});
+plaque(hallLiving,'KŌMØ CULTURE','MOVEMENT · SCIENCE · COMMUNITY',4.75,.92,11.32,5.64,-15.6,{rotY:-Math.PI/2,dark:true,titleSize:57});
+
+// One additional live editorial screen — existing motion-screen system is already throttled/culling-aware.
+motionScreen(hallLiving,11.40,4.55,-8.8,-Math.PI/2,'TODAY AT KŌMØ');
+
+// Material library objects near the Desk and Life entrance.
+const displayCubes=[];
+[[-5.1,2.25,2.4],[5.45,2.25,.6],[-5.25,2.25,-19.3],[5.2,2.25,-19.0]].forEach(([x,y,z],idx)=>{
+  displayCubes.push({x,y,z,sx:.55,sy:.55,sz:.55,ry:idx*.42});
+});
+instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.walnut,displayCubes,'KOMO_HALL_MATERIAL_OBJECTS_V30');
+
+// Minimal low-cost wayfinding to make the hall legible as a hub.
+plaque(hallLiving,'TWIN','UNDERSTAND',2.35,.58,-4.6,2.25,-25.9,{dark:true,titleSize:46});
+plaque(hallLiving,'FITNESS CLUB','TRAIN DAILY',2.55,.58,0,2.25,-25.9,{dark:false,titleSize:42});
+plaque(hallLiving,'ARENA','ENGAGE',2.35,.58,4.6,2.25,-25.9,{dark:true,titleSize:46});
+
 // Minimal planting, kept out of central axis.
 [[-8.3,-5.5,1],[8.3,-5.5,-1],[-8.3,-17,-1],[8.3,-17,1]].forEach(([x,z,m])=>{
   box(building,3.0,.34,1.7,M.stoneDeep,x,.18,z);
@@ -1296,6 +1404,12 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',x:5.4,y:0,z:-18.4,outfit:'charcoal',sp
 ]});
   makeNpc(npcRoot,{role:'visitor',label:'Sofia',x:7.0,y:0,z:5.8,outfit:'bronze',speed:.28,phase:.22,route:[
     [7.0,0,5.8],[9.2,0,4.2],[9.0,0,1.2],[7.2,0,.4],[7.4,0,3.0]
+  ]});
+  makeNpc(npcRoot,{role:'staff',label:'Camille',x:-6.3,y:0,z:6.7,outfit:'sage',speed:.24,phase:.43,route:[
+    [-6.3,0,6.7],[-7.1,0,4.2],[-5.7,0,2.5],[-4.8,0,6.0],[-6.3,0,7.2]
+  ]});
+  makeNpc(npcRoot,{role:'visitor',label:'Lina',x:5.5,y:0,z:-11.8,outfit:'cream',speed:.25,phase:.67,route:[
+    [5.5,0,-11.8],[6.8,0,-9.7],[5.9,0,-7.2],[4.8,0,-9.4],[5.5,0,-12.2]
   ]});
   makeNpc(npcRoot,{role:'staff',label:'Alex',x:-8.72,y:UPPER_Y,z:4.8,outfit:'sage',speed:.30,phase:.48,route:[
     [-8.72,UPPER_Y,4.8],[-8.72,UPPER_Y,-4.8],[-8.72,UPPER_Y,-14.8],[-4.2,UPPER_Y,-21.2]
@@ -2758,6 +2872,7 @@ function updateVisibilityBudget(now){
   const deepHall=player.z<7;
   exterior.visible=player.z>5;
   upperLevel.visible=playerLevel===1||player.z<16;
+  hallLiving.visible=player.z<19&&player.z>-29;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
   arrivalDetails.visible=player.z>1&&player.z<26;
   npcRoot.visible=true;
@@ -2945,7 +3060,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.9.0-fitness-club',
+  version:'3.0.0-hall-living',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
