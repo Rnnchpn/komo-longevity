@@ -44,6 +44,9 @@ function css(){
   .kwmp-target{height:34px;padding:0 8px;border:1px solid rgba(216,186,134,.20);border-radius:9px;background:rgba(216,186,134,.08);color:#ead9ba;font-size:6px;font-weight:900;letter-spacing:.07em;cursor:pointer;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .kwmp-compose input{min-width:0;height:34px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.04);color:#f0e8da;padding:0 10px;font-size:9px;outline:none}.kwmp-compose button[type="submit"]{height:34px;padding:0 10px;border-radius:9px;background:#d8ba86;color:#1d2d25;font-size:7px;font-weight:850;cursor:pointer}.kwmp-compose button:disabled,.kwmp-compose input:disabled{opacity:.42}
   .kwmp-note{padding:0 9px 7px;color:rgba(242,236,226,.28);font-size:6px;line-height:1.35}
+  .kwmp-chat-launcher{display:none}
+  .kwmp-voicebox{display:contents}
+  .kwmp-voice-toggle,.kwmp-voice-collapse{display:none}
   .kwmp-talk{position:fixed;z-index:94;left:50%;bottom:22px;transform:translateX(-50%);height:54px;min-width:210px;padding:0 22px;border:1px solid rgba(216,186,134,.32);border-radius:999px;background:linear-gradient(180deg,rgba(38,58,47,.96),rgba(21,35,28,.96));box-shadow:0 12px 34px rgba(7,12,9,.24);color:#f1e7d7;font-size:8px;font-weight:900;letter-spacing:.12em;cursor:pointer;user-select:none;touch-action:none;transition:.16s ease}
   .kwmp-talk:hover{transform:translateX(-50%) translateY(-1px);border-color:rgba(216,186,134,.50)}
   .kwmp-talk[data-state="talking"]{background:linear-gradient(180deg,rgba(128,55,49,.98),rgba(83,35,31,.98));border-color:rgba(255,190,171,.62);box-shadow:0 0 0 5px rgba(180,85,70,.10),0 12px 34px rgba(7,12,9,.26)}
@@ -77,7 +80,7 @@ function css(){
     .kwmp-chat-launcher b{display:grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#dfbd80;color:#203027;font-size:7px}
     .kwmp-chat.open+.kwmp-chat-launcher{display:none}
     .kwmp-voicebox{
-      position:fixed;z-index:94;right:22px;bottom:22px;display:flex;align-items:center;gap:8px;
+      display:flex;position:fixed;z-index:94;right:22px;bottom:22px;display:flex;align-items:center;gap:8px;
       padding:6px;border:1px solid rgba(255,255,255,.09);border-radius:19px;
       background:linear-gradient(145deg,rgba(21,37,29,.88),rgba(28,43,35,.80));
       -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
@@ -88,8 +91,8 @@ function css(){
       box-shadow:none;background:linear-gradient(180deg,rgba(35,57,45,.96),rgba(24,40,31,.96));font-size:7px
     }
     .kwmp-talk:hover{transform:none}
-    .kwmp-voice-toggle{height:48px;min-width:72px;padding:0 10px;border-left:1px solid rgba(255,255,255,.065);background:transparent;color:rgba(242,236,226,.62);font-size:6px;font-weight:850;letter-spacing:.08em;cursor:pointer}
-    .kwmp-voice-collapse{width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.035);color:#e8dfd1;cursor:pointer}
+    .kwmp-voice-toggle{display:block;height:48px;min-width:72px;padding:0 10px;border-left:1px solid rgba(255,255,255,.065);background:transparent;color:rgba(242,236,226,.62);font-size:6px;font-weight:850;letter-spacing:.08em;cursor:pointer}
+    .kwmp-voice-collapse{display:block;width:32px;height:32px;border-radius:10px;background:rgba(255,255,255,.035);color:#e8dfd1;cursor:pointer}
     .kwmp-voicebox.collapsed .kwmp-talk{min-width:48px;width:48px;padding:0;font-size:0}
     .kwmp-voicebox.collapsed .kwmp-talk:before{content:"🎙";font-size:16px}
     .kwmp-voicebox.collapsed .kwmp-voice-toggle{display:none}
