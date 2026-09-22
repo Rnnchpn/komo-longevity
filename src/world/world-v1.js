@@ -347,79 +347,222 @@ function applyDaylight(){
 }applyDaylight();
 const daylightTimer=setInterval(applyDaylight,60000);
 
+// V4.4 Materials Realism — procedural PBR kit shared across the campus.
+const TEX_SIZE=lowPower?256:512;
+const TEX_ANISO=Math.min(lowPower?2:8,renderer.capabilities.getMaxAnisotropy());
+const fract=n=>n-Math.floor(n);
+const hash2=(x,y,seed=1)=>fract(Math.sin(x*127.1+y*311.7+seed*74.7)*43758.5453123);
+
+function canvasTexture(canvas,{repeat=[1,1],srgb=false}={}){
+  const tx=new THREE.CanvasTexture(canvas);
+  if(srgb)tx.colorSpace=THREE.SRGBColorSpace;
+  tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.repeat.set(...repeat);
+  tx.anisotropy=TEX_ANISO;return tx;
+}
+function makeSurfaceCanvases(kind,{seed=1,base='#ddd1bf',accent='#aa9578',dark='#776754'}={}){
+  const size=TEX_SIZE;
+  const color=document.createElement('canvas'),rough=document.createElement('canvas'),height=document.createElement('canvas');
+  color.width=color.height=rough.width=rough.height=height.width=height.height=size;
+  const cx=color.getContext('2d'),rx=rough.getContext('2d'),hx=height.getContext('2d');
+
+  cx.fillStyle=base;cx.fillRect(0,0,size,size);
+  rx.fillStyle='#b8b8b8';rx.fillRect(0,0,size,size);
+  hx.fillStyle='#808080';hx.fillRect(0,0,size,size);
+
+  if(kind==='travertine'||kind==='limestone'){
+    const horizontal=kind==='travertine';
+    for(let i=0;i<(horizontal?38:26);i++){
+      const a=(i*37+seed*53)%size;
+      cx.beginPath();hx.beginPath();rx.beginPath();
+      for(let p=0;p<=size;p+=8){
+        const wave=Math.sin(p*.018+i*1.31+seed)*5+Math.sin(p*.006+i*.77)*8;
+        const x=horizontal?p:a+wave,y=horizontal?a+wave:p;
+        if(p===0){cx.moveTo(x,y);hx.moveTo(x,y);rx.moveTo(x,y)}
+        else{cx.lineTo(x,y);hx.lineTo(x,y);rx.lineTo(x,y)}
+      }
+      cx.strokeStyle=i%5===0?'rgba(105,87,67,.17)':'rgba(255,255,255,.10)';
+      cx.lineWidth=i%7===0?2.2:1;cx.stroke();
+      hx.strokeStyle=i%4===0?'rgba(78,78,78,.24)':'rgba(170,170,170,.12)';hx.lineWidth=i%5===0?2:1;hx.stroke();
+      rx.strokeStyle=i%3===0?'rgba(72,72,72,.16)':'rgba(220,220,220,.11)';rx.lineWidth=2;rx.stroke();
+    }
+    const pits=horizontal?340:210;
+    for(let i=0;i<pits;i++){
+      const px=hash2(i,seed,2)*size,py=hash2(i,seed,7)*size,r=.45+hash2(i,seed,9)*(horizontal?2.1:1.25);
+      cx.fillStyle=i%4===0?'rgba(85,70,55,.09)':'rgba(255,255,255,.045)';
+      cx.beginPath();cx.arc(px,py,r,0,Math.PI*2);cx.fill();
+      hx.fillStyle=i%3===0?'rgba(45,45,45,.23)':'rgba(175,175,175,.10)';
+      hx.beginPath();hx.arc(px,py,r*.85,0,Math.PI*2);hx.fill();
+    }
+  }else if(kind==='plaster'){
+    for(let y=0;y<size;y+=3){
+      for(let x=0;x<size;x+=3){
+        const n=hash2(x,y,seed),n2=hash2(x+17,y+29,seed);
+        const v=Math.floor(244+(n-.5)*13);
+        cx.fillStyle=`rgb(${v},${Math.max(0,v-4)},${Math.max(0,v-9)})`;cx.fillRect(x,y,3,3);
+        const h=Math.floor(116+n2*26);hx.fillStyle=`rgb(${h},${h},${h})`;hx.fillRect(x,y,3,3);
+        const r=Math.floor(160+n*34);rx.fillStyle=`rgb(${r},${r},${r})`;rx.fillRect(x,y,3,3);
+      }
+    }
+    for(let i=0;i<14;i++){
+      const yy=(i*41+seed*23)%size;
+      cx.strokeStyle='rgba(145,126,105,.035)';cx.lineWidth=1;cx.beginPath();cx.moveTo(0,yy);cx.bezierCurveTo(size*.3,yy+5,size*.7,yy-4,size,yy+2);cx.stroke();
+    }
+  }else if(kind==='walnut'){
+    cx.fillStyle=base;cx.fillRect(0,0,size,size);
+    for(let i=0;i<46;i++){
+      const yy=(i*13+seed*19)%size;
+      const width=1+hash2(i,seed,4)*3;
+      cx.strokeStyle=i%5===0?'rgba(38,20,12,.30)':'rgba(226,177,118,.12)';
+      cx.lineWidth=width;cx.beginPath();
+      for(let x=0;x<=size;x+=8){
+        const y=yy+Math.sin(x*.020+i*.7)*4+Math.sin(x*.006+i)*7;
+        if(x===0)cx.moveTo(x,y);else cx.lineTo(x,y);
+      }cx.stroke();
+      hx.strokeStyle=i%4===0?'rgba(52,52,52,.18)':'rgba(185,185,185,.08)';hx.lineWidth=Math.max(1,width*.65);
+      hx.beginPath();for(let x=0;x<=size;x+=8){const y=yy+Math.sin(x*.020+i*.7)*4+Math.sin(x*.006+i)*7;if(x===0)hx.moveTo(x,y);else hx.lineTo(x,y)}hx.stroke();
+    }
+    for(let i=0;i<8;i++){
+      const px=hash2(i,seed,10)*size,py=hash2(i,seed,12)*size,rr=5+hash2(i,seed,14)*10;
+      cx.strokeStyle='rgba(42,22,13,.22)';cx.lineWidth=1.5;
+      for(let k=0;k<3;k++){cx.beginPath();cx.ellipse(px,py,rr+k*4,(rr+k*4)*.48,.2,0,Math.PI*2);cx.stroke()}
+    }
+    rx.fillStyle='rgba(120,120,120,.34)';rx.fillRect(0,0,size,size);
+  }else if(kind==='fabric'){
+    cx.fillStyle=base;cx.fillRect(0,0,size,size);
+    for(let i=0;i<size;i+=4){
+      cx.strokeStyle=i%8===0?'rgba(255,255,255,.055)':'rgba(30,35,31,.055)';
+      cx.beginPath();cx.moveTo(i,0);cx.lineTo(i,size);cx.stroke();
+      cx.beginPath();cx.moveTo(0,i);cx.lineTo(size,i);cx.stroke();
+      hx.strokeStyle=i%8===0?'rgba(165,165,165,.22)':'rgba(105,105,105,.18)';
+      hx.beginPath();hx.moveTo(i,0);hx.lineTo(i,size);hx.stroke();
+      hx.beginPath();hx.moveTo(0,i);hx.lineTo(size,i);hx.stroke();
+    }
+    rx.fillStyle='rgba(215,215,215,.54)';rx.fillRect(0,0,size,size);
+  }else if(kind==='brushed'){
+    cx.fillStyle=base;cx.fillRect(0,0,size,size);
+    for(let y=0;y<size;y+=2){
+      const n=hash2(y,seed,5);
+      cx.fillStyle=`rgba(255,255,255,${.015+n*.055})`;cx.fillRect(0,y,size,1);
+      const r=Math.floor(90+n*85);rx.fillStyle=`rgb(${r},${r},${r})`;rx.fillRect(0,y,size,1);
+      const h=Math.floor(112+n*26);hx.fillStyle=`rgb(${h},${h},${h})`;hx.fillRect(0,y,size,1);
+    }
+  }
+  return {color,rough,height};
+}
+function makeSurface(kind,opts={},repeat=[1,1]){
+  const c=makeSurfaceCanvases(kind,opts);
+  return {
+    map:canvasTexture(c.color,{repeat,srgb:true}),
+    roughnessMap:canvasTexture(c.rough,{repeat}),
+    bumpMap:canvasTexture(c.height,{repeat})
+  };
+}
+function makePbrMaterial(kind,opts={},repeat=[1,1],params={}){
+  const tex=makeSurface(kind,opts,repeat);
+  return new THREE.MeshStandardMaterial({
+    ...tex,
+    color:params.color??0xffffff,
+    roughness:params.roughness??.65,
+    metalness:params.metalness??0,
+    bumpScale:lowPower?0:(params.bumpScale??.025),
+    envMapIntensity:params.envMapIntensity??1
+  });
+}
+
+const S_TRAVERTINE=makeSurface('travertine',{seed:3,base:'#e2d4c0'},[1.8,3.4]);
+const S_LIMESTONE=makeSurface('limestone',{seed:11,base:'#ddd1bd'},[2.2,3.0]);
+const S_PLASTER=makeSurface('plaster',{seed:19,base:'#eee9df'},[2.8,2.8]);
+const S_WALNUT=makeSurface('walnut',{seed:23,base:'#6e4c32'},[1.2,3.0]);
+const S_FABRIC=makeSurface('fabric',{seed:29,base:'#435449'},[8,8]);
+const S_FABRIC_LIGHT=makeSurface('fabric',{seed:31,base:'#bbb5aa'},[8,8]);
+const S_BRASS=makeSurface('brushed',{seed:37,base:'#b28b57'},[1,3]);
+const S_BRONZE=makeSurface('brushed',{seed:41,base:'#9f754b'},[1,3]);
+
 const M={
-  ground:new THREE.MeshStandardMaterial({color:0x9ca793,roughness:.98,metalness:0}),
-  stone:new THREE.MeshStandardMaterial({color:0xeee7dd,roughness:.64,metalness:.015}),
-  stoneLight:new THREE.MeshStandardMaterial({color:0xf7f1e9,roughness:.58,metalness:.01}),
-  stoneDeep:new THREE.MeshStandardMaterial({color:0xcdbfa9,roughness:.84,metalness:.01}),
-  wall:new THREE.MeshStandardMaterial({color:0xf0e9df,roughness:.76,metalness:0}),
-  sage:new THREE.MeshStandardMaterial({color:0x2a4336,roughness:.52,metalness:.03}),
-  sageDeep:new THREE.MeshStandardMaterial({color:0x172a21,roughness:.48,metalness:.05}),
-  sageSoft:new THREE.MeshStandardMaterial({color:0x6f8170,roughness:.94,metalness:0}),
-  bronze:new THREE.MeshStandardMaterial({color:0xa77d4f,roughness:.28,metalness:.62}),
-  bronzeSoft:new THREE.MeshStandardMaterial({color:0xcda66f,roughness:.34,metalness:.40}),
-  soil:new THREE.MeshStandardMaterial({color:0x575d50,roughness:1,metalness:0}),
-  trunk:new THREE.MeshStandardMaterial({color:0x735e45,roughness:.96,metalness:0}),
-  water:lowPower?new THREE.MeshStandardMaterial({color:0x87a39a,roughness:.38,metalness:.02,transparent:true,opacity:.64,depthWrite:true}):new THREE.MeshPhysicalMaterial({color:0x87a39a,roughness:.12,metalness:0,transparent:true,opacity:.56,transmission:.12,depthWrite:true}),
-  glass:lowPower?new THREE.MeshStandardMaterial({color:0xaab8b0,roughness:.26,metalness:.03,transparent:true,opacity:.26,depthWrite:false}):new THREE.MeshPhysicalMaterial({color:0xc8d4cd,roughness:.08,metalness:0,transparent:true,opacity:.22,transmission:.52,depthWrite:false}),
-  warm:new THREE.MeshStandardMaterial({color:0xf0cc96,roughness:.34,metalness:.03,emissive:0xa36d35,emissiveIntensity:.45}),
-  twinGlass:lowPower?new THREE.MeshStandardMaterial({color:0x8fa494,roughness:.34,metalness:.03,transparent:true,opacity:.52,depthWrite:false}):new THREE.MeshPhysicalMaterial({color:0x9bb6a3,roughness:.18,metalness:.02,transparent:true,opacity:.48,transmission:.12,depthWrite:false}),
+  ground:new THREE.MeshStandardMaterial({color:0x9ba690,roughness:.98,metalness:0}),
+  stone:new THREE.MeshStandardMaterial({...S_TRAVERTINE,color:0xffffff,roughness:.58,metalness:.01,bumpScale:lowPower?0:.030}),
+  stoneLight:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xfbf8f2,roughness:.62,metalness:.005,bumpScale:lowPower?0:.020}),
+  stoneDeep:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xcbbda9,roughness:.74,metalness:.005,bumpScale:lowPower?0:.026}),
+  wall:new THREE.MeshStandardMaterial({...S_PLASTER,color:0xfffdf8,roughness:.78,metalness:0,bumpScale:lowPower?0:.014}),
+  sage:new THREE.MeshStandardMaterial({color:0x294235,roughness:.48,metalness:.025}),
+  sageDeep:new THREE.MeshStandardMaterial({color:0x16291f,roughness:.43,metalness:.04}),
+  sageSoft:new THREE.MeshStandardMaterial({color:0x708271,roughness:.90,metalness:0}),
+  bronze:new THREE.MeshStandardMaterial({...S_BRONZE,color:0xffffff,roughness:.26,metalness:.72,bumpScale:lowPower?0:.008}),
+  bronzeSoft:new THREE.MeshStandardMaterial({...S_BRONZE,color:0xd9b681,roughness:.34,metalness:.48,bumpScale:lowPower?0:.006}),
+  soil:new THREE.MeshStandardMaterial({color:0x565b50,roughness:1,metalness:0}),
+  trunk:new THREE.MeshStandardMaterial({...S_WALNUT,color:0x8a6545,roughness:.82,metalness:0,bumpScale:lowPower?0:.018}),
+  water:lowPower?
+    new THREE.MeshStandardMaterial({color:0x87a39a,roughness:.34,metalness:.02,transparent:true,opacity:.62,depthWrite:true}):
+    new THREE.MeshPhysicalMaterial({color:0x91aaa1,roughness:.08,metalness:0,transparent:true,opacity:.50,transmission:.28,ior:1.333,thickness:.12,clearcoat:.28,clearcoatRoughness:.14,depthWrite:true}),
+  glass:lowPower?
+    new THREE.MeshStandardMaterial({color:0xaab8b0,roughness:.24,metalness:.02,transparent:true,opacity:.24,depthWrite:false}):
+    new THREE.MeshPhysicalMaterial({color:0xd4ddd8,roughness:.045,metalness:0,transparent:true,opacity:.17,transmission:.74,ior:1.48,thickness:.18,clearcoat:.34,clearcoatRoughness:.08,depthWrite:false,side:THREE.DoubleSide}),
+  warm:new THREE.MeshStandardMaterial({color:0xf2d09a,roughness:.30,metalness:.02,emissive:0x9a612c,emissiveIntensity:.38}),
+  twinGlass:lowPower?
+    new THREE.MeshStandardMaterial({color:0x91a99a,roughness:.30,metalness:.02,transparent:true,opacity:.46,depthWrite:false}):
+    new THREE.MeshPhysicalMaterial({color:0xa8c1b0,roughness:.10,metalness:.01,transparent:true,opacity:.36,transmission:.38,ior:1.46,thickness:.10,clearcoat:.18,clearcoatRoughness:.12,depthWrite:false}),
   twinGlow:new THREE.MeshStandardMaterial({color:0xb8d0bc,roughness:.34,metalness:.03,emissive:0x577462,emissiveIntensity:.42}),
   attention:new THREE.MeshStandardMaterial({color:0xcf9f65,roughness:.34,metalness:.08,emissive:0x8c5627,emissiveIntensity:.48}),
-  arena:new THREE.MeshStandardMaterial({color:0x2a241b,roughness:.65,metalness:.08}),
-  arenaGold:new THREE.MeshStandardMaterial({color:0xb9935c,roughness:.36,metalness:.48})
+  arena:new THREE.MeshStandardMaterial({color:0x2a241b,roughness:.61,metalness:.08}),
+  arenaGold:new THREE.MeshStandardMaterial({...S_BRASS,color:0xc8a36d,roughness:.25,metalness:.70,bumpScale:lowPower?0:.006})
 };
 const MAT={
-  fabric:new THREE.MeshStandardMaterial({color:0x415347,roughness:.96,metalness:0}),
-  fabricLight:new THREE.MeshStandardMaterial({color:0xb8b2a5,roughness:.98,metalness:0}),
-  walnut:new THREE.MeshStandardMaterial({color:0x6b513a,roughness:.76,metalness:.01}),
-  charcoal:new THREE.MeshStandardMaterial({color:0x222a25,roughness:.68,metalness:.03}),
-  brass:new THREE.MeshStandardMaterial({color:0xb18a56,roughness:.30,metalness:.66}),
-  ivory:new THREE.MeshStandardMaterial({color:0xf1eadf,roughness:.88,metalness:0}),
-  smokedGlass:lowPower?new THREE.MeshStandardMaterial({color:0x64766b,roughness:.34,metalness:.04,transparent:true,opacity:.29,depthWrite:false}):new THREE.MeshPhysicalMaterial({color:0x718177,roughness:.17,metalness:.02,transparent:true,opacity:.24,transmission:.28,depthWrite:false}),
-  limestone:new THREE.MeshStandardMaterial({color:0xdccfba,roughness:.90,metalness:0}),
-  travertine:new THREE.MeshStandardMaterial({color:0xe5d8c5,roughness:.84,metalness:.01}),
-  blackened:new THREE.MeshStandardMaterial({color:0x151d18,roughness:.48,metalness:.10})
+  fabric:new THREE.MeshStandardMaterial({...S_FABRIC,color:0xffffff,roughness:.92,metalness:0,bumpScale:lowPower?0:.018}),
+  fabricLight:new THREE.MeshStandardMaterial({...S_FABRIC_LIGHT,color:0xffffff,roughness:.94,metalness:0,bumpScale:lowPower?0:.016}),
+  walnut:new THREE.MeshStandardMaterial({...S_WALNUT,color:0xffffff,roughness:.56,metalness:.01,bumpScale:lowPower?0:.024}),
+  charcoal:new THREE.MeshStandardMaterial({color:0x222a25,roughness:.62,metalness:.04}),
+  brass:new THREE.MeshStandardMaterial({...S_BRASS,color:0xffffff,roughness:.24,metalness:.76,bumpScale:lowPower?0:.008}),
+  ivory:new THREE.MeshStandardMaterial({...S_FABRIC_LIGHT,color:0xf8f2e8,roughness:.91,metalness:0,bumpScale:lowPower?0:.010}),
+  smokedGlass:lowPower?
+    new THREE.MeshStandardMaterial({color:0x67776d,roughness:.30,metalness:.03,transparent:true,opacity:.27,depthWrite:false}):
+    new THREE.MeshPhysicalMaterial({color:0x708178,roughness:.095,metalness:.01,transparent:true,opacity:.20,transmission:.50,ior:1.46,thickness:.14,clearcoat:.20,clearcoatRoughness:.10,depthWrite:false,side:THREE.DoubleSide}),
+  limestone:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xf0e8db,roughness:.74,metalness:0,bumpScale:lowPower?0:.025}),
+  travertine:new THREE.MeshStandardMaterial({...S_TRAVERTINE,color:0xf5e9d7,roughness:.61,metalness:.008,bumpScale:lowPower?0:.032}),
+  blackened:new THREE.MeshStandardMaterial({color:0x151d18,roughness:.42,metalness:.16})
 };
+
+// Blackened metal uses the brushed bronze texture family but neutral color.
+MAT.blackened.map=S_BRASS.map;MAT.blackened.roughnessMap=S_BRASS.roughnessMap;MAT.blackened.bumpMap=S_BRASS.bumpMap;MAT.blackened.bumpScale=lowPower?0:.006;
 
 function makeStoneTexture(base='#ddd1bf',vein='#b9aa94',joint='#8f806d',seed=1){
-  const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d');
-  x.fillStyle=base;x.fillRect(0,0,512,512);
-  // large slab joints
-  x.strokeStyle=joint;x.globalAlpha=.20;x.lineWidth=2;
-  [0,256,512].forEach(v=>{x.beginPath();x.moveTo(v,0);x.lineTo(v,512);x.stroke();x.beginPath();x.moveTo(0,v);x.lineTo(512,v);x.stroke()});
+  // Legacy-compatible floor texture, upgraded with mineral variation and deterministic joints.
+  const c=document.createElement('canvas');c.width=c.height=TEX_SIZE;const x=c.getContext('2d');
+  x.fillStyle=base;x.fillRect(0,0,TEX_SIZE,TEX_SIZE);
+  x.strokeStyle=joint;x.globalAlpha=.16;x.lineWidth=1.5;
+  [0,TEX_SIZE/2,TEX_SIZE].forEach(v=>{x.beginPath();x.moveTo(v,0);x.lineTo(v,TEX_SIZE);x.stroke();x.beginPath();x.moveTo(0,v);x.lineTo(TEX_SIZE,v);x.stroke()});
   x.globalAlpha=1;
-  // deterministic travertine-like veins
-  for(let i=0;i<22;i++){
-    const yy=(i*23+seed*17)%512;
-    x.strokeStyle=i%4===0?'rgba(117,101,82,.14)':'rgba(255,255,255,.12)';
-    x.lineWidth=i%5===0?2.2:1.1;x.beginPath();
-    for(let px=0;px<=512;px+=16){
+  for(let i=0;i<30;i++){
+    const yy=(i*23+seed*17)%TEX_SIZE;
+    x.strokeStyle=i%5===0?'rgba(112,93,72,.16)':'rgba(255,255,255,.085)';
+    x.lineWidth=i%6===0?2:1;x.beginPath();
+    for(let px=0;px<=TEX_SIZE;px+=10){
       const py=yy+Math.sin(px*.021+i*1.73+seed)*5+Math.sin(px*.008+i)*3;
       if(px===0)x.moveTo(px,py);else x.lineTo(px,py);
-    }
-    x.stroke();
+    }x.stroke();
   }
-  // mineral speckle
-  for(let i=0;i<150;i++){
-    const px=(i*83+seed*37)%512,py=(i*151+seed*53)%512;
-    x.fillStyle=i%3===0?'rgba(255,255,255,.08)':'rgba(77,66,55,.045)';
-    x.fillRect(px,py,1.5,1.5);
+  for(let i=0;i<260;i++){
+    const px=hash2(i,seed,11)*TEX_SIZE,py=hash2(i,seed,17)*TEX_SIZE;
+    x.fillStyle=i%3===0?'rgba(255,255,255,.055)':'rgba(73,62,51,.050)';
+    x.fillRect(px,py,1.4,1.4);
   }
-  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;
-  tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.repeat.set(1.7,4.8);
-  tx.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
-  return tx;
+  return canvasTexture(c,{repeat:[1.7,4.8],srgb:true});
+}
+function floorMaterial(base,vein,joint,seed,roughness,bump=.018){
+  const color=makeStoneTexture(base,vein,joint,seed);
+  const h=makeSurface('travertine',{seed,base},[1.7,4.8]);
+  return new THREE.MeshStandardMaterial({
+    map:color,roughnessMap:h.roughnessMap,bumpMap:h.bumpMap,
+    color:0xffffff,roughness,metalness:.008,bumpScale:lowPower?0:bump
+  });
 }
 const FLOOR={
-  hall:new THREE.MeshStandardMaterial({map:makeStoneTexture('#d8cbb8','#b8a88f','#9a876f',3),color:0xffffff,roughness:.62,metalness:.01}),
-  promenade:new THREE.MeshStandardMaterial({map:makeStoneTexture('#eee4d5','#cabba5','#a78c6c',7),color:0xffffff,roughness:.54,metalness:.015}),
-  side:new THREE.MeshStandardMaterial({map:makeStoneTexture('#c9bca9','#aa9a84','#8f7d69',11),color:0xffffff,roughness:.70,metalness:.01}),
-  exterior:new THREE.MeshStandardMaterial({map:makeStoneTexture('#dfd2bf','#b8a58d','#8d7c68',15),color:0xffffff,roughness:.76,metalness:.005}),
-  life:new THREE.MeshStandardMaterial({map:makeStoneTexture('#b9aa94','#8d7962','#705e4c',19),color:0xffffff,roughness:.52,metalness:.025}),
-  upper:new THREE.MeshStandardMaterial({map:makeStoneTexture('#e4d9c8','#bbaa94','#8f7b64',23),color:0xffffff,roughness:.60,metalness:.01})
+  hall:floorMaterial('#d8cbb8','#b8a88f','#9a876f',3,.60,.020),
+  promenade:floorMaterial('#eee4d5','#cabba5','#a78c6c',7,.50,.017),
+  side:floorMaterial('#c9bca9','#aa9a84','#8f7d69',11,.68,.023),
+  exterior:floorMaterial('#dfd2bf','#b8a58d','#8d7c68',15,.73,.026),
+  life:floorMaterial('#b9aa94','#8d7962','#705e4c',19,.49,.020),
+  upper:floorMaterial('#e4d9c8','#bbaa94','#8f7b64',23,.58,.018)
 };
-
 
 function mesh(parent,geometry,material,x=0,y=0,z=0,{cast=false,receive=true}={}){
   const o=new THREE.Mesh(geometry,material);o.position.set(x,y,z);o.castShadow=cast&&!lowPower;o.receiveShadow=receive;parent.add(o);return o;
@@ -4097,7 +4240,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'4.3.0-hall-lighting',
+  version:'4.4.0-materials-realism',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
