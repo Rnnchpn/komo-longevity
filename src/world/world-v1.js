@@ -1596,6 +1596,24 @@ const globe=mesh(lifeOrbit,new THREE.SphereGeometry(.28,22,16),M.sage,0,0,0,{cas
 const orbitA=mesh(lifeOrbit,new THREE.TorusGeometry(.52,.024,8,60),MAT.brass,0,0,0);orbitA.rotation.x=.72;
 const orbitB=mesh(lifeOrbit,new THREE.TorusGeometry(.42,.020,8,54),M.bronzeSoft,0,0,0);orbitB.rotation.y=.88;
 
+// V3.2 KŌMØ Life — tangible items placed directly in the flagship.
+const lifeItemsRoot=new THREE.Group();lifeItemsRoot.name='KOMO_LIFE_ITEMS_V32';lifeStore.add(lifeItemsRoot);
+function lifePedestal(x,z,label,sub){
+  const g=new THREE.Group();g.position.set(x,0,z);lifeItemsRoot.add(g);
+  box(g,1.28,.48,1.12,MAT.travertine,0,.25,0);
+  box(g,1.05,.055,.90,MAT.brass,0,.52,0);
+  plaque(g,label,sub,1.55,.42,0,1.72,.50,{dark:true,titleSize:34});
+  return g;
+}
+const strapPed=lifePedestal(-1.35,2.65,'MOTION STRAP','MOVE');
+const strap=mesh(strapPed,new THREE.TorusGeometry(.27,.055,8,28),MAT.fabric,0,.92,0,{cast:true});strap.rotation.x=.55;strap.rotation.y=.25;
+const bottlePed=lifePedestal(1.35,2.65,'KŌMØ BOTTLE','HYDRATE');
+cyl(bottlePed,.14,.17,.62,MAT.charcoal,0,.88,0,18,{cast:true});cyl(bottlePed,.09,.11,.10,MAT.brass,0,1.25,0,14,{cast:true});
+const recoveryPed=lifePedestal(-1.35,-2.55,'RECOVERY ROLL','RESET');
+const recoveryRoll=cyl(recoveryPed,.22,.22,.78,MAT.fabricLight,0,.90,0,18,{cast:true});recoveryRoll.rotation.z=Math.PI/2;
+const travelPed=lifePedestal(1.35,-2.55,'TRAVEL KIT','RIVIERA');
+box(travelPed,.72,.42,.42,MAT.walnut,0,.83,0,{cast:true});box(travelPed,.55,.035,.30,MAT.brass,0,1.06,0);
+
 // Discreet checkout / service bar at the back.
 box(lifeStore,3.70,.88,.78,M.sageDeep,.20,.47,3.65,{cast:true});
 box(lifeStore,3.88,.08,.92,MAT.brass,.20,.94,3.65);
@@ -1634,6 +1652,27 @@ portals.forEach(({x,title,sub,dark})=>{
   box(building,.08,4.9,.10,M.bronze,x-2.16,2.95,-29.29);
   box(building,.08,4.9,.10,M.bronze,x+2.16,2.95,-29.29);
   plaque(building,title,sub,4.2,1.05,x,6.28,-29.25,{dark,titleSize:title==='FUNCTIONAL TWIN'?58:70});
+});
+
+// V3.2 Destination Doors — clear, animated thresholds for Twin / Fitness / Arena.
+[
+  {id:'twin',x:-6.8,label:'TWIN',accent:0xb8d0bc},
+  {id:'rehab',x:0,label:'KŌMØ FIT',accent:0xd9b77b},
+  {id:'arena',x:6.8,label:'ARENA',accent:0xb9935c}
+].forEach((cfg,idx)=>{
+  const g=new THREE.Group();g.name='KOMO_DESTINATION_DOOR_'+cfg.id.toUpperCase()+'_V32';g.position.set(cfg.x,0,-28.98);building.add(g);
+  box(g,4.55,.15,.34,MAT.blackened,0,.46,0);
+  box(g,4.55,.15,.34,MAT.brass,0,5.28,0);
+  [-2.20,2.20].forEach(px=>box(g,.14,5.0,.34,MAT.brass,px,2.86,0));
+  const left=new THREE.Group(),right=new THREE.Group();left.position.x=-1.08;right.position.x=1.08;g.add(left,right);
+  box(left,2.08,4.62,.075,M.glass,0,2.82,.02);
+  box(right,2.08,4.62,.075,M.glass,0,2.82,.02);
+  box(left,.055,4.55,.10,MAT.brass,1.00,2.82,.06);
+  box(right,.055,4.55,.10,MAT.brass,-1.00,2.82,.06);
+  const mat=new THREE.MeshBasicMaterial({color:cfg.accent,transparent:true,opacity:.12,depthWrite:false});
+  const threshold=box(g,4.05,.018,.11,mat,0,.43,.42,{cast:false,receive:false});
+  const beacon=mesh(g,new THREE.RingGeometry(.20,.27,24),mat,0,5.60,.12,{cast:false,receive:false});beacon.rotation.x=Math.PI/2;beacon.userData.dynamic=true;
+  living.destinationDoors.push({id:cfg.id,x:cfg.x,left,right,threshold,beacon,mat,progress:0});
 });
 plaque(building,'LIBRARY','SCIENCE · METHOD',3.5,.84,-11.45,4.3,-10,{rotY:Math.PI/2,dark:false,titleSize:68});
 plaque(building,'TALKS','EXPERTS · EVENTS',3.5,.84,11.45,4.3,-10,{rotY:-Math.PI/2,dark:true,titleSize:68});
