@@ -147,7 +147,8 @@ function applyQualityProfile(){
     sun.shadow.mapSize.set(1024,1024);
     renderer.shadowMap.needsUpdate=true;
   }
-  fill.intensity=qualityMode==='high'&&!lowPower?1.0:0;
+  fill.intensity=lowPower?.12:emergencyPerformance?0:qualityMode==='high'?.62:qualityMode==='performance'?.16:.34;
+  if(typeof hallLightGroup!=='undefined')hallLightGroup.visible=!lowPower&&!emergencyPerformance;
   activeLightBudget=emergencyPerformance||lowPower?0:(qualityMode==='high'?6:qualityMode==='performance'?2:4);
   living.lights.forEach(l=>{if(l){l.visible=false;l.intensity=0}});
   applyRenderScale();
@@ -1577,6 +1578,53 @@ for(let z=10;z>=-23;z-=4.7){
   ceilingBlades.push({x:5.1,y:7.42,z,sx:3.9,sy:.022,sz:.045});
 }
 instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),bladeMat,ceilingBlades,'KOMO_HALL_LIGHT_BLADES_V30');
+
+// V4.3 ceiling practicals — visible sources aligned with the actual light rig.
+const hallPracticalGroup=new THREE.Group();hallPracticalGroup.name='KOMO_HALL_PRACTICALS_V43';hallLiving.add(hallPracticalGroup);
+const practicalWarm=new THREE.MeshBasicMaterial({color:0xffe2b5,transparent:true,opacity:.80,depthWrite:false});
+const practicalSoft=new THREE.MeshBasicMaterial({color:0xfff0d6,transparent:true,opacity:.52,depthWrite:false});
+const practicalCool=new THREE.MeshBasicMaterial({color:0xe2ece6,transparent:true,opacity:.42,depthWrite:false});
+const lightPoolMat=new THREE.MeshBasicMaterial({color:0xf3d8ad,transparent:true,opacity:.038,depthWrite:false,depthTest:true,side:THREE.DoubleSide});
+const coolPoolMat=new THREE.MeshBasicMaterial({color:0xdbe9e1,transparent:true,opacity:.030,depthWrite:false,depthTest:true,side:THREE.DoubleSide});
+
+// Central recessed fixtures establish rhythm along the promenade.
+[
+  [0,7.39,10.8,3.2,.10,.64,practicalSoft],
+  [0,7.39,3.0,2.6,.10,.54,practicalWarm],
+  [0,7.39,-5.4,3.2,.10,.64,practicalWarm],
+  [0,7.39,-13.0,2.6,.10,.54,practicalSoft],
+  [0,7.39,-18.4,3.2,.10,.64,practicalCool]
+].forEach(([x,y,z,w,h,d,mat])=>box(hallPracticalGroup,w,h,d,mat,x,y,z,{cast:false,receive:false}));
+
+// Perimeter lines visually explain the warmer side-wall washes.
+[-1,1].forEach(side=>{
+  [7.5,-2.0,-11.5,-20.5].forEach((z,idx)=>{
+    box(hallPracticalGroup,2.25,.035,.055,idx===3?practicalCool:practicalWarm,side*8.25,6.84,z,{cast:false,receive:false});
+  });
+});
+
+// Very subtle pools on the stone floor anchor the fixtures spatially.
+[
+  [0,.408,9.0,2.55,lightPoolMat],
+  [0,.408,-5.4,2.90,lightPoolMat],
+  [0,.408,-20.0,2.65,coolPoolMat],
+  [-7.1,.408,1.2,1.45,lightPoolMat],
+  [7.1,.408,-12.4,1.45,lightPoolMat]
+].forEach(([x,y,z,r,mat])=>{
+  const p=mesh(hallPracticalGroup,new THREE.CircleGeometry(r,lowPower?20:42),mat,x,y,z,{cast:false,receive:false});
+  p.rotation.x=-Math.PI/2;p.scale.set(1,.72,1);
+});
+
+// Destination thresholds are brighter in geometry, but not neon.
+[
+  [-4.6,-25.72,0xdceae0],
+  [0,-25.72,0xffdda2],
+  [4.6,-25.72,0xe8c98f]
+].forEach(([x,z,color])=>{
+  const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.44,depthWrite:false});
+  box(hallPracticalGroup,2.05,.025,.075,mat,x,.415,z,{cast:false,receive:false});
+});
+
 
 // Indoor Riviera planters — instanced trunks/crowns/bases for density at low draw-call cost.
 const plantSites=[
@@ -3841,6 +3889,7 @@ function updateVisibilityBudget(now){
   if(living.district)living.district.visible=player.z>35;
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
+  hallLightGroup.visible=!lowPower&&!emergencyPerformance&&player.z<22&&player.z>-31&&Math.abs(player.x)<15;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
   arrivalDetails.visible=player.z>1&&player.z<26;
   npcRoot.visible=true;
