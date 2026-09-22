@@ -198,6 +198,9 @@ const scripts = [
   // Final interaction layer: restrained motion, depth and tactile feedback
   // for the premium patient-facing home without changing the content flow.
   'scripts/homepage-premium-motion-v1.mjs',
+  // Absolute final home clarity pass: put the patient narrative first and
+  // keep transitions calm, legible and accessible across all home locales.
+  'scripts/homepage-clarity-transition-v1.mjs',
   // Keep the commercial framework visible as a separate, clearly labelled
   // working draft instead of redirecting CGV visitors to site-use terms.
   'scripts/commercial-legal-v2.mjs',
