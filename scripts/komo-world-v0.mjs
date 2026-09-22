@@ -42,9 +42,12 @@ const checks=[
   ['FPS budget V2.8+ present',runtime.includes('function updateLightBudget')&&runtime.includes('function updateVisibilityBudget')],
   ['shadow budget V2.8 present',runtime.includes('renderer.shadowMap.enabled=false')&&runtime.includes("qualityMode==='high'")],
   ['draw-call telemetry V2.8 present',runtime.includes('renderer.info.render.calls')&&runtime.includes('activeLightBudget')],
-  ['Fitness Club V2.9 present',runtime.includes("version:'2.9.0-fitness-club'")&&runtime.includes('KOMO_FITNESS_CLUB_V29')&&runtime.includes('const FITNESS_ACTIVITIES')],
+  ['Fitness Club V2.9+ present',runtime.includes('KOMO_FITNESS_CLUB_V29')&&runtime.includes('const FITNESS_ACTIVITIES')],
   ['daily Fitness program V2.9 present',runtime.includes('function fitnessToday')&&runtime.includes('function fitnessStreak')&&runtime.includes('function markFitnessTodayComplete')],
-  ['Fitness Coach V2.9 present',runtime.includes('function runFitnessCoachPreview')&&runtime.includes('ALEX · FITNESS COACH')]
+  ['Fitness Coach V2.9 present',runtime.includes('function runFitnessCoachPreview')&&runtime.includes('ALEX · FITNESS COACH')],
+  ['Hall Living V3 present',runtime.includes("version:'3.0.1-hall-living'")&&runtime.includes('KOMO_HALL_LIVING_V30')&&runtime.includes('function instancedStatic')],
+  ['Hall Living social layer present',runtime.includes("label:'Camille'")&&runtime.includes("label:'Lina'")&&runtime.includes('TODAY AT KŌMØ')],
+  ['Hall Living culling present',runtime.includes('hallLiving.visible=player.z<19&&player.z>-29')&&runtime.includes('mesh:m')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
