@@ -9,33 +9,50 @@ const HEARTBEAT_MS=2200;
 const POSE_MS=125;
 const PRESENCE_REFRESH_MS=4000;
 const CHAT_LIMIT=50;
+const VOICE_ENTER_M=11;
+const VOICE_EXIT_M=14;
+const SOCIAL_KEY='komo_world_social_v1';
+function dayKey(d=new Date()){return d.toISOString().slice(0,10)}
+function loadSocial(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(SOCIAL_KEY)||'{}');
+    return {day:raw.day||dayKey(),xp:Number(raw.xp)||0,done:raw.done&&typeof raw.done==='object'?raw.done:{},streak:Number(raw.streak)||0,lastActive:raw.lastActive||''};
+  }catch{return {day:dayKey(),xp:0,done:{},streak:0,lastActive:''}}
+}
 
 function escText(v,max=500){return String(v??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max)}
 function css(){
   if(document.querySelector('#komo-world-mp-style'))return;
   const s=document.createElement('style');s.id='komo-world-mp-style';s.textContent=`
-  .kwmp-dock{position:fixed;z-index:82;top:92px;right:18px;display:flex;gap:7px;align-items:center}
+  .kwmp-dock{position:fixed;z-index:82;top:92px;right:18px;display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;max-width:520px}
   .kwmp-pill{height:31px;padding:0 12px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:rgba(24,39,31,.76);backdrop-filter:blur(15px);color:rgba(242,236,226,.76);font-size:7px;font-weight:800;letter-spacing:.11em;cursor:pointer}
-  .kwmp-pill[data-state="online"]{border-color:rgba(190,218,193,.18);color:#dce9dd}.kwmp-pill[data-state="online"]::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:#a8c9ab;margin-right:7px;box-shadow:0 0 10px rgba(168,201,171,.38)}
-  .kwmp-chat{position:fixed;z-index:96;right:18px;top:132px;width:min(360px,calc(100vw - 36px));height:min(520px,calc(100vh - 154px));display:grid;grid-template-rows:auto auto 1fr auto auto;border:1px solid rgba(255,255,255,.09);border-radius:22px;background:linear-gradient(150deg,rgba(20,35,28,.96),rgba(27,42,34,.93));backdrop-filter:blur(24px);box-shadow:0 26px 70px rgba(10,18,13,.24);overflow:hidden;opacity:0;visibility:hidden;transform:translateY(-7px);transition:.22s ease}
-  .kwmp-chat.open{opacity:1;visibility:visible;transform:none}
-  .kwmp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 16px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
-  .kwmp-head span{display:block;color:#d6b67f;font-size:7px;font-weight:800;letter-spacing:.16em}.kwmp-head strong{display:block;margin-top:4px;font:500 23px/1 Georgia,serif}.kwmp-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.055);color:#eee5d8;font-size:18px;cursor:pointer}
-  .kwmp-roster{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:grid;gap:6px}.kwmp-person{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:7px 9px;border:1px solid rgba(255,255,255,.055);border-radius:10px;background:rgba(255,255,255,.025)}.kwmp-person b{font-size:7px;letter-spacing:.04em}.kwmp-person span{font-size:6px;color:#d8ba86;letter-spacing:.09em;white-space:nowrap}.kwmp-person small{display:block;margin-top:3px;font-size:5px;color:rgba(240,234,224,.42);letter-spacing:.05em}.kwmp-person button{height:24px;padding:0 8px;border:1px solid rgba(216,186,134,.22);border-radius:8px;background:rgba(216,186,134,.09);color:#ead9ba;font-size:5px;font-weight:850;letter-spacing:.08em;cursor:pointer}.kwmp-person button:hover{background:rgba(216,186,134,.16)}.kwmp-person.mine{border-color:rgba(216,186,134,.14)}
-  .kwmp-messages{overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}.kwmp-msg{max-width:86%;padding:9px 11px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.035)}.kwmp-msg.mine{align-self:flex-end;background:rgba(210,179,126,.09);border-color:rgba(210,179,126,.13)}.kwmp-msg b{display:block;margin-bottom:4px;font-size:8px}.kwmp-msg p{margin:0;font-size:9px;line-height:1.45;color:rgba(242,236,226,.72);white-space:pre-wrap;word-break:break-word}.kwmp-msg small{display:block;margin-top:5px;font-size:7px;color:rgba(242,236,226,.34)}
-  .kwmp-empty{margin:auto;color:rgba(242,236,226,.40);font-size:9px;text-align:center;line-height:1.5;padding:18px}
-  .kwmp-compose{display:flex;gap:7px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.07)}.kwmp-compose input{flex:1;min-width:0;height:38px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.045);color:#f0e8da;padding:0 11px;font-size:9px;outline:none}.kwmp-compose button{height:38px;padding:0 12px;border-radius:12px;background:#d8ba86;color:#1d2d25;font-size:8px;font-weight:850;cursor:pointer}.kwmp-compose button:disabled,.kwmp-compose input:disabled{opacity:.42}
-  .kwmp-note{padding:0 13px 12px;color:rgba(242,236,226,.34);font-size:7px;line-height:1.45}
+  .kwmp-pill[data-state="online"],.kwmp-pill[data-state="on"]{border-color:rgba(190,218,193,.24);color:#dce9dd}
+  .kwmp-pill[data-state="online"]::before,.kwmp-pill[data-state="on"]::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:#a8c9ab;margin-right:7px;box-shadow:0 0 10px rgba(168,201,171,.38)}
+  .kwmp-chat{position:fixed;z-index:96;left:18px;bottom:18px;width:min(440px,calc(100vw - 36px));max-height:min(350px,48vh);display:grid;grid-template-rows:auto auto minmax(70px,1fr) auto auto;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:linear-gradient(150deg,rgba(11,18,14,.52),rgba(18,28,22,.38));backdrop-filter:blur(10px);box-shadow:0 14px 42px rgba(8,14,10,.16);overflow:hidden;opacity:1;visibility:visible;transform:none}
+  .kwmp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px 6px;border-bottom:1px solid rgba(255,255,255,.045)}
+  .kwmp-head span{display:block;color:#d6b67f;font-size:6px;font-weight:800;letter-spacing:.15em}.kwmp-head strong{display:block;margin-top:2px;font:500 14px/1.1 Georgia,serif}
+  .kwmp-world-btn{height:24px;padding:0 9px;border:1px solid rgba(216,186,134,.18);border-radius:8px;background:rgba(216,186,134,.07);color:#ead9ba;font-size:6px;font-weight:850;letter-spacing:.08em;cursor:pointer}
+  .kwmp-roster{display:none;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.05);gap:5px;max-height:130px;overflow:auto}.kwmp-chat.people-open .kwmp-roster{display:grid}
+  .kwmp-person{display:grid;grid-template-columns:1fr auto auto auto;gap:6px;align-items:center;padding:6px 7px;border:1px solid rgba(255,255,255,.05);border-radius:9px;background:rgba(255,255,255,.025)}
+  .kwmp-person b{font-size:7px;letter-spacing:.03em}.kwmp-person span{font-size:6px;color:#d8ba86;letter-spacing:.07em;white-space:nowrap}.kwmp-person small{display:block;margin-top:2px;font-size:5px;color:rgba(240,234,224,.42)}
+  .kwmp-person button{height:22px;padding:0 7px;border:1px solid rgba(216,186,134,.18);border-radius:7px;background:rgba(216,186,134,.07);color:#ead9ba;font-size:5px;font-weight:850;letter-spacing:.07em;cursor:pointer}.kwmp-person button:hover{background:rgba(216,186,134,.14)}.kwmp-person.mine{border-color:rgba(216,186,134,.13)}
+  .kwmp-messages{overflow:auto;padding:8px 10px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;min-height:84px}
+  .kwmp-msg{max-width:96%;padding:3px 6px;border-radius:7px;background:rgba(8,13,10,.18);text-shadow:0 1px 2px rgba(0,0,0,.32)}.kwmp-msg.mine{align-self:stretch;background:rgba(210,179,126,.055)}.kwmp-msg.dm{border-left:2px solid rgba(216,186,134,.62);background:rgba(101,81,48,.13)}
+  .kwmp-msg b{display:inline;margin-right:5px;font-size:8px;color:#f0e8da}.kwmp-msg p{display:inline;margin:0;font-size:9px;line-height:1.35;color:rgba(242,236,226,.80);white-space:pre-wrap;word-break:break-word}.kwmp-msg small{display:inline;margin-left:6px;font-size:6px;color:rgba(242,236,226,.28)}
+  .kwmp-empty{margin:auto;color:rgba(242,236,226,.38);font-size:8px;text-align:center;line-height:1.45;padding:12px}
+  .kwmp-compose{display:grid;grid-template-columns:auto 1fr auto;gap:6px;padding:7px 8px;border-top:1px solid rgba(255,255,255,.055)}
+  .kwmp-target{height:34px;padding:0 8px;border:1px solid rgba(216,186,134,.20);border-radius:9px;background:rgba(216,186,134,.08);color:#ead9ba;font-size:6px;font-weight:900;letter-spacing:.07em;cursor:pointer;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .kwmp-compose input{min-width:0;height:34px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.04);color:#f0e8da;padding:0 10px;font-size:9px;outline:none}.kwmp-compose button[type="submit"]{height:34px;padding:0 10px;border-radius:9px;background:#d8ba86;color:#1d2d25;font-size:7px;font-weight:850;cursor:pointer}.kwmp-compose button:disabled,.kwmp-compose input:disabled{opacity:.42}
+  .kwmp-note{padding:0 9px 7px;color:rgba(242,236,226,.28);font-size:6px;line-height:1.35}
   @media(max-width:900px),(pointer:coarse){
-    .kwmp-dock{top:63px;right:8px;gap:4px;align-items:center}
-    .kwmp-pill{height:25px;padding:0 8px;font-size:5px;letter-spacing:.08em;background:rgba(22,37,29,.90);backdrop-filter:none}
-    .kwmp-chat{right:8px;top:96px;width:min(360px,calc(100vw - 16px));height:min(500px,calc(100vh - 106px))}
+    .kwmp-dock{top:63px;right:8px;gap:4px;max-width:calc(100vw - 16px)}
+    .kwmp-pill{height:25px;padding:0 8px;font-size:5px;letter-spacing:.07em;background:rgba(22,37,29,.90);backdrop-filter:none}
+    .kwmp-chat{left:8px;bottom:74px;width:min(420px,calc(100vw - 16px));max-height:34vh;background:linear-gradient(150deg,rgba(11,18,14,.66),rgba(18,28,22,.52));backdrop-filter:none}
   }
   @media(max-width:520px){
-    .kwmp-dock{top:109px;right:8px}
-    .kwmp-pill{height:24px;padding:0 7px}
-    .kwmp-pill[data-kwmp-connect]{max-width:82px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .kwmp-chat{top:140px;height:min(500px,calc(100vh - 150px))}
+    .kwmp-dock{top:109px}.kwmp-pill{height:24px;padding:0 7px}
+    .kwmp-pill[data-kwmp-connect]{max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .kwmp-chat{bottom:82px;max-height:31vh}.kwmp-head strong{font-size:12px}.kwmp-note{display:none}
   }
   `;document.head.appendChild(s);
 }
@@ -47,28 +64,32 @@ function ui(){
     connect:dock.querySelector('[data-kwmp-connect]'),
     people:dock.querySelector('[data-kwmp-people]'),
     chat:dock.querySelector('[data-kwmp-chat]'),
+    voice:dock.querySelector('[data-kwmp-voice]'),
+    social:dock.querySelector('[data-kwmp-social]'),
     drawer:document.querySelector('#kwmpChat'),
     roster:document.querySelector('#kwmpRoster'),
     messages:document.querySelector('#kwmpMessages'),
     form:document.querySelector('#kwmpCompose'),
-    input:document.querySelector('#kwmpInput')
+    input:document.querySelector('#kwmpInput'),
+    target:document.querySelector('#kwmpTarget'),
+    worldBtn:document.querySelector('[data-kwmp-world]')
   };
   dock=document.createElement('div');dock.id='kwmpDock';dock.className='kwmp-dock';
-  dock.innerHTML='<button type="button" class="kwmp-pill" data-kwmp-connect data-state="offline">CONNECT PULSE</button><button type="button" class="kwmp-pill" data-kwmp-people>PEOPLE · 0</button><button type="button" class="kwmp-pill" data-kwmp-chat>CHAT</button>';
+  dock.innerHTML='<button type="button" class="kwmp-pill" data-kwmp-connect data-state="offline">CONNECT WORLD</button><button type="button" class="kwmp-pill" data-kwmp-people>PEOPLE · 0</button><button type="button" class="kwmp-pill" data-kwmp-chat>CHAT</button><button type="button" class="kwmp-pill" data-kwmp-voice data-state="off">VOICE · OFF</button><button type="button" class="kwmp-pill" data-kwmp-social>SOCIAL · 0</button>';
   document.body.appendChild(dock);
-  const drawer=document.createElement('aside');drawer.id='kwmpChat';drawer.className='kwmp-chat';drawer.setAttribute('aria-hidden','true');
-  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · SOCIAL</span><strong>World Chat</strong></div><button type="button" class="kwmp-close" data-kwmp-close>×</button></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez votre session Pulse pour voir les personnes présentes et discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Écrire dans World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">Identité sociale uniquement. Les données Motion, Clinical et de santé ne sont jamais partagées dans World.</div>';
+  const drawer=document.createElement('aside');drawer.id='kwmpChat';drawer.className='kwmp-chat open';drawer.setAttribute('aria-hidden','false');
+  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · LIVE</span><strong>World Chat</strong></div><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget">WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">ENTER · écrire · PEOPLE → MP · VOICE = vocal de proximité. Les données de santé ne sont jamais partagées.</div>';
   document.body.appendChild(drawer);
-  return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput')};
+  return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:dock.querySelector('[data-kwmp-voice]'),social:dock.querySelector('[data-kwmp-social]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
 }
-function labelSprite(THREE,text){
+function labelSpritefunction labelSprite(THREE,text,subtitle='PULSE MEMBER'){
   const c=document.createElement('canvas');c.width=512;c.height=144;const x=c.getContext('2d');
   x.clearRect(0,0,512,144);
   x.fillStyle='rgba(19,31,24,.84)';x.fillRect(24,18,464,104);
   x.strokeStyle='rgba(216,185,132,.58)';x.lineWidth=2;x.strokeRect(25,19,462,102);
   x.fillStyle='#f3ede3';x.font='600 35px Arial';x.textAlign='center';x.textBaseline='middle';
   x.fillText(escText(text,24)||'KŌMØ Member',256,59);
-  x.fillStyle='rgba(216,185,132,.92)';x.font='700 16px Arial';x.fillText('PULSE MEMBER',256,92);
+  x.fillStyle='rgba(216,185,132,.92)';x.font='700 16px Arial';x.fillText(escText(subtitle,28)||'PULSE MEMBER',256,92);
   const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=2;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:false}));
   sp.scale.set(2.25,.64,1);sp.position.y=2.52;sp.renderOrder=30;return sp;
@@ -114,7 +135,7 @@ function presenceAvatar(runtime,record){
   beacon.position.y=1.65;beacon.renderOrder=27;g.add(beacon);
   const beaconTop=new THREE.Mesh(new THREE.RingGeometry(.12,.18,24),new THREE.MeshBasicMaterial({color:0xf0d4a0,transparent:true,opacity:.58,depthWrite:false,depthTest:false}));
   beaconTop.position.y=3.28;beaconTop.rotation.x=-Math.PI/2;beaconTop.renderOrder=29;g.add(beaconTop);
-  const tag=labelSprite(THREE,record.display_name);g.add(tag);
+  const tag=labelSprite(THREE,record.display_name,record.role_title||'PULSE MEMBER');g.add(tag);
 
   g.userData.target=new THREE.Vector3(Number(record.x)||0,Number(record.y)||0,Number(record.z)||0);
   g.userData.targetYaw=record.yaw||0;g.userData.zone=record.zone||'world';g.position.copy(g.userData.target);
@@ -125,11 +146,27 @@ export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
   const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0};
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,social:loadSocial(),voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set()}};
+  const roleFor=id=>state.roles.get(id)||null;
+  const decoratePresence=row=>row?{...row,role_title:roleFor(row.user_id)?.display_title||''}:row;
+  const saveSocial=()=>{try{localStorage.setItem(SOCIAL_KEY,JSON.stringify(state.social))}catch{}};
+  const updateSocialUI=()=>{U.social.textContent='SOCIAL · '+state.social.xp+(state.social.streak>1?' · '+state.social.streak+'D':'')};
+  const awardSocial=(kind,xp)=>{
+    const today=dayKey();
+    if(state.social.day!==today){
+      const yesterday=dayKey(new Date(Date.now()-86400000));
+      state.social={day:today,xp:0,done:{},streak:state.social.lastActive===yesterday?Math.max(1,state.social.streak+1):1,lastActive:state.social.lastActive||''};
+    }
+    if(state.social.done[kind])return false;
+    state.social.done[kind]=Date.now();state.social.xp+=xp;state.social.lastActive=today;if(!state.social.streak)state.social.streak=1;saveSocial();updateSocialUI();
+    runtime.completeSocial?.();runtime.notify?.('SOCIAL +'+xp+' XP');
+    return true;
+  };
 
   const setOnlineUI=()=>{
     if(state.presenceLive){
-      U.connect.textContent=(escText(state.profile?.display_name||'WORLD',14)||'WORLD').toUpperCase()+' · ONLINE';
+      const ownRole=roleFor(state.session?.user?.id)?.display_title||'';
+      U.connect.textContent=((escText(state.profile?.display_name||'WORLD',12)||'WORLD')+(ownRole?' · '+ownRole:'')).toUpperCase();
       U.connect.dataset.state='online';
     }else if(state.session?.user){
       U.connect.textContent='WORLD · SYNCING';
@@ -138,41 +175,59 @@ export async function mount(runtime){
       U.connect.textContent='CONNECT WORLD';
       U.connect.dataset.state='offline';
     }
-    U.input.disabled=!state.presenceLive;U.form.querySelector('button').disabled=!state.presenceLive;
+    U.input.disabled=!state.presenceLive;U.form.querySelector('button[type="submit"]').disabled=!state.presenceLive;
+    updateSocialUI();
   };
+  const updateVoiceUI=()=>{
+    const n=state.voice.connected.size;
+    U.voice.dataset.state=state.voice.enabled?'on':'off';
+    U.voice.textContent=state.voice.enabled?('VOICE · ON'+(n?' · '+n:'')):'VOICE · OFF';
+  };
+  const displayNameFor=id=>state.rows.get(id)?.display_name||roleFor(id)?.display_title||'Member';
   const renderMessages=()=>{
     U.messages.innerHTML='';
-    if(!state.messages.length){const e=document.createElement('div');e.className='kwmp-empty';e.textContent=state.connected?'Aucun message pour le moment.':'Connectez votre session Pulse pour discuter.';U.messages.appendChild(e);return}
+    if(!state.messages.length){const e=document.createElement('div');e.className='kwmp-empty';e.textContent=state.connected?'Le chat World est ouvert.':'Connectez World pour discuter.';U.messages.appendChild(e);return}
     for(const m of state.messages.slice(-CHAT_LIMIT)){
-      const d=document.createElement('div');d.className='kwmp-msg'+(m.user_id===state.session?.user?.id?' mine':'');
-      const n=document.createElement('b');n.textContent=escText(m.display_name,60)||'KŌMØ Member';
+      const mine=m.user_id===state.session?.user?.id,isDm=!!m.recipient_id;
+      const d=document.createElement('div');d.className='kwmp-msg'+(mine?' mine':'')+(isDm?' dm':'');
+      const role=roleFor(m.user_id);
+      const n=document.createElement('b');n.textContent=(escText(m.display_name,60)||'KŌMØ Member')+(role?.display_title?' · '+role.display_title:'');
       const p=document.createElement('p');p.textContent=escText(m.body,500);
-      const small=document.createElement('small');const date=new Date(m.created_at||Date.now());small.textContent=date.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      const small=document.createElement('small');const date=new Date(m.created_at||Date.now());
+      const dmLabel=isDm?(mine?' · MP → '+displayNameFor(m.recipient_id):' · MP'):'';
+      small.textContent=date.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+dmLabel;
       d.append(n,p,small);U.messages.appendChild(d);
     }
     U.messages.scrollTop=U.messages.scrollHeight;
   };
-  const zoneLabel=z=>({world:'WORLD',twin:'TWIN',rehab:'KŌMØ FIT',arena:'ARENA'}[z]||'WORLD');
+  const setDmTarget=(row=null)=>{
+    state.dmTarget=row?{user_id:row.user_id,display_name:row.display_name}:null;
+    U.target.textContent=row?('MP · '+escText(row.display_name,18)):'WORLD';
+    U.input.placeholder=row?('Message privé à '+escText(row.display_name,28)+'…'):'Message World…';
+    U.target.title=row?'Cliquer pour revenir au chat World':'Chat World';
+    U.input.focus();
+  };
+  const zoneLabel=  const zoneLabel=z=>({world:'WORLD',twin:'TWIN',rehab:'KŌMØ FIT',arena:'ARENA'}[z]||'WORLD');
   const renderRoster=()=>{
     if(!U.roster)return;
     U.roster.innerHTML='';
-    const now=Date.now(),own=state.session?.user?.id,local=runtime.getState();
+    const own=state.session?.user?.id,local=runtime.getState();
     const active=[...state.rows.values()].filter(row=>fresh(row));
     if(state.presenceLive&&own&&!active.some(r=>r.user_id===own)){
       const st=runtime.getState();
-      active.unshift({user_id:own,display_name:state.profile?.display_name||'You',zone:st.mode||'world',x:st.position.x,y:st.position.y,z:st.position.z,updated_at:new Date().toISOString()});
+      active.unshift(decoratePresence({user_id:own,display_name:state.profile?.display_name||'You',zone:st.mode||'world',x:st.position.x,y:st.position.y,z:st.position.z,voice_enabled:state.voice.enabled,updated_at:new Date().toISOString()}));
     }
     active.sort((a,b)=>(a.user_id===own?-1:b.user_id===own?1:String(a.display_name||'').localeCompare(String(b.display_name||''))));
     if(!active.length){const e=document.createElement('div');e.className='kwmp-empty';e.textContent=state.session?.user?'Synchronisation de la présence…':'Connectez World pour voir les personnes présentes.';U.roster.appendChild(e);return}
     for(const row of active){
-      const mine=row.user_id===own;
+      const mine=row.user_id===own,role=roleFor(row.user_id);
       const item=document.createElement('div');item.className='kwmp-person'+(mine?' mine':'');
       const copy=document.createElement('div');
-      const n=document.createElement('b');n.textContent=(mine?'YOU · ':'')+(escText(row.display_name,40)||'KŌMØ Member');
+      const n=document.createElement('b');n.textContent=(mine?'YOU · ':'')+(escText(row.display_name,40)||'KŌMØ Member')+(role?.display_title?' · '+role.display_title:'');
       const meta=document.createElement('small');
       const sameZone=(row.zone||'world')===local.mode;
       const distance=sameZone?Math.hypot((Number(row.x)||0)-local.position.x,(Number(row.z)||0)-local.position.z):null;
-      meta.textContent=mine?'CURRENT POSITION':sameZone?(Math.round(distance)+' m away'):'Different space';
+      meta.textContent=mine?'CURRENT POSITION':sameZone?(Math.round(distance)+' m away'+(row.voice_enabled?' · VOICE':'')):'Different space';
       copy.append(n,meta);
       const z=document.createElement('span');z.textContent=zoneLabel(row.zone);
       item.append(copy,z);
@@ -180,18 +235,15 @@ export async function mount(runtime){
         const join=document.createElement('button');join.type='button';join.textContent='JOIN';
         join.addEventListener('click',()=>{
           const ok=runtime.joinPresence?.(row);
-          if(ok){
-            U.drawer.classList.remove('open');U.drawer.setAttribute('aria-hidden','true');
-            runtime.notify?.('Joining '+(escText(row.display_name,28)||'member'));
-            setTimeout(()=>{heartbeat();sendPose(true)},320);
-          }
+          if(ok){runtime.notify?.('Joining '+(escText(row.display_name,28)||'member'));setTimeout(()=>{heartbeat();sendPose(true)},320)}
         });
-        item.append(join);
+        const dm=document.createElement('button');dm.type='button';dm.textContent='MP';dm.addEventListener('click',()=>{setDmTarget(row);U.drawer.classList.remove('people-open')});
+        item.append(join,dm);
       }
       U.roster.appendChild(item);
     }
   };
-  const timestampPlausible=(row)=>{
+  const timestampPlausible=  const timestampPlausible=(row)=>{
     const t=new Date(row?.updated_at||0).getTime();
     if(!Number.isFinite(t)||!t)return true;
     const age=Date.now()-t;
@@ -213,24 +265,26 @@ export async function mount(runtime){
   };
   const consumePresence=(row)=>{
     if(!row?.user_id||!timestampPlausible(row))return;
-    state.rows.set(row.user_id,{...row,_local_seen_at:Date.now()});syncPeers();
+    state.rows.set(row.user_id,{...decoratePresence(row),_local_seen_at:Date.now()});syncPeers();
   };
   const removePresence=(row)=>{
     if(!row?.user_id)return;state.rows.delete(row.user_id);const p=state.peers.get(row.user_id);if(p){p.removeFromParent();state.peers.delete(row.user_id)};syncPeers();
   };
   const loadInitial=async()=>{
-    const [{data:presence,error:pe},{data:messages,error:me}]=await Promise.all([
-      client.from('world_presence').select('user_id,display_name,avatar_config,zone,x,y,z,yaw,updated_at').order('updated_at',{ascending:false}).limit(50),
-      client.from('world_chat_messages').select('id,user_id,display_name,body,created_at').order('created_at',{ascending:false}).limit(CHAT_LIMIT)
+    const [{data:roles,error:re},{data:presence,error:pe},{data:messages,error:me}]=await Promise.all([
+      client.from('komo_community_roles').select('user_id,role_key,display_title,icon,sort_order,is_active').eq('is_active',true),
+      client.from('world_presence').select('user_id,display_name,avatar_config,zone,x,y,z,yaw,voice_enabled,updated_at').order('updated_at',{ascending:false}).limit(50),
+      client.from('world_chat_messages').select('id,user_id,recipient_id,display_name,body,created_at').order('created_at',{ascending:false}).limit(CHAT_LIMIT)
     ]);
-    if(pe)throw pe;if(me)throw me;
-    (presence||[]).forEach(consumePresence);state.messages=(messages||[]).reverse();renderMessages();
+    if(re)throw re;if(pe)throw pe;if(me)throw me;
+    for(const role of roles||[])if(role?.user_id)state.roles.set(role.user_id,role);
+    (presence||[]).forEach(consumePresence);state.messages=(messages||[]).reverse();renderMessages();setOnlineUI();syncPeers();
   };
-  const refreshPresence=async()=>{
+  const refreshPresence=async()=>{  const refreshPresence=async()=>{
     if(!state.session?.user)return false;
     try{
       const {data,error}=await client.from('world_presence')
-        .select('user_id,display_name,avatar_config,zone,x,y,z,yaw,updated_at')
+        .select('user_id,display_name,avatar_config,zone,x,y,z,yaw,voice_enabled,updated_at')
         .order('updated_at',{ascending:false}).limit(50);
       if(error)throw error;
       const seen=new Set();
@@ -263,11 +317,11 @@ export async function mount(runtime){
       display_name:escText(state.profile?.display_name||'KŌMØ Member',60)||'KŌMØ Member',
       avatar_config:state.profile?.avatar_config&&typeof state.profile.avatar_config==='object'?state.profile.avatar_config:{},
       zone:['world','twin','rehab','arena'].includes(st.mode)?st.mode:'world',
-      x:+st.position.x.toFixed(3),y:+(st.position.y||0).toFixed(3),z:+st.position.z.toFixed(3),yaw:+st.yaw.toFixed(4),updated_at:new Date().toISOString()
+      x:+st.position.x.toFixed(3),y:+(st.position.y||0).toFixed(3),z:+st.position.z.toFixed(3),yaw:+st.yaw.toFixed(4),voice_enabled:!!state.voice.enabled,updated_at:new Date().toISOString()
     }};
   const posePayload=()=>{
     const p=presencePayload();
-    return {user_id:p.user_id,display_name:p.display_name,avatar_config:p.avatar_config,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,updated_at:p.updated_at};
+    return {user_id:p.user_id,display_name:p.display_name,avatar_config:p.avatar_config,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,voice_enabled:p.voice_enabled,updated_at:p.updated_at};
   };
   const poseChanged=(a,b)=>{
     if(!a||!b)return true;
@@ -288,6 +342,96 @@ export async function mount(runtime){
     }catch(err){console.warn('[World pose broadcast]',err);return false}
   };
 
+  const sendVoiceSignal=async(recipientId,signalType,payload={})=>{
+    if(!state.session?.user||!recipientId)return false;
+    const {error}=await client.from('world_voice_signals').insert({sender_id:state.session.user.id,recipient_id:recipientId,signal_type:signalType,payload});
+    if(error){console.warn('[World voice signal]',error);return false}return true;
+  };
+  const closeVoicePeer=(id,{signal=false}={})=>{
+    const peer=state.voice.peers.get(id);if(!peer)return;
+    if(signal&&state.session?.user)sendVoiceSignal(id,'hangup',{}).catch(()=>{});
+    try{peer.pc.onicecandidate=null;peer.pc.ontrack=null;peer.pc.close()}catch{}
+    try{peer.audio?.pause();peer.audio?.remove()}catch{}
+    state.voice.peers.delete(id);state.voice.connected.delete(id);updateVoiceUI();
+  };
+  const voiceDistance=row=>{
+    const local=runtime.getState();if(!row||(row.zone||'world')!==local.mode)return Infinity;
+    return Math.hypot((Number(row.x)||0)-local.position.x,(Number(row.z)||0)-local.position.z);
+  };
+  const ensureVoicePeer=async(row,{offer=true}={})=>{
+    if(!state.voice.enabled||!state.voice.stream||!row?.user_id||row.user_id===state.session?.user?.id||!row.voice_enabled)return null;
+    const id=row.user_id;let peer=state.voice.peers.get(id);if(peer)return peer;
+    const pc=new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+    const audio=document.createElement('audio');audio.autoplay=true;audio.playsInline=true;audio.volume=0;audio.dataset.komoVoice=id;document.body.appendChild(audio);
+    peer={pc,audio,pending:[],offering:false};state.voice.peers.set(id,peer);
+    for(const track of state.voice.stream.getAudioTracks())pc.addTrack(track,state.voice.stream);
+    pc.onicecandidate=e=>{if(e.candidate)sendVoiceSignal(id,'candidate',{candidate:e.candidate.toJSON?e.candidate.toJSON():e.candidate}).catch(()=>{})};
+    pc.ontrack=e=>{audio.srcObject=e.streams?.[0]||new MediaStream([e.track]);audio.play().catch(()=>{})};
+    pc.onconnectionstatechange=()=>{
+      if(pc.connectionState==='connected'){
+        state.voice.connected.add(id);updateVoiceUI();awardSocial('voice',15);
+      }else if(['failed','closed'].includes(pc.connectionState)){closeVoicePeer(id)}
+    };
+    if(offer&&String(state.session.user.id)<String(id)){
+      peer.offering=true;
+      try{
+        const desc=await pc.createOffer({offerToReceiveAudio:true});await pc.setLocalDescription(desc);
+        await sendVoiceSignal(id,'offer',{sdp:pc.localDescription});
+      }catch(err){console.warn('[World voice offer]',err);closeVoicePeer(id)}
+      finally{peer.offering=false}
+    }
+    return peer;
+  };
+  const handleVoiceSignal=async(row)=>{
+    if(!row?.id||row.recipient_id!==state.session?.user?.id)return;
+    try{
+      const sender=state.rows.get(row.sender_id);
+      if(row.signal_type==='hangup'){closeVoicePeer(row.sender_id);return}
+      if(!state.voice.enabled||!state.voice.stream||!sender?.voice_enabled)return;
+      const peer=await ensureVoicePeer(sender,{offer:false});if(!peer)return;
+      const pc=peer.pc,p=row.payload||{};
+      if(row.signal_type==='offer'&&p.sdp){
+        await pc.setRemoteDescription(new RTCSessionDescription(p.sdp));
+        for(const cand of peer.pending.splice(0))await pc.addIceCandidate(cand);
+        const answer=await pc.createAnswer();await pc.setLocalDescription(answer);
+        await sendVoiceSignal(row.sender_id,'answer',{sdp:pc.localDescription});
+      }else if(row.signal_type==='answer'&&p.sdp){
+        if(!pc.currentRemoteDescription){await pc.setRemoteDescription(new RTCSessionDescription(p.sdp));for(const cand of peer.pending.splice(0))await pc.addIceCandidate(cand)}
+      }else if(row.signal_type==='candidate'&&p.candidate){
+        const cand=new RTCIceCandidate(p.candidate);
+        if(pc.remoteDescription)await pc.addIceCandidate(cand);else peer.pending.push(cand);
+      }
+    }catch(err){console.warn('[World voice receive]',err)}
+    finally{client.from('world_voice_signals').delete().eq('id',row.id).then(()=>{})}
+  };
+  const updateVoiceProximity=(now=performance.now())=>{
+    if(!state.voice.enabled||now-state.voice.lastSweep<320)return;state.voice.lastSweep=now;
+    const own=state.session?.user?.id;
+    for(const [id,row] of state.rows){
+      if(id===own)continue;
+      const d=voiceDistance(row),peer=state.voice.peers.get(id);
+      if(row.voice_enabled&&d<=VOICE_ENTER_M&&!peer)ensureVoicePeer(row).catch(()=>{});
+      if(peer){
+        peer.audio.volume=Math.max(0,Math.min(1,1-(Math.max(2,d)-2)/(VOICE_EXIT_M-2)));
+        if(!row.voice_enabled||d>VOICE_EXIT_M)closeVoicePeer(id,{signal:true});
+      }
+    }
+  };
+  const disableVoice=async()=>{
+    state.voice.enabled=false;for(const id of [...state.voice.peers.keys()])closeVoicePeer(id,{signal:true});
+    if(state.voice.stream){for(const t of state.voice.stream.getTracks())t.stop();state.voice.stream=null}
+    updateVoiceUI();await heartbeat();await sendPose(true);
+  };
+  const toggleVoice=async()=>{
+    if(state.voice.enabled){await disableVoice();runtime.notify?.('VOICE PROXIMITY · OFF');return}
+    if(!navigator.mediaDevices?.getUserMedia){runtime.notify?.('Microphone non disponible');return}
+    try{
+      state.voice.stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});
+      state.voice.enabled=true;updateVoiceUI();await heartbeat();await sendPose(true);runtime.notify?.('VOICE PROXIMITY · ON · 11 m');
+      updateVoiceProximity();
+    }catch(err){state.voice.enabled=false;state.voice.stream=null;updateVoiceUI();runtime.notify?.('Autorisez le microphone pour le vocal');console.warn('[World voice permission]',err)}
+  };
+
   const heartbeat=async()=>{
     if(!state.session?.user)return false;
     try{
@@ -296,7 +440,7 @@ export async function mount(runtime){
       if(error)throw error;
       const firstLive=!state.presenceLive;
       state.presenceLive=true;state.connected=true;state.lastPresenceError='';
-      state.rows.set(payload.user_id,payload);setOnlineUI();syncPeers();
+      state.rows.set(payload.user_id,{...decoratePresence(payload),_local_seen_at:Date.now()});setOnlineUI();syncPeers();
       if(firstLive)runtime.notify?.('World multiplayer online');
       return true;
     }catch(err){
@@ -319,7 +463,12 @@ export async function mount(runtime){
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'world_presence'},({new:row})=>consumePresence(row))
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'world_presence'},({new:row})=>consumePresence(row))
       .on('postgres_changes',{event:'DELETE',schema:'public',table:'world_presence'},({old:row})=>removePresence(row))
-      .on('postgres_changes',{event:'INSERT',schema:'public',table:'world_chat_messages'},({new:row})=>{if(!row?.id||state.messages.some(x=>x.id===row.id))return;state.messages.push(row);if(state.messages.length>CHAT_LIMIT)state.messages.shift();renderMessages()})
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'world_chat_messages'},({new:row})=>{
+        if(!row?.id||state.messages.some(x=>x.id===row.id))return;
+        state.messages.push(row);if(state.messages.length>CHAT_LIMIT)state.messages.shift();renderMessages();
+        if(row.recipient_id===state.session?.user?.id)runtime.notify?.('MP · '+(escText(row.display_name,24)||'Member'));
+      })
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'world_voice_signals'},({new:row})=>handleVoiceSignal(row))
       .on('broadcast',{event:'pose'},({payload})=>{
         if(!payload?.user_id||payload.user_id===state.session?.user?.id)return;
         consumePresence(payload);
@@ -385,18 +534,29 @@ export async function mount(runtime){
   window.addEventListener('message',onMessage);
 
   U.connect.addEventListener('click',()=>state.presenceLive?runtime.notify?.('World multiplayer actif'):state.session?.user?heartbeat():openPulse());
-  U.people.addEventListener('click',async()=>{await refreshPresence();U.drawer.classList.add('open');U.drawer.setAttribute('aria-hidden','false');renderRoster()});
-  U.chat.addEventListener('click',()=>{U.drawer.classList.toggle('open');U.drawer.setAttribute('aria-hidden',U.drawer.classList.contains('open')?'false':'true')});
-  U.drawer.querySelector('[data-kwmp-close]').addEventListener('click',()=>{U.drawer.classList.remove('open');U.drawer.setAttribute('aria-hidden','true')});
+  U.people.addEventListener('click',async()=>{await refreshPresence();U.drawer.classList.toggle('people-open');renderRoster()});
+  U.chat.addEventListener('click',()=>U.input.focus());
+  U.voice.addEventListener('click',()=>toggleVoice());
+  U.worldBtn.addEventListener('click',()=>setDmTarget(null));
+  U.target.addEventListener('click',()=>{if(state.dmTarget)setDmTarget(null);else U.input.focus()});
+  document.addEventListener('keydown',e=>{
+    if(e.code!=='Enter'||e.metaKey||e.ctrlKey||e.altKey)return;
+    const a=document.activeElement,tag=a?.tagName;
+    if(tag==='INPUT'||tag==='TEXTAREA'||a?.isContentEditable)return;
+    e.preventDefault();U.input.focus();
+  });
   U.form.addEventListener('submit',async e=>{
     e.preventDefault();if(!state.presenceLive||!state.session?.user)return;
     const body=escText(U.input.value,500);if(!body)return;U.input.value='';
-    const row={user_id:state.session.user.id,display_name:escText(state.profile?.display_name||'KŌMØ Member',60)||'KŌMØ Member',body};
-    const {error}=await client.from('world_chat_messages').insert(row);if(error){runtime.notify?.('Message non envoyé');console.warn('[World chat]',error)}
+    const recipient_id=state.dmTarget?.user_id||null;
+    const row={user_id:state.session.user.id,recipient_id,display_name:escText(state.profile?.display_name||'KŌMØ Member',60)||'KŌMØ Member',body};
+    const {error}=await client.from('world_chat_messages').insert(row);
+    if(error){runtime.notify?.('Message non envoyé');console.warn('[World chat]',error);return}
+    awardSocial(recipient_id?'dm':'chat',recipient_id?10:5);
   });
 
-  function animatePeers(){
-    const local=runtime.getState(),cam=runtime.camera;
+  function animatePeers(){  function animatePeers(){
+    const local=runtime.getState(),cam=runtime.camera;updateVoiceProximity();
     for(const peer of state.peers.values()){
       const localZone=local.mode==='rehab'?'rehab':local.mode;
       peer.visible=peer.userData.zone===localZone;
@@ -445,14 +605,14 @@ export async function mount(runtime){
     }
     state.raf=requestAnimationFrame(animatePeers);
   }
-  animatePeers();setOnlineUI();renderMessages();renderRoster();
+  animatePeers();setOnlineUI();updateVoiceUI();updateSocialUI();renderMessages();renderRoster();
   client.auth.getSession().then(({data,error})=>{
     if(error){console.warn('[World auth restore]',error);return}
     if(data?.session?.user)startLiveSession(data.session).catch(err=>console.warn('[World session restore]',err));
   });
 
   const cleanup=()=>{
-    clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);
+    clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);for(const id of [...state.voice.peers.keys()])closeVoicePeer(id);if(state.voice.stream)for(const t of state.voice.stream.getTracks())t.stop();
     if(state.channel)client.removeChannel(state.channel);
     if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
@@ -464,5 +624,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.5.3-clock-safe-presence',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.6.0-social-voice',connect:openPulse,state};
 }
