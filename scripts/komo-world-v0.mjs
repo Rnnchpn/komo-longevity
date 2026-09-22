@@ -65,13 +65,15 @@ const checks=[
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub V3.3 quests present',runtime.includes("quest:'fitness'")&&runtime.includes("quest:'arena'")&&runtime.includes("id:'coach'")],
   ['Immersive Hub V3.3 district detail present',runtime.includes('KOMO_DISTRICT_DETAILS_V33')&&runtime.includes('HEALTH PAVILION')&&runtime.includes('CLUB HOUSE')],
-  ['multiplayer reliable presence V0.4+ present',multiplayer.includes("version:'0.4.1-cross-tab-bridge'")&&multiplayer.includes("persistSession:true")&&multiplayer.includes("komo-world-auth-v1")],
+  ['multiplayer reliable presence V0.4+ present',multiplayer.includes("version:'0.5.0-join-friend'")&&multiplayer.includes("persistSession:true")&&multiplayer.includes("komo-world-auth-v1")],
   ['multiplayer heartbeat verifies writes',multiplayer.includes("const {error}=await client.from('world_presence').upsert")&&multiplayer.includes("state.presenceLive=true")],
   ['multiplayer mobile presence tolerance',multiplayer.includes('const STALE_MS=45000')&&multiplayer.includes('const HEARTBEAT_MS=2200')],
   ['multiplayer roster present',multiplayer.includes('const renderRoster=()=>')&&multiplayer.includes('kwmpRoster')],
   ['multiplayer Safari restore present',multiplayer.includes('client.auth.getSession().then')&&multiplayer.includes('event.persisted')],
   ['Pulse cross-tab World bridge present',pulseAuth.includes('WORLD_BRIDGE_CHANNEL')&&pulseAuth.includes("type:'komo:pulse-world-session-request'")&&pulseAuth.includes("type:'komo:pulse-world-session-response'")],
-  ['World bridge ACK present',pulseAuth.includes("type!=='komo:world-bridge-ack'")&&multiplayer.includes("type:'komo:world-bridge-ack'")]
+  ['World bridge ACK present',pulseAuth.includes("type!=='komo:world-bridge-ack'")&&multiplayer.includes("type:'komo:world-bridge-ack'")],
+  ['multiplayer join friend V0.5 present',runtime.includes('function joinPresence(target)')&&runtime.includes('joinPresence,')&&multiplayer.includes('runtime.joinPresence?.(row)')],
+  ['multiplayer distance roster present',multiplayer.includes("Math.round(distance)+' m away'")&&multiplayer.includes("join.textContent='JOIN'")]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
