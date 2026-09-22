@@ -259,15 +259,8 @@ for(let i=0;i<cloudCount;i++){
   cloud.userData.baseX=cloud.position.x;cloud.userData.speed=.34+(i%4)*.07;cloud.userData.phase=i*.83;
   cloudGroup.add(cloud);living.clouds.push(cloud);
 }
-const sunCanvas=document.createElement('canvas');sunCanvas.width=sunCanvas.height=256;
-const sunCtx=sunCanvas.getContext('2d');
-const sunGrad=sunCtx.createRadialGradient(128,128,8,128,128,124);
-sunGrad.addColorStop(0,'rgba(255,248,220,1)');sunGrad.addColorStop(.16,'rgba(255,224,165,.95)');
-sunGrad.addColorStop(.50,'rgba(255,204,130,.24)');sunGrad.addColorStop(1,'rgba(255,204,130,0)');
-sunCtx.fillStyle=sunGrad;sunCtx.fillRect(0,0,256,256);
-const sunTx=new THREE.CanvasTexture(sunCanvas);sunTx.colorSpace=THREE.SRGBColorSpace;
-const sunSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:sunTx,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.90}));
-sunSprite.scale.set(lowPower?38:44,lowPower?38:44,1);sunSprite.name='KOMO_SKY_SUN_V18';scene.add(sunSprite);living.sunSprite=sunSprite;
+// V3.4 horizon cleanup — keep atmospheric lighting without the oversized sun disc.
+living.sunSprite=null;
 
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
@@ -3748,6 +3741,7 @@ window.KomoWorld={
   getLocale:()=>locale,
   getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale,pixelRatio:renderer.getPixelRatio(),drawCalls:renderer.info.render.calls,activeLightBudget,shadows:renderer.shadowMap.enabled,retinaMobile}),
   getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
+  completeSocial:()=>completeJourney('social'),
   getCameraMode:()=>cameraMode,
   fastTravel,
   joinPresence,
