@@ -37,7 +37,7 @@
   </header>
 
   <div class="location-chip" aria-live="polite">
-    <span id="location-name">ARRIVAL PLAZA</span>
+    <span id="location-name">WORLD ENTRANCE</span>
     <b id="location-heading">N</b>
   </div>
 
@@ -49,6 +49,16 @@
       <small id="journey-next">Explore the Hall · +20 XP</small>
     </span>
     <span class="journey-xp"><b id="journey-xp">0</b><small>XP</small></span>
+  </button>
+
+  <button id="health-hud" class="health-hud" type="button" aria-label="Ouvrir mon aperçu mouvement">
+    <span><small>YOUR HEALTH · MOVEMENT</small><strong id="health-status">84 · STABLE</strong></span>
+    <span class="health-domains">
+      <i><b>MUSCLE</b><em id="health-muscle">—</em></i>
+      <i><b>BALANCE</b><em id="health-balance">—</em></i>
+      <i><b>CAPACITY</b><em id="health-capacity">—</em></i>
+    </span>
+    <u id="health-source">DEMO</u>
   </button>
 
   <div id="world-reticle" class="world-reticle" aria-hidden="true"><i></i></div>
@@ -101,7 +111,7 @@
     </div>
     <p id="world-menu-copy">Choisissez un espace ou ajustez votre expérience.</p>
     <div class="world-menu-grid">
-      <button type="button" data-fast-travel="arrival"><span>ARRIVAL</span><b>Extérieur</b></button>
+      <button type="button" data-fast-travel="arrival"><span>DISTRICT</span><b>Fontaine & campus</b></button>
       <button type="button" data-fast-travel="hall"><span>HALL</span><b>Centre</b></button>
       <button type="button" data-fast-travel="twin"><span>TWIN</span><b>Comprendre</b></button>
       <button type="button" data-fast-travel="rehab"><span>FITNESS CLUB</span><b>S’entraîner</b></button>
@@ -127,6 +137,8 @@
       <div><span>PERFORMANCE</span><b id="fps-status">— FPS</b></div>
     </div>
     <div class="world-menu-actions">
+      <button id="avatar-toggle" type="button">AVATAR</button>
+      <button id="challenges-toggle" type="button">CHALLENGES</button>
       <button id="camera-toggle" type="button">CAMERA · 3RD</button>
       <button id="guide-toggle" type="button">GUIDE · ON</button>
       <button id="quality-toggle" type="button">AUTO QUALITY</button>

@@ -44,6 +44,14 @@ const journeyMissionsEl=$('#journey-missions');
 const journeyLevelLadder=$('#journey-level-ladder');
 const journeyBadgesEl=$('#journey-badges');
 const guideToggle=$('#guide-toggle');
+const healthHud=$('#health-hud');
+const healthStatusEl=$('#health-status');
+const healthMuscleEl=$('#health-muscle');
+const healthBalanceEl=$('#health-balance');
+const healthCapacityEl=$('#health-capacity');
+const healthSourceEl=$('#health-source');
+const avatarToggle=$('#avatar-toggle');
+const challengesToggle=$('#challenges-toggle');
 
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
@@ -173,6 +181,9 @@ const living={
   sunSprite:null,
   clouds:[],
   npcs:[],
+  destinationDoors:[],
+  fountainJets:[],
+  district:null,
   daylight:'day'
 };
 
@@ -238,7 +249,7 @@ function makeCloudTexture(){
 }
 const cloudTexture=makeCloudTexture();
 const cloudGroup=new THREE.Group();cloudGroup.name='KOMO_CLOUD_FIELD_V18';scene.add(cloudGroup);
-const cloudCount=lowPower?0:9;
+const cloudCount=lowPower?2:9;
 for(let i=0;i<cloudCount;i++){
   const mat=new THREE.MeshBasicMaterial({map:cloudTexture,transparent:true,opacity:lowPower?.10:.14,depthWrite:false,side:THREE.DoubleSide});
   const cloud=new THREE.Mesh(new THREE.PlaneGeometry(34+(i%3)*8,13+(i%2)*4),mat);
@@ -255,7 +266,7 @@ sunGrad.addColorStop(.50,'rgba(255,204,130,.24)');sunGrad.addColorStop(1,'rgba(2
 sunCtx.fillStyle=sunGrad;sunCtx.fillRect(0,0,256,256);
 const sunTx=new THREE.CanvasTexture(sunCanvas);sunTx.colorSpace=THREE.SRGBColorSpace;
 const sunSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:sunTx,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,opacity:.90}));
-sunSprite.scale.set(34,34,1);sunSprite.name='KOMO_SKY_SUN_V18';scene.add(sunSprite);living.sunSprite=sunSprite;
+sunSprite.scale.set(lowPower?38:44,lowPower?38:44,1);sunSprite.name='KOMO_SKY_SUN_V18';scene.add(sunSprite);living.sunSprite=sunSprite;
 
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
@@ -660,7 +671,7 @@ function makePlayerAvatar(){
   ring.rotation.x=-Math.PI/2;ring.position.y=.016;g.add(ring);
 
   const tag=npcNameTag('YOU','KŌMØ WORLD');tag.position.y=2.49;tag.scale.set(1.40,.40,1);g.add(tag);
-  g.userData.avatar={hipsGroup,torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,phase:0,facing:0};
+  g.userData.avatar={hipsGroup,torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,phase:0,facing:0,materials:{skin,skinWarm,cloth,clothDark,trouser,shoe,hair,bronze}};
   return g;
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
@@ -940,6 +951,52 @@ exteriorBench(exterior,-16.1,30.3,Math.PI/2,.80);
 ].forEach(([x,y,z,intensity])=>{
   const l=glow(exterior,0xf2cf98,intensity,6,x,y,z);living.lights.push(l);
 });
+
+// V3.2 KŌMØ District — fountain, pavilions and a wider living campus.
+const worldDistrict=new THREE.Group();worldDistrict.name='KOMO_WORLD_DISTRICT_V32';world.add(worldDistrict);living.district=worldDistrict;
+box(worldDistrict,31.5,.045,23.0,MAT.travertine,0,.07,68.0);
+box(worldDistrict,9.0,.025,22.0,M.stoneLight,0,.10,68.0);
+[-4.65,4.65].forEach(x=>line(worldDistrict,.045,21.4,x,68.0,MAT.brass,.125));
+[58.5,63.0,67.5,72.0,76.5].forEach(z=>line(worldDistrict,8.7,.032,0,z,M.bronzeSoft,.128));
+
+// Grand fountain — low-cost animated jets, no dynamic lights.
+const grandFountain=new THREE.Group();grandFountain.name='KOMO_GRAND_FOUNTAIN_V32';grandFountain.position.set(0,0,68.2);worldDistrict.add(grandFountain);
+cyl(grandFountain,5.35,5.35,.36,MAT.limestone,0,.18,0,64,{cast:false});
+cyl(grandFountain,4.72,4.72,.18,M.water,0,.38,0,64,{cast:false});
+mesh(grandFountain,new THREE.RingGeometry(4.85,5.18,72),MAT.brass,0,.39,0,{cast:false}).rotation.x=-Math.PI/2;
+cyl(grandFountain,.72,.95,2.15,MAT.travertine,0,1.36,0,28,{cast:true});
+mesh(grandFountain,new THREE.SphereGeometry(.48,20,14),MAT.brass,0,2.62,0,{cast:true});
+const fountainWaterMat=new THREE.MeshBasicMaterial({color:0xc8ded5,transparent:true,opacity:.40,depthWrite:false});
+for(let i=0;i<(lowPower?6:12);i++){
+  const a=i/(lowPower?6:12)*Math.PI*2,r=3.35;
+  const jet=mesh(grandFountain,new THREE.CylinderGeometry(.025,.038,1.0,6),fountainWaterMat,Math.cos(a)*r,.95,Math.sin(a)*r,{cast:false,receive:false});
+  jet.userData.phase=i*.63;jet.userData.baseY=.95;jet.userData.dynamic=true;living.fountainJets.push(jet);
+}
+plaque(worldDistrict,'GRAND FOUNTAIN','KŌMØ DISTRICT · COMMUNITY',4.8,.92,0,2.45,61.9,{dark:true,titleSize:61});
+
+// Three exterior pavilions establish a visible district around the flagship.
+function districtPavilion(x,z,w,d,title,sub,dark=false){
+  const g=new THREE.Group();g.position.set(x,0,z);worldDistrict.add(g);
+  box(g,w,.20,d,MAT.travertine,0,.10,0);
+  box(g,w,4.8,.22,dark?M.sageDeep:MAT.smokedGlass,0,2.55,-d/2+.10);
+  box(g,.26,5.15,d,MAT.limestone,-w/2+.13,2.58,0,{cast:true});
+  box(g,.26,5.15,d,MAT.limestone,w/2-.13,2.58,0,{cast:true});
+  box(g,w,.28,d,MAT.limestone,0,5.05,0,{cast:true});
+  box(g,w-.55,.04,d-.45,M.warm,0,4.82,0);
+  plaque(g,title,sub,Math.min(w-1,5.2),.82,0,4.25,-d/2-.05,{dark,titleSize:52});
+  return g;
+}
+districtPavilion(-14.6,68.0,7.2,8.8,'MOVEMENT HOUSE','COMMUNITY · EVENTS',false);
+districtPavilion(14.6,68.0,7.2,8.8,'LIFE LAB','OBJECTS · RECOVERY',true);
+districtPavilion(0,77.0,9.0,5.2,'PERFORMANCE PAVILION','CHALLENGES · TALKS',true);
+
+[-1,1].forEach(side=>{
+  exteriorBench(worldDistrict,side*7.2,61.0,side>0?-Math.PI/2:Math.PI/2,.82);
+  tree(worldDistrict,side*9.0,75.0,.62);
+  tree(worldDistrict,side*19.2,61.0,.56);
+});
+bannerTotem(worldDistrict,-10.8,58.5,'WORLD','CHALLENGES',.05);
+bannerTotem(worldDistrict,10.8,58.5,'KŌMØ LIFE','DISTRICT',-.05);
 
 // Main building — one continuous architectural object, no reception avatar.
 const building=new THREE.Group();building.name='KOMO_MAIN_BUILDING_V1';world.add(building);
@@ -1461,6 +1518,12 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',x:5.4,y:0,z:-18.4,outfit:'charcoal',sp
   makeNpc(npcRoot,{role:'visitor',label:'Mila',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
     [8.72,UPPER_Y,-3.0],[8.72,UPPER_Y,-10.5],[8.72,UPPER_Y,-18.0],[3.6,UPPER_Y,-21.2],[.4,UPPER_Y,-21.2]
   ]});
+  makeNpc(npcRoot,{role:'coach',label:'Nora',x:-7.5,y:0,z:55.5,outfit:'sage',speed:.36,phase:.35,route:[
+    [-7.5,0,55.5],[-3.0,0,60.5],[0,0,62.5],[3.0,0,60.5],[7.5,0,55.5],[0,0,58.0]
+  ]});
+  makeNpc(npcRoot,{role:'visitor',label:'Jules',x:10.5,y:0,z:64.0,outfit:'sand',speed:.31,phase:.58,route:[
+    [10.5,0,64.0],[15.0,0,68.0],[10.5,0,72.5],[4.2,0,70.0],[3.5,0,64.0]
+  ]});
 }
 // Living atmosphere — subtle, non-game-like movement.
 const dustCount=lowPower?0:78;
@@ -1539,6 +1602,24 @@ const globe=mesh(lifeOrbit,new THREE.SphereGeometry(.28,22,16),M.sage,0,0,0,{cas
 const orbitA=mesh(lifeOrbit,new THREE.TorusGeometry(.52,.024,8,60),MAT.brass,0,0,0);orbitA.rotation.x=.72;
 const orbitB=mesh(lifeOrbit,new THREE.TorusGeometry(.42,.020,8,54),M.bronzeSoft,0,0,0);orbitB.rotation.y=.88;
 
+// V3.2 KŌMØ Life — tangible items placed directly in the flagship.
+const lifeItemsRoot=new THREE.Group();lifeItemsRoot.name='KOMO_LIFE_ITEMS_V32';lifeStore.add(lifeItemsRoot);
+function lifePedestal(x,z,label,sub){
+  const g=new THREE.Group();g.position.set(x,0,z);lifeItemsRoot.add(g);
+  box(g,1.28,.48,1.12,MAT.travertine,0,.25,0);
+  box(g,1.05,.055,.90,MAT.brass,0,.52,0);
+  plaque(g,label,sub,1.55,.42,0,1.72,.50,{dark:true,titleSize:34});
+  return g;
+}
+const strapPed=lifePedestal(-1.35,2.65,'MOTION STRAP','MOVE');
+const strap=mesh(strapPed,new THREE.TorusGeometry(.27,.055,8,28),MAT.fabric,0,.92,0,{cast:true});strap.rotation.x=.55;strap.rotation.y=.25;
+const bottlePed=lifePedestal(1.35,2.65,'KŌMØ BOTTLE','HYDRATE');
+cyl(bottlePed,.14,.17,.62,MAT.charcoal,0,.88,0,18,{cast:true});cyl(bottlePed,.09,.11,.10,MAT.brass,0,1.25,0,14,{cast:true});
+const recoveryPed=lifePedestal(-1.35,-2.55,'RECOVERY ROLL','RESET');
+const recoveryRoll=cyl(recoveryPed,.22,.22,.78,MAT.fabricLight,0,.90,0,18,{cast:true});recoveryRoll.rotation.z=Math.PI/2;
+const travelPed=lifePedestal(1.35,-2.55,'TRAVEL KIT','RIVIERA');
+box(travelPed,.72,.42,.42,MAT.walnut,0,.83,0,{cast:true});box(travelPed,.55,.035,.30,MAT.brass,0,1.06,0);
+
 // Discreet checkout / service bar at the back.
 box(lifeStore,3.70,.88,.78,M.sageDeep,.20,.47,3.65,{cast:true});
 box(lifeStore,3.88,.08,.92,MAT.brass,.20,.94,3.65);
@@ -1577,6 +1658,27 @@ portals.forEach(({x,title,sub,dark})=>{
   box(building,.08,4.9,.10,M.bronze,x-2.16,2.95,-29.29);
   box(building,.08,4.9,.10,M.bronze,x+2.16,2.95,-29.29);
   plaque(building,title,sub,4.2,1.05,x,6.28,-29.25,{dark,titleSize:title==='FUNCTIONAL TWIN'?58:70});
+});
+
+// V3.2 Destination Doors — clear, animated thresholds for Twin / Fitness / Arena.
+[
+  {id:'twin',x:-6.8,label:'TWIN',accent:0xb8d0bc},
+  {id:'rehab',x:0,label:'KŌMØ FIT',accent:0xd9b77b},
+  {id:'arena',x:6.8,label:'ARENA',accent:0xb9935c}
+].forEach((cfg,idx)=>{
+  const g=new THREE.Group();g.name='KOMO_DESTINATION_DOOR_'+cfg.id.toUpperCase()+'_V32';g.position.set(cfg.x,0,-28.98);building.add(g);
+  box(g,4.55,.15,.34,MAT.blackened,0,.46,0);
+  box(g,4.55,.15,.34,MAT.brass,0,5.28,0);
+  [-2.20,2.20].forEach(px=>box(g,.14,5.0,.34,MAT.brass,px,2.86,0));
+  const left=new THREE.Group(),right=new THREE.Group();left.position.x=-1.08;right.position.x=1.08;g.add(left,right);
+  box(left,2.08,4.62,.075,M.glass,0,2.82,.02);
+  box(right,2.08,4.62,.075,M.glass,0,2.82,.02);
+  box(left,.055,4.55,.10,MAT.brass,1.00,2.82,.06);
+  box(right,.055,4.55,.10,MAT.brass,-1.00,2.82,.06);
+  const mat=new THREE.MeshBasicMaterial({color:cfg.accent,transparent:true,opacity:.12,depthWrite:false});
+  const threshold=box(g,4.05,.018,.11,mat,0,.43,.42,{cast:false,receive:false});
+  const beacon=mesh(g,new THREE.RingGeometry(.20,.27,24),mat,0,5.60,.12,{cast:false,receive:false});beacon.rotation.x=Math.PI/2;beacon.userData.dynamic=true;
+  living.destinationDoors.push({id:cfg.id,x:cfg.x,left,right,threshold,beacon,mat,progress:0});
 });
 plaque(building,'LIBRARY','SCIENCE · METHOD',3.5,.84,-11.45,4.3,-10,{rotY:Math.PI/2,dark:false,titleSize:68});
 plaque(building,'TALKS','EXPERTS · EVENTS',3.5,.84,11.45,4.3,-10,{rotY:-Math.PI/2,dark:true,titleSize:68});
@@ -1760,14 +1862,18 @@ plaque(arenaRoom,'ARENA','PERFORMANCE · COMMUNITY',7.2,1.45,0,7.05,-12.85,{dark
 plaque(arenaRoom,'BALANCE','DAILY · 60 S',3.6,.94,-5.2,4.7,-8.1,{dark:true,titleSize:68});
 plaque(arenaRoom,'SQUAT 10','CONTROL',3.6,.94,0,4.7,-8.1,{dark:true,titleSize:68});
 plaque(arenaRoom,'STAND UP','CAPACITY',3.6,.94,5.2,4.7,-8.1,{dark:true,titleSize:68});
+const arenaChallengeBoard=new THREE.Group();arenaChallengeBoard.name='KOMO_CHALLENGE_BOARD_V32';arenaChallengeBoard.position.set(0,0,2.7);arenaRoom.add(arenaChallengeBoard);
+box(arenaChallengeBoard,5.8,.18,2.1,MAT.travertine,0,.10,0);
+box(arenaChallengeBoard,5.15,2.65,.22,MAT.blackened,0,1.55,-.78,{cast:true});
+plaque(arenaChallengeBoard,'WORLD CHALLENGES','DAILY · XP · COMMUNITY',4.7,.82,0,2.80,-.62,{dark:true,titleSize:54});
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 
 // Runtime state.
-const player=new THREE.Vector3(0,0,31.5);
+const player=new THREE.Vector3(0,0,13.8);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
 let cameraMode='third';
-let thirdPersonDistance=lowPower?4.0:4.8;
+let thirdPersonDistance=lowPower?3.75:4.25;
 const playerAvatar=makePlayerAvatar();
 let playerFacing=0;
 const cameraDesired=new THREE.Vector3(),cameraLook=new THREE.Vector3();
@@ -1788,7 +1894,16 @@ const interactions=[
   {id:'library',x:-10.7,z:-10,r:3.2,title:()=>copy[locale].libraryTitle,desc:()=>copy[locale].libraryCopy,action:showLibrary},
   {id:'talks',x:10.7,z:-10,r:3.2,title:()=>copy[locale].talksTitle,desc:()=>copy[locale].talksCopy,action:showTalks},
   {id:'life',x:8.6,z:2.6,r:3.4,title:()=>copy[locale].storeTitle,desc:()=>copy[locale].storeCopy,action:showLifeStore},
-  {id:'journey',x:4.8,z:8.5,r:3.0,title:()=>locale==='fr'?'World Journey':'World Journey',desc:()=>locale==='fr'?'Voir votre niveau, vos XP et les prochaines étapes.':'View your level, XP and next steps.',action:showJourneyPanel}
+  {id:'journey',x:4.8,z:8.5,r:3.0,title:()=>locale==='fr'?'World Journey':'World Journey',desc:()=>locale==='fr'?'Voir votre niveau, vos XP et les prochaines étapes.':'View your level, XP and next steps.',action:showJourneyPanel},
+  {id:'fountain',x:0,z:68.2,r:5.4,title:()=>locale==='fr'?'Grande Fontaine · KŌMØ District':'Grand Fountain · KŌMØ District',desc:()=>locale==='fr'?'Découvrir le campus extérieur · +15 XP':'Discover the exterior campus · +15 XP',action:showFountain},
+  {id:'life_strap',x:7.10,z:6.45,r:1.35,title:()=> 'Motion Strap',desc:()=>locale==='fr'?'KŌMØ Life · objet mouvement':'KŌMØ Life · movement object',action:()=>showLifeItem('strap')},
+  {id:'life_bottle',x:9.80,z:6.45,r:1.35,title:()=> 'KŌMØ Bottle',desc:()=>locale==='fr'?'KŌMØ Life · hydratation':'KŌMØ Life · hydration',action:()=>showLifeItem('bottle')},
+  {id:'life_recovery',x:7.10,z:1.25,r:1.35,title:()=> 'Recovery Roll',desc:()=>locale==='fr'?'KŌMØ Life · récupération':'KŌMØ Life · recovery',action:()=>showLifeItem('recovery')},
+  {id:'life_travel',x:9.80,z:1.25,r:1.35,title:()=> 'Travel Kit',desc:()=>locale==='fr'?'KŌMØ Life · Riviera':'KŌMØ Life · Riviera',action:()=>showLifeItem('travel')}
+];
+
+const arenaInteractions=[
+  {id:'challenge_board',x:45,z:2.7,r:3.5,title:()=>locale==='fr'?'World Challenges':'World Challenges',desc:()=>locale==='fr'?'Voir les défis du jour':'View today’s challenges',action:showChallenges}
 ];
 
 const twinInteractions=[
@@ -1930,6 +2045,128 @@ function showJourneyPanel(){
 }
 journeyHud.addEventListener('click',showJourneyPanel);
 
+// V3.2 Health Snapshot — movement-oriented overview, separate from World XP.
+function updateHealthHUD(){
+  const snap=current(),d=snap.domains||{};
+  const score=Number(snap.motion_score)||0;
+  const cmp=core.compare?.(baseline.snapshot_id,snap.snapshot_id,'world-v1');
+  const delta=Number(cmp?.motion_score_delta)||0;
+  const trend=delta>1?(locale==='fr'?'EN HAUSSE':'UP'):delta<-1?(locale==='fr'?'À SUIVRE':'WATCH'):(locale==='fr'?'STABLE':'STABLE');
+  healthStatusEl.textContent=score+' · '+trend;
+  healthMuscleEl.textContent=Math.round(Number(d.muscle)||0);
+  healthBalanceEl.textContent=Math.round(Number(d.balance)||0);
+  healthCapacityEl.textContent=Math.round(Number(d.endurance)||0);
+  healthSourceEl.textContent='DEMO';
+}
+function healthOverviewHtml(){
+  const snap=current(),d=snap.domains||{};
+  const rows=[
+    ['MUSCLE',d.muscle], [locale==='fr'?'MOBILITÉ':'MOBILITY',d.mobility],
+    [locale==='fr'?'ÉQUILIBRE':'BALANCE',d.balance],['POSTURE',d.posture],['CAPACITY',d.endurance]
+  ];
+  return `
+    <div class="metric-hero"><div><span>MOTION SCORE</span><strong>${snap.motion_score}<em>/100</em></strong></div><div><span>MOTION AGE</span><strong>${snap.motion_age}</strong></div></div>
+    <div class="health-overview">${rows.map(([label,val])=>`<div class="health-row"><span>${label}</span><i><em style="width:${THREE.MathUtils.clamp(Number(val)||0,0,100)}%"></em></i><b>${Math.round(Number(val)||0)}</b></div>`).join('')}</div>
+    <div class="priority-card"><b>${locale==='fr'?'COMMENT LIRE CET APERÇU':'HOW TO READ THIS'}</b>${locale==='fr'?'Il résume les domaines de mouvement suivis dans le Functional Twin. Ouvrez le Twin pour comprendre chaque domaine et son évolution dans le temps.':'It summarises movement domains tracked in Functional Twin. Open Twin to understand each domain and its change over time.'}</div>
+    <div class="data-note">${locale==='fr'?'Aperçu informatif du mouvement, pas un diagnostic. Les valeurs sont actuellement celles du jeu de démonstration TwinCore tant que Pulse personnel n’est pas connecté.':'Informational movement overview, not a diagnosis. Values currently use the TwinCore demo dataset until a personal Pulse session is connected.'}</div>`;
+}
+function showHealthOverview(){
+  openPanel(locale==='fr'?'VOTRE SANTÉ · MOUVEMENT':'YOUR HEALTH · MOVEMENT',locale==='fr'?'Comprendre votre état en un coup d’œil.':'Understand your movement status at a glance.',healthOverviewHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:locale==='fr'?'OUVRIR LE TWIN':'OPEN TWIN',primary:true,onClick:enterTwin}
+  ]);
+}
+healthHud.addEventListener('click',showHealthOverview);
+updateHealthHUD();
+
+// V3.2 Daily World Challenges — engagement only, never health rankings.
+const CHALLENGE_KEY='komo_world_challenges_v1';
+const challengeDefs=[
+  {id:'distance',reward:20,target:120,title:{fr:'Explorer le World',en:'Explore the World'},sub:{fr:'Parcourir 120 m dans le campus',en:'Move 120 m through the campus'}},
+  {id:'twin',reward:20,target:1,title:{fr:'Lire votre Twin',en:'Read your Twin'},sub:{fr:'Entrer dans Functional Twin',en:'Enter Functional Twin'}},
+  {id:'fitness',reward:25,target:1,title:{fr:'Bouger aujourd’hui',en:'Move today'},sub:{fr:'Valider la séance KŌMØ Fitness Club',en:'Complete today’s KŌMØ Fitness Club session'}},
+  {id:'fountain',reward:15,target:1,title:{fr:'Découvrir la grande fontaine',en:'Discover the Grand Fountain'},sub:{fr:'Explorer le nouveau KŌMØ District',en:'Explore the new KŌMØ District'}}
+];
+function loadChallengeState(){
+  const today=localDateKey();
+  try{
+    const raw=JSON.parse(localStorage.getItem(CHALLENGE_KEY)||'{}');
+    if(raw.date===today)return {date:today,progress:raw.progress||{},done:raw.done||{},points:Number(raw.points)||0};
+  }catch{}
+  return {date:today,progress:{},done:{},points:0};
+}
+const challenges=loadChallengeState();
+function saveChallenges(){try{localStorage.setItem(CHALLENGE_KEY,JSON.stringify(challenges))}catch{}}
+function challengeProgress(id){return Number(challenges.progress[id])||0}
+function completeChallenge(id){
+  const d=challengeDefs.find(x=>x.id===id);if(!d||challenges.done[id])return false;
+  challenges.progress[id]=d.target;challenges.done[id]=Date.now();challenges.points+=d.reward;saveChallenges();
+  journey.xp+=d.reward;saveJourney();updateJourneyUI();
+  notify('+'+d.reward+' XP · '+d.title[locale]);return true;
+}
+function addChallengeProgress(id,amount){
+  const d=challengeDefs.find(x=>x.id===id);if(!d||challenges.done[id])return;
+  challenges.progress[id]=Math.min(d.target,challengeProgress(id)+amount);saveChallenges();
+  if(challenges.progress[id]>=d.target)completeChallenge(id);
+}
+function challengesHtml(){
+  return `
+    <div class="panel-grid"><div><span>DAILY</span><b>${challengeDefs.filter(d=>challenges.done[d.id]).length}/${challengeDefs.length}</b></div><div><span>CHALLENGE XP</span><b>${challenges.points}</b></div></div>
+    <div class="challenge-grid">${challengeDefs.map(d=>{const p=Math.min(d.target,challengeProgress(d.id)),pct=d.target?p/d.target*100:0;return `
+      <div class="challenge-card ${challenges.done[d.id]?'done':''}">
+        <span><em>+${d.reward} XP</em><em>${challenges.done[d.id]?'✓ DONE':Math.round(p)+' / '+d.target}</em></span>
+        <b>${d.title[locale]}</b><small>${d.sub[locale]}</small>
+        <i><em style="width:${pct}%"></em></i>
+      </div>`}).join('')}</div>
+    <div class="data-note">${locale==='fr'?'Les défis récompensent l’exploration et l’activité. Ils ne comparent ni Motion Score ni données de santé entre utilisateurs.':'Challenges reward exploration and activity. They never compare Motion Score or health data between users.'}</div>`;
+}
+function showChallenges(){
+  openPanel('WORLD CHALLENGES',locale==='fr'?'Vos défis du jour.':'Your challenges for today.',challengesHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:locale==='fr'?'ALLER À L’ARENA':'GO TO ARENA',primary:true,onClick:()=>fastTravel('arena')}
+  ]);
+}
+challengesToggle.addEventListener('click',()=>{closeWorldMenu();showChallenges()});
+
+// V3.2 lightweight Avatar Studio.
+const AVATAR_KEY='komo_world_avatar_v1';
+const avatarPalettes={
+  outfit:{sage:[0x24483a,0x19372d,0x303733],sand:[0xa69379,0x756451,0x423d36],black:[0x282d2a,0x171b19,0x242624]},
+  skin:{light:[0xd4a17d,0xbd805f],medium:[0xb87e59,0x9d6548],deep:[0x7c4f38,0x653b29]},
+  hair:{dark:0x2a2420,brown:0x5a3c2d,grey:0x6b6a65}
+};
+function loadAvatarConfig(){try{return {...{outfit:'sage',skin:'medium',hair:'dark'},...JSON.parse(localStorage.getItem(AVATAR_KEY)||'{}')}}catch{return {outfit:'sage',skin:'medium',hair:'dark'}}}
+const avatarConfig=loadAvatarConfig();
+function applyAvatarConfig(){
+  const mats=playerAvatar.userData.avatar.materials;if(!mats)return;
+  const o=avatarPalettes.outfit[avatarConfig.outfit]||avatarPalettes.outfit.sage;
+  const sk=avatarPalettes.skin[avatarConfig.skin]||avatarPalettes.skin.medium;
+  mats.cloth.color.setHex(o[0]);mats.clothDark.color.setHex(o[1]);mats.trouser.color.setHex(o[2]);
+  mats.skin.color.setHex(sk[0]);mats.skinWarm.color.setHex(sk[1]);
+  mats.hair.color.setHex(avatarPalettes.hair[avatarConfig.hair]||avatarPalettes.hair.dark);
+}
+function saveAvatarConfig(){try{localStorage.setItem(AVATAR_KEY,JSON.stringify(avatarConfig))}catch{}applyAvatarConfig()}
+function avatarStudioHtml(){
+  const row=(key,label,opts)=>`<div class="avatar-option-row"><span>${label}</span><div class="avatar-swatches">${opts.map(([id,name])=>`<button data-avatar-key="${key}" data-avatar-value="${id}" class="${avatarConfig[key]===id?'selected':''}">${name}</button>`).join('')}</div></div>`;
+  return `<div class="avatar-options">
+    ${row('outfit',locale==='fr'?'TENUE':'OUTFIT',[['sage','KŌMØ SAGE'],['sand','RIVIERA SAND'],['black','MIDNIGHT']])}
+    ${row('skin',locale==='fr'?'TEINTE':'SKIN',[['light','LIGHT'],['medium','MEDIUM'],['deep','DEEP']])}
+    ${row('hair',locale==='fr'?'CHEVEUX':'HAIR',[['dark','DARK'],['brown','BROWN'],['grey','GREY']])}
+  </div><div class="data-note">${locale==='fr'?'Personnalisation locale de votre avatar World. La synchronisation complète avec Pulse pourra reprendre cette configuration.':'Local World avatar customisation. Full Pulse sync can reuse this configuration.'}</div>`;
+}
+function bindAvatarStudio(){
+  panelBody.querySelectorAll('[data-avatar-key]').forEach(btn=>btn.addEventListener('click',()=>{
+    avatarConfig[btn.dataset.avatarKey]=btn.dataset.avatarValue;saveAvatarConfig();showAvatarStudio();
+  }));
+}
+function showAvatarStudio(){
+  openPanel('AVATAR STUDIO',locale==='fr'?'Personnalisez votre présence dans KŌMØ World.':'Customise your presence in KŌMØ World.',avatarStudioHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}
+  ]);bindAvatarStudio();
+}
+avatarToggle.addEventListener('click',()=>{closeWorldMenu();showAvatarStudio()});
+applyAvatarConfig();
+
 function syncUiOpen(){
   document.body.classList.toggle('ui-open',worldMenu.classList.contains('open')||panel.classList.contains('open'));
 }
@@ -1949,8 +2186,8 @@ function setCameraMode(next){
 function toggleCamera(){setCameraMode(cameraMode==='third'?'first':'third')}
 setCameraMode('third');
 const travelPoints={
-  arrival:{mode:'world',x:0,y:0,z:31.5,yaw:0,level:0},
-  hall:{mode:'world',x:0,y:0,z:5.5,yaw:0,level:0},
+  arrival:{mode:'world',x:0,y:0,z:58.5,yaw:Math.PI,level:0},
+  hall:{mode:'world',x:0,y:0,z:13.8,yaw:0,level:0},
   twin:{mode:'world',x:-5.9,y:0,z:-22.2,yaw:0,level:0},
   rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
   arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
@@ -1958,7 +2195,7 @@ const travelPoints={
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
 };
 const journeyTargets={
-  arrival:{x:0,y:0,z:31.5},hall:{x:0,y:0,z:5.5},journey:{x:4.8,y:0,z:8.5},
+  arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:13.8},journey:{x:4.8,y:0,z:8.5},
   twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
   life:{x:8.4,y:0,z:3.4},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
@@ -2351,7 +2588,7 @@ function markFitnessTodayComplete(){
   saveFitnessProfile();
   const coachId=t.activity.coach;
   rehabProgress[coachId]=(rehabProgress[coachId]||0)+1;rehabProgress.total++;saveRehabProgress();
-  completeJourney('rehab_session');
+  completeJourney('rehab_session');completeChallenge('fitness');
   setRehabCoachStation(coachId,false);
   notify((locale==='fr'?'+20 CLUB POINTS · STREAK ':'+20 CLUB POINTS · STREAK ')+fitnessStreak());
   showFitnessToday(true);
@@ -2425,7 +2662,7 @@ function twinHtml(){
 }
 function bindTimeline(){
   panelBody.querySelectorAll('[data-time]').forEach(btn=>btn.addEventListener('click',()=>{
-    core.setTimeIndex(+btn.dataset.time,'world-v1');$('#hud-motion').textContent=current().motion_score;$('#hud-age').textContent=current().motion_age;updateTwinVisuals();showTwin();
+    core.setTimeIndex(+btn.dataset.time,'world-v1');$('#hud-motion').textContent=current().motion_score;$('#hud-age').textContent=current().motion_age;updateTwinVisuals();updateHealthHUD();showTwin();
   }));
   panelBody.querySelectorAll('[data-domain]').forEach(btn=>btn.addEventListener('click',()=>showTwinDomain(btn.dataset.domain)));
 }
@@ -2485,6 +2722,7 @@ function arenaHtml(){
 function showArena(){
   openPanel('ARENA',locale==='fr'?'Performance · progression · communauté.':'Performance · progression · community.',arenaHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
+    {label:locale==='fr'?'DÉFIS DU JOUR':'DAILY CHALLENGES',primary:true,onClick:showChallenges},
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}
   ]);
 }
@@ -2503,20 +2741,50 @@ function showTalks(){
   openPanel('TALKS',locale==='fr'?'Experts & événements.':'Experts & events.',html,[{label:copy[locale].close,onClick:closePanel}]);
 }
 
+function showFountain(){
+  completeChallenge('fountain');
+  openPanel('GRAND FOUNTAIN',locale==='fr'?'Le cœur du KŌMØ District.':'The heart of KŌMØ District.',`
+    <p>${locale==='fr'?'La grande fontaine devient le point central du campus extérieur : Movement House, Life Lab et Performance Pavilion entourent cette nouvelle place.':'The Grand Fountain is the centre of the exterior campus: Movement House, Life Lab and Performance Pavilion surround the new square.'}</p>
+    <div class="panel-grid"><div><span>MOVEMENT HOUSE</span><b>Community</b></div><div><span>LIFE LAB</span><b>Objects</b></div><div><span>PERFORMANCE</span><b>Challenges</b></div><div><span>DISTRICT</span><b>Explore</b></div></div>
+    <div class="priority-card"><b>WORLD CHALLENGE</b>${challenges.done.fountain?(locale==='fr'?'✓ Fontaine découverte':'✓ Fountain discovered'):(locale==='fr'?'Approchez-vous de la fontaine pour débloquer +15 XP.':'Approach the fountain to unlock +15 XP.')}</div>`,[
+    {label:locale==='fr'?'VOIR LES DÉFIS':'VIEW CHALLENGES',onClick:showChallenges},
+    {label:locale==='fr'?'RETOUR AU HALL':'BACK TO HALL',primary:true,onClick:()=>fastTravel('hall')}
+  ]);
+}
+function showLifeItem(id){
+  completeJourney('life',{silent:true});
+  const items={
+    strap:{name:'MOTION STRAP',cat:'MOVE',fr:'Un objet textile KŌMØ pensé autour du mouvement, des capteurs et de l’entraînement.',en:'A KŌMØ textile object built around movement, sensors and training.'},
+    bottle:{name:'KŌMØ BOTTLE',cat:'HYDRATE',fr:'Objet quotidien KŌMØ Life, simple et durable, intégré à la routine.',en:'A simple durable KŌMØ Life daily object integrated into the routine.'},
+    recovery:{name:'RECOVERY ROLL',cat:'RESET',fr:'Accessoire de mobilité et de récupération présenté directement dans le flagship.',en:'A mobility and recovery accessory displayed directly in the flagship.'},
+    travel:{name:'TRAVEL KIT',cat:'RIVIERA',fr:'Kit compact pensé pour prolonger la routine KŌMØ en déplacement.',en:'A compact kit designed to extend the KŌMØ routine while travelling.'}
+  };
+  const it=items[id]||items.strap;
+  openPanel('KŌMØ LIFE · '+it.cat,it.name,`
+    <p>${it[locale]}</p>
+    <div class="life-item-grid">
+      <article><span>WORLD</span><b>Displayed in 3D</b><small>${locale==='fr'?'Approchez-vous de chaque objet pour le découvrir.':'Walk up to each object to discover it.'}</small></article>
+      <article><span>LIFE</span><b>Physical object</b><small>${locale==='fr'?'La boutique Life relie l’objet virtuel au produit réel.':'Life links the virtual object to the real product.'}</small></article>
+    </div>`,[
+    {label:locale==='fr'?'CONTINUER À EXPLORER':'KEEP EXPLORING',onClick:closePanel},
+    {label:copy[locale].openLife,primary:true,onClick:()=>{location.href='https://life.komolongevity.com/'}}
+  ]);
+}
+
 function showLifeStore(){
   completeJourney('life');
   const html=locale==='fr'
     ?`<p>KŌMØ Life prolonge World dans le réel : objets, équipements et éditions conçus autour du mouvement et de la longévité.</p>
       <div class="store-products">
         <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>La valise KŌMØ configurable, présentée ici comme objet signature.</small></article>
-        <article><span>02 · ORIGINALS</span><b>KŌMØ Life</b><small>Pièces, objets et culture du mouvement.</small></article>
-        <article><span>03 · EDITIONS</span><b>Selected drops</b><small>Collaborations et séries limitées à venir.</small></article>
+        <article><span>02 · OBJECTS</span><b>Motion Strap · Bottle · Recovery Roll</b><small>Les objets sont désormais disposés physiquement dans le flagship World.</small></article>
+        <article><span>03 · EDITIONS</span><b>Travel Kit · Selected drops</b><small>Collaborations, séries limitées et objets Riviera.</small></article>
       </div>`
     :`<p>KŌMØ Life extends World into real life: objects, equipment and editions designed around movement and longevity.</p>
       <div class="store-products">
         <article><span>01 · EQUIPMENT</span><b>KŌMØ Case 01</b><small>The configurable KŌMØ case, presented here as a signature object.</small></article>
-        <article><span>02 · ORIGINALS</span><b>KŌMØ Life</b><small>Pieces, objects and movement culture.</small></article>
-        <article><span>03 · EDITIONS</span><b>Selected drops</b><small>Collaborations and limited editions to come.</small></article>
+        <article><span>02 · OBJECTS</span><b>Motion Strap · Bottle · Recovery Roll</b><small>Objects are now physically placed inside the World flagship.</small></article>
+        <article><span>03 · EDITIONS</span><b>Travel Kit · Selected drops</b><small>Collaborations, limited editions and Riviera objects.</small></article>
       </div>`;
   openPanel('KŌMØ LIFE',locale==='fr'?'La boutique du World.':'The World store.',html,[
     {label:copy[locale].openLife,onClick:()=>{location.href='https://life.komolongevity.com/'}},
@@ -2546,23 +2814,23 @@ function showRehabCoach(){
 function showNpcConversation(npc){
   const d=npc?.userData?.npc;if(!d)return;
   completeJourney('social');
+  const t=fitnessToday();
   const lines={
-    staff:{fr:'Bienvenue. Le meilleur point de départ est le Functional Twin : il vous montre comment KŌMØ organise votre parcours.',en:'Welcome. The best place to start is Functional Twin: it shows how KŌMØ organises your journey.'},
-    coach:{fr:'Arena transforme l’engagement en challenges. Seuls les scores de challenge peuvent être comparés — jamais les données de santé.',en:'Arena turns engagement into challenges. Only challenge scores may be compared — never health data.'},
+    staff:{fr:'Bienvenue. Commencez par l’aperçu santé puis le Functional Twin pour comprendre votre trajectoire.',en:'Welcome. Start with the health snapshot and Functional Twin to understand your trajectory.'},
+    coach:{fr:t?'Votre séance du jour est prête : '+t.activity.title.fr+' · '+t.title+' · '+t.duration+' min.':'Choisissez une pratique dans KŌMØ Fitness Club et je vous proposerai une séance chaque jour.',en:t?'Today’s session is ready: '+t.activity.title.en+' · '+t.title+' · '+t.duration+' min.':'Choose an activity in KŌMØ Fitness Club and I will give you a daily session.'},
     visitor:{fr:'Je découvre aussi le World. KŌMØ Life relie l’expérience numérique aux objets et équipements du monde réel.',en:'I am exploring the World too. KŌMØ Life connects the digital experience with real-world objects and equipment.'}
   };
-  const body=`<p>${lines[d.role]?.[locale]||lines.visitor[locale]}</p><div class="priority-card"><b>WORLD JOURNEY</b>${locale==='fr'?'Échange social débloqué · +15 XP':'Social interaction unlocked · +15 XP'}</div>`;
-  openPanel(d.label||'KŌMØ MEMBER',d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'COACH':'WORLD GUEST',body,[
-    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
-    {label:locale==='fr'?'VOIR LE JOURNEY':'VIEW JOURNEY',primary:true,onClick:showJourneyPanel}
-  ]);
+  const actions=[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}];
+  if(d.role==='coach')actions.push({label:t?(locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION'):(locale==='fr'?'FITNESS CLUB':'FITNESS CLUB'),primary:true,onClick:t?showFitnessToday:showRehab});
+  else actions.push({label:locale==='fr'?'VOIR LE JOURNEY':'VIEW JOURNEY',primary:true,onClick:showJourneyPanel});
+  openPanel(d.label||'KŌMØ MEMBER',d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'FITNESS COACH':'WORLD GUEST',`<p>${lines[d.role]?.[locale]||lines.visitor[locale]}</p><div class="priority-card"><b>WORLD JOURNEY</b>${locale==='fr'?'Échange social · +15 XP':'Social interaction · +15 XP'}</div>`,actions);
 }
 function setMode(next){
   if(next!=='rehab')stopRehabSession();
   mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';rehabCoach.visible=next==='rehab';
 }
 function enterTwin(){
-  completeJourney('twin');
+  completeJourney('twin');completeChallenge('twin');
   playerLevel=0;setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';
 }
 function enterRehab(){
@@ -2604,7 +2872,7 @@ function canMove(p){
   if(mode==='world'){
     if(isStairPosition(p))return true;
     if(playerLevel===1||player.y>UPPER_Y-.70)return isUpperWalkable(p);
-    if(p.z>63||p.z<-28.6||Math.abs(p.x)>20)return false;
+    if(p.z>81||p.z<-28.6||Math.abs(p.x)>24)return false;
     if(p.z<16.5&&Math.abs(p.x)>11.15)return false;
     if(p.z>=14.1&&p.z<=18.8&&Math.abs(p.x)>4.35)return false;
     if(p.x>-10.1&&p.x<-4.7&&p.z>1.9&&p.z<6.1)return false;
@@ -2616,7 +2884,8 @@ function canMove(p){
   return true;
 }
 function commitMove(next){
-  player.copy(next);syncPlayerElevation();
+  const moved=player.distanceTo(next);player.copy(next);syncPlayerElevation();
+  if(mode==='world'&&moved>0)addChallengeProgress('distance',moved);
 }
 function tryMove(dx,dz){
   const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){commitMove(n);return}
@@ -2681,7 +2950,7 @@ function updateCamera(now,dt){
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
     const distance=thirdPersonDistance;
-    const height=lowPower?2.45:2.72;
+    const height=lowPower?2.08:2.30;
     cameraDesired.set(
       player.x+Math.sin(yaw)*distance,
       player.y+height+pitch*1.25,
@@ -2700,7 +2969,7 @@ function updateCamera(now,dt){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
-    cameraLook.set(player.x,player.y+1.28+pitch*.55,player.z);
+    cameraLook.set(player.x,player.y+1.12+pitch*.48,player.z);
     camera.lookAt(cameraLook);
   }else{
     const move=Math.min(1,velocity.length()/4.35);
@@ -2711,6 +2980,20 @@ function updateCamera(now,dt){
     camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
   }
   updatePlayerAvatar(now,dt);
+}
+function updateDestinationDoors(now,dt){
+  if(!living.destinationDoors?.length)return;
+  living.destinationDoors.forEach((d,i)=>{
+    const near=mode==='world'&&player.z<-21.5&&player.z>-29&&Math.abs(player.x-d.x)<3.2;
+    const target=near?1:0;
+    d.progress+=(target-d.progress)*(1-Math.exp(-(target?8.5:5.0)*dt));
+    const e=d.progress*d.progress*(3-2*d.progress);
+    d.left.position.x=THREE.MathUtils.lerp(-1.08,-2.00,e);
+    d.right.position.x=THREE.MathUtils.lerp(1.08,2.00,e);
+    d.mat.opacity=.10+.34*e;
+    d.beacon.rotation.z=now*.0011*(i%2?1:-1);
+    d.beacon.scale.setScalar(.92+.10*e+.04*Math.sin(now*.004+i));
+  });
 }
 function updateDoors(now,dt){
   let approach=mode==='world'&&player.z<25.8&&player.z>9.0&&Math.abs(player.x)<4.8;
@@ -2748,7 +3031,9 @@ function updateLocation(){
     else locationName.textContent='LIFE LOUNGE · LEVEL 2';
     return;
   }
-  if(player.z>23)locationName.textContent='ARRIVAL PLAZA';
+  if(player.z>57)locationName.textContent='KŌMØ DISTRICT';
+  else if(player.z>23)locationName.textContent='ARRIVAL COURT';
+  else if(player.z>11.8)locationName.textContent='WORLD ENTRANCE';
   else if(player.x>6.8&&player.z>-2&&player.z<7){locationName.textContent='KŌMØ LIFE';completeJourney('life',{silent:true})}
   else if(player.z>-7){locationName.textContent='KŌMØ HALL';completeJourney('hall',{silent:true})}
   else locationName.textContent='MOTION ATRIUM';
@@ -2759,7 +3044,7 @@ function updateHeading(){
   headingEl.textContent=dirs[Math.round(a/(Math.PI/4))%8];
 }
 function updateInteraction(){
-  let pool=mode==='world'?interactions:mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions:[];
+  let pool=mode==='world'?interactions:mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions:mode==='arena'?arenaInteractions:[];
   let best=null,bestD=Infinity;
   for(const it of pool){
     if(mode==='world'&&playerLevel===1&&it.level!==1)continue;
@@ -2880,7 +3165,7 @@ function applyLocale(){
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
   $('#world-menu-copy').textContent=locale==='fr'?'Choisissez un espace ou ajustez votre expérience.':'Choose a space or adjust your experience.';
-  updateJourneyUI();
+  updateJourneyUI();updateHealthHUD();
   if(currentInteraction){interactionTitle.textContent=currentInteraction.title();interactionCopy.textContent=currentInteraction.desc()}
   if(panel.classList.contains('open')){
     if(mode==='twin')showTwin();else if(mode==='rehab')showRehab();else if(mode==='arena')showArena();
@@ -2922,6 +3207,7 @@ function updateVisibilityBudget(now){
   // Coarse occlusion/distance budget: do not draw whole zones when they cannot contribute.
   const deepHall=player.z<7;
   exterior.visible=player.z>5;
+  if(living.district)living.district.visible=player.z>35;
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
@@ -3038,13 +3324,20 @@ function animateLiving(now){
   if(living.skyDome){
     living.skyDome.position.copy(camera.position);
   }
-  if(!lowPower&&living.clouds?.length){
+  if(living.clouds?.length){
     living.clouds.forEach((cloud,i)=>{
       let x=cloud.userData.baseX+(t*cloud.userData.speed*1.8);
       while(x>105)x-=210;
       cloud.position.x=x;
       cloud.position.z+=Math.sin(t*.035+i)*.0015;
       cloud.material.opacity=(lowPower?.075:.105)+.035*(.5+.5*Math.sin(t*.08+i*.8));
+    });
+  }
+  if(living.fountainJets?.length){
+    living.fountainJets.forEach((jet,i)=>{
+      const h=.72+.52*(.5+.5*Math.sin(t*1.25+jet.userData.phase));
+      jet.scale.y=h;jet.position.y=jet.userData.baseY+(h-.72)*.38;
+      jet.material.opacity=.30+.16*(.5+.5*Math.sin(t*.9+i*.4));
     });
   }
   if(living.sunSprite&&living.skyUniforms){
@@ -3058,6 +3351,7 @@ function animate(now){
   updateMovement(dt);
   updateCamera(now,dt);
   updateDoors(now,dt);
+  updateDestinationDoors(now,dt);
 
   // UI / proximity logic does not need 60 Hz.
   if(now-lastUiUpdate>(lowPower?100:66)){
@@ -3115,7 +3409,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.1.0-visual-polish',
+  version:'3.2.0-world-hub',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
