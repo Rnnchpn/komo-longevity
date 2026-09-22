@@ -664,7 +664,7 @@ function motionScreen(parent,x,y,z,rotY=0,label='MOTION'){
   const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
   const mat=new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide});
   const m=mesh(parent,new THREE.PlaneGeometry(3.55,1.8),mat,x,y,z,{receive:false});m.rotation.y=rotY;
-  const rec={ctx,tx,label,phase:Math.random()*10};living.motionScreens.push(rec);
+  const rec={ctx,tx,label,phase:Math.random()*10,mesh:m};living.motionScreens.push(rec);
   return m;
 }
 function drawMotionScreen(rec,t){
@@ -1319,8 +1319,6 @@ const artFrames=[
   {x:-11.43,y:3.55,z:-18.2,ry:Math.PI/2,sx:2.0,sy:2.75,sz:.055}
 ];
 instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.blackened,artFrames,'KOMO_HALL_ART_FRAMES_V30');
-const artInner=artFrames.map((it,i)=>({...it,x:it.x+(i===1?-.06:.06),sx:1.72,sy:2.43,sz:.018}));
-
 // Explicit art interiors, only three meshes.
 const artColors=[0x809484,0xc2a477,0x566c60];
 artFrames.forEach((it,i)=>{
@@ -1333,7 +1331,7 @@ plaque(hallLiving,'LONGEVITY IN MOTION','MEASURE · UNDERSTAND · TRAIN · LIVE'
 plaque(hallLiving,'KŌMØ CULTURE','MOVEMENT · SCIENCE · COMMUNITY',4.75,.92,11.32,5.64,-15.6,{rotY:-Math.PI/2,dark:true,titleSize:57});
 
 // One additional live editorial screen — existing motion-screen system is already throttled/culling-aware.
-motionScreen(hallLiving,11.40,4.55,-8.8,-Math.PI/2,'TODAY AT KŌMØ');
+if(!lowPower)motionScreen(hallLiving,11.40,4.55,-8.8,-Math.PI/2,'TODAY AT KŌMØ');
 
 // Material library objects near the Desk and Life entrance.
 const displayCubes=[];
@@ -3060,7 +3058,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.0.0-hall-living',
+  version:'3.0.1-hall-living',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
