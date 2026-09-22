@@ -948,7 +948,7 @@ plaque(outerFrame,'KŌMØ','WORLD · LONGEVITY IN MOTION',5.6,1.25,0,8.55,17.52,
 
 // V1.7 facade banners — institutional, vertical and visible from the closer spawn.
 fabricBanner(building,-12.65,7.55,18.55,1.22,4.65,'TWIN','UNDERSTAND',{dark:true});
-fabricBanner(building,-10.75,7.55,18.75,1.22,4.65,'REHAB','ACT',{dark:false});
+fabricBanner(building,-10.75,7.55,18.75,1.22,4.65,'FITNESS','TRAIN',{dark:false});
 fabricBanner(building,10.75,7.55,18.75,1.22,4.65,'ARENA','ENGAGE',{dark:false});
 fabricBanner(building,12.65,7.55,18.55,1.22,4.65,'KŌMØ LIFE','CASE 01',{dark:true});
 [
@@ -1410,7 +1410,7 @@ box(building,22.7,7.2,.42,M.sageDeep,0,4.0,-30.0);
 box(building,21.8,.07,.10,M.bronze,0,7.05,-29.73);
 const portals=[
   {x:-6.8,title:'FUNCTIONAL TWIN',sub:'UNDERSTAND',dark:true},
-  {x:0,title:'REHAB',sub:'ACT',dark:false},
+  {x:0,title:'KŌMØ FITNESS',sub:'DAILY CLUB',dark:false},
   {x:6.8,title:'ARENA',sub:'ENGAGE',dark:true}
 ];
 portals.forEach(({x,title,sub,dark})=>{
