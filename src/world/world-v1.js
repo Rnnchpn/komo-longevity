@@ -3514,8 +3514,8 @@ function updateCamera(now,dt){
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
     const distance=thirdPersonDistance;
-    const height=lowPower?1.88:2.08;
-    const shoulder=lowPower?.24:.34;
+    const height=lowPower?1.94:2.16;
+    const shoulder=lowPower?.22:.31;
     cameraDesired.set(
       player.x+Math.sin(yaw)*distance+Math.cos(yaw)*shoulder,
       player.y+height+pitch*1.08,
@@ -3534,12 +3534,12 @@ function updateCamera(now,dt){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
-    cameraLook.set(player.x,player.y+1.03+pitch*.42,player.z);
+    cameraLook.set(player.x,player.y+1.18+pitch*.40,player.z);
     camera.lookAt(cameraLook);
   }else{
     const move=Math.min(1,velocity.length()/4.35);
     const bob=move*Math.sin(now*.0102)*.006;
-    const eyeY=player.y+1.72+bob;
+    const eyeY=player.y+1.96+bob;
     camera.position.set(player.x,eyeY,player.z);
     const cp=Math.cos(pitch),sp=Math.sin(pitch),look=18;
     camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
