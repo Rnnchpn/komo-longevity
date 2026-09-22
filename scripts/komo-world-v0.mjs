@@ -52,7 +52,7 @@ const checks=[
   ['mobile no forced rescue V3.0.2+ present',!runtime.includes('if(lowPower)applyEmergencyPerformance();')&&runtime.includes('retinaMobile?1.02:.86')&&runtime.includes('retinaMobile?.78:.68')],
   ['Visual polish V3.1+ present',runtime.includes('KOMO_PLAYER_AVATAR_V31')&&runtime.includes('KOMO_HALL_HOST_V31')],
   ['player grounding V3.1 present',runtime.includes('Grounding: contact shadow')&&runtime.includes('leftElbow')&&runtime.includes('rightElbow')],
-  ['World Hub V3.2 present',runtime.includes("version:'3.2.0-world-hub'")&&runtime.includes('KOMO_WORLD_DISTRICT_V32')&&runtime.includes('KOMO_GRAND_FOUNTAIN_V32')],
+  ['World Hub V3.2+ present',runtime.includes('KOMO_WORLD_DISTRICT_V32')&&runtime.includes('KOMO_GRAND_FOUNTAIN_V32')],
   ['World Hub destination doors present',runtime.includes('KOMO_DESTINATION_DOOR_')&&runtime.includes('function updateDestinationDoors')],
   ['World Hub health + challenges present',runtime.includes('function showHealthOverview')&&runtime.includes('const CHALLENGE_KEY')&&runtime.includes('KOMO_CHALLENGE_BOARD_V32')],
   ['World Hub Life items present',runtime.includes('KOMO_LIFE_ITEMS_V32')&&runtime.includes('function showLifeItem')],
