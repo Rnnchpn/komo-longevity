@@ -4,6 +4,7 @@ const URL='https://uqlolefsiktbznnymriy.supabase.co';
 const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const PULSE_ORIGIN='https://pulse.komolongevity.com';
 const STALE_MS=45000;
+const CLOCK_SKEW_MS=180000;
 const HEARTBEAT_MS=2200;
 const POSE_MS=125;
 const PRESENCE_REFRESH_MS=4000;
@@ -190,7 +191,16 @@ export async function mount(runtime){
       U.roster.appendChild(item);
     }
   };
-  const fresh=(row)=>Date.now()-new Date(row.updated_at||0).getTime()<STALE_MS;
+  const timestampPlausible=(row)=>{
+    const t=new Date(row?.updated_at||0).getTime();
+    if(!Number.isFinite(t)||!t)return true;
+    const age=Date.now()-t;
+    return age<STALE_MS+CLOCK_SKEW_MS&&age>-CLOCK_SKEW_MS;
+  };
+  const fresh=(row)=>{
+    const seen=Number(row?._local_seen_at)||0;
+    return seen?Date.now()-seen<STALE_MS:timestampPlausible(row);
+  };
   const syncPeers=()=>{
     const own=state.session?.user?.id;let count=state.presenceLive?1:0;
     for(const [id,row] of [...state.rows]){
@@ -202,15 +212,15 @@ export async function mount(runtime){
     U.people.textContent='PEOPLE · '+count;renderRoster();
   };
   const consumePresence=(row)=>{
-    if(!row?.user_id)return;state.rows.set(row.user_id,row);syncPeers();
+    if(!row?.user_id||!timestampPlausible(row))return;
+    state.rows.set(row.user_id,{...row,_local_seen_at:Date.now()});syncPeers();
   };
   const removePresence=(row)=>{
     if(!row?.user_id)return;state.rows.delete(row.user_id);const p=state.peers.get(row.user_id);if(p){p.removeFromParent();state.peers.delete(row.user_id)};syncPeers();
   };
   const loadInitial=async()=>{
-    const cutoff=new Date(Date.now()-STALE_MS).toISOString();
     const [{data:presence,error:pe},{data:messages,error:me}]=await Promise.all([
-      client.from('world_presence').select('user_id,display_name,avatar_config,zone,x,y,z,yaw,updated_at').gte('updated_at',cutoff),
+      client.from('world_presence').select('user_id,display_name,avatar_config,zone,x,y,z,yaw,updated_at').order('updated_at',{ascending:false}).limit(50),
       client.from('world_chat_messages').select('id,user_id,display_name,body,created_at').order('created_at',{ascending:false}).limit(CHAT_LIMIT)
     ]);
     if(pe)throw pe;if(me)throw me;
@@ -227,7 +237,7 @@ export async function mount(runtime){
       for(const row of data||[]){
         if(!row?.user_id)continue;
         seen.add(row.user_id);
-        if(fresh(row)||row.user_id===state.session.user.id)consumePresence(row);
+        if(timestampPlausible(row)||row.user_id===state.session.user.id)consumePresence(row);
       }
       for(const [id,row] of [...state.rows]){
         if(id===state.session.user.id)continue;
@@ -454,5 +464,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.5.2-symmetric-presence',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.5.3-clock-safe-presence',connect:openPulse,state};
 }
