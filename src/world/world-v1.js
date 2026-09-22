@@ -2409,6 +2409,45 @@ function fastTravel(id){
   },180);
 }
 document.querySelectorAll('[data-fast-travel]').forEach(btn=>btn.addEventListener('click',()=>fastTravel(btn.dataset.fastTravel)));
+
+function joinPresence(target){
+  if(!target)return false;
+  const zone=['world','twin','rehab','arena'].includes(target.zone)?target.zone:'world';
+  const tx=Number(target.x)||0,tz=Number(target.z)||0,ty=Number(target.y)||0,tyaw=Number(target.yaw)||0;
+  closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
+  setTimeout(()=>{
+    if(zone==='world'){
+      setMode('world');
+      playerLevel=ty>UPPER_Y*.55?1:0;
+      const offsets=[[1.65,1.15],[-1.65,1.15],[1.65,-1.15],[-1.65,-1.15],[0,1.9]];
+      let placed=false;
+      for(const [ox,oz] of offsets){
+        const p=new THREE.Vector3(
+          THREE.MathUtils.clamp(tx+ox,-23.2,23.2),
+          playerLevel===1?UPPER_Y:0,
+          THREE.MathUtils.clamp(tz+oz,-27.8,80.2)
+        );
+        if(canMove(p)){player.copy(p);placed=true;break}
+      }
+      if(!placed){
+        player.set(THREE.MathUtils.clamp(tx,-22.8,22.8),playerLevel===1?UPPER_Y:0,THREE.MathUtils.clamp(tz,-27.6,79.8));
+      }
+      syncPlayerElevation();
+    }else if(zone==='twin'){
+      playerLevel=0;setMode('twin');
+      player.set(THREE.MathUtils.clamp(tx+1.2,-55.2,-34.8),0,THREE.MathUtils.clamp(tz+1.0,-11.2,10.2));
+    }else if(zone==='rehab'){
+      playerLevel=0;setMode('rehab');
+      player.set(THREE.MathUtils.clamp(tx+1.2,-9.2,9.2),0,THREE.MathUtils.clamp(tz+1.0,-65.2,-43.8));
+    }else{
+      playerLevel=0;setMode('arena');
+      player.set(THREE.MathUtils.clamp(tx+1.2,34.8,55.2),0,THREE.MathUtils.clamp(tz+1.0,-11.2,10.2));
+    }
+    yaw=targetYaw=tyaw;playerFacing=tyaw;pitch=targetPitch=-.035;updateLocation();
+    setTimeout(()=>travelFade.classList.remove('active'),110);
+  },180);
+  return true;
+}
 function closePanel(){
   if(typeof rehabSessionTimer!=='undefined'&&rehabSessionTimer)stopRehabSession();
   panel.classList.remove('open');panel.setAttribute('aria-hidden','true');panelActions.innerHTML='';syncUiOpen();
@@ -3633,6 +3672,7 @@ window.KomoWorld={
   getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
   getCameraMode:()=>cameraMode,
   fastTravel,
+  joinPresence,
   notify
 };
 import('./world-multiplayer-v1.js')
