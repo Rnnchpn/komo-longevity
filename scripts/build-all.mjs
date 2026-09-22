@@ -189,7 +189,13 @@ const scripts = [
   'scripts/homepage-experience-clarity-v1.mjs',
   // Final home-only visual pass: add joyful Riviera colour while preserving
   // the premium, patient-first hierarchy.
-  'scripts/homepage-colour-balance-v1.mjs'
+  'scripts/homepage-colour-balance-v1.mjs',
+  // French is the primary public entry point; keep a complete English route
+  // available at /en/ and align language switchers across all homes.
+  'scripts/homepage-french-default-v1.mjs',
+  // Final interaction layer: restrained motion, depth and tactile feedback
+  // for the premium patient-facing home without changing the content flow.
+  'scripts/homepage-premium-motion-v1.mjs'
 ];
 
 for (const script of scripts) {
