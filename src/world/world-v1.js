@@ -119,7 +119,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.02;
+renderer.toneMappingExposure=1.04;
 renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -161,9 +161,9 @@ scene.fog=new THREE.Fog(0xcbd2c8,82,215);
 const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.12,260);
 camera.position.set(0,1.72,58);
 
-const hemi=new THREE.HemisphereLight(0xf0f0e8,0x667064,2.45);
+const hemi=new THREE.HemisphereLight(0xf4f1e9,0x59665d,2.05);
 scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffe3b8,3.05);
+const sun=new THREE.DirectionalLight(0xffe4bd,2.72);
 sun.position.set(-24,38,32);
 sun.castShadow=true;
 if(sun.castShadow){
@@ -172,21 +172,53 @@ if(sun.castShadow){
   sun.shadow.camera.near=1;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;
 }
 scene.add(sun);
-const fill=new THREE.DirectionalLight(0xe6ece5,lowPower?.18:.92);
+const fill=new THREE.DirectionalLight(0xe3ebe5,lowPower?.12:.62);
 fill.position.set(28,18,-30);scene.add(fill);
-const hallAmbient=new THREE.AmbientLight(0xfff3e4,lowPower?.18:.30);scene.add(hallAmbient);
-const hallLightGroup=new THREE.Group();hallLightGroup.name='KOMO_HALL_LIGHTING_V41';scene.add(hallLightGroup);
+const hallAmbient=new THREE.AmbientLight(0xfff3e4,lowPower?.13:.20);scene.add(hallAmbient);
+const hallLightGroup=new THREE.Group();hallLightGroup.name='KOMO_HALL_LIGHTING_V43';scene.add(hallLightGroup);
 const hallLights=[];
-if(!lowPower){
-  [
-    {p:[0,6.6,8],c:0xffd9a6,i:20,d:24},
-    {p:[-8.2,5.4,-4],c:0xffe6c5,i:12,d:18},
-    {p:[8.2,5.4,-4],c:0xffe6c5,i:12,d:18},
-    {p:[0,4.8,-18],c:0xdde8df,i:8,d:18}
-  ].forEach(cfg=>{
-    const l=new THREE.PointLight(cfg.c,cfg.i,cfg.d,2.0);l.position.set(...cfg.p);hallLightGroup.add(l);hallLights.push(l);
-  });
+const hallLightProfile={day:[],morning:[],golden:[],evening:[]};
+
+function addHallPoint({p,color=0xffdfb3,intensity=6,distance=15}){
+  if(lowPower)return null;
+  const l=new THREE.PointLight(color,intensity,distance,2.0);
+  l.position.set(...p);l.userData.baseIntensity=intensity;hallLightGroup.add(l);hallLights.push(l);return l;
 }
+function addHallSpot({p,target,color=0xffe2bd,intensity=24,distance=18,angle=.72,penumbra=.72}){
+  if(lowPower)return null;
+  const l=new THREE.SpotLight(color,intensity,distance,angle,penumbra,1.55);
+  l.position.set(...p);l.castShadow=false;l.userData.baseIntensity=intensity;
+  const t=new THREE.Object3D();t.position.set(...target);hallLightGroup.add(t);l.target=t;
+  hallLightGroup.add(l);hallLights.push(l);return l;
+}
+
+// Quiet bounce gives believable fill without flattening the whole interior.
+addHallPoint({p:[0,5.6,10.5],color:0xffe7c9,intensity:5.2,distance:16});
+addHallPoint({p:[0,4.5,-10.5],color:0xe6eee8,intensity:3.2,distance:15});
+
+// Architectural downlights: entrance, central promenade and destination threshold.
+addHallSpot({p:[0,7.25,10.8],target:[0,.3,9.0],color:0xffe3b8,intensity:28,distance:17,angle:.66,penumbra:.82});
+addHallSpot({p:[0,7.20,-5.4],target:[0,.25,-5.4],color:0xffdfb0,intensity:31,distance:17,angle:.60,penumbra:.78});
+addHallSpot({p:[0,7.15,-18.4],target:[0,.28,-20.0],color:0xf1e5d0,intensity:25,distance:17,angle:.62,penumbra:.84});
+
+// Side accents give the walls and furniture dimensionality.
+addHallSpot({p:[-8.8,5.85,1.8],target:[-7.1,.8,1.2],color:0xffd49a,intensity:15,distance:12,angle:.58,penumbra:.88});
+addHallSpot({p:[8.8,5.85,-11.8],target:[7.1,.8,-12.4],color:0xffd49a,intensity:15,distance:12,angle:.58,penumbra:.88});
+
+// Destination accents: slightly different temperatures create spatial orientation.
+addHallSpot({p:[-5.1,5.3,-24.0],target:[-4.6,1.35,-26.0],color:0xdceae0,intensity:17,distance:10,angle:.48,penumbra:.86});
+addHallSpot({p:[0,5.3,-24.0],target:[0,1.35,-26.0],color:0xffdda2,intensity:19,distance:10,angle:.48,penumbra:.86});
+addHallSpot({p:[5.1,5.3,-24.0],target:[4.6,1.35,-26.0],color:0xe8c98f,intensity:17,distance:10,angle:.48,penumbra:.86});
+
+// Profiles keep daylight changes natural rather than just multiplying everything.
+hallLights.forEach((l,i)=>{
+  const base=l.userData.baseIntensity||1;
+  hallLightProfile.day[i]=base*.82;
+  hallLightProfile.morning[i]=base*.90;
+  hallLightProfile.golden[i]=base*.98;
+  hallLightProfile.evening[i]=base*1.12;
+});
+
 
 const living={
   trees:[],
@@ -286,22 +318,23 @@ living.sunSprite=null;
 
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
-  let bg=0xdfe7e0,fog=0xd9e1da,sunColor=0xffe3b8,sunPower=3.05,hemiPower=2.45,exposure=1.03,state='day';
+  let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe4bd,sunPower=2.72,hemiPower=2.05,exposure=1.04,state='day';
   let top=0x6f9fbd,horizon=0xdce7e3,low=0xf2e2c8,skySun=0xffddb0,skyStrength=.72;
   if(h<7||h>=21){
-    bg=0x74848c;fog=0x8d9793;sunColor=0xddcdc0;sunPower=1.35;hemiPower=1.48;exposure=.80;state='evening';
+    bg=0x74838a;fog=0x8c9691;sunColor=0xe2d0c1;sunPower=1.20;hemiPower=1.34;exposure=.86;state='evening';
     top=0x405865;horizon=0x87908d;low=0xaa8068;skySun=0xe2c5ae;skyStrength=.10;
   }else if(h<9){
-    bg=0xdde3dd;fog=0xd8ddd6;sunColor=0xffcf96;sunPower=2.55;hemiPower=2.15;exposure=.98;state='morning';
+    bg=0xe0e5df;fog=0xdbe0d9;sunColor=0xffd29d;sunPower=2.28;hemiPower=1.86;exposure=1.00;state='morning';
     top=0x7fa8bd;horizon=0xe7d8c7;low=0xf2b77b;skySun=0xffc27e;skyStrength=.88;
   }else if(h>=17.5){
-    bg=0xdcd7ca;fog=0xd6cfc3;sunColor=0xffc482;sunPower=2.75;hemiPower=2.02;exposure=.95;state='golden';
+    bg=0xdfd9cd;fog=0xd8d1c5;sunColor=0xffc98d;sunPower=2.40;hemiPower=1.72;exposure=.98;state='golden';
     top=0x8098a7;horizon=0xe5ccb0;low=0xee9f66;skySun=0xffb66a;skyStrength=1.0;
   }
   scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=82;scene.fog.far=215;
   sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
-  hallAmbient.intensity=state==='evening'?.36:state==='golden'?.32:.30;
-  hallLights.forEach((l,i)=>{l.intensity=(state==='evening'?[22,14,14,7]:state==='golden'?[18,12,12,7]:[20,12,12,8])[i]||l.intensity});
+  hallAmbient.intensity=state==='evening'?.24:state==='golden'?.21:state==='morning'?.20:.18;
+  const practicalProfile=hallLightProfile[state]||hallLightProfile.day;
+  hallLights.forEach((l,i)=>{l.intensity=practicalProfile[i]??l.userData.baseIntensity??l.intensity});
   if(renderer.shadowMap.enabled)renderer.shadowMap.needsUpdate=true;
   const dayT=THREE.MathUtils.clamp((h-6)/15,0,1);
   const arc=Math.PI*dayT;
@@ -4015,7 +4048,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'4.2.1-proportions',
+  version:'4.3.0-hall-lighting',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
