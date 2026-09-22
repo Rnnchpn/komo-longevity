@@ -230,6 +230,21 @@ const pages = [
   }
 ];
 
+const meta = {
+  fr: {
+    title: 'KŌMØ — Comprendre votre mobilité. Savoir quoi faire ensuite.',
+    description: 'KŌMØ vous aide à mesurer votre mobilité, suivre ce qui évolue et choisir la prochaine étape : Motion, Pulse, Clinical ou World.'
+  },
+  en: {
+    title: 'KŌMØ — Understand your mobility. Know what comes next.',
+    description: 'KŌMØ helps you measure mobility, follow what changes and choose the next step: Motion, Pulse, Clinical or World.'
+  },
+  es: {
+    title: 'KŌMØ — Entender tu movilidad. Saber cuál es el siguiente paso.',
+    description: 'KŌMØ te ayuda a medir tu movilidad, seguir lo que cambia y elegir el siguiente paso: Motion, Pulse, Clinical o World.'
+  }
+};
+
 const style = `<style id="komo-homepage-clarity-transition-v1-style">
   .rvc-home{scroll-padding-top:78px}
   .rvc-home section{scroll-margin-top:78px}
@@ -441,8 +456,18 @@ function addMotionLayer(html) {
   return html.replace('</body>', `${script}\n</body>`);
 }
 
+function updateMeta(html, locale) {
+  const c = meta[locale];
+  return html
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${c.title}</title>`)
+    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${c.description}">`)
+    .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${c.title}">`)
+    .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${c.description}">`);
+}
+
 for (const page of pages) {
   let html = await readFile(page.file, 'utf8');
+  html = updateMeta(html, page.locale);
   html = reorderHomeSections(html);
   html = updateCopy(html, { ...page, locale: page.locale });
   html = addMotionLayer(html);
