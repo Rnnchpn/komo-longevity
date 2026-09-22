@@ -39,9 +39,12 @@ const checks=[
   ['Twin/Rehab room interactions V2.6 present',runtime.includes("mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions")&&runtime.includes('function updateTwinVisuals')],
   ['Biomechanical Twin V2.7+ present',runtime.includes('KOMO_BIOMECH_TWIN_V27')&&runtime.includes('function updateBiomechTwin')],
   ['Rehab Coach V2.7 present',runtime.includes('KOMO_REHAB_COACH_V27')&&runtime.includes('function animateRehabCoach')&&runtime.includes("id:'rehab_coach'")],
-  ['FPS budget V2.8 present',runtime.includes("version:'2.8.1-fps-budget'")&&runtime.includes('function updateLightBudget')&&runtime.includes('function updateVisibilityBudget')],
+  ['FPS budget V2.8+ present',runtime.includes('function updateLightBudget')&&runtime.includes('function updateVisibilityBudget')],
   ['shadow budget V2.8 present',runtime.includes('renderer.shadowMap.enabled=false')&&runtime.includes("qualityMode==='high'")],
-  ['draw-call telemetry V2.8 present',runtime.includes('renderer.info.render.calls')&&runtime.includes('activeLightBudget')]
+  ['draw-call telemetry V2.8 present',runtime.includes('renderer.info.render.calls')&&runtime.includes('activeLightBudget')],
+  ['Fitness Club V2.9 present',runtime.includes("version:'2.9.0-fitness-club'")&&runtime.includes('KOMO_FITNESS_CLUB_V29')&&runtime.includes('const FITNESS_ACTIVITIES')],
+  ['daily Fitness program V2.9 present',runtime.includes('function fitnessToday')&&runtime.includes('function fitnessStreak')&&runtime.includes('function markFitnessTodayComplete')],
+  ['Fitness Coach V2.9 present',runtime.includes('function runFitnessCoachPreview')&&runtime.includes('ALEX · FITNESS COACH')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);

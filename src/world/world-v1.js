@@ -63,12 +63,12 @@ const copy={
     action:'ACTION',
     deskTitle:'Ouvrir le KŌMØ Desk',deskCopy:'Orientation · trajectoire · espaces',
     twinTitle:'Entrer dans Functional Twin',twinCopy:'Comprendre votre mouvement dans le temps',
-    rehabTitle:'Entrer dans Rehab',rehabCopy:'Transformer les données en actions',
+    rehabTitle:'Entrer dans KŌMØ Fitness Club',rehabCopy:'Choisir une activité · programme quotidien · coach',
     arenaTitle:'Entrer dans Arena',arenaCopy:'Performance · défis · communauté',
     libraryTitle:'Ouvrir la Library',libraryCopy:'Science · méthode · provenance',
     talksTitle:'Voir Talks',talksCopy:'Experts · événements · contenus',
     storeTitle:'Entrer dans KŌMØ Life',storeCopy:'Objets · Case 01 · éditions',
-    back:'RETOUR AU HALL',close:'FERMER',openRehab:'OUVRIR REHAB',openLife:'OUVRIR KŌMØ LIFE',configureCase:'CONFIGURER CASE 01'
+    back:'RETOUR AU HALL',close:'FERMER',openRehab:'OUVRIR FITNESS CLUB',openLife:'OUVRIR KŌMØ LIFE',configureCase:'CONFIGURER CASE 01'
   },
   en:{
     today:'TODAY · EXPLORE YOUR TWIN',
@@ -79,12 +79,12 @@ const copy={
     action:'ACTION',
     deskTitle:'Open KŌMØ Desk',deskCopy:'Orientation · trajectory · spaces',
     twinTitle:'Enter Functional Twin',twinCopy:'Understand your movement over time',
-    rehabTitle:'Enter Rehab',rehabCopy:'Turn data into action',
+    rehabTitle:'Enter KŌMØ Fitness Club',rehabCopy:'Choose an activity · daily program · coach',
     arenaTitle:'Enter Arena',arenaCopy:'Performance · challenges · community',
     libraryTitle:'Open Library',libraryCopy:'Science · method · provenance',
     talksTitle:'View Talks',talksCopy:'Experts · events · content',
     storeTitle:'Enter KŌMØ Life',storeCopy:'Objects · Case 01 · editions',
-    back:'BACK TO HALL',close:'CLOSE',openRehab:'OPEN REHAB',openLife:'OPEN KŌMØ LIFE',configureCase:'CONFIGURE CASE 01'
+    back:'BACK TO HALL',close:'CLOSE',openRehab:'OPEN FITNESS CLUB',openLife:'OPEN KŌMØ LIFE',configureCase:'CONFIGURE CASE 01'
   }
 };
 let locale='fr';
@@ -746,7 +746,7 @@ function bodySegment(parent,a,b,r,material){
 
 const world=new THREE.Group();world.name='KOMO_WORLD_V1';scene.add(world);
 const twinRoom=new THREE.Group();twinRoom.name='KOMO_TWIN_V1';twinRoom.visible=false;scene.add(twinRoom);
-const rehabRoom=new THREE.Group();rehabRoom.name='KOMO_REHAB_V1';rehabRoom.visible=false;scene.add(rehabRoom);
+const rehabRoom=new THREE.Group();rehabRoom.name='KOMO_FITNESS_CLUB_V29';rehabRoom.visible=false;scene.add(rehabRoom);
 const arenaRoom=new THREE.Group();arenaRoom.name='KOMO_ARENA_V1';arenaRoom.visible=false;scene.add(arenaRoom);
 
 // Landscape + arrival.
@@ -948,7 +948,7 @@ plaque(outerFrame,'KŌMØ','WORLD · LONGEVITY IN MOTION',5.6,1.25,0,8.55,17.52,
 
 // V1.7 facade banners — institutional, vertical and visible from the closer spawn.
 fabricBanner(building,-12.65,7.55,18.55,1.22,4.65,'TWIN','UNDERSTAND',{dark:true});
-fabricBanner(building,-10.75,7.55,18.75,1.22,4.65,'REHAB','ACT',{dark:false});
+fabricBanner(building,-10.75,7.55,18.75,1.22,4.65,'FITNESS','TRAIN',{dark:false});
 fabricBanner(building,10.75,7.55,18.75,1.22,4.65,'ARENA','ENGAGE',{dark:false});
 fabricBanner(building,12.65,7.55,18.55,1.22,4.65,'KŌMØ LIFE','CASE 01',{dark:true});
 [
@@ -1410,7 +1410,7 @@ box(building,22.7,7.2,.42,M.sageDeep,0,4.0,-30.0);
 box(building,21.8,.07,.10,M.bronze,0,7.05,-29.73);
 const portals=[
   {x:-6.8,title:'FUNCTIONAL TWIN',sub:'UNDERSTAND',dark:true},
-  {x:0,title:'REHAB',sub:'ACT',dark:false},
+  {x:0,title:'KŌMØ FITNESS',sub:'DAILY CLUB',dark:false},
   {x:6.8,title:'ARENA',sub:'ENGAGE',dark:true}
 ];
 portals.forEach(({x,title,sub,dark})=>{
@@ -1511,14 +1511,14 @@ box(rehabRoom,22,.24,24,M.stoneLight,0,.10,0);
 box(rehabRoom,.36,7.6,24,M.wall,-10.8,3.8,0);
 box(rehabRoom,.36,7.6,24,M.wall,10.8,3.8,0);
 box(rehabRoom,22,7.6,.36,M.sage,0,3.8,-11.8);
-plaque(rehabRoom,'REHAB','FROM INSIGHT TO ACTION',7.2,1.45,0,6.7,-11.55,{dark:true,titleSize:88});
+plaque(rehabRoom,'KŌMØ FITNESS CLUB','MOVE · TRAIN · PROGRESS',7.2,1.45,0,6.7,-11.55,{dark:true,titleSize:88});
 [-5.3,0,5.3].forEach((x,i)=>{
   box(rehabRoom,4.0,.24,4.8,i===1?M.stoneDeep:M.stone,x,.12,-3.2);
   line(rehabRoom,3.5,.04,x,-3.2,M.bronze,.26);
 });
-plaque(rehabRoom,'01','CONTROL',3.2,.90,-5.3,4.6,-8.0,{dark:false,titleSize:74});
+plaque(rehabRoom,'01','BALANCE',3.2,.90,-5.3,4.6,-8.0,{dark:false,titleSize:74});
 plaque(rehabRoom,'02','STRENGTH',3.2,.90,0,4.6,-8.0,{dark:true,titleSize:74});
-plaque(rehabRoom,'03','CAPACITY',3.2,.90,5.3,4.6,-8.0,{dark:false,titleSize:74});
+plaque(rehabRoom,'03','CARDIO',3.2,.90,5.3,4.6,-8.0,{dark:false,titleSize:74});
 glow(rehabRoom,0xf0d2a7,3.5,15,0,5.4,-6);
 
 // V2.6 Rehab Lab — three tangible stations, no extra dynamic lights.
@@ -1547,7 +1547,7 @@ const rehabStationVisuals={};
     box(g,2.20,.035,1.75,MAT.fabricLight,0,.31,0);
   }
 });
-plaque(rehabRoom,'GUIDED DEMO','CHOOSE A STATION · PRESS E',6.8,.72,0,1.05,8.9,{dark:false,titleSize:58});
+plaque(rehabRoom,'COACH FLOOR','CHOOSE A STATION · PRESS E',6.8,.72,0,1.05,8.9,{dark:false,titleSize:58});
 
 // V2.7 Rehab Coach — one lightweight demonstrator shared across all stations.
 function makeRehabCoach(){
@@ -1574,14 +1574,20 @@ function makeRehabCoach(){
   const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();leftElbow.position.y=-.28;rightElbow.position.y=-.28;leftArm.add(leftElbow);rightArm.add(rightElbow);
   cyl(leftArm,.05,.058,.30,cloth,0,-.15,0,lowPower?7:10,{cast});cyl(rightArm,.05,.058,.30,cloth,0,-.15,0,lowPower?7:10,{cast});
   cyl(leftElbow,.045,.052,.27,skin,0,-.14,0,lowPower?7:10,{cast});cyl(rightElbow,.045,.052,.27,skin,0,-.14,0,lowPower?7:10,{cast});
-  const tag=npcNameTag('ALEX','REHAB COACH');tag.position.y=2.48;tag.scale.set(1.62,.46,1);g.add(tag);
+  const tag=npcNameTag('ALEX','FITNESS COACH');tag.position.y=2.48;tag.scale.set(1.62,.46,1);g.add(tag);
   g.userData.dynamic=true;
   g.userData.coach={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag};
   return g;
 }
 const rehabCoach=makeRehabCoach();
 const rehabCoachState={station:'control',running:false,phase:0};
-plaque(rehabRoom,'COACH','LIVE MOVEMENT DEMO',3.4,.62,0,3.05,-9.15,{dark:true,titleSize:52});
+plaque(rehabRoom,'COACH ALEX','DAILY MOVEMENT DEMO',3.4,.62,0,3.05,-9.15,{dark:true,titleSize:52});
+const fitnessProgramWall=new THREE.Group();fitnessProgramWall.name='KOMO_FITNESS_PROGRAM_WALL_V29';rehabRoom.add(fitnessProgramWall);
+[
+  ['STRENGTH',-7.8],['MOBILITY',-3.9],['BALANCE',0],['CARDIO',3.9],['RECOVERY',7.8]
+].forEach(([label,x],i)=>{
+  plaque(fitnessProgramWall,String(i+1).padStart(2,'0'),label,2.6,.66,x,5.50,7.9,{dark:i%2===1,titleSize:43});
+});
 
 // Arena room.
 arenaRoom.position.set(45,0,0);
@@ -1651,7 +1657,7 @@ const rehabInteractions=[
 }));
 rehabInteractions.push({
   id:'rehab_coach',x:0,z:-61.3,r:2.15,
-  title:()=>locale==='fr'?'Alex · Rehab Coach':'Alex · Rehab Coach',
+  title:()=>locale==='fr'?'Alex · Fitness Coach':'Alex · Rehab Coach',
   desc:()=>locale==='fr'?'Voir le rôle du coach virtuel':'Learn about the virtual coach',
   action:()=>showRehabCoach()
 });
@@ -1673,8 +1679,8 @@ const JOURNEY_MISSIONS=[
   {id:'hall',xp:20,title:{fr:'Découvrir le Hall',en:'Discover the Hall'},sub:{fr:'Franchir l’entrée principale',en:'Cross the main entrance'}},
   {id:'journey',xp:15,title:{fr:'Comprendre le World Journey',en:'Understand World Journey'},sub:{fr:'Ouvrir la station de progression',en:'Open the progression station'}},
   {id:'twin',xp:35,title:{fr:'Explorer le Functional Twin',en:'Explore Functional Twin'},sub:{fr:'Comprendre votre espace de données',en:'Understand your data space'}},
-  {id:'rehab',xp:35,title:{fr:'Passer de l’insight à l’action',en:'Move from insight to action'},sub:{fr:'Découvrir Rehab',en:'Discover Rehab'}},
-  {id:'rehab_session',xp:25,title:{fr:'Compléter une session Rehab',en:'Complete a Rehab session'},sub:{fr:'Valider une station guidée',en:'Complete one guided station'}},
+  {id:'rehab',xp:35,title:{fr:'Entrer au KŌMØ Fitness Club',en:'Enter KŌMØ Fitness Club'},sub:{fr:'Choisir votre pratique',en:'Choose your activity'}},
+  {id:'rehab_session',xp:25,title:{fr:'Compléter votre séance du jour',en:'Complete today’s session'},sub:{fr:'Construire votre régularité',en:'Build your consistency'}},
   {id:'arena',xp:35,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir les challenges',en:'Discover challenges'}},
   {id:'life',xp:25,title:{fr:'Visiter KŌMØ Life',en:'Visit KŌMØ Life'},sub:{fr:'Relier World au réel',en:'Connect World to real life'}},
   {id:'upper',xp:30,title:{fr:'Atteindre le Level 2',en:'Reach Level 2'},sub:{fr:'Explorer les galeries hautes',en:'Explore the upper galleries'}},
@@ -1853,11 +1859,11 @@ function deskHtml(){
   const s=current();
   if(locale==='fr')return `
     <p>Votre World organise votre parcours autour de trois espaces. Aucun personnage d'accueil : le Desk est simplement votre point d'orientation.</p>
-    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>Rehab</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>ÉTAT ACTUEL</span><b>Motion ${s.motion_score}</b></div></div>
+    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>ÉTAT ACTUEL</span><b>Motion ${s.motion_score}</b></div></div>
     <div class="priority-card"><b>PROCHAINE ÉTAPE</b>Commencez par le Functional Twin pour voir votre état actuel et votre progression depuis la baseline.</div>`;
   return `
     <p>Your World is organised around three spaces. There is no reception avatar: the Desk is simply your orientation point.</p>
-    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>Rehab</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>CURRENT STATE</span><b>Motion ${s.motion_score}</b></div></div>
+    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>CURRENT STATE</span><b>Motion ${s.motion_score}</b></div></div>
     <div class="priority-card"><b>NEXT STEP</b>Start with Functional Twin to review your current state and progression from baseline.</div>`;
 }
 function showDesk(){
@@ -1980,7 +1986,9 @@ function animateRehabCoach(now,dt){
   a.leftArm.rotation.x*=intensity;a.rightArm.rotation.x*=intensity;
 }
 const REHAB_KEY='komo_world_rehab_v1';
+const FITNESS_KEY='komo_world_fitness_club_v1';
 let rehabSessionTimer=null;
+
 function loadRehabProgress(){
   try{
     const raw=JSON.parse(localStorage.getItem(REHAB_KEY)||'{}');
@@ -1989,11 +1997,213 @@ function loadRehabProgress(){
 }
 const rehabProgress=loadRehabProgress();
 function saveRehabProgress(){try{localStorage.setItem(REHAB_KEY,JSON.stringify(rehabProgress))}catch{}}
+
+const FITNESS_ACTIVITIES={
+  strength:{
+    title:{fr:'Force',en:'Strength'},code:'STRENGTH',coach:'strength',base:20,
+    promise:{fr:'Construire force, contrôle et régularité.',en:'Build strength, control and consistency.'},
+    days:[
+      ['FOUNDATION',['Activation','Squat & hinge','Core']],
+      ['LOWER BODY',['Mobility warm-up','Lower-body strength','Balance finisher']],
+      ['UPPER + CORE',['Shoulder prep','Push / pull pattern','Core control']],
+      ['RESET',['Mobility','Easy strength','Breathing']],
+      ['TOTAL BODY',['Warm-up','Full-body circuit','Core']],
+      ['CONTROL',['Tempo strength','Single-leg control','Mobility']],
+      ['RECOVERY STRENGTH',['Easy activation','Mobility flow','Walk / reset']]
+    ]
+  },
+  mobility:{
+    title:{fr:'Mobilité',en:'Mobility'},code:'MOBILITY',coach:'control',base:16,
+    promise:{fr:'Bouger avec plus d’amplitude et de contrôle.',en:'Move with more range and control.'},
+    days:[
+      ['FULL BODY FLOW',['Breathing','Global mobility','Easy flow']],
+      ['HIPS',['Hip mobility','Rotation','Controlled range']],
+      ['SPINE',['Thoracic mobility','Rotation','Core control']],
+      ['SHOULDERS',['Shoulder mobility','Scapular control','Breathing']],
+      ['ANKLES + HIPS',['Ankle mobility','Hip flow','Balance']],
+      ['DYNAMIC FLOW',['Warm-up flow','Dynamic mobility','Easy capacity']],
+      ['RESET',['Gentle mobility','Breathing','Walk']]
+    ]
+  },
+  balance:{
+    title:{fr:'Équilibre',en:'Balance'},code:'BALANCE',coach:'control',base:15,
+    promise:{fr:'Développer stabilité, coordination et confiance.',en:'Build stability, coordination and confidence.'},
+    days:[
+      ['FOUNDATION',['Stable stance','Weight shifts','Easy single-leg']],
+      ['SINGLE LEG',['Warm-up','Single-leg control','Step control']],
+      ['DYNAMIC',['Direction changes','Reach patterns','Walk line']],
+      ['MOBILITY + BALANCE',['Hip mobility','Ankle control','Balance flow']],
+      ['COORDINATION',['Cross-body patterns','Step sequence','Reset']],
+      ['FLOW',['Balance circuit','Controlled walk','Breathing']],
+      ['RESET',['Easy stance','Mobility','Recovery walk']]
+    ]
+  },
+  cardio:{
+    title:{fr:'Cardio',en:'Cardio'},code:'CARDIO',coach:'capacity',base:22,
+    promise:{fr:'Développer progressivement votre capacité d’effort.',en:'Progressively build your exercise capacity.'},
+    days:[
+      ['BASE',['Easy warm-up','Steady effort','Cooldown']],
+      ['INTERVALS',['Warm-up','Short intervals','Recovery']],
+      ['TEMPO',['Progressive warm-up','Tempo block','Cooldown']],
+      ['RECOVERY',['Easy walk','Mobility','Breathing']],
+      ['AEROBIC MIX',['Warm-up','Mixed pace','Easy finish']],
+      ['SHORT INTERVALS',['Warm-up','Short efforts','Cooldown']],
+      ['EASY CAPACITY',['Comfortable pace','Mobility','Reset']]
+    ]
+  },
+  recovery:{
+    title:{fr:'Recovery',en:'Recovery'},code:'RECOVERY',coach:'control',base:14,
+    promise:{fr:'Créer une routine quotidienne légère et récupératrice.',en:'Create a light daily recovery routine.'},
+    days:[
+      ['BREATH + MOBILITY',['Breathing','Gentle mobility','Easy walk']],
+      ['LOWER BODY RESET',['Ankles','Hips','Leg mobility']],
+      ['SPINE RESET',['Breathing','Spine mobility','Easy core']],
+      ['UPPER BODY RESET',['Shoulders','Thoracic mobility','Breathing']],
+      ['WALK + FLOW',['Easy walk','Mobility flow','Breathing']],
+      ['FULL RESET',['Full-body mobility','Easy balance','Breathing']],
+      ['RESTORE',['Gentle flow','Long exhale breathing','Easy walk']]
+    ]
+  }
+};
+const FITNESS_ORDER=['strength','mobility','balance','cardio','recovery'];
+
+function localDateKey(date=new Date()){
+  const y=date.getFullYear(),m=String(date.getMonth()+1).padStart(2,'0'),d=String(date.getDate()).padStart(2,'0');
+  return `${y}-${m}-${d}`;
+}
+function dateFromKey(key){
+  const [y,m,d]=String(key).split('-').map(Number);return new Date(y,m-1,d);
+}
+function daysBetweenLocal(a,b){
+  const A=dateFromKey(a),B=dateFromKey(b);
+  return Math.floor((Date.UTC(B.getFullYear(),B.getMonth(),B.getDate())-Date.UTC(A.getFullYear(),A.getMonth(),A.getDate()))/86400000);
+}
+function loadFitnessProfile(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(FITNESS_KEY)||'{}');
+    return {
+      activity:FITNESS_ORDER.includes(raw.activity)?raw.activity:null,
+      startDate:raw.startDate||null,
+      completed:raw.completed&&typeof raw.completed==='object'?raw.completed:{},
+      points:Number(raw.points)||0
+    };
+  }catch{return {activity:null,startDate:null,completed:{},points:0}}
+}
+const fitnessProfile=loadFitnessProfile();
+function saveFitnessProfile(){try{localStorage.setItem(FITNESS_KEY,JSON.stringify(fitnessProfile))}catch{}}
+
+function fitnessStreak(){
+  let streak=0,d=new Date();
+  // If today is not completed, allow the streak to continue from yesterday.
+  if(!fitnessProfile.completed[localDateKey(d)])d.setDate(d.getDate()-1);
+  for(let i=0;i<365;i++){
+    const key=localDateKey(d);
+    if(!fitnessProfile.completed[key])break;
+    streak++;d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+function fitnessToday(){
+  if(!fitnessProfile.activity)return null;
+  if(!fitnessProfile.startDate)fitnessProfile.startDate=localDateKey();
+  const activity=FITNESS_ACTIVITIES[fitnessProfile.activity];
+  const elapsed=Math.max(0,daysBetweenLocal(fitnessProfile.startDate,localDateKey()));
+  const dayIndex=elapsed%7,week=Math.floor(elapsed/7)+1,phase=Math.min(4,week);
+  const def=activity.days[dayIndex];
+  const duration=activity.base+Math.min(6,(phase-1)*2)+(dayIndex===3||dayIndex===6?-4:0);
+  return {
+    activityId:fitnessProfile.activity,activity,
+    elapsed,day:elapsed+1,dayIndex,week,phase,
+    title:def[0],blocks:def[1],duration:Math.max(10,duration),
+    date:localDateKey(),completed:!!fitnessProfile.completed[localDateKey()]
+  };
+}
+function selectFitnessActivity(id){
+  if(!FITNESS_ORDER.includes(id))return;
+  if(fitnessProfile.activity!==id){
+    fitnessProfile.activity=id;fitnessProfile.startDate=localDateKey();
+  }else if(!fitnessProfile.startDate)fitnessProfile.startDate=localDateKey();
+  saveFitnessProfile();
+  setRehabCoachStation(FITNESS_ACTIVITIES[id].coach,false);
+  notify((locale==='fr'?'PROGRAMME · ':'PROGRAM · ')+FITNESS_ACTIVITIES[id].title[locale]);
+  showFitnessToday();
+}
+function fitnessActivityCards(){
+  return `<div class="fitness-activity-grid">${FITNESS_ORDER.map(id=>{
+    const a=FITNESS_ACTIVITIES[id],selected=fitnessProfile.activity===id;
+    return `<button data-fitness="${id}" class="${selected?'selected':''}">
+      <span>${a.code}</span><b>${a.title[locale]}</b><small>${a.promise[locale]}</small>
+    </button>`;
+  }).join('')}</div>`;
+}
+function fitnessWeekStrip(){
+  const t=fitnessToday();if(!t)return '';
+  return `<div class="fitness-week">${t.activity.days.map((d,i)=>{
+    const offset=i-t.dayIndex,date=new Date();date.setDate(date.getDate()+offset);
+    const key=localDateKey(date),done=!!fitnessProfile.completed[key];
+    return `<div class="${i===t.dayIndex?'today':''} ${done?'done':''}"><span>D${i+1}</span><b>${d[0]}</b><small>${done?'✓':i===t.dayIndex?(locale==='fr'?'Aujourd’hui':'Today'):''}</small></div>`;
+  }).join('')}</div>`;
+}
+function fitnessTodayHtml(previewPct=0,previewRemaining=null){
+  const t=fitnessToday();if(!t)return '';
+  const streak=fitnessStreak();
+  return `
+    <div class="fitness-today-hero">
+      <div><span>${t.activity.code} · WEEK ${t.week}</span><strong>${locale==='fr'?'Jour':'Day'} ${t.day}</strong><small>${t.title}</small></div>
+      <div><b>${t.duration}</b><small>MIN</small></div>
+    </div>
+    ${previewRemaining!==null?`<div class="rehab-progress"><i style="width:${previewPct}%"></i></div><div class="fitness-preview-label">COACH PREVIEW · ${previewRemaining}s</div>`:''}
+    <div class="fitness-blocks">${t.blocks.map((b,i)=>`<div><span>0${i+1}</span><b>${b}</b><small>${i===0?'PREP':i===t.blocks.length-1?'FINISH':'MAIN'}</small></div>`).join('')}</div>
+    <div class="panel-grid">
+      <div><span>STREAK</span><b>${streak} day${streak===1?'':'s'}</b></div>
+      <div><span>CLUB POINTS</span><b>${fitnessProfile.points}</b></div>
+      <div><span>PHASE</span><b>${t.phase}/4</b></div>
+      <div><span>STATUS</span><b>${t.completed?'✓ DONE':'TODAY'}</b></div>
+    </div>
+    ${fitnessWeekStrip()}
+    <div class="data-note">${locale==='fr'?'Programme fitness générique d’engagement. Adaptez l’intensité à votre situation et interrompez l’exercice en cas de douleur ou symptôme inhabituel.':'General fitness engagement program. Adjust intensity to your situation and stop if you experience pain or unusual symptoms.'}</div>`;
+}
+function showFitnessToday(previewed=false){
+  const t=fitnessToday();if(!t){showRehab();return}
+  stopRehabSession();setRehabCoachStation(t.activity.coach,false);
+  openPanel('KŌMØ FITNESS CLUB',t.activity.title[locale]+' · '+(locale==='fr'?'séance du jour':'today’s session'),fitnessTodayHtml(),[
+    {label:locale==='fr'?'CHANGER D’ACTIVITÉ':'CHANGE ACTIVITY',onClick:showRehab},
+    {label:locale==='fr'?'APERÇU COACH':'COACH PREVIEW',onClick:runFitnessCoachPreview},
+    {label:t.completed?(locale==='fr'?'✓ TERMINÉ AUJOURD’HUI':'✓ DONE TODAY'):(locale==='fr'?'J’AI TERMINÉ':'MARK COMPLETE'),primary:!t.completed,onClick:markFitnessTodayComplete}
+  ]);
+}
+function runFitnessCoachPreview(){
+  const t=fitnessToday();if(!t)return;
+  stopRehabSession();setRehabCoachStation(t.activity.coach,true);
+  const start=performance.now(),duration=15000;
+  openPanel('ALEX · FITNESS COACH',t.activity.title[locale]+' · '+(locale==='fr'?'aperçu du mouvement':'movement preview'),fitnessTodayHtml(0,15),[
+    {label:locale==='fr'?'ARRÊTER':'STOP',onClick:showFitnessToday}
+  ]);
+  rehabSessionTimer=setInterval(()=>{
+    const elapsed=performance.now()-start,pct=THREE.MathUtils.clamp(elapsed/duration*100,0,100),left=Math.max(0,Math.ceil((duration-elapsed)/1000));
+    panelBody.innerHTML=fitnessTodayHtml(pct,left);
+    if(elapsed>=duration){stopRehabSession();showFitnessToday(true)}
+  },250);
+}
+function markFitnessTodayComplete(){
+  const t=fitnessToday();if(!t)return;
+  if(t.completed){notify(locale==='fr'?'Séance déjà validée aujourd’hui':'Today’s session is already complete');return}
+  fitnessProfile.completed[t.date]={activity:t.activityId,at:Date.now()};
+  fitnessProfile.points+=20;
+  saveFitnessProfile();
+  const coachId=t.activity.coach;
+  rehabProgress[coachId]=(rehabProgress[coachId]||0)+1;rehabProgress.total++;saveRehabProgress();
+  completeJourney('rehab_session');
+  setRehabCoachStation(coachId,false);
+  notify((locale==='fr'?'+20 CLUB POINTS · STREAK ':'+20 CLUB POINTS · STREAK ')+fitnessStreak());
+  showFitnessToday(true);
+}
+
 function rehabStationCopy(id){
   const data={
-    control:{title:{fr:'CONTROL',en:'CONTROL'},duration:15,focus:{fr:'Contrôle · précision · stabilité',en:'Control · precision · stability'},demo:{fr:'Séquence guidée de contrôle moteur.',en:'Guided motor-control sequence.'}},
-    strength:{title:{fr:'STRENGTH',en:'STRENGTH'},duration:18,focus:{fr:'Force · activation · répétition',en:'Strength · activation · repetition'},demo:{fr:'Séquence guidée d’activation et de force.',en:'Guided activation and strength sequence.'}},
-    capacity:{title:{fr:'CAPACITY',en:'CAPACITY'},duration:20,focus:{fr:'Capacité · rythme · endurance',en:'Capacity · pace · endurance'},demo:{fr:'Séquence guidée de capacité fonctionnelle.',en:'Guided functional-capacity sequence.'}}
+    control:{title:{fr:'BALANCE / CONTROL',en:'BALANCE / CONTROL'},duration:15,focus:{fr:'Équilibre · contrôle · mobilité',en:'Balance · control · mobility'},demo:{fr:'Aperçu coach de contrôle et stabilité.',en:'Coach preview for control and stability.'}},
+    strength:{title:{fr:'STRENGTH',en:'STRENGTH'},duration:18,focus:{fr:'Force · activation · répétition',en:'Strength · activation · repetition'},demo:{fr:'Aperçu coach de force fonctionnelle.',en:'Coach preview for functional strength.'}},
+    capacity:{title:{fr:'CARDIO / CAPACITY',en:'CARDIO / CAPACITY'},duration:20,focus:{fr:'Rythme · capacité · endurance',en:'Pace · capacity · endurance'},demo:{fr:'Aperçu coach de capacité et cardio.',en:'Coach preview for capacity and cardio.'}}
   };
   return data[id]||data.control;
 }
@@ -2002,15 +2212,15 @@ function rehabStationHtml(id,running=false,pct=0,remaining=null){
   return `
     <div class="rehab-station-hero"><span>${c.title[locale]}</span><strong>${running?(remaining+'s'):(count?'✓ '+count:'READY')}</strong></div>
     <div class="rehab-progress"><i style="width:${pct}%"></i></div>
-    <div class="priority-card"><b>${locale==='fr'?'OBJECTIF DE DÉMO':'DEMO FOCUS'}</b>${c.focus[locale]}</div>
+    <div class="priority-card"><b>COACH MODE</b>${c.focus[locale]}</div>
     <p>${c.demo[locale]}</p>
     <div class="panel-grid">
-      <div><span>DURATION</span><b>${c.duration}s</b></div>
+      <div><span>PREVIEW</span><b>${c.duration}s</b></div>
       <div><span>SESSIONS</span><b>${count}</b></div>
-      <div><span>MODE</span><b>GUIDED</b></div>
-      <div><span>XP</span><b>+25</b></div>
+      <div><span>COACH</span><b>ALEX</b></div>
+      <div><span>MODE</span><b>FITNESS</b></div>
     </div>
-    <div class="data-note">${locale==='fr'?'Démonstration d’engagement dans World. Ce module ne constitue pas une prescription médicale autonome et ne remplace pas une adaptation au contexte de l’utilisateur.':'World engagement demonstration. This module is not an autonomous medical prescription and does not replace adaptation to user context.'}</div>`;
+    <div class="data-note">${locale==='fr'?'Ces démonstrations servent à découvrir les mouvements du Fitness Club. Elles ne constituent pas une prescription médicale personnalisée.':'These demonstrations introduce Fitness Club movements. They are not personalised medical prescriptions.'}</div>`;
 }
 function stopRehabSession(){
   if(rehabSessionTimer){clearInterval(rehabSessionTimer);rehabSessionTimer=null}
@@ -2018,14 +2228,13 @@ function stopRehabSession(){
 }
 function completeRehabStation(id){
   stopRehabSession();rehabProgress[id]=(rehabProgress[id]||0)+1;rehabProgress.total++;saveRehabProgress();
-  completeJourney('rehab_session');
-  notify((locale==='fr'?'SESSION VALIDÉE · ':'SESSION COMPLETE · ')+rehabStationCopy(id).title[locale]);
+  notify((locale==='fr'?'APERÇU TERMINÉ · ':'PREVIEW COMPLETE · ')+rehabStationCopy(id).title[locale]);
   showRehabStation(id,true);
 }
 function runRehabDemo(id){
   stopRehabSession();setRehabCoachStation(id,true);
   const c=rehabStationCopy(id),start=performance.now(),duration=c.duration*1000;
-  openPanel(c.title[locale],'REHAB · LIVE',rehabStationHtml(id,true,0,c.duration),[
+  openPanel(c.title[locale],'FITNESS CLUB · COACH',rehabStationHtml(id,true,0,c.duration),[
     {label:locale==='fr'?'ARRÊTER':'STOP',onClick:()=>{stopRehabSession();showRehabStation(id)}}
   ]);
   rehabSessionTimer=setInterval(()=>{
@@ -2038,9 +2247,9 @@ function runRehabDemo(id){
 function showRehabStation(id,completed=false){
   stopRehabSession();setRehabCoachStation(id,false);
   const c=rehabStationCopy(id);
-  openPanel(c.title[locale],locale==='fr'?'Station Rehab guidée.':'Guided Rehab station.',rehabStationHtml(id,false,completed?100:0),[
-    {label:locale==='fr'?'RETOUR REHAB':'REHAB OVERVIEW',onClick:showRehab},
-    {label:completed?(locale==='fr'?'REJOUER':'REPLAY'):(locale==='fr'?'DÉMARRER':'START'),primary:true,onClick:()=>runRehabDemo(id)}
+  openPanel(c.title[locale],locale==='fr'?'Station coach du KŌMØ Fitness Club.':'KŌMØ Fitness Club coach station.',rehabStationHtml(id,false,completed?100:0),[
+    {label:locale==='fr'?'FITNESS CLUB':'FITNESS CLUB',onClick:showRehab},
+    {label:completed?(locale==='fr'?'REJOUER':'REPLAY'):(locale==='fr'?'VOIR LE MOUVEMENT':'PREVIEW MOVEMENT'),primary:true,onClick:()=>runRehabDemo(id)}
   ]);
 }
 
@@ -2071,25 +2280,43 @@ function showTwin(){
   ]);bindTimeline();
 }
 function rehabHtml(){
-  const s=current();const entries=Object.entries(s.domains);entries.sort((a,b)=>a[1]-b[1]);const [lowest,val]=entries[0];
-  const names={muscle:'Muscle',mobility:locale==='fr'?'Mobilité':'Mobility',balance:locale==='fr'?'Équilibre':'Balance',posture:'Posture',endurance:'Endurance'};
+  const t=fitnessToday();
+  if(!t){
+    return `
+      <div class="fitness-club-intro">
+        <span>KŌMØ FITNESS CLUB</span>
+        <h3>${locale==='fr'?'Choisissez comment vous voulez bouger.':'Choose how you want to move.'}</h3>
+        <p>${locale==='fr'?'Sélectionnez une pratique. KŌMØ construit ensuite un programme quotidien simple, progressif et suivi avec Alex, votre coach virtuel.':'Select an activity. KŌMØ then builds a simple progressive daily program with Alex, your virtual coach.'}</p>
+      </div>
+      ${fitnessActivityCards()}
+      <div class="data-note">${locale==='fr'?'Le Fitness Club propose des routines générales d’activité physique et d’engagement. Elles ne constituent pas une prescription médicale personnalisée.':'Fitness Club provides general physical-activity and engagement routines. They are not personalised medical prescriptions.'}</div>`;
+  }
   return `
-    <p>${locale==='fr'?'Rehab transforme les signaux du Twin en séquences d’action simples et suivies. Les trois stations peuvent être explorées physiquement dans la salle. Le coach virtuel montre le mouvement de démonstration associé.':'Rehab turns Twin signals into simple trackable action sequences. All three stations can be explored spatially in the room. The virtual coach demonstrates the associated movement.'}</p>
-    <div class="priority-card"><b>${locale==='fr'?'FOCUS DE DÉMONSTRATION':'DEMO FOCUS'}</b>${names[lowest]} · ${val}/100</div>
-    <div class="rehab-station-grid">
-      ${['control','strength','capacity'].map(id=>{const c=rehabStationCopy(id);return `<button data-rehab="${id}"><span>${c.title[locale]}</span><b>${c.focus[locale]}</b><small>${rehabProgress[id]?'✓ '+rehabProgress[id]+' session'+(rehabProgress[id]>1?'s':''):'READY · '+c.duration+'s'}</small></button>`}).join('')}
+    <div class="fitness-club-intro compact">
+      <span>KŌMØ FITNESS CLUB · ${t.activity.code}</span>
+      <h3>${locale==='fr'?'Votre entraînement, chaque jour.':'Your training, every day.'}</h3>
+      <p>${t.activity.promise[locale]}</p>
     </div>
-    <div class="panel-grid"><div><span>CONTROL</span><b>${rehabProgress.control}</b></div><div><span>STRENGTH</span><b>${rehabProgress.strength}</b></div><div><span>CAPACITY</span><b>${rehabProgress.capacity}</b></div><div><span>TOTAL</span><b>${rehabProgress.total}</b></div></div>
-    <div class="data-note">${locale==='fr'?'Les séquences Rehab montrées dans World sont des démonstrations d’engagement. Elles ne constituent pas une prescription médicale autonome et doivent être adaptées au contexte utilisateur lorsque nécessaire.':'Rehab sequences shown in World are engagement demonstrations. They are not autonomous medical prescriptions and should be adapted to user context when needed.'}</div>`;
+    ${fitnessTodayHtml()}
+    <div class="fitness-change-title">${locale==='fr'?'Changer de pratique':'Change activity'}</div>
+    ${fitnessActivityCards()}`;
+}
+function bindFitnessClub(){
+  panelBody.querySelectorAll('[data-fitness]').forEach(btn=>btn.addEventListener('click',()=>selectFitnessActivity(btn.dataset.fitness)));
 }
 function showRehab(){
-  stopRehabSession();setRehabCoachStation('control',false);
-  openPanel('REHAB',locale==='fr'?'De l’insight à l’action.':'From insight to action.',rehabHtml(),[
+  stopRehabSession();
+  const t=fitnessToday();
+  setRehabCoachStation(t?.activity?.coach||'control',false);
+  openPanel('KŌMØ FITNESS CLUB',t
+    ?(locale==='fr'?'Programme quotidien · Coach Alex':'Daily program · Coach Alex')
+    :(locale==='fr'?'Choisissez votre activité physique.':'Choose your physical activity.'),rehabHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
-    {label:locale==='fr'?'EXPLORER LES STATIONS':'EXPLORE STATIONS',primary:true,onClick:closePanel},
+    ...(t?[{label:locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION',primary:true,onClick:showFitnessToday}]:[]),
+    {label:locale==='fr'?'EXPLORER LE CLUB':'EXPLORE CLUB',onClick:closePanel},
     {label:locale==='fr'?'VOIR LE TWIN':'VIEW TWIN',onClick:enterTwin}
   ]);
-  panelBody.querySelectorAll('[data-rehab]').forEach(btn=>btn.addEventListener('click',()=>showRehabStation(btn.dataset.rehab)));
+  bindFitnessClub();
 }
 function arenaHtml(){
   return `
@@ -2140,14 +2367,21 @@ function showLifeStore(){
 }
 
 function showRehabCoach(){
+  const t=fitnessToday();
   const html=`
-    <p>${locale==='fr'?'Alex démontre visuellement la séquence choisie dans Rehab : contrôle, force ou capacité. Le rôle du coach ici est pédagogique et spatial.':'Alex visually demonstrates the selected Rehab sequence: control, strength or capacity. The coach role here is educational and spatial.'}</p>
-    <div class="panel-grid"><div><span>CONTROL</span><b>BALANCE</b></div><div><span>STRENGTH</span><b>SQUAT</b></div><div><span>CAPACITY</span><b>MARCH</b></div><div><span>MODE</span><b>DEMO</b></div></div>
-    <div class="data-note">${locale==='fr'?'Les mouvements sont des démonstrations génériques de l’interface World, pas une prescription personnalisée.':'Movements are generic World-interface demonstrations, not personalised prescriptions.'}</div>`;
-  openPanel('ALEX · REHAB COACH',locale==='fr'?'Démonstrateur de mouvement.':'Movement demonstrator.',html,[
+    <p>${locale==='fr'?'Alex est le coach virtuel du KŌMØ Fitness Club. Il montre les mouvements, accompagne la séance du jour et change de démonstration selon votre pratique.':'Alex is the KŌMØ Fitness Club virtual coach. He demonstrates movements, supports today’s session and changes demonstrations with your chosen activity.'}</p>
+    <div class="panel-grid">
+      <div><span>STRENGTH</span><b>SQUAT</b></div>
+      <div><span>MOBILITY</span><b>CONTROL</b></div>
+      <div><span>BALANCE</span><b>STABILITY</b></div>
+      <div><span>CARDIO</span><b>MARCH</b></div>
+    </div>
+    ${t?`<div class="priority-card"><b>${locale==='fr'?'AUJOURD’HUI':'TODAY'}</b>${t.activity.title[locale]} · ${t.title} · ${t.duration} min</div>`:''}
+    <div class="data-note">${locale==='fr'?'Alex guide des routines fitness générales. Le contenu doit être adapté à votre condition et à votre contexte lorsque nécessaire.':'Alex guides general fitness routines. Content should be adapted to your condition and context when needed.'}</div>`;
+  openPanel('ALEX · FITNESS COACH',locale==='fr'?'Votre coach quotidien.':'Your daily coach.',html,[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
-    {label:locale==='fr'?'CONTROL':'CONTROL',onClick:()=>showRehabStation('control')},
-    {label:locale==='fr'?'STRENGTH':'STRENGTH',primary:true,onClick:()=>showRehabStation('strength')}
+    {label:locale==='fr'?'FITNESS CLUB':'FITNESS CLUB',onClick:showRehab},
+    ...(t?[{label:locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION',primary:true,onClick:showFitnessToday}]:[])
   ]);
 }
 
@@ -2175,7 +2409,7 @@ function enterTwin(){
 }
 function enterRehab(){
   completeJourney('rehab');
-  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='REHAB';
+  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='KŌMØ FITNESS CLUB';
 }
 function enterArena(){
   completeJourney('arena');
@@ -2340,7 +2574,7 @@ function updateDoors(now,dt){
 }
 function updateLocation(){
   if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';return}
-  if(mode==='rehab'){locationName.textContent='REHAB';return}
+  if(mode==='rehab'){locationName.textContent='KŌMØ FITNESS CLUB';return}
   if(mode==='arena'){locationName.textContent='ARENA';return}
   if(playerLevel===1){
     completeJourney('upper',{silent:true});
@@ -2711,7 +2945,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.8.1-fps-budget',
+  version:'2.9.0-fitness-club',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
