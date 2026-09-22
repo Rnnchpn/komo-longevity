@@ -1856,6 +1856,10 @@ plaque(arenaRoom,'ARENA','PERFORMANCE · COMMUNITY',7.2,1.45,0,7.05,-12.85,{dark
 plaque(arenaRoom,'BALANCE','DAILY · 60 S',3.6,.94,-5.2,4.7,-8.1,{dark:true,titleSize:68});
 plaque(arenaRoom,'SQUAT 10','CONTROL',3.6,.94,0,4.7,-8.1,{dark:true,titleSize:68});
 plaque(arenaRoom,'STAND UP','CAPACITY',3.6,.94,5.2,4.7,-8.1,{dark:true,titleSize:68});
+const arenaChallengeBoard=new THREE.Group();arenaChallengeBoard.name='KOMO_CHALLENGE_BOARD_V32';arenaChallengeBoard.position.set(0,0,2.7);arenaRoom.add(arenaChallengeBoard);
+box(arenaChallengeBoard,5.8,.18,2.1,MAT.travertine,0,.10,0);
+box(arenaChallengeBoard,5.15,2.65,.22,MAT.blackened,0,1.55,-.78,{cast:true});
+plaque(arenaChallengeBoard,'WORLD CHALLENGES','DAILY · XP · COMMUNITY',4.7,.82,0,2.80,-.62,{dark:true,titleSize:54});
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 
 // Runtime state.
@@ -1884,7 +1888,16 @@ const interactions=[
   {id:'library',x:-10.7,z:-10,r:3.2,title:()=>copy[locale].libraryTitle,desc:()=>copy[locale].libraryCopy,action:showLibrary},
   {id:'talks',x:10.7,z:-10,r:3.2,title:()=>copy[locale].talksTitle,desc:()=>copy[locale].talksCopy,action:showTalks},
   {id:'life',x:8.6,z:2.6,r:3.4,title:()=>copy[locale].storeTitle,desc:()=>copy[locale].storeCopy,action:showLifeStore},
-  {id:'journey',x:4.8,z:8.5,r:3.0,title:()=>locale==='fr'?'World Journey':'World Journey',desc:()=>locale==='fr'?'Voir votre niveau, vos XP et les prochaines étapes.':'View your level, XP and next steps.',action:showJourneyPanel}
+  {id:'journey',x:4.8,z:8.5,r:3.0,title:()=>locale==='fr'?'World Journey':'World Journey',desc:()=>locale==='fr'?'Voir votre niveau, vos XP et les prochaines étapes.':'View your level, XP and next steps.',action:showJourneyPanel},
+  {id:'fountain',x:0,z:68.2,r:5.4,title:()=>locale==='fr'?'Grande Fontaine · KŌMØ District':'Grand Fountain · KŌMØ District',desc:()=>locale==='fr'?'Découvrir le campus extérieur · +15 XP':'Discover the exterior campus · +15 XP',action:showFountain},
+  {id:'life_strap',x:7.10,z:6.45,r:1.35,title:()=> 'Motion Strap',desc:()=>locale==='fr'?'KŌMØ Life · objet mouvement':'KŌMØ Life · movement object',action:()=>showLifeItem('strap')},
+  {id:'life_bottle',x:9.80,z:6.45,r:1.35,title:()=> 'KŌMØ Bottle',desc:()=>locale==='fr'?'KŌMØ Life · hydratation':'KŌMØ Life · hydration',action:()=>showLifeItem('bottle')},
+  {id:'life_recovery',x:7.10,z:1.25,r:1.35,title:()=> 'Recovery Roll',desc:()=>locale==='fr'?'KŌMØ Life · récupération':'KŌMØ Life · recovery',action:()=>showLifeItem('recovery')},
+  {id:'life_travel',x:9.80,z:1.25,r:1.35,title:()=> 'Travel Kit',desc:()=>locale==='fr'?'KŌMØ Life · Riviera':'KŌMØ Life · Riviera',action:()=>showLifeItem('travel')}
+];
+
+const arenaInteractions=[
+  {id:'challenge_board',x:45,z:2.7,r:3.5,title:()=>locale==='fr'?'World Challenges':'World Challenges',desc:()=>locale==='fr'?'Voir les défis du jour':'View today’s challenges',action:showChallenges}
 ];
 
 const twinInteractions=[
@@ -2569,7 +2582,7 @@ function markFitnessTodayComplete(){
   saveFitnessProfile();
   const coachId=t.activity.coach;
   rehabProgress[coachId]=(rehabProgress[coachId]||0)+1;rehabProgress.total++;saveRehabProgress();
-  completeJourney('rehab_session');
+  completeJourney('rehab_session');completeChallenge('fitness');
   setRehabCoachStation(coachId,false);
   notify((locale==='fr'?'+20 CLUB POINTS · STREAK ':'+20 CLUB POINTS · STREAK ')+fitnessStreak());
   showFitnessToday(true);
@@ -2703,6 +2716,7 @@ function arenaHtml(){
 function showArena(){
   openPanel('ARENA',locale==='fr'?'Performance · progression · communauté.':'Performance · progression · community.',arenaHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
+    {label:locale==='fr'?'DÉFIS DU JOUR':'DAILY CHALLENGES',primary:true,onClick:showChallenges},
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}
   ]);
 }
@@ -2780,7 +2794,7 @@ function setMode(next){
   mode=next;world.visible=next==='world';twinRoom.visible=next==='twin';rehabRoom.visible=next==='rehab';arenaRoom.visible=next==='arena';rehabCoach.visible=next==='rehab';
 }
 function enterTwin(){
-  completeJourney('twin');
+  completeJourney('twin');completeChallenge('twin');
   playerLevel=0;setMode('twin');player.set(-45,0,8.7);velocity.set(0,0,0);yaw=0;pitch=-.03;showTwin();locationName.textContent='FUNCTIONAL TWIN';
 }
 function enterRehab(){
@@ -2834,7 +2848,8 @@ function canMove(p){
   return true;
 }
 function commitMove(next){
-  player.copy(next);syncPlayerElevation();
+  const moved=player.distanceTo(next);player.copy(next);syncPlayerElevation();
+  if(mode==='world'&&moved>0)addChallengeProgress('distance',moved);
 }
 function tryMove(dx,dz){
   const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){commitMove(n);return}
@@ -2930,6 +2945,20 @@ function updateCamera(now,dt){
   }
   updatePlayerAvatar(now,dt);
 }
+function updateDestinationDoors(now,dt){
+  if(!living.destinationDoors?.length)return;
+  living.destinationDoors.forEach((d,i)=>{
+    const near=mode==='world'&&player.z<-21.5&&player.z>-29&&Math.abs(player.x-d.x)<3.2;
+    const target=near?1:0;
+    d.progress+=(target-d.progress)*(1-Math.exp(-(target?8.5:5.0)*dt));
+    const e=d.progress*d.progress*(3-2*d.progress);
+    d.left.position.x=THREE.MathUtils.lerp(-1.08,-2.00,e);
+    d.right.position.x=THREE.MathUtils.lerp(1.08,2.00,e);
+    d.mat.opacity=.10+.34*e;
+    d.beacon.rotation.z=now*.0011*(i%2?1:-1);
+    d.beacon.scale.setScalar(.92+.10*e+.04*Math.sin(now*.004+i));
+  });
+}
 function updateDoors(now,dt){
   let approach=mode==='world'&&player.z<25.8&&player.z>9.0&&Math.abs(player.x)<4.8;
   // Ambient people can also trigger the entrance, making it feel like a real place.
@@ -2979,7 +3008,7 @@ function updateHeading(){
   headingEl.textContent=dirs[Math.round(a/(Math.PI/4))%8];
 }
 function updateInteraction(){
-  let pool=mode==='world'?interactions:mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions:[];
+  let pool=mode==='world'?interactions:mode==='twin'?twinInteractions:mode==='rehab'?rehabInteractions:mode==='arena'?arenaInteractions:[];
   let best=null,bestD=Infinity;
   for(const it of pool){
     if(mode==='world'&&playerLevel===1&&it.level!==1)continue;
@@ -3286,6 +3315,7 @@ function animate(now){
   updateMovement(dt);
   updateCamera(now,dt);
   updateDoors(now,dt);
+  updateDestinationDoors(now,dt);
 
   // UI / proximity logic does not need 60 Hz.
   if(now-lastUiUpdate>(lowPower?100:66)){
