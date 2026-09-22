@@ -64,7 +64,7 @@ function labelSprite(THREE,text){
   x.fillStyle='#f3ede3';x.font='600 35px Arial';x.textAlign='center';x.textBaseline='middle';
   x.fillText(escText(text,24)||'KŌMØ Member',256,59);
   x.fillStyle='rgba(216,185,132,.92)';x.font='700 16px Arial';x.fillText('PULSE MEMBER',256,92);
-  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=Math.min(4,runtime?.renderer?.capabilities?.getMaxAnisotropy?.()||1);
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=2;
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
   sp.scale.set(2.25,.64,1);sp.position.y=2.52;sp.renderOrder=30;return sp;
 }
