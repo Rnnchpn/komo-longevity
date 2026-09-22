@@ -5,6 +5,7 @@ const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const PULSE_ORIGIN='https://pulse.komolongevity.com';
 const STALE_MS=45000;
 const HEARTBEAT_MS=2200;
+const POSE_MS=125;
 const CHAT_LIMIT=50;
 
 function escText(v,max=500){return String(v??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max)}
@@ -18,7 +19,7 @@ function css(){
   .kwmp-chat.open{opacity:1;visibility:visible;transform:none}
   .kwmp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 16px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
   .kwmp-head span{display:block;color:#d6b67f;font-size:7px;font-weight:800;letter-spacing:.16em}.kwmp-head strong{display:block;margin-top:4px;font:500 23px/1 Georgia,serif}.kwmp-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.055);color:#eee5d8;font-size:18px;cursor:pointer}
-  .kwmp-roster{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:grid;gap:6px}.kwmp-person{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:7px 9px;border:1px solid rgba(255,255,255,.055);border-radius:10px;background:rgba(255,255,255,.025)}.kwmp-person b{font-size:7px;letter-spacing:.04em}.kwmp-person span{font-size:6px;color:#d8ba86;letter-spacing:.09em}.kwmp-person.mine{border-color:rgba(216,186,134,.14)}
+  .kwmp-roster{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:grid;gap:6px}.kwmp-person{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:7px 9px;border:1px solid rgba(255,255,255,.055);border-radius:10px;background:rgba(255,255,255,.025)}.kwmp-person b{font-size:7px;letter-spacing:.04em}.kwmp-person span{font-size:6px;color:#d8ba86;letter-spacing:.09em;white-space:nowrap}.kwmp-person small{display:block;margin-top:3px;font-size:5px;color:rgba(240,234,224,.42);letter-spacing:.05em}.kwmp-person button{height:24px;padding:0 8px;border:1px solid rgba(216,186,134,.22);border-radius:8px;background:rgba(216,186,134,.09);color:#ead9ba;font-size:5px;font-weight:850;letter-spacing:.08em;cursor:pointer}.kwmp-person button:hover{background:rgba(216,186,134,.16)}.kwmp-person.mine{border-color:rgba(216,186,134,.14)}
   .kwmp-messages{overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}.kwmp-msg{max-width:86%;padding:9px 11px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.035)}.kwmp-msg.mine{align-self:flex-end;background:rgba(210,179,126,.09);border-color:rgba(210,179,126,.13)}.kwmp-msg b{display:block;margin-bottom:4px;font-size:8px}.kwmp-msg p{margin:0;font-size:9px;line-height:1.45;color:rgba(242,236,226,.72);white-space:pre-wrap;word-break:break-word}.kwmp-msg small{display:block;margin-top:5px;font-size:7px;color:rgba(242,236,226,.34)}
   .kwmp-empty{margin:auto;color:rgba(242,236,226,.40);font-size:9px;text-align:center;line-height:1.5;padding:18px}
   .kwmp-compose{display:flex;gap:7px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.07)}.kwmp-compose input{flex:1;min-width:0;height:38px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.045);color:#f0e8da;padding:0 11px;font-size:9px;outline:none}.kwmp-compose button{height:38px;padding:0 12px;border-radius:12px;background:#d8ba86;color:#1d2d25;font-size:8px;font-weight:850;cursor:pointer}.kwmp-compose button:disabled,.kwmp-compose input:disabled{opacity:.42}
@@ -67,7 +68,7 @@ function labelSprite(THREE,text){
   x.fillText(escText(text,24)||'KŌMØ Member',256,59);
   x.fillStyle='rgba(216,185,132,.92)';x.font='700 16px Arial';x.fillText('PULSE MEMBER',256,92);
   const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=2;
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:false}));
   sp.scale.set(2.25,.64,1);sp.position.y=2.52;sp.renderOrder=30;return sp;
 }
 function presenceAvatar(runtime,record){
@@ -105,19 +106,24 @@ function presenceAvatar(runtime,record){
   q=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.27,10),matSkin);q.position.y=-.14;leftElbow.add(q);
   q=new THREE.Mesh(new THREE.CylinderGeometry(.045,.052,.27,10),matSkin);q.position.y=-.14;rightElbow.add(q);
 
-  const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.46,40),accent);ring.rotation.x=-Math.PI/2;ring.position.y=.015;g.add(ring);
+  const ringMat=new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.48,depthWrite:false});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.42,.50,40),ringMat);ring.rotation.x=-Math.PI/2;ring.position.y=.018;ring.renderOrder=28;g.add(ring);
+  const beacon=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,3.3,6),new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.20,depthWrite:false,depthTest:false}));
+  beacon.position.y=1.65;beacon.renderOrder=27;g.add(beacon);
+  const beaconTop=new THREE.Mesh(new THREE.RingGeometry(.12,.18,24),new THREE.MeshBasicMaterial({color:0xf0d4a0,transparent:true,opacity:.58,depthWrite:false,depthTest:false}));
+  beaconTop.position.y=3.28;beaconTop.rotation.x=-Math.PI/2;beaconTop.renderOrder=29;g.add(beaconTop);
   const tag=labelSprite(THREE,record.display_name);g.add(tag);
 
   g.userData.target=new THREE.Vector3(Number(record.x)||0,Number(record.y)||0,Number(record.z)||0);
   g.userData.targetYaw=record.yaw||0;g.userData.zone=record.zone||'world';g.position.copy(g.userData.target);
-  g.userData.avatar={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,lastPosition:g.position.clone(),walkPhase:0};
+  g.userData.avatar={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,ring,beacon,beaconTop,lastPosition:g.position.clone(),walkPhase:0};
   runtime.scene.add(g);return g;
 }
 export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
   const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0};
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0};
 
   const setOnlineUI=()=>{
     if(state.presenceLive){
@@ -148,19 +154,39 @@ export async function mount(runtime){
   const renderRoster=()=>{
     if(!U.roster)return;
     U.roster.innerHTML='';
-    const now=Date.now(),own=state.session?.user?.id;
+    const now=Date.now(),own=state.session?.user?.id,local=runtime.getState();
     const active=[...state.rows.values()].filter(row=>now-new Date(row.updated_at||0).getTime()<STALE_MS);
     if(state.presenceLive&&own&&!active.some(r=>r.user_id===own)){
       const st=runtime.getState();
-      active.unshift({user_id:own,display_name:state.profile?.display_name||'You',zone:st.mode||'world',updated_at:new Date().toISOString()});
+      active.unshift({user_id:own,display_name:state.profile?.display_name||'You',zone:st.mode||'world',x:st.position.x,y:st.position.y,z:st.position.z,updated_at:new Date().toISOString()});
     }
     active.sort((a,b)=>(a.user_id===own?-1:b.user_id===own?1:String(a.display_name||'').localeCompare(String(b.display_name||''))));
     if(!active.length){const e=document.createElement('div');e.className='kwmp-empty';e.textContent=state.session?.user?'Synchronisation de la présence…':'Connectez World pour voir les personnes présentes.';U.roster.appendChild(e);return}
     for(const row of active){
-      const item=document.createElement('div');item.className='kwmp-person'+(row.user_id===own?' mine':'');
-      const n=document.createElement('b');n.textContent=(row.user_id===own?'YOU · ':'')+(escText(row.display_name,40)||'KŌMØ Member');
+      const mine=row.user_id===own;
+      const item=document.createElement('div');item.className='kwmp-person'+(mine?' mine':'');
+      const copy=document.createElement('div');
+      const n=document.createElement('b');n.textContent=(mine?'YOU · ':'')+(escText(row.display_name,40)||'KŌMØ Member');
+      const meta=document.createElement('small');
+      const sameZone=(row.zone||'world')===local.mode;
+      const distance=sameZone?Math.hypot((Number(row.x)||0)-local.position.x,(Number(row.z)||0)-local.position.z):null;
+      meta.textContent=mine?'CURRENT POSITION':sameZone?(Math.round(distance)+' m away'):'Different space';
+      copy.append(n,meta);
       const z=document.createElement('span');z.textContent=zoneLabel(row.zone);
-      item.append(n,z);U.roster.appendChild(item);
+      item.append(copy,z);
+      if(!mine){
+        const join=document.createElement('button');join.type='button';join.textContent='JOIN';
+        join.addEventListener('click',()=>{
+          const ok=runtime.joinPresence?.(row);
+          if(ok){
+            U.drawer.classList.remove('open');U.drawer.setAttribute('aria-hidden','true');
+            runtime.notify?.('Joining '+(escText(row.display_name,28)||'member'));
+            setTimeout(()=>{heartbeat();sendPose(true)},320);
+          }
+        });
+        item.append(join);
+      }
+      U.roster.appendChild(item);
     }
   };
   const fresh=(row)=>Date.now()-new Date(row.updated_at||0).getTime()<STALE_MS;
@@ -197,6 +223,25 @@ export async function mount(runtime){
       zone:['world','twin','rehab','arena'].includes(st.mode)?st.mode:'world',
       x:+st.position.x.toFixed(3),y:+(st.position.y||0).toFixed(3),z:+st.position.z.toFixed(3),yaw:+st.yaw.toFixed(4),updated_at:new Date().toISOString()
     }};
+  const posePayload=()=>{
+    const p=presencePayload();
+    return {user_id:p.user_id,display_name:p.display_name,avatar_config:p.avatar_config,zone:p.zone,x:p.x,y:p.y,z:p.z,yaw:p.yaw,updated_at:p.updated_at};
+  };
+  const poseChanged=(a,b)=>{
+    if(!a||!b)return true;
+    return a.zone!==b.zone||Math.abs(a.x-b.x)>.015||Math.abs(a.y-b.y)>.015||Math.abs(a.z-b.z)>.015||Math.abs(a.yaw-b.yaw)>.008;
+  };
+  const sendPose=async(force=false)=>{
+    if(!state.presenceLive||!state.subscribed||!state.channel||!state.session?.user)return false;
+    const payload=posePayload(),now=Date.now();
+    if(!force&&!poseChanged(payload,state.lastPose)&&now-state.lastPoseSentAt<900)return false;
+    state.lastPose=payload;state.lastPoseSentAt=now;
+    try{
+      const status=await state.channel.send({type:'broadcast',event:'pose',payload});
+      return status==='ok'||status==='timed out'?status==='ok':true;
+    }catch(err){console.warn('[World pose broadcast]',err);return false}
+  };
+
   const heartbeat=async()=>{
     if(!state.session?.user)return false;
     try{
@@ -221,7 +266,11 @@ export async function mount(runtime){
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'world_presence'},({new:row})=>consumePresence(row))
       .on('postgres_changes',{event:'DELETE',schema:'public',table:'world_presence'},({old:row})=>removePresence(row))
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'world_chat_messages'},({new:row})=>{if(!row?.id||state.messages.some(x=>x.id===row.id))return;state.messages.push(row);if(state.messages.length>CHAT_LIMIT)state.messages.shift();renderMessages()})
-      .subscribe(status=>{if(status==='SUBSCRIBED'){state.subscribed=true;setOnlineUI();heartbeat()}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){state.subscribed=false;state.presenceLive=false;state.connected=false;setOnlineUI();syncPeers()}});
+      .on('broadcast',{event:'pose'},({payload})=>{
+        if(!payload?.user_id||payload.user_id===state.session?.user?.id)return;
+        consumePresence(payload);
+      })
+      .subscribe(status=>{if(status==='SUBSCRIBED'){state.subscribed=true;setOnlineUI();heartbeat().then(()=>sendPose(true))}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){state.subscribed=false;state.presenceLive=false;state.connected=false;setOnlineUI();syncPeers()}});
   };
   const loadProfile=async(profileHint={})=>{
     let profile={};
@@ -238,6 +287,7 @@ export async function mount(runtime){
     if(!state.started){
       state.started=true;await loadInitial();subscribe();
       state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);
+      state.poseTimer=setInterval(()=>sendPose(false),POSE_MS);
     }
     const live=await heartbeat();syncPeers();return !!live;
   };
@@ -282,25 +332,36 @@ export async function mount(runtime){
   function animatePeers(){
     const local=runtime.getState(),cam=runtime.camera;
     for(const peer of state.peers.values()){
-      peer.visible=peer.userData.zone===local.mode;
+      const localZone=local.mode==='rehab'?'rehab':local.mode;
+      peer.visible=peer.userData.zone===localZone;
       if(!peer.visible)continue;
       const av=peer.userData.avatar;
       const beforeX=peer.position.x,beforeZ=peer.position.z;
-      peer.position.lerp(peer.userData.target,.18);
+      peer.position.lerp(peer.userData.target,.28);
       let d=((peer.userData.targetYaw-peer.rotation.y+Math.PI)%(Math.PI*2))-Math.PI;
-      peer.rotation.y+=d*.18;
+      peer.rotation.y+=d*.26;
 
       if(av){
         const speed=Math.hypot(peer.position.x-beforeX,peer.position.z-beforeZ);
         av.walkPhase+=Math.min(.22,speed*7.0);
         const stride=Math.sin(av.walkPhase);
         const distance=cam?cam.position.distanceTo(peer.position):0;
-        const near=distance<24;
-        av.tag.visible=distance<26;
+        const near=distance<28;
+        av.tag.visible=distance<90;
         if(av.tag.visible){
-          const k=Math.max(1,Math.min(1.24,1+distance*.011));
+          const k=Math.max(1,Math.min(1.85,1+distance*.014));
           av.tag.scale.set(2.25*k,.64*k,1);
         }
+        if(av.beacon){
+          av.beacon.visible=distance>7&&distance<90;
+          av.beacon.material.opacity=THREE.MathUtils.clamp(.34-distance*.0025,.12,.32);
+        }
+        if(av.beaconTop){
+          av.beaconTop.visible=distance>5&&distance<90;
+          const pulse=1+.12*Math.sin(performance.now()*.004);
+          av.beaconTop.scale.setScalar(pulse);
+        }
+        if(av.ring)av.ring.material.opacity=distance<30?.56:.34;
         if(near&&speed>.002){
           av.leftLeg.rotation.x=stride*.38;av.rightLeg.rotation.x=-stride*.38;
           av.leftKnee.rotation.x=Math.max(0,-stride)*.28;av.rightKnee.rotation.x=Math.max(0,stride)*.28;
@@ -325,12 +386,12 @@ export async function mount(runtime){
   });
 
   const cleanup=()=>{
-    clearInterval(state.timer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);
+    clearInterval(state.timer);clearInterval(state.poseTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);
     if(state.channel)client.removeChannel(state.channel);
     if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
   window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup()});
-  window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);heartbeat();syncPeers()}});
+  window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);if(!state.poseTimer)state.poseTimer=setInterval(()=>sendPose(false),POSE_MS);heartbeat();sendPose(true);syncPeers()}});
 
-  window.KomoWorldMultiplayer={version:'0.4.1-cross-tab-bridge',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.5.1-live-motion',connect:openPulse,state};
 }
