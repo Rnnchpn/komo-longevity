@@ -48,7 +48,10 @@ const guideToggle=$('#guide-toggle');
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
 const lowPower=coarse||isiOS;
+const deviceDpr=Math.max(1,window.devicePixelRatio||1);
+const retinaMobile=lowPower&&deviceDpr>=2;
 document.documentElement.classList.toggle('low-power',lowPower);
+document.documentElement.classList.toggle('retina-mobile',retinaMobile);
 
 const core=new TwinCore();
 const baseline=core.snapshots[0];
@@ -102,13 +105,17 @@ renderer.toneMappingExposure=.92;
 renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-let qualityMode=lowPower?'performance':'auto';
-let renderScale=lowPower?.62:1.15;
+let qualityMode=lowPower?'auto':'auto';
+let renderScale=lowPower?(retinaMobile?.90:.82):1.15;
 let fpsEMA=60,lastPerfSample=performance.now(),perfFrames=0;
-let emergencyPerformance=lowPower;
+let emergencyPerformance=false;
 let lastBudgetUpdate=0,lastVisibilityUpdate=0,lastUiUpdate=0,lastDecorUpdate=0,lastRoomFxUpdate=0;
 let activeLightBudget=0;
-function maxPixelRatio(){return qualityMode==='performance'?(lowPower?.64:.90):qualityMode==='high'?(lowPower?.90:1.55):(lowPower?.76:1.25)}
+function maxPixelRatio(){
+  if(qualityMode==='performance')return lowPower?(retinaMobile?.78:.72):.90;
+  if(qualityMode==='high')return lowPower?(retinaMobile?1.05:.95):1.55;
+  return lowPower?(retinaMobile?.98:.88):1.25;
+}
 function applyRenderScale(){
   const ratio=Math.min(window.devicePixelRatio||1,renderScale,maxPixelRatio());
   renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight,false);
@@ -2811,7 +2818,7 @@ cameraToggle.addEventListener('click',toggleCamera);
 guideToggle.addEventListener('click',toggleGuide);
 qualityToggle.addEventListener('click',()=>{
   qualityMode=qualityMode==='auto'?'performance':qualityMode==='performance'?'high':'auto';
-  renderScale=qualityMode==='performance'?(lowPower?.55:.82):qualityMode==='high'?(lowPower?.82:1.35):(lowPower?.62:1.10);
+  renderScale=qualityMode==='performance'?(lowPower?(retinaMobile?.78:.72):.82):qualityMode==='high'?(lowPower?(retinaMobile?1.02:.94):1.35):(lowPower?(retinaMobile?.92:.84):1.10);
   applyQualityProfile();notify('QUALITY · '+qualityMode.toUpperCase());
 });
 resetPosition.addEventListener('click',()=>fastTravel('arrival'));
@@ -2898,7 +2905,7 @@ function updateVisibilityBudget(now){
 function applyEmergencyPerformance(){
   if(!emergencyPerformance)emergencyPerformance=true;
   qualityMode='performance';
-  renderScale=lowPower?.52:.68;
+  renderScale=lowPower?(retinaMobile?.72:.66):.68;
   activeLightBudget=0;renderer.shadowMap.enabled=false;fill.intensity=0;
   living.lights.forEach(l=>{l.visible=false;if('intensity' in l)l.intensity=0});
   if(living.dust)living.dust.visible=false;
@@ -2915,12 +2922,13 @@ function updatePerformance(now){
   if(fpsStatus)fpsStatus.textContent=Math.round(fpsEMA)+' FPS · '+renderer.info.render.calls+' DC';
   if(fpsEMA<18&&!emergencyPerformance){applyEmergencyPerformance();notify(locale==='fr'?'Mode performance activé':'Performance mode enabled')}
   if(qualityMode==='auto'&&!emergencyPerformance){
-    const min=lowPower?.50:.70,max=lowPower?.72:1.25;
+    const min=lowPower?(retinaMobile?.72:.66):.70;
+    const max=lowPower?(retinaMobile?.98:.88):1.25;
     let next=renderScale;
-    if(fpsEMA<24)next=Math.max(min,renderScale-.16);
-    else if(fpsEMA<40)next=Math.max(min,renderScale-.09);
-    else if(fpsEMA<52)next=Math.max(min,renderScale-.04);
-    else if(fpsEMA>58)next=Math.min(max,renderScale+.025);
+    if(fpsEMA<22)next=Math.max(min,renderScale-(lowPower?.07:.16));
+    else if(fpsEMA<36)next=Math.max(min,renderScale-(lowPower?.045:.09));
+    else if(fpsEMA<48)next=Math.max(min,renderScale-(lowPower?.025:.04));
+    else if(fpsEMA>57)next=Math.min(max,renderScale+(lowPower?.02:.025));
     if(Math.abs(next-renderScale)>.01){renderScale=next;applyRenderScale()}
   }
 }
@@ -3051,19 +3059,18 @@ function freezeStaticScene(){
 }
 freezeStaticScene();
 applyQualityProfile();
-if(lowPower)applyEmergencyPerformance();
 syncPlayerElevation();
 updateJourneyUI();
 applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.0.1-hall-living',
+  version:'3.0.2-retina-sharp',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
   getLocale:()=>locale,
-  getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale,drawCalls:renderer.info.render.calls,activeLightBudget,shadows:renderer.shadowMap.enabled}),
+  getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale,pixelRatio:renderer.getPixelRatio(),drawCalls:renderer.info.render.calls,activeLightBudget,shadows:renderer.shadowMap.enabled,retinaMobile}),
   getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
   getCameraMode:()=>cameraMode,
   fastTravel,

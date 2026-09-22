@@ -45,9 +45,11 @@ const checks=[
   ['Fitness Club V2.9+ present',runtime.includes('KOMO_FITNESS_CLUB_V29')&&runtime.includes('const FITNESS_ACTIVITIES')],
   ['daily Fitness program V2.9 present',runtime.includes('function fitnessToday')&&runtime.includes('function fitnessStreak')&&runtime.includes('function markFitnessTodayComplete')],
   ['Fitness Coach V2.9 present',runtime.includes('function runFitnessCoachPreview')&&runtime.includes('ALEX · FITNESS COACH')],
-  ['Hall Living V3 present',runtime.includes("version:'3.0.1-hall-living'")&&runtime.includes('KOMO_HALL_LIVING_V30')&&runtime.includes('function instancedStatic')],
+  ['Hall Living V3+ present',runtime.includes('KOMO_HALL_LIVING_V30')&&runtime.includes('function instancedStatic')],
   ['Hall Living social layer present',runtime.includes("label:'Camille'")&&runtime.includes("label:'Lina'")&&runtime.includes('TODAY AT KŌMØ')],
-  ['Hall Living culling present',runtime.includes('hallLiving.visible=player.z<19&&player.z>-29')&&runtime.includes('mesh:m')]
+  ['Hall Living culling present',runtime.includes('hallLiving.visible=player.z<19&&player.z>-29')&&runtime.includes('mesh:m')],
+  ['Retina sharpness V3.0.2 present',runtime.includes("version:'3.0.2-retina-sharp'")&&runtime.includes('const retinaMobile=lowPower&&deviceDpr>=2')&&runtime.includes('pixelRatio:renderer.getPixelRatio()')],
+  ['mobile no forced rescue V3.0.2 present',!runtime.includes('if(lowPower)applyEmergencyPerformance();')&&runtime.includes('retinaMobile?.90:.82')&&runtime.includes('retinaMobile?.72:.66')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
