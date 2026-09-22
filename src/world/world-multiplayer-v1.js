@@ -245,79 +245,108 @@ function ui(){
   return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:voicebox.querySelector('[data-kwmp-voice]'),talk,voicebox,voiceCollapse:voicebox.querySelector('[data-kwmp-voice-collapse]'),chatLauncher,social:dock.querySelector('[data-kwmp-social]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
 }
 function labelSprite(THREE,text,subtitle='PULSE MEMBER'){
-  const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');
-  x.clearRect(0,0,512,128);
-  const rr=(ctx,x0,y0,w,h,r)=>{ctx.beginPath();ctx.roundRect(x0,y0,w,h,r);ctx.closePath()};
-  rr(x,58,18,396,88,24);x.fillStyle='rgba(16,29,22,.78)';x.fill();
-  x.strokeStyle='rgba(223,197,151,.28)';x.lineWidth=1.5;x.stroke();
-  x.fillStyle='#f5eee4';x.font='600 29px Arial';x.textAlign='center';x.textBaseline='middle';
-  x.fillText(escText(text,24)||'KŌMØ Member',256,52);
-  x.fillStyle='rgba(224,197,148,.82)';x.font='700 13px Arial';x.fillText(escText(subtitle,28)||'PULSE MEMBER',256,80);
+  const c=document.createElement('canvas');c.width=512;c.height=112;const x=c.getContext('2d');
+  x.clearRect(0,0,512,112);
+  x.beginPath();x.roundRect(72,18,368,76,20);x.closePath();
+  x.fillStyle='rgba(13,27,20,.64)';x.fill();
+  x.strokeStyle='rgba(223,197,151,.18)';x.lineWidth=1;x.stroke();
+  x.fillStyle='rgba(248,242,233,.94)';x.font='600 27px Arial';x.textAlign='center';x.textBaseline='middle';
+  x.fillText(escText(text,24)||'KŌMØ Member',256,48);
+  x.fillStyle='rgba(224,197,148,.70)';x.font='700 11px Arial';x.fillText(escText(subtitle,28)||'PULSE MEMBER',256,74);
   const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.anisotropy=2;
-  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:false,opacity:.96}));
-  sp.scale.set(1.72,.43,1);sp.position.y=2.42;sp.renderOrder=30;return sp;
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:false,opacity:.90}));
+  sp.scale.set(1.46,.32,1);sp.position.y=2.45;sp.renderOrder=30;return sp;
 }
 function presenceAvatar(runtime,record){
-  const {THREE}=runtime,g=new THREE.Group();g.name='KOMO_REMOTE_'+record.user_id;
+  const {THREE}=runtime,g=new THREE.Group();g.name='KOMO_REMOTE_V42_'+record.user_id;
   const cfg=record.avatar_config||{};
   const skin={porcelain:0xe9d5c3,sand:0xd8b797,amber:0xb9845e,bronze:0x8e6248,deep:0x5d4034}[cfg.skin]||0xc79772;
   const outfit={tee:0x294238,sweat:0x56675a,varsity:0x21352f,motion:0x334b3e}[cfg.outfit]||0x294238;
   const hairColor={dark:0x26221f,brown:0x594438,sand:0x8b745d,black:0x171717}[cfg.hair]||0x2c2521;
-  const matSkin=new THREE.MeshStandardMaterial({color:skin,roughness:.74});
-  const matSkinWarm=new THREE.MeshStandardMaterial({color:new THREE.Color(skin).multiplyScalar(.88),roughness:.78});
-  const matOut=new THREE.MeshStandardMaterial({color:outfit,roughness:.60,metalness:.015});
-  const matOutDark=new THREE.MeshStandardMaterial({color:new THREE.Color(outfit).multiplyScalar(.72),roughness:.66});
-  const matTrouser=new THREE.MeshStandardMaterial({color:0x343a36,roughness:.76});
-  const matHair=new THREE.MeshStandardMaterial({color:hairColor,roughness:.86});
-  const matShoe=new THREE.MeshStandardMaterial({color:0x222220,roughness:.50});
-  const matSole=new THREE.MeshStandardMaterial({color:0xd1ccc2,roughness:.84});
-  const accent=new THREE.MeshStandardMaterial({color:0xaa8254,roughness:.34,metalness:.38});
+
+  const matSkin=new THREE.MeshStandardMaterial({color:skin,roughness:.69});
+  const matSkinWarm=new THREE.MeshStandardMaterial({color:new THREE.Color(skin).multiplyScalar(.88),roughness:.75});
+  const matOut=new THREE.MeshStandardMaterial({color:outfit,roughness:.49,metalness:.018});
+  const matOutDark=new THREE.MeshStandardMaterial({color:new THREE.Color(outfit).multiplyScalar(.72),roughness:.57});
+  const matOutSoft=new THREE.MeshStandardMaterial({color:new THREE.Color(outfit).multiplyScalar(1.14),roughness:.62});
+  const matTrouser=new THREE.MeshStandardMaterial({color:0x343a36,roughness:.69});
+  const matHair=new THREE.MeshStandardMaterial({color:hairColor,roughness:.81});
+  const matShoe=new THREE.MeshStandardMaterial({color:0x222421,roughness:.43});
+  const matSole=new THREE.MeshStandardMaterial({color:0xd3cec5,roughness:.73});
+  const accent=new THREE.MeshStandardMaterial({color:0xaa8254,roughness:.29,metalness:.43});
   const capsule=(r,len,mat,parent,y=0)=>{
     const m=new THREE.Mesh(new THREE.CapsuleGeometry(r,len,5,12),mat);m.position.y=y;parent.add(m);return m;
   };
 
-  const hips=new THREE.Group();hips.position.y=.98;g.add(hips);
-  let q=new THREE.Mesh(new THREE.SphereGeometry(.24,16,10),matTrouser);q.scale.set(1,.72,.80);hips.add(q);
+  const hips=new THREE.Group();hips.position.y=1.04;g.add(hips);
+  let q=new THREE.Mesh(new THREE.SphereGeometry(.215,18,12),matTrouser);q.scale.set(1.06,.62,.76);hips.add(q);
 
-  const torso=new THREE.Group();torso.position.y=1.42;g.add(torso);
-  q=new THREE.Mesh(new THREE.CapsuleGeometry(.215,.42,7,16),matOut);q.scale.set(1.04,1,.80);torso.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.30,16,10),matOut);q.position.y=.14;q.scale.set(1.17,.48,.70);torso.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.235,14,9),matOutDark);q.position.y=-.29;q.scale.set(1,.26,.76);torso.add(q);
-  q=new THREE.Mesh(new THREE.BoxGeometry(.014,.44,.018),accent);q.position.set(0,-.01,.202);torso.add(q);
+  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();
+  leftLeg.position.set(-.135,1.03,0);rightLeg.position.set(.135,1.03,0);g.add(leftLeg,rightLeg);
+  const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();
+  leftKnee.position.y=-.46;rightKnee.position.y=-.46;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
+  q=capsule(.069,.32,matTrouser,leftLeg,-.255);q.scale.set(1.02,1,.92);
+  q=capsule(.069,.32,matTrouser,rightLeg,-.255);q.scale.set(1.02,1,.92);
+  q=capsule(.053,.30,matTrouser,leftKnee,-.235);q.scale.set(.96,1,.90);
+  q=capsule(.053,.30,matTrouser,rightKnee,-.235);q.scale.set(.96,1,.90);
 
-  const head=new THREE.Group();head.position.y=2.055;g.add(head);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.178,22,16),matSkin);q.scale.set(.90,1.08,.94);head.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.130,14,10),matSkin);q.position.set(0,-.105,.015);q.scale.set(.90,.60,.88);head.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.184,18,12,0,Math.PI*2,0,Math.PI*.56),matHair);q.position.set(0,.068,-.009);q.scale.set(.92,.86,.96);head.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.028,8,6),matSkinWarm);q.position.set(0,-.002,.187);q.scale.set(.62,.74,1.10);head.add(q);
+  const makeShoe=(parent)=>{
+    const group=new THREE.Group();group.position.set(0,-.49,.075);parent.add(group);
+    const upper=new THREE.Mesh(new THREE.CapsuleGeometry(.070,.17,5,12),matShoe);upper.position.set(0,.005,.025);upper.rotation.x=Math.PI/2;upper.scale.set(.90,.82,1);group.add(upper);
+    const toe=new THREE.Mesh(new THREE.SphereGeometry(.082,14,9),matShoe);toe.position.set(0,-.006,.112);toe.scale.set(.88,.54,1.06);group.add(toe);
+    q=new THREE.Mesh(new THREE.BoxGeometry(.135,.027,.305),matSole);q.position.set(0,-.055,.045);group.add(q);
+    q=new THREE.Mesh(new THREE.BoxGeometry(.125,.038,.105),matSole);q.position.set(0,-.047,-.062);group.add(q);
+    return group;
+  };
+  const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee);
 
-  const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.14,.93,0);rightLeg.position.set(.14,.93,0);g.add(leftLeg,rightLeg);
-  const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();leftKnee.position.y=-.405;rightKnee.position.y=-.405;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
-  capsule(.074,.28,matTrouser,leftLeg,-.215);capsule(.074,.28,matTrouser,rightLeg,-.215);
-  capsule(.058,.25,matTrouser,leftKnee,-.205);capsule(.058,.25,matTrouser,rightKnee,-.205);
-  const leftShoe=new THREE.Mesh(new THREE.SphereGeometry(.12,14,9),matShoe);leftShoe.position.set(0,-.445,.070);leftShoe.scale.set(.72,.42,1.28);leftKnee.add(leftShoe);
-  const rightShoe=leftShoe.clone();rightKnee.add(rightShoe);
-  const leftSole=new THREE.Mesh(new THREE.SphereGeometry(.117,12,8),matSole);leftSole.position.set(0,-.485,.082);leftSole.scale.set(.70,.19,1.24);leftKnee.add(leftSole);
-  const rightSole=leftSole.clone();rightKnee.add(rightSole);
+  const torso=new THREE.Group();torso.position.y=1.50;g.add(torso);
+  q=new THREE.Mesh(new THREE.CapsuleGeometry(.202,.40,7,16),matOut);q.position.y=-.01;q.scale.set(1.03,1,.76);torso.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.275,18,12),matOut);q.position.y=.155;q.scale.set(1.22,.46,.69);torso.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.205,14,9),matOutDark);q.position.y=-.305;q.scale.set(1,.24,.72);torso.add(q);
+  const shoulderGeo=new THREE.SphereGeometry(.105,14,9);
+  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(-.292,.185,0);q.scale.set(.92,.64,.82);torso.add(q);
+  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(.292,.185,0);q.scale.set(.92,.64,.82);torso.add(q);
+  q=new THREE.Mesh(new THREE.BoxGeometry(.010,.50,.014),accent);q.position.set(0,-.015,.188);torso.add(q);
+  q=new THREE.Mesh(new THREE.BoxGeometry(.175,.155,.022),matOutDark);q.position.set(-.086,.295,.178);q.rotation.z=-.34;torso.add(q);
+  q=new THREE.Mesh(new THREE.BoxGeometry(.175,.155,.022),matOutDark);q.position.set(.086,.295,.178);q.rotation.z=.34;torso.add(q);
+  q=new THREE.Mesh(new THREE.BoxGeometry(.37,.025,.018),matOutSoft);q.position.set(0,-.355,.160);torso.add(q);
 
-  const leftArm=new THREE.Group(),rightArm=new THREE.Group();leftArm.position.set(-.335,1.66,0);rightArm.position.set(.335,1.66,0);leftArm.rotation.z=-.055;rightArm.rotation.z=.055;g.add(leftArm,rightArm);
-  const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();leftElbow.position.y=-.315;rightElbow.position.y=-.315;leftArm.add(leftElbow);rightArm.add(rightElbow);
-  capsule(.055,.22,matOut,leftArm,-.175);capsule(.055,.22,matOut,rightArm,-.175);
-  capsule(.044,.19,matSkin,leftElbow,-.15);capsule(.044,.19,matSkin,rightElbow,-.15);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.054,10,8),matSkin);q.position.set(0,-.33,.006);q.scale.set(.84,1.05,.68);leftElbow.add(q);
-  q=q.clone();rightElbow.add(q);
+  const neck=new THREE.Mesh(new THREE.CylinderGeometry(.058,.064,.145,12),matSkin);neck.position.y=1.93;g.add(neck);
+  const head=new THREE.Group();head.position.y=2.115;g.add(head);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.160,22,16),matSkin);q.scale.set(.91,1.07,.95);head.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.112,14,10),matSkin);q.position.set(0,-.098,.014);q.scale.set(.90,.60,.87);head.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.166,18,12,0,Math.PI*2,0,Math.PI*.55),matHair);q.position.set(0,.062,-.008);q.scale.set(.93,.84,.97);head.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.022,8,6),matSkinWarm);q.position.set(0,-.004,.160);q.scale.set(.58,.72,1.06);head.add(q);
 
-  const ringMat=new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.18,depthWrite:false});
-  const ring=new THREE.Mesh(new THREE.RingGeometry(.37,.405,36),ringMat);ring.rotation.x=-Math.PI/2;ring.position.y=.018;ring.renderOrder=28;g.add(ring);
-  const beacon=new THREE.Mesh(new THREE.CylinderGeometry(.010,.010,3.0,6),new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.10,depthWrite:false,depthTest:false}));
-  beacon.position.y=1.52;beacon.renderOrder=27;g.add(beacon);
-  const beaconTop=new THREE.Mesh(new THREE.RingGeometry(.09,.14,24),new THREE.MeshBasicMaterial({color:0xf0d4a0,transparent:true,opacity:.32,depthWrite:false,depthTest:false}));
-  beaconTop.position.y=3.05;beaconTop.rotation.x=-Math.PI/2;beaconTop.renderOrder=29;g.add(beaconTop);
+  const leftArm=new THREE.Group(),rightArm=new THREE.Group();
+  leftArm.position.set(-.326,1.70,0);rightArm.position.set(.326,1.70,0);leftArm.rotation.z=-.042;rightArm.rotation.z=.042;g.add(leftArm,rightArm);
+  const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();
+  leftElbow.position.y=-.34;rightElbow.position.y=-.34;leftArm.add(leftElbow);rightArm.add(rightElbow);
+  capsule(.050,.245,matOut,leftArm,-.188);capsule(.050,.245,matOut,rightArm,-.188);
+  q=new THREE.Mesh(new THREE.CylinderGeometry(.051,.048,.040,10),matOutSoft);q.position.y=-.337;leftArm.add(q);
+  q=q.clone();rightArm.add(q);
+  capsule(.039,.215,matSkin,leftElbow,-.165);capsule(.039,.215,matSkin,rightElbow,-.165);
+
+  const makeHand=(parent)=>{
+    const h=new THREE.Mesh(new THREE.CapsuleGeometry(.032,.066,5,10),matSkin);h.position.set(0,-.365,.006);h.scale.set(.92,1.04,.64);parent.add(h);return h;
+  };
+  const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow);
+
+  const ringMat=new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.075,depthWrite:false});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.34,.365,36),ringMat);ring.rotation.x=-Math.PI/2;ring.position.y=.015;ring.renderOrder=28;g.add(ring);
+  const beacon=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,2.5,6),new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.07,depthWrite:false,depthTest:false}));
+  beacon.position.y=1.55;beacon.renderOrder=27;g.add(beacon);
+  const beaconTop=new THREE.Mesh(new THREE.RingGeometry(.065,.095,24),new THREE.MeshBasicMaterial({color:0xf0d4a0,transparent:true,opacity:.18,depthWrite:false,depthTest:false}));
+  beaconTop.position.y=2.88;beaconTop.rotation.x=-Math.PI/2;beaconTop.renderOrder=29;g.add(beaconTop);
   const tag=labelSprite(THREE,record.display_name,record.role_title||'PULSE MEMBER');g.add(tag);
 
   g.userData.target=new THREE.Vector3(Number(record.x)||0,Number(record.y)||0,Number(record.z)||0);
   g.userData.targetYaw=record.yaw||0;g.userData.zone=record.zone||'world';g.position.copy(g.userData.target);
-  g.userData.avatar={hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,leftShoe,rightShoe,tag,ring,beacon,beaconTop,lastPosition:g.position.clone(),walkPhase:0};
+  g.userData.avatar={
+    hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,
+    leftShoe,rightShoe,leftHand,rightHand,tag,ring,beacon,beaconTop,lastPosition:g.position.clone(),walkPhase:0
+  };
   runtime.scene.add(g);return g;
 }
 export async function mount(runtime){
@@ -823,34 +852,39 @@ export async function mount(runtime){
         const near=distance<28;
         av.tag.visible=distance<90;
         if(av.tag.visible){
-          const k=Math.max(1,Math.min(1.48,1+distance*.008));
-          av.tag.scale.set(1.72*k,.43*k,1);
+          const k=Math.max(.92,Math.min(1.28,.96+distance*.005));
+          av.tag.scale.set(1.46*k,.32*k,1);
         }
         if(av.beacon){
-          av.beacon.visible=distance>15&&distance<90;
-          av.beacon.material.opacity=THREE.MathUtils.clamp(.18-distance*.0012,.06,.16);
+          av.beacon.visible=distance>22&&distance<90;
+          av.beacon.material.opacity=THREE.MathUtils.clamp(.11-distance*.0008,.035,.09);
         }
         if(av.beaconTop){
-          av.beaconTop.visible=distance>15&&distance<90;
-          const pulse=1+.07*Math.sin(performance.now()*.0032);
+          av.beaconTop.visible=distance>22&&distance<90;
+          const pulse=1+.045*Math.sin(performance.now()*.0028);
           av.beaconTop.scale.setScalar(pulse);
         }
-        if(av.ring)av.ring.material.opacity=distance<18?.18:.10;
+        if(av.ring)av.ring.material.opacity=distance<16?.075:.038;
+        const idle=Math.sin(performance.now()*.0013);
         if(near&&speed>.002){
-          av.leftLeg.rotation.x=stride*.34;av.rightLeg.rotation.x=-stride*.34;
-          av.leftKnee.rotation.x=Math.max(0,-stride)*.36;av.rightKnee.rotation.x=Math.max(0,stride)*.36;
-          av.leftArm.rotation.x=-stride*.23;av.rightArm.rotation.x=stride*.23;
-          av.leftElbow.rotation.x=Math.max(0,stride)*.12;av.rightElbow.rotation.x=Math.max(0,-stride)*.12;
-          av.torso.rotation.z=Math.cos(av.walkPhase*.5)*.012;
-          av.torso.rotation.y=Math.sin(av.walkPhase*.5)*.016;
-          av.hips.rotation.y=Math.sin(av.walkPhase*.5)*.026;
-          av.head.rotation.y=Math.sin(av.walkPhase*.24)*.045;
-          if(av.leftShoe)av.leftShoe.rotation.x=-Math.max(0,-stride)*.10;
-          if(av.rightShoe)av.rightShoe.rotation.x=-Math.max(0,stride)*.10;
+          av.leftLeg.rotation.x=stride*.31;av.rightLeg.rotation.x=-stride*.31;
+          av.leftKnee.rotation.x=Math.max(0,-stride)*.43;av.rightKnee.rotation.x=Math.max(0,stride)*.43;
+          av.leftArm.rotation.x=-stride*.19;av.rightArm.rotation.x=stride*.19;
+          av.leftElbow.rotation.x=.035+Math.max(0,stride)*.09;av.rightElbow.rotation.x=.035+Math.max(0,-stride)*.09;
+          av.torso.rotation.z=Math.cos(av.walkPhase*.5)*.008;
+          av.torso.rotation.y=Math.sin(av.walkPhase*.5)*.014;
+          av.hips.rotation.y=Math.sin(av.walkPhase*.5)*.023;
+          av.head.rotation.y=Math.sin(av.walkPhase*.24)*.032;
+          if(av.leftShoe)av.leftShoe.rotation.x=-Math.max(0,-stride)*.09;
+          if(av.rightShoe)av.rightShoe.rotation.x=-Math.max(0,stride)*.09;
         }else{
-          av.leftLeg.rotation.x*=.78;av.rightLeg.rotation.x*=.78;
-          av.leftArm.rotation.x*=.78;av.rightArm.rotation.x*=.78;
-          av.leftKnee.rotation.x*=.72;av.rightKnee.rotation.x*=.72;
+          av.leftLeg.rotation.x*=.76;av.rightLeg.rotation.x*=.76;
+          av.leftArm.rotation.x*=.76;av.rightArm.rotation.x*=.76;
+          av.leftKnee.rotation.x*=.70;av.rightKnee.rotation.x*=.70;
+          av.torso.rotation.z*=.80;av.torso.rotation.y*=.80;
+          av.hips.rotation.y*=.80;
+          av.head.rotation.y=Math.sin(performance.now()*.00043)*.018;
+          av.torso.position.y=1.50+idle*.0025;
         }
       }
     }
@@ -875,5 +909,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.8.0-v41-avatar',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.8.1-v42-avatar-realism',connect:openPulse,state};
 }
