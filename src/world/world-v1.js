@@ -44,6 +44,7 @@ const journeyMissionsEl=$('#journey-missions');
 const journeyLevelLadder=$('#journey-level-ladder');
 const journeyBadgesEl=$('#journey-badges');
 const guideToggle=$('#guide-toggle');
+const controlsToggle=$('#controls-toggle');
 const healthHud=$('#health-hud');
 const healthStatusEl=$('#health-status');
 const healthMuscleEl=$('#health-muscle');
@@ -2043,6 +2044,72 @@ let doorProgress=0,doorTarget=0,doorHoldUntil=0,doorLastOpen=false;
 let dragging=false,lastX=0,lastY=0;
 let joyX=0,joyY=0,joyTargetX=0,joyTargetY=0,joyPointer=null;
 const keys=new Set();
+const KEYBIND_KEY='komo_world_keybinds_v1';
+const KEY_DEFAULTS={
+  forward:['KeyW','KeyZ','ArrowUp'],
+  back:['KeyS','ArrowDown'],
+  left:['KeyA','KeyQ','ArrowLeft'],
+  right:['KeyD','ArrowRight'],
+  sprint:['ShiftLeft','ShiftRight'],
+  action:['KeyE'],
+  camera:['KeyV'],
+  guide:['KeyG'],
+  menu:['KeyM']
+};
+function loadKeybinds(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(KEYBIND_KEY)||'{}');
+    const out={};
+    for(const [k,v] of Object.entries(KEY_DEFAULTS))out[k]=Array.isArray(raw[k])&&raw[k].length?raw[k].slice(0,3):v.slice();
+    return out;
+  }catch{return Object.fromEntries(Object.entries(KEY_DEFAULTS).map(([k,v])=>[k,v.slice()]))}
+}
+const keybinds=loadKeybinds();
+function saveKeybinds(){try{localStorage.setItem(KEYBIND_KEY,JSON.stringify(keybinds))}catch{}}
+function keyHas(action,code){return keybinds[action]?.includes(code)}
+function isPressed(action){return (keybinds[action]||[]).some(code=>keys.has(code))}
+function keyLabel(code){
+  const map={ArrowUp:'↑',ArrowDown:'↓',ArrowLeft:'←',ArrowRight:'→',ShiftLeft:'SHIFT',ShiftRight:'SHIFT',Space:'SPACE',Escape:'ESC'};
+  if(map[code])return map[code];
+  return String(code||'').replace(/^Key/,'').replace(/^Digit/,'');
+}
+function keybindHtml(){
+  const labels={
+    forward:locale==='fr'?'AVANCER':'FORWARD',
+    back:locale==='fr'?'RECULER':'BACK',
+    left:locale==='fr'?'GAUCHE':'LEFT',
+    right:locale==='fr'?'DROITE':'RIGHT',
+    sprint:locale==='fr'?'ACCÉLÉRER':'SPRINT',
+    action:'ACTION',camera:'CAMERA',guide:'GUIDE',menu:'MENU'
+  };
+  return `<div class="keybind-grid">${Object.keys(labels).map(k=>`<div class="keybind-row"><span>${labels[k]}</span><button type="button" data-keybind="${k}">${keybinds[k].map(keyLabel).join(' / ')}</button></div>`).join('')}</div><div class="keybind-note">${locale==='fr'?'Clique sur une commande puis appuie sur la touche à utiliser. Les réglages sont sauvegardés sur cet appareil.':'Click a command, then press the key you want to use. Settings are saved on this device.'}</div>`;
+}
+function bindKeybindPanel(){
+  panelBody.querySelectorAll('[data-keybind]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      panelBody.querySelectorAll('[data-keybind]').forEach(b=>b.classList.remove('listening'));
+      btn.classList.add('listening');btn.textContent=locale==='fr'?'APPUYEZ…':'PRESS KEY…';
+      const action=btn.dataset.keybind;
+      const handler=e=>{
+        e.preventDefault();e.stopPropagation();
+        if(e.code==='Escape'){showControlsPanel();return}
+        keybinds[action]=[e.code];saveKeybinds();showControlsPanel();
+      };
+      window.addEventListener('keydown',handler,{once:true,capture:true});
+    });
+  });
+}
+function resetKeybinds(){
+  for(const [k,v] of Object.entries(KEY_DEFAULTS))keybinds[k]=v.slice();
+  saveKeybinds();showControlsPanel();notify(locale==='fr'?'COMMANDES RÉINITIALISÉES':'CONTROLS RESET');
+}
+function showControlsPanel(){
+  openPanel(locale==='fr'?'COMMANDES':'CONTROLS',locale==='fr'?'Personnalisez les touches de KŌMØ World.':'Customise KŌMØ World controls.',keybindHtml(),[
+    {label:locale==='fr'?'RÉINITIALISER':'RESET DEFAULTS',onClick:resetKeybinds},
+    {label:locale==='fr'?'FERMER':'CLOSE',primary:true,onClick:closePanel}
+  ]);bindKeybindPanel();
+}
+
 
 const interactions=[
   {id:'desk',x:-7.3,z:4.0,r:3.6,title:()=>copy[locale].deskTitle,desc:()=>copy[locale].deskCopy,action:showDesk},
@@ -3143,13 +3210,13 @@ function updateMovement(dt){
     velocity.lerp(new THREE.Vector3(),1-Math.exp(-12*dt));return;
   }
   let x=0,z=0;
-  if(keys.has('KeyW')||keys.has('KeyZ')||keys.has('ArrowUp'))z+=1;
-  if(keys.has('KeyS')||keys.has('ArrowDown'))z-=1;
-  if(keys.has('KeyD')||keys.has('ArrowRight'))x+=1;
-  if(keys.has('KeyA')||keys.has('KeyQ')||keys.has('ArrowLeft'))x-=1;
+  if(isPressed('forward'))z+=1;
+  if(isPressed('back'))z-=1;
+  if(isPressed('right'))x+=1;
+  if(isPressed('left'))x-=1;
   x+=joyX;z+=-joyY;
   const input=new THREE.Vector2(x,z);
-  const sprint=keys.has('ShiftLeft')||keys.has('ShiftRight');
+  const sprint=isPressed('sprint');
   const speed=sprint?7.15:4.35;
   const target=new THREE.Vector3();
   if(input.lengthSq()>.002){
@@ -3347,11 +3414,12 @@ function updateTwinScan(now){
 }
 
 window.addEventListener('keydown',e=>{
-  if(['KeyW','KeyA','KeyS','KeyD','KeyZ','KeyQ','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code)){keys.add(e.code);e.preventDefault()}
-  if(e.code==='KeyE'&&!worldMenu.classList.contains('open')){triggerAction();e.preventDefault()}
-  if(e.code==='KeyM'){toggleWorldMenu();e.preventDefault()}
-  if(e.code==='KeyV'){toggleCamera();e.preventDefault()}
-  if(e.code==='KeyG'){toggleGuide();e.preventDefault()}
+  const movement=['forward','back','left','right','sprint'].some(a=>keyHas(a,e.code));
+  if(movement){keys.add(e.code);e.preventDefault()}
+  if(keyHas('action',e.code)&&!worldMenu.classList.contains('open')&&!panel.classList.contains('open')){triggerAction();e.preventDefault()}
+  if(keyHas('menu',e.code)&&!panel.classList.contains('open')){toggleWorldMenu();e.preventDefault()}
+  if(keyHas('camera',e.code)&&!panel.classList.contains('open')){toggleCamera();e.preventDefault()}
+  if(keyHas('guide',e.code)&&!panel.classList.contains('open')){toggleGuide();e.preventDefault()}
   if(e.code==='Escape'){if(worldMenu.classList.contains('open'))closeWorldMenu();else if(panel.classList.contains('open'))closePanel();else if(mode!=='world')returnToHall()}
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
@@ -3393,6 +3461,7 @@ worldMenuToggle.addEventListener('click',toggleWorldMenu);
 worldMenuClose.addEventListener('click',closeWorldMenu);
 cameraToggle.addEventListener('click',toggleCamera);
 guideToggle.addEventListener('click',toggleGuide);
+controlsToggle.addEventListener('click',()=>{closeWorldMenu();showControlsPanel()});
 qualityToggle.addEventListener('click',()=>{
   qualityMode=qualityMode==='auto'?'performance':qualityMode==='performance'?'high':'auto';
   renderScale=qualityMode==='performance'?(lowPower?(retinaMobile?.82:.74):.82):qualityMode==='high'?(lowPower?(retinaMobile?1.14:.98):1.35):(lowPower?(retinaMobile?1.04:.88):1.10);
@@ -3411,6 +3480,15 @@ function applyLocale(){
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
   $('#world-menu-copy').textContent=locale==='fr'?'Choisissez un espace ou ajustez votre expérience.':'Choose a space or adjust your experience.';
+  const controlHints=document.querySelectorAll('.world-menu-controls span');
+  if(controlHints.length>=6){
+    controlHints[0].innerHTML='<kbd>'+keybinds.forward.map(keyLabel).join('/')+'</kbd> MOVE';
+    controlHints[1].innerHTML='<kbd>'+keybinds.sprint.map(keyLabel).join('/')+'</kbd> SPRINT';
+    controlHints[2].innerHTML='<kbd>'+keybinds.action.map(keyLabel).join('/')+'</kbd> ACTION';
+    controlHints[3].innerHTML='<kbd>'+keybinds.camera.map(keyLabel).join('/')+'</kbd> CAMERA';
+    controlHints[4].innerHTML='<kbd>'+keybinds.guide.map(keyLabel).join('/')+'</kbd> GUIDE';
+    controlHints[5].innerHTML='<kbd>'+keybinds.menu.map(keyLabel).join('/')+'</kbd> MENU';
+  }
   updateJourneyUI();updateHealthHUD();
   if(currentInteraction){interactionTitle.textContent=currentInteraction.title();interactionCopy.textContent=currentInteraction.desc()}
   if(panel.classList.contains('open')){
