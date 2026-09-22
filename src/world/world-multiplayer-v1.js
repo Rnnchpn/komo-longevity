@@ -157,7 +157,7 @@ export async function mount(runtime){
     if(!U.roster)return;
     U.roster.innerHTML='';
     const now=Date.now(),own=state.session?.user?.id,local=runtime.getState();
-    const active=[...state.rows.values()].filter(row=>now-new Date(row.updated_at||0).getTime()<STALE_MS);
+    const active=[...state.rows.values()].filter(row=>fresh(row));
     if(state.presenceLive&&own&&!active.some(r=>r.user_id===own)){
       const st=runtime.getState();
       active.unshift({user_id:own,display_name:state.profile?.display_name||'You',zone:st.mode||'world',x:st.position.x,y:st.position.y,z:st.position.z,updated_at:new Date().toISOString()});
