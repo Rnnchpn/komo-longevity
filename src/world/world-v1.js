@@ -249,7 +249,7 @@ function makeCloudTexture(){
 }
 const cloudTexture=makeCloudTexture();
 const cloudGroup=new THREE.Group();cloudGroup.name='KOMO_CLOUD_FIELD_V18';scene.add(cloudGroup);
-const cloudCount=lowPower?2:9;
+const cloudCount=lowPower?3:11;
 for(let i=0;i<cloudCount;i++){
   const mat=new THREE.MeshBasicMaterial({map:cloudTexture,transparent:true,opacity:lowPower?.10:.14,depthWrite:false,side:THREE.DoubleSide});
   const cloud=new THREE.Mesh(new THREE.PlaneGeometry(34+(i%3)*8,13+(i%2)*4),mat);
@@ -997,6 +997,54 @@ districtPavilion(0,77.0,9.0,5.2,'PERFORMANCE PAVILION','CHALLENGES · TALKS',tru
 });
 bannerTotem(worldDistrict,-10.8,58.5,'WORLD','CHALLENGES',.05);
 bannerTotem(worldDistrict,10.8,58.5,'KŌMØ LIFE','DISTRICT',-.05);
+
+// V3.3 District detail pass — more urban depth, seating and a stronger fountain.
+const districtDetails=new THREE.Group();districtDetails.name='KOMO_DISTRICT_DETAILS_V33';worldDistrict.add(districtDetails);
+
+// Secondary buildings make the district feel inhabited rather than like three isolated boxes.
+districtPavilion(-18.2,77.0,6.0,5.6,'HEALTH PAVILION','CHECK · UNDERSTAND',true);
+districtPavilion(18.2,77.0,6.0,5.6,'CLUB HOUSE','MEET · MOVE',false);
+
+// Arc promenade around fountain.
+for(let i=0;i<18;i++){
+  const a=(i/18)*Math.PI*2,r=7.15;
+  const tile=box(districtDetails,.85,.025,.24,i%2?MAT.brass:M.bronzeSoft,Math.cos(a)*r,.13,68.2+Math.sin(a)*r,{cast:false,receive:false});
+  tile.rotation.y=-a;
+}
+
+// Street furniture and low-cost lantern markers (emissive-looking geometry, no PointLights).
+const lanternMat=new THREE.MeshBasicMaterial({color:0xe2c18a,transparent:true,opacity:.55});
+[-1,1].forEach(side=>{
+  [59.0,64.0,72.4,77.0].forEach((z,idx)=>{
+    const x=side*(idx%2?11.5:8.7);
+    cyl(districtDetails,.055,.070,2.2,MAT.blackened,x,1.15,z,8,{cast:false});
+    mesh(districtDetails,new THREE.SphereGeometry(.105,8,6),lanternMat,x,2.30,z,{cast:false,receive:false});
+  });
+  exteriorBench(districtDetails,side*11.2,72.2,side>0?-Math.PI/2:Math.PI/2,.78);
+  exteriorBench(districtDetails,side*12.0,63.8,side>0?-Math.PI/2:Math.PI/2,.78);
+});
+
+// Tree avenue toward the Performance Pavilion.
+[-1,1].forEach(side=>{
+  [60.5,65.2,70.0,74.8].forEach((z,idx)=>tree(districtDetails,side*(12.4+idx*.85),z,.48+idx*.025));
+});
+
+// Fountain central plume + concentric ripples.
+const centralJet=mesh(grandFountain,new THREE.CylinderGeometry(.055,.075,2.35,8),fountainWaterMat,0,3.58,0,{cast:false,receive:false});
+centralJet.userData.phase=1.7;centralJet.userData.baseY=3.58;centralJet.userData.dynamic=true;living.fountainJets.push(centralJet);
+[1.55,2.35,3.20].forEach((r,i)=>{
+  const ripple=mesh(grandFountain,new THREE.RingGeometry(r,r+.045,48),new THREE.MeshBasicMaterial({color:0xd7e5de,transparent:true,opacity:.16-i*.025,depthWrite:false}),0,.495,0,{cast:false,receive:false});
+  ripple.rotation.x=-Math.PI/2;ripple.userData.dynamic=true;ripple.userData.ripplePhase=i*.8;living.fountainJets.push(ripple);
+});
+
+// Distant skyline blocks add depth without expensive detail.
+[
+  [-22,82,7,8],[-12,84,5.5,6.5],[12,84,5.5,6.5],[22,82,7,8]
+].forEach(([x,z,w,h],i)=>{
+  box(districtDetails,w,h,3.6,i%2?MAT.limestone:M.sageDeep,x,h/2,z,{cast:false});
+  box(districtDetails,w-.45,.035,3.15,M.warm,x,h-.28,z-.10,{cast:false,receive:false});
+});
+plaque(districtDetails,'KŌMØ DISTRICT','MOVE · CONNECT · LIVE',6.4,.86,0,4.15,80.0,{dark:true,titleSize:60});
 
 // Main building — one continuous architectural object, no reception avatar.
 const building=new THREE.Group();building.name='KOMO_MAIN_BUILDING_V1';world.add(building);
@@ -3494,9 +3542,17 @@ function animateLiving(now){
   }
   if(living.fountainJets?.length){
     living.fountainJets.forEach((jet,i)=>{
-      const h=.72+.52*(.5+.5*Math.sin(t*1.25+jet.userData.phase));
-      jet.scale.y=h;jet.position.y=jet.userData.baseY+(h-.72)*.38;
-      jet.material.opacity=.30+.16*(.5+.5*Math.sin(t*.9+i*.4));
+      if(jet.geometry?.type==='RingGeometry'){
+        const pulse=.96+.08*Math.sin(t*.75+(jet.userData.ripplePhase||0));
+        jet.scale.set(pulse,pulse,pulse);
+        jet.material.opacity=.10+.08*(.5+.5*Math.sin(t*.8+i*.55));
+      }else{
+        const base=jet===centralJet?1.0:.72;
+        const amp=jet===centralJet?.78:.52;
+        const h=base+amp*(.5+.5*Math.sin(t*1.25+(jet.userData.phase||0)));
+        jet.scale.y=h;jet.position.y=(jet.userData.baseY||.95)+(h-base)*.38;
+        jet.material.opacity=.30+.16*(.5+.5*Math.sin(t*.9+i*.4));
+      }
     });
   }
   if(living.sunSprite&&living.skyUniforms){
@@ -3568,7 +3624,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.3.3-quests',
+  version:'3.3.4-district',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
