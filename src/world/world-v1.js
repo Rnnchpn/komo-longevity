@@ -1516,9 +1516,9 @@ plaque(rehabRoom,'KŌMØ FITNESS CLUB','MOVE · TRAIN · PROGRESS',7.2,1.45,0,6.
   box(rehabRoom,4.0,.24,4.8,i===1?M.stoneDeep:M.stone,x,.12,-3.2);
   line(rehabRoom,3.5,.04,x,-3.2,M.bronze,.26);
 });
-plaque(rehabRoom,'01','CONTROL',3.2,.90,-5.3,4.6,-8.0,{dark:false,titleSize:74});
+plaque(rehabRoom,'01','BALANCE',3.2,.90,-5.3,4.6,-8.0,{dark:false,titleSize:74});
 plaque(rehabRoom,'02','STRENGTH',3.2,.90,0,4.6,-8.0,{dark:true,titleSize:74});
-plaque(rehabRoom,'03','CAPACITY',3.2,.90,5.3,4.6,-8.0,{dark:false,titleSize:74});
+plaque(rehabRoom,'03','CARDIO',3.2,.90,5.3,4.6,-8.0,{dark:false,titleSize:74});
 glow(rehabRoom,0xf0d2a7,3.5,15,0,5.4,-6);
 
 // V2.6 Rehab Lab — three tangible stations, no extra dynamic lights.
