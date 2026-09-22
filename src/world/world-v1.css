@@ -303,3 +303,101 @@ body.camera-third .interaction-card{bottom:112px}
 @media(max-height:720px){
   .intro-card{top:96px;padding:16px}.intro-card h1{font-size:32px;margin:10px 0}.intro-path{margin:12px 0}
 }
+
+
+/* V3.5 Desktop HUD — premium social/game layout */
+@media(min-width:901px) and (pointer:fine){
+  .world-hud{
+    top:14px;left:22px;right:22px;height:72px;
+    grid-template-columns:auto auto minmax(320px,1fr) auto auto auto;
+    gap:14px;padding:9px 12px 9px 20px;border-radius:24px;
+    border-color:rgba(232,214,184,.11);
+    background:linear-gradient(135deg,rgba(17,31,24,.90),rgba(20,36,28,.78));
+    -webkit-backdrop-filter:blur(24px) saturate(1.08);backdrop-filter:blur(24px) saturate(1.08);
+    box-shadow:0 18px 50px rgba(8,17,12,.16),inset 0 1px 0 rgba(255,255,255,.035)
+  }
+  .world-brand strong{font-size:30px;letter-spacing:.09em}
+  .world-brand span{font-size:6px;letter-spacing:.32em;color:rgba(242,236,226,.36)}
+  .world-metrics{gap:8px}
+  .world-metrics>div{
+    min-width:88px;padding:8px 12px;border-radius:14px;
+    background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+    border-color:rgba(255,255,255,.085)
+  }
+  .world-metrics span{font-size:6px;letter-spacing:.13em}
+  .world-metrics b{font-size:18px}
+  .world-today{
+    height:48px;max-width:700px;justify-self:stretch;
+    border-color:rgba(229,202,155,.10);
+    background:linear-gradient(135deg,rgba(8,20,14,.66),rgba(17,31,23,.56));
+    font-size:7px;letter-spacing:.15em;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)
+  }
+  .hud-link,.hud-button{
+    height:40px;padding:0 15px;border-radius:13px;
+    border-color:rgba(255,255,255,.085);background:rgba(255,255,255,.028);
+    transition:background .16s ease,border-color .16s ease,transform .16s ease
+  }
+  .hud-link:hover,.hud-button:hover{transform:translateY(-1px);background:rgba(255,255,255,.055);border-color:rgba(222,194,145,.20)}
+
+  .location-chip{
+    top:102px;height:34px;padding:0 16px;
+    border-color:rgba(255,255,255,.09);background:rgba(19,35,27,.80);
+    box-shadow:0 12px 30px rgba(8,16,11,.10);font-size:6px;letter-spacing:.18em
+  }
+  .location-chip b{font-size:8px}
+
+  .journey-hud{
+    left:22px;top:104px;width:390px;min-height:86px;
+    grid-template-columns:70px 1fr 58px;gap:13px;padding:12px 15px;
+    border-radius:20px;border-color:rgba(255,255,255,.09);
+    background:linear-gradient(145deg,rgba(17,31,24,.86),rgba(30,45,36,.73));
+    box-shadow:0 18px 48px rgba(8,16,11,.13),inset 0 1px 0 rgba(255,255,255,.025)
+  }
+  .journey-level{height:58px}
+  .journey-level small{font-size:5px;letter-spacing:.16em}
+  .journey-level strong{font-size:30px}
+  .journey-main>b{font-size:9px;letter-spacing:.12em}
+  .journey-main>i{height:5px;margin:9px 0 7px}
+  .journey-main>small{font-size:6px;letter-spacing:.05em}
+  .journey-xp b{font-size:14px}
+
+  .health-hud{
+    right:22px;top:151px;width:430px;min-height:76px;
+    grid-template-columns:1.05fr 1.45fr auto;gap:13px;padding:11px 14px;
+    border-radius:19px;border-color:rgba(255,255,255,.09);
+    background:linear-gradient(145deg,rgba(17,31,24,.87),rgba(30,45,36,.74));
+    box-shadow:0 18px 48px rgba(8,16,11,.13),inset 0 1px 0 rgba(255,255,255,.025)
+  }
+  .health-hud>span:first-child{padding-right:8px;border-right:1px solid rgba(255,255,255,.065)}
+  .health-hud>span:first-child small{font-size:5px;letter-spacing:.16em}
+  .health-hud>span:first-child strong{margin-top:6px;font-size:22px}
+  .health-domains{gap:7px}
+  .health-domains i{padding:7px 6px;border-radius:10px}
+  .health-domains b{font-size:5px}.health-domains em{font-size:10px}
+  .health-hud u{padding:6px 8px}
+
+  .world-quick-nav{
+    bottom:18px;gap:2px;padding:5px;border-radius:18px;
+    border-color:rgba(255,255,255,.09);
+    background:linear-gradient(145deg,rgba(21,37,29,.82),rgba(28,43,35,.74));
+    -webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);
+    box-shadow:0 18px 44px rgba(8,16,11,.15),inset 0 1px 0 rgba(255,255,255,.025)
+  }
+  .world-quick-nav button{
+    min-width:96px;height:48px;padding:0 15px;border-radius:13px;
+    position:relative
+  }
+  .world-quick-nav button+button:before{
+    content:"";position:absolute;left:-1px;top:10px;bottom:10px;width:1px;background:rgba(255,255,255,.055)
+  }
+  .world-quick-nav button:hover{background:rgba(255,255,255,.045)}
+  .world-quick-nav span{font-size:8px;letter-spacing:.11em}
+  .world-quick-nav small{margin-top:4px;font-size:5px;letter-spacing:.12em}
+  .desktop-help{display:none!important}
+
+  .world-menu{
+    top:96px;right:22px;width:min(410px,calc(100vw - 44px));max-height:calc(100vh - 118px);
+    border-radius:22px;background:linear-gradient(155deg,rgba(15,29,22,.97),rgba(27,43,33,.94))
+  }
+  .world-panel{top:96px;right:22px;bottom:22px;border-radius:22px}
+}
