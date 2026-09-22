@@ -2280,25 +2280,43 @@ function showTwin(){
   ]);bindTimeline();
 }
 function rehabHtml(){
-  const s=current();const entries=Object.entries(s.domains);entries.sort((a,b)=>a[1]-b[1]);const [lowest,val]=entries[0];
-  const names={muscle:'Muscle',mobility:locale==='fr'?'Mobilité':'Mobility',balance:locale==='fr'?'Équilibre':'Balance',posture:'Posture',endurance:'Endurance'};
+  const t=fitnessToday();
+  if(!t){
+    return `
+      <div class="fitness-club-intro">
+        <span>KŌMØ FITNESS CLUB</span>
+        <h3>${locale==='fr'?'Choisissez comment vous voulez bouger.':'Choose how you want to move.'}</h3>
+        <p>${locale==='fr'?'Sélectionnez une pratique. KŌMØ construit ensuite un programme quotidien simple, progressif et suivi avec Alex, votre coach virtuel.':'Select an activity. KŌMØ then builds a simple progressive daily program with Alex, your virtual coach.'}</p>
+      </div>
+      ${fitnessActivityCards()}
+      <div class="data-note">${locale==='fr'?'Le Fitness Club propose des routines générales d’activité physique et d’engagement. Elles ne constituent pas une prescription médicale personnalisée.':'Fitness Club provides general physical-activity and engagement routines. They are not personalised medical prescriptions.'}</div>`;
+  }
   return `
-    <p>${locale==='fr'?'Rehab transforme les signaux du Twin en séquences d’action simples et suivies. Les trois stations peuvent être explorées physiquement dans la salle. Le coach virtuel montre le mouvement de démonstration associé.':'Rehab turns Twin signals into simple trackable action sequences. All three stations can be explored spatially in the room. The virtual coach demonstrates the associated movement.'}</p>
-    <div class="priority-card"><b>${locale==='fr'?'FOCUS DE DÉMONSTRATION':'DEMO FOCUS'}</b>${names[lowest]} · ${val}/100</div>
-    <div class="rehab-station-grid">
-      ${['control','strength','capacity'].map(id=>{const c=rehabStationCopy(id);return `<button data-rehab="${id}"><span>${c.title[locale]}</span><b>${c.focus[locale]}</b><small>${rehabProgress[id]?'✓ '+rehabProgress[id]+' session'+(rehabProgress[id]>1?'s':''):'READY · '+c.duration+'s'}</small></button>`}).join('')}
+    <div class="fitness-club-intro compact">
+      <span>KŌMØ FITNESS CLUB · ${t.activity.code}</span>
+      <h3>${locale==='fr'?'Votre entraînement, chaque jour.':'Your training, every day.'}</h3>
+      <p>${t.activity.promise[locale]}</p>
     </div>
-    <div class="panel-grid"><div><span>CONTROL</span><b>${rehabProgress.control}</b></div><div><span>STRENGTH</span><b>${rehabProgress.strength}</b></div><div><span>CAPACITY</span><b>${rehabProgress.capacity}</b></div><div><span>TOTAL</span><b>${rehabProgress.total}</b></div></div>
-    <div class="data-note">${locale==='fr'?'Les séquences Rehab montrées dans World sont des démonstrations d’engagement. Elles ne constituent pas une prescription médicale autonome et doivent être adaptées au contexte utilisateur lorsque nécessaire.':'Rehab sequences shown in World are engagement demonstrations. They are not autonomous medical prescriptions and should be adapted to user context when needed.'}</div>`;
+    ${fitnessTodayHtml()}
+    <div class="fitness-change-title">${locale==='fr'?'Changer de pratique':'Change activity'}</div>
+    ${fitnessActivityCards()}`;
+}
+function bindFitnessClub(){
+  panelBody.querySelectorAll('[data-fitness]').forEach(btn=>btn.addEventListener('click',()=>selectFitnessActivity(btn.dataset.fitness)));
 }
 function showRehab(){
-  stopRehabSession();setRehabCoachStation('control',false);
-  openPanel('REHAB',locale==='fr'?'De l’insight à l’action.':'From insight to action.',rehabHtml(),[
+  stopRehabSession();
+  const t=fitnessToday();
+  setRehabCoachStation(t?.activity?.coach||'control',false);
+  openPanel('KŌMØ FITNESS CLUB',t
+    ?(locale==='fr'?'Programme quotidien · Coach Alex':'Daily program · Coach Alex')
+    :(locale==='fr'?'Choisissez votre activité physique.':'Choose your physical activity.'),rehabHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
-    {label:locale==='fr'?'EXPLORER LES STATIONS':'EXPLORE STATIONS',primary:true,onClick:closePanel},
+    ...(t?[{label:locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION',primary:true,onClick:showFitnessToday}]:[]),
+    {label:locale==='fr'?'EXPLORER LE CLUB':'EXPLORE CLUB',onClick:closePanel},
     {label:locale==='fr'?'VOIR LE TWIN':'VIEW TWIN',onClick:enterTwin}
   ]);
-  panelBody.querySelectorAll('[data-rehab]').forEach(btn=>btn.addEventListener('click',()=>showRehabStation(btn.dataset.rehab)));
+  bindFitnessClub();
 }
 function arenaHtml(){
   return `
@@ -2349,14 +2367,21 @@ function showLifeStore(){
 }
 
 function showRehabCoach(){
+  const t=fitnessToday();
   const html=`
-    <p>${locale==='fr'?'Alex démontre visuellement la séquence choisie dans Rehab : contrôle, force ou capacité. Le rôle du coach ici est pédagogique et spatial.':'Alex visually demonstrates the selected Rehab sequence: control, strength or capacity. The coach role here is educational and spatial.'}</p>
-    <div class="panel-grid"><div><span>CONTROL</span><b>BALANCE</b></div><div><span>STRENGTH</span><b>SQUAT</b></div><div><span>CAPACITY</span><b>MARCH</b></div><div><span>MODE</span><b>DEMO</b></div></div>
-    <div class="data-note">${locale==='fr'?'Les mouvements sont des démonstrations génériques de l’interface World, pas une prescription personnalisée.':'Movements are generic World-interface demonstrations, not personalised prescriptions.'}</div>`;
-  openPanel('ALEX · FITNESS COACH',locale==='fr'?'Démonstrateur de mouvement.':'Movement demonstrator.',html,[
+    <p>${locale==='fr'?'Alex est le coach virtuel du KŌMØ Fitness Club. Il montre les mouvements, accompagne la séance du jour et change de démonstration selon votre pratique.':'Alex is the KŌMØ Fitness Club virtual coach. He demonstrates movements, supports today’s session and changes demonstrations with your chosen activity.'}</p>
+    <div class="panel-grid">
+      <div><span>STRENGTH</span><b>SQUAT</b></div>
+      <div><span>MOBILITY</span><b>CONTROL</b></div>
+      <div><span>BALANCE</span><b>STABILITY</b></div>
+      <div><span>CARDIO</span><b>MARCH</b></div>
+    </div>
+    ${t?`<div class="priority-card"><b>${locale==='fr'?'AUJOURD’HUI':'TODAY'}</b>${t.activity.title[locale]} · ${t.title} · ${t.duration} min</div>`:''}
+    <div class="data-note">${locale==='fr'?'Alex guide des routines fitness générales. Le contenu doit être adapté à votre condition et à votre contexte lorsque nécessaire.':'Alex guides general fitness routines. Content should be adapted to your condition and context when needed.'}</div>`;
+  openPanel('ALEX · FITNESS COACH',locale==='fr'?'Votre coach quotidien.':'Your daily coach.',html,[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
-    {label:locale==='fr'?'CONTROL':'CONTROL',onClick:()=>showRehabStation('control')},
-    {label:locale==='fr'?'STRENGTH':'STRENGTH',primary:true,onClick:()=>showRehabStation('strength')}
+    {label:locale==='fr'?'FITNESS CLUB':'FITNESS CLUB',onClick:showRehab},
+    ...(t?[{label:locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION',primary:true,onClick:showFitnessToday}]:[])
   ]);
 }
 
@@ -2384,7 +2409,7 @@ function enterTwin(){
 }
 function enterRehab(){
   completeJourney('rehab');
-  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='REHAB';
+  playerLevel=0;setMode('rehab');player.set(0,0,-44.5);velocity.set(0,0,0);yaw=0;pitch=-.03;showRehab();locationName.textContent='KŌMØ FITNESS CLUB';
 }
 function enterArena(){
   completeJourney('arena');
@@ -2549,7 +2574,7 @@ function updateDoors(now,dt){
 }
 function updateLocation(){
   if(mode==='twin'){locationName.textContent='FUNCTIONAL TWIN';return}
-  if(mode==='rehab'){locationName.textContent='REHAB';return}
+  if(mode==='rehab'){locationName.textContent='KŌMØ FITNESS CLUB';return}
   if(mode==='arena'){locationName.textContent='ARENA';return}
   if(playerLevel===1){
     completeJourney('upper',{silent:true});
@@ -2920,7 +2945,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'2.8.1-fps-budget',
+  version:'2.9.0-fitness-club',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
