@@ -61,7 +61,7 @@ const checks=[
   ['World Hub Life items present',runtime.includes('KOMO_LIFE_ITEMS_V32')&&runtime.includes('function showLifeItem')],
   ['World Hub avatar studio present',runtime.includes('AVATAR_KEY')&&runtime.includes('function showAvatarStudio')],
   ['World Hub mobile clouds present',runtime.includes('const cloudCount=lowPower?3:11')&&runtime.includes('if(living.clouds?.length)')],
-  ['Immersive Hub V3.3 entry present',runtime.includes("version:'3.3.4-district'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
+  ['Immersive Hub V3.7 entry present',runtime.includes("version:'3.7.0-one-world'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
   ['Immersive Hub V3.3 portals present',runtime.includes('KOMO_PORTAL_ARCH_V33_')&&runtime.includes('function updateDestinationDoors')],
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub V3.3 quests present',runtime.includes("quest:'fitness'")&&runtime.includes("quest:'arena'")&&runtime.includes("id:'coach'")],
