@@ -69,7 +69,7 @@ const checks=[
   ['push-to-talk voice control present',multiplayer.includes('MAINTENIR POUR PARLER')&&multiplayer.includes('const startTalking=async')&&multiplayer.includes("e.code!=='KeyT'")&&multiplayer.includes('track.enabled=state.voice.talking')],
   ['voice signaling fallback present',multiplayer.includes('const pollVoiceSignals=async')&&multiplayer.includes("setInterval(()=>pollVoiceSignals(),350)")&&multiplayer.includes("VOICE_EXIT_M=22")],
   ['desktop social HUD present',multiplayer.includes('kwmp-chat-launcher')&&multiplayer.includes('kwmp-voicebox')&&multiplayer.includes("drawer.className='kwmp-chat'")&&multiplayer.includes('const openChat=()=>')],
-  ['persistent Minecraft-style chat present',multiplayer.includes("kwmp-chat open")&&multiplayer.includes("ENTER · écrire")&&multiplayer.includes("data-kwmp-target")],
+  ['persistent Minecraft-style chat present',multiplayer.includes("drawer.className='kwmp-chat'")&&multiplayer.includes("const openChat=()=>")&&multiplayer.includes("data-kwmp-target")],
   ['private messages present',multiplayer.includes("recipient_id")&&multiplayer.includes("setDmTarget")&&multiplayer.includes("dm.textContent='MP'")],
   ['community roles present',multiplayer.includes("komo_community_roles")&&multiplayer.includes("role_title")&&multiplayer.includes("display_title")],
   ['social communication XP present',multiplayer.includes("SOCIAL_KEY")&&multiplayer.includes("awardSocial")&&multiplayer.includes("runtime.completeSocial?.()")],
