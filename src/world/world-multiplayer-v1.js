@@ -3,8 +3,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const URL='https://uqlolefsiktbznnymriy.supabase.co';
 const KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const PULSE_ORIGIN='https://pulse.komolongevity.com';
-const STALE_MS=12000;
-const HEARTBEAT_MS=650;
+const STALE_MS=45000;
+const HEARTBEAT_MS=2200;
 const CHAT_LIMIT=50;
 
 function escText(v,max=500){return String(v??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max)}
@@ -14,10 +14,11 @@ function css(){
   .kwmp-dock{position:fixed;z-index:82;top:92px;right:18px;display:flex;gap:7px;align-items:center}
   .kwmp-pill{height:31px;padding:0 12px;border:1px solid rgba(255,255,255,.09);border-radius:999px;background:rgba(24,39,31,.76);backdrop-filter:blur(15px);color:rgba(242,236,226,.76);font-size:7px;font-weight:800;letter-spacing:.11em;cursor:pointer}
   .kwmp-pill[data-state="online"]{border-color:rgba(190,218,193,.18);color:#dce9dd}.kwmp-pill[data-state="online"]::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:#a8c9ab;margin-right:7px;box-shadow:0 0 10px rgba(168,201,171,.38)}
-  .kwmp-chat{position:fixed;z-index:96;right:18px;top:132px;width:min(360px,calc(100vw - 36px));height:min(520px,calc(100vh - 154px));display:grid;grid-template-rows:auto 1fr auto auto;border:1px solid rgba(255,255,255,.09);border-radius:22px;background:linear-gradient(150deg,rgba(20,35,28,.96),rgba(27,42,34,.93));backdrop-filter:blur(24px);box-shadow:0 26px 70px rgba(10,18,13,.24);overflow:hidden;opacity:0;visibility:hidden;transform:translateY(-7px);transition:.22s ease}
+  .kwmp-chat{position:fixed;z-index:96;right:18px;top:132px;width:min(360px,calc(100vw - 36px));height:min(520px,calc(100vh - 154px));display:grid;grid-template-rows:auto auto 1fr auto auto;border:1px solid rgba(255,255,255,.09);border-radius:22px;background:linear-gradient(150deg,rgba(20,35,28,.96),rgba(27,42,34,.93));backdrop-filter:blur(24px);box-shadow:0 26px 70px rgba(10,18,13,.24);overflow:hidden;opacity:0;visibility:hidden;transform:translateY(-7px);transition:.22s ease}
   .kwmp-chat.open{opacity:1;visibility:visible;transform:none}
   .kwmp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 16px 12px;border-bottom:1px solid rgba(255,255,255,.07)}
   .kwmp-head span{display:block;color:#d6b67f;font-size:7px;font-weight:800;letter-spacing:.16em}.kwmp-head strong{display:block;margin-top:4px;font:500 23px/1 Georgia,serif}.kwmp-close{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.055);color:#eee5d8;font-size:18px;cursor:pointer}
+  .kwmp-roster{padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06);display:grid;gap:6px}.kwmp-person{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:7px 9px;border:1px solid rgba(255,255,255,.055);border-radius:10px;background:rgba(255,255,255,.025)}.kwmp-person b{font-size:7px;letter-spacing:.04em}.kwmp-person span{font-size:6px;color:#d8ba86;letter-spacing:.09em}.kwmp-person.mine{border-color:rgba(216,186,134,.14)}
   .kwmp-messages{overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}.kwmp-msg{max-width:86%;padding:9px 11px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.035)}.kwmp-msg.mine{align-self:flex-end;background:rgba(210,179,126,.09);border-color:rgba(210,179,126,.13)}.kwmp-msg b{display:block;margin-bottom:4px;font-size:8px}.kwmp-msg p{margin:0;font-size:9px;line-height:1.45;color:rgba(242,236,226,.72);white-space:pre-wrap;word-break:break-word}.kwmp-msg small{display:block;margin-top:5px;font-size:7px;color:rgba(242,236,226,.34)}
   .kwmp-empty{margin:auto;color:rgba(242,236,226,.40);font-size:9px;text-align:center;line-height:1.5;padding:18px}
   .kwmp-compose{display:flex;gap:7px;padding:10px 12px;border-top:1px solid rgba(255,255,255,.07)}.kwmp-compose input{flex:1;min-width:0;height:38px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.045);color:#f0e8da;padding:0 11px;font-size:9px;outline:none}.kwmp-compose button{height:38px;padding:0 12px;border-radius:12px;background:#d8ba86;color:#1d2d25;font-size:8px;font-weight:850;cursor:pointer}.kwmp-compose button:disabled,.kwmp-compose input:disabled{opacity:.42}
@@ -44,6 +45,7 @@ function ui(){
     people:dock.querySelector('[data-kwmp-people]'),
     chat:dock.querySelector('[data-kwmp-chat]'),
     drawer:document.querySelector('#kwmpChat'),
+    roster:document.querySelector('#kwmpRoster'),
     messages:document.querySelector('#kwmpMessages'),
     form:document.querySelector('#kwmpCompose'),
     input:document.querySelector('#kwmpInput')
@@ -52,9 +54,9 @@ function ui(){
   dock.innerHTML='<button type="button" class="kwmp-pill" data-kwmp-connect data-state="offline">CONNECT PULSE</button><button type="button" class="kwmp-pill" data-kwmp-people>PEOPLE · 0</button><button type="button" class="kwmp-pill" data-kwmp-chat>CHAT</button>';
   document.body.appendChild(dock);
   const drawer=document.createElement('aside');drawer.id='kwmpChat';drawer.className='kwmp-chat';drawer.setAttribute('aria-hidden','true');
-  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · SOCIAL</span><strong>World Chat</strong></div><button type="button" class="kwmp-close" data-kwmp-close>×</button></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez votre session Pulse pour voir les personnes présentes et discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Écrire dans World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">Identité sociale uniquement. Les données Motion, Clinical et de santé ne sont jamais partagées dans World.</div>';
+  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · SOCIAL</span><strong>World Chat</strong></div><button type="button" class="kwmp-close" data-kwmp-close>×</button></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez votre session Pulse pour voir les personnes présentes et discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Écrire dans World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">Identité sociale uniquement. Les données Motion, Clinical et de santé ne sont jamais partagées dans World.</div>';
   document.body.appendChild(drawer);
-  return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),drawer,messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput')};
+  return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput')};
 }
 function labelSprite(THREE,text){
   const c=document.createElement('canvas');c.width=512;c.height=144;const x=c.getContext('2d');
@@ -114,13 +116,21 @@ function presenceAvatar(runtime,record){
 export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
-  const client=createClient(URL,KEY,{auth:{persistSession:false,autoRefreshToken:true,detectSessionInUrl:false}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,lastZone:'',timer:null,raf:0,popup:null,messages:[],started:false};
+  const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0};
 
   const setOnlineUI=()=>{
-    U.connect.textContent=state.connected?escText(state.profile?.display_name||'PULSE ONLINE',18).toUpperCase():'CONNECT PULSE';
-    U.connect.dataset.state=state.connected?'online':'offline';
-    U.input.disabled=!state.connected;U.form.querySelector('button').disabled=!state.connected;
+    if(state.presenceLive){
+      U.connect.textContent=(escText(state.profile?.display_name||'WORLD',14)||'WORLD').toUpperCase()+' · ONLINE';
+      U.connect.dataset.state='online';
+    }else if(state.session?.user){
+      U.connect.textContent='WORLD · SYNCING';
+      U.connect.dataset.state='syncing';
+    }else{
+      U.connect.textContent='CONNECT WORLD';
+      U.connect.dataset.state='offline';
+    }
+    U.input.disabled=!state.presenceLive;U.form.querySelector('button').disabled=!state.presenceLive;
   };
   const renderMessages=()=>{
     U.messages.innerHTML='';
@@ -134,16 +144,35 @@ export async function mount(runtime){
     }
     U.messages.scrollTop=U.messages.scrollHeight;
   };
+  const zoneLabel=z=>({world:'WORLD',twin:'TWIN',rehab:'KŌMØ FIT',arena:'ARENA'}[z]||'WORLD');
+  const renderRoster=()=>{
+    if(!U.roster)return;
+    U.roster.innerHTML='';
+    const now=Date.now(),own=state.session?.user?.id;
+    const active=[...state.rows.values()].filter(row=>now-new Date(row.updated_at||0).getTime()<STALE_MS);
+    if(state.presenceLive&&own&&!active.some(r=>r.user_id===own)){
+      const st=runtime.getState();
+      active.unshift({user_id:own,display_name:state.profile?.display_name||'You',zone:st.mode||'world',updated_at:new Date().toISOString()});
+    }
+    active.sort((a,b)=>(a.user_id===own?-1:b.user_id===own?1:String(a.display_name||'').localeCompare(String(b.display_name||''))));
+    if(!active.length){const e=document.createElement('div');e.className='kwmp-empty';e.textContent=state.session?.user?'Synchronisation de la présence…':'Connectez World pour voir les personnes présentes.';U.roster.appendChild(e);return}
+    for(const row of active){
+      const item=document.createElement('div');item.className='kwmp-person'+(row.user_id===own?' mine':'');
+      const n=document.createElement('b');n.textContent=(row.user_id===own?'YOU · ':'')+(escText(row.display_name,40)||'KŌMØ Member');
+      const z=document.createElement('span');z.textContent=zoneLabel(row.zone);
+      item.append(n,z);U.roster.appendChild(item);
+    }
+  };
   const fresh=(row)=>Date.now()-new Date(row.updated_at||0).getTime()<STALE_MS;
   const syncPeers=()=>{
-    const own=state.session?.user?.id;let count=state.connected?1:0;
+    const own=state.session?.user?.id;let count=state.presenceLive?1:0;
     for(const [id,row] of [...state.rows]){
       if(!fresh(row)){state.rows.delete(id);const p=state.peers.get(id);if(p){p.removeFromParent();state.peers.delete(id)};continue}
       if(id===own)continue;count++;
       let peer=state.peers.get(id);if(!peer){peer=presenceAvatar(runtime,row);state.peers.set(id,peer)}
       peer.userData.target.set(Number(row.x)||0,Number(row.y)||0,Number(row.z)||0);peer.userData.targetYaw=Number(row.yaw)||0;peer.userData.zone=row.zone||'world';
     }
-    U.people.textContent='PEOPLE · '+count;
+    U.people.textContent='PEOPLE · '+count;renderRoster();
   };
   const consumePresence=(row)=>{
     if(!row?.user_id)return;state.rows.set(row.user_id,row);syncPeers();
@@ -169,8 +198,22 @@ export async function mount(runtime){
       x:+st.position.x.toFixed(3),y:+(st.position.y||0).toFixed(3),z:+st.position.z.toFixed(3),yaw:+st.yaw.toFixed(4),updated_at:new Date().toISOString()
     }};
   const heartbeat=async()=>{
-    if(!state.connected||!state.session?.user)return;
-    try{const payload=presencePayload();state.lastZone=payload.zone;await client.from('world_presence').upsert(payload,{onConflict:'user_id'})}catch(err){console.warn('[World presence]',err)}
+    if(!state.session?.user)return false;
+    try{
+      const payload=presencePayload();state.lastZone=payload.zone;
+      const {error}=await client.from('world_presence').upsert(payload,{onConflict:'user_id'});
+      if(error)throw error;
+      const firstLive=!state.presenceLive;
+      state.presenceLive=true;state.connected=true;state.lastPresenceError='';
+      state.rows.set(payload.user_id,payload);setOnlineUI();syncPeers();
+      if(firstLive)runtime.notify?.('World multiplayer online');
+      return true;
+    }catch(err){
+      state.presenceLive=false;state.connected=false;setOnlineUI();syncPeers();
+      const msg=escText(err?.message||String(err),160);state.lastPresenceError=msg;
+      const now=Date.now();if(now-state.lastPresenceErrorAt>8000){state.lastPresenceErrorAt=now;runtime.notify?.('World presence unavailable');}
+      console.warn('[World presence]',err);return false;
+    }
   };
   const subscribe=()=>{
     state.channel=client.channel('komo-world-db-v1')
@@ -178,21 +221,34 @@ export async function mount(runtime){
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'world_presence'},({new:row})=>consumePresence(row))
       .on('postgres_changes',{event:'DELETE',schema:'public',table:'world_presence'},({old:row})=>removePresence(row))
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'world_chat_messages'},({new:row})=>{if(!row?.id||state.messages.some(x=>x.id===row.id))return;state.messages.push(row);if(state.messages.length>CHAT_LIMIT)state.messages.shift();renderMessages()})
-      .subscribe(status=>{if(status==='SUBSCRIBED'){state.connected=true;setOnlineUI();heartbeat();runtime.notify?.('Pulse connected · World multiplayer online')}});
+      .subscribe(status=>{if(status==='SUBSCRIBED'){state.subscribed=true;setOnlineUI();heartbeat()}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){state.subscribed=false;state.presenceLive=false;state.connected=false;setOnlineUI();syncPeers()}});
+  };
+  const loadProfile=async(profileHint={})=>{
+    let profile={};
+    try{const r=await client.from('profiles').select('display_name,avatar_config,interests').eq('id',state.session.user.id).maybeSingle();profile=r.data||{}}catch{}
+    state.profile={
+      display_name:escText(profile?.display_name||profileHint?.display_name||state.session.user.user_metadata?.display_name||'KŌMØ Member',60)||'KŌMØ Member',
+      avatar_config:profile?.avatar_config&&typeof profile.avatar_config==='object'?profile.avatar_config:(profileHint?.avatar_config||{}),
+      interests:Array.isArray(profile?.interests)?profile.interests.slice(0,8):(profileHint?.interests||[]).slice(0,8)
+    };
+  };
+  const startLiveSession=async(session,profileHint={})=>{
+    if(!session?.user)return;
+    state.session=session;await loadProfile(profileHint);setOnlineUI();
+    if(!state.started){
+      state.started=true;await loadInitial();subscribe();
+      state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);
+    }else{
+      await heartbeat();syncPeers();
+    }
   };
   const connectWithBridge=async(payload)=>{
     if(!payload?.session?.access_token||!payload?.session?.refresh_token)return;
     try{
       const {data,error}=await client.auth.setSession({access_token:payload.session.access_token,refresh_token:payload.session.refresh_token});if(error)throw error;
-      state.session=data.session;if(!state.session?.user)throw new Error('Session Pulse invalide');
-      const {data:profile}=await client.from('profiles').select('display_name,avatar_config,interests').eq('id',state.session.user.id).maybeSingle();
-      state.profile={
-        display_name:escText(profile?.display_name||payload.profile?.display_name||'KŌMØ Member',60)||'KŌMØ Member',
-        avatar_config:profile?.avatar_config&&typeof profile.avatar_config==='object'?profile.avatar_config:(payload.profile?.avatar_config||{}),
-        interests:Array.isArray(profile?.interests)?profile.interests.slice(0,8):(payload.profile?.interests||[]).slice(0,8)
-      };
-      await loadInitial();subscribe();state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);setOnlineUI();
-    }catch(err){console.error('[World Pulse bridge]',err);runtime.notify?.('Connexion Pulse impossible');}
+      if(!data.session?.user)throw new Error('Session Pulse invalide');
+      await startLiveSession(data.session,payload.profile||{});
+    }catch(err){console.error('[World Pulse bridge]',err);state.presenceLive=false;state.connected=false;setOnlineUI();runtime.notify?.('Connexion World impossible');}
   };
   const openPulse=()=>{
     const url=PULSE_ORIGIN+'/?world_bridge=1&world_origin='+encodeURIComponent(location.origin);
@@ -207,12 +263,12 @@ export async function mount(runtime){
   };
   window.addEventListener('message',onMessage);
 
-  U.connect.addEventListener('click',()=>state.connected?runtime.notify?.('Pulse connecté · multiplayer actif'):openPulse());
+  U.connect.addEventListener('click',()=>state.presenceLive?runtime.notify?.('World multiplayer actif'):state.session?.user?heartbeat():openPulse());
   U.people.addEventListener('click',()=>{U.drawer.classList.add('open');U.drawer.setAttribute('aria-hidden','false')});
   U.chat.addEventListener('click',()=>{U.drawer.classList.toggle('open');U.drawer.setAttribute('aria-hidden',U.drawer.classList.contains('open')?'false':'true')});
   U.drawer.querySelector('[data-kwmp-close]').addEventListener('click',()=>{U.drawer.classList.remove('open');U.drawer.setAttribute('aria-hidden','true')});
   U.form.addEventListener('submit',async e=>{
-    e.preventDefault();if(!state.connected||!state.session?.user)return;
+    e.preventDefault();if(!state.presenceLive||!state.session?.user)return;
     const body=escText(U.input.value,500);if(!body)return;U.input.value='';
     const row={user_id:state.session.user.id,display_name:escText(state.profile?.display_name||'KŌMØ Member',60)||'KŌMØ Member',body};
     const {error}=await client.from('world_chat_messages').insert(row);if(error){runtime.notify?.('Message non envoyé');console.warn('[World chat]',error)}
@@ -257,14 +313,19 @@ export async function mount(runtime){
     }
     state.raf=requestAnimationFrame(animatePeers);
   }
-  animatePeers();setOnlineUI();renderMessages();
+  animatePeers();setOnlineUI();renderMessages();renderRoster();
+  client.auth.getSession().then(({data,error})=>{
+    if(error){console.warn('[World auth restore]',error);return}
+    if(data?.session?.user)startLiveSession(data.session).catch(err=>console.warn('[World session restore]',err));
+  });
 
   const cleanup=()=>{
     clearInterval(state.timer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);
     if(state.channel)client.removeChannel(state.channel);
     if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
-  window.addEventListener('pagehide',cleanup,{once:true});
+  window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup()});
+  window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);heartbeat();syncPeers()}});
 
-  window.KomoWorldMultiplayer={version:'0.3.1-mobile-polish',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.4.0-reliable-presence',connect:openPulse,state};
 }
