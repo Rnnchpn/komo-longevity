@@ -8,6 +8,7 @@ const intro=$('#intro');
 const languageToggle=$('#language-toggle');
 const locationChip=$('.location-chip');
 const locationName=$('#location-name');
+const locationPurpose=$('#location-purpose');
 const headingEl=$('#location-heading');
 const interactionEl=$('#interaction');
 const interactionTitle=$('#interaction-title');
@@ -54,6 +55,13 @@ const healthCapacityEl=$('#health-capacity');
 const healthSourceEl=$('#health-source');
 const avatarToggle=$('#avatar-toggle');
 const challengesToggle=$('#challenges-toggle');
+const resultsToggle=$('#results-toggle');
+const campusToggle=$('#campus-toggle');
+const journeyToggle=$('#journey-toggle');
+const menuMotion=$('#menu-motion');
+const menuAge=$('#menu-age');
+const journeyTitleMenu=$('#journey-title-menu');
+const journeyXpMenu=$('#journey-xp-menu');
 
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
@@ -2236,21 +2244,23 @@ function updateJourneyUI(){
   const level=journeyLevelForXp(journey.xp),nextLevel=journeyNextLevel(level),nextMission=journeyNextMission();
   const floor=level.min,ceil=nextLevel?nextLevel.min:Math.max(level.min+1,journey.xp);
   const pct=nextLevel?THREE.MathUtils.clamp((journey.xp-floor)/(ceil-floor)*100,0,100):100;
-  journeyLevelEl.textContent=String(level.level).padStart(2,'0');
-  journeyTitleEl.textContent=level.title[locale];
-  journeyXpEl.textContent=journey.xp;
-  journeyProgressEl.style.width=pct+'%';
-  journeyNextEl.textContent=nextMission?(nextMission.title[locale]+' · +'+nextMission.xp+' XP'):(locale==='fr'?'Journey complété':'Journey complete');
-  journeyMenuLevel.textContent='LEVEL '+String(level.level).padStart(2,'0')+' · '+level.title[locale];
-  journeyMenuXp.textContent=journey.xp+' XP';
-  journeyMenuProgress.style.width=pct+'%';
-  journeyMenuNext.textContent=nextMission?(locale==='fr'?'Prochaine étape : ':'Next step: ')+nextMission.title[locale]:(locale==='fr'?'Vous avez exploré le parcours actuel.':'You explored the current journey.');
-  journeyLevelLadder.innerHTML=JOURNEY_LEVELS.map(l=>`
+  if(journeyLevelEl)journeyLevelEl.textContent=String(level.level).padStart(2,'0');
+  if(journeyTitleEl)journeyTitleEl.textContent=level.title[locale];
+  if(journeyXpEl)journeyXpEl.textContent=journey.xp;
+  if(journeyProgressEl)journeyProgressEl.style.width=pct+'%';
+  if(journeyNextEl)journeyNextEl.textContent=nextMission?(nextMission.title[locale]+' · +'+nextMission.xp+' XP'):(locale==='fr'?'Journey complété':'Journey complete');
+  if(journeyMenuLevel)journeyMenuLevel.textContent=String(level.level).padStart(2,'0');
+  if(journeyMenuXp)journeyMenuXp.textContent=journey.xp+' XP';
+  if(journeyTitleMenu)journeyTitleMenu.textContent=level.title[locale];
+  if(journeyXpMenu)journeyXpMenu.textContent=journey.xp+' XP';
+  if(journeyMenuProgress)journeyMenuProgress.style.width=pct+'%';
+  if(journeyMenuNext)journeyMenuNext.textContent=nextMission?(locale==='fr'?'Prochaine étape · ':'Next · ')+nextMission.title[locale]:(locale==='fr'?'Parcours actuel complété':'Current journey complete');
+  if(journeyLevelLadder)journeyLevelLadder.innerHTML=JOURNEY_LEVELS.map(l=>`
     <div class="journey-step ${l.level<level.level?'done':''} ${l.level===level.level?'current':''}">
       <span>${String(l.level).padStart(2,'0')}</span><b>${l.title[locale]}</b><small>${l.desc[locale]}</small>
     </div>`).join('');
-  journeyBadgesEl.innerHTML=JOURNEY_BADGES.map(b=>`<span class="journey-badge ${b.test()?'unlocked':''}">${b.test()?'✓ ':''}${b.label[locale]}</span>`).join('');
-  journeyMissionsEl.innerHTML=JOURNEY_MISSIONS.map((m,i)=>`
+  if(journeyBadgesEl)journeyBadgesEl.innerHTML=JOURNEY_BADGES.map(b=>`<span class="journey-badge ${b.test()?'unlocked':''}">${b.test()?'✓ ':''}${b.label[locale]}</span>`).join('');
+  if(journeyMissionsEl)journeyMissionsEl.innerHTML=JOURNEY_MISSIONS.map((m,i)=>`
     <div class="journey-mission ${journey.done[m.id]?'done':''}">
       <i>${journey.done[m.id]?'✓':String(i+1).padStart(2,'0')}</i>
       <span><b>${m.title[locale]}</b><small>${m.sub[locale]}</small></span>
@@ -2300,6 +2310,8 @@ function updateHealthHUD(){
   healthBalanceEl.textContent=Math.round(Number(d.balance)||0);
   healthCapacityEl.textContent=Math.round(Number(d.endurance)||0);
   healthSourceEl.textContent='DEMO';
+  if(menuMotion)menuMotion.innerHTML=score+'<small>/100</small>';
+  if(menuAge)menuAge.textContent=Math.round(Number(snap.motion_age)||0);
   if(typeof healthStationBars!=='undefined'){
     Object.entries(healthStationBars).forEach(([id,fill])=>{
       const v=THREE.MathUtils.clamp(Number(d[id])||0,0,100),h=.20+(v/100)*1.12;
@@ -2309,7 +2321,7 @@ function updateHealthHUD(){
   }
 }
 function healthOverviewHtml(){
-  const snap=current(),d=snap.domains||{};
+  const snap=current(),d=snap.domains||{},metrics=snap.metrics||{};
   const score=Math.round(Number(snap.motion_score)||0),age=Math.round(Number(snap.motion_age)||0);
   const baseScore=Math.round(Number(baseline.motion_score)||0),baseAge=Math.round(Number(baseline.motion_age)||0);
   const scoreDelta=score-baseScore,ageDelta=age-baseAge;
@@ -2325,13 +2337,28 @@ function healthOverviewHtml(){
     const v=Math.round(Number(val)||0),base=Math.round(Number(baseline.domains?.[id])||0),delta=v-base;
     const tone=v>=80?'high':v>=65?'mid':'watch';
     const status=v>=80?(locale==='fr'?'POINT FORT':'STRONG'):v>=65?(locale==='fr'?'SOLIDE':'SOLID'):(locale==='fr'?'À EXPLORER':'EXPLORE');
-    return `<article class="result-domain ${tone}">
+    return `<article class="result-domain ${tone}" data-result-domain="${id}">
       <div><span>${label}</span><em>${status}</em></div>
       <strong>${v}<small>/100</small></strong>
       <i><b style="width:${THREE.MathUtils.clamp(v,0,100)}%"></b></i>
       <footer><span>Baseline ${base}</span><b class="${delta>=0?'positive':'negative'}">${delta>=0?'+':''}${delta}</b></footer>
     </article>`;
   }).join('');
+  const timeline=core.snapshots.map((s,i)=>{
+    const active=s.snapshot_id===snap.snapshot_id;
+    const date=new Date(s.captured_at);
+    const dateLabel=date.toLocaleDateString(locale==='fr'?'fr-FR':'en-GB',{day:'2-digit',month:'short'});
+    return `<button type="button" class="result-timepoint ${active?'active':''}" data-result-time="${i}">
+      <span>${s.label}</span><b>${s.motion_score}</b><small>${dateLabel} · Age ${s.motion_age}</small>
+    </button>`;
+  }).join('');
+  const signals=[
+    [locale==='fr'?'VITESSE DE MARCHE':'GAIT SPEED',(Number(metrics.gait_speed)||0).toFixed(2),'m/s'],
+    [locale==='fr'?'SYMÉTRIE QUADRICEPS':'QUADRICEPS SYMMETRY',Math.round(Number(metrics.quadriceps_symmetry)||0),'%'],
+    [locale==='fr'?'INDEX DE FORCE':'STRENGTH INDEX',Math.round(Number(metrics.strength_index)||0),'/100'],
+    [locale==='fr'?'INDEX POSTURE':'POSTURE INDEX',Math.round(Number(metrics.posture_index)||0),'/100']
+  ].map(([label,value,unit])=>`<div><span>${label}</span><b>${value}<small>${unit}</small></b></div>`).join('');
+  const captured=new Date(snap.captured_at).toLocaleString(locale==='fr'?'fr-FR':'en-GB',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
   return `
     <section class="results-dashboard">
       <div class="results-hero">
@@ -2343,7 +2370,7 @@ function healthOverviewHtml(){
         <div class="results-age">
           <span>MOTION AGE</span>
           <strong>${age}</strong>
-          <small>${locale==='fr'?'Baseline':'Baseline'} ${baseAge} · ${ageDelta===0?'—':(ageDelta>0?'+':'')+ageDelta}</small>
+          <small>Baseline ${baseAge} · ${ageDelta===0?'—':(ageDelta>0?'+':'')+ageDelta}</small>
         </div>
         <div class="results-change">
           <span>${locale==='fr'?'DEPUIS LA BASELINE':'SINCE BASELINE'}</span>
@@ -2351,23 +2378,43 @@ function healthOverviewHtml(){
           <small>Motion Score</small>
         </div>
       </div>
+
       <div class="results-context">
         <div><span>${locale==='fr'?'POINT FORT ACTUEL':'CURRENT STRENGTH'}</span><b>${strongest[1]} · ${Math.round(Number(strongest[2])||0)}</b></div>
         <div><span>${locale==='fr'?'À EXPLORER':'EXPLORE NEXT'}</span><b>${weakest[1]} · ${Math.round(Number(weakest[2])||0)}</b></div>
       </div>
+
+      <div class="results-section-title"><span>${locale==='fr'?'VOTRE PROFIL':'YOUR PROFILE'}</span><b>5 ${locale==='fr'?'domaines de mouvement':'movement domains'}</b></div>
       <div class="results-domains">${domainCards}</div>
+
+      <div class="results-section-title"><span>${locale==='fr'?'ÉVOLUTION':'TRAJECTORY'}</span><b>Baseline → Today</b></div>
+      <div class="results-timeline">${timeline}</div>
+
+      <div class="results-section-title"><span>${locale==='fr'?'SIGNAUX MESURÉS':'MEASURED SIGNALS'}</span><b>${locale==='fr'?'Extrait du bilan':'Assessment extract'}</b></div>
+      <div class="results-signals">${signals}</div>
+
       <div class="results-reading">
         <b>${locale==='fr'?'COMMENT LIRE VOS RÉSULTATS':'HOW TO READ YOUR RESULTS'}</b>
-        <p>${locale==='fr'?'Le Motion Score synthétise votre profil de mouvement. Les cinq domaines permettent de comprendre ce qui contribue au score et comment votre profil évolue dans le temps.':'Motion Score summarises your movement profile. The five domains show what contributes to the score and how your profile changes over time.'}</p>
+        <p>${locale==='fr'?'Le Motion Score synthétise votre profil de mouvement. Les domaines montrent ce qui contribue au score ; la trajectoire permet de distinguer votre état actuel de votre évolution dans le temps.':'Motion Score summarises your movement profile. Domains show what contributes to the score; trajectory separates your current state from your change over time.'}</p>
       </div>
-      <div class="data-note">${locale==='fr'?'Aperçu informatif du mouvement, pas un diagnostic. Les valeurs affichées restent des données de démonstration tant que Pulse personnel n’est pas connecté.':'Informational movement overview, not a diagnosis. Values remain demo data until a personal Pulse session is connected.'}</div>
+      <div class="results-meta"><span>${locale==='fr'?'MESURE':'MEASURED'} · ${captured}</span><span>DEMO · TwinCore</span></div>
+      <div class="data-note">${locale==='fr'?'Aperçu informatif du mouvement, pas un diagnostic. Les valeurs restent des données de démonstration tant que Pulse personnel n’est pas connecté.':'Informational movement overview, not a diagnosis. Values remain demo data until personal Pulse is connected.'}</div>
     </section>`;
 }
+function bindHealthResults(){
+  panelBody.querySelectorAll('[data-result-time]').forEach(btn=>btn.addEventListener('click',()=>{
+    core.setTimeIndex(Number(btn.dataset.resultTime),'world-results');updateHealthHUD();showHealthOverview();
+  }));
+  panelBody.querySelectorAll('[data-result-domain]').forEach(card=>card.addEventListener('click',()=>showTwinDomain(card.dataset.resultDomain)));
+}
 function showHealthOverview(){
-  openPanel(locale==='fr'?'VOTRE SANTÉ · MOUVEMENT':'YOUR HEALTH · MOVEMENT',locale==='fr'?'Comprendre votre état en un coup d’œil.':'Understand your movement status at a glance.',healthOverviewHtml(),[
+  closeWorldMenu();
+  openPanel(locale==='fr'?'VOS RÉSULTATS MOTION':'YOUR MOTION RESULTS',locale==='fr'?'État actuel · évolution · domaines.':'Current state · trajectory · domains.',healthOverviewHtml(),[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
-    {label:locale==='fr'?'OUVRIR LE TWIN':'OPEN TWIN',primary:true,onClick:enterTwin}
+    {label:locale==='fr'?'FITNESS':'FITNESS',onClick:enterRehab},
+    {label:locale==='fr'?'EXPLORER LE TWIN':'EXPLORE TWIN',primary:true,onClick:enterTwin}
   ]);
+  bindHealthResults();
 }
 healthHud.addEventListener('click',showHealthOverview);
 updateHealthHUD();
@@ -2585,6 +2632,42 @@ function openPanel(kicker,title,html,actions=[]){
   });
   panel.classList.add('open');panel.setAttribute('aria-hidden','false');worldMenu.classList.remove('open');worldMenu.setAttribute('aria-hidden','true');velocity.set(0,0,0);syncUiOpen();
 }
+function campusMapHtml(){
+  return `
+    <section class="campus-map">
+      <div class="campus-map-head">
+        <span>ONE WORLD</span>
+        <b>${locale==='fr'?'Un campus continu. Aucune zone séparée.':'One continuous campus. No separate worlds.'}</b>
+      </div>
+      <div class="campus-map-stage">
+        <button class="campus-node district" data-campus-go="arrival"><b>DISTRICT</b><small>${locale==='fr'?'Extérieur':'Outdoor'}</small></button>
+        <button class="campus-node life" data-campus-go="life"><b>LIFE</b><small>Discover</small></button>
+        <button class="campus-node hall current" data-campus-go="hall"><b>HALL</b><small>Home</small></button>
+        <button class="campus-node twin" data-campus-go="twin"><b>TWIN</b><small>Understand</small></button>
+        <button class="campus-node fitness" data-campus-go="rehab"><b>FITNESS</b><small>Move</small></button>
+        <button class="campus-node arena" data-campus-go="arena"><b>ARENA</b><small>Engage</small></button>
+        <button class="campus-node upper" data-campus-go="upper"><b>LEVEL 2</b><small>Explore</small></button>
+        <i class="map-line l1"></i><i class="map-line l2"></i><i class="map-line l3"></i><i class="map-line l4"></i>
+      </div>
+      <div class="campus-purpose-grid">
+        <div><span>FUNCTIONAL TWIN</span><b>${locale==='fr'?'Comprendre votre mouvement et votre évolution.':'Understand movement and trajectory.'}</b></div>
+        <div><span>FITNESS CLUB</span><b>${locale==='fr'?'Transformer les résultats en action.':'Turn results into action.'}</b></div>
+        <div><span>ARENA</span><b>${locale==='fr'?'Défis, progression et communauté.':'Challenges, progress and community.'}</b></div>
+        <div><span>KŌMØ LIFE</span><b>${locale==='fr'?'Relier le World aux objets et expériences réels.':'Connect World to real objects and experiences.'}</b></div>
+      </div>
+    </section>`;
+}
+function bindCampusMap(){
+  panelBody.querySelectorAll('[data-campus-go]').forEach(btn=>btn.addEventListener('click',()=>{closePanel();fastTravel(btn.dataset.campusGo)}));
+}
+function showCampusMap(){
+  closeWorldMenu();
+  openPanel('KŌMØ CAMPUS',locale==='fr'?'Tout votre World sur une seule carte.':'Your entire World on one map.',campusMapHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}
+  ]);
+  bindCampusMap();
+}
+
 function deskHtml(){
   const s=current();
   if(locale==='fr')return `
@@ -3405,30 +3488,32 @@ function syncQuickNav(zone){
   });
 }
 let lastWorldZone='';
-function showWorldZone(label){
+function showWorldZone(label,purpose=''){
   if(label===lastWorldZone)return;
   lastWorldZone=label;locationName.textContent=label;
+  if(locationPurpose)locationPurpose.textContent=purpose;
   locationChip?.classList.remove('show');void locationChip?.offsetWidth;locationChip?.classList.add('show');
-  clearTimeout(showWorldZone.t);showWorldZone.t=setTimeout(()=>locationChip?.classList.remove('show'),2200);
+  clearTimeout(showWorldZone.t);showWorldZone.t=setTimeout(()=>locationChip?.classList.remove('show'),2600);
 }
 function updateLocation(){
-  let label='KŌMØ HALL',nav='hall';
-  if(inTwinZone()){label='FUNCTIONAL TWIN';nav='twin';completeJourney('twin',{silent:true})}
-  else if(inFitnessZone()){label='KŌMØ FITNESS CLUB';nav='';completeJourney('rehab',{silent:true})}
-  else if(inArenaZone()){label='ARENA';nav='';completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
+  let label='KŌMØ HALL',purpose=locale==='fr'?'VOTRE POINT CENTRAL':'YOUR HOME BASE',nav='hall';
+  if(inTwinZone()){label='FUNCTIONAL TWIN';purpose=locale==='fr'?'COMPRENDRE VOTRE MOUVEMENT':'UNDERSTAND YOUR MOVEMENT';nav='twin';completeJourney('twin',{silent:true})}
+  else if(inFitnessZone()){label='KŌMØ FITNESS CLUB';purpose=locale==='fr'?'BOUGER · S’ENTRAÎNER · PROGRESSER':'MOVE · TRAIN · PROGRESS';nav='';completeJourney('rehab',{silent:true})}
+  else if(inArenaZone()){label='ARENA';purpose=locale==='fr'?'DÉFIS · PROGRESSION · COMMUNAUTÉ':'CHALLENGES · PROGRESSION · COMMUNITY';nav='';completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
   else if(playerLevel===1){
     nav='upper';completeJourney('upper',{silent:true});
     label=player.z<-18.8?'UPPER OBSERVATORY':player.x<0?'SCIENCE LIBRARY · LEVEL 2':'LIFE LOUNGE · LEVEL 2';
-  }else if(inTwinLink())label='TWIN WALK';
-  else if(inArenaLink())label='ARENA WALK';
-  else if(inFitnessLink())label='FITNESS WALK';
-  else if(player.z>57)label='KŌMØ DISTRICT';
-  else if(player.z>23)label='ARRIVAL COURT';
-  else if(player.z>11.8)label='WORLD ENTRANCE';
-  else if(player.x>6.8&&player.z>-2&&player.z<7){label='KŌMØ LIFE';nav='life';completeJourney('life',{silent:true})}
-  else if(player.z>-7){label='KŌMØ HALL';completeJourney('hall',{silent:true})}
-  else label='MOTION ATRIUM';
-  syncQuickNav(nav);showWorldZone(label);
+    purpose=player.z<-18.8?(locale==='fr'?'VOIR LE WORLD AUTREMENT':'A NEW VIEW OF WORLD'):player.x<0?(locale==='fr'?'SCIENCE · MÉTHODE · SOURCES':'SCIENCE · METHOD · SOURCES'):(locale==='fr'?'OBJETS · CULTURE · DISCOVERY':'OBJECTS · CULTURE · DISCOVERY');
+  }else if(inTwinLink()){label='TWIN WALK';purpose=locale==='fr'?'VERS FUNCTIONAL TWIN':'TO FUNCTIONAL TWIN'}
+  else if(inArenaLink()){label='ARENA WALK';purpose=locale==='fr'?'VERS ARENA':'TO ARENA'}
+  else if(inFitnessLink()){label='FITNESS WALK';purpose=locale==='fr'?'VERS FITNESS CLUB':'TO FITNESS CLUB'}
+  else if(player.z>57){label='KŌMØ DISTRICT';purpose=locale==='fr'?'CAMPUS EXTÉRIEUR':'OUTDOOR CAMPUS'}
+  else if(player.z>23){label='ARRIVAL COURT';purpose=locale==='fr'?'ARRIVÉE · HOSPITALITY':'ARRIVAL · HOSPITALITY'}
+  else if(player.z>11.8){label='WORLD ENTRANCE';purpose=locale==='fr'?'ENTRER DANS VOTRE WORLD':'ENTER YOUR WORLD'}
+  else if(player.x>6.8&&player.z>-2&&player.z<7){label='KŌMØ LIFE';purpose=locale==='fr'?'OBJETS · ÉQUIPEMENT · ÉDITIONS':'OBJECTS · EQUIPMENT · EDITIONS';nav='life';completeJourney('life',{silent:true})}
+  else if(player.z>-7){label='KŌMØ HALL';purpose=locale==='fr'?'VOTRE POINT CENTRAL':'YOUR HOME BASE';completeJourney('hall',{silent:true})}
+  else{label='MOTION ATRIUM';purpose=locale==='fr'?'ACCÈS TWIN · FITNESS · ARENA':'TWIN · FITNESS · ARENA'}
+  syncQuickNav(nav);showWorldZone(label,purpose);
 }
 function updateHeading(){
   const a=((yaw%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
@@ -3538,6 +3623,9 @@ $('#intro-enter').addEventListener('click',()=>{intro.classList.add('hidden');ta
 $('#panel-close').addEventListener('click',closePanel);
 worldMenuToggle.addEventListener('click',toggleWorldMenu);
 worldMenuClose.addEventListener('click',closeWorldMenu);
+resultsToggle?.addEventListener('click',showHealthOverview);
+campusToggle?.addEventListener('click',showCampusMap);
+journeyToggle?.addEventListener('click',()=>{closeWorldMenu();showJourneyPanel()});
 cameraToggle.addEventListener('click',toggleCamera);
 guideToggle.addEventListener('click',toggleGuide);
 controlsToggle.addEventListener('click',()=>{closeWorldMenu();showControlsPanel()});
@@ -3558,7 +3646,7 @@ function applyLocale(){
   $('#intro-enter').textContent=c.introButton;
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
-  $('#world-menu-copy').textContent=locale==='fr'?'Choisissez un espace ou ajustez votre expérience.':'Choose a space or adjust your experience.';
+  $('#world-menu-copy').textContent=locale==='fr'?'Votre santé, votre progression et le campus KŌMØ au même endroit.':'Your health, progress and the KŌMØ campus in one place.';
   const controlHints=document.querySelectorAll('.world-menu-controls span');
   if(controlHints.length>=6){
     controlHints[0].innerHTML='<kbd>'+keybinds.forward.map(keyLabel).join('/')+'</kbd> MOVE';
@@ -3820,7 +3908,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.7.0-one-world',
+  version:'3.8.0-information-architecture',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
