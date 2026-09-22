@@ -53,7 +53,6 @@ const scripts = [
   'scripts/method-science-v2.mjs',
   'scripts/method-science-polish-v1.mjs',
   'scripts/method-score-clarity-v3.mjs',
-  'scripts/commercial-legal-v1.mjs',
   'scripts/seo-sitemap-v2.mjs',
   'scripts/seo-growth-qa.mjs',
   'scripts/ecosystem-public-v1.mjs',
@@ -198,7 +197,11 @@ const scripts = [
   'scripts/homepage-consultation-offers-v1.mjs',
   // Final interaction layer: restrained motion, depth and tactile feedback
   // for the premium patient-facing home without changing the content flow.
-  'scripts/homepage-premium-motion-v1.mjs'
+  'scripts/homepage-premium-motion-v1.mjs',
+  // Keep the commercial framework visible as a separate, clearly labelled
+  // working draft instead of redirecting CGV visitors to site-use terms.
+  'scripts/commercial-legal-v2.mjs',
+  'scripts/commercial-legal-qa-v1.mjs'
 ];
 
 for (const script of scripts) {

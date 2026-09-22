@@ -24,7 +24,7 @@ const legalCopy = {
     },
     footerLabel: 'Legal & privacy',
     back: 'Back to KŌMØ',
-    updated: 'Last updated: 22 August 2026',
+    updated: 'Last updated: 22 September 2026',
     contactPrivacy: 'Your message is used only to reply to your request. Please do not include medical or health information in this form.',
     privacyLink: 'Read our privacy notice',
     contactDirectoryTitle: 'One address. The right conversation.',
@@ -81,7 +81,7 @@ const legalCopy = {
       terms: {
         title: 'Terms of use',
         description: 'Conditions governing access to and use of the public KŌMØ website.',
-        intro: 'These terms govern the informational public website. They are not sales terms and do not govern a future paid KŌMØ service, which will have its own applicable contract before launch.',
+        intro: 'These terms govern the informational public website. They are not sales terms. The legal navigation also points to a separate working draft of the future KŌMØ commercial terms; the final contract will be shown before any paid service launches.',
         sections: [
           ['Informational purpose', 'Content is provided to explain KŌMØ, locomotor longevity, its method, research direction and future services. It may evolve as protocols, evidence and the company structure develop.'],
           ['No medical consultation online', 'The website does not provide an individual diagnosis, prognosis, prescription or autonomous care decision. Information cannot replace history-taking, examination or professional judgement where these are required.'],
@@ -127,7 +127,7 @@ const legalCopy = {
     },
     footerLabel: 'Juridique & confidentialité',
     back: 'Retour à KŌMØ',
-    updated: 'Dernière mise à jour : 22 août 2026',
+    updated: 'Dernière mise à jour : 22 septembre 2026',
     contactPrivacy: 'Votre message est utilisé uniquement pour répondre à votre demande. N’indiquez aucune donnée médicale ou de santé dans ce formulaire.',
     privacyLink: 'Lire notre politique de confidentialité',
     contactDirectoryTitle: 'Une adresse. La bonne conversation.',
@@ -184,7 +184,7 @@ const legalCopy = {
       terms: {
         title: 'Conditions d’utilisation',
         description: 'Conditions applicables à l’accès et à l’utilisation du site public KŌMØ.',
-        intro: 'Ces conditions régissent le site public informatif. Elles ne constituent pas des CGV et ne régissent pas un futur service payant KŌMØ, qui disposera de son propre contrat applicable avant son lancement.',
+        intro: 'Ces conditions régissent le site public informatif. Elles ne constituent pas des CGV. La navigation juridique renvoie aussi vers une version de travail du futur cadre commercial KŌMØ ; le contrat final sera présenté avant toute ouverture d’un service payant.',
         sections: [
           ['Objet informatif', 'Le contenu présente KŌMØ, la longévité locomotrice, sa méthode, sa direction scientifique et ses futurs services. Il peut évoluer avec les protocoles, les preuves disponibles et la structuration de la société.'],
           ['Pas de consultation médicale en ligne', 'Le site ne fournit pas de diagnostic individuel, de pronostic, de prescription ni de décision de soins autonome. L’information ne remplace ni l’interrogatoire, ni l’examen clinique, ni le jugement professionnel lorsqu’ils sont nécessaires.'],
@@ -230,7 +230,7 @@ const legalCopy = {
     },
     footerLabel: 'Legal y privacidad',
     back: 'Volver a KŌMØ',
-    updated: 'Última actualización: 22 de agosto de 2026',
+    updated: 'Última actualización: 22 de septiembre de 2026',
     contactPrivacy: 'Tu mensaje se utiliza únicamente para responder a tu solicitud. No incluyas información médica o de salud en este formulario.',
     privacyLink: 'Leer nuestra política de privacidad',
     contactDirectoryTitle: 'Una dirección. La conversación adecuada.',
@@ -287,7 +287,7 @@ const legalCopy = {
       terms: {
         title: 'Condiciones de uso',
         description: 'Condiciones aplicables al acceso y uso del sitio público KŌMØ.',
-        intro: 'Estas condiciones regulan el sitio público informativo. No son condiciones de venta y no regulan un futuro servicio de pago KŌMØ, que tendrá su propio contrato antes del lanzamiento.',
+        intro: 'Estas condiciones regulan el sitio público informativo. No son condiciones de venta. La navegación legal también enlaza a un borrador del futuro marco comercial KŌMØ; el contrato final se mostrará antes de abrir cualquier servicio de pago.',
         sections: [
           ['Finalidad informativa', 'El contenido presenta KŌMØ, la longevidad locomotora, su método, dirección científica y futuros servicios. Puede evolucionar con los protocolos, la evidencia disponible y la estructuración societaria.'],
           ['Sin consulta médica online', 'El sitio no proporciona un diagnóstico individual, pronóstico, prescripción ni decisión asistencial autónoma. La información no sustituye anamnesis, exploración clínica ni juicio profesional cuando estos son necesarios.'],
@@ -330,6 +330,11 @@ const legalCopy = {
 const localeRoot = (locale) => locale === 'en' ? '' : `/${locale}`;
 const pageHref = (locale, slug) => `${localeRoot(locale)}/${slug}/`;
 const homeHref = (locale) => locale === 'en' ? '/' : `/${locale}/`;
+const commercialLabel = {
+  en: 'Sales terms (draft)',
+  fr: 'CGV (version préparatoire)',
+  es: 'Condiciones de venta (borrador)'
+};
 
 async function listHtmlFiles(dir) {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -351,13 +356,15 @@ function localeFromPath(file) {
 
 function legalNav(locale) {
   const c = legalCopy[locale];
-  return `<nav class="legal-links" aria-label="${escapeHtml(c.footerLabel)}">${legalSlugs.map((slug) => `<a href="${pageHref(locale, slug)}">${escapeHtml(c.labels[slug])}</a>`).join('')}</nav>`;
+  const links = legalSlugs.map((slug) => `<a href="${pageHref(locale, slug)}">${escapeHtml(c.labels[slug])}</a>`).join('');
+  return `<nav class="legal-links" aria-label="${escapeHtml(c.footerLabel)}">${links}<a href="${pageHref(locale, 'cgv')}">${escapeHtml(commercialLabel[locale])}</a></nav>`;
 }
 
 function legalMain(locale, slug) {
   const c = legalCopy[locale];
   const page = c.pages[slug];
-  const nav = `<div class="legal-page-nav">${legalSlugs.map((item) => `<a href="${pageHref(locale, item)}"${item === slug ? ' aria-current="page"' : ''}>${escapeHtml(c.labels[item])}</a>`).join('')}</div>`;
+  const links = legalSlugs.map((item) => `<a href="${pageHref(locale, item)}"${item === slug ? ' aria-current="page"' : ''}>${escapeHtml(c.labels[item])}</a>`).join('');
+  const nav = `<div class="legal-page-nav">${links}<a href="${pageHref(locale, 'cgv')}">${escapeHtml(commercialLabel[locale])}</a></div>`;
   const sections = page.sections.map(([heading, body]) => `<section class="legal-section"><h2>${escapeHtml(heading)}</h2><div class="legal-rich">${body}</div></section>`).join('');
   return `<main id="main"><section class="legal-hero"><div class="shell"><p class="eyebrow">KŌMØ · ${escapeHtml(c.labels[slug])}</p><h1>${escapeHtml(page.title)}</h1><p>${escapeHtml(page.intro)}</p><div class="legal-meta"><span>${escapeHtml(c.updated)}</span><a href="${homeHref(locale)}">${escapeHtml(c.back)} →</a></div></div></section><section class="legal-body"><div class="shell legal-layout"><aside>${nav}</aside><article>${sections}</article></div></section></main>`;
 }
@@ -376,14 +383,14 @@ function rewriteHead(html, locale, slug) {
   html = html.replace(/<meta property="og:description" content="[\s\S]*?">/, `<meta property="og:description" content="${escapeHtml(page.description)}">`);
   html = html.replace(/<meta property="og:url" content="[^"]*">/, `<meta property="og:url" content="${canonical}">`);
   html = html.replace(/<body data-page="[^"]*">/, `<body data-page="${slug}">`);
-  html = html.replace(/<main id="main">[\s\S]*?<\/main>/, legalMain(locale, slug));
+  html = html.replace(/<main\b[^>]*>[\s\S]*?<\/main>/, legalMain(locale, slug));
   html = html.replace(/<a class="button mobile-cta"[\s\S]*?<\/a>\s*<\/body>/, '</body>');
   return html;
 }
 
 function hardenFooter(html, locale) {
   if (html.includes('class="legal-links"')) return html;
-  return html.replace(/(<div class="footer-bottom">)([\s\S]*?)(<\/div>)/, `$1$2${legalNav(locale)}$3`);
+  return html.replace(/(<div class="(?:footer-bottom|kp-footer-bottom)">)([\s\S]*?)(<\/div>)/, `$1$2${legalNav(locale)}$3`);
 }
 
 function hardenContact(html, locale) {
@@ -438,7 +445,7 @@ async function hardenCss() {
 async function updateSitemap() {
   const sitemapPath = join(siteDir, 'sitemap.xml');
   let xml = await readFile(sitemapPath, 'utf8');
-  const additions = locales.flatMap((locale) => legalSlugs.map((slug) => `${origin}${pageHref(locale, slug)}`));
+  const additions = locales.flatMap((locale) => [...legalSlugs, 'cgv'].map((slug) => `${origin}${pageHref(locale, slug)}`));
   const missing = additions.filter((url) => !xml.includes(`<loc>${url}</loc>`));
   if (missing.length) xml = xml.replace('</urlset>', `${missing.map((url) => `  <url><loc>${url}</loc></url>`).join('\n')}\n</urlset>`);
   await writeFile(sitemapPath, xml);

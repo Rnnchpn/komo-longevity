@@ -8,8 +8,7 @@ async function walk(dir,out=[]){for(const e of await readdir(dir,{withFileTypes:
 const replacements=[
   [/https:\/\/komolongevity\.com\/fr\/confidentialite\//g,'https://komolongevity.com/fr/privacy/'],
   [/https:\/\/komolongevity\.com\/fr\/mentions-legales\//g,'https://komolongevity.com/fr/legal/'],
-  [/https:\/\/komolongevity\.com\/fr\/cgv\//g,'https://komolongevity.com/fr/terms/'],
-  [/href="\/fr\/confidentialite\/"/g,'href="/fr/privacy/"'],[/href="\/fr\/mentions-legales\/"/g,'href="/fr/legal/"'],[/href="\/fr\/cgv\/"/g,'href="/fr/terms/"'],[/href="\/fr\/method\/"/g,'href="/fr/methode/"'],
+  [/href="\/fr\/confidentialite\/"/g,'href="/fr/privacy/"'],[/href="\/fr\/mentions-legales\/"/g,'href="/fr/legal/"'],[/href="\/fr\/method\/"/g,'href="/fr/methode/"'],
   [/href="\/confidentialite\/?"/g,'href="/privacy/"'],[/href="\/mentions-legales\/?"/g,'href="/legal/"'],[/href="\/legal\/conditions-generales-utilisation\/?"/g,'href="/terms/"']
 ];
 let patched=0;
@@ -56,7 +55,7 @@ for(const [lang,[rel,title,desc]] of Object.entries(contact)){const p=join(site,
 
 await writeFile(join(site,'robots.txt'),'User-agent: *\nAllow: /\nSitemap: https://komolongevity.com/sitemap.xml\n');await mkdir(join(site,'pulse-v12'),{recursive:true});await writeFile(join(site,'pulse-v12','robots.txt'),'User-agent: *\nDisallow: /\n');
 async function alias(rel,target,lang='fr'){const d=join(site,...rel.split('/').filter(Boolean));await mkdir(d,{recursive:true});await writeFile(join(d,'index.html'),`<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="robots" content="noindex,follow"><meta http-equiv="refresh" content="0;url=${target}"><link rel="canonical" href="https://komolongevity.com${target}"><meta name="komo-build" content="${assetVersion}"><title>KŌMØ</title></head><body><a href="${target}">Continue →</a><script>location.replace(${JSON.stringify(target)});</script></body></html>`)}
-await alias('fr/confidentialite','/fr/privacy/');await alias('fr/mentions-legales','/fr/legal/');await alias('fr/cgv','/fr/terms/');await alias('fr/method','/fr/methode/');await alias('confidentialite','/privacy/','en');await alias('mentions-legales','/legal/','en');await alias('cgv','/terms/','en');await alias('legal/conditions-generales-utilisation','/terms/');await alias('media','/media','en');
+await alias('fr/confidentialite','/fr/privacy/');await alias('fr/mentions-legales','/fr/legal/');await alias('fr/method','/fr/methode/');await alias('confidentialite','/privacy/','en');await alias('mentions-legales','/legal/','en');await alias('legal/conditions-generales-utilisation','/terms/');await alias('media','/media','en');
 
 const sm=join(site,'sitemap.xml');let s=await readFile(sm,'utf8');for(const [u,p] of [['https://komolongevity.com/','1.0'],['https://komolongevity.com/fr/','1.0'],['https://komolongevity.com/es/','1.0'],['https://komolongevity.com/contact/','0.7'],['https://komolongevity.com/es/contact/','0.7'],['https://komolongevity.com/locomotor/','0.8'],['https://komolongevity.com/es/locomotor/','0.8']])if(!s.includes(`<loc>${u}</loc>`))s=s.replace('</urlset>',`  <url><loc>${u}</loc><priority>${p}</priority></url>\n</urlset>`);await writeFile(sm,s);
 console.log(`[public-site-final-hardening] ${patched} HTML files normalized; legacy partner form removed; public and Pulse CSS/JS busted with ${assetVersion}; robots, aliases and sitemap repaired.`);
