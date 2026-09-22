@@ -71,9 +71,33 @@ function css(){
       -webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:none
     }
     .kwmp-pill{
-      height:30px;padding:0 10px;border:1px solid rgba(255,255,255,.09);
-      border-radius:11px;background:rgba(15,30,22,.70);font-size:5px;
-      -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)
+      height:29px;padding:0 10px;border:1px solid rgba(255,255,255,.06);
+      border-radius:10px;background:rgba(13,27,20,.62);font-size:5px;letter-spacing:.09em;
+      color:rgba(245,239,230,.68);box-shadow:0 7px 18px rgba(5,12,8,.07);
+      -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)
+    }
+    .kwmp-pill:hover{background:rgba(20,37,28,.78);border-color:rgba(218,187,132,.14);color:#f5eee4}
+    .kwmp-chat-launcher{
+      border-color:rgba(255,255,255,.055)!important;
+      background:rgba(13,27,20,.68)!important;
+      box-shadow:0 9px 24px rgba(5,12,8,.09)!important;
+      -webkit-backdrop-filter:blur(16px)!important;backdrop-filter:blur(16px)!important
+    }
+    .kwmp-chat{
+      border-color:rgba(255,255,255,.06)!important;
+      background:linear-gradient(160deg,rgba(13,27,20,.96),rgba(24,39,30,.94))!important;
+      box-shadow:0 20px 60px rgba(5,12,8,.18)!important;
+      -webkit-backdrop-filter:blur(24px)!important;backdrop-filter:blur(24px)!important
+    }
+    .kwmp-voicebox{
+      border-color:rgba(255,255,255,.055)!important;
+      background:rgba(13,27,20,.68)!important;
+      box-shadow:0 9px 24px rgba(5,12,8,.09)!important
+    }
+    .kwmp-talk{
+      border-color:rgba(218,187,132,.16)!important;
+      background:rgba(23,42,32,.82)!important;
+      box-shadow:none!important
     }
     .kwmp-chat{
       left:22px;bottom:22px;width:430px;max-height:min(390px,50vh);
