@@ -1737,6 +1737,14 @@ box(floorV19,7.7,.020,1.58,MAT.brass,0,.370,13.0);
 box(floorV19,7.25,.024,1.16,FLOOR.promenade,0,.384,13.0);
 const medallion=mesh(floorV19,new THREE.RingGeometry(1.38,1.48,72),MAT.brass,0,.372,-8.6,{receive:false});medallion.rotation.x=-Math.PI/2;
 const medallion2=mesh(floorV19,new THREE.RingGeometry(.78,.82,64),M.bronzeSoft,0,.374,-8.6,{receive:false});medallion2.rotation.x=-Math.PI/2;
+
+// V4.5 central focal point — one sculptural object, deliberately clear of the walking axis.
+const atriumFocal=new THREE.Group();atriumFocal.name='KOMO_ATRIUM_FOCAL_V45';atriumFocal.position.set(0,0,-8.6);building.add(atriumFocal);
+box(atriumFocal,2.65,.34,.58,MAT.travertine,0,.50,0,{cast:true});
+box(atriumFocal,2.42,.055,.50,MAT.brass,0,.70,0,{cast:false,receive:false});
+const focalArc=mesh(atriumFocal,new THREE.TorusGeometry(.52,.035,10,56,Math.PI*1.35),MAT.brass,0,1.43,0,{cast:true});
+focalArc.rotation.set(.35,.18,.25);
+
 // V2.0 floor polish: stair landing + lounge islands.
 box(floorV19,4.45,.035,6.55,FLOOR.life,-8.72,.368,10.05);
 [-10.20,-7.24].forEach(x=>line(floorV19,.035,6.05,x,10.05,MAT.brass,.392));
@@ -1790,17 +1798,17 @@ function instancedStatic(parent,geometry,material,items,name){
 // Fluted wall ribs: high visual detail, one draw call.
 const wallRibs=[];
 [-1,1].forEach(side=>{
-  for(let z=10.0;z>=-23;z-=3.1)wallRibs.push({x:side*11.43,y:3.30,z,sx:.055,sy:3.05,sz:.12});
+  for(let z=9.6;z>=-22.8;z-=4.8)wallRibs.push({x:side*11.43,y:3.30,z,sx:.045,sy:3.00,sz:.10});
 });
 instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.brass,wallRibs,'KOMO_HALL_BRASS_RIBS_V30');
 
 // Warm ceiling blades create a richer ceiling without any extra PointLight.
 const bladeMat=new THREE.MeshBasicMaterial({color:0xd8b47b});
 const ceilingBlades=[];
-for(let z=10;z>=-23;z-=4.7){
-  ceilingBlades.push({x:-5.1,y:7.42,z,sx:3.9,sy:.022,sz:.045});
-  ceilingBlades.push({x:5.1,y:7.42,z,sx:3.9,sy:.022,sz:.045});
-}
+[10.2,2.1,-6.0,-14.1,-22.2].forEach(z=>{
+  ceilingBlades.push({x:-5.1,y:7.42,z,sx:3.55,sy:.018,sz:.036});
+  ceilingBlades.push({x:5.1,y:7.42,z,sx:3.55,sy:.018,sz:.036});
+});
 instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),bladeMat,ceilingBlades,'KOMO_HALL_LIGHT_BLADES_V30');
 
 // V4.3 ceiling practicals — visible sources aligned with the actual light rig.
@@ -1896,8 +1904,8 @@ artFrames.forEach((it,i)=>{
 });
 
 // Brand / culture walls.
-plaque(hallLiving,'LONGEVITY IN MOTION','MEASURE · UNDERSTAND · TRAIN · LIVE',5.15,1.05,-11.32,5.78,7.4,{rotY:Math.PI/2,dark:true,titleSize:63});
-plaque(hallLiving,'KŌMØ CULTURE','MOVEMENT · SCIENCE · COMMUNITY',4.75,.92,11.32,5.64,-15.6,{rotY:-Math.PI/2,dark:true,titleSize:57});
+plaque(hallLiving,'LONGEVITY IN MOTION','MEASURE · UNDERSTAND · TRAIN · LIVE',3.85,.70,-11.32,5.52,7.4,{rotY:Math.PI/2,dark:true,titleSize:44});
+plaque(hallLiving,'KŌMØ CULTURE','MOVEMENT · SCIENCE · COMMUNITY',3.65,.68,11.32,5.48,-15.6,{rotY:-Math.PI/2,dark:true,titleSize:42});
 
 // One additional live editorial screen — existing motion-screen system is already throttled/culling-aware.
 if(!lowPower)motionScreen(hallLiving,11.40,4.55,-8.8,-Math.PI/2,'TODAY AT KŌMØ');
@@ -1909,10 +1917,14 @@ const displayCubes=[];
 });
 instancedStatic(hallLiving,new THREE.BoxGeometry(1,1,1),MAT.walnut,displayCubes,'KOMO_HALL_MATERIAL_OBJECTS_V30');
 
-// Minimal low-cost wayfinding to make the hall legible as a hub.
-plaque(hallLiving,'TWIN','UNDERSTAND',2.35,.58,-4.6,2.25,-25.9,{dark:true,titleSize:46});
-plaque(hallLiving,'FITNESS CLUB','TRAIN DAILY',2.55,.58,0,2.25,-25.9,{dark:false,titleSize:42});
-plaque(hallLiving,'ARENA','ENGAGE',2.35,.58,4.6,2.25,-25.9,{dark:true,titleSize:46});
+// V4.5 integrated wayfinding — a single architectural datum instead of floating sign cards.
+const destinationDatum=new THREE.Group();destinationDatum.name='KOMO_DESTINATION_DATUM_V45';hallLiving.add(destinationDatum);
+box(destinationDatum,14.8,.045,.065,MAT.brass,0,2.34,-25.88,{cast:false,receive:false});
+[
+  [-4.6,'TWIN','UNDERSTAND',true],
+  [0,'FITNESS','TRAIN',false],
+  [4.6,'ARENA','ENGAGE',true]
+].forEach(([x,label,sub,dark])=>plaque(destinationDatum,label,sub,1.78,.40,x,2.62,-25.84,{dark,titleSize:30}));
 
 // V3.1 lightweight Hall Host — visible human presence at negligible draw cost.
 const hallHost=new THREE.Group();hallHost.name='KOMO_HALL_HOST_V31';hallHost.position.set(-3.95,0,9.3);building.add(hallHost);
