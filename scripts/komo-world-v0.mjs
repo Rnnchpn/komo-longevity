@@ -57,7 +57,12 @@ const checks=[
   ['World Hub health + challenges present',runtime.includes('function showHealthOverview')&&runtime.includes('const CHALLENGE_KEY')&&runtime.includes('KOMO_CHALLENGE_BOARD_V32')],
   ['World Hub Life items present',runtime.includes('KOMO_LIFE_ITEMS_V32')&&runtime.includes('function showLifeItem')],
   ['World Hub avatar studio present',runtime.includes('AVATAR_KEY')&&runtime.includes('function showAvatarStudio')],
-  ['World Hub mobile clouds present',runtime.includes('const cloudCount=lowPower?2:9')&&runtime.includes('if(living.clouds?.length)')]
+  ['World Hub mobile clouds present',runtime.includes('const cloudCount=lowPower?3:11')&&runtime.includes('if(living.clouds?.length)')],
+  ['Immersive Hub V3.3 entry present',runtime.includes("version:'3.3.4-district'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
+  ['Immersive Hub V3.3 portals present',runtime.includes('KOMO_PORTAL_ARCH_V33_')&&runtime.includes('function updateDestinationDoors')],
+  ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
+  ['Immersive Hub V3.3 quests present',runtime.includes("quest:'fitness'")&&runtime.includes("quest:'arena'")&&runtime.includes("id:'coach'")],
+  ['Immersive Hub V3.3 district detail present',runtime.includes('KOMO_DISTRICT_DETAILS_V33')&&runtime.includes('HEALTH PAVILION')&&runtime.includes('CLUB HOUSE')]
 ];
 for(const [label,ok] of checks){
   console.log(`[komo-world-qa] ${ok?'OK':'FAIL'} · ${label}`);
