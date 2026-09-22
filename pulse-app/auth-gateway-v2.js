@@ -8,7 +8,11 @@ const PENDING_KEY='komo_pending_pro_application_v1';
 const REMEMBER_KEY='komo_pulse_remember';
 let client=null;
 let worldBridgeSent='';
+let worldBridgeRequestId='';
+let worldBridgeAcked=false;
+const WORLD_BRIDGE_CHANNEL='komo-pulse-world-bridge-v2';
 const WORLD_ORIGINS=new Set(['https://komolongevity.com','https://www.komolongevity.com']);
+const worldBridgeChannel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel(WORLD_BRIDGE_CHANNEL):null;
 
 function storage(){return localStorage.getItem(REMEMBER_KEY)==='1'?localStorage:sessionStorage}
 function sb(){if(!client)client=createClient(URL,KEY,{auth:{storage:storage(),persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});return client}
@@ -92,26 +96,80 @@ function worldBridgeConfig(){
   const targetOrigin=WORLD_ORIGINS.has(requested)?requested:'https://komolongevity.com';
   return{targetOrigin};
 }
+async function worldBridgeProfile(c,session){
+  let profile={};
+  try{const r=await c.from('profiles').select('display_name,avatar_config,interests').eq('id',session.user.id).maybeSingle();profile=r.data||{}}catch{}
+  return{
+    display_name:String(profile?.display_name||session.user.user_metadata?.display_name||'KŌMØ Member').slice(0,60),
+    avatar_config:profile?.avatar_config&&typeof profile.avatar_config==='object'?profile.avatar_config:{},
+    interests:Array.isArray(profile?.interests)?profile.interests.slice(0,8):[]
+  };
+}
+function worldBridgePayload(session,profile,requestId=''){
+  return{
+    type:'komo:pulse-world-session',
+    status:'authenticated',
+    request_id:requestId||'',
+    session:{access_token:session.access_token,refresh_token:session.refresh_token,expires_at:session.expires_at||null},
+    profile
+  };
+}
+function sendWorldBridgePayload(cfg,payload){
+  if(!window.opener)return false;
+  worldBridgeAcked=false;
+  window.opener.postMessage(payload,cfg.targetOrigin);
+  showToast('Connexion à KŌMØ World…');
+  return true;
+}
 async function worldBridgeAttempt(){
   const cfg=worldBridgeConfig();if(!cfg||!window.opener)return;
   const c=sb(),{data:{session}}=await c.auth.getSession();
-  if(!session?.user)return;
-  if(worldBridgeSent===session.access_token)return;
-  worldBridgeSent=session.access_token;
-  let profile={};
-  try{const r=await c.from('profiles').select('display_name,avatar_config,interests').eq('id',session.user.id).maybeSingle();profile=r.data||{}}catch{}
-  window.opener.postMessage({
-    type:'komo:pulse-world-session',
-    status:'authenticated',
-    session:{access_token:session.access_token,refresh_token:session.refresh_token,expires_at:session.expires_at||null},
-    profile:{
-      display_name:String(profile?.display_name||session.user.user_metadata?.display_name||'KŌMØ Member').slice(0,60),
-      avatar_config:profile?.avatar_config&&typeof profile.avatar_config==='object'?profile.avatar_config:{},
-      interests:Array.isArray(profile?.interests)?profile.interests.slice(0,8):[]
-    }
-  },cfg.targetOrigin);
-  setTimeout(()=>{try{window.close()}catch{}},260);
+  if(session?.user){
+    if(worldBridgeSent===session.access_token&&!worldBridgeAcked)return;
+    worldBridgeSent=session.access_token;
+    const profile=await worldBridgeProfile(c,session);
+    sendWorldBridgePayload(cfg,worldBridgePayload(session,profile,worldBridgeRequestId));
+    return;
+  }
+  // A Pulse session stored in sessionStorage belongs to the existing Pulse tab.
+  // Ask that same-origin tab for a one-time transfer instead of forcing another login.
+  if(worldBridgeChannel&&!worldBridgeRequestId){
+    worldBridgeRequestId=(crypto?.randomUUID?.()||('wb-'+Date.now()+'-'+Math.random().toString(16).slice(2)));
+    worldBridgeChannel.postMessage({type:'komo:pulse-world-session-request',request_id:worldBridgeRequestId,requested_at:Date.now()});
+    showToast('Recherche de votre session Pulse ouverte…');
+  }
 }
+if(worldBridgeChannel){
+  worldBridgeChannel.addEventListener('message',async event=>{
+    const d=event.data||{};
+    if(d.type==='komo:pulse-world-session-request'&&d.request_id){
+      const c=sb(),{data:{session}}=await c.auth.getSession();
+      if(!session?.user)return;
+      const profile=await worldBridgeProfile(c,session);
+      worldBridgeChannel.postMessage({
+        type:'komo:pulse-world-session-response',
+        request_id:d.request_id,
+        payload:worldBridgePayload(session,profile,d.request_id)
+      });
+      return;
+    }
+    if(d.type==='komo:pulse-world-session-response'&&d.request_id&&d.request_id===worldBridgeRequestId){
+      const cfg=worldBridgeConfig();if(!cfg||!window.opener||!d.payload)return;
+      worldBridgeSent=d.payload.session?.access_token||'';
+      sendWorldBridgePayload(cfg,d.payload);
+    }
+  });
+}
+window.addEventListener('message',event=>{
+  const cfg=worldBridgeConfig();if(!cfg||event.origin!==cfg.targetOrigin)return;
+  const d=event.data||{};if(d.type!=='komo:world-bridge-ack')return;
+  if(d.status==='connected'){
+    worldBridgeAcked=true;showToast('KŌMØ World connecté.');
+    setTimeout(()=>{try{window.close()}catch{}},350);
+  }else if(d.status==='error'){
+    showToast('Connexion World impossible. Réessayez depuis le bouton CONNECT WORLD.');
+  }
+});
 
 function schedule(){mount();if(authVisible())setAudience(getAudience());attemptPending().catch(console.error);worldBridgeAttempt().catch(console.error)}
 const obs=new MutationObserver(()=>setTimeout(schedule,80));obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
