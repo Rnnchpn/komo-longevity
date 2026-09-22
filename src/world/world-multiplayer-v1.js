@@ -233,22 +233,21 @@ export async function mount(runtime){
     };
   };
   const startLiveSession=async(session,profileHint={})=>{
-    if(!session?.user)return;
+    if(!session?.user)return false;
     state.session=session;await loadProfile(profileHint);setOnlineUI();
     if(!state.started){
       state.started=true;await loadInitial();subscribe();
       state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);
-    }else{
-      await heartbeat();syncPeers();
     }
+    const live=await heartbeat();syncPeers();return !!live;
   };
   const connectWithBridge=async(payload)=>{
-    if(!payload?.session?.access_token||!payload?.session?.refresh_token)return;
+    if(!payload?.session?.access_token||!payload?.session?.refresh_token)return false;
     try{
       const {data,error}=await client.auth.setSession({access_token:payload.session.access_token,refresh_token:payload.session.refresh_token});if(error)throw error;
       if(!data.session?.user)throw new Error('Session Pulse invalide');
-      await startLiveSession(data.session,payload.profile||{});
-    }catch(err){console.error('[World Pulse bridge]',err);state.presenceLive=false;state.connected=false;setOnlineUI();runtime.notify?.('Connexion World impossible');}
+      return await startLiveSession(data.session,payload.profile||{});
+    }catch(err){console.error('[World Pulse bridge]',err);state.presenceLive=false;state.connected=false;setOnlineUI();runtime.notify?.('Connexion World impossible');return false}
   };
   const openPulse=()=>{
     const url=PULSE_ORIGIN+'/?world_bridge=1&world_origin='+encodeURIComponent(location.origin);
@@ -258,8 +257,14 @@ export async function mount(runtime){
   const onMessage=(event)=>{
     if(event.origin!==PULSE_ORIGIN)return;
     const d=event.data;if(!d||d.type!=='komo:pulse-world-session')return;
-    if(d.status==='authenticated')connectWithBridge(d);
-    else if(d.status==='signed_out')runtime.notify?.('Connectez-vous à Pulse pour activer le multiplayer');
+    if(d.status==='authenticated'){
+      connectWithBridge(d).then(ok=>{
+        try{event.source?.postMessage({type:'komo:world-bridge-ack',status:ok?'connected':'error',request_id:d.request_id||''},PULSE_ORIGIN)}catch{}
+      });
+    }else if(d.status==='signed_out'){
+      runtime.notify?.('Connectez-vous à Pulse pour activer le multiplayer');
+      try{event.source?.postMessage({type:'komo:world-bridge-ack',status:'error',request_id:d.request_id||''},PULSE_ORIGIN)}catch{}
+    }
   };
   window.addEventListener('message',onMessage);
 
@@ -327,5 +332,5 @@ export async function mount(runtime){
   window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup()});
   window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);heartbeat();syncPeers()}});
 
-  window.KomoWorldMultiplayer={version:'0.4.0-reliable-presence',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.4.1-cross-tab-bridge',connect:openPulse,state};
 }
