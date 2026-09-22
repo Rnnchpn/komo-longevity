@@ -1023,21 +1023,26 @@ function drawMotionScreen(rec,t){
   tx.needsUpdate=true;
 }
 function architecturalBay(parent,x,z,side=1,label='',sub=''){
-  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
-  box(g,3.45,.18,5.25,MAT.travertine,0,.12,0);
-  box(g,.26,5.9,5.0,MAT.limestone,side*1.56,3.0,0,{cast:true});
-  box(g,3.1,.24,5.0,MAT.limestone,0,5.86,0,{cast:true});
-  box(g,.08,5.15,4.5,MAT.smokedGlass,-side*1.44,2.85,0);
-  [-1.85,0,1.85].forEach(zz=>box(g,.075,5.1,.10,MAT.brass,-side*1.38,2.88,zz));
-  box(g,2.5,.08,.18,M.warm,0,5.47,-2.12);
-  if(label)plaque(g,label,sub,3.35,.84,-side*1.36,4.65,0,{rotY:side>0?-Math.PI/2:Math.PI/2,dark:true,titleSize:58});
+  const g=new THREE.Group();g.position.set(x,0,z);g.name='KOMO_RECESSED_BAY_V45_'+label.replace(/\s+/g,'_');parent.add(g);
+  // Recessed mineral bay: a back wall, one return, a thin canopy and a shadow reveal.
+  box(g,3.20,.10,5.10,FLOOR.side,0,.34,0,{cast:false,receive:true});
+  box(g,.18,5.35,4.75,MAT.limestone,side*1.52,2.95,0,{cast:true});
+  box(g,.075,4.82,4.35,MAT.smokedGlass,-side*1.47,2.82,0,{cast:false,receive:true});
+  box(g,3.05,.18,4.75,MAT.travertine,0,5.62,0,{cast:true});
+  // Deep black reveal gives the bay a built-in appearance.
+  box(g,.040,4.70,.040,MAT.blackened,-side*1.39,2.82,-2.08,{cast:false,receive:false});
+  box(g,.040,4.70,.040,MAT.blackened,-side*1.39,2.82,2.08,{cast:false,receive:false});
+  box(g,2.70,.032,.080,MAT.brass,0,5.37,-2.08,{cast:false,receive:false});
+  if(label)plaque(g,label,sub,2.55,.54,-side*1.405,4.22,0,{rotY:side>0?-Math.PI/2:Math.PI/2,dark:true,titleSize:40});
   return g;
 }
 function ceilingRaft(parent,x,z,w=5.2,d=5.8){
-  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
-  box(g,w,.18,d,MAT.travertine,0,7.64,0,{cast:true});
-  box(g,w-.45,.035,d-.40,MAT.walnut,0,7.51,0);
-  [-1,1].forEach(side=>box(g,w-.70,.035,.055,M.warm,0,7.42,side*(d/2-.35)));
+  const g=new THREE.Group();g.position.set(x,0,z);g.name='KOMO_CEILING_RAFT_V45';parent.add(g);
+  // Thin perimeter tray rather than a solid suspended slab.
+  box(g,w,.10,d,MAT.travertine,0,7.66,0,{cast:true});
+  box(g,w-.34,.055,d-.34,MAT.walnut,0,7.58,0,{cast:false,receive:true});
+  box(g,w-.72,.020,d-.66,MAT.blackened,0,7.545,0,{cast:false,receive:false});
+  [-1,1].forEach(side=>box(g,w-.72,.025,.052,M.warm,0,7.515,side*(d/2-.42),{cast:false,receive:false}));
   return g;
 }
 function caseObject(parent,x,y,z,scale=1,open=false){
@@ -1544,6 +1549,30 @@ const hallMaterialFinish=new THREE.Group();hallMaterialFinish.name='KOMO_HALL_MA
 
 // V1.5 interior architecture: galleries, balcony datum and layered ceiling.
 const hallArchitecture=new THREE.Group();hallArchitecture.name='KOMO_HALL_ARCHITECTURE_V15';building.add(hallArchitecture);
+
+// V4.5 Architectural Polish — a clear spatial spine replaces the "decorated corridor" feeling.
+const architecturalSpine=new THREE.Group();architecturalSpine.name='KOMO_ARCHITECTURAL_SPINE_V45';building.add(architecturalSpine);
+
+// Five repeated portal frames establish scale, rhythm and a legible central nave.
+[10.2,2.1,-6.0,-14.1,-22.2].forEach((z,i)=>{
+  const mat=i===4?MAT.travertine:MAT.limestone;
+  box(architecturalSpine,.26,6.55,.52,mat,-5.38,3.60,z,{cast:true});
+  box(architecturalSpine,.26,6.55,.52,mat,5.38,3.60,z,{cast:true});
+  box(architecturalSpine,11.02,.24,.52,mat,0,6.84,z,{cast:true});
+  // Recessed bronze line, intentionally thin.
+  box(architecturalSpine,10.46,.030,.055,MAT.brass,0,6.64,z+.275,{cast:false,receive:false});
+});
+
+// Continuous dark reveal around the central skylight makes the roof read as one architectural gesture.
+box(architecturalSpine,.055,.060,40.6,MAT.blackened,-4.98,7.765,-6.7,{cast:false,receive:false});
+box(architecturalSpine,.055,.060,40.6,MAT.blackened,4.98,7.765,-6.7,{cast:false,receive:false});
+
+// Arrival threshold becomes a proper lobby frame instead of another floating sign.
+box(architecturalSpine,.34,5.95,.78,MAT.travertine,-4.55,3.28,12.25,{cast:true});
+box(architecturalSpine,.34,5.95,.78,MAT.travertine,4.55,3.28,12.25,{cast:true});
+box(architecturalSpine,9.44,.30,.78,MAT.travertine,0,6.12,12.25,{cast:true});
+box(architecturalSpine,8.70,.032,.070,MAT.brass,0,5.88,11.82,{cast:false,receive:false});
+
 
 // Continuous upper gallery lines make the Hall read as a designed volume.
 [-1,1].forEach(side=>{
@@ -2131,6 +2160,27 @@ plaque(lifeStore,'LIFE','SELECT · CONFIGURE · ORDER',3.20,.58,.20,1.55,4.06,{d
 
 living.lifeDisplay={group:lifeStore,orbitA,orbitB,globe,flagshipCase};
 
+// V4.5 Destination vestibules — three architectural rooms read before the animated doors.
+const destinationVestibules=new THREE.Group();destinationVestibules.name='KOMO_DESTINATION_VESTIBULES_V45';building.add(destinationVestibules);
+[
+  {x:-6.8,w:5.35,accent:0xb9cfbf,mat:MAT.limestone},
+  {x:0,w:5.35,accent:0xd7b777,mat:MAT.travertine},
+  {x:6.8,w:5.35,accent:0xb9935c,mat:MAT.limestone}
+].forEach((p,i)=>{
+  const g=new THREE.Group();g.position.set(p.x,0,-27.65);destinationVestibules.add(g);
+  // 1.8 m deep vestibule projects into the Hall and creates a real threshold.
+  box(g,.30,5.75,1.80,p.mat,-2.48,3.20,0,{cast:true});
+  box(g,.30,5.75,1.80,p.mat,2.48,3.20,0,{cast:true});
+  box(g,5.26,.26,1.80,p.mat,0,5.96,0,{cast:true});
+  box(g,4.72,.032,1.42,MAT.blackened,0,5.73,.02,{cast:false,receive:false});
+  // Side reveals and floor transition.
+  box(g,.045,4.85,1.44,MAT.brass,-2.26,3.02,.02,{cast:false,receive:false});
+  box(g,.045,4.85,1.44,MAT.brass,2.26,3.02,.02,{cast:false,receive:false});
+  box(g,4.74,.030,1.42,i===1?FLOOR.promenade:FLOOR.side,0,.405,.02,{cast:false,receive:true});
+  const accentMat=new THREE.MeshBasicMaterial({color:p.accent,transparent:true,opacity:.20,depthWrite:false});
+  box(g,4.28,.018,.055,accentMat,0,.435,.73,{cast:false,receive:false});
+});
+
 // Destination wall — three monumental thresholds rather than flat doors.
 box(building,22.7,7.2,.42,M.sageDeep,0,4.0,-30.0);
 [-7.0,0,7.0].forEach((x,i)=>{
@@ -2174,30 +2224,17 @@ portals.forEach(({x,title,sub,dark})=>{
   living.destinationDoors.push({id:cfg.id,x:cfg.x,left,right,threshold,beacon,mat,progress:0});
 });
 
-// V3.3 Destination architecture — each portal has its own visual language.
+// V4.5 Destination identity — architecture carries the hierarchy; signage stays secondary.
 [
   {x:-6.8,title:'FUNCTIONAL TWIN',sub:'UNDERSTAND',accent:0xb9cfbf,dark:true},
   {x:0,title:'KŌMØ FIT',sub:'TRAIN DAILY',accent:0xd7b777,dark:false},
   {x:6.8,title:'ARENA',sub:'CHALLENGE',accent:0xb9935c,dark:true}
 ].forEach((p,i)=>{
-  const g=new THREE.Group();g.name='KOMO_PORTAL_ARCH_V33_'+i;g.position.set(p.x,0,-28.55);building.add(g);
-  // Deep limestone portal frame.
-  box(g,5.20,.34,1.05,MAT.limestone,0,5.55,0,{cast:true});
-  box(g,.36,5.45,1.05,MAT.limestone,-2.42,2.92,0,{cast:true});
-  box(g,.36,5.45,1.05,MAT.limestone,2.42,2.92,0,{cast:true});
-  // Bronze reveal and low-cost emissive-like strip.
-  box(g,4.55,.08,.11,MAT.brass,0,5.17,.56);
-  const glowMat=new THREE.MeshBasicMaterial({color:p.accent,transparent:true,opacity:.22,depthWrite:false});
-  box(g,4.20,.025,.10,glowMat,0,.43,.58,{cast:false,receive:false});
-  // Flanking fins give depth without additional lights.
-  [-1,1].forEach(side=>{
-    box(g,.10,4.25,.48,p.dark?MAT.blackened:MAT.brass,side*2.10,2.72,.36,{cast:false});
-    box(g,.055,3.80,.30,glowMat,side*1.92,2.72,.58,{cast:false,receive:false});
-  });
-  plaque(g,p.title,p.sub,4.25,.86,0,6.07,.58,{dark:p.dark,titleSize:p.title==='FUNCTIONAL TWIN'?46:58});
-  // Floor icon/medallion in front of each portal.
-  const ring=mesh(g,new THREE.RingGeometry(.58,.70,36),glowMat,0,.205,3.05,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;
-  const inner=mesh(g,new THREE.CircleGeometry(.48,32),new THREE.MeshBasicMaterial({color:p.accent,transparent:true,opacity:.08,depthWrite:false}),0,.208,3.05,{cast:false,receive:false});inner.rotation.x=-Math.PI/2;
+  const g=new THREE.Group();g.name='KOMO_PORTAL_ARCH_V45_'+i;g.position.set(p.x,0,-28.40);building.add(g);
+  const glowMat=new THREE.MeshBasicMaterial({color:p.accent,transparent:true,opacity:.16,depthWrite:false});
+  plaque(g,p.title,p.sub,3.65,.66,0,6.10,.86,{dark:p.dark,titleSize:p.title==='FUNCTIONAL TWIN'?40:50});
+  box(g,3.20,.022,.055,glowMat,0,5.55,.89,{cast:false,receive:false});
+  const ring=mesh(g,new THREE.RingGeometry(.47,.53,36),glowMat,0,.420,2.75,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;
 });
 plaque(building,'LIBRARY','SCIENCE · METHOD',3.5,.84,-11.45,4.3,-10,{rotY:Math.PI/2,dark:false,titleSize:68});
 plaque(building,'TALKS','EXPERTS · EVENTS',3.5,.84,11.45,4.3,-10,{rotY:-Math.PI/2,dark:true,titleSize:68});
@@ -4292,7 +4329,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'4.4.0-materials-realism',
+  version:'4.5.0-architectural-polish',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
