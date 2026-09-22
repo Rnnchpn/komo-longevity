@@ -984,3 +984,181 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .world-menu,.world-panel,.panel-body{scrollbar-width:thin;scrollbar-color:rgba(215,183,127,.22) transparent}
 .world-menu::-webkit-scrollbar,.world-panel::-webkit-scrollbar{width:6px}
 .world-menu::-webkit-scrollbar-thumb,.world-panel::-webkit-scrollbar-thumb{background:rgba(215,183,127,.18);border-radius:999px}
+
+
+/* V4.1 Sprint — premium desktop surfaces and results */
+@media(min-width:901px) and (pointer:fine){
+  .world-menu,.world-panel{
+    border-color:rgba(255,255,255,.045)!important;
+    background:
+      linear-gradient(180deg,rgba(255,255,255,.018),transparent 18%),
+      linear-gradient(155deg,rgba(11,24,18,.965),rgba(22,37,28,.945))!important;
+    box-shadow:0 24px 72px rgba(4,10,7,.18)!important;
+  }
+  .world-menu{padding:20px!important}
+  .world-panel{padding:24px 22px 20px!important}
+  .world-menu-head strong,.world-panel h2{letter-spacing:-.04em}
+  .world-menu-summary>div,
+  .world-menu-primary button,
+  .world-menu-campus-mini,
+  .journey-menu.compact{
+    border-color:rgba(255,255,255,.04)!important;
+    background:rgba(255,255,255,.012)!important;
+  }
+  .world-menu-primary button:hover{
+    border-color:rgba(218,187,132,.15)!important;
+    background:rgba(218,187,132,.035)!important;
+  }
+  .world-menu-primary i{
+    border:1px solid rgba(218,187,132,.10);
+    background:rgba(218,187,132,.035)!important;
+  }
+  .panel-actions{
+    background:linear-gradient(180deg,transparent,rgba(12,25,19,.98) 38%)!important;
+  }
+  .panel-actions button{
+    border-color:rgba(255,255,255,.045)!important;
+    background:rgba(255,255,255,.018)!important;
+  }
+  .panel-actions button.primary{
+    background:linear-gradient(135deg,#ead3a5,#caa26b)!important;
+    box-shadow:0 10px 28px rgba(5,11,8,.13)!important;
+  }
+  .interaction-card{
+    border-color:rgba(255,255,255,.04)!important;
+    background:rgba(12,25,19,.66)!important;
+    box-shadow:0 10px 30px rgba(5,11,8,.08)!important;
+  }
+}
+
+/* V4.1 Results */
+.results-hero-v41{
+  grid-template-columns:minmax(180px,.92fr) 1.08fr!important;
+  gap:10px!important;
+  align-items:stretch;
+}
+.results-score-v41{
+  min-height:230px!important;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  text-align:center;
+}
+.score-orbit{
+  --score:84;
+  position:relative;
+  width:142px;
+  height:142px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at center,rgba(16,29,22,1) 0 57%,transparent 58%),
+    conic-gradient(#d6b77e calc(var(--score)*1%),rgba(255,255,255,.055) 0);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.025),0 20px 42px rgba(6,13,9,.14);
+}
+.score-orbit:after{
+  content:"";
+  position:absolute;inset:9px;border-radius:50%;
+  border:1px solid rgba(255,255,255,.035);
+  pointer-events:none;
+}
+.score-orbit>div{position:relative;z-index:1}
+.score-orbit strong{
+  display:inline!important;margin:0!important;
+  font:500 48px/1 Georgia,serif!important;
+  letter-spacing:-.055em;color:#f4ecdf;
+}
+.score-orbit small{
+  margin-left:4px;font-size:8px!important;color:rgba(242,236,226,.36)!important
+}
+.results-score-v41>span{font-size:6px!important;letter-spacing:.16em!important}
+.results-score-v41>em{margin-top:0!important}
+.results-side-v41{display:grid;grid-template-rows:1fr 1fr;gap:10px}
+.results-side-v41>.results-age,
+.results-side-v41>.results-change{
+  min-height:0!important;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:18px!important;
+  border:1px solid rgba(255,255,255,.045)!important;
+  border-radius:14px;
+  background:rgba(255,255,255,.012)!important;
+}
+.results-side-v41 .results-age strong{font-size:38px!important;margin-top:8px!important}
+.results-side-v41 .results-change strong{font-size:34px!important;margin-top:9px!important}
+.results-context{gap:7px!important}
+.results-context>div{padding:13px 14px!important}
+.results-section-title{margin-top:5px!important}
+.results-domains{
+  grid-template-columns:1fr!important;
+  gap:6px!important;
+}
+.result-domain{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:
+    "meta score"
+    "bar bar"
+    "foot foot";
+  gap:9px 14px!important;
+  align-items:center;
+  padding:12px 13px!important;
+  border-color:rgba(255,255,255,.04)!important;
+  background:rgba(255,255,255,.010)!important;
+}
+.result-domain>div{grid-area:meta}
+.result-domain>strong{
+  grid-area:score;
+  margin:0!important;
+  font-size:22px!important;
+  text-align:right;
+}
+.result-domain>i{grid-area:bar}
+.result-domain>footer{grid-area:foot;margin-top:0!important}
+.result-domain:hover{
+  transform:none!important;
+  border-color:rgba(218,187,132,.14)!important;
+  background:rgba(218,187,132,.026)!important;
+}
+.results-timeline{gap:7px!important}
+.result-timepoint{
+  min-height:82px!important;
+  border-color:rgba(255,255,255,.04)!important;
+  background:rgba(255,255,255,.010)!important;
+}
+.result-timepoint.active{
+  border-color:rgba(218,187,132,.17)!important;
+  background:rgba(218,187,132,.034)!important;
+}
+.results-signals{grid-template-columns:repeat(2,1fr)!important;gap:7px!important}
+.results-signals>div{
+  min-height:72px!important;padding:12px 13px!important;
+  border-color:rgba(255,255,255,.04)!important;
+  background:rgba(255,255,255,.010)!important;
+}
+.results-reading{
+  border-left-color:rgba(218,187,132,.22)!important;
+  background:rgba(218,187,132,.018)!important;
+}
+.domain-result-comparison>div{
+  border-color:rgba(255,255,255,.04)!important;
+  background:rgba(255,255,255,.010)!important;
+}
+.avatar-option-row{
+  border-color:rgba(255,255,255,.04)!important;
+  background:rgba(255,255,255,.010)!important;
+}
+.avatar-swatches button{
+  border-color:rgba(255,255,255,.04)!important;
+  background:rgba(255,255,255,.012)!important;
+}
+
+@media(max-width:1180px) and (min-width:901px) and (pointer:fine){
+  .score-orbit{width:126px;height:126px}
+  .score-orbit strong{font-size:43px!important}
+  .results-score-v41{min-height:210px!important}
+}
