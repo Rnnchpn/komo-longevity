@@ -37,8 +37,8 @@
   </header>
 
   <div class="location-chip" aria-live="polite">
-    <span id="location-name">WORLD ENTRANCE</span>
-    <b id="location-heading">N</b>
+    <span><b id="location-name">WORLD ENTRANCE</b><small id="location-purpose">ENTER KŌMØ WORLD</small></span>
+    <i id="location-heading">N</i>
   </div>
 
   <button id="journey-hud" class="journey-hud" type="button" aria-label="Ouvrir ma progression KŌMØ World">
@@ -104,48 +104,65 @@
 
   <aside id="world-menu" class="world-menu" aria-hidden="true">
     <div class="world-menu-head">
-      <div><span>KŌMØ WORLD</span><strong>Explorer</strong></div>
+      <div><span>KŌMØ WORLD</span><strong>My World</strong></div>
       <button id="world-menu-close" type="button" aria-label="Fermer le menu">×</button>
     </div>
-    <p id="world-menu-copy">Choisissez un espace ou ajustez votre expérience.</p>
-    <div class="world-menu-grid">
-      <button type="button" data-fast-travel="arrival"><span>DISTRICT</span><b>Fontaine & campus</b></button>
-      <button type="button" data-fast-travel="hall"><span>HALL</span><b>Centre</b></button>
-      <button type="button" data-fast-travel="twin"><span>TWIN</span><b>Comprendre</b></button>
-      <button type="button" data-fast-travel="rehab"><span>FITNESS CLUB</span><b>S’entraîner</b></button>
-      <button type="button" data-fast-travel="arena"><span>ARENA</span><b>Progresser</b></button>
-      <button type="button" data-fast-travel="life"><span>LIFE</span><b>Découvrir</b></button>
-      <button type="button" data-fast-travel="upper"><span>LEVEL 2</span><b>Galeries</b></button>
-    </div>
-    <section class="journey-menu">
-      <div class="journey-menu-head">
-        <div><span>WORLD JOURNEY</span><b id="journey-menu-level">LEVEL 01 · ARRIVAL</b></div>
-        <strong id="journey-menu-xp">0 XP</strong>
-      </div>
-      <div class="journey-menu-bar"><i id="journey-menu-progress"></i></div>
-      <p id="journey-menu-next">Explorez le Hall pour poursuivre votre parcours.</p>
-      <div id="journey-level-ladder" class="journey-level-ladder"></div>
-      <div id="journey-badges" class="journey-badges"></div>
-      <div id="journey-missions" class="journey-missions"></div>
-      <small class="journey-rule">XP = exploration & engagement. Les données de santé ne sont jamais classées.</small>
+    <p id="world-menu-copy">Votre santé, votre progression et le campus KŌMØ au même endroit.</p>
+
+    <section class="world-menu-summary" aria-label="Résumé personnel">
+      <div><span>MOTION SCORE</span><strong id="menu-motion">84<small>/100</small></strong></div>
+      <div><span>MOTION AGE</span><strong id="menu-age">39</strong></div>
+      <div><span>WORLD LEVEL</span><strong id="journey-menu-level">05</strong><small id="journey-menu-xp">250 XP</small></div>
     </section>
 
-    <div class="world-menu-status">
-      <div><span>QUALITÉ</span><b id="quality-status">AUTO</b></div>
-      <div><span>PERFORMANCE</span><b id="fps-status">— FPS</b></div>
+    <div class="world-menu-primary">
+      <button id="results-toggle" type="button"><i>◉</i><span><b>RÉSULTATS</b><small>Motion · domaines · évolution</small></span></button>
+      <button id="campus-toggle" type="button"><i>⌖</i><span><b>CAMPUS</b><small>Voir toutes les zones du World</small></span></button>
+      <button id="journey-toggle" type="button"><i>↗</i><span><b>JOURNEY</b><small>Niveau · XP · prochaines étapes</small></span></button>
+      <button id="challenges-toggle" type="button"><i>◇</i><span><b>CHALLENGES</b><small>Défis du jour · engagement</small></span></button>
     </div>
-    <div class="world-menu-actions">
-      <button id="avatar-toggle" type="button">AVATAR</button>
-      <button id="challenges-toggle" type="button">CHALLENGES</button>
-      <button id="camera-toggle" type="button">CAMERA · 3RD</button>
-      <button id="guide-toggle" type="button">GUIDE · ON</button>
-      <button id="quality-toggle" type="button">AUTO QUALITY</button>
-      <button id="controls-toggle" type="button">CONTROLS</button>
-      <button id="reset-position" type="button">RESET POSITION</button>
-    </div>
-    <div class="world-menu-controls">
-      <span><kbd>WASD</kbd> MOVE</span><span><kbd>SHIFT</kbd> SPRINT</span><span><kbd>E</kbd> ACTION</span><span><kbd>V</kbd> CAMERA</span><span><kbd>G</kbd> GUIDE</span><span><kbd>M</kbd> MENU</span>
-    </div>
+
+    <section class="world-menu-campus-mini">
+      <div class="world-menu-section-head"><span>ONE WORLD</span><b>Campus continu</b></div>
+      <div class="campus-mini-line">
+        <button data-fast-travel="twin"><span>TWIN</span><small>Understand</small></button>
+        <i></i>
+        <button data-fast-travel="hall"><span>HALL</span><small>Home</small></button>
+        <i></i>
+        <button data-fast-travel="arena"><span>ARENA</span><small>Engage</small></button>
+      </div>
+      <div class="campus-mini-branch">
+        <i></i><button data-fast-travel="rehab"><span>FITNESS</span><small>Move</small></button>
+      </div>
+    </section>
+
+    <section class="journey-menu compact">
+      <div class="journey-menu-head">
+        <div><span>WORLD JOURNEY</span><b id="journey-title-menu">PROGRESSION</b></div>
+        <strong id="journey-xp-menu">250 XP</strong>
+      </div>
+      <div class="journey-menu-bar"><i id="journey-menu-progress"></i></div>
+      <p id="journey-menu-next">Prochaine étape</p>
+    </section>
+
+    <details class="world-menu-settings">
+      <summary>RÉGLAGES & PERSONNALISATION</summary>
+      <div class="world-menu-status">
+        <div><span>QUALITÉ</span><b id="quality-status">AUTO</b></div>
+        <div><span>PERFORMANCE</span><b id="fps-status">— FPS</b></div>
+      </div>
+      <div class="world-menu-actions">
+        <button id="avatar-toggle" type="button">AVATAR</button>
+        <button id="camera-toggle" type="button">CAMERA · 3RD</button>
+        <button id="guide-toggle" type="button">GUIDE · ON</button>
+        <button id="quality-toggle" type="button">AUTO QUALITY</button>
+        <button id="controls-toggle" type="button">CONTROLS</button>
+        <button id="reset-position" type="button">RESET POSITION</button>
+      </div>
+      <div class="world-menu-controls">
+        <span><kbd>WASD</kbd> MOVE</span><span><kbd>SHIFT</kbd> SPRINT</span><span><kbd>E</kbd> ACTION</span><span><kbd>V</kbd> CAMERA</span><span><kbd>G</kbd> GUIDE</span><span><kbd>M</kbd> MENU</span>
+      </div>
+    </details>
   </aside>
 
   <div id="travel-fade" class="travel-fade" aria-hidden="true"><span>KŌMØ</span></div>
