@@ -1131,6 +1131,46 @@ const waypointStem=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,1.45,6),g
 const waypointCap=new THREE.Mesh(new THREE.SphereGeometry(.075,8,6),guideMat.clone());waypointCap.position.y=1.52;waypointCap.userData.dynamic=true;waypoint.add(waypointCap);
 
 
+// V3.3 Entry Guide — immediate orientation + movement health snapshot.
+const entryGuide=new THREE.Group();entryGuide.name='KOMO_ENTRY_GUIDE_V33';building.add(entryGuide);
+
+// Bronze arrival medallion directly under the spawn.
+const entryMedallion=mesh(entryGuide,new THREE.RingGeometry(1.18,1.28,48),MAT.brass,0,.205,14.55,{cast:false,receive:false});
+entryMedallion.rotation.x=-Math.PI/2;
+const entryCore=mesh(entryGuide,new THREE.CircleGeometry(.82,40),new THREE.MeshBasicMaterial({color:0x314b3d,transparent:true,opacity:.12,depthWrite:false}),0,.208,14.55,{cast:false,receive:false});
+entryCore.rotation.x=-Math.PI/2;
+plaque(entryGuide,'YOUR WORLD','UNDERSTAND · TRAIN · ENGAGE',4.6,.72,0,3.35,12.75,{dark:true,titleSize:52});
+
+// Three floor cues point immediately toward the core destinations.
+[
+  [-2.35,-24.8,0xb9cfbf],
+  [0,-24.8,0xd7b777],
+  [2.35,-24.8,0xb9935c]
+].forEach(([x,z,color],i)=>{
+  const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.28,depthWrite:false});
+  box(entryGuide,.055,.012,34.0,mat,x,.205,-5.7,{cast:false,receive:false});
+});
+
+// Physical Health Station at the left side of arrival, outside central walk axis.
+const healthStation=new THREE.Group();healthStation.name='KOMO_HEALTH_STATION_V33';healthStation.position.set(-5.25,0,10.55);building.add(healthStation);
+box(healthStation,3.75,.18,1.45,MAT.travertine,0,.10,0);
+box(healthStation,3.15,2.45,.26,MAT.blackened,0,1.48,-.53,{cast:true});
+plaque(healthStation,'YOUR HEALTH','MOVEMENT SNAPSHOT',2.85,.60,0,2.62,-.36,{dark:true,titleSize:44});
+const healthStationBars={};
+[
+  ['muscle',-1.12,0xb9cfbf],
+  ['mobility',-.56,0xb9cfbf],
+  ['balance',0,0xd7b777],
+  ['posture',.56,0xb9cfbf],
+  ['endurance',1.12,0xd7b777]
+].forEach(([id,x,color])=>{
+  const track=box(healthStation,.30,1.38,.12,new THREE.MeshBasicMaterial({color:0x39473f,transparent:true,opacity:.72}),x,1.32,-.33,{cast:false,receive:false});
+  const fillMat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.74});
+  const fill=box(healthStation,.20,.70,.14,fillMat,x,.98,-.24,{cast:false,receive:false});
+  fill.userData.dynamic=true;healthStationBars[id]=fill;
+});
+plaque(healthStation,'OPEN','PRESS E · SEE DETAILS',2.55,.42,0,.56,.78,{dark:false,titleSize:34});
+
 // Hall shell.
 box(building,23.8,.28,46,M.stoneLight,0,.13,-7.0);
 box(building,.42,8.2,46,M.wall,-11.7,4.1,-7.0,{cast:true});
@@ -1869,11 +1909,11 @@ plaque(arenaChallengeBoard,'WORLD CHALLENGES','DAILY · XP · COMMUNITY',4.7,.82
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 
 // Runtime state.
-const player=new THREE.Vector3(0,0,13.8);
+const player=new THREE.Vector3(0,0,14.55);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
 let cameraMode='third';
-let thirdPersonDistance=lowPower?3.75:4.25;
+let thirdPersonDistance=lowPower?3.55:4.05;
 const playerAvatar=makePlayerAvatar();
 let playerFacing=0;
 const cameraDesired=new THREE.Vector3(),cameraLook=new THREE.Vector3();
@@ -1888,6 +1928,7 @@ const keys=new Set();
 
 const interactions=[
   {id:'desk',x:-7.3,z:4.0,r:3.6,title:()=>copy[locale].deskTitle,desc:()=>copy[locale].deskCopy,action:showDesk},
+  {id:'health',x:-5.25,z:10.55,r:2.7,title:()=>locale==='fr'?'Votre santé · mouvement':'Your health · movement',desc:()=>locale==='fr'?'Comprendre les 5 domaines en un coup d’œil':'Understand the 5 domains at a glance',action:showHealthOverview},
   {id:'twin',x:-6.8,z:-26.7,r:4.0,title:()=>copy[locale].twinTitle,desc:()=>copy[locale].twinCopy,action:enterTwin},
   {id:'rehab',x:0,z:-26.7,r:4.0,title:()=>copy[locale].rehabTitle,desc:()=>copy[locale].rehabCopy,action:enterRehab},
   {id:'arena',x:6.8,z:-26.7,r:4.0,title:()=>copy[locale].arenaTitle,desc:()=>copy[locale].arenaCopy,action:enterArena},
@@ -2057,6 +2098,13 @@ function updateHealthHUD(){
   healthBalanceEl.textContent=Math.round(Number(d.balance)||0);
   healthCapacityEl.textContent=Math.round(Number(d.endurance)||0);
   healthSourceEl.textContent='DEMO';
+  if(typeof healthStationBars!=='undefined'){
+    Object.entries(healthStationBars).forEach(([id,fill])=>{
+      const v=THREE.MathUtils.clamp(Number(d[id])||0,0,100),h=.20+(v/100)*1.12;
+      fill.scale.y=h;fill.position.y=.50+h/2;
+      fill.material.opacity=.48+(v/100)*.34;
+    });
+  }
 }
 function healthOverviewHtml(){
   const snap=current(),d=snap.domains||{};
@@ -2187,7 +2235,7 @@ function toggleCamera(){setCameraMode(cameraMode==='third'?'first':'third')}
 setCameraMode('third');
 const travelPoints={
   arrival:{mode:'world',x:0,y:0,z:58.5,yaw:Math.PI,level:0},
-  hall:{mode:'world',x:0,y:0,z:13.8,yaw:0,level:0},
+  hall:{mode:'world',x:0,y:0,z:14.55,yaw:0,level:0},
   twin:{mode:'world',x:-5.9,y:0,z:-22.2,yaw:0,level:0},
   rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
   arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
@@ -2195,7 +2243,7 @@ const travelPoints={
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
 };
 const journeyTargets={
-  arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:13.8},journey:{x:4.8,y:0,z:8.5},
+  arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:14.55},journey:{x:4.8,y:0,z:8.5},
   twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
   life:{x:8.4,y:0,z:3.4},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
@@ -2950,11 +2998,12 @@ function updateCamera(now,dt){
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
     const distance=thirdPersonDistance;
-    const height=lowPower?2.08:2.30;
+    const height=lowPower?1.88:2.08;
+    const shoulder=lowPower?.24:.34;
     cameraDesired.set(
-      player.x+Math.sin(yaw)*distance,
-      player.y+height+pitch*1.25,
-      player.z+Math.cos(yaw)*distance
+      player.x+Math.sin(yaw)*distance+Math.cos(yaw)*shoulder,
+      player.y+height+pitch*1.08,
+      player.z+Math.cos(yaw)*distance-Math.sin(yaw)*shoulder
     );
     // Cheap camera collision clamp for major architectural volumes.
     if(mode==='world'&&player.z<17.2&&player.z>-28){
@@ -2969,7 +3018,7 @@ function updateCamera(now,dt){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
-    cameraLook.set(player.x,player.y+1.12+pitch*.48,player.z);
+    cameraLook.set(player.x,player.y+1.03+pitch*.42,player.z);
     camera.lookAt(cameraLook);
   }else{
     const move=Math.min(1,velocity.length()/4.35);
@@ -3409,7 +3458,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'3.2.0-world-hub',
+  version:'3.3.0-entry-health',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
