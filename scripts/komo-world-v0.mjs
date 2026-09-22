@@ -28,7 +28,7 @@ const checks=[
   ['low-power lights disabled',runtime.includes('l.visible=false;l.intensity=0')&&runtime.includes("antialias:!lowPower")],
   ['living entrance V2.3+ present',runtime.includes('KOMO_LIVING_ENTRANCE_V23')&&runtime.includes('function updateDoors(now,dt)')],
   ['arrival life cues V2.3 present',runtime.includes('KOMO_ARRIVAL_DETAILS_V23')],
-  ['third-person V2.4+ present',runtime.includes('KOMO_PLAYER_AVATAR_V24')&&runtime.includes("cameraMode='third'")],
+  ['third-person V2.4+ present',(runtime.includes('KOMO_PLAYER_AVATAR_V31')||runtime.includes('KOMO_PLAYER_AVATAR_V24'))&&runtime.includes("cameraMode='third'")],
   ['World Journey V2.4+ present',runtime.includes('KOMO_WORLD_JOURNEY_V24')&&runtime.includes('const JOURNEY_MISSIONS')&&runtime.includes('function completeJourney')],
   ['faster gameplay V2.4 present',runtime.includes('const speed=sprint?7.15:4.35')],
   ['living journey V2.5+ present',runtime.includes('KOMO_JOURNEY_GUIDE_V25')&&runtime.includes('function updateJourneyGuide')],
