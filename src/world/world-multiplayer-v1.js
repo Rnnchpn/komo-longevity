@@ -6,6 +6,7 @@ const PULSE_ORIGIN='https://pulse.komolongevity.com';
 const STALE_MS=45000;
 const HEARTBEAT_MS=2200;
 const POSE_MS=125;
+const PRESENCE_REFRESH_MS=4000;
 const CHAT_LIMIT=50;
 
 function escText(v,max=500){return String(v??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max)}
@@ -123,7 +124,7 @@ export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
   const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0};
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0};
 
   const setOnlineUI=()=>{
     if(state.presenceLive){
@@ -215,6 +216,37 @@ export async function mount(runtime){
     if(pe)throw pe;if(me)throw me;
     (presence||[]).forEach(consumePresence);state.messages=(messages||[]).reverse();renderMessages();
   };
+  const refreshPresence=async()=>{
+    if(!state.session?.user)return false;
+    try{
+      const {data,error}=await client.from('world_presence')
+        .select('user_id,display_name,avatar_config,zone,x,y,z,yaw,updated_at')
+        .order('updated_at',{ascending:false}).limit(50);
+      if(error)throw error;
+      const seen=new Set();
+      for(const row of data||[]){
+        if(!row?.user_id)continue;
+        seen.add(row.user_id);
+        if(fresh(row)||row.user_id===state.session.user.id)consumePresence(row);
+      }
+      for(const [id,row] of [...state.rows]){
+        if(id===state.session.user.id)continue;
+        if(!seen.has(id)&&!fresh(row))removePresence(row);
+      }
+      syncPeers();return true;
+    }catch(err){console.warn('[World presence refresh]',err);return false}
+  };
+  const syncRealtimePresence=()=>{
+    if(!state.channel?.presenceState)return;
+    const presenceState=state.channel.presenceState()||{};
+    for(const entries of Object.values(presenceState)){
+      for(const row of Array.isArray(entries)?entries:[]){
+        if(!row?.user_id||row.user_id===state.session?.user?.id)continue;
+        consumePresence(row);
+      }
+    }
+    syncPeers();
+  };
   const presencePayload=()=>{
     const st=runtime.getState();return{
       user_id:state.session.user.id,
@@ -238,6 +270,10 @@ export async function mount(runtime){
     state.lastPose=payload;state.lastPoseSentAt=now;
     try{
       const status=await state.channel.send({type:'broadcast',event:'pose',payload});
+      if(now-state.lastTrackSentAt>900&&state.channel.track){
+        state.lastTrackSentAt=now;
+        try{await state.channel.track(payload)}catch(err){console.warn('[World presence track]',err)}
+      }
       return status==='ok'||status==='timed out'?status==='ok':true;
     }catch(err){console.warn('[World pose broadcast]',err);return false}
   };
@@ -261,7 +297,15 @@ export async function mount(runtime){
     }
   };
   const subscribe=()=>{
-    state.channel=client.channel('komo-world-db-v1')
+    state.channel=client.channel('komo-world-db-v1',{
+      config:{
+        presence:{key:state.session.user.id},
+        broadcast:{self:false}
+      }
+    })
+      .on('presence',{event:'sync'},()=>syncRealtimePresence())
+      .on('presence',{event:'join'},({newPresences})=>{for(const row of newPresences||[])if(row?.user_id&&row.user_id!==state.session?.user?.id)consumePresence(row)})
+      .on('presence',{event:'leave'},({leftPresences})=>{for(const row of leftPresences||[])if(row?.user_id&&row.user_id!==state.session?.user?.id)removePresence(row)})
       .on('postgres_changes',{event:'INSERT',schema:'public',table:'world_presence'},({new:row})=>consumePresence(row))
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'world_presence'},({new:row})=>consumePresence(row))
       .on('postgres_changes',{event:'DELETE',schema:'public',table:'world_presence'},({old:row})=>removePresence(row))
@@ -270,7 +314,18 @@ export async function mount(runtime){
         if(!payload?.user_id||payload.user_id===state.session?.user?.id)return;
         consumePresence(payload);
       })
-      .subscribe(status=>{if(status==='SUBSCRIBED'){state.subscribed=true;setOnlineUI();heartbeat().then(()=>sendPose(true))}else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){state.subscribed=false;state.presenceLive=false;state.connected=false;setOnlineUI();syncPeers()}});
+      .subscribe(async status=>{
+        if(status==='SUBSCRIBED'){
+          state.subscribed=true;setOnlineUI();
+          const live=await heartbeat();
+          if(live){
+            try{await state.channel.track(posePayload());state.lastTrackSentAt=Date.now()}catch(err){console.warn('[World presence initial track]',err)}
+            await refreshPresence();await sendPose(true);
+          }
+        }else if(status==='CHANNEL_ERROR'||status==='TIMED_OUT'){
+          state.subscribed=false;state.presenceLive=false;state.connected=false;setOnlineUI();syncPeers()
+        }
+      });
   };
   const loadProfile=async(profileHint={})=>{
     let profile={};
@@ -288,6 +343,7 @@ export async function mount(runtime){
       state.started=true;await loadInitial();subscribe();
       state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);
       state.poseTimer=setInterval(()=>sendPose(false),POSE_MS);
+      state.presenceRefreshTimer=setInterval(()=>refreshPresence(),PRESENCE_REFRESH_MS);
     }
     const live=await heartbeat();syncPeers();return !!live;
   };
@@ -319,7 +375,7 @@ export async function mount(runtime){
   window.addEventListener('message',onMessage);
 
   U.connect.addEventListener('click',()=>state.presenceLive?runtime.notify?.('World multiplayer actif'):state.session?.user?heartbeat():openPulse());
-  U.people.addEventListener('click',()=>{U.drawer.classList.add('open');U.drawer.setAttribute('aria-hidden','false')});
+  U.people.addEventListener('click',async()=>{await refreshPresence();U.drawer.classList.add('open');U.drawer.setAttribute('aria-hidden','false');renderRoster()});
   U.chat.addEventListener('click',()=>{U.drawer.classList.toggle('open');U.drawer.setAttribute('aria-hidden',U.drawer.classList.contains('open')?'false':'true')});
   U.drawer.querySelector('[data-kwmp-close]').addEventListener('click',()=>{U.drawer.classList.remove('open');U.drawer.setAttribute('aria-hidden','true')});
   U.form.addEventListener('submit',async e=>{
@@ -386,12 +442,17 @@ export async function mount(runtime){
   });
 
   const cleanup=()=>{
-    clearInterval(state.timer);clearInterval(state.poseTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);
+    clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);
     if(state.channel)client.removeChannel(state.channel);
     if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
   window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup()});
-  window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);if(!state.poseTimer)state.poseTimer=setInterval(()=>sendPose(false),POSE_MS);heartbeat();sendPose(true);syncPeers()}});
+  window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){
+    if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);
+    if(!state.poseTimer)state.poseTimer=setInterval(()=>sendPose(false),POSE_MS);
+    if(!state.presenceRefreshTimer)state.presenceRefreshTimer=setInterval(()=>refreshPresence(),PRESENCE_REFRESH_MS);
+    heartbeat();refreshPresence();sendPose(true);syncPeers()
+  }});
 
-  window.KomoWorldMultiplayer={version:'0.5.1-live-motion',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.5.2-symmetric-presence',connect:openPulse,state};
 }
