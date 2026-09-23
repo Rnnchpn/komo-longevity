@@ -70,6 +70,8 @@ const deviceDpr=Math.max(1,window.devicePixelRatio||1);
 const retinaMobile=lowPower&&deviceDpr>=2;
 document.documentElement.classList.toggle('low-power',lowPower);
 document.documentElement.classList.toggle('retina-mobile',retinaMobile);
+document.body.classList.toggle('world-mobile-ui',lowPower||innerWidth<=900);
+document.body.classList.add('world-intro-active');
 
 const core=new TwinCore();
 const baseline=core.snapshots[0];
@@ -4051,7 +4053,12 @@ function resetJoy(e){if(joyPointer!==null&&e.pointerId!==joyPointer)return;joyPo
 joystickZone.addEventListener('pointerup',resetJoy);joystickZone.addEventListener('pointercancel',resetJoy);
 mobileAction.addEventListener('click',triggerAction);
 
-$('#intro-enter').addEventListener('click',()=>{intro.classList.add('hidden');targetYaw=yaw;targetPitch=pitch;completeJourney('arrival');notify(locale==='fr'?'Bienvenue dans KŌMØ World':'Welcome to KŌMØ World')});
+$('#intro-enter').addEventListener('click',()=>{
+  intro.classList.add('hidden');
+  document.body.classList.remove('world-intro-active');
+  targetYaw=yaw;targetPitch=pitch;completeJourney('arrival');
+  notify(locale==='fr'?'Bienvenue dans KŌMØ World':'Welcome to KŌMØ World')
+});
 $('#panel-close').addEventListener('click',closePanel);
 worldMenuToggle.addEventListener('click',toggleWorldMenu);
 worldMenuClose.addEventListener('click',closeWorldMenu);
@@ -4097,6 +4104,7 @@ function applyLocale(){
 languageToggle.addEventListener('click',()=>{locale=locale==='fr'?'en':'fr';applyLocale()});
 
 window.addEventListener('resize',()=>{
+  document.body.classList.toggle('world-mobile-ui',lowPower||innerWidth<=900);
   camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
   applyRenderScale();
 });
@@ -4341,7 +4349,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'4.5.0-architectural-polish',
+  version:'4.6.0-mobile-ui',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
