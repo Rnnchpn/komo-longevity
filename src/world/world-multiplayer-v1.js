@@ -196,16 +196,67 @@ function css(){
     .kwmp-voicebox.collapsed .kwmp-voice-collapse{transform:rotate(180deg)}
     .kwmp-note{display:none}
   }
+  /* V4.6 Mobile social layer — compact controls, intentional sheets */
   @media(max-width:900px),(pointer:coarse){
-    .kwmp-dock{top:63px;right:8px;gap:4px;max-width:calc(100vw - 16px)}
-    .kwmp-pill{height:25px;padding:0 8px;font-size:5px;letter-spacing:.07em;background:rgba(22,37,29,.90);backdrop-filter:none}
-    .kwmp-chat{left:8px;bottom:74px;width:min(420px,calc(100vw - 16px));max-height:34vh;background:linear-gradient(150deg,rgba(11,18,14,.66),rgba(18,28,22,.52));backdrop-filter:none}
-    .kwmp-talk{bottom:12px;height:50px;min-width:190px;padding:0 18px;font-size:7px}
+    .kwmp-dock{
+      top:calc(max(12px,env(safe-area-inset-top)) + 62px)!important;right:9px!important;
+      gap:4px!important;max-width:calc(100vw - 18px)!important;z-index:88!important;
+      padding:0!important;background:transparent!important
+    }
+    .kwmp-pill{
+      height:30px!important;padding:0 9px!important;border-radius:10px!important;
+      font-size:5px!important;letter-spacing:.065em!important;
+      background:rgba(15,30,23,.91)!important;border-color:rgba(255,255,255,.055)!important;
+      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;box-shadow:none!important
+    }
+    .kwmp-pill[data-kwmp-social]{display:none!important}
+    .kwmp-pill[data-kwmp-connect]{max-width:74px!important;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+    body.world-intro-active .kwmp-dock{display:none!important}
+
+    .kwmp-chat-launcher{display:none!important}
+    .kwmp-chat{
+      z-index:145!important;left:8px!important;right:8px!important;bottom:calc(max(12px,env(safe-area-inset-bottom)) + 6px)!important;
+      width:auto!important;max-height:min(52dvh,460px)!important;
+      border-radius:20px!important;
+      background:rgba(12,25,19,.985)!important;border-color:rgba(255,255,255,.065)!important;
+      -webkit-backdrop-filter:none!important;backdrop-filter:none!important;
+      box-shadow:0 18px 60px rgba(4,10,7,.28)!important;
+      opacity:0!important;visibility:hidden!important;transform:translateY(12px)!important;pointer-events:none!important
+    }
+    .kwmp-chat.open{opacity:1!important;visibility:visible!important;transform:none!important;pointer-events:auto!important}
+    .kwmp-head{padding:12px 12px 10px!important}.kwmp-head strong{font-size:16px!important}
+    .kwmp-messages{min-height:110px!important;max-height:25dvh!important;padding:10px 11px!important}
+    .kwmp-compose{grid-template-columns:auto 1fr auto!important;padding:9px!important}
+    .kwmp-compose input{height:40px!important;font-size:11px!important}
+    .kwmp-compose button,.kwmp-target{height:40px!important}
+    body.world-intro-active .kwmp-chat{display:none!important}
+
+    .kwmp-voicebox{
+      display:flex!important;position:fixed!important;z-index:89!important;
+      left:50%!important;right:auto!important;bottom:calc(max(12px,env(safe-area-inset-bottom)) + 22px)!important;
+      transform:translateX(-50%)!important;width:46px!important;height:46px!important;padding:0!important;
+      border:1px solid rgba(216,186,134,.18)!important;border-radius:50%!important;
+      background:rgba(15,30,23,.78)!important;box-shadow:none!important;
+      -webkit-backdrop-filter:none!important;backdrop-filter:none!important
+    }
+    .kwmp-talk{
+      position:static!important;transform:none!important;width:44px!important;min-width:44px!important;height:44px!important;
+      padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;
+      font-size:0!important;box-shadow:none!important
+    }
+    .kwmp-talk:before{content:"🎙";font-size:16px!important}
+    .kwmp-talk[data-state="talking"]{background:rgba(118,55,45,.84)!important}
+    .kwmp-talk[data-state="talking"]:before{content:"●";font-size:16px!important;color:#ffe9df!important}
+    .kwmp-voice-toggle,.kwmp-voice-collapse{display:none!important}
+    body.world-intro-active .kwmp-voicebox,
+    body.world-social-open .kwmp-voicebox{display:none!important}
+    body.world-social-open .kwmp-dock{display:none!important}
   }
   @media(max-width:520px){
-    .kwmp-dock{top:109px}.kwmp-pill{height:24px;padding:0 7px}
-    .kwmp-pill[data-kwmp-connect]{max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .kwmp-chat{bottom:82px;max-height:31vh}.kwmp-head strong{font-size:12px}.kwmp-note{display:none}
+    .kwmp-pill[data-kwmp-connect]{display:none!important}
+    .kwmp-dock{top:calc(max(12px,env(safe-area-inset-top)) + 61px)!important}
+    .kwmp-pill{height:29px!important;padding:0 8px!important}
+    .kwmp-chat{left:7px!important;right:7px!important;max-height:56dvh!important}
   }
   `;document.head.appendChild(s);
 }
@@ -237,6 +288,7 @@ function ui(){
   const voicebox=document.createElement('div');voicebox.id='kwmpVoicebox';voicebox.className='kwmp-voicebox';
   voicebox.innerHTML='<button type="button" class="kwmp-talk" id="kwmpTalk" data-state="idle" disabled aria-label="Maintenir pour parler aux joueurs proches">🎙  MAINTENIR POUR PARLER</button><button type="button" class="kwmp-voice-toggle" data-kwmp-voice data-state="off">VOICE<br>OFF</button><button type="button" class="kwmp-voice-collapse" data-kwmp-voice-collapse aria-label="Réduire le contrôle vocal">⌄</button>';
   document.body.appendChild(voicebox);
+  if(window.matchMedia?.('(max-width:900px), (pointer:coarse)')?.matches)voicebox.classList.add('collapsed');
   const talk=voicebox.querySelector('#kwmpTalk');
   const drawer=document.createElement('aside');drawer.id='kwmpChat';drawer.className='kwmp-chat';drawer.setAttribute('aria-hidden','true');
   drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · SOCIAL</span><strong>World Chat</strong></div><div style="display:flex;gap:6px"><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button><button type="button" class="kwmp-chat-close" data-kwmp-chat-close aria-label="Fermer le chat">×</button></div></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget" data-kwmp-target>WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">Les données de santé ne sont jamais partagées dans World.</div>';
@@ -398,9 +450,15 @@ export async function mount(runtime){
     badge.textContent=String(Math.min(99,state.unread||0));badge.style.display=state.unread?'grid':'none';
   };
   const openChat=()=>{
-    U.drawer.classList.add('open');U.drawer.setAttribute('aria-hidden','false');state.unread=0;updateUnread();setTimeout(()=>U.input.focus(),30);
+    if(document.body.classList.contains('world-intro-active')&&window.matchMedia?.('(max-width:900px), (pointer:coarse)')?.matches)return;
+    U.drawer.classList.add('open');U.drawer.setAttribute('aria-hidden','false');
+    document.body.classList.add('world-social-open');
+    state.unread=0;updateUnread();setTimeout(()=>U.input.focus(),30);
   };
-  const closeChat=()=>{U.drawer.classList.remove('open','people-open');U.drawer.setAttribute('aria-hidden','true')};
+  const closeChat=()=>{
+    U.drawer.classList.remove('open','people-open');U.drawer.setAttribute('aria-hidden','true');
+    document.body.classList.remove('world-social-open');
+  };
   const toggleChat=()=>U.drawer.classList.contains('open')?closeChat():openChat();
   const displayNameFor=id=>state.rows.get(id)?.display_name||roleFor(id)?.display_title||'Member';
   const renderMessages=()=>{
@@ -901,7 +959,7 @@ export async function mount(runtime){
     if(state.channel)client.removeChannel(state.channel);
     if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
-  window.addEventListener('pagehide',event=>{if(!event.persisted)cleanup()});
+  window.addEventListener('pagehide',event=>{document.body.classList.remove('world-social-open');if(!event.persisted)cleanup()});
   window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){
     if(!state.timer)state.timer=setInterval(()=>{heartbeat();syncPeers()},HEARTBEAT_MS);
     if(!state.poseTimer)state.poseTimer=setInterval(()=>sendPose(false),POSE_MS);
@@ -909,5 +967,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.8.2-v421-proportions',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.8.3-mobile-ui',connect:openPulse,state};
 }
