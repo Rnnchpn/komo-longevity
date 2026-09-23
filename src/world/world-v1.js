@@ -2844,6 +2844,7 @@ const challengeDefs=[
   {id:'arena_visit',reward:15,target:1,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir le Challenge Board',en:'Discover the Challenge Board'}},
   {id:'social_chat',reward:15,target:1,title:{fr:'Briser la glace',en:'Break the ice'},sub:{fr:'Envoyer un message dans le World Chat',en:'Send a message in World Chat'}},
   {id:'social_direct',reward:20,target:1,title:{fr:'Créer un contact',en:'Make a connection'},sub:{fr:'Envoyer un message privé à un membre',en:'Send a private message to a member'}},
+  {id:'social_join',reward:15,target:1,title:{fr:'Rejoindre un membre',en:'Join a member'},sub:{fr:'Rejoindre la position d’un autre membre',en:'Join another member’s position'}},
   {id:'social_voice',reward:25,target:1,title:{fr:'Parler en proximité',en:'Talk nearby'},sub:{fr:'Utiliser la voix avec un membre proche',en:'Use proximity voice with a nearby member'}},
   {id:'social_together',reward:30,target:20,title:{fr:'Bouger ensemble',en:'Move together'},sub:{fr:'Rester 20 secondes à proximité d’un membre',en:'Stay near another member for 20 seconds'}}
 ];
@@ -2870,7 +2871,7 @@ function addChallengeProgress(id,amount){
   if(challenges.progress[id]>=d.target)completeChallenge(id);
 }
 function socialChallengeEvent(type,amount=1){
-  const map={chat:'social_chat',dm:'social_direct',voice:'social_voice',together:'social_together'};
+  const map={chat:'social_chat',dm:'social_direct',join:'social_join',voice:'social_voice',together:'social_together'};
   const id=map[type];if(!id)return false;
   addChallengeProgress(id,Math.max(0,Number(amount)||1));
   if(type==='chat'||type==='dm'||type==='voice')completeJourney('social',{silent:true});
