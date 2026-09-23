@@ -2841,7 +2841,11 @@ const challengeDefs=[
   {id:'fountain',reward:15,target:1,title:{fr:'Découvrir la grande fontaine',en:'Discover the Grand Fountain'},sub:{fr:'Explorer le nouveau KŌMØ District',en:'Explore the new KŌMØ District'}},
   {id:'coach',reward:10,target:1,title:{fr:'Parler à un coach',en:'Meet a coach'},sub:{fr:'Demander une quête Fitness à Leo ou Nora',en:'Ask Leo or Nora for a Fitness quest'}},
   {id:'life_item',reward:10,target:1,title:{fr:'Découvrir un objet Life',en:'Discover a Life object'},sub:{fr:'Explorer un produit directement dans le flagship',en:'Explore a product directly in the flagship'}},
-  {id:'arena_visit',reward:15,target:1,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir le Challenge Board',en:'Discover the Challenge Board'}}
+  {id:'arena_visit',reward:15,target:1,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir le Challenge Board',en:'Discover the Challenge Board'}},
+  {id:'social_chat',reward:15,target:1,title:{fr:'Briser la glace',en:'Break the ice'},sub:{fr:'Envoyer un message dans le World Chat',en:'Send a message in World Chat'}},
+  {id:'social_direct',reward:20,target:1,title:{fr:'Créer un contact',en:'Make a connection'},sub:{fr:'Envoyer un message privé à un membre',en:'Send a private message to a member'}},
+  {id:'social_voice',reward:25,target:1,title:{fr:'Parler en proximité',en:'Talk nearby'},sub:{fr:'Utiliser la voix avec un membre proche',en:'Use proximity voice with a nearby member'}},
+  {id:'social_together',reward:30,target:20,title:{fr:'Bouger ensemble',en:'Move together'},sub:{fr:'Rester 20 secondes à proximité d’un membre',en:'Stay near another member for 20 seconds'}}
 ];
 function loadChallengeState(){
   const today=localDateKey();
@@ -2865,6 +2869,14 @@ function addChallengeProgress(id,amount){
   challenges.progress[id]=Math.min(d.target,challengeProgress(id)+amount);saveChallenges();
   if(challenges.progress[id]>=d.target)completeChallenge(id);
 }
+function socialChallengeEvent(type,amount=1){
+  const map={chat:'social_chat',dm:'social_direct',voice:'social_voice',together:'social_together'};
+  const id=map[type];if(!id)return false;
+  addChallengeProgress(id,Math.max(0,Number(amount)||1));
+  if(type==='chat'||type==='dm'||type==='voice')completeJourney('social',{silent:true});
+  if(panel.classList.contains('open')&&panelTitle.textContent==='WORLD CHALLENGES')showChallenges();
+  return true;
+}
 function challengesHtml(){
   return `
     <div class="panel-grid"><div><span>DAILY</span><b>${challengeDefs.filter(d=>challenges.done[d.id]).length}/${challengeDefs.length}</b></div><div><span>CHALLENGE XP</span><b>${challenges.points}</b></div></div>
@@ -2874,7 +2886,7 @@ function challengesHtml(){
         <b>${d.title[locale]}</b><small>${d.sub[locale]}</small>
         <i><em style="width:${pct}%"></em></i>
       </div>`}).join('')}</div>
-    <div class="data-note">${locale==='fr'?'Les défis récompensent l’exploration et l’activité. Ils ne comparent ni Motion Score ni données de santé entre utilisateurs.':'Challenges reward exploration and activity. They never compare Motion Score or health data between users.'}</div>`;
+    <div class="data-note">${locale==='fr'?'Les défis récompensent l’exploration, l’activité et la communication. Ils ne comparent ni Motion Score ni données de santé entre utilisateurs.':'Challenges reward exploration, activity and communication. They never compare Motion Score or health data between users.'}</div>`;
 }
 function showChallenges(){
   openPanel('WORLD CHALLENGES',locale==='fr'?'Vos défis du jour.':'Your challenges for today.',challengesHtml(),[
@@ -4349,7 +4361,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'4.6.0-mobile-ui',
+  version:'4.7.0-social-challenges',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
@@ -4357,6 +4369,8 @@ window.KomoWorld={
   getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale,pixelRatio:renderer.getPixelRatio(),drawCalls:renderer.info.render.calls,activeLightBudget,shadows:renderer.shadowMap.enabled,retinaMobile}),
   getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
   completeSocial:()=>completeJourney('social'),
+  socialChallenge:socialChallengeEvent,
+  getChallengeState:()=>({date:challenges.date,progress:{...challenges.progress},done:{...challenges.done},points:challenges.points}),
   getCameraMode:()=>cameraMode,
   fastTravel,
   joinPresence,
