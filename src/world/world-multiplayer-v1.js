@@ -12,12 +12,26 @@ const CHAT_LIMIT=50;
 const VOICE_ENTER_M=18;
 const VOICE_EXIT_M=22;
 const SOCIAL_KEY='komo_world_social_v1';
+const SOCIAL_MISSIONS=[
+  {id:'chat',xp:10,target:1,label:'BRISER LA GLACE',short:'CHAT'},
+  {id:'dm',xp:15,target:1,label:'CRÉER UN CONTACT',short:'MP'},
+  {id:'join',xp:15,target:1,label:'REJOINDRE UN MEMBRE',short:'JOIN'},
+  {id:'voice',xp:20,target:1,label:'PARLER EN PROXIMITÉ',short:'VOICE'},
+  {id:'together',xp:25,target:20,label:'BOUGER ENSEMBLE',short:'20 S'}
+];
 function dayKey(d=new Date()){return d.toISOString().slice(0,10)}
 function loadSocial(){
   try{
     const raw=JSON.parse(localStorage.getItem(SOCIAL_KEY)||'{}');
-    return {day:raw.day||dayKey(),xp:Number(raw.xp)||0,done:raw.done&&typeof raw.done==='object'?raw.done:{},streak:Number(raw.streak)||0,lastActive:raw.lastActive||''};
-  }catch{return {day:dayKey(),xp:0,done:{},streak:0,lastActive:''}}
+    return {
+      day:raw.day||dayKey(),
+      xp:Number(raw.xp)||0,
+      done:raw.done&&typeof raw.done==='object'?raw.done:{},
+      progress:raw.progress&&typeof raw.progress==='object'?raw.progress:{},
+      streak:Number(raw.streak)||0,
+      lastActive:raw.lastActive||''
+    };
+  }catch{return {day:dayKey(),xp:0,done:{},progress:{},streak:0,lastActive:''}}
 }
 
 function escText(v,max=500){return String(v??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max)}
@@ -196,6 +210,40 @@ function css(){
     .kwmp-voicebox.collapsed .kwmp-voice-collapse{transform:rotate(180deg)}
     .kwmp-note{display:none}
   }
+  /* V4.7 Social Missions */
+  .kwmp-chat{grid-template-rows:auto auto auto minmax(70px,1fr) auto auto}
+  .kwmp-social-missions{
+    padding:10px 11px 9px;border-bottom:1px solid rgba(255,255,255,.045);
+    background:linear-gradient(135deg,rgba(216,186,134,.045),rgba(255,255,255,.010))
+  }
+  .kwmp-social-missions>header{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:8px}
+  .kwmp-social-missions>header span{display:block;font-size:5px;font-weight:900;letter-spacing:.15em;color:#d8ba86}
+  .kwmp-social-missions>header strong{display:block;margin-top:3px;font-size:8px;color:#f0e8da}
+  .kwmp-social-missions>header b{font-size:8px;color:#e1c38e}
+  .kwmp-social-list{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+  .kwmp-social-task{
+    min-width:0;padding:6px 5px;border:1px solid rgba(255,255,255,.05);border-radius:9px;
+    background:rgba(255,255,255,.018)
+  }
+  .kwmp-social-task.done{opacity:.52;border-color:rgba(174,205,177,.16)}
+  .kwmp-social-task span{display:block;font-size:5px;font-weight:900;letter-spacing:.07em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:rgba(242,236,226,.56)}
+  .kwmp-social-task b{display:block;margin-top:5px;font-size:6px;color:#d8ba86}
+  .kwmp-social-task i{display:block;height:3px;margin-top:5px;border-radius:4px;background:rgba(255,255,255,.06);overflow:hidden}
+  .kwmp-social-task i em{display:block;height:100%;background:linear-gradient(90deg,#819b88,#d5b679);border-radius:4px}
+  .kwmp-icebreakers{display:flex;gap:4px;margin-top:8px;overflow-x:auto;scrollbar-width:none}
+  .kwmp-icebreakers::-webkit-scrollbar{display:none}
+  .kwmp-icebreakers button{
+    flex:0 0 auto;height:27px;padding:0 8px;border:1px solid rgba(216,186,134,.11);border-radius:8px;
+    background:rgba(216,186,134,.035);color:rgba(240,232,218,.68);font-size:5px;font-weight:800;letter-spacing:.045em;cursor:pointer
+  }
+  .kwmp-icebreakers button:hover{background:rgba(216,186,134,.085);color:#f3e9d9}
+  .kwmp-person .kwmp-wave{border-color:rgba(168,201,171,.18);color:#dce9dd;background:rgba(168,201,171,.055)}
+  @media(max-width:900px),(pointer:coarse){
+    .kwmp-social-list{grid-template-columns:repeat(5,minmax(58px,1fr));overflow-x:auto}
+    .kwmp-social-task{min-width:58px}
+    .kwmp-social-missions{padding:9px 10px 8px}
+  }
+
   /* V4.6 Mobile social layer — compact controls, intentional sheets */
   @media(max-width:900px),(pointer:coarse){
     .kwmp-dock{
@@ -291,10 +339,10 @@ function ui(){
   if(window.matchMedia?.('(max-width:900px), (pointer:coarse)')?.matches)voicebox.classList.add('collapsed');
   const talk=voicebox.querySelector('#kwmpTalk');
   const drawer=document.createElement('aside');drawer.id='kwmpChat';drawer.className='kwmp-chat';drawer.setAttribute('aria-hidden','true');
-  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · SOCIAL</span><strong>World Chat</strong></div><div style="display:flex;gap:6px"><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button><button type="button" class="kwmp-chat-close" data-kwmp-chat-close aria-label="Fermer le chat">×</button></div></div><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget" data-kwmp-target>WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">Les données de santé ne sont jamais partagées dans World.</div>';
+  drawer.innerHTML='<div class="kwmp-head"><div><span>KŌMØ WORLD · SOCIAL</span><strong>World Chat</strong></div><div style="display:flex;gap:6px"><button type="button" class="kwmp-world-btn" data-kwmp-world>WORLD</button><button type="button" class="kwmp-chat-close" data-kwmp-chat-close aria-label="Fermer le chat">×</button></div></div><section class="kwmp-social-missions" id="kwmpSocialMissions"><header><div><span>DAILY SOCIAL</span><strong id="kwmpSocialSummary">0 / 5 MISSIONS</strong></div><b id="kwmpSocialProgress">0 XP</b></header><div class="kwmp-social-list" id="kwmpSocialList"></div><div class="kwmp-icebreakers" id="kwmpIcebreakers"><button type="button" data-kwmp-prompt="👋 Salut ! Quel espace explores-tu ?">👋 DIRE BONJOUR</button><button type="button" data-kwmp-prompt="On tente un défi Arena ensemble ?">◇ DÉFI ARENA</button><button type="button" data-kwmp-prompt="Tu veux explorer le Twin ensemble ?">◎ EXPLORER LE TWIN</button></div></section><div class="kwmp-roster" id="kwmpRoster"><div class="kwmp-empty">Aucune présence World active.</div></div><div class="kwmp-messages" id="kwmpMessages"><div class="kwmp-empty">Connectez World pour discuter.</div></div><form class="kwmp-compose" id="kwmpCompose"><button type="button" class="kwmp-target" id="kwmpTarget" data-kwmp-target>WORLD</button><input id="kwmpInput" maxlength="500" autocomplete="off" placeholder="Message World…" disabled><button type="submit" disabled>ENVOYER</button></form><div class="kwmp-note">Les données de santé ne sont jamais partagées dans World.</div>';
   document.body.appendChild(drawer);
   const chatLauncher=document.createElement('button');chatLauncher.type='button';chatLauncher.id='kwmpChatLauncher';chatLauncher.className='kwmp-chat-launcher';chatLauncher.innerHTML='<i>◔</i><span>WORLD CHAT</span><b data-kwmp-unread>0</b>';document.body.appendChild(chatLauncher);
-  return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:voicebox.querySelector('[data-kwmp-voice]'),talk,voicebox,voiceCollapse:voicebox.querySelector('[data-kwmp-voice-collapse]'),chatLauncher,social:dock.querySelector('[data-kwmp-social]'),drawer,roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
+  return {dock,connect:dock.querySelector('[data-kwmp-connect]'),people:dock.querySelector('[data-kwmp-people]'),chat:dock.querySelector('[data-kwmp-chat]'),voice:voicebox.querySelector('[data-kwmp-voice]'),talk,voicebox,voiceCollapse:voicebox.querySelector('[data-kwmp-voice-collapse]'),chatLauncher,social:dock.querySelector('[data-kwmp-social]'),drawer,socialMissions:drawer.querySelector('#kwmpSocialMissions'),socialSummary:drawer.querySelector('#kwmpSocialSummary'),socialProgress:drawer.querySelector('#kwmpSocialProgress'),socialList:drawer.querySelector('#kwmpSocialList'),icebreakers:drawer.querySelector('#kwmpIcebreakers'),roster:drawer.querySelector('#kwmpRoster'),messages:drawer.querySelector('#kwmpMessages'),form:drawer.querySelector('#kwmpCompose'),input:drawer.querySelector('#kwmpInput'),target:drawer.querySelector('#kwmpTarget'),worldBtn:drawer.querySelector('[data-kwmp-world]')};
 }
 function labelSprite(THREE,text,subtitle='PULSE MEMBER'){
   const c=document.createElement('canvas');c.width=512;c.height=112;const x=c.getContext('2d');
@@ -405,21 +453,51 @@ export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
   const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,unread:0,social:loadSocial(),voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set(),talking:false,pttHeld:false,signalPollTimer:null,seenSignals:new Set()}};
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,unread:0,social:loadSocial(),nearbyPeerId:null,nearbyTickAt:0,voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set(),talking:false,pttHeld:false,signalPollTimer:null,seenSignals:new Set()}};
   const roleFor=id=>state.roles.get(id)||null;
   const decoratePresence=row=>row?{...row,role_title:roleFor(row.user_id)?.display_title||''}:row;
   const saveSocial=()=>{try{localStorage.setItem(SOCIAL_KEY,JSON.stringify(state.social))}catch{}};
-  const updateSocialUI=()=>{U.social.textContent='SOCIAL · '+state.social.xp+(state.social.streak>1?' · '+state.social.streak+'D':'')};
-  const awardSocial=(kind,xp)=>{
-    const today=dayKey();
-    if(state.social.day!==today){
-      const yesterday=dayKey(new Date(Date.now()-86400000));
-      state.social={day:today,xp:0,done:{},streak:state.social.lastActive===yesterday?Math.max(1,state.social.streak+1):1,lastActive:state.social.lastActive||''};
-    }
-    if(state.social.done[kind])return false;
-    state.social.done[kind]=Date.now();state.social.xp+=xp;state.social.lastActive=today;if(!state.social.streak)state.social.streak=1;saveSocial();updateSocialUI();
-    runtime.completeSocial?.();runtime.notify?.('SOCIAL +'+xp+' XP');
+  const resetSocialDay=()=>{
+    const today=dayKey();if(state.social.day===today)return;
+    const yesterday=dayKey(new Date(Date.now()-86400000));
+    state.social={day:today,xp:0,done:{},progress:{},streak:state.social.lastActive===yesterday?Math.max(1,state.social.streak+1):1,lastActive:state.social.lastActive||''};
+  };
+  const missionFor=id=>SOCIAL_MISSIONS.find(m=>m.id===id);
+  const missionProgress=id=>{
+    const m=missionFor(id);if(!m)return 0;
+    return state.social.done[id]?m.target:Math.min(m.target,Number(state.social.progress?.[id])||0);
+  };
+  const updateSocialUI=()=>{
+    resetSocialDay();
+    const completed=SOCIAL_MISSIONS.filter(m=>state.social.done[m.id]).length;
+    if(U.social)U.social.textContent='SOCIAL · '+state.social.xp+(state.social.streak>1?' · '+state.social.streak+'D':'');
+    if(U.socialSummary)U.socialSummary.textContent=completed+' / '+SOCIAL_MISSIONS.length+' MISSIONS';
+    if(U.socialProgress)U.socialProgress.textContent=state.social.xp+' XP';
+    if(U.socialList)U.socialList.innerHTML=SOCIAL_MISSIONS.map(m=>{
+      const p=missionProgress(m.id),pct=Math.min(100,(p/m.target)*100),done=!!state.social.done[m.id];
+      return '<div class="kwmp-social-task '+(done?'done':'')+'"><span>'+m.short+'</span><b>'+(done?'✓ DONE':(m.target>1?Math.round(p)+' / '+m.target:'+'+m.xp+' XP'))+'</b><i><em style="width:'+pct+'%"></em></i></div>';
+    }).join('');
+  };
+  const completeSocialMission=(kind,xp)=>{
+    resetSocialDay();if(state.social.done[kind])return false;
+    const mission=missionFor(kind);if(!mission)return false;
+    state.social.progress[kind]=mission.target;state.social.done[kind]=Date.now();
+    state.social.xp+=Number(xp)||mission.xp;state.social.lastActive=dayKey();if(!state.social.streak)state.social.streak=1;
+    saveSocial();updateSocialUI();runtime.completeSocial?.();runtime.socialChallenge?.(kind,1);
+    runtime.notify?.('SOCIAL +'+(Number(xp)||mission.xp)+' XP · '+mission.label);
     return true;
+  };
+  const awardSocial=(kind,xp)=>completeSocialMission(kind,xp);
+  const addSocialProgress=(kind,amount=1)=>{
+    resetSocialDay();const mission=missionFor(kind);if(!mission||state.social.done[kind])return false;
+    const add=Math.max(0,Number(amount)||0);if(!add)return false;
+    state.social.progress[kind]=Math.min(mission.target,missionProgress(kind)+add);
+    runtime.socialChallenge?.(kind,add);
+    if(state.social.progress[kind]>=mission.target){
+      state.social.done[kind]=Date.now();state.social.xp+=mission.xp;state.social.lastActive=dayKey();if(!state.social.streak)state.social.streak=1;
+      runtime.completeSocial?.();runtime.notify?.('SOCIAL +'+mission.xp+' XP · '+mission.label);
+    }
+    saveSocial();updateSocialUI();return true;
   };
 
   const setOnlineUI=()=>{
@@ -967,5 +1045,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.8.3-mobile-ui',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.9.0-social-challenges',connect:openPulse,state};
 }
