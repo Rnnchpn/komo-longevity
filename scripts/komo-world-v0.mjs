@@ -8,6 +8,7 @@ const target = join(root, 'site', 'world');
 
 const html=await readFile(join(source,'index.html'),'utf8');
 const runtime=await readFile(join(source,'world-v1.js'),'utf8');
+const css=await readFile(join(source,'world-v1.css'),'utf8');
 const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const checks=[
@@ -61,12 +62,12 @@ const checks=[
   ['World Hub Life items present',runtime.includes('KOMO_LIFE_ITEMS_V32')&&runtime.includes('function showLifeItem')],
   ['World Hub avatar studio present',runtime.includes('AVATAR_KEY')&&runtime.includes('function showAvatarStudio')],
   ['World Hub mobile clouds present',runtime.includes('const cloudCount=lowPower?3:11')&&runtime.includes('if(living.clouds?.length)')],
-  ['Immersive Hub V4.5 entry present',runtime.includes("version:'4.5.0-architectural-polish'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
+  ['Immersive Hub V4.6 entry present',runtime.includes("version:'4.6.0-mobile-ui'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
   ['Immersive Hub V4.5 portals present',runtime.includes('KOMO_PORTAL_ARCH_V45_')&&runtime.includes('KOMO_DESTINATION_VESTIBULES_V45')&&runtime.includes('function updateDestinationDoors')],
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub V3.3 quests present',runtime.includes("quest:'fitness'")&&runtime.includes("quest:'arena'")&&runtime.includes("id:'coach'")],
   ['Immersive Hub V3.3 district detail present',runtime.includes('KOMO_DISTRICT_DETAILS_V33')&&runtime.includes('HEALTH PAVILION')&&runtime.includes('CLUB HOUSE')],
-  ['multiplayer reliable presence V0.8.2 present',multiplayer.includes("version:'0.8.2-v421-proportions'")&&multiplayer.includes("persistSession:true")&&multiplayer.includes("komo-world-auth-v1")],
+  ['multiplayer reliable presence V0.8.3 present',multiplayer.includes("version:'0.8.3-mobile-ui'")&&multiplayer.includes("persistSession:true")&&multiplayer.includes("komo-world-auth-v1")],
   ['push-to-talk voice control present',multiplayer.includes('MAINTENIR POUR PARLER')&&multiplayer.includes('const startTalking=async')&&multiplayer.includes("U.talk.addEventListener('pointerdown'")&&multiplayer.includes('track.enabled=state.voice.talking')],
   ['voice signaling fallback present',multiplayer.includes('const pollVoiceSignals=async')&&multiplayer.includes("setInterval(()=>pollVoiceSignals(),350)")&&multiplayer.includes("VOICE_EXIT_M=22")],
   ['desktop social HUD present',multiplayer.includes('kwmp-chat-launcher')&&multiplayer.includes('kwmp-voicebox')&&multiplayer.includes("drawer.className='kwmp-chat'")&&multiplayer.includes('const openChat=()=>')],
@@ -76,7 +77,7 @@ const checks=[
   ['avatar symmetry V4.2 present',runtime.includes('const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee)')&&runtime.includes('const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow)')&&multiplayer.includes('const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee)')&&multiplayer.includes('const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow)')],
   ['adult gait V4.2.1 present',runtime.includes('av.leftKnee.rotation.x=Math.max(0,-stride)*.46')&&runtime.includes('av.torsoGroup.rotation.x=-.014-.004*moveAmount')&&multiplayer.includes('av.leftKnee.rotation.x=Math.max(0,-stride)*.40')],
   ['proportion patch V4.2.1 present',runtime.includes('hips.scale.set(1.14,.68,.82)')&&runtime.includes('leftKnee.position.y=-.54')&&runtime.includes('new THREE.SphereGeometry(.074')&&runtime.includes('new THREE.SphereGeometry(.153')&&runtime.includes('new THREE.CapsuleGeometry(.038,.078')&&multiplayer.includes('q.scale.set(1.14,.68,.82)')&&multiplayer.includes('new THREE.SphereGeometry(.074')],
-  ['One World continuous campus present',runtime.includes("version:'4.5.0-architectural-polish'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
+  ['One World continuous campus present',runtime.includes("version:'4.6.0-mobile-ui'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
   ['transient zone label present',runtime.includes("function showWorldZone(label,purpose='')")&&runtime.includes("locationChip?.classList.add('show')")&&runtime.includes("locationPurpose.textContent=purpose")],
   ['results dashboard V4.1 present',runtime.includes('results-hero-v41')&&runtime.includes('score-orbit')&&runtime.includes('results-domains')&&runtime.includes('results-timeline')&&runtime.includes('results-signals')],
   ['hall lighting V4.3 present',runtime.includes('KOMO_HALL_LIGHTING_V43')&&runtime.includes('KOMO_HALL_PRACTICALS_V43')&&runtime.includes('function addHallSpot')&&runtime.includes('hallLightProfile')&&runtime.includes('renderer.toneMappingExposure=1.04')],
@@ -91,6 +92,10 @@ const checks=[
   ['architectural bays V4.5 present',runtime.includes('KOMO_RECESSED_BAY_V45_')&&runtime.includes('Deep black reveal gives the bay a built-in appearance')&&runtime.includes('KOMO_CEILING_RAFT_V45')],
   ['destination vestibules V4.5 present',runtime.includes('KOMO_DESTINATION_VESTIBULES_V45')&&runtime.includes('1.8 m deep vestibule')&&runtime.includes('KOMO_PORTAL_ARCH_V45_')],
   ['architectural wayfinding V4.5 present',runtime.includes('KOMO_DESTINATION_DATUM_V45')&&runtime.includes('KOMO_ATRIUM_FOCAL_V45')&&runtime.includes('align decorative rhythm with V4.5')===false],
+  ['mobile UI V4.6 present',css.includes('V4.6 Mobile UI')&&css.includes('body.world-intro-active .mobile-controls')&&css.includes('.journey-hud,.health-hud,.location-chip')&&css.includes('100dvh')],
+  ['mobile onboarding V4.6 state present',runtime.includes("document.body.classList.add('world-intro-active')")&&runtime.includes("document.body.classList.remove('world-intro-active')")&&runtime.includes("world-mobile-ui")],
+  ['mobile social V0.8.3 present',multiplayer.includes('V4.6 Mobile social layer')&&multiplayer.includes("world-intro-active")&&multiplayer.includes("world-social-open")&&multiplayer.includes("max-height:min(52dvh,460px)")],
+  ['mobile voice compact V0.8.3 present',multiplayer.includes('width:46px!important')&&multiplayer.includes('.kwmp-talk:before{content:"🎙"')&&multiplayer.includes("voicebox.classList.add('collapsed')")],
   ['persistent Minecraft-style chat present',multiplayer.includes("drawer.className='kwmp-chat'")&&multiplayer.includes("const openChat=()=>")&&multiplayer.includes("data-kwmp-target")],
   ['private messages present',multiplayer.includes("recipient_id")&&multiplayer.includes("setDmTarget")&&multiplayer.includes("dm.textContent='MP'")],
   ['community roles present',multiplayer.includes("komo_community_roles")&&multiplayer.includes("role_title")&&multiplayer.includes("display_title")],
