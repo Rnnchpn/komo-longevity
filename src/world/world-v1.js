@@ -159,9 +159,9 @@ applyRenderScale();
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xcbd2c8);
-scene.fog=new THREE.Fog(0xcbd2c8,82,215);
+scene.fog=new THREE.Fog(0xcbd2c8,lowPower?82:58,lowPower?215:150);
 
-const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.12,260);
+const camera=new THREE.PerspectiveCamera(lowPower?60:54,innerWidth/innerHeight,.12,260);
 camera.position.set(0,1.72,58);
 
 const hemi=new THREE.HemisphereLight(0xf4f1e9,0x59665d,2.05);
@@ -333,7 +333,7 @@ function applyDaylight(){
     bg=0xdfd9cd;fog=0xd8d1c5;sunColor=0xffc98d;sunPower=2.40;hemiPower=1.72;exposure=.98;state='golden';
     top=0x8098a7;horizon=0xe5ccb0;low=0xee9f66;skySun=0xffb66a;skyStrength=1.0;
   }
-  scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=82;scene.fog.far=215;
+  scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=lowPower?82:58;scene.fog.far=lowPower?215:150;
   sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
   hallAmbient.intensity=state==='evening'?.24:state==='golden'?.21:state==='morning'?.20:.18;
   const practicalProfile=hallLightProfile[state]||hallLightProfile.day;
@@ -549,6 +549,24 @@ const MAT={
 
 // Blackened metal uses the brushed bronze texture family but neutral color.
 MAT.blackened.map=S_BRASS.map;MAT.blackened.roughnessMap=S_BRASS.roughnessMap;MAT.blackened.bumpMap=S_BRASS.bumpMap;MAT.blackened.bumpScale=lowPower?0:.006;MAT.blackened.needsUpdate=true;
+
+// V5.0 desktop cinematic material accents.
+const CINEMATIC={
+  floor:lowPower?null:new THREE.MeshPhysicalMaterial({
+    color:0xe8dcc9,roughness:.22,metalness:.015,transparent:true,opacity:.26,
+    clearcoat:.58,clearcoatRoughness:.14,depthWrite:false,side:THREE.DoubleSide
+  }),
+  darkGlass:lowPower?null:new THREE.MeshPhysicalMaterial({
+    color:0x22332b,roughness:.09,metalness:.02,transparent:true,opacity:.22,
+    transmission:.42,ior:1.46,thickness:.16,clearcoat:.36,clearcoatRoughness:.08,depthWrite:false
+  }),
+  warmGlow:lowPower?null:new THREE.MeshBasicMaterial({
+    color:0xffdfaa,transparent:true,opacity:.075,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending
+  }),
+  coolGlow:lowPower?null:new THREE.MeshBasicMaterial({
+    color:0xd9ebe1,transparent:true,opacity:.052,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending
+  })
+};
 
 function makeStoneTexture(base='#ddd1bf',vein='#b9aa94',joint='#8f806d',seed=1){
   // Legacy-compatible floor texture, upgraded with mineral variation and deterministic joints.
@@ -1574,6 +1592,65 @@ box(architecturalSpine,.34,5.95,.78,MAT.travertine,-4.55,3.28,12.25,{cast:true})
 box(architecturalSpine,.34,5.95,.78,MAT.travertine,4.55,3.28,12.25,{cast:true});
 box(architecturalSpine,9.44,.30,.78,MAT.travertine,0,6.12,12.25,{cast:true});
 box(architecturalSpine,8.70,.032,.070,MAT.brass,0,5.88,11.82,{cast:false,receive:false});
+
+// V5.0 Desktop Visual Revolution — optical depth and cinematic focal hierarchy.
+const desktopCinematic=new THREE.Group();desktopCinematic.name='KOMO_DESKTOP_CINEMATIC_V50';building.add(desktopCinematic);
+desktopCinematic.visible=!lowPower;
+
+if(!lowPower){
+  // Polished central runway: thin physical overlay only on desktop.
+  const runway=mesh(desktopCinematic,new THREE.PlaneGeometry(8.65,39.8),CINEMATIC.floor,0,.421,-6.7,{cast:false,receive:false});
+  runway.rotation.x=-Math.PI/2;runway.renderOrder=3;
+
+  // Luminous skylight membrane gives the nave a credible source of soft top light.
+  const skylightMat=new THREE.MeshPhysicalMaterial({
+    color:0xeaf0e9,roughness:.16,metalness:0,transparent:true,opacity:.28,
+    transmission:.54,ior:1.42,thickness:.08,clearcoat:.24,clearcoatRoughness:.10,depthWrite:false
+  });
+  box(desktopCinematic,8.88,.026,39.4,skylightMat,0,7.72,-6.65,{cast:false,receive:false});
+
+  // Long warm light reveals inside the skylight.
+  [-3.85,3.85].forEach(x=>box(desktopCinematic,.042,.018,37.8,M.warm,x,7.66,-6.65,{cast:false,receive:false}));
+
+  // Soft volumetric shafts; low opacity avoids a game-like bloom effect.
+  const shaftGeo=new THREE.CylinderGeometry(.62,2.15,6.3,28,1,true);
+  [
+    [-2.7,4.42,5.2,CINEMATIC.warmGlow,.11],
+    [2.6,4.38,-5.2,CINEMATIC.coolGlow,-.08],
+    [-1.4,4.30,-15.2,CINEMATIC.warmGlow,.06]
+  ].forEach(([x,y,z,mat,rz],i)=>{
+    const shaft=new THREE.Mesh(shaftGeo,mat.clone());
+    shaft.position.set(x,y,z);shaft.rotation.z=rz;shaft.rotation.x=i===1?.04:-.03;
+    shaft.renderOrder=1;desktopCinematic.add(shaft);
+  });
+
+  // Dark glass reveals behind the key destinations increase perceived depth.
+  [
+    [-6.8,-28.48,4.55,4.55],
+    [0,-28.48,4.55,4.55],
+    [6.8,-28.48,4.55,4.55]
+  ].forEach(([x,z,w,h])=>box(desktopCinematic,w,h,.035,CINEMATIC.darkGlass,x,3.05,z,{cast:false,receive:false}));
+
+  // Light pools in the promenade strengthen foreground / midground / background separation.
+  const makeOpticalPool=(x,z,r,color,opacity)=>{
+    const cc=document.createElement('canvas');cc.width=cc.height=256;const gx=cc.getContext('2d');
+    const g=gx.createRadialGradient(128,128,0,128,128,126);
+    g.addColorStop(0,'rgba(255,255,255,'+opacity+')');g.addColorStop(.46,'rgba(255,255,255,'+(opacity*.42)+')');g.addColorStop(1,'rgba(255,255,255,0)');
+    gx.fillStyle=g;gx.fillRect(0,0,256,256);
+    const tx=new THREE.CanvasTexture(cc);tx.colorSpace=THREE.SRGBColorSpace;
+    const mat=new THREE.MeshBasicMaterial({map:tx,color,transparent:true,opacity:1,depthWrite:false,blending:THREE.AdditiveBlending});
+    const p=mesh(desktopCinematic,new THREE.PlaneGeometry(r*2,r*2),mat,x,.426,z,{cast:false,receive:false});
+    p.rotation.x=-Math.PI/2;p.renderOrder=4;return p;
+  };
+  makeOpticalPool(-1.4,7.4,3.4,0xffe2b7,.18);
+  makeOpticalPool(1.6,-5.8,3.8,0xffddb0,.16);
+  makeOpticalPool(-.8,-18.2,3.2,0xdce9e1,.12);
+
+  // One quiet monolithic focal wall at the far end.
+  box(desktopCinematic,17.4,5.82,.16,MAT.blackened,0,3.20,-29.10,{cast:true,receive:true});
+  box(desktopCinematic,16.65,.028,.08,MAT.brass,0,5.76,-29.00,{cast:false,receive:false});
+}
+
 
 
 // Continuous upper gallery lines make the Hall read as a designed volume.
@@ -4155,6 +4232,7 @@ function updateVisibilityBudget(now){
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
   hallLightGroup.visible=!lowPower&&!emergencyPerformance&&player.z<22&&player.z>-31&&Math.abs(player.x)<15;
+  if(typeof desktopCinematic!=='undefined')desktopCinematic.visible=!lowPower&&!emergencyPerformance&&player.z<21&&player.z>-31;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
   arrivalDetails.visible=player.z>1&&player.z<26;
   npcRoot.visible=true;
@@ -4186,6 +4264,7 @@ function applyEmergencyPerformance(){
   activeLightBudget=0;renderer.shadowMap.enabled=false;fill.intensity=0;
   living.lights.forEach(l=>{l.visible=false;if('intensity' in l)l.intensity=0});
   if(living.dust)living.dust.visible=false;
+  if(typeof desktopCinematic!=='undefined')desktopCinematic.visible=false;
   living.clouds.forEach(c=>c.visible=false);
   // Keep only the first two ambient NPCs under emergency load.
   living.npcs.forEach((npc,i)=>{npc.visible=i<2});
@@ -4362,7 +4441,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'4.7.0-social-challenges',
+  version:'5.0.0-desktop-visual-revolution',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
