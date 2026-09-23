@@ -323,6 +323,11 @@ function ui(){
     chatLauncher:document.querySelector('#kwmpChatLauncher'),
     social:dock.querySelector('[data-kwmp-social]'),
     drawer:document.querySelector('#kwmpChat'),
+    socialMissions:document.querySelector('#kwmpSocialMissions'),
+    socialSummary:document.querySelector('#kwmpSocialSummary'),
+    socialProgress:document.querySelector('#kwmpSocialProgress'),
+    socialList:document.querySelector('#kwmpSocialList'),
+    icebreakers:document.querySelector('#kwmpIcebreakers'),
     roster:document.querySelector('#kwmpRoster'),
     messages:document.querySelector('#kwmpMessages'),
     form:document.querySelector('#kwmpCompose'),
@@ -590,10 +595,19 @@ export async function mount(runtime){
         const join=document.createElement('button');join.type='button';join.textContent='JOIN';
         join.addEventListener('click',()=>{
           const ok=runtime.joinPresence?.(row);
-          if(ok){runtime.notify?.('Joining '+(escText(row.display_name,28)||'member'));setTimeout(()=>{heartbeat();sendPose(true)},320)}
+          if(ok){
+            awardSocial('join',15);
+            runtime.notify?.('Joining '+(escText(row.display_name,28)||'member'));
+            setTimeout(()=>{heartbeat();sendPose(true)},320)
+          }
+        });
+        const wave=document.createElement('button');wave.type='button';wave.className='kwmp-wave';wave.textContent='SALUER';
+        wave.addEventListener('click',()=>{
+          setDmTarget(row);U.drawer.classList.remove('people-open');
+          U.input.value='👋 Salut ! Tu explores quelle zone ?';U.input.focus();
         });
         const dm=document.createElement('button');dm.type='button';dm.textContent='MP';dm.addEventListener('click',()=>{setDmTarget(row);U.drawer.classList.remove('people-open')});
-        item.append(join,dm);
+        item.append(wave,join,dm);
       }
       U.roster.appendChild(item);
     }
@@ -829,7 +843,11 @@ export async function mount(runtime){
     if(!state.presenceLive||!state.session?.user)return;
     state.voice.pttHeld=true;
     const ready=await enableVoice();
-    if(ready&&state.voice.pttHeld){setTransmit(true);runtime.notify?.('Vous parlez aux joueurs proches')}
+    if(ready&&state.voice.pttHeld){
+      setTransmit(true);
+      if(state.voice.connected.size>0)awardSocial('voice',20);
+      runtime.notify?.(state.voice.connected.size>0?'Vous parlez aux joueurs proches':'VOICE actif · aucun membre proche pour le moment')
+    }
   };
   const stopTalking=()=>{
     state.voice.pttHeld=false;
@@ -941,6 +959,11 @@ export async function mount(runtime){
   U.connect.addEventListener('click',()=>state.presenceLive?runtime.notify?.('World multiplayer actif'):state.session?.user?heartbeat():openPulse());
   U.people.addEventListener('click',async()=>{await refreshPresence();openChat();U.drawer.classList.add('people-open');renderRoster()});
   U.chat.addEventListener('click',()=>{openChat();U.drawer.classList.remove('people-open')});
+  U.social?.addEventListener('click',()=>{openChat();U.drawer.classList.remove('people-open');U.socialMissions?.scrollIntoView?.({block:'nearest'})});
+  U.icebreakers?.querySelectorAll('[data-kwmp-prompt]').forEach(btn=>btn.addEventListener('click',()=>{
+    if(!state.presenceLive){runtime.notify?.('Connectez World pour envoyer un message');return}
+    U.input.value=btn.dataset.kwmpPrompt||'';U.input.focus();
+  }));
   U.chatLauncher?.addEventListener('click',openChat);
   U.drawer.querySelector('[data-kwmp-chat-close]')?.addEventListener('click',closeChat);
   U.voice.addEventListener('click',()=>toggleVoice());
@@ -965,15 +988,18 @@ export async function mount(runtime){
     const row={user_id:state.session.user.id,recipient_id,display_name:escText(state.profile?.display_name||'KŌMØ Member',60)||'KŌMØ Member',body};
     const {error}=await client.from('world_chat_messages').insert(row);
     if(error){runtime.notify?.('Message non envoyé');console.warn('[World chat]',error);return}
-    awardSocial(recipient_id?'dm':'chat',recipient_id?10:5);
+    awardSocial(recipient_id?'dm':'chat',recipient_id?15:10);
   });
 
   function animatePeers(){
     const local=runtime.getState(),cam=runtime.camera;updateVoiceProximity();
-    for(const peer of state.peers.values()){
+    let closestPeerId=null,closestDist=Infinity;
+    for(const [peerId,peer] of state.peers){
       const localZone=local.mode==='rehab'?'rehab':local.mode;
       peer.visible=peer.userData.zone===localZone;
       if(!peer.visible)continue;
+      const playerDist=Math.hypot(peer.position.x-local.position.x,peer.position.z-local.position.z);
+      if(playerDist<closestDist){closestDist=playerDist;closestPeerId=peerId}
       const av=peer.userData.avatar;
       const beforeX=peer.position.x,beforeZ=peer.position.z;
       peer.position.lerp(peer.userData.target,.28);
@@ -1000,7 +1026,7 @@ export async function mount(runtime){
           const pulse=1+.045*Math.sin(performance.now()*.0028);
           av.beaconTop.scale.setScalar(pulse);
         }
-        if(av.ring)av.ring.material.opacity=distance<16?.075:.038;
+        if(av.ring)av.ring.material.opacity=playerDist<6?.16:distance<16?.075:.038;
         const idle=Math.sin(performance.now()*.0013);
         if(near&&speed>.002){
           av.leftLeg.rotation.x=stride*.29;av.rightLeg.rotation.x=-stride*.29;
@@ -1023,6 +1049,18 @@ export async function mount(runtime){
           av.torso.position.y=1.57+idle*.0025;
         }
       }
+    }
+    const now=performance.now();
+    if(closestPeerId&&closestDist<=6){
+      if(state.nearbyPeerId!==closestPeerId){
+        state.nearbyPeerId=closestPeerId;state.nearbyTickAt=now;
+      }else if(now-state.nearbyTickAt>=1000){
+        const seconds=Math.max(1,Math.floor((now-state.nearbyTickAt)/1000));
+        state.nearbyTickAt+=seconds*1000;
+        addSocialProgress('together',seconds);
+      }
+    }else{
+      state.nearbyPeerId=null;state.nearbyTickAt=now;
     }
     state.raf=requestAnimationFrame(animatePeers);
   }
