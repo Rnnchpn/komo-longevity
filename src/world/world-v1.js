@@ -71,6 +71,7 @@ const retinaMobile=lowPower&&deviceDpr>=2;
 document.documentElement.classList.toggle('low-power',lowPower);
 document.documentElement.classList.toggle('retina-mobile',retinaMobile);
 document.body.classList.toggle('world-mobile-ui',lowPower||innerWidth<=900);
+document.body.classList.toggle('desktop-visual-v5',!lowPower&&innerWidth>900);
 document.body.classList.add('world-intro-active');
 
 const core=new TwinCore();
@@ -121,7 +122,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=1.04;
+renderer.toneMappingExposure=lowPower?1.04:1.07;
 renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -321,7 +322,7 @@ living.sunSprite=null;
 
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
-  let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe4bd,sunPower=2.72,hemiPower=2.05,exposure=1.04,state='day';
+  let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe4bd,sunPower=2.72,hemiPower=2.05,exposure=lowPower?1.04:1.07,state='day';
   let top=0x6f9fbd,horizon=0xdce7e3,low=0xf2e2c8,skySun=0xffddb0,skyStrength=.72;
   if(h<7||h>=21){
     bg=0x74838a;fog=0x8c9691;sunColor=0xe2d0c1;sunPower=1.20;hemiPower=1.34;exposure=.86;state='evening';
@@ -4195,6 +4196,7 @@ languageToggle.addEventListener('click',()=>{locale=locale==='fr'?'en':'fr';appl
 
 window.addEventListener('resize',()=>{
   document.body.classList.toggle('world-mobile-ui',lowPower||innerWidth<=900);
+  document.body.classList.toggle('desktop-visual-v5',!lowPower&&innerWidth>900);
   camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
   applyRenderScale();
 });
