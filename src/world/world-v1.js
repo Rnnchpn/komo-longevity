@@ -64,6 +64,8 @@ const campusToggle=$('#campus-toggle');
 const journeyToggle=$('#journey-toggle');
 const menuMotion=$('#menu-motion');
 const menuAge=$('#menu-age');
+const menuCurrentZone=$('#menu-current-zone');
+const menuCurrentPurpose=$('#menu-current-purpose');
 const journeyTitleMenu=$('#journey-title-menu');
 const journeyXpMenu=$('#journey-xp-menu');
 
@@ -2078,6 +2080,57 @@ function instancedStatic(parent,geometry,material,items,name){
   });
   inst.instanceMatrix.needsUpdate=true;parent.add(inst);return inst;
 }
+
+// V6.1 Grand Flagship — scale comes from silhouette, rhythm and emissive depth, not extra lights.
+const grandFlagshipV61=new THREE.Group();grandFlagshipV61.name='KOMO_GRAND_FLAGSHIP_V61';building.add(grandFlagshipV61);
+grandFlagshipV61.userData.realismDetail=true;
+const grandWarmV61=new THREE.MeshBasicMaterial({color:0xe8c58b,transparent:true,opacity:lowPower?.30:.52,depthWrite:false});
+const grandCoolV61=new THREE.MeshBasicMaterial({color:0xc6dbce,transparent:true,opacity:lowPower?.24:.42,depthWrite:false});
+const grandDarkV61=MAT.blackened;
+const grandUnitBoxV61=new THREE.BoxGeometry(1,1,1);
+
+// Monumental nave rhythm: tall paired fins create a longer, higher perceived hall with only two draw calls.
+const grandStoneFinsV61=[],grandBrassFinsV61=[];
+[10.0,2.0,-6.0,-14.0,-22.0].forEach((z,i)=>{
+  [-1,1].forEach(side=>{
+    grandStoneFinsV61.push({x:side*10.72,y:4.30,z, sx:.34,sy:7.45,sz:.72});
+    grandBrassFinsV61.push({x:side*10.50,y:4.30,z:z+.39, sx:.045,sy:6.84,sz:.055});
+  });
+});
+instancedStatic(grandFlagshipV61,grandUnitBoxV61,WALL.travertine,grandStoneFinsV61,'KOMO_GRAND_STONE_FINS_INST_V61');
+instancedStatic(grandFlagshipV61,grandUnitBoxV61,MAT.brass,grandBrassFinsV61,'KOMO_GRAND_BRASS_FINS_INST_V61');
+
+// Ceiling procession: dark ribs + luminous inner spine make the nave read as a ceremonial gallery.
+const grandCeilingRibsV61=[];
+[-21.8,-17.8,-13.8,-9.8,-5.8,-1.8,2.2,6.2,10.2].forEach(z=>{
+  grandCeilingRibsV61.push({x:0,y:7.53,z,sx:9.30,sy:.12,sz:.24});
+});
+instancedStatic(grandFlagshipV61,grandUnitBoxV61,grandDarkV61,grandCeilingRibsV61,'KOMO_GRAND_CEILING_RIBS_INST_V61');
+box(grandFlagshipV61,8.65,.024,36.0,grandWarmV61,0,7.43,-6.2,{cast:false,receive:false});
+[-4.16,4.16].forEach(x=>box(grandFlagshipV61,.038,.024,35.4,grandCoolV61,x,7.40,-6.2,{cast:false,receive:false}));
+
+// Monumental armillary above the existing atrium focal: dramatic silhouette, only three meshes.
+const grandArmillaryV61=new THREE.Group();grandArmillaryV61.name='KOMO_ATRIUM_ARMILLARY_V61';grandArmillaryV61.position.set(0,4.20,-8.6);grandFlagshipV61.add(grandArmillaryV61);
+const grandRingA=mesh(grandArmillaryV61,new THREE.TorusGeometry(2.30,.065,12,72),MAT.brass,0,0,0,{cast:false,receive:false});
+const grandRingB=mesh(grandArmillaryV61,new THREE.TorusGeometry(1.82,.045,10,64),grandCoolV61,0,0,0,{cast:false,receive:false});
+const grandRingC=mesh(grandArmillaryV61,new THREE.TorusGeometry(1.24,.035,10,56),grandWarmV61,0,0,0,{cast:false,receive:false});
+grandRingA.rotation.set(.18,.52,.08);grandRingB.rotation.set(Math.PI/2,.12,.44);grandRingC.rotation.set(.75,.20,Math.PI/2);
+const grandCoreV61=mesh(grandArmillaryV61,new THREE.SphereGeometry(.18,18,12),M.warm,0,0,0,{cast:false,receive:false});
+
+// Destination theatre: tall halo portals give Twin / Fitness / Arena a visual identity from across the Hall.
+const destinationTheatreV61=new THREE.Group();destinationTheatreV61.name='KOMO_DESTINATION_THEATRE_V61';building.add(destinationTheatreV61);
+[
+  [-6.8,grandCoolV61,0xb9cfbf],
+  [0,grandWarmV61,0xd7b777],
+  [6.8,grandWarmV61,0xb9935c]
+].forEach(([x,mat,color],i)=>{
+  const halo=mesh(destinationTheatreV61,new THREE.TorusGeometry(2.15,.052,12,64),mat,x,3.18,-31.25,{cast:false,receive:false});
+  halo.rotation.y=.04*(i-1);halo.userData.phase=i*.9;
+  const inner=mesh(destinationTheatreV61,new THREE.TorusGeometry(1.70,.024,8,56),mat.clone(),x,3.18,-31.18,{cast:false,receive:false});
+  inner.material.opacity*=.68;inner.userData.phase=i*.9+.4;
+  plaque(destinationTheatreV61,i===0?'TWIN':i===1?'FITNESS':'ARENA',i===0?'UNDERSTAND':i===1?'MOVE':'ENGAGE',3.25,.60,x,6.02,-30.94,{dark:true,titleSize:44});
+});
+
 
 // Travertine hospitality islands break up the long central corridor.
 [
@@ -4804,6 +4857,14 @@ function updateLocation(){
   else if(player.x>6.8&&player.z>-2&&player.z<7){label='KŌMØ LIFE';purpose=locale==='fr'?'OBJETS · ÉQUIPEMENT · ÉDITIONS':'OBJECTS · EQUIPMENT · EDITIONS';nav='life';completeJourney('life',{silent:true})}
   else if(player.z>-7){label='KŌMØ HALL';purpose=locale==='fr'?'VOTRE POINT CENTRAL':'YOUR HOME BASE';completeJourney('hall',{silent:true})}
   else{label='MOTION ATRIUM';purpose=locale==='fr'?'ACCÈS TWIN · FITNESS · ARENA':'TWIN · FITNESS · ARENA'}
+  if(menuCurrentZone)menuCurrentZone.textContent=label;
+  if(menuCurrentPurpose)menuCurrentPurpose.textContent=purpose;
+  document.querySelectorAll('.world-destinations [data-destination]').forEach(btn=>{
+    const map={hall:'hall',twin:'twin',fitness:'',arena:''};
+    const key=btn.dataset.destination;
+    const active=(key==='hall'&&nav==='hall')||(key==='twin'&&nav==='twin')||(key==='fitness'&&inFitnessZone())||(key==='arena'&&inArenaZone());
+    btn.classList.toggle('active',active);
+  });
   syncQuickNav(nav);showWorldZone(label,purpose);
 }
 function updateHeading(){
@@ -5059,6 +5120,12 @@ function updateRealismLOD(){
     const nearGallery=inTwinLink(player)||inArenaLink(player)||inFitnessLink(player)||(!inTwinZone(player)&&!inFitnessZone(player)&&!inArenaZone(player)&&player.z<-15);
     galleryWallsV59.visible=nearGallery||Math.min(twinD,fitD,arenaD)<(lowPower?18:28);
   }
+  if(typeof grandFlagshipV61!=='undefined'){
+    grandFlagshipV61.visible=!emergencyPerformance&&(!lowPower||player.z>-30&&player.z<18);
+  }
+  if(typeof destinationTheatreV61!=='undefined'){
+    destinationTheatreV61.visible=!emergencyPerformance&&player.z<12&&player.z>-40;
+  }
   if(typeof realismLightWashesV60!=='undefined'){
     realismLightWashesV60.visible=!emergencyPerformance;
     hallWashInst.visible=hallDetail;
@@ -5118,6 +5185,8 @@ function applyEmergencyPerformance(){
   if(living.dust)living.dust.visible=false;
   if(typeof desktopCinematic!=='undefined')desktopCinematic.visible=false;
   if(typeof realismLightWashesV60!=='undefined')realismLightWashesV60.visible=false;
+  if(typeof grandFlagshipV61!=='undefined')grandFlagshipV61.visible=false;
+  if(typeof destinationTheatreV61!=='undefined')destinationTheatreV61.visible=false;
   living.clouds.forEach(c=>c.visible=false);
   // Keep only the first two ambient NPCs under emergency load.
   living.npcs.forEach((npc,i)=>{npc.visible=i<2});
@@ -5219,6 +5288,21 @@ function animateLiving(now){
     living.kinetic.b.rotation.x=t*.041;
     living.kinetic.c.rotation.y=t*.073;
     living.kinetic.group.position.y=5.25+Math.sin(t*.32)*.045;
+  }
+  if(typeof grandArmillaryV61!=='undefined'){
+    grandRingA.rotation.y=.52+t*.045;
+    grandRingB.rotation.z=.44-t*.058;
+    grandRingC.rotation.x=.75+t*.072;
+    grandArmillaryV61.position.y=4.20+Math.sin(t*.34)*.025;
+    grandCoreV61.scale.setScalar(.94+.08*(.5+.5*Math.sin(t*.62)));
+  }
+  if(typeof destinationTheatreV61!=='undefined'&&!lowPower){
+    destinationTheatreV61.children.forEach((o,i)=>{
+      if(o.geometry?.type==='TorusGeometry'){
+        o.rotation.z=Math.sin(t*.22+(o.userData.phase||i))*.035;
+        const p=1+.018*Math.sin(t*.52+(o.userData.phase||i));o.scale.setScalar(p);
+      }
+    });
   }
   if(!lowPower&&living.exteriorSculptures?.length){
     living.exteriorSculptures.forEach((sculpture,i)=>{
@@ -5341,7 +5425,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'6.0.0-realism-lite',
+  version:'6.1.0-grand-flagship-ui',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
