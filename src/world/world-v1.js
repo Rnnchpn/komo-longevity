@@ -788,15 +788,19 @@ function makeNpc(parent,{role='visitor',label='Guest',quest=null,x=0,y=0,z=0,sca
     const bag=box(g,.26,.34,.12,MAT.walnut,.31,1.02,-.12,{cast});bag.rotation.z=-.08;
   }
 
+  // V5.0.1 NPC grounding: body and label move together; contact shadow stays on the floor.
+  const bodyRoot=new THREE.Group();bodyRoot.name='KOMO_NPC_BODY_GROUNDING_V501';
+  [...g.children].forEach(child=>bodyRoot.add(child));g.add(bodyRoot);
+
   // label + contact shadow
-  const tag=npcNameTag(label,role==='staff'?'KŌMØ STAFF':role==='coach'?'COACH':'GUEST');g.add(tag);
+  const tag=npcNameTag(label,role==='staff'?'KŌMØ STAFF':role==='coach'?'COACH':'GUEST');bodyRoot.add(tag);
   const shadow=new THREE.Mesh(new THREE.CircleGeometry(.34,20),new THREE.MeshBasicMaterial({color:0x27352d,transparent:true,opacity:.11,depthWrite:false}));
   shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;g.add(shadow);
 
   const points=route.length?route.map(p=>new THREE.Vector3(p[0],p[1]??y,p[2])):[new THREE.Vector3(x,y,z)];
   const seg=[],cum=[0];let total=0;
   for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total)}
-  g.userData.npc={role,label,quest,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
+  g.userData.npc={role,label,quest,bodyRoot,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
   living.npcs.push(g);return g;
 }
 function updateNpc(npc,t,index){
@@ -828,6 +832,11 @@ function updateNpc(npc,t,index){
   const a=d.points[segIndex],b=d.points[(segIndex+1)%d.points.length],len=Math.max(.001,d.seg[segIndex]);
   const u=(routeDist-d.cum[segIndex])/len;
   npc.position.lerpVectors(a,b,u);
+  const npcSurface=visualSurfaceOffsetAt(npc.position);
+  // NPC shoe sole was authored around Y=.17, so only compensate finishes above that level.
+  const npcLift=Math.max(0,npcSurface-.169);
+  d.bodyRoot.position.y+=(npcLift-d.bodyRoot.position.y)*(1-Math.exp(-14*stepDt));
+  d.shadow.position.y=npcSurface+.004;
   const dx=b.x-a.x,dz=b.z-a.z;
   const desired=Math.atan2(dx,dz);
   npc.rotation.y=desired;
@@ -969,15 +978,20 @@ function makePlayerAvatar(){
   };
   const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow);
 
+  // V5.0.1 grounding: body is lifted independently from the logical player root.
+  // This keeps shoes on the visible architectural floor while shadows remain on the floor plane.
+  const bodyRoot=new THREE.Group();bodyRoot.name='KOMO_PLAYER_BODY_GROUNDING_V501';
+  [...g.children].forEach(child=>bodyRoot.add(child));g.add(bodyRoot);
+
   // Ground contact stays subtle; self tag remains hidden.
   const shadow=new THREE.Mesh(new THREE.CircleGeometry(.31,lowPower?18:30),new THREE.MeshBasicMaterial({color:0x17251e,transparent:true,opacity:.105,depthWrite:false}));
   shadow.rotation.x=-Math.PI/2;shadow.position.y=.011;shadow.scale.set(1,.52,1);g.add(shadow);
   const ring=new THREE.Mesh(new THREE.RingGeometry(.34,.365,lowPower?24:38),new THREE.MeshBasicMaterial({color:0xc49a62,transparent:true,opacity:.060,depthWrite:false}));
   ring.rotation.x=-Math.PI/2;ring.position.y=.015;g.add(ring);
 
-  const tag=npcNameTag('YOU','KŌMØ WORLD');tag.position.y=2.43;tag.scale.set(1.0,.28,1);tag.visible=false;g.add(tag);
+  const tag=npcNameTag('YOU','KŌMØ WORLD');tag.position.y=2.43;tag.scale.set(1.0,.28,1);tag.visible=false;bodyRoot.add(tag);
   g.userData.avatar={
-    hipsGroup,torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,
+    bodyRoot,hipsGroup,torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,
     leftShoe,rightShoe,leftHand,rightHand,tag,shadow,ring,phase:0,facing:0,
     materials:{skin,skinWarm,cloth,clothDark,clothSoft,trouser,shoe,sole,hair,bronze}
   };
@@ -3828,6 +3842,26 @@ function syncPlayerElevation(){
   }
   player.y=playerLevel===1?UPPER_Y:0;
 }
+// Visible floor heights are intentionally independent from logical navigation Y.
+// The player navigation plane stays simple; only the rendered human is grounded to the actual finish surface.
+const AVATAR_SOLE_COMPENSATION=.043;
+function visualSurfaceOffsetAt(p=player){
+  if(isStairPosition(p))return .012;
+  const py=Number(p?.y)||0;
+  if(py>UPPER_Y*.55&&isUpperWalkable(p))return .183;
+  if(inTwinZone(p)||inArenaZone(p))return .025;
+  if(inFitnessZone(p))return .220;
+  const x=Number(p?.x)||0,z=Number(p?.z)||0;
+  if(Math.abs(x)<11.55&&z<16.8&&z>-30.2){
+    // V5 polished runway is higher than the side stone finish.
+    return Math.abs(x)<4.34?.421:.365;
+  }
+  if(z>=16.0&&z<62&&Math.abs(x)<24)return .170;
+  if(inTwinLink(p)||inArenaLink(p)||inFitnessLink(p))return .105;
+  return .055;
+}
+function getAvatarGroundLift(p=player){return visualSurfaceOffsetAt(p)+AVATAR_SOLE_COMPENSATION;}
+
 function inTwinZone(p=player){return p.x>-56&&p.x<-33.5&&p.z>-12.5&&p.z<11.5}
 function inFitnessZone(p=player){return p.x>-10.5&&p.x<10.5&&p.z>-67&&p.z<-43}
 function inArenaZone(p=player){return p.x>33.5&&p.x<56&&p.z>-12.5&&p.z<11.5}
@@ -3882,6 +3916,11 @@ function updateMovement(dt){
 function updatePlayerAvatar(now,dt){
   playerAvatar.position.set(player.x,player.y,player.z);
   const av=playerAvatar.userData.avatar;
+  const surfaceOffset=visualSurfaceOffsetAt(player);
+  const targetBodyLift=surfaceOffset+AVATAR_SOLE_COMPENSATION;
+  av.bodyRoot.position.y+= (targetBodyLift-av.bodyRoot.position.y)*(1-Math.exp(-18*dt));
+  av.shadow.position.y=surfaceOffset+.004;
+  av.ring.position.y=surfaceOffset+.008;
   const speed=velocity.length(),moving=speed>.08;
   let turnDelta=0;
   if(moving){
@@ -3928,6 +3967,7 @@ function updatePlayerAvatar(now,dt){
 }
 function updateCamera(now,dt){
   const smooth=1-Math.exp(-16*dt);
+  const visualGround=visualSurfaceOffsetAt(player);
   yaw+=((targetYaw-yaw+Math.PI)%(Math.PI*2)-Math.PI)*smooth;
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
@@ -3936,14 +3976,14 @@ function updateCamera(now,dt){
     const shoulder=lowPower?.23:.32;
     cameraDesired.set(
       player.x+Math.sin(yaw)*distance+Math.cos(yaw)*shoulder,
-      player.y+height+pitch*1.08,
+      player.y+visualGround+height+pitch*1.08,
       player.z+Math.cos(yaw)*distance-Math.sin(yaw)*shoulder
     );
     // Cheap camera collision clamp for major architectural volumes.
     if(Math.abs(player.x)<12&&player.z<17.2&&player.z>-28){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,-10.9,10.9);
       cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-27.2,16.8);
-      cameraDesired.y=THREE.MathUtils.clamp(cameraDesired.y,player.y+1.75,player.y+(playerLevel===1?3.2:6.5));
+      cameraDesired.y=THREE.MathUtils.clamp(cameraDesired.y,player.y+visualGround+1.75,player.y+visualGround+(playerLevel===1?3.2:6.5));
     }else if(inTwinZone()){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,-55.2,-34.8);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }else if(inFitnessZone()){
@@ -3952,12 +3992,12 @@ function updateCamera(now,dt){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
-    cameraLook.set(player.x,player.y+1.24+pitch*.39,player.z);
+    cameraLook.set(player.x,player.y+visualGround+1.24+pitch*.39,player.z);
     camera.lookAt(cameraLook);
   }else{
     const move=Math.min(1,velocity.length()/4.35);
     const bob=move*Math.sin(now*.0102)*.006;
-    const eyeY=player.y+2.03+bob;
+    const eyeY=player.y+visualGround+2.03+bob;
     camera.position.set(player.x,eyeY,player.z);
     const cp=Math.cos(pitch),sp=Math.sin(pitch),look=18;
     camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
@@ -4443,7 +4483,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.0.0-desktop-visual-revolution',
+  version:'5.0.1-avatar-grounding',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
@@ -4452,6 +4492,8 @@ window.KomoWorld={
   getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
   completeSocial:()=>completeJourney('social'),
   socialChallenge:socialChallengeEvent,
+  getAvatarGroundLift:(p)=>getAvatarGroundLift(p||player),
+  getVisualSurfaceOffset:(p)=>visualSurfaceOffsetAt(p||player),
   getChallengeState:()=>({date:challenges.date,progress:{...challenges.progress},done:{...challenges.done},points:challenges.points}),
   getCameraMode:()=>cameraMode,
   fastTravel,
