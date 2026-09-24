@@ -86,9 +86,9 @@ const copy={
     introButton:'ENTRER DANS MON WORLD',
     action:'ACTION',
     deskTitle:'Ouvrir le KŌMØ Desk',deskCopy:'Orientation · trajectoire · espaces',
-    twinTitle:'Entrer dans Functional Twin',twinCopy:'Comprendre votre mouvement dans le temps',
-    rehabTitle:'Entrer dans KŌMØ Fitness Club',rehabCopy:'Choisir une activité · programme quotidien · coach',
-    arenaTitle:'Entrer dans Arena',arenaCopy:'Performance · défis · communauté',
+    twinTitle:'Functional Twin',twinCopy:'Courez à travers le seuil · accès automatique · E pour entrer maintenant',
+    rehabTitle:'KŌMØ Fitness Club',rehabCopy:'Courez à travers le seuil · programme quotidien · coach',
+    arenaTitle:'Arena',arenaCopy:'Courez à travers le seuil · défis · communauté',
     libraryTitle:'Ouvrir la Library',libraryCopy:'Science · méthode · provenance',
     talksTitle:'Voir Talks',talksCopy:'Experts · événements · contenus',
     storeTitle:'Entrer dans KŌMØ Life',storeCopy:'Objets · Case 01 · éditions',
@@ -2789,7 +2789,7 @@ function keybindHtml(){
     back:locale==='fr'?'RECULER':'BACK',
     left:locale==='fr'?'GAUCHE':'LEFT',
     right:locale==='fr'?'DROITE':'RIGHT',
-    sprint:locale==='fr'?'BOOST (COURSE AUTO)':'BOOST (AUTO RUN)',
+    sprint:locale==='fr'?'BOOST (COURSE)':'BOOST (RUN)',
     action:'ACTION',camera:'CAMERA',guide:'GUIDE',menu:'MENU'
   };
   return `<div class="keybind-grid">${Object.keys(labels).map(k=>`<div class="keybind-row"><span>${labels[k]}</span><button type="button" data-keybind="${k}">${keybinds[k].map(keyLabel).join(' / ')}</button></div>`).join('')}</div><div class="keybind-note">${locale==='fr'?'Clique sur une commande puis appuie sur la touche à utiliser. Les réglages sont sauvegardés sur cet appareil.':'Click a command, then press the key you want to use. Settings are saved on this device.'}</div>`;
