@@ -739,7 +739,7 @@ function npcNameTag(text,sub=''){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
   sp.scale.set(2.05,.58,1);sp.position.y=2.48;sp.renderOrder=25;return sp;
 }
-function makeNpc(parent,{role='visitor',label='Guest',quest=null,x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
+function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=null,x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
   const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);g.name='KOMO_NPC_'+role.toUpperCase();parent.add(g);
   const seed=Math.abs(Math.floor(x*31+z*17+phase*101));
   const skinColors=[0xe8c9ad,0xd0a27f,0xb27b58,0x7b543f,0x513a31];
@@ -793,14 +793,14 @@ function makeNpc(parent,{role='visitor',label='Guest',quest=null,x=0,y=0,z=0,sca
   [...g.children].forEach(child=>bodyRoot.add(child));g.add(bodyRoot);
 
   // label + contact shadow
-  const tag=npcNameTag(label,role==='staff'?'KŌMØ STAFF':role==='coach'?'COACH':'GUEST');bodyRoot.add(tag);
+  const tag=npcNameTag(label,functionLabel||(role==='staff'?'KŌMØ STAFF':role==='coach'?'COACH':'GUEST'));bodyRoot.add(tag);
   const shadow=new THREE.Mesh(new THREE.CircleGeometry(.34,20),new THREE.MeshBasicMaterial({color:0x27352d,transparent:true,opacity:.11,depthWrite:false}));
   shadow.rotation.x=-Math.PI/2;shadow.position.y=.012;g.add(shadow);
 
   const points=route.length?route.map(p=>new THREE.Vector3(p[0],p[1]??y,p[2])):[new THREE.Vector3(x,y,z)];
   const seg=[],cum=[0];let total=0;
   for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total)}
-  g.userData.npc={role,label,quest,bodyRoot,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
+  g.userData.npc={role,label,quest,functionLabel,bodyRoot,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
   living.npcs.push(g);return g;
 }
 function updateNpc(npc,t,index){
@@ -2170,41 +2170,41 @@ glow(kinetic,0xf0c98d,1.7,7,0,0,0);
 
 // V1.9 ambient people — anonymous social life, separate from real Pulse members.
 const npcRoot=new THREE.Group();npcRoot.name='KOMO_AMBIENT_PEOPLE_V19';world.add(npcRoot);
-makeNpc(npcRoot,{role:'staff',label:'Maya',x:-2.8,y:0,z:11.2,outfit:'sage',speed:.34,phase:.12,route:[
+makeNpc(npcRoot,{role:'staff',label:'Maya',quest:'maya',functionLabel:'MOVEMENT GUIDE',x:-2.8,y:0,z:11.2,outfit:'sage',speed:.34,phase:.12,route:[
   [-2.8,0,11.2],[-2.8,0,5.8],[-1.6,0,1.8],[-3.2,0,-2.5],[-4.0,0,4.2]
 ]});
-makeNpc(npcRoot,{role:'visitor',label:'Noah',x:3.6,y:0,z:27.8,outfit:'cream',speed:.54,phase:.36,route:[
+makeNpc(npcRoot,{role:'visitor',label:'Noah',quest:'noah',functionLabel:'WORLD RUNNER',x:3.6,y:0,z:27.8,outfit:'cream',speed:.54,phase:.36,route:[
   [3.6,0,27.8],[2.5,0,18.7],[2.8,0,10.8],[3.6,0,2.5],[4.2,0,-6.2],[3.0,0,-14.4]
 ]});
 if(!lowPower){
-  makeNpc(npcRoot,{role:'visitor',label:'Elena',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
+  makeNpc(npcRoot,{role:'visitor',label:'Elena',quest:'elena',functionLabel:'BALANCE GUIDE',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
   [-3.8,0,-4.5],[-3.2,0,-12.0],[-4.8,0,-20.4],[-1.4,0,-24.2],[1.8,0,-19.2],[.8,0,-8.0]
 ]});
-makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'fitness',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
+makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'leo',functionLabel:'FITNESS COACH',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
   [5.4,0,-18.4],[5.2,0,-10.0],[4.8,0,-2.2],[3.7,0,5.2],[5.5,0,9.0]
 ]});
-  makeNpc(npcRoot,{role:'visitor',label:'Sofia',x:7.0,y:0,z:5.8,outfit:'bronze',speed:.28,phase:.22,route:[
+  makeNpc(npcRoot,{role:'visitor',label:'Sofia',quest:'sofia',functionLabel:'LIFE CURATOR',x:7.0,y:0,z:5.8,outfit:'bronze',speed:.28,phase:.22,route:[
     [7.0,0,5.8],[9.2,0,4.2],[9.0,0,1.2],[7.2,0,.4],[7.4,0,3.0]
   ]});
-  makeNpc(npcRoot,{role:'staff',label:'Camille',quest:'twin',x:-6.3,y:0,z:6.7,outfit:'sage',speed:.24,phase:.43,route:[
+  makeNpc(npcRoot,{role:'staff',label:'Camille',quest:'camille',functionLabel:'TWIN GUIDE',x:-6.3,y:0,z:6.7,outfit:'sage',speed:.24,phase:.43,route:[
     [-6.3,0,6.7],[-7.1,0,4.2],[-5.7,0,2.5],[-4.8,0,6.0],[-6.3,0,7.2]
   ]});
-  makeNpc(npcRoot,{role:'visitor',label:'Lina',x:5.5,y:0,z:-11.8,outfit:'cream',speed:.25,phase:.67,route:[
+  makeNpc(npcRoot,{role:'visitor',label:'Lina',quest:'lina',functionLabel:'COMMUNITY HOST',x:5.5,y:0,z:-11.8,outfit:'cream',speed:.25,phase:.67,route:[
     [5.5,0,-11.8],[6.8,0,-9.7],[5.9,0,-7.2],[4.8,0,-9.4],[5.5,0,-12.2]
   ]});
-  makeNpc(npcRoot,{role:'staff',label:'Alex',x:-8.72,y:UPPER_Y,z:4.8,outfit:'sage',speed:.30,phase:.48,route:[
+  makeNpc(npcRoot,{role:'staff',label:'Alex',quest:'alex',functionLabel:'SCIENCE GUIDE',x:-8.72,y:UPPER_Y,z:4.8,outfit:'sage',speed:.30,phase:.48,route:[
     [-8.72,UPPER_Y,4.8],[-8.72,UPPER_Y,-4.8],[-8.72,UPPER_Y,-14.8],[-4.2,UPPER_Y,-21.2]
   ]});
-  makeNpc(npcRoot,{role:'visitor',label:'Mila',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
+  makeNpc(npcRoot,{role:'visitor',label:'Mila',quest:'mila',functionLabel:'LEVEL 2 HOST',x:8.72,y:UPPER_Y,z:-3.0,outfit:'cream',speed:.31,phase:.72,route:[
     [8.72,UPPER_Y,-3.0],[8.72,UPPER_Y,-10.5],[8.72,UPPER_Y,-18.0],[3.6,UPPER_Y,-21.2],[.4,UPPER_Y,-21.2]
   ]});
-  makeNpc(npcRoot,{role:'coach',label:'Théo',quest:'arena',x:6.0,y:0,z:-20.5,outfit:'bronze',speed:.26,phase:.15,route:[
+  makeNpc(npcRoot,{role:'coach',label:'Théo',quest:'theo',functionLabel:'ARENA COACH',x:6.0,y:0,z:-20.5,outfit:'bronze',speed:.26,phase:.15,route:[
     [6.0,0,-20.5],[7.4,0,-17.8],[6.2,0,-14.6],[4.8,0,-17.2],[6.0,0,-20.5]
   ]});
-  makeNpc(npcRoot,{role:'coach',label:'Nora',quest:'district',x:-7.5,y:0,z:55.5,outfit:'sage',speed:.36,phase:.35,route:[
+  makeNpc(npcRoot,{role:'coach',label:'Nora',quest:'nora',functionLabel:'DISTRICT GUIDE',x:-7.5,y:0,z:55.5,outfit:'sage',speed:.36,phase:.35,route:[
     [-7.5,0,55.5],[-3.0,0,60.5],[0,0,62.5],[3.0,0,60.5],[7.5,0,55.5],[0,0,58.0]
   ]});
-  makeNpc(npcRoot,{role:'visitor',label:'Jules',x:10.5,y:0,z:64.0,outfit:'sand',speed:.31,phase:.58,route:[
+  makeNpc(npcRoot,{role:'visitor',label:'Jules',quest:'jules',functionLabel:'RECOVERY HOST',x:10.5,y:0,z:64.0,outfit:'sand',speed:.31,phase:.58,route:[
     [10.5,0,64.0],[15.0,0,68.0],[10.5,0,72.5],[4.2,0,70.0],[3.5,0,64.0]
   ]});
 }
@@ -2957,7 +2957,7 @@ function updateJourneyUI(){
 function completeJourney(id,{silent=false}={}){
   const mission=JOURNEY_MISSIONS.find(m=>m.id===id);if(!mission||journey.done[id])return false;
   const before=journeyLevelForXp(journey.xp);
-  journey.done[id]=Date.now();journey.xp+=mission.xp;saveJourney();updateJourneyUI();
+  journey.done[id]=Date.now();journey.xp+=mission.xp;saveJourney();updateJourneyUI();if(typeof syncNpcMissionByLink==='function')syncNpcMissionByLink('journey',id);
   journeyHud.classList.remove('pulse');void journeyHud.offsetWidth;journeyHud.classList.add('pulse');
   const after=journeyLevelForXp(journey.xp);
   if(!silent){
@@ -2985,6 +2985,33 @@ function showJourneyPanel(){
 }
 journeyHud.addEventListener('click',showJourneyPanel);
 
+// V5.4 Daily Health bridge — normalised input for Pulse / Apple Health / Health Connect / wearables.
+const DAILY_HEALTH_KEY='komo_world_daily_health_v1';
+const HEALTH_BRIDGE_CHANNEL='komo-health-v1';
+function loadDailyHealth(){try{return JSON.parse(localStorage.getItem(DAILY_HEALTH_KEY)||'null')}catch{return null}}
+let dailyHealth=loadDailyHealth();
+function normaliseDailyHealth(input={}){
+  const n=v=>Number.isFinite(Number(v))?Number(v):null;
+  return {date:String(input.date||localDateKey()),source:String(input.source||'CONNECTED').slice(0,32),steps:n(input.steps),active_minutes:n(input.active_minutes),sleep_hours:n(input.sleep_hours),resting_hr:n(input.resting_hr),hrv_ms:n(input.hrv_ms),pain:n(input.pain),recovery:n(input.recovery),updated_at:Date.now()};
+}
+function ingestDailyHealth(input){
+  dailyHealth=normaliseDailyHealth(input);try{localStorage.setItem(DAILY_HEALTH_KEY,JSON.stringify(dailyHealth))}catch{}
+  updateHealthHUD();window.dispatchEvent(new CustomEvent('komo:daily-health',{detail:dailyHealth}));return dailyHealth;
+}
+function dailyHealthHtml(){
+  const h=dailyHealth;
+  if(!h)return '<div class="priority-card"><b>'+(locale==='fr'?'DAILY HEALTH · NON CONNECTÉ':'DAILY HEALTH · NOT CONNECTED')+'</b>'+(locale==='fr'?'World est prêt à recevoir les données quotidiennes depuis Pulse, Apple Health, Health Connect ou une source wearable normalisée.':'World is ready to receive daily data from Pulse, Apple Health, Health Connect or a normalised wearable source.')+'</div>';
+  const v=(x,s='')=>x==null?'—':x+s;
+  return '<div class="results-section-title"><span>DAILY HEALTH</span><b>'+h.source+' · '+h.date+'</b></div><div class="panel-grid"><div><span>STEPS</span><b>'+v(h.steps)+'</b></div><div><span>ACTIVE</span><b>'+v(h.active_minutes,' min')+'</b></div><div><span>SLEEP</span><b>'+v(h.sleep_hours,' h')+'</b></div><div><span>REST HR</span><b>'+v(h.resting_hr,' bpm')+'</b></div><div><span>HRV</span><b>'+v(h.hrv_ms,' ms')+'</b></div><div><span>RECOVERY</span><b>'+v(h.recovery,'%')+'</b></div></div>';
+}
+function showDailyHealthConnect(){
+  const status=dailyHealth?(locale==='fr'?'CONNECTÉ · '+dailyHealth.source:'CONNECTED · '+dailyHealth.source):(locale==='fr'?'NON CONNECTÉ':'NOT CONNECTED');
+  const html='<div class="metric-hero"><div><span>DAILY HEALTH</span><strong>'+status+'</strong></div><div><span>DATE</span><strong>'+(dailyHealth?.date||localDateKey())+'</strong></div></div>'+dailyHealthHtml()+'<div class="panel-grid"><div><span>iOS</span><b>Apple Health → Pulse</b></div><div><span>ANDROID</span><b>Health Connect → Pulse</b></div><div><span>WEARABLES</span><b>API → Pulse</b></div><div><span>WORLD</span><b>Health Bridge</b></div></div><div class="data-note">'+(locale==='fr'?'Le navigateur ne lit pas directement Apple Health. La connexion réelle passera par Pulse/app mobile ou un connecteur autorisé, puis World recevra uniquement les champs normalisés nécessaires.':'The browser cannot read Apple Health directly. The real connection will go through Pulse/mobile app or an authorised connector; World receives only the normalised fields it needs.')+'</div>';
+  openPanel('DAILY HEALTH',locale==='fr'?'Connecter vos données quotidiennes.':'Connect your daily data.',html,[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},{label:'PULSE',primary:true,onClick:()=>{location.href='/pulse/'}}]);
+}
+try{const hc=new BroadcastChannel(HEALTH_BRIDGE_CHANNEL);hc.addEventListener('message',e=>{if(e.data?.type==='komo:daily-health'&&e.data.payload)ingestDailyHealth(e.data.payload)})}catch{}
+window.addEventListener('message',e=>{if(e.data?.type==='komo:daily-health'&&e.data.payload)ingestDailyHealth(e.data.payload)});
+
 // V3.2 Health Snapshot — movement-oriented overview, separate from World XP.
 function updateHealthHUD(){
   const snap=current(),d=snap.domains||{};
@@ -2996,7 +3023,7 @@ function updateHealthHUD(){
   healthMuscleEl.textContent=Math.round(Number(d.muscle)||0);
   healthBalanceEl.textContent=Math.round(Number(d.balance)||0);
   healthCapacityEl.textContent=Math.round(Number(d.endurance)||0);
-  healthSourceEl.textContent='DEMO';
+  healthSourceEl.textContent=dailyHealth?.source||'DEMO';
   if(menuMotion)menuMotion.innerHTML=score+'<small>/100</small>';
   if(menuAge)menuAge.textContent=Math.round(Number(snap.motion_age)||0);
   if(typeof healthStationBars!=='undefined'){
@@ -3078,6 +3105,7 @@ function healthOverviewHtml(){
       <div class="results-section-title"><span>${locale==='fr'?'VOTRE PROFIL':'YOUR PROFILE'}</span><b>5 ${locale==='fr'?'domaines de mouvement':'movement domains'}</b></div>
       <div class="results-domains">${domainCards}</div>
 
+      ${dailyHealthHtml()}
       <div class="results-section-title"><span>${locale==='fr'?'ÉVOLUTION':'TRAJECTORY'}</span><b>Baseline → Today</b></div>
       <div class="results-timeline">${timeline}</div>
 
@@ -3102,6 +3130,7 @@ function showHealthOverview(){
   closeWorldMenu();
   openPanel(locale==='fr'?'VOS RÉSULTATS MOTION':'YOUR MOTION RESULTS',locale==='fr'?'État actuel · évolution · domaines.':'Current state · trajectory · domains.',healthOverviewHtml(),[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:'DAILY HEALTH',onClick:showDailyHealthConnect},
     {label:locale==='fr'?'FITNESS':'FITNESS',onClick:enterRehab},
     {label:locale==='fr'?'EXPLORER LE TWIN':'EXPLORE TWIN',primary:true,onClick:enterTwin}
   ]);
@@ -3139,7 +3168,7 @@ function saveChallenges(){try{localStorage.setItem(CHALLENGE_KEY,JSON.stringify(
 function challengeProgress(id){return Number(challenges.progress[id])||0}
 function completeChallenge(id){
   const d=challengeDefs.find(x=>x.id===id);if(!d||challenges.done[id])return false;
-  challenges.progress[id]=d.target;challenges.done[id]=Date.now();challenges.points+=d.reward;saveChallenges();
+  challenges.progress[id]=d.target;challenges.done[id]=Date.now();challenges.points+=d.reward;saveChallenges();if(typeof syncNpcMissionByLink==='function')syncNpcMissionByLink('challenge',id);
   journey.xp+=d.reward;saveJourney();updateJourneyUI();
   notify('+'+d.reward+' XP · '+d.title[locale]);return true;
 }
@@ -3174,6 +3203,41 @@ function showChallenges(){
   ]);
 }
 challengesToggle.addEventListener('click',()=>{closeWorldMenu();showChallenges()});
+
+// V5.4 NPC functions + daily missions.
+const NPC_MISSION_KEY='komo_world_npc_missions_v1';
+const NPC_MISSIONS={
+  maya:{name:'Maya',role:{fr:'GUIDE MOUVEMENT',en:'MOVEMENT GUIDE'},type:'reps',target:15,reward:30,unit:{fr:'squats',en:'squats'},title:{fr:'15 squats avec Maya',en:'15 squats with Maya'},body:{fr:'Maya te lance un défi simple : réalise 15 squats contrôlés. Valide chaque répétition dans World ; la détection capteur pourra ensuite remplacer cette validation.',en:'Maya gives you a simple challenge: complete 15 controlled squats. Confirm each rep in World; sensor detection can replace this later.'}},
+  noah:{name:'Noah',role:{fr:'RUNNER DU WORLD',en:'WORLD RUNNER'},type:'distance',target:80,reward:25,unit:{fr:'m',en:'m'},title:{fr:'Run 80 m',en:'Run 80 m'},body:{fr:'Noah te propose une boucle de 80 mètres. La distance est comptée automatiquement dès que tu acceptes.',en:'Noah challenges you to an 80-metre run. Distance is counted automatically once accepted.'}},
+  elena:{name:'Elena',role:{fr:'GUIDE ÉQUILIBRE',en:'BALANCE GUIDE'},type:'timer',target:30,reward:20,unit:{fr:'s',en:'s'},title:{fr:'30 secondes d’équilibre',en:'30-second balance hold'},body:{fr:'Tiens une position stable pendant 30 secondes. Le minuteur World valide la durée ; une mesure instrumentée pourra ensuite prendre le relais.',en:'Hold a stable position for 30 seconds. World times the duration; instrumented measurement can take over later.'}},
+  leo:{name:'Leo',role:{fr:'COACH FITNESS',en:'FITNESS COACH'},type:'linked',link:['challenge','fitness'],reward:30,target:1,unit:{fr:'séance',en:'session'},title:{fr:'Terminer la séance Fitness',en:'Complete the Fitness session'},body:{fr:'Leo te confie la séance KŌMØ Fitness du jour. Termine-la dans le Club pour valider sa mission.',en:'Leo assigns today’s KŌMØ Fitness session. Complete it in the Club to clear his mission.'},go:'rehab'},
+  sofia:{name:'Sofia',role:{fr:'CURATRICE LIFE',en:'LIFE CURATOR'},type:'linked',link:['challenge','life_item'],reward:20,target:1,unit:{fr:'objet',en:'item'},title:{fr:'Découvrir un objet KŌMØ Life',en:'Discover a KŌMØ Life object'},body:{fr:'Sofia te demande de choisir et d’explorer un objet de la collection KŌMØ Life.',en:'Sofia asks you to choose and explore one object from the KŌMØ Life collection.'},go:'life'},
+  camille:{name:'Camille',role:{fr:'GUIDE FUNCTIONAL TWIN',en:'FUNCTIONAL TWIN GUIDE'},type:'linked',link:['challenge','twin'],reward:25,target:1,unit:{fr:'visite',en:'visit'},title:{fr:'Entrer dans Functional Twin',en:'Enter Functional Twin'},body:{fr:'Camille t’oriente vers ton Twin : entre dans la salle et consulte ta trajectoire.',en:'Camille guides you to your Twin: enter the room and review your trajectory.'},go:'twin'},
+  lina:{name:'Lina',role:{fr:'HÔTE COMMUNAUTÉ',en:'COMMUNITY HOST'},type:'social',target:3,reward:25,unit:{fr:'personnes',en:'people'},title:{fr:'Parler à 3 personnes',en:'Talk to 3 people'},body:{fr:'Lina te propose de rencontrer trois personnages différents du World. Chaque conversation unique compte.',en:'Lina asks you to meet three different World characters. Each unique conversation counts.'}},
+  alex:{name:'Alex',role:{fr:'GUIDE SCIENCE',en:'SCIENCE GUIDE'},type:'linked',link:['journey','library'],reward:20,target:1,unit:{fr:'lecture',en:'visit'},title:{fr:'Consulter la Science Library',en:'Visit the Science Library'},body:{fr:'Alex te demande de consulter la Library pour comprendre la méthode et la provenance des mesures.',en:'Alex asks you to visit the Library to understand methodology and data provenance.'},go:'library'},
+  mila:{name:'Mila',role:{fr:'HÔTE LEVEL 2',en:'LEVEL 2 HOST'},type:'linked',link:['journey','upper'],reward:25,target:1,unit:{fr:'niveau',en:'level'},title:{fr:'Atteindre le Level 2',en:'Reach Level 2'},body:{fr:'Mila t’attend à l’étage : rejoins les galeries hautes du World.',en:'Mila is waiting upstairs: reach the upper galleries of World.'},go:'upper'},
+  theo:{name:'Théo',role:{fr:'COACH ARENA',en:'ARENA COACH'},type:'linked',link:['challenge','arena_visit'],reward:25,target:1,unit:{fr:'entrée',en:'visit'},title:{fr:'Entrer dans Arena',en:'Enter Arena'},body:{fr:'Théo te demande de franchir le seuil Arena et d’ouvrir le Challenge Board.',en:'Théo asks you to enter Arena and open the Challenge Board.'},go:'arena'},
+  nora:{name:'Nora',role:{fr:'GUIDE DISTRICT',en:'DISTRICT GUIDE'},type:'linked',link:['challenge','fountain'],reward:20,target:1,unit:{fr:'lieu',en:'place'},title:{fr:'Trouver la Grande Fontaine',en:'Find the Grand Fountain'},body:{fr:'Nora t’envoie vers le cœur du District : trouve la Grande Fontaine.',en:'Nora sends you to the heart of the District: find the Grand Fountain.'},go:'arrival'},
+  jules:{name:'Jules',role:{fr:'HÔTE RECOVERY',en:'RECOVERY HOST'},type:'timer',target:45,reward:20,unit:{fr:'s',en:'s'},title:{fr:'45 secondes de recovery',en:'45-second recovery reset'},body:{fr:'Jules propose une courte pause : reste 45 secondes en récupération calme avant de repartir.',en:'Jules proposes a short reset: spend 45 seconds in calm recovery before moving on.'}}
+};
+function loadNpcMissionState(){const date=localDateKey();try{const raw=JSON.parse(localStorage.getItem(NPC_MISSION_KEY)||'{}');if(raw.date===date)return {date,missions:raw.missions||{},talked:Array.isArray(raw.talked)?raw.talked:[]}}catch{}return {date,missions:{},talked:[]}}
+const npcMissionState=loadNpcMissionState();
+let npcMissionTimer=null;
+function saveNpcMissionState(){try{localStorage.setItem(NPC_MISSION_KEY,JSON.stringify(npcMissionState))}catch{}}
+function npcMissionRecord(id){const d=NPC_MISSIONS[id];if(!d)return null;return npcMissionState.missions[id]||(npcMissionState.missions[id]={accepted:0,progress:0,done:0})}
+function completeNpcMission(id){const d=NPC_MISSIONS[id],r=npcMissionRecord(id);if(!d||!r||r.done)return false;r.progress=d.target;r.done=Date.now();saveNpcMissionState();journey.xp+=d.reward;saveJourney();updateJourneyUI();notify('+'+d.reward+' XP · '+d.name.toUpperCase());return true}
+function npcLinkDone(d){if(!d?.link)return false;const [kind,id]=d.link;return kind==='challenge'?!!challenges.done[id]:kind==='journey'?!!journey.done[id]:false}
+function syncNpcMission(id){const d=NPC_MISSIONS[id],r=npcMissionRecord(id);if(!d||!r?.accepted||r.done)return false;if(d.type==='linked'&&npcLinkDone(d))return completeNpcMission(id);if(d.type==='social'){r.progress=Math.min(d.target,npcMissionState.talked.filter(n=>n!=='Lina').length);saveNpcMissionState();if(r.progress>=d.target)return completeNpcMission(id)}return false}
+function syncNpcMissionByLink(kind,id){Object.entries(NPC_MISSIONS).forEach(([key,d])=>{if(d.link?.[0]===kind&&d.link?.[1]===id)syncNpcMission(key)})}
+function addNpcMissionProgress(id,amount=1){const d=NPC_MISSIONS[id],r=npcMissionRecord(id);if(!d||!r?.accepted||r.done)return false;r.progress=Math.min(d.target,(Number(r.progress)||0)+Math.max(0,Number(amount)||0));saveNpcMissionState();if(r.progress>=d.target)completeNpcMission(id);return true}
+function acceptNpcMission(id){const r=npcMissionRecord(id);if(!r)return false;if(!r.accepted)r.accepted=Date.now();saveNpcMissionState();syncNpcMission(id);showNpcMission(id);return true}
+function registerNpcTalk(label){if(label&&!npcMissionState.talked.includes(label)){npcMissionState.talked.push(label);saveNpcMissionState()}syncNpcMission('lina')}
+function npcMissionGo(id){const d=NPC_MISSIONS[id];if(!d)return;if(d.go==='rehab')return enterRehab();if(d.go==='life')return fastTravel('life');if(d.go==='twin')return enterTwin();if(d.go==='library')return showLibrary();if(d.go==='upper')return fastTravel('upper');if(d.go==='arena')return enterArena();if(d.go==='arrival')return fastTravel('arrival')}
+function stopNpcMissionTimer(){if(npcMissionTimer){clearInterval(npcMissionTimer);npcMissionTimer=null}}
+function startNpcTimedMission(id){const d=NPC_MISSIONS[id],r=npcMissionRecord(id);if(!d||d.type!=='timer'||r.done)return;if(!r.accepted){r.accepted=Date.now();saveNpcMissionState()}stopNpcMissionTimer();npcMissionTimer=setInterval(()=>{if(!panel.classList.contains('open')||panel.dataset.npcMission!==id){stopNpcMissionTimer();return}addNpcMissionProgress(id,1);const rr=npcMissionRecord(id),el=panelBody.querySelector('[data-npc-progress]'),bar=panelBody.querySelector('[data-npc-bar]');if(el)el.textContent=Math.round(rr.progress)+' / '+d.target+' '+d.unit[locale];if(bar)bar.style.width=Math.min(100,rr.progress/d.target*100)+'%';if(rr.done){stopNpcMissionTimer();showNpcMission(id)}},1000)}
+function addNpcRep(id){addNpcMissionProgress(id,1);showNpcMission(id)}
+function npcMissionHtml(id){const d=NPC_MISSIONS[id],r=npcMissionRecord(id);if(!d||!r)return '';syncNpcMission(id);const pct=Math.min(100,(Number(r.progress)||0)/d.target*100),status=r.done?'✓ '+(locale==='fr'?'TERMINÉ':'DONE'):r.accepted?(locale==='fr'?'MISSION ACTIVE':'MISSION ACTIVE'):(locale==='fr'?'À ACCEPTER':'READY');return '<div class="metric-hero"><div><span>'+d.role[locale]+'</span><strong>'+d.name+'</strong></div><div><span>REWARD</span><strong>+'+d.reward+'<em> XP</em></strong></div></div><p>'+d.body[locale]+'</p><div class="priority-card"><b>'+status+'</b>'+d.title[locale]+'</div><div class="challenge-card '+(r.done?'done':'')+'"><span><em>'+d.unit[locale].toUpperCase()+'</em><em data-npc-progress>'+Math.round(Number(r.progress)||0)+' / '+d.target+' '+d.unit[locale]+'</em></span><b>'+d.title[locale]+'</b><i><em data-npc-bar style="width:'+pct+'%"></em></i></div><div class="data-note">'+(locale==='fr'?'Les missions World récompensent l’engagement. Les validations physiques restent déclaratives tant qu’un capteur ou une source santé n’est pas connecté.':'World missions reward engagement. Physical validation is self-reported until a sensor or health source is connected.')+'</div>'}
+function showNpcMission(id){const d=NPC_MISSIONS[id];if(!d)return;const r=npcMissionRecord(id);syncNpcMission(id);const actions=[{label:locale==='fr'?'FERMER':'CLOSE',onClick:()=>{stopNpcMissionTimer();closePanel()}}];if(!r.accepted&&!r.done)actions.push({label:locale==='fr'?'ACCEPTER LE DÉFI':'ACCEPT CHALLENGE',primary:true,onClick:()=>acceptNpcMission(id)});else if(!r.done){if(d.type==='reps')actions.push({label:locale==='fr'?'+1 SQUAT':'+1 SQUAT',primary:true,onClick:()=>addNpcRep(id)});else if(d.type==='timer')actions.push({label:locale==='fr'?'LANCER LE CHRONO':'START TIMER',primary:true,onClick:()=>startNpcTimedMission(id)});else if(d.type==='linked')actions.push({label:locale==='fr'?'ALLER À LA MISSION':'GO TO MISSION',primary:true,onClick:()=>npcMissionGo(id)});else if(d.type==='distance'||d.type==='social')actions.push({label:locale==='fr'?'CONTINUER DANS LE WORLD':'CONTINUE IN WORLD',primary:true,onClick:closePanel})}openPanel(d.name.toUpperCase()+' · '+d.role[locale],d.title[locale],npcMissionHtml(id),actions);panel.dataset.npcMission=id}
 
 // V3.2 lightweight Avatar Studio.
 const AVATAR_KEY='komo_world_avatar_v1';
@@ -3942,48 +4006,10 @@ function showRehabCoach(){
 
 function showNpcConversation(npc){
   const d=npc?.userData?.npc;if(!d)return;
-  completeJourney('social');
-  const t=fitnessToday();
-  const quest=d.quest;
-  if(quest==='fitness'||quest==='district')completeChallenge('coach');
-
-  const questCopy={
-    fitness:{
-      title:{fr:'QUÊTE FITNESS',en:'FITNESS QUEST'},
-      body:{fr:t?'Ta séance du jour est prête : '+t.activity.title.fr+' · '+t.title+' · '+t.duration+' min. Termine-la pour valider le défi Fitness.':'Choisis ton activité dans KŌMØ Fit. Je construirai ensuite une séance différente chaque jour.',en:t?'Today’s session is ready: '+t.activity.title.en+' · '+t.title+' · '+t.duration+' min. Complete it to clear the Fitness challenge.':'Choose your activity in KŌMØ Fit. I will then build a different session every day.'},
-      button:()=>t?(locale==='fr'?'LANCER MA SÉANCE':'START SESSION'):'KŌMØ FIT',
-      action:()=>t?showFitnessToday():showRehab()
-    },
-    twin:{
-      title:{fr:'QUÊTE TWIN',en:'TWIN QUEST'},
-      body:{fr:'Commence par ton aperçu santé à l’entrée, puis ouvre Functional Twin. Le but est de comprendre quels domaines composent ta trajectoire de mouvement.',en:'Start with your health snapshot at the entrance, then open Functional Twin. The goal is to understand the domains that make up your movement trajectory.'},
-      button:()=>locale==='fr'?'OUVRIR LE TWIN':'OPEN TWIN',
-      action:enterTwin
-    },
-    arena:{
-      title:{fr:'QUÊTE ARENA',en:'ARENA QUEST'},
-      body:{fr:'Arena regroupe les défis d’engagement du World. Consulte le Challenge Board et complète les objectifs du jour.',en:'Arena brings together World engagement challenges. Check the Challenge Board and complete today’s objectives.'},
-      button:()=>locale==='fr'?'ALLER À ARENA':'GO TO ARENA',
-      action:enterArena
-    },
-    district:{
-      title:{fr:'QUÊTE DISTRICT',en:'DISTRICT QUEST'},
-      body:{fr:'Sors vers la grande fontaine, explore les pavillons et reviens avec le défi Fontaine validé.',en:'Head outside to the Grand Fountain, explore the pavilions and return with the Fountain challenge cleared.'},
-      button:()=>locale==='fr'?'ALLER À LA FONTAINE':'GO TO FOUNTAIN',
-      action:()=>fastTravel('arrival')
-    }
-  };
-  const q=questCopy[quest];
-  const defaultLines={
-    staff:{fr:'Bienvenue. L’aperçu santé et le Functional Twin sont le meilleur point de départ.',en:'Welcome. The health snapshot and Functional Twin are the best place to start.'},
-    coach:{fr:'Le KŌMØ Fitness Club propose un programme différent chaque jour.',en:'KŌMØ Fitness Club offers a different program every day.'},
-    visitor:{fr:'Je découvre aussi le World. KŌMØ Life relie l’expérience numérique aux objets du monde réel.',en:'I am exploring the World too. KŌMØ Life connects the digital experience with real-world objects.'}
-  };
-  const body=q?q.body[locale]:defaultLines[d.role]?.[locale]||defaultLines.visitor[locale];
-  const actions=[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}];
-  if(q)actions.push({label:q.button(),primary:true,onClick:q.action});
-  else actions.push({label:locale==='fr'?'VOIR LE JOURNEY':'VIEW JOURNEY',primary:true,onClick:showJourneyPanel});
-  openPanel(d.label||'KŌMØ MEMBER',q?q.title[locale]:(d.role==='staff'?'KŌMØ STAFF':d.role==='coach'?'FITNESS COACH':'WORLD GUEST'),`<p>${body}</p><div class="priority-card"><b>${q?q.title[locale]:'WORLD JOURNEY'}</b>${q?(locale==='fr'?'Objectif disponible · récompense XP':'Objective available · XP reward'):(locale==='fr'?'Échange social · +15 XP':'Social interaction · +15 XP')}</div>`,actions);
+  completeJourney('social');registerNpcTalk(d.label);
+  if(d.quest&&NPC_MISSIONS[d.quest]){syncNpcMission(d.quest);showNpcMission(d.quest);return}
+  const body=d.role==='coach'?(locale==='fr'?'Je peux te proposer un défi du jour.':'I can give you a daily challenge.'):(locale==='fr'?'Bienvenue dans KŌMØ World.':'Welcome to KŌMØ World.');
+  openPanel(d.label||'KŌMØ MEMBER',d.functionLabel||'WORLD MEMBER','<p>'+body+'</p>',[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}]);
 }
 function setMode(){
   mode='world';
@@ -4112,7 +4138,7 @@ function canMove(p){
 }
 function commitMove(next){
   const moved=player.distanceTo(next);player.copy(next);syncPlayerElevation();
-  if(mode==='world'&&moved>0)addChallengeProgress('distance',moved);
+  if(mode==='world'&&moved>0){addChallengeProgress('distance',moved);if(typeof addNpcMissionProgress==='function')addNpcMissionProgress('noah',moved);}
 }
 function tryMove(dx,dz){
   const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){commitMove(n);return true}
@@ -4732,7 +4758,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.3.0-run-flow',
+  version:'5.4.0-npc-health-bridge',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
@@ -4744,6 +4770,9 @@ window.KomoWorld={
   getAvatarGroundLift:(p)=>getAvatarGroundLift(p||player),
   getVisualSurfaceOffset:(p)=>visualSurfaceOffsetAt(p||player),
   getChallengeState:()=>({date:challenges.date,progress:{...challenges.progress},done:{...challenges.done},points:challenges.points}),
+  getNpcMissions:()=>({date:npcMissionState.date,missions:JSON.parse(JSON.stringify(npcMissionState.missions)),talked:[...npcMissionState.talked]}),
+  getDailyHealth:()=>dailyHealth?{...dailyHealth}:null,
+  ingestDailyHealth,
   getCameraMode:()=>cameraMode,
   fastTravel,
   joinPresence,
