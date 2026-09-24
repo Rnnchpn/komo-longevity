@@ -868,7 +868,7 @@ function npcNameTag(text,sub=''){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
   sp.scale.set(2.05,.58,1);sp.position.y=2.48;sp.renderOrder=25;return sp;
 }
-function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=null,x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage',body='auto',hairStyle='auto',age='adult',skinTone=null}={}){
+function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=null,x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage',body='auto',hairStyle='auto',age='adult',skinTone=null,task='auto'}={}){
   const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);g.name='KOMO_NPC_'+role.toUpperCase();parent.add(g);
   const seed=Math.abs(Math.floor(x*31+z*17+phase*101));
   const skinColors=[0xf0d2bc,0xdfb698,0xc99170,0xa46f51,0x7d533f,0x593d32];
@@ -887,6 +887,13 @@ function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=n
   const bodyW=bodyMode==='slim'?.91:bodyMode==='broad'?1.12:bodyMode==='soft'?1.07:1;
   const bodyD=bodyMode==='slim'?.94:bodyMode==='broad'?1.07:bodyMode==='soft'?1.10:1;
   const resolvedHair=hairStyle==='auto'?['short','crop','bob','bun','bald'][seed%5]:hairStyle;
+  const roleText=String(functionLabel||'').toUpperCase();
+  const resolvedTask=task!=='auto'?task:
+    (/LIBRARY|SCIENCE/.test(roleText)?'read':
+    /BOARDING|YACHT|MARINA/.test(roleText)?'observe':
+    /RETREAT|WELLNESS|POOL|NUTRITION/.test(roleText)?'lounge':
+    /FITNESS|ARENA|RUNNER|TRAINING|MOTION/.test(roleText)||role==='coach'?'train':
+    role==='staff'?'host':'social');
 
   // hips + torso + shoulders
   const hips=mesh(g,new THREE.CylinderGeometry(.235,.25,.28,14),trouser,0,.93,0,{cast});hips.scale.set(bodyW,1,bodyD);
@@ -929,6 +936,14 @@ function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=n
   }else if(seed%2===0){
     const bag=box(g,.26,.34,.12,MAT.walnut,.31,1.02,-.12,{cast});bag.rotation.z=-.08;
   }
+  if(resolvedTask==='read'){
+    const book=box(g,.30,.030,.22,MAT.walnut,0,1.22,.30,{cast:false});
+    book.rotation.x=-.28;
+  }else if(resolvedTask==='lounge'){
+    cyl(g,.055,.065,.16,MAT.ivory,.19,1.15,.27,10,{cast:false});
+  }else if(resolvedTask==='observe'&&role!=='staff'){
+    const phone=box(g,.095,.17,.018,MAT.blackened,.18,1.25,.27,{cast:false});phone.rotation.z=-.10;
+  }
 
   // V5.0.1 NPC grounding: body and label move together; contact shadow stays on the floor.
   const bodyRoot=new THREE.Group();bodyRoot.name='KOMO_NPC_BODY_GROUNDING_V501';
@@ -942,11 +957,11 @@ function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=n
   const points=route.length?route.map(p=>new THREE.Vector3(p[0],p[1]??y,p[2])):[new THREE.Vector3(x,y,z)];
   const seg=[],cum=[0];let total=0;
   for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total)}
-  g.userData.npc={role,label,quest,functionLabel,bodyRoot,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0,bodyMode,resolvedHair,age};
+  g.userData.npc={role,label,quest,functionLabel,bodyRoot,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0,bodyMode,resolvedHair,age,task:resolvedTask};
   living.npcs.push(g);return g;
 }
 function updateNpc(npc,t,index){
-  const d=npc.userData.npc;if(!d||!d.total)return;
+  const d=npc.userData.npc;if(!d)return;
   const distToCamera=camera.position.distanceTo(npc.position);
   const sameLevel=Math.abs(camera.position.y-(npc.position.y+1.7))<4.6;
   d.tag.visible=distToCamera<13&&sameLevel;
@@ -955,50 +970,89 @@ function updateNpc(npc,t,index){
     d.tag.scale.set(2.05*k,.58*k,1);
   }
 
-  // On low-power devices, far characters move at 10 Hz and don't animate limbs.
   const far=distToCamera>13;
   if(far&&t-d.lastFarUpdate<.10)return;
   if(far)d.lastFarUpdate=t;
 
-  if(d.routeClock==null){d.routeClock=(d.phase*d.total)%d.total;d.routeLastT=t}
-  const stepDt=THREE.MathUtils.clamp(t-d.routeLastT,0,.12);d.routeLastT=t;
-  const poiSlow=(Math.abs(npc.position.x)<4.5&&npc.position.z>13&&npc.position.z<20)
-    ||(npc.position.x>6.4&&npc.position.z>-1&&npc.position.z<7)
-    ||(Math.abs(npc.position.x)<5&&npc.position.z<-6&&npc.position.z>-11);
-  const idlePulse=poiSlow?(.5+.5*Math.sin(t*.66+d.phase*9+index*.7)):0;
-  const pace=poiSlow&&idlePulse>.76?THREE.MathUtils.lerp(.08,.34,(1-idlePulse)/.24):1;
-  d.routeClock=(d.routeClock+stepDt*d.speed*pace)%d.total;
-  const routeDist=d.routeClock;
-  let segIndex=0;
-  while(segIndex<d.seg.length-1&&routeDist>d.cum[segIndex+1])segIndex++;
-  const a=d.points[segIndex],b=d.points[(segIndex+1)%d.points.length],len=Math.max(.001,d.seg[segIndex]);
-  const u=(routeDist-d.cum[segIndex])/len;
-  npc.position.lerpVectors(a,b,u);
-  const npcSurface=visualSurfaceOffsetAt(npc.position);
-  // NPC shoe sole was authored around Y=.17, so only compensate finishes above that level.
-  const npcLift=Math.max(0,npcSurface-.169);
-  d.bodyRoot.position.y+=(npcLift-d.bodyRoot.position.y)*(1-Math.exp(-14*stepDt));
-  d.shadow.position.y=npcSurface+.004;
-  const dx=b.x-a.x,dz=b.z-a.z;
-  const desired=Math.atan2(dx,dz);
-  npc.rotation.y=desired;
-  if(poiSlow&&idlePulse>.76){
-    d.head.rotation.y=Math.sin(t*.95+index)*.22;
-    d.torso.rotation.y=Math.sin(t*.38+index)*.035;
-    d.leftArm.rotation.z=Math.sin(t*.72+index)*.055;
-    if(d.role==='staff')d.rightArm.rotation.x=-.20;
-  }else{
-    d.leftArm.rotation.z*=.82;
-    d.torso.rotation.y*=.82;
+  const hasRoute=d.total>.001;
+  const taskWave=.5+.5*Math.sin(t*(d.task==='train'?.62:.31)+d.phase*8.3+index*.41);
+  const taskThreshold=d.task==='read'?.36:d.task==='host'?.52:d.task==='observe'?.46:d.task==='lounge'?.42:d.task==='train'?.68:.60;
+  const performing=d.task!=='walk'&&taskWave>taskThreshold;
+
+  let routeA=null,routeB=null,pace=performing?.035:1;
+  if(hasRoute){
+    if(d.routeClock==null){d.routeClock=(d.phase*d.total)%d.total;d.routeLastT=t}
+    const stepDt=THREE.MathUtils.clamp(t-d.routeLastT,0,.12);d.routeLastT=t;
+    d.routeClock=(d.routeClock+stepDt*d.speed*pace)%d.total;
+    const routeDist=d.routeClock;
+    let segIndex=0;
+    while(segIndex<d.seg.length-1&&routeDist>d.cum[segIndex+1])segIndex++;
+    routeA=d.points[segIndex];routeB=d.points[(segIndex+1)%d.points.length];
+    const len=Math.max(.001,d.seg[segIndex]);
+    const u=(routeDist-d.cum[segIndex])/len;
+    npc.position.lerpVectors(routeA,routeB,u);
+    if(!performing){
+      const dx=routeB.x-routeA.x,dz=routeB.z-routeA.z;
+      npc.rotation.y=Math.atan2(dx,dz);
+    }
   }
 
+  const npcSurface=visualSurfaceOffsetAt(npc.position);
+  const npcLift=Math.max(0,npcSurface-.169);
+  const stepDt=hasRoute?THREE.MathUtils.clamp(t-(d.poseLastT??t-.016),0,.12):.016;d.poseLastT=t;
+  d.bodyRoot.position.y+=(npcLift-d.bodyRoot.position.y)*(1-Math.exp(-14*stepDt));
+  d.shadow.position.y=npcSurface+.004;
+
+  // Reset toward a neutral body before layering the current task.
+  d.leftArm.rotation.z*=.78;d.rightArm.rotation.z*=.78;
+  d.torso.rotation.y*=.76;d.torso.rotation.x*=.76;d.torso.rotation.z*=.76;
+  d.head.rotation.x*=.76;d.head.rotation.z*=.76;
+  d.leftKnee.rotation.x*=.72;d.rightKnee.rotation.x*=.72;
+
+  if(performing){
+    if(d.task==='read'){
+      d.head.rotation.x=.18;d.head.rotation.y=Math.sin(t*.33+index)*.05;
+      d.leftArm.rotation.x=-.62;d.rightArm.rotation.x=-.62;
+      d.leftElbow.rotation.x=.72;d.rightElbow.rotation.x=.72;
+      d.torso.rotation.x=.035;
+    }else if(d.task==='host'){
+      d.rightArm.rotation.x=-.34;d.rightElbow.rotation.x=.42;
+      d.leftArm.rotation.x=-.08;d.head.rotation.y=Math.sin(t*.55+index)*.16;
+      d.torso.rotation.y=Math.sin(t*.34+index)*.035;
+    }else if(d.task==='observe'){
+      d.head.rotation.y=Math.sin(t*.28+index)*.24;
+      d.rightArm.rotation.x=-.28;d.rightElbow.rotation.x=.48;
+      d.torso.rotation.y=Math.sin(t*.18+index)*.04;
+    }else if(d.task==='lounge'){
+      d.torso.rotation.y=Math.sin(t*.22+index)*.05;
+      d.head.rotation.y=Math.sin(t*.31+index)*.18;
+      d.leftArm.rotation.x=-.10;d.rightArm.rotation.x=-.18;
+      d.rightElbow.rotation.x=.30;
+    }else if(d.task==='train'){
+      const rep=.5+.5*Math.sin(t*1.55+d.phase*5);
+      d.leftKnee.rotation.x=.18+rep*.34;d.rightKnee.rotation.x=.18+rep*.34;
+      d.torso.rotation.x=.04+rep*.08;
+      d.leftArm.rotation.x=-.28+rep*.32;d.rightArm.rotation.x=-.28+rep*.32;
+    }else{
+      d.head.rotation.y=Math.sin(t*.46+index)*.18;
+      d.rightArm.rotation.x=-.18;d.rightElbow.rotation.x=.26;
+    }
+    d.leftLeg.rotation.x*=.64;d.rightLeg.rotation.x*=.64;
+    if(far){d.leftLeg.rotation.x=d.rightLeg.rotation.x=0}
+    return;
+  }
+
+  if(!hasRoute){
+    d.head.rotation.y=Math.sin(t*.35+index)*.10;
+    return;
+  }
   if(far){
     d.leftLeg.rotation.x=d.rightLeg.rotation.x=d.leftArm.rotation.x=d.rightArm.rotation.x=0;
     return;
   }
 
   const cadence=t*d.speed*5.25+index*.72;
-  const stride=Math.sin(cadence)*pace,half=Math.sin(cadence+Math.PI*.5);
+  const stride=Math.sin(cadence);
   d.leftLeg.rotation.x=stride*.38;d.rightLeg.rotation.x=-stride*.38;
   d.leftKnee.rotation.x=Math.max(0,-stride)*.30;d.rightKnee.rotation.x=Math.max(0,stride)*.30;
   d.leftArm.rotation.x=-stride*.29;d.rightArm.rotation.x=stride*.29;
@@ -4108,7 +4162,7 @@ const fitnessStatusBars=[];
 const player=new THREE.Vector3(0,0,14.55);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
-let cameraMode='third';
+let cameraMode='first';
 let thirdPersonDistance=5.35;
 const playerAvatar=makePlayerAvatar();
 const komoMascot=makeKomoMascotV71();
@@ -4690,14 +4744,17 @@ function openWorldMenu(){
   closePanel();worldMenu.classList.add('open');worldMenu.setAttribute('aria-hidden','false');velocity.set(0,0,0);syncUiOpen();
 }
 function toggleWorldMenu(){worldMenu.classList.contains('open')?closeWorldMenu():openWorldMenu()}
-function setCameraMode(next){
-  cameraMode=next==='first'?'first':'third';
-  document.body.classList.toggle('camera-third',cameraMode==='third');
-  playerAvatar.visible=cameraMode==='third';
-  cameraToggle.textContent='CAMERA · '+(cameraMode==='third'?'3RD':'1ST');
+function setCameraMode(){
+  cameraMode='first';
+  document.body.classList.remove('camera-third');
+  playerAvatar.visible=false;
+  if(cameraToggle)cameraToggle.textContent='CAMERA · 1ST';
 }
-function toggleCamera(){setCameraMode(cameraMode==='third'?'first':'third')}
-setCameraMode('third');
+function toggleCamera(){
+  setCameraMode('first');
+  notify(locale==='fr'?'CAMÉRA · PREMIÈRE PERSONNE':'CAMERA · FIRST PERSON');
+}
+setCameraMode('first');
 const travelPoints={
   arrival:{mode:'world',x:0,y:0,z:58.5,yaw:Math.PI,level:0},
   hall:{mode:'world',x:0,y:0,z:14.55,yaw:0,level:0},
@@ -4807,6 +4864,7 @@ function updateJourneyGuide(now){
 setGuideEnabled(true);
 function fastTravel(id){
   const p=travelPoints[id];if(!p)return;
+  setCameraMode('first');
   closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
   setTimeout(()=>{
     setMode(p.mode);playerLevel=p.level;player.set(p.x,p.y,p.z);yaw=targetYaw=p.yaw;pitch=targetPitch=-.035;syncPlayerElevation();updateLocation();if(id==='upper')completeJourney('upper');else if(['twin','rehab','arena','life'].includes(id))completeJourney(id);
@@ -4817,6 +4875,7 @@ document.querySelectorAll('[data-fast-travel]').forEach(btn=>btn.addEventListene
 
 function joinPresence(target){
   if(!target)return false;
+  setCameraMode('first');
   const zone=['world','twin','rehab','arena'].includes(target.zone)?target.zone:'world';
   const tx=Number(target.x)||0,tz=Number(target.z)||0,ty=Number(target.y)||0,tyaw=Number(target.yaw)||0;
   closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
@@ -5761,11 +5820,12 @@ function updateCamera(now,dt){
     cameraLook.set(player.x,player.y+visualGround+1.05+pitch*.34,player.z-.55);
     camera.lookAt(cameraLook);
   }else{
-    const desiredFov=61;
+    const desiredFov=68;
     if(Math.abs(camera.fov-desiredFov)>.01){camera.fov+=(desiredFov-camera.fov)*(1-Math.exp(-6*dt));camera.updateProjectionMatrix()}
     const move=Math.min(1,velocity.length()/AUTO_RUN_SPEED);
-    const bob=move*Math.sin(now*.0102)*.006;
-    const eyeY=player.y+visualGround+2.03+bob;
+    const bob=move*Math.sin(now*.0092)*.0042;
+    const breath=(1-move)*Math.sin(now*.00125)*.0018;
+    const eyeY=player.y+visualGround+1.72+bob+breath;
     camera.position.set(player.x,eyeY,player.z);
     const cp=Math.cos(pitch),sp=Math.sin(pitch),look=18;
     camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
