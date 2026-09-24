@@ -5633,8 +5633,16 @@ function showNpcConversation(npc){
   const d=npc?.userData?.npc;if(!d)return;
   completeJourney('social');registerNpcTalk(d.label);
   if(d.quest&&NPC_MISSIONS[d.quest]){syncNpcMission(d.quest);showNpcMission(d.quest);return}
-  const body=d.role==='coach'?(locale==='fr'?'Je peux te proposer un défi du jour.':'I can give you a daily challenge.'):(locale==='fr'?'Bienvenue dans KŌMØ World.':'Welcome to KŌMØ World.');
-  openPanel(d.label||'KŌMØ MEMBER',d.functionLabel||'WORLD MEMBER','<p>'+body+'</p>',[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}]);
+  const taskCopy={
+    read:{fr:'Je consulte la Science Library et les sources KŌMØ.',en:'I am reviewing the Science Library and KŌMØ sources.'},
+    host:{fr:'Je m’occupe de l’accueil et de l’orientation des visiteurs.',en:'I am hosting and guiding visitors through the space.'},
+    observe:{fr:'Je prends un moment pour observer le lieu et préparer la prochaine étape.',en:'I am observing the space and preparing the next step.'},
+    lounge:{fr:'Je profite d’un temps calme dans l’expérience KŌMØ.',en:'I am taking a quiet moment inside the KŌMØ experience.'},
+    train:{fr:'Je suis une séquence d’entraînement dans cette zone.',en:'I am following a training sequence in this area.'},
+    social:{fr:'Je retrouve d’autres membres du World.',en:'I am meeting other World members.'}
+  };
+  const body=d.role==='coach'?(locale==='fr'?'Je guide les séances et les mouvements de cette zone.':'I guide sessions and movement in this area.'):(taskCopy[d.task]?.[locale]||(locale==='fr'?'Bienvenue dans KŌMØ World.':'Welcome to KŌMØ World.'));
+  openPanel(d.label||'KŌMØ MEMBER',(d.functionLabel||'WORLD MEMBER')+' · '+String(d.task||'').toUpperCase(),'<p>'+body+'</p>',[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}]);
 }
 function setMode(){
   mode='world';
@@ -5989,7 +5997,7 @@ function updateLocation(){
   if(inTwinZone()){label='FUNCTIONAL TWIN';purpose=locale==='fr'?'COMPRENDRE VOTRE MOUVEMENT':'UNDERSTAND YOUR MOVEMENT';nav='twin';completeJourney('twin',{silent:true})}
   else if(inFitnessZone()){label='KŌMØ FITNESS CLUB';purpose=locale==='fr'?'BOUGER · S’ENTRAÎNER · PROGRESSER':'MOVE · TRAIN · PROGRESS';nav='';completeJourney('rehab',{silent:true})}
   else if(inArenaZone()){label='ARENA';purpose=locale==='fr'?'DÉFIS · PROGRESSION · COMMUNAUTÉ':'CHALLENGES · PROGRESSION · COMMUNITY';nav='';completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
-  else if(inLibraryZone()){label='SCIENCE LIBRARY';purpose=locale==='fr'?'SCIENCE · MÉTHODE · SOURCES':'SCIENCE · METHOD · SOURCES';nav='';completeJourney('library',{silent:true})}
+  else if(inLibraryZone()){label='SCIENCE LIBRARY';purpose=locale==='fr'?'SCIENCE · MÉTHODE · SOURCES':'SCIENCE · METHOD · SOURCES';nav='library';completeJourney('library',{silent:true})}
   else if(inMarinaZone()){label='KŌMØ MARINA';purpose=locale==='fr'?'YACHTING · HOSPITALITY · RETREATS':'YACHTING · HOSPITALITY · RETREATS';nav=''}
   else if(inVillaZone()){label='RETREAT VILLA';purpose=locale==='fr'?'PRIVATE LONGEVITY EXPERIENCE':'PRIVATE LONGEVITY EXPERIENCE';nav=''}
   else if(inMarinaLink()){label='MARINA PROMENADE';purpose=locale==='fr'?'VERS LE PORT & YACHTING':'TO MARINA & YACHTING';nav=''}
@@ -6012,7 +6020,7 @@ function updateLocation(){
   document.querySelectorAll('.world-destinations [data-destination]').forEach(btn=>{
     const map={hall:'hall',twin:'twin',fitness:'',arena:''};
     const key=btn.dataset.destination;
-    const active=(key==='hall'&&nav==='hall')||(key==='twin'&&nav==='twin')||(key==='fitness'&&inFitnessZone())||(key==='arena'&&inArenaZone());
+    const active=(key==='hall'&&nav==='hall')||(key==='twin'&&nav==='twin')||(key==='library'&&nav==='library')||(key==='fitness'&&inFitnessZone())||(key==='arena'&&inArenaZone());
     btn.classList.toggle('active',active);
   });
   syncQuickNav(nav);showWorldZone(label,purpose);
