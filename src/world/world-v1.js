@@ -1726,10 +1726,17 @@ function campusPavilionV64(x,z,w,d,title,sub,side=1){
   box(g,w,5.9,.30,MAT.limestone,0,3.12,d/2-.15,{cast:true});
   box(g,.28,5.9,d,MAT.limestone,-w/2+.14,3.12,0,{cast:true});
   box(g,.28,5.9,d,MAT.limestone,w/2-.14,3.12,0,{cast:true});
-  box(g,w,.24,d,MAT.blackened,0,6.0,0,{cast:true});
+  box(g,w+.34,.28,d+.34,MAT.blackened,0,6.02,0,{cast:true});
+  // V7.3 real roofline: raised parapet, warm soffit and a narrow longitudinal skylight.
+  box(g,w+.42,.42,.24,MAT.travertine,0,6.28,d/2+.05,{cast:true});
+  box(g,w+.42,.42,.24,MAT.travertine,0,6.28,-d/2-.05,{cast:true});
+  box(g,.24,.42,d+.18,MAT.travertine,-w/2-.09,6.28,0,{cast:true});
+  box(g,.24,.42,d+.18,MAT.travertine,w/2+.09,6.28,0,{cast:true});
+  box(g,Math.max(1.8,w*.28),.06,Math.max(2.2,d*.42),campusGlassV64,0,6.19,0,{cast:false,receive:false});
   box(g,w-.65,.055,d-.55,campusInteriorGlowV64,0,5.83,0,{cast:false,receive:false});
   box(g,w-.55,4.75,.045,campusGlassV64,0,3.05,-d/2+.20,{cast:false,receive:false});
   box(g,w-.85,.025,.07,MAT.brass,0,5.45,-d/2+.16,{cast:false,receive:false});
+  box(g,w*.58,.18,1.45,MAT.travertine,0,5.86,-d/2-.62,{cast:true});
   plaque(g,title,sub,Math.min(w-1,6.8),.82,0,4.72,-d/2-.08,{dark:true,titleSize:title.length>14?43:53});
   // warm interior shelf visible through the glazing
   box(g,w-.9,.06,1.2,MAT.walnut,0,.68,-d/2+1.35,{cast:true});
@@ -1929,6 +1936,10 @@ box(boardingV68,18.5,.30,14.5,MAT.blackened,0,6.65,0,{cast:true});
 box(boardingV68,.048,5.55,12.9,campusGlassV64,8.80,3.35,0,{cast:false,receive:false});
 box(boardingV68,16.4,.045,12.6,campusInteriorGlowV64,0,6.38,0,{cast:false,receive:false});
 plaque(boardingV68,'BOARDING LOUNGE','KŌMØ YACHTING · RETREATS',7.4,.98,-8.92,4.85,0,{rotY:Math.PI/2,dark:true,titleSize:52});
+box(boardingV68,19.2,.24,15.2,MAT.blackened,0,6.90,0,{cast:true});
+box(boardingV68,19.4,.30,.22,MAT.travertine,0,7.13,7.45,{cast:true});
+box(boardingV68,19.4,.30,.22,MAT.travertine,0,7.13,-7.45,{cast:true});
+box(boardingV68,6.8,.12,2.15,MAT.travertine,0,6.78,-7.55,{cast:true});
 loungeCluster(boardingV68,-2.7,-1.4,Math.PI/2,.84);
 loungeCluster(boardingV68,3.5,2.1,-Math.PI/2,.78);
 
@@ -1940,6 +1951,9 @@ box(marinaClubV68,.30,5.4,11.2,MAT.limestone,7.85,2.84,0,{cast:true});
 box(marinaClubV68,16.0,.26,11.2,MAT.blackened,0,5.48,0,{cast:true});
 box(marinaClubV68,.045,4.5,9.8,campusGlassV64,7.62,2.75,0,{cast:false});
 plaque(marinaClubV68,'YACHTING HOUSE','PRIVATE EXPERIENCE · HOSPITALITY',6.9,.84,-7.70,4.10,0,{rotY:Math.PI/2,dark:true,titleSize:45});
+box(marinaClubV68,16.7,.22,11.9,MAT.blackened,0,5.70,0,{cast:true});
+box(marinaClubV68,16.9,.30,.20,MAT.travertine,0,5.94,5.85,{cast:true});
+box(marinaClubV68,16.9,.30,.20,MAT.travertine,0,5.94,-5.85,{cast:true});
 
 // Three piers with yachts close enough to read from the campus.
 [46.5,62.5,78.5].forEach((z,i)=>{
@@ -1991,6 +2005,10 @@ box(retreatHouseV68,33.4,.055,15.6,campusInteriorGlowV64,0,6.58,0,{cast:false,re
 box(retreatHouseV68,19.8,5.55,.048,campusGlassV64,0,3.50,-8.0,{cast:false,receive:false});
 [-14.1,14.1].forEach(x=>box(retreatHouseV68,5.6,5.55,.048,campusGlassV64,x,3.50,-8.0,{cast:false,receive:false}));
 plaque(retreatHouseV68,'KŌMØ RETREAT VILLA','PRIVATE LONGEVITY EXPERIENCE',9.0,1.05,0,5.55,-8.26,{dark:true,titleSize:60});
+box(retreatHouseV68,36.0,.24,17.9,MAT.blackened,0,7.02,0,{cast:true});
+box(retreatHouseV68,36.2,.32,.22,MAT.travertine,0,7.27,8.75,{cast:true});
+box(retreatHouseV68,36.2,.32,.22,MAT.travertine,0,7.27,-8.75,{cast:true});
+[-1,1].forEach(side=>box(retreatHouseV68,.22,.32,17.6,MAT.travertine,side*17.9,7.27,0,{cast:true}));
 
 // Cantilevered upper suite gives the villa a landmark silhouette.
 const upperSuiteV68=new THREE.Group();upperSuiteV68.position.set(5.8,6.85,1.7);retreatHouseV68.add(upperSuiteV68);
@@ -2097,6 +2115,62 @@ box(outerFrame,15.8,.055,2.10,M.warm,0,9.06,16.22);
 box(outerFrame,15.7,.10,.12,MAT.brass,0,8.82,17.46);
 [-5.8,-3.9,3.9,5.8].forEach(x=>box(outerFrame,.16,7.3,1.75,MAT.travertine,x,4.25,16.55,{cast:true}));
 plaque(outerFrame,'KŌMØ','WORLD · LONGEVITY IN MOTION',5.6,1.25,0,8.55,17.52,{dark:true,titleSize:86});
+
+// V7.3 Main roof — one legible architectural cap over the Hall and destination atrium.
+const mainRoofV73=new THREE.Group();mainRoofV73.name='KOMO_MAIN_ROOF_V73';building.add(mainRoofV73);
+box(mainRoofV73,24.8,.34,48.8,MAT.blackened,0,9.58,-5.8,{cast:true});
+box(mainRoofV73,25.3,.54,.28,MAT.travertine,0,9.88,18.45,{cast:true});
+box(mainRoofV73,25.3,.54,.28,MAT.travertine,0,9.88,-30.05,{cast:true});
+box(mainRoofV73,.28,.54,48.4,MAT.travertine,-12.52,9.88,-5.8,{cast:true});
+box(mainRoofV73,.28,.54,48.4,MAT.travertine,12.52,9.88,-5.8,{cast:true});
+box(mainRoofV73,3.65,.06,31.5,MAT.smokedGlass,0,9.78,-6.8,{cast:false,receive:false});
+[-1,1].forEach(side=>box(mainRoofV73,.10,.10,41.0,MAT.brass,side*4.45,9.80,-4.6,{cast:false,receive:false}));
+
+// V7.3 Science Library — a physically open reading room connected to the Hall.
+const libraryV73=new THREE.Group();libraryV73.name='KOMO_LIBRARY_V73';building.add(libraryV73);
+const libX=-18.3,libZ=-10.0,libW=13.4,libD=15.0,libH=6.15;
+box(libraryV73,libW,.22,libD,MAT.travertine,libX,.11,libZ,{cast:false,receive:true});
+box(libraryV73,.34,libH,libD,MAT.limestone,libX-libW/2+.17,libH/2,libZ,{cast:true});
+box(libraryV73,libW,.34,.34,MAT.limestone,libX,libH/2,libZ-libD/2+.17,{cast:true});
+box(libraryV73,libW,.34,.34,MAT.limestone,libX,libH/2,libZ+libD/2-.17,{cast:true});
+// East facade is split so the room is genuinely walkable from the Hall.
+box(libraryV73,.28,libH,4.85,MAT.limestone,libX+libW/2-.14,libH/2,libZ-5.10,{cast:true});
+box(libraryV73,.28,libH,4.85,MAT.limestone,libX+libW/2-.14,libH/2,libZ+5.10,{cast:true});
+box(libraryV73,.055,4.95,4.55,MAT.smokedGlass,libX+libW/2-.31,2.85,libZ-5.10,{cast:false});
+box(libraryV73,.055,4.95,4.55,MAT.smokedGlass,libX+libW/2-.31,2.85,libZ+5.10,{cast:false});
+// Proper library roof with parapet + skylight.
+box(libraryV73,libW+.40,.30,libD+.40,MAT.blackened,libX,6.22,libZ,{cast:true});
+box(libraryV73,libW+.46,.42,.22,MAT.travertine,libX,6.48,libZ-libD/2-.08,{cast:true});
+box(libraryV73,libW+.46,.42,.22,MAT.travertine,libX,6.48,libZ+libD/2+.08,{cast:true});
+box(libraryV73,.22,.42,libD+.18,MAT.travertine,libX-libW/2-.09,6.48,libZ,{cast:true});
+box(libraryV73,.22,.42,libD+.18,MAT.travertine,libX+libW/2+.09,6.48,libZ,{cast:true});
+box(libraryV73,2.8,.055,7.6,MAT.smokedGlass,libX,6.37,libZ,{cast:false,receive:false});
+box(libraryV73,5.4,.18,1.35,MAT.travertine,libX+libW/2-.25,5.92,libZ,{cast:true});
+plaque(libraryV73,'SCIENCE LIBRARY','METHOD · SOURCES · LONGEVITY',5.15,.74,libX+libW/2-.08,4.90,libZ,{rotY:-Math.PI/2,dark:true,titleSize:42});
+
+// Full-height timber book wall + brass shelf rhythm.
+box(libraryV73,.38,4.9,12.4,MAT.walnut,libX-libW/2+.43,2.72,libZ,{cast:true});
+for(let z=-5.3;z<=5.3;z+=2.12){
+  for(let y=.86;y<=4.55;y+=.91){
+    box(libraryV73,.52,.055,1.62,MAT.brass,libX-libW/2+.67,y,libZ+z,{cast:false});
+    const bookMat=(Math.round((z+6)*10+y*7)%3===0)?MAT.ivory:(Math.round(y*10)%2?M.sage:MAT.charcoal);
+    for(let j=0;j<4;j++)box(libraryV73,.18,.42,.25,bookMat,libX-libW/2+.72,y+.24,libZ+z-.55+j*.36,{cast:false});
+  }
+}
+
+// Reading tables, lounge corners and quiet task stations.
+[-2.8,2.5].forEach(zOff=>{
+  box(libraryV73,4.2,.16,1.35,MAT.walnut,libX+.65,.86,libZ+zOff,{cast:true});
+  [-1.55,1.55].forEach(xOff=>{
+    box(libraryV73,1.0,.12,.88,MAT.fabricLight,libX+.65+xOff,.48,libZ+zOff,{cast:true});
+    box(libraryV73,.72,.72,.10,MAT.fabricLight,libX+.65+xOff,.83,libZ+zOff+(zOff<0?.58:-.58),{cast:true});
+  });
+});
+const libCentral=box(libraryV73,2.65,.18,2.10,MAT.travertine,libX+2.35,.78,libZ,{cast:true});
+box(libraryV73,2.28,.035,1.74,MAT.brass,libX+2.35,.89,libZ,{cast:false});
+plaque(libraryV73,'KŌMØ METHOD','READ · TRACE · UNDERSTAND',2.85,.52,libX+2.35,1.75,libZ+1.10,{dark:true,titleSize:31});
+// Warm ceiling panels without extra dynamic lights.
+[-4.6,0,4.6].forEach(zOff=>box(libraryV73,7.5,.025,1.15,campusInteriorGlowV64,libX,5.88,libZ+zOff,{cast:false,receive:false}));
 
 // Side lantern volumes create an inhabited facade rather than a flat front.
 [-1,1].forEach(side=>{
@@ -4251,7 +4325,8 @@ const interactions=[
   {id:'twin',x:-10.75,z:-24.0,r:3.4,title:()=>copy[locale].twinTitle,desc:()=>locale==='fr'?'Galerie ouverte · marcher vers le Twin':'Open gallery · walk to Twin',action:enterTwin},
   {id:'rehab',x:0,z:-28.0,r:3.4,title:()=>copy[locale].rehabTitle,desc:()=>locale==='fr'?'Tunnel ouvert · marcher vers Fitness':'Open tunnel · walk to Fitness',action:enterRehab},
   {id:'arena',x:10.75,z:-24.0,r:3.4,title:()=>copy[locale].arenaTitle,desc:()=>locale==='fr'?'Galerie ouverte · marcher vers Arena':'Open gallery · walk to Arena',action:enterArena},
-  {id:'library',x:-10.7,z:-10,r:3.2,title:()=>copy[locale].libraryTitle,desc:()=>copy[locale].libraryCopy,action:showLibrary},
+  {id:'library_entry',x:-11.2,z:-10,r:2.4,title:()=>locale==='fr'?'Entrer dans la Science Library':'Enter Science Library',desc:()=>locale==='fr'?'Espace ouvert · lecture · méthode':'Open room · reading · method',action:()=>requestWalkTo('library')},
+  {id:'library',x:-16.2,z:-10,r:3.0,title:()=>copy[locale].libraryTitle,desc:()=>copy[locale].libraryCopy,action:showLibrary},
   {id:'talks',x:10.7,z:-10,r:3.2,title:()=>copy[locale].talksTitle,desc:()=>copy[locale].talksCopy,action:showTalks},
   {id:'life',x:8.6,z:2.6,r:3.4,title:()=>copy[locale].storeTitle,desc:()=>copy[locale].storeCopy,action:showLifeStore},
   {id:'journey',x:4.8,z:8.5,r:3.0,title:()=>locale==='fr'?'World Journey':'World Journey',desc:()=>locale==='fr'?'Voir votre niveau, vos XP et les prochaines étapes.':'View your level, XP and next steps.',action:showJourneyPanel},
@@ -4762,6 +4837,7 @@ const travelPoints={
   rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
   arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
   life:{mode:'world',x:5.4,y:0,z:3.6,yaw:-1.15,level:0},
+  library:{mode:'world',x:-15.0,y:0,z:-10.0,yaw:Math.PI/2,level:0},
   marina:{mode:'world',x:50.0,y:0,z:63.0,yaw:-Math.PI/2,level:0},
   villa:{mode:'world',x:-43.0,y:0,z:62.0,yaw:Math.PI/2,level:0},
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
@@ -4769,7 +4845,7 @@ const travelPoints={
 const journeyTargets={
   arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:14.55},journey:{x:4.8,y:0,z:8.5},
   twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
-  life:{x:8.4,y:0,z:3.4},marina:{x:50,y:0,z:63},villa:{x:-43,y:0,z:62},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
+  life:{x:8.4,y:0,z:3.4},library:{x:-18.0,y:0,z:-10},marina:{x:50,y:0,z:63},villa:{x:-43,y:0,z:62},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
 function setGuideEnabled(value){
   guideEnabled=!!value;guideRoot.visible=guideEnabled;guideToggle.textContent='GUIDE · '+(guideEnabled?'ON':'OFF');
@@ -4799,6 +4875,10 @@ function campusWalkingTarget(destination,p=player){
     if(zone==='rehab')return {x:0,y:0,z:-53.5};
     if(inFitnessLink(p))return {x:0,y:0,z:-43.7};
     return {x:0,y:0,z:-28.0};
+  }
+  if(destination==='library'){
+    if(zone==='library')return {x:-20.0,y:0,z:-10.0};
+    return {x:-11.2,y:0,z:-10.0};
   }
   if(destination==='marina'){
     if(zone==='marina')return {x:72,y:0,z:62.5};
@@ -5550,9 +5630,9 @@ function setMode(){
 }
 let manualCampusDestination=null;
 function requestWalkTo(id){
-  if(!['hall','twin','rehab','arena'].includes(id))return;
+  if(!['hall','twin','rehab','arena','library'].includes(id))return;
   manualCampusDestination=id;setGuideEnabled(true);closePanel();closeWorldMenu();
-  const names={hall:'KŌMØ HALL',twin:'FUNCTIONAL TWIN',rehab:'KŌMØ FITNESS CLUB',arena:'ARENA'};
+  const names={hall:'KŌMØ HALL',twin:'FUNCTIONAL TWIN',rehab:'KŌMØ FITNESS CLUB',arena:'ARENA',library:'SCIENCE LIBRARY'};
   notify((locale==='fr'?'PARCOURS À PIED · ':'WALKABLE ROUTE · ')+names[id]);
 }
 function enterTwin(){requestWalkTo('twin')}
@@ -5623,6 +5703,8 @@ function getAvatarGroundLift(p=player){return visualSurfaceOffsetAt(p)+AVATAR_SO
 function inTwinZone(p=player){return p.x>-57.2&&p.x<-32.15&&p.z>-13.3&&p.z<12.2}
 function inFitnessZone(p=player){return p.x>-11.0&&p.x<11.0&&p.z>-67.5&&p.z<-42.15}
 function inArenaZone(p=player){return p.x>32.15&&p.x<57.2&&p.z>-13.3&&p.z<12.2}
+function inLibraryZone(p=player){return p.x>-25.2&&p.x<-10.65&&p.z>-17.25&&p.z<-2.75}
+function inLibraryDoor(p=player){return p.x>-12.2&&p.x<-9.8&&p.z>-12.45&&p.z<-7.55}
 function inMarinaLink(p=player){return p.x>20&&p.x<43&&p.z>63.2&&p.z<72.2}
 function inVillaLink(p=player){return p.x<-20&&p.x>-43&&p.z>63.2&&p.z<72.2}
 function inMarinaZone(p=player){
@@ -5639,6 +5721,7 @@ function getCampusZone(p=player){
   if(inTwinZone(p))return 'twin';
   if(inFitnessZone(p))return 'rehab';
   if(inArenaZone(p))return 'arena';
+  if(inLibraryZone(p))return 'library';
   if(inMarinaZone(p))return 'marina';
   if(inVillaZone(p))return 'villa';
   return 'hall';
@@ -5646,7 +5729,7 @@ function getCampusZone(p=player){
 function canMove(p){
   if(isStairPosition(p))return true;
   if(playerLevel===1||player.y>UPPER_Y-.70)return isUpperWalkable(p);
-  if(inTwinZone(p)||inFitnessZone(p)||inArenaZone(p)||inTwinLink(p)||inArenaLink(p)||inFitnessLink(p)||inMarinaZone(p)||inVillaZone(p)||inMarinaLink(p)||inVillaLink(p))return true;
+  if(inTwinZone(p)||inFitnessZone(p)||inArenaZone(p)||inLibraryZone(p)||inLibraryDoor(p)||inTwinLink(p)||inArenaLink(p)||inFitnessLink(p)||inMarinaZone(p)||inVillaZone(p)||inMarinaLink(p)||inVillaLink(p))return true;
   // Main Hall / arrival navigation plane.
   if(p.z>81||p.z<-29.15||Math.abs(p.x)>24)return false;
   if(p.z<16.5&&Math.abs(p.x)>11.55)return false;
@@ -5893,6 +5976,7 @@ function updateLocation(){
   if(inTwinZone()){label='FUNCTIONAL TWIN';purpose=locale==='fr'?'COMPRENDRE VOTRE MOUVEMENT':'UNDERSTAND YOUR MOVEMENT';nav='twin';completeJourney('twin',{silent:true})}
   else if(inFitnessZone()){label='KŌMØ FITNESS CLUB';purpose=locale==='fr'?'BOUGER · S’ENTRAÎNER · PROGRESSER':'MOVE · TRAIN · PROGRESS';nav='';completeJourney('rehab',{silent:true})}
   else if(inArenaZone()){label='ARENA';purpose=locale==='fr'?'DÉFIS · PROGRESSION · COMMUNAUTÉ':'CHALLENGES · PROGRESSION · COMMUNITY';nav='';completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
+  else if(inLibraryZone()){label='SCIENCE LIBRARY';purpose=locale==='fr'?'SCIENCE · MÉTHODE · SOURCES':'SCIENCE · METHOD · SOURCES';nav='';completeJourney('library',{silent:true})}
   else if(inMarinaZone()){label='KŌMØ MARINA';purpose=locale==='fr'?'YACHTING · HOSPITALITY · RETREATS':'YACHTING · HOSPITALITY · RETREATS';nav=''}
   else if(inVillaZone()){label='RETREAT VILLA';purpose=locale==='fr'?'PRIVATE LONGEVITY EXPERIENCE':'PRIVATE LONGEVITY EXPERIENCE';nav=''}
   else if(inMarinaLink()){label='MARINA PROMENADE';purpose=locale==='fr'?'VERS LE PORT & YACHTING':'TO MARINA & YACHTING';nav=''}
@@ -6562,7 +6646,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.2.1-strict-iphone-parity',
+  version:'7.3.0-first-person-living-world',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
