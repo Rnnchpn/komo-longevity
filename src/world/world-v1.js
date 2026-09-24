@@ -1553,6 +1553,57 @@ const arrivalReflectionMatV632=new THREE.MeshBasicMaterial({
 const arrivalReflectionPlaneV632=mesh(arrivalHeroV632,new THREE.PlaneGeometry(8.2,28),arrivalReflectionMatV632,0,.166,40.5,{cast:false,receive:false});
 arrivalReflectionPlaneV632.rotation.x=-Math.PI/2;arrivalReflectionPlaneV632.renderOrder=3;
 
+// V7.3.2 Arrival Experience — the first screen must already feel inhabited.
+const arrivalExperienceV732=new THREE.Group();arrivalExperienceV732.name='KOMO_ARRIVAL_EXPERIENCE_V732';building.add(arrivalExperienceV732);
+const arrivalWaterV732=new THREE.MeshStandardMaterial({color:0x9fbcb7,roughness:.16,metalness:.02,transparent:true,opacity:.72});
+const arrivalGreenV732=new THREE.MeshStandardMaterial({color:0x536a58,roughness:.94,metalness:0});
+
+// Twin side water gardens: low enough to preserve the central architectural axis.
+[-1,1].forEach(side=>{
+  const x=side*8.25;
+  box(arrivalExperienceV732,3.2,.18,5.2,MAT.travertine,x,.10,7.0,{cast:true});
+  const water=box(arrivalExperienceV732,2.82,.055,4.78,arrivalWaterV732,x,.235,7.0,{cast:false,receive:false});
+  living.water.push(water);
+  box(arrivalExperienceV732,3.35,.08,.10,MAT.brass,x,.255,4.45,{cast:false});
+  // sculptural bronze ring gives each side a clear premium landmark.
+  const ring=mesh(arrivalExperienceV732,new THREE.TorusGeometry(.58,.045,12,54),MAT.brass,x,1.25,7.0,{cast:true});
+  ring.rotation.set(Math.PI/2,.16*side,.22*side);
+  const inner=mesh(arrivalExperienceV732,new THREE.TorusGeometry(.34,.025,10,42),M.bronzeSoft,x,1.25,7.0,{cast:true});
+  inner.rotation.set(Math.PI/2,-.25*side,-.18*side);
+
+  // Low planting, deliberately below eye level.
+  [-1,1].forEach(zSide=>{
+    const planterZ=7.0+zSide*3.45;
+    box(arrivalExperienceV732,2.25,.52,.92,MAT.travertine,x,.27,planterZ,{cast:true});
+    [-.70,0,.70].forEach((dx,j)=>{
+      const crown=mesh(arrivalExperienceV732,new THREE.SphereGeometry(.34+(j%2)*.05,10,7),arrivalGreenV732,x+dx,.74,planterZ,{cast:false});
+      crown.scale.set(1.10,.58,.78);
+    });
+  });
+
+  exteriorBench(arrivalExperienceV732,side*6.40,2.8,side>0?-Math.PI/2:Math.PI/2,.74);
+  exteriorBench(arrivalExperienceV732,side*6.45,12.0,side>0?-Math.PI/2:Math.PI/2,.72);
+});
+
+// Two quiet hospitality tables create activity pockets without blocking movement.
+[-1,1].forEach(side=>{
+  const x=side*5.45,z=5.0;
+  cyl(arrivalExperienceV732,.52,.52,.08,MAT.walnut,x,.76,z,24,{cast:true});
+  cyl(arrivalExperienceV732,.07,.09,.68,MAT.blackened,x,.40,z,10,{cast:true});
+  [-.95,.95].forEach(dx=>{
+    box(arrivalExperienceV732,.72,.10,.72,MAT.fabricLight,x+dx,.46,z,{cast:true});
+    box(arrivalExperienceV732,.62,.68,.10,MAT.fabricLight,x+dx,.80,z+.31,{cast:true});
+  });
+});
+
+// Small water/light markers pull the eye through the Hall rather than leaving a blank floor.
+[-1,1].forEach(side=>{
+  [9.8,4.4,-1.0].forEach((z,i)=>{
+    const marker=mesh(arrivalExperienceV732,new THREE.RingGeometry(.13,.18,24),i===1?MAT.brass:M.bronzeSoft,side*3.55,.215,z,{cast:false,receive:false});
+    marker.rotation.x=-Math.PI/2;
+  });
+});
+
 
 // V3.2 KŌMØ District — fountain, pavilions and a wider living campus.
 const worldDistrict=new THREE.Group();worldDistrict.name='KOMO_WORLD_DISTRICT_V32';world.add(worldDistrict);living.district=worldDistrict;
@@ -2280,9 +2331,9 @@ const waypointCap=new THREE.Mesh(new THREE.SphereGeometry(.075,8,6),guideMat.clo
 const entryGuide=new THREE.Group();entryGuide.name='KOMO_ENTRY_GUIDE_V33';building.add(entryGuide);
 
 // Bronze arrival medallion directly under the spawn.
-const entryMedallion=mesh(entryGuide,new THREE.RingGeometry(1.18,1.28,48),MAT.brass,0,.205,14.55,{cast:false,receive:false});
+const entryMedallion=mesh(entryGuide,new THREE.RingGeometry(1.18,1.28,48),MAT.brass,0,.205,12.20,{cast:false,receive:false});
 entryMedallion.rotation.x=-Math.PI/2;
-const entryCore=mesh(entryGuide,new THREE.CircleGeometry(.82,40),new THREE.MeshBasicMaterial({color:0x314b3d,transparent:true,opacity:.12,depthWrite:false}),0,.208,14.55,{cast:false,receive:false});
+const entryCore=mesh(entryGuide,new THREE.CircleGeometry(.82,40),new THREE.MeshBasicMaterial({color:0x314b3d,transparent:true,opacity:.12,depthWrite:false}),0,.208,12.20,{cast:false,receive:false});
 entryCore.rotation.x=-Math.PI/2;
 plaque(entryGuide,'YOUR WORLD','UNDERSTAND · TRAIN · ENGAGE',4.6,.72,0,3.35,12.75,{dark:true,titleSize:52});
 
@@ -3229,6 +3280,17 @@ const libraryPopulationV73=[
   {role:'visitor',label:'Adam',functionLabel:'SCIENCE GUEST',x:-16.2,y:0,z:-12.7,outfit:'blue',body:'broad',hairStyle:'short',scale:1.04,speed:.13,phase:.86,task:'social',route:[[-16.2,0,-12.7],[-17.4,0,-12.5],[-16.8,0,-11.8]]}
 ];
 libraryPopulationV73.forEach(p=>makeNpc(npcRoot,p));
+const arrivalPopulationV732=[
+  {role:'staff',label:'Camille',functionLabel:'ARRIVAL HOST',x:-3.8,y:0,z:10.5,outfit:'sage',body:'slim',hairStyle:'bob',scale:.96,speed:.15,phase:.08,task:'host',route:[[-3.8,0,10.5],[-4.4,0,8.0],[-3.7,0,6.2],[-3.1,0,8.5]]},
+  {role:'staff',label:'Noah',functionLabel:'WORLD CONCIERGE',x:4.0,y:0,z:9.5,outfit:'charcoal',body:'regular',hairStyle:'short',scale:1.01,speed:.16,phase:.19,task:'host',route:[[4.0,0,9.5],[4.5,0,7.2],[4.0,0,5.4],[3.4,0,7.8]]},
+  {role:'visitor',label:'Mila',functionLabel:'WORLD GUEST',x:-6.4,y:0,z:5.1,outfit:'ivory',body:'slim',hairStyle:'bun',scale:.92,speed:.12,phase:.31,task:'lounge',route:[[-6.4,0,5.1],[-6.8,0,4.4],[-6.1,0,4.5]]},
+  {role:'visitor',label:'Elias',functionLabel:'WORLD GUEST',x:-4.6,y:0,z:4.8,outfit:'olive',body:'broad',hairStyle:'crop',scale:1.05,speed:.12,phase:.42,task:'social',route:[[-4.6,0,4.8],[-5.0,0,4.3],[-4.3,0,4.1]]},
+  {role:'visitor',label:'Sana',functionLabel:'MOTION GUEST',x:6.4,y:0,z:5.2,outfit:'sand',body:'soft',hairStyle:'bob',scale:.97,speed:.13,phase:.53,task:'observe',route:[[6.4,0,5.2],[7.0,0,6.3],[7.4,0,8.1],[6.7,0,9.2]]},
+  {role:'visitor',label:'Victor',functionLabel:'LIFE MEMBER',x:6.7,y:0,z:11.4,outfit:'navy',body:'regular',hairStyle:'short',age:'senior',scale:1.02,speed:.14,phase:.64,task:'lounge',route:[[6.7,0,11.4],[7.2,0,10.8],[6.5,0,10.4]]},
+  {role:'staff',label:'Amira',functionLabel:'PULSE GUIDE',x:-7.0,y:0,z:11.8,outfit:'burgundy',body:'regular',hairStyle:'bun',scale:.95,speed:.15,phase:.76,task:'observe',route:[[-7.0,0,11.8],[-7.6,0,10.6],[-7.1,0,9.4],[-6.5,0,10.7]]},
+  {role:'visitor',label:'Leo',functionLabel:'TWIN MEMBER',x:3.9,y:0,z:1.8,outfit:'blue',body:'broad',hairStyle:'short',scale:1.04,speed:.20,phase:.87,task:'social',route:[[3.9,0,1.8],[5.0,0,.2],[4.2,0,-2.0],[3.2,0,-.4]]}
+];
+arrivalPopulationV732.forEach(p=>makeNpc(npcRoot,p));
 
 // Living atmosphere — subtle, non-game-like movement.
 const dustCount=0;
@@ -4243,7 +4305,7 @@ const fitnessStatusBars=[];
 
 
 // Runtime state.
-const player=new THREE.Vector3(0,0,14.55);
+const player=new THREE.Vector3(0,0,12.20);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
 let cameraMode='first';
@@ -4842,7 +4904,7 @@ function toggleCamera(){
 setCameraMode('first');
 const travelPoints={
   arrival:{mode:'world',x:0,y:0,z:58.5,yaw:Math.PI,level:0},
-  hall:{mode:'world',x:0,y:0,z:14.55,yaw:0,level:0},
+  hall:{mode:'world',x:0,y:0,z:12.20,yaw:0,level:0},
   twin:{mode:'world',x:-5.9,y:0,z:-22.2,yaw:0,level:0},
   rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
   arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
@@ -4853,7 +4915,7 @@ const travelPoints={
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
 };
 const journeyTargets={
-  arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:14.55},journey:{x:4.8,y:0,z:8.5},
+  arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:12.20},journey:{x:4.8,y:0,z:8.5},
   twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
   life:{x:8.4,y:0,z:3.4},library:{x:-18.0,y:0,z:-10},marina:{x:50,y:0,z:63},villa:{x:-43,y:0,z:62},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
@@ -4985,7 +5047,7 @@ function joinPresence(target){
       }
       if(!placed){
         const fallback=new THREE.Vector3(THREE.MathUtils.clamp(tx,-112.0,110.0),playerLevel===1?UPPER_Y:0,THREE.MathUtils.clamp(tz,-66.5,97.5));
-        if(canMove(fallback))player.copy(fallback);else player.set(0,0,14.55);
+        if(canMove(fallback))player.copy(fallback);else player.set(0,0,12.20);
       }
       syncPlayerElevation();
     }else if(zone==='twin'){
@@ -5924,7 +5986,7 @@ function updateCamera(now,dt){
     cameraLook.set(player.x,player.y+visualGround+1.05+pitch*.34,player.z-.55);
     camera.lookAt(cameraLook);
   }else{
-    const desiredFov=68;
+    const desiredFov=63.5;
     if(Math.abs(camera.fov-desiredFov)>.01){camera.fov+=(desiredFov-camera.fov)*(1-Math.exp(-6*dt));camera.updateProjectionMatrix()}
     const move=Math.min(1,velocity.length()/AUTO_RUN_SPEED);
     const bob=move*Math.sin(now*.0092)*.0042;
@@ -6667,7 +6729,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.3.1-first-person-living-world',
+  version:'7.3.2-arrival-experience',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
