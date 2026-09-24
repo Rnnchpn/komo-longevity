@@ -2466,12 +2466,60 @@ plaque(oneWorldLinks,'TWIN','UNDERSTAND',3.3,.72,-26.8,2.15,-23.85,{dark:true,ti
 plaque(oneWorldLinks,'FITNESS','MOVE',3.3,.72,0,2.15,-31.2,{dark:true,titleSize:55});
 plaque(oneWorldLinks,'ARENA','ENGAGE',3.3,.72,26.8,2.15,-23.85,{dark:true,titleSize:55});
 
+const roomAccess=new THREE.Group();roomAccess.name='KOMO_ROOM_ACCESS_V52';oneWorldLinks.add(roomAccess);
+function accessPortal({id,title,sub,x,z,rot=0,accent=0xd5b679,dark=true}){
+  const g=new THREE.Group();g.name='KOMO_ACCESS_'+id+'_V52';g.position.set(x,0,z);g.rotation.y=rot;roomAccess.add(g);
+  const accentMat=new THREE.MeshBasicMaterial({color:accent,transparent:true,opacity:.52,depthWrite:false});
+  box(g,.30,5.40,.70,MAT.travertine,-2.55,2.76,0,{cast:true});
+  box(g,.30,5.40,.70,MAT.travertine,2.55,2.76,0,{cast:true});
+  box(g,5.40,.26,.70,MAT.travertine,0,5.32,0,{cast:true});
+  box(g,4.78,.035,.075,MAT.brass,0,5.04,.38,{cast:false,receive:false});
+  box(g,4.20,.020,.060,accentMat,0,.145,.58,{cast:false,receive:false});
+  plaque(g,title,sub,4.30,.64,0,4.55,.40,{dark,titleSize:title.length>12?42:50});
+  const ring=mesh(g,new THREE.RingGeometry(.38,.44,36),accentMat,0,.16,.72,{cast:false,receive:false});
+  ring.rotation.x=-Math.PI/2;
+  return g;
+}
+accessPortal({id:'TWIN_A',title:'FUNCTIONAL TWIN',sub:'UNDERSTAND · ENTER',x:-13.0,z:-24.0,rot:Math.PI/2,accent:0xb9cfbf});
+accessPortal({id:'FIT_A',title:'KŌMØ FITNESS',sub:'MOVE · ENTER',x:0,z:-29.8,accent:0xd7b777,dark:false});
+accessPortal({id:'ARENA_A',title:'ARENA',sub:'ENGAGE · ENTER',x:13.0,z:-24.0,rot:-Math.PI/2,accent:0xb9935c});
+accessPortal({id:'TWIN_B',title:'TWIN LAB',sub:'BODY · TIME · DATA',x:-32.1,z:-2.1,rot:Math.PI/2,accent:0xb9cfbf});
+accessPortal({id:'FIT_B',title:'FITNESS CLUB',sub:'TRAIN · PROGRESS',x:0,z:-43.3,accent:0xd7b777,dark:false});
+accessPortal({id:'ARENA_B',title:'ARENA FLOOR',sub:'CHALLENGE · COMMUNITY',x:32.1,z:-2.1,rot:-Math.PI/2,accent:0xb9935c});
+
+const guideTwin=new THREE.MeshBasicMaterial({color:0xb9cfbf,transparent:true,opacity:.24,depthWrite:false});
+const guideFit=new THREE.MeshBasicMaterial({color:0xd7b777,transparent:true,opacity:.25,depthWrite:false});
+const guideArena=new THREE.MeshBasicMaterial({color:0xb9935c,transparent:true,opacity:.24,depthWrite:false});
+box(roomAccess,20.0,.018,.055,guideTwin,-22.8,.122,-24.0,{cast:false,receive:false});
+box(roomAccess,.055,.018,12.2,guideTwin,-32.1,.122,-12.2,{cast:false,receive:false});
+box(roomAccess,.055,.018,13.2,guideFit,0,.122,-36.2,{cast:false,receive:false});
+box(roomAccess,20.0,.018,.055,guideArena,22.8,.122,-24.0,{cast:false,receive:false});
+box(roomAccess,.055,.018,12.2,guideArena,32.1,.122,-12.2,{cast:false,receive:false});
+
+
 // Functional Twin room.
 twinRoom.position.set(-45,0,0);
 mesh(twinRoom,new THREE.CircleGeometry(13,96),M.sageDeep,0,.01,-2).rotation.x=-Math.PI/2;
 mesh(twinRoom,new THREE.RingGeometry(7.8,8.0,96),M.bronze,0,.025,-2).rotation.x=-Math.PI/2;
 box(twinRoom,22,7.8,.38,M.sage,0,4.0,-13.1);
 plaque(twinRoom,'FUNCTIONAL TWIN','YOUR BODY · ACROSS TIME',7.8,1.55,0,7.25,-12.86,{dark:true,titleSize:84});
+const twinV52=new THREE.Group();twinV52.name='KOMO_TWIN_ROOM_V52';twinRoom.add(twinV52);
+const twinGlassV52=lowPower?MAT.smokedGlass:M.glass;
+box(twinV52,20.6,.16,17.8,MAT.travertine,0,.085,-1.4,{cast:false,receive:true});
+[-9.85,9.85].forEach(x=>{
+  box(twinV52,.20,5.80,17.2,MAT.limestone,x,2.96,-1.5,{cast:true});
+  box(twinV52,.035,4.85,15.8,twinGlassV52,x*.992,2.82,-1.5,{cast:false,receive:false});
+});
+box(twinV52,20.6,.22,1.00,MAT.limestone,0,5.82,-1.5,{cast:true});
+[-7.4,-3.7,0,3.7,7.4].forEach(x=>box(twinV52,.045,.030,15.0,MAT.brass,x,5.63,-1.5,{cast:false,receive:false}));
+[2.0,3.25,4.5].forEach((y,i)=>{
+  const ring=mesh(twinV52,new THREE.TorusGeometry(3.0+i*.34,.035,10,64),i===1?M.twinGlow:MAT.brass,0,y,-4.2,{cast:false});
+  ring.rotation.x=Math.PI/2;
+});
+[-1,1].forEach(side=>{
+  for(let z=-7.3;z<=4.5;z+=3.0)box(twinV52,.055,3.65,.055,side<0?M.twinGlow:MAT.brass,side*8.15,2.15,z,{cast:false,receive:false});
+});
+
 const body=new THREE.Group();body.position.set(0,0,-4.2);twinRoom.add(body);
 mesh(body,new THREE.SphereGeometry(.40,24,18),M.twinGlass,0,4.65,0);
 const torso=mesh(body,new THREE.SphereGeometry(1,28,22),M.twinGlass,0,3.25,0);torso.scale.set(.72,1.05,.42);
@@ -2559,6 +2607,17 @@ plaque(rehabRoom,'01','BALANCE',3.2,.90,-5.3,4.6,-8.0,{dark:false,titleSize:74})
 plaque(rehabRoom,'02','STRENGTH',3.2,.90,0,4.6,-8.0,{dark:true,titleSize:74});
 plaque(rehabRoom,'03','CARDIO',3.2,.90,5.3,4.6,-8.0,{dark:false,titleSize:74});
 glow(rehabRoom,0xf0d2a7,3.5,15,0,5.4,-6);
+const fitnessV52=new THREE.Group();fitnessV52.name='KOMO_FITNESS_ROOM_V52';rehabRoom.add(fitnessV52);
+box(fitnessV52,20.6,.040,22.6,FLOOR.promenade,0,.235,0,{cast:false,receive:true});
+[-8.1,8.1].forEach(x=>line(fitnessV52,.045,20.8,x,0,MAT.brass,.274));
+for(let z=-8.4;z<=7.8;z+=2.7)line(fitnessV52,15.2,.026,0,z,M.bronzeSoft,.276);
+box(fitnessV52,18.8,4.65,.045,MAT.smokedGlass,0,2.75,10.9,{cast:false,receive:false});
+box(fitnessV52,18.8,.055,.080,MAT.brass,0,5.10,10.82,{cast:false,receive:false});
+for(let x=-8.4;x<=8.4;x+=2.1)box(fitnessV52,.065,.035,19.2,MAT.walnut,x,6.82,-.2,{cast:false,receive:false});
+box(fitnessV52,5.1,.32,1.25,MAT.walnut,-6.7,.43,7.4,{cast:true});
+box(fitnessV52,4.6,.15,.92,MAT.fabric,-6.7,.68,7.4,{cast:true});
+plaque(fitnessV52,'TODAY','MOVE · TRAIN · RECOVER',4.5,.74,6.55,4.75,10.70,{dark:true,titleSize:48});
+
 
 // V2.6 Rehab Lab — three tangible stations, no extra dynamic lights.
 const rehabLab=new THREE.Group();rehabLab.name='KOMO_REHAB_LAB_V26';rehabRoom.add(rehabLab);
@@ -2646,6 +2705,19 @@ box(arenaChallengeBoard,5.8,.18,2.1,MAT.travertine,0,.10,0);
 box(arenaChallengeBoard,5.15,2.65,.22,MAT.blackened,0,1.55,-.78,{cast:true});
 plaque(arenaChallengeBoard,'WORLD CHALLENGES','DAILY · XP · COMMUNITY',4.7,.82,0,2.80,-.62,{dark:true,titleSize:54});
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
+const arenaV52=new THREE.Group();arenaV52.name='KOMO_ARENA_ROOM_V52';arenaRoom.add(arenaV52);
+const arenaFloor=mesh(arenaV52,new THREE.CircleGeometry(10.9,96),new THREE.MeshStandardMaterial({color:0x202821,roughness:.46,metalness:.05}),0,.045,-2,{cast:false,receive:true});
+arenaFloor.rotation.x=-Math.PI/2;
+const arenaOuter=mesh(arenaV52,new THREE.RingGeometry(9.9,10.35,96),M.arenaGold,0,.072,-2,{cast:false,receive:false});arenaOuter.rotation.x=-Math.PI/2;
+const startRing=mesh(arenaV52,new THREE.RingGeometry(2.05,2.18,64),MAT.brass,0,.085,2.2,{cast:false,receive:false});startRing.rotation.x=-Math.PI/2;
+[-1,1].forEach(side=>{
+  box(arenaV52,3.0,.34,13.6,MAT.blackened,side*10.65,.32,-1.7,{cast:true});
+  box(arenaV52,2.45,.34,12.0,MAT.walnut,side*10.35,.68,-1.7,{cast:true});
+  box(arenaV52,.055,4.60,12.8,MAT.brass,side*9.65,3.05,-1.7,{cast:false,receive:false});
+});
+box(arenaV52,15.8,2.45,.16,MAT.blackened,0,4.25,9.7,{cast:true});
+plaque(arenaV52,'LIVE ARENA','DAILY CHALLENGES · SOCIAL',7.6,1.08,0,4.38,9.55,{dark:true,titleSize:70});
+
 
 // Runtime state.
 const player=new THREE.Vector3(0,0,14.55);
@@ -4177,9 +4249,9 @@ function updateLocation(){
     nav='upper';completeJourney('upper',{silent:true});
     label=player.z<-18.8?'UPPER OBSERVATORY':player.x<0?'SCIENCE LIBRARY · LEVEL 2':'LIFE LOUNGE · LEVEL 2';
     purpose=player.z<-18.8?(locale==='fr'?'VOIR LE WORLD AUTREMENT':'A NEW VIEW OF WORLD'):player.x<0?(locale==='fr'?'SCIENCE · MÉTHODE · SOURCES':'SCIENCE · METHOD · SOURCES'):(locale==='fr'?'OBJETS · CULTURE · DISCOVERY':'OBJECTS · CULTURE · DISCOVERY');
-  }else if(inTwinLink()){label='TWIN WALK';purpose=locale==='fr'?'VERS FUNCTIONAL TWIN':'TO FUNCTIONAL TWIN'}
-  else if(inArenaLink()){label='ARENA WALK';purpose=locale==='fr'?'VERS ARENA':'TO ARENA'}
-  else if(inFitnessLink()){label='FITNESS WALK';purpose=locale==='fr'?'VERS FITNESS CLUB':'TO FITNESS CLUB'}
+  }else if(inTwinLink()){label='TWIN GALLERY';purpose=locale==='fr'?'COURIR VERS FUNCTIONAL TWIN':'RUN TO FUNCTIONAL TWIN'}
+  else if(inArenaLink()){label='ARENA GALLERY';purpose=locale==='fr'?'COURIR VERS ARENA':'RUN TO ARENA'}
+  else if(inFitnessLink()){label='FITNESS TUNNEL';purpose=locale==='fr'?'COURIR VERS FITNESS CLUB':'RUN TO FITNESS CLUB'}
   else if(player.z>57){label='KŌMØ DISTRICT';purpose=locale==='fr'?'CAMPUS EXTÉRIEUR':'OUTDOOR CAMPUS'}
   else if(player.z>23){label='ARRIVAL COURT';purpose=locale==='fr'?'ARRIVÉE · HOSPITALITY':'ARRIVAL · HOSPITALITY'}
   else if(player.z>11.8){label='WORLD ENTRANCE';purpose=locale==='fr'?'ENTRER DANS VOTRE WORLD':'ENTER YOUR WORLD'}
