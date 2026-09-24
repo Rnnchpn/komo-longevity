@@ -9,6 +9,7 @@ const introPulse=$('#intro-pulse');
 const introGuestName=$('#intro-guest-name');
 const introAuthNote=$('#intro-auth-note');
 const introAuthStatus=$('#intro-auth-status');
+const introAvatarOpen=$('#intro-avatar-open');
 const languageToggle=$('#language-toggle');
 const locationChip=$('.location-chip');
 const locationName=$('#location-name');
@@ -2682,11 +2683,12 @@ function campusPath(w,d,x,z){
     const b=box(oneWorldLinks,.035,.018,d-.5,M.bronzeSoft,x+w*.28,.108,z,{cast:false,receive:false});
   }
 }
-campusPath(25,5.2,-22.0,-24.0);
-campusPath(5.2,22.5,-32.1,-13.0);
-campusPath(25,5.2,22.0,-24.0);
-campusPath(5.2,22.5,32.1,-13.0);
-campusPath(8.0,16.0,0,-35.5);
+// V6.2: wider promenades make the destination circulation read as primary architecture.
+campusPath(25.8,7.1,-22.0,-24.0);
+campusPath(7.1,23.0,-32.1,-13.0);
+campusPath(25.8,7.1,22.0,-24.0);
+campusPath(7.1,23.0,32.1,-13.0);
+campusPath(9.4,16.8,0,-35.5);
 plaque(oneWorldLinks,'TWIN','UNDERSTAND',3.3,.72,-26.8,2.15,-23.85,{dark:true,titleSize:55});
 plaque(oneWorldLinks,'FITNESS','MOVE',3.3,.72,0,2.15,-31.2,{dark:true,titleSize:55});
 plaque(oneWorldLinks,'ARENA','ENGAGE',3.3,.72,26.8,2.15,-23.85,{dark:true,titleSize:55});
@@ -2695,19 +2697,19 @@ const roomAccess=new THREE.Group();roomAccess.name='KOMO_ROOM_ACCESS_V52';oneWor
 function accessPortal({id,title,sub,x,z,rot=0,accent=0xd5b679,dark=true}){
   const g=new THREE.Group();g.name='KOMO_ACCESS_'+id+'_V52';g.position.set(x,0,z);g.rotation.y=rot;roomAccess.add(g);
   const accentMat=new THREE.MeshBasicMaterial({color:accent,transparent:true,opacity:.52,depthWrite:false});
-  box(g,.30,5.40,.70,MAT.travertine,-2.55,2.76,0,{cast:true});
-  box(g,.30,5.40,.70,MAT.travertine,2.55,2.76,0,{cast:true});
-  box(g,5.40,.26,.70,MAT.travertine,0,5.32,0,{cast:true});
-  box(g,4.78,.035,.075,MAT.brass,0,5.04,.38,{cast:false,receive:false});
-  box(g,4.20,.020,.060,accentMat,0,.145,.58,{cast:false,receive:false});
-  plaque(g,title,sub,4.30,.64,0,4.55,.40,{dark,titleSize:title.length>12?42:50});
+  box(g,.32,5.72,.82,MAT.travertine,-3.05,2.92,0,{cast:true});
+  box(g,.32,5.72,.82,MAT.travertine,3.05,2.92,0,{cast:true});
+  box(g,6.42,.30,.82,MAT.travertine,0,5.64,0,{cast:true});
+  box(g,5.78,.035,.085,MAT.brass,0,5.32,.44,{cast:false,receive:false});
+  box(g,5.18,.020,.070,accentMat,0,.145,.64,{cast:false,receive:false});
+  plaque(g,title,sub,5.10,.68,0,4.78,.46,{dark,titleSize:title.length>12?42:50});
   const ring=mesh(g,new THREE.RingGeometry(.38,.44,36),accentMat,0,.16,.72,{cast:false,receive:false});
   ring.rotation.x=-Math.PI/2;
   return g;
 }
-accessPortal({id:'TWIN_A',title:'FUNCTIONAL TWIN',sub:'UNDERSTAND · RUN IN',x:-13.0,z:-24.0,rot:Math.PI/2,accent:0xb9cfbf});
-accessPortal({id:'FIT_A',title:'KŌMØ FITNESS',sub:'MOVE · RUN IN',x:0,z:-29.8,accent:0xd7b777,dark:false});
-accessPortal({id:'ARENA_A',title:'ARENA',sub:'ENGAGE · RUN IN',x:13.0,z:-24.0,rot:-Math.PI/2,accent:0xb9935c});
+accessPortal({id:'TWIN_A',title:'FUNCTIONAL TWIN',sub:'UNDERSTAND · WALK IN',x:-13.0,z:-24.0,rot:Math.PI/2,accent:0xb9cfbf});
+accessPortal({id:'FIT_A',title:'KŌMØ FITNESS',sub:'MOVE · WALK IN',x:0,z:-29.8,accent:0xd7b777,dark:false});
+accessPortal({id:'ARENA_A',title:'ARENA',sub:'ENGAGE · WALK IN',x:13.0,z:-24.0,rot:-Math.PI/2,accent:0xb9935c});
 accessPortal({id:'TWIN_B',title:'TWIN LAB',sub:'BODY · TIME · DATA',x:-32.1,z:-2.1,rot:Math.PI/2,accent:0xb9cfbf});
 accessPortal({id:'FIT_B',title:'FITNESS CLUB',sub:'TRAIN · PROGRESS',x:0,z:-43.3,accent:0xd7b777,dark:false});
 accessPortal({id:'ARENA_B',title:'ARENA FLOOR',sub:'CHALLENGE · COMMUNITY',x:32.1,z:-2.1,rot:-Math.PI/2,accent:0xb9935c});
@@ -2720,6 +2722,45 @@ box(roomAccess,.055,.018,12.2,guideTwin,-32.1,.122,-12.2,{cast:false,receive:fal
 box(roomAccess,.055,.018,13.2,guideFit,0,.122,-36.2,{cast:false,receive:false});
 box(roomAccess,20.0,.018,.055,guideArena,22.8,.122,-24.0,{cast:false,receive:false});
 box(roomAccess,.055,.018,12.2,guideArena,32.1,.122,-12.2,{cast:false,receive:false});
+
+// V6.2 Access Architecture — wider covered promenades visually connect Hall and rooms.
+const accessArchitectureV62=new THREE.Group();accessArchitectureV62.name='KOMO_ACCESS_ARCHITECTURE_V62';oneWorldLinks.add(accessArchitectureV62);
+accessArchitectureV62.userData.realismDetail=true;
+const accessRoofGlassV62=lowPower?MAT.smokedGlass:M.glass;
+const accessRoofGlowV62=new THREE.MeshBasicMaterial({color:0xd9c49c,transparent:true,opacity:lowPower?.14:.24,depthWrite:false});
+const accessUnitV62=new THREE.BoxGeometry(1,1,1);
+const accessRoofItemsV62=[],accessBeamItemsV62=[],accessLightItemsV62=[];
+function accessSpan(x,z,w,d,rot=0){
+  accessRoofItemsV62.push({x,y:5.35,z,ry:rot,sx:w,sy:.10,sz:d});
+  accessBeamItemsV62.push({x,y:5.19,z,ry:rot,sx:w,sy:.12,sz:.16});
+  accessBeamItemsV62.push({x,y:5.19,z:z+(rot?0:d*.46),ry:rot,sx:w,sy:.12,sz:.16});
+  accessLightItemsV62.push({x,y:5.16,z,ry:rot,sx:Math.max(1,w-.55),sy:.018,sz:.055});
+}
+// horizontal Twin / Arena promenades
+accessSpan(-22.0,-24.0,25.8,6.85,0);
+accessSpan(22.0,-24.0,25.8,6.85,0);
+// lateral approach legs
+accessSpan(-32.1,-13.0,23.0,6.85,Math.PI/2);
+accessSpan(32.1,-13.0,23.0,6.85,Math.PI/2);
+// central Fitness gallery
+accessSpan(0,-35.5,16.8,9.1,Math.PI/2);
+instancedStatic(accessArchitectureV62,accessUnitV62,accessRoofGlassV62,accessRoofItemsV62,'KOMO_ACCESS_ROOF_INST_V62');
+instancedStatic(accessArchitectureV62,accessUnitV62,MAT.blackened,accessBeamItemsV62,'KOMO_ACCESS_BEAM_INST_V62');
+instancedStatic(accessArchitectureV62,accessUnitV62,accessRoofGlowV62,accessLightItemsV62,'KOMO_ACCESS_LIGHT_INST_V62');
+
+// Large threshold canopies reinforce the destination hierarchy without blocking sightlines.
+[
+  {x:-13,z:-24,rot:Math.PI/2,accent:guideTwin,label:'TWIN'},
+  {x:0,z:-29.8,rot:0,accent:guideFit,label:'FITNESS'},
+  {x:13,z:-24,rot:-Math.PI/2,accent:guideArena,label:'ARENA'}
+].forEach((p,i)=>{
+  const g=new THREE.Group();g.position.set(p.x,0,p.z);g.rotation.y=p.rot;accessArchitectureV62.add(g);
+  box(g,7.10,.20,2.25,MAT.travertine,0,5.86,0,{cast:true});
+  box(g,6.45,.030,1.72,p.accent,0,5.69,.05,{cast:false,receive:false});
+  [-3.25,3.25].forEach(px=>box(g,.20,5.45,.54,MAT.limestone,px,3.02,0,{cast:true}));
+  box(g,6.12,.040,.080,MAT.brass,0,5.52,.84,{cast:false,receive:false});
+  plaque(g,p.label,'OPEN GALLERY',4.60,.58,0,5.02,.90,{dark:i!==1,titleSize:45});
+});
 
 // V6.0 Walkable Gallery Walls — same architecture, batched into a handful of draw calls.
 const galleryWallsV59=new THREE.Group();galleryWallsV59.name='KOMO_GALLERY_WALLS_V59';oneWorldLinks.add(galleryWallsV59);
@@ -3786,9 +3827,7 @@ function showAvatarStudio(){
   ]);bindAvatarStudio();
 }
 avatarToggle.addEventListener('click',()=>{closeWorldMenu();showAvatarStudio()});
-document.querySelectorAll('[data-intro-avatar-key]').forEach(btn=>btn.addEventListener('click',()=>{
-  avatarConfig[btn.dataset.introAvatarKey]=btn.dataset.introAvatarValue;saveAvatarConfig();
-}));
+if(introAvatarOpen)introAvatarOpen.addEventListener('click',()=>showAvatarStudio());
 applyAvatarConfig();
 
 function syncUiOpen(){
@@ -4657,9 +4696,9 @@ function inTwinZone(p=player){return p.x>-57.2&&p.x<-32.15&&p.z>-13.3&&p.z<12.2}
 function inFitnessZone(p=player){return p.x>-11.0&&p.x<11.0&&p.z>-67.5&&p.z<-42.15}
 function inArenaZone(p=player){return p.x>32.15&&p.x<57.2&&p.z>-13.3&&p.z<12.2}
 // Broad overlapping galleries make each room part of one continuous navigation mesh.
-function inTwinLink(p=player){return ((p.x>-35.2&&p.x<-9.55&&p.z>-28.15&&p.z<-20.15)||(p.x>-35.2&&p.x<-28.65&&p.z>-25.2&&p.z<1.45))}
-function inArenaLink(p=player){return ((p.x>9.55&&p.x<35.2&&p.z>-28.15&&p.z<-20.15)||(p.x>28.65&&p.x<35.2&&p.z>-25.2&&p.z<1.45))}
-function inFitnessLink(p=player){return p.x>-4.85&&p.x<4.85&&p.z>-45.1&&p.z<-26.65}
+function inTwinLink(p=player){return ((p.x>-35.7&&p.x<-9.15&&p.z>-28.65&&p.z<-19.35)||(p.x>-35.7&&p.x<-28.15&&p.z>-25.7&&p.z<1.85))}
+function inArenaLink(p=player){return ((p.x>9.15&&p.x<35.7&&p.z>-28.65&&p.z<-19.35)||(p.x>28.15&&p.x<35.7&&p.z>-25.7&&p.z<1.85))}
+function inFitnessLink(p=player){return p.x>-5.35&&p.x<5.35&&p.z>-45.5&&p.z<-26.25}
 function getCampusZone(p=player){
   if(inTwinZone(p))return 'twin';
   if(inFitnessZone(p))return 'rehab';
@@ -5155,6 +5194,10 @@ function updateRealismLOD(){
     const nearGallery=inTwinLink(player)||inArenaLink(player)||inFitnessLink(player)||(!inTwinZone(player)&&!inFitnessZone(player)&&!inArenaZone(player)&&player.z<-15);
     galleryWallsV59.visible=nearGallery||Math.min(twinD,fitD,arenaD)<(lowPower?18:28);
   }
+  if(typeof accessArchitectureV62!=='undefined'){
+    const nearAccess=inTwinLink(player)||inArenaLink(player)||inFitnessLink(player)||player.z<-14;
+    accessArchitectureV62.visible=nearAccess||Math.min(twinD,fitD,arenaD)<(lowPower?22:34);
+  }
   if(typeof grandFlagshipV61!=='undefined'){
     grandFlagshipV61.visible=!emergencyPerformance&&(!lowPower||player.z>-30&&player.z<18);
   }
@@ -5222,6 +5265,7 @@ function applyEmergencyPerformance(){
   if(typeof realismLightWashesV60!=='undefined')realismLightWashesV60.visible=false;
   if(typeof grandFlagshipV61!=='undefined')grandFlagshipV61.visible=false;
   if(typeof destinationTheatreV61!=='undefined')destinationTheatreV61.visible=false;
+  if(typeof accessArchitectureV62!=='undefined')accessArchitectureV62.visible=false;
   living.clouds.forEach(c=>c.visible=false);
   // Keep only the first two ambient NPCs under emergency load.
   living.npcs.forEach((npc,i)=>{npc.visible=i<2});
@@ -5460,7 +5504,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'6.1.0-grand-flagship-ui',
+  version:'6.2.0-access-upgrade',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
