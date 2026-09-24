@@ -138,7 +138,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=lowPower?1.00:1.03;
+renderer.toneMappingExposure=lowPower?1.04:1.22;
 renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -168,7 +168,7 @@ function applyQualityProfile(){
   }
   fill.intensity=lowPower?.12:emergencyPerformance?0:qualityMode==='high'?.62:qualityMode==='performance'?.16:.34;
   if(typeof hallLightGroup!=='undefined')hallLightGroup.visible=!lowPower&&!emergencyPerformance;
-  activeLightBudget=emergencyPerformance||lowPower?0:(qualityMode==='high'?6:qualityMode==='performance'?2:4);
+  activeLightBudget=emergencyPerformance||lowPower?0:(qualityMode==='high'?10:qualityMode==='performance'?3:7);
   living.lights.forEach(l=>{if(l){l.visible=false;l.intensity=0}});
   applyRenderScale();
 }
@@ -176,15 +176,15 @@ applyRenderScale();
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xcbd2c8);
-scene.fog=new THREE.Fog(0xcbd2c8,lowPower?82:58,lowPower?215:150);
+scene.fog=new THREE.Fog(0xd4d9d1,lowPower?88:76,lowPower?225:195);
 
 const camera=new THREE.PerspectiveCamera(lowPower?60:54,innerWidth/innerHeight,.12,260);
 camera.position.set(0,1.72,58);
 
 // V6.3.1 structural lighting: directional architecture first, ambient fill second.
-const hemi=new THREE.HemisphereLight(0xf3f1ea,0x4d5b52,1.72);
+const hemi=new THREE.HemisphereLight(0xf7f3ea,0x657268,lowPower?1.82:2.18);
 scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffe8ca,3.05);
+const sun=new THREE.DirectionalLight(0xffe9cf,lowPower?3.10:3.65);
 sun.position.set(-24,38,32);
 sun.castShadow=true;
 if(sun.castShadow){
@@ -193,9 +193,9 @@ if(sun.castShadow){
   sun.shadow.camera.near=1;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;
 }
 scene.add(sun);
-const fill=new THREE.DirectionalLight(0xdfe9e3,lowPower?.09:.44);
+const fill=new THREE.DirectionalLight(0xe7eee9,lowPower?.14:.72);
 fill.position.set(28,18,-30);scene.add(fill);
-const hallAmbient=new THREE.AmbientLight(0xfff4e8,lowPower?.09:.13);scene.add(hallAmbient);
+const hallAmbient=new THREE.AmbientLight(0xfff5ea,lowPower?.12:.24);scene.add(hallAmbient);
 const hallLightGroup=new THREE.Group();hallLightGroup.name='KOMO_HALL_LIGHTING_V43';scene.add(hallLightGroup);
 const hallLights=[];
 const hallLightProfile={day:[],morning:[],golden:[],evening:[]};
@@ -999,10 +999,10 @@ function updateNpc(npc,t,index){
 function makePlayerAvatar(){
   const g=new THREE.Group();g.name='KOMO_PLAYER_AVATAR_V42_REALISM';g.userData.dynamic=true;scene.add(g);
 
-  const skin=new THREE.MeshStandardMaterial({color:0xc99673,roughness:.68,metalness:0});
-  const skinWarm=new THREE.MeshStandardMaterial({color:0xb87958,roughness:.74,metalness:0});
-  const cloth=new THREE.MeshStandardMaterial({color:0x24483a,roughness:.48,metalness:.018});
-  const clothDark=new THREE.MeshStandardMaterial({color:0x19372d,roughness:.56,metalness:.025});
+  const skin=new THREE.MeshStandardMaterial({color:0xb8876e,roughness:.76,metalness:0});
+  const skinWarm=new THREE.MeshStandardMaterial({color:0x9f6f58,roughness:.80,metalness:0});
+  const cloth=new THREE.MeshStandardMaterial({color:0x25342e,roughness:.62,metalness:.012});
+  const clothDark=new THREE.MeshStandardMaterial({color:0x151d1a,roughness:.66,metalness:.018});
   const clothSoft=new THREE.MeshStandardMaterial({color:0x385c4b,roughness:.62,metalness:.01});
   const trouser=new THREE.MeshStandardMaterial({color:0x303733,roughness:.68,metalness:.012});
   const shoe=new THREE.MeshStandardMaterial({color:0x202421,roughness:.42,metalness:.035});
@@ -1072,16 +1072,16 @@ function makePlayerAvatar(){
   // Neck and smaller adult head.
   cyl(g,.064,.070,.125,skin,0,2.00,0,lowPower?8:12,{cast});
   const headGroup=new THREE.Group();headGroup.position.y=2.14;g.add(headGroup);
-  const head=mesh(headGroup,new THREE.SphereGeometry(.153,lowPower?14:24,lowPower?10:18),skin,0,0,0,{cast});
-  head.scale.set(.90,1.05,.94);
-  const jaw=mesh(headGroup,new THREE.SphereGeometry(.106,lowPower?10:16,lowPower?7:12),skin,0,-.093,.014,{cast});
-  jaw.scale.set(.89,.59,.86);
+  const head=mesh(headGroup,new THREE.SphereGeometry(.128,lowPower?14:24,lowPower?10:18),skin,0,0,0,{cast});
+  head.scale.set(.88,1.04,.92);
+  const jaw=mesh(headGroup,new THREE.SphereGeometry(.086,lowPower?10:16,lowPower?7:12),skin,0,-.082,.012,{cast});
+  jaw.scale.set(.86,.54,.82);
   const earGeo=new THREE.SphereGeometry(.027,lowPower?7:10,lowPower?5:8);
   [-.149,.149].forEach(x=>{const e=mesh(headGroup,earGeo,skin,x,-.004,0,{cast:false});e.scale.set(.52,1.0,.56)});
-  const hairCap=mesh(headGroup,new THREE.SphereGeometry(.166,lowPower?14:22,lowPower?8:14,0,Math.PI*2,0,Math.PI*.55),hair,0,.062,-.008,{cast});
-  hairCap.scale.set(.93,.84,.97);
-  const fringe=mesh(headGroup,new THREE.SphereGeometry(.078,lowPower?8:14,lowPower?6:10),hair,-.042,.111,.103,{cast:false});
-  fringe.scale.set(1.08,.38,.46);fringe.rotation.z=-.14;
+  const hairCap=mesh(headGroup,new THREE.SphereGeometry(.139,lowPower?14:22,lowPower?8:14,0,Math.PI*2,0,Math.PI*.50),hair,0,.055,-.010,{cast});
+  hairCap.scale.set(.94,.72,.96);
+  const fringe=mesh(headGroup,new THREE.SphereGeometry(.056,lowPower?8:14,lowPower?6:10),hair,-.034,.093,.092,{cast:false});
+  fringe.scale.set(1.04,.26,.34);fringe.rotation.z=-.10;
   const nose=mesh(headGroup,new THREE.SphereGeometry(.022,lowPower?6:10,lowPower?5:8),skinWarm,0,-.004,.160,{cast:false});
   nose.scale.set(.58,.72,1.06);
   [-.050,.050].forEach(x=>{
@@ -1126,6 +1126,9 @@ function makePlayerAvatar(){
     materials:{skin,skinWarm,cloth,clothDark,clothSoft,trouser,shoe,sole,hair,bronze},
     garments:{torso,chest,waist,shoulderL,shoulderR,collarL,collarR,cuffL,cuffR,chestPin}
   };
+  // V6.5: deliberately understated proportions so the avatar never dominates the architecture.
+  bodyRoot.scale.set(.92,.94,.92);
+  ring.material.opacity=.028;
   return g;
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
@@ -1591,8 +1594,9 @@ function heroTreeV64(x,z,scale=1,spread=1){
   g.userData.swayPhase=(x*.73+z*.41);living.trees.push(g);return g;
 }
 const heroTreeSpecsV64=lowPower?[
-  [-25.6,32.5,1.18,1.05],[25.4,34.0,1.14,1.05],[-26.5,67.5,1.08,1.0],[26.8,69.0,1.12,1.02]
+  [-11.8,9.2,.92,1.0],[11.8,9.8,.90,1.0],[-25.6,32.5,1.18,1.05],[25.4,34.0,1.14,1.05],[-26.5,67.5,1.08,1.0],[26.8,69.0,1.12,1.02]
 ]:[
+  [-11.8,8.8,1.02,1.04],[11.8,9.6,1.00,1.04],[-14.8,18.2,1.10,1.06],[14.8,19.0,1.08,1.06],
   [-25.6,32.5,1.30,1.10],[25.4,34.0,1.24,1.08],[-28.2,52.0,1.16,1.06],[28.0,53.5,1.18,1.05],
   [-26.5,67.5,1.18,1.05],[26.8,69.0,1.22,1.08],[-19.5,87.5,1.04,1.0],[19.5,87.5,1.04,1.0]
 ];
@@ -1651,6 +1655,17 @@ const pavilionLongevityV64=campusPavilionV64(30.5,43.0,11.8,18.0,'LONGEVITY','SC
 const pavilionCommunityV64=campusPavilionV64(-30.0,69.5,10.8,14.5,'COMMUNITY LOUNGE','MEET · CONNECT · RECOVER',1);
 const pavilionRecoveryV64=campusPavilionV64(30.0,69.5,10.8,14.5,'RECOVERY HOUSE','REST · RESET · RESTORE',1);
 
+// V6.5 Arrival Presence — readable architecture in the very first desktop frame.
+if(!lowPower){
+  campusPavilionV64(-17.8,14.0,7.8,8.8,'MOTION HOUSE','MEASURE · MOVE',1);
+  campusPavilionV64(17.8,14.0,7.8,8.8,'LONGEVITY LAB','SCIENCE · LIVE',1);
+  [-1,1].forEach(side=>{
+    const x=side*8.7;
+    box(livingCampusV64,.10,.035,19.0,MAT.brass,x,.035,10.5,{cast:false,receive:false});
+    box(livingCampusV64,1.10,.020,19.0,campusInteriorGlowV64,side*6.7,.028,10.5,{cast:false,receive:false});
+  });
+}
+
 // Side water mirrors and rear reflecting court anchor architecture in the landscape.
 function waterMirrorV64(x,z,w,d){
   const g=new THREE.Group();g.position.set(x,0,z);livingCampusV64.add(g);
@@ -1664,6 +1679,7 @@ function waterMirrorV64(x,z,w,d){
   return g;
 }
 waterMirrorV64(-24.6,45.0,5.4,24.0);waterMirrorV64(24.6,45.0,5.4,24.0);
+if(!lowPower){waterMirrorV64(-10.6,13.5,2.4,9.6);waterMirrorV64(10.6,13.5,2.4,9.6);}
 waterMirrorV64(0,89.2,18.0,7.2);
 
 // Rear longevity terrace and stylised waterfall create a destination-scale backdrop.
@@ -3759,7 +3775,7 @@ const player=new THREE.Vector3(0,0,14.55);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
 let cameraMode='third';
-let thirdPersonDistance=lowPower?3.55:4.05;
+let thirdPersonDistance=lowPower?4.15:5.35;
 const playerAvatar=makePlayerAvatar();
 let playerFacing=0;
 const cameraDesired=new THREE.Vector3(),cameraLook=new THREE.Vector3();
@@ -5318,11 +5334,11 @@ function updateCamera(now,dt){
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
     const runAmount=THREE.MathUtils.clamp(velocity.length()/AUTO_RUN_SPEED,0,1);
-    const desiredFov=(lowPower?60:54)+(lowPower?1.5:3.0)*runAmount;
+    const desiredFov=(lowPower?58:50)+(lowPower?1.3:2.4)*runAmount;
     if(Math.abs(camera.fov-desiredFov)>.01){camera.fov+= (desiredFov-camera.fov)*(1-Math.exp(-6*dt));camera.updateProjectionMatrix()}
     const distance=thirdPersonDistance+(lowPower?.10:.34)*runAmount;
-    const height=(lowPower?2.00:2.24)+.06*runAmount;
-    const shoulder=lowPower?.23:.32;
+    const height=(lowPower?2.25:2.72)+.05*runAmount;
+    const shoulder=lowPower?.18:.22;
     cameraDesired.set(
       player.x+Math.sin(yaw)*distance+Math.cos(yaw)*shoulder,
       player.y+visualGround+height+pitch*1.08,
@@ -5341,7 +5357,7 @@ function updateCamera(now,dt){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
     camera.position.lerp(cameraDesired,1-Math.exp(-8.6*dt));
-    cameraLook.set(player.x,player.y+visualGround+1.24+pitch*.39,player.z);
+    cameraLook.set(player.x,player.y+visualGround+1.05+pitch*.34,player.z-.55);
     camera.lookAt(cameraLook);
   }else{
     const desiredFov=lowPower?61:57;
@@ -5704,12 +5720,12 @@ function updateLightBudget(now){
     if(!shown)continue;
     const wp=new THREE.Vector3();l.getWorldPosition(wp);
     const d=wp.distanceTo(camera.position);
-    if(d<18)candidates.push({l,d});
+    if(d<(lowPower?18:32))candidates.push({l,d});
   }
   candidates.sort((a,b)=>a.d-b.d);
   candidates.slice(0,activeLightBudget).forEach(({l,d})=>{
     l.visible=true;
-    l.intensity=(l.userData.profileIntensity||l.userData.baseIntensity||1)*THREE.MathUtils.clamp(1-d/20,.28,1);
+    l.intensity=(l.userData.profileIntensity||l.userData.baseIntensity||1)*THREE.MathUtils.clamp(1-d/(lowPower?20:36),.32,1);
   });
 }
 function updateRealismLOD(){
@@ -5762,14 +5778,14 @@ function updateVisibilityBudget(now){
   // Coarse occlusion/distance budget: do not draw whole zones when they cannot contribute.
   const deepHall=player.z<7;
   exterior.visible=player.z>5;
-  if(living.district)living.district.visible=player.z>35;
+  if(living.district)living.district.visible=!lowPower||player.z>24;
   if(living.atmosphereV632)living.atmosphereV632.visible=!emergencyPerformance;
-  if(typeof arrivalHeroV632!=='undefined')arrivalHeroV632.visible=!emergencyPerformance&&player.z>8;
+  if(typeof arrivalHeroV632!=='undefined')arrivalHeroV632.visible=!emergencyPerformance&&(!lowPower||player.z>4);
   if(living.livingCampusV64){
-    const campusNear=player.z>9||camera.position.z>12;
+    const campusNear=!lowPower||player.z>4||camera.position.z>8;
     living.livingCampusV64.visible=!emergencyPerformance&&campusNear;
-    campusCrowdV64.visible=!lowPower||player.z>42;
-    rearTerraceV64.visible=!lowPower||player.z>52;
+    campusCrowdV64.visible=!lowPower||player.z>34;
+    rearTerraceV64.visible=!lowPower||player.z>44;
   }
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
@@ -5786,22 +5802,22 @@ function updateVisibilityBudget(now){
   living.trees.forEach(tree=>{
     const wp=new THREE.Vector3();tree.getWorldPosition(wp);
     const hero=tree.name==='KOMO_HERO_TREE_V64';
-    tree.visible=wp.distanceTo(camera.position)<(hero?(lowPower?54:82):(lowPower?30:46));
+    tree.visible=wp.distanceTo(camera.position)<(hero?(lowPower?58:130):(lowPower?34:96));
   });
   living.npcs.forEach((npc,i)=>{
     const sameLevel=Math.abs(npc.position.y-player.y)<2;
     const dist=Math.hypot(npc.position.x-player.x,npc.position.z-player.z);
     const allowed=!emergencyPerformance||i<2;
-    npc.visible=allowed&&sameLevel&&dist<(lowPower?20:34);
+    npc.visible=allowed&&sameLevel&&dist<(lowPower?22:68);
   });
   living.banners.forEach(banner=>{
     const wp=new THREE.Vector3();banner.getWorldPosition(wp);
-    banner.visible=wp.distanceTo(camera.position)<42;
+    banner.visible=wp.distanceTo(camera.position)<(lowPower?46:96);
   });
   living.motionScreens.forEach(screen=>{
     const mesh=screen.mesh||screen;
     if(mesh?.getWorldPosition){
-      const wp=new THREE.Vector3();mesh.getWorldPosition(wp);mesh.visible=wp.distanceTo(camera.position)<28;
+      const wp=new THREE.Vector3();mesh.getWorldPosition(wp);mesh.visible=wp.distanceTo(camera.position)<(lowPower?30:62);
     }
   });
 }
@@ -5832,7 +5848,7 @@ function updatePerformance(now){
   if(now-lastPerfSample<1000)return;
   const fps=perfFrames*1000/(now-lastPerfSample);fpsEMA=fpsEMA*.72+fps*.28;perfFrames=0;lastPerfSample=now;
   if(fpsStatus)fpsStatus.textContent=Math.round(fpsEMA)+' FPS · '+renderer.info.render.calls+' DC';
-  if(fpsEMA<18&&!emergencyPerformance){applyEmergencyPerformance();notify(locale==='fr'?'Mode performance activé':'Performance mode enabled')}
+  if(fpsEMA<(lowPower?17:13)&&!emergencyPerformance){applyEmergencyPerformance();notify(locale==='fr'?'Mode performance activé':'Performance mode enabled')}
   if(qualityMode==='auto'&&!emergencyPerformance){
     const min=lowPower?(retinaMobile?.78:.68):.70;
     const max=lowPower?(retinaMobile?1.10:.90):1.25;
@@ -6066,7 +6082,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'6.4.0-living-campus',
+  version:'6.5.0-visual-presence',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
