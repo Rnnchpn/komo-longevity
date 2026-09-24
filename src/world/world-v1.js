@@ -2667,39 +2667,44 @@ box(roomAccess,.055,.018,13.2,guideFit,0,.122,-36.2,{cast:false,receive:false});
 box(roomAccess,20.0,.018,.055,guideArena,22.8,.122,-24.0,{cast:false,receive:false});
 box(roomAccess,.055,.018,12.2,guideArena,32.1,.122,-12.2,{cast:false,receive:false});
 
-// V5.9 Walkable Gallery Walls — architectural edges without closing the campus sightlines.
+// V6.0 Walkable Gallery Walls — same architecture, batched into a handful of draw calls.
 const galleryWallsV59=new THREE.Group();galleryWallsV59.name='KOMO_GALLERY_WALLS_V59';oneWorldLinks.add(galleryWallsV59);
+galleryWallsV59.userData.realismDetail=true;
 const galleryGlass=lowPower?MAT.smokedGlass:M.glass;
-function galleryBay(parent,x,z,rot=0,accent=0xd5b679,flip=false){
-  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
-  const accentMat=new THREE.MeshBasicMaterial({color:accent,transparent:true,opacity:lowPower?.20:.34,depthWrite:false});
-  // Solid base + spaced piers + glass upper field keeps views open.
-  box(g,3.25,.56,.24,WALL.travertine,0,.34,0,{cast:false,receive:true});
-  box(g,3.10,.030,.10,WALL.brass,0,.66,flip?.08:-.08,{cast:false,receive:false});
-  [-1.52,1.52].forEach(px=>box(g,.16,2.75,.30,WALL.mineral,px,1.68,0,{cast:true}));
-  box(g,2.86,1.75,.035,galleryGlass,0,1.82,0,{cast:false,receive:false});
-  box(g,2.72,.020,.050,accentMat,0,2.68,.03,{cast:false,receive:false});
-  return g;
+const galleryAccentTwin=new THREE.MeshBasicMaterial({color:0xb9cfbf,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
+const galleryAccentFit=new THREE.MeshBasicMaterial({color:0xd7b777,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
+const galleryAccentArena=new THREE.MeshBasicMaterial({color:0xb9935c,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
+const galleryBatches={base:[],brass:[],pier:[],glass:[],walnut:[],twin:[],fit:[],arena:[]};
+function galleryPush(list,b,lx,ly,lz,sx,sy,sz){
+  const c=Math.cos(b.rot),sn=Math.sin(b.rot);
+  list.push({x:b.x+lx*c+lz*sn,y:ly,z:b.z-lx*sn+lz*c,ry:b.rot,sx,sy,sz});
 }
-// Twin / Arena transverse galleries.
+function galleryBaySpec(x,z,rot=0,accent='fit',flip=false,timber=false){
+  const b={x,z,rot};
+  galleryPush(galleryBatches.base,b,0,.34,0,3.25,.56,.24);
+  galleryPush(galleryBatches.brass,b,0,.66,flip?.08:-.08,3.10,.030,.10);
+  galleryPush(galleryBatches.pier,b,-1.52,1.68,0,.16,2.75,.30);
+  galleryPush(galleryBatches.pier,b,1.52,1.68,0,.16,2.75,.30);
+  galleryPush(galleryBatches.glass,b,0,1.82,0,2.86,1.75,.035);
+  galleryPush(galleryBatches[accent],b,0,2.68,.03,2.72,.020,.050);
+  if(timber)galleryPush(galleryBatches.walnut,b,0,1.72,.045,2.42,1.25,.055);
+}
 [-27.65,-20.95].forEach((z,side)=>{
-  [-28.8,-24.9,-21.0,-17.1,-13.2].forEach((x,i)=>galleryBay(galleryWallsV59,x,z,0,0xb9cfbf,!!side));
-  [13.2,17.1,21.0,24.9,28.8].forEach((x,i)=>galleryBay(galleryWallsV59,x,z,0,0xb9935c,!side));
+  [-28.8,-24.9,-21.0,-17.1,-13.2].forEach(x=>galleryBaySpec(x,z,0,'twin',!!side));
+  [13.2,17.1,21.0,24.9,28.8].forEach(x=>galleryBaySpec(x,z,0,'arena',!side));
 });
-// Lateral legs approaching Twin and Arena.
-[-34.25,-29.75].forEach((x,side)=>{
-  [-18.8,-14.8,-10.8,-6.8].forEach(z=>galleryBay(galleryWallsV59,x,z,Math.PI/2,0xb9cfbf,!!side));
-});
-[29.75,34.25].forEach((x,side)=>{
-  [-18.8,-14.8,-10.8,-6.8].forEach(z=>galleryBay(galleryWallsV59,x,z,Math.PI/2,0xb9935c,!side));
-});
-// Central Fitness tunnel: alternating timber / glass character.
-[-4.55,4.55].forEach((x,side)=>{
-  [-40.8,-36.9,-33.0,-29.1].forEach((z,i)=>{
-    const g=galleryBay(galleryWallsV59,x,z,Math.PI/2,0xd7b777,!!side);
-    if(i%2===0)box(g,2.42,1.25,.055,WALL.walnut,0,1.72,.045,{cast:false,receive:true});
-  });
-});
+[-34.25,-29.75].forEach((x,side)=>[-18.8,-14.8,-10.8,-6.8].forEach(z=>galleryBaySpec(x,z,Math.PI/2,'twin',!!side)));
+[29.75,34.25].forEach((x,side)=>[-18.8,-14.8,-10.8,-6.8].forEach(z=>galleryBaySpec(x,z,Math.PI/2,'arena',!side)));
+[-4.55,4.55].forEach((x,side)=>[-40.8,-36.9,-33.0,-29.1].forEach((z,i)=>galleryBaySpec(x,z,Math.PI/2,'fit',!!side,i%2===0)));
+const galleryUnitBox=new THREE.BoxGeometry(1,1,1);
+instancedStatic(galleryWallsV59,galleryUnitBox,WALL.travertine,galleryBatches.base,'KOMO_GALLERY_BASE_INST_V60');
+instancedStatic(galleryWallsV59,galleryUnitBox,WALL.brass,galleryBatches.brass,'KOMO_GALLERY_BRASS_INST_V60');
+instancedStatic(galleryWallsV59,galleryUnitBox,WALL.mineral,galleryBatches.pier,'KOMO_GALLERY_PIER_INST_V60');
+instancedStatic(galleryWallsV59,galleryUnitBox,galleryGlass,galleryBatches.glass,'KOMO_GALLERY_GLASS_INST_V60');
+instancedStatic(galleryWallsV59,galleryUnitBox,WALL.walnut,galleryBatches.walnut,'KOMO_GALLERY_WALNUT_INST_V60');
+instancedStatic(galleryWallsV59,galleryUnitBox,galleryAccentTwin,galleryBatches.twin,'KOMO_GALLERY_TWIN_GLOW_INST_V60');
+instancedStatic(galleryWallsV59,galleryUnitBox,galleryAccentFit,galleryBatches.fit,'KOMO_GALLERY_FIT_GLOW_INST_V60');
+instancedStatic(galleryWallsV59,galleryUnitBox,galleryAccentArena,galleryBatches.arena,'KOMO_GALLERY_ARENA_GLOW_INST_V60');
 
 // V5.3 room thresholds — every destination has a visible physical way back to the Hall.
 function roomReturnPortal(parent,{label='HALL',sub='WALK OUT · RETURN',x=0,z=10.65,rot=0,accent=0xd5b679,dark=true}={}){
