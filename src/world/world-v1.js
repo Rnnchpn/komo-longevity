@@ -5,6 +5,10 @@ const $=(s)=>document.querySelector(s);
 const canvas=$('#world-canvas');
 const loader=$('#world-loader');
 const intro=$('#intro');
+const introPulse=$('#intro-pulse');
+const introGuestName=$('#intro-guest-name');
+const introAuthNote=$('#intro-auth-note');
+const introAuthStatus=$('#intro-auth-status');
 const languageToggle=$('#language-toggle');
 const locationChip=$('.location-chip');
 const locationName=$('#location-name');
@@ -83,7 +87,11 @@ const copy={
     introKicker:'KŌMØ WORLD · SPATIAL LONGEVITY',
     intro1:'Votre corps.',intro2:'Votre trajectoire.',
     introBody:'Entrez dans un espace personnel conçu pour comprendre votre mouvement, choisir une action et suivre votre progression dans le temps.',
-    introButton:'ENTRER DANS MON WORLD',
+    introButton:'ENTRER EN INVITÉ',
+    introPulse:'CRÉER / SE CONNECTER',
+    introPulseMeta:'Profil · progression · données',
+    introGuest:'MODE INVITÉ',introGuestPlaceholder:'Votre prénom ou pseudo',
+    introAuthNote:'Les deux modes rejoignent le même World multijoueur. Le mode invité est temporaire.',
     action:'ACTION',
     deskTitle:'Ouvrir le KŌMØ Desk',deskCopy:'Orientation · trajectoire · espaces',
     twinTitle:'Functional Twin',twinCopy:'Courez à travers le seuil · accès automatique · E pour entrer maintenant',
@@ -99,7 +107,11 @@ const copy={
     introKicker:'KŌMØ WORLD · SPATIAL LONGEVITY',
     intro1:'Your body.',intro2:'Your trajectory.',
     introBody:'Enter a personal space designed to understand your movement, choose an action and follow your progress over time.',
-    introButton:'ENTER MY WORLD',
+    introButton:'ENTER AS GUEST',
+    introPulse:'CREATE / SIGN IN',
+    introPulseMeta:'Profile · progress · data',
+    introGuest:'GUEST MODE',introGuestPlaceholder:'Your first name or nickname',
+    introAuthNote:'Both modes join the same multiplayer World. Guest mode is temporary.',
     action:'ACTION',
     deskTitle:'Open KŌMØ Desk',deskCopy:'Orientation · trajectory · spaces',
     twinTitle:'Enter Functional Twin',twinCopy:'Understand your movement over time',
@@ -112,6 +124,7 @@ const copy={
   }
 };
 let locale='fr';
+if(introGuestName)introGuestName.value=(localStorage.getItem('komo_world_guest_name')||'').slice(0,24);
 
 const current=()=>core.current();
 $('#hud-motion').textContent=current().motion_score;
@@ -4462,11 +4475,63 @@ function resetJoy(e){if(joyPointer!==null&&e.pointerId!==joyPointer)return;joyPo
 joystickZone.addEventListener('pointerup',resetJoy);joystickZone.addEventListener('pointercancel',resetJoy);
 mobileAction.addEventListener('click',triggerAction);
 
-$('#intro-enter').addEventListener('click',()=>{
+let worldEntryComplete=false;
+function setIntroAuthStatus(message='',error=false){
+  if(!introAuthStatus)return;
+  introAuthStatus.textContent=message;introAuthStatus.classList.toggle('error',!!error);
+}
+function setIntroAuthBusy(busy){
+  if(introPulse)introPulse.disabled=!!busy;
+  const guest=$('#intro-enter');if(guest)guest.disabled=!!busy;
+  if(introGuestName)introGuestName.disabled=!!busy;
+}
+function defaultGuestName(){
+  const stored=(localStorage.getItem('komo_world_guest_name')||'').trim();
+  if(stored)return stored.slice(0,24);
+  const suffix=String(Math.floor(1000+Math.random()*9000));
+  return (locale==='fr'?'Invité ':'Guest ')+suffix;
+}
+function enterWorldAfterAuth(detail={}){
+  if(worldEntryComplete)return;
+  worldEntryComplete=true;setIntroAuthBusy(false);setIntroAuthStatus('');
   intro.classList.add('hidden');
   document.body.classList.remove('world-intro-active');
   targetYaw=yaw;targetPitch=pitch;completeJourney('arrival');
-  notify(locale==='fr'?'Bienvenue dans KŌMØ World':'Welcome to KŌMØ World')
+  const mode=detail.mode==='guest'?(locale==='fr'?'Invité':'Guest'):'Pulse';
+  notify((locale==='fr'?'Bienvenue dans KŌMØ World · ':'Welcome to KŌMØ World · ')+mode);
+}
+function waitForWorldMultiplayer(timeout=6500){
+  if(window.KomoWorldMultiplayer)return Promise.resolve(window.KomoWorldMultiplayer);
+  return new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>{window.removeEventListener('komo:world-multiplayer-ready',onReady);reject(new Error('Multiplayer indisponible'))},timeout);
+    const onReady=()=>{clearTimeout(timer);resolve(window.KomoWorldMultiplayer)};
+    window.addEventListener('komo:world-multiplayer-ready',onReady,{once:true});
+  });
+}
+window.addEventListener('komo:world-session-ready',event=>enterWorldAfterAuth(event.detail||{}));
+
+introPulse?.addEventListener('click',()=>{
+  setIntroAuthStatus(locale==='fr'?'Ouverture de Pulse…':'Opening Pulse…');setIntroAuthBusy(true);
+  const api=window.KomoWorldMultiplayer;
+  if(api?.connectPulse){api.connectPulse();setTimeout(()=>setIntroAuthBusy(false),900);return}
+  // Preserve the user gesture so popup blockers do not prevent authentication.
+  window.open('https://pulse.komolongevity.com/?world_bridge=1&world_origin='+encodeURIComponent(location.origin),'komoPulseWorldBridge','popup=yes,width=520,height=760,resizable=yes,scrollbars=yes');
+  setTimeout(()=>setIntroAuthBusy(false),900);
+});
+
+$('#intro-enter').addEventListener('click',async()=>{
+  const name=(introGuestName?.value||'').trim().slice(0,24)||defaultGuestName();
+  if(introGuestName)introGuestName.value=name;
+  localStorage.setItem('komo_world_guest_name',name);
+  setIntroAuthBusy(true);setIntroAuthStatus(locale==='fr'?'Connexion au World multijoueur…':'Joining multiplayer World…');
+  try{
+    const api=await waitForWorldMultiplayer();
+    const ok=await api.connectGuest(name);
+    if(!ok)throw new Error(locale==='fr'?'Le mode invité doit être activé dans Supabase Auth.':'Guest mode must be enabled in Supabase Auth.');
+  }catch(err){
+    setIntroAuthBusy(false);
+    setIntroAuthStatus(err?.message||(locale==='fr'?'Connexion invité impossible.':'Guest connection failed.'),true);
+  }
 });
 $('#panel-close').addEventListener('click',closePanel);
 worldMenuToggle.addEventListener('click',toggleWorldMenu);
@@ -4492,6 +4557,10 @@ function applyLocale(){
   $('#intro-title').innerHTML=`<span>${c.intro1}</span><em>${c.intro2}</em>`;
   intro.querySelector('p').textContent=c.introBody;
   $('#intro-enter').textContent=c.introButton;
+  if(introPulse){introPulse.querySelector('strong').textContent=c.introPulse;introPulse.querySelector('em').textContent=c.introPulseMeta}
+  const guestLabel=intro.querySelector('.intro-guest-name>span');if(guestLabel)guestLabel.textContent=c.introGuest;
+  if(introGuestName)introGuestName.placeholder=c.introGuestPlaceholder;
+  if(introAuthNote)introAuthNote.textContent=c.introAuthNote;
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
   $('#world-menu-copy').textContent=locale==='fr'?'Votre santé, votre progression et le campus KŌMØ au même endroit.':'Your health, progress and the KŌMØ campus in one place.';
@@ -4762,7 +4831,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.4.0-npc-health-bridge',
+  version:'5.5.0-entry-gateway',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
