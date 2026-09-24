@@ -142,7 +142,7 @@ const checks=[
   ['Fitness room V5.2 present',runtime.includes('KOMO_FITNESS_ROOM_V52')&&runtime.includes("'TODAY','MOVE · TRAIN · RECOVER'")&&runtime.includes('MAT.smokedGlass')],
   ['Arena room V5.2 present',runtime.includes('KOMO_ARENA_ROOM_V52')&&runtime.includes("'LIVE ARENA','DAILY CHALLENGES · SOCIAL'")&&runtime.includes('new THREE.RingGeometry(2.05,2.18,64)')],
   ['destination access V5.6 present',runtime.includes('left.position.x=-2.20;right.position.x=2.20')&&runtime.includes('progress:1')&&runtime.includes('d.progress+=(1-d.progress)')&&runtime.includes('doorTarget?11.2:4.6')],
-  ['continuous navigation mesh V5.8 present',runtime.includes('Broad overlapping galleries make each room part of one continuous navigation mesh')&&runtime.includes('p.x>-57.2&&p.x<-32.15')&&runtime.includes('p.z>-45.1&&p.z<-26.65')&&runtime.includes('p.x>32.15&&p.x<57.2')],
+  ['continuous navigation mesh V6.2 present',runtime.includes('Broad overlapping galleries make each room part of one continuous navigation mesh')&&runtime.includes('p.x>-57.2&&p.x<-32.15')&&runtime.includes('p.z>-45.5&&p.z<-26.25')&&runtime.includes('p.x>32.15&&p.x<57.2')],
   ['walkable guide routing V5.8 present',runtime.includes('function campusWalkingTarget')&&runtime.includes("manualCampusDestination==='")===false&&runtime.includes('if(manualCampusDestination)')&&runtime.includes("requestWalkTo('hall')")],
   ['lateral return arches V5.8 present',runtime.includes("x:12.72,z:-2.10,rot:-Math.PI/2")&&runtime.includes("x:-12.72,z:-2.10,rot:Math.PI/2")],
   ['desktop optical depth V5 present',runtime.includes('lowPower?82:58')&&runtime.includes('lowPower?215:150')&&runtime.includes("new THREE.PerspectiveCamera(lowPower?60:54")],
