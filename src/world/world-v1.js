@@ -999,7 +999,7 @@ function updateNpc(npc,t,index){
   npc.position.y+=Math.abs(stride)*.015;
 }
 function makePlayerAvatar(){
-  const g=new THREE.Group();g.name='KOMO_PLAYER_AVATAR_V70_HUMAN';g.userData.dynamic=true;scene.add(g);
+  const g=new THREE.Group();g.name='KOMO_PLAYER_AVATAR_V71_OVERSIZED';g.userData.dynamic=true;scene.add(g);
 
   // V7.0 Human — deliberately matte, neutral and fashion-led rather than toy-like.
   const skin=new THREE.MeshStandardMaterial({color:0xb99079,roughness:.86,metalness:0});
@@ -1021,20 +1021,20 @@ function makePlayerAvatar(){
 
   // Lower body — long adult proportions, joints hidden through controlled overlap.
   const hipsGroup=new THREE.Group();hipsGroup.position.y=1.08;g.add(hipsGroup);
-  const hips=mesh(hipsGroup,new THREE.SphereGeometry(.205,lowPower?10:16,lowPower?7:11),trouser,0,0,0,{cast});
-  hips.scale.set(1.12,.58,.78);
+  const hips=mesh(hipsGroup,new THREE.SphereGeometry(.225,lowPower?10:16,lowPower?7:11),trouser,0,0,0,{cast});
+  hips.scale.set(1.18,.58,.82);
 
   const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();
-  leftLeg.position.set(-.125,1.10,0);rightLeg.position.set(.125,1.10,0);g.add(leftLeg,rightLeg);
+  leftLeg.position.set(-.145,1.10,0);rightLeg.position.set(.145,1.10,0);g.add(leftLeg,rightLeg);
   const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();
   leftKnee.position.y=-.535;rightKnee.position.y=-.535;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
 
-  const leftThigh=capsule(.068,.405,trouser,leftLeg,-.286);
-  const rightThigh=capsule(.068,.405,trouser,rightLeg,-.286);
-  leftThigh.scale.set(1.02,1,.92);rightThigh.scale.copy(leftThigh.scale);
-  const leftShin=capsule(.052,.395,trouser,leftKnee,-.270);
-  const rightShin=capsule(.052,.395,trouser,rightKnee,-.270);
-  leftShin.scale.set(.94,1,.88);rightShin.scale.copy(leftShin.scale);
+  const leftThigh=capsule(.086,.410,trouser,leftLeg,-.286);
+  const rightThigh=capsule(.086,.410,trouser,rightLeg,-.286);
+  leftThigh.scale.set(1.05,1,.96);rightThigh.scale.copy(leftThigh.scale);
+  const leftShin=capsule(.074,.405,trouser,leftKnee,-.272);
+  const rightShin=capsule(.074,.405,trouser,rightKnee,-.272);
+  leftShin.scale.set(1.02,1,.94);rightShin.scale.copy(leftShin.scale);
 
   const makeShoe=(parent)=>{
     const group=new THREE.Group();group.position.set(0,-.505,.080);parent.add(group);
@@ -1048,20 +1048,22 @@ function makePlayerAvatar(){
   };
   const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee);
 
-  // Torso — tapered jacket shell, no spherical toy chest.
+  // V7.1 — oversized fashion shell: broad, continuous and deliberately anonymous.
   const torsoGroup=new THREE.Group();torsoGroup.position.y=1.59;g.add(torsoGroup);
-  const torso=mesh(torsoGroup,new THREE.CylinderGeometry(.235,.205,.56,lowPower?8:12,1,false),cloth,0,-.045,0,{cast});
-  torso.scale.set(1.08,1,.78);
-  const chest=mesh(torsoGroup,new THREE.SphereGeometry(.255,lowPower?10:16,lowPower?7:11),cloth,0,.155,0,{cast});
-  chest.scale.set(1.20,.37,.68);
-  const waist=mesh(torsoGroup,new THREE.CylinderGeometry(.205,.185,.135,lowPower?8:12),clothDark,0,-.365,0,{cast});
-  waist.scale.set(1.02,1,.74);
+  const torso=mesh(torsoGroup,new THREE.CylinderGeometry(.285,.245,.625,lowPower?8:12,1,false),cloth,0,-.055,0,{cast});
+  torso.scale.set(1.10,1,.82);
+  const chest=mesh(torsoGroup,new THREE.SphereGeometry(.285,lowPower?10:16,lowPower?7:11),cloth,0,.165,0,{cast});
+  chest.scale.set(1.30,.35,.72);
+  const waist=mesh(torsoGroup,new THREE.CylinderGeometry(.245,.228,.175,lowPower?8:12),clothDark,0,-.405,0,{cast});
+  waist.scale.set(1.08,1,.78);
+  const jacketYoke=box(torsoGroup,.665,.155,.275,cloth,0,.185,0,{cast:true});
+  const jacketHem=box(torsoGroup,.555,.085,.265,clothDark,0,-.455,0,{cast:true});
 
   // Shoulder volumes are embedded in the jacket so the arm no longer reads as a ball-and-stick joint.
   const shoulderGeo=new THREE.SphereGeometry(.068,lowPower?9:14,lowPower?6:9);
-  const shoulderL=mesh(torsoGroup,shoulderGeo,cloth,-.247,.175,0,{cast});
-  const shoulderR=mesh(torsoGroup,shoulderGeo,cloth,.247,.175,0,{cast});
-  shoulderL.scale.set(.88,.64,.70);shoulderR.scale.copy(shoulderL.scale);
+  const shoulderL=mesh(torsoGroup,shoulderGeo,cloth,-.305,.175,0,{cast});
+  const shoulderR=mesh(torsoGroup,shoulderGeo,cloth,.305,.175,0,{cast});
+  shoulderL.scale.set(1.12,.76,.82);shoulderR.scale.copy(shoulderL.scale);
 
   // Minimal garment construction: collar, concealed zip and tiny hardware.
   const collarL=mesh(torsoGroup,new THREE.BoxGeometry(.145,.118,.018),clothDark,-.070,.315,.164,{cast:false});
@@ -1075,18 +1077,20 @@ function makePlayerAvatar(){
 
   // Arms — slim, overlapped at elbow; hands small and neutral.
   const leftArm=new THREE.Group(),rightArm=new THREE.Group();
-  leftArm.position.set(-.285,1.755,0);rightArm.position.set(.285,1.755,0);g.add(leftArm,rightArm);
+  leftArm.position.set(-.325,1.755,0);rightArm.position.set(.325,1.755,0);g.add(leftArm,rightArm);
   leftArm.rotation.z=-.018;rightArm.rotation.z=.018;
   const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();
   leftElbow.position.y=-.335;rightElbow.position.y=-.335;leftArm.add(leftElbow);rightArm.add(rightElbow);
 
-  capsule(.050,.285,cloth,leftArm,-.190);capsule(.050,.285,cloth,rightArm,-.190);
-  const cuffL=mesh(leftArm,new THREE.CylinderGeometry(.047,.044,.052,9),clothSoft,0,-.355,0,{cast});
-  const cuffR=mesh(rightArm,new THREE.CylinderGeometry(.047,.044,.052,9),clothSoft,0,-.355,0,{cast});
-  capsule(.042,.265,skin,leftElbow,-.178);capsule(.042,.265,skin,rightElbow,-.178);
+  capsule(.064,.300,cloth,leftArm,-.200);capsule(.064,.300,cloth,rightArm,-.200);
+  const cuffL=mesh(leftArm,new THREE.CylinderGeometry(.060,.055,.070,9),clothSoft,0,-.365,0,{cast});
+  const cuffR=mesh(rightArm,new THREE.CylinderGeometry(.060,.055,.070,9),clothSoft,0,-.365,0,{cast});
+  const leftSleeve=capsule(.057,.285,clothDark,leftElbow,-.190);
+  const rightSleeve=capsule(.057,.285,clothDark,rightElbow,-.190);
+  leftSleeve.scale.set(1.04,1,.96);rightSleeve.scale.copy(leftSleeve.scale);
 
   const makeHand=(parent)=>{
-    const hand=mesh(parent,new THREE.CapsuleGeometry(.034,.072,4,9),skin,0,-.370,.006,{cast});
+    const hand=mesh(parent,new THREE.CapsuleGeometry(.034,.064,4,9),skin,0,-.405,.006,{cast});
     hand.scale.set(.92,1.08,.68);
     return hand;
   };
@@ -1097,28 +1101,16 @@ function makePlayerAvatar(){
   const headGroup=new THREE.Group();headGroup.position.y=2.125;g.add(headGroup);
   const head=mesh(headGroup,new THREE.SphereGeometry(.122,lowPower?12:20,lowPower?9:15),skin,0,0,0,{cast});
   head.scale.set(.84,1.05,.90);
-  const lowerFace=mesh(headGroup,new THREE.SphereGeometry(.086,lowPower?9:14,lowPower?6:10),skin,0,-.074,.010,{cast});
-  lowerFace.scale.set(.80,.48,.76);
-  const earGeo=new THREE.SphereGeometry(.023,lowPower?6:9,lowPower?5:7);
-  [-.112,.112].forEach(x=>{const e=mesh(headGroup,earGeo,skin,x,-.004,-.004,{cast:false});e.scale.set(.48,.92,.50)});
+  const lowerFace=mesh(headGroup,new THREE.SphereGeometry(.084,lowPower?9:14,lowPower?6:10),skin,0,-.070,.006,{cast});
+  lowerFace.scale.set(.78,.45,.74);
 
-  // Hair built as a few asymmetric low-poly masses, not a helmet.
+  // V7.1 minimal face — no eyes, brows, nose or mouth. Identity comes from silhouette, hair and clothing.
   const hairTop=mesh(headGroup,new THREE.SphereGeometry(.126,lowPower?10:16,lowPower?7:11,0,Math.PI*2,0,Math.PI*.48),hair,0,.055,-.012,{cast});
   hairTop.scale.set(.91,.64,.94);
   const hairSide=mesh(headGroup,new THREE.SphereGeometry(.064,lowPower?8:12,lowPower?6:9),hair,-.050,.065,.020,{cast:false});
   hairSide.scale.set(1.12,.42,.76);hairSide.rotation.z=-.14;
   const hairBack=mesh(headGroup,new THREE.SphereGeometry(.072,lowPower?8:12,lowPower?6:9),hair,.030,.032,-.078,{cast:false});
   hairBack.scale.set(1.16,.52,.62);
-
-  const nose=mesh(headGroup,new THREE.SphereGeometry(.018,lowPower?6:9,lowPower?5:7),skinWarm,0,-.006,.128,{cast:false});
-  nose.scale.set(.52,.72,1.00);
-  [-.042,.042].forEach(x=>{
-    const eye=mesh(headGroup,new THREE.SphereGeometry(.0062,6,4),eyeMat,x,.024,.126,{cast:false,receive:false});
-    eye.scale.set(1,.58,.38);
-    const brow=mesh(headGroup,new THREE.BoxGeometry(.035,.0045,.005),hair,x,.050,.126,{cast:false});
-    brow.rotation.z=x<0?.055:-.055;
-  });
-  const mouth=mesh(headGroup,new THREE.BoxGeometry(.038,.0035,.004),skinWarm,0,-.058,.127,{cast:false});
 
   // Grounding root keeps body mechanics independent from logical navigation.
   const bodyRoot=new THREE.Group();bodyRoot.name='KOMO_PLAYER_BODY_GROUNDING_V70';
@@ -1137,6 +1129,34 @@ function makePlayerAvatar(){
     garments:{torso,chest,waist,shoulderL,shoulderR,collarL,collarR,cuffL,cuffR,chestPin},
     base:{torsoY:1.59,headY:2.125,leftArmZ:-.018,rightArmZ:.018}
   };
+  return g;
+}
+function makeKomoMascotV71(){
+  const g=new THREE.Group();g.name='KOMO_MASCOT_V71';g.userData.dynamic=true;scene.add(g);
+  const shell=new THREE.MeshStandardMaterial({color:0x15211c,roughness:.42,metalness:.14});
+  const brass=new THREE.MeshStandardMaterial({color:0xb49361,roughness:.34,metalness:.50});
+  const haloMat=new THREE.MeshBasicMaterial({color:0xd9bc86,transparent:true,opacity:.14,depthWrite:false});
+  const core=mesh(g,new THREE.SphereGeometry(.155,lowPower?12:20,lowPower?8:14),shell,0,0,0,{cast:!lowPower});
+  core.scale.set(1,.94,.64);
+  const halo=mesh(g,new THREE.TorusGeometry(.205,.012,8,lowPower?28:48),haloMat,0,0,0,{cast:false,receive:false});
+  halo.rotation.y=Math.PI/2;
+  const accent=mesh(g,new THREE.TorusGeometry(.162,.009,8,lowPower?24:40,Math.PI*1.58),brass,0,0,.006,{cast:false,receive:false});
+  accent.rotation.z=.50;
+
+  const cv=document.createElement('canvas');cv.width=cv.height=256;const x=cv.getContext('2d');
+  x.clearRect(0,0,256,256);
+  x.fillStyle='rgba(0,0,0,0)';
+  x.fillRect(0,0,256,256);
+  x.fillStyle='#eee7dc';x.textAlign='center';x.textBaseline='middle';
+  x.font='500 112px Georgia, Times New Roman, serif';x.fillText('K',128,126);
+  x.fillStyle='#b99762';x.font='700 24px Arial, sans-serif';x.fillText('KŌMØ',128,202);
+  const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;
+  const mark=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
+  mark.scale.set(.34,.34,1);mark.position.set(0,0,.13);mark.renderOrder=26;g.add(mark);
+
+  const ground=mesh(g,new THREE.CircleGeometry(.16,lowPower?16:28),new THREE.MeshBasicMaterial({color:0x17251e,transparent:true,opacity:.08,depthWrite:false}),0,-1.34,0,{cast:false,receive:false});
+  ground.rotation.x=-Math.PI/2;ground.scale.set(1,.45,1);
+  g.userData.mascot={core,halo,accent,mark,ground,phase:0,target:new THREE.Vector3()};
   return g;
 }
 function loungeCluster(parent,x,z,rot=0,scale=1){
@@ -4046,6 +4066,7 @@ let playerLevel=0;
 let cameraMode='third';
 let thirdPersonDistance=5.35;
 const playerAvatar=makePlayerAvatar();
+const komoMascot=makeKomoMascotV71();
 let playerFacing=0;
 const cameraDesired=new THREE.Vector3(),cameraLook=new THREE.Vector3();
 let yaw=0,pitch=-.045;
@@ -4550,9 +4571,9 @@ const avatarPalettes={
   skin:{light:[0xd0aa91,0xb98a72],medium:[0xb99079,0xa77965],deep:[0x795846,0x654536]},
   hair:{dark:0x2b2521,brown:0x554033,grey:0x6d6b67},
   look:{
-    tailored:{roughness:.76,metalness:.004,chest:[1.20,.37,.68],torso:[1.08,1,.78],collar:true,pin:true},
-    performance:{roughness:.82,metalness:.002,chest:[1.15,.35,.66],torso:[1.04,.98,.76],collar:false,pin:false},
-    riviera:{roughness:.79,metalness:.003,chest:[1.18,.36,.67],torso:[1.06,.99,.77],collar:true,pin:true}
+    tailored:{roughness:.80,metalness:.003,chest:[1.30,.35,.72],torso:[1.10,1,.82],collar:true,pin:true},
+    performance:{roughness:.84,metalness:.002,chest:[1.24,.34,.70],torso:[1.08,.99,.80],collar:false,pin:false},
+    riviera:{roughness:.82,metalness:.002,chest:[1.28,.35,.71],torso:[1.10,1,.81],collar:true,pin:true}
   }
 };
 function loadAvatarConfig(){try{return {...{look:'tailored',outfit:'sage',skin:'medium',hair:'dark'},...JSON.parse(localStorage.getItem(AVATAR_KEY)||'{}')}}catch{return {look:'tailored',outfit:'sage',skin:'medium',hair:'dark'}}}
@@ -5645,6 +5666,23 @@ function updatePlayerAvatar(now,dt){
   av.ring.material.opacity=.014+.008*(1-moveAmount);
   av.tag.visible=false;
 }
+function updateKomoMascot(now,dt){
+  if(!komoMascot)return;
+  const m=komoMascot.userData.mascot,t=now*.001;
+  const side=new THREE.Vector3(Math.cos(playerFacing),0,-Math.sin(playerFacing));
+  const back=new THREE.Vector3(-Math.sin(playerFacing),0,-Math.cos(playerFacing));
+  m.target.copy(player).addScaledVector(side,.72).addScaledVector(back,.18);
+  m.target.y=player.y+visualSurfaceOffsetAt(player)+1.54+Math.sin(t*1.35)*.035;
+  komoMascot.position.lerp(m.target,1-Math.exp(-5.8*dt));
+  komoMascot.rotation.y+=dt*.22;
+  m.halo.rotation.z=t*.34;
+  m.accent.rotation.z=.50+Math.sin(t*.52)*.06;
+  const pulse=1+.035*Math.sin(t*1.15);
+  m.halo.scale.setScalar(pulse);
+  m.mark.material.opacity=.82+.12*(.5+.5*Math.sin(t*.72));
+  m.ground.position.y=-Math.max(.25,komoMascot.position.y-(player.y+visualSurfaceOffsetAt(player)))+.02;
+  komoMascot.visible=cameraMode==='third'&&!emergencyPerformance;
+}
 function updateCamera(now,dt){
   const smooth=1-Math.exp(-16*dt);
   const visualGround=visualSurfaceOffsetAt(player);
@@ -5688,6 +5726,7 @@ function updateCamera(now,dt){
     camera.lookAt(player.x-Math.sin(yaw)*cp*look,eyeY+sp*look,player.z-Math.cos(yaw)*cp*look);
   }
   updatePlayerAvatar(now,dt);
+  updateKomoMascot(now,dt);
 }
 function updateDestinationDoors(now,dt){
   if(!living.destinationDoors?.length)return;
@@ -6393,7 +6432,7 @@ window.addEventListener('pagehide',()=>{cancelAnimationFrame(raf);clearInterval(
 
 function freezeStaticScene(){
   const dynamicMeshes=new Set([
-    scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB,journeyRing,waypointRing,waypointStem,waypointCap,
+    scanRing,living.skyDome,sensorEye,sensorHalo,thresholdA,thresholdB,journeyRing,waypointRing,waypointStem,waypointCap,komoMascot,
     ...guideDots.flatMap(g=>g.children),
     ...living.shimmers,
     ...living.clouds,
@@ -6418,7 +6457,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.0.0-human-avatar',
+  version:'7.1.0-oversized-mascot',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
