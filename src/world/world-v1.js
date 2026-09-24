@@ -1664,6 +1664,23 @@ if(!lowPower){
   // One quiet monolithic focal wall at the far end.
   box(desktopCinematic,17.4,5.82,.16,MAT.blackened,0,3.20,-29.10,{cast:true,receive:true});
   box(desktopCinematic,16.65,.028,.08,MAT.brass,0,5.76,-29.00,{cast:false,receive:false});
+// V5.1 monumental destination wall and editorial banners.
+const flagshipBrand=new THREE.Group();flagshipBrand.name='KOMO_FLAGSHIP_BRAND_V51';desktopCinematic.add(flagshipBrand);
+box(flagshipBrand,8.75,4.65,.12,MAT.blackened,0,3.63,-28.92,{cast:true,receive:true});
+plaque(flagshipBrand,'KŌMØ','WORLD · LONGEVITY IN MOTION',7.35,2.10,0,4.22,-28.80,{dark:true,titleSize:118});
+box(flagshipBrand,7.70,.040,.075,MAT.brass,0,2.76,-28.76,{cast:false,receive:false});
+
+// Tall editorial banners flank the central brand wall.
+const bannerMatL=new THREE.MeshStandardMaterial({color:0x18372c,roughness:.46,metalness:.02});
+const bannerMatR=bannerMatL.clone();
+[-1,1].forEach((side,i)=>{
+  const x=side*6.85;
+  box(flagshipBrand,3.10,5.35,.10,i?bannerMatR:bannerMatL,x,3.95,-28.82,{cast:true,receive:true});
+  box(flagshipBrand,3.10,.045,.065,MAT.brass,x,6.61,-28.72,{cast:false,receive:false});
+});
+plaque(flagshipBrand,'LONGEVITY','LIVES HERE',2.64,1.48,-6.85,4.15,-28.68,{dark:true,titleSize:48});
+plaque(flagshipBrand,'PEOPLE','SCIENCE · PLACES · PROGRESS',2.64,1.48,6.85,4.15,-28.68,{dark:true,titleSize:48});
+
 }
 
 
@@ -1831,6 +1848,60 @@ box(floorV19,7.7,.020,1.58,MAT.brass,0,.370,13.0);
 box(floorV19,7.25,.024,1.16,FLOOR.promenade,0,.384,13.0);
 const medallion=mesh(floorV19,new THREE.RingGeometry(1.38,1.48,72),MAT.brass,0,.372,-8.6,{receive:false});medallion.rotation.x=-Math.PI/2;
 const medallion2=mesh(floorV19,new THREE.RingGeometry(.78,.82,64),M.bronzeSoft,0,.374,-8.6,{receive:false});medallion2.rotation.x=-Math.PI/2;
+// V5.1 Flagship lobby — monumental KŌMØ WORLD stone mosaic at the arrival.
+function makeKomoWorldMosaicTexture(){
+  const size=1024,cv=document.createElement('canvas');cv.width=cv.height=size;
+  const g=cv.getContext('2d');g.clearRect(0,0,size,size);
+
+  // Ivory stone disc.
+  g.beginPath();g.arc(512,512,492,0,Math.PI*2);
+  g.fillStyle='rgba(239,229,211,.98)';g.fill();
+
+  // Mineral grain.
+  for(let i=0;i<1150;i++){
+    const a=hash2(i,71,3)*Math.PI*2,r=Math.sqrt(hash2(i,73,7))*480;
+    const x=512+Math.cos(a)*r,y=512+Math.sin(a)*r;
+    const warm=i%3===0;
+    g.fillStyle=warm?'rgba(137,112,79,.035)':'rgba(255,255,255,.055)';
+    g.fillRect(x,y,1.2+hash2(i,79,11)*2.4,1.2+hash2(i,83,13)*2.4);
+  }
+
+  // Green marble and bronze inlay rings.
+  g.lineWidth=40;g.strokeStyle='#19372d';g.beginPath();g.arc(512,512,452,0,Math.PI*2);g.stroke();
+  g.lineWidth=7;g.strokeStyle='#b98d53';g.beginPath();g.arc(512,512,424,0,Math.PI*2);g.stroke();
+  g.lineWidth=5;g.strokeStyle='#b98d53';g.beginPath();g.arc(512,512,300,0,Math.PI*2);g.stroke();
+
+  // Thin radial inlay.
+  for(let i=0;i<24;i++){
+    const a=i/24*Math.PI*2;
+    const r0=430,r1=474;
+    g.strokeStyle=i%2===0?'rgba(185,141,83,.82)':'rgba(31,63,50,.50)';
+    g.lineWidth=i%2===0?3:2;
+    g.beginPath();g.moveTo(512+Math.cos(a)*r0,512+Math.sin(a)*r0);
+    g.lineTo(512+Math.cos(a)*r1,512+Math.sin(a)*r1);g.stroke();
+  }
+
+  g.textAlign='center';g.textBaseline='middle';
+  g.fillStyle='#8f6d45';
+  g.font='500 168px Georgia, Times New Roman, serif';
+  g.fillText('KŌMØ',512,478);
+  g.font='600 76px Arial, sans-serif';
+  g.letterSpacing='20px';
+  g.fillText('W O R L D',512,625);
+
+  const tx=new THREE.CanvasTexture(cv);tx.colorSpace=THREE.SRGBColorSpace;
+  tx.anisotropy=Math.min(12,renderer.capabilities.getMaxAnisotropy());
+  return tx;
+}
+const komoMosaicMat=new THREE.MeshStandardMaterial({
+  map:makeKomoWorldMosaicTexture(),transparent:true,alphaTest:.02,
+  roughness:.34,metalness:.025,depthWrite:false
+});
+const komoMosaic=mesh(floorV19,new THREE.CircleGeometry(4.42,96),komoMosaicMat,0,.431,10.4,{cast:false,receive:false});
+komoMosaic.rotation.x=-Math.PI/2;komoMosaic.renderOrder=5;komoMosaic.name='KOMO_WORLD_MOSAIC_V51';
+const komoMosaicOuter=mesh(floorV19,new THREE.RingGeometry(4.46,4.58,96),MAT.brass,0,.433,10.4,{cast:false,receive:false});
+komoMosaicOuter.rotation.x=-Math.PI/2;komoMosaicOuter.renderOrder=6;
+
 
 // V4.5 central focal point — one sculptural object, deliberately clear of the walking axis.
 const atriumFocal=new THREE.Group();atriumFocal.name='KOMO_ATRIUM_FOCAL_V45';atriumFocal.position.set(0,0,-8.6);building.add(atriumFocal);
@@ -1865,6 +1936,31 @@ glow(desk,0xe9c48e,2.2,8,0,3.1,1.4);
 
 // V3.0 Hall Living — denser premium flagship without breaking the FPS budget.
 const hallLiving=new THREE.Group();hallLiving.name='KOMO_HALL_LIVING_V30';building.add(hallLiving);
+// V5.1 premium lobby composition: symmetrical planters + bronze ring sculptures.
+const flagshipDecor=new THREE.Group();flagshipDecor.name='KOMO_FLAGSHIP_DECOR_V51';building.add(flagshipDecor);
+const leafMat=new THREE.MeshStandardMaterial({color:0x405d49,roughness:.90,metalness:0});
+const leafMat2=new THREE.MeshStandardMaterial({color:0x6f826d,roughness:.94,metalness:0});
+const planterMat=MAT.travertine;
+function flagshipTree(x,z,s=1){
+  const g=new THREE.Group();g.position.set(x,0,z);flagshipDecor.add(g);
+  box(g,1.12,.72,1.12,planterMat,0,.37,0,{cast:true});
+  cyl(g,.10,.14,2.25,MAT.walnut,0,1.70,0,10,{cast:true});
+  [[0,2.95,0,.82],[-.45,2.72,.08,.58],[.42,2.72,-.10,.62],[0,3.38,.02,.54]].forEach((v,i)=>{
+    const crown=mesh(g,new THREE.SphereGeometry(v[3]*s,16,11),i%2?leafMat2:leafMat,v[0]*s,v[1]*s,v[2]*s,{cast:false});
+    crown.scale.set(1.12,.82,1);
+  });
+}
+[[-8.55,11.0],[8.55,11.0],[-8.55,-2.3],[8.55,-2.3],[-8.55,-16.8],[8.55,-16.8]].forEach(p=>flagshipTree(p[0],p[1],.86));
+
+[-1,1].forEach(side=>{
+  const pedestal=new THREE.Group();pedestal.position.set(side*7.10,0,5.2);flagshipDecor.add(pedestal);
+  box(pedestal,1.55,.82,1.55,MAT.travertine,0,.42,0,{cast:true});
+  const ring=mesh(pedestal,new THREE.TorusGeometry(.82,.055,14,64),MAT.brass,0,1.95,0,{cast:true});
+  ring.rotation.y=.35*side;ring.rotation.x=.10;
+  const inner=mesh(pedestal,new THREE.TorusGeometry(.48,.032,12,48),MAT.bronze,0,1.95,0,{cast:true});
+  inner.rotation.y=-.42*side;inner.rotation.z=.32;
+});
+
 
 function instancedStatic(parent,geometry,material,items,name){
   const inst=new THREE.InstancedMesh(geometry,material,items.length);inst.name=name;inst.castShadow=false;inst.receiveShadow=false;
@@ -4483,7 +4579,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.0.1-avatar-grounding',
+  version:'5.1.0-flagship-lobby',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
