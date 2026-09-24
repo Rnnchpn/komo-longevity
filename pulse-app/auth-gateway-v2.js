@@ -11,6 +11,7 @@ let worldBridgeSent='';
 let worldBridgeRequestId='';
 let worldBridgeAcked=false;
 let worldBridgeLastSendAt=0;
+let worldBridgeLastPayload=null;
 let worldBridgeRetryTimer=null;
 const WORLD_BRIDGE_CHANNEL='komo-pulse-world-bridge-v2';
 const WORLD_ORIGINS=new Set(['https://komolongevity.com','https://www.komolongevity.com']);
@@ -118,7 +119,7 @@ function worldBridgePayload(session,profile,requestId=''){
 }
 function sendWorldBridgePayload(cfg,payload){
   if(!window.opener)return false;
-  worldBridgeAcked=false;worldBridgeLastSendAt=Date.now();
+  worldBridgeAcked=false;worldBridgeLastSendAt=Date.now();worldBridgeLastPayload=payload;
   window.opener.postMessage(payload,cfg.targetOrigin);
   showToast('Connexion à KŌMØ World…');
   return true;
@@ -132,6 +133,12 @@ async function worldBridgeAttempt(){
     worldBridgeSent=session.access_token;
     const profile=await worldBridgeProfile(c,session);
     sendWorldBridgePayload(cfg,worldBridgePayload(session,profile,worldBridgeRequestId));
+    return;
+  }
+  // If the session came from another Pulse tab through BroadcastChannel, keep retrying
+  // the already received payload until World confirms it.
+  if(worldBridgeLastPayload&&!worldBridgeAcked){
+    if(Date.now()-worldBridgeLastSendAt>=850)sendWorldBridgePayload(cfg,worldBridgeLastPayload);
     return;
   }
   // A Pulse session stored in sessionStorage belongs to the existing Pulse tab.
