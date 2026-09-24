@@ -76,7 +76,19 @@
       <span><b>03</b> INTERAGIR <kbd>E</kbd></span>
       <span><b>04</b> CAMÉRA <kbd>V</kbd></span>
     </div>
-    <button id="intro-enter" type="button">ENTRER DANS MON WORLD</button>
+    <div class="intro-auth" aria-label="Connexion KŌMØ World">
+      <button id="intro-pulse" class="intro-pulse" type="button">
+        <span>PULSE</span><strong>CRÉER / SE CONNECTER</strong><em>Profil · progression · données</em>
+      </button>
+      <div class="intro-auth-separator"><i></i><span>OU</span><i></i></div>
+      <label class="intro-guest-name" for="intro-guest-name">
+        <span>MODE INVITÉ</span>
+        <input id="intro-guest-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Votre prénom ou pseudo" />
+      </label>
+      <button id="intro-enter" class="intro-guest" type="button">ENTRER EN INVITÉ</button>
+      <small id="intro-auth-note">Les deux modes rejoignent le même World multijoueur. Le mode invité est temporaire.</small>
+      <div id="intro-auth-status" class="intro-auth-status" role="status" aria-live="polite"></div>
+    </div>
   </section>
 
   <aside id="interaction" class="interaction-card" aria-live="polite">
