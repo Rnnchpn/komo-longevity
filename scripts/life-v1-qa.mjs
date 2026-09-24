@@ -19,7 +19,7 @@ const checks=[
  ['no image hydration',!js.includes('hydrateLogo')&&!js.includes('hydrateAsset')],
  ['light-only visual system',!css.includes('--green:')&&!css.includes('background:var(--green)')&&css.includes('--ivory:#fbfaf7')],
  ['no visible storefront grid or cart',!html.includes('product-grid')&&!html.includes('cart-drawer')&&!html.includes('checkout-button')],
- ['culture manifesto',html.includes('beyond medicine')&&html.includes('au-delà de la médecine')],
+ ['commercial Life positioning',html.includes('Products for a longer life')&&html.includes('Des produits pour vivre plus longtemps')&&html.includes('SHOP FORMULAS')],
  ['KŌMØ Points bridge',html.includes('KŌMØ POINTS')&&html.includes('https://pulse.komolongevity.com/')],
  ['responsive mobile menu',css.includes('@media(max-width:900px)')&&html.includes('data-mobile-menu')],
  ['no lorem ipsum',!/lorem ipsum/i.test(html+js+css)]
