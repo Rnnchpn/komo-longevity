@@ -4175,6 +4175,8 @@ function updateCamera(now,dt){
     cameraLook.set(player.x,player.y+visualGround+1.24+pitch*.39,player.z);
     camera.lookAt(cameraLook);
   }else{
+    const desiredFov=lowPower?61:57;
+    if(Math.abs(camera.fov-desiredFov)>.01){camera.fov+=(desiredFov-camera.fov)*(1-Math.exp(-6*dt));camera.updateProjectionMatrix()}
     const move=Math.min(1,velocity.length()/AUTO_RUN_SPEED);
     const bob=move*Math.sin(now*.0102)*.006;
     const eyeY=player.y+visualGround+2.03+bob;
@@ -4187,9 +4189,9 @@ function updateCamera(now,dt){
 function updateDestinationDoors(now,dt){
   if(!living.destinationDoors?.length)return;
   living.destinationDoors.forEach((d,i)=>{
-    const near=player.z<-21.5&&player.z>-29&&Math.abs(player.x-d.x)<3.2;
+    const near=player.z<-19.8&&player.z>-29.4&&Math.abs(player.x-d.x)<3.75;
     const target=near?1:0;
-    d.progress+=(target-d.progress)*(1-Math.exp(-(target?8.5:5.0)*dt));
+    d.progress+=(target-d.progress)*(1-Math.exp(-(target?12.5:5.4)*dt));
     const e=d.progress*d.progress*(3-2*d.progress);
     d.left.position.x=THREE.MathUtils.lerp(-1.08,-2.00,e);
     d.right.position.x=THREE.MathUtils.lerp(1.08,2.00,e);
@@ -4201,7 +4203,7 @@ function updateDestinationDoors(now,dt){
   });
 }
 function updateDoors(now,dt){
-  let approach=mode==='world'&&player.z<25.8&&player.z>9.0&&Math.abs(player.x)<4.8;
+  let approach=mode==='world'&&player.z<27.2&&player.z>8.5&&Math.abs(player.x)<5.2;
   // Ambient people can also trigger the entrance, making it feel like a real place.
   if(!approach&&living.npcs?.length){
     approach=living.npcs.some(n=>n.visible&&Math.abs(n.position.x)<4.4&&n.position.z<23.5&&n.position.z>12.0&&Math.abs(n.position.y)<.8);
@@ -4209,7 +4211,7 @@ function updateDoors(now,dt){
   if(approach)doorHoldUntil=now+1350;
   doorTarget=(approach||now<doorHoldUntil)?1:0;
   // Smooth exponential motion, faster opening than closing.
-  const response=doorTarget?7.8:4.2;
+  const response=doorTarget?11.2:4.6;
   doorProgress+=(doorTarget-doorProgress)*(1-Math.exp(-response*dt));
   const eased=doorProgress*doorProgress*(3-2*doorProgress);
   doorLeft.position.x=THREE.MathUtils.lerp(-1.29,-3.08,eased);
