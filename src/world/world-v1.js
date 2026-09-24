@@ -2433,10 +2433,12 @@ portals.forEach(({x,title,sub,dark})=>{
   box(right,2.08,4.62,.075,M.glass,0,2.82,.02);
   box(left,.055,4.55,.10,MAT.brass,1.00,2.82,.06);
   box(right,.055,4.55,.10,MAT.brass,-1.00,2.82,.06);
-  const mat=new THREE.MeshBasicMaterial({color:cfg.accent,transparent:true,opacity:.12,depthWrite:false});
+  const mat=new THREE.MeshBasicMaterial({color:cfg.accent,transparent:true,opacity:.39,depthWrite:false});
   const threshold=box(g,4.05,.018,.11,mat,0,.43,.42,{cast:false,receive:false});
   const beacon=mesh(g,new THREE.RingGeometry(.20,.27,24),mat,0,5.60,.12,{cast:false,receive:false});beacon.rotation.x=Math.PI/2;beacon.userData.dynamic=true;
-  living.destinationDoors.push({id:cfg.id,x:cfg.x,left,right,threshold,beacon,mat,progress:0});
+  // V5.6 open campus: destination leaves start parked and never block the sightline.
+  left.position.x=-2.20;right.position.x=2.20;
+  living.destinationDoors.push({id:cfg.id,x:cfg.x,left,right,threshold,beacon,mat,progress:1});
 });
 
 // V4.5 Destination identity — architecture carries the hierarchy; signage stays secondary.
