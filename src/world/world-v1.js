@@ -263,7 +263,9 @@ const living={
   district:null,
   daylight:'day',
   lightingV631:null,
-  atmosphereV632:null
+  atmosphereV632:null,
+  livingCampusV64:null,
+  waterfallsV64:[]
 };
 
 // V1.8 true sky — atmospheric dome, visible sun and slow cloud field.
@@ -1551,6 +1553,182 @@ centralJet.userData.phase=1.7;centralJet.userData.baseY=3.58;centralJet.userData
   box(districtDetails,w-.45,.035,3.15,M.warm,x,h-.28,z-.10,{cast:false,receive:false});
 });
 plaque(districtDetails,'KŌMØ DISTRICT','MOVE · CONNECT · LIVE',6.4,.86,0,4.15,80.0,{dark:true,titleSize:60});
+
+// V6.4 Living Campus — landscape, architecture, water and ambient life around the playable core.
+const livingCampusV64=new THREE.Group();livingCampusV64.name='KOMO_LIVING_CAMPUS_V64';world.add(livingCampusV64);living.livingCampusV64=livingCampusV64;
+livingCampusV64.userData.environmentDetail=true;
+
+const campusUnitV64=new THREE.BoxGeometry(1,1,1);
+const campusCrownGeoV64=new THREE.IcosahedronGeometry(1,1);
+const campusCypressGeoV64=new THREE.ConeGeometry(1,2,8);
+const campusPineGeoV64=new THREE.IcosahedronGeometry(1,1);
+const campusGreenDeepV64=new THREE.MeshStandardMaterial({color:0x314839,roughness:.90,metalness:0,fog:true});
+const campusGreenMidV64=new THREE.MeshStandardMaterial({color:0x516653,roughness:.92,metalness:0,fog:true});
+const campusGreenSoftV64=new THREE.MeshStandardMaterial({color:0x71806c,roughness:.94,metalness:0,fog:true});
+const campusTrunkV64=new THREE.MeshStandardMaterial({color:0x624b38,roughness:.96,metalness:0,fog:true});
+const campusInteriorGlowV64=new THREE.MeshBasicMaterial({color:0xe8c992,transparent:true,opacity:lowPower?.22:.38,depthWrite:false});
+const campusGlassV64=lowPower?MAT.smokedGlass:new THREE.MeshPhysicalMaterial({color:0x9eb4aa,roughness:.16,metalness:.03,transparent:true,opacity:.42,depthWrite:false,side:THREE.DoubleSide});
+
+// A few hero trees use real branching; secondary vegetation is fully instanced.
+function heroTreeV64(x,z,scale=1,spread=1){
+  const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);g.name='KOMO_HERO_TREE_V64';livingCampusV64.add(g);
+  cyl(g,.24,.38,4.3,campusTrunkV64,0,2.15,0,lowPower?7:10,{cast:true});
+  const branches=[
+    [[0,3.4,0],[1.55,5.05,.25],.17],[[0,3.5,0],[-1.35,4.85,-.20],.16],
+    [[.05,3.8,0],[.65,5.50,-1.15],.14],[[-.05,3.75,0],[-.75,5.35,1.05],.14]
+  ];
+  branches.forEach(([a,b,r])=>bodySegment(g,a,b,r,campusTrunkV64));
+  const crowns=lowPower?[
+    [0,5.75,0,1.85],[1.55,5.55,.15,1.35],[-1.45,5.45,-.10,1.30]
+  ]:[
+    [0,5.85,0,1.80],[1.55,5.55,.15,1.35],[-1.45,5.45,-.10,1.30],
+    [.65,5.90,-1.15,1.15],[-.70,5.80,1.00,1.10],[.10,6.50,.15,1.00]
+  ];
+  crowns.forEach(([cx,cy,cz,r],i)=>{
+    const m=mesh(g,campusCrownGeoV64,i%3===0?campusGreenMidV64:campusGreenDeepV64,cx*spread,cy,cz*spread,{cast:!lowPower});
+    m.scale.set(r*1.38,r*.82,r*1.16);
+  });
+  g.userData.swayPhase=(x*.73+z*.41);living.trees.push(g);return g;
+}
+const heroTreeSpecsV64=lowPower?[
+  [-25.6,32.5,1.18,1.05],[25.4,34.0,1.14,1.05],[-26.5,67.5,1.08,1.0],[26.8,69.0,1.12,1.02]
+]:[
+  [-25.6,32.5,1.30,1.10],[25.4,34.0,1.24,1.08],[-28.2,52.0,1.16,1.06],[28.0,53.5,1.18,1.05],
+  [-26.5,67.5,1.18,1.05],[26.8,69.0,1.22,1.08],[-19.5,87.5,1.04,1.0],[19.5,87.5,1.04,1.0]
+];
+heroTreeSpecsV64.forEach(v=>heroTreeV64(...v));
+
+// Cypress rhythm + umbrella pines + low planting beds.
+const cypressTrunksV64=[],cypressCrownsV64=[],pineTrunksV64=[],pineCrownsV64=[],shrubItemsV64=[];
+[-1,1].forEach(side=>{
+  const zs=[25,33,41,49,57,65,73,81,89];
+  zs.slice(0,lowPower?6:zs.length).forEach((z,i)=>{
+    const x=side*(20.5+(i%2)*1.8);
+    cypressTrunksV64.push({x,y:1.6,z,sx:.16,sy:3.2,sz:.16});
+    cypressCrownsV64.push({x,y:4.2,z,sx:.72+(i%3)*.08,sy:3.35+(i%2)*.35,sz:.72+(i%3)*.08});
+  });
+});
+const pineSpecsV64=lowPower?[
+  [-29,42,1.0], [29,44,1.0],[-28,76,.92],[28,77,.92]
+]:[
+  [-30,40,1.08],[30,42,1.06],[-31,58,1.00],[31,59,1.02],[-29,76,.98],[29,77,.98],[-11,91,.90],[11,91,.90]
+];
+pineSpecsV64.forEach(([x,z,sc],i)=>{
+  pineTrunksV64.push({x,y:1.55,z,sx:.20*sc,sy:3.1*sc,sz:.20*sc});
+  pineCrownsV64.push({x,y:4.30*sc,z,sx:2.05*sc,sy:.76*sc,sz:1.85*sc,ry:i*.67});
+});
+const shrubCountV64=lowPower?18:44;
+for(let i=0;i<shrubCountV64;i++){
+  const side=i%2?-1:1,band=Math.floor(i/2)%4;
+  const z=26+(i%11)*5.8;
+  const x=side*(17.2+band*2.25);
+  shrubItemsV64.push({x,y:.32,z,sx:.72+(i%3)*.12,sy:.38+(i%2)*.06,sz:.62+(i%4)*.08,ry:i*.71});
+}
+instancedStatic(livingCampusV64,campusUnitV64,campusTrunkV64,cypressTrunksV64,'KOMO_CYPRESS_TRUNKS_INST_V64');
+instancedStatic(livingCampusV64,campusCypressGeoV64,campusGreenDeepV64,cypressCrownsV64,'KOMO_CYPRESS_CROWNS_INST_V64');
+instancedStatic(livingCampusV64,campusUnitV64,campusTrunkV64,pineTrunksV64,'KOMO_PINE_TRUNKS_INST_V64');
+instancedStatic(livingCampusV64,campusPineGeoV64,campusGreenMidV64,pineCrownsV64,'KOMO_PINE_CROWNS_INST_V64');
+instancedStatic(livingCampusV64,campusCrownGeoV64,campusGreenSoftV64,shrubItemsV64,'KOMO_LANDSCAPE_SHRUBS_INST_V64');
+
+// Premium side pavilions close the visual field around Arrival and District.
+function campusPavilionV64(x,z,w,d,title,sub,side=1){
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=side<0?Math.PI:0;g.name='KOMO_CAMPUS_PAVILION_V64_'+title.replace(/\s+/g,'_');livingCampusV64.add(g);
+  box(g,w,.34,d,MAT.travertine,0,.17,0,{cast:true});
+  box(g,w,5.9,.30,MAT.limestone,0,3.12,d/2-.15,{cast:true});
+  box(g,.28,5.9,d,MAT.limestone,-w/2+.14,3.12,0,{cast:true});
+  box(g,.28,5.9,d,MAT.limestone,w/2-.14,3.12,0,{cast:true});
+  box(g,w,.24,d,MAT.blackened,0,6.0,0,{cast:true});
+  box(g,w-.65,.055,d-.55,campusInteriorGlowV64,0,5.83,0,{cast:false,receive:false});
+  box(g,w-.55,4.75,.045,campusGlassV64,0,3.05,-d/2+.20,{cast:false,receive:false});
+  box(g,w-.85,.025,.07,MAT.brass,0,5.45,-d/2+.16,{cast:false,receive:false});
+  plaque(g,title,sub,Math.min(w-1,6.8),.82,0,4.72,-d/2-.08,{dark:true,titleSize:title.length>14?43:53});
+  // warm interior shelf visible through the glazing
+  box(g,w-.9,.06,1.2,MAT.walnut,0,.68,-d/2+1.35,{cast:true});
+  return g;
+}
+const pavilionMovementV64=campusPavilionV64(-30.5,43.0,11.8,18.0,'MOVEMENT','MEASURE · TRAIN · MOVE',1);
+const pavilionLongevityV64=campusPavilionV64(30.5,43.0,11.8,18.0,'LONGEVITY','SCIENCE · TRAJECTORY',1);
+const pavilionCommunityV64=campusPavilionV64(-30.0,69.5,10.8,14.5,'COMMUNITY LOUNGE','MEET · CONNECT · RECOVER',1);
+const pavilionRecoveryV64=campusPavilionV64(30.0,69.5,10.8,14.5,'RECOVERY HOUSE','REST · RESET · RESTORE',1);
+
+// Side water mirrors and rear reflecting court anchor architecture in the landscape.
+function waterMirrorV64(x,z,w,d){
+  const g=new THREE.Group();g.position.set(x,0,z);livingCampusV64.add(g);
+  box(g,w+.55,.18,d+.55,MAT.travertine,0,.09,0,{cast:false});
+  const pool=box(g,w,.075,d,M.water,0,.205,0,{cast:false,receive:false});living.water.push(pool);
+  const count=lowPower?1:3;
+  for(let i=0;i<count;i++){
+    const q=box(g,w*.72,.010,.050,shimmerMat,0,.255,-d*.32+i*(d*.64/Math.max(1,count-1)),{cast:false,receive:false});
+    q.userData.phase=.11+i*.29+(x>0?.37:.08);q.userData.v64Local=true;living.shimmers.push(q);
+  }
+  return g;
+}
+waterMirrorV64(-24.6,45.0,5.4,24.0);waterMirrorV64(24.6,45.0,5.4,24.0);
+waterMirrorV64(0,89.2,18.0,7.2);
+
+// Rear longevity terrace and stylised waterfall create a destination-scale backdrop.
+const rearTerraceV64=new THREE.Group();rearTerraceV64.name='KOMO_REAR_TERRACE_V64';rearTerraceV64.position.set(0,0,94);livingCampusV64.add(rearTerraceV64);
+box(rearTerraceV64,31,2.6,8.5,MAT.limestone,0,1.30,0,{cast:true});
+box(rearTerraceV64,26.5,.20,6.8,MAT.travertine,0,2.68,-.4,{cast:true});
+[-1,1].forEach(side=>box(rearTerraceV64,7.4,.12,1.2,MAT.brass,side*8.2,2.82,-3.1,{cast:false,receive:false}));
+plaque(rearTerraceV64,'KŌMØ TERRACE','LONGEVITY · COMMUNITY · CULTURE',7.3,.94,0,6.30,-4.29,{dark:true,titleSize:58});
+for(let i=0;i<5;i++)box(rearTerraceV64,17.0,.32,1.15,MAT.travertine,0,.16+i*.29,-6.0+i*.58,{cast:true});
+
+// Lightweight animated waterfall texture.
+function waterfallTextureV64(){
+  const c=document.createElement('canvas');c.width=256;c.height=512;const x=c.getContext('2d');
+  const gr=x.createLinearGradient(0,0,256,0);gr.addColorStop(0,'rgba(205,225,217,.10)');gr.addColorStop(.2,'rgba(244,250,247,.72)');gr.addColorStop(.52,'rgba(195,221,211,.42)');gr.addColorStop(.82,'rgba(247,251,249,.74)');gr.addColorStop(1,'rgba(205,225,217,.10)');
+  x.fillStyle=gr;x.fillRect(0,0,256,512);
+  for(let i=0;i<22;i++){x.fillStyle='rgba(255,255,255,'+(0.03+(i%4)*.012)+')';x.fillRect((i*47)%256,0,2+(i%3),512)}
+  const tx=new THREE.CanvasTexture(c);tx.wrapS=tx.wrapT=THREE.RepeatWrapping;tx.repeat.set(1,1.35);return tx;
+}
+const waterfallTxV64=waterfallTextureV64();
+const waterfallMatV64=new THREE.MeshBasicMaterial({map:waterfallTxV64,color:0xdcebe5,transparent:true,opacity:lowPower?.30:.48,depthWrite:false,side:THREE.DoubleSide});
+const waterfallV64=mesh(rearTerraceV64,new THREE.PlaneGeometry(18.5,4.6),waterfallMatV64,0,5.0,4.28,{cast:false,receive:false});
+living.waterfallsV64.push({mesh:waterfallV64,texture:waterfallTxV64,baseOpacity:waterfallMatV64.opacity});
+
+// Static ambient crowd: two draw calls, visible life without AI cost.
+const campusCrowdV64=new THREE.Group();campusCrowdV64.name='KOMO_AMBIENT_CROWD_INST_V64';livingCampusV64.add(campusCrowdV64);
+const crowdBodyMatV64=new THREE.MeshStandardMaterial({color:0x26372f,roughness:.82,metalness:0});
+const crowdHeadMatV64=new THREE.MeshStandardMaterial({color:0xa9795e,roughness:.86,metalness:0});
+const crowdBodyItemsV64=[],crowdHeadItemsV64=[];
+const crowdSpotsV64=lowPower?[
+  [-20,30], [20,31],[-15,66],[15,66],[-8,82],[8,82]
+]:[
+  [-20,29],[-17,34],[-21,47],[20,30],[17,35],[21,48],
+  [-13,61],[-16,68],[-11,73],[13,61],[16,68],[11,73],
+  [-8,82],[-4,84],[4,84],[8,82],[-23,76],[23,76],
+  [-31,39],[-30,48],[31,39],[30,48],[-29,66],[29,66]
+];
+crowdSpotsV64.forEach(([x,z],i)=>{
+  const h=.92+(i%4)*.04,ry=(i*.83)%6.28;
+  crowdBodyItemsV64.push({x,y:1.02,z,ry,sx:.24+(i%3)*.02,sy:h,sz:.22});
+  crowdHeadItemsV64.push({x,y:1.93+(i%4)*.03,z,ry,sx:.18,sy:.19,sz:.18});
+});
+instancedStatic(campusCrowdV64,new THREE.CylinderGeometry(1,1,1,8),crowdBodyMatV64,crowdBodyItemsV64,'KOMO_CAMPUS_PEOPLE_BODY_INST_V64');
+instancedStatic(campusCrowdV64,new THREE.SphereGeometry(1,8,6),crowdHeadMatV64,crowdHeadItemsV64,'KOMO_CAMPUS_PEOPLE_HEAD_INST_V64');
+
+// A small number of true walking NPCs adds motion close to the player.
+if(!lowPower){
+  makeNpc(npcRoot,{role:'visitor',label:'Iris',functionLabel:'MOVEMENT GUEST',x:-10.8,y:0,z:56.0,outfit:'cream',speed:.32,phase:.18,route:[
+    [-10.8,0,56.0],[-6.5,0,61.5],[-3.2,0,67.0],[-7.0,0,72.5],[-11.5,0,68.0]
+  ]});
+  makeNpc(npcRoot,{role:'visitor',label:'Louis',functionLabel:'COMMUNITY',x:9.8,y:0,z:60.5,outfit:'sand',speed:.29,phase:.52,route:[
+    [9.8,0,60.5],[5.0,0,64.0],[2.8,0,70.0],[7.5,0,75.5],[12.0,0,69.0]
+  ]});
+  makeNpc(npcRoot,{role:'staff',label:'Eva',functionLabel:'CAMPUS HOST',x:-4.8,y:0,z:75.0,outfit:'sage',speed:.25,phase:.73,route:[
+    [-4.8,0,75.0],[0,0,77.0],[4.8,0,75.0],[3.0,0,70.0],[-3.0,0,70.0]
+  ]});
+}
+
+// Small furniture clusters turn empty edges into actual places.
+[-1,1].forEach(side=>{
+  exteriorBench(livingCampusV64,side*18.2,58.5,side>0?-Math.PI/2:Math.PI/2,.92);
+  exteriorBench(livingCampusV64,side*20.0,78.5,side>0?-Math.PI/2:Math.PI/2,.86);
+  sculptureGarden(livingCampusV64,side*14.0,84.5,.78);
+  bannerTotem(livingCampusV64,side*22.0,85.0,side<0?'MOVEMENT':'LONGEVITY',side<0?'CAMPUS':'RIVIERA',side>0?-Math.PI/2:Math.PI/2);
+});
+
 
 // Main building — one continuous architectural object, no reception avatar.
 const building=new THREE.Group();building.name='KOMO_MAIN_BUILDING_V1';world.add(building);
@@ -5590,6 +5768,12 @@ function updateVisibilityBudget(now){
   if(living.district)living.district.visible=player.z>35;
   if(living.atmosphereV632)living.atmosphereV632.visible=!emergencyPerformance;
   if(typeof arrivalHeroV632!=='undefined')arrivalHeroV632.visible=!emergencyPerformance&&player.z>8;
+  if(living.livingCampusV64){
+    const campusNear=player.z>9||camera.position.z>12;
+    living.livingCampusV64.visible=!emergencyPerformance&&campusNear;
+    campusCrowdV64.visible=!lowPower||player.z>42;
+    rearTerraceV64.visible=!lowPower||player.z>52;
+  }
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
   hallLightGroup.visible=!lowPower&&!emergencyPerformance&&player.z<22&&player.z>-31&&Math.abs(player.x)<15;
@@ -5604,7 +5788,8 @@ function updateVisibilityBudget(now){
   npcRoot.visible=true;
   living.trees.forEach(tree=>{
     const wp=new THREE.Vector3();tree.getWorldPosition(wp);
-    tree.visible=wp.distanceTo(camera.position)<(lowPower?30:46);
+    const hero=tree.name==='KOMO_HERO_TREE_V64';
+    tree.visible=wp.distanceTo(camera.position)<(hero?(lowPower?54:82):(lowPower?30:46));
   });
   living.npcs.forEach((npc,i)=>{
     const sameLevel=Math.abs(npc.position.y-player.y)<2;
@@ -5638,6 +5823,7 @@ function applyEmergencyPerformance(){
   if(living.lightingV631)living.lightingV631.root.visible=false;
   if(living.atmosphereV632)living.atmosphereV632.visible=false;
   if(typeof arrivalHeroV632!=='undefined')arrivalHeroV632.visible=false;
+  if(living.livingCampusV64)living.livingCampusV64.visible=false;
   living.clouds.forEach(c=>c.visible=false);
   // Keep only the first two ambient NPCs under emergency load.
   living.npcs.forEach((npc,i)=>{npc.visible=i<2});
@@ -5674,7 +5860,8 @@ function animateLiving(now){
   });
   if(!lowPower)living.shimmers.forEach((q,i)=>{
     const travel=((t*.045+q.userData.phase)%1);
-    q.position.z=25.5+travel*29.0;
+    if(!q.userData.v64Local)q.position.z=25.5+travel*29.0;
+    else q.position.x=Math.sin(t*.20+i*.8)*.18;
     q.material.opacity=.045+.045*(.5+.5*Math.sin(t*.7+i));
   });
   if(living.dust){
@@ -5791,6 +5978,12 @@ function animateLiving(now){
       cloud.material.opacity=cloud.userData.baseOpacity*(.90+.10*Math.sin(t*.035+i*.67));
     });
   }
+  if(living.waterfallsV64?.length){
+    living.waterfallsV64.forEach((w,i)=>{
+      w.texture.offset.y=-(t*.045+i*.13)%1;
+      w.mesh.material.opacity=w.baseOpacity*(.92+.08*Math.sin(t*.33+i));
+    });
+  }
   if(living.fountainJets?.length){
     living.fountainJets.forEach((jet,i)=>{
       if(jet.geometry?.type==='RingGeometry'){
@@ -5876,7 +6069,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'6.3.2-sky-atmosphere',
+  version:'6.4.0-living-campus',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
