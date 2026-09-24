@@ -102,6 +102,7 @@ const checks=[
   ['room access V5.3 present',runtime.includes('KOMO_ROOM_ACCESS_V52')&&runtime.includes('KOMO_ROOM_RETURN_')&&runtime.includes('function seamlessRoomTransition')&&runtime.includes('function updateRoomAccess(now)')&&runtime.includes('updateRoomAccess(now);')],
   ['NPC missions V5.4 present',runtime.includes("const NPC_MISSION_KEY='komo_world_npc_missions_v1'")&&runtime.includes("maya:{name:'Maya'")&&runtime.includes("jules:{name:'Jules'")&&runtime.includes('function showNpcMission')&&runtime.includes('function registerNpcTalk')],
   ['Daily Health bridge V5.4 present',runtime.includes("const DAILY_HEALTH_KEY='komo_world_daily_health_v1'")&&runtime.includes("const HEALTH_BRIDGE_CHANNEL='komo-health-v1'")&&runtime.includes('function ingestDailyHealth')&&runtime.includes('function showDailyHealthConnect')&&runtime.includes('getDailyHealth:()=>')],
+  ['Pulse Daily Health hydration V5.4 present',multiplayer.includes("from('pulse_daily_health')")&&multiplayer.includes("runtime.ingestDailyHealth?.(")],
   ['Twin room V5.2 present',runtime.includes('KOMO_TWIN_ROOM_V52')&&runtime.includes('Data canopy')===false&&runtime.includes('new THREE.TorusGeometry(3.0+i*.34')],
   ['Fitness room V5.2 present',runtime.includes('KOMO_FITNESS_ROOM_V52')&&runtime.includes("'TODAY','MOVE · TRAIN · RECOVER'")&&runtime.includes('MAT.smokedGlass')],
   ['Arena room V5.2 present',runtime.includes('KOMO_ARENA_ROOM_V52')&&runtime.includes("'LIVE ARENA','DAILY CHALLENGES · SOCIAL'")&&runtime.includes('new THREE.RingGeometry(2.05,2.18,64)')],
