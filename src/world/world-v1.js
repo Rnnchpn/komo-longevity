@@ -2622,6 +2622,40 @@ box(roomAccess,.055,.018,13.2,guideFit,0,.122,-36.2,{cast:false,receive:false});
 box(roomAccess,20.0,.018,.055,guideArena,22.8,.122,-24.0,{cast:false,receive:false});
 box(roomAccess,.055,.018,12.2,guideArena,32.1,.122,-12.2,{cast:false,receive:false});
 
+// V5.9 Walkable Gallery Walls — architectural edges without closing the campus sightlines.
+const galleryWallsV59=new THREE.Group();galleryWallsV59.name='KOMO_GALLERY_WALLS_V59';oneWorldLinks.add(galleryWallsV59);
+const galleryGlass=lowPower?MAT.smokedGlass:M.glass;
+function galleryBay(parent,x,z,rot=0,accent=0xd5b679,flip=false){
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
+  const accentMat=new THREE.MeshBasicMaterial({color:accent,transparent:true,opacity:lowPower?.20:.34,depthWrite:false});
+  // Solid base + spaced piers + glass upper field keeps views open.
+  box(g,3.25,.56,.24,WALL.travertine,0,.34,0,{cast:false,receive:true});
+  box(g,3.10,.030,.10,WALL.brass,0,.66,flip?.08:-.08,{cast:false,receive:false});
+  [-1.52,1.52].forEach(px=>box(g,.16,2.75,.30,WALL.mineral,px,1.68,0,{cast:true}));
+  box(g,2.86,1.75,.035,galleryGlass,0,1.82,0,{cast:false,receive:false});
+  box(g,2.72,.020,.050,accentMat,0,2.68,.03,{cast:false,receive:false});
+  return g;
+}
+// Twin / Arena transverse galleries.
+[-27.65,-20.95].forEach((z,side)=>{
+  [-28.8,-24.9,-21.0,-17.1,-13.2].forEach((x,i)=>galleryBay(galleryWallsV59,x,z,0,0xb9cfbf,!!side));
+  [13.2,17.1,21.0,24.9,28.8].forEach((x,i)=>galleryBay(galleryWallsV59,x,z,0,0xb9935c,!side));
+});
+// Lateral legs approaching Twin and Arena.
+[-34.25,-29.75].forEach((x,side)=>{
+  [-18.8,-14.8,-10.8,-6.8].forEach(z=>galleryBay(galleryWallsV59,x,z,Math.PI/2,0xb9cfbf,!!side));
+});
+[29.75,34.25].forEach((x,side)=>{
+  [-18.8,-14.8,-10.8,-6.8].forEach(z=>galleryBay(galleryWallsV59,x,z,Math.PI/2,0xb9935c,!side));
+});
+// Central Fitness tunnel: alternating timber / glass character.
+[-4.55,4.55].forEach((x,side)=>{
+  [-40.8,-36.9,-33.0,-29.1].forEach((z,i)=>{
+    const g=galleryBay(galleryWallsV59,x,z,Math.PI/2,0xd7b777,!!side);
+    if(i%2===0)box(g,2.42,1.25,.055,WALL.walnut,0,1.72,.045,{cast:false,receive:true});
+  });
+});
+
 // V5.3 room thresholds — every destination has a visible physical way back to the Hall.
 function roomReturnPortal(parent,{label='HALL',sub='WALK OUT · RETURN',x=0,z=10.65,rot=0,accent=0xd5b679,dark=true}={}){
   const g=new THREE.Group();g.name='KOMO_ROOM_RETURN_'+label.replace(/\W+/g,'_').toUpperCase()+'_V58';g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
