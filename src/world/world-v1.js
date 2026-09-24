@@ -1072,7 +1072,8 @@ function makePlayerAvatar(){
   g.userData.avatar={
     bodyRoot,hipsGroup,torsoGroup,headGroup,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,
     leftShoe,rightShoe,leftHand,rightHand,tag,shadow,ring,phase:0,facing:0,
-    materials:{skin,skinWarm,cloth,clothDark,clothSoft,trouser,shoe,sole,hair,bronze}
+    materials:{skin,skinWarm,cloth,clothDark,clothSoft,trouser,shoe,sole,hair,bronze},
+    garments:{torso,chest,waist,shoulderL,shoulderR,collarL,collarR,cuffL,cuffR,chestPin}
   };
   return g;
 }
@@ -3722,22 +3723,53 @@ const AVATAR_KEY='komo_world_avatar_v1';
 const avatarPalettes={
   outfit:{sage:[0x24483a,0x19372d,0x303733],sand:[0xa69379,0x756451,0x423d36],black:[0x282d2a,0x171b19,0x242624]},
   skin:{light:[0xd4a17d,0xbd805f],medium:[0xb87e59,0x9d6548],deep:[0x7c4f38,0x653b29]},
-  hair:{dark:0x2a2420,brown:0x5a3c2d,grey:0x6b6a65}
+  hair:{dark:0x2a2420,brown:0x5a3c2d,grey:0x6b6a65},
+  look:{
+    tailored:{roughness:.48,metalness:.018,chest:[1.28,.50,.72],torso:[1.08,1,.79],collar:true,pin:true},
+    performance:{roughness:.62,metalness:.008,chest:[1.18,.46,.69],torso:[1.03,.97,.76],collar:false,pin:false},
+    riviera:{roughness:.54,metalness:.012,chest:[1.23,.48,.71],torso:[1.06,.99,.78],collar:true,pin:true}
+  }
 };
-function loadAvatarConfig(){try{return {...{outfit:'sage',skin:'medium',hair:'dark'},...JSON.parse(localStorage.getItem(AVATAR_KEY)||'{}')}}catch{return {outfit:'sage',skin:'medium',hair:'dark'}}}
+function loadAvatarConfig(){try{return {...{look:'tailored',outfit:'sage',skin:'medium',hair:'dark'},...JSON.parse(localStorage.getItem(AVATAR_KEY)||'{}')}}catch{return {look:'tailored',outfit:'sage',skin:'medium',hair:'dark'}}}
 const avatarConfig=loadAvatarConfig();
+function syncIntroAvatarControls(){
+  document.querySelectorAll('[data-intro-avatar-key]').forEach(btn=>{
+    btn.classList.toggle('selected',avatarConfig[btn.dataset.introAvatarKey]===btn.dataset.introAvatarValue);
+  });
+  const preview=document.querySelector('.intro-avatar-silhouette');
+  if(preview){
+    preview.dataset.look=avatarConfig.look||'tailored';
+    preview.dataset.outfit=avatarConfig.outfit||'sage';
+  }
+}
 function applyAvatarConfig(){
-  const mats=playerAvatar.userData.avatar.materials;if(!mats)return;
+  const av=playerAvatar.userData.avatar,mats=av.materials;if(!mats)return;
   const o=avatarPalettes.outfit[avatarConfig.outfit]||avatarPalettes.outfit.sage;
   const sk=avatarPalettes.skin[avatarConfig.skin]||avatarPalettes.skin.medium;
+  const look=avatarPalettes.look[avatarConfig.look]||avatarPalettes.look.tailored;
   mats.cloth.color.setHex(o[0]);mats.clothDark.color.setHex(o[1]);mats.trouser.color.setHex(o[2]);
+  mats.cloth.roughness=look.roughness;mats.cloth.metalness=look.metalness;
   mats.skin.color.setHex(sk[0]);mats.skinWarm.color.setHex(sk[1]);
   mats.hair.color.setHex(avatarPalettes.hair[avatarConfig.hair]||avatarPalettes.hair.dark);
+  const g=av.garments;
+  if(g){
+    g.chest.scale.set(...look.chest);g.torso.scale.set(...look.torso);
+    g.collarL.visible=g.collarR.visible=look.collar;g.chestPin.visible=look.pin;
+    if(avatarConfig.look==='performance'){
+      g.waist.scale.set(1.08,.20,.72);g.shoulderL.scale.set(.72,.40,.60);g.shoulderR.scale.copy(g.shoulderL.scale);
+    }else if(avatarConfig.look==='riviera'){
+      g.waist.scale.set(1.01,.22,.72);g.shoulderL.scale.set(.75,.43,.62);g.shoulderR.scale.copy(g.shoulderL.scale);
+    }else{
+      g.waist.scale.set(1.04,.25,.74);g.shoulderL.scale.set(.78,.46,.64);g.shoulderR.scale.copy(g.shoulderL.scale);
+    }
+  }
+  syncIntroAvatarControls();
 }
 function saveAvatarConfig(){try{localStorage.setItem(AVATAR_KEY,JSON.stringify(avatarConfig))}catch{}applyAvatarConfig()}
 function avatarStudioHtml(){
   const row=(key,label,opts)=>`<div class="avatar-option-row"><span>${label}</span><div class="avatar-swatches">${opts.map(([id,name])=>`<button data-avatar-key="${key}" data-avatar-value="${id}" class="${avatarConfig[key]===id?'selected':''}">${name}</button>`).join('')}</div></div>`;
   return `<div class="avatar-options">
+    ${row('look',locale==='fr'?'STYLE':'STYLE',[['tailored','TAILORED'],['performance','PERFORMANCE'],['riviera','RIVIERA']])}
     ${row('outfit',locale==='fr'?'TENUE':'OUTFIT',[['sage','KŌMØ SAGE'],['sand','RIVIERA SAND'],['black','MIDNIGHT']])}
     ${row('skin',locale==='fr'?'TEINTE':'SKIN',[['light','LIGHT'],['medium','MEDIUM'],['deep','DEEP']])}
     ${row('hair',locale==='fr'?'CHEVEUX':'HAIR',[['dark','DARK'],['brown','BROWN'],['grey','GREY']])}
@@ -3754,6 +3786,9 @@ function showAvatarStudio(){
   ]);bindAvatarStudio();
 }
 avatarToggle.addEventListener('click',()=>{closeWorldMenu();showAvatarStudio()});
+document.querySelectorAll('[data-intro-avatar-key]').forEach(btn=>btn.addEventListener('click',()=>{
+  avatarConfig[btn.dataset.introAvatarKey]=btn.dataset.introAvatarValue;saveAvatarConfig();
+}));
 applyAvatarConfig();
 
 function syncUiOpen(){
