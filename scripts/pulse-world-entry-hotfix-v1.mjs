@@ -31,6 +31,16 @@ mykomo=mykomo.replace(
   "document.querySelectorAll('[data-mkv5-world]').forEach(b=>b.addEventListener('click',()=>{location.href='https://komolongevity.com/world/'}))"
 );
 
+// The World session bridge must be present in the generated Pulse runtime, not only in source.
+if(!html.includes('auth-gateway-v2.js')){
+  html=html.replace(
+    '</body>',
+    '  <script type="module" src="./auth-gateway-v2.js?v=20260924-world-bridge-v3"></script>\n</body>'
+  );
+}else{
+  html=html.replace(/\.\/auth-gateway-v2\.js\?v=[^"']+/g,'./auth-gateway-v2.js?v=20260924-world-bridge-v3');
+}
+
 // The production HTML gets a direct World entry too. appShell is auth-gated already,
 // so this does not create a second route owner or expose patient data.
 if(!html.includes('id="komoWorldTopEntry"')){
@@ -56,7 +66,8 @@ const checks=[
   ['World quick access',mykomo.includes('data-mkv5-world-quick')],
   ['all World CTAs bound',mykomo.includes("querySelectorAll('[data-mkv5-world]')")],
   ['topbar World entry',html.includes('id="komoWorldTopEntry"')],
+  ['World auth bridge loaded',html.includes('auth-gateway-v2.js?v=20260924-world-bridge-v3')],
   ['explicit My KŌMØ cache bust',html.includes('my-komo-stable-v5.js?v=20260907-world-access-v1')]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[world-entry-hotfix] failed: '+label);
-console.log('[world-entry-hotfix] PASS · World visible in header + My KŌMØ hero + World card + quick access');
+console.log('[world-entry-hotfix] PASS · World visible + auth bridge loaded + cache-fresh');
