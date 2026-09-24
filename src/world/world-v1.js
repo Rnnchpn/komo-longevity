@@ -73,6 +73,7 @@ const journeyXpMenu=$('#journey-xp-menu');
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
 const lowPower=coarse||isiOS;
+const iphoneVisualReference=true;
 const deviceDpr=Math.max(1,window.devicePixelRatio||1);
 const retinaMobile=lowPower&&deviceDpr>=2;
 document.documentElement.classList.toggle('low-power',lowPower);
@@ -138,7 +139,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=lowPower?1.17:1.22;
+renderer.toneMappingExposure=1.17;
 renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -159,16 +160,11 @@ function applyRenderScale(){
   if(qualityStatus)qualityStatus.textContent=(qualityMode==='auto'?'AUTO':qualityMode.toUpperCase())+' · '+ratio.toFixed(2)+'×';
 }
 function applyQualityProfile(){
-  // Shadows are the most expensive duplicate draw pass: HIGH only.
-  const shadows=qualityMode==='high'&&!lowPower&&!emergencyPerformance;
-  renderer.shadowMap.enabled=shadows;
-  if(shadows){
-    sun.shadow.mapSize.set(1024,1024);
-    renderer.shadowMap.needsUpdate=true;
-  }
-  fill.intensity=lowPower?.12:emergencyPerformance?0:qualityMode==='high'?.62:qualityMode==='performance'?.16:.34;
-  if(typeof hallLightGroup!=='undefined')hallLightGroup.visible=!lowPower&&!emergencyPerformance;
-  activeLightBudget=emergencyPerformance||lowPower?0:(qualityMode==='high'?10:qualityMode==='performance'?3:7);
+  // V7.2: iPhone is the visual source of truth. Desktop may render sharper, never differently.
+  renderer.shadowMap.enabled=false;
+  fill.intensity=emergencyPerformance?0:.12;
+  if(typeof hallLightGroup!=='undefined')hallLightGroup.visible=false;
+  activeLightBudget=0;
   living.lights.forEach(l=>{if(l){l.visible=false;l.intensity=0}});
   applyRenderScale();
 }
@@ -176,7 +172,7 @@ applyRenderScale();
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xd8ded8);
-scene.fog=new THREE.Fog(0xd4d9d1,82,270);
+scene.fog=new THREE.Fog(0xd4d9d1,96,238);
 
 const camera=new THREE.PerspectiveCamera(54,innerWidth/innerHeight,.12,420);
 camera.position.set(0,1.72,58);
@@ -333,7 +329,7 @@ const skyMaterial=new THREE.ShaderMaterial({
     }
   `
 });
-const skyDome=new THREE.Mesh(new THREE.SphereGeometry(300,lowPower?24:48,lowPower?12:28),skyMaterial);
+const skyDome=new THREE.Mesh(new THREE.SphereGeometry(300,24,12),skyMaterial);
 skyDome.name='KOMO_TRUE_SKY_V18';skyDome.renderOrder=-1000;scene.add(skyDome);
 living.skyDome=skyDome;living.skyUniforms=skyUniforms;
 
@@ -358,10 +354,10 @@ function makeCloudTexture(seed=0){
 }
 const cloudTextures=[makeCloudTexture(1),makeCloudTexture(4),makeCloudTexture(7)];
 const cloudGroup=new THREE.Group();cloudGroup.name='KOMO_CLOUD_FIELD_V632';scene.add(cloudGroup);
-const cloudCount=lowPower?1:9;
+const cloudCount=1;
 for(let i=0;i<cloudCount;i++){
   const mat=new THREE.MeshBasicMaterial({
-    map:cloudTextures[i%cloudTextures.length],transparent:true,opacity:lowPower?.045:.080,
+    map:cloudTextures[i%cloudTextures.length],transparent:true,opacity:.045,
     depthWrite:false,depthTest:true,side:THREE.DoubleSide,fog:true
   });
   const w=29+(i%4)*8,h=9+(i%3)*3.5;
@@ -372,7 +368,7 @@ for(let i=0;i<cloudCount;i++){
   cloud.scale.x=.92+(i%3)*.16;cloud.scale.y=.88+(i%2)*.12;
   cloud.userData.baseX=cloud.position.x;
   cloud.userData.baseZ=cloud.position.z;
-  cloud.userData.baseOpacity=lowPower?.045:(.058+(i%4)*.009);
+  cloud.userData.baseOpacity=.045;
   cloud.userData.speed=.095+(i%4)*.025;
   cloud.userData.phase=i*.91;
   cloudGroup.add(cloud);living.clouds.push(cloud);
@@ -382,21 +378,21 @@ living.sunSprite=null;
 
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
-  let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe8ca,sunPower=3.05,hemiPower=1.72,exposure=lowPower?1.00:1.03,state='day';
+  let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe8ca,sunPower=3.05,hemiPower=1.72,exposure=1.00,state='day';
   let zenith=0x789caf,upper=0x9eb8c2,horizon=0xdde3dc,haze=0xe8ddd0,low=0xeee0cf,skySun=0xffe0b8,skyStrength=.54,horizonSoftness=.34;
-  let fogNear=lowPower?96:72,fogFar=lowPower?238:188;
+  let fogNear=96,fogFar=238;
   if(h<7||h>=21){
     bg=0x74838a;fog=0x8c9691;sunColor=0xe5d6c9;sunPower=1.48;hemiPower=1.12;exposure=.88;state='evening';
     zenith=0x415966;upper=0x667a80;horizon=0x939995;haze=0x9e948a;low=0xa7816e;skySun=0xe4cdb9;skyStrength=.11;horizonSoftness=.42;
-    fogNear=lowPower?92:68;fogFar=lowPower?220:172;
+    fogNear=92;fogFar=220;
   }else if(h<9){
     bg=0xe0e5df;fog=0xdbe0d9;sunColor=0xffd8aa;sunPower=2.62;hemiPower=1.55;exposure=.99;state='morning';
     zenith=0x83a6b5;upper=0xaec1c1;horizon=0xe5d9ca;haze=0xead6c0;low=0xeeb985;skySun=0xffc98d;skyStrength=.64;horizonSoftness=.37;
-    fogNear=lowPower?94:70;fogFar=lowPower?230:182;
+    fogNear=94;fogFar=230;
   }else if(h>=17.5){
     bg=0xdfd9cd;fog=0xd8d1c5;sunColor=0xffcf9b;sunPower=2.72;hemiPower=1.42;exposure=.97;state='golden';
     zenith=0x8299a4;upper=0xaeb6b2;horizon=0xe2cfb8;haze=0xe7c7a7;low=0xe8a876;skySun=0xffbd7c;skyStrength=.68;horizonSoftness=.40;
-    fogNear=lowPower?98:74;fogFar=lowPower?228:180;
+    fogNear=98;fogFar=228;
   }
   scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=fogNear;scene.fog.far=fogFar;
   sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
@@ -435,7 +431,7 @@ function canvasTexture(canvas,{repeat=[1,1],srgb=false}={}){
 // V6.0: derive a subtle tangent-space normal map once at startup from the procedural height field.
 // Desktop gets true normal response; low-power devices keep the cheaper roughness/albedo path.
 function normalTextureFromHeight(heightCanvas,repeat=[1,1],strength=2.0){
-  if(lowPower)return null;
+  if(iphoneVisualReference)return null;
   const w=heightCanvas.width,h=heightCanvas.height,src=heightCanvas.getContext('2d').getImageData(0,0,w,h).data;
   const out=document.createElement('canvas');out.width=w;out.height=h;
   const ctx=out.getContext('2d'),img=ctx.createImageData(w,h),dst=img.data;
@@ -939,15 +935,15 @@ function updateNpc(npc,t,index){
   const d=npc.userData.npc;if(!d||!d.total)return;
   const distToCamera=camera.position.distanceTo(npc.position);
   const sameLevel=Math.abs(camera.position.y-(npc.position.y+1.7))<4.6;
-  d.tag.visible=distToCamera<22&&sameLevel;
+  d.tag.visible=distToCamera<13&&sameLevel;
   if(d.tag.visible){
     const k=THREE.MathUtils.clamp(1+distToCamera*.012,1,1.22);
     d.tag.scale.set(2.05*k,.58*k,1);
   }
 
   // On low-power devices, far characters move at 10 Hz and don't animate limbs.
-  const far=distToCamera>(lowPower?13:22);
-  if(far&&t-d.lastFarUpdate<(lowPower?.10:.065))return;
+  const far=distToCamera>13;
+  if(far&&t-d.lastFarUpdate<.10)return;
   if(far)d.lastFarUpdate=t;
 
   if(d.routeClock==null){d.routeClock=(d.phase*d.total)%d.total;d.routeLastT=t}
@@ -2269,7 +2265,7 @@ box(architecturalSpine,8.70,.032,.070,MAT.brass,0,5.88,11.82,{cast:false,receive
 
 // V5.0 Desktop Visual Revolution — optical depth and cinematic focal hierarchy.
 const desktopCinematic=new THREE.Group();desktopCinematic.name='KOMO_DESKTOP_CINEMATIC_V50';building.add(desktopCinematic);
-desktopCinematic.visible=!lowPower;
+desktopCinematic.visible=false;
 
 if(!lowPower){
   // Polished central runway: thin physical overlay only on desktop.
@@ -2721,10 +2717,10 @@ const distantArchitectureInstV632=instancedStatic(atmosphereV632,new THREE.BoxGe
 function applyAtmosphereV632Profile(state='day'){
   if(!living.atmosphereV632)return;
   const profile={
-    day:{haze:0xd9ddd5,ground:0x85917e,near:0x788579,far:0x89958d,pine:0x445a4a,architecture:0xc7c1b5,opacity:lowPower?.12:.20},
-    morning:{haze:0xe4d7c8,ground:0x89927f,near:0x7f897b,far:0x969b90,pine:0x4a604e,architecture:0xd0c3b2,opacity:lowPower?.13:.22},
-    golden:{haze:0xdfcbb3,ground:0x8d8d76,near:0x827e6d,far:0x999081,pine:0x4c5944,architecture:0xcdb9a3,opacity:lowPower?.14:.24},
-    evening:{haze:0x8f9690,ground:0x69746b,near:0x606d64,far:0x737f78,pine:0x35483b,architecture:0x9b9b91,opacity:lowPower?.13:.23}
+    day:{haze:0xd9ddd5,ground:0x85917e,near:0x788579,far:0x89958d,pine:0x445a4a,architecture:0xc7c1b5,opacity:.12},
+    morning:{haze:0xe4d7c8,ground:0x89927f,near:0x7f897b,far:0x969b90,pine:0x4a604e,architecture:0xd0c3b2,opacity:.13},
+    golden:{haze:0xdfcbb3,ground:0x8d8d76,near:0x827e6d,far:0x999081,pine:0x4c5944,architecture:0xcdb9a3,opacity:.14},
+    evening:{haze:0x8f9690,ground:0x69746b,near:0x606d64,far:0x737f78,pine:0x35483b,architecture:0x9b9b91,opacity:.13}
   }[state]||null;
   if(!profile)return;
   horizonHazeUniformsV632.hazeColor.value.setHex(profile.haze);horizonHazeUniformsV632.opacity.value=profile.opacity;
@@ -2738,8 +2734,8 @@ applyAtmosphereV632Profile(living.daylight);
 // V6.1 Grand Flagship — scale comes from silhouette, rhythm and emissive depth, not extra lights.
 const grandFlagshipV61=new THREE.Group();grandFlagshipV61.name='KOMO_GRAND_FLAGSHIP_V61';building.add(grandFlagshipV61);
 grandFlagshipV61.userData.realismDetail=true;
-const grandWarmV61=new THREE.MeshBasicMaterial({color:0xe8c58b,transparent:true,opacity:lowPower?.30:.52,depthWrite:false});
-const grandCoolV61=new THREE.MeshBasicMaterial({color:0xc6dbce,transparent:true,opacity:lowPower?.24:.42,depthWrite:false});
+const grandWarmV61=new THREE.MeshBasicMaterial({color:0xe8c58b,transparent:true,opacity:.30,depthWrite:false});
+const grandCoolV61=new THREE.MeshBasicMaterial({color:0xc6dbce,transparent:true,opacity:.24,depthWrite:false});
 const grandDarkV61=MAT.blackened;
 const grandUnitBoxV61=new THREE.BoxGeometry(1,1,1);
 
@@ -3047,7 +3043,7 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'leo',functionLabel:'FITNESS COA
   ]});
 }
 // Living atmosphere — subtle, non-game-like movement.
-const dustCount=lowPower?0:78;
+const dustCount=0;
 const dustPositions=new Float32Array(dustCount*3);
 for(let i=0;i<dustCount;i++){
   dustPositions[i*3]=(Math.random()-.5)*20;
@@ -3798,15 +3794,15 @@ const washPlaneV60=new THREE.PlaneGeometry(1,1);
 const hallWashItems=[];
 [-1,1].forEach(side=>{
   const x=side*11.16,ry=side<0?Math.PI/2:-Math.PI/2;
-  (lowPower?[-14,3]:[-20,-12,-4,4,11]).forEach(z=>hallWashItems.push({x,y:3.60,z,ry,sx:3.15,sy:4.65,sz:1}));
+  [-14,3].forEach(z=>hallWashItems.push({x,y:3.60,z,ry,sx:3.15,sy:4.65,sz:1}));
 });
-const twinWashItems=(lowPower?[-4.8,4.8]:[-7.0,-3.5,0,3.5,7.0]).map(x=>({x:x-45,y:3.55,z:-12.64,ry:0,sx:3.15,sy:4.55,sz:1}));
-const fitWashItems=(lowPower?[-4.8,4.8]:[-7.2,-3.6,0,3.6,7.2]).map(x=>({x,y:3.50,z:-66.50,ry:0,sx:3.12,sy:4.45,sz:1}));
-const arenaWashItems=(lowPower?[-4.8,4.8]:[-7.0,-3.5,0,3.5,7.0]).map(x=>({x:x+45,y:3.55,z:-12.64,ry:0,sx:3.15,sy:4.55,sz:1}));
-const hallWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xffd7a0,lowPower?.10:.17),hallWashItems,'KOMO_HALL_WASH_INST_V60');
-const twinWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xc8e0d2,lowPower?.10:.16),twinWashItems,'KOMO_TWIN_WASH_INST_V60');
-const fitWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xf0c987,lowPower?.10:.17),fitWashItems,'KOMO_FITNESS_WASH_INST_V60');
-const arenaWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xd9aa67,lowPower?.11:.19),arenaWashItems,'KOMO_ARENA_WASH_INST_V60');
+const twinWashItems=[-4.8,4.8].map(x=>({x:x-45,y:3.55,z:-12.64,ry:0,sx:3.15,sy:4.55,sz:1}));
+const fitWashItems=[-4.8,4.8].map(x=>({x,y:3.50,z:-66.50,ry:0,sx:3.12,sy:4.45,sz:1}));
+const arenaWashItems=[-4.8,4.8].map(x=>({x:x+45,y:3.55,z:-12.64,ry:0,sx:3.15,sy:4.55,sz:1}));
+const hallWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xffd7a0,.10),hallWashItems,'KOMO_HALL_WASH_INST_V60');
+const twinWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xc8e0d2,.10),twinWashItems,'KOMO_TWIN_WASH_INST_V60');
+const fitWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xf0c987,.10),fitWashItems,'KOMO_FITNESS_WASH_INST_V60');
+const arenaWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xd9aa67,.11),arenaWashItems,'KOMO_ARENA_WASH_INST_V60');
 [hallWashInst,twinWashInst,fitWashInst,arenaWashInst].forEach(m=>{m.renderOrder=2;m.frustumCulled=true});
 
 // V6.3.1 Lighting Overhaul — perceived depth with zero additional realtime lights.
@@ -3919,27 +3915,27 @@ function applyLightingV631Profile(state='day'){
     golden:{structural:.80,decorative:1.12,destination:1.08},
     evening:{structural:.62,decorative:1.18,destination:1.16}
   }[state]||{structural:1,decorative:1,destination:1};
-  structuralWarmMatV631.opacity=(lowPower?.055:.105)*factors.structural;
-  structuralBounceMatV631.opacity=(lowPower?.045:.085)*factors.structural;
-  armillaryBounceMatV631.opacity=(lowPower?.07:.15)*factors.decorative;
-  twinKeyMatV631.opacity=(lowPower?.08:.16)*factors.decorative;
-  fitKeyMatV631.opacity=(lowPower?.075:.15)*factors.decorative;
-  arenaKeyMatV631.opacity=(lowPower?.07:.16)*factors.decorative;
-  destinationCoolMatV631.opacity=(lowPower?.075:.15)*factors.destination;
-  destinationFitMatV631.opacity=(lowPower?.075:.15)*factors.destination;
-  destinationArenaMatV631.opacity=(lowPower?.075:.16)*factors.destination;
-  destWallMatsV631.forEach((m,i)=>m.opacity=(lowPower?.08:(i===2?.18:.17))*factors.destination);
+  structuralWarmMatV631.opacity=.055*factors.structural;
+  structuralBounceMatV631.opacity=.045*factors.structural;
+  armillaryBounceMatV631.opacity=.07*factors.decorative;
+  twinKeyMatV631.opacity=.08*factors.decorative;
+  fitKeyMatV631.opacity=.075*factors.decorative;
+  arenaKeyMatV631.opacity=.07*factors.decorative;
+  destinationCoolMatV631.opacity=.075*factors.destination;
+  destinationFitMatV631.opacity=.075*factors.destination;
+  destinationArenaMatV631.opacity=.075*factors.destination;
+  destWallMatsV631.forEach(m=>m.opacity=.08*factors.destination);
 }
 applyLightingV631Profile(living.daylight);
 
 // V5.6 Open Rooms — Twin, Fitness and Arena remain visually open at all times.
 // The interior pass relies mostly on emissive geometry rather than extra realtime lights.
 const roomPremium=new THREE.Group();roomPremium.name='KOMO_OPEN_ROOMS_V56';scene.add(roomPremium);
-const roomWarmStrip=new THREE.MeshBasicMaterial({color:0xf2d39d,transparent:true,opacity:lowPower?.46:.72,depthWrite:false});
-const roomCoolStrip=new THREE.MeshBasicMaterial({color:0xc9ddd0,transparent:true,opacity:lowPower?.42:.66,depthWrite:false});
-const roomArenaStrip=new THREE.MeshBasicMaterial({color:0xd6ad70,transparent:true,opacity:lowPower?.48:.76,depthWrite:false});
+const roomWarmStrip=new THREE.MeshBasicMaterial({color:0xf2d39d,transparent:true,opacity:.46,depthWrite:false});
+const roomCoolStrip=new THREE.MeshBasicMaterial({color:0xc9ddd0,transparent:true,opacity:.42,depthWrite:false});
+const roomArenaStrip=new THREE.MeshBasicMaterial({color:0xd6ad70,transparent:true,opacity:.48,depthWrite:false});
 const roomScreen=new THREE.MeshBasicMaterial({color:0x20372c,transparent:true,opacity:.94,depthWrite:false});
-const roomMirror=lowPower?MAT.smokedGlass:M.glass;
+const roomMirror=MAT.smokedGlass;
 
 function ceilingRail(parent,x,z,w=3.0,accent=roomWarmStrip){
   const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
@@ -6095,19 +6091,19 @@ function updateRealismLOD(){
   const arenaD=Math.hypot(player.x-45,player.z+2);
   const hallDetail=player.z>-31&&player.z<21&&Math.abs(player.x)<15;
   if(typeof hallWallsV59!=='undefined')hallWallsV59.visible=hallDetail;
-  if(typeof twinWallV59!=='undefined')twinWallV59.visible=twinD<(lowPower?25:40);
-  if(typeof fitnessWallsV59!=='undefined')fitnessWallsV59.visible=fitD<(lowPower?25:40);
-  if(typeof arenaWallsV59!=='undefined')arenaWallsV59.visible=arenaD<(lowPower?25:40);
+  if(typeof twinWallV59!=='undefined')twinWallV59.visible=twinD<25;
+  if(typeof fitnessWallsV59!=='undefined')fitnessWallsV59.visible=fitD<25;
+  if(typeof arenaWallsV59!=='undefined')arenaWallsV59.visible=arenaD<25;
   if(typeof galleryWallsV59!=='undefined'){
     const nearGallery=inTwinLink(player)||inArenaLink(player)||inFitnessLink(player)||(!inTwinZone(player)&&!inFitnessZone(player)&&!inArenaZone(player)&&player.z<-15);
-    galleryWallsV59.visible=nearGallery||Math.min(twinD,fitD,arenaD)<(lowPower?18:28);
+    galleryWallsV59.visible=nearGallery||Math.min(twinD,fitD,arenaD)<18;
   }
   if(typeof accessArchitectureV62!=='undefined'){
     const nearAccess=inTwinLink(player)||inArenaLink(player)||inFitnessLink(player)||player.z<-14;
-    accessArchitectureV62.visible=nearAccess||Math.min(twinD,fitD,arenaD)<(lowPower?22:34);
+    accessArchitectureV62.visible=nearAccess||Math.min(twinD,fitD,arenaD)<22;
   }
   if(typeof grandFlagshipV61!=='undefined'){
-    grandFlagshipV61.visible=!emergencyPerformance&&(!lowPower||player.z>-30&&player.z<18);
+    grandFlagshipV61.visible=!emergencyPerformance&&player.z>-30&&player.z<18;
   }
   if(typeof destinationTheatreV61!=='undefined'){
     destinationTheatreV61.visible=!emergencyPerformance&&player.z<12&&player.z>-40;
@@ -6115,18 +6111,18 @@ function updateRealismLOD(){
   if(typeof realismLightWashesV60!=='undefined'){
     realismLightWashesV60.visible=!emergencyPerformance;
     hallWashInst.visible=hallDetail;
-    twinWashInst.visible=twinD<(lowPower?23:36);
-    fitWashInst.visible=fitD<(lowPower?23:36);
-    arenaWashInst.visible=arenaD<(lowPower?23:36);
+    twinWashInst.visible=twinD<23;
+    fitWashInst.visible=fitD<23;
+    arenaWashInst.visible=arenaD<23;
   }
   if(living.lightingV631){
     const L=living.lightingV631;
     L.root.visible=!emergencyPerformance;
     L.structural.visible=hallDetail;
     decorativeHallV631.visible=hallDetail;
-    decorativeTwinV631.visible=twinD<(lowPower?22:36);
-    decorativeFitV631.visible=fitD<(lowPower?22:36);
-    decorativeArenaV631.visible=arenaD<(lowPower?22:36);
+    decorativeTwinV631.visible=twinD<22;
+    decorativeFitV631.visible=fitD<22;
+    decorativeArenaV631.visible=arenaD<22;
     L.destination.visible=player.z<8&&player.z>-38&&Math.abs(player.x)<15;
   }
 }
@@ -6157,8 +6153,8 @@ function updateVisibilityBudget(now){
   }
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
-  hallLightGroup.visible=!lowPower&&!emergencyPerformance&&player.z<22&&player.z>-31&&Math.abs(player.x)<15;
-  if(typeof desktopCinematic!=='undefined')desktopCinematic.visible=!lowPower&&!emergencyPerformance&&player.z<21&&player.z>-31;
+  hallLightGroup.visible=false;
+  if(typeof desktopCinematic!=='undefined')desktopCinematic.visible=false;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
   // Structural rooms and destination vistas stay visible; only dense premium detail is distance-budgeted.
   if(typeof twinPremium!=='undefined')twinPremium.visible=Math.hypot(player.x+45,player.z)<52;
@@ -6176,7 +6172,7 @@ function updateVisibilityBudget(now){
     const sameLevel=Math.abs(npc.position.y-player.y)<2;
     const dist=Math.hypot(npc.position.x-player.x,npc.position.z-player.z);
     const allowed=!emergencyPerformance||i<2;
-    npc.visible=allowed&&sameLevel&&dist<68;
+    npc.visible=allowed&&sameLevel&&dist<46;
   });
   living.banners.forEach(banner=>{
     const wp=new THREE.Vector3();banner.getWorldPosition(wp);
@@ -6234,12 +6230,12 @@ function animateLiving(now){
     hallHost.rotation.y=-.38+Math.sin(t*.38)*.08;
     hallHost.position.y=Math.sin(t*.72)*.006;
   }
-  if(!lowPower){journeyRing.rotation.z=t*.18;journeyRing.rotation.y=t*.10;}
-  if(!lowPower)living.trees.forEach((tree,i)=>{
+  if(false){journeyRing.rotation.z=t*.18;journeyRing.rotation.y=t*.10;}
+  if(false)living.trees.forEach((tree,i)=>{
     const sway=Math.sin(t*.42+tree.userData.swayPhase+i*.17);
     tree.rotation.z=sway*.008;tree.rotation.x=Math.cos(t*.36+tree.userData.swayPhase)*.004;
   });
-  if(!lowPower)living.shimmers.forEach((q,i)=>{
+  if(false)living.shimmers.forEach((q,i)=>{
     const travel=((t*.045+q.userData.phase)%1);
     if(!q.userData.v64Local)q.position.z=25.5+travel*29.0;
     else q.position.x=Math.sin(t*.20+i*.8)*.18;
@@ -6296,13 +6292,13 @@ function animateLiving(now){
   if(typeof twinWallGlow!=='undefined')twinWallGlow.opacity=(lowPower?.20:.34)+.07*(.5+.5*Math.sin(t*.33));
   if(typeof fitnessWallGlow!=='undefined')fitnessWallGlow.opacity=(lowPower?.18:.29)+.06*(.5+.5*Math.sin(t*.29));
   if(typeof arenaWallGlow!=='undefined')arenaWallGlow.opacity=(lowPower?.21:.36)+.08*(.5+.5*Math.sin(t*.38));
-  if(living.lifeDisplay&&!lowPower){
+  if(false&&living.lifeDisplay){
     living.lifeDisplay.orbitA.rotation.z=t*.16;
     living.lifeDisplay.orbitB.rotation.x=t*.11;
     living.lifeDisplay.globe.rotation.y=t*.10;
     if(living.lifeDisplay.flagshipCase)living.lifeDisplay.flagshipCase.rotation.y=Math.sin(t*.18)*.08;
   }
-  if(living.kinetic&&!lowPower){
+  if(false&&living.kinetic){
     living.kinetic.a.rotation.z=t*.055;
     living.kinetic.b.rotation.x=t*.041;
     living.kinetic.c.rotation.y=t*.073;
@@ -6315,7 +6311,7 @@ function animateLiving(now){
     grandArmillaryV61.position.y=4.20+Math.sin(t*.34)*.025;
     grandCoreV61.scale.setScalar(.94+.08*(.5+.5*Math.sin(t*.62)));
   }
-  if(typeof destinationTheatreV61!=='undefined'&&!lowPower){
+  if(false&&typeof destinationTheatreV61!=='undefined'){
     destinationTheatreV61.children.forEach((o,i)=>{
       if(o.geometry?.type==='TorusGeometry'){
         o.rotation.z=Math.sin(t*.22+(o.userData.phase||i))*.035;
@@ -6323,7 +6319,7 @@ function animateLiving(now){
       }
     });
   }
-  if(!lowPower&&living.exteriorSculptures?.length){
+  if(false&&living.exteriorSculptures?.length){
     living.exteriorSculptures.forEach((sculpture,i)=>{
       sculpture.a.rotation.z=t*.045+i*.32;
       sculpture.b.rotation.x=t*.038+i*.21;
@@ -6333,7 +6329,7 @@ function animateLiving(now){
   if(living.npcs?.length){
     living.npcs.forEach((npc,i)=>updateNpc(npc,t,i));
   }
-    if(living.banners?.length&&(!lowPower||Math.floor(t*15)%2===0)){
+    if(living.banners?.length&&Math.floor(t*15)%2===0){
     living.banners.forEach((banner,i)=>{
       const pos=banner.geometry.attributes.position,arr=pos.array,base=banner.userData.base,h=banner.userData.height||4;
       for(let k=0;k<arr.length;k+=3){
@@ -6346,7 +6342,7 @@ function animateLiving(now){
       pos.needsUpdate=true;
     });
   }
-  if(!lowPower&&Math.floor(t*8)!==animateLiving.lastScreenBucket){animateLiving.lastScreenBucket=Math.floor(t*8);living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));}
+  if(false&&Math.floor(t*8)!==animateLiving.lastScreenBucket){animateLiving.lastScreenBucket=Math.floor(t*8);living.motionScreens.forEach(screen=>drawMotionScreen(screen,t));}
   if(living.skyDome){
     living.skyDome.position.copy(camera.position);
   }
@@ -6456,7 +6452,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.1.0-oversized-mascot',
+  version:'7.2.0-iphone-parity-populated',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
