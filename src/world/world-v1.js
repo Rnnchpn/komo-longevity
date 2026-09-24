@@ -78,7 +78,7 @@ const retinaMobile=lowPower&&deviceDpr>=2;
 document.documentElement.classList.toggle('low-power',lowPower);
 document.documentElement.classList.toggle('retina-mobile',retinaMobile);
 document.body.classList.toggle('world-mobile-ui',lowPower||innerWidth<=900);
-document.body.classList.toggle('desktop-visual-v5',!lowPower&&innerWidth>900);
+document.body.classList.toggle('desktop-visual-v5',innerWidth>900);
 document.body.classList.add('world-intro-active');
 
 const core=new TwinCore();
@@ -138,7 +138,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=lowPower?1.04:1.22;
+renderer.toneMappingExposure=lowPower?1.17:1.22;
 renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -176,15 +176,15 @@ applyRenderScale();
 
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0xd8ded8);
-scene.fog=new THREE.Fog(0xd4d9d1,lowPower?92:82,lowPower?245:270);
+scene.fog=new THREE.Fog(0xd4d9d1,82,270);
 
-const camera=new THREE.PerspectiveCamera(lowPower?60:54,innerWidth/innerHeight,.12,420);
+const camera=new THREE.PerspectiveCamera(54,innerWidth/innerHeight,.12,420);
 camera.position.set(0,1.72,58);
 
 // V6.3.1 structural lighting: directional architecture first, ambient fill second.
-const hemi=new THREE.HemisphereLight(0xf7f3ea,0x657268,lowPower?1.82:2.18);
+const hemi=new THREE.HemisphereLight(0xf7f3ea,0x657268,lowPower?2.06:2.18);
 scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffe9cf,lowPower?3.10:3.65);
+const sun=new THREE.DirectionalLight(0xffe9cf,lowPower?3.48:3.65);
 sun.position.set(-24,38,32);
 sun.castShadow=true;
 if(sun.castShadow){
@@ -193,9 +193,9 @@ if(sun.castShadow){
   sun.shadow.camera.near=1;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;
 }
 scene.add(sun);
-const fill=new THREE.DirectionalLight(0xe7eee9,lowPower?.14:.72);
+const fill=new THREE.DirectionalLight(0xe7eee9,lowPower?.30:.72);
 fill.position.set(28,18,-30);scene.add(fill);
-const hallAmbient=new THREE.AmbientLight(0xfff5ea,lowPower?.12:.24);scene.add(hallAmbient);
+const hallAmbient=new THREE.AmbientLight(0xfff5ea,lowPower?.20:.24);scene.add(hallAmbient);
 const hallLightGroup=new THREE.Group();hallLightGroup.name='KOMO_HALL_LIGHTING_V43';scene.add(hallLightGroup);
 const hallLights=[];
 const hallLightProfile={day:[],morning:[],golden:[],evening:[]};
@@ -1583,9 +1583,7 @@ function heroTreeV64(x,z,scale=1,spread=1){
     [[.05,3.8,0],[.65,5.50,-1.15],.14],[[-.05,3.75,0],[-.75,5.35,1.05],.14]
   ];
   branches.forEach(([a,b,r])=>bodySegment(g,a,b,r,campusTrunkV64));
-  const crowns=lowPower?[
-    [0,5.75,0,1.85],[1.55,5.55,.15,1.35],[-1.45,5.45,-.10,1.30]
-  ]:[
+  const crowns=[
     [0,5.85,0,1.80],[1.55,5.55,.15,1.35],[-1.45,5.45,-.10,1.30],
     [.65,5.90,-1.15,1.15],[-.70,5.80,1.00,1.10],[.10,6.50,.15,1.00]
   ];
@@ -1595,9 +1593,7 @@ function heroTreeV64(x,z,scale=1,spread=1){
   });
   g.userData.swayPhase=(x*.73+z*.41);living.trees.push(g);return g;
 }
-const heroTreeSpecsV64=lowPower?[
-  [-11.8,9.2,.92,1.0],[11.8,9.8,.90,1.0],[-25.6,32.5,1.18,1.05],[25.4,34.0,1.14,1.05],[-26.5,67.5,1.08,1.0],[26.8,69.0,1.12,1.02]
-]:[
+const heroTreeSpecsV64=[
   [-11.8,8.8,1.02,1.04],[11.8,9.6,1.00,1.04],[-14.8,18.2,1.10,1.06],[14.8,19.0,1.08,1.06],
   [-25.6,32.5,1.30,1.10],[25.4,34.0,1.24,1.08],[-28.2,52.0,1.16,1.06],[28.0,53.5,1.18,1.05],
   [-26.5,67.5,1.18,1.05],[26.8,69.0,1.22,1.08],[-19.5,87.5,1.04,1.0],[19.5,87.5,1.04,1.0]
@@ -1608,22 +1604,20 @@ heroTreeSpecsV64.forEach(v=>heroTreeV64(...v));
 const cypressTrunksV64=[],cypressCrownsV64=[],pineTrunksV64=[],pineCrownsV64=[],shrubItemsV64=[];
 [-1,1].forEach(side=>{
   const zs=[25,33,41,49,57,65,73,81,89];
-  zs.slice(0,lowPower?6:zs.length).forEach((z,i)=>{
+  zs.forEach((z,i)=>{
     const x=side*(20.5+(i%2)*1.8);
     cypressTrunksV64.push({x,y:1.6,z,sx:.16,sy:3.2,sz:.16});
     cypressCrownsV64.push({x,y:4.2,z,sx:.72+(i%3)*.08,sy:3.35+(i%2)*.35,sz:.72+(i%3)*.08});
   });
 });
-const pineSpecsV64=lowPower?[
-  [-29,42,1.0], [29,44,1.0],[-28,76,.92],[28,77,.92]
-]:[
+const pineSpecsV64=[
   [-30,40,1.08],[30,42,1.06],[-31,58,1.00],[31,59,1.02],[-29,76,.98],[29,77,.98],[-11,91,.90],[11,91,.90]
 ];
 pineSpecsV64.forEach(([x,z,sc],i)=>{
   pineTrunksV64.push({x,y:1.55,z,sx:.20*sc,sy:3.1*sc,sz:.20*sc});
   pineCrownsV64.push({x,y:4.30*sc,z,sx:2.05*sc,sy:.76*sc,sz:1.85*sc,ry:i*.67});
 });
-const shrubCountV64=lowPower?18:44;
+const shrubCountV64=44;
 for(let i=0;i<shrubCountV64;i++){
   const side=i%2?-1:1,band=Math.floor(i/2)%4;
   const z=26+(i%11)*5.8;
@@ -1657,16 +1651,14 @@ const pavilionLongevityV64=campusPavilionV64(30.5,43.0,11.8,18.0,'LONGEVITY','SC
 const pavilionCommunityV64=campusPavilionV64(-30.0,69.5,10.8,14.5,'COMMUNITY LOUNGE','MEET · CONNECT · RECOVER',1);
 const pavilionRecoveryV64=campusPavilionV64(30.0,69.5,10.8,14.5,'RECOVERY HOUSE','REST · RESET · RESTORE',1);
 
-// V6.5 Arrival Presence — readable architecture in the very first desktop frame.
-if(!lowPower){
-  campusPavilionV64(-17.8,14.0,7.8,8.8,'MOTION HOUSE','MEASURE · MOVE',1);
-  campusPavilionV64(17.8,14.0,7.8,8.8,'LONGEVITY LAB','SCIENCE · LIVE',1);
-  [-1,1].forEach(side=>{
-    const x=side*8.7;
-    box(livingCampusV64,.10,.035,19.0,MAT.brass,x,.035,10.5,{cast:false,receive:false});
-    box(livingCampusV64,1.10,.020,19.0,campusInteriorGlowV64,side*6.7,.028,10.5,{cast:false,receive:false});
-  });
-}
+// V6.9 Visual parity — arrival architecture is identical on desktop and mobile.
+campusPavilionV64(-17.8,14.0,7.8,8.8,'MOTION HOUSE','MEASURE · MOVE',1);
+campusPavilionV64(17.8,14.0,7.8,8.8,'LONGEVITY LAB','SCIENCE · LIVE',1);
+[-1,1].forEach(side=>{
+  const x=side*8.7;
+  box(livingCampusV64,.10,.035,19.0,MAT.brass,x,.035,10.5,{cast:false,receive:false});
+  box(livingCampusV64,1.10,.020,19.0,campusInteriorGlowV64,side*6.7,.028,10.5,{cast:false,receive:false});
+});
 
 // Side water mirrors and rear reflecting court anchor architecture in the landscape.
 function waterMirrorV64(x,z,w,d){
@@ -1681,7 +1673,7 @@ function waterMirrorV64(x,z,w,d){
   return g;
 }
 waterMirrorV64(-24.6,45.0,5.4,24.0);waterMirrorV64(24.6,45.0,5.4,24.0);
-if(!lowPower){waterMirrorV64(-10.6,13.5,2.4,9.6);waterMirrorV64(10.6,13.5,2.4,9.6);}
+waterMirrorV64(-10.6,13.5,2.4,9.6);waterMirrorV64(10.6,13.5,2.4,9.6);
 waterMirrorV64(0,89.2,18.0,7.2);
 
 // Rear longevity terrace and stylised waterfall create a destination-scale backdrop.
@@ -1710,9 +1702,7 @@ const campusCrowdV64=new THREE.Group();campusCrowdV64.name='KOMO_AMBIENT_CROWD_I
 const crowdBodyMatV64=new THREE.MeshStandardMaterial({color:0x26372f,roughness:.82,metalness:0});
 const crowdHeadMatV64=new THREE.MeshStandardMaterial({color:0xa9795e,roughness:.86,metalness:0});
 const crowdBodyItemsV64=[],crowdHeadItemsV64=[];
-const crowdSpotsV64=lowPower?[
-  [-20,30], [20,31],[-15,66],[15,66],[-8,82],[8,82]
-]:[
+const crowdSpotsV64=[
   [-20,29],[-17,34],[-21,47],[20,30],[17,35],[21,48],
   [-13,61],[-16,68],[-11,73],[13,61],[16,68],[11,73],
   [-8,82],[-4,84],[4,84],[8,82],[-23,76],[23,76],
@@ -1745,7 +1735,7 @@ const wayfindingV68=new THREE.Group();wayfindingV68.name='KOMO_MASTERPLAN_WAYFIN
 const landscapeV68=new THREE.Group();landscapeV68.name='KOMO_RIVIERA_LANDSCAPE_V68';masterplanV68.add(landscapeV68);
 living.masterplanV68={root:masterplanV68,marina:marinaV68,marinaDetail:marinaDetailV68,villa:villaV68,villaDetail:villaDetailV68,landscape:landscapeV68};
 
-const v68Warm=new THREE.MeshBasicMaterial({color:0xe7c98f,transparent:true,opacity:lowPower?.24:.44,depthWrite:false});
+const v68Warm=new THREE.MeshBasicMaterial({color:0xe7c98f,transparent:true,opacity:lowPower?.36:.44,depthWrite:false});
 const v68Sea=new THREE.MeshStandardMaterial({color:0x7fa0a0,roughness:.20,metalness:.025,transparent:true,opacity:.94});
 const v68SeaDeep=new THREE.MeshStandardMaterial({color:0x557475,roughness:.28,metalness:.025});
 const v68YachtWhite=new THREE.MeshStandardMaterial({color:0xedece7,roughness:.28,metalness:.025});
@@ -1765,7 +1755,7 @@ function masterplanSignV68(parent,x,z,title,sub,rotY=0){
 function oliveTreeV68(parent,x,z,scale=1){
   const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);parent.add(g);
   cyl(g,.21,.31,3.35,campusTrunkV64,0,1.67,0,9,{cast:!lowPower});
-  [[0,3.90,0,1.46],[.92,3.72,.15,.96],[-.88,3.73,-.12,.92],[.32,4.28,-.64,.76],[-.38,4.20,.60,.74]].slice(0,lowPower?3:5).forEach(([cx,cy,cz,s],i)=>{
+  [[0,3.90,0,1.46],[.92,3.72,.15,.96],[-.88,3.73,-.12,.92],[.32,4.28,-.64,.76],[-.38,4.20,.60,.74]].forEach(([cx,cy,cz,s],i)=>{
     const crown=mesh(g,campusCrownGeoV64,i%2?v68Olive:campusGreenSoftV64,cx,cy,cz,{cast:!lowPower});
     crown.scale.set(s*1.34,s*.68,s*1.04);
   });
@@ -1807,7 +1797,7 @@ box(wayfindingV68,74,.030,1.10,v68Warm,0,.135,67.8,{cast:false,receive:false});
 [-34,-26,-18,18,26,34].forEach((x,i)=>{
   exteriorBollard(wayfindingV68,x,64.7,.70);
   exteriorBollard(wayfindingV68,x,70.9,.70);
-  if(!lowPower&&i%2===0)oliveTreeV68(wayfindingV68,x,74.8,.68);
+  if(i%2===0)oliveTreeV68(wayfindingV68,x,74.8,.68);
 });
 gatewayPergolaV68(wayfindingV68,35.2,67.8,'MARINA',Math.PI/2);
 gatewayPergolaV68(wayfindingV68,-35.2,67.8,'RETREAT VILLA',-Math.PI/2);
@@ -1873,7 +1863,7 @@ plaque(marinaClubV68,'YACHTING HOUSE','PRIVATE EXPERIENCE · HOSPITALITY',6.9,.8
 });
 yachtV68(marinaV68,79.0,49.6,19,Math.PI/2,'MOTION I');
 yachtV68(marinaV68,81.0,65.5,27,Math.PI/2,'KŌMØ ONE');
-if(!lowPower)yachtV68(marinaV68,79.5,81.2,21,Math.PI/2,'RIVIERA');
+yachtV68(marinaV68,79.5,81.2,21,Math.PI/2,'RIVIERA');
 
 // Harbor edge / horizon marker.
 box(marinaV68,30,.42,2.5,MAT.limestone,91.0,.21,31.0,{cast:true});
@@ -1971,7 +1961,7 @@ bannerTotem(villaDetailV68,-34.0,73.5,'PRIVATE','RETREAT',Math.PI/2);
 [
   [-73,46,.80],[-69,50,.76],[-74,71,.86],[-70,91,.78],[-63,95,.80],
   [-48,95,.78],[-37,91,.76],[-34,48,.76],[-40,44,.80],[-62,44,.74]
-].slice(0,lowPower?6:10).forEach(v=>oliveTreeV68(villaDetailV68,...v));
+].forEach(v=>oliveTreeV68(villaDetailV68,...v));
 [-72,-64,-56,-48,-40,-34].forEach((x,i)=>exteriorBollard(villaDetailV68,x,67.2+(i%2?2.3:-2.3),.68));
 
 // Territorial labels remain visible from the cross-axis.
@@ -4048,7 +4038,7 @@ const player=new THREE.Vector3(0,0,14.55);
 const velocity=new THREE.Vector3();
 let playerLevel=0;
 let cameraMode='third';
-let thirdPersonDistance=lowPower?4.15:5.35;
+let thirdPersonDistance=5.35;
 const playerAvatar=makePlayerAvatar();
 let playerFacing=0;
 const cameraDesired=new THREE.Vector3(),cameraLook=new THREE.Vector3();
@@ -5638,11 +5628,11 @@ function updateCamera(now,dt){
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
     const runAmount=THREE.MathUtils.clamp(velocity.length()/AUTO_RUN_SPEED,0,1);
-    const desiredFov=(lowPower?58:50)+(lowPower?1.3:2.4)*runAmount;
+    const desiredFov=50+2.4*runAmount;
     if(Math.abs(camera.fov-desiredFov)>.01){camera.fov+= (desiredFov-camera.fov)*(1-Math.exp(-6*dt));camera.updateProjectionMatrix()}
     const distance=thirdPersonDistance+(lowPower?.10:.34)*runAmount;
-    const height=(lowPower?2.25:2.72)+.05*runAmount;
-    const shoulder=lowPower?.18:.22;
+    const height=2.72+.05*runAmount;
+    const shoulder=.22;
     cameraDesired.set(
       player.x+Math.sin(yaw)*distance+Math.cos(yaw)*shoulder,
       player.y+visualGround+height+pitch*1.08,
@@ -6086,23 +6076,22 @@ function updateVisibilityBudget(now){
   // Coarse occlusion/distance budget: do not draw whole zones when they cannot contribute.
   const deepHall=player.z<7;
   exterior.visible=player.z>5;
-  if(living.district)living.district.visible=!lowPower||player.z>24;
+  if(living.district)living.district.visible=true;
   if(living.atmosphereV632)living.atmosphereV632.visible=!emergencyPerformance;
-  if(typeof arrivalHeroV632!=='undefined')arrivalHeroV632.visible=!emergencyPerformance&&(!lowPower||player.z>4);
+  if(typeof arrivalHeroV632!=='undefined')arrivalHeroV632.visible=!emergencyPerformance;
   if(living.livingCampusV64){
-    const campusNear=!lowPower||player.z>4||camera.position.z>8;
-    living.livingCampusV64.visible=!emergencyPerformance&&campusNear;
-    campusCrowdV64.visible=!lowPower||player.z>34;
-    rearTerraceV64.visible=!lowPower||player.z>44;
+    living.livingCampusV64.visible=!emergencyPerformance;
+    campusCrowdV64.visible=!emergencyPerformance;
+    rearTerraceV64.visible=!emergencyPerformance;
   }
   if(living.masterplanV68){
     const M=living.masterplanV68;
     M.root.visible=true;
     const marinaNear=Math.hypot(player.x-56,player.z-63)<74;
     const villaNear=Math.hypot(player.x+54,player.z-69)<74;
-    M.marinaDetail.visible=!emergencyPerformance&&(!lowPower||marinaNear);
-    M.villaDetail.visible=!emergencyPerformance&&(!lowPower||villaNear);
-    M.landscape.visible=!emergencyPerformance||!lowPower;
+    M.marinaDetail.visible=!emergencyPerformance;
+    M.villaDetail.visible=!emergencyPerformance;
+    M.landscape.visible=!emergencyPerformance;
   }
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
@@ -6119,22 +6108,22 @@ function updateVisibilityBudget(now){
   living.trees.forEach(tree=>{
     const wp=new THREE.Vector3();tree.getWorldPosition(wp);
     const hero=tree.name==='KOMO_HERO_TREE_V64';
-    tree.visible=wp.distanceTo(camera.position)<(hero?(lowPower?58:130):(lowPower?34:96));
+    tree.visible=wp.distanceTo(camera.position)<(hero?130:96);
   });
   living.npcs.forEach((npc,i)=>{
     const sameLevel=Math.abs(npc.position.y-player.y)<2;
     const dist=Math.hypot(npc.position.x-player.x,npc.position.z-player.z);
     const allowed=!emergencyPerformance||i<2;
-    npc.visible=allowed&&sameLevel&&dist<(lowPower?22:68);
+    npc.visible=allowed&&sameLevel&&dist<68;
   });
   living.banners.forEach(banner=>{
     const wp=new THREE.Vector3();banner.getWorldPosition(wp);
-    banner.visible=wp.distanceTo(camera.position)<(lowPower?46:96);
+    banner.visible=wp.distanceTo(camera.position)<96;
   });
   living.motionScreens.forEach(screen=>{
     const mesh=screen.mesh||screen;
     if(mesh?.getWorldPosition){
-      const wp=new THREE.Vector3();mesh.getWorldPosition(wp);mesh.visible=wp.distanceTo(camera.position)<(lowPower?30:62);
+      const wp=new THREE.Vector3();mesh.getWorldPosition(wp);mesh.visible=wp.distanceTo(camera.position)<62;
     }
   });
 }
@@ -6405,7 +6394,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'6.8.0-compact-riviera-estate',
+  version:'6.9.0-cross-device-parity',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
