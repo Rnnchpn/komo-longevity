@@ -1784,3 +1784,25 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   .world-brand strong{font-size:18px!important}
   .world-hud{left:7px!important;right:7px!important}
 }
+
+
+/* V7.4 Library + Roofs + Global Design Pass */
+.world-quick-nav button[data-nav-zone="library"]{
+  border-color:rgba(214,190,143,.22);
+  background:linear-gradient(180deg,rgba(218,193,145,.085),rgba(255,255,255,.018));
+}
+.world-quick-nav button[data-nav-zone="library"] i{color:#dcc28f}
+.world-destinations button[data-destination="library"]{
+  border-color:rgba(214,190,143,.20);
+  background:linear-gradient(135deg,rgba(214,190,143,.075),rgba(255,255,255,.018));
+}
+@media(max-width:520px){
+  /* Keep Library reachable in one tap on iPhone while preserving the compact HUD. */
+  .world-quick-nav{
+    display:grid;
+    width:154px;
+    grid-template-columns:repeat(2,1fr);
+    bottom:calc(var(--safe-bottom) + 132px);
+  }
+  .world-quick-nav button[data-nav-zone="upper"]{display:none}
+}
