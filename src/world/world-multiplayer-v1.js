@@ -1000,9 +1000,17 @@ export async function mount(runtime){
   };
   const openPulse=()=>{
     const url=PULSE_ORIGIN+'/?world_bridge=1&world_origin='+encodeURIComponent(location.origin);
+    try{
+      if(state.popup&&!state.popup.closed){state.popup.focus?.();return true}
+    }catch{}
     state.popup=window.open(url,'komoPulseWorldBridge','popup=yes,width=520,height=760,resizable=yes,scrollbars=yes');
-    if(!state.popup)runtime.notify?.('Autorisez la fenêtre Pulse pour connecter World');
-    return !!state.popup;
+    if(!state.popup){
+      const message='Autorisez la fenêtre Pulse pour connecter World';
+      runtime.notify?.(message);
+      window.dispatchEvent(new CustomEvent('komo:world-auth-error',{detail:{mode:'pulse',message}}));
+      return false;
+    }
+    return true;
   };
   const connectPulse=async()=>{
     const {data}=await client.auth.getSession();
@@ -1012,7 +1020,7 @@ export async function mount(runtime){
       if(ok)emitSessionReady('pulse');
       return ok;
     }
-    openPulse();return null;
+    return openPulse()?'pending':false;
   };
   const startLocalGuest=async(name,reason='')=>{
     if(state.started)await resetLiveLayer({deletePresence:true});
