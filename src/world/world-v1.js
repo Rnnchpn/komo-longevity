@@ -5389,7 +5389,8 @@ function enterWorldAfterAuth(detail={}){
   intro.classList.add('hidden');
   document.body.classList.remove('world-intro-active');
   targetYaw=yaw;targetPitch=pitch;completeJourney('arrival');
-  const mode=detail.mode==='guest'?(locale==='fr'?'Invité':'Guest'):'Pulse';
+  const guestMode=String(detail.mode||'').startsWith('guest');
+  const mode=guestMode?(locale==='fr'?'Invité':'Guest'):'Pulse';
   notify((locale==='fr'?'Bienvenue dans KŌMØ World · ':'Welcome to KŌMØ World · ')+mode);
 }
 function waitForWorldMultiplayer(timeout=6500){
@@ -5406,35 +5407,57 @@ window.addEventListener('komo:world-auth-error',event=>{
   setIntroAuthBusy(false);setIntroAuthStatus(message,true);
 });
 
-introPulse?.addEventListener('click',async()=>{
+introPulse?.addEventListener('click',()=>{
   setIntroAuthStatus(locale==='fr'?'Connexion à Pulse…':'Connecting to Pulse…');setIntroAuthBusy(true);
-  try{
-    const api=await waitForWorldMultiplayer();
-    const result=await api.connectPulse();
-    if(result===true)return;
-    if(result==='pending'){
-      setIntroAuthStatus(locale==='fr'?'Pulse est ouvert. Connectez-vous puis revenez dans World.':'Pulse is open. Sign in, then return to World.');
-      setTimeout(()=>setIntroAuthBusy(false),1100);return;
+
+  // Never await before opening Pulse: the popup must stay inside the native user gesture.
+  const api=window.KomoWorldMultiplayer;
+  if(api?.connectPulse){
+    try{
+      const result=api.connectPulse();
+      Promise.resolve(result).then(value=>{
+        if(value===true)return;
+        if(value==='pending'){
+          setIntroAuthStatus(locale==='fr'?'Pulse est ouvert. Connectez-vous : World se connectera automatiquement.':'Pulse is open. Sign in and World will connect automatically.');
+          setTimeout(()=>setIntroAuthBusy(false),1100);return;
+        }
+        setIntroAuthBusy(false);
+        setIntroAuthStatus(locale==='fr'?'La fenêtre Pulse a été bloquée. Autorisez les fenêtres puis réessayez.':'The Pulse window was blocked. Allow pop-ups and try again.',true);
+      }).catch(err=>{setIntroAuthBusy(false);setIntroAuthStatus(err?.message||'Connexion Pulse impossible.',true)});
+      return;
+    }catch(err){
+      setIntroAuthBusy(false);setIntroAuthStatus(err?.message||'Connexion Pulse impossible.',true);return;
     }
-    throw new Error(locale==='fr'?'La fenêtre Pulse a été bloquée par le navigateur. Autorisez les fenêtres puis réessayez.':'The Pulse window was blocked. Allow pop-ups and try again.');
-  }catch(err){
-    setIntroAuthBusy(false);setIntroAuthStatus(err?.message||(locale==='fr'?'Connexion Pulse impossible.':'Pulse connection failed.'),true);
   }
+
+  // Multiplayer module is not ready yet: open Pulse synchronously anyway, then let the bridge retry until ACK.
+  const popup=window.open(
+    'https://pulse.komolongevity.com/?world_bridge=1&world_origin='+encodeURIComponent(location.origin),
+    'komoPulseWorldBridge',
+    'popup=yes,width=520,height=760,resizable=yes,scrollbars=yes'
+  );
+  if(!popup){
+    setIntroAuthBusy(false);
+    setIntroAuthStatus(locale==='fr'?'La fenêtre Pulse a été bloquée. Autorisez les fenêtres puis réessayez.':'The Pulse window was blocked. Allow pop-ups and try again.',true);
+    return;
+  }
+  setIntroAuthStatus(locale==='fr'?'Pulse est ouvert. Connectez-vous : World se connectera automatiquement.':'Pulse is open. Sign in and World will connect automatically.');
+  waitForWorldMultiplayer().catch(()=>{});
+  setTimeout(()=>setIntroAuthBusy(false),1100);
 });
 
-$('#intro-enter').addEventListener('click',async()=>{
+$('#intro-enter').addEventListener('click',()=>{
   const name=(introGuestName?.value||'').trim().slice(0,24)||defaultGuestName();
   if(introGuestName)introGuestName.value=name;
   localStorage.setItem('komo_world_guest_name',name);
-  setIntroAuthBusy(true);setIntroAuthStatus(locale==='fr'?'Connexion au World multijoueur…':'Joining multiplayer World…');
-  try{
-    const api=await waitForWorldMultiplayer();
-    const ok=await api.connectGuest(name);
-    if(!ok)throw new Error(locale==='fr'?'Connexion invité impossible.':'Guest connection failed.');
-  }catch(err){
-    setIntroAuthBusy(false);
-    setIntroAuthStatus(err?.message||(locale==='fr'?'Connexion invité impossible.':'Guest connection failed.'),true);
-  }
+
+  // Guest access is never blocked by Auth or multiplayer availability.
+  enterWorldAfterAuth({mode:'guest-local',display_name:name});
+
+  // Upgrade silently to authenticated anonymous multiplayer when available.
+  waitForWorldMultiplayer(12000).then(api=>api.connectGuest(name)).then(ok=>{
+    if(ok)notify(locale==='fr'?'Mode multijoueur connecté.':'Multiplayer connected.');
+  }).catch(err=>console.warn('[World guest background connect]',err));
 });
 $('#panel-close').addEventListener('click',closePanel);
 worldMenuToggle.addEventListener('click',toggleWorldMenu);
