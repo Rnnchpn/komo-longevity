@@ -2396,8 +2396,13 @@ const destinationVestibules=new THREE.Group();destinationVestibules.name='KOMO_D
   box(g,4.28,.018,.055,accentMat,0,.435,.73,{cast:false,receive:false});
 });
 
-// Destination wall — three monumental thresholds rather than flat doors.
-box(building,22.7,7.2,.42,M.sageDeep,0,4.0,-30.0);
+// V5.7 Open Atrium — the destination wall is physically perforated so each universe reads from the Hall.
+const destinationWallOpen=new THREE.Group();destinationWallOpen.name='KOMO_OPEN_ATRIUM_WALL_V57';building.add(destinationWallOpen);
+box(destinationWallOpen,22.7,1.15,.46,M.sageDeep,0,7.08,-30.0,{cast:true});
+box(destinationWallOpen,1.20,6.10,.46,M.sageDeep,-10.75,3.56,-30.0,{cast:true});
+box(destinationWallOpen,1.20,6.10,.46,M.sageDeep,10.75,3.56,-30.0,{cast:true});
+[-3.42,3.42].forEach(x=>box(destinationWallOpen,1.02,6.10,.46,M.sageDeep,x,3.56,-30.0,{cast:true}));
+box(destinationWallOpen,22.0,.08,.16,MAT.brass,0,6.46,-29.76,{cast:false,receive:false});
 [-7.0,0,7.0].forEach((x,i)=>{
   box(building,.24,6.45,.78,i===1?MAT.travertine:MAT.limestone,x-2.40,3.48,-29.30,{cast:true});
   box(building,.24,6.45,.78,i===1?MAT.travertine:MAT.limestone,x+2.40,3.48,-29.30,{cast:true});
@@ -2411,12 +2416,71 @@ const portals=[
   {x:6.8,title:'ARENA',sub:'ENGAGE',dark:true}
 ];
 portals.forEach(({x,title,sub,dark})=>{
-  box(building,4.9,5.8,.34,dark?M.sage:M.stone,x,3.15,-29.62);
-  box(building,4.15,4.65,.10,dark?M.glass:M.stoneLight,x,2.85,-29.38);
+  // No opaque slab: only a deep frame, so the illuminated destination remains visible through the threshold.
+  box(building,.22,5.25,.56,dark?M.sage:M.stone,x-2.32,3.03,-29.56,{cast:true});
+  box(building,.22,5.25,.56,dark?M.sage:M.stone,x+2.32,3.03,-29.56,{cast:true});
+  box(building,4.86,.24,.56,dark?M.sage:M.stone,x,5.54,-29.56,{cast:true});
   box(building,.08,4.9,.10,M.bronze,x-2.16,2.95,-29.29);
   box(building,.08,4.9,.10,M.bronze,x+2.16,2.95,-29.29);
   plaque(building,title,sub,4.2,1.05,x,6.28,-29.25,{dark,titleSize:title==='FUNCTIONAL TWIN'?58:70});
 });
+
+// V5.7 Destination Vistas — each room has a living sightline before the player crosses the threshold.
+const destinationVistas=new THREE.Group();destinationVistas.name='KOMO_DESTINATION_VISTAS_V57';building.add(destinationVistas);
+const twinVistaRings=[],fitVistaMarkers=[],arenaVistaRings=[],portalActors=[];
+const vistaCool=new THREE.MeshBasicMaterial({color:0xc9ddd0,transparent:true,opacity:lowPower?.30:.48,depthWrite:false});
+const vistaWarm=new THREE.MeshBasicMaterial({color:0xe1bd7f,transparent:true,opacity:lowPower?.34:.56,depthWrite:false});
+const vistaArena=new THREE.MeshBasicMaterial({color:0xc99a5e,transparent:true,opacity:lowPower?.36:.62,depthWrite:false});
+function portalActor(parent,x,z,accent=0xd8b679,phase=0){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  const bodyMat=new THREE.MeshStandardMaterial({color:0x26362e,roughness:.76,metalness:.02});
+  const skinMat=new THREE.MeshStandardMaterial({color:0xc99e7b,roughness:.82});
+  const accentMat=new THREE.MeshBasicMaterial({color:accent,transparent:true,opacity:.40,depthWrite:false});
+  cyl(g,.16,.19,1.10,bodyMat,0,1.22,0,10,{cast:false});
+  mesh(g,new THREE.SphereGeometry(.18,12,9),skinMat,0,1.94,0,{cast:false});
+  [-.18,.18].forEach(xx=>cyl(g,.055,.065,.84,bodyMat,xx,.50,0,8,{cast:false}));
+  const ring=mesh(g,new THREE.RingGeometry(.28,.31,24),accentMat,0,.10,0,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;
+  g.userData.phase=phase;portalActors.push(g);return g;
+}
+function vistaTunnel(x,accentMat,kind){
+  const g=new THREE.Group();g.position.set(x,0,-34.3);destinationVistas.add(g);
+  box(g,4.35,.035,8.2,kind==='fitness'?FLOOR.promenade:FLOOR.side,0,.39,-.6,{cast:false,receive:true});
+  [-2.12,2.12].forEach(px=>{
+    box(g,.08,4.65,8.1,MAT.blackened,px,2.72,-.6,{cast:false,receive:false});
+    box(g,.025,3.80,7.7,accentMat,px*.995,2.62,-.6,{cast:false,receive:false});
+  });
+  box(g,4.25,.08,8.0,MAT.blackened,0,5.18,-.6,{cast:false,receive:false});
+  [-1.55,0,1.55].forEach(px=>box(g,1.10,.018,6.8,accentMat,px,5.12,-.7,{cast:false,receive:false}));
+  return g;
+}
+const twinVista=vistaTunnel(-6.8,vistaCool,'twin');
+for(let i=0;i<4;i++){
+  const r=mesh(twinVista,new THREE.TorusGeometry(.66+i*.10,.025,8,44),i%2?vistaWarm:vistaCool,0,2.35,-1.0-i*1.25,{cast:false,receive:false});
+  r.rotation.x=Math.PI/2;r.userData.phase=i*.75;twinVistaRings.push(r);
+}
+plaque(twinVista,'BODY / TIME','FUNCTIONAL TWIN',3.15,.62,0,4.35,-4.28,{dark:true,titleSize:38});
+portalActor(twinVista,-.72,-2.55,0xb9cfbf,.4);
+
+const fitVista=vistaTunnel(0,vistaWarm,'fitness');
+for(let i=0;i<7;i++){
+  const marker=box(fitVista,.56,.025,.12,i%2?vistaCool:vistaWarm,(i%3-1)*1.05,.45,2.55-i*.98,{cast:false,receive:false});
+  marker.userData.baseZ=marker.position.z;marker.userData.phase=i*.83;fitVistaMarkers.push(marker);
+}
+const fitRig=new THREE.Group();fitRig.position.set(0,0,-2.8);fitVista.add(fitRig);
+[-.82,.82].forEach(px=>box(fitRig,.08,2.25,.08,MAT.blackened,px,1.50,0,{cast:false}));
+box(fitRig,1.74,.07,.07,MAT.brass,0,2.55,0,{cast:false});
+box(fitRig,1.58,.10,.50,MAT.leatherDark,0,.61,.52,{cast:false});
+plaque(fitVista,'OPEN CLUB','MOVE · TRAIN · RECOVER',3.25,.62,0,4.35,-4.28,{dark:false,titleSize:38});
+portalActor(fitVista,.72,-2.25,0xd7b777,1.4);
+
+const arenaVista=vistaTunnel(6.8,vistaArena,'arena');
+for(let i=0;i<3;i++){
+  const r=mesh(arenaVista,new THREE.RingGeometry(.72+i*.44,.76+i*.44,48),i===1?vistaWarm:vistaArena,0,.44,-1.35-i*.98,{cast:false,receive:false});
+  r.rotation.x=-Math.PI/2;r.userData.phase=i*.88;arenaVistaRings.push(r);
+}
+box(arenaVista,3.35,1.55,.12,MAT.blackened,0,3.24,-4.20,{cast:false});
+plaque(arenaVista,'LIVE','DAILY · XP · COMMUNITY',3.10,.70,0,3.30,-4.12,{dark:true,titleSize:46});
+portalActor(arenaVista,-.68,-2.20,0xb9935c,2.2);
 
 // V3.2 Destination Doors — clear, animated thresholds for Twin / Fitness / Arena.
 [
@@ -4735,6 +4799,11 @@ function updateVisibilityBudget(now){
   hallLightGroup.visible=!lowPower&&!emergencyPerformance&&player.z<22&&player.z>-31&&Math.abs(player.x)<15;
   if(typeof desktopCinematic!=='undefined')desktopCinematic.visible=!lowPower&&!emergencyPerformance&&player.z<21&&player.z>-31;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
+  // Structural rooms and destination vistas stay visible; only dense premium detail is distance-budgeted.
+  if(typeof twinPremium!=='undefined')twinPremium.visible=Math.hypot(player.x+45,player.z)<52;
+  if(typeof fitPremium!=='undefined')fitPremium.visible=Math.hypot(player.x,player.z+55)<52;
+  if(typeof arenaPremium!=='undefined')arenaPremium.visible=Math.hypot(player.x-45,player.z)<52;
+  destinationVistas.visible=player.z<3&&player.z>-35&&Math.abs(player.x)<14;
   arrivalDetails.visible=player.z>1&&player.z<26;
   npcRoot.visible=true;
   living.trees.forEach(tree=>{
@@ -4809,6 +4878,32 @@ function animateLiving(now){
     living.dust.rotation.y=Math.sin(t*.04)*.035;
     living.dust.position.y=Math.sin(t*.18)*.04;
     living.dust.material.opacity=.14+.06*(.5+.5*Math.sin(t*.23));
+  }
+  if(twinVistaRings?.length){
+    twinVistaRings.forEach((ring,i)=>{
+      ring.rotation.z=t*(i%2?.17:-.14)+(ring.userData.phase||0);
+      const p=1+.05*Math.sin(t*.92+i*.8);ring.scale.setScalar(p);
+    });
+  }
+  if(fitVistaMarkers?.length){
+    fitVistaMarkers.forEach((marker,i)=>{
+      const travel=((t*.34+i*.13)%1);
+      marker.position.z=2.55-travel*5.9;
+      marker.material.opacity=.30+.32*(.5+.5*Math.sin(t*1.5+i));
+    });
+  }
+  if(arenaVistaRings?.length){
+    arenaVistaRings.forEach((ring,i)=>{
+      const pulse=1+.055*Math.sin(t*1.25+i*.9);
+      ring.scale.setScalar(pulse);ring.rotation.z=t*(i%2?.10:-.08);
+      ring.material.opacity=.30+.28*(.5+.5*Math.sin(t*.85+i));
+    });
+  }
+  if(portalActors?.length){
+    portalActors.forEach((actor,i)=>{
+      actor.position.y=Math.sin(t*.72+(actor.userData.phase||i))*.018;
+      actor.rotation.y=.18*Math.sin(t*.30+i*.8);
+    });
   }
   if(living.lifeDisplay&&!lowPower){
     living.lifeDisplay.orbitA.rotation.z=t*.16;
@@ -4943,7 +5038,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.6.0-open-premium-rooms',
+  version:'5.7.0-living-campus',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
