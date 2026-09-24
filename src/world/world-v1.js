@@ -2926,6 +2926,20 @@ plaque(arenaPremium,'LIVE SCORE','CHALLENGES · COMMUNITY · XP',8.2,1.20,0,4.35
 const arenaCanopy=mesh(arenaPremium,new THREE.RingGeometry(5.2,5.30,84),roomArenaStrip,0,6.32,-2,{cast:false,receive:false});arenaCanopy.rotation.x=Math.PI/2;
 const arenaCanopyInner=mesh(arenaPremium,new THREE.RingGeometry(3.55,3.62,72),roomWarmStrip,0,6.28,-2,{cast:false,receive:false});arenaCanopyInner.rotation.x=Math.PI/2;
 
+// Quiet ambient activity makes the rooms feel occupied even before multiplayer peers arrive.
+portalActor(twinPremium,-7.0,1.8,0xb9cfbf,3.1).scale.setScalar(.94);
+portalActor(fitPremium,-4.4,2.8,0xd7b777,3.8).scale.setScalar(.96);
+portalActor(fitPremium,4.2,5.2,0xb9cfbf,4.6).scale.setScalar(.92);
+portalActor(arenaPremium,-6.1,1.7,0xb9935c,5.2).scale.setScalar(.95);
+portalActor(arenaPremium,6.0,.6,0xd7b777,5.9).scale.setScalar(.92);
+
+// Subtle status bars — visual rhythm, not medical data.
+const fitnessStatusBars=[];
+[-5.4,-2.7,0,2.7,5.4].forEach((x,i)=>{
+  const b=box(fitPremium,1.65,.025,.08,i%2?roomCoolStrip:roomWarmStrip,x,5.64,10.58,{cast:false,receive:false});
+  b.userData.phase=i*.72;fitnessStatusBars.push(b);
+});
+
 
 // Runtime state.
 const player=new THREE.Vector3(0,0,14.55);
@@ -4903,6 +4917,21 @@ function animateLiving(now){
     portalActors.forEach((actor,i)=>{
       actor.position.y=Math.sin(t*.72+(actor.userData.phase||i))*.018;
       actor.rotation.y=.18*Math.sin(t*.30+i*.8);
+    });
+  }
+  if(typeof twinCeilingHalo!=='undefined'){
+    twinCeilingHalo.rotation.z=t*.055;
+    twinCeilingHalo.material.opacity=.48+.18*(.5+.5*Math.sin(t*.52));
+  }
+  if(typeof arenaCanopy!=='undefined'){
+    arenaCanopy.rotation.z=t*.042;
+    arenaCanopyInner.rotation.z=-t*.058;
+    const ap=1+.024*Math.sin(t*.82);arenaCanopy.scale.setScalar(ap);
+  }
+  if(typeof fitnessStatusBars!=='undefined'){
+    fitnessStatusBars.forEach((bar,i)=>{
+      bar.scale.x=.58+.42*(.5+.5*Math.sin(t*.92+(bar.userData.phase||i)));
+      bar.material.opacity=.36+.28*(.5+.5*Math.sin(t*.71+i*.6));
     });
   }
   if(living.lifeDisplay&&!lowPower){
