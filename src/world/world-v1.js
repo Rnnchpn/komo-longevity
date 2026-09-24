@@ -74,12 +74,13 @@ const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
 const lowPower=coarse||isiOS;
 const iphoneVisualReference=true;
+const visualLowPower=iphoneVisualReference; // iPhone is the visual source of truth on every device
 const deviceDpr=Math.max(1,window.devicePixelRatio||1);
 const retinaMobile=lowPower&&deviceDpr>=2;
 document.documentElement.classList.toggle('low-power',lowPower);
 document.documentElement.classList.toggle('retina-mobile',retinaMobile);
 document.body.classList.toggle('world-mobile-ui',lowPower||innerWidth<=900);
-document.body.classList.toggle('desktop-visual-v5',innerWidth>900);
+document.body.classList.toggle('desktop-visual-v5',false);
 document.body.classList.add('world-intro-active');
 
 const core=new TwinCore();
@@ -178,9 +179,9 @@ const camera=new THREE.PerspectiveCamera(54,innerWidth/innerHeight,.12,420);
 camera.position.set(0,1.72,58);
 
 // V6.3.1 structural lighting: directional architecture first, ambient fill second.
-const hemi=new THREE.HemisphereLight(0xf7f3ea,0x657268,lowPower?2.06:2.18);
+const hemi=new THREE.HemisphereLight(0xf7f3ea,0x657268,2.06);
 scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffe9cf,lowPower?3.48:3.65);
+const sun=new THREE.DirectionalLight(0xffe9cf,3.48);
 sun.position.set(-24,38,32);
 sun.castShadow=true;
 if(sun.castShadow){
@@ -189,9 +190,9 @@ if(sun.castShadow){
   sun.shadow.camera.near=1;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;
 }
 scene.add(sun);
-const fill=new THREE.DirectionalLight(0xe7eee9,lowPower?.30:.72);
+const fill=new THREE.DirectionalLight(0xe7eee9,.30);
 fill.position.set(28,18,-30);scene.add(fill);
-const hallAmbient=new THREE.AmbientLight(0xfff5ea,lowPower?.20:.24);scene.add(hallAmbient);
+const hallAmbient=new THREE.AmbientLight(0xfff5ea,.20);scene.add(hallAmbient);
 const hallLightGroup=new THREE.Group();hallLightGroup.name='KOMO_HALL_LIGHTING_V43';scene.add(hallLightGroup);
 const hallLights=[];
 const hallLightProfile={day:[],morning:[],golden:[],evening:[]};
@@ -586,7 +587,7 @@ function makePbrMaterial(kind,opts={},repeat=[1,1],params={}){
     color:params.color??0xffffff,
     roughness:params.roughness??.65,
     metalness:params.metalness??0,
-    bumpScale:lowPower?0:(params.bumpScale??.025),
+    bumpScale:visualLowPower?0:(params.bumpScale??.025),
     envMapIntensity:params.envMapIntensity??1
   });
 }
@@ -608,51 +609,51 @@ const S_RUBBER=makeSurface('micro',{seed:67,base:'#252822'},[7,7]);
 
 const M={
   ground:new THREE.MeshStandardMaterial({color:0x9ba690,roughness:.98,metalness:0}),
-  stone:new THREE.MeshStandardMaterial({...S_TRAVERTINE,color:0xffffff,roughness:.58,metalness:.01,bumpScale:lowPower?0:.030}),
-  stoneLight:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xfbf8f2,roughness:.62,metalness:.005,bumpScale:lowPower?0:.020}),
-  stoneDeep:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xcbbda9,roughness:.74,metalness:.005,bumpScale:lowPower?0:.026}),
-  wall:new THREE.MeshStandardMaterial({...S_PLASTER,color:0xfffdf8,roughness:.78,metalness:0,bumpScale:lowPower?0:.014}),
-  sage:new THREE.MeshStandardMaterial({...S_SAGE,color:0xffffff,roughness:.56,metalness:.018,bumpScale:lowPower?0:.010,normalScale:new THREE.Vector2(.62,.62)}),
-  sageDeep:new THREE.MeshStandardMaterial({...S_SAGE_DEEP,color:0xffffff,roughness:.50,metalness:.032,bumpScale:lowPower?0:.008,normalScale:new THREE.Vector2(.56,.56)}),
+  stone:new THREE.MeshStandardMaterial({...S_TRAVERTINE,color:0xffffff,roughness:.58,metalness:.01,bumpScale:visualLowPower?0:.030}),
+  stoneLight:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xfbf8f2,roughness:.62,metalness:.005,bumpScale:visualLowPower?0:.020}),
+  stoneDeep:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xcbbda9,roughness:.74,metalness:.005,bumpScale:visualLowPower?0:.026}),
+  wall:new THREE.MeshStandardMaterial({...S_PLASTER,color:0xfffdf8,roughness:.78,metalness:0,bumpScale:visualLowPower?0:.014}),
+  sage:new THREE.MeshStandardMaterial({...S_SAGE,color:0xffffff,roughness:.56,metalness:.018,bumpScale:visualLowPower?0:.010,normalScale:new THREE.Vector2(.62,.62)}),
+  sageDeep:new THREE.MeshStandardMaterial({...S_SAGE_DEEP,color:0xffffff,roughness:.50,metalness:.032,bumpScale:visualLowPower?0:.008,normalScale:new THREE.Vector2(.56,.56)}),
   sageSoft:new THREE.MeshStandardMaterial({color:0x708271,roughness:.90,metalness:0}),
-  bronze:new THREE.MeshStandardMaterial({...S_BRONZE,color:0xffffff,roughness:.26,metalness:.72,bumpScale:lowPower?0:.008}),
-  bronzeSoft:new THREE.MeshStandardMaterial({...S_BRONZE,color:0xd9b681,roughness:.34,metalness:.48,bumpScale:lowPower?0:.006}),
+  bronze:new THREE.MeshStandardMaterial({...S_BRONZE,color:0xffffff,roughness:.26,metalness:.72,bumpScale:visualLowPower?0:.008}),
+  bronzeSoft:new THREE.MeshStandardMaterial({...S_BRONZE,color:0xd9b681,roughness:.34,metalness:.48,bumpScale:visualLowPower?0:.006}),
   soil:new THREE.MeshStandardMaterial({color:0x565b50,roughness:1,metalness:0}),
-  trunk:new THREE.MeshStandardMaterial({...S_WALNUT,color:0x8a6545,roughness:.82,metalness:0,bumpScale:lowPower?0:.018}),
-  water:lowPower?
+  trunk:new THREE.MeshStandardMaterial({...S_WALNUT,color:0x8a6545,roughness:.82,metalness:0,bumpScale:visualLowPower?0:.018}),
+  water:visualLowPower?
     new THREE.MeshStandardMaterial({color:0x87a39a,roughness:.34,metalness:.02,transparent:true,opacity:.62,depthWrite:true}):
     new THREE.MeshPhysicalMaterial({color:0x91aaa1,roughness:.08,metalness:0,transparent:true,opacity:.50,transmission:.28,ior:1.333,thickness:.12,clearcoat:.28,clearcoatRoughness:.14,depthWrite:true}),
-  glass:lowPower?
+  glass:visualLowPower?
     new THREE.MeshStandardMaterial({color:0xaab8b0,roughness:.24,metalness:.02,transparent:true,opacity:.24,depthWrite:false}):
     new THREE.MeshPhysicalMaterial({color:0xd4ddd8,roughness:.045,metalness:0,transparent:true,opacity:.17,transmission:.74,ior:1.48,thickness:.18,clearcoat:.34,clearcoatRoughness:.08,depthWrite:false,side:THREE.DoubleSide}),
   warm:new THREE.MeshStandardMaterial({color:0xf2d09a,roughness:.30,metalness:.02,emissive:0x9a612c,emissiveIntensity:.38}),
-  twinGlass:lowPower?
+  twinGlass:visualLowPower?
     new THREE.MeshStandardMaterial({color:0x91a99a,roughness:.30,metalness:.02,transparent:true,opacity:.46,depthWrite:false}):
     new THREE.MeshPhysicalMaterial({color:0xa8c1b0,roughness:.10,metalness:.01,transparent:true,opacity:.36,transmission:.38,ior:1.46,thickness:.10,clearcoat:.18,clearcoatRoughness:.12,depthWrite:false}),
   twinGlow:new THREE.MeshStandardMaterial({color:0xb8d0bc,roughness:.34,metalness:.03,emissive:0x577462,emissiveIntensity:.42}),
   attention:new THREE.MeshStandardMaterial({color:0xcf9f65,roughness:.34,metalness:.08,emissive:0x8c5627,emissiveIntensity:.48}),
-  arena:new THREE.MeshStandardMaterial({...S_RUBBER,color:0x453a2b,roughness:.72,metalness:.035,bumpScale:lowPower?0:.010,normalScale:new THREE.Vector2(.68,.68)}),
-  arenaGold:new THREE.MeshStandardMaterial({...S_BRASS,color:0xc8a36d,roughness:.25,metalness:.70,bumpScale:lowPower?0:.006})
+  arena:new THREE.MeshStandardMaterial({...S_RUBBER,color:0x453a2b,roughness:.72,metalness:.035,bumpScale:visualLowPower?0:.010,normalScale:new THREE.Vector2(.68,.68)}),
+  arenaGold:new THREE.MeshStandardMaterial({...S_BRASS,color:0xc8a36d,roughness:.25,metalness:.70,bumpScale:visualLowPower?0:.006})
 };
 const wallWarm=M.wall.clone();wallWarm.color.setHex(0xfffbf3);wallWarm.roughness=.74;
 const wallShade=M.wall.clone();wallShade.color.setHex(0xe8e2d9);wallShade.roughness=.82;
 const stoneWarm=M.stoneLight.clone();stoneWarm.color.setHex(0xf2e8d9);stoneWarm.roughness=.66;
 
 const MAT={
-  fabric:new THREE.MeshStandardMaterial({...S_FABRIC,color:0xffffff,roughness:.92,metalness:0,bumpScale:lowPower?0:.018}),
-  fabricLight:new THREE.MeshStandardMaterial({...S_FABRIC_LIGHT,color:0xffffff,roughness:.94,metalness:0,bumpScale:lowPower?0:.016}),
-  walnut:new THREE.MeshStandardMaterial({...S_WALNUT,color:0xffffff,roughness:.56,metalness:.01,bumpScale:lowPower?0:.024}),
+  fabric:new THREE.MeshStandardMaterial({...S_FABRIC,color:0xffffff,roughness:.92,metalness:0,bumpScale:visualLowPower?0:.018}),
+  fabricLight:new THREE.MeshStandardMaterial({...S_FABRIC_LIGHT,color:0xffffff,roughness:.94,metalness:0,bumpScale:visualLowPower?0:.016}),
+  walnut:new THREE.MeshStandardMaterial({...S_WALNUT,color:0xffffff,roughness:.56,metalness:.01,bumpScale:visualLowPower?0:.024}),
   charcoal:new THREE.MeshStandardMaterial({color:0x222a25,roughness:.62,metalness:.04}),
-  brass:new THREE.MeshStandardMaterial({...S_BRASS,color:0xffffff,roughness:.24,metalness:.76,bumpScale:lowPower?0:.008}),
-  ivory:new THREE.MeshStandardMaterial({...S_FABRIC_LIGHT,color:0xf8f2e8,roughness:.91,metalness:0,bumpScale:lowPower?0:.010}),
-  smokedGlass:lowPower?
+  brass:new THREE.MeshStandardMaterial({...S_BRASS,color:0xffffff,roughness:.24,metalness:.76,bumpScale:visualLowPower?0:.008}),
+  ivory:new THREE.MeshStandardMaterial({...S_FABRIC_LIGHT,color:0xf8f2e8,roughness:.91,metalness:0,bumpScale:visualLowPower?0:.010}),
+  smokedGlass:visualLowPower?
     new THREE.MeshStandardMaterial({color:0x67776d,roughness:.30,metalness:.03,transparent:true,opacity:.27,depthWrite:false}):
     new THREE.MeshPhysicalMaterial({color:0x708178,roughness:.095,metalness:.01,transparent:true,opacity:.20,transmission:.50,ior:1.46,thickness:.14,clearcoat:.20,clearcoatRoughness:.10,depthWrite:false,side:THREE.DoubleSide}),
-  limestone:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xf0e8db,roughness:.74,metalness:0,bumpScale:lowPower?0:.025}),
-  travertine:new THREE.MeshStandardMaterial({...S_TRAVERTINE,color:0xf5e9d7,roughness:.61,metalness:.008,bumpScale:lowPower?0:.032}),
-  blackened:new THREE.MeshStandardMaterial({...S_BLACKENED,color:0xffffff,roughness:.38,metalness:.24,bumpScale:lowPower?0:.005,normalScale:new THREE.Vector2(.44,.44)}),
-  leather:new THREE.MeshStandardMaterial({...S_LEATHER,color:0xffffff,roughness:.66,metalness:0,bumpScale:lowPower?0:.020}),
-  leatherDark:new THREE.MeshStandardMaterial({...S_LEATHER_DARK,color:0xffffff,roughness:.58,metalness:.01,bumpScale:lowPower?0:.018})
+  limestone:new THREE.MeshStandardMaterial({...S_LIMESTONE,color:0xf0e8db,roughness:.74,metalness:0,bumpScale:visualLowPower?0:.025}),
+  travertine:new THREE.MeshStandardMaterial({...S_TRAVERTINE,color:0xf5e9d7,roughness:.61,metalness:.008,bumpScale:visualLowPower?0:.032}),
+  blackened:new THREE.MeshStandardMaterial({...S_BLACKENED,color:0xffffff,roughness:.38,metalness:.24,bumpScale:visualLowPower?0:.005,normalScale:new THREE.Vector2(.44,.44)}),
+  leather:new THREE.MeshStandardMaterial({...S_LEATHER,color:0xffffff,roughness:.66,metalness:0,bumpScale:visualLowPower?0:.020}),
+  leatherDark:new THREE.MeshStandardMaterial({...S_LEATHER_DARK,color:0xffffff,roughness:.58,metalness:.01,bumpScale:visualLowPower?0:.018})
 };
 
 // V5.9 wall architecture palette — restrained, tactile and shared across the campus.
@@ -679,18 +680,18 @@ MAT.blackened.needsUpdate=true;
 
 // V5.0 desktop cinematic material accents.
 const CINEMATIC={
-  floor:lowPower?null:new THREE.MeshPhysicalMaterial({
+  floor:visualLowPower?null:new THREE.MeshPhysicalMaterial({
     color:0xe8dcc9,roughness:.22,metalness:.015,transparent:true,opacity:.26,
     clearcoat:.58,clearcoatRoughness:.14,depthWrite:false,side:THREE.DoubleSide
   }),
-  darkGlass:lowPower?null:new THREE.MeshPhysicalMaterial({
+  darkGlass:visualLowPower?null:new THREE.MeshPhysicalMaterial({
     color:0x22332b,roughness:.09,metalness:.02,transparent:true,opacity:.22,
     transmission:.42,ior:1.46,thickness:.16,clearcoat:.36,clearcoatRoughness:.08,depthWrite:false
   }),
-  warmGlow:lowPower?null:new THREE.MeshBasicMaterial({
+  warmGlow:visualLowPower?null:new THREE.MeshBasicMaterial({
     color:0xffdfaa,transparent:true,opacity:.075,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending
   }),
-  coolGlow:lowPower?null:new THREE.MeshBasicMaterial({
+  coolGlow:visualLowPower?null:new THREE.MeshBasicMaterial({
     color:0xd9ebe1,transparent:true,opacity:.052,depthWrite:false,side:THREE.DoubleSide,blending:THREE.AdditiveBlending
   })
 };
@@ -726,7 +727,7 @@ function floorMaterial(base,vein,joint,seed,roughness,bump=.018){
   const normalMap=normalTextureFromHeight(raw.height,repeat,1.55);
   return new THREE.MeshStandardMaterial({
     map:color,roughnessMap,bumpMap,...(normalMap?{normalMap}:{}),
-    color:0xffffff,roughness,metalness:.008,bumpScale:lowPower?0:bump,
+    color:0xffffff,roughness,metalness:.008,bumpScale:visualLowPower?0:bump,
     normalScale:new THREE.Vector2(.52,.52)
   });
 }
@@ -768,7 +769,7 @@ function line(parent,w,d,x,z,material=M.bronze,y=.075){
 function tree(parent,x,z,s=.8){
   const g=new THREE.Group();g.position.set(x,0,z);g.userData.swayPhase=(x*1.73+z*.91);parent.add(g);living.trees.push(g);
   cyl(g,.10*s,.15*s,1.8*s,M.trunk,0,.9*s,0,lowPower?6:10,{cast:true});
-  const crown=lowPower?[[0,2.10,0,.78],[.12,2.45,0,.43]]:[[0,2.08,0,.72],[.47,2.06,.03,.48],[-.46,2.1,-.02,.46],[.08,2.48,0,.39]];
+  const crown=visualLowPower?[[0,2.10,0,.78],[.12,2.45,0,.43]]:[[0,2.08,0,.72],[.47,2.06,.03,.48],[-.46,2.1,-.02,.46],[.08,2.48,0,.39]];
   crown.forEach(([a,b,c,r])=>{
     const f=mesh(g,new THREE.SphereGeometry(r*s,lowPower?8:18,lowPower?6:12),M.sageSoft,a*s,b*s,c*s,{cast:true});
     f.scale.set(1,.72,1);
@@ -1455,7 +1456,7 @@ exteriorBench(exterior,-16.1,30.3,Math.PI/2,.80);
 const arrivalHeroV632=new THREE.Group();arrivalHeroV632.name='KOMO_ARRIVAL_HERO_V632';exterior.add(arrivalHeroV632);
 arrivalHeroV632.userData.environmentDetail=true;
 
-const arrivalRoofMatV632=lowPower?MAT.smokedGlass:new THREE.MeshPhysicalMaterial({
+const arrivalRoofMatV632=visualLowPower?MAT.smokedGlass:new THREE.MeshPhysicalMaterial({
   color:0xd7ddd6,roughness:.18,metalness:.03,transparent:true,opacity:.66,
   transmission:0,depthWrite:false,side:THREE.DoubleSide
 });
@@ -1514,8 +1515,8 @@ mesh(grandFountain,new THREE.RingGeometry(4.85,5.18,72),MAT.brass,0,.39,0,{cast:
 cyl(grandFountain,.72,.95,2.15,MAT.travertine,0,1.36,0,28,{cast:true});
 mesh(grandFountain,new THREE.SphereGeometry(.48,20,14),MAT.brass,0,2.62,0,{cast:true});
 const fountainWaterMat=new THREE.MeshBasicMaterial({color:0xc8ded5,transparent:true,opacity:.40,depthWrite:false});
-for(let i=0;i<(lowPower?6:12);i++){
-  const a=i/(lowPower?6:12)*Math.PI*2,r=3.35;
+for(let i=0;i<(visualLowPower?6:12);i++){
+  const a=i/(visualLowPower?6:12)*Math.PI*2,r=3.35;
   const jet=mesh(grandFountain,new THREE.CylinderGeometry(.025,.038,1.0,6),fountainWaterMat,Math.cos(a)*r,.95,Math.sin(a)*r,{cast:false,receive:false});
   jet.userData.phase=i*.63;jet.userData.baseY=.95;jet.userData.dynamic=true;living.fountainJets.push(jet);
 }
@@ -1606,7 +1607,7 @@ const campusGreenMidV64=new THREE.MeshStandardMaterial({color:0x516653,roughness
 const campusGreenSoftV64=new THREE.MeshStandardMaterial({color:0x71806c,roughness:.94,metalness:0,fog:true});
 const campusTrunkV64=new THREE.MeshStandardMaterial({color:0x624b38,roughness:.96,metalness:0,fog:true});
 const campusInteriorGlowV64=new THREE.MeshBasicMaterial({color:0xe8c992,transparent:true,opacity:lowPower?.22:.38,depthWrite:false});
-const campusGlassV64=lowPower?MAT.smokedGlass:new THREE.MeshPhysicalMaterial({color:0x9eb4aa,roughness:.16,metalness:.03,transparent:true,opacity:.42,depthWrite:false,side:THREE.DoubleSide});
+const campusGlassV64=visualLowPower?MAT.smokedGlass:new THREE.MeshPhysicalMaterial({color:0x9eb4aa,roughness:.16,metalness:.03,transparent:true,opacity:.42,depthWrite:false,side:THREE.DoubleSide});
 
 // A few hero trees use real branching; secondary vegetation is fully instanced.
 function heroTreeV64(x,z,scale=1,spread=1){
@@ -1699,7 +1700,7 @@ function waterMirrorV64(x,z,w,d){
   const g=new THREE.Group();g.position.set(x,0,z);livingCampusV64.add(g);
   box(g,w+.55,.18,d+.55,MAT.travertine,0,.09,0,{cast:false});
   const pool=box(g,w,.075,d,M.water,0,.205,0,{cast:false,receive:false});living.water.push(pool);
-  const count=lowPower?1:3;
+  const count=visualLowPower?1:3;
   for(let i=0;i<count;i++){
     const q=box(g,w*.72,.010,.050,shimmerMat,0,.255,-d*.32+i*(d*.64/Math.max(1,count-1)),{cast:false,receive:false});
     q.userData.phase=.11+i*.29+(x>0?.37:.08);q.userData.v64Local=true;living.shimmers.push(q);
@@ -1914,7 +1915,7 @@ bannerTotem(marinaDetailV68,43.2,72.0,'RETREATS','BOARDING',0);
   exteriorBench(marinaDetailV68,57.0,z+3.2,-Math.PI/2,.82);
 });
 [37,45,54,63,72,81,89].forEach(z=>exteriorBollard(marinaDetailV68,61.1,z,.68));
-if(!lowPower){
+if(!iphoneVisualReference){
   for(let i=0;i<6;i++){
     const q=box(marinaDetailV68,28,.010,.055,shimmerMat,83.2,.115,37+i*10.0,{cast:false,receive:false});
     q.userData.phase=.18+i*.17;q.userData.v64Local=true;living.shimmers.push(q);
@@ -2682,7 +2683,7 @@ const hillNearMatV632=new THREE.MeshStandardMaterial({color:0x788579,roughness:1
 const hillFarMatV632=new THREE.MeshStandardMaterial({color:0x89958d,roughness:1,metalness:0,fog:true});
 const hillGeoV632=new THREE.IcosahedronGeometry(1,1);
 const hillNearItemsV632=[],hillFarItemsV632=[];
-const hillNearCount=lowPower?10:18,hillFarCount=lowPower?8:15;
+const hillNearCount=visualLowPower?10:18,hillFarCount=visualLowPower?8:15;
 for(let i=0;i<hillNearCount;i++){
   const a=i/hillNearCount*Math.PI*2+.12*Math.sin(i*1.9),r=100+(i%4)*7;
   hillNearItemsV632.push({
@@ -2704,7 +2705,7 @@ const hillFarInstV632=instancedStatic(atmosphereV632,hillGeoV632,hillFarMatV632,
 const pineMatV632=new THREE.MeshStandardMaterial({color:0x445a4a,roughness:1,metalness:0,fog:true});
 const pineTrunkMatV632=new THREE.MeshStandardMaterial({color:0x6a5948,roughness:1,metalness:0,fog:true});
 const pineCrownItemsV632=[],pineTrunkItemsV632=[];
-const pineCount=lowPower?8:24;
+const pineCount=visualLowPower?8:24;
 for(let i=0;i<pineCount;i++){
   const a=(i/pineCount)*Math.PI*2+.38,r=83+(i%5)*6;
   const x=Math.cos(a)*r,z=10+Math.sin(a)*r,h=3.5+(i%4)*.55;
@@ -2717,7 +2718,7 @@ instancedStatic(atmosphereV632,new THREE.BoxGeometry(1,1,1),pineTrunkMatV632,pin
 // Sparse low horizontal pavilion forms evoke Riviera architecture without forming a generic skyline.
 const distantArchitectureMatV632=new THREE.MeshStandardMaterial({color:0xc7c1b5,roughness:.92,metalness:0,fog:true});
 const distantArchitectureItemsV632=[];
-const pavilionCount=lowPower?4:8;
+const pavilionCount=visualLowPower?4:8;
 for(let i=0;i<pavilionCount;i++){
   const a=.22+i/(pavilionCount)*Math.PI*2,r=91+(i%3)*9;
   distantArchitectureItemsV632.push({
@@ -2919,7 +2920,7 @@ plaque(hallLiving,'LONGEVITY IN MOTION','MEASURE · UNDERSTAND · TRAIN · LIVE'
 plaque(hallLiving,'KŌMØ CULTURE','MOVEMENT · SCIENCE · COMMUNITY',3.65,.68,11.32,5.48,-15.6,{rotY:-Math.PI/2,dark:true,titleSize:42});
 
 // One additional live editorial screen — existing motion-screen system is already throttled/culling-aware.
-if(!lowPower)motionScreen(hallLiving,11.40,4.55,-8.8,-Math.PI/2,'TODAY AT KŌMØ');
+if(!iphoneVisualReference)motionScreen(hallLiving,11.40,4.55,-8.8,-Math.PI/2,'TODAY AT KŌMØ');
 
 // Material library objects near the Desk and Life entrance.
 const displayCubes=[];
@@ -3449,7 +3450,7 @@ box(roomAccess,.055,.018,12.2,guideArena,32.1,.122,-12.2,{cast:false,receive:fal
 // V6.2 Access Architecture — wider covered promenades visually connect Hall and rooms.
 const accessArchitectureV62=new THREE.Group();accessArchitectureV62.name='KOMO_ACCESS_ARCHITECTURE_V62';oneWorldLinks.add(accessArchitectureV62);
 accessArchitectureV62.userData.realismDetail=true;
-const accessRoofGlassV62=lowPower?MAT.smokedGlass:M.glass;
+const accessRoofGlassV62=visualLowPower?MAT.smokedGlass:M.glass;
 const accessRoofGlowV62=new THREE.MeshBasicMaterial({color:0xd9c49c,transparent:true,opacity:lowPower?.14:.24,depthWrite:false});
 const accessUnitV62=new THREE.BoxGeometry(1,1,1);
 const accessRoofItemsV62=[],accessBeamItemsV62=[],accessLightItemsV62=[];
@@ -3488,7 +3489,7 @@ instancedStatic(accessArchitectureV62,accessUnitV62,accessRoofGlowV62,accessLigh
 // V6.0 Walkable Gallery Walls — same architecture, batched into a handful of draw calls.
 const galleryWallsV59=new THREE.Group();galleryWallsV59.name='KOMO_GALLERY_WALLS_V59';oneWorldLinks.add(galleryWallsV59);
 galleryWallsV59.userData.realismDetail=true;
-const galleryGlass=lowPower?MAT.smokedGlass:M.glass;
+const galleryGlass=visualLowPower?MAT.smokedGlass:M.glass;
 const galleryAccentTwin=new THREE.MeshBasicMaterial({color:0xb9cfbf,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
 const galleryAccentFit=new THREE.MeshBasicMaterial({color:0xd7b777,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
 const galleryAccentArena=new THREE.MeshBasicMaterial({color:0xb9935c,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
@@ -3558,7 +3559,7 @@ box(twinWallV59,20.2,.40,.22,WALL.travertine,0,.38,-12.72,{cast:false,receive:tr
 box(twinWallV59,20.0,.040,.14,WALL.brass,0,.62,-12.60,{cast:false,receive:false});
 plaque(twinRoom,'FUNCTIONAL TWIN','YOUR BODY · ACROSS TIME',7.8,1.55,0,7.25,-12.86,{dark:true,titleSize:84});
 const twinV52=new THREE.Group();twinV52.name='KOMO_TWIN_ROOM_V52';twinRoom.add(twinV52);
-const twinGlassV52=lowPower?MAT.smokedGlass:M.glass;
+const twinGlassV52=visualLowPower?MAT.smokedGlass:M.glass;
 box(twinV52,20.6,.16,17.8,MAT.travertine,0,.085,-1.4,{cast:false,receive:true});
 [-9.85,9.85].forEach(x=>{
   box(twinV52,.20,5.80,17.2,MAT.limestone,x,2.96,-1.5,{cast:true});
@@ -3656,7 +3657,7 @@ box(rehabRoom,22,7.6,.36,WALL.sage,0,3.8,-11.8);
 // V5.9 Fitness Walls — warm acoustic timber, mirrors and limestone piers.
 const fitnessWallsV59=new THREE.Group();fitnessWallsV59.name='KOMO_FITNESS_WALLS_V59';rehabRoom.add(fitnessWallsV59);
 const fitnessWallGlow=new THREE.MeshBasicMaterial({color:0xe5c184,transparent:true,opacity:lowPower?.20:.34,depthWrite:false});
-const fitnessWallMirror=lowPower?MAT.smokedGlass:M.glass;
+const fitnessWallMirror=visualLowPower?MAT.smokedGlass:M.glass;
 [-1,1].forEach(side=>{
   const x=side*10.58;
   box(fitnessWallsV59,.10,.42,21.3,WALL.travertine,x,.36,0,{cast:false,receive:true});
@@ -3897,11 +3898,11 @@ const lightPlaneV631=new THREE.PlaneGeometry(1,1);
 // STRUCTURAL — skylight rhythm and restrained wall bounce make the nave feel taller/deeper.
 const structuralWarmMatV631=lightingMatV631(lightTexCeilingV631,0xf3dcc0,lowPower?.055:.105);
 const structuralBounceMatV631=lightingMatV631(lightTexWallV631,0xeed9bb,lowPower?.045:.085);
-const structuralCeilingItemsV631=(lowPower?[-15,-3,9]:[-21,-15,-9,-3,3,9]).map(z=>({x:0,y:7.35,z,rx:Math.PI/2,sx:8.65,sy:5.15,sz:1}));
+const structuralCeilingItemsV631=(visualLowPower?[-15,-3,9]:[-21,-15,-9,-3,3,9]).map(z=>({x:0,y:7.35,z,rx:Math.PI/2,sx:8.65,sy:5.15,sz:1}));
 const structuralWallItemsV631=[];
 [-1,1].forEach(side=>{
   const x=side*11.04,ry=side<0?Math.PI/2:-Math.PI/2;
-  (lowPower?[-11,5]:[-19,-11,-3,5,11]).forEach(z=>structuralWallItemsV631.push({x,y:2.70,z,ry,sx:4.15,sy:4.55,sz:1}));
+  (visualLowPower?[-11,5]:[-19,-11,-3,5,11]).forEach(z=>structuralWallItemsV631.push({x,y:2.70,z,ry,sx:4.15,sy:4.55,sz:1}));
 });
 const structuralCeilingInstV631=instancedStatic(lightingStructuralV631,lightPlaneV631,structuralWarmMatV631,structuralCeilingItemsV631,'KOMO_STRUCTURAL_SKYLIGHT_INST_V631');
 const structuralWallInstV631=instancedStatic(lightingStructuralV631,lightPlaneV631,structuralBounceMatV631,structuralWallItemsV631,'KOMO_STRUCTURAL_BOUNCE_INST_V631');
@@ -5611,8 +5612,8 @@ function tryMoveSmooth(dx,dz){
   for(let i=0;i<steps;i++)tryMove(sx,sz);
 }
 
-const AUTO_RUN_SPEED=lowPower?6.05:7.05;
-const AUTO_RUN_BOOST=lowPower?7.15:8.35;
+const AUTO_RUN_SPEED=6.05;
+const AUTO_RUN_BOOST=7.15;
 function updateMovement(dt){
   joyX+= (joyTargetX-joyX)*(1-Math.exp(-18*dt));
   joyY+= (joyTargetY-joyY)*(1-Math.exp(-18*dt));
@@ -5736,7 +5737,7 @@ function updateCamera(now,dt){
     const runAmount=THREE.MathUtils.clamp(velocity.length()/AUTO_RUN_SPEED,0,1);
     const desiredFov=50+2.4*runAmount;
     if(Math.abs(camera.fov-desiredFov)>.01){camera.fov+= (desiredFov-camera.fov)*(1-Math.exp(-6*dt));camera.updateProjectionMatrix()}
-    const distance=thirdPersonDistance+(lowPower?.10:.34)*runAmount;
+    const distance=thirdPersonDistance+.10*runAmount;
     const height=2.72+.05*runAmount;
     const shoulder=.22;
     cameraDesired.set(
@@ -5760,7 +5761,7 @@ function updateCamera(now,dt){
     cameraLook.set(player.x,player.y+visualGround+1.05+pitch*.34,player.z-.55);
     camera.lookAt(cameraLook);
   }else{
-    const desiredFov=lowPower?61:57;
+    const desiredFov=61;
     if(Math.abs(camera.fov-desiredFov)>.01){camera.fov+=(desiredFov-camera.fov)*(1-Math.exp(-6*dt));camera.updateProjectionMatrix()}
     const move=Math.min(1,velocity.length()/AUTO_RUN_SPEED);
     const bob=move*Math.sin(now*.0102)*.006;
@@ -6501,7 +6502,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.2.0-iphone-parity-populated',
+  version:'7.2.1-strict-iphone-parity',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
