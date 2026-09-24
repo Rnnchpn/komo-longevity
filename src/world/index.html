@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#18271f" />
-  <meta name="komo-world-version" content="7.2.1-strict-iphone-parity" />
+  <meta name="komo-world-version" content="7.3.1-first-person-living-world" />
   <meta name="color-scheme" content="dark" />
   <title>KŌMØ World · Longevity in Motion</title>
   <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
-  <link rel="stylesheet" href="./world-v1.css?v=7.2.1-strict-iphone-parity" />
+  <link rel="stylesheet" href="./world-v1.css?v=7.3.1-first-person-living-world" />
 </head>
 <body>
   <canvas id="world-canvas" aria-label="KŌMØ World"></canvas>
@@ -116,6 +116,7 @@
     <button type="button" data-fast-travel="hall" data-nav-zone="hall" class="active" aria-current="page"><i aria-hidden="true">⌂</i><span>HALL</span><small>HOME</small></button>
     <button type="button" data-fast-travel="twin" data-nav-zone="twin"><i aria-hidden="true">◎</i><span>TWIN</span><small>UNDERSTAND</small></button>
     <button type="button" data-fast-travel="life" data-nav-zone="life"><i aria-hidden="true">◉</i><span>LIFE</span><small>DISCOVER</small></button>
+    <button type="button" data-fast-travel="library" data-nav-zone="library"><i aria-hidden="true">▤</i><span>LIBRARY</span><small>SCIENCE</small></button>
     <button type="button" data-fast-travel="upper" data-nav-zone="upper"><i aria-hidden="true">▥</i><span>LEVEL 2</span><small>EXPLORE</small></button>
   </nav>
 
@@ -161,6 +162,7 @@
         <button data-fast-travel="rehab" data-destination="fitness"><i>△</i><span>FITNESS</span><small>Move</small></button>
         <button data-fast-travel="arena" data-destination="arena"><i>◇</i><span>ARENA</span><small>Engage</small></button>
         <button data-fast-travel="life" data-destination="life"><i>◉</i><span>LIFE</span><small>Discover</small></button>
+        <button data-fast-travel="library" data-destination="library"><i>▤</i><span>LIBRARY</span><small>Science</small></button>
         <button data-fast-travel="marina" data-destination="marina"><i>≈</i><span>MARINA</span><small>Yachting</small></button>
         <button data-fast-travel="villa" data-destination="villa"><i>⌂</i><span>RETREAT</span><small>Private Villa</small></button>
       </div>
@@ -183,14 +185,14 @@
       </div>
       <div class="world-menu-actions">
         <button id="avatar-toggle" type="button">AVATAR</button>
-        <button id="camera-toggle" type="button">CAMERA · 3RD</button>
+        <button id="camera-toggle" type="button">CAMERA · 1ST</button>
         <button id="guide-toggle" type="button">GUIDE · ON</button>
         <button id="quality-toggle" type="button">AUTO QUALITY</button>
         <button id="controls-toggle" type="button">CONTROLS</button>
         <button id="reset-position" type="button">RESET POSITION</button>
       </div>
       <div class="world-menu-controls">
-        <span><kbd>WASD</kbd> MOVE</span><span><kbd>SHIFT</kbd> BOOST</span><span><kbd>E</kbd> ACTION</span><span><kbd>V</kbd> CAMERA</span><span><kbd>G</kbd> GUIDE</span><span><kbd>M</kbd> MENU</span>
+        <span><kbd>WASD</kbd> MOVE</span><span><kbd>SHIFT</kbd> BOOST</span><span><kbd>E</kbd> ACTION</span><span><kbd>V</kbd> FIRST PERSON</span><span><kbd>G</kbd> GUIDE</span><span><kbd>M</kbd> MENU</span>
       </div>
     </details>
   </aside>
@@ -201,7 +203,7 @@
     <span><kbd>WASD</kbd> / <kbd>ZQSD</kbd> COURIR</span>
     <span><kbd>SHIFT</kbd> BOOST</span>
     <span>GLISSER POUR REGARDER</span>
-    <span><kbd>V</kbd> CAMÉRA</span>
+    <span><kbd>V</kbd> 1RE PERSONNE</span>
     <span><kbd>G</kbd> GUIDE</span>
     <span><kbd>M</kbd> MENU</span>
   </div>
@@ -216,6 +218,6 @@
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <noscript>KŌMØ World nécessite JavaScript.</noscript>
-  <script type="module" src="./world-v1.js?v=7.2.1-strict-iphone-parity"></script>
+  <script type="module" src="./world-v1.js?v=7.3.1-first-person-living-world"></script>
 </body>
 </html>
