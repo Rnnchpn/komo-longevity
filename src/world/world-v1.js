@@ -3219,6 +3219,16 @@ const populationV72=[
   {role:'visitor',label:'Samuel',functionLabel:'TWIN GUEST',x:-40.0,y:0,z:-4.0,outfit:'sand',body:'soft',hairStyle:'bald',scale:1.02,speed:.22,phase:.77,route:[[-40,0,-4],[-43,0,1],[-47,0,5],[-51,0,0],[-47,0,-5]]}
 ];
 populationV72.forEach(p=>makeNpc(npcRoot,p));
+const libraryPopulationV73=[
+  {role:'staff',label:'Sofia',functionLabel:'LIBRARY HOST',x:-14.4,y:0,z:-10.1,outfit:'charcoal',body:'slim',hairStyle:'bob',scale:.96,speed:.16,phase:.12,task:'host',route:[[-14.4,0,-10.1],[-15.2,0,-7.7],[-14.6,0,-12.4]]},
+  {role:'visitor',label:'Maya',functionLabel:'SCIENCE READER',x:-19.2,y:0,z:-7.2,outfit:'ivory',body:'regular',hairStyle:'bun',scale:.92,speed:.12,phase:.24,task:'read',route:[[-19.2,0,-7.2],[-20.2,0,-7.0],[-19.4,0,-7.5]]},
+  {role:'visitor',label:'Louis',functionLabel:'METHOD READER',x:-19.0,y:0,z:-12.8,outfit:'olive',body:'broad',hairStyle:'short',age:'senior',scale:1.02,speed:.11,phase:.37,task:'read',route:[[-19.0,0,-12.8],[-20.2,0,-13.0],[-19.4,0,-12.4]]},
+  {role:'visitor',label:'Noura',functionLabel:'LONGEVITY READER',x:-22.2,y:0,z:-5.2,outfit:'burgundy',body:'slim',hairStyle:'bob',scale:.94,speed:.14,phase:.49,task:'read',route:[[-22.2,0,-5.2],[-23.4,0,-6.5],[-22.4,0,-8.0],[-21.4,0,-6.4]]},
+  {role:'visitor',label:'Theo',functionLabel:'SOURCES',x:-22.1,y:0,z:-14.3,outfit:'navy',body:'regular',hairStyle:'crop',scale:1.00,speed:.13,phase:.61,task:'observe',route:[[-22.1,0,-14.3],[-23.2,0,-12.9],[-22.6,0,-11.5],[-21.6,0,-12.9]]},
+  {role:'visitor',label:'Clara',functionLabel:'METHOD TABLE',x:-16.1,y:0,z:-7.2,outfit:'sand',body:'soft',hairStyle:'bun',scale:.97,speed:.10,phase:.74,task:'read',route:[[-16.1,0,-7.2],[-17.0,0,-7.4],[-16.5,0,-6.8]]},
+  {role:'visitor',label:'Adam',functionLabel:'SCIENCE GUEST',x:-16.2,y:0,z:-12.7,outfit:'blue',body:'broad',hairStyle:'short',scale:1.04,speed:.13,phase:.86,task:'social',route:[[-16.2,0,-12.7],[-17.4,0,-12.5],[-16.8,0,-11.8]]}
+];
+libraryPopulationV73.forEach(p=>makeNpc(npcRoot,p));
 
 // Living atmosphere — subtle, non-game-like movement.
 const dustCount=0;
@@ -5533,9 +5543,11 @@ function showArena(){
 function showLibrary(){
   completeJourney('library');
   const html=locale==='fr'
-    ?'<p>La Library rassemble la méthode KŌMØ, les sources, la littérature et la provenance des mesures utilisées dans votre parcours.</p><div class="panel-grid"><div><span>SOURCES</span><b>Mesuré</b></div><div><span>METHOD</span><b>Traçable</b></div><div><span>TIME</span><b>Longitudinal</b></div><div><span>DATA</span><b>Privé</b></div></div>'
-    :'<p>Library brings together KŌMØ methodology, sources, literature and measurement provenance used across your journey.</p><div class="panel-grid"><div><span>SOURCES</span><b>Measured</b></div><div><span>METHOD</span><b>Traceable</b></div><div><span>TIME</span><b>Longitudinal</b></div><div><span>DATA</span><b>Private</b></div></div>';
-  openPanel('LIBRARY',locale==='fr'?'Science & méthode.':'Science & method.',html,[{label:copy[locale].close,onClick:closePanel}]);
+    ?'<p>Vous êtes dans la Science Library : méthode KŌMØ, sources, littérature et provenance des mesures. Les tables de lecture et les rayonnages structurent cet espace calme du World.</p><div class="panel-grid"><div><span>SOURCES</span><b>Mesuré</b></div><div><span>METHOD</span><b>Traçable</b></div><div><span>READING ROOM</span><b>Ouvert</b></div><div><span>DATA</span><b>Privé</b></div></div><div class="priority-card"><b>SCIENCE LIBRARY</b>Explorez physiquement la salle, les rayonnages et la table KŌMØ Method.</div>'
+    :'<p>You are inside the Science Library: KŌMØ methodology, sources, literature and measurement provenance. Reading tables and book walls form a quiet knowledge space inside World.</p><div class="panel-grid"><div><span>SOURCES</span><b>Measured</b></div><div><span>METHOD</span><b>Traceable</b></div><div><span>READING ROOM</span><b>Open</b></div><div><span>DATA</span><b>Private</b></div></div><div class="priority-card"><b>SCIENCE LIBRARY</b>Walk through the room, shelves and KŌMØ Method table.</div>';
+  openPanel('SCIENCE LIBRARY',locale==='fr'?'Science · méthode · sources.':'Science · method · sources.',html,[
+    {label:locale==='fr'?'CONTINUER À EXPLORER':'KEEP EXPLORING',primary:true,onClick:closePanel}
+  ]);
 }
 function showTalks(){
   completeJourney('talks');
@@ -5626,6 +5638,7 @@ function showNpcConversation(npc){
 }
 function setMode(){
   mode='world';
+  setCameraMode('first');
   world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true;rehabCoach.visible=true;
 }
 let manualCampusDestination=null;
@@ -6646,7 +6659,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.3.0-first-person-living-world',
+  version:'7.3.1-first-person-living-world',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
