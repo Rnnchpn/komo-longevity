@@ -13,6 +13,8 @@ const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const pulseHtml=await readFile('pulse-app/index.html','utf8');
 const checks=[
+  ['V6.4 desktop HTML cache bust present',html.includes('world-v1.css?v=6.4.0-living-campus')&&html.includes('world-v1.js?v=6.4.0-living-campus')&&html.includes('name="komo-world-version" content="6.4.0-living-campus"')],
+
   ['canonical World V1 runtime',runtime.includes("window.KomoWorld={")],
   ['render loop present',runtime.includes('renderer.render(scene,camera)')],
   ['living animation owner present',runtime.includes('function animateLiving(now)')],
