@@ -2131,6 +2131,108 @@ function instancedStatic(parent,geometry,material,items,name){
   inst.instanceMatrix.needsUpdate=true;parent.add(inst);return inst;
 }
 
+// V6.3.2 Sky & Atmosphere — a grounded Riviera horizon in six lightweight draw-call families.
+const atmosphereV632=new THREE.Group();atmosphereV632.name='KOMO_ATMOSPHERE_V632';world.add(atmosphereV632);
+atmosphereV632.userData.environmentDetail=true;living.atmosphereV632=atmosphereV632;
+
+// A broad landscape skirt hides the edge of the playable ground and receives native fog.
+const distantGroundMatV632=new THREE.MeshStandardMaterial({color:0x85917e,roughness:1,metalness:0,fog:true});
+const distantGroundV632=mesh(atmosphereV632,new THREE.PlaneGeometry(310,310),distantGroundMatV632,0,-.16,12,{cast:false,receive:false});
+distantGroundV632.rotation.x=-Math.PI/2;
+
+// Cylindrical haze band: one transparent shader, no volumetric pass.
+const horizonHazeUniformsV632={
+  hazeColor:{value:new THREE.Color(0xd9ddd5)},
+  opacity:{value:lowPower?.12:.20}
+};
+const horizonHazeMatV632=new THREE.ShaderMaterial({
+  uniforms:horizonHazeUniformsV632,transparent:true,depthWrite:false,depthTest:true,side:THREE.BackSide,fog:false,
+  vertexShader:`
+    varying vec2 vUv;
+    void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}
+  `,
+  fragmentShader:`
+    varying vec2 vUv;
+    uniform vec3 hazeColor;
+    uniform float opacity;
+    void main(){
+      float vertical=smoothstep(0.02,.22,vUv.y)*(1.0-smoothstep(.56,.96,vUv.y));
+      float base=smoothstep(.0,.12,vUv.y);
+      float alpha=(vertical*.72+base*.18)*opacity;
+      gl_FragColor=vec4(hazeColor,alpha);
+    }
+  `
+});
+const horizonHazeV632=mesh(atmosphereV632,new THREE.CylinderGeometry(154,166,54,64,1,true),horizonHazeMatV632,0,19,10,{cast:false,receive:false});
+horizonHazeV632.renderOrder=-50;
+
+// Low-poly hills: two depth layers, deliberately organic rather than an urban skyline.
+const hillNearMatV632=new THREE.MeshStandardMaterial({color:0x788579,roughness:1,metalness:0,fog:true});
+const hillFarMatV632=new THREE.MeshStandardMaterial({color:0x89958d,roughness:1,metalness:0,fog:true});
+const hillGeoV632=new THREE.IcosahedronGeometry(1,1);
+const hillNearItemsV632=[],hillFarItemsV632=[];
+const hillNearCount=lowPower?10:18,hillFarCount=lowPower?8:15;
+for(let i=0;i<hillNearCount;i++){
+  const a=i/hillNearCount*Math.PI*2+.12*Math.sin(i*1.9),r=100+(i%4)*7;
+  hillNearItemsV632.push({
+    x:Math.cos(a)*r,y:-4.4+(i%3)*.35,z:10+Math.sin(a)*r,
+    ry:a*.35,sx:18+(i%5)*5,sy:8+(i%4)*2.4,sz:11+(i%3)*3.2
+  });
+}
+for(let i=0;i<hillFarCount;i++){
+  const a=i/hillFarCount*Math.PI*2+.19,r=132+(i%3)*8;
+  hillFarItemsV632.push({
+    x:Math.cos(a)*r,y:-3.0,z:10+Math.sin(a)*r,
+    ry:a*.24,sx:25+(i%4)*6,sy:10+(i%3)*2.8,sz:15+(i%5)*2.5
+  });
+}
+const hillNearInstV632=instancedStatic(atmosphereV632,hillGeoV632,hillNearMatV632,hillNearItemsV632,'KOMO_RIVIERA_HILLS_NEAR_INST_V632');
+const hillFarInstV632=instancedStatic(atmosphereV632,hillGeoV632,hillFarMatV632,hillFarItemsV632,'KOMO_RIVIERA_HILLS_FAR_INST_V632');
+
+// Mediterranean tree silhouettes establish scale at the edge of the campus.
+const pineMatV632=new THREE.MeshStandardMaterial({color:0x445a4a,roughness:1,metalness:0,fog:true});
+const pineTrunkMatV632=new THREE.MeshStandardMaterial({color:0x6a5948,roughness:1,metalness:0,fog:true});
+const pineCrownItemsV632=[],pineTrunkItemsV632=[];
+const pineCount=lowPower?8:24;
+for(let i=0;i<pineCount;i++){
+  const a=(i/pineCount)*Math.PI*2+.38,r=83+(i%5)*6;
+  const x=Math.cos(a)*r,z=10+Math.sin(a)*r,h=3.5+(i%4)*.55;
+  pineCrownItemsV632.push({x,y:2.2+h*.20,z,ry:a,sx:1.45+(i%3)*.22,sy:h*.68,sz:1.45+(i%2)*.18});
+  pineTrunkItemsV632.push({x,y:.85,z,ry:a,sx:.16,sy:1.7,sz:.16});
+}
+instancedStatic(atmosphereV632,new THREE.ConeGeometry(1,2,7),pineMatV632,pineCrownItemsV632,'KOMO_RIVIERA_PINES_INST_V632');
+instancedStatic(atmosphereV632,new THREE.BoxGeometry(1,1,1),pineTrunkMatV632,pineTrunkItemsV632,'KOMO_RIVIERA_PINE_TRUNKS_INST_V632');
+
+// Sparse low horizontal pavilion forms evoke Riviera architecture without forming a generic skyline.
+const distantArchitectureMatV632=new THREE.MeshStandardMaterial({color:0xc7c1b5,roughness:.92,metalness:0,fog:true});
+const distantArchitectureItemsV632=[];
+const pavilionCount=lowPower?4:8;
+for(let i=0;i<pavilionCount;i++){
+  const a=.22+i/(pavilionCount)*Math.PI*2,r=91+(i%3)*9;
+  distantArchitectureItemsV632.push({
+    x:Math.cos(a)*r,y:2.0+(i%2)*.45,z:10+Math.sin(a)*r,ry:-a,
+    sx:6.5+(i%3)*2.0,sy:3.6+(i%2)*.9,sz:2.8+(i%2)*.8
+  });
+}
+const distantArchitectureInstV632=instancedStatic(atmosphereV632,new THREE.BoxGeometry(1,1,1),distantArchitectureMatV632,distantArchitectureItemsV632,'KOMO_RIVIERA_PAVILIONS_INST_V632');
+
+function applyAtmosphereV632Profile(state='day'){
+  if(!living.atmosphereV632)return;
+  const profile={
+    day:{haze:0xd9ddd5,ground:0x85917e,near:0x788579,far:0x89958d,pine:0x445a4a,architecture:0xc7c1b5,opacity:lowPower?.12:.20},
+    morning:{haze:0xe4d7c8,ground:0x89927f,near:0x7f897b,far:0x969b90,pine:0x4a604e,architecture:0xd0c3b2,opacity:lowPower?.13:.22},
+    golden:{haze:0xdfcbb3,ground:0x8d8d76,near:0x827e6d,far:0x999081,pine:0x4c5944,architecture:0xcdb9a3,opacity:lowPower?.14:.24},
+    evening:{haze:0x8f9690,ground:0x69746b,near:0x606d64,far:0x737f78,pine:0x35483b,architecture:0x9b9b91,opacity:lowPower?.13:.23}
+  }[state]||null;
+  if(!profile)return;
+  horizonHazeUniformsV632.hazeColor.value.setHex(profile.haze);horizonHazeUniformsV632.opacity.value=profile.opacity;
+  distantGroundMatV632.color.setHex(profile.ground);
+  hillNearMatV632.color.setHex(profile.near);hillFarMatV632.color.setHex(profile.far);
+  pineMatV632.color.setHex(profile.pine);distantArchitectureMatV632.color.setHex(profile.architecture);
+}
+applyAtmosphereV632Profile(living.daylight);
+
+
 // V6.1 Grand Flagship — scale comes from silhouette, rhythm and emissive depth, not extra lights.
 const grandFlagshipV61=new THREE.Group();grandFlagshipV61.name='KOMO_GRAND_FLAGSHIP_V61';building.add(grandFlagshipV61);
 grandFlagshipV61.userData.realismDetail=true;
@@ -5403,6 +5505,7 @@ function updateVisibilityBudget(now){
   const deepHall=player.z<7;
   exterior.visible=player.z>5;
   if(living.district)living.district.visible=player.z>35;
+  if(living.atmosphereV632)living.atmosphereV632.visible=!emergencyPerformance;
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
   hallLightGroup.visible=!lowPower&&!emergencyPerformance&&player.z<22&&player.z>-31&&Math.abs(player.x)<15;
@@ -5449,6 +5552,7 @@ function applyEmergencyPerformance(){
   if(typeof destinationTheatreV61!=='undefined')destinationTheatreV61.visible=false;
   if(typeof accessArchitectureV62!=='undefined')accessArchitectureV62.visible=false;
   if(living.lightingV631)living.lightingV631.root.visible=false;
+  if(living.atmosphereV632)living.atmosphereV632.visible=false;
   living.clouds.forEach(c=>c.visible=false);
   // Keep only the first two ambient NPCs under emergency load.
   living.npcs.forEach((npc,i)=>{npc.visible=i<2});
