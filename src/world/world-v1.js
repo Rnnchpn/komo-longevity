@@ -102,7 +102,7 @@ const copy={
     twinTitle:'Functional Twin',twinCopy:'Courez à travers le seuil · accès automatique · E pour entrer maintenant',
     rehabTitle:'KŌMØ Fitness Club',rehabCopy:'Courez à travers le seuil · programme quotidien · coach',
     arenaTitle:'Arena',arenaCopy:'Courez à travers le seuil · défis · communauté',
-    libraryTitle:'Ouvrir la Library',libraryCopy:'Science · méthode · provenance',
+    libraryTitle:'Entrer dans la Science Library',libraryCopy:'Aile gauche du Hall · science · méthode · sources',
     talksTitle:'Voir Talks',talksCopy:'Experts · événements · contenus',
     storeTitle:'Entrer dans KŌMØ Life',storeCopy:'Objets · Case 01 · éditions',
     back:'RETOUR AU HALL',close:'FERMER',openRehab:'OUVRIR FITNESS CLUB',openLife:'OUVRIR KŌMØ LIFE',configureCase:'CONFIGURER CASE 01'
@@ -122,7 +122,7 @@ const copy={
     twinTitle:'Enter Functional Twin',twinCopy:'Understand your movement over time',
     rehabTitle:'Enter KŌMØ Fitness Club',rehabCopy:'Choose an activity · daily program · coach',
     arenaTitle:'Enter Arena',arenaCopy:'Performance · challenges · community',
-    libraryTitle:'Open Library',libraryCopy:'Science · method · provenance',
+    libraryTitle:'Enter the Science Library',libraryCopy:'Left wing of the Hall · science · method · sources',
     talksTitle:'View Talks',talksCopy:'Experts · events · content',
     storeTitle:'Enter KŌMØ Life',storeCopy:'Objects · Case 01 · editions',
     back:'BACK TO HALL',close:'CLOSE',openRehab:'OPEN FITNESS CLUB',openLife:'OPEN KŌMØ LIFE',configureCase:'CONFIGURE CASE 01'
@@ -1635,6 +1635,12 @@ function districtPavilion(x,z,w,d,title,sub,dark=false){
   box(g,.26,5.15,d,MAT.limestone,-w/2+.13,2.58,0,{cast:true});
   box(g,.26,5.15,d,MAT.limestone,w/2-.13,2.58,0,{cast:true});
   box(g,w,.28,d,MAT.limestone,0,5.05,0,{cast:true});
+  // V7.4 roofline: all district buildings receive a readable cap, parapet and skylight.
+  box(g,w+.30,.30,.20,MAT.travertine,0,5.30,d/2+.04,{cast:true});
+  box(g,w+.30,.30,.20,MAT.travertine,0,5.30,-d/2-.04,{cast:true});
+  box(g,.20,.30,d+.10,MAT.travertine,-w/2-.05,5.30,0,{cast:true});
+  box(g,.20,.30,d+.10,MAT.travertine,w/2+.05,5.30,0,{cast:true});
+  box(g,Math.max(1.5,w*.30),.045,Math.max(1.7,d*.34),MAT.smokedGlass,0,5.20,0,{cast:false,receive:false});
   box(g,w-.55,.04,d-.45,M.warm,0,4.82,0);
   plaque(g,title,sub,Math.min(w-1,5.2),.82,0,4.25,-d/2-.05,{dark,titleSize:52});
   return g;
@@ -2222,6 +2228,35 @@ box(libraryV73,2.28,.035,1.74,MAT.brass,libX+2.35,.89,libZ,{cast:false});
 plaque(libraryV73,'KŌMØ METHOD','READ · TRACE · UNDERSTAND',2.85,.52,libX+2.35,1.75,libZ+1.10,{dark:true,titleSize:31});
 // Warm ceiling panels without extra dynamic lights.
 [-4.6,0,4.6].forEach(zOff=>box(libraryV73,7.5,.025,1.15,campusInteriorGlowV64,libX,5.88,libZ+zOff,{cast:false,receive:false}));
+
+// V7.4 Library Access — one unmistakable architectural route from Hall to Science Library.
+const libraryAccessV74=new THREE.Group();libraryAccessV74.name='KOMO_LIBRARY_ACCESS_V74';building.add(libraryAccessV74);
+const libraryGuideMatV74=new THREE.MeshBasicMaterial({color:0xd9bc83,transparent:true,opacity:lowPower?.30:.44,depthWrite:false});
+const libraryGlowMatV74=new THREE.MeshBasicMaterial({color:0xc9d8ce,transparent:true,opacity:lowPower?.24:.38,depthWrite:false});
+function libraryGuideSegmentV74(ax,az,bx,bz){
+  const dx=bx-ax,dz=bz-az,len=Math.hypot(dx,dz),mx=(ax+bx)/2,mz=(az+bz)/2;
+  const q=box(libraryAccessV74,.075,.018,len,libraryGuideMatV74,mx,.448,mz,{cast:false,receive:false});
+  q.rotation.y=Math.atan2(dx,dz);return q;
+}
+// Brass datum starts in the central Hall and bends cleanly toward the open Library threshold.
+[[-2.6,3.4,-4.9,.3],[-4.9,.3,-7.4,-3.7],[-7.4,-3.7,-10.45,-9.25]].forEach(p=>libraryGuideSegmentV74(...p));
+const libraryEntryV74=new THREE.Group();libraryEntryV74.name='KOMO_LIBRARY_ENTRY_PORTICO_V74';libraryEntryV74.position.set(-10.92,0,-10);building.add(libraryEntryV74);
+box(libraryEntryV74,1.48,.20,5.70,MAT.blackened,0,5.78,0,{cast:true});
+box(libraryEntryV74,1.62,.055,5.26,libraryGlowMatV74,.02,5.62,0,{cast:false,receive:false});
+[-2.45,2.45].forEach(z=>{
+  box(libraryEntryV74,.18,5.48,.18,MAT.travertine,.38,2.92,z,{cast:true});
+  box(libraryEntryV74,.045,4.76,.10,MAT.brass,.27,2.75,z,{cast:false,receive:false});
+});
+plaque(libraryEntryV74,'LIBRARY','SCIENCE · METHOD',3.95,.72,.44,4.85,0,{rotY:-Math.PI/2,dark:true,titleSize:50});
+const libraryBeaconV74=mesh(libraryAccessV74,new THREE.RingGeometry(.42,.52,36),libraryGlowMatV74,-10.55,.455,-10,{cast:false,receive:false});
+libraryBeaconV74.rotation.x=-Math.PI/2;libraryBeaconV74.userData.dynamic=true;
+box(libraryAccessV74,.055,2.72,.055,MAT.brass,-10.55,1.80,-10,{cast:false,receive:false});
+const libraryCapV74=mesh(libraryAccessV74,new THREE.SphereGeometry(.10,10,7),libraryGlowMatV74,-10.55,3.18,-10,{cast:false,receive:false});
+libraryCapV74.userData.dynamic=true;
+
+// A calmer, deeper entrance court makes the room read as a destination rather than a side opening.
+box(libraryAccessV74,2.20,.035,5.10,FLOOR.side,-12.05,.438,-10,{cast:false,receive:true});
+[-1,1].forEach(side=>box(libraryAccessV74,2.10,.030,.050,MAT.brass,-12.05,.470,-10+side*2.18,{cast:false,receive:false}));
 
 // Side lantern volumes create an inhabited facade rather than a flat front.
 [-1,1].forEach(side=>{
@@ -4019,6 +4054,72 @@ const startRing=mesh(arenaV52,new THREE.RingGeometry(2.05,2.18,64),MAT.brass,0,.
 box(arenaV52,15.8,2.45,.16,MAT.blackened,0,4.25,9.7,{cast:true});
 plaque(arenaV52,'LIVE ARENA','DAILY CHALLENGES · SOCIAL',7.6,1.08,0,4.38,9.55,{dark:true,titleSize:70});
 
+// V7.4 Global Roof + Design Pass — complete silhouettes without adding realtime lights.
+const globalRoofPassV74=new THREE.Group();globalRoofPassV74.name='KOMO_GLOBAL_ROOF_PASS_V74';world.add(globalRoofPassV74);
+const globalDesignV74=new THREE.Group();globalDesignV74.name='KOMO_GLOBAL_DESIGN_PASS_V74';world.add(globalDesignV74);
+const roofGlowV74=new THREE.MeshBasicMaterial({color:0xe5c68f,transparent:true,opacity:lowPower?.12:.20,depthWrite:false});
+function roofCapV74(parent,{name,w,d,y,skylight=true,parapet=.30,edge=MAT.travertine}){
+  const g=new THREE.Group();g.name='KOMO_ROOF_V74_'+name;parent.add(g);
+  box(g,w+.34,.24,d+.34,MAT.blackened,0,y,0,{cast:true});
+  box(g,w+.46,parapet,.20,edge,0,y+.25,d/2+.10,{cast:true});
+  box(g,w+.46,parapet,.20,edge,0,y+.25,-d/2-.10,{cast:true});
+  box(g,.20,parapet,d+.22,edge,-w/2-.10,y+.25,0,{cast:true});
+  box(g,.20,parapet,d+.22,edge,w/2+.10,y+.25,0,{cast:true});
+  if(skylight){
+    box(g,Math.max(2.2,w*.24),.045,Math.max(2.7,d*.40),MAT.smokedGlass,0,y+.15,0,{cast:false,receive:false});
+    box(g,Math.max(2.5,w*.30),.018,.055,roofGlowV74,0,y+.18,-d*.16,{cast:false,receive:false});
+  }
+  return g;
+}
+// Main destinations were previously open-topped visual rooms. They now read as complete buildings.
+roofCapV74(twinRoom,{name:'TWIN',w:21.2,d:18.4,y:6.10,skylight:true});
+roofCapV74(rehabRoom,{name:'FITNESS',w:21.7,d:22.9,y:7.02,skylight:true});
+roofCapV74(arenaRoom,{name:'ARENA',w:21.8,d:19.5,y:6.16,skylight:false,edge:MAT.blackened});
+roofCapV74(lifeStore,{name:'LIFE',w:5.85,d:10.30,y:6.88,skylight:true});
+
+// Hall crown: stronger roof edge and a long central lantern, preserving the existing V7.3 roof.
+box(globalDesignV74,25.55,.14,.24,MAT.brass,0,10.14,18.50,{cast:false,receive:false});
+box(globalDesignV74,25.55,.14,.24,MAT.brass,0,10.14,-30.10,{cast:false,receive:false});
+[-1,1].forEach(side=>box(globalDesignV74,.12,.14,48.5,MAT.brass,side*12.76,10.14,-5.8,{cast:false,receive:false}));
+box(globalDesignV74,2.65,.035,29.0,MAT.smokedGlass,0,10.08,-6.9,{cast:false,receive:false});
+
+// Destination canopies and façade datums visually unify Twin / Fitness / Arena.
+[
+  {parent:twinRoom,z:8.9,w:7.0,accent:0xc4d9cc},
+  {parent:rehabRoom,z:9.2,w:7.4,accent:0xe0bd7e},
+  {parent:arenaRoom,z:8.2,w:7.0,accent:0xc7995d}
+].forEach((r,i)=>{
+  const mat=new THREE.MeshBasicMaterial({color:r.accent,transparent:true,opacity:lowPower?.16:.25,depthWrite:false});
+  box(r.parent,r.w,.18,1.15,MAT.blackened,0,5.72,r.z,{cast:true});
+  box(r.parent,r.w-.55,.025,.08,mat,0,5.60,r.z-.58,{cast:false,receive:false});
+  [-r.w*.42,r.w*.42].forEach(x=>box(r.parent,.12,4.30,.12,MAT.brass,x,2.50,r.z,{cast:false,receive:false}));
+});
+
+// Life gets a stronger retail cornice; Library gets a quieter science cornice.
+box(lifeStore,5.95,.16,.70,MAT.blackened,0,6.55,-4.78,{cast:true});
+box(lifeStore,5.15,.025,.065,roofGlowV74,0,6.40,-5.14,{cast:false,receive:false});
+box(libraryV73,libW+.55,.14,.70,MAT.blackened,libX,6.16,libZ+libD/2-.34,{cast:true});
+box(libraryV73,libW-.90,.025,.065,libraryGlowMatV74,libX,6.04,libZ+libD/2+.02,{cast:false,receive:false});
+
+// A consistent bronze datum ties the central campus together without visual clutter.
+[-1,1].forEach(side=>{
+  box(globalDesignV74,.055,.025,38.0,MAT.brass,side*10.92,.46,-5.2,{cast:false,receive:false});
+  [14.5,5.0,-4.5,-14.0,-23.5].forEach(z=>box(globalDesignV74,.46,.022,.055,MAT.brass,side*10.92,.47,z,{cast:false,receive:false}));
+});
+
+// Light landscape framing around the Hall makes the architecture feel intentionally planted.
+const designPlanterMatV74=new THREE.MeshStandardMaterial({color:0x5c705e,roughness:.96,metalness:0});
+[-1,1].forEach(side=>{
+  [17.2,23.8].forEach((z,j)=>{
+    box(globalDesignV74,4.2,.38,1.28,MAT.travertine,side*8.7,.20,z,{cast:true});
+    for(let k=-2;k<=2;k++){
+      const c=mesh(globalDesignV74,new THREE.SphereGeometry(.28+(k%2?0:.05),8,6),designPlanterMatV74,side*8.7+k*.68,.67,z,{cast:false});
+      c.scale.set(1.15,.55,.82);
+    }
+  });
+});
+
+// // V6.0 Realism Lite — baked-style wall washes: 4 draw calls, zero realtime lights.
 // V6.0 Realism Lite — baked-style wall washes: 4 draw calls, zero realtime lights.
 function makeWallWashTexture(){
   const c=document.createElement('canvas');c.width=128;c.height=256;const g=c.getContext('2d');
@@ -5019,7 +5120,7 @@ function fastTravel(id){
   setCameraMode('first');
   closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
   setTimeout(()=>{
-    setMode(p.mode);playerLevel=p.level;player.set(p.x,p.y,p.z);yaw=targetYaw=p.yaw;pitch=targetPitch=-.035;syncPlayerElevation();updateLocation();if(id==='upper')completeJourney('upper');else if(['twin','rehab','arena','life'].includes(id))completeJourney(id);
+    setMode(p.mode);playerLevel=p.level;player.set(p.x,p.y,p.z);yaw=targetYaw=p.yaw;pitch=targetPitch=-.035;syncPlayerElevation();updateLocation();if(id==='upper')completeJourney('upper');else if(['twin','rehab','arena','life','library'].includes(id))completeJourney(id);
     setTimeout(()=>travelFade.classList.remove('active'),110);
   },180);
 }
@@ -5734,7 +5835,8 @@ function updateRoomAccess(now){
     if(zone==='twin'){completeJourney('twin',{silent:true});completeChallenge('twin')}
     else if(zone==='rehab')completeJourney('rehab',{silent:true});
     else if(zone==='arena'){completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
-    if(manualCampusDestination===zone){manualCampusDestination=null;notify(locale==='fr'?'DESTINATION ATTEINTE':'DESTINATION REACHED')}
+    else if(zone==='library'){completeJourney('library',{silent:true});showWorldZone('SCIENCE LIBRARY',locale==='fr'?'SCIENCE · MÉTHODE · SOURCES':'SCIENCE · METHOD · SOURCES')}
+    if(manualCampusDestination===zone){manualCampusDestination=null;notify(locale==='fr'?'DESTINATION ATTEINTE · LIBRARY À GAUCHE DU HALL':'DESTINATION REACHED · LIBRARY IN THE LEFT WING')}
   }
 }
 
@@ -6729,7 +6831,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.3.3-arrival-hotfix',
+  version:'7.4.0-library-roofs-design',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
