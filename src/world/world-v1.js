@@ -2699,7 +2699,7 @@ function keybindHtml(){
     back:locale==='fr'?'RECULER':'BACK',
     left:locale==='fr'?'GAUCHE':'LEFT',
     right:locale==='fr'?'DROITE':'RIGHT',
-    sprint:locale==='fr'?'ACCÉLÉRER':'SPRINT',
+    sprint:locale==='fr'?'BOOST (COURSE AUTO)':'BOOST (AUTO RUN)',
     action:'ACTION',camera:'CAMERA',guide:'GUIDE',menu:'MENU'
   };
   return `<div class="keybind-grid">${Object.keys(labels).map(k=>`<div class="keybind-row"><span>${labels[k]}</span><button type="button" data-keybind="${k}">${keybinds[k].map(keyLabel).join(' / ')}</button></div>`).join('')}</div><div class="keybind-note">${locale==='fr'?'Clique sur une commande puis appuie sur la touche à utiliser. Les réglages sont sauvegardés sur cet appareil.':'Click a command, then press the key you want to use. Settings are saved on this device.'}</div>`;
@@ -3979,16 +3979,25 @@ function commitMove(next){
   if(mode==='world'&&moved>0)addChallengeProgress('distance',moved);
 }
 function tryMove(dx,dz){
-  const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){commitMove(n);return}
-  const nx=player.clone();nx.x+=dx;if(canMove(nx)){commitMove(nx);return}
-  const nz=player.clone();nz.z+=dz;if(canMove(nz))commitMove(nz);
+  const n=player.clone();n.x+=dx;n.z+=dz;if(canMove(n)){commitMove(n);return true}
+  const nx=player.clone();nx.x+=dx;if(canMove(nx)){commitMove(nx);return true}
+  const nz=player.clone();nz.z+=dz;if(canMove(nz)){commitMove(nz);return true}
+  return false;
+}
+function tryMoveSmooth(dx,dz){
+  const distance=Math.hypot(dx,dz);
+  const steps=Math.max(1,Math.ceil(distance/.075));
+  const sx=dx/steps,sz=dz/steps;
+  for(let i=0;i<steps;i++)tryMove(sx,sz);
 }
 
+const AUTO_RUN_SPEED=lowPower?5.55:6.35;
+const AUTO_RUN_BOOST=lowPower?6.20:7.15;
 function updateMovement(dt){
-  joyX+= (joyTargetX-joyX)*(1-Math.exp(-14*dt));
-  joyY+= (joyTargetY-joyY)*(1-Math.exp(-14*dt));
+  joyX+= (joyTargetX-joyX)*(1-Math.exp(-18*dt));
+  joyY+= (joyTargetY-joyY)*(1-Math.exp(-18*dt));
   if(worldMenu.classList.contains('open')||panel.classList.contains('open')||!intro.classList.contains('hidden')){
-    velocity.lerp(new THREE.Vector3(),1-Math.exp(-12*dt));return;
+    velocity.lerp(new THREE.Vector3(),1-Math.exp(-16*dt));return;
   }
   let x=0,z=0;
   if(isPressed('forward'))z+=1;
@@ -3997,17 +4006,17 @@ function updateMovement(dt){
   if(isPressed('left'))x-=1;
   x+=joyX;z+=-joyY;
   const input=new THREE.Vector2(x,z);
-  const sprint=isPressed('sprint');
-  const speed=sprint?7.15:4.35;
   const target=new THREE.Vector3();
   if(input.lengthSq()>.002){
     input.normalize();
     const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
     const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+    const speed=isPressed('sprint')?AUTO_RUN_BOOST:AUTO_RUN_SPEED;
     target.addScaledVector(right,input.x).addScaledVector(forward,input.y).normalize().multiplyScalar(speed);
   }
-  velocity.lerp(target,1-Math.exp(-(input.lengthSq()>.002?10.2:12.5)*dt));
-  if(velocity.lengthSq()>.0004)tryMove(velocity.x*dt,velocity.z*dt);
+  const response=input.lengthSq()>.002?11.5:17.0;
+  velocity.lerp(target,1-Math.exp(-response*dt));
+  if(velocity.lengthSq()>.0004)tryMoveSmooth(velocity.x*dt,velocity.z*dt);
 }
 function updatePlayerAvatar(now,dt){
   playerAvatar.position.set(player.x,player.y,player.z);
@@ -4023,21 +4032,21 @@ function updatePlayerAvatar(now,dt){
     const desired=Math.atan2(velocity.x,velocity.z);
     turnDelta=((desired-playerFacing+Math.PI)%(Math.PI*2))-Math.PI;
     playerFacing+=turnDelta*(1-Math.exp(-11.5*dt));
-    av.phase+=dt*(4.35+speed*.92);
+    av.phase+=dt*(6.65+speed*1.06);
   }else av.phase+=dt*.44;
 
   playerAvatar.rotation.y=playerFacing;
-  const moveAmount=Math.min(1,speed/4.35);
+  const moveAmount=Math.min(1,speed/AUTO_RUN_SPEED);
   const stride=Math.sin(av.phase)*moveAmount;
   const strideOpp=Math.sin(av.phase+Math.PI)*moveAmount;
   const turn=THREE.MathUtils.clamp(turnDelta,-.45,.45);
 
-  av.leftLeg.rotation.x=stride*.34;av.rightLeg.rotation.x=strideOpp*.34;
-  av.leftKnee.rotation.x=Math.max(0,-stride)*.46;av.rightKnee.rotation.x=Math.max(0,-strideOpp)*.46;
-  av.leftShoe.rotation.x=-Math.max(0,-stride)*.10;av.rightShoe.rotation.x=-Math.max(0,-strideOpp)*.10;
+  av.leftLeg.rotation.x=stride*.47;av.rightLeg.rotation.x=strideOpp*.47;
+  av.leftKnee.rotation.x=Math.max(0,-stride)*.64;av.rightKnee.rotation.x=Math.max(0,-strideOpp)*.64;
+  av.leftShoe.rotation.x=-Math.max(0,-stride)*.16;av.rightShoe.rotation.x=-Math.max(0,-strideOpp)*.16;
 
-  av.leftArm.rotation.x=-stride*.20;av.rightArm.rotation.x=-strideOpp*.20;
-  av.leftElbow.rotation.x=.035+Math.max(0,stride)*.10;av.rightElbow.rotation.x=.035+Math.max(0,strideOpp)*.10;
+  av.leftArm.rotation.x=-stride*.30;av.rightArm.rotation.x=-strideOpp*.30;
+  av.leftElbow.rotation.x=.085+Math.max(0,stride)*.16;av.rightElbow.rotation.x=.085+Math.max(0,strideOpp)*.16;
   av.leftArm.rotation.z=-.042+Math.sin(av.phase*.5)*.008*moveAmount;
   av.rightArm.rotation.z=.042-Math.sin(av.phase*.5)*.008*moveAmount;
 
@@ -4045,8 +4054,8 @@ function updatePlayerAvatar(now,dt){
   av.hipsGroup.rotation.z=Math.cos(av.phase)*.007*moveAmount;
   av.torsoGroup.rotation.z=Math.cos(av.phase*.5)*.008*moveAmount-turn*.045;
   av.torsoGroup.rotation.y=Math.sin(av.phase*.5)*.014*moveAmount+turn*.07;
-  av.torsoGroup.rotation.x=-.014-.004*moveAmount;
-  av.torsoGroup.position.y=1.57+Math.abs(Math.sin(av.phase))*0.007*moveAmount+Math.sin(now*.00135)*.0028*(1-moveAmount);
+  av.torsoGroup.rotation.x=-.016-.030*moveAmount;
+  av.torsoGroup.position.y=1.57+Math.abs(Math.sin(av.phase))*0.014*moveAmount+Math.sin(now*.00135)*.0028*(1-moveAmount);
 
   // Adult idle posture: open chest, subtle breathing and attention.
   const breathe=Math.sin(now*.00135);
@@ -4067,8 +4076,11 @@ function updateCamera(now,dt){
   yaw+=((targetYaw-yaw+Math.PI)%(Math.PI*2)-Math.PI)*smooth;
   pitch+=(targetPitch-pitch)*smooth;
   if(cameraMode==='third'){
-    const distance=thirdPersonDistance;
-    const height=lowPower?2.00:2.24;
+    const runAmount=THREE.MathUtils.clamp(velocity.length()/AUTO_RUN_SPEED,0,1);
+    const desiredFov=(lowPower?60:54)+(lowPower?1.5:3.0)*runAmount;
+    if(Math.abs(camera.fov-desiredFov)>.01){camera.fov+= (desiredFov-camera.fov)*(1-Math.exp(-6*dt));camera.updateProjectionMatrix()}
+    const distance=thirdPersonDistance+(lowPower?.10:.34)*runAmount;
+    const height=(lowPower?2.00:2.24)+.06*runAmount;
     const shoulder=lowPower?.23:.32;
     cameraDesired.set(
       player.x+Math.sin(yaw)*distance+Math.cos(yaw)*shoulder,
@@ -4087,11 +4099,11 @@ function updateCamera(now,dt){
     }else if(inArenaZone()){
       cameraDesired.x=THREE.MathUtils.clamp(cameraDesired.x,34.8,55.2);cameraDesired.z=THREE.MathUtils.clamp(cameraDesired.z,-11.2,10.2);
     }
-    camera.position.lerp(cameraDesired,1-Math.exp(-10*dt));
+    camera.position.lerp(cameraDesired,1-Math.exp(-8.6*dt));
     cameraLook.set(player.x,player.y+visualGround+1.24+pitch*.39,player.z);
     camera.lookAt(cameraLook);
   }else{
-    const move=Math.min(1,velocity.length()/4.35);
+    const move=Math.min(1,velocity.length()/AUTO_RUN_SPEED);
     const bob=move*Math.sin(now*.0102)*.006;
     const eyeY=player.y+visualGround+2.03+bob;
     camera.position.set(player.x,eyeY,player.z);
@@ -4579,7 +4591,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.1.0-flagship-lobby',
+  version:'5.2.0-fluid-rooms',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
