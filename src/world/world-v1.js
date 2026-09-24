@@ -2480,9 +2480,9 @@ function accessPortal({id,title,sub,x,z,rot=0,accent=0xd5b679,dark=true}){
   ring.rotation.x=-Math.PI/2;
   return g;
 }
-accessPortal({id:'TWIN_A',title:'FUNCTIONAL TWIN',sub:'UNDERSTAND · ENTER',x:-13.0,z:-24.0,rot:Math.PI/2,accent:0xb9cfbf});
-accessPortal({id:'FIT_A',title:'KŌMØ FITNESS',sub:'MOVE · ENTER',x:0,z:-29.8,accent:0xd7b777,dark:false});
-accessPortal({id:'ARENA_A',title:'ARENA',sub:'ENGAGE · ENTER',x:13.0,z:-24.0,rot:-Math.PI/2,accent:0xb9935c});
+accessPortal({id:'TWIN_A',title:'FUNCTIONAL TWIN',sub:'UNDERSTAND · RUN IN',x:-13.0,z:-24.0,rot:Math.PI/2,accent:0xb9cfbf});
+accessPortal({id:'FIT_A',title:'KŌMØ FITNESS',sub:'MOVE · RUN IN',x:0,z:-29.8,accent:0xd7b777,dark:false});
+accessPortal({id:'ARENA_A',title:'ARENA',sub:'ENGAGE · RUN IN',x:13.0,z:-24.0,rot:-Math.PI/2,accent:0xb9935c});
 accessPortal({id:'TWIN_B',title:'TWIN LAB',sub:'BODY · TIME · DATA',x:-32.1,z:-2.1,rot:Math.PI/2,accent:0xb9cfbf});
 accessPortal({id:'FIT_B',title:'FITNESS CLUB',sub:'TRAIN · PROGRESS',x:0,z:-43.3,accent:0xd7b777,dark:false});
 accessPortal({id:'ARENA_B',title:'ARENA FLOOR',sub:'CHALLENGE · COMMUNITY',x:32.1,z:-2.1,rot:-Math.PI/2,accent:0xb9935c});
@@ -2496,9 +2496,25 @@ box(roomAccess,.055,.018,13.2,guideFit,0,.122,-36.2,{cast:false,receive:false});
 box(roomAccess,20.0,.018,.055,guideArena,22.8,.122,-24.0,{cast:false,receive:false});
 box(roomAccess,.055,.018,12.2,guideArena,32.1,.122,-12.2,{cast:false,receive:false});
 
+// V5.3 room thresholds — every destination has a visible physical way back to the Hall.
+function roomReturnPortal(parent,{label='HALL',sub='RUN OUT · RETURN',z=10.65,accent=0xd5b679,dark=true}={}){
+  const g=new THREE.Group();g.name='KOMO_ROOM_RETURN_'+label.replace(/\W+/g,'_').toUpperCase()+'_V53';g.position.set(0,0,z);parent.add(g);
+  const accentMat=new THREE.MeshBasicMaterial({color:accent,transparent:true,opacity:.48,depthWrite:false});
+  box(g,.28,4.95,.62,MAT.travertine,-2.35,2.52,0,{cast:true});
+  box(g,.28,4.95,.62,MAT.travertine,2.35,2.52,0,{cast:true});
+  box(g,4.98,.24,.62,MAT.travertine,0,4.88,0,{cast:true});
+  box(g,4.25,.026,.070,MAT.brass,0,4.62,-.34,{cast:false,receive:false});
+  box(g,3.92,.018,.070,accentMat,0,.14,-.40,{cast:false,receive:false});
+  plaque(g,label,sub,3.95,.60,0,4.13,-.36,{dark,titleSize:46});
+  const ring=mesh(g,new THREE.RingGeometry(.34,.40,32),accentMat,0,.145,-.48,{cast:false,receive:false});
+  ring.rotation.x=-Math.PI/2;
+  return g;
+}
+
 
 // Functional Twin room.
 twinRoom.position.set(-45,0,0);
+roomReturnPortal(twinRoom,{label:'HALL',sub:'RUN OUT · RETURN',z:10.72,accent:0xb9cfbf});
 mesh(twinRoom,new THREE.CircleGeometry(13,96),M.sageDeep,0,.01,-2).rotation.x=-Math.PI/2;
 mesh(twinRoom,new THREE.RingGeometry(7.8,8.0,96),M.bronze,0,.025,-2).rotation.x=-Math.PI/2;
 box(twinRoom,22,7.8,.38,M.sage,0,4.0,-13.1);
@@ -2594,6 +2610,7 @@ plaque(twinRoom,'EXPLORE','APPROACH A DOMAIN · PRESS E',6.6,.72,0,1.05,8.7,{dar
 
 // Rehab room.
 rehabRoom.position.set(0,0,-55);
+roomReturnPortal(rehabRoom,{label:'HALL',sub:'RUN OUT · RETURN',z:11.10,accent:0xd7b777,dark:false});
 box(rehabRoom,22,.24,24,M.stoneLight,0,.10,0);
 box(rehabRoom,.36,7.6,24,M.wall,-10.8,3.8,0);
 box(rehabRoom,.36,7.6,24,M.wall,10.8,3.8,0);
@@ -2689,6 +2706,7 @@ const fitnessProgramWall=new THREE.Group();fitnessProgramWall.name='KOMO_FITNESS
 
 // Arena room.
 arenaRoom.position.set(45,0,0);
+roomReturnPortal(arenaRoom,{label:'HALL',sub:'RUN OUT · RETURN',z:10.72,accent:0xb9935c});
 mesh(arenaRoom,new THREE.CircleGeometry(14.2,96),M.arena,0,.01,-2).rotation.x=-Math.PI/2;
 mesh(arenaRoom,new THREE.RingGeometry(8.7,8.9,96),M.arenaGold,0,.025,-2).rotation.x=-Math.PI/2;
 box(arenaRoom,22,7.8,.38,M.sageDeep,0,4.0,-13.1);
@@ -3987,6 +4005,52 @@ function returnToHall(){
   playerLevel=0;setMode();player.set(0,0,-22.5);velocity.set(0,0,0);yaw=targetYaw=0;pitch=targetPitch=-.03;closePanel();updateLocation();
 }
 
+// V5.3 seamless room access — running through a threshold is enough. E remains as a fallback.
+let roomGateBusy=false,roomGateCooldownUntil=0;
+function seamlessRoomTransition(id,entering=true){
+  if(roomGateBusy)return;
+  roomGateBusy=true;
+  const boosted=isPressed('sprint');
+  const runSpeed=boosted?AUTO_RUN_BOOST:AUTO_RUN_SPEED;
+  travelFade.classList.add('active');
+  closePanel();closeWorldMenu();
+  setTimeout(()=>{
+    playerLevel=0;setMode();
+    if(entering){
+      if(id==='twin'){
+        completeJourney('twin');completeChallenge('twin');player.set(-45,0,8.65);
+      }else if(id==='rehab'){
+        completeJourney('rehab');player.set(0,0,-44.55);
+      }else{
+        completeJourney('arena');completeChallenge('arena_visit');player.set(45,0,8.65);
+      }
+      yaw=targetYaw=0;playerFacing=0;pitch=targetPitch=-.03;
+      velocity.set(0,0,-runSpeed*.74);
+    }else{
+      const exitX=id==='twin'?-6.8:id==='arena'?6.8:0;
+      player.set(exitX,0,-25.15);
+      yaw=targetYaw=Math.PI;playerFacing=Math.PI;pitch=targetPitch=-.03;
+      velocity.set(0,0,runSpeed*.70);
+    }
+    syncPlayerElevation();updateLocation();
+    roomGateCooldownUntil=performance.now()+900;
+    setTimeout(()=>{travelFade.classList.remove('active');roomGateBusy=false},115);
+  },95);
+}
+function updateRoomAccess(now){
+  if(roomGateBusy||now<roomGateCooldownUntil||worldMenu.classList.contains('open')||panel.classList.contains('open')||!intro.classList.contains('hidden'))return;
+  // Hall -> destination: the three monumental doors now behave like real automatic thresholds.
+  if(playerLevel===0&&player.z<-27.05&&player.z>-28.58&&velocity.z<-.35){
+    if(Math.abs(player.x+6.8)<2.18)return seamlessRoomTransition('twin',true);
+    if(Math.abs(player.x)<2.18)return seamlessRoomTransition('rehab',true);
+    if(Math.abs(player.x-6.8)<2.18)return seamlessRoomTransition('arena',true);
+  }
+  // Destination -> Hall: turn around and run through the return arch.
+  if(inTwinZone()&&player.z>9.72&&velocity.z>.35)return seamlessRoomTransition('twin',false);
+  if(inFitnessZone()&&player.z>-44.18&&velocity.z>.35)return seamlessRoomTransition('rehab',false);
+  if(inArenaZone()&&player.z>9.72&&velocity.z>.35)return seamlessRoomTransition('arena',false);
+}
+
 function isStairPosition(p){
   return p.x>-10.45&&p.x<-6.98&&p.z>6.90&&p.z<13.28;
 }
@@ -4063,8 +4127,8 @@ function tryMoveSmooth(dx,dz){
   for(let i=0;i<steps;i++)tryMove(sx,sz);
 }
 
-const AUTO_RUN_SPEED=lowPower?5.55:6.35;
-const AUTO_RUN_BOOST=lowPower?6.20:7.15;
+const AUTO_RUN_SPEED=lowPower?6.05:7.05;
+const AUTO_RUN_BOOST=lowPower?7.15:8.35;
 function updateMovement(dt){
   joyX+= (joyTargetX-joyX)*(1-Math.exp(-18*dt));
   joyY+= (joyTargetY-joyY)*(1-Math.exp(-18*dt));
@@ -4086,7 +4150,8 @@ function updateMovement(dt){
     const speed=isPressed('sprint')?AUTO_RUN_BOOST:AUTO_RUN_SPEED;
     target.addScaledVector(right,input.x).addScaledVector(forward,input.y).normalize().multiplyScalar(speed);
   }
-  const response=input.lengthSq()>.002?11.5:17.0;
+  // Default locomotion is a run. Acceleration is responsive, deceleration stays progressive to avoid skating/snapping.
+  const response=input.lengthSq()>.002?10.2:13.4;
   velocity.lerp(target,1-Math.exp(-response*dt));
   if(velocity.lengthSq()>.0004)tryMoveSmooth(velocity.x*dt,velocity.z*dt);
 }
@@ -4103,8 +4168,8 @@ function updatePlayerAvatar(now,dt){
   if(moving){
     const desired=Math.atan2(velocity.x,velocity.z);
     turnDelta=((desired-playerFacing+Math.PI)%(Math.PI*2))-Math.PI;
-    playerFacing+=turnDelta*(1-Math.exp(-11.5*dt));
-    av.phase+=dt*(6.65+speed*1.06);
+    playerFacing+=turnDelta*(1-Math.exp(-13.2*dt));
+    av.phase+=dt*(8.05+speed*.96);
   }else av.phase+=dt*.44;
 
   playerAvatar.rotation.y=playerFacing;
@@ -4113,21 +4178,22 @@ function updatePlayerAvatar(now,dt){
   const strideOpp=Math.sin(av.phase+Math.PI)*moveAmount;
   const turn=THREE.MathUtils.clamp(turnDelta,-.45,.45);
 
-  av.leftLeg.rotation.x=stride*.47;av.rightLeg.rotation.x=strideOpp*.47;
-  av.leftKnee.rotation.x=Math.max(0,-stride)*.64;av.rightKnee.rotation.x=Math.max(0,-strideOpp)*.64;
-  av.leftShoe.rotation.x=-Math.max(0,-stride)*.16;av.rightShoe.rotation.x=-Math.max(0,-strideOpp)*.16;
+  // Permanent run cycle while moving: longer stride, active knee drive and arm counter-swing.
+  av.leftLeg.rotation.x=stride*.69;av.rightLeg.rotation.x=strideOpp*.69;
+  av.leftKnee.rotation.x=Math.max(0,-stride)*.94;av.rightKnee.rotation.x=Math.max(0,-strideOpp)*.94;
+  av.leftShoe.rotation.x=-Math.max(0,-stride)*.23;av.rightShoe.rotation.x=-Math.max(0,-strideOpp)*.23;
 
-  av.leftArm.rotation.x=-stride*.30;av.rightArm.rotation.x=-strideOpp*.30;
-  av.leftElbow.rotation.x=.085+Math.max(0,stride)*.16;av.rightElbow.rotation.x=.085+Math.max(0,strideOpp)*.16;
+  av.leftArm.rotation.x=-stride*.51;av.rightArm.rotation.x=-strideOpp*.51;
+  av.leftElbow.rotation.x=.18+Math.max(0,stride)*.24;av.rightElbow.rotation.x=.18+Math.max(0,strideOpp)*.24;
   av.leftArm.rotation.z=-.042+Math.sin(av.phase*.5)*.008*moveAmount;
   av.rightArm.rotation.z=.042-Math.sin(av.phase*.5)*.008*moveAmount;
 
-  av.hipsGroup.rotation.y=Math.sin(av.phase*.5)*.024*moveAmount;
-  av.hipsGroup.rotation.z=Math.cos(av.phase)*.007*moveAmount;
-  av.torsoGroup.rotation.z=Math.cos(av.phase*.5)*.008*moveAmount-turn*.045;
-  av.torsoGroup.rotation.y=Math.sin(av.phase*.5)*.014*moveAmount+turn*.07;
-  av.torsoGroup.rotation.x=-.016-.030*moveAmount;
-  av.torsoGroup.position.y=1.57+Math.abs(Math.sin(av.phase))*0.014*moveAmount+Math.sin(now*.00135)*.0028*(1-moveAmount);
+  av.hipsGroup.rotation.y=Math.sin(av.phase*.5)*.035*moveAmount;
+  av.hipsGroup.rotation.z=Math.cos(av.phase)*.010*moveAmount;
+  av.torsoGroup.rotation.z=Math.cos(av.phase*.5)*.010*moveAmount-turn*.052;
+  av.torsoGroup.rotation.y=Math.sin(av.phase*.5)*.018*moveAmount+turn*.082;
+  av.torsoGroup.rotation.x=-.018-.058*moveAmount;
+  av.torsoGroup.position.y=1.57+Math.abs(Math.sin(av.phase))*0.026*moveAmount+Math.sin(now*.00135)*.0028*(1-moveAmount);
 
   // Adult idle posture: open chest, subtle breathing and attention.
   const breathe=Math.sin(now*.00135);
@@ -4605,6 +4671,7 @@ let livingAnimationFailed=false;
 function animate(now){
   const dt=Math.min(.05,(now-last)/1000||.016);last=now;updatePerformance(now);
   updateMovement(dt);
+  updateRoomAccess(now);
   updateCamera(now,dt);
   updateDoors(now,dt);
   updateDestinationDoors(now,dt);
@@ -4665,7 +4732,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.2.0-fluid-rooms',
+  version:'5.3.0-run-flow',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
