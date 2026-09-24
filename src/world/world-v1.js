@@ -138,7 +138,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure=lowPower?1.04:1.07;
+renderer.toneMappingExposure=lowPower?1.00:1.03;
 renderer.shadowMap.enabled=false;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -181,9 +181,10 @@ scene.fog=new THREE.Fog(0xcbd2c8,lowPower?82:58,lowPower?215:150);
 const camera=new THREE.PerspectiveCamera(lowPower?60:54,innerWidth/innerHeight,.12,260);
 camera.position.set(0,1.72,58);
 
-const hemi=new THREE.HemisphereLight(0xf4f1e9,0x59665d,2.05);
+// V6.3.1 structural lighting: directional architecture first, ambient fill second.
+const hemi=new THREE.HemisphereLight(0xf3f1ea,0x4d5b52,1.72);
 scene.add(hemi);
-const sun=new THREE.DirectionalLight(0xffe4bd,2.72);
+const sun=new THREE.DirectionalLight(0xffe8ca,3.05);
 sun.position.set(-24,38,32);
 sun.castShadow=true;
 if(sun.castShadow){
@@ -192,9 +193,9 @@ if(sun.castShadow){
   sun.shadow.camera.near=1;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;
 }
 scene.add(sun);
-const fill=new THREE.DirectionalLight(0xe3ebe5,lowPower?.12:.62);
+const fill=new THREE.DirectionalLight(0xdfe9e3,lowPower?.09:.44);
 fill.position.set(28,18,-30);scene.add(fill);
-const hallAmbient=new THREE.AmbientLight(0xfff3e4,lowPower?.13:.20);scene.add(hallAmbient);
+const hallAmbient=new THREE.AmbientLight(0xfff4e8,lowPower?.09:.13);scene.add(hallAmbient);
 const hallLightGroup=new THREE.Group();hallLightGroup.name='KOMO_HALL_LIGHTING_V43';scene.add(hallLightGroup);
 const hallLights=[];
 const hallLightProfile={day:[],morning:[],golden:[],evening:[]};
@@ -202,12 +203,13 @@ const hallLightProfile={day:[],morning:[],golden:[],evening:[]};
 function addHallPoint({p,color=0xffdfb3,intensity=6,distance=15}){
   if(lowPower)return null;
   const l=new THREE.PointLight(color,intensity,distance,2.0);
-  l.position.set(...p);l.userData.baseIntensity=intensity;hallLightGroup.add(l);hallLights.push(l);return l;
+  l.position.set(...p);l.userData.baseIntensity=intensity;l.userData.profileIntensity=intensity;l.userData.lightingRole='decorative';l.visible=false;
+  hallLightGroup.add(l);hallLights.push(l);return l;
 }
 function addHallSpot({p,target,color=0xffe2bd,intensity=24,distance=18,angle=.72,penumbra=.72}){
   if(lowPower)return null;
   const l=new THREE.SpotLight(color,intensity,distance,angle,penumbra,1.55);
-  l.position.set(...p);l.castShadow=false;l.userData.baseIntensity=intensity;
+  l.position.set(...p);l.castShadow=false;l.userData.baseIntensity=intensity;l.userData.profileIntensity=intensity;l.userData.lightingRole='decorative';l.visible=false;
   const t=new THREE.Object3D();t.position.set(...target);hallLightGroup.add(t);l.target=t;
   hallLightGroup.add(l);hallLights.push(l);return l;
 }
@@ -259,7 +261,8 @@ const living={
   destinationDoors:[],
   fountainJets:[],
   district:null,
-  daylight:'day'
+  daylight:'day',
+  lightingV631:null
 };
 
 // V1.8 true sky — atmospheric dome, visible sun and slow cloud field.
@@ -338,23 +341,25 @@ living.sunSprite=null;
 
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
-  let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe4bd,sunPower=2.72,hemiPower=2.05,exposure=lowPower?1.04:1.07,state='day';
-  let top=0x6f9fbd,horizon=0xdce7e3,low=0xf2e2c8,skySun=0xffddb0,skyStrength=.72;
+  let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe8ca,sunPower=3.05,hemiPower=1.72,exposure=lowPower?1.00:1.03,state='day';
+  let top=0x6f9fbd,horizon=0xdce7e3,low=0xf2e2c8,skySun=0xffdfb7,skyStrength=.68;
   if(h<7||h>=21){
-    bg=0x74838a;fog=0x8c9691;sunColor=0xe2d0c1;sunPower=1.20;hemiPower=1.34;exposure=.86;state='evening';
+    bg=0x74838a;fog=0x8c9691;sunColor=0xe5d6c9;sunPower=1.48;hemiPower=1.12;exposure=.88;state='evening';
     top=0x405865;horizon=0x87908d;low=0xaa8068;skySun=0xe2c5ae;skyStrength=.10;
   }else if(h<9){
-    bg=0xe0e5df;fog=0xdbe0d9;sunColor=0xffd29d;sunPower=2.28;hemiPower=1.86;exposure=1.00;state='morning';
+    bg=0xe0e5df;fog=0xdbe0d9;sunColor=0xffd8aa;sunPower=2.62;hemiPower=1.55;exposure=.99;state='morning';
     top=0x7fa8bd;horizon=0xe7d8c7;low=0xf2b77b;skySun=0xffc27e;skyStrength=.88;
   }else if(h>=17.5){
-    bg=0xdfd9cd;fog=0xd8d1c5;sunColor=0xffc98d;sunPower=2.40;hemiPower=1.72;exposure=.98;state='golden';
+    bg=0xdfd9cd;fog=0xd8d1c5;sunColor=0xffcf9b;sunPower=2.72;hemiPower=1.42;exposure=.97;state='golden';
     top=0x8098a7;horizon=0xe5ccb0;low=0xee9f66;skySun=0xffb66a;skyStrength=1.0;
   }
   scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=lowPower?82:58;scene.fog.far=lowPower?215:150;
   sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
-  hallAmbient.intensity=state==='evening'?.24:state==='golden'?.21:state==='morning'?.20:.18;
+  hallAmbient.intensity=state==='evening'?.17:state==='golden'?.13:state==='morning'?.12:.105;
+  fill.color.setHex(state==='evening'?0xcfdad4:state==='golden'?0xe7ddd1:0xdfe9e3);
   const practicalProfile=hallLightProfile[state]||hallLightProfile.day;
-  hallLights.forEach((l,i)=>{l.intensity=practicalProfile[i]??l.userData.baseIntensity??l.intensity});
+  hallLights.forEach((l,i)=>{l.userData.profileIntensity=practicalProfile[i]??l.userData.baseIntensity??1});
+  applyLightingV631Profile(state);
   if(renderer.shadowMap.enabled)renderer.shadowMap.needsUpdate=true;
   const dayT=THREE.MathUtils.clamp((h-6)/15,0,1);
   const arc=Math.PI*dayT;
@@ -3131,6 +3136,129 @@ const fitWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMat
 const arenaWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xd9aa67,lowPower?.11:.19),arenaWashItems,'KOMO_ARENA_WASH_INST_V60');
 [hallWashInst,twinWashInst,fitWashInst,arenaWashInst].forEach(m=>{m.renderOrder=2;m.frustumCulled=true});
 
+// V6.3.1 Lighting Overhaul — perceived depth with zero additional realtime lights.
+// Roles are deliberately separated so each layer can be culled independently.
+const lightingV631=new THREE.Group();lightingV631.name='KOMO_LIGHTING_V631';scene.add(lightingV631);
+const lightingStructuralV631=new THREE.Group();lightingStructuralV631.name='KOMO_LIGHTING_STRUCTURAL_V631';lightingV631.add(lightingStructuralV631);
+const lightingDecorativeV631=new THREE.Group();lightingDecorativeV631.name='KOMO_LIGHTING_DECORATIVE_V631';lightingV631.add(lightingDecorativeV631);
+const lightingDestinationV631=new THREE.Group();lightingDestinationV631.name='KOMO_LIGHTING_DESTINATION_V631';lightingV631.add(lightingDestinationV631);
+living.lightingV631={root:lightingV631,structural:lightingStructuralV631,decorative:lightingDecorativeV631,destination:lightingDestinationV631};
+
+function makeLightingGradientV631(mode='wall'){
+  const c=document.createElement('canvas');c.width=128;c.height=256;const g=c.getContext('2d');
+  g.clearRect(0,0,c.width,c.height);
+  if(mode==='floor'){
+    const gr=g.createRadialGradient(64,128,4,64,128,118);
+    gr.addColorStop(0,'rgba(255,255,255,.68)');gr.addColorStop(.30,'rgba(255,255,255,.26)');
+    gr.addColorStop(.72,'rgba(255,255,255,.055)');gr.addColorStop(1,'rgba(255,255,255,0)');
+    g.fillStyle=gr;
+  }else if(mode==='ceiling'){
+    const gr=g.createLinearGradient(0,0,0,256);
+    gr.addColorStop(0,'rgba(255,255,255,0)');gr.addColorStop(.28,'rgba(255,255,255,.18)');
+    gr.addColorStop(.52,'rgba(255,255,255,.62)');gr.addColorStop(.78,'rgba(255,255,255,.12)');
+    gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;
+  }else{
+    const gr=g.createLinearGradient(0,0,0,256);
+    gr.addColorStop(0,'rgba(255,255,255,.62)');gr.addColorStop(.22,'rgba(255,255,255,.34)');
+    gr.addColorStop(.66,'rgba(255,255,255,.07)');gr.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=gr;
+  }
+  g.fillRect(0,0,128,256);
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.minFilter=THREE.LinearMipmapLinearFilter;tx.magFilter=THREE.LinearFilter;return tx;
+}
+const lightTexWallV631=makeLightingGradientV631('wall');
+const lightTexFloorV631=makeLightingGradientV631('floor');
+const lightTexCeilingV631=makeLightingGradientV631('ceiling');
+function lightingMatV631(texture,color,opacity){
+  return new THREE.MeshBasicMaterial({
+    map:texture,color,transparent:true,opacity,depthWrite:false,depthTest:true,
+    blending:THREE.AdditiveBlending,side:THREE.DoubleSide
+  });
+}
+const lightPlaneV631=new THREE.PlaneGeometry(1,1);
+
+// STRUCTURAL — skylight rhythm and restrained wall bounce make the nave feel taller/deeper.
+const structuralWarmMatV631=lightingMatV631(lightTexCeilingV631,0xf3dcc0,lowPower?.055:.105);
+const structuralBounceMatV631=lightingMatV631(lightTexWallV631,0xeed9bb,lowPower?.045:.085);
+const structuralCeilingItemsV631=(lowPower?[-15,-3,9]:[-21,-15,-9,-3,3,9]).map(z=>({x:0,y:7.35,z,rx:Math.PI/2,sx:8.65,sy:5.15,sz:1}));
+const structuralWallItemsV631=[];
+[-1,1].forEach(side=>{
+  const x=side*11.04,ry=side<0?Math.PI/2:-Math.PI/2;
+  (lowPower?[-11,5]:[-19,-11,-3,5,11]).forEach(z=>structuralWallItemsV631.push({x,y:2.70,z,ry,sx:4.15,sy:4.55,sz:1}));
+});
+const structuralCeilingInstV631=instancedStatic(lightingStructuralV631,lightPlaneV631,structuralWarmMatV631,structuralCeilingItemsV631,'KOMO_STRUCTURAL_SKYLIGHT_INST_V631');
+const structuralWallInstV631=instancedStatic(lightingStructuralV631,lightPlaneV631,structuralBounceMatV631,structuralWallItemsV631,'KOMO_STRUCTURAL_BOUNCE_INST_V631');
+
+// DECORATIVE — armillary focus + differentiated room ambience.
+const decorativeHallV631=new THREE.Group();decorativeHallV631.name='KOMO_LIGHTING_DECORATIVE_HALL_V631';lightingDecorativeV631.add(decorativeHallV631);
+const decorativeTwinV631=new THREE.Group();decorativeTwinV631.name='KOMO_LIGHTING_DECORATIVE_TWIN_V631';lightingDecorativeV631.add(decorativeTwinV631);
+const decorativeFitV631=new THREE.Group();decorativeFitV631.name='KOMO_LIGHTING_DECORATIVE_FITNESS_V631';lightingDecorativeV631.add(decorativeFitV631);
+const decorativeArenaV631=new THREE.Group();decorativeArenaV631.name='KOMO_LIGHTING_DECORATIVE_ARENA_V631';lightingDecorativeV631.add(decorativeArenaV631);
+
+const armillaryBounceMatV631=lightingMatV631(lightTexFloorV631,0xe4c28c,lowPower?.07:.15);
+const armillaryBounceV631=mesh(decorativeHallV631,new THREE.PlaneGeometry(8.8,8.8),armillaryBounceMatV631,0,.445,-8.6,{cast:false,receive:false});
+armillaryBounceV631.rotation.x=-Math.PI/2;armillaryBounceV631.renderOrder=3;
+
+const twinKeyMatV631=lightingMatV631(lightTexWallV631,0xc5dbcf,lowPower?.08:.16);
+const fitKeyMatV631=lightingMatV631(lightTexWallV631,0xe8c997,lowPower?.075:.15);
+const arenaKeyMatV631=lightingMatV631(lightTexWallV631,0xc9975d,lowPower?.07:.16);
+const twinKeyV631=mesh(decorativeTwinV631,new THREE.PlaneGeometry(15.6,5.5),twinKeyMatV631,-45,3.30,-12.60,{cast:false,receive:false});
+const fitKeyV631=mesh(decorativeFitV631,new THREE.PlaneGeometry(16.2,5.4),fitKeyMatV631,0,3.25,-66.55,{cast:false,receive:false});
+const arenaKeyV631=mesh(decorativeArenaV631,new THREE.PlaneGeometry(15.6,5.5),arenaKeyMatV631,45,3.30,-12.60,{cast:false,receive:false});
+[twinKeyV631,fitKeyV631,arenaKeyV631].forEach(m=>m.renderOrder=3);
+
+// Subtle floor pools distinguish room atmosphere without blue-neon/game lighting.
+function floorPoolV631(parent,x,z,w,d,color,opacity){
+  const mat=lightingMatV631(lightTexFloorV631,color,lowPower?opacity*.55:opacity);
+  const p=mesh(parent,new THREE.PlaneGeometry(w,d),mat,x,.285,z,{cast:false,receive:false});
+  p.rotation.x=-Math.PI/2;p.renderOrder=3;return p;
+}
+floorPoolV631(decorativeTwinV631,-45,-4.2,12.0,10.0,0xbfd8ca,.115);
+floorPoolV631(decorativeFitV631,0,-58.0,13.5,11.0,0xe5c184,.105);
+floorPoolV631(decorativeArenaV631,45,-4.0,12.5,10.5,0xc58f55,.12);
+
+// DESTINATION — readable light carpets guide walking without adding lamps.
+const destinationCoolMatV631=lightingMatV631(lightTexFloorV631,0xbfd7ca,lowPower?.075:.15);
+const destinationFitMatV631=lightingMatV631(lightTexFloorV631,0xe3c18a,lowPower?.075:.15);
+const destinationArenaMatV631=lightingMatV631(lightTexFloorV631,0xc89258,lowPower?.075:.16);
+[
+  [-6.8,destinationCoolMatV631],
+  [0,destinationFitMatV631],
+  [6.8,destinationArenaMatV631]
+].forEach(([x,mat],i)=>{
+  const carpet=mesh(lightingDestinationV631,new THREE.PlaneGeometry(4.7,9.5),mat,x,.446,-25.2,{cast:false,receive:false});
+  carpet.rotation.x=-Math.PI/2;carpet.renderOrder=4;carpet.userData.phase=i*.8;
+});
+const destWallMatsV631=[
+  lightingMatV631(lightTexWallV631,0xc4d9cc,lowPower?.08:.17),
+  lightingMatV631(lightTexWallV631,0xe4c28d,lowPower?.08:.17),
+  lightingMatV631(lightTexWallV631,0xc7955b,lowPower?.08:.18)
+];
+[-6.8,0,6.8].forEach((x,i)=>{
+  const p=mesh(lightingDestinationV631,new THREE.PlaneGeometry(4.45,5.35),destWallMatsV631[i],x,3.05,-29.05,{cast:false,receive:false});
+  p.renderOrder=3;p.userData.phase=i*.7;
+});
+
+function applyLightingV631Profile(state='day'){
+  const L=living.lightingV631;if(!L)return;
+  const factors={
+    day:{structural:1,decorative:.92,destination:.95},
+    morning:{structural:.92,decorative:1.02,destination:1.02},
+    golden:{structural:.80,decorative:1.12,destination:1.08},
+    evening:{structural:.62,decorative:1.18,destination:1.16}
+  }[state]||{structural:1,decorative:1,destination:1};
+  structuralWarmMatV631.opacity=(lowPower?.055:.105)*factors.structural;
+  structuralBounceMatV631.opacity=(lowPower?.045:.085)*factors.structural;
+  armillaryBounceMatV631.opacity=(lowPower?.07:.15)*factors.decorative;
+  twinKeyMatV631.opacity=(lowPower?.08:.16)*factors.decorative;
+  fitKeyMatV631.opacity=(lowPower?.075:.15)*factors.decorative;
+  arenaKeyMatV631.opacity=(lowPower?.07:.16)*factors.decorative;
+  destinationCoolMatV631.opacity=(lowPower?.075:.15)*factors.destination;
+  destinationFitMatV631.opacity=(lowPower?.075:.15)*factors.destination;
+  destinationArenaMatV631.opacity=(lowPower?.075:.16)*factors.destination;
+  destWallMatsV631.forEach((m,i)=>m.opacity=(lowPower?.08:(i===2?.18:.17))*factors.destination);
+}
+applyLightingV631Profile(living.daylight);
+
 // V5.6 Open Rooms — Twin, Fitness and Arena remain visually open at all times.
 // The interior pass relies mostly on emissive geometry rather than extra realtime lights.
 const roomPremium=new THREE.Group();roomPremium.name='KOMO_OPEN_ROOMS_V56';scene.add(roomPremium);
@@ -5163,7 +5291,8 @@ function updateLightBudget(now){
   if(now-lastBudgetUpdate<280)return;
   lastBudgetUpdate=now;
   const candidates=[];
-  for(const l of new Set(living.lights)){
+  // V6.3.1: every non-structural realtime practical shares one budget.
+  for(const l of new Set([...living.lights,...hallLights])){
     if(!l||!l.parent)continue;
     l.visible=false;l.intensity=0;
     if(activeLightBudget<=0)continue;
@@ -5177,7 +5306,7 @@ function updateLightBudget(now){
   candidates.sort((a,b)=>a.d-b.d);
   candidates.slice(0,activeLightBudget).forEach(({l,d})=>{
     l.visible=true;
-    l.intensity=(l.userData.baseIntensity||1)*THREE.MathUtils.clamp(1-d/20,.28,1);
+    l.intensity=(l.userData.profileIntensity||l.userData.baseIntensity||1)*THREE.MathUtils.clamp(1-d/20,.28,1);
   });
 }
 function updateRealismLOD(){
@@ -5210,6 +5339,16 @@ function updateRealismLOD(){
     twinWashInst.visible=twinD<(lowPower?23:36);
     fitWashInst.visible=fitD<(lowPower?23:36);
     arenaWashInst.visible=arenaD<(lowPower?23:36);
+  }
+  if(living.lightingV631){
+    const L=living.lightingV631;
+    L.root.visible=!emergencyPerformance;
+    L.structural.visible=hallDetail;
+    decorativeHallV631.visible=hallDetail;
+    decorativeTwinV631.visible=twinD<(lowPower?22:36);
+    decorativeFitV631.visible=fitD<(lowPower?22:36);
+    decorativeArenaV631.visible=arenaD<(lowPower?22:36);
+    L.destination.visible=player.z<8&&player.z>-38&&Math.abs(player.x)<15;
   }
 }
 function updateVisibilityBudget(now){
@@ -5266,6 +5405,7 @@ function applyEmergencyPerformance(){
   if(typeof grandFlagshipV61!=='undefined')grandFlagshipV61.visible=false;
   if(typeof destinationTheatreV61!=='undefined')destinationTheatreV61.visible=false;
   if(typeof accessArchitectureV62!=='undefined')accessArchitectureV62.visible=false;
+  if(living.lightingV631)living.lightingV631.root.visible=false;
   living.clouds.forEach(c=>c.visible=false);
   // Keep only the first two ambient NPCs under emergency load.
   living.npcs.forEach((npc,i)=>{npc.visible=i<2});
@@ -5356,6 +5496,11 @@ function animateLiving(now){
   if(typeof twinWallGlow!=='undefined')twinWallGlow.opacity=(lowPower?.20:.34)+.07*(.5+.5*Math.sin(t*.33));
   if(typeof fitnessWallGlow!=='undefined')fitnessWallGlow.opacity=(lowPower?.18:.29)+.06*(.5+.5*Math.sin(t*.29));
   if(typeof arenaWallGlow!=='undefined')arenaWallGlow.opacity=(lowPower?.21:.36)+.08*(.5+.5*Math.sin(t*.38));
+  if(living.lightingV631&&!lowPower&&!emergencyPerformance){
+    const slow=.5+.5*Math.sin(t*.18);
+    armillaryBounceMatV631.opacity*=.992+.008*slow;
+    destWallMatsV631.forEach((m,i)=>{m.opacity*=.995+.005*(.5+.5*Math.sin(t*.20+i*.7))});
+  }
   if(living.lifeDisplay&&!lowPower){
     living.lifeDisplay.orbitA.rotation.z=t*.16;
     living.lifeDisplay.orbitB.rotation.x=t*.11;
@@ -5504,7 +5649,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'6.2.0-access-upgrade',
+  version:'6.3.1-lighting-overhaul',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
