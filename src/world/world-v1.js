@@ -2754,6 +2754,7 @@ box(rehabRoom,22,7.6,.36,WALL.sage,0,3.8,-11.8);
 // V5.9 Fitness Walls — warm acoustic timber, mirrors and limestone piers.
 const fitnessWallsV59=new THREE.Group();fitnessWallsV59.name='KOMO_FITNESS_WALLS_V59';rehabRoom.add(fitnessWallsV59);
 const fitnessWallGlow=new THREE.MeshBasicMaterial({color:0xe5c184,transparent:true,opacity:lowPower?.20:.34,depthWrite:false});
+const fitnessWallMirror=lowPower?MAT.smokedGlass:M.glass;
 [-1,1].forEach(side=>{
   const x=side*10.58;
   box(fitnessWallsV59,.10,.42,21.3,WALL.travertine,x,.36,0,{cast:false,receive:true});
@@ -2763,7 +2764,7 @@ const fitnessWallGlow=new THREE.MeshBasicMaterial({color:0xe5c184,transparent:tr
       box(fitnessWallsV59,.085,3.48,3.28,WALL.walnut,x-side*.095,3.28,z,{cast:false,receive:true});
       [-1.15,-.58,0,.58,1.15].forEach(dz=>box(fitnessWallsV59,.020,3.20,.045,WALL.black,x-side*.145,3.28,z+dz,{cast:false,receive:false}));
     }else{
-      box(fitnessWallsV59,.070,3.48,3.28,roomMirror,x-side*.085,3.28,z,{cast:false,receive:false});
+      box(fitnessWallsV59,.070,3.48,3.28,fitnessWallMirror,x-side*.085,3.28,z,{cast:false,receive:false});
       box(fitnessWallsV59,.082,3.56,.035,WALL.brass,x-side*.120,3.28,z+1.66,{cast:false,receive:false});
     }
     const wash=box(fitnessWallsV59,.092,.020,2.72,fitnessWallGlow,x-side*.155,5.06,z,{cast:false,receive:false});
