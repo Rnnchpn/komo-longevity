@@ -10,6 +10,8 @@ let client=null;
 let worldBridgeSent='';
 let worldBridgeRequestId='';
 let worldBridgeAcked=false;
+let worldBridgeLastSendAt=0;
+let worldBridgeRetryTimer=null;
 const WORLD_BRIDGE_CHANNEL='komo-pulse-world-bridge-v2';
 const WORLD_ORIGINS=new Set(['https://komolongevity.com','https://www.komolongevity.com']);
 const worldBridgeChannel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel(WORLD_BRIDGE_CHANNEL):null;
@@ -116,7 +118,7 @@ function worldBridgePayload(session,profile,requestId=''){
 }
 function sendWorldBridgePayload(cfg,payload){
   if(!window.opener)return false;
-  worldBridgeAcked=false;
+  worldBridgeAcked=false;worldBridgeLastSendAt=Date.now();
   window.opener.postMessage(payload,cfg.targetOrigin);
   showToast('Connexion à KŌMØ World…');
   return true;
@@ -125,7 +127,8 @@ async function worldBridgeAttempt(){
   const cfg=worldBridgeConfig();if(!cfg||!window.opener)return;
   const c=sb(),{data:{session}}=await c.auth.getSession();
   if(session?.user){
-    if(worldBridgeSent===session.access_token&&!worldBridgeAcked)return;
+    if(worldBridgeAcked)return;
+    if(worldBridgeSent===session.access_token&&Date.now()-worldBridgeLastSendAt<850)return;
     worldBridgeSent=session.access_token;
     const profile=await worldBridgeProfile(c,session);
     sendWorldBridgePayload(cfg,worldBridgePayload(session,profile,worldBridgeRequestId));
@@ -164,7 +167,9 @@ window.addEventListener('message',event=>{
   const cfg=worldBridgeConfig();if(!cfg||event.origin!==cfg.targetOrigin)return;
   const d=event.data||{};if(d.type!=='komo:world-bridge-ack')return;
   if(d.status==='connected'){
-    worldBridgeAcked=true;showToast('KŌMØ World connecté.');
+    worldBridgeAcked=true;
+    if(worldBridgeRetryTimer){clearInterval(worldBridgeRetryTimer);worldBridgeRetryTimer=null}
+    showToast('KŌMØ World connecté.');
     setTimeout(()=>{try{window.close()}catch{}},350);
   }else if(d.status==='error'){
     showToast('Connexion World impossible. Réessayez depuis le bouton CONNECT WORLD.');
@@ -176,3 +181,7 @@ const obs=new MutationObserver(()=>setTimeout(schedule,80));obs.observe(document
 document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,300));
 window.addEventListener('pageshow',()=>setTimeout(schedule,150));window.addEventListener('komo:session-ready',()=>worldBridgeAttempt().catch(console.error));
 setTimeout(schedule,700);
+if(worldBridgeConfig()){
+  worldBridgeRetryTimer=setInterval(()=>{if(worldBridgeAcked){clearInterval(worldBridgeRetryTimer);worldBridgeRetryTimer=null;return}worldBridgeAttempt().catch(console.error)},900);
+}
+window.addEventListener('pagehide',()=>{if(worldBridgeRetryTimer){clearInterval(worldBridgeRetryTimer);worldBridgeRetryTimer=null}});
