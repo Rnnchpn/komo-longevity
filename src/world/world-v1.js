@@ -262,17 +262,21 @@ const living={
   fountainJets:[],
   district:null,
   daylight:'day',
-  lightingV631:null
+  lightingV631:null,
+  atmosphereV632:null
 };
 
 // V1.8 true sky — atmospheric dome, visible sun and slow cloud field.
 const skyUniforms={
-  topColor:{value:new THREE.Color(0x6f9fbd)},
-  horizonColor:{value:new THREE.Color(0xdce7e3)},
-  lowColor:{value:new THREE.Color(0xf2e2c8)},
+  zenithColor:{value:new THREE.Color(0x789caf)},
+  upperColor:{value:new THREE.Color(0x9eb8c2)},
+  horizonColor:{value:new THREE.Color(0xdde3dc)},
+  hazeColor:{value:new THREE.Color(0xe8ddd0)},
+  lowColor:{value:new THREE.Color(0xeee0cf)},
   sunDir:{value:new THREE.Vector3(-.45,.58,.42).normalize()},
-  sunColor:{value:new THREE.Color(0xffddb0)},
-  sunStrength:{value:.72}
+  sunColor:{value:new THREE.Color(0xffe0b8)},
+  sunStrength:{value:.54},
+  horizonSoftness:{value:.34}
 };
 const skyMaterial=new THREE.ShaderMaterial({
   uniforms:skyUniforms,
@@ -289,22 +293,38 @@ const skyMaterial=new THREE.ShaderMaterial({
   `,
   fragmentShader:`
     varying vec3 vWorldPosition;
-    uniform vec3 topColor;
+    uniform vec3 zenithColor;
+    uniform vec3 upperColor;
     uniform vec3 horizonColor;
+    uniform vec3 hazeColor;
     uniform vec3 lowColor;
     uniform vec3 sunDir;
     uniform vec3 sunColor;
     uniform float sunStrength;
+    uniform float horizonSoftness;
     void main(){
       vec3 dir=normalize(vWorldPosition-cameraPosition);
       float y=clamp(dir.y,-1.0,1.0);
-      float up=smoothstep(-0.02,.72,y);
-      vec3 base=mix(horizonColor,topColor,up);
-      float low=smoothstep(.16,-.28,y);
-      base=mix(base,lowColor,low*.64);
-      float sunCore=pow(max(dot(dir,normalize(sunDir)),0.0),850.0);
-      float sunGlow=pow(max(dot(dir,normalize(sunDir)),0.0),34.0);
-      base+=sunColor*(sunCore*1.55+sunGlow*.18)*sunStrength;
+
+      // Four-stage natural gradient: warm low atmosphere → soft horizon → desaturated upper sky → zenith.
+      float horizonBand=exp(-abs(y)/max(.08,horizonSoftness));
+      float upperMix=smoothstep(.05,.58,y);
+      float zenithMix=smoothstep(.42,.96,y);
+      vec3 base=mix(horizonColor,upperColor,upperMix);
+      base=mix(base,zenithColor,zenithMix);
+      float below=smoothstep(.10,-.34,y);
+      base=mix(base,lowColor,below*.72);
+      base=mix(base,hazeColor,horizonBand*.24);
+
+      // Broad atmospheric solar glow only: no artificial visible sun disc.
+      float s=max(dot(dir,normalize(sunDir)),0.0);
+      float sunGlow=pow(s,18.0);
+      float sunHalo=pow(s,5.5);
+      base+=sunColor*(sunGlow*.115+sunHalo*.020)*sunStrength;
+
+      // Very subtle desaturation near the horizon improves distance perception.
+      float luma=dot(base,vec3(.299,.587,.114));
+      base=mix(base,vec3(luma),horizonBand*.055);
       gl_FragColor=vec4(base,1.0);
     }
   `
@@ -313,27 +333,44 @@ const skyDome=new THREE.Mesh(new THREE.SphereGeometry(300,lowPower?24:48,lowPowe
 skyDome.name='KOMO_TRUE_SKY_V18';skyDome.renderOrder=-1000;scene.add(skyDome);
 living.skyDome=skyDome;living.skyUniforms=skyUniforms;
 
-function makeCloudTexture(){
-  const c=document.createElement('canvas');c.width=1024;c.height=512;const x=c.getContext('2d');
+function makeCloudTexture(seed=0){
+  const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');
   x.clearRect(0,0,c.width,c.height);
-  const blobs=[[.20,.55,.22],[.36,.43,.28],[.52,.50,.31],[.68,.43,.25],[.80,.57,.18]];
-  blobs.forEach(([px,py,r],i)=>{
+  const count=5+(seed%3);
+  for(let i=0;i<count;i++){
+    const px=.13+i*(.72/Math.max(1,count-1))+.035*Math.sin(seed*1.7+i*2.1);
+    const py=.48+.10*Math.sin(seed*.9+i*1.4);
+    const r=.17+.055*((i+seed)%3);
     const gx=px*c.width,gy=py*c.height,rr=r*c.width;
     const g=x.createRadialGradient(gx,gy,0,gx,gy,rr);
-    g.addColorStop(0,'rgba(255,255,255,.72)');g.addColorStop(.48,'rgba(255,255,255,.38)');g.addColorStop(1,'rgba(255,255,255,0)');
+    g.addColorStop(0,'rgba(255,255,255,.52)');
+    g.addColorStop(.34,'rgba(255,255,255,.27)');
+    g.addColorStop(.72,'rgba(255,255,255,.075)');
+    g.addColorStop(1,'rgba(255,255,255,0)');
     x.fillStyle=g;x.fillRect(0,0,c.width,c.height);
-  });
-  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;return tx;
+  }
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;
+  tx.minFilter=THREE.LinearMipmapLinearFilter;tx.magFilter=THREE.LinearFilter;return tx;
 }
-const cloudTexture=makeCloudTexture();
-const cloudGroup=new THREE.Group();cloudGroup.name='KOMO_CLOUD_FIELD_V18';scene.add(cloudGroup);
-const cloudCount=lowPower?3:11;
+const cloudTextures=[makeCloudTexture(1),makeCloudTexture(4),makeCloudTexture(7)];
+const cloudGroup=new THREE.Group();cloudGroup.name='KOMO_CLOUD_FIELD_V632';scene.add(cloudGroup);
+const cloudCount=lowPower?1:9;
 for(let i=0;i<cloudCount;i++){
-  const mat=new THREE.MeshBasicMaterial({map:cloudTexture,transparent:true,opacity:lowPower?.10:.14,depthWrite:false,side:THREE.DoubleSide});
-  const cloud=new THREE.Mesh(new THREE.PlaneGeometry(34+(i%3)*8,13+(i%2)*4),mat);
+  const mat=new THREE.MeshBasicMaterial({
+    map:cloudTextures[i%cloudTextures.length],transparent:true,opacity:lowPower?.045:.080,
+    depthWrite:false,depthTest:true,side:THREE.DoubleSide,fog:true
+  });
+  const w=29+(i%4)*8,h=9+(i%3)*3.5;
+  const cloud=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
   cloud.rotation.x=-Math.PI/2;
-  cloud.position.set(-85+i*22,42+(i%3)*4,-68+(i%4)*38);
-  cloud.userData.baseX=cloud.position.x;cloud.userData.speed=.34+(i%4)*.07;cloud.userData.phase=i*.83;
+  cloud.rotation.z=((i%5)-2)*.035;
+  cloud.position.set(-105+i*27,44+(i%4)*3.8,-92+(i%5)*42);
+  cloud.scale.x=.92+(i%3)*.16;cloud.scale.y=.88+(i%2)*.12;
+  cloud.userData.baseX=cloud.position.x;
+  cloud.userData.baseZ=cloud.position.z;
+  cloud.userData.baseOpacity=lowPower?.045:(.058+(i%4)*.009);
+  cloud.userData.speed=.095+(i%4)*.025;
+  cloud.userData.phase=i*.91;
   cloudGroup.add(cloud);living.clouds.push(cloud);
 }
 // V3.4 horizon cleanup — keep atmospheric lighting without the oversized sun disc.
@@ -342,18 +379,22 @@ living.sunSprite=null;
 function applyDaylight(){
   const d=new Date(),h=d.getHours()+d.getMinutes()/60;
   let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe8ca,sunPower=3.05,hemiPower=1.72,exposure=lowPower?1.00:1.03,state='day';
-  let top=0x6f9fbd,horizon=0xdce7e3,low=0xf2e2c8,skySun=0xffdfb7,skyStrength=.68;
+  let zenith=0x789caf,upper=0x9eb8c2,horizon=0xdde3dc,haze=0xe8ddd0,low=0xeee0cf,skySun=0xffe0b8,skyStrength=.54,horizonSoftness=.34;
+  let fogNear=lowPower?96:72,fogFar=lowPower?238:188;
   if(h<7||h>=21){
     bg=0x74838a;fog=0x8c9691;sunColor=0xe5d6c9;sunPower=1.48;hemiPower=1.12;exposure=.88;state='evening';
-    top=0x405865;horizon=0x87908d;low=0xaa8068;skySun=0xe2c5ae;skyStrength=.10;
+    zenith=0x415966;upper=0x667a80;horizon=0x939995;haze=0x9e948a;low=0xa7816e;skySun=0xe4cdb9;skyStrength=.11;horizonSoftness=.42;
+    fogNear=lowPower?92:68;fogFar=lowPower?220:172;
   }else if(h<9){
     bg=0xe0e5df;fog=0xdbe0d9;sunColor=0xffd8aa;sunPower=2.62;hemiPower=1.55;exposure=.99;state='morning';
-    top=0x7fa8bd;horizon=0xe7d8c7;low=0xf2b77b;skySun=0xffc27e;skyStrength=.88;
+    zenith=0x83a6b5;upper=0xaec1c1;horizon=0xe5d9ca;haze=0xead6c0;low=0xeeb985;skySun=0xffc98d;skyStrength=.64;horizonSoftness=.37;
+    fogNear=lowPower?94:70;fogFar=lowPower?230:182;
   }else if(h>=17.5){
     bg=0xdfd9cd;fog=0xd8d1c5;sunColor=0xffcf9b;sunPower=2.72;hemiPower=1.42;exposure=.97;state='golden';
-    top=0x8098a7;horizon=0xe5ccb0;low=0xee9f66;skySun=0xffb66a;skyStrength=1.0;
+    zenith=0x8299a4;upper=0xaeb6b2;horizon=0xe2cfb8;haze=0xe7c7a7;low=0xe8a876;skySun=0xffbd7c;skyStrength=.68;horizonSoftness=.40;
+    fogNear=lowPower?98:74;fogFar=lowPower?228:180;
   }
-  scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=lowPower?82:58;scene.fog.far=lowPower?215:150;
+  scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=fogNear;scene.fog.far=fogFar;
   sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
   hallAmbient.intensity=state==='evening'?.17:state==='golden'?.13:state==='morning'?.12:.105;
   fill.color.setHex(state==='evening'?0xcfdad4:state==='golden'?0xe7ddd1:0xdfe9e3);
@@ -364,8 +405,10 @@ function applyDaylight(){
   const dayT=THREE.MathUtils.clamp((h-6)/15,0,1);
   const arc=Math.PI*dayT;
   const dir=new THREE.Vector3(-Math.cos(arc)*.82,Math.max(.08,Math.sin(arc)*.88),.42).normalize();
-  skyUniforms.topColor.value.setHex(top);skyUniforms.horizonColor.value.setHex(horizon);skyUniforms.lowColor.value.setHex(low);
-  skyUniforms.sunDir.value.copy(dir);skyUniforms.sunColor.value.setHex(skySun);skyUniforms.sunStrength.value=skyStrength;
+  skyUniforms.zenithColor.value.setHex(zenith);skyUniforms.upperColor.value.setHex(upper);
+  skyUniforms.horizonColor.value.setHex(horizon);skyUniforms.hazeColor.value.setHex(haze);skyUniforms.lowColor.value.setHex(low);
+  skyUniforms.sunDir.value.copy(dir);skyUniforms.sunColor.value.setHex(skySun);skyUniforms.sunStrength.value=skyStrength;skyUniforms.horizonSoftness.value=horizonSoftness;
+  applyAtmosphereV632Profile(state);
   sun.position.set(dir.x*48,Math.max(16,dir.y*56),dir.z*48);
   if(living.sunSprite){living.sunSprite.material.opacity=state==='evening'?.28:.88}
 }applyDaylight();
@@ -5552,11 +5595,11 @@ function animateLiving(now){
   }
   if(living.clouds?.length){
     living.clouds.forEach((cloud,i)=>{
-      let x=cloud.userData.baseX+(t*cloud.userData.speed*1.8);
-      while(x>105)x-=210;
+      let x=cloud.userData.baseX+t*cloud.userData.speed;
+      while(x>125)x-=250;
       cloud.position.x=x;
-      cloud.position.z+=Math.sin(t*.035+i)*.0015;
-      cloud.material.opacity=(lowPower?.075:.105)+.035*(.5+.5*Math.sin(t*.08+i*.8));
+      cloud.position.z=cloud.userData.baseZ+Math.sin(t*.018+cloud.userData.phase)*1.10;
+      cloud.material.opacity=cloud.userData.baseOpacity*(.90+.10*Math.sin(t*.035+i*.67));
     });
   }
   if(living.fountainJets?.length){
@@ -5644,7 +5687,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'6.3.1-lighting-overhaul',
+  version:'6.3.2-sky-atmosphere',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
