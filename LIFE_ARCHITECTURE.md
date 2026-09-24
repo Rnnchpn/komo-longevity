@@ -141,3 +141,18 @@ Do not call the store publicly open until all of the following are complete:
 8. KŌMØ Points legal/accounting rules approved;
 9. mobile purchase flow tested on iOS and Android;
 10. production domain and social preview verified.
+
+
+## Formulas architecture
+
+The kin 2026 supplement catalogue is integrated into KŌMØ Life as a dedicated formulation layer, without replacing the kin identity.
+
+Public presentation is organised in three groups:
+
+- LLP™ Samples — 6 proprietary locomotor formulas;
+- The Basics — 10 universal formulas;
+- Clinical Protocols — 5 curated packs displayed as a professional pathway.
+
+The storefront presents catalogue composition, intended focus, format and published pricing. Clinical packs are deliberately not positioned as self-prescription products. Public copy avoids disease-treatment promises and includes a professional-review disclaimer.
+
+The first release is catalogue-only. Supplement checkout must remain disabled until regulatory wording, product labelling, inventory, VAT/shipping rules and dedicated Stripe Price IDs are approved.
