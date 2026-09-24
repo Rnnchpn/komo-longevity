@@ -2749,6 +2749,117 @@ const startRing=mesh(arenaV52,new THREE.RingGeometry(2.05,2.18,64),MAT.brass,0,.
 box(arenaV52,15.8,2.45,.16,MAT.blackened,0,4.25,9.7,{cast:true});
 plaque(arenaV52,'LIVE ARENA','DAILY CHALLENGES · SOCIAL',7.6,1.08,0,4.38,9.55,{dark:true,titleSize:70});
 
+// V5.6 Open Rooms — Twin, Fitness and Arena remain visually open at all times.
+// The interior pass relies mostly on emissive geometry rather than extra realtime lights.
+const roomPremium=new THREE.Group();roomPremium.name='KOMO_OPEN_ROOMS_V56';scene.add(roomPremium);
+const roomWarmStrip=new THREE.MeshBasicMaterial({color:0xf2d39d,transparent:true,opacity:lowPower?.46:.72,depthWrite:false});
+const roomCoolStrip=new THREE.MeshBasicMaterial({color:0xc9ddd0,transparent:true,opacity:lowPower?.42:.66,depthWrite:false});
+const roomArenaStrip=new THREE.MeshBasicMaterial({color:0xd6ad70,transparent:true,opacity:lowPower?.48:.76,depthWrite:false});
+const roomScreen=new THREE.MeshBasicMaterial({color:0x20372c,transparent:true,opacity:.94,depthWrite:false});
+const roomMirror=lowPower?MAT.smokedGlass:M.glass;
+
+function ceilingRail(parent,x,z,w=3.0,accent=roomWarmStrip){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  box(g,w,.035,.10,MAT.blackened,0,6.55,0,{cast:false,receive:false});
+  box(g,w-.18,.018,.045,accent,0,6.515,.035,{cast:false,receive:false});
+  return g;
+}
+function luxeBench(parent,x,z,w=2.2,rot=0){
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
+  box(g,w,.17,.58,MAT.walnut,0,.47,0,{cast:true});
+  box(g,w-.12,.11,.50,MAT.leatherDark,0,.62,0,{cast:true});
+  [-w*.36,w*.36].forEach(px=>box(g,.09,.43,.42,MAT.brass,px,.23,0,{cast:true}));
+  return g;
+}
+function dataTotem(parent,x,z,title,sub,accent=roomCoolStrip){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  box(g,1.55,.24,1.18,MAT.travertine,0,.12,0,{cast:true});
+  box(g,1.22,3.25,.16,MAT.blackened,0,1.92,0,{cast:true});
+  box(g,1.05,2.72,.025,accent,0,1.92,.095,{cast:false,receive:false});
+  plaque(g,title,sub,1.12,.60,0,2.23,.12,{dark:true,titleSize:title.length>10?34:42});
+  return g;
+}
+
+// FUNCTIONAL TWIN — brighter lab, longitudinal data and an open glass pavilion.
+const twinPremium=new THREE.Group();twinPremium.name='KOMO_TWIN_PREMIUM_V56';twinRoom.add(twinPremium);
+[-7.2,-3.6,0,3.6,7.2].forEach((x,i)=>ceilingRail(twinPremium,x,-2.0,2.55,i%2?roomCoolStrip:roomWarmStrip));
+box(twinPremium,18.2,4.85,.045,roomMirror,0,2.80,-10.55,{cast:false,receive:false});
+box(twinPremium,18.4,.055,.08,MAT.brass,0,5.28,-10.46,{cast:false,receive:false});
+[-7.2,-3.6,3.6,7.2].forEach((x,i)=>dataTotem(twinPremium,x,4.8,i<2?'TODAY':'TREND',i%2?'MOTION AGE':'MOTION SCORE',i%2?roomCoolStrip:roomWarmStrip));
+luxeBench(twinPremium,-6.3,7.0,3.0,0);luxeBench(twinPremium,6.3,7.0,3.0,0);
+[-8.55,8.55].forEach(side=>{
+  box(twinPremium,.08,4.15,12.2,MAT.brass,side,2.55,-1.5,{cast:false,receive:false});
+  for(let z=-6.5;z<=3.4;z+=2.48)box(twinPremium,.035,3.15,.035,roomCoolStrip,side*.995,2.55,z,{cast:false,receive:false});
+});
+const twinCeilingHalo=mesh(twinPremium,new THREE.RingGeometry(4.3,4.37,72),roomCoolStrip,0,6.38,-4.2,{cast:false,receive:false});twinCeilingHalo.rotation.x=Math.PI/2;
+
+// FITNESS CLUB — open boutique training studio with real equipment silhouettes.
+const fitPremium=new THREE.Group();fitPremium.name='KOMO_FITNESS_PREMIUM_V56';rehabRoom.add(fitPremium);
+[-7.5,-3.75,0,3.75,7.5].forEach((x,i)=>ceilingRail(fitPremium,x,-.8,2.75,i===2?roomWarmStrip:roomCoolStrip));
+box(fitPremium,19.0,4.55,.04,roomMirror,0,2.85,-10.25,{cast:false,receive:false});
+box(fitPremium,19.2,.055,.09,MAT.brass,0,5.17,-10.15,{cast:false,receive:false});
+plaque(fitPremium,'OPEN STUDIO','TRAIN · MOVE · RECOVER',6.2,.72,0,5.48,-10.08,{dark:true,titleSize:56});
+
+// Strength bay.
+const strengthBay=new THREE.Group();strengthBay.position.set(-6.45,0,-2.8);fitPremium.add(strengthBay);
+[-1.0,1.0].forEach(x=>box(strengthBay,.11,2.35,.11,MAT.blackened,x,1.42,0,{cast:true}));
+box(strengthBay,2.15,.10,.10,MAT.brass,0,2.55,0,{cast:true});
+box(strengthBay,1.75,.12,.54,MAT.leatherDark,0,.58,.68,{cast:true});
+box(strengthBay,.78,.10,.58,MAT.blackened,0,.36,.68,{cast:true});
+const bar=box(strengthBay,2.62,.055,.055,MAT.brass,0,1.72,-.05,{cast:true});
+[-1.18,1.18].forEach(x=>{cyl(strengthBay,.20,.20,.075,MAT.blackened,x,1.72,-.05,18,{cast:true}).rotation.z=Math.PI/2});
+plaque(strengthBay,'STRENGTH','CONTROL · POWER',2.6,.54,0,3.08,.02,{dark:true,titleSize:38});
+
+// Balance bay.
+const balanceBay=new THREE.Group();balanceBay.position.set(-2.15,0,-2.8);fitPremium.add(balanceBay);
+const bosu=mesh(balanceBay,new THREE.SphereGeometry(.58,28,14,0,Math.PI*2,0,Math.PI/2),M.twinGlow,0,.27,0,{cast:true});bosu.scale.y=.46;
+cyl(balanceBay,.66,.66,.08,MAT.blackened,0,.08,0,32,{cast:true});
+[-.72,.72].forEach(x=>box(balanceBay,.12,1.55,.12,MAT.brass,x,.88,.45,{cast:true}));
+box(balanceBay,1.55,.055,.055,MAT.brass,0,1.63,.45,{cast:true});
+plaque(balanceBay,'BALANCE','STABILITY · CONTROL',2.55,.54,0,3.08,.02,{dark:false,titleSize:38});
+
+// Cardio bay.
+const cardioBay=new THREE.Group();cardioBay.position.set(2.15,0,-2.8);fitPremium.add(cardioBay);
+box(cardioBay,1.25,.18,2.25,MAT.blackened,0,.22,0,{cast:true});
+box(cardioBay,1.08,.045,2.00,MAT.leatherDark,0,.33,0,{cast:true});
+[-.50,.50].forEach(x=>box(cardioBay,.08,1.22,.08,MAT.brass,x,.92,-.78,{cast:true}));
+box(cardioBay,1.10,.08,.08,MAT.brass,0,1.50,-.78,{cast:true});
+box(cardioBay,.70,.50,.12,roomScreen,0,1.75,-.78,{cast:false,receive:false});
+plaque(cardioBay,'CARDIO','CAPACITY · FLOW',2.55,.54,0,3.08,.02,{dark:true,titleSize:38});
+
+// Recovery bay.
+const recoveryBay=new THREE.Group();recoveryBay.position.set(6.45,0,-2.8);fitPremium.add(recoveryBay);
+luxeBench(recoveryBay,0,.15,2.55,0);
+[-.64,0,.64].forEach((x,i)=>{const roll=cyl(recoveryBay,.16,.16,.72,i===1?MAT.fabricLight:MAT.charcoal,x,.92,.08,18,{cast:true});roll.rotation.z=Math.PI/2});
+box(recoveryBay,1.65,.62,.55,MAT.travertine,0,.34,-.92,{cast:true});
+plaque(recoveryBay,'RECOVERY','RESET · BREATHE',2.55,.54,0,3.08,.02,{dark:false,titleSize:38});
+
+// Open lounge / hydration bar so the room reads as a club, not a test lab.
+luxeBench(fitPremium,-5.8,7.1,3.1,0);luxeBench(fitPremium,5.8,7.1,3.1,0);
+box(fitPremium,3.8,.88,.72,MAT.walnut,0,.47,8.15,{cast:true});
+box(fitPremium,3.95,.06,.86,MAT.brass,0,.94,8.15);
+[-.72,0,.72].forEach(x=>cyl(fitPremium,.10,.12,.42,MAT.charcoal,x,1.17,8.15,14,{cast:true}));
+plaque(fitPremium,'HYDRATE','PAUSE · RECOVER',3.0,.50,0,1.66,8.53,{dark:true,titleSize:38});
+
+// ARENA — more spectacular, with spectator benches, light canopy and result wall.
+const arenaPremium=new THREE.Group();arenaPremium.name='KOMO_ARENA_PREMIUM_V56';arenaRoom.add(arenaPremium);
+[-7.2,-3.6,0,3.6,7.2].forEach((x,i)=>ceilingRail(arenaPremium,x,-2.0,2.75,i===2?roomArenaStrip:roomWarmStrip));
+[-1,1].forEach(side=>{
+  [0,1,2].forEach(row=>{
+    const z=3.8+row*1.18;
+    const g=new THREE.Group();g.position.set(side*8.45,0,z);g.rotation.y=side<0?Math.PI/2:-Math.PI/2;arenaPremium.add(g);
+    box(g,5.4,.32,.72,row===1?MAT.walnut:MAT.blackened,0,.32+row*.22,0,{cast:true});
+    box(g,5.1,.10,.58,MAT.leatherDark,0,.55+row*.22,0,{cast:true});
+  });
+});
+box(arenaPremium,9.2,2.65,.18,MAT.blackened,0,4.0,-10.15,{cast:true});
+plaque(arenaPremium,'LIVE SCORE','CHALLENGES · COMMUNITY · XP',8.2,1.20,0,4.35,-10.02,{dark:true,titleSize:68});
+[-3.2,0,3.2].forEach((x,i)=>{
+  plaque(arenaPremium,i===0?'BALANCE':i===1?'SQUAT':'CAPACITY',i===0?'60 S':i===1?'10 REPS':'STAND UP',2.35,.62,x,2.85,-9.90,{dark:i!==1,titleSize:38});
+});
+const arenaCanopy=mesh(arenaPremium,new THREE.RingGeometry(5.2,5.30,84),roomArenaStrip,0,6.32,-2,{cast:false,receive:false});arenaCanopy.rotation.x=Math.PI/2;
+const arenaCanopyInner=mesh(arenaPremium,new THREE.RingGeometry(3.55,3.62,72),roomWarmStrip,0,6.28,-2,{cast:false,receive:false});arenaCanopyInner.rotation.x=Math.PI/2;
+
 
 // Runtime state.
 const player=new THREE.Vector3(0,0,14.55);
@@ -4298,17 +4409,16 @@ function updateCamera(now,dt){
 function updateDestinationDoors(now,dt){
   if(!living.destinationDoors?.length)return;
   living.destinationDoors.forEach((d,i)=>{
-    const near=player.z<-19.8&&player.z>-29.4&&Math.abs(player.x-d.x)<3.75;
-    const target=near?1:0;
-    d.progress+=(target-d.progress)*(1-Math.exp(-(target?12.5:5.4)*dt));
+    // V5.6: destination rooms are permanently open. Glass leaves stay parked inside the jambs.
+    d.progress+=(1-d.progress)*(1-Math.exp(-11.5*dt));
     const e=d.progress*d.progress*(3-2*d.progress);
-    d.left.position.x=THREE.MathUtils.lerp(-1.08,-2.00,e);
-    d.right.position.x=THREE.MathUtils.lerp(1.08,2.00,e);
-    d.mat.opacity=.10+.34*e;
+    d.left.position.x=THREE.MathUtils.lerp(-1.82,-2.20,e);
+    d.right.position.x=THREE.MathUtils.lerp(1.82,2.20,e);
+    d.mat.opacity=.17+.22*e;
     d.beacon.rotation.z=now*.0011*(i%2?1:-1);
-    d.beacon.scale.setScalar(.92+.14*e+.045*Math.sin(now*.004+i));
-    d.beacon.material.opacity=.12+.36*e;
-    d.threshold.material.opacity=.10+.30*e;
+    d.beacon.scale.setScalar(1.08+.035*Math.sin(now*.004+i));
+    d.beacon.material.opacity=.38;
+    d.threshold.material.opacity=.32;
   });
 }
 function updateDoors(now,dt){
@@ -4831,7 +4941,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.5.0-entry-gateway',
+  version:'5.6.0-open-premium-rooms',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
