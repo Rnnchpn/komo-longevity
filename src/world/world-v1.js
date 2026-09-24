@@ -5352,14 +5352,25 @@ function waitForWorldMultiplayer(timeout=6500){
   });
 }
 window.addEventListener('komo:world-session-ready',event=>enterWorldAfterAuth(event.detail||{}));
+window.addEventListener('komo:world-auth-error',event=>{
+  const message=event.detail?.message||(locale==='fr'?'Connexion impossible.':'Connection failed.');
+  setIntroAuthBusy(false);setIntroAuthStatus(message,true);
+});
 
-introPulse?.addEventListener('click',()=>{
-  setIntroAuthStatus(locale==='fr'?'Ouverture de Pulse…':'Opening Pulse…');setIntroAuthBusy(true);
-  const api=window.KomoWorldMultiplayer;
-  if(api?.connectPulse){api.connectPulse();setTimeout(()=>setIntroAuthBusy(false),900);return}
-  // Preserve the user gesture so popup blockers do not prevent authentication.
-  window.open('https://pulse.komolongevity.com/?world_bridge=1&world_origin='+encodeURIComponent(location.origin),'komoPulseWorldBridge','popup=yes,width=520,height=760,resizable=yes,scrollbars=yes');
-  setTimeout(()=>setIntroAuthBusy(false),900);
+introPulse?.addEventListener('click',async()=>{
+  setIntroAuthStatus(locale==='fr'?'Connexion à Pulse…':'Connecting to Pulse…');setIntroAuthBusy(true);
+  try{
+    const api=await waitForWorldMultiplayer();
+    const result=await api.connectPulse();
+    if(result===true)return;
+    if(result==='pending'){
+      setIntroAuthStatus(locale==='fr'?'Pulse est ouvert. Connectez-vous puis revenez dans World.':'Pulse is open. Sign in, then return to World.');
+      setTimeout(()=>setIntroAuthBusy(false),1100);return;
+    }
+    throw new Error(locale==='fr'?'La fenêtre Pulse a été bloquée par le navigateur. Autorisez les fenêtres puis réessayez.':'The Pulse window was blocked. Allow pop-ups and try again.');
+  }catch(err){
+    setIntroAuthBusy(false);setIntroAuthStatus(err?.message||(locale==='fr'?'Connexion Pulse impossible.':'Pulse connection failed.'),true);
+  }
 });
 
 $('#intro-enter').addEventListener('click',async()=>{
@@ -5370,7 +5381,7 @@ $('#intro-enter').addEventListener('click',async()=>{
   try{
     const api=await waitForWorldMultiplayer();
     const ok=await api.connectGuest(name);
-    if(!ok)throw new Error(locale==='fr'?'Le mode invité doit être activé dans Supabase Auth.':'Guest mode must be enabled in Supabase Auth.');
+    if(!ok)throw new Error(locale==='fr'?'Connexion invité impossible.':'Guest connection failed.');
   }catch(err){
     setIntroAuthBusy(false);
     setIntroAuthStatus(err?.message||(locale==='fr'?'Connexion invité impossible.':'Guest connection failed.'),true);
