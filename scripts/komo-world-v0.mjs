@@ -110,7 +110,7 @@ const checks=[
   ['Twin room V5.2 present',runtime.includes('KOMO_TWIN_ROOM_V52')&&runtime.includes('Data canopy')===false&&runtime.includes('new THREE.TorusGeometry(3.0+i*.34')],
   ['Fitness room V5.2 present',runtime.includes('KOMO_FITNESS_ROOM_V52')&&runtime.includes("'TODAY','MOVE · TRAIN · RECOVER'")&&runtime.includes('MAT.smokedGlass')],
   ['Arena room V5.2 present',runtime.includes('KOMO_ARENA_ROOM_V52')&&runtime.includes("'LIVE ARENA','DAILY CHALLENGES · SOCIAL'")&&runtime.includes('new THREE.RingGeometry(2.05,2.18,64)')],
-  ['fast destination doors V5.2 present',runtime.includes('player.z<-19.8')&&runtime.includes('target?12.5:5.4')&&runtime.includes('doorTarget?11.2:4.6')],
+  ['destination access V5.6 present',runtime.includes('left.position.x=-2.20;right.position.x=2.20')&&runtime.includes('progress:1')&&runtime.includes('d.progress+=(1-d.progress)')&&runtime.includes('doorTarget?11.2:4.6')],
   ['desktop optical depth V5 present',runtime.includes('lowPower?82:58')&&runtime.includes('lowPower?215:150')&&runtime.includes("new THREE.PerspectiveCamera(lowPower?60:54")],
   ['desktop V5 performance safety present',runtime.includes("desktopCinematic.visible=false")&&runtime.includes("desktopCinematic.visible=!lowPower&&!emergencyPerformance")],
   ['desktop UI V5 present',css.includes('V5.0 Desktop Visual Revolution')&&css.includes('body.desktop-visual-v5 #world-canvas')&&css.includes('body.desktop-visual-v5::before')&&css.includes('body.desktop-visual-v5 .world-hud')],
