@@ -1012,15 +1012,22 @@ export async function mount(runtime){
     }
     return true;
   };
-  const connectPulse=async()=>{
-    const {data}=await client.auth.getSession();
-    const session=data?.session||state.session;
-    if(session?.user&&!session.user.is_anonymous){
+  const connectPulse=()=>{
+    // Must open synchronously from the click event so Safari/iPad/Chrome keep the user gesture.
+    if(state.session?.user&&!state.session.user.is_anonymous){
+      return startLiveSession(state.session).then(ok=>{if(ok)emitSessionReady('pulse');return ok});
+    }
+    const opened=openPulse();
+    if(!opened)return false;
+    // A non-persistent World session may still be available in memory; check only after the popup is safely open.
+    client.auth.getSession().then(async({data})=>{
+      const session=data?.session;
+      if(!session?.user||session.user.is_anonymous)return;
+      state.session=session;
       const ok=await startLiveSession(session);
       if(ok)emitSessionReady('pulse');
-      return ok;
-    }
-    return openPulse()?'pending':false;
+    }).catch(err=>console.warn('[World Pulse session check]',err));
+    return 'pending';
   };
   const startLocalGuest=async(name,reason='')=>{
     if(state.started)await resetLiveLayer({deletePresence:true});
