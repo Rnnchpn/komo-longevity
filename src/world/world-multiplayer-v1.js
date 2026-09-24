@@ -302,8 +302,15 @@ function css(){
   }
   @media(max-width:520px){
     .kwmp-pill[data-kwmp-connect]{display:none!important}
-    .kwmp-dock{top:calc(max(12px,env(safe-area-inset-top)) + 61px)!important}
-    .kwmp-pill{height:29px!important;padding:0 8px!important}
+    .kwmp-dock{
+      top:calc(max(12px,env(safe-area-inset-top)) + 51px)!important;
+      right:7px!important;gap:5px!important;max-width:240px!important
+    }
+    .kwmp-pill{
+      height:27px!important;padding:0 8px!important;border-radius:10px!important;
+      font-size:6px!important;letter-spacing:.10em!important;
+      background:rgba(15,30,23,.82)!important
+    }
     .kwmp-chat{left:7px!important;right:7px!important;max-height:56dvh!important}
   }
   `;document.head.appendChild(s);
@@ -1224,7 +1231,7 @@ export async function mount(runtime){
   });
 
   window.KomoWorldMultiplayer={
-    version:'1.4.0-oversized-avatar',
+    version:'1.5.0-arrival-ui',
     connectGuest,
     connectPulse,
     openPulse,
@@ -1245,5 +1252,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'1.3.0-human-avatar',connect:openPulse,state};
+  window.KomoWorldMultiplayer={...window.KomoWorldMultiplayer,version:'1.5.0-arrival-ui',connect:openPulse,state};
 }
