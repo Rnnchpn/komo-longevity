@@ -3000,6 +3000,42 @@ const startRing=mesh(arenaV52,new THREE.RingGeometry(2.05,2.18,64),MAT.brass,0,.
 box(arenaV52,15.8,2.45,.16,MAT.blackened,0,4.25,9.7,{cast:true});
 plaque(arenaV52,'LIVE ARENA','DAILY CHALLENGES · SOCIAL',7.6,1.08,0,4.38,9.55,{dark:true,titleSize:70});
 
+// V6.0 Realism Lite — baked-style wall washes: 4 draw calls, zero realtime lights.
+function makeWallWashTexture(){
+  const c=document.createElement('canvas');c.width=128;c.height=256;const g=c.getContext('2d');
+  g.clearRect(0,0,128,256);
+  const radial=g.createRadialGradient(64,26,2,64,82,126);
+  radial.addColorStop(0,'rgba(255,255,255,.82)');
+  radial.addColorStop(.22,'rgba(255,255,255,.34)');
+  radial.addColorStop(.62,'rgba(255,255,255,.10)');
+  radial.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle=radial;g.fillRect(0,0,128,256);
+  const tx=new THREE.CanvasTexture(c);tx.colorSpace=THREE.SRGBColorSpace;tx.minFilter=THREE.LinearMipmapLinearFilter;tx.magFilter=THREE.LinearFilter;return tx;
+}
+const wallWashTextureV60=makeWallWashTexture();
+function wallWashMaterial(color,opacity){
+  return new THREE.MeshBasicMaterial({
+    map:wallWashTextureV60,color,transparent:true,opacity,depthWrite:false,depthTest:true,
+    blending:THREE.AdditiveBlending,side:THREE.DoubleSide
+  });
+}
+const realismLightWashesV60=new THREE.Group();realismLightWashesV60.name='KOMO_REALISM_LIGHT_WASHES_V60';scene.add(realismLightWashesV60);
+realismLightWashesV60.userData.realismDetail=true;
+const washPlaneV60=new THREE.PlaneGeometry(1,1);
+const hallWashItems=[];
+[-1,1].forEach(side=>{
+  const x=side*11.16,ry=side<0?Math.PI/2:-Math.PI/2;
+  (lowPower?[-14,3]:[-20,-12,-4,4,11]).forEach(z=>hallWashItems.push({x,y:3.60,z,ry,sx:3.15,sy:4.65,sz:1}));
+});
+const twinWashItems=(lowPower?[-4.8,4.8]:[-7.0,-3.5,0,3.5,7.0]).map(x=>({x:x-45,y:3.55,z:-12.64,ry:0,sx:3.15,sy:4.55,sz:1}));
+const fitWashItems=(lowPower?[-4.8,4.8]:[-7.2,-3.6,0,3.6,7.2]).map(x=>({x,y:3.50,z:-66.50,ry:0,sx:3.12,sy:4.45,sz:1}));
+const arenaWashItems=(lowPower?[-4.8,4.8]:[-7.0,-3.5,0,3.5,7.0]).map(x=>({x:x+45,y:3.55,z:-12.64,ry:0,sx:3.15,sy:4.55,sz:1}));
+const hallWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xffd7a0,lowPower?.10:.17),hallWashItems,'KOMO_HALL_WASH_INST_V60');
+const twinWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xc8e0d2,lowPower?.10:.16),twinWashItems,'KOMO_TWIN_WASH_INST_V60');
+const fitWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xf0c987,lowPower?.10:.17),fitWashItems,'KOMO_FITNESS_WASH_INST_V60');
+const arenaWashInst=instancedStatic(realismLightWashesV60,washPlaneV60,wallWashMaterial(0xd9aa67,lowPower?.11:.19),arenaWashItems,'KOMO_ARENA_WASH_INST_V60');
+[hallWashInst,twinWashInst,fitWashInst,arenaWashInst].forEach(m=>{m.renderOrder=2;m.frustumCulled=true});
+
 // V5.6 Open Rooms — Twin, Fitness and Arena remain visually open at all times.
 // The interior pass relies mostly on emissive geometry rather than extra realtime lights.
 const roomPremium=new THREE.Group();roomPremium.name='KOMO_OPEN_ROOMS_V56';scene.add(roomPremium);
@@ -5009,10 +5045,33 @@ function updateLightBudget(now){
     l.intensity=(l.userData.baseIntensity||1)*THREE.MathUtils.clamp(1-d/20,.28,1);
   });
 }
+function updateRealismLOD(){
+  // Textured structural walls always remain. Only fine overlays/washes are distance-gated.
+  const twinD=Math.hypot(player.x+45,player.z+2);
+  const fitD=Math.hypot(player.x,player.z+55);
+  const arenaD=Math.hypot(player.x-45,player.z+2);
+  const hallDetail=player.z>-31&&player.z<21&&Math.abs(player.x)<15;
+  if(typeof hallWallsV59!=='undefined')hallWallsV59.visible=hallDetail;
+  if(typeof twinWallV59!=='undefined')twinWallV59.visible=twinD<(lowPower?25:40);
+  if(typeof fitnessWallsV59!=='undefined')fitnessWallsV59.visible=fitD<(lowPower?25:40);
+  if(typeof arenaWallsV59!=='undefined')arenaWallsV59.visible=arenaD<(lowPower?25:40);
+  if(typeof galleryWallsV59!=='undefined'){
+    const nearGallery=inTwinLink(player)||inArenaLink(player)||inFitnessLink(player)||(!inTwinZone(player)&&!inFitnessZone(player)&&!inArenaZone(player)&&player.z<-15);
+    galleryWallsV59.visible=nearGallery||Math.min(twinD,fitD,arenaD)<(lowPower?18:28);
+  }
+  if(typeof realismLightWashesV60!=='undefined'){
+    realismLightWashesV60.visible=!emergencyPerformance;
+    hallWashInst.visible=hallDetail;
+    twinWashInst.visible=twinD<(lowPower?23:36);
+    fitWashInst.visible=fitD<(lowPower?23:36);
+    arenaWashInst.visible=arenaD<(lowPower?23:36);
+  }
+}
 function updateVisibilityBudget(now){
   if(now-lastVisibilityUpdate<420)return;
   lastVisibilityUpdate=now;
   if(mode!=='world')return;
+  updateRealismLOD();
   // Coarse occlusion/distance budget: do not draw whole zones when they cannot contribute.
   const deepHall=player.z<7;
   exterior.visible=player.z>5;
@@ -5058,6 +5117,7 @@ function applyEmergencyPerformance(){
   living.lights.forEach(l=>{l.visible=false;if('intensity' in l)l.intensity=0});
   if(living.dust)living.dust.visible=false;
   if(typeof desktopCinematic!=='undefined')desktopCinematic.visible=false;
+  if(typeof realismLightWashesV60!=='undefined')realismLightWashesV60.visible=false;
   living.clouds.forEach(c=>c.visible=false);
   // Keep only the first two ambient NPCs under emergency load.
   living.npcs.forEach((npc,i)=>{npc.visible=i<2});
@@ -5281,7 +5341,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.9.0-architectural-walls',
+  version:'6.0.0-realism-lite',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
