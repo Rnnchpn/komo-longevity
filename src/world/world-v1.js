@@ -5896,6 +5896,6 @@ window.KomoWorld={
   joinPresence,
   notify
 };
-import('./world-multiplayer-v1.js')
+import('./world-multiplayer-v1.js?v=20260924-auth-v121')
   .then(mod=>mod.mount?.(window.KomoWorld))
   .catch(err=>console.warn('[KŌMØ World multiplayer] optional layer unavailable',err));
