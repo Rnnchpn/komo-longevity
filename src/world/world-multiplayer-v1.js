@@ -921,6 +921,27 @@ export async function mount(runtime){
       avatar_config:profile?.avatar_config&&typeof profile.avatar_config==='object'?profile.avatar_config:(profileHint?.avatar_config||{}),
       interests:Array.isArray(profile?.interests)?profile.interests.slice(0,8):(profileHint?.interests||[]).slice(0,8)
     };
+    // V5.4 Daily Health: private user-owned summary, never written to presence/chat.
+    try{
+      const h=await client.from('pulse_daily_health')
+        .select('health_date,source,steps,active_minutes,sleep_hours,resting_hr,hrv_ms,pain,recovery,captured_at')
+        .eq('user_id',state.session.user.id)
+        .order('health_date',{ascending:false})
+        .order('captured_at',{ascending:false})
+        .limit(1)
+        .maybeSingle();
+      if(h.data)runtime.ingestDailyHealth?.({
+        date:h.data.health_date,
+        source:String(h.data.source||'pulse').replaceAll('_',' ').toUpperCase(),
+        steps:h.data.steps,
+        active_minutes:h.data.active_minutes,
+        sleep_hours:h.data.sleep_hours,
+        resting_hr:h.data.resting_hr,
+        hrv_ms:h.data.hrv_ms,
+        pain:h.data.pain,
+        recovery:h.data.recovery
+      });
+    }catch(err){console.warn('[World daily health]',err)}
   };
   const startLiveSession=async(session,profileHint={})=>{
     if(!session?.user)return false;
