@@ -13,7 +13,7 @@ const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const pulseHtml=await readFile('pulse-app/index.html','utf8');
 const checks=[
-  ['V7.2.1 desktop HTML cache bust present',html.includes('world-v1.css?v=7.2.1-strict-iphone-parity')&&html.includes('world-v1.js?v=7.2.1-strict-iphone-parity')&&html.includes('name="komo-world-version" content="7.2.1-strict-iphone-parity"')],
+  ['V7.3.1 HTML cache bust present',html.includes('world-v1.css?v=7.3.1-first-person-living-world')&&html.includes('world-v1.js?v=7.3.1-first-person-living-world')&&html.includes('name="komo-world-version" content="7.3.1-first-person-living-world"')],
   ['V7.2.1 strict iPhone visual reference present',runtime.includes('const iphoneVisualReference=true')&&runtime.includes('const visualLowPower=iphoneVisualReference')&&runtime.includes("classList.toggle('desktop-visual-v5',false)")],
   ['V7.2 living population present',runtime.includes('const populationV72=[')&&runtime.includes("label:'Aiko'")&&runtime.includes("label:'Chiara'")&&runtime.includes("label:'Salma'")&&runtime.includes("label:'Samuel'")&&runtime.includes("body:'broad'")&&runtime.includes("hairStyle:'bun'")],
 
@@ -38,7 +38,11 @@ const checks=[
   ['low-power lights disabled',runtime.includes('l.visible=false;l.intensity=0')&&runtime.includes("antialias:!lowPower")],
   ['living entrance V2.3+ present',runtime.includes('KOMO_LIVING_ENTRANCE_V23')&&runtime.includes('function updateDoors(now,dt)')],
   ['arrival life cues V2.3 present',runtime.includes('KOMO_ARRIVAL_DETAILS_V23')],
-  ['third-person V7 present',runtime.includes('KOMO_PLAYER_AVATAR_V71_OVERSIZED')&&runtime.includes("cameraMode='third'")&&runtime.includes('const eyeY=player.y+visualGround+2.03+bob')],
+  ['first-person V7.3 default present',runtime.includes('KOMO_PLAYER_AVATAR_V71_OVERSIZED')&&runtime.includes("cameraMode='first'")&&runtime.includes("setCameraMode('first')")&&runtime.includes('const eyeY=player.y+visualGround+1.72+bob+breath')],
+  ['V7.3 open Science Library present',runtime.includes("libraryV73.name='KOMO_LIBRARY_V73'")&&runtime.includes('function inLibraryZone')&&runtime.includes("library:{mode:'world'")&&runtime.includes("id:'library_entry'")],
+  ['V7.3 Library population present',runtime.includes('const libraryPopulationV73=[')&&runtime.includes("task:'read'")&&runtime.includes("functionLabel:'LIBRARY HOST'")],
+  ['V7.3 task-driven NPC system present',runtime.includes("task='auto'")&&runtime.includes('const resolvedTask=')&&runtime.includes("d.task==='read'")&&runtime.includes("d.task==='train'")&&runtime.includes("d.task==='host'")],
+  ['V7.3 real roof architecture present',runtime.includes("mainRoofV73.name='KOMO_MAIN_ROOF_V73'")&&runtime.includes('V7.3 real roofline')&&runtime.includes('Proper library roof with parapet')&&runtime.includes('box(boardingV68,19.2,.24,15.2')],
   ['World Journey V2.4+ present',runtime.includes('KOMO_WORLD_JOURNEY_V24')&&runtime.includes('const JOURNEY_MISSIONS')&&runtime.includes('function completeJourney')],
   ['iPhone-reference run gameplay V7.2.1 present',runtime.includes('const AUTO_RUN_SPEED=6.05')&&runtime.includes('const AUTO_RUN_BOOST=7.15')&&runtime.includes('tryMoveSmooth')],
   ['living journey V2.5+ present',runtime.includes('KOMO_JOURNEY_GUIDE_V25')&&runtime.includes('function updateJourneyGuide')],
@@ -68,7 +72,7 @@ const checks=[
   ['World Hub Life items present',runtime.includes('KOMO_LIFE_ITEMS_V32')&&runtime.includes('function showLifeItem')],
   ['World Hub avatar studio present',runtime.includes('AVATAR_KEY')&&runtime.includes('function showAvatarStudio')],
   ['V7.2.1 iPhone cloud composition present',runtime.includes('const cloudCount=1')&&runtime.includes('const cloudTextures=[makeCloudTexture(1),makeCloudTexture(4),makeCloudTexture(7)]')&&runtime.includes('cloud.userData.baseOpacity')&&runtime.includes('if(living.clouds?.length)')],
-  ['Immersive Hub V6.4 entry present',runtime.includes("version:'7.2.1-strict-iphone-parity'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
+  ['Immersive Hub V7.3 entry present',runtime.includes("version:'7.3.1-first-person-living-world'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
   ['Immersive Hub V4.5 portals present',runtime.includes('KOMO_PORTAL_ARCH_V45_')&&runtime.includes('KOMO_DESTINATION_VESTIBULES_V45')&&runtime.includes('function updateDestinationDoors')],
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub NPC roles present',runtime.includes("quest:'leo'")&&runtime.includes("quest:'theo'")&&runtime.includes("quest:'maya'")&&runtime.includes("functionLabel:'FITNESS COACH'")&&runtime.includes("functionLabel:'ARENA COACH'")],
@@ -93,7 +97,7 @@ const checks=[
   ['V7 matte human materials present',runtime.includes('roughness:.86,metalness:0')&&runtime.includes('roughness:.78,metalness:.004')&&runtime.includes('color:0xe4e0d7')&&runtime.includes('color:0xa98658,roughness:.48,metalness:.24')],
   ['V7 premium idle present',runtime.includes('const idleBreath=Math.sin(now*.00115)')&&runtime.includes('const idleWeight=Math.sin(now*.00052)')&&runtime.includes('av.headGroup.rotation.y=Math.sin(now*.00034)*.016')],
   ['V7.1 oversized proportions present',runtime.includes('hips.scale.set(1.18,.58,.82)')&&runtime.includes('new THREE.CylinderGeometry(.285,.245,.625')&&runtime.includes('new THREE.CapsuleGeometry(.034,.064')&&runtime.includes('const jacketYoke=box')&&multiplayer.includes('q.scale.set(1.18,.58,.82)')&&multiplayer.includes('new THREE.CylinderGeometry(.285,.245,.625')],
-  ['One World continuous campus present',runtime.includes("version:'7.2.1-strict-iphone-parity'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
+  ['One World continuous campus present',runtime.includes("version:'7.3.1-first-person-living-world'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  setCameraMode('first');\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
   ['transient zone label present',runtime.includes("function showWorldZone(label,purpose='')")&&runtime.includes("locationChip?.classList.add('show')")&&runtime.includes("locationPurpose.textContent=purpose")],
   ['results dashboard V4.1 present',runtime.includes('results-hero-v41')&&runtime.includes('score-orbit')&&runtime.includes('results-domains')&&runtime.includes('results-timeline')&&runtime.includes('results-signals')],
   ['hall lighting V7.2.1 iPhone profile compatible',runtime.includes('KOMO_HALL_LIGHTING_V43')&&runtime.includes('KOMO_HALL_PRACTICALS_V43')&&runtime.includes('function addHallSpot')&&runtime.includes('hallLightProfile')&&runtime.includes('renderer.toneMappingExposure=1.17')],
@@ -210,7 +214,7 @@ const checks=[
   ['desktop UI V5 present',css.includes('V5.0 Desktop Visual Revolution')&&css.includes('body.desktop-visual-v5 #world-canvas')&&css.includes('body.desktop-visual-v5::before')&&css.includes('body.desktop-visual-v5 .world-hud')],
   ['desktop visual filter disabled for parity V7.2.1',css.includes('@media(min-width:901px) and (pointer:fine)')&&runtime.includes("classList.toggle('desktop-visual-v5',false)")],
   ['V7 avatar visible-floor grounding present',runtime.includes('AVATAR_SOLE_COMPENSATION=.043')&&runtime.includes('function visualSurfaceOffsetAt')&&runtime.includes('KOMO_PLAYER_BODY_GROUNDING_V70')&&runtime.includes('av.shadow.position.y=surfaceOffset+.004')],
-  ['camera follows visible floor V5.0.1 present',runtime.includes('const visualGround=visualSurfaceOffsetAt(player)')&&runtime.includes('player.y+visualGround+height')&&runtime.includes('player.y+visualGround+2.03+bob')],
+  ['camera follows visible floor V7.3 present',runtime.includes('const visualGround=visualSurfaceOffsetAt(player)')&&runtime.includes('player.y+visualGround+height')&&runtime.includes('player.y+visualGround+1.72+bob+breath')],
   ['NPC visible-floor grounding V5.0.1 present',runtime.includes('KOMO_NPC_BODY_GROUNDING_V501')&&runtime.includes('const npcLift=Math.max(0,npcSurface-.169)')],
   ['V7.1 remote visible-floor grounding present',multiplayer.includes('KOMO_REMOTE_BODY_GROUNDING_V71')&&multiplayer.includes('runtime.getAvatarGroundLift?.(peer.position)')&&multiplayer.includes('av.ring.position.y=remoteSurface+.008')],
   ['mobile UI V4.6 present',css.includes('V4.6 Mobile UI')&&css.includes('body.world-intro-active .mobile-controls')&&css.includes('.journey-hud,.health-hud,.location-chip')&&css.includes('100dvh')],
