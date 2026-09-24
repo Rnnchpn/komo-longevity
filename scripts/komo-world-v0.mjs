@@ -13,7 +13,7 @@ const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const pulseHtml=await readFile('pulse-app/index.html','utf8');
 const checks=[
-  ['V6.4 desktop HTML cache bust present',html.includes('world-v1.css?v=6.4.0-living-campus')&&html.includes('world-v1.js?v=6.4.0-living-campus')&&html.includes('name="komo-world-version" content="6.4.0-living-campus"')],
+  ['V6.5 desktop HTML cache bust present',html.includes('world-v1.css?v=6.5.0-visual-presence')&&html.includes('world-v1.js?v=6.5.0-visual-presence')&&html.includes('name="komo-world-version" content="6.5.0-visual-presence"')],
 
   ['canonical World V1 runtime',runtime.includes("window.KomoWorld={")],
   ['render loop present',runtime.includes('renderer.render(scene,camera)')],
@@ -127,6 +127,9 @@ const checks=[
   ['V6.3.2 arrival performance budget present',runtime.includes("arrivalHeroV632.visible=!emergencyPerformance&&player.z>8")&&runtime.includes("arrivalHeroV632.visible=false")],
   ['V6.4 living campus root present',runtime.includes('KOMO_LIVING_CAMPUS_V64')&&runtime.includes('living.livingCampusV64=livingCampusV64')],
   ['V6.4 hero trees present',runtime.includes('function heroTreeV64')&&runtime.includes('KOMO_HERO_TREE_V64')&&runtime.includes('heroTreeSpecsV64')],
+  ['V6.5 premium avatar framing present',runtime.includes("let thirdPersonDistance=lowPower?4.15:5.35")&&runtime.includes("bodyRoot.scale.set(.92,.94,.92)")&&runtime.includes("const desiredFov=(lowPower?58:50)")],
+  ['V6.5 arrival visual presence present',runtime.includes("'MOTION HOUSE','MEASURE · MOVE'")&&runtime.includes("'LONGEVITY LAB','SCIENCE · LIVE'")&&runtime.includes("waterMirrorV64(-10.6,13.5,2.4,9.6)")],
+  ['V6.5 richer desktop LOD present',runtime.includes("npc.visible=allowed&&sameLevel&&dist<(lowPower?22:68)")&&runtime.includes("banner.visible=wp.distanceTo(camera.position)<(lowPower?46:96)")],
   ['V6.4 landscape instancing present',runtime.includes('KOMO_CYPRESS_CROWNS_INST_V64')&&runtime.includes('KOMO_PINE_CROWNS_INST_V64')&&runtime.includes('KOMO_LANDSCAPE_SHRUBS_INST_V64')],
   ['V6.4 premium pavilions present',runtime.includes("'MOVEMENT','MEASURE · TRAIN · MOVE'")&&runtime.includes("'LONGEVITY','SCIENCE · TRAJECTORY'")&&runtime.includes("'COMMUNITY LOUNGE','MEET · CONNECT · RECOVER'")&&runtime.includes("'RECOVERY HOUSE','REST · RESET · RESTORE'")],
   ['V6.4 water mirrors present',runtime.includes('function waterMirrorV64')&&runtime.includes('waterMirrorV64(-24.6,45.0,5.4,24.0)')&&runtime.includes('waterMirrorV64(0,89.2,18.0,7.2)')],
@@ -134,8 +137,8 @@ const checks=[
   ['V6.4 ambient crowd instancing present',runtime.includes('KOMO_AMBIENT_CROWD_INST_V64')&&runtime.includes('KOMO_CAMPUS_PEOPLE_BODY_INST_V64')&&runtime.includes('KOMO_CAMPUS_PEOPLE_HEAD_INST_V64')],
   ['V6.4 moving campus NPCs present',runtime.includes("label:'Iris'")&&runtime.includes("label:'Louis'")&&runtime.includes("label:'Eva'")&&runtime.indexOf("label:'Iris'")>runtime.indexOf("const npcRoot=new THREE.Group()")],
   ['V6.4 living animation present',runtime.includes('living.waterfallsV64?.length')&&runtime.includes('w.texture.offset.y=-(t*.045')],
-  ['V6.4 performance budget present',runtime.includes("livingCampusV64.visible=!emergencyPerformance&&campusNear")&&runtime.includes("campusCrowdV64.visible=!lowPower||player.z>42")&&runtime.includes("living.livingCampusV64.visible=false")],
-  ['V6.4 hero tree LOD present',runtime.includes("tree.name==='KOMO_HERO_TREE_V64'")&&runtime.includes("(lowPower?54:82)")],
+  ['V6.4 performance budget present',runtime.includes("livingCampusV64.visible=!emergencyPerformance&&campusNear")&&runtime.includes("campusCrowdV64.visible=!lowPower||player.z>34")&&runtime.includes("living.livingCampusV64.visible=false")],
+  ['V6.4 hero tree LOD present',runtime.includes("tree.name==='KOMO_HERO_TREE_V64'")&&runtime.includes("(lowPower?58:130)")],
 
 
 
