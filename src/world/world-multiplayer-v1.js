@@ -438,18 +438,22 @@ function presenceAvatar(runtime,record){
   };
   const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow);
 
+  // V5.0.1 remote grounding mirrors the local player body/root split.
+  const bodyRoot=new THREE.Group();bodyRoot.name='KOMO_REMOTE_BODY_GROUNDING_V501';
+  [...g.children].forEach(child=>bodyRoot.add(child));g.add(bodyRoot);
+
   const ringMat=new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.075,depthWrite:false});
   const ring=new THREE.Mesh(new THREE.RingGeometry(.34,.365,36),ringMat);ring.rotation.x=-Math.PI/2;ring.position.y=.015;ring.renderOrder=28;g.add(ring);
   const beacon=new THREE.Mesh(new THREE.CylinderGeometry(.008,.008,2.5,6),new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.07,depthWrite:false,depthTest:false}));
   beacon.position.y=1.55;beacon.renderOrder=27;g.add(beacon);
   const beaconTop=new THREE.Mesh(new THREE.RingGeometry(.065,.095,24),new THREE.MeshBasicMaterial({color:0xf0d4a0,transparent:true,opacity:.18,depthWrite:false,depthTest:false}));
   beaconTop.position.y=2.88;beaconTop.rotation.x=-Math.PI/2;beaconTop.renderOrder=29;g.add(beaconTop);
-  const tag=labelSprite(THREE,record.display_name,record.role_title||'PULSE MEMBER');g.add(tag);
+  const tag=labelSprite(THREE,record.display_name,record.role_title||'PULSE MEMBER');bodyRoot.add(tag);
 
   g.userData.target=new THREE.Vector3(Number(record.x)||0,Number(record.y)||0,Number(record.z)||0);
   g.userData.targetYaw=record.yaw||0;g.userData.zone=record.zone||'world';g.position.copy(g.userData.target);
   g.userData.avatar={
-    hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,
+    bodyRoot,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,
     leftShoe,rightShoe,leftHand,rightHand,tag,ring,beacon,beaconTop,lastPosition:g.position.clone(),walkPhase:0
   };
   runtime.scene.add(g);return g;
@@ -1007,6 +1011,12 @@ export async function mount(runtime){
       peer.rotation.y+=d*.26;
 
       if(av){
+        const remoteSurface=runtime.getVisualSurfaceOffset?.(peer.position)??.055;
+        const remoteLift=runtime.getAvatarGroundLift?.(peer.position)??(remoteSurface+.043);
+        av.bodyRoot.position.y+=(remoteLift-av.bodyRoot.position.y)*.28;
+        if(av.ring)av.ring.position.y=remoteSurface+.008;
+        if(av.beacon)av.beacon.position.y=remoteSurface+1.55;
+        if(av.beaconTop)av.beaconTop.position.y=remoteSurface+2.88;
         const speed=Math.hypot(peer.position.x-beforeX,peer.position.z-beforeZ);
         av.walkPhase+=Math.min(.22,speed*7.0);
         const stride=Math.sin(av.walkPhase);
@@ -1083,5 +1093,5 @@ export async function mount(runtime){
     heartbeat();refreshPresence();sendPose(true);syncPeers()
   }});
 
-  window.KomoWorldMultiplayer={version:'0.9.0-social-challenges',connect:openPulse,state};
+  window.KomoWorldMultiplayer={version:'0.9.1-avatar-grounding',connect:openPulse,state};
 }
