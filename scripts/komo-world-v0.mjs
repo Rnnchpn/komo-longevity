@@ -185,7 +185,7 @@ const checks=[
 
   ['V6.1 grandeur performance budget present',runtime.includes("grandFlagshipV61.visible=!emergencyPerformance")&&runtime.includes("destinationTheatreV61.visible=!emergencyPerformance")&&runtime.includes('instancedStatic(grandFlagshipV61')],
 
-  ['permanent auto-run V5.3 present',runtime.includes('const AUTO_RUN_SPEED=lowPower?6.05:7.05')&&runtime.includes('const AUTO_RUN_BOOST=lowPower?7.15:8.35')&&runtime.includes('tryMoveSmooth')&&runtime.includes("BOOST (COURSE)"),],
+  ['permanent auto-run V7.2.1 present',runtime.includes('const AUTO_RUN_SPEED=6.05')&&runtime.includes('const AUTO_RUN_BOOST=7.15')&&runtime.includes('tryMoveSmooth')&&runtime.includes("BOOST (COURSE)"),],
   ['V7 running animation present',runtime.includes('const strideAmp=THREE.MathUtils.lerp(.34,.58,runBlend)*moveAmount')&&runtime.includes('av.leftKnee.rotation.x=Math.max(0,-s)*kneeAmp')&&runtime.includes('av.torsoGroup.rotation.x=-THREE.MathUtils.lerp(.004,.038,runBlend)*moveAmount')],
   ['fluid run camera V7.2.1 present',runtime.includes('const runAmount=THREE.MathUtils.clamp(velocity.length()/AUTO_RUN_SPEED')&&runtime.includes('const desiredFov=50+2.4*runAmount')&&runtime.includes('thirdPersonDistance+.10*runAmount')],
   ['walkable room access V5.8 present',runtime.includes('KOMO_ROOM_ACCESS_V52')&&runtime.includes('KOMO_ROOM_RETURN_')&&runtime.includes('function requestWalkTo')&&runtime.includes('function getCampusZone')&&runtime.includes('manualCampusDestination')&&runtime.includes('function updateRoomAccess(now)')&&runtime.includes('updateRoomAccess(now);')&&!runtime.includes('function seamlessRoomTransition')],
