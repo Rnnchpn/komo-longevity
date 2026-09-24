@@ -11,13 +11,14 @@ const runtime=await readFile(join(source,'world-v1.js'),'utf8');
 const css=await readFile(join(source,'world-v1.css'),'utf8');
 const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
+const pulseHtml=await readFile('pulse-app/index.html','utf8');
 const checks=[
   ['canonical World V1 runtime',runtime.includes("window.KomoWorld={")],
   ['render loop present',runtime.includes('renderer.render(scene,camera)')],
   ['living animation owner present',runtime.includes('function animateLiving(now)')],
   ['living animation invoked safely',runtime.includes('try{animateLiving(now)}')],
   ['retired undefined updateLiving call absent',!runtime.includes('updateLiving(now)')],
-  ['multiplayer remains optional',runtime.includes("import('./world-multiplayer-v1.js')")&&runtime.includes('.catch(err=>console.warn')],
+  ['multiplayer remains optional',runtime.includes("import('./world-multiplayer-v1.js?v=20260924-auth-v121')")&&runtime.includes('.catch(err=>console.warn')],
   ['true sky V6.3.2 present',runtime.includes('KOMO_TRUE_SKY_V18')&&runtime.includes('KOMO_CLOUD_FIELD_V632')&&runtime.includes('uniform vec3 zenithColor')&&runtime.includes('uniform vec3 hazeColor')],
   ['second floor V1.8 present',runtime.includes('KOMO_UPPER_LEVEL_V18')&&runtime.includes('KOMO_GRAND_STAIR_V18')],
   ['upper-floor navigation present',runtime.includes('syncPlayerElevation')&&runtime.includes('isUpperWalkable')],
@@ -67,7 +68,7 @@ const checks=[
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub NPC roles present',runtime.includes("quest:'leo'")&&runtime.includes("quest:'theo'")&&runtime.includes("quest:'maya'")&&runtime.includes("functionLabel:'FITNESS COACH'")&&runtime.includes("functionLabel:'ARENA COACH'")],
   ['Immersive Hub V3.3 district detail present',runtime.includes('KOMO_DISTRICT_DETAILS_V33')&&runtime.includes('HEALTH PAVILION')&&runtime.includes('CLUB HOUSE')],
-  ['multiplayer auth isolation V1.2 present',multiplayer.includes("version:'1.2-auth-isolation'")&&multiplayer.includes("persistSession:false")&&multiplayer.includes("autoRefreshToken:false")&&!multiplayer.includes("storageKey:'komo-world-auth-v1'")],
+  ['multiplayer auth isolation V1.2 present',multiplayer.includes("version:'1.2.1-entry-resilience'")&&multiplayer.includes("persistSession:false")&&multiplayer.includes("autoRefreshToken:false")&&!multiplayer.includes("storageKey:'komo-world-auth-v1'")],
   ['push-to-talk voice control present',multiplayer.includes('MAINTENIR POUR PARLER')&&multiplayer.includes('const startTalking=async')&&multiplayer.includes("U.talk.addEventListener('pointerdown'")&&multiplayer.includes('track.enabled=state.voice.talking')],
   ['voice signaling fallback present',multiplayer.includes('const pollVoiceSignals=async')&&multiplayer.includes("setInterval(()=>pollVoiceSignals(),350)")&&multiplayer.includes("VOICE_EXIT_M=22")],
   ['desktop social HUD present',multiplayer.includes('kwmp-chat-launcher')&&multiplayer.includes('kwmp-voicebox')&&multiplayer.includes("drawer.className='kwmp-chat'")&&multiplayer.includes('const openChat=()=>')],
@@ -158,7 +159,7 @@ const checks=[
   ['Living campus sightlines V5.7 present',runtime.includes('KOMO_OPEN_ATRIUM_WALL_V57')&&runtime.includes('KOMO_DESTINATION_VISTAS_V57')&&runtime.includes('function vistaTunnel')&&runtime.includes('function portalActor')],
   ['Living room animation V5.7 present',runtime.includes('fitnessStatusBars')&&runtime.includes('twinCeilingHalo.rotation.z')&&runtime.includes('arenaCanopy.rotation.z')&&runtime.includes('portalActors.forEach')],
   ['Destination rooms permanently open V5.6',runtime.includes("destination rooms are permanently open")&&runtime.includes("d.progress+=(1-d.progress)")],
-  ['Resilient guest entry V1.2 present',multiplayer.includes('signInAnonymously')&&multiplayer.includes('const connectGuest=async')&&multiplayer.includes('const startLocalGuest=async')&&multiplayer.includes("version:'1.2-auth-isolation'")&&multiplayer.includes("emitSessionReady('guest-local')")],
+  ['Resilient guest entry V1.2 present',multiplayer.includes('signInAnonymously')&&multiplayer.includes('const connectGuest=async')&&multiplayer.includes('const startLocalGuest=async')&&multiplayer.includes("version:'1.2.1-entry-resilience'")&&multiplayer.includes("emitSessionReady('guest-local')")],
   ['Twin room V5.2 present',runtime.includes('KOMO_TWIN_ROOM_V52')&&runtime.includes('Data canopy')===false&&runtime.includes('new THREE.TorusGeometry(3.0+i*.34')],
   ['Fitness room V5.2 present',runtime.includes('KOMO_FITNESS_ROOM_V52')&&runtime.includes("'TODAY','MOVE · TRAIN · RECOVER'")&&runtime.includes('MAT.smokedGlass')],
   ['Arena room V5.2 present',runtime.includes('KOMO_ARENA_ROOM_V52')&&runtime.includes("'LIVE ARENA','DAILY CHALLENGES · SOCIAL'")&&runtime.includes('new THREE.RingGeometry(2.05,2.18,64)')],
@@ -203,6 +204,9 @@ const checks=[
   ['Guest entry never blocks present',runtime.includes("enterWorldAfterAuth({mode:'guest-local'")&&runtime.includes("waitForWorldMultiplayer(12000).then(api=>api.connectGuest(name))")],
   ['Pulse popup user gesture preserved',runtime.includes("Never await before opening Pulse")&&multiplayer.includes("Must open synchronously from the click event")],
   ['Pulse bridge retries until ACK',pulseAuth.includes('worldBridgeRetryTimer=setInterval')&&pulseAuth.includes('Date.now()-worldBridgeLastSendAt<850')&&pulseAuth.includes('if(worldBridgeAcked)return')],
+  ['Pulse bridge runtime loaded',pulseHtml.includes('auth-gateway-v2.js?v=20260924-world-bridge-v3')],
+  ['Pulse bridge stores retry payload',pulseAuth.includes('worldBridgeLastPayload=payload')&&pulseAuth.includes('if(worldBridgeLastPayload&&!worldBridgeAcked)')],
+
 
   ['multiplayer join friend V0.5 present',runtime.includes('function joinPresence(target)')&&runtime.includes('joinPresence,')&&multiplayer.includes('runtime.joinPresence?.(row)')],
   ['multiplayer distance roster present',multiplayer.includes("Math.round(distance)+' m away'")&&multiplayer.includes("join.textContent='JOIN'")],
