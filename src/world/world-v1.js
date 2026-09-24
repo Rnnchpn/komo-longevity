@@ -175,7 +175,7 @@ function applyQualityProfile(){
 applyRenderScale();
 
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0xcbd2c8);
+scene.background=new THREE.Color(0xd8ded8);
 scene.fog=new THREE.Fog(0xd4d9d1,lowPower?92:82,lowPower?245:270);
 
 const camera=new THREE.PerspectiveCamera(lowPower?60:54,innerWidth/innerHeight,.12,420);
@@ -272,14 +272,14 @@ const living={
 
 // V1.8 true sky — atmospheric dome, visible sun and slow cloud field.
 const skyUniforms={
-  zenithColor:{value:new THREE.Color(0x789caf)},
-  upperColor:{value:new THREE.Color(0x9eb8c2)},
-  horizonColor:{value:new THREE.Color(0xdde3dc)},
-  hazeColor:{value:new THREE.Color(0xe8ddd0)},
-  lowColor:{value:new THREE.Color(0xeee0cf)},
+  zenithColor:{value:new THREE.Color(0x8eafbc)},
+  upperColor:{value:new THREE.Color(0xb2c7cc)},
+  horizonColor:{value:new THREE.Color(0xe7e7dd)},
+  hazeColor:{value:new THREE.Color(0xeadfce)},
+  lowColor:{value:new THREE.Color(0xf2e6d5)},
   sunDir:{value:new THREE.Vector3(-.45,.58,.42).normalize()},
   sunColor:{value:new THREE.Color(0xffe0b8)},
-  sunStrength:{value:.54},
+  sunStrength:{value:.66},
   horizonSoftness:{value:.34}
 };
 const skyMaterial=new THREE.ShaderMaterial({
@@ -3014,21 +3014,21 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'leo',functionLabel:'FITNESS COA
   makeNpc(npcRoot,{role:'staff',label:'Eva',functionLabel:'CAMPUS HOST',x:-4.8,y:0,z:75.0,outfit:'sage',speed:.25,phase:.73,route:[
     [-4.8,0,75.0],[0,0,77.0],[4.8,0,75.0],[3.0,0,70.0],[-3.0,0,70.0]
   ]});
-  // V6.7 territorial life — marina hospitality and private retreat hosts.
-  makeNpc(npcRoot,{role:'staff',label:'Alba',functionLabel:'MARINA HOST',x:63.0,y:0,z:54.0,outfit:'sage',speed:.28,phase:.21,route:[
-    [63.0,0,54.0],[69.0,0,54.0],[73.0,0,58.0],[72.0,0,68.0],[65.0,0,70.0],[61.0,0,62.0]
+  // V6.8 territorial life — compact marina and retreat scenes remain active in the same visual field.
+  makeNpc(npcRoot,{role:'staff',label:'Alba',functionLabel:'MARINA HOST',x:47.0,y:0,z:55.0,outfit:'sage',speed:.28,phase:.21,route:[
+    [47.0,0,55.0],[53.0,0,55.0],[59.0,0,59.0],[59.0,0,68.0],[52.0,0,71.0],[45.0,0,64.0]
   ]});
-  makeNpc(npcRoot,{role:'visitor',label:'Victor',functionLabel:'YACHT GUEST',x:70.0,y:0,z:45.0,outfit:'cream',speed:.24,phase:.46,route:[
-    [70.0,0,45.0],[75.0,0,44.0],[83.0,0,44.0],[76.0,0,44.0],[70.0,0,51.0]
+  makeNpc(npcRoot,{role:'visitor',label:'Victor',functionLabel:'YACHT GUEST',x:57.0,y:0,z:46.5,outfit:'cream',speed:.24,phase:.46,route:[
+    [57.0,0,46.5],[62.0,0,46.5],[70.0,0,46.5],[62.5,0,46.5],[57.0,0,52.0]
   ]});
-  makeNpc(npcRoot,{role:'staff',label:'Sacha',functionLabel:'BOARDING',x:64.0,y:0,z:39.0,outfit:'charcoal',speed:.20,phase:.64,route:[
-    [64.0,0,39.0],[68.0,0,39.0],[70.0,0,43.0],[67.0,0,47.0],[63.0,0,45.0]
+  makeNpc(npcRoot,{role:'staff',label:'Sacha',functionLabel:'BOARDING',x:48.0,y:0,z:42.0,outfit:'charcoal',speed:.20,phase:.64,route:[
+    [48.0,0,42.0],[52.0,0,42.0],[56.0,0,45.5],[53.0,0,49.0],[47.0,0,47.0]
   ]});
-  makeNpc(npcRoot,{role:'staff',label:'Clara',functionLabel:'RETREAT HOST',x:-72.0,y:0,z:61.0,outfit:'sage',speed:.23,phase:.32,route:[
-    [-72.0,0,61.0],[-80.0,0,60.0],[-86.0,0,57.0],[-94.0,0,60.0],[-88.0,0,68.0],[-78.0,0,67.0]
+  makeNpc(npcRoot,{role:'staff',label:'Clara',functionLabel:'RETREAT HOST',x:-43.0,y:0,z:62.0,outfit:'sage',speed:.23,phase:.32,route:[
+    [-43.0,0,62.0],[-48.0,0,59.0],[-54.0,0,57.0],[-61.0,0,59.0],[-60.0,0,68.0],[-49.0,0,69.0]
   ]});
-  makeNpc(npcRoot,{role:'visitor',label:'Amélie',functionLabel:'RETREAT GUEST',x:-98.0,y:0,z:56.0,outfit:'sand',speed:.18,phase:.79,route:[
-    [-98.0,0,56.0],[-103.0,0,61.0],[-101.0,0,70.0],[-94.0,0,72.0],[-89.0,0,65.0],[-94.0,0,58.0]
+  makeNpc(npcRoot,{role:'visitor',label:'Amélie',functionLabel:'RETREAT GUEST',x:-65.0,y:0,z:55.0,outfit:'sand',speed:.18,phase:.79,route:[
+    [-65.0,0,55.0],[-69.0,0,61.0],[-68.0,0,72.0],[-62.0,0,75.0],[-55.0,0,67.0],[-59.0,0,58.0]
   ]});
 }
 // Living atmosphere — subtle, non-game-like movement.
