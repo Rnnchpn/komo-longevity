@@ -561,6 +561,25 @@ const MAT={
   leatherDark:new THREE.MeshStandardMaterial({...S_LEATHER_DARK,color:0xffffff,roughness:.58,metalness:.01,bumpScale:lowPower?0:.018})
 };
 
+// V5.9 wall architecture palette — restrained, tactile and shared across the campus.
+const WALL={
+  ivory:M.wall.clone(),
+  mineral:MAT.limestone.clone(),
+  travertine:MAT.travertine.clone(),
+  sage:M.sage.clone(),
+  sageDeep:M.sageDeep.clone(),
+  walnut:MAT.walnut.clone(),
+  black:MAT.blackened.clone(),
+  brass:MAT.brass.clone()
+};
+WALL.ivory.color.setHex(0xf7f1e7);WALL.ivory.roughness=.78;
+WALL.mineral.color.setHex(0xe8dfd1);WALL.mineral.roughness=.72;
+WALL.travertine.color.setHex(0xead9c1);WALL.travertine.roughness=.58;
+WALL.sage.color.setHex(0x334d40);WALL.sage.roughness=.52;
+WALL.sageDeep.color.setHex(0x14251e);WALL.sageDeep.roughness=.46;
+WALL.walnut.roughness=.62;
+WALL.black.roughness=.40;
+
 // Blackened metal uses the brushed bronze texture family but neutral color.
 MAT.blackened.map=S_BRASS.map;MAT.blackened.roughnessMap=S_BRASS.roughnessMap;MAT.blackened.bumpMap=S_BRASS.bumpMap;MAT.blackened.bumpScale=lowPower?0:.006;MAT.blackened.needsUpdate=true;
 
@@ -1594,6 +1613,34 @@ const hallMaterialFinish=new THREE.Group();hallMaterialFinish.name='KOMO_HALL_MA
   box(hallMaterialFinish,.038,3.78,.024,MAT.brass,x-side*.018,y,z+1.30,{cast:false,receive:false});
 });
 
+// V5.9 Hall Walls — deeper panels, shadow gaps and gallery-like niches.
+const hallWallsV59=new THREE.Group();hallWallsV59.name='KOMO_HALL_WALLS_V59';building.add(hallWallsV59);
+const hallWallGlow=new THREE.MeshBasicMaterial({color:0xe9c98d,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
+[-1,1].forEach(side=>{
+  const x=side*11.30;
+  // Strong lower plinth makes the walls feel built rather than paper-thin.
+  box(hallWallsV59,.16,.46,43.4,WALL.travertine,x,.34,-6.4,{cast:false,receive:true});
+  box(hallWallsV59,.08,.050,42.9,WALL.brass,x-side*.09,.59,-6.4,{cast:false,receive:false});
+  // Repeated 2.55 m wall bays with a recessed central field.
+  [-20.9,-15.7,-10.5,-5.3,-.1,5.1,10.3].forEach((z,i)=>{
+    const face=i%3===1?WALL.ivory:i%3===2?WALL.mineral:wallWarm;
+    box(hallWallsV59,.055,4.36,4.70,face,x-side*.085,3.24,z,{cast:false,receive:true});
+    box(hallWallsV59,.075,4.48,.055,WALL.black,x-side*.118,3.24,z+2.39,{cast:false,receive:false});
+    box(hallWallsV59,.075,.055,4.54,WALL.black,x-side*.118,5.47,z,{cast:false,receive:false});
+    // Fine brass datum + warm wall wash line.
+    box(hallWallsV59,.078,.026,4.18,WALL.brass,x-side*.126,2.50,z,{cast:false,receive:false});
+    const wash=box(hallWallsV59,.082,.020,3.72,hallWallGlow,x-side*.132,5.18,z,{cast:false,receive:false});
+    wash.userData.phase=i*.68+side;wash.userData.dynamic=true;
+  });
+  // Hero niches punctuate the long nave without closing circulation.
+  const heroZ=side<0?[-8.0,7.4]:[-15.6,1.9];
+  heroZ.forEach((z,i)=>{
+    box(hallWallsV59,.12,3.35,2.42,WALL.black,x-side*.16,3.34,z,{cast:false,receive:false});
+    box(hallWallsV59,.13,2.85,2.00,i%2?WALL.travertine:WALL.sage,x-side*.205,3.34,z,{cast:false,receive:true});
+    box(hallWallsV59,.14,.038,1.72,WALL.brass,x-side*.278,4.66,z,{cast:false,receive:false});
+  });
+});
+
 
 // V1.5 interior architecture: galleries, balcony datum and layered ceiling.
 const hallArchitecture=new THREE.Group();hallArchitecture.name='KOMO_HALL_ARCHITECTURE_V15';building.add(hallArchitecture);
@@ -2596,7 +2643,17 @@ twinRoom.position.set(-45,0,0);
 roomReturnPortal(twinRoom,{label:'HALL',sub:'WALK OUT · CONTINUOUS CAMPUS',x:12.72,z:-2.10,rot:-Math.PI/2,accent:0xb9cfbf});
 mesh(twinRoom,new THREE.CircleGeometry(13,96),M.sageDeep,0,.01,-2).rotation.x=-Math.PI/2;
 mesh(twinRoom,new THREE.RingGeometry(7.8,8.0,96),M.bronze,0,.025,-2).rotation.x=-Math.PI/2;
-box(twinRoom,22,7.8,.38,M.sage,0,4.0,-13.1);
+box(twinRoom,22,7.8,.38,WALL.sage,0,4.0,-13.1);
+// V5.9 Twin Data Wall — mineral frame + recessed dark data fields.
+const twinWallV59=new THREE.Group();twinWallV59.name='KOMO_TWIN_WALLS_V59';twinRoom.add(twinWallV59);
+const twinWallGlow=new THREE.MeshBasicMaterial({color:0xbfd8ca,transparent:true,opacity:lowPower?.22:.40,depthWrite:false});
+[-8.25,-4.95,-1.65,1.65,4.95,8.25].forEach((x,i)=>{
+  box(twinWallV59,2.86,4.55,.08,i===2||i===3?WALL.sageDeep:WALL.sage,x,3.20,-12.88,{cast:false,receive:true});
+  box(twinWallV59,.035,4.42,.12,i%2?WALL.brass:twinWallGlow,x+1.49,3.20,-12.80,{cast:false,receive:false});
+  if(i!==2&&i!==3)box(twinWallV59,2.20,.025,.08,twinWallGlow,x,5.20,-12.76,{cast:false,receive:false});
+});
+box(twinWallV59,20.2,.40,.22,WALL.travertine,0,.38,-12.72,{cast:false,receive:true});
+box(twinWallV59,20.0,.040,.14,WALL.brass,0,.62,-12.60,{cast:false,receive:false});
 plaque(twinRoom,'FUNCTIONAL TWIN','YOUR BODY · ACROSS TIME',7.8,1.55,0,7.25,-12.86,{dark:true,titleSize:84});
 const twinV52=new THREE.Group();twinV52.name='KOMO_TWIN_ROOM_V52';twinRoom.add(twinV52);
 const twinGlassV52=lowPower?MAT.smokedGlass:M.glass;
@@ -2691,9 +2748,33 @@ plaque(twinRoom,'EXPLORE','APPROACH A DOMAIN · PRESS E',6.6,.72,0,1.05,8.7,{dar
 rehabRoom.position.set(0,0,-55);
 roomReturnPortal(rehabRoom,{label:'HALL',sub:'WALK OUT · CONTINUOUS CAMPUS',z:11.10,accent:0xd7b777,dark:false});
 box(rehabRoom,22,.24,24,M.stoneLight,0,.10,0);
-box(rehabRoom,.36,7.6,24,M.wall,-10.8,3.8,0);
-box(rehabRoom,.36,7.6,24,M.wall,10.8,3.8,0);
-box(rehabRoom,22,7.6,.36,M.sage,0,3.8,-11.8);
+box(rehabRoom,.36,7.6,24,WALL.ivory,-10.8,3.8,0);
+box(rehabRoom,.36,7.6,24,WALL.ivory,10.8,3.8,0);
+box(rehabRoom,22,7.6,.36,WALL.sage,0,3.8,-11.8);
+// V5.9 Fitness Walls — warm acoustic timber, mirrors and limestone piers.
+const fitnessWallsV59=new THREE.Group();fitnessWallsV59.name='KOMO_FITNESS_WALLS_V59';rehabRoom.add(fitnessWallsV59);
+const fitnessWallGlow=new THREE.MeshBasicMaterial({color:0xe5c184,transparent:true,opacity:lowPower?.20:.34,depthWrite:false});
+[-1,1].forEach(side=>{
+  const x=side*10.58;
+  box(fitnessWallsV59,.10,.42,21.3,WALL.travertine,x,.36,0,{cast:false,receive:true});
+  box(fitnessWallsV59,.075,.030,20.6,WALL.brass,x-side*.085,2.62,0,{cast:false,receive:false});
+  [-8.2,-4.1,0,4.1,8.2].forEach((z,i)=>{
+    if(i%2===0){
+      box(fitnessWallsV59,.085,3.48,3.28,WALL.walnut,x-side*.095,3.28,z,{cast:false,receive:true});
+      [-1.15,-.58,0,.58,1.15].forEach(dz=>box(fitnessWallsV59,.020,3.20,.045,WALL.black,x-side*.145,3.28,z+dz,{cast:false,receive:false}));
+    }else{
+      box(fitnessWallsV59,.070,3.48,3.28,roomMirror,x-side*.085,3.28,z,{cast:false,receive:false});
+      box(fitnessWallsV59,.082,3.56,.035,WALL.brass,x-side*.120,3.28,z+1.66,{cast:false,receive:false});
+    }
+    const wash=box(fitnessWallsV59,.092,.020,2.72,fitnessWallGlow,x-side*.155,5.06,z,{cast:false,receive:false});
+    wash.userData.phase=i*.76+side;wash.userData.dynamic=true;
+  });
+});
+[-7.4,-3.7,0,3.7,7.4].forEach((x,i)=>{
+  box(fitnessWallsV59,3.20,3.95,.08,i===2?WALL.sageDeep:WALL.sage,x,3.16,-11.58,{cast:false,receive:true});
+  box(fitnessWallsV59,.035,3.80,.11,i%2?fitnessWallGlow:WALL.brass,x+1.65,3.16,-11.49,{cast:false,receive:false});
+});
+box(fitnessWallsV59,20.2,.38,.22,WALL.travertine,0,.36,-11.42,{cast:false,receive:true});
 plaque(rehabRoom,'KŌMØ FITNESS CLUB','MOVE · TRAIN · PROGRESS',7.2,1.45,0,6.7,-11.55,{dark:true,titleSize:88});
 [-5.3,0,5.3].forEach((x,i)=>{
   box(rehabRoom,4.0,.24,4.8,i===1?M.stoneDeep:M.stone,x,.12,-3.2);
@@ -2788,7 +2869,26 @@ arenaRoom.position.set(45,0,0);
 roomReturnPortal(arenaRoom,{label:'HALL',sub:'WALK OUT · CONTINUOUS CAMPUS',x:-12.72,z:-2.10,rot:Math.PI/2,accent:0xb9935c});
 mesh(arenaRoom,new THREE.CircleGeometry(14.2,96),M.arena,0,.01,-2).rotation.x=-Math.PI/2;
 mesh(arenaRoom,new THREE.RingGeometry(8.7,8.9,96),M.arenaGold,0,.025,-2).rotation.x=-Math.PI/2;
-box(arenaRoom,22,7.8,.38,M.sageDeep,0,4.0,-13.1);
+box(arenaRoom,22,7.8,.38,WALL.sageDeep,0,4.0,-13.1);
+// V5.9 Arena Walls — blackened ribs, bronze reveals and luminous score bays.
+const arenaWallsV59=new THREE.Group();arenaWallsV59.name='KOMO_ARENA_WALLS_V59';arenaRoom.add(arenaWallsV59);
+const arenaWallGlow=new THREE.MeshBasicMaterial({color:0xd6a762,transparent:true,opacity:lowPower?.24:.44,depthWrite:false});
+[-8.2,-5.45,-2.70,0,2.70,5.45,8.2].forEach((x,i)=>{
+  box(arenaWallsV59,2.30,4.70,.10,i===3?WALL.sageDeep:WALL.black,x,3.28,-12.86,{cast:false,receive:true});
+  box(arenaWallsV59,.060,4.80,.14,i%2?WALL.brass:arenaWallGlow,x+1.22,3.28,-12.76,{cast:false,receive:false});
+  box(arenaWallsV59,1.82,.025,.12,arenaWallGlow,x,5.34,-12.72,{cast:false,receive:false});
+});
+box(arenaWallsV59,20.1,.42,.24,WALL.black,0,.40,-12.68,{cast:false,receive:true});
+box(arenaWallsV59,19.7,.045,.16,WALL.brass,0,.65,-12.54,{cast:false,receive:false});
+[-1,1].forEach(side=>{
+  const x=side*10.45;
+  [-7.2,-2.8,1.6,6.0].forEach((z,i)=>{
+    box(arenaWallsV59,.10,3.85,3.45,WALL.black,x,3.10,z,{cast:false,receive:true});
+    box(arenaWallsV59,.040,3.70,.045,WALL.brass,x-side*.075,3.10,z+1.76,{cast:false,receive:false});
+    const wash=box(arenaWallsV59,.080,.022,2.75,arenaWallGlow,x-side*.130,4.96,z,{cast:false,receive:false});
+    wash.userData.phase=i*.9+side;wash.userData.dynamic=true;
+  });
+});
 plaque(arenaRoom,'ARENA','PERFORMANCE · COMMUNITY',7.2,1.45,0,7.05,-12.85,{dark:true,titleSize:94});
 [-5.2,0,5.2].forEach((x,i)=>{
   box(arenaRoom,3.7,.28,3.7,i===1?M.arenaGold:M.stoneDeep,x,.14,-4.0);
@@ -4958,6 +5058,11 @@ function animateLiving(now){
       bar.material.opacity=.36+.28*(.5+.5*Math.sin(t*.71+i*.6));
     });
   }
+  // V5.9 wall washes breathe almost imperceptibly; no extra dynamic lights are used.
+  if(typeof hallWallGlow!=='undefined')hallWallGlow.opacity=(lowPower?.16:.25)+.05*(.5+.5*Math.sin(t*.24));
+  if(typeof twinWallGlow!=='undefined')twinWallGlow.opacity=(lowPower?.20:.34)+.07*(.5+.5*Math.sin(t*.33));
+  if(typeof fitnessWallGlow!=='undefined')fitnessWallGlow.opacity=(lowPower?.18:.29)+.06*(.5+.5*Math.sin(t*.29));
+  if(typeof arenaWallGlow!=='undefined')arenaWallGlow.opacity=(lowPower?.21:.36)+.08*(.5+.5*Math.sin(t*.38));
   if(living.lifeDisplay&&!lowPower){
     living.lifeDisplay.orbitA.rotation.z=t*.16;
     living.lifeDisplay.orbitB.rotation.x=t*.11;
@@ -5091,7 +5196,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'5.8.0-walkable-campus',
+  version:'5.9.0-architectural-walls',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
