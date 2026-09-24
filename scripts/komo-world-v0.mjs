@@ -13,14 +13,14 @@ const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const pulseHtml=await readFile('pulse-app/index.html','utf8');
 const checks=[
-  ['V6.9 desktop HTML cache bust present',html.includes('world-v1.css?v=6.9.0-cross-device-parity')&&html.includes('world-v1.js?v=6.9.0-cross-device-parity')&&html.includes('name="komo-world-version" content="6.9.0-cross-device-parity"')],
+  ['V7 desktop HTML cache bust present',html.includes('world-v1.css?v=7.0.0-human-avatar')&&html.includes('world-v1.js?v=7.0.0-human-avatar')&&html.includes('name="komo-world-version" content="7.0.0-human-avatar"')],
 
   ['canonical World V1 runtime',runtime.includes("window.KomoWorld={")],
   ['render loop present',runtime.includes('renderer.render(scene,camera)')],
   ['living animation owner present',runtime.includes('function animateLiving(now)')],
   ['living animation invoked safely',runtime.includes('try{animateLiving(now)}')],
   ['retired undefined updateLiving call absent',!runtime.includes('updateLiving(now)')],
-  ['multiplayer remains optional',runtime.includes("import('./world-multiplayer-v1.js?v=20260924-auth-v121')")&&runtime.includes('.catch(err=>console.warn')],
+  ['multiplayer remains optional',runtime.includes("import('./world-multiplayer-v1.js?v=20260924-avatar-v130')")&&runtime.includes('.catch(err=>console.warn')],
   ['true sky V6.3.2 present',runtime.includes('KOMO_TRUE_SKY_V18')&&runtime.includes('KOMO_CLOUD_FIELD_V632')&&runtime.includes('uniform vec3 zenithColor')&&runtime.includes('uniform vec3 hazeColor')],
   ['second floor V1.8 present',runtime.includes('KOMO_UPPER_LEVEL_V18')&&runtime.includes('KOMO_GRAND_STAIR_V18')],
   ['upper-floor navigation present',runtime.includes('syncPlayerElevation')&&runtime.includes('isUpperWalkable')],
@@ -35,7 +35,7 @@ const checks=[
   ['low-power lights disabled',runtime.includes('l.visible=false;l.intensity=0')&&runtime.includes("antialias:!lowPower")],
   ['living entrance V2.3+ present',runtime.includes('KOMO_LIVING_ENTRANCE_V23')&&runtime.includes('function updateDoors(now,dt)')],
   ['arrival life cues V2.3 present',runtime.includes('KOMO_ARRIVAL_DETAILS_V23')],
-  ['third-person V5.0.1 present',runtime.includes('KOMO_PLAYER_AVATAR_V42_REALISM')&&runtime.includes("cameraMode='third'")&&runtime.includes('const eyeY=player.y+visualGround+2.03+bob')],
+  ['third-person V7 present',runtime.includes('KOMO_PLAYER_AVATAR_V70_HUMAN')&&runtime.includes("cameraMode='third'")&&runtime.includes('const eyeY=player.y+visualGround+2.03+bob')],
   ['World Journey V2.4+ present',runtime.includes('KOMO_WORLD_JOURNEY_V24')&&runtime.includes('const JOURNEY_MISSIONS')&&runtime.includes('function completeJourney')],
   ['auto-run gameplay V5.3 present',runtime.includes('const AUTO_RUN_SPEED=lowPower?6.05:7.05')&&runtime.includes('const AUTO_RUN_BOOST=lowPower?7.15:8.35')&&runtime.includes('tryMoveSmooth')],
   ['living journey V2.5+ present',runtime.includes('KOMO_JOURNEY_GUIDE_V25')&&runtime.includes('function updateJourneyGuide')],
@@ -57,7 +57,7 @@ const checks=[
   ['Hall Living culling present',runtime.includes('hallLiving.visible=player.z<19&&player.z>-29')&&runtime.includes('mesh:m')],
   ['Retina sharpness V3.0.2+ present',runtime.includes('const retinaMobile=lowPower&&deviceDpr>=2')&&runtime.includes('pixelRatio:renderer.getPixelRatio()')],
   ['mobile no forced rescue V3.0.2+ present',!runtime.includes('if(lowPower)applyEmergencyPerformance();')&&runtime.includes('retinaMobile?1.02:.86')&&runtime.includes('retinaMobile?.78:.68')],
-  ['Visual polish V4.2 present',runtime.includes('KOMO_PLAYER_AVATAR_V42_REALISM')&&runtime.includes('KOMO_HALL_HOST_V31')&&runtime.includes('THREE.CapsuleGeometry')],
+  ['Visual polish V7 present',runtime.includes('KOMO_PLAYER_AVATAR_V70_HUMAN')&&runtime.includes('KOMO_HALL_HOST_V31')&&runtime.includes('THREE.CapsuleGeometry')],
   ['player grounding V4.2 present',runtime.includes('Ground contact stays subtle')&&runtime.includes('leftElbow')&&runtime.includes('rightElbow')&&runtime.includes('av.tag.visible=false')],
   ['World Hub V3.2+ present',runtime.includes('KOMO_WORLD_DISTRICT_V32')&&runtime.includes('KOMO_GRAND_FOUNTAIN_V32')],
   ['World Hub destination doors present',runtime.includes('KOMO_DESTINATION_DOOR_')&&runtime.includes('function updateDestinationDoors')],
