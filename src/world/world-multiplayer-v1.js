@@ -461,9 +461,11 @@ function presenceAvatar(runtime,record){
 export async function mount(runtime){
   if(!runtime?.scene||!runtime?.THREE||!runtime?.getState)return;
   const U=ui();
-  const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
-  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,unread:0,social:loadSocial(),nearbyPeerId:null,nearbyTickAt:0,voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set(),talking:false,pttHeld:false,signalPollTimer:null,seenSignals:new Set()}};
-  const isGuestSession=(session=state.session)=>!!session?.user?.is_anonymous;
+  // World consumes Pulse access tokens but never rotates its refresh token.
+  // This prevents Pulse and World from racing on the same refresh token.
+  const client=createClient(URL,KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,localGuest:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,unread:0,social:loadSocial(),nearbyPeerId:null,nearbyTickAt:0,voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set(),talking:false,pttHeld:false,signalPollTimer:null,seenSignals:new Set()}};
+  const isGuestSession=(session=state.session)=>state.localGuest||!!session?.user?.is_anonymous;
   const roleFor=id=>state.roles.get(id)||null;
   const decoratePresence=row=>row?{...row,role_title:roleFor(row.user_id)?.display_title||''}:row;
   const saveSocial=()=>{try{localStorage.setItem(SOCIAL_KEY,JSON.stringify(state.social))}catch{}};
@@ -517,8 +519,8 @@ export async function mount(runtime){
       U.connect.textContent=(guest+(escText(state.profile?.display_name||'WORLD',12)||'WORLD')+(ownRole?' · '+ownRole:'')).toUpperCase();
       U.connect.dataset.state='online';
     }else if(state.session?.user){
-      U.connect.textContent=isGuestSession()?'GUEST · READY':'PULSE · READY';
-      U.connect.dataset.state='syncing';
+      U.connect.textContent=state.localGuest?'GUEST · SOLO':(isGuestSession()?'GUEST · READY':'PULSE · READY');
+      U.connect.dataset.state=state.localGuest?'offline':'syncing';
     }else{
       U.connect.textContent='CONNECT WORLD';
       U.connect.dataset.state='offline';
@@ -958,7 +960,7 @@ export async function mount(runtime){
     if(state.channel){try{await client.removeChannel(state.channel)}catch{};state.channel=null}
     if(deletePresence&&oldUser){try{await client.from('world_presence').delete().eq('user_id',oldUser)}catch{}}
     for(const peer of state.peers.values())peer.removeFromParent();
-    state.peers.clear();state.rows.clear();state.roles.clear();state.messages=[];state.started=false;state.subscribed=false;state.presenceLive=false;state.connected=false;state.lastPose=null;
+    state.peers.clear();state.rows.clear();state.roles.clear();state.messages=[];state.started=false;state.subscribed=false;state.presenceLive=false;state.connected=false;state.localGuest=false;state.lastPose=null;
     setOnlineUI();syncPeers();renderMessages();renderRoster();
   };
   const emitSessionReady=(mode)=>{
@@ -979,14 +981,22 @@ export async function mount(runtime){
   const connectWithBridge=async(payload)=>{
     if(!payload?.session?.access_token||!payload?.session?.refresh_token)return false;
     try{
+      const expiresAt=Number(payload.session.expires_at)||0;
+      if(expiresAt&&expiresAt*1000<Date.now()+15000)throw new Error('Session Pulse expirée — actualisez Pulse puis reconnectez World.');
       const incomingId=payload.session?.user?.id||'';
       if(state.started&&incomingId&&state.session?.user?.id&&state.session.user.id!==incomingId)await resetLiveLayer({deletePresence:true});
+      state.localGuest=false;
+      // setSession is safe here because the bridged access token is fresh and this client has autoRefresh disabled.
       const {data,error}=await client.auth.setSession({access_token:payload.session.access_token,refresh_token:payload.session.refresh_token});if(error)throw error;
       if(!data.session?.user)throw new Error('Session Pulse invalide');
       const ok=await startLiveSession(data.session,payload.profile||{});
       if(ok)emitSessionReady('pulse');
       return ok;
-    }catch(err){console.error('[World Pulse bridge]',err);state.presenceLive=false;state.connected=false;setOnlineUI();runtime.notify?.('Connexion World impossible');return false}
+    }catch(err){
+      console.error('[World Pulse bridge]',err);state.presenceLive=false;state.connected=false;setOnlineUI();
+      const message=String(err?.message||'Connexion World impossible');
+      runtime.notify?.(message);window.dispatchEvent(new CustomEvent('komo:world-auth-error',{detail:{mode:'pulse',message}}));return false
+    }
   };
   const openPulse=()=>{
     const url=PULSE_ORIGIN+'/?world_bridge=1&world_origin='+encodeURIComponent(location.origin);
@@ -1004,14 +1014,27 @@ export async function mount(runtime){
     }
     openPulse();return null;
   };
+  const startLocalGuest=async(name,reason='')=>{
+    if(state.started)await resetLiveLayer({deletePresence:true});
+    const id='local-'+(crypto?.randomUUID?.()||Math.random().toString(16).slice(2));
+    state.localGuest=true;
+    state.session={user:{id,is_anonymous:true,user_metadata:{display_name:name,world_guest:true}}};
+    state.profile={display_name:name,avatar_config:{guest:true},interests:[]};
+    state.connected=false;state.presenceLive=false;state.started=false;setOnlineUI();
+    runtime.notify?.('MODE INVITÉ · SOLO');
+    if(reason)console.info('[World guest local fallback]',reason);
+    emitSessionReady('guest-local');
+    return true;
+  };
   const connectGuest=async(displayName='Guest')=>{
     const name=escText(displayName,24)||('Guest '+Math.floor(1000+Math.random()*9000));
     try{
       const {data:{session:existing}}=await client.auth.getSession();
       let session=existing;
+      // Never sign out a bridged Pulse session: Supabase signOut defaults to global token revocation.
       if(session?.user&&!session.user.is_anonymous){
         if(state.started)await resetLiveLayer({deletePresence:true});
-        await client.auth.signOut();session=null;
+        session=null;
       }
       if(session?.user?.is_anonymous){
         const update=await client.auth.updateUser({data:{display_name:name,world_guest:true}});
@@ -1022,13 +1045,15 @@ export async function mount(runtime){
         if(error)throw error;session=data.session;
       }
       if(!session?.user)throw new Error('Guest session unavailable');
+      state.localGuest=false;
       const ok=await startLiveSession(session,{display_name:name,avatar_config:{guest:true}});
       if(ok)emitSessionReady('guest');
       return !!ok;
     }catch(err){
-      console.error('[World guest auth]',err);
-      runtime.notify?.('Mode invité indisponible');
-      return false;
+      const message=String(err?.message||err);
+      console.warn('[World guest auth]',message);
+      // Anonymous Auth is optional: the World remains accessible in a safe local guest mode.
+      return startLocalGuest(name,message);
     }
   };
   const onMessage=(event)=>{
@@ -1174,18 +1199,18 @@ export async function mount(runtime){
   });
 
   window.KomoWorldMultiplayer={
-    version:'1.1-entry-gateway',
+    version:'1.2-auth-isolation',
     connectGuest,
     connectPulse,
     openPulse,
-    getState:()=>({connected:state.presenceLive,ready:!!state.session?.user,guest:isGuestSession(),display_name:state.profile?.display_name||state.session?.user?.user_metadata?.display_name||'',people:Math.max(0,state.rows.size)})
+    getState:()=>({connected:state.presenceLive,ready:!!state.session?.user,guest:isGuestSession(),localGuest:state.localGuest,display_name:state.profile?.display_name||state.session?.user?.user_metadata?.display_name||'',people:Math.max(0,state.rows.size)})
   };
   window.dispatchEvent(new CustomEvent('komo:world-multiplayer-ready'));
 
   const cleanup=()=>{
     clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);if(state.voice.signalPollTimer)clearInterval(state.voice.signalPollTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);stopTalking();for(const id of [...state.voice.peers.keys()])closeVoicePeer(id);if(state.voice.stream)for(const t of state.voice.stream.getTracks())t.stop();
     if(state.channel)client.removeChannel(state.channel);
-    if(state.session?.user)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
+    if(state.session?.user&&!state.localGuest)client.from('world_presence').delete().eq('user_id',state.session.user.id).then(()=>{});
   };
   window.addEventListener('pagehide',event=>{document.body.classList.remove('world-social-open');if(!event.persisted)cleanup()});
   window.addEventListener('pageshow',event=>{if(event.persisted&&state.session?.user){
