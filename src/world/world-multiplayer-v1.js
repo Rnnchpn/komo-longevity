@@ -6,7 +6,7 @@ const PULSE_ORIGIN='https://pulse.komolongevity.com';
 const STALE_MS=45000;
 const CLOCK_SKEW_MS=180000;
 const HEARTBEAT_MS=2200;
-const POSE_MS=125;
+const POSE_MS=250;
 const PRESENCE_REFRESH_MS=4000;
 const CHAT_LIMIT=50;
 const VOICE_ENTER_M=18;
@@ -448,7 +448,7 @@ function presenceAvatar(runtime,record){
   beacon.position.y=1.55;beacon.renderOrder=27;g.add(beacon);
   const beaconTop=new THREE.Mesh(new THREE.RingGeometry(.065,.095,24),new THREE.MeshBasicMaterial({color:0xf0d4a0,transparent:true,opacity:.18,depthWrite:false,depthTest:false}));
   beaconTop.position.y=2.88;beaconTop.rotation.x=-Math.PI/2;beaconTop.renderOrder=29;g.add(beaconTop);
-  const tag=labelSprite(THREE,record.display_name,record.role_title||'PULSE MEMBER');bodyRoot.add(tag);
+  const tag=labelSprite(THREE,record.display_name,record.role_title||(record.avatar_config?.guest?'GUEST':'PULSE MEMBER'));bodyRoot.add(tag);
 
   g.userData.target=new THREE.Vector3(Number(record.x)||0,Number(record.y)||0,Number(record.z)||0);
   g.userData.targetYaw=record.yaw||0;g.userData.zone=record.zone||'world';g.position.copy(g.userData.target);
@@ -463,6 +463,7 @@ export async function mount(runtime){
   const U=ui();
   const client=createClient(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:'komo-world-auth-v1'}});
   const state={session:null,profile:null,channel:null,peers:new Map(),rows:new Map(),roles:new Map(),connected:false,presenceLive:false,subscribed:false,lastZone:'',timer:null,poseTimer:null,presenceRefreshTimer:null,raf:0,popup:null,messages:[],started:false,lastPresenceError:'',lastPresenceErrorAt:0,lastPose:null,lastPoseSentAt:0,lastTrackSentAt:0,dmTarget:null,unread:0,social:loadSocial(),nearbyPeerId:null,nearbyTickAt:0,voice:{enabled:false,stream:null,peers:new Map(),lastSweep:0,connected:new Set(),talking:false,pttHeld:false,signalPollTimer:null,seenSignals:new Set()}};
+  const isGuestSession=(session=state.session)=>!!session?.user?.is_anonymous;
   const roleFor=id=>state.roles.get(id)||null;
   const decoratePresence=row=>row?{...row,role_title:roleFor(row.user_id)?.display_title||''}:row;
   const saveSocial=()=>{try{localStorage.setItem(SOCIAL_KEY,JSON.stringify(state.social))}catch{}};
@@ -512,10 +513,11 @@ export async function mount(runtime){
   const setOnlineUI=()=>{
     if(state.presenceLive){
       const ownRole=roleFor(state.session?.user?.id)?.display_title||'';
-      U.connect.textContent=((escText(state.profile?.display_name||'WORLD',12)||'WORLD')+(ownRole?' · '+ownRole:'')).toUpperCase();
+      const guest=isGuestSession()?'GUEST · ':'';
+      U.connect.textContent=(guest+(escText(state.profile?.display_name||'WORLD',12)||'WORLD')+(ownRole?' · '+ownRole:'')).toUpperCase();
       U.connect.dataset.state='online';
     }else if(state.session?.user){
-      U.connect.textContent='WORLD · SYNCING';
+      U.connect.textContent=isGuestSession()?'GUEST · READY':'PULSE · READY';
       U.connect.dataset.state='syncing';
     }else{
       U.connect.textContent='CONNECT WORLD';
@@ -916,9 +918,11 @@ export async function mount(runtime){
   const loadProfile=async(profileHint={})=>{
     let profile={};
     try{const r=await client.from('profiles').select('display_name,avatar_config,interests').eq('id',state.session.user.id).maybeSingle();profile=r.data||{}}catch{}
+    const guest=isGuestSession();
+    const avatarBase=profile?.avatar_config&&typeof profile.avatar_config==='object'?profile.avatar_config:(profileHint?.avatar_config||{});
     state.profile={
-      display_name:escText(profile?.display_name||profileHint?.display_name||state.session.user.user_metadata?.display_name||'KŌMØ Member',60)||'KŌMØ Member',
-      avatar_config:profile?.avatar_config&&typeof profile.avatar_config==='object'?profile.avatar_config:(profileHint?.avatar_config||{}),
+      display_name:escText(profile?.display_name||profileHint?.display_name||state.session.user.user_metadata?.display_name||(guest?'Guest':'KŌMØ Member'),60)||(guest?'Guest':'KŌMØ Member'),
+      avatar_config:{...avatarBase,...(guest?{guest:true}:{})},
       interests:Array.isArray(profile?.interests)?profile.interests.slice(0,8):(profileHint?.interests||[]).slice(0,8)
     };
     // V5.4 Daily Health: private user-owned summary, never written to presence/chat.
@@ -943,8 +947,26 @@ export async function mount(runtime){
       });
     }catch(err){console.warn('[World daily health]',err)}
   };
+  const resetLiveLayer=async({deletePresence=true}={})=>{
+    const oldUser=state.session?.user?.id;
+    clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);
+    state.timer=state.poseTimer=state.presenceRefreshTimer=null;
+    if(state.voice.signalPollTimer){clearInterval(state.voice.signalPollTimer);state.voice.signalPollTimer=null}
+    for(const id of [...state.voice.peers.keys()])closeVoicePeer(id);
+    if(state.voice.stream){for(const t of state.voice.stream.getTracks())t.stop();state.voice.stream=null}
+    state.voice.enabled=false;state.voice.talking=false;state.voice.connected.clear();
+    if(state.channel){try{await client.removeChannel(state.channel)}catch{};state.channel=null}
+    if(deletePresence&&oldUser){try{await client.from('world_presence').delete().eq('user_id',oldUser)}catch{}}
+    for(const peer of state.peers.values())peer.removeFromParent();
+    state.peers.clear();state.rows.clear();state.roles.clear();state.messages=[];state.started=false;state.subscribed=false;state.presenceLive=false;state.connected=false;state.lastPose=null;
+    setOnlineUI();syncPeers();renderMessages();renderRoster();
+  };
+  const emitSessionReady=(mode)=>{
+    window.dispatchEvent(new CustomEvent('komo:world-session-ready',{detail:{mode,display_name:state.profile?.display_name||'',user_id:state.session?.user?.id||''}}));
+  };
   const startLiveSession=async(session,profileHint={})=>{
     if(!session?.user)return false;
+    if(state.started&&state.session?.user?.id&&state.session.user.id!==session.user.id)await resetLiveLayer({deletePresence:true});
     state.session=session;await loadProfile(profileHint);setOnlineUI();
     if(!state.started){
       state.started=true;await loadInitial();subscribe();
@@ -957,15 +979,57 @@ export async function mount(runtime){
   const connectWithBridge=async(payload)=>{
     if(!payload?.session?.access_token||!payload?.session?.refresh_token)return false;
     try{
+      const incomingId=payload.session?.user?.id||'';
+      if(state.started&&incomingId&&state.session?.user?.id&&state.session.user.id!==incomingId)await resetLiveLayer({deletePresence:true});
       const {data,error}=await client.auth.setSession({access_token:payload.session.access_token,refresh_token:payload.session.refresh_token});if(error)throw error;
       if(!data.session?.user)throw new Error('Session Pulse invalide');
-      return await startLiveSession(data.session,payload.profile||{});
+      const ok=await startLiveSession(data.session,payload.profile||{});
+      if(ok)emitSessionReady('pulse');
+      return ok;
     }catch(err){console.error('[World Pulse bridge]',err);state.presenceLive=false;state.connected=false;setOnlineUI();runtime.notify?.('Connexion World impossible');return false}
   };
   const openPulse=()=>{
     const url=PULSE_ORIGIN+'/?world_bridge=1&world_origin='+encodeURIComponent(location.origin);
     state.popup=window.open(url,'komoPulseWorldBridge','popup=yes,width=520,height=760,resizable=yes,scrollbars=yes');
     if(!state.popup)runtime.notify?.('Autorisez la fenêtre Pulse pour connecter World');
+    return !!state.popup;
+  };
+  const connectPulse=async()=>{
+    const {data}=await client.auth.getSession();
+    const session=data?.session||state.session;
+    if(session?.user&&!session.user.is_anonymous){
+      const ok=await startLiveSession(session);
+      if(ok)emitSessionReady('pulse');
+      return ok;
+    }
+    openPulse();return null;
+  };
+  const connectGuest=async(displayName='Guest')=>{
+    const name=escText(displayName,24)||('Guest '+Math.floor(1000+Math.random()*9000));
+    try{
+      const {data:{session:existing}}=await client.auth.getSession();
+      let session=existing;
+      if(session?.user&&!session.user.is_anonymous){
+        if(state.started)await resetLiveLayer({deletePresence:true});
+        await client.auth.signOut();session=null;
+      }
+      if(session?.user?.is_anonymous){
+        const update=await client.auth.updateUser({data:{display_name:name,world_guest:true}});
+        if(update.error)throw update.error;
+        const current=await client.auth.getSession();session=current.data.session;
+      }else{
+        const {data,error}=await client.auth.signInAnonymously({options:{data:{display_name:name,world_guest:true}}});
+        if(error)throw error;session=data.session;
+      }
+      if(!session?.user)throw new Error('Guest session unavailable');
+      const ok=await startLiveSession(session,{display_name:name,avatar_config:{guest:true}});
+      if(ok)emitSessionReady('guest');
+      return !!ok;
+    }catch(err){
+      console.error('[World guest auth]',err);
+      runtime.notify?.('Mode invité indisponible');
+      return false;
+    }
   };
   const onMessage=(event)=>{
     if(event.origin!==PULSE_ORIGIN)return;
@@ -981,7 +1045,15 @@ export async function mount(runtime){
   };
   window.addEventListener('message',onMessage);
 
-  U.connect.addEventListener('click',()=>state.presenceLive?runtime.notify?.('World multiplayer actif'):state.session?.user?heartbeat():openPulse());
+  U.connect.addEventListener('click',async()=>{
+    if(state.presenceLive){runtime.notify?.('World multiplayer actif');return}
+    if(state.session?.user){
+      const ok=await startLiveSession(state.session);
+      if(ok)emitSessionReady(isGuestSession()?'guest':'pulse');
+      return;
+    }
+    openPulse();
+  });
   U.people.addEventListener('click',async()=>{await refreshPresence();openChat();U.drawer.classList.add('people-open');renderRoster()});
   U.chat.addEventListener('click',()=>{openChat();U.drawer.classList.remove('people-open')});
   U.social?.addEventListener('click',()=>{openChat();U.drawer.classList.remove('people-open');U.socialMissions?.scrollIntoView?.({block:'nearest'})});
@@ -1098,8 +1170,17 @@ export async function mount(runtime){
   animatePeers();setOnlineUI();updateVoiceUI();updateSocialUI();updateUnread();renderMessages();renderRoster();
   client.auth.getSession().then(({data,error})=>{
     if(error){console.warn('[World auth restore]',error);return}
-    if(data?.session?.user)startLiveSession(data.session).catch(err=>console.warn('[World session restore]',err));
+    if(data?.session?.user){state.session=data.session;setOnlineUI()}
   });
+
+  window.KomoWorldMultiplayer={
+    version:'1.1-entry-gateway',
+    connectGuest,
+    connectPulse,
+    openPulse,
+    getState:()=>({connected:state.presenceLive,ready:!!state.session?.user,guest:isGuestSession(),display_name:state.profile?.display_name||state.session?.user?.user_metadata?.display_name||'',people:Math.max(0,state.rows.size)})
+  };
+  window.dispatchEvent(new CustomEvent('komo:world-multiplayer-ready'));
 
   const cleanup=()=>{
     clearInterval(state.timer);clearInterval(state.poseTimer);clearInterval(state.presenceRefreshTimer);if(state.voice.signalPollTimer)clearInterval(state.voice.signalPollTimer);cancelAnimationFrame(state.raf);window.removeEventListener('message',onMessage);stopTalking();for(const id of [...state.voice.peers.keys()])closeVoicePeer(id);if(state.voice.stream)for(const t of state.voice.stream.getTracks())t.stop();
