@@ -3518,12 +3518,63 @@ function setGuideEnabled(value){
   guideEnabled=!!value;guideRoot.visible=guideEnabled;guideToggle.textContent='GUIDE · '+(guideEnabled?'ON':'OFF');
 }
 function toggleGuide(){setGuideEnabled(!guideEnabled)}
+function campusWalkingTarget(destination,p=player){
+  const zone=getCampusZone(p);
+  if(destination==='twin'){
+    if(zone==='twin')return {x:-43.0,y:0,z:-2.0};
+    if(inTwinLink(p)){
+      if(p.x>-28.9)return {x:-32.0,y:0,z:-24.0};
+      if(p.z<-4.0)return {x:-32.0,y:0,z:-2.2};
+      return {x:-37.0,y:0,z:-2.0};
+    }
+    return {x:-10.7,y:0,z:-24.0};
+  }
+  if(destination==='arena'){
+    if(zone==='arena')return {x:43.0,y:0,z:-2.0};
+    if(inArenaLink(p)){
+      if(p.x<28.9)return {x:32.0,y:0,z:-24.0};
+      if(p.z<-4.0)return {x:32.0,y:0,z:-2.2};
+      return {x:37.0,y:0,z:-2.0};
+    }
+    return {x:10.7,y:0,z:-24.0};
+  }
+  if(destination==='rehab'){
+    if(zone==='rehab')return {x:0,y:0,z:-53.5};
+    if(inFitnessLink(p))return {x:0,y:0,z:-43.7};
+    return {x:0,y:0,z:-28.0};
+  }
+  if(destination==='hall'){
+    if(zone==='twin'){
+      if(p.x<-34.0)return {x:-32.0,y:0,z:-2.2};
+    }else if(zone==='arena'){
+      if(p.x>34.0)return {x:32.0,y:0,z:-2.2};
+    }else if(zone==='rehab'){
+      return {x:0,y:0,z:-43.2};
+    }
+    if(inTwinLink(p)){
+      if(p.z>-20.4)return {x:-32.0,y:0,z:-24.0};
+      if(p.x<-11.2)return {x:-10.7,y:0,z:-24.0};
+    }
+    if(inArenaLink(p)){
+      if(p.z>-20.4)return {x:32.0,y:0,z:-24.0};
+      if(p.x>11.2)return {x:10.7,y:0,z:-24.0};
+    }
+    if(inFitnessLink(p))return {x:0,y:0,z:-27.0};
+    return {x:0,y:0,z:-18.0};
+  }
+  return null;
+}
 function guideTarget(){
+  if(manualCampusDestination){
+    const t=campusWalkingTarget(manualCampusDestination);
+    if(t)return t;
+  }
   const m=journeyNextMission();if(!m)return null;
   if(m.id==='social'){
     const n=living.npcs.find(n=>n.visible&&Math.abs(n.position.y-player.y)<1.2);
     return n?{x:n.position.x,y:n.position.y,z:n.position.z}:journeyTargets.hall;
   }
+  if(['twin','rehab','arena'].includes(m.id))return campusWalkingTarget(m.id)||journeyTargets[m.id];
   return journeyTargets[m.id]||null;
 }
 function updateJourneyGuide(now){
