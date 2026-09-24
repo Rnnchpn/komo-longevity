@@ -4764,23 +4764,27 @@ function campusMapHtml(){
     <section class="campus-map">
       <div class="campus-map-head">
         <span>ONE WORLD</span>
-        <b>${locale==='fr'?'Un campus continu. Aucune zone séparée.':'One continuous campus. No separate worlds.'}</b>
+        <b>${locale==='fr'?'Campus · Marina · Retreat : un seul écosystème KŌMØ.':'Campus · Marina · Retreat: one KŌMØ ecosystem.'}</b>
       </div>
       <div class="campus-map-stage">
-        <button class="campus-node district" data-campus-go="arrival"><b>DISTRICT</b><small>${locale==='fr'?'Extérieur':'Outdoor'}</small></button>
+        <button class="campus-node district" data-campus-go="arrival"><b>CAMPUS</b><small>Science · Movement</small></button>
+        <button class="campus-node marina" data-campus-go="marina"><b>MARINA</b><small>Yachting</small></button>
+        <button class="campus-node villa" data-campus-go="villa"><b>RETREAT</b><small>Private Villa</small></button>
         <button class="campus-node life" data-campus-go="life"><b>LIFE</b><small>Discover</small></button>
         <button class="campus-node hall current" data-campus-go="hall"><b>HALL</b><small>Home</small></button>
         <button class="campus-node twin" data-campus-go="twin"><b>TWIN</b><small>Understand</small></button>
         <button class="campus-node fitness" data-campus-go="rehab"><b>FITNESS</b><small>Move</small></button>
         <button class="campus-node arena" data-campus-go="arena"><b>ARENA</b><small>Engage</small></button>
         <button class="campus-node upper" data-campus-go="upper"><b>LEVEL 2</b><small>Explore</small></button>
-        <i class="map-line l1"></i><i class="map-line l2"></i><i class="map-line l3"></i><i class="map-line l4"></i>
+        <i class="map-line l1"></i><i class="map-line l2"></i><i class="map-line l3"></i><i class="map-line l4"></i><i class="map-line l5"></i><i class="map-line l6"></i>
       </div>
       <div class="campus-purpose-grid">
         <div><span>FUNCTIONAL TWIN</span><b>${locale==='fr'?'Comprendre votre mouvement et votre évolution.':'Understand movement and trajectory.'}</b></div>
         <div><span>FITNESS CLUB</span><b>${locale==='fr'?'Transformer les résultats en action.':'Turn results into action.'}</b></div>
         <div><span>ARENA</span><b>${locale==='fr'?'Défis, progression et communauté.':'Challenges, progress and community.'}</b></div>
         <div><span>KŌMØ LIFE</span><b>${locale==='fr'?'Relier le World aux objets et expériences réels.':'Connect World to real objects and experiences.'}</b></div>
+        <div><span>KŌMØ MARINA</span><b>${locale==='fr'?'Yachting, boarding lounge et expériences de longévité en mer.':'Yachting, boarding lounge and longevity at sea.'}</b></div>
+        <div><span>RETREAT VILLA</span><b>${locale==='fr'?'Villa privée, piscine, ateliers et parcours longévité.':'Private villa, pool, workshops and longevity journey.'}</b></div>
       </div>
     </section>`;
 }
@@ -4798,11 +4802,11 @@ function showCampusMap(){
 function deskHtml(){
   const s=current();
   if(locale==='fr')return `
-    <p>KŌMØ World est désormais un campus continu : marchez librement entre Functional Twin, Fitness Club, Arena, Life et les espaces de découverte.</p>
+    <p>KŌMØ World est un écosystème Riviera continu : Central Campus, Functional Twin, Fitness, Arena et Life au cœur du domaine, Marina/Yachting à l’est et Retreat Villa à l’ouest.</p>
     <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>ÉTAT ACTUEL</span><b>Motion ${s.motion_score}</b></div></div>
     <div class="priority-card"><b>PROCHAINE ÉTAPE</b>Commencez par le Functional Twin pour voir votre état actuel et votre progression depuis la baseline.</div>`;
   return `
-    <p>KŌMØ World is one continuous campus: move freely between Functional Twin, Fitness Club, Arena, Life and discovery spaces.</p>
+    <p>KŌMØ World is one continuous Riviera ecosystem: Central Campus, Functional Twin, Fitness, Arena and Life at its heart, Marina/Yachting to the east and the Retreat Villa to the west.</p>
     <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>CURRENT STATE</span><b>Motion ${s.motion_score}</b></div></div>
     <div class="priority-card"><b>NEXT STEP</b>Start with Functional Twin to review your current state and progression from baseline.</div>`;
 }
