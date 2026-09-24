@@ -1012,7 +1012,6 @@ function makePlayerAvatar(){
   const sole=new THREE.MeshStandardMaterial({color:0xc8c4bc,roughness:.86,metalness:.001});
   const hair=new THREE.MeshStandardMaterial({color:0x2b2521,roughness:.88,metalness:0});
   const bronze=new THREE.MeshStandardMaterial({color:0xa98658,roughness:.48,metalness:.24});
-  const eyeMat=new THREE.MeshStandardMaterial({color:0x292522,roughness:.88,metalness:0});
   const cast=!lowPower;
   const capsule=(r,len,mat,parent,y=0,segments=lowPower?8:12)=>{
     const m=mesh(parent,new THREE.CapsuleGeometry(r,len,lowPower?4:6,segments),mat,0,y,0,{cast});
