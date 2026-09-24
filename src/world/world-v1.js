@@ -1409,6 +1409,55 @@ exteriorBench(exterior,-16.1,30.3,Math.PI/2,.80);
   const l=glow(exterior,0xf2cf98,intensity,6,x,y,z);living.lights.push(l);
 });
 
+// V6.3.2 visible arrival upgrade — strong architecture in the first camera view.
+// This is deliberately geometry-light: one canopy, instanced colonnade/barriers and emissive strips.
+const arrivalHeroV632=new THREE.Group();arrivalHeroV632.name='KOMO_ARRIVAL_HERO_V632';exterior.add(arrivalHeroV632);
+arrivalHeroV632.userData.environmentDetail=true;
+
+const arrivalRoofMatV632=lowPower?MAT.smokedGlass:new THREE.MeshPhysicalMaterial({
+  color:0xd7ddd6,roughness:.18,metalness:.03,transparent:true,opacity:.66,
+  transmission:0,depthWrite:false,side:THREE.DoubleSide
+});
+const arrivalWarmStripV632=new THREE.MeshBasicMaterial({color:0xe7c88f,transparent:true,opacity:lowPower?.28:.46,depthWrite:false});
+const arrivalDarkStripV632=new THREE.MeshBasicMaterial({color:0x1a241e,transparent:true,opacity:.84,depthWrite:true});
+
+// Monumental covered threshold seen immediately from spawn.
+box(arrivalHeroV632,19.6,.22,7.4,MAT.blackened,0,6.16,24.8,{cast:true});
+box(arrivalHeroV632,18.9,.085,6.85,arrivalRoofMatV632,0,6.02,24.8,{cast:false,receive:false});
+box(arrivalHeroV632,17.8,.028,5.95,arrivalWarmStripV632,0,5.91,24.8,{cast:false,receive:false});
+[-8.9,8.9].forEach(x=>{
+  box(arrivalHeroV632,.34,5.95,.72,MAT.travertine,x,3.06,24.8,{cast:true});
+  box(arrivalHeroV632,.055,5.15,.10,MAT.brass,x-Math.sign(x)*.22,3.18,25.19,{cast:false,receive:false});
+});
+plaque(arrivalHeroV632,'KŌMØ WORLD','LONGEVITY IN MOTION',6.6,.86,0,4.98,28.28,{dark:true,titleSize:64});
+
+// Side colonnades and real campus edges remove the floating-platform feel.
+const arrivalUnitV632=new THREE.BoxGeometry(1,1,1);
+const arrivalPiersV632=[],arrivalWallV632=[],arrivalBrassV632=[];
+[-1,1].forEach(side=>{
+  [29,35,41,47,53].forEach((z,i)=>{
+    arrivalPiersV632.push({x:side*23.25,y:2.05,z,sx:.34,sy:4.1,sz:.60});
+    arrivalBrassV632.push({x:side*23.03,y:2.12,z:z+.34,sx:.045,sy:3.35,sz:.045});
+  });
+  arrivalWallV632.push({x:side*23.35,y:.58,z:41,sx:.62,sy:1.10,sz:33.5});
+});
+instancedStatic(arrivalHeroV632,arrivalUnitV632,MAT.limestone,arrivalPiersV632,'KOMO_ARRIVAL_PIERS_INST_V632');
+instancedStatic(arrivalHeroV632,arrivalUnitV632,MAT.travertine,arrivalWallV632,'KOMO_ARRIVAL_BOUNDARY_INST_V632');
+instancedStatic(arrivalHeroV632,arrivalUnitV632,MAT.brass,arrivalBrassV632,'KOMO_ARRIVAL_BRASS_INST_V632');
+
+// Dark reveal under the boundary wall gives the landscape a real physical edge.
+[-1,1].forEach(side=>box(arrivalHeroV632,.16,.18,33.2,arrivalDarkStripV632,side*23.64,.16,41,{cast:false,receive:false}));
+
+// A brighter central reflection path pulls the eye from spawn toward the Hall.
+const arrivalReflectionV632=makeLightingGradientV631('floor');
+const arrivalReflectionMatV632=new THREE.MeshBasicMaterial({
+  map:arrivalReflectionV632,color:0xf0d9b0,transparent:true,opacity:lowPower?.07:.13,
+  blending:THREE.AdditiveBlending,depthWrite:false
+});
+const arrivalReflectionPlaneV632=mesh(arrivalHeroV632,new THREE.PlaneGeometry(8.2,28),arrivalReflectionMatV632,0,.166,40.5,{cast:false,receive:false});
+arrivalReflectionPlaneV632.rotation.x=-Math.PI/2;arrivalReflectionPlaneV632.renderOrder=3;
+
+
 // V3.2 KŌMØ District — fountain, pavilions and a wider living campus.
 const worldDistrict=new THREE.Group();worldDistrict.name='KOMO_WORLD_DISTRICT_V32';world.add(worldDistrict);living.district=worldDistrict;
 box(worldDistrict,31.5,.045,23.0,MAT.travertine,0,.07,68.0);
@@ -5517,6 +5566,7 @@ function updateVisibilityBudget(now){
   exterior.visible=player.z>5;
   if(living.district)living.district.visible=player.z>35;
   if(living.atmosphereV632)living.atmosphereV632.visible=!emergencyPerformance;
+  if(typeof arrivalHeroV632!=='undefined')arrivalHeroV632.visible=!emergencyPerformance&&player.z>8;
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
   hallLightGroup.visible=!lowPower&&!emergencyPerformance&&player.z<22&&player.z>-31&&Math.abs(player.x)<15;
@@ -5564,6 +5614,7 @@ function applyEmergencyPerformance(){
   if(typeof accessArchitectureV62!=='undefined')accessArchitectureV62.visible=false;
   if(living.lightingV631)living.lightingV631.root.visible=false;
   if(living.atmosphereV632)living.atmosphereV632.visible=false;
+  if(typeof arrivalHeroV632!=='undefined')arrivalHeroV632.visible=false;
   living.clouds.forEach(c=>c.visible=false);
   // Keep only the first two ambient NPCs under emergency load.
   living.npcs.forEach((npc,i)=>{npc.visible=i<2});
