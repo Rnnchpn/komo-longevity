@@ -363,7 +363,7 @@ function labelSprite(THREE,text,subtitle='PULSE MEMBER'){
   sp.scale.set(1.46,.32,1);sp.position.y=2.45;sp.renderOrder=30;return sp;
 }
 function presenceAvatar(runtime,record){
-  const {THREE}=runtime,g=new THREE.Group();g.name='KOMO_REMOTE_V70_'+record.user_id;
+  const {THREE}=runtime,g=new THREE.Group();g.name='KOMO_REMOTE_V71_'+record.user_id;
   const cfg=record.avatar_config||{};
   const skin={porcelain:0xd8b8a0,sand:0xc7a087,amber:0xa9785f,bronze:0x805d4c,deep:0x624638}[cfg.skin]||0xb99079;
   const outfit={tee:0x29372f,sweat:0x4c5d52,varsity:0x202b27,motion:0x31433a}[cfg.outfit]||0x29372f;
@@ -384,16 +384,16 @@ function presenceAvatar(runtime,record){
   };
 
   const hips=new THREE.Group();hips.position.y=1.08;g.add(hips);
-  let q=new THREE.Mesh(new THREE.SphereGeometry(.205,14,10),matTrouser);q.scale.set(1.12,.58,.78);hips.add(q);
+  let q=new THREE.Mesh(new THREE.SphereGeometry(.225,14,10),matTrouser);q.scale.set(1.18,.58,.82);hips.add(q);
 
   const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();
-  leftLeg.position.set(-.125,1.10,0);rightLeg.position.set(.125,1.10,0);g.add(leftLeg,rightLeg);
+  leftLeg.position.set(-.145,1.10,0);rightLeg.position.set(.145,1.10,0);g.add(leftLeg,rightLeg);
   const leftKnee=new THREE.Group(),rightKnee=new THREE.Group();
   leftKnee.position.y=-.535;rightKnee.position.y=-.535;leftLeg.add(leftKnee);rightLeg.add(rightKnee);
-  q=capsule(.068,.405,matTrouser,leftLeg,-.286);q.scale.set(1.02,1,.92);
-  q=capsule(.068,.405,matTrouser,rightLeg,-.286);q.scale.set(1.02,1,.92);
-  q=capsule(.052,.395,matTrouser,leftKnee,-.270);q.scale.set(.94,1,.88);
-  q=capsule(.052,.395,matTrouser,rightKnee,-.270);q.scale.set(.94,1,.88);
+  q=capsule(.086,.410,matTrouser,leftLeg,-.286);q.scale.set(1.05,1,.96);
+  q=capsule(.086,.410,matTrouser,rightLeg,-.286);q.scale.set(1.05,1,.96);
+  q=capsule(.074,.405,matTrouser,leftKnee,-.272);q.scale.set(1.02,1,.94);
+  q=capsule(.074,.405,matTrouser,rightKnee,-.272);q.scale.set(1.02,1,.94);
 
   const makeShoe=(parent)=>{
     const group=new THREE.Group();group.position.set(0,-.505,.080);parent.add(group);
@@ -406,41 +406,43 @@ function presenceAvatar(runtime,record){
   const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee);
 
   const torso=new THREE.Group();torso.position.y=1.59;g.add(torso);
-  q=new THREE.Mesh(new THREE.CylinderGeometry(.235,.205,.56,10,1,false),matOut);q.position.y=-.045;q.scale.set(1.08,1,.78);torso.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.255,14,10),matOut);q.position.y=.155;q.scale.set(1.20,.37,.68);torso.add(q);
-  q=new THREE.Mesh(new THREE.CylinderGeometry(.205,.185,.135,10),matOutDark);q.position.y=-.365;q.scale.set(1.02,1,.74);torso.add(q);
+  q=new THREE.Mesh(new THREE.CylinderGeometry(.285,.245,.625,10,1,false),matOut);q.position.y=-.055;q.scale.set(1.10,1,.82);torso.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.285,14,10),matOut);q.position.y=.165;q.scale.set(1.30,.35,.72);torso.add(q);
+  q=new THREE.Mesh(new THREE.CylinderGeometry(.245,.228,.175,10),matOutDark);q.position.y=-.405;q.scale.set(1.08,1,.78);torso.add(q);
+  q=new THREE.Mesh(new THREE.BoxGeometry(.665,.155,.275),matOut);q.position.set(0,.185,0);torso.add(q);
+  q=new THREE.Mesh(new THREE.BoxGeometry(.555,.085,.265),matOutDark);q.position.set(0,-.455,0);torso.add(q);
   const shoulderGeo=new THREE.SphereGeometry(.068,12,8);
-  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(-.247,.175,0);q.scale.set(.88,.64,.70);torso.add(q);
-  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(.247,.175,0);q.scale.set(.88,.64,.70);torso.add(q);
+  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(-.305,.175,0);q.scale.set(1.12,.76,.82);torso.add(q);
+  q=new THREE.Mesh(shoulderGeo,matOut);q.position.set(.305,.175,0);q.scale.set(1.12,.76,.82);torso.add(q);
   q=new THREE.Mesh(new THREE.BoxGeometry(.008,.47,.012),accent);q.position.set(0,-.060,.174);torso.add(q);
   q=new THREE.Mesh(new THREE.BoxGeometry(.145,.118,.018),matOutDark);q.position.set(-.070,.315,.164);q.rotation.z=-.28;torso.add(q);
   q=new THREE.Mesh(new THREE.BoxGeometry(.145,.118,.018),matOutDark);q.position.set(.070,.315,.164);q.rotation.z=.28;torso.add(q);
   q=new THREE.Mesh(new THREE.BoxGeometry(.355,.020,.016),matOutSoft);q.position.set(0,-.405,.145);torso.add(q);
 
   const leftArm=new THREE.Group(),rightArm=new THREE.Group();
-  leftArm.position.set(-.285,1.755,0);rightArm.position.set(.285,1.755,0);leftArm.rotation.z=-.018;rightArm.rotation.z=.018;g.add(leftArm,rightArm);
+  leftArm.position.set(-.325,1.755,0);rightArm.position.set(.325,1.755,0);leftArm.rotation.z=-.018;rightArm.rotation.z=.018;g.add(leftArm,rightArm);
   const leftElbow=new THREE.Group(),rightElbow=new THREE.Group();
   leftElbow.position.y=-.335;rightElbow.position.y=-.335;leftArm.add(leftElbow);rightArm.add(rightElbow);
-  capsule(.050,.285,matOut,leftArm,-.190);capsule(.050,.285,matOut,rightArm,-.190);
-  q=new THREE.Mesh(new THREE.CylinderGeometry(.047,.044,.052,9),matOutSoft);q.position.y=-.355;leftArm.add(q);
+  capsule(.064,.300,matOut,leftArm,-.200);capsule(.064,.300,matOut,rightArm,-.200);
+  q=new THREE.Mesh(new THREE.CylinderGeometry(.060,.055,.070,9),matOutSoft);q.position.y=-.365;leftArm.add(q);
   q=q.clone();rightArm.add(q);
-  capsule(.042,.265,matSkin,leftElbow,-.178);capsule(.042,.265,matSkin,rightElbow,-.178);
+  q=capsule(.057,.285,matOutDark,leftElbow,-.190);q.scale.set(1.04,1,.96);
+  q=capsule(.057,.285,matOutDark,rightElbow,-.190);q.scale.set(1.04,1,.96);
 
   const makeHand=(parent)=>{
-    const h=new THREE.Mesh(new THREE.CapsuleGeometry(.034,.072,4,9),matSkin);h.position.set(0,-.370,.006);h.scale.set(.92,1.08,.68);parent.add(h);return h;
+    const h=new THREE.Mesh(new THREE.CapsuleGeometry(.034,.064,4,9),matSkin);h.position.set(0,-.405,.006);h.scale.set(.92,1.08,.68);parent.add(h);return h;
   };
   const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow);
 
   const neck=new THREE.Mesh(new THREE.CylinderGeometry(.058,.064,.118,10),matSkin);neck.position.y=2.000;g.add(neck);
   const head=new THREE.Group();head.position.y=2.125;g.add(head);
   q=new THREE.Mesh(new THREE.SphereGeometry(.122,18,13),matSkin);q.scale.set(.84,1.05,.90);head.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.086,12,9),matSkin);q.position.set(0,-.074,.010);q.scale.set(.80,.48,.76);head.add(q);
+  q=new THREE.Mesh(new THREE.SphereGeometry(.084,12,9),matSkin);q.position.set(0,-.070,.006);q.scale.set(.78,.45,.74);head.add(q);
   q=new THREE.Mesh(new THREE.SphereGeometry(.126,14,10,0,Math.PI*2,0,Math.PI*.48),matHair);q.position.set(0,.055,-.012);q.scale.set(.91,.64,.94);head.add(q);
   q=new THREE.Mesh(new THREE.SphereGeometry(.064,10,8),matHair);q.position.set(-.050,.065,.020);q.scale.set(1.12,.42,.76);q.rotation.z=-.14;head.add(q);
   q=new THREE.Mesh(new THREE.SphereGeometry(.072,10,8),matHair);q.position.set(.030,.032,-.078);q.scale.set(1.16,.52,.62);head.add(q);
-  q=new THREE.Mesh(new THREE.SphereGeometry(.018,7,5),matSkinWarm);q.position.set(0,-.006,.128);q.scale.set(.52,.72,1);head.add(q);
 
-  const bodyRoot=new THREE.Group();bodyRoot.name='KOMO_REMOTE_BODY_GROUNDING_V70';
+  const bodyRoot=new THREE.Group();bodyRoot.name='KOMO_REMOTE_BODY_GROUNDING_V71';
   [...g.children].forEach(child=>bodyRoot.add(child));g.add(bodyRoot);
 
   const ringMat=new THREE.MeshBasicMaterial({color:0xd6b779,transparent:true,opacity:.035,depthWrite:false});
@@ -1222,7 +1224,7 @@ export async function mount(runtime){
   });
 
   window.KomoWorldMultiplayer={
-    version:'1.3.0-human-avatar',
+    version:'1.4.0-oversized-avatar',
     connectGuest,
     connectPulse,
     openPulse,
