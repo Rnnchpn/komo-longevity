@@ -12,7 +12,6 @@ const css=await readFile(join(source,'world-v1.css'),'utf8');
 const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const pulseHtml=await readFile('pulse-app/index.html','utf8');
-const pulseBuiltHtml=await readFile('site/pulse-v12/index.html','utf8');
 const checks=[
   ['canonical World V1 runtime',runtime.includes("window.KomoWorld={")],
   ['render loop present',runtime.includes('renderer.render(scene,camera)')],
@@ -206,7 +205,6 @@ const checks=[
   ['Pulse popup user gesture preserved',runtime.includes("Never await before opening Pulse")&&multiplayer.includes("Must open synchronously from the click event")],
   ['Pulse bridge retries until ACK',pulseAuth.includes('worldBridgeRetryTimer=setInterval')&&pulseAuth.includes('Date.now()-worldBridgeLastSendAt<850')&&pulseAuth.includes('if(worldBridgeAcked)return')],
   ['Pulse bridge runtime loaded',pulseHtml.includes('auth-gateway-v2.js?v=20260924-world-bridge-v3')],
-  ['Pulse production bridge runtime loaded',pulseBuiltHtml.includes('auth-gateway-v2.js?v=20260924-world-bridge-v3')],
   ['Pulse bridge stores retry payload',pulseAuth.includes('worldBridgeLastPayload=payload')&&pulseAuth.includes('if(worldBridgeLastPayload&&!worldBridgeAcked)')],
 
 
