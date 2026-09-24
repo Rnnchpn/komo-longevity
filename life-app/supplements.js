@@ -1,11 +1,11 @@
 const FORMULA_GROUPS = [
   {
     id: 'llp',
-    label: { en: 'LLP™ Samples', fr: 'Samples LLP™' },
-    kicker: { en: '6 proprietary formulas', fr: '6 formules propriétaires' },
+    label: { en: 'Targeted Formulas', fr: 'Formules ciblées' },
+    kicker: { en: '6 formulas', fr: '6 formules' },
     intro: {
-      en: 'The locomotor core of the range — six formulas developed around movement, recovery, connective tissue and neuromuscular function.',
-      fr: 'Le cœur locomoteur de la gamme — six formules développées autour du mouvement, de la récupération, des tissus conjonctifs et de la fonction neuromusculaire.'
+      en: 'Movement · Recovery · Connective tissue · Neuromuscular function',
+      fr: 'Mouvement · Récupération · Tissus conjonctifs · Fonction neuromusculaire'
     },
     items: [
       { code:'SAMPLE 01', name:'Motion Formula', price:'€68 / month', priceFr:'68 € / mois', focus:{en:'Joint mobility · Spinal disc · Lubrication',fr:'Mobilité articulaire · Disque spinal · Lubrification'}, formula:'UC-II® 40 mg · Boswellia 30% AKBA 200 mg · Hyaluronic Acid 120 mg · Glucosamine Sulfate 500 mg · Vitamin C 200 mg · Manganese 2 mg', use:{en:'60 capsules · 2 capsules / morning — fasting',fr:'60 gélules · 2 gélules le matin — à jeun'} },
@@ -18,11 +18,11 @@ const FORMULA_GROUPS = [
   },
   {
     id: 'basics',
-    label: { en: 'The Basics', fr: 'Les essentiels' },
-    kicker: { en: '10 universal formulas', fr: '10 formules universelles' },
+    label: { en: 'Essentials', fr: 'Essentiels' },
+    kicker: { en: '10 daily essentials', fr: '10 essentiels quotidiens' },
     intro: {
-      en: 'A restrained daily layer: micronutrients, omega-3, creatine, collagen, sleep and microbiome support.',
-      fr: 'Une base quotidienne volontairement simple : micronutriments, oméga-3, créatine, collagène, sommeil et microbiote.'
+      en: 'Micronutrients · Omega-3 · Creatine · Collagen · Sleep · Microbiome',
+      fr: 'Micronutriments · Oméga-3 · Créatine · Collagène · Sommeil · Microbiote'
     },
     items: [
       { code:'BASIC 01', name:'Daily Foundation', price:'€38 / month', priceFr:'38 € / mois', focus:{en:'45 bioactive micronutrients',fr:'45 micronutriments bioactifs'}, formula:'Methylfolate · Methylcobalamin · P5P · Natural fat-soluble vitamins · Chelated minerals', use:{en:'2 capsules / day — with a meal',fr:'2 gélules / jour — avec un repas'} },
@@ -39,11 +39,11 @@ const FORMULA_GROUPS = [
   },
   {
     id: 'clinical',
-    label: { en: 'Clinical Protocols', fr: 'Protocoles cliniques' },
-    kicker: { en: '5 professional packs', fr: '5 packs professionnels' },
+    label: { en: 'Professional Packs', fr: 'Packs professionnels' },
+    kicker: { en: '5 clinician-led packs', fr: '5 packs encadrés' },
     intro: {
-      en: 'Curated combinations from the catalogue, shown inside Life as a professional pathway rather than an open self-prescription layer.',
-      fr: 'Des associations issues du catalogue, présentées dans Life comme un parcours professionnel et non comme une couche d’auto-prescription.'
+      en: 'Structured combinations available after professional review.',
+      fr: 'Associations structurées disponibles après évaluation professionnelle.'
     },
     clinical: true,
     items: [
@@ -165,9 +165,10 @@ function productCard(item, clinical){
   const l = lang();
   const price = l === 'fr' ? item.priceFr : item.price;
   const focus = item.focus[l];
-  const utility = UTILITY_COPY[item.code] || {};
-  const why = utility.why?.[l] || focus;
-  const when = utility.when?.[l] || '';
+  const action = clinical
+    ? (l === 'fr' ? 'PRENDRE RENDEZ-VOUS' : 'BOOK A REVIEW')
+    : (l === 'fr' ? 'COMMANDER' : 'ORDER');
+  const subject = encodeURIComponent(`KŌMØ Life — ${item.code} — ${item.name}`);
   return `
     <article class="formula-card${clinical ? ' formula-card-clinical' : ''}">
       <div class="formula-card-top">
@@ -177,15 +178,10 @@ function productCard(item, clinical){
       <div class="formula-mark" aria-hidden="true"><span></span><b>${esc(item.code.split(' ').pop())}</b></div>
       <h3>${esc(item.name)}</h3>
       <p class="formula-focus">${esc(focus)}</p>
-      <div class="formula-utility">
-        <span>${l === 'fr' ? 'Pourquoi elle existe' : 'Why it exists'}</span>
-        <p>${esc(why)}</p>
-      </div>
+      <a class="formula-buy" href="mailto:contact@komolongevity.com?subject=${subject}">${action}</a>
       <details>
-        <summary>${l === 'fr' ? 'Composition & place dans le parcours' : 'Composition & place in the pathway'}</summary>
+        <summary>${l === 'fr' ? 'DÉTAILS' : 'DETAILS'}</summary>
         <div class="formula-detail">
-          <span class="formula-detail-label">${l === 'fr' ? 'Quand elle a du sens' : 'When it makes sense'}</span>
-          <p>${esc(when)}</p>
           <span class="formula-detail-label">${l === 'fr' ? 'Composition' : 'Formula'}</span>
           <p>${esc(item.formula)}</p>
           <span class="formula-detail-label">${l === 'fr' ? 'Format' : 'Format'}</span>
@@ -200,25 +196,9 @@ function render(){
   const l = lang();
   const group = FORMULA_GROUPS.find(entry => entry.id === activeGroup) || FORMULA_GROUPS[0];
   mount.innerHTML = `
-    <div class="formula-purpose">
-      <div>
-        <p class="formula-purpose-kicker">${l === 'fr' ? 'LA LOGIQUE KŌMØ' : 'THE KŌMØ LOGIC'}</p>
-        <h3>${l === 'fr' ? 'Le but n’est pas de prendre plus de compléments.' : 'The goal is not to take more supplements.'}</h3>
-      </div>
-      <p>${l === 'fr'
-        ? 'Leur utilité est de soutenir une priorité identifiée dans une trajectoire : récupération, mobilité, force, sommeil, tissu conjonctif ou équilibre neuromusculaire. On mesure d’abord, on choisit ensuite, puis on réévalue.'
-        : 'Their role is to support a priority identified within a trajectory: recovery, mobility, strength, sleep, connective tissue or neuromuscular balance. Measure first, choose second, then reassess.'}</p>
-    </div>
-    <div class="formula-process">
-      ${PROCESS_STEPS.map(step => {
-        const copy = step[l];
-        return `<article><span>${step.n}</span><h4>${esc(copy[0])}</h4><p>${esc(copy[1])}</p></article>`;
-      }).join('')}
-    </div>
-    <div class="formula-layers">
-      <span>${l === 'fr' ? 'BASE' : 'FOUNDATION'}</span><i>→</i>
-      <span>${l === 'fr' ? 'CIBLÉ' : 'TARGETED'}</span><i>→</i>
-      <span>${l === 'fr' ? 'ENCADRÉ' : 'CLINICIAN-LED'}</span>
+    <div class="formula-shop-head">
+      <p>${l === 'fr' ? 'ACHETER PAR CATÉGORIE' : 'SHOP BY CATEGORY'}</p>
+      <span>${l === 'fr' ? 'Prix mensuels indicatifs · détails disponibles sur chaque produit' : 'Indicative monthly pricing · details available on each product'}</span>
     </div>
     <div class="formula-tabs" role="tablist" aria-label="${l === 'fr' ? 'Catégories de compléments' : 'Supplement categories'}">
       ${FORMULA_GROUPS.map(entry => `<button type="button" class="${entry.id === activeGroup ? 'is-active' : ''}" data-formula-group="${entry.id}" role="tab" aria-selected="${entry.id === activeGroup}">${esc(entry.label[l])}</button>`).join('')}
@@ -232,16 +212,15 @@ function render(){
       ${group.items.map(item => productCard(item, group.clinical)).join('')}
     </div>
     <div class="formula-legal">
-      <strong>${l === 'fr' ? 'Information importante' : 'Important information'}</strong>
+      <strong>${l === 'fr' ? 'INFORMATION' : 'INFORMATION'}</strong>
       <p>${l === 'fr'
-        ? 'Les informations ci-dessus reprennent le catalogue 2026. Les compléments alimentaires ne remplacent ni une alimentation équilibrée ni une prise en charge médicale. Les protocoles cliniques nécessitent une évaluation professionnelle et doivent être revus en fonction des traitements, antécédents, grossesse, fonction rénale/hépatique et contexte péri-opératoire.'
-        : 'The information above reflects the 2026 catalogue. Food supplements do not replace a balanced diet or medical care. Clinical protocols require professional review and should be reconciled with medications, medical history, pregnancy, renal/hepatic function and peri-operative context.'}</p>
+        ? 'Compléments alimentaires. Ne remplacent ni une alimentation équilibrée ni un suivi médical. Les packs professionnels nécessitent une évaluation préalable et une vérification des traitements, antécédents et contre-indications.'
+        : 'Food supplements. Not a substitute for a balanced diet or medical care. Professional packs require prior review of medications, medical history and contraindications.'}</p>
     </div>`;
   mount.querySelectorAll('[data-formula-group]').forEach(button => {
     button.addEventListener('click', () => {
       activeGroup = button.dataset.formulaGroup;
       render();
-      document.getElementById('formulas')?.scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block:'start'});
     });
   });
 }
