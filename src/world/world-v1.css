@@ -842,12 +842,16 @@ body.camera-third .interaction-card{bottom:112px}
 .campus-node.twin{left:8%;top:55%}.campus-node.arena{right:8%;top:55%}.campus-node.fitness{left:50%;bottom:7%;transform:translateX(-50%)}
 .campus-node.fitness:hover{transform:translate(-50%,-1px)}
 .campus-node.district{left:50%;top:6%;transform:translateX(-50%)}.campus-node.district:hover{transform:translate(-50%,-1px)}
-.campus-node.life{right:12%;top:22%}.campus-node.upper{left:12%;top:22%}
+.campus-node.life{right:16%;top:28%}.campus-node.upper{left:16%;top:28%}
+.campus-node.marina{right:4%;top:7%;border-color:rgba(158,195,195,.24);background:rgba(24,49,48,.94)}
+.campus-node.villa{left:4%;top:7%;border-color:rgba(216,185,132,.24);background:rgba(49,42,31,.94)}
 .map-line{position:absolute;z-index:1;height:1px;background:rgba(216,185,132,.26);transform-origin:left center}
 .map-line.l1{left:26%;top:58%;width:25%;transform:rotate(-5deg)}
 .map-line.l2{left:51%;top:58%;width:25%;transform:rotate(5deg)}
 .map-line.l3{left:50%;top:52%;width:1px;height:36%;background:rgba(216,185,132,.26)}
 .map-line.l4{left:50%;top:18%;width:1px;height:31%;background:rgba(216,185,132,.26)}
+.map-line.l5{left:57%;top:22%;width:37%;transform:rotate(-13deg);background:linear-gradient(90deg,rgba(216,185,132,.18),rgba(145,189,187,.38))}
+.map-line.l6{left:7%;top:22%;width:37%;transform:rotate(13deg);background:linear-gradient(90deg,rgba(216,185,132,.38),rgba(216,185,132,.14))}
 .campus-purpose-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .campus-purpose-grid>div{padding:12px;border:1px solid rgba(255,255,255,.06);border-radius:13px;background:rgba(255,255,255,.022)}
 .campus-purpose-grid span{display:block;font-size:6px;font-weight:850;letter-spacing:.09em;color:#d4b47d}
@@ -1567,7 +1571,7 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .world-command-center .world-menu-primary small{font-size:5px;line-height:1.4;color:rgba(243,237,228,.39)}
 
 .world-destinations{padding:13px!important}
-.destination-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.destination-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .destination-grid button{
   position:relative;min-width:0;height:67px;padding:8px 5px 7px;border:1px solid rgba(255,255,255,.045);border-radius:13px;
   background:rgba(255,255,255,.012);color:rgba(242,236,226,.55);cursor:pointer;transition:.18s ease
@@ -1647,6 +1651,33 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   .world-command-center .world-menu-primary button{min-height:62px}
 }
 
+
+/* V6.7 Riviera Masterplan */
+.campus-node.marina small{color:#9fc5c2}
+.campus-node.villa small{color:#dec18d}
+.campus-node.marina:hover{border-color:rgba(159,199,196,.48)}
+.campus-node.villa:hover{border-color:rgba(222,193,141,.48)}
+@media(min-width:901px) and (pointer:fine){
+  body.desktop-visual-v5 .campus-map-stage{
+    height:360px;
+    background:
+      radial-gradient(circle at 50% 54%,rgba(216,185,132,.085),transparent 27%),
+      radial-gradient(circle at 91% 15%,rgba(121,174,174,.10),transparent 24%),
+      radial-gradient(circle at 9% 15%,rgba(203,171,116,.08),transparent 24%),
+      linear-gradient(145deg,rgba(255,255,255,.025),rgba(255,255,255,.010));
+  }
+  body.desktop-visual-v5 .campus-node{min-width:102px;padding:11px 12px}
+  body.desktop-visual-v5 .campus-purpose-grid{grid-template-columns:repeat(3,1fr)}
+  body.desktop-visual-v5 .destination-grid button{height:72px}
+}
+@media(max-width:900px){
+  .campus-map-stage{height:390px}
+  .campus-node.marina{right:3%;top:5%}
+  .campus-node.villa{left:3%;top:5%}
+  .campus-node.life{right:8%;top:27%}
+  .campus-node.upper{left:8%;top:27%}
+  .campus-purpose-grid{grid-template-columns:1fr}
+}
 
 /* V6.1 Entrance Character Configurator */
 .intro-avatar-config{
