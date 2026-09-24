@@ -265,8 +265,8 @@ const living={
   lightingV631:null,
   atmosphereV632:null,
   livingCampusV64:null,
-  masterplanV67:null,
-  yachtsV67:[],
+  masterplanV68:null,
+  yachtsV68:[],
   waterfallsV64:[]
 };
 
@@ -1259,7 +1259,7 @@ const rehabRoom=new THREE.Group();rehabRoom.name='KOMO_FITNESS_CLUB_V29';rehabRo
 const arenaRoom=new THREE.Group();arenaRoom.name='KOMO_ARENA_V1';arenaRoom.visible=true;scene.add(arenaRoom);
 
 // Landscape + arrival.
-mesh(world,new THREE.PlaneGeometry(280,240),M.ground,0,-.04,36,{receive:true}).rotation.x=-Math.PI/2;
+mesh(world,new THREE.PlaneGeometry(220,205),M.ground,0,-.04,39,{receive:true}).rotation.x=-Math.PI/2;
 box(world,13.2,.18,48,M.stoneLight,0,.07,39,{receive:true});
 [-6.5,6.5].forEach(x=>line(world,.05,47.5,x,39,M.bronze,.17));
 [20,30,40,50,60].forEach(z=>line(world,13,.04,0,z,M.bronzeSoft,.17));
@@ -1735,209 +1735,258 @@ instancedStatic(campusCrowdV64,new THREE.SphereGeometry(1,8,6),crowdHeadMatV64,c
 });
 
 
-// V6.7 Riviera Masterplan — one readable estate: Central Campus + Marina + Retreat Villa.
-const masterplanV67=new THREE.Group();masterplanV67.name='KOMO_RIVIERA_MASTERPLAN_V67';world.add(masterplanV67);
-const marinaV67=new THREE.Group();marinaV67.name='KOMO_MARINA_V67';masterplanV67.add(marinaV67);
-const marinaDetailV67=new THREE.Group();marinaDetailV67.name='KOMO_MARINA_DETAIL_V67';marinaV67.add(marinaDetailV67);
-const villaV67=new THREE.Group();villaV67.name='KOMO_RETREAT_VILLA_V67';masterplanV67.add(villaV67);
-const villaDetailV67=new THREE.Group();villaDetailV67.name='KOMO_RETREAT_VILLA_DETAIL_V67';villaV67.add(villaDetailV67);
-const wayfindingV67=new THREE.Group();wayfindingV67.name='KOMO_MASTERPLAN_WAYFINDING_V67';masterplanV67.add(wayfindingV67);
-living.masterplanV67={root:masterplanV67,marina:marinaV67,marinaDetail:marinaDetailV67,villa:villaV67,villaDetail:villaDetailV67};
+// V6.8 Compact Riviera Estate — denser proportions, stronger silhouettes and readable cross-views.
+const masterplanV68=new THREE.Group();masterplanV68.name='KOMO_RIVIERA_MASTERPLAN_V68';world.add(masterplanV68);
+const marinaV68=new THREE.Group();marinaV68.name='KOMO_MARINA_V68';masterplanV68.add(marinaV68);
+const marinaDetailV68=new THREE.Group();marinaDetailV68.name='KOMO_MARINA_DETAIL_V68';marinaV68.add(marinaDetailV68);
+const villaV68=new THREE.Group();villaV68.name='KOMO_RETREAT_VILLA_V68';masterplanV68.add(villaV68);
+const villaDetailV68=new THREE.Group();villaDetailV68.name='KOMO_RETREAT_VILLA_DETAIL_V68';villaV68.add(villaDetailV68);
+const wayfindingV68=new THREE.Group();wayfindingV68.name='KOMO_MASTERPLAN_WAYFINDING_V68';masterplanV68.add(wayfindingV68);
+const landscapeV68=new THREE.Group();landscapeV68.name='KOMO_RIVIERA_LANDSCAPE_V68';masterplanV68.add(landscapeV68);
+living.masterplanV68={root:masterplanV68,marina:marinaV68,marinaDetail:marinaDetailV68,villa:villaV68,villaDetail:villaDetailV68,landscape:landscapeV68};
 
-const v67Warm=new THREE.MeshBasicMaterial({color:0xe5c88f,transparent:true,opacity:lowPower?.24:.42,depthWrite:false});
-const v67Sea=new THREE.MeshStandardMaterial({color:0x789b9b,roughness:.24,metalness:.03,transparent:true,opacity:.92});
-const v67SeaDeep=new THREE.MeshStandardMaterial({color:0x587879,roughness:.28,metalness:.02});
-const v67YachtWhite=new THREE.MeshStandardMaterial({color:0xe8e7e1,roughness:.30,metalness:.03});
-const v67YachtDark=new THREE.MeshStandardMaterial({color:0x26302f,roughness:.28,metalness:.12});
-const v67Deck=new THREE.MeshStandardMaterial({color:0x8a674b,roughness:.68,metalness:.02});
-const v67Pool=new THREE.MeshStandardMaterial({color:0xaac8c5,roughness:.18,metalness:.02,transparent:true,opacity:.88});
-const v67Sand=new THREE.MeshStandardMaterial({color:0xc8baa2,roughness:.94,metalness:0});
-const v67Olive=new THREE.MeshStandardMaterial({color:0x61715e,roughness:.94,metalness:0});
+const v68Warm=new THREE.MeshBasicMaterial({color:0xe7c98f,transparent:true,opacity:lowPower?.24:.44,depthWrite:false});
+const v68Sea=new THREE.MeshStandardMaterial({color:0x7fa0a0,roughness:.20,metalness:.025,transparent:true,opacity:.94});
+const v68SeaDeep=new THREE.MeshStandardMaterial({color:0x557475,roughness:.28,metalness:.025});
+const v68YachtWhite=new THREE.MeshStandardMaterial({color:0xedece7,roughness:.28,metalness:.025});
+const v68Deck=new THREE.MeshStandardMaterial({color:0x8f694b,roughness:.66,metalness:.02});
+const v68Pool=new THREE.MeshStandardMaterial({color:0xa9cbc7,roughness:.16,metalness:.02,transparent:true,opacity:.90});
+const v68Olive=new THREE.MeshStandardMaterial({color:0x64755f,roughness:.94,metalness:0});
+const v68Gravel=new THREE.MeshStandardMaterial({color:0xb9ae97,roughness:.98,metalness:0});
 
-function masterplanSignV67(parent,x,z,title,sub,rotY=0){
+function masterplanSignV68(parent,x,z,title,sub,rotY=0){
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rotY;parent.add(g);
-  box(g,4.7,.16,.85,MAT.travertine,0,.10,0,{cast:true});
-  box(g,.13,3.55,.18,MAT.brass,-2.02,1.83,0,{cast:false});
-  box(g,.13,3.55,.18,MAT.brass,2.02,1.83,0,{cast:false});
-  plaque(g,title,sub,3.75,.82,0,2.45,.11,{dark:true,titleSize:title.length>16?38:48});
+  box(g,5.2,.18,.96,MAT.travertine,0,.10,0,{cast:true});
+  box(g,.14,3.85,.18,MAT.brass,-2.28,1.98,0,{cast:false});
+  box(g,.14,3.85,.18,MAT.brass,2.28,1.98,0,{cast:false});
+  plaque(g,title,sub,4.18,.88,0,2.65,.12,{dark:true,titleSize:title.length>16?39:50});
   return g;
 }
-function oliveTreeV67(parent,x,z,scale=1){
+function oliveTreeV68(parent,x,z,scale=1){
   const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);parent.add(g);
-  cyl(g,.19,.28,3.2,campusTrunkV64,0,1.6,0,9,{cast:!lowPower});
-  [[0,3.75,0,1.35],[.85,3.55,.18,.90],[-.82,3.58,-.14,.88],[.28,4.18,-.62,.72],[-.35,4.10,.58,.68]].slice(0,lowPower?3:5).forEach(([cx,cy,cz,s],i)=>{
-    const crown=mesh(g,campusCrownGeoV64,i%2?v67Olive:campusGreenSoftV64,cx,cy,cz,{cast:!lowPower});
-    crown.scale.set(s*1.28,s*.66,s);
+  cyl(g,.21,.31,3.35,campusTrunkV64,0,1.67,0,9,{cast:!lowPower});
+  [[0,3.90,0,1.46],[.92,3.72,.15,.96],[-.88,3.73,-.12,.92],[.32,4.28,-.64,.76],[-.38,4.20,.60,.74]].slice(0,lowPower?3:5).forEach(([cx,cy,cz,s],i)=>{
+    const crown=mesh(g,campusCrownGeoV64,i%2?v68Olive:campusGreenSoftV64,cx,cy,cz,{cast:!lowPower});
+    crown.scale.set(s*1.34,s*.68,s*1.04);
   });
   g.userData.swayPhase=(x*.29+z*.17);living.trees.push(g);return g;
 }
-function yachtV67(parent,x,z,length=20,heading=0,name='KŌMØ'){
-  const g=new THREE.Group();g.position.set(x,.12,z);g.rotation.y=heading;g.name='KOMO_YACHT_V67_'+name.replace(/\s+/g,'_');parent.add(g);
-  const hull=mesh(g,new THREE.CapsuleGeometry(1.30,Math.max(8,length-2.6),6,18),v67YachtWhite,0,.72,0,{cast:true});
-  hull.rotation.x=Math.PI/2;hull.scale.set(1.26,.52,1);
-  box(g,2.88,.18,length*.58,v67Deck,0,1.22,-length*.05,{cast:true});
-  box(g,2.55,.92,length*.31,v67YachtWhite,0,1.74,-length*.06,{cast:true});
-  box(g,2.34,.42,length*.20,MAT.smokedGlass,0,2.08,-length*.13,{cast:false});
-  box(g,1.72,.56,length*.12,v67YachtWhite,0,2.56,-length*.12,{cast:true});
-  box(g,.07,1.90,.07,MAT.brass,.02,3.58,-length*.10,{cast:false});
-  const radar=mesh(g,new THREE.SphereGeometry(.19,12,8),v67YachtWhite,.02,3.83,-length*.10,{cast:false});radar.scale.set(1.35,.58,1);
-  [-1,1].forEach(side=>{
-    box(g,.035,.45,length*.42,MAT.brass,side*1.48,1.55,-length*.03,{cast:false,receive:false});
-  });
-  plaque(g,name,'KŌMØ YACHTING',Math.min(4.1,length*.28),.58,0,1.70,length*.40,{dark:true,titleSize:34});
-  living.yachtsV67.push({group:g,baseY:.12,phase:living.yachtsV67.length*.81});
+function cypressV68(parent,x,z,scale=1){
+  const g=new THREE.Group();g.position.set(x,0,z);parent.add(g);
+  cyl(g,.10,.16,2.7,campusTrunkV64,0,1.35,0,8,{cast:false});
+  const crown=mesh(g,campusCypressGeoV64,campusGreenDeepV64,0,3.45,0,{cast:!lowPower});
+  crown.scale.set(.62*scale,2.15*scale,.62*scale);return g;
+}
+function yachtV68(parent,x,z,length=22,heading=0,name='KŌMØ'){
+  const g=new THREE.Group();g.position.set(x,.12,z);g.rotation.y=heading;g.name='KOMO_YACHT_V68_'+name.replace(/\s+/g,'_');parent.add(g);
+  const hull=mesh(g,new THREE.CapsuleGeometry(1.42,Math.max(9,length-2.8),6,18),v68YachtWhite,0,.78,0,{cast:true});
+  hull.rotation.x=Math.PI/2;hull.scale.set(1.34,.54,1);
+  box(g,3.22,.20,length*.60,v68Deck,0,1.30,-length*.04,{cast:true});
+  box(g,2.92,1.02,length*.33,v68YachtWhite,0,1.85,-length*.06,{cast:true});
+  box(g,2.65,.48,length*.22,MAT.smokedGlass,0,2.26,-length*.13,{cast:false});
+  box(g,1.96,.62,length*.13,v68YachtWhite,0,2.77,-length*.12,{cast:true});
+  box(g,.08,2.10,.08,MAT.brass,.02,3.78,-length*.10,{cast:false});
+  const radar=mesh(g,new THREE.SphereGeometry(.21,12,8),v68YachtWhite,.02,4.02,-length*.10,{cast:false});radar.scale.set(1.35,.58,1);
+  [-1,1].forEach(side=>box(g,.038,.48,length*.45,MAT.brass,side*1.64,1.62,-length*.03,{cast:false,receive:false}));
+  plaque(g,name,'KŌMØ YACHTING',Math.min(4.5,length*.28),.62,0,1.83,length*.41,{dark:true,titleSize:35});
+  living.yachtsV68.push({group:g,baseY:.12,phase:living.yachtsV68.length*.83});
+  return g;
+}
+function gatewayPergolaV68(parent,x,z,title,rot=0){
+  const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rot;parent.add(g);
+  [-3.5,3.5].forEach(px=>box(g,.28,4.6,.28,MAT.travertine,px,2.3,0,{cast:true}));
+  box(g,7.4,.24,1.15,MAT.blackened,0,4.55,0,{cast:true});
+  for(let px=-2.8;px<=2.8;px+=1.4)box(g,.12,.18,3.6,MAT.walnut,px,4.34,0,{cast:true});
+  plaque(g,title,title==='MARINA'?'YACHTING · BOARDING':'PRIVATE · RETREAT',5.4,.70,0,3.35,.62,{dark:true,titleSize:44});
   return g;
 }
 
-// MASTERPLAN SPINE — branch clearly from the central fountain / district.
-box(wayfindingV67,43,.075,6.8,MAT.travertine,44,.08,57.0,{cast:false,receive:true});
-box(wayfindingV67,43,.075,6.8,MAT.travertine,-44,.08,68.0,{cast:false,receive:true});
-box(wayfindingV67,39,.028,1.35,v67Warm,45,.135,57.0,{cast:false,receive:false});
-box(wayfindingV67,39,.028,1.35,v67Warm,-45,.135,68.0,{cast:false,receive:false});
+// CENTRAL CROSS AXIS — extend the fountain district into a real estate masterplan.
+box(wayfindingV68,78,.075,8.4,MAT.travertine,0,.08,67.8,{cast:false,receive:true});
+box(wayfindingV68,74,.030,1.10,v68Warm,0,.135,67.8,{cast:false,receive:false});
+[-34,-26,-18,18,26,34].forEach((x,i)=>{
+  exteriorBollard(wayfindingV68,x,64.7,.70);
+  exteriorBollard(wayfindingV68,x,70.9,.70);
+  if(!lowPower&&i%2===0)oliveTreeV68(wayfindingV68,x,74.8,.68);
+});
+gatewayPergolaV68(wayfindingV68,35.2,67.8,'MARINA',Math.PI/2);
+gatewayPergolaV68(wayfindingV68,-35.2,67.8,'RETREAT VILLA',-Math.PI/2);
+masterplanSignV68(wayfindingV68,24.2,61.2,'MARINA','YACHTING · BOARDING',Math.PI/2);
+masterplanSignV68(wayfindingV68,-24.2,74.4,'RETREAT VILLA','PRIVATE LONGEVITY',-Math.PI/2);
+
+// LANDSCAPE INFILL — remove the empty-lawn feeling between destinations.
 [-1,1].forEach(side=>{
-  const xs=side>0?[28,36,44,52,60]:[-28,-36,-44,-52,-60];
-  xs.forEach((x,i)=>{
-    exteriorBollard(wayfindingV67,x,side>0?54.3:71.2,.70);
-    if(!lowPower&&i%2===0)oliveTreeV67(wayfindingV67,x,side>0?61.0:63.5,.62);
+  const sx=side;
+  [30,38,46].forEach((x0,j)=>{
+    const x=sx*x0;
+    box(landscapeV68,6.8,.10,9.2,v68Gravel,x,.05,79+(j%2)*2.6,{cast:false,receive:true});
+    box(landscapeV68,5.8,.15,1.05,MAT.limestone,x,.12,83.0+(j%2)*2.6,{cast:false});
+    oliveTreeV68(landscapeV68,x-sx*1.3,79.0+(j%2)*2.6,.66+.05*j);
+    cypressV68(landscapeV68,x+sx*1.65,80.0+(j%2)*2.6,.90);
   });
 });
-masterplanSignV67(wayfindingV67,22.7,61.8,'MARINA','YACHTING · BOARDING',Math.PI/2);
-masterplanSignV67(wayfindingV67,-22.7,72.0,'RETREAT VILLA','PRIVATE LONGEVITY',-Math.PI/2);
-
-// EAST — KŌMØ MARINA / YACHTING.
-box(marinaV67,20,.18,68,MAT.travertine,66.0,.09,62,{cast:false,receive:true});
-box(marinaV67,7.5,.08,63,v67Deck,71.1,.18,62,{cast:false,receive:true});
-box(marinaV67,1.05,.52,70,MAT.limestone,76.0,.26,62,{cast:true});
-const marinaSeaV67=box(marinaV67,58,.10,78,v67Sea,102.2,.04,62,{cast:false,receive:false});living.water.push(marinaSeaV67);
-box(marinaV67,8,.12,78,v67SeaDeep,129.0,.01,62,{cast:false,receive:false});
-
-// A clear harbor mouth / breakwater silhouette.
-box(marinaV67,34,.40,2.6,MAT.limestone,111,.20,25.2,{cast:true});
-box(marinaV67,34,.40,2.6,MAT.limestone,111,.20,98.8,{cast:true});
 [-1,1].forEach(side=>{
-  cyl(marinaV67,.32,.42,2.6,MAT.limestone,127.3,1.30,62+side*36.7,14,{cast:true});
-  mesh(marinaV67,new THREE.SphereGeometry(.22,10,8),v67Warm,127.3,2.72,62+side*36.7,{cast:false});
+  [28,36,44,52].forEach((x0,i)=>{
+    const x=side*x0;
+    shrubCluster(landscapeV68,x,58.8,.72+(i%2)*.06);
+    shrubCluster(landscapeV68,x,76.8,.68+(i%2)*.05);
+  });
 });
 
-// Three walkable piers.
-[44,62,80].forEach((z,i)=>{
-  box(marinaV67,34,.22,2.7,MAT.travertine,93,.24,z,{cast:true});
-  box(marinaV67,31,.045,2.05,v67Deck,94,.385,z,{cast:false,receive:true});
-  for(let x=80;x<=108;x+=7){
-    cyl(marinaDetailV67,.055,.070,1.15,MAT.blackened,x,.86,z-1.05,8,{cast:false});
-    mesh(marinaDetailV67,new THREE.SphereGeometry(.085,8,6),v67Warm,x,1.48,z-1.05,{cast:false,receive:false});
+// EAST — KŌMØ Marina moved closer to the Campus and scaled up.
+box(marinaV68,23,.18,58,MAT.travertine,51.5,.09,62.5,{cast:false,receive:true});
+box(marinaV68,7.8,.08,54,v68Deck,58.2,.18,62.5,{cast:false,receive:true});
+box(marinaV68,1.05,.58,60,MAT.limestone,62.6,.29,62.5,{cast:true});
+const marinaSeaV68=box(marinaV68,43,.10,66,v68Sea,83.8,.04,62.5,{cast:false,receive:false});living.water.push(marinaSeaV68);
+box(marinaV68,5.2,.12,66,v68SeaDeep,105.0,.01,62.5,{cast:false,receive:false});
+
+// Waterfront plaza and two destination buildings create a meaningful silhouette.
+const boardingV68=new THREE.Group();boardingV68.position.set(49.0,0,43.0);marinaV68.add(boardingV68);
+box(boardingV68,18.5,.32,14.5,MAT.travertine,0,.16,0,{cast:true});
+box(boardingV68,18.5,6.6,.32,MAT.limestone,0,3.45,7.05,{cast:true});
+box(boardingV68,.32,6.6,14.5,MAT.limestone,-9.05,3.45,0,{cast:true});
+box(boardingV68,.32,6.6,14.5,MAT.limestone,9.05,3.45,0,{cast:true});
+box(boardingV68,18.5,.30,14.5,MAT.blackened,0,6.65,0,{cast:true});
+box(boardingV68,.048,5.55,12.9,campusGlassV64,8.80,3.35,0,{cast:false,receive:false});
+box(boardingV68,16.4,.045,12.6,campusInteriorGlowV64,0,6.38,0,{cast:false,receive:false});
+plaque(boardingV68,'BOARDING LOUNGE','KŌMØ YACHTING · RETREATS',7.4,.98,-8.92,4.85,0,{rotY:Math.PI/2,dark:true,titleSize:52});
+loungeCluster(boardingV68,-2.7,-1.4,Math.PI/2,.84);
+loungeCluster(boardingV68,3.5,2.1,-Math.PI/2,.78);
+
+const marinaClubV68=new THREE.Group();marinaClubV68.position.set(49.5,0,77.5);marinaV68.add(marinaClubV68);
+box(marinaClubV68,16.0,.28,11.2,MAT.travertine,0,.14,0,{cast:true});
+box(marinaClubV68,16.0,5.4,.30,MAT.limestone,0,2.84,5.42,{cast:true});
+box(marinaClubV68,.30,5.4,11.2,MAT.limestone,-7.85,2.84,0,{cast:true});
+box(marinaClubV68,.30,5.4,11.2,MAT.limestone,7.85,2.84,0,{cast:true});
+box(marinaClubV68,16.0,.26,11.2,MAT.blackened,0,5.48,0,{cast:true});
+box(marinaClubV68,.045,4.5,9.8,campusGlassV64,7.62,2.75,0,{cast:false});
+plaque(marinaClubV68,'YACHTING HOUSE','PRIVATE EXPERIENCE · HOSPITALITY',6.9,.84,-7.70,4.10,0,{rotY:Math.PI/2,dark:true,titleSize:45});
+
+// Three piers with yachts close enough to read from the campus.
+[46.5,62.5,78.5].forEach((z,i)=>{
+  box(marinaV68,28,.22,2.9,MAT.travertine,76.5,.24,z,{cast:true});
+  box(marinaV68,25.5,.045,2.18,v68Deck,77.5,.385,z,{cast:false,receive:true});
+  for(let x=65;x<=88;x+=5.75){
+    cyl(marinaDetailV68,.058,.074,1.18,MAT.blackened,x,.87,z-1.10,8,{cast:false});
+    mesh(marinaDetailV68,new THREE.SphereGeometry(.088,8,6),v68Warm,x,1.50,z-1.10,{cast:false,receive:false});
   }
 });
+yachtV68(marinaV68,79.0,49.6,19,Math.PI/2,'MOTION I');
+yachtV68(marinaV68,81.0,65.5,27,Math.PI/2,'KŌMØ ONE');
+if(!lowPower)yachtV68(marinaV68,79.5,81.2,21,Math.PI/2,'RIVIERA');
 
-// Boarding lounge with glazed waterfront facade.
-const boardingV67=new THREE.Group();boardingV67.position.set(65.0,0,39.0);marinaV67.add(boardingV67);
-box(boardingV67,15.5,.30,12.8,MAT.travertine,0,.15,0,{cast:true});
-box(boardingV67,15.5,5.9,.30,MAT.limestone,0,3.05,6.25,{cast:true});
-box(boardingV67,.30,5.9,12.8,MAT.limestone,-7.60,3.05,0,{cast:true});
-box(boardingV67,.30,5.9,12.8,MAT.limestone,7.60,3.05,0,{cast:true});
-box(boardingV67,15.5,.28,12.8,MAT.blackened,0,5.92,0,{cast:true});
-box(boardingV67,.045,4.95,11.4,campusGlassV64,7.38,2.95,0,{cast:false,receive:false});
-box(boardingV67,13.5,.040,10.9,campusInteriorGlowV64,0,5.70,0,{cast:false,receive:false});
-plaque(boardingV67,'BOARDING LOUNGE','KŌMØ YACHTING · RETREATS',6.5,.90,-7.48,4.30,0,{rotY:Math.PI/2,dark:true,titleSize:50});
-loungeCluster(boardingV67,-2.0,-1.1,Math.PI/2,.78);
-loungeCluster(boardingV67,3.2,1.8,-Math.PI/2,.72);
-
-// Flagship marina marker.
-masterplanSignV67(marinaV67,70.7,88.8,'KŌMØ MARINA','RIVIERA · YACHTING',0);
-bannerTotem(marinaDetailV67,61.5,54.0,'YACHTING','PRIVATE EXPERIENCE',0);
-bannerTotem(marinaDetailV67,61.5,72.0,'RETREATS','BOARDING',0);
-
-// Yachts remain visible from the Central Campus as unmistakable yachting landmarks.
-yachtV67(marinaV67,94.0,48.3,18,Math.PI/2,'MOTION I');
-yachtV67(marinaV67,96.0,66.5,25,Math.PI/2,'KŌMØ ONE');
-if(!lowPower)yachtV67(marinaV67,94.5,84.3,20,Math.PI/2,'RIVIERA');
-
-// Marina waterfront furniture + Mediterranean landscape.
-[33,50,68,87].forEach((z,i)=>{
-  oliveTreeV67(marinaDetailV67,59.6,z,.74+(i%2)*.06);
-  exteriorBench(marinaDetailV67,69.0,z+3.8,-Math.PI/2,.78);
+// Harbor edge / horizon marker.
+box(marinaV68,30,.42,2.5,MAT.limestone,91.0,.21,31.0,{cast:true});
+box(marinaV68,30,.42,2.5,MAT.limestone,91.0,.21,94.0,{cast:true});
+[-1,1].forEach(side=>{
+  cyl(marinaV68,.34,.44,2.9,MAT.limestone,105.0,1.45,62.5+side*31.5,14,{cast:true});
+  mesh(marinaV68,new THREE.SphereGeometry(.23,10,8),v68Warm,105.0,3.0,62.5+side*31.5,{cast:false});
 });
-[34,42,52,60,70,78,88].forEach((z,i)=>exteriorBollard(marinaDetailV67,74.5,z,.66));
+masterplanSignV68(marinaV68,52.5,90.0,'KŌMØ MARINA','RIVIERA · YACHTING',0);
+bannerTotem(marinaDetailV68,43.2,55.0,'YACHTING','PRIVATE EXPERIENCE',0);
+bannerTotem(marinaDetailV68,43.2,72.0,'RETREATS','BOARDING',0);
+[36,51,66,84].forEach((z,i)=>{
+  oliveTreeV68(marinaDetailV68,42.5,z,.76+(i%2)*.07);
+  exteriorBench(marinaDetailV68,57.0,z+3.2,-Math.PI/2,.82);
+});
+[37,45,54,63,72,81,89].forEach(z=>exteriorBollard(marinaDetailV68,61.1,z,.68));
 if(!lowPower){
-  for(let i=0;i<7;i++){
-    const q=box(marinaDetailV67,34,.010,.055,shimmerMat,101.5,.115,34+i*9.2,{cast:false,receive:false});
+  for(let i=0;i<6;i++){
+    const q=box(marinaDetailV68,28,.010,.055,shimmerMat,83.2,.115,37+i*10.0,{cast:false,receive:false});
     q.userData.phase=.18+i*.17;q.userData.v64Local=true;living.shimmers.push(q);
   }
 }
 
-// WEST — KŌMØ Retreat Villa / private longevity estate.
-box(villaV67,56,.14,58,M.ground,-86,.03,69,{cast:false,receive:true});
-box(villaV67,49,.22,50,MAT.travertine,-86,.11,69,{cast:false,receive:true});
-box(villaV67,43,.035,45,M.stoneLight,-86,.24,69,{cast:false,receive:true});
+// WEST — KŌMØ Retreat Villa moved closer and made architecturally larger.
+box(villaV68,43,.14,54,M.ground,-54.0,.03,68.5,{cast:false,receive:true});
+box(villaV68,38,.22,49,MAT.travertine,-54.0,.11,68.5,{cast:false,receive:true});
+box(villaV68,33,.035,44,M.stoneLight,-54.0,.24,68.5,{cast:false,receive:true});
 
-// Villa architecture: low, horizontal Riviera composition around a private courtyard.
-const retreatHouseV67=new THREE.Group();retreatHouseV67.position.set(-86,0,78);villaV67.add(retreatHouseV67);
-box(retreatHouseV67,31,.30,15.5,MAT.travertine,0,.15,0,{cast:true});
-box(retreatHouseV67,31,6.4,.34,MAT.limestone,0,3.35,7.55,{cast:true});
-box(retreatHouseV67,.34,6.4,15.5,MAT.limestone,-15.3,3.35,0,{cast:true});
-box(retreatHouseV67,.34,6.4,15.5,MAT.limestone,15.3,3.35,0,{cast:true});
-box(retreatHouseV67,31,.30,15.5,MAT.blackened,0,6.45,0,{cast:true});
-box(retreatHouseV67,29.5,.055,14.2,campusInteriorGlowV64,0,6.18,0,{cast:false,receive:false});
-box(retreatHouseV67,17.5,5.15,.045,campusGlassV64,0,3.25,-7.30,{cast:false,receive:false});
-[-12.4,12.4].forEach(x=>box(retreatHouseV67,5.1,5.15,.045,campusGlassV64,x,3.25,-7.30,{cast:false,receive:false}));
-plaque(retreatHouseV67,'KŌMØ RETREAT VILLA','PRIVATE LONGEVITY EXPERIENCE',8.2,1.02,0,5.15,-7.52,{dark:true,titleSize:58});
+const retreatHouseV68=new THREE.Group();retreatHouseV68.position.set(-54,0,79);villaV68.add(retreatHouseV68);
+box(retreatHouseV68,35,.32,17.0,MAT.travertine,0,.16,0,{cast:true});
+box(retreatHouseV68,35,6.8,.36,MAT.limestone,0,3.58,8.25,{cast:true});
+box(retreatHouseV68,.36,6.8,17.0,MAT.limestone,-17.3,3.58,0,{cast:true});
+box(retreatHouseV68,.36,6.8,17.0,MAT.limestone,17.3,3.58,0,{cast:true});
+box(retreatHouseV68,35,.30,17.0,MAT.blackened,0,6.86,0,{cast:true});
+box(retreatHouseV68,33.4,.055,15.6,campusInteriorGlowV64,0,6.58,0,{cast:false,receive:false});
+box(retreatHouseV68,19.8,5.55,.048,campusGlassV64,0,3.50,-8.0,{cast:false,receive:false});
+[-14.1,14.1].forEach(x=>box(retreatHouseV68,5.6,5.55,.048,campusGlassV64,x,3.50,-8.0,{cast:false,receive:false}));
+plaque(retreatHouseV68,'KŌMØ RETREAT VILLA','PRIVATE LONGEVITY EXPERIENCE',9.0,1.05,0,5.55,-8.26,{dark:true,titleSize:60});
 
-// Private terrace + pool axis.
-box(villaV67,31,.11,14.5,v67Deck,-86,.29,60.5,{cast:false,receive:true});
-box(villaV67,23.4,.22,9.2,MAT.travertine,-86,.18,51.5,{cast:false,receive:true});
-const villaPoolV67=box(villaV67,21.8,.11,7.8,v67Pool,-86,.34,51.5,{cast:false,receive:false});living.water.push(villaPoolV67);
-mesh(villaV67,new THREE.RingGeometry(1.65,1.72,56),new THREE.MeshBasicMaterial({color:0xe7d09f,transparent:true,opacity:.32,depthWrite:false}),-86,.415,51.5,{cast:false,receive:false}).rotation.x=-Math.PI/2;
+// Cantilevered upper suite gives the villa a landmark silhouette.
+const upperSuiteV68=new THREE.Group();upperSuiteV68.position.set(5.8,6.85,1.7);retreatHouseV68.add(upperSuiteV68);
+box(upperSuiteV68,16.5,.28,9.4,MAT.travertine,0,.14,0,{cast:true});
+box(upperSuiteV68,16.5,4.3,.30,MAT.limestone,0,2.28,4.55,{cast:true});
+box(upperSuiteV68,.30,4.3,9.4,MAT.limestone,-8.1,2.28,0,{cast:true});
+box(upperSuiteV68,.045,3.55,8.1,campusGlassV64,8.0,2.25,0,{cast:false});
+box(upperSuiteV68,16.5,.28,9.4,MAT.blackened,0,4.38,0,{cast:true});
+plaque(upperSuiteV68,'PRIVATE SUITES','SLEEP · RECOVERY',5.4,.70,-8.0,3.25,-4.70,{rotY:Math.PI/2,dark:true,titleSize:38});
 
-// Pergola and outdoor dining.
-const pergolaV67=new THREE.Group();pergolaV67.position.set(-68.8,0,62.5);villaDetailV67.add(pergolaV67);
-box(pergolaV67,11,.18,8.0,MAT.travertine,0,.10,0,{cast:true});
-[-5.1,5.1].forEach(x=>[-3.5,3.5].forEach(z=>box(pergolaV67,.22,3.5,.22,MAT.blackened,x,1.85,z,{cast:true})));
-for(let x=-4.6;x<=4.6;x+=1.15)box(pergolaV67,.14,.14,7.5,MAT.walnut,x,3.58,0,{cast:true});
-box(pergolaV67,6.2,.17,1.45,MAT.walnut,0,1.04,0,{cast:true});
-[-2.1,0,2.1].forEach(x=>{cyl(pergolaV67,.36,.36,.44,MAT.fabricLight,x,.48,-1.75,18,{cast:true});cyl(pergolaV67,.36,.36,.44,MAT.fabricLight,x,.48,1.75,18,{cast:true})});
-plaque(pergolaV67,'LONGEVITY TABLE','NUTRITION · CONVERSATION',4.8,.70,0,2.55,3.88,{dark:true,titleSize:38});
-
-// Wellness corners give the retreat program a clear spatial meaning.
-[
-  [-105.0,62.0,'SLEEP','RECOVERY'],
-  [-104.0,82.0,'NUTRITION','METABOLIC'],
-  [-68.0,82.0,'SKIN + NAD','LONGEVITY']
-].forEach(([x,z,title,sub],i)=>{
-  const g=new THREE.Group();g.position.set(x,0,z);villaDetailV67.add(g);
-  box(g,8.4,.22,7.0,MAT.travertine,0,.11,0,{cast:true});
-  box(g,8.4,3.8,.24,i===2?MAT.smokedGlass:MAT.limestone,0,2.02,3.38,{cast:true});
-  box(g,.24,3.8,7.0,MAT.limestone,-4.08,2.02,0,{cast:true});
-  box(g,.24,3.8,7.0,MAT.limestone,4.08,2.02,0,{cast:true});
-  box(g,8.4,.20,7.0,MAT.blackened,0,3.90,0,{cast:true});
-  plaque(g,title,sub,5.4,.68,0,3.18,-3.53,{dark:true,titleSize:title.length>8?36:44});
+// Pool court and hospitality terrace.
+box(villaV68,34,.12,15.5,v68Deck,-54,.30,59.0,{cast:false,receive:true});
+box(villaV68,25.8,.24,9.8,MAT.travertine,-54,.18,49.5,{cast:false,receive:true});
+const villaPoolV68=box(villaV68,24.0,.12,8.2,v68Pool,-54,.35,49.5,{cast:false,receive:false});living.water.push(villaPoolV68);
+[-1,1].forEach(side=>{
+  const q=box(villaV68,9.2,.012,.055,shimmerMat,-54,.425,47.4+side*2.0,{cast:false,receive:false});
+  q.userData.phase=.41+side*.22;living.shimmers.push(q);
 });
 
-// Lounge / hospitality scenes around the villa.
-loungeCluster(villaDetailV67,-99.5,55.8,.15,.86);
-loungeCluster(villaDetailV67,-74.0,55.6,-.12,.84);
-masterplanSignV67(villaV67,-107.0,92.0,'RETREAT VILLA','SLEEP · NUTRITION · RECOVERY',0);
-bannerTotem(villaDetailV67,-63.0,72.5,'PRIVATE','RETREAT',Math.PI/2);
+// Pool cabanas close the foreground.
+[-1,1].forEach(side=>{
+  const g=new THREE.Group();g.position.set(-54+side*13.6,0,52.5);villaDetailV68.add(g);
+  box(g,7.8,.18,5.5,MAT.travertine,0,.09,0,{cast:true});
+  [-3.4,3.4].forEach(x=>[-2.25,2.25].forEach(z=>box(g,.18,3.25,.18,MAT.blackened,x,1.72,z,{cast:true})));
+  for(let x=-3.0;x<=3.0;x+=1.0)box(g,.10,.13,5.0,MAT.walnut,x,3.28,0,{cast:true});
+  loungeCluster(g,0,0,side>0?Math.PI:-Math.PI,.72);
+});
 
-// Garden rooms / olive grove frame the villa and make it feel private.
+// Pergola dining and wellness pavilions.
+const pergolaV68=new THREE.Group();pergolaV68.position.set(-37.5,0,63.5);villaDetailV68.add(pergolaV68);
+box(pergolaV68,11.5,.18,8.5,MAT.travertine,0,.10,0,{cast:true});
+[-5.25,5.25].forEach(x=>[-3.75,3.75].forEach(z=>box(pergolaV68,.22,3.7,.22,MAT.blackened,x,1.95,z,{cast:true})));
+for(let x=-4.7;x<=4.7;x+=1.15)box(pergolaV68,.14,.14,8.0,MAT.walnut,x,3.78,0,{cast:true});
+box(pergolaV68,6.6,.17,1.5,MAT.walnut,0,1.04,0,{cast:true});
+[-2.2,0,2.2].forEach(x=>{cyl(pergolaV68,.38,.38,.46,MAT.fabricLight,x,.50,-1.9,18,{cast:true});cyl(pergolaV68,.38,.38,.46,MAT.fabricLight,x,.50,1.9,18,{cast:true})});
+plaque(pergolaV68,'LONGEVITY TABLE','NUTRITION · CONVERSATION',5.0,.72,0,2.70,4.12,{dark:true,titleSize:39});
+
 [
-  [-111,48,.78],[-105,52,.72],[-111,70,.84],[-108,91,.74],[-98,95,.76],
-  [-75,94,.74],[-64,90,.72],[-62,48,.72],[-70,45,.76],[-99,45,.70]
-].slice(0,lowPower?6:10).forEach(v=>oliveTreeV67(villaDetailV67,...v));
-[-110,-102,-94,-78,-70,-62].forEach((x,i)=>exteriorBollard(villaDetailV67,x,67.7+(i%2?2.0:-2.0),.66));
+  [-70.0,62.0,'SLEEP','RECOVERY'],
+  [-69.0,83.0,'NUTRITION','METABOLIC'],
+  [-38.0,82.0,'SKIN + NAD','LONGEVITY']
+].forEach(([x,z,title,sub],i)=>{
+  const g=new THREE.Group();g.position.set(x,0,z);villaDetailV68.add(g);
+  box(g,9.2,.22,7.6,MAT.travertine,0,.11,0,{cast:true});
+  box(g,9.2,4.2,.26,i===2?MAT.smokedGlass:MAT.limestone,0,2.22,3.67,{cast:true});
+  box(g,.26,4.2,7.6,MAT.limestone,-4.47,2.22,0,{cast:true});
+  box(g,.26,4.2,7.6,MAT.limestone,4.47,2.22,0,{cast:true});
+  box(g,9.2,.22,7.6,MAT.blackened,0,4.28,0,{cast:true});
+  plaque(g,title,sub,5.8,.72,0,3.48,-3.82,{dark:true,titleSize:title.length>8?37:45});
+});
+loungeCluster(villaDetailV68,-66.0,54.5,.15,.90);
+loungeCluster(villaDetailV68,-42.0,55.0,-.12,.88);
+masterplanSignV68(villaV68,-70.0,92.0,'RETREAT VILLA','SLEEP · NUTRITION · RECOVERY',0);
+bannerTotem(villaDetailV68,-34.0,73.5,'PRIVATE','RETREAT',Math.PI/2);
 
-// Strong, low-cost territorial labels visible from the central campus.
-plaque(wayfindingV67,'CENTRAL CAMPUS','SCIENCE · MOVEMENT · LIFE',6.4,.90,0,4.10,87.0,{dark:true,titleSize:55});
-plaque(wayfindingV67,'MARINA','YACHTING',4.6,.80,57.8,4.25,58.9,{rotY:-Math.PI/2,dark:true,titleSize:48});
-plaque(wayfindingV67,'VILLA','RETREATS',4.6,.80,-57.8,4.25,68.9,{rotY:Math.PI/2,dark:true,titleSize:48});
+// Garden enclosure / view corridors: dense enough to feel built, open enough to read the Campus.
+[
+  [-73,46,.80],[-69,50,.76],[-74,71,.86],[-70,91,.78],[-63,95,.80],
+  [-48,95,.78],[-37,91,.76],[-34,48,.76],[-40,44,.80],[-62,44,.74]
+].slice(0,lowPower?6:10).forEach(v=>oliveTreeV68(villaDetailV68,...v));
+[-72,-64,-56,-48,-40,-34].forEach((x,i)=>exteriorBollard(villaDetailV68,x,67.2+(i%2?2.3:-2.3),.68));
 
-function showMarinaV67(){
+// Territorial labels remain visible from the cross-axis.
+plaque(wayfindingV68,'CENTRAL CAMPUS','SCIENCE · MOVEMENT · LIFE',6.8,.92,0,4.20,88.0,{dark:true,titleSize:56});
+plaque(wayfindingV68,'MARINA','YACHTING',4.8,.82,39.8,4.35,61.0,{rotY:-Math.PI/2,dark:true,titleSize:49});
+plaque(wayfindingV68,'VILLA','RETREATS',4.8,.82,-39.8,4.35,73.2,{rotY:Math.PI/2,dark:true,titleSize:49});
+
+function showMarinaV68(){
   openPanel('KŌMØ MARINA',locale==='fr'?'Yachting, hospitalité et retraites privées sur la Riviera.':'Yachting, hospitality and private Riviera retreats.',
-    '<div class="panel-grid"><div><span>YACHTING</span><b>KŌMØ One</b></div><div><span>BOARDING</span><b>Private lounge</b></div><div><span>EXPERIENCE</span><b>Longevity at sea</b></div><div><span>WORLD</span><b>Riviera</b></div></div><div class="priority-card"><b>MARINA</b>'+ (locale==='fr'?'Le point de départ des expériences KŌMØ Yachting et des formats retreat à bord.':'The departure point for KŌMØ Yachting experiences and onboard retreat formats.') +'</div>',
+    '<div class="panel-grid"><div><span>YACHTING</span><b>KŌMØ One</b></div><div><span>BOARDING</span><b>Private lounge</b></div><div><span>EXPERIENCE</span><b>Longevity at sea</b></div><div><span>WORLD</span><b>Riviera</b></div></div><div class="priority-card"><b>MARINA</b>'+ (locale==='fr'?'Le port KŌMØ réunit boarding lounge, Yachting House, quais privés et expériences de longévité en mer.':'KŌMØ Marina brings together the boarding lounge, Yachting House, private piers and longevity at sea.') +'</div>',
     [{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},{label:locale==='fr'?'ALLER AU QUAI':'GO TO PIER',primary:true,onClick:()=>{closePanel();fastTravel('marina')}}]);
 }
-function showVillaV67(){
+function showVillaV68(){
   openPanel('KŌMØ RETREAT VILLA',locale==='fr'?'Une expérience privée de longévité, d’hospitalité et d’art de vivre.':'A private longevity, hospitality and lifestyle experience.',
-    '<div class="panel-grid"><div><span>RETREAT</span><b>Private villa</b></div><div><span>PROGRAM</span><b>Sleep · Nutrition</b></div><div><span>LONGEVITY</span><b>Skin · NAD</b></div><div><span>HOSPITALITY</span><b>Riviera</b></div></div><div class="priority-card"><b>PRIVATE EXPERIENCE</b>'+ (locale==='fr'?'Villa, piscine, jardins, ateliers et espaces de consultation composent l’expérience retreat.':'Villa, pool, gardens, workshops and consultation spaces form the retreat experience.') +'</div>',
+    '<div class="panel-grid"><div><span>RETREAT</span><b>Private villa</b></div><div><span>PROGRAM</span><b>Sleep · Nutrition</b></div><div><span>LONGEVITY</span><b>Skin · NAD</b></div><div><span>HOSPITALITY</span><b>Riviera</b></div></div><div class="priority-card"><b>PRIVATE EXPERIENCE</b>'+ (locale==='fr'?'Villa, piscine, suites, jardins, ateliers et espaces longevity composent une expérience résidentielle complète.':'Villa, pool, suites, gardens, workshops and longevity spaces form a complete residential retreat.') +'</div>',
     [{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},{label:locale==='fr'?'ALLER À LA VILLA':'GO TO VILLA',primary:true,onClick:()=>{closePanel();fastTravel('villa')}}]);
 }
 
@@ -4079,8 +4128,8 @@ function showControlsPanel(){
 
 
 const interactions=[
-  {id:'marina',x:59.8,z:57.0,r:4.3,title:()=>locale==='fr'?'KŌMØ Marina · Yachting':'KŌMØ Marina · Yachting',desc:()=>locale==='fr'?'Port privé · yachts · boarding lounge':'Private marina · yachts · boarding lounge',action:showMarinaV67},
-  {id:'villa',x:-59.8,z:68.0,r:4.3,title:()=>locale==='fr'?'KŌMØ Retreat Villa':'KŌMØ Retreat Villa',desc:()=>locale==='fr'?'Villa privée · piscine · expériences longévité':'Private villa · pool · longevity experiences',action:showVillaV67},
+  {id:'marina',x:39.0,z:67.8,r:4.8,title:()=>locale==='fr'?'KŌMØ Marina · Yachting':'KŌMØ Marina · Yachting',desc:()=>locale==='fr'?'Port privé · yachts · boarding lounge':'Private marina · yachts · boarding lounge',action:showMarinaV68},
+  {id:'villa',x:-39.0,z:67.8,r:4.8,title:()=>locale==='fr'?'KŌMØ Retreat Villa':'KŌMØ Retreat Villa',desc:()=>locale==='fr'?'Villa privée · piscine · expériences longévité':'Private villa · pool · longevity experiences',action:showVillaV68},
   {id:'desk',x:-7.3,z:4.0,r:3.6,title:()=>copy[locale].deskTitle,desc:()=>copy[locale].deskCopy,action:showDesk},
   {id:'health',x:-5.25,z:10.55,r:2.7,title:()=>locale==='fr'?'Votre santé · mouvement':'Your health · movement',desc:()=>locale==='fr'?'Comprendre les 5 domaines en un coup d’œil':'Understand the 5 domains at a glance',action:showHealthOverview},
   {id:'twin',x:-10.75,z:-24.0,r:3.4,title:()=>copy[locale].twinTitle,desc:()=>locale==='fr'?'Galerie ouverte · marcher vers le Twin':'Open gallery · walk to Twin',action:enterTwin},
@@ -4594,14 +4643,14 @@ const travelPoints={
   rehab:{mode:'world',x:0,y:0,z:-22.2,yaw:0,level:0},
   arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
   life:{mode:'world',x:5.4,y:0,z:3.6,yaw:-1.15,level:0},
-  marina:{mode:'world',x:68.0,y:0,z:62.0,yaw:-Math.PI/2,level:0},
-  villa:{mode:'world',x:-72.0,y:0,z:61.0,yaw:Math.PI/2,level:0},
+  marina:{mode:'world',x:50.0,y:0,z:63.0,yaw:-Math.PI/2,level:0},
+  villa:{mode:'world',x:-43.0,y:0,z:62.0,yaw:Math.PI/2,level:0},
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
 };
 const journeyTargets={
   arrival:{x:0,y:0,z:58.5},hall:{x:0,y:0,z:14.55},journey:{x:4.8,y:0,z:8.5},
   twin:{x:-6.8,y:0,z:-26.0},rehab:{x:0,y:0,z:-26.0},rehab_session:{x:0,y:0,z:-58.2},arena:{x:6.8,y:0,z:-26.0},
-  life:{x:8.4,y:0,z:3.4},marina:{x:68,y:0,z:62},villa:{x:-72,y:0,z:61},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
+  life:{x:8.4,y:0,z:3.4},marina:{x:50,y:0,z:63},villa:{x:-43,y:0,z:62},upper:{x:-8.72,y:UPPER_Y,z:5.7},library:{x:-10.2,y:0,z:-10},talks:{x:10.2,y:0,z:-10}
 };
 function setGuideEnabled(value){
   guideEnabled=!!value;guideRoot.visible=guideEnabled;guideToggle.textContent='GUIDE · '+(guideEnabled?'ON':'OFF');
@@ -4633,14 +4682,14 @@ function campusWalkingTarget(destination,p=player){
     return {x:0,y:0,z:-28.0};
   }
   if(destination==='marina'){
-    if(zone==='marina')return {x:88,y:0,z:62};
-    if(inMarinaLink(p))return {x:62,y:0,z:57};
-    return {x:22.5,y:0,z:57};
+    if(zone==='marina')return {x:72,y:0,z:62.5};
+    if(inMarinaLink(p))return {x:43,y:0,z:67.8};
+    return {x:22.5,y:0,z:67.8};
   }
   if(destination==='villa'){
-    if(zone==='villa')return {x:-86,y:0,z:60};
-    if(inVillaLink(p))return {x:-62,y:0,z:68};
-    return {x:-22.5,y:0,z:68};
+    if(zone==='villa')return {x:-54,y:0,z:59};
+    if(inVillaLink(p))return {x:-43,y:0,z:67.8};
+    return {x:-22.5,y:0,z:67.8};
   }
   if(destination==='hall'){
     if(zone==='twin'){
@@ -5453,14 +5502,14 @@ function getAvatarGroundLift(p=player){return visualSurfaceOffsetAt(p)+AVATAR_SO
 function inTwinZone(p=player){return p.x>-57.2&&p.x<-32.15&&p.z>-13.3&&p.z<12.2}
 function inFitnessZone(p=player){return p.x>-11.0&&p.x<11.0&&p.z>-67.5&&p.z<-42.15}
 function inArenaZone(p=player){return p.x>32.15&&p.x<57.2&&p.z>-13.3&&p.z<12.2}
-function inMarinaLink(p=player){return p.x>21&&p.x<61&&p.z>52.5&&p.z<61.5}
-function inVillaLink(p=player){return p.x<-21&&p.x>-61&&p.z>63.5&&p.z<72.5}
+function inMarinaLink(p=player){return p.x>20&&p.x<43&&p.z>63.2&&p.z<72.2}
+function inVillaLink(p=player){return p.x<-20&&p.x>-43&&p.z>63.2&&p.z<72.2}
 function inMarinaZone(p=player){
-  const waterfront=p.x>57&&p.x<76.4&&p.z>27&&p.z<96;
-  const pier=p.x>=75.2&&p.x<111.5&&((p.z>42.2&&p.z<45.8)||(p.z>60.2&&p.z<63.8)||(p.z>78.2&&p.z<81.8));
+  const waterfront=p.x>40&&p.x<63.5&&p.z>31&&p.z<94;
+  const pier=p.x>=62&&p.x<91.5&&((p.z>44.6&&p.z<48.5)||(p.z>60.6&&p.z<64.5)||(p.z>76.6&&p.z<80.5));
   return waterfront||pier;
 }
-function inVillaZone(p=player){return p.x>-114&&p.x<-57&&p.z>41&&p.z<99}
+function inVillaZone(p=player){return p.x>-75&&p.x<-33&&p.z>42&&p.z<96}
 // Broad overlapping galleries make each room part of one continuous navigation mesh.
 function inTwinLink(p=player){return ((p.x>-35.7&&p.x<-9.15&&p.z>-28.65&&p.z<-19.35)||(p.x>-35.7&&p.x<-28.15&&p.z>-25.7&&p.z<1.85))}
 function inArenaLink(p=player){return ((p.x>9.15&&p.x<35.7&&p.z>-28.65&&p.z<-19.35)||(p.x>28.15&&p.x<35.7&&p.z>-25.7&&p.z<1.85))}
@@ -6046,13 +6095,14 @@ function updateVisibilityBudget(now){
     campusCrowdV64.visible=!lowPower||player.z>34;
     rearTerraceV64.visible=!lowPower||player.z>44;
   }
-  if(living.masterplanV67){
-    const M=living.masterplanV67;
+  if(living.masterplanV68){
+    const M=living.masterplanV68;
     M.root.visible=true;
-    const marinaNear=Math.hypot(player.x-78,player.z-62)<92;
-    const villaNear=Math.hypot(player.x+86,player.z-69)<92;
+    const marinaNear=Math.hypot(player.x-56,player.z-63)<74;
+    const villaNear=Math.hypot(player.x+54,player.z-69)<74;
     M.marinaDetail.visible=!emergencyPerformance&&(!lowPower||marinaNear);
     M.villaDetail.visible=!emergencyPerformance&&(!lowPower||villaNear);
+    M.landscape.visible=!emergencyPerformance||!lowPower;
   }
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
@@ -6264,8 +6314,8 @@ function animateLiving(now){
       w.mesh.material.opacity=w.baseOpacity*(.92+.08*Math.sin(t*.33+i));
     });
   }
-  if(living.yachtsV67?.length){
-    living.yachtsV67.forEach((y,i)=>{
+  if(living.yachtsV68?.length){
+    living.yachtsV68.forEach((y,i)=>{
       y.group.position.y=y.baseY+Math.sin(t*.48+y.phase)*.035;
       y.group.rotation.z=Math.sin(t*.31+y.phase+i)*.0028;
     });
@@ -6355,7 +6405,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'6.7.0-riviera-masterplan',
+  version:'6.8.0-compact-riviera-estate',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
