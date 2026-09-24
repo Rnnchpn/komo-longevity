@@ -1214,7 +1214,7 @@ export async function mount(runtime){
   });
 
   window.KomoWorldMultiplayer={
-    version:'1.2-auth-isolation',
+    version:'1.2.1-entry-resilience',
     connectGuest,
     connectPulse,
     openPulse,
