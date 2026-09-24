@@ -13,7 +13,7 @@ const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const pulseHtml=await readFile('pulse-app/index.html','utf8');
 const checks=[
-  ['V6.5 desktop HTML cache bust present',html.includes('world-v1.css?v=6.5.0-visual-presence')&&html.includes('world-v1.js?v=6.5.0-visual-presence')&&html.includes('name="komo-world-version" content="6.5.0-visual-presence"')],
+  ['V6.7 desktop HTML cache bust present',html.includes('world-v1.css?v=6.7.0-riviera-masterplan')&&html.includes('world-v1.js?v=6.7.0-riviera-masterplan')&&html.includes('name="komo-world-version" content="6.7.0-riviera-masterplan"')],
 
   ['canonical World V1 runtime',runtime.includes("window.KomoWorld={")],
   ['render loop present',runtime.includes('renderer.render(scene,camera)')],
@@ -65,7 +65,7 @@ const checks=[
   ['World Hub Life items present',runtime.includes('KOMO_LIFE_ITEMS_V32')&&runtime.includes('function showLifeItem')],
   ['World Hub avatar studio present',runtime.includes('AVATAR_KEY')&&runtime.includes('function showAvatarStudio')],
   ['V6.3.2 adaptive clouds present',runtime.includes('const cloudCount=lowPower?1:9')&&runtime.includes('const cloudTextures=[makeCloudTexture(1),makeCloudTexture(4),makeCloudTexture(7)]')&&runtime.includes('cloud.userData.baseOpacity')&&runtime.includes('if(living.clouds?.length)')],
-  ['Immersive Hub V6.4 entry present',runtime.includes("version:'6.5.0-visual-presence'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
+  ['Immersive Hub V6.4 entry present',runtime.includes("version:'6.7.0-riviera-masterplan'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
   ['Immersive Hub V4.5 portals present',runtime.includes('KOMO_PORTAL_ARCH_V45_')&&runtime.includes('KOMO_DESTINATION_VESTIBULES_V45')&&runtime.includes('function updateDestinationDoors')],
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub NPC roles present',runtime.includes("quest:'leo'")&&runtime.includes("quest:'theo'")&&runtime.includes("quest:'maya'")&&runtime.includes("functionLabel:'FITNESS COACH'")&&runtime.includes("functionLabel:'ARENA COACH'")],
@@ -85,7 +85,7 @@ const checks=[
   ['avatar symmetry V4.2 present',runtime.includes('const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee)')&&runtime.includes('const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow)')&&multiplayer.includes('const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee)')&&multiplayer.includes('const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow)')],
   ['adult running gait V5.3 present',runtime.includes('av.leftKnee.rotation.x=Math.max(0,-stride)*.94')&&runtime.includes('av.torsoGroup.rotation.x=-.018-.058*moveAmount')&&multiplayer.includes('av.leftKnee.rotation.x=Math.max(0,-stride)*.40')],
   ['proportion patch V4.2.1 present',runtime.includes('hips.scale.set(1.14,.68,.82)')&&runtime.includes('leftKnee.position.y=-.54')&&runtime.includes('new THREE.SphereGeometry(.074')&&runtime.includes('new THREE.SphereGeometry(.128')&&runtime.includes('new THREE.CapsuleGeometry(.038,.078')&&multiplayer.includes('q.scale.set(1.14,.68,.82)')&&multiplayer.includes('new THREE.SphereGeometry(.074')],
-  ['One World continuous campus present',runtime.includes("version:'6.5.0-visual-presence'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
+  ['One World continuous campus present',runtime.includes("version:'6.7.0-riviera-masterplan'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
   ['transient zone label present',runtime.includes("function showWorldZone(label,purpose='')")&&runtime.includes("locationChip?.classList.add('show')")&&runtime.includes("locationPurpose.textContent=purpose")],
   ['results dashboard V4.1 present',runtime.includes('results-hero-v41')&&runtime.includes('score-orbit')&&runtime.includes('results-domains')&&runtime.includes('results-timeline')&&runtime.includes('results-signals')],
   ['hall lighting V6.3.1 compatible',runtime.includes('KOMO_HALL_LIGHTING_V43')&&runtime.includes('KOMO_HALL_PRACTICALS_V43')&&runtime.includes('function addHallSpot')&&runtime.includes('hallLightProfile')&&runtime.includes('renderer.toneMappingExposure=lowPower?1.04:1.22')],
@@ -130,6 +130,12 @@ const checks=[
   ['V6.5 premium avatar framing present',runtime.includes("let thirdPersonDistance=lowPower?4.15:5.35")&&runtime.includes("bodyRoot.scale.set(.92,.94,.92)")&&runtime.includes("const desiredFov=(lowPower?58:50)")],
   ['V6.5 arrival visual presence present',runtime.includes("'MOTION HOUSE','MEASURE · MOVE'")&&runtime.includes("'LONGEVITY LAB','SCIENCE · LIVE'")&&runtime.includes("waterMirrorV64(-10.6,13.5,2.4,9.6)")],
   ['V6.5 richer desktop LOD present',runtime.includes("npc.visible=allowed&&sameLevel&&dist<(lowPower?22:68)")&&runtime.includes("banner.visible=wp.distanceTo(camera.position)<(lowPower?46:96)")],
+  ['V6.7 Riviera masterplan present',runtime.includes('KOMO_RIVIERA_MASTERPLAN_V67')&&runtime.includes('KOMO_MARINA_V67')&&runtime.includes('KOMO_RETREAT_VILLA_V67')],
+  ['V6.7 marina reads as yachting destination',runtime.includes("'BOARDING LOUNGE','KŌMØ YACHTING · RETREATS'")&&runtime.includes("yachtV67(marinaV67,96.0,66.5,25")&&runtime.includes("'KŌMØ MARINA','RIVIERA · YACHTING'")],
+  ['V6.7 retreat villa program present',runtime.includes("'KŌMØ RETREAT VILLA','PRIVATE LONGEVITY EXPERIENCE'")&&runtime.includes("'LONGEVITY TABLE','NUTRITION · CONVERSATION'")&&runtime.includes("'SKIN + NAD','LONGEVITY'")],
+  ['V6.7 territories are walkable',runtime.includes('function inMarinaZone')&&runtime.includes('function inVillaZone')&&runtime.includes('inMarinaLink(p)||inVillaLink(p)')],
+  ['V6.7 navigation exposes territories',runtime.includes("marina:{mode:'world'")&&runtime.includes("villa:{mode:'world'")&&html.includes('data-fast-travel="marina"')&&html.includes('data-fast-travel="villa"')],
+  ['V6.7 campus map exposes ecosystem',runtime.includes('class="campus-node marina"')&&runtime.includes('class="campus-node villa"')&&css.includes('.campus-node.marina')&&css.includes('.campus-node.villa')],
   ['V6.4 landscape instancing present',runtime.includes('KOMO_CYPRESS_CROWNS_INST_V64')&&runtime.includes('KOMO_PINE_CROWNS_INST_V64')&&runtime.includes('KOMO_LANDSCAPE_SHRUBS_INST_V64')],
   ['V6.4 premium pavilions present',runtime.includes("'MOVEMENT','MEASURE · TRAIN · MOVE'")&&runtime.includes("'LONGEVITY','SCIENCE · TRAJECTORY'")&&runtime.includes("'COMMUNITY LOUNGE','MEET · CONNECT · RECOVER'")&&runtime.includes("'RECOVERY HOUSE','REST · RESET · RESTORE'")],
   ['V6.4 water mirrors present',runtime.includes('function waterMirrorV64')&&runtime.includes('waterMirrorV64(-24.6,45.0,5.4,24.0)')&&runtime.includes('waterMirrorV64(0,89.2,18.0,7.2)')],
@@ -184,7 +190,7 @@ const checks=[
   ['continuous navigation mesh V6.2 present',runtime.includes('Broad overlapping galleries make each room part of one continuous navigation mesh')&&runtime.includes('p.x>-57.2&&p.x<-32.15')&&runtime.includes('p.z>-45.5&&p.z<-26.25')&&runtime.includes('p.x>32.15&&p.x<57.2')],
   ['walkable guide routing V5.8 present',runtime.includes('function campusWalkingTarget')&&runtime.includes("manualCampusDestination==='")===false&&runtime.includes('if(manualCampusDestination)')&&runtime.includes("requestWalkTo('hall')")],
   ['lateral return arches V5.8 present',runtime.includes("x:12.72,z:-2.10,rot:-Math.PI/2")&&runtime.includes("x:-12.72,z:-2.10,rot:Math.PI/2")],
-  ['desktop optical depth V5 present',runtime.includes('lowPower?88:76')&&runtime.includes('lowPower?225:195')&&runtime.includes("new THREE.PerspectiveCamera(lowPower?60:54")],
+  ['desktop optical depth V5 present',runtime.includes('lowPower?92:82')&&runtime.includes('lowPower?245:270')&&runtime.includes("new THREE.PerspectiveCamera(lowPower?60:54")],
   ['desktop V5 performance safety present',runtime.includes("desktopCinematic.visible=false")&&runtime.includes("desktopCinematic.visible=!lowPower&&!emergencyPerformance")],
   ['desktop UI V5 present',css.includes('V5.0 Desktop Visual Revolution')&&css.includes('body.desktop-visual-v5 #world-canvas')&&css.includes('body.desktop-visual-v5::before')&&css.includes('body.desktop-visual-v5 .world-hud')],
   ['desktop UI isolated from mobile V5',css.includes('@media(min-width:901px) and (pointer:fine)')&&runtime.includes("classList.toggle('desktop-visual-v5',!lowPower&&innerWidth>900)")],
