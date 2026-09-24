@@ -199,7 +199,10 @@ const checks=[
   ['World bridge ACK present',pulseAuth.includes("type!=='komo:world-bridge-ack'")&&multiplayer.includes("type:'komo:world-bridge-ack'")],
   ['Pulse refresh-token race fixed',multiplayer.includes('World consumes Pulse access tokens but never rotates its refresh token')&&multiplayer.includes("autoRefreshToken:false")&&multiplayer.includes('expiresAt*1000<Date.now()+15000')],
   ['World never globally signs out Pulse',!multiplayer.includes('await client.auth.signOut()')&&!multiplayer.includes("signOut({ scope: 'global'")&&multiplayer.includes('Never sign out a bridged Pulse session')],
-  ['World auth error feedback present',multiplayer.includes("komo:world-auth-error")&&runtime.includes("window.addEventListener('komo:world-auth-error'")&&runtime.includes("result==='pending'")],
+  ['World auth error feedback present',multiplayer.includes("komo:world-auth-error")&&runtime.includes("window.addEventListener('komo:world-auth-error'")&&runtime.includes("value==='pending'")],
+  ['Guest entry never blocks present',runtime.includes("enterWorldAfterAuth({mode:'guest-local'")&&runtime.includes("waitForWorldMultiplayer(12000).then(api=>api.connectGuest(name))")],
+  ['Pulse popup user gesture preserved',runtime.includes("Never await before opening Pulse")&&multiplayer.includes("Must open synchronously from the click event")],
+  ['Pulse bridge retries until ACK',pulseAuth.includes('worldBridgeRetryTimer=setInterval')&&pulseAuth.includes('Date.now()-worldBridgeLastSendAt<850')&&pulseAuth.includes('if(worldBridgeAcked)return')],
 
   ['multiplayer join friend V0.5 present',runtime.includes('function joinPresence(target)')&&runtime.includes('joinPresence,')&&multiplayer.includes('runtime.joinPresence?.(row)')],
   ['multiplayer distance roster present',multiplayer.includes("Math.round(distance)+' m away'")&&multiplayer.includes("join.textContent='JOIN'")],
