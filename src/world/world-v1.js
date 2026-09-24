@@ -3207,14 +3207,14 @@ const arenaKeyV631=mesh(decorativeArenaV631,new THREE.PlaneGeometry(15.6,5.5),ar
 [twinKeyV631,fitKeyV631,arenaKeyV631].forEach(m=>m.renderOrder=3);
 
 // Subtle floor pools distinguish room atmosphere without blue-neon/game lighting.
-function floorPoolV631(parent,x,z,w,d,color,opacity){
+function floorPoolV631(parent,x,y,z,w,d,color,opacity){
   const mat=lightingMatV631(lightTexFloorV631,color,lowPower?opacity*.55:opacity);
-  const p=mesh(parent,new THREE.PlaneGeometry(w,d),mat,x,.285,z,{cast:false,receive:false});
+  const p=mesh(parent,new THREE.PlaneGeometry(w,d),mat,x,y,z,{cast:false,receive:false});
   p.rotation.x=-Math.PI/2;p.renderOrder=3;return p;
 }
-floorPoolV631(decorativeTwinV631,-45,-4.2,12.0,10.0,0xbfd8ca,.115);
-floorPoolV631(decorativeFitV631,0,-58.0,13.5,11.0,0xe5c184,.105);
-floorPoolV631(decorativeArenaV631,45,-4.0,12.5,10.5,0xc58f55,.12);
+floorPoolV631(decorativeTwinV631,-45,.18,-4.2,12.0,10.0,0xbfd8ca,.115);
+floorPoolV631(decorativeFitV631,0,.29,-58.0,13.5,11.0,0xe5c184,.105);
+floorPoolV631(decorativeArenaV631,45,.10,-4.0,12.5,10.5,0xc58f55,.12);
 
 // DESTINATION — readable light carpets guide walking without adding lamps.
 const destinationCoolMatV631=lightingMatV631(lightTexFloorV631,0xbfd7ca,lowPower?.075:.15);
@@ -5496,11 +5496,6 @@ function animateLiving(now){
   if(typeof twinWallGlow!=='undefined')twinWallGlow.opacity=(lowPower?.20:.34)+.07*(.5+.5*Math.sin(t*.33));
   if(typeof fitnessWallGlow!=='undefined')fitnessWallGlow.opacity=(lowPower?.18:.29)+.06*(.5+.5*Math.sin(t*.29));
   if(typeof arenaWallGlow!=='undefined')arenaWallGlow.opacity=(lowPower?.21:.36)+.08*(.5+.5*Math.sin(t*.38));
-  if(living.lightingV631&&!lowPower&&!emergencyPerformance){
-    const slow=.5+.5*Math.sin(t*.18);
-    armillaryBounceMatV631.opacity*=.992+.008*slow;
-    destWallMatsV631.forEach((m,i)=>{m.opacity*=.995+.005*(.5+.5*Math.sin(t*.20+i*.7))});
-  }
   if(living.lifeDisplay&&!lowPower){
     living.lifeDisplay.orbitA.rotation.z=t*.16;
     living.lifeDisplay.orbitB.rotation.x=t*.11;
