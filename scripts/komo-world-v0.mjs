@@ -94,6 +94,7 @@ const checks=[
   ['Fitness architectural walls V5.9 present',runtime.includes('KOMO_FITNESS_WALLS_V59')&&runtime.includes('warm acoustic timber')&&runtime.includes('fitnessWallMirror')],
   ['Arena architectural walls V5.9 present',runtime.includes('KOMO_ARENA_WALLS_V59')&&runtime.includes('blackened ribs')&&runtime.includes('arenaWallGlow')],
   ['wall lighting performance V5.9 present',runtime.includes('no extra dynamic lights are used')&&runtime.includes("typeof hallWallGlow!=='undefined'")],
+  ['walkable gallery walls V5.9 present',runtime.includes('KOMO_GALLERY_WALLS_V59')&&runtime.includes('function galleryBay')&&runtime.includes('Central Fitness tunnel: alternating timber / glass character')],
   ['architectural spine V4.5 present',runtime.includes('KOMO_ARCHITECTURAL_SPINE_V45')&&runtime.includes('Five repeated portal frames establish scale')&&runtime.includes('Continuous dark reveal around the central skylight')],
   ['architectural bays V4.5 present',runtime.includes('KOMO_RECESSED_BAY_V45_')&&runtime.includes('Deep black reveal gives the bay a built-in appearance')&&runtime.includes('KOMO_CEILING_RAFT_V45')],
   ['destination vestibules V4.5 present',runtime.includes('KOMO_DESTINATION_VESTIBULES_V45')&&runtime.includes('1.8 m deep vestibule')&&runtime.includes('KOMO_PORTAL_ARCH_V45_')],
