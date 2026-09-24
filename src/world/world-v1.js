@@ -1554,7 +1554,7 @@ const arrivalReflectionPlaneV632=mesh(arrivalHeroV632,new THREE.PlaneGeometry(8.
 arrivalReflectionPlaneV632.rotation.x=-Math.PI/2;arrivalReflectionPlaneV632.renderOrder=3;
 
 // V7.3.2 Arrival Experience — the first screen must already feel inhabited.
-const arrivalExperienceV732=new THREE.Group();arrivalExperienceV732.name='KOMO_ARRIVAL_EXPERIENCE_V732';building.add(arrivalExperienceV732);
+const arrivalExperienceV732=new THREE.Group();arrivalExperienceV732.name='KOMO_ARRIVAL_EXPERIENCE_V732';world.add(arrivalExperienceV732);
 const arrivalWaterV732=new THREE.MeshStandardMaterial({color:0x9fbcb7,roughness:.16,metalness:.02,transparent:true,opacity:.72});
 const arrivalGreenV732=new THREE.MeshStandardMaterial({color:0x536a58,roughness:.94,metalness:0});
 
@@ -6729,7 +6729,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.3.2-arrival-experience',
+  version:'7.3.3-arrival-hotfix',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
