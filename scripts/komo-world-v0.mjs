@@ -63,7 +63,7 @@ const checks=[
   ['World Hub Life items present',runtime.includes('KOMO_LIFE_ITEMS_V32')&&runtime.includes('function showLifeItem')],
   ['World Hub avatar studio present',runtime.includes('AVATAR_KEY')&&runtime.includes('function showAvatarStudio')],
   ['V6.3.2 adaptive clouds present',runtime.includes('const cloudCount=lowPower?1:9')&&runtime.includes('const cloudTextures=[makeCloudTexture(1),makeCloudTexture(4),makeCloudTexture(7)]')&&runtime.includes('cloud.userData.baseOpacity')&&runtime.includes('if(living.clouds?.length)')],
-  ['Immersive Hub V6.3.2 entry present',runtime.includes("version:'6.3.2-sky-atmosphere'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
+  ['Immersive Hub V6.4 entry present',runtime.includes("version:'6.4.0-living-campus'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
   ['Immersive Hub V4.5 portals present',runtime.includes('KOMO_PORTAL_ARCH_V45_')&&runtime.includes('KOMO_DESTINATION_VESTIBULES_V45')&&runtime.includes('function updateDestinationDoors')],
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub NPC roles present',runtime.includes("quest:'leo'")&&runtime.includes("quest:'theo'")&&runtime.includes("quest:'maya'")&&runtime.includes("functionLabel:'FITNESS COACH'")&&runtime.includes("functionLabel:'ARENA COACH'")],
@@ -83,7 +83,7 @@ const checks=[
   ['avatar symmetry V4.2 present',runtime.includes('const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee)')&&runtime.includes('const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow)')&&multiplayer.includes('const leftShoe=makeShoe(leftKnee),rightShoe=makeShoe(rightKnee)')&&multiplayer.includes('const leftHand=makeHand(leftElbow),rightHand=makeHand(rightElbow)')],
   ['adult running gait V5.3 present',runtime.includes('av.leftKnee.rotation.x=Math.max(0,-stride)*.94')&&runtime.includes('av.torsoGroup.rotation.x=-.018-.058*moveAmount')&&multiplayer.includes('av.leftKnee.rotation.x=Math.max(0,-stride)*.40')],
   ['proportion patch V4.2.1 present',runtime.includes('hips.scale.set(1.14,.68,.82)')&&runtime.includes('leftKnee.position.y=-.54')&&runtime.includes('new THREE.SphereGeometry(.074')&&runtime.includes('new THREE.SphereGeometry(.153')&&runtime.includes('new THREE.CapsuleGeometry(.038,.078')&&multiplayer.includes('q.scale.set(1.14,.68,.82)')&&multiplayer.includes('new THREE.SphereGeometry(.074')],
-  ['One World continuous campus present',runtime.includes("version:'6.3.2-sky-atmosphere'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
+  ['One World continuous campus present',runtime.includes("version:'6.4.0-living-campus'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
   ['transient zone label present',runtime.includes("function showWorldZone(label,purpose='')")&&runtime.includes("locationChip?.classList.add('show')")&&runtime.includes("locationPurpose.textContent=purpose")],
   ['results dashboard V4.1 present',runtime.includes('results-hero-v41')&&runtime.includes('score-orbit')&&runtime.includes('results-domains')&&runtime.includes('results-timeline')&&runtime.includes('results-signals')],
   ['hall lighting V6.3.1 compatible',runtime.includes('KOMO_HALL_LIGHTING_V43')&&runtime.includes('KOMO_HALL_PRACTICALS_V43')&&runtime.includes('function addHallSpot')&&runtime.includes('hallLightProfile')&&runtime.includes('renderer.toneMappingExposure=lowPower?1.00:1.03')],
@@ -123,6 +123,18 @@ const checks=[
   ['V6.3.2 visible arrival hero present',runtime.includes('KOMO_ARRIVAL_HERO_V632')&&runtime.includes('KOMO_ARRIVAL_PIERS_INST_V632')&&runtime.includes('KOMO_ARRIVAL_BOUNDARY_INST_V632')&&runtime.includes("'KŌMØ WORLD','LONGEVITY IN MOTION'")],
   ['V6.3.2 arrival canopy present',runtime.includes('arrivalRoofMatV632')&&runtime.includes('19.6,.22,7.4')&&runtime.includes('arrivalReflectionMatV632')],
   ['V6.3.2 arrival performance budget present',runtime.includes("arrivalHeroV632.visible=!emergencyPerformance&&player.z>8")&&runtime.includes("arrivalHeroV632.visible=false")],
+  ['V6.4 living campus root present',runtime.includes('KOMO_LIVING_CAMPUS_V64')&&runtime.includes('living.livingCampusV64=livingCampusV64')],
+  ['V6.4 hero trees present',runtime.includes('function heroTreeV64')&&runtime.includes('KOMO_HERO_TREE_V64')&&runtime.includes('heroTreeSpecsV64')],
+  ['V6.4 landscape instancing present',runtime.includes('KOMO_CYPRESS_CROWNS_INST_V64')&&runtime.includes('KOMO_PINE_CROWNS_INST_V64')&&runtime.includes('KOMO_LANDSCAPE_SHRUBS_INST_V64')],
+  ['V6.4 premium pavilions present',runtime.includes("'MOVEMENT','MEASURE · TRAIN · MOVE'")&&runtime.includes("'LONGEVITY','SCIENCE · TRAJECTORY'")&&runtime.includes("'COMMUNITY LOUNGE','MEET · CONNECT · RECOVER'")&&runtime.includes("'RECOVERY HOUSE','REST · RESET · RESTORE'")],
+  ['V6.4 water mirrors present',runtime.includes('function waterMirrorV64')&&runtime.includes('waterMirrorV64(-24.6,45.0,5.4,24.0)')&&runtime.includes('waterMirrorV64(0,89.2,18.0,7.2)')],
+  ['V6.4 rear terrace waterfall present',runtime.includes('KOMO_REAR_TERRACE_V64')&&runtime.includes('function waterfallTextureV64')&&runtime.includes('living.waterfallsV64.push')],
+  ['V6.4 ambient crowd instancing present',runtime.includes('KOMO_AMBIENT_CROWD_INST_V64')&&runtime.includes('KOMO_CAMPUS_PEOPLE_BODY_INST_V64')&&runtime.includes('KOMO_CAMPUS_PEOPLE_HEAD_INST_V64')],
+  ['V6.4 moving campus NPCs present',runtime.includes("label:'Iris'")&&runtime.includes("label:'Louis'")&&runtime.includes("label:'Eva'")&&runtime.indexOf("label:'Iris'")>runtime.indexOf("const npcRoot=new THREE.Group()")],
+  ['V6.4 living animation present',runtime.includes('living.waterfallsV64?.length')&&runtime.includes('w.texture.offset.y=-(t*.045')],
+  ['V6.4 performance budget present',runtime.includes("livingCampusV64.visible=!emergencyPerformance&&campusNear")&&runtime.includes("campusCrowdV64.visible=!lowPower||player.z>42")&&runtime.includes("living.livingCampusV64.visible=false")],
+  ['V6.4 hero tree LOD present',runtime.includes("tree.name==='KOMO_HERO_TREE_V64'")&&runtime.includes("(lowPower?54:82)")],
+
 
 
 
