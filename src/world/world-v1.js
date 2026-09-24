@@ -3390,9 +3390,13 @@ function joinPresence(target){
 }
 function closePanel(){
   if(typeof rehabSessionTimer!=='undefined'&&rehabSessionTimer)stopRehabSession();
+  if(typeof stopNpcMissionTimer==='function')stopNpcMissionTimer();
+  delete panel.dataset.npcMission;
   panel.classList.remove('open');panel.setAttribute('aria-hidden','true');panelActions.innerHTML='';syncUiOpen();
 }
 function openPanel(kicker,title,html,actions=[]){
+  if(typeof stopNpcMissionTimer==='function')stopNpcMissionTimer();
+  delete panel.dataset.npcMission;
   panelKicker.textContent=kicker;panelTitle.textContent=title;panelBody.innerHTML=html;panelActions.innerHTML='';
   actions.forEach(a=>{
     const b=document.createElement('button');b.type='button';b.textContent=a.label;if(a.primary)b.classList.add('primary');
