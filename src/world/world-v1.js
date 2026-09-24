@@ -867,30 +867,43 @@ function npcNameTag(text,sub=''){
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));
   sp.scale.set(2.05,.58,1);sp.position.y=2.48;sp.renderOrder=25;return sp;
 }
-function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=null,x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage'}={}){
+function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=null,x=0,y=0,z=0,scale=1,route=[],speed=.65,phase=0,outfit='sage',body='auto',hairStyle='auto',age='adult',skinTone=null}={}){
   const g=new THREE.Group();g.position.set(x,y,z);g.scale.setScalar(scale);g.name='KOMO_NPC_'+role.toUpperCase();parent.add(g);
   const seed=Math.abs(Math.floor(x*31+z*17+phase*101));
-  const skinColors=[0xe8c9ad,0xd0a27f,0xb27b58,0x7b543f,0x513a31];
-  const hairColors=[0x2d2521,0x5b4637,0x8a6f58,0x201d1b];
-  const skin=new THREE.MeshStandardMaterial({color:skinColors[seed%skinColors.length],roughness:.82});
-  const hair=new THREE.MeshStandardMaterial({color:hairColors[(seed+2)%hairColors.length],roughness:.90});
-  const outfits={sage:0x324b3e,cream:0xd8d0c3,charcoal:0x2c312f,sand:0xaa9277,bronze:0x705747};
+  const skinColors=[0xf0d2bc,0xdfb698,0xc99170,0xa46f51,0x7d533f,0x593d32];
+  const hairColors=[0x241f1c,0x4b372d,0x755a45,0xa18568,0x6f6d67,0x171716];
+  const skinHex=typeof skinTone==='number'?skinTone:skinColors[seed%skinColors.length];
+  const hairHex=age==='senior'?0x77756f:hairColors[(seed+2)%hairColors.length];
+  const skin=new THREE.MeshStandardMaterial({color:skinHex,roughness:.84});
+  const hair=new THREE.MeshStandardMaterial({color:hairHex,roughness:.92});
+  const outfits={sage:0x324b3e,cream:0xd8d0c3,charcoal:0x2c312f,sand:0xaa9277,bronze:0x705747,navy:0x26343d,ivory:0xcfc7b8,rust:0x8b5e49,olive:0x59614d,blue:0x536a75,burgundy:0x65414a};
   const cloth=new THREE.MeshStandardMaterial({color:outfits[outfit]||outfits.sage,roughness:.76});
   const trouser=new THREE.MeshStandardMaterial({color:role==='staff'?0x222b27:0x4a4d49,roughness:.82});
   const shoe=new THREE.MeshStandardMaterial({color:0x242220,roughness:.64});
   const metal=MAT.brass;
   const cast=!lowPower;
+  const bodyMode=body==='auto'?['slim','regular','broad','soft'][seed%4]:body;
+  const bodyW=bodyMode==='slim'?.91:bodyMode==='broad'?1.12:bodyMode==='soft'?1.07:1;
+  const bodyD=bodyMode==='slim'?.94:bodyMode==='broad'?1.07:bodyMode==='soft'?1.10:1;
+  const resolvedHair=hairStyle==='auto'?['short','crop','bob','bun','bald'][seed%5]:hairStyle;
 
   // hips + torso + shoulders
-  const hips=mesh(g,new THREE.CylinderGeometry(.235,.25,.28,14),trouser,0,.93,0,{cast});
-  const torso=mesh(g,new THREE.CylinderGeometry(.24,.30,.72,16),cloth,0,1.31,0,{cast});
-  const shoulder=box(g,.68,.16,.24,cloth,0,1.56,0,{cast});
+  const hips=mesh(g,new THREE.CylinderGeometry(.235,.25,.28,14),trouser,0,.93,0,{cast});hips.scale.set(bodyW,1,bodyD);
+  const torso=mesh(g,new THREE.CylinderGeometry(.24,.30,.72,16),cloth,0,1.31,0,{cast});torso.scale.set(bodyW,1,bodyD);
+  const shoulder=box(g,.68*bodyW,.16,.24*bodyD,cloth,0,1.56,0,{cast});
   const neck=cyl(g,.075,.085,.12,skin,0,1.70,0,12,{cast});
   const head=mesh(g,new THREE.SphereGeometry(.184,18,14),skin,0,1.88,0,{cast});head.scale.set(.92,1.05,.94);
-  // hair cap + subtle face detail
-  const hairCap=mesh(g,new THREE.SphereGeometry(.211,16,10,0,Math.PI*2,0,Math.PI*.50),hair,0,1.95,-.005,{cast});
-  hairCap.scale.set(.94,.88,.96);
-  const nose=mesh(g,new THREE.SphereGeometry(.030,8,6),skin,0,1.88,.195,{cast:false});nose.scale.set(.72,.72,1.05);
+  // Diverse but minimal head silhouettes — no facial features, consistent with the player avatar.
+  if(resolvedHair!=='bald'){
+    const hairCap=mesh(g,new THREE.SphereGeometry(.211,16,10,0,Math.PI*2,0,Math.PI*.50),hair,0,1.95,-.005,{cast});
+    hairCap.scale.set(.94,resolvedHair==='crop'?.64:.88,resolvedHair==='bob'?1.05:.96);
+    if(resolvedHair==='bob'){
+      const sideL=mesh(g,new THREE.SphereGeometry(.090,10,8),hair,-.12,1.88,-.01,{cast:false});sideL.scale.set(.62,1.18,.74);
+      const sideR=mesh(g,new THREE.SphereGeometry(.090,10,8),hair,.12,1.88,-.01,{cast:false});sideR.scale.copy(sideL.scale);
+    }else if(resolvedHair==='bun'){
+      const bun=mesh(g,new THREE.SphereGeometry(.075,10,8),hair,0,2.10,-.095,{cast:false});bun.scale.set(1,.90,1);
+    }
+  }
 
   // legs with upper/lower segments
   const leftLeg=new THREE.Group(),rightLeg=new THREE.Group();leftLeg.position.set(-.13,.90,0);rightLeg.position.set(.13,.90,0);g.add(leftLeg,rightLeg);
@@ -928,7 +941,7 @@ function makeNpc(parent,{role='visitor',label='Guest',quest=null,functionLabel=n
   const points=route.length?route.map(p=>new THREE.Vector3(p[0],p[1]??y,p[2])):[new THREE.Vector3(x,y,z)];
   const seg=[],cum=[0];let total=0;
   for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length],d=a.distanceTo(b);seg.push(d);total+=d;cum.push(total)}
-  g.userData.npc={role,label,quest,functionLabel,bodyRoot,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0};
+  g.userData.npc={role,label,quest,functionLabel,bodyRoot,hips,torso,head,leftLeg,rightLeg,leftKnee,rightKnee,leftArm,rightArm,leftElbow,rightElbow,tag,shadow,points,seg,cum,total,speed,phase,baseY:y,lastFarUpdate:0,bodyMode,resolvedHair,age};
   living.npcs.push(g);return g;
 }
 function updateNpc(npc,t,index){
@@ -2984,8 +2997,7 @@ makeNpc(npcRoot,{role:'staff',label:'Maya',quest:'maya',functionLabel:'MOVEMENT 
 makeNpc(npcRoot,{role:'visitor',label:'Noah',quest:'noah',functionLabel:'WORLD RUNNER',x:3.6,y:0,z:27.8,outfit:'cream',speed:.54,phase:.36,route:[
   [3.6,0,27.8],[2.5,0,18.7],[2.8,0,10.8],[3.6,0,2.5],[4.2,0,-6.2],[3.0,0,-14.4]
 ]});
-if(!lowPower){
-  makeNpc(npcRoot,{role:'visitor',label:'Elena',quest:'elena',functionLabel:'BALANCE GUIDE',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
+makeNpc(npcRoot,{role:'visitor',label:'Elena',quest:'elena',functionLabel:'BALANCE GUIDE',x:-3.8,y:0,z:-4.5,outfit:'sand',speed:.46,phase:.61,route:[
   [-3.8,0,-4.5],[-3.2,0,-12.0],[-4.8,0,-20.4],[-1.4,0,-24.2],[1.8,0,-19.2],[.8,0,-8.0]
 ]});
 makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'leo',functionLabel:'FITNESS COACH',x:5.4,y:0,z:-18.4,outfit:'charcoal',speed:.42,phase:.82,route:[
@@ -3041,7 +3053,44 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'leo',functionLabel:'FITNESS COA
   makeNpc(npcRoot,{role:'visitor',label:'Amélie',functionLabel:'RETREAT GUEST',x:-65.0,y:0,z:55.0,outfit:'sand',speed:.18,phase:.79,route:[
     [-65.0,0,55.0],[-69.0,0,61.0],[-68.0,0,72.0],[-62.0,0,75.0],[-55.0,0,67.0],[-59.0,0,58.0]
   ]});
-}
+// V7.2 Populated World — diverse ambient population shared identically by iPhone and desktop.
+const populationV72=[
+  {role:'visitor',label:'Aiko',functionLabel:'MOTION GUEST',x:-6.2,y:0,z:18.5,outfit:'navy',body:'slim',hairStyle:'bob',scale:.94,speed:.30,phase:.11,route:[[-6.2,0,18.5],[-3.8,0,12],[-5.4,0,5.8],[-7.0,0,10.2]]},
+  {role:'visitor',label:'Fatou',functionLabel:'COMMUNITY',x:6.4,y:0,z:16.8,outfit:'ivory',body:'soft',hairStyle:'bun',scale:1.01,speed:.28,phase:.17,route:[[6.4,0,16.8],[4.0,0,10.2],[6.8,0,4.5],[8.2,0,9.8]]},
+  {role:'staff',label:'Gabriel',functionLabel:'WORLD HOST',x:-8.0,y:0,z:2.0,outfit:'charcoal',body:'broad',hairStyle:'short',scale:1.05,speed:.24,phase:.22,route:[[-8,0,2],[-8.4,0,-5.5],[-6.8,0,-12],[-7.4,0,-2]]},
+  {role:'visitor',label:'Leïla',functionLabel:'LIFE GUEST',x:8.6,y:0,z:7.2,outfit:'rust',body:'regular',hairStyle:'bob',scale:.97,speed:.25,phase:.28,route:[[8.6,0,7.2],[9.2,0,2.0],[7.8,0,-1.5],[7.0,0,4.2]]},
+  {role:'visitor',label:'Matteo',functionLabel:'RUNNER',x:1.8,y:0,z:31.0,outfit:'olive',body:'slim',hairStyle:'crop',scale:1.03,speed:.56,phase:.33,route:[[1.8,0,31],[1.5,0,22],[1.2,0,13],[.8,0,5],[-.5,0,-6]]},
+  {role:'staff',label:'Inès',functionLabel:'MOVEMENT TEAM',x:-10.0,y:0,z:65.0,outfit:'sage',body:'regular',hairStyle:'bun',scale:.95,speed:.27,phase:.39,route:[[-10,0,65],[-5,0,69],[-1,0,73],[-7,0,75],[-12,0,70]]},
+  {role:'visitor',label:'Karim',functionLabel:'CAMPUS GUEST',x:13.0,y:0,z:68.0,outfit:'blue',body:'broad',hairStyle:'short',scale:1.06,speed:.31,phase:.44,route:[[13,0,68],[8,0,72],[2,0,70],[6,0,64],[12,0,62]]},
+  {role:'visitor',label:'Mina',functionLabel:'DESIGN GUEST',x:-16.0,y:0,z:55.0,outfit:'burgundy',body:'slim',hairStyle:'bob',scale:.91,speed:.24,phase:.49,route:[[-16,0,55],[-19,0,61],[-16,0,68],[-12,0,63]]},
+  {role:'visitor',label:'Olivier',functionLabel:'LONGEVITY GUEST',x:17.0,y:0,z:58.0,outfit:'sand',body:'regular',hairStyle:'short',age:'senior',scale:1.00,speed:.20,phase:.54,route:[[17,0,58],[20,0,63],[18,0,70],[13,0,67]]},
+  {role:'visitor',label:'Mei',functionLabel:'SCIENCE GUEST',x:-8.72,y:UPPER_Y,z:-2.5,outfit:'cream',body:'slim',hairStyle:'bob',scale:.93,speed:.26,phase:.59,route:[[-8.72,UPPER_Y,-2.5],[-8.72,UPPER_Y,-10],[-8.72,UPPER_Y,-17],[-4.5,UPPER_Y,-21.2]]},
+  {role:'visitor',label:'Arthur',functionLabel:'TALKS GUEST',x:8.72,y:UPPER_Y,z:-8.0,outfit:'navy',body:'broad',hairStyle:'crop',scale:1.04,speed:.25,phase:.64,route:[[8.72,UPPER_Y,-8],[8.72,UPPER_Y,-15],[6,UPPER_Y,-21.2],[1.5,UPPER_Y,-21.2]]},
+
+  {role:'staff',label:'Chiara',functionLabel:'YACHTING HOST',x:44.5,y:0,z:61.0,outfit:'ivory',body:'slim',hairStyle:'bob',scale:.96,speed:.24,phase:.10,route:[[44.5,0,61],[49,0,57],[55,0,59],[58,0,65],[52,0,70],[46,0,68]]},
+  {role:'visitor',label:'Elias',functionLabel:'YACHT GUEST',x:58.0,y:0,z:50.0,outfit:'navy',body:'broad',hairStyle:'short',scale:1.07,speed:.22,phase:.18,route:[[58,0,50],[62,0,47],[70,0,47],[63,0,47],[58,0,54]]},
+  {role:'visitor',label:'Naomi',functionLabel:'RIVIERA GUEST',x:55.0,y:0,z:77.0,outfit:'cream',body:'regular',hairStyle:'bun',scale:.94,speed:.23,phase:.26,route:[[55,0,77],[60,0,79],[67,0,79],[61,0,74],[55,0,72]]},
+  {role:'staff',label:'Idriss',functionLabel:'BOARDING TEAM',x:49.0,y:0,z:39.0,outfit:'charcoal',body:'broad',hairStyle:'crop',scale:1.04,speed:.20,phase:.34,route:[[49,0,39],[53,0,40],[57,0,44],[54,0,48],[49,0,46]]},
+  {role:'visitor',label:'Marta',functionLabel:'YACHT OWNER',x:59.0,y:0,z:64.0,outfit:'burgundy',body:'soft',hairStyle:'bob',scale:.98,speed:.18,phase:.42,route:[[59,0,64],[63,0,63],[70,0,63],[64,0,67],[59,0,69]]},
+  {role:'visitor',label:'Kenji',functionLabel:'MARINA GUEST',x:45.0,y:0,z:84.0,outfit:'olive',body:'slim',hairStyle:'short',scale:.92,speed:.27,phase:.50,route:[[45,0,84],[50,0,88],[56,0,87],[55,0,81],[49,0,80]]},
+  {role:'visitor',label:'Jean',functionLabel:'RIVIERA MEMBER',x:52.0,y:0,z:53.0,outfit:'sand',body:'regular',hairStyle:'short',age:'senior',scale:1.00,speed:.18,phase:.58,route:[[52,0,53],[56,0,55],[58,0,60],[54,0,62],[50,0,58]]},
+
+  {role:'staff',label:'Salma',functionLabel:'RETREAT TEAM',x:-40.0,y:0,z:63.0,outfit:'sage',body:'regular',hairStyle:'bun',scale:.96,speed:.22,phase:.14,route:[[-40,0,63],[-45,0,59],[-51,0,57],[-48,0,65],[-43,0,69]]},
+  {role:'visitor',label:'Luca',functionLabel:'RETREAT GUEST',x:-56.0,y:0,z:54.0,outfit:'ivory',body:'broad',hairStyle:'crop',scale:1.06,speed:.19,phase:.23,route:[[-56,0,54],[-62,0,55],[-66,0,61],[-61,0,66],[-54,0,63]]},
+  {role:'visitor',label:'Ana',functionLabel:'WELLNESS GUEST',x:-67.0,y:0,z:76.0,outfit:'rust',body:'slim',hairStyle:'bob',scale:.92,speed:.20,phase:.32,route:[[-67,0,76],[-69,0,82],[-64,0,87],[-58,0,83],[-60,0,77]]},
+  {role:'visitor',label:'David',functionLabel:'PRIVATE GUEST',x:-44.0,y:0,z:82.0,outfit:'navy',body:'regular',hairStyle:'short',age:'senior',scale:1.02,speed:.18,phase:.41,route:[[-44,0,82],[-49,0,87],[-55,0,88],[-53,0,80],[-47,0,77]]},
+  {role:'staff',label:'Noor',functionLabel:'NUTRITION TEAM',x:-68.0,y:0,z:62.0,outfit:'olive',body:'soft',hairStyle:'bun',scale:.98,speed:.20,phase:.50,route:[[-68,0,62],[-69,0,68],[-66,0,74],[-61,0,70],[-63,0,64]]},
+  {role:'visitor',label:'Elena R.',functionLabel:'RETREAT MEMBER',x:-38.0,y:0,z:73.0,outfit:'cream',body:'slim',hairStyle:'bob',scale:.94,speed:.19,phase:.59,route:[[-38,0,73],[-40,0,79],[-45,0,82],[-47,0,74],[-42,0,70]]},
+
+  {role:'coach',label:'Malik',functionLabel:'FITNESS COACH',x:-4.0,y:0,z:-53.0,outfit:'charcoal',body:'broad',hairStyle:'crop',scale:1.07,speed:.30,phase:.16,route:[[-4,0,-53],[-6,0,-58],[-2,0,-63],[3,0,-59],[4,0,-52]]},
+  {role:'visitor',label:'Zoé',functionLabel:'TRAINING GUEST',x:4.5,y:0,z:-57.0,outfit:'blue',body:'slim',hairStyle:'bun',scale:.92,speed:.36,phase:.29,route:[[4.5,0,-57],[6.5,0,-62],[2,0,-65],[-2,0,-62],[-1,0,-56]]},
+  {role:'coach',label:'Rafael',functionLabel:'ARENA TEAM',x:45.0,y:0,z:2.0,outfit:'bronze',body:'broad',hairStyle:'short',scale:1.05,speed:.28,phase:.43,route:[[45,0,2],[50,0,5],[53,0,0],[49,0,-5],[44,0,-3]]},
+  {role:'visitor',label:'Yara',functionLabel:'ARENA GUEST',x:40.0,y:0,z:-5.0,outfit:'burgundy',body:'regular',hairStyle:'bob',scale:.96,speed:.30,phase:.57,route:[[40,0,-5],[43,0,0],[47,0,4],[51,0,1],[47,0,-5]]},
+  {role:'staff',label:'Hana',functionLabel:'TWIN TEAM',x:-45.0,y:0,z:4.0,outfit:'sage',body:'slim',hairStyle:'bob',scale:.94,speed:.22,phase:.68,route:[[-45,0,4],[-50,0,6],[-53,0,1],[-49,0,-5],[-44,0,-3]]},
+  {role:'visitor',label:'Samuel',functionLabel:'TWIN GUEST',x:-40.0,y:0,z:-4.0,outfit:'sand',body:'soft',hairStyle:'bald',scale:1.02,speed:.22,phase:.77,route:[[-40,0,-4],[-43,0,1],[-47,0,5],[-51,0,0],[-47,0,-5]]}
+];
+populationV72.forEach(p=>makeNpc(npcRoot,p));
+
 // Living atmosphere — subtle, non-game-like movement.
 const dustCount=0;
 const dustPositions=new Float32Array(dustCount*3);
