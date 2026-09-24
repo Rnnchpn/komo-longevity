@@ -114,43 +114,53 @@
     <button type="button" data-fast-travel="upper" data-nav-zone="upper"><i aria-hidden="true">▥</i><span>LEVEL 2</span><small>EXPLORE</small></button>
   </nav>
 
-  <aside id="world-menu" class="world-menu" aria-hidden="true">
+  <aside id="world-menu" class="world-menu world-command-center" aria-hidden="true">
     <div class="world-menu-head">
-      <div><span>KŌMØ WORLD</span><strong>My World</strong></div>
+      <div class="world-menu-brandblock">
+        <span>KŌMØ WORLD · COMMAND CENTER</span>
+        <strong>My World</strong>
+      </div>
+      <div class="world-menu-live"><i></i><span>LIVE</span></div>
       <button id="world-menu-close" type="button" aria-label="Fermer le menu">×</button>
     </div>
-    <p id="world-menu-copy">Votre santé, votre progression et le campus KŌMØ au même endroit.</p>
+
+    <section class="world-menu-context" aria-label="Position actuelle">
+      <div>
+        <span>NOW IN</span>
+        <strong id="menu-current-zone">KŌMØ HALL</strong>
+        <small id="menu-current-purpose">VOTRE POINT CENTRAL</small>
+      </div>
+      <i class="world-menu-context-mark">K</i>
+    </section>
+
+    <p id="world-menu-copy">Votre santé, votre progression et le campus KŌMØ réunis dans un seul espace.</p>
 
     <section class="world-menu-summary" aria-label="Résumé personnel">
-      <div><span>MOTION SCORE</span><strong id="menu-motion">84<small>/100</small></strong></div>
-      <div><span>MOTION AGE</span><strong id="menu-age">39</strong></div>
-      <div><span>WORLD LEVEL</span><strong id="journey-menu-level">05</strong><small id="journey-menu-xp">250 XP</small></div>
+      <div class="summary-score"><span>MOTION SCORE</span><strong id="menu-motion">84<small>/100</small></strong><em>Movement today</em></div>
+      <div><span>MOTION AGE</span><strong id="menu-age">39</strong><em>Functional trajectory</em></div>
+      <div><span>WORLD LEVEL</span><strong id="journey-menu-level">05</strong><small id="journey-menu-xp">250 XP</small><em>Explore · progress</em></div>
     </section>
 
     <div class="world-menu-primary">
-      <button id="results-toggle" type="button"><i>◉</i><span><b>RÉSULTATS</b><small>Motion · domaines · évolution</small></span></button>
-      <button id="campus-toggle" type="button"><i>⌖</i><span><b>CAMPUS</b><small>Voir toutes les zones du World</small></span></button>
-      <button id="journey-toggle" type="button"><i>↗</i><span><b>JOURNEY</b><small>Niveau · XP · prochaines étapes</small></span></button>
-      <button id="challenges-toggle" type="button"><i>◇</i><span><b>CHALLENGES</b><small>Défis du jour · engagement</small></span></button>
+      <button id="results-toggle" type="button" data-screen="results"><i>◉</i><span><b>RÉSULTATS</b><small>Motion · domaines · évolution</small></span><em>›</em></button>
+      <button id="campus-toggle" type="button" data-screen="campus"><i>⌖</i><span><b>CAMPUS</b><small>Explorer toutes les zones</small></span><em>›</em></button>
+      <button id="journey-toggle" type="button" data-screen="journey"><i>↗</i><span><b>JOURNEY</b><small>Niveau · XP · prochaines étapes</small></span><em>›</em></button>
+      <button id="challenges-toggle" type="button" data-screen="challenges"><i>◇</i><span><b>CHALLENGES</b><small>Défis du jour · engagement</small></span><em>›</em></button>
     </div>
 
-    <section class="world-menu-campus-mini">
+    <section class="world-menu-campus-mini world-destinations">
       <div class="world-menu-section-head"><span>ONE WORLD</span><b>Campus continu</b></div>
-      <div class="campus-mini-line">
-        <button data-fast-travel="twin"><span>TWIN</span><small>Understand</small></button>
-        <i></i>
-        <button data-fast-travel="hall"><span>HALL</span><small>Home</small></button>
-        <i></i>
-        <button data-fast-travel="arena"><span>ARENA</span><small>Engage</small></button>
-      </div>
-      <div class="campus-mini-branch">
-        <i></i><button data-fast-travel="rehab"><span>FITNESS</span><small>Move</small></button>
+      <div class="destination-grid">
+        <button data-fast-travel="hall" data-destination="hall"><i>⌂</i><span>HALL</span><small>Home</small></button>
+        <button data-fast-travel="twin" data-destination="twin"><i>◎</i><span>TWIN</span><small>Understand</small></button>
+        <button data-fast-travel="rehab" data-destination="fitness"><i>△</i><span>FITNESS</span><small>Move</small></button>
+        <button data-fast-travel="arena" data-destination="arena"><i>◇</i><span>ARENA</span><small>Engage</small></button>
       </div>
     </section>
 
-    <section class="journey-menu compact">
+    <section class="journey-menu compact world-focus-card">
       <div class="journey-menu-head">
-        <div><span>WORLD JOURNEY</span><b id="journey-title-menu">PROGRESSION</b></div>
+        <div><span>CURRENT FOCUS</span><b id="journey-title-menu">PROGRESSION</b></div>
         <strong id="journey-xp-menu">250 XP</strong>
       </div>
       <div class="journey-menu-bar"><i id="journey-menu-progress"></i></div>
@@ -158,7 +168,7 @@
     </section>
 
     <details class="world-menu-settings">
-      <summary>RÉGLAGES & PERSONNALISATION</summary>
+      <summary>WORLD SETTINGS <small>PERSONNALISATION & PERFORMANCE</small></summary>
       <div class="world-menu-status">
         <div><span>QUALITÉ</span><b id="quality-status">AUTO</b></div>
         <div><span>PERFORMANCE</span><b id="fps-status">— FPS</b></div>
