@@ -1708,19 +1708,6 @@ crowdSpotsV64.forEach(([x,z],i)=>{
 instancedStatic(campusCrowdV64,new THREE.CylinderGeometry(1,1,1,8),crowdBodyMatV64,crowdBodyItemsV64,'KOMO_CAMPUS_PEOPLE_BODY_INST_V64');
 instancedStatic(campusCrowdV64,new THREE.SphereGeometry(1,8,6),crowdHeadMatV64,crowdHeadItemsV64,'KOMO_CAMPUS_PEOPLE_HEAD_INST_V64');
 
-// A small number of true walking NPCs adds motion close to the player.
-if(!lowPower){
-  makeNpc(npcRoot,{role:'visitor',label:'Iris',functionLabel:'MOVEMENT GUEST',x:-10.8,y:0,z:56.0,outfit:'cream',speed:.32,phase:.18,route:[
-    [-10.8,0,56.0],[-6.5,0,61.5],[-3.2,0,67.0],[-7.0,0,72.5],[-11.5,0,68.0]
-  ]});
-  makeNpc(npcRoot,{role:'visitor',label:'Louis',functionLabel:'COMMUNITY',x:9.8,y:0,z:60.5,outfit:'sand',speed:.29,phase:.52,route:[
-    [9.8,0,60.5],[5.0,0,64.0],[2.8,0,70.0],[7.5,0,75.5],[12.0,0,69.0]
-  ]});
-  makeNpc(npcRoot,{role:'staff',label:'Eva',functionLabel:'CAMPUS HOST',x:-4.8,y:0,z:75.0,outfit:'sage',speed:.25,phase:.73,route:[
-    [-4.8,0,75.0],[0,0,77.0],[4.8,0,75.0],[3.0,0,70.0],[-3.0,0,70.0]
-  ]});
-}
-
 // Small furniture clusters turn empty edges into actual places.
 [-1,1].forEach(side=>{
   exteriorBench(livingCampusV64,side*18.2,58.5,side>0?-Math.PI/2:Math.PI/2,.92);
@@ -2743,6 +2730,16 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'leo',functionLabel:'FITNESS COA
   ]});
   makeNpc(npcRoot,{role:'visitor',label:'Jules',quest:'jules',functionLabel:'RECOVERY HOST',x:10.5,y:0,z:64.0,outfit:'sand',speed:.31,phase:.58,route:[
     [10.5,0,64.0],[15.0,0,68.0],[10.5,0,72.5],[4.2,0,70.0],[3.5,0,64.0]
+  ]});
+  // V6.4: extra campus life uses the established NPC system after npcRoot exists.
+  makeNpc(npcRoot,{role:'visitor',label:'Iris',functionLabel:'MOVEMENT GUEST',x:-10.8,y:0,z:56.0,outfit:'cream',speed:.32,phase:.18,route:[
+    [-10.8,0,56.0],[-6.5,0,61.5],[-3.2,0,67.0],[-7.0,0,72.5],[-11.5,0,68.0]
+  ]});
+  makeNpc(npcRoot,{role:'visitor',label:'Louis',functionLabel:'COMMUNITY',x:9.8,y:0,z:60.5,outfit:'sand',speed:.29,phase:.52,route:[
+    [9.8,0,60.5],[5.0,0,64.0],[2.8,0,70.0],[7.5,0,75.5],[12.0,0,69.0]
+  ]});
+  makeNpc(npcRoot,{role:'staff',label:'Eva',functionLabel:'CAMPUS HOST',x:-4.8,y:0,z:75.0,outfit:'sage',speed:.25,phase:.73,route:[
+    [-4.8,0,75.0],[0,0,77.0],[4.8,0,75.0],[3.0,0,70.0],[-3.0,0,70.0]
   ]});
 }
 // Living atmosphere — subtle, non-game-like movement.
