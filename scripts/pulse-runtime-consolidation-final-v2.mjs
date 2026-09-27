@@ -63,7 +63,23 @@ router=replaceRequired(
   "let [profileRes,roleRes]=await Promise.all([state.client.from('profiles').select('*').eq('id',userId).maybeSingle(),state.client.from('account_roles').select('role').eq('user_id',userId).maybeSingle()]);\n  if(roleRes.error){await new Promise(resolve=>setTimeout(resolve,120));roleRes=await state.client.from('account_roles').select('role').eq('user_id',userId).maybeSingle()}\n  state.profile=profileRes.data||{display_name:state.user.user_metadata?.display_name||'',city:null,country:null};const sharedRole=window.KomoRuntime?.role;state.role=roleRes.data?.role||(['admin','professional'].includes(sharedRole)?sharedRole:'member');window.KomoRuntime?.setContext?.(state.session,state.role);",
   'resilient role resolution'
 );
+// The app-router is the sole login owner. Signup, recovery and logout are owned by
+// patient-onboarding/auth-gateway, runtime.js and logout-hardening respectively.
+const authBindFrom="els.loginForm.addEventListener('submit',login);els.signupButton.addEventListener('click',signup);els.forgotPasswordButton.addEventListener('click',resetPassword);";
+if(router.includes(authBindFrom))router=router.replace(authBindFrom,"els.loginForm.addEventListener('submit',login);");
+const logoutBindFrom="els.logoutButton.addEventListener('click',logout);els.refreshButton.addEventListener('click',async()=>{await loadAppData();renderRoute(currentRoute());toast('Données actualisées.')});";
+if(router.includes(logoutBindFrom))router=router.replace(logoutBindFrom,"els.refreshButton.addEventListener('click',async()=>{await loadAppData();renderRoute(currentRoute());toast('Données actualisées.')});");
+if(router.includes("signupButton.addEventListener('click',signup)")||router.includes("forgotPasswordButton.addEventListener('click',resetPassword)")||router.includes("logoutButton.addEventListener('click',logout)"))throw new Error('[pulse-runtime-final-v2] duplicate app-router auth action owner survived');
 await write('app-router-v2.js',router);
+
+// Retire the capture-phase REST login owner while retaining the visual/bootstrap
+// code in auth-login-canonical.js.
+let canonical=await read('auth-login-canonical.js');
+const canonicalOwner="document.addEventListener('submit',canonicalLogin,true);";
+if(canonical.includes(canonicalOwner))canonical=canonical.replace(canonicalOwner,"// login owned by app-router-v2");
+canonical=canonical.replace("window.KomoCanonicalLogin={version:'1',authKey:AUTH_KEY};","window.KomoCanonicalLogin={version:'retired',owner:'app-router-v2',authKey:AUTH_KEY};");
+if(canonical.includes(canonicalOwner))throw new Error('[pulse-runtime-final-v2] duplicate canonical login owner survived');
+await write('auth-login-canonical.js',canonical);
 
 // 3) Clinical must never demote a global admin to professional.
 // It also consumes the role already resolved by app-router.
@@ -137,4 +153,4 @@ if(!runtimeAnchor)throw new Error('[pulse-runtime-final-v2] avatar anchor missin
 html=html.replace(runtimeAnchor,runtimeAnchor+perfTag+routerTag);
 await write('index.html',html);
 
-console.log('[pulse-runtime-final-v2] PASS · one session owner · app-router role owner · admin preserved · consultation org fixed');
+console.log('[pulse-runtime-final-v2] PASS · one session owner · one login owner · app-router role owner · admin preserved · consultation org fixed');
