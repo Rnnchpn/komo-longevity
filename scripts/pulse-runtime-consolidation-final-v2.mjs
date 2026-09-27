@@ -15,6 +15,12 @@ function replaceRequired(src,from,to,label){
 let perf=await read('performance-runtime-v1.js');
 perf=replaceRequired(
   perf,
+  "R.session=R.session||null;R.role=R.role||'member';R.userId=R.userId||null;R.ready=!!R.session;",
+  "R.session=R.session||null;R.role=R.role||'member';R.userId=R.userId||null;R.ready=!!R.session;R.roleResolved=R.roleResolved===true;",
+  'runtime roleResolved state'
+);
+perf=replaceRequired(
+  perf,
   "let rolePromise=null,authSubscription=null,syncPromise=null,lastSyncAt=0;",
   "let authSubscription=null,syncPromise=null,lastSyncAt=0;",
   'performance runtime state'
@@ -35,16 +41,23 @@ const hydrateTo=`async function hydrate(session,forcedRole=null){
   const previous=R.userId;
   R.session=session||null;R.userId=session?.user?.id||null;
   if(!session?.user){
-    R.role='member';R.ready=true;
+    R.role='member';R.roleResolved=false;R.ready=true;
     if(previous)window.dispatchEvent(new CustomEvent('komo:session-cleared'));
     return R;
   }
-  if(forcedRole)R.role=forcedRole;
+  if(previous&&previous!==R.userId){R.role='member';R.roleResolved=false}
+  if(forcedRole){R.role=forcedRole;R.roleResolved=true}
   R.ready=true;
-  window.dispatchEvent(new CustomEvent('komo:session-ready',{detail:{session:R.session,role:R.role,roleResolved:!!forcedRole}}));
+  window.dispatchEvent(new CustomEvent('komo:session-ready',{detail:{session:R.session,role:R.role,roleResolved:R.roleResolved}}));
   return R;
 }`;
 perf=replaceRequired(perf,hydrateFrom,hydrateTo,'deadlock-free hydrate');
+perf=replaceRequired(
+  perf,
+  "R.getContext=()=>({client:R.client,session:R.session,role:R.role,ready:R.ready});",
+  "R.getContext=()=>({client:R.client,session:R.session,role:R.role,roleResolved:R.roleResolved,ready:R.ready});",
+  'runtime roleResolved context'
+);
 if(/onAuthStateChange[\s\S]{0,500}account_roles/.test(perf))throw new Error('[pulse-runtime-final-v2] account_roles query remains in auth callback');
 await write('performance-runtime-v1.js',perf);
 
@@ -87,7 +100,7 @@ let clinical=await read('clinical-cockpit-v1.js');
 clinical=replaceRequired(
   clinical,
   "const rr=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();const accountRole=rr.data?.role||'member';s.role=route()==='clinical'&&accountRole==='admin'?'professional':accountRole;",
-  "let accountRole=window.KomoRuntime?.role||'member';if(!['admin','professional'].includes(accountRole)){const rr=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();accountRole=rr.data?.role||'member'}s.role=accountRole;",
+  "const rt=window.KomoRuntime;let accountRole=rt?.role||'member';if(!rt?.roleResolved){const rr=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();accountRole=rr.data?.role||'member';if(rt){rt.role=accountRole;rt.roleResolved=true}}s.role=accountRole;",
   'clinical admin preservation'
 );
 clinical=replaceRequired(
@@ -104,7 +117,7 @@ let pro=await read('pro-access-v1.js');
 pro=replaceRequired(
   pro,
   "if(checkedFor!==session.user.id){checkedFor=session.user.id;const r=await sb.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();role=r.data?.role||'member'}",
-  "if(checkedFor!==session.user.id){checkedFor=session.user.id;const shared=window.KomoRuntime?.role;if(['admin','professional'].includes(shared))role=shared;else{const r=await sb.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();role=r.data?.role||'member'}}",
+  "if(checkedFor!==session.user.id){checkedFor=session.user.id;const rt=window.KomoRuntime;if(rt?.roleResolved)role=rt.role||'member';else{const r=await sb.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();role=r.data?.role||'member';if(rt){rt.role=role;rt.roleResolved=true}}}",
   'Pro role fallback'
 );
 await write('pro-access-v1.js',pro);
@@ -113,7 +126,7 @@ let scope=await read('professional-scope-v1.js');
 scope=replaceRequired(
   scope,
   "const rr=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();role=rr.data?.role||'member';if(role==='admin'){scope='clinical';return}",
-  "const shared=window.KomoRuntime?.role;if(['admin','professional'].includes(shared))role=shared;else{const rr=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();role=rr.data?.role||'member'}if(role==='admin'){scope='clinical';return}",
+  "const rt=window.KomoRuntime;if(rt?.roleResolved)role=rt.role||'member';else{const rr=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();role=rr.data?.role||'member';if(rt){rt.role=role;rt.roleResolved=true}}if(role==='admin'){scope='clinical';return}",
   'professional scope shared role'
 );
 await write('professional-scope-v1.js',scope);
@@ -122,7 +135,7 @@ let booking=await read('booking-layer-v1.js');
 booking=replaceRequired(
   booking,
   "async function base(){const {data:{session}}=await sb().auth.getSession();S.session=session;if(!session?.user)return false;const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';return true}",
-  "async function base(){const {data:{session}}=await sb().auth.getSession();S.session=session;if(!session?.user)return false;const shared=window.KomoRuntime?.role;if(['admin','professional'].includes(shared))S.role=shared;else{const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member'}return true}",
+  "async function base(){const {data:{session}}=await sb().auth.getSession();S.session=session;if(!session?.user)return false;const rt=window.KomoRuntime;if(rt?.roleResolved)S.role=rt.role||'member';else{const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';if(rt){rt.role=S.role;rt.roleResolved=true}}return true}",
   'booking shared role'
 );
 await write('booking-layer-v1.js',booking);
@@ -142,6 +155,9 @@ intake=intake.replace(
 );
 await write('patient-intake-v1.js',intake);
 
+let adaptive=await read('adaptive-shell-v4.js');
+if(!adaptive.includes('async function verifyRole')||!adaptive.includes('komo:role-ready'))throw new Error('[pulse-runtime-final-v2] adaptive role verifier missing');
+
 // 6) Load the session owner before the app router; both are modules, so source order is deterministic.
 let html=await read('index.html');
 const routerTag=html.match(/\s*<script type="module" src="\.\/app-router-v2\.js[^"]*"><\/script>/)?.[0]||'';
@@ -153,4 +169,4 @@ if(!runtimeAnchor)throw new Error('[pulse-runtime-final-v2] avatar anchor missin
 html=html.replace(runtimeAnchor,runtimeAnchor+perfTag+routerTag);
 await write('index.html',html);
 
-console.log('[pulse-runtime-final-v2] PASS · one session owner · one login owner · app-router role owner · admin preserved · consultation org fixed');
+console.log('[pulse-runtime-final-v2] PASS · one session owner · resolved role contract · adaptive Pro/Admin verifier · admin preserved · consultation org fixed');
