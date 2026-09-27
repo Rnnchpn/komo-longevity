@@ -6,6 +6,7 @@
   const TABLET='(min-width: 768px) and (max-width: 1366px) and (hover: none) and (pointer: coarse)';
   let raf=0;
   let proActive='dashboard';
+  let verifiedRole=null,verifiedUser=null,rolePromise=null;
 
   const I={
     home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3.5 10.5 12 3l8.5 7.5"/><path d="M5.5 9.5V21h13V9.5"/><path d="M9.5 21v-6h5v6"/></svg>',
@@ -25,7 +26,42 @@
   function isIPad(){return /iPad/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)}
   function adaptive(){return window.matchMedia(PHONE).matches||window.matchMedia(TABLET).matches||(isIPad()&&innerWidth>=768&&innerWidth<=1366)}
   function appVisible(){const a=document.querySelector('#appShell'),x=document.querySelector('#authScreen');return !!a&&!a.hidden&&(!x||x.hidden)}
-  function role(){return window.KomoRuntime?.role||window.KomoRuntime?.getContext?.()?.role||'member'}
+  function role(){return verifiedRole||window.KomoRuntime?.role||window.KomoRuntime?.getContext?.()?.role||'member'}
+  async function verifyRole(force=false){
+    if(!appVisible())return role();
+    const rt=window.KomoRuntime,client=rt?.client;
+    if(!client)return role();
+    let ctx=rt.getContext?.()||{};
+    let session=ctx.session||rt.session||null;
+    if(!session?.user){
+      const got=await client.auth.getSession();
+      session=got.data?.session||null;
+    }
+    if(!session?.user){
+      verifiedRole=null;verifiedUser=null;
+      delete document.documentElement.dataset.komoAccountRole;
+      return 'member';
+    }
+    if(verifiedUser!==session.user.id){verifiedUser=session.user.id;verifiedRole=null}
+    ctx=rt.getContext?.()||ctx;
+    if(ctx.roleResolved&&['member','professional','admin'].includes(ctx.role)){
+      verifiedRole=ctx.role;
+      document.documentElement.dataset.komoAccountRole=verifiedRole;
+      return verifiedRole;
+    }
+    if(!force&&verifiedRole)return verifiedRole;
+    if(rolePromise)return rolePromise;
+    rolePromise=(async()=>{
+      const rr=await client.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();
+      const next=rr.data?.role||'member';
+      verifiedRole=next;
+      if(rt){rt.role=next;rt.roleResolved=true;rt.session=session;rt.userId=session.user.id}
+      document.documentElement.dataset.komoAccountRole=next;
+      window.dispatchEvent(new CustomEvent('komo:role-ready',{detail:{role:next,userId:session.user.id}}));
+      return next;
+    })().finally(()=>{rolePromise=null});
+    return rolePromise;
+  }
   function mode(){return route()==='admin'?'admin':route()==='clinical'?'pro':'patient'}
   function allowedPro(){return ['professional','admin'].includes(role())}
   function allowedAdmin(){return role()==='admin'}
@@ -188,6 +224,9 @@
   },true);
 
   function refresh(){
+    verifyRole(false).then(()=>paint()).catch(()=>paint());
+  }
+  function paint(){
     cancelAnimationFrame(raf);
     raf=requestAnimationFrame(()=>{
       if(!setSurface()){
@@ -199,7 +238,7 @@
 
   const observer=new MutationObserver(()=>refresh());
   observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden','class']});
-  ['hashchange','resize','orientationchange','pageshow','komo:route-ready','komo:session-ready','komo:session-cleared','komo:data-ready','komo:admin-open'].forEach(type=>window.addEventListener(type,refresh,{passive:true}));
+  ['hashchange','resize','orientationchange','pageshow','komo:route-ready','komo:session-ready','komo:session-cleared','komo:data-ready','komo:role-ready','komo:admin-open'].forEach(type=>window.addEventListener(type,refresh,{passive:true}));
   document.addEventListener('DOMContentLoaded',()=>setTimeout(refresh,250));
   setTimeout(refresh,700);setTimeout(refresh,1500);
 })();
