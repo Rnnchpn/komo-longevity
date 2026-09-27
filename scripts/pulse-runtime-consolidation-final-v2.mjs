@@ -157,14 +157,20 @@ await write('patient-intake-v1.js',intake);
 
 let adaptive=await read('adaptive-shell-v4.js');
 if(!adaptive.includes('async function verifyRole')||!adaptive.includes('komo:role-ready'))throw new Error('[pulse-runtime-final-v2] adaptive role verifier missing');
-const patientNavFrom=`    const r=route();
-    return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:key','KEY',I.follow,r==='key')+navItem('patient:results','Résultats',I.tests,r==='results')+navItem('patient:trajectory','Trajectoire',I.results,r==='trajectory')+navItem('more','Plus',I.more,false);`;
-const patientNavTo=`    const r=route();
-    if(allowedAdmin())return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:results','Résultats',I.tests,r==='results')+navItem('pro:dashboard','Pro',I.center,false)+navItem('admin','Admin',I.admin,false)+navItem('more','Plus',I.more,false);
-    if(allowedPro())return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:results','Résultats',I.tests,r==='results')+navItem('patient:trajectory','Trajectoire',I.results,r==='trajectory')+navItem('pro:dashboard','Pro',I.center,false)+navItem('more','Plus',I.more,false);
-    return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:key','KEY',I.follow,r==='key')+navItem('patient:results','Résultats',I.tests,r==='results')+navItem('patient:trajectory','Trajectoire',I.results,r==='trajectory')+navItem('more','Plus',I.more,false);`;
-if(adaptive.includes(patientNavFrom))adaptive=adaptive.replace(patientNavFrom,patientNavTo);
-if(!adaptive.includes("navItem('admin','Admin',I.admin,false)"))throw new Error('[pulse-runtime-final-v2] explicit mobile Admin entry missing');
+
+const generatedPatientNavFrom=`    const r=route();
+    return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo');`;
+const generatedPatientNavTo=`    const r=route();
+    if(allowedAdmin())return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('pro:dashboard','Pro',I.center,false)+navItem('admin','Admin',I.admin,false)+navItem('more','Plus',I.more,false);
+    if(allowedPro())return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:documents','Rendez-vous',I.agenda,r==='documents')+navItem('pro:dashboard','Pro',I.center,false)+navItem('more','Plus',I.more,false);
+    return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo');`;
+if(!adaptive.includes(generatedPatientNavFrom))throw new Error('[pulse-runtime-final-v2] generated patient nav anchor missing');
+adaptive=adaptive.replace(generatedPatientNavFrom,generatedPatientNavTo);
+adaptive=adaptive.replace(
+  "    if(mode()==='patient'){document.querySelector('#kamBottomBar')?.remove();return;}",
+  "    if(mode()==='patient'&&!allowedPro()){document.querySelector('#kamBottomBar')?.remove();return;}"
+);
+if(!adaptive.includes("navItem('admin','Admin',I.admin,false)")||!adaptive.includes("mode()==='patient'&&!allowedPro()"))throw new Error('[pulse-runtime-final-v2] explicit privileged mobile navigation missing');
 await write('adaptive-shell-v4.js',adaptive);
 
 // 6) Load the session owner before the app router; both are modules, so source order is deterministic.
