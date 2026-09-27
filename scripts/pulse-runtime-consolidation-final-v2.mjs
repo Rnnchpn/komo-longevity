@@ -63,7 +63,32 @@ router=replaceRequired(
   "let [profileRes,roleRes]=await Promise.all([state.client.from('profiles').select('*').eq('id',userId).maybeSingle(),state.client.from('account_roles').select('role').eq('user_id',userId).maybeSingle()]);\n  if(roleRes.error){await new Promise(resolve=>setTimeout(resolve,120));roleRes=await state.client.from('account_roles').select('role').eq('user_id',userId).maybeSingle()}\n  state.profile=profileRes.data||{display_name:state.user.user_metadata?.display_name||'',city:null,country:null};const sharedRole=window.KomoRuntime?.role;state.role=roleRes.data?.role||(['admin','professional'].includes(sharedRole)?sharedRole:'member');window.KomoRuntime?.setContext?.(state.session,state.role);",
   'resilient role resolution'
 );
+// The app-router is the sole login owner. Signup, recovery and logout are owned by
+// patient-onboarding/auth-gateway, runtime.js and logout-hardening respectively.
+router=replaceRequired(
+  router,
+  "els.loginForm.addEventListener('submit',login);els.signupButton.addEventListener('click',signup);els.forgotPasswordButton.addEventListener('click',resetPassword);",
+  "els.loginForm.addEventListener('submit',login);",
+  'single auth action owners'
+);
+router=replaceRequired(
+  router,
+  "els.logoutButton.addEventListener('click',logout);els.refreshButton.addEventListener('click',async()=>{await loadAppData();renderRoute(currentRoute());toast('Données actualisées.')});",
+  "els.refreshButton.addEventListener('click',async()=>{await loadAppData();renderRoute(currentRoute());toast('Données actualisées.')});",
+  'single logout owner'
+);
 await write('app-router-v2.js',router);
+
+// Disable the retired capture-phase REST login owner while keeping the launch/auth
+// visual bootstrap contained later in the same file.
+let canonical=await read('auth-login-canonical.js');
+canonical=replaceRequired(
+  canonical,
+  "document.addEventListener('submit',canonicalLogin,true);\n  window.KomoCanonicalLogin={version:'1',authKey:AUTH_KEY};",
+  "window.KomoCanonicalLogin={version:'retired',owner:'app-router-v2',authKey:AUTH_KEY};",
+  'retire duplicate canonical login'
+);
+await write('auth-login-canonical.js',canonical);
 
 // 3) Clinical must never demote a global admin to professional.
 // It also consumes the role already resolved by app-router.
@@ -137,4 +162,8 @@ if(!runtimeAnchor)throw new Error('[pulse-runtime-final-v2] avatar anchor missin
 html=html.replace(runtimeAnchor,runtimeAnchor+perfTag+routerTag);
 await write('index.html',html);
 
-console.log('[pulse-runtime-final-v2] PASS · one session owner · app-router role owner · admin preserved · consultation org fixed');
+const finalRouter=await read('app-router-v2.js');
+const finalCanonical=await read('auth-login-canonical.js');
+if(finalCanonical.includes("document.addEventListener('submit',canonicalLogin,true)"))throw new Error('[pulse-runtime-final-v2] duplicate login owner survived');
+if(finalRouter.includes("signupButton.addEventListener('click',signup)")||finalRouter.includes("forgotPasswordButton.addEventListener('click',resetPassword)")||finalRouter.includes("logoutButton.addEventListener('click',logout)"))throw new Error('[pulse-runtime-final-v2] duplicate auth action owner survived');
+console.log('[pulse-runtime-final-v2] PASS · one session owner · one login owner · app-router role owner · admin preserved · consultation org fixed');
