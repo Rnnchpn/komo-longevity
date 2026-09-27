@@ -111,7 +111,22 @@ booking=replaceRequired(
 );
 await write('booking-layer-v1.js',booking);
 
-// 5) Load the session owner before the app router; both are modules, so source order is deterministic.
+// 5) Patient intake completeness must match the backend contract.
+// Sex at birth can remain unstated at onboarding and must not block Motion preparation.
+let intake=await read('patient-intake-v1.js');
+intake=replaceRequired(
+  intake,
+  "return{ok:!!(x?.first_name&&x?.last_name&&x?.birth_date&&x?.sex_at_birth),profile:x||{}};",
+  "return{ok:!!(x?.first_name&&x?.last_name&&x?.birth_date),profile:x||{}};",
+  'patient intake profile completeness'
+);
+intake=intake.replace(
+  'Prénom, nom, date de naissance et sexe de référence sont requis pour préparer Motion.',
+  'Prénom, nom et date de naissance sont requis pour préparer Motion.'
+);
+await write('patient-intake-v1.js',intake);
+
+// 6) Load the session owner before the app router; both are modules, so source order is deterministic.
 let html=await read('index.html');
 const routerTag=html.match(/\s*<script type="module" src="\.\/app-router-v2\.js[^"]*"><\/script>/)?.[0]||'';
 const perfTag=html.match(/\s*<script type="module" src="\.\/performance-runtime-v1\.js[^"]*"><\/script>/)?.[0]||'';
