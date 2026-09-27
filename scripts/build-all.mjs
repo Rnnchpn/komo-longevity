@@ -177,6 +177,7 @@ const scripts = [
   'scripts/pulse-pro-motion-final-v1.mjs',
   // Absolute last iPad Centre pass: keep assignment + consultation drawer directly connected.
   'scripts/pulse-ipad-center-connect-v1.mjs',
+  'scripts/pulse-runtime-consolidation-final-v2.mjs',
   // Public home hand-off: keep KŌMØ World visible as the virtual-rehabilitation
   // and network layer after every historical home mutation.
   'scripts/world-public-home-v1.mjs',
