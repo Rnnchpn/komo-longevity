@@ -195,8 +195,6 @@
       return navItem('admin:patients','Patients',I.patients,a==='patients')+navItem('admin:pros','Accès Pro',I.pro,a==='pros')+navItem('admin:motion','Demandes',I.motion,a==='motion')+navItem('pro:dashboard','Pro',I.center,false)+navItem('more','Plus',I.more,false);
     }
     const r=route();
-    if(allowedAdmin())return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:results','Résultats',I.tests,r==='results')+navItem('pro:dashboard','Pro',I.center,false)+navItem('admin','Admin',I.admin,false)+navItem('more','Plus',I.more,false);
-    if(allowedPro())return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:results','Résultats',I.tests,r==='results')+navItem('patient:trajectory','Trajectoire',I.results,r==='trajectory')+navItem('pro:dashboard','Pro',I.center,false)+navItem('more','Plus',I.more,false);
     return navItem('patient:home','Accueil',I.home,r==='home')+navItem('patient:key','KEY',I.follow,r==='key')+navItem('patient:results','Résultats',I.tests,r==='results')+navItem('patient:trajectory','Trajectoire',I.results,r==='trajectory')+navItem('more','Plus',I.more,false);
   }
 
