@@ -208,7 +208,7 @@ const scripts = [
   'scripts/commercial-legal-qa-v1.mjs'
 ];
 
-for (const script of scripts.slice(0,131)) {
+for (const script of scripts) {
   console.log(`[build-all] ${script}`);
   const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
   if (run.status !== 0) process.exit(run.status ?? 1);
