@@ -138,3 +138,79 @@ body.komo-pro-mode .main-shell,body.komo-pro-mode #viewRoot{background:var(--kp-
   #viewRoot>*,#authScreen .auth-panel{animation:none!important}
   #viewRoot button,#viewRoot a,.kam-nav-item,.kam-role-switch button,.mode-switch button,.icon-button,.avatar-button,#authScreen button,#authScreen input{transition:none!important;transform:none!important}
 }
+
+
+/* KŌMØ Pulse — canonical light commercial system v14.1 */
+:root{
+  --kp-bg:#f6f7f3;
+  --kp-shell:#f2f4ef;
+  --kp-surface:#ffffff;
+  --kp-surface-2:#f4f6f2;
+  --kp-paper:#edf1eb;
+  --kp-ink:#172119;
+  --kp-muted:#67736b;
+  --kp-muted-2:#88938c;
+  --kp-line:rgba(24,45,31,.10);
+  --kp-line-strong:rgba(24,45,31,.17);
+  --kp-green:#52705b;
+  --kp-green-core:#294936;
+  --kp-green-soft:rgba(76,111,85,.10);
+  --kp-green-faint:rgba(76,111,85,.055);
+  --kp-warm:#9b8050;
+  --kp-amber:#a9792f;
+  --kp-red:#a75c55;
+  --kp-red-soft:rgba(167,92,85,.09);
+}
+html,body,#appShell,.app-shell,.main-shell,#viewRoot,.view-root{background:var(--kp-bg)!important;color:var(--kp-ink)!important}
+.sidebar{background:#f2f4ef!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important}
+html body .topbar{background:rgba(250,251,248,.96)!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important;box-shadow:none!important}
+#pageEyebrow{color:#78857c!important}#pageTitle{color:var(--kp-ink)!important}
+.icon-button,.avatar-button{background:#fff!important;border-color:var(--kp-line)!important;color:#33473a!important}
+.mode-switch,html body .kam-role-switch{background:#fff!important;border-color:var(--kp-line)!important}
+.mode-switch button,.kam-role-switch button{color:var(--kp-muted)!important}.mode-switch button.active,.kam-role-switch button.active{background:#e4ebe4!important;color:#20352a!important}
+.account-popover{background:#fff!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important;box-shadow:0 20px 56px rgba(24,45,31,.10)!important}.account-popover a,.account-popover button{color:#34473b!important;border-color:var(--kp-line)!important}
+#kpDockV6,#kamBottomBar,.kam-bottom{background:rgba(250,251,248,.97)!important;border-color:var(--kp-line)!important;box-shadow:0 14px 36px rgba(24,45,31,.10)!important}
+#kpDockV6 a,.kam-nav-item{color:#768179!important}#kpDockV6 a.active,.kam-nav-item.active{background:#e3ebe4!important;border-color:#e3ebe4!important;color:#20372a!important;box-shadow:none!important}
+#kpDockV6 .kp6-indicator{background:#e3ebe4!important;box-shadow:none!important}
+
+#viewRoot input,#viewRoot select,#viewRoot textarea{background:#fff!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important}
+#viewRoot input::placeholder,#viewRoot textarea::placeholder{color:#96a099!important}
+#viewRoot input:focus,#viewRoot select:focus,#viewRoot textarea:focus{border-color:rgba(82,112,91,.46)!important;box-shadow:0 0 0 3px rgba(82,112,91,.08)!important}
+#viewRoot .primary-button,.kr2-btn.primary,.kcanon-btn.primary,.km4-btn.primary,.kc4-btn.primary,.ag4-btn.primary,.mkv4-btn.primary,.mkv4-step button,.kap-btn,.kcp-btn.primary{background:var(--kp-green-core)!important;border-color:var(--kp-green-core)!important;color:#fff!important}
+#viewRoot .secondary-button,.kr2-btn,.kcanon-btn,.km4-btn,.kc4-btn,.ag4-btn,.mkv4-btn,.kap-btn.quiet,.kcp-btn{background:#fff!important;border-color:var(--kp-line)!important;color:#33473a!important}
+#viewRoot .card,#viewRoot .empty-state{background:#fff!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important}
+
+html body #viewRoot :is(.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.kcp,.kav2){color:var(--kp-ink)!important}
+html body #viewRoot :is(.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.kcp,.kav2) :is(h1,h2,h3,h4,h5,h6,strong,b){color:var(--kp-ink)!important}
+html body #viewRoot :is(.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.kcp,.kav2) :is(p,small,li){color:var(--kp-muted)!important}
+
+html body.connected-v2 .main-shell,html body.connected-v2 #viewRoot,
+html body.kresults-v2 .main-shell,html body.kresults-v2 #viewRoot,
+html body.consultations-v4 .main-shell,html body.consultations-v4 #viewRoot,
+html body.agenda-v4 .main-shell,html body.mykomo-v5 .main-shell,
+html body.komo-pro-mode .main-shell,html body.komo-pro-mode #viewRoot{background:var(--kp-bg)!important;color:var(--kp-ink)!important}
+html body.kmotion-v4{--m4bg:var(--kp-bg)!important;--m4paper:#fff!important;--m4ink:var(--kp-ink)!important;--m4muted:var(--kp-muted)!important;--m4line:var(--kp-line)!important;--m4green:var(--kp-green)!important;--m4amber:var(--kp-amber)!important;--m4red:var(--kp-red)!important;background:var(--kp-bg)!important;color:var(--kp-ink)!important}
+html body.kmotion-v4 #appShell,html body.kmotion-v4 .main-shell,html body.kmotion-v4 #viewRoot{background:var(--kp-bg)!important;color:var(--kp-ink)!important}
+
+html body #viewRoot :is(.kcv2-card,.kcv2-metric,.kcv2-panel,.kcv2-empty,.kr2-card,.kr2-section,.kr2-connected-card,.kr2-domain,.kr2-row,.kr2-clinical-card,.kr2-clinical-empty,.km4-score,.km4-komo,.km4-domain,.km4-next,.km4-empty,.kc4-card,.kc4-appt,.kc4-plan-item,.kc4-control,.kc4-empty,.ag4-card,.ag4-next,.ag4-book,.ag4-upcoming,.ag4-network,.ag4-day,.ag4-slot,.ag4-weekbar,.ag4-shortcut,.mkv4-card,.mkv4-stats,.mkv4-daily,.mkv4-stat,.mkv4-mini,.mkv4-badge,.mkv4-build-box,.mkv4-quest,.kpv-hero,.kpv-card,.kah-card,.kap-card,.kmsg-head,.kmsg-layout,.kmsg-people,.kmsg-conversation,.kmsg-conv-head,.kmsg-thread,.kmsg-empty,.kcp-head,.kcp-tabs,.kcp-patientbar,.kcp-view,.kcp-card,.kcp-row,.kcp-todo-item,.kcp-scorebox,.kcp-empty,.kav2-hero,.kav2-tabs,.kav2-card,.kav2-registry-row,.kav2-row,.kav2-patient-row,.kav2-mini,.kav2-detail,.kav2-empty,.kav2-loading,.kav2-denied){background:#fff!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important;box-shadow:none!important}
+html body #viewRoot :is(.kcv2-hero,.kr2-hero,.kc4-hero,.km4-focus,.ag4-hero,.mkv4-hero,.mkv4-quests,.mkv4-build,.kpv-hero,.kcp-head,.kav2-hero){background:linear-gradient(145deg,#eef3ed,#e5ece5)!important;border-color:rgba(41,73,54,.10)!important;color:var(--kp-ink)!important;box-shadow:none!important}
+html body #viewRoot :is(.kcv2-panel.good,.kr2-connected-card.good,.kr2-row.good,.kc4-appt.upcoming,.kcp-state.good,.kav2 i.good){background:#e8f0e9!important;color:#36533f!important}
+html body #viewRoot :is(.kr2-connected-card.bad,.kr2-row.bad,.kap-error,.kav2 i.bad){background:#f7e9e7!important;color:#8d4e48!important}
+.km4-k,.kcanon-account .hero-score,.kcanon-doc-main,.mkv4-stat.main{background:#e7eee7!important;color:#20352a!important}
+.km4-skeleton{background:linear-gradient(110deg,#edf0eb 8%,#f7f8f5 18%,#edf0eb 33%)!important}
+.ag4{background:linear-gradient(145deg,#fbfcf9,#f1f4ef)!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important;box-shadow:none!important}.ag4-select select,.ag4-search input,.ag4-filter,.mkv4-step input,.kmsg-compose textarea,.kav2 input,.kav2 select{background:#fff!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important}
+.kmsg-bubble.other{background:#eef1ed!important;color:#26382d!important}.kmsg-bubble.mine{background:var(--kp-green-core)!important;color:#fff!important}
+.kcp-tab,.kav2-tabs button{color:#758078!important}.kcp-tab.active,.kav2-tabs button.active{background:#e7eee7!important;color:#284532!important}
+
+#authScreen.auth-screen{background:var(--kp-bg)!important;color:var(--kp-ink)!important}
+#authScreen .auth-brand{background:radial-gradient(620px 380px at 22% 20%,rgba(82,112,91,.12),transparent 70%),linear-gradient(145deg,#edf2ec,#e5ece5)!important}
+#authScreen .auth-panel-wrap{background:linear-gradient(160deg,#fafbf8,#f2f4ef)!important}
+#authScreen .auth-panel{border-color:var(--kp-line)!important;background:#fff!important;color:var(--kp-ink)!important;box-shadow:0 28px 80px rgba(24,45,31,.11)!important}
+#authScreen .auth-heading h2{color:var(--kp-ink)!important}
+#authScreen .auth-heading p,#authScreen .auth-form label>span,#authScreen .auth-note,#authScreen .auth-footer-links a,#authScreen .remember-row,#authScreen .text-button{color:var(--kp-muted)!important}
+#authScreen .auth-form input[type="email"],#authScreen .auth-form input[type="password"]{background:#fbfcfa!important;border-color:var(--kp-line)!important;color:var(--kp-ink)!important}
+#authScreen .auth-form input:focus{background:#fff!important;border-color:rgba(82,112,91,.46)!important;box-shadow:0 0 0 3px rgba(82,112,91,.08)!important}
+#authScreen .auth-submit{background:var(--kp-green-core)!important;border-color:var(--kp-green-core)!important;color:#fff!important;box-shadow:none!important}
+#authScreen .auth-panel>.secondary-button,#authScreen .auth-pro-entry .secondary-button{background:#fff!important;border-color:var(--kp-line)!important;color:#33473a!important}
+#authScreen .custom-check{background:#fff!important;border-color:var(--kp-line)!important}
+#authScreen .product-pill{background:var(--kp-green-faint)!important;color:#496752!important;border-color:rgba(82,112,91,.16)!important}
