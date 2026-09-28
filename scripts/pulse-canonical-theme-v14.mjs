@@ -6,6 +6,7 @@ const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const index=join(root,'site','pulse-v12','index.html');
 const cssPath=join(root,'site','pulse-v12','pulse-canonical-theme-v14.css');
 let html=await readFile(index,'utf8');
+html=html.replace(/<meta name="theme-color" content="[^"]*"\s*\/>/,'<meta name="theme-color" content="#f6f7f3" />');
 const css=await readFile(cssPath,'utf8');
 
 // v14 is the only transverse visual owner. Keep structural/component CSS, retire broad or dead historical polish layers.
@@ -23,56 +24,51 @@ html=html
   .replace(/\s*<link rel="stylesheet" href="\.\/pulse-canonical-theme-v14\.css(?:\?[^\"]*)?"\s*\/>/g,'')
   .replace(/\s*<style id="kpCanonicalThemePriorityV14">[\s\S]*?<\/style>/g,'');
 
-const tag='  <link rel="stylesheet" href="./pulse-canonical-theme-v14.css?v=20260903-canonical-v14-consolidated" />';
+const tag='  <link rel="stylesheet" href="./pulse-canonical-theme-v14.css?v=20260928-light-commercial-v14-1" />';
 const priority=`  <style id="kpCanonicalThemePriorityV14">
-  /* Canonical canvas: no stacked visual filters or legacy dimming. */
+  /* Canonical commercial canvas: one light visual owner, KŌMØ green as accent. */
   html body.connected-v2 .main-shell,html body.connected-v2 #viewRoot,
   html body.kresults-v2 .main-shell,html body.kresults-v2 #viewRoot,
   html body.consultations-v4 .main-shell,html body.consultations-v4 #viewRoot,
   html body.agenda-v4 .main-shell,html body.mykomo-v5 .main-shell,
-  html body.komo-pro-mode .main-shell,html body.komo-pro-mode #viewRoot{background:#050706!important;color:#f3f5f2!important}
-  html body.kmotion-v4{--m4bg:#050706!important;--m4paper:#0a0e0b!important;--m4ink:#f3f5f2!important;--m4muted:#a2aca5!important;--m4line:rgba(255,255,255,.10)!important;--m4green:#8fb39a!important;--m4amber:#d0ad6b!important;--m4red:#d18a83!important;background:#050706!important;color:#f3f5f2!important}
-  html body.kmotion-v4 #appShell,html body.kmotion-v4 .main-shell,html body.kmotion-v4 #viewRoot{background:#050706!important;color:#f3f5f2!important}
+  html body.komo-pro-mode .main-shell,html body.komo-pro-mode #viewRoot{background:#f6f7f3!important;color:#172119!important}
+  html body.kmotion-v4{--m4bg:#f6f7f3!important;--m4paper:#fff!important;--m4ink:#172119!important;--m4muted:#67736b!important;--m4line:rgba(24,45,31,.10)!important;--m4green:#52705b!important;--m4amber:#a9792f!important;--m4red:#a75c55!important;background:#f6f7f3!important;color:#172119!important}
+  html body.kmotion-v4 #appShell,html body.kmotion-v4 .main-shell,html body.kmotion-v4 #viewRoot{background:#f6f7f3!important;color:#172119!important}
   html body #appShell .main-shell #viewRoot{opacity:1!important;filter:none!important;mix-blend-mode:normal!important}
   html body #appShell::before,html body #appShell::after{display:none!important}
-  html body #viewRoot :is(.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.kcp,.kav2){color:#f3f5f2!important}
-  html body #viewRoot :is(.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.kcp,.kav2) :is(h1,h2,h3,h4,h5,h6,strong,b){color:#f3f5f2!important}
+  html body #viewRoot :is(.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.kcp,.kav2){color:#172119!important}
+  html body #viewRoot :is(.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.kcp,.kav2) :is(h1,h2,h3,h4,h5,h6,strong,b){color:#172119!important}
 
-  /* One patient navigation owner. Legacy sidebar/mobile nav are already retired by the route core; this is a final visual guard. */
   html[data-kp-nav-mode="patient"] #desktopNav,html[data-kp-nav-mode="patient"] #mobileNav,html[data-kp-nav-mode="patient"] #kamBottomBar{display:none!important}
-  #kpDockV6{background:rgba(8,12,9,.985)!important;border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 16px 42px rgba(0,0,0,.28)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important}
+  #kpDockV6{background:rgba(250,251,248,.98)!important;border:1px solid rgba(24,45,31,.10)!important;box-shadow:0 14px 36px rgba(24,45,31,.10)!important;backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important}
   #kpDockV6::before,#kpDockV6::after,#kpDockV6 .kp6-indicator::before{display:none!important}
-  #kpDockV6 .kp6-indicator{background:#edf1ed!important;box-shadow:0 5px 16px rgba(0,0,0,.18)!important}
-  #kpDockV6 a{color:#929d95!important;text-shadow:none!important}
-  #kpDockV6 a.active{color:#18231c!important;text-shadow:none!important}
+  #kpDockV6 .kp6-indicator{background:#e3ebe4!important;box-shadow:none!important}
+  #kpDockV6 a{color:#768179!important;text-shadow:none!important}
+  #kpDockV6 a.active{color:#20372a!important;text-shadow:none!important}
 
-  /* Calm chrome: solid surfaces, one border, minimal blur. */
-  html body .topbar{background:rgba(5,7,6,.985)!important;border-color:rgba(255,255,255,.075)!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-  html body .account-popover{background:#0a0e0b!important;border-color:rgba(255,255,255,.10)!important;box-shadow:0 18px 46px rgba(0,0,0,.28)!important}
-  html body .mode-switch,html body .kam-role-switch{background:#0a0e0b!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  html body .topbar{background:rgba(250,251,248,.98)!important;border-color:rgba(24,45,31,.09)!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  html body .account-popover{background:#fff!important;border-color:rgba(24,45,31,.10)!important;box-shadow:0 18px 46px rgba(24,45,31,.10)!important}
+  html body .mode-switch,html body .kam-role-switch{background:#fff!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 
-  /* One sober card language across product surfaces. */
-  html body #viewRoot :is(.kcv2-card,.kcv2-metric,.kcv2-panel,.kr2-card,.kr2-section,.kr2-connected-card,.kr2-domain,.kr2-row,.kr2-clinical-card,.km4-score,.km4-komo,.km4-domain,.km4-next,.kc4-card,.kc4-appt,.kc4-plan-item,.kc4-control,.ag4-card,.ag4-next,.ag4-book,.ag4-upcoming,.ag4-network,.mkv4-card,.kpv-card,.kah-card,.kap-card,.kmsg-conversation,.kcp-card,.kav2-card){background:#0a0e0b!important;border-color:rgba(255,255,255,.09)!important;box-shadow:none!important}
-  html body #viewRoot :is(.kcv2-hero,.kr2-hero,.kc4-hero,.km4-focus){background:#0b100d!important;border:1px solid rgba(255,255,255,.10)!important;box-shadow:none!important}
-  html body #viewRoot :is(.kcv2-panel.good,.kr2-connected-card.good,.kr2-row.good,.kc4-appt.upcoming){background:rgba(127,165,138,.09)!important}
-  html body #viewRoot :is(.kr2-connected-card.bad,.kr2-row.bad){background:rgba(200,121,114,.09)!important}
+  html body #viewRoot :is(.kcv2-card,.kcv2-metric,.kcv2-panel,.kr2-card,.kr2-section,.kr2-connected-card,.kr2-domain,.kr2-row,.kr2-clinical-card,.km4-score,.km4-komo,.km4-domain,.km4-next,.kc4-card,.kc4-appt,.kc4-plan-item,.kc4-control,.ag4-card,.ag4-next,.ag4-book,.ag4-upcoming,.ag4-network,.mkv4-card,.kpv-card,.kah-card,.kap-card,.kmsg-conversation,.kcp-card,.kav2-card){background:#fff!important;border-color:rgba(24,45,31,.09)!important;box-shadow:none!important}
+  html body #viewRoot :is(.kcv2-hero,.kr2-hero,.kc4-hero,.km4-focus){background:linear-gradient(145deg,#eef3ed,#e5ece5)!important;border:1px solid rgba(41,73,54,.10)!important;color:#172119!important;box-shadow:none!important}
+  html body #viewRoot :is(.kcv2-panel.good,.kr2-connected-card.good,.kr2-row.good,.kc4-appt.upcoming){background:#e8f0e9!important}
+  html body #viewRoot :is(.kr2-connected-card.bad,.kr2-row.bad){background:#f7e9e7!important}
 
-  /* Home stays data-free and becomes quieter: no decorative light layers. */
-  html body.khome-final-v1 [data-my-komo-home]{background:#050706!important}
+  html body.khome-final-v1 [data-my-komo-home]{background:radial-gradient(820px 480px at 88% 2%,rgba(111,146,120,.10),transparent 66%),linear-gradient(180deg,#fbfcf8 0%,#f6f7f3 56%,#f2f4ef 100%)!important}
   html body.khome-final-v1 [data-my-komo-home]::before{display:none!important}
-  html body.khome-final-v1 .kh7-actions a{background:#0a0e0b!important;border-color:rgba(255,255,255,.09)!important;box-shadow:none!important}
-  @media(hover:hover){html body.khome-final-v1 .kh7-actions a:hover{background:#0d1510!important;border-color:rgba(127,165,138,.28)!important;transform:translateY(-1px)!important}}
+  html body.khome-final-v1 .kh7-actions a{background:#fff!important;border-color:rgba(24,45,31,.09)!important;box-shadow:none!important}
+  @media(hover:hover){html body.khome-final-v1 .kh7-actions a:hover{background:#fff!important;border-color:rgba(82,112,91,.28)!important;transform:translateY(-1px)!important}}
 
-  /* Authentication keeps its structural responsive CSS, with one restrained finishing layer. */
-  html body #authScreen .auth-panel{border-radius:28px!important;box-shadow:0 22px 64px rgba(0,0,0,.20)!important}
+  html body #authScreen .auth-panel{border-radius:28px!important;background:#fff!important;color:#172119!important;border-color:rgba(24,45,31,.10)!important;box-shadow:0 22px 64px rgba(24,45,31,.11)!important}
 
   @media(max-width:760px){
-    #kpDockV6{box-shadow:0 10px 28px rgba(0,0,0,.28)!important}
+    #kpDockV6{box-shadow:0 10px 28px rgba(24,45,31,.10)!important}
     #kpDockV6 b{white-space:normal!important;text-align:center!important;line-height:1.02!important;max-width:100%!important}
     html body.khome-final-v1 .kh7-actions a{border-radius:14px!important}
   }
   @media(prefers-reduced-motion:reduce){#kpDockV6,#kpDockV6 *{transition:none!important}}
-  </style>`;
+  </style>`
 html=html.replace('</head>',`${tag}\n${priority}\n</head>`);
 await writeFile(index,html,'utf8');
 
@@ -111,4 +107,4 @@ const checks=[
 ];
 for(const [label,ok] of checks){console.log(`[pulse-theme-v14] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)process.exitCode=1}
 if(process.exitCode)throw new Error('Pulse canonical theme v14 guard failed');
-console.log('[pulse-theme-v14] PASS · one transverse visual owner · historical polish layers retired · sober rendering frozen');
+console.log('[pulse-theme-v14] PASS · one transverse visual owner · premium light commercial rendering frozen');
