@@ -64,12 +64,13 @@ const checks=[
   ['Home score uses released results only',js.includes("from('scores')")&&js.includes("eq('release_status','released')")&&js.includes('Motion Score')],
   ['Home Connected preview uses real wearable daily metrics',js.includes("from('wearable_daily_metrics')")&&js.includes('sleep_minutes')&&js.includes('resting_hr')],
   ['Home appointment preview uses future persisted consultations',js.includes("from('organization_appointments')")&&js.includes("gte('scheduled_start'")&&js.includes('Aucun rendez-vous planifié')],
-  ['Home identity uses existing profile community and wallet contracts',js.includes("from('profiles')")&&js.includes("rpc('komo_my_community_identity_v1')")&&js.includes("rpc('komo_engagement_summary')")&&js.includes("rpc('komo_wallet_summary')")],
+  ['Home identity stays lean',js.includes("from('profiles')")&&js.includes("rpc('komo_my_community_identity_v1')")&&!js.includes("rpc('komo_engagement_summary')")&&!js.includes("rpc('komo_wallet_summary')")],
   ['Home routes to Results',js.includes('data-kh8-route="results"')],
   ['Home routes to Connected',js.includes('data-kh8-route="key"')],
   ['Home routes to Consultations',js.includes('data-kh8-route="documents"')&&js.includes('Consultations')],
   ['Home routes to My KŌMØ',js.includes('data-kh8-route="mykomo"')],
-  ['Home routes to Club',js.includes('data-kh8-route="club"')],
+  ['Home exposes World directly',js.includes('https://komolongevity.com/world/')&&js.includes('Entrer dans KŌMØ World')],
+  ['Home exposes commercial consultation CTA',js.includes('Débuter votre consultation')&&js.includes('data-kh8-route="documents"')],
   ['Home uses one canonical navigation controller',js.includes('KomoPatientNavigation.go(target)')&&!js.includes("location.hash='results'")&&!js.includes("location.hash='documents'")],
   ['Home does not import competing Results Connected Agenda or My KŌMØ owners',!js.includes('patient-canonical-results.js')&&!js.includes('key-hub-v1.js')&&!js.includes('agenda-v4.js')&&!js.includes('my-komo-stable-v5.js')],
   ['Home keeps assistant and responsive runtime as imports',js.includes("import './komo-assistant-shell-v2.js'")&&js.includes("import './patient-mobile-v1.js'")&&!finalScript(mobileJsFile)],
@@ -78,7 +79,7 @@ const checks=[
   ['desktop dock uses approved labels',nav.includes("['home','Home'")&&nav.includes("['results','Résultats'")&&nav.includes("['key','Connected'")&&nav.includes("['agenda','Consultations & rendez-vous'")&&nav.includes("['mykomo','My KŌMØ'")&&!nav.includes("['trajectory','Trajectoire'")],
   ['five destinations stay canonical routes',finalDock.every(r=>navCore.includes(`'${r}'`))],
   ['desktop dock uses five columns',nav.includes('grid-template-columns:repeat(5,minmax(0,1fr))')],
-  ['Home stays black clinical with green as accent',css.includes('--kh8-bg:#050706')&&css.includes('--kh8-green:#8fb39a')&&css.includes('--kh8-panel:#0a0e0b')],
+  ['Home uses premium light canvas with green accent',css.includes('KŌMØ Pulse — Home V8.1 commercial light canvas')&&css.includes('--kh8-bg:#f6f7f3')&&css.includes('--kh8-green:#52705b')],
   ['desktop iPad mobile share one information contract',css.includes('@media(max-width:1080px)')&&css.includes('@media(max-width:820px)')&&css.includes('@media(max-width:620px)')&&css.includes('@media(max-width:380px)')],
   ['Home prevents horizontal canvas drift',css.includes('overflow-x:hidden!important')],
   ['reduced motion supported',css.includes('@media(prefers-reduced-motion:reduce)')],
@@ -86,4 +87,4 @@ const checks=[
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v8] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log(`[pulse-home-web-v8] PASS · ${checks.length}/${checks.length} canonical cockpit + five-navigation assertions`);
+console.log(`[pulse-home-web-v8] PASS · ${checks.length}/${checks.length} commercial light cockpit + five-navigation assertions`);
