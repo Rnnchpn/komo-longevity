@@ -166,7 +166,7 @@ function render(){
  if(!host)return;
  tuneChrome();
  host.innerHTML=homeMarkup();
- host.dataset.khomeOwner='patient-home-command-v1@8.1';
+ host.dataset.khomeOwner='patient-home-command-v1@8';
  requestAnimationFrame(()=>window.KomoAssistantV2?.refresh?.());
  window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,cockpit:true}}));
 }
