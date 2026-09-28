@@ -11,8 +11,13 @@ async function resolveOrganization(){
     .eq('status','active');
   if(result.error)throw result.error;
   const memberships=result.data||[];
-  const selected=memberships.find(x=>x.organizations?.slug==='komo-poc')||memberships[0];
-  if(!selected?.organization_id)throw new Error('Aucune organisation professionnelle active.');
+  if(!memberships.length)throw new Error('Aucune organisation professionnelle active.');
+  const selectedId=localStorage.getItem('komo_clinical_org')||'';
+  let selected=selectedId?memberships.find(x=>x.organization_id===selectedId):null;
+  if(!selected&&memberships.length===1)selected=memberships[0];
+  if(!selected&&memberships.length>1)throw new Error('Sélectionnez le centre concerné avant de créer le patient.');
+  if(!selected?.organization_id)throw new Error('Centre professionnel invalide.');
+  localStorage.setItem('komo_clinical_org',selected.organization_id);
   return selected;
 }
 
