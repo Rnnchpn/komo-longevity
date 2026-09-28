@@ -1,7 +1,7 @@
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='8.0.0-cockpit';
+const VERSION='8.1.0-commercial';
 let timer=0;
 const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,scores:[],wearable:null,appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
 
@@ -45,15 +45,20 @@ function homeMarkup(){
  const score=num(s?.motion_score),scoreDate=s?.released_at||s?.calculated_at;
  const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0);
  const appointmentDate=appt?.scheduled_start;
+ const consultationLabel=appt?'Voir votre prochaine consultation':'Débuter votre consultation';
  return `<section class="kh8" data-khome-v8 data-khome-v7 aria-label="KŌMØ Pulse Home">
    <div class="kh8-brand"><span>KŌMØ</span><small>PULSE</small></div>
 
    <div class="kh8-top">
     <div class="kh8-hero">
       <p class="kh8-kicker">LONGEVITY IN MOTION</p>
-      <h2>Votre KŌMØ.<br><em>Simplement.</em></h2>
-      <p class="kh8-lead">Vos résultats, votre quotidien connecté, vos consultations et votre espace personnel dans une seule interface.</p>
-      <button class="kh8-continue" type="button" data-kh8-route="results"><span>Continuer votre parcours</span><b aria-hidden="true">→</b></button>
+      <h2>Votre trajectoire.<br><em>Clairement.</em></h2>
+      <p class="kh8-lead">Mesurez votre mouvement, comprenez vos résultats, passez à l’action puis mesurez à nouveau. Pulse garde le fil entre chaque étape.</p>
+      <div class="kh8-hero-actions">
+        <button class="kh8-continue" type="button" data-kh8-route="documents"><span>${esc(consultationLabel)}</span><b aria-hidden="true">→</b></button>
+        <a class="kh8-world" href="https://komolongevity.com/world/" target="_blank" rel="noopener"><span>Entrer dans KŌMØ World</span><b aria-hidden="true">↗</b></a>
+      </div>
+      <div class="kh8-journey" aria-label="Trajectoire KŌMØ"><span><b>01</b>Mesurer</span><i>→</i><span><b>02</b>Comprendre</span><i>→</i><span><b>03</b>Agir</span><i>→</i><span><b>04</b>Mesurer à nouveau</span></div>
     </div>
 
     <div class="kh8-side">
@@ -82,9 +87,9 @@ function homeMarkup(){
       <small>${w.metric_date?`Synchronisé · ${esc(fmtDate(w.metric_date))}`:'Aucune donnée Connected aujourd’hui'}</small>
     </a>
     <a href="#documents" data-kh8-route="documents" class="kh8-card">
-      <div class="kh8-card-head"><span>03</span><b aria-hidden="true">→</b></div><h3>Consultations</h3><p>Votre suivi et vos rendez-vous</p>
+      <div class="kh8-card-head"><span>03</span><b aria-hidden="true">→</b></div><h3>Consultation</h3><p>Commencer, préparer ou suivre votre rendez-vous</p>
       <div class="kh8-appointment-mini"><b>${appt?esc(fmtShortDate(appointmentDate)):'—'}</b><span>${appt?esc(appointmentLabel(appt.appointment_type)):'Aucun rendez-vous à venir'}</span><small>${appt?esc(orgLabel()):'Votre agenda KŌMØ'}</small></div>
-      <small>Voir tous mes rendez-vous</small>
+      <small>Votre prochaine étape KŌMØ</small>
     </a>
     <a href="#mykomo" data-kh8-route="mykomo" class="kh8-card">
       <div class="kh8-card-head"><span>04</span><b aria-hidden="true">→</b></div><h3>My KŌMØ</h3><p>Votre profil, Club et communauté</p>
@@ -94,7 +99,7 @@ function homeMarkup(){
    </nav>
 
    <button class="kh8-club" type="button" data-kh8-route="club"><span><small>KŌMØ CLUB</small><strong>Une communauté qui avance ensemble.</strong><em>Défis · événements · contenus · récompenses</em></span><b>Accéder au Club →</b></button>
-   <p class="kh8-foot">Measure → Understand → Act → Live</p>
+   <p class="kh8-foot">Measure → Understand → Act → Live → Engage → Reward → Measure Again</p>
   </section>`;
 }
 
@@ -161,7 +166,7 @@ function render(){
  if(!host)return;
  tuneChrome();
  host.innerHTML=homeMarkup();
- host.dataset.khomeOwner='patient-home-command-v1@8';
+ host.dataset.khomeOwner='patient-home-command-v1@8.1';
  requestAnimationFrame(()=>window.KomoAssistantV2?.refresh?.());
  window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,cockpit:true}}));
 }
