@@ -3,7 +3,7 @@ import './patient-mobile-v1.js';
 
 const VERSION='8.1.0-commercial';
 let timer=0;
-const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,scores:[],wearable:null,appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
+const state={user:null,profile:null,role:null,patient:null,scores:[],wearable:null,appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
 
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const client=()=>window.KomoRuntime?.client||null;
@@ -37,13 +37,11 @@ function avatarMarkup(){
 }
 function roleMarkup(){return `${isFounder()?'<span class="kh8-crown" aria-hidden="true">♛</span>':''}<span>${esc(roleTitle())}</span>`}
 function scoreChangeMarkup(){const d=scoreDelta();if(d===null)return'Votre dernier bilan apparaîtra ici';const sign=d>0?'+':'';return `${sign}${d.toFixed(1).replace('.',',')} depuis le bilan précédent`}
-function clubLabel(){const n=state.memberships.length;return n?`${n} Club${n>1?'s':''} actif${n>1?'s':''}`:'Accès Club'}
 function orgLabel(){const o=state.organization||{};return [o.name,o.city].filter(Boolean).join(' · ')||'KŌMØ'}
 
 function homeMarkup(){
- const s=currentScore(),w=state.wearable||{},appt=nextAppointment(),e=state.engagement||{},wallet=state.wallet||{};
+ const s=currentScore(),w=state.wearable||{},appt=nextAppointment();
  const score=num(s?.motion_score),scoreDate=s?.released_at||s?.calculated_at;
- const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0);
  const appointmentDate=appt?.scheduled_start;
  const consultationLabel=appt?'Voir votre prochaine consultation':'Débuter votre consultation';
  return `<section class="kh8" data-khome-v8 data-khome-v7 aria-label="KŌMØ Pulse Home">
@@ -66,7 +64,6 @@ function homeMarkup(){
         <div class="kh8-avatar">${avatarMarkup()}</div>
         <div class="kh8-profile-copy"><small>MY KŌMØ</small><strong>${esc(profileName())}</strong><div class="kh8-role">${roleMarkup()}</div></div>
         <div class="kh8-profile-arrow" aria-hidden="true">→</div>
-        <div class="kh8-profile-stats"><span><b>${level}</b><small>Niveau</small></span><span><b>${points}</b><small>K Points</small></span><span><b>${esc(clubLabel())}</b><small>Club</small></span></div>
       </article>
       <article class="kh8-next" data-kh8-route="documents" role="button" tabindex="0" aria-label="Ouvrir mes consultations">
         <div><small>PROCHAIN RENDEZ-VOUS</small><strong>${appt?esc(appointmentLabel(appt.appointment_type)):'Aucun rendez-vous planifié'}</strong><p>${appt?`${esc(orgLabel())}${appointmentDate?` · ${esc(fmtTime(appointmentDate))}`:''}`:'Planifiez votre prochaine étape depuis Consultations.'}</p></div>
@@ -91,14 +88,8 @@ function homeMarkup(){
       <div class="kh8-appointment-mini"><b>${appt?esc(fmtShortDate(appointmentDate)):'—'}</b><span>${appt?esc(appointmentLabel(appt.appointment_type)):'Aucun rendez-vous à venir'}</span><small>${appt?esc(orgLabel()):'Votre agenda KŌMØ'}</small></div>
       <small>Votre prochaine étape KŌMØ</small>
     </a>
-    <a href="#mykomo" data-kh8-route="mykomo" class="kh8-card">
-      <div class="kh8-card-head"><span>04</span><b aria-hidden="true">→</b></div><h3>My KŌMØ</h3><p>Votre profil, Club et communauté</p>
-      <div class="kh8-community-mini"><span class="kh8-mini-avatar">${avatarMarkup()}</span><div><b>${esc(roleTitle())}</b><small>${esc(clubLabel())}</small></div></div>
-      <small>Profil social · réglages · Club</small>
-    </a>
    </nav>
 
-   <button class="kh8-club" type="button" data-kh8-route="club"><span><small>KŌMØ CLUB</small><strong>Une communauté qui avance ensemble.</strong><em>Défis · événements · contenus · récompenses</em></span><b>Accéder au Club →</b></button>
    <p class="kh8-foot">Measure → Understand → Act → Live → Engage → Reward → Measure Again</p>
   </section>`;
 }
@@ -129,16 +120,13 @@ async function load(force=false){
  if(!force&&state.loadedFor===session.user.id&&Date.now()-state.lastLoad<180000){render();return}
  state.loading=true;state.user=session.user;
  try{
-   const [profile,role,engagement,wallet,memberships,wearable,patient]=await Promise.all([
+   const [profile,role,wearable,patient]=await Promise.all([
      safe(c.from('profiles').select('display_name,first_name,last_name,avatar_path,avatar_config').eq('id',session.user.id).maybeSingle()),
      safe(c.rpc('komo_my_community_identity_v1')),
-     safe(c.rpc('komo_engagement_summary')),
-     safe(c.rpc('komo_wallet_summary')),
-     safe(c.from('komo_club_members').select('club_id,role').eq('user_id',session.user.id)),
-     safe(c.from('wearable_daily_metrics').select('metric_date,steps,sleep_minutes,resting_hr,source,source_quality').eq('user_id',session.user.id).order('metric_date',{ascending:false}).limit(1).maybeSingle()),
+     safe(c.from('wearable_daily_metrics').select('metric_date,steps,sleep_minutes,resting_hr').eq('user_id',session.user.id).order('metric_date',{ascending:false}).limit(1).maybeSingle()),
      safe(c.from('patients').select('id').eq('patient_user_id',session.user.id).order('updated_at',{ascending:false}).limit(1).maybeSingle())
    ]);
-   state.profile=profile||{};state.role=role||{};state.engagement=engagement||{};state.wallet=wallet||{};state.memberships=Array.isArray(memberships)?memberships:[];state.wearable=wearable||null;state.patient=patient||null;
+   state.profile=profile||{};state.role=role||{};state.wearable=wearable||null;state.patient=patient||null;
    state.avatarUrl=await signedAvatar(c,state.profile);
    if(patient?.id){
      const [assessments,appointments]=await Promise.all([
