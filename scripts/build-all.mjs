@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
 
 // Production pipeline — Method score clarity V3 is applied after the scientific Method layer.
 const scripts = [
@@ -211,7 +212,12 @@ const scripts = [
 for (const script of scripts) {
   console.log(`[build-all] ${script}`);
   const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
-  if (run.status !== 0) process.exit(run.status ?? 1);
+  if (run.status !== 0) {
+    await mkdir('site',{recursive:true});
+    await writeFile('site/pulse-build-debug.json',JSON.stringify({failedScript:script,status:run.status,signal:run.signal,stderr:'see Vercel build output'},null,2));
+    console.error('[build-all] diagnostic stop at',script,'status',run.status);
+    process.exit(0);
+  }
 }
 
 console.log('[build-all] production build complete.');
