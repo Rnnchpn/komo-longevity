@@ -67,7 +67,15 @@ async function handoffSignupSession(session){
     const accept=window.KomoPulseApp?.acceptSession;
     if(accept){
       try{
-        await accept(session);
+        const activation=Promise.resolve(accept(session));
+        const shellReady=new Promise(resolve=>{
+          let settled=false;
+          const done=()=>{if(settled)return;settled=true;window.removeEventListener('komo:session-ready',done);resolve(true)};
+          window.addEventListener('komo:session-ready',done,{once:true});
+          setTimeout(done,1600);
+        });
+        await Promise.race([activation,shellReady]);
+        activation.catch(err=>console.error('[patient-signup-live]',err));
         window.dispatchEvent(new CustomEvent('komo:session-ready',{detail:{session,source:'patient-signup-live'}}));
         return true;
       }catch(err){lastError=err;break}
@@ -82,7 +90,7 @@ async function handoffSignupSession(session){
 `);
 
   const submitFrom="if(data?.session)showCheckHandoff();else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; Pulse vous proposera ensuite de commencer votre KŌMØ Check.',true)";
-  const submitTo="if(data?.session){const adopted=await handoffSignupSession(data.session);if(adopted)showCheckHandoff();else{feedback(out,'Votre espace est prêt. Ouverture de Pulse…',true);setTimeout(()=>location.replace(location.origin+'/?start=check'),120)}}else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; Pulse vous proposera ensuite de commencer votre KŌMØ Check.',true)";
+  const submitTo="if(data?.session){const adopted=await handoffSignupSession(data.session);if(adopted){const modal=document.querySelector('#patientCreateModal');if(modal){modal.hidden=true;delete modal.dataset.handoff}handoffShown=true;clearStart();location.hash='home';setTimeout(()=>window.KomoPatientHomeCommand?.refresh?.(),40)}else{feedback(out,'Votre espace est prêt. Ouverture de Pulse…',true);setTimeout(()=>location.replace(location.origin+'/#home'),120)}}else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; Pulse vous ouvrira ensuite directement votre accueil.',true)";
   if(!onboarding.includes(submitFrom))throw new Error('[pulse-ipad-auth] patient signup session anchor missing');
   onboarding=onboarding.replace(submitFrom,submitTo);
 
@@ -97,7 +105,7 @@ async function handoffSignupSession(session){
   onboarding=onboarding.replace(showFrom,showTo);
 
   const maybeFrom="async function maybeHandoff(){if(handoffShown)return;const q=new URLSearchParams(location.search);if(q.get('start')!=='check'&&sessionStorage.getItem('komo_start_check_after_signup')!=='1')return;const {data:{session}}=await sb().auth.getSession();if(!session?.user)return;const auth=document.querySelector('#authScreen');if(auth&&!auth.hidden)return;showCheckHandoff()}";
-  const maybeTo="async function maybeHandoff(){if(handoffShown)return;const q=new URLSearchParams(location.search);if(q.get('start')!=='check'&&sessionStorage.getItem('komo_start_check_after_signup')!=='1')return;const {data:{session}}=await sb().auth.getSession();if(!session?.user)return;const auth=document.querySelector('#authScreen');if(auth&&!auth.hidden){const adopted=await handoffSignupSession(session);if(!adopted&&auth&&!auth.hidden){location.replace(location.origin+'/?start=check');return}}showCheckHandoff()}";
+  const maybeTo="async function maybeHandoff(){if(handoffShown)return;const q=new URLSearchParams(location.search);if(q.get('start')!=='check'&&sessionStorage.getItem('komo_start_check_after_signup')!=='1')return;const {data:{session}}=await sb().auth.getSession();if(!session?.user)return;const auth=document.querySelector('#authScreen');if(auth&&!auth.hidden){const adopted=await handoffSignupSession(session);if(!adopted&&auth&&!auth.hidden){location.replace(location.origin+'/#home');return}}handoffShown=true;clearStart();const modal=document.querySelector('#patientCreateModal');if(modal){modal.hidden=true;delete modal.dataset.handoff}location.hash='home';setTimeout(()=>window.KomoPatientHomeCommand?.refresh?.(),40)}";
   if(!onboarding.includes(maybeFrom))throw new Error('[pulse-ipad-auth] maybe handoff anchor missing');
   onboarding=onboarding.replace(maybeFrom,maybeTo);
 
@@ -113,4 +121,4 @@ if(!onboarding.includes('patient-signup-live')||!onboarding.includes("addEventLi
   throw new Error('[pulse-ipad-auth] patient signup handoff patch did not apply');
 }
 
-console.log('[pulse-ipad-auth] PASS · login + patient signup handoff hardened for Safari/iPad');
+console.log('[pulse-ipad-auth] PASS · login + patient signup handoff hardened for Safari/iPad · successful signup lands directly on Home');
