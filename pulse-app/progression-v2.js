@@ -7,7 +7,7 @@ const memberMode=()=>{const b=document.querySelector('#modeSwitch button[data-mo
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const n=v=>{const x=Number(v);return Number.isFinite(x)?x:null};
 const fmtDate=v=>{if(!v)return'—';const d=new Date(v);return Number.isNaN(d.getTime())?'—':new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'short',year:'numeric'}).format(d).replace('.','')};
-const go=r=>{location.hash=`#${r}`};
+const go=r=>window.KomoPatientNavigation?.go?.(r);
 function openKomo(){const b=document.querySelector('#komoOperatorLauncher');if(b&&!b.hidden)b.click();else window.dispatchEvent(new CustomEvent('komo:operator-open'))}
 function released(s){return['released','published'].includes(String(s?.release_status||s?.status||'').toLowerCase())}
 function score(s){const v=n(s?.motion_score??s?.overall_score);return v===null?null:Math.round(v)}
