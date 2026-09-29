@@ -55,7 +55,7 @@ for(const dir of dirs){
     );
     const patientBottomGuard="if(mode()==='patient'&&!allowedPro()){document.querySelector('#kamBottomBar')?.remove();return;}";
     js=js.replace(
-      /function ensureBottom\(\)\{\s*(?:if\(mode\(\)==='patient'[^\n]*\n\s*)?const app=document\.querySelector\('#appShell'\);if\(!app\)return;/,
+      /function ensureBottom\(\)\{[\s\S]*?const app=document\.querySelector\('#appShell'\);if\(!app\)return;/,
       `function ensureBottom(){\n    ${patientBottomGuard}\n    const app=document.querySelector('#appShell');if(!app)return;`
     );
     if(!js.includes("navItem('pro:dashboard','Pro',I.center,false)")||!js.includes("navItem('admin','Admin',I.admin,false)")){
