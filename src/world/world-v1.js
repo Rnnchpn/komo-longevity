@@ -65,6 +65,7 @@ const challengesToggle=$('#challenges-toggle');
 const resultsToggle=$('#results-toggle');
 const campusToggle=$('#campus-toggle');
 const journeyToggle=$('#journey-toggle');
+const membershipToggle=$('#membership-toggle');
 const menuMotion=$('#menu-motion');
 const menuAge=$('#menu-age');
 const menuCurrentZone=$('#menu-current-zone');
@@ -4792,9 +4793,56 @@ function trajectoryStepsHtml(t=personalTrajectory){
     return '<span class="'+state+'"><i>'+(state==='done'?'✓':step)+'</i><b>'+label+'</b></span>';
   }).join('')+'</div>';
 }
+
+const WORLD_INCLUDED_DAYS=90;
+const WORLD_PLUS_PRICE_EUR=24;
+function worldCommercialContact(kind='world-plus'){
+  const base=locale==='fr'?'/fr/contact/':'/contact/';
+  return base+'?interest='+encodeURIComponent(kind)+'&source=world';
+}
+function worldAccessHtml(){
+  const connected=!!personalTrajectory;
+  const checkpoint=connected?trajectoryCheckpointLabel(personalTrajectory):(locale==='fr'?'Après votre bilan':'After your assessment');
+  return '<section class="world-access-layer">'+
+    '<div class="world-access-intro"><span>'+(locale==='fr'?'VOTRE PARCOURS':'YOUR PATH')+'</span><h3>'+(connected?(locale==='fr'?'Votre trajectoire est active.':'Your trajectory is active.'):(locale==='fr'?'World est gratuit à découvrir.':'World is free to discover.'))+'</h3><p>'+
+    (connected
+      ?(locale==='fr'?'Votre bilan devient un suivi : référence, priorité, action et prochain checkpoint restent réunis ici.':'Your assessment becomes follow-up: reference, priority, action and next checkpoint stay together here.')
+      :(locale==='fr'?'Explorez le Hall, la Library et les espaces KŌMØ. La personnalisation commence après un bilan KŌMØ.':'Explore the Hall, Library and KŌMØ spaces. Personalisation starts after a KŌMØ assessment.'))+
+    '</p></div>'+
+    '<div class="world-access-steps">'+
+      '<article class="'+(connected?'done':'current')+'"><i>'+(connected?'✓':'1')+'</i><div><span>'+(locale==='fr'?'DÉCOUVRIR':'DISCOVER')+'</span><b>World Discovery</b><small>'+(locale==='fr'?'Accès libre au World et à la science KŌMØ.':'Free access to World and KŌMØ science.')+'</small></div><strong>0 €</strong></article>'+
+      '<article class="'+(connected?'current':'')+'"><i>'+(connected?'✓':'2')+'</i><div><span>'+(locale==='fr'?'APRÈS LE BILAN':'AFTER ASSESSMENT')+'</span><b>'+(locale==='fr'?'Accès personnel':'Personal access')+'</b><small>'+(locale==='fr'?'Trajectoire, Twin, résultats et programme · '+WORLD_INCLUDED_DAYS+' jours inclus.':'Trajectory, Twin, results and programme · '+WORLD_INCLUDED_DAYS+' days included.')+'</small></div><strong>'+(connected?(locale==='fr'?'ACTIF':'ACTIVE'):(locale==='fr'?'INCLUS':'INCLUDED'))+'</strong></article>'+
+      '<article class="plus"><i>＋</i><div><span>'+(locale==='fr'?'CONTINUER':'CONTINUE')+'</span><b>World+</b><small>'+(locale==='fr'?'Conserver votre trajectoire entre deux checkpoints KŌMØ.':'Keep your trajectory active between KŌMØ checkpoints.')+'</small></div><strong>'+WORLD_PLUS_PRICE_EUR+' €<small>/mois</small></strong></article>'+
+    '</div>'+
+    '<div class="world-plus-value"><span>WORLD+</span><div class="world-plus-features">'+
+      '<b>'+(locale==='fr'?'Programme personnel':'Personal programme')+'</b>'+
+      '<b>'+(locale==='fr'?'Progression longitudinale':'Longitudinal progress')+'</b>'+
+      '<b>Twin + Fitness + Library</b>'+
+      '<b>'+(locale==='fr'?'Préparation du prochain checkpoint':'Next checkpoint preparation')+'</b>'+
+    '</div><small>'+(locale==='fr'?'Phase pilote : l’activation est actuellement réalisée sur demande. Aucun paiement n’est déclenché dans World.':'Pilot phase: activation is currently handled on request. No payment is taken inside World.')+'</small></div>'+
+    (connected?'<div class="world-access-next"><span>'+(locale==='fr'?'PROCHAIN POINT':'NEXT CHECKPOINT')+'</span><b>'+checkpoint+'</b></div>':'')+
+  '</section>';
+}
+function discoveryPathHtml(){
+  return '<section class="world-simple-path">'+
+    '<article><span>01</span><div><b>'+(locale==='fr'?'Découvrez KŌMØ World':'Discover KŌMØ World')+'</b><small>'+(locale==='fr'?'Explorez librement. Aucun abonnement nécessaire.':'Explore freely. No subscription required.')+'</small></div></article>'+
+    '<article><span>02</span><div><b>'+(locale==='fr'?'Faites votre bilan KŌMØ':'Complete your KŌMØ assessment')+'</b><small>'+(locale==='fr'?'Votre référence, vos priorités et votre trajectoire apparaissent ici.':'Your reference, priorities and trajectory appear here.')+'</small></div></article>'+
+    '<article><span>03</span><div><b>'+(locale==='fr'?'Continuez si cela vous est utile':'Continue if it is useful to you')+'</b><small>World+ · '+WORLD_PLUS_PRICE_EUR+' €/'+(locale==='fr'?'mois':'month')+' · '+(locale==='fr'?'sans rendre World obligatoire':'World remains optional')+'</small></div></article>'+
+  '</section>';
+}
+function showWorldAccess(){
+  closeWorldMenu();
+  const connected=!!personalTrajectory;
+  openPanel('KŌMØ WORLD+',connected?(locale==='fr'?'Continuer votre trajectoire.':'Continue your trajectory.'):(locale==='fr'?'De la découverte au suivi personnel.':'From discovery to personal follow-up.'),worldAccessHtml(),[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:connected?(locale==='fr'?'MA TRAJECTOIRE':'MY TRAJECTORY'):'PULSE',onClick:connected?showJourneyPanel:()=>{location.href='/pulse/'}},
+    {label:connected?(locale==='fr'?'DEMANDER WORLD+':'REQUEST WORLD+'):(locale==='fr'?'DEMANDER UN BILAN':'REQUEST AN ASSESSMENT'),primary:true,onClick:()=>{location.href=worldCommercialContact(connected?'world-plus':'assessment')}}
+  ]);
+}
+
 function trajectoryPanelHtml(){
   const t=personalTrajectory;
-  if(!t)return '<section class="trajectory-panel empty"><span>KŌMØ TRAJECTORY</span><h3>'+(locale==='fr'?'Votre World peut devenir personnel.':'Your World can become personal.')+'</h3><p>'+(locale==='fr'?'Connectez-vous avec votre compte KŌMØ pour retrouver ici la priorité issue de votre consultation, votre prochaine action et votre prochain checkpoint.':'Connect your KŌMØ account to see the priority from your consultation, your next action and your next checkpoint here.')+'</p></section>';
+  if(!t)return '<section class="trajectory-panel empty"><span>KŌMØ TRAJECTORY</span><h3>'+(locale==='fr'?'Votre trajectoire commence après votre bilan.':'Your trajectory starts after your assessment.')+'</h3><p>'+(locale==='fr'?'World reste libre à explorer. Après votre bilan KŌMØ, Pulse active ici votre référence, votre priorité, votre action et votre prochain checkpoint.':'World remains free to explore. After your KŌMØ assessment, Pulse activates your reference, priority, action and next checkpoint here.')+'</p></section>';
   const days=trajectoryDaysToCheckpoint(t),checkpoint=trajectoryCheckpointLabel(t),priority=t.priority||(locale==='fr'?'Priorité en cours de préparation':'Priority being prepared'),action=t.current_action||priority;
   return '<section class="trajectory-panel">'+
     '<div class="trajectory-kicker">'+trajectoryPhaseLabel(t)+'</div>'+
@@ -4803,9 +4851,10 @@ function trajectoryPanelHtml(){
     '<div class="trajectory-grid">'+
       '<article><span>'+(locale==='fr'?'VOTRE RÉFÉRENCE':'YOUR REFERENCE')+'</span><strong>'+(t.motion_score!=null?'Motion Score '+Math.round(t.motion_score)+'/100':(locale==='fr'?'Bilan enregistré':'Assessment recorded'))+'</strong></article>'+
       '<article><span>'+(locale==='fr'?'MAINTENANT':'NOW')+'</span><strong>'+escHtml(priority)+'</strong></article>'+
-      '<article><span>'+(locale==='fr'?'D’ICI AU PROCHAIN POINT':'UNTIL NEXT CHECKPOINT')+'</span><strong>'+escHtml(action)+'</strong></article>'+
-      '<article><span>'+(locale==='fr'?'PROCHAIN POINT KŌMØ':'NEXT KŌMØ CHECKPOINT')+'</span><strong>'+checkpoint+(days!=null?' · '+days+(locale==='fr'?' j':' d'):'')+'</strong></article>'+
-    '</div></section>';
+      '<article><span>'+(locale==='fr'?'À FAIRE':'TO DO')+'</span><strong>'+escHtml(action)+'</strong></article>'+
+      '<article><span>'+(locale==='fr'?'PROCHAIN POINT':'NEXT CHECKPOINT')+'</span><strong>'+checkpoint+(days!=null?' · '+days+(locale==='fr'?' j':' d'):'')+'</strong></article>'+
+    '</div>'+
+    '<div class="trajectory-continuity"><span>'+(locale==='fr'?'ACCÈS PERSONNEL':'PERSONAL ACCESS')+'</span><b>'+(locale==='fr'?WORLD_INCLUDED_DAYS+' jours inclus après votre bilan':WORLD_INCLUDED_DAYS+' days included after your assessment')+'</b><small>'+(locale==='fr'?'World+ permet ensuite de conserver votre trajectoire active pour '+WORLD_PLUS_PRICE_EUR+' €/mois.':'World+ can then keep your trajectory active for €'+WORLD_PLUS_PRICE_EUR+'/month.')+'</small></div></section>';
 }
 function ingestTrajectory(input){
   personalTrajectory=cleanTrajectory(input);
@@ -4943,15 +4992,16 @@ function journeyHtml(){
 function showJourneyPanel(){
   completeJourney('journey',{silent:true});
   if(personalTrajectory){
-    openPanel(locale==='fr'?'VOTRE TRAJECTOIRE':'YOUR TRAJECTORY',locale==='fr'?'Votre consultation continue dans World.':'Your consultation continues in World.',trajectoryPanelHtml(),[
-      {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    openPanel(locale==='fr'?'VOTRE TRAJECTOIRE':'YOUR TRAJECTORY',locale==='fr'?'Où vous en êtes · quoi faire · quand refaire le point.':'Where you are · what to do · when to check again.',trajectoryPanelHtml(),[
+      {label:'WORLD+',onClick:showWorldAccess},
       {label:'TWIN',onClick:enterTwin},
-      {label:locale==='fr'?'CONTINUER':'CONTINUE',primary:true,onClick:()=>{const id=trajectoryFocusKey();closePanel();if(id)enterRehab();else enterTwin()}}
+      {label:locale==='fr'?'CONTINUER MON ACTION':'CONTINUE MY ACTION',primary:true,onClick:()=>{const id=trajectoryFocusKey();closePanel();if(id)enterRehab();else enterTwin()}}
     ]);return;
   }
-  openPanel('KŌMØ WORLD',locale==='fr'?'Explorez librement ou connectez Pulse pour activer votre trajectoire personnelle.':'Explore freely or connect Pulse to activate your personal trajectory.',trajectoryPanelHtml()+journeyHtml(),[
+  openPanel('KŌMØ WORLD',locale==='fr'?'Un parcours simple : découvrir, mesurer, continuer.':'A simple path: discover, measure, continue.',trajectoryPanelHtml()+discoveryPathHtml(),[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
-    {label:'PULSE',primary:true,onClick:()=>{location.href='/pulse/'}}
+    {label:'PULSE',onClick:()=>{location.href='/pulse/'}},
+    {label:locale==='fr'?'VOIR LES ACCÈS':'VIEW ACCESS',primary:true,onClick:showWorldAccess}
   ]);
 }
 journeyHud.addEventListener('click',showJourneyPanel);
@@ -6778,6 +6828,7 @@ worldMenuClose.addEventListener('click',closeWorldMenu);
 resultsToggle?.addEventListener('click',showHealthOverview);
 campusToggle?.addEventListener('click',showCampusMap);
 journeyToggle?.addEventListener('click',()=>{closeWorldMenu();showJourneyPanel()});
+membershipToggle?.addEventListener('click',showWorldAccess);
 cameraToggle.addEventListener('click',toggleCamera);
 guideToggle.addEventListener('click',toggleGuide);
 controlsToggle.addEventListener('click',()=>{closeWorldMenu();showControlsPanel()});
@@ -6802,7 +6853,9 @@ function applyLocale(){
   if(introAuthNote)introAuthNote.textContent=c.introAuthNote;
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
-  $('#world-menu-copy').textContent=locale==='fr'?'Votre santé, votre progression et le campus KŌMØ au même endroit.':'Your health, progress and the KŌMØ campus in one place.';
+  $('#world-menu-copy').textContent=personalTrajectory
+    ?(locale==='fr'?'Votre prochaine action, vos résultats et votre prochain checkpoint au même endroit.':'Your next action, results and next checkpoint in one place.')
+    :(locale==='fr'?'Découvrez World librement. Votre trajectoire personnelle s’active après un bilan KŌMØ.':'Explore World freely. Your personal trajectory activates after a KŌMØ assessment.');
   const controlHints=document.querySelectorAll('.world-menu-controls span');
   if(controlHints.length>=6){
     controlHints[0].innerHTML='<kbd>'+keybinds.forward.map(keyLabel).join('/')+'</kbd> MOVE';
@@ -7222,7 +7275,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.6.0-desktop-hq',
+  version:'8.7.0-commerce-layer',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),

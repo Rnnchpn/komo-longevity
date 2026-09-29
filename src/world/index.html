@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#18271f" />
-  <meta name="komo-world-version" content="8.6.0-desktop-hq" />
+  <meta name="komo-world-version" content="8.7.0-commerce-layer" />
   <meta name="color-scheme" content="dark" />
   <title>KŌMØ World · Longevity in Motion</title>
   <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
-  <link rel="stylesheet" href="./world-v1.css?v=8.6.0-desktop-hq" />
+  <link rel="stylesheet" href="./world-v1.css?v=8.7.0-commerce-layer" />
   <link rel="modulepreload" href="./vendor/three.module.js" />
 </head>
 <body>
@@ -124,8 +124,8 @@
   <aside id="world-menu" class="world-menu world-command-center" aria-hidden="true">
     <div class="world-menu-head">
       <div class="world-menu-brandblock">
-        <span>KŌMØ WORLD · COMMAND CENTER</span>
-        <strong>My World</strong>
+        <span>KŌMØ WORLD</span>
+        <strong>My KŌMØ</strong>
       </div>
       <div class="world-menu-live"><i></i><span>LIVE</span></div>
       <button id="world-menu-close" type="button" aria-label="Fermer le menu">×</button>
@@ -140,19 +140,19 @@
       <i class="world-menu-context-mark">K</i>
     </section>
 
-    <p id="world-menu-copy">Votre santé, le campus, la marina et les expériences retreat KŌMØ réunis dans un seul monde.</p>
+    <p id="world-menu-copy">Comprendre où vous en êtes, savoir quoi faire maintenant et garder le prochain point KŌMØ en vue.</p>
 
     <section class="world-menu-summary" aria-label="Résumé personnel">
-      <div class="summary-score"><span>MOTION SCORE</span><strong id="menu-motion">84<small>/100</small></strong><em>Movement today</em></div>
-      <div><span>MOTION AGE</span><strong id="menu-age">39</strong><em>Functional trajectory</em></div>
-      <div><span>TRAJECTORY</span><strong id="journey-menu-level">—</strong><small id="journey-menu-xp">PULSE</small><em>Understand · act · follow</em></div>
+      <div class="summary-score"><span>VOTRE RÉFÉRENCE</span><strong id="menu-motion">84<small>/100</small></strong><em>Motion Score</em></div>
+      <div><span>MOTION AGE</span><strong id="menu-age">39</strong><em>Repère fonctionnel</em></div>
+      <div><span>PROCHAIN POINT</span><strong id="journey-menu-level">—</strong><small id="journey-menu-xp">PULSE</small><em>Trajectoire KŌMØ</em></div>
     </section>
 
     <div class="world-menu-primary">
-      <button id="results-toggle" type="button" data-screen="results"><i>◉</i><span><b>RÉSULTATS</b><small>Motion · domaines · évolution</small></span><em>›</em></button>
-      <button id="campus-toggle" type="button" data-screen="campus"><i>⌖</i><span><b>CAMPUS</b><small>Explorer toutes les zones</small></span><em>›</em></button>
-      <button id="journey-toggle" type="button" data-screen="journey"><i>↗</i><span><b>TRAJECTOIRE</b><small>Priorité · action · prochain point</small></span><em>›</em></button>
-      <button id="challenges-toggle" type="button" data-screen="challenges"><i>◇</i><span><b>CHALLENGES</b><small>Défis du jour · engagement</small></span><em>›</em></button>
+      <button id="journey-toggle" class="primary-trajectory" type="button" data-screen="journey"><i>↗</i><span><b>MA TRAJECTOIRE</b><small>Priorité · action · prochain point</small></span><em>›</em></button>
+      <button id="results-toggle" type="button" data-screen="results"><i>◉</i><span><b>MES RÉSULTATS</b><small>Motion · domaines · évolution</small></span><em>›</em></button>
+      <button id="membership-toggle" class="primary-membership" type="button" data-screen="membership"><i>＋</i><span><b>CONTINUER AVEC KŌMØ</b><small>World+ · suivi continu · 24 €/mois</small></span><em>›</em></button>
+      <button id="campus-toggle" type="button" data-screen="campus"><i>⌖</i><span><b>EXPLORER WORLD</b><small>Campus · Marina · Retreat</small></span><em>›</em></button>
     </div>
 
     <section class="world-menu-campus-mini world-destinations">
@@ -190,6 +190,7 @@
         <button id="guide-toggle" type="button">GUIDE · ON</button>
         <button id="quality-toggle" type="button">AUTO QUALITY</button>
         <button id="controls-toggle" type="button">CONTROLS</button>
+        <button id="challenges-toggle" type="button">CHALLENGES</button>
         <button id="reset-position" type="button">RESET POSITION</button>
       </div>
       <div class="world-menu-controls">
@@ -249,7 +250,7 @@
     },8000);
   </script>
   <script type="module">
-    import('./world-v1.js?v=8.6.0-desktop-hq')
+    import('./world-v1.js?v=8.7.0-commerce-layer')
       .catch(function(err){window.__KOMO_REPORT_BOOT_ERROR('module-import',err)});
   </script>
 </body>
