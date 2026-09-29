@@ -96,12 +96,14 @@ pro=replaceRequired(
   "const S={client:null,role:'member',ready:false,roleLoading:false,active:'planning'};let actionToken=0;",
   'Professional role lifecycle state'
 );
-pro=replaceRequired(
-  pro,
-  "async function loadRole(){const c=sb(),rt=window.KomoRuntime;const {data:{session}}=await c.auth.getSession();if(!session?.user)return;if(rt?.roleResolved)S.role=rt.role||'member';else{const r=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';if(rt){rt.role=S.role;rt.roleResolved=true;rt.session=session;rt.userId=session.user.id}}S.ready=true;ensureProNav();applyMode()}",
-  "async function loadRole(){if(S.roleLoading)return;S.roleLoading=true;try{const c=sb(),rt=window.KomoRuntime;const {data:{session}}=await c.auth.getSession();if(!session?.user)return;if(rt?.roleResolved)S.role=rt.role||'member';else{const r=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';if(rt){rt.role=S.role;rt.roleResolved=true;rt.session=session;rt.userId=session.user.id}}S.ready=true;ensureProNav();applyMode()}finally{S.roleLoading=false}}",
-  'Professional serialized role loading'
-);
+if(!pro.includes('if(S.roleLoading)return')){
+  pro=replaceRequired(
+    pro,
+    "async function loadRole(){const c=sb(),rt=window.KomoRuntime;const {data:{session}}=await c.auth.getSession();if(!session?.user)return;if(rt?.roleResolved)S.role=rt.role||'member';else{const r=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';if(rt){rt.role=S.role;rt.roleResolved=true;rt.session=session;rt.userId=session.user.id}}S.ready=true;ensureProNav();applyMode()}",
+    "async function loadRole(){if(S.roleLoading)return;S.roleLoading=true;try{const c=sb(),rt=window.KomoRuntime;const {data:{session}}=await c.auth.getSession();if(!session?.user)return;if(rt?.roleResolved)S.role=rt.role||'member';else{const r=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';if(rt){rt.role=S.role;rt.roleResolved=true;rt.session=session;rt.userId=session.user.id}}S.ready=true;ensureProNav();applyMode()}finally{S.roleLoading=false}}",
+    'Professional serialized role loading'
+  );
+}
 pro=pro.replace("setTimeout(()=>loadRole().catch(console.error),1000);",'');
 await write('pro',pro);
 
