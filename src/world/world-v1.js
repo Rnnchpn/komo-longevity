@@ -3950,14 +3950,17 @@ const twinDomainLayout=[
   ['endurance',0,1.4,5.1,'ENDURANCE']
 ];
 twinDomainLayout.forEach(([id,x,y,z,label],i)=>{
-  const g=new THREE.Group();g.position.set(x,0,z);twinLab.add(g);
-  box(g,2.25,.16,1.55,MAT.travertine,0,.08,0);
-  const well=box(g,.52,2.45,.52,MAT.blackened,0,1.34,0);
-  const fillMat=new THREE.MeshBasicMaterial({color:i%2?0xb8cbbf:0xd1b57c,transparent:true,opacity:.72});
-  const fill=box(g,.38,1.0,.38,fillMat,0,.62,.29,{cast:false,receive:false});fill.userData.dynamic=true;
-  const ring=mesh(g,new THREE.RingGeometry(.48,.54,28),new THREE.MeshBasicMaterial({color:0xd3b77f,transparent:true,opacity:.26,depthWrite:false}),0,.19,.30,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;ring.userData.dynamic=true;
-  plaque(g,label,'LIVE DOMAIN',1.95,.54,0,2.94,.32,{dark:true,titleSize:48});
-  twinDomainVisuals[id]={group:g,fill,ring,label};
+  const g=new THREE.Group();g.position.set(x,0,z);g.name='KOMO_TWIN_DOMAIN_'+id.toUpperCase()+'_V82';twinLab.add(g);
+  // Low, gallery-like measurement plinth: no screen, no sign, no kiosk silhouette.
+  box(g,2.18,.12,1.54,MAT.travertine,0,.06,0,{cast:true});
+  box(g,1.84,.035,1.18,i%2?roomCoolStrip:roomWarmStrip,0,.145,0,{cast:false,receive:false});
+  const fillMat=new THREE.MeshBasicMaterial({color:i%2?0xb8cbbf:0xd1b57c,transparent:true,opacity:.66});
+  const fill=box(g,.30,.54,.30,fillMat,0,.43,.02,{cast:false,receive:false});fill.userData.dynamic=true;
+  const ring=mesh(g,new THREE.RingGeometry(.48,.57,34),new THREE.MeshBasicMaterial({color:i%2?0xb8cbbf:0xd3b77f,transparent:true,opacity:.22,depthWrite:false}),0,.18,.02,{cast:false,receive:false});
+  ring.rotation.x=-Math.PI/2;ring.userData.dynamic=true;
+  const orbit=mesh(g,new THREE.TorusGeometry(.68,.020,8,34),new THREE.MeshBasicMaterial({color:0xc9d8ce,transparent:true,opacity:.13,depthWrite:false}),0,.62,.02,{cast:false,receive:false});
+  orbit.rotation.x=Math.PI/2;orbit.userData.dynamic=true;
+  twinDomainVisuals[id]={group:g,fill,ring,orbit,label};
 });
 const twinTimeRail=new THREE.Group();twinTimeRail.name='KOMO_TWIN_TIMELINE_V26';twinRoom.add(twinTimeRail);
 [-4.8,-2.4,0,2.4,4.8].forEach((x,i)=>{
@@ -4399,7 +4402,13 @@ const twinPremium=new THREE.Group();twinPremium.name='KOMO_TWIN_PREMIUM_V56';twi
 [-7.2,-3.6,0,3.6,7.2].forEach((x,i)=>ceilingRail(twinPremium,x,-2.0,2.55,i%2?roomCoolStrip:roomWarmStrip));
 box(twinPremium,18.2,4.85,.045,roomMirror,0,2.80,-10.55,{cast:false,receive:false});
 box(twinPremium,18.4,.055,.08,MAT.brass,0,5.28,-10.46,{cast:false,receive:false});
-[-7.2,-3.6,3.6,7.2].forEach((x,i)=>dataTotem(twinPremium,x,4.8,i<2?'TODAY':'TREND',i%2?'MOTION AGE':'MOTION SCORE',i%2?roomCoolStrip:roomWarmStrip));
+// V8.2: remove tall data totems. Longitudinal information lives in the personal UI, while the room stays architectural.
+[-6.4,-2.15,2.15,6.4].forEach((x,i)=>{
+  const p=new THREE.Group();p.position.set(x,0,4.8);p.name='KOMO_TWIN_LONGITUDINAL_PLINTH_V82_'+i;twinPremium.add(p);
+  box(p,2.25,.14,1.15,MAT.travertine,0,.07,0,{cast:true});
+  box(p,1.82,.030,.82,i%2?roomCoolStrip:roomWarmStrip,0,.16,0,{cast:false,receive:false});
+  const r=mesh(p,new THREE.RingGeometry(.28,.34,30),i%2?roomCoolStrip:roomWarmStrip,0,.19,0,{cast:false,receive:false});r.rotation.x=-Math.PI/2;
+});
 luxeBench(twinPremium,-6.3,7.0,3.0,0);luxeBench(twinPremium,6.3,7.0,3.0,0);
 [-8.55,8.55].forEach(side=>{
   box(twinPremium,.08,4.15,12.2,MAT.brass,side,2.55,-1.5,{cast:false,receive:false});
@@ -4612,7 +4621,7 @@ const twinInteractions=[
 ].map(it=>({
   ...it,
   title:()=>twinDomainName(it.domain),
-  desc:()=>locale==='fr'?'Explorer ce domaine du Twin':'Explore this Twin domain',
+  desc:()=>personalTrajectory&&trajectoryTwinDomainId()===it.domain?(locale==='fr'?'Votre priorité actuelle · ouvrir':'Your current priority · open'):(locale==='fr'?'Explorer ce domaine du Twin':'Explore this Twin domain'),
   action:()=>showTwinDomain(it.domain)
 }));
 const rehabInteractions=[
@@ -4694,6 +4703,9 @@ function trajectoryFocusKey(t=personalTrajectory){
   if(/endurance|cardio|capacit|marche|gait/.test(s))return 'cardio';
   if(/recovery|récup|fatigue|sleep|sommeil|pain|douleur/.test(s))return 'recovery';
   return null;
+}
+function trajectoryTwinDomainId(t=personalTrajectory){
+  return {strength:'muscle',mobility:'mobility',balance:'balance',cardio:'endurance',recovery:'posture'}[trajectoryFocusKey(t)]||null;
 }
 function trajectoryLibraryTopics(){
   const key=trajectoryFocusKey();
@@ -5484,32 +5496,36 @@ function twinDomainName(id){
   return names[id]?.[locale]||id;
 }
 function updateBiomechTwin(){
-  const d=current().domains||{};
+  const personal=personalTrajectory,sourceDomains=personal?.domains||current().domains||{},focus=trajectoryTwinDomainId(personal);
   Object.entries(biomechZones).forEach(([id,parts])=>{
-    const value=THREE.MathUtils.clamp(Number(d[id])||0,0,100);
-    const active=twinActiveDomain==='all'||twinActiveDomain===id;
+    const raw=sourceDomains?.[id],hasValue=Number.isFinite(Number(raw)),value=hasValue?THREE.MathUtils.clamp(Number(raw),0,100):55;
+    const focusActive=!!personal&&focus===id;
+    const active=twinActiveDomain==='all'||twinActiveDomain===id||focusActive;
     parts.forEach((part,i)=>{
       part.visible=active||twinActiveDomain==='all';
       if(part.material){
-        part.userData.baseOpacity=(active?.26:.07)+(value/100)*(active?.48:.10);
+        part.userData.baseOpacity=focusActive?.72:((active?.22:.05)+(hasValue?value/100:0)*(active?.40:.08));
         part.material.opacity=part.userData.baseOpacity;
         if(part.material.color){
           const color=value>=75?0xbdd3c4:value>=55?0xd5b878:0xc68f6a;
           part.material.color.setHex(color);
         }
       }
-      part.scale.setScalar(active?1:0.92);
+      part.scale.setScalar(focusActive?1.10:(active?1:0.92));
     });
   });
 }
 function updateTwinVisuals(){
-  const d=current().domains||{};
+  const personal=personalTrajectory,sourceDomains=personal?.domains||current().domains||{},focus=trajectoryTwinDomainId(personal);
   Object.entries(twinDomainVisuals).forEach(([id,v])=>{
-    const value=THREE.MathUtils.clamp(Number(d[id])||0,0,100);
-    const h=.18+value/100*2.05;
-    v.fill.scale.y=h;v.fill.position.y=.34+h/2;
-    v.fill.material.opacity=.46+value/100*.34;
-    v.ring.material.opacity=.12+value/100*.30;
+    const raw=sourceDomains?.[id],hasValue=Number.isFinite(Number(raw)),value=hasValue?THREE.MathUtils.clamp(Number(raw),0,100):42;
+    const h=hasValue?(.14+value/100*.82):.24;
+    v.fill.scale.y=h;v.fill.position.y=.18+h/2;
+    v.fill.material.opacity=hasValue?(.34+value/100*.30):.14;
+    const isFocus=!!personal&&focus===id;
+    v.ring.material.opacity=isFocus?.62:(hasValue?.18:.08);
+    if(v.orbit){v.orbit.material.opacity=isFocus?.34:.10;v.orbit.scale.setScalar(isFocus?1.12:1)}
+    v.group.scale.setScalar(isFocus?1.045:1);
   });
   updateBiomechTwin();
 }
@@ -5897,7 +5913,7 @@ function bindTimeline(){
 }
 function showTwin(){
   twinActiveDomain='all';updateTwinVisuals();
-  openPanel('FUNCTIONAL TWIN',locale==='fr'?'Votre corps à travers le temps.':'Your body across time.',twinHtml(),[
+  openPanel('FUNCTIONAL TWIN',personalTrajectory?(locale==='fr'?'Votre corps, replacé dans votre trajectoire.':'Your body, placed in your trajectory.'):(locale==='fr'?'Votre corps à travers le temps.':'Your body across time.'),twinHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
     {label:locale==='fr'?'EXPLORER LA SALLE':'EXPLORE ROOM',primary:true,onClick:closePanel},
     {label:copy[locale].openRehab,onClick:enterRehab}
@@ -7091,7 +7107,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.1.0-hall-trajectory',
+  version:'8.2.0-twin-trajectory',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
