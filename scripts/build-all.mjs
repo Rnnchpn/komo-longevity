@@ -87,6 +87,7 @@ const scripts = [
   'scripts/build-command-v1.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
+  // Wire map assets before the CSS bundle is generated.
   'scripts/pulse-booking-directory-map-v1.mjs',
   'scripts/pulse-stability-audit-v1.mjs',
   'scripts/pulse-v12-qa.mjs',
@@ -106,6 +107,8 @@ const scripts = [
   'scripts/pulse-flicker-stability-qa-v1.mjs',
   'scripts/pulse-navigation-freeze-v1.mjs',
   'scripts/pulse-navigation-freeze-qa-v1.mjs',
+  // The navigation freeze rewrites booking markup; restore the reserved map shell after it.
+  'scripts/pulse-booking-directory-map-v1.mjs',
   'scripts/pulse-booking-directory-map-qa-v1.mjs',
   'scripts/homepage-product-stepup-v1.mjs',
   'scripts/homepage-hero-image-v2.mjs',

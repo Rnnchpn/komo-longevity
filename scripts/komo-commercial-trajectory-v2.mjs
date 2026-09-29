@@ -23,7 +23,7 @@ const css = `
 .kt-pricebar{display:flex;flex-wrap:wrap;gap:9px;margin-top:25px}.kt-pricebar span{padding:8px 11px;border-radius:999px;background:rgba(255,255,255,.58);border:1px solid rgba(16,21,18,.1);font-size:10px;color:#4e5c53}
 .kt-section{padding:clamp(72px,9vw,122px) 0;border-top:1px solid var(--kt-line)}.kt-section--warm{background:var(--kt-warm)}.kt-section--sage{background:#e8efe9}.kt-section--dark{background:var(--kt-dark);color:#f7f5ef}.kt-section--dark .kt-ey{color:#9db5a6}.kt-section--dark .kt-copy,.kt-section--dark .kt-lead{color:rgba(247,245,239,.67)}
 .kt-head{display:grid;grid-template-columns:minmax(0,.9fr) minmax(320px,.7fr);gap:40px;align-items:end}.kt-head .kt-copy{margin:0;max-width:590px}
-.kt-doors{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:48px}.kt-door{min-height:360px;padding:27px;border:1px solid var(--kt-line);background:rgba(255,255,255,.62);border-radius:24px;display:flex;flex-direction:column}.kt-door--clinical{background:#122019;color:#f7f5ef}.kt-door--clinical .kt-copy,.kt-door--clinical .kt-kicker{color:rgba(247,245,239,.65)}.kt-kicker{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#68756c}.kt-door .kt-h3{margin-top:55px}.kt-door .kt-copy{max-width:34ch}.kt-door-foot{margin-top:auto;padding-top:26px;display:flex;justify-content:space-between;gap:12px;align-items:end}.kt-door-foot b{font-size:13px}.kt-door-foot a{text-decoration:none;font-size:12px;font-weight:700}
+.kt-doors{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:38px}.kt-door{min-height:330px;padding:23px 20px;border:1px solid var(--kt-line);background:rgba(255,255,255,.72);border-radius:23px;display:flex;flex-direction:column}.kt-door--clinical{background:#122019;color:#f7f5ef}.kt-door--clinical .kt-copy,.kt-door--clinical .kt-kicker{color:rgba(247,245,239,.65)}.kt-kicker{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#68756c}.kt-door .kt-h3{margin-top:42px}.kt-door .kt-copy{max-width:34ch}.kt-door-foot{margin-top:auto;padding-top:26px;display:flex;justify-content:space-between;gap:12px;align-items:end}.kt-door-foot b{font-size:13px}.kt-door-foot a{text-decoration:none;font-size:12px;font-weight:700}.kt-account-link{font-weight:800!important;color:#283b30!important}.kt-account-panel{display:flex;align-items:center;justify-content:space-between;gap:24px;margin-top:28px;padding:21px 24px;border:1px solid var(--kt-line);border-radius:20px;background:#fff}.kt-account-panel p{margin:0;color:var(--kt-muted);font-size:13px;line-height:1.6}.kt-account-panel a{flex:none;text-decoration:none;font-size:12px;font-weight:800}
 .kt-journey{display:grid;grid-template-columns:repeat(6,1fr);margin-top:50px;border-top:1px solid var(--kt-line);border-bottom:1px solid var(--kt-line)}.kt-step{min-height:220px;padding:21px 18px 24px;border-right:1px solid var(--kt-line)}.kt-step:last-child{border-right:0}.kt-step span{font-size:9px;font-weight:800;color:#718176}.kt-step h3{margin:54px 0 12px;font:400 27px/1 "Iowan Old Style",Baskerville,Georgia,serif;letter-spacing:-.04em}.kt-step p{margin:0;font-size:11px;line-height:1.55;color:#687169}
 .kt-expgrid{display:grid;grid-template-columns:1.2fr .8fr .8fr;grid-template-rows:auto auto;gap:14px;margin-top:48px}.kt-exp{min-height:250px;border-radius:26px;padding:28px;background:#fff;border:1px solid var(--kt-line);display:flex;flex-direction:column}.kt-exp--yacht{grid-row:1/3;min-height:520px;background:linear-gradient(180deg,#183249,#0f2536);color:#fff}.kt-exp--yacht .kt-copy,.kt-exp--yacht .kt-kicker{color:rgba(255,255,255,.68)}.kt-exp .kt-h3{margin-top:42px}.kt-exp .kt-copy{max-width:38ch}.kt-exp a{margin-top:auto;padding-top:24px;text-decoration:none;font-size:12px;font-weight:700}
 .kt-clinical-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(38px,7vw,90px);align-items:start}.kt-clinical-panel{padding:27px;border-radius:24px;background:rgba(255,255,255,.7);border:1px solid var(--kt-line)}.kt-list{list-style:none;padding:0;margin:10px 0 0}.kt-list li{display:grid;grid-template-columns:18px 1fr;gap:10px;padding:14px 0;border-top:1px solid var(--kt-line);font-size:12px;line-height:1.5}.kt-list li:first-child{border-top:0}.kt-list li:before{content:'•';color:#6f8979}
@@ -31,8 +31,9 @@ const css = `
 .kt-pro-grid{display:grid;grid-template-columns:.86fr 1.14fr;gap:clamp(42px,8vw,100px);align-items:start}.kt-pipeline{border-top:1px solid rgba(255,255,255,.2);margin-top:10px}.kt-pipe{display:grid;grid-template-columns:48px 1fr;gap:15px;padding:20px 0;border-bottom:1px solid rgba(255,255,255,.12)}.kt-pipe b{font-size:10px;color:#9db5a6}.kt-pipe h3{margin:0 0 7px;font:400 25px/1 "Iowan Old Style",Baskerville,Georgia,serif}.kt-pipe p{margin:0;font-size:11px;line-height:1.55;color:rgba(255,255,255,.59)}
 .kt-final{padding:clamp(76px,10vw,132px) 0;background:#d8e6dd}.kt-final-grid{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end}.kt-final .kt-h2{max-width:820px}
 .kt-pagehero{padding:clamp(78px,9vw,120px) 0 64px;background:linear-gradient(145deg,#f8f6ef,#e8efe9)}.kt-pagehero .kt-lead{max-width:760px}.kt-pagebody{padding:70px 0 110px;background:var(--kt-paper)}.kt-pagegrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:42px}.kt-pagecard{padding:28px;border-radius:24px;background:#fff;border:1px solid var(--kt-line)}.kt-pagecard .kt-h3{margin-top:36px}.kt-note{margin-top:20px;padding:16px 18px;border-left:2px solid #6f8979;background:#edf2ee;font-size:11px;line-height:1.6;color:#59645c}.kt-mini-flow{display:grid;grid-template-columns:repeat(5,1fr);margin-top:42px;border-top:1px solid var(--kt-line);border-bottom:1px solid var(--kt-line)}.kt-mini-flow div{padding:20px 16px;border-right:1px solid var(--kt-line)}.kt-mini-flow div:last-child{border-right:0}.kt-mini-flow b{font-size:9px;color:#6b8073}.kt-mini-flow span{display:block;margin-top:28px;font:400 22px/1 "Iowan Old Style",Baskerville,Georgia,serif}
-@media(max-width:980px){.kt-hero-grid,.kt-head,.kt-clinical-grid,.kt-pro-grid,.kt-final-grid{grid-template-columns:1fr}.kt-doors{grid-template-columns:1fr}.kt-door{min-height:0}.kt-journey{grid-template-columns:repeat(3,1fr)}.kt-step:nth-child(3){border-right:0}.kt-expgrid{grid-template-columns:1fr 1fr}.kt-exp--yacht{grid-row:auto;grid-column:1/-1;min-height:360px}.kt-pagegrid{grid-template-columns:1fr}.kt-mini-flow{grid-template-columns:1fr}}
-@media(max-width:650px){.kt-shell{width:min(100% - 28px,1180px)}.kt-hero{padding-top:58px}.kt-title{font-size:clamp(44px,14vw,64px)}.kt-hero-card{padding:21px;border-radius:20px}.kt-journey{grid-template-columns:1fr}.kt-step,.kt-step:nth-child(3){min-height:0;border-right:0;border-bottom:1px solid var(--kt-line)}.kt-step:last-child{border-bottom:0}.kt-step h3{margin-top:26px}.kt-expgrid,.kt-continuity{grid-template-columns:1fr}.kt-exp--yacht{grid-column:auto;min-height:320px}.kt-exp{min-height:240px}.kt-final .kt-btns{margin-top:0}.kt-mini-flow div{border-right:0;border-bottom:1px solid var(--kt-line)}.kt-mini-flow div:last-child{border-bottom:0}}
+@media(max-width:1180px){.kt-doors{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:980px){.kt-hero-grid,.kt-head,.kt-clinical-grid,.kt-pro-grid,.kt-final-grid{grid-template-columns:1fr}.kt-doors{grid-template-columns:repeat(2,minmax(0,1fr))}.kt-door{min-height:0}.kt-journey{grid-template-columns:repeat(3,1fr)}.kt-step:nth-child(3){border-right:0}.kt-expgrid{grid-template-columns:1fr 1fr}.kt-exp--yacht{grid-row:auto;grid-column:1/-1;min-height:360px}.kt-pagegrid{grid-template-columns:1fr}.kt-mini-flow{grid-template-columns:1fr}}
+@media(max-width:650px){.kt-shell{width:min(100% - 28px,1180px)}.kt-hero{padding-top:58px}.kt-title{font-size:clamp(44px,14vw,64px)}.kt-hero-card{padding:21px;border-radius:20px}.kt-doors{grid-template-columns:1fr}.kt-journey{grid-template-columns:1fr}.kt-step,.kt-step:nth-child(3){min-height:0;border-right:0;border-bottom:1px solid var(--kt-line)}.kt-step:last-child{border-bottom:0}.kt-step h3{margin-top:26px}.kt-expgrid,.kt-continuity{grid-template-columns:1fr}.kt-exp--yacht{grid-column:auto;min-height:320px}.kt-exp{min-height:240px}.kt-account-panel{align-items:flex-start;flex-direction:column}.kt-final .kt-btns{margin-top:0}.kt-mini-flow div{border-right:0;border-bottom:1px solid var(--kt-line)}.kt-mini-flow div:last-child{border-bottom:0}}
 </style>`;
 
 const localeData = {
@@ -42,20 +43,24 @@ const localeData = {
     clinicalFile: 'fr/clinical/index.html',
     partnersFile: 'fr/partners/index.html',
     pulseFile: 'fr/pulse/index.html',
-    paths: { assessment:'/fr/bilan/', clinical:'/fr/clinical/', experience:'/fr/experience/', partners:'/fr/partners/', contact:'/fr/contact/?intent=consultation', pulse:'https://pulse.komolongevity.com/', world:'/world/', method:'/fr/methode/' },
+    paths: { assessment:'/fr/bilan/', clinical:'/fr/clinical/', experience:'/fr/experience/', partners:'/fr/partners/', contact:'/fr/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'https://pulse.komolongevity.com/#documents', world:'/world/', method:'/fr/methode/', offers:'#komo-offers' },
     metaTitle:'KŌMØ — Assessment, Clinical & Experiences | Longévité en mouvement',
     metaDescription:'KŌMØ propose une évaluation fonctionnelle complète, un parcours Clinical lorsqu’une lecture médicale est indiquée, puis un accompagnement continu à domicile, en hôtel, à bord ou en retreat.',
     heroEy:'KŌMØ · LONGÉVITÉ EN MOUVEMENT',
     heroTitle:'Comprendre votre corps.<br><em>Construire la suite.</em>',
     heroLead:'KŌMØ réunit évaluation du mouvement, restitution claire, lecture clinique lorsqu’elle est indiquée et accompagnement dans le temps. Une seule trajectoire, quel que soit le lieu où vous la vivez.',
-    heroPrimary:'Demander une consultation',
-    heroSecondary:'Découvrir KŌMØ Clinical',
+    heroPrimary:'Réserver une expérience',
+    heroSecondary:'Découvrir KŌMØ',
+    loginLabel:'Se connecter',
+    singleAccount:'Un seul compte KŌMØ vous donne accès à Pulse et, lorsque votre accompagnement le prévoit, à Clinical, Life et World. Vos données et vos étapes restent réunies dans votre parcours.',
     prices:['Assessment · 300 € tarif de référence','Clinical · 500 € tarif de référence','Yachting · du bilan individuel au programme privé'],
     flow:[['01','Avant','Profil & objectifs'],['02','Assessment','Mouvement & muscle'],['03','Résultats','Score & priorités'],['04','Équipe','Professionnels adaptés'],['05','Pulse','Suivi & réévaluation']],
     doors:[
-      ['ASSESSMENT','KŌMØ Assessment','Votre porte d’entrée universelle : mouvement, marche, équilibre, force, mobilité, coordination et analyse musculaire selon le protocole.','300 €','Découvrir l’Assessment','assessment'],
-      ['CLINICAL','KŌMØ Clinical','Quand une lecture médicale est utile : consultation, examen, interprétation et examens complémentaires uniquement lorsqu’ils sont indiqués.','500 €','Découvrir Clinical','clinical'],
-      ['EXPERIENCES','KŌMØ Experiences','La même expertise délivrée dans votre environnement : à domicile, en hôtel, à bord d’un yacht ou pendant un retreat.','À la carte','Voir les expériences','experience']
+      ['MOUVEMENT','KŌMØ Motion','Un bilan fonctionnel structuré du mouvement, de la marche, de l’équilibre et du muscle, suivi d’une restitution claire.','Dès 300 €','Découvrir Motion','assessment'],
+      ['MÉDICAL','KŌMØ Clinical','Une consultation et une interprétation médicale lorsque la situation le justifie, dans un cadre professionnel adapté.','Dès 500 €','Découvrir Clinical','clinical'],
+      ['À BORD','KŌMØ Yachting','Une expérience privée à bord, d’un bilan individuel à un programme organisé pendant ou après le voyage.','Sur demande','Découvrir Yachting','experience'],
+      ['HOSPITALITÉ','KŌMØ Hospitality','Des consultations et journées KŌMØ organisées dans les hôtels, clubs et lieux partenaires.','Sur demande','Pour les lieux partenaires','partners'],
+      ['SÉJOURS','KŌMØ Retreats','Un format collectif ou résidentiel qui relie mouvement, récupération, échanges et continuité après le séjour.','Sur demande','Découvrir les Retreats','experience']
     ],
     journeyEy:'UNE EXPÉRIENCE COMPLÈTE',
     journeyTitle:'Le bilan est le début.<br><em>Pas la fin.</em>',
@@ -88,7 +93,7 @@ const localeData = {
     finalTitle:'Votre première expérience KŌMØ peut commencer<br><em>par une seule consultation.</em>',
     finalCopy:'Particulier, hôtel, yacht, clinique ou club : nous commençons par le besoin réel, puis nous construisons le niveau d’accompagnement adapté.',
     finalCta:'Demander une consultation',
-    nav:[['Assessment','assessment'],['Clinical','clinical'],['Experiences','experience'],['Professionnels','partners'],['Pulse','pulse']]
+    nav:[['Motion','assessment'],['Clinical','clinical'],['Yachting','experience'],['Hospitality','partners'],['Retreats','experience'],['Se connecter','pulse']]
   },
   en: {
     homeFiles: ['en/index.html'],
@@ -96,20 +101,24 @@ const localeData = {
     clinicalFile: 'clinical/index.html',
     partnersFile: 'partners/index.html',
     pulseFile: 'pulse/index.html',
-    paths: { assessment:'/assessment/', clinical:'/clinical/', experience:'/experience/', partners:'/partners/', contact:'/contact/?intent=consultation', pulse:'https://pulse.komolongevity.com/', world:'/world/', method:'/method/' },
+    paths: { assessment:'/assessment/', clinical:'/clinical/', experience:'/experience/', partners:'/partners/', contact:'/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'https://pulse.komolongevity.com/#documents', world:'/world/', method:'/method/', offers:'#komo-offers' },
     metaTitle:'KŌMØ — Assessment, Clinical & Experiences | Longevity in Motion',
     metaDescription:'KŌMØ combines a complete functional assessment, a Clinical pathway when medical interpretation is indicated, and longitudinal support at home, in hotels, onboard or on retreat.',
     heroEy:'KŌMØ · LONGEVITY IN MOTION',
     heroTitle:'Understand your body.<br><em>Build what comes next.</em>',
     heroLead:'KŌMØ brings together movement assessment, clear results, clinical interpretation when indicated and ongoing support. One trajectory, wherever you choose to experience it.',
-    heroPrimary:'Request a consultation',
-    heroSecondary:'Discover KŌMØ Clinical',
+    heroPrimary:'Book an experience',
+    heroSecondary:'Discover KŌMØ',
+    loginLabel:'Sign in',
+    singleAccount:'One KŌMØ account connects you to Pulse and, when your pathway calls for them, Clinical, Life and World. Your information and next steps stay together.',
     prices:['Assessment · €300 reference price','Clinical · €500 reference price','Yachting · individual assessment to private programme'],
     flow:[['01','Before','Profile & goals'],['02','Assessment','Movement & muscle'],['03','Results','Score & priorities'],['04','Team','Right professionals'],['05','Pulse','Follow-up & reassessment']],
     doors:[
-      ['ASSESSMENT','KŌMØ Assessment','The universal entry point: movement, gait, balance, strength, mobility, coordination and muscle analysis according to protocol.','€300','Discover Assessment','assessment'],
-      ['CLINICAL','KŌMØ Clinical','When medical interpretation is useful: consultation, examination and additional investigations only when independently indicated.','€500','Discover Clinical','clinical'],
-      ['EXPERIENCES','KŌMØ Experiences','The same expertise delivered around you: at home, in hotels, onboard a yacht or during a retreat.','Tailored','Explore experiences','experience']
+      ['MOVEMENT','KŌMØ Motion','A structured functional review of movement, gait, balance and muscle, followed by a clear debrief.','From €300','Discover Motion','assessment'],
+      ['MEDICAL','KŌMØ Clinical','Medical consultation and interpretation when your situation calls for it, within an appropriate professional setting.','From €500','Discover Clinical','clinical'],
+      ['ON BOARD','KŌMØ Yachting','A private onboard experience, from an individual assessment to a programme during or after the voyage.','By request','Explore Yachting','experience'],
+      ['HOSPITALITY','KŌMØ Hospitality','KŌMØ consultations and service days delivered in hotels, clubs and partner settings.','By request','For partner venues','partners'],
+      ['STAYS','KŌMØ Retreats','A group or residential format connecting movement, recovery, conversation and continuity after the stay.','By request','Explore Retreats','experience']
     ],
     journeyEy:'A COMPLETE EXPERIENCE',
     journeyTitle:'The assessment is the beginning.<br><em>Not the end.</em>',
@@ -142,7 +151,7 @@ const localeData = {
     finalTitle:'Your first KŌMØ experience can begin<br><em>with one consultation.</em>',
     finalCopy:'Individual, hotel, yacht, clinic or club: we start with the real need and build the right level of support around it.',
     finalCta:'Request a consultation',
-    nav:[['Assessment','assessment'],['Clinical','clinical'],['Experiences','experience'],['Professionals','partners'],['Pulse','pulse']]
+    nav:[['Motion','assessment'],['Clinical','clinical'],['Yachting','experience'],['Hospitality','partners'],['Retreats','experience'],['Sign in','pulse']]
   },
   es: {
     homeFiles: ['es/index.html'],
@@ -150,20 +159,24 @@ const localeData = {
     clinicalFile: 'es/clinical/index.html',
     partnersFile: 'es/partners/index.html',
     pulseFile: 'es/pulse/index.html',
-    paths: { assessment:'/es/evaluacion/', clinical:'/es/clinical/', experience:'/es/experience/', partners:'/es/partners/', contact:'/es/contact/?intent=consultation', pulse:'https://pulse.komolongevity.com/', world:'/world/', method:'/es/metodo/' },
+    paths: { assessment:'/es/evaluacion/', clinical:'/es/clinical/', experience:'/es/experience/', partners:'/es/partners/', contact:'/es/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'https://pulse.komolongevity.com/#documents', world:'/world/', method:'/es/metodo/', offers:'#komo-offers' },
     metaTitle:'KŌMØ — Assessment, Clinical & Experiences | Longevidad en movimiento',
     metaDescription:'KŌMØ combina evaluación funcional completa, un recorrido Clinical cuando se necesita interpretación médica y seguimiento continuo en casa, hoteles, a bordo o en retreats.',
     heroEy:'KŌMØ · LONGEVIDAD EN MOVIMIENTO',
     heroTitle:'Entender tu cuerpo.<br><em>Construir lo que sigue.</em>',
     heroLead:'KŌMØ reúne evaluación del movimiento, resultados claros, interpretación clínica cuando está indicada y acompañamiento en el tiempo. Una trayectoria, donde quieras vivirla.',
-    heroPrimary:'Solicitar una consulta',
-    heroSecondary:'Descubrir KŌMØ Clinical',
+    heroPrimary:'Reservar una experiencia',
+    heroSecondary:'Descubrir KŌMØ',
+    loginLabel:'Acceder',
+    singleAccount:'Una sola cuenta KŌMØ te da acceso a Pulse y, cuando tu recorrido lo requiere, a Clinical, Life y World. Tus datos y próximos pasos permanecen reunidos.',
     prices:['Assessment · 300 € precio de referencia','Clinical · 500 € precio de referencia','Yachting · evaluación individual a programa privado'],
     flow:[['01','Antes','Perfil y objetivos'],['02','Assessment','Movimiento y músculo'],['03','Resultados','Score y prioridades'],['04','Equipo','Profesionales adecuados'],['05','Pulse','Seguimiento y reevaluación']],
     doors:[
-      ['ASSESSMENT','KŌMØ Assessment','La puerta de entrada universal: movimiento, marcha, equilibrio, fuerza, movilidad, coordinación y análisis muscular según protocolo.','300 €','Descubrir Assessment','assessment'],
-      ['CLINICAL','KŌMØ Clinical','Cuando hace falta lectura médica: consulta, exploración y pruebas complementarias solo cuando están indicadas.','500 €','Descubrir Clinical','clinical'],
-      ['EXPERIENCES','KŌMØ Experiences','La misma experiencia en tu entorno: casa, hotel, yacht o retreat.','A medida','Ver experiencias','experience']
+      ['MOVIMIENTO','KŌMØ Motion','Una evaluación funcional estructurada del movimiento, la marcha, el equilibrio y el músculo, seguida de una explicación clara.','Desde 300 €','Descubrir Motion','assessment'],
+      ['MÉDICO','KŌMØ Clinical','Consulta e interpretación médica cuando la situación lo requiere, en un marco profesional adecuado.','Desde 500 €','Descubrir Clinical','clinical'],
+      ['A BORDO','KŌMØ Yachting','Una experiencia privada a bordo, desde una evaluación individual a un programa durante o después del viaje.','A petición','Descubrir Yachting','experience'],
+      ['HOSPITALIDAD','KŌMØ Hospitality','Consultas y jornadas KŌMØ en hoteles, clubs y espacios asociados.','A petición','Para espacios asociados','partners'],
+      ['ESTANCIAS','KŌMØ Retreats','Un formato colectivo o residencial que une movimiento, recuperación, conversación y continuidad.','A petición','Descubrir Retreats','experience']
     ],
     journeyEy:'UNA EXPERIENCIA COMPLETA',
     journeyTitle:'La evaluación es el principio.<br><em>No el final.</em>',
@@ -196,7 +209,7 @@ const localeData = {
     finalTitle:'Tu primera experiencia KŌMØ puede empezar<br><em>con una consulta.</em>',
     finalCopy:'Persona, hotel, yacht, clínica o club: empezamos por la necesidad real y construimos el nivel de acompañamiento adecuado.',
     finalCta:'Solicitar una consulta',
-    nav:[['Assessment','assessment'],['Clinical','clinical'],['Experiences','experience'],['Profesionales','partners'],['Pulse','pulse']]
+    nav:[['Motion','assessment'],['Clinical','clinical'],['Yachting','experience'],['Hospitality','partners'],['Retreats','experience'],['Acceder','pulse']]
   }
 };
 
@@ -210,13 +223,13 @@ function meta(html, title, description){
 }
 function url(c,key){ return c.paths[key] || key; }
 function nav(c){
-  const links = c.nav.map(([label,key])=>`<a href="${url(c,key)}">${label}</a>`).join('');
+  const links = c.nav.map(([label,key])=>`<a${key==='pulse'?' class="kt-account-link"':''} href="${url(c,key)}">${label}</a>`).join('');
   return links;
 }
 function patchNav(html,c){
   html = html.replace(/<nav class="kp-nav">[\s\S]*?<\/nav>/, `<nav class="kp-nav">${nav(c)}</nav>`);
   html = html.replace(/<details class="kp-menu">[\s\S]*?<\/details>/, `<details class="kp-menu"><summary>Menu</summary><nav>${nav(c)}</nav></details>`);
-  html = html.replace(/<a class="kp-mini" href="[^"]*">[\s\S]*?<\/a>/, `<a class="kp-mini" href="${c.paths.contact}">${c.heroPrimary} →</a>`);
+  html = html.replace(/<a class="kp-mini" href="[^"]*">[\s\S]*?<\/a>/, `<a class="kp-mini" href="${c.paths.booking}">${c.heroPrimary} →</a>`);
   return html;
 }
 function mainReplace(html, body){
@@ -232,8 +245,8 @@ function home(c){
   const clinicalList = c.clinicalItems.map(x=>`<li>${x}</li>`).join('');
   const pipe = c.pipeline.map(([n,t,p])=>`<div class="kt-pipe"><b>${n}</b><div><h3>${t}</h3><p>${p}</p></div></div>`).join('');
   return `
-<section class="kt-hero"><div class="kt-shell kt-hero-grid"><div><p class="kt-ey">${c.heroEy}</p><h1 class="kt-title">${c.heroTitle}</h1><p class="kt-lead">${c.heroLead}</p><div class="kt-btns"><a class="kt-btn kt-btn--dark" href="${c.paths.contact}">${c.heroPrimary}</a><a class="kt-btn kt-btn--light" href="${c.paths.clinical}">${c.heroSecondary}</a></div><div class="kt-pricebar">${c.prices.map(x=>`<span>${x}</span>`).join('')}</div></div><aside class="kt-hero-card"><strong>KŌMØ JOURNEY</strong><div class="kt-flow">${flow}</div></aside></div></section>
-<section class="kt-section"><div class="kt-shell"><div class="kt-head"><div><p class="kt-ey">ONE KŌMØ · THREE ENTRANCES</p><h2 class="kt-h2">Assessment.<br>Clinical. <em>Experiences.</em></h2></div><p class="kt-copy">${c.heroLead}</p></div><div class="kt-doors">${doors}</div></div></section>
+<section class="kt-hero"><div class="kt-shell kt-hero-grid"><div><p class="kt-ey">${c.heroEy}</p><h1 class="kt-title">${c.heroTitle}</h1><p class="kt-lead">${c.heroLead}</p><div class="kt-btns"><a class="kt-btn kt-btn--dark" href="${c.paths.booking}">${c.heroPrimary}</a><a class="kt-btn kt-btn--light" href="${c.paths.offers}">${c.heroSecondary}</a></div><div class="kt-pricebar">${c.prices.map(x=>`<span>${x}</span>`).join('')}</div></div><aside class="kt-hero-card"><strong>KŌMØ JOURNEY</strong><div class="kt-flow">${flow}</div></aside></div></section>
+<section class="kt-section" id="komo-offers"><div class="kt-shell"><div class="kt-head"><div><p class="kt-ey">ONE KŌMØ · FIVE WAYS IN</p><h2 class="kt-h2">Motion. Clinical.<br><em>Yachting, Hospitality, Retreats.</em></h2></div><p class="kt-copy">${c.heroLead}</p></div><div class="kt-doors">${doors}</div><div class="kt-account-panel"><p>${c.singleAccount}</p><a href="${c.paths.pulse}">${c.loginLabel} · KŌMØ Pulse →</a></div></div></section>
 <section class="kt-section kt-section--warm"><div class="kt-shell"><div class="kt-head"><div><p class="kt-ey">${c.journeyEy}</p><h2 class="kt-h2">${c.journeyTitle}</h2></div><p class="kt-copy">${c.journeyLead}</p></div><div class="kt-journey">${steps}</div></div></section>
 <section class="kt-section"><div class="kt-shell"><div class="kt-head"><div><p class="kt-ey">${c.expEy}</p><h2 class="kt-h2">${c.expTitle}</h2></div><p class="kt-copy">${c.expLead}</p></div><div class="kt-expgrid">${exps}</div></div></section>
 <section class="kt-section kt-section--sage"><div class="kt-shell kt-clinical-grid"><div><p class="kt-ey">${c.clinicalEy}</p><h2 class="kt-h2">${c.clinicalTitle}</h2><p class="kt-lead">${c.clinicalLead}</p><p class="kt-note">${c.clinicalNote}</p><div class="kt-btns"><a class="kt-btn kt-btn--dark" href="${c.paths.clinical}">${c.heroSecondary}</a></div></div><div class="kt-clinical-panel"><ul class="kt-list">${clinicalList}</ul></div></div></section>
