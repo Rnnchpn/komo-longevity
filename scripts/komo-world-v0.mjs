@@ -159,7 +159,7 @@ const checks=[
   ['V6.4 hero trees present',runtime.includes('function heroTreeV64')&&runtime.includes('KOMO_HERO_TREE_V64')&&runtime.includes('heroTreeSpecsV64')],
   ['V7 premium avatar framing present',runtime.includes("let thirdPersonDistance=5.35")&&runtime.includes("g.name='KOMO_PLAYER_AVATAR_V71_OVERSIZED'")&&runtime.includes("const desiredFov=50+2.4*runAmount")],
   ['V6.5 arrival visual presence present',runtime.includes("'MOTION HOUSE','MEASURE · MOVE'")&&runtime.includes("'LONGEVITY LAB','SCIENCE · LIVE'")&&runtime.includes("waterMirrorV64(-10.6,13.5,2.4,9.6)")],
-  ['V7.2.1 populated LOD present',runtime.includes("npc.visible=allowed&&sameLevel&&dist<46")&&runtime.includes("banner.visible=wp.distanceTo(camera.position)<96")],
+  ['V8.6 populated LOD scales on desktop',runtime.includes("npc.visible=allowed&&sameLevel&&dist<(desktopRenderHQ()?60:46)")&&runtime.includes("banner.visible=wp.distanceTo(camera.position)<96")],
   ['V6.8 compact Riviera masterplan present',runtime.includes('KOMO_RIVIERA_MASTERPLAN_V68')&&runtime.includes('KOMO_MARINA_V68')&&runtime.includes('KOMO_RETREAT_VILLA_V68')],
   ['V6.8 marina reads as yachting destination',runtime.includes("yachtV68(marinaV68,81.0,65.5,27")&&runtime.includes("marinaV68.name='KOMO_MARINA_V68'")&&runtime.includes('function inMarinaZone')],
   ['V6.8 retreat villa program present',runtime.includes("'KŌMØ RETREAT VILLA','PRIVATE LONGEVITY EXPERIENCE'")&&runtime.includes("'LONGEVITY TABLE','NUTRITION · CONVERSATION'")&&runtime.includes("'SKIN + NAD','LONGEVITY'")],
@@ -172,7 +172,7 @@ const checks=[
   ['V6.9 same camera framing across devices',runtime.includes('new THREE.PerspectiveCamera(54')&&runtime.includes('const desiredFov=50+2.4*runAmount')&&runtime.includes('let thirdPersonDistance=5.35')],
   ['V6.9 same campus geometry across devices',!runtime.includes('const heroTreeSpecsV64=lowPower?')&&runtime.includes('const shrubCountV64=44')&&runtime.includes("campusPavilionV64(-17.8,14.0,7.8,8.8,'MOTION HOUSE'")],
   ['V6.9 same estate composition across devices',runtime.includes("yachtV68(marinaV68,79.5,81.2,21,Math.PI/2,'RIVIERA')")&&!runtime.includes("if(!lowPower)yachtV68(marinaV68,79.5,81.2,21")&&runtime.includes('].forEach(v=>oliveTreeV68(villaDetailV68,...v))')],
-  ['V6.9 structural visibility parity',runtime.includes('M.marinaDetail.visible=!emergencyPerformance;')&&runtime.includes('M.villaDetail.visible=!emergencyPerformance;')&&runtime.includes('tree.visible=wp.distanceTo(camera.position)<(hero?130:96)')],
+  ['V8.6 structural visibility preserves mobile and expands desktop',runtime.includes('M.marinaDetail.visible=!emergencyPerformance;')&&runtime.includes('M.villaDetail.visible=!emergencyPerformance;')&&runtime.includes("tree.visible=wp.distanceTo(camera.position)<(hero?(desktopRenderHQ()?160:130):(desktopRenderHQ()?126:96))")],
   ['V6.4 landscape instancing present',runtime.includes('KOMO_CYPRESS_CROWNS_INST_V64')&&runtime.includes('KOMO_PINE_CROWNS_INST_V64')&&runtime.includes('KOMO_LANDSCAPE_SHRUBS_INST_V64')],
   ['V6.4 premium pavilions present',runtime.includes("'MOVEMENT','MEASURE · TRAIN · MOVE'")&&runtime.includes("'LONGEVITY','SCIENCE · TRAJECTORY'")&&runtime.includes("'COMMUNITY LOUNGE','MEET · CONNECT · RECOVER'")&&runtime.includes("'RECOVERY HOUSE','REST · RESET · RESTORE'")],
   ['V6.4 water mirrors present',runtime.includes('function waterMirrorV64')&&runtime.includes('waterMirrorV64(-24.6,45.0,5.4,24.0)')&&runtime.includes('waterMirrorV64(0,89.2,18.0,7.2)')],
@@ -181,7 +181,7 @@ const checks=[
   ['V6.4 moving campus NPCs present',runtime.includes("label:'Iris'")&&runtime.includes("label:'Louis'")&&runtime.includes("label:'Eva'")&&runtime.indexOf("label:'Iris'")>runtime.indexOf("const npcRoot=new THREE.Group()")],
   ['V6.4 living animation present',runtime.includes('living.waterfallsV64?.length')&&runtime.includes('w.texture.offset.y=-(t*.045')],
   ['V6.9 campus parity performance budget present',runtime.includes("living.livingCampusV64.visible=!emergencyPerformance")&&runtime.includes("campusCrowdV64.visible=!emergencyPerformance")&&runtime.includes("living.livingCampusV64.visible=false")],
-  ['V6.9 hero tree LOD parity present',runtime.includes("tree.name==='KOMO_HERO_TREE_V64'")&&runtime.includes("(hero?130:96)")],
+  ['V8.6 hero tree desktop LOD present',runtime.includes("tree.name==='KOMO_HERO_TREE_V64'")&&runtime.includes("(hero?(desktopRenderHQ()?160:130):(desktopRenderHQ()?126:96))")],
 
 
 
