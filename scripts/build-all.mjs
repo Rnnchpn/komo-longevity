@@ -223,6 +223,7 @@ const scripts = [
   'scripts/komo-commercial-trajectory-v2.mjs',
   'scripts/komo-zoi-world-v1.mjs',
   'scripts/komo-yachting-v1.mjs',
+  'scripts/komo-motion-conversion-v1.mjs',
   'scripts/komo-public-editorial-qa-v1.mjs',
   // Absolute last production pass: fixed Pulse viewport + unified visual language.
   'scripts/pulse-editorial-fixed-frame-v1.mjs'
