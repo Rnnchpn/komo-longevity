@@ -7,17 +7,17 @@ const locales={
   fr:{
     home:'index.html',motion:'fr/motion/index.html',contact:'/fr/contact/?intent=motion',clinical:'/fr/clinical/',
     heroEy:'KŌMØ · BILAN DU MOUVEMENT',
-    heroTitle:'Comprendre comment votre corps bouge aujourd’hui',
-    heroLead:'KŌMØ évalue votre marche, votre équilibre, votre force, votre mobilité et votre activité musculaire. Questionnaires, tests fonctionnels et capteurs sont réunis dans un même bilan, puis expliqués simplement.',
+    heroTitle:'Un bilan pour comprendre votre mobilité et savoir quoi améliorer',
+    heroLead:'KŌMØ évalue votre marche, votre équilibre, votre force, votre mobilité et votre activité musculaire. Vous repartez avec un point de référence, trois priorités et un plan clair.',
     primary:'Réserver mon bilan',secondary:'Voir le déroulé',
-    quick:[['6','capteurs'],['119','marqueurs musculaires analysés'],['3','tests fonctionnels'],['1','questionnaire locomoteur']],
-    whyEy:'POURQUOI LE FAIRE ?',whyTitle:'Un bilan utile même quand on ne sait pas exactement quoi regarder',
-    whyLead:'Le bilan crée un point de référence. Il permet de mieux comprendre votre façon de bouger aujourd’hui et de suivre son évolution dans le temps.',
+    quick:[['6','capteurs'],['119','indicateurs de l’analyse musculaire'],['3','tests fonctionnels'],['1','questionnaire locomoteur']],
+    whyEy:'CE QUE LE BILAN VOUS APPORTE',whyTitle:'Des résultats qui débouchent sur des décisions simples',
+    whyLead:'Le bilan transforme les mesures en informations utiles : où vous en êtes, ce qui compte le plus maintenant et quoi faire ensuite.',
     why:[
-      ['Faire le point','Vous voulez savoir où vous en êtes en mobilité, équilibre et force.'],
-      ['Comprendre','Vous sentez que votre mouvement ou vos capacités ont changé et souhaitez les objectiver.'],
-      ['Préserver','Vous voulez agir tôt sur les capacités fonctionnelles importantes pour rester actif.'],
-      ['Suivre','Vous souhaitez mesurer l’effet d’un entraînement, d’un programme ou d’une évolution dans le temps.']
+      ['Votre point de référence','Une lecture fonctionnelle de votre mobilité au moment du bilan.'],
+      ['Vos 3 priorités','Les éléments les plus utiles à travailler, surveiller ou réévaluer.'],
+      ['Votre plan','Les prochaines actions proposées selon votre profil et vos objectifs.'],
+      ['Votre suivi','Vos résultats restent accessibles dans Pulse pour pouvoir les comparer plus tard.']
     ],
     measureEy:'CE QUE NOUS MESURONS',measureTitle:'Cinq dimensions faciles à comprendre',
     measure:[
@@ -53,13 +53,13 @@ const locales={
   en:{
     home:'en/index.html',motion:'motion/index.html',contact:'/contact/?intent=motion',clinical:'/clinical/',
     heroEy:'KŌMØ · MOVEMENT ASSESSMENT',
-    heroTitle:'Understand how your body moves today',
-    heroLead:'KŌMØ assesses gait, balance, strength, mobility and muscle activity. Questionnaires, functional tests and sensors are combined in one assessment and then explained clearly.',
+    heroTitle:'An assessment to understand your mobility and what to improve',
+    heroLead:'KŌMØ assesses gait, balance, strength, mobility and muscle activity. You leave with a baseline, three priorities and a clear plan.',
     primary:'Book my assessment',secondary:'See how it works',
-    quick:[['6','sensors'],['119','muscle markers analysed'],['3','functional tests'],['1','locomotor questionnaire']],
-    whyEy:'WHY DO IT?',whyTitle:'A useful baseline even when you are not sure what to look at',
-    whyLead:'The assessment creates a reference point. It helps you understand how you move today and follow change over time.',
-    why:[['Take stock','See where you stand in mobility, balance and strength.'],['Understand','Objectify changes you have noticed in movement or performance.'],['Preserve','Act early on functional capacities that matter for staying active.'],['Track','Measure change after training, a programme or over time.']],
+    quick:[['6','sensors'],['119','muscle-analysis indicators'],['3','functional tests'],['1','locomotor questionnaire']],
+    whyEy:'WHAT THE ASSESSMENT GIVES YOU',whyTitle:'Results that lead to simple decisions',
+    whyLead:'The assessment turns measurements into useful information: where you are, what matters most now and what to do next.',
+    why:[['Your baseline','A functional view of your mobility at the time of assessment.'],['Your 3 priorities','The areas most useful to work on, monitor or reassess.'],['Your plan','Suggested next actions based on your profile and goals.'],['Your follow-up','Results remain in Pulse so they can be compared over time.']],
     measureEy:'WHAT WE MEASURE',measureTitle:'Five dimensions that are easy to understand',
     measure:[['Gait','How you move from place to place.'],['Balance','How you stabilise yourself.'],['Strength','How you produce useful effort.'],['Mobility','How your joints and body move.'],['Muscles','How selected muscles activate during measured tasks.']],
     apptEy:'YOUR APPOINTMENT',apptTitle:'The assessment, step by step',
@@ -73,13 +73,13 @@ const locales={
   es:{
     home:'es/index.html',motion:'es/motion/index.html',contact:'/es/contact/?intent=motion',clinical:'/es/clinical/',
     heroEy:'KŌMØ · EVALUACIÓN DEL MOVIMIENTO',
-    heroTitle:'Comprender cómo se mueve tu cuerpo hoy',
-    heroLead:'KŌMØ evalúa marcha, equilibrio, fuerza, movilidad y actividad muscular. Cuestionarios, pruebas funcionales y sensores se reúnen en una misma evaluación y después se explican de forma sencilla.',
+    heroTitle:'Una evaluación para comprender tu movilidad y saber qué mejorar',
+    heroLead:'KŌMØ evalúa marcha, equilibrio, fuerza, movilidad y actividad muscular. Sales con un punto de referencia, tres prioridades y un plan claro.',
     primary:'Reservar mi evaluación',secondary:'Ver cómo funciona',
-    quick:[['6','sensores'],['119','marcadores musculares analizados'],['3','pruebas funcionales'],['1','cuestionario locomotor']],
-    whyEy:'¿POR QUÉ HACERLO?',whyTitle:'Un punto de referencia útil incluso si no sabes exactamente qué mirar',
-    whyLead:'La evaluación crea una referencia. Permite comprender mejor cómo te mueves hoy y seguir tu evolución en el tiempo.',
-    why:[['Hacer balance','Saber dónde estás en movilidad, equilibrio y fuerza.'],['Comprender','Objetivar cambios que notas en movimiento o capacidades.'],['Preservar','Actuar pronto sobre capacidades funcionales importantes para seguir activo.'],['Seguir','Medir cambios después de entrenamiento, un programa o con el tiempo.']],
+    quick:[['6','sensores'],['119','indicadores del análisis muscular'],['3','pruebas funcionales'],['1','cuestionario locomotor']],
+    whyEy:'QUÉ TE APORTA LA EVALUACIÓN',whyTitle:'Resultados que llevan a decisiones sencillas',
+    whyLead:'La evaluación transforma las medidas en información útil: dónde estás, qué importa más ahora y qué hacer después.',
+    why:[['Tu referencia','Una lectura funcional de tu movilidad en el momento de la evaluación.'],['Tus 3 prioridades','Los puntos más útiles para trabajar, vigilar o reevaluar.'],['Tu plan','Siguientes acciones propuestas según tu perfil y objetivos.'],['Tu seguimiento','Los resultados permanecen en Pulse para compararlos con el tiempo.']],
     measureEy:'QUÉ MEDIMOS',measureTitle:'Cinco dimensiones fáciles de entender',
     measure:[['Marcha','Cómo te desplazas.'],['Equilibrio','Cómo te estabilizas.'],['Fuerza','Cómo produces un esfuerzo útil.'],['Movilidad','Cómo se mueven tus articulaciones y tu cuerpo.'],['Músculos','Cómo se activan determinados músculos durante las tareas medidas.']],
     apptEy:'TU CITA',apptTitle:'La evaluación, paso a paso',
@@ -132,17 +132,29 @@ async function patchMotion(c){
 async function patchHome(c){
  const fp=join(site,c.home);if(!(await exists(fp)))return;
  let html=style(await readFile(fp,'utf8'));
- const mainStart=html.indexOf('<main');
- const firstAfterEarly=html.indexOf('<section class="kt-z-section kt-z-section--sand">',mainStart);
- if(mainStart<0||firstAfterEarly<0)return;
- const openEnd=html.indexOf('>',mainStart)+1;
- const early=hero(c)+quick(c)+why(c)+measure(c)+appointment(c)+receive(c)+cta(c);
- html=html.slice(0,openEnd)+early+html.slice(firstAfterEarly);
- // Remove the redundant older orientation block so Motion/Clinical/Signature are not explained twice.
- html=html.replace(/<section class="kt-z-section" id="komo-orientation">[\s\S]*?<\/section>/,'');
- // Remove product/case imagery from the old method block, keeping only the scientific-method content.
- html=html.replace(/<div class="kt-z-method-image"><img[^>]*komo-case-gait[^>]*><\/div>/,'');
- html=html.replace(/<div class="kt-shell kt-z-method">/g,'<div class="kt-shell">');
+ const lang=c===locales.fr?'fr':c===locales.es?'es':'en';
+ const science=lang==='fr'?'/fr/science/':lang==='es'?'/es/science/':'/science/';
+ const partners=lang==='fr'?'/fr/partners/':lang==='es'?'/es/partners/':'/partners/';
+ const yachting=lang==='fr'?'/fr/yachting/':lang==='es'?'/es/yachting/':'/en/yachting/';
+ const world=lang==='fr'?'/fr/world/':lang==='es'?'/es/world/':'/en/world/';
+ const experience=lang==='fr'?'/fr/experience/':lang==='es'?'/es/experience/':'/experience/';
+ const methodTitle=lang==='fr'?'Une méthode structurée de l’évaluation au suivi':lang==='es'?'Un método estructurado desde la evaluación hasta el seguimiento':'A structured method from assessment to follow-up';
+ const nextTitle=lang==='fr'?'Et ensuite, seulement si vous en avez besoin':lang==='es'?'Después, solo si lo necesitas':'Then, only if you need it';
+ const nextCopy=lang==='fr'?'Motion reste le point de départ fonctionnel. Les autres services répondent à des besoins différents.':lang==='es'?'Motion sigue siendo el punto de partida funcional. Los demás servicios responden a necesidades diferentes.':'Motion remains the functional starting point. Other services answer different needs.';
+ const clinicalCopy=lang==='fr'?'Consultation et interprétation médicale lorsqu’elles sont indiquées.':lang==='es'?'Consulta e interpretación médica cuando están indicadas.':'Medical consultation and interpretation when indicated.';
+ const yachtCopy=lang==='fr'?'KŌMØ Anywhere à bord : évaluation privée, restitution et suivi pour owners, guests et partenaires yacht.':lang==='es'?'KŌMØ Anywhere a bordo: evaluación privada, restitución y seguimiento para owners, guests y partners.':'KŌMØ Anywhere onboard: private assessment, debrief and follow-up for owners, guests and yacht partners.';
+ const pulseCopy=lang==='fr'?'KŌMØ PULSE conserve vos résultats, vos priorités, votre plan et vos réévaluations.':lang==='es'?'KŌMØ PULSE conserva resultados, prioridades, plan y reevaluaciones.':'KŌMØ PULSE keeps your results, priorities, plan and reassessments.';
+ const worldCopy=lang==='fr'?'KŌMØ WORLD · OPTIONNEL prolonge le programme avec des contenus et modules interactifs. La 3D n’est jamais obligatoire.':lang==='es'?'KŌMØ WORLD · OPCIONAL prolonga el programa con contenidos y módulos interactivos. 3D nunca es obligatoria.':'KŌMØ WORLD · OPTIONAL extends the programme with content and interactive modules. 3D is never required.';
+ const faqTitle=lang==='fr'?'Avant de réserver':lang==='es'?'Antes de reservar':'Before booking';
+ const faq1=lang==='fr'?['Motion est-il médical ?','Non. Motion est une évaluation fonctionnelle non diagnostique. Si une consultation médicale est nécessaire, KŌMØ Clinical constitue un parcours séparé.']:lang==='es'?['¿Motion es médico?','No. Motion es una evaluación funcional no diagnóstica. Si hace falta consulta médica, KŌMØ Clinical es un recorrido separado.']:['Is Motion medical?','No. Motion is a non-diagnostic functional assessment. If medical consultation is needed, KŌMØ Clinical is a separate pathway.'];
+ const faq2=lang==='fr'?['Que vais-je recevoir ?','Une synthèse de votre profil, trois priorités, Motion Score et Motion Age présentés avec leurs limites, un plan et votre suivi dans Pulse.']:lang==='es'?['¿Qué voy a recibir?','Una síntesis de tu perfil, tres prioridades, Motion Score y Motion Age presentados con sus límites, un plan y seguimiento en Pulse.']:['What will I receive?','A profile summary, three priorities, Motion Score and Motion Age presented with their limitations, a plan and follow-up in Pulse.'];
+ const faq3=lang==='fr'?['Dois-je être sportif ?','Non. Le bilan porte sur des capacités fonctionnelles utiles à la vie quotidienne, quel que soit votre niveau d’activité.']:lang==='es'?['¿Tengo que ser deportista?','No. La evaluación analiza capacidades funcionales útiles en la vida diaria, sea cual sea tu nivel de actividad.']:['Do I need to be athletic?','No. The assessment focuses on functional capacities relevant to everyday life, whatever your activity level.'];
+ const ecosystem=`<section class="kt-z-section kt-z-section--sand"><div class="kt-shell"><div class="kt-z-heading"><div><p class="kt-ey">KŌMØ</p><h2 class="kt-h2">${nextTitle}</h2></div><p class="kt-copy">${nextCopy}</p></div><div class="kt-z-continuity"><article><strong>KŌMØ Clinical</strong><h3>Clinical</h3><p class="kt-copy">${clinicalCopy}</p><div class="kt-btns"><a class="kt-btn kt-btn--light" href="${c.clinical}">Clinical →</a></div></article><article><strong>KŌMØ Yachting · KŌMØ Anywhere</strong><h3>Yachting</h3><p class="kt-copy">${yachtCopy}</p><div class="kt-btns"><a class="kt-btn kt-btn--light" href="${yachting}">Yachting →</a><a class="kt-btn kt-btn--light" href="${experience}">Anywhere →</a></div></article></div><div class="kt-z-continuity"><article><strong>KŌMØ PULSE</strong><h3>Pulse</h3><p class="kt-copy">${pulseCopy}</p><div class="kt-btns"><a class="kt-btn kt-btn--light" href="https://pulse.komolongevity.com/">Pulse →</a></div></article><article><strong>KŌMØ WORLD · ${lang==='fr'?'OPTIONNEL':lang==='es'?'OPCIONAL':'OPTIONAL'}</strong><h3>World</h3><p class="kt-copy">${worldCopy}</p><div class="kt-btns"><a class="kt-btn kt-btn--light" href="${world}">World →</a></div></article></div><div class="kt-account-panel"><p><strong>${methodTitle}</strong><br>${lang==='fr'?'Questionnaires, tests fonctionnels et mesure instrumentée sont utilisés pour produire une restitution compréhensible et suivre l’évolution dans le temps.':lang==='es'?'Cuestionarios, pruebas funcionales y medición instrumentada se utilizan para producir una restitución comprensible y seguir la evolución en el tiempo.':'Questionnaires, functional tests and instrumented measurement are used to produce an understandable debrief and follow change over time.'}</p><a href="${science}">Science →</a></div></div></section>`;
+ const faq=`<section class="kt-z-section kt-z-section--sage"><div class="kt-shell kt-z-faq"><div><p class="kt-ey">FAQ</p><h2 class="kt-h2">${faqTitle}</h2></div><div>${[faq1,faq2,faq3].map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join('')}</div></div></section>`;
+ const pro=`<section class="kt-z-section kt-z-section--deep"><div class="kt-shell kt-pro-grid"><div><p class="kt-ey">${lang==='fr'?'POUR LES PROFESSIONNELS':lang==='es'?'PARA PROFESIONALES':'FOR PROFESSIONALS'}</p><h2 class="kt-h2">${lang==='fr'?'Déployer KŌMØ dans votre établissement':lang==='es'?'Implementar KŌMØ en tu establecimiento':'Bring KŌMØ into your organisation'}</h2><p class="kt-lead">${lang==='fr'?'KŌMØ peut d’abord intervenir avec son équipe et son matériel. La Case devient pertinente seulement lorsqu’un déploiement permanent est justifié.':lang==='es'?'KŌMØ puede intervenir primero con su equipo y material. La Case resulta pertinente solo cuando se justifica un despliegue permanente.':'KŌMØ can first operate with its own team and equipment. The Case becomes relevant only when permanent deployment is justified.'}</p><div class="kt-btns"><a class="kt-btn kt-btn--ghost" href="${partners}">${lang==='fr'?'Professionnels':lang==='es'?'Profesionales':'Professionals'} →</a></div></div></div></section>`;
+ const final=`<section class="kt-z-final"><div class="kt-shell kt-final-grid"><div><p class="kt-ey">KŌMØ MOTION</p><h2 class="kt-h2">${lang==='fr'?'Établir votre point de référence':lang==='es'?'Establecer tu punto de referencia':'Establish your baseline'}</h2><p class="kt-copy">${lang==='fr'?'Le premier bilan permet de savoir où vous en êtes aujourd’hui et de décider de la suite sur des données plus claires.':lang==='es'?'La primera evaluación permite saber dónde estás hoy y decidir el siguiente paso con datos más claros.':'A first assessment shows where you are today and helps decide what comes next using clearer data.'}</p></div><div class="kt-btns"><a class="kt-btn kt-btn--dark" href="${c.contact}">${c.primary}</a></div></div></section>`;
+ const newMain=`<main id="main" class="kt-home">${hero(c)}${quick(c)}${why(c)}${measure(c)}${appointment(c)}${cta(c)}${ecosystem}${faq}${pro}${final}</main>`;
+ html=html.replace(/<main(?:\s[^>]*)?>[\s\S]*?<\/main>/,newMain);
  await writeFile(fp,html,'utf8');
 }
 
