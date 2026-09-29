@@ -41,6 +41,7 @@ const localeData = {
     assessmentFile: 'fr/bilan/index.html',
     clinicalFile: 'fr/clinical/index.html',
     partnersFile: 'fr/partners/index.html',
+    pulseFile: 'fr/pulse/index.html',
     paths: { assessment:'/fr/bilan/', clinical:'/fr/clinical/', experience:'/fr/experience/', partners:'/fr/partners/', contact:'/fr/contact/?intent=consultation', pulse:'https://pulse.komolongevity.com/', world:'/world/', method:'/fr/methode/' },
     metaTitle:'KŌMØ — Assessment, Clinical & Experiences | Longévité en mouvement',
     metaDescription:'KŌMØ propose une évaluation fonctionnelle complète, un parcours Clinical lorsqu’une lecture médicale est indiquée, puis un accompagnement continu à domicile, en hôtel, à bord ou en retreat.',
@@ -94,6 +95,7 @@ const localeData = {
     assessmentFile: 'assessment/index.html',
     clinicalFile: 'clinical/index.html',
     partnersFile: 'partners/index.html',
+    pulseFile: 'pulse/index.html',
     paths: { assessment:'/assessment/', clinical:'/clinical/', experience:'/experience/', partners:'/partners/', contact:'/contact/?intent=consultation', pulse:'https://pulse.komolongevity.com/', world:'/world/', method:'/method/' },
     metaTitle:'KŌMØ — Assessment, Clinical & Experiences | Longevity in Motion',
     metaDescription:'KŌMØ combines a complete functional assessment, a Clinical pathway when medical interpretation is indicated, and longitudinal support at home, in hotels, onboard or on retreat.',
@@ -147,6 +149,7 @@ const localeData = {
     assessmentFile: 'es/evaluacion/index.html',
     clinicalFile: 'es/clinical/index.html',
     partnersFile: 'es/partners/index.html',
+    pulseFile: 'es/pulse/index.html',
     paths: { assessment:'/es/evaluacion/', clinical:'/es/clinical/', experience:'/es/experience/', partners:'/es/partners/', contact:'/es/contact/?intent=consultation', pulse:'https://pulse.komolongevity.com/', world:'/world/', method:'/es/metodo/' },
     metaTitle:'KŌMØ — Assessment, Clinical & Experiences | Longevidad en movimiento',
     metaDescription:'KŌMØ combina evaluación funcional completa, un recorrido Clinical cuando se necesita interpretación médica y seguimiento continuo en casa, hoteles, a bordo o en retreats.',
@@ -307,7 +310,8 @@ function partnersPage(c){
     ['Clinical','Medical and longevity centres building a structured locomotor offer.'],
     ['Fitness & performance','Assessment, progression and continuity with clear governance.']
   ];
-  return pageHero(c.proEy,title,lead,isFr?'Organiser un pilote':isEs?'Organizar un piloto':'Run a pilot',c.paths.contact,'Découvrir KŌMØ',c.paths.assessment)+`<section class="kt-pagebody"><div class="kt-shell"><div class="kt-mini-flow">${c.pipeline.map(([n,t])=>`<div><b>${n}</b><span>${t}</span></div>`).join('')}</div><div class="kt-pagegrid">${sectors.map(([t,p])=>`<article class="kt-pagecard"><span class="kt-kicker">KŌMØ</span><h2 class="kt-h3">${t}</h2><p class="kt-copy">${p}</p></article>`).join('')}</div><p class="kt-note">${isFr?'La KŌMØ Case devient une infrastructure de déploiement une fois l’usage démontré. Elle n’est plus la première chose que nous essayons de vendre.':isEs?'La KŌMØ Case se convierte en infraestructura cuando el uso ya está demostrado; deja de ser el primer producto a vender.':'The KŌMØ Case becomes deployment infrastructure once real use has been demonstrated. It is no longer the first thing we try to sell.'}</p></div></section>`;
+  const secondary=isFr?'Découvrir l’Assessment':isEs?'Descubrir Assessment':'Discover Assessment';
+  return pageHero(c.proEy,title,lead,isFr?'Organiser un pilote':isEs?'Organizar un piloto':'Run a pilot',c.paths.contact,secondary,c.paths.assessment)+`<section class="kt-pagebody"><div class="kt-shell"><div class="kt-mini-flow">${c.pipeline.map(([n,t])=>`<div><b>${n}</b><span>${t}</span></div>`).join('')}</div><div class="kt-pagegrid">${sectors.map(([t,p])=>`<article class="kt-pagecard"><span class="kt-kicker">KŌMØ</span><h2 class="kt-h3">${t}</h2><p class="kt-copy">${p}</p></article>`).join('')}</div><p class="kt-note">${isFr?'La KŌMØ Case devient une infrastructure de déploiement une fois l’usage démontré. Elle n’est plus la première chose que nous essayons de vendre.':isEs?'La KŌMØ Case se convierte en infraestructura cuando el uso ya está demostrado; deja de ser el primer producto a vender.':'The KŌMØ Case becomes deployment infrastructure once real use has been demonstrated. It is no longer the first thing we try to sell.'}</p></div></section>`;
 }
 function experiencePage(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
@@ -316,6 +320,44 @@ function experiencePage(c){
   const cards=c.experiences.map(([k,t,p,cta,key])=>`<article class="kt-pagecard"><span class="kt-kicker">${k}</span><h2 class="kt-h3">${t}</h2><p class="kt-copy">${p}</p><div class="kt-btns"><a class="kt-btn kt-btn--light" href="${url(c,key)}">${cta}</a></div></article>`).join('');
   return pageHero('KŌMØ EXPERIENCES',title,lead,c.heroPrimary,c.paths.contact,c.heroSecondary,c.paths.clinical)+`<section class="kt-pagebody"><div class="kt-shell"><div class="kt-pagegrid">${cards}</div><p class="kt-note">${c.clinicalNote}</p></div></section>`;
 }
+
+function pulsePage(c){
+  const isFr=c===localeData.fr,isEs=c===localeData.es;
+  const title=isFr?'Votre consultation continue<br><em>dans Pulse.</em>':isEs?'Tu consulta continúa<br><em>en Pulse.</em>':'Your consultation continues<br><em>in Pulse.</em>';
+  const lead=isFr?'Pulse est l’espace personnel KŌMØ après votre consultation : résultats, priorités, programme, professionnels, progression et prochaine réévaluation restent réunis dans une seule trajectoire.':isEs?'Pulse es el espacio personal KŌMØ después de tu consulta: resultados, prioridades, programa, profesionales, progreso y próxima reevaluación en una sola trayectoria.':'Pulse is your personal KŌMØ space after consultation: results, priorities, programme, professionals, progress and the next reassessment stay together in one trajectory.';
+  const cards=isFr?[
+    ['VOS RÉSULTATS','Comprendre','Retrouvez votre restitution, vos repères fonctionnels, votre Motion Score et les éléments expliqués pendant la consultation.'],
+    ['VOTRE PLAN','Agir','Les priorités et prochaines actions restent visibles, sans transformer Pulse en outil d’auto-diagnostic.'],
+    ['VOTRE ÉQUIPE','Être accompagné','Retrouvez les professionnels qui interviennent dans votre trajectoire et les prochains rendez-vous utiles.'],
+    ['VOTRE PROGRESSION','Réévaluer','Comparez les évaluations successives et mesurez ce qui évolue réellement dans le temps.']
+  ]:isEs?[
+    ['TUS RESULTADOS','Entender','Consulta tu restitución, referencias funcionales, Motion Score y los elementos explicados durante la consulta.'],
+    ['TU PLAN','Actuar','Las prioridades y siguientes acciones siguen visibles sin convertir Pulse en autodiagnóstico.'],
+    ['TU EQUIPO','Acompañamiento','Profesionales, próximos pasos y citas útiles reunidos en el mismo espacio.'],
+    ['TU PROGRESO','Reevaluar','Compara evaluaciones sucesivas y mide lo que realmente cambia con el tiempo.']
+  ]:[
+    ['YOUR RESULTS','Understand','Return to your debrief, functional references, Motion Score and the elements explained during the consultation.'],
+    ['YOUR PLAN','Act','Keep priorities and next actions visible without turning Pulse into a self-diagnosis tool.'],
+    ['YOUR TEAM','Be supported','Find the professionals involved in your trajectory and the next useful appointments.'],
+    ['YOUR PROGRESS','Reassess','Compare successive assessments and measure what actually changes over time.']
+  ];
+  const access=isFr?'Accéder à mon espace Pulse':isEs?'Acceder a mi espacio Pulse':'Open my Pulse space';
+  const consult=isFr?'Demander une consultation':isEs?'Solicitar una consulta':'Request a consultation';
+  const note=isFr?'Il n’existe plus de « test KŌMØ gratuit » comme porte d’entrée commerciale. Pulse prend sa valeur dans la continuité d’une vraie évaluation et de son accompagnement.':isEs?'El « test KŌMØ gratuito » ya no es una puerta de entrada comercial. Pulse cobra valor como continuidad de una evaluación real y su acompañamiento.':'The “free KŌMØ test” is no longer a commercial entry point. Pulse is valuable as the continuity layer after a real assessment and its follow-up.';
+  return pageHero('KŌMØ PULSE',title,lead,access,'https://pulse.komolongevity.com/',consult,c.paths.contact)+
+    `<section class="kt-pagebody"><div class="kt-shell"><div class="kt-pagegrid">${cards.map(([e,t,p])=>`<article class="kt-pagecard"><span class="kt-kicker">${e}</span><h2 class="kt-h3">${t}</h2><p class="kt-copy">${p}</p></article>`).join('')}</div><p class="kt-note">${note}</p></div></section>`;
+}
+function pageMeta(c,type){
+  const isFr=c===localeData.fr,isEs=c===localeData.es;
+  const map={
+    assessment: isFr?['KŌMØ Assessment — Évaluation fonctionnelle et trajectoire','Évaluation du mouvement, de la marche, de l’équilibre, de la force et du muscle, suivie d’une restitution et d’un plan d’action.']:isEs?['KŌMØ Assessment — Evaluación funcional y trayectoria','Evaluación de movimiento, marcha, equilibrio, fuerza y músculo, con restitución y plan de acción.']:['KŌMØ Assessment — Functional assessment and trajectory','Movement, gait, balance, strength and muscle assessment followed by a clear debrief and action plan.'],
+    clinical: isFr?['KŌMØ Clinical — Évaluation médicale de longévité locomotrice','KŌMØ Clinical associe évaluation fonctionnelle et consultation médicale lorsque l’indication le justifie, avec plan et suivi personnalisés.']:isEs?['KŌMØ Clinical — Evaluación médica de longevidad locomotora','KŌMØ Clinical combina evaluación funcional y consulta médica cuando está indicada, con plan y seguimiento personalizados.']:['KŌMØ Clinical — Medical locomotor longevity assessment','KŌMØ Clinical combines functional assessment with medical consultation when indicated, followed by a personalised plan and continuity.'],
+    partners: isFr?['KŌMØ pour les professionnels — Pilotes, consultations et déploiement','Hôtels, yachts, cliniques et clubs : commencez par un pilote KŌMØ opéré sur site, mesurez l’usage, puis déployez le modèle adapté.']:isEs?['KŌMØ para profesionales — Pilotos, consultas y despliegue','Hoteles, yachts, clínicas y clubs: empieza con un piloto KŌMØ operado in situ y despliega después el modelo adecuado.']:['KŌMØ for Professionals — Pilots, consultations and deployment','Hotels, yachts, clinics and clubs: start with an operated KŌMØ pilot, prove usage, then deploy the right recurring model.'],
+    experience: isFr?['KŌMØ Experiences — Yachting, Home, Hospitality & Retreats','Vivez l’expérience KŌMØ à bord, à domicile, en hôtel ou en retreat, avec la même exigence d’évaluation, de restitution et de suivi.']:isEs?['KŌMØ Experiences — Yachting, Home, Hospitality & Retreats','Vive KŌMØ a bordo, en casa, hotel o retreat con el mismo estándar de evaluación, restitución y seguimiento.']:['KŌMØ Experiences — Yachting, Home, Hospitality & Retreats','Experience KŌMØ onboard, at home, in hotels or on retreat with the same standard of assessment, debrief and follow-up.'],
+    pulse: isFr?['KŌMØ Pulse — Vos résultats, votre plan, votre progression','Après votre consultation KŌMØ, Pulse réunit résultats, priorités, programme, professionnels, progression et prochaine réévaluation.']:isEs?['KŌMØ Pulse — Resultados, plan y progreso','Después de tu consulta KŌMØ, Pulse reúne resultados, prioridades, programa, profesionales, progreso y próxima reevaluación.']:['KŌMØ Pulse — Results, plan and progress','After your KŌMØ consultation, Pulse brings together results, priorities, programme, professionals, progress and your next reassessment.']
+  };
+  return map[type];
+}
 async function exists(fp){try{await access(fp);return true}catch{return false}}
 async function patchExisting(relative,c,body,title,description){
   const fp=join(site,relative); if(!(await exists(fp))) return false;
@@ -323,21 +365,23 @@ async function patchExisting(relative,c,body,title,description){
 }
 async function ensureExperience(relative,c){
   const fp=join(site,relative);
-  if(await exists(fp)){return patchExisting(relative,c,experiencePage(c),c.metaTitle,c.metaDescription)}
+  if(await exists(fp)){const m=pageMeta(c,'experience');return patchExisting(relative,c,experiencePage(c),...m)}
   const source=join(site,c.homeFiles[0]);
   if(!(await exists(source))) return false;
   await mkdir(dirname(fp),{recursive:true});
-  let html=await readFile(source,'utf8'); html=meta(html,c.metaTitle,c.metaDescription); html=patchNav(html,c); html=mainReplace(html,experiencePage(c)); await writeFile(fp,html,'utf8'); return true;
+  const m=pageMeta(c,'experience'); let html=await readFile(source,'utf8'); html=meta(html,...m); html=patchNav(html,c); html=mainReplace(html,experiencePage(c)); await writeFile(fp,html,'utf8'); return true;
 }
 
 for(const c of Object.values(localeData)){
   for(const homeFile of c.homeFiles) await patchExisting(homeFile,c,home(c),c.metaTitle,c.metaDescription);
-  await patchExisting(c.assessmentFile,c,assessment(c),c.metaTitle,c.metaDescription);
-  await patchExisting(c.clinicalFile,c,clinicalPage(c),c.metaTitle,c.metaDescription);
-  await patchExisting(c.partnersFile,c,partnersPage(c),c.metaTitle,c.metaDescription);
+  const assessmentMeta=pageMeta(c,'assessment'),clinicalMeta=pageMeta(c,'clinical'),partnersMeta=pageMeta(c,'partners'),pulseMeta=pageMeta(c,'pulse');
+  await patchExisting(c.assessmentFile,c,assessment(c),...assessmentMeta);
+  await patchExisting(c.clinicalFile,c,clinicalPage(c),...clinicalMeta);
+  await patchExisting(c.partnersFile,c,partnersPage(c),...partnersMeta);
+  await patchExisting(c.pulseFile,c,pulsePage(c),...pulseMeta);
 }
 await ensureExperience('fr/experience/index.html',localeData.fr);
 await ensureExperience('es/experience/index.html',localeData.es);
-await patchExisting('experience/index.html',localeData.en,experiencePage(localeData.en),localeData.en.metaTitle,localeData.en.metaDescription);
+await patchExisting('experience/index.html',localeData.en,experiencePage(localeData.en),...pageMeta(localeData.en,'experience'));
 
 console.log('[komo-commercial-trajectory-v2] PASS · consultation-first, Clinical-first, experience-first commercial architecture applied; free-test entry removed from primary public journey.');
