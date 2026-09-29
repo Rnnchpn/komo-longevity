@@ -1842,3 +1842,8 @@ body.trajectory-connected .location-chip{border-color:rgba(147,191,160,.16)}
 /* V8.2 — Functional Twin as a body-reading space */
 body.trajectory-connected .twin-domain-list button.trajectory-focus{transform:translateY(-1px);box-shadow:0 12px 28px rgba(94,143,111,.08)}
 .trajectory-results .priority-card{border-color:rgba(144,189,157,.20)}
+
+
+/* V8.3 — Fitness as the action layer of the trajectory */
+.fitness-activity-grid button.recommended:before{content:"TRAJECTORY";display:block;margin-bottom:5px;font-size:6px;font-weight:850;letter-spacing:.13em;color:#b8d3c0}
+.trajectory-fitness-context{box-shadow:inset 0 0 0 1px rgba(144,189,157,.03)}
