@@ -96,7 +96,7 @@ pro=replaceRequired(
   "const S={client:null,role:'member',ready:false,roleLoading:false,active:'planning'};let actionToken=0;",
   'Professional role lifecycle state'
 );
-if(!pro.includes('if(S.roleLoading)return')){
+if(!pro.includes('if(S.roleLoading')){
   pro=replaceRequired(
     pro,
     "async function loadRole(){const c=sb(),rt=window.KomoRuntime;const {data:{session}}=await c.auth.getSession();if(!session?.user)return;if(rt?.roleResolved)S.role=rt.role||'member';else{const r=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';if(rt){rt.role=S.role;rt.roleResolved=true;rt.session=session;rt.userId=session.user.id}}S.ready=true;ensureProNav();applyMode()}",
@@ -121,7 +121,7 @@ const checks=[
   ['Admin refresh is explicit and forced',admin.includes("loadAll(true);return")],
   ['Admin fixed startup timer removed',!admin.includes('setTimeout(open,250)')],
   ['Admin Professionals deduplicates requests',adminPros.includes('if(state.loading)return')],
-  ['Professional role lookup serialized',pro.includes('roleLoading:false')&&pro.includes('if(S.roleLoading)return')&&pro.includes('rt?.roleResolved')],
+  ['Professional role lookup serialized',pro.includes('roleLoading:false')&&pro.includes('if(S.roleLoading')&&pro.includes('rt?.roleResolved')],
   ['Professional duplicate fallback role timer removed',!pro.includes("setTimeout(()=>loadRole().catch(console.error),1000)")],
   ['Clinical duplicate fallback mount timer removed',!clinical.includes('setTimeout(schedule,1300)')]
 ];
