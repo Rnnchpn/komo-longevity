@@ -207,7 +207,9 @@ const scripts = [
   'scripts/commercial-legal-v2.mjs',
   'scripts/commercial-legal-qa-v1.mjs',
   // Final Pulse presentation-only layer: bright, clear, modern visual system.
-  'scripts/pulse-bright-modern-v1.mjs'
+  'scripts/pulse-bright-modern-v1.mjs',
+  // Absolute final production gate: desktop Pro layout, retired-asset pruning and page-owner audit.
+  'scripts/pulse-final-production-audit-v1.mjs'
 ];
 
 for (const script of scripts) {
