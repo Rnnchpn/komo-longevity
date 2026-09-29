@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js';
+import * as THREE from './vendor/three.module.js';
 import { TwinCore } from './v04/twin-core.js';
 
 const $=(s)=>document.querySelector(s);
@@ -6896,6 +6896,7 @@ updateJourneyUI();
 applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
+if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
   version:'7.6.2-recovery-boot',
   THREE,scene,camera,renderer,core,
