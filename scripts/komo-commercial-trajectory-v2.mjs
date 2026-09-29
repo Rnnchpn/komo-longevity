@@ -57,7 +57,7 @@ const css = `
 
 const localeData = {
   fr: {
-    homeFiles: ['fr/index.html'],
+    homeFiles: ['index.html','fr/index.html'],
     assessmentFile: 'fr/motion/index.html',
     legacyAssessmentFile: 'fr/bilan/index.html',
     signatureFile: 'fr/signature/index.html',
@@ -67,7 +67,7 @@ const localeData = {
     clinicalFile: 'fr/clinical/index.html',
     partnersFile: 'fr/partners/index.html',
     pulseFile: 'fr/pulse/index.html',
-    paths: { assessment:'/fr/motion/', signature:'/fr/signature/', clinical:'/fr/clinical/', experience:'/fr/experience/', partners:'/fr/partners/', contact:'/fr/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'/fr/contact/?intent=experience', world:'/world/', method:'/fr/science/', science:'/fr/science/', about:'/fr/a-propos/', offers:'#komo-offers' },
+    paths: { home:'/', assessment:'/fr/motion/', signature:'/fr/signature/', clinical:'/fr/clinical/', experience:'/fr/experience/', partners:'/fr/partners/', contact:'/fr/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'/fr/contact/?intent=experience', world:'/world/', method:'/fr/science/', science:'/fr/science/', about:'/fr/a-propos/', offers:'#komo-offers' },
     metaTitle:'KŌMØ — Santé en mouvement | Motion, Clinical & expériences sur mesure',
     metaDescription:'KŌMØ associe évaluation fonctionnelle, accompagnement médical lorsqu’il est indiqué et expériences sur mesure à domicile, en hôtel, à bord ou en retreat.',
     heroEy:'KŌMØ · LONGÉVITÉ EN MOUVEMENT',
@@ -144,7 +144,8 @@ const localeData = {
     nav:[['Motion','assessment'],['Clinical','clinical'],['Expériences','experience'],['Science','science'],['Professionnels','partners'],['À propos','about'],['Se connecter','pulse']]
   },
   en: {
-    homeFiles: ['index.html'],
+    homeFiles: ['en/index.html'],
+    homeSourceFile: 'index.html',
     assessmentFile: 'motion/index.html',
     legacyAssessmentFile: 'assessment/index.html',
     signatureFile: 'signature/index.html',
@@ -154,7 +155,7 @@ const localeData = {
     clinicalFile: 'clinical/index.html',
     partnersFile: 'partners/index.html',
     pulseFile: 'pulse/index.html',
-    paths: { assessment:'/motion/', signature:'/signature/', clinical:'/clinical/', experience:'/experience/', partners:'/partners/', contact:'/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'/contact/?intent=experience', world:'/world/', method:'/science/', science:'/science/', about:'/about/', offers:'#komo-offers' },
+    paths: { home:'/en/', assessment:'/motion/', signature:'/signature/', clinical:'/clinical/', experience:'/experience/', partners:'/partners/', contact:'/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'/contact/?intent=experience', world:'/world/', method:'/science/', science:'/science/', about:'/about/', offers:'#komo-offers' },
     metaTitle:'KŌMØ — Health in motion | Motion, Clinical & tailored experiences',
     metaDescription:'KŌMØ connects functional assessment, medical care when indicated, and tailored experiences at home, in hotels, onboard or on retreat.',
     heroEy:'KŌMØ · LONGEVITY IN MOTION',
@@ -241,7 +242,7 @@ const localeData = {
     clinicalFile: 'es/clinical/index.html',
     partnersFile: 'es/partners/index.html',
     pulseFile: 'es/pulse/index.html',
-    paths: { assessment:'/es/motion/', signature:'/es/signature/', clinical:'/es/clinical/', experience:'/es/experience/', partners:'/es/partners/', contact:'/es/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'/es/contact/?intent=experience', world:'/world/', method:'/es/science/', science:'/es/science/', about:'/es/sobre/', offers:'#komo-offers' },
+    paths: { home:'/es/', assessment:'/es/motion/', signature:'/es/signature/', clinical:'/es/clinical/', experience:'/es/experience/', partners:'/es/partners/', contact:'/es/contact/?intent=experience', pulse:'https://pulse.komolongevity.com/', booking:'/es/contact/?intent=experience', world:'/world/', method:'/es/science/', science:'/es/science/', about:'/es/sobre/', offers:'#komo-offers' },
     metaTitle:'KŌMØ — Salud en movimiento | Motion, Clinical y experiencias a medida',
     metaDescription:'KŌMØ conecta evaluación funcional, atención médica cuando está indicada y experiencias a medida en casa, hoteles, a bordo o en retiros.',
     heroEy:'KŌMØ · LONGEVIDAD EN MOVIMIENTO',
@@ -320,7 +321,7 @@ const localeData = {
 };
 
 const localizedRoutes={
-  home:{en:'/',fr:'/fr/',es:'/es/'},
+  home:{en:'/en/',fr:'/',es:'/es/'},
   assessment:{en:'/motion/',fr:'/fr/motion/',es:'/es/motion/'},
   signature:{en:'/signature/',fr:'/fr/signature/',es:'/es/signature/'},
   clinical:{en:'/clinical/',fr:'/fr/clinical/',es:'/es/clinical/'},
@@ -361,7 +362,7 @@ function meta(html, title, description, seo){
   html=html.replace(/\s*<link rel="alternate" hreflang="[^"]*" href="[^"]*">/g,'');
   if(seo.alternates){
     const alternates=Object.entries(seo.alternates).map(([lang,path])=>`<link rel="alternate" hreflang="${lang}" href="https://komolongevity.com${path}">`).join('\n');
-    html=html.replace('</head>',`${alternates}\n<link rel="alternate" hreflang="x-default" href="https://komolongevity.com${seo.alternates.en}">\n</head>`);
+    html=html.replace('</head>',`${alternates}\n<link rel="alternate" hreflang="x-default" href="https://komolongevity.com${seo.alternates.fr}">\n</head>`);
   }
   html = html.replace(/\s*<style id="komo-commercial-trajectory-v2-style">[\s\S]*?<\/style>\s*(?=<\/head>)/,'');
   return html.replace('</head>', css+'\n</head>');
@@ -564,7 +565,7 @@ async function patchExisting(relative,c,body,title,description){
 async function ensurePage(relative,c,body,title,description){
   const fp=join(site,relative);
   if(await patchExisting(relative,c,body,title,description)) return true;
-  const source=join(site,c.homeFiles[0]);
+  const source=join(site,c.homeSourceFile||c.homeFiles[0]);
   if(!(await exists(source))) return false;
   await mkdir(dirname(fp),{recursive:true});
   let html=await readFile(source,'utf8');
@@ -597,7 +598,7 @@ const sitemapPath=join(site,'sitemap.xml');
 if(await exists(sitemapPath)){
   let sitemap=await readFile(sitemapPath,'utf8');
   const routes=new Set();
-  for(const c of Object.values(localeData)) for(const key of ['assessment','signature','clinical','experience','partners','about','science','pulse']) routes.add(c.paths[key]);
+  for(const c of Object.values(localeData)) for(const key of ['home','assessment','signature','clinical','experience','partners','about','science','pulse']) routes.add(c.paths[key]);
   for(const route of routes){
     const canonical=`https://komolongevity.com${route}`;
     if(!sitemap.includes(`<loc>${canonical}</loc>`)) sitemap=sitemap.replace('</urlset>',`  <url><loc>${canonical}</loc><priority>0.8</priority></url>\n</urlset>`);
