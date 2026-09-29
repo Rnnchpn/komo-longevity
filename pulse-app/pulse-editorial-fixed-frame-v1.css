@@ -548,3 +548,52 @@ html body.khome-final-v1 .kh8-card:nth-child(4n+1){border-top:3px solid #45a977!
 html body.khome-final-v1 .kh8-card:nth-child(4n+2){border-top:3px solid #5d78f4!important}
 html body.khome-final-v1 .kh8-card:nth-child(4n+3){border-top:3px solid #12a9a1!important}
 html body.khome-final-v1 .kh8-card:nth-child(4n+4){border-top:3px solid #f56f5c!important}
+
+
+/* ---------- 10. iOS Home frame repair ---------- */
+@media(max-width:760px){
+  /* In Patient Home the privileged role selector must not consume a full row.
+     It remains available on Pro/Admin surfaces and other privileged views. */
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 #kamRoleRow{
+    display:none!important;
+  }
+
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 .main-shell{
+    height:100dvh!important;
+    max-height:100dvh!important;
+    min-height:0!important;
+    padding-bottom:calc(76px + 12px + env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+  }
+
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 #viewRoot{
+    flex:1 1 0!important;
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 [data-my-komo-home]{
+    width:100%!important;
+    height:100%!important;
+    max-height:100%!important;
+    min-height:0!important;
+    padding:12px 14px 8px!important;
+    overflow:hidden!important;
+    background:
+      radial-gradient(780px 440px at 92% 0%,rgba(93,120,244,.09),transparent 68%),
+      radial-gradient(700px 440px at 0% 34%,rgba(69,169,119,.09),transparent 72%),
+      #f4f7f5!important;
+  }
+
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 .kh8{
+    min-height:100%!important;
+    align-content:start!important;
+  }
+
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 .kh8-brand{
+    margin-bottom:2px!important;
+  }
+}
