@@ -2299,6 +2299,8 @@ box(libraryV73,2.28,.035,1.74,MAT.brass,libX+2.35,.89,libZ,{cast:false});
 plaque(libraryV73,'KŌMØ METHOD','READ · TRACE · UNDERSTAND',2.85,.52,libX+2.35,1.75,libZ+1.10,{dark:true,titleSize:31});
 // V8.4 — three quiet reading objects map the member's current trajectory into the physical Library.
 const libraryFocusObjectsV84=new THREE.Group();libraryFocusObjectsV84.name='KOMO_LIBRARY_FOCUS_OBJECTS_V84';libraryV73.add(libraryFocusObjectsV84);
+const libraryWarmStripV84=new THREE.MeshBasicMaterial({color:0xd9bc83,transparent:true,opacity:lowPower?.28:.42,depthWrite:false});
+const libraryCoolStripV84=new THREE.MeshBasicMaterial({color:0xc9d8ce,transparent:true,opacity:lowPower?.24:.38,depthWrite:false});
 [
   [libX+.65,1.00,libZ-2.80,-.08],
   [libX+.65,1.00,libZ+2.50,.08],
@@ -2307,8 +2309,8 @@ const libraryFocusObjectsV84=new THREE.Group();libraryFocusObjectsV84.name='KOMO
   const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=rot;g.name='KOMO_LIBRARY_READING_OBJECT_V84_'+(i+1);libraryFocusObjectsV84.add(g);
   box(g,1.05,.045,.72,MAT.ivory,0,0,0,{cast:true});
   box(g,1.08,.018,.075,MAT.brass,0,.035,-.34,{cast:false,receive:false});
-  box(g,.018,.028,.62,i===1?roomCoolStrip:roomWarmStrip,-.48,.045,0,{cast:false,receive:false});
-  const dot=mesh(g,new THREE.RingGeometry(.10,.14,24),i===1?roomCoolStrip:roomWarmStrip,.38,.055,.20,{cast:false,receive:false});
+  box(g,.018,.028,.62,i===1?libraryCoolStripV84:libraryWarmStripV84,-.48,.045,0,{cast:false,receive:false});
+  const dot=mesh(g,new THREE.RingGeometry(.10,.14,24),i===1?libraryCoolStripV84:libraryWarmStripV84,.38,.055,.20,{cast:false,receive:false});
   dot.rotation.x=-Math.PI/2;
 });
 // Warm ceiling panels without extra dynamic lights.
@@ -7206,7 +7208,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.5.0-arena-trajectory',
+  version:'8.5.1-arena-stable',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
