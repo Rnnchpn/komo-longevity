@@ -87,6 +87,7 @@ const scripts = [
   'scripts/build-command-v1.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
+  // Wire map assets before the CSS bundle is generated.
   'scripts/pulse-booking-directory-map-v1.mjs',
   'scripts/pulse-stability-audit-v1.mjs',
   'scripts/pulse-v12-qa.mjs',
@@ -106,6 +107,8 @@ const scripts = [
   'scripts/pulse-flicker-stability-qa-v1.mjs',
   'scripts/pulse-navigation-freeze-v1.mjs',
   'scripts/pulse-navigation-freeze-qa-v1.mjs',
+  // The navigation freeze rewrites booking markup; restore the reserved map shell after it.
+  'scripts/pulse-booking-directory-map-v1.mjs',
   'scripts/pulse-booking-directory-map-qa-v1.mjs',
   'scripts/homepage-product-stepup-v1.mjs',
   'scripts/homepage-hero-image-v2.mjs',
@@ -135,12 +138,13 @@ const scripts = [
   'scripts/pulse-mobile-vertical-app-v1.mjs',
   'scripts/pulse-mobile-vertical-app-qa-v1.mjs',
   'scripts/pulse-key-hub-v1.mjs',
-  'scripts/pulse-key-results-v2.mjs',
   'scripts/pulse-account-privacy-rights-v1.mjs',
   'scripts/pulse-admin-privacy-queue-v1.mjs',
   'scripts/pulse-account-closure-execution-v1.mjs',
   'scripts/pulse-privacy-export-v1.mjs',
   'scripts/pulse-report-visual-v2.mjs',
+  // Finalise Motion Report before the imported home IA gate checks its payload.
+  'scripts/pulse-key-results-v2.mjs',
   'scripts/pulse-runtime-consolidation-late-v1.mjs',
   'scripts/pulse-runtime-route-cleanup-v21.mjs',
   'scripts/pulse-runtime-debt-audit-v1.mjs',
@@ -216,7 +220,8 @@ const scripts = [
   'scripts/pulse-pro-access-workspace-v2.mjs',
   // Absolute final production gate: desktop Pro layout, retired-asset pruning and page-owner audit.
   'scripts/pulse-final-production-audit-v1.mjs',
-  'scripts/komo-commercial-trajectory-v2.mjs'
+  'scripts/komo-commercial-trajectory-v2.mjs',
+  'scripts/komo-public-editorial-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
