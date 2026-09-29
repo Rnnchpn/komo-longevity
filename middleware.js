@@ -34,7 +34,7 @@ export default async function middleware(request) {
   const incomingUrl = new URL(request.url);
   const hostname = (request.headers.get('host') || incomingUrl.hostname).split(':')[0].toLowerCase();
 
-  const isCommandPath = (hostname === 'komolongevity.com' || hostname === 'www.komolongevity.com') && (incomingUrl.pathname === '/command' || incomingUrl.pathname.startsWith('/command/'));
+  const isCommandPath = incomingUrl.pathname === '/command' || incomingUrl.pathname.startsWith('/command/');
   if (hostname === COMMAND_HOST || isCommandPath) {
     const authorization = request.headers.get('authorization') || '';
     let password = '';
