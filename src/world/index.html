@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#18271f" />
-  <meta name="komo-world-version" content="7.6.4-three-core" />
+  <meta name="komo-world-version" content="7.6.5-runtime-trace" />
   <meta name="color-scheme" content="dark" />
   <title>KŌMØ World · Longevity in Motion</title>
   <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
-  <link rel="stylesheet" href="./world-v1.css?v=7.6.4-three-core" />
+  <link rel="stylesheet" href="./world-v1.css?v=7.6.5-runtime-trace" />
   <link rel="modulepreload" href="./vendor/three.module.js" />
 </head>
 <body>
@@ -220,15 +220,37 @@
 
   <noscript>KŌMØ World nécessite JavaScript.</noscript>
   <script>
-    window.__KOMO_BOOT_WATCH=setTimeout(function(){
-      if(window.KomoWorld)return;
+    window.__KOMO_BOOT_ERROR=null;
+    window.__KOMO_REPORT_BOOT_ERROR=function(stage,err){
+      var raw=err&&((err.stack)||(err.message))||String(err||'Unknown error');
+      var payload={stage:stage,error:String(raw),href:location.href,ua:navigator.userAgent,ts:new Date().toISOString()};
+      window.__KOMO_BOOT_ERROR=payload;
+      try{fetch('/api/world-boot-error',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),keepalive:true})}catch(_){}
       var loader=document.getElementById('world-loader');
       if(loader){loader.classList.add('hidden');setTimeout(function(){loader.remove()},650)}
       var status=document.getElementById('intro-auth-status');
-      if(status){status.textContent='Le moteur 3D n’a pas démarré. Rechargez cette page.';status.classList.add('error')}
+      if(status){
+        var first=String(raw).split('\n')[0].slice(0,260);
+        status.textContent='Erreur moteur 3D · '+first;
+        status.classList.add('error');
+      }
       document.body.classList.add('world-boot-fallback');
-    },5000);
+    };
+    window.addEventListener('error',function(e){
+      if(!window.KomoWorld)window.__KOMO_REPORT_BOOT_ERROR('window-error',e.error||e.message);
+    });
+    window.addEventListener('unhandledrejection',function(e){
+      if(!window.KomoWorld)window.__KOMO_REPORT_BOOT_ERROR('unhandled-rejection',e.reason);
+    });
+    window.__KOMO_BOOT_WATCH=setTimeout(function(){
+      if(window.KomoWorld)return;
+      if(window.__KOMO_BOOT_ERROR)return;
+      window.__KOMO_REPORT_BOOT_ERROR('watchdog','World module did not complete within 8 seconds');
+    },8000);
   </script>
-  <script type="module" src="./world-v1.js?v=7.6.4-three-core"></script>
+  <script type="module">
+    import('./world-v1.js?v=7.6.5-runtime-trace')
+      .catch(function(err){window.__KOMO_REPORT_BOOT_ERROR('module-import',err)});
+  </script>
 </body>
 </html>
