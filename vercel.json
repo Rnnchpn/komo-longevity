@@ -209,6 +209,19 @@
   ],
   "headers": [
     {
+      "source": "/command-v1/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
       "source": "/world",
       "headers": [
         {
@@ -550,6 +563,7 @@
     }
   ],
   "alias": [
-    "experience.komolongevity.com"
+    "experience.komolongevity.com",
+    "command.komolongevity.com"
   ]
 }
