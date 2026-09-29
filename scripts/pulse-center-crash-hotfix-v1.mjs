@@ -11,15 +11,17 @@ const replace=(from,to,label)=>{if(!src.includes(from))throw new Error('[center-
 
 replace('let timer=null;','let timer=null,rowsLoadPromise=null,activating=false,navRefreshQueued=false,rowsLoadedAt=0;','state guards');
 
-replace(
-`function rebuildNav(){if(!isPro())return;styles();for(const id of ['proDesktopNav','proMobileNav']){const nav=document.querySelector('#'+id);if(!nav)continue;nav.innerHTML=\`<button type="button" class="nav-item pro-nav-item active" data-k2tw-nav="patients">\${navIcon('patients')}<span>Consultations</span></button>\`}}`,
-`function rebuildNav(){if(!isPro())return;styles();const markup=\`<button type="button" class="nav-item pro-nav-item active" data-k2tw-nav="patients">\${navIcon('patients')}<span>Consultations</span></button>\`;for(const id of ['proDesktopNav','proMobileNav']){const nav=document.querySelector('#'+id);if(!nav)continue;if(nav.dataset.k2twOwner==='consultations'&&nav.innerHTML===markup)continue;nav.dataset.k2twOwner='consultations';nav.innerHTML=markup}}`,
-'idempotent nav');
+const legacyNav=`function rebuildNav(){if(!isPro())return;styles();for(const id of ['proDesktopNav','proMobileNav']){const nav=document.querySelector('#'+id);if(!nav)continue;nav.innerHTML=\`<button type="button" class="nav-item pro-nav-item active" data-k2tw-nav="patients">\${navIcon('patients')}<span>Consultations</span></button>\`}}`;
+const canonicalNav=`function rebuildNav(){if(!isPro())return;styles()}`;
+if(src.includes(legacyNav))src=src.replace(legacyNav,canonicalNav);
+if(!src.includes(canonicalNav))throw new Error('[center-crash-hotfix] canonical navigation owner contract missing');
 
-replace(
-`async function role(){const {data:{session}}=await sb().auth.getSession();if(!session?.user)return false;const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';return['professional','admin'].includes(S.role)}`,
-`async function role(){if(['professional','admin'].includes(S.role))return true;const {data:{session}}=await sb().auth.getSession();if(!session?.user)return false;const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';return['professional','admin'].includes(S.role)}`,
-'role cache');
+const legacyRole=`async function role(){const {data:{session}}=await sb().auth.getSession();if(!session?.user)return false;const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';return['professional','admin'].includes(S.role)}`;
+const cachedRole=`async function role(){if(['professional','admin'].includes(S.role))return true;const {data:{session}}=await sb().auth.getSession();if(!session?.user)return false;const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';return['professional','admin'].includes(S.role)}`;
+const canonicalRole=`async function role(){if(['professional','admin'].includes(S.role))return true;const c=sb(),rt=window.KomoRuntime,{data:{session}}=await c.auth.getSession();if(!session?.user)return false;if(rt?.roleResolved)S.role=rt.role||'member';else{const r=await c.from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';if(rt){rt.role=S.role;rt.roleResolved=true;rt.session=session;rt.userId=session.user.id}}return['professional','admin'].includes(S.role)}`;
+if(src.includes(legacyRole))src=src.replace(legacyRole,canonicalRole);
+else if(src.includes(cachedRole))src=src.replace(cachedRole,canonicalRole);
+if(!src.includes(canonicalRole))throw new Error('[center-crash-hotfix] canonical role contract missing');
 
 replace(
 `async function loadRows(){S.loading=true;S.error='';renderPatients();try{const d=await sb().functions.invoke('professional-dashboard',{body:{action:'list'}});if(d.error)throw d.error;if(d.data?.error)throw new Error(d.data.detail||d.data.error);S.rows=d.data?.rows||[];selectedRows()}catch(e){S.error=e.message||'Chargement impossible'}finally{S.loading=false;renderPatients()}}`,
@@ -56,11 +58,11 @@ if(check.status!==0)throw new Error('[center-crash-hotfix] syntax: '+(check.stde
 const final=fs.readFileSync(centerPath,'utf8');
 const checks=[
   ['no mutation observer feedback loop',!final.includes('new MutationObserver')],
-  ['nav writes are idempotent',final.includes("nav.dataset.k2twOwner==='consultations'")],
+  ['shared Pro navigation is not rewritten',final.includes('function rebuildNav(){if(!isPro())return;styles()}')&&!final.includes('nav.dataset.k2twOwner')&&!final.includes('nav.innerHTML=markup')],
   ['dashboard request deduplicated',final.includes('rowsLoadPromise')],
   ['centre activation guarded',final.includes('activating=true')],
   ['cockpit ready resynchronizes consultation owner',final.includes("komo:clinical-cockpit-ready")],
   ['legacy cockpit header hidden in consultation mode',final.includes('.kcp-head,body.komo-pro-mode .kcp-tabs')]
 ];
 for(const [label,ok] of checks)if(!ok)throw new Error('[center-crash-hotfix] failed: '+label);
-console.log('[center-crash-hotfix] PASS · Centre render loop retired · loads deduped · consultation owner stable');
+console.log('[center-crash-hotfix] PASS · Centre render loop retired · loads deduped · shared Pro navigation untouched');
