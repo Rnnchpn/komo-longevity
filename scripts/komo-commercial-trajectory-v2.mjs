@@ -3,6 +3,27 @@ import { dirname, join } from 'node:path';
 
 const site = join(process.cwd(), 'site');
 
+const komoBrandHeroParts = [
+  'src/assets/site2026/komo-brand-home-v1/part00.b64',
+  'src/assets/site2026/komo-brand-home-v1/part01.b64',
+  'src/assets/site2026/komo-brand-home-v1/part02.b64',
+  'src/assets/site2026/komo-brand-home-v1/part03.b64',
+  'src/assets/site2026/komo-brand-home-v1/part04.b64',
+  'src/assets/site2026/komo-brand-home-v1/part05.b64',
+  'src/assets/site2026/komo-brand-home-v1/part06.b64',
+  'src/assets/site2026/komo-brand-home-v1/part07.b64',
+  'src/assets/site2026/komo-brand-home-v1/part08.b64'
+];
+
+async function writeKomoBrandHero(){
+  const encoded=(await Promise.all(
+    komoBrandHeroParts.map((relative)=>readFile(join(process.cwd(),relative),'utf8'))
+  )).join('').replace(/\s+/g,'');
+  const target=join(site,'assets','images','komo-brand-collage-v1.webp');
+  await mkdir(dirname(target),{recursive:true});
+  await writeFile(target,Buffer.from(encoded,'base64'));
+}
+
 const css = `
 <style id="komo-commercial-trajectory-v2-style">
 :root{--kt-ink:#101512;--kt-paper:#f7f5ef;--kt-warm:#eee7dc;--kt-sage:#738c7d;--kt-sage2:#dce7df;--kt-blue:#dfe9f2;--kt-line:rgba(16,21,18,.14);--kt-muted:#69716b;--kt-dark:#0d1511}
@@ -397,7 +418,7 @@ function home(c){
   const choiceCards=c.choices.map(([n,t,p,key])=>`<a class="kt-z-option" href="${url(c,key)}"><div><span>${n}</span><strong>${t}</strong><p class="kt-copy">${p}</p></div><i aria-hidden="true">→</i></a>`).join('');
   const photos={fr:'KŌMØ accompagne votre santé en mouvement.',en:'KŌMØ supports health in motion.',es:'KŌMØ acompaña tu salud en movimiento.'};
   return `
-<section class="kt-z-hero"><div class="kt-z-hero-media"><img src="/assets/images/hero-mediterranean-motion-v1.webp" alt="${photos[c===localeData.fr?'fr':c===localeData.es?'es':'en']}" fetchpriority="high"></div><div class="kt-shell"><div class="kt-z-hero-copy"><p class="kt-ey">${c.heroEy}</p><h1 class="kt-title">${c.heroTitle}</h1><p class="kt-lead">${c.heroLead}</p><div class="kt-btns"><a class="kt-btn kt-btn--dark" href="${c.paths.contact}">${c.heroPrimary}</a><a class="kt-btn kt-btn--light" href="${c.paths.offers}">${c.heroSecondary}</a></div></div></div></section>
+<section class="kt-z-hero"><div class="kt-z-hero-media"><img src="/assets/images/komo-brand-collage-v1.webp" alt="${photos[c===localeData.fr?'fr':c===localeData.es?'es':'en']}" fetchpriority="high"></div><div class="kt-shell"><div class="kt-z-hero-copy"><p class="kt-ey">${c.heroEy}</p><h1 class="kt-title">${c.heroTitle}</h1><p class="kt-lead">${c.heroLead}</p><div class="kt-btns"><a class="kt-btn kt-btn--dark" href="${c.paths.contact}">${c.heroPrimary}</a><a class="kt-btn kt-btn--light" href="${c.paths.offers}">${c.heroSecondary}</a></div></div></div></section>
 <section class="kt-z-underhero"><div class="kt-shell kt-z-underhero-grid">${c.proofs.map(([title,copy])=>`<div class="kt-z-proof"><b>${title}</b><span>${copy}</span></div>`).join('')}</div></section>
 <section class="kt-z-section" id="komo-offers"><div class="kt-shell"><div class="kt-z-heading"><div><p class="kt-ey">${c.offerEy}</p><h2 class="kt-h2">${c.offerTitle}</h2></div><p class="kt-copy">${c.offerLead}</p></div><div class="kt-z-offers">${offers}</div></div></section>
 <section class="kt-z-section kt-z-section--sand"><div class="kt-shell kt-z-method"><div><p class="kt-ey">${c.journeyEy}</p><h2 class="kt-h2">${c.journeyTitle}</h2><p class="kt-lead">${c.journeyLead}</p><div class="kt-z-pillars">${steps}</div><div class="kt-btns"><a class="kt-btn kt-btn--light" href="${url(c,'science')}">${c.scienceCta} →</a></div></div><div class="kt-z-method-image"><img src="/assets/images/komo-case-gait.jpeg" alt="" loading="lazy"></div></div></section>
@@ -579,6 +600,8 @@ async function patchPublicChrome(relative,c){
   const description=html.match(/<meta name="description" content="([^"]*)">/)?.[1]||c.metaDescription;
   html=meta(html,title,description,pageSeo(relative,c)); html=patchNav(html,c); await writeFile(fp,html,'utf8'); return true;
 }
+
+await writeKomoBrandHero();
 
 for(const c of Object.values(localeData)){
   for(const homeFile of c.homeFiles) await ensurePage(homeFile,c,home(c),c.metaTitle,c.metaDescription);
