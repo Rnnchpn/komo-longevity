@@ -32,6 +32,314 @@ body.kresults-v4 .main-shell,body.kresults-v4 #viewRoot{background:#050706!impor
 .kr4-details{border:1px solid var(--line);border-radius:18px;background:#090d0a;overflow:hidden}.kr4-details>summary{list-style:none;cursor:pointer;padding:17px 18px;display:flex;justify-content:space-between;gap:16px;align-items:center}.kr4-details>summary::-webkit-details-marker{display:none}.kr4-details>summary strong{font-size:11px}.kr4-details>summary span{color:#7d8981;font-size:8px}.kr4-detail-body{border-top:1px solid var(--line);padding:12px}.kr4-lazy-empty{padding:16px;color:#7d8981;font-size:8px}.kr4-tech-row{display:grid;grid-template-columns:120px 110px 1fr 100px 95px;gap:9px;padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.055);font-size:7.5px}.kr4-tech-row:last-child{border-bottom:0}.kr4-tech-row strong{font-size:8px}.kr4-tech-row small{color:#738078}.kr4-clinical{margin-top:8px;background:linear-gradient(145deg,#0a0e0b,#111813)}.kr4-clinical-hero{padding:26px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}.kr4-clinical-hero p{max-width:700px;margin:9px 0 0;font-size:10px;line-height:1.55}.kr4-clinical-list{padding:0 22px 22px;display:grid;gap:8px}.kr4-clinical-card{padding:15px;border:1px solid var(--line);border-radius:16px;background:#0b100d}.kr4-clinical-card strong{display:block;margin-top:7px;font-size:13px}.kr4-clinical-card p{margin:7px 0 0;font-size:8.5px;line-height:1.5}.kr4-empty{padding:18px;border:1px solid var(--line);border-radius:16px;background:#0a0e0b;color:#829087;font-size:9px;line-height:1.55}.kr4-note{margin-top:10px;color:#748078;font-size:7.5px;line-height:1.45}
 @media(max-width:980px){.kr4-hero{grid-template-columns:1fr}.kr4-hero-side{grid-template-columns:repeat(4,1fr)}.kr4-grid,.kr4-muscle{grid-template-columns:1fr 1fr}.kr4-row{grid-template-columns:1fr 110px}.kr4-row .kr4-source,.kr4-row .kr4-status{grid-column:1/-1}.kr4-tech-row{grid-template-columns:100px 90px 1fr}.kr4-tech-row>*:nth-child(4),.kr4-tech-row>*:nth-child(5){display:none}}
 @media(max-width:700px){.kr4{gap:9px}.kr4-card{border-radius:19px}.kr4-hero-main{padding:20px 17px}.kr4-hero-top{display:block}.kr4-hero-top>.kr4-status{margin-top:12px}.kr4-hero-side{grid-template-columns:1fr 1fr;padding:12px}.kr4-section{padding:17px}.kr4-section-head{display:block}.kr4-section-head p{text-align:left;margin-top:7px}.kr4-grid,.kr4-muscle{grid-template-columns:1fr}.kr4-row{grid-template-columns:1fr}.kr4-row .kr4-source,.kr4-row .kr4-status{grid-column:auto}.kr4-table{display:block;overflow-x:auto}.kr4-q summary{grid-template-columns:1fr auto}.kr4-q summary>.kr4-status{grid-column:1/-1;width:max-content}.kr4-response{grid-template-columns:1fr}.kr4-clinical-hero{grid-template-columns:1fr;padding:20px 17px}.kr4-clinical-list{padding:0 17px 17px}.kr4-details>summary{align-items:flex-start;flex-direction:column}.kr4-tech-row{grid-template-columns:1fr 1fr}.kr4-tech-row>*:nth-child(n+3){display:none}}
+
+
+/* Patient Results · bright visual refresh · 2026-09-29 */
+body.kresults-v4{
+  background:#f4f7f5!important;
+  color:#173326!important;
+}
+body.kresults-v4 .main-shell,
+body.kresults-v4 #viewRoot{
+  background:
+    radial-gradient(900px 540px at 100% 0%,rgba(99,124,245,.07),transparent 70%),
+    radial-gradient(720px 480px at 0% 20%,rgba(73,183,127,.07),transparent 70%),
+    #f4f7f5!important;
+}
+.kr4{
+  --bg:#f4f7f5;
+  --panel:#ffffff;
+  --panel2:#f7faf8;
+  --panel3:#eef5f1;
+  --line:#dce8e1;
+  --ink:#173326;
+  --muted:#6c7c72;
+  --green:#2f9a68;
+  --greenBg:#e6f7ed;
+  --red:#cf6658;
+  --redBg:#fff0ed;
+  --amber:#c88e27;
+  --amberBg:#fff5dc;
+  --neutral:#728178;
+  max-width:1480px!important;
+  padding:8px 0 120px!important;
+  color:var(--ink)!important;
+  gap:14px!important;
+}
+.kr4-card{
+  border:1px solid var(--line)!important;
+  border-radius:24px!important;
+  background:#fff!important;
+  box-shadow:0 12px 34px rgba(39,70,51,.065)!important;
+}
+.kr4-kicker{color:#56806a!important}
+.kr4 h2,.kr4 h3,.kr4 h4{color:#193a2a!important}
+.kr4 p{color:var(--muted)!important}
+
+/* Motion hero */
+.kr4-hero{
+  min-height:360px!important;
+  grid-template-columns:minmax(0,1.18fr) minmax(350px,.82fr)!important;
+  background:
+    radial-gradient(620px 360px at 8% 0%,rgba(73,183,127,.16),transparent 66%),
+    radial-gradient(540px 320px at 88% 8%,rgba(99,124,245,.12),transparent 68%),
+    linear-gradient(135deg,#f1fbf5 0%,#f3f5ff 62%,#fff5ef 100%)!important;
+  overflow:hidden!important;
+  box-shadow:0 22px 58px rgba(39,70,51,.09)!important;
+}
+.kr4-hero-main{
+  padding:clamp(26px,3vw,42px)!important;
+}
+.kr4-hero-top{align-items:flex-start!important}
+.kr4-score{
+  position:relative!important;
+  display:inline-flex!important;
+  align-items:flex-end!important;
+  width:max-content!important;
+  margin-top:22px!important;
+  color:#1e6849!important;
+  font-size:clamp(92px,10vw,148px)!important;
+  letter-spacing:-.095em!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.7)!important;
+}
+.kr4-score:before{
+  content:""!important;
+  position:absolute!important;
+  z-index:-1!important;
+  left:-18px!important;
+  top:-18px!important;
+  width:132px!important;
+  height:132px!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle,rgba(73,183,127,.14),rgba(73,183,127,.04) 62%,transparent 72%)!important;
+}
+.kr4-score small{
+  margin:0 0 9px 11px!important;
+  color:#708178!important;
+  font-size:17px!important;
+  letter-spacing:-.02em!important;
+}
+.kr4-headline{margin-top:24px!important}
+.kr4-headline h2{
+  max-width:780px!important;
+  font-size:clamp(32px,4vw,58px)!important;
+  line-height:.98!important;
+}
+.kr4-hero p{
+  max-width:680px!important;
+  margin-top:12px!important;
+  color:#66786d!important;
+  font-size:12px!important;
+  line-height:1.62!important;
+}
+.kr4-actions{margin-top:24px!important;gap:9px!important}
+.kr4-btn{
+  min-height:42px!important;
+  padding:0 14px!important;
+  border:1px solid #d9e5de!important;
+  border-radius:12px!important;
+  background:rgba(255,255,255,.76)!important;
+  color:#355443!important;
+  font-size:8.5px!important;
+  box-shadow:0 6px 18px rgba(39,70,51,.04)!important;
+}
+.kr4-btn.primary{
+  border-color:transparent!important;
+  background:linear-gradient(110deg,#2f8f63,#14a69d)!important;
+  color:#fff!important;
+  box-shadow:0 12px 28px rgba(31,137,98,.20)!important;
+}
+.kr4-btn:hover{transform:translateY(-1px)!important}
+
+/* Hero KPI panel */
+.kr4-hero-side{
+  padding:18px!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:9px!important;
+  background:rgba(255,255,255,.50)!important;
+  border-left:1px solid rgba(61,105,78,.08)!important;
+}
+.kr4-stat{
+  min-height:104px!important;
+  padding:16px!important;
+  border:1px solid #e0e9e4!important;
+  border-radius:17px!important;
+  background:rgba(255,255,255,.82)!important;
+  box-shadow:0 8px 24px rgba(39,70,51,.045)!important;
+}
+.kr4-stat:nth-child(1){border-top:3px solid #42ad77!important}
+.kr4-stat:nth-child(2){border-top:3px solid #637cf5!important}
+.kr4-stat:nth-child(3){border-top:3px solid #14aaa2!important}
+.kr4-stat:nth-child(4){border-top:3px solid #f1ad4e!important}
+.kr4-stat:nth-child(5){border-top:3px solid #7f91e9!important}
+.kr4-stat:nth-child(6){border-top:3px solid #ee806d!important}
+.kr4-stat span{color:#7a8981!important}
+.kr4-stat strong{color:#213f30!important;font-size:27px!important}
+.kr4-stat small{color:#7b8a82!important}
+
+/* State chips */
+.kr4-status.good{color:#28784f!important;background:#e2f5e9!important}
+.kr4-status.bad{color:#b65346!important;background:#fff0ed!important}
+.kr4-status.watch{color:#956a18!important;background:#fff4d8!important}
+.kr4-status.neutral{color:#64746b!important;background:#eef2f0!important}
+
+/* Sections */
+.kr4-section{padding:24px!important}
+.kr4-section-head{
+  margin-bottom:18px!important;
+  padding-bottom:2px!important;
+}
+.kr4-section-head h3{
+  margin-top:5px!important;
+  font-size:clamp(23px,2.3vw,32px)!important;
+}
+.kr4-section-head p{
+  max-width:600px!important;
+  color:#75857c!important;
+  font-size:9.5px!important;
+}
+.kr4-grid{gap:10px!important}
+.kr4-signal{
+  min-height:126px!important;
+  padding:17px!important;
+  border-color:#e1e9e5!important;
+  background:#f8faf9!important;
+}
+.kr4-signal.good{background:#edf9f2!important;border-color:#d3eadb!important}
+.kr4-signal.bad{background:#fff3f0!important;border-color:#f6d8d2!important}
+.kr4-signal.watch{background:#fff8e8!important;border-color:#f2e0af!important}
+.kr4-signal span{color:#74857b!important}
+.kr4-signal strong{color:#264536!important;font-size:23px!important}
+.kr4-signal p{color:#74837b!important}
+.kr4-signal em{color:#87958d!important}
+
+/* Functional rows */
+.kr4-row{
+  min-height:70px!important;
+  border-color:#e1e9e5!important;
+  background:#fafcfb!important;
+}
+.kr4-row.good{background:#edf9f2!important}
+.kr4-row.bad{background:#fff3f0!important}
+.kr4-row.watch{background:#fff8e8!important}
+.kr4-row strong{color:#294938!important}
+.kr4-row small,.kr4-source{color:#78877f!important}
+.kr4-value{color:#2f6f50!important;font-size:15px!important}
+
+/* Muscle cards */
+.kr4-muscle{gap:10px!important}
+.kr4-muscle-card{
+  min-height:170px!important;
+  padding:18px!important;
+  border-color:#e1e9e5!important;
+  background:#f8faf9!important;
+}
+.kr4-muscle-card.good{background:#edf9f2!important;border-color:#d3eadb!important}
+.kr4-muscle-card.bad{background:#fff3f0!important;border-color:#f6d8d2!important}
+.kr4-muscle-card.watch{background:#fff8e8!important;border-color:#f2e0af!important}
+.kr4-muscle-card .kr4-muscle-value{color:#244a36!important}
+.kr4-pair div{background:rgba(255,255,255,.72)!important;border:1px solid rgba(65,105,79,.06)!important}
+.kr4-pair span{color:#7b8981!important}
+.kr4-pair strong{color:#314d3d!important}
+
+/* Tables / questionnaires / technical details */
+.kr4-table th{color:#74837b!important}
+.kr4-table td{
+  background:#fafcfb!important;
+  border-color:#e1e9e5!important;
+  color:#2d4738!important;
+}
+.kr4-table .good td{background:#edf9f2!important}
+.kr4-table .bad td{background:#fff3f0!important}
+.kr4-table .watch td{background:#fff8e8!important}
+.kr4-table small{color:#7b8981!important}
+
+.kr4-q,
+.kr4-details{
+  border-color:#e1e9e5!important;
+  background:#f9fbfa!important;
+}
+.kr4-q summary strong,
+.kr4-details>summary strong{color:#294838!important}
+.kr4-q summary span,
+.kr4-details>summary span{color:#7d8b83!important}
+.kr4-q-body,
+.kr4-detail-body{border-top-color:#e2eae5!important}
+.kr4-response{border-bottom-color:#e5ece8!important;color:#304c3b!important}
+.kr4-response small{color:#7b8981!important}
+.kr4-lazy-empty,.kr4-empty{
+  border-color:#e1e9e5!important;
+  background:#f7faf8!important;
+  color:#78877f!important;
+}
+.kr4-tech-row{border-bottom-color:#e5ece8!important;color:#304c3b!important}
+.kr4-tech-row small{color:#7d8b83!important}
+.kr4-note{color:#829087!important}
+
+/* Clinical remains distinct without going dark */
+.kr4-clinical{
+  background:
+    radial-gradient(520px 240px at 96% 0%,rgba(99,124,245,.11),transparent 70%),
+    linear-gradient(135deg,#f6f7ff,#f3faf6)!important;
+}
+.kr4-clinical-hero{padding:28px!important}
+.kr4-clinical-card{
+  border-color:#dde4f8!important;
+  background:rgba(255,255,255,.82)!important;
+}
+.kr4-clinical-card strong{color:#2e456f!important}
+.kr4-clinical-card p{color:#74817a!important}
+
+/* Embedded canonical result cards on Profile/Documents */
+.kcanon{
+  border-color:#dce8e1!important;
+  background:#fff!important;
+  color:#173326!important;
+  box-shadow:0 12px 34px rgba(39,70,51,.06)!important;
+}
+.kcanon-kicker{color:#64806f!important}
+.kcanon-title{color:#244434!important}
+.kcanon-badge{background:#eef2f0!important;color:#68776e!important}
+.kcanon-badge.published{background:#e2f5e9!important;color:#28784f!important}
+.kcanon-metric,
+.kcanon-account .mini,
+.kcanon-doc-side{background:#f6f9f7!important}
+.kcanon-metric small,.kcanon-account small,.kcanon-doc small{color:#7b8981!important}
+.kcanon-metric strong,.kcanon-account strong,.kcanon-doc strong{color:#284837!important}
+.kcanon-finding{background:#f7faf8!important}
+.kcanon-finding strong{color:#2d4939!important}
+.kcanon-finding span{color:#7c8a82!important}
+.kcanon-btn{
+  border-color:#dce8e1!important;
+  background:#fff!important;
+  color:#355443!important;
+}
+.kcanon-btn.primary{
+  border-color:transparent!important;
+  background:linear-gradient(110deg,#2f8f63,#14a69d)!important;
+  color:#fff!important;
+}
+
+@media(max-width:980px){
+  .kr4-hero{grid-template-columns:1fr!important}
+  .kr4-hero-side{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    border-left:0!important;
+    border-top:1px solid #e0e9e4!important;
+  }
+}
+@media(max-width:700px){
+  .kr4{padding-top:2px!important}
+  .kr4-card{border-radius:20px!important}
+  .kr4-hero-main{padding:22px 18px!important}
+  .kr4-score{font-size:94px!important}
+  .kr4-score:before{width:112px!important;height:112px!important}
+  .kr4-headline h2{font-size:34px!important}
+  .kr4-hero-side{grid-template-columns:1fr 1fr!important;padding:12px!important}
+  .kr4-stat{min-height:92px!important;padding:13px!important}
+  .kr4-section{padding:18px!important}
+  .kr4-section-head p{font-size:9px!important}
+}
 `;document.head.appendChild(s)}
 
 function topFindings(r){return[...(r?.summary?.priorities||[]),...(r?.summary?.strengths||[])].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i).slice(0,3)}
@@ -52,7 +360,7 @@ function qcChip(qc){const t=qcTone(qc);return `<span class="kr4-status ${t}">${e
 function resultStatusForId(findings,id){return findings.get(id)?.status||'descriptive'}
 function metricSignal(label,value,sub,status='descriptive'){const t=tone(status);return `<article class="kr4-signal ${t}"><div class="kr4-signal-top"><div><span>${esc(label)}</span><strong>${esc(value)}</strong></div>${statusChip(status)}</div><p>${esc(sub||'')}</p></article>`}
 
-function motionHero(result,payload,findings){const s=payload.summary||{},fn=payload.function||{},sensor=payload.sensor||{},context=payload.context||{},heroFinding=findings.get('neuromuscular_symmetry'),heroStatus=heroFinding?.status||'descriptive';const wording=heroFinding?.patientMessage||s.sentence||'Votre bilan Motion constitue votre référence instrumentée.';return `<article class="kr4-card kr4-hero"><div class="kr4-hero-main"><div><div class="kr4-hero-top"><div><div class="kr4-kicker">RÉSULTAT MOTION</div><div class="kr4-score">${score(s.score)}<small>/100</small></div></div>${statusChip(heroStatus,statusLabel(s.releaseStatus))}</div><div class="kr4-headline"><h2>${esc(heroFinding?.status==='favorable'?'Votre mouvement est dans une zone favorable.':heroFinding?.status==='priority'?'Une priorité ressort clairement.':heroFinding?.status==='watch'?'Un point mérite votre attention.':'Votre référence Motion.')}</h2><p>${esc(wording)}</p></div></div><div class="kr4-actions"><button class="kr4-btn primary" type="button" data-komo-export-report>Exporter le rapport complet</button><button class="kr4-btn" type="button" data-scroll-clinical>Voir Clinical</button></div></div><aside class="kr4-hero-side"><div class="kr4-stat"><span>Symétrie</span><strong>${pct(s.symmetry,1)}</strong><small>LSI neuromusculaire</small></div><div class="kr4-stat"><span>Confiance</span><strong>${pct(s.confidence)}</strong><small>Qualité du calcul</small></div><div class="kr4-stat"><span>Marqueurs</span><strong>${sensor.totalMetricCount??0}</strong><small>Mesures Myodev conservées</small></div><div class="kr4-stat"><span>Fonction</span><strong>${fn.availableCount??0}/${fn.totalCount??7}</strong><small>Tests documentés</small></div><div class="kr4-stat"><span>Marche</span><strong>${sensor.gait?.scalarCountPresent??0}/${sensor.gait?.scalarCountExpected??15}</strong><small>Valeurs spatio-temporelles</small></div><div class="kr4-stat"><span>Questionnaires</span><strong>${context.completedQuestionnaireCount??0}/${context.questionnaireCount??0}</strong><small>Questionnaires complétés</small></div></aside></article>`}
+function motionHero(result,payload,findings){const s=payload.summary||{},fn=payload.function||{},sensor=payload.sensor||{},context=payload.context||{},heroFinding=findings.get('neuromuscular_symmetry'),heroStatus=heroFinding?.status||'descriptive';const wording=heroFinding?.patientMessage||s.sentence||'Votre bilan Motion constitue votre référence instrumentée.';return `<article class="kr4-card kr4-hero"><div class="kr4-hero-main"><div><div class="kr4-hero-top"><div><div class="kr4-kicker">RÉSULTAT MOTION</div><div class="kr4-score">${score(s.score)}<small>/100</small></div></div>${statusChip(heroStatus,statusLabel(s.releaseStatus))}</div><div class="kr4-headline"><h2>${esc(heroFinding?.status==='favorable'?'Votre mouvement est dans une zone favorable.':heroFinding?.status==='priority'?'Une priorité ressort clairement.':heroFinding?.status==='watch'?'Un point mérite votre attention.':'Votre référence Motion.')}</h2><p>${esc(wording)}</p></div></div><div class="kr4-actions"><button class="kr4-btn primary" type="button" data-komo-export-report>Télécharger mon rapport PDF</button><button class="kr4-btn" type="button" data-scroll-clinical>Voir l’analyse Clinical</button></div></div><aside class="kr4-hero-side"><div class="kr4-stat"><span>Symétrie</span><strong>${pct(s.symmetry,1)}</strong><small>LSI neuromusculaire</small></div><div class="kr4-stat"><span>Confiance</span><strong>${pct(s.confidence)}</strong><small>Qualité du calcul</small></div><div class="kr4-stat"><span>Marqueurs</span><strong>${sensor.totalMetricCount??0}</strong><small>Mesures Myodev conservées</small></div><div class="kr4-stat"><span>Fonction</span><strong>${fn.availableCount??0}/${fn.totalCount??7}</strong><small>Tests documentés</small></div><div class="kr4-stat"><span>Marche</span><strong>${sensor.gait?.scalarCountPresent??0}/${sensor.gait?.scalarCountExpected??15}</strong><small>Valeurs spatio-temporelles</small></div><div class="kr4-stat"><span>Questionnaires</span><strong>${context.completedQuestionnaireCount??0}/${context.questionnaireCount??0}</strong><small>Questionnaires complétés</small></div></aside></article>`}
 
 function summarySection(result,payload,findings){const strength=result?.interpretation?.summary?.strengths||[],priority=result?.interpretation?.summary?.priorities||[],items=[...priority,...strength].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i);return `<article class="kr4-card kr4-section"><div class="kr4-section-head"><div><div class="kr4-kicker">EN UN REGARD</div><h3>Ce qu’il faut comprendre.</h3></div><p>Vert : zone favorable selon une référence explicite. Rouge : priorité. Ambre : à surveiller. Gris : mesure descriptive sans seuil appliqué.</p></div><div class="kr4-grid">${items.length?items.slice(0,6).map(f=>metricSignal(f.title,f.displayValue||'—',f.patientMessage||f.referenceLabel||'',f.status)).join(''):'<div class="kr4-empty">Aucun signal interprétable publié pour ce bilan.</div>'}</div></article>`}
 
