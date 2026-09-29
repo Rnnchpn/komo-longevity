@@ -37,6 +37,287 @@ body.connected-v3 .main-shell,body.connected-v3 #viewRoot{background:#050706!imp
 .kcn3-more{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.kcn3-mini{padding:15px;border:1px solid var(--line);border-radius:16px;background:#0b100d}.kcn3-mini span{display:block;color:#79867e;font-size:7px;text-transform:uppercase;letter-spacing:.1em}.kcn3-mini strong{display:block;margin-top:7px;font:600 19px/1 Manrope,sans-serif}.kcn3-mini small{display:block;margin-top:6px;color:#748078;font-size:8px}.kcn3-foot{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:15px 18px}.kcn3-foot p{margin:0;font-size:8px;line-height:1.5}.kcn3-btn{border:1px solid rgba(255,255,255,.12);border-radius:11px;background:#111712;color:#dfe5e0;padding:8px 11px;font:600 8px DM Sans,sans-serif;cursor:pointer}.kcn3-btn.primary{background:#91b29a;color:#142018;border-color:#91b29a}.kcn3-empty{padding:22px;border:1px solid var(--line);border-radius:18px;background:#0a0e0b;color:#89958d;font-size:10px;line-height:1.55}
 @media(max-width:980px){.kcn3-today{grid-template-columns:1fr}.kcn3-signals{grid-template-columns:repeat(3,1fr)}.kcn3-signal{grid-template-columns:1fr}.kcn3-subscore{text-align:left}.kcn3-trajectory{grid-template-columns:1fr}.kcn3-periodstats{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:720px){.kcn3{padding-top:0;gap:9px}.kcn3-card{border-radius:19px}.kcn3-score{padding:21px 18px}.kcn3-scoretop{display:block}.kcn3-date{text-align:left;margin-top:22px}.kcn3-signals{grid-template-columns:1fr;padding:12px}.kcn3-section{padding:17px}.kcn3-head{display:block}.kcn3-head p{text-align:left;margin-top:7px}.kcn3-periods{margin-top:13px;width:max-content}.kcn3-more{grid-template-columns:1fr 1fr}.kcn3-periodstats{grid-template-columns:1fr}.kcn3-bars{height:130px}.kcn3-foot{align-items:flex-start;flex-direction:column}.kcn3-foot .kcn3-btn{width:100%}}
+
+
+/* KŌMØ Connected · bright premium refresh · 2026-09-29 */
+body.connected-v3{
+  background:#f4f7f5!important;
+  color:#173326!important;
+}
+body.connected-v3 .app-shell,
+body.connected-v3 .main-shell,
+body.connected-v3 #viewRoot{
+  background:
+    radial-gradient(920px 540px at 100% 0%,rgba(99,124,245,.07),transparent 70%),
+    radial-gradient(760px 500px at 0% 18%,rgba(73,183,127,.08),transparent 70%),
+    #f4f7f5!important;
+  color:#173326!important;
+}
+body.connected-v3 .topbar{
+  background:rgba(244,247,245,.92)!important;
+  border-bottom:1px solid #dce8e1!important;
+}
+body.connected-v3 #pageEyebrow{color:#587765!important}
+body.connected-v3 #pageTitle{color:#173326!important}
+
+.kcn3{
+  --bg:#f4f7f5;
+  --panel:#ffffff;
+  --panel2:#f8faf9;
+  --line:#dce8e1;
+  --ink:#173326;
+  --muted:#6f7f75;
+  --green:#3aa873;
+  --greenSoft:#e4f6eb;
+  --amber:#d19a31;
+  --red:#d66e61;
+  max-width:1480px!important;
+  gap:14px!important;
+  color:var(--ink)!important;
+}
+.kcn3-card{
+  border-color:var(--line)!important;
+  background:#fff!important;
+  box-shadow:0 12px 34px rgba(39,70,51,.065)!important;
+}
+.kcn3-kicker{color:#5d7f6b!important}
+.kcn3 h2,.kcn3 h3,.kcn3 h4{color:#193a2a!important}
+.kcn3 p{color:var(--muted)!important}
+
+/* Daily signal hero */
+.kcn3-today{
+  min-height:360px!important;
+  grid-template-columns:minmax(0,1.12fr) minmax(380px,.88fr)!important;
+  border-radius:28px!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(620px 360px at 6% 0%,rgba(73,183,127,.17),transparent 68%),
+    radial-gradient(520px 320px at 90% 6%,rgba(99,124,245,.12),transparent 70%),
+    linear-gradient(135deg,#f1fbf5 0%,#f3f5ff 63%,#fff5ef 100%)!important;
+  box-shadow:0 22px 58px rgba(39,70,51,.09)!important;
+}
+.kcn3-score{
+  padding:clamp(26px,3vw,42px)!important;
+  background:transparent!important;
+}
+.kcn3-scoretop{
+  align-items:flex-start!important;
+}
+.kcn3-scoreorb{
+  --kcn-score:0;
+  position:relative!important;
+  width:clamp(160px,14vw,210px)!important;
+  height:clamp(160px,14vw,210px)!important;
+  margin-top:20px!important;
+  display:grid!important;
+  place-items:center!important;
+  border-radius:50%!important;
+  background:
+    radial-gradient(circle at center,#f8fcfa 0 58%,transparent 59%),
+    conic-gradient(from -90deg,#3cab76 calc(var(--kcn-score)*1%),#dce9e1 0)!important;
+  box-shadow:
+    0 18px 42px rgba(39,97,66,.12),
+    inset 0 0 0 1px rgba(255,255,255,.65)!important;
+}
+.kcn3-scoreorb:after{
+  content:"CONNECTED"!important;
+  position:absolute!important;
+  bottom:31px!important;
+  color:#799087!important;
+  font:800 7px/1 "DM Sans",sans-serif!important;
+  letter-spacing:.15em!important;
+}
+.kcn3-scorevalue{
+  margin:0 0 8px!important;
+  color:#1e6849!important;
+  font-size:clamp(58px,6vw,82px)!important;
+  line-height:.82!important;
+  letter-spacing:-.085em!important;
+}
+.kcn3-scorevalue small{
+  margin-left:5px!important;
+  color:#76887e!important;
+  font-size:14px!important;
+}
+.kcn3-score h2{
+  max-width:710px!important;
+  margin-top:24px!important;
+  font-size:clamp(32px,4vw,56px)!important;
+  line-height:.98!important;
+}
+.kcn3-score p{
+  max-width:680px!important;
+  color:#66786d!important;
+  font-size:12px!important;
+}
+.kcn3-date{text-align:right!important}
+.kcn3-date strong{color:#2b4a39!important}
+.kcn3-date span{color:#7a8a81!important}
+.kcn3-composite-note{
+  color:#718078!important;
+  font-size:9px!important;
+}
+.kcn3-dot{background:#3cab76!important}
+.kcn3-provisional{
+  border-color:#eedca9!important;
+  color:#8c671b!important;
+  background:#fff6de!important;
+}
+
+/* Three daily pillars */
+.kcn3-signals{
+  padding:18px!important;
+  gap:10px!important;
+  background:rgba(255,255,255,.52)!important;
+  border-left:1px solid rgba(61,105,78,.08)!important;
+}
+.kcn3-signal{
+  min-height:94px!important;
+  padding:17px!important;
+  border-color:#e0e9e4!important;
+  background:rgba(255,255,255,.86)!important;
+  box-shadow:0 8px 24px rgba(39,70,51,.045)!important;
+}
+.kcn3-signal:nth-child(1){border-left:4px solid #3eac74!important}
+.kcn3-signal:nth-child(2){border-left:4px solid #637cf5!important}
+.kcn3-signal:nth-child(3){border-left:4px solid #ef806d!important}
+.kcn3-signal.good{
+  background:#edf9f2!important;
+  border-color:#d3eadb!important;
+}
+.kcn3-signal .label{color:#7a8a81!important}
+.kcn3-signal strong{color:#264536!important;font-size:24px!important}
+.kcn3-signal small{color:#78877f!important}
+.kcn3-subscore{
+  color:#5f7067!important;
+  font-size:29px!important;
+}
+.kcn3-subscore.good{color:#31865c!important}
+.kcn3-subscore em{color:#849087!important}
+
+/* Trajectory */
+.kcn3-section{padding:24px!important}
+.kcn3-head{margin-bottom:19px!important}
+.kcn3-head h3{
+  margin-top:5px!important;
+  font-size:clamp(24px,2.4vw,32px)!important;
+}
+.kcn3-head p{
+  color:#74847b!important;
+  font-size:9.5px!important;
+}
+.kcn3-periods{
+  border-color:#dce8e1!important;
+  background:#edf2ef!important;
+}
+.kcn3-periods button{color:#74837b!important}
+.kcn3-periods button.active{
+  background:#fff!important;
+  color:#2b6649!important;
+  box-shadow:0 4px 12px rgba(39,70,51,.08)!important;
+}
+.kcn3-trajectory{gap:14px!important}
+.kcn3-chart{
+  padding:20px!important;
+  border-color:#e0e9e4!important;
+  background:
+    linear-gradient(180deg,#fbfdfc,#f7faf8)!important;
+}
+.kcn3-charttop strong{color:#244434!important;font-size:32px!important}
+.kcn3-charttop span{color:#74847b!important}
+.kcn3-bars{
+  height:170px!important;
+  border-bottom-color:#dfe8e3!important;
+  gap:6px!important;
+}
+.kcn3-bar{
+  background:linear-gradient(180deg,#b9c9c0,#91a69a)!important;
+}
+.kcn3-bar.current{
+  background:linear-gradient(180deg,#4db47d,#2f8f63)!important;
+  box-shadow:0 7px 16px rgba(47,143,99,.16)!important;
+}
+.kcn3-barwrap:hover:after{
+  background:#244434!important;
+  color:#fff!important;
+}
+.kcn3-axis{color:#849188!important}
+.kcn3-periodstats{gap:10px!important}
+.kcn3-periodstat{
+  padding:17px!important;
+  border-color:#e0e9e4!important;
+  background:#f8faf9!important;
+}
+.kcn3-periodstat:nth-child(1){border-top:3px solid #3eac74!important}
+.kcn3-periodstat:nth-child(2){border-top:3px solid #637cf5!important}
+.kcn3-periodstat:nth-child(3){border-top:3px solid #ef806d!important}
+.kcn3-periodstat span{color:#7a8981!important}
+.kcn3-periodstat strong{color:#294838!important;font-size:20px!important}
+.kcn3-periodstat small{color:#7b8981!important}
+
+/* Secondary daily metrics */
+.kcn3-more{gap:10px!important}
+.kcn3-mini{
+  min-height:122px!important;
+  padding:17px!important;
+  border-color:#e1e9e5!important;
+  background:#f8faf9!important;
+}
+.kcn3-mini:nth-child(1){border-top:3px solid #3eac74!important}
+.kcn3-mini:nth-child(2){border-top:3px solid #14aaa2!important}
+.kcn3-mini:nth-child(3){border-top:3px solid #7a85e8!important}
+.kcn3-mini:nth-child(4){border-top:3px solid #72a8d8!important}
+.kcn3-mini span{color:#7a8981!important}
+.kcn3-mini strong{color:#294838!important;font-size:22px!important}
+.kcn3-mini small{color:#7b8981!important}
+
+/* Consent/footer */
+.kcn3-foot{
+  border-color:#dce8e1!important;
+  background:linear-gradient(135deg,#f7faf8,#f1f6f3)!important;
+}
+.kcn3-foot p{color:#74847b!important}
+.kcn3-btn{
+  min-height:40px!important;
+  border-color:#d7e4dc!important;
+  background:#fff!important;
+  color:#355443!important;
+}
+.kcn3-btn.primary{
+  border-color:transparent!important;
+  background:linear-gradient(110deg,#2f8f63,#14a69d)!important;
+  color:#fff!important;
+}
+.kcn3-empty{
+  border-color:#dce8e1!important;
+  background:#fff!important;
+  color:#75857c!important;
+  box-shadow:0 12px 34px rgba(39,70,51,.06)!important;
+}
+
+@media(max-width:980px){
+  .kcn3-today{grid-template-columns:1fr!important}
+  .kcn3-signals{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    border-left:0!important;
+    border-top:1px solid #dce8e1!important;
+  }
+}
+@media(max-width:720px){
+  .kcn3-card{border-radius:20px!important}
+  .kcn3-score{padding:22px 18px!important}
+  .kcn3-scoreorb{
+    width:160px!important;
+    height:160px!important;
+  }
+  .kcn3-scoreorb:after{bottom:25px!important}
+  .kcn3-score h2{font-size:34px!important}
+  .kcn3-date{text-align:left!important}
+  .kcn3-signals{grid-template-columns:1fr!important;padding:12px!important}
+  .kcn3-section{padding:18px!important}
+  .kcn3-more{grid-template-columns:1fr 1fr!important}
+  .kcn3-bars{height:138px!important}
+}
 `;document.head.appendChild(s)}
 async function load(force=false){if(!force&&cache&&Date.now()-cacheAt<15000)return cache;const c=client();if(!c)return null;const session=window.KomoRuntime?.getContext?.()?.session||(await c.auth.getSession()).data?.session;if(!session?.user)return null;const from=new Date();from.setDate(from.getDate()-100);const [d,co]=await Promise.all([c.from('wearable_daily_metrics').select('metric_date,steps,distance_m,active_minutes,sedentary_minutes,resting_hr,avg_hr,hrv_ms,spo2_avg,sleep_minutes,deep_sleep_minutes,rem_sleep_minutes,wear_minutes,source,source_quality,day_wear_mode,night_worn,raw_payload').eq('user_id',session.user.id).gte('metric_date',dayKey(from)).order('metric_date',{ascending:false}).limit(100),c.from('wearable_consents').select('*').eq('user_id',session.user.id).eq('purpose','connected_followup').order('accepted_at',{ascending:false}).limit(1)]);if(d.error)throw d.error;if(co.error)throw co.error;cache={session,rows:d.data||[],consent:(co.data||[])[0]||null};cacheAt=Date.now();return cache}
 const consentActive=d=>d?.consent?.status==='active';
@@ -48,9 +329,9 @@ function bars(rows,days){const end=rows[0]?.metric_date||dayKey(new Date()),star
 function signalCard(label,data,formatter,goodCopy){const t=tone(data.score),source=data.provisional?' · provisoire Mi Fitness':'';return`<article class="kcn3-signal ${t==='good'?'good':''}"><div><span class="label">${esc(label)}</span><strong>${formatter(data.value)}</strong><small>${data.usual===null?'Habituel en construction':`${trendText(data.delta)} · habituel ${formatter(data.usual)}`}${source}</small></div><div class="kcn3-subscore ${t==='good'?'good':''}">${data.score===null?'—':data.score}<em>${data.score===null?'score en attente':goodCopy}</em></div></article>`}
 function periodComparison(label,m,formatter){return`<article class="kcn3-periodstat"><span>${esc(label)}</span><strong>${formatter(m.cur)}</strong><small>${m.count} jour${m.count>1?'s':''} · ${m.delta===null?'comparaison en attente':trendText(m.delta)}</small></article>`}
 function html(data){const rows=data.rows||[],sig=dailySignals(rows),on=consentActive(data);if(!sig)return`<section class="kcn3"><div class="kcn3-empty">Aucune donnée Connected n’est encore disponible. Dès qu’un dispositif compatible synchronise ses données, votre journée et votre trajectoire apparaissent ici.</div></section>`;const ps=periodStats(rows,period),latest=sig.latest,latestActive=latestWith(rows,'active_minutes'),latestHrv=latestWith(rows,'hrv_ms'),latestSpo2=latestWith(rows,'spo2_avg'),latestDistance=latestWith(rows,'distance_m'),composite=sig.composite;return`<section class="kcn3" data-connected-v3>
-<article class="kcn3-card kcn3-today"><div class="kcn3-score"><div><div class="kcn3-scoretop"><div><div class="kcn3-kicker">MOTION TODAY · CONNECTED</div><div class="kcn3-scorevalue">${composite===null?'—':composite}<small>${composite===null?'':'/100'}</small></div></div><div class="kcn3-date"><div class="kcn3-kicker">DERNIÈRE JOURNÉE</div><strong>${esc(fmtLongDate(latest.metric_date))}</strong><span>${on?'Synchronisation active':'Collecte inactive'}</span></div></div><h2>${esc(scoreLabel(composite))}</h2><p>${composite===null?'Le score quotidien apparaîtra lorsque Mouvement, Sommeil et Cœur disposent d’une référence suffisante. Les données disponibles restent affichées sans valeur inventée.':'Votre signal Connected combine mouvement, sommeil et fréquence cardiaque par rapport à votre propre niveau habituel.'}</p></div><div class="kcn3-composite-note"><span class="kcn3-dot"></span><span>Signal quotidien non clinique · Motion Myodev reste votre mesure de référence</span>${sig.provisional?'<span class="kcn3-provisional">Estimation provisoire</span>':''}</div></div><div class="kcn3-signals">${signalCard('Mouvement',sig.move,v=>v===null?'—':fmtInt(v)+' pas','mouvement')}${signalCard(sig.sleep.provisional?'Sommeil · temps au lit':'Sommeil',sig.sleep,fmtHours,'sommeil')}${signalCard(sig.heart.provisional?'Cœur · FC nocturne':'Cœur · FC repos',sig.heart,fmtBpm,'cœur')}</div></article>
-<article class="kcn3-card kcn3-section"><div class="kcn3-head"><div><div class="kcn3-kicker">TRAJECTOIRE</div><h3>Où vous vous situez.</h3></div><div><p>Votre niveau récent est comparé à la période précédente, avec la couverture réelle des données.</p><div class="kcn3-periods"><button type="button" data-kcn-period="7" class="${period===7?'active':''}">7 jours</button><button type="button" data-kcn-period="30" class="${period===30?'active':''}">30 jours</button></div></div></div><div class="kcn3-trajectory"><div class="kcn3-chart"><div class="kcn3-charttop"><div><div class="kcn3-kicker">PAS MOYENS · ${period} JOURS</div><strong>${ps.steps.cur===null?'—':fmtInt(ps.steps.cur)}</strong><span>${ps.steps.delta===null?'Comparaison en attente':trendText(ps.steps.delta)} · couverture ${ps.coverage}%</span></div><div class="kcn3-kicker">${fmtDate(shiftDay(ps.end,-period+1))} → ${fmtDate(ps.end)}</div></div><div class="kcn3-bars">${bars(rows,period)}</div><div class="kcn3-axis"><span>${fmtDate(shiftDay(ps.end,-period+1))}</span><span>${fmtDate(ps.end)}</span></div></div><div class="kcn3-periodstats">${periodComparison('Pas / jour',ps.steps,v=>v===null?'—':fmtInt(v))}${periodComparison('Sommeil / nuit',ps.sleep,fmtHours)}${periodComparison('FC repos / nocturne',ps.rhr,fmtBpm)}</div></div></article>
-<article class="kcn3-card kcn3-section"><div class="kcn3-head"><div><div class="kcn3-kicker">PLUS DE SIGNAL</div><h3>Votre quotidien, sans surcharge.</h3></div><p>Ces données complètent la trajectoire sans remplacer votre bilan Motion.</p></div><div class="kcn3-more"><article class="kcn3-mini"><span>Temps actif</span><strong>${latestActive&&valueFor(latestActive,'active_minutes')!==null?`${Math.round(valueFor(latestActive,'active_minutes'))} min`:'—'}</strong><small>${latestActive?'dernière donnée disponible':'en attente de synchronisation'}</small></article><article class="kcn3-mini"><span>Distance</span><strong>${latestDistance&&valueFor(latestDistance,'distance_m')!==null?`${(valueFor(latestDistance,'distance_m')/1000).toLocaleString('fr-FR',{maximumFractionDigits:1})} km`:'—'}</strong><small>${latestDistance?'dernière donnée disponible':'en attente de synchronisation'}</small></article><article class="kcn3-mini"><span>HRV</span><strong>${latestHrv&&valueFor(latestHrv,'hrv_ms')!==null?`${Math.round(valueFor(latestHrv,'hrv_ms'))} ms`:'—'}</strong><small>${latestHrv?'dernière donnée disponible':'en attente de synchronisation'}</small></article><article class="kcn3-mini"><span>SpO₂</span><strong>${latestSpo2&&valueFor(latestSpo2,'spo2_avg')!==null?`${valueFor(latestSpo2,'spo2_avg').toLocaleString('fr-FR',{maximumFractionDigits:1})}%`:'—'}</strong><small>${latestSpo2?'dernière donnée disponible':'en attente de synchronisation'}</small></article></div></article>
+<article class="kcn3-card kcn3-today"><div class="kcn3-score"><div><div class="kcn3-scoretop"><div><div class="kcn3-kicker">MOTION TODAY · CONNECTED</div><div class="kcn3-scoreorb" style="--kcn-score:${composite===null?0:clamp(composite)}"><div class="kcn3-scorevalue">${composite===null?'—':composite}<small>${composite===null?'':'/100'}</small></div></div></div><div class="kcn3-date"><div class="kcn3-kicker">DERNIÈRE JOURNÉE</div><strong>${esc(fmtLongDate(latest.metric_date))}</strong><span>${on?'Synchronisation active':'Collecte inactive'}</span></div></div><h2>${esc(scoreLabel(composite))}</h2><p>${composite===null?'Le score quotidien apparaîtra lorsque Mouvement, Sommeil et Cœur disposent d’une référence suffisante. Les données disponibles restent affichées sans valeur inventée.':'Votre signal Connected combine mouvement, sommeil et fréquence cardiaque par rapport à votre propre niveau habituel.'}</p></div><div class="kcn3-composite-note"><span class="kcn3-dot"></span><span>Signal quotidien non clinique · Motion Myodev reste votre mesure de référence</span>${sig.provisional?'<span class="kcn3-provisional">Estimation provisoire</span>':''}</div></div><div class="kcn3-signals">${signalCard('Mouvement',sig.move,v=>v===null?'—':fmtInt(v)+' pas','mouvement')}${signalCard(sig.sleep.provisional?'Sommeil · temps au lit':'Sommeil',sig.sleep,fmtHours,'sommeil')}${signalCard(sig.heart.provisional?'Cœur · FC nocturne':'Cœur · FC repos',sig.heart,fmtBpm,'cœur')}</div></article>
+<article class="kcn3-card kcn3-section"><div class="kcn3-head"><div><div class="kcn3-kicker">TRAJECTOIRE</div><h3>Votre tendance récente.</h3></div><div><p>Votre niveau récent est comparé à la période précédente, avec la couverture réelle des données.</p><div class="kcn3-periods"><button type="button" data-kcn-period="7" class="${period===7?'active':''}">7 jours</button><button type="button" data-kcn-period="30" class="${period===30?'active':''}">30 jours</button></div></div></div><div class="kcn3-trajectory"><div class="kcn3-chart"><div class="kcn3-charttop"><div><div class="kcn3-kicker">PAS MOYENS · ${period} JOURS</div><strong>${ps.steps.cur===null?'—':fmtInt(ps.steps.cur)}</strong><span>${ps.steps.delta===null?'Comparaison en attente':trendText(ps.steps.delta)} · couverture ${ps.coverage}%</span></div><div class="kcn3-kicker">${fmtDate(shiftDay(ps.end,-period+1))} → ${fmtDate(ps.end)}</div></div><div class="kcn3-bars">${bars(rows,period)}</div><div class="kcn3-axis"><span>${fmtDate(shiftDay(ps.end,-period+1))}</span><span>${fmtDate(ps.end)}</span></div></div><div class="kcn3-periodstats">${periodComparison('Pas / jour',ps.steps,v=>v===null?'—':fmtInt(v))}${periodComparison('Sommeil / nuit',ps.sleep,fmtHours)}${periodComparison('FC repos / nocturne',ps.rhr,fmtBpm)}</div></div></article>
+<article class="kcn3-card kcn3-section"><div class="kcn3-head"><div><div class="kcn3-kicker">SIGNaux DU QUOTIDIEN</div><h3>Les repères qui complètent votre journée.</h3></div><p>Ces données complètent la trajectoire sans remplacer votre bilan Motion.</p></div><div class="kcn3-more"><article class="kcn3-mini"><span>Temps actif</span><strong>${latestActive&&valueFor(latestActive,'active_minutes')!==null?`${Math.round(valueFor(latestActive,'active_minutes'))} min`:'—'}</strong><small>${latestActive?'dernière donnée disponible':'en attente de synchronisation'}</small></article><article class="kcn3-mini"><span>Distance</span><strong>${latestDistance&&valueFor(latestDistance,'distance_m')!==null?`${(valueFor(latestDistance,'distance_m')/1000).toLocaleString('fr-FR',{maximumFractionDigits:1})} km`:'—'}</strong><small>${latestDistance?'dernière donnée disponible':'en attente de synchronisation'}</small></article><article class="kcn3-mini"><span>HRV</span><strong>${latestHrv&&valueFor(latestHrv,'hrv_ms')!==null?`${Math.round(valueFor(latestHrv,'hrv_ms'))} ms`:'—'}</strong><small>${latestHrv?'dernière donnée disponible':'en attente de synchronisation'}</small></article><article class="kcn3-mini"><span>SpO₂</span><strong>${latestSpo2&&valueFor(latestSpo2,'spo2_avg')!==null?`${valueFor(latestSpo2,'spo2_avg').toLocaleString('fr-FR',{maximumFractionDigits:1})}%`:'—'}</strong><small>${latestSpo2?'dernière donnée disponible':'en attente de synchronisation'}</small></article></div></article>
 <article class="kcn3-card kcn3-foot"><p>${on?'Connected collecte les catégories que vous avez autorisées.':'La collecte Connected est inactive.'} Les valeurs provisoires issues de Mi Fitness restent identifiées comme telles jusqu’à validation de leur mapping définitif.</p><button class="kcn3-btn ${on?'':'primary'}" type="button" data-connected-consent>${on?'Gérer la collecte':'Activer Connected'}</button></article>
 </section>`}
 function setChrome(){const eyebrow=document.querySelector('#pageEyebrow'),title=document.querySelector('#pageTitle');if(eyebrow)eyebrow.textContent='KŌMØ CONNECTED';if(title)title.textContent='Votre quotidien, dans le temps.'}
