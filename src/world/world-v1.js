@@ -2558,8 +2558,8 @@ box(architecturalSpine,8.70,.032,.070,MAT.brass,0,5.88,11.82,{cast:false,receive
 const desktopCinematic=new THREE.Group();desktopCinematic.name='KOMO_DESKTOP_CINEMATIC_V50';building.add(desktopCinematic);
 desktopCinematic.visible=false;
 
-if(!lowPower){
-  // Polished central runway: thin physical overlay only on desktop.
+if(!visualLowPower&&!lowPower){
+  // Polished central runway: only build this layer when cinematic materials exist.
   const runway=mesh(desktopCinematic,new THREE.PlaneGeometry(8.65,39.8),CINEMATIC.floor,0,.421,-6.7,{cast:false,receive:false});
   runway.rotation.x=-Math.PI/2;runway.renderOrder=3;
 
