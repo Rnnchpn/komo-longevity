@@ -4129,18 +4129,27 @@ box(arenaWallsV59,19.7,.045,.16,WALL.brass,0,.65,-12.54,{cast:false,receive:fals
     wash.userData.phase=i*.9+side;wash.userData.dynamic=true;
   });
 });
-plaque(arenaRoom,'ARENA','PERFORMANCE · COMMUNITY',7.2,1.45,0,7.05,-12.85,{dark:true,titleSize:94});
+plaque(arenaRoom,'ARENA','PERSONAL PROGRESS · REASSESS',7.2,1.45,0,7.05,-12.85,{dark:true,titleSize:94});
 [-5.2,0,5.2].forEach((x,i)=>{
   box(arenaRoom,3.7,.28,3.7,i===1?M.arenaGold:M.stoneDeep,x,.14,-4.0);
   box(arenaRoom,3.2,.16,3.2,M.arena,x,.43,-4.0);
 });
-plaque(arenaRoom,'BALANCE','DAILY · 60 S',3.6,.94,-5.2,4.7,-8.1,{dark:true,titleSize:68});
-plaque(arenaRoom,'SQUAT 10','CONTROL',3.6,.94,0,4.7,-8.1,{dark:true,titleSize:68});
-plaque(arenaRoom,'STAND UP','CAPACITY',3.6,.94,5.2,4.7,-8.1,{dark:true,titleSize:68});
+plaque(arenaRoom,'CONTROL','BALANCE · STABILITY',3.6,.94,-5.2,4.7,-8.1,{dark:true,titleSize:68});
+plaque(arenaRoom,'POWER','LOWER-LIMB REPEAT',3.6,.94,0,4.7,-8.1,{dark:true,titleSize:68});
+plaque(arenaRoom,'CAPACITY','STAND · MOVE · ENDURE',3.6,.94,5.2,4.7,-8.1,{dark:true,titleSize:68});
+// V8.5 — Arena is a personal progression room: test, compare to self, repeat.
+const arenaTrajectoryV85=new THREE.Group();arenaTrajectoryV85.name='KOMO_ARENA_PROGRESS_V85';arenaRoom.add(arenaTrajectoryV85);
+const arenaProgressStationsV85={};
+[['control',-5.2,0xb8cbbd],['power',0,0xd7b16d],['capacity',5.2,0xb7c7cf]].forEach(([id,x,color])=>{
+  const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:lowPower?.14:.21,depthWrite:false});
+  const ring=mesh(arenaTrajectoryV85,new THREE.RingGeometry(1.28,1.43,48),mat,x,.625,-4.0,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;ring.name='KOMO_ARENA_PROGRESS_STATION_V85_'+id.toUpperCase();
+  const strip=box(arenaTrajectoryV85,2.88,.025,.075,mat,x,.64,-5.46,{cast:false,receive:false});
+  arenaProgressStationsV85[id]={ring,strip,mat};
+});
 const arenaChallengeBoard=new THREE.Group();arenaChallengeBoard.name='KOMO_CHALLENGE_BOARD_V32';arenaChallengeBoard.position.set(0,0,2.7);arenaRoom.add(arenaChallengeBoard);
 box(arenaChallengeBoard,5.8,.18,2.1,MAT.travertine,0,.10,0);
 box(arenaChallengeBoard,5.15,2.65,.22,MAT.blackened,0,1.55,-.78,{cast:true});
-plaque(arenaChallengeBoard,'WORLD CHALLENGES','DAILY · XP · COMMUNITY',4.7,.82,0,2.80,-.62,{dark:true,titleSize:54});
+plaque(arenaChallengeBoard,'YOUR PROGRESS','REFERENCE · RETEST · FOLLOW-UP',4.7,.82,0,2.80,-.62,{dark:true,titleSize:54});
 glow(arenaRoom,0xe4b96f,4.8,15,0,5.5,-5);
 const arenaV52=new THREE.Group();arenaV52.name='KOMO_ARENA_ROOM_V52';arenaRoom.add(arenaV52);
 const arenaFloor=mesh(arenaV52,new THREE.CircleGeometry(10.9,96),new THREE.MeshStandardMaterial({color:0x202821,roughness:.46,metalness:.05}),0,.045,-2,{cast:false,receive:true});
@@ -4153,7 +4162,7 @@ const startRing=mesh(arenaV52,new THREE.RingGeometry(2.05,2.18,64),MAT.brass,0,.
   box(arenaV52,.055,4.60,12.8,MAT.brass,side*9.65,3.05,-1.7,{cast:false,receive:false});
 });
 box(arenaV52,15.8,2.45,.16,MAT.blackened,0,4.25,9.7,{cast:true});
-plaque(arenaV52,'LIVE ARENA','DAILY CHALLENGES · SOCIAL',7.6,1.08,0,4.38,9.55,{dark:true,titleSize:70});
+plaque(arenaV52,'LIVE ARENA','PERSONAL PROGRESS · REASSESS',7.6,1.08,0,4.38,9.55,{dark:true,titleSize:70});
 
 // V7.4 Global Roof + Design Pass — complete silhouettes without adding realtime lights.
 const globalRoofPassV74=new THREE.Group();globalRoofPassV74.name='KOMO_GLOBAL_ROOF_PASS_V74';world.add(globalRoofPassV74);
@@ -4626,8 +4635,11 @@ const interactions=[
 ];
 
 const arenaInteractions=[
-  {id:'challenge_board',x:45,z:2.7,r:3.5,title:()=>locale==='fr'?'World Challenges':'World Challenges',desc:()=>locale==='fr'?'Voir les défis du jour':'View today’s challenges',action:showChallenges}
-];
+  {id:'arena_progress',x:45,z:2.7,r:3.5,title:()=>locale==='fr'?'Votre progression':'Your progress',desc:()=>personalTrajectory?(locale==='fr'?'Référence · priorité · prochain checkpoint':'Reference · priority · next checkpoint'):(locale==='fr'?'Repères personnels · sans classement santé':'Personal benchmarks · no health ranking'),action:showArena},
+  {id:'arena_control',x:39.8,z:-4.0,r:2.45,station:'control'},
+  {id:'arena_power',x:45.0,z:-4.0,r:2.45,station:'power'},
+  {id:'arena_capacity',x:50.2,z:-4.0,r:2.45,station:'capacity'}
+].map(it=>it.station?{...it,title:()=>arenaStationCopy(it.station).title[locale],desc:()=>personalTrajectory&&trajectoryArenaStationId()===it.station?(locale==='fr'?'Repère lié à votre priorité · ouvrir':'Benchmark linked to your priority · open'):(locale==='fr'?'Repère personnel · ouvrir':'Personal benchmark · open'),action:()=>showArenaStation(it.station)}:it);
 
 const twinInteractions=[
   {id:'twin_muscle',domain:'muscle',x:-50.15,z:-2.2,r:2.0},
@@ -4731,6 +4743,23 @@ function trajectoryFitnessStationId(t=personalTrajectory){
   if(key==='balance'||key==='mobility'||key==='recovery')return 'control';
   return null;
 }
+function trajectoryArenaStationId(t=personalTrajectory){
+  const key=trajectoryFocusKey(t);
+  if(key==='strength')return 'power';
+  if(key==='cardio')return 'capacity';
+  if(key==='balance'||key==='mobility'||key==='recovery')return 'control';
+  return null;
+}
+function updateArenaTrajectoryVisuals(){
+  const focus=trajectoryArenaStationId();
+  Object.entries(arenaProgressStationsV85).forEach(([id,station])=>{
+    const active=!!personalTrajectory&&focus===id;
+    station.mat.opacity=active?(lowPower?.42:.68):(lowPower?.14:.21);
+    station.ring.scale.setScalar(active?1.075:1);
+    station.strip.scale.x=active?1.10:1;
+  });
+}
+updateArenaTrajectoryVisuals();
 function trajectoryLibraryTopics(){
   const key=trajectoryFocusKey();
   const topics={
@@ -4768,7 +4797,7 @@ function ingestTrajectory(input){
   personalTrajectory=cleanTrajectory(input);
   try{if(personalTrajectory)sessionStorage.setItem(TRAJECTORY_SESSION_KEY,JSON.stringify(personalTrajectory));else sessionStorage.removeItem(TRAJECTORY_SESSION_KEY)}catch{}
   document.body.classList.toggle('trajectory-connected',!!personalTrajectory);
-  updateJourneyUI?.();updateHealthHUD?.();
+  updateJourneyUI?.();updateHealthHUD?.();updateArenaTrajectoryVisuals?.();
   const today=$('#hud-today');if(today)today.textContent=personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||copy[locale].today):copy[locale].today;
   window.dispatchEvent(new CustomEvent('komo:trajectory-updated',{detail:personalTrajectory}));
   return personalTrajectory;
@@ -4789,7 +4818,7 @@ const JOURNEY_MISSIONS=[
   {id:'twin',xp:35,title:{fr:'Explorer le Functional Twin',en:'Explore Functional Twin'},sub:{fr:'Comprendre votre espace de données',en:'Understand your data space'}},
   {id:'rehab',xp:35,title:{fr:'Entrer au KŌMØ Fitness Club',en:'Enter KŌMØ Fitness Club'},sub:{fr:'Choisir votre pratique',en:'Choose your activity'}},
   {id:'rehab_session',xp:25,title:{fr:'Compléter votre séance du jour',en:'Complete today’s session'},sub:{fr:'Construire votre régularité',en:'Build your consistency'}},
-  {id:'arena',xp:35,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir les challenges',en:'Discover challenges'}},
+  {id:'arena',xp:35,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Comparer vos repères dans le temps',en:'Compare your benchmarks over time'}},
   {id:'life',xp:25,title:{fr:'Visiter KŌMØ Life',en:'Visit KŌMØ Life'},sub:{fr:'Relier World au réel',en:'Connect World to real life'}},
   {id:'upper',xp:30,title:{fr:'Atteindre le Level 2',en:'Reach Level 2'},sub:{fr:'Explorer les galeries hautes',en:'Explore the upper galleries'}},
   {id:'library',xp:20,title:{fr:'Ouvrir Science Library',en:'Open Science Library'},sub:{fr:'Voir la méthode et les sources',en:'See method and sources'}},
@@ -5088,7 +5117,7 @@ const challengeDefs=[
   {id:'fountain',reward:15,target:1,title:{fr:'Découvrir la grande fontaine',en:'Discover the Grand Fountain'},sub:{fr:'Explorer le nouveau KŌMØ District',en:'Explore the new KŌMØ District'}},
   {id:'coach',reward:10,target:1,title:{fr:'Parler à un coach',en:'Meet a coach'},sub:{fr:'Demander une quête Fitness à Leo ou Nora',en:'Ask Leo or Nora for a Fitness quest'}},
   {id:'life_item',reward:10,target:1,title:{fr:'Découvrir un objet Life',en:'Discover a Life object'},sub:{fr:'Explorer un produit directement dans le flagship',en:'Explore a product directly in the flagship'}},
-  {id:'arena_visit',reward:15,target:1,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir le Challenge Board',en:'Discover the Challenge Board'}},
+  {id:'arena_visit',reward:15,target:1,title:{fr:'Entrer dans Arena',en:'Enter Arena'},sub:{fr:'Découvrir votre espace de progression',en:'Discover your personal progress space'}},
   {id:'social_chat',reward:15,target:1,title:{fr:'Briser la glace',en:'Break the ice'},sub:{fr:'Envoyer un message dans le World Chat',en:'Send a message in World Chat'}},
   {id:'social_direct',reward:20,target:1,title:{fr:'Créer un contact',en:'Make a connection'},sub:{fr:'Envoyer un message privé à un membre',en:'Send a private message to a member'}},
   {id:'social_join',reward:15,target:1,title:{fr:'Rejoindre un membre',en:'Join a member'},sub:{fr:'Rejoindre la position d’un autre membre',en:'Join another member’s position'}},
@@ -5987,18 +6016,45 @@ function showRehab(){
   ]);
   bindFitnessClub();
 }
+function arenaStationCopy(id){
+  const data={
+    control:{title:{fr:'CONTROL',en:'CONTROL'},focus:{fr:'Équilibre · stabilité · coordination',en:'Balance · stability · coordination'},why:{fr:'Un repère simple pour observer le contrôle et sa reproductibilité dans le temps.',en:'A simple benchmark to observe control and repeatability over time.'}},
+    power:{title:{fr:'POWER',en:'POWER'},focus:{fr:'Puissance des membres inférieurs',en:'Lower-limb power'},why:{fr:'Un repère fonctionnel pour suivre votre capacité à produire un effort de façon contrôlée.',en:'A functional benchmark to track controlled force production over time.'}},
+    capacity:{title:{fr:'CAPACITY',en:'CAPACITY'},focus:{fr:'Se relever · marcher · soutenir l’effort',en:'Stand · walk · sustain effort'},why:{fr:'Un repère de capacité pour relire votre progression entre deux checkpoints.',en:'A capacity benchmark to review progression between checkpoints.'}}
+  };
+  return data[id]||data.control;
+}
 function arenaHtml(){
-  return `
-    <p>${locale==='fr'?'Arena est la couche d’engagement : challenges fonctionnels, progression et communauté. Les données de santé ne sont jamais classées.':'Arena is the engagement layer: functional challenges, progression and community. Health data is never ranked.'}</p>
-    <div class="panel-grid"><div><span>CHALLENGE 01</span><b>Balance Hold · 60 s</b></div><div><span>CHALLENGE 02</span><b>Squat 10</b></div><div><span>CHALLENGE 03</span><b>Stand Up</b></div><div><span>SEASON</span><b>01 · Riviera</b></div></div>
-    <div class="priority-card"><b>FAIR PLAY</b>${locale==='fr'?'Seul le score du challenge peut alimenter un classement. Motion Score, Motion Age et métriques personnelles restent privés.':'Only challenge scores may feed a leaderboard. Motion Score, Motion Age and personal metrics remain private.'}</div>`;
+  const stationId=trajectoryArenaStationId(),station=stationId?arenaStationCopy(stationId):null;
+  if(personalTrajectory){
+    const priority=personalTrajectory.priority||personalTrajectory.current_action||(locale==='fr'?'Priorité en cours':'Current priority');
+    const reference=personalTrajectory.motion_score!=null?'Motion Score '+Math.round(personalTrajectory.motion_score)+'/100':(locale==='fr'?'Bilan enregistré':'Assessment recorded');
+    return '<p>'+(locale==='fr'?'Arena sert à vous remettre à l’épreuve à partir de votre propre référence. Ici, la comparaison utile est celle avec vous-même, dans le temps.':'Arena lets you reassess yourself from your own reference. The useful comparison here is with yourself over time.')+'</p>'+
+      '<div class="priority-card"><b>'+(locale==='fr'?'VOTRE PRIORITÉ':'YOUR PRIORITY')+'</b>'+escHtml(priority)+'</div>'+
+      '<div class="panel-grid"><div><span>'+(locale==='fr'?'RÉFÉRENCE':'REFERENCE')+'</span><b>'+reference+'</b></div><div><span>'+(locale==='fr'?'REPÈRE À REJOUER':'BENCHMARK TO REPEAT')+'</span><b>'+(station?station.title[locale]:(locale==='fr'?'LIBRE':'OPEN'))+'</b></div><div><span>'+(locale==='fr'?'PROCHAIN POINT':'NEXT CHECKPOINT')+'</span><b>'+trajectoryCheckpointLabel(personalTrajectory)+'</b></div><div><span>LOGIC</span><b>YOU vs YOU</b></div></div>'+
+      '<div class="data-note">'+(locale==='fr'?'Aucun classement de Motion Score, Motion Age ou donnée de santé. Les repères Arena servent à objectiver votre progression personnelle et à préparer le prochain checkpoint.':'No ranking of Motion Score, Motion Age or health data. Arena benchmarks are used to objectify personal progression and prepare the next checkpoint.')+'</div>';
+  }
+  return '<p>'+(locale==='fr'?'Arena est un espace de réévaluation personnelle : choisissez un repère, rejouez-le dans le temps et observez votre progression. Connectez Pulse pour relier Arena à votre trajectoire.':'Arena is a personal reassessment space: choose a benchmark, repeat it over time and observe your progression. Connect Pulse to link Arena to your trajectory.')+'</p>'+
+    '<div class="panel-grid"><div><span>CONTROL</span><b>Balance · Stability</b></div><div><span>POWER</span><b>Lower limb</b></div><div><span>CAPACITY</span><b>Stand · Move</b></div><div><span>PRINCIPLE</span><b>YOU vs YOU</b></div></div>'+
+    '<div class="data-note">'+(locale==='fr'?'World ne transforme pas vos données de santé en compétition. Les challenges sociaux restent séparés de cette logique clinique et personnelle.':'World does not turn health data into competition. Social challenges remain separate from this clinical and personal logic.')+'</div>';
+}
+function showArenaStation(id){
+  const station=arenaStationCopy(id),recommended=!!personalTrajectory&&trajectoryArenaStationId()===id;
+  const priority=personalTrajectory?.priority||personalTrajectory?.current_action||'';
+  const body='<section class="library-focus-detail"><span>KŌMØ ARENA · '+station.title[locale]+'</span><h3>'+station.focus[locale]+'</h3>'+
+    (recommended?'<div class="priority-card"><b>'+(locale==='fr'?'POURQUOI MAINTENANT':'WHY NOW')+'</b>'+(locale==='fr'?'Ce repère est mis en avant car votre trajectoire actuelle porte sur : ':'This benchmark is highlighted because your current trajectory focuses on: ')+escHtml(priority)+'</div>':'')+
+    '<p>'+station.why[locale]+'</p>'+
+    (personalTrajectory?'<div class="trajectory-mini"><span>'+(locale==='fr'?'PROCHAIN CHECKPOINT':'NEXT CHECKPOINT')+'</span><b>'+trajectoryCheckpointLabel(personalTrajectory)+'</b></div>':'')+
+    '<div class="data-note">'+(locale==='fr'?'Le repère sert à votre suivi longitudinal. Il n’est pas présenté comme une prescription automatique et n’alimente aucun classement de santé.':'This benchmark supports longitudinal follow-up. It is not presented as an automatic prescription and does not feed any health ranking.')+'</div></section>';
+  openPanel('ARENA · '+station.title[locale],recommended?(locale==='fr'?'Repère lié à votre trajectoire.':'Benchmark linked to your trajectory.'):(locale==='fr'?'Repère personnel.':'Personal benchmark.'),body,[
+    {label:locale==='fr'?'RETOUR ARENA':'BACK TO ARENA',onClick:showArena},
+    {label:locale==='fr'?'CONTINUER':'CONTINUE',primary:true,onClick:closePanel}
+  ]);
 }
 function showArena(){
-  openPanel('ARENA',locale==='fr'?'Performance · progression · communauté.':'Performance · progression · community.',arenaHtml(),[
-    {label:copy[locale].back,onClick:returnToHall},
-    {label:locale==='fr'?'DÉFIS DU JOUR':'DAILY CHALLENGES',primary:true,onClick:showChallenges},
-    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}
-  ]);
+  const actions=[{label:copy[locale].back,onClick:returnToHall},{label:locale==='fr'?'EXPLORER LES REPÈRES':'EXPLORE BENCHMARKS',primary:true,onClick:closePanel}];
+  if(personalTrajectory)actions.push({label:locale==='fr'?'VOIR MA TRAJECTOIRE':'VIEW MY TRAJECTORY',onClick:showJourneyPanel});
+  openPanel('ARENA',locale==='fr'?'Réévaluation · comparaison à soi-même · progression.':'Reassessment · self-comparison · progression.',arenaHtml(),actions);
 }
 function showLibraryFocus(index=0){
   const topics=trajectoryLibraryTopics(),topic=topics[Math.max(0,Math.min(2,index))]||topics[0];
@@ -6472,7 +6528,7 @@ function updateLocation(){
   let label='KŌMØ HALL',purpose=locale==='fr'?'VOTRE POINT CENTRAL':'YOUR HOME BASE',nav='hall';
   if(inTwinZone()){label='FUNCTIONAL TWIN';purpose=locale==='fr'?'COMPRENDRE VOTRE MOUVEMENT':'UNDERSTAND YOUR MOVEMENT';nav='twin';completeJourney('twin',{silent:true})}
   else if(inFitnessZone()){label='KŌMØ FITNESS CLUB';purpose=locale==='fr'?'BOUGER · S’ENTRAÎNER · PROGRESSER':'MOVE · TRAIN · PROGRESS';nav='';completeJourney('rehab',{silent:true})}
-  else if(inArenaZone()){label='ARENA';purpose=locale==='fr'?'DÉFIS · PROGRESSION · COMMUNAUTÉ':'CHALLENGES · PROGRESSION · COMMUNITY';nav='';completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
+  else if(inArenaZone()){label='ARENA';purpose=locale==='fr'?'RÉÉVALUER · COMPARER · PROGRESSER':'REASSESS · COMPARE · PROGRESS';nav='';completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
   else if(inLibraryZone()){label='SCIENCE LIBRARY';purpose=locale==='fr'?'SCIENCE · MÉTHODE · SOURCES':'SCIENCE · METHOD · SOURCES';nav='library';completeJourney('library',{silent:true})}
   else if(inMarinaZone()){label='KŌMØ MARINA';purpose=locale==='fr'?'YACHTING · HOSPITALITY · RETREATS':'YACHTING · HOSPITALITY · RETREATS';nav=''}
   else if(inVillaZone()){label='RETREAT VILLA';purpose=locale==='fr'?'PRIVATE LONGEVITY EXPERIENCE':'PRIVATE LONGEVITY EXPERIENCE';nav=''}
@@ -7150,7 +7206,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.4.0-library-trajectory',
+  version:'8.5.0-arena-trajectory',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),

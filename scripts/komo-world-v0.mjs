@@ -17,9 +17,9 @@ await readFile(localThreeCore,'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const pulseHtml=await readFile('pulse-app/index.html','utf8');
 const checks=[
-  ['V8.4 runtime trace bootstrap present',html.includes("import('./world-v1.js?v=8.4.0-library-trajectory')")&&html.includes('__KOMO_REPORT_BOOT_ERROR')&&html.includes("fetch('/api/world-boot-error'")],
+  ['V8.5 runtime trace bootstrap present',html.includes("import('./world-v1.js?v=8.5.0-arena-trajectory')")&&html.includes('__KOMO_REPORT_BOOT_ERROR')&&html.includes("fetch('/api/world-boot-error'")],
   ['V7.6.4 local Three bundle complete',runtime.includes("import * as THREE from './vendor/three.module.js'")&&!runtime.includes('cdn.jsdelivr.net/npm/three@')&&localThreeSource.includes("from './three.core.js'")],
-  ['V8.4 HTML cache bust present',html.includes('world-v1.css?v=8.4.0-library-trajectory')&&html.includes('world-v1.js?v=8.4.0-library-trajectory')&&html.includes('name="komo-world-version" content="8.4.0-library-trajectory"')],
+  ['V8.5 HTML cache bust present',html.includes('world-v1.css?v=8.5.0-arena-trajectory')&&html.includes('world-v1.js?v=8.5.0-arena-trajectory')&&html.includes('name="komo-world-version" content="8.5.0-arena-trajectory"')],
   ['V7.2.1 strict iPhone visual reference present',runtime.includes('const iphoneVisualReference=true')&&runtime.includes('const visualLowPower=iphoneVisualReference')&&runtime.includes("classList.toggle('desktop-visual-v5',false)")],
   ['V7.2 living population present',runtime.includes('const populationV72=[')&&runtime.includes("label:'Aiko'")&&runtime.includes("label:'Chiara'")&&runtime.includes("label:'Salma'")&&runtime.includes("label:'Samuel'")&&runtime.includes("body:'broad'")&&runtime.includes("hairStyle:'bun'")],
 
@@ -89,7 +89,7 @@ const checks=[
   ['World Hub Life items present',runtime.includes('KOMO_LIFE_ITEMS_V32')&&runtime.includes('function showLifeItem')],
   ['World Hub avatar studio present',runtime.includes('AVATAR_KEY')&&runtime.includes('function showAvatarStudio')],
   ['V7.2.1 iPhone cloud composition present',runtime.includes('const cloudCount=1')&&runtime.includes('const cloudTextures=[makeCloudTexture(1),makeCloudTexture(4),makeCloudTexture(7)]')&&runtime.includes('cloud.userData.baseOpacity')&&runtime.includes('if(living.clouds?.length)')],
-  ['Immersive Hub V7.3.2 entry present',runtime.includes("version:'8.4.0-library-trajectory'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
+  ['Immersive Hub V7.3.2 entry present',runtime.includes("version:'8.5.0-arena-trajectory'")&&runtime.includes('KOMO_HEALTH_STATION_V33')&&runtime.includes('KOMO_ENTRY_GUIDE_V33')],
   ['Immersive Hub V4.5 portals present',runtime.includes('KOMO_PORTAL_ARCH_V45_')&&runtime.includes('KOMO_DESTINATION_VESTIBULES_V45')&&runtime.includes('function updateDestinationDoors')],
   ['Immersive Hub V3.3 Life retail present',runtime.includes('KOMO_LIFE_RETAIL_WALL_V33')&&runtime.includes("id:'life_jacket'")&&runtime.includes("id:'life_band'")],
   ['Immersive Hub NPC roles present',runtime.includes("quest:'leo'")&&runtime.includes("quest:'theo'")&&runtime.includes("quest:'maya'")&&runtime.includes("functionLabel:'FITNESS COACH'")&&runtime.includes("functionLabel:'ARENA COACH'")],
@@ -114,7 +114,7 @@ const checks=[
   ['V7 matte human materials present',runtime.includes('roughness:.86,metalness:0')&&runtime.includes('roughness:.78,metalness:.004')&&runtime.includes('color:0xe4e0d7')&&runtime.includes('color:0xa98658,roughness:.48,metalness:.24')],
   ['V7 premium idle present',runtime.includes('const idleBreath=Math.sin(now*.00115)')&&runtime.includes('const idleWeight=Math.sin(now*.00052)')&&runtime.includes('av.headGroup.rotation.y=Math.sin(now*.00034)*.016')],
   ['V7.1 oversized proportions present',runtime.includes('hips.scale.set(1.18,.58,.82)')&&runtime.includes('new THREE.CylinderGeometry(.285,.245,.625')&&runtime.includes('new THREE.CapsuleGeometry(.034,.064')&&runtime.includes('const jacketYoke=box')&&multiplayer.includes('q.scale.set(1.18,.58,.82)')&&multiplayer.includes('new THREE.CylinderGeometry(.285,.245,.625')],
-  ['One World continuous campus present',runtime.includes("version:'8.4.0-library-trajectory'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  setCameraMode('first');\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
+  ['One World continuous campus present',runtime.includes("version:'8.5.0-arena-trajectory'")&&runtime.includes('KOMO_ONE_WORLD_LINKS_V37')&&runtime.includes('function inTwinZone')&&runtime.includes("mode='world';\n  setCameraMode('first');\n  world.visible=true;twinRoom.visible=true;rehabRoom.visible=true;arenaRoom.visible=true")],
   ['transient zone label present',runtime.includes("function showWorldZone(label,purpose='')")&&runtime.includes("locationChip?.classList.add('show')")&&runtime.includes("locationPurpose.textContent=purpose")],
   ['results dashboard V4.1 present',runtime.includes('results-hero-v41')&&runtime.includes('score-orbit')&&runtime.includes('results-domains')&&runtime.includes('results-timeline')&&runtime.includes('results-signals')],
   ['hall lighting V7.2.1 iPhone profile compatible',runtime.includes('KOMO_HALL_LIGHTING_V43')&&runtime.includes('KOMO_HALL_PRACTICALS_V43')&&runtime.includes('function addHallSpot')&&runtime.includes('hallLightProfile')&&runtime.includes('renderer.toneMappingExposure=1.17')],
@@ -221,6 +221,7 @@ const checks=[
   ['V8.2 Twin is a priority-led body-reading space',runtime.includes("KOMO_TWIN_DOMAIN_")&&runtime.includes("KOMO_TWIN_LONGITUDINAL_PLINTH_V82_")&&runtime.includes('function trajectoryTwinDomainId')&&runtime.includes('focusActive?.72')&&!runtime.includes("dataTotem(twinPremium,x,4.8")],
   ['V8.3 Fitness is the trajectory action layer',runtime.includes("KOMO_FITNESS_ACTION_FLOOR_V83")&&runtime.includes("KOMO_FITNESS_'+id.toUpperCase()+'_ZONE_V83")&&runtime.includes('function trajectoryFitnessStationId')&&runtime.includes("recommended?.62")&&runtime.includes("Recommandé pour votre priorité · ouvrir")],
   ['V8.4 Library is a trajectory reading room',runtime.includes("KOMO_LIBRARY_FOCUS_OBJECTS_V84")&&runtime.includes("KOMO_LIBRARY_READING_OBJECT_V84_")&&runtime.includes("id:'library_focus_1'")&&runtime.includes('function showLibraryFocus(index=0)')&&runtime.includes('trajectoryLibraryTopics()[0]')],
+  ['V8.5 Arena is a personal progression room',runtime.includes("KOMO_ARENA_PROGRESS_V85")&&runtime.includes("KOMO_ARENA_PROGRESS_STATION_V85_")&&runtime.includes('function trajectoryArenaStationId')&&runtime.includes('function showArenaStation(id)')&&runtime.includes('YOU vs YOU')&&runtime.includes('REFERENCE · RETEST · FOLLOW-UP')],
   ['V8 personal data never falls back to demo numbers',runtime.includes('Les données personnelles non synchronisées restent volontairement vides')&&runtime.includes('no demo value is shown')],
   ['World entry gateway V5.5 present',html.includes('id="intro-pulse"')&&html.includes('id="intro-guest-name"')&&runtime.includes('function enterWorldAfterAuth')&&runtime.includes("'komo:world-session-ready'")],
   ['Open premium rooms V5.6 present',runtime.includes("KOMO_OPEN_ROOMS_V56")&&runtime.includes("KOMO_FITNESS_PREMIUM_V56")&&runtime.includes("KOMO_TWIN_PREMIUM_V56")&&runtime.includes("KOMO_ARENA_PREMIUM_V56")],
@@ -230,7 +231,7 @@ const checks=[
   ['Resilient guest entry V1.5 present',multiplayer.includes('signInAnonymously')&&multiplayer.includes('const connectGuest=async')&&multiplayer.includes('const startLocalGuest=async')&&multiplayer.includes("version:'1.5.0-arrival-ui'")&&multiplayer.includes("emitSessionReady('guest-local')")],
   ['Twin room V5.2 present',runtime.includes('KOMO_TWIN_ROOM_V52')&&runtime.includes('Data canopy')===false&&runtime.includes('new THREE.TorusGeometry(3.0+i*.34')],
   ['Fitness room V5.2 present',runtime.includes('KOMO_FITNESS_ROOM_V52')&&runtime.includes("'TODAY','MOVE · TRAIN · RECOVER'")&&runtime.includes('MAT.smokedGlass')],
-  ['Arena room V5.2 present',runtime.includes('KOMO_ARENA_ROOM_V52')&&runtime.includes("'LIVE ARENA','DAILY CHALLENGES · SOCIAL'")&&runtime.includes('new THREE.RingGeometry(2.05,2.18,64)')],
+  ['Arena room V5.2 present',runtime.includes('KOMO_ARENA_ROOM_V52')&&runtime.includes("'LIVE ARENA','PERSONAL PROGRESS · REASSESS'")&&runtime.includes('new THREE.RingGeometry(2.05,2.18,64)')],
   ['destination access V5.6 present',runtime.includes('left.position.x=-2.20;right.position.x=2.20')&&runtime.includes('progress:1')&&runtime.includes('d.progress+=(1-d.progress)')&&runtime.includes('doorTarget?11.2:4.6')],
   ['continuous navigation mesh V6.2 present',runtime.includes('Broad overlapping galleries make each room part of one continuous navigation mesh')&&runtime.includes('p.x>-57.2&&p.x<-32.15')&&runtime.includes('p.z>-45.5&&p.z<-26.25')&&runtime.includes('p.x>32.15&&p.x<57.2')],
   ['walkable guide routing V5.8 present',runtime.includes('function campusWalkingTarget')&&runtime.includes("manualCampusDestination==='")===false&&runtime.includes('if(manualCampusDestination)')&&runtime.includes("requestWalkTo('hall')")],
