@@ -241,7 +241,7 @@ const checks=[
   ['iPhone optical depth V7.2.1 present',runtime.includes('scene.fog=new THREE.Fog(0xd4d9d1,96,238)')&&runtime.includes("new THREE.PerspectiveCamera(54")],
   ['desktop cinematic disabled for iPhone parity V7.2.1',runtime.includes("desktopCinematic.visible=false")&&!runtime.includes("desktopCinematic.visible=!lowPower&&!emergencyPerformance")],
   ['desktop UI V5 present',css.includes('V5.0 Desktop Visual Revolution')&&css.includes('body.desktop-visual-v5 #world-canvas')&&css.includes('body.desktop-visual-v5::before')&&css.includes('body.desktop-visual-v5 .world-hud')],
-  ['desktop visual filter disabled for parity V7.2.1',css.includes('@media(min-width:901px) and (pointer:fine)')&&runtime.includes("classList.toggle('desktop-visual-v5',false)")],
+  ['V8.6 desktop visual treatment enabled at first paint',css.includes('@media(min-width:901px) and (pointer:fine)')&&runtime.includes("classList.toggle('desktop-visual-v5',desktopRenderHQ())")&&runtime.includes("classList.toggle('desktop-render-hq',desktopRenderHQ())")],
   ['V7 avatar visible-floor grounding present',runtime.includes('AVATAR_SOLE_COMPENSATION=.043')&&runtime.includes('function visualSurfaceOffsetAt')&&runtime.includes('KOMO_PLAYER_BODY_GROUNDING_V70')&&runtime.includes('av.shadow.position.y=surfaceOffset+.004')],
   ['camera follows visible floor V7.3 present',runtime.includes('const visualGround=visualSurfaceOffsetAt(player)')&&runtime.includes('player.y+visualGround+height')&&runtime.includes('player.y+visualGround+1.72+bob+breath')],
   ['NPC visible-floor grounding V5.0.1 present',runtime.includes('KOMO_NPC_BODY_GROUNDING_V501')&&runtime.includes('const npcLift=Math.max(0,npcSurface-.169)')],
