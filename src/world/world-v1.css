@@ -1837,3 +1837,8 @@ body.trajectory-connected .journey-hud{border-color:rgba(157,196,169,.26);backgr
 .hall-team-panel>h3{margin:8px 0 12px;font:500 27px/1.02 Georgia,serif;color:#f2ece2}
 .hall-team-panel>p{margin:0 0 14px;max-width:38ch;color:rgba(242,236,226,.62);line-height:1.65}
 body.trajectory-connected .location-chip{border-color:rgba(147,191,160,.16)}
+
+
+/* V8.2 — Functional Twin as a body-reading space */
+body.trajectory-connected .twin-domain-list button.trajectory-focus{transform:translateY(-1px);box-shadow:0 12px 28px rgba(94,143,111,.08)}
+.trajectory-results .priority-card{border-color:rgba(144,189,157,.20)}
