@@ -1,0 +1,297 @@
+/* KŌMØ Pulse — Editorial Fixed Frame v1 · 2026-09-29
+   Final presentation layer only. It does not own routes, auth, data or workflows.
+   Goal: one visual language across Pulse + an app-like fixed viewport with no document scroll. */
+
+:root{
+  --kp-frame-gap:14px;
+  --kp-frame-radius:22px;
+  --kp-frame-radius-sm:14px;
+  --kp-frame-topbar:78px;
+  --kp-frame-border:1px solid rgba(44,86,62,.10);
+  --kp-frame-shadow:0 12px 34px rgba(35,63,48,.075);
+}
+
+/* ---------- 1. Fixed application frame ---------- */
+html{
+  width:100%;
+  height:100%;
+  min-height:100%;
+  overflow:hidden!important;
+  overscroll-behavior:none;
+  background:var(--kp-bg,#f4f7f5)!important;
+}
+body{
+  width:100%;
+  height:100%;
+  min-height:0!important;
+  max-height:100dvh;
+  overflow:hidden!important;
+  overscroll-behavior:none;
+}
+body.khome-final-v1{overflow:hidden!important}
+#appShell.app-shell,.app-shell{
+  width:100%;
+  height:100dvh!important;
+  min-height:0!important;
+  max-height:100dvh!important;
+  overflow:hidden!important;
+}
+.main-shell{
+  height:100dvh!important;
+  min-height:0!important;
+  max-height:100dvh!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  padding-bottom:18px!important;
+}
+.topbar{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 auto!important;
+  min-height:var(--kp-frame-topbar)!important;
+  margin-bottom:0!important;
+  padding-top:18px!important;
+  padding-bottom:15px!important;
+  background:rgba(244,247,245,.94)!important;
+}
+.view-root,#viewRoot{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  overflow:hidden!important;
+  padding-top:12px!important;
+  padding-bottom:0!important;
+}
+#viewRoot>*{
+  min-height:0!important;
+  max-height:100%!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+  scroll-behavior:smooth;
+}
+#viewRoot>*::-webkit-scrollbar,
+.auth-panel-wrap::-webkit-scrollbar,
+.auth-brand::-webkit-scrollbar,
+.kam-sheet::-webkit-scrollbar,
+.kcp-table-wrap::-webkit-scrollbar,
+.k2tw-table-wrap::-webkit-scrollbar,
+.kav2-table-wrap::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}
+.sidebar{
+  height:100dvh!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+/* Route-specific historical overrides may re-enable body scrolling. Never allow it. */
+body[class*="home"],body[class*="route"],body[class*="mode"]{overscroll-behavior:none}
+body.khome-final-v1 [data-my-komo-home]{
+  height:100%!important;
+  min-height:0!important;
+  max-height:100%!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding-bottom:28px!important;
+}
+
+/* ---------- 2. One editorial grammar ---------- */
+#viewRoot{
+  --pulse-card-bg:#fff;
+  --pulse-card-line:#dce6df;
+  --pulse-card-shadow:0 12px 32px rgba(35,63,48,.07);
+  --pulse-title:#17251d;
+  --pulse-muted:#66756c;
+}
+#viewRoot :is(h1,h2,h3,h4,h5,h6){
+  font-family:"Manrope","DM Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+  color:var(--pulse-title)!important;
+  text-wrap:balance;
+}
+#viewRoot :is(p,li,small,label,span){
+  text-rendering:geometricPrecision;
+}
+#viewRoot :is(p,small,li){color:var(--pulse-muted)}
+#viewRoot :is(.eyebrow,[class*="-kicker"],[class*="-label"]){
+  letter-spacing:.12em;
+}
+#viewRoot :is(
+  .card,.hero-card,.metric-card,.explorer-card,.clinical-card,
+  .kcv2-card,.kcv2-metric,.kcv2-panel,.kcv2-empty,
+  .kr2-card,.kr2-section,.kr2-connected-card,.kr2-domain,.kr2-row,.kr2-clinical-card,.kr2-clinical-empty,
+  .kcanon,.kcanon-home,.kcanon-account,.kcanon-doc,.kcanon-metric,.kcanon-finding,.kcanon-doc-side,
+  .km4-score,.km4-komo,.km4-domain,.km4-next,.km4-empty,
+  .kc4-card,.kc4-appt,.kc4-plan-item,.kc4-control,.kc4-empty,
+  .ag4-card,.ag4-next,.ag4-book,.ag4-upcoming,.ag4-network,.ag4-day,.ag4-slot,.ag4-weekbar,.ag4-shortcut,
+  .mkv4-card,.mkv4-stats,.mkv4-daily,.mkv4-mini,.mkv4-badge,.mkv4-build-box,.mkv4-quest,
+  .kpv-card,.kah-card,.kap-card,
+  .kmsg-head,.kmsg-layout,.kmsg-people,.kmsg-conversation,.kmsg-conv-head,.kmsg-thread,.kmsg-empty,
+  .kcp-head,.kcp-tabs,.kcp-patientbar,.kcp-card,.kcp-empty,
+  .kav2-hero,.kav2-tabs,.kav2-card,.kav2-registry-row,.kav2-row,.kav2-patient-row,.kav2-mini,.kav2-detail,.kav2-empty,.kav2-loading,.kav2-denied,
+  .k2tw-head,.k2tw-kpi,.k2tw-row,.k2tw-card,.k2tw-panel,.k2tw-empty,
+  .kac-head,.kac-center,.kac-card,
+  .tests-v1-card,.tests-v1-panel,.questionnaire-card,.questionnaire-panel,
+  .clm-card,.clm-panel,.clm-step,.pro-card,.admin-card
+){
+  border-radius:var(--kp-frame-radius)!important;
+  border-color:var(--pulse-card-line)!important;
+  box-shadow:var(--pulse-card-shadow)!important;
+}
+
+/* Large route wrappers should feel like software canvases, not pages. */
+#viewRoot :is(.kcp,.kav2,.k2tw,.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.tests-v1-root){
+  width:100%!important;
+  max-width:1500px!important;
+  margin:0 auto!important;
+  padding-bottom:18px!important;
+}
+.kcp{
+  min-height:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  padding-top:0!important;
+}
+.kcp-head,.kav2-hero,.k2tw-head,.kpv-hero{
+  border-radius:24px!important;
+}
+.kcp-tabs,.kav2-tabs{
+  position:relative!important;
+  top:auto!important;
+}
+
+/* Consistent action language. */
+#viewRoot :is(
+  button,.primary-button,.secondary-button,.ghost-button,
+  .kcv2-btn,.kr2-btn,.kcanon-btn,.km4-btn,.kc4-btn,.ag4-btn,.mkv4-btn,.kap-btn,.kcp-btn,.k2tw-btn,.kac-btn
+){
+  border-radius:12px!important;
+  min-height:40px;
+  font-weight:600;
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease!important;
+}
+#viewRoot :is(input,select,textarea){
+  border-radius:12px!important;
+}
+@media(hover:hover) and (pointer:fine){
+  #viewRoot :is(
+    button,.primary-button,.secondary-button,.ghost-button,
+    .kcv2-btn,.kr2-btn,.kcanon-btn,.km4-btn,.kc4-btn,.ag4-btn,.mkv4-btn,.kap-btn,.kcp-btn,.k2tw-btn,.kac-btn
+  ):not(:disabled):hover{transform:translateY(-1px)}
+}
+
+/* ---------- 3. Internal scrolling only where content genuinely overflows ---------- */
+:is(.kcp-view,.kav2-grid,.k2tw-grid,.kmsg-thread,.kcp-table-wrap,.k2tw-table-wrap,.kav2-table-wrap,.ag4-calendar,.kc4-list,.kr2-list){
+  scrollbar-width:none!important;
+}
+:is(.kcp-view,.kav2-grid,.k2tw-grid,.kmsg-thread,.kcp-table-wrap,.k2tw-table-wrap,.kav2-table-wrap,.ag4-calendar,.kc4-list,.kr2-list)::-webkit-scrollbar{
+  display:none!important;
+}
+
+/* ---------- 4. Adaptive / mobile shell ---------- */
+html[data-adaptive-shell] body{height:100dvh!important;overflow:hidden!important}
+html[data-adaptive-shell] .main-shell{
+  height:100dvh!important;
+  max-height:100dvh!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  padding-top:0!important;
+  overflow:hidden!important;
+}
+html[data-adaptive-shell] .topbar{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 auto!important;
+  margin-bottom:0!important;
+}
+html[data-adaptive-shell] .kam-role-row{
+  position:relative!important;
+  top:auto!important;
+  flex:0 0 auto!important;
+  margin-bottom:8px!important;
+}
+html[data-adaptive-shell] #viewRoot{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  overflow:hidden!important;
+  padding-top:4px!important;
+}
+html[data-adaptive-shell] #viewRoot>*{
+  max-height:100%!important;
+  padding-bottom:18px!important;
+}
+html[data-adaptive-shell][data-adaptive-mode="pro"] .main-shell,
+html[data-adaptive-shell][data-adaptive-mode="admin"] .main-shell,
+html[data-adaptive-shell][data-adaptive-mode="patient"] .main-shell{
+  padding-bottom:calc(var(--kam-bottom,76px) + 20px + env(safe-area-inset-bottom))!important;
+}
+
+/* ---------- 5. Authentication is also a fixed screen ---------- */
+#authScreen.auth-screen{
+  height:100dvh!important;
+  min-height:0!important;
+  max-height:100dvh!important;
+  overflow:hidden!important;
+}
+#authScreen .auth-brand,#authScreen .auth-panel-wrap{
+  min-height:0!important;
+  max-height:100dvh!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-width:none!important;
+}
+#authScreen .auth-panel{
+  margin-block:auto!important;
+}
+
+/* ---------- 6. Desktop densification: everything important should fit in the first frame ---------- */
+@media(min-width:1100px){
+  .main-shell{padding-bottom:14px!important}
+  .topbar{min-height:74px!important;padding-top:14px!important;padding-bottom:12px!important}
+  #viewRoot{padding-top:10px!important}
+  .kcp-head{min-height:150px!important;padding:24px 26px!important}
+  .kcp-head h2{font-size:clamp(30px,3.2vw,46px)!important}
+  .kcp-view{min-height:0!important}
+  .kcp-card{padding:18px!important}
+  .kcp-kpi{min-height:92px!important;padding:14px 15px!important}
+  .kpv{gap:12px!important}
+  .kpv-hero{padding:22px 24px!important}
+  .kpv-card{padding:20px 22px!important}
+}
+
+/* ---------- 7. Mobile: fixed shell, compact hierarchy ---------- */
+@media(max-width:860px){
+  :root{--kp-frame-topbar:66px;--kp-frame-radius:18px}
+  .main-shell{padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
+  .topbar{min-height:66px!important;padding-top:10px!important;padding-bottom:9px!important}
+  #viewRoot{padding-top:5px!important}
+  #viewRoot>*{padding-bottom:10px!important}
+  #viewRoot :is(.kcp,.kav2,.k2tw,.kcv2,.kr2,.km4,.kc4,.ag4,.mkv4,.kpv,.kah,.kap,.kmsg-pro,.kmsg-patient-center,.tests-v1-root){
+    padding-bottom:10px!important;
+  }
+  .kcp-head,.kav2-hero,.k2tw-head,.kpv-hero{border-radius:18px!important}
+}
+
+@media(max-width:620px){
+  #authScreen.auth-screen{display:block!important}
+  #authScreen .auth-brand{display:none!important}
+  #authScreen .auth-panel-wrap{
+    height:100dvh!important;
+    max-height:100dvh!important;
+    padding-top:max(18px,env(safe-area-inset-top))!important;
+    padding-bottom:max(18px,env(safe-area-inset-bottom))!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  #viewRoot>*{scroll-behavior:auto!important}
+  #viewRoot :is(button,.primary-button,.secondary-button,.ghost-button,.kcv2-btn,.kr2-btn,.kcanon-btn,.km4-btn,.kc4-btn,.ag4-btn,.mkv4-btn,.kap-btn,.kcp-btn,.k2tw-btn,.kac-btn){
+    transition:none!important;
+  }
+}
