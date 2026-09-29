@@ -21,7 +21,7 @@ const css=await readFile(join(root,'pulse-app','patient-home-command-v1.css'),'u
 const checks=[
   ['legacy KEY reparent runtime absent',!final.includes('home-key-position-v1.js')],
   ['legacy KEY position stylesheet absent',!final.includes('home-key-position-v1.css')],
-  ['Home V8 canonical source present',home.includes("const VERSION='8.0.0-cockpit'")&&home.includes('data-khome-v8')&&home.includes("host.dataset.khomeOwner='patient-home-command-v1@8'")],
+  ['Home canonical guided trajectory source present',home.includes("const VERSION='8.1.0-guided-trajectory'")&&home.includes('data-khome-v8')&&home.includes("host.dataset.khomeOwner='patient-home-command-v1@8'")],
   ['Home V8 uses released scores only',home.includes("from('scores')")&&home.includes("eq('release_status','released')")],
   ['Home V8 uses real Connected daily metrics',home.includes("from('wearable_daily_metrics')")&&home.includes('sleep_minutes')&&home.includes('resting_hr')],
   ['Home V8 uses persisted future consultations',home.includes("from('organization_appointments')")&&home.includes("gte('scheduled_start'")],
