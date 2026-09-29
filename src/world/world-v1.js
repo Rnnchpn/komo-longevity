@@ -66,6 +66,11 @@ const resultsToggle=$('#results-toggle');
 const campusToggle=$('#campus-toggle');
 const journeyToggle=$('#journey-toggle');
 const membershipToggle=$('#membership-toggle');
+const worldNextStep=$('#world-next-step');
+const worldAccessStateEl=$('#world-access-state');
+const worldNextKicker=$('#world-next-kicker');
+const worldNextTitle=$('#world-next-title');
+const worldNextMeta=$('#world-next-meta');
 const menuMotion=$('#menu-motion');
 const menuAge=$('#menu-age');
 const menuCurrentZone=$('#menu-current-zone');
@@ -97,14 +102,14 @@ const baseline=core.snapshots[0];
 const copy={
   fr:{
     today:'AUJOURD\'HUI · EXPLORER VOTRE TWIN',
-    introKicker:'KŌMØ WORLD · SPATIAL LONGEVITY',
-    intro1:'Votre corps.',intro2:'Votre trajectoire.',
-    introBody:'Entrez dans un espace personnel conçu pour comprendre votre mouvement, choisir une action et suivre votre progression dans le temps.',
-    introButton:'ENTRER EN INVITÉ',
-    introPulse:'CRÉER / SE CONNECTER',
-    introPulseMeta:'Profil · progression · données',
-    introGuest:'MODE INVITÉ',introGuestPlaceholder:'Votre prénom ou pseudo',
-    introAuthNote:'Les deux modes rejoignent le même World multijoueur. Le mode invité est temporaire.',
+    introKicker:'KŌMØ WORLD',
+    intro1:'Comprendre.',intro2:'Agir. Suivre.',
+    introBody:'Explorez World librement. Après un bilan KŌMØ, retrouvez ici votre trajectoire, votre action et votre prochain point.',
+    introButton:'DÉCOUVRIR WORLD GRATUITEMENT',
+    introPulse:'RETROUVER MA TRAJECTOIRE',
+    introPulseMeta:'J’ai déjà un compte ou un bilan KŌMØ',
+    introGuest:'DÉCOUVERTE LIBRE',introGuestPlaceholder:'Votre prénom ou pseudo',
+    introAuthNote:'Découvrir World est gratuit. Votre espace personnel s’active après un bilan KŌMØ.',
     action:'ACTION',
     deskTitle:'Ouvrir le KŌMØ Desk',deskCopy:'Orientation · trajectoire · espaces',
     twinTitle:'Functional Twin',twinCopy:'Courez à travers le seuil · accès automatique · E pour entrer maintenant',
@@ -117,14 +122,14 @@ const copy={
   },
   en:{
     today:'TODAY · EXPLORE YOUR TWIN',
-    introKicker:'KŌMØ WORLD · SPATIAL LONGEVITY',
-    intro1:'Your body.',intro2:'Your trajectory.',
-    introBody:'Enter a personal space designed to understand your movement, choose an action and follow your progress over time.',
-    introButton:'ENTER AS GUEST',
-    introPulse:'CREATE / SIGN IN',
-    introPulseMeta:'Profile · progress · data',
-    introGuest:'GUEST MODE',introGuestPlaceholder:'Your first name or nickname',
-    introAuthNote:'Both modes join the same multiplayer World. Guest mode is temporary.',
+    introKicker:'KŌMØ WORLD',
+    intro1:'Understand.',intro2:'Act. Follow.',
+    introBody:'Explore World freely. After a KŌMØ assessment, your trajectory, next action and next checkpoint live here.',
+    introButton:'DISCOVER WORLD FOR FREE',
+    introPulse:'OPEN MY TRAJECTORY',
+    introPulseMeta:'I already have a KŌMØ account or assessment',
+    introGuest:'FREE DISCOVERY',introGuestPlaceholder:'Your first name or nickname',
+    introAuthNote:'World is free to explore. Your personal space activates after a KŌMØ assessment.',
     action:'ACTION',
     deskTitle:'Open KŌMØ Desk',deskCopy:'Orientation · trajectory · spaces',
     twinTitle:'Enter Functional Twin',twinCopy:'Understand your movement over time',
@@ -4709,6 +4714,8 @@ function cleanTrajectory(input){
     priority:String(input.priority||'').slice(0,240),
     priorities:Array.isArray(input.priorities)?input.priorities.map(v=>String(v||'').slice(0,220)).filter(Boolean).slice(0,3):[],
     current_action:String(input.current_action||'').slice(0,280),
+    access_tier:String(input.access_tier||input.world_access||'personal').toLowerCase().slice(0,24),
+    access_until:String(input.access_until||input.world_access_until||'').slice(0,64),
     next_checkpoint:input.next_checkpoint&&typeof input.next_checkpoint==='object'?{
       scheduled_start:String(input.next_checkpoint.scheduled_start||'').slice(0,64),
       appointment_type:String(input.next_checkpoint.appointment_type||'').slice(0,80),
@@ -4796,12 +4803,33 @@ function trajectoryStepsHtml(t=personalTrajectory){
 
 const WORLD_INCLUDED_DAYS=90;
 const WORLD_PLUS_PRICE_EUR=24;
+function worldAccessTier(){
+  if(!personalTrajectory)return 'discovery';
+  return /plus|premium|world\+/.test(personalTrajectory.access_tier||'')?'plus':'personal';
+}
+function updateCommercialUI(){
+  const tier=worldAccessTier(),connected=tier!=='discovery';
+  const checkpoint=connected?trajectoryCheckpointLabel(personalTrajectory):null;
+  if(worldAccessStateEl)worldAccessStateEl.textContent=tier==='plus'?'WORLD+':connected?'PERSONAL':'DISCOVERY';
+  if(worldNextKicker)worldNextKicker.textContent=locale==='fr'?'PROCHAINE ÉTAPE':'NEXT STEP';
+  if(worldNextTitle)worldNextTitle.textContent=connected?(personalTrajectory.current_action||personalTrajectory.priority||(locale==='fr'?'Continuer ma trajectoire':'Continue my trajectory')):(locale==='fr'?'Faire un bilan KŌMØ':'Complete a KŌMØ assessment');
+  if(worldNextMeta)worldNextMeta.textContent=connected?((locale==='fr'?'Prochain point · ':'Next checkpoint · ')+checkpoint):(locale==='fr'?'Active votre trajectoire personnelle':'Activates your personal trajectory');
+  if(membershipToggle){
+    const small=membershipToggle.querySelector('small');
+    if(small)small.textContent=tier==='plus'
+      ?(locale==='fr'?'World+ actif · votre suivi continue':'World+ active · your follow-up continues')
+      :connected
+        ?('World+ · '+(locale==='fr'?'prolonger le suivi · ':'continue follow-up · ')+WORLD_PLUS_PRICE_EUR+' €/'+(locale==='fr'?'mois':'month'))
+        :('World+ · '+(locale==='fr'?'après votre bilan · ':'after your assessment · ')+WORLD_PLUS_PRICE_EUR+' €/'+(locale==='fr'?'mois':'month'));
+  }
+  document.body.dataset.worldAccess=tier;
+}
 function worldCommercialContact(kind='world-plus'){
   const base=locale==='fr'?'/fr/contact/':'/contact/';
   return base+'?interest='+encodeURIComponent(kind)+'&source=world';
 }
 function worldAccessHtml(){
-  const connected=!!personalTrajectory;
+  const tier=worldAccessTier(),connected=tier!=='discovery',plus=tier==='plus';
   const checkpoint=connected?trajectoryCheckpointLabel(personalTrajectory):(locale==='fr'?'Après votre bilan':'After your assessment');
   return '<section class="world-access-layer">'+
     '<div class="world-access-intro"><span>'+(locale==='fr'?'VOTRE PARCOURS':'YOUR PATH')+'</span><h3>'+(connected?(locale==='fr'?'Votre trajectoire est active.':'Your trajectory is active.'):(locale==='fr'?'World est gratuit à découvrir.':'World is free to discover.'))+'</h3><p>'+
@@ -4812,7 +4840,7 @@ function worldAccessHtml(){
     '<div class="world-access-steps">'+
       '<article class="'+(connected?'done':'current')+'"><i>'+(connected?'✓':'1')+'</i><div><span>'+(locale==='fr'?'DÉCOUVRIR':'DISCOVER')+'</span><b>World Discovery</b><small>'+(locale==='fr'?'Accès libre au World et à la science KŌMØ.':'Free access to World and KŌMØ science.')+'</small></div><strong>0 €</strong></article>'+
       '<article class="'+(connected?'current':'')+'"><i>'+(connected?'✓':'2')+'</i><div><span>'+(locale==='fr'?'APRÈS LE BILAN':'AFTER ASSESSMENT')+'</span><b>'+(locale==='fr'?'Accès personnel':'Personal access')+'</b><small>'+(locale==='fr'?'Trajectoire, Twin, résultats et programme · '+WORLD_INCLUDED_DAYS+' jours inclus.':'Trajectory, Twin, results and programme · '+WORLD_INCLUDED_DAYS+' days included.')+'</small></div><strong>'+(connected?(locale==='fr'?'ACTIF':'ACTIVE'):(locale==='fr'?'INCLUS':'INCLUDED'))+'</strong></article>'+
-      '<article class="plus"><i>＋</i><div><span>'+(locale==='fr'?'CONTINUER':'CONTINUE')+'</span><b>World+</b><small>'+(locale==='fr'?'Conserver votre trajectoire entre deux checkpoints KŌMØ.':'Keep your trajectory active between KŌMØ checkpoints.')+'</small></div><strong>'+WORLD_PLUS_PRICE_EUR+' €<small>/mois</small></strong></article>'+
+      '<article class="plus '+(plus?'current':'')+'"><i>'+(plus?'✓':'＋')+'</i><div><span>'+(locale==='fr'?'CONTINUER':'CONTINUE')+'</span><b>World+</b><small>'+(locale==='fr'?'Conserver votre trajectoire entre deux checkpoints KŌMØ.':'Keep your trajectory active between KŌMØ checkpoints.')+'</small></div><strong>'+(plus?(locale==='fr'?'ACTIF':'ACTIVE'):WORLD_PLUS_PRICE_EUR+' €<small>/mois</small>')+'</strong></article>'+
     '</div>'+
     '<div class="world-plus-value"><span>WORLD+</span><div class="world-plus-features">'+
       '<b>'+(locale==='fr'?'Programme personnel':'Personal programme')+'</b>'+
@@ -4832,11 +4860,11 @@ function discoveryPathHtml(){
 }
 function showWorldAccess(){
   closeWorldMenu();
-  const connected=!!personalTrajectory;
+  const tier=worldAccessTier(),connected=tier!=='discovery',plus=tier==='plus';
   openPanel('KŌMØ WORLD+',connected?(locale==='fr'?'Continuer votre trajectoire.':'Continue your trajectory.'):(locale==='fr'?'De la découverte au suivi personnel.':'From discovery to personal follow-up.'),worldAccessHtml(),[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
     {label:connected?(locale==='fr'?'MA TRAJECTOIRE':'MY TRAJECTORY'):'PULSE',onClick:connected?showJourneyPanel:()=>{location.href='/pulse/'}},
-    {label:connected?(locale==='fr'?'DEMANDER WORLD+':'REQUEST WORLD+'):(locale==='fr'?'DEMANDER UN BILAN':'REQUEST AN ASSESSMENT'),primary:true,onClick:()=>{location.href=worldCommercialContact(connected?'world-plus':'assessment')}}
+    {label:plus?(locale==='fr'?'OUVRIR PULSE':'OPEN PULSE'):connected?(locale==='fr'?'DEMANDER WORLD+':'REQUEST WORLD+'):(locale==='fr'?'DEMANDER UN BILAN':'REQUEST AN ASSESSMENT'),primary:true,onClick:()=>{location.href=plus?'/pulse/':worldCommercialContact(connected?'world-plus':'assessment')}}
   ]);
 }
 
@@ -4860,7 +4888,7 @@ function ingestTrajectory(input){
   personalTrajectory=cleanTrajectory(input);
   try{if(personalTrajectory)sessionStorage.setItem(TRAJECTORY_SESSION_KEY,JSON.stringify(personalTrajectory));else sessionStorage.removeItem(TRAJECTORY_SESSION_KEY)}catch{}
   document.body.classList.toggle('trajectory-connected',!!personalTrajectory);
-  updateJourneyUI?.();updateHealthHUD?.();updateArenaTrajectoryVisuals?.();
+  updateJourneyUI?.();updateHealthHUD?.();updateArenaTrajectoryVisuals?.();updateCommercialUI?.();
   const today=$('#hud-today');if(today)today.textContent=personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||copy[locale].today):copy[locale].today;
   window.dispatchEvent(new CustomEvent('komo:trajectory-updated',{detail:personalTrajectory}));
   return personalTrajectory;
@@ -4927,8 +4955,8 @@ function updateJourneyUI(){
     if(journeyNextEl)journeyNextEl.textContent=t.current_action||t.priority||(locale==='fr'?'Votre trajectoire KŌMØ':'Your KŌMØ trajectory');
     if(journeyXpEl)journeyXpEl.textContent=days!=null?days:'—';
     if(journeySideLabel)journeySideLabel.textContent=days!=null?(locale==='fr'?'JOURS':'DAYS'):(locale==='fr'?'POINT':'NEXT');
-    if(journeyMenuLevel)journeyMenuLevel.textContent=String(t.phase_index).padStart(2,'0');
-    if(journeyMenuXp)journeyMenuXp.textContent=checkpoint;
+    if(journeyMenuLevel)journeyMenuLevel.textContent=checkpoint;
+    if(journeyMenuXp)journeyMenuXp.textContent=days!=null?(days+(locale==='fr'?' JOURS':' DAYS')):'PULSE';
     if(journeyTitleMenu)journeyTitleMenu.textContent=phase;
     if(journeyXpMenu)journeyXpMenu.textContent=checkpoint;
     if(journeyMenuProgress)journeyMenuProgress.style.width=(t.progress||t.phase_index*22)+'%';
@@ -4947,22 +4975,20 @@ function updateJourneyUI(){
     return;
   }
   if(journeyHud)journeyHud.classList.remove('trajectory-active');
-  if(journeyLevelLabel)journeyLevelLabel.textContent='WORLD LEVEL';
-  if(journeySideLabel)journeySideLabel.textContent='XP';
-  const level=journeyLevelForXp(journey.xp),nextLevel=journeyNextLevel(level),nextMission=journeyNextMission();
-  const floor=level.min,ceil=nextLevel?nextLevel.min:Math.max(level.min+1,journey.xp);
-  const pct=nextLevel?THREE.MathUtils.clamp((journey.xp-floor)/(ceil-floor)*100,0,100):100;
-  if(journeyLevelEl)journeyLevelEl.textContent=String(level.level).padStart(2,'0');
-  if(journeyTitleEl)journeyTitleEl.textContent=level.title[locale];
-  if(journeyXpEl)journeyXpEl.textContent=journey.xp;
-  if(journeyProgressEl)journeyProgressEl.style.width=pct+'%';
-  if(journeyNextEl)journeyNextEl.textContent=locale==='fr'?'Connectez Pulse pour activer votre trajectoire':'Connect Pulse to activate your trajectory';
-  if(journeyMenuLevel)journeyMenuLevel.textContent=String(level.level).padStart(2,'0');
-  if(journeyMenuXp)journeyMenuXp.textContent=journey.xp+' XP';
-  if(journeyTitleMenu)journeyTitleMenu.textContent=locale==='fr'?'EXPLORATION':'EXPLORATION';
-  if(journeyXpMenu)journeyXpMenu.textContent=journey.xp+' XP';
-  if(journeyMenuProgress)journeyMenuProgress.style.width=pct+'%';
-  if(journeyMenuNext)journeyMenuNext.textContent=locale==='fr'?'Mode invité · exploration libre':'Guest mode · free exploration';
+  if(journeyLevelLabel)journeyLevelLabel.textContent=locale==='fr'?'ACCÈS':'ACCESS';
+  if(journeySideLabel)journeySideLabel.textContent=locale==='fr'?'PRIX':'PRICE';
+  const level=journeyLevelForXp(journey.xp);
+  if(journeyLevelEl)journeyLevelEl.textContent='FREE';
+  if(journeyTitleEl)journeyTitleEl.textContent='DISCOVERY';
+  if(journeyXpEl)journeyXpEl.textContent='0 €';
+  if(journeyProgressEl)journeyProgressEl.style.width='0%';
+  if(journeyNextEl)journeyNextEl.textContent=locale==='fr'?'Explorez librement · bilan pour personnaliser':'Explore freely · assessment to personalise';
+  if(journeyMenuLevel)journeyMenuLevel.textContent='—';
+  if(journeyMenuXp)journeyMenuXp.textContent=locale==='fr'?'APRÈS BILAN':'AFTER ASSESSMENT';
+  if(journeyTitleMenu)journeyTitleMenu.textContent=locale==='fr'?'DÉCOUVERTE':'DISCOVERY';
+  if(journeyXpMenu)journeyXpMenu.textContent='0 €';
+  if(journeyMenuProgress)journeyMenuProgress.style.width='0%';
+  if(journeyMenuNext)journeyMenuNext.textContent=locale==='fr'?'Bilan KŌMØ → trajectoire personnelle':'KŌMØ assessment → personal trajectory';
   if(journeyLevelLadder)journeyLevelLadder.innerHTML=JOURNEY_LEVELS.map(l=>'<div class="journey-step '+(l.level<level.level?'done ':'')+(l.level===level.level?'current':'')+'"><span>'+String(l.level).padStart(2,'0')+'</span><b>'+l.title[locale]+'</b><small>'+l.desc[locale]+'</small></div>').join('');
   if(journeyBadgesEl)journeyBadgesEl.innerHTML=JOURNEY_BADGES.map(b=>'<span class="journey-badge '+(b.test()?'unlocked':'')+'">'+(b.test()?'✓ ':'')+b.label[locale]+'</span>').join('');
   if(journeyMissionsEl)journeyMissionsEl.innerHTML=JOURNEY_MISSIONS.slice(0,6).map((m,i)=>'<div class="journey-mission '+(journey.done[m.id]?'done':'')+'"><i>'+(journey.done[m.id]?'✓':String(i+1).padStart(2,'0'))+'</i><span><b>'+m.title[locale]+'</b><small>'+m.sub[locale]+'</small></span></div>').join('');
@@ -5040,15 +5066,15 @@ function updateHealthHUD(){
   const cmp=core.compare?.(baseline.snapshot_id,snap.snapshot_id,'world-v1');
   const delta=Number(cmp?.motion_score_delta)||0;
   const trend=delta>1?(locale==='fr'?'EN HAUSSE':'UP'):delta<-1?(locale==='fr'?'À SUIVRE':'WATCH'):(locale==='fr'?'STABLE':'STABLE');
-  healthStatusEl.textContent=score+' · '+(personal?trajectoryPhaseLabel(personal):trend);
-  healthMuscleEl.textContent=d.muscle!=null?Math.round(Number(d.muscle)):'—';
-  healthBalanceEl.textContent=d.balance!=null?Math.round(Number(d.balance)):'—';
-  healthCapacityEl.textContent=d.endurance!=null?Math.round(Number(d.endurance)):'—';
-  healthSourceEl.textContent=personal?'PULSE':(dailyHealth?.source||'DEMO');
-  if(menuMotion)menuMotion.innerHTML=score+'<small>/100</small>';
-  if(menuAge)menuAge.textContent=personal?.motion_age!=null?Math.round(Number(personal.motion_age)):(!personal?Math.round(Number(snap.motion_age)||0):'—');
-  $('#hud-motion').textContent=score||'—';
-  $('#hud-age').textContent=personal?.motion_age!=null?Math.round(Number(personal.motion_age)):(!personal?Math.round(Number(snap.motion_age)||0):'—');
+  healthStatusEl.textContent=personal?(score+' · '+trajectoryPhaseLabel(personal)):(locale==='fr'?'DÉCOUVERTE':'DISCOVERY');
+  healthMuscleEl.textContent=personal&&d.muscle!=null?Math.round(Number(d.muscle)):'—';
+  healthBalanceEl.textContent=personal&&d.balance!=null?Math.round(Number(d.balance)):'—';
+  healthCapacityEl.textContent=personal&&d.endurance!=null?Math.round(Number(d.endurance)):'—';
+  healthSourceEl.textContent=personal?'PULSE':'DEMO';
+  if(menuMotion)menuMotion.innerHTML=personal?(score+'<small>/100</small>'):'—';
+  if(menuAge)menuAge.textContent=personal?.motion_age!=null?Math.round(Number(personal.motion_age)):'—';
+  $('#hud-motion').textContent=personal?(score||'—'):'—';
+  $('#hud-age').textContent=personal?.motion_age!=null?Math.round(Number(personal.motion_age)):'—';
   if(typeof healthStationBars!=='undefined'){
     Object.entries(healthStationBars).forEach(([id,fill])=>{
       const v=THREE.MathUtils.clamp(Number(d[id])||0,0,100),h=.20+(v/100)*1.12;
@@ -6829,6 +6855,7 @@ resultsToggle?.addEventListener('click',showHealthOverview);
 campusToggle?.addEventListener('click',showCampusMap);
 journeyToggle?.addEventListener('click',()=>{closeWorldMenu();showJourneyPanel()});
 membershipToggle?.addEventListener('click',showWorldAccess);
+worldNextStep?.addEventListener('click',()=>{if(personalTrajectory)showJourneyPanel();else showWorldAccess()});
 cameraToggle.addEventListener('click',toggleCamera);
 guideToggle.addEventListener('click',toggleGuide);
 controlsToggle.addEventListener('click',()=>{closeWorldMenu();showControlsPanel()});
@@ -6851,6 +6878,8 @@ function applyLocale(){
   const guestLabel=intro.querySelector('.intro-guest-name>span');if(guestLabel)guestLabel.textContent=c.introGuest;
   if(introGuestName)introGuestName.placeholder=c.introGuestPlaceholder;
   if(introAuthNote)introAuthNote.textContent=c.introAuthNote;
+  const introPathLabels=locale==='fr'?['DÉCOUVRIR','MESURER','AGIR','SUIVRE']:['DISCOVER','ASSESS','ACT','FOLLOW'];
+  intro.querySelectorAll('.intro-path span').forEach((el,i)=>{if(introPathLabels[i])el.textContent=introPathLabels[i]});
   mobileAction.textContent=c.action;
   languageToggle.textContent=locale==='fr'?'EN':'FR';
   $('#world-menu-copy').textContent=personalTrajectory
@@ -6865,7 +6894,7 @@ function applyLocale(){
     controlHints[4].innerHTML='<kbd>'+keybinds.guide.map(keyLabel).join('/')+'</kbd> GUIDE';
     controlHints[5].innerHTML='<kbd>'+keybinds.menu.map(keyLabel).join('/')+'</kbd> MENU';
   }
-  updateJourneyUI();updateHealthHUD();
+  updateJourneyUI();updateHealthHUD();updateCommercialUI();
   if(currentInteraction){interactionTitle.textContent=currentInteraction.title();interactionCopy.textContent=currentInteraction.desc()}
   if(panel.classList.contains('open')){
     if(mode==='twin')showTwin();else if(mode==='rehab')showRehab();else if(mode==='arena')showArena();
@@ -7275,7 +7304,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.7.0-commerce-layer',
+  version:'8.8.0-clarity-commerce',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),

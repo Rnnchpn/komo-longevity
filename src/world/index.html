@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#18271f" />
-  <meta name="komo-world-version" content="8.7.0-commerce-layer" />
+  <meta name="komo-world-version" content="8.8.0-clarity-commerce" />
   <meta name="color-scheme" content="dark" />
   <title>KŌMØ World · Longevity in Motion</title>
   <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
-  <link rel="stylesheet" href="./world-v1.css?v=8.7.0-commerce-layer" />
+  <link rel="stylesheet" href="./world-v1.css?v=8.8.0-clarity-commerce" />
   <link rel="modulepreload" href="./vendor/three.module.js" />
 </head>
 <body>
@@ -54,7 +54,7 @@
   </button>
 
   <button id="health-hud" class="health-hud" type="button" aria-label="Ouvrir mon aperçu mouvement">
-    <span><small>YOUR HEALTH · MOVEMENT</small><strong id="health-status">84 · STABLE</strong></span>
+    <span><small>YOUR HEALTH · MOVEMENT</small><strong id="health-status">DÉCOUVERTE</strong></span>
     <span class="health-domains">
       <i><b>MUSCLE</b><em id="health-muscle">—</em></i>
       <i><b>BALANCE</b><em id="health-balance">—</em></i>
@@ -66,33 +66,36 @@
   <div id="world-reticle" class="world-reticle" aria-hidden="true"><i></i></div>
 
   <section id="intro" class="intro-card" aria-labelledby="intro-title">
-    <div class="intro-kicker">KŌMØ WORLD · SPATIAL LONGEVITY</div>
-    <h1 id="intro-title"><span>Votre corps.</span><em>Votre trajectoire.</em></h1>
-    <p>Entrez dans un espace personnel conçu pour comprendre votre mouvement, choisir une action et suivre votre progression dans le temps.</p>
+    <div class="intro-kicker">KŌMØ WORLD</div>
+    <h1 id="intro-title"><span>Comprendre.</span><em>Agir. Suivre.</em></h1>
+    <p>Explorez World librement. Après un bilan KŌMØ, retrouvez ici votre trajectoire, votre action et votre prochain point.</p>
     <div class="intro-path">
-      <span>MEASURE</span><i></i><span>UNDERSTAND</span><i></i><span>ACT</span><i></i><span>LIVE</span>
+      <span>DÉCOUVRIR</span><i></i><span>MESURER</span><i></i><span>AGIR</span><i></i><span>SUIVRE</span>
     </div>
-    <div class="intro-controls" aria-label="Commandes">
-      <span><b>01</b> COURIR <kbd>WASD</kbd></span>
-      <span><b>02</b> REGARDER <em>GLISSER</em></span>
-      <span><b>03</b> INTERAGIR <kbd>E</kbd></span>
-      <span><b>04</b> CAMÉRA <kbd>V</kbd></span>
-    </div>
+    <details class="intro-controls-details">
+      <summary>COMMANDES <small>WASD / ZQSD · souris · E</small></summary>
+      <div class="intro-controls" aria-label="Commandes">
+        <span><b>01</b> COURIR <kbd>WASD</kbd></span>
+        <span><b>02</b> REGARDER <em>GLISSER</em></span>
+        <span><b>03</b> INTERAGIR <kbd>E</kbd></span>
+        <span><b>04</b> CAMÉRA <kbd>V</kbd></span>
+      </div>
+    </details>
     <button id="intro-avatar-open" class="intro-avatar-open" type="button">
       <span>PERSONNAGE</span><strong>Personnaliser mon avatar</strong><em>Style · tenue · apparence</em>
     </button>
 
     <div class="intro-auth" aria-label="Connexion KŌMØ World">
       <button id="intro-pulse" class="intro-pulse" type="button">
-        <span>PULSE</span><strong>CRÉER / SE CONNECTER</strong><em>Profil · progression · données</em>
+        <span>PULSE</span><strong>RETROUVER MA TRAJECTOIRE</strong><em>J’ai déjà un compte ou un bilan KŌMØ</em>
       </button>
       <div class="intro-auth-separator"><i></i><span>OU</span><i></i></div>
       <label class="intro-guest-name" for="intro-guest-name">
-        <span>MODE INVITÉ</span>
+        <span>DÉCOUVERTE LIBRE</span>
         <input id="intro-guest-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Votre prénom ou pseudo" />
       </label>
-      <button id="intro-enter" class="intro-guest" type="button">ENTRER EN INVITÉ</button>
-      <small id="intro-auth-note">Les deux modes rejoignent le même World multijoueur. Le mode invité est temporaire.</small>
+      <button id="intro-enter" class="intro-guest" type="button">DÉCOUVRIR WORLD GRATUITEMENT</button>
+      <small id="intro-auth-note">Découvrir World est gratuit. Votre espace personnel s’active après un bilan KŌMØ.</small>
       <div id="intro-auth-status" class="intro-auth-status" role="status" aria-live="polite"></div>
     </div>
   </section>
@@ -127,7 +130,7 @@
         <span>KŌMØ WORLD</span>
         <strong>My KŌMØ</strong>
       </div>
-      <div class="world-menu-live"><i></i><span>LIVE</span></div>
+      <div class="world-menu-live world-access-chip"><i></i><span id="world-access-state">DISCOVERY</span></div>
       <button id="world-menu-close" type="button" aria-label="Fermer le menu">×</button>
     </div>
 
@@ -142,9 +145,16 @@
 
     <p id="world-menu-copy">Comprendre où vous en êtes, savoir quoi faire maintenant et garder le prochain point KŌMØ en vue.</p>
 
+    <button id="world-next-step" class="world-next-step" type="button">
+      <span id="world-next-kicker">PROCHAINE ÉTAPE</span>
+      <b id="world-next-title">Faire un bilan KŌMØ</b>
+      <small id="world-next-meta">Active votre trajectoire personnelle</small>
+      <em>›</em>
+    </button>
+
     <section class="world-menu-summary" aria-label="Résumé personnel">
-      <div class="summary-score"><span>VOTRE RÉFÉRENCE</span><strong id="menu-motion">84<small>/100</small></strong><em>Motion Score</em></div>
-      <div><span>MOTION AGE</span><strong id="menu-age">39</strong><em>Repère fonctionnel</em></div>
+      <div class="summary-score"><span>VOTRE RÉFÉRENCE</span><strong id="menu-motion">—</strong><em>Motion Score</em></div>
+      <div><span>MOTION AGE</span><strong id="menu-age">—</strong><em>Repère fonctionnel</em></div>
       <div><span>PROCHAIN POINT</span><strong id="journey-menu-level">—</strong><small id="journey-menu-xp">PULSE</small><em>Trajectoire KŌMØ</em></div>
     </section>
 
@@ -250,7 +260,7 @@
     },8000);
   </script>
   <script type="module">
-    import('./world-v1.js?v=8.7.0-commerce-layer')
+    import('./world-v1.js?v=8.8.0-clarity-commerce')
       .catch(function(err){window.__KOMO_REPORT_BOOT_ERROR('module-import',err)});
   </script>
 </body>
