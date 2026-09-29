@@ -74,6 +74,68 @@ const css = `
 .kt-z-final{padding:80px 0;background:#d9e4dc}.kt-z-final .kt-final-grid{grid-template-columns:1fr auto;align-items:center}.kt-z-final .kt-h2{max-width:820px}.kt-z-about-grid{display:grid;grid-template-columns:.85fr 1.15fr;gap:50px;align-items:start;margin-top:36px}.kt-z-about-grid>article{padding:30px;background:#fff;border-radius:18px}.kt-z-program-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:52px;align-items:start}.kt-z-program-visual{min-height:430px;overflow:hidden;border-radius:20px;background:#e5e7e1}.kt-z-program-visual img{width:100%;height:100%;min-height:430px;object-fit:cover;display:block}
 @media(max-width:900px){.kt-z-heading{align-items:start;flex-direction:column;gap:18px}.kt-z-method,.kt-z-orient,.kt-z-faq,.kt-z-about-grid,.kt-z-program-grid{grid-template-columns:1fr}.kt-z-offers{grid-template-columns:1fr 1fr}.kt-z-card:last-child{grid-column:1/-1}.kt-z-method-image{height:350px}.kt-z-locations{grid-template-columns:repeat(2,1fr)}.kt-z-location,.kt-z-location:nth-child(1),.kt-z-location:nth-child(4){grid-column:span 1}.kt-z-location:last-child{grid-column:1/-1}}
 @media(max-width:640px){.kt-z-hero{min-height:680px;align-items:flex-end;padding:80px 0 50px}.kt-z-hero .kt-shell{width:min(100% - 32px,1320px)}.kt-z-hero:after{background:linear-gradient(0deg,rgba(248,248,244,.98) 0%,rgba(248,248,244,.91) 42%,rgba(248,248,244,.15) 100%)}.kt-z-hero-media img{object-position:66% center}.kt-z-hero .kt-title{font-size:clamp(45px,13.5vw,64px)}.kt-z-hero .kt-lead{font-size:17px;line-height:1.5}.kt-z-underhero-grid{grid-template-columns:1fr;gap:3px}.kt-z-proof{padding:7px 0}.kt-z-offers{grid-template-columns:1fr}.kt-z-card:last-child{grid-column:auto}.kt-z-card-media{height:205px}.kt-z-card-body{min-height:245px}.kt-z-pillars{grid-template-columns:1fr}.kt-z-pillar{padding:16px 0;border-bottom:1px solid var(--kt-line)}.kt-z-pillar:last-child{border-bottom:0}.kt-z-locations{grid-template-columns:1fr}.kt-z-location,.kt-z-location:nth-child(1),.kt-z-location:nth-child(4),.kt-z-location:last-child{grid-column:auto;min-height:260px}.kt-z-continuity{grid-template-columns:1fr}.kt-z-final .kt-final-grid{grid-template-columns:1fr}}
+
+/* KŌMØ public navigation V3 — restrained top line, complete discovery panel. */
+.kp-nav>.kt-simple-nav,.pv2-nav>.kt-simple-nav,.primary-nav>.kt-simple-nav,.nav>.kt-simple-nav{display:flex;align-items:center;gap:clamp(15px,1.8vw,27px)}
+.kt-simple-nav{position:relative}
+.kt-simple-link,.kt-mega>summary{position:relative;display:inline-flex;align-items:center;min-height:42px;padding:0;color:#4f5a53!important;text-decoration:none!important;font:650 11px/1 Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.01em;white-space:nowrap;cursor:pointer;list-style:none}
+.kt-mega>summary::-webkit-details-marker{display:none}
+.kt-simple-link:after,.kt-mega>summary:after{content:"";position:absolute;left:0;right:100%;bottom:6px;height:1px;background:#486454;transition:right .3s cubic-bezier(.22,1,.36,1)}
+.kt-simple-link:hover:after,.kt-simple-link:focus-visible:after,.kt-simple-link.is-current:after,.kt-mega[open]>summary:after{right:0}
+.kt-simple-link:hover,.kt-simple-link.is-current,.kt-mega[open]>summary{color:#142219!important}
+.kt-simple-link.kt-account-link{min-height:38px;padding:0 14px;border:1px solid rgba(31,48,38,.16);border-radius:999px;background:rgba(255,255,255,.58);color:#1b3023!important}
+.kt-simple-link.kt-account-link:after{display:none}
+.kt-simple-link.kt-account-link:hover{background:#17291f;color:#fff!important;border-color:#17291f}
+.kt-mega{position:relative}
+.kt-mega-panel{position:absolute;z-index:120;top:calc(100% + 14px);right:-120px;width:min(920px,calc(100vw - 48px));padding:28px;border:1px solid rgba(26,39,31,.12);border-radius:22px;background:rgba(250,249,246,.985);box-shadow:0 28px 80px rgba(22,32,26,.16);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);transform-origin:80% 0;animation:ktMenuIn .32s cubic-bezier(.22,1,.36,1)}
+.kt-mega-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.kt-menu-group{min-width:0}
+.kt-menu-group>strong{display:block;margin-bottom:13px;color:#7b887f;font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+.kt-menu-link{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid rgba(26,39,31,.08);color:#263129!important;text-decoration:none!important;font-size:12px;line-height:1.25;transition:padding-left .24s ease,color .24s ease,border-color .24s ease}
+.kt-menu-link:last-child{border-bottom:0}
+.kt-menu-link:after{content:"↗";opacity:0;transform:translate(-4px,2px);font-size:9px;transition:opacity .22s ease,transform .22s ease}
+.kt-menu-link:hover,.kt-menu-link.is-current{padding-left:5px;color:#41604e!important;border-color:rgba(65,96,78,.22)}
+.kt-menu-link:hover:after,.kt-menu-link.is-current:after{opacity:.72;transform:translate(0,2px)}
+.kt-mega-foot{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:22px;padding-top:18px;border-top:1px solid rgba(26,39,31,.1)}
+.kt-mega-foot span{max-width:560px;color:#758078;font-size:10px;line-height:1.55}
+.kt-mega-foot a{display:inline-flex;align-items:center;min-height:37px;padding:0 13px;border-radius:999px;background:#16271d;color:#fff!important;text-decoration:none!important;font-size:10px;font-weight:750}
+.kt-mobile-menu{padding:10px 0 2px}
+.kt-mobile-menu .kt-menu-group{padding:12px 0;border-top:1px solid rgba(26,39,31,.1)}
+.kt-mobile-menu .kt-menu-group:first-child{border-top:0}
+.kt-mobile-menu .kt-menu-group>strong{margin-bottom:6px}
+.kt-mobile-menu .kt-menu-link{padding:11px 2px;font-size:13px}
+.kt-mobile-account{display:flex!important;margin-top:12px!important;min-height:44px!important;align-items:center!important;justify-content:center!important;border-radius:999px!important;background:#17291f!important;color:#fff!important;text-decoration:none!important;font-size:12px!important;font-weight:760!important}
+
+/* Motion and highlight language shared by the public storefront and restored legacy pages. */
+.kt-motion-ready .kt-reveal{opacity:0;transform:translateY(16px);transition:opacity .72s cubic-bezier(.22,1,.36,1),transform .72s cubic-bezier(.22,1,.36,1)}
+.kt-motion-ready .kt-reveal.kt-in{opacity:1;transform:none}
+.kt-z-card,.kt-pagecard,.kt-z-option,.kt-z-continuity article,.kt-z-pillar{transition:transform .34s cubic-bezier(.22,1,.36,1),box-shadow .34s ease,border-color .34s ease,background-color .34s ease}
+@media(hover:hover){
+  .kt-z-card:hover,.kt-pagecard:hover,.kt-z-continuity article:hover{transform:translateY(-5px);box-shadow:0 22px 60px rgba(31,42,35,.10);border-color:rgba(82,111,94,.25)}
+  .kt-z-option:hover{transform:translateX(5px);box-shadow:0 14px 34px rgba(31,42,35,.07)}
+  .kt-z-pillar:hover{background:rgba(255,255,255,.48)}
+  .kt-z-location:hover img,.kt-z-method-image:hover img,.kt-z-program-visual:hover img{transform:scale(1.045);filter:saturate(1.05) contrast(1.01)}
+}
+.kt-z-location img,.kt-z-method-image img,.kt-z-program-visual img{transition:transform .7s cubic-bezier(.22,1,.36,1),filter .45s ease}
+.kt-z-card:focus-within,.kt-pagecard:focus-within,.kt-z-option:focus-visible{outline:2px solid rgba(76,105,87,.42);outline-offset:4px}
+.kt-z-hero:before{content:"";position:absolute;z-index:-1;width:58vw;height:58vw;right:-18vw;top:-27vw;border-radius:50%;background:radial-gradient(circle,rgba(225,241,230,.34),rgba(225,241,230,0) 68%);pointer-events:none;animation:ktHeroGlow 12s ease-in-out infinite alternate}
+.kt-kicker,.kt-ey{transition:color .28s ease,letter-spacing .28s ease}
+.kt-z-card:hover .kt-kicker,.kt-pagecard:hover .kt-kicker,.kt-z-section:hover>.kt-shell>.kt-z-heading .kt-ey{color:#476653}
+body.kt-scrolled .kp-top,body.kt-scrolled .pv2-top,body.kt-scrolled header{box-shadow:0 9px 30px rgba(23,34,27,.055)}
+@keyframes ktMenuIn{from{opacity:0;transform:translateY(-8px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes ktHeroGlow{from{transform:translate3d(0,0,0) scale(.96)}to{transform:translate3d(-2vw,2vw,0) scale(1.05)}}
+@media(max-width:980px){
+  .kp-nav>.kt-simple-nav,.pv2-nav>.kt-simple-nav,.primary-nav>.kt-simple-nav,.nav>.kt-simple-nav{display:none}
+  .kt-mega-panel{right:-40px;width:min(760px,calc(100vw - 28px))}
+  .kt-mega-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:640px){.kt-mega-grid{grid-template-columns:1fr}.kt-mega-panel{padding:20px}}
+@media(prefers-reduced-motion:reduce){
+  .kt-z-hero:before{animation:none}
+  .kt-motion-ready .kt-reveal{opacity:1!important;transform:none!important;transition:none!important}
+  .kt-z-card,.kt-pagecard,.kt-z-option,.kt-z-continuity article,.kt-z-pillar,.kt-z-location img,.kt-z-method-image img,.kt-z-program-visual img{transition:none!important}
+}
+
 </style>`;
 
 const localeData = {
@@ -389,22 +451,113 @@ function meta(html, title, description, seo){
   return html.replace('</head>', css+'\n</head>');
 }
 function url(c,key){ return c.paths[key] || key; }
+function menuGroups(c){
+  const isFr=c===localeData.fr,isEs=c===localeData.es;
+  if(isFr) return [
+    {title:'Votre parcours',links:[
+      ['Motion',c.paths.assessment],['Clinical',c.paths.clinical],['Signature',c.paths.signature],['Pulse','https://pulse.komolongevity.com/']
+    ]},
+    {title:'Expériences',links:[
+      ['KŌMØ Anywhere',c.paths.experience],['Riviera','/fr/riviera/'],['World','/world/'],['Life','https://life.komolongevity.com/']
+    ]},
+    {title:'Méthode & science',links:[
+      ['Science',c.paths.science],['Méthode','/fr/methode/'],['Marche','/fr/methode/marche/'],['Équilibre','/fr/methode/equilibre/'],['Posture','/fr/methode/posture/'],['Locomotor','/fr/locomotor/'],['Library','/media/']
+    ]},
+    {title:'Écosystème',links:[
+      ['Réseau','/fr/network/'],['KŌMØ Case','/fr/case/equipment/'],['Professionnels',c.paths.partners],['À propos',c.paths.about],['Contact','/fr/contact/']
+    ]}
+  ];
+  if(isEs) return [
+    {title:'Tu recorrido',links:[
+      ['Motion',c.paths.assessment],['Clinical',c.paths.clinical],['Signature',c.paths.signature],['Pulse','https://pulse.komolongevity.com/']
+    ]},
+    {title:'Experiencias',links:[
+      ['KŌMØ Anywhere',c.paths.experience],['Riviera','/fr/riviera/'],['World','/world/'],['Life','https://life.komolongevity.com/']
+    ]},
+    {title:'Método & ciencia',links:[
+      ['Ciencia',c.paths.science],['Marcha','/es/metodo/marcha/'],['Equilibrio','/es/metodo/equilibrio/'],['Postura','/es/metodo/postura/'],['Control muscular','/es/metodo/control-muscular/'],['Locomotor','/es/locomotor/'],['Library','/media/']
+    ]},
+    {title:'Ecosistema',links:[
+      ['Red','/es/network/france/'],['KŌMØ Case','/es/case/equipment/'],['Profesionales',c.paths.partners],['Quiénes somos',c.paths.about],['Contacto','/es/contact/']
+    ]}
+  ];
+  return [
+    {title:'Your pathway',links:[
+      ['Motion',c.paths.assessment],['Clinical',c.paths.clinical],['Signature',c.paths.signature],['Pulse','https://pulse.komolongevity.com/']
+    ]},
+    {title:'Experiences',links:[
+      ['KŌMØ Anywhere',c.paths.experience],['Riviera','/riviera/'],['World','/world/'],['Life','https://life.komolongevity.com/']
+    ]},
+    {title:'Method & science',links:[
+      ['Science',c.paths.science],['Gait','/method/gait/'],['Balance','/method/balance/'],['Posture','/method/posture/'],['Muscle control','/method/muscle-control/'],['Locomotor','/locomotor/'],['Library','/media/']
+    ]},
+    {title:'Ecosystem',links:[
+      ['Network','/network/france/'],['Case & deployment','/partners/deployment/'],['Professionals',c.paths.partners],['About',c.paths.about],['Contact','/contact/']
+    ]}
+  ];
+}
+function menuLink([label,href]){
+  const external=/^https?:\/\//.test(href);
+  return \`<a class="kt-menu-link" href="\${href}"\${external?' target="_blank" rel="noopener noreferrer"':''}>\${label}</a>\`;
+}
+function menuPanel(c){
+  const isFr=c===localeData.fr,isEs=c===localeData.es;
+  const groups=menuGroups(c).map(group=>\`<div class="kt-menu-group"><strong>\${group.title}</strong>\${group.links.map(menuLink).join('')}</div>\`).join('');
+  const foot=isFr?'Retrouvez l’ensemble des services, expériences, pages scientifiques et produits KŌMØ.':isEs?'Accede a todos los servicios, experiencias, contenidos científicos y productos KŌMØ.':'Access all KŌMØ services, experiences, science content and products.';
+  const contact=isFr?'Parler avec KŌMØ':isEs?'Hablar con KŌMØ':'Talk with KŌMØ';
+  return \`<div class="kt-mega-panel"><div class="kt-mega-grid">\${groups}</div><div class="kt-mega-foot"><span>\${foot}</span><a href="\${c.paths.contact}">\${contact}</a></div></div>\`;
+}
 function nav(c){
-  const links = c.nav.map(([label,key])=>`<a${key==='pulse'?' class="kt-account-link"':''} href="${url(c,key)}">${label}</a>`).join('');
-  return links;
+  const isFr=c===localeData.fr,isEs=c===localeData.es;
+  const explore=isFr?'Découvrir':isEs?'Explorar':'Explore';
+  const login=isFr?'Se connecter':isEs?'Acceder':'Sign in';
+  const top=[
+    [isFr?'Motion':'Motion',c.paths.assessment],
+    [isFr?'Clinical':'Clinical',c.paths.clinical],
+    [isFr?'Expériences':isEs?'Experiencias':'Experiences',c.paths.experience],
+    [isFr?'Professionnels':isEs?'Profesionales':'Professionals',c.paths.partners]
+  ].map(([label,href])=>\`<a class="kt-simple-link" href="\${href}">\${label}</a>\`).join('');
+  return \`<div class="kt-simple-nav">\${top}<details class="kt-mega"><summary>\${explore}</summary>\${menuPanel(c)}</details><a class="kt-simple-link kt-account-link" href="https://pulse.komolongevity.com/">\${login}</a></div>\`;
+}
+function mobileNav(c){
+  const isFr=c===localeData.fr,isEs=c===localeData.es;
+  const login=isFr?'Se connecter à Pulse':isEs?'Acceder a Pulse':'Sign in to Pulse';
+  return menuGroups(c).map(group=>\`<div class="kt-menu-group"><strong>\${group.title}</strong>\${group.links.map(menuLink).join('')}</div>\`).join('')+\`<a class="kt-mobile-account" href="https://pulse.komolongevity.com/">\${login}</a>\`;
+}
+function motionRuntime(){
+  return \`<script id="komo-public-motion-v3">
+  (()=>{if(document.documentElement.dataset.ktMotion==='3')return;document.documentElement.dataset.ktMotion='3';
+    const reduce=matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const targets=[...document.querySelectorAll('.kt-z-section,.kt-z-card,.kt-pagecard,.kt-z-option,.kt-z-location,.kt-z-pillar,.kt-z-continuity article,.kt-pagehero .kt-shell,.kt-z-final .kt-shell')];
+    targets.forEach((el,i)=>{el.classList.add('kt-reveal');el.style.transitionDelay=Math.min(i%5,4)*55+'ms'});
+    document.documentElement.classList.add('kt-motion-ready');
+    if(reduce||!('IntersectionObserver'in window))targets.forEach(el=>el.classList.add('kt-in'));
+    else{const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('kt-in');io.unobserve(e.target)}}),{threshold:.09,rootMargin:'0px 0px -7% 0px'});targets.forEach(el=>io.observe(el))}
+    const path=location.pathname.replace(/\/+$/,'')||'/';
+    document.querySelectorAll('.kt-simple-link,.kt-menu-link').forEach(a=>{try{const u=new URL(a.href,location.href);if(u.origin===location.origin){const p=u.pathname.replace(/\/+$/,'')||'/';if(p===path)a.classList.add('is-current')}}catch{}});
+    const close=()=>document.querySelectorAll('.kt-mega[open]').forEach(d=>d.removeAttribute('open'));
+    document.addEventListener('pointerdown',e=>{if(!e.target.closest('.kt-mega'))close()});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+    document.querySelectorAll('.kt-menu-link').forEach(a=>a.addEventListener('click',close));
+    const onScroll=()=>document.body.classList.toggle('kt-scrolled',scrollY>20);
+    addEventListener('scroll',onScroll,{passive:true});onScroll();
+  })();
+  <\/script>\`;
 }
 function patchNav(html,c){
-  html = html.replace(/<nav class="kp-nav">[\s\S]*?<\/nav>/, `<nav class="kp-nav">${nav(c)}</nav>`);
-  html = html.replace(/<nav class="pv2-nav"([^>]*)>[\s\S]*?<\/nav>/, `<nav class="pv2-nav"$1>${nav(c)}</nav>`);
-  html = html.replace(/<nav class="primary-nav"([^>]*)>[\s\S]*?<\/nav>/, `<nav class="primary-nav"$1>${nav(c)}</nav>`);
-  html = html.replace(/<nav class="nav">[\s\S]*?<\/nav>/, `<nav class="nav">${nav(c)}</nav>`);
-  html = html.replace(/<details class="kp-menu">[\s\S]*?<\/details>/, `<details class="kp-menu"><summary>Menu</summary><nav>${nav(c)}</nav></details>`);
-  html = html.replace(/<details class="pv2-mobile">[\s\S]*?<\/details>/, `<details class="pv2-mobile"><summary>Menu</summary><nav>${nav(c)}</nav></details>`);
-  html = html.replace(/<a class="kp-mini" href="[^"]*"[^>]*>[\s\S]*?<\/a>/, `<a class="kp-mini" href="${c.paths.contact}">${c.heroPrimary} →</a>`);
-  html = html.replace(/<a class="pv2-cta"[^>]*>[\s\S]*?<\/a>/, `<a class="pv2-cta" href="${c.paths.contact}">${c.heroPrimary} <span aria-hidden="true">↗</span></a>`);
-  html = html.replace(/<a class="nav-cta"[^>]*>[\s\S]*?<\/a>/, `<a class="nav-cta" href="${c.paths.contact}">${c.heroPrimary}</a>`);
+  html = html.replace(/<nav class="kp-nav">[\s\S]*?<\/nav>/, \`<nav class="kp-nav">\${nav(c)}</nav>\`);
+  html = html.replace(/<nav class="pv2-nav"([^>]*)>[\s\S]*?<\/nav>/, \`<nav class="pv2-nav"\$1>\${nav(c)}</nav>\`);
+  html = html.replace(/<nav class="primary-nav"([^>]*)>[\s\S]*?<\/nav>/, \`<nav class="primary-nav"\$1>\${nav(c)}</nav>\`);
+  html = html.replace(/<nav class="nav">[\s\S]*?<\/nav>/, \`<nav class="nav">\${nav(c)}</nav>\`);
+  html = html.replace(/<details class="kp-menu">[\s\S]*?<\/details>/, \`<details class="kp-menu"><summary>Menu</summary><div class="kt-mobile-menu">\${mobileNav(c)}</div></details>\`);
+  html = html.replace(/<details class="pv2-mobile">[\s\S]*?<\/details>/, \`<details class="pv2-mobile"><summary>Menu</summary><div class="kt-mobile-menu">\${mobileNav(c)}</div></details>\`);
+  html = html.replace(/<a class="kp-mini" href="[^"]*"[^>]*>[\s\S]*?<\/a>/, \`<a class="kp-mini" href="\${c.paths.contact}">\${c.heroPrimary} →</a>\`);
+  html = html.replace(/<a class="pv2-cta"[^>]*>[\s\S]*?<\/a>/, \`<a class="pv2-cta" href="\${c.paths.contact}">\${c.heroPrimary} <span aria-hidden="true">↗</span></a>\`);
+  html = html.replace(/<a class="nav-cta"[^>]*>[\s\S]*?<\/a>/, \`<a class="nav-cta" href="\${c.paths.contact}">\${c.heroPrimary}</a>\`);
+  if(!html.includes('komo-public-motion-v3')) html=html.replace('</body>',motionRuntime()+'</body>');
   return html;
 }
+
 function mainReplace(html, body){
   const replacement = `<main id="main" class="kt-home">${body}</main>`;
   if (/<main(?:\s[^>]*)?>[\s\S]*?<\/main>/.test(html)) return html.replace(/<main(?:\s[^>]*)?>[\s\S]*?<\/main>/, replacement);
@@ -601,6 +754,26 @@ async function patchPublicChrome(relative,c){
   html=meta(html,title,description,pageSeo(relative,c)); html=patchNav(html,c); await writeFile(fp,html,'utf8'); return true;
 }
 
+function restoredPublicFiles(c){
+  if(c===localeData.fr) return [
+    'fr/methode/index.html','fr/methode/marche/index.html','fr/methode/equilibre/index.html','fr/methode/posture/index.html','fr/methode/controle-musculaire/index.html','fr/methode/tests-fonctionnels/index.html','fr/methode/pre-bilan-pulse/index.html',
+    'fr/network/index.html','fr/network/france/index.html','fr/locomotor/index.html','fr/riviera/index.html',
+    'fr/case/equipment/index.html','fr/case/workflow/index.html','fr/case/pulse/index.html',
+    'fr/partners/clinical/index.html','fr/partners/deployment/index.html','fr/partners/motion/index.html','fr/contact/index.html'
+  ];
+  if(c===localeData.es) return [
+    'es/metodo/marcha/index.html','es/metodo/equilibrio/index.html','es/metodo/postura/index.html','es/metodo/control-muscular/index.html','es/metodo/pruebas-funcionales/index.html','es/metodo/pre-evaluacion-pulse/index.html',
+    'es/network/france/index.html','es/locomotor/index.html',
+    'es/case/equipment/index.html','es/case/workflow/index.html','es/case/pulse/index.html',
+    'es/partners/clinical/index.html','es/partners/deployment/index.html','es/partners/motion/index.html','es/contact/index.html'
+  ];
+  return [
+    'method/gait/index.html','method/balance/index.html','method/posture/index.html','method/muscle-control/index.html','method/functional-tests/index.html','method/pulse-baseline/index.html',
+    'network/france/index.html','locomotor/index.html','riviera/index.html',
+    'partners/clinical/index.html','partners/deployment/index.html','partners/motion/index.html','contact/index.html'
+  ];
+}
+
 await writeKomoBrandHero();
 
 for(const c of Object.values(localeData)){
@@ -615,14 +788,19 @@ for(const c of Object.values(localeData)){
   await ensurePage(c.pulseFile,c,pulsePage(c),...pulseMeta);
   await ensurePage(c.experienceFile,c,experiencePage(c),...experienceMeta);
   await patchPublicChrome(c.scienceFile,c);
+  for(const relative of restoredPublicFiles(c)) await patchPublicChrome(relative,c);
 }
+
+await patchPublicChrome('media/index.html',localeData.fr);
 
 const sitemapPath=join(site,'sitemap.xml');
 if(await exists(sitemapPath)){
   let sitemap=await readFile(sitemapPath,'utf8');
   const routes=new Set();
   for(const c of Object.values(localeData)) for(const key of ['home','assessment','signature','clinical','experience','partners','about','science','pulse']) routes.add(c.paths[key]);
+  sitemap=sitemap.replace(/\s*<url><loc>https:\/\/komolongevity\.comhttps:\/\/pulse\.komolongevity\.com\/<\/loc><priority>0\.8<\/priority><\/url>/g,'');
   for(const route of routes){
+    if(/^https?:\/\//.test(route)) continue;
     const canonical=`https://komolongevity.com${route}`;
     if(!sitemap.includes(`<loc>${canonical}</loc>`)) sitemap=sitemap.replace('</urlset>',`  <url><loc>${canonical}</loc><priority>0.8</priority></url>\n</urlset>`);
   }
