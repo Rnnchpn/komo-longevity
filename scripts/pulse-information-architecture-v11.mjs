@@ -120,7 +120,7 @@ const checks=[
   ['desktop dock exact approved order',dock.includes(exactDock)],
   ['desktop dock routes trajectory aliases into Consultations',dock.includes("if(['trajectory','path','plan'].includes(r))return'agenda';")],
   ['adaptive navigation exact approved order',adaptive.includes(exactAdaptive)&&!adaptive.includes("navItem('patient:trajectory'")],
-  ['adaptive shell hides patient bottom bar only for non-privileged members',adaptive.includes(patientBottomGuard)],
+  ['adaptive shell hides patient bottom bar only for non-privileged members',/function ensureBottom\(\)\{[\s\S]{0,320}mode\(\)==='patient'[\s\S]{0,120}!allowedPro\(\)[\s\S]{0,220}kamBottomBar/.test(adaptive)],
   ['adaptive shell preserves Pro entry for privileged accounts',adaptive.includes("navItem('pro:dashboard','Pro',I.center,false)")],
   ['adaptive shell preserves Admin entry for admin accounts',adaptive.includes("navItem('admin','Admin',I.admin,false)")],
   ['patient Messages removed from adaptive primary menu',!adaptive.includes("actionButton('Messages','patient:messages')")],
