@@ -2410,13 +2410,23 @@ box(arrivalConsole,1.18,.80,.58,MAT.travertine,0,.42,0);
 box(arrivalConsole,.96,.055,.44,MAT.brass,0,.84,0);
 plaque(arrivalConsole,'ARRIVAL','PULSE · WORLD',1.0,.38,0,1.20,-.30,{dark:true,titleSize:38});
 
-// V2.4 World Journey station — explains progression inside the spatial experience.
-const journeyStation=new THREE.Group();journeyStation.name='KOMO_WORLD_JOURNEY_V24';journeyStation.position.set(4.8,0,8.5);building.add(journeyStation);
-box(journeyStation,1.35,.22,1.35,MAT.travertine,0,.12,0);
-box(journeyStation,.92,1.72,.34,MAT.blackened,0,1.05,0,{cast:true});
-box(journeyStation,.74,.05,.22,MAT.brass,0,1.78,.16);
-plaque(journeyStation,'WORLD JOURNEY','EXPLORE · UNDERSTAND · ACT',1.25,.48,0,1.28,.20,{dark:true,titleSize:37});
-const journeyRing=mesh(journeyStation,new THREE.TorusGeometry(.27,.028,8,30),MAT.brass,0,2.14,0,{cast:false});journeyRing.rotation.x=Math.PI/2;
+// V8.1 Hall Trajectory Lounge — hospitality, not a game-progress terminal.
+const journeyStation=new THREE.Group();journeyStation.name='KOMO_HALL_TRAJECTORY_LOUNGE_V81';journeyStation.position.set(5.35,0,8.45);building.add(journeyStation);
+box(journeyStation,4.55,.055,3.20,FLOOR.side,0,.39,0,{cast:false,receive:true});
+box(journeyStation,4.20,.025,.060,MAT.brass,0,.425,-1.45,{cast:false,receive:false});
+box(journeyStation,4.20,.025,.060,MAT.brass,0,.425,1.45,{cast:false,receive:false});
+box(journeyStation,1.55,.12,1.02,MAT.walnut,0,.62,0,{cast:true});
+cyl(journeyStation,.055,.065,.45,MAT.brass,0,.38,0,12,{cast:true});
+const journeyRing=mesh(journeyStation,new THREE.TorusGeometry(.34,.024,8,36),MAT.brass,0,.695,0,{cast:false,receive:false});journeyRing.rotation.x=Math.PI/2;journeyRing.userData.dynamic=true;
+[-1.45,1.45].forEach(x=>{
+  box(journeyStation,1.05,.18,.82,MAT.fabricLight,x,.48,.05,{cast:true});
+  box(journeyStation,.90,.62,.14,MAT.fabricLight,x,.78,.40,{cast:true});
+  box(journeyStation,.045,.32,.045,MAT.brass,x-.36,.23,-.18,{cast:true});
+  box(journeyStation,.045,.32,.045,MAT.brass,x+.36,.23,-.18,{cast:true});
+});
+const trajectoryLoungeGlow=new THREE.MeshBasicMaterial({color:0xbfd7c7,transparent:true,opacity:.18,depthWrite:false});
+const trajectoryLoungeHalo=mesh(journeyStation,new THREE.RingGeometry(.74,.82,40),trajectoryLoungeGlow,0,.405,0,{cast:false,receive:false});
+trajectoryLoungeHalo.rotation.x=-Math.PI/2;trajectoryLoungeHalo.userData.dynamic=true;
 
 // V2.5 low-cost objective guide: bronze breadcrumbs + destination beacon.
 const guideRoot=new THREE.Group();guideRoot.name='KOMO_JOURNEY_GUIDE_V25';world.add(guideRoot);
@@ -2881,6 +2891,7 @@ line(floorV19,5.30,.045,8.45,8.50,MAT.brass,.373);
 // Desk as architecture only.
 const desk=new THREE.Group();desk.name='KOMO_DESK_V1';building.add(desk);
 desk.position.set(-7.3,0,4.0);
+desk.name='KOMO_CONCIERGE_DESK_V81';
 box(desk,4.9,.20,2.2,M.stoneDeep,0,.12,0);
 box(desk,4.55,.88,1.02,M.stone,0,.62,.10);
 box(desk,4.2,.42,.86,M.sageDeep,0,.82,.16);
@@ -3246,10 +3257,12 @@ hallHost.userData.dynamic=true;
 loungeCluster(building,7.95,-7.7,Math.PI+.05,.82);
 loungeCluster(building,-8.0,-14.2,-.05,.76);
 
-// Motion gallery along the left wall.
-motionScreen(building,-11.42,4.75,5.4,Math.PI/2,'MOTION');
-motionScreen(building,-11.42,4.75,-3.3,Math.PI/2,'MUSCLE');
-motionScreen(building,-11.42,4.75,-12.0,Math.PI/2,'BALANCE');
+// V8.1 Hall: no explanatory screen-wall; architecture + contextual UI do the orientation.
+if(!QUIET_WORLD_V8){
+  motionScreen(building,-11.42,4.75,5.4,Math.PI/2,'MOTION');
+  motionScreen(building,-11.42,4.75,-3.3,Math.PI/2,'MUSCLE');
+  motionScreen(building,-11.42,4.75,-12.0,Math.PI/2,'BALANCE');
+}
 
 // Object gallery around the central promenade.
 pedestalObject(building,-7.2,-2.0,'ring');
@@ -4567,8 +4580,8 @@ const interactions=[
   {id:'marina_recovery',x:50.0,z:67.0,r:4.6,title:()=> 'Recovery Lounge',desc:()=>locale==='fr'?'Hydratation · recovery · travel reset':'Hydration · recovery · travel reset',action:showMarinaV68},
   {id:'marina_dock',x:63.0,z:62.5,r:3.8,title:()=>locale==='fr'?'Private Dock · embarquement':'Private Dock · boarding',desc:()=>locale==='fr'?'Services KŌMØ directement à bord':'KŌMØ services directly onboard',action:showMarinaV68},
   {id:'villa',x:-39.0,z:67.8,r:4.8,title:()=>locale==='fr'?'KŌMØ Retreat Villa':'KŌMØ Retreat Villa',desc:()=>locale==='fr'?'Villa privée · piscine · expériences longévité':'Private villa · pool · longevity experiences',action:showVillaV68},
-  {id:'desk',x:-7.3,z:4.0,r:3.6,title:()=>copy[locale].deskTitle,desc:()=>copy[locale].deskCopy,action:showDesk},
-  {id:'health',x:-5.25,z:10.55,r:2.7,title:()=>locale==='fr'?'Votre santé · mouvement':'Your health · movement',desc:()=>locale==='fr'?'Comprendre les 5 domaines en un coup d’œil':'Understand the 5 domains at a glance',action:showHealthOverview},
+  {id:'desk',x:-7.3,z:4.0,r:3.6,title:()=>locale==='fr'?'Votre équipe KŌMØ':'Your KŌMØ team',desc:()=>personalTrajectory?(locale==='fr'?'Faire le point · prochain checkpoint · orientation':'Check in · next checkpoint · guidance'):(locale==='fr'?'Accueil · orientation · connexion Pulse':'Welcome · guidance · connect Pulse'),action:showDesk},
+  {id:'health',x:-5.25,z:10.55,r:2.7,title:()=>personalTrajectory?(locale==='fr'?'Votre référence':'Your reference'):(locale==='fr'?'Aperçu mouvement':'Movement overview'),desc:()=>personalTrajectory?(personalTrajectory.motion_score!=null?'Motion Score '+Math.round(personalTrajectory.motion_score)+' · '+trajectoryPhaseLabel(personalTrajectory):trajectoryPhaseLabel(personalTrajectory)):(locale==='fr'?'Comprendre les 5 domaines en un coup d’œil':'Understand the 5 domains at a glance'),action:showHealthOverview},
   {id:'twin',x:-10.75,z:-24.0,r:3.4,title:()=>copy[locale].twinTitle,desc:()=>locale==='fr'?'Galerie ouverte · marcher vers le Twin':'Open gallery · walk to Twin',action:enterTwin},
   {id:'rehab',x:0,z:-28.0,r:3.4,title:()=>copy[locale].rehabTitle,desc:()=>locale==='fr'?'Tunnel ouvert · marcher vers Fitness':'Open tunnel · walk to Fitness',action:enterRehab},
   {id:'arena',x:10.75,z:-24.0,r:3.4,title:()=>copy[locale].arenaTitle,desc:()=>locale==='fr'?'Galerie ouverte · marcher vers Arena':'Open gallery · walk to Arena',action:enterArena},
@@ -4576,7 +4589,7 @@ const interactions=[
   {id:'library',x:-16.2,z:-10,r:3.0,title:()=>copy[locale].libraryTitle,desc:()=>copy[locale].libraryCopy,action:showLibrary},
   {id:'talks',x:10.7,z:-10,r:3.2,title:()=>copy[locale].talksTitle,desc:()=>copy[locale].talksCopy,action:showTalks},
   {id:'life',x:8.6,z:2.6,r:3.4,title:()=>copy[locale].storeTitle,desc:()=>copy[locale].storeCopy,action:showLifeStore},
-  {id:'journey',x:4.8,z:8.5,r:3.0,title:()=>locale==='fr'?'World Journey':'World Journey',desc:()=>locale==='fr'?'Voir votre niveau, vos XP et les prochaines étapes.':'View your level, XP and next steps.',action:showJourneyPanel},
+  {id:'journey',x:5.35,z:8.45,r:3.2,title:()=>personalTrajectory?(locale==='fr'?'Votre trajectoire':'Your trajectory'):(locale==='fr'?'Activer ma trajectoire':'Activate my trajectory'),desc:()=>personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||trajectoryPhaseLabel(personalTrajectory)):(locale==='fr'?'Connectez Pulse pour retrouver votre suivi':'Connect Pulse to continue your follow-up'),action:showJourneyPanel},
   {id:'fountain',x:0,z:68.2,r:5.4,title:()=>locale==='fr'?'Grande Fontaine · KŌMØ District':'Grand Fountain · KŌMØ District',desc:()=>locale==='fr'?'Découvrir le campus extérieur · +15 XP':'Discover the exterior campus · +15 XP',action:showFountain},
   {id:'life_strap',x:7.10,z:6.45,r:1.35,title:()=> 'Motion Strap',desc:()=>locale==='fr'?'KŌMØ Life · objet mouvement':'KŌMØ Life · movement object',action:()=>showLifeItem('strap')},
   {id:'life_bottle',x:9.80,z:6.45,r:1.35,title:()=> 'KŌMØ Bottle',desc:()=>locale==='fr'?'KŌMØ Life · hydratation':'KŌMØ Life · hydration',action:()=>showLifeItem('bottle')},
@@ -5442,22 +5455,23 @@ function showCampusMap(){
 }
 
 function deskHtml(){
-  const s=current();
-  if(locale==='fr')return `
-    <p>KŌMØ World est un écosystème Riviera continu : Central Campus, Functional Twin, Fitness, Arena et Life au cœur du domaine, Marina/Yachting à l’est et Retreat Villa à l’ouest.</p>
-    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>ÉTAT ACTUEL</span><b>Motion ${s.motion_score}</b></div></div>
-    <div class="priority-card"><b>PROCHAINE ÉTAPE</b>Commencez par le Functional Twin pour voir votre état actuel et votre progression depuis la baseline.</div>`;
-  return `
-    <p>KŌMØ World is one continuous Riviera ecosystem: Central Campus, Functional Twin, Fitness, Arena and Life at its heart, Marina/Yachting to the east and the Retreat Villa to the west.</p>
-    <div class="panel-grid"><div><span>01 · UNDERSTAND</span><b>Functional Twin</b></div><div><span>02 · ACT</span><b>KŌMØ Fitness Club</b></div><div><span>03 · ENGAGE</span><b>Arena</b></div><div><span>CURRENT STATE</span><b>Motion ${s.motion_score}</b></div></div>
-    <div class="priority-card"><b>NEXT STEP</b>Start with Functional Twin to review your current state and progression from baseline.</div>`;
+  if(personalTrajectory){
+    const t=personalTrajectory,checkpoint=trajectoryCheckpointLabel(t),days=trajectoryDaysToCheckpoint(t);
+    return '<section class="hall-team-panel"><span>'+(locale==='fr'?'VOTRE ÉQUIPE KŌMØ':'YOUR KŌMØ TEAM')+'</span><h3>'+(locale==='fr'?'On garde le fil.':'We keep the thread.')+'</h3><p>'+(locale==='fr'?'Le Hall est votre point de contact : comprendre ce qui compte maintenant, retrouver votre prochaine étape et revenir vers votre équipe quand vous en avez besoin.':'The Hall is your contact point: understand what matters now, find your next step and return to your team whenever you need it.')+'</p><div class="panel-grid"><div><span>PHASE</span><b>'+trajectoryPhaseLabel(t)+'</b></div><div><span>'+(locale==='fr'?'PROCHAIN POINT':'NEXT CHECKPOINT')+'</span><b>'+checkpoint+(days!=null?' · '+days+(locale==='fr'?' j':' d'):'')+'</b></div></div><div class="priority-card"><b>'+(locale==='fr'?'MAINTENANT':'NOW')+'</b>'+escHtml(t.priority||t.current_action||(locale==='fr'?'Priorité en cours de préparation':'Priority being prepared'))+'</div><div class="priority-card"><b>'+(locale==='fr'?'PROCHAINE ACTION':'NEXT ACTION')+'</b>'+escHtml(t.current_action||t.priority||(locale==='fr'?'Préparer le prochain point':'Prepare the next checkpoint'))+'</div></section>';
+  }
+  return '<section class="hall-team-panel"><span>KŌMØ CONCIERGE</span><h3>'+(locale==='fr'?'Bienvenue dans votre point de départ.':'Welcome to your starting point.')+'</h3><p>'+(locale==='fr'?'Connectez votre compte KŌMØ pour transformer World en environnement personnel : priorité, prochaine action et prochain point de suivi.':'Connect your KŌMØ account to turn World into a personal environment: priority, next action and next follow-up checkpoint.')+'</p></section>';
 }
 function showDesk(){
   completeJourney('hall',{silent:true});
-  openPanel('KŌMØ DESK',locale==='fr'?'Votre prochaine étape.':'Your next move.',deskHtml(),[
+  const actions=personalTrajectory?[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
-    {label:locale==='fr'?'ALLER AU TWIN':'GO TO TWIN',primary:true,onClick:()=>{closePanel();player.set(-6.8,0,-23.0);yaw=0}}
-  ]);
+    {label:locale==='fr'?'MA TRAJECTOIRE':'MY TRAJECTORY',onClick:showJourneyPanel},
+    {label:locale==='fr'?'ALLER AU TWIN':'GO TO TWIN',primary:true,onClick:()=>{closePanel();fastTravel('twin')}}
+  ]:[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    {label:'PULSE',primary:true,onClick:()=>{location.href='/pulse/'}}
+  ];
+  openPanel(locale==='fr'?'VOTRE ÉQUIPE KŌMØ':'YOUR KŌMØ TEAM',personalTrajectory?(locale==='fr'?'Votre prochain point commence ici.':'Your next checkpoint starts here.'):(locale==='fr'?'Accueil et orientation.':'Welcome and guidance.'),deskHtml(),actions);
 }
 function twinDomainName(id){
   const names={
@@ -6853,7 +6867,8 @@ function animateLiving(now){
     hallHost.rotation.y=-.38+Math.sin(t*.38)*.08;
     hallHost.position.y=Math.sin(t*.72)*.006;
   }
-  if(false){journeyRing.rotation.z=t*.18;journeyRing.rotation.y=t*.10;}
+  if(journeyRing?.visible){journeyRing.rotation.z=t*.10;}
+  if(typeof trajectoryLoungeHalo!=='undefined'&&trajectoryLoungeHalo?.visible){const p=personalTrajectory?.progress||35;trajectoryLoungeHalo.material.opacity=.10+Math.min(.14,p/100*.14)+.025*Math.sin(t*.85);}
   if(false)living.trees.forEach((tree,i)=>{
     const sway=Math.sin(t*.42+tree.userData.swayPhase+i*.17);
     tree.rotation.z=sway*.008;tree.rotation.x=Math.cos(t*.36+tree.userData.swayPhase)*.004;
@@ -7076,7 +7091,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.0.0-trajectory-world',
+  version:'8.1.0-hall-trajectory',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
