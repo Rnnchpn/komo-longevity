@@ -88,6 +88,32 @@ try{
 }catch{}
 console.log(`[pulse-editorial-fixed-frame-v2] adaptive duplicate branches=${adaptiveDuplicate?'yes':'no'}`);
 
+// Post-final production audit: record the assets that actually reach the browser,
+// after pruning/dedupe, instead of the intermediate pre-pruning graph.
+try{
+  const finalIndex=await readFile(join(pulse,'index.html'),'utf8');
+  const finalScripts=[...finalIndex.matchAll(/<script[^>]+src=["']\\.\\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*><\\/script>/g)].map(x=>x[1]);
+  const finalStyles=[...finalIndex.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]+href=["']\\.\\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*>/g)].map(x=>x[1]);
+  const auditPath=join(pulse,'pulse-final-production-audit-v1.json');
+  let audit={};
+  try{audit=JSON.parse(await readFile(auditPath,'utf8'))}catch{}
+  audit.post_final={
+    script_count:finalScripts.length,
+    stylesheet_count:finalStyles.length,
+    scripts:finalScripts,
+    stylesheets:finalStyles,
+    retired_styles_surviving:retiredStyles.filter(x=>finalStyles.includes(x)),
+    adaptive_duplicate_branches:adaptiveDuplicate,
+    fixed_frame_present:finalStyles.includes(file),
+    generated_at:new Date().toISOString()
+  };
+  if(audit.post_final.retired_styles_surviving.length||adaptiveDuplicate||!audit.post_final.fixed_frame_present)audit.status='FAIL';
+  await writeFile(auditPath,JSON.stringify(audit,null,2)+'\\n','utf8');
+  console.log(`[pulse-editorial-fixed-frame-v2] post-final production audit · scripts=${finalScripts.length} · styles=${finalStyles.length}`);
+}catch(error){
+  console.warn('[pulse-editorial-fixed-frame-v2] post-final audit update skipped:',error?.message||error);
+}
+
 console.log(
   `[pulse-editorial-fixed-frame-v2] ${present&&!survivors.length&&!oldInline?'PASS':'WARN'} · final stylesheet=${present?'yes':'no'} · retired-survivors=${survivors.join(',')||'none'} · old-inline=${oldInline?'yes':'no'} · ${htmlFiles.length} HTML surfaces`
 );
