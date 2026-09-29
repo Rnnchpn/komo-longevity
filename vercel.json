@@ -5,6 +5,14 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/command",
+      "destination": "/command-v1/"
+    },
+    {
+      "source": "/command/:path*",
+      "destination": "/command-v1/:path*"
+    },
+    {
       "source": "/",
       "has": [
         {
@@ -208,6 +216,32 @@
     }
   ],
   "headers": [
+    {
+      "source": "/command",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/command/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
     {
       "source": "/command-v1/:path*",
       "headers": [
