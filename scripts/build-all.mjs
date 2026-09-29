@@ -208,6 +208,8 @@ const scripts = [
   'scripts/commercial-legal-qa-v1.mjs',
   // Final Pulse presentation-only layer: bright, clear, modern visual system.
   'scripts/pulse-bright-modern-v1.mjs',
+  // Dedicated authentication presentation owner: login only, no auth/session behavior.
+  'scripts/pulse-auth-login-v2.mjs',
   // Absolute final production gate: desktop Pro layout, retired-asset pruning and page-owner audit.
   'scripts/pulse-final-production-audit-v1.mjs'
 ];
