@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#18271f" />
-  <meta name="komo-world-version" content="7.6.5-runtime-trace" />
+  <meta name="komo-world-version" content="8.0.0-trajectory-world" />
   <meta name="color-scheme" content="dark" />
   <title>KŌMØ World · Longevity in Motion</title>
   <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
-  <link rel="stylesheet" href="./world-v1.css?v=7.6.5-runtime-trace" />
+  <link rel="stylesheet" href="./world-v1.css?v=8.0.0-trajectory-world" />
   <link rel="modulepreload" href="./vendor/three.module.js" />
 </head>
 <body>
@@ -43,14 +43,14 @@
     <i id="location-heading">N</i>
   </div>
 
-  <button id="journey-hud" class="journey-hud" type="button" aria-label="Ouvrir ma progression KŌMØ World">
-    <span class="journey-level"><small>WORLD LEVEL</small><strong id="journey-level">01</strong></span>
+  <button id="journey-hud" class="journey-hud" type="button" aria-label="Ouvrir ma trajectoire KŌMØ">
+    <span class="journey-level"><small id="journey-level-label">TRAJECTORY</small><strong id="journey-level">01</strong></span>
     <span class="journey-main">
-      <b id="journey-title">ARRIVAL</b>
+      <b id="journey-title">MY KŌMØ</b>
       <i><em id="journey-progress"></em></i>
-      <small id="journey-next">Explore the Hall · +20 XP</small>
+      <small id="journey-next">Connectez Pulse pour activer votre trajectoire</small>
     </span>
-    <span class="journey-xp"><b id="journey-xp">0</b><small>XP</small></span>
+    <span class="journey-xp"><b id="journey-xp">—</b><small id="journey-side-label">NEXT</small></span>
   </button>
 
   <button id="health-hud" class="health-hud" type="button" aria-label="Ouvrir mon aperçu mouvement">
@@ -145,13 +145,13 @@
     <section class="world-menu-summary" aria-label="Résumé personnel">
       <div class="summary-score"><span>MOTION SCORE</span><strong id="menu-motion">84<small>/100</small></strong><em>Movement today</em></div>
       <div><span>MOTION AGE</span><strong id="menu-age">39</strong><em>Functional trajectory</em></div>
-      <div><span>WORLD LEVEL</span><strong id="journey-menu-level">05</strong><small id="journey-menu-xp">250 XP</small><em>Explore · progress</em></div>
+      <div><span>TRAJECTORY</span><strong id="journey-menu-level">—</strong><small id="journey-menu-xp">PULSE</small><em>Understand · act · follow</em></div>
     </section>
 
     <div class="world-menu-primary">
       <button id="results-toggle" type="button" data-screen="results"><i>◉</i><span><b>RÉSULTATS</b><small>Motion · domaines · évolution</small></span><em>›</em></button>
       <button id="campus-toggle" type="button" data-screen="campus"><i>⌖</i><span><b>CAMPUS</b><small>Explorer toutes les zones</small></span><em>›</em></button>
-      <button id="journey-toggle" type="button" data-screen="journey"><i>↗</i><span><b>JOURNEY</b><small>Niveau · XP · prochaines étapes</small></span><em>›</em></button>
+      <button id="journey-toggle" type="button" data-screen="journey"><i>↗</i><span><b>TRAJECTOIRE</b><small>Priorité · action · prochain point</small></span><em>›</em></button>
       <button id="challenges-toggle" type="button" data-screen="challenges"><i>◇</i><span><b>CHALLENGES</b><small>Défis du jour · engagement</small></span><em>›</em></button>
     </div>
 
@@ -249,7 +249,7 @@
     },8000);
   </script>
   <script type="module">
-    import('./world-v1.js?v=7.6.5-runtime-trace')
+    import('./world-v1.js?v=8.0.0-trajectory-world')
       .catch(function(err){window.__KOMO_REPORT_BOOT_ERROR('module-import',err)});
   </script>
 </body>
