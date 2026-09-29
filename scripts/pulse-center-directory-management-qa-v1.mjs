@@ -20,8 +20,8 @@ const checks=[
  ['center interface saves through protected rpc',profile.includes("rpc('update_komo_center_directory_profile'")],
  ['RDV and Agenda share live appointment channel',booking.includes('bookingRealtimeChannel')&&booking.includes("table:'organization_appointments'")&&booking.includes("route==='documents'")&&booking.includes('S.proActive')],
  ['map remains nonblocking and persistent',map.includes('Promise.allSettled(tasks)')&&booking.includes('komo:booking-map-restored')],
- ['patient label remains RDV and pro label remains Agenda',pro.includes("navItem('planning','Agenda'")&&pro.includes("s.textContent='RDV'")],
- ['main menu structure stays frozen',pro.includes("navItem('dashboard','Centre'")&&pro.includes("navItem('patients','Patients'")&&pro.includes("navItem('messages','Messages'")]
+ ['patient label remains RDV and pro label is Consultations',pro.includes("navItem('planning','Consultations'")&&pro.includes("s.textContent='RDV'")],
+ ['single-owner Pro menu structure stays frozen',pro.includes("navItem('planning','Consultations'")&&pro.includes("navItem('patients','Patients'")&&pro.includes("navItem('motion','Motion'")&&pro.includes("navItem('myocare','Analyse'")&&!pro.includes("navItem('dashboard','Centre'")&&!pro.includes("navItem('messages','Messages'")]
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([name])=>name);
 if(failed.length){console.error('[pulse-center-directory-qa] failed: '+failed.join(', '));process.exit(1)}
