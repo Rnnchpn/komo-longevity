@@ -39,10 +39,12 @@ const resetPosition=$('#reset-position');
 const cameraToggle=$('#camera-toggle');
 const journeyHud=$('#journey-hud');
 const journeyLevelEl=$('#journey-level');
+const journeyLevelLabel=$('#journey-level-label');
 const journeyTitleEl=$('#journey-title');
 const journeyProgressEl=$('#journey-progress');
 const journeyNextEl=$('#journey-next');
 const journeyXpEl=$('#journey-xp');
+const journeySideLabel=$('#journey-side-label');
 const journeyMenuLevel=$('#journey-menu-level');
 const journeyMenuXp=$('#journey-menu-xp');
 const journeyMenuProgress=$('#journey-menu-progress');
@@ -75,6 +77,7 @@ const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==
 const lowPower=coarse||isiOS;
 const iphoneVisualReference=true;
 const visualLowPower=iphoneVisualReference; // iPhone is the visual source of truth on every device
+const QUIET_WORLD_V8=true; // physical signs/totems are removed; context lives in architecture + UI
 const deviceDpr=Math.max(1,window.devicePixelRatio||1);
 const retinaMobile=lowPower&&deviceDpr>=2;
 document.documentElement.classList.toggle('low-power',lowPower);
@@ -755,7 +758,10 @@ function panelTexture(title,subtitle,{dark=true,accent='#d5b477',w=1400,h=360,ti
   x.fillStyle=dark?accent:'#7c674e';x.font='650 27px Arial';x.fillText(subtitle.toUpperCase(),w/2,h*.72);
   const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return t;
 }
-function plaque(parent,title,subtitle,w,h,x,y,z,{rotY=0,dark=true,titleSize=90}={}){
+function plaque(parent,title,subtitle,w,h,x,y,z,{rotY=0,dark=true,titleSize=90,quietKeep=false}={}){
+  if(QUIET_WORLD_V8&&!quietKeep){
+    const marker=new THREE.Object3D();marker.position.set(x,y,z);marker.rotation.y=rotY;marker.userData.quietSignRemoved=true;marker.userData.signLabel=title;parent.add(marker);return marker;
+  }
   const tx=panelTexture(title,subtitle,{dark,titleSize});const mat=new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide,transparent:false});
   const p=mesh(parent,new THREE.PlaneGeometry(w,h),mat,x,y,z,{receive:false});p.rotation.y=rotY;p.userData.texture=tx;return p;
 }
@@ -823,8 +829,9 @@ function bannerTexture(title,subtitle,{w=720,h=1800,dark=true,accent='#d5b477'}=
   x.fillStyle=dark?'rgba(240,234,223,.42)':'rgba(32,53,42,.42)';x.font='600 17px Arial';x.fillText('KŌMØ · RIVIERA',w/2,h*.82);
   const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return t;
 }
-function fabricBanner(parent,x,y,z,w=1.35,h=4.2,title='KŌMØ',subtitle='WORLD',{rotY=0,dark=true}={}){
+function fabricBanner(parent,x,y,z,w=1.35,h=4.2,title='KŌMØ',subtitle='WORLD',{rotY=0,dark=true,quietKeep=false}={}){
   const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=rotY;parent.add(g);
+  if(QUIET_WORLD_V8&&!quietKeep){g.userData.quietSignRemoved=true;return g;}
   const tx=bannerTexture(title,subtitle,{dark});
   const geo=new THREE.PlaneGeometry(w,h,lowPower?1:12,lowPower?1:22);
   const mat=lowPower?new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide}):new THREE.MeshStandardMaterial({map:tx,side:THREE.DoubleSide,roughness:.92,metalness:0});
@@ -854,6 +861,7 @@ function gravelIsland(parent,x,z,w=4.2,d=2.7){
 }
 function bannerTotem(parent,x,z,title,subtitle,rotY=0){
   const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=rotY;parent.add(g);
+  if(QUIET_WORLD_V8){g.userData.quietSignRemoved=true;return g;}
   box(g,1.18,.22,1.18,MAT.travertine,0,.11,0,{cast:true});
   box(g,.18,5.55,.18,MAT.blackened,0,2.78,0,{cast:true});
   fabricBanner(g,0,5.30,.07,1.45,4.45,title,subtitle,{dark:true});
@@ -4615,6 +4623,108 @@ function notify(message){
   toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(notify.t);
   notify.t=setTimeout(()=>toastEl.classList.remove('show'),1800);
 }
+// V8.0 — KŌMØ Trajectory is the primary post-consultation product.
+const TRAJECTORY_SESSION_KEY='komo_world_trajectory_v8';
+function loadPersonalTrajectory(){try{return JSON.parse(sessionStorage.getItem(TRAJECTORY_SESSION_KEY)||'null')}catch{return null}}
+let personalTrajectory=loadPersonalTrajectory();
+function cleanTrajectory(input){
+  if(!input||typeof input!=='object')return null;
+  const n=v=>Number.isFinite(Number(v))?Number(v):null;
+  const domains=input.domains&&typeof input.domains==='object'?Object.fromEntries(Object.entries(input.domains).map(([k,v])=>[k,n(v)])):{};
+  return {
+    source:String(input.source||'PULSE').slice(0,24),
+    user_id:String(input.user_id||'').slice(0,96),
+    phase:String(input.phase||'baseline').slice(0,24),
+    phase_index:Math.min(4,Math.max(1,Number(input.phase_index)||1)),
+    progress:Math.min(100,Math.max(0,Number(input.progress)||0)),
+    assessment_id:String(input.assessment_id||'').slice(0,96),
+    motion_score:n(input.motion_score),
+    motion_age:n(input.motion_age),
+    priority:String(input.priority||'').slice(0,240),
+    priorities:Array.isArray(input.priorities)?input.priorities.map(v=>String(v||'').slice(0,220)).filter(Boolean).slice(0,3):[],
+    current_action:String(input.current_action||'').slice(0,280),
+    next_checkpoint:input.next_checkpoint&&typeof input.next_checkpoint==='object'?{
+      scheduled_start:String(input.next_checkpoint.scheduled_start||'').slice(0,64),
+      appointment_type:String(input.next_checkpoint.appointment_type||'').slice(0,80),
+      service_code:String(input.next_checkpoint.service_code||'').slice(0,80)
+    }:null,
+    domains,
+    synced_at:String(input.synced_at||new Date().toISOString()).slice(0,64)
+  };
+}
+function trajectoryPhaseLabel(t=personalTrajectory){
+  const labels={
+    baseline:{fr:'POINT DE DÉPART',en:'BASELINE'},
+    reading:{fr:'LECTURE',en:'READING'},
+    plan:{fr:'PLAN ACTIF',en:'ACTIVE PLAN'},
+    followup:{fr:'SUIVI',en:'FOLLOW-UP'}
+  };
+  return labels[t?.phase]?.[locale]||labels.baseline[locale];
+}
+function trajectoryCheckpointDate(t=personalTrajectory){
+  const raw=t?.next_checkpoint?.scheduled_start;if(!raw)return null;
+  const d=new Date(raw);return Number.isNaN(d.getTime())?null:d;
+}
+function trajectoryDaysToCheckpoint(t=personalTrajectory){
+  const d=trajectoryCheckpointDate(t);if(!d)return null;
+  return Math.max(0,Math.ceil((d-Date.now())/86400000));
+}
+function trajectoryCheckpointLabel(t=personalTrajectory){
+  const d=trajectoryCheckpointDate(t);if(!d)return locale==='fr'?'À PLANIFIER':'TO SCHEDULE';
+  return d.toLocaleDateString(locale==='fr'?'fr-FR':'en-GB',{day:'2-digit',month:'short'});
+}
+function trajectoryFocusKey(t=personalTrajectory){
+  const s=((t?.priority||'')+' '+(t?.current_action||'')).toLowerCase();
+  if(/force|strength|muscl|quadriceps|puissance/.test(s))return 'strength';
+  if(/mobilit|mobility|hanche|hip|amplitude|range/.test(s))return 'mobility';
+  if(/équilibre|balance|stabil|coordination/.test(s))return 'balance';
+  if(/endurance|cardio|capacit|marche|gait/.test(s))return 'cardio';
+  if(/recovery|récup|fatigue|sleep|sommeil|pain|douleur/.test(s))return 'recovery';
+  return null;
+}
+function trajectoryLibraryTopics(){
+  const key=trajectoryFocusKey();
+  const topics={
+    strength:{fr:['Puissance des membres inférieurs','Force et longévité fonctionnelle','Progression de la charge'],en:['Lower-limb power','Strength and functional longevity','Progressive loading']},
+    mobility:{fr:['Mobilité fonctionnelle','Hanche et amplitude utile','Mobilité et qualité de mouvement'],en:['Functional mobility','Hip and useful range','Mobility and movement quality']},
+    balance:{fr:['Équilibre et contrôle','Prévention des chutes','Coordination et marche'],en:['Balance and control','Falls prevention','Coordination and gait']},
+    cardio:{fr:['Capacité fonctionnelle','Marche et endurance','Progression de l’effort'],en:['Functional capacity','Gait and endurance','Effort progression']},
+    recovery:{fr:['Récupération et activité','Sommeil et mouvement','Charge, repos et régularité'],en:['Recovery and activity','Sleep and movement','Load, rest and consistency']}
+  };
+  return (topics[key]?.[locale]||[locale==='fr'?'Comprendre votre priorité':'Understand your priority',locale==='fr'?'Suivre votre progression':'Track your progress',locale==='fr'?'Préparer votre prochain point':'Prepare your next checkpoint']);
+}
+function trajectoryStepsHtml(t=personalTrajectory){
+  const labels=locale==='fr'?['Bilan','Lecture','Plan','Suivi']:['Assessment','Reading','Plan','Follow-up'];
+  return '<div class="trajectory-steps">'+labels.map((label,i)=>{
+    const step=i+1,state=step<t.phase_index?'done':step===t.phase_index?'current':'upcoming';
+    return '<span class="'+state+'"><i>'+(state==='done'?'✓':step)+'</i><b>'+label+'</b></span>';
+  }).join('')+'</div>';
+}
+function trajectoryPanelHtml(){
+  const t=personalTrajectory;
+  if(!t)return '<section class="trajectory-panel empty"><span>KŌMØ TRAJECTORY</span><h3>'+(locale==='fr'?'Votre World peut devenir personnel.':'Your World can become personal.')+'</h3><p>'+(locale==='fr'?'Connectez-vous avec votre compte KŌMØ pour retrouver ici la priorité issue de votre consultation, votre prochaine action et votre prochain checkpoint.':'Connect your KŌMØ account to see the priority from your consultation, your next action and your next checkpoint here.')+'</p></section>';
+  const days=trajectoryDaysToCheckpoint(t),checkpoint=trajectoryCheckpointLabel(t),priority=t.priority||(locale==='fr'?'Priorité en cours de préparation':'Priority being prepared'),action=t.current_action||priority;
+  return '<section class="trajectory-panel">'+
+    '<div class="trajectory-kicker">'+trajectoryPhaseLabel(t)+'</div>'+
+    '<h3>'+(locale==='fr'?'Votre consultation continue ici.':'Your consultation continues here.')+'</h3>'+
+    trajectoryStepsHtml(t)+
+    '<div class="trajectory-grid">'+
+      '<article><span>'+(locale==='fr'?'VOTRE RÉFÉRENCE':'YOUR REFERENCE')+'</span><strong>'+(t.motion_score!=null?'Motion Score '+Math.round(t.motion_score)+'/100':(locale==='fr'?'Bilan enregistré':'Assessment recorded'))+'</strong></article>'+
+      '<article><span>'+(locale==='fr'?'MAINTENANT':'NOW')+'</span><strong>'+escHtml(priority)+'</strong></article>'+
+      '<article><span>'+(locale==='fr'?'D’ICI AU PROCHAIN POINT':'UNTIL NEXT CHECKPOINT')+'</span><strong>'+escHtml(action)+'</strong></article>'+
+      '<article><span>'+(locale==='fr'?'PROCHAIN POINT KŌMØ':'NEXT KŌMØ CHECKPOINT')+'</span><strong>'+checkpoint+(days!=null?' · '+days+(locale==='fr'?' j':' d'):'')+'</strong></article>'+
+    '</div></section>';
+}
+function ingestTrajectory(input){
+  personalTrajectory=cleanTrajectory(input);
+  try{if(personalTrajectory)sessionStorage.setItem(TRAJECTORY_SESSION_KEY,JSON.stringify(personalTrajectory));else sessionStorage.removeItem(TRAJECTORY_SESSION_KEY)}catch{}
+  document.body.classList.toggle('trajectory-connected',!!personalTrajectory);
+  updateJourneyUI?.();updateHealthHUD?.();
+  const today=$('#hud-today');if(today)today.textContent=personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||copy[locale].today):copy[locale].today;
+  window.dispatchEvent(new CustomEvent('komo:trajectory-updated',{detail:personalTrajectory}));
+  return personalTrajectory;
+}
+
 const JOURNEY_KEY='komo_world_journey_v1';
 const JOURNEY_LEVELS=[
   {level:1,min:0,title:{fr:'ARRIVAL',en:'ARRIVAL'},desc:{fr:'Entrer',en:'Enter'}},
@@ -4666,6 +4776,38 @@ function journeyNextMission(){
   return JOURNEY_MISSIONS.find(m=>!journey.done[m.id])||null;
 }
 function updateJourneyUI(){
+  if(personalTrajectory){
+    const t=personalTrajectory,days=trajectoryDaysToCheckpoint(t),phase=trajectoryPhaseLabel(t),checkpoint=trajectoryCheckpointLabel(t);
+    if(journeyHud)journeyHud.classList.add('trajectory-active');
+    if(journeyLevelLabel)journeyLevelLabel.textContent=locale==='fr'?'ÉTAPE':'STEP';
+    if(journeyLevelEl)journeyLevelEl.textContent=String(t.phase_index).padStart(2,'0');
+    if(journeyTitleEl)journeyTitleEl.textContent=phase;
+    if(journeyProgressEl)journeyProgressEl.style.width=(t.progress||t.phase_index*22)+'%';
+    if(journeyNextEl)journeyNextEl.textContent=t.current_action||t.priority||(locale==='fr'?'Votre trajectoire KŌMØ':'Your KŌMØ trajectory');
+    if(journeyXpEl)journeyXpEl.textContent=days!=null?days:'—';
+    if(journeySideLabel)journeySideLabel.textContent=days!=null?(locale==='fr'?'JOURS':'DAYS'):(locale==='fr'?'POINT':'NEXT');
+    if(journeyMenuLevel)journeyMenuLevel.textContent=String(t.phase_index).padStart(2,'0');
+    if(journeyMenuXp)journeyMenuXp.textContent=checkpoint;
+    if(journeyTitleMenu)journeyTitleMenu.textContent=phase;
+    if(journeyXpMenu)journeyXpMenu.textContent=checkpoint;
+    if(journeyMenuProgress)journeyMenuProgress.style.width=(t.progress||t.phase_index*22)+'%';
+    if(journeyMenuNext)journeyMenuNext.textContent=(locale==='fr'?'Maintenant · ':'Now · ')+(t.priority||t.current_action||phase);
+    if(journeyLevelLadder)journeyLevelLadder.innerHTML=(locale==='fr'?['BILAN','LECTURE','PLAN','SUIVI']:['ASSESS','READ','PLAN','FOLLOW']).map((label,i)=>{
+      const step=i+1,state=step<t.phase_index?'done':step===t.phase_index?'current':'';
+      return '<div class="journey-step '+state+'"><span>0'+step+'</span><b>'+label+'</b><small>'+(state==='done'?'✓':state==='current'?(locale==='fr'?'VOUS ÊTES ICI':'YOU ARE HERE'):'')+'</small></div>';
+    }).join('');
+    if(journeyBadgesEl)journeyBadgesEl.innerHTML='<span class="journey-badge unlocked">PULSE · CONNECTED</span>';
+    if(journeyMissionsEl)journeyMissionsEl.innerHTML=[
+      [locale==='fr'?'Référence':'Reference',t.motion_score!=null?'Motion Score '+Math.round(t.motion_score)+'/100':(locale==='fr'?'Bilan enregistré':'Assessment recorded')],
+      [locale==='fr'?'Priorité':'Priority',t.priority||'—'],
+      [locale==='fr'?'Action':'Action',t.current_action||t.priority||'—'],
+      [locale==='fr'?'Checkpoint':'Checkpoint',checkpoint]
+    ].map(([a,b],i)=>'<div class="journey-mission '+(i<t.phase_index?'done':'')+'"><i>'+(i<t.phase_index?'✓':'0'+(i+1))+'</i><span><b>'+a+'</b><small>'+escHtml(String(b))+'</small></span></div>').join('');
+    return;
+  }
+  if(journeyHud)journeyHud.classList.remove('trajectory-active');
+  if(journeyLevelLabel)journeyLevelLabel.textContent='WORLD LEVEL';
+  if(journeySideLabel)journeySideLabel.textContent='XP';
   const level=journeyLevelForXp(journey.xp),nextLevel=journeyNextLevel(level),nextMission=journeyNextMission();
   const floor=level.min,ceil=nextLevel?nextLevel.min:Math.max(level.min+1,journey.xp);
   const pct=nextLevel?THREE.MathUtils.clamp((journey.xp-floor)/(ceil-floor)*100,0,100):100;
@@ -4673,24 +4815,16 @@ function updateJourneyUI(){
   if(journeyTitleEl)journeyTitleEl.textContent=level.title[locale];
   if(journeyXpEl)journeyXpEl.textContent=journey.xp;
   if(journeyProgressEl)journeyProgressEl.style.width=pct+'%';
-  if(journeyNextEl)journeyNextEl.textContent=nextMission?(nextMission.title[locale]+' · +'+nextMission.xp+' XP'):(locale==='fr'?'Journey complété':'Journey complete');
+  if(journeyNextEl)journeyNextEl.textContent=locale==='fr'?'Connectez Pulse pour activer votre trajectoire':'Connect Pulse to activate your trajectory';
   if(journeyMenuLevel)journeyMenuLevel.textContent=String(level.level).padStart(2,'0');
   if(journeyMenuXp)journeyMenuXp.textContent=journey.xp+' XP';
-  if(journeyTitleMenu)journeyTitleMenu.textContent=level.title[locale];
+  if(journeyTitleMenu)journeyTitleMenu.textContent=locale==='fr'?'EXPLORATION':'EXPLORATION';
   if(journeyXpMenu)journeyXpMenu.textContent=journey.xp+' XP';
   if(journeyMenuProgress)journeyMenuProgress.style.width=pct+'%';
-  if(journeyMenuNext)journeyMenuNext.textContent=nextMission?(locale==='fr'?'Prochaine étape · ':'Next · ')+nextMission.title[locale]:(locale==='fr'?'Parcours actuel complété':'Current journey complete');
-  if(journeyLevelLadder)journeyLevelLadder.innerHTML=JOURNEY_LEVELS.map(l=>`
-    <div class="journey-step ${l.level<level.level?'done':''} ${l.level===level.level?'current':''}">
-      <span>${String(l.level).padStart(2,'0')}</span><b>${l.title[locale]}</b><small>${l.desc[locale]}</small>
-    </div>`).join('');
-  if(journeyBadgesEl)journeyBadgesEl.innerHTML=JOURNEY_BADGES.map(b=>`<span class="journey-badge ${b.test()?'unlocked':''}">${b.test()?'✓ ':''}${b.label[locale]}</span>`).join('');
-  if(journeyMissionsEl)journeyMissionsEl.innerHTML=JOURNEY_MISSIONS.map((m,i)=>`
-    <div class="journey-mission ${journey.done[m.id]?'done':''}">
-      <i>${journey.done[m.id]?'✓':String(i+1).padStart(2,'0')}</i>
-      <span><b>${m.title[locale]}</b><small>${m.sub[locale]}</small></span>
-      <small>+${m.xp} XP</small>
-    </div>`).join('');
+  if(journeyMenuNext)journeyMenuNext.textContent=locale==='fr'?'Mode invité · exploration libre':'Guest mode · free exploration';
+  if(journeyLevelLadder)journeyLevelLadder.innerHTML=JOURNEY_LEVELS.map(l=>'<div class="journey-step '+(l.level<level.level?'done ':'')+(l.level===level.level?'current':'')+'"><span>'+String(l.level).padStart(2,'0')+'</span><b>'+l.title[locale]+'</b><small>'+l.desc[locale]+'</small></div>').join('');
+  if(journeyBadgesEl)journeyBadgesEl.innerHTML=JOURNEY_BADGES.map(b=>'<span class="journey-badge '+(b.test()?'unlocked':'')+'">'+(b.test()?'✓ ':'')+b.label[locale]+'</span>').join('');
+  if(journeyMissionsEl)journeyMissionsEl.innerHTML=JOURNEY_MISSIONS.slice(0,6).map((m,i)=>'<div class="journey-mission '+(journey.done[m.id]?'done':'')+'"><i>'+(journey.done[m.id]?'✓':String(i+1).padStart(2,'0'))+'</i><span><b>'+m.title[locale]+'</b><small>'+m.sub[locale]+'</small></span></div>').join('');
 }
 function completeJourney(id,{silent=false}={}){
   const mission=JOURNEY_MISSIONS.find(m=>m.id===id);if(!mission||journey.done[id])return false;
@@ -4715,10 +4849,17 @@ function journeyHtml(){
     ${next?`<div class="priority-card"><b>${locale==='fr'?'PROCHAINE ÉTAPE':'NEXT STEP'}</b>${next.title[locale]} · +${next.xp} XP</div>`:''}`;
 }
 function showJourneyPanel(){
-  completeJourney('journey');
-  openPanel('WORLD JOURNEY',locale==='fr'?'Votre progression dans KŌMØ World.':'Your progression through KŌMØ World.',journeyHtml(),[
+  completeJourney('journey',{silent:true});
+  if(personalTrajectory){
+    openPanel(locale==='fr'?'VOTRE TRAJECTOIRE':'YOUR TRAJECTORY',locale==='fr'?'Votre consultation continue dans World.':'Your consultation continues in World.',trajectoryPanelHtml(),[
+      {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+      {label:'TWIN',onClick:enterTwin},
+      {label:locale==='fr'?'CONTINUER':'CONTINUE',primary:true,onClick:()=>{const id=trajectoryFocusKey();closePanel();if(id)enterRehab();else enterTwin()}}
+    ]);return;
+  }
+  openPanel('KŌMØ WORLD',locale==='fr'?'Explorez librement ou connectez Pulse pour activer votre trajectoire personnelle.':'Explore freely or connect Pulse to activate your personal trajectory.',trajectoryPanelHtml()+journeyHtml(),[
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
-    {label:locale==='fr'?'PROCHAINE ÉTAPE':'NEXT STEP',primary:true,onClick:()=>{const n=journeyNextMission();closePanel();if(n&&travelPoints[n.id])fastTravel(n.id)}}
+    {label:'PULSE',primary:true,onClick:()=>{location.href='/pulse/'}}
   ]);
 }
 journeyHud.addEventListener('click',showJourneyPanel);
@@ -4752,18 +4893,20 @@ window.addEventListener('message',e=>{if(e.data?.type==='komo:daily-health'&&e.d
 
 // V3.2 Health Snapshot — movement-oriented overview, separate from World XP.
 function updateHealthHUD(){
-  const snap=current(),d=snap.domains||{};
-  const score=Number(snap.motion_score)||0;
+  const snap=current(),personal=personalTrajectory,d=(personal?.domains&&Object.values(personal.domains).some(v=>v!=null))?personal.domains:(personal?{}:(snap.domains||{}));
+  const score=personal?.motion_score!=null?Number(personal.motion_score):(Number(snap.motion_score)||0);
   const cmp=core.compare?.(baseline.snapshot_id,snap.snapshot_id,'world-v1');
   const delta=Number(cmp?.motion_score_delta)||0;
   const trend=delta>1?(locale==='fr'?'EN HAUSSE':'UP'):delta<-1?(locale==='fr'?'À SUIVRE':'WATCH'):(locale==='fr'?'STABLE':'STABLE');
-  healthStatusEl.textContent=score+' · '+trend;
-  healthMuscleEl.textContent=Math.round(Number(d.muscle)||0);
-  healthBalanceEl.textContent=Math.round(Number(d.balance)||0);
-  healthCapacityEl.textContent=Math.round(Number(d.endurance)||0);
-  healthSourceEl.textContent=dailyHealth?.source||'DEMO';
+  healthStatusEl.textContent=score+' · '+(personal?trajectoryPhaseLabel(personal):trend);
+  healthMuscleEl.textContent=d.muscle!=null?Math.round(Number(d.muscle)):'—';
+  healthBalanceEl.textContent=d.balance!=null?Math.round(Number(d.balance)):'—';
+  healthCapacityEl.textContent=d.endurance!=null?Math.round(Number(d.endurance)):'—';
+  healthSourceEl.textContent=personal?'PULSE':(dailyHealth?.source||'DEMO');
   if(menuMotion)menuMotion.innerHTML=score+'<small>/100</small>';
-  if(menuAge)menuAge.textContent=Math.round(Number(snap.motion_age)||0);
+  if(menuAge)menuAge.textContent=personal?.motion_age!=null?Math.round(Number(personal.motion_age)):(!personal?Math.round(Number(snap.motion_age)||0):'—');
+  $('#hud-motion').textContent=score||'—';
+  $('#hud-age').textContent=personal?.motion_age!=null?Math.round(Number(personal.motion_age)):(!personal?Math.round(Number(snap.motion_age)||0):'—');
   if(typeof healthStationBars!=='undefined'){
     Object.entries(healthStationBars).forEach(([id,fill])=>{
       const v=THREE.MathUtils.clamp(Number(d[id])||0,0,100),h=.20+(v/100)*1.12;
@@ -4773,6 +4916,16 @@ function updateHealthHUD(){
   }
 }
 function healthOverviewHtml(){
+  if(personalTrajectory){
+    const t=personalTrajectory,topics=trajectoryLibraryTopics(),checkpoint=trajectoryCheckpointLabel(t);
+    return '<section class="results-dashboard trajectory-results">'+trajectoryPanelHtml()+
+      '<div class="results-section-title"><span>'+(locale==='fr'?'VOTRE PRIORITÉ':'YOUR PRIORITY')+'</span><b>PULSE</b></div>'+
+      '<div class="priority-card"><b>'+(locale==='fr'?'MAINTENANT':'NOW')+'</b>'+escHtml(t.priority||t.current_action||(locale==='fr'?'Priorité en préparation':'Priority being prepared'))+'</div>'+
+      '<div class="results-section-title"><span>'+(locale==='fr'?'À COMPRENDRE':'UNDERSTAND NEXT')+'</span><b>'+checkpoint+'</b></div>'+
+      '<div class="panel-grid">'+topics.map(x=>'<div><span>LIBRARY</span><b>'+escHtml(x)+'</b></div>').join('')+'</div>'+
+      dailyHealthHtml()+
+      '<div class="data-note">'+(locale==='fr'?'Les données affichées ici proviennent de votre session Pulse lorsqu’elles sont disponibles. Les métriques non synchronisées ne sont pas remplacées par des valeurs de démonstration.':'Data shown here comes from your Pulse session when available. Metrics that are not synced are not replaced with demo values.')+'</div></section>';
+  }
   const snap=current(),d=snap.domains||{},metrics=snap.metrics||{};
   const score=Math.round(Number(snap.motion_score)||0),age=Math.round(Number(snap.motion_age)||0);
   const baseScore=Math.round(Number(baseline.motion_score)||0),baseAge=Math.round(Number(baseline.motion_age)||0);
@@ -5347,6 +5500,14 @@ function updateTwinVisuals(){
   updateBiomechTwin();
 }
 function twinDomainHtml(id){
+  if(personalTrajectory){
+    const value=personalTrajectory.domains?.[id],priority=personalTrajectory.priority||personalTrajectory.current_action||'';
+    const isFocus=trajectoryFocusKey()===({muscle:'strength',mobility:'mobility',balance:'balance',endurance:'cardio',posture:'mobility'}[id]||'');
+    return '<section class="domain-result"><div class="domain-result-head"><div><span>'+twinDomainName(id).toUpperCase()+'</span><em>'+(isFocus?(locale==='fr'?'PRIORITÉ':'PRIORITY'):(locale==='fr'?'TWIN':'TWIN'))+'</em></div><strong>'+(value!=null?Math.round(value)+'<small>/100</small>':'—')+'</strong></div>'+
+      '<p>'+(locale==='fr'?'Ce domaine est replacé dans votre trajectoire personnelle.':'This domain is placed in the context of your personal trajectory.')+'</p>'+
+      (isFocus&&priority?'<div class="priority-card"><b>'+(locale==='fr'?'PRIORITÉ ACTUELLE':'CURRENT PRIORITY')+'</b>'+escHtml(priority)+'</div>':'')+
+      '<div class="data-note">'+(value!=null?(locale==='fr'?'Valeur synchronisée depuis Pulse.':'Value synced from Pulse.'):(locale==='fr'?'Le sous-score personnel de ce domaine n’est pas encore synchronisé ; aucune valeur de démonstration n’est affichée.':'The personal subscore for this domain is not synced yet; no demo value is shown.'))+'</div></section>';
+  }
   const s=current(),value=Math.round(Number(s.domains?.[id])||0),base=Math.round(Number(baseline.domains?.[id])||0),delta=value-base;
   const explanations={
     muscle:{fr:'Capacités musculaires observées dans le bilan et évolution depuis la baseline.',en:'Muscular capability signals and change from baseline.'},
@@ -5567,10 +5728,11 @@ function selectFitnessActivity(id){
   showFitnessToday();
 }
 function fitnessActivityCards(){
+  const recommended=trajectoryFocusKey();
   return `<div class="fitness-activity-grid">${FITNESS_ORDER.map(id=>{
-    const a=FITNESS_ACTIVITIES[id],selected=fitnessProfile.activity===id;
-    return `<button data-fitness="${id}" class="${selected?'selected':''}">
-      <span>${a.code}</span><b>${a.title[locale]}</b><small>${a.promise[locale]}</small>
+    const a=FITNESS_ACTIVITIES[id],selected=fitnessProfile.activity===id,isRecommended=recommended===id;
+    return `<button data-fitness="${id}" class="${selected?'selected ':''}${isRecommended?'recommended':''}">
+      <span>${a.code}${isRecommended?' · TRAJECTORY':''}</span><b>${a.title[locale]}</b><small>${a.promise[locale]}</small>
     </button>`;
   }).join('')}</div>`;
 }
@@ -5692,6 +5854,16 @@ function showRehabStation(id,completed=false){
 }
 
 function twinHtml(){
+  if(personalTrajectory){
+    const t=personalTrajectory,domains=['muscle','mobility','balance','posture','endurance'],focus=trajectoryFocusKey(),checkpoint=trajectoryCheckpointLabel(t);
+    const focusMap={strength:'muscle',mobility:'mobility',balance:'balance',cardio:'endurance',recovery:'posture'};
+    return '<p>'+(locale==='fr'?'Votre Functional Twin n’est plus un tableau de scores : il replace vos mesures dans votre trajectoire et met en avant ce qui compte maintenant.':'Your Functional Twin is no longer a score board: it places measurements in your trajectory and highlights what matters now.')+'</p>'+
+      '<div class="metric-hero"><div><span>MOTION SCORE</span><strong>'+(t.motion_score!=null?Math.round(t.motion_score):'—')+(t.motion_score!=null?'<em>/100</em>':'')+'</strong></div><div><span>MOTION AGE</span><strong>'+(t.motion_age!=null?Math.round(t.motion_age):'—')+'</strong></div></div>'+
+      '<div class="priority-card"><b>'+(locale==='fr'?'PRIORITÉ ACTUELLE':'CURRENT PRIORITY')+'</b>'+escHtml(t.priority||t.current_action||(locale==='fr'?'En cours de préparation':'Being prepared'))+'</div>'+
+      '<div class="twin-domain-list">'+domains.map(id=>'<button data-domain="'+id+'" class="'+(focusMap[focus]===id?'trajectory-focus':'')+'"><span>'+twinDomainName(id)+'</span><b>'+(t.domains?.[id]!=null?Math.round(t.domains[id]):'→')+'</b><i><em style="width:'+(t.domains?.[id]!=null?THREE.MathUtils.clamp(t.domains[id],0,100):0)+'%"></em></i></button>').join('')+'</div>'+
+      '<div class="trajectory-mini"><span>'+(locale==='fr'?'PROCHAIN POINT':'NEXT CHECKPOINT')+'</span><b>'+checkpoint+'</b></div>'+
+      '<div class="data-note">'+(locale==='fr'?'Les données personnelles non synchronisées restent volontairement vides : World ne les remplace pas par des données de démonstration.':'Unsynced personal data intentionally stays empty: World never replaces it with demo data.')+'</div>';
+  }
   const s=current(),cmp=core.compare(baseline.snapshot_id,s.snapshot_id,'world-v1');
   const d=s.domains;
   const domains=['muscle','mobility','balance','posture','endurance'];
@@ -5718,7 +5890,8 @@ function showTwin(){
   ]);bindTimeline();
 }
 function rehabHtml(){
-  const t=fitnessToday();
+  const t=fitnessToday(),recommended=trajectoryFocusKey(),trajectoryContext=personalTrajectory?'<div class="trajectory-fitness-context"><span>'+(locale==='fr'?'VOTRE TRAJECTOIRE':'YOUR TRAJECTORY')+'</span><strong>'+escHtml(personalTrajectory.priority||personalTrajectory.current_action||trajectoryPhaseLabel(personalTrajectory))+'</strong>'+(recommended?'<small>'+(locale==='fr'?'Pratique suggérée pour explorer cette priorité : ':'Suggested activity to explore this priority: ')+FITNESS_ACTIVITIES[recommended].title[locale]+'</small>':'')+'</div>':'';
+
   if(!t){
     return `
       <div class="fitness-club-intro">
@@ -5726,6 +5899,7 @@ function rehabHtml(){
         <h3>${locale==='fr'?'Choisissez comment vous voulez bouger.':'Choose how you want to move.'}</h3>
         <p>${locale==='fr'?'Sélectionnez une pratique. KŌMØ construit ensuite un programme quotidien simple, progressif et suivi avec Alex, votre coach virtuel.':'Select an activity. KŌMØ then builds a simple progressive daily program with Alex, your virtual coach.'}</p>
       </div>
+      ${trajectoryContext}
       ${fitnessActivityCards()}
       <div class="data-note">${locale==='fr'?'Le Fitness Club propose des routines générales d’activité physique et d’engagement. Elles ne constituent pas une prescription médicale personnalisée.':'Fitness Club provides general physical-activity and engagement routines. They are not personalised medical prescriptions.'}</div>`;
   }
@@ -5735,6 +5909,7 @@ function rehabHtml(){
       <h3>${locale==='fr'?'Votre entraînement, chaque jour.':'Your training, every day.'}</h3>
       <p>${t.activity.promise[locale]}</p>
     </div>
+    ${trajectoryContext}
     ${fitnessTodayHtml()}
     <div class="fitness-change-title">${locale==='fr'?'Changer de pratique':'Change activity'}</div>
     ${fitnessActivityCards()}`;
@@ -5770,11 +5945,14 @@ function showArena(){
   ]);
 }
 function showLibrary(){
-  completeJourney('library');
-  const html=locale==='fr'
-    ?'<p>Vous êtes dans la Science Library : méthode KŌMØ, sources, littérature et provenance des mesures. Les tables de lecture et les rayonnages structurent cet espace calme du World.</p><div class="panel-grid"><div><span>SOURCES</span><b>Mesuré</b></div><div><span>METHOD</span><b>Traçable</b></div><div><span>READING ROOM</span><b>Ouvert</b></div><div><span>DATA</span><b>Privé</b></div></div><div class="priority-card"><b>SCIENCE LIBRARY</b>Explorez physiquement la salle, les rayonnages et la table KŌMØ Method.</div>'
-    :'<p>You are inside the Science Library: KŌMØ methodology, sources, literature and measurement provenance. Reading tables and book walls form a quiet knowledge space inside World.</p><div class="panel-grid"><div><span>SOURCES</span><b>Measured</b></div><div><span>METHOD</span><b>Traceable</b></div><div><span>READING ROOM</span><b>Open</b></div><div><span>DATA</span><b>Private</b></div></div><div class="priority-card"><b>SCIENCE LIBRARY</b>Walk through the room, shelves and KŌMØ Method table.</div>';
-  openPanel('SCIENCE LIBRARY',locale==='fr'?'Science · méthode · sources.':'Science · method · sources.',html,[
+  completeJourney('library',{silent:true});
+  const topics=trajectoryLibraryTopics(),priority=personalTrajectory?.priority||personalTrajectory?.current_action||'';
+  const html=personalTrajectory
+    ?'<section class="trajectory-library"><span>KŌMØ LIBRARY · '+trajectoryPhaseLabel(personalTrajectory)+'</span><h3>'+(locale==='fr'?'Trois choses utiles pour votre trajectoire.':'Three useful things for your trajectory.')+'</h3>'+(priority?'<div class="priority-card"><b>'+(locale==='fr'?'VOTRE PRIORITÉ':'YOUR PRIORITY')+'</b>'+escHtml(priority)+'</div>':'')+'<div class="library-focus-grid">'+topics.map((x,i)=>'<article><small>0'+(i+1)+'</small><strong>'+escHtml(x)+'</strong><span>'+(locale==='fr'?'À lire / regarder':'Read / watch')+'</span></article>').join('')+'</div></section>'
+    :(locale==='fr'
+      ?'<p>Science Library rassemble la méthode KŌMØ, les sources et les contenus de référence. Connectez Pulse pour afficher une sélection liée à votre trajectoire.</p>'
+      :'<p>Science Library brings together KŌMØ methods, sources and reference content. Connect Pulse to see a selection related to your trajectory.</p>');
+  openPanel('SCIENCE LIBRARY',personalTrajectory?(locale==='fr'?'Contenus liés à votre priorité.':'Content linked to your priority.'):(locale==='fr'?'Science · méthode · sources.':'Science · method · sources.'),html,[
     {label:locale==='fr'?'CONTINUER À EXPLORER':'KEEP EXPLORING',primary:true,onClick:closePanel}
   ]);
 }
@@ -6393,7 +6571,7 @@ function waitForWorldMultiplayer(timeout=6500){
     window.addEventListener('komo:world-multiplayer-ready',onReady,{once:true});
   });
 }
-window.addEventListener('komo:world-session-ready',event=>enterWorldAfterAuth(event.detail||{}));
+window.addEventListener('komo:world-session-ready',event=>{const detail=event.detail||{};if(String(detail.mode||'').startsWith('guest'))ingestTrajectory(null);enterWorldAfterAuth(detail)});
 window.addEventListener('komo:world-auth-error',event=>{
   const message=event.detail?.message||(locale==='fr'?'Connexion impossible.':'Connection failed.');
   setIntroAuthBusy(false);setIntroAuthStatus(message,true);
@@ -6470,7 +6648,7 @@ resetPosition.addEventListener('click',()=>fastTravel('arrival'));
 function applyLocale(){
   document.documentElement.lang=locale;
   const c=copy[locale];
-  $('#hud-today').textContent=c.today;
+  $('#hud-today').textContent=personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||c.today):c.today;
   $('.intro-kicker').textContent=c.introKicker;
   $('#intro-title').innerHTML=`<span>${c.intro1}</span><em>${c.intro2}</em>`;
   intro.querySelector('p').textContent=c.introBody;
@@ -6898,7 +7076,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'7.6.5-runtime-trace',
+  version:'8.0.0-trajectory-world',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
@@ -6913,11 +7091,13 @@ window.KomoWorld={
   getNpcMissions:()=>({date:npcMissionState.date,missions:JSON.parse(JSON.stringify(npcMissionState.missions)),talked:[...npcMissionState.talked]}),
   getDailyHealth:()=>dailyHealth?{...dailyHealth}:null,
   ingestDailyHealth,
+  getTrajectory:()=>personalTrajectory?JSON.parse(JSON.stringify(personalTrajectory)):null,
+  ingestTrajectory,
   getCameraMode:()=>cameraMode,
   fastTravel,
   joinPresence,
   notify
 };
-import('./world-multiplayer-v1.js?v=20260925-arrival-v150')
+import('./world-multiplayer-v1.js?v=20260929-trajectory-v8')
   .then(mod=>mod.mount?.(window.KomoWorld))
   .catch(err=>console.warn('[KŌMØ World multiplayer] optional layer unavailable',err));
