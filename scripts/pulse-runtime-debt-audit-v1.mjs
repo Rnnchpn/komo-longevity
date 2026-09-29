@@ -45,13 +45,17 @@ function exactViewRootMutations(text){
   return{aliases:[...aliases].sort(),replace,insert,total:replace+insert};
 }
 
+const VENDOR_RUNTIME_FILES=new Set(['supabase-umd-v1.js']);
+const vendorRuntime=[];
 const metrics=[];
 for(const file of [...reachable].sort()){
   const text=textByFile.get(file)||'';
   const st=await stat(join(target,file));
   const routeWrites=(text.match(/location\.hash\s*=|history\.(?:pushState|replaceState)\s*\(/g)||[]).length;
   const observers=(text.match(/new\s+MutationObserver\s*\(/g)||[]).length;
-  const intervals=(text.match(/setInterval\s*\(/g)||[]).length;
+  const rawIntervals=(text.match(/setInterval\s*\(/g)||[]).length;
+  const intervals=VENDOR_RUNTIME_FILES.has(file)?0:rawIntervals;
+  if(VENDOR_RUNTIME_FILES.has(file))vendorRuntime.push({file,intervals:rawIntervals});
   const timeouts=(text.match(/setTimeout\s*\(/g)||[]).length;
   const createClients=(text.match(/createClient\s*\(/g)||[]).length;
   const sharedRuntime=text.includes('KomoRuntime');
@@ -106,7 +110,7 @@ for(const [surface,candidates] of Object.entries(owners)){
   console.log(`[pulse-runtime-debt-v1] surface ${surface}: ${loaded.length} candidates · ${loaded.join(', ')||'none'}`);
 }
 
-const report={generated_at:new Date().toISOString(),direct_scripts:scripts.length,unique_script_tags:scriptCounts.size,reachable_modules:reachable.size,total_js_modules:jsFiles.length,loaded_bytes:loadedBytes,mutation_observers:observerCount,interval_count:intervalCount,whole_body_observers:wholeBody.map(x=>x.file),interval_modules:metrics.filter(x=>x.intervals>0).map(x=>({file:x.file,count:x.intervals})),direct_supabase_clients:directClients.map(x=>x.file),isolated_supabase_clients:isolatedClients.map(x=>x.file),route_writers:routeWriters.map(x=>x.file),view_writers_legacy_proxy:legacyViewOwners.map(x=>x.file),view_mutators_exact:exactViewMutators.map(x=>x.file),view_replacers_exact:exactViewReplacers.map(x=>x.file),view_inserters_exact:exactViewInserters.map(x=>x.file),view_proxy_false_positives:legacyViewFalsePositives.map(x=>x.file),duplicate_script_tags:duplicateScriptTags,top_risk:ranked.slice(0,30),surface_candidates:Object.fromEntries(Object.entries(owners).map(([k,v])=>[k,v.filter(x=>reachable.has(x))]))};
+const report={generated_at:new Date().toISOString(),direct_scripts:scripts.length,unique_script_tags:scriptCounts.size,reachable_modules:reachable.size,total_js_modules:jsFiles.length,loaded_bytes:loadedBytes,mutation_observers:observerCount,interval_count:intervalCount,vendor_runtime:vendorRuntime,whole_body_observers:wholeBody.map(x=>x.file),interval_modules:metrics.filter(x=>x.intervals>0).map(x=>({file:x.file,count:x.intervals})),direct_supabase_clients:directClients.map(x=>x.file),isolated_supabase_clients:isolatedClients.map(x=>x.file),route_writers:routeWriters.map(x=>x.file),view_writers_legacy_proxy:legacyViewOwners.map(x=>x.file),view_mutators_exact:exactViewMutators.map(x=>x.file),view_replacers_exact:exactViewReplacers.map(x=>x.file),view_inserters_exact:exactViewInserters.map(x=>x.file),view_proxy_false_positives:legacyViewFalsePositives.map(x=>x.file),duplicate_script_tags:duplicateScriptTags,top_risk:ranked.slice(0,30),surface_candidates:Object.fromEntries(Object.entries(owners).map(([k,v])=>[k,v.filter(x=>reachable.has(x))]))};
 console.log('[pulse-runtime-debt-v1] REPORT_JSON '+JSON.stringify(report));
 
 const BASELINE=JSON.parse(await readFile(baselinePath,'utf8'));
