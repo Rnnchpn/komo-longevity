@@ -1806,3 +1806,27 @@ body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
   }
   .world-quick-nav button[data-nav-zone="upper"]{display:none}
 }
+
+
+/* V8.0 — KŌMØ Trajectory World */
+body.trajectory-connected .journey-hud{border-color:rgba(157,196,169,.26);background:linear-gradient(135deg,rgba(19,44,31,.90),rgba(24,49,36,.82))}
+.journey-hud.trajectory-active .journey-level strong{color:#b9d7c3}
+.journey-hud.trajectory-active .journey-main>i>em{background:linear-gradient(90deg,#6fa787,#c7d9cf)}
+.journey-hud.trajectory-active .journey-xp small{color:#a9c9b4}
+.trajectory-panel>h3,.trajectory-library>h3{margin:8px 0 14px;font:500 25px/1.05 Georgia,serif;color:#f2ece2}
+.trajectory-kicker,.trajectory-library>span,.trajectory-fitness-context>span{display:block;font-size:7px;font-weight:800;letter-spacing:.15em;color:#b8d3c0}
+.trajectory-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:14px 0}
+.trajectory-steps span{min-height:54px;padding:9px;border:1px solid rgba(255,255,255,.07);border-radius:12px;background:rgba(255,255,255,.025);display:flex;align-items:center;gap:7px}
+.trajectory-steps i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.05);font-size:7px;font-style:normal}
+.trajectory-steps b{font-size:7px;letter-spacing:.04em}.trajectory-steps .done{opacity:.62}.trajectory-steps .done i{background:rgba(117,170,135,.18);color:#b8d3c0}.trajectory-steps .current{border-color:rgba(147,191,160,.34);background:rgba(106,158,123,.10)}.trajectory-steps .current i{background:#b8d3c0;color:#183025}
+.trajectory-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.trajectory-grid article{min-height:100px;padding:13px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.025)}
+.trajectory-grid span{display:block;font-size:6px;font-weight:800;letter-spacing:.12em;color:rgba(240,234,224,.40)}
+.trajectory-grid strong{display:block;margin-top:8px;font-size:11px;line-height:1.4;color:#efe8dc}
+.trajectory-mini{display:flex;justify-content:space-between;align-items:center;margin:12px 0;padding:11px 13px;border-radius:13px;background:rgba(120,170,137,.08);border:1px solid rgba(145,190,159,.16)}.trajectory-mini span{font-size:7px;font-weight:800;letter-spacing:.11em;color:#a9c9b4}.trajectory-mini b{font-size:11px}
+.twin-domain-list button.trajectory-focus{border-color:rgba(147,191,160,.38);background:rgba(116,171,135,.10)}
+.trajectory-fitness-context{margin:0 0 12px;padding:14px;border:1px solid rgba(145,190,159,.18);border-radius:15px;background:rgba(106,158,123,.07)}
+.trajectory-fitness-context strong{display:block;margin-top:7px;font:500 16px/1.2 Georgia,serif;color:#efe9df}.trajectory-fitness-context small{display:block;margin-top:7px;font-size:8px;line-height:1.45;color:rgba(240,234,224,.48)}
+.fitness-activity-grid button.recommended{border-color:rgba(149,193,163,.38)!important;box-shadow:inset 0 0 0 1px rgba(149,193,163,.10)}
+.library-focus-grid{display:grid;gap:8px;margin-top:12px}.library-focus-grid article{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:12px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(255,255,255,.025)}.library-focus-grid small{font-size:7px;color:#b8d3c0}.library-focus-grid strong{font-size:10px}.library-focus-grid span{font-size:6px;color:rgba(240,234,224,.38)}
+@media(max-width:620px){.trajectory-grid{grid-template-columns:1fr}.trajectory-steps{grid-template-columns:1fr 1fr}.trajectory-panel>h3,.trajectory-library>h3{font-size:22px}}
