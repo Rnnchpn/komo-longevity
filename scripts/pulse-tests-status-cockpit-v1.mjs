@@ -4,10 +4,7 @@ import {join} from 'node:path';
 const root=process.cwd(),pulse=join(root,'site','pulse-v12'),src=join(root,'pulse-app');
 const htmlPath=join(pulse,'index.html'),cssPath=join(pulse,'pulse-ui-v1.css'),proArchPath=join(pulse,'pro-architecture-v2.js'),myocarePath=join(pulse,'myocare-import-v1.js'),prepPath=join(pulse,'patient-preparation-hub-v2.js'),questionnairePath=join(pulse,'questionnaire-engine-v1.js');
 const release='20260828-canonical-4p8';
-await Promise.all([
-  copyFile(join(src,'tests-status-cockpit-v1.js'),join(pulse,'tests-status-cockpit-v1.js')),
-  copyFile(join(src,'pro-agenda-dossier-v1.js'),join(pulse,'pro-agenda-dossier-v1.js'))
-]);
+await copyFile(join(src,'tests-status-cockpit-v1.js'),join(pulse,'tests-status-cockpit-v1.js'));
 let [html,css,cockpitCss,cockpitJs,proCss,proJs,proArch,myocare,prep,questionnaire]=await Promise.all([
   readFile(htmlPath,'utf8'),readFile(cssPath,'utf8'),readFile(join(src,'tests-status-cockpit-v1.css'),'utf8'),readFile(join(src,'tests-status-cockpit-v1.js'),'utf8'),readFile(join(src,'pro-agenda-dossier-v1.css'),'utf8'),readFile(join(src,'pro-agenda-dossier-v1.js'),'utf8'),readFile(proArchPath,'utf8'),readFile(myocarePath,'utf8'),readFile(prepPath,'utf8'),readFile(questionnairePath,'utf8')
 ]);
@@ -15,14 +12,14 @@ let [html,css,cockpitCss,cockpitJs,proCss,proJs,proArch,myocare,prep,questionnai
 // Patient Tests: replace the decorative progress card with a state-aware status cockpit.
 html=html.replace(/\s*<script type="module" src="\.\/tests-status-cockpit-v1\.js(?:\?v=[^\"]+)?"><\/script>/g,'');
 html=html.replace(/\s*<script type="module" src="\.\/pro-agenda-dossier-v1\.js(?:\?v=[^\"]+)?"><\/script>/g,'');
-html=html.replace('</body>',`  <script type="module" src="./tests-status-cockpit-v1.js"></script>\n  <script type="module" src="./pro-agenda-dossier-v1.js"></script>\n</body>`);
+html=html.replace('</body>',`  <script type="module" src="./tests-status-cockpit-v1.js"></script>\n</body>`);
 
-// Professional Agenda is the canonical approval surface. No route/menu is added.
-proArch=proArch.replace("window.KomoBooking?.deactivatePro?.();if(id==='dashboard')","window.KomoBooking?.deactivatePro?.();window.KomoProAgendaWorkflow?.deactivate?.();if(id==='dashboard')");
-proArch=proArch.replace("else if(id==='planning')window.KomoBooking?.openProPlanning?.();","else if(id==='planning'){if(window.KomoProAgendaWorkflow?.open)window.KomoProAgendaWorkflow.open();else window.KomoBooking?.openProPlanning?.();}");
-proArch=proArch.replace("if(s&&s.textContent!=='RDV')s.textContent='RDV';if(b.getAttribute('aria-label')!=='Rendez-vous')b.setAttribute('aria-label','Rendez-vous')","if(s&&s.textContent!=='Agenda et réseau')s.textContent='Agenda et réseau';if(b.getAttribute('aria-label')!=='Agenda et réseau')b.setAttribute('aria-label','Agenda et réseau')");
-if(!proArch.includes('KomoProAgendaWorkflow?.open'))throw new Error('[pulse-4p8] pro Agenda ownership patch missing');
-if(!proArch.includes("s.textContent='Agenda et réseau'"))throw new Error('[pulse-4p8] patient Agenda label can regress to RDV');
+// V7.6 compatibility: the legacy Pro Agenda owner is retired.
+// Keep the single-owner desktop navigation and the patient RDV label intact.
+const compactProNav=proArch.includes("navItem('planning','Consultations'")&&proArch.includes("navItem('patients','Patients'")&&proArch.includes("navItem('motion','Motion'")&&proArch.includes("navItem('myocare','Analyse'");
+if(!compactProNav)throw new Error('[pulse-4p8] compact Pro navigation contract missing');
+if(!proArch.includes("s.textContent='RDV'"))throw new Error('[pulse-4p8] patient RDV label contract missing');
+if(!proArch.includes('KomoCenterWorkspace?.openConsultations'))throw new Error('[pulse-4p8] canonical consultation owner missing');
 await writeFile(proArchPath,proArch);
 
 // Real field-test imports belong to Motion v0.5, never the retired v0.4 default.
@@ -54,7 +51,7 @@ await writeFile(questionnairePath,questionnaire);
 // Bundle both visual systems before the canonical shell guard.
 css=css.replace(/\n\/\* KŌMØ Tests status cockpit v1 \*\/[\s\S]*?(?=\n\/\* KŌMØ Pro agenda dossier v1 \*\/|\n\/\* Canonical Pulse shell ownership \*\/|$)/,'');
 css=css.replace(/\n\/\* KŌMØ Pro agenda dossier v1 \*\/[\s\S]*?(?=\n\/\* Canonical Pulse shell ownership \*\/|$)/,'');
-const owner=`\n/* KŌMØ Tests status cockpit v1 */\n${cockpitCss}\n/* KŌMØ Pro agenda dossier v1 */\n${proCss}\n`;
+const owner=`\n/* KŌMØ Tests status cockpit v1 */\n${cockpitCss}\n`;
 const canonical=css.indexOf('/* Canonical Pulse shell ownership */');
 css=canonical>=0?css.slice(0,canonical)+owner+css.slice(canonical):css+owner;
 
@@ -65,26 +62,21 @@ await Promise.all([writeFile(htmlPath,html),writeFile(cssPath,css)]);
 
 const checks=[
  ['test cockpit asset shipped',html.includes(`tests-status-cockpit-v1.js?v=${release}`)],
- ['professional workflow asset shipped',html.includes(`pro-agenda-dossier-v1.js?v=${release}`)],
+ ['retired professional Agenda asset stays unloaded',!html.includes('pro-agenda-dossier-v1.js')],
  ['canonical release bumped',html.includes(`komo-pulse-release" content="${release}`)],
  ['all local assets share release',[...html.matchAll(/(?:src|href)="\.\/[^"?#]+\.(?:js|css)\?v=([^"#]+)"/g)].every(x=>x[1]===release)],
  ['old progress block is replaced dynamically',cockpitJs.includes("document.querySelector('.tests-v1-progress-card')")&&cockpitJs.includes('old.replaceWith(node)')],
  ['next action is patient-state aware',cockpitJs.includes('PROCHAINE ÉTAPE')&&cockpitJs.includes('CONSULTATION VALIDÉE')&&cockpitJs.includes('VOS RÉSULTATS SONT DISPONIBLES')],
  ['Start Motion Clinical statuses exist',cockpitJs.includes("step('KŌMØ Start'")&&cockpitJs.includes("step('KŌMØ Motion'")&&cockpitJs.includes("step('KŌMØ Clinical'")],
  ['Agenda and preparation handoffs stay canonical',cockpitJs.includes('komo_booking_service')&&cockpitJs.includes('komo_open_preparation')&&cockpitJs.includes("location.hash='documents'")],
- ['patient Agenda label cannot fall back to RDV',proArch.includes("s.textContent='Agenda et réseau'")&&!proArch.includes("s.textContent='RDV'" )],
- ['pro Agenda is canonical planning owner',proArch.includes('KomoProAgendaWorkflow?.open')&&proJs.includes('AGENDA · VALIDATION DES DEMANDES')],
- ['pending appointment has explicit validation switch',proJs.includes('En attente de validation')&&proJs.includes('data-kpad-approve')&&proJs.includes("rpc('approve_komo_appointment'" )],
- ['patient dossier opens from Agenda and Patients',proJs.includes('KomoProPatientDossier')&&proJs.includes('[data-kfollow-open]')&&proJs.includes('#kcpPatientsBody tr[data-patient]')],
- ['patient Start results are visible to professional',proJs.includes('KŌMØ Check')&&proJs.includes('Chair Stand')&&proJs.includes('Two-Step')],
- ['pre-consultation six sections are visible',proJs.includes('PRÉ-CONSULTATION MOTION')&&proJs.includes('/6 sections complétées')],
+ ['patient RDV label remains canonical',proArch.includes("s.textContent='RDV'")&&!proArch.includes("s.textContent='Agenda et réseau'")],
+ ['Pro consultations use canonical Centre workspace',proArch.includes('KomoCenterWorkspace?.openConsultations')&&!proArch.includes('KomoProAgendaWorkflow?.open')],
  ['patient prep only sees validated appointments',prep.includes(".in('status',['confirmed','arrived','in_progress'])")&&!prep.includes(".in('status',['scheduled','confirmed','arrived','in_progress'])")],
  ['patient prep reads assessmentId from RPC contract',prep.includes('e.data?.assessmentId')&&prep.includes(".eq('assessment_id',assessmentId)" )],
  ['questionnaire engine independently enforces validation',questionnaire.includes(".eq('appointment_type','motion').in('status',['confirmed','arrived','in_progress'])")&&questionnaire.includes('scheduled_at')],
- ['SVA is saved through protected RPC',proJs.includes("rpc('save_komo_motion_sva'")&&proJs.includes('POSTURE · SVA')],
- ['MyoCare Excel importer mounts inside dossier',proJs.includes('id="clmImporter"')&&proJs.includes("komo:clinical-motion-render")],
+
  ['MyoCare default protocol is v0.5',myocare.includes("PROTOCOL='motion-v0.5'")&&!myocare.includes("PROTOCOL='motion-v0.4'" )],
- ['visual systems bundled',css.includes('KŌMØ Tests status cockpit v1')&&css.includes('.tests-v1-status-card')&&css.includes('KŌMØ Pro agenda dossier v1')&&css.includes('.kpad-drawer')]
+ ['patient status visual system bundled',css.includes('KŌMØ Tests status cockpit v1')&&css.includes('.tests-v1-status-card')&&!html.includes('pro-agenda-dossier-v1.js')]
 ];
 let failed=0;for(const [label,ok] of checks){console.log(`[pulse-4p8] ${ok?'OK':'FAIL'} · ${label}`);if(!ok)failed++}if(failed)process.exit(1);
 console.log(`[pulse-4p8] ${checks.length} checks passed · slide-contract release ${release}.`);
