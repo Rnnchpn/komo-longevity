@@ -164,8 +164,10 @@ const generatedPatientNavTo=`    const r=route();
     if(allowedAdmin())return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('pro:dashboard','Pro',I.center,false)+navItem('admin','Admin',I.admin,false)+navItem('more','Plus',I.more,false);
     if(allowedPro())return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:documents','Rendez-vous',I.agenda,r==='documents')+navItem('pro:dashboard','Pro',I.center,false)+navItem('more','Plus',I.more,false);
     return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo');`;
-if(!adaptive.includes(generatedPatientNavFrom))throw new Error('[pulse-runtime-final-v2] generated patient nav anchor missing');
-adaptive=adaptive.replace(generatedPatientNavFrom,generatedPatientNavTo);
+if(!adaptive.includes(generatedPatientNavTo)){
+  if(!adaptive.includes(generatedPatientNavFrom))throw new Error('[pulse-runtime-final-v2] generated patient nav anchor missing');
+  adaptive=adaptive.replace(generatedPatientNavFrom,generatedPatientNavTo);
+}
 adaptive=adaptive.replace(
   "    if(mode()==='patient'){document.querySelector('#kamBottomBar')?.remove();return;}",
   "    if(mode()==='patient'&&!allowedPro()){document.querySelector('#kamBottomBar')?.remove();return;}"
