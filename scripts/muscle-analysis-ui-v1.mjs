@@ -34,7 +34,9 @@ if(fs.existsSync(importerPath)){
 }
 
 let pro=fs.readFileSync(proPath,'utf8');
-pro=pro.replace("navItem('myocare','MyoCare',icons.myocare)","navItem('myocare','Analyse musculaire',icons.myocare)");
+// Keep the compact single-owner Pro navigation label introduced by the desktop workspace.
+pro=pro.replace("navItem('myocare','MyoCare',icons.myocare)","navItem('myocare','Analyse',icons.myocare)");
+pro=pro.replace("navItem('myocare','Analyse musculaire',icons.myocare)","navItem('myocare','Analyse',icons.myocare)");
 fs.writeFileSync(proPath,pro);
 
 let html=fs.readFileSync(indexPath,'utf8');
@@ -50,7 +52,7 @@ const asset=fs.readFileSync(assetDst,'utf8');
 const checks=[
   ['cockpit tab label',cockpit.includes("['myocare','Analyse musculaire']")],
   ['cockpit fallback label',cockpit.includes('<h3>Analyse musculaire</h3><p>Acquisitions Myodev, provenance et contrôle qualité.</p>')],
-  ['professional navigation label',pro.includes("navItem('myocare','Analyse musculaire',icons.myocare)")],
+  ['professional navigation label',pro.includes("navItem('myocare','Analyse',icons.myocare)")],
   ['metric timestamp uses schema column',asset.includes("task_code,created_at,calibration_id")&&!asset.includes("task_code,recorded_at,calibration_id")],
   ['shared Supabase runtime',asset.includes('window.KomoRuntime?.client')],
   ['asset',fs.existsSync(assetDst)],
