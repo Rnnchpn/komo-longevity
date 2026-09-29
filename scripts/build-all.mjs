@@ -223,9 +223,15 @@ const scripts = [
 const failures=[];
 for (const script of scripts) {
   console.log(`[build-all] ${script}`);
-  const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
+  const run = spawnSync(process.execPath, [script], { encoding:'utf8',maxBuffer:16*1024*1024 });
+  if(run.stdout)process.stdout.write(run.stdout);
+  if(run.stderr)process.stderr.write(run.stderr);
   if (run.status !== 0) {
-    failures.push({script,status:run.status??1,signal:run.signal??null});
+    failures.push({
+      script,status:run.status??1,signal:run.signal??null,
+      stdout:String(run.stdout||'').slice(-12000),
+      stderr:String(run.stderr||'').slice(-12000)
+    });
     console.error('[build-all-diagnostic] '+script+' failed status='+(run.status??1));
   }
 }
