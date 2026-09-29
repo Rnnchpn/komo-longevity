@@ -6,7 +6,7 @@ const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const source=join(root,'pulse-app','pulse-editorial-fixed-frame-v1.css');
 const pulse=join(root,'site','pulse-v12');
 const file='pulse-editorial-fixed-frame-v1.css';
-const version='20260929-editorial-fixed-frame-v1';
+const version='20260929-editorial-fixed-frame-v2';
 
 const css=await readFile(source,'utf8');
 await writeFile(join(pulse,file),css,'utf8');
@@ -24,16 +24,21 @@ const retiredStyles=[
   'pulse-canonical-theme-v14.css'
 ];
 
+const escapeRegExp=value=>value.replace(/[.*+?^{}()|[\]\\]/g,'\\$&');
+
 for(const name of htmlFiles){
   const path=join(pulse,name);
   let html=await readFile(path,'utf8');
+
   for(const retired of retiredStyles){
-    const escaped=retired.replace(/[.*+?^$()|[\]{}\\]/g,'\\for(const name of htmlFiles){
-  const path=join(pulse,name);
-  let html=await readFile(path,'utf8');');
-    html=html.replace(new RegExp('\\\\s*<link[^>]+href=["\\\']\\\\./'+escaped+'(?:\\\\?[^"\\\']*)?["\\\'][^>]*>','g'),'');
+    const escaped=escapeRegExp(retired);
+    html=html.replace(
+      new RegExp('\\s*<link[^>]+href=["\\\']\\./'+escaped+'(?:\\?[^"\\\']*)?["\\\'][^>]*>','g'),
+      ''
+    );
   }
-  html=html.replace(/\\s*<style id=["']kpCanonicalThemePriorityV14["']>[\\s\\S]*?<\\/style>/g,'');
+
+  html=html.replace(/\s*<style id=["']kpCanonicalThemePriorityV14["']>[\s\S]*?<\/style>/g,'');
   html=html.replace(/\s*<link[^>]+href=["']\.\/pulse-editorial-fixed-frame-v1\.css(?:\?[^"']*)?["'][^>]*>/g,'');
   html=html.replace('</head>',`  <link rel="stylesheet" href="./${file}?v=${version}" />\n</head>`);
   await writeFile(path,html,'utf8');
@@ -43,4 +48,7 @@ const index=await readFile(join(pulse,'index.html'),'utf8');
 const present=index.includes(`${file}?v=${version}`);
 const survivors=retiredStyles.filter(x=>index.includes(x));
 const oldInline=index.includes('kpCanonicalThemePriorityV14');
-console.log(`[pulse-editorial-fixed-frame-v1] ${present&&!survivors.length&&!oldInline?'PASS':'WARN'} · final stylesheet=${present?'yes':'no'} · retired-survivors=${survivors.join(',')||'none'} · old-inline=${oldInline?'yes':'no'} · ${htmlFiles.length} HTML surfaces`);
+
+console.log(
+  `[pulse-editorial-fixed-frame-v2] ${present&&!survivors.length&&!oldInline?'PASS':'WARN'} · final stylesheet=${present?'yes':'no'} · retired-survivors=${survivors.join(',')||'none'} · old-inline=${oldInline?'yes':'no'} · ${htmlFiles.length} HTML surfaces`
+);
