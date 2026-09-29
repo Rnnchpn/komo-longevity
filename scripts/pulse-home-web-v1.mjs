@@ -15,6 +15,7 @@ const mobileCssFile='patient-mobile-v1.css';
 const jsFile='patient-home-command-v1.js';
 const mobileJsFile='patient-mobile-v1.js';
 const assistantCssFile='komo-assistant-shell-v2.css';
+const homePhotoFile='pulse-home-photo.webp';
 const navFile='pulse-bottom-nav-v6.js';
 const navCoreFile='patient-navigation-core-v1.js';
 const legacyCss=['patient-home-hero-v2.css','patient-home-daily-v2.css'];
@@ -26,6 +27,7 @@ const legacyScripts=['patient-home-entry-v1.js','patient-home-daily-v2.js','pati
 for(const file of [cssFile,mobileCssFile,jsFile,mobileJsFile,assistantCssFile,navFile]){
   await copyFile(join(root,'pulse-app',file),join(pulse,file));
 }
+await copyFile(join(root,'src','assets','images','pulse-profile-v1.webp'),join(pulse,homePhotoFile));
 
 let html=await readFile(htmlPath,'utf8');
 const esc=file=>file.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
@@ -70,6 +72,8 @@ const checks=[
   ['Home routes to Consultations',js.includes('data-kh8-route="documents"')&&js.includes('Consultations')],
   ['Home routes to My KŌMØ',js.includes('data-kh8-route="mykomo"')],
   ['Home routes to Club',js.includes('data-kh8-route="club"')],
+  ['Home exposes KŌMØ World directly',js.includes('data-kh8-world')&&js.includes('https://komolongevity.com/world/')],
+  ['Home hero uses patient photo with KŌMØ fallback',js.includes('heroPhotoMarkup')&&js.includes('./pulse-home-photo.webp')],
   ['Home uses one canonical navigation controller',js.includes('KomoPatientNavigation.go(target)')&&!js.includes("location.hash='results'")&&!js.includes("location.hash='documents'")],
   ['Home does not import competing Results Connected Agenda or My KŌMØ owners',!js.includes('patient-canonical-results.js')&&!js.includes('key-hub-v1.js')&&!js.includes('agenda-v4.js')&&!js.includes('my-komo-stable-v5.js')],
   ['Home keeps assistant and responsive runtime as imports',js.includes("import './komo-assistant-shell-v2.js'")&&js.includes("import './patient-mobile-v1.js'")&&!finalScript(mobileJsFile)],
@@ -78,7 +82,7 @@ const checks=[
   ['desktop dock uses approved labels',nav.includes("['home','Home'")&&nav.includes("['results','Résultats'")&&nav.includes("['key','Connected'")&&nav.includes("['agenda','Consultations & rendez-vous'")&&nav.includes("['mykomo','My KŌMØ'")&&!nav.includes("['trajectory','Trajectoire'")],
   ['five destinations stay canonical routes',finalDock.every(r=>navCore.includes(`'${r}'`))],
   ['desktop dock uses five columns',nav.includes('grid-template-columns:repeat(5,minmax(0,1fr))')],
-  ['Home stays black clinical with green as accent',css.includes('--kh8-bg:#050706')&&css.includes('--kh8-green:#8fb39a')&&css.includes('--kh8-panel:#0a0e0b')],
+  ['Home uses bright premium palette',css.includes('--kh8-bg:#f4f7f5')&&css.includes('--kh8-green:#3da873')&&css.includes('Patient Home bright photo refresh')],
   ['desktop iPad mobile share one information contract',css.includes('@media(max-width:1080px)')&&css.includes('@media(max-width:820px)')&&css.includes('@media(max-width:620px)')&&css.includes('@media(max-width:380px)')],
   ['Home prevents horizontal canvas drift',css.includes('overflow-x:hidden!important')],
   ['reduced motion supported',css.includes('@media(prefers-reduced-motion:reduce)')],
@@ -86,4 +90,4 @@ const checks=[
 ];
 for(const [label,ok] of checks)console.log(`[pulse-home-web-v8] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log(`[pulse-home-web-v8] PASS · ${checks.length}/${checks.length} canonical cockpit + five-navigation assertions`);
+console.log(`[pulse-home-web-v8] PASS · ${checks.length}/${checks.length} canonical cockpit + photo hero + World access + five-navigation assertions`);
