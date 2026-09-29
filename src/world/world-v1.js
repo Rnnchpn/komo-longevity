@@ -75,15 +75,19 @@ const journeyXpMenu=$('#journey-xp-menu');
 const coarse=window.matchMedia?.('(pointer:coarse)')?.matches||false;
 const isiOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||((navigator.platform==='MacIntel')&&(navigator.maxTouchPoints>1));
 const lowPower=coarse||isiOS;
+const desktopRenderCapable=!lowPower;
+const desktopRenderHQ=()=>desktopRenderCapable&&innerWidth>900;
+// Architecture and composition stay aligned with iPhone; only GPU quality scales up on desktop.
 const iphoneVisualReference=true;
-const visualLowPower=iphoneVisualReference; // iPhone is the visual source of truth on every device
+const visualLowPower=lowPower;
 const QUIET_WORLD_V8=true; // physical signs/totems are removed; context lives in architecture + UI
 const deviceDpr=Math.max(1,window.devicePixelRatio||1);
 const retinaMobile=lowPower&&deviceDpr>=2;
 document.documentElement.classList.toggle('low-power',lowPower);
 document.documentElement.classList.toggle('retina-mobile',retinaMobile);
+document.documentElement.classList.toggle('desktop-render-hq',desktopRenderHQ());
 document.body.classList.toggle('world-mobile-ui',lowPower||innerWidth<=900);
-document.body.classList.toggle('desktop-visual-v5',false);
+document.body.classList.toggle('desktop-visual-v5',desktopRenderHQ());
 document.body.classList.add('world-intro-active');
 
 const core=new TwinCore();
@@ -139,36 +143,41 @@ $('#hud-motion').textContent=current().motion_score;
 $('#hud-age').textContent=current().motion_age;
 
 const renderer=new THREE.WebGLRenderer({canvas,antialias:!lowPower,powerPreference:'high-performance',precision:lowPower?'mediump':'highp',stencil:false});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,lowPower?1.45:1.8));
+renderer.setPixelRatio(Math.min(lowPower?(window.devicePixelRatio||1):Math.max(1.15,window.devicePixelRatio||1),lowPower?1.45:1.75));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.17;
-renderer.shadowMap.enabled=false;
+renderer.shadowMap.enabled=desktopRenderCapable;
 renderer.shadowMap.autoUpdate=false;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.shadowMap.needsUpdate=desktopRenderCapable;
 let qualityMode=lowPower?'auto':'auto';
-let renderScale=lowPower?(retinaMobile?1.02:.86):1.15;
+let renderScale=lowPower?(retinaMobile?1.02:.86):1.62;
 let fpsEMA=60,lastPerfSample=performance.now(),perfFrames=0;
 let emergencyPerformance=false;
 let lastBudgetUpdate=0,lastVisibilityUpdate=0,lastUiUpdate=0,lastDecorUpdate=0,lastRoomFxUpdate=0;
 let activeLightBudget=0;
 function maxPixelRatio(){
-  if(qualityMode==='performance')return lowPower?(retinaMobile?.82:.74):.90;
-  if(qualityMode==='high')return lowPower?(retinaMobile?1.16:.98):1.55;
-  return lowPower?(retinaMobile?1.10:.90):1.25;
+  if(qualityMode==='performance')return lowPower?(retinaMobile?.82:.74):1.00;
+  if(qualityMode==='high')return lowPower?(retinaMobile?1.16:.98):2.00;
+  return lowPower?(retinaMobile?1.10:.90):1.75;
 }
 function applyRenderScale(){
-  const ratio=Math.min(window.devicePixelRatio||1,renderScale,maxPixelRatio());
+  const nativeRatio=lowPower?(window.devicePixelRatio||1):Math.max(1.15,window.devicePixelRatio||1);
+  const ratio=Math.min(nativeRatio,renderScale,maxPixelRatio());
   renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight,false);
   if(qualityStatus)qualityStatus.textContent=(qualityMode==='auto'?'AUTO':qualityMode.toUpperCase())+' · '+ratio.toFixed(2)+'×';
 }
 function applyQualityProfile(){
-  // V7.2: iPhone is the visual source of truth. Desktop may render sharper, never differently.
-  renderer.shadowMap.enabled=false;
-  fill.intensity=emergencyPerformance?0:.12;
-  if(typeof hallLightGroup!=='undefined')hallLightGroup.visible=false;
-  activeLightBudget=0;
+  // V8.6: same World composition, materially richer desktop render path.
+  const desktopHQ=desktopRenderHQ()&&!emergencyPerformance&&qualityMode!=='performance';
+  renderer.shadowMap.enabled=desktopHQ;
+  renderer.shadowMap.autoUpdate=false;
+  renderer.shadowMap.needsUpdate=desktopHQ;
+  fill.intensity=emergencyPerformance?0:(desktopHQ?.20:.12);
+  if(typeof hallLightGroup!=='undefined')hallLightGroup.visible=desktopHQ;
+  activeLightBudget=desktopHQ?(qualityMode==='high'?8:5):0;
   living.lights.forEach(l=>{if(l){l.visible=false;l.intensity=0}});
   applyRenderScale();
 }
@@ -188,7 +197,7 @@ const sun=new THREE.DirectionalLight(0xffe9cf,3.48);
 sun.position.set(-24,38,32);
 sun.castShadow=true;
 if(sun.castShadow){
-  sun.shadow.mapSize.set(1024,1024);
+  sun.shadow.mapSize.set(desktopRenderCapable?2048:1024,desktopRenderCapable?2048:1024);
   sun.shadow.camera.left=-45;sun.shadow.camera.right=45;sun.shadow.camera.top=55;sun.shadow.camera.bottom=-45;
   sun.shadow.camera.near=1;sun.shadow.camera.far=110;sun.shadow.bias=-.00025;
 }
@@ -422,7 +431,7 @@ const daylightTimer=setInterval(applyDaylight,60000);
 
 // V4.4 Materials Realism — procedural PBR kit shared across the campus.
 const TEX_SIZE=lowPower?256:512;
-const TEX_ANISO=Math.min(lowPower?2:8,renderer.capabilities.getMaxAnisotropy());
+const TEX_ANISO=Math.min(lowPower?2:12,renderer.capabilities.getMaxAnisotropy());
 const fract=n=>n-Math.floor(n);
 const hash2=(x,y,seed=1)=>fract(Math.sin(x*127.1+y*311.7+seed*74.7)*43758.5453123);
 
@@ -437,7 +446,7 @@ function canvasTexture(canvas,{repeat=[1,1],srgb=false}={}){
 // V6.0: derive a subtle tangent-space normal map once at startup from the procedural height field.
 // Desktop gets true normal response; low-power devices keep the cheaper roughness/albedo path.
 function normalTextureFromHeight(heightCanvas,repeat=[1,1],strength=2.0){
-  if(iphoneVisualReference)return null;
+  if(visualLowPower)return null;
   const w=heightCanvas.width,h=heightCanvas.height,src=heightCanvas.getContext('2d').getImageData(0,0,w,h).data;
   const out=document.createElement('canvas');out.width=w;out.height=h;
   const ctx=out.getContext('2d'),img=ctx.createImageData(w,h),dst=img.data;
@@ -6774,7 +6783,7 @@ guideToggle.addEventListener('click',toggleGuide);
 controlsToggle.addEventListener('click',()=>{closeWorldMenu();showControlsPanel()});
 qualityToggle.addEventListener('click',()=>{
   qualityMode=qualityMode==='auto'?'performance':qualityMode==='performance'?'high':'auto';
-  renderScale=qualityMode==='performance'?(lowPower?(retinaMobile?.82:.74):.82):qualityMode==='high'?(lowPower?(retinaMobile?1.14:.98):1.35):(lowPower?(retinaMobile?1.04:.88):1.10);
+  renderScale=qualityMode==='performance'?(lowPower?(retinaMobile?.82:.74):.92):qualityMode==='high'?(lowPower?(retinaMobile?1.14:.98):2.00):(lowPower?(retinaMobile?1.04:.88):1.62);
   applyQualityProfile();notify('QUALITY · '+qualityMode.toUpperCase());
 });
 resetPosition.addEventListener('click',()=>fastTravel('arrival'));
@@ -6813,9 +6822,10 @@ languageToggle.addEventListener('click',()=>{locale=locale==='fr'?'en':'fr';appl
 
 window.addEventListener('resize',()=>{
   document.body.classList.toggle('world-mobile-ui',lowPower||innerWidth<=900);
-  document.body.classList.toggle('desktop-visual-v5',!lowPower&&innerWidth>900);
+  document.body.classList.toggle('desktop-visual-v5',desktopRenderHQ());
+  document.documentElement.classList.toggle('desktop-render-hq',desktopRenderHQ());
   camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
-  applyRenderScale();
+  applyQualityProfile();
 });
 
 let last=performance.now(),raf=0;
@@ -6910,26 +6920,27 @@ function updateVisibilityBudget(now){
   }
   upperLevel.visible=playerLevel===1||player.z<16;
   hallLiving.visible=player.z<19&&player.z>-29;hallHost.visible=mode==='world'&&player.z<20&&player.z>-8;
-  hallLightGroup.visible=false;
+  hallLightGroup.visible=desktopRenderHQ()&&!emergencyPerformance&&qualityMode!=='performance';
   if(typeof desktopCinematic!=='undefined')desktopCinematic.visible=false;
   lifeStore.visible=Math.hypot(player.x-8.45,player.z-3.8)<24;
   // Structural rooms and destination vistas stay visible; only dense premium detail is distance-budgeted.
-  if(typeof twinPremium!=='undefined')twinPremium.visible=Math.hypot(player.x+45,player.z)<52;
-  if(typeof fitPremium!=='undefined')fitPremium.visible=Math.hypot(player.x,player.z+55)<52;
-  if(typeof arenaPremium!=='undefined')arenaPremium.visible=Math.hypot(player.x-45,player.z)<52;
+  const premiumRoomDistance=desktopRenderHQ()?68:52;
+  if(typeof twinPremium!=='undefined')twinPremium.visible=Math.hypot(player.x+45,player.z)<premiumRoomDistance;
+  if(typeof fitPremium!=='undefined')fitPremium.visible=Math.hypot(player.x,player.z+55)<premiumRoomDistance;
+  if(typeof arenaPremium!=='undefined')arenaPremium.visible=Math.hypot(player.x-45,player.z)<premiumRoomDistance;
   destinationVistas.visible=player.z<3&&player.z>-35&&Math.abs(player.x)<14;
   arrivalDetails.visible=player.z>1&&player.z<26;
   npcRoot.visible=true;
   living.trees.forEach(tree=>{
     const wp=new THREE.Vector3();tree.getWorldPosition(wp);
     const hero=tree.name==='KOMO_HERO_TREE_V64';
-    tree.visible=wp.distanceTo(camera.position)<(hero?130:96);
+    tree.visible=wp.distanceTo(camera.position)<(hero?(desktopRenderHQ()?160:130):(desktopRenderHQ()?126:96));
   });
   living.npcs.forEach((npc,i)=>{
     const sameLevel=Math.abs(npc.position.y-player.y)<2;
     const dist=Math.hypot(npc.position.x-player.x,npc.position.z-player.z);
     const allowed=!emergencyPerformance||i<2;
-    npc.visible=allowed&&sameLevel&&dist<46;
+    npc.visible=allowed&&sameLevel&&dist<(desktopRenderHQ()?60:46);
   });
   living.banners.forEach(banner=>{
     const wp=new THREE.Vector3();banner.getWorldPosition(wp);
@@ -6938,7 +6949,7 @@ function updateVisibilityBudget(now){
   living.motionScreens.forEach(screen=>{
     const mesh=screen.mesh||screen;
     if(mesh?.getWorldPosition){
-      const wp=new THREE.Vector3();mesh.getWorldPosition(wp);mesh.visible=wp.distanceTo(camera.position)<62;
+      const wp=new THREE.Vector3();mesh.getWorldPosition(wp);mesh.visible=wp.distanceTo(camera.position)<(desktopRenderHQ()?82:62);
     }
   });
 }
@@ -6971,8 +6982,8 @@ function updatePerformance(now){
   if(fpsStatus)fpsStatus.textContent=Math.round(fpsEMA)+' FPS · '+renderer.info.render.calls+' DC';
   if(fpsEMA<(lowPower?17:13)&&!emergencyPerformance){applyEmergencyPerformance();notify(locale==='fr'?'Mode performance activé':'Performance mode enabled')}
   if(qualityMode==='auto'&&!emergencyPerformance){
-    const min=lowPower?(retinaMobile?.78:.68):.70;
-    const max=lowPower?(retinaMobile?1.10:.90):1.25;
+    const min=lowPower?(retinaMobile?.78:.68):.92;
+    const max=lowPower?(retinaMobile?1.10:.90):1.75;
     let next=renderScale;
     if(fpsEMA<22)next=Math.max(min,renderScale-(lowPower?.07:.16));
     else if(fpsEMA<36)next=Math.max(min,renderScale-(lowPower?.045:.09));
@@ -7211,12 +7222,12 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.5.2-arena-stable',
+  version:'8.6.0-desktop-hq',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
   getLocale:()=>locale,
-  getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale,pixelRatio:renderer.getPixelRatio(),drawCalls:renderer.info.render.calls,activeLightBudget,shadows:renderer.shadowMap.enabled,retinaMobile}),
+  getPerformance:()=>({fps:fpsEMA,qualityMode,renderScale,pixelRatio:renderer.getPixelRatio(),drawCalls:renderer.info.render.calls,activeLightBudget,shadows:renderer.shadowMap.enabled,retinaMobile,desktopHQ:desktopRenderHQ()}),
   getJourney:()=>({xp:journey.xp,done:{...journey.done},level:journeyLevelForXp(journey.xp)}),
   completeSocial:()=>completeJourney('social'),
   socialChallenge:socialChallengeEvent,
