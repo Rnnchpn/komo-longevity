@@ -21,7 +21,7 @@ await injectDesktop();
 const retired=[
   'agenda-hub-v4.js','agenda-premium-map-v1.js','pro-agenda-dossier-v1.js','booking-directory-map-v1.js',
   'center-patient-links.js','center-context-v1.js','center-command-cockpit-v2.js','center-profile-v1.js',
-  'center-workspace-v1.js','center-messaging-v1.js','center-patient-polish.js','center-owner-ui-guard-v1.js',
+  'center-workspace-v1.js','center-patient-polish.js','center-owner-ui-guard-v1.js',
   'account-tab-restore-v1.js','patient-v4.js','my-komo-club-entry-v1.js',
   'motion-route-guard-v3.js','motion-entry-v1.js','motion-tests-entry-v1.js','motion-sva-ui-v1.js','motion-hub-v3.js',
   'patient-results-sync.js','patient-calculated-results-v2.js','patient-score-details-v1.js','score-report-pdf-v1.js',
@@ -78,7 +78,7 @@ const surfaces={
   mykomo:{owner:'my-komo-stable-v5.js'},
   club:{owner:'club-hub-v1.js'},
   profile:{owner:'profile-v2.js'},
-  messages:{owner:'care-messaging-v2.js'},
+  messages:{owner:'care-messaging-v2.js',bridge:'center-messaging-v1.js'},
   clinical:{owner:'center-two-tab-workspace-v1.js',shell:'clinical-cockpit-v1.js'},
   admin:{owner:'admin-console-v2.js'},
   auth:{owner:'auth-login-canonical.js'},
@@ -92,6 +92,7 @@ if(duplicates(styles).length)failures.push('duplicate styles: '+duplicates(style
 for(const [surface,cfg] of Object.entries(surfaces)){
   if(!scripts.includes(cfg.owner))failures.push(`${surface}: missing owner ${cfg.owner}`);
   if(cfg.shell&&!scripts.includes(cfg.shell))failures.push(`${surface}: missing shell ${cfg.shell}`);
+  if(cfg.bridge&&!reachable.has(cfg.bridge))failures.push(`${surface}: missing bridge ${cfg.bridge}`);
 }
 for(const file of retired)if(scripts.includes(file)||styles.includes(file))failures.push('retired asset loaded: '+file);
 
