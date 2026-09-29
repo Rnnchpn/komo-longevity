@@ -2297,6 +2297,20 @@ for(let z=-5.3;z<=5.3;z+=2.12){
 const libCentral=box(libraryV73,2.65,.18,2.10,MAT.travertine,libX+2.35,.78,libZ,{cast:true});
 box(libraryV73,2.28,.035,1.74,MAT.brass,libX+2.35,.89,libZ,{cast:false});
 plaque(libraryV73,'KŌMØ METHOD','READ · TRACE · UNDERSTAND',2.85,.52,libX+2.35,1.75,libZ+1.10,{dark:true,titleSize:31});
+// V8.4 — three quiet reading objects map the member's current trajectory into the physical Library.
+const libraryFocusObjectsV84=new THREE.Group();libraryFocusObjectsV84.name='KOMO_LIBRARY_FOCUS_OBJECTS_V84';libraryV73.add(libraryFocusObjectsV84);
+[
+  [libX+.65,1.00,libZ-2.80,-.08],
+  [libX+.65,1.00,libZ+2.50,.08],
+  [libX+2.35,1.01,libZ,0]
+].forEach(([x,y,z,rot],i)=>{
+  const g=new THREE.Group();g.position.set(x,y,z);g.rotation.y=rot;g.name='KOMO_LIBRARY_READING_OBJECT_V84_'+(i+1);libraryFocusObjectsV84.add(g);
+  box(g,1.05,.045,.72,MAT.ivory,0,0,0,{cast:true});
+  box(g,1.08,.018,.075,MAT.brass,0,.035,-.34,{cast:false,receive:false});
+  box(g,.018,.028,.62,i===1?roomCoolStrip:roomWarmStrip,-.48,.045,0,{cast:false,receive:false});
+  const dot=mesh(g,new THREE.RingGeometry(.10,.14,24),i===1?roomCoolStrip:roomWarmStrip,.38,.055,.20,{cast:false,receive:false});
+  dot.rotation.x=-Math.PI/2;
+});
 // Warm ceiling panels without extra dynamic lights.
 [-4.6,0,4.6].forEach(zOff=>box(libraryV73,7.5,.025,1.15,campusInteriorGlowV64,libX,5.88,libZ+zOff,{cast:false,receive:false}));
 
@@ -4596,6 +4610,9 @@ const interactions=[
   {id:'arena',x:10.75,z:-24.0,r:3.4,title:()=>copy[locale].arenaTitle,desc:()=>locale==='fr'?'Galerie ouverte · marcher vers Arena':'Open gallery · walk to Arena',action:enterArena},
   {id:'library_entry',x:-11.2,z:-10,r:2.4,title:()=>locale==='fr'?'Entrer dans la Science Library':'Enter Science Library',desc:()=>locale==='fr'?'Espace ouvert · lecture · méthode':'Open room · reading · method',action:()=>requestWalkTo('library')},
   {id:'library',x:-16.2,z:-10,r:3.0,title:()=>copy[locale].libraryTitle,desc:()=>copy[locale].libraryCopy,action:showLibrary},
+  {id:'library_focus_1',x:-17.65,z:-12.80,r:1.55,title:()=>trajectoryLibraryTopics()[0],desc:()=>personalTrajectory?(locale==='fr'?'Sélectionné pour votre priorité actuelle':'Selected for your current priority'):(locale==='fr'?'Lecture KŌMØ':'KŌMØ reading'),action:()=>showLibraryFocus(0)},
+  {id:'library_focus_2',x:-17.65,z:-7.50,r:1.55,title:()=>trajectoryLibraryTopics()[1],desc:()=>personalTrajectory?(locale==='fr'?'Pour comprendre votre trajectoire':'To understand your trajectory'):(locale==='fr'?'Lecture KŌMØ':'KŌMØ reading'),action:()=>showLibraryFocus(1)},
+  {id:'library_focus_3',x:-15.95,z:-10.0,r:1.55,title:()=>trajectoryLibraryTopics()[2],desc:()=>personalTrajectory?(locale==='fr'?'Pour préparer le prochain point':'To prepare your next checkpoint'):(locale==='fr'?'Lecture KŌMØ':'KŌMØ reading'),action:()=>showLibraryFocus(2)},
   {id:'talks',x:10.7,z:-10,r:3.2,title:()=>copy[locale].talksTitle,desc:()=>copy[locale].talksCopy,action:showTalks},
   {id:'life',x:8.6,z:2.6,r:3.4,title:()=>copy[locale].storeTitle,desc:()=>copy[locale].storeCopy,action:showLifeStore},
   {id:'journey',x:5.35,z:8.45,r:3.2,title:()=>personalTrajectory?(locale==='fr'?'Votre trajectoire':'Your trajectory'):(locale==='fr'?'Activer ma trajectoire':'Activate my trajectory'),desc:()=>personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||trajectoryPhaseLabel(personalTrajectory)):(locale==='fr'?'Connectez Pulse pour retrouver votre suivi':'Connect Pulse to continue your follow-up'),action:showJourneyPanel},
@@ -5983,6 +6000,18 @@ function showArena(){
     {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel}
   ]);
 }
+function showLibraryFocus(index=0){
+  const topics=trajectoryLibraryTopics(),topic=topics[Math.max(0,Math.min(2,index))]||topics[0];
+  const priority=personalTrajectory?.priority||personalTrajectory?.current_action||'';
+  const body='<section class="library-focus-detail"><span>KŌMØ LIBRARY · 0'+(index+1)+'</span><h3>'+escHtml(topic)+'</h3>'+
+    (priority?'<div class="priority-card"><b>'+(locale==='fr'?'POURQUOI MAINTENANT':'WHY NOW')+'</b>'+(locale==='fr'?'Ce contenu est remonté parce que votre trajectoire actuelle met l’accent sur : ':'This content is surfaced because your current trajectory focuses on: ')+escHtml(priority)+'</div>':'')+
+    '<p>'+(locale==='fr'?'La Library doit vous aider à comprendre ce que vous faites et pourquoi, sans vous noyer dans une bibliothèque générale.':'The Library should help you understand what you are doing and why, without burying you in a generic content catalogue.')+'</p></section>';
+  openPanel(topic,personalTrajectory?(locale==='fr'?'Lecture liée à votre trajectoire.':'Reading linked to your trajectory.'):(locale==='fr'?'Lecture KŌMØ.':'KŌMØ reading.'),body,[
+    {label:locale==='fr'?'RETOUR LIBRARY':'BACK TO LIBRARY',onClick:showLibrary},
+    {label:locale==='fr'?'CONTINUER':'CONTINUE',primary:true,onClick:closePanel}
+  ]);
+}
+
 function showLibrary(){
   completeJourney('library',{silent:true});
   const topics=trajectoryLibraryTopics(),priority=personalTrajectory?.priority||personalTrajectory?.current_action||'';
@@ -7121,7 +7150,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.3.0-fitness-trajectory',
+  version:'8.4.0-library-trajectory',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
