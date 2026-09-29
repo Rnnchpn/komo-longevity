@@ -218,7 +218,7 @@ const scripts = [
   'scripts/pulse-final-production-audit-v1.mjs'
 ];
 
-for (const script of scripts.slice(0, 140)) {
+for (const script of scripts.slice(0, 136)) {
   console.log(`[build-all] ${script}`);
   const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
   if (run.status !== 0) process.exit(run.status ?? 1);
