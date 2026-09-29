@@ -1830,3 +1830,10 @@ body.trajectory-connected .journey-hud{border-color:rgba(157,196,169,.26);backgr
 .fitness-activity-grid button.recommended{border-color:rgba(149,193,163,.38)!important;box-shadow:inset 0 0 0 1px rgba(149,193,163,.10)}
 .library-focus-grid{display:grid;gap:8px;margin-top:12px}.library-focus-grid article{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:12px;border:1px solid rgba(255,255,255,.07);border-radius:13px;background:rgba(255,255,255,.025)}.library-focus-grid small{font-size:7px;color:#b8d3c0}.library-focus-grid strong{font-size:10px}.library-focus-grid span{font-size:6px;color:rgba(240,234,224,.38)}
 @media(max-width:620px){.trajectory-grid{grid-template-columns:1fr}.trajectory-steps{grid-template-columns:1fr 1fr}.trajectory-panel>h3,.trajectory-library>h3{font-size:22px}}
+
+
+/* V8.1 — Hall as continuity lobby */
+.hall-team-panel>span{display:block;font-size:7px;font-weight:800;letter-spacing:.15em;color:#b7d2bf}
+.hall-team-panel>h3{margin:8px 0 12px;font:500 27px/1.02 Georgia,serif;color:#f2ece2}
+.hall-team-panel>p{margin:0 0 14px;max-width:38ch;color:rgba(242,236,226,.62);line-height:1.65}
+body.trajectory-connected .location-chip{border-color:rgba(147,191,160,.16)}
