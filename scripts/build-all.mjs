@@ -215,14 +215,16 @@ const scripts = [
 ];
 
 const diagnostics=[];
-for (const script of scripts) {
+for (let i=0;i<scripts.length;i++) {
+  const script=scripts[i];
   console.log(`[build-all] ${script}`);
   const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
   if (run.status !== 0) {
-    diagnostics.push({script,status:run.status ?? 1,signal:run.signal ?? null});
+    diagnostics.push({index:i,script,status:run.status ?? 1,signal:run.signal ?? null});
     console.error(`[build-all-diagnostic] CONTINUE AFTER FAILURE · ${script} · status=${run.status ?? 1}`);
   }
 }
 await mkdir(join(process.cwd(),'site'),{recursive:true});
 await writeFile(join(process.cwd(),'site','build-diagnostics.json'),JSON.stringify({generated_at:new Date().toISOString(),failures:diagnostics},null,2)+'\n','utf8');
 console.log('[build-all-diagnostic] complete · failures='+diagnostics.length);
+if(diagnostics.length)process.exit(Math.min(255,diagnostics[0].index+1));
