@@ -60,6 +60,9 @@ for(const dir of dirs){
         `  function ensureBottom(){\n    ${patientBottomGuard}\n    const app=document.querySelector('#appShell');if(!app)return;`
       );
     }
+    if(!js.includes("navItem('pro:dashboard','Pro',I.center,false)")||!js.includes("navItem('admin','Admin',I.admin,false)")){
+      throw new Error('[pulse-ia-v11] privileged Pro/Admin patient navigation was not preserved');
+    }
     return js;
   });
 
@@ -119,7 +122,9 @@ const checks=[
   ['desktop dock exact approved order',dock.includes(exactDock)],
   ['desktop dock routes trajectory aliases into Consultations',dock.includes("if(['trajectory','path','plan'].includes(r))return'agenda';")],
   ['adaptive navigation exact approved order',adaptive.includes(exactAdaptive)&&!adaptive.includes("navItem('patient:trajectory'")],
-  ['adaptive shell hides patient bottom bar only for non-privileged members',adaptive.includes(patientBottomGuard)&&adaptive.includes("if(allowedAdmin())return navItem('patient:home','Home'")&&adaptive.includes("if(allowedPro())return navItem('patient:home','Home'")],
+  ['adaptive shell hides patient bottom bar only for non-privileged members',adaptive.includes(patientBottomGuard)],
+  ['adaptive shell preserves Pro entry for privileged accounts',adaptive.includes("navItem('pro:dashboard','Pro',I.center,false)")],
+  ['adaptive shell preserves Admin entry for admin accounts',adaptive.includes("navItem('admin','Admin',I.admin,false)")],
   ['patient Messages removed from adaptive primary menu',!adaptive.includes("actionButton('Messages','patient:messages')")],
   ['My KŌMØ exposes Club',myk.includes('data-myk-control')&&myk.includes('data-mkv5-route="club"')],
   ['My KŌMØ routes core score to Results',myk.includes('data-mkv5-route="results">Voir tous mes résultats')],
