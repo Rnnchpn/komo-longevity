@@ -11,8 +11,8 @@ let pro=await read('pro');
 pro=req(pro,'async function loadRole(){if(S.roleLoading)return;','async function loadRole(){if(S.roleLoading||S.ready)return;','professional role lookup must be single-shot');
 pro=req(
   pro,
-  "document.addEventListener('click',inferActiveFromCockpit,true);window.addEventListener('hashchange',()=>setTimeout(()=>{applyMode();if(location.hash.replace(/^#/,'')==='clinical'&&!['planning','patients','motion','myocare','messages','dashboard'].includes(S.active)){S.active='dashboard';renderActive()}},80));document.addEventListener('DOMContentLoaded',()=>setTimeout(loadRole,500));",
-  "function syncRouteMode(){applyMode();if(location.hash.replace(/^#/,'')==='clinical'&&!['planning','patients','motion','myocare','messages','dashboard'].includes(S.active)){S.active='dashboard';renderActive()}}document.addEventListener('click',inferActiveFromCockpit,true);window.addEventListener('hashchange',syncRouteMode);document.addEventListener('DOMContentLoaded',loadRole);window.addEventListener('komo:data-ready',loadRole);",
+  "document.addEventListener('click',inferActiveFromCockpit,true);window.addEventListener('hashchange',()=>setTimeout(()=>{applyMode();if(location.hash.replace(/^#/,'')==='clinical'&&!['planning','patients','motion','myocare'].includes(S.active)){S.active='planning';renderActive()}},80));document.addEventListener('DOMContentLoaded',()=>setTimeout(loadRole,500));",
+  "function syncRouteMode(){applyMode();if(location.hash.replace(/^#/,'')==='clinical'&&!['planning','patients','motion','myocare'].includes(S.active)){S.active='planning';renderActive()}}document.addEventListener('click',inferActiveFromCockpit,true);window.addEventListener('hashchange',syncRouteMode);document.addEventListener('DOMContentLoaded',loadRole);window.addEventListener('komo:data-ready',loadRole);",
   'professional navigation must not depend on 80/500ms timers'
 );
 await write('pro',pro);
