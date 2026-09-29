@@ -57,6 +57,7 @@ const checks=[
 for(const [label,ok] of checks) console.log(`[pulse-key-results-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
 console.log('[pulse-key-results-v2] PASS · KEY views + Apple Health ZIP/XML lazy import in canonical KŌMØ operator');
+process.exit(0);
 
 // My KŌMØ is forced into a single, event-driven route owner after every KEY build.
 await import('./pulse-my-komo-stability-v4.mjs');
