@@ -1,9 +1,9 @@
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='8.0.0-cockpit';
+const VERSION='8.1.0-guided-trajectory';
 let timer=0;
-const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,scores:[],wearable:null,appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
+const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,assessment:null,priorities:[],scores:[],wearable:null,appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
 
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const client=()=>window.KomoRuntime?.client||null;
@@ -29,6 +29,30 @@ function currentScore(){return state.scores[0]||null}
 function previousScore(){return state.scores[1]||null}
 function scoreDelta(){const a=num(currentScore()?.motion_score),b=num(previousScore()?.motion_score);if(a===null||b===null)return null;return a-b}
 function nextAppointment(){return state.appointment||null}
+function currentPriority(){return state.priorities?.[0]||null}
+function assessmentDone(){return Boolean(state.assessment)}
+function resultReady(){return num(currentScore()?.motion_score)!==null}
+function trajectoryModel(){
+ const assessment=state.assessment,score=currentScore(),priority=currentPriority(),appt=nextAppointment();
+ const ready=resultReady(),hasAssessment=assessmentDone();
+ const priorityText=priority?.patient_wording||priority?.category||'Consolider votre mobilité entre deux bilans';
+ const nextDate=appt?.scheduled_start;
+ let phase='POINT DE DÉPART',headline='Construisons votre trajectoire KŌMØ.',now='Préparer votre première référence',week='Compléter les éléments nécessaires au bilan',cta='Préparer ma trajectoire';
+ if(hasAssessment&&!ready){phase='ANALYSE EN COURS';headline='Votre bilan est en cours de lecture.';now='Votre référence est en cours de consolidation';week='Gardez vos habitudes stables pour faciliter l’interprétation';cta='Voir ma trajectoire'}
+ if(ready){phase='TRAJECTOIRE ACTIVE';headline='Votre consultation continue ici.';now=priorityText;week=priority?.category?'Mettre en pratique votre priorité : '+priority.category:'Suivre votre plan et observer ce qui change';cta='Continuer ma trajectoire'}
+ const checkpoint=nextDate?appointmentLabel(appt.appointment_type)+' · '+fmtShortDate(nextDate)+(fmtTime(nextDate)?' · '+fmtTime(nextDate):''):'Prochain point à planifier';
+ const scoreText=ready?'Motion Score '+Math.round(num(score.motion_score))+'/100':'Référence à construire';
+ return {phase,headline,now,week,checkpoint,cta,scoreText,hasAssessment,ready,hasPlan:Boolean(priority),hasAppointment:Boolean(appt)};
+}
+function trajectorySteps(m){
+ const steps=[
+   {label:'Bilan',state:m.hasAssessment?'done':'current'},
+   {label:'Lecture',state:m.ready?'done':m.hasAssessment?'current':'upcoming'},
+   {label:'Plan',state:m.hasPlan?'done':m.ready?'current':'upcoming'},
+   {label:'Suivi',state:m.hasAppointment?'current':'upcoming'}
+ ];
+ return steps.map((s,i)=>'<span class="kh8-traj-step '+s.state+'"><i>'+(s.state==='done'?'✓':i+1)+'</i><b>'+s.label+'</b></span>').join('');
+}
 
 function avatarMarkup(){
  if(state.avatarUrl)return `<img src="${esc(state.avatarUrl)}" alt="Photo de profil KŌMØ">`;
@@ -49,6 +73,7 @@ function homeMarkup(){
  const score=num(s?.motion_score),scoreDate=s?.released_at||s?.calculated_at;
  const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0);
  const appointmentDate=appt?.scheduled_start;
+ const traj=trajectoryModel();
  return `<section class="kh8" data-khome-v8 data-khome-v7 aria-label="KŌMØ Pulse Home">
    <div class="kh8-brand"><span>KŌMØ</span><small>PULSE</small></div>
 
@@ -56,10 +81,10 @@ function homeMarkup(){
     <div class="kh8-hero">
       <div class="kh8-hero-copy">
         <p class="kh8-kicker">LONGEVITY IN MOTION</p>
-        <h2>Votre santé,<br><em>en mouvement.</em></h2>
-        <p class="kh8-lead">Résultats, quotidien connecté, consultations et progression réunis dans votre espace KŌMØ.</p>
+        <h2>Votre santé,<br><em>avec une trajectoire.</em></h2>
+        <p class="kh8-lead">Après chaque consultation, KŌMØ reste avec vous : une priorité claire, une prochaine action et un point de suivi dans le temps.</p>
         <div class="kh8-hero-actions">
-          <button class="kh8-continue" type="button" data-kh8-route="results"><span>Voir mes résultats</span><b aria-hidden="true">→</b></button>
+          <button class="kh8-continue" type="button" data-kh8-route="path"><span>${esc(traj.cta)}</span><b aria-hidden="true">→</b></button>
           <button class="kh8-world-action" type="button" data-kh8-world><span>Entrer dans KŌMØ World</span><b aria-hidden="true">↗</b></button>
         </div>
       </div>
@@ -82,6 +107,24 @@ function homeMarkup(){
       </article>
     </div>
    </div>
+
+   <section class="kh8-trajectory" aria-label="Votre trajectoire KŌMØ">
+    <div class="kh8-traj-head">
+      <div>
+        <small>${esc(traj.phase)}</small>
+        <h3>${esc(traj.headline)}</h3>
+        <p>KŌMØ ne s’arrête pas au compte rendu. Votre espace garde le fil entre aujourd’hui et votre prochain point.</p>
+      </div>
+      <div class="kh8-traj-reference"><span>VOTRE RÉFÉRENCE</span><strong>${esc(traj.scoreText)}</strong></div>
+    </div>
+    <div class="kh8-traj-progress">${trajectorySteps(traj)}</div>
+    <div class="kh8-traj-grid">
+      <article><span>MAINTENANT</span><strong>${esc(traj.now)}</strong><p>La priorité issue de votre situation actuelle.</p></article>
+      <article><span>D’ICI AU PROCHAIN POINT</span><strong>${esc(traj.week)}</strong><p>Votre cap entre deux consultations.</p></article>
+      <article><span>PROCHAIN POINT KŌMØ</span><strong>${esc(traj.checkpoint)}</strong><p>${traj.hasAppointment?'Votre suivi est déjà inscrit dans votre trajectoire.':'Planifiez le prochain contact pour garder la continuité.'}</p></article>
+    </div>
+    <div class="kh8-traj-actions"><button type="button" data-kh8-route="path">Voir toute ma trajectoire →</button><button type="button" data-kh8-route="documents">Mes consultations</button></div>
+   </section>
 
    <nav class="kh8-grid" aria-label="Accès rapides KŌMØ Pulse">
     <a href="#results" data-kh8-route="results" class="kh8-card">
@@ -107,7 +150,7 @@ function homeMarkup(){
    </nav>
 
    <button class="kh8-club" type="button" data-kh8-route="club"><span><small>KŌMØ CLUB</small><strong>Une communauté qui avance ensemble.</strong><em>Défis · événements · contenus · récompenses</em></span><b>Accéder au Club →</b></button>
-   <p class="kh8-foot">Measure → Understand → Act → Live</p>
+   <p class="kh8-foot">Mesurer → Comprendre → Agir → Suivre → Progresser</p>
   </section>`;
 }
 
@@ -146,24 +189,30 @@ async function load(force=false){
      safe(c.from('wearable_daily_metrics').select('metric_date,steps,sleep_minutes,resting_hr,source,source_quality').eq('user_id',session.user.id).order('metric_date',{ascending:false}).limit(1).maybeSingle()),
      safe(c.from('patients').select('id').eq('patient_user_id',session.user.id).order('updated_at',{ascending:false}).limit(1).maybeSingle())
    ]);
-   state.profile=profile||{};state.role=role||{};state.engagement=engagement||{};state.wallet=wallet||{};state.memberships=Array.isArray(memberships)?memberships:[];state.wearable=wearable||null;state.patient=patient||null;
+   state.profile=profile||{};state.role=role||{};state.engagement=engagement||{};state.wallet=wallet||{};state.memberships=Array.isArray(memberships)?memberships:[];state.wearable=wearable||null;state.patient=patient||null;state.assessment=null;state.priorities=[];
    state.avatarUrl=await signedAvatar(c,state.profile);
    if(patient?.id){
      const [assessments,appointments]=await Promise.all([
-       safe(c.from('assessments').select('id').eq('patient_id',patient.id).order('created_at',{ascending:false}).limit(12)),
+       safe(c.from('assessments').select('id,status,completed_at,created_at,product_mode,assessment_type').eq('patient_id',patient.id).order('created_at',{ascending:false}).limit(12)),
        safe(c.from('organization_appointments').select('id,organization_id,appointment_type,scheduled_start,status,service_code').eq('patient_id',patient.id).gte('scheduled_start',new Date().toISOString()).order('scheduled_start',{ascending:true}).limit(8))
      ]);
-     const ids=(Array.isArray(assessments)?assessments:[]).map(x=>x.id).filter(Boolean);
+     const assessmentRows=Array.isArray(assessments)?assessments:[];
+     state.assessment=assessmentRows[0]||null;
+     const ids=assessmentRows.map(x=>x.id).filter(Boolean);
      if(ids.length){
-       const scores=await safe(c.from('scores').select('assessment_id,motion_score,calculated_at,released_at,release_status,status').in('assessment_id',ids).eq('release_status','released').order('calculated_at',{ascending:false}).limit(2));
+       const [scores,priorities]=await Promise.all([
+         safe(c.from('scores').select('assessment_id,motion_score,calculated_at,released_at,release_status,status').in('assessment_id',ids).eq('release_status','released').order('calculated_at',{ascending:false}).limit(2)),
+         state.assessment?.id?safe(c.from('priorities').select('rank,category,patient_wording').eq('assessment_id',state.assessment.id).order('rank',{ascending:true}).limit(3)):Promise.resolve([])
+       ]);
        state.scores=Array.isArray(scores)?scores:[];
-     }else state.scores=[];
+       state.priorities=Array.isArray(priorities)?priorities:[];
+     }else{state.scores=[];state.priorities=[]};
      const allowed=(Array.isArray(appointments)?appointments:[]).filter(x=>!['cancelled','completed','no_show'].includes(String(x.status||'').toLowerCase()));
      state.appointment=allowed[0]||null;
      if(state.appointment?.organization_id){
        state.organization=await safe(c.from('organizations').select('name,city').eq('id',state.appointment.organization_id).maybeSingle());
      }else state.organization=null;
-   }else{state.scores=[];state.appointment=null;state.organization=null}
+   }else{state.assessment=null;state.priorities=[];state.scores=[];state.appointment=null;state.organization=null}
    state.loadedFor=session.user.id;state.lastLoad=Date.now();render();
  }catch(error){console.warn('[patient-home-command-v8]',error)}finally{state.loading=false}
 }
