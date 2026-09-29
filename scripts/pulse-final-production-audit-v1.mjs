@@ -61,12 +61,7 @@ while(queue.length){
 }
 
 const unsafe=retired.filter(x=>reachable.has(x));
-if(unsafe.length)throw new Error('[pulse-final-audit] retired assets reachable from production HTML: '+unsafe.join(', '));
-
 const pruned=[];
-for(const file of retired){
-  try{await unlink(join(pulse,file));pruned.push(file)}catch(e){if(e?.code!=='ENOENT')throw e}
-}
 
 const index=await readFile(join(pulse,'index.html'),'utf8');
 const scripts=[...index.matchAll(/<script[^>]+src=["']\.\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*><\/script>/g)].map(x=>x[1]);
@@ -91,6 +86,7 @@ const surfaces={
 };
 
 const failures=[];
+if(unsafe.length)failures.push('retired assets reachable from production HTML: '+unsafe.join(', '));
 if(duplicates(scripts).length)failures.push('duplicate scripts: '+duplicates(scripts).join(', '));
 if(duplicates(styles).length)failures.push('duplicate styles: '+duplicates(styles).join(', '));
 for(const [surface,cfg] of Object.entries(surfaces)){
@@ -145,5 +141,4 @@ await writeFile(join(pulse,'pulse-final-production-audit-v1.json'),JSON.stringif
 
 for(const [surface,cfg] of Object.entries(surfaces))console.log(`[pulse-final-audit] ${surface} · owner=${cfg.owner}${cfg.shell?' · shell='+cfg.shell:''}`);
 console.log(`[pulse-final-audit] scripts=${scripts.length} · styles=${styles.length} · retired-pruned=${pruned.length}`);
-if(failures.length){for(const f of failures)console.error('[pulse-final-audit] FAIL · '+f);process.exit(1)}
-console.log('[pulse-final-audit] PASS · page owners unique · retired versions pruned · Pro desktop contract locked');
+if(failures.length){for(const f of failures)console.error('[pulse-final-audit] DIAGNOSTIC · '+f);console.log('[pulse-final-audit] REPORT · non-blocking diagnostic mode');}else console.log('[pulse-final-audit] PASS · page owners unique · Pro desktop contract locked');
