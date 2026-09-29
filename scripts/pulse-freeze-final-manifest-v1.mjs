@@ -20,6 +20,12 @@ await import('./pulse-information-architecture-v11.mjs');
 await import('./pulse-connected-consultations-single-layer-v12.mjs');
 await import('./pulse-canonical-theme-v14.mjs');
 
+const pulseIndex=await readFile(join(root,'site','pulse-v12','index.html'),'utf8');
+const consultationPruned=!pulseIndex.includes('agenda-hub-v4.js');
+const documentsSurface=consultationPruned
+  ? {owner:'booking-layer-v1.js',controllers:['patient-intake-v1.js','pulse-free-continuity-v2.js','questionnaire-engine-v1.js'],extensions:[]}
+  : {owner:'agenda-hub-v4.js',controllers:['booking-layer-v1.js','patient-intake-v1.js','pulse-free-continuity-v2.js','questionnaire-engine-v1.js'],extensions:['agenda-premium-map-v1.js']};
+
 const manifest={
   version:'2026-09-03-motion-sensor-v06-final-freeze',
   principles:[
@@ -38,7 +44,7 @@ const manifest={
     motion:{owner:'motion-hub-v4.js',controllers:['motion-workflow.js','motion-route-guard-v4.js','motion-access-fix-v1.js'],extensions:[]},
     key:{owner:'key-hub-v1.js',controllers:[],extensions:[]},
     trajectory:{owner:'trajectory-v3.js',controllers:[],extensions:[]},
-    documents:{owner:'agenda-hub-v4.js',controllers:['booking-layer-v1.js','patient-intake-v1.js','pulse-free-continuity-v2.js','questionnaire-engine-v1.js'],extensions:['agenda-premium-map-v1.js']},
+    documents:documentsSurface,
     mykomo:{owner:'my-komo-stable-v5.js',controllers:[],extensions:[]},
     club:{owner:'club-hub-v1.js',controllers:[],extensions:[]},
     profile:{owner:'profile-v2.js',controllers:[],extensions:['account-hub-v2.js','account-privacy-v1.js']},
@@ -51,4 +57,4 @@ const manifest={
   global_controllers:['app-router-v2.js','patient-onboarding-v1.js','pro-architecture-v2.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
-console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Motion sensor v0.6 frozen · legacy first-test controller retired · final architecture manifest locked`);
+console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} surfaces · documents=${documentsSurface.owner} · Motion sensor v0.6 frozen · architecture manifest locked`);
