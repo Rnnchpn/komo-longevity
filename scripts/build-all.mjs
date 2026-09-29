@@ -212,6 +212,8 @@ const scripts = [
   'scripts/pulse-bright-modern-v1.mjs',
   // Dedicated authentication presentation owner: login only, no auth/session behavior.
   'scripts/pulse-auth-login-v2.mjs',
+  // Final Pro access/workspace consolidation after all historical consultation passes.
+  'scripts/pulse-pro-access-workspace-v2.mjs',
   // Absolute final production gate: desktop Pro layout, retired-asset pruning and page-owner audit.
   'scripts/pulse-final-production-audit-v1.mjs'
 ];
