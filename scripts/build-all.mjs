@@ -83,6 +83,8 @@ const scripts = [
   'scripts/build-pulse-v12.mjs',
   'scripts/pulse-key-cycle-inject-v1.mjs',
   'scripts/build-life-v1.mjs',
+  // Private CEO cockpit: isolated static surface for command.komolongevity.com.
+  'scripts/build-command-v1.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
   'scripts/pulse-booking-directory-map-v1.mjs',
