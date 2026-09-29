@@ -65,7 +65,7 @@ const localeData = {
     expTitle:'Nous venons à vous.<br><em>La méthode reste la même.</em>',
     expLead:'Yachting est notre première verticale de déploiement, pas une frontière de marque. KŌMØ doit être accessible à un particulier comme à un hôtel, une villa, un yacht ou un groupe en retreat.',
     experiences:[
-      ['YACHTING','KŌMØ Yachting','Une expérience de longévité fonctionnelle délivrée à bord, du bilan individuel au programme privé : assessment, restitution, professionnels et suivi après le voyage.','Découvrir Yachting','/experience/'],
+      ['YACHTING','KŌMØ Yachting','Une expérience de longévité fonctionnelle délivrée à bord, du bilan individuel au programme privé : assessment, restitution, professionnels et suivi après le voyage.','Découvrir Yachting','experience'],
       ['HOME & VILLAS','Chez vous','Une consultation KŌMØ dans un environnement privé, avec la même qualité de protocole et de restitution.','Demander une consultation','contact'],
       ['HOSPITALITY','Hôtels & clubs','Des journées ou programmes KŌMØ opérés sur place avant toute installation permanente.','Pour les professionnels','partners'],
       ['RETREATS','Retreats','Plusieurs jours pour évaluer, agir et organiser la continuité au retour.','Découvrir les formats','experience']
@@ -78,7 +78,7 @@ const localeData = {
     teamTitle:'Une trajectoire entourée des bonnes personnes.',
     teamCopy:'Selon le programme et l’indication, KŌMØ peut coordonner médecin, kinésithérapeute, coach, infirmier ou autres professionnels. L’objectif n’est pas d’empiler des prestations : c’est de rendre l’étape suivante évidente et exécutable.',
     pulseTitle:'Pulse garde le fil.',
-    pulseCopy:'Résultats, priorités, programme, professionnels, progression et prochaine réévaluation : Pulse devient l’espace de continuité après la consultation, pas un test gratuit à faire avant.',
+    pulseCopy:'Résultats, priorités, programme, professionnels, progression et prochaine réévaluation : Pulse prolonge la consultation et garde toute la trajectoire dans un même espace.',
     worldTitle:'World prolonge l’accompagnement.',
     worldCopy:'World reste une couche interactive optionnelle pour exercices guidés, rééducation virtuelle, contenus et engagement entre deux étapes lorsque le programme s’y prête.',
     proEy:'POUR LES PROFESSIONNELS',
@@ -119,7 +119,7 @@ const localeData = {
     expTitle:'We come to you.<br><em>The method stays consistent.</em>',
     expLead:'Yachting is our first major deployment vertical, not a boundary around the brand. KŌMØ should work for an individual, hotel, villa, yacht or retreat group.',
     experiences:[
-      ['YACHTING','KŌMØ Yachting','Functional longevity delivered onboard, from one individual assessment to a private programme: assessment, debrief, professionals and follow-up after the voyage.','Explore Yachting','/experience/'],
+      ['YACHTING','KŌMØ Yachting','Functional longevity delivered onboard, from one individual assessment to a private programme: assessment, debrief, professionals and follow-up after the voyage.','Explore Yachting','experience'],
       ['HOME & VILLAS','At home','A KŌMØ consultation in a private environment, with the same protocol and quality of debrief.','Request a consultation','contact'],
       ['HOSPITALITY','Hotels & clubs','KŌMØ days and programmes operated on site before any permanent equipment decision.','For professionals','partners'],
       ['RETREATS','Retreats','Several days to assess, act and organise continuity after the stay.','Explore formats','experience']
@@ -132,7 +132,7 @@ const localeData = {
     teamTitle:'A trajectory surrounded by the right people.',
     teamCopy:'Depending on the programme and indication, KŌMØ can coordinate a physician, physiotherapist, coach, nurse or other professionals. The goal is not to stack services; it is to make the next step executable.',
     pulseTitle:'Pulse keeps the thread.',
-    pulseCopy:'Results, priorities, programme, professionals, progress and the next reassessment: Pulse becomes the continuity space after the consultation, not a free test before it.',
+    pulseCopy:'Results, priorities, programme, professionals, progress and the next reassessment: Pulse extends the consultation and keeps the whole trajectory in one place.',
     worldTitle:'World extends the support.',
     worldCopy:'World remains an optional interactive layer for guided exercise, virtual rehabilitation, education and engagement between steps when the programme calls for it.',
     proEy:'FOR PROFESSIONALS',
@@ -173,7 +173,7 @@ const localeData = {
     expTitle:'Vamos donde estás.<br><em>El método se mantiene.</em>',
     expLead:'Yachting es nuestra primera gran vertical de despliegue, no un límite de la marca. KŌMØ debe funcionar para una persona, hotel, villa, yacht o grupo de retreat.',
     experiences:[
-      ['YACHTING','KŌMØ Yachting','Longevidad funcional a bordo, desde una evaluación individual hasta un programa privado con seguimiento posterior.','Descubrir Yachting','/experience/'],
+      ['YACHTING','KŌMØ Yachting','Longevidad funcional a bordo, desde una evaluación individual hasta un programa privado con seguimiento posterior.','Descubrir Yachting','experience'],
       ['HOME & VILLAS','En casa','Consulta KŌMØ en un entorno privado con el mismo protocolo y calidad de restitución.','Solicitar consulta','contact'],
       ['HOSPITALITY','Hoteles & clubs','Jornadas KŌMØ operadas in situ antes de decidir una instalación permanente.','Para profesionales','partners'],
       ['RETREATS','Retreats','Varios días para evaluar, actuar y organizar la continuidad.','Ver formatos','experience']
@@ -186,7 +186,7 @@ const localeData = {
     teamTitle:'Una trayectoria con las personas adecuadas.',
     teamCopy:'Según programa e indicación, KŌMØ puede coordinar médico, fisioterapeuta, coach, enfermería u otros profesionales. El objetivo no es acumular servicios, sino hacer ejecutable el siguiente paso.',
     pulseTitle:'Pulse mantiene el hilo.',
-    pulseCopy:'Resultados, prioridades, programa, profesionales, progreso y próxima reevaluación: Pulse es el espacio de continuidad después de la consulta, no un test gratuito previo.',
+    pulseCopy:'Resultados, prioridades, programa, profesionales, progreso y próxima reevaluación: Pulse prolonga la consulta y mantiene toda la trayectoria en un solo espacio.',
     worldTitle:'World prolonga el acompañamiento.',
     worldCopy:'World sigue como capa interactiva opcional para ejercicio guiado, rehabilitación virtual, educación y engagement cuando el programa lo requiere.',
     proEy:'PARA PROFESIONALES',
@@ -343,7 +343,7 @@ function pulsePage(c){
   ];
   const access=isFr?'Accéder à mon espace Pulse':isEs?'Acceder a mi espacio Pulse':'Open my Pulse space';
   const consult=isFr?'Demander une consultation':isEs?'Solicitar una consulta':'Request a consultation';
-  const note=isFr?'Il n’existe plus de « test KŌMØ gratuit » comme porte d’entrée commerciale. Pulse prend sa valeur dans la continuité d’une vraie évaluation et de son accompagnement.':isEs?'El « test KŌMØ gratuito » ya no es una puerta de entrada comercial. Pulse cobra valor como continuidad de una evaluación real y su acompañamiento.':'The “free KŌMØ test” is no longer a commercial entry point. Pulse is valuable as the continuity layer after a real assessment and its follow-up.';
+  const note=isFr?'Pulse s’inscrit dans la continuité d’une évaluation réelle, d’une restitution humaine et d’un accompagnement structuré dans le temps.':isEs?'Pulse forma parte de la continuidad de una evaluación real, una restitución humana y un acompañamiento estructurado en el tiempo.':'Pulse is designed as the continuity layer after a real assessment, a human debrief and structured follow-up over time.';
   return pageHero('KŌMØ PULSE',title,lead,access,'https://pulse.komolongevity.com/',consult,c.paths.contact)+
     `<section class="kt-pagebody"><div class="kt-shell"><div class="kt-pagegrid">${cards.map(([e,t,p])=>`<article class="kt-pagecard"><span class="kt-kicker">${e}</span><h2 class="kt-h3">${t}</h2><p class="kt-copy">${p}</p></article>`).join('')}</div><p class="kt-note">${note}</p></div></section>`;
 }
