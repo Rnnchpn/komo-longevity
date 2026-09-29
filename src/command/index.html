@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="theme-color" content="#101210">
-  <title>KŌMØ Command</title>
+  <title>KŌMØ Command — Centre de pilotage</title>
   <style>
     :root{--bg:#0f1110;--panel:#171a18;--panel2:#1d211e;--line:#2b302d;--text:#f4f1ea;--muted:#a9aea9;--soft:#d7d2c7;--accent:#b7d7b5;--warn:#e6c98a;--danger:#e79c91;--good:#9fd0a5;--shadow:0 24px 70px rgba(0,0,0,.28)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(145deg,#0d0f0e,#131613 55%,#0f1110);color:var(--text);font:14px/1.45 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
@@ -28,168 +28,169 @@
 <body>
 <div class="app">
   <aside class="side">
-    <div class="brand">KŌMØ</div><div class="sub">Command Center</div>
+    <div class="brand">KŌMØ</div><div class="sub">Centre de pilotage</div>
     <nav class="nav">
-      <button class="active" data-view="today">Today</button>
+      <button class="active" data-view="today">Aujourd’hui</button>
       <button data-view="pipeline">Pipeline</button>
-      <button data-view="companies">Companies</button>
-      <button data-view="legal">Legal</button>
-      <button data-view="product">Product</button>
+      <button data-view="companies">Sociétés</button>
+      <button data-view="legal">Juridique</button>
+      <button data-view="product">Produit</button>
     </nav>
-    <div class="side-foot">Private workspace · no patient data<br>Browser-local MVP v0.1</div>
+    <div class="side-foot">Espace privé · aucune donnée patient<br>MVP local navigateur v0.2 FR</div>
   </aside>
   <main class="main">
     <header class="top">
-      <div><div class="eyebrow">Tuesday · 29 September 2026</div><h1 class="h1" id="viewTitle">Command</h1><div class="muted">Sell → Deliver → Measure → Improve → Scale</div></div>
-      <div class="pill"><span class="dot"></span> Private</div>
+      <div><div class="eyebrow">Mardi · 29 septembre 2026</div><h1 class="h1" id="viewTitle">Pilotage</h1><div class="muted">Vendre → Délivrer → Mesurer → Améliorer → Déployer</div></div>
+      <div class="pill"><span class="dot"></span> Privé</div>
     </header>
 
     <section id="today" class="section active">
       <div class="grid">
         <article class="card span12">
-          <h3>Priority absolute</h3>
-          <div class="priority">Be commercially ready to convert Friday's meetings into a paid KŌMØ Yachting pilot.</div>
+          <h3>Priorité absolue</h3>
+          <div class="priority">Être prêt commercialement à convertir les rendez-vous de vendredi en un premier pilote KŌMØ Yachting payé.</div>
           <div class="kpis">
-            <div class="kpi"><b id="openTasks">3</b><small>Priority missions</small></div>
-            <div class="kpi"><b>3</b><small>Friday meetings</small></div>
-            <div class="kpi"><b>€10k</b><small>Qualified target</small></div>
-            <div class="kpi"><b id="blockers">2</b><small>Sales blockers</small></div>
+            <div class="kpi"><b id="openTasks">3</b><small>Missions prioritaires</small></div>
+            <div class="kpi"><b>3</b><small>Rendez-vous vendredi</small></div>
+            <div class="kpi"><b>€10k</b><small>Pipeline qualifié</small></div>
+            <div class="kpi"><b id="blockers">2</b><small>Blocages commerciaux</small></div>
           </div>
         </article>
         <article class="card span7">
           <h3>3 missions maximum</h3>
           <div id="tasks"></div>
-          <div class="capture"><input id="newTask" placeholder="Ajouter une mission ou action…"><button class="btn" id="addTask">Add</button></div>
+          <div class="capture"><input id="newTask" placeholder="Ajouter une mission ou action…"><button class="btn" id="addTask">Ajouter</button></div>
         </article>
         <article class="card span5">
-          <h3>Until tonight</h3>
+          <h3>Jusqu’à ce soir</h3>
           <div class="timeline">
-            <div class="time-row"><div class="time">16:30</div><div><b>Legal</b><div class="meta">Validate pact, governance, IP, 40/30/30</div></div></div>
-            <div class="time-row"><div class="time">17:20</div><div><b>Experiences / Dolce</b><div class="meta">50/50 JV principles + transitional billing</div></div></div>
-            <div class="time-row"><div class="time">18:00</div><div><b>Friday sales pack</b><div class="meta">Offer, quote, deposit, lead source</div></div></div>
-            <div class="time-row"><div class="time">18:45</div><div><b>Pulse</b><div class="meta">End-to-end sales demo only</div></div></div>
-            <div class="time-row"><div class="time">20:00</div><div><b>World</b><div class="meta">Stability gate, no feature creep</div></div></div>
+            <div class="time-row"><div class="time">16:30</div><div><b>Juridique</b><div class="meta">Valider pacte, gouvernance, PI, 40/30/30</div></div></div>
+            <div class="time-row"><div class="time">17:20</div><div><b>Experiences / Dolce</b><div class="meta">Principes de la JV 50/50 + facturation transitoire</div></div></div>
+            <div class="time-row"><div class="time">18:00</div><div><b>Pack commercial vendredi</b><div class="meta">Offre, devis, acompte, origine du lead</div></div></div>
+            <div class="time-row"><div class="time">18:45</div><div><b>Pulse</b><div class="meta">Test complet du parcours de démonstration commerciale</div></div></div>
+            <div class="time-row"><div class="time">20:00</div><div><b>World</b><div class="meta">Validation de stabilité, aucune nouvelle fonctionnalité</div></div></div>
           </div>
         </article>
         <article class="card span7">
-          <h3>What changed?</h3>
+          <h3>Quoi de neuf ?</h3>
           <div class="capture"><textarea id="updateText" rows="3" placeholder="Ex: Janet confirme vendredi. Ugo valide 50/50. Pulse PDF fonctionne…"></textarea></div>
-          <div class="capture"><button class="btn primary" id="logUpdate">Save update</button><button class="btn ghost" id="clearDone">Clear completed</button></div>
+          <div class="capture"><button class="btn primary" id="logUpdate">Enregistrer</button><button class="btn ghost" id="clearDone">Effacer les tâches terminées</button></div>
         </article>
-        <article class="card span5"><h3>Recent decisions</h3><div id="activity" class="log"></div></article>
+        <article class="card span5"><h3>Décisions récentes</h3><div id="activity" class="log"></div></article>
       </div>
     </section>
 
     <section id="pipeline" class="section">
       <div class="grid">
         <article class="card span12">
-          <h3>Commercial pipeline</h3>
-          <table class="table"><thead><tr><th>Target</th><th>Stage</th><th>€</th><th>Owner</th><th>Source</th><th>Next action</th></tr></thead><tbody id="deals"></tbody></table>
-          <div class="capture"><input id="dealName" placeholder="New target"><input id="dealValue" type="number" placeholder="€"><button class="btn" id="addDeal">Add target</button></div>
+          <h3>Pipeline commercial</h3>
+          <table class="table"><thead><tr><th>Prospect</th><th>Étape</th><th>€</th><th>Responsable</th><th>Source</th><th>Prochaine action</th></tr></thead><tbody id="deals"></tbody></table>
+          <div class="capture"><input id="dealName" placeholder="Nouveau prospect"><input id="dealValue" type="number" placeholder="€"><button class="btn" id="addDeal">Ajouter</button></div>
         </article>
-        <article class="card span6"><h3>Rule</h3><div class="priority" style="font-size:22px">No active prospect without a next action.</div><div class="muted">Target → Contacted → Meeting → Demo → Proposal → Negotiation → Won / Lost</div></article>
-        <article class="card span6"><h3>Friday closing objective</h3><b>Janet / Calista</b><div class="meta">Pilot or named owner/yacht manager introduction + dated next step.</div><br><b>Zayd Hassoune</b><div class="meta">At least one qualified introduction.</div><br><b>Marie Menu / COTE</b><div class="meta">Publication angle, deadline, digital/event leverage.</div></article>
+        <article class="card span6"><h3>Règle</h3><div class="priority" style="font-size:22px">Aucun prospect actif sans prochaine action.</div><div class="muted">Cible → Contacté → RDV → Démo → Proposition → Négociation → Gagné / Perdu</div></article>
+        <article class="card span6"><h3>Objectifs de closing vendredi</h3><b>Janet / Calista</b><div class="meta">Pilote ou introduction nominative owner/yacht manager + prochaine étape datée.</div><br><b>Zayd Hassoune</b><div class="meta">Au moins une introduction qualifiée.</div><br><b>Marie Menu / COTE</b><div class="meta">Angle éditorial, deadline et activation digitale/événementielle.</div></article>
       </div>
     </section>
 
     <section id="companies" class="section">
       <div class="grid">
-        <article class="card span8"><h3>Group architecture</h3>
-          <div class="company"><div><h4>RC Venture</h4><div class="meta">Personal holding · founder block</div></div><div class="ownership">Renan 100%</div></div>
-          <div class="company"><div><h4>KŌMØ SAS</h4><div class="meta">Operations + commercial · Motion · Case · B2B delivery</div></div><div class="ownership">40 / 30 / 30</div></div>
-          <div class="company"><div><h4>KŌMØ Technologies</h4><div class="meta">IP · Pulse · World · scores · algorithms · technology</div></div><div class="ownership">RC Venture 100%</div></div>
+        <article class="card span8"><h3>Architecture du groupe</h3>
+          <div class="company"><div><h4>RC Venture</h4><div class="meta">Holding personnelle · bloc fondateur</div></div><div class="ownership">Renan 100%</div></div>
+          <div class="company"><div><h4>KŌMØ SAS</h4><div class="meta">Opérations + commerce · Motion · Case · delivery B2B</div></div><div class="ownership">40 / 30 / 30</div></div>
+          <div class="company"><div><h4>KŌMØ Technologies</h4><div class="meta">PI · Pulse · World · scores · algorithmes · technologie</div></div><div class="ownership">RC Venture 100%</div></div>
           <div class="company"><div><h4>KŌMØ Experiences</h4><div class="meta">Future JV · Yachting · Retreats · Villas · Hospitality</div></div><div class="ownership">Renan 50 / Ugo 50</div></div>
-          <div class="company"><div><h4>Dolce Riviera</h4><div class="meta">Independent hospitality / production partner</div></div><div class="ownership">External</div></div>
+          <div class="company"><div><h4>Dolce Riviera</h4><div class="meta">Partenaire indépendant hospitality / production</div></div><div class="ownership">Externe</div></div>
         </article>
-        <article class="card span4"><h3>Roles</h3>
-          <b>Renan</b><div class="meta">Founder · strategy · science · product · strategic closing</div><br>
-          <b>Ugo</b><div class="meta">KŌMØ SAS commercial + future Experiences partner</div><br>
-          <b>Benoît</b><div class="meta">KŌMØ SAS operations only · logistics · delivery</div><br>
-          <b>Dolce</b><div class="meta">Hospitality execution, not owner of KŌMØ IP</div>
+        <article class="card span4"><h3>Rôles</h3>
+          <b>Renan</b><div class="meta">Fondateur · stratégie · science · produit · closing stratégique</div><br>
+          <b>Ugo</b><div class="meta">Commercial KŌMØ SAS + futur associé Experiences</div><br>
+          <b>Benoît</b><div class="meta">Opérations KŌMØ SAS uniquement · logistique · delivery</div><br>
+          <b>Dolce</b><div class="meta">Exécution hospitality, sans propriété sur la PI KŌMØ</div>
         </article>
       </div>
     </section>
 
     <section id="legal" class="section">
       <div class="grid">
-        <article class="card span7"><h3>Legal validation queue</h3><div id="legalList"></div></article>
-        <article class="card span5"><h3>Non-negotiables</h3>
-          <div class="checkline"><div>Founder IP remains outside KŌMØ SAS until written transfer/licence.</div></div>
-          <div class="checkline"><div>Dolce gets no implied ownership or exclusivity over Yachting/Retreats.</div></div>
-          <div class="checkline"><div>Capital ownership ≠ remuneration for work performed.</div></div>
-          <div class="checkline"><div>Related-party flows are documented and economically justified.</div></div>
-          <div class="checkline"><div>Medical acts remain separate from wellness/hospitality billing.</div></div>
+        <article class="card span7"><h3>Documents juridiques à valider</h3><div id="legalList"></div></article>
+        <article class="card span5"><h3>Principes non négociables</h3>
+          <div class="checkline"><div>La PI du fondateur reste hors de KŌMØ SAS tant qu’aucun transfert ou licence écrite n’est signé.</div></div>
+          <div class="checkline"><div>Dolce n’acquiert aucun droit implicite de propriété ou d’exclusivité sur Yachting / Retreats.</div></div>
+          <div class="checkline"><div>Participation au capital ≠ rémunération du travail effectué.</div></div>
+          <div class="checkline"><div>Les flux entre parties liées sont documentés et économiquement justifiés.</div></div>
+          <div class="checkline"><div>Les actes médicaux restent séparés de la facturation wellness / hospitality.</div></div>
         </article>
       </div>
     </section>
 
     <section id="product" class="section">
       <div class="products">
-        <article class="card"><h3>Pulse · sales readiness</h3>
-          <div class="product-row"><div>New account → patient flow<div class="bar"><span style="width:90%"></span></div></div><span class="status green">Test</span></div>
-          <div class="product-row"><div>PDF generation<div class="bar"><span style="width:80%"></span></div></div><span class="status orange">Verify</span></div>
-          <div class="product-row"><div>Professional desktop<div class="bar"><span style="width:75%"></span></div></div><span class="status orange">Verify</span></div>
-          <div class="product-row"><div>Admin / centre<div class="bar"><span style="width:75%"></span></div></div><span class="status orange">Verify</span></div>
+        <article class="card"><h3>Pulse · prêt pour la vente</h3>
+          <div class="product-row"><div>Nouveau compte → parcours patient<div class="bar"><span style="width:90%"></span></div></div><span class="status green">Tester</span></div>
+          <div class="product-row"><div>Génération du PDF<div class="bar"><span style="width:80%"></span></div></div><span class="status orange">À vérifier</span></div>
+          <div class="product-row"><div>Interface Pro desktop<div class="bar"><span style="width:75%"></span></div></div><span class="status orange">À vérifier</span></div>
+          <div class="product-row"><div>Admin / centre<div class="bar"><span style="width:75%"></span></div></div><span class="status orange">À vérifier</span></div>
         </article>
-        <article class="card"><h3>World · demo gate</h3>
-          <div class="product-row"><div>Engine launch<div class="bar"><span style="width:60%"></span></div></div><span class="status red">Blocker</span></div>
-          <div class="product-row"><div>Desktop latest build<div class="bar"><span style="width:70%"></span></div></div><span class="status orange">Verify</span></div>
-          <div class="product-row"><div>First person / Marina<div class="bar"><span style="width:85%"></span></div></div><span class="status green">Keep</span></div>
-          <div class="product-row"><div>Multiplayer<div class="bar"><span style="width:65%"></span></div></div><span class="status orange">Secondary</span></div>
+        <article class="card"><h3>World · validation démo</h3>
+          <div class="product-row"><div>Démarrage du moteur<div class="bar"><span style="width:60%"></span></div></div><span class="status red">Bloquant</span></div>
+          <div class="product-row"><div>Dernière version desktop<div class="bar"><span style="width:70%"></span></div></div><span class="status orange">À vérifier</span></div>
+          <div class="product-row"><div>Première personne / Marina<div class="bar"><span style="width:85%"></span></div></div><span class="status green">Conserver</span></div>
+          <div class="product-row"><div>Multiplayer<div class="bar"><span style="width:65%"></span></div></div><span class="status orange">Secondaire</span></div>
         </article>
       </div>
-      <div class="footer-note">Rule: stability before features. If it does not block a sale or Friday demo, move it to backlog.</div>
+      <div class="footer-note">Règle : stabilité avant nouvelles fonctionnalités. Si cela ne bloque ni une vente ni la démo de vendredi, le sujet passe au Backlog.</div>
     </section>
   </main>
 </div>
 <script>
-const KEY='komo-command-v01';
+const KEY='komo-command-v02-fr';
 const seed={
  tasks:[
-  {id:1,title:'Validate legal architecture',meta:'Renan · pact + IP + governance · today',priority:'high',done:false},
-  {id:2,title:'Finalize Friday Yachting sales pack',meta:'Renan · offer + quote + billing route',priority:'high',done:false},
-  {id:3,title:'Run Pulse end-to-end sales demo',meta:'Renan · account → result → PDF → Pro',priority:'medium',done:false}
+  {id:1,title:'Valider l’architecture juridique',meta:'Renan · pacte + PI + gouvernance · aujourd’hui',priority:'high',done:false},
+  {id:2,title:'Finaliser le pack commercial Yachting de vendredi',meta:'Renan · offre + devis + circuit de facturation',priority:'high',done:false},
+  {id:3,title:'Tester Pulse de bout en bout pour la vente',meta:'Renan · compte → résultat → PDF → Pro',priority:'medium',done:false}
  ],
  deals:[
-  {id:1,name:'Janet / Calista',stage:'Meeting',value:5000,owner:'Renan',source:'Renan',next:'Fri 15:00 · pilot / owner introduction'},
-  {id:2,name:'Zayd Hassoune',stage:'Meeting',value:5000,owner:'Renan',source:'Renan',next:'Friday lunch · qualified introduction'},
-  {id:3,name:'Marie Menu / COTE',stage:'Meeting',value:0,owner:'Renan',source:'Renan',next:'Friday AM · publication + deadline'}
+  {id:1,name:'Janet / Calista',stage:'RDV',value:5000,owner:'Renan',source:'Renan',next:'Vendredi 15h · pilote / introduction owner'},
+  {id:2,name:'Zayd Hassoune',stage:'RDV',value:5000,owner:'Renan',source:'Renan',next:'Déjeuner vendredi · introduction qualifiée'},
+  {id:3,name:'Marie Menu / COTE',stage:'RDV',value:0,owner:'Renan',source:'Renan',next:'Vendredi matin · publication + deadline'}
  ],
  legal:[
-  {id:1,label:'KŌMØ SAS shareholder pact',status:'Review',done:false},
-  {id:2,label:'KŌMØ SAS articles alignment',status:'Review',done:false},
-  {id:3,label:'Founder IP inventory',status:'Open',done:false},
-  {id:4,label:'KŌMØ Experiences 50/50 term sheet',status:'Draft',done:false},
-  {id:5,label:'Dolce ↔ KŌMØ transitional agreement',status:'Draft',done:false},
-  {id:6,label:'KŌMØ Technologies licence framework',status:'Backlog',done:false}
+  {id:1,label:'Pacte d’associés KŌMØ SAS',status:'À valider',done:false},
+  {id:2,label:'Alignement des statuts KŌMØ SAS',status:'À valider',done:false},
+  {id:3,label:'Inventaire de la PI du fondateur',status:'Ouvert',done:false},
+  {id:4,label:'Term sheet KŌMØ Experiences 50/50',status:'Brouillon',done:false},
+  {id:5,label:'Convention transitoire Dolce ↔ KŌMØ',status:'Brouillon',done:false},
+  {id:6,label:'Cadre de licence KŌMØ Technologies',status:'Backlog',done:false}
  ],
- activity:[{at:new Date().toISOString(),text:'KŌMØ Command initialized.'}]
+ activity:[{at:new Date().toISOString(),text:'KŌMØ Command initialisé.'}]
 };
 let state=JSON.parse(localStorage.getItem(KEY)||'null')||seed;
 const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const priorityLabels={high:'URGENT',medium:'IMPORTANT',good:'OK'};
 function renderTasks(){
- const el=document.querySelector('#tasks'); el.innerHTML=state.tasks.slice(0,6).map(t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" data-task="${t.id}" ${t.done?'checked':''}><div><div class="task-title">${esc(t.title)}</div><div class="meta">${esc(t.meta||'')}</div></div><span class="badge ${t.priority}">${t.priority}</span></div>`).join('');
+ const el=document.querySelector('#tasks'); el.innerHTML=state.tasks.slice(0,6).map(t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" data-task="${t.id}" ${t.done?'checked':''}><div><div class="task-title">${esc(t.title)}</div><div class="meta">${esc(t.meta||'')}</div></div><span class="badge ${t.priority}">${priorityLabels[t.priority]||t.priority}</span></div>`).join('');
  document.querySelector('#openTasks').textContent=state.tasks.filter(t=>!t.done).slice(0,3).length;
  document.querySelectorAll('[data-task]').forEach(x=>x.onchange=()=>{const t=state.tasks.find(t=>t.id==x.dataset.task);t.done=x.checked;save();renderTasks()})
 }
 function renderDeals(){
- const stages=['Target','Contacted','Meeting','Demo','Proposal','Negotiation','Won','Lost'];
- document.querySelector('#deals').innerHTML=state.deals.map(d=>`<tr><td><b>${esc(d.name)}</b></td><td><select data-stage="${d.id}">${stages.map(s=>`<option ${s===d.stage?'selected':''}>${s}</option>`).join('')}</select></td><td class="money">${d.value?new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(d.value):'—'}</td><td>${esc(d.owner)}</td><td>${esc(d.source)}</td><td>${esc(d.next||'NO NEXT ACTION')}</td></tr>`).join('');
+ const stages=['Cible','Contacté','RDV','Démo','Proposition','Négociation','Gagné','Perdu'];
+ document.querySelector('#deals').innerHTML=state.deals.map(d=>`<tr><td><b>${esc(d.name)}</b></td><td><select data-stage="${d.id}">${stages.map(s=>`<option ${s===d.stage?'selected':''}>${s}</option>`).join('')}</select></td><td class="money">${d.value?new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(d.value):'—'}</td><td>${esc(d.owner)}</td><td>${esc(d.source)}</td><td>${esc(d.next||'AUCUNE PROCHAINE ACTION')}</td></tr>`).join('');
  document.querySelectorAll('[data-stage]').forEach(x=>x.onchange=()=>{state.deals.find(d=>d.id==x.dataset.stage).stage=x.value;save()})
 }
 function renderLegal(){
- document.querySelector('#legalList').innerHTML=state.legal.map(l=>`<div class="checkline"><input type="checkbox" data-legal="${l.id}" ${l.done?'checked':''}><div>${esc(l.label)}</div><span class="status ${l.done?'green':l.status==='Review'?'orange':'red'}">${l.done?'Validated':esc(l.status)}</span></div>`).join('');
+ document.querySelector('#legalList').innerHTML=state.legal.map(l=>`<div class="checkline"><input type="checkbox" data-legal="${l.id}" ${l.done?'checked':''}><div>${esc(l.label)}</div><span class="status ${l.done?'green':l.status==='À valider'?'orange':'red'}">${l.done?'Validé':esc(l.status)}</span></div>`).join('');
  document.querySelectorAll('[data-legal]').forEach(x=>x.onchange=()=>{state.legal.find(l=>l.id==x.dataset.legal).done=x.checked;save();renderLegal()})
 }
 function renderActivity(){
  const a=state.activity.slice().reverse().slice(0,8);document.querySelector('#activity').innerHTML=a.length?a.map(i=>`<div class="log-item"><b>${new Date(i.at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</b><div class="meta">${esc(i.text)}</div></div>`).join(''):'<div class="empty">No updates yet.</div>'
 }
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelector('#'+b.dataset.view).classList.add('active');document.querySelector('#viewTitle').textContent=b.textContent});
-document.querySelector('#addTask').onclick=()=>{const i=document.querySelector('#newTask');if(!i.value.trim())return;state.tasks.push({id:Date.now(),title:i.value.trim(),meta:'Added manually',priority:'medium',done:false});i.value='';save();renderTasks()};
+document.querySelector('#addTask').onclick=()=>{const i=document.querySelector('#newTask');if(!i.value.trim())return;state.tasks.push({id:Date.now(),title:i.value.trim(),meta:'Ajouté manuellement',priority:'medium',done:false});i.value='';save();renderTasks()};
 document.querySelector('#clearDone').onclick=()=>{state.tasks=state.tasks.filter(t=>!t.done);save();renderTasks()};
 document.querySelector('#logUpdate').onclick=()=>{const i=document.querySelector('#updateText');if(!i.value.trim())return;state.activity.push({at:new Date().toISOString(),text:i.value.trim()});i.value='';save();renderActivity()};
-document.querySelector('#addDeal').onclick=()=>{const n=document.querySelector('#dealName'),v=document.querySelector('#dealValue');if(!n.value.trim())return;state.deals.push({id:Date.now(),name:n.value.trim(),stage:'Target',value:Number(v.value||0),owner:'Renan',source:'Manual',next:'NO NEXT ACTION'});n.value='';v.value='';save();renderDeals()};
+document.querySelector('#addDeal').onclick=()=>{const n=document.querySelector('#dealName'),v=document.querySelector('#dealValue');if(!n.value.trim())return;state.deals.push({id:Date.now(),name:n.value.trim(),stage:'Cible',value:Number(v.value||0),owner:'Renan',source:'Manuel',next:'AUCUNE PROCHAINE ACTION'});n.value='';v.value='';save();renderDeals()};
 renderTasks();renderDeals();renderLegal();renderActivity();
 </script>
 </body></html>
