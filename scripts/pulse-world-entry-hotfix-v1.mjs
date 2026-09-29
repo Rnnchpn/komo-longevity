@@ -30,6 +30,9 @@ mykomo=mykomo.replace(
   "document.querySelector('[data-mkv5-world]')?.addEventListener('click',()=>{location.href='https://komolongevity.com/world/'})",
   "document.querySelectorAll('[data-mkv5-world]').forEach(b=>b.addEventListener('click',()=>{location.href='https://komolongevity.com/world/'}))"
 );
+if(!mykomo.includes('data-kmw-world-binding')){
+  mykomo += `\n/* data-kmw-world-binding · resilient delegated World entry */\ndocument.addEventListener('click',event=>{const trigger=event.target?.closest?.('[data-mkv5-world]');if(!trigger)return;event.preventDefault();window.location.href='https://komolongevity.com/world/';});\n`;
+}
 
 // The World session bridge must be present in the generated Pulse runtime, not only in source.
 if(!html.includes('auth-gateway-v2.js')){
@@ -64,7 +67,7 @@ const checks=[
   ['World hero CTA',mykomo.includes('data-mkv5-world-hero')],
   ['World destination copy',mykomo.includes('data-mkv5-world-hero')&&mykomo.includes('Entrer dans KŌMØ World →')],
   ['World quick access',mykomo.includes('data-mkv5-world-quick')],
-  ['all World CTAs bound',mykomo.includes("querySelectorAll('[data-mkv5-world]')")],
+  ['all World CTAs bound',mykomo.includes('data-kmw-world-binding')||mykomo.includes("querySelectorAll('[data-mkv5-world]')")],
   ['topbar World entry',html.includes('id="komoWorldTopEntry"')],
   ['World auth bridge loaded',html.includes('auth-gateway-v2.js?v=20260924-world-bridge-v3')],
   ['explicit My KŌMØ cache bust',html.includes('my-komo-stable-v5.js?v=20260907-world-access-v1')]
