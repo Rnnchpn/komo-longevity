@@ -5,6 +5,7 @@ const LIFE_HOST = 'life.komolongevity.com';
 const SHOP_HOST = 'shop.komolongevity.com';
 const EXPERIENCE_HOST = 'experience.komolongevity.com';
 const COMMAND_HOST = 'command.komolongevity.com';
+const COMMAND_AUTH_HASH = 'fb0f776871c2bf1c7b14535a77332a9d3c7985cc9fed87ecfee836b523f3e21d';
 const STATIC_ORIGIN = 'https://komolongevity.com';
 const STATIC_ASSET_RE = /\.(?:css|js|mjs|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i;
 
@@ -23,9 +24,38 @@ const HOST_APPS = {
 
 export const config = { matcher: '/:path*' };
 
+async function sha256Hex(value) {
+  const bytes = new TextEncoder().encode(value);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 export default async function middleware(request) {
   const incomingUrl = new URL(request.url);
   const hostname = (request.headers.get('host') || incomingUrl.hostname).split(':')[0].toLowerCase();
+
+  if (hostname === COMMAND_HOST) {
+    const authorization = request.headers.get('authorization') || '';
+    let password = '';
+    if (authorization.startsWith('Basic ')) {
+      try {
+        const decoded = atob(authorization.slice(6));
+        const separator = decoded.indexOf(':');
+        password = separator >= 0 ? decoded.slice(separator + 1) : '';
+      } catch {}
+    }
+    const valid = password && (await sha256Hex(password)) === COMMAND_AUTH_HASH;
+    if (!valid) {
+      return new Response('KOMO Command — authentication required', {
+        status: 401,
+        headers: {
+          'WWW-Authenticate': 'Basic realm="KOMO Command", charset="UTF-8"',
+          'Cache-Control': 'private, no-store, max-age=0',
+          'X-Robots-Tag': 'noindex, nofollow, noarchive'
+        }
+      });
+    }
+  }
 
   if (hostname === SHOP_HOST) {
     const destination = new URL(incomingUrl.pathname + incomingUrl.search, `https://${LIFE_HOST}`);
