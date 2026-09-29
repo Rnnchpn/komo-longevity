@@ -295,3 +295,195 @@ html[data-adaptive-shell][data-adaptive-mode="patient"] .main-shell{
     transition:none!important;
   }
 }
+
+
+/* ---------- 8. Canonical current-route visual owners ---------- */
+/* Current route owners still inject structural CSS at runtime. These selectors are
+   intentionally stronger and define the only production palette/hierarchy. */
+
+/* Shared current-route canvas */
+html body.connected-v3,
+html body.kresults-v4,
+html body.mykomo-v5,
+html body.kclub-route-v2,
+html body.consultations-v4{
+  background:var(--kp-bg,#f4f7f5)!important;
+  color:var(--kp-ink,#17251d)!important;
+}
+html body.connected-v3 :is(.main-shell,#viewRoot),
+html body.kresults-v4 :is(.main-shell,#viewRoot),
+html body.mykomo-v5 :is(.main-shell,#viewRoot),
+html body.kclub-route-v2 :is(.main-shell,#viewRoot),
+html body.consultations-v4 :is(.main-shell,#viewRoot){
+  background:var(--kp-bg,#f4f7f5)!important;
+  color:var(--kp-ink,#17251d)!important;
+}
+
+/* Connected — current V3 owner */
+html body.connected-v3 .kcn3{
+  --bg:#f4f7f5!important;--panel:#fff!important;--panel2:#f8faf9!important;
+  --line:#dce6df!important;--ink:#17251d!important;--muted:#66756c!important;
+  --green:#45a977!important;--greenSoft:#def5e7!important;--amber:#d99d2b!important;--red:#d95d55!important;
+  color:#17251d!important;
+}
+html body.connected-v3 .kcn3-card,
+html body.connected-v3 .kcn3-score,
+html body.connected-v3 .kcn3 :is([class*="-card"],[class*="-panel"],[class*="-row"]){
+  background:#fff!important;border-color:#dce6df!important;color:#17251d!important;
+  box-shadow:0 12px 32px rgba(35,63,48,.07)!important;
+}
+html body.connected-v3 .kcn3-score{
+  background:linear-gradient(135deg,#f1fff7 0%,#f2f5ff 62%,#fff4ef 100%)!important;
+}
+html body.connected-v3 .kcn3 :is(h1,h2,h3,h4,strong,b){color:#17251d!important}
+html body.connected-v3 .kcn3 :is(p,small,span){color:#66756c!important}
+html body.connected-v3 .kcn3-scorevalue{color:#205f43!important}
+html body.connected-v3 .kcn3 :is(.good,[class*="good"]){background:#eefaf3!important;border-color:#cbe8d6!important}
+html body.connected-v3 .kcn3 :is(.bad,[class*="bad"]){background:#fff0ec!important;border-color:#ffd8d1!important}
+
+/* Results — current V4 owner */
+html body.kresults-v4 .kr4{
+  --bg:#f4f7f5!important;--panel:#fff!important;--panel2:#f8faf9!important;--panel3:#eef3f0!important;
+  --line:#dce6df!important;--ink:#17251d!important;--muted:#66756c!important;
+  --green:#45a977!important;--greenBg:#def5e7!important;--red:#d95d55!important;--redBg:#fff0ec!important;
+  --amber:#d99d2b!important;--amberBg:#fff6de!important;--neutral:#7b8980!important;
+  color:#17251d!important;
+}
+html body.kresults-v4 .kr4-card,
+html body.kresults-v4 .kr4 :is([class*="-card"],[class*="-panel"],[class*="-row"],[class*="-domain"]){
+  background:#fff!important;border-color:#dce6df!important;color:#17251d!important;
+  box-shadow:0 12px 32px rgba(35,63,48,.07)!important;
+}
+html body.kresults-v4 .kr4-hero{
+  background:
+    radial-gradient(520px 260px at 90% 0%,rgba(93,120,244,.14),transparent 68%),
+    radial-gradient(460px 260px at 0% 100%,rgba(69,169,119,.16),transparent 70%),
+    linear-gradient(135deg,#f1fff7,#f2f5ff 62%,#fff4ef)!important;
+}
+html body.kresults-v4 .kr4 :is(h1,h2,h3,h4,strong,b){color:#17251d!important}
+html body.kresults-v4 .kr4 :is(p,small,span){color:#66756c!important}
+html body.kresults-v4 .kr4-score{color:#205f43!important}
+html body.kresults-v4 .kr4-btn{
+  background:#fff!important;color:#365344!important;border-color:#dce6df!important;
+}
+html body.kresults-v4 .kr4-btn.primary{
+  background:linear-gradient(135deg,#2b8059,#169d91)!important;color:#fff!important;border-color:transparent!important;
+}
+
+/* My KŌMØ — social profile owner */
+html body.mykomo-v5 .mks{
+  --bg:#f4f7f5!important;--panel:#fff!important;--panel2:#f8faf9!important;--text:#17251d!important;
+  --muted:#66756c!important;--line:#dce6df!important;--green:#45a977!important;--warm:#d99d2b!important;
+  max-width:1320px!important;color:#17251d!important;
+}
+html body.mykomo-v5 .mks-card,
+html body.mykomo-v5 .mks-profile,
+html body.mykomo-v5 .mks-status,
+html body.mykomo-v5 .mks-community,
+html body.mykomo-v5 .mks-komo,
+html body.mykomo-v5 .mks-control{
+  background:#fff!important;border-color:#dce6df!important;color:#17251d!important;
+  box-shadow:0 12px 32px rgba(35,63,48,.07)!important;
+}
+html body.mykomo-v5 .mks-profile{
+  background:
+    radial-gradient(480px 280px at 0% 100%,rgba(69,169,119,.14),transparent 70%),
+    radial-gradient(500px 300px at 100% 0%,rgba(93,120,244,.13),transparent 70%),
+    linear-gradient(135deg,#f5fff9,#f3f6ff 64%,#fff7f2)!important;
+}
+html body.mykomo-v5 .mks-status{
+  background:linear-gradient(145deg,#eefaf3,#eef5ff)!important;
+}
+html body.mykomo-v5 .mks-community.primary{
+  background:linear-gradient(145deg,#f1fbf5,#eef4ff)!important;
+}
+html body.mykomo-v5 .mks :is(h1,h2,h3,h4,strong,b){color:#17251d!important}
+html body.mykomo-v5 .mks :is(p,small,span){color:#66756c!important}
+html body.mykomo-v5 .mks-name{color:#173d2c!important}
+html body.mykomo-v5 .mks-avatar{
+  background:#e8f2ec!important;border-color:#cfe0d5!important;color:#205f43!important;
+  box-shadow:0 14px 34px rgba(35,63,48,.10)!important;
+}
+html body.mykomo-v5 .mks-crown{
+  background:#fff8e8!important;border-color:#ecd9aa!important;color:#936814!important;box-shadow:none!important;
+}
+html body.mykomo-v5 .mks-role{
+  background:#fff6de!important;border-color:#ecdba9!important;color:#8c681b!important;
+}
+html body.mykomo-v5 .mks-access{
+  background:#def5e7!important;border-color:#c6e8d3!important;color:#24714d!important;
+}
+html body.mykomo-v5 .mks-stat,
+html body.mykomo-v5 .mks-icon,
+html body.mykomo-v5 .mks-club-row{
+  background:#f5f8f6!important;border-color:#e0e9e3!important;color:#365344!important;
+}
+html body.mykomo-v5 .mks-card-foot{border-color:#e1e9e4!important}
+html body.mykomo-v5 .mks-btn,
+html body.mykomo-v5 .mks-mini-btn{
+  background:#fff!important;color:#365344!important;border-color:#dce6df!important;
+}
+html body.mykomo-v5 .mks-btn:not(.alt),
+html body.mykomo-v5 .mks-mini-btn.primary{
+  background:linear-gradient(135deg,#2b8059,#169d91)!important;color:#fff!important;border-color:transparent!important;
+}
+
+/* Club — current V2 owner */
+html body.kclub-route-v2{
+  --kc-bg:#f4f7f5!important;--kc-panel:#fff!important;--kc-panel2:#f8faf9!important;
+  --kc-line:#dce6df!important;--kc-text:#17251d!important;--kc-muted:#66756c!important;
+  --kc-green:#45a977!important;--kc-green-core:#287a55!important;--kc-warm:#d99d2b!important;
+}
+html body.kclub-route-v2 .topbar{background:rgba(244,247,245,.94)!important;border-color:#dce6df!important}
+html body.kclub-route-v2 .kclub,
+html body.kclub-route-v2 #viewRoot{background:#f4f7f5!important;color:#17251d!important}
+html body.kclub-route-v2 .kclub :is([class*="-card"],[class*="-panel"],[class*="-row"],[class*="-tile"]){
+  background:#fff!important;border-color:#dce6df!important;color:#17251d!important;
+  box-shadow:0 12px 32px rgba(35,63,48,.07)!important;
+}
+html body.kclub-route-v2 .kclub :is(h1,h2,h3,h4,strong,b){color:#17251d!important}
+html body.kclub-route-v2 .kclub :is(p,small,span){color:#66756c!important}
+
+/* Consultation current owner */
+html body.consultations-v4 .kc4{
+  --ink:#17251d!important;--muted:#66756c!important;--line:#dce6df!important;--green:#287a55!important;
+  --green-bg:#def5e7!important;--dark:#205f43!important;
+}
+html body.consultations-v4 .kc4-hero{
+  background:linear-gradient(135deg,#eefaf3,#eef5ff)!important;
+  color:#17251d!important;border-color:#dce6df!important;box-shadow:0 12px 32px rgba(35,63,48,.07)!important;
+}
+html body.consultations-v4 .kc4-hero :is(h1,h2,h3,strong,p,small,span){color:#17251d!important}
+
+/* Account privacy — remove last legacy dark cards. */
+html body .kap-head h3{color:#17251d!important;font-family:Manrope,"DM Sans",sans-serif!important}
+html body .kap-head :is(p,small){color:#66756c!important}
+html body .kap-card,
+html body .kap-card.warm,
+html body .kap-card.light{
+  background:#fff!important;color:#17251d!important;border-color:#dce6df!important;
+  box-shadow:0 12px 32px rgba(35,63,48,.07)!important;
+}
+
+/* Patient dock — current navigation owner, modern light treatment. */
+html body #kpDockV6{
+  background:rgba(255,255,255,.96)!important;
+  border:1px solid #dce6df!important;
+  box-shadow:0 16px 46px rgba(35,63,48,.14)!important;
+  backdrop-filter:blur(22px) saturate(140%)!important;
+  -webkit-backdrop-filter:blur(22px) saturate(140%)!important;
+}
+html body #kpDockV6 .kp6-indicator{
+  background:linear-gradient(135deg,#def5e7,#e9edff)!important;
+  box-shadow:0 6px 18px rgba(35,63,48,.08)!important;
+}
+html body #kpDockV6 a{color:#728078!important;text-shadow:none!important}
+html body #kpDockV6 a.active{color:#205f43!important}
+html body #kpDockV6 .kp6-icon{color:currentColor!important}
+
+/* Final guard: no route may restore a black application canvas. */
+html body #appShell,
+html body #appShell .main-shell,
+html body #appShell #viewRoot{
+  background-color:var(--kp-bg,#f4f7f5)!important;
+}
