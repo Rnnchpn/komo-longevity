@@ -10,6 +10,12 @@ const introGuestName=$('#intro-guest-name');
 const introAuthNote=$('#intro-auth-note');
 const introAuthStatus=$('#intro-auth-status');
 const introAvatarOpen=$('#intro-avatar-open');
+const worldHome=$('#world-home');
+const worldHomeBody=$('#world-home-body');
+const worldHomeTitle=$('#world-home-title');
+const worldHomeAccess=$('#world-home-access');
+const worldHomeClose=$('#world-home-close');
+const worldHomeToggle=$('#world-home-toggle');
 const languageToggle=$('#language-toggle');
 const locationChip=$('.location-chip');
 const locationName=$('#location-name');
@@ -64,6 +70,7 @@ const avatarToggle=$('#avatar-toggle');
 const challengesToggle=$('#challenges-toggle');
 const resultsToggle=$('#results-toggle');
 const campusToggle=$('#campus-toggle');
+const homeToggle=$('#home-toggle');
 const journeyToggle=$('#journey-toggle');
 const membershipToggle=$('#membership-toggle');
 const worldNextStep=$('#world-next-step');
@@ -4828,6 +4835,111 @@ function worldCommercialContact(kind='world-plus'){
   const base=locale==='fr'?'/fr/contact/':'/contact/';
   return base+'?interest='+encodeURIComponent(kind)+'&source=world';
 }
+
+function worldHomeProgress(t=personalTrajectory){
+  if(!t)return 0;
+  const explicit=Number(t.progress);
+  if(Number.isFinite(explicit)&&explicit>0)return THREE.MathUtils.clamp(Math.round(explicit),0,100);
+  return THREE.MathUtils.clamp(Math.round(((Math.max(1,t.phase_index)-1)/3)*100),0,100);
+}
+function worldHomeHtml(){
+  const t=personalTrajectory;
+  const tier=worldAccessTier();
+  const connected=!!t;
+  const plus=tier==='plus';
+  const score=connected&&t.motion_score!=null?Math.round(t.motion_score):null;
+  const age=connected&&t.motion_age!=null?Math.round(t.motion_age):null;
+  const progress=worldHomeProgress(t);
+  const phase=connected?trajectoryPhaseLabel(t):(locale==='fr'?'NON ACTIVÉE':'NOT ACTIVE');
+  const checkpoint=connected?trajectoryCheckpointLabel(t):(locale==='fr'?'APRÈS VOTRE BILAN':'AFTER YOUR ASSESSMENT');
+  const days=connected?trajectoryDaysToCheckpoint(t):null;
+  const priority=connected?(t.priority||t.current_action||'—'):(locale==='fr'?'Votre profil de mouvement':'Your movement profile');
+  const action=connected?(t.current_action||t.priority||(locale==='fr'?'Continuer votre trajectoire':'Continue your trajectory')):(locale==='fr'?'Faire votre bilan KŌMØ':'Complete your KŌMØ assessment');
+  const homeLead=connected
+    ?(locale==='fr'?'Votre action du moment':'Your current action')
+    :(locale==='fr'?'Votre prochaine étape':'Your next step');
+  const homeCopy=connected
+    ?(locale==='fr'?'Votre bilan reste vivant : agissez aujourd’hui et gardez le prochain point en vue.':'Your assessment stays active: act today and keep the next checkpoint in view.')
+    :(locale==='fr'?'World est libre à explorer. Un bilan KŌMØ transforme ensuite cet espace en suivi personnel.':'World is free to explore. A KŌMØ assessment then turns this space into personal follow-up.');
+
+  return '<div class="world-home-main">'+
+    '<article class="home-today-card '+(connected?'personal':'discovery')+'">'+
+      '<div class="home-today-top"><span>AUJOURD’HUI</span><em>'+(plus?'WORLD+':connected?'PERSONAL':'DISCOVERY')+'</em></div>'+
+      '<small>'+homeLead+'</small>'+
+      '<h1>'+escHtml(action)+'</h1>'+
+      '<p>'+homeCopy+'</p>'+
+      (connected?'<div class="home-priority"><span>'+(locale==='fr'?'PRIORITÉ':'PRIORITY')+'</span><b>'+escHtml(priority)+'</b></div>':'')+
+      '<div class="home-primary-actions">'+
+        '<button type="button" class="primary" data-home-action="'+(connected?'continue':'assessment')+'">'+(connected?(locale==='fr'?'CONTINUER MON ACTION':'CONTINUE MY ACTION'):(locale==='fr'?'DEMANDER UN BILAN':'REQUEST AN ASSESSMENT'))+'</button>'+
+        '<button type="button" data-home-action="'+(connected?'results':'world')+'">'+(connected?(locale==='fr'?'VOIR MES RÉSULTATS':'VIEW MY RESULTS'):(locale==='fr'?'EXPLORER WORLD':'EXPLORE WORLD'))+'</button>'+
+      '</div>'+
+    '</article>'+
+    '<section class="home-metric-grid">'+
+      '<article><span>MOTION SCORE</span><strong>'+(score==null?'—':score+'<small>/100</small>')+'</strong><em>'+(connected?(locale==='fr'?'Votre référence':'Your reference'):(locale==='fr'?'Après votre bilan':'After your assessment'))+'</em></article>'+
+      '<article><span>MOTION AGE</span><strong>'+(age==null?'—':age)+'</strong><em>'+(connected?(locale==='fr'?'Repère fonctionnel':'Functional reference'):(locale==='fr'?'Après votre bilan':'After your assessment'))+'</em></article>'+
+      '<article class="home-progress-card"><span>'+(locale==='fr'?'TRAJECTOIRE':'TRAJECTORY')+'</span><strong>'+phase+'</strong><i><b style="width:'+progress+'%"></b></i><em>'+(connected?progress+'%':(locale==='fr'?'À activer':'To activate'))+'</em></article>'+
+    '</section>'+
+  '</div>'+
+  '<aside class="world-home-side">'+
+    '<article class="home-checkpoint-card"><span>'+(locale==='fr'?'PROCHAIN CHECKPOINT':'NEXT CHECKPOINT')+'</span><strong>'+checkpoint+'</strong><small>'+(days!=null?(days+(locale==='fr'?' jours':' days')):(connected?(locale==='fr'?'À planifier dans Pulse':'Schedule in Pulse'):(locale==='fr'?'Le suivi commence après le bilan':'Follow-up starts after assessment')))+'</small><button type="button" data-home-action="'+(connected?'trajectory':'assessment')+'">'+(connected?(locale==='fr'?'VOIR MA TRAJECTOIRE':'VIEW MY TRAJECTORY'):(locale==='fr'?'DÉCOUVRIR LE PARCOURS':'SEE THE PATH'))+'</button></article>'+
+    '<section class="home-quick-section"><div class="home-section-head"><span>'+(locale==='fr'?'ACCÈS RAPIDES':'QUICK ACCESS')+'</span><b>'+(locale==='fr'?'Sans se déplacer dans World':'No need to walk through World')+'</b></div>'+
+      '<div class="home-quick-grid">'+
+        '<button type="button" data-home-action="twin"><i>◎</i><span>FUNCTIONAL TWIN</span><small>'+(locale==='fr'?'Comprendre':'Understand')+'</small></button>'+
+        '<button type="button" data-home-action="fitness"><i>△</i><span>FITNESS</span><small>'+(locale==='fr'?'Agir':'Act')+'</small></button>'+
+        '<button type="button" data-home-action="library"><i>▤</i><span>LIBRARY</span><small>'+(locale==='fr'?'Comprendre la science':'Science')+'</small></button>'+
+        '<button type="button" data-home-action="world"><i>⌖</i><span>WORLD 3D</span><small>'+(locale==='fr'?'Explorer':'Explore')+'</small></button>'+
+      '</div>'+
+    '</section>'+
+    '<article class="home-access-card '+(plus?'active':'')+'">'+
+      '<div><span>'+ (plus?'WORLD+ · ACTIF':connected?'CONTINUITÉ':'ACCÈS') +'</span><strong>'+ (plus?(locale==='fr'?'Votre suivi continue.':'Your follow-up continues.'):connected?'World+ · '+WORLD_PLUS_PRICE_EUR+' €/'+(locale==='fr'?'mois':'month'):(locale==='fr'?'Discovery · gratuit':'Discovery · free')) +'</strong></div>'+
+      '<p>'+ (plus?(locale==='fr'?'Programme, progression et préparation du prochain checkpoint restent actifs.':'Programme, progress and next-checkpoint preparation stay active.'):connected?(locale==='fr'?'Prolongez la trajectoire entre deux checkpoints si vous souhaitez poursuivre le suivi.':'Continue your trajectory between checkpoints if you want ongoing follow-up.'):(locale==='fr'?'Explorez librement. La personnalisation commence après votre bilan.':'Explore freely. Personalisation starts after your assessment.')) +'</p>'+
+      '<button type="button" data-home-action="'+(plus?'pulse':connected?'world-plus':'assessment')+'">'+(plus?'PULSE':connected?(locale==='fr'?'VOIR WORLD+':'VIEW WORLD+'):(locale==='fr'?'COMMENT ÇA MARCHE':'HOW IT WORKS'))+'</button>'+
+    '</article>'+
+  '</aside>';
+}
+function bindWorldHomeActions(){
+  if(!worldHomeBody)return;
+  worldHomeBody.querySelectorAll('[data-home-action]').forEach(btn=>btn.addEventListener('click',()=>{
+    const action=btn.dataset.homeAction;
+    if(action==='world'){closeWorldHome();return}
+    if(action==='assessment'){location.href=worldCommercialContact('assessment');return}
+    if(action==='world-plus'){closeWorldHome();showWorldAccess();return}
+    if(action==='pulse'){location.href='/pulse/';return}
+    if(action==='results'){closeWorldHome();showHealthOverview();return}
+    if(action==='trajectory'){closeWorldHome();showJourneyPanel();return}
+    if(action==='twin'){closeWorldHome();fastTravel('twin');return}
+    if(action==='fitness'){closeWorldHome();fastTravel('rehab');return}
+    if(action==='library'){closeWorldHome();fastTravel('library');return}
+    if(action==='continue'){
+      const id=trajectoryFocusKey();
+      closeWorldHome();
+      if(id)fastTravel('rehab');else fastTravel('twin');
+    }
+  }));
+}
+function refreshWorldHome(){
+  if(!worldHome?.classList.contains('open'))return;
+  worldHomeBody.innerHTML=worldHomeHtml();bindWorldHomeActions();
+  const tier=worldAccessTier();
+  if(worldHomeAccess)worldHomeAccess.textContent=tier==='plus'?'WORLD+':tier==='personal'?'PERSONAL':'DISCOVERY';
+  if(worldHomeTitle)worldHomeTitle.textContent=locale==='fr'?'Aujourd’hui':'Today';
+}
+function showWorldHome(){
+  if(!worldEntryComplete)return;
+  closePanel();closeWorldMenu();
+  worldHomeBody.innerHTML=worldHomeHtml();bindWorldHomeActions();
+  const tier=worldAccessTier();
+  if(worldHomeAccess)worldHomeAccess.textContent=tier==='plus'?'WORLD+':tier==='personal'?'PERSONAL':'DISCOVERY';
+  if(worldHomeTitle)worldHomeTitle.textContent=locale==='fr'?'Aujourd’hui':'Today';
+  worldHome.classList.add('open');worldHome.setAttribute('aria-hidden','false');
+  document.body.classList.add('world-home-open');velocity.set(0,0,0);keys.clear();syncUiOpen();
+}
+function closeWorldHome(){
+  if(!worldHome)return;
+  worldHome.classList.remove('open');worldHome.setAttribute('aria-hidden','true');
+  document.body.classList.remove('world-home-open');syncUiOpen();
+}
+
 function worldAccessHtml(){
   const tier=worldAccessTier(),connected=tier!=='discovery',plus=tier==='plus';
   const checkpoint=connected?trajectoryCheckpointLabel(personalTrajectory):(locale==='fr'?'Après votre bilan':'After your assessment');
@@ -4888,8 +5000,8 @@ function ingestTrajectory(input){
   personalTrajectory=cleanTrajectory(input);
   try{if(personalTrajectory)sessionStorage.setItem(TRAJECTORY_SESSION_KEY,JSON.stringify(personalTrajectory));else sessionStorage.removeItem(TRAJECTORY_SESSION_KEY)}catch{}
   document.body.classList.toggle('trajectory-connected',!!personalTrajectory);
-  updateJourneyUI?.();updateHealthHUD?.();updateArenaTrajectoryVisuals?.();updateCommercialUI?.();
-  const today=$('#hud-today');if(today)today.textContent=personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||copy[locale].today):copy[locale].today;
+  updateJourneyUI?.();updateHealthHUD?.();updateArenaTrajectoryVisuals?.();updateCommercialUI?.();refreshWorldHome?.();
+  const today=$('#hud-today');if(today)today.textContent=personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||copy[locale].today):(locale==='fr'?'AUJOURD’HUI · OUVRIR MY KŌMØ':'TODAY · OPEN MY KŌMØ');
   window.dispatchEvent(new CustomEvent('komo:trajectory-updated',{detail:personalTrajectory}));
   return personalTrajectory;
 }
@@ -5370,13 +5482,13 @@ if(introAvatarOpen)introAvatarOpen.addEventListener('click',()=>showAvatarStudio
 applyAvatarConfig();
 
 function syncUiOpen(){
-  document.body.classList.toggle('ui-open',worldMenu.classList.contains('open')||panel.classList.contains('open'));
+  document.body.classList.toggle('ui-open',worldMenu.classList.contains('open')||panel.classList.contains('open')||worldHome?.classList.contains('open'));
 }
 function closeWorldMenu(){
   worldMenu.classList.remove('open');worldMenu.setAttribute('aria-hidden','true');syncUiOpen();
 }
 function openWorldMenu(){
-  closePanel();worldMenu.classList.add('open');worldMenu.setAttribute('aria-hidden','false');velocity.set(0,0,0);syncUiOpen();
+  closeWorldHome();closePanel();worldMenu.classList.add('open');worldMenu.setAttribute('aria-hidden','false');velocity.set(0,0,0);syncUiOpen();
 }
 function toggleWorldMenu(){worldMenu.classList.contains('open')?closeWorldMenu():openWorldMenu()}
 function setCameraMode(){
@@ -5505,7 +5617,7 @@ setGuideEnabled(true);
 function fastTravel(id){
   const p=travelPoints[id];if(!p)return;
   setCameraMode('first');
-  closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
+  closeWorldHome();closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
   setTimeout(()=>{
     setMode(p.mode);playerLevel=p.level;player.set(p.x,p.y,p.z);yaw=targetYaw=p.yaw;pitch=targetPitch=-.035;syncPlayerElevation();updateLocation();if(id==='upper')completeJourney('upper');else if(['twin','rehab','arena','life','library'].includes(id))completeJourney(id);
     setTimeout(()=>travelFade.classList.remove('active'),110);
@@ -5560,6 +5672,7 @@ function closePanel(){
   panel.classList.remove('open');panel.setAttribute('aria-hidden','true');panelActions.innerHTML='';syncUiOpen();
 }
 function openPanel(kicker,title,html,actions=[]){
+  closeWorldHome();
   if(typeof stopNpcMissionTimer==='function')stopNpcMissionTimer();
   delete panel.dataset.npcMission;
   panelKicker.textContent=kicker;panelTitle.textContent=title;panelBody.innerHTML=html;panelActions.innerHTML='';
@@ -6402,7 +6515,7 @@ const AUTO_RUN_BOOST=7.15;
 function updateMovement(dt){
   joyX+= (joyTargetX-joyX)*(1-Math.exp(-18*dt));
   joyY+= (joyTargetY-joyY)*(1-Math.exp(-18*dt));
-  if(worldMenu.classList.contains('open')||panel.classList.contains('open')||!intro.classList.contains('hidden')){
+  if(worldMenu.classList.contains('open')||panel.classList.contains('open')||worldHome?.classList.contains('open')||!intro.classList.contains('hidden')){
     velocity.lerp(new THREE.Vector3(),1-Math.exp(-16*dt));return;
   }
   let x=0,z=0;
@@ -6717,11 +6830,12 @@ function updateTwinScan(now){
 window.addEventListener('keydown',e=>{
   const movement=['forward','back','left','right','sprint'].some(a=>keyHas(a,e.code));
   if(movement){keys.add(e.code);e.preventDefault()}
-  if(keyHas('action',e.code)&&!worldMenu.classList.contains('open')&&!panel.classList.contains('open')){triggerAction();e.preventDefault()}
-  if(keyHas('menu',e.code)&&!panel.classList.contains('open')){toggleWorldMenu();e.preventDefault()}
-  if(keyHas('camera',e.code)&&!panel.classList.contains('open')){toggleCamera();e.preventDefault()}
-  if(keyHas('guide',e.code)&&!panel.classList.contains('open')){toggleGuide();e.preventDefault()}
-  if(e.code==='Escape'){if(worldMenu.classList.contains('open'))closeWorldMenu();else if(panel.classList.contains('open'))closePanel();else if(mode!=='world')returnToHall()}
+  const homeOpen=worldHome?.classList.contains('open');
+  if(keyHas('action',e.code)&&!worldMenu.classList.contains('open')&&!panel.classList.contains('open')&&!homeOpen){triggerAction();e.preventDefault()}
+  if(keyHas('menu',e.code)&&!panel.classList.contains('open')&&!homeOpen){toggleWorldMenu();e.preventDefault()}
+  if(keyHas('camera',e.code)&&!panel.classList.contains('open')&&!homeOpen){toggleCamera();e.preventDefault()}
+  if(keyHas('guide',e.code)&&!panel.classList.contains('open')&&!homeOpen){toggleGuide();e.preventDefault()}
+  if(e.code==='Escape'){if(homeOpen)closeWorldHome();else if(worldMenu.classList.contains('open'))closeWorldMenu();else if(panel.classList.contains('open'))closePanel();else if(mode!=='world')returnToHall()}
 });
 window.addEventListener('keyup',e=>keys.delete(e.code));
 window.addEventListener('blur',()=>keys.clear());
@@ -6778,6 +6892,7 @@ function enterWorldAfterAuth(detail={}){
   intro.classList.add('hidden');
   document.body.classList.remove('world-intro-active');
   targetYaw=yaw;targetPitch=pitch;completeJourney('arrival');
+  setTimeout(()=>showWorldHome(),50);
   const guestMode=String(detail.mode||'').startsWith('guest');
   const mode=guestMode?(locale==='fr'?'Invité':'Guest'):'Pulse';
   notify((locale==='fr'?'Bienvenue dans KŌMØ World · ':'Welcome to KŌMØ World · ')+mode);
@@ -6851,8 +6966,11 @@ $('#intro-enter').addEventListener('click',()=>{
 $('#panel-close').addEventListener('click',closePanel);
 worldMenuToggle.addEventListener('click',toggleWorldMenu);
 worldMenuClose.addEventListener('click',closeWorldMenu);
+worldHomeClose?.addEventListener('click',closeWorldHome);
+worldHomeToggle?.addEventListener('click',showWorldHome);
 resultsToggle?.addEventListener('click',showHealthOverview);
 campusToggle?.addEventListener('click',showCampusMap);
+homeToggle?.addEventListener('click',showWorldHome);
 journeyToggle?.addEventListener('click',()=>{closeWorldMenu();showJourneyPanel()});
 membershipToggle?.addEventListener('click',showWorldAccess);
 worldNextStep?.addEventListener('click',()=>{if(personalTrajectory)showJourneyPanel();else showWorldAccess()});
@@ -6869,7 +6987,7 @@ resetPosition.addEventListener('click',()=>fastTravel('arrival'));
 function applyLocale(){
   document.documentElement.lang=locale;
   const c=copy[locale];
-  $('#hud-today').textContent=personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||c.today):c.today;
+  $('#hud-today').textContent=personalTrajectory?(personalTrajectory.current_action||personalTrajectory.priority||c.today):(locale==='fr'?'AUJOURD’HUI · OUVRIR MY KŌMØ':'TODAY · OPEN MY KŌMØ');
   $('.intro-kicker').textContent=c.introKicker;
   $('#intro-title').innerHTML=`<span>${c.intro1}</span><em>${c.intro2}</em>`;
   intro.querySelector('p').textContent=c.introBody;
@@ -6894,7 +7012,7 @@ function applyLocale(){
     controlHints[4].innerHTML='<kbd>'+keybinds.guide.map(keyLabel).join('/')+'</kbd> GUIDE';
     controlHints[5].innerHTML='<kbd>'+keybinds.menu.map(keyLabel).join('/')+'</kbd> MENU';
   }
-  updateJourneyUI();updateHealthHUD();updateCommercialUI();
+  updateJourneyUI();updateHealthHUD();updateCommercialUI();refreshWorldHome();
   if(currentInteraction){interactionTitle.textContent=currentInteraction.title();interactionCopy.textContent=currentInteraction.desc()}
   if(panel.classList.contains('open')){
     if(mode==='twin')showTwin();else if(mode==='rehab')showRehab();else if(mode==='arena')showArena();
@@ -7304,7 +7422,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.8.0-clarity-commerce',
+  version:'8.9.0-personal-home',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),

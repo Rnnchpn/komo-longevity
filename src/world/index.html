@@ -4,11 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#18271f" />
-  <meta name="komo-world-version" content="8.8.0-clarity-commerce" />
+  <meta name="komo-world-version" content="8.9.0-personal-home" />
   <meta name="color-scheme" content="dark" />
   <title>KŌMØ World · Longevity in Motion</title>
   <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
-  <link rel="stylesheet" href="./world-v1.css?v=8.8.0-clarity-commerce" />
+  <link rel="stylesheet" href="./world-v1.css?v=8.9.0-personal-home" />
   <link rel="modulepreload" href="./vendor/three.module.js" />
 </head>
 <body>
@@ -28,10 +28,10 @@
       <div><span>MOTION</span><b id="hud-motion">—</b></div>
       <div><span>MOTION AGE</span><b id="hud-age">—</b></div>
     </div>
-    <div class="world-today">
+    <button id="world-home-toggle" class="world-today" type="button" aria-label="Ouvrir l’accueil KŌMØ">
       <i></i>
-      <span id="hud-today">AUJOURD'HUI · EXPLORER VOTRE TWIN</span>
-    </div>
+      <span id="hud-today">AUJOURD'HUI · OUVRIR MY KŌMØ</span>
+    </button>
     <a class="hud-link" href="/pulse/">PULSE</a>
     <a class="hud-link hud-life" href="https://life.komolongevity.com/">LIFE</a>
     <button class="hud-button" id="world-menu-toggle" type="button" aria-label="Ouvrir le menu KŌMØ World">MENU</button>
@@ -100,6 +100,22 @@
     </div>
   </section>
 
+  <section id="world-home" class="world-home" aria-hidden="true" aria-label="Accueil KŌMØ World">
+    <div class="world-home-shell">
+      <header class="world-home-head">
+        <div>
+          <span>MY KŌMØ</span>
+          <strong id="world-home-title">Aujourd’hui</strong>
+        </div>
+        <div class="world-home-head-actions">
+          <span id="world-home-access" class="world-home-access">DISCOVERY</span>
+          <button id="world-home-close" type="button">ENTRER DANS WORLD <em>›</em></button>
+        </div>
+      </header>
+      <div id="world-home-body" class="world-home-body"></div>
+    </div>
+  </section>
+
   <aside id="interaction" class="interaction-card" aria-live="polite">
     <div class="interaction-key">E</div>
     <div>
@@ -159,6 +175,7 @@
     </section>
 
     <div class="world-menu-primary">
+      <button id="home-toggle" class="primary-home" type="button" data-screen="home"><i>⌂</i><span><b>ACCUEIL</b><small>Aujourd’hui · action · progression</small></span><em>›</em></button>
       <button id="journey-toggle" class="primary-trajectory" type="button" data-screen="journey"><i>↗</i><span><b>MA TRAJECTOIRE</b><small>Priorité · action · prochain point</small></span><em>›</em></button>
       <button id="results-toggle" type="button" data-screen="results"><i>◉</i><span><b>MES RÉSULTATS</b><small>Motion · domaines · évolution</small></span><em>›</em></button>
       <button id="membership-toggle" class="primary-membership" type="button" data-screen="membership"><i>＋</i><span><b>CONTINUER AVEC KŌMØ</b><small>World+ · suivi continu · 24 €/mois</small></span><em>›</em></button>
@@ -260,7 +277,7 @@
     },8000);
   </script>
   <script type="module">
-    import('./world-v1.js?v=8.8.0-clarity-commerce')
+    import('./world-v1.js?v=8.9.0-personal-home')
       .catch(function(err){window.__KOMO_REPORT_BOOT_ERROR('module-import',err)});
   </script>
 </body>
