@@ -21,7 +21,8 @@ const retiredStyles=[
   'iphone-app-lock-v1.css',
   'pulse-iphone-stable-v1.css',
   'patient-mobile-v1.css',
-  'pulse-canonical-theme-v14.css'
+  'pulse-canonical-theme-v14.css',
+  'auth-premium-v3.css'
 ];
 
 const escapeRegExp=value=>value.replace(/[.*+?^{}()|[\]\\]/g,'\\$&');
