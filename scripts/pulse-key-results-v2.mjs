@@ -57,7 +57,6 @@ const checks=[
 for(const [label,ok] of checks) console.log(`[pulse-key-results-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok)) process.exit(1);
 console.log('[pulse-key-results-v2] PASS · KEY views + Apple Health ZIP/XML lazy import in canonical KŌMØ operator');
-process.exit(0);
 
 // My KŌMØ is forced into a single, event-driven route owner after every KEY build.
 await import('./pulse-my-komo-stability-v4.mjs');
@@ -69,15 +68,3 @@ await import('./pulse-home-key-position-v1.mjs');
 await import('./pulse-key-pdf-report-v1.mjs');
 // iPhone is the final presentation owner: fixed viewport, safe areas and locked zoom.
 await import('./pulse-iphone-app-lock-v1.mjs');
-// Authentication is the final session boundary: no login resurfacing or mobile layout jumps.
-await import('./pulse-auth-stability-v1.mjs');
-// Dark Luxe establishes the shared black visual language.
-await import('./pulse-dark-luxe-v1.mjs');
-// Final material hierarchy: graphite canvas with porcelain, forest and warm focal surfaces.
-await import('./pulse-dark-luxe-polish-v2.mjs');
-// Real-device iPhone QA: compact header, edge-to-edge content, aligned copy and compact dock.
-await import('./pulse-iphone-density-v1.mjs');
-// Desktop web login is a single page-specific owner, applied after every shared visual layer.
-await import('./pulse-auth-web-v1.mjs');
-// Commercial Home is the final route owner: one cockpit for Motion, Age, KEY, next action, Clinical and trajectory.
-await import('./pulse-home-web-v1.mjs');
