@@ -62,9 +62,3 @@ console.log('[pulse-key-results-v2] PASS · KEY views + Apple Health ZIP/XML laz
 await import('./pulse-my-komo-stability-v4.mjs');
 // Fine-detail styling is visual-only and always applied after the stable owner.
 await import('./pulse-premium-detail-v1.mjs');
-// Home hierarchy helper remains available for the iPhone KEY-first presentation.
-await import('./pulse-home-key-position-v1.mjs');
-// Official PDF: append a consent-gated longitudinal KEY page without touching score calculation.
-await import('./pulse-key-pdf-report-v1.mjs');
-// iPhone is the final presentation owner: fixed viewport, safe areas and locked zoom.
-await import('./pulse-iphone-app-lock-v1.mjs');
