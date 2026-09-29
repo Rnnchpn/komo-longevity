@@ -4,6 +4,10 @@ import { TwinCore } from './v04/twin-core.js';
 const $=(s)=>document.querySelector(s);
 const canvas=$('#world-canvas');
 const loader=$('#world-loader');
+// V7.6.1 boot diagnostics: capture first client-side startup failure for support without blocking UI.
+window.__KOMO_WORLD_BOOT_ERRORS__=[];
+window.addEventListener('error',e=>{window.__KOMO_WORLD_BOOT_ERRORS__.push(String(e?.error?.stack||e?.message||'unknown error'))});
+window.addEventListener('unhandledrejection',e=>{window.__KOMO_WORLD_BOOT_ERRORS__.push(String(e?.reason?.stack||e?.reason||'unhandled rejection'))});
 const intro=$('#intro');
 const introPulse=$('#intro-pulse');
 const introGuestName=$('#intro-guest-name');
@@ -731,12 +735,15 @@ function mesh(parent,geometry,material,x=0,y=0,z=0,{cast=false,receive=true}={})
 function box(parent,w,h,d,material,x,y,z,opt){return mesh(parent,new THREE.BoxGeometry(w,h,d),material,x,y,z,opt)}
 function cyl(parent,rTop,rBot,h,material,x,y,z,segments=18,opt){return mesh(parent,new THREE.CylinderGeometry(rTop,rBot,h,segments),material,x,y,z,opt)}
 function panelTexture(title,subtitle,{dark=true,accent='#d5b477',w=1400,h=360,titleSize=90}={}){
-  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  // V7.6.1 startup safety: identical logical canvas, 75% less texture memory on iPhone/low-power.
+  const textureScale=visualLowPower?.50:1;
+  const c=document.createElement('canvas');c.width=Math.round(w*textureScale);c.height=Math.round(h*textureScale);const x=c.getContext('2d');
+  x.scale(textureScale,textureScale);
   x.fillStyle=dark?'#1b3027':'#eee5d8';x.fillRect(0,0,w,h);
   x.strokeStyle=dark?'rgba(218,187,136,.34)':'rgba(42,64,51,.16)';x.lineWidth=3;x.strokeRect(4,4,w-8,h-8);
   x.textAlign='center';x.textBaseline='middle';x.fillStyle=dark?'#f1eadf':'#20352a';x.font=`500 ${titleSize}px Georgia`;x.fillText(title,w/2,h*.42);
   x.fillStyle=dark?accent:'#7c674e';x.font='650 27px Arial';x.fillText(subtitle.toUpperCase(),w/2,h*.72);
-  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());return t;
+  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=Math.min(visualLowPower?2:4,renderer.capabilities.getMaxAnisotropy());return t;
 }
 function plaque(parent,title,subtitle,w,h,x,y,z,{rotY=0,dark=true,titleSize=90}={}){
   const tx=panelTexture(title,subtitle,{dark,titleSize});const mat=new THREE.MeshBasicMaterial({map:tx,side:THREE.DoubleSide,transparent:false});
@@ -2032,76 +2039,91 @@ if(!iphoneVisualReference){
   }
 }
 
-// V7.6 KŌMØ Yachting Services — the Marina is now a service hub, not only scenery.
-const marinaServicesV76=new THREE.Group();marinaServicesV76.name='KOMO_YACHTING_SERVICES_V76';marinaV68.add(marinaServicesV76);
-const yachtingWarmV76=new THREE.MeshBasicMaterial({color:0xe4c38b,transparent:true,opacity:lowPower?.24:.36,depthWrite:false});
-const yachtingCoolV76=new THREE.MeshBasicMaterial({color:0xc7d9d2,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
-
-const yachtingConciergeV76=new THREE.Group();yachtingConciergeV76.name='KOMO_YACHTING_CONCIERGE_V76';yachtingConciergeV76.position.set(49,0,43);marinaServicesV76.add(yachtingConciergeV76);
-box(yachtingConciergeV76,5.6,.34,1.18,MAT.walnut,-1.1,.50,-3.15,{cast:true});
-box(yachtingConciergeV76,5.05,.055,.95,MAT.brass,-1.1,.71,-3.15,{cast:false,receive:false});
-plaque(yachtingConciergeV76,'KŌMØ YACHTING','CONCIERGE · ONBOARD · RIVIERA',5.7,.82,-5.95,4.05,-5.80,{rotY:Math.PI/2,dark:true,titleSize:45});
-box(yachtingConciergeV76,8.8,.12,.95,MAT.blackened,1.7,1.62,5.55,{cast:true});
-plaque(yachtingConciergeV76,'SERVICES','MOTION · LONGEVITY · RECOVERY · SKIN · PERFORMANCE · RETREATS',7.8,.62,1.7,2.28,5.02,{dark:true,titleSize:34});
-
-const motionDeckV76=new THREE.Group();motionDeckV76.name='KOMO_MOTION_DECK_V76';motionDeckV76.position.set(50.0,0,56.0);marinaServicesV76.add(motionDeckV76);
-box(motionDeckV76,13.6,.22,8.4,MAT.travertine,0,.13,0,{cast:true});
-[-6.35,6.35].forEach(x=>[-3.55,3.55].forEach(z=>box(motionDeckV76,.18,3.85,.18,MAT.blackened,x,2.05,z,{cast:true})));
-for(let x=-5.8;x<=5.8;x+=1.45)box(motionDeckV76,.10,.14,7.8,MAT.walnut,x,4.02,0,{cast:true});
-plaque(motionDeckV76,'MOTION DECK','ASSESS · MOVE · UNDERSTAND',7.0,.82,0,3.12,-4.05,{dark:true,titleSize:46});
-box(motionDeckV76,8.7,.035,1.10,yachtingCoolV76,0,.29,.25,{cast:false,receive:false});
-[-3.0,0,3.0].forEach(x=>box(motionDeckV76,.045,.025,6.8,MAT.brass,x,.32,.25,{cast:false,receive:false}));
-const motionCaseV76=new THREE.Group();motionCaseV76.name='KOMO_CASE_MARINA_V76';motionCaseV76.position.set(-4.65,.34,2.28);motionDeckV76.add(motionCaseV76);
-box(motionCaseV76,2.15,.22,1.28,MAT.leatherDark,0,.13,0,{cast:true});
-box(motionCaseV76,2.02,.060,1.14,MAT.brass,0,.28,0,{cast:false,receive:false});
-plaque(motionCaseV76,'KŌMØ CASE','6 SENSORS',1.85,.38,0,.82,.67,{dark:true,titleSize:24});
-cyl(motionDeckV76,.045,.065,2.35,MAT.blackened,4.25,1.38,1.95,8,{cast:false});
-[-.55,.55].forEach(dx=>box(motionDeckV76,.88,1.12,.065,MAT.blackened,4.25+dx,2.55,1.95,{cast:true}));
-box(motionDeckV76,1.72,.84,.035,campusGlassV64,4.25,2.55,1.90,{cast:false,receive:false});
-plaque(motionDeckV76,'30 MIN','MOTION ASSESSMENT',3.25,.60,0,1.15,3.62,{dark:false,titleSize:40});
-
-const recoveryLoungeV76=new THREE.Group();recoveryLoungeV76.name='KOMO_RECOVERY_LOUNGE_V76';recoveryLoungeV76.position.set(50.0,0,67.0);marinaServicesV76.add(recoveryLoungeV76);
-box(recoveryLoungeV76,13.8,.22,8.2,MAT.travertine,0,.12,0,{cast:true});
-[-6.4,6.4].forEach(x=>[-3.45,3.45].forEach(z=>box(recoveryLoungeV76,.16,3.65,.16,MAT.blackened,x,1.95,z,{cast:true})));
-for(let x=-5.8;x<=5.8;x+=1.30)box(recoveryLoungeV76,.095,.13,7.55,MAT.walnut,x,3.74,0,{cast:true});
-plaque(recoveryLoungeV76,'RECOVERY LOUNGE','HYDRATION · RESET · IV',6.7,.80,0,2.95,-3.90,{dark:true,titleSize:45});
-[-3.4,0,3.4].forEach((x,i)=>{
-  box(recoveryLoungeV76,2.45,.30,1.15,MAT.fabricLight,x,.38,.35,{cast:true});
-  box(recoveryLoungeV76,2.20,.14,.88,MAT.fabric,x,.62,.35,{cast:true});
-  if(i!==1){
-    cyl(recoveryLoungeV76,.028,.038,2.15,MAT.brass,x+1.05,1.38,-.72,8,{cast:false});
-    box(recoveryLoungeV76,.38,.52,.035,yachtingCoolV76,x+1.05,2.20,-.72,{cast:false,receive:false});
+// V7.6.1 Startup Safe Marina — build commercial scenery after the core World has booted.
+let marinaServicesV76=null;
+let marinaServicesReadyV761=false;
+function buildMarinaServicesV761(){
+  if(marinaServicesReadyV761)return;
+  marinaServicesReadyV761=true;
+  try{
+    marinaServicesV76=new THREE.Group();marinaServicesV76.name='KOMO_YACHTING_SERVICES_V76';marinaV68.add(marinaServicesV76);
+    const yachtingWarmV76=new THREE.MeshBasicMaterial({color:0xe4c38b,transparent:true,opacity:lowPower?.24:.36,depthWrite:false});
+    const yachtingCoolV76=new THREE.MeshBasicMaterial({color:0xc7d9d2,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
+    
+    const yachtingConciergeV76=new THREE.Group();yachtingConciergeV76.name='KOMO_YACHTING_CONCIERGE_V76';yachtingConciergeV76.position.set(49,0,43);marinaServicesV76.add(yachtingConciergeV76);
+    box(yachtingConciergeV76,5.6,.34,1.18,MAT.walnut,-1.1,.50,-3.15,{cast:true});
+    box(yachtingConciergeV76,5.05,.055,.95,MAT.brass,-1.1,.71,-3.15,{cast:false,receive:false});
+    plaque(yachtingConciergeV76,'KŌMØ YACHTING','CONCIERGE · ONBOARD · RIVIERA',5.7,.82,-5.95,4.05,-5.80,{rotY:Math.PI/2,dark:true,titleSize:45});
+    box(yachtingConciergeV76,8.8,.12,.95,MAT.blackened,1.7,1.62,5.55,{cast:true});
+    plaque(yachtingConciergeV76,'SERVICES','MOTION · LONGEVITY · RECOVERY · SKIN · PERFORMANCE · RETREATS',7.8,.62,1.7,2.28,5.02,{dark:true,titleSize:34});
+    
+    const motionDeckV76=new THREE.Group();motionDeckV76.name='KOMO_MOTION_DECK_V76';motionDeckV76.position.set(50.0,0,56.0);marinaServicesV76.add(motionDeckV76);
+    box(motionDeckV76,13.6,.22,8.4,MAT.travertine,0,.13,0,{cast:true});
+    [-6.35,6.35].forEach(x=>[-3.55,3.55].forEach(z=>box(motionDeckV76,.18,3.85,.18,MAT.blackened,x,2.05,z,{cast:true})));
+    for(let x=-5.8;x<=5.8;x+=1.45)box(motionDeckV76,.10,.14,7.8,MAT.walnut,x,4.02,0,{cast:true});
+    plaque(motionDeckV76,'MOTION DECK','ASSESS · MOVE · UNDERSTAND',7.0,.82,0,3.12,-4.05,{dark:true,titleSize:46});
+    box(motionDeckV76,8.7,.035,1.10,yachtingCoolV76,0,.29,.25,{cast:false,receive:false});
+    [-3.0,0,3.0].forEach(x=>box(motionDeckV76,.045,.025,6.8,MAT.brass,x,.32,.25,{cast:false,receive:false}));
+    const motionCaseV76=new THREE.Group();motionCaseV76.name='KOMO_CASE_MARINA_V76';motionCaseV76.position.set(-4.65,.34,2.28);motionDeckV76.add(motionCaseV76);
+    box(motionCaseV76,2.15,.22,1.28,MAT.leatherDark,0,.13,0,{cast:true});
+    box(motionCaseV76,2.02,.060,1.14,MAT.brass,0,.28,0,{cast:false,receive:false});
+    plaque(motionCaseV76,'KŌMØ CASE','6 SENSORS',1.85,.38,0,.82,.67,{dark:true,titleSize:24});
+    cyl(motionDeckV76,.045,.065,2.35,MAT.blackened,4.25,1.38,1.95,8,{cast:false});
+    [-.55,.55].forEach(dx=>box(motionDeckV76,.88,1.12,.065,MAT.blackened,4.25+dx,2.55,1.95,{cast:true}));
+    box(motionDeckV76,1.72,.84,.035,campusGlassV64,4.25,2.55,1.90,{cast:false,receive:false});
+    plaque(motionDeckV76,'30 MIN','MOTION ASSESSMENT',3.25,.60,0,1.15,3.62,{dark:false,titleSize:40});
+    
+    const recoveryLoungeV76=new THREE.Group();recoveryLoungeV76.name='KOMO_RECOVERY_LOUNGE_V76';recoveryLoungeV76.position.set(50.0,0,67.0);marinaServicesV76.add(recoveryLoungeV76);
+    box(recoveryLoungeV76,13.8,.22,8.2,MAT.travertine,0,.12,0,{cast:true});
+    [-6.4,6.4].forEach(x=>[-3.45,3.45].forEach(z=>box(recoveryLoungeV76,.16,3.65,.16,MAT.blackened,x,1.95,z,{cast:true})));
+    for(let x=-5.8;x<=5.8;x+=1.30)box(recoveryLoungeV76,.095,.13,7.55,MAT.walnut,x,3.74,0,{cast:true});
+    plaque(recoveryLoungeV76,'RECOVERY LOUNGE','HYDRATION · RESET · IV',6.7,.80,0,2.95,-3.90,{dark:true,titleSize:45});
+    [-3.4,0,3.4].forEach((x,i)=>{
+      box(recoveryLoungeV76,2.45,.30,1.15,MAT.fabricLight,x,.38,.35,{cast:true});
+      box(recoveryLoungeV76,2.20,.14,.88,MAT.fabric,x,.62,.35,{cast:true});
+      if(i!==1){
+        cyl(recoveryLoungeV76,.028,.038,2.15,MAT.brass,x+1.05,1.38,-.72,8,{cast:false});
+        box(recoveryLoungeV76,.38,.52,.035,yachtingCoolV76,x+1.05,2.20,-.72,{cast:false,receive:false});
+      }
+    });
+    box(recoveryLoungeV76,4.4,.36,1.08,MAT.walnut,0,.45,2.85,{cast:true});
+    plaque(recoveryLoungeV76,'TRAVEL RESET','RECOVER · HYDRATE',3.3,.52,0,1.10,3.35,{dark:false,titleSize:31});
+    
+    const longevitySalonV76=new THREE.Group();longevitySalonV76.name='KOMO_LONGEVITY_SALON_V76';longevitySalonV76.position.set(49.5,0,77.5);marinaServicesV76.add(longevitySalonV76);
+    box(longevitySalonV76,5.8,.18,3.5,MAT.walnut,-3.1,.22,-1.15,{cast:true});
+    box(longevitySalonV76,5.35,.06,3.05,MAT.fabricLight,-3.1,.38,-1.15,{cast:false});
+    plaque(longevitySalonV76,'LONGEVITY SALON','CONSULT · SLEEP · NUTRITION · TRAJECTORY',6.4,.72,-2.8,3.58,4.98,{dark:true,titleSize:38});
+    box(longevitySalonV76,5.6,.18,3.5,MAT.travertine,3.35,.22,-1.15,{cast:true});
+    box(longevitySalonV76,4.85,.035,2.72,campusGlassV64,3.35,.36,-1.15,{cast:false,receive:false});
+    plaque(longevitySalonV76,'SKIN + AESTHETICS','ANALYSE · GLOW · RECOVERY',5.4,.72,3.0,3.58,4.98,{dark:true,titleSize:36});
+    
+    const marinaGalleryV76=new THREE.Group();marinaGalleryV76.name='KOMO_YACHTING_GALLERY_V76';marinaServicesV76.add(marinaGalleryV76);
+    [
+      ['MOTION','ASSESSMENT',49.5],['LONGEVITY','CONSULTATION',55.4],['RECOVERY','IV · HYDRATION',61.3],
+      ['SKIN','AESTHETICS',67.2],['PERFORMANCE','MOBILITY',73.1],['SIGNATURE','RETREAT · CONCIERGE',79.0]
+    ].forEach(([title,sub,z],i)=>{
+      const g=new THREE.Group();g.position.set(42.1,0,z);g.rotation.y=Math.PI/2;marinaGalleryV76.add(g);
+      box(g,3.95,.18,1.10,MAT.travertine,0,.10,0,{cast:true});
+      box(g,.10,3.25,.10,MAT.brass,-1.70,1.72,0,{cast:false});box(g,.10,3.25,.10,MAT.brass,1.70,1.72,0,{cast:false});
+      box(g,3.70,.025,.055,i%2?yachtingWarmV76:yachtingCoolV76,0,3.20,.08,{cast:false,receive:false});
+      plaque(g,title,sub,3.35,.64,0,2.28,.10,{dark:true,titleSize:title.length>9?30:36});
+    });
+    
+    const dockGateV76=new THREE.Group();dockGateV76.name='KOMO_PRIVATE_DOCK_V76';dockGateV76.position.set(63.0,0,62.5);marinaServicesV76.add(dockGateV76);
+    [-1.65,1.65].forEach(z=>box(dockGateV76,.20,3.85,.20,MAT.travertine,0,2.00,z,{cast:true}));
+    box(dockGateV76,.95,.22,3.75,MAT.blackened,0,3.88,0,{cast:true});
+    box(dockGateV76,.055,3.20,3.20,yachtingWarmV76,-.10,2.10,0,{cast:false,receive:false});
+    plaque(dockGateV76,'ONBOARD','KŌMØ YACHTING SERVICES',3.0,.60,-.48,2.92,0,{rotY:Math.PI/2,dark:true,titleSize:35});
+    bannerTotem(marinaDetailV68,66.0,62.5,'PRIVATE DOCK','ONBOARD DELIVERY',Math.PI/2);
+    if(marinaServicesV76){
+      marinaServicesV76.traverse(o=>{if(o.isMesh&&!o.userData.dynamic){o.updateMatrix();o.matrixAutoUpdate=false}});
+    }
+  }catch(err){
+    marinaServicesReadyV761=false;
+    console.warn('[KŌMØ World] Marina V7.6 service scenery skipped; core World remains available.',err);
   }
-});
-box(recoveryLoungeV76,4.4,.36,1.08,MAT.walnut,0,.45,2.85,{cast:true});
-plaque(recoveryLoungeV76,'TRAVEL RESET','RECOVER · HYDRATE',3.3,.52,0,1.10,3.35,{dark:false,titleSize:31});
-
-const longevitySalonV76=new THREE.Group();longevitySalonV76.name='KOMO_LONGEVITY_SALON_V76';longevitySalonV76.position.set(49.5,0,77.5);marinaServicesV76.add(longevitySalonV76);
-box(longevitySalonV76,5.8,.18,3.5,MAT.walnut,-3.1,.22,-1.15,{cast:true});
-box(longevitySalonV76,5.35,.06,3.05,MAT.fabricLight,-3.1,.38,-1.15,{cast:false});
-plaque(longevitySalonV76,'LONGEVITY SALON','CONSULT · SLEEP · NUTRITION · TRAJECTORY',6.4,.72,-2.8,3.58,4.98,{dark:true,titleSize:38});
-box(longevitySalonV76,5.6,.18,3.5,MAT.travertine,3.35,.22,-1.15,{cast:true});
-box(longevitySalonV76,4.85,.035,2.72,campusGlassV64,3.35,.36,-1.15,{cast:false,receive:false});
-plaque(longevitySalonV76,'SKIN + AESTHETICS','ANALYSE · GLOW · RECOVERY',5.4,.72,3.0,3.58,4.98,{dark:true,titleSize:36});
-
-const marinaGalleryV76=new THREE.Group();marinaGalleryV76.name='KOMO_YACHTING_GALLERY_V76';marinaServicesV76.add(marinaGalleryV76);
-[
-  ['MOTION','ASSESSMENT',49.5],['LONGEVITY','CONSULTATION',55.4],['RECOVERY','IV · HYDRATION',61.3],
-  ['SKIN','AESTHETICS',67.2],['PERFORMANCE','MOBILITY',73.1],['SIGNATURE','RETREAT · CONCIERGE',79.0]
-].forEach(([title,sub,z],i)=>{
-  const g=new THREE.Group();g.position.set(42.1,0,z);g.rotation.y=Math.PI/2;marinaGalleryV76.add(g);
-  box(g,3.95,.18,1.10,MAT.travertine,0,.10,0,{cast:true});
-  box(g,.10,3.25,.10,MAT.brass,-1.70,1.72,0,{cast:false});box(g,.10,3.25,.10,MAT.brass,1.70,1.72,0,{cast:false});
-  box(g,3.70,.025,.055,i%2?yachtingWarmV76:yachtingCoolV76,0,3.20,.08,{cast:false,receive:false});
-  plaque(g,title,sub,3.35,.64,0,2.28,.10,{dark:true,titleSize:title.length>9?30:36});
-});
-
-const dockGateV76=new THREE.Group();dockGateV76.name='KOMO_PRIVATE_DOCK_V76';dockGateV76.position.set(63.0,0,62.5);marinaServicesV76.add(dockGateV76);
-[-1.65,1.65].forEach(z=>box(dockGateV76,.20,3.85,.20,MAT.travertine,0,2.00,z,{cast:true}));
-box(dockGateV76,.95,.22,3.75,MAT.blackened,0,3.88,0,{cast:true});
-box(dockGateV76,.055,3.20,3.20,yachtingWarmV76,-.10,2.10,0,{cast:false,receive:false});
-plaque(dockGateV76,'ONBOARD','KŌMØ YACHTING SERVICES',3.0,.60,-.48,2.92,0,{rotY:Math.PI/2,dark:true,titleSize:35});
-bannerTotem(marinaDetailV68,66.0,62.5,'PRIVATE DOCK','ONBOARD DELIVERY',Math.PI/2);
+}
+setTimeout(buildMarinaServicesV761,visualLowPower?900:450);
 
 // WEST — KŌMØ Retreat Villa moved closer and made architecturally larger.
 box(villaV68,43,.14,54,M.ground,-54.0,.03,68.5,{cast:false,receive:true});
@@ -3332,11 +3354,15 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'leo',functionLabel:'FITNESS COA
   makeNpc(npcRoot,{role:'staff',label:'Sacha',functionLabel:'BOARDING',x:48.0,y:0,z:42.0,outfit:'charcoal',speed:.20,phase:.64,route:[
     [48.0,0,42.0],[52.0,0,42.0],[56.0,0,45.5],[53.0,0,49.0],[47.0,0,47.0]
   ]});
-  makeNpc(npcRoot,{role:'staff',label:'Léonie',functionLabel:'YACHTING CONCIERGE',x:48.2,y:0,z:43.4,outfit:'ivory',body:'slim',hairStyle:'bob',scale:.96,speed:.14,phase:.11,task:'host',route:[[48.2,0,43.4],[50.5,0,43.2],[52.0,0,45.0],[49.5,0,46.2]]});
-  makeNpc(npcRoot,{role:'staff',label:'Maya',functionLabel:'MOTION SPECIALIST',x:49.0,y:0,z:56.0,outfit:'sage',body:'regular',hairStyle:'bun',scale:.97,speed:.16,phase:.28,task:'observe',route:[[49,0,56],[52,0,56],[54,0,58],[50,0,59],[47,0,57]]});
-  makeNpc(npcRoot,{role:'staff',label:'Nina',functionLabel:'RECOVERY HOST',x:48.5,y:0,z:66.8,outfit:'sand',body:'slim',hairStyle:'bob',scale:.94,speed:.12,phase:.45,task:'host',route:[[48.5,0,66.8],[51,0,66.5],[53,0,69],[49.5,0,70]]});
-  makeNpc(npcRoot,{role:'visitor',label:'Adrien',functionLabel:'MOTION GUEST',x:52.2,y:0,z:56.7,outfit:'navy',body:'broad',hairStyle:'short',scale:1.02,speed:.13,phase:.60,task:'observe',route:[[52.2,0,56.7],[54,0,57],[53,0,59],[50.5,0,58.5]]});
-  makeNpc(npcRoot,{role:'visitor',label:'Elena',functionLabel:'RECOVERY GUEST',x:52.6,y:0,z:67.2,outfit:'cream',body:'regular',hairStyle:'bun',scale:.95,speed:.10,phase:.73,task:'lounge',route:[[52.6,0,67.2],[53.8,0,68.2],[52.5,0,69.5],[51.0,0,68.5]]});
+  // V7.6.1 Marina service population: compact on iPhone, richer on desktop.
+  const marinaServicePopulationV761=[
+    {role:'staff',label:'Léonie',functionLabel:'YACHTING CONCIERGE',x:48.2,y:0,z:43.4,outfit:'ivory',body:'slim',hairStyle:'bob',scale:.96,speed:.14,phase:.11,task:'host',route:[[48.2,0,43.4],[50.5,0,43.2],[52.0,0,45.0],[49.5,0,46.2]]},
+    {role:'staff',label:'Maya',functionLabel:'MOTION SPECIALIST',x:49.0,y:0,z:56.0,outfit:'sage',body:'regular',hairStyle:'bun',scale:.97,speed:.16,phase:.28,task:'observe',route:[[49,0,56],[52,0,56],[54,0,58],[50,0,59],[47,0,57]]},
+    {role:'staff',label:'Nina',functionLabel:'RECOVERY HOST',x:48.5,y:0,z:66.8,outfit:'sand',body:'slim',hairStyle:'bob',scale:.94,speed:.12,phase:.45,task:'host',route:[[48.5,0,66.8],[51,0,66.5],[53,0,69],[49.5,0,70]]},
+    {role:'visitor',label:'Adrien',functionLabel:'MOTION GUEST',x:52.2,y:0,z:56.7,outfit:'navy',body:'broad',hairStyle:'short',scale:1.02,speed:.13,phase:.60,task:'observe',route:[[52.2,0,56.7],[54,0,57],[53,0,59],[50.5,0,58.5]]},
+    {role:'visitor',label:'Elena',functionLabel:'RECOVERY GUEST',x:52.6,y:0,z:67.2,outfit:'cream',body:'regular',hairStyle:'bun',scale:.95,speed:.10,phase:.73,task:'lounge',route:[[52.6,0,67.2],[53.8,0,68.2],[52.5,0,69.5],[51.0,0,68.5]]}
+  ];
+  marinaServicePopulationV761.slice(0,visualLowPower?3:5).forEach(p=>{try{makeNpc(npcRoot,p)}catch(err){console.warn('[KŌMØ World] Marina NPC skipped',p.label,err)}});
   makeNpc(npcRoot,{role:'staff',label:'Clara',functionLabel:'RETREAT HOST',x:-43.0,y:0,z:62.0,outfit:'sage',speed:.23,phase:.32,route:[
     [-43.0,0,62.0],[-48.0,0,59.0],[-54.0,0,57.0],[-61.0,0,59.0],[-60.0,0,68.0],[-49.0,0,69.0]
   ]});
@@ -6911,7 +6937,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.6.0-yachting-services',
+  version:'7.6.1-startup-safe',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
