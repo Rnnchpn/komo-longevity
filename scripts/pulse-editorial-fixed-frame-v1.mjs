@@ -47,6 +47,19 @@ for(const name of htmlFiles){
   await writeFile(path,html,'utf8');
 }
 
+// iOS Home runtime repair: pulse-bottom-nav-v6 injects its CSS after linked
+// stylesheets, so correct the generated runtime at the absolute end of the build.
+const dockPath=join(pulse,'pulse-bottom-nav-v6.js');
+try{
+  let dock=await readFile(dockPath,'utf8');
+  const from=`body.kpulse-app-mode.kpulse-home-mode #viewRoot,body.kpulse-app-mode.kpulse-home-mode .view-root{width:100%!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;padding:0 0 calc(76px + env(safe-area-inset-bottom))!important;overflow:hidden!important;overscroll-behavior:none!important;background:transparent!important}body.kpulse-app-mode.kpulse-home-mode [data-my-komo-home]{height:100%!important;min-height:0!important;overflow:hidden!important;background:transparent!important}`;
+  const to=`body.kpulse-app-mode.kpulse-home-mode #viewRoot,body.kpulse-app-mode.kpulse-home-mode .view-root{width:100%!important;max-width:none!important;flex:1 1 0!important;height:auto!important;max-height:none!important;min-height:0!important;padding:0!important;overflow:hidden!important;overscroll-behavior:none!important;background:transparent!important}body.kpulse-app-mode.kpulse-home-mode [data-my-komo-home]{width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;overflow:hidden!important;background:transparent!important}`;
+  if(dock.includes(from))dock=dock.replace(from,to);
+  await writeFile(dockPath,dock,'utf8');
+}catch(error){
+  console.warn('[pulse-editorial-fixed-frame-v2] iOS Home runtime repair skipped:',error?.message||error);
+}
+
 const index=await readFile(join(pulse,'index.html'),'utf8');
 const present=index.includes(`${file}?v=${version}`);
 const survivors=retiredStyles.filter(x=>index.includes(x));
