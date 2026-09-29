@@ -130,7 +130,7 @@ const checks=[
   ['My KŌMØ outer beige removed',mycss.includes('body.mykomo-v5 .main-shell{background:#f6f7f5!important}')],
   ['Results contains Motion then Clinical',results.includes('RÉSULTAT MOTION')&&results.includes('RÉSULTAT CLINICAL')&&!results.includes('KEY · QUOTIDIEN')],
   ['Results mirrors complete Motion Report payload',results.includes('report-payload-v1.js')&&results.includes('RÉSULTATS FONCTIONNELS')&&results.includes('QUESTIONNAIRES')&&results.includes('Données Myodev')&&results.includes('TOUTES LES MESURES')],
-  ['Results exports the canonical complete report',results.includes('data-komo-export-report')&&results.includes('Exporter le rapport complet')],
+  ['Results exports the canonical complete report',results.includes('data-komo-export-report')&&results.includes('Télécharger mon rapport PDF')],
   ['Results uses green red amber neutral semantics',results.includes("'good'")&&results.includes("'bad'")&&results.includes("'watch'")&&results.includes("'neutral'")],
   ['legacy self-tests cannot own Results',tests.includes("!== 'self-tests'")&&!tests.includes("!== 'results'")],
   ['Connected is single key owner',connected.includes('KŌMØ Connected.')&&connected.includes("route()!=='key'")],
