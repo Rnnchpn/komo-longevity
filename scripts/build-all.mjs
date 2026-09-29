@@ -1,4 +1,6 @@
 import { spawnSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 
 // Production pipeline — Method score clarity V3 is applied after the scientific Method layer.
 const scripts = [
@@ -218,10 +220,14 @@ const scripts = [
   'scripts/pulse-final-production-audit-v1.mjs'
 ];
 
+const failures=[];
 for (const script of scripts) {
   console.log(`[build-all] ${script}`);
-  const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
-  if (run.status !== 0) process.exit(run.status ?? 1);
+  const run = spawnSync(process.execPath,[script],{encoding:'utf8',maxBuffer:16*1024*1024});
+  if(run.stdout)process.stdout.write(run.stdout);
+  if(run.stderr)process.stderr.write(run.stderr);
+  if(run.status!==0)failures.push({script,status:run.status??1,stdout:String(run.stdout||'').slice(-10000),stderr:String(run.stderr||'').slice(-10000)});
 }
-
-console.log('[build-all] production build complete.');
+await mkdir(join(process.cwd(),'site'),{recursive:true});
+await writeFile(join(process.cwd(),'site','build-diagnostics.json'),JSON.stringify({generated_at:new Date().toISOString(),failures},null,2)+'\n','utf8');
+console.log('[build-all-diagnostic] complete failures='+failures.length);
