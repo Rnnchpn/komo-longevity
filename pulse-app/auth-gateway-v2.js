@@ -185,7 +185,7 @@ window.addEventListener('message',event=>{
   }
 });
 
-function schedule(){mount();if(authVisible())setAudience(getAudience());attemptPending().catch(console.error);worldBridgeAttempt().catch(console.error)}
+function schedule(){mount();if(authVisible())setAudience(getAudience());attemptPending().catch(console.error);worldBridgeAttempt().catch(console.error);ecosystemGatewaySchedule()}
 const obs=new MutationObserver(()=>setTimeout(schedule,80));obs.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});
 document.addEventListener('DOMContentLoaded',()=>setTimeout(schedule,300));
 window.addEventListener('pageshow',()=>setTimeout(schedule,150));window.addEventListener('komo:session-ready',()=>worldBridgeAttempt().catch(console.error));
@@ -194,3 +194,86 @@ if(worldBridgeConfig()){
   worldBridgeRetryTimer=setInterval(()=>{if(worldBridgeAcked){clearInterval(worldBridgeRetryTimer);worldBridgeRetryTimer=null;return}worldBridgeAttempt().catch(console.error)},900);
 }
 window.addEventListener('pagehide',()=>{if(worldBridgeRetryTimer){clearInterval(worldBridgeRetryTimer);worldBridgeRetryTimer=null}});
+
+
+// KŌMØ Ecosystem Gateway — lives inside the canonical auth controller.
+const ECOSYSTEM_GATEWAY_SEEN='komo_gateway_seen_session_v1';
+const ECOSYSTEM_INITIAL_HASH=location.hash;
+function ecosystemGatewayStyles(){
+  if(document.querySelector('#komoGatewayStyle'))return;
+  const s=document.createElement('style');s.id='komoGatewayStyle';s.textContent=`
+body.komo-gateway-open{overflow:hidden}.komo-gateway[hidden]{display:none!important}.komo-gateway{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:28px;isolation:isolate}.kg-backdrop{position:absolute;inset:0;background:rgba(239,237,231,.92);backdrop-filter:blur(24px) saturate(.95)}.kg-shell{position:relative;width:min(1180px,100%);max-height:calc(100dvh - 56px);overflow:auto;padding:34px;border:1px solid rgba(21,21,18,.08);border-radius:34px;background:rgba(251,250,247,.97);box-shadow:0 34px 100px rgba(36,32,25,.14);transition:opacity .22s ease,transform .22s ease}.komo-gateway.is-leaving .kg-shell{opacity:0;transform:translateY(8px) scale(.992)}.kg-head{display:flex;align-items:center;justify-content:space-between;gap:20px}.kg-brand{display:flex;align-items:baseline;gap:13px;text-decoration:none}.kg-brand span{font:600 22px/1 Georgia,serif;letter-spacing:.10em}.kg-brand small{font-size:8px;font-weight:700;letter-spacing:.18em;color:#8d887f}.kg-close{width:40px;height:40px;border:1px solid rgba(21,21,18,.09);border-radius:50%;background:#fff;cursor:pointer;font-size:22px;line-height:1}.kg-intro{padding:64px 2px 38px}.kg-intro>p{margin:0 0 14px;font-size:9px;font-weight:700;letter-spacing:.18em;color:#59675d}.kg-intro h1{margin:0;font-size:clamp(46px,7vw,92px);line-height:.88;font-weight:500;letter-spacing:-.065em}.kg-intro h2{margin:18px 0 10px;font-size:clamp(18px,2vw,28px);font-weight:500;letter-spacing:-.035em;color:#4c4942}.kg-intro small{display:block;max-width:680px;font-size:12px;line-height:1.65;color:#817c73}.kg-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.kg-card{position:relative;min-height:310px;padding:28px;text-align:left;border:1px solid rgba(21,21,18,.09);border-radius:26px;background:#f5f2ec;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.kg-card:hover{transform:translateY(-4px);border-color:rgba(21,21,18,.16);box-shadow:0 22px 52px rgba(36,32,25,.08)}.kg-card.recommended{background:linear-gradient(145deg,#f7f5ef,#e7ebe5);border-color:rgba(89,103,93,.16)}.kg-card.world{background:linear-gradient(145deg,#1c2e25,#243a2e);color:#f3ede3;border-color:rgba(255,255,255,.08)}.kg-card-top{display:flex;align-items:center;justify-content:space-between}.kg-card-top i{font-style:normal;font-size:10px;letter-spacing:.12em;color:#8d887f}.kg-card.world .kg-card-top i{color:rgba(243,237,227,.50)}.kg-card-top em{font-style:normal;font-size:22px;font-weight:300}.kg-kicker{margin-top:auto;padding-top:72px;font-size:8px;font-weight:750;letter-spacing:.16em;color:#59675d}.kg-card.world .kg-kicker{color:#d5b477}.kg-card strong{display:block;margin-top:9px;font-size:clamp(26px,3vw,42px);font-weight:500;letter-spacing:-.055em}.kg-copy{display:block;margin-top:12px;max-width:34ch;font-size:11px;line-height:1.65;color:#77736b}.kg-card.world .kg-copy{color:rgba(243,237,227,.62)}.kg-foot{display:flex;justify-content:space-between;gap:20px;padding:22px 4px 0;font-size:9px;color:#8d887f}.kg-foot b{color:#4c4942;font-weight:700}
+@media(max-width:850px){.komo-gateway{padding:14px}.kg-shell{padding:22px;border-radius:26px;max-height:calc(100dvh - 28px)}.kg-intro{padding:38px 0 26px}.kg-grid{grid-template-columns:1fr}.kg-card{min-height:190px;padding:22px}.kg-kicker{padding-top:38px}.kg-foot{display:none}.kg-brand small{display:none}}
+@media(max-width:520px){.komo-gateway{padding:0}.kg-shell{min-height:100dvh;max-height:100dvh;border-radius:0;border:0;padding:calc(18px + env(safe-area-inset-top)) 18px calc(22px + env(safe-area-inset-bottom))}.kg-intro h1{font-size:48px}.kg-intro h2{font-size:18px}.kg-card{min-height:174px;border-radius:22px}}
+`;document.head.appendChild(s);
+}
+function ecosystemGatewayIsPro(){
+  const mode=document.querySelector('#modeSwitch');
+  return Boolean(mode&&!mode.hidden);
+}
+function ecosystemGatewayReady(){
+  const shell=document.querySelector('#appShell'),auth=document.querySelector('#authScreen'),root=document.querySelector('#viewRoot');
+  return Boolean(shell&&!shell.hidden&&auth?.hidden&&root);
+}
+function ecosystemGatewayName(){
+  const raw=document.querySelector('#accountName')?.textContent?.trim()||'';
+  return raw&&raw!=='Compte KŌMØ'?raw.split(/\s+/)[0]:'';
+}
+function ecosystemGatewayClose(){
+  const el=document.querySelector('#komoEcosystemGateway');if(!el)return;
+  el.classList.add('is-leaving');
+  setTimeout(()=>{el.hidden=true;document.body.classList.remove('komo-gateway-open')},220);
+  sessionStorage.setItem(ECOSYSTEM_GATEWAY_SEEN,'1');
+}
+function ecosystemGatewayGo(route){
+  ecosystemGatewayClose();
+  setTimeout(()=>{location.hash=route},80);
+}
+function ecosystemGatewayWorld(){
+  ecosystemGatewayClose();
+  const url='https://komolongevity.com/world/?from=pulse&entry=gateway';
+  const win=window.open(url,'_blank');
+  if(!win)location.href=url;
+}
+function ecosystemGatewayCard(num,kicker,title,copy,action,extra=''){
+  return '<button type="button" class="kg-card '+extra+'" data-gateway-action="'+action+'"><span class="kg-card-top"><i>'+num+'</i><em>→</em></span><span class="kg-kicker">'+kicker+'</span><strong>'+title+'</strong><span class="kg-copy">'+copy+'</span></button>';
+}
+function ecosystemGatewayEnsure(){
+  let el=document.querySelector('#komoEcosystemGateway');if(el)return el;
+  ecosystemGatewayStyles();el=document.createElement('section');el.id='komoEcosystemGateway';el.className='komo-gateway';el.hidden=true;el.setAttribute('aria-label','Choisir votre espace KŌMØ');
+  el.innerHTML='<div class="kg-backdrop"></div><div class="kg-shell"><header class="kg-head"><a href="https://komolongevity.com/fr/" class="kg-brand" target="_blank" rel="noopener noreferrer"><span>KŌMØ</span><small>ONE ACCOUNT · ONE ECOSYSTEM</small></a><button type="button" class="kg-close" data-gateway-close aria-label="Fermer">×</button></header><div class="kg-intro"><p>KŌMØ GATEWAY</p><h1>Bienvenue<span class="kg-name"></span>.</h1><h2>Comment souhaitez-vous entrer aujourd’hui ?</h2><small>Le même compte vous accompagne partout. Vous pouvez changer d’espace à tout moment.</small></div><div class="kg-grid">'+
+    ecosystemGatewayCard('01','VOTRE TRAJECTOIRE','MY KŌMØ','Votre priorité, vos résultats, votre Motion Passport, votre progression et votre prochain point.','my','recommended')+
+    ecosystemGatewayCard('02','L’ÉCOSYSTÈME','EXPLORE','Network, expériences, hôtels, Yachting, Retreats, Life et contenus KŌMØ.','explore')+
+    ecosystemGatewayCard('03','MODE SPATIAL','WORLD','Entrez dans votre Twin, Fitness, Library, Arena et Marina dans l’expérience 3D.','world','world')+
+    '</div><footer class="kg-foot"><span><b>MY KŌMØ</b> pour être accompagné au quotidien.</span><span><b>WORLD</b> quand l’immersion apporte quelque chose.</span></footer></div>';
+  document.body.appendChild(el);
+  el.querySelector('[data-gateway-close]')?.addEventListener('click',ecosystemGatewayClose);
+  el.querySelector('[data-gateway-action="my"]')?.addEventListener('click',()=>ecosystemGatewayGo('home'));
+  el.querySelector('[data-gateway-action="explore"]')?.addEventListener('click',()=>ecosystemGatewayGo('explore'));
+  el.querySelector('[data-gateway-action="world"]')?.addEventListener('click',ecosystemGatewayWorld);
+  return el;
+}
+function ecosystemGatewayShow(force=false){
+  if(!ecosystemGatewayReady()||ecosystemGatewayIsPro())return false;
+  if(!force){
+    if(ECOSYSTEM_INITIAL_HASH&&ECOSYSTEM_INITIAL_HASH!=='#gateway')return false;
+    if(sessionStorage.getItem(ECOSYSTEM_GATEWAY_SEEN)==='1')return false;
+  }
+  const el=ecosystemGatewayEnsure(),name=ecosystemGatewayName(),target=el.querySelector('.kg-name');
+  if(target)target.textContent=name?' '+name:'';
+  el.hidden=false;el.classList.remove('is-leaving');document.body.classList.add('komo-gateway-open');return true;
+}
+function ecosystemGatewayInstallReturn(){
+  const pop=document.querySelector('#accountPopover');if(!pop||pop.querySelector('[data-open-komo-gateway]'))return;
+  const btn=document.createElement('button');btn.type='button';btn.dataset.openKomoGateway='1';btn.textContent='Changer d’espace KŌMØ';
+  pop.insertBefore(btn,document.querySelector('#logoutButton')||null);
+  btn.addEventListener('click',()=>{pop.hidden=true;sessionStorage.removeItem(ECOSYSTEM_GATEWAY_SEEN);ecosystemGatewayShow(true)});
+}
+function ecosystemGatewaySchedule(){
+  if(authVisible()){sessionStorage.removeItem(ECOSYSTEM_GATEWAY_SEEN);return}
+  ecosystemGatewayInstallReturn();setTimeout(()=>ecosystemGatewayShow(false),50);
+}
+window.addEventListener('komo:route-ready',ecosystemGatewaySchedule);
+window.addEventListener('komo:session-ready',ecosystemGatewaySchedule);
+window.addEventListener('hashchange',()=>{if(location.hash==='#gateway'){sessionStorage.removeItem(ECOSYSTEM_GATEWAY_SEEN);ecosystemGatewayShow(true)}});
+window.KomoGateway={open:()=>ecosystemGatewayShow(true),close:ecosystemGatewayClose};
