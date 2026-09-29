@@ -61,7 +61,7 @@ const checks=[
   ['Centre patient search remains interactive',center.includes("addEventListener('input'")&&center.includes('setSelectionRange(pos,pos)')],
   ['Centre readable light-surface contrast',html.includes('body.komo-pro-mode #kcpView .k2tw-patients')&&html.includes('-webkit-text-fill-color:#18241d!important')],
   ['Centre has no mutation observer render loop',!center.includes('new MutationObserver')],
-  ['Centre navigation writes are idempotent',center.includes("nav.dataset.k2twOwner==='consultations'")],
+  ['Centre no longer owns shared Pro navigation',!center.includes('nav.dataset.k2twOwner')&&!center.includes('nav.innerHTML=markup')],
   ['Centre dashboard requests are deduplicated',center.includes('rowsLoadPromise')],
   ['Centre activation is guarded',center.includes('activating=true')],
   ['Centre resynchronizes after cockpit shell',center.includes('komo:clinical-cockpit-ready')],
