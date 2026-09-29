@@ -66,7 +66,7 @@ const checks=[
   ['NPC conversations V2.5 present',runtime.includes('function showNpcConversation')&&runtime.includes("id:'social'")],
   ['smart third-person camera V2.5 present',runtime.includes('thirdPersonDistance')&&runtime.includes('Cheap camera collision clamp')],
   ['Twin Lab V2.6+ present',runtime.includes('KOMO_TWIN_LAB_V26')&&runtime.includes('const twinInteractions')],
-  ['Rehab Lab V2.6+ present',runtime.includes('KOMO_REHAB_LAB_V26')&&runtime.includes('const rehabInteractions')&&runtime.includes('function runRehabDemo')],
+  ['Fitness action floor retained under V8.3',runtime.includes('KOMO_FITNESS_ACTION_FLOOR_V83')&&runtime.includes('const rehabInteractions')&&runtime.includes('function runRehabDemo')&&runtime.includes("KOMO_FITNESS_'+id.toUpperCase()+'_ZONE_V83")],
   ['One World interaction pool present',runtime.includes("const pool=[...interactions,...twinInteractions,...rehabInteractions,...arenaInteractions]")&&runtime.includes('function updateTwinVisuals')],
   ['Biomechanical Twin V2.7+ present',runtime.includes('KOMO_BIOMECH_TWIN_V27')&&runtime.includes('function updateBiomechTwin')],
   ['Rehab Coach V2.7 present',runtime.includes('KOMO_REHAB_COACH_V27')&&runtime.includes('function animateRehabCoach')&&runtime.includes("id:'rehab_coach'")],
