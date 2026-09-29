@@ -62,7 +62,7 @@ fs.writeFileSync(indexPath,html);
 
 const checks=[
   ['World hero CTA',mykomo.includes('data-mkv5-world-hero')],
-  ['World card',mykomo.includes('mks-world')&&mykomo.includes('Entrer dans World →')],
+  ['World destination copy',mykomo.includes('data-mkv5-world-hero')&&mykomo.includes('Entrer dans KŌMØ World →')],
   ['World quick access',mykomo.includes('data-mkv5-world-quick')],
   ['all World CTAs bound',mykomo.includes("querySelectorAll('[data-mkv5-world]')")],
   ['topbar World entry',html.includes('id="komoWorldTopEntry"')],
