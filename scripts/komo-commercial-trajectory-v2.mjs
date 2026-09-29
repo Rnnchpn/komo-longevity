@@ -71,7 +71,7 @@ const localeData = {
     metaTitle:'KŌMØ — Santé en mouvement | Motion, Clinical & expériences sur mesure',
     metaDescription:'KŌMØ associe évaluation fonctionnelle, accompagnement médical lorsqu’il est indiqué et expériences sur mesure à domicile, en hôtel, à bord ou en retreat.',
     heroEy:'KŌMØ · LONGÉVITÉ EN MOUVEMENT',
-    heroTitle:'Mieux comprendre<br><em>le mouvement du corps.</em>',
+    heroTitle:'Mesurer et suivre vos capacités fonctionnelles',
     heroLead:'Évaluer le mouvement. Comprendre ses repères. Choisir la suite avec des professionnels adaptés — dans un même parcours KŌMØ.',
     heroPrimary:'Réserver une expérience',
     heroSecondary:'Découvrir KŌMØ',
@@ -85,10 +85,10 @@ const localeData = {
       ['PROGRAMME SUR MESURE','KŌMØ Signature','Un accompagnement coordonné dans le lieu et au rythme qui vous conviennent, pensé autour de vos objectifs.','Sur proposition','Parler de mon projet','signature','/assets/images/hero-mediterranean-motion-v1.webp']
     ],
     offerEy:'TROIS FAÇONS DE COMMENCER',
-    offerTitle:'Un point de départ.<br><em>Une suite adaptée.</em>',
+    offerTitle:'Choisir le niveau d’accompagnement adapté',
     offerLead:'Choisissez le niveau de réponse qui correspond à votre besoin. Motion et Clinical ont des objectifs différents; Signature coordonne un format personnalisé.',
     journeyEy:'LA MÉTHODE KŌMØ',
-    journeyTitle:'Mesurer.<br><em>Comprendre. Progresser.</em>',
+    journeyTitle:'Une méthode structurée de l’évaluation au suivi',
     journeyLead:'Une méthode lisible, de l’évaluation au suivi. Chaque étape éclaire la suivante et laisse la place au bon professionnel lorsque c’est nécessaire.',
     journey:[['01','Mesurer','Une évaluation fonctionnelle structurée, expliquée dans son contexte.'],['02','Comprendre','Une restitution claire relie les résultats à vos objectifs.'],['03','Progresser','Un plan adapté, un suivi et une réévaluation au bon moment.']],
     choiceEy:'TROUVER LE BON PARCOURS',
@@ -96,7 +96,7 @@ const localeData = {
     choiceLead:'Choisissez votre intention. Cette orientation vous présente l’offre correspondante; elle ne remplace pas un avis médical.',
     choices:[['01 · MOUVEMENT','Je veux mieux comprendre mon mouvement','Marche, équilibre, force et capacités fonctionnelles.','assessment'],['02 · AVIS MÉDICAL','Je cherche une évaluation médicale','Une consultation est envisagée selon votre situation et l’indication clinique.','clinical'],['03 · SUR MESURE','Je souhaite un programme personnalisé','Un format privé, une expérience sur place ou une coordination dédiée.','signature']],
     expEy:'KŌMØ EXPERIENCES',
-    expTitle:'La méthode KŌMØ,<br><em>où que vous soyez.</em>',
+    expTitle:'KŌMØ dans votre environnement',
     expLead:'KŌMØ Anywhere s’adapte au lieu et à votre rythme : à bord, dans un hôtel, chez vous, au travail ou pendant un retreat.',
     experiences:[
       ['À BORD','En mer','Une expérience personnalisée à bord, avec évaluation, restitution et continuité après le voyage.','Découvrir Yachting','experience','/assets/images/hero-mediterranean-motion-v1.webp'],
@@ -107,17 +107,17 @@ const localeData = {
     ],
     experiencesCta:'Découvrir les expériences',
     clinicalEy:'KŌMØ CLINICAL',
-    clinicalTitle:'La profondeur médicale,<br><em>quand elle est nécessaire.</em>',
+    clinicalTitle:'KŌMØ Clinical : consultation et interprétation médicale',
     clinicalLead:'Clinical revient au premier plan : ce n’est pas un “upgrade premium”, mais la voie médicale de KŌMØ lorsqu’une situation nécessite une consultation, un examen ou une décision clinique.',
     clinicalItems:['Consultation médicale et histoire fonctionnelle','Examen clinique selon le contexte','Biologie, imagerie ou examens complémentaires uniquement si indiqués','Plan de rééducation, exercice ou orientation vers le bon professionnel','Coordination et réévaluation dans le temps'],
     clinicalNote:'Les actes médicaux restent distincts des offres wellness et ne sont proposés que dans un cadre professionnel, réglementaire et territorial approprié.',
     clinicalCta:'Voir le parcours Clinical',
     motionCta:'Découvrir Motion',
-    teamTitle:'Une trajectoire entourée des bonnes personnes.',
+    teamTitle:'Une équipe coordonnée selon votre parcours.',
     teamCopy:'Selon le programme et l’indication, KŌMØ peut coordonner médecin, kinésithérapeute, coach, infirmier ou autres professionnels. L’objectif n’est pas d’empiler des prestations : c’est de rendre l’étape suivante évidente et exécutable.',
-    pulseTitle:'Pulse garde le fil.',
+    pulseTitle:'Pulse centralise le suivi.',
     pulseCopy:'Résultats, priorités, programme, professionnels, progression et prochaine réévaluation : Pulse prolonge la consultation et garde toute la trajectoire dans un même espace.',
-    worldTitle:'World prolonge l’accompagnement.',
+    worldTitle:'World reste une extension optionnelle.',
     worldCopy:'World est une couche optionnelle pour le mouvement guidé, les contenus et l’engagement. Votre programme reste accessible dans une interface classique; l’expérience 3D n’est jamais obligatoire.',
     continuityEy:'UN COMPTE KŌMØ',
     optionalLabel:'OPTIONNEL',
@@ -126,20 +126,20 @@ const localeData = {
     faqLead:'Une première conversation permet de choisir le format et le lieu adaptés.',
     faq:[['Quelle différence entre Motion et Clinical ?','Motion propose une évaluation fonctionnelle et une restitution non médicale. Clinical correspond à une consultation médicale, uniquement lorsqu’elle est indiquée et délivrée dans un cadre approprié.'],['Dois-je me déplacer ?','Pas nécessairement. Selon les services disponibles, KŌMØ Anywhere peut se vivre à domicile, à bord, en hôtel, au travail ou dans un retreat.'],['Où retrouver mes informations ?','Pulse est l’espace connecté KŌMØ. Le bouton « Se connecter » ouvre directement votre espace existant.'],['World est-il obligatoire ?','Non. World est une option d’accompagnement; votre parcours peut se dérouler sans expérience 3D.']],
     proEy:'POUR LES PROFESSIONNELS',
-    proTitle:'Vendez d’abord l’expérience.<br><em>La Case vient ensuite.</em>',
-    proLead:'Pour un hôtel, une clinique, un club ou un opérateur, KŌMØ commence par des consultations réellement délivrées. Le matériel permanent n’arrive qu’après preuve d’usage.',
-    pipeline:[['01','Pilot','KŌMØ vient sur place avec l’équipe et le matériel.'],['02','Paid sessions','Le partenaire mesure la demande réelle et la satisfaction.'],['03','Recurring programme','Des journées ou créneaux KŌMØ deviennent récurrents.'],['04','Train','L’équipe partenaire est formée au périmètre qui lui revient.'],['05','Deploy Case','La Case devient l’infrastructure d’un service déjà utilisé.']],
-    finalTitle:'Votre première expérience KŌMØ peut commencer<br><em>par une seule consultation.</em>',
-    finalCopy:'Particulier, hôtel, yacht, clinique ou club : nous commençons par le besoin réel, puis nous construisons le niveau d’accompagnement adapté.',
+    proTitle:'Déployer un service KŌMØ dans votre établissement',
+    proLead:'KŌMØ peut intervenir sur site pour tester le service, mesurer la demande et structurer un programme récurrent. La Case devient pertinente lorsqu’un déploiement permanent est justifié.',
+    pipeline:[['01','Pilote sur site','KŌMØ intervient avec son équipe et son matériel.'],['02','Sessions facturées','Le partenaire mesure la demande, le taux de réservation et la satisfaction.'],['03','Programme récurrent','Des journées ou créneaux KŌMØ sont planifiés de façon régulière.'],['04','Formation','L’équipe partenaire est formée aux opérations relevant de son périmètre.'],['05','Installation','La Case équipe le site lorsque le volume d’activité le justifie.']],
+    finalTitle:'Organiser votre première consultation KŌMØ',
+    finalCopy:'Particulier, hôtel, yacht, clinique ou club : nous définissons le format, le lieu et le niveau d’accompagnement avant la première intervention.',
     finalCta:'Demander une consultation',
-    finalEy:'PRENDRE LE TEMPS DE BIEN COMMENCER',
+    finalEy:'COMMENCER AVEC KŌMØ',
     scienceCta:'Voir notre approche scientifique',
     proCta:'Échanger avec KŌMØ',
-    aboutTitle:'La santé en mouvement,<br><em>pensée sur la durée.</em>',
+    aboutTitle:'KŌMØ relie évaluation fonctionnelle et suivi dans le temps',
     aboutLead:'KŌMØ relie la mesure fonctionnelle, l’expertise clinique lorsqu’elle est requise et un accompagnement qui s’inscrit dans la vie réelle.',
     aboutSectionTitle:'Une approche coordonnée autour de la personne.',
     aboutSectionCopy:'Nos expériences réunissent des protocoles fonctionnels, des professionnels qualifiés et une restitution compréhensible. Chaque service conserve son rôle : Motion n’est pas un diagnostic médical; Clinical relève de la responsabilité du médecin.',
-    aboutMethodTitle:'Le mouvement comme point de départ.',
+    aboutMethodTitle:'L’évaluation fonctionnelle au cœur de la méthode KŌMØ.',
     aboutMethodCopy:'Nous observons le mouvement, la force, l’équilibre et les capacités fonctionnelles pour ouvrir une conversation concrète sur la suite. Le cadre, les outils et l’équipe évoluent selon le lieu et le parcours.',
     nav:[['Motion','assessment'],['Clinical','clinical'],['Expériences','experience'],['Science','science'],['Professionnels','partners'],['À propos','about'],['Se connecter','pulse']]
   },
@@ -159,7 +159,7 @@ const localeData = {
     metaTitle:'KŌMØ — Health in motion | Motion, Clinical & tailored experiences',
     metaDescription:'KŌMØ connects functional assessment, medical care when indicated, and tailored experiences at home, in hotels, onboard or on retreat.',
     heroEy:'KŌMØ · LONGEVITY IN MOTION',
-    heroTitle:'Understand movement.<br><em>Find your next step.</em>',
+    heroTitle:'Measure and track functional capacity',
     heroLead:'Measure movement. Make sense of the signals. Choose a next step with the right professionals — within one KŌMØ pathway.',
     heroPrimary:'Book an experience',
     heroSecondary:'Discover KŌMØ',
@@ -173,10 +173,10 @@ const localeData = {
       ['TAILORED PROGRAMME','KŌMØ Signature','A coordinated programme shaped around your goals, chosen setting and preferred pace.','By proposal','Discuss your plans','signature','/assets/images/hero-mediterranean-motion-v1.webp']
     ],
     offerEy:'THREE WAYS TO BEGIN',
-    offerTitle:'One starting point.<br><em>A path shaped around you.</em>',
+    offerTitle:'Choose the right level of support',
     offerLead:'Choose the level of support that fits your needs. Motion and Clinical serve different purposes; Signature coordinates a tailored format.',
     journeyEy:'THE KŌMØ METHOD',
-    journeyTitle:'Measure.<br><em>Understand. Progress.</em>',
+    journeyTitle:'A structured method from assessment to follow-up',
     journeyLead:'A clear method from assessment to follow-up. Each step informs the next and brings in the right professional when needed.',
     journey:[['01','Measure','Structured functional assessment, explained in context.'],['02','Understand','A clear debrief connects the findings to your goals.'],['03','Progress','A tailored plan, follow-up and reassessment at the right time.']],
     choiceEy:'FIND YOUR STARTING POINT',
@@ -184,7 +184,7 @@ const localeData = {
     choiceLead:'Choose what you are looking for. This helps you explore the right service; it does not replace medical advice.',
     choices:[['01 · MOVEMENT','I want to understand my movement','Gait, balance, strength and functional capacity.','assessment'],['02 · MEDICAL','I am looking for medical assessment','A consultation is considered according to your situation and clinical indication.','clinical'],['03 · TAILORED','I want a personalised programme','A private format, an on-site experience or dedicated coordination.','signature']],
     expEy:'KŌMØ EXPERIENCES',
-    expTitle:'One KŌMØ method,<br><em>wherever you are.</em>',
+    expTitle:'KŌMØ in your own environment',
     expLead:'KŌMØ Anywhere adapts to your setting and schedule: onboard, in a hotel, at home, at work or on retreat.',
     experiences:[
       ['ONBOARD','At sea','A private onboard experience with assessment, debrief and continuity after the voyage.','Explore Yachting','experience','/assets/images/hero-mediterranean-motion-v1.webp'],
@@ -195,39 +195,39 @@ const localeData = {
     ],
     experiencesCta:'Explore experiences',
     clinicalEy:'KŌMØ CLINICAL',
-    clinicalTitle:'Medical depth,<br><em>when it is needed.</em>',
+    clinicalTitle:'KŌMØ Clinical: medical consultation and clinical interpretation',
     clinicalLead:'Clinical returns to the foreground. It is not a premium upsell; it is the medical KŌMØ pathway when consultation, examination or clinical decision-making is required.',
     clinicalItems:['Medical consultation and functional history','Clinical examination according to context','Biology, imaging or other investigations only when indicated','Rehabilitation, exercise or referral plan','Coordination and reassessment over time'],
     clinicalNote:'Medical acts remain distinct from wellness offers and are delivered only within the appropriate professional, regulatory and territorial framework.',
     clinicalCta:'View the Clinical pathway',
     motionCta:'Explore Motion',
-    teamTitle:'A trajectory surrounded by the right people.',
+    teamTitle:'A coordinated team for your pathway.',
     teamCopy:'Depending on the programme and indication, KŌMØ can coordinate a physician, physiotherapist, coach, nurse or other professionals. The goal is not to stack services; it is to make the next step executable.',
-    pulseTitle:'Pulse keeps the thread.',
+    pulseTitle:'Pulse centralises follow-up.',
     pulseCopy:'Results, priorities, programme, professionals, progress and the next reassessment: Pulse extends the consultation and keeps the whole trajectory in one place.',
-    worldTitle:'World extends the support.',
+    worldTitle:'World remains an optional extension.',
     worldCopy:'World is an optional layer for guided movement, education and engagement. You can follow your programme through the standard interface; immersive 3D is never required.',
     continuityEy:'ONE KŌMØ ACCOUNT',
     optionalLabel:'OPTIONAL',
     faqEy:'COMMON QUESTIONS',
-    faqTitle:'A few things to know before you begin.',
+    faqTitle:'Frequently asked questions about Motion, Clinical and Pulse.',
     faqLead:'A first conversation helps us choose a suitable format and setting.',
     faq:[['How are Motion and Clinical different?','Motion provides functional assessment and non-medical feedback. Clinical is a medical consultation, offered when indicated and delivered in the appropriate professional setting.'],['Do I need to travel?','Not always. Depending on local availability, KŌMØ Anywhere can take place at home, onboard, in a hotel, at work or on retreat.'],['Where can I find my information?','Pulse is your connected KŌMØ space. Use “Sign in” to open your existing account.'],['Do I have to use World in 3D?','No. World is an optional support layer; your pathway can work without an immersive 3D experience.']],
     proEy:'FOR PROFESSIONALS',
-    proTitle:'Sell the experience first.<br><em>The Case comes later.</em>',
-    proLead:'For a hotel, clinic, club or operator, KŌMØ starts with real consultations delivered on site. Permanent equipment follows demonstrated use.',
-    pipeline:[['01','Pilot','KŌMØ arrives with the team and equipment.'],['02','Paid sessions','The partner measures real demand and client response.'],['03','Recurring programme','KŌMØ days or slots become recurring.'],['04','Train','The partner team is trained for its defined scope.'],['05','Deploy Case','The Case becomes infrastructure for a service already in use.']],
-    finalTitle:'Your first KŌMØ experience can begin<br><em>with one consultation.</em>',
-    finalCopy:'Individual, hotel, yacht, clinic or club: we start with the real need and build the right level of support around it.',
+    proTitle:'Deploy KŌMØ within your organisation',
+    proLead:'KŌMØ can deliver the service on site, measure real demand and structure a recurring programme. The Case becomes relevant when a permanent deployment is justified.',
+    pipeline:[['01','On-site pilot','KŌMØ delivers with its own team and equipment.'],['02','Paid sessions','The partner measures demand, booking rate and client satisfaction.'],['03','Recurring programme','KŌMØ days or appointment slots are scheduled regularly.'],['04','Training','The partner team is trained for the operations within its scope.'],['05','Installation','The Case equips the site when activity volume justifies it.']],
+    finalTitle:'Book your first KŌMØ consultation',
+    finalCopy:'Individual, hotel, yacht, clinic or club: we define the format, setting and level of support before the first delivery.',
     finalCta:'Request a consultation',
-    finalEy:'A GOOD PLACE TO START',
+    finalEy:'START WITH KŌMØ',
     scienceCta:'Explore our scientific approach',
     proCta:'Talk with KŌMØ',
-    aboutTitle:'Health in motion,<br><em>considered over time.</em>',
+    aboutTitle:'KŌMØ connects functional assessment with longitudinal follow-up',
     aboutLead:'KŌMØ brings functional assessment, clinical expertise when required and support that fits into real life.',
     aboutSectionTitle:'A coordinated approach centred on the person.',
     aboutSectionCopy:'Our experiences bring together functional protocols, qualified professionals and clear feedback. Each service keeps its purpose: Motion is not a medical diagnosis; Clinical sits within the physician’s responsibility.',
-    aboutMethodTitle:'Movement as a starting point.',
+    aboutMethodTitle:'Functional assessment is central to the KŌMØ method.',
     aboutMethodCopy:'We observe movement, strength, balance and functional capacity to open a practical conversation about what comes next. The setting, tools and team adapt to the place and pathway.',
     nav:[['Motion','assessment'],['Clinical','clinical'],['Experiences','experience'],['Science','science'],['Professionals','partners'],['About','about'],['Sign in','pulse']]
   },
@@ -246,7 +246,7 @@ const localeData = {
     metaTitle:'KŌMØ — Salud en movimiento | Motion, Clinical y experiencias a medida',
     metaDescription:'KŌMØ conecta evaluación funcional, atención médica cuando está indicada y experiencias a medida en casa, hoteles, a bordo o en retiros.',
     heroEy:'KŌMØ · LONGEVIDAD EN MOVIMIENTO',
-    heroTitle:'Comprender el movimiento.<br><em>Elegir el siguiente paso.</em>',
+    heroTitle:'Medir y seguir la capacidad funcional',
     heroLead:'Medir el movimiento. Comprender las señales. Elegir el siguiente paso con los profesionales adecuados — en un mismo recorrido KŌMØ.',
     heroPrimary:'Reservar una experiencia',
     heroSecondary:'Descubrir KŌMØ',
@@ -260,10 +260,10 @@ const localeData = {
       ['PROGRAMA A MEDIDA','KŌMØ Signature','Un acompañamiento coordinado según tus objetivos, el lugar elegido y tu ritmo.','Propuesta personalizada','Cuéntanos tu proyecto','signature','/assets/images/hero-mediterranean-motion-v1.webp']
     ],
     offerEy:'TRES FORMAS DE EMPEZAR',
-    offerTitle:'Un punto de partida.<br><em>Un recorrido a tu medida.</em>',
+    offerTitle:'Elegir el nivel de acompañamiento adecuado',
     offerLead:'Elige el nivel de apoyo que mejor responde a tus necesidades. Motion y Clinical cumplen funciones distintas; Signature coordina un formato personalizado.',
     journeyEy:'EL MÉTODO KŌMØ',
-    journeyTitle:'Medir.<br><em>Comprender. Progresar.</em>',
+    journeyTitle:'Un método estructurado desde la evaluación hasta el seguimiento',
     journeyLead:'Un método claro desde la evaluación hasta el seguimiento. Cada paso orienta el siguiente e incorpora al profesional adecuado cuando hace falta.',
     journey:[['01','Medir','Evaluación funcional estructurada, explicada en su contexto.'],['02','Comprender','Una restitución clara relaciona los resultados con tus objetivos.'],['03','Progresar','Un plan adaptado, seguimiento y reevaluación en el momento oportuno.']],
     choiceEy:'ENCUENTRA TU PUNTO DE PARTIDA',
@@ -271,7 +271,7 @@ const localeData = {
     choiceLead:'Elige lo que necesitas. Esta orientación ayuda a explorar el servicio adecuado; no sustituye el consejo médico.',
     choices:[['01 · MOVIMIENTO','Quiero comprender mejor mi movimiento','Marcha, equilibrio, fuerza y capacidad funcional.','assessment'],['02 · MÉDICO','Busco una evaluación médica','La consulta se valora según tu situación y la indicación clínica.','clinical'],['03 · A MEDIDA','Quiero un programa personalizado','Un formato privado, una experiencia en el lugar o coordinación dedicada.','signature']],
     expEy:'KŌMØ EXPERIENCES',
-    expTitle:'Un método KŌMØ,<br><em>donde estés.</em>',
+    expTitle:'KŌMØ en tu propio entorno',
     expLead:'KŌMØ Anywhere se adapta al lugar y a tu horario: a bordo, en un hotel, en casa, en el trabajo o durante un retreat.',
     experiences:[
       ['A BORDO','En el mar','Una experiencia privada con evaluación, restitución y continuidad después del viaje.','Descubrir Yachting','experience','/assets/images/hero-mediterranean-motion-v1.webp'],
@@ -282,17 +282,17 @@ const localeData = {
     ],
     experiencesCta:'Descubrir experiencias',
     clinicalEy:'KŌMØ CLINICAL',
-    clinicalTitle:'Profundidad médica,<br><em>cuando hace falta.</em>',
+    clinicalTitle:'KŌMØ Clinical: consulta médica e interpretación clínica',
     clinicalLead:'Clinical vuelve al primer plano. No es un upsell premium; es la vía médica de KŌMØ cuando se requiere consulta, exploración o decisión clínica.',
     clinicalItems:['Consulta médica e historia funcional','Exploración clínica según contexto','Biología, imagen u otras pruebas solo si están indicadas','Plan de rehabilitación, ejercicio o derivación','Coordinación y reevaluación'],
     clinicalNote:'Los actos médicos permanecen separados de las ofertas wellness y solo se realizan dentro del marco profesional, regulatorio y territorial apropiado.',
     clinicalCta:'Ver el recorrido Clinical',
     motionCta:'Descubrir Motion',
-    teamTitle:'Una trayectoria con las personas adecuadas.',
+    teamTitle:'Un equipo coordinado según tu recorrido.',
     teamCopy:'Según programa e indicación, KŌMØ puede coordinar médico, fisioterapeuta, coach, enfermería u otros profesionales. El objetivo no es acumular servicios, sino hacer ejecutable el siguiente paso.',
-    pulseTitle:'Pulse mantiene el hilo.',
+    pulseTitle:'Pulse centraliza el seguimiento.',
     pulseCopy:'Resultados, prioridades, programa, profesionales, progreso y próxima reevaluación: Pulse prolonga la consulta y mantiene toda la trayectoria en un solo espacio.',
-    worldTitle:'World prolonga el acompañamiento.',
+    worldTitle:'World sigue siendo una extensión opcional.',
     worldCopy:'World es una capa opcional para movimiento guiado, educación y participación. Puedes seguir tu programa con la interfaz habitual; la experiencia inmersiva 3D nunca es obligatoria.',
     continuityEy:'UNA CUENTA KŌMØ',
     optionalLabel:'OPCIONAL',
@@ -301,20 +301,20 @@ const localeData = {
     faqLead:'Una primera conversación nos permite elegir el formato y el lugar adecuados.',
     faq:[['¿Cuál es la diferencia entre Motion y Clinical?','Motion ofrece evaluación funcional y una restitución no médica. Clinical es una consulta médica, ofrecida cuando está indicada y dentro del marco profesional adecuado.'],['¿Tengo que desplazarme?','No siempre. Según la disponibilidad local, KŌMØ Anywhere puede realizarse en casa, a bordo, en un hotel, en el trabajo o en retreat.'],['¿Dónde encuentro mi información?','Pulse es tu espacio conectado KŌMØ. Usa «Acceder» para abrir tu cuenta existente.'],['¿Tengo que usar World en 3D?','No. World es una capa de acompañamiento opcional; tu recorrido puede continuar sin una experiencia inmersiva 3D.']],
     proEy:'PARA PROFESIONALES',
-    proTitle:'Primero la experiencia.<br><em>La Case viene después.</em>',
-    proLead:'Para hotel, clínica, club u operador, KŌMØ empieza con consultas reales in situ. El equipamiento permanente llega después de demostrar uso.',
-    pipeline:[['01','Pilot','KŌMØ llega con equipo y material.'],['02','Paid sessions','El socio mide demanda real y respuesta.'],['03','Recurring programme','Las jornadas KŌMØ se vuelven recurrentes.'],['04','Train','Se forma al equipo socio en su ámbito.'],['05','Deploy Case','La Case se convierte en infraestructura de un servicio ya usado.']],
-    finalTitle:'Tu primera experiencia KŌMØ puede empezar<br><em>con una consulta.</em>',
-    finalCopy:'Persona, hotel, yacht, clínica o club: empezamos por la necesidad real y construimos el nivel de acompañamiento adecuado.',
+    proTitle:'Implantar KŌMØ en tu establecimiento',
+    proLead:'KŌMØ puede prestar el servicio in situ, medir la demanda real y estructurar un programa recurrente. La Case cobra sentido cuando se justifica una implantación permanente.',
+    pipeline:[['01','Piloto in situ','KŌMØ presta el servicio con su equipo y material.'],['02','Sesiones facturadas','El socio mide demanda, tasa de reserva y satisfacción.'],['03','Programa recurrente','Se programan jornadas o citas KŌMØ de forma regular.'],['04','Formación','El equipo del socio se forma en las operaciones de su ámbito.'],['05','Instalación','La Case equipa el centro cuando el volumen de actividad lo justifica.']],
+    finalTitle:'Reservar una primera consulta KŌMØ',
+    finalCopy:'Persona, hotel, yacht, clínica o club: definimos el formato, el lugar y el nivel de acompañamiento antes de la primera intervención.',
     finalCta:'Solicitar una consulta',
-    finalEy:'UN BUEN LUGAR PARA EMPEZAR',
+    finalEy:'EMPEZAR CON KŌMØ',
     scienceCta:'Conocer nuestro enfoque científico',
     proCta:'Hablar con KŌMØ',
-    aboutTitle:'Salud en movimiento,<br><em>pensada a largo plazo.</em>',
+    aboutTitle:'KŌMØ integra evaluación funcional y seguimiento longitudinal',
     aboutLead:'KŌMØ reúne evaluación funcional, experiencia clínica cuando hace falta y acompañamiento que encaja en la vida cotidiana.',
     aboutSectionTitle:'Un enfoque coordinado en torno a la persona.',
     aboutSectionCopy:'Nuestras experiencias conectan protocolos funcionales, profesionales cualificados y resultados comprensibles. Cada servicio conserva su función: Motion no es un diagnóstico médico; Clinical corresponde a la responsabilidad del médico.',
-    aboutMethodTitle:'El movimiento como punto de partida.',
+    aboutMethodTitle:'La evaluación funcional es central en el método KŌMØ.',
     aboutMethodCopy:'Observamos movimiento, fuerza, equilibrio y capacidad funcional para abrir una conversación práctica sobre el siguiente paso. El lugar, las herramientas y el equipo se adaptan al recorrido.',
     nav:[['Motion','assessment'],['Clinical','clinical'],['Experiencias','experience'],['Ciencia','science'],['Profesionales','partners'],['Quiénes somos','about'],['Acceder','pulse']]
   }
@@ -414,7 +414,7 @@ function pageHero(ey,title,lead,primary,href,secondary='',href2=''){
 }
 function assessment(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
-  const title=isFr?'Une lecture du mouvement.<br><em>Des repères pour la suite.</em>':isEs?'Una lectura del movimiento.<br><em>Referencias para avanzar.</em>':'A closer look at movement.<br><em>Clearer next steps.</em>';
+  const title=isFr?'Évaluation fonctionnelle du mouvement':isEs?'Evaluación funcional del movimiento':'Functional movement assessment';
   const lead=isFr?'KŌMØ Motion évalue des dimensions fonctionnelles du mouvement et les restitue dans un langage clair. Le parcours aide à comprendre ses repères et à identifier une prochaine étape adaptée.':isEs?'KŌMØ Motion evalúa aspectos funcionales del movimiento y los explica con claridad para entender tus referencias y elegir el siguiente paso.':'KŌMØ Motion assesses functional aspects of movement and explains them clearly, helping you understand your measures and identify a suitable next step.';
   const labels=isFr?[
     ['01 · PRÉPARER','Votre contexte','Vos objectifs, habitudes de mouvement et informations utiles orientent la session.'],
@@ -437,7 +437,7 @@ function assessment(c){
 }
 function clinicalPage(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
-  const title=isFr?'Quand les données ont besoin<br><em>d’une lecture médicale.</em>':isEs?'Cuando los datos necesitan<br><em>lectura médica.</em>':'When data needs<br><em>medical interpretation.</em>';
+  const title=isFr?'Consultation médicale et interprétation clinique':isEs?'Consulta médica e interpretación clínica':'Medical consultation and clinical interpretation';
   const lead=isFr?'KŌMØ Clinical associe l’évaluation fonctionnelle à une consultation médicale lorsque le contexte le justifie. Le médecin garde la responsabilité de l’indication, de l’interprétation et des décisions de soin.':isEs?'KŌMØ Clinical une la evaluación funcional con consulta médica cuando el contexto lo justifica. El médico mantiene la responsabilidad de indicación, interpretación y decisiones clínicas.':'KŌMØ Clinical combines functional assessment with medical consultation when the context warrants it. The physician remains responsible for indication, interpretation and care decisions.';
   const items=isFr?[
     ['01','Contexte','Histoire fonctionnelle, symptômes éventuels, objectifs et contraintes.'],
@@ -462,7 +462,7 @@ function clinicalPage(c){
 }
 function partnersPage(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
-  const title=isFr?'Faites vivre KŌMØ<br><em>avant d’acheter du matériel.</em>':isEs?'Haz vivir KŌMØ<br><em>antes de comprar material.</em>':'Deliver KŌMØ first.<br><em>Buy hardware later.</em>';
+  const title=isFr?'Intégrer KŌMØ à votre établissement':isEs?'Integrar KŌMØ en tu establecimiento':'Integrate KŌMØ into your organisation';
   const lead=isFr?'Notre modèle B2B commence par des consultations et des journées KŌMØ opérées sur votre site. Vous voyez la demande, vos équipes comprennent le service, puis nous construisons le modèle récurrent et seulement ensuite le déploiement permanent.':isEs?'Nuestro modelo B2B empieza con consultas y jornadas KŌMØ operadas en tu centro. Primero se demuestra la demanda y después se construye el modelo recurrente y el despliegue permanente.':'Our B2B model starts with consultations and KŌMØ days operated in your setting. Demand is demonstrated first; recurring operations and permanent deployment follow.';
   const sectors=isFr?[
     ['Yachting','Programme à bord pour owners, guests ou crew selon le format.'],
@@ -481,11 +481,11 @@ function partnersPage(c){
     ['Fitness & performance','Assessment, progression and continuity with clear governance.']
   ];
   const secondary=isFr?'Découvrir l’Assessment':isEs?'Descubrir Assessment':'Discover Assessment';
-  return pageHero(c.proEy,title,lead,isFr?'Organiser un pilote':isEs?'Organizar un piloto':'Run a pilot',c.paths.contact,secondary,c.paths.assessment)+`<section class="kt-pagebody"><div class="kt-shell"><div class="kt-mini-flow">${c.pipeline.map(([n,t])=>`<div><b>${n}</b><span>${t}</span></div>`).join('')}</div><div class="kt-pagegrid">${sectors.map(([t,p])=>`<article class="kt-pagecard"><span class="kt-kicker">KŌMØ</span><h2 class="kt-h3">${t}</h2><p class="kt-copy">${p}</p></article>`).join('')}</div><p class="kt-note">${isFr?'La KŌMØ Case devient une infrastructure de déploiement une fois l’usage démontré. Elle n’est plus la première chose que nous essayons de vendre.':isEs?'La KŌMØ Case se convierte en infraestructura cuando el uso ya está demostrado; deja de ser el primer producto a vender.':'The KŌMØ Case becomes deployment infrastructure once real use has been demonstrated. It is no longer the first thing we try to sell.'}</p></div></section>`;
+  return pageHero(c.proEy,title,lead,isFr?'Organiser un pilote':isEs?'Organizar un piloto':'Run a pilot',c.paths.contact,secondary,c.paths.assessment)+`<section class="kt-pagebody"><div class="kt-shell"><div class="kt-mini-flow">${c.pipeline.map(([n,t])=>`<div><b>${n}</b><span>${t}</span></div>`).join('')}</div><div class="kt-pagegrid">${sectors.map(([t,p])=>`<article class="kt-pagecard"><span class="kt-kicker">KŌMØ</span><h2 class="kt-h3">${t}</h2><p class="kt-copy">${p}</p></article>`).join('')}</div><p class="kt-note">${isFr?'La KŌMØ Case peut équiper le partenaire lorsque le volume d’activité justifie une installation permanente.':isEs?'La KŌMØ Case puede equipar al socio cuando el volumen de actividad justifica una instalación permanente.':'The KŌMØ Case can equip the partner site when activity volume justifies a permanent installation.'}</p></div></section>`;
 }
 function experiencePage(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
-  const title=isFr?'Une même expérience.<br><em>Plusieurs lieux.</em>':isEs?'Una misma experiencia.<br><em>Varios lugares.</em>':'One experience.<br><em>Different settings.</em>';
+  const title=isFr?'KŌMØ à bord, à l’hôtel, à domicile ou en retreat':isEs?'KŌMØ a bordo, en hotel, en casa o en retreat':'KŌMØ onboard, in hotels, at home or on retreat';
   const lead=isFr?'KŌMØ se déplace avec la personne. Yachting ouvre la voie, mais la même qualité d’évaluation, de restitution et de suivi peut être délivrée à domicile, dans un hôtel ou pendant un retreat.':isEs?'KŌMØ se desplaza con la persona. Yachting abre el camino, pero la misma calidad puede vivir en casa, hotel o retreat.':'KŌMØ moves with the person. Yachting leads the launch, but the same standard of assessment, debrief and follow-up can be delivered at home, in hotels or during retreats.';
   const cards=c.experiences.map(([k,t,p,cta,key,image])=>`<article class="kt-z-location"><img src="${image}" alt="" loading="lazy"><div class="kt-z-location-copy"><span class="kt-kicker">${k}</span><h3>${t}</h3><p>${p}</p><a href="${url(c,key)}" class="kt-btn kt-btn--light">${cta}</a></div></article>`).join('');
   return pageHero('KŌMØ ANYWHERE',title,lead,c.heroPrimary,c.paths.contact,c.experiencesCta,'#komo-anywhere')+`<section class="kt-pagebody"><div class="kt-shell"><div class="kt-z-locations" id="komo-anywhere">${cards}</div><p class="kt-note">${c.clinicalNote}</p></div></section>`;
@@ -493,7 +493,7 @@ function experiencePage(c){
 
 function signaturePage(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
-  const title=isFr?'Un programme composé<br><em>autour de vos objectifs.</em>':isEs?'Un programa creado<br><em>en torno a tus objetivos.</em>':'A programme designed<br><em>around your goals.</em>';
+  const title=isFr?'Un programme KŌMØ conçu sur mesure':isEs?'Un programa KŌMØ diseñado a medida':'A bespoke KŌMØ programme';
   const lead=isFr?'KŌMØ Signature coordonne une expérience privée à partir de vos priorités, du lieu souhaité et des professionnels utiles. Le format et le périmètre sont établis lors d’un premier échange.':isEs?'KŌMØ Signature coordina una experiencia privada a partir de tus prioridades, el lugar elegido y los profesionales adecuados. El formato y el alcance se definen en una primera conversación.':'KŌMØ Signature coordinates a private experience around your priorities, preferred setting and appropriate professionals. The format and scope are agreed in an initial conversation.';
   const points=isFr?[
     ['01','Commencer par vos objectifs','Mouvement, autonomie, préparation physique ou continuité après une évaluation.'],
@@ -520,7 +520,7 @@ function aboutPage(c){
 
 function pulsePage(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
-  const title=isFr?'Votre consultation continue<br><em>dans Pulse.</em>':isEs?'Tu consulta continúa<br><em>en Pulse.</em>':'Your consultation continues<br><em>in Pulse.</em>';
+  const title=isFr?'Pulse centralise vos résultats et votre suivi KŌMØ':isEs?'Pulse reúne tus resultados y el seguimiento KŌMØ':'Pulse brings together your results and KŌMØ follow-up';
   const lead=isFr?'Pulse est l’espace personnel KŌMØ après votre consultation : résultats, priorités, programme, professionnels, progression et prochaine réévaluation restent réunis dans une seule trajectoire.':isEs?'Pulse es el espacio personal KŌMØ después de tu consulta: resultados, prioridades, programa, profesionales, progreso y próxima reevaluación en una sola trayectoria.':'Pulse is your personal KŌMØ space after consultation: results, priorities, programme, professionals, progress and the next reassessment stay together in one trajectory.';
   const cards=isFr?[
     ['VOS RÉSULTATS','Comprendre','Retrouvez votre restitution, vos repères fonctionnels, votre Motion Score et les éléments expliqués pendant la consultation.'],
