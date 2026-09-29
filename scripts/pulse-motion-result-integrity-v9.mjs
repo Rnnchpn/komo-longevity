@@ -41,7 +41,7 @@ for(const dir of [source,built]){
 const exporter=await readFile(join(built,'canonical-report-export-v3.js'),'utf8');
 const pdf=await readFile(join(built,'mobility-report-pdf-v3.js'),'utf8');
 const reportChecks=[
-  ['PDF export uses canonical result',exporter.includes('loadCanonicalResult({force:true})')],
+  ['PDF export uses canonical result',/loadCanonicalResult\(\{(?:patientId,)?force:true\}\)/.test(exporter)],
   ['PDF payload validated before generation',exporter.includes('validateReportPayload(payload)')],
   ['PDF download owner present',exporter.includes('downloadMobilityReport')],
   ['PDF engine has jsDelivr source',pdf.includes('cdn.jsdelivr.net/npm/jspdf@2.5.2')],
