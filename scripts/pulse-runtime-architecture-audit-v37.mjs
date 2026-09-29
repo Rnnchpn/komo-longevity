@@ -22,6 +22,7 @@ function viewWrites(src){
  return count;
 }
 const routeWrites=src=>(src.match(/location\.hash\s*=|history\.(?:pushState|replaceState)\s*\(/g)||[]).length;
+const VENDOR_RUNTIME_FILES=new Set(['supabase-umd-v1.js']);
 
 const roles=new Map(),owners=[];
 function addRole(file,role,surface){if(!roles.has(file))roles.set(file,[]);roles.get(file).push({role,surface});if(role==='owner')owners.push(file)}
@@ -43,7 +44,7 @@ const duplicateOwners=owners.filter((x,i)=>owners.indexOf(x)!==i);if(duplicateOw
 const extensionFiles=[...roles.entries()].filter(([,r])=>r.some(x=>x.role==='extension')).map(([f])=>f);
 for(const file of extensionFiles){const src=text.get(file)||'';const rw=routeWrites(src),vw=viewWrites(src);if(rw||vw)failures.push(`extension ${file} is structural (route=${rw}, view=${vw})`)}
 
-const structural=[...reachable].filter(file=>{const src=text.get(file)||'';return routeWrites(src)>0||viewWrites(src)>0}).sort();
+const structural=[...reachable].filter(file=>{if(VENDOR_RUNTIME_FILES.has(file))return false;const src=text.get(file)||'';return routeWrites(src)>0||viewWrites(src)>0}).sort();
 const unclassified=structural.filter(file=>!roles.has(file));
 if(unclassified.length)failures.push(`unclassified structural modules: ${unclassified.join(', ')}`);
 
