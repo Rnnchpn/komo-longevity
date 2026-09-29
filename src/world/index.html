@@ -9,6 +9,7 @@
   <title>KŌMØ World · Longevity in Motion</title>
   <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
   <link rel="stylesheet" href="./world-v1.css?v=7.6.2-recovery-boot" />
+  <link rel="modulepreload" href="./vendor/three.module.js" />
 </head>
 <body>
   <canvas id="world-canvas" aria-label="KŌMØ World"></canvas>
@@ -218,6 +219,16 @@
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <noscript>KŌMØ World nécessite JavaScript.</noscript>
+  <script>
+    window.__KOMO_BOOT_WATCH=setTimeout(function(){
+      if(window.KomoWorld)return;
+      var loader=document.getElementById('world-loader');
+      if(loader){loader.classList.add('hidden');setTimeout(function(){loader.remove()},650)}
+      var status=document.getElementById('intro-auth-status');
+      if(status){status.textContent='Le moteur 3D n’a pas démarré. Rechargez cette page.';status.classList.add('error')}
+      document.body.classList.add('world-boot-fallback');
+    },5000);
+  </script>
   <script type="module" src="./world-v1.js?v=7.6.2-recovery-boot"></script>
 </body>
 </html>
