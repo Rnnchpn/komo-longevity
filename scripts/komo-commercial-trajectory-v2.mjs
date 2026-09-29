@@ -498,14 +498,14 @@ function menuGroups(c){
 }
 function menuLink([label,href]){
   const external=/^https?:\/\//.test(href);
-  return \`<a class="kt-menu-link" href="\${href}"\${external?' target="_blank" rel="noopener noreferrer"':''}>\${label}</a>\`;
+  return `<a class="kt-menu-link" href="${href}"${external?' target="_blank" rel="noopener noreferrer"':''}>${label}</a>`;
 }
 function menuPanel(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
-  const groups=menuGroups(c).map(group=>\`<div class="kt-menu-group"><strong>\${group.title}</strong>\${group.links.map(menuLink).join('')}</div>\`).join('');
+  const groups=menuGroups(c).map(group=>`<div class="kt-menu-group"><strong>${group.title}</strong>${group.links.map(menuLink).join('')}</div>`).join('');
   const foot=isFr?'Retrouvez l’ensemble des services, expériences, pages scientifiques et produits KŌMØ.':isEs?'Accede a todos los servicios, experiencias, contenidos científicos y productos KŌMØ.':'Access all KŌMØ services, experiences, science content and products.';
   const contact=isFr?'Parler avec KŌMØ':isEs?'Hablar con KŌMØ':'Talk with KŌMØ';
-  return \`<div class="kt-mega-panel"><div class="kt-mega-grid">\${groups}</div><div class="kt-mega-foot"><span>\${foot}</span><a href="\${c.paths.contact}">\${contact}</a></div></div>\`;
+  return `<div class="kt-mega-panel"><div class="kt-mega-grid">${groups}</div><div class="kt-mega-foot"><span>${foot}</span><a href="${c.paths.contact}">${contact}</a></div></div>`;
 }
 function nav(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
@@ -516,16 +516,16 @@ function nav(c){
     [isFr?'Clinical':'Clinical',c.paths.clinical],
     [isFr?'Expériences':isEs?'Experiencias':'Experiences',c.paths.experience],
     [isFr?'Professionnels':isEs?'Profesionales':'Professionals',c.paths.partners]
-  ].map(([label,href])=>\`<a class="kt-simple-link" href="\${href}">\${label}</a>\`).join('');
-  return \`<div class="kt-simple-nav">\${top}<details class="kt-mega"><summary>\${explore}</summary>\${menuPanel(c)}</details><a class="kt-simple-link kt-account-link" href="https://pulse.komolongevity.com/">\${login}</a></div>\`;
+  ].map(([label,href])=>`<a class="kt-simple-link" href="${href}">${label}</a>`).join('');
+  return `<div class="kt-simple-nav">${top}<details class="kt-mega"><summary>${explore}</summary>${menuPanel(c)}</details><a class="kt-simple-link kt-account-link" href="https://pulse.komolongevity.com/">${login}</a></div>`;
 }
 function mobileNav(c){
   const isFr=c===localeData.fr,isEs=c===localeData.es;
   const login=isFr?'Se connecter à Pulse':isEs?'Acceder a Pulse':'Sign in to Pulse';
-  return menuGroups(c).map(group=>\`<div class="kt-menu-group"><strong>\${group.title}</strong>\${group.links.map(menuLink).join('')}</div>\`).join('')+\`<a class="kt-mobile-account" href="https://pulse.komolongevity.com/">\${login}</a>\`;
+  return menuGroups(c).map(group=>`<div class="kt-menu-group"><strong>${group.title}</strong>${group.links.map(menuLink).join('')}</div>`).join('')+`<a class="kt-mobile-account" href="https://pulse.komolongevity.com/">${login}</a>`;
 }
 function motionRuntime(){
-  return \`<script id="komo-public-motion-v3">
+  return `<script id="komo-public-motion-v3">
   (()=>{if(document.documentElement.dataset.ktMotion==='3')return;document.documentElement.dataset.ktMotion='3';
     const reduce=matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
     const targets=[...document.querySelectorAll('.kt-z-section,.kt-z-card,.kt-pagecard,.kt-z-option,.kt-z-location,.kt-z-pillar,.kt-z-continuity article,.kt-pagehero .kt-shell,.kt-z-final .kt-shell')];
@@ -542,18 +542,18 @@ function motionRuntime(){
     const onScroll=()=>document.body.classList.toggle('kt-scrolled',scrollY>20);
     addEventListener('scroll',onScroll,{passive:true});onScroll();
   })();
-  <\/script>\`;
+  <\/script>`;
 }
 function patchNav(html,c){
-  html = html.replace(/<nav class="kp-nav">[\s\S]*?<\/nav>/, \`<nav class="kp-nav">\${nav(c)}</nav>\`);
-  html = html.replace(/<nav class="pv2-nav"([^>]*)>[\s\S]*?<\/nav>/, \`<nav class="pv2-nav"\$1>\${nav(c)}</nav>\`);
-  html = html.replace(/<nav class="primary-nav"([^>]*)>[\s\S]*?<\/nav>/, \`<nav class="primary-nav"\$1>\${nav(c)}</nav>\`);
-  html = html.replace(/<nav class="nav">[\s\S]*?<\/nav>/, \`<nav class="nav">\${nav(c)}</nav>\`);
-  html = html.replace(/<details class="kp-menu">[\s\S]*?<\/details>/, \`<details class="kp-menu"><summary>Menu</summary><div class="kt-mobile-menu">\${mobileNav(c)}</div></details>\`);
-  html = html.replace(/<details class="pv2-mobile">[\s\S]*?<\/details>/, \`<details class="pv2-mobile"><summary>Menu</summary><div class="kt-mobile-menu">\${mobileNav(c)}</div></details>\`);
-  html = html.replace(/<a class="kp-mini" href="[^"]*"[^>]*>[\s\S]*?<\/a>/, \`<a class="kp-mini" href="\${c.paths.contact}">\${c.heroPrimary} →</a>\`);
-  html = html.replace(/<a class="pv2-cta"[^>]*>[\s\S]*?<\/a>/, \`<a class="pv2-cta" href="\${c.paths.contact}">\${c.heroPrimary} <span aria-hidden="true">↗</span></a>\`);
-  html = html.replace(/<a class="nav-cta"[^>]*>[\s\S]*?<\/a>/, \`<a class="nav-cta" href="\${c.paths.contact}">\${c.heroPrimary}</a>\`);
+  html = html.replace(/<nav class="kp-nav">[\s\S]*?<\/nav>/, `<nav class="kp-nav">${nav(c)}</nav>`);
+  html = html.replace(/<nav class="pv2-nav"([^>]*)>[\s\S]*?<\/nav>/, `<nav class="pv2-nav"\$1>${nav(c)}</nav>`);
+  html = html.replace(/<nav class="primary-nav"([^>]*)>[\s\S]*?<\/nav>/, `<nav class="primary-nav"\$1>${nav(c)}</nav>`);
+  html = html.replace(/<nav class="nav">[\s\S]*?<\/nav>/, `<nav class="nav">${nav(c)}</nav>`);
+  html = html.replace(/<details class="kp-menu">[\s\S]*?<\/details>/, `<details class="kp-menu"><summary>Menu</summary><div class="kt-mobile-menu">${mobileNav(c)}</div></details>`);
+  html = html.replace(/<details class="pv2-mobile">[\s\S]*?<\/details>/, `<details class="pv2-mobile"><summary>Menu</summary><div class="kt-mobile-menu">${mobileNav(c)}</div></details>`);
+  html = html.replace(/<a class="kp-mini" href="[^"]*"[^>]*>[\s\S]*?<\/a>/, `<a class="kp-mini" href="${c.paths.contact}">${c.heroPrimary} →</a>`);
+  html = html.replace(/<a class="pv2-cta"[^>]*>[\s\S]*?<\/a>/, `<a class="pv2-cta" href="${c.paths.contact}">${c.heroPrimary} <span aria-hidden="true">↗</span></a>`);
+  html = html.replace(/<a class="nav-cta"[^>]*>[\s\S]*?<\/a>/, `<a class="nav-cta" href="${c.paths.contact}">${c.heroPrimary}</a>`);
   if(!html.includes('komo-public-motion-v3')) html=html.replace('</body>',motionRuntime()+'</body>');
   return html;
 }
