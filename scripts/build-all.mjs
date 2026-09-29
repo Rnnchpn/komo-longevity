@@ -220,12 +220,12 @@ const scripts = [
   'scripts/pulse-pro-access-workspace-v2.mjs',
   // Absolute final production gate: desktop Pro layout, retired-asset pruning and page-owner audit.
   'scripts/pulse-final-production-audit-v1.mjs',
-  // Absolute final Pulse visual owner: fixed 100dvh app frame + unified editorial language.
-  'scripts/pulse-editorial-fixed-frame-v1.mjs',
   'scripts/komo-commercial-trajectory-v2.mjs',
   'scripts/komo-zoi-world-v1.mjs',
   'scripts/komo-yachting-v1.mjs',
-  'scripts/komo-public-editorial-qa-v1.mjs'
+  'scripts/komo-public-editorial-qa-v1.mjs',
+  // Absolute last production pass: fixed Pulse viewport + unified visual language.
+  'scripts/pulse-editorial-fixed-frame-v1.mjs'
 ];
 
 for (const script of scripts) {
