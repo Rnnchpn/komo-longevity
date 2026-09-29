@@ -4023,14 +4023,14 @@ plaque(fitnessV52,'TODAY','MOVE · TRAIN · RECOVER',4.5,.74,6.55,4.75,10.70,{da
 
 
 // V2.6 Rehab Lab — three tangible stations, no extra dynamic lights.
-const rehabLab=new THREE.Group();rehabLab.name='KOMO_REHAB_LAB_V26';rehabRoom.add(rehabLab);
+const rehabLab=new THREE.Group();rehabLab.name='KOMO_FITNESS_ACTION_FLOOR_V83';rehabRoom.add(rehabLab);
 const rehabStationVisuals={};
 [
   ['control',-5.3,-3.2,0xb7c9be],
   ['strength',0,-3.2,0xd3b77f],
   ['capacity',5.3,-3.2,0xb7c9be]
 ].forEach(([id,x,z,color],i)=>{
-  const g=new THREE.Group();g.position.set(x,0,z);rehabLab.add(g);
+  const g=new THREE.Group();g.position.set(x,0,z);g.name='KOMO_FITNESS_'+id.toUpperCase()+'_ZONE_V83';rehabLab.add(g);
   const ringMat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.26,depthWrite:false});
   const ring=mesh(g,new THREE.RingGeometry(1.45,1.56,40),ringMat,0,.29,0,{cast:false,receive:false});ring.rotation.x=-Math.PI/2;ring.userData.dynamic=true;
   const pulse=mesh(g,new THREE.RingGeometry(.88,.94,34),ringMat.clone(),0,.30,0,{cast:false,receive:false});pulse.rotation.x=-Math.PI/2;pulse.userData.dynamic=true;
@@ -4631,13 +4631,13 @@ const rehabInteractions=[
 ].map(it=>({
   ...it,
   title:()=>rehabStationCopy(it.station).title[locale],
-  desc:()=>locale==='fr'?'Ouvrir la station guidée':'Open guided station',
+  desc:()=>personalTrajectory&&trajectoryFitnessStationId()===it.station?(locale==='fr'?'Recommandé pour votre priorité · ouvrir':'Recommended for your priority · open'):(locale==='fr'?'Explorer cette pratique':'Explore this practice'),
   action:()=>showRehabStation(it.station)
 }));
 rehabInteractions.push({
   id:'rehab_coach',x:0,z:-61.3,r:2.15,
   title:()=>locale==='fr'?'Alex · Fitness Coach':'Alex · Rehab Coach',
-  desc:()=>locale==='fr'?'Voir le rôle du coach virtuel':'Learn about the virtual coach',
+  desc:()=>personalTrajectory?(locale==='fr'?'Adapter votre séance à la trajectoire':'Relate your session to your trajectory'):(locale==='fr'?'Voir le rôle du coach virtuel':'Learn about the virtual coach'),
   action:()=>showRehabCoach()
 });
 
@@ -4706,6 +4706,13 @@ function trajectoryFocusKey(t=personalTrajectory){
 }
 function trajectoryTwinDomainId(t=personalTrajectory){
   return {strength:'muscle',mobility:'mobility',balance:'balance',cardio:'endurance',recovery:'posture'}[trajectoryFocusKey(t)]||null;
+}
+function trajectoryFitnessStationId(t=personalTrajectory){
+  const key=trajectoryFocusKey(t);
+  if(key==='strength')return 'strength';
+  if(key==='cardio')return 'capacity';
+  if(key==='balance'||key==='mobility'||key==='recovery')return 'control';
+  return null;
 }
 function trajectoryLibraryTopics(){
   const key=trajectoryFocusKey();
@@ -5920,7 +5927,7 @@ function showTwin(){
   ]);bindTimeline();
 }
 function rehabHtml(){
-  const t=fitnessToday(),recommended=trajectoryFocusKey(),trajectoryContext=personalTrajectory?'<div class="trajectory-fitness-context"><span>'+(locale==='fr'?'VOTRE TRAJECTOIRE':'YOUR TRAJECTORY')+'</span><strong>'+escHtml(personalTrajectory.priority||personalTrajectory.current_action||trajectoryPhaseLabel(personalTrajectory))+'</strong>'+(recommended?'<small>'+(locale==='fr'?'Pratique suggérée pour explorer cette priorité : ':'Suggested activity to explore this priority: ')+FITNESS_ACTIVITIES[recommended].title[locale]+'</small>':'')+'</div>':'';
+  const t=fitnessToday(),recommended=trajectoryFocusKey(),trajectoryContext=personalTrajectory?'<div class="trajectory-fitness-context"><span>'+(locale==='fr'?'VOTRE TRAJECTOIRE':'YOUR TRAJECTORY')+'</span><strong>'+escHtml(personalTrajectory.priority||personalTrajectory.current_action||trajectoryPhaseLabel(personalTrajectory))+'</strong>'+(recommended?'<small>'+(locale==='fr'?'Pratique suggérée pour travailler autour de cette priorité : ':'Suggested activity to work around this priority: ')+FITNESS_ACTIVITIES[recommended].title[locale]+'</small>':'')+'</div>':'';
 
   if(!t){
     return `
@@ -5951,9 +5958,11 @@ function showRehab(){
   stopRehabSession();
   const t=fitnessToday();
   setRehabCoachStation(t?.activity?.coach||'control',false);
-  openPanel('KŌMØ FITNESS CLUB',t
-    ?(locale==='fr'?'Programme quotidien · Coach Alex':'Daily program · Coach Alex')
-    :(locale==='fr'?'Choisissez votre activité physique.':'Choose your physical activity.'),rehabHtml(),[
+  const recommended=trajectoryFocusKey();
+  const intro=personalTrajectory
+    ?(recommended?(locale==='fr'?'Agir sur votre priorité · '+FITNESS_ACTIVITIES[recommended].title.fr:'Act on your priority · '+FITNESS_ACTIVITIES[recommended].title.en):(locale==='fr'?'Agir sur votre trajectoire.':'Act on your trajectory.'))
+    :(t?(locale==='fr'?'Programme quotidien · Coach Alex':'Daily program · Coach Alex'):(locale==='fr'?'Choisissez votre activité physique.':'Choose your physical activity.'));
+  openPanel('KŌMØ FITNESS CLUB',intro,rehabHtml(),[
     {label:copy[locale].back,onClick:returnToHall},
     ...(t?[{label:locale==='fr'?'SÉANCE DU JOUR':'TODAY’S SESSION',primary:true,onClick:showFitnessToday}]:[]),
     {label:locale==='fr'?'EXPLORER LE CLUB':'EXPLORE CLUB',onClick:closePanel},
@@ -6518,9 +6527,14 @@ function updateTwinScan(now){
   }
   if(inFitnessZone()){
     animateRehabCoach(now,Math.min(.05,(now-(updateTwinScan.lastNow||now))/1000||.016));updateTwinScan.lastNow=now;
-    Object.values(rehabStationVisuals).forEach((v,i)=>{
-      if(!rehabSessionTimer)v.pulse.scale.setScalar(.95+.06*Math.sin(now*.0016+i*.9));
+    const recommendedStation=trajectoryFitnessStationId();
+    Object.entries(rehabStationVisuals).forEach(([id,v],i)=>{
+      const recommended=!!personalTrajectory&&recommendedStation===id;
+      if(!rehabSessionTimer)v.pulse.scale.setScalar(recommended?(1.07+.08*Math.sin(now*.0016+i*.9)):(.95+.04*Math.sin(now*.0016+i*.9)));
       v.ring.rotation.z=now*.00022*(i%2?1:-1);
+      v.ring.material.opacity=recommended?.62:.20;
+      v.pulse.material.opacity=recommended?.40:.16;
+      v.group.scale.setScalar(recommended?1.035:1);
     });
   }
 }
@@ -7107,7 +7121,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.2.0-twin-trajectory',
+  version:'8.3.0-fitness-trajectory',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
