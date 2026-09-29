@@ -1754,7 +1754,7 @@ const campusGlassV64=visualLowPower?MAT.smokedGlass:new THREE.MeshPhysicalMateri
 
 // A few hero trees use real branching; secondary vegetation is fully instanced.
 function heroTreeV64(x,z,scale=1,spread=1){
-  const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);g.name='KOMO_HERO_TREE_V64';livingCampusV64.add(g);
+  const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale*(lowPower?1.12:1.36));g.name='KOMO_HERO_TREE_V64';livingCampusV64.add(g);
   cyl(g,.24,.38,4.3,campusTrunkV64,0,2.15,0,lowPower?7:10,{cast:true});
   const branches=[
     [[0,3.4,0],[1.55,5.05,.25],.17],[[0,3.5,0],[-1.35,4.85,-.20],.16],
@@ -1777,6 +1777,13 @@ const heroTreeSpecsV64=[
   [-26.5,67.5,1.18,1.05],[26.8,69.0,1.22,1.08],[-19.5,87.5,1.04,1.0],[19.5,87.5,1.04,1.0]
 ];
 heroTreeSpecsV64.forEach(v=>heroTreeV64(...v));
+const grandCanopyV91=[
+  [-38.0,30.0,1.02,1.08],[38.0,31.5,1.00,1.08],
+  [-39.5,57.0,1.08,1.10],[39.0,56.0,1.06,1.10],
+  [-18.0,78.0,1.00,1.12],[18.0,79.0,1.02,1.12],
+  [-34.0,91.0,.96,1.08],[34.0,91.0,.96,1.08]
+];
+grandCanopyV91.forEach(v=>heroTreeV64(...v));
 
 // Cypress rhythm + umbrella pines + low planting beds.
 const cypressTrunksV64=[],cypressCrownsV64=[],pineTrunksV64=[],pineCrownsV64=[],shrubItemsV64=[];
@@ -1784,16 +1791,16 @@ const cypressTrunksV64=[],cypressCrownsV64=[],pineTrunksV64=[],pineCrownsV64=[],
   const zs=[25,33,41,49,57,65,73,81,89];
   zs.forEach((z,i)=>{
     const x=side*(20.5+(i%2)*1.8);
-    cypressTrunksV64.push({x,y:1.6,z,sx:.16,sy:3.2,sz:.16});
-    cypressCrownsV64.push({x,y:4.2,z,sx:.72+(i%3)*.08,sy:3.35+(i%2)*.35,sz:.72+(i%3)*.08});
+    cypressTrunksV64.push({x,y:1.95,z,sx:.18,sy:3.9,sz:.18});
+    cypressCrownsV64.push({x,y:5.05,z,sx:.82+(i%3)*.09,sy:4.05+(i%2)*.42,sz:.82+(i%3)*.09});
   });
 });
 const pineSpecsV64=[
   [-30,40,1.08],[30,42,1.06],[-31,58,1.00],[31,59,1.02],[-29,76,.98],[29,77,.98],[-11,91,.90],[11,91,.90]
 ];
 pineSpecsV64.forEach(([x,z,sc],i)=>{
-  pineTrunksV64.push({x,y:1.55,z,sx:.20*sc,sy:3.1*sc,sz:.20*sc});
-  pineCrownsV64.push({x,y:4.30*sc,z,sx:2.05*sc,sy:.76*sc,sz:1.85*sc,ry:i*.67});
+  pineTrunksV64.push({x,y:1.95,z,sx:.23*sc,sy:3.9*sc,sz:.23*sc});
+  pineCrownsV64.push({x,y:5.45*sc,z,sx:2.62*sc,sy:.92*sc,sz:2.34*sc,ry:i*.67});
 });
 const shrubCountV64=44;
 for(let i=0;i<shrubCountV64;i++){
@@ -1831,14 +1838,14 @@ function campusPavilionV64(x,z,w,d,title,sub,side=1){
   box(g,w-.9,.06,1.2,MAT.walnut,0,.68,-d/2+1.35,{cast:true});
   return g;
 }
-const pavilionMovementV64=campusPavilionV64(-30.5,43.0,11.8,18.0,'MOVEMENT','MEASURE · TRAIN · MOVE',1);
-const pavilionLongevityV64=campusPavilionV64(30.5,43.0,11.8,18.0,'LONGEVITY','SCIENCE · TRAJECTORY',1);
-const pavilionCommunityV64=campusPavilionV64(-30.0,69.5,10.8,14.5,'COMMUNITY LOUNGE','MEET · CONNECT · RECOVER',1);
-const pavilionRecoveryV64=campusPavilionV64(30.0,69.5,10.8,14.5,'RECOVERY HOUSE','REST · RESET · RESTORE',1);
+const pavilionMovementV64=campusPavilionV64(-30.5,43.0,11.8,18.0,'MOVEMENT PAVILION','ASSESS · PRACTICE · PROGRESS',1);
+const pavilionLongevityV64=campusPavilionV64(30.5,43.0,11.8,18.0,'LONGEVITY PAVILION','CLINICAL · TRAJECTORY · FOLLOW-UP',1);
+const pavilionCommunityV64=campusPavilionV64(-30.0,69.5,10.8,14.5,'COMMUNITY LOUNGE','MEET · TALKS · MEMBERS',1);
+const pavilionRecoveryV64=campusPavilionV64(30.0,69.5,10.8,14.5,'RECOVERY HOUSE','RECOVER · RESET · RESTORE',1);
 
 // V6.9 Visual parity — arrival architecture is identical on desktop and mobile.
-campusPavilionV64(-17.8,14.0,7.8,8.8,'MOTION HOUSE','MEASURE · MOVE',1);
-campusPavilionV64(17.8,14.0,7.8,8.8,'LONGEVITY LAB','SCIENCE · LIVE',1);
+campusPavilionV64(-17.8,14.0,7.8,8.8,'MOTION HOUSE','ASSESS · UNDERSTAND',1);
+campusPavilionV64(17.8,14.0,7.8,8.8,'LONGEVITY LAB','CLINICAL · CONSULT · PLAN',1);
 [-1,1].forEach(side=>{
   const x=side*8.7;
   box(livingCampusV64,.10,.035,19.0,MAT.brass,x,.035,10.5,{cast:false,receive:false});
@@ -1938,7 +1945,7 @@ function masterplanSignV68(parent,x,z,title,sub,rotY=0){
   return g;
 }
 function oliveTreeV68(parent,x,z,scale=1){
-  const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale);parent.add(g);
+  const g=new THREE.Group();g.position.set(x,0,z);g.scale.setScalar(scale*(lowPower?1.04:1.18));parent.add(g);
   cyl(g,.21,.31,3.35,campusTrunkV64,0,1.67,0,9,{cast:!lowPower});
   [[0,3.90,0,1.46],[.92,3.72,.15,.96],[-.88,3.73,-.12,.92],[.32,4.28,-.64,.76],[-.38,4.20,.60,.74]].forEach(([cx,cy,cz,s],i)=>{
     const crown=mesh(g,campusCrownGeoV64,i%2?v68Olive:campusGreenSoftV64,cx,cy,cz,{cast:!lowPower});
@@ -2024,7 +2031,7 @@ box(boardingV68,.32,6.6,14.5,MAT.limestone,9.05,3.45,0,{cast:true});
 box(boardingV68,18.5,.30,14.5,MAT.blackened,0,6.65,0,{cast:true});
 box(boardingV68,.048,5.55,12.9,campusGlassV64,8.80,3.35,0,{cast:false,receive:false});
 box(boardingV68,16.4,.045,12.6,campusInteriorGlowV64,0,6.38,0,{cast:false,receive:false});
-plaque(boardingV68,'BOARDING LOUNGE','KŌMØ YACHTING · RETREATS',7.4,.98,-8.92,4.85,0,{rotY:Math.PI/2,dark:true,titleSize:52});
+plaque(boardingV68,'BOARDING LOUNGE','CONCIERGE · BOARDING · ONBOARD',7.4,.98,-8.92,4.85,0,{rotY:Math.PI/2,dark:true,titleSize:52});
 box(boardingV68,19.2,.24,15.2,MAT.blackened,0,6.90,0,{cast:true});
 box(boardingV68,19.4,.30,.22,MAT.travertine,0,7.13,7.45,{cast:true});
 box(boardingV68,19.4,.30,.22,MAT.travertine,0,7.13,-7.45,{cast:true});
@@ -2039,7 +2046,7 @@ box(marinaClubV68,.30,5.4,11.2,MAT.limestone,-7.85,2.84,0,{cast:true});
 box(marinaClubV68,.30,5.4,11.2,MAT.limestone,7.85,2.84,0,{cast:true});
 box(marinaClubV68,16.0,.26,11.2,MAT.blackened,0,5.48,0,{cast:true});
 box(marinaClubV68,.045,4.5,9.8,campusGlassV64,7.62,2.75,0,{cast:false});
-plaque(marinaClubV68,'YACHTING HOUSE','PRIVATE EXPERIENCE · HOSPITALITY',6.9,.84,-7.70,4.10,0,{rotY:Math.PI/2,dark:true,titleSize:45});
+plaque(marinaClubV68,'YACHTING HOUSE','HOSPITALITY · PRIVATE EXPERIENCES',6.9,.84,-7.70,4.10,0,{rotY:Math.PI/2,dark:true,titleSize:45});
 box(marinaClubV68,16.7,.22,11.9,MAT.blackened,0,5.70,0,{cast:true});
 box(marinaClubV68,16.9,.30,.20,MAT.travertine,0,5.94,5.85,{cast:true});
 box(marinaClubV68,16.9,.30,.20,MAT.travertine,0,5.94,-5.85,{cast:true});
@@ -2054,8 +2061,11 @@ box(marinaClubV68,16.9,.30,.20,MAT.travertine,0,5.94,-5.85,{cast:true});
   }
 });
 yachtV68(marinaV68,79.0,49.6,19,Math.PI/2,'MOTION I');
-yachtV68(marinaV68,81.0,65.5,27,Math.PI/2,'KŌMØ ONE');
+yachtV68(marinaV68,82.0,65.5,36,Math.PI/2,'KŌMØ ONE');
 yachtV68(marinaV68,79.5,81.2,21,Math.PI/2,'RIVIERA');
+box(marinaDetailV68,1.28,.12,4.75,v68Deck,70.0,.46,64.35,{cast:true,receive:true});
+[-.48,.48].forEach(x=>box(marinaDetailV68,.045,.62,4.55,MAT.brass,70.0+x,.82,64.35,{cast:false}));
+plaque(marinaDetailV68,'KŌMØ ONE','PRIVATE BOARDING',3.3,.56,68.9,2.05,63.0,{rotY:-Math.PI/2,dark:true,titleSize:32});
 
 // Harbor edge / horizon marker.
 box(marinaV68,30,.42,2.5,MAT.limestone,91.0,.21,31.0,{cast:true});
@@ -2072,6 +2082,8 @@ bannerTotem(marinaDetailV68,43.2,72.0,'RETREATS','BOARDING',0);
   exteriorBench(marinaDetailV68,57.0,z+3.2,-Math.PI/2,.82);
 });
 [37,45,54,63,72,81,89].forEach(z=>exteriorBollard(marinaDetailV68,61.1,z,.68));
+[[43.0,34.5,1.08],[43.5,91.0,1.16],[58.0,34.0,1.02],[58.0,90.0,1.06]].forEach(([x,z,s])=>oliveTreeV68(marinaDetailV68,x,z,s));
+exteriorBench(marinaDetailV68,45.5,35.5,0,.92);exteriorBench(marinaDetailV68,45.5,89.5,Math.PI,.92);
 if(!iphoneVisualReference){
   for(let i=0;i<6;i++){
     const q=box(marinaDetailV68,28,.010,.055,shimmerMat,83.2,.115,37+i*10.0,{cast:false,receive:false});
@@ -2148,7 +2160,7 @@ box(retreatHouseV68,35,.30,17.0,MAT.blackened,0,6.86,0,{cast:true});
 box(retreatHouseV68,33.4,.055,15.6,campusInteriorGlowV64,0,6.58,0,{cast:false,receive:false});
 box(retreatHouseV68,19.8,5.55,.048,campusGlassV64,0,3.50,-8.0,{cast:false,receive:false});
 [-14.1,14.1].forEach(x=>box(retreatHouseV68,5.6,5.55,.048,campusGlassV64,x,3.50,-8.0,{cast:false,receive:false}));
-plaque(retreatHouseV68,'KŌMØ RETREAT VILLA','PRIVATE LONGEVITY EXPERIENCE',9.0,1.05,0,5.55,-8.26,{dark:true,titleSize:60});
+plaque(retreatHouseV68,'KŌMØ RETREAT VILLA','SLEEP · NUTRITION · RECOVERY',9.0,1.05,0,5.55,-8.26,{dark:true,titleSize:60});
 box(retreatHouseV68,36.0,.24,17.9,MAT.blackened,0,7.02,0,{cast:true});
 box(retreatHouseV68,36.2,.32,.22,MAT.travertine,0,7.27,8.75,{cast:true});
 box(retreatHouseV68,36.2,.32,.22,MAT.travertine,0,7.27,-8.75,{cast:true});
@@ -2235,6 +2247,30 @@ function showVillaV68(){
   openPanel('KŌMØ RETREAT VILLA',locale==='fr'?'Une expérience privée de longévité, d’hospitalité et d’art de vivre.':'A private longevity, hospitality and lifestyle experience.',
     '<div class="panel-grid"><div><span>RETREAT</span><b>Private villa</b></div><div><span>PROGRAM</span><b>Sleep · Nutrition</b></div><div><span>LONGEVITY</span><b>Skin · NAD</b></div><div><span>HOSPITALITY</span><b>Riviera</b></div></div><div class="priority-card"><b>PRIVATE EXPERIENCE</b>'+ (locale==='fr'?'Villa, piscine, suites, jardins, ateliers et espaces longevity composent une expérience résidentielle complète.':'Villa, pool, suites, gardens, workshops and longevity spaces form a complete residential retreat.') +'</div>',
     [{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},{label:locale==='fr'?'ALLER À LA VILLA':'GO TO VILLA',primary:true,onClick:()=>{closePanel();fastTravel('villa')}}]);
+}
+
+
+const CAMPUS_PLACES_V91={
+  motion:{title:'MOTION HOUSE',fr:'Votre point de mesure et de compréhension du mouvement.',en:'Your movement assessment and understanding point.',tags:['ASSESS','MOTION','REFERENCE']},
+  longevityLab:{title:'LONGEVITY LAB',fr:'Consultation, lecture globale et construction de la trajectoire.',en:'Consultation, whole-person review and trajectory planning.',tags:['CLINICAL','CONSULT','PLAN']},
+  movement:{title:'MOVEMENT PAVILION',fr:'Transformer une priorité en pratique et en progression.',en:'Turn a priority into practice and progression.',tags:['PRACTICE','MOBILITY','PROGRESS']},
+  longevity:{title:'LONGEVITY PAVILION',fr:'Suivi longitudinal, Clinical et prochains checkpoints.',en:'Longitudinal follow-up, Clinical and next checkpoints.',tags:['CLINICAL','FOLLOW-UP','TRAJECTORY']},
+  community:{title:'COMMUNITY LOUNGE',fr:'Rencontres, talks et temps de pause du campus.',en:'Meet, attend talks and pause between campus experiences.',tags:['MEET','TALKS','MEMBERS']},
+  recovery:{title:'RECOVERY HOUSE',fr:'Récupération, reset, hydratation et retour à l’équilibre.',en:'Recovery, reset, hydration and restoration.',tags:['RECOVER','RESET','RESTORE']}
+};
+function showCampusPlaceV91(id){
+  const p=CAMPUS_PLACES_V91[id];if(!p)return;
+  const cards=p.tags.map((t,i)=>'<div><span>'+String(i+1).padStart(2,'0')+'</span><b>'+t+'</b></div>').join('');
+  openPanel('KŌMØ CAMPUS',p.title,'<div class="panel-grid">'+cards+'</div><div class="priority-card"><b>'+(locale==='fr'?'RÔLE DANS LE PARCOURS':'ROLE IN YOUR PATH')+'</b>'+(locale==='fr'?p.fr:p.en)+'</div>',[
+    {label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},
+    ...(id==='recovery'?[{label:locale==='fr'?'ALLER À RECOVERY':'GO TO RECOVERY',primary:true,onClick:()=>{closePanel();fastTravel('recovery')}}]:[])
+  ]);
+}
+function showYachtAccessV91(){
+  ensureMarinaServicesV762();
+  openPanel('KŌMØ YACHTING',locale==='fr'?'Votre expérience KŌMØ peut continuer directement à bord.':'Your KŌMØ experience can continue directly onboard.',
+    '<div class="panel-grid"><div><span>01</span><b>MOTION · ONBOARD</b></div><div><span>02</span><b>CLINICAL · CONSULT</b></div><div><span>03</span><b>RECOVERY · IV</b></div><div><span>04</span><b>CONCIERGE · RETREAT</b></div></div><div class="priority-card"><b>KŌMØ ONE</b>'+(locale==='fr'?'Boarding Lounge, quai privé et yacht forment une continuité : bilan, consultation, récupération et expérience hospitality sans quitter le parcours KŌMØ.':'Boarding Lounge, private dock and yacht form one continuum: assessment, consultation, recovery and hospitality without leaving the KŌMØ journey.')+'</div>',
+    [{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},{label:locale==='fr'?'ALLER AU YACHT':'GO TO YACHT',primary:true,onClick:()=>{closePanel();fastTravel('yacht')}}]);
 }
 
 // Main building — one continuous architectural object, no reception avatar.
@@ -4634,10 +4670,17 @@ function showControlsPanel(){
 
 
 const interactions=[
+  {id:'motion_house_v91',x:-10.4,z:14.0,r:7.6,title:()=> 'Motion House',desc:()=>locale==='fr'?'Mesurer · comprendre · créer votre référence':'Assess · understand · establish your reference',action:()=>showCampusPlaceV91('motion')},
+  {id:'longevity_lab_v91',x:10.4,z:14.0,r:7.6,title:()=> 'Longevity Lab',desc:()=>locale==='fr'?'Consultation · Clinical · trajectoire':'Consultation · Clinical · trajectory',action:()=>showCampusPlaceV91('longevityLab')},
+  {id:'movement_pavilion_v91',x:-22.5,z:43.0,r:7.6,title:()=> 'Movement Pavilion',desc:()=>locale==='fr'?'Pratiquer · mobilité · progresser':'Practice · mobility · progress',action:()=>showCampusPlaceV91('movement')},
+  {id:'longevity_pavilion_v91',x:22.5,z:43.0,r:7.6,title:()=> 'Longevity Pavilion',desc:()=>locale==='fr'?'Clinical · suivi · prochain point':'Clinical · follow-up · next checkpoint',action:()=>showCampusPlaceV91('longevity')},
+  {id:'community_lounge_v91',x:-26.0,z:69.5,r:6.6,title:()=> 'Community Lounge',desc:()=>locale==='fr'?'Talks · membres · rencontres':'Talks · members · meet',action:()=>showCampusPlaceV91('community')},
+  {id:'recovery_house_v91',x:26.0,z:69.5,r:6.6,title:()=> 'Recovery House',desc:()=>locale==='fr'?'Recovery · reset · restore':'Recovery · reset · restore',action:()=>showCampusPlaceV91('recovery')},
   {id:'marina',x:39.0,z:67.8,r:4.8,title:()=>locale==='fr'?'KŌMØ Marina · Yachting':'KŌMØ Marina · Yachting',desc:()=>locale==='fr'?'Services à bord · à quai · en villa':'Onboard · dockside · villa services',action:showMarinaV68},
   {id:'marina_motion',x:50.0,z:56.0,r:4.6,title:()=> 'KŌMØ Motion Deck',desc:()=>locale==='fr'?'Bilan Motion · mobilité · performance':'Motion assessment · mobility · performance',action:showMarinaV68},
   {id:'marina_recovery',x:50.0,z:67.0,r:4.6,title:()=> 'Recovery Lounge',desc:()=>locale==='fr'?'Hydratation · recovery · travel reset':'Hydration · recovery · travel reset',action:showMarinaV68},
-  {id:'marina_dock',x:63.0,z:62.5,r:3.8,title:()=>locale==='fr'?'Private Dock · embarquement':'Private Dock · boarding',desc:()=>locale==='fr'?'Services KŌMØ directement à bord':'KŌMØ services directly onboard',action:showMarinaV68},
+  {id:'marina_dock',x:63.0,z:62.5,r:4.2,title:()=>locale==='fr'?'Private Dock · embarquement':'Private Dock · boarding',desc:()=>locale==='fr'?'Accéder à KŌMØ ONE et aux services à bord':'Access KŌMØ ONE and onboard services',action:showYachtAccessV91},
+  {id:'yacht_boarding_v91',x:70.0,z:63.0,r:5.0,title:()=> 'KŌMØ ONE · Yacht Access',desc:()=>locale==='fr'?'Boarding · Motion · Clinical · Recovery':'Boarding · Motion · Clinical · Recovery',action:showYachtAccessV91},
   {id:'villa',x:-39.0,z:67.8,r:4.8,title:()=>locale==='fr'?'KŌMØ Retreat Villa':'KŌMØ Retreat Villa',desc:()=>locale==='fr'?'Villa privée · piscine · expériences longévité':'Private villa · pool · longevity experiences',action:showVillaV68},
   {id:'desk',x:-7.3,z:4.0,r:3.6,title:()=>locale==='fr'?'Votre équipe KŌMØ':'Your KŌMØ team',desc:()=>personalTrajectory?(locale==='fr'?'Faire le point · prochain checkpoint · orientation':'Check in · next checkpoint · guidance'):(locale==='fr'?'Accueil · orientation · connexion Pulse':'Welcome · guidance · connect Pulse'),action:showDesk},
   {id:'health',x:-5.25,z:10.55,r:2.7,title:()=>personalTrajectory?(locale==='fr'?'Votre référence':'Your reference'):(locale==='fr'?'Aperçu mouvement':'Movement overview'),desc:()=>personalTrajectory?(personalTrajectory.motion_score!=null?'Motion Score '+Math.round(personalTrajectory.motion_score)+' · '+trajectoryPhaseLabel(personalTrajectory):trajectoryPhaseLabel(personalTrajectory)):(locale==='fr'?'Comprendre les 5 domaines en un coup d’œil':'Understand the 5 domains at a glance'),action:showHealthOverview},
@@ -4917,7 +4960,7 @@ function worldHomeHtml(){
     '<section class="home-change-card-v90"><div class="home-card-title"><div><span>'+(locale==='fr'?'DEPUIS LE DERNIER BILAN':'SINCE LAST ASSESSMENT')+'</span><strong>'+(locale==='fr'?'Ce qui a changé':'What changed')+'</strong></div></div>'+worldHomeChangesHtml(t)+'</section>'+
     '<section class="home-program-card-v90">'+worldHomeProgramHtml(t)+'<button type="button" data-home-action="fitness">'+(locale==='fr'?'OUVRIR FITNESS':'OPEN FITNESS')+' ›</button></section>'+
     '<section class="home-checkpoint-v90"><span>'+(locale==='fr'?'PROCHAIN CHECKPOINT':'NEXT CHECKPOINT')+'</span><strong>'+checkpoint+'</strong><small>'+(days!=null?(days+(locale==='fr'?' jours':' days')):(connected?(locale==='fr'?'À planifier dans Pulse':'Schedule in Pulse'):(locale==='fr'?'Après votre bilan':'After your assessment')))+'</small><button type="button" data-home-action="'+(connected?'trajectory':'assessment')+'">'+(connected?(locale==='fr'?'VOIR LA TRAJECTOIRE':'VIEW TRAJECTORY'):(locale==='fr'?'VOIR LE PARCOURS':'SEE THE PATH'))+' ›</button></section>'+
-    '<section class="home-destinations-v90"><div class="home-card-title"><div><span>'+(locale==='fr'?'ACCÈS DIRECTS':'DIRECT ACCESS')+'</span><strong>'+(locale==='fr'?'Utilisez World comme vous voulez':'Use World your way')+'</strong></div></div><div class="home-destination-row"><button type="button" data-home-action="twin"><i>◎</i><b>FUNCTIONAL TWIN</b><small>'+(locale==='fr'?'Comprendre':'Understand')+'</small></button><button type="button" data-home-action="fitness"><i>△</i><b>FITNESS</b><small>'+(locale==='fr'?'Agir':'Act')+'</small></button><button type="button" data-home-action="library"><i>▤</i><b>LIBRARY</b><small>Science</small></button><button type="button" data-home-action="world"><i>⌖</i><b>WORLD 3D</b><small>'+(locale==='fr'?'Explorer':'Explore')+'</small></button></div></section>'+
+    '<section class="home-destinations-v90"><div class="home-card-title"><div><span>DESTINATIONS</span><strong>'+(locale==='fr'?'Chaque lieu a une fonction dans votre parcours':'Every place has a role in your journey')+'</strong></div></div><div class="home-destination-row"><button type="button" data-home-action="twin"><i>◎</i><b>FUNCTIONAL TWIN</b><small>'+(locale==='fr'?'Comprendre':'Understand')+'</small></button><button type="button" data-home-action="fitness"><i>△</i><b>FITNESS</b><small>'+(locale==='fr'?'Agir':'Act')+'</small></button><button type="button" data-home-action="recovery"><i>◌</i><b>RECOVERY</b><small>'+(locale==='fr'?'Récupérer':'Recover')+'</small></button><button type="button" data-home-action="library"><i>▤</i><b>LIBRARY</b><small>Science</small></button><button type="button" data-home-action="life"><i>◉</i><b>LIFE</b><small>'+(locale==='fr'?'Protocoles':'Protocols')+'</small></button><button type="button" data-home-action="arena"><i>◇</i><b>ARENA</b><small>'+(locale==='fr'?'Réévaluer':'Reassess')+'</small></button><button type="button" class="featured-yacht" data-home-action="yacht"><i>≈</i><b>YACHT / MARINA</b><small>'+(locale==='fr'?'À bord':'Onboard')+'</small></button><button type="button" data-home-action="retreat"><i>⌂</i><b>RETREAT</b><small>'+(locale==='fr'?'Immersion':'Immersion')+'</small></button></div></section>'+
     '<section class="home-continuity-v90 '+(plus?'active':'')+'"><div><span>'+(plus?'WORLD+ · ACTIF':connected?'WORLD+':'DISCOVERY')+'</span><strong>'+(plus?(locale==='fr'?'Votre suivi continue':'Your follow-up continues'):connected?(locale==='fr'?'Continuer entre deux checkpoints':'Continue between checkpoints'):(locale==='fr'?'World reste libre à explorer':'World stays free to explore'))+'</strong></div><p>'+(plus?(locale==='fr'?'Programme, progression et préparation du prochain point restent réunis ici.':'Programme, progress and next-checkpoint preparation stay here.'):connected?(locale==='fr'?'World+ prolonge votre espace personnel si vous souhaitez poursuivre le suivi.':'World+ extends your personal space if you want ongoing follow-up.'):(locale==='fr'?'La personnalisation commence après un bilan KŌMØ.':'Personalisation starts after a KŌMØ assessment.'))+'</p><button type="button" data-home-action="'+(plus?'pulse':connected?'world-plus':'assessment')+'">'+(plus?'PULSE':connected?'WORLD+':(locale==='fr'?'COMMENT ÇA MARCHE':'HOW IT WORKS'))+' ›</button></section>'+
   '</div>';
 }
@@ -4933,7 +4976,12 @@ function bindWorldHomeActions(){
     if(action==='trajectory'){closeWorldHome();showJourneyPanel();return}
     if(action==='twin'){closeWorldHome();fastTravel('twin');return}
     if(action==='fitness'){closeWorldHome();fastTravel('rehab');return}
+    if(action==='recovery'){closeWorldHome();fastTravel('recovery');return}
     if(action==='library'){closeWorldHome();fastTravel('library');return}
+    if(action==='life'){closeWorldHome();fastTravel('life');return}
+    if(action==='arena'){closeWorldHome();fastTravel('arena');return}
+    if(action==='yacht'){closeWorldHome();fastTravel('yacht');return}
+    if(action==='retreat'){closeWorldHome();fastTravel('villa');return}
     if(action==='continue'){const id=trajectoryFocusKey();closeWorldHome();if(id)fastTravel('rehab');else fastTravel('twin')}
   }));
 }
@@ -5525,7 +5573,9 @@ const travelPoints={
   arena:{mode:'world',x:5.9,y:0,z:-22.2,yaw:0,level:0},
   life:{mode:'world',x:5.4,y:0,z:3.6,yaw:-1.15,level:0},
   library:{mode:'world',x:-15.0,y:0,z:-10.0,yaw:Math.PI/2,level:0},
+  recovery:{mode:'world',x:25.5,y:0,z:69.5,yaw:-Math.PI/2,level:0},
   marina:{mode:'world',x:50.0,y:0,z:63.0,yaw:-Math.PI/2,level:0},
+  yacht:{mode:'world',x:69.5,y:0,z:62.7,yaw:-Math.PI/2,level:0},
   villa:{mode:'world',x:-43.0,y:0,z:62.0,yaw:Math.PI/2,level:0},
   upper:{mode:'world',x:-8.72,y:UPPER_Y,z:5.7,yaw:0,level:1}
 };
@@ -5631,6 +5681,7 @@ function updateJourneyGuide(now){
 setGuideEnabled(true);
 function fastTravel(id){
   const p=travelPoints[id];if(!p)return;
+  if(id==='marina'||id==='yacht')ensureMarinaServicesV762();
   setCameraMode('first');
   closeWorldHome();closePanel();closeWorldMenu();travelFade.classList.add('active');velocity.set(0,0,0);keys.clear();
   setTimeout(()=>{
@@ -6477,6 +6528,7 @@ function inArenaZone(p=player){return p.x>32.15&&p.x<57.2&&p.z>-13.3&&p.z<12.2}
 function inLibraryZone(p=player){return p.x>-25.2&&p.x<-10.65&&p.z>-17.25&&p.z<-2.75}
 function inLibraryDoor(p=player){return p.x>-12.2&&p.x<-9.8&&p.z>-12.45&&p.z<-7.55}
 function inMarinaLink(p=player){return p.x>20&&p.x<43&&p.z>63.2&&p.z<72.2}
+function inRecoveryZoneV91(p=player){return p.x>23.5&&p.x<36.5&&p.z>62.5&&p.z<77.0}
 function inVillaLink(p=player){return p.x<-20&&p.x>-43&&p.z>63.2&&p.z<72.2}
 function inMarinaZone(p=player){
   const waterfront=p.x>40&&p.x<63.5&&p.z>31&&p.z<94;
@@ -6493,6 +6545,7 @@ function getCampusZone(p=player){
   if(inFitnessZone(p))return 'rehab';
   if(inArenaZone(p))return 'arena';
   if(inLibraryZone(p))return 'library';
+  if(inRecoveryZoneV91(p))return 'recovery';
   if(inMarinaZone(p))return 'marina';
   if(inVillaZone(p))return 'villa';
   return 'hall';
@@ -6500,7 +6553,7 @@ function getCampusZone(p=player){
 function canMove(p){
   if(isStairPosition(p))return true;
   if(playerLevel===1||player.y>UPPER_Y-.70)return isUpperWalkable(p);
-  if(inTwinZone(p)||inFitnessZone(p)||inArenaZone(p)||inLibraryZone(p)||inLibraryDoor(p)||inTwinLink(p)||inArenaLink(p)||inFitnessLink(p)||inMarinaZone(p)||inVillaZone(p)||inMarinaLink(p)||inVillaLink(p))return true;
+  if(inTwinZone(p)||inFitnessZone(p)||inArenaZone(p)||inLibraryZone(p)||inLibraryDoor(p)||inTwinLink(p)||inArenaLink(p)||inFitnessLink(p)||inRecoveryZoneV91(p)||inMarinaZone(p)||inVillaZone(p)||inMarinaLink(p)||inVillaLink(p))return true;
   // Main Hall / arrival navigation plane.
   if(p.z>81||p.z<-29.15||Math.abs(p.x)>24)return false;
   if(p.z<16.5&&Math.abs(p.x)>11.55)return false;
@@ -6748,8 +6801,12 @@ function updateLocation(){
   else if(inFitnessZone()){label='KŌMØ FITNESS CLUB';purpose=locale==='fr'?'BOUGER · S’ENTRAÎNER · PROGRESSER':'MOVE · TRAIN · PROGRESS';nav='';completeJourney('rehab',{silent:true})}
   else if(inArenaZone()){label='ARENA';purpose=locale==='fr'?'RÉÉVALUER · COMPARER · PROGRESSER':'REASSESS · COMPARE · PROGRESS';nav='';completeJourney('arena',{silent:true});completeChallenge('arena_visit')}
   else if(inLibraryZone()){label='SCIENCE LIBRARY';purpose=locale==='fr'?'SCIENCE · MÉTHODE · SOURCES':'SCIENCE · METHOD · SOURCES';nav='library';completeJourney('library',{silent:true})}
-  else if(inMarinaZone()){label='KŌMØ MARINA';purpose=locale==='fr'?'YACHTING · HOSPITALITY · RETREATS':'YACHTING · HOSPITALITY · RETREATS';nav=''}
-  else if(inVillaZone()){label='RETREAT VILLA';purpose=locale==='fr'?'PRIVATE LONGEVITY EXPERIENCE':'PRIVATE LONGEVITY EXPERIENCE';nav=''}
+  else if(inRecoveryZoneV91()){label='RECOVERY HOUSE';purpose=locale==='fr'?'RÉCUPÉRER · RESET · RESTAURER':'RECOVER · RESET · RESTORE';nav='recovery'}
+  else if(inMarinaZone()){
+    if(player.x>64&&player.z>58&&player.z<70){label='KŌMØ ONE · PRIVATE DOCK';purpose=locale==='fr'?'BOARDING · EXPÉRIENCE À BORD':'BOARDING · ONBOARD EXPERIENCE';nav='marina'}
+    else{label='KŌMØ MARINA';purpose=locale==='fr'?'YACHTING · HOSPITALITY · RETREATS':'YACHTING · HOSPITALITY · RETREATS';nav='marina'}
+  }
+  else if(inVillaZone()){label='RETREAT VILLA';purpose=locale==='fr'?'SLEEP · NUTRITION · RECOVERY':'SLEEP · NUTRITION · RECOVERY';nav='villa'}
   else if(inMarinaLink()){label='MARINA PROMENADE';purpose=locale==='fr'?'VERS LE PORT & YACHTING':'TO MARINA & YACHTING';nav=''}
   else if(inVillaLink()){label='RETREAT GARDEN WALK';purpose=locale==='fr'?'VERS LA VILLA PRIVÉE':'TO PRIVATE VILLA';nav=''}
   else if(playerLevel===1){
@@ -6770,7 +6827,7 @@ function updateLocation(){
   document.querySelectorAll('.world-destinations [data-destination]').forEach(btn=>{
     const map={hall:'hall',twin:'twin',fitness:'',arena:''};
     const key=btn.dataset.destination;
-    const active=(key==='hall'&&nav==='hall')||(key==='twin'&&nav==='twin')||(key==='library'&&nav==='library')||(key==='fitness'&&inFitnessZone())||(key==='arena'&&inArenaZone());
+    const active=(key==='hall'&&nav==='hall')||(key==='twin'&&nav==='twin')||(key==='library'&&nav==='library')||(key==='fitness'&&inFitnessZone())||(key==='arena'&&inArenaZone())||(key==='recovery'&&nav==='recovery')||(key==='marina'&&nav==='marina')||(key==='villa'&&nav==='villa');
     btn.classList.toggle('active',active);
   });
   syncQuickNav(nav);showWorldZone(label,purpose);
@@ -7437,7 +7494,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'9.0.0-health-home',
+  version:'9.1.0-campus-yachting',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
