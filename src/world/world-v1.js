@@ -4708,7 +4708,24 @@ let personalTrajectory=loadPersonalTrajectory();
 function cleanTrajectory(input){
   if(!input||typeof input!=='object')return null;
   const n=v=>Number.isFinite(Number(v))?Number(v):null;
-  const domains=input.domains&&typeof input.domains==='object'?Object.fromEntries(Object.entries(input.domains).map(([k,v])=>[k,n(v)])):{};
+  const cleanDomains=value=>value&&typeof value==='object'?Object.fromEntries(Object.entries(value).map(([k,v])=>[k,n(v)]).filter(([,v])=>v!=null)):{};
+  const domains=cleanDomains(input.domains);
+  const historySource=Array.isArray(input.history)?input.history:(Array.isArray(input.assessment_history)?input.assessment_history:[]);
+  const history=historySource.map((item,index)=>{
+    if(!item||typeof item!=='object')return null;
+    const captured=String(item.captured_at||item.date||item.assessed_at||'').slice(0,64);
+    const motionScore=n(item.motion_score),motionAge=n(item.motion_age);
+    if(!captured&&motionScore==null&&motionAge==null)return null;
+    return {id:String(item.id||item.assessment_id||index).slice(0,96),captured_at:captured,label:String(item.label||'').slice(0,80),motion_score:motionScore,motion_age:motionAge,domains:cleanDomains(item.domains)};
+  }).filter(Boolean).slice(-10);
+  const weekSource=input.program_week&&typeof input.program_week==='object'?input.program_week:(input.week_program&&typeof input.week_program==='object'?input.week_program:{});
+  const weekTotal=Math.max(0,Math.min(14,Number(weekSource.total)||0));
+  const weekCompleted=Math.max(0,Math.min(weekTotal||14,Number(weekSource.completed)||0));
+  const explicitChanges=Array.isArray(input.changes)?input.changes.map(item=>{
+    if(!item||typeof item!=='object')return null;
+    const label=String(item.label||item.metric||'').slice(0,80);if(!label)return null;
+    return {label,delta:n(item.delta),value:n(item.value),unit:String(item.unit||'').slice(0,20)};
+  }).filter(Boolean).slice(0,3):[];
   return {
     source:String(input.source||'PULSE').slice(0,24),
     user_id:String(input.user_id||'').slice(0,96),
@@ -4728,6 +4745,9 @@ function cleanTrajectory(input){
       appointment_type:String(input.next_checkpoint.appointment_type||'').slice(0,80),
       service_code:String(input.next_checkpoint.service_code||'').slice(0,80)
     }:null,
+    program_week:{completed:weekCompleted,total:weekTotal,label:String(weekSource.label||weekSource.name||'').slice(0,100),next_session:String(weekSource.next_session||weekSource.next_action||'').slice(0,160)},
+    changes:explicitChanges,
+    history,
     domains,
     synced_at:String(input.synced_at||new Date().toISOString()).slice(0,64)
   };
@@ -4842,60 +4862,64 @@ function worldHomeProgress(t=personalTrajectory){
   if(Number.isFinite(explicit)&&explicit>0)return THREE.MathUtils.clamp(Math.round(explicit),0,100);
   return THREE.MathUtils.clamp(Math.round(((Math.max(1,t.phase_index)-1)/3)*100),0,100);
 }
+function worldHomeHistory(t=personalTrajectory){
+  if(!t||!Array.isArray(t.history))return [];
+  return t.history.filter(item=>item&&Number.isFinite(Number(item.motion_score))).sort((a,b)=>{
+    const da=new Date(a.captured_at||0).getTime()||0,db=new Date(b.captured_at||0).getTime()||0;
+    return da-db;
+  }).slice(-8);
+}
+function worldHomeTrendSvg(t=personalTrajectory){
+  const history=worldHomeHistory(t);
+  if(history.length<2)return '<div class="home-trend-empty"><i></i><span>'+(locale==='fr'?'La courbe apparaîtra après votre prochain bilan synchronisé.':'Your curve will appear after your next synced assessment.')+'</span></div>';
+  const values=history.map(x=>Number(x.motion_score)),min=Math.max(0,Math.min(...values)-5),max=Math.min(100,Math.max(...values)+5),span=Math.max(10,max-min);
+  const points=history.map((item,i)=>({x:10+(i/(history.length-1))*280,y:100-((Number(item.motion_score)-min)/span)*76,item}));
+  const line=points.map((p,i)=>(i?'L':'M')+p.x.toFixed(1)+' '+p.y.toFixed(1)).join(' '),area=line+' L 290 108 L 10 108 Z';
+  const dots=points.map((p,i)=>'<circle cx="'+p.x.toFixed(1)+'" cy="'+p.y.toFixed(1)+'" r="'+(i===points.length-1?'4':'2.6')+'" class="'+(i===points.length-1?'latest':'')+'"></circle>').join('');
+  const first=history[0],last=history[history.length-1],delta=Math.round((Number(last.motion_score)-Number(first.motion_score))*10)/10;
+  const label=item=>{const d=new Date(item.captured_at||'');return Number.isNaN(d.getTime())?(item.label||'—'):d.toLocaleDateString(locale==='fr'?'fr-FR':'en-GB',{month:'short',year:'2-digit'})};
+  return '<div class="home-trend-chart"><div class="home-trend-head"><div><span>MOTION SCORE</span><strong>'+Math.round(Number(last.motion_score))+'<small>/100</small></strong></div><em class="'+(delta>0?'positive':delta<0?'negative':'neutral')+'">'+(delta>0?'+':'')+delta+'</em></div><svg viewBox="0 0 300 114" preserveAspectRatio="none" aria-label="Évolution Motion Score"><path class="area" d="'+area+'"></path><path class="line" d="'+line+'"></path>'+dots+'</svg><div class="home-trend-axis"><span>'+escHtml(label(first))+'</span><span>'+escHtml(label(last))+'</span></div></div>';
+}
+function worldHomeDerivedChanges(t=personalTrajectory){
+  if(!t)return [];
+  if(Array.isArray(t.changes)&&t.changes.length)return t.changes.slice(0,3);
+  const history=worldHomeHistory(t);if(history.length<2)return [];
+  const previous=history[history.length-2],latest=history[history.length-1],result=[];
+  if(previous.motion_score!=null&&latest.motion_score!=null)result.push({label:'Motion Score',delta:Math.round((latest.motion_score-previous.motion_score)*10)/10,unit:''});
+  if(previous.motion_age!=null&&latest.motion_age!=null)result.push({label:'Motion Age',delta:Math.round((latest.motion_age-previous.motion_age)*10)/10,unit:locale==='fr'?' ans':' yrs'});
+  const labels={muscle:'Muscle',mobility:locale==='fr'?'Mobilité':'Mobility',balance:locale==='fr'?'Équilibre':'Balance',posture:'Posture',endurance:locale==='fr'?'Capacité':'Capacity'};
+  const domainDeltas=Object.keys(labels).map(key=>{const a=Number(previous.domains?.[key]),b=Number(latest.domains?.[key]);return Number.isFinite(a)&&Number.isFinite(b)?{label:labels[key],delta:Math.round((b-a)*10)/10,unit:''}:null}).filter(Boolean).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  if(domainDeltas[0])result.push(domainDeltas[0]);return result.slice(0,3);
+}
+function worldHomeChangesHtml(t=personalTrajectory){
+  const changes=worldHomeDerivedChanges(t);
+  if(!changes.length)return '<div class="home-change-empty"><span>'+(locale==='fr'?'EN ATTENTE':'WAITING')+'</span><p>'+(locale==='fr'?'Le prochain bilan permettra de comparer vos repères dans le temps.':'Your next assessment will make longitudinal comparison available.')+'</p></div>';
+  return '<div class="home-change-list">'+changes.map(item=>{const delta=Number(item.delta),has=Number.isFinite(delta),good=item.label==='Motion Age'?delta<0:delta>0,tone=!has||delta===0?'neutral':good?'positive':'watch';return '<article><span>'+escHtml(item.label)+'</span><strong class="'+tone+'">'+(has?(delta>0?'+':'')+delta:'—')+escHtml(item.unit||'')+'</strong></article>'}).join('')+'</div>';
+}
+function worldHomeProgramHtml(t=personalTrajectory){
+  const p=t?.program_week||{},total=Number(p.total)||0,completed=Number(p.completed)||0;
+  if(!total)return '<div class="home-program-empty"><div class="home-program-ring empty"><span>—</span></div><div><span>'+(locale==='fr'?'PROGRAMME DE LA SEMAINE':'THIS WEEK')+'</span><strong>'+(locale==='fr'?'À synchroniser':'To sync')+'</strong><small>'+(locale==='fr'?'Pulse pourra afficher ici vos séances et actions prévues.':'Pulse can show your planned sessions and actions here.')+'</small></div></div>';
+  const pct=THREE.MathUtils.clamp(Math.round((completed/Math.max(1,total))*100),0,100);
+  return '<div class="home-program-live"><div class="home-program-ring" style="--program:'+pct+'"><span>'+pct+'<small>%</small></span></div><div><span>'+(locale==='fr'?'PROGRAMME DE LA SEMAINE':'THIS WEEK')+'</span><strong>'+completed+' / '+total+' actions</strong><small>'+escHtml(p.next_session||(p.label||(locale==='fr'?'Continuez votre programme dans Fitness.':'Continue your programme in Fitness.')))+'</small></div></div>';
+}
 function worldHomeHtml(){
-  const t=personalTrajectory;
-  const tier=worldAccessTier();
-  const connected=!!t;
-  const plus=tier==='plus';
-  const score=connected&&t.motion_score!=null?Math.round(t.motion_score):null;
-  const age=connected&&t.motion_age!=null?Math.round(t.motion_age):null;
-  const progress=worldHomeProgress(t);
-  const phase=connected?trajectoryPhaseLabel(t):(locale==='fr'?'NON ACTIVÉE':'NOT ACTIVE');
-  const checkpoint=connected?trajectoryCheckpointLabel(t):(locale==='fr'?'APRÈS VOTRE BILAN':'AFTER YOUR ASSESSMENT');
-  const days=connected?trajectoryDaysToCheckpoint(t):null;
+  const t=personalTrajectory,tier=worldAccessTier(),connected=!!t,plus=tier==='plus';
+  const score=connected&&t.motion_score!=null?Math.round(t.motion_score):null,age=connected&&t.motion_age!=null?Math.round(t.motion_age):null,progress=worldHomeProgress(t);
+  const phase=connected?trajectoryPhaseLabel(t):(locale==='fr'?'NON ACTIVÉE':'NOT ACTIVE'),checkpoint=connected?trajectoryCheckpointLabel(t):(locale==='fr'?'APRÈS VOTRE BILAN':'AFTER YOUR ASSESSMENT'),days=connected?trajectoryDaysToCheckpoint(t):null;
   const priority=connected?(t.priority||t.current_action||'—'):(locale==='fr'?'Votre profil de mouvement':'Your movement profile');
   const action=connected?(t.current_action||t.priority||(locale==='fr'?'Continuer votre trajectoire':'Continue your trajectory')):(locale==='fr'?'Faire votre bilan KŌMØ':'Complete your KŌMØ assessment');
-  const homeLead=connected
-    ?(locale==='fr'?'Votre action du moment':'Your current action')
-    :(locale==='fr'?'Votre prochaine étape':'Your next step');
-  const homeCopy=connected
-    ?(locale==='fr'?'Votre bilan reste vivant : agissez aujourd’hui et gardez le prochain point en vue.':'Your assessment stays active: act today and keep the next checkpoint in view.')
-    :(locale==='fr'?'World est libre à explorer. Un bilan KŌMØ transforme ensuite cet espace en suivi personnel.':'World is free to explore. A KŌMØ assessment then turns this space into personal follow-up.');
-
-  return '<div class="world-home-main">'+
-    '<article class="home-today-card '+(connected?'personal':'discovery')+'">'+
-      '<div class="home-today-top"><span>AUJOURD’HUI</span><em>'+(plus?'WORLD+':connected?'PERSONAL':'DISCOVERY')+'</em></div>'+
-      '<small>'+homeLead+'</small>'+
-      '<h1>'+escHtml(action)+'</h1>'+
-      '<p>'+homeCopy+'</p>'+
-      (connected?'<div class="home-priority"><span>'+(locale==='fr'?'PRIORITÉ':'PRIORITY')+'</span><b>'+escHtml(priority)+'</b></div>':'')+
-      '<div class="home-primary-actions">'+
-        '<button type="button" class="primary" data-home-action="'+(connected?'continue':'assessment')+'">'+(connected?(locale==='fr'?'CONTINUER MON ACTION':'CONTINUE MY ACTION'):(locale==='fr'?'DEMANDER UN BILAN':'REQUEST AN ASSESSMENT'))+'</button>'+
-        '<button type="button" data-home-action="'+(connected?'results':'world')+'">'+(connected?(locale==='fr'?'VOIR MES RÉSULTATS':'VIEW MY RESULTS'):(locale==='fr'?'EXPLORER WORLD':'EXPLORE WORLD'))+'</button>'+
-      '</div>'+
-    '</article>'+
-    '<section class="home-metric-grid">'+
-      '<article><span>MOTION SCORE</span><strong>'+(score==null?'—':score+'<small>/100</small>')+'</strong><em>'+(connected?(locale==='fr'?'Votre référence':'Your reference'):(locale==='fr'?'Après votre bilan':'After your assessment'))+'</em></article>'+
-      '<article><span>MOTION AGE</span><strong>'+(age==null?'—':age)+'</strong><em>'+(connected?(locale==='fr'?'Repère fonctionnel':'Functional reference'):(locale==='fr'?'Après votre bilan':'After your assessment'))+'</em></article>'+
-      '<article class="home-progress-card"><span>'+(locale==='fr'?'TRAJECTOIRE':'TRAJECTORY')+'</span><strong>'+phase+'</strong><i><b style="width:'+progress+'%"></b></i><em>'+(connected?progress+'%':(locale==='fr'?'À activer':'To activate'))+'</em></article>'+
-    '</section>'+
-  '</div>'+
-  '<aside class="world-home-side">'+
-    '<article class="home-checkpoint-card"><span>'+(locale==='fr'?'PROCHAIN CHECKPOINT':'NEXT CHECKPOINT')+'</span><strong>'+checkpoint+'</strong><small>'+(days!=null?(days+(locale==='fr'?' jours':' days')):(connected?(locale==='fr'?'À planifier dans Pulse':'Schedule in Pulse'):(locale==='fr'?'Le suivi commence après le bilan':'Follow-up starts after assessment')))+'</small><button type="button" data-home-action="'+(connected?'trajectory':'assessment')+'">'+(connected?(locale==='fr'?'VOIR MA TRAJECTOIRE':'VIEW MY TRAJECTORY'):(locale==='fr'?'DÉCOUVRIR LE PARCOURS':'SEE THE PATH'))+'</button></article>'+
-    '<section class="home-quick-section"><div class="home-section-head"><span>'+(locale==='fr'?'ACCÈS RAPIDES':'QUICK ACCESS')+'</span><b>'+(locale==='fr'?'Sans se déplacer dans World':'No need to walk through World')+'</b></div>'+
-      '<div class="home-quick-grid">'+
-        '<button type="button" data-home-action="twin"><i>◎</i><span>FUNCTIONAL TWIN</span><small>'+(locale==='fr'?'Comprendre':'Understand')+'</small></button>'+
-        '<button type="button" data-home-action="fitness"><i>△</i><span>FITNESS</span><small>'+(locale==='fr'?'Agir':'Act')+'</small></button>'+
-        '<button type="button" data-home-action="library"><i>▤</i><span>LIBRARY</span><small>'+(locale==='fr'?'Comprendre la science':'Science')+'</small></button>'+
-        '<button type="button" data-home-action="world"><i>⌖</i><span>WORLD 3D</span><small>'+(locale==='fr'?'Explorer':'Explore')+'</small></button>'+
-      '</div>'+
-    '</section>'+
-    '<article class="home-access-card '+(plus?'active':'')+'">'+
-      '<div><span>'+ (plus?'WORLD+ · ACTIF':connected?'CONTINUITÉ':'ACCÈS') +'</span><strong>'+ (plus?(locale==='fr'?'Votre suivi continue.':'Your follow-up continues.'):connected?'World+ · '+WORLD_PLUS_PRICE_EUR+' €/'+(locale==='fr'?'mois':'month'):(locale==='fr'?'Discovery · gratuit':'Discovery · free')) +'</strong></div>'+
-      '<p>'+ (plus?(locale==='fr'?'Programme, progression et préparation du prochain checkpoint restent actifs.':'Programme, progress and next-checkpoint preparation stay active.'):connected?(locale==='fr'?'Prolongez la trajectoire entre deux checkpoints si vous souhaitez poursuivre le suivi.':'Continue your trajectory between checkpoints if you want ongoing follow-up.'):(locale==='fr'?'Explorez librement. La personnalisation commence après votre bilan.':'Explore freely. Personalisation starts after your assessment.')) +'</p>'+
-      '<button type="button" data-home-action="'+(plus?'pulse':connected?'world-plus':'assessment')+'">'+(plus?'PULSE':connected?(locale==='fr'?'VOIR WORLD+':'VIEW WORLD+'):(locale==='fr'?'COMMENT ÇA MARCHE':'HOW IT WORKS'))+'</button>'+
-    '</article>'+
-  '</aside>';
+  const homeCopy=connected?(locale==='fr'?'Votre bilan devient une trajectoire : une priorité claire, une action maintenant et un prochain point dans le temps.':'Your assessment becomes a trajectory: one clear priority, one action now and one next checkpoint.'):(locale==='fr'?'Découvrez World librement. Après un bilan KŌMØ, cette Home devient votre espace personnel de suivi.':'Explore World freely. After a KŌMØ assessment, this Home becomes your personal follow-up space.');
+  const scoreStyle=score==null?0:THREE.MathUtils.clamp(score,0,100);
+  return '<div class="home-dashboard-v90">'+
+    '<section class="home-hero-v90 '+(connected?'personal':'discovery')+'"><div class="home-hero-copy"><div class="home-eyebrow"><span>'+(locale==='fr'?'AUJOURD’HUI':'TODAY')+'</span><em>'+(plus?'WORLD+':connected?'PERSONAL':'DISCOVERY')+'</em></div><small>'+(connected?(locale==='fr'?'VOTRE ACTION DU MOMENT':'YOUR CURRENT ACTION'):(locale==='fr'?'VOTRE PROCHAINE ÉTAPE':'YOUR NEXT STEP'))+'</small><h1>'+escHtml(action)+'</h1><p>'+homeCopy+'</p>'+(connected?'<div class="home-priority-v90"><span>'+(locale==='fr'?'PRIORITÉ':'PRIORITY')+'</span><b>'+escHtml(priority)+'</b></div>':'')+'<div class="home-primary-actions"><button type="button" class="primary" data-home-action="'+(connected?'continue':'assessment')+'">'+(connected?(locale==='fr'?'CONTINUER':'CONTINUE'):(locale==='fr'?'DEMANDER UN BILAN':'REQUEST AN ASSESSMENT'))+'</button><button type="button" data-home-action="'+(connected?'results':'world')+'">'+(connected?(locale==='fr'?'MES RÉSULTATS':'MY RESULTS'):(locale==='fr'?'EXPLORER WORLD':'EXPLORE WORLD'))+'</button></div></div>'+
+    '<div class="home-score-visual"><div class="home-score-ring-v90" style="--score:'+scoreStyle+'"><div><span>MOTION</span><strong>'+(score==null?'—':score)+'</strong><small>'+(score==null?(locale==='fr'?'APRÈS BILAN':'AFTER ASSESSMENT'):'/100')+'</small></div></div><div class="home-score-meta"><article><span>MOTION AGE</span><b>'+(age==null?'—':age)+'</b></article><article><span>'+(locale==='fr'?'TRAJECTOIRE':'TRAJECTORY')+'</span><b>'+phase+'</b><i><em style="width:'+progress+'%"></em></i></article></div></div></section>'+
+    '<section class="home-trend-card-v90"><div class="home-card-title"><div><span>'+(locale==='fr'?'ÉVOLUTION':'PROGRESS')+'</span><strong>'+(locale==='fr'?'Votre trajectoire dans le temps':'Your trajectory over time')+'</strong></div><button type="button" data-home-action="results">'+(locale==='fr'?'DÉTAIL':'DETAIL')+' ›</button></div>'+worldHomeTrendSvg(t)+'</section>'+
+    '<section class="home-change-card-v90"><div class="home-card-title"><div><span>'+(locale==='fr'?'DEPUIS LE DERNIER BILAN':'SINCE LAST ASSESSMENT')+'</span><strong>'+(locale==='fr'?'Ce qui a changé':'What changed')+'</strong></div></div>'+worldHomeChangesHtml(t)+'</section>'+
+    '<section class="home-program-card-v90">'+worldHomeProgramHtml(t)+'<button type="button" data-home-action="fitness">'+(locale==='fr'?'OUVRIR FITNESS':'OPEN FITNESS')+' ›</button></section>'+
+    '<section class="home-checkpoint-v90"><span>'+(locale==='fr'?'PROCHAIN CHECKPOINT':'NEXT CHECKPOINT')+'</span><strong>'+checkpoint+'</strong><small>'+(days!=null?(days+(locale==='fr'?' jours':' days')):(connected?(locale==='fr'?'À planifier dans Pulse':'Schedule in Pulse'):(locale==='fr'?'Après votre bilan':'After your assessment')))+'</small><button type="button" data-home-action="'+(connected?'trajectory':'assessment')+'">'+(connected?(locale==='fr'?'VOIR LA TRAJECTOIRE':'VIEW TRAJECTORY'):(locale==='fr'?'VOIR LE PARCOURS':'SEE THE PATH'))+' ›</button></section>'+
+    '<section class="home-destinations-v90"><div class="home-card-title"><div><span>'+(locale==='fr'?'ACCÈS DIRECTS':'DIRECT ACCESS')+'</span><strong>'+(locale==='fr'?'Utilisez World comme vous voulez':'Use World your way')+'</strong></div></div><div class="home-destination-row"><button type="button" data-home-action="twin"><i>◎</i><b>FUNCTIONAL TWIN</b><small>'+(locale==='fr'?'Comprendre':'Understand')+'</small></button><button type="button" data-home-action="fitness"><i>△</i><b>FITNESS</b><small>'+(locale==='fr'?'Agir':'Act')+'</small></button><button type="button" data-home-action="library"><i>▤</i><b>LIBRARY</b><small>Science</small></button><button type="button" data-home-action="world"><i>⌖</i><b>WORLD 3D</b><small>'+(locale==='fr'?'Explorer':'Explore')+'</small></button></div></section>'+
+    '<section class="home-continuity-v90 '+(plus?'active':'')+'"><div><span>'+(plus?'WORLD+ · ACTIF':connected?'WORLD+':'DISCOVERY')+'</span><strong>'+(plus?(locale==='fr'?'Votre suivi continue':'Your follow-up continues'):connected?(locale==='fr'?'Continuer entre deux checkpoints':'Continue between checkpoints'):(locale==='fr'?'World reste libre à explorer':'World stays free to explore'))+'</strong></div><p>'+(plus?(locale==='fr'?'Programme, progression et préparation du prochain point restent réunis ici.':'Programme, progress and next-checkpoint preparation stay here.'):connected?(locale==='fr'?'World+ prolonge votre espace personnel si vous souhaitez poursuivre le suivi.':'World+ extends your personal space if you want ongoing follow-up.'):(locale==='fr'?'La personnalisation commence après un bilan KŌMØ.':'Personalisation starts after a KŌMØ assessment.'))+'</p><button type="button" data-home-action="'+(plus?'pulse':connected?'world-plus':'assessment')+'">'+(plus?'PULSE':connected?'WORLD+':(locale==='fr'?'COMMENT ÇA MARCHE':'HOW IT WORKS'))+' ›</button></section>'+
+  '</div>';
 }
 function bindWorldHomeActions(){
   if(!worldHomeBody)return;
@@ -4910,34 +4934,25 @@ function bindWorldHomeActions(){
     if(action==='twin'){closeWorldHome();fastTravel('twin');return}
     if(action==='fitness'){closeWorldHome();fastTravel('rehab');return}
     if(action==='library'){closeWorldHome();fastTravel('library');return}
-    if(action==='continue'){
-      const id=trajectoryFocusKey();
-      closeWorldHome();
-      if(id)fastTravel('rehab');else fastTravel('twin');
-    }
+    if(action==='continue'){const id=trajectoryFocusKey();closeWorldHome();if(id)fastTravel('rehab');else fastTravel('twin')}
   }));
 }
 function refreshWorldHome(){
   if(!worldHome?.classList.contains('open'))return;
   worldHomeBody.innerHTML=worldHomeHtml();bindWorldHomeActions();
-  const tier=worldAccessTier();
-  if(worldHomeAccess)worldHomeAccess.textContent=tier==='plus'?'WORLD+':tier==='personal'?'PERSONAL':'DISCOVERY';
+  const tier=worldAccessTier();if(worldHomeAccess)worldHomeAccess.textContent=tier==='plus'?'WORLD+':tier==='personal'?'PERSONAL':'DISCOVERY';
   if(worldHomeTitle)worldHomeTitle.textContent=locale==='fr'?'Aujourd’hui':'Today';
 }
 function showWorldHome(){
   if(!worldEntryComplete)return;
-  closePanel();closeWorldMenu();
-  worldHomeBody.innerHTML=worldHomeHtml();bindWorldHomeActions();
-  const tier=worldAccessTier();
-  if(worldHomeAccess)worldHomeAccess.textContent=tier==='plus'?'WORLD+':tier==='personal'?'PERSONAL':'DISCOVERY';
+  closePanel();closeWorldMenu();worldHomeBody.innerHTML=worldHomeHtml();bindWorldHomeActions();
+  const tier=worldAccessTier();if(worldHomeAccess)worldHomeAccess.textContent=tier==='plus'?'WORLD+':tier==='personal'?'PERSONAL':'DISCOVERY';
   if(worldHomeTitle)worldHomeTitle.textContent=locale==='fr'?'Aujourd’hui':'Today';
-  worldHome.classList.add('open');worldHome.setAttribute('aria-hidden','false');
-  document.body.classList.add('world-home-open');velocity.set(0,0,0);keys.clear();syncUiOpen();
+  worldHome.classList.add('open');worldHome.setAttribute('aria-hidden','false');document.body.classList.add('world-home-open');velocity.set(0,0,0);keys.clear();syncUiOpen();
 }
 function closeWorldHome(){
   if(!worldHome)return;
-  worldHome.classList.remove('open');worldHome.setAttribute('aria-hidden','true');
-  document.body.classList.remove('world-home-open');syncUiOpen();
+  worldHome.classList.remove('open');worldHome.setAttribute('aria-hidden','true');document.body.classList.remove('world-home-open');syncUiOpen();
 }
 
 function worldAccessHtml(){
@@ -7422,7 +7437,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.9.0-personal-home',
+  version:'9.0.0-health-home',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
