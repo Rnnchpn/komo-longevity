@@ -37,20 +37,31 @@ const retired=[
 
 const entries=await readdir(pulse,{withFileTypes:true});
 const htmlFiles=entries.filter(x=>x.isFile()&&x.name.endsWith('.html')).map(x=>x.name);
-const jsFiles=entries.filter(x=>x.isFile()&&x.name.endsWith('.js')).map(x=>x.name);
-const refs=new Set();
+const directRefs=new Set();
 
 for(const name of htmlFiles){
-  const src=await readFile(join(pulse,name),'utf8');
-  for(const m of src.matchAll(/(?:src|href)=["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']/g))refs.add(m[1]);
-}
-for(const name of jsFiles){
-  const src=await readFile(join(pulse,name),'utf8');
-  for(const m of src.matchAll(/(?:from\s*|import\s*)["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']|import\s*\(\s*["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']\s*\)/g))refs.add(m[1]||m[2]);
+  const html=await readFile(join(pulse,name),'utf8');
+  for(const m of html.matchAll(/(?:src|href)=["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']/g))directRefs.add(m[1]);
 }
 
-const unsafe=retired.filter(x=>refs.has(x));
-if(unsafe.length)throw new Error('[pulse-final-audit] retired assets still referenced: '+unsafe.join(', '));
+// Audit the executable graph, not references between files that are themselves retired.
+// Start from assets reachable from shipped HTML and recurse through local module imports.
+const reachable=new Set(directRefs);
+const queue=[...directRefs].filter(x=>x.endsWith('.js'));
+while(queue.length){
+  const name=queue.shift();
+  let code='';
+  try{code=await readFile(join(pulse,name),'utf8')}catch{continue}
+  for(const m of code.matchAll(/(?:from\s*|import\s*)["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']|import\s*\(\s*["']\.\/([^"'?#]+)(?:[?#][^"']*)?["']\s*\)/g)){
+    const dep=m[1]||m[2];
+    if(!dep||reachable.has(dep))continue;
+    reachable.add(dep);
+    if(dep.endsWith('.js'))queue.push(dep);
+  }
+}
+
+const unsafe=retired.filter(x=>reachable.has(x));
+if(unsafe.length)throw new Error('[pulse-final-audit] retired assets reachable from production HTML: '+unsafe.join(', '));
 
 const pruned=[];
 for(const file of retired){
@@ -124,6 +135,7 @@ const report={
   duplicate_scripts:duplicates(scripts),
   duplicate_stylesheets:duplicates(styles),
   pruned_retired_assets:pruned,
+  reachable_asset_count:reachable.size,
   surfaces,
   pro_desktop:{navigation_owner:'pro-architecture-v2.js',workspace_owner:'center-two-tab-workspace-v1.js',stylesheet:desktopCss},
   status:failures.length?'FAIL':'PASS',
