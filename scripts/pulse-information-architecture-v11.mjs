@@ -54,12 +54,10 @@ for(const dir of dirs){
       "primary=actionButton('Consultations & rendez-vous','patient:documents')+actionButton('My KŌMØ','patient:mykomo');"
     );
     const patientBottomGuard="if(mode()==='patient'&&!allowedPro()){document.querySelector('#kamBottomBar')?.remove();return;}";
-    if(!js.includes(patientBottomGuard)){
-      js=js.replace(
-        "  function ensureBottom(){\n    const app=document.querySelector('#appShell');if(!app)return;",
-        `  function ensureBottom(){\n    ${patientBottomGuard}\n    const app=document.querySelector('#appShell');if(!app)return;`
-      );
-    }
+    js=js.replace(
+      /function ensureBottom\(\)\{\s*(?:if\(mode\(\)==='patient'[^\n]*\n\s*)?const app=document\.querySelector\('#appShell'\);if\(!app\)return;/,
+      `function ensureBottom(){\n    ${patientBottomGuard}\n    const app=document.querySelector('#appShell');if(!app)return;`
+    );
     if(!js.includes("navItem('pro:dashboard','Pro',I.center,false)")||!js.includes("navItem('admin','Admin',I.admin,false)")){
       throw new Error('[pulse-ia-v11] privileged Pro/Admin patient navigation was not preserved');
     }
