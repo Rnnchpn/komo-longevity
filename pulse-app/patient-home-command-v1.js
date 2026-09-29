@@ -35,6 +35,10 @@ function avatarMarkup(){
  const cfg=state.profile?.avatar_config||{};
  return window.KomoAvatar?.render?.(cfg,{label:'Avatar KŌMØ'})||esc(initials());
 }
+function heroPhotoMarkup(){
+ const src=state.avatarUrl||'./pulse-home-photo.webp';
+ return `<img src="${esc(src)}" alt="Votre espace KŌMØ" loading="eager" decoding="async">`;
+}
 function roleMarkup(){return `${isFounder()?'<span class="kh8-crown" aria-hidden="true">♛</span>':''}<span>${esc(roleTitle())}</span>`}
 function scoreChangeMarkup(){const d=scoreDelta();if(d===null)return'Votre dernier bilan apparaîtra ici';const sign=d>0?'+':'';return `${sign}${d.toFixed(1).replace('.',',')} depuis le bilan précédent`}
 function clubLabel(){const n=state.memberships.length;return n?`${n} Club${n>1?'s':''} actif${n>1?'s':''}`:'Accès Club'}
@@ -50,10 +54,19 @@ function homeMarkup(){
 
    <div class="kh8-top">
     <div class="kh8-hero">
-      <p class="kh8-kicker">LONGEVITY IN MOTION</p>
-      <h2>Votre KŌMØ.<br><em>Simplement.</em></h2>
-      <p class="kh8-lead">Vos résultats, votre quotidien connecté, vos consultations et votre espace personnel dans une seule interface.</p>
-      <button class="kh8-continue" type="button" data-kh8-route="results"><span>Continuer votre parcours</span><b aria-hidden="true">→</b></button>
+      <div class="kh8-hero-copy">
+        <p class="kh8-kicker">LONGEVITY IN MOTION</p>
+        <h2>Votre santé,<br><em>en mouvement.</em></h2>
+        <p class="kh8-lead">Résultats, quotidien connecté, consultations et progression réunis dans votre espace KŌMØ.</p>
+        <div class="kh8-hero-actions">
+          <button class="kh8-continue" type="button" data-kh8-route="results"><span>Voir mes résultats</span><b aria-hidden="true">→</b></button>
+          <button class="kh8-world-action" type="button" data-kh8-world><span>Entrer dans KŌMØ World</span><b aria-hidden="true">↗</b></button>
+        </div>
+      </div>
+      <button class="kh8-hero-media" type="button" data-kh8-world aria-label="Entrer dans KŌMØ World">
+        <span class="kh8-hero-photo">${heroPhotoMarkup()}</span>
+        <span class="kh8-world-badge"><small>KŌMØ WORLD</small><strong>Entrez dans votre univers</strong><em>Explorer ↗</em></span>
+      </button>
     </div>
 
     <div class="kh8-side">
@@ -170,6 +183,8 @@ function schedule(ms=0,force=false){clearTimeout(timer);timer=setTimeout(()=>{re
 
 function go(target){if(!target)return;if(window.KomoPatientNavigation?.go)window.KomoPatientNavigation.go(target);else location.hash=target}
 document.addEventListener('click',event=>{
+ const world=event.target.closest?.('[data-kh8-world]');
+ if(world){event.preventDefault();window.location.href='https://komolongevity.com/world/';return}
  const link=event.target.closest?.('[data-kh8-route]');if(!link)return;
  const target=link.getAttribute('data-kh8-route');if(!target)return;
  event.preventDefault();go(target);
