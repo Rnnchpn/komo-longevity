@@ -958,6 +958,55 @@ export async function mount(runtime){
         recovery:h.data.recovery
       });
     }catch(err){console.warn('[World daily health]',err)}
+
+    // V8 Trajectory: private, user-owned post-consultation context. Never written to presence/chat.
+    if(guest){
+      runtime.ingestTrajectory?.(null);
+    }else{
+      try{
+        const patientRes=await client.from('patients').select('id').eq('patient_user_id',state.session.user.id).order('updated_at',{ascending:false}).limit(1).maybeSingle();
+        const patientId=patientRes.data?.id||null;
+        if(!patientId){runtime.ingestTrajectory?.(null)}
+        else{
+          const assessmentsRes=await client.from('assessments').select('id,status,completed_at,created_at,product_mode,assessment_type').eq('patient_id',patientId).order('created_at',{ascending:false}).limit(1);
+          const assessment=assessmentsRes.data?.[0]||null;
+          let score=null,priorities=[],appointment=null;
+          if(assessment?.id){
+            const [scoreRes,priorityRes]=await Promise.all([
+              client.from('scores').select('*').eq('assessment_id',assessment.id).eq('release_status','released').order('calculated_at',{ascending:false}).limit(1).maybeSingle(),
+              client.from('priorities').select('rank,category,patient_wording').eq('assessment_id',assessment.id).order('rank',{ascending:true}).limit(3)
+            ]);
+            score=scoreRes.data||null;priorities=Array.isArray(priorityRes.data)?priorityRes.data:[];
+          }
+          const apptRes=await client.from('organization_appointments').select('appointment_type,scheduled_start,status,service_code').eq('patient_id',patientId).gte('scheduled_start',new Date().toISOString()).order('scheduled_start',{ascending:true}).limit(1);
+          appointment=apptRes.data?.[0]||null;
+          const first=priorities[0]||null,priority=String(first?.patient_wording||first?.category||'').trim();
+          let phase='baseline',phaseIndex=1,progress=18;
+          if(assessment){phase='reading';phaseIndex=2;progress=42}
+          if(score||priority){phase='plan';phaseIndex=3;progress=68}
+          if(appointment){phase='followup';phaseIndex=4;progress=86}
+          const domainValue=(...keys)=>{for(const key of keys){const v=score?.[key];if(Number.isFinite(Number(v)))return Number(v)}return null};
+          runtime.ingestTrajectory?.({
+            source:'PULSE',user_id:state.session.user.id,phase,phase_index:phaseIndex,progress,
+            assessment_id:assessment?.id||'',
+            motion_score:Number.isFinite(Number(score?.motion_score))?Number(score.motion_score):null,
+            motion_age:Number.isFinite(Number(score?.motion_age))?Number(score.motion_age):null,
+            priority,
+            priorities:priorities.map(p=>p.patient_wording||p.category).filter(Boolean),
+            current_action:priority,
+            next_checkpoint:appointment?{scheduled_start:appointment.scheduled_start,appointment_type:appointment.appointment_type,service_code:appointment.service_code}:null,
+            domains:{
+              muscle:domainValue('muscle','muscle_score','muscle_subscore'),
+              mobility:domainValue('mobility','mobility_score','mobility_subscore'),
+              balance:domainValue('balance','balance_score','balance_subscore'),
+              posture:domainValue('posture','posture_score','posture_subscore'),
+              endurance:domainValue('endurance','capacity','capacity_score','endurance_score')
+            },
+            synced_at:new Date().toISOString()
+          });
+        }
+      }catch(err){console.warn('[World trajectory]',err);runtime.ingestTrajectory?.(null)}
+    }
   };
   const resetLiveLayer=async({deletePresence=true}={})=>{
     const oldUser=state.session?.user?.id;
