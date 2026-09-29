@@ -1,0 +1,281 @@
+/* KŌMØ Pulse — Professional Desktop Workspace v1 · 2026-09-29
+   Desktop-only presentation layer. Patient/tablet/mobile contracts are untouched. */
+@media (min-width:1180px){
+  body.komo-pro-mode{--sidebar:228px!important}
+
+  body.komo-pro-mode .sidebar{
+    width:228px!important;
+    align-items:stretch!important;
+    gap:18px!important;
+    padding:24px 16px 20px!important;
+    background:linear-gradient(180deg,#ffffff 0%,#fbfdfc 70%,#f1f7f3 100%)!important;
+  }
+  body.komo-pro-mode .brand{
+    align-items:flex-start!important;
+    padding:2px 12px 20px!important;
+    border-bottom:1px solid var(--kp-line)!important;
+  }
+  body.komo-pro-mode .brand-mark{
+    font-size:19px!important;
+    letter-spacing:.13em!important;
+  }
+  body.komo-pro-mode .brand-product{
+    margin-top:3px!important;
+    font-size:9px!important;
+    color:#5f7568!important;
+  }
+
+  body.komo-pro-mode #proDesktopNav{
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:flex-start!important;
+    gap:6px!important;
+    width:100%!important;
+    padding:10px 0!important;
+  }
+  body.komo-pro-mode #proDesktopNav .nav-item{
+    width:100%!important;
+    min-height:48px!important;
+    margin:0!important;
+    padding:0 14px!important;
+    display:grid!important;
+    grid-template-columns:22px minmax(0,1fr)!important;
+    place-items:initial!important;
+    align-items:center!important;
+    gap:11px!important;
+    border:1px solid transparent!important;
+    border-radius:14px!important;
+    text-align:left!important;
+  }
+  body.komo-pro-mode #proDesktopNav .nav-item svg{
+    width:19px!important;
+    height:19px!important;
+  }
+  body.komo-pro-mode #proDesktopNav .nav-item span{
+    font-size:12px!important;
+    font-weight:650!important;
+    letter-spacing:-.01em!important;
+    white-space:nowrap!important;
+  }
+  body.komo-pro-mode #proDesktopNav .nav-item.active{
+    background:linear-gradient(135deg,#def5e7,#e9edff)!important;
+    border-color:#cfe3d6!important;
+    color:#205f43!important;
+    box-shadow:0 8px 22px rgba(35,63,48,.07)!important;
+  }
+  body.komo-pro-mode .sidebar-foot{
+    align-items:stretch!important;
+    padding-top:14px!important;
+    border-top:1px solid var(--kp-line)!important;
+  }
+  body.komo-pro-mode .site-link{
+    display:flex!important;
+    justify-content:space-between!important;
+    align-items:center!important;
+    min-height:40px!important;
+    padding:0 10px!important;
+    text-align:left!important;
+    border-radius:10px!important;
+  }
+  body.komo-pro-mode .avatar-button{
+    align-self:flex-start!important;
+    margin-left:8px!important;
+  }
+
+  body.komo-pro-mode .main-shell{
+    margin-left:228px!important;
+    padding:0 28px 54px!important;
+  }
+  body.komo-pro-mode .topbar{
+    max-width:none!important;
+    min-height:82px!important;
+    padding:20px 2px 14px!important;
+    align-items:center!important;
+  }
+  body.komo-pro-mode .topbar h1{
+    font-size:30px!important;
+    line-height:1!important;
+  }
+  body.komo-pro-mode .view-root{
+    max-width:none!important;
+    width:100%!important;
+    margin:0!important;
+  }
+
+  /* The internal legacy tab strip is not desktop navigation anymore. */
+  body.komo-pro-mode .kcp-tabs{display:none!important}
+
+  body.komo-pro-mode .kcp{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:0 0 34px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    overflow:visible!important;
+  }
+  body.komo-pro-mode .kcp-head{
+    min-height:150px!important;
+    grid-template-columns:minmax(0,1.5fr) minmax(250px,.5fr)!important;
+    padding:24px 28px!important;
+    border-radius:22px!important;
+  }
+  body.komo-pro-mode .kcp-head h2{
+    font-size:clamp(34px,2.7vw,48px)!important;
+  }
+  body.komo-pro-mode .kcp-patientbar{
+    position:sticky!important;
+    top:82px!important;
+    z-index:18!important;
+    grid-template-columns:minmax(260px,.72fr) minmax(0,1.7fr) auto!important;
+    padding:14px 18px!important;
+    border-radius:16px!important;
+    box-shadow:0 10px 30px rgba(35,63,48,.08)!important;
+  }
+  body.komo-pro-mode .kcp-view{min-height:calc(100vh - 160px)!important}
+  body.komo-pro-mode .kcp-grid{gap:12px!important}
+  body.komo-pro-mode .kcp-card{padding:22px!important}
+  body.komo-pro-mode .kcp-kpi{min-height:112px!important;padding:18px!important}
+  body.komo-pro-mode .kcp-kpi span{font-size:9px!important}
+  body.komo-pro-mode .kcp-kpi strong{font-size:36px!important}
+  body.komo-pro-mode .kcp-kpi small{font-size:9px!important}
+  body.komo-pro-mode .kcp-card h3{font-size:18px!important}
+  body.komo-pro-mode .kcp-card p{font-size:11px!important}
+  body.komo-pro-mode .kcp-btn{min-height:38px!important;font-size:10px!important;padding:0 13px!important}
+  body.komo-pro-mode .kcp-state{font-size:8px!important}
+  body.komo-pro-mode .kcp-row-main strong,
+  body.komo-pro-mode .kcp-appt strong,
+  body.komo-pro-mode .kcp-priority strong{font-size:11px!important}
+  body.komo-pro-mode .kcp-row-main span,
+  body.komo-pro-mode .kcp-row>span,
+  body.komo-pro-mode .kcp-appt span,
+  body.komo-pro-mode .kcp-priority p{font-size:9px!important}
+
+  /* Canonical Centre consultation workspace */
+  body.komo-pro-mode .k2tw-patients{
+    display:grid!important;
+    grid-template-rows:auto auto 1fr!important;
+    gap:14px!important;
+  }
+  body.komo-pro-mode .k2tw-head{
+    min-height:126px!important;
+    padding:24px 26px!important;
+    border-radius:22px!important;
+  }
+  body.komo-pro-mode .k2tw-head h2{
+    margin:4px 0 7px!important;
+    font-size:30px!important;
+    line-height:1!important;
+  }
+  body.komo-pro-mode .k2tw-head p{
+    max-width:760px!important;
+    font-size:11px!important;
+    line-height:1.55!important;
+  }
+  body.komo-pro-mode .k2tw-tools{
+    align-items:end!important;
+    gap:9px!important;
+  }
+  body.komo-pro-mode .k2tw-tools label span{font-size:9px!important}
+  body.komo-pro-mode .k2tw-tools input,
+  body.komo-pro-mode .k2tw-tools select{
+    min-width:260px!important;
+    min-height:40px!important;
+    font-size:12px!important;
+  }
+  body.komo-pro-mode .k2tw-kpis{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:12px!important;
+  }
+  body.komo-pro-mode .k2tw-kpi{
+    min-height:94px!important;
+    padding:16px 18px!important;
+  }
+  body.komo-pro-mode .k2tw-kpi span{font-size:9px!important}
+  body.komo-pro-mode .k2tw-kpi strong{font-size:30px!important}
+  body.komo-pro-mode .k2tw-list{gap:8px!important}
+  body.komo-pro-mode .k2tw-row{
+    grid-template-columns:minmax(240px,1.35fr) minmax(180px,.85fr) minmax(180px,.85fr) minmax(150px,.65fr) minmax(170px,.7fr)!important;
+    min-height:86px!important;
+    gap:16px!important;
+    padding:14px 16px!important;
+    border-radius:15px!important;
+  }
+  body.komo-pro-mode .k2tw-person strong{font-size:13px!important}
+  body.komo-pro-mode .k2tw-person span,
+  body.komo-pro-mode .k2tw-cell span,
+  body.komo-pro-mode .k2tw-cell small{font-size:9px!important}
+  body.komo-pro-mode .k2tw-cell strong{font-size:12px!important}
+  body.komo-pro-mode .k2tw-open,
+  body.komo-pro-mode .k2tw-btn{
+    min-height:37px!important;
+    padding:0 12px!important;
+    font-size:10px!important;
+  }
+
+  /* Patient management list */
+  body.komo-pro-mode .kfollow-head{
+    display:grid!important;
+    grid-template-columns:minmax(320px,.8fr) minmax(620px,1.2fr)!important;
+    gap:24px!important;
+    align-items:end!important;
+  }
+  body.komo-pro-mode .kfollow-head h2{font-size:32px!important}
+  body.komo-pro-mode .kfollow-head p{font-size:11px!important}
+  body.komo-pro-mode .kfollow-head-actions{
+    display:grid!important;
+    grid-template-columns:minmax(220px,1fr) minmax(210px,.8fr) auto auto!important;
+    gap:8px!important;
+    align-items:end!important;
+  }
+  body.komo-pro-mode .kfollow-search input,
+  body.komo-pro-mode .kfollow-center select{
+    min-height:40px!important;
+    font-size:12px!important;
+  }
+  body.komo-pro-mode .kfollow-kpis{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+
+  /* Drawer becomes a proper desktop dossier side panel. */
+  body.komo-pro-mode .k2tw-drawer{
+    grid-template-columns:minmax(240px,1fr) minmax(760px,62vw)!important;
+    background:rgba(24,42,32,.30)!important;
+  }
+  body.komo-pro-mode .k2tw-panel{
+    grid-column:2!important;
+    padding:28px 30px 42px!important;
+  }
+  body.komo-pro-mode .k2tw-panel-head h2{font-size:32px!important}
+  body.komo-pro-mode .k2tw-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:14px!important;
+  }
+  body.komo-pro-mode .k2tw-card{padding:20px!important}
+  body.komo-pro-mode .k2tw-card h3{font-size:18px!important}
+  body.komo-pro-mode .k2tw-card p{font-size:11px!important}
+  body.komo-pro-mode .k2tw-step span,
+  body.komo-pro-mode .k2tw-step strong{font-size:10px!important}
+
+  /* Mouse/trackpad affordances */
+  body.komo-pro-mode button,
+  body.komo-pro-mode select,
+  body.komo-pro-mode input{cursor:pointer}
+  body.komo-pro-mode input[type="text"],
+  body.komo-pro-mode input[type="search"],
+  body.komo-pro-mode input[type="email"],
+  body.komo-pro-mode input[type="datetime-local"],
+  body.komo-pro-mode textarea{cursor:text}
+}
+
+@media (min-width:1600px){
+  body.komo-pro-mode{--sidebar:244px!important}
+  body.komo-pro-mode .sidebar{width:244px!important}
+  body.komo-pro-mode .main-shell{margin-left:244px!important;padding-left:38px!important;padding-right:38px!important}
+  body.komo-pro-mode .k2tw-row{
+    grid-template-columns:minmax(280px,1.45fr) minmax(210px,.9fr) minmax(210px,.9fr) minmax(180px,.7fr) minmax(190px,.7fr)!important;
+  }
+}
