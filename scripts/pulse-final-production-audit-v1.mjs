@@ -111,7 +111,7 @@ for(const [label,required,forbidden] of families){
 
 const pro=await readFile(join(pulse,'pro-architecture-v2.js'),'utf8');
 const center=await readFile(join(pulse,'center-two-tab-workspace-v1.js'),'utf8');
-const proNavTokens=["navItem('planning','Consultations'","navItem('patients','Patients'","navItem('motion','Motion'","navItem('myocare','Analyse'"];
+const proNavTokens=["navItem('planning','Aujourd’hui'","navItem('patients','Patients'","navItem('motion','Motion'","navItem('myocare','Analyse'"];
 if(proNavTokens.some(token=>!pro.includes(token)))failures.push('Pro desktop navigation contract incomplete');
 if(pro.includes("navItem('messages','Messages'")||pro.includes("navItem('dashboard','Centre'"))failures.push('dead Pro navigation item survived');
 if(center.includes('nav.dataset.k2twOwner')||center.includes('nav.innerHTML=markup'))failures.push('Centre still rewrites shared Pro navigation');
