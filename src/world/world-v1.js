@@ -377,41 +377,26 @@ for(let i=0;i<cloudCount;i++){
 // V3.4 horizon cleanup — keep atmospheric lighting without the oversized sun disc.
 living.sunSprite=null;
 
+// V7.6 Permanent Riviera Sun — fixed late-morning daylight on every device and at every real-world hour.
+const PERMANENT_SUN_V76=true;
 function applyDaylight(){
-  const d=new Date(),h=d.getHours()+d.getMinutes()/60;
-  let bg=0xe1e7e1,fog=0xdce2dc,sunColor=0xffe8ca,sunPower=3.05,hemiPower=1.72,exposure=1.00,state='day';
-  let zenith=0x789caf,upper=0x9eb8c2,horizon=0xdde3dc,haze=0xe8ddd0,low=0xeee0cf,skySun=0xffe0b8,skyStrength=.54,horizonSoftness=.34;
-  let fogNear=96,fogFar=238;
-  if(h<7||h>=21){
-    bg=0x74838a;fog=0x8c9691;sunColor=0xe5d6c9;sunPower=1.48;hemiPower=1.12;exposure=.88;state='evening';
-    zenith=0x415966;upper=0x667a80;horizon=0x939995;haze=0x9e948a;low=0xa7816e;skySun=0xe4cdb9;skyStrength=.11;horizonSoftness=.42;
-    fogNear=92;fogFar=220;
-  }else if(h<9){
-    bg=0xe0e5df;fog=0xdbe0d9;sunColor=0xffd8aa;sunPower=2.62;hemiPower=1.55;exposure=.99;state='morning';
-    zenith=0x83a6b5;upper=0xaec1c1;horizon=0xe5d9ca;haze=0xead6c0;low=0xeeb985;skySun=0xffc98d;skyStrength=.64;horizonSoftness=.37;
-    fogNear=94;fogFar=230;
-  }else if(h>=17.5){
-    bg=0xdfd9cd;fog=0xd8d1c5;sunColor=0xffcf9b;sunPower=2.72;hemiPower=1.42;exposure=.97;state='golden';
-    zenith=0x8299a4;upper=0xaeb6b2;horizon=0xe2cfb8;haze=0xe7c7a7;low=0xe8a876;skySun=0xffbd7c;skyStrength=.68;horizonSoftness=.40;
-    fogNear=98;fogFar=228;
-  }
-  scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=fogNear;scene.fog.far=fogFar;
+  const h=11.25;
+  const bg=0xe4ebe5,fog=0xdfe6df,sunColor=0xffe5bd,sunPower=3.18,hemiPower=1.76,exposure=1.04,state='day';
+  const zenith=0x77a6bf,upper=0xa8c6d0,horizon=0xe6e7dc,haze=0xeee0cf,low=0xf2dfc6,skySun=0xffd79d,skyStrength=.68,horizonSoftness=.31;
+  scene.background.setHex(bg);scene.fog.color.setHex(fog);scene.fog.near=100;scene.fog.far=246;
   sun.color.setHex(sunColor);sun.intensity=sunPower;hemi.intensity=hemiPower;renderer.toneMappingExposure=exposure;living.daylight=state;
-  hallAmbient.intensity=state==='evening'?.17:state==='golden'?.13:state==='morning'?.12:.105;
-  fill.color.setHex(state==='evening'?0xcfdad4:state==='golden'?0xe7ddd1:0xdfe9e3);
-  const practicalProfile=hallLightProfile[state]||hallLightProfile.day;
+  hallAmbient.intensity=.105;fill.color.setHex(0xdfe9e3);
+  const practicalProfile=hallLightProfile.day;
   hallLights.forEach((l,i)=>{l.userData.profileIntensity=practicalProfile[i]??l.userData.baseIntensity??1});
-  applyLightingV631Profile(state);
+  applyLightingV631Profile('day');
   if(renderer.shadowMap.enabled)renderer.shadowMap.needsUpdate=true;
-  const dayT=THREE.MathUtils.clamp((h-6)/15,0,1);
-  const arc=Math.PI*dayT;
-  const dir=new THREE.Vector3(-Math.cos(arc)*.82,Math.max(.08,Math.sin(arc)*.88),.42).normalize();
+  const dir=new THREE.Vector3(-.36,.88,.31).normalize();
   skyUniforms.zenithColor.value.setHex(zenith);skyUniforms.upperColor.value.setHex(upper);
   skyUniforms.horizonColor.value.setHex(horizon);skyUniforms.hazeColor.value.setHex(haze);skyUniforms.lowColor.value.setHex(low);
   skyUniforms.sunDir.value.copy(dir);skyUniforms.sunColor.value.setHex(skySun);skyUniforms.sunStrength.value=skyStrength;skyUniforms.horizonSoftness.value=horizonSoftness;
-  applyAtmosphereV632Profile(state);
-  sun.position.set(dir.x*48,Math.max(16,dir.y*56),dir.z*48);
-  if(living.sunSprite){living.sunSprite.material.opacity=state==='evening'?.28:.88}
+  applyAtmosphereV632Profile('day');
+  sun.position.set(dir.x*52,Math.max(18,dir.y*58),dir.z*52);
+  if(living.sunSprite)living.sunSprite.material.opacity=.88;
 }applyDaylight();
 const daylightTimer=setInterval(applyDaylight,60000);
 
@@ -2047,6 +2032,77 @@ if(!iphoneVisualReference){
   }
 }
 
+// V7.6 KŌMØ Yachting Services — the Marina is now a service hub, not only scenery.
+const marinaServicesV76=new THREE.Group();marinaServicesV76.name='KOMO_YACHTING_SERVICES_V76';marinaV68.add(marinaServicesV76);
+const yachtingWarmV76=new THREE.MeshBasicMaterial({color:0xe4c38b,transparent:true,opacity:lowPower?.24:.36,depthWrite:false});
+const yachtingCoolV76=new THREE.MeshBasicMaterial({color:0xc7d9d2,transparent:true,opacity:lowPower?.18:.30,depthWrite:false});
+
+const yachtingConciergeV76=new THREE.Group();yachtingConciergeV76.name='KOMO_YACHTING_CONCIERGE_V76';yachtingConciergeV76.position.set(49,0,43);marinaServicesV76.add(yachtingConciergeV76);
+box(yachtingConciergeV76,5.6,.34,1.18,MAT.walnut,-1.1,.50,-3.15,{cast:true});
+box(yachtingConciergeV76,5.05,.055,.95,MAT.brass,-1.1,.71,-3.15,{cast:false,receive:false});
+plaque(yachtingConciergeV76,'KŌMØ YACHTING','CONCIERGE · ONBOARD · RIVIERA',5.7,.82,-5.95,4.05,-5.80,{rotY:Math.PI/2,dark:true,titleSize:45});
+box(yachtingConciergeV76,8.8,.12,.95,MAT.blackened,1.7,1.62,5.55,{cast:true});
+plaque(yachtingConciergeV76,'SERVICES','MOTION · LONGEVITY · RECOVERY · SKIN · PERFORMANCE · RETREATS',7.8,.62,1.7,2.28,5.02,{dark:true,titleSize:34});
+
+const motionDeckV76=new THREE.Group();motionDeckV76.name='KOMO_MOTION_DECK_V76';motionDeckV76.position.set(50.0,0,56.0);marinaServicesV76.add(motionDeckV76);
+box(motionDeckV76,13.6,.22,8.4,MAT.travertine,0,.13,0,{cast:true});
+[-6.35,6.35].forEach(x=>[-3.55,3.55].forEach(z=>box(motionDeckV76,.18,3.85,.18,MAT.blackened,x,2.05,z,{cast:true})));
+for(let x=-5.8;x<=5.8;x+=1.45)box(motionDeckV76,.10,.14,7.8,MAT.walnut,x,4.02,0,{cast:true});
+plaque(motionDeckV76,'MOTION DECK','ASSESS · MOVE · UNDERSTAND',7.0,.82,0,3.12,-4.05,{dark:true,titleSize:46});
+box(motionDeckV76,8.7,.035,1.10,yachtingCoolV76,0,.29,.25,{cast:false,receive:false});
+[-3.0,0,3.0].forEach(x=>box(motionDeckV76,.045,.025,6.8,MAT.brass,x,.32,.25,{cast:false,receive:false}));
+const motionCaseV76=new THREE.Group();motionCaseV76.name='KOMO_CASE_MARINA_V76';motionCaseV76.position.set(-4.65,.34,2.28);motionDeckV76.add(motionCaseV76);
+box(motionCaseV76,2.15,.22,1.28,MAT.leatherDark,0,.13,0,{cast:true});
+box(motionCaseV76,2.02,.060,1.14,MAT.brass,0,.28,0,{cast:false,receive:false});
+plaque(motionCaseV76,'KŌMØ CASE','6 SENSORS',1.85,.38,0,.82,.67,{dark:true,titleSize:24});
+cyl(motionDeckV76,.045,.065,2.35,MAT.blackened,4.25,1.38,1.95,8,{cast:false});
+[-.55,.55].forEach(dx=>box(motionDeckV76,.88,1.12,.065,MAT.blackened,4.25+dx,2.55,1.95,{cast:true}));
+box(motionDeckV76,1.72,.84,.035,campusGlassV64,4.25,2.55,1.90,{cast:false,receive:false});
+plaque(motionDeckV76,'30 MIN','MOTION ASSESSMENT',3.25,.60,0,1.15,3.62,{dark:false,titleSize:40});
+
+const recoveryLoungeV76=new THREE.Group();recoveryLoungeV76.name='KOMO_RECOVERY_LOUNGE_V76';recoveryLoungeV76.position.set(50.0,0,67.0);marinaServicesV76.add(recoveryLoungeV76);
+box(recoveryLoungeV76,13.8,.22,8.2,MAT.travertine,0,.12,0,{cast:true});
+[-6.4,6.4].forEach(x=>[-3.45,3.45].forEach(z=>box(recoveryLoungeV76,.16,3.65,.16,MAT.blackened,x,1.95,z,{cast:true})));
+for(let x=-5.8;x<=5.8;x+=1.30)box(recoveryLoungeV76,.095,.13,7.55,MAT.walnut,x,3.74,0,{cast:true});
+plaque(recoveryLoungeV76,'RECOVERY LOUNGE','HYDRATION · RESET · IV',6.7,.80,0,2.95,-3.90,{dark:true,titleSize:45});
+[-3.4,0,3.4].forEach((x,i)=>{
+  box(recoveryLoungeV76,2.45,.30,1.15,MAT.fabricLight,x,.38,.35,{cast:true});
+  box(recoveryLoungeV76,2.20,.14,.88,MAT.fabric,x,.62,.35,{cast:true});
+  if(i!==1){
+    cyl(recoveryLoungeV76,.028,.038,2.15,MAT.brass,x+1.05,1.38,-.72,8,{cast:false});
+    box(recoveryLoungeV76,.38,.52,.035,yachtingCoolV76,x+1.05,2.20,-.72,{cast:false,receive:false});
+  }
+});
+box(recoveryLoungeV76,4.4,.36,1.08,MAT.walnut,0,.45,2.85,{cast:true});
+plaque(recoveryLoungeV76,'TRAVEL RESET','RECOVER · HYDRATE',3.3,.52,0,1.10,3.35,{dark:false,titleSize:31});
+
+const longevitySalonV76=new THREE.Group();longevitySalonV76.name='KOMO_LONGEVITY_SALON_V76';longevitySalonV76.position.set(49.5,0,77.5);marinaServicesV76.add(longevitySalonV76);
+box(longevitySalonV76,5.8,.18,3.5,MAT.walnut,-3.1,.22,-1.15,{cast:true});
+box(longevitySalonV76,5.35,.06,3.05,MAT.fabricLight,-3.1,.38,-1.15,{cast:false});
+plaque(longevitySalonV76,'LONGEVITY SALON','CONSULT · SLEEP · NUTRITION · TRAJECTORY',6.4,.72,-2.8,3.58,4.98,{dark:true,titleSize:38});
+box(longevitySalonV76,5.6,.18,3.5,MAT.travertine,3.35,.22,-1.15,{cast:true});
+box(longevitySalonV76,4.85,.035,2.72,campusGlassV64,3.35,.36,-1.15,{cast:false,receive:false});
+plaque(longevitySalonV76,'SKIN + AESTHETICS','ANALYSE · GLOW · RECOVERY',5.4,.72,3.0,3.58,4.98,{dark:true,titleSize:36});
+
+const marinaGalleryV76=new THREE.Group();marinaGalleryV76.name='KOMO_YACHTING_GALLERY_V76';marinaServicesV76.add(marinaGalleryV76);
+[
+  ['MOTION','ASSESSMENT',49.5],['LONGEVITY','CONSULTATION',55.4],['RECOVERY','IV · HYDRATION',61.3],
+  ['SKIN','AESTHETICS',67.2],['PERFORMANCE','MOBILITY',73.1],['SIGNATURE','RETREAT · CONCIERGE',79.0]
+].forEach(([title,sub,z],i)=>{
+  const g=new THREE.Group();g.position.set(42.1,0,z);g.rotation.y=Math.PI/2;marinaGalleryV76.add(g);
+  box(g,3.95,.18,1.10,MAT.travertine,0,.10,0,{cast:true});
+  box(g,.10,3.25,.10,MAT.brass,-1.70,1.72,0,{cast:false});box(g,.10,3.25,.10,MAT.brass,1.70,1.72,0,{cast:false});
+  box(g,3.70,.025,.055,i%2?yachtingWarmV76:yachtingCoolV76,0,3.20,.08,{cast:false,receive:false});
+  plaque(g,title,sub,3.35,.64,0,2.28,.10,{dark:true,titleSize:title.length>9?30:36});
+});
+
+const dockGateV76=new THREE.Group();dockGateV76.name='KOMO_PRIVATE_DOCK_V76';dockGateV76.position.set(63.0,0,62.5);marinaServicesV76.add(dockGateV76);
+[-1.65,1.65].forEach(z=>box(dockGateV76,.20,3.85,.20,MAT.travertine,0,2.00,z,{cast:true}));
+box(dockGateV76,.95,.22,3.75,MAT.blackened,0,3.88,0,{cast:true});
+box(dockGateV76,.055,3.20,3.20,yachtingWarmV76,-.10,2.10,0,{cast:false,receive:false});
+plaque(dockGateV76,'ONBOARD','KŌMØ YACHTING SERVICES',3.0,.60,-.48,2.92,0,{rotY:Math.PI/2,dark:true,titleSize:35});
+bannerTotem(marinaDetailV68,66.0,62.5,'PRIVATE DOCK','ONBOARD DELIVERY',Math.PI/2);
+
 // WEST — KŌMØ Retreat Villa moved closer and made architecturally larger.
 box(villaV68,43,.14,54,M.ground,-54.0,.03,68.5,{cast:false,receive:true});
 box(villaV68,38,.22,49,MAT.travertine,-54.0,.11,68.5,{cast:false,receive:true});
@@ -2133,10 +2189,24 @@ plaque(wayfindingV68,'CENTRAL CAMPUS','SCIENCE · MOVEMENT · LIFE',6.8,.92,0,4.
 plaque(wayfindingV68,'MARINA','YACHTING',4.8,.82,39.8,4.35,61.0,{rotY:-Math.PI/2,dark:true,titleSize:49});
 plaque(wayfindingV68,'VILLA','RETREATS',4.8,.82,-39.8,4.35,73.2,{rotY:Math.PI/2,dark:true,titleSize:49});
 
+const YACHTING_SERVICES_V76={
+  overview:{title:'KŌMØ YACHTING',fr:'Un hub Riviera pour déployer KŌMØ à bord, à quai ou en villa.',en:'A Riviera hub for KŌMØ services onboard, dockside or in a private villa.',cards:[['MOTION','30 min assessment'],['LONGEVITY','Consultation'],['RECOVERY','IV · hydration'],['SKIN','Analysis · aesthetics'],['PERFORMANCE','Mobility session'],['SIGNATURE','Retreat · concierge']]},
+  motion:{title:'KŌMØ MOTION',fr:'Bilan locomoteur mobile avec analyse du mouvement, équilibre, posture, mobilité et restitution.',en:'Mobile locomotor assessment covering movement, balance, posture, mobility and results review.',cards:[['FORMAT','Onboard · Dock · Villa'],['SESSION','30 min analysis'],['OUTPUT','Results + recommendations'],['KIT','KŌMØ Case']]},
+  recovery:{title:'KŌMØ RECOVERY',fr:'Hydratation, récupération du voyage et protocoles IV / NAD+ lorsqu’ils sont indiqués et réalisables avec les professionnels habilités.',en:'Hydration, travel recovery and IV / NAD+ protocols when appropriate and delivered with qualified professionals.',cards:[['FOCUS','Travel reset'],['FORMAT','Lounge · Onboard'],['CARE','Hydration · Recovery'],['ACCESS','Clinical eligibility']]},
+  longevity:{title:'LONGEVITY CONSULTATION',fr:'Consultation personnalisée autour du sommeil, de la nutrition, de la récupération et de la trajectoire physique.',en:'Personal consultation around sleep, nutrition, recovery and physical trajectory.',cards:[['SLEEP','Review'],['NUTRITION','Strategy'],['RECOVERY','Plan'],['TRAJECTORY','Follow-up']]},
+  aesthetics:{title:'SKIN + AESTHETICS',fr:'Analyse de peau et protocoles esthétiques / recovery intégrés à l’expérience privée.',en:'Skin analysis and aesthetic / recovery protocols integrated into the private experience.',cards:[['SKIN','Analysis'],['BEAUTY','Protocol'],['RECOVERY','Glow'],['FORMAT','Onboard · Villa']]},
+  performance:{title:'PERFORMANCE + MOBILITY',fr:'Séances de mobilité, activation et mouvement fonctionnel adaptées au contexte yacht et voyage.',en:'Mobility, activation and functional movement sessions adapted to yachting and travel.',cards:[['MOBILITY','Session'],['ACTIVATION','Pre-activity'],['MOVE','Functional'],['FORMAT','Deck · Villa']]},
+  signature:{title:'SIGNATURE RIVIERA',fr:'Expérience sur mesure combinant yacht, villa, longévité, recovery, mouvement, nutrition et hospitalité.',en:'Bespoke experience combining yacht, villa, longevity, recovery, movement, nutrition and hospitality.',cards:[['ONBOARD','Private yacht'],['VILLA','Retreat'],['CONCIERGE','Curated'],['RIVIERA','1 day · 3 days']]}
+};
+function showYachtingServiceV76(id='overview'){
+  const s=YACHTING_SERVICES_V76[id]||YACHTING_SERVICES_V76.overview;
+  const cards=s.cards.map(([k,v])=>'<div><span>'+k+'</span><b>'+v+'</b></div>').join('');
+  const note=id==='recovery'?(locale==='fr'?'Les actes cliniques sont proposés uniquement lorsqu’ils sont appropriés et conformément aux règles locales applicables.':'Clinical services are offered only when appropriate and in accordance with applicable local requirements.'):(locale==='fr'?'Disponible à bord, à quai, en villa ou dans une expérience Riviera sur mesure.':'Available onboard, dockside, in a villa or as a bespoke Riviera experience.');
+  openPanel(s.title,locale==='fr'?s.fr:s.en,'<div class="panel-grid">'+cards+'</div><div class="priority-card"><b>KŌMØ YACHTING</b>'+note+'</div>',[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},{label:locale==='fr'?'VOIR LA MARINA':'VIEW MARINA',primary:true,onClick:()=>{closePanel();fastTravel('marina')}}]);
+}
 function showMarinaV68(){
-  openPanel('KŌMØ MARINA',locale==='fr'?'Yachting, hospitalité et retraites privées sur la Riviera.':'Yachting, hospitality and private Riviera retreats.',
-    '<div class="panel-grid"><div><span>YACHTING</span><b>KŌMØ One</b></div><div><span>BOARDING</span><b>Private lounge</b></div><div><span>EXPERIENCE</span><b>Longevity at sea</b></div><div><span>WORLD</span><b>Riviera</b></div></div><div class="priority-card"><b>MARINA</b>'+ (locale==='fr'?'Le port KŌMØ réunit boarding lounge, Yachting House, quais privés et expériences de longévité en mer.':'KŌMØ Marina brings together the boarding lounge, Yachting House, private piers and longevity at sea.') +'</div>',
-    [{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},{label:locale==='fr'?'ALLER AU QUAI':'GO TO PIER',primary:true,onClick:()=>{closePanel();fastTravel('marina')}}]);
+  const s=YACHTING_SERVICES_V76.overview,cards=s.cards.map(([k,v])=>'<div><span>'+k+'</span><b>'+v+'</b></div>').join('');
+  openPanel('KŌMØ YACHTING',locale==='fr'?'Services de longévité et de mouvement déployables à bord, à quai et en villa.':'Longevity and movement services deployable onboard, dockside and in private villas.','<div class="panel-grid">'+cards+'</div><div class="priority-card"><b>MARINA HUB</b>'+ (locale==='fr'?'Boarding Lounge, Motion Deck, Recovery Lounge, Longevity Salon, Services Gallery et Private Dock composent maintenant le parcours KŌMØ Yachting.':'Boarding Lounge, Motion Deck, Recovery Lounge, Longevity Salon, Services Gallery and Private Dock now form the KŌMØ Yachting journey.') +'</div>',[{label:locale==='fr'?'FERMER':'CLOSE',onClick:closePanel},{label:'SERVICES',onClick:()=>showYachtingServiceV76('overview')},{label:locale==='fr'?'ALLER À LA MARINA':'GO TO MARINA',primary:true,onClick:()=>{closePanel();fastTravel('marina')}}]);
 }
 function showVillaV68(){
   openPanel('KŌMØ RETREAT VILLA',locale==='fr'?'Une expérience privée de longévité, d’hospitalité et d’art de vivre.':'A private longevity, hospitality and lifestyle experience.',
@@ -3262,6 +3332,11 @@ makeNpc(npcRoot,{role:'coach',label:'Leo',quest:'leo',functionLabel:'FITNESS COA
   makeNpc(npcRoot,{role:'staff',label:'Sacha',functionLabel:'BOARDING',x:48.0,y:0,z:42.0,outfit:'charcoal',speed:.20,phase:.64,route:[
     [48.0,0,42.0],[52.0,0,42.0],[56.0,0,45.5],[53.0,0,49.0],[47.0,0,47.0]
   ]});
+  makeNpc(npcRoot,{role:'staff',label:'Léonie',functionLabel:'YACHTING CONCIERGE',x:48.2,y:0,z:43.4,outfit:'ivory',body:'slim',hairStyle:'bob',scale:.96,speed:.14,phase:.11,task:'host',route:[[48.2,0,43.4],[50.5,0,43.2],[52.0,0,45.0],[49.5,0,46.2]]});
+  makeNpc(npcRoot,{role:'staff',label:'Maya',functionLabel:'MOTION SPECIALIST',x:49.0,y:0,z:56.0,outfit:'sage',body:'regular',hairStyle:'bun',scale:.97,speed:.16,phase:.28,task:'observe',route:[[49,0,56],[52,0,56],[54,0,58],[50,0,59],[47,0,57]]});
+  makeNpc(npcRoot,{role:'staff',label:'Nina',functionLabel:'RECOVERY HOST',x:48.5,y:0,z:66.8,outfit:'sand',body:'slim',hairStyle:'bob',scale:.94,speed:.12,phase:.45,task:'host',route:[[48.5,0,66.8],[51,0,66.5],[53,0,69],[49.5,0,70]]});
+  makeNpc(npcRoot,{role:'visitor',label:'Adrien',functionLabel:'MOTION GUEST',x:52.2,y:0,z:56.7,outfit:'navy',body:'broad',hairStyle:'short',scale:1.02,speed:.13,phase:.60,task:'observe',route:[[52.2,0,56.7],[54,0,57],[53,0,59],[50.5,0,58.5]]});
+  makeNpc(npcRoot,{role:'visitor',label:'Elena',functionLabel:'RECOVERY GUEST',x:52.6,y:0,z:67.2,outfit:'cream',body:'regular',hairStyle:'bun',scale:.95,speed:.10,phase:.73,task:'lounge',route:[[52.6,0,67.2],[53.8,0,68.2],[52.5,0,69.5],[51.0,0,68.5]]});
   makeNpc(npcRoot,{role:'staff',label:'Clara',functionLabel:'RETREAT HOST',x:-43.0,y:0,z:62.0,outfit:'sage',speed:.23,phase:.32,route:[
     [-43.0,0,62.0],[-48.0,0,59.0],[-54.0,0,57.0],[-61.0,0,59.0],[-60.0,0,68.0],[-49.0,0,69.0]
   ]});
@@ -4491,7 +4566,12 @@ function showControlsPanel(){
 
 
 const interactions=[
-  {id:'marina',x:39.0,z:67.8,r:4.8,title:()=>locale==='fr'?'KŌMØ Marina · Yachting':'KŌMØ Marina · Yachting',desc:()=>locale==='fr'?'Port privé · yachts · boarding lounge':'Private marina · yachts · boarding lounge',action:showMarinaV68},
+  {id:'marina',x:39.0,z:67.8,r:4.8,title:()=>locale==='fr'?'KŌMØ Marina · Yachting':'KŌMØ Marina · Yachting',desc:()=>locale==='fr'?'Services à bord · à quai · en villa':'Onboard · dockside · villa services',action:showMarinaV68},
+  {id:'marina_motion',x:50.0,z:56.0,r:4.6,title:()=> 'KŌMØ Motion Deck',desc:()=>locale==='fr'?'Bilan Motion · mobilité · performance':'Motion assessment · mobility · performance',action:()=>showYachtingServiceV76('motion')},
+  {id:'marina_recovery',x:50.0,z:67.0,r:4.6,title:()=> 'Recovery Lounge',desc:()=>locale==='fr'?'Hydratation · recovery · travel reset':'Hydration · recovery · travel reset',action:()=>showYachtingServiceV76('recovery')},
+  {id:'marina_longevity',x:49.5,z:77.5,r:4.3,title:()=> 'Longevity Salon',desc:()=>locale==='fr'?'Consultation · skin · trajectoire':'Consultation · skin · trajectory',action:()=>showYachtingServiceV76('longevity')},
+  {id:'marina_services',x:42.4,z:64.0,r:4.0,title:()=> 'Yachting Services Gallery',desc:()=>locale==='fr'?'Motion · Recovery · Skin · Performance · Retreat':'Motion · Recovery · Skin · Performance · Retreat',action:()=>showYachtingServiceV76('overview')},
+  {id:'marina_dock',x:63.0,z:62.5,r:3.8,title:()=>locale==='fr'?'Private Dock · embarquement':'Private Dock · boarding',desc:()=>locale==='fr'?'Services KŌMØ livrés directement à bord':'KŌMØ services delivered directly onboard',action:()=>showYachtingServiceV76('signature')},
   {id:'villa',x:-39.0,z:67.8,r:4.8,title:()=>locale==='fr'?'KŌMØ Retreat Villa':'KŌMØ Retreat Villa',desc:()=>locale==='fr'?'Villa privée · piscine · expériences longévité':'Private villa · pool · longevity experiences',action:showVillaV68},
   {id:'desk',x:-7.3,z:4.0,r:3.6,title:()=>copy[locale].deskTitle,desc:()=>copy[locale].deskCopy,action:showDesk},
   {id:'health',x:-5.25,z:10.55,r:2.7,title:()=>locale==='fr'?'Votre santé · mouvement':'Your health · movement',desc:()=>locale==='fr'?'Comprendre les 5 domaines en un coup d’œil':'Understand the 5 domains at a glance',action:showHealthOverview},
@@ -6831,7 +6911,7 @@ applyLocale();
 setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 window.KomoWorld={
-  version:'7.4.0-library-roofs-design',
+  version:'7.6.0-yachting-services',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
