@@ -47,6 +47,16 @@ must(
 pro=pro.replace("navItem('planning','Consultations',icons.planning)","navItem('planning','Aujourd’hui',icons.planning)");
 center=center.replace(/<span>Consultation<\/span>/g,'<span>Prochain rendez-vous</span>').replace(/<span>Questionnaires<\/span>/g,'<span>Pré-bilan patient</span>').replace(/<span>Motion Score<\/span>/g,'<span>Résultat</span>');
 center=center.replace("function bindPatients(){document.querySelector('#k2twOrg')?.addEventListener('change',","function bindPatients(){document.querySelector('[data-k2tw-go-patients]')?.addEventListener('click',()=>window.KomoPatientManagement?.open?.());document.querySelector('#k2twOrg')?.addEventListener('change',");
+const dossierMarker='<p class="eyebrow">CONSULTATION MOTION</p>';
+const dossierIndex=center.indexOf(dossierMarker);
+if(dossierIndex>=0){
+  const gridToken='</header><div class="k2tw-grid">';
+  const gridIndex=center.indexOf(gridToken,dossierIndex);
+  if(gridIndex>=0){
+    const guidance=`</header><section class="k2tw-next-action"><div><small>PROCHAINE ACTION</small><strong>\${!appt?'Attribuer la consultation':!ready?'Pré-bilan à compléter · '+c.qs+'/6':!imports.length?'Charger l’analyse Motion':score==null?'Finaliser l’analyse Motion':'Résultat disponible'}</strong><span>\${!appt?'Le parcours patient démarre après attribution.':!ready?'Le patient doit terminer les six questionnaires avant les mesures.':!imports.length?'Le patient est prêt pour l’acquisition Myodev / MyoCare.':score==null?'Les données sont chargées : poursuivez l’analyse.':'Le bilan est prêt à être relu et restitué.'}</span></div>\${!appt?'<button class="k2tw-btn primary" data-k2tw-dossier-assign>Attribuer maintenant</button>':ready&&!imports.length?'<button class="k2tw-btn primary" data-k2tw-import>Charger Motion</button>':score!=null?'<button class="k2tw-btn primary" data-k2tw-results>Voir les résultats</button>':''}</section><div class="k2tw-flow"><span class="\${appt?'done':'active'}"><b>1</b> Consultation</span><span class="\${ready?'done':appt?'active':''}"><b>2</b> Pré-bilan</span><span class="\${imports.length?'done':ready?'active':''}"><b>3</b> Motion</span><span class="\${score!=null?'done':imports.length?'active':''}"><b>4</b> Résultat</span></div><div class="k2tw-grid">`;
+    center=center.slice(0,gridIndex)+guidance+center.slice(gridIndex+gridToken.length);
+  }
+}
 await writeFile(centerPath,center,'utf8');
 await writeFile(proPath,pro,'utf8');
 
@@ -57,6 +67,7 @@ const checks=[
   ['centre selector',center.includes('id="k2twOrg"')&&center.includes("localStorage.setItem(ORG_KEY,S.orgId)")],
   ['desktop operational KPIs',center.includes('Consultations aujourd’hui')&&center.includes('Prêts pour Motion')&&center.includes('Patients du centre')],
   ['cabinet start screen is operational',center.includes('Votre journée au centre.')&&center.includes('PROCHAINES CONSULTATIONS')&&center.includes('Ouvrir le registre patients')],
+  ['dossier next action guidance',center.includes('PROCHAINE ACTION')&&center.includes('k2tw-flow')&&center.includes('Pré-bilan à compléter')],
   ['single canonical workspace',center.includes('window.KomoCenterWorkspace={openConsultations,openPatients,openCentre:openConsultations,openDossier}')],
   ['Pro navigation says Today',pro.includes("navItem('planning','Aujourd’hui'" )],
   ['legacy Myodev page title retired',!center.includes("textContent='Myodev'")]
