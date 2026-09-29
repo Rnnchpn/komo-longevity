@@ -30,7 +30,8 @@ const manifest={
     'desktop, tablet and mobile share the same canonical content contract',
     'Motion Score is sensor-only; questionnaires are contextual and legacy manual Motion tests are retired',
     'Home and Club define the canonical Pulse color system across patient, professional, admin and auth surfaces',
-    'canonical contrast, authentication card geometry and motion timing are frozen across Pulse'
+    'canonical contrast, authentication card geometry and motion timing are frozen across Pulse',
+    'final consultation architecture retires the legacy Agenda/Centre owners in favor of booking-layer and center-two-tab workspace'
   ],
   surfaces:{
     home:{owner:'patient-home-command-v1.js',controllers:[],extensions:[]},
@@ -38,17 +39,17 @@ const manifest={
     motion:{owner:'motion-hub-v4.js',controllers:['motion-workflow.js','motion-route-guard-v4.js','motion-access-fix-v1.js'],extensions:[]},
     key:{owner:'key-hub-v1.js',controllers:[],extensions:[]},
     trajectory:{owner:'trajectory-v3.js',controllers:[],extensions:[]},
-    documents:{owner:'agenda-hub-v4.js',controllers:['booking-layer-v1.js','patient-intake-v1.js','pulse-free-continuity-v2.js','questionnaire-engine-v1.js'],extensions:['agenda-premium-map-v1.js']},
+    documents:{owner:'booking-layer-v1.js',controllers:['patient-intake-v1.js','pulse-free-continuity-v2.js','questionnaire-engine-v1.js'],extensions:[]},
     mykomo:{owner:'my-komo-stable-v5.js',controllers:[],extensions:[]},
     club:{owner:'club-hub-v1.js',controllers:[],extensions:[]},
     profile:{owner:'profile-v2.js',controllers:[],extensions:['account-hub-v2.js','account-privacy-v1.js']},
     messages:{owner:'care-messaging-v2.js',controllers:[],extensions:[]},
-    clinical:{owner:'clinical-cockpit-v1.js',controllers:['center-two-tab-workspace-v1.js','clinical-motion-v1.js','myocare-import.js','patient-assessment-trio-v1.js','pro-agenda-dossier-v1.js','pro-followup-v1.js','tests-status-cockpit-v1.js','booking-layer-v1.js'],extensions:[]},
+    clinical:{owner:'center-two-tab-workspace-v1.js',controllers:['clinical-cockpit-v1.js','clinical-motion-v1.js','myocare-import.js','patient-assessment-trio-v1.js','pro-followup-v1.js','tests-status-cockpit-v1.js','booking-layer-v1.js'],extensions:[]},
     admin:{owner:'admin-console-v2.js',controllers:['admin-motion-validation-v1.js','admin-patient-manager-v1.js','admin-professionals-v1.js','admin-centers-v1.js','admin-privacy-queue-v1.js','admin-shortcut-v1.js'],extensions:[]},
     auth:{owner:'auth-login-canonical.js',controllers:['auth-gateway-v2.js'],extensions:[]},
     navigation:{owner:'patient-navigation-core-v1.js',controllers:['adaptive-shell-v4.js','pulse-bottom-nav-v6.js'],extensions:['mobile-runtime-v3.js']}
   },
-  global_controllers:['app-router-v2.js','patient-onboarding-v1.js','pro-architecture-v2.js']
+  global_controllers:['app-router-v2.js','patient-onboarding-v1.js','pro-architecture-v2.js','pulse-functional-rc1.js']
 };
 await writeFile(join(root,'scripts','pulse-runtime-architecture-v37.json'),JSON.stringify(manifest,null,2)+'\n','utf8');
 console.log(`[pulse-freeze-final-manifest-v1] ${Object.keys(manifest.surfaces).length} final surfaces · Motion sensor v0.6 frozen · legacy first-test controller retired · final architecture manifest locked`);
