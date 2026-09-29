@@ -4,7 +4,9 @@ import { join } from 'node:path';
 const pulse=join(process.cwd(),'site','pulse-v12');
 const centerPath=join(pulse,'center-two-tab-workspace-v1.js');
 const authPath=join(pulse,'auth-gateway-v2.js');
+const proPath=join(pulse,'pro-architecture-v2.js');
 let center=await readFile(centerPath,'utf8');
+let pro=await readFile(proPath,'utf8');
 const auth=await readFile(authPath,'utf8');
 
 const must=(before,after,label)=>{
@@ -20,19 +22,19 @@ must(
 
 must(
   "const list=selectedRows(),assigned=list.filter(x=>x.next_appointment).length,ready=list.filter(x=>x.next_appointment&&(x.pre_bilan?.complete===true||Number(x.pre_bilan?.completed||0)>=6)).length,scored=list.filter(x=>x.score?.motion_score!=null).length;",
-  "const list=selectedRows(),activeOrg=orgs().find(o=>o.id===S.orgId)||orgs()[0]||null,todayKey=new Date().toDateString(),today=list.filter(x=>x.next_appointment&&new Date(x.next_appointment.scheduled_start).toDateString()===todayKey).length,ready=list.filter(x=>x.next_appointment&&(x.pre_bilan?.complete===true||Number(x.pre_bilan?.completed||0)>=6)).length,scored=list.filter(x=>x.score?.motion_score!=null).length;",
+  "const patients=selectedRows(),activeOrg=orgs().find(o=>o.id===S.orgId)||orgs()[0]||null,list=patients.filter(x=>x.next_appointment&&!['cancelled','completed','no_show'].includes(x.next_appointment.status)).sort((a,b)=>new Date(a.next_appointment.scheduled_start)-new Date(b.next_appointment.scheduled_start)),todayKey=new Date().toDateString(),today=list.filter(x=>new Date(x.next_appointment.scheduled_start).toDateString()===todayKey).length,ready=list.filter(x=>x.pre_bilan?.complete===true||Number(x.pre_bilan?.completed||0)>=6).length,scored=patients.filter(x=>x.score?.motion_score!=null).length;",
   'Pro KPI model'
 );
 
 must(
   '<header class="k2tw-head"><div><p class="eyebrow">KŌMØ CENTRE · MYODEV</p><h2>Attribuer une consultation Motion.</h2><p>Choisissez un patient, attribuez sa consultation, puis retrouvez son pré-bilan avant la réalisation des mesures Myodev.</p></div><div class="k2tw-tools"><label><span>Recherche</span>',
-  '<header class="k2tw-head"><div class="k2tw-head-copy"><p class="eyebrow">KŌMØ PRO · CENTRE</p><h2>Votre activité Motion.</h2><p>Consultations, préparation patient et analyses réunies dans un seul workspace professionnel.</p>${activeOrg?\`<span class="k2tw-centre-label">\${esc(activeOrg.name)}</span>\`:\'\'}</div><div class="k2tw-tools"><label><span>Centre</span><select id="k2twOrg">${orgs().map(o=>\`<option value="\${o.id}" \${o.id===S.orgId?\'selected\':\'\'}>\${esc(o.name)}</option>\`).join(\'\')}</select></label><label><span>Recherche</span>',
+  '<header class="k2tw-head"><div class="k2tw-head-copy"><p class="eyebrow">KŌMØ PRO · AUJOURD’HUI</p><h2>Votre journée au centre.</h2><p>Commencez ici : consultations à venir, patients prêts pour Motion et dossiers qui nécessitent votre attention.</p>${activeOrg?\`<span class="k2tw-centre-label">\${esc(activeOrg.name)}</span>\`:\'\'}</div><div class="k2tw-tools"><label><span>Centre</span><select id="k2twOrg">${orgs().map(o=>\`<option value="\${o.id}" \${o.id===S.orgId?\'selected\':\'\'}>\${esc(o.name)}</option>\`).join(\'\')}</select></label><label><span>Rechercher dans les consultations</span>',
   'Pro hero and centre selector'
 );
 
 must(
   '<div class="k2tw-kpis"><div class="k2tw-kpi"><span>Attribuées</span><strong>${assigned}</strong></div><div class="k2tw-kpi"><span>Prêtes</span><strong>${ready}</strong></div><div class="k2tw-kpi"><span>Bilans réalisés</span><strong>${scored}</strong></div><div class="k2tw-kpi"><span>Patients</span><strong>${list.length}</strong></div></div>',
-  '<div class="k2tw-kpis"><div class="k2tw-kpi"><span>Aujourd’hui</span><strong>${today}</strong><small>consultation${today===1?\'\':\'s\'} planifiée${today===1?\'\':\'s\'}</small></div><div class="k2tw-kpi"><span>Prêts pour Motion</span><strong>${ready}</strong><small>pré-bilan 6/6 terminé</small></div><div class="k2tw-kpi"><span>Bilans réalisés</span><strong>${scored}</strong><small>Motion Score disponible</small></div><div class="k2tw-kpi"><span>Patients</span><strong>${list.length}</strong><small>dans le centre sélectionné</small></div></div>',
+  '<div class="k2tw-kpis"><div class="k2tw-kpi"><span>Consultations aujourd’hui</span><strong>${today}</strong><small>${today?\'à traiter aujourd’hui\':\'aucune consultation aujourd’hui\'}</small></div><div class="k2tw-kpi"><span>Prêts pour Motion</span><strong>${ready}</strong><small>pré-bilan 6/6 terminé</small></div><div class="k2tw-kpi"><span>Bilans réalisés</span><strong>${scored}</strong><small>Motion Score disponible</small></div><div class="k2tw-kpi"><span>Patients du centre</span><strong>${patients.length}</strong><small>registre complet dans « Patients »</small></div></div><div class="k2tw-section-label"><div><p class="eyebrow">PROCHAINES CONSULTATIONS</p><h3>${list.length?\'Ce qui arrive maintenant.\':\'Aucune consultation attribuée.\'}</h3></div><button type="button" class="k2tw-btn" data-k2tw-go-patients>Ouvrir le registre patients →</button></div>',
   'Pro KPI copy'
 );
 
@@ -42,15 +44,21 @@ must(
   'multi-centre selector binding'
 );
 
+pro=pro.replace("navItem('planning','Consultations',icons.planning)","navItem('planning','Aujourd’hui',icons.planning)");
+center=center.replace(/<span>Consultation<\/span>/g,'<span>Prochain rendez-vous</span>').replace(/<span>Questionnaires<\/span>/g,'<span>Pré-bilan patient</span>').replace(/<span>Motion Score<\/span>/g,'<span>Résultat</span>');
+center=center.replace("function bindPatients(){document.querySelector('#k2twOrg')?.addEventListener('change',","function bindPatients(){document.querySelector('[data-k2tw-go-patients]')?.addEventListener('click',()=>window.KomoPatientManagement?.open?.());document.querySelector('#k2twOrg')?.addEventListener('change',");
 await writeFile(centerPath,center,'utf8');
+await writeFile(proPath,pro,'utf8');
 
 const checks=[
   ['professional login copy',auth.includes("title.textContent=pro?'KŌMØ Pro':'Bienvenue'")&&auth.includes("submit.textContent=pro?'Accéder à mon centre':'Se connecter'")],
   ['professional manifesto',auth.includes("Votre centre,<br><em>en mouvement.</em>")],
   ['workspace title',center.includes("textContent='KŌMØ PRO'")&&center.includes("textContent='Centre'")],
   ['centre selector',center.includes('id="k2twOrg"')&&center.includes("localStorage.setItem(ORG_KEY,S.orgId)")],
-  ['desktop operational KPIs',center.includes('Aujourd’hui')&&center.includes('Prêts pour Motion')&&center.includes('Motion Score disponible')],
+  ['desktop operational KPIs',center.includes('Consultations aujourd’hui')&&center.includes('Prêts pour Motion')&&center.includes('Patients du centre')],
+  ['cabinet start screen is operational',center.includes('Votre journée au centre.')&&center.includes('PROCHAINES CONSULTATIONS')&&center.includes('Ouvrir le registre patients')],
   ['single canonical workspace',center.includes('window.KomoCenterWorkspace={openConsultations,openPatients,openCentre:openConsultations,openDossier}')],
+  ['Pro navigation says Today',pro.includes("navItem('planning','Aujourd’hui'" )],
   ['legacy Myodev page title retired',!center.includes("textContent='Myodev'")]
 ];
 for(const [label,ok] of checks)console.log('[pro-access-v2] '+(ok?'OK':'FAIL')+' · '+label);
