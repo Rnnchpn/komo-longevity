@@ -487,3 +487,64 @@ html body #appShell .main-shell,
 html body #appShell #viewRoot{
   background-color:var(--kp-bg,#f4f7f5)!important;
 }
+
+
+/* ---------- 9. Canonical Home visual normalization ---------- */
+html body.khome-final-v1{
+  --kh8-bg:#f4f7f5!important;
+  --kh8-panel:#ffffff!important;
+  --kh8-panel2:#f8faf9!important;
+  --kh8-ink:#17251d!important;
+  --kh8-muted:#66756c!important;
+  --kh8-soft:#7d8c83!important;
+  --kh8-line:#dce6df!important;
+  --kh8-green:#45a977!important;
+  --kh8-green-soft:#def5e7!important;
+  --kh8-warm:#d99d2b!important;
+  background:#f4f7f5!important;
+  color:#17251d!important;
+}
+html body.khome-final-v1 :is(.app-shell,.main-shell,.view-root,#viewRoot){
+  background:#f4f7f5!important;
+  color:#17251d!important;
+}
+html body.khome-final-v1 [data-my-komo-home]{
+  background:
+    radial-gradient(780px 440px at 92% 0%,rgba(93,120,244,.09),transparent 68%),
+    radial-gradient(700px 440px at 0% 34%,rgba(69,169,119,.09),transparent 72%),
+    #f4f7f5!important;
+}
+html body.khome-final-v1 .kh8{
+  color:#17251d!important;
+}
+html body.khome-final-v1 :is(.kh8-hero,.kh8-side,.kh8-profile,.kh8-next,.kh8-card,.kh8-club,.kh8-trajectory,.kh8-traj-reference,.kh8-traj-step){
+  background:#fff!important;
+  color:#17251d!important;
+  border-color:#dce6df!important;
+  box-shadow:0 12px 32px rgba(35,63,48,.07)!important;
+}
+html body.khome-final-v1 .kh8-hero{
+  background:
+    radial-gradient(560px 300px at 88% 0%,rgba(93,120,244,.14),transparent 68%),
+    radial-gradient(520px 300px at 0% 100%,rgba(69,169,119,.16),transparent 70%),
+    linear-gradient(135deg,#f1fff7,#f2f5ff 62%,#fff4ef)!important;
+}
+html body.khome-final-v1 .kh8 :is(h1,h2,h3,h4,strong,b){color:#17251d!important}
+html body.khome-final-v1 .kh8 :is(p,small,span){color:#66756c!important}
+html body.khome-final-v1 .kh8-brand span{color:#205f43!important}
+html body.khome-final-v1 .kh8-brand small,
+html body.khome-final-v1 .kh8-kicker{color:#4e7b61!important}
+html body.khome-final-v1 .kh8-avatar,
+html body.khome-final-v1 .kh8-mini-avatar{
+  background:#e8f2ec!important;border-color:#cfe0d5!important;color:#205f43!important;
+}
+html body.khome-final-v1 :is(.kh8-continue,.kh8-world-action,.kh8-hero-actions a,.kh8-hero-actions button,.kh8-traj-actions a,.kh8-traj-actions button){
+  background:linear-gradient(135deg,#2b8059,#169d91)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+  box-shadow:0 10px 24px rgba(31,125,91,.18)!important;
+}
+html body.khome-final-v1 .kh8-card:nth-child(4n+1){border-top:3px solid #45a977!important}
+html body.khome-final-v1 .kh8-card:nth-child(4n+2){border-top:3px solid #5d78f4!important}
+html body.khome-final-v1 .kh8-card:nth-child(4n+3){border-top:3px solid #12a9a1!important}
+html body.khome-final-v1 .kh8-card:nth-child(4n+4){border-top:3px solid #f56f5c!important}
