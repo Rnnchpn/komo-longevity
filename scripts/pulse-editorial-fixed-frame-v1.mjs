@@ -60,10 +60,33 @@ try{
   console.warn('[pulse-editorial-fixed-frame-v2] iOS Home runtime repair skipped:',error?.message||error);
 }
 
+// Adaptive navigation dedupe: older build passes can append a second patient
+// branch after the canonical member return. Keep exactly one current owner.
+const adaptivePath=join(pulse,'adaptive-shell-v4.js');
+try{
+  let adaptive=await readFile(adaptivePath,'utf8');
+  const duplicate=`
+    if(allowedPro())return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:documents','Rendez-vous',I.agenda,r==='documents')+navItem('pro:dashboard','Pro',I.center,false)+navItem('more','Plus',I.more,false);
+    return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo');`;
+  const first=adaptive.indexOf(duplicate);
+  const second=first>=0?adaptive.indexOf(duplicate,first+duplicate.length):-1;
+  if(second>=0)adaptive=adaptive.slice(0,second)+adaptive.slice(second+duplicate.length);
+  await writeFile(adaptivePath,adaptive,'utf8');
+}catch(error){
+  console.warn('[pulse-editorial-fixed-frame-v2] adaptive navigation dedupe skipped:',error?.message||error);
+}
+
 const index=await readFile(join(pulse,'index.html'),'utf8');
 const present=index.includes(`${file}?v=${version}`);
 const survivors=retiredStyles.filter(x=>index.includes(x));
 const oldInline=index.includes('kpCanonicalThemePriorityV14');
+let adaptiveDuplicate=false;
+try{
+  const adaptiveCheck=await readFile(join(pulse,'adaptive-shell-v4.js'),'utf8');
+  const needle="if(allowedPro())return navItem('patient:home','Home'";
+  adaptiveDuplicate=adaptiveCheck.indexOf(needle)!==adaptiveCheck.lastIndexOf(needle);
+}catch{}
+console.log(`[pulse-editorial-fixed-frame-v2] adaptive duplicate branches=${adaptiveDuplicate?'yes':'no'}`);
 
 console.log(
   `[pulse-editorial-fixed-frame-v2] ${present&&!survivors.length&&!oldInline?'PASS':'WARN'} · final stylesheet=${present?'yes':'no'} · retired-survivors=${survivors.join(',')||'none'} · old-inline=${oldInline?'yes':'no'} · ${htmlFiles.length} HTML surfaces`
