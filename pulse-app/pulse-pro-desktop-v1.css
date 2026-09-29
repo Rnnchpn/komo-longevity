@@ -279,3 +279,297 @@
     grid-template-columns:minmax(280px,1.45fr) minmax(210px,.9fr) minmax(210px,.9fr) minmax(180px,.7fr) minmax(190px,.7fr)!important;
   }
 }
+
+
+/* KŌMØ Pro desktop refinement · 2026-09-29 */
+@media (min-width:1180px){
+  body.komo-pro-mode{
+    background:
+      radial-gradient(900px 520px at 100% 0%,rgba(99,124,245,.06),transparent 70%),
+      radial-gradient(760px 480px at 0% 18%,rgba(20,170,162,.055),transparent 70%),
+      #f3f7f5!important;
+  }
+  body.komo-pro-mode .sidebar{
+    border-right:1px solid #d9e5de!important;
+    box-shadow:10px 0 34px rgba(38,66,50,.04)!important;
+  }
+  body.komo-pro-mode #proDesktopNav .nav-item{
+    font-weight:700!important;
+    letter-spacing:-.01em!important;
+  }
+  body.komo-pro-mode #proDesktopNav .nav-item.active{
+    background:linear-gradient(135deg,#e1f6ed,#e9edff)!important;
+    border-color:#cbded4!important;
+    color:#225f44!important;
+  }
+
+  body.komo-pro-mode #kcpView{
+    min-width:0!important;
+  }
+  body.komo-pro-mode .k2tw-patients{
+    gap:16px!important;
+  }
+  body.komo-pro-mode .k2tw-head{
+    position:relative!important;
+    overflow:hidden!important;
+    min-height:158px!important;
+    grid-template-columns:minmax(0,1.1fr) minmax(520px,.9fr)!important;
+    display:grid!important;
+    align-items:end!important;
+    gap:24px!important;
+    padding:26px 28px!important;
+    border:1px solid #d9e7df!important;
+    border-radius:24px!important;
+    background:
+      radial-gradient(520px 260px at 96% 0%,rgba(99,124,245,.13),transparent 70%),
+      radial-gradient(460px 240px at 0% 100%,rgba(20,170,162,.10),transparent 72%),
+      linear-gradient(135deg,#f7fbf9,#f4f6ff)!important;
+    box-shadow:0 18px 46px rgba(38,66,50,.075)!important;
+  }
+  body.komo-pro-mode .k2tw-head:before{
+    content:""!important;
+    position:absolute!important;
+    width:230px!important;
+    height:230px!important;
+    right:-92px!important;
+    top:-112px!important;
+    border-radius:50%!important;
+    border:1px solid rgba(85,110,214,.10)!important;
+    box-shadow:0 0 0 42px rgba(255,255,255,.11),0 0 0 86px rgba(255,255,255,.07)!important;
+    pointer-events:none!important;
+  }
+  body.komo-pro-mode .k2tw-head>.k2tw-head-copy,
+  body.komo-pro-mode .k2tw-head>.k2tw-tools{
+    position:relative!important;
+    z-index:2!important;
+  }
+  body.komo-pro-mode .k2tw-head .eyebrow{
+    margin:0!important;
+    color:#4e7961!important;
+    font-size:8px!important;
+    font-weight:850!important;
+    letter-spacing:.14em!important;
+  }
+  body.komo-pro-mode .k2tw-head h2{
+    margin:8px 0 8px!important;
+    color:#183729!important;
+    font-size:clamp(34px,2.8vw,46px)!important;
+    line-height:.96!important;
+    letter-spacing:-.05em!important;
+  }
+  body.komo-pro-mode .k2tw-head p{
+    max-width:690px!important;
+    color:#6d7d73!important;
+    font-size:11px!important;
+    line-height:1.55!important;
+  }
+  body.komo-pro-mode .k2tw-centre-label{
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:7px!important;
+    margin-top:14px!important;
+    padding:7px 10px!important;
+    border:1px solid #d6e5dc!important;
+    border-radius:999px!important;
+    background:rgba(255,255,255,.68)!important;
+    color:#315c45!important;
+    font-size:8px!important;
+    font-weight:800!important;
+  }
+  body.komo-pro-mode .k2tw-centre-label:before{
+    content:""!important;
+    width:7px!important;
+    height:7px!important;
+    border-radius:50%!important;
+    background:#42ad77!important;
+    box-shadow:0 0 0 5px rgba(66,173,119,.10)!important;
+  }
+
+  body.komo-pro-mode .k2tw-tools{
+    display:grid!important;
+    grid-template-columns:minmax(190px,.8fr) minmax(240px,1.2fr) auto auto!important;
+    gap:9px!important;
+    align-items:end!important;
+    justify-content:stretch!important;
+  }
+  body.komo-pro-mode .k2tw-tools label{
+    min-width:0!important;
+  }
+  body.komo-pro-mode .k2tw-tools select,
+  body.komo-pro-mode .k2tw-tools input{
+    width:100%!important;
+    min-width:0!important;
+    min-height:44px!important;
+    padding:0 13px!important;
+    border:1px solid #d6e3db!important;
+    border-radius:12px!important;
+    background:rgba(255,255,255,.90)!important;
+    color:#213c2d!important;
+    font-size:11px!important;
+    box-shadow:0 5px 16px rgba(38,66,50,.035)!important;
+  }
+  body.komo-pro-mode .k2tw-tools select:focus,
+  body.komo-pro-mode .k2tw-tools input:focus{
+    border-color:#83b99a!important;
+    box-shadow:0 0 0 4px rgba(66,173,119,.10)!important;
+    outline:none!important;
+  }
+
+  body.komo-pro-mode .k2tw-kpis{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:12px!important;
+  }
+  body.komo-pro-mode .k2tw-kpi{
+    position:relative!important;
+    overflow:hidden!important;
+    min-height:112px!important;
+    padding:18px 19px!important;
+    border:1px solid #dce7e1!important;
+    border-radius:18px!important;
+    background:#fff!important;
+    box-shadow:0 9px 26px rgba(38,66,50,.055)!important;
+  }
+  body.komo-pro-mode .k2tw-kpi:nth-child(1){border-top:3px solid #637cf5!important}
+  body.komo-pro-mode .k2tw-kpi:nth-child(2){border-top:3px solid #14aaa2!important}
+  body.komo-pro-mode .k2tw-kpi:nth-child(3){border-top:3px solid #3eac74!important}
+  body.komo-pro-mode .k2tw-kpi:nth-child(4){border-top:3px solid #e3aa43!important}
+  body.komo-pro-mode .k2tw-kpi span{
+    color:#77877e!important;
+    font-size:8px!important;
+    letter-spacing:.11em!important;
+  }
+  body.komo-pro-mode .k2tw-kpi strong{
+    margin-top:11px!important;
+    color:#223f30!important;
+    font-size:34px!important;
+    letter-spacing:-.05em!important;
+  }
+  body.komo-pro-mode .k2tw-kpi small{
+    display:block!important;
+    margin-top:5px!important;
+    color:#89968f!important;
+    font-size:8px!important;
+  }
+
+  body.komo-pro-mode .k2tw-list{
+    gap:7px!important;
+  }
+  body.komo-pro-mode .k2tw-row{
+    min-height:92px!important;
+    grid-template-columns:minmax(250px,1.3fr) minmax(185px,.8fr) minmax(190px,.8fr) minmax(170px,.7fr) minmax(175px,.7fr)!important;
+    padding:14px 16px!important;
+    border:1px solid #dfe8e3!important;
+    border-radius:15px!important;
+    background:#fff!important;
+    box-shadow:0 6px 20px rgba(38,66,50,.035)!important;
+  }
+  body.komo-pro-mode .k2tw-row:hover{
+    border-color:#b9d5c5!important;
+    box-shadow:0 13px 30px rgba(38,66,50,.085)!important;
+    transform:translateY(-1px)!important;
+  }
+  body.komo-pro-mode .k2tw-person{
+    min-width:0!important;
+  }
+  body.komo-pro-mode .k2tw-person strong{
+    color:#203d2d!important;
+    font-size:13px!important;
+    font-weight:750!important;
+  }
+  body.komo-pro-mode .k2tw-person span{
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    color:#829088!important;
+  }
+  body.komo-pro-mode .k2tw-cell>span{
+    color:#87958d!important;
+    font-size:7.5px!important;
+    font-weight:800!important;
+    letter-spacing:.08em!important;
+    text-transform:uppercase!important;
+  }
+  body.komo-pro-mode .k2tw-cell strong{
+    color:#304d3d!important;
+    font-size:11px!important;
+  }
+  body.komo-pro-mode .k2tw-cell small{
+    color:#87938d!important;
+  }
+  body.komo-pro-mode .k2tw-progress{
+    height:6px!important;
+    background:#e9efeb!important;
+  }
+  body.komo-pro-mode .k2tw-progress i{
+    background:linear-gradient(90deg,#14aaa2,#3eac74)!important;
+  }
+  body.komo-pro-mode .k2tw-open{
+    min-height:38px!important;
+    border-radius:11px!important;
+    background:linear-gradient(110deg,#2f8f63,#159f96)!important;
+    color:#fff!important;
+    box-shadow:0 8px 18px rgba(31,137,98,.15)!important;
+  }
+  body.komo-pro-mode .k2tw-btn{
+    min-height:38px!important;
+    border:1px solid #d7e3dc!important;
+    border-radius:11px!important;
+    background:#fff!important;
+    color:#365343!important;
+  }
+  body.komo-pro-mode .k2tw-btn.primary{
+    border-color:transparent!important;
+    background:linear-gradient(110deg,#168f87,#5873ea)!important;
+    color:#fff!important;
+    box-shadow:0 8px 20px rgba(68,92,190,.16)!important;
+  }
+
+  /* Professional dossier drawer */
+  body.komo-pro-mode .k2tw-drawer{
+    backdrop-filter:blur(7px)!important;
+    -webkit-backdrop-filter:blur(7px)!important;
+  }
+  body.komo-pro-mode .k2tw-panel{
+    border-left:1px solid #dbe6df!important;
+    background:#f7faf8!important;
+    box-shadow:-30px 0 80px rgba(30,53,39,.16)!important;
+  }
+  body.komo-pro-mode .k2tw-panel-head{
+    position:sticky!important;
+    top:0!important;
+    z-index:5!important;
+    padding:0 0 18px!important;
+    background:linear-gradient(180deg,#f7faf8 78%,rgba(247,250,248,0))!important;
+  }
+  body.komo-pro-mode .k2tw-panel-head h2{
+    color:#193a2a!important;
+    font-size:34px!important;
+  }
+  body.komo-pro-mode .k2tw-card{
+    border-color:#dfe8e3!important;
+    background:#fff!important;
+    box-shadow:0 8px 24px rgba(38,66,50,.045)!important;
+  }
+  body.komo-pro-mode .k2tw-card .eyebrow{color:#6c8275!important}
+  body.komo-pro-mode .k2tw-card h3{color:#244434!important}
+  body.komo-pro-mode .k2tw-card p{color:#74847b!important}
+  body.komo-pro-mode .k2tw-step{
+    border-bottom-color:#e6ece8!important;
+  }
+  body.komo-pro-mode .k2tw-step span,
+  body.komo-pro-mode .k2tw-step strong{color:#3a5545!important}
+  body.komo-pro-mode .k2tw-step small{color:#849188!important}
+}
+
+@media (min-width:1180px) and (max-width:1380px){
+  body.komo-pro-mode .k2tw-head{
+    grid-template-columns:1fr!important;
+  }
+  body.komo-pro-mode .k2tw-tools{
+    grid-template-columns:minmax(180px,.75fr) minmax(240px,1.25fr) auto auto!important;
+  }
+  body.komo-pro-mode .k2tw-row{
+    grid-template-columns:minmax(230px,1.25fr) minmax(160px,.8fr) minmax(170px,.8fr) minmax(150px,.7fr) minmax(160px,.7fr)!important;
+  }
+}
