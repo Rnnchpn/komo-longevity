@@ -10,9 +10,12 @@ const html=await readFile(join(source,'index.html'),'utf8');
 const runtime=await readFile(join(source,'world-v1.js'),'utf8');
 const css=await readFile(join(source,'world-v1.css'),'utf8');
 const multiplayer=await readFile(join(source,'world-multiplayer-v1.js'),'utf8');
+const localThree=join(root,'node_modules','three','build','three.module.js');
+await readFile(localThree,'utf8');
 const pulseAuth=await readFile('pulse-app/auth-gateway-v2.js','utf8');
 const pulseHtml=await readFile('pulse-app/index.html','utf8');
 const checks=[
+  ['V7.6.3 local Three dependency present',runtime.includes("import * as THREE from './vendor/three.module.js'")&&!runtime.includes('cdn.jsdelivr.net/npm/three@')],
   ['V7.6.2 HTML cache bust present',html.includes('world-v1.css?v=7.6.2-recovery-boot')&&html.includes('world-v1.js?v=7.6.2-recovery-boot')&&html.includes('name="komo-world-version" content="7.6.2-recovery-boot"')],
   ['V7.2.1 strict iPhone visual reference present',runtime.includes('const iphoneVisualReference=true')&&runtime.includes('const visualLowPower=iphoneVisualReference')&&runtime.includes("classList.toggle('desktop-visual-v5',false)")],
   ['V7.2 living population present',runtime.includes('const populationV72=[')&&runtime.includes("label:'Aiko'")&&runtime.includes("label:'Chiara'")&&runtime.includes("label:'Salma'")&&runtime.includes("label:'Samuel'")&&runtime.includes("body:'broad'")&&runtime.includes("hairStyle:'bun'")],
@@ -279,5 +282,7 @@ for(const [label,ok] of checks){
 await rm(target, { recursive: true, force: true });
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true });
+await mkdir(join(target,'vendor'),{recursive:true});
+await cp(localThree,join(target,'vendor','three.module.js'));
 
 console.log(`[komo-world-qa] PASS · ${checks.length}/${checks.length} · canonical World copied to /site/world/`);
