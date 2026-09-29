@@ -205,7 +205,9 @@ const scripts = [
   // Keep the commercial framework visible as a separate, clearly labelled
   // working draft instead of redirecting CGV visitors to site-use terms.
   'scripts/commercial-legal-v2.mjs',
-  'scripts/commercial-legal-qa-v1.mjs'
+  'scripts/commercial-legal-qa-v1.mjs',
+  // Final Pulse presentation-only layer: bright, clear, modern visual system.
+  'scripts/pulse-bright-modern-v1.mjs'
 ];
 
 for (const script of scripts) {
