@@ -36,8 +36,8 @@ function styles(){
 }
 
 function navIcon(type){return type==='patients'?'<svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3.5 20c.5-4 2.3-6 5.5-6s5 2 5.5 6M16 8h5M18.5 5.5v5"/></svg>':'<svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v5h-7zM4 13h7v7H4zM13 11h7v9h-7z"/></svg>'}
-function rebuildNav(){if(!isPro())return;styles();for(const id of ['proDesktopNav','proMobileNav']){const nav=document.querySelector('#'+id);if(!nav)continue;if(nav.dataset.k2tw==='1')continue;nav.dataset.k2tw='1';nav.innerHTML=`<button type="button" class="nav-item pro-nav-item ${S.active==='patients'?'active':''}" data-k2tw-nav="patients" aria-label="Patients">${navIcon('patients')}<span>Patients</span></button><button type="button" class="nav-item pro-nav-item ${S.active==='centre'?'active':''}" data-k2tw-nav="centre" aria-label="Centre">${navIcon('centre')}<span>Centre</span></button>`;nav.querySelectorAll('[data-k2tw-nav]').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.k2twNav)))}}
-function navState(){document.querySelectorAll('[data-k2tw-nav]').forEach(b=>b.classList.toggle('active',b.dataset.k2twNav===S.active))}
+function rebuildNav(){if(!isPro())return;styles()}
+function navState(){}
 function hideCockpitChrome(){document.querySelector('.kcp-tabs')?.setAttribute('aria-hidden','true')}
 
 async function role(){const {data:{session}}=await sb().auth.getSession();if(!session?.user)return false;const r=await sb().from('account_roles').select('role').eq('user_id',session.user.id).maybeSingle();S.role=r.data?.role||'member';return['professional','admin'].includes(S.role)}
