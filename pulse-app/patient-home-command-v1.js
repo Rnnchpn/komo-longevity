@@ -71,13 +71,9 @@ function orgLabel(){const o=state.organization||{};return [o.name,o.city].filter
 function homeMarkup(){
  const s=currentScore(),w=state.wearable||{},appt=nextAppointment(),e=state.engagement||{},wallet=state.wallet||{};
  const score=num(s?.motion_score),scoreDate=s?.released_at||s?.calculated_at;
- const motionAge=num(s?.motion_age),firstName=(state.profile?.first_name||profileName().split(/\s+/)[0]||'').trim();
  const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0);
  const appointmentDate=appt?.scheduled_start;
  const traj=trajectoryModel();
- const assessmentDate=state.assessment?.completed_at||state.assessment?.created_at||scoreDate;
- const change=scoreDelta();
- const clinicalRelevant=state.assessment?.product_mode==='clinical'||state.assessment?.assessment_type==='clinical'||appt?.appointment_type==='clinical';
  return `<section class="kh8" data-khome-v8 data-khome-v7 aria-label="KŌMØ Pulse Home">
    <div class="kh8-brand"><span>KŌMØ</span><small>PULSE</small></div>
 
@@ -85,13 +81,17 @@ function homeMarkup(){
     <div class="kh8-hero">
       <div class="kh8-hero-copy">
         <p class="kh8-kicker">LONGEVITY IN MOTION</p>
-        <h2>Bonjour ${esc(firstName)}.</h2>
-        <p class="kh8-lead"><strong>Mon parcours KŌMØ</strong><br>Résultats, priorités et prochaine étape réunis dans un seul espace.</p>
+        <h2>Votre santé,<br><em>avec une trajectoire.</em></h2>
+        <p class="kh8-lead">Après chaque consultation, KŌMØ reste avec vous : une priorité claire, une prochaine action et un point de suivi dans le temps.</p>
         <div class="kh8-hero-actions">
-          <button class="kh8-continue" type="button" data-kh8-route="path"><span>Voir mon parcours</span><b aria-hidden="true">→</b></button>
+          <button class="kh8-continue" type="button" data-kh8-route="path"><span>${esc(traj.cta)}</span><b aria-hidden="true">→</b></button>
+          <button class="kh8-world-action" type="button" data-kh8-world><span>Entrer dans KŌMØ World</span><b aria-hidden="true">↗</b></button>
         </div>
       </div>
-      <div class="kh8-hero-media kh9-summary" aria-label="Vos derniers repères"><small>VOTRE DERNIER BILAN</small><strong>${assessmentDate?esc(fmtDate(assessmentDate)):'À réaliser'}</strong><span>MOTION SCORE <b>${score===null?'—':Math.round(score)+'/100'}</b></span><span>MOTION AGE <b>${motionAge===null?'—':Math.round(motionAge)+' ans'}</b></span>${change===null?'':`<em>${change>0?'+':''}${change.toFixed(1).replace('.',',')} depuis l’évaluation précédente</em>`}</div>
+      <button class="kh8-hero-media" type="button" data-kh8-world aria-label="Entrer dans KŌMØ World">
+        <span class="kh8-hero-photo">${heroPhotoMarkup()}</span>
+        <span class="kh8-world-badge"><small>KŌMØ WORLD</small><strong>Entrez dans votre univers</strong><em>Explorer ↗</em></span>
+      </button>
     </div>
 
     <div class="kh8-side">
@@ -117,13 +117,7 @@ function homeMarkup(){
       </div>
       <div class="kh8-traj-reference"><span>VOTRE RÉFÉRENCE</span><strong>${esc(traj.scoreText)}</strong></div>
     </div>
-   <div class="kh8-traj-progress">${trajectorySteps(traj)}</div>
-    <div class="kh9-dashboard-metrics">
-      <article><small>PROCHAIN RENDEZ-VOUS</small><strong>${appt?esc(appointmentLabel(appt.appointment_type)):'À planifier'}</strong><p>${appt?`${esc(fmtShortDate(appointmentDate))}${fmtTime(appointmentDate)?` · ${esc(fmtTime(appointmentDate))}`:''}`:'Réservez depuis vos consultations.'}</p></article>
-      <article><small>DERNIER BILAN</small><strong>${assessmentDate?esc(fmtDate(assessmentDate)):'À réaliser'}</strong><p>${state.assessment?esc(state.assessment.product_mode==='clinical'?'KŌMØ Clinical':'KŌMØ Motion'):'Votre premier bilan crée le point de départ.'}</p></article>
-      <article><small>MOTION SCORE</small><strong>${score===null?'—':Math.round(score)}<i>${score===null?'':'/100'}</i></strong><p>${change===null?'Votre première référence apparaîtra ici.':`${change>0?'+':''}${change.toFixed(1).replace('.',',')} depuis la précédente.`}</p></article>
-      <article><small>MOTION AGE</small><strong>${motionAge===null?'—':`${Math.round(motionAge)} ans`}</strong><p>Repère longitudinal, lorsqu’il est disponible et validé. Ce n’est pas un diagnostic.</p></article>
-    </div>
+    <div class="kh8-traj-progress">${trajectorySteps(traj)}</div>
     <div class="kh8-traj-grid">
       <article><span>MAINTENANT</span><strong>${esc(traj.now)}</strong><p>La priorité issue de votre situation actuelle.</p></article>
       <article><span>D’ICI AU PROCHAIN POINT</span><strong>${esc(traj.week)}</strong><p>Votre cap entre deux consultations.</p></article>
@@ -155,9 +149,7 @@ function homeMarkup(){
     </a>
    </nav>
 
-   ${clinicalRelevant?`<section class="kh9-clinical"><div><small>KŌMØ CLINICAL</small><strong>Votre parcours inclut une étape médicale.</strong><p>Retrouvez les éléments mis à disposition par l’équipe responsable de votre suivi.</p></div><button type="button" data-kh8-route="documents">Ouvrir mon dossier →</button></section>`:''}
    <button class="kh8-club" type="button" data-kh8-route="club"><span><small>KŌMØ CLUB</small><strong>Une communauté qui avance ensemble.</strong><em>Défis · événements · contenus · récompenses</em></span><b>Accéder au Club →</b></button>
-   <section class="kh9-world"><div><small>OPTIONNEL · KŌMØ WORLD</small><strong>Un autre format pour continuer.</strong><p>Vous pouvez utiliser tout votre parcours dans Pulse. World propose en complément une expérience immersive de mouvement, de rééducation et de réseau.</p></div><button type="button" data-kh8-world>Découvrir World ↗</button></section>
    <p class="kh8-foot">Mesurer → Comprendre → Agir → Suivre → Progresser</p>
   </section>`;
 }
@@ -209,7 +201,7 @@ async function load(force=false){
      const ids=assessmentRows.map(x=>x.id).filter(Boolean);
      if(ids.length){
        const [scores,priorities]=await Promise.all([
-         safe(c.from('scores').select('assessment_id,motion_score,motion_age,calculated_at,released_at,release_status,status').in('assessment_id',ids).eq('release_status','released').order('calculated_at',{ascending:false}).limit(2)),
+         safe(c.from('scores').select('assessment_id,motion_score,calculated_at,released_at,release_status,status').in('assessment_id',ids).eq('release_status','released').order('calculated_at',{ascending:false}).limit(2)),
          state.assessment?.id?safe(c.from('priorities').select('rank,category,patient_wording').eq('assessment_id',state.assessment.id).order('rank',{ascending:true}).limit(3)):Promise.resolve([])
        ]);
        state.scores=Array.isArray(scores)?scores:[];
