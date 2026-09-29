@@ -4,6 +4,7 @@ const PULSE_HOST = 'pulse.komolongevity.com';
 const LIFE_HOST = 'life.komolongevity.com';
 const SHOP_HOST = 'shop.komolongevity.com';
 const EXPERIENCE_HOST = 'experience.komolongevity.com';
+const COMMAND_HOST = 'command.komolongevity.com';
 const STATIC_ORIGIN = 'https://komolongevity.com';
 const STATIC_ASSET_RE = /\.(?:css|js|mjs|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i;
 
@@ -17,6 +18,7 @@ const HOST_APPS = {
   [PULSE_HOST]: { prefix: '/pulse-v12', private: true, routeHeader: 'X-KOMO-Pulse-Route' },
   [LIFE_HOST]: { prefix: '/life-v1', private: false, routeHeader: 'X-KOMO-Life-Route' },
   [EXPERIENCE_HOST]: { prefix: '/experience', private: false, routeHeader: 'X-KOMO-Experience-Route' },
+  [COMMAND_HOST]: { prefix: '/command-v1', private: true, routeHeader: 'X-KOMO-Command-Route' },
 };
 
 export const config = { matcher: '/:path*' };
@@ -31,6 +33,10 @@ export default async function middleware(request) {
   }
 
   const app = HOST_APPS[hostname];
+  // COMMAND is only reachable through its dedicated host; hide the generated path on public hosts.
+  if (!app && incomingUrl.pathname.startsWith('/command-v1')) {
+    return new Response('Not Found', { status: 404, headers: { 'X-Robots-Tag': 'noindex, nofollow, noarchive' } });
+  }
   if (!app) return next();
 
   if (incomingUrl.pathname.startsWith('/api/') || incomingUrl.pathname.startsWith('/_vercel/')) return next();
