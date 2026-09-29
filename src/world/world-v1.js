@@ -3958,6 +3958,9 @@ glow(twinRoom,0xc9d7c9,2.0,12,0,5.5,-3);
 // V2.6 Twin Lab — spatial domain readout around the body.
 const twinLab=new THREE.Group();twinLab.name='KOMO_TWIN_LAB_V26';twinRoom.add(twinLab);
 const twinDomainVisuals={};
+// V8.5.2 — keep Twin materials local: this block is constructed before the shared V5.6 room materials.
+const twinWarmStripV852=new THREE.MeshBasicMaterial({color:0xf2d39d,transparent:true,opacity:lowPower?.30:.46,depthWrite:false});
+const twinCoolStripV852=new THREE.MeshBasicMaterial({color:0xc9ddd0,transparent:true,opacity:lowPower?.28:.42,depthWrite:false});
 const twinDomainLayout=[
   ['muscle',-5.15,1.4,-2.2,'MUSCLE'],
   ['mobility',5.15,1.4,-2.2,'MOBILITY'],
@@ -3969,7 +3972,7 @@ twinDomainLayout.forEach(([id,x,y,z,label],i)=>{
   const g=new THREE.Group();g.position.set(x,0,z);g.name='KOMO_TWIN_DOMAIN_'+id.toUpperCase()+'_V82';twinLab.add(g);
   // Low, gallery-like measurement plinth: no screen, no sign, no kiosk silhouette.
   box(g,2.18,.12,1.54,MAT.travertine,0,.06,0,{cast:true});
-  box(g,1.84,.035,1.18,i%2?roomCoolStrip:roomWarmStrip,0,.145,0,{cast:false,receive:false});
+  box(g,1.84,.035,1.18,i%2?twinCoolStripV852:twinWarmStripV852,0,.145,0,{cast:false,receive:false});
   const fillMat=new THREE.MeshBasicMaterial({color:i%2?0xb8cbbf:0xd1b57c,transparent:true,opacity:.66});
   const fill=box(g,.30,.54,.30,fillMat,0,.43,.02,{cast:false,receive:false});fill.userData.dynamic=true;
   const ring=mesh(g,new THREE.RingGeometry(.48,.57,34),new THREE.MeshBasicMaterial({color:i%2?0xb8cbbf:0xd3b77f,transparent:true,opacity:.22,depthWrite:false}),0,.18,.02,{cast:false,receive:false});
@@ -7208,7 +7211,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'8.5.1-arena-stable',
+  version:'8.5.2-arena-stable',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
