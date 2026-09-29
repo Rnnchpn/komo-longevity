@@ -60,7 +60,7 @@ const checks=[
   ['V7.3.2 arrival NPC scenes present',runtime.includes('const arrivalPopulationV732=[')&&runtime.includes("functionLabel:'ARRIVAL HOST'")&&runtime.includes("task:'lounge'")&&runtime.includes("task:'observe'")],
   ['V7.3.2 compact mobile HUD present',css.includes('V7.3.2 Arrival Experience')&&css.includes('grid-template-columns:auto 1fr auto auto!important')&&css.includes('#language-toggle')&&css.includes('height:44px!important')],
   ['V7.3.2 compact social dock present',multiplayer.includes("version:'1.5.0-arrival-ui'")&&multiplayer.includes("+ 51px)!important")&&multiplayer.includes('height:27px!important')],
-  ['World Journey V2.4+ present',runtime.includes('KOMO_WORLD_JOURNEY_V24')&&runtime.includes('const JOURNEY_MISSIONS')&&runtime.includes('function completeJourney')],
+  ['World Journey progression retained under V8.1 Hall',runtime.includes('KOMO_HALL_TRAJECTORY_LOUNGE_V81')&&runtime.includes('const JOURNEY_MISSIONS')&&runtime.includes('function completeJourney')&&runtime.includes('function showJourneyPanel')],
   ['iPhone-reference run gameplay V7.2.1 present',runtime.includes('const AUTO_RUN_SPEED=6.05')&&runtime.includes('const AUTO_RUN_BOOST=7.15')&&runtime.includes('tryMoveSmooth')],
   ['living journey V2.5+ present',runtime.includes('KOMO_JOURNEY_GUIDE_V25')&&runtime.includes('function updateJourneyGuide')],
   ['NPC conversations V2.5 present',runtime.includes('function showNpcConversation')&&runtime.includes("id:'social'")],
