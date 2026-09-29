@@ -1847,3 +1847,9 @@ body.trajectory-connected .twin-domain-list button.trajectory-focus{transform:tr
 /* V8.3 — Fitness as the action layer of the trajectory */
 .fitness-activity-grid button.recommended:before{content:"TRAJECTORY";display:block;margin-bottom:5px;font-size:6px;font-weight:850;letter-spacing:.13em;color:#b8d3c0}
 .trajectory-fitness-context{box-shadow:inset 0 0 0 1px rgba(144,189,157,.03)}
+
+
+/* V8.4 — Library as a trajectory reading room */
+.library-focus-detail>span{display:block;font-size:7px;font-weight:800;letter-spacing:.15em;color:#b8d3c0}
+.library-focus-detail>h3{margin:8px 0 13px;font:500 25px/1.05 Georgia,serif;color:#f2ece2}
+.library-focus-detail>p{color:rgba(242,236,226,.60);line-height:1.65}
