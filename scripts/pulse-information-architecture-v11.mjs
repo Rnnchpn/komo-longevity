@@ -42,8 +42,8 @@ for(const dir of dirs){
       js=js.replace("    center:'<svg", "    mykomo:'<svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\"><circle cx=\"12\" cy=\"8\" r=\"3.2\"/><path d=\"M5.5 20c.6-4 2.7-6 6.5-6s5.9 2 6.5 6\"/></svg>',\n    center:'<svg");
     }
     js=js.replace(
-      /const r=route\(\);\s*return navItem\('patient:home'[\s\S]*?navItem\('more','Plus',I\.more,false\);/,
-      "const r=route();\n    return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo');"
+      /const r=route\(\);\s*(?:if\(allowedAdmin\(\)\)[\s\S]*?)?return navItem\('patient:home'[\s\S]*?navItem\('(?:patient:mykomo|more)'[^;]*;/,
+      "const r=route();\n    if(allowedAdmin())return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('pro:dashboard','Pro',I.center,false)+navItem('admin','Admin',I.admin,false)+navItem('more','Plus',I.more,false);\n    if(allowedPro())return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:documents','Rendez-vous',I.agenda,r==='documents')+navItem('pro:dashboard','Pro',I.center,false)+navItem('more','Plus',I.more,false);\n    return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo');"
     );
     js=js.replace(
       "primary=actionButton('Rendez-vous','patient:documents')+actionButton('My KŌMØ','patient:mykomo')+actionButton('Messages','patient:messages');",
@@ -53,7 +53,7 @@ for(const dir of dirs){
       "primary=actionButton('Agenda et réseau','patient:documents')+actionButton('My KŌMØ','patient:mykomo')+actionButton('Messages','patient:messages');",
       "primary=actionButton('Consultations & rendez-vous','patient:documents')+actionButton('My KŌMØ','patient:mykomo');"
     );
-    const patientBottomGuard="if(mode()==='patient'){document.querySelector('#kamBottomBar')?.remove();return;}";
+    const patientBottomGuard="if(mode()==='patient'&&!allowedPro()){document.querySelector('#kamBottomBar')?.remove();return;}";
     if(!js.includes(patientBottomGuard)){
       js=js.replace(
         "  function ensureBottom(){\n    const app=document.querySelector('#appShell');if(!app)return;",
@@ -112,14 +112,14 @@ const exactDock=`const items=[
   ['agenda','Consultations & rendez-vous','□','documents'],
   ['mykomo','My KŌMØ','◉','mykomo']
 ];`;
-const exactAdaptive="navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo')";
+const exactAdaptive="return navItem('patient:home','Home',I.home,r==='home')+navItem('patient:results','Résultats',I.results,r==='results')+navItem('patient:key','Connected',I.follow,r==='key')+navItem('patient:documents','Consultations & rendez-vous',I.agenda,r==='documents')+navItem('patient:mykomo','My KŌMØ',I.mykomo,r==='mykomo')";
 const patientBottomGuard="if(mode()==='patient'){document.querySelector('#kamBottomBar')?.remove();return;}";
 const checks=[
   ['desktop dock has exactly five patient destinations',(dock.match(/^\s*\['(?:home|key|results|agenda|mykomo)'/gm)||[]).length===5],
   ['desktop dock exact approved order',dock.includes(exactDock)],
   ['desktop dock routes trajectory aliases into Consultations',dock.includes("if(['trajectory','path','plan'].includes(r))return'agenda';")],
   ['adaptive navigation exact approved order',adaptive.includes(exactAdaptive)&&!adaptive.includes("navItem('patient:trajectory'")],
-  ['adaptive shell does not create a patient bottom bar',adaptive.includes(patientBottomGuard)],
+  ['adaptive shell hides patient bottom bar only for non-privileged members',adaptive.includes(patientBottomGuard)&&adaptive.includes("if(allowedAdmin())return navItem('patient:home','Home'")&&adaptive.includes("if(allowedPro())return navItem('patient:home','Home'")],
   ['patient Messages removed from adaptive primary menu',!adaptive.includes("actionButton('Messages','patient:messages')")],
   ['My KŌMØ exposes Club',myk.includes('data-myk-control')&&myk.includes('data-mkv5-route="club"')],
   ['My KŌMØ routes core score to Results',myk.includes('data-mkv5-route="results">Voir tous mes résultats')],
