@@ -92,8 +92,8 @@ console.log(`[pulse-editorial-fixed-frame-v2] adaptive duplicate branches=${adap
 // after pruning/dedupe, instead of the intermediate pre-pruning graph.
 try{
   const finalIndex=await readFile(join(pulse,'index.html'),'utf8');
-  const finalScripts=[...finalIndex.matchAll(/<script[^>]+src=["']\\.\\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*><\\/script>/g)].map(x=>x[1]);
-  const finalStyles=[...finalIndex.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]+href=["']\\.\\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*>/g)].map(x=>x[1]);
+  const finalScripts=[...finalIndex.matchAll(/<script[^>]+src=["']\.\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*><\/script>/g)].map(x=>x[1]);
+  const finalStyles=[...finalIndex.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]+href=["']\.\/([^"'?#]+)(?:[?#][^"']*)?["'][^>]*>/g)].map(x=>x[1]);
   const auditPath=join(pulse,'pulse-final-production-audit-v1.json');
   let audit={};
   try{audit=JSON.parse(await readFile(auditPath,'utf8'))}catch{}
