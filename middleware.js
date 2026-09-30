@@ -134,7 +134,10 @@ export default async function middleware(request) {
   const isStaticAsset = STATIC_ASSET_RE.test(incomingPath);
   const isVersionedAsset = isStaticAsset && incomingUrl.searchParams.has('v');
 
-  if (isVersionedAsset) {
+  if (hostname === PULSE_HOST && isStaticAsset && !isVersionedAsset) {
+    responseHeaders.set('Cache-Control', 'private, no-store, max-age=0');
+    responseHeaders.delete('CDN-Cache-Control');
+  } else if (isVersionedAsset) {
     responseHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
     responseHeaders.set('CDN-Cache-Control', 'public, s-maxage=31536000, immutable');
   } else if (isStaticAsset) {
