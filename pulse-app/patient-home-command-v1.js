@@ -1,7 +1,7 @@
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='9.0.0-pulse-dashboard';
+const VERSION='9.0.0-demo-dashboard';
 let timer=0;
 const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,assessment:null,priorities:[],scores:[],wearable:null,appointments:[],appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
 
@@ -71,89 +71,82 @@ function orgLabel(){const o=state.organization||{};return [o.name,o.city].filter
 function homeMarkup(){
  const s=currentScore(),w=state.wearable||{},appt=nextAppointment(),e=state.engagement||{},wallet=state.wallet||{};
  const score=num(s?.motion_score),scoreDate=s?.released_at||s?.calculated_at;
- const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0);
+ const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0),xp=fmt(e.xp??e.experience??e.total_xp??0);
+ const appointmentDate=appt?.scheduled_start;
  const traj=trajectoryModel();
- const upcoming=(Array.isArray(state.appointments)?state.appointments:[]).slice(0,2);
- const resultDate=scoreDate?fmtDate(scoreDate):'Aucun bilan publié';
- const priority=state.priorities?.[0]?.patient_wording||state.priorities?.[0]?.category||'Votre priorité apparaîtra après le bilan';
- const appointmentRows=upcoming.length?upcoming.map((a,i)=>`
-   <button type="button" class="kh9-appt-row" data-kh8-route="documents">
-     <span class="kh9-appt-date"><b>${esc(fmtShortDate(a.scheduled_start))}</b><small>${esc(fmtTime(a.scheduled_start))}</small></span>
-     <span class="kh9-appt-copy"><strong>${esc(appointmentLabel(a.appointment_type))}</strong><small>${esc(i===0?orgLabel():'KŌMØ')}</small></span>
-     <span class="kh9-arrow">→</span>
-   </button>`).join(''):`
-   <button type="button" class="kh9-appt-empty" data-kh8-route="documents">
-     <strong>Aucun rendez-vous planifié</strong>
-     <span>Planifier mon prochain point →</span>
-   </button>`;
-
  return `<section class="kh9" data-khome-v9 aria-label="KŌMØ Pulse Home">
-   <header class="kh9-welcome">
+   <header class="kh9-intro">
      <div class="kh9-brand"><span>KŌMØ</span><small>PULSE</small></div>
-     <div class="kh9-welcome-copy">
-       <p>VOTRE ESPACE KŌMŌ</p>
-       <h1>Bienvenue sur KŌMØ Pulse</h1>
-       <span>Vos résultats ici, votre trajectoire, votre World.</span>
+     <div class="kh9-welcome">
+       <p class="kh9-kicker">BIENVENUE SUR KŌMØ PULSE</p>
+       <h1>Votre santé. Vos résultats.<br><em>Votre trajectoire.</em></h1>
+       <p>Retrouvez ici vos résultats KŌMØ, votre trajectoire personnalisée et votre accès à KŌMØ World.</p>
+       <div class="kh9-intro-actions">
+         <button type="button" data-kh8-route="results">Voir mes résultats</button>
+         <button type="button" data-kh8-route="path">Voir ma trajectoire</button>
+         <button type="button" data-kh8-world>Entrer dans World ↗</button>
+       </div>
      </div>
    </header>
 
-   <section class="kh9-main-grid">
-     <button type="button" class="kh9-photo-card" data-kh8-route="mykomo" aria-label="Ouvrir My KŌMØ">
-       <span class="kh9-photo">${heroPhotoMarkup()}</span>
-       <span class="kh9-photo-overlay">
-         <small>MY KŌMØ</small>
+   <section class="kh9-primary">
+     <article class="kh9-photo-card">
+       <div class="kh9-photo">${heroPhotoMarkup()}</div>
+       <div class="kh9-photo-overlay">
+         <small>VOTRE ESPACE KŌMØ</small>
          <strong>${esc(profileName())}</strong>
-         <em>${esc(roleTitle())}</em>
-       </span>
-     </button>
-
-     <aside class="kh9-appointments" aria-label="Mes rendez-vous">
-       <div class="kh9-section-head">
-         <div><small>AGENDA</small><h2>Vos rendez-vous</h2></div>
-         <button type="button" data-kh8-route="documents" aria-label="Voir tous les rendez-vous">→</button>
+         <span>${esc(roleTitle())}</span>
        </div>
-       <div class="kh9-appt-list">${appointmentRows}</div>
-       <div class="kh9-next-caption">${appt?`Prochain point · ${esc(fmtDate(appt.scheduled_start))}`:'Votre suivi se construit ici.'}</div>
-     </aside>
+     </article>
+
+     <article class="kh9-appointment" data-kh8-route="documents" role="button" tabindex="0">
+       <div class="kh9-card-label">PROCHAIN RENDEZ-VOUS</div>
+       <div class="kh9-appt-date">${appt?esc(fmtShortDate(appointmentDate)):'À PLANIFIER'}</div>
+       <h2>${appt?esc(appointmentLabel(appt.appointment_type)):'Votre prochain point KŌMØ'}</h2>
+       <p>${appt?esc(orgLabel()):'Planifiez votre prochain bilan ou votre consultation depuis Pulse.'}</p>
+       <div class="kh9-appt-meta">
+         <span>${appt&&appointmentDate?esc(fmtTime(appointmentDate)):'Agenda KŌMØ'}</span>
+         <b>Ouvrir les rendez-vous →</b>
+       </div>
+     </article>
    </section>
 
-   <section class="kh9-results" aria-label="Principaux résultats">
-     <button type="button" class="kh9-result-card kh9-motion" data-kh8-route="results">
-       <div class="kh9-result-top"><small>MOTION</small><span>Résultats →</span></div>
-       <div class="kh9-score-line"><strong>${score===null?'—':Math.round(score)}</strong><em>/100</em></div>
-       <p>Motion Score</p>
-       <small>${esc(resultDate)}</small>
-     </button>
-
-     <button type="button" class="kh9-result-card kh9-connected" data-kh8-route="key">
-       <div class="kh9-result-top"><small>CONNECTED</small><span>Quotidien →</span></div>
-       <div class="kh9-vitals">
-         <span><b>${fmt(w.steps)}</b><small>pas</small></span>
-         <span><b>${fmtSleep(w.sleep_minutes)}</b><small>sommeil</small></span>
-         <span><b>${num(w.resting_hr)===null?'—':Math.round(num(w.resting_hr))}</b><small>FC repos</small></span>
-       </div>
-       <small>${w.metric_date?`Mis à jour · ${esc(fmtDate(w.metric_date))}`:'Connectez vos données quotidiennes'}</small>
-     </button>
-
-     <button type="button" class="kh9-result-card kh9-trajectory-card" data-kh8-route="path">
-       <div class="kh9-result-top"><small>TRAJECTOIRE</small><span>Ouvrir →</span></div>
-       <strong class="kh9-priority">${esc(priority)}</strong>
-       <p>${esc(traj.checkpoint)}</p>
-       <small>${esc(traj.phase)}</small>
-     </button>
+   <section class="kh9-results">
+     <article class="kh9-result-main" data-kh8-route="results" role="button" tabindex="0">
+       <div><small>MOTION SCORE</small><strong>${score===null?'—':Math.round(score)}<em>/100</em></strong></div>
+       <p>${scoreDate?`Dernier bilan · ${esc(fmtDate(scoreDate))}`:'Votre prochain résultat apparaîtra ici.'}</p>
+     </article>
+     <article class="kh9-result-card" data-kh8-route="path" role="button" tabindex="0">
+       <small>TRAJECTOIRE</small>
+       <strong>${esc(traj.phase)}</strong>
+       <p>${esc(traj.now)}</p>
+     </article>
+     <article class="kh9-result-card" data-kh8-route="key" role="button" tabindex="0">
+       <small>CONNECTED</small>
+       <strong>${fmt(w.steps)} pas</strong>
+       <p>${fmtSleep(w.sleep_minutes)} sommeil · ${num(w.resting_hr)===null?'—':Math.round(num(w.resting_hr))+' bpm'} repos</p>
+     </article>
+     <article class="kh9-result-card" data-kh8-route="mykomo" role="button" tabindex="0">
+       <small>MY KŌMØ</small>
+       <strong>${level} · Niveau</strong>
+       <p>${points} K Points · ${esc(clubLabel())}</p>
+     </article>
    </section>
 
-   <section class="kh9-bottom-grid">
-     <button type="button" class="kh9-world-card" data-kh8-world>
-       <div><small>KŌMØ WORLD</small><strong>Entrez dans votre World.</strong><span>Votre espace immersif, vos programmes et vos expériences.</span></div>
+   <section class="kh9-bottom">
+     <button class="kh9-world" type="button" data-kh8-world>
+       <span><small>KŌMØ WORLD</small><strong>Votre univers de santé, de mouvement et de progression.</strong></span>
        <b>Entrer dans World ↗</b>
      </button>
-
-     <button type="button" class="kh9-xp-card" data-kh8-route="mykomo">
-       <div class="kh9-xp-head"><small>EXPÉRIENCE</small><span>Niveau ${level}</span></div>
-       <div class="kh9-xp-value"><strong>${points}</strong><em>K Points</em></div>
-       <div class="kh9-xp-foot"><span>${esc(clubLabel())}</span><b>Voir mon expérience →</b></div>
-     </button>
+     <article class="kh9-xp" data-kh8-route="mykomo" role="button" tabindex="0">
+       <div>
+         <small>EXPÉRIENCE</small>
+         <strong>${xp}</strong>
+         <span>XP · Niveau ${level}</span>
+       </div>
+       <div class="kh9-xp-track"><i style="width:${Math.min(100,Math.max(12,(Number(e.level_progress??e.progress??42)||42)))}%"></i></div>
+       <p>Votre activité KŌMØ, vos défis et votre progression dans World alimentent votre expérience.</p>
+     </article>
    </section>
  </section>`;
 }
