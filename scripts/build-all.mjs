@@ -238,7 +238,9 @@ const scripts = [
   'scripts/komo-hd-editorial-v1.mjs',
 
   // Absolute last production pass: fixed Pulse viewport + unified visual language.
-  'scripts/pulse-editorial-fixed-frame-v1.mjs'
+  'scripts/pulse-editorial-fixed-frame-v1.mjs',
+  // Absolute last public homepage pass: user-approved KŌMØ hero image.
+  'scripts/komo-home-hero-20260930-v1.mjs'
 ];
 
 for (const script of scripts) {
