@@ -114,7 +114,7 @@ function homeMarkup(){
    <section class="kh9-results">
      <article class="kh9-result-main" data-kh8-route="results" role="button" tabindex="0">
        <div><small>MOTION SCORE</small><strong>${score===null?'—':Math.round(score)}<em>/100</em></strong></div>
-       <p>${scoreDate?`Dernier bilan · ${esc(fmtDate(scoreDate))}`:'Votre prochain résultat apparaîtra ici.'}</p>
+       <p>${scoreDate?'Dernier bilan · '+esc(fmtDate(scoreDate)):'Votre prochain résultat apparaîtra ici.'}</p>
      </article>
      <article class="kh9-result-card" data-kh8-route="path" role="button" tabindex="0">
        <small>TRAJECTOIRE</small>
@@ -211,7 +211,7 @@ async function load(force=false){
      }else state.organization=null;
    }else{state.assessment=null;state.priorities=[];state.scores=[];state.appointments=[];state.appointment=null;state.organization=null}
    state.loadedFor=session.user.id;state.lastLoad=Date.now();render();
- }catch(error){console.warn('[patient-home-command-v8]',error)}finally{state.loading=false}
+ }catch(error){console.warn('[patient-home-command-v9]',error)}finally{state.loading=false}
 }
 
 function render(){
@@ -220,7 +220,7 @@ function render(){
  if(!host)return;
  tuneChrome();
  host.innerHTML=homeMarkup();
- host.dataset.khomeOwner='patient-home-command-v1@8';
+ host.dataset.khomeOwner='patient-home-command-v1@9';
  requestAnimationFrame(()=>window.KomoAssistantV2?.refresh?.());
  window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,cockpit:true}}));
 }
