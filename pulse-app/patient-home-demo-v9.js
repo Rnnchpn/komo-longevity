@@ -67,85 +67,118 @@ function roleMarkup(){return `${isFounder()?'<span class="kh8-crown" aria-hidden
 function scoreChangeMarkup(){const d=scoreDelta();if(d===null)return'Votre dernier bilan apparaîtra ici';const sign=d>0?'+':'';return `${sign}${d.toFixed(1).replace('.',',')} depuis le bilan précédent`}
 function clubLabel(){const n=state.memberships.length;return n?`${n} Club${n>1?'s':''} actif${n>1?'s':''}`:'Accès Club'}
 function orgLabel(){const o=state.organization||{};return [o.name,o.city].filter(Boolean).join(' · ')||'KŌMØ'}
+function connectedTrend(){
+ const rows=Array.isArray(state.wearables)?state.wearables:[];
+ const unique=[...new Map(rows.filter(x=>x&&x.metric_date).map(x=>[x.metric_date,x])).values()];
+ const avg=list=>list.length?list.reduce((sum,x)=>sum+(num(x.steps)||0),0)/list.length:null;
+ const recent=avg(unique.slice(0,7)),previous=avg(unique.slice(7,14));
+ if(recent===null||previous===null||previous<=0)return'Tendance 7 jours';
+ const pct=Math.round(((recent-previous)/previous)*100);
+ if(pct===0)return'Tendance 7 jours stable';
+ return'Tendance 7 jours · '+(pct>0?'+':'')+pct+'%';
+}
+function trajectoryRecheck(){
+ const value=state.report?.payload?.priorities?.[0]?.recheck;
+ if(value)return String(value);
+ const date=nextAppointment()?.scheduled_start;
+ return date?'Prochain point · '+fmtShortDate(date):'Recheck à planifier';
+}
+function upcomingMore(){return Math.max(0,(Array.isArray(state.appointments)?state.appointments.length:0)-1)}
+
 
 function homeMarkup(){
  const s=currentScore(),w=state.wearable||{},appt=nextAppointment(),e=state.engagement||{},wallet=state.wallet||{};
  const score=num(s?.motion_score),scoreDate=s?.released_at||s?.calculated_at;
  const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0),xp=fmt(e.xp_total??e.xp??e.experience??e.total_xp??0);
- const appointmentDate=appt?.scheduled_start;
- const traj=trajectoryModel();
+ const appointmentDate=appt?.scheduled_start,priority=currentPriority();
+ const priorityText=priority?.patient_wording||priority?.category||'Votre priorité apparaîtra après votre prochain bilan';
+ const recheck=trajectoryRecheck(),more=upcomingMore(),trend=connectedTrend();
+ const xpProgress=Math.min(100,Math.max(12,(Number(e.level_pct??e.level_progress??e.progress??42)||42)));
  return `<section class="kh9" data-khome-v9 aria-label="KŌMØ Pulse Home">
-   <header class="kh9-intro">
-     <div class="kh9-brand"><span>KŌMØ</span><small>PULSE</small></div>
-     <div class="kh9-welcome">
-       <p class="kh9-kicker">BIENVENUE SUR KŌMØ PULSE</p>
-       <h1>Votre santé. Vos résultats.<br><em>Votre trajectoire.</em></h1>
-       <p>Retrouvez ici vos résultats KŌMØ, votre trajectoire personnalisée et votre accès à KŌMØ World.</p>
-       <div class="kh9-intro-actions">
-         <button type="button" data-kh8-route="results">Voir mes résultats</button>
-         <button type="button" data-kh8-route="path">Voir ma trajectoire</button>
-         <button type="button" data-kh8-world>Entrer dans World ↗</button>
-       </div>
+   <header class="kh9-header">
+     <div class="kh9-brand" aria-label="KŌMØ Pulse"><span>KŌMØ</span><small>PULSE</small></div>
+     <div class="kh9-heading">
+       <h1>Bienvenue sur KŌMØ Pulse</h1>
+       <p>Vos résultats. Votre trajectoire. Votre World.</p>
+     </div>
+     <div class="kh9-header-actions">
+       <button type="button" data-kh8-route="results">Voir mes résultats</button>
+       <button type="button" data-kh8-route="path">Voir ma trajectoire</button>
      </div>
    </header>
 
-   <section class="kh9-primary">
-     <article class="kh9-photo-card">
+   <section class="kh9-hero">
+     <article class="kh9-photo-card" data-kh8-route="mykomo" role="button" tabindex="0" aria-label="Ouvrir My KŌMØ">
        <div class="kh9-photo">${heroPhotoMarkup()}</div>
        <div class="kh9-photo-overlay">
-         <small>VOTRE ESPACE KŌMØ</small>
+         <small>MY KŌMØ</small>
          <strong>${esc(profileName())}</strong>
          <span>${esc(roleTitle())}</span>
        </div>
      </article>
 
-     <article class="kh9-appointment" data-kh8-route="documents" role="button" tabindex="0">
-       <div class="kh9-card-label">PROCHAIN RENDEZ-VOUS</div>
-       <div class="kh9-appt-date">${appt?esc(fmtShortDate(appointmentDate)):'À PLANIFIER'}</div>
-       <h2>${appt?esc(appointmentLabel(appt.appointment_type)):'Votre prochain point KŌMØ'}</h2>
-       <p>${appt?esc(orgLabel()):'Planifiez votre prochain bilan ou votre consultation depuis Pulse.'}</p>
-       <div class="kh9-appt-meta">
-         <span>${appt&&appointmentDate?esc(fmtTime(appointmentDate)):'Agenda KŌMØ'}</span>
-         <b>Ouvrir les rendez-vous →</b>
+     <article class="kh9-appointment" data-kh8-route="documents" role="button" tabindex="0" aria-label="Ouvrir mes rendez-vous">
+       <div class="kh9-section-label"><span>Prochain rendez-vous</span>${more?'<b>+'+more+' à venir</b>':''}</div>
+       <div class="kh9-date-row">
+         <strong>${appt?esc(fmtShortDate(appointmentDate)):'À planifier'}</strong>
+         <em>${appt&&appointmentDate?esc(fmtTime(appointmentDate)):'Agenda'}</em>
        </div>
+       <div class="kh9-appointment-copy">
+         <h2>${appt?esc(appointmentLabel(appt.appointment_type)):'Votre prochain point KŌMØ'}</h2>
+         <p>${appt?esc(orgLabel()):'Planifiez votre prochaine consultation depuis Pulse.'}</p>
+       </div>
+       <div class="kh9-card-cta">Voir mes rendez-vous <b>→</b></div>
      </article>
    </section>
 
-   <section class="kh9-results">
-     <article class="kh9-result-main" data-kh8-route="results" role="button" tabindex="0">
-       <div><small>MOTION SCORE</small><strong>${score===null?'—':Math.round(score)}<em>/100</em></strong></div>
-       <p>${scoreDate?'Dernier bilan · '+esc(fmtDate(scoreDate)):'Votre prochain résultat apparaîtra ici.'}</p>
+   <section class="kh9-metrics" aria-label="Vos données principales">
+     <article class="kh9-metric" data-kh8-route="results" role="button" tabindex="0">
+       <div class="kh9-metric-head"><span>Motion</span><b>Résultats →</b></div>
+       <div class="kh9-motion-value"><strong>${score===null?'—':Math.round(score)}</strong><em>/100</em></div>
+       <h3>Motion Score</h3>
+       <p>${scoreDate?'Dernier bilan · '+esc(fmtDate(scoreDate)):'Aucun bilan publié'}</p>
      </article>
-     <article class="kh9-result-card" data-kh8-route="path" role="button" tabindex="0">
-       <small>TRAJECTOIRE</small>
-       <strong>${esc(traj.phase)}</strong>
-       <p>${esc(traj.now)}</p>
+
+     <article class="kh9-metric" data-kh8-route="path" role="button" tabindex="0">
+       <div class="kh9-metric-head"><span>Trajectoire</span><b>Ouvrir →</b></div>
+       <strong class="kh9-priority">${esc(priorityText)}</strong>
+       <p class="kh9-recheck">${esc(recheck)}</p>
+       <div class="kh9-status"><i></i><span>${resultReady()?'Trajectoire active':'À construire'}</span></div>
      </article>
-     <article class="kh9-result-card" data-kh8-route="key" role="button" tabindex="0">
-       <small>CONNECTED</small>
-       <strong>${fmt(w.steps)} pas</strong>
-       <p>${fmtSleep(w.sleep_minutes)} sommeil · ${num(w.resting_hr)===null?'—':Math.round(num(w.resting_hr))+' bpm'} repos</p>
+
+     <article class="kh9-metric" data-kh8-route="key" role="button" tabindex="0">
+       <div class="kh9-metric-head"><span>Connected</span><b>Quotidien →</b></div>
+       <div class="kh9-connected-grid">
+         <div><strong>${fmt(w.steps)}</strong><span>pas</span></div>
+         <div><strong>${fmtSleep(w.sleep_minutes)}</strong><span>sommeil</span></div>
+         <div><strong>${num(w.resting_hr)===null?'—':Math.round(num(w.resting_hr))}</strong><span>bpm repos</span></div>
+       </div>
+       <p>${esc(trend)}</p>
      </article>
-     <article class="kh9-result-card" data-kh8-route="mykomo" role="button" tabindex="0">
-       <small>MY KŌMØ</small>
-       <strong>${level} · Niveau</strong>
-       <p>${points} K Points · ${esc(clubLabel())}</p>
+
+     <article class="kh9-metric" data-kh8-route="mykomo" role="button" tabindex="0">
+       <div class="kh9-metric-head"><span>My KŌMØ</span><b>Profil →</b></div>
+       <div class="kh9-level"><strong>Niveau ${level}</strong><span>${points} K Points</span></div>
+       <p>${esc(clubLabel())}</p>
+       <div class="kh9-member-line"><span>${esc(roleTitle())}</span><i></i></div>
      </article>
    </section>
 
    <section class="kh9-bottom">
      <button class="kh9-world" type="button" data-kh8-world>
-       <span><small>KŌMØ WORLD</small><strong>Votre univers de santé, de mouvement et de progression.</strong></span>
+       <span>
+         <small>KŌMØ World</small>
+         <strong>Entrez dans votre World.</strong>
+         <em>Programmes, expériences et progression KŌMØ.</em>
+       </span>
        <b>Entrer dans World ↗</b>
      </button>
+
      <article class="kh9-xp" data-kh8-route="mykomo" role="button" tabindex="0">
-       <div>
-         <small>EXPÉRIENCE</small>
-         <strong>${xp}</strong>
-         <span>XP · Niveau ${level}</span>
-       </div>
-       <div class="kh9-xp-track"><i style="width:${Math.min(100,Math.max(12,(Number(e.level_pct??e.level_progress??e.progress??42)||42)))}%"></i></div>
-       <p>Votre activité KŌMØ, vos défis et votre progression dans World alimentent votre expérience.</p>
+       <div class="kh9-xp-head"><span>Expérience</span><b>Niveau ${level}</b></div>
+       <div class="kh9-xp-value"><strong>${xp}</strong><em>XP</em></div>
+       <div class="kh9-xp-track"><i style="width:${xpProgress}%"></i></div>
+       <div class="kh9-xp-foot"><span>${points} K Points</span><b>Voir ma progression →</b></div>
      </article>
    </section>
  </section>`;
