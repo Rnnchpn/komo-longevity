@@ -38,8 +38,9 @@ export default async function middleware(request) {
   const incomingUrl = new URL(request.url);
   const hostname = (request.headers.get('host') || incomingUrl.hostname).split(':')[0].toLowerCase();
 
+  const isCommandApi = incomingUrl.pathname === '/command-api';
   const isCommandPath = incomingUrl.pathname === '/command' || incomingUrl.pathname.startsWith('/command/');
-  if (hostname === COMMAND_HOST || isCommandPath) {
+  if (hostname === COMMAND_HOST || isCommandPath || isCommandApi) {
     const authorization = request.headers.get('authorization') || '';
     let username = '';
     let password = '';
@@ -62,6 +63,23 @@ export default async function middleware(request) {
           'X-Robots-Tag': 'noindex, nofollow, noarchive'
         }
       });
+    }
+
+    if (isCommandApi) {
+      const target = 'https://uqlolefsiktbznnymriy.supabase.co/functions/v1/command-state';
+      const headers = new Headers();
+      headers.set('authorization', authorization);
+      headers.set('content-type', request.headers.get('content-type') || 'application/json');
+      const upstream = await fetch(target, {
+        method: request.method,
+        headers,
+        body: request.method === 'GET' || request.method === 'HEAD' ? undefined : request.body,
+        redirect: 'manual'
+      });
+      const responseHeaders = new Headers(upstream.headers);
+      responseHeaders.set('Cache-Control', 'private, no-store, max-age=0');
+      responseHeaders.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+      return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers: responseHeaders });
     }
 
     const commandRole = hostname === COMMAND_HOST
