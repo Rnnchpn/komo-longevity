@@ -70,6 +70,93 @@ try{
   process.exit(1);
 }
 
+// Premium Auth finalization: legacy QA validates historical source contracts first.
+// This absolute-last pass ships the single current visual/runtime owner without reintroducing
+// the deprecated choice screen or the dark mobile skin.
+try{
+  const authToken='20261001-premium-auth-v1';
+  const indexPath=join(pulse,'index.html');
+  let authHtml=await readFile(indexPath,'utf8');
+
+  authHtml=authHtml.replace(
+    '<div class="auth-manifesto"><p class="eyebrow">KŌMØ PULSE · VOTRE ESPACE</p><h1>Votre santé,<br><em>en mouvement.</em></h1><p>Rendez-vous, tests, résultats et progression KŌMØ réunis dans un seul espace personnel.</p></div>',
+    '<div class="auth-manifesto"><p class="eyebrow">KŌMØ PULSE</p><h1>Bienvenue sur KŌMØ Pulse</h1><p>Vos résultats. Votre trajectoire. Votre World.</p></div>'
+  );
+  authHtml=authHtml.replace(
+    '<div class="auth-panel-wrap"><div class="auth-panel"><div class="auth-heading"><span class="product-pill">Pulse</span><h2>Bienvenue</h2><p>Connectez-vous pour retrouver votre espace KŌMØ.</p></div>',
+    '<div class="auth-panel-wrap"><div class="auth-panel"><div class="auth-heading"><span class="product-pill">Accès sécurisé</span><h2>Se connecter</h2><p>Retrouvez votre espace personnel KŌMØ Pulse.</p></div>'
+  );
+
+  for(const asset of ['pulse-auth-login-v2.css','auth-stability-v1.css','auth-gateway-v2.js']){
+    const escaped=asset.replaceAll('.','\\.');
+    authHtml=authHtml.replace(new RegExp('\\./'+escaped+'(?:\\?v=[^"\'#+]+)?','g'),'./'+asset+'?v='+authToken);
+  }
+  await writeFile(indexPath,authHtml,'utf8');
+
+  const authGatewayPath=join(pulse,'auth-gateway-v2.js');
+  let authGateway=await readFile(authGatewayPath,'utf8');
+  authGateway=authGateway.replace(
+    "if(!auth.dataset.clientMode)auth.dataset.clientMode=sessionStorage.getItem(CLIENT_MODE_KEY)||'choose';",
+    "if(!auth.dataset.clientMode){const saved=sessionStorage.getItem(CLIENT_MODE_KEY);auth.dataset.clientMode=saved==='booking'?'booking':'login';}"
+  );
+  authGateway=authGateway.replace(
+    "title.textContent=pro?'KŌMØ Pro':'Bienvenue'",
+    "title.textContent=pro?'KŌMØ Pro':'Se connecter'"
+  );
+  authGateway=authGateway.replace(
+    "if(eyebrow)eyebrow.textContent=pro?'KŌMØ PRO · ESPACE CENTRE':'KŌMØ PULSE · VOTRE ESPACE';",
+    "if(eyebrow)eyebrow.textContent=pro?'KŌMØ PRO · ESPACE CENTRE':'KŌMØ PULSE';"
+  );
+  authGateway=authGateway.replace(
+    "if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.innerHTML=pro?'Votre centre,<br><em>en mouvement.</em>':'Votre santé,<br><em>en mouvement.</em>';if(p)p.textContent=pro?'Consultations, dossiers patients, Motion et analyses réunis dans un espace professionnel pensé pour le desktop.':'Rendez-vous, tests, résultats et progression KŌMØ réunis dans un seul espace personnel.'}",
+    "if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.textContent=pro?'Bienvenue sur KŌMØ Pro':'Bienvenue sur KŌMØ Pulse';if(p)p.textContent=pro?'Vos patients. Vos analyses. Votre centre.':'Vos résultats. Votre trajectoire. Votre World.'}"
+  );
+  await writeFile(authGatewayPath,authGateway,'utf8');
+
+  const stableCss=`/* KŌMØ Pulse — Auth stability final · structural semantics only */
+#authScreen[hidden],#appShell[hidden]{display:none!important}
+html[data-komo-auth-bootstrap="session"] #authScreen:not([data-komo-auth-resolved="guest"]){visibility:hidden!important}
+#authScreen{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#authScreen input,#authScreen button,#authScreen select,#authScreen textarea{font:inherit}
+#authScreen input[type="checkbox"]{-webkit-appearance:auto;appearance:auto}
+#authScreen .auth-panel-wrap{-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#authScreen .auth-form input{font-size:16px}
+@media(prefers-reduced-motion:reduce){#authScreen *,#authScreen *::before,#authScreen *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+`;
+  await writeFile(join(pulse,'auth-stability-v1.css'),stableCss,'utf8');
+
+  const framePath=join(pulse,file);
+  let frameCss=await readFile(framePath,'utf8');
+  const authFrameOverride=`
+/* Premium Auth frame override — after historical fixed-frame mobile rules */
+@media(max-width:620px){
+  #authScreen.auth-screen{display:grid!important;grid-template-columns:1fr!important;grid-template-rows:auto minmax(0,1fr)!important}
+  #authScreen .auth-brand{display:flex!important;min-height:104px!important;max-height:104px!important;overflow:hidden!important}
+  #authScreen .auth-panel-wrap{height:auto!important;max-height:none!important;min-height:0!important;padding-top:0!important;padding-bottom:max(10px,env(safe-area-inset-bottom))!important}
+}
+`;
+  if(!frameCss.includes('Premium Auth frame override'))frameCss+=authFrameOverride;
+  await writeFile(framePath,frameCss,'utf8');
+
+  const finalAuthHtml=await readFile(indexPath,'utf8');
+  const finalAuthCss=await readFile(join(pulse,'pulse-auth-login-v2.css'),'utf8');
+  const finalAuthGateway=await readFile(authGatewayPath,'utf8');
+  const authChecks=[
+    ['copy',finalAuthHtml.includes('Bienvenue sur KŌMØ Pulse')&&finalAuthHtml.includes('Vos résultats. Votre trajectoire. Votre World.')],
+    ['direct login',finalAuthHtml.includes('<h2>Se connecter</h2>')&&finalAuthGateway.includes("saved==='booking'?'booking':'login'")],
+    ['old headline gone',!finalAuthHtml.includes('Votre santé,<br><em>en mouvement.</em>')],
+    ['premium owner',finalAuthCss.includes('Single visual owner')&&finalAuthCss.includes('Premium application entry')],
+    ['supported weights',!/(font-weight|font):[^;]*(650|700|750|800|850|900)/.test(finalAuthCss)],
+    ['mobile brand visible',frameCss.includes('Premium Auth frame override')]
+  ];
+  for(const [label,ok] of authChecks)console.log(`[pulse-premium-auth-final] ${ok?'OK':'FAIL'} · ${label}`);
+  if(authChecks.some(([,ok])=>!ok))throw new Error('Premium Auth final contract failed');
+  console.log('[pulse-premium-auth-final] PASS · one Auth visual system · direct login · desktop/mobile');
+}catch(error){
+  console.error('[pulse-premium-auth-final] failed:',error?.message||error);
+  process.exit(1);
+}
+
 // iOS Home runtime repair: pulse-bottom-nav-v6 injects its CSS after linked
 // stylesheets, so correct the generated runtime at the absolute end of the build.
 const dockPath=join(pulse,'pulse-bottom-nav-v6.js');
