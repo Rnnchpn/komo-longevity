@@ -6,6 +6,7 @@ const indexPath=join(pulse,'index.html');
 const jsName='pulse-friday-demo-hardening-v1.js';
 const cssName='pulse-friday-demo-hardening-v1.css';
 const version='20260930-friday-demo-v1';
+const cacheVersion=process.env.VERCEL_GIT_COMMIT_SHA?.slice(0,12)||version;
 
 const runtime=String.raw`(() => {
   const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
@@ -205,6 +206,8 @@ html=html
   .replace(/\s*<script[^>]+src=["']\.\/pulse-friday-demo-hardening-v1\.js(?:\?[^"']*)?["'][^>]*><\/script>/g,'');
 html=html.replace('</head>',`  <meta name="komo-pulse-demo-hardening" content="${version}" />\n  <link rel="stylesheet" href="./${cssName}?v=${version}" />\n</head>`);
 html=html.replace('</body>',`  <script src="./${jsName}?v=${version}"></script>\n</body>`);
+html=html.replace(/((?:src|href)=["']\.\/[^"'?]+\.(?:js|css))(?:\?[^"']*)?(["'])/g,`$1?v=${cacheVersion}$2`);
+html=html.replace(/<meta name="komo-build" content="[^"]*">/g,`<meta name="komo-build" content="${cacheVersion}">`);
 await writeFile(indexPath,html,'utf8');
 
 const checks=[
