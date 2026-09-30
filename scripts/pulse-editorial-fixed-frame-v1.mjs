@@ -47,6 +47,21 @@ for(const name of htmlFiles){
   await writeFile(path,html,'utf8');
 }
 
+// Friday Home V9 finalization: historical build passes validate the stable
+// canonical owner first. Only after every QA pass do we replace the shipped
+// owner contents, preserving the same filename and route ownership contract.
+try{
+  const homeJs=await readFile(join(root,'pulse-app','patient-home-demo-v9.js'),'utf8');
+  const homeCss=await readFile(join(root,'pulse-app','patient-home-demo-v9.css'),'utf8');
+  if(!homeJs.includes('data-khome-v9')||!homeJs.includes("const VERSION='9.0.1-friday-demo'"))throw new Error('Home V9 runtime contract missing');
+  await writeFile(join(pulse,'patient-home-command-v1.js'),homeJs,'utf8');
+  await writeFile(join(pulse,'patient-home-command-v1.css'),homeCss,'utf8');
+  console.log('[pulse-editorial-fixed-frame-v2] Friday Home V9 finalized as canonical shipped owner');
+}catch(error){
+  console.error('[pulse-editorial-fixed-frame-v2] Friday Home V9 finalization failed:',error?.message||error);
+  process.exit(1);
+}
+
 // iOS Home runtime repair: pulse-bottom-nav-v6 injects its CSS after linked
 // stylesheets, so correct the generated runtime at the absolute end of the build.
 const dockPath=join(pulse,'pulse-bottom-nav-v6.js');
