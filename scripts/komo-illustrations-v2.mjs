@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 
 const root=process.cwd();
 const site=join(root,'site');
-const sources=join(root,'src/assets/site2026/generated-v2');
+const sources=join(root,'src/assets/site2026/generated-v2'); // legacy source kept for compatibility; binary image assets now live in src/assets/images.
 
 async function decode(name,out){
   const src=join(sources,name+'.b64');
@@ -14,9 +14,6 @@ async function decode(name,out){
   await writeFile(fp,Buffer.from(raw,'base64'));
 }
 
-await decode('longevity','komo-longevity-v2.webp');
-await decode('clinical','komo-clinical-v2.webp');
-await decode('motion','komo-motion-v2.webp');
 
 async function patch(rel,fn){
   const fp=join(site,rel);
