@@ -201,8 +201,8 @@ await writeFile(join(pulse,cssName),css,'utf8');
 let html=await readFile(indexPath,'utf8');
 html=html
   .replace(/\s*<meta name="komo-pulse-demo-hardening"[^>]*>/g,'')
-  .replace(new RegExp('\\s*<link[^>]+href=["\\']\\./'+cssName.replaceAll('.','\\.')+'(?:\\?[^"\\']*)?["\\'][^>]*>','g'),'')
-  .replace(new RegExp('\\s*<script[^>]+src=["\\']\\./'+jsName.replaceAll('.','\\.')+'(?:\\?[^"\\']*)?["\\'][^>]*><\\/script>','g'),'');
+  .replace(/\s*<link[^>]+href=["']\.\/pulse-friday-demo-hardening-v1\.css(?:\?[^"']*)?["'][^>]*>/g,'')
+  .replace(/\s*<script[^>]+src=["']\.\/pulse-friday-demo-hardening-v1\.js(?:\?[^"']*)?["'][^>]*><\/script>/g,'');
 html=html.replace('</head>',`  <meta name="komo-pulse-demo-hardening" content="${version}" />\n  <link rel="stylesheet" href="./${cssName}?v=${version}" />\n</head>`);
 html=html.replace('</body>',`  <script src="./${jsName}?v=${version}"></script>\n</body>`);
 await writeFile(indexPath,html,'utf8');
