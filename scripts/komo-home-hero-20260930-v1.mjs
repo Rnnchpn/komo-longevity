@@ -4,11 +4,11 @@ import { join } from 'node:path';
 const root = process.cwd();
 const site = join(root, 'site');
 const chunksDir = join(root, 'src', 'assets', 'site2026', 'generated-v2');
-const heroOut = join(site, 'assets', 'images', 'komo-hero-20260930.avif');
-const chunkNames = Array.from({length:9}, (_,i) => `komo-hero-20260930-${String(i+1).padStart(2,'0')}.b64`);
+const heroOut = join(site, 'assets', 'images', 'komo-hero-final-20260930.webp');
+const heroSource = join(chunksDir, 'komo-hero-final-20260930.b64');
 
 await mkdir(join(site, 'assets', 'images'), { recursive: true });
-const encoded = (await Promise.all(chunkNames.map(name => readFile(join(chunksDir, name), 'utf8')))).join('').replace(/\s+/g,'');
+const encoded = (await readFile(heroSource, 'utf8')).replace(/\s+/g,'');
 await writeFile(heroOut, Buffer.from(encoded, 'base64'));
 
 const dictionaries = {
@@ -228,13 +228,13 @@ const heroCss=`
 }
 .komo-hero-20260930 .kpv-hero-media img{
   display:block!important;width:100%!important;height:100%!important;min-height:100%!important;
-  object-fit:cover!important;object-position:center center!important;image-rendering:auto!important;
+  object-fit:cover!important;object-position:50% 50%!important;image-rendering:auto!important;
   opacity:1!important;transform:none!important;filter:none!important;backface-visibility:visible!important;
 }
 .komo-hero-20260930 .kc-hero-copy{
   position:absolute!important;z-index:2!important;left:clamp(28px,4.7vw,72px)!important;
-  bottom:clamp(30px,4.4vw,58px)!important;width:min(500px,calc(100% - 56px))!important;
-  max-width:500px!important;padding:clamp(24px,2.2vw,30px)!important;margin:0!important;min-height:0!important;
+  bottom:clamp(30px,4.4vw,58px)!important;width:min(470px,calc(100% - 56px))!important;
+  max-width:470px!important;padding:clamp(24px,2.2vw,30px)!important;margin:0!important;min-height:0!important;
   border:1px solid rgba(255,255,255,.68)!important;border-radius:22px!important;
   background:rgba(248,245,238,.965)!important;box-shadow:0 24px 70px rgba(31,25,19,.10)!important;
   backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
@@ -268,8 +268,8 @@ body .ke-switch,body .ke-pulse{display:none!important}
 function applyHero(html, lang){
   html=cleanPreviousPass(html);
   html=html
-    .replaceAll('/assets/images/komo-hero-hd-v4.webp','/assets/images/komo-hero-20260930.avif')
-    .replaceAll('/assets/images/komo-longevity-v3.webp','/assets/images/komo-hero-20260930.avif');
+    .replaceAll('/assets/images/komo-hero-hd-v4.webp','/assets/images/komo-hero-final-20260930.webp')
+    .replaceAll('/assets/images/komo-longevity-v3.webp','/assets/images/komo-hero-final-20260930.webp');
   html=html.replace(
     /(<figure[^>]*class="[^"]*kpv-hero-media[^"]*"[^>]*>\s*<img\s+)([^>]*)(>)/i,
     (_,start,attrs,end)=>{
@@ -278,8 +278,8 @@ function applyHero(html, lang){
         :lang==='es'
           ?'KŌMØ Longevity — evaluación funcional del movimiento en la Costa Azul'
           :'KŌMØ Longevity — évaluation fonctionnelle du mouvement sur la Côte d’Azur';
-      let next=attrs.replace(/src="[^"]*"/i,'src="/assets/images/komo-hero-20260930.avif"');
-      if(!/src="/i.test(next))next='src="/assets/images/komo-hero-20260930.avif" '+next;
+      let next=attrs.replace(/src="[^"]*"/i,'src="/assets/images/komo-hero-final-20260930.webp"');
+      if(!/src="/i.test(next))next='src="/assets/images/komo-hero-final-20260930.webp" '+next;
       next=next.replace(/alt="[^"]*"/i,`alt="${alt}"`);
       if(!/alt="/i.test(next))next+=` alt="${alt}"`;
       next=next.replace(/loading="lazy"/i,'loading="eager"');
@@ -297,7 +297,7 @@ function applyHero(html, lang){
       return `<section class="${[...set].join(' ')}">`;
     }
   );
-  const preload='<link rel="preload" as="image" href="/assets/images/komo-hero-20260930.avif" type="image/avif" fetchpriority="high">';
+  const preload='<link rel="preload" as="image" href="/assets/images/komo-hero-final-20260930.webp" type="image/webp" fetchpriority="high">';
   html=html.replace('</head>',preload+'\n'+heroCss+'\n</head>');
   return html;
 }
@@ -324,4 +324,4 @@ await writeHomepage('fr','fr/index.html',false);
 await writeHomepage('en','en/index.html',false);
 await writeHomepage('es','es/index.html',false);
 
-console.log('[komo-home-unified-v3] PASS · FR/EN/ES now share one homepage structure, one hero and localised copy/navigation.');
+console.log('[komo-home-unified-v4] PASS · final generated hero deployed consistently across FR/EN/ES.');
