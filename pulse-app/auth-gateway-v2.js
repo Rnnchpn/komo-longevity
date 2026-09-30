@@ -22,9 +22,67 @@ function sb(){if(!client)client=createClient(URL,KEY,{auth:{storage:storage(),pe
 function authVisible(){const a=document.querySelector('#authScreen');return !!a&&!a.hidden}
 function getAudience(){const q=new URLSearchParams(location.search);if(q.get('mode')==='professional')return'professional';return sessionStorage.getItem(AUDIENCE_KEY)||'patient'}
 
+
+const CLIENT_MODE_KEY='komo_client_entry_mode_v1';
+const POST_AUTH_ROUTE='komo_post_auth_route_v1';
+
+function ensureClientEntry(auth,panel,heading){
+  if(!panel.querySelector('[data-client-entry]')){
+    const entry=document.createElement('section');
+    entry.className='auth-client-entry';
+    entry.dataset.clientEntry='1';
+    entry.innerHTML='<p class="eyebrow">KŌMØ PULSE</p><h2>Que souhaitez-vous faire ?</h2><p>Pulse est l’espace où vous prenez rendez-vous, réalisez vos tests, retrouvez vos résultats et suivez votre trajectoire.</p><div class="auth-client-actions"><button type="button" class="auth-client-card primary" data-client-mode="booking"><span><b>Prendre rendez-vous</b><small>Créer mon profil puis choisir mon bilan et mon créneau.</small></span><i>→</i></button><button type="button" class="auth-client-card" data-client-mode="login"><span><b>J’ai déjà un compte</b><small>Accéder à mes tests, rendez-vous, résultats et suivi.</small></span><i>→</i></button></div><button type="button" class="auth-client-pro" data-client-pro>Professionnel KŌMØ ? Accéder à Pulse Pro →</button>';
+    heading.insertAdjacentElement('beforebegin',entry);
+    entry.querySelectorAll('[data-client-mode]').forEach(b=>b.addEventListener('click',()=>setClientMode(b.dataset.clientMode)));
+    entry.querySelector('[data-client-pro]')?.addEventListener('click',()=>{setClientMode('login');setAudience('professional')});
+  }
+  if(!panel.querySelector('[data-client-back]')){
+    const back=document.createElement('button');
+    back.type='button';back.className='auth-client-back';back.dataset.clientBack='1';back.textContent='← Retour';
+    heading.insertAdjacentElement('beforebegin',back);
+    back.addEventListener('click',()=>setClientMode('choose'));
+  }
+  const form=panel.querySelector('#loginForm');
+  if(form&&!form.querySelector('#signupIdentityFields')){
+    const fields=document.createElement('div');
+    fields.id='signupIdentityFields';fields.className='auth-signup-identity';
+    fields.innerHTML='<div class="auth-signup-grid"><label class="field"><span>Prénom *</span><input id="signupFirstName" autocomplete="given-name"></label><label class="field"><span>Nom *</span><input id="signupLastName" autocomplete="family-name"></label></div><label class="field"><span>Date de naissance *</span><input id="signupBirthDate" type="date" autocomplete="bday"></label><label class="field"><span>Téléphone <small>optionnel</small></span><input id="signupPhone" type="tel" autocomplete="tel" placeholder="+33 …"></label><p>Ces informations ouvrent votre profil et permettent la réservation.</p>';
+    form.querySelector('.auth-options')?.insertAdjacentElement('beforebegin',fields);
+  }
+  if(!auth.dataset.clientMode)auth.dataset.clientMode=sessionStorage.getItem(CLIENT_MODE_KEY)||'choose';
+}
+function setClientMode(mode){
+  const auth=document.querySelector('#authScreen');if(!auth)return;
+  auth.dataset.clientMode=mode;sessionStorage.setItem(CLIENT_MODE_KEY,mode);
+  if(mode==='booking'){
+    sessionStorage.setItem(POST_AUTH_ROUTE,'documents');
+    sessionStorage.setItem(AUDIENCE_KEY,'patient');
+    auth.dataset.authAudience='patient';
+  }else sessionStorage.removeItem(POST_AUTH_ROUTE);
+  applyClientMode();
+}
+function applyClientMode(){
+  const auth=document.querySelector('#authScreen');if(!auth)return;
+  const pro=auth.dataset.authAudience==='professional',mode=auth.dataset.clientMode||'choose';
+  const title=auth.querySelector('.auth-heading h2'),copy=auth.querySelector('.auth-heading p'),signup=auth.querySelector('#signupButton');
+  [auth.querySelector('#signupFirstName'),auth.querySelector('#signupLastName'),auth.querySelector('#signupBirthDate')].forEach(x=>{if(x)x.required=!pro&&mode==='booking'});
+  if(pro)return;
+  if(mode==='booking'){
+    if(title)title.textContent='Créez votre profil pour réserver';
+    if(copy)copy.textContent='Quelques informations suffisent. Vous choisirez ensuite votre bilan, votre centre et votre créneau.';
+    if(signup)signup.textContent='Créer mon profil et réserver →';
+  }else if(mode==='login'){
+    if(title)title.textContent='Bienvenue';
+    if(copy)copy.textContent='Connectez-vous pour retrouver vos tests, rendez-vous, résultats et votre trajectoire KŌMØ.';
+    if(signup)signup.textContent='Créer mon espace Pulse';
+  }
+}
+
 function mount(){
   const auth=document.querySelector('#authScreen'),panel=auth?.querySelector('.auth-panel'),heading=auth?.querySelector('.auth-heading');
-  if(!auth||!panel||!heading||panel.querySelector('[data-auth-audience-switch]'))return;
+  if(!auth||!panel||!heading)return;
+  ensureClientEntry(auth,panel,heading);
+  if(panel.querySelector('[data-auth-audience-switch]')){applyClientMode();return;}
   const switcher=document.createElement('div');
   switcher.className='auth-audience-switch';switcher.dataset.authAudienceSwitch='1';
   switcher.innerHTML='<button type="button" data-auth-audience="patient">Patient</button><button type="button" data-auth-audience="professional">Professionnel</button>';
@@ -50,7 +108,8 @@ function setAudience(mode){
   if(pill)pill.textContent=pro?'Pulse · Pro':'Pulse';
   if(eyebrow)eyebrow.textContent=pro?'KŌMØ PRO · ESPACE CENTRE':'KŌMØ PULSE · VOTRE ESPACE';
   const manifesto=auth.querySelector('.auth-manifesto');
-  if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.innerHTML=pro?'Votre centre,<br><em>en mouvement.</em>':'Votre santé,<br><em>en mouvement.</em>';if(p)p.textContent=pro?'Consultations, dossiers patients, Motion et analyses réunis dans un espace professionnel pensé pour le desktop.':'Résultats, consultations, progression et données KŌMØ réunis dans un seul espace personnel.'}
+  if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.innerHTML=pro?'Votre centre,<br><em>en mouvement.</em>':'Votre santé,<br><em>en mouvement.</em>';if(p)p.textContent=pro?'Consultations, dossiers patients, Motion et analyses réunis dans un espace professionnel pensé pour le desktop.':'Rendez-vous, tests, résultats et progression KŌMØ réunis dans un seul espace personnel.'}
+  applyClientMode();
 }
 
 function modal(){let m=document.querySelector('#proCreateModal');if(m)return m;m=document.createElement('div');m.id='proCreateModal';m.className='pro-create-modal';m.hidden=true;document.body.appendChild(m);return m}
