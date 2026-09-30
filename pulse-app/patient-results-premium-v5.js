@@ -477,6 +477,21 @@ body.kresults-v4 #komoAssistantRail{
 }
 body.kresults-v4 #komoAssistantRail .ka2-rail-copy{display:none!important}
 
+/* Results V5 is the only patient Results visual owner.
+   Legacy report/free layers may still exist in historical scripts, but never render here. */
+body.kresults-v4 [data-krpatient],
+body.kresults-v4 [data-kfree-v2],
+body.kresults-v4 [data-kfree-v2-library],
+body.kresults-v4 .pulse-free-result-v2,
+body.kresults-v4 .pulse-free-entry,
+body.kresults-v4 [data-kpa-trio],
+body.kresults-v4 [data-kts]{
+  display:none!important;
+}
+html[data-adaptive-shell][data-adaptive-mode="patient"] body.kresults-v4 #kamRoleRow{
+  display:none!important;
+}
+
 @media(max-width:900px){
   .kr5{padding-left:12px;padding-right:12px}
   .kr5-hero{grid-template-columns:1fr}
@@ -487,6 +502,42 @@ body.kresults-v4 #komoAssistantRail .ka2-rail-copy{display:none!important}
   .kr5-lsi-value{text-align:left}
 }
 @media(max-width:700px){
+  body.kresults-v4 .topbar{
+    min-height:52px!important;
+    height:52px!important;
+    padding:7px 12px!important;
+    border-bottom:1px solid #dce6df!important;
+    display:flex!important;
+    align-items:center!important;
+  }
+  body.kresults-v4 .topbar>div:first-child{
+    min-width:0!important;
+  }
+  body.kresults-v4 #pageEyebrow{
+    display:none!important;
+  }
+  body.kresults-v4 #pageTitle{
+    margin:0!important;
+    font:600 18px/1 Manrope,"DM Sans",sans-serif!important;
+    letter-spacing:-.035em!important;
+  }
+  body.kresults-v4 .topbar-actions{
+    margin-left:auto!important;
+    gap:6px!important;
+  }
+  body.kresults-v4 #komoWorldTopEntry{
+    min-height:30px!important;
+    padding:0 9px!important;
+    font-size:6px!important;
+  }
+  body.kresults-v4 #refreshButton{
+    width:30px!important;
+    min-width:30px!important;
+    height:30px!important;
+  }
+  body.kresults-v4 #viewRoot{
+    padding-top:0!important;
+  }
   .kr5{padding:6px 8px calc(76px + env(safe-area-inset-bottom));gap:7px}
   .kr5-top{min-height:52px;grid-template-columns:minmax(0,1fr) auto;gap:8px}
   .kr5-top h1{font-size:23px}
