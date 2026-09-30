@@ -5,7 +5,11 @@ const LIFE_HOST = 'life.komolongevity.com';
 const SHOP_HOST = 'shop.komolongevity.com';
 const EXPERIENCE_HOST = 'experience.komolongevity.com';
 const COMMAND_HOST = 'command.komolongevity.com';
-const COMMAND_AUTH_HASH = 'fb0f776871c2bf1c7b14535a77332a9d3c7985cc9fed87ecfee836b523f3e21d';
+const COMMAND_USERS = {
+  rchapon: 'a23a2e2e2e0f89c78ee26e41f87d51ea70a9a3c7525438078a23bd9ce2b72489',
+  ucalia: '1d5fe7d4a4b9cbe6bf7c61647cb705610b80d482a30ba6d0a5a5cb224c0c72b2',
+  blebeau: 'f13a76203e19332f390ccfd3ad11775382b8a236d6f830920a3ecece5092f2a5'
+};
 const STATIC_ORIGIN = 'https://komolongevity.com';
 const STATIC_ASSET_RE = /\.(?:css|js|mjs|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i;
 
@@ -37,15 +41,18 @@ export default async function middleware(request) {
   const isCommandPath = incomingUrl.pathname === '/command' || incomingUrl.pathname.startsWith('/command/');
   if (hostname === COMMAND_HOST || isCommandPath) {
     const authorization = request.headers.get('authorization') || '';
+    let username = '';
     let password = '';
     if (authorization.startsWith('Basic ')) {
       try {
         const decoded = atob(authorization.slice(6));
         const separator = decoded.indexOf(':');
+        username = separator >= 0 ? decoded.slice(0, separator).trim().toLowerCase() : '';
         password = separator >= 0 ? decoded.slice(separator + 1) : '';
       } catch {}
     }
-    const valid = password && (await sha256Hex(password)) === COMMAND_AUTH_HASH;
+    const expectedHash = COMMAND_USERS[username];
+    const valid = Boolean(expectedHash && password && (await sha256Hex(username + ':' + password)) === expectedHash);
     if (!valid) {
       return new Response('KOMO Command — authentication required', {
         status: 401,
@@ -55,6 +62,22 @@ export default async function middleware(request) {
           'X-Robots-Tag': 'noindex, nofollow, noarchive'
         }
       });
+    }
+
+    const commandRole = hostname === COMMAND_HOST
+      ? incomingUrl.pathname.split('/').filter(Boolean)[0]
+      : incomingUrl.pathname.split('/').filter(Boolean)[1];
+
+    if (!commandRole) {
+      const destination = new URL(request.url);
+      destination.pathname = hostname === COMMAND_HOST ? '/' + username : '/command/' + username;
+      return Response.redirect(destination, 307);
+    }
+
+    if (commandRole !== username) {
+      const destination = new URL(request.url);
+      destination.pathname = hostname === COMMAND_HOST ? '/' + username : '/command/' + username;
+      return Response.redirect(destination, 307);
     }
   }
 
@@ -78,7 +101,8 @@ export default async function middleware(request) {
   }
 
   let targetPath;
-  if (incomingPath === '/') targetPath = `${app.prefix}/`;
+  if (hostname === COMMAND_HOST) targetPath = `${app.prefix}/`;
+  else if (incomingPath === '/') targetPath = `${app.prefix}/`;
   else if (incomingPath.startsWith(`${app.prefix}/`)) targetPath = incomingPath;
   else targetPath = `${app.prefix}${incomingPath}`;
 
