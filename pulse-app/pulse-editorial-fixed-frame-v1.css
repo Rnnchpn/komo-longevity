@@ -279,13 +279,22 @@ html[data-adaptive-shell][data-adaptive-mode="patient"] .main-shell{
 }
 
 @media(max-width:620px){
-  #authScreen.auth-screen{display:block!important}
-  #authScreen .auth-brand{display:none!important}
+  #authScreen.auth-screen{
+    display:grid!important;
+    grid-template-rows:auto minmax(0,1fr)!important;
+  }
+  #authScreen .auth-brand{
+    display:flex!important;
+    min-height:104px!important;
+    max-height:104px!important;
+    overflow:hidden!important;
+  }
   #authScreen .auth-panel-wrap{
-    height:100dvh!important;
-    max-height:100dvh!important;
-    padding-top:max(18px,env(safe-area-inset-top))!important;
-    padding-bottom:max(18px,env(safe-area-inset-bottom))!important;
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    padding-top:0!important;
+    padding-bottom:max(10px,env(safe-area-inset-bottom))!important;
   }
 }
 
