@@ -144,7 +144,7 @@ function homeMarkup(){
          <strong>${xp}</strong>
          <span>XP · Niveau ${level}</span>
        </div>
-       <div class="kh9-xp-track"><i style="width:${Math.min(100,Math.max(12,(Number(e.level_progress??e.progress??42)||42)))}%"></i></div>
+       <div class="kh9-xp-track"><i style="width:${Math.min(100,Math.max(12,(Number(e.level_pct??e.level_progress??e.progress??42)||42)))}%"></i></div>
        <p>Votre activité KŌMØ, vos défis et votre progression dans World alimentent votre expérience.</p>
      </article>
    </section>
