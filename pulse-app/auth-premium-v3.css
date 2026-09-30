@@ -519,3 +519,37 @@ body.komo-gateway-open{overflow:hidden}.komo-gateway[hidden]{display:none!import
 @media(max-width:850px){.komo-gateway{padding:14px}.kg-shell{padding:22px;border-radius:26px;max-height:calc(100dvh - 28px)}.kg-intro{padding:38px 0 26px}.kg-grid{grid-template-columns:1fr}.kg-card{min-height:190px;padding:22px}.kg-kicker{padding-top:38px}.kg-foot{display:none}.kg-brand small{display:none}}
 @media(max-width:520px){.komo-gateway{padding:0}.kg-shell{min-height:100dvh;max-height:100dvh;border-radius:0;border:0;padding:calc(18px + env(safe-area-inset-top)) 18px calc(22px + env(safe-area-inset-bottom))}.kg-intro h1{font-size:48px}.kg-intro h2{font-size:18px}.kg-card{min-height:174px;border-radius:22px}}
 
+
+/* KŌMØ client entry 2026-09-30 */
+.kg-grid.kg-grid-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.auth-client-entry,.auth-client-back,.auth-signup-identity{display:none}
+#authScreen[data-auth-audience="patient"][data-client-mode="choose"] .auth-client-entry{display:block}
+#authScreen[data-auth-audience="patient"][data-client-mode="choose"] .auth-audience-switch,
+#authScreen[data-auth-audience="patient"][data-client-mode="choose"] .auth-heading,
+#authScreen[data-auth-audience="patient"][data-client-mode="choose"] #loginForm,
+#authScreen[data-auth-audience="patient"][data-client-mode="choose"] .auth-divider,
+#authScreen[data-auth-audience="patient"][data-client-mode="choose"] #signupButton,
+#authScreen[data-auth-audience="patient"][data-client-mode="choose"] .auth-footer-links,
+#authScreen[data-auth-audience="patient"][data-client-mode="choose"] .auth-pro-entry{display:none!important}
+.auth-client-entry>.eyebrow{margin:0 0 10px}.auth-client-entry h2{margin:0;font-size:32px;letter-spacing:-.04em}.auth-client-entry>p:not(.eyebrow){margin:12px 0 24px;color:#747c75;font-size:11px;line-height:1.6}
+.auth-client-actions{display:grid;gap:9px}.auth-client-card{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;padding:17px;border:1px solid #dedbd4;border-radius:17px;background:#f8f7f3;color:#2c3830;text-align:left;cursor:pointer}.auth-client-card.primary{background:#27382e;color:#fff;border-color:#27382e}.auth-client-card span{display:grid;gap:4px}.auth-client-card b{font-size:11px}.auth-client-card small{font-size:9px;line-height:1.45;color:#7a827b}.auth-client-card.primary small{color:rgba(255,255,255,.65)}.auth-client-card i{font-style:normal;font-size:18px}.auth-client-pro{margin-top:15px;border:0;background:none;padding:4px 0;color:#6c756e;font:inherit;font-size:9px;font-weight:700;cursor:pointer}
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] .auth-client-back,
+#authScreen[data-auth-audience="patient"][data-client-mode="login"] .auth-client-back{display:block;margin:0 0 15px;padding:0;border:0;background:none;color:#6c756e;font:inherit;font-size:9px;font-weight:700;cursor:pointer}
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] .auth-audience-switch,
+#authScreen[data-auth-audience="patient"][data-client-mode="login"] .auth-audience-switch{display:none!important}
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] .auth-signup-identity{display:grid;gap:10px}
+.auth-signup-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.auth-signup-identity>p{margin:0;color:#7c837d;font-size:9px;line-height:1.45}.auth-signup-identity small{font-size:8px;font-weight:500;text-transform:none;letter-spacing:0}
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] #loginButton,
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] .auth-options,
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] .auth-divider,
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] .auth-footer-links,
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] .auth-pro-entry{display:none!important}
+#authScreen[data-auth-audience="patient"][data-client-mode="booking"] #signupButton{display:flex!important}
+#authScreen[data-auth-audience="patient"][data-client-mode="login"] .auth-signup-identity,
+#authScreen[data-auth-audience="patient"][data-client-mode="login"] #signupButton,
+#authScreen[data-auth-audience="patient"][data-client-mode="login"] .auth-divider,
+#authScreen[data-auth-audience="patient"][data-client-mode="login"] .auth-pro-entry{display:none!important}
+#authScreen[data-auth-audience="professional"] .auth-client-entry,
+#authScreen[data-auth-audience="professional"] .auth-client-back,
+#authScreen[data-auth-audience="professional"] .auth-signup-identity{display:none!important}
+@media(max-width:850px){.kg-grid.kg-grid-two{grid-template-columns:1fr}.auth-signup-grid{grid-template-columns:1fr}}
