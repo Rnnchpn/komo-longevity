@@ -12,13 +12,13 @@ const encoded = (await Promise.all(chunkNames.map(name => readFile(join(chunksDi
 await writeFile(heroOut, Buffer.from(encoded, 'base64'));
 
 const css = `
-<style id="komo-home-hero-20260930-v1-style">
+<style id="komo-home-hero-20260930-v2-style">
 .komo-hero-20260930{
   position:relative!important;
   display:block!important;
-  min-height:clamp(650px,82vh,900px)!important;
+  min-height:clamp(640px,82vh,840px)!important;
   overflow:hidden!important;
-  background:#d6c8b7!important;
+  background:#cdbca8!important;
 }
 .komo-hero-20260930 .kpv-hero-media{
   position:absolute!important;
@@ -28,13 +28,14 @@ const css = `
   margin:0!important;
   overflow:hidden!important;
   z-index:0!important;
+  background:#cdbca8!important;
 }
 .komo-hero-20260930 .kpv-hero-media:after{
   content:"";
   position:absolute;
   inset:0;
   pointer-events:none;
-  background:linear-gradient(90deg,rgba(21,18,14,.12) 0%,rgba(21,18,14,0) 52%);
+  background:linear-gradient(90deg,rgba(24,21,17,.07) 0%,rgba(24,21,17,0) 42%);
 }
 .komo-hero-20260930 .kpv-hero-media img{
   display:block!important;
@@ -44,26 +45,53 @@ const css = `
   object-fit:cover!important;
   object-position:center center!important;
   image-rendering:auto!important;
+  opacity:0;
+  transform:translateZ(0) scale(1.002);
+  backface-visibility:hidden;
+  transition:opacity .28s ease;
 }
+.komo-hero-20260930.is-image-ready .kpv-hero-media img{opacity:1}
 .komo-hero-20260930 .kc-hero-copy{
   position:absolute!important;
   z-index:2!important;
-  left:clamp(20px,5vw,76px)!important;
-  bottom:clamp(24px,5vw,70px)!important;
-  width:min(620px,calc(100% - 40px))!important;
-  max-width:620px!important;
-  padding:clamp(22px,2.8vw,34px)!important;
+  left:clamp(28px,4.7vw,72px)!important;
+  bottom:clamp(30px,4.4vw,58px)!important;
+  width:min(500px,calc(100% - 56px))!important;
+  max-width:500px!important;
+  padding:clamp(24px,2.2vw,30px)!important;
   margin:0!important;
   min-height:0!important;
-  border:1px solid rgba(255,255,255,.48)!important;
-  border-radius:24px!important;
-  background:rgba(248,244,236,.88)!important;
-  box-shadow:0 24px 70px rgba(31,25,19,.12)!important;
-  backdrop-filter:blur(16px) saturate(118%);
-  -webkit-backdrop-filter:blur(16px) saturate(118%);
+  border:1px solid rgba(255,255,255,.58)!important;
+  border-radius:22px!important;
+  background:rgba(248,245,238,.91)!important;
+  box-shadow:0 24px 70px rgba(31,25,19,.10)!important;
+  backdrop-filter:blur(14px) saturate(112%);
+  -webkit-backdrop-filter:blur(14px) saturate(112%);
 }
-.komo-hero-20260930 .kc-hero-copy .kt-title{max-width:560px!important}
-.komo-hero-20260930 .kc-hero-copy .kt-copy{max-width:560px!important}
+.komo-hero-20260930 .kc-hero-copy .kt-title{
+  max-width:450px!important;
+  font-size:clamp(56px,5vw,76px)!important;
+  line-height:.92!important;
+  letter-spacing:-.05em!important;
+}
+.komo-hero-20260930 .kc-hero-copy .kt-lead,
+.komo-hero-20260930 .kc-hero-copy .kt-copy{
+  max-width:440px!important;
+  font-size:clamp(15px,1.28vw,18px)!important;
+  line-height:1.55!important;
+}
+.komo-hero-20260930 .kc-hero-copy .kt-btns{margin-top:24px!important}
+.komo-hero-20260930 .kc-hero-copy .kt-btn{min-height:44px!important;padding:0 20px!important}
+body.komo-home-hero-page .ke-switch,
+body.komo-home-hero-page .ke-pulse{display:none!important}
+
+@media(max-width:1100px) and (min-width:761px){
+  .komo-hero-20260930 .kc-hero-copy{
+    width:min(460px,calc(100% - 48px))!important;
+    max-width:460px!important;
+  }
+  .komo-hero-20260930 .kc-hero-copy .kt-title{font-size:clamp(52px,6vw,68px)!important}
+}
 @media(max-width:760px){
   .komo-hero-20260930{
     min-height:0!important;
@@ -81,6 +109,7 @@ const css = `
   .komo-hero-20260930 .kpv-hero-media img{
     min-height:0!important;
     object-position:51% center!important;
+    transform:none;
   }
   .komo-hero-20260930 .kc-hero-copy{
     position:relative!important;
@@ -89,7 +118,7 @@ const css = `
     order:1!important;
     width:100%!important;
     max-width:none!important;
-    padding:34px 22px 42px!important;
+    padding:32px 22px 40px!important;
     border:0!important;
     border-radius:0!important;
     background:#f7f2e9!important;
@@ -97,8 +126,33 @@ const css = `
     backdrop-filter:none!important;
     -webkit-backdrop-filter:none!important;
   }
+  .komo-hero-20260930 .kc-hero-copy .kt-title{
+    max-width:100%!important;
+    font-size:clamp(45px,13vw,62px)!important;
+    line-height:.94!important;
+  }
 }
 </style>`;
+
+const runtime=`<script id="komo-home-hero-20260930-v2-runtime">
+(()=>{
+  document.body.classList.add('komo-home-hero-page');
+  const hero=document.querySelector('.komo-hero-20260930');
+  const img=hero?.querySelector('.kpv-hero-media img');
+  if(!hero||!img)return;
+  let done=false;
+  const ready=()=>{if(done)return;done=true;hero.classList.add('is-image-ready')};
+  if(img.decode){
+    img.decode().then(ready).catch(ready);
+  }else if(img.complete){
+    ready();
+  }else{
+    img.addEventListener('load',ready,{once:true});
+    img.addEventListener('error',ready,{once:true});
+  }
+  setTimeout(ready,1400);
+})();
+</script>`;
 
 async function patch(rel){
   const fp = join(site, rel);
@@ -117,7 +171,9 @@ async function patch(rel){
       next = next.replace(/alt="[^"]*"/i, 'alt="KŌMØ Longevity — évaluation fonctionnelle du mouvement sur la Côte d’Azur"');
       if (!/alt="/i.test(next)) next += ' alt="KŌMØ Longevity — évaluation fonctionnelle du mouvement sur la Côte d’Azur"';
       next = next.replace(/loading="lazy"/i, 'loading="eager"');
+      if (!/loading=/i.test(next)) next += ' loading="eager"';
       if (!/fetchpriority=/i.test(next)) next += ' fetchpriority="high"';
+      if (!/decoding=/i.test(next)) next += ' decoding="sync"';
       return start + next + end;
     }
   );
@@ -131,9 +187,18 @@ async function patch(rel){
     }
   );
 
-  if (!html.includes('komo-home-hero-20260930-v1-style')) {
-    html = html.replace('</head>', css + '\n</head>');
+  html=html
+    .replace(/<style id="komo-home-hero-20260930-v1-style">[\s\S]*?<\/style>/,'')
+    .replace(/<style id="komo-home-hero-20260930-v2-style">[\s\S]*?<\/style>/,'')
+    .replace(/<script id="komo-home-hero-20260930-v2-runtime">[\s\S]*?<\/script>/,'');
+
+  const preload='<link rel="preload" as="image" href="/assets/images/komo-hero-20260930.avif" type="image/avif" fetchpriority="high">';
+  if(!html.includes('href="/assets/images/komo-hero-20260930.avif" type="image/avif"')){
+    html=html.replace('</head>',preload+'\n'+css+'\n</head>');
+  }else{
+    html=html.replace('</head>',css+'\n</head>');
   }
+  html=html.replace('</body>',runtime+'\n</body>');
 
   await writeFile(fp, html, 'utf8');
 }
@@ -141,4 +206,4 @@ async function patch(rel){
 await patch('index.html');
 await patch('fr/index.html');
 
-console.log('[komo-home-hero-20260930-v1] PASS · uploaded KŌMØ image installed as responsive homepage hero.');
+console.log('[komo-home-hero-20260930-v2] PASS · cleaner composition, decoded-image reveal and unobstructed hero.');
