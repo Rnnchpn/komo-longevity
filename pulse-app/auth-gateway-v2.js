@@ -255,77 +255,80 @@ if(worldBridgeConfig()){
 window.addEventListener('pagehide',()=>{if(worldBridgeRetryTimer){clearInterval(worldBridgeRetryTimer);worldBridgeRetryTimer=null}});
 
 
-// KŌMØ Ecosystem Gateway — lives inside the canonical auth controller.
+// KŌMØ Ecosystem Gateway — canonical Pulse / World entry.
 const ECOSYSTEM_GATEWAY_SEEN='komo_gateway_seen_session_v1';
-const ECOSYSTEM_INITIAL_HASH=location.hash;
-function ecosystemGatewayStyles(){}
-function ecosystemGatewayIsPro(){
-  const mode=document.querySelector('#modeSwitch');
-  return Boolean(mode&&!mode.hidden);
-}
+
 function ecosystemGatewayReady(){
-  const shell=document.querySelector('#appShell'),auth=document.querySelector('#authScreen'),root=document.querySelector('#viewRoot');
-  return Boolean(shell&&!shell.hidden&&auth?.hidden&&root);
-}
-function ecosystemGatewayName(){
-  const raw=document.querySelector('#accountName')?.textContent?.trim()||'';
-  return raw&&raw!=='Compte KŌMØ'?raw.split(/\s+/)[0]:'';
+  const shell=document.querySelector('#appShell'),auth=document.querySelector('#authScreen');
+  return Boolean(shell&&!shell.hidden&&auth?.hidden);
 }
 function ecosystemGatewayClose(){
   const el=document.querySelector('#komoEcosystemGateway');if(!el)return;
   el.classList.add('is-leaving');
-  setTimeout(()=>{el.hidden=true;document.body.classList.remove('komo-gateway-open')},220);
+  setTimeout(()=>{el.hidden=true;document.body.classList.remove('komo-gateway-open')},180);
   sessionStorage.setItem(ECOSYSTEM_GATEWAY_SEEN,'1');
 }
-function ecosystemGatewayGo(route){
+function ecosystemGatewayPulse(){
+  if(authVisible()){
+    sessionStorage.setItem(AUDIENCE_KEY,'patient');
+    setAudience('patient');
+    setClientMode('choose');
+    ecosystemGatewayClose();
+    return;
+  }
   ecosystemGatewayClose();
-  setTimeout(()=>window.KomoPatientNavigation?.go?.(route),80);
+  setTimeout(()=>window.KomoPatientNavigation?.go?.('home'),70);
 }
 function ecosystemGatewayWorld(){
   ecosystemGatewayClose();
-  const url='https://komolongevity.com/world/?from=pulse&entry=gateway';
-  const win=window.open(url,'_blank');
-  if(!win)location.href=url;
-}
-function ecosystemGatewayCard(num,kicker,title,copy,action,extra=''){
-  return '<button type="button" class="kg-card '+extra+'" data-gateway-action="'+action+'"><span class="kg-card-top"><i>'+num+'</i><em>→</em></span><span class="kg-kicker">'+kicker+'</span><strong>'+title+'</strong><span class="kg-copy">'+copy+'</span></button>';
+  location.href='https://komolongevity.com/world/?from=pulse&entry=gateway';
 }
 function ecosystemGatewayEnsure(){
   let el=document.querySelector('#komoEcosystemGateway');if(el)return el;
-  ecosystemGatewayStyles();el=document.createElement('section');el.id='komoEcosystemGateway';el.className='komo-gateway';el.hidden=true;el.setAttribute('aria-label','Choisir votre espace KŌMØ');
-  el.innerHTML='<div class="kg-backdrop"></div><div class="kg-shell"><header class="kg-head"><a href="https://komolongevity.com/fr/" class="kg-brand" target="_blank" rel="noopener noreferrer"><span>KŌMØ</span><small>ONE ACCOUNT · ONE ECOSYSTEM</small></a><button type="button" class="kg-close" data-gateway-close aria-label="Fermer">×</button></header><div class="kg-intro"><p>KŌMØ GATEWAY</p><h1>Bienvenue<span class="kg-name"></span>.</h1><h2>Comment souhaitez-vous entrer aujourd’hui ?</h2><small>Le même compte vous accompagne partout. Vous pouvez changer d’espace à tout moment.</small></div><div class="kg-grid">'+
-    ecosystemGatewayCard('01','VOTRE TRAJECTOIRE','MY KŌMØ','Votre priorité, vos résultats, votre Motion Passport, votre progression et votre prochain point.','my','recommended')+
-    ecosystemGatewayCard('02','L’ÉCOSYSTÈME','EXPLORE','Network, expériences, hôtels, Yachting, Retreats, Life et contenus KŌMØ.','explore')+
-    ecosystemGatewayCard('03','MODE SPATIAL','WORLD','Entrez dans votre Twin, Fitness, Library, Arena et Marina dans l’expérience 3D.','world','world')+
-    '</div><footer class="kg-foot"><span><b>MY KŌMØ</b> pour être accompagné au quotidien.</span><span><b>WORLD</b> quand l’immersion apporte quelque chose.</span></footer></div>';
+  el=document.createElement('section');
+  el.id='komoEcosystemGateway';el.className='komo-gateway';el.hidden=true;
+  el.setAttribute('aria-label','Choisir votre espace KŌMØ');
+  el.innerHTML='<div class="kg-backdrop"></div><div class="kg-shell"><header class="kg-head"><a href="https://komolongevity.com/fr/" class="kg-brand"><span>KŌMØ</span><small>LONGEVITY IN MOTION</small></a></header><div class="kg-intro"><p>KŌMØ</p><h1>Choisissez votre espace.</h1><h2>Deux portes d’entrée, un même écosystème.</h2><small>Pulse pour agir et suivre votre parcours. World pour explorer l’expérience KŌMØ de manière immersive.</small></div><div class="kg-grid kg-grid-two"><button type="button" class="kg-card recommended" data-gateway-action="pulse"><span class="kg-card-top"><i>01</i><em>→</em></span><span class="kg-kicker">AGIR · SUIVRE</span><strong>PULSE</strong><span class="kg-copy">Prendre rendez-vous, réaliser vos tests, préparer votre bilan, retrouver vos résultats et suivre votre progression.</span></button><button type="button" class="kg-card world" data-gateway-action="world"><span class="kg-card-top"><i>02</i><em>↗</em></span><span class="kg-kicker">EXPLORER · VIVRE</span><strong>WORLD</strong><span class="kg-copy">Entrer dans votre Twin, Fitness, Library, Arena, Marina et les expériences immersives KŌMØ.</span></button></div><footer class="kg-foot"><span><b>PULSE</b> est votre espace opérationnel.</span><span><b>WORLD</b> est votre expérience immersive.</span></footer></div>';
   document.body.appendChild(el);
-  el.querySelector('[data-gateway-close]')?.addEventListener('click',ecosystemGatewayClose);
-  el.querySelector('[data-gateway-action="my"]')?.addEventListener('click',()=>ecosystemGatewayGo('home'));
-  el.querySelector('[data-gateway-action="explore"]')?.addEventListener('click',()=>ecosystemGatewayGo('explore'));
+  el.querySelector('[data-gateway-action="pulse"]')?.addEventListener('click',ecosystemGatewayPulse);
   el.querySelector('[data-gateway-action="world"]')?.addEventListener('click',ecosystemGatewayWorld);
   return el;
 }
 function ecosystemGatewayShow(force=false){
-  if(!ecosystemGatewayReady()||ecosystemGatewayIsPro())return false;
-  if(!force){
-    if(ECOSYSTEM_INITIAL_HASH&&ECOSYSTEM_INITIAL_HASH!=='#gateway')return false;
-    if(sessionStorage.getItem(ECOSYSTEM_GATEWAY_SEEN)==='1')return false;
-  }
-  const el=ecosystemGatewayEnsure(),name=ecosystemGatewayName(),target=el.querySelector('.kg-name');
-  if(target)target.textContent=name?' '+name:'';
-  el.hidden=false;el.classList.remove('is-leaving');document.body.classList.add('komo-gateway-open');return true;
+  const onAuth=authVisible(),onApp=ecosystemGatewayReady();
+  if(!onAuth&&!onApp)return false;
+  if(onAuth&&getAudience()==='professional'&&!force)return false;
+  if(!force&&sessionStorage.getItem(ECOSYSTEM_GATEWAY_SEEN)==='1')return false;
+  const el=ecosystemGatewayEnsure();
+  el.hidden=false;el.classList.remove('is-leaving');document.body.classList.add('komo-gateway-open');
+  return true;
 }
 function ecosystemGatewayInstallReturn(){
-  const pop=document.querySelector('#accountPopover');if(!pop||pop.querySelector('[data-open-komo-gateway]'))return;
-  const btn=document.createElement('button');btn.type='button';btn.dataset.openKomoGateway='1';btn.textContent='Changer d’espace KŌMØ';
+  const pop=document.querySelector('#accountPopover');
+  if(!pop||pop.querySelector('[data-open-komo-gateway]'))return;
+  const btn=document.createElement('button');
+  btn.type='button';btn.dataset.openKomoGateway='1';btn.textContent='Pulse / World';
   pop.insertBefore(btn,document.querySelector('#logoutButton')||null);
-  btn.addEventListener('click',()=>{pop.hidden=true;sessionStorage.removeItem(ECOSYSTEM_GATEWAY_SEEN);ecosystemGatewayShow(true)});
+  btn.addEventListener('click',()=>{pop.hidden=true;ecosystemGatewayShow(true)});
 }
 function ecosystemGatewaySchedule(){
-  if(authVisible()){sessionStorage.removeItem(ECOSYSTEM_GATEWAY_SEEN);return}
-  ecosystemGatewayInstallReturn();setTimeout(()=>ecosystemGatewayShow(false),50);
+  if(authVisible()){
+    if(getAudience()==='professional'){
+      const el=document.querySelector('#komoEcosystemGateway');if(el)el.hidden=true;
+      document.body.classList.remove('komo-gateway-open');
+      return;
+    }
+    setTimeout(()=>ecosystemGatewayShow(false),40);
+    return;
+  }
+  ecosystemGatewayInstallReturn();
+  const pending=sessionStorage.getItem(POST_AUTH_ROUTE);
+  if(pending){
+    sessionStorage.removeItem(POST_AUTH_ROUTE);
+    sessionStorage.setItem(ECOSYSTEM_GATEWAY_SEEN,'1');
+    location.hash=pending;
+  }
 }
 window.addEventListener('komo:route-ready',ecosystemGatewaySchedule);
 window.addEventListener('komo:session-ready',ecosystemGatewaySchedule);
-window.addEventListener('hashchange',()=>{if(location.hash==='#gateway'){sessionStorage.removeItem(ECOSYSTEM_GATEWAY_SEEN);ecosystemGatewayShow(true)}});
 window.KomoGateway={open:()=>ecosystemGatewayShow(true),close:ecosystemGatewayClose};
