@@ -6,9 +6,9 @@ const SHOP_HOST = 'shop.komolongevity.com';
 const EXPERIENCE_HOST = 'experience.komolongevity.com';
 const COMMAND_HOST = 'command.komolongevity.com';
 const COMMAND_USERS = {
-  rchapon: 'a23a2e2e2e0f89c78ee26e41f87d51ea70a9a3c7525438078a23bd9ce2b72489',
-  ucalia: '1d5fe7d4a4b9cbe6bf7c61647cb705610b80d482a30ba6d0a5a5cb224c0c72b2',
-  blebeau: 'f13a76203e19332f390ccfd3ad11775382b8a236d6f830920a3ecece5092f2a5'
+  rchapon: '6ec6c6a47d4032f77a555043c7ca24ef65ad8dd39753f1deece6dee09b1489b8',
+  ucalia: '8488b6a79bd2d686f3c46361e97e993158671166049fd68ef56debff55aa3a3d',
+  blebeau: '24987f490aca798867e5dfa16dd2893011efae964969c909c86ae9a16906614e'
 };
 const STATIC_ORIGIN = 'https://komolongevity.com';
 const STATIC_ASSET_RE = /\.(?:css|js|mjs|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i;
