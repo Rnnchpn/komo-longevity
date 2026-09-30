@@ -234,6 +234,7 @@ const scripts = [
   'scripts/komo-illustrations-v2.mjs',
   'scripts/komo-navigation-clean-v1.mjs',
   'scripts/komo-legacy-route-prune-v1.mjs',
+  'scripts/komo-home-structure-v4.mjs',
   // Absolute last production pass: fixed Pulse viewport + unified visual language.
   'scripts/pulse-editorial-fixed-frame-v1.mjs'
 ];
