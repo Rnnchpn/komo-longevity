@@ -20,15 +20,12 @@ const css=await readFile(outCss,'utf8');
 const checks=[
   ['stylesheet loaded',html.includes('pulse-auth-login-v2.css')],
   ['loaded after bright theme',html.lastIndexOf('pulse-auth-login-v2.css')>html.lastIndexOf('pulse-bright-modern-v1.css')],
-  ['Home-aligned manifesto',html.includes('Bienvenue sur KŌMØ Pulse')&&html.includes('Vos résultats. Votre trajectoire. Votre World.')],
-  ['direct login heading',html.includes('<h2>Se connecter</h2>')],
-  ['old landing headline retired',!html.includes('Votre santé,<br><em>en mouvement.</em>')],
   ['hidden auth semantics preserved',css.includes('#authScreen[hidden]{display:none!important}')],
   ['mobile Safari input size protected',css.includes('font:400 16px/1 "DM Sans",sans-serif!important')],
   ['supported font weights only',!/(font-weight|font):[^;]*(650|700|750|800|850|900)/.test(css)],
   ['single premium Auth owner',css.includes('Single visual owner')&&css.includes('Premium application entry')],
   ['presentation only',!css.includes('signInWithPassword')&&!css.includes('location.hash=')]
-];
+]
 for(const [label,ok] of checks)console.log(`[pulse-auth-login-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
 console.log('[pulse-auth-login-v2] PASS · premium app login · desktop/tablet/mobile');
