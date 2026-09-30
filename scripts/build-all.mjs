@@ -241,6 +241,8 @@ const scripts = [
   'scripts/pulse-editorial-fixed-frame-v1.mjs',
   // Absolute last public homepage pass: user-approved KŌMØ hero image.
   'scripts/komo-home-hero-20260930-v1.mjs',
+  // Keep the /en/ public surface internally coherent, including legal and CGV routes.
+  'scripts/komo-en-legal-aliases-v1.mjs',
   // Final Friday demo hardening: auth recovery, deterministic validation and accessible consent controls.
   'scripts/pulse-friday-demo-hardening-v1.mjs'
 ];
