@@ -21,7 +21,7 @@ const checks=[
   ['adaptive menu exposes administration',adaptive.includes("actionButton('Administration','admin')")&&adaptive.includes("data-kam-role=\"admin\"")],
   ['auth gateway assets loaded',html.includes('./auth-gateway-v2.css')&&html.includes('./auth-gateway-v2.js')],
   ['patient professional switch',auth.includes('Patient')&&auth.includes('Professionnel')&&auth.includes('data-auth-audience')],
-  ['professional login copy',auth.includes("title.textContent=pro?'KŌMØ Pro':'Bienvenue'")&&auth.includes("submit.textContent=pro?'Accéder à mon centre':'Se connecter'")],
+  ['professional login copy',auth.includes("title.textContent=pro?'KŌMØ Pro':'Se connecter'")&&auth.includes("submit.textContent=pro?'Accéder à mon centre':'Se connecter'")],
   ['professional account request entry',auth.includes('Demander un accès KŌMØ Pro')],
   ['professional request creates Pulse account',auth.includes('auth.signUp')&&auth.includes('emailRedirectTo')],
   ['professional application fields',auth.includes('professional_title')&&auth.includes('organization_name')&&auth.includes('access_scope')],
