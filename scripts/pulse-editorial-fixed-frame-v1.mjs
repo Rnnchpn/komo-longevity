@@ -56,6 +56,14 @@ try{
   if(!homeJs.includes('data-khome-v9')||!homeJs.includes("const VERSION='9.0.1-friday-demo'"))throw new Error('Home V9 runtime contract missing');
   await writeFile(join(pulse,'patient-home-command-v1.js'),homeJs,'utf8');
   await writeFile(join(pulse,'patient-home-command-v1.css'),homeCss,'utf8');
+  const homeToken='20260930-friday-demo-v9';
+  for(const name of htmlFiles){
+    const htmlPath=join(pulse,name);
+    let homeHtml=await readFile(htmlPath,'utf8');
+    homeHtml=homeHtml.replace(/\.\/patient-home-command-v1\.js(?:\?v=[^"'#]+)?/g,`./patient-home-command-v1.js?v=${homeToken}`);
+    homeHtml=homeHtml.replace(/\.\/patient-home-command-v1\.css(?:\?v=[^"'#]+)?/g,`./patient-home-command-v1.css?v=${homeToken}`);
+    await writeFile(htmlPath,homeHtml,'utf8');
+  }
   console.log('[pulse-editorial-fixed-frame-v2] Friday Home V9 finalized as canonical shipped owner');
 }catch(error){
   console.error('[pulse-editorial-fixed-frame-v2] Friday Home V9 finalization failed:',error?.message||error);
