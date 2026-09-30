@@ -313,6 +313,7 @@ function ecosystemGatewayInstallReturn(){
 }
 function ecosystemGatewaySchedule(){
   if(authVisible()){
+    if(!document.querySelector('#komoEcosystemGateway') && sessionStorage.getItem(ECOSYSTEM_GATEWAY_SEEN)!=='1') ecosystemGatewayShow(false);
     if(getAudience()==='professional'){
       const el=document.querySelector('#komoEcosystemGateway');if(el)el.hidden=true;
       document.body.classList.remove('komo-gateway-open');
