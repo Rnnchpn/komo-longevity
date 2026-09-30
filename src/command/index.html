@@ -42,7 +42,7 @@
   <main class="main">
     <header class="top">
       <div><div class="eyebrow">Mercredi · 30 septembre 2026</div><h1 class="h1" id="viewTitle">Pilotage</h1><div class="muted">Vendre → Délivrer → Mesurer → Améliorer → Déployer</div></div>
-      <div class="pill"><span class="dot"></span> Privé</div>
+      <div class="pill"><span class="dot"></span> <span id="userBadge">Privé</span></div>
     </header>
 
     <section id="today" class="section active">
@@ -116,9 +116,9 @@
           <div class="company"><div><h4>Dolce Riviera</h4><div class="meta">Partenaire indépendant hospitality / production</div></div><div class="ownership">Externe</div></div>
         </article>
         <article class="card span4"><h3>Rôles</h3>
-          <b>Renan</b><div class="meta">Stratégie · médical · produit · juridique · marque · grands rendez-vous · closing</div><br>
-          <b>Hugo</b><div class="meta">Commercial · réseau · partenariats · hôtels / yachting · construction du réseau Clinical</div><br>
-          <b>Benoît</b><div class="meta">Opérations · logistique · matériel · procédures · coûts · capacité réelle à délivrer</div><br>
+          <b>Renan · rchapon</b><div class="meta">Stratégie · médical · produit · juridique · marque · grands rendez-vous · closing</div><br>
+          <b>Hugo · ucalia</b><div class="meta">Commercial · réseau · partenariats · hôtels / yachting · construction du réseau Clinical</div><br>
+          <b>Benoît · blebeau</b><div class="meta">Opérations · logistique · matériel · procédures · coûts · capacité réelle à délivrer</div><br>
           <b>Dolce</b><div class="meta">Partenaire hospitality / production, sans propriété sur la PI KŌMØ</div>
         </article>
       </div>
@@ -201,6 +201,17 @@
   </main>
 </div>
 <script>
+const ROLE_FROM_PATH=(()=>{
+ const p=location.pathname.split('/').filter(Boolean);
+ const candidate=location.hostname==='command.komolongevity.com'?p[0]:p[1];
+ return ['rchapon','ucalia','blebeau'].includes(candidate)?candidate:'rchapon';
+})();
+const USER_CONFIG={
+ rchapon:{name:'Renan',role:'CEO · stratégie / médical / closing',tabs:['today','pipeline','companies','legal','finance','product'],priority:'Finaliser le socle juridique et commercial, préparer Janet / Zayd et garder une vision globale.'},
+ ucalia:{name:'Hugo',role:'Commercial · réseau / partenariats',tabs:['today','pipeline','companies'],priority:'Construire le réseau Clinical et activer les partenaires commerciaux nécessaires à la vente.'},
+ blebeau:{name:'Benoît',role:'Opérations · delivery / coûts',tabs:['today','companies','product'],priority:'Rendre KŌMØ livrable immédiatement : matériel, process, coûts et logistique.'}
+};
+const CURRENT_USER=USER_CONFIG[ROLE_FROM_PATH];
 const KEY='komo-command-v02-fr';
 const seed={
  tasks:[
@@ -258,9 +269,15 @@ if(state.planDate!=='2026-09-30'){
 const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const priorityLabels={high:'URGENT',medium:'IMPORTANT',good:'OK'};
+function taskBelongsToUser(t){
+ if(ROLE_FROM_PATH==='rchapon') return true;
+ const name=CURRENT_USER.name.toLowerCase();
+ return String(t.meta||'').toLowerCase().includes(name);
+}
 function renderTasks(){
- const el=document.querySelector('#tasks'); el.innerHTML=state.tasks.slice(0,6).map(t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" data-task="${t.id}" ${t.done?'checked':''}><div><div class="task-title">${esc(t.title)}</div><div class="meta">${esc(t.meta||'')}</div></div><span class="badge ${t.priority}">${priorityLabels[t.priority]||t.priority}</span></div>`).join('');
- document.querySelector('#openTasks').textContent=state.tasks.filter(t=>!t.done).slice(0,3).length;
+ const visible=state.tasks.filter(taskBelongsToUser);
+ const el=document.querySelector('#tasks'); el.innerHTML=visible.slice(0,6).map(t=>`<div class="task ${t.done?'done':''}"><input type="checkbox" data-task="${t.id}" ${t.done?'checked':''}><div><div class="task-title">${esc(t.title)}</div><div class="meta">${esc(t.meta||'')}</div></div><span class="badge ${t.priority}">${priorityLabels[t.priority]||t.priority}</span></div>`).join('');
+ document.querySelector('#openTasks').textContent=visible.filter(t=>!t.done).length;
  document.querySelectorAll('[data-task]').forEach(x=>x.onchange=()=>{const t=state.tasks.find(t=>t.id==x.dataset.task);t.done=x.checked;save();renderTasks()})
 }
 function renderDeals(){
@@ -310,10 +327,13 @@ document.querySelector('#addExpense').onclick=()=>{const n=document.querySelecto
 document.querySelector('#addReceivable').onclick=()=>{const n=document.querySelector('#receivableName'),a=document.querySelector('#receivableAmount'),d=document.querySelector('#receivableDue');if(!n.value.trim())return;state.receivables.push({id:Date.now(),name:n.value.trim(),amount:Number(a.value||0),due:d.value,received:false});n.value='';a.value='';d.value='';save();renderReceivables()};
 document.querySelector('#saveClose').onclick=()=>{state.closing={done:document.querySelector('#closeDone').value.trim(),pending:document.querySelector('#closePending').value.trim(),decisions:document.querySelector('#closeDecisions').value.trim(),tomorrow:document.querySelector('#closeTomorrow').value.trim(),savedAt:new Date().toISOString()};state.activity.push({at:new Date().toISOString(),text:'Clôture du jour enregistrée pour le résumé PDF.'});save();renderClosing();renderActivity()};
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelector('#'+b.dataset.view).classList.add('active');document.querySelector('#viewTitle').textContent=b.textContent});
-document.querySelector('#addTask').onclick=()=>{const i=document.querySelector('#newTask');if(!i.value.trim())return;state.tasks.push({id:Date.now(),title:i.value.trim(),meta:'Ajouté manuellement',priority:'medium',done:false});i.value='';save();renderTasks()};
+document.querySelector('#addTask').onclick=()=>{const i=document.querySelector('#newTask');if(!i.value.trim())return;state.tasks.push({id:Date.now(),title:i.value.trim(),meta:CURRENT_USER.name+' · ajouté manuellement',priority:'medium',done:false});i.value='';save();renderTasks()};
 document.querySelector('#clearDone').onclick=()=>{state.tasks=state.tasks.filter(t=>!t.done);save();renderTasks()};
 document.querySelector('#logUpdate').onclick=()=>{const i=document.querySelector('#updateText');if(!i.value.trim())return;state.activity.push({at:new Date().toISOString(),text:i.value.trim()});i.value='';save();renderActivity()};
 document.querySelector('#addDeal').onclick=()=>{const n=document.querySelector('#dealName'),v=document.querySelector('#dealValue');if(!n.value.trim())return;state.deals.push({id:Date.now(),name:n.value.trim(),stage:'Cible',value:Number(v.value||0),owner:'Renan',source:'Manuel',next:'AUCUNE PROCHAINE ACTION'});n.value='';v.value='';save();renderDeals()};
+document.querySelector('#userBadge').textContent=CURRENT_USER.name+' · '+CURRENT_USER.role;
+document.querySelector('.priority').textContent=CURRENT_USER.priority;
+document.querySelectorAll('.nav button').forEach(b=>{if(!CURRENT_USER.tabs.includes(b.dataset.view)) b.style.display='none';});
 renderTasks();renderDeals();renderLegal();renderActivity();renderFinanceChecklist();renderReceivables();renderClosing();renderExpenses();save();
 </script>
 </body></html>
