@@ -10,7 +10,7 @@
     :root{--bg:#0f1110;--panel:#171a18;--panel2:#1d211e;--line:#2b302d;--text:#f4f1ea;--muted:#a9aea9;--soft:#d7d2c7;--accent:#b7d7b5;--warn:#e6c98a;--danger:#e79c91;--good:#9fd0a5;--shadow:0 24px 70px rgba(0,0,0,.28)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(145deg,#0d0f0e,#131613 55%,#0f1110);color:var(--text);font:14px/1.45 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh}
     button,input,select,textarea{font:inherit}.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh}.side{position:sticky;top:0;height:100vh;padding:28px 18px;border-right:1px solid var(--line);background:rgba(11,13,12,.84);backdrop-filter:blur(18px)}
-    .brand{font-size:20px;letter-spacing:.2em;font-weight:700;margin:0 10px 4px}.sub{color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:0 10px 28px}.nav{display:grid;gap:6px}.nav button{border:0;background:transparent;color:var(--muted);padding:11px 12px;border-radius:12px;text-align:left;cursor:pointer}.nav button.active,.nav button:hover{background:var(--panel2);color:var(--text)}
+    .brand{font-size:20px;letter-spacing:.2em;font-weight:700;margin:0 10px 4px}.sub{color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin:0 10px 28px}.nav{display:grid;gap:6px}.nav-label{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#6f776f;padding:10px 12px 4px}.nav-label.secondary{margin-top:12px;border-top:1px solid var(--line);padding-top:18px}.nav button{border:0;background:transparent;color:var(--muted);padding:11px 12px;border-radius:12px;text-align:left;cursor:pointer}.nav button.active,.nav button:hover{background:var(--panel2);color:var(--text)}
     .side-foot{position:absolute;bottom:22px;left:18px;right:18px;color:var(--muted);font-size:11px;border-top:1px solid var(--line);padding-top:14px}.main{padding:32px 36px 70px;max-width:1500px;width:100%}.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:26px}.eyebrow{color:var(--accent);font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700}.h1{font-size:34px;letter-spacing:-.04em;margin:5px 0 4px}.muted{color:var(--muted)}
     .pill{display:inline-flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid var(--line);border-radius:999px;color:var(--soft);background:#141714}.dot{width:7px;height:7px;border-radius:50%;background:var(--good)}
     .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.card{background:linear-gradient(180deg,rgba(29,33,30,.95),rgba(22,25,23,.95));border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow)}.span12{grid-column:span 12}.span8{grid-column:span 8}.span7{grid-column:span 7}.span6{grid-column:span 6}.span5{grid-column:span 5}.span4{grid-column:span 4}
@@ -21,8 +21,8 @@
     .table{width:100%;border-collapse:collapse}.table th{font-size:10px;text-transform:uppercase;letter-spacing:.09em;text-align:left;color:var(--muted);padding:8px;border-bottom:1px solid var(--line)}.table td{padding:11px 8px;border-bottom:1px solid var(--line);vertical-align:middle}.table select{background:#111411;color:var(--text);border:1px solid var(--line);border-radius:9px;padding:6px 8px}.money{text-align:right;font-variant-numeric:tabular-nums}
     .company{display:flex;justify-content:space-between;gap:15px;padding:14px 0;border-top:1px solid var(--line)}.company:first-of-type{border-top:0}.company h4{margin:0 0 3px;font-size:16px}.ownership{font-weight:750;color:var(--accent);white-space:nowrap}.checkline{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}.checkline:first-of-type{border-top:0}.status{font-size:11px;border-radius:999px;padding:4px 8px;margin-left:auto}.red{background:#3d2422;color:#ffc3bb}.orange{background:#3b3221;color:#f1d59b}.green{background:#203225;color:#bee9c3}
     .products{display:grid;grid-template-columns:1fr 1fr;gap:14px}.product-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:11px 0;border-top:1px solid var(--line)}.product-row:first-of-type{border-top:0}.bar{height:6px;background:#101310;border-radius:99px;overflow:hidden;margin-top:7px}.bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
-    .log{max-height:220px;overflow:auto}.log-item{padding:10px 0;border-top:1px solid var(--line)}.log-item:first-child{border-top:0}.empty{color:var(--muted);padding:12px 0}.footer-note{margin-top:20px;color:#7f877f;font-size:11px}
-    @media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:sticky;z-index:5;padding:14px;border-right:0;border-bottom:1px solid var(--line)}.brand,.sub{display:none}.nav{grid-template-columns:repeat(6,1fr);overflow:auto}.nav button{text-align:center;padding:9px 5px;font-size:11px}.side-foot{display:none}.main{padding:22px 14px 60px}.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.kpis{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:1fr}.top{align-items:center}.h1{font-size:28px}.priority{font-size:24px}.table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
+    .journal-entry{padding:16px 0;border-top:1px solid var(--line)}.journal-entry:first-child{border-top:0}.journal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:6px}.journal-text{white-space:pre-wrap;color:var(--soft)}.agenda-row{display:grid;grid-template-columns:100px 70px 1fr 120px auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}.agenda-row:first-child{border-top:0}.agenda-title{font-weight:700}.sync{font-size:11px;color:var(--muted);margin-top:6px}.log{max-height:220px;overflow:auto}.log-item{padding:10px 0;border-top:1px solid var(--line)}.log-item:first-child{border-top:0}.empty{color:var(--muted);padding:12px 0}.footer-note{margin-top:20px;color:#7f877f;font-size:11px}
+    @media(max-width:900px){.agenda-row{grid-template-columns:82px 55px 1fr}.agenda-row .agenda-owner,.agenda-row .agenda-actions{grid-column:3}.capture{flex-wrap:wrap}.app{grid-template-columns:1fr}.side{height:auto;position:sticky;z-index:5;padding:14px;border-right:0;border-bottom:1px solid var(--line)}.brand,.sub{display:none}.nav{grid-template-columns:repeat(6,1fr);overflow:auto}.nav button{text-align:center;padding:9px 5px;font-size:11px}.side-foot{display:none}.main{padding:22px 14px 60px}.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.kpis{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:1fr}.top{align-items:center}.h1{font-size:28px}.priority{font-size:24px}.table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
   </style>
 </head>
 <body>
@@ -30,19 +30,23 @@
   <aside class="side">
     <div class="brand">KŌMØ</div><div class="sub">Centre de pilotage</div>
     <nav class="nav">
-      <button class="active" data-view="today">Aujourd’hui</button>
-      <button data-view="pipeline">Pipeline</button>
+      <div class="nav-label">Pilotage</div>
+      <button class="active" data-view="today">Vue d’ensemble</button>
+      <button data-view="agenda">Agenda</button>
+      <button data-view="pipeline">Commercial</button>
+      <button data-view="finance">Finance</button>
+      <button data-view="journal">Journal</button>
+      <div class="nav-label secondary">Structure</div>
       <button data-view="companies">Sociétés</button>
       <button data-view="legal">Juridique</button>
-      <button data-view="finance">Trésorerie</button>
-      <button data-view="product">Produit</button>
+      <button data-view="product">Opérations</button>
     </nav>
     <div class="side-foot">Espace privé · aucune donnée patient<br>MVP local navigateur v0.2 FR</div>
   </aside>
   <main class="main">
     <header class="top">
-      <div><div class="eyebrow">Mercredi · 30 septembre 2026</div><h1 class="h1" id="viewTitle">Pilotage</h1><div class="muted">Vendre → Délivrer → Mesurer → Améliorer → Déployer</div></div>
-      <div class="pill"><span class="dot"></span> <span id="userBadge">Privé</span></div>
+      <div><div class="eyebrow" id="todayDate">30 septembre 2026</div><h1 class="h1" id="viewTitle">Vue d’ensemble</h1><div class="muted">Vendre → Délivrer → Mesurer → Améliorer → Déployer</div></div>
+      <div><div class="pill"><span class="dot"></span> <span id="userBadge">Privé</span></div><div class="sync" id="syncStatus">Connexion…</div></div>
     </header>
 
     <section id="today" class="section active">
@@ -63,33 +67,20 @@
           <div class="capture"><input id="newTask" placeholder="Ajouter une mission ou action…"><button class="btn" id="addTask">Ajouter</button></div>
         </article>
         <article class="card span5">
-          <h3>Jusqu’à ce soir</h3>
-          <div class="timeline">
-            <div class="time-row"><div class="time">13:15</div><div><b>Pacte d’associés</b><div class="meta">40/30/30, PI, gouvernance, investisseurs, carve-out Experiences</div></div></div>
-            <div class="time-row"><div class="time">14:30</div><div><b>Documents société</b><div class="meta">Statuts, PI, conventions et envoi aux associés pour relecture</div></div></div>
-            <div class="time-row"><div class="time">15:30</div><div><b>Banque & identité pro</b><div class="meta">Qonto, téléphone, email, cartes de visite, devis et facturation</div></div></div>
-            <div class="time-row"><div class="time">16:30</div><div><b>Janet + Zayd</b><div class="meta">Pitch, offres, modèle partenaire et prochaine action recherchée</div></div></div>
-            <div class="time-row"><div class="time">17:30</div><div><b>Site</b><div class="meta">Améliorations en parallèle, sans bloquer juridique ni commercial</div></div></div>
-            <div class="time-row"><div class="time">19:30</div><div><b>Point associés</b><div class="meta">Retour Hugo + Benoît, décisions et actions du lendemain</div></div></div>
-          </div>
+          <h3>Agenda · prochain</h3>
+          <div id="agendaToday"></div>
+          <div class="capture"><button class="btn ghost" data-jump="agenda">Ouvrir l’agenda</button></div>
         </article>
         <article class="card span7">
-          <h3>Quoi de neuf ?</h3>
-          <div class="capture"><textarea id="updateText" rows="3" placeholder="Ex: Janet confirme vendredi. Ugo valide 50/50. Pulse PDF fonctionne…"></textarea></div>
+          <h3>Ajouter au journal</h3>
+          <div class="capture"><textarea id="updateText" rows="3" placeholder="Décision, avancée, blocage, information importante…"></textarea></div>
           <div class="capture"><button class="btn primary" id="logUpdate">Enregistrer</button><button class="btn ghost" id="clearDone">Effacer les tâches terminées</button></div>
         </article>
         <article class="card span5"><h3>Décisions récentes</h3><div id="activity" class="log"></div></article>
         <article class="card span12">
-          <h3>Clôture du jour · pour le PDF de 19h30</h3>
-          <div class="capture">
-            <textarea id="closeDone" rows="3" placeholder="Réalisé aujourd’hui…"></textarea>
-            <textarea id="closePending" rows="3" placeholder="Non réalisé / à reporter…"></textarea>
-          </div>
-          <div class="capture">
-            <textarea id="closeDecisions" rows="3" placeholder="Décisions prises…"></textarea>
-            <textarea id="closeTomorrow" rows="3" placeholder="3 priorités de demain…"></textarea>
-          </div>
-          <div class="capture"><button class="btn primary" id="saveClose">Enregistrer la clôture</button><span class="meta" id="closeSaved"></span></div>
+          <h3>Note de la veille</h3>
+          <div id="yesterdayNote" class="journal-text muted">Aucune note de la veille.</div>
+          <div class="capture"><button class="btn ghost" data-jump="journal">Voir le journal complet</button></div>
         </article>
       </div>
     </section>
@@ -103,6 +94,38 @@
         </article>
         <article class="card span6"><h3>Règle</h3><div class="priority" style="font-size:22px">Aucun prospect actif sans prochaine action.</div><div class="muted">Cible → Contacté → RDV → Démo → Proposition → Négociation → Gagné / Perdu</div></article>
         <article class="card span6"><h3>Objectifs de closing vendredi</h3><b>Janet / Calista</b><div class="meta">Pilote ou introduction nominative owner/yacht manager + prochaine étape datée.</div><br><b>Zayd Hassoune</b><div class="meta">Au moins une introduction qualifiée.</div><br><b>Marie Menu / COTE</b><div class="meta">Angle éditorial, deadline et activation digitale/événementielle.</div></article>
+      </div>
+    </section>
+
+    <section id="agenda" class="section">
+      <div class="grid">
+        <article class="card span12">
+          <h3>Agenda partagé</h3>
+          <div class="capture">
+            <input id="agendaDate" type="date">
+            <input id="agendaTime" type="time">
+            <input id="agendaTitle" placeholder="Rendez-vous / deadline / intervention">
+            <select id="agendaOwner"><option>Renan</option><option>Hugo</option><option>Benoît</option><option>Équipe</option></select>
+            <select id="agendaType"><option>Rendez-vous</option><option>Deadline</option><option>Commercial</option><option>Opérations</option><option>Juridique</option></select>
+            <button class="btn primary" id="addAgenda">Ajouter</button>
+          </div>
+          <div id="agendaList" style="margin-top:16px"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="journal" class="section">
+      <div class="grid">
+        <article class="card span5">
+          <h3>Nouvelle note</h3>
+          <div class="capture"><select id="journalKind"><option value="note">Note</option><option value="decision">Décision</option><option value="blocker">Blocage</option><option value="summary">Résumé du jour</option></select></div>
+          <div class="capture"><textarea id="journalText" rows="8" placeholder="Écrire une information à conserver dans le journal de bord…"></textarea></div>
+          <div class="capture"><button class="btn primary" id="addJournal">Enregistrer</button></div>
+        </article>
+        <article class="card span7">
+          <h3>Journal de bord</h3>
+          <div id="journalList"></div>
+        </article>
       </div>
     </section>
 
@@ -149,6 +172,16 @@
             <div class="kpi"><b id="unpaidCount">0</b><small>Dépenses non payées</small></div>
           </div>
           <div class="capture"><input id="cashInput" type="number" placeholder="Trésorerie actuelle €"><button class="btn" id="saveCash">Mettre à jour</button></div>
+        </article>
+        <article class="card span12">
+          <h3>Saisie rapide</h3>
+          <div class="capture">
+            <select id="quickMoneyType"><option value="expense">Dépense</option><option value="income">Encaissement</option></select>
+            <input id="quickMoneyLabel" placeholder="Objet / fournisseur / client">
+            <input id="quickMoneyAmount" type="number" step="0.01" placeholder="Montant €">
+            <input id="quickMoneyDue" type="date">
+            <button class="btn primary" id="addQuickMoney">Ajouter</button>
+          </div>
         </article>
         <article class="card span6">
           <h3>Banque / pré-compta · à mettre en place</h3>
@@ -207,9 +240,9 @@ const ROLE_FROM_PATH=(()=>{
  return ['rchapon','ucalia','blebeau'].includes(candidate)?candidate:'rchapon';
 })();
 const USER_CONFIG={
- rchapon:{name:'Renan',role:'CEO · stratégie / médical / closing',tabs:['today','pipeline','companies','legal','finance','product'],priority:'Finaliser le socle juridique et commercial, préparer Janet / Zayd et garder une vision globale.'},
- ucalia:{name:'Hugo',role:'Commercial · réseau / partenariats',tabs:['today','pipeline','companies'],priority:'Construire le réseau Clinical et activer les partenaires commerciaux nécessaires à la vente.'},
- blebeau:{name:'Benoît',role:'Opérations · delivery / coûts',tabs:['today','companies','product'],priority:'Rendre KŌMØ livrable immédiatement : matériel, process, coûts et logistique.'}
+ rchapon:{name:'Renan',role:'CEO · stratégie / médical / closing',tabs:['today','agenda','pipeline','finance','journal','companies','legal','product'],priority:'Finaliser le socle juridique et commercial, préparer Janet / Zayd et garder une vision globale.'},
+ ucalia:{name:'Hugo',role:'Commercial · réseau / partenariats',tabs:['today','agenda','pipeline','journal','companies'],priority:'Construire le réseau Clinical et activer les partenaires commerciaux nécessaires à la vente.'},
+ blebeau:{name:'Benoît',role:'Opérations · delivery / coûts',tabs:['today','agenda','journal','companies','product'],priority:'Rendre KŌMØ livrable immédiatement : matériel, process, coûts et logistique.'}
 };
 const CURRENT_USER=USER_CONFIG[ROLE_FROM_PATH];
 const KEY='komo-command-v02-fr';
@@ -250,6 +283,10 @@ const seed={
   {id:7,label:'Mettre en place devis, facturation et suivi des acomptes',done:false}
  ],
  receivables:[],
+ agenda:[
+  {id:1001,date:'2026-10-02',time:'15:00',title:'Janet / Calista · Yacht Club de Cannes',owner:'Renan',type:'Rendez-vous',done:false}
+ ],
+ journal:[],
  closing:{done:'',pending:'',decisions:'',tomorrow:'',savedAt:null},
  cash:null,
  planDate:'2026-09-30',
@@ -259,6 +296,8 @@ let state=JSON.parse(localStorage.getItem(KEY)||'null')||seed;
 if(!state.expenses) state.expenses=seed.expenses;
 if(!state.financeChecklist) state.financeChecklist=seed.financeChecklist;
 if(!state.receivables) state.receivables=[];
+if(!state.agenda) state.agenda=seed.agenda;
+if(!state.journal) state.journal=[];
 if(!state.closing) state.closing={done:'',pending:'',decisions:'',tomorrow:'',savedAt:null};
 if(state.cash===undefined) state.cash=null;
 if(state.planDate!=='2026-09-30'){
@@ -266,7 +305,39 @@ if(state.planDate!=='2026-09-30'){
  state.planDate='2026-09-30';
  state.activity=(state.activity||[]).concat([{at:new Date().toISOString(),text:'Objectifs du 30 septembre chargés.'}]);
 }
-const save=()=>localStorage.setItem(KEY,JSON.stringify(state));
+let syncTimer=null;
+function save(){
+ localStorage.setItem(KEY,JSON.stringify(state));
+ clearTimeout(syncTimer);
+ syncTimer=setTimeout(pushSharedState,350);
+}
+async function pushSharedState(){
+ try{
+  const r=await fetch('/command-api',{method:'PATCH',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({state})});
+  if(r.ok){const d=await r.json();const el=document.querySelector('#syncStatus');if(el)el.textContent='Synchronisé · '+(d.updated_by||CURRENT_USER.name);}
+ }catch{}
+}
+async function loadSharedState(){
+ try{
+  const r=await fetch('/command-api',{credentials:'same-origin',cache:'no-store'});
+  if(!r.ok) throw new Error('sync');
+  const d=await r.json();
+  if(d.state && Object.keys(d.state).length){
+   state={...seed,...d.state};
+   if(!state.agenda)state.agenda=[];
+   if(!state.journal)state.journal=[];
+   if(!state.expenses)state.expenses=[];
+   if(!state.receivables)state.receivables=[];
+   localStorage.setItem(KEY,JSON.stringify(state));
+  }else{
+   await pushSharedState();
+  }
+  renderAll();
+  const el=document.querySelector('#syncStatus');if(el)el.textContent='Partagé · '+(d.updated_by||'équipe');
+ }catch{
+  const el=document.querySelector('#syncStatus');if(el)el.textContent='Mode local · synchronisation indisponible';
+ }
+}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const priorityLabels={high:'URGENT',medium:'IMPORTANT',good:'OK'};
 function taskBelongsToUser(t){
@@ -302,12 +373,35 @@ function renderReceivables(){
  document.querySelector('#receivables').innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.due||'—')}</td><td><b>${esc(r.name)}</b></td><td class="money">${new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(Number(r.amount||0))}</td><td><button class="btn ghost" data-rec="${r.id}">${r.received?'Encaissé':'À encaisser'}</button></td></tr>`).join(''):'<tr><td colspan="4" class="muted">Aucun encaissement saisi.</td></tr>';
  document.querySelectorAll('[data-rec]').forEach(x=>x.onclick=()=>{const r=state.receivables.find(r=>r.id==x.dataset.rec);r.received=!r.received;save();renderReceivables()});
 }
-function renderClosing(){
- document.querySelector('#closeDone').value=state.closing.done||'';
- document.querySelector('#closePending').value=state.closing.pending||'';
- document.querySelector('#closeDecisions').value=state.closing.decisions||'';
- document.querySelector('#closeTomorrow').value=state.closing.tomorrow||'';
- document.querySelector('#closeSaved').textContent=state.closing.savedAt?'Dernière sauvegarde : '+new Date(state.closing.savedAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+function isoToday(){
+ const d=new Date(); const local=new Date(d.getTime()-d.getTimezoneOffset()*60000); return local.toISOString().slice(0,10);
+}
+function renderAgenda(){
+ const rows=(state.agenda||[]).slice().sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')));
+ const today=isoToday();
+ const upcoming=rows.filter(a=>!a.done&&a.date>=today).slice(0,5);
+ const home=document.querySelector('#agendaToday');
+ if(home) home.innerHTML=upcoming.length?upcoming.map(a=>`<div class="time-row"><div class="time">${esc(a.date===today?(a.time||'Jour'):a.date.slice(5).split('-').reverse().join('/'))}</div><div><b>${esc(a.title)}</b><div class="meta">${esc(a.owner)} · ${esc(a.type)}</div></div></div>`).join(''):'<div class="empty">Rien de planifié.</div>';
+ const list=document.querySelector('#agendaList');
+ if(list) list.innerHTML=rows.length?rows.map(a=>`<div class="agenda-row"><div>${esc(a.date)}</div><div>${esc(a.time||'—')}</div><div><div class="agenda-title">${esc(a.title)}</div><div class="meta">${esc(a.type)}</div></div><div class="agenda-owner">${esc(a.owner)}</div><div class="agenda-actions"><button class="btn ghost" data-agenda-done="${a.id}">${a.done?'Réouvrir':'Fait'}</button> <button class="btn ghost" data-agenda-del="${a.id}">×</button></div></div>`).join(''):'<div class="empty">Agenda vide.</div>';
+ document.querySelectorAll('[data-agenda-done]').forEach(x=>x.onclick=()=>{const a=state.agenda.find(a=>a.id==x.dataset.agendaDone);a.done=!a.done;save();renderAgenda()});
+ document.querySelectorAll('[data-agenda-del]').forEach(x=>x.onclick=()=>{state.agenda=state.agenda.filter(a=>a.id!=x.dataset.agendaDel);save();renderAgenda()});
+}
+function renderJournal(){
+ const rows=(state.journal||[]).slice().sort((a,b)=>(b.at||'').localeCompare(a.at||''));
+ const list=document.querySelector('#journalList');
+ if(list) list.innerHTML=rows.length?rows.map(j=>`<div class="journal-entry"><div class="journal-head"><b>${esc(j.kind==='summary'?'Résumé du jour':j.kind==='decision'?'Décision':j.kind==='blocker'?'Blocage':'Note')}</b><span class="meta">${esc(j.date)} · ${esc(j.author)}</span></div><div class="journal-text">${esc(j.text)}</div></div>`).join(''):'<div class="empty">Le journal est vide.</div>';
+ const yesterday=new Date(); yesterday.setDate(yesterday.getDate()-1); const yd=new Date(yesterday.getTime()-yesterday.getTimezoneOffset()*60000).toISOString().slice(0,10);
+ const previous=rows.find(j=>j.date===yd&&j.kind==='summary')||rows.find(j=>j.date<isoToday());
+ const note=document.querySelector('#yesterdayNote'); if(note) note.textContent=previous?previous.text:'Aucune note de la veille.';
+}
+function addJournalEntry(text,kind='note'){
+ if(!text.trim())return;
+ state.journal.push({id:Date.now(),date:isoToday(),at:new Date().toISOString(),author:CURRENT_USER.name,kind,text:text.trim()});
+ save();renderJournal();
+}
+function renderAll(){
+ renderTasks();renderDeals();renderLegal();renderActivity();renderFinanceChecklist();renderReceivables();renderExpenses();renderAgenda();renderJournal();
 }
 function renderExpenses(){
  const today=new Date('2026-09-30T00:00:00');
@@ -325,15 +419,21 @@ function renderExpenses(){
 document.querySelector('#saveCash').onclick=()=>{const x=document.querySelector('#cashInput');state.cash=x.value===''?null:Number(x.value);save();renderExpenses()};
 document.querySelector('#addExpense').onclick=()=>{const n=document.querySelector('#expenseName'),a=document.querySelector('#expenseAmount'),d=document.querySelector('#expenseDue'),cat=document.querySelector('#expenseCategory'),rec=document.querySelector('#expenseRecurring');if(!n.value.trim())return;state.expenses.push({id:Date.now(),name:n.value.trim(),amount:Number(a.value||0),due:d.value,category:cat.value,recurring:rec.value,paid:false});n.value='';a.value='';d.value='';save();renderExpenses()};
 document.querySelector('#addReceivable').onclick=()=>{const n=document.querySelector('#receivableName'),a=document.querySelector('#receivableAmount'),d=document.querySelector('#receivableDue');if(!n.value.trim())return;state.receivables.push({id:Date.now(),name:n.value.trim(),amount:Number(a.value||0),due:d.value,received:false});n.value='';a.value='';d.value='';save();renderReceivables()};
-document.querySelector('#saveClose').onclick=()=>{state.closing={done:document.querySelector('#closeDone').value.trim(),pending:document.querySelector('#closePending').value.trim(),decisions:document.querySelector('#closeDecisions').value.trim(),tomorrow:document.querySelector('#closeTomorrow').value.trim(),savedAt:new Date().toISOString()};state.activity.push({at:new Date().toISOString(),text:'Clôture du jour enregistrée pour le résumé PDF.'});save();renderClosing();renderActivity()};
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelector('#'+b.dataset.view).classList.add('active');document.querySelector('#viewTitle').textContent=b.textContent});
 document.querySelector('#addTask').onclick=()=>{const i=document.querySelector('#newTask');if(!i.value.trim())return;state.tasks.push({id:Date.now(),title:i.value.trim(),meta:CURRENT_USER.name+' · ajouté manuellement',priority:'medium',done:false});i.value='';save();renderTasks()};
 document.querySelector('#clearDone').onclick=()=>{state.tasks=state.tasks.filter(t=>!t.done);save();renderTasks()};
-document.querySelector('#logUpdate').onclick=()=>{const i=document.querySelector('#updateText');if(!i.value.trim())return;state.activity.push({at:new Date().toISOString(),text:i.value.trim()});i.value='';save();renderActivity()};
+document.querySelector('#logUpdate').onclick=()=>{const i=document.querySelector('#updateText');if(!i.value.trim())return;const txt=i.value.trim();state.activity.push({at:new Date().toISOString(),text:txt});addJournalEntry(txt,'note');i.value='';save();renderActivity()};
+document.querySelector('#addAgenda').onclick=()=>{const d=document.querySelector('#agendaDate'),t=document.querySelector('#agendaTime'),n=document.querySelector('#agendaTitle'),o=document.querySelector('#agendaOwner'),y=document.querySelector('#agendaType');if(!d.value||!n.value.trim())return;state.agenda.push({id:Date.now(),date:d.value,time:t.value,title:n.value.trim(),owner:o.value,type:y.value,done:false});n.value='';t.value='';save();renderAgenda()};
+document.querySelector('#addJournal').onclick=()=>{const t=document.querySelector('#journalText'),k=document.querySelector('#journalKind');addJournalEntry(t.value,k.value);t.value=''};
+document.querySelector('#addQuickMoney').onclick=()=>{const type=document.querySelector('#quickMoneyType').value,label=document.querySelector('#quickMoneyLabel'),amount=document.querySelector('#quickMoneyAmount'),due=document.querySelector('#quickMoneyDue');if(!label.value.trim())return;if(type==='expense')state.expenses.push({id:Date.now(),name:label.value.trim(),category:'Autre',amount:Number(amount.value||0),due:due.value,recurring:'non',paid:false});else state.receivables.push({id:Date.now(),name:label.value.trim(),amount:Number(amount.value||0),due:due.value,received:false});label.value='';amount.value='';due.value='';save();renderExpenses();renderReceivables()};
+document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{const target=b.dataset.jump;const nav=[...document.querySelectorAll('.nav button')].find(x=>x.dataset.view===target);if(nav)nav.click()});
 document.querySelector('#addDeal').onclick=()=>{const n=document.querySelector('#dealName'),v=document.querySelector('#dealValue');if(!n.value.trim())return;state.deals.push({id:Date.now(),name:n.value.trim(),stage:'Cible',value:Number(v.value||0),owner:'Renan',source:'Manuel',next:'AUCUNE PROCHAINE ACTION'});n.value='';v.value='';save();renderDeals()};
 document.querySelector('#userBadge').textContent=CURRENT_USER.name+' · '+CURRENT_USER.role;
 document.querySelector('.priority').textContent=CURRENT_USER.priority;
 document.querySelectorAll('.nav button').forEach(b=>{if(!CURRENT_USER.tabs.includes(b.dataset.view)) b.style.display='none';});
-renderTasks();renderDeals();renderLegal();renderActivity();renderFinanceChecklist();renderReceivables();renderClosing();renderExpenses();save();
+const now=new Date();document.querySelector('#todayDate').textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+document.querySelector('#agendaDate').value=isoToday();
+renderAll();
+loadSharedState();
 </script>
 </body></html>
