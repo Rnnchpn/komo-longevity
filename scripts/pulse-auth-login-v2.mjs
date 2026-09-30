@@ -7,7 +7,7 @@ const srcCss=join(root,'pulse-app','pulse-auth-login-v2.css');
 const outDir=join(root,'site','pulse-v12');
 const outCss=join(outDir,'pulse-auth-login-v2.css');
 const indexPath=join(outDir,'index.html');
-const version='20260929-auth-login-v2';
+const version='20261001-auth-login-v3';
 
 await copyFile(srcCss,outCss);
 
@@ -20,13 +20,15 @@ const css=await readFile(outCss,'utf8');
 const checks=[
   ['stylesheet loaded',html.includes('pulse-auth-login-v2.css')],
   ['loaded after bright theme',html.lastIndexOf('pulse-auth-login-v2.css')>html.lastIndexOf('pulse-bright-modern-v1.css')],
-  ['French-first manifesto',html.includes('Votre santé,<br><em>en mouvement.</em>')],
-  ['simple welcome heading',html.includes('<h2>Bienvenue</h2>')],
+  ['Home-aligned manifesto',html.includes('Bienvenue sur KŌMØ Pulse')&&html.includes('Vos résultats. Votre trajectoire. Votre World.')],
+  ['direct login heading',html.includes('<h2>Se connecter</h2>')],
+  ['old landing headline retired',!html.includes('Votre santé,<br><em>en mouvement.</em>')],
   ['hidden auth semantics preserved',css.includes('#authScreen[hidden]{display:none!important}')],
-  ['mobile Safari input size protected',css.includes('font-size:16px!important; /* prevent Safari zoom */')],
-  ['legacy image skin overridden',css.includes('background-image:none!important')],
+  ['mobile Safari input size protected',css.includes('font:400 16px/1 "DM Sans",sans-serif!important')],
+  ['supported font weights only',!/(font-weight|font):[^;]*(650|700|750|800|850|900)/.test(css)],
+  ['single premium Auth owner',css.includes('Single visual owner')&&css.includes('Premium application entry')],
   ['presentation only',!css.includes('signInWithPassword')&&!css.includes('location.hash=')]
-];
+]
 for(const [label,ok] of checks)console.log(`[pulse-auth-login-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
-console.log('[pulse-auth-login-v2] PASS · bright premium login · desktop/tablet/mobile');
+console.log('[pulse-auth-login-v2] PASS · premium app login · desktop/tablet/mobile');
