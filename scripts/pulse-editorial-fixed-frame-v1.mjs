@@ -53,10 +53,10 @@ for(const name of htmlFiles){
 try{
   const homeJs=await readFile(join(root,'pulse-app','patient-home-demo-v9.js'),'utf8');
   const homeCss=await readFile(join(root,'pulse-app','patient-home-demo-v9.css'),'utf8');
-  if(!homeJs.includes('data-khome-v9')||!homeJs.includes("const VERSION='9.0.1-friday-demo'"))throw new Error('Home V9 runtime contract missing');
+  if(!homeJs.includes('data-khome-v9')||!homeJs.includes("const VERSION='9.2.0-premium-cockpit'"))throw new Error('Home premium runtime contract missing');
   await writeFile(join(pulse,'patient-home-command-v1.js'),homeJs,'utf8');
   await writeFile(join(pulse,'patient-home-command-v1.css'),homeCss,'utf8');
-  const homeToken='20260930-friday-demo-v9';
+  const homeToken='20261001-premium-home-v1';
   for(const name of htmlFiles){
     const htmlPath=join(pulse,name);
     let homeHtml=await readFile(htmlPath,'utf8');
@@ -75,6 +75,23 @@ try{
 const dockPath=join(pulse,'pulse-bottom-nav-v6.js');
 try{
   let dock=await readFile(dockPath,'utf8');
+  const premiumDockFrom=`const items=[
+  ['home','Accueil','⌂','home'],
+  ['key','KEY','◌','key'],
+  ['results','Résultats','◎','results'],
+  ['trajectory','Trajectoire','⌁','trajectory'],
+  ['agenda','Rendez-vous','□','documents'],
+  ['mykomo','My KŌMØ','◉','mykomo']
+];`;
+  const premiumDockItems=`const items=[
+  ['home','Home','⌂','home'],
+  ['results','Résultats','◎','results'],
+  ['key','Connected','◌','key'],
+  ['agenda','Rendez-vous','□','documents'],
+  ['mykomo','My KŌMØ','◉','mykomo']
+];`;
+  if(dock.includes(premiumDockFrom))dock=dock.replace(premiumDockFrom,premiumDockItems);
+  dock=dock.replace("if(['trajectory','path','plan'].includes(r))return'trajectory';","if(['trajectory','path','plan'].includes(r))return'results';");
   const from=`body.kpulse-app-mode.kpulse-home-mode #viewRoot,body.kpulse-app-mode.kpulse-home-mode .view-root{width:100%!important;max-width:none!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;padding:0 0 calc(76px + env(safe-area-inset-bottom))!important;overflow:hidden!important;overscroll-behavior:none!important;background:transparent!important}body.kpulse-app-mode.kpulse-home-mode [data-my-komo-home]{height:100%!important;min-height:0!important;overflow:hidden!important;background:transparent!important}`;
   const to=`body.kpulse-app-mode.kpulse-home-mode #viewRoot,body.kpulse-app-mode.kpulse-home-mode .view-root{width:100%!important;max-width:none!important;flex:1 1 0!important;height:auto!important;max-height:none!important;min-height:0!important;padding:0!important;overflow:hidden!important;overscroll-behavior:none!important;background:transparent!important}body.kpulse-app-mode.kpulse-home-mode [data-my-komo-home]{width:100%!important;height:100%!important;max-height:100%!important;min-height:0!important;overflow:hidden!important;background:transparent!important}`;
   if(dock.includes(from))dock=dock.replace(from,to);
