@@ -1,11 +1,33 @@
-import { cp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { cp, mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const source = join(root, 'pulse-app');
 const target = join(root, 'site', 'pulse-v12');
-const RELEASE='20260903-motion-sensor-v06';
+const RELEASE=process.env.VERCEL_GIT_COMMIT_SHA
+  ? 'git-'+process.env.VERCEL_GIT_COMMIT_SHA.slice(0,12)
+  : '20260930-friday-demo-v10';
+
+function stampHtmlAssets(doc){
+  return doc.replace(/((?:src|href)="\.\/[^"?]+\.(?:js|css))(?:\?[^"]*)?"/g,`$1?v=${RELEASE}"`);
+}
+function stampModuleImports(source){
+  return source
+    .replace(/(from\s*['"])(\.\/[^'"]+\.js)(?:\?[^'"]*)?(['"])/g,`$1$2?v=${RELEASE}$3`)
+    .replace(/(import\s*['"])(\.\/[^'"]+\.js)(?:\?[^'"]*)?(['"])/g,`$1$2?v=${RELEASE}$3`)
+    .replace(/(import\(\s*['"])(\.\/[^'"]+\.js)(?:\?[^'"]*)?(['"]\s*\))/g,`$1$2?v=${RELEASE}$3`);
+}
+async function stampModuleTree(dir){
+  for(const entry of await readdir(dir,{withFileTypes:true})){
+    const full=join(dir,entry.name);
+    if(entry.isDirectory()){await stampModuleTree(full);continue}
+    if(!entry.isFile()||!entry.name.endsWith('.js'))continue;
+    const source=await readFile(full,'utf8');
+    const stamped=stampModuleImports(source);
+    if(stamped!==source)await writeFile(full,stamped,'utf8');
+  }
+}
 
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true });
@@ -63,6 +85,7 @@ const remove=[
 for(const re of remove) html=html.replace(re,'');
 html=html.replace(/(<script src="\.\/runtime\.js[^>]*><\/script>)/,`  <script src="./patient-navigation-core-v1.js?v=${RELEASE}"></script>\n  <script src="./my-komo-route-guard-v1.js?v=${RELEASE}"></script>\n  <script src="./trajectory-route-guard-v1.js?v=${RELEASE}"></script>\n  <script src="./motion-route-guard-v4.js?v=${RELEASE}"></script>\n  <script src="./auth-login-canonical.js?v=${RELEASE}"></script>\n  <script src="./center-patient-links.js?v=${RELEASE}"></script>\n  $1`);
 html=html.replace('</body>',`  <script type="module" src="./myocare-import.js?v=${RELEASE}"></script>\n  <script type="module" src="./motion-workflow.js?v=${RELEASE}"></script>\n  <script type="module" src="./myocare-import-entry-v2.js?v=${RELEASE}"></script>\n  <script type="module" src="./center-two-tab-workspace-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./myocare-dossier-import-fix-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./center-patient-polish.js?v=${RELEASE}"></script>\n  <script type="module" src="./motion-hub-v4.js?v=${RELEASE}"></script>\n  <script type="module" src="./canonical-report-export-v2.js?v=${RELEASE}"></script>\n  <script type="module" src="./report-bootstrap-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./patient-canonical-results.js?v=${RELEASE}"></script>\n  <script src="./patient-home-visual-v2.js?v=${RELEASE}"></script>\n  <script type="module" src="./patient-home-datawall-v3.js?v=${RELEASE}"></script>\n  <script src="./patient-home-micro-motion-v1.js?v=${RELEASE}"></script>\n  <script src="./pulse-home-hero-polish-v2.js?v=${RELEASE}"></script>\n  <script src="./pulse-bottom-nav-v5.js?v=${RELEASE}"></script>\n  <script type="module" src="./my-komo-lobby-v3.js?v=${RELEASE}"></script>\n  <script src="./my-komo-club-entry-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./trajectory-v3.js?v=${RELEASE}"></script>\n  <script type="module" src="./club-hub-v1.js?v=${RELEASE}"></script>\n  <script type="module" src="./club-connections-v1.js?v=${RELEASE}"></script>\n</body>`);
+html=stampHtmlAssets(html);
 await writeFile(indexPath,html,'utf8');
 
 const dossierPath=join(target,'dossier.html');
@@ -80,6 +103,9 @@ const dossierRemove=[
 ];
 for(const re of dossierRemove)dossier=dossier.replace(re,'');
 dossier=dossier.replace('</body>',`  <script src="./navigation-scroll-top.js?v=${RELEASE}"></script>\n  <script type="module" src="./canonical-report-export-v2.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-pdf-export-v2.js?v=${RELEASE}"></script>\n  <script src="./dossier-export-bridge.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-result-preview.js?v=${RELEASE}"></script>\n  <script type="module" src="./dossier-canonical-results.js?v=${RELEASE}"></script>\n</body>`);
+dossier=stampHtmlAssets(dossier);
 await writeFile(dossierPath,dossier,'utf8');
 
-console.log('[pulse-v12] Motion sensor v0.6 = canonical score · Myodev only · legacy manual Motion layers removed');
+await stampModuleTree(target);
+
+console.log(`[pulse-v12] release ${RELEASE} · canonical patient runtime · assets stamped by deployment`);
