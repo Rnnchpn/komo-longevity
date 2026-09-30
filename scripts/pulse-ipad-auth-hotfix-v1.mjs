@@ -81,36 +81,30 @@ async function handoffSignupSession(session){
 }
 `);
 
-  const submitFrom="if(data?.session)showCheckHandoff();else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; Pulse vous proposera ensuite de commencer votre KŌMØ Check.',true)";
-  const submitTo="if(data?.session){const adopted=await handoffSignupSession(data.session);if(adopted)showCheckHandoff();else{feedback(out,'Votre espace est prêt. Ouverture de Pulse…',true);setTimeout(()=>location.replace(location.origin+'/?start=check'),120)}}else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; Pulse vous proposera ensuite de commencer votre KŌMØ Check.',true)";
-  if(!onboarding.includes(submitFrom))throw new Error('[pulse-ipad-auth] patient signup session anchor missing');
-  onboarding=onboarding.replace(submitFrom,submitTo);
+  const homeFrom="if(data?.session){clearStart();const m=document.querySelector('#patientCreateModal');if(m)m.hidden=true;feedback(out,'Votre espace est prêt. Ouverture de Pulse…',true);setTimeout(()=>location.replace(location.origin+'/#home'),120)}else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; vous arriverez ensuite directement dans Pulse.',true)";
+  const homeTo="if(data?.session){const adopted=await handoffSignupSession(data.session);clearStart();const m=document.querySelector('#patientCreateModal');if(m)m.hidden=true;feedback(out,'Votre espace est prêt. Ouverture de Pulse…',true);if(adopted){if(location.hash!=='#home')location.hash='home'}else setTimeout(()=>location.replace(location.origin+'/#home'),120)}else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; vous arriverez ensuite directement dans Pulse.',true)";
 
+  const legacyFrom="if(data?.session)showCheckHandoff();else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; Pulse vous proposera ensuite de commencer votre KŌMØ Check.',true)";
+  const legacyTo="if(data?.session){const adopted=await handoffSignupSession(data.session);if(adopted)showCheckHandoff();else{feedback(out,'Votre espace est prêt. Ouverture de Pulse…',true);setTimeout(()=>location.replace(location.origin+'/?start=check'),120)}}else feedback(out,'Votre espace est créé. Confirmez votre adresse e-mail ; Pulse vous proposera ensuite de commencer votre KŌMØ Check.',true)";
+
+  if(onboarding.includes(homeFrom)) onboarding=onboarding.replace(homeFrom,homeTo);
+  else if(onboarding.includes(legacyFrom)) onboarding=onboarding.replace(legacyFrom,legacyTo);
+  else throw new Error('[pulse-ipad-auth] patient signup session anchor missing');
+
+  // Legacy Check-handoff builds need the historical iPad click and handoff fixes.
   const startFrom="function startKomoCheck(){hideHandoff();location.hash='results';setTimeout(()=>openBaselineWhenReady(0),80)}";
   const startTo="function startKomoCheck(){hideHandoff();const auth=document.querySelector('#authScreen'),app=document.querySelector('#appShell');if((auth&&!auth.hidden)||app?.hidden){location.replace(location.origin+'/?start=check#results');return}location.hash='results';setTimeout(()=>openBaselineWhenReady(0),80)}";
-  if(!onboarding.includes(startFrom))throw new Error('[pulse-ipad-auth] start KŌMØ Check anchor missing');
-  onboarding=onboarding.replace(startFrom,startTo);
+  if(onboarding.includes(startFrom)) onboarding=onboarding.replace(startFrom,startTo);
 
   const showFrom="function showCheckHandoff(){if(handoffShown)return;handoffShown=true;const m=modal();m.dataset.handoff='1';m.hidden=false;m.innerHTML=\`<div class=\"patient-create-backdrop\"></div><section class=\"patient-create-sheet patient-create-success\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"patientHandoffTitle\"><p class=\"eyebrow\">BIENVENUE DANS KŌMØ</p><h2 id=\"patientHandoffTitle\">Votre espace est prêt.</h2><p>Vous pouvez maintenant établir votre premier point de départ avec le KŌMØ Check.</p><button type=\"button\" class=\"primary-button\" data-start-komo-check>Commencer mon KŌMØ Check →</button><button type=\"button\" class=\"secondary-button\" data-patient-later>Plus tard</button></section>\`}";
   const showTo="function showCheckHandoff(){if(handoffShown)return;handoffShown=true;const m=modal();m.dataset.handoff='1';m.hidden=false;m.innerHTML=\`<div class=\"patient-create-backdrop\"></div><section class=\"patient-create-sheet patient-create-success\" role=\"dialog\" aria-modal=\"true\" aria-labelledby=\"patientHandoffTitle\"><p class=\"eyebrow\">BIENVENUE DANS KŌMØ</p><h2 id=\"patientHandoffTitle\">Votre espace est prêt.</h2><p>Vous pouvez maintenant établir votre premier point de départ avec le KŌMØ Check.</p><button type=\"button\" class=\"primary-button\" data-start-komo-check>Commencer mon KŌMØ Check →</button><button type=\"button\" class=\"secondary-button\" data-patient-later>Plus tard</button></section>\`;m.querySelector('[data-start-komo-check]')?.addEventListener('click',startKomoCheck);m.querySelector('[data-patient-later]')?.addEventListener('click',()=>{hideHandoff();location.hash='home'})}";
-  if(!onboarding.includes(showFrom))throw new Error('[pulse-ipad-auth] success handoff modal anchor missing');
-  onboarding=onboarding.replace(showFrom,showTo);
-
-  const maybeFrom="async function maybeHandoff(){if(handoffShown)return;const q=new URLSearchParams(location.search);if(q.get('start')!=='check'&&sessionStorage.getItem('komo_start_check_after_signup')!=='1')return;const {data:{session}}=await sb().auth.getSession();if(!session?.user)return;const auth=document.querySelector('#authScreen');if(auth&&!auth.hidden)return;showCheckHandoff()}";
-  const maybeTo="async function maybeHandoff(){if(handoffShown)return;const q=new URLSearchParams(location.search);if(q.get('start')!=='check'&&sessionStorage.getItem('komo_start_check_after_signup')!=='1')return;const {data:{session}}=await sb().auth.getSession();if(!session?.user)return;const auth=document.querySelector('#authScreen');if(auth&&!auth.hidden){const adopted=await handoffSignupSession(session);if(!adopted&&auth&&!auth.hidden){location.replace(location.origin+'/?start=check');return}}showCheckHandoff()}";
-  if(!onboarding.includes(maybeFrom))throw new Error('[pulse-ipad-auth] maybe handoff anchor missing');
-  onboarding=onboarding.replace(maybeFrom,maybeTo);
-
-  const listenerFrom="document.addEventListener('click',e=>{const start=e.target.closest?.('[data-start-komo-check]');if(start){e.preventDefault();e.stopImmediatePropagation();startKomoCheck();return}const later=e.target.closest?.('[data-patient-later]');if(later){e.preventDefault();e.stopImmediatePropagation();hideHandoff();location.hash='home';return}const signup=e.target.closest?.('#signupButton');if(!signup)return;const auth=document.querySelector('#authScreen');if(auth?.dataset.authAudience==='professional')return;e.preventDefault();e.stopImmediatePropagation();open()},true);";
-  const listenerTo="document.addEventListener('click',e=>{const signup=e.target.closest?.('#signupButton');if(!signup)return;const auth=document.querySelector('#authScreen');if(auth?.dataset.authAudience==='professional')return;e.preventDefault();e.stopImmediatePropagation();open()},true);";
-  if(!onboarding.includes(listenerFrom))throw new Error('[pulse-ipad-auth] patient onboarding delegated click anchor missing');
-  onboarding=onboarding.replace(listenerFrom,listenerTo);
+  if(onboarding.includes(showFrom)) onboarding=onboarding.replace(showFrom,showTo);
 }
 
 await writeFile(onboardingPath,onboarding,'utf8');
 
-if(!onboarding.includes('patient-signup-live')||!onboarding.includes("addEventListener('click',startKomoCheck)")){
-  throw new Error('[pulse-ipad-auth] patient signup handoff patch did not apply');
+if(!onboarding.includes('patient-signup-live')){
+  throw new Error('[pulse-ipad-auth] patient signup live-session patch did not apply');
 }
 
 console.log('[pulse-ipad-auth] PASS · login + patient signup handoff hardened for Safari/iPad');
