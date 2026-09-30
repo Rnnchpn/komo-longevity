@@ -102,7 +102,7 @@ function setAudience(mode){
   auth.dataset.authAudience=pro?'professional':'patient';
   auth.querySelectorAll('[data-auth-audience]').forEach(b=>b.classList.toggle('active',b.dataset.authAudience===(pro?'professional':'patient')));
   const title=auth.querySelector('.auth-heading h2'),copy=auth.querySelector('.auth-heading p'),submit=auth.querySelector('#loginButton span:first-child'),pill=auth.querySelector('.product-pill'),eyebrow=auth.querySelector('.auth-manifesto .eyebrow');
-  if(title)title.textContent=pro?'KŌMØ Pro':'Bienvenue';
+  if(title)title.textContent=pro?'KŌMØ Pro':'Se connecter';
   if(copy)copy.textContent=pro?'Connectez-vous à votre centre pour gérer consultations, patients et analyses Motion.':'Connectez-vous pour retrouver votre espace KŌMØ.';
   if(submit)submit.textContent=pro?'Accéder à mon centre':'Se connecter';
   if(pill)pill.textContent=pro?'Pulse · Pro':'Pulse';
