@@ -221,6 +221,7 @@ html=html.replace('</head>',`  <meta name="komo-pulse-demo-hardening" content="$
 html=html.replace('</body>',`  <script src="./${jsName}?v=${version}"></script>\n</body>`);
 html=html.replace(/((?:src|href)=["']\.\/[^"'?]+\.(?:js|css))(?:\?[^"']*)?(["'])/g,`$1?v=${cacheVersion}$2`);
 html=html.replace(/<meta name="komo-build" content="[^"]*">/g,`<meta name="komo-build" content="${cacheVersion}">`);
+html=html.replace(/<meta name="komo-pulse-release" content="[^"]*"\s*\/?>/g,`<meta name="komo-pulse-release" content="${cacheVersion}" />`);
 await writeFile(indexPath,html,'utf8');
 await stampNestedImports(pulse);
 
