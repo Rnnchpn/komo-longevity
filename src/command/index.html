@@ -22,7 +22,7 @@
     .company{display:flex;justify-content:space-between;gap:15px;padding:14px 0;border-top:1px solid var(--line)}.company:first-of-type{border-top:0}.company h4{margin:0 0 3px;font-size:16px}.ownership{font-weight:750;color:var(--accent);white-space:nowrap}.checkline{display:flex;gap:10px;align-items:flex-start;padding:11px 0;border-top:1px solid var(--line)}.checkline:first-of-type{border-top:0}.status{font-size:11px;border-radius:999px;padding:4px 8px;margin-left:auto}.red{background:#3d2422;color:#ffc3bb}.orange{background:#3b3221;color:#f1d59b}.green{background:#203225;color:#bee9c3}
     .products{display:grid;grid-template-columns:1fr 1fr;gap:14px}.product-row{display:grid;grid-template-columns:1fr auto;gap:10px;padding:11px 0;border-top:1px solid var(--line)}.product-row:first-of-type{border-top:0}.bar{height:6px;background:#101310;border-radius:99px;overflow:hidden;margin-top:7px}.bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
     .log{max-height:220px;overflow:auto}.log-item{padding:10px 0;border-top:1px solid var(--line)}.log-item:first-child{border-top:0}.empty{color:var(--muted);padding:12px 0}.footer-note{margin-top:20px;color:#7f877f;font-size:11px}
-    @media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:sticky;z-index:5;padding:14px;border-right:0;border-bottom:1px solid var(--line)}.brand,.sub{display:none}.nav{grid-template-columns:repeat(5,1fr);overflow:auto}.nav button{text-align:center;padding:9px 5px;font-size:11px}.side-foot{display:none}.main{padding:22px 14px 60px}.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.kpis{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:1fr}.top{align-items:center}.h1{font-size:28px}.priority{font-size:24px}.table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
+    @media(max-width:900px){.app{grid-template-columns:1fr}.side{height:auto;position:sticky;z-index:5;padding:14px;border-right:0;border-bottom:1px solid var(--line)}.brand,.sub{display:none}.nav{grid-template-columns:repeat(6,1fr);overflow:auto}.nav button{text-align:center;padding:9px 5px;font-size:11px}.side-foot{display:none}.main{padding:22px 14px 60px}.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.kpis{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:1fr}.top{align-items:center}.h1{font-size:28px}.priority{font-size:24px}.table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
   </style>
 </head>
 <body>
@@ -79,6 +79,18 @@
           <div class="capture"><button class="btn primary" id="logUpdate">Enregistrer</button><button class="btn ghost" id="clearDone">Effacer les tâches terminées</button></div>
         </article>
         <article class="card span5"><h3>Décisions récentes</h3><div id="activity" class="log"></div></article>
+        <article class="card span12">
+          <h3>Clôture du jour · pour le PDF de 19h30</h3>
+          <div class="capture">
+            <textarea id="closeDone" rows="3" placeholder="Réalisé aujourd’hui…"></textarea>
+            <textarea id="closePending" rows="3" placeholder="Non réalisé / à reporter…"></textarea>
+          </div>
+          <div class="capture">
+            <textarea id="closeDecisions" rows="3" placeholder="Décisions prises…"></textarea>
+            <textarea id="closeTomorrow" rows="3" placeholder="3 priorités de demain…"></textarea>
+          </div>
+          <div class="capture"><button class="btn primary" id="saveClose">Enregistrer la clôture</button><span class="meta" id="closeSaved"></span></div>
+        </article>
       </div>
     </section>
 
@@ -137,6 +149,20 @@
             <div class="kpi"><b id="unpaidCount">0</b><small>Dépenses non payées</small></div>
           </div>
           <div class="capture"><input id="cashInput" type="number" placeholder="Trésorerie actuelle €"><button class="btn" id="saveCash">Mettre à jour</button></div>
+        </article>
+        <article class="card span6">
+          <h3>Banque / pré-compta · à mettre en place</h3>
+          <div id="financeChecklist"></div>
+        </article>
+        <article class="card span6">
+          <h3>Encaissements à venir</h3>
+          <table class="table"><thead><tr><th>Échéance</th><th>Client / objet</th><th>Montant €</th><th>Statut</th></tr></thead><tbody id="receivables"></tbody></table>
+          <div class="capture">
+            <input id="receivableName" placeholder="Client / facture / acompte">
+            <input id="receivableAmount" type="number" step="0.01" placeholder="Montant €">
+            <input id="receivableDue" type="date">
+            <button class="btn" id="addReceivable">Ajouter</button>
+          </div>
         </article>
         <article class="card span12">
           <h3>Dépenses</h3>
@@ -203,12 +229,26 @@ const seed={
   {id:2,name:'Cartes de visite KŌMØ',category:'Marketing',amount:0,due:'2026-10-02',recurring:'non',paid:false},
   {id:3,name:'Téléphone / ligne professionnelle',category:'Administratif',amount:0,due:'2026-10-02',recurring:'mensuel',paid:false}
  ],
+ financeChecklist:[
+  {id:1,label:'Ouvrir / finaliser le compte professionnel Qonto',done:false},
+  {id:2,label:'Définir les droits Renan / Hugo / Benoît sur le compte',done:false},
+  {id:3,label:'Choisir expert-comptable / logiciel comptable connecté',done:false},
+  {id:4,label:'Saisir capital, apport et trésorerie initiale',done:false},
+  {id:5,label:'Lister tous les abonnements et coûts déjà engagés',done:false},
+  {id:6,label:'Construire le prévisionnel de trésorerie à 90 jours',done:false},
+  {id:7,label:'Mettre en place devis, facturation et suivi des acomptes',done:false}
+ ],
+ receivables:[],
+ closing:{done:'',pending:'',decisions:'',tomorrow:'',savedAt:null},
  cash:null,
  planDate:'2026-09-30',
  activity:[{at:new Date().toISOString(),text:'KŌMØ Command initialisé.'}]
 };
 let state=JSON.parse(localStorage.getItem(KEY)||'null')||seed;
 if(!state.expenses) state.expenses=seed.expenses;
+if(!state.financeChecklist) state.financeChecklist=seed.financeChecklist;
+if(!state.receivables) state.receivables=[];
+if(!state.closing) state.closing={done:'',pending:'',decisions:'',tomorrow:'',savedAt:null};
 if(state.cash===undefined) state.cash=null;
 if(state.planDate!=='2026-09-30'){
  state.tasks=seed.tasks;
@@ -235,6 +275,23 @@ function renderLegal(){
 function renderActivity(){
  const a=state.activity.slice().reverse().slice(0,8);document.querySelector('#activity').innerHTML=a.length?a.map(i=>`<div class="log-item"><b>${new Date(i.at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</b><div class="meta">${esc(i.text)}</div></div>`).join(''):'<div class="empty">No updates yet.</div>'
 }
+function renderFinanceChecklist(){
+ const el=document.querySelector('#financeChecklist');
+ el.innerHTML=(state.financeChecklist||[]).map(i=>`<div class="checkline"><input type="checkbox" data-fincheck="${i.id}" ${i.done?'checked':''}><div>${esc(i.label)}</div><span class="status ${i.done?'green':'orange'}">${i.done?'Fait':'À faire'}</span></div>`).join('');
+ document.querySelectorAll('[data-fincheck]').forEach(x=>x.onchange=()=>{const i=state.financeChecklist.find(i=>i.id==x.dataset.fincheck);i.done=x.checked;save();renderFinanceChecklist()});
+}
+function renderReceivables(){
+ const rows=state.receivables||[];
+ document.querySelector('#receivables').innerHTML=rows.length?rows.map(r=>`<tr><td>${esc(r.due||'—')}</td><td><b>${esc(r.name)}</b></td><td class="money">${new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'}).format(Number(r.amount||0))}</td><td><button class="btn ghost" data-rec="${r.id}">${r.received?'Encaissé':'À encaisser'}</button></td></tr>`).join(''):'<tr><td colspan="4" class="muted">Aucun encaissement saisi.</td></tr>';
+ document.querySelectorAll('[data-rec]').forEach(x=>x.onclick=()=>{const r=state.receivables.find(r=>r.id==x.dataset.rec);r.received=!r.received;save();renderReceivables()});
+}
+function renderClosing(){
+ document.querySelector('#closeDone').value=state.closing.done||'';
+ document.querySelector('#closePending').value=state.closing.pending||'';
+ document.querySelector('#closeDecisions').value=state.closing.decisions||'';
+ document.querySelector('#closeTomorrow').value=state.closing.tomorrow||'';
+ document.querySelector('#closeSaved').textContent=state.closing.savedAt?'Dernière sauvegarde : '+new Date(state.closing.savedAt).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+}
 function renderExpenses(){
  const today=new Date('2026-09-30T00:00:00');
  const in30=new Date(today); in30.setDate(in30.getDate()+30);
@@ -250,11 +307,13 @@ function renderExpenses(){
 }
 document.querySelector('#saveCash').onclick=()=>{const x=document.querySelector('#cashInput');state.cash=x.value===''?null:Number(x.value);save();renderExpenses()};
 document.querySelector('#addExpense').onclick=()=>{const n=document.querySelector('#expenseName'),a=document.querySelector('#expenseAmount'),d=document.querySelector('#expenseDue'),cat=document.querySelector('#expenseCategory'),rec=document.querySelector('#expenseRecurring');if(!n.value.trim())return;state.expenses.push({id:Date.now(),name:n.value.trim(),amount:Number(a.value||0),due:d.value,category:cat.value,recurring:rec.value,paid:false});n.value='';a.value='';d.value='';save();renderExpenses()};
+document.querySelector('#addReceivable').onclick=()=>{const n=document.querySelector('#receivableName'),a=document.querySelector('#receivableAmount'),d=document.querySelector('#receivableDue');if(!n.value.trim())return;state.receivables.push({id:Date.now(),name:n.value.trim(),amount:Number(a.value||0),due:d.value,received:false});n.value='';a.value='';d.value='';save();renderReceivables()};
+document.querySelector('#saveClose').onclick=()=>{state.closing={done:document.querySelector('#closeDone').value.trim(),pending:document.querySelector('#closePending').value.trim(),decisions:document.querySelector('#closeDecisions').value.trim(),tomorrow:document.querySelector('#closeTomorrow').value.trim(),savedAt:new Date().toISOString()};state.activity.push({at:new Date().toISOString(),text:'Clôture du jour enregistrée pour le résumé PDF.'});save();renderClosing();renderActivity()};
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));document.querySelector('#'+b.dataset.view).classList.add('active');document.querySelector('#viewTitle').textContent=b.textContent});
 document.querySelector('#addTask').onclick=()=>{const i=document.querySelector('#newTask');if(!i.value.trim())return;state.tasks.push({id:Date.now(),title:i.value.trim(),meta:'Ajouté manuellement',priority:'medium',done:false});i.value='';save();renderTasks()};
 document.querySelector('#clearDone').onclick=()=>{state.tasks=state.tasks.filter(t=>!t.done);save();renderTasks()};
 document.querySelector('#logUpdate').onclick=()=>{const i=document.querySelector('#updateText');if(!i.value.trim())return;state.activity.push({at:new Date().toISOString(),text:i.value.trim()});i.value='';save();renderActivity()};
 document.querySelector('#addDeal').onclick=()=>{const n=document.querySelector('#dealName'),v=document.querySelector('#dealValue');if(!n.value.trim())return;state.deals.push({id:Date.now(),name:n.value.trim(),stage:'Cible',value:Number(v.value||0),owner:'Renan',source:'Manuel',next:'AUCUNE PROCHAINE ACTION'});n.value='';v.value='';save();renderDeals()};
-renderTasks();renderDeals();renderLegal();renderActivity();renderExpenses();save();
+renderTasks();renderDeals();renderLegal();renderActivity();renderFinanceChecklist();renderReceivables();renderClosing();renderExpenses();save();
 </script>
 </body></html>
