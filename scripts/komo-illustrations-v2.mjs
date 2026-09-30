@@ -28,9 +28,9 @@ for(const rel of homeFiles){
   await patch(rel,html=>{
     html=html
       .replace(/(<figure class="kpv-hero-media"><img src=")[^"]+(" alt=")[^"]*(" fetchpriority="high"><\/figure>)/,
-        '$1/assets/images/komo-longevity-v2.webp$2KŌMØ Longevity, environnement de consultation et d’évaluation fonctionnelle sur la Côte d’Azur$3')
-      .replaceAll('/assets/site2026/generated/komo-clinical-premium.webp','/assets/images/komo-clinical-v2.webp')
-      .replaceAll('/assets/images/komo-clinical-premium.webp','/assets/images/komo-clinical-v2.webp');
+        '$1/assets/images/komo-longevity-v3.webp$2KŌMØ Longevity, environnement de consultation et d’évaluation fonctionnelle sur la Côte d’Azur$3')
+      .replaceAll('/assets/site2026/generated/komo-clinical-premium.webp','/assets/images/komo-clinical-v3.webp')
+      .replaceAll('/assets/images/komo-clinical-premium.webp','/assets/images/komo-clinical-v3.webp');
     return html;
   });
 }
@@ -38,23 +38,23 @@ for(const rel of homeFiles){
 for(const rel of ['fr/motion/index.html','motion/index.html','es/motion/index.html']){
   await patch(rel,html=>html.replace(
     /(<figure class="kpv-hero-media"><img src=")[^"]+(" alt=")[^"]*(" fetchpriority="high"><\/figure>)/,
-    '$1/assets/images/komo-motion-v2.webp$2Évaluation KŌMØ Motion avec analyse de la marche, de la posture et de l’activité musculaire$3'
+    '$1/assets/images/komo-motion-v3.webp$2Évaluation KŌMØ Motion avec analyse de la marche, de la posture et de l’activité musculaire$3'
   ));
 }
 
 for(const rel of ['fr/clinical/index.html','clinical/index.html','es/clinical/index.html']){
   await patch(rel,html=>html
-    .replaceAll('/assets/site2026/generated/komo-clinical-premium.webp','/assets/images/komo-clinical-v2.webp')
-    .replaceAll('/assets/images/komo-clinical-premium.webp','/assets/images/komo-clinical-v2.webp')
+    .replaceAll('/assets/site2026/generated/komo-clinical-premium.webp','/assets/images/komo-clinical-v3.webp')
+    .replaceAll('/assets/images/komo-clinical-premium.webp','/assets/images/komo-clinical-v3.webp')
     .replace(/alt="KŌMØ Clinical dans un environnement privé"/g,'alt="Consultation KŌMØ Clinical avec restitution intégrée des données fonctionnelles et biologiques"')
   );
 }
 
 for(const rel of ['fr/a-propos/index.html','about/index.html','es/sobre/index.html']){
   await patch(rel,html=>{
-    if(html.includes('komo-longevity-v2.webp')) return html;
+    if(html.includes('komo-longevity-v3.webp')) return html;
     return html.replace(/(<section class="kt-pagehero">[\s\S]*?<\/section>)/,
-      '$1<section class="kpv-wide-media"><img src="/assets/images/komo-longevity-v2.webp" alt="KŌMØ Longevity, environnement de consultation et de mesure" loading="lazy"></section>');
+      '$1<section class="kpv-wide-media"><img src="/assets/images/komo-longevity-v3.webp" alt="KŌMØ Longevity, environnement de consultation et de mesure" loading="lazy"></section>');
   });
 }
 
