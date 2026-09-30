@@ -70,6 +70,38 @@ try{
   process.exit(1);
 }
 
+// Premium Results finalization: keep historical V4 source for build QA, then
+// ship the V5 patient cockpit through the same canonical filename.
+try{
+  const resultsJs=await readFile(join(root,'pulse-app','patient-results-premium-v5.js'),'utf8');
+  if(!resultsJs.includes("const VERSION='5.0.0-premium-results'")||!resultsJs.includes('data-kresults-v5'))throw new Error('Premium Results runtime contract missing');
+  await writeFile(join(pulse,'patient-canonical-results.js'),resultsJs,'utf8');
+  const resultsToken='20261001-premium-results-v5';
+  for(const name of htmlFiles){
+    const htmlPath=join(pulse,name);
+    let resultsHtml=await readFile(htmlPath,'utf8');
+    resultsHtml=resultsHtml.replace(/\.\/patient-canonical-results\.js(?:\?v=[^"'#]+)?/g,`./patient-canonical-results.js?v=${resultsToken}`);
+    await writeFile(htmlPath,resultsHtml,'utf8');
+  }
+  const finalResults=await readFile(join(pulse,'patient-canonical-results.js'),'utf8');
+  const resultsChecks=[
+    ['version',finalResults.includes("const VERSION='5.0.0-premium-results'")],
+    ['single owner contract',finalResults.includes('data-kresults-v4')&&finalResults.includes('data-kresults-v5')],
+    ['premium score cockpit',finalResults.includes('kr5-score-pane')&&finalResults.includes('MOTION SCORE')],
+    ['three LSI cards',finalResults.includes("kr5LsiCard(quad,'Quadriceps')")&&finalResults.includes("kr5LsiCard(ham,'Ischio-jambiers')")&&finalResults.includes("kr5LsiCard(calf,'Mollets')")],
+    ['trajectory CTA',finalResults.includes('data-route="path"')],
+    ['report CTA',finalResults.includes('data-komo-export-report')],
+    ['detail disclosure',finalResults.includes('Voir le détail du bilan')],
+    ['legacy dark Results skin retired',!finalResults.includes('body.kresults-v4 .main-shell,body.kresults-v4 #viewRoot{background:#050706!important}')]
+  ];
+  for(const [label,ok] of resultsChecks)console.log(`[pulse-premium-results-final] ${ok?'OK':'FAIL'} · ${label}`);
+  if(resultsChecks.some(([,ok])=>!ok))throw new Error('Premium Results final contract failed');
+  console.log('[pulse-premium-results-final] PASS · V5 shipped through canonical Results owner');
+}catch(error){
+  console.error('[pulse-premium-results-final] failed:',error?.message||error);
+  process.exit(1);
+}
+
 // Premium Auth finalization: legacy QA validates historical source contracts first.
 // This absolute-last pass ships the single current visual/runtime owner without reintroducing
 // the deprecated choice screen or the dark mobile skin.
