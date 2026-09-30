@@ -56,8 +56,8 @@
           <div class="priority">Finaliser le socle juridique et opérationnel de KŌMØ, répartir les responsabilités et préparer le rendez-vous Janet / Zayd.</div>
           <div class="kpis">
             <div class="kpi"><b id="openTasks">3</b><small>Missions prioritaires</small></div>
-            <div class="kpi"><b>3</b><small>Rendez-vous vendredi</small></div>
-            <div class="kpi"><b>€10k</b><small>Pipeline qualifié</small></div>
+            <div class="kpi"><b id="meetingsKpi">0</b><small>Rendez-vous à venir</small></div>
+            <div class="kpi"><b id="pipelineKpi">0 €</b><small>Pipeline actif</small></div>
             <div class="kpi"><b id="blockers">2</b><small>Blocages commerciaux</small></div>
           </div>
         </article>
@@ -247,6 +247,7 @@ const USER_CONFIG={
 const CURRENT_USER=USER_CONFIG[ROLE_FROM_PATH];
 const KEY='komo-command-v02-fr';
 const seed={
+ globalPriority:'Finaliser le socle juridique et opérationnel de KŌMØ, activer le réseau Clinical et préparer Janet / Zayd.',
  tasks:[
   {id:1,title:'Finaliser + envoyer les documents juridiques',meta:'Renan · pacte, statuts, PI, Experiences/Dolce · deadline 18:00',priority:'high',done:false},
   {id:2,title:'Activer le réseau Clinical local',meta:'Hugo · kiné + IDE + pharmacie + clinique + laboratoire · premiers contacts aujourd’hui',priority:'high',done:false},
@@ -400,8 +401,17 @@ function addJournalEntry(text,kind='note'){
  state.journal.push({id:Date.now(),date:isoToday(),at:new Date().toISOString(),author:CURRENT_USER.name,kind,text:text.trim()});
  save();renderJournal();
 }
+function renderKpis(){
+ const activeDeals=(state.deals||[]).filter(d=>!['Gagné','Perdu'].includes(d.stage));
+ const upcoming=(state.agenda||[]).filter(a=>!a.done&&a.date>=isoToday()&&a.type==='Rendez-vous');
+ const blockers=(state.journal||[]).filter(j=>j.kind==='blocker'&&j.date===isoToday()).length;
+ const m=document.querySelector('#meetingsKpi');if(m)m.textContent=upcoming.length;
+ const p=document.querySelector('#pipelineKpi');if(p)p.textContent=new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(activeDeals.reduce((s,d)=>s+Number(d.value||0),0));
+ const b=document.querySelector('#blockers');if(b)b.textContent=blockers;
+ const pr=document.querySelector('.priority');if(pr)pr.textContent=ROLE_FROM_PATH==='rchapon'?(state.globalPriority||CURRENT_USER.priority):CURRENT_USER.priority;
+}
 function renderAll(){
- renderTasks();renderDeals();renderLegal();renderActivity();renderFinanceChecklist();renderReceivables();renderExpenses();renderAgenda();renderJournal();
+ renderTasks();renderDeals();renderLegal();renderActivity();renderFinanceChecklist();renderReceivables();renderExpenses();renderAgenda();renderJournal();renderKpis();
 }
 function renderExpenses(){
  const today=new Date('2026-09-30T00:00:00');
@@ -429,7 +439,7 @@ document.querySelector('#addQuickMoney').onclick=()=>{const type=document.queryS
 document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{const target=b.dataset.jump;const nav=[...document.querySelectorAll('.nav button')].find(x=>x.dataset.view===target);if(nav)nav.click()});
 document.querySelector('#addDeal').onclick=()=>{const n=document.querySelector('#dealName'),v=document.querySelector('#dealValue');if(!n.value.trim())return;state.deals.push({id:Date.now(),name:n.value.trim(),stage:'Cible',value:Number(v.value||0),owner:'Renan',source:'Manuel',next:'AUCUNE PROCHAINE ACTION'});n.value='';v.value='';save();renderDeals()};
 document.querySelector('#userBadge').textContent=CURRENT_USER.name+' · '+CURRENT_USER.role;
-document.querySelector('.priority').textContent=CURRENT_USER.priority;
+
 document.querySelectorAll('.nav button').forEach(b=>{if(!CURRENT_USER.tabs.includes(b.dataset.view)) b.style.display='none';});
 const now=new Date();document.querySelector('#todayDate').textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 document.querySelector('#agendaDate').value=isoToday();
