@@ -113,6 +113,12 @@ try{
   );
   await writeFile(authGatewayPath,authGateway,'utf8');
 
+  const authCanonicalPath=join(pulse,'auth-login-canonical.js');
+  let authCanonical=await readFile(authCanonicalPath,'utf8');
+  authCanonical=authCanonical.replace("if (pill) pill.textContent = 'KŌMØ PULSE';","if (pill) pill.textContent = 'Accès sécurisé';");
+  authCanonical=authCanonical.replace('Accès privé · KŌMØ Pulse','Connexion protégée · KŌMØ Pulse');
+  await writeFile(authCanonicalPath,authCanonical,'utf8');
+
   const stableCss=`/* KŌMØ Pulse — Auth stability final · structural semantics only */
 #authScreen[hidden],#appShell[hidden]{display:none!important}
 html[data-komo-auth-bootstrap="session"] #authScreen:not([data-komo-auth-resolved="guest"]){visibility:hidden!important}
@@ -144,6 +150,7 @@ html[data-komo-auth-bootstrap="session"] #authScreen:not([data-komo-auth-resolve
   const authChecks=[
     ['copy',finalAuthHtml.includes('Bienvenue sur KŌMØ Pulse')&&finalAuthHtml.includes('Vos résultats. Votre trajectoire. Votre World.')],
     ['direct login',finalAuthHtml.includes('<h2>Se connecter</h2>')&&finalAuthGateway.includes("saved==='booking'?'booking':'login'")],
+    ['secure access label',(await readFile(join(pulse,'auth-login-canonical.js'),'utf8')).includes("pill.textContent = 'Accès sécurisé'")],
     ['old headline gone',!finalAuthHtml.includes('Votre santé,<br><em>en mouvement.</em>')],
     ['premium owner',finalAuthCss.includes('Single visual owner')&&finalAuthCss.includes('Premium application entry')],
     ['supported weights',!/(font-weight|font):[^;]*(650|700|750|800|850|900)/.test(finalAuthCss)],
