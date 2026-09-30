@@ -28,7 +28,7 @@ const checks=[
   ['supported font weights only',!/(font-weight|font):[^;]*(650|700|750|800|850|900)/.test(css)],
   ['single premium Auth owner',css.includes('Single visual owner')&&css.includes('Premium application entry')],
   ['presentation only',!css.includes('signInWithPassword')&&!css.includes('location.hash=')]
-]
+];
 for(const [label,ok] of checks)console.log(`[pulse-auth-login-v2] ${ok?'OK':'FAIL'} · ${label}`);
 if(checks.some(([,ok])=>!ok))process.exit(1);
 console.log('[pulse-auth-login-v2] PASS · premium app login · desktop/tablet/mobile');
