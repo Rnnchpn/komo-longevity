@@ -1,9 +1,9 @@
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='9.0.1-friday-demo';
+const VERSION='9.2.0-premium-cockpit';
 let timer=0;
-const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,assessment:null,priorities:[],scores:[],wearable:null,appointments:[],appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
+const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,assessment:null,priorities:[],scores:[],wearables:[],wearable:null,report:null,appointments:[],appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
 
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const client=()=>window.KomoRuntime?.client||null;
@@ -154,8 +154,8 @@ function homeMarkup(){
 function tuneChrome(){
  const home=route()==='home';
  document.body.classList.toggle('khome-final-v1',home);
- document.body.classList.toggle('khome-direction-v8',home);
- document.body.classList.remove('khome-direction-v7');
+ document.body.classList.toggle('khome-direction-v9',home);
+ document.body.classList.remove('khome-direction-v8','khome-direction-v7');
  if(!home)return;
  const eyebrow=document.querySelector('#pageEyebrow');
  const title=document.querySelector('#pageTitle');
@@ -177,16 +177,16 @@ async function load(force=false){
  if(!force&&state.loadedFor===session.user.id&&Date.now()-state.lastLoad<180000){render();return}
  state.loading=true;state.user=session.user;
  try{
-   const [profile,role,engagement,wallet,memberships,wearable,patient]=await Promise.all([
+   const [profile,role,engagement,wallet,memberships,wearables,patient]=await Promise.all([
      safe(c.from('profiles').select('display_name,first_name,last_name,avatar_path,avatar_config').eq('id',session.user.id).maybeSingle()),
      safe(c.rpc('komo_my_community_identity_v1')),
      safe(c.rpc('komo_engagement_summary')),
      safe(c.rpc('komo_wallet_summary')),
      safe(c.from('komo_club_members').select('club_id,role').eq('user_id',session.user.id)),
-     safe(c.from('wearable_daily_metrics').select('metric_date,steps,sleep_minutes,resting_hr,source,source_quality').eq('user_id',session.user.id).order('metric_date',{ascending:false}).limit(1).maybeSingle()),
+     safe(c.from('wearable_daily_metrics').select('metric_date,steps,sleep_minutes,resting_hr,source,source_quality').eq('user_id',session.user.id).order('metric_date',{ascending:false}).limit(14)),
      safe(c.from('patients').select('id').eq('patient_user_id',session.user.id).order('updated_at',{ascending:false}).limit(1).maybeSingle())
    ]);
-   state.profile=profile||{};state.role=role||{};state.engagement=engagement||{};state.wallet=wallet||{};state.memberships=Array.isArray(memberships)?memberships:[];state.wearable=wearable||null;state.patient=patient||null;state.assessment=null;state.priorities=[];
+   state.profile=profile||{};state.role=role||{};state.engagement=engagement||{};state.wallet=wallet||{};state.memberships=Array.isArray(memberships)?memberships:[];state.wearables=Array.isArray(wearables)?wearables:[];state.wearable=state.wearables[0]||null;state.patient=patient||null;state.assessment=null;state.priorities=[];state.report=null;
    state.avatarUrl=await signedAvatar(c,state.profile);
    if(patient?.id){
      const [assessments,appointments]=await Promise.all([
@@ -197,19 +197,20 @@ async function load(force=false){
      state.assessment=assessmentRows.find(x=>x.product_mode==='motion')||assessmentRows[0]||null;
      const ids=assessmentRows.map(x=>x.id).filter(Boolean);
      if(ids.length){
-       const [scores,priorities]=await Promise.all([
+       const [scores,priorities,report]=await Promise.all([
          safe(c.from('scores').select('assessment_id,motion_score,calculated_at,released_at,release_status,status').in('assessment_id',ids).eq('release_status','released').order('calculated_at',{ascending:false}).limit(2)),
-         state.assessment?.id?safe(c.from('priorities').select('rank,category,patient_wording').eq('assessment_id',state.assessment.id).order('rank',{ascending:true}).limit(3)):Promise.resolve([])
+         state.assessment?.id?safe(c.from('priorities').select('rank,category,patient_wording').eq('assessment_id',state.assessment.id).order('rank',{ascending:true}).limit(3)):Promise.resolve([]),
+         state.assessment?.id?safe(c.from('komo_reports').select('payload,released_at,status').eq('assessment_id',state.assessment.id).eq('status','released').order('version',{ascending:false}).limit(1).maybeSingle()):Promise.resolve(null)
        ]);
        state.scores=Array.isArray(scores)?scores:[];
-       state.priorities=Array.isArray(priorities)?priorities:[];
-     }else{state.scores=[];state.priorities=[]};
+       state.priorities=Array.isArray(priorities)?priorities:[];state.report=report||null;
+     }else{state.scores=[];state.priorities=[];state.report=null};
      const allowed=(Array.isArray(appointments)?appointments:[]).filter(x=>!['cancelled','completed','no_show'].includes(String(x.status||'').toLowerCase()));
      state.appointments=allowed;state.appointment=allowed[0]||null;
      if(state.appointment?.organization_id){
        state.organization=await safe(c.from('organizations').select('name,city').eq('id',state.appointment.organization_id).maybeSingle());
      }else state.organization=null;
-   }else{state.assessment=null;state.priorities=[];state.scores=[];state.appointments=[];state.appointment=null;state.organization=null}
+   }else{state.assessment=null;state.priorities=[];state.scores=[];state.report=null;state.appointments=[];state.appointment=null;state.organization=null}
    state.loadedFor=session.user.id;state.lastLoad=Date.now();render();
  }catch(error){console.warn('[patient-home-command-v9]',error)}finally{state.loading=false}
 }
@@ -220,7 +221,7 @@ function render(){
  if(!host)return;
  tuneChrome();
  host.innerHTML=homeMarkup();
- host.dataset.khomeOwner='patient-home-command-v1@9';
+ host.dataset.khomeOwner='patient-home-command-v1@9.2';
  requestAnimationFrame(()=>window.KomoAssistantV2?.refresh?.());
  window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,cockpit:true}}));
 }
