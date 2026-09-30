@@ -70,6 +70,37 @@ try{
   process.exit(1);
 }
 
+// Premium Connected finalization: preserve legacy V3 checks, then ship
+// the premium V4 cockpit through the canonical key-hub-v1.js filename.
+try{
+  const connectedJs=await readFile(join(root,'pulse-app','patient-connected-premium-v4.js'),'utf8');
+  if(!connectedJs.includes("const V='4.0.0-premium-connected'")||!connectedJs.includes('data-connected-v4'))throw new Error('Premium Connected runtime contract missing');
+  await writeFile(join(pulse,'key-hub-v1.js'),connectedJs,'utf8');
+  const connectedToken='20261001-premium-connected-v4';
+  for(const name of htmlFiles){
+    const htmlPath=join(pulse,name);
+    let connectedHtml=await readFile(htmlPath,'utf8');
+    connectedHtml=connectedHtml.replace(/\.\/key-hub-v1\.js(?:\?v=[^"'#]+)?/g,`./key-hub-v1.js?v=${connectedToken}`);
+    await writeFile(htmlPath,connectedHtml,'utf8');
+  }
+  const finalConnected=await readFile(join(pulse,'key-hub-v1.js'),'utf8');
+  const connectedChecks=[
+    ['version',finalConnected.includes("const V='4.0.0-premium-connected'")],
+    ['single owner',finalConnected.includes('data-connected-v4')],
+    ['three primary signals',finalConnected.includes('>PAS<')&&finalConnected.includes('>SOMMEIL<')&&finalConnected.includes('>FC REPOS<')],
+    ['trend',finalConnected.includes('Vos ${period} derniers jours.')&&finalConnected.includes('data-kcn-period="7"')&&finalConnected.includes('data-kcn-period="30"')],
+    ['secondary signals',finalConnected.includes('Temps actif')&&finalConnected.includes('Distance')&&finalConnected.includes('HRV')&&finalConnected.includes('SpO₂')],
+    ['no dark owner',!finalConnected.includes('body.connected-v3 .main-shell,body.connected-v3 #viewRoot{background:#050706!important}')],
+    ['patient role row hidden',finalConnected.includes('body.connected-v3 #kamRoleRow')]
+  ];
+  for(const [label,ok] of connectedChecks)console.log(`[pulse-premium-connected-final] ${ok?'OK':'FAIL'} · ${label}`);
+  if(connectedChecks.some(([,ok])=>!ok))throw new Error('Premium Connected final contract failed');
+  console.log('[pulse-premium-connected-final] PASS · V4 shipped through canonical Connected owner');
+}catch(error){
+  console.error('[pulse-premium-connected-final] failed:',error?.message||error);
+  process.exit(1);
+}
+
 // Premium Results finalization: keep historical V4 source for build QA, then
 // ship the V5 patient cockpit through the same canonical filename.
 try{
