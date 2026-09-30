@@ -130,7 +130,6 @@ Deno.serve(async(req:Request)=>{
   }).select("*").single();
 
   if(patientInsert.error){
-    if(newlyCreatedAuth&&accountUserId)await svc.auth.admin.deleteUser(accountUserId).catch(()=>{});
     return json(req,{error:"patient_create_failed",detail:patientInsert.error.message},500);
   }
 
@@ -150,7 +149,6 @@ Deno.serve(async(req:Request)=>{
     });
     if(assignment.error){
       await svc.from("patients").delete().eq("id",patient.id);
-      if(newlyCreatedAuth&&accountUserId)await svc.auth.admin.deleteUser(accountUserId).catch(()=>{});
       return json(req,{error:"patient_assignment_failed",detail:assignment.error.message},500);
     }
   }
