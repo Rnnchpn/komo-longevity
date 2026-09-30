@@ -4,11 +4,11 @@ import { join } from 'node:path';
 const root = process.cwd();
 const site = join(root, 'site');
 const chunksDir = join(root, 'src', 'assets', 'site2026', 'generated-v2');
-const heroOut = join(site, 'assets', 'images', 'komo-hero-final-v2-20260930.webp');
-const heroSource = join(chunksDir, 'komo-hero-final-20260930.b64');
+const heroOut = join(site, 'assets', 'images', 'komo-hero-restored-20260930.avif');
+const chunkNames = Array.from({length:9}, (_,i) => `komo-hero-20260930-${String(i+1).padStart(2,'0')}.b64`);
 
 await mkdir(join(site, 'assets', 'images'), { recursive: true });
-const encoded = (await readFile(heroSource, 'utf8')).replace(/\s+/g,'');
+const encoded = (await Promise.all(chunkNames.map(name => readFile(join(chunksDir, name), 'utf8')))).join('').replace(/\s+/g,'');
 await writeFile(heroOut, Buffer.from(encoded, 'base64'));
 
 const dictionaries = {
@@ -216,25 +216,23 @@ const heroCss=`
   display:block!important;
   min-height:clamp(640px,82vh,840px)!important;
   overflow:hidden!important;
-  background-color:#cdbca8!important;
-  background-image:url('/assets/images/komo-hero-final-v2-20260930.webp')!important;
-  background-size:cover!important;
-  background-position:center center!important;
-  background-repeat:no-repeat!important;
+  background:#cdbca8!important;
 }
 .komo-hero-20260930 .kpv-hero-media{
   position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
-  margin:0!important;overflow:hidden!important;z-index:0!important;
-  background-color:#cdbca8!important;
-  background-image:url('/assets/images/komo-hero-final-v2-20260930.webp')!important;
-  background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important;
+  margin:0!important;overflow:hidden!important;z-index:0!important;background:#cdbca8!important;
 }
 .komo-hero-20260930 .kpv-hero-media:after{
   content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(90deg,rgba(24,21,17,.06) 0%,rgba(24,21,17,0) 42%);
 }
 .komo-hero-20260930 .kpv-hero-media img{
-  display:none!important;
+  display:block!important;
+  position:absolute!important;inset:0!important;
+  width:100%!important;height:100%!important;min-height:100%!important;
+  object-fit:cover!important;object-position:center center!important;
+  opacity:1!important;visibility:visible!important;
+  transform:none!important;filter:none!important;
 }
 .komo-hero-20260930 .kc-hero-copy{
   position:absolute!important;z-index:2!important;left:clamp(28px,4.7vw,72px)!important;
@@ -261,7 +259,7 @@ body .ke-switch,body .ke-pulse{display:none!important}
   .komo-hero-20260930{min-height:0!important;display:grid!important;grid-template-columns:1fr!important;background:#f7f2e9!important}
   .komo-hero-20260930 .kpv-hero-media{position:relative!important;inset:auto!important;aspect-ratio:16/11!important;order:0!important}
   .komo-hero-20260930 .kpv-hero-media:after{display:none!important}
-  .komo-hero-20260930 .kpv-hero-media img{display:none!important}
+  .komo-hero-20260930 .kpv-hero-media img{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:51% center!important}
   .komo-hero-20260930 .kc-hero-copy{
     position:relative!important;left:auto!important;bottom:auto!important;order:1!important;width:100%!important;max-width:none!important;
     padding:32px 22px 40px!important;border:0!important;border-radius:0!important;background:#f7f2e9!important;box-shadow:none!important
@@ -273,8 +271,8 @@ body .ke-switch,body .ke-pulse{display:none!important}
 function applyHero(html, lang){
   html=cleanPreviousPass(html);
   html=html
-    .replaceAll('/assets/images/komo-hero-hd-v4.webp','/assets/images/komo-hero-final-v2-20260930.webp')
-    .replaceAll('/assets/images/komo-longevity-v3.webp','/assets/images/komo-hero-final-v2-20260930.webp');
+    .replaceAll('/assets/images/komo-hero-hd-v4.webp','/assets/images/komo-hero-restored-20260930.avif')
+    .replaceAll('/assets/images/komo-longevity-v3.webp','/assets/images/komo-hero-restored-20260930.avif');
   html=html.replace(
     /(<figure[^>]*class="[^"]*kpv-hero-media[^"]*"[^>]*>\s*<img\s+)([^>]*)(>)/i,
     (_,start,attrs,end)=>{
@@ -283,8 +281,8 @@ function applyHero(html, lang){
         :lang==='es'
           ?'KŌMØ Longevity — evaluación funcional del movimiento en la Costa Azul'
           :'KŌMØ Longevity — évaluation fonctionnelle du mouvement sur la Côte d’Azur';
-      let next=attrs.replace(/src="[^"]*"/i,'src="/assets/images/komo-hero-final-v2-20260930.webp"');
-      if(!/src="/i.test(next))next='src="/assets/images/komo-hero-final-v2-20260930.webp" '+next;
+      let next=attrs.replace(/src="[^"]*"/i,'src="/assets/images/komo-hero-restored-20260930.avif"');
+      if(!/src="/i.test(next))next='src="/assets/images/komo-hero-restored-20260930.avif" '+next;
       next=next.replace(/alt="[^"]*"/i,`alt="${alt}"`);
       if(!/alt="/i.test(next))next+=` alt="${alt}"`;
       next=next.replace(/loading="lazy"/i,'loading="eager"');
@@ -302,7 +300,7 @@ function applyHero(html, lang){
       return `<section class="${[...set].join(' ')}">`;
     }
   );
-  const preload='<link rel="preload" as="image" href="/assets/images/komo-hero-final-v2-20260930.webp" type="image/webp" fetchpriority="high">';
+  const preload='<link rel="preload" as="image" href="/assets/images/komo-hero-restored-20260930.avif" type="image/avif" fetchpriority="high">';
   html=html.replace('</head>',preload+'\n'+heroCss+'\n</head>');
   return html;
 }
@@ -329,4 +327,4 @@ await writeHomepage('fr','fr/index.html',false);
 await writeHomepage('en','en/index.html',false);
 await writeHomepage('es','es/index.html',false);
 
-console.log('[komo-home-unified-v5] PASS · hero rendered as CSS background across FR/EN/ES with cache-busted asset.');
+console.log('[komo-home-unified-v6] PASS · original approved hero restored and forced visible across FR/EN/ES.');
