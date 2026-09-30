@@ -8,9 +8,10 @@ const retired=['patient-home-micro-motion-v1.js','my-komo-key-home-v1.js','pulse
 const commandSource=await readFile(root+command,'utf8');
 let html=await readFile(htmlPath,'utf8');
 
-const isV8=commandSource.includes("const VERSION='8.0.0-cockpit'")||commandSource.includes('data-khome-v8');
-const isV7=!isV8&&(commandSource.includes("const VERSION='7.0.0'")||commandSource.includes('data-khome-v7'));
-const canonicalHome=isV8||isV7||commandSource.includes("const VERSION='6.0.0'")||commandSource.includes('data-khome-v6')||commandSource.includes("const VERSION='5.0.0'")||commandSource.includes('data-khome-v5')||commandSource.includes("const VERSION='3.0.0'")||commandSource.includes('data-khome-v3');
+const isV9=commandSource.includes("const VERSION='9.0.0-demo-dashboard'")||commandSource.includes('data-khome-v9');
+const isV8=!isV9&&(commandSource.includes("const VERSION='8.0.0-cockpit'")||commandSource.includes('data-khome-v8'));
+const isV7=!isV9&&!isV8&&(commandSource.includes("const VERSION='7.0.0'")||commandSource.includes('data-khome-v7'));
+const canonicalHome=isV9||isV8||isV7||commandSource.includes("const VERSION='6.0.0'")||commandSource.includes('data-khome-v6')||commandSource.includes("const VERSION='5.0.0'")||commandSource.includes('data-khome-v5')||commandSource.includes("const VERSION='3.0.0'")||commandSource.includes('data-khome-v3');
 if(!canonicalHome)throw new Error('[pulse-home-v35] canonical Home contract not recognized');
 
 // The canonical Home owns presentation. Historical Home overlays stay retired.
@@ -30,7 +31,16 @@ if(!commandSource.includes('komo:home-command-rendered'))throw new Error('[pulse
 if(!commandSource.includes('KomoAssistantV2'))throw new Error('[pulse-home-v35] canonical Komo assistant bridge missing');
 if(commandSource.includes('MutationObserver')||commandSource.includes('setInterval('))throw new Error('[pulse-home-v35] canonical Home regained persistent observation');
 
-if(isV8){
+if(isV9){
+  const v9Checks=[
+    ['canonical V9 owner',commandSource.includes('data-khome-v9')&&commandSource.includes("host.dataset.khomeOwner='patient-home-command-v1@9'")],
+    ['authenticated bounded data',commandSource.includes('auth.getSession()')&&commandSource.includes("from('scores')")&&commandSource.includes("eq('release_status','released')")&&commandSource.includes("from('wearable_daily_metrics')")&&commandSource.includes("from('organization_appointments')")],
+    ['explicit empty states',commandSource.includes('Votre prochain résultat apparaîtra ici.')&&commandSource.includes('Votre prochain point KŌMØ')]
+  ];
+  for(const [label,ok] of v9Checks)if(!ok)throw new Error(`[pulse-home-v35] V9 contract changed: ${label}`);
+  for(const route of ['results','key','documents','mykomo'])if(!commandSource.includes(`data-kh8-route="${route}"`))throw new Error(`[pulse-home-v35] V9 route missing: ${route}`);
+  console.log('[pulse-home-v35] Home V9 detected · demo dashboard · authenticated bounded data · single canonical owner preserved');
+}else if(isV8){
   const v8Checks=[
     ['canonical V8 owner',commandSource.includes('data-khome-v8')&&commandSource.includes("host.dataset.khomeOwner='patient-home-command-v1@8'")],
     ['authenticated bounded data',commandSource.includes('auth.getSession()')&&commandSource.includes("from('scores')")&&commandSource.includes("eq('release_status','released')")&&commandSource.includes("from('wearable_daily_metrics')")&&commandSource.includes("from('organization_appointments')")],
