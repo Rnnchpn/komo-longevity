@@ -2501,17 +2501,10 @@ const journeyRing=mesh(journeyStation,new THREE.TorusGeometry(.34,.024,8,36),MAT
 const trajectoryLoungeGlow=new THREE.MeshBasicMaterial({color:0xbfd7c7,transparent:true,opacity:.18,depthWrite:false});
 const trajectoryLoungeHalo=mesh(journeyStation,new THREE.RingGeometry(.74,.82,40),trajectoryLoungeGlow,0,.405,0,{cast:false,receive:false});
 trajectoryLoungeHalo.rotation.x=-Math.PI/2;trajectoryLoungeHalo.userData.dynamic=true;
-// V9.2 — four material markers embody Assessment → Reading → Plan → Follow-up with no printed labels.
-const trajectoryMarkersV92=new THREE.Group();trajectoryMarkersV92.name='KOMO_HALL_TRAJECTORY_MARKERS_V92';journeyStation.add(trajectoryMarkersV92);
-[-1.05,-.35,.35,1.05].forEach((x,i)=>{
-  const mat=i<2?MAT.brass:(i===2?new THREE.MeshBasicMaterial({color:0xbfd7c7,transparent:true,opacity:.72}):MAT.blackened);
-  cyl(trajectoryMarkersV92,.075,.075,.10,mat,x,.82,-.62,18,{cast:true});
-});
-box(trajectoryMarkersV92,2.15,.018,.025,MAT.brass,0,.77,-.62,{cast:false,receive:false});
 
 // V2.5 low-cost objective guide: bronze breadcrumbs + destination beacon.
 const guideRoot=new THREE.Group();guideRoot.name='KOMO_JOURNEY_GUIDE_V25';world.add(guideRoot);
-let guideEnabled=false,guideLastUpdate=0;
+let guideEnabled=true,guideLastUpdate=0;
 const guideMat=new THREE.MeshBasicMaterial({color:0xd5b477,transparent:true,opacity:.30,depthWrite:false});
 const guideDots=[];
 for(let i=0;i<(lowPower?4:7);i++){
@@ -2544,12 +2537,11 @@ plaque(entryGuide,'YOUR WORLD','UNDERSTAND · TRAIN · ENGAGE',4.6,.72,0,3.35,12
   box(entryGuide,.055,.012,34.0,mat,x,.205,-5.7,{cast:false,receive:false});
 });
 
-// V9.2 Hall Reference Table — personal baseline is handled as a quiet object, not a vertical dashboard.
-const healthStation=new THREE.Group();healthStation.name='KOMO_HALL_REFERENCE_TABLE_V92';healthStation.position.set(-5.25,0,10.55);building.add(healthStation);
-box(healthStation,3.85,.18,1.55,MAT.travertine,0,.10,0,{cast:true});
-box(healthStation,3.28,.62,1.02,MAT.walnut,0,.48,-.02,{cast:true});
-box(healthStation,3.62,.055,1.30,MAT.brass,0,.82,0,{cast:true});
-box(healthStation,3.40,.045,1.14,MAT.ivory,0,.875,0,{cast:true});
+// Physical Health Station at the left side of arrival, outside central walk axis.
+const healthStation=new THREE.Group();healthStation.name='KOMO_HEALTH_STATION_V33';healthStation.position.set(-5.25,0,10.55);building.add(healthStation);
+box(healthStation,3.75,.18,1.45,MAT.travertine,0,.10,0);
+box(healthStation,3.15,2.45,.26,MAT.blackened,0,1.48,-.53,{cast:true});
+plaque(healthStation,'YOUR HEALTH','MOVEMENT SNAPSHOT',2.85,.60,0,2.62,-.36,{dark:true,titleSize:44});
 const healthStationBars={};
 [
   ['muscle',-1.12,0xb9cfbf],
@@ -2558,15 +2550,12 @@ const healthStationBars={};
   ['posture',.56,0xb9cfbf],
   ['endurance',1.12,0xd7b777]
 ].forEach(([id,x,color])=>{
-  box(healthStation,.32,.022,.72,new THREE.MeshBasicMaterial({color:0x59675f,transparent:true,opacity:.28}),x,.908,0,{cast:false,receive:false});
-  const fillMat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.72});
-  const fill=box(healthStation,.22,.030,.58,fillMat,x,.916,.05,{cast:false,receive:false});
-  fill.userData.dynamic=true;fill.userData.hallReferenceV92=true;healthStationBars[id]=fill;
+  const track=box(healthStation,.30,1.38,.12,new THREE.MeshBasicMaterial({color:0x39473f,transparent:true,opacity:.72}),x,1.32,-.33,{cast:false,receive:false});
+  const fillMat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.74});
+  const fill=box(healthStation,.20,.70,.14,fillMat,x,.98,-.24,{cast:false,receive:false});
+  fill.userData.dynamic=true;healthStationBars[id]=fill;
 });
-// One sculptural reference object signals “your baseline” without text.
-const referenceOrb=mesh(healthStation,new THREE.SphereGeometry(.16,18,12),MAT.brass,0,1.12,-.10,{cast:true});
-const referenceRing=mesh(healthStation,new THREE.TorusGeometry(.34,.025,10,34),new THREE.MeshBasicMaterial({color:0xbfd7c7,transparent:true,opacity:.36}),0,1.12,-.10,{cast:false,receive:false});
-referenceRing.rotation.x=Math.PI/2;referenceRing.userData.dynamic=true;
+plaque(healthStation,'OPEN','PRESS E · SEE DETAILS',2.55,.42,0,.56,.78,{dark:false,titleSize:34});
 
 // Hall shell.
 box(building,23.8,.28,46,M.stoneLight,0,.13,-7.0);
@@ -2982,14 +2971,6 @@ box(desk,4.55,.88,1.02,M.stone,0,.62,.10);
 box(desk,4.2,.42,.86,M.sageDeep,0,.82,.16);
 box(desk,4.75,.10,1.12,M.bronze,0,1.17,.10);
 plaque(desk,'KŌMØ DESK','ORIENTATION · TRAJECTORY',3.7,.88,0,2.85,-.58,{dark:true,titleSize:74});
-// V9.2 — quiet concierge details: tablet, document tray and hospitality vessel instead of signage.
-const deskTablet=new THREE.Group();deskTablet.position.set(.85,1.28,.02);desk.add(deskTablet);
-box(deskTablet,.72,.045,.48,MAT.blackened,0,0,0,{cast:true});
-box(deskTablet,.62,.012,.38,new THREE.MeshBasicMaterial({color:0xc7d8ce,transparent:true,opacity:.52}),0,.032,0,{cast:false,receive:false});
-box(desk,.82,.035,.46,MAT.ivory,-.82,1.25,.02,{cast:true});
-cyl(desk,.20,.17,.34,MAT.travertine,1.72,1.36,.06,18,{cast:true});
-const deskLeaf=new THREE.MeshStandardMaterial({color:0x587260,roughness:.92});
-[-.10,.05,.18].forEach((x,i)=>{const leaf=mesh(desk,new THREE.SphereGeometry(.11,10,7),deskLeaf,1.72+x,1.61+.08*i,.06,{cast:false});leaf.scale.set(.65,1.6,.42)});
 glow(desk,0xe9c48e,2.2,8,0,3.1,1.4);
 
 // V3.0 Hall Living — denser premium flagship without breaking the FPS budget.
@@ -3493,8 +3474,8 @@ const libraryPopulationV73=[
 ];
 libraryPopulationV73.forEach(p=>makeNpc(npcRoot,p));
 const arrivalPopulationV732=[
-  {role:'staff',label:'Camille',functionLabel:'KŌMØ HOST',x:-3.8,y:0,z:10.5,outfit:'sage',body:'slim',hairStyle:'bob',scale:.96,speed:.15,phase:.08,task:'host',route:[[-3.8,0,10.5],[-4.4,0,8.0],[-3.7,0,6.2],[-3.1,0,8.5]]},
-  {role:'staff',label:'Noah',functionLabel:'TRAJECTORY CONCIERGE',x:4.0,y:0,z:9.5,outfit:'charcoal',body:'regular',hairStyle:'short',scale:1.01,speed:.16,phase:.19,task:'host',route:[[4.0,0,9.5],[4.5,0,7.2],[4.0,0,5.4],[3.4,0,7.8]]},
+  {role:'staff',label:'Camille',functionLabel:'ARRIVAL HOST',x:-3.8,y:0,z:10.5,outfit:'sage',body:'slim',hairStyle:'bob',scale:.96,speed:.15,phase:.08,task:'host',route:[[-3.8,0,10.5],[-4.4,0,8.0],[-3.7,0,6.2],[-3.1,0,8.5]]},
+  {role:'staff',label:'Noah',functionLabel:'WORLD CONCIERGE',x:4.0,y:0,z:9.5,outfit:'charcoal',body:'regular',hairStyle:'short',scale:1.01,speed:.16,phase:.19,task:'host',route:[[4.0,0,9.5],[4.5,0,7.2],[4.0,0,5.4],[3.4,0,7.8]]},
   {role:'visitor',label:'Mila',functionLabel:'WORLD GUEST',x:-6.4,y:0,z:5.1,outfit:'ivory',body:'slim',hairStyle:'bun',scale:.92,speed:.12,phase:.31,task:'lounge',route:[[-6.4,0,5.1],[-6.8,0,4.4],[-6.1,0,4.5]]},
   {role:'visitor',label:'Elias',functionLabel:'WORLD GUEST',x:-4.6,y:0,z:4.8,outfit:'olive',body:'broad',hairStyle:'crop',scale:1.05,speed:.12,phase:.42,task:'social',route:[[-4.6,0,4.8],[-5.0,0,4.3],[-4.3,0,4.1]]},
   {role:'visitor',label:'Sana',functionLabel:'MOTION GUEST',x:6.4,y:0,z:5.2,outfit:'sand',body:'soft',hairStyle:'bob',scale:.97,speed:.13,phase:.53,task:'observe',route:[[6.4,0,5.2],[7.0,0,6.3],[7.4,0,8.1],[6.7,0,9.2]]},
@@ -5271,12 +5252,8 @@ function updateHealthHUD(){
   $('#hud-age').textContent=personal?.motion_age!=null?Math.round(Number(personal.motion_age)):'—';
   if(typeof healthStationBars!=='undefined'){
     Object.entries(healthStationBars).forEach(([id,fill])=>{
-      const v=THREE.MathUtils.clamp(Number(d[id])||0,0,100);
-      if(fill.userData.hallReferenceV92){
-        fill.scale.z=.22+.78*(v/100);fill.position.z=.22*(1-fill.scale.z);
-      }else{
-        const h=.20+(v/100)*1.12;fill.scale.y=h;fill.position.y=.50+h/2;
-      }
+      const v=THREE.MathUtils.clamp(Number(d[id])||0,0,100),h=.20+(v/100)*1.12;
+      fill.scale.y=h;fill.position.y=.50+h/2;
       fill.material.opacity=.48+(v/100)*.34;
     });
   }
@@ -5701,7 +5678,7 @@ function updateJourneyGuide(now){
   waypointRing.rotation.z=now*.0011;
   waypoint.scale.setScalar(.92+.06*Math.sin(now*.003));
 }
-setGuideEnabled(false);
+setGuideEnabled(true);
 function fastTravel(id){
   const p=travelPoints[id];if(!p)return;
   if(id==='marina'||id==='yacht')ensureMarinaServicesV762();
@@ -5814,7 +5791,7 @@ function showCampusMap(){
 function deskHtml(){
   if(personalTrajectory){
     const t=personalTrajectory,checkpoint=trajectoryCheckpointLabel(t),days=trajectoryDaysToCheckpoint(t);
-    return '<section class="hall-team-panel"><span>'+(locale==='fr'?'VOTRE ÉQUIPE KŌMØ':'YOUR KŌMØ TEAM')+'</span><h3>'+(locale==='fr'?'On garde le fil.':'We keep the thread.')+'</h3><p>'+(locale==='fr'?'Le Hall est votre point de contact après la consultation. Votre équipe garde le fil : ce qui compte maintenant, ce que vous faites ensuite et quand nous refaisons le point.':'The Hall is your contact point after the consultation. Your team keeps the thread: what matters now, what you do next and when we check in again.')+'</p><div class="panel-grid"><div><span>PHASE</span><b>'+trajectoryPhaseLabel(t)+'</b></div><div><span>'+(locale==='fr'?'PROCHAIN POINT':'NEXT CHECKPOINT')+'</span><b>'+checkpoint+(days!=null?' · '+days+(locale==='fr'?' j':' d'):'')+'</b></div></div><div class="priority-card"><b>'+(locale==='fr'?'MAINTENANT':'NOW')+'</b>'+escHtml(t.priority||t.current_action||(locale==='fr'?'Priorité en cours de préparation':'Priority being prepared'))+'</div><div class="priority-card"><b>'+(locale==='fr'?'PROCHAINE ACTION':'NEXT ACTION')+'</b>'+escHtml(t.current_action||t.priority||(locale==='fr'?'Préparer le prochain point':'Prepare the next checkpoint'))+'</div></section>';
+    return '<section class="hall-team-panel"><span>'+(locale==='fr'?'VOTRE ÉQUIPE KŌMØ':'YOUR KŌMØ TEAM')+'</span><h3>'+(locale==='fr'?'On garde le fil.':'We keep the thread.')+'</h3><p>'+(locale==='fr'?'Le Hall est votre point de contact : comprendre ce qui compte maintenant, retrouver votre prochaine étape et revenir vers votre équipe quand vous en avez besoin.':'The Hall is your contact point: understand what matters now, find your next step and return to your team whenever you need it.')+'</p><div class="panel-grid"><div><span>PHASE</span><b>'+trajectoryPhaseLabel(t)+'</b></div><div><span>'+(locale==='fr'?'PROCHAIN POINT':'NEXT CHECKPOINT')+'</span><b>'+checkpoint+(days!=null?' · '+days+(locale==='fr'?' j':' d'):'')+'</b></div></div><div class="priority-card"><b>'+(locale==='fr'?'MAINTENANT':'NOW')+'</b>'+escHtml(t.priority||t.current_action||(locale==='fr'?'Priorité en cours de préparation':'Priority being prepared'))+'</div><div class="priority-card"><b>'+(locale==='fr'?'PROCHAINE ACTION':'NEXT ACTION')+'</b>'+escHtml(t.current_action||t.priority||(locale==='fr'?'Préparer le prochain point':'Prepare the next checkpoint'))+'</div></section>';
   }
   return '<section class="hall-team-panel"><span>KŌMØ CONCIERGE</span><h3>'+(locale==='fr'?'Bienvenue dans votre point de départ.':'Welcome to your starting point.')+'</h3><p>'+(locale==='fr'?'Connectez votre compte KŌMØ pour transformer World en environnement personnel : priorité, prochaine action et prochain point de suivi.':'Connect your KŌMØ account to turn World into a personal environment: priority, next action and next follow-up checkpoint.')+'</p></section>';
 }
@@ -6843,7 +6820,7 @@ function updateLocation(){
   else if(player.z>23){label='ARRIVAL COURT';purpose=locale==='fr'?'ARRIVÉE · HOSPITALITY':'ARRIVAL · HOSPITALITY'}
   else if(player.z>11.8){label='WORLD ENTRANCE';purpose=locale==='fr'?'ENTRER DANS VOTRE WORLD':'ENTER YOUR WORLD'}
   else if(player.x>6.8&&player.z>-2&&player.z<7){label='KŌMØ LIFE';purpose=locale==='fr'?'OBJETS · ÉQUIPEMENT · ÉDITIONS':'OBJECTS · EQUIPMENT · EDITIONS';nav='life';completeJourney('life',{silent:true})}
-  else if(player.z>-7){label='KŌMØ HALL';purpose=personalTrajectory?(locale==='fr'?'VOTRE TRAJECTOIRE · VOTRE ÉQUIPE':'YOUR TRAJECTORY · YOUR TEAM'):(locale==='fr'?'ACCUEIL · ORIENTATION':'WELCOME · GUIDANCE');completeJourney('hall',{silent:true})}
+  else if(player.z>-7){label='KŌMØ HALL';purpose=locale==='fr'?'VOTRE POINT CENTRAL':'YOUR HOME BASE';completeJourney('hall',{silent:true})}
   else{label='MOTION ATRIUM';purpose=locale==='fr'?'ACCÈS TWIN · FITNESS · ARENA':'TWIN · FITNESS · ARENA'}
   if(menuCurrentZone)menuCurrentZone.textContent=label;
   if(menuCurrentPurpose)menuCurrentPurpose.textContent=purpose;
@@ -7517,7 +7494,7 @@ setTimeout(()=>loader.classList.add('hidden'),380);
 setTimeout(()=>loader.remove(),1050);
 if(window.__KOMO_BOOT_WATCH)clearTimeout(window.__KOMO_BOOT_WATCH);
 window.KomoWorld={
-  version:'9.2.0-hall-trajectory',
+  version:'9.1.0-campus-yachting',
   THREE,scene,camera,renderer,core,
   enterTwin,enterRehab,enterArena,returnToHall,
   getState:()=>({position:player.clone(),yaw:cameraMode==='third'?playerFacing:yaw,mode,level:playerLevel}),
