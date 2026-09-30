@@ -49,7 +49,7 @@ function ensureClientEntry(auth,panel,heading){
     fields.innerHTML='<div class="auth-signup-grid"><label class="field"><span>Prénom *</span><input id="signupFirstName" autocomplete="given-name"></label><label class="field"><span>Nom *</span><input id="signupLastName" autocomplete="family-name"></label></div><label class="field"><span>Date de naissance *</span><input id="signupBirthDate" type="date" autocomplete="bday"></label><label class="field"><span>Téléphone <small>optionnel</small></span><input id="signupPhone" type="tel" autocomplete="tel" placeholder="+33 …"></label><p>Ces informations ouvrent votre profil et permettent la réservation.</p>';
     form.querySelector('.auth-options')?.insertAdjacentElement('beforebegin',fields);
   }
-  if(!auth.dataset.clientMode){const saved=sessionStorage.getItem(CLIENT_MODE_KEY);auth.dataset.clientMode=saved==='booking'?'booking':'login';}
+  if(!auth.dataset.clientMode)auth.dataset.clientMode=sessionStorage.getItem(CLIENT_MODE_KEY)||'choose';
 }
 function setClientMode(mode){
   const auth=document.querySelector('#authScreen');if(!auth)return;
@@ -102,13 +102,13 @@ function setAudience(mode){
   auth.dataset.authAudience=pro?'professional':'patient';
   auth.querySelectorAll('[data-auth-audience]').forEach(b=>b.classList.toggle('active',b.dataset.authAudience===(pro?'professional':'patient')));
   const title=auth.querySelector('.auth-heading h2'),copy=auth.querySelector('.auth-heading p'),submit=auth.querySelector('#loginButton span:first-child'),pill=auth.querySelector('.product-pill'),eyebrow=auth.querySelector('.auth-manifesto .eyebrow');
-  if(title)title.textContent=pro?'KŌMØ Pro':'Se connecter';
+  if(title)title.textContent=pro?'KŌMØ Pro':'Bienvenue';
   if(copy)copy.textContent=pro?'Connectez-vous à votre centre pour gérer consultations, patients et analyses Motion.':'Connectez-vous pour retrouver votre espace KŌMØ.';
   if(submit)submit.textContent=pro?'Accéder à mon centre':'Se connecter';
   if(pill)pill.textContent=pro?'Pulse · Pro':'Pulse';
-  if(eyebrow)eyebrow.textContent=pro?'KŌMØ PRO · ESPACE CENTRE':'KŌMØ PULSE';
+  if(eyebrow)eyebrow.textContent=pro?'KŌMØ PRO · ESPACE CENTRE':'KŌMØ PULSE · VOTRE ESPACE';
   const manifesto=auth.querySelector('.auth-manifesto');
-  if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.textContent=pro?'Bienvenue sur KŌMØ Pro':'Bienvenue sur KŌMØ Pulse';if(p)p.textContent=pro?'Vos patients. Vos analyses. Votre centre.':'Vos résultats. Votre trajectoire. Votre World.'}
+  if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.innerHTML=pro?'Votre centre,<br><em>en mouvement.</em>':'Votre santé,<br><em>en mouvement.</em>';if(p)p.textContent=pro?'Consultations, dossiers patients, Motion et analyses réunis dans un espace professionnel pensé pour le desktop.':'Rendez-vous, tests, résultats et progression KŌMØ réunis dans un seul espace personnel.'}
   applyClientMode();
 }
 
