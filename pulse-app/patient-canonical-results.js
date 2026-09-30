@@ -1,7 +1,7 @@
 import { loadCanonicalResult, getCanonicalClient } from './canonical-result-runtime.js';
 import { levelLabel } from './normative-engine-v1.js';
 
-const VERSION='5.0.0-premium-results';
+const VERSION='4.0.0-motion-report';
 const REPORT_RELEASE='20260903-motion-report-complete-v7';
 let timer=null;
 let lazyStores=new Map();
@@ -21,519 +21,327 @@ const qcLabel=s=>({valid:'Mesure valide',suspect:'À vérifier',invalid:'Invalid
 const sideLabel=s=>({left:'Gauche',right:'Droite',bilateral:'Bilatéral',na:'—',LEFT:'Gauche',RIGHT:'Droite'})[s]||s||'—';
 const valueText=v=>{if(v===null||v===undefined||v==='')return'—';if(typeof v==='boolean')return v?'Oui':'Non';if(Array.isArray(v))return v.map(valueText).join(', ');if(typeof v==='object'){try{return JSON.stringify(v)}catch{return String(v)}}return String(v).replaceAll('_',' ')};
 
-function installStyle(){
-  if(document.querySelector('#kresultsV5Style'))return;
-  document.querySelector('#kresultsV4Style')?.remove();
-  document.querySelector('#kresultsV2Style')?.remove();
-  const s=document.createElement('style');
-  s.id='kresultsV5Style';
-  s.textContent=`
+function installStyle(){if(document.querySelector('#kresultsV4Style'))return;document.querySelector('#kresultsV2Style')?.remove();const s=document.createElement('style');s.id='kresultsV4Style';s.textContent=`
+body.kresults-v4 .main-shell,body.kresults-v4 #viewRoot{background:#050706!important}.kr4{--bg:#050706;--panel:#0a0e0b;--panel2:#0d130f;--panel3:#111813;--line:rgba(255,255,255,.09);--ink:#f0f4f0;--muted:#8c9890;--green:#9bc0a4;--greenBg:rgba(125,173,139,.12);--red:#db8c83;--redBg:rgba(196,92,81,.13);--amber:#d7b66f;--amberBg:rgba(199,158,74,.12);--neutral:#89948d;max-width:1480px;margin:0 auto;padding:0 0 120px;color:var(--ink);display:grid;gap:12px}.kr4 *{box-sizing:border-box}.kr4-card{border:1px solid var(--line);border-radius:24px;background:var(--panel);overflow:hidden}.kr4-kicker{font:700 8px/1.2 DM Sans,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#748179}.kr4 h2,.kr4 h3,.kr4 h4{margin:0;font-family:Manrope,sans-serif;letter-spacing:-.045em}.kr4 h2{font-size:clamp(34px,5vw,68px);line-height:.94;font-weight:500}.kr4 h3{font-size:clamp(22px,2.3vw,31px);font-weight:500}.kr4 h4{font-size:14px;font-weight:600}.kr4 p{color:var(--muted)}
+.kr4-hero{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(340px,.85fr);min-height:330px;background:linear-gradient(145deg,#090d0a,#102017)}.kr4-hero-main{padding:30px;display:flex;flex-direction:column;justify-content:space-between}.kr4-hero-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-start}.kr4-score{margin-top:18px;font:500 clamp(84px,10vw,142px)/.78 Manrope,sans-serif;letter-spacing:-.09em}.kr4-score small{font-size:18px;letter-spacing:-.02em;color:#7f9085;margin-left:8px}.kr4-headline{margin-top:21px}.kr4-hero p{max-width:700px;margin:10px 0 0;font-size:11px;line-height:1.58}.kr4-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}.kr4-btn{border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#121914;color:#e5eae6;padding:10px 13px;font:700 8px/1 DM Sans,sans-serif;cursor:pointer}.kr4-btn.primary{background:#edf2ee;color:#17221a;border-color:#edf2ee}.kr4-hero-side{padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#080b09}.kr4-stat{padding:15px;border:1px solid var(--line);border-radius:17px;background:var(--panel2);min-height:100px}.kr4-stat span{display:block;font-size:7px;text-transform:uppercase;letter-spacing:.11em;color:#77847c}.kr4-stat strong{display:block;margin-top:9px;font:600 25px/1 Manrope,sans-serif}.kr4-stat small{display:block;margin-top:7px;color:#7e8a82;font-size:7.5px;line-height:1.4}
+.kr4-status{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;font:700 7px/1 DM Sans,sans-serif;white-space:nowrap}.kr4-status:before{content:'';width:7px;height:7px;border-radius:50%;background:currentColor}.kr4-status.good{color:var(--green);background:var(--greenBg)}.kr4-status.bad{color:var(--red);background:var(--redBg)}.kr4-status.watch{color:var(--amber);background:var(--amberBg)}.kr4-status.neutral{color:var(--neutral);background:rgba(137,148,141,.09)}
+.kr4-section{padding:22px}.kr4-section-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;margin-bottom:16px}.kr4-section-head p{max-width:640px;margin:0;text-align:right;font-size:9px;line-height:1.5}.kr4-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kr4-signal{padding:15px;border:1px solid var(--line);border-radius:17px;background:var(--panel2)}.kr4-signal.good{background:var(--greenBg);border-color:rgba(155,192,164,.17)}.kr4-signal.bad{background:var(--redBg);border-color:rgba(219,140,131,.17)}.kr4-signal.watch{background:var(--amberBg);border-color:rgba(215,182,111,.17)}.kr4-signal-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.kr4-signal span{display:block;color:#7d8981;font-size:7px;text-transform:uppercase;letter-spacing:.1em}.kr4-signal strong{display:block;margin-top:7px;font:600 22px/1.05 Manrope,sans-serif}.kr4-signal p{margin:8px 0 0;font-size:8px;line-height:1.45}.kr4-signal em{font-style:normal;color:#a6b0aa;font-size:8px}.kr4-rowlist{display:grid;gap:6px}.kr4-row{display:grid;grid-template-columns:minmax(180px,1.15fr) minmax(110px,.55fr) minmax(190px,.9fr) auto;gap:12px;align-items:center;padding:12px 13px;border:1px solid var(--line);border-radius:14px;background:#0b100d}.kr4-row.good{background:var(--greenBg)}.kr4-row.bad{background:var(--redBg)}.kr4-row.watch{background:var(--amberBg)}.kr4-row strong,.kr4-row small{display:block}.kr4-row strong{font-size:9px}.kr4-row small{margin-top:4px;color:#78847c;font-size:7px;line-height:1.35}.kr4-value{font:600 14px/1.1 Manrope,sans-serif}.kr4-source{color:#89958d;font-size:8px;line-height:1.35}
+.kr4-muscle{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kr4-muscle-card{padding:17px;border:1px solid var(--line);border-radius:18px;background:#0b100d}.kr4-muscle-card.good{background:var(--greenBg)}.kr4-muscle-card.bad{background:var(--redBg)}.kr4-muscle-card.watch{background:var(--amberBg)}.kr4-muscle-card .kr4-muscle-value{display:block;margin:13px 0 4px;font:600 34px/1 Manrope,sans-serif}.kr4-pair{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:11px}.kr4-pair div{padding:9px;border-radius:11px;background:rgba(255,255,255,.035)}.kr4-pair span,.kr4-pair strong{display:block}.kr4-pair span{font-size:6.5px;text-transform:uppercase;color:#738078}.kr4-pair strong{margin-top:4px;font-size:10px}
+.kr4-table{width:100%;border-collapse:separate;border-spacing:0 5px}.kr4-table th{padding:0 10px 5px;text-align:left;color:#66746b;font:700 6.5px/1 DM Sans,sans-serif;letter-spacing:.1em;text-transform:uppercase}.kr4-table td{padding:11px 10px;background:#0b100d;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-size:8px;vertical-align:top}.kr4-table td:first-child{border-left:1px solid var(--line);border-radius:12px 0 0 12px}.kr4-table td:last-child{border-right:1px solid var(--line);border-radius:0 12px 12px 0}.kr4-table strong{display:block;font-size:8.5px}.kr4-table small{display:block;margin-top:3px;color:#748078;font-size:6.8px}.kr4-table .good td{background:var(--greenBg)}.kr4-table .bad td{background:var(--redBg)}.kr4-table .watch td{background:var(--amberBg)}
+.kr4-questionnaires{display:grid;gap:8px}.kr4-q{border:1px solid var(--line);border-radius:16px;background:#0b100d;overflow:hidden}.kr4-q summary{list-style:none;cursor:pointer;padding:14px 15px;display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center}.kr4-q summary::-webkit-details-marker{display:none}.kr4-q summary strong{font-size:10px}.kr4-q summary span{font-size:8px;color:#849087}.kr4-q-body{border-top:1px solid var(--line);padding:10px 14px 14px}.kr4-response{display:grid;grid-template-columns:170px 1fr 1fr;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.055);font-size:8px}.kr4-response:last-child{border-bottom:0}.kr4-response small{color:#78857d}
+.kr4-details{border:1px solid var(--line);border-radius:18px;background:#090d0a;overflow:hidden}.kr4-details>summary{list-style:none;cursor:pointer;padding:17px 18px;display:flex;justify-content:space-between;gap:16px;align-items:center}.kr4-details>summary::-webkit-details-marker{display:none}.kr4-details>summary strong{font-size:11px}.kr4-details>summary span{color:#7d8981;font-size:8px}.kr4-detail-body{border-top:1px solid var(--line);padding:12px}.kr4-lazy-empty{padding:16px;color:#7d8981;font-size:8px}.kr4-tech-row{display:grid;grid-template-columns:120px 110px 1fr 100px 95px;gap:9px;padding:9px 10px;border-bottom:1px solid rgba(255,255,255,.055);font-size:7.5px}.kr4-tech-row:last-child{border-bottom:0}.kr4-tech-row strong{font-size:8px}.kr4-tech-row small{color:#738078}.kr4-clinical{margin-top:8px;background:linear-gradient(145deg,#0a0e0b,#111813)}.kr4-clinical-hero{padding:26px;display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end}.kr4-clinical-hero p{max-width:700px;margin:9px 0 0;font-size:10px;line-height:1.55}.kr4-clinical-list{padding:0 22px 22px;display:grid;gap:8px}.kr4-clinical-card{padding:15px;border:1px solid var(--line);border-radius:16px;background:#0b100d}.kr4-clinical-card strong{display:block;margin-top:7px;font-size:13px}.kr4-clinical-card p{margin:7px 0 0;font-size:8.5px;line-height:1.5}.kr4-empty{padding:18px;border:1px solid var(--line);border-radius:16px;background:#0a0e0b;color:#829087;font-size:9px;line-height:1.55}.kr4-note{margin-top:10px;color:#748078;font-size:7.5px;line-height:1.45}
+@media(max-width:980px){.kr4-hero{grid-template-columns:1fr}.kr4-hero-side{grid-template-columns:repeat(4,1fr)}.kr4-grid,.kr4-muscle{grid-template-columns:1fr 1fr}.kr4-row{grid-template-columns:1fr 110px}.kr4-row .kr4-source,.kr4-row .kr4-status{grid-column:1/-1}.kr4-tech-row{grid-template-columns:100px 90px 1fr}.kr4-tech-row>*:nth-child(4),.kr4-tech-row>*:nth-child(5){display:none}}
+@media(max-width:700px){.kr4{gap:9px}.kr4-card{border-radius:19px}.kr4-hero-main{padding:20px 17px}.kr4-hero-top{display:block}.kr4-hero-top>.kr4-status{margin-top:12px}.kr4-hero-side{grid-template-columns:1fr 1fr;padding:12px}.kr4-section{padding:17px}.kr4-section-head{display:block}.kr4-section-head p{text-align:left;margin-top:7px}.kr4-grid,.kr4-muscle{grid-template-columns:1fr}.kr4-row{grid-template-columns:1fr}.kr4-row .kr4-source,.kr4-row .kr4-status{grid-column:auto}.kr4-table{display:block;overflow-x:auto}.kr4-q summary{grid-template-columns:1fr auto}.kr4-q summary>.kr4-status{grid-column:1/-1;width:max-content}.kr4-response{grid-template-columns:1fr}.kr4-clinical-hero{grid-template-columns:1fr;padding:20px 17px}.kr4-clinical-list{padding:0 17px 17px}.kr4-details>summary{align-items:flex-start;flex-direction:column}.kr4-tech-row{grid-template-columns:1fr 1fr}.kr4-tech-row>*:nth-child(n+3){display:none}}
+
+
+/* Patient Results · bright visual refresh · 2026-09-29 */
+body.kresults-v4{
+  background:#f4f7f5!important;
+  color:#173326!important;
+}
 body.kresults-v4 .main-shell,
 body.kresults-v4 #viewRoot{
-  background:#f4f7f5!important;
-}
-body.kresults-v4 #viewRoot{
-  min-height:0!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  scrollbar-width:none!important;
-}
-body.kresults-v4 #viewRoot::-webkit-scrollbar{display:none!important}
-.kr5{
-  --bg:#f4f7f5;
-  --panel:#fff;
-  --soft:#f8faf9;
-  --ink:#17251d;
-  --muted:#6e7d74;
-  --line:#dce6df;
-  --green:#2f8b60;
-  --green-dark:#205f43;
-  --green-soft:#edf7f1;
-  --blue:#647cf1;
-  --amber:#b98328;
-  --amber-soft:#fff6e4;
-  --red:#b95b50;
-  --red-soft:#fff1ee;
-  width:min(1280px,100%);
-  margin:0 auto;
-  padding:10px clamp(18px,3vw,42px) 96px;
-  display:grid;
-  gap:10px;
-  color:var(--ink);
-  font-family:"DM Sans",system-ui,sans-serif;
-  box-sizing:border-box;
-}
-.kr5 *{box-sizing:border-box}
-.kr5 button,.kr5 summary{font-family:"DM Sans",system-ui,sans-serif}
-.kr5-card{
-  border:1px solid var(--line);
-  border-radius:22px;
-  background:rgba(255,255,255,.96);
-  box-shadow:0 13px 34px rgba(38,67,50,.06);
-}
-.kr5-eyebrow{
-  margin:0;
-  color:#668073;
-  font:600 8px/1 "DM Sans",sans-serif;
-  letter-spacing:.11em;
-  text-transform:uppercase;
-}
-.kr5-top{
-  min-height:58px;
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:18px;
-  align-items:center;
-}
-.kr5-top h1{
-  margin:5px 0 0;
-  color:#18382a;
-  font:600 clamp(26px,2.7vw,38px)/1 Manrope,"DM Sans",sans-serif;
-  letter-spacing:-.048em;
-}
-.kr5-top p{
-  margin:6px 0 0;
-  color:var(--muted);
-  font:400 10px/1.35 "DM Sans",sans-serif;
-}
-.kr5-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;justify-content:flex-end}
-.kr5-btn{
-  min-height:36px;
-  padding:0 13px;
-  border:1px solid #d8e3dc;
-  border-radius:999px;
-  background:#fff;
-  color:#355947;
-  font:600 8px/1 "DM Sans",sans-serif;
-  cursor:pointer;
-}
-.kr5-btn.primary{
-  border-color:transparent;
-  background:#2f8059;
-  color:#fff;
-  box-shadow:0 8px 20px rgba(47,128,89,.16);
-}
-.kr5-btn.blue{border-color:#dce1fb;background:#f4f6ff;color:#4c5eb4}
-
-.kr5-hero{
-  min-height:300px;
-  display:grid;
-  grid-template-columns:minmax(0,1.02fr) minmax(470px,.98fr);
-  overflow:hidden;
   background:
-    radial-gradient(520px 300px at 2% 0%,rgba(69,169,119,.12),transparent 70%),
-    radial-gradient(460px 300px at 98% 8%,rgba(100,124,241,.08),transparent 72%),
-    #fff;
+    radial-gradient(900px 540px at 100% 0%,rgba(99,124,245,.07),transparent 70%),
+    radial-gradient(720px 480px at 0% 20%,rgba(73,183,127,.07),transparent 70%),
+    #f4f7f5!important;
 }
-.kr5-score-pane{
-  min-width:0;
-  padding:28px 30px;
-  display:grid;
-  grid-template-rows:auto 1fr auto;
-  border-right:1px solid #e3ebe6;
+.kr4{
+  --bg:#f4f7f5;
+  --panel:#ffffff;
+  --panel2:#f7faf8;
+  --panel3:#eef5f1;
+  --line:#dce8e1;
+  --ink:#173326;
+  --muted:#6c7c72;
+  --green:#2f9a68;
+  --greenBg:#e6f7ed;
+  --red:#cf6658;
+  --redBg:#fff0ed;
+  --amber:#c88e27;
+  --amberBg:#fff5dc;
+  --neutral:#728178;
+  max-width:1480px!important;
+  padding:8px 0 120px!important;
+  color:var(--ink)!important;
+  gap:14px!important;
 }
-.kr5-score-head{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.kr5-chip{
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  min-height:25px;
-  padding:0 9px;
-  border-radius:999px;
-  background:#eef5f1;
-  color:#4e705e;
-  font:600 7px/1 "DM Sans",sans-serif;
-}
-.kr5-chip:before{
-  content:"";
-  width:6px;
-  height:6px;
-  border-radius:50%;
-  background:#45a977;
-}
-.kr5-chip.watch{background:var(--amber-soft);color:#8f671e}
-.kr5-chip.watch:before{background:#d5a03f}
-.kr5-chip.priority{background:var(--red-soft);color:#a45248}
-.kr5-chip.priority:before{background:#cf6a5c}
-.kr5-score-wrap{align-self:center}
-.kr5-score{
-  display:flex;
-  align-items:flex-end;
-  gap:8px;
-  margin-top:4px;
-}
-.kr5-score strong{
-  color:#236b49;
-  font:500 clamp(86px,8vw,124px)/.78 Manrope,"DM Sans",sans-serif;
-  letter-spacing:-.09em;
-}
-.kr5-score span{
-  margin-bottom:8px;
-  color:#7c8a82;
-  font:500 15px/1 "DM Sans",sans-serif;
-}
-.kr5-score-wrap h2{
-  max-width:620px;
-  margin:20px 0 0;
-  color:#203f30;
-  font:600 clamp(21px,2.2vw,31px)/1.04 Manrope,"DM Sans",sans-serif;
-  letter-spacing:-.04em;
-}
-.kr5-score-wrap p{
-  max-width:600px;
-  margin:9px 0 0;
-  color:#6d7e74;
-  font:400 10px/1.55 "DM Sans",sans-serif;
-}
-.kr5-score-meta{
-  display:flex;
-  gap:14px;
-  flex-wrap:wrap;
-  padding-top:12px;
-  color:#819087;
-  font:500 8px/1 "DM Sans",sans-serif;
-}
-
-.kr5-muscles{
-  min-width:0;
-  padding:18px;
-  display:grid;
-  grid-template-rows:auto repeat(3,minmax(0,1fr));
-  gap:8px;
-  background:rgba(249,251,250,.75);
-}
-.kr5-muscles-head{
-  display:flex;
-  justify-content:space-between;
-  gap:12px;
-  align-items:center;
-  padding:2px 2px 4px;
-}
-.kr5-muscles-head strong{
-  color:#2a4939;
-  font:600 11px/1 "DM Sans",sans-serif;
-}
-.kr5-muscles-head span{
-  color:#829087;
-  font:400 8px/1 "DM Sans",sans-serif;
-}
-.kr5-lsi{
-  min-width:0;
-  padding:14px 15px;
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:14px;
-  align-items:center;
-  border:1px solid #e1e9e5;
-  border-radius:16px;
-  background:#fff;
-}
-.kr5-lsi.priority{border-color:#efd7d2;background:#fff7f5}
-.kr5-lsi.watch{border-color:#eadfbd;background:#fffaf0}
-.kr5-lsi-copy{min-width:0}
-.kr5-lsi-copy span{
-  display:block;
-  color:#75847b;
-  font:500 8px/1 "DM Sans",sans-serif;
-}
-.kr5-lsi-copy strong{
-  display:block;
-  margin-top:6px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap;
-  color:#294a39;
-  font:600 14px/1.05 Manrope,"DM Sans",sans-serif;
-}
-.kr5-lsi-value{
-  min-width:76px;
-  text-align:right;
-  color:#286b4c;
-  font:600 28px/1 Manrope,"DM Sans",sans-serif;
-  letter-spacing:-.045em;
-}
-.kr5-lsi.priority .kr5-lsi-value{color:#ad574d}
-.kr5-lsi.watch .kr5-lsi-value{color:#9b711f}
-
-.kr5-priority{
-  min-height:94px;
-  padding:16px 18px;
-  display:grid;
-  grid-template-columns:150px minmax(0,1fr) auto;
-  gap:18px;
-  align-items:center;
-}
-.kr5-priority-label strong{
-  display:block;
-  margin-top:7px;
-  color:#6f7e75;
-  font:500 9px/1.2 "DM Sans",sans-serif;
-}
-.kr5-priority-main h3{
-  margin:0;
-  color:#274636;
-  font:600 clamp(17px,1.55vw,22px)/1.08 Manrope,"DM Sans",sans-serif;
-  letter-spacing:-.03em;
-}
-.kr5-priority-main p{
-  margin:7px 0 0;
-  color:#718078;
-  font:400 9px/1.35 "DM Sans",sans-serif;
-}
-.kr5-recheck{
-  min-width:142px;
-  padding:10px 12px;
-  border:1px solid #dfe8e3;
-  border-radius:13px;
-  background:#f8faf9;
-}
-.kr5-recheck span{
-  display:block;
-  color:#839088;
-  font:500 7px/1 "DM Sans",sans-serif;
-  text-transform:uppercase;
-  letter-spacing:.07em;
-}
-.kr5-recheck strong{
-  display:block;
-  margin-top:6px;
-  color:#315642;
-  font:600 11px/1.15 "DM Sans",sans-serif;
-}
-
-.kr5-strip{
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:10px;
-}
-.kr5-mini{
-  min-width:0;
-  min-height:88px;
-  padding:15px 16px;
-}
-.kr5-mini span{
-  display:block;
-  color:#75847c;
-  font:500 8px/1 "DM Sans",sans-serif;
-}
-.kr5-mini strong{
-  display:block;
-  margin-top:8px;
-  color:#294b39;
-  font:600 21px/1 Manrope,"DM Sans",sans-serif;
-  letter-spacing:-.035em;
-}
-.kr5-mini p{
-  margin:7px 0 0;
-  color:#829087;
-  font:400 8px/1.3 "DM Sans",sans-serif;
-}
-
-.kr5-detail{
-  overflow:hidden;
-}
-.kr5-detail>summary{
-  min-height:66px;
-  padding:0 18px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:18px;
-  list-style:none;
-  cursor:pointer;
-}
-.kr5-detail>summary::-webkit-details-marker{display:none}
-.kr5-detail-title strong{
-  display:block;
-  color:#294938;
-  font:600 13px/1 "DM Sans",sans-serif;
-}
-.kr5-detail-title span{
-  display:block;
-  margin-top:5px;
-  color:#829087;
-  font:400 8px/1.25 "DM Sans",sans-serif;
-}
-.kr5-detail-arrow{
-  flex:none;
-  width:32px;
-  height:32px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  background:#f0f5f2;
-  color:#456452;
-  font:600 14px/1 "DM Sans",sans-serif;
-  transition:transform .18s ease;
-}
-.kr5-detail[open] .kr5-detail-arrow{transform:rotate(45deg)}
-.kr5-detail-body{
-  padding:0 10px 10px;
-  display:grid;
-  gap:8px;
-  border-top:1px solid #e5ece8;
-  background:#f8faf9;
-}
-
-/* Existing scientific sections are deliberately secondary inside the disclosure. */
-.kr5-detail-body .kr4-card{
-  border:1px solid #e1e9e5!important;
-  border-radius:17px!important;
+.kr4-card{
+  border:1px solid var(--line)!important;
+  border-radius:24px!important;
   background:#fff!important;
-  box-shadow:none!important;
-  color:#17251d!important;
+  box-shadow:0 12px 34px rgba(39,70,51,.065)!important;
 }
-.kr5-detail-body .kr4-section,
-.kr5-detail-body .kr4-clinical-hero{padding:17px!important}
-.kr5-detail-body .kr4-section-head{
-  display:flex!important;
-  align-items:flex-end!important;
-  justify-content:space-between!important;
-  gap:16px!important;
-  margin-bottom:14px!important;
+.kr4-kicker{color:#56806a!important}
+.kr4 h2,.kr4 h3,.kr4 h4{color:#193a2a!important}
+.kr4 p{color:var(--muted)!important}
+
+/* Motion hero */
+.kr4-hero{
+  min-height:360px!important;
+  grid-template-columns:minmax(0,1.18fr) minmax(350px,.82fr)!important;
+  background:
+    radial-gradient(620px 360px at 8% 0%,rgba(73,183,127,.16),transparent 66%),
+    radial-gradient(540px 320px at 88% 8%,rgba(99,124,245,.12),transparent 68%),
+    linear-gradient(135deg,#f1fbf5 0%,#f3f5ff 62%,#fff5ef 100%)!important;
+  overflow:hidden!important;
+  box-shadow:0 22px 58px rgba(39,70,51,.09)!important;
 }
-.kr5-detail-body .kr4-kicker{color:#668073!important;font:600 7px/1 "DM Sans",sans-serif!important}
-.kr5-detail-body :is(h2,h3,h4,strong){color:#294938!important}
-.kr5-detail-body .kr4-section-head h3{font:600 21px/1.02 Manrope,"DM Sans",sans-serif!important;letter-spacing:-.035em!important}
-.kr5-detail-body :is(p,small,span){color:#78877f!important}
-.kr5-detail-body .kr4-section-head p{max-width:580px!important;margin:0!important;font:400 8px/1.45 "DM Sans",sans-serif!important;text-align:right!important}
-.kr5-detail-body .kr4-grid,.kr5-detail-body .kr4-muscle{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
-.kr5-detail-body .kr4-signal,
-.kr5-detail-body .kr4-muscle-card,
-.kr5-detail-body .kr4-row,
-.kr5-detail-body .kr4-q,
-.kr5-detail-body .kr4-details,
-.kr5-detail-body .kr4-clinical-card{
-  border:1px solid #e3eae6!important;
-  border-radius:13px!important;
-  background:#fafcfb!important;
-  color:#294938!important;
-  box-shadow:none!important;
+.kr4-hero-main{
+  padding:clamp(26px,3vw,42px)!important;
 }
-.kr5-detail-body .kr4-signal,
-.kr5-detail-body .kr4-muscle-card{padding:12px!important}
-.kr5-detail-body .kr4-row{padding:10px 11px!important}
-.kr5-detail-body .kr4-signal.good,
-.kr5-detail-body .kr4-muscle-card.good,
-.kr5-detail-body .kr4-row.good{background:#eef8f2!important}
-.kr5-detail-body .kr4-signal.watch,
-.kr5-detail-body .kr4-muscle-card.watch,
-.kr5-detail-body .kr4-row.watch{background:#fff8e9!important}
-.kr5-detail-body .kr4-signal.bad,
-.kr5-detail-body .kr4-muscle-card.bad,
-.kr5-detail-body .kr4-row.bad{background:#fff2ef!important}
-.kr5-detail-body .kr4-status{
+.kr4-hero-top{align-items:flex-start!important}
+.kr4-score{
+  position:relative!important;
   display:inline-flex!important;
-  align-items:center!important;
-  min-height:22px!important;
-  padding:0 7px!important;
-  border-radius:999px!important;
-  font:600 7px/1 "DM Sans",sans-serif!important;
+  align-items:flex-end!important;
+  width:max-content!important;
+  margin-top:22px!important;
+  color:#1e6849!important;
+  font-size:clamp(92px,10vw,148px)!important;
+  letter-spacing:-.095em!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.7)!important;
 }
-.kr5-detail-body .kr4-status.good{background:#e8f6ee!important;color:#337551!important}
-.kr5-detail-body .kr4-status.watch{background:#fff3d8!important;color:#91691e!important}
-.kr5-detail-body .kr4-status.bad{background:#ffede9!important;color:#a9564c!important}
-.kr5-detail-body .kr4-status.neutral{background:#eef2f0!important;color:#68776f!important}
-.kr5-detail-body .kr4-signal strong{font:600 18px/1 Manrope,"DM Sans",sans-serif!important}
-.kr5-detail-body .kr4-muscle-value{font:600 25px/1 Manrope,"DM Sans",sans-serif!important;color:#2c6d4f!important}
-.kr5-detail-body .kr4-rowlist{display:grid!important;gap:6px!important}
-.kr5-detail-body .kr4-row{display:grid!important;grid-template-columns:minmax(160px,1fr) 110px minmax(180px,.8fr) auto!important;gap:10px!important;align-items:center!important}
-.kr5-detail-body .kr4-table{width:100%!important;border-collapse:separate!important;border-spacing:0 4px!important}
-.kr5-detail-body .kr4-table td{padding:9px!important;background:#fafcfb!important;border-color:#e4ebe7!important;font-size:8px!important}
-.kr5-detail-body .kr4-questionnaires{display:grid!important;gap:7px!important}
-.kr5-detail-body .kr4-q summary,
-.kr5-detail-body .kr4-details>summary{padding:12px 13px!important}
-.kr5-detail-body .kr4-q-body,
-.kr5-detail-body .kr4-detail-body{border-top:1px solid #e5ece8!important;padding:10px 12px!important}
-.kr5-detail-body .kr4-empty{
-  padding:14px!important;
-  border:1px solid #e3eae6!important;
+.kr4-score:before{
+  content:""!important;
+  position:absolute!important;
+  z-index:-1!important;
+  left:-18px!important;
+  top:-18px!important;
+  width:132px!important;
+  height:132px!important;
+  border-radius:50%!important;
+  background:radial-gradient(circle,rgba(73,183,127,.14),rgba(73,183,127,.04) 62%,transparent 72%)!important;
+}
+.kr4-score small{
+  margin:0 0 9px 11px!important;
+  color:#708178!important;
+  font-size:17px!important;
+  letter-spacing:-.02em!important;
+}
+.kr4-headline{margin-top:24px!important}
+.kr4-headline h2{
+  max-width:780px!important;
+  font-size:clamp(32px,4vw,58px)!important;
+  line-height:.98!important;
+}
+.kr4-hero p{
+  max-width:680px!important;
+  margin-top:12px!important;
+  color:#66786d!important;
+  font-size:12px!important;
+  line-height:1.62!important;
+}
+.kr4-actions{margin-top:24px!important;gap:9px!important}
+.kr4-btn{
+  min-height:42px!important;
+  padding:0 14px!important;
+  border:1px solid #d9e5de!important;
   border-radius:12px!important;
+  background:rgba(255,255,255,.76)!important;
+  color:#355443!important;
+  font-size:8.5px!important;
+  box-shadow:0 6px 18px rgba(39,70,51,.04)!important;
+}
+.kr4-btn.primary{
+  border-color:transparent!important;
+  background:linear-gradient(110deg,#2f8f63,#14a69d)!important;
+  color:#fff!important;
+  box-shadow:0 12px 28px rgba(31,137,98,.20)!important;
+}
+.kr4-btn:hover{transform:translateY(-1px)!important}
+
+/* Hero KPI panel */
+.kr4-hero-side{
+  padding:18px!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:9px!important;
+  background:rgba(255,255,255,.50)!important;
+  border-left:1px solid rgba(61,105,78,.08)!important;
+}
+.kr4-stat{
+  min-height:104px!important;
+  padding:16px!important;
+  border:1px solid #e0e9e4!important;
+  border-radius:17px!important;
+  background:rgba(255,255,255,.82)!important;
+  box-shadow:0 8px 24px rgba(39,70,51,.045)!important;
+}
+.kr4-stat:nth-child(1){border-top:3px solid #42ad77!important}
+.kr4-stat:nth-child(2){border-top:3px solid #637cf5!important}
+.kr4-stat:nth-child(3){border-top:3px solid #14aaa2!important}
+.kr4-stat:nth-child(4){border-top:3px solid #f1ad4e!important}
+.kr4-stat:nth-child(5){border-top:3px solid #7f91e9!important}
+.kr4-stat:nth-child(6){border-top:3px solid #ee806d!important}
+.kr4-stat span{color:#7a8981!important}
+.kr4-stat strong{color:#213f30!important;font-size:27px!important}
+.kr4-stat small{color:#7b8a82!important}
+
+/* State chips */
+.kr4-status.good{color:#28784f!important;background:#e2f5e9!important}
+.kr4-status.bad{color:#b65346!important;background:#fff0ed!important}
+.kr4-status.watch{color:#956a18!important;background:#fff4d8!important}
+.kr4-status.neutral{color:#64746b!important;background:#eef2f0!important}
+
+/* Sections */
+.kr4-section{padding:24px!important}
+.kr4-section-head{
+  margin-bottom:18px!important;
+  padding-bottom:2px!important;
+}
+.kr4-section-head h3{
+  margin-top:5px!important;
+  font-size:clamp(23px,2.3vw,32px)!important;
+}
+.kr4-section-head p{
+  max-width:600px!important;
+  color:#75857c!important;
+  font-size:9.5px!important;
+}
+.kr4-grid{gap:10px!important}
+.kr4-signal{
+  min-height:126px!important;
+  padding:17px!important;
+  border-color:#e1e9e5!important;
+  background:#f8faf9!important;
+}
+.kr4-signal.good{background:#edf9f2!important;border-color:#d3eadb!important}
+.kr4-signal.bad{background:#fff3f0!important;border-color:#f6d8d2!important}
+.kr4-signal.watch{background:#fff8e8!important;border-color:#f2e0af!important}
+.kr4-signal span{color:#74857b!important}
+.kr4-signal strong{color:#264536!important;font-size:23px!important}
+.kr4-signal p{color:#74837b!important}
+.kr4-signal em{color:#87958d!important}
+
+/* Functional rows */
+.kr4-row{
+  min-height:70px!important;
+  border-color:#e1e9e5!important;
   background:#fafcfb!important;
-  color:#7c8a82!important;
-  font:400 9px/1.45 "DM Sans",sans-serif!important;
+}
+.kr4-row.good{background:#edf9f2!important}
+.kr4-row.bad{background:#fff3f0!important}
+.kr4-row.watch{background:#fff8e8!important}
+.kr4-row strong{color:#294938!important}
+.kr4-row small,.kr4-source{color:#78877f!important}
+.kr4-value{color:#2f6f50!important;font-size:15px!important}
+
+/* Muscle cards */
+.kr4-muscle{gap:10px!important}
+.kr4-muscle-card{
+  min-height:170px!important;
+  padding:18px!important;
+  border-color:#e1e9e5!important;
+  background:#f8faf9!important;
+}
+.kr4-muscle-card.good{background:#edf9f2!important;border-color:#d3eadb!important}
+.kr4-muscle-card.bad{background:#fff3f0!important;border-color:#f6d8d2!important}
+.kr4-muscle-card.watch{background:#fff8e8!important;border-color:#f2e0af!important}
+.kr4-muscle-card .kr4-muscle-value{color:#244a36!important}
+.kr4-pair div{background:rgba(255,255,255,.72)!important;border:1px solid rgba(65,105,79,.06)!important}
+.kr4-pair span{color:#7b8981!important}
+.kr4-pair strong{color:#314d3d!important}
+
+/* Tables / questionnaires / technical details */
+.kr4-table th{color:#74837b!important}
+.kr4-table td{
+  background:#fafcfb!important;
+  border-color:#e1e9e5!important;
+  color:#2d4738!important;
+}
+.kr4-table .good td{background:#edf9f2!important}
+.kr4-table .bad td{background:#fff3f0!important}
+.kr4-table .watch td{background:#fff8e8!important}
+.kr4-table small{color:#7b8981!important}
+
+.kr4-q,
+.kr4-details{
+  border-color:#e1e9e5!important;
+  background:#f9fbfa!important;
+}
+.kr4-q summary strong,
+.kr4-details>summary strong{color:#294838!important}
+.kr4-q summary span,
+.kr4-details>summary span{color:#7d8b83!important}
+.kr4-q-body,
+.kr4-detail-body{border-top-color:#e2eae5!important}
+.kr4-response{border-bottom-color:#e5ece8!important;color:#304c3b!important}
+.kr4-response small{color:#7b8981!important}
+.kr4-lazy-empty,.kr4-empty{
+  border-color:#e1e9e5!important;
+  background:#f7faf8!important;
+  color:#78877f!important;
+}
+.kr4-tech-row{border-bottom-color:#e5ece8!important;color:#304c3b!important}
+.kr4-tech-row small{color:#7d8b83!important}
+.kr4-note{color:#829087!important}
+
+/* Clinical remains distinct without going dark */
+.kr4-clinical{
+  background:
+    radial-gradient(520px 240px at 96% 0%,rgba(99,124,245,.11),transparent 70%),
+    linear-gradient(135deg,#f6f7ff,#f3faf6)!important;
+}
+.kr4-clinical-hero{padding:28px!important}
+.kr4-clinical-card{
+  border-color:#dde4f8!important;
+  background:rgba(255,255,255,.82)!important;
+}
+.kr4-clinical-card strong{color:#2e456f!important}
+.kr4-clinical-card p{color:#74817a!important}
+
+/* Embedded canonical result cards on Profile/Documents */
+.kcanon{
+  border-color:#dce8e1!important;
+  background:#fff!important;
+  color:#173326!important;
+  box-shadow:0 12px 34px rgba(39,70,51,.06)!important;
+}
+.kcanon-kicker{color:#64806f!important}
+.kcanon-title{color:#244434!important}
+.kcanon-badge{background:#eef2f0!important;color:#68776e!important}
+.kcanon-badge.published{background:#e2f5e9!important;color:#28784f!important}
+.kcanon-metric,
+.kcanon-account .mini,
+.kcanon-doc-side{background:#f6f9f7!important}
+.kcanon-metric small,.kcanon-account small,.kcanon-doc small{color:#7b8981!important}
+.kcanon-metric strong,.kcanon-account strong,.kcanon-doc strong{color:#284837!important}
+.kcanon-finding{background:#f7faf8!important}
+.kcanon-finding strong{color:#2d4939!important}
+.kcanon-finding span{color:#7c8a82!important}
+.kcanon-btn{
+  border-color:#dce8e1!important;
+  background:#fff!important;
+  color:#355443!important;
+}
+.kcanon-btn.primary{
+  border-color:transparent!important;
+  background:linear-gradient(110deg,#2f8f63,#14a69d)!important;
+  color:#fff!important;
 }
 
-body.kresults-v4 #komoAssistantRail{
-  width:48px!important;
-  min-width:48px!important;
-  height:48px!important;
-  min-height:48px!important;
-  right:11px!important;
-  bottom:86px!important;
-  padding:0!important;
-  border:1px solid #dce6df!important;
-  border-radius:16px!important;
-  background:rgba(255,255,255,.94)!important;
-  color:#244c37!important;
-  box-shadow:0 12px 30px rgba(31,57,42,.12)!important;
-  writing-mode:horizontal-tb!important;
-  transform:none!important;
-}
-body.kresults-v4 #komoAssistantRail .ka2-rail-copy{display:none!important}
-
-@media(max-width:900px){
-  .kr5{padding-left:12px;padding-right:12px}
-  .kr5-hero{grid-template-columns:1fr}
-  .kr5-score-pane{border-right:0;border-bottom:1px solid #e3ebe6}
-  .kr5-muscles{grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto 1fr}
-  .kr5-muscles-head{grid-column:1/-1}
-  .kr5-lsi{grid-template-columns:1fr;gap:8px}
-  .kr5-lsi-value{text-align:left}
+@media(max-width:980px){
+  .kr4-hero{grid-template-columns:1fr!important}
+  .kr4-hero-side{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    border-left:0!important;
+    border-top:1px solid #e0e9e4!important;
+  }
 }
 @media(max-width:700px){
-  .kr5{padding:6px 8px calc(76px + env(safe-area-inset-bottom));gap:7px}
-  .kr5-top{min-height:52px;grid-template-columns:minmax(0,1fr) auto;gap:8px}
-  .kr5-top h1{font-size:23px}
-  .kr5-top p{font-size:8px}
-  .kr5-actions{gap:4px}
-  .kr5-btn{min-height:30px;padding:0 8px;font-size:6.5px}
-  .kr5-actions .blue{display:none}
-  .kr5-card{border-radius:16px}
-  .kr5-hero{min-height:0;grid-template-columns:1fr}
-  .kr5-score-pane{padding:16px}
-  .kr5-score strong{font-size:72px}
-  .kr5-score span{font-size:10px;margin-bottom:5px}
-  .kr5-score-wrap h2{margin-top:14px;font-size:19px}
-  .kr5-score-wrap p{font-size:8px}
-  .kr5-score-meta{font-size:6.5px}
-  .kr5-muscles{padding:10px;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
-  .kr5-muscles-head{grid-column:1/-1}
-  .kr5-lsi{min-height:82px;padding:9px;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
-  .kr5-lsi-copy span{font-size:6px}
-  .kr5-lsi-copy strong{font-size:9px;white-space:normal}
-  .kr5-lsi-value{min-width:0;font-size:21px}
-  .kr5-priority{min-height:0;padding:12px;grid-template-columns:1fr auto;gap:8px}
-  .kr5-priority-label{grid-column:1/-1}
-  .kr5-priority-main h3{font-size:14px}
-  .kr5-priority-main p{font-size:7px}
-  .kr5-recheck{min-width:106px;padding:8px}
-  .kr5-recheck span{font-size:5.5px}
-  .kr5-recheck strong{font-size:8px}
-  .kr5-strip{gap:5px}
-  .kr5-mini{min-height:74px;padding:10px}
-  .kr5-mini span{font-size:6px}
-  .kr5-mini strong{margin-top:6px;font-size:15px}
-  .kr5-mini p{font-size:6px}
-  .kr5-detail>summary{min-height:58px;padding:0 12px}
-  .kr5-detail-title strong{font-size:10px}
-  .kr5-detail-title span{font-size:6.5px}
-  .kr5-detail-body{padding:0 6px 6px}
-  .kr5-detail-body .kr4-section-head{display:block!important}
-  .kr5-detail-body .kr4-section-head p{margin-top:6px!important;text-align:left!important}
-  .kr5-detail-body .kr4-grid,.kr5-detail-body .kr4-muscle{grid-template-columns:1fr!important}
-  .kr5-detail-body .kr4-row{grid-template-columns:1fr!important}
-  .kr5-detail-body .kr4-table{display:block!important;overflow-x:auto!important}
-  body.kresults-v4 #komoAssistantRail{width:44px!important;min-width:44px!important;height:44px!important;min-height:44px!important;bottom:76px!important}
+  .kr4{padding-top:2px!important}
+  .kr4-card{border-radius:20px!important}
+  .kr4-hero-main{padding:22px 18px!important}
+  .kr4-score{font-size:94px!important}
+  .kr4-score:before{width:112px!important;height:112px!important}
+  .kr4-headline h2{font-size:34px!important}
+  .kr4-hero-side{grid-template-columns:1fr 1fr!important;padding:12px!important}
+  .kr4-stat{min-height:92px!important;padding:13px!important}
+  .kr4-section{padding:18px!important}
+  .kr4-section-head p{font-size:9px!important}
 }
-`;
-  document.head.appendChild(s);
-}
+`;document.head.appendChild(s)}
+
 function topFindings(r){return[...(r?.summary?.priorities||[]),...(r?.summary?.strengths||[])].filter((x,i,a)=>a.findIndex(y=>y.id===x.id)===i).slice(0,3)}
 function summaryValues(result){const s=result.score||{},d=s.domain_scores||{};return{score:s.motion_score,symmetry:d.neuromuscular_symmetry,confidence:n(s.confidence)===null?null:Number(s.confidence)*100,completeness:s.completeness}}
 function bindRoutes(root=document){root.querySelectorAll?.('[data-route]').forEach(b=>{if(b.dataset.kcanonBound)return;b.dataset.kcanonBound='1';b.addEventListener('click',()=>window.KomoPatientNavigation?.go?.(b.dataset.route)||(location.hash=`#${b.dataset.route}`))})}
@@ -581,147 +389,7 @@ function lazySensorRows(rows){if(!rows.length)return'<div class="kr4-empty">Aucu
 function lazyMeasurementRows(rows){if(!rows.length)return'<div class="kr4-empty">Aucune mesure complémentaire disponible.</div>';return rows.map(r=>`<div class="kr4-tech-row"><div><strong>${esc(r.indicatorCode||'Mesure')}</strong><small>${esc(r.taskCode||'')}</small></div><div><strong>${esc(valueText(r.numericValue??r.textValue??r.rawText))}</strong><small>${esc(r.unit||'')}</small></div><div>${esc(r.source||'—')}<br><small>${esc(r.protocolVersion||'')}</small></div><div>${qcChip(r.qcStatus)}</div><div><small>${esc(fmtDate(r.recordedAt))}</small></div></div>`).join('')}
 function bindResults(root){root.querySelector('[data-scroll-clinical]')?.addEventListener('click',()=>root.querySelector('#clinicalResults')?.scrollIntoView({behavior:'smooth',block:'start'}));root.querySelectorAll('details[data-lazy-key]').forEach(d=>d.addEventListener('toggle',()=>{if(!d.open||d.dataset.loaded)return;d.dataset.loaded='1';const key=d.dataset.lazyKey,rows=lazyStores.get(key)||[],body=d.querySelector('.kr4-detail-body');if(body)body.innerHTML=key==='sensor'?lazySensorRows(rows):lazyMeasurementRows(rows)}));bindRoutes(root)}
 
-
-function kr5Lsi(payload,keys,label){
-  const rows=payload?.sensor?.lsi||[];
-  const keyset=new Set(keys.map(x=>String(x).toUpperCase()));
-  const row=rows.find(x=>keyset.has(String(x?.muscle||'').toUpperCase())||keys.some(k=>String(x?.label||'').toLowerCase().includes(String(k).toLowerCase())));
-  return {value:n(row?.value),label:row?.label||label,muscle:row?.muscle||''};
-}
-function kr5ToneForLsi(v){
-  if(v===null)return'';
-  if(v<85)return'priority';
-  if(v<90)return'watch';
-  return'';
-}
-function kr5Priority(payload,result){
-  const p=(payload?.priorities||[])[0]||result?.interpretation?.summary?.priorities?.[0]||null;
-  return {
-    title:p?.title||p?.domain||'Poursuivre votre progression locomotrice',
-    recheck:p?.recheck||'6–8 semaines',
-    copy:(p?.actions||[]).join(' · ')||p?.firstAction||p?.patientMessage||'Votre trajectoire transforme ce résultat en prochaines actions.'
-  };
-}
-function kr5HeroStatus(result){
-  const f=(result?.interpretation?.summary?.priorities||[])[0];
-  if(f?.status==='priority')return['priority','Priorité identifiée'];
-  if(f?.status==='watch')return['watch','À surveiller'];
-  return['','Bilan publié'];
-}
-function kr5LsiCard(item,fallbackLabel){
-  const tone=kr5ToneForLsi(item.value);
-  return `<article class="kr5-lsi ${tone}"><div class="kr5-lsi-copy"><span>SYMETRIE LSI</span><strong>${esc(fallbackLabel)}</strong></div><div class="kr5-lsi-value">${item.value===null?'—':Math.round(item.value)+' %'}</div></article>`;
-}
-function kr5Overview(result,payload){
-  const s=payload.summary||{};
-  const quad=kr5Lsi(payload,['VM','VL','quadriceps'],'Quadriceps');
-  const ham=kr5Lsi(payload,['BF','ischio','hamstring'],'Ischio-jambiers');
-  const calf=kr5Lsi(payload,['GM','gastro','mollet','calf'],'Mollets');
-  const priority=kr5Priority(payload,result);
-  const [chipTone,chipLabel]=kr5HeroStatus(result);
-  const heroFinding=(result?.interpretation?.findings||[]).find(x=>x.id==='neuromuscular_symmetry');
-  const headline=heroFinding?.status==='priority'?'Une priorité claire ressort de votre bilan.':heroFinding?.status==='watch'?'Votre bilan est solide avec un point à surveiller.':'Votre mouvement constitue une base solide.';
-  const copy=heroFinding?.patientMessage||s.sentence||'Votre Motion Score synthétise vos mesures instrumentées et sert de référence pour suivre votre évolution.';
-  const released=s.releaseStatus||result?.score?.release_status;
-  const calculated=result?.score?.calculated_at||payload?.provenance?.scoreReleasedAt;
-  return `
-    <header class="kr5-top">
-      <div>
-        <p class="kr5-eyebrow">KŌMØ PULSE · RÉSULTATS</p>
-        <h1>Votre bilan Motion.</h1>
-        <p>Votre état actuel, les points qui comptent et la prochaine étape.</p>
-      </div>
-      <div class="kr5-actions">
-        <button class="kr5-btn primary" type="button" data-komo-export-report>Rapport PDF</button>
-        <button class="kr5-btn blue" type="button" data-route="path">Ma trajectoire</button>
-      </div>
-    </header>
-    <article class="kr5-card kr5-hero">
-      <section class="kr5-score-pane">
-        <div class="kr5-score-head">
-          <p class="kr5-eyebrow">MOTION SCORE</p>
-          <span class="kr5-chip ${chipTone}">${esc(chipLabel)}</span>
-        </div>
-        <div class="kr5-score-wrap">
-          <div class="kr5-score"><strong>${score(s.score)}</strong><span>/100</span></div>
-          <h2>${esc(headline)}</h2>
-          <p>${esc(copy)}</p>
-        </div>
-        <div class="kr5-score-meta">
-          <span>Dernier bilan · ${esc(fmtDate(calculated))}</span>
-          <span>${esc(statusLabel(released))}</span>
-        </div>
-      </section>
-      <aside class="kr5-muscles">
-        <div class="kr5-muscles-head"><strong>Symétrie musculaire</strong><span>LSI · gauche / droite</span></div>
-        ${kr5LsiCard(quad,'Quadriceps')}
-        ${kr5LsiCard(ham,'Ischio-jambiers')}
-        ${kr5LsiCard(calf,'Mollets')}
-      </aside>
-    </article>
-    <article class="kr5-card kr5-priority">
-      <div class="kr5-priority-label">
-        <p class="kr5-eyebrow">PRIORITÉ ACTUELLE</p>
-        <strong>Ce que KŌMØ vous recommande de travailler maintenant.</strong>
-      </div>
-      <div class="kr5-priority-main">
-        <h3>${esc(priority.title)}</h3>
-        <p>${esc(priority.copy)}</p>
-      </div>
-      <div class="kr5-recheck"><span>PROCHAIN RECHECK</span><strong>${esc(priority.recheck)}</strong></div>
-    </article>
-    <section class="kr5-strip">
-      <article class="kr5-card kr5-mini"><span>SYMETRIE GLOBALE</span><strong>${pct(s.symmetry,1)}</strong><p>Indice neuromusculaire global.</p></article>
-      <article class="kr5-card kr5-mini"><span>CONFIANCE</span><strong>${pct(s.confidence)}</strong><p>Qualité du calcul instrumenté.</p></article>
-      <article class="kr5-card kr5-mini"><span>DONNÉES CAPTEURS</span><strong>${payload?.sensor?.totalMetricCount??0}</strong><p>Marqueurs conservés dans votre bilan.</p></article>
-    </section>
-  `;
-}
-function kr5Details(result,payload,findings,clinical){
-  return `<details class="kr5-card kr5-detail">
-    <summary>
-      <div class="kr5-detail-title"><strong>Voir le détail du bilan</strong><span>Muscle, fonction, marche, posture, questionnaires, Clinical et traçabilité.</span></div>
-      <span class="kr5-detail-arrow">+</span>
-    </summary>
-    <div class="kr5-detail-body">
-      ${summarySection(result,payload,findings)}
-      ${muscleSection(payload,findings)}
-      ${functionalSection(payload)}
-      ${gaitSection(payload,findings)}
-      ${postureSection(payload)}
-      ${questionnaireSection(payload)}
-      ${technicalSections(payload)}
-      ${provenanceSection(payload)}
-      ${clinicalSection(clinical)}
-    </div>
-  </details>`;
-}
-
-async function renderResults(result){
-  if(route()!=='results')return;
-  const root=document.querySelector('#viewRoot');
-  if(!root)return;
-  installStyle();
-  document.body.classList.remove('kresults-v2');
-  document.body.classList.add('kresults-v4');
-  const pe=document.querySelector('#pageEyebrow'),pt=document.querySelector('#pageTitle');
-  if(pe)pe.textContent='KŌMØ PULSE · RÉSULTATS';
-  if(pt)pt.textContent='Vos résultats.';
-  let payload;
-  try{payload=await reportPayload(result)}
-  catch(e){
-    console.error('[results-v5-payload]',e);
-    root.innerHTML='<section class="kr5"><div class="kr5-card kr5-mini"><strong>Votre rapport est momentanément indisponible.</strong><p>Réessayez dans quelques instants.</p></div></section>';
-    return;
-  }
-  if(route()!=='results')return;
-  const client=getCanonicalClient();
-  const clinical=await loadClinical(client,result.patientId).catch(()=>({assessments:[],scores:[],reports:[]}));
-  if(route()!=='results')return;
-  const findings=findingMap(result);
-  root.innerHTML=`<section class="kr5" data-kresults-v4 data-kresults-v5 data-motion-report-payload="${esc(payload.schemaVersion||'')}">${kr5Overview(result,payload)}${kr5Details(result,payload,findings,clinical)}</section>`;
-  bindResults(root);
-}
+async function renderResults(result){if(route()!=='results')return;const root=document.querySelector('#viewRoot');if(!root)return;installStyle();document.body.classList.remove('kresults-v2');document.body.classList.add('kresults-v4');const pe=document.querySelector('#pageEyebrow'),pt=document.querySelector('#pageTitle');if(pe)pe.textContent='KŌMØ PULSE · RÉSULTATS';if(pt)pt.textContent='Vos résultats.';let payload;try{payload=await reportPayload(result)}catch(e){console.error('[results-v4-payload]',e);root.innerHTML='<section class="kr4"><div class="kr4-empty">Le rapport complet ne peut pas être chargé pour le moment.</div></section>';return}if(route()!=='results')return;const client=getCanonicalClient();const clinical=await loadClinical(client,result.patientId).catch(()=>({assessments:[],scores:[],reports:[]}));if(route()!=='results')return;const findings=findingMap(result);root.innerHTML=`<section class="kr4" data-kresults-v4 data-motion-report-payload="${esc(payload.schemaVersion||'')}">${motionHero(result,payload,findings)}${summarySection(result,payload,findings)}${functionalSection(payload)}${muscleSection(payload,findings)}${gaitSection(payload,findings)}${postureSection(payload)}${questionnaireSection(payload)}${prioritiesSection(payload)}${technicalSections(payload)}${provenanceSection(payload)}${clinicalSection(clinical)}</section>`;bindResults(root)}
 
 async function render(force=false){try{const result=await loadCanonicalResult({force});renderHome(result);renderAccount(result);renderDocuments(result);await renderResults(result)}catch(e){console.error('[patient-canonical-results]',e);if(route()==='results'){const root=document.querySelector('#viewRoot');if(root)root.innerHTML='<section class="kr4"><div class="kr4-empty">Votre résultat Motion est en attente de publication ou momentanément indisponible.</div></section>'}}}
 function schedule(force=false){clearTimeout(timer);timer=setTimeout(()=>render(force),80)}
