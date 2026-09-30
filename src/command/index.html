@@ -355,7 +355,7 @@ function renderTasks(){
 function renderDeals(){
  const stages=['Cible','Contacté','RDV','Démo','Proposition','Négociation','Gagné','Perdu'];
  document.querySelector('#deals').innerHTML=state.deals.map(d=>`<tr><td><b>${esc(d.name)}</b></td><td><select data-stage="${d.id}">${stages.map(s=>`<option ${s===d.stage?'selected':''}>${s}</option>`).join('')}</select></td><td class="money">${d.value?new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(d.value):'—'}</td><td>${esc(d.owner)}</td><td>${esc(d.source)}</td><td>${esc(d.next||'AUCUNE PROCHAINE ACTION')}</td></tr>`).join('');
- document.querySelectorAll('[data-stage]').forEach(x=>x.onchange=()=>{state.deals.find(d=>d.id==x.dataset.stage).stage=x.value;save()})
+ document.querySelectorAll('[data-stage]').forEach(x=>x.onchange=()=>{state.deals.find(d=>d.id==x.dataset.stage).stage=x.value;save();renderKpis()})
 }
 function renderLegal(){
  document.querySelector('#legalList').innerHTML=state.legal.map(l=>`<div class="checkline"><input type="checkbox" data-legal="${l.id}" ${l.done?'checked':''}><div>${esc(l.label)}</div><span class="status ${l.done?'green':l.status==='À valider'?'orange':'red'}">${l.done?'Validé':esc(l.status)}</span></div>`).join('');
@@ -385,7 +385,7 @@ function renderAgenda(){
  if(home) home.innerHTML=upcoming.length?upcoming.map(a=>`<div class="time-row"><div class="time">${esc(a.date===today?(a.time||'Jour'):a.date.slice(5).split('-').reverse().join('/'))}</div><div><b>${esc(a.title)}</b><div class="meta">${esc(a.owner)} · ${esc(a.type)}</div></div></div>`).join(''):'<div class="empty">Rien de planifié.</div>';
  const list=document.querySelector('#agendaList');
  if(list) list.innerHTML=rows.length?rows.map(a=>`<div class="agenda-row"><div>${esc(a.date)}</div><div>${esc(a.time||'—')}</div><div><div class="agenda-title">${esc(a.title)}</div><div class="meta">${esc(a.type)}</div></div><div class="agenda-owner">${esc(a.owner)}</div><div class="agenda-actions"><button class="btn ghost" data-agenda-done="${a.id}">${a.done?'Réouvrir':'Fait'}</button> <button class="btn ghost" data-agenda-del="${a.id}">×</button></div></div>`).join(''):'<div class="empty">Agenda vide.</div>';
- document.querySelectorAll('[data-agenda-done]').forEach(x=>x.onclick=()=>{const a=state.agenda.find(a=>a.id==x.dataset.agendaDone);a.done=!a.done;save();renderAgenda()});
+ document.querySelectorAll('[data-agenda-done]').forEach(x=>x.onclick=()=>{const a=state.agenda.find(a=>a.id==x.dataset.agendaDone);a.done=!a.done;save();renderAgenda();renderKpis()});
  document.querySelectorAll('[data-agenda-del]').forEach(x=>x.onclick=()=>{state.agenda=state.agenda.filter(a=>a.id!=x.dataset.agendaDel);save();renderAgenda()});
 }
 function renderJournal(){
@@ -399,7 +399,7 @@ function renderJournal(){
 function addJournalEntry(text,kind='note'){
  if(!text.trim())return;
  state.journal.push({id:Date.now(),date:isoToday(),at:new Date().toISOString(),author:CURRENT_USER.name,kind,text:text.trim()});
- save();renderJournal();
+ save();renderJournal();renderKpis();
 }
 function renderKpis(){
  const activeDeals=(state.deals||[]).filter(d=>!['Gagné','Perdu'].includes(d.stage));
@@ -433,11 +433,11 @@ document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.quer
 document.querySelector('#addTask').onclick=()=>{const i=document.querySelector('#newTask');if(!i.value.trim())return;state.tasks.push({id:Date.now(),title:i.value.trim(),meta:CURRENT_USER.name+' · ajouté manuellement',priority:'medium',done:false});i.value='';save();renderTasks()};
 document.querySelector('#clearDone').onclick=()=>{state.tasks=state.tasks.filter(t=>!t.done);save();renderTasks()};
 document.querySelector('#logUpdate').onclick=()=>{const i=document.querySelector('#updateText');if(!i.value.trim())return;const txt=i.value.trim();state.activity.push({at:new Date().toISOString(),text:txt});addJournalEntry(txt,'note');i.value='';save();renderActivity()};
-document.querySelector('#addAgenda').onclick=()=>{const d=document.querySelector('#agendaDate'),t=document.querySelector('#agendaTime'),n=document.querySelector('#agendaTitle'),o=document.querySelector('#agendaOwner'),y=document.querySelector('#agendaType');if(!d.value||!n.value.trim())return;state.agenda.push({id:Date.now(),date:d.value,time:t.value,title:n.value.trim(),owner:o.value,type:y.value,done:false});n.value='';t.value='';save();renderAgenda()};
+document.querySelector('#addAgenda').onclick=()=>{const d=document.querySelector('#agendaDate'),t=document.querySelector('#agendaTime'),n=document.querySelector('#agendaTitle'),o=document.querySelector('#agendaOwner'),y=document.querySelector('#agendaType');if(!d.value||!n.value.trim())return;state.agenda.push({id:Date.now(),date:d.value,time:t.value,title:n.value.trim(),owner:o.value,type:y.value,done:false});n.value='';t.value='';save();renderAgenda();renderKpis()};
 document.querySelector('#addJournal').onclick=()=>{const t=document.querySelector('#journalText'),k=document.querySelector('#journalKind');addJournalEntry(t.value,k.value);t.value=''};
 document.querySelector('#addQuickMoney').onclick=()=>{const type=document.querySelector('#quickMoneyType').value,label=document.querySelector('#quickMoneyLabel'),amount=document.querySelector('#quickMoneyAmount'),due=document.querySelector('#quickMoneyDue');if(!label.value.trim())return;if(type==='expense')state.expenses.push({id:Date.now(),name:label.value.trim(),category:'Autre',amount:Number(amount.value||0),due:due.value,recurring:'non',paid:false});else state.receivables.push({id:Date.now(),name:label.value.trim(),amount:Number(amount.value||0),due:due.value,received:false});label.value='';amount.value='';due.value='';save();renderExpenses();renderReceivables()};
 document.querySelectorAll('[data-jump]').forEach(b=>b.onclick=()=>{const target=b.dataset.jump;const nav=[...document.querySelectorAll('.nav button')].find(x=>x.dataset.view===target);if(nav)nav.click()});
-document.querySelector('#addDeal').onclick=()=>{const n=document.querySelector('#dealName'),v=document.querySelector('#dealValue');if(!n.value.trim())return;state.deals.push({id:Date.now(),name:n.value.trim(),stage:'Cible',value:Number(v.value||0),owner:'Renan',source:'Manuel',next:'AUCUNE PROCHAINE ACTION'});n.value='';v.value='';save();renderDeals()};
+document.querySelector('#addDeal').onclick=()=>{const n=document.querySelector('#dealName'),v=document.querySelector('#dealValue');if(!n.value.trim())return;state.deals.push({id:Date.now(),name:n.value.trim(),stage:'Cible',value:Number(v.value||0),owner:'Renan',source:'Manuel',next:'AUCUNE PROCHAINE ACTION'});n.value='';v.value='';save();renderDeals();renderKpis()};
 document.querySelector('#userBadge').textContent=CURRENT_USER.name+' · '+CURRENT_USER.role;
 
 document.querySelectorAll('.nav button').forEach(b=>{if(!CURRENT_USER.tabs.includes(b.dataset.view)) b.style.display='none';});
