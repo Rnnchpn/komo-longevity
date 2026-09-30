@@ -245,8 +245,9 @@ for (const [index,script] of scripts.entries()) {
   console.log(`[build-all] #${index} ${script}`);
   const run = spawnSync(process.execPath, [script], { stdio: 'inherit' });
   if (run.status !== 0) {
-    console.error(`[build-all-diag] first failure #${index} ${script} -> child exit ${run.status}`);
-    process.exit(run.status ?? 1);
+    const code=index+10;
+    console.error(`[build-all-diag] first failure #${index} ${script} -> exit ${code}`);
+    process.exit(code);
   }
 }
 console.log('[build-all] diagnostic production build complete.');
