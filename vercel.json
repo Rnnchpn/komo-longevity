@@ -10,7 +10,7 @@
     },
     {
       "source": "/command/:path*",
-      "destination": "/command-v1/:path*"
+      "destination": "/command-v1/"
     },
     {
       "source": "/",
