@@ -1,15 +1,14 @@
-import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const root = process.cwd();
 const site = join(root, 'site');
-const chunksDir = join(root, 'src', 'assets', 'site2026', 'generated-v2');
-const heroOut = join(site, 'assets', 'images', 'komo-hero-restored-20260930.avif');
-const chunkNames = Array.from({length:9}, (_,i) => `komo-hero-20260930-${String(i+1).padStart(2,'0')}.b64`);
+const heroAsset = '/assets/images/komo-hero-hd-v4.webp';
 
+// The previous AVIF source showed large block corruption in production.
+// Use the clean high-resolution WebP already shipped in src/assets/images instead.
+// build.mjs copies src/assets to site/assets before this final homepage pass.
 await mkdir(join(site, 'assets', 'images'), { recursive: true });
-const encoded = (await Promise.all(chunkNames.map(name => readFile(join(chunksDir, name), 'utf8')))).join('').replace(/\s+/g,'');
-await writeFile(heroOut, Buffer.from(encoded, 'base64'));
 
 const dictionaries = {
   en: {
@@ -179,7 +178,7 @@ function cleanPreviousPass(html){
     .replace(/<style id="komo-home-hero-20260930-v2-style">[\s\S]*?<\/style>/g,'')
     .replace(/<style id="komo-home-unified-v3-style">[\s\S]*?<\/style>/g,'')
     .replace(/<script id="komo-home-hero-20260930-v2-runtime">[\s\S]*?<\/script>/g,'')
-    .replace(/<link rel="preload" as="image" href="\/assets\/images\/komo-hero-20260930\.avif"[^>]*>\s*/g,'');
+    .replace(/<link rel="preload" as="image" href="\/assets\/images\/(?:komo-hero-20260930\.avif|komo-hero-restored-20260930\.avif|komo-hero-final-v2-20260930\.webp|komo-hero-hd-v4\.webp)"[^>]*>\s*/g,'');
 }
 function setLanguageSwitch(html, lang, isRoot=false){
   const current=lang==='fr'?'FR':lang==='en'?'EN':'ES';
@@ -231,6 +230,7 @@ const heroCss=`
   position:absolute!important;inset:0!important;
   width:100%!important;height:100%!important;min-height:100%!important;
   object-fit:cover!important;object-position:center center!important;
+  image-rendering:auto!important;
   opacity:1!important;visibility:visible!important;
   transform:none!important;filter:none!important;
 }
@@ -271,8 +271,11 @@ body .ke-switch,body .ke-pulse{display:none!important}
 function applyHero(html, lang){
   html=cleanPreviousPass(html);
   html=html
-    .replaceAll('/assets/images/komo-hero-hd-v4.webp','/assets/images/komo-hero-restored-20260930.avif')
-    .replaceAll('/assets/images/komo-longevity-v3.webp','/assets/images/komo-hero-restored-20260930.avif');
+    .replaceAll('/assets/images/komo-hero-restored-20260930.avif',heroAsset)
+    .replaceAll('/assets/images/komo-hero-20260930.avif',heroAsset)
+    .replaceAll('/assets/images/komo-hero-final-v2-20260930.webp',heroAsset)
+    .replaceAll('/assets/images/komo-hero-final-20260930.webp',heroAsset)
+    .replaceAll('/assets/images/komo-longevity-v3.webp',heroAsset);
   html=html.replace(
     /(<figure[^>]*class="[^"]*kpv-hero-media[^"]*"[^>]*>\s*<img\s+)([^>]*)(>)/i,
     (_,start,attrs,end)=>{
@@ -281,8 +284,8 @@ function applyHero(html, lang){
         :lang==='es'
           ?'KŌMØ Longevity — evaluación funcional del movimiento en la Costa Azul'
           :'KŌMØ Longevity — évaluation fonctionnelle du mouvement sur la Côte d’Azur';
-      let next=attrs.replace(/src="[^"]*"/i,'src="/assets/images/komo-hero-restored-20260930.avif"');
-      if(!/src="/i.test(next))next='src="/assets/images/komo-hero-restored-20260930.avif" '+next;
+      let next=attrs.replace(/src="[^"]*"/i,`src="${heroAsset}"`);
+      if(!/src="/i.test(next))next=`src="${heroAsset}" `+next;
       next=next.replace(/alt="[^"]*"/i,`alt="${alt}"`);
       if(!/alt="/i.test(next))next+=` alt="${alt}"`;
       next=next.replace(/loading="lazy"/i,'loading="eager"');
@@ -300,7 +303,7 @@ function applyHero(html, lang){
       return `<section class="${[...set].join(' ')}">`;
     }
   );
-  const preload='<link rel="preload" as="image" href="/assets/images/komo-hero-restored-20260930.avif" type="image/avif" fetchpriority="high">';
+  const preload=`<link rel="preload" as="image" href="${heroAsset}" type="image/webp" fetchpriority="high">`;
   html=html.replace('</head>',preload+'\n'+heroCss+'\n</head>');
   return html;
 }
@@ -327,4 +330,4 @@ await writeHomepage('fr','fr/index.html',false);
 await writeHomepage('en','en/index.html',false);
 await writeHomepage('es','es/index.html',false);
 
-console.log('[komo-home-unified-v6] PASS · original approved hero restored and forced visible across FR/EN/ES.');
+console.log('[komo-home-unified-v7] PASS · corrupted AVIF retired; clean HD WebP hero forced across FR/EN/ES.');
