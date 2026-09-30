@@ -1,9 +1,9 @@
 import './komo-assistant-shell-v2.js';
 import './patient-mobile-v1.js';
 
-const VERSION='9.0.0-demo-dashboard';
+const VERSION='8.1.0-guided-trajectory';
 let timer=0;
-const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,assessment:null,priorities:[],scores:[],wearable:null,appointments:[],appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
+const state={user:null,profile:null,role:null,engagement:null,wallet:null,memberships:[],patient:null,assessment:null,priorities:[],scores:[],wearable:null,appointment:null,organization:null,avatarUrl:'',loadedFor:null,lastLoad:0,loading:false};
 
 const route=()=>window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';
 const client=()=>window.KomoRuntime?.client||null;
@@ -71,84 +71,87 @@ function orgLabel(){const o=state.organization||{};return [o.name,o.city].filter
 function homeMarkup(){
  const s=currentScore(),w=state.wearable||{},appt=nextAppointment(),e=state.engagement||{},wallet=state.wallet||{};
  const score=num(s?.motion_score),scoreDate=s?.released_at||s?.calculated_at;
- const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0),xp=fmt(e.xp??e.experience??e.total_xp??0);
+ const level=fmt(e.level||1),points=fmt(wallet.available_kp??e.points??0);
  const appointmentDate=appt?.scheduled_start;
  const traj=trajectoryModel();
- return `<section class="kh9" data-khome-v9 aria-label="KŌMØ Pulse Home">
-   <header class="kh9-intro">
-     <div class="kh9-brand"><span>KŌMØ</span><small>PULSE</small></div>
-     <div class="kh9-welcome">
-       <p class="kh9-kicker">BIENVENUE SUR KŌMØ PULSE</p>
-       <h1>Votre santé. Vos résultats.<br><em>Votre trajectoire.</em></h1>
-       <p>Retrouvez ici vos résultats KŌMØ, votre trajectoire personnalisée et votre accès à KŌMØ World.</p>
-       <div class="kh9-intro-actions">
-         <button type="button" data-kh8-route="results">Voir mes résultats</button>
-         <button type="button" data-kh8-route="path">Voir ma trajectoire</button>
-         <button type="button" data-kh8-world>Entrer dans World ↗</button>
-       </div>
-     </div>
-   </header>
+ return `<section class="kh8" data-khome-v8 data-khome-v7 aria-label="KŌMØ Pulse Home">
+   <div class="kh8-brand"><span>KŌMØ</span><small>PULSE</small></div>
 
-   <section class="kh9-primary">
-     <article class="kh9-photo-card">
-       <div class="kh9-photo">${heroPhotoMarkup()}</div>
-       <div class="kh9-photo-overlay">
-         <small>VOTRE ESPACE KŌMØ</small>
-         <strong>${esc(profileName())}</strong>
-         <span>${esc(roleTitle())}</span>
-       </div>
-     </article>
+   <div class="kh8-top">
+    <div class="kh8-hero">
+      <div class="kh8-hero-copy">
+        <p class="kh8-kicker">LONGEVITY IN MOTION</p>
+        <h2>Votre santé,<br><em>avec une trajectoire.</em></h2>
+        <p class="kh8-lead">Après chaque consultation, KŌMØ reste avec vous : une priorité claire, une prochaine action et un point de suivi dans le temps.</p>
+        <div class="kh8-hero-actions">
+          <button class="kh8-continue" type="button" data-kh8-route="path"><span>${esc(traj.cta)}</span><b aria-hidden="true">→</b></button>
+          <button class="kh8-world-action" type="button" data-kh8-world><span>Entrer dans KŌMØ World</span><b aria-hidden="true">↗</b></button>
+        </div>
+      </div>
+      <button class="kh8-hero-media" type="button" data-kh8-world aria-label="Entrer dans KŌMØ World">
+        <span class="kh8-hero-photo">${heroPhotoMarkup()}</span>
+        <span class="kh8-world-badge"><small>KŌMØ WORLD</small><strong>Entrez dans votre univers</strong><em>Explorer ↗</em></span>
+      </button>
+    </div>
 
-     <article class="kh9-appointment" data-kh8-route="documents" role="button" tabindex="0">
-       <div class="kh9-card-label">PROCHAIN RENDEZ-VOUS</div>
-       <div class="kh9-appt-date">${appt?esc(fmtShortDate(appointmentDate)):'À PLANIFIER'}</div>
-       <h2>${appt?esc(appointmentLabel(appt.appointment_type)):'Votre prochain point KŌMØ'}</h2>
-       <p>${appt?esc(orgLabel()):'Planifiez votre prochain bilan ou votre consultation depuis Pulse.'}</p>
-       <div class="kh9-appt-meta">
-         <span>${appt&&appointmentDate?esc(fmtTime(appointmentDate)):'Agenda KŌMØ'}</span>
-         <b>Ouvrir les rendez-vous →</b>
-       </div>
-     </article>
+    <div class="kh8-side">
+      <article class="kh8-profile" data-kh8-route="mykomo" role="button" tabindex="0" aria-label="Ouvrir My KŌMØ">
+        <div class="kh8-avatar">${avatarMarkup()}</div>
+        <div class="kh8-profile-copy"><small>MY KŌMØ</small><strong>${esc(profileName())}</strong><div class="kh8-role">${roleMarkup()}</div></div>
+        <div class="kh8-profile-arrow" aria-hidden="true">→</div>
+        <div class="kh8-profile-stats"><span><b>${level}</b><small>Niveau</small></span><span><b>${points}</b><small>K Points</small></span><span><b>${esc(clubLabel())}</b><small>Club</small></span></div>
+      </article>
+      <article class="kh8-next" data-kh8-route="documents" role="button" tabindex="0" aria-label="Ouvrir mes consultations">
+        <div><small>PROCHAIN RENDEZ-VOUS</small><strong>${appt?esc(appointmentLabel(appt.appointment_type)):'Aucun rendez-vous planifié'}</strong><p>${appt?`${esc(orgLabel())}${appointmentDate?` · ${esc(fmtTime(appointmentDate))}`:''}`:'Planifiez votre prochaine étape depuis Consultations.'}</p></div>
+        <div class="kh8-next-date"><b>${appt?esc(fmtShortDate(appointmentDate)):'—'}</b><span aria-hidden="true">→</span></div>
+      </article>
+    </div>
+   </div>
+
+   <section class="kh8-trajectory" aria-label="Votre trajectoire KŌMØ">
+    <div class="kh8-traj-head">
+      <div>
+        <small>${esc(traj.phase)}</small>
+        <h3>${esc(traj.headline)}</h3>
+        <p>KŌMØ ne s’arrête pas au compte rendu. Votre espace garde le fil entre aujourd’hui et votre prochain point.</p>
+      </div>
+      <div class="kh8-traj-reference"><span>VOTRE RÉFÉRENCE</span><strong>${esc(traj.scoreText)}</strong></div>
+    </div>
+    <div class="kh8-traj-progress">${trajectorySteps(traj)}</div>
+    <div class="kh8-traj-grid">
+      <article><span>MAINTENANT</span><strong>${esc(traj.now)}</strong><p>La priorité issue de votre situation actuelle.</p></article>
+      <article><span>D’ICI AU PROCHAIN POINT</span><strong>${esc(traj.week)}</strong><p>Votre cap entre deux consultations.</p></article>
+      <article><span>PROCHAIN POINT KŌMØ</span><strong>${esc(traj.checkpoint)}</strong><p>${traj.hasAppointment?'Votre suivi est déjà inscrit dans votre trajectoire.':'Planifiez le prochain contact pour garder la continuité.'}</p></article>
+    </div>
+    <div class="kh8-traj-actions"><button type="button" data-kh8-route="path">Voir toute ma trajectoire →</button><button type="button" data-kh8-route="documents">Mes consultations</button></div>
    </section>
 
-   <section class="kh9-results">
-     <article class="kh9-result-main" data-kh8-route="results" role="button" tabindex="0">
-       <div><small>MOTION SCORE</small><strong>${score===null?'—':Math.round(score)}<em>/100</em></strong></div>
-       <p>${scoreDate?'Dernier bilan · '+esc(fmtDate(scoreDate)):'Votre prochain résultat apparaîtra ici.'}</p>
-     </article>
-     <article class="kh9-result-card" data-kh8-route="path" role="button" tabindex="0">
-       <small>TRAJECTOIRE</small>
-       <strong>${esc(traj.phase)}</strong>
-       <p>${esc(traj.now)}</p>
-     </article>
-     <article class="kh9-result-card" data-kh8-route="key" role="button" tabindex="0">
-       <small>CONNECTED</small>
-       <strong>${fmt(w.steps)} pas</strong>
-       <p>${fmtSleep(w.sleep_minutes)} sommeil · ${num(w.resting_hr)===null?'—':Math.round(num(w.resting_hr))+' bpm'} repos</p>
-     </article>
-     <article class="kh9-result-card" data-kh8-route="mykomo" role="button" tabindex="0">
-       <small>MY KŌMØ</small>
-       <strong>${level} · Niveau</strong>
-       <p>${points} K Points · ${esc(clubLabel())}</p>
-     </article>
-   </section>
+   <nav class="kh8-grid" aria-label="Accès rapides KŌMØ Pulse">
+    <a href="#results" data-kh8-route="results" class="kh8-card">
+      <div class="kh8-card-head"><span>01</span><b aria-hidden="true">→</b></div><h3>Résultats</h3><p>Vos scores et leur évolution</p>
+      <div class="kh8-result-mini"><strong>${score===null?'—':Math.round(score)}</strong><span>Motion Score</span><i>${esc(scoreChangeMarkup())}</i></div>
+      <small>${scoreDate?`Dernier bilan · ${esc(fmtDate(scoreDate))}`:'Aucun bilan publié'}</small>
+    </a>
+    <a href="#key" data-kh8-route="key" class="kh8-card">
+      <div class="kh8-card-head"><span>02</span><b aria-hidden="true">→</b></div><h3>Connected</h3><p>Votre quotidien, votre récupération</p>
+      <div class="kh8-connected-mini"><span><b>${fmt(w.steps)}</b><small>pas</small></span><span><b>${fmtSleep(w.sleep_minutes)}</b><small>sommeil</small></span><span><b>${num(w.resting_hr)===null?'—':`${Math.round(num(w.resting_hr))} bpm`}</b><small>repos</small></span></div>
+      <small>${w.metric_date?`Synchronisé · ${esc(fmtDate(w.metric_date))}`:'Aucune donnée Connected aujourd’hui'}</small>
+    </a>
+    <a href="#documents" data-kh8-route="documents" class="kh8-card">
+      <div class="kh8-card-head"><span>03</span><b aria-hidden="true">→</b></div><h3>Consultations</h3><p>Votre suivi et vos rendez-vous</p>
+      <div class="kh8-appointment-mini"><b>${appt?esc(fmtShortDate(appointmentDate)):'—'}</b><span>${appt?esc(appointmentLabel(appt.appointment_type)):'Aucun rendez-vous à venir'}</span><small>${appt?esc(orgLabel()):'Votre agenda KŌMØ'}</small></div>
+      <small>Voir tous mes rendez-vous</small>
+    </a>
+    <a href="#mykomo" data-kh8-route="mykomo" class="kh8-card">
+      <div class="kh8-card-head"><span>04</span><b aria-hidden="true">→</b></div><h3>My KŌMØ</h3><p>Votre profil, Club et communauté</p>
+      <div class="kh8-community-mini"><span class="kh8-mini-avatar">${avatarMarkup()}</span><div><b>${esc(roleTitle())}</b><small>${esc(clubLabel())}</small></div></div>
+      <small>Profil social · réglages · Club</small>
+    </a>
+   </nav>
 
-   <section class="kh9-bottom">
-     <button class="kh9-world" type="button" data-kh8-world>
-       <span><small>KŌMØ WORLD</small><strong>Votre univers de santé, de mouvement et de progression.</strong></span>
-       <b>Entrer dans World ↗</b>
-     </button>
-     <article class="kh9-xp" data-kh8-route="mykomo" role="button" tabindex="0">
-       <div>
-         <small>EXPÉRIENCE</small>
-         <strong>${xp}</strong>
-         <span>XP · Niveau ${level}</span>
-       </div>
-       <div class="kh9-xp-track"><i style="width:${Math.min(100,Math.max(12,(Number(e.level_progress??e.progress??42)||42)))}%"></i></div>
-       <p>Votre activité KŌMØ, vos défis et votre progression dans World alimentent votre expérience.</p>
-     </article>
-   </section>
- </section>`;
+   <button class="kh8-club" type="button" data-kh8-route="club"><span><small>KŌMØ CLUB</small><strong>Une communauté qui avance ensemble.</strong><em>Défis · événements · contenus · récompenses</em></span><b>Accéder au Club →</b></button>
+   <p class="kh8-foot">Mesurer → Comprendre → Agir → Suivre → Progresser</p>
+  </section>`;
 }
 
 function tuneChrome(){
@@ -205,13 +208,13 @@ async function load(force=false){
        state.priorities=Array.isArray(priorities)?priorities:[];
      }else{state.scores=[];state.priorities=[]};
      const allowed=(Array.isArray(appointments)?appointments:[]).filter(x=>!['cancelled','completed','no_show'].includes(String(x.status||'').toLowerCase()));
-     state.appointments=allowed;state.appointment=allowed[0]||null;
+     state.appointment=allowed[0]||null;
      if(state.appointment?.organization_id){
        state.organization=await safe(c.from('organizations').select('name,city').eq('id',state.appointment.organization_id).maybeSingle());
      }else state.organization=null;
-   }else{state.assessment=null;state.priorities=[];state.scores=[];state.appointments=[];state.appointment=null;state.organization=null}
+   }else{state.assessment=null;state.priorities=[];state.scores=[];state.appointment=null;state.organization=null}
    state.loadedFor=session.user.id;state.lastLoad=Date.now();render();
- }catch(error){console.warn('[patient-home-command-v9]',error)}finally{state.loading=false}
+ }catch(error){console.warn('[patient-home-command-v8]',error)}finally{state.loading=false}
 }
 
 function render(){
@@ -220,7 +223,7 @@ function render(){
  if(!host)return;
  tuneChrome();
  host.innerHTML=homeMarkup();
- host.dataset.khomeOwner='patient-home-command-v1@9';
+ host.dataset.khomeOwner='patient-home-command-v1@8';
  requestAnimationFrame(()=>window.KomoAssistantV2?.refresh?.());
  window.dispatchEvent(new CustomEvent('komo:home-command-rendered',{detail:{version:VERSION,cockpit:true}}));
 }
