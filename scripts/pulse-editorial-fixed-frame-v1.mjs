@@ -102,6 +102,43 @@ try{
   process.exit(1);
 }
 
+// Results V5 isolation cleanup: historical patient helpers must never prepend
+// their own report/free UI into the canonical premium Results cockpit.
+try{
+  const reportUiPath=join(pulse,'report-patient-ui-v1.js');
+  let reportUi=await readFile(reportUiPath,'utf8');
+  const reportFrom="async function render(force=false){if(busy)return;const h=host();if(!h)return;busy=true;";
+  const reportTo="async function render(force=false){const current=window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home';if(current==='results'){document.querySelector('[data-krpatient]')?.remove();return}if(busy)return;const h=host();if(!h)return;busy=true;";
+  if(reportUi.includes(reportFrom))reportUi=reportUi.replace(reportFrom,reportTo);
+  await writeFile(reportUiPath,reportUi,'utf8');
+
+  const freePath=join(pulse,'pulse-free-continuity-v2.js');
+  let freeUi=await readFile(freePath,'utf8');
+  const freeFrom="async function render(force=false){if(!ROUTES.has(route()))return;await load(force);";
+  const freeTo="async function render(force=false){if(route()==='results'){document.querySelectorAll('[data-kfree-v2],[data-kfree-v2-library],.pulse-free-result-v2').forEach(x=>x.remove());return}if(!ROUTES.has(route()))return;await load(force);";
+  if(freeUi.includes(freeFrom))freeUi=freeUi.replace(freeFrom,freeTo);
+  await writeFile(freePath,freeUi,'utf8');
+
+  const adaptiveResultsPath=join(pulse,'adaptive-shell-v4.js');
+  let adaptiveResults=await readFile(adaptiveResultsPath,'utf8');
+  const roleFrom="let row=document.querySelector('#kamRoleRow');\n    if(!allowedPro()){";
+  const roleTo="let row=document.querySelector('#kamRoleRow');\n    if(mode()==='patient'){row?.remove();return;}\n    if(!allowedPro()){";
+  if(adaptiveResults.includes(roleFrom))adaptiveResults=adaptiveResults.replace(roleFrom,roleTo);
+  await writeFile(adaptiveResultsPath,adaptiveResults,'utf8');
+
+  const isolationChecks=[
+    ['report UI blocked on Results',reportUi.includes("if(current==='results'){document.querySelector('[data-krpatient]')?.remove();return}")],
+    ['Pulse Free blocked on Results',freeUi.includes("if(route()==='results'){document.querySelectorAll('[data-kfree-v2],[data-kfree-v2-library],.pulse-free-result-v2').forEach(x=>x.remove());return}")],
+    ['patient role row removed',adaptiveResults.includes("if(mode()==='patient'){row?.remove();return;}")]
+  ];
+  for(const [label,ok] of isolationChecks)console.log(`[pulse-results-isolation] ${ok?'OK':'FAIL'} · ${label}`);
+  if(isolationChecks.some(([,ok])=>!ok))throw new Error('Results V5 isolation contract failed');
+  console.log('[pulse-results-isolation] PASS · legacy report/free/role layers cannot overlay Results V5');
+}catch(error){
+  console.error('[pulse-results-isolation] failed:',error?.message||error);
+  process.exit(1);
+}
+
 // Premium Auth finalization: legacy QA validates historical source contracts first.
 // This absolute-last pass ships the single current visual/runtime owner without reintroducing
 // the deprecated choice screen or the dark mobile skin.
