@@ -2018,10 +2018,3 @@ body.world-home-open .world-reticle,body.world-home-open .location-chip,body.wor
 .home-dashboard-v90{grid-template-rows:minmax(245px,1.28fr) minmax(158px,.76fr) minmax(142px,.62fr)}
 .home-destinations-v90{align-items:stretch}.home-destination-row{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(54px,1fr))}.home-destination-row button{height:auto;min-height:54px}.home-destination-row .featured-yacht{border-color:rgba(219,187,129,.22);background:linear-gradient(135deg,rgba(219,187,129,.08),rgba(87,137,105,.055));box-shadow:inset 0 1px 0 rgba(255,255,255,.025)}.home-destination-row .featured-yacht i,.home-destination-row .featured-yacht b{color:#e2c58f}.world-command-center .destination-grid button[data-destination="marina"]{border-color:rgba(219,187,129,.18);background:rgba(219,187,129,.045)}.world-command-center .destination-grid button[data-destination="recovery"]{border-color:rgba(145,188,158,.13);background:rgba(82,132,101,.035)}
 @media(max-width:1100px){.home-dashboard-v90{grid-template-rows:minmax(255px,1.2fr) minmax(165px,.8fr) auto auto}.home-destination-row{grid-template-columns:repeat(4,minmax(0,1fr))}}@media(max-width:900px),(pointer:coarse){.home-destination-row{grid-template-columns:1fr 1fr;grid-template-rows:none}.home-destination-row button{min-height:64px}}
-
-
-/* V9.2 — Hall as continuity lounge, not an information lobby */
-.hall-team-panel>span{display:block;font-size:7px;font-weight:850;letter-spacing:.15em;color:#b9d4c1}
-.hall-team-panel>h3{margin:8px 0 10px;font:500 27px/1.02 Georgia,serif;color:#f2ece2}
-.hall-team-panel>p{max-width:39ch;color:rgba(242,236,226,.62)}
-body.trajectory-connected .location-chip{border-color:rgba(164,200,176,.14)}
