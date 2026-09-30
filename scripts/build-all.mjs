@@ -231,6 +231,7 @@ const scripts = [
   'scripts/komo-longevity-tone-v1.mjs',
   'scripts/komo-luxury-clinic-v2.mjs',
   'scripts/komo-home-live-notes-v1.mjs',
+  'scripts/komo-illustrations-v2.mjs',
   // Absolute last production pass: fixed Pulse viewport + unified visual language.
   'scripts/pulse-editorial-fixed-frame-v1.mjs'
 ];
