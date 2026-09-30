@@ -112,4 +112,24 @@ await patch('fr/world/index.html',[
   ['World regroupe des modules numériques complémentaires au suivi KŌMØ. Les résultats, comptes rendus et rendez-vous restent centralisés dans Pulse. L’interface 3D est facultative.','World prolonge votre suivi KŌMØ avec des modules de visualisation, d’exercice et de contenu personnalisés. Pulse reste l’espace principal pour vos résultats, vos rendez-vous et votre trajectoire.']
 ]);
 
+
+// Final French homepage copy cleanup: keep the intended KŌMØ Longevity voice exact.
+await patch('index.html',[
+  ['Le bilan associe un questionnaire locomoteur, des tests standardisés standardisés et des mesures par capteurs. Les résultats sont analysés puis restitués avec les principales données fonctionnelles et les modalités de suivi.','La plateforme de mesure de votre longévité locomotrice. Découvrez nos solutions fonctionnelles et médicales pour comprendre votre mouvement, mesurer vos capacités et intégrer ces données dans votre suivi de santé.'],
+  ['Résultats compréhensibles fonctionnelles adaptées aux résultats et aux objectifs déclarés.','Une restitution claire avec vos résultats, vos principaux repères et les prochaines étapes de votre suivi.'],
+  ['Questionnaires de réserver','Questions fréquentes'],
+  ['Questionnaires, tests standardisés et mesure instrumentée sont utilisés pour produire une restitution compréhensible et suivre l’évolution dans le temps.','Questionnaires, tests fonctionnels et mesures instrumentées permettent de documenter votre fonction locomotrice et son évolution dans le temps.'],
+  ['Motion, Clinical, Pulse, World, Yachting et Signature s’intègrent dans un même environnement pour mesurer, comprendre et suivre votre santé locomotrice.','Motion, Clinical, Pulse, World, Yachting et Signature s’intègrent dans un même environnement pour mesurer votre fonction locomotrice, comprendre vos résultats et suivre votre évolution.'],
+  ['Vos résultats sont centralisés dans Pulse pour suivre votre évolution et retrouver immédiatement votre trajectoire.','Pulse centralise vos résultats et permet d’identifier immédiatement votre trajectoire KŌMØ et les prochaines étapes de votre suivi.']
+]);
+
+await patch('fr/motion/index.html',[
+  ['tests standardisés standardisés','tests fonctionnels standardisés'],
+  ['Une restitution claire avec vos résultats, vos principaux repères et les prochaines étapes de votre suivi.','Une restitution claire présente vos résultats, vos principaux repères fonctionnels et les éléments à suivre dans le temps.']
+]);
+
+await patch('fr/clinical/index.html',[
+  ['Clinical associe l’évaluation du mouvement à une consultation médicale, des questionnaires personnalisés et jusqu’à 150 biomarqueurs intégrés selon l’indication. L’objectif est de replacer votre fonction locomotrice dans une lecture plus globale de votre santé.','Clinical associe l’évaluation du mouvement à une consultation médicale, des questionnaires personnalisés et jusqu’à 150 biomarqueurs intégrés selon l’indication. Les résultats fonctionnels et biologiques sont interprétés ensemble afin de replacer votre mobilité dans une lecture plus globale de votre santé.']
+]);
+
 console.log('[komo-longevity-tone-v1] PASS · institutional longevity tone applied.');
