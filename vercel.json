@@ -594,6 +594,336 @@
       "source": "/es/white-coast/:path*",
       "destination": "/es/partners",
       "permanent": true
+    },
+    {
+      "source": "/fr/methode/marche",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/marche/:path*",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/equilibre",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/equilibre/:path*",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/posture",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/posture/:path*",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/controle-musculaire",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/controle-musculaire/:path*",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/tests-fonctionnels",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/tests-fonctionnels/:path*",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/pre-bilan-pulse",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/methode/pre-bilan-pulse/:path*",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/locomotor",
+      "destination": "/fr/science/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/locomotor/:path*",
+      "destination": "/fr/science/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/network",
+      "destination": "/fr/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/network/:path*",
+      "destination": "/fr/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/riviera",
+      "destination": "/fr/yachting/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/riviera/:path*",
+      "destination": "/fr/yachting/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/case/equipment",
+      "destination": "/fr/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/case/equipment/:path*",
+      "destination": "/fr/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/case/workflow",
+      "destination": "/fr/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/case/workflow/:path*",
+      "destination": "/fr/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/case/pulse",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/case/pulse/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/partners/clinical",
+      "destination": "/fr/clinical/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/partners/clinical/:path*",
+      "destination": "/fr/clinical/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/partners/motion",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/partners/motion/:path*",
+      "destination": "/fr/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/partners/deployment",
+      "destination": "/fr/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/partners/deployment/:path*",
+      "destination": "/fr/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/method/gait",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/method/gait/:path*",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/method/balance",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/method/balance/:path*",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/method/posture",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/method/posture/:path*",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/method/muscle-control",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/method/muscle-control/:path*",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/network/france",
+      "destination": "/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/network/france/:path*",
+      "destination": "/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/riviera",
+      "destination": "/en/yachting/",
+      "permanent": true
+    },
+    {
+      "source": "/riviera/:path*",
+      "destination": "/en/yachting/",
+      "permanent": true
+    },
+    {
+      "source": "/partners/clinical",
+      "destination": "/clinical/",
+      "permanent": true
+    },
+    {
+      "source": "/partners/clinical/:path*",
+      "destination": "/clinical/",
+      "permanent": true
+    },
+    {
+      "source": "/partners/motion",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/partners/motion/:path*",
+      "destination": "/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/partners/deployment",
+      "destination": "/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/partners/deployment/:path*",
+      "destination": "/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/marcha",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/marcha/:path*",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/equilibrio",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/equilibrio/:path*",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/postura",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/postura/:path*",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/control-muscular",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/control-muscular/:path*",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/locomotor",
+      "destination": "/es/science/",
+      "permanent": true
+    },
+    {
+      "source": "/es/locomotor/:path*",
+      "destination": "/es/science/",
+      "permanent": true
+    },
+    {
+      "source": "/es/network/france",
+      "destination": "/es/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/es/network/france/:path*",
+      "destination": "/es/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/es/partners/clinical",
+      "destination": "/es/clinical/",
+      "permanent": true
+    },
+    {
+      "source": "/es/partners/clinical/:path*",
+      "destination": "/es/clinical/",
+      "permanent": true
+    },
+    {
+      "source": "/es/partners/motion",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/partners/motion/:path*",
+      "destination": "/es/motion/",
+      "permanent": true
+    },
+    {
+      "source": "/es/partners/deployment",
+      "destination": "/es/partners/",
+      "permanent": true
+    },
+    {
+      "source": "/es/partners/deployment/:path*",
+      "destination": "/es/partners/",
+      "permanent": true
     }
   ],
   "alias": [
