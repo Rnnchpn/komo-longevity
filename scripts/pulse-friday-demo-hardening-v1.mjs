@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const pulse=join(process.cwd(),'site','pulse-v12');
@@ -7,6 +7,19 @@ const jsName='pulse-friday-demo-hardening-v1.js';
 const cssName='pulse-friday-demo-hardening-v1.css';
 const version='20260930-friday-demo-v1';
 const cacheVersion=process.env.VERCEL_GIT_COMMIT_SHA?.slice(0,12)||version;
+
+async function stampNestedImports(dir){
+  for(const entry of await readdir(dir,{withFileTypes:true})){
+    const full=join(dir,entry.name);
+    if(entry.isDirectory()){await stampNestedImports(full);continue}
+    if(!entry.isFile()||!entry.name.endsWith('.js'))continue;
+    const before=await readFile(full,'utf8');
+    const after=before
+      .replace(/((?:from|import)\s*["'])(\.\/[^"'?]+\.js)(?:\?[^"']*)?(["'])/g,`$1$2?v=${cacheVersion}$3`)
+      .replace(/(import\(\s*["'])(\.\/[^"'?]+\.js)(?:\?[^"']*)?(["']\s*\))/g,`$1$2?v=${cacheVersion}$3`);
+    if(after!==before)await writeFile(full,after,'utf8');
+  }
+}
 
 const runtime=String.raw`(() => {
   const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
@@ -209,6 +222,7 @@ html=html.replace('</body>',`  <script src="./${jsName}?v=${version}"></script>\
 html=html.replace(/((?:src|href)=["']\.\/[^"'?]+\.(?:js|css))(?:\?[^"']*)?(["'])/g,`$1?v=${cacheVersion}$2`);
 html=html.replace(/<meta name="komo-build" content="[^"]*">/g,`<meta name="komo-build" content="${cacheVersion}">`);
 await writeFile(indexPath,html,'utf8');
+await stampNestedImports(pulse);
 
 const checks=[
   ['hardening meta',html.includes('komo-pulse-demo-hardening')],
@@ -218,7 +232,8 @@ const checks=[
   ['login validation',runtime.includes("form.id==='loginForm'")],
   ['patient validation',runtime.includes("form.id==='patientCreateForm'")],
   ['pro validation',runtime.includes("form.id==='proCreateForm'")],
-  ['French feedback',runtime.includes('Complétez les champs obligatoires')]
+  ['French feedback',runtime.includes('Complétez les champs obligatoires')],
+  ['nested import stamping',typeof stampNestedImports==='function']
 ];
 for(const [label,ok] of checks)console.log('[pulse-friday-demo-v1] '+(ok?'OK':'FAIL')+' · '+label);
 if(checks.some(([,ok])=>!ok))process.exit(1);
