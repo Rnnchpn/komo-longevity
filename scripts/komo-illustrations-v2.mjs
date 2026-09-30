@@ -16,6 +16,7 @@ async function decode(name,out){
 
 await decode('longevity','komo-longevity-v2.webp');
 await decode('clinical','komo-clinical-v2.webp');
+await decode('motion','komo-motion-v2.webp');
 
 async function patch(rel,fn){
   const fp=join(site,rel);
@@ -37,6 +38,13 @@ for(const rel of homeFiles){
   });
 }
 
+for(const rel of ['fr/motion/index.html','motion/index.html','es/motion/index.html']){
+  await patch(rel,html=>html.replace(
+    /(<figure class="kpv-hero-media"><img src=")[^"]+(" alt=")[^"]*(" fetchpriority="high"><\/figure>)/,
+    '$1/assets/images/komo-motion-v2.webp$2Évaluation KŌMØ Motion avec analyse de la marche, de la posture et de l’activité musculaire$3'
+  ));
+}
+
 for(const rel of ['fr/clinical/index.html','clinical/index.html','es/clinical/index.html']){
   await patch(rel,html=>html
     .replaceAll('/assets/site2026/generated/komo-clinical-premium.webp','/assets/images/komo-clinical-v2.webp')
@@ -53,4 +61,4 @@ for(const rel of ['fr/a-propos/index.html','about/index.html','es/sobre/index.ht
   });
 }
 
-console.log('[komo-illustrations-v2] PASS · first visual wave integrated: Longevity + Clinical.');
+console.log('[komo-illustrations-v2] PASS · first visual wave integrated: Longevity + Motion + Clinical.');
