@@ -127,7 +127,7 @@ async function loadMemberData(){
   const userId=state.user.id;state.score=null;state.assessment=null;state.patient=null;state.priorities=[];state.documents=[];state.trajectory=[];
   const oldScore=await state.client.from('pulse_score_runs').select('*').eq('user_id',userId).order('created_at',{ascending:false}).limit(1).maybeSingle();
   if(oldScore.data){state.score={motion_score:numberOrNull(oldScore.data.overall_score),motion_age:numberOrNull(oldScore.data.motion_age),domain_scores:oldScore.data.subscores||{},confidence_label:oldScore.data.confidence||'—',completeness:numberOrNull(oldScore.data.completeness),calculated_at:oldScore.data.computed_at||oldScore.data.created_at,release_status:oldScore.data.status}}
-  const patientRes=await state.client.from('patients').select('*').eq('patient_user_id',userId).order('created_at',{ascending:false}).limit(1).maybeSingle();if(!patientRes.data)return;state.patient=patientRes.data;
+  const patientRes=await state.client.from('patients').select('*').eq('patient_user_id',userId).order('updated_at',{ascending:false}).limit(1).maybeSingle();if(!patientRes.data)return;state.patient=patientRes.data;
   const assessmentRes=await state.client.from('assessments').select('*').eq('patient_id',state.patient.id).order('created_at',{ascending:false}).limit(1).maybeSingle();if(!assessmentRes.data)return;state.assessment=assessmentRes.data;
   const [scoreRes,prioritiesRes,docsRes,trajectoryRes]=await Promise.all([
     state.client.from('scores').select('*').eq('assessment_id',state.assessment.id).order('calculated_at',{ascending:false}).limit(1).maybeSingle(),
