@@ -101,6 +101,35 @@ try{
   process.exit(1);
 }
 
+// Premium patient booking finalization: legacy map/privacy passes keep their
+// historical source contract, then the follow-up-first patient owner is shipped last.
+try{
+  const bookingJs=await readFile(join(root,'pulse-app','patient-booking-premium-v2.js'),'utf8');
+  if(!bookingJs.includes('patientBookingPremiumStyle')||!bookingJs.includes('data-kbd-shell')||!bookingJs.includes('class="reserved"'))throw new Error('Premium patient booking runtime contract missing');
+  await writeFile(join(pulse,'booking-layer-v1.js'),bookingJs,'utf8');
+  const bookingToken='20261001-premium-booking-v2';
+  for(const name of htmlFiles){
+    const htmlPath=join(pulse,name);
+    let bookingHtml=await readFile(htmlPath,'utf8');
+    bookingHtml=bookingHtml.replace(/\.\/booking-layer-v1\.js(?:\?v=[^"'#]+)?/g,`./booking-layer-v1.js?v=${bookingToken}`);
+    await writeFile(htmlPath,bookingHtml,'utf8');
+  }
+  const finalBooking=await readFile(join(pulse,'booking-layer-v1.js'),'utf8');
+  const bookingChecks=[
+    ['patient premium owner',finalBooking.includes('patientBookingPremiumStyle')&&finalBooking.includes('kbooking-patient')],
+    ['follow-up first copy',finalBooking.includes('Votre suivi KŌMØ.')&&finalBooking.includes('PROCHAIN RENDEZ-VOUS')],
+    ['network map preserved',finalBooking.includes('data-kbd-shell')],
+    ['occupied slot privacy preserved',finalBooking.includes('class="reserved"')],
+    ['pro booking owner preserved',finalBooking.includes('function renderPro()')&&finalBooking.includes('data-kbook-pro')]
+  ];
+  for(const [label,ok] of bookingChecks)console.log(`[pulse-premium-booking-final] ${ok?'OK':'FAIL'} · ${label}`);
+  if(bookingChecks.some(([,ok])=>!ok))throw new Error('Premium patient booking final contract failed');
+  console.log('[pulse-premium-booking-final] PASS · patient follow-up first · Pro booking unchanged');
+}catch(error){
+  console.error('[pulse-premium-booking-final] failed:',error?.message||error);
+  process.exit(1);
+}
+
 // Premium Results finalization: keep historical V4 source for build QA, then
 // ship the V5 patient cockpit through the same canonical filename.
 try{
