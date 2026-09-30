@@ -117,7 +117,7 @@ const runtime=String.raw`(() => {
     button.textContent='Envoi…';
     authFeedback('');
     try{
-      const response=await fetch(SUPABASE_URL+'/auth/v1/recover?redirect_to='+encodeURIComponent(location.origin+'/'),{
+      const response=await fetch(SUPABASE_URL+'/auth/v1/recover?redirect_to='+encodeURIComponent(location.origin+'/reset/'),{
         method:'POST',
         headers:{
           apikey:SUPABASE_KEY,
