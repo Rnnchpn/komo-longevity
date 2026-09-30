@@ -226,6 +226,7 @@ const scripts = [
   'scripts/komo-motion-conversion-v1.mjs',
   'scripts/komo-motion-clarity-v2.mjs',
   'scripts/komo-premium-visual-system-v1.mjs',
+  'scripts/komo-medical-editorial-v1.mjs',
   'scripts/komo-public-editorial-qa-v1.mjs',
   // Absolute last production pass: fixed Pulse viewport + unified visual language.
   'scripts/pulse-editorial-fixed-frame-v1.mjs'
