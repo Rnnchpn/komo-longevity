@@ -1,8 +1,8 @@
-/* KŌMØ Pulse — canonical patient dock v7.2.0
-   Persistent app chrome: immediate dock, fixed viewport, glossy premium navigation. */
+/* KŌMØ Pulse — canonical patient dock v7.3.0
+   Persistent app chrome: one route scroller, immediate dock, glossy premium navigation. */
 (() => {
 'use strict';
-const V='7.2.0';
+const V='7.3.0';
 const LEGACY_ROUTE_CONTRACT="['club','Club','∞','club','']";
 void LEGACY_ROUTE_CONTRACT;
 const items=[
@@ -42,7 +42,8 @@ body.kpulse-app-mode .topbar{position:relative!important;z-index:60!important}
 body.kpulse-app-mode .topbar::after{content:'KŌMØ PULSE';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;color:#f1eee7;font:700 9px/1 'DM Sans',sans-serif;letter-spacing:.20em;white-space:nowrap;opacity:.92}
 body.kpulse-app-mode .topbar::before{content:'';position:absolute;left:calc(50% - 62px);top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:#8da18f;box-shadow:0 0 0 0 rgba(141,161,143,.32);animation:kpulseBrand 2.8s ease-out infinite;pointer-events:none}
 @keyframes kpulseBrand{0%{box-shadow:0 0 0 0 rgba(141,161,143,.32)}55%,100%{box-shadow:0 0 0 8px rgba(141,161,143,0)}}
-body.kpulse-app-mode:not(.kpulse-home-mode) #viewRoot,body.kpulse-app-mode:not(.kpulse-home-mode) .view-root{max-height:calc(100dvh - 54px)!important;overflow:auto!important;overscroll-behavior:contain!important;scrollbar-width:none!important;padding-bottom:104px!important;box-sizing:border-box!important}
+body.kpulse-app-mode:not(.kpulse-home-mode) #viewRoot,body.kpulse-app-mode:not(.kpulse-home-mode) .view-root{max-height:calc(100dvh - 54px)!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;scrollbar-width:none!important;padding-bottom:104px!important;box-sizing:border-box!important}
+body.kpulse-app-mode:not(.kpulse-home-mode) #viewRoot>*,body.kpulse-app-mode:not(.kpulse-home-mode) .view-root>*{max-height:none!important;overflow:visible!important;overscroll-behavior:auto!important}
 body.kpulse-app-mode:not(.kpulse-home-mode) #viewRoot::-webkit-scrollbar,body.kpulse-app-mode:not(.kpulse-home-mode) .view-root::-webkit-scrollbar{display:none!important}
 #kpDock,#kpDockV5{display:none!important}
 #kpDockV6{position:fixed!important;z-index:10000!important;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(1180px,calc(100vw - 48px));height:76px;padding:6px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;border:1px solid rgba(239,235,225,.15);border-radius:26px;background:linear-gradient(180deg,rgba(31,43,35,.96) 0%,rgba(13,18,15,.985) 52%,rgba(9,13,11,.99) 100%);box-shadow:0 28px 74px rgba(12,20,15,.31),0 8px 24px rgba(12,20,15,.20),inset 0 1px rgba(255,255,255,.13),inset 0 -1px rgba(0,0,0,.42);backdrop-filter:blur(26px) saturate(128%);-webkit-backdrop-filter:blur(26px) saturate(128%);isolation:isolate;overflow:hidden;box-sizing:border-box;pointer-events:auto!important;touch-action:manipulation}#kpDockV6[hidden]{display:none!important}
