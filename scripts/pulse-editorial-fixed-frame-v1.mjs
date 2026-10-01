@@ -93,7 +93,32 @@ try{
     pdfHtml=pdfHtml.replace(/report-bootstrap-v1\.js(?:\?v=[^"'#]+)?/g,`report-bootstrap-v1.js?v=${pdfToken}`);
     await writeFile(htmlPath,pdfHtml,'utf8');
   }
-  const finalPdf=await readFile(join(pulse,'mobility-report-pdf-v3.js'),'utf8');
+  // Canonical report freshness repair: released snapshots created with an older
+// payload remain immutable in storage, but the downloaded PDF must not omit newer canonical
+// assessment data. If the current canonical payload has more information, render that data
+// with the released report metadata instead of downloading an incomplete snapshot.
+  {
+    const exportPath=join(pulse,'canonical-report-export-v3.js');
+    let exporter=await readFile(exportPath,'utf8');
+    const exportOld=`async function officialSnapshot(patientId=null){try{const s=await loadReportSnapshot({patientId,force:true});return s?.status==='released'&&s?.payload?.schemaVersion===SCHEMA_VERSION?s:null}catch{return null}}
+async function currentPayload(patientId=null){const result=await loadCanonicalResult({patientId,force:true});const payload=buildReportPayload(result,{practitionerName:fallbackPractitioner(result),centerName:result?.dossier?.patient?.organization_name||'KŌMØ'});const check=validateReportPayload(payload);if(!check.ok)throw new Error(\`Rapport Motion incomplet : \${check.errors.join(', ')}\`);return payload}
+export async function exportCanonicalMobilityReport({button=null,patientId=null}={}){if(busy)return;busy=true;const old=button?.textContent,targetPatientId=patientId||professionalPatientId(button);try{if(button){button.disabled=true;button.textContent='Préparation du Motion Report…'}const snapshot=await officialSnapshot(targetPatientId);if(snapshot){await downloadMobilityReport(snapshot.payload,{draft:false});toast(\`Motion Report officiel v\${snapshot.version} téléchargé.\`);return}const payload=await currentPayload(targetPatientId);await downloadMobilityReport(payload,{draft:true});toast(targetPatientId?'Motion Report du patient sélectionné téléchargé.':'Motion Report actualisé téléchargé en aperçu.')}catch(e){console.error('[canonical-report-export-v3]',e);toast(\`Export impossible : \${e?.message||e}\`);throw e}finally{busy=false;if(button){button.disabled=false;button.textContent=old||'Télécharger le Motion Report'}}}`;
+    const exportNew=`async function officialSnapshot(patientId=null){try{const s=await loadReportSnapshot({patientId,force:true});return s?.status==='released'&&s?.payload?.schemaVersion===SCHEMA_VERSION?s:null}catch{return null}}
+async function currentPayload(patientId=null){const result=await loadCanonicalResult({patientId,force:true});const payload=buildReportPayload(result,{practitionerName:fallbackPractitioner(result),centerName:result?.dossier?.patient?.organization_name||'KŌMØ'});const check=validateReportPayload(payload);if(!check.ok)throw new Error(\`Rapport Motion incomplet : \${check.errors.join(', ')}\`);return payload}
+function reportCoverage(p){return{lsi:(p?.sensor?.lsi||[]).filter(x=>Number.isFinite(Number(x?.value))).length,functional:(p?.function?.tests||[]).filter(x=>x?.available).length,questionnaires:Number(p?.context?.questionnaireCount||0),metrics:Number(p?.sensor?.totalMetricCount||0),measurements:(p?.appendix?.measurements||[]).length,sensorRows:(p?.appendix?.sensorMetrics||[]).length,priority:String(p?.priorities?.[0]?.title||'')}}
+function reportSnapshotIsStale(snapshotPayload,current){const a=reportCoverage(snapshotPayload),b=reportCoverage(current);return b.lsi>a.lsi||b.functional>a.functional||b.questionnaires>a.questionnaires||b.metrics>a.metrics||b.measurements>a.measurements||b.sensorRows>a.sensorRows||(b.priority&&a.priority!==b.priority)}
+function releasedCurrentPayload(current,snapshot){const p=typeof structuredClone==='function'?structuredClone(current):JSON.parse(JSON.stringify(current));p.report={...(p.report||{}),version:snapshot.version,status:'released'};p.generatedAt=new Date().toISOString();p.provenance={...(p.provenance||{}),scoreReleasedAt:p.provenance?.scoreReleasedAt||snapshot.releasedAt||null};return p}
+export async function exportCanonicalMobilityReport({button=null,patientId=null}={}){if(busy)return;busy=true;const old=button?.textContent,targetPatientId=patientId||professionalPatientId(button);try{if(button){button.disabled=true;button.textContent='Préparation du Motion Report…'}const snapshot=await officialSnapshot(targetPatientId);const current=await currentPayload(targetPatientId);if(snapshot){const stale=reportSnapshotIsStale(snapshot.payload,current),payload=stale?releasedCurrentPayload(current,snapshot):snapshot.payload;await downloadMobilityReport(payload,{draft:false});toast(stale?\`Motion Report officiel v\${snapshot.version} actualisé avec les données canoniques.\`:\`Motion Report officiel v\${snapshot.version} téléchargé.\`);return}await downloadMobilityReport(current,{draft:true});toast(targetPatientId?'Motion Report du patient sélectionné téléchargé.':'Motion Report actualisé téléchargé en aperçu.')}catch(e){console.error('[canonical-report-export-v3]',e);toast(\`Export impossible : \${e?.message||e}\`);throw e}finally{busy=false;if(button){button.disabled=false;button.textContent=old||'Télécharger le Motion Report'}}}`;
+    if(exporter.includes(exportOld))exporter=exporter.replace(exportOld,exportNew);
+    await writeFile(exportPath,exporter,'utf8');
+
+    const reportUiPath=join(pulse,'report-patient-ui-v1.js');
+    let reportUi=await readFile(reportUiPath,'utf8');
+    reportUi=reportUi.replace("function host(){return document.querySelector('#viewRoot')}","function host(){return null}");
+    await writeFile(reportUiPath,reportUi,'utf8');
+  }
+
+const finalPdf=await readFile(join(pulse,'mobility-report-pdf-v3.js'),'utf8');
   const pdfChecks=[
     ['version',finalPdf.includes("const VERSION='8.0.0-premium'")],
     ['modern typography',finalPdf.includes("doc.setFont('helvetica',style)")&&!finalPdf.includes("doc.setFont('times',style)")],
