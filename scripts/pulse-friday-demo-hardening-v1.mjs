@@ -5,7 +5,7 @@ const pulse=join(process.cwd(),'site','pulse-v12');
 const indexPath=join(pulse,'index.html');
 const jsName='pulse-friday-demo-hardening-v1.js';
 const cssName='pulse-friday-demo-hardening-v1.css';
-const version='20260930-friday-demo-v1';
+const version='20261001-login-validation-fix-v1';
 const cacheVersion=process.env.VERCEL_GIT_COMMIT_SHA?.slice(0,12)||version;
 
 async function stampNestedImports(dir){
@@ -51,7 +51,7 @@ const runtime=String.raw`(() => {
       else {
         const value=String(input.value||'').trim();
         bad=!value;
-        if(!bad&&input.type==='email')bad=!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value);
+        if(!bad&&input.type==='email')bad=!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
         if(!bad&&input.minLength>0)bad=value.length<input.minLength;
       }
       fieldInvalid(input,bad);
@@ -81,14 +81,14 @@ const runtime=String.raw`(() => {
       const password=form.querySelector('#passwordInput');
       const emailValue=String(email?.value||'').trim();
       const passwordValue=String(password?.value||'');
-      const emailBad=!emailValue||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(emailValue);
+      const emailBad=!emailValue;
       const passwordBad=!passwordValue;
       fieldInvalid(email,emailBad);
       fieldInvalid(password,passwordBad);
       if(emailBad||passwordBad){
         event.preventDefault();
         event.stopImmediatePropagation();
-        authFeedback(emailBad&&!passwordBad?'Vérifiez votre adresse e-mail.':'Renseignez votre adresse e-mail et votre mot de passe.');
+        authFeedback('Renseignez votre adresse e-mail et votre mot de passe.');
         (emailBad?email:password)?.focus();
       }
       return;
@@ -120,7 +120,7 @@ const runtime=String.raw`(() => {
     event.stopImmediatePropagation();
     const email=document.querySelector('#emailInput');
     const value=String(email?.value||'').trim();
-    if(!value||!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(value)){
+    if(!value||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)){
       fieldInvalid(email,true);
       authFeedback('Saisissez d’abord l’adresse e-mail de votre compte Pulse.');
       email?.focus();
@@ -163,7 +163,7 @@ const runtime=String.raw`(() => {
   });
   observer.observe(document.documentElement,{childList:true,subtree:true});
 
-  window.KomoPulseFridayDemo={version:'20260930-v1',validateRequiredForm};
+  window.KomoPulseFridayDemo={version:'20261001-login-validation-fix-v1',validateRequiredForm};
 })();`;
 
 const css=String.raw`
