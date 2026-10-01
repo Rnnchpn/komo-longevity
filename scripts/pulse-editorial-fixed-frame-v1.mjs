@@ -240,6 +240,42 @@ try{
     "if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.innerHTML=pro?'Votre centre,<br><em>en mouvement.</em>':'Votre santé,<br><em>en mouvement.</em>';if(p)p.textContent=pro?'Consultations, dossiers patients, Motion et analyses réunis dans un espace professionnel pensé pour le desktop.':'Rendez-vous, tests, résultats et progression KŌMØ réunis dans un seul espace personnel.'}",
     "if(manifesto){const h=manifesto.querySelector('h1'),p=manifesto.querySelector('p:not(.eyebrow)');if(h)h.textContent=pro?'Bienvenue sur KŌMØ Pro':'Bienvenue sur KŌMØ Pulse';if(p)p.textContent=pro?'Vos patients. Vos analyses. Votre centre.':'Vos résultats. Votre trajectoire. Votre World.'}"
   );
+  // Do not auto-open the retired Pulse / World gateway on login.
+// It remains available manually from the account menu after authentication.
+  const oldGatewaySchedule=`function ecosystemGatewaySchedule(){
+  if(authVisible()){
+    if(!document.querySelector('#komoEcosystemGateway') && sessionStorage.getItem(ECOSYSTEM_GATEWAY_SEEN)!=='1') ecosystemGatewayShow(false);
+    if(getAudience()==='professional'){
+      const el=document.querySelector('#komoEcosystemGateway');if(el)el.hidden=true;
+      document.body.classList.remove('komo-gateway-open');
+      return;
+    }
+    setTimeout(()=>ecosystemGatewayShow(false),40);
+    return;
+  }
+  ecosystemGatewayInstallReturn();
+  const pending=sessionStorage.getItem(POST_AUTH_ROUTE);
+  if(pending){
+    sessionStorage.removeItem(POST_AUTH_ROUTE);
+    sessionStorage.setItem(ECOSYSTEM_GATEWAY_SEEN,'1');
+    location.hash=pending;
+  }
+}`;
+  const newGatewaySchedule=`function ecosystemGatewaySchedule(){
+  if(authVisible()){
+    const el=document.querySelector('#komoEcosystemGateway');if(el)el.hidden=true;
+    document.body.classList.remove('komo-gateway-open');
+    return;
+  }
+  ecosystemGatewayInstallReturn();
+  const pending=sessionStorage.getItem(POST_AUTH_ROUTE);
+  if(pending){
+    sessionStorage.removeItem(POST_AUTH_ROUTE);
+    sessionStorage.setItem(ECOSYSTEM_GATEWAY_SEEN,'1');
+    location.hash=pending;
+  }
+}`;
+  if(authGateway.includes(oldGatewaySchedule))authGateway=authGateway.replace(oldGatewaySchedule,newGatewaySchedule);
   await writeFile(authGatewayPath,authGateway,'utf8');
 
   const authCanonicalPath=join(pulse,'auth-login-canonical.js');
