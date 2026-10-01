@@ -70,6 +70,47 @@ try{
   process.exit(1);
 }
 
+// Premium Motion Report PDF finalization: keep the complete V7 renderer for
+// historical build QA, then ship V8 through the same canonical mobility-report-pdf-v3.js owner.
+try{
+  const premiumPdf=await readFile(join(root,'pulse-app','mobility-report-pdf-premium-v8.js'),'utf8');
+  if(!premiumPdf.includes("const VERSION='8.0.0-premium'")||!premiumPdf.includes("VISUAL_SYSTEM='komo-motion-report-premium-2026'"))throw new Error('Premium Motion Report V8 contract missing');
+  if(!premiumPdf.includes('Votre référence Motion.')||!premiumPdf.includes('ISCHIO-JAMBIERS')||!premiumPdf.includes('PROCHAIN RECHECK'))throw new Error('Premium Motion Report V8 patient hierarchy missing');
+  if(!premiumPdf.includes('Données Myodev · détail complet')||!premiumPdf.includes('Mesures cliniques · source')||!premiumPdf.includes('Réponses questionnaires')||!premiumPdf.includes('Provenance & validation'))throw new Error('Premium Motion Report V8 technical traceability missing');
+  await writeFile(join(pulse,'mobility-report-pdf-v3.js'),premiumPdf,'utf8');
+
+  const pdfToken='20261001-motion-report-premium-v8';
+  for(const asset of ['canonical-report-export-v3.js','report-patient-ui-v1.js','report-bootstrap-v1.js','report-delivery-v2.js']){
+    const p=join(pulse,asset);
+    let js=await readFile(p,'utf8');
+    js=js.replace(/mobility-report-pdf-v3\.js(?:\?v=[^'"\s]+)?/g,`mobility-report-pdf-v3.js?v=${pdfToken}`);
+    await writeFile(p,js,'utf8');
+  }
+  for(const name of htmlFiles){
+    const htmlPath=join(pulse,name);
+    let pdfHtml=await readFile(htmlPath,'utf8');
+    pdfHtml=pdfHtml.replace(/canonical-report-export-v3\.js(?:\?v=[^"'#]+)?/g,`canonical-report-export-v3.js?v=${pdfToken}`);
+    pdfHtml=pdfHtml.replace(/report-bootstrap-v1\.js(?:\?v=[^"'#]+)?/g,`report-bootstrap-v1.js?v=${pdfToken}`);
+    await writeFile(htmlPath,pdfHtml,'utf8');
+  }
+  const finalPdf=await readFile(join(pulse,'mobility-report-pdf-v3.js'),'utf8');
+  const pdfChecks=[
+    ['version',finalPdf.includes("const VERSION='8.0.0-premium'")],
+    ['modern typography',finalPdf.includes("doc.setFont('helvetica',style)")&&!finalPdf.includes("doc.setFont('times',style)")],
+    ['premium cover',finalPdf.includes('Votre référence Motion.')&&finalPdf.includes('PRIORITÉ ACTUELLE')],
+    ['three muscle LSI',finalPdf.includes('QUADRICEPS')&&finalPdf.includes('ISCHIO-JAMBIERS')&&finalPdf.includes('MOLLETS')],
+    ['recheck visible',finalPdf.includes('PROCHAIN RECHECK')],
+    ['appendices preserved',finalPdf.includes('Données Myodev · détail complet')&&finalPdf.includes('Réponses questionnaires')],
+    ['resilient engine preserved',finalPdf.includes('cdn.jsdelivr.net/npm/jspdf@2.5.2')&&finalPdf.includes('cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2')&&finalPdf.includes('blob.size<16000')]
+  ];
+  for(const [label,ok] of pdfChecks)console.log(`[pulse-premium-pdf-final] ${ok?'OK':'FAIL'} · ${label}`);
+  if(pdfChecks.some(([,ok])=>!ok))throw new Error('Premium Motion Report V8 final contract failed');
+  console.log('[pulse-premium-pdf-final] PASS · premium patient front section · full technical annexes preserved');
+}catch(error){
+  console.error('[pulse-premium-pdf-final] failed:',error?.message||error);
+  process.exit(1);
+}
+
 // Premium Connected finalization: preserve legacy V3 checks, then ship
 // the premium V4 cockpit through the canonical key-hub-v1.js filename.
 try{
