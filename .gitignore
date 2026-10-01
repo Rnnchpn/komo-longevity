@@ -2,3 +2,10 @@ node_modules/
 site/
 storybook-static/
 .DS_Store
+
+# iOS
+DerivedData/
+.build/
+ios/Config/Secrets.xcconfig
+*.xcuserstate
+xcuserdata/
