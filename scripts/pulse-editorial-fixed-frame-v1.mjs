@@ -6,7 +6,7 @@ const root=dirname(dirname(fileURLToPath(import.meta.url)));
 const source=join(root,'pulse-app','pulse-editorial-fixed-frame-v1.css');
 const pulse=join(root,'site','pulse-v12');
 const file='pulse-editorial-fixed-frame-v1.css';
-const version='20260929-editorial-fixed-frame-v2';
+const version='20261001-editorial-flow-v3';
 
 const css=await readFile(source,'utf8');
 await writeFile(join(pulse,file),css,'utf8');
