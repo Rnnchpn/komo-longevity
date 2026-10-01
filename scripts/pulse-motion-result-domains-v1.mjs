@@ -24,7 +24,7 @@ const QUALITY_OF_LIFE_DEFS=[
   }
 
   const posture=`function postureSummary(d){const ms=d?.measurements||[],defs=[['M-POS-01','Inclinaison du tronc','°'],['M-POS-02','SVA','mm']];const items=defs.map(([code,label,unit])=>{const m=ms.filter(x=>x.indicator_code===code&&measurementValue(x)!==null&&measurementValue(x)!=='').sort((a,b)=>new Date(b.recorded_at||0)-new Date(a.recorded_at||0))[0]||null;const value=m?measurementValue(m):null;return{code,label,value,unit:m?.unit||unit,source:m?.source||'',protocolVersion:m?.protocol_version||d?.motion?.protocol_version||'',qcStatus:m?.qc_status||'',recordedAt:m?.recorded_at||null,available:value!==null&&value!==''}});const sva=items.find(x=>x.code==='M-POS-02'&&x.available)||null;return{svaMm:sva?round(n(sva.value),1):null,unit:sva?.unit||'mm',source:sva?.source||'',protocolVersion:sva?.protocolVersion||d?.motion?.protocol_version||'',qcStatus:sva?.qcStatus||'',recordedAt:sva?.recordedAt||null,contextClass:d?.motion?.context_class||'',assessmentStatus:d?.motion?.status||'',items,available:items.some(x=>x.available),numericContribution:0}}`;
-  src=mustReplace(src,/function postureSummary\(d\)\{[\s\S]*?\}\nfunction lsiRows/,posture+'\nfunction lsiRows','posture summary');
+  src=mustReplace(src,/function postureSummary\(d\)\{[\s\S]*?\}\nfunction lsiRows/,posture+"\nfunction firstMuscleMetric(d,code,muscles,targetSide=''){for(const m of muscles){const v=metric(d,code,m,targetSide);if(v!==null)return{muscle:m,value:v}}return{muscle:muscles[0],value:null}}\nfunction lsiRows",'posture summary + muscle metric helper');
 
   src=src.replace('questionnaires=questionnaireSessions(d),functional=functionalSummary(d,questionnaires),posture=postureSummary(d)', 'questionnaires=questionnaireSessions(d),functional=functionalSummary(d,questionnaires),qualityOfLife=qualityOfLifeSummary(questionnaires),posture=postureSummary(d)');
   if(!src.includes('qualityOfLife=qualityOfLifeSummary(questionnaires)'))throw new Error('[pulse-motion-domains] payload quality of life binding missing');
@@ -93,6 +93,7 @@ const checks=[
  ['five Motion result families are explicit',payload.includes("resultDomains:['functional','muscle','gait','posture','quality_of_life_daily']")&&results.includes('QUALITÉ DE VIE & QUOTIDIEN')],
  ['gait speed remains in gait only',payload.includes("['gait_speed_m_s','Vitesse de marche'")],
  ['Motion posture carries measured posture items',payload.includes("['M-POS-01','Inclinaison du tronc'")&&payload.includes("['M-POS-02','SVA'")],
+ ['muscle alias helper survives posture patch',payload.includes('function firstMuscleMetric')&&payload.includes('const v=metric(d,code,m,targetSide)')],
  ['Clinical adds signed full posture and biology',results.includes("from('clinical_context')")&&results.includes("eq('status','signed')")&&results.includes('POSTURE COMPLÈTE')&&results.includes('BIOLOGIE')],
  ['legacy raw measurements remain available',payload.includes('rawMeasurementRows')&&results.includes('TOUTES LES MESURES')],
  ['numeric Motion policy is not silently reweighted',payload.includes("scorePolicy:'sensor_only'")&&payload.includes('qualityOfLifeContribution:0')&&results.includes('Les LSI sont les seules mesures qui alimentent numériquement le Motion Score v0.6')],
