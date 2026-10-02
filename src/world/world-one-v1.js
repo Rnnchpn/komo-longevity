@@ -183,6 +183,25 @@ function renderNow(){
   $('#panelTitle').textContent='NOW';$('#panelCopy').textContent='What is relevant now, soon or this week — without filling the map with noise.';
   $('#sideBody').innerHTML=html;bindCommon();
 }
+function renderEchelon(){
+  if(state.access.tier!=='echelon'){renderView('world');return}
+  const privatePlaces=state.places.filter(p=>p.visibility==='echelon');
+  const privateEvents=state.events.filter(e=>e.visibility==='echelon');
+  const privateExperiences=state.experiences.filter(x=>x.visibility==='echelon');
+  $('#panelEyebrow').textContent='KŌMØ ECHELON';
+  $('#panelTitle').textContent='Private access.';
+  $('#panelCopy').textContent='Extraordinary places. Private moments. Human response from KŌMØ.';
+  let html='<section class="echelon-intro"><div class="ey">FOUNDING ACCESS</div><h3>Another layer of World is active.</h3><p>Only access available to this identity is revealed. Nothing here is a public directory.</p><button class="echelon-ask" data-open-ask>ASK KŌMØ</button></section>';
+  html+='<div class="section-row"><b>Private Places</b><span>'+privatePlaces.length+' ACCESSIBLE</span></div><div class="place-list">';
+  html+=privatePlaces.length?privatePlaces.map(placeCard).join(''):'<div class="empty">No private place is being surfaced right now.</div>';
+  html+='</div><div class="section-row" style="margin-top:14px"><b>Private Moments</b><span>'+(privateEvents.length+privateExperiences.length)+' AVAILABLE</span></div><div class="event-list">';
+  html+=privateEvents.map(eventCard).join('')+privateExperiences.map(experienceCard).join('');
+  if(!privateEvents.length&&!privateExperiences.length)html+='<div class="empty">No private moment is currently available.</div>';
+  html+='</div>';
+  $('#sideBody').innerHTML=html;
+  bindCommon();
+  $('[data-open-ask]')?.addEventListener('click',()=>askModal());
+}
 function eventCard(e){
   const mine=state.attendance.find(a=>a.event_id===e.id);
   const access=visibilityClass(e);
@@ -276,7 +295,7 @@ function renderView(view){
   state.view=view;
   $$('.side-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.panelView===view));
   $$('.mobile-nav button').forEach(b=>b.classList.toggle('active',b.dataset.mobileView===view));
-  if(view==='world')renderWorld();else if(view==='now')renderNow();else if(view==='moments')renderMoments();else if(view==='card')renderCard();else renderYou();
+  if(view==='world')renderWorld();else if(view==='now')renderNow();else if(view==='moments')renderMoments();else if(view==='card')renderCard();else if(view==='echelon')renderEchelon();else renderYou();
 }
 
 function openPlace(p){
@@ -434,7 +453,7 @@ map.on('load',async()=>{
   analytics('world_opened');
   add3DBuildings();
   const q=new URLSearchParams(location.search);
-  const initial=['world','now','moments','card','you'].includes(q.get('view'))?q.get('view'):'world';
+  const initial=q.get('layer')==='echelon'?'echelon':(['world','now','moments','card','you'].includes(q.get('view'))?q.get('view'):'world');
   state.view=initial;
   await refreshAll();
   renderView(initial);
