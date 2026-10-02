@@ -10,13 +10,13 @@ function render(title,lead,actions='',tag=''){
   state.innerHTML='<p class="ey">KŌMØ CARD</p><h1>'+title+'</h1><p class="lead">'+lead+'</p>'+(tag?'<span class="tag">'+tag+'</span>':'')+(actions?'<div class="actions">'+actions+'</div>':'');
   document.querySelector('[data-confirm]')?.addEventListener('click',()=>connectPulse());
 }
-async function inspect(){
-  if(!token||token.length<20){render('Card not recognised.','This KŌMØ Card link is incomplete or invalid.','<a href="/world/">OPEN KŌMØ WORLD</a>');return}
+export async function verifyCardTap(cardToken=token){
+  if(!cardToken||cardToken.length<20){render('Card not recognised.','This KŌMØ Card link is incomplete or invalid.','<a href="/world/">OPEN KŌMØ WORLD</a>');return}
   const session=await getSession();
   const res=await fetch(SUPABASE_URL+'/functions/v1/world-card',{
     method:'POST',
     headers:{'content-type':'application/json','apikey':SUPABASE_KEY,'authorization':'Bearer '+(session?.access_token||SUPABASE_KEY)},
-    body:JSON.stringify({token})
+    body:JSON.stringify({token:cardToken})
   });
   let data={};try{data=await res.json()}catch{}
   if(res.status===404||data.detected===false){render('Card not recognised.','This card is not registered with KŌMØ.','<a href="/world/">OPEN KŌMØ WORLD</a>');return}
@@ -30,5 +30,14 @@ async function inspect(){
   }
   render('Unable to read card.','Please try again or continue to KŌMØ World.','<a href="/world/">OPEN KŌMØ WORLD</a>');
 }
-onSession(()=>inspect());
-inspect();
+let lastSessionUser='__init__';
+async function runVerification(){
+  const session=await getSession();
+  const uid=session?.user?.id||'';
+  if(uid===lastSessionUser&&lastSessionUser!=='__init__')return;
+  lastSessionUser=uid;
+  await verifyCardTap(token);
+}
+window.KomoCardNfc={version:'1.0.0',verifyCardTap};
+onSession(()=>runVerification());
+runVerification();
