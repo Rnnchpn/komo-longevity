@@ -51,8 +51,8 @@ function syncWorldControls(){
   const mode=worldModeForView(state.view);
   document.body.dataset.worldMode=mode;
   document.body.classList.toggle('map-zoom-detail',map.getZoom()>=10.7);
-  $('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
-  $('[data-destination]').forEach(b=>b.classList.toggle('active',b.dataset.destination===(state.destination||'all')));
+  $$('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  $$('[data-destination]').forEach(b=>b.classList.toggle('active',b.dataset.destination===(state.destination||'all')));
   updateWorldSummary();
 }
 function setWorldMode(mode){
@@ -573,7 +573,7 @@ async function nearMe(){
   navigator.geolocation.getCurrentPosition(pos=>{
     state.near={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy};
     state.destination='all';state.intent='all';state.view='world';
-    $('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));
+    $$('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));
     $('#nearBtn').classList.add('active');$('#nearBtn').textContent='◎ AROUND ME';
     renderUserLocation();
     renderMarkers();renderView('world');
@@ -617,15 +617,15 @@ map.on('zoomend',syncWorldControls);
 
 $$('[data-detail-close]').forEach(x=>x.onclick=()=>{$('#detailSheet').classList.remove('open');$('#detailSheet').setAttribute('aria-hidden','true')});
 $$('[data-modal-close]').forEach(x=>x.onclick=closeModal);
-$('[data-panel-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.panelView));
-$('[data-mobile-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.mobileView));
-$('[data-mode]').forEach(b=>b.onclick=()=>setWorldMode(b.dataset.mode));
-$('[data-destination]').forEach(b=>b.onclick=()=>setWorldDestination(b.dataset.destination));
+$$('[data-panel-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.panelView));
+$$('[data-mobile-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.mobileView));
+$$('[data-mode]').forEach(b=>b.onclick=()=>setWorldMode(b.dataset.mode));
+$$('[data-destination]').forEach(b=>b.onclick=()=>setWorldDestination(b.dataset.destination));
 $('#worldListToggle').onclick=toggleWorldList;
-$('[data-intent]').forEach(b=>b.onclick=()=>{state.intent=b.dataset.intent;$('[data-intent]').forEach(x=>x.classList.toggle('active',x===b));renderMarkers();renderView('world');fitVisibleWorld({duration:520});document.body.classList.add('map-engaged')});
+$$('[data-intent]').forEach(b=>b.onclick=()=>{state.intent=b.dataset.intent;$$('[data-intent]').forEach(x=>x.classList.toggle('active',x===b));renderMarkers();renderView('world');fitVisibleWorld({duration:520});document.body.classList.add('map-engaged')});
 $('#nearBtn').onclick=nearMe;
 $('#viewToggle').onclick=()=>{state.pitched=!state.pitched;map.easeTo({pitch:state.pitched?50:0,bearing:state.pitched?-10:0,duration:600});$('#viewToggle').innerHTML=state.pitched?'2D':'<b>3D</b>'};
-$('#recenterBtn').onclick=()=>{state.near=null;clearUserLocation();$('#nearBtn').classList.remove('active');$('#nearBtn').textContent='◎ AROUND ME';$('#nearSummary').classList.remove('open');state.intent='all';state.destination='all';$('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));renderMarkers();renderView('world');fitVisibleWorld({duration:700});document.body.classList.add('map-engaged');window.dispatchEvent(new CustomEvent('komo:near-change',{detail:{active:false}}))};
+$('#recenterBtn').onclick=()=>{state.near=null;clearUserLocation();$('#nearBtn').classList.remove('active');$('#nearBtn').textContent='◎ AROUND ME';$('#nearSummary').classList.remove('open');state.intent='all';state.destination='all';$$('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));renderMarkers();renderView('world');fitVisibleWorld({duration:700});document.body.classList.add('map-engaged');window.dispatchEvent(new CustomEvent('komo:near-change',{detail:{active:false}}))};
 $('#searchInput').oninput=e=>search(e.target.value);
 $('#signInBtn').onclick=()=>member()?renderView('card'):startOne();
 $('#memberPill').onclick=()=>renderView(member()?'you':'world');
