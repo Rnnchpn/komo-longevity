@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex,nofollow">
   <title>KŌMØ — Your World. Your Health. Your Life.</title>
   <meta name="description" content="KŌMØ connected ecosystem: World, Moments, Life, Pulse and Card.">
-  <link rel="stylesheet" href="./ecosystem-home-v1.css?v=1">
+  <link rel="stylesheet" href="./ecosystem-home-v1.css?v=2">
 </head>
 <body>
 <main class="os-home" id="osHome">
@@ -29,17 +29,25 @@
     </div>
 
     <div class="os-orbit" id="osOrbit">
-      <div class="os-ring ring-a"></div>
-      <div class="os-ring ring-b"></div>
+      <div class="os-ambient" aria-hidden="true">
+        <i class="ambient-a"></i><i class="ambient-b"></i><i class="ambient-c"></i><i class="ambient-d"></i>
+      </div>
+      <div class="os-ring ring-a"><i></i></div>
+      <div class="os-ring ring-b"><i></i></div>
+      <div class="os-ring ring-c"><i></i></div>
       <button class="os-node node-world" data-module="world"><span>WORLD</span><small>Where to go</small></button>
       <button class="os-node node-life" data-module="life"><span>LIFE</span><small>What to own</small></button>
       <button class="os-node node-pulse" data-module="pulse"><span>PULSE</span><small>How you are</small></button>
       <button class="os-node node-moments" data-module="moments"><span>MOMENTS</span><small>What to experience</small></button>
       <button class="os-node node-card" data-module="card"><span>CARD</span><small>Your identity key</small></button>
       <button class="os-node node-echelon" data-module="echelon" hidden><span>ECHELON</span><small>Private access</small></button>
-      <button class="os-sphere" id="osSphere" aria-label="KŌMØ">
-        <span>KŌMØ</span>
-        <small>CONNECTED</small>
+      <div class="planet-aura" aria-hidden="true"></div>
+      <button class="os-sphere" id="osSphere" aria-label="Open your KŌMØ identity">
+        <span class="planet-atmosphere" aria-hidden="true"></span>
+        <span class="planet-surface" aria-hidden="true"></span>
+        <span class="planet-contour" aria-hidden="true"></span>
+        <span class="planet-glint" aria-hidden="true"></span>
+        <span class="planet-copy"><b>KŌMØ</b><small>CONNECTED</small></span>
       </button>
     </div>
 
@@ -92,9 +100,13 @@
     </section>
   </aside>
 
+  <div class="os-transition" id="osTransition" aria-hidden="true">
+    <div class="transition-orb"></div>
+    <span id="osTransitionLabel">WORLD</span>
+  </div>
   <div class="os-toast" id="osToast"></div>
 </main>
 <script src="/world/supabase-umd-v1.js?v=1"></script>
-<script type="module" src="./ecosystem-home-v1.js?v=1"></script>
+<script type="module" src="./ecosystem-home-v1.js?v=2"></script>
 </body>
 </html>
