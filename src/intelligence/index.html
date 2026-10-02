@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#f5f6f3" />
+  <meta name="theme-color" content="#f5f6f3" />\n  <meta name="robots" content="noindex,nofollow,noarchive" />
   <title>KŌMØ Intelligence Service — Riviera</title>
   <meta name="description" content="KŌMØ Intelligence Service — yacht, network, partner and event intelligence for the Riviera." />
   <link rel="preconnect" href="https://unpkg.com">
@@ -249,6 +249,17 @@
   let yachts = [];
   let liveMeta = {};
   let sizeFilter = 'all', movingOnly = false, exactOnly = false;
+  const $=id=>document.getElementById(id);
+  const visibleYachts=$('visibleYachts'), warmCount=$('warmCount'), actionCount=$('actionCount');
+  const liveBadge=$('liveBadge'), sourceBadge=$('sourceBadge');
+  const detailPanel=$('detailPanel'), detailStatus=$('detailStatus'), detailName=$('detailName'), detailSub=$('detailSub');
+  const detailLength=$('detailLength'), detailEta=$('detailEta'), detailRelation=$('detailRelation'), detailCaptain=$('detailCaptain');
+  const detailManager=$('detailManager'), detailIntro=$('detailIntro'), detailLast=$('detailLast'), detailNext=$('detailNext');
+  const detailOffer=$('detailOffer'), detailEvent=$('detailEvent'), detailConfidence=$('detailConfidence'), smartAction=$('smartAction');
+  const todayList=$('todayList'), companyGrid=$('companyGrid'), partnerGrid=$('partnerGrid'), eventList=$('eventList'), networkGrid=$('networkGrid');
+  const companiesDrawer=$('companiesDrawer'), partnersDrawer=$('partnersDrawer'), eventsDrawer=$('eventsDrawer'), networkDrawer=$('networkDrawer');
+  const closePanel=$('closePanel'), cardBtn=$('cardBtn'), layerBtn=$('layerBtn'), addBtn=$('addBtn');
+  const searchInput=$('searchInput'), searchResults=$('searchResults');
 
   const companies = [
     {name:'Burgess',category:'Brokerage · Charter · Management',city:'Monaco',lat:43.7363,lng:7.4215,address:'Le Panorama, 57 rue Grimaldi, 98000 Monaco',relationship:'Target'},
