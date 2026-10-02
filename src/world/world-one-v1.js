@@ -639,10 +639,10 @@ function bindCommon(){
   $$('[data-claim-card]').forEach(el=>el.onclick=claimCardModal);
   $$('[data-save-preferences]').forEach(el=>el.onclick=savePreferences);
   $$('[data-sign-out]').forEach(el=>el.onclick=signOut);
-  $('[data-ask-place]').forEach(el=>el.onclick=()=>{const p=state.places.find(x=>x.id===el.dataset.askPlace);askModal('Help me with '+(p?.name||'this place')+'.')});
-  $('[data-myworld-map]').forEach(el=>el.onclick=()=>renderView('world'));
-  $('[data-myworld-moments]').forEach(el=>el.onclick=()=>renderView('moments'));
-  $('[data-myworld-card]').forEach(el=>el.onclick=()=>renderView('card'));
+  $$('[data-ask-place]').forEach(el=>el.onclick=()=>{const p=state.places.find(x=>x.id===el.dataset.askPlace);askModal('Help me with '+(p?.name||'this place')+'.')});
+  $$('[data-myworld-map]').forEach(el=>el.onclick=()=>renderView('world'));
+  $$('[data-myworld-moments]').forEach(el=>el.onclick=()=>renderView('moments'));
+  $$('[data-myworld-card]').forEach(el=>el.onclick=()=>renderView('card'));
 }
 function search(term){
   const q=String(term||'').trim().toLowerCase(),box=$('#searchResults');
