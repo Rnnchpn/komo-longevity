@@ -44,7 +44,7 @@ function setMode(mode){
 }
 function setDestination(dest){
   const s=st();if(s?.near){
-    s.near=null;
+    window.__KOMO_CLEAR_LOCATION?.();
     document.querySelector('#nearSummary')?.classList.remove('open');
     const near=document.querySelector('#nearBtn');if(near){near.classList.remove('active');near.textContent='◎ AROUND ME'}
   }
