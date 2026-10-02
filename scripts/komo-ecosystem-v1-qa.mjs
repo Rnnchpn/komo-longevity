@@ -21,6 +21,11 @@ const checks=[];
 const pass=(label,ok)=>{checks.push([label,ok]);if(!ok)failures.push(label)};
 
 pass('home and /app share one ecosystem owner',code.home===code.app);
+pass('home planet has lightweight interactive motion',code.home.includes('initPlanetMotion')&&code.home.includes('--ry')&&code.home.includes('requestAnimationFrame'));
+pass('home module transitions are explicit',code.home.includes('exitTo')&&code.home.includes('osTransition'));
+const homeCss=await readFile(join(root,'site','home','ecosystem-home-v1.css'),'utf8');
+pass('home respects reduced motion',homeCss.includes('prefers-reduced-motion:reduce')&&homeCss.includes('animation:none!important'));
+pass('home planet remains CSS/GPU not Three.js',!code.home.includes('three')&&!code.home.includes('WebGLRenderer'));
 pass('world remains map-first',code.world.includes("new maplibregl.Map")&&code.worldHtml.includes('WHY KŌMØ'));
 pass('life uses shared KŌMØ identity',code.life.includes("from '/world/komo-world-auth-v1.js"));
 pass('life checkout is order-request only',code.life.includes('No payment is collected')&&code.life.includes('life_create_order_v1'));
