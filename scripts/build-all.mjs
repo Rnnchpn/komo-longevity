@@ -251,7 +251,9 @@ const scripts = [
   // Final Friday demo hardening: auth recovery, deterministic validation and accessible consent controls.
   'scripts/pulse-friday-demo-hardening-v1.mjs',
   // Absolute final patient presentation: connected KŌMØ OS health home.
-  'scripts/pulse-ecosystem-home-v1.mjs'
+  'scripts/pulse-ecosystem-home-v1.mjs',
+  // Connected ecosystem release gate: auth reuse, routes and health-data boundaries.
+  'scripts/komo-ecosystem-v1-qa.mjs'
 ];
 
 for (const script of scripts) {
