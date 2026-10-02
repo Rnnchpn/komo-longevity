@@ -39,7 +39,7 @@ function setMode(mode){
   window.__KOMO_SET_VIEW?.(view);
   document.body.dataset.worldMode=mode;
   document.body.classList.add('map-engaged');
-  $$('.world-modebar button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  $$$('.world-modebar button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
   updateSummary();
 }
 function setDestination(dest){
@@ -49,7 +49,7 @@ function setDestination(dest){
     const near=document.querySelector('#nearBtn');if(near){near.classList.remove('active');near.textContent='◎ AROUND ME'}
   }
   window.__KOMO_SET_DESTINATION?.(dest);
-  $('.world-destinations button').forEach(b=>b.classList.toggle('active',b.dataset.destination===dest));
+  $$('.world-destinations button').forEach(b=>b.classList.toggle('active',b.dataset.destination===dest));
   document.body.classList.add('map-engaged');
   requestAnimationFrame(()=>window.__KOMO_FIT_VISIBLE?.({duration:620,maxZoom:12.8}));
   updateSummary();
@@ -79,8 +79,8 @@ function syncFromState(){
   const mode=modeName(s.view);
   document.body.dataset.worldMode=['places','events','experiences'].includes(mode)?mode:'places';
   document.body.classList.toggle('map-zoom-detail',(mp()?.getZoom?.()||0)>=10.7);
-  $('.world-modebar button').forEach(b=>b.classList.toggle('active',b.dataset.mode===document.body.dataset.worldMode));
-  $('.world-destinations button').forEach(b=>b.classList.toggle('active',b.dataset.destination===(s.destination||'all')));
+  $$('.world-modebar button').forEach(b=>b.classList.toggle('active',b.dataset.mode===document.body.dataset.worldMode));
+  $$('.world-destinations button').forEach(b=>b.classList.toggle('active',b.dataset.destination===(s.destination||'all')));
   updateSummary();
 }
 function init(){
