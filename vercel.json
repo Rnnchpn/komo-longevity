@@ -295,6 +295,10 @@
         {
           "key": "Expires",
           "value": "0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
         }
       ]
     },
@@ -312,6 +316,10 @@
         {
           "key": "Expires",
           "value": "0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
         }
       ]
     },
@@ -440,6 +448,36 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/fr/world",
+      "destination": "/world/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/world/:path*",
+      "destination": "/world/",
+      "permanent": true
+    },
+    {
+      "source": "/en/world",
+      "destination": "/world/",
+      "permanent": true
+    },
+    {
+      "source": "/en/world/:path*",
+      "destination": "/world/",
+      "permanent": true
+    },
+    {
+      "source": "/es/world",
+      "destination": "/world/",
+      "permanent": true
+    },
+    {
+      "source": "/es/world/:path*",
+      "destination": "/world/",
+      "permanent": true
+    },
     {
       "source": "/check",
       "destination": "https://pulse.komolongevity.com/",
