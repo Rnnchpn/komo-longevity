@@ -116,12 +116,14 @@
 
   function closeSheet(){
     document.querySelector('#kamSheet')?.classList.remove('open');
-    document.querySelector('#kamBackdrop')?.classList.remove('open');
+    const back=document.querySelector('#kamBackdrop');
+    if(back){back.classList.remove('open');back.hidden=true}
     document.querySelector('#kamMore')?.setAttribute('aria-expanded','false');
     document.querySelector('#kamTopMenu')?.setAttribute('aria-expanded','false');
   }
   function openSheet(){
     const sheet=document.querySelector('#kamSheet'),back=document.querySelector('#kamBackdrop');if(!sheet||!back)return;
+    back.hidden=false;
     sheet.classList.add('open');back.classList.add('open');
     document.querySelector('#kamMore')?.setAttribute('aria-expanded','true');
     document.querySelector('#kamTopMenu')?.setAttribute('aria-expanded','true');
@@ -149,7 +151,7 @@
 
   function ensureSheet(){
     const app=document.querySelector('#appShell');if(!app)return;
-    let back=document.querySelector('#kamBackdrop');if(!back){back=document.createElement('button');back.type='button';back.id='kamBackdrop';back.className='kam-backdrop';back.setAttribute('aria-label','Fermer le menu');back.addEventListener('click',closeSheet);app.appendChild(back)}
+    let back=document.querySelector('#kamBackdrop');if(!back){back=document.createElement('button');back.type='button';back.id='kamBackdrop';back.className='kam-backdrop';back.hidden=true;back.setAttribute('aria-label','Fermer le menu');back.addEventListener('click',closeSheet);app.appendChild(back)}
     let sheet=document.querySelector('#kamSheet');if(!sheet){sheet=document.createElement('aside');sheet.id='kamSheet';sheet.className='kam-sheet';sheet.setAttribute('aria-label','Menu KŌMØ Pulse');app.appendChild(sheet)}
     const signature=`${mode()}:${role()}`;
     if(sheet.dataset.signature!==signature){sheet.dataset.signature=signature;sheet.innerHTML=sheetContent()}
