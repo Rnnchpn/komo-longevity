@@ -172,7 +172,14 @@ function fitVisibleWorld({duration=650}={}){
   const list=visibleMapPlaces(); if(!list.length)return;
   const bounds=new maplibregl.LngLatBounds();
   list.forEach(p=>bounds.extend([Number(p.longitude),Number(p.latitude)]));
-  map.fitBounds(bounds,{padding:{top:285,bottom:105,left:95,right:405},maxZoom:11.25,duration});
+  const mobile=window.innerWidth<=820;
+  const compact=window.innerWidth<=1100;
+  const padding=mobile
+    ? {top:230,bottom:300,left:38,right:38}
+    : compact
+      ? {top:245,bottom:110,left:70,right:350}
+      : {top:260,bottom:105,left:85,right:395};
+  map.fitBounds(bounds,{padding,maxZoom:mobile?10.8:11.25,duration});
 }
 function renderMarkers(){
   for(const marker of state.markers.values())marker.remove();state.markers.clear();
