@@ -22,6 +22,8 @@ const pass=(label,ok)=>{checks.push([label,ok]);if(!ok)failures.push(label)};
 
 pass('home and /app share one ecosystem owner',code.home===code.app);
 pass('home planet has lightweight interactive motion',code.home.includes('initPlanetMotion')&&code.home.includes('--ry')&&code.home.includes('requestAnimationFrame'));
+pass('all ecosystem modules bind clicks',code.home.includes("$('[data-module]').forEach")&&code.home.includes("e.preventDefault()"));
+pass('home context reset is non-recursive',!code.home.includes('function renderContext(){\n  renderContext();'));
 pass('home module transitions are explicit',code.home.includes('exitTo')&&code.home.includes('osTransition'));
 const homeCss=await readFile(join(root,'site','home','ecosystem-home-v1.css'),'utf8');
 pass('home respects reduced motion',homeCss.includes('prefers-reduced-motion:reduce')&&homeCss.includes('animation:none!important'));
