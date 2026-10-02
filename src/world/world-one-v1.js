@@ -34,6 +34,47 @@ window.__KOMO_CLEAR_LOCATION=()=>{state.near=null;clearUserLocation();};
 const categoryLabel={eat:'EAT',stay:'STAY',move:'MOVE',recover:'RECOVER',experience:'EXPERIENCE',meet:'MEET'};
 const categorySymbol={eat:'EAT',stay:'STAY',move:'MOVE',recover:'REC',experience:'EXP',meet:'MEET'};
 const preferenceOptions=['Gastronomy','Yachting','Fitness','Recovery','Art','Hotels','Travel','Events','Culture'];
+const worldDestinationCenters={
+  all:[7.02,43.53],cannes:[7.0174,43.5528],monaco:[7.4246,43.7384],'saint-tropez':[6.6407,43.2677]
+};
+function worldModeForView(view){return view==='events'?'events':view==='experiences'?'experiences':'places'}
+function updateWorldSummary(){
+  const hero=$('.hero-copy');if(!hero)return;
+  let box=hero.querySelector('.world-summary');
+  if(!box){box=document.createElement('div');box.className='world-summary';hero.appendChild(box)}
+  const places=filteredPlaces().length;
+  const events=filteredEvents().filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=Date.now()).length;
+  const experiences=filteredExperiences().length;
+  box.innerHTML='<span><b>'+places+'</b> places</span><span><b>'+events+'</b> events</span><span><b>'+experiences+'</b> experiences</span>';
+}
+function syncWorldControls(){
+  const mode=worldModeForView(state.view);
+  document.body.dataset.worldMode=mode;
+  document.body.classList.toggle('map-zoom-detail',map.getZoom()>=10.7);
+  $('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  $('[data-destination]').forEach(b=>b.classList.toggle('active',b.dataset.destination===(state.destination||'all')));
+  updateWorldSummary();
+}
+function setWorldMode(mode){
+  document.body.classList.add('map-engaged');
+  renderView(mode==='places'?'world':mode);
+}
+function setWorldDestination(destination){
+  if(state.near){
+    state.near=null;clearUserLocation();
+    $('#nearBtn').classList.remove('active');$('#nearBtn').textContent='◎ AROUND ME';$('#nearSummary').classList.remove('open');
+  }
+  state.destination=destination||'all';
+  renderMarkers();
+  renderView(state.view);
+  fitVisibleWorld({duration:620,maxZoom:12.8});
+}
+function toggleWorldList(){
+  const collapsed=document.body.classList.toggle('panel-collapsed');
+  const button=$('#worldListToggle');
+  if(button)button.textContent=collapsed?'SHOW LIST':'HIDE LIST';
+  setTimeout(()=>map.resize(),260);
+}
 
 function toast(message){
   const el=$('#toast');el.textContent=message;el.classList.add('show');
@@ -401,6 +442,7 @@ function renderView(view){
   else if(view==='card')renderCard();
   else renderYou();
   syncMarkerVisibility();
+  syncWorldControls();
   window.dispatchEvent(new CustomEvent('komo:view-change',{detail:{view:state.view,destination:state.destination}}));
 }
 
@@ -571,11 +613,15 @@ map.on('load',async()=>{
   setTimeout(()=>$('#worldIntro').classList.add('hidden'),700);
 });
 map.on('click',()=>{$('#detailSheet').classList.remove('open');document.body.classList.add('map-engaged')});
+map.on('zoomend',syncWorldControls);
 
 $$('[data-detail-close]').forEach(x=>x.onclick=()=>{$('#detailSheet').classList.remove('open');$('#detailSheet').setAttribute('aria-hidden','true')});
 $$('[data-modal-close]').forEach(x=>x.onclick=closeModal);
-$$('[data-panel-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.panelView));
-$$('[data-mobile-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.mobileView));
+$('[data-panel-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.panelView));
+$('[data-mobile-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.mobileView));
+$('[data-mode]').forEach(b=>b.onclick=()=>setWorldMode(b.dataset.mode));
+$('[data-destination]').forEach(b=>b.onclick=()=>setWorldDestination(b.dataset.destination));
+$('#worldListToggle').onclick=toggleWorldList;
 $('[data-intent]').forEach(b=>b.onclick=()=>{state.intent=b.dataset.intent;$('[data-intent]').forEach(x=>x.classList.toggle('active',x===b));renderMarkers();renderView('world');fitVisibleWorld({duration:520});document.body.classList.add('map-engaged')});
 $('#nearBtn').onclick=nearMe;
 $('#viewToggle').onclick=()=>{state.pitched=!state.pitched;map.easeTo({pitch:state.pitched?50:0,bearing:state.pitched?-10:0,duration:600});$('#viewToggle').innerHTML=state.pitched?'2D':'<b>3D</b>'};
