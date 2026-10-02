@@ -150,7 +150,7 @@ function filteredPlaces(){
 function filteredEvents(){return state.events.filter(matchesDestination)}
 function filteredExperiences(){return state.experiences.filter(matchesDestination)}
 function markerElement(p){
-  const wrap=document.createElement('div');wrap.className='poi-wrap poi-'+(p.category||'other');
+  const wrap=document.createElement('div');wrap.className='poi-wrap poi-'+(p.category||'other')+(isKomo(p)?' komo-wrap':'');
   const el=document.createElement('button');
   const cls=visibilityClass(p);
   el.className='poi '+(cls||'')+(isKomo(p)?' komo':'')+' category-'+(p.category||'other');
@@ -174,7 +174,7 @@ function destinationPoint(value,index=0){
 }
 function eventMarkerElement(event,place){
   const wrap=document.createElement('div');wrap.className='poi-wrap event-poi-wrap';
-  const el=document.createElement('button');const komoEvent=isKomoEvent(event);el.className='poi event-poi'+(komoEvent?' komo':'');el.type='button';el.innerHTML='<span>'+(komoEvent?'KØ':'✦')+'</span>';el.setAttribute('aria-label',(komoEvent?'KŌMØ EVENT':'EVENT')+' · '+event.title);
+  const el=document.createElement('button');const komoEvent=isKomoEvent(event);if(komoEvent)wrap.classList.add('komo-wrap');el.className='poi event-poi'+(komoEvent?' komo':'');el.type='button';el.innerHTML='<span>'+(komoEvent?'KØ':'✦')+'</span>';el.setAttribute('aria-label',(komoEvent?'KŌMØ EVENT':'EVENT')+' · '+event.title);
   const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(event.title)+'</b><small>EVENT · '+esc(place?.city||event.destination||'KŌMØ')+'</small>';
   wrap.append(el,label);
   el.addEventListener('click',e=>{e.stopPropagation();renderView('events');setTimeout(()=>document.querySelector('[data-event-request="'+event.id+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}),80)});
@@ -182,7 +182,7 @@ function eventMarkerElement(event,place){
 }
 function experienceMarkerElement(exp,place){
   const wrap=document.createElement('div');wrap.className='poi-wrap experience-poi-wrap';
-  const el=document.createElement('button');const komoExp=String(exp?.operator_name||'').includes('KŌMØ')||String(exp?.title||'').startsWith('KŌMØ');el.className='poi experience-poi'+(komoExp?' komo':'');el.type='button';el.innerHTML='<span>'+(komoExp?'KØ':'EXP')+'</span>';el.setAttribute('aria-label',(komoExp?'KŌMØ EXPERIENCE':'EXPERIENCE')+' · '+exp.title);
+  const el=document.createElement('button');const komoExp=String(exp?.operator_name||'').includes('KŌMØ')||String(exp?.title||'').startsWith('KŌMØ');if(komoExp)wrap.classList.add('komo-wrap');el.className='poi experience-poi'+(komoExp?' komo':'');el.type='button';el.innerHTML='<span>'+(komoExp?'KØ':'EXP')+'</span>';el.setAttribute('aria-label',(komoExp?'KŌMØ EXPERIENCE':'EXPERIENCE')+' · '+exp.title);
   const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(exp.title)+'</b><small>EXPERIENCE · '+esc(place?.city||exp.destination||'KŌMØ')+'</small>';
   wrap.append(el,label);
   el.addEventListener('click',e=>{e.stopPropagation();renderView('experiences')});
