@@ -21,26 +21,6 @@
       "has": [
         {
           "type": "host",
-          "value": "life.komolongevity.com"
-        }
-      ],
-      "destination": "/life-v1/"
-    },
-    {
-      "source": "/:path((?!api/).*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "life.komolongevity.com"
-        }
-      ],
-      "destination": "/life-v1/:path*"
-    },
-    {
-      "source": "/",
-      "has": [
-        {
-          "type": "host",
           "value": "pulse.komolongevity.com"
         }
       ],
@@ -220,6 +200,42 @@
     }
   ],
   "headers": [
+    {
+      "source": "/life/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/life",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/home/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/home",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
     {
       "source": "/card/:path*",
       "headers": [
@@ -470,6 +486,28 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "life.komolongevity.com"
+        }
+      ],
+      "destination": "https://komolongevity.com/life/:path*",
+      "permanent": false
+    },
+    {
+      "source": "/",
+      "has": [
+        {
+          "type": "host",
+          "value": "life.komolongevity.com"
+        }
+      ],
+      "destination": "https://komolongevity.com/life/",
+      "permanent": false
+    },
     {
       "source": "/fr/world",
       "destination": "/world/",
