@@ -785,3 +785,164 @@ body.khome-final-v1 #kpDockV6 b{
   .kh9-hero{grid-template-columns:minmax(0,1.25fr) minmax(118px,.75fr)}
   .kh9-connected-grid strong{font-size:7.2px}
 }
+
+/* KŌMØ Pulse — iPad portrait home final v3 · 2026-10-02 */
+@media (min-width:761px) and (max-width:1024px) and (orientation:portrait){
+  /* Make the patient Home a true flex-filled app surface. This removes the
+     unresolved percentage-height chain that left a large empty zone on iPad. */
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 .main-shell{
+    height:100dvh!important;
+    min-height:0!important;
+    max-height:100dvh!important;
+    padding-bottom:calc(74px + 10px + env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+  }
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 #viewRoot{
+    flex:1 1 0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 #viewRoot>[data-my-komo-home],
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.khome-final-v1 [data-my-komo-home]{
+    flex:1 1 0!important;
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    padding:12px 14px 10px!important;
+    overflow:hidden!important;
+  }
+
+  .kh9{
+    flex:1 1 0!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0!important;
+    grid-template-rows:
+      64px
+      minmax(282px,1.16fr)
+      minmax(258px,.98fr)
+      minmax(118px,.52fr)!important;
+    gap:10px!important;
+    align-content:stretch!important;
+  }
+
+  /* Portrait photo: the photo card is deliberately narrower than it is tall,
+     so profile photography reads as a portrait instead of a landscape crop. */
+  .kh9-hero{
+    min-height:0!important;
+    grid-template-columns:minmax(252px,.70fr) minmax(0,1.30fr)!important;
+    gap:10px!important;
+  }
+  .kh9-photo-card{
+    min-width:252px!important;
+    min-height:0!important;
+    border-radius:24px!important;
+  }
+  .kh9-photo{
+    inset:0!important;
+    background:#15372b!important;
+  }
+  .kh9-photo img{
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    object-position:center 16%!important;
+  }
+  .kh9-photo-overlay{
+    left:18px!important;
+    right:18px!important;
+    bottom:16px!important;
+  }
+  .kh9-photo-overlay strong{
+    font-size:clamp(20px,2.6vw,28px)!important;
+  }
+
+  /* Use the right side of the hero fully rather than leaving a sparse card. */
+  .kh9-appointment{
+    min-height:0!important;
+    padding:20px 20px 18px!important;
+    border-radius:24px!important;
+  }
+  .kh9-date-row{margin-top:22px!important}
+  .kh9-date-row strong{font-size:clamp(34px,4.8vw,48px)!important}
+  .kh9-date-row em{font-size:10px!important}
+  .kh9-appointment-copy{padding-top:18px!important}
+  .kh9-appointment-copy h2{font-size:clamp(20px,2.45vw,27px)!important}
+  .kh9-appointment-copy p{font-size:10px!important}
+  .kh9-card-cta{margin-top:16px!important;padding-top:13px!important;font-size:9px!important}
+
+  /* 2 × 2 cards stretch to the full available row height. */
+  .kh9-metrics{
+    min-height:0!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+  .kh9-metric{
+    min-height:0!important;
+    padding:16px 18px!important;
+    border-radius:20px!important;
+  }
+  .kh9-metric-head span{font-size:8.5px!important}
+  .kh9-metric-head b{font-size:7.5px!important}
+  .kh9-motion-value strong{font-size:clamp(42px,5.5vw,58px)!important}
+  .kh9-metric h3{font-size:11.5px!important}
+  .kh9-metric>p{font-size:8.5px!important}
+  .kh9-priority{font-size:clamp(15px,2vw,20px)!important}
+  .kh9-connected-grid{gap:7px!important;margin-top:11px!important}
+  .kh9-connected-grid>div{padding:9px 8px!important}
+  .kh9-connected-grid strong{font-size:13px!important}
+  .kh9-connected-grid span{font-size:6.5px!important}
+  .kh9-level strong{font-size:clamp(20px,2.7vw,28px)!important}
+
+  .kh9-bottom{
+    min-height:0!important;
+    grid-template-columns:minmax(0,1.42fr) minmax(236px,.58fr)!important;
+    gap:10px!important;
+  }
+  .kh9-world,.kh9-xp{
+    min-height:0!important;
+    padding:16px 18px!important;
+    border-radius:20px!important;
+  }
+  .kh9-world strong{font-size:clamp(18px,2.25vw,24px)!important}
+  .kh9-world em{font-size:8.5px!important}
+  .kh9-world>b{min-height:36px!important;padding:0 14px!important;font-size:7.5px!important}
+  .kh9-xp-value strong{font-size:32px!important}
+
+  /* Keep the dock close to the page edge so the dashboard itself gets the
+     maximum usable vertical space. */
+  body.khome-final-v1 #kpDockV6{
+    bottom:max(7px,env(safe-area-inset-bottom))!important;
+  }
+}
+
+/* Shorter portrait tablets remain full-height without forcing document scroll. */
+@media (min-width:761px) and (max-width:1024px) and (orientation:portrait) and (max-height:930px){
+  .kh9{
+    grid-template-rows:
+      58px
+      minmax(236px,1.08fr)
+      minmax(228px,.94fr)
+      minmax(104px,.48fr)!important;
+    gap:8px!important;
+  }
+  .kh9-header-actions button{min-height:32px!important}
+  .kh9-hero,.kh9-metrics,.kh9-bottom{gap:8px!important}
+  .kh9-photo-card{min-width:228px!important}
+  .kh9-appointment{padding:16px 17px!important}
+  .kh9-date-row{margin-top:14px!important}
+  .kh9-metric{padding:13px 15px!important}
+  .kh9-world,.kh9-xp{padding:13px 15px!important}
+}
