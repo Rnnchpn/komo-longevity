@@ -661,3 +661,53 @@ html body.khome-final-v1 .kh8-card:nth-child(4n+4){border-top:3px solid #f56f5c!
     filter:none!important;
   }
 }
+
+/* KŌMØ Pulse — emergency mobile no-blur guard · 2026-10-02 */
+@media (max-width:820px){
+  /* Emergency WebKit guard: no visual-filter compositor is allowed anywhere
+     inside the authenticated app on phone/tablet. This deliberately trades
+     glass effects for guaranteed legibility. */
+  #appShell,
+  #appShell *,
+  #appShell *::before,
+  #appShell *::after{
+    -webkit-filter:none!important;
+    filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+
+  /* Full-screen dimmers stay flat and non-blurred. */
+  #kamBackdrop,
+  #komoAssistantDrawer,
+  .patient-create-backdrop,
+  .pro-create-backdrop,
+  .pro-app-backdrop,
+  dialog::backdrop{
+    -webkit-filter:none!important;
+    filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+
+  /* Closed overlays must not participate in compositing at all. */
+  #kamBackdrop:not(.open),
+  #komoAssistantDrawer[hidden],
+  .patient-create-modal[hidden],
+  .pro-create-modal[hidden],
+  .pro-app-modal[hidden]{
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+
+  /* Keep persistent chrome opaque enough that no backdrop sampling is needed. */
+  #appShell .topbar,
+  #appShell #kpDockV6,
+  #appShell .kam-bottom,
+  #appShell .mobile-nav,
+  #appShell #komoAssistantRail{
+    background-color:#fbfcfb!important;
+  }
+}
