@@ -328,11 +328,28 @@
   font:400 9px/1 "DM Sans",sans-serif!important;
 }
 #authScreen .remember-row input{
-  width:16px!important;
-  height:16px!important;
+  width:17px!important;
+  min-width:17px!important;
+  height:17px!important;
+  min-height:17px!important;
   margin:0!important;
+  padding:0!important;
+  display:inline-block!important;
+  position:static!important;
+  opacity:1!important;
+  visibility:visible!important;
+  -webkit-appearance:checkbox!important;
+  appearance:auto!important;
   accent-color:var(--ka-green)!important;
+  flex:0 0 17px!important;
+  cursor:pointer!important;
 }
+#authScreen #loginForm .remember-row input#rememberInput{
+  display:inline-block!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+#authScreen .remember-row{cursor:pointer!important;user-select:none!important;-webkit-user-select:none!important}
 #authScreen .custom-check{display:none!important}
 #authScreen .text-button{
   padding:0!important;
