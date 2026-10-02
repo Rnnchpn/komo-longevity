@@ -581,6 +581,75 @@ body.khome-final-v1 #kpDockV6 b{
   .kh9-connected-grid>div{padding:7px 5px}
 }
 
+/* Portrait tablets / iPad: use the full vertical app frame and switch the
+   KPI strip to a readable 2 × 2 grid. 768–834px iPads otherwise inherit the
+   compact-desktop layout, which compresses four cards into one row and leaves
+   most of the portrait viewport visually empty. */
+@media (min-width:761px) and (max-width:1024px) and (orientation:portrait){
+  body.khome-final-v1 .main-shell{
+    min-height:0!important;
+    padding-bottom:calc(76px + 12px + env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+  }
+  body.khome-final-v1 #viewRoot{
+    flex:1 1 0!important;
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+  }
+  body.khome-final-v1 [data-my-komo-home]{
+    width:100%!important;
+    height:100%!important;
+    max-height:100%!important;
+    min-height:0!important;
+    padding:12px 14px 8px!important;
+    overflow:hidden!important;
+  }
+  body.khome-final-v1 #kamRoleRow{display:none!important}
+
+  .kh9{
+    width:100%;
+    height:100%;
+    grid-template-rows:64px minmax(250px,.95fr) minmax(270px,1.05fr) 116px;
+    gap:10px;
+  }
+  .kh9-header{
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:14px;
+    padding:0 3px;
+  }
+  .kh9-brand{display:none}
+  .kh9-heading h1{font-size:28px}
+  .kh9-heading p{margin-top:6px;font-size:10px}
+  .kh9-header-actions{gap:6px}
+  .kh9-header-actions button{min-height:34px;padding:0 11px;font-size:7.5px}
+
+  .kh9-hero{
+    grid-template-columns:minmax(0,1.45fr) minmax(238px,.72fr);
+    gap:10px;
+  }
+  .kh9-photo img{object-position:center 27%}
+  .kh9-appointment{padding:17px}
+  .kh9-appointment-copy h2{font-size:17px}
+  .kh9-appointment-copy p{font-size:9px}
+
+  .kh9-metrics{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-rows:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+  .kh9-metric{padding:15px 17px}
+  .kh9-connected-grid>div{padding:8px 7px}
+
+  .kh9-bottom{
+    grid-template-columns:minmax(0,1.45fr) minmax(230px,.55fr);
+    gap:10px;
+  }
+  .kh9-world,.kh9-xp{padding:14px 16px}
+}
+
 /* Mobile app: same hierarchy, denser composition */
 @media(max-width:760px){
   body.khome-final-v1 [data-my-komo-home]{
