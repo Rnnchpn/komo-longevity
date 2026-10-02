@@ -271,3 +271,24 @@ html.world-hub-open,html.world-hub-open body{overflow:hidden}
   .ecosystem-node.events{left:1%}.ecosystem-node.experiences{right:1%}
   .ecosystem-node.life{left:3%}.ecosystem-node.pulse{right:3%}
 }
+
+
+/* ===== iPad / tablet arrival hub v9 ===== */
+@media (min-width:821px) and (max-width:1180px) and (orientation:portrait){
+  .ecosystem-shell{width:100vw;height:100dvh;min-height:700px}
+  .ecosystem-kicker{top:max(5.5%,calc(env(safe-area-inset-top) + 24px))}
+  .ecosystem-kicker b{font-size:10px}
+  .ecosystem-kicker .eco-title{font-size:42px;margin-top:10px}
+  .ecosystem-kicker .eco-tagline{margin-top:10px;font-size:6.2px}
+  .ecosystem-shell::before{width:min(690px,82vw);top:52%}
+  .ecosystem-shell::after{width:min(520px,64vw);top:52%}
+  .ecosystem-sphere{top:52%;width:min(350px,42vw)}
+  .ecosystem-node{width:126px;height:126px}
+  .ecosystem-node.events{top:24%;left:5%}
+  .ecosystem-node.experiences{top:24%;right:5%}
+  .ecosystem-node.life{bottom:15%;left:9%}
+  .ecosystem-node.pulse{bottom:15%;right:9%}
+  .ecosystem-node.one{bottom:3.5%}
+  .ecosystem-live{top:52%;translate:-50% 194px}
+  .ecosystem-caption{bottom:1.5%}
+}
