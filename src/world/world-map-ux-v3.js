@@ -20,7 +20,11 @@ function countVisible(){
   const places=(s.places||[]).filter(x=>matches(x,dest)).filter(x=>s.intent==='all'||x.category===s.intent);
   const events=(s.events||[]).filter(x=>matches(x,dest)).filter(x=>!x.ends_at||new Date(x.ends_at).getTime()>=Date.now());
   const experiences=(s.experiences||[]).filter(x=>matches(x,dest));
-  return{places:places.length,events:events.length,experiences:experiences.length};
+  return{
+    places:places.length||s.markers?.size||0,
+    events:events.length||s.eventMarkers?.size||0,
+    experiences:experiences.length||s.experienceMarkers?.size||0
+  };
 }
 function updateSummary(){
   const hero=$('.hero-copy');if(!hero)return;
@@ -76,5 +80,8 @@ function init(){
   $('#intentBar')?.addEventListener('click',()=>setTimeout(updateSummary,30));
   window.addEventListener('komo:world-ready',syncFromState);
   window.addEventListener('komo:view-change',syncFromState);
+  const body=$('#sideBody');
+  if(body)new MutationObserver(()=>updateSummary()).observe(body,{childList:true,subtree:true});
+  [80,300,900,1800,3500].forEach(ms=>setTimeout(syncFromState,ms));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
