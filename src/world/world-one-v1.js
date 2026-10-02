@@ -100,7 +100,19 @@ async function refreshAll({fly=false}={}){
   updateIdentityUI();
   renderMarkers();
   renderView(state.view);
+  maybeWelcome();
   if(fly)map.easeTo({center:[7.02,43.49],zoom:9.05,pitch:0,bearing:0,duration:650});
+}
+
+function maybeWelcome(){
+  if(!member()||!state.session?.user)return;
+  const key='komo_world_welcome_'+state.session.user.id+'_'+state.access.tier;
+  if(localStorage.getItem(key))return;
+  localStorage.setItem(key,'1');
+  const echelon=state.access.tier==='echelon';
+  openModal('<button class="modal-close" data-modal-close>×</button><div class="ey">WELCOME TO KŌMØ '+(echelon?'ECHELON':'ONE')+'</div><h2>'+(echelon?'Enter the private layer.':'World is now yours.')+'</h2><p>'+(echelon?'FOUNDING ACCESS · Private World, Ask KŌMØ and priority permissions are now active for this identity.':'KŌMØ knows your identity. My World, your digital Card, Passport, member experiences and Pulse bridge are now active.')+'</p><div class="card-actions"><button class="primary" data-welcome-card>OPEN MY CARD</button><button data-modal-close>EXPLORE MY WORLD</button></div>');
+  document.querySelector('[data-welcome-card]')?.addEventListener('click',()=>{closeModal();renderView('card')});
+  document.querySelectorAll('[data-modal-close]').forEach(x=>x.onclick=closeModal);
 }
 
 function updateIdentityUI(){
