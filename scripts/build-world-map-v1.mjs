@@ -7,7 +7,7 @@ const out=resolve(root,'site/world');
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
-for(const file of ['index.html','world-one-v1.css','world-one-v1.js','world-ecosystem-v1.css','world-ecosystem-v1.js','komo-world-auth-v1.js']){
+for(const file of ['index.html','world-one-v1.css','world-one-v1.js','world-ecosystem-v1.css','world-ecosystem-v1.js','world-map-ux-v2.css','world-map-ux-v2.js','komo-world-auth-v1.js']){
   await copyFile(resolve(source,file),resolve(out,file));
 }
 
