@@ -381,7 +381,11 @@ function add3DBuildings(){
 
 map.on('load',async()=>{
   add3DBuildings();
+  const q=new URLSearchParams(location.search);
+  const initial=['world','now','moments','card','you'].includes(q.get('view'))?q.get('view'):'world';
+  state.view=initial;
   await refreshAll();
+  renderView(initial);
   setTimeout(()=>$('#worldIntro').classList.add('hidden'),700);
 });
 map.on('click',()=>$('#detailSheet').classList.remove('open'));
