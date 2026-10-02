@@ -6,7 +6,7 @@ const $$=s=>[...document.querySelectorAll(s)];
 const state={
   session:null,profile:null,role:null,access:{authenticated:false,tier:'public',founding:false,entitlements:[]},
   entitlements:new Set(),places:[],events:[],experiences:[],saved:new Set(),passport:[],attendance:[],experienceRequests:[],claims:[],
-  preferences:null,intent:'all',view:'world',selected:null,markers:new Map(),eventMarkers:new Map(),pitched:false,near:null
+  preferences:null,intent:'all',view:'world',selected:null,markers:new Map(),eventMarkers:new Map(),experienceMarkers:new Map(),pitched:false,near:null
 };
 
 const map=new maplibregl.Map({
@@ -149,6 +149,16 @@ function markerElement(p){
   wrap.append(el,label);el.addEventListener('click',e=>{e.stopPropagation();openPlace(p)});
   return wrap;
 }
+const destinationCenters={
+  monaco:[7.4246,43.7384],cannes:[7.0174,43.5528],'saint-tropez':[6.6407,43.2677],sainttropez:[6.6407,43.2677],
+  antibes:[7.1251,43.5804],nice:[7.2620,43.7102],riviera:[7.03,43.49],courchevel:[6.6347,45.415]
+};
+function destinationPoint(value,index=0){
+  const key=String(value||'riviera').toLowerCase().replace(/[’']/g,'').replace(/\s+/g,'-');
+  const base=destinationCenters[key]||destinationCenters.riviera;
+  const dx=((index%3)-1)*.012,dy=((Math.floor(index/3)%3)-1)*.008;
+  return [base[0]+dx,base[1]+dy];
+}
 function eventMarkerElement(event,place){
   const wrap=document.createElement('div');wrap.className='poi-wrap event-poi-wrap';
   const el=document.createElement('button');el.className='poi event-poi';el.type='button';el.innerHTML='<span>✦</span>';el.setAttribute('aria-label','EVENT · '+event.title);
@@ -157,14 +167,31 @@ function eventMarkerElement(event,place){
   el.addEventListener('click',e=>{e.stopPropagation();renderView('now');setTimeout(()=>document.querySelector('[data-event-request="'+event.id+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}),80)});
   return wrap;
 }
+function experienceMarkerElement(exp,place){
+  const wrap=document.createElement('div');wrap.className='poi-wrap experience-poi-wrap';
+  const el=document.createElement('button');el.className='poi experience-poi';el.type='button';el.innerHTML='<span>EXP</span>';el.setAttribute('aria-label','EXPERIENCE · '+exp.title);
+  const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(exp.title)+'</b><small>EXPERIENCE · '+esc(place?.city||exp.destination||'KŌMØ')+'</small>';
+  wrap.append(el,label);
+  el.addEventListener('click',e=>{e.stopPropagation();window.dispatchEvent(new CustomEvent('komo:open-experiences'));});
+  return wrap;
+}
 function renderEventMarkers(){
   for(const marker of state.eventMarkers.values())marker.remove();state.eventMarkers.clear();
   const now=Date.now();
-  state.events.filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=now).slice(0,12).forEach(e=>{
+  state.events.filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=now).slice(0,12).forEach((e,index)=>{
     const p=state.places.find(x=>x.id===e.place_id);
-    if(!p?.latitude||!p?.longitude)return;
-    const m=new maplibregl.Marker({element:eventMarkerElement(e,p),anchor:'center'}).setLngLat([p.longitude,p.latitude]).addTo(map);
+    const lngLat=(p?.latitude&&p?.longitude)?[Number(p.longitude),Number(p.latitude)]:destinationPoint(e.destination,index);
+    const m=new maplibregl.Marker({element:eventMarkerElement(e,p),anchor:'center',offset:[14,-14]}).setLngLat(lngLat).addTo(map);
     state.eventMarkers.set(e.id,m);
+  });
+}
+function renderExperienceMarkers(){
+  for(const marker of state.experienceMarkers.values())marker.remove();state.experienceMarkers.clear();
+  state.experiences.slice(0,12).forEach((x,index)=>{
+    const p=state.places.find(q=>q.id===x.place_id);
+    const lngLat=(p?.latitude&&p?.longitude)?[Number(p.longitude),Number(p.latitude)]:destinationPoint(x.destination,index+2);
+    const m=new maplibregl.Marker({element:experienceMarkerElement(x,p),anchor:'center',offset:[-14,14]}).setLngLat(lngLat).addTo(map);
+    state.experienceMarkers.set(x.id,m);
   });
 }
 function visibleMapPlaces(){return filteredPlaces().filter(p=>Number.isFinite(Number(p.latitude))&&Number.isFinite(Number(p.longitude)))}
@@ -188,6 +215,7 @@ function renderMarkers(){
     state.markers.set(p.id,m);
   });
   renderEventMarkers();
+  renderExperienceMarkers();
 }
 
 function placeCard(p){
