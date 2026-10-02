@@ -31,7 +31,12 @@ async function load(){
   render();
 }
 function renderContext(){
-  renderContext();
+  const ctx=$('#osContext');
+  if(!ctx)return;
+  if(state.access.tier==='echelon'){ctx.innerHTML='<span>ECHELON · PRIVATE LAYER ACTIVE</span><p>World, Moments and Life are revealing the private access available to this identity.</p>'}
+  else if(state.access.tier==='one'){ctx.innerHTML='<span>KŌMØ ONE · MY WORLD</span><p>KŌMØ knows this identity. Card, Passport, saved places, Moments and Pulse are connected.</p>'}
+  else if(state.session?.user){ctx.innerHTML='<span>KŌMØ ID · SIGNED IN</span><p>Your identity is recognised. ONE activates after your first validated KŌMØ assessment.</p>'}
+  else ctx.innerHTML='<span>WORLD · LIFE</span><p>Explore the public KŌMØ world. ONE activates after your first validated KŌMØ assessment.</p>';
 }
 function render(){
   const home=$('#osHome');home.classList.toggle('tier-one',state.access.tier==='one');home.classList.toggle('tier-echelon',state.access.tier==='echelon');
@@ -41,11 +46,7 @@ function render(){
   $('.node-echelon').hidden=state.access.tier!=='echelon';
   ['pulse','moments','card'].forEach(k=>$('.node-'+k)?.classList.toggle('locked',!member()));
   $('#osAsk').hidden=!has('concierge.request');
-  const ctx=$('#osContext');
-  if(state.access.tier==='echelon'){ctx.innerHTML='<span>ECHELON · PRIVATE LAYER ACTIVE</span><p>World, Moments and Life are revealing the private access available to this identity.</p>'}
-  else if(state.access.tier==='one'){ctx.innerHTML='<span>KŌMØ ONE · MY WORLD</span><p>KŌMØ knows this identity. Card, Passport, saved places, Moments and Pulse are connected.</p>'}
-  else if(state.session?.user){ctx.innerHTML='<span>KŌMØ ID · SIGNED IN</span><p>Your identity is recognised. ONE activates after your first validated KŌMØ assessment.</p>'}
-  else ctx.innerHTML='<span>WORLD · LIFE</span><p>Explore the public KŌMØ world. ONE activates after your first validated KŌMØ assessment.</p>';
+  renderContext();
 }
 function transitionLabel(module){
   return {world:'WORLD',life:'LIFE',pulse:'PULSE',moments:'MOMENTS',echelon:'ECHELON'}[module]||'KŌMØ';
@@ -156,7 +157,10 @@ function initPlanetMotion(){
   orbit.addEventListener('pointerleave',()=>{targetX=0;targetY=0;queue()},{passive:true});
 }
 $('[data-module]').forEach(b=>{
-  b.onclick=()=>go(b.dataset.module);
+  b.addEventListener('click',e=>{
+    e.preventDefault();
+    go(b.dataset.module);
+  });
   b.addEventListener('pointerenter',()=>setOrbitFocus(b.dataset.module));
   b.addEventListener('focus',()=>setOrbitFocus(b.dataset.module));
   b.addEventListener('pointerleave',()=>setOrbitFocus(''));
