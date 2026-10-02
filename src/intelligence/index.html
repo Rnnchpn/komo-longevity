@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#f5f6f3" />\n  <meta name="robots" content="noindex,nofollow,noarchive" />
+  <meta name="theme-color" content="#f5f6f3" />
+  <meta name="robots" content="noindex,nofollow,noarchive" />
   <title>KŌMØ Intelligence Service — Riviera</title>
   <meta name="description" content="KŌMØ Intelligence Service — yacht, network, partner and event intelligence for the Riviera." />
   <link rel="preconnect" href="https://unpkg.com">
-  <link rel="preconnect" href="https://a.basemaps.cartocdn.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'" />
   <style>
     :root{
@@ -23,7 +23,8 @@
     #map{position:absolute;inset:0}
     .leaflet-control-zoom{border:0!important;box-shadow:var(--shadow)!important}
     .leaflet-control-zoom a{border:0!important;color:var(--ink)!important}
-    .leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.72)!important}
+    .leaflet-control-attribution{font-size:8px!important;background:rgba(255,255,255,.78)!important;border-radius:8px 0 0 0!important;padding:2px 5px!important}
+    .leaflet-tile-pane{filter:saturate(.68) brightness(1.04) contrast(.94)}
     .topbar{position:absolute;z-index:1000;top:18px;left:18px;right:18px;height:68px;display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.7);border-radius:22px;background:rgba(251,252,249,.89);backdrop-filter:blur(22px);box-shadow:var(--shadow)}
     .brand{display:flex;align-items:center;gap:12px;min-width:270px;padding:0 10px}
     .brand-mark{width:38px;height:38px;border-radius:13px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:12px;letter-spacing:.13em;font-weight:700}
@@ -119,14 +120,59 @@
     .port-cluster{min-width:48px;height:48px;border-radius:17px;background:rgba(17,23,20,.92);color:#fff;border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(17,23,20,.23);display:grid;place-items:center;padding:5px 8px;backdrop-filter:blur(8px)}
     .port-cluster strong{display:block;font-size:15px;line-height:1;text-align:center}.port-cluster span{display:block;font-size:7px;letter-spacing:.08em;text-transform:uppercase;opacity:.72;margin-top:3px;white-space:nowrap}
     .live.degraded{color:#9a6f2d}.live.degraded .dot{background:#c8994f;box-shadow:0 0 0 5px rgba(200,153,79,.12)}
+    .micro-filters{position:absolute;z-index:997;top:142px;left:318px;right:356px;display:flex;gap:7px;pointer-events:none}
+    .micro-filters .chip{pointer-events:auto}.micro-icon{display:inline-block;margin-right:6px}
+    .map-controls{display:none}
+    .top-actions #layerBtn svg{width:22px;height:22px}
+    .port-cluster{min-width:70px;height:66px;border-radius:23px;padding:7px 9px;background:linear-gradient(145deg,rgba(24,34,30,.97),rgba(7,14,12,.98));box-shadow:0 13px 29px rgba(8,18,15,.28),0 0 0 4px rgba(255,255,255,.22)}
+    .port-cluster strong{font-size:21px}.port-cluster span{font-size:8px;margin-top:5px;max-width:62px;overflow:hidden;text-overflow:ellipsis}
+    .port-cluster i{position:absolute;width:10px;height:10px;border-radius:50%;background:#17231f;border:2px solid white;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+    .port-cluster{position:relative}.port-cluster .c1{left:-9px;top:10px}.port-cluster .c2{right:-9px;top:39px}.port-cluster .c3{left:8px;bottom:-10px}
+    .vessel-marker{width:40px;height:44px;position:relative;display:grid;place-items:center;filter:drop-shadow(0 7px 8px rgba(4,14,11,.25))}
+    .vessel-marker .halo{position:absolute;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(15,31,26,.10);z-index:-1}
+    .vessel-marker.exact .halo{border:2px solid rgba(25,83,69,.72);box-shadow:0 0 0 4px rgba(255,255,255,.55)}
+    .vessel-marker svg{width:31px;height:40px;overflow:visible}
+    .vessel-marker .spd{position:absolute;left:30px;top:0;background:#111916;color:#fff;padding:2px 5px;border-radius:999px;font-size:7px;white-space:nowrap;display:none}
+    .vessel-marker.exact .spd{display:block}
+    .yacht-thumb{width:58px;height:62px;border-radius:12px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(160deg,#a7cad4 0,#6d9dab 44%,#3d7385 45%,#1f4d5e 100%);position:relative}
+    .yacht-thumb:after{content:"";position:absolute;left:-6px;right:-6px;bottom:15px;height:1px;background:rgba(255,255,255,.46);box-shadow:0 7px 0 rgba(255,255,255,.18)}
+    .yacht-thumb svg{width:50px;height:31px;position:relative;z-index:2;filter:drop-shadow(0 4px 4px rgba(0,0,0,.22))}
     @media(max-width:1100px){
       .brand{min-width:210px}.brand-copy span{display:none}.sidebar{width:254px}.filters,.map-legend{left:284px}.right-panel{width:300px}.company-drawer,.events-drawer,.network-drawer{left:284px;right:330px}.filters{right:330px}
     }
     @media(max-width:850px){
-      .topbar{top:10px;left:10px;right:10px}.brand{min-width:auto}.brand-copy{display:none}.top-actions .pill-btn:not(.dark){display:none}
-      .sidebar{left:10px;right:10px;top:auto;bottom:10px;width:auto;height:166px;padding:10px}.region-row,.summary{display:none}.nav{border:0}.section-title{margin:7px 2px 5px}.list{display:flex;gap:7px;overflow-x:auto}.action-card{min-width:210px;margin:0}
-      .filters{left:10px;right:10px;top:88px}.right-panel{left:10px;right:10px;top:142px;bottom:184px;width:auto;display:none}.right-panel.open{display:flex}
-      .map-legend,.demo-badge{display:none}.company-drawer,.events-drawer,.network-drawer{inset:142px 10px 184px 10px}.directory-grid{grid-template-columns:1fr 1fr}
+      #app{height:100dvh}
+      .topbar{top:max(10px,env(safe-area-inset-top));left:12px;right:12px;height:64px;padding:7px 8px;border-radius:22px;gap:8px;background:rgba(255,255,253,.95)}
+      .brand{min-width:auto;padding:0}.brand-copy{display:none}.brand-mark{width:48px;height:48px;border-radius:15px;font-size:14px}
+      .search input{height:48px;border-radius:15px;padding:0 10px;font-size:14px}.search-kbd{display:none}
+      .top-actions{display:flex;gap:0}.top-actions #cardBtn,.top-actions #addBtn{display:none}.top-actions #layerBtn{display:grid;place-items:center;width:42px;height:42px;padding:0;border:0;background:transparent}
+      .filters{left:12px;right:12px;top:calc(max(10px,env(safe-area-inset-top)) + 75px);gap:7px;padding:0 0 4px}
+      .filters [data-layer]{display:none}
+      .micro-filters{left:12px;right:12px;top:calc(max(10px,env(safe-area-inset-top)) + 123px);gap:7px}
+      .chip{height:40px;padding:0 16px;font-size:12px;background:rgba(255,255,253,.95);box-shadow:0 6px 18px rgba(14,28,23,.08)}
+      .micro-filters .chip{height:38px;padding:0 15px;font-size:11px}
+      .sidebar{left:9px;right:9px;top:auto;bottom:calc(9px + env(safe-area-inset-bottom));width:auto;height:218px;padding:18px 14px 13px;border-radius:29px;background:rgba(255,255,253,.965);backdrop-filter:blur(24px);box-shadow:0 -5px 30px rgba(17,31,26,.13);overflow:hidden}
+      .sidebar:before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:42px;height:5px;border-radius:99px;background:#c8cecb}
+      .sidebar>.eyebrow{display:block;margin:2px 3px 0;font-size:9px;letter-spacing:.24em;color:#626b67}
+      .region-row{display:block;position:absolute;right:15px;top:16px;margin:0;padding:0}.region-row h1{display:none}.region-row .live{font-size:8px}
+      .summary{display:none}
+      .nav{height:40px;margin-top:8px;border-bottom:1px solid rgba(16,24,21,.08);padding:0 0 6px;gap:3px}
+      .nav button{height:34px;font-size:10px;padding:0 5px;border-radius:12px}
+      .sidebar>.section-title{display:flex;margin:10px 3px 7px;font-size:14px}.sidebar>.section-title span{font-size:10px;letter-spacing:.08em}
+      .sidebar>.list{display:flex;gap:9px;overflow-x:auto;overflow-y:hidden;padding:1px 0 2px;scrollbar-width:none}
+      .sidebar>.list::-webkit-scrollbar{display:none}
+      .action-card{min-width:248px;height:84px;margin:0;border-radius:18px;padding:10px;display:grid;grid-template-columns:58px 1fr;gap:11px;background:#fff;box-shadow:0 4px 14px rgba(12,26,21,.05)}
+      .action-card:hover{transform:none}.action-card .yacht-thumb{grid-row:1/4}.action-card .action-top{align-items:center;min-width:0}.action-card .action-top b{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.action-card p{font-size:10px;margin:6px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.action-card .mini-link{display:none}.tag{font-size:8px;padding:4px 7px}
+      .right-panel{left:9px;right:9px;top:calc(max(10px,env(safe-area-inset-top)) + 170px);bottom:calc(238px + env(safe-area-inset-bottom));width:auto;display:none;border-radius:24px}.right-panel.open{display:flex}
+      .panel-cover{height:108px}.panel-cover h2{font-size:22px}
+      .map-legend,.demo-badge{display:none}
+      .company-drawer,.events-drawer,.network-drawer{inset:calc(max(10px,env(safe-area-inset-top)) + 170px) 9px calc(238px + env(safe-area-inset-bottom)) 9px;border-radius:24px}
+      .directory-grid{grid-template-columns:1fr}
+      .leaflet-control-zoom{display:none!important}
+      .leaflet-control-attribution{margin-bottom:calc(232px + env(safe-area-inset-bottom))!important;font-size:6px!important;max-width:74vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .map-controls{display:flex;position:absolute;z-index:988;right:13px;bottom:calc(236px + env(safe-area-inset-bottom));flex-direction:column;border-radius:19px;overflow:hidden;box-shadow:0 12px 26px rgba(14,28,23,.15);border:1px solid rgba(255,255,255,.78)}
+      .map-controls button{width:47px;height:46px;border:0;border-bottom:1px solid rgba(16,24,21,.08);background:rgba(255,255,253,.95);font-size:22px;color:#101815;display:grid;place-items:center}.map-controls button:last-child{border-bottom:0}.map-controls svg{width:20px;height:20px}
+      .port-cluster{min-width:68px;height:64px;border-radius:22px}.port-cluster strong{font-size:21px}.port-cluster span{font-size:8px;max-width:62px}
     }
     @media(max-width:560px){.directory-grid{grid-template-columns:1fr}.top-actions{display:none}.event-card{grid-template-columns:1fr}.event-stats{text-align:left}}
   </style>
@@ -146,7 +192,7 @@
       <div id="searchResults" class="search-results"></div>
     </div>
     <div class="top-actions">
-      <button class="pill-btn" id="layerBtn">Layers</button>
+      <button class="pill-btn" id="layerBtn" aria-label="Couches de carte"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 12h3M11 12h9M4 17h7M15 17h5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="13" cy="17" r="2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg></button>
       <button class="pill-btn" id="cardBtn">KŌMØ Card</button>
       <button class="pill-btn dark" id="addBtn">+ Ajouter</button>
     </div>
@@ -177,10 +223,17 @@
     <button class="chip" data-filter="40-60">40–60 m</button>
     <button class="chip" data-filter="60-80">60–80 m</button>
     <button class="chip" data-filter="80+">80 m+</button>
-    <button class="chip" data-toggle="moving">En mouvement</button>
-    <button class="chip" data-toggle="exact">AIS exact</button>
     <button class="chip gold active" data-layer="companies">Sociétés</button>
     <button class="chip gold active" data-layer="partners">Privileges</button>
+  </div>
+  <div class="micro-filters">
+    <button class="chip" data-toggle="exact"><span class="micro-icon">◎</span>AIS exact</button>
+    <button class="chip" data-toggle="moving"><span class="micro-icon">➤</span>En mouvement</button>
+  </div>
+  <div class="map-controls" aria-label="Contrôles de carte">
+    <button id="zoomInBtn" aria-label="Zoom avant">+</button>
+    <button id="zoomOutBtn" aria-label="Zoom arrière">−</button>
+    <button id="recenterBtn" aria-label="Recentrer Riviera"><svg viewBox="0 0 24 24"><path d="M4 12 20 5l-7 15-2.4-6.6L4 12Z" fill="currentColor"/></svg></button>
   </div>
 
   <aside class="right-panel" id="detailPanel">
@@ -290,40 +343,39 @@
     {name:'KŌMØ Card',type:'Privileges',text:'Future couche de partenaires, invitations et avantages réservés aux membres.',foot:'Coming next'}
   ];
 
-  const map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:8,maxZoom:17,preferCanvas:true}).setView([43.49,6.96],9);
+  const map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:8,maxZoom:17,preferCanvas:true}).setView([43.52,7.03],9);
   L.control.zoom({position:'bottomright'}).addTo(map);
-  let usingFallbackTiles=false;
-  let tileErrors=0;
-  const primaryTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-    attribution:'&copy; OpenStreetMap contributors &copy; CARTO',
-    subdomains:'abcd',maxZoom:20,updateWhenIdle:true,keepBuffer:4
-  });
-  primaryTiles.on('tileerror',()=>{
-    tileErrors+=1;
-    if(tileErrors>=4 && !usingFallbackTiles){
-      usingFallbackTiles=true;
-      try{map.removeLayer(primaryTiles)}catch{}
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-        attribution:'&copy; OpenStreetMap contributors',maxZoom:19
-      }).addTo(map);
-    }
-  });
-  primaryTiles.addTo(map);
+  const primaryTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; OpenStreetMap contributors',
+    maxZoom:19,updateWhenIdle:true,keepBuffer:4
+  }).addTo(map);
+  if(window.innerWidth<850){map.setView([43.51,7.02],8);}
 
   const yachtLayer=L.layerGroup().addTo(map);
   const companyLayer=L.layerGroup().addTo(map);
   const partnerLayer=L.layerGroup().addTo(map);
   const yachtMarkers=new Map();
+  const REGION_CENTERS={"Monaco · Nice":[43.716,7.345],"Antibes":[43.582,7.127],"Cannes":[43.548,7.026],"Saint-Tropez":[43.271,6.639]};
+  function regionKey(y){
+    const s=((y.port||'')+' '+(y.city||'')).toLowerCase();
+    if(s.includes('saint-tropez')) return 'Saint-Tropez';
+    if(s.includes('cannes')||s.includes('canto')) return 'Cannes';
+    if(s.includes('antibes')||s.includes('vauban')||s.includes('golfe-juan')) return 'Antibes';
+    if(s.includes('monaco')||s.includes('hercule')||s.includes('fontvieille')||s.includes('nice')||s.includes('villefranche')) return 'Monaco · Nice';
+    return 'Riviera';
+  }
   const PORT_CENTERS={"Port Hercule":[43.7369,7.4254],"Port Vauban (Antibes / IYCA)":[43.5824,7.1274],"Port Vauban":[43.5824,7.1274],"Cannes Vieux Port":[43.5501,7.0156],"Port Canto (Cannes)":[43.5427,7.0352],"Port Canto":[43.5427,7.0352],"Golfe-Juan Anchorage":[43.5639,7.0734],"Port de Saint-Tropez":[43.2713,6.6385],"Port de Nice (Lympia)":[43.6963,7.2867],"Port de Nice":[43.6963,7.2867],"Villefranche-sur-Mer Anchorage":[43.6998,7.3156],"Port de Fontvieille":[43.7284,7.4168]};
 
   function yachtIcon(y){
-    const c=y.precision==='ais'?'exact':'';
-    const label = y.length ? Math.round(y.length) : 'Y';
-    return L.divIcon({className:'',html:'<div class="boat-icon '+c+'"><span>'+label+'</span></div>',iconSize:[30,30],iconAnchor:[15,15]});
+    const exact=y.precision==='ais';
+    const heading=Number.isFinite(Number(y.heading))?Number(y.heading):(Number.isFinite(Number(y.course))?Number(y.course):0);
+    const speed=exact&&Number(y.speed)>0.5?Number(y.speed).toFixed(1)+' kn':'';
+    const svg='<svg viewBox="0 0 32 42" style="transform:rotate('+heading+'deg)"><path d="M16 2 25 32 20 39H12L7 32 16 2Z" fill="white" stroke="#15211d" stroke-width="1.35"/><path d="M16 8v23M11.5 29h9" stroke="#5f6d67" stroke-width="1.15" stroke-linecap="round"/><path d="M12 18h8l2 8H10l2-8Z" fill="#dbe5e2" stroke="#60706a" stroke-width=".85"/></svg>';
+    return L.divIcon({className:'',html:'<div class="vessel-marker '+(exact?'exact':'')+'"><i class="halo"></i>'+svg+(speed?'<span class="spd">'+speed+'</span>':'')+'</div>',iconSize:[40,44],iconAnchor:[20,22]});
   }
   function clusterIcon(port,count){
     const short=String(port).replace('Port de ','').replace('Port ','').replace(' (Antibes / IYCA)','').replace(' (Cannes)','').replace(' Anchorage','');
-    return L.divIcon({className:'',html:'<div class="port-cluster"><div><strong>'+count+'</strong><span>'+short+'</span></div></div>',iconSize:[58,48],iconAnchor:[29,24]});
+    return L.divIcon({className:'',html:'<div class="port-cluster"><i class="c1"></i><i class="c2"></i><i class="c3"></i><div><strong>'+count+'</strong><span>'+short+'</span></div></div>',iconSize:[70,66],iconAnchor:[35,33]});
   }
   function landIcon(){return L.divIcon({className:'',html:'<div class="land-icon">Y</div>',iconSize:[25,25],iconAnchor:[12,12]});}
   function partnerIcon(){return L.divIcon({className:'',html:'<div class="partner-icon">✦</div>',iconSize:[25,25],iconAnchor:[12,12]});}
@@ -354,7 +406,28 @@
     warmCount.textContent=exact;
     document.querySelector('.metric:nth-child(2) span').textContent='AIS exact';
 
-    if(map.getZoom()<11){
+    if(map.getZoom()<10){
+      const groups=new Map();
+      filtered.forEach(y=>{
+        const key=regionKey(y);
+        if(!groups.has(key)) groups.set(key,[]);
+        groups.get(key).push(y);
+      });
+      for(const [region,list] of groups){
+        const center=REGION_CENTERS[region]||[
+          list.reduce((sum,y)=>sum+Number(y.lat),0)/list.length,
+          list.reduce((sum,y)=>sum+Number(y.lng),0)/list.length
+        ];
+        const maxLen=Math.max(...list.map(y=>Number(y.length)||0));
+        const m=L.marker(center,{icon:clusterIcon(region,list.length),zIndexOffset:220})
+          .bindTooltip('<b>'+esc(region)+'</b><br>'+list.length+' yachts · '+maxLen+' m max');
+        m.on('click',()=>map.flyTo(center,11,{duration:.6}));
+        m.addTo(yachtLayer);
+      }
+      return;
+    }
+
+    if(map.getZoom()<12){
       const groups=new Map();
       filtered.forEach(y=>{
         const key=y.port||y.city||'Riviera';
@@ -369,7 +442,7 @@
         const maxLen=Math.max(...list.map(y=>Number(y.length)||0));
         const m=L.marker(center,{icon:clusterIcon(port,list.length),zIndexOffset:200})
           .bindTooltip('<b>'+esc(port)+'</b><br>'+list.length+' yachts · '+maxLen+' m max');
-        m.on('click',()=>map.flyTo(center,13,{duration:.65}));
+        m.on('click',()=>map.flyTo(center,13,{duration:.6}));
         m.addTo(yachtLayer);
       }
       return;
@@ -419,13 +492,13 @@
   function renderToday(){
     const recent=[...yachts].filter(y=>hoursAlongside(y.alongside)<24).sort((a,b)=>hoursAlongside(a.alongside)-hoursAlongside(b.alongside)).slice(0,8);
     const feed=recent.length?recent:[...yachts].sort((a,b)=>(b.length||0)-(a.length||0)).slice(0,8);
-    todayList.innerHTML=feed.map(y=>'<div class="action-card" data-yacht="'+esc(y.id)+'"><div class="action-top"><b>'+esc(y.name)+'</b><span class="tag">'+(hoursAlongside(y.alongside)<24?'ARRIVAL':'LIVE')+'</span></div><p>'+esc((y.length||'?')+' m · '+(y.port||'Riviera')+(y.alongside?' · '+y.alongside:''))+'</p><button class="mini-link">Open yacht →</button></div>').join('');
+    const thumb='<div class="yacht-thumb"><svg viewBox="0 0 70 38"><path d="M7 26h55l-7 7H17l-10-7Z" fill="#f7faf9" stroke="#21342d" stroke-width="1"/><path d="M22 16h27l8 10H15l7-10Z" fill="#eef4f2" stroke="#21342d" stroke-width="1"/><path d="M31 9h11l5 7H25l6-7Z" fill="#f8fbfa" stroke="#21342d" stroke-width="1"/><rect x="34" y="4" width="2" height="6" rx="1" fill="#21342d"/></svg></div>';
+    todayList.innerHTML=feed.map(y=>'<div class="action-card" data-yacht="'+esc(y.id)+'">'+thumb+'<div class="action-top"><b>'+esc(y.name)+'</b><span class="tag">'+(hoursAlongside(y.alongside)<24?'ARRIVAL':'LIVE')+'</span></div><p>'+esc((y.length||'?')+' m · '+(y.port||'Riviera')+(y.alongside?' · '+y.alongside:''))+'</p><button class="mini-link">Voir sur la carte →</button></div>').join('');
     [...todayList.querySelectorAll('[data-yacht]')].forEach(el=>el.addEventListener('click',()=>{
       const y=yachts.find(x=>x.id===el.dataset.yacht); if(y){selectYacht(y); map.setView([y.lat,y.lng],12)}
     }));
     actionCount.textContent=recent.length;
   }
-
   function renderDirectories(){
     companyGrid.innerHTML=companies.map(c=>'<div class="directory-card"><div class="type">'+esc(c.category)+' · '+esc(c.city)+'</div><h3>'+esc(c.name)+'</h3><p>'+esc(c.address)+'</p><div class="foot"><span>'+esc(c.relationship)+'</span><b>On map →</b></div></div>').join('');
     partnerGrid.innerHTML='<div class="directory-card"><div class="type">KŌMØ CARD</div><h3>Private Privileges</h3><p>Aucun partenaire n’est affiché comme actif tant que l’accord et le privilège n’ont pas été validés.</p><div class="foot"><span class="privilege">COMING NEXT</span><b>Verified only</b></div></div>';
@@ -470,6 +543,9 @@
     document.querySelectorAll('.chip[data-filter]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); sizeFilter=btn.dataset.filter; renderYachts();
   }));
   document.querySelector('[data-toggle="moving"]').addEventListener('click',e=>{movingOnly=!movingOnly;e.currentTarget.classList.toggle('active',movingOnly);renderYachts()});
+  document.getElementById('zoomInBtn')?.addEventListener('click',()=>map.zoomIn());
+  document.getElementById('zoomOutBtn')?.addEventListener('click',()=>map.zoomOut());
+  document.getElementById('recenterBtn')?.addEventListener('click',()=>map.setView([43.51,7.02],window.innerWidth<850?8:9));
   document.querySelector('[data-toggle="exact"]').addEventListener('click',e=>{exactOnly=!exactOnly;e.currentTarget.classList.toggle('active',exactOnly);renderYachts()});
   document.querySelector('[data-layer="companies"]').addEventListener('click',e=>{if(map.hasLayer(companyLayer)){map.removeLayer(companyLayer);e.currentTarget.classList.remove('active')}else{map.addLayer(companyLayer);e.currentTarget.classList.add('active')}});
   document.querySelector('[data-layer="partners"]').addEventListener('click',e=>{if(map.hasLayer(partnerLayer)){map.removeLayer(partnerLayer);e.currentTarget.classList.remove('active')}else{map.addLayer(partnerLayer);e.currentTarget.classList.add('active')}});
