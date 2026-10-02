@@ -31,6 +31,12 @@ function toast(message){
   const el=$('#toast');el.textContent=message;el.classList.add('show');
   clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600);
 }
+async function analytics(event_name,entity_type=null,entity_id=null,metadata={}){
+  try{
+    let anon=localStorage.getItem('komo_anon_v1');if(!anon){anon=crypto.randomUUID();localStorage.setItem('komo_anon_v1',anon)}
+    await supabase.from('komo_product_analytics').insert({user_id:state.session?.user?.id||null,anonymous_id:anon,event_name,surface:'world',entity_type,entity_id,metadata});
+  }catch{}
+}
 function esc(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function has(code){return state.entitlements.has(code)}
 function member(){return state.access.tier==='one'||state.access.tier==='echelon'}
@@ -203,13 +209,21 @@ function renderMoments(){
 }
 function renderCard(){
   if(!has('world.card.digital.view')){renderLocked('KŌMØ ONE CARD','Your KŌMØ Identity Key is unlocked with ONE after a completed KŌMØ assessment.','BECOME ONE');return}
+  analytics('card_viewed');
   const echelon=state.access.tier==='echelon',name=state.profile?.display_name||[state.profile?.first_name,state.profile?.last_name].filter(Boolean).join(' ')||'KŌMØ Member';
   const activeClaim=state.claims.find(c=>['requested','approved','production','shipped'].includes(c.status));
+  const since=state.access.access_started_at?new Date(state.access.access_started_at).getFullYear():2026;
   const html='<div class="digital-card '+(echelon?'echelon':'')+'"><div><small>KŌMØ IDENTITY KEY</small><strong>KŌMØ<br>'+(echelon?'ECHELON':'ONE')+'</strong></div><div class="card-foot"><span class="card-name">'+esc(name)+'</span><span class="nfc">)))</span></div></div>'+
-    '<div class="card-actions">'+(activeClaim?'<button disabled>PHYSICAL CARD · '+esc(activeClaim.status.toUpperCase())+'</button>':'<button class="primary" data-claim-card>CLAIM YOUR KŌMØ '+(echelon?'ECHELON':'ONE')+' CARD</button>')+'</div>'+
+    '<div class="member-line"><b>KŌMØ MEMBER</b><span>Member since '+since+'</span></div>'+
+    '<div class="card-action-grid"><button data-wallet-placeholder>ADD TO WALLET</button><button data-qr-placeholder>SHOW QR</button><button data-member-access>MEMBER ACCESS</button></div>'+
+    '<div class="card-actions">'+(activeClaim?'<button disabled>PHYSICAL CARD · '+esc(activeClaim.status.toUpperCase())+'</button>':'<button class="primary" data-claim-card>CLAIM YOUR PHYSICAL CARD</button>')+'</div>'+
+    (state.access.founding?'<div class="founding-card-note"><b>FOUNDING MEMBER</b><span>Physical card is complimentary during the Founding phase.</span></div>':'')+
     '<div class="pulse-bridge"><div class="ey">KŌMØ PULSE</div><b>YOUR KŌMØ TRAJECTORY IS ACTIVE</b><a href="'+pulseUrl()+'">OPEN PULSE →</a></div>';
   $('#panelTitle').textContent=echelon?'KŌMØ ECHELON':'KŌMØ ONE';$('#panelCopy').textContent=echelon?'PRIVATE MEMBERSHIP · FOUNDING ACCESS':'Your identity across World, Card and the KŌMØ member layer.';
   $('#sideBody').innerHTML=html;bindCommon();
+  $('[data-wallet-placeholder]')?.addEventListener('click',()=>openModal('<button class="modal-close" data-modal-close>×</button><div class="ey">APPLE WALLET</div><h2>Coming soon.</h2><p>KŌMØ does not issue an Apple Wallet pass in this V1 yet. Your digital Card remains available here.</p>'));
+  $('[data-qr-placeholder]')?.addEventListener('click',()=>openModal('<button class="modal-close" data-modal-close>×</button><div class="ey">KŌMØ QR ACCESS</div><h2>Coming soon.</h2><p>QR-based member access is not active in this V1. NFC card recognition is being prepared separately and never replaces strong identity verification.</p>'));
+  $('[data-member-access]')?.addEventListener('click',()=>renderView('world'));
 }
 function renderYou(){
   if(!state.session?.user){renderLocked('YOU','Sign in with your existing KŌMØ identity. No second account is created.','SIGN IN');return}
@@ -236,6 +250,7 @@ function renderView(view){
 
 function openPlace(p){
   state.selected=p;
+  analytics(p.visibility==='echelon'?'echelon_private_place_viewed':'place_viewed','world_place',p.id,{category:p.category,visibility:p.visibility});
   const vis=visibilityClass(p),cover=$('#detailCover');
   cover.className='detail-cover '+vis;
   $('#detailEy').textContent=vis==='echelon'?'KŌMØ ECHELON':vis==='one'?'KŌMØ ONE':'KŌMØ SELECTED';
@@ -264,7 +279,7 @@ async function toggleSaved(id){
   }else{
     const {error}=await supabase.from('world_saved_places').insert({user_id:uid,place_id:id});
     if(error)return toast('Could not save this place.');
-    state.saved.add(id);toast('Saved to My World');
+    state.saved.add(id);analytics('place_saved','world_place',id);toast('Saved to My World');
   }
   renderView(state.view);
   if(state.selected?.id===id)openPlace(state.selected);
@@ -274,7 +289,7 @@ async function requestEvent(id){
   if(current)return toast('Event status · '+current.status);
   const {error}=await supabase.from('world_event_attendance').insert({event_id:id,user_id:state.session.user.id,status:'requested'});
   if(error)return toast(error.message.includes('row-level')?'This event is not available with your access.':'Request could not be sent.');
-  toast('Access requested');await loadContent();renderView('now');
+  analytics('event_requested','world_event',id);toast('Access requested');await loadContent();renderView('now');
 }
 async function requestExperience(id){
   const current=state.experienceRequests.find(x=>x.experience_id===id);
@@ -309,7 +324,7 @@ async function submitCardClaim(e){
     delivery_city:String(fd.get('delivery_city')||'').trim(),delivery_country:String(fd.get('delivery_country')||'').trim()};
   const {error}=await supabase.from('world_card_claims').insert(row);
   if(error)return toast(error.message.includes('duplicate')?'A card claim is already active.':'Card claim could not be submitted.');
-  closeModal();toast('Card claim received');await loadContent();renderCard();
+  analytics('physical_card_requested','world_card_claim',null,{card_type:state.access.tier});closeModal();toast('Card claim received');await loadContent();renderCard();
 }
 
 function askModal(defaultText=''){
@@ -324,7 +339,7 @@ async function submitAsk(e){
   const row={user_id:state.session.user.id,request_type:'ask_komo',prompt:String(fd.get('prompt')||'').trim(),destination:String(fd.get('destination')||'').trim()||null,requested_for:fd.get('requested_for')?new Date(String(fd.get('requested_for'))).toISOString():null,priority:has('concierge.priority')?'priority':'standard'};
   const {error}=await supabase.from('world_concierge_requests').insert(row);
   if(error)return toast('Ask KŌMØ could not be sent.');
-  closeModal();toast('KŌMØ received your request');
+  analytics('ask_komo_created','concierge_request',null,{priority:row.priority});closeModal();toast('KŌMØ received your request');
 }
 function openModal(html){$('#modalCard').innerHTML=html;$('#modalShell').classList.add('open');$('#modalShell').setAttribute('aria-hidden','false');$$('[data-modal-close]').forEach(x=>x.onclick=closeModal)}
 function closeModal(){$('#modalShell').classList.remove('open');$('#modalShell').setAttribute('aria-hidden','true')}
@@ -358,7 +373,7 @@ async function nearMe(){
   if(!navigator.geolocation){box.textContent='Location is not available on this device.';box.classList.add('open');return}
   $('#nearBtn').classList.add('active');box.textContent='Finding what matters around you…';box.classList.add('open');
   navigator.geolocation.getCurrentPosition(pos=>{
-    state.near={lat:pos.coords.latitude,lng:pos.coords.longitude};
+    state.near={lat:pos.coords.latitude,lng:pos.coords.longitude};analytics('near_me_used',null,null,{accuracy_bucket:pos.coords.accuracy<100?'under_100m':'coarse'});
     const nearby=state.places.filter(p=>km(state.near.lat,state.near.lng,p.latitude,p.longitude)<=15);
     const today=state.events.filter(e=>{const d=new Date(e.starts_at),n=new Date();return d.toDateString()===n.toDateString()}).length;
     const week=state.events.filter(e=>{const ms=new Date(e.starts_at)-Date.now();return ms>=0&&ms<=7*86400000}).length;
@@ -380,6 +395,7 @@ function add3DBuildings(){
 }
 
 map.on('load',async()=>{
+  analytics('world_opened');
   add3DBuildings();
   const q=new URLSearchParams(location.search);
   const initial=['world','now','moments','card','you'].includes(q.get('view'))?q.get('view'):'world';
