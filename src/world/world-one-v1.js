@@ -29,6 +29,7 @@ window.__KOMO_SET_DESTINATION=(value)=>{state.destination=value||'all';renderMar
 window.__KOMO_SET_VIEW=(value)=>renderView(value);
 window.__KOMO_FIT_VISIBLE=(opts)=>fitVisibleWorld(opts||{});
 window.__KOMO_NEAR_ME=()=>nearMe();
+window.__KOMO_CLEAR_LOCATION=()=>{state.near=null;clearUserLocation();};
 
 const categoryLabel={eat:'EAT',stay:'STAY',move:'MOVE',recover:'RECOVER',experience:'EXPERIENCE',meet:'MEET'};
 const categorySymbol={eat:'EAT',stay:'STAY',move:'MOVE',recover:'REC',experience:'EXP',meet:'MEET'};
