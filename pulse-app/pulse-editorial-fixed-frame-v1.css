@@ -612,3 +612,52 @@ html body.khome-final-v1 .kh8-card:nth-child(4n+4){border-top:3px solid #f56f5c!
     margin-bottom:2px!important;
   }
 }
+
+/* KŌMØ Pulse — iPhone WebKit blur compositor hardening · 2026-10-02 */
+@media (max-width:767px){
+  html.kamo-iphone-locked #appShell,
+  html.kamo-iphone-locked #appShell .main-shell,
+  html.kamo-iphone-locked #appShell #viewRoot,
+  html.kamo-iphone-locked #appShell .topbar,
+  html.kamo-iphone-locked #appShell #kpDockV6,
+  html.kamo-iphone-locked #appShell .kam-bottom,
+  html.kamo-iphone-locked #appShell .kam-role-row,
+  html.kamo-iphone-locked #appShell .account-popover,
+  html.kamo-iphone-locked #appShell #komoAssistantRail{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+    filter:none!important;
+  }
+
+  html.kamo-iphone-locked #kamBackdrop:not(.open){
+    display:none!important;
+    visibility:hidden!important;
+    opacity:0!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+
+  html.kamo-iphone-locked #kamBackdrop.open{
+    display:block!important;
+    visibility:visible!important;
+  }
+
+  html.kamo-iphone-locked #komoAssistantDrawer[hidden]{
+    display:none!important;
+    visibility:hidden!important;
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+
+  html.kamo-iphone-locked #appShell .topbar,
+  html.kamo-iphone-locked #appShell #kpDockV6,
+  html.kamo-iphone-locked #appShell .kam-bottom{
+    background-color:rgba(255,255,255,.98)!important;
+  }
+
+  html.kamo-iphone-locked #viewRoot,
+  html.kamo-iphone-locked #viewRoot>*{
+    opacity:1!important;
+    filter:none!important;
+  }
+}
