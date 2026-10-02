@@ -501,6 +501,99 @@ html[data-adaptive-shell][data-adaptive-mode="patient"] body.kresults-v4 #kamRol
   .kr5-lsi{grid-template-columns:1fr;gap:8px}
   .kr5-lsi-value{text-align:left}
 }
+/* iPad portrait — use the complete app canvas instead of the stacked
+   narrow-tablet composition. Keep the scientific overview visible at once,
+   with a two-column score/muscle cockpit and full-width secondary cards. */
+@media (min-width:701px) and (max-width:1024px) and (orientation:portrait){
+  body.kresults-v4 .main-shell{
+    height:100dvh!important;
+    max-height:100dvh!important;
+    min-height:0!important;
+    padding-bottom:calc(76px + 12px + env(safe-area-inset-bottom))!important;
+    overflow:hidden!important;
+  }
+  body.kresults-v4 #viewRoot{
+    flex:1 1 0!important;
+    width:100%!important;
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    padding:0!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  html[data-adaptive-shell][data-adaptive-mode="patient"] body.kresults-v4 #kamRoleRow{
+    display:none!important;
+  }
+  .kr5{
+    width:100%;
+    min-height:100%;
+    margin:0;
+    padding:12px 14px 18px;
+    gap:10px;
+    align-content:start;
+  }
+  .kr5-top{
+    min-height:64px;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:12px;
+  }
+  .kr5-top h1{font-size:30px}
+  .kr5-top p{font-size:9px}
+  .kr5-actions{gap:6px}
+  .kr5-btn{min-height:34px;padding:0 11px;font-size:7.5px}
+
+  .kr5-hero{
+    min-height:390px;
+    grid-template-columns:minmax(0,1.08fr) minmax(300px,.92fr);
+  }
+  .kr5-score-pane{
+    padding:22px 24px;
+    border-right:1px solid #e3ebe6;
+    border-bottom:0;
+  }
+  .kr5-score strong{font-size:86px}
+  .kr5-score-wrap h2{margin-top:16px;font-size:24px}
+  .kr5-score-wrap p{font-size:9px}
+  .kr5-score-meta{font-size:7px}
+
+  .kr5-muscles{
+    padding:14px;
+    grid-template-columns:1fr;
+    grid-template-rows:auto repeat(3,minmax(0,1fr));
+    gap:7px;
+  }
+  .kr5-muscles-head{grid-column:auto}
+  .kr5-lsi{
+    min-height:0;
+    padding:12px 13px;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:10px;
+    align-items:center;
+  }
+  .kr5-lsi-copy span{font-size:7px}
+  .kr5-lsi-copy strong{font-size:12px}
+  .kr5-lsi-value{min-width:64px;text-align:right;font-size:24px}
+
+  .kr5-priority{
+    min-height:104px;
+    padding:15px 16px;
+    grid-template-columns:130px minmax(0,1fr) 132px;
+    gap:14px;
+  }
+  .kr5-priority-main h3{font-size:18px}
+  .kr5-priority-main p{font-size:8px}
+  .kr5-recheck{min-width:0;padding:9px 10px}
+
+  .kr5-strip{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .kr5-mini{min-height:94px;padding:14px 15px}
+  .kr5-mini strong{font-size:20px}
+  .kr5-detail>summary{min-height:64px}
+}
+
+/* Phone */
 @media(max-width:700px){
   body.kresults-v4 .topbar{
     min-height:52px!important;
