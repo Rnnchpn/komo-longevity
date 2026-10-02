@@ -89,7 +89,7 @@
     .legend-dot.company{background:#29303d}.legend-dot.partner{background:var(--gold)}
     .boat-icon{width:30px;height:30px;border-radius:50% 50% 50% 12%;background:#143e35;transform:rotate(45deg);display:grid;place-items:center;border:2px solid rgba(255,255,255,.9);box-shadow:0 4px 12px rgba(15,38,32,.25)}
     .boat-icon span{transform:rotate(-45deg);color:white;font-size:8px;font-weight:800}
-    .boat-icon.warm{background:#8e744b}
+    .boat-icon.warm{background:#8e744b}.boat-icon.exact{background:#111714;box-shadow:0 0 0 5px rgba(20,62,53,.16),0 4px 12px rgba(15,38,32,.25)}
     .boat-icon.vip{background:#111714;box-shadow:0 0 0 5px rgba(164,134,86,.18),0 4px 12px rgba(15,38,32,.25)}
     .land-icon{width:25px;height:25px;border-radius:9px;background:#283038;border:2px solid white;box-shadow:0 4px 12px rgba(20,20,20,.22);display:grid;place-items:center;color:#fff;font-size:10px;font-weight:800}
     .partner-icon{width:25px;height:25px;border-radius:50%;background:#a48656;border:2px solid white;box-shadow:0 4px 12px rgba(20,20,20,.22);display:grid;place-items:center;color:#fff;font-size:11px}
@@ -150,7 +150,7 @@
 
   <aside class="sidebar">
     <div class="eyebrow">Riviera Intelligence</div>
-    <div class="region-row"><h1>Live Riviera</h1><div class="live"><i class="dot"></i> LIVE</div></div>
+    <div class="region-row"><h1>Live Riviera</h1><div class="live" id="liveBadge"><i class="dot"></i> CONNECTING</div></div>
     <div class="nav">
       <button class="active" data-view="map">Carte</button>
       <button data-view="today">Today</button>
@@ -173,8 +173,8 @@
     <button class="chip" data-filter="40-60">40–60 m</button>
     <button class="chip" data-filter="60-80">60–80 m</button>
     <button class="chip" data-filter="80+">80 m+</button>
-    <button class="chip" data-toggle="charter">Charter</button>
-    <button class="chip" data-toggle="warm">Réseau KŌMØ</button>
+    <button class="chip" data-toggle="moving">En mouvement</button>
+    <button class="chip" data-toggle="exact">AIS exact</button>
     <button class="chip gold active" data-layer="companies">Sociétés</button>
     <button class="chip gold active" data-layer="partners">Privileges</button>
   </div>
@@ -223,7 +223,7 @@
     <div class="legend-key"><i class="legend-dot company"></i> Yacht company</div>
     <div class="legend-key"><i class="legend-dot partner"></i> KŌMØ Privilege</div>
   </div>
-  <div class="demo-badge">V1 · DEMO DATA · AIS CONNECTOR NEXT</div>
+  <div class="demo-badge" id="sourceBadge">LIVE DATA · CONNECTING</div>
 
   <section class="company-drawer" id="partnersDrawer">
     <div class="drawer-head"><div><div class="eyebrow">KŌMØ CARD</div><h2>Private Privileges</h2></div><button data-close="partnersDrawer">×</button></div>
@@ -246,68 +246,34 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 (() => {
-  const yachts = [
-    {id:'y1',name:'M/Y Aurelia',lat:43.7363,lng:7.4318,length:68,type:'Private',port:'Monaco',eta:'In port',relation:'Warm',priority:'vip',captain:'Known contact',manager:'Private management',intro:'Zayd network',last:'14 days',next:'Welcome',offer:'Motion onboard',event:'Private dinner eligible'},
-    {id:'y2',name:'M/Y Sirocco',lat:43.7392,lng:7.4240,length:47,type:'Charter',port:'Monaco',eta:'In port',relation:'New',priority:'normal',captain:'To identify',manager:'Management listed',intro:'No introduction yet',last:'—',next:'Find warm intro',offer:'Recovery onboard',event:'Captain circle'},
-    {id:'y3',name:'M/Y Altair',lat:43.7254,lng:7.4190,length:91,type:'Private',port:'Cap-d’Ail',eta:'16:40',relation:'Warm',priority:'vip',captain:'Direct contact',manager:'Known manager',intro:'Janet network',last:'42 days',next:'Welcome + invite',offer:'Clinical onboard',event:'Dolce dinner'},
-    {id:'y4',name:'M/Y Cassiopeia',lat:43.5718,lng:7.1222,length:54,type:'Charter',port:'Antibes',eta:'In port',relation:'Warm',priority:'warm',captain:'Known contact',manager:'Charter management',intro:'Broker referral',last:'61 days',next:'Reconnect',offer:'Motion onboard',event:'Captain dinner'},
-    {id:'y5',name:'M/Y Solaris',lat:43.5485,lng:7.0407,length:73,type:'Private',port:'Golfe-Juan',eta:'12:20',relation:'New',priority:'normal',captain:'Public professional contact',manager:'Known company',intro:'Ask partner',last:'—',next:'Request introduction',offer:'KŌMØ introduction',event:'Not yet'},
-    {id:'y6',name:'M/Y Étoile',lat:43.5460,lng:7.0170,length:39,type:'Charter',port:'Cannes',eta:'In port',relation:'Warm',priority:'warm',captain:'Known contact',manager:'Known manager',intro:'Direct',last:'8 days',next:'Offer availability',offer:'Recovery + physio',event:'Thursday dinner'},
-    {id:'y7',name:'M/Y Northstar',lat:43.5394,lng:7.0303,length:82,type:'Private',port:'Cannes',eta:'18:10',relation:'New',priority:'normal',captain:'To identify',manager:'Management listed',intro:'No introduction yet',last:'—',next:'Do nothing',offer:'—',event:'—'},
-    {id:'y8',name:'M/Y Riviera',lat:43.4893,lng:6.9167,length:44,type:'Charter',port:'La Napoule',eta:'In port',relation:'Warm',priority:'warm',captain:'Known contact',manager:'Charter management',intro:'Dolce guest',last:'3 days',next:'Invite',offer:'Motion onboard',event:'Dolce dinner'},
-    {id:'y9',name:'M/Y Azure',lat:43.2860,lng:6.6440,length:61,type:'Private',port:'Saint-Tropez',eta:'In port',relation:'Warm',priority:'vip',captain:'Direct contact',manager:'Private office',intro:'Direct',last:'Yesterday',next:'Follow-up',offer:'Physio onboard',event:'Already invited'},
-    {id:'y10',name:'M/Y Celeste',lat:43.2735,lng:6.6332,length:36,type:'Charter',port:'Saint-Tropez',eta:'14:50',relation:'New',priority:'normal',captain:'To identify',manager:'Charter listing',intro:'Broker route available',last:'—',next:'Ask broker',offer:'Recovery onboard',event:'Captain circle'},
-    {id:'y11',name:'M/Y Meridian',lat:43.2478,lng:6.6731,length:105,type:'Private',port:'Pampelonne',eta:'At anchor',relation:'Warm',priority:'vip',captain:'Known contact',manager:'Family office route',intro:'Zayd network',last:'27 days',next:'Discreet welcome',offer:'Clinical + recovery',event:'Private dinner eligible'},
-    {id:'y12',name:'M/Y Alba',lat:43.4030,lng:6.7660,length:58,type:'Private',port:'En route',eta:'Saint-Tropez 19:15',relation:'New',priority:'normal',captain:'Unknown',manager:'Unknown',intro:'—',last:'—',next:'Do nothing',offer:'—',event:'—'},
-    {id:'y13',name:'M/Y Aria',lat:43.6030,lng:7.1640,length:33,type:'Private',port:'Antibes',eta:'In port',relation:'Warm',priority:'warm',captain:'Known contact',manager:'Known manager',intro:'Direct',last:'19 days',next:'Check-in',offer:'Motion onboard',event:'Dolce lunch'},
-    {id:'y14',name:'M/Y Orion',lat:43.6570,lng:7.2850,length:77,type:'Charter',port:'Nice',eta:'In port',relation:'New',priority:'normal',captain:'Professional contact',manager:'Known company',intro:'Concierge route',last:'—',next:'Intro via concierge',offer:'Recovery onboard',event:'Private dinner eligible'}
-  ];
+  let yachts = [];
+  let liveMeta = {};
+  let sizeFilter = 'all', movingOnly = false, exactOnly = false;
 
   const companies = [
-    {name:'Monaco Yacht Brokerage',category:'Broker',city:'Monaco',lat:43.7352,lng:7.4210,relationship:'Warm',detail:'Broker & charter contact layer'},
-    {name:'Monaco Yacht Management',category:'Management',city:'Monaco',lat:43.7345,lng:7.4265,relationship:'Target',detail:'Management & captain introductions'},
-    {name:'Port Hercule Network',category:'Marina / Port',city:'Monaco',lat:43.7358,lng:7.4252,relationship:'Strategic',detail:'Port-side operational network'},
-    {name:'Antibes Yacht Services',category:'Yacht Services',city:'Antibes',lat:43.5811,lng:7.1254,relationship:'Warm',detail:'Crew, provisioning & operations'},
-    {name:'Antibes Crew Network',category:'Crew Agency',city:'Antibes',lat:43.5782,lng:7.1240,relationship:'Target',detail:'Captain & senior crew access'},
-    {name:'Cannes Charter Office',category:'Charter',city:'Cannes',lat:43.5520,lng:7.0188,relationship:'Warm',detail:'Charter managers & brokers'},
-    {name:'Cannes Marine Concierge',category:'Concierge',city:'Cannes',lat:43.5503,lng:7.0199,relationship:'Partner',detail:'Guest and villa coordination'},
-    {name:'Saint-Tropez Yacht Desk',category:'Broker',city:'Saint-Tropez',lat:43.2723,lng:6.6392,relationship:'Target',detail:'Local charter & owner network'},
-    {name:'Golfe de Saint-Tropez Concierge',category:'Concierge',city:'Saint-Tropez',lat:43.2681,lng:6.6401,relationship:'Warm',detail:'Private guest coordination'}
+    {name:'Burgess',category:'Brokerage · Charter · Management',city:'Monaco',lat:43.7363,lng:7.4215,address:'Le Panorama, 57 rue Grimaldi, 98000 Monaco',relationship:'Target'},
+    {name:'Fraser Yachts',category:'Brokerage · Charter · Management',city:'Monaco',lat:43.7331,lng:7.4217,address:'2 Quai Antoine 1er, 98000 Monaco',relationship:'Target'},
+    {name:'Camper & Nicholsons',category:'Brokerage · Charter Management',city:'Monaco',lat:43.7290,lng:7.4174,address:'Gildo Pastor Center, 7 Rue du Gabian, 98000 Monaco',relationship:'Target'},
+    {name:'Northrop & Johnson',category:'Yacht Brokerage',city:'Monaco',lat:43.7365,lng:7.4217,address:'Le Panorama, 57 Rue Grimaldi, 98000 Monaco',relationship:'Target'},
+    {name:'Edmiston',category:'Sales · Charter · Management',city:'Monaco',lat:43.7355,lng:7.4236,address:'27 Boulevard Albert 1er, 98000 Monaco',relationship:'Target'},
+    {name:'Hill Robinson',category:'Yacht Management',city:'Monaco',lat:43.7335,lng:7.4210,address:'8 Quai Antoine 1er, 98000 Monaco',relationship:'Target'},
+    {name:'Fraser Yachts Antibes',category:'Yacht Management',city:'Antibes',lat:43.5812,lng:7.1248,address:'12 Avenue Pasteur, 06600 Antibes',relationship:'Target'},
+    {name:'The Crew Network',category:'Crew Agency',city:'Antibes',lat:43.5810,lng:7.1246,address:'12 Avenue Pasteur, 06600 Antibes',relationship:'Target'},
+    {name:'Hill Robinson Antibes',category:'Yacht Management',city:'Antibes',lat:43.5806,lng:7.1265,address:'17 Avenue du 11 Novembre, 06600 Antibes',relationship:'Target'},
+    {name:'YPI CREW',category:'Crew Agency',city:'Antibes',lat:43.5817,lng:7.1218,address:'6 Avenue de la Libération, 06600 Antibes',relationship:'Target'},
+    {name:'SH Prestige Yachts',category:'Charter · Sales',city:'Cannes',lat:43.5508,lng:7.0128,address:'21 Quai Saint-Pierre, 06400 Cannes',relationship:'Target'}
   ];
 
-  const partners = [
-    {name:'Riviera Palace',category:'Hotel',city:'Monaco',lat:43.7380,lng:7.4260,benefit:'Preferred rate · Priority access',status:'KŌMØ Preferred'},
-    {name:'Mediterranean Table',category:'Restaurant',city:'Cannes',lat:43.5512,lng:7.0147,benefit:'Priority reservation · Welcome experience',status:'Dolce Riviera'},
-    {name:'Private Recovery Studio',category:'Recovery',city:'Antibes',lat:43.5790,lng:7.1170,benefit:'Priority booking · Member privilege',status:'KŌMØ Partner'},
-    {name:'Tropez Beach House',category:'Hospitality',city:'Saint-Tropez',lat:43.2748,lng:6.6388,benefit:'Priority access · Guest experience',status:'KŌMØ Preferred'},
-    {name:'Riviera Driver',category:'Mobility',city:'Cannes / Monaco',lat:43.6640,lng:7.2010,benefit:'Priority dispatch · Preferred terms',status:'KŌMØ Partner'}
-  ];
-
-  const actions = [
-    ['M/Y Altair','Arrive Monaco · 16:40','WELCOME','Welcome + Dolce invitation'],
-    ['M/Y Étoile','Cannes · captain known','SERVICE','Offer onboard availability'],
-    ['M/Y Meridian','Pampelonne · direct network','VIP','Discreet welcome via Zayd'],
-    ['Cannes Charter Office','3 relevant yachts nearby','INTRO','Ask for one introduction'],
-    ['Dolce Riviera Dinner','9 / 12 confirmed','EVENT','Invite 3 relevant guests'],
-    ['M/Y Azure','Service yesterday','FOLLOW-UP','Thank + next checkpoint']
-  ];
-
-  const events = [
-    {date:'08',month:'OCT',name:'Mediterranean Longevity Dinner',place:'Cap d’Antibes · KŌMØ × Dolce Riviera',desc:'12 guests · Mediterranean gastronomy · mobility & longevity experience',confirmed:9,total:12},
-    {date:'17',month:'OCT',name:'Captain’s Table',place:'Cannes · Private',desc:'Senior crew, yacht managers and trusted partners. Relationship-first, no sales presentation.',confirmed:7,total:10},
-    {date:'24',month:'OCT',name:'Riviera Recovery Morning',place:'Saint-Tropez · Private villa',desc:'Motion assessment, recovery and breakfast for selected guests and crew.',confirmed:6,total:8}
-  ];
-
+  const partners = [];
+  const events = [];
   const network = [
-    {name:'Zayd Network',type:'Introducer',text:'Broker / owner introductions · Riviera & Middle East',foot:'11 linked relationships'},
-    {name:'Janet Network',type:'Introducer',text:'Yachting relationships · captains, management, events',foot:'8 linked relationships'},
-    {name:'Captain Circle',type:'Circle',text:'Senior crew & captains with direct or warm relationship',foot:'14 contacts'},
-    {name:'Dolce Circle',type:'Circle',text:'Guests hosted through dinners and private experiences',foot:'21 guests'},
-    {name:'KŌMØ Members',type:'Circle',text:'Clients and private members — no medical data surfaced here',foot:'18 members'},
-    {name:'Riviera Partners',type:'Circle',text:'Hospitality, concierge, transport and wellness partners',foot:'12 partners'}
+    {name:'Yacht Intelligence',type:'Live layer',text:'Yachts réels présents dans la zone Riviera, avec précision signalée au niveau de chaque position.',foot:'Live'},
+    {name:'Yacht Companies',type:'Shore layer',text:'Brokers, yacht managers et crew agencies affichés directement à terre.',foot:companies.length+' organisations'},
+    {name:'KŌMØ Network',type:'Private layer',text:'Introductions, historique et permission to engage seront reliés séparément des données AIS.',foot:'Private'},
+    {name:'KŌMØ Card',type:'Privileges',text:'Future couche de partenaires, invitations et avantages réservés aux membres.',foot:'Coming next'}
   ];
 
-  const map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:8,maxZoom:16}).setView([43.48,6.90],9);
+  const map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:8,maxZoom:17}).setView([43.48,6.90],9);
   L.control.zoom({position:'bottomright'}).addTo(map);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
     attribution:'&copy; OpenStreetMap contributors &copy; CARTO',
@@ -317,84 +283,130 @@
   const yachtLayer=L.layerGroup().addTo(map);
   const companyLayer=L.layerGroup().addTo(map);
   const partnerLayer=L.layerGroup().addTo(map);
-  const markers=new Map();
+  const yachtMarkers=new Map();
 
   function yachtIcon(y){
-    const c=y.priority==='vip'?'vip':y.priority==='warm'?'warm':'';
-    return L.divIcon({className:'',html:'<div class="boat-icon '+c+'"><span>'+y.length+'</span></div>',iconSize:[30,30],iconAnchor:[15,15]});
+    const c=y.precision==='ais'?'exact':'';
+    const label = y.length ? Math.round(y.length) : 'Y';
+    return L.divIcon({className:'',html:'<div class="boat-icon '+c+'"><span>'+label+'</span></div>',iconSize:[30,30],iconAnchor:[15,15]});
   }
   function landIcon(){return L.divIcon({className:'',html:'<div class="land-icon">Y</div>',iconSize:[25,25],iconAnchor:[12,12]});}
   function partnerIcon(){return L.divIcon({className:'',html:'<div class="partner-icon">✦</div>',iconSize:[25,25],iconAnchor:[12,12]});}
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 
-  function addMarkers(){
-    yachts.forEach(y=>{
-      const m=L.marker([y.lat,y.lng],{icon:yachtIcon(y)}).bindTooltip('<b>'+y.name+'</b><br>'+y.length+' m · '+y.port);
-      m.on('click',()=>selectYacht(y));
-      m.addTo(yachtLayer); markers.set(y.id,m);
-    });
-    companies.forEach((c,i)=>{
-      const m=L.marker([c.lat,c.lng],{icon:landIcon()}).bindTooltip('<b>'+c.name+'</b><br>'+c.category+' · '+c.city);
-      m.on('click',()=>openCompany(c));
-      m.addTo(companyLayer); markers.set('c'+i,m);
-    });
-    partners.forEach((p,i)=>{
-      const m=L.marker([p.lat,p.lng],{icon:partnerIcon()}).bindTooltip('<b>'+p.name+'</b><br>'+p.benefit);
-      m.on('click',()=>openPartners());
-      m.addTo(partnerLayer); markers.set('p'+i,m);
-    });
-  }
+  companies.forEach((c,i)=>{
+    const m=L.marker([c.lat,c.lng],{icon:landIcon()}).bindTooltip('<b>'+esc(c.name)+'</b><br>'+esc(c.category)+' · '+esc(c.city));
+    m.on('click',()=>openCompany(c));
+    m.addTo(companyLayer);
+  });
 
-  let sizeFilter='all', charterOnly=false, warmOnly=false;
   function matches(y){
-    if(charterOnly && y.type!=='Charter') return false;
-    if(warmOnly && y.relation!=='Warm') return false;
+    if(movingOnly && !(Number(y.speed)>0.5)) return false;
+    if(exactOnly && y.precision!=='ais') return false;
     if(sizeFilter==='24-40' && !(y.length>=24&&y.length<40)) return false;
     if(sizeFilter==='40-60' && !(y.length>=40&&y.length<60)) return false;
     if(sizeFilter==='60-80' && !(y.length>=60&&y.length<80)) return false;
     if(sizeFilter==='80+' && y.length<80) return false;
     return true;
   }
-  function refreshYachts(){
+
+  function renderYachts(){
     yachtLayer.clearLayers();
-    let count=0,warm=0;
+    yachtMarkers.clear();
+    let count=0, exact=0;
     yachts.filter(matches).forEach(y=>{
-      const m=markers.get(y.id); m.addTo(yachtLayer); count++; if(y.relation==='Warm') warm++;
+      if(!Number.isFinite(Number(y.lat))||!Number.isFinite(Number(y.lng))) return;
+      const precision = y.precision==='ais' ? 'AIS exact' : y.precision==='harbour' ? 'présence port/anchorage' : 'snapshot';
+      const m=L.marker([y.lat,y.lng],{icon:yachtIcon(y)})
+        .bindTooltip('<b>'+esc(y.name)+'</b><br>'+esc((y.length||'?')+' m · '+y.port)+'<br><span style="opacity:.65">'+esc(precision)+'</span>');
+      m.on('click',()=>selectYacht(y));
+      m.addTo(yachtLayer);
+      yachtMarkers.set(y.id,m);
+      count++; if(y.precision==='ais') exact++;
     });
-    document.getElementById('visibleYachts').textContent=count;
-    document.getElementById('warmCount').textContent=warm;
+    visibleYachts.textContent=count;
+    warmCount.textContent=exact;
+    document.querySelector('.metric:nth-child(2) span').textContent='AIS exact';
   }
 
   function selectYacht(y){
-    document.getElementById('detailPanel').classList.add('open');
-    detailStatus.textContent=(y.priority==='vip'?'PRIORITY RELATION':'YACHT PROFILE')+' · '+y.port.toUpperCase();
-    detailName.textContent=y.name; detailSub.textContent=y.length+' m · '+y.port+' · '+y.type;
-    detailLength.textContent=y.length+' m'; detailEta.textContent=y.eta; detailRelation.textContent=y.relation;
-    detailCaptain.textContent=y.captain; detailManager.textContent=y.manager; detailIntro.textContent=y.intro;
-    detailLast.textContent=y.last; detailNext.textContent=y.next; detailOffer.textContent=y.offer; detailEvent.textContent=y.event;
-    detailConfidence.textContent=y.relation==='Warm'?'RELATIONSHIP DATA':'TO VERIFY';
-    smartAction.textContent=y.next==='Do nothing'?'Aucune sollicitation recommandée':'Préparer · '+y.next;
+    detailPanel.classList.add('open');
+    const exact = y.precision==='ais';
+    detailStatus.textContent=(exact?'AIS LIVE':'LIVE HARBOUR')+' · '+String(y.port||y.city||'RIVIERA').toUpperCase();
+    detailName.textContent=y.name;
+    detailSub.textContent=(y.length||'?')+' m · '+(y.port||'Riviera')+' · '+(y.flag||'flag n/a');
+    detailLength.textContent=(y.length||'?')+' m';
+    detailEta.textContent=exact && y.speed>0.5 ? (y.speed.toFixed(1)+' kn') : (y.status||'Live');
+    detailRelation.textContent=exact?'AIS':'Harbour';
+    detailCaptain.textContent='Non relié au réseau KŌMØ';
+    detailManager.textContent=y.manager||'À enrichir';
+    detailIntro.textContent='—';
+    detailLast.textContent=y.aisTimestamp||([y.arrived,y.alongside].filter(Boolean).join(' · ')||'Live');
+    detailNext.textContent='Ouvrir / enrichir la relation';
+    detailOffer.textContent='KŌMØ Onboard available';
+    detailEvent.textContent='Invitation possible après validation relationnelle';
+    detailConfidence.textContent=exact?'POSITION AIS':'PORT STATUS';
+    smartAction.textContent='Ajouter au réseau KŌMØ';
     map.panTo([y.lat,y.lng],{animate:true});
   }
 
-  function openCompany(c){
-    document.querySelector('[data-view="partners"]')?.classList.remove('active');
-    companiesDrawer.classList.add('open');
-  }
+  function openCompany(){ closeDrawers(); companiesDrawer.classList.add('open'); }
+  function openPartners(){ closeDrawers(); partnersDrawer.classList.add('open'); }
   function closeDrawers(){['partnersDrawer','companiesDrawer','eventsDrawer','networkDrawer'].forEach(id=>document.getElementById(id).classList.remove('open'));}
 
-  function render(){
-    todayList.innerHTML=actions.map(a=>'<div class="action-card"><div class="action-top"><b>'+a[0]+'</b><span class="tag">'+a[2]+'</span></div><p>'+a[1]+'</p><button class="mini-link">'+a[3]+' →</button></div>').join('');
-    companyGrid.innerHTML=companies.map(c=>'<div class="directory-card"><div class="type">'+c.category+' · '+c.city+'</div><h3>'+c.name+'</h3><p>'+c.detail+'</p><div class="foot"><span>'+c.relationship+'</span><b>Open on map →</b></div></div>').join('');
-    partnerGrid.innerHTML=partners.map(p=>'<div class="directory-card"><div class="type">'+p.category+' · '+p.city+'</div><h3>'+p.name+'</h3><p>'+p.benefit+'</p><div class="foot"><span class="privilege">'+p.status+'</span><b>View privilege →</b></div></div>').join('');
-    eventList.innerHTML=events.map(e=>'<div class="event-card"><div class="event-date"><strong>'+e.date+'</strong><span>'+e.month+'</span></div><div class="event-copy"><h3>'+e.name+'</h3><p>'+e.place+'<br>'+e.desc+'</p></div><div class="event-stats"><strong>'+e.confirmed+'/'+e.total+'</strong><span>confirmed</span><br><br><button class="pill-btn">Guest list</button></div></div>').join('');
-    networkGrid.innerHTML=network.map(n=>'<div class="directory-card"><div class="type">'+n.type+'</div><h3>'+n.name+'</h3><p>'+n.text+'</p><div class="foot"><span>'+n.foot+'</span><b>Open graph →</b></div></div>').join('');
+  function hoursAlongside(v=''){
+    const m=String(v).match(/(\d+)\s*hours?/i);
+    return m?Number(m[1]):9999;
+  }
+
+  function renderToday(){
+    const recent=[...yachts].filter(y=>hoursAlongside(y.alongside)<24).sort((a,b)=>hoursAlongside(a.alongside)-hoursAlongside(b.alongside)).slice(0,8);
+    const feed=recent.length?recent:[...yachts].sort((a,b)=>(b.length||0)-(a.length||0)).slice(0,8);
+    todayList.innerHTML=feed.map(y=>'<div class="action-card" data-yacht="'+esc(y.id)+'"><div class="action-top"><b>'+esc(y.name)+'</b><span class="tag">'+(hoursAlongside(y.alongside)<24?'ARRIVAL':'LIVE')+'</span></div><p>'+esc((y.length||'?')+' m · '+(y.port||'Riviera')+(y.alongside?' · '+y.alongside:''))+'</p><button class="mini-link">Open yacht →</button></div>').join('');
+    [...todayList.querySelectorAll('[data-yacht]')].forEach(el=>el.addEventListener('click',()=>{
+      const y=yachts.find(x=>x.id===el.dataset.yacht); if(y){selectYacht(y); map.setView([y.lat,y.lng],12)}
+    }));
+    actionCount.textContent=recent.length;
+  }
+
+  function renderDirectories(){
+    companyGrid.innerHTML=companies.map(c=>'<div class="directory-card"><div class="type">'+esc(c.category)+' · '+esc(c.city)+'</div><h3>'+esc(c.name)+'</h3><p>'+esc(c.address)+'</p><div class="foot"><span>'+esc(c.relationship)+'</span><b>On map →</b></div></div>').join('');
+    partnerGrid.innerHTML='<div class="directory-card"><div class="type">KŌMØ CARD</div><h3>Private Privileges</h3><p>Aucun partenaire n’est affiché comme actif tant que l’accord et le privilège n’ont pas été validés.</p><div class="foot"><span class="privilege">COMING NEXT</span><b>Verified only</b></div></div>';
+    eventList.innerHTML='<div class="directory-card"><div class="type">KŌMØ × DOLCE RIVIERA</div><h3>Private events</h3><p>Les invitations seront reliées au réseau et aux yachts présents, sans envoi automatique.</p></div>';
+    networkGrid.innerHTML=network.map(n=>'<div class="directory-card"><div class="type">'+esc(n.type)+'</div><h3>'+esc(n.name)+'</h3><p>'+esc(n.text)+'</p><div class="foot"><span>'+esc(n.foot)+'</span><b>Open →</b></div></div>').join('');
+  }
+
+  function updateLiveState(ok){
+    const when = liveMeta.updatedAt ? new Date(liveMeta.updatedAt) : new Date();
+    const time = when.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const exact = liveMeta.exactAIS ? 'AIS EXACT + PORTS' : 'PORTS LIVE';
+    liveBadge.innerHTML='<i class="dot"></i> '+(ok?'LIVE':'DEGRADED');
+    sourceBadge.textContent=exact+' · '+yachts.length+' YACHTS · '+time;
+  }
+
+  async function loadLive(){
+    try{
+      const r=await fetch('/api/intelligence-live',{cache:'no-store',credentials:'same-origin'});
+      if(!r.ok) throw new Error('live '+r.status);
+      const data=await r.json();
+      yachts=Array.isArray(data.yachts)?data.yachts:[];
+      liveMeta={...(data.meta||{}),updatedAt:data.updatedAt};
+      renderYachts(); renderToday(); updateLiveState(true);
+      const current=detailName.textContent;
+      const selected=yachts.find(y=>y.name===current);
+      if(selected) selectYacht(selected);
+      else if(yachts.length && !detailPanel.dataset.userClosed) selectYacht(yachts[0]);
+    }catch(err){
+      console.error('[KOMO Intelligence live]',err);
+      updateLiveState(false);
+    }
   }
 
   document.querySelectorAll('.chip[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{
-    document.querySelectorAll('.chip[data-filter]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); sizeFilter=btn.dataset.filter; refreshYachts();
+    document.querySelectorAll('.chip[data-filter]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); sizeFilter=btn.dataset.filter; renderYachts();
   }));
-  document.querySelector('[data-toggle="charter"]').addEventListener('click',e=>{charterOnly=!charterOnly;e.currentTarget.classList.toggle('active',charterOnly);refreshYachts()});
-  document.querySelector('[data-toggle="warm"]').addEventListener('click',e=>{warmOnly=!warmOnly;e.currentTarget.classList.toggle('active',warmOnly);refreshYachts()});
+  document.querySelector('[data-toggle="moving"]').addEventListener('click',e=>{movingOnly=!movingOnly;e.currentTarget.classList.toggle('active',movingOnly);renderYachts()});
+  document.querySelector('[data-toggle="exact"]').addEventListener('click',e=>{exactOnly=!exactOnly;e.currentTarget.classList.toggle('active',exactOnly);renderYachts()});
   document.querySelector('[data-layer="companies"]').addEventListener('click',e=>{if(map.hasLayer(companyLayer)){map.removeLayer(companyLayer);e.currentTarget.classList.remove('active')}else{map.addLayer(companyLayer);e.currentTarget.classList.add('active')}});
   document.querySelector('[data-layer="partners"]').addEventListener('click',e=>{if(map.hasLayer(partnerLayer)){map.removeLayer(partnerLayer);e.currentTarget.classList.remove('active')}else{map.addLayer(partnerLayer);e.currentTarget.classList.add('active')}});
 
@@ -404,38 +416,40 @@
     if(v==='network') networkDrawer.classList.add('open');
     if(v==='events') eventsDrawer.classList.add('open');
     if(v==='partners') partnersDrawer.classList.add('open');
-    if(v==='today') document.querySelector('.sidebar .list').scrollTo({top:0,behavior:'smooth'});
   }));
   document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.close).classList.remove('open')));
-  closePanel.addEventListener('click',()=>detailPanel.classList.remove('open'));
-  cardBtn.addEventListener('click',()=>{closeDrawers();partnersDrawer.classList.add('open')});
-  layerBtn.addEventListener('click',()=>{closeDrawers();companiesDrawer.classList.add('open')});
-  addBtn.addEventListener('click',()=>alert('V1: création manuelle du yacht, contact ou partenaire sera reliée à Supabase dans la prochaine itération.'));
-  smartAction.addEventListener('click',()=>alert('Action préparée — la V2 ouvrira le canal relationnel et générera un message contextualisé, toujours avec validation humaine.'));
+  closePanel.addEventListener('click',()=>{detailPanel.classList.remove('open');detailPanel.dataset.userClosed='1'});
+  cardBtn.addEventListener('click',openPartners);
+  layerBtn.addEventListener('click',openCompany);
+  addBtn.addEventListener('click',()=>alert('Ajout manuel au réseau KŌMØ : prochaine couche, séparée du flux AIS.'));
+  smartAction.addEventListener('click',()=>alert('Cette action créera une fiche relationnelle privée KŌMØ. Aucun contact automatique ne sera envoyé.'));
 
-  const allSearch=[
-    ...yachts.map(y=>({label:y.name,sub:y.length+' m · '+y.port,kind:'yacht',obj:y})),
-    ...companies.map(c=>({label:c.name,sub:c.category+' · '+c.city,kind:'company',obj:c})),
-    ...partners.map(p=>({label:p.name,sub:'KŌMØ Privilege · '+p.city,kind:'partner',obj:p}))
-  ];
+  function searchable(){
+    return [
+      ...yachts.map(y=>({label:y.name,sub:(y.length||'?')+' m · '+(y.port||'Riviera'),kind:'yacht',obj:y})),
+      ...companies.map(c=>({label:c.name,sub:c.category+' · '+c.city,kind:'company',obj:c}))
+    ];
+  }
   function doSearch(q){
     const term=q.trim().toLowerCase();
     if(!term){searchResults.classList.remove('open');return}
-    const r=allSearch.filter(x=>(x.label+' '+x.sub).toLowerCase().includes(term)).slice(0,8);
-    searchResults.innerHTML=r.map((x,i)=>'<div class="search-item" data-i="'+i+'"><b>'+x.label+'</b><span>'+x.sub+'</span></div>').join('');
+    const r=searchable().filter(x=>(x.label+' '+x.sub).toLowerCase().includes(term)).slice(0,10);
+    searchResults.innerHTML=r.map((x,i)=>'<div class="search-item" data-i="'+i+'"><b>'+esc(x.label)+'</b><span>'+esc(x.sub)+'</span></div>').join('');
     searchResults.classList.add('open');
     [...searchResults.children].forEach((el,i)=>el.onclick=()=>{
       const x=r[i]; searchResults.classList.remove('open'); searchInput.value=x.label;
-      if(x.kind==='yacht'){selectYacht(x.obj); map.setView([x.obj.lat,x.obj.lng],12)}
-      if(x.kind==='company'){closeDrawers();companiesDrawer.classList.add('open');map.setView([x.obj.lat,x.obj.lng],13)}
-      if(x.kind==='partner'){closeDrawers();partnersDrawer.classList.add('open');map.setView([x.obj.lat,x.obj.lng],13)}
+      if(x.kind==='yacht'){selectYacht(x.obj);map.setView([x.obj.lat,x.obj.lng],13)}
+      if(x.kind==='company'){closeDrawers();companiesDrawer.classList.add('open');map.setView([x.obj.lat,x.obj.lng],14)}
     });
   }
   searchInput.addEventListener('input',e=>doSearch(e.target.value));
   document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();searchInput.focus()}if(e.key==='Escape'){closeDrawers();detailPanel.classList.remove('open');searchResults.classList.remove('open')}});
   document.addEventListener('click',e=>{if(!e.target.closest('.search'))searchResults.classList.remove('open')});
 
-  render(); addMarkers(); refreshYachts(); selectYacht(yachts[0]);
+  renderDirectories();
+  detailPanel.classList.remove('open');
+  loadLive();
+  setInterval(loadLive,120000);
 })();
 </script>
 </body>
