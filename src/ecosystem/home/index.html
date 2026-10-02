@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f1ede4">
+  <meta name="robots" content="noindex,nofollow">
+  <title>KŌMØ — Your World. Your Health. Your Life.</title>
+  <meta name="description" content="KŌMØ connected ecosystem: World, Moments, Life, Pulse and Card.">
+  <link rel="stylesheet" href="./ecosystem-home-v1.css?v=1">
+</head>
+<body>
+<main class="os-home" id="osHome">
+  <header class="os-topbar">
+    <a class="os-wordmark" href="/home/" aria-label="KŌMØ Home">KŌMØ</a>
+    <nav class="os-desktop-nav" aria-label="KŌMØ">
+      <a href="/world/">WORLD</a>
+      <a href="/world/?view=moments">MOMENTS</a>
+      <a href="/life/">LIFE</a>
+      <a href="https://pulse.komolongevity.com/">PULSE</a>
+    </nav>
+    <button class="os-access" id="osAccess"><i></i><span>PUBLIC</span></button>
+  </header>
+
+  <section class="os-stage" aria-label="KŌMØ ecosystem">
+    <div class="os-copy">
+      <p>KŌMØ</p>
+      <h1>YOUR WORLD.<br>YOUR HEALTH.<br>YOUR LIFE.</h1>
+    </div>
+
+    <div class="os-orbit" id="osOrbit">
+      <div class="os-ring ring-a"></div>
+      <div class="os-ring ring-b"></div>
+      <button class="os-node node-world" data-module="world"><span>WORLD</span><small>Where to go</small></button>
+      <button class="os-node node-life" data-module="life"><span>LIFE</span><small>What to own</small></button>
+      <button class="os-node node-pulse" data-module="pulse"><span>PULSE</span><small>How you are</small></button>
+      <button class="os-node node-moments" data-module="moments"><span>MOMENTS</span><small>What to experience</small></button>
+      <button class="os-node node-card" data-module="card"><span>CARD</span><small>Your identity key</small></button>
+      <button class="os-node node-echelon" data-module="echelon" hidden><span>ECHELON</span><small>Private access</small></button>
+      <button class="os-sphere" id="osSphere" aria-label="KŌMØ">
+        <span>KŌMØ</span>
+        <small>CONNECTED</small>
+      </button>
+    </div>
+
+    <div class="os-context" id="osContext">
+      <span>WORLD · LIFE</span>
+      <p>Explore the public KŌMØ world. ONE activates after your first validated KŌMØ assessment.</p>
+    </div>
+  </section>
+
+  <button class="os-ask" id="osAsk" hidden>ASK KŌMØ</button>
+
+  <nav class="os-mobile-nav" aria-label="KŌMØ navigation">
+    <a href="/world/"><span>WORLD</span></a>
+    <a href="/world/?view=moments"><span>MOMENTS</span></a>
+    <a href="/life/"><span>LIFE</span></a>
+    <a href="https://pulse.komolongevity.com/"><span>PULSE</span></a>
+    <button id="osYouMobile"><span>YOU</span></button>
+  </nav>
+
+  <aside class="os-you" id="osYou" aria-hidden="true">
+    <div class="os-you-backdrop" data-you-close></div>
+    <section class="os-you-panel">
+      <header>
+        <div><p>KŌMØ IDENTITY</p><h2 id="osYouTitle">YOU</h2></div>
+        <button data-you-close>×</button>
+      </header>
+      <div class="os-you-body" id="osYouBody"></div>
+    </section>
+  </aside>
+
+  <aside class="os-ask-shell" id="osAskShell" aria-hidden="true">
+    <div class="os-you-backdrop" data-ask-close></div>
+    <section class="os-ask-panel">
+      <button class="os-panel-close" data-ask-close>×</button>
+      <p class="ey">ASK KŌMØ</p>
+      <h2>What do you need?</h2>
+      <p>One request. A human response from the KŌMØ network.</p>
+      <div class="os-quick">
+        <button data-quick="Dinner tonight.">DINNER TONIGHT</button>
+        <button data-quick="Find a yacht tomorrow.">YACHT TOMORROW</button>
+        <button data-quick="Arrange recovery at my villa.">RECOVERY AT VILLA</button>
+        <button data-quick="Something exceptional tomorrow.">SOMETHING EXCEPTIONAL</button>
+      </div>
+      <form id="osAskForm">
+        <textarea name="prompt" minlength="3" maxlength="1200" required placeholder="Tell KŌMØ what you need."></textarea>
+        <div class="os-ask-grid"><input name="destination" placeholder="Destination"><input name="requested_for" type="datetime-local"></div>
+        <button type="submit">SEND TO KŌMØ</button>
+        <small>Handled by the KŌMØ team. This is not an automated booking.</small>
+      </form>
+    </section>
+  </aside>
+
+  <div class="os-toast" id="osToast"></div>
+</main>
+<script src="/world/supabase-umd-v1.js?v=1"></script>
+<script type="module" src="./ecosystem-home-v1.js?v=1"></script>
+</body>
+</html>
