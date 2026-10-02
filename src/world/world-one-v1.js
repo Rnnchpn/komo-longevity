@@ -339,8 +339,8 @@ function renderLocked(title,copy,cta){
 }
 function renderView(view){
   state.view=view;
-  $('.side-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.panelView===view));
-  $('.mobile-nav button').forEach(b=>b.classList.toggle('active',b.dataset.mobileView===view));
+  $$('.side-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.panelView===view));
+  $$('.mobile-nav button').forEach(b=>b.classList.toggle('active',b.dataset.mobileView===view));
   if(view==='world')renderWorld();
   else if(view==='events')renderEvents();
   else if(view==='experiences')renderExperiences();
@@ -513,10 +513,10 @@ $$('[data-detail-close]').forEach(x=>x.onclick=()=>{$('#detailSheet').classList.
 $$('[data-modal-close]').forEach(x=>x.onclick=closeModal);
 $$('[data-panel-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.panelView));
 $$('[data-mobile-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.mobileView));
-$('[data-intent]').forEach(b=>b.onclick=()=>{state.intent=b.dataset.intent;$('[data-intent]').forEach(x=>x.classList.toggle('active',x===b));renderMarkers();renderView('world');fitVisibleWorld({duration:520});document.body.classList.add('map-engaged')});
+$$('[data-intent]').forEach(b=>b.onclick=()=>{state.intent=b.dataset.intent;$$('[data-intent]').forEach(x=>x.classList.toggle('active',x===b));renderMarkers();renderView('world');fitVisibleWorld({duration:520});document.body.classList.add('map-engaged')});
 $('#nearBtn').onclick=nearMe;
 $('#viewToggle').onclick=()=>{state.pitched=!state.pitched;map.easeTo({pitch:state.pitched?50:0,bearing:state.pitched?-10:0,duration:600});$('#viewToggle').innerHTML=state.pitched?'2D':'<b>3D</b>'};
-$('#recenterBtn').onclick=()=>{state.near=null;$('#nearBtn').classList.remove('active');$('#nearSummary').classList.remove('open');state.intent='all';$('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));renderMarkers();renderView('world');fitVisibleWorld({duration:700});document.body.classList.add('map-engaged')};
+$('#recenterBtn').onclick=()=>{state.near=null;$('#nearBtn').classList.remove('active');$('#nearSummary').classList.remove('open');state.intent='all';$$('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));renderMarkers();renderView('world');fitVisibleWorld({duration:700});document.body.classList.add('map-engaged')};
 $('#searchInput').oninput=e=>search(e.target.value);
 $('#signInBtn').onclick=()=>member()?renderView('card'):startOne();
 $('#memberPill').onclick=()=>renderView(member()?'you':'world');
