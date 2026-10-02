@@ -45,11 +45,20 @@ function setHub(open){
   document.documentElement.classList.toggle('world-hub-open',open);
 }
 
+function syncMapAfterHub(){
+  requestAnimationFrame(()=>{
+    try{window.__KOMO_WORLD_MAP?.resize?.()}catch(_){}
+    setTimeout(()=>{
+      try{window.__KOMO_WORLD_MAP?.resize?.();window.__KOMO_FIT_VISIBLE?.({duration:0})}catch(_){}
+    },140);
+  });
+}
 function openView(view){
   setHub(false);
   document.body.classList.add('map-engaged');
   document.body.classList.remove('panel-collapsed');
   window.__KOMO_SET_VIEW?.(view);
+  syncMapAfterHub();
 }
 
 function go(target){
