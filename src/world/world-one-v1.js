@@ -6,7 +6,7 @@ const $$=s=>[...document.querySelectorAll(s)];
 const state={
   session:null,profile:null,role:null,access:{authenticated:false,tier:'public',founding:false,entitlements:[]},
   entitlements:new Set(),places:[],events:[],experiences:[],saved:new Set(),passport:[],attendance:[],experienceRequests:[],claims:[],
-  preferences:null,intent:'all',destination:'all',view:'world',selected:null,markers:new Map(),eventMarkers:new Map(),experienceMarkers:new Map(),pitched:false,near:null
+  preferences:null,intent:'all',destination:'all',view:'world',selected:null,markers:new Map(),eventMarkers:new Map(),experienceMarkers:new Map(),pitched:false,near:null,nearRadiusKm:25,userMarker:null
 };
 
 const map=new maplibregl.Map({
@@ -27,6 +27,8 @@ window.__KOMO_WORLD_STATE=state;
 window.__KOMO_MAPLIBRE=maplibregl;
 window.__KOMO_SET_DESTINATION=(value)=>{state.destination=value||'all';renderMarkers();renderView(state.view);};
 window.__KOMO_SET_VIEW=(value)=>renderView(value);
+window.__KOMO_FIT_VISIBLE=(opts)=>fitVisibleWorld(opts||{});
+window.__KOMO_NEAR_ME=()=>nearMe();
 
 const categoryLabel={eat:'EAT',stay:'STAY',move:'MOVE',recover:'RECOVER',experience:'EXPERIENCE',meet:'MEET'};
 const categorySymbol={eat:'EAT',stay:'STAY',move:'MOVE',recover:'REC',experience:'EXP',meet:'MEET'};
@@ -144,7 +146,12 @@ function matchesDestination(item){
 function filteredPlaces(){
   let list=state.places.filter(matchesDestination);
   if(state.intent!=='all')list=list.filter(p=>p.category===state.intent);
-  if(state.near)list=[...list].sort((a,b)=>km(state.near.lat,state.near.lng,a.latitude,a.longitude)-km(state.near.lat,state.near.lng,b.latitude,b.longitude));
+  if(state.near){
+    list=list
+      .map(p=>({...p,_distanceKm:km(state.near.lat,state.near.lng,p.latitude,p.longitude)}))
+      .filter(p=>p._distanceKm<=state.nearRadiusKm)
+      .sort((a,b)=>a._distanceKm-b._distanceKm);
+  }
   return list;
 }
 function filteredEvents(){return state.events.filter(matchesDestination)}
@@ -153,12 +160,15 @@ function markerElement(p){
   const wrap=document.createElement('div');wrap.className='poi-wrap poi-'+(p.category||'other')+(isKomo(p)?' komo-wrap':'');
   const el=document.createElement('button');
   const cls=visibilityClass(p);
-  el.className='poi '+(cls||'')+(isKomo(p)?' komo':'')+' category-'+(p.category||'other');
+  const nearby=state.near&&km(state.near.lat,state.near.lng,p.latitude,p.longitude)<=state.nearRadiusKm;
+  el.className='poi '+(cls||'')+(isKomo(p)?' komo':'')+(nearby?' nearby':'')+' category-'+(p.category||'other');
   el.type='button';
   const glyph=isKomo(p)?'KØ':categorySymbol[p.category]||'•';
   el.innerHTML='<span>'+esc(glyph)+'</span>';
   el.setAttribute('aria-label',(categoryLabel[p.category]||'KŌMØ')+' · '+p.name);
-  const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(p.name)+'</b><small>'+esc(categoryLabel[p.category]||p.category||'KŌMØ')+'</small>';
+  const label=document.createElement('span');label.className='poi-label';
+  const dist=state.near?km(state.near.lat,state.near.lng,p.latitude,p.longitude):null;
+  label.innerHTML='<b>'+esc(p.name)+'</b><small>'+esc(categoryLabel[p.category]||p.category||'KŌMØ')+(dist!=null?' · '+dist.toFixed(1)+' km':'')+'</small>';
   wrap.append(el,label);el.addEventListener('click',e=>{e.stopPropagation();openPlace(p)});
   return wrap;
 }
@@ -207,19 +217,58 @@ function renderExperienceMarkers(){
     state.experienceMarkers.set(x.id,m);
   });
 }
+function circlePolygon(lat,lng,radiusKm,steps=72){
+  const coords=[];
+  const latRad=lat*Math.PI/180;
+  for(let i=0;i<=steps;i++){
+    const a=2*Math.PI*i/steps;
+    const dLat=(radiusKm/111.32)*Math.sin(a);
+    const dLng=(radiusKm/(111.32*Math.max(.2,Math.cos(latRad))))*Math.cos(a);
+    coords.push([lng+dLng,lat+dLat]);
+  }
+  return {type:'Feature',properties:{},geometry:{type:'Polygon',coordinates:[coords]}};
+}
+function clearUserLocation(){
+  if(state.userMarker){state.userMarker.remove();state.userMarker=null}
+  if(map.getLayer('komo-near-radius-line'))map.removeLayer('komo-near-radius-line');
+  if(map.getLayer('komo-near-radius-fill'))map.removeLayer('komo-near-radius-fill');
+  if(map.getSource('komo-near-radius'))map.removeSource('komo-near-radius');
+}
+function renderUserLocation(){
+  if(!state.near||!map?.getStyle)return;
+  if(state.userMarker)state.userMarker.remove();
+  const el=document.createElement('div');
+  el.className='komo-user-location';
+  el.innerHTML='<span></span><b>YOU</b>';
+  state.userMarker=new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([state.near.lng,state.near.lat]).addTo(map);
+  const data=circlePolygon(state.near.lat,state.near.lng,state.nearRadiusKm);
+  const addRadius=()=>{
+    if(map.getSource('komo-near-radius')){map.getSource('komo-near-radius').setData(data);return}
+    map.addSource('komo-near-radius',{type:'geojson',data});
+    map.addLayer({id:'komo-near-radius-fill',type:'fill',source:'komo-near-radius',paint:{'fill-color':'#b39e7d','fill-opacity':.08}});
+    map.addLayer({id:'komo-near-radius-line',type:'line',source:'komo-near-radius',paint:{'line-color':'#8c785b','line-width':1.5,'line-opacity':.5,'line-dasharray':[3,2]}});
+  };
+  if(map.isStyleLoaded())addRadius();else map.once('styledata',addRadius);
+}
 function visibleMapPlaces(){return filteredPlaces().filter(p=>Number.isFinite(Number(p.latitude))&&Number.isFinite(Number(p.longitude)))}
-function fitVisibleWorld({duration=650}={}){
-  const list=visibleMapPlaces(); if(!list.length)return;
-  const bounds=new maplibregl.LngLatBounds();
-  list.forEach(p=>bounds.extend([Number(p.longitude),Number(p.latitude)]));
+function fitVisibleWorld({duration=650,maxZoom}={}){
+  const list=visibleMapPlaces();
   const mobile=window.innerWidth<=820;
   const compact=window.innerWidth<=1100;
+  const panelHidden=document.body.classList.contains('panel-collapsed');
   const padding=mobile
-    ? {top:230,bottom:300,left:38,right:38}
+    ? {top:205,bottom:285,left:42,right:42}
     : compact
-      ? {top:245,bottom:110,left:70,right:350}
-      : {top:260,bottom:105,left:85,right:395};
-  map.fitBounds(bounds,{padding,maxZoom:mobile?10.8:11.25,duration});
+      ? {top:220,bottom:90,left:80,right:panelHidden?80:350}
+      : {top:220,bottom:90,left:90,right:panelHidden?90:410};
+  if(!list.length){
+    if(state.near)map.easeTo({center:[state.near.lng,state.near.lat],zoom:11.5,padding,duration});
+    return;
+  }
+  const bounds=new maplibregl.LngLatBounds();
+  if(state.near)bounds.extend([state.near.lng,state.near.lat]);
+  list.forEach(p=>bounds.extend([Number(p.longitude),Number(p.latitude)]));
+  map.fitBounds(bounds,{padding,maxZoom:maxZoom??(mobile?12.2:12.8),duration});
 }
 function syncMarkerVisibility(){
   const showPlaces=state.view==='world';
@@ -246,8 +295,10 @@ function placeCard(p){
 }
 function renderWorld(){
   const list=filteredPlaces().slice(0,12);
-  $('#panelTitle').textContent=state.intent==='all'?(member()?'My World':(state.destination==='all'?'Selected for the Riviera':'Selected in '+state.destination.replace(/-/g,' '))):(categoryLabel[state.intent]||state.intent);
-  $('#panelCopy').textContent=member()?'Your accessible KŌMØ layer is active. Public and member places are shown together.':'A small edit of places chosen for their setting, relevance and connection to the KŌMØ world.';
+  $('#panelTitle').textContent=state.near?'Around you':state.intent==='all'?(member()?'My World':(state.destination==='all'?'Selected for the Riviera':'Selected in '+state.destination.replace(/-/g,' '))):(categoryLabel[state.intent]||state.intent);
+  $('#panelCopy').textContent=state.near
+    ? 'KŌMØ places within '+state.nearRadiusKm+' km of your current position. Your location stays in this browser session.'
+    : member()?'Your accessible KŌMØ layer is active. Public and member places are shown together.':'A small edit of places chosen for their setting, relevance and connection to the KŌMØ world.';
   let html='<div class="section-row"><b>'+(member()?'Your accessible world':'KŌMØ Selected')+'</b><span>'+list.length+' visible</span></div><div class="place-list">'+list.map(placeCard).join('')+'</div>';
   if(!member())html+='<div class="locked-card" style="margin-top:10px"><div class="ey">KŌMØ ONE</div><h3>Make World yours.</h3><p>'+pulseSignInCopy()+'</p><button data-connect-one>DISCOVER ONE</button></div>';
   else if(state.access.tier==='one')html+='<div class="locked-card" style="margin-top:10px"><div class="ey">KŌMØ ECHELON</div><h3>Another layer exists.</h3><p>ECHELON access is currently assigned privately to selected Founding Members.</p></div>';
@@ -474,17 +525,28 @@ function search(term){
 async function nearMe(){
   const box=$('#nearSummary');
   if(!navigator.geolocation){box.textContent='Location is not available on this device.';box.classList.add('open');return}
-  $('#nearBtn').classList.add('active');box.textContent='Finding what matters around you…';box.classList.add('open');
+  $('#nearBtn').classList.add('active');$('#nearBtn').textContent='LOCATING…';
+  box.innerHTML='<b>Locating you…</b><br>Your position is used only to show what is around you.';box.classList.add('open');
   navigator.geolocation.getCurrentPosition(pos=>{
-    state.near={lat:pos.coords.latitude,lng:pos.coords.longitude};
-    const nearby=state.places.filter(p=>km(state.near.lat,state.near.lng,p.latitude,p.longitude)<=15);
-    const today=state.events.filter(e=>{const d=new Date(e.starts_at),n=new Date();return d.toDateString()===n.toDateString()}).length;
-    const week=state.events.filter(e=>{const ms=new Date(e.starts_at)-Date.now();return ms>=0&&ms<=7*86400000}).length;
-    box.innerHTML='<b>'+nearby.length+' KŌMØ places nearby</b><br>'+today+' experience'+(today===1?'':'s')+' today · '+week+' event'+(week===1?'':'s')+' this week';
-    map.easeTo({center:[state.near.lng,state.near.lat],zoom:12,duration:700});renderMarkers();renderView(state.view);
-  },()=>{
-    state.near=null;$('#nearBtn').classList.remove('active');box.textContent='Location was not shared. World still works without it.';
-  },{enableHighAccuracy:false,timeout:7000,maximumAge:300000});
+    state.near={lat:pos.coords.latitude,lng:pos.coords.longitude,accuracy:pos.coords.accuracy};
+    state.destination='all';state.intent='all';state.view='world';
+    $('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));
+    $('#nearBtn').classList.add('active');$('#nearBtn').textContent='◎ AROUND ME';
+    renderUserLocation();
+    renderMarkers();renderView('world');
+    const nearby=visibleMapPlaces();
+    const nearest=state.places
+      .map(p=>({p,d:km(state.near.lat,state.near.lng,p.latitude,p.longitude)}))
+      .sort((a,b)=>a.d-b.d)[0];
+    box.innerHTML='<b>You are here · '+nearby.length+' KŌMØ place'+(nearby.length===1?'':'s')+' within '+state.nearRadiusKm+' km</b>'+
+      (nearby.length?'<br>Tap a marker to open it. Distances are shown in the list.':nearest?'<br>Nearest KŌMØ place: '+esc(nearest.p.name)+' · '+nearest.d.toFixed(0)+' km away.':'');
+    fitVisibleWorld({duration:750,maxZoom:12.8});
+    window.dispatchEvent(new CustomEvent('komo:near-change',{detail:{active:true,count:nearby.length,radiusKm:state.nearRadiusKm}}));
+  },err=>{
+    state.near=null;clearUserLocation();$('#nearBtn').classList.remove('active');$('#nearBtn').textContent='◎ AROUND ME';
+    box.textContent=err?.code===1?'Location permission was not granted. Enable it in your browser to use Around Me.':'Your position could not be determined. Try again.';
+    window.dispatchEvent(new CustomEvent('komo:near-change',{detail:{active:false}}));
+  },{enableHighAccuracy:true,timeout:9000,maximumAge:60000});
 }
 
 function add3DBuildings(){
@@ -516,7 +578,7 @@ $$('[data-mobile-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.mobileVie
 $$('[data-intent]').forEach(b=>b.onclick=()=>{state.intent=b.dataset.intent;$$('[data-intent]').forEach(x=>x.classList.toggle('active',x===b));renderMarkers();renderView('world');fitVisibleWorld({duration:520});document.body.classList.add('map-engaged')});
 $('#nearBtn').onclick=nearMe;
 $('#viewToggle').onclick=()=>{state.pitched=!state.pitched;map.easeTo({pitch:state.pitched?50:0,bearing:state.pitched?-10:0,duration:600});$('#viewToggle').innerHTML=state.pitched?'2D':'<b>3D</b>'};
-$('#recenterBtn').onclick=()=>{state.near=null;$('#nearBtn').classList.remove('active');$('#nearSummary').classList.remove('open');state.intent='all';$$('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));renderMarkers();renderView('world');fitVisibleWorld({duration:700});document.body.classList.add('map-engaged')};
+$('#recenterBtn').onclick=()=>{state.near=null;clearUserLocation();$('#nearBtn').classList.remove('active');$('#nearBtn').textContent='◎ AROUND ME';$('#nearSummary').classList.remove('open');state.intent='all';state.destination='all';$('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));renderMarkers();renderView('world');fitVisibleWorld({duration:700});document.body.classList.add('map-engaged');window.dispatchEvent(new CustomEvent('komo:near-change',{detail:{active:false}}))};
 $('#searchInput').oninput=e=>search(e.target.value);
 $('#signInBtn').onclick=()=>member()?renderView('card'):startOne();
 $('#memberPill').onclick=()=>renderView(member()?'you':'world');
