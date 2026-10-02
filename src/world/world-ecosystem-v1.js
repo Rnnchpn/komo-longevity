@@ -32,6 +32,9 @@ function openInternal(view){
 function filterNow(kind){
   openInternal('now');
   requestAnimationFrame(()=>{
+    all('.side-tabs button').forEach(b=>b.classList.remove('active'));
+    if(kind==='experiences') one('[data-experiences-tab]')?.classList.add('active');
+    else one('[data-panel-view="now"]')?.classList.add('active');
     const cards=all('#sideBody .event-card');
     cards.forEach(card=>{
       const label=(card.querySelector('.ey')?.textContent||'').toUpperCase();
@@ -69,8 +72,16 @@ function buildDock(){
   }));
 }
 function patchNavigation(){
+  const worldTab=one('[data-panel-view="world"]'); if(worldTab)worldTab.textContent='PLACES';
   const nowTab=one('[data-panel-view="now"]'); if(nowTab)nowTab.textContent='EVENTS';
   const mobileNow=one('[data-mobile-view="now"]'); if(mobileNow)mobileNow.textContent='EVENTS';
+  const tabs=one('.side-tabs');
+  if(tabs&&!one('[data-experiences-tab]')){
+    const exp=document.createElement('button');
+    exp.type='button';exp.textContent='EXPERIENCES';exp.setAttribute('data-experiences-tab','');
+    exp.addEventListener('click',()=>filterNow('experiences'));
+    nowTab?.insertAdjacentElement('afterend',exp);
+  }
 
   const mobile=one('.mobile-nav');
   if(mobile){
