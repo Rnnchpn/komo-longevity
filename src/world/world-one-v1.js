@@ -1,5 +1,7 @@
-import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.11.2/dist/maplibre-gl.mjs';
 import {supabase,getSession,getProfile,getAccountRole,connectPulse,disconnectWorld,onSession,pulseUrl} from './komo-world-auth-v1.js?v=1';
+
+const maplibregl=window.maplibregl;
+if(!maplibregl?.Map)throw new Error('[KŌMØ World] MapLibre failed to load.');
 
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
@@ -315,16 +317,22 @@ function renderUserLocation(){
   if(map.isStyleLoaded())addRadius();else map.once('styledata',addRadius);
 }
 function visibleMapPlaces(){return filteredPlaces().filter(p=>Number.isFinite(Number(p.latitude))&&Number.isFinite(Number(p.longitude)))}
+function isTabletPortrait(){
+  return window.innerWidth>820&&window.innerWidth<=1180&&window.matchMedia?.('(orientation: portrait)').matches;
+}
 function fitVisibleWorld({duration=650,maxZoom}={}){
   const list=visibleMapPlaces();
   const mobile=window.innerWidth<=820;
-  const compact=window.innerWidth<=1100;
+  const tabletPortrait=isTabletPortrait();
+  const compact=window.innerWidth<=1180;
   const panelHidden=document.body.classList.contains('panel-collapsed');
   const padding=mobile
     ? {top:205,bottom:285,left:42,right:42}
-    : compact
-      ? {top:220,bottom:90,left:80,right:panelHidden?80:350}
-      : {top:220,bottom:90,left:90,right:panelHidden?90:410};
+    : tabletPortrait
+      ? {top:235,bottom:350,left:58,right:58}
+      : compact
+        ? {top:220,bottom:90,left:74,right:panelHidden?74:342}
+        : {top:220,bottom:90,left:90,right:panelHidden?90:410};
   if(!list.length){
     if(state.near)map.easeTo({center:[state.near.lng,state.near.lat],zoom:11.5,padding,duration});
     return;
@@ -332,7 +340,7 @@ function fitVisibleWorld({duration=650,maxZoom}={}){
   const bounds=new maplibregl.LngLatBounds();
   if(state.near)bounds.extend([state.near.lng,state.near.lat]);
   list.forEach(p=>bounds.extend([Number(p.longitude),Number(p.latitude)]));
-  map.fitBounds(bounds,{padding,maxZoom:maxZoom??(mobile?12.2:12.8),duration});
+  map.fitBounds(bounds,{padding,maxZoom:maxZoom??(mobile?12.2:tabletPortrait?12.35:12.8),duration});
 }
 function syncMarkerVisibility(){
   const showPlaces=state.view==='world'||state.view==='myworld';
@@ -687,6 +695,20 @@ function add3DBuildings(){
         'fill-extrusion-base':['coalesce',['to-number',['get','render_min_height']],['to-number',['get','min_height']],0],'fill-extrusion-opacity':.62}},labels?.id);
   }catch(e){console.warn('[World 3D]',e)}
 }
+
+let worldViewportRaf=0;
+function syncWorldViewport({refit=false}={}){
+  cancelAnimationFrame(worldViewportRaf);
+  worldViewportRaf=requestAnimationFrame(()=>{
+    try{map.resize()}catch(_){}
+    syncWorldControls();
+    if(refit)setTimeout(()=>fitVisibleWorld({duration:0}),60);
+  });
+}
+window.addEventListener('resize',()=>syncWorldViewport(),{passive:true});
+window.visualViewport?.addEventListener('resize',()=>syncWorldViewport(),{passive:true});
+window.addEventListener('orientationchange',()=>setTimeout(()=>syncWorldViewport({refit:true}),220),{passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(()=>syncWorldViewport(),80)});
 
 // Immediate data boot: World content must not depend on the basemap/style load.
 // This keeps places, events and experiences available even if map tiles are slow or blocked.
