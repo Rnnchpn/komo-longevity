@@ -164,6 +164,8 @@ const scripts = [
   'scripts/riviera-commercial-v1.mjs',
   // KŌMØ World is now the member map. The former fictional 3D runtime is archived and not shipped.
   'scripts/build-world-map-v1.mjs',
+  // Physical/digital KŌMØ Card recognition surface.
+  'scripts/build-card-v1.mjs',
   // Absolute last Pulse pass: prevent retired appointment/calendar/map owners
   // from reappearing after historical build layers.
   'scripts/pulse-consultation-runtime-prune-v1.mjs',
