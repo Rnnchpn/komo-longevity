@@ -62,6 +62,13 @@ const dictionaries = {
     'World propose des modules de visualisation, d’exercice et de contenu associés au programme KŌMØ. Pulse reste l’espace principal pour les résultats, les rendez-vous et les réévaluations.':'World offers visualisation, exercise and content modules linked to the KŌMØ programme. Pulse remains the primary space for results, appointments and reassessments.',
     'Modules optionnels':'Optional modules',
     'Voir World →':'Explore World →',
+    'Découvrir les expériences →':'Explore experiences →',
+    '03 · YACHTING · HOSPITALITY · PRIVATE':'03 · YACHTING · HOSPITALITY · PRIVATE',
+    '04 · ÉCOSYSTÈME KŌMØ':'04 · KŌMØ ECOSYSTEM',
+    'World est la porte d’entrée vers l’écosystème KŌMØ : lieux, établissements, événements, expériences et services autour de vous. Pulse reste votre espace santé pour les résultats et le suivi.':'World is the gateway to the KŌMØ ecosystem: places, venues, events, experiences and services around you. Pulse remains your health space for results and follow-up.',
+    'Un écosystème connecté entre santé, lieux et expériences':'A connected ecosystem across health, places and experiences',
+    'KŌMØ relie votre bilan, votre suivi santé et un réseau de lieux, d’événements et d’expériences accessibles depuis World.':'KŌMØ connects your assessment and health follow-up with a network of places, events and experiences accessible through World.',
+    'Explorez les lieux, établissements, événements, expériences et services qui composent l’écosystème KŌMØ.':'Explore the places, venues, events, experiences and services that make up the KŌMØ ecosystem.',
     'ÉCOSYSTÈME KŌMØ':'KŌMØ ECOSYSTEM',
     'Résultats, suivi et interventions dans le même environnement':'Results, follow-up and services in one environment',
     'Pulse centralise les données. Yachting et Signature organisent des formats privés. Les professionnels peuvent intégrer KŌMØ dans leur établissement.':'Pulse centralises data. Yachting and Signature organise private formats. Professionals can integrate KŌMØ into their establishment.',
@@ -147,6 +154,13 @@ const dictionaries = {
     'World propose des modules de visualisation, d’exercice et de contenu associés au programme KŌMØ. Pulse reste l’espace principal pour les résultats, les rendez-vous et les réévaluations.':'World ofrece módulos de visualización, ejercicio y contenidos asociados al programa KŌMØ. Pulse sigue siendo el espacio principal para resultados, citas y reevaluaciones.',
     'Modules optionnels':'Módulos opcionales',
     'Voir World →':'Ver World →',
+    'Découvrir les expériences →':'Descubrir experiencias →',
+    '03 · YACHTING · HOSPITALITY · PRIVATE':'03 · YACHTING · HOSPITALITY · PRIVATE',
+    '04 · ÉCOSYSTÈME KŌMØ':'04 · ECOSISTEMA KŌMØ',
+    'World est la porte d’entrée vers l’écosystème KŌMØ : lieux, établissements, événements, expériences et services autour de vous. Pulse reste votre espace santé pour les résultats et le suivi.':'World es la puerta de entrada al ecosistema KŌMØ: lugares, establecimientos, eventos, experiencias y servicios a tu alrededor. Pulse sigue siendo tu espacio de salud para resultados y seguimiento.',
+    'Un écosystème connecté entre santé, lieux et expériences':'Un ecosistema conectado entre salud, lugares y experiencias',
+    'KŌMØ relie votre bilan, votre suivi santé et un réseau de lieux, d’événements et d’expériences accessibles depuis World.':'KŌMØ conecta tu evaluación y seguimiento de salud con una red de lugares, eventos y experiencias accesibles desde World.',
+    'Explorez les lieux, établissements, événements, expériences et services qui composent l’écosystème KŌMØ.':'Explora los lugares, establecimientos, eventos, experiencias y servicios que forman el ecosistema KŌMØ.',
     'ÉCOSYSTÈME KŌMØ':'ECOSISTEMA KŌMØ',
     'Résultats, suivi et interventions dans le même environnement':'Resultados, seguimiento e intervenciones en un mismo entorno',
     'Pulse centralise les données. Yachting et Signature organisent des formats privés. Les professionnels peuvent intégrer KŌMØ dans leur établissement.':'Pulse centraliza los datos. Yachting y Signature organizan formatos privados. Los profesionales pueden integrar KŌMØ en su establecimiento.',
@@ -212,6 +226,17 @@ function setLanguageSwitch(html, lang, isRoot=false){
 }
 function localizePaths(html, lang, isRoot=false){
   if(lang==='en'){
+    const enRoutes=[
+      ['/fr/motion/','/motion/'],
+      ['/fr/clinical/','/clinical/'],
+      ['/fr/experience/','/experience/'],
+      ['/fr/partners/','/partners/'],
+      ['/fr/science/','/science/'],
+      ['/fr/signature/','/signature/'],
+      ['/fr/a-propos/','/about/'],
+      ['/fr/contact/','/contact/']
+    ];
+    for(const [from,to] of enRoutes) html=html.replaceAll(`href="${from}`,`href="${to}`);
     html=html.replace(/href="\/fr\//g,'href="/en/');
     html=html.replace(/href="\/#/g,'href="/en/#');
   }else if(lang==='es'){
