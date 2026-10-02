@@ -18,20 +18,21 @@ function node(cls,target,title,copy,icon){
 function hubMarkup(){
   return '<section class="ecosystem-hub" id="'+HUB_ID+'" aria-label="KŌMØ World">' +
     '<div class="ecosystem-shell">' +
-      '<div class="ecosystem-kicker"><b>KŌMØ WORLD</b><span class="eco-title">Your world, curated.</span><span class="eco-tagline">People · Places · Experiences · A more meaningful life</span></div>' +
-      node('world','world','Map','KŌMØ & selected places','map') +
+      '<div class="ecosystem-kicker"><b>KŌMØ WORLD</b><span class="eco-title">Choose your world.</span><span class="eco-tagline">Places · Events · Experiences · Life · Health · Access</span></div>' +
+      '<button class="ecosystem-sphere" data-eco="world" type="button" aria-label="Enter KŌMØ World map">' +
+        '<span class="sphere-orbit orbit-a"></span><span class="sphere-orbit orbit-b"></span>' +
+        '<span class="ecosystem-core"><span class="ecosystem-core-inner"><b>KŌMØ</b><span>WORLD</span><em>ENTER MAP</em></span></span>' +
+      '</button>' +
       node('events','events','Events',"What's happening",'events') +
       node('experiences','experiences','Experiences','Curated for you','experiences') +
-      node('life','life','Life','Objects, movement & living','life') +
-      node('pulse','pulse','Pulse','Health, trends & insights','pulse') +
-      node('one','card','One','Your identity & access','one') +
-      '<div class="ecosystem-sphere"><div class="ecosystem-core"><span class="ecosystem-core-inner"><b>KŌMØ</b><span>WORLD</span></span></div></div>' +
+      node('life','life','Life','Objects & essentials','life') +
+      node('pulse','pulse','Pulse','Health & insights','pulse') +
+      node('one','card','One','Identity & access','one') +
       '<div class="ecosystem-live" id="ecosystemLive">CURATED WORLD · LIVE</div>' +
-      '<div class="ecosystem-caption">WORLD · MAP · EVENTS · EXPERIENCES · LIFE · PULSE · ONE</div>' +
+      '<div class="ecosystem-caption">KŌMØ · ONE WORLD · FIVE DOORS</div>' +
     '</div>' +
   '</section>';
 }
-
 function setHub(open){
   const hub=one('#'+HUB_ID); if(!hub)return;
   hub.classList.toggle('is-hidden',!open);
@@ -68,7 +69,7 @@ function refreshHubCounts(){
   setCopy('events',liveEvents.length+' live & upcoming');
   setCopy('experiences',experiences.length+' curated experiences');
   const live=one('#ecosystemLive');
-  if(live)live.textContent='CURATED WORLD · '+places.length+' PLACES · '+liveEvents.length+' EVENTS';
+  if(live)live.textContent='LIVE WORLD · '+places.length+' PLACES · '+liveEvents.length+' EVENTS · '+experiences.length+' EXPERIENCES';
 }
 function buildDock(){
   if(one('.ecosystem-dock'))return;
