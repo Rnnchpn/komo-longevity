@@ -43,10 +43,16 @@ function setMode(mode){
   updateSummary();
 }
 function setDestination(dest){
+  const s=st();if(s?.near){
+    s.near=null;
+    document.querySelector('#nearSummary')?.classList.remove('open');
+    const near=document.querySelector('#nearBtn');if(near){near.classList.remove('active');near.textContent='◎ AROUND ME'}
+  }
   window.__KOMO_SET_DESTINATION?.(dest);
-  $$('.world-destinations button').forEach(b=>b.classList.toggle('active',b.dataset.destination===dest));
-  const m=mp(),c=centers[dest]||centers.all;if(m)m.easeTo({center:[c[0],c[1]],zoom:c[2],pitch:0,bearing:0,duration:600});
-  document.body.classList.add('map-engaged');updateSummary();
+  $('.world-destinations button').forEach(b=>b.classList.toggle('active',b.dataset.destination===dest));
+  document.body.classList.add('map-engaged');
+  requestAnimationFrame(()=>window.__KOMO_FIT_VISIBLE?.({duration:620,maxZoom:12.8}));
+  updateSummary();
 }
 function buildModebar(){
   const n=document.createElement('nav');n.className='world-modebar';n.setAttribute('aria-label','Choose what to explore');
@@ -69,8 +75,9 @@ function syncFromState(){
   const s=st();if(!s)return;
   const mode=modeName(s.view);
   document.body.dataset.worldMode=['places','events','experiences'].includes(mode)?mode:'places';
-  $$('.world-modebar button').forEach(b=>b.classList.toggle('active',b.dataset.mode===document.body.dataset.worldMode));
-  $$('.world-destinations button').forEach(b=>b.classList.toggle('active',b.dataset.destination===(s.destination||'all')));
+  document.body.classList.toggle('map-zoom-detail',(mp()?.getZoom?.()||0)>=10.7);
+  $('.world-modebar button').forEach(b=>b.classList.toggle('active',b.dataset.mode===document.body.dataset.worldMode));
+  $('.world-destinations button').forEach(b=>b.classList.toggle('active',b.dataset.destination===(s.destination||'all')));
   updateSummary();
 }
 function init(){
@@ -78,6 +85,8 @@ function init(){
   $('#map')?.addEventListener('pointerdown',()=>document.body.classList.add('map-engaged'),{passive:true});
   $('#searchInput')?.addEventListener('focus',()=>document.body.classList.add('map-engaged'));
   $('#intentBar')?.addEventListener('click',()=>setTimeout(updateSummary,30));
+  mp()?.on?.('zoomend',syncFromState);
+  window.addEventListener('komo:near-change',syncFromState);
   window.addEventListener('komo:world-ready',syncFromState);
   window.addEventListener('komo:view-change',syncFromState);
   const body=$('#sideBody');
