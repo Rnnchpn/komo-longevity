@@ -263,3 +263,7 @@ body.map-zoom-detail .spot-wrap .poi-label{display:block!important;opacity:1!imp
   .place-symbol{width:48px!important;height:42px!important}
   .place-copy b{font-size:11px!important}
 }
+
+/* KŌMØ SPOT legend */
+.map-badge{display:block!important;font-size:7px!important;letter-spacing:.06em!important;padding:8px 10px!important}
+@media(max-width:820px){.map-badge{display:none!important}}
