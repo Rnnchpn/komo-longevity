@@ -5,7 +5,7 @@ const pulse=join(process.cwd(),'site','pulse-v12');
 const indexPath=join(pulse,'index.html');
 const jsName='pulse-friday-demo-hardening-v1.js';
 const cssName='pulse-friday-demo-hardening-v1.css';
-const version='20261002-ipad-home-recovery-v2';
+const version='20261002-mobile-no-blur-runtime-v1';
 const cacheVersion=process.env.VERCEL_GIT_COMMIT_SHA?.slice(0,12)||version;
 
 async function stampNestedImports(dir){
@@ -152,44 +152,36 @@ const runtime=String.raw`(() => {
 
   function mobileVisualReset(){
     if(!window.matchMedia('(max-width: 820px)').matches)return;
+    let guard=document.querySelector('#kpMobileNoBlurRuntime');
+    if(!guard){
+      guard=document.createElement('style');
+      guard.id='kpMobileNoBlurRuntime';
+      guard.textContent='html body *::before,html body *::after{-webkit-filter:none!important;filter:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}';
+      document.head.appendChild(guard);
+    }
+    const roots=[document.body,document.querySelector('#appShell'),document.querySelector('#authScreen')].filter(Boolean);
+    const seen=new Set();
+    for(const root of roots){
+      const nodes=[root,...root.querySelectorAll('*')];
+      for(const el of nodes){
+        if(!(el instanceof HTMLElement||el instanceof SVGElement)||seen.has(el))continue;
+        seen.add(el);
+        el.style.setProperty('filter','none','important');
+        el.style.setProperty('-webkit-filter','none','important');
+        el.style.setProperty('backdrop-filter','none','important');
+        el.style.setProperty('-webkit-backdrop-filter','none','important');
+      }
+    }
     const gateway=document.querySelector('#komoEcosystemGateway');
     if(gateway?.hidden)document.body.classList.remove('komo-gateway-open');
     document.querySelectorAll('#kamBackdrop:not(.open),#komoAssistantDrawer[hidden],.pir-modal[hidden],.pro-app-modal[hidden],.pro-create-modal[hidden],.patient-create-modal[hidden],.kfree-v2-modal[hidden]').forEach(el=>{
-      if(el.style.display!=='none')el.style.setProperty('display','none','important');
-      if(el.style.visibility!=='hidden')el.style.setProperty('visibility','hidden','important');
-      if(el.style.pointerEvents!=='none')el.style.setProperty('pointer-events','none','important');
+      el.style.setProperty('display','none','important');
+      el.style.setProperty('visibility','hidden','important');
+      el.style.setProperty('opacity','0','important');
+      el.style.setProperty('pointer-events','none','important');
     });
   }
 
-  let homeRecoveryLoading=false;
-  function pulseRoute(){return window.KomoPatientNavigation?.route?.()||location.hash.replace(/^#/,'')||'home'}
-  async function recoverHome(){
-    if(pulseRoute()!=='home')return;
-    const app=document.querySelector('#appShell');
-    if(!app||app.hidden)return;
-    let host=document.querySelector('[data-my-komo-home]');
-    const root=document.querySelector('#viewRoot');
-    if(!host&&root){
-      root.innerHTML='<div data-my-komo-home data-home-owner="patient-home-command-v1"></div>';
-      host=root.querySelector('[data-my-komo-home]');
-    }
-    if(!host)return;
-    if(host.childElementCount>0)return;
-    if(window.KomoPatientHomeCommand?.refresh){
-      window.KomoPatientHomeCommand.refresh();
-      return;
-    }
-    if(homeRecoveryLoading)return;
-    homeRecoveryLoading=true;
-    try{
-      await import('./patient-home-command-v1.js?v=${cacheVersion}');
-      window.KomoPatientHomeCommand?.refresh?.();
-    }catch(error){
-      console.error('[pulse-home-recovery]',error);
-    }finally{
-      homeRecoveryLoading=false;
-    }
-  }
   hardenDynamicForms();
   mobileVisualReset();
   requestAnimationFrame(mobileVisualReset);
@@ -208,17 +200,12 @@ const runtime=String.raw`(() => {
     }
   });
   observer.observe(document.documentElement,{childList:true,subtree:true});
-  ['pageshow','resize','orientationchange','komo:route-ready','komo:session-ready','komo:data-ready','komo:home-command-rendered'].forEach(name=>window.addEventListener(name,()=>{
-    setTimeout(mobileVisualReset,0);
-    setTimeout(recoverHome,30);
-  },{passive:true}));
+  const filterObserver=new MutationObserver(()=>mobileVisualReset());
+  filterObserver.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']});
+  ['pageshow','resize','orientationchange','komo:route-ready','komo:session-ready','komo:data-ready','komo:home-command-rendered'].forEach(name=>window.addEventListener(name,()=>setTimeout(mobileVisualReset,0),{passive:true}));
   window.visualViewport?.addEventListener('resize',()=>setTimeout(mobileVisualReset,0),{passive:true});
-  setTimeout(recoverHome,80);
-  setTimeout(recoverHome,350);
-  setTimeout(recoverHome,900);
-  setTimeout(recoverHome,1800);
 
-  window.KomoPulseFridayDemo={version:'20261002-ipad-home-recovery-v2',validateRequiredForm,mobileVisualReset,recoverHome};
+  window.KomoPulseFridayDemo={version:'20261002-mobile-no-blur-runtime-v1',validateRequiredForm,mobileVisualReset};
 })();`;
 
 const css=String.raw`
