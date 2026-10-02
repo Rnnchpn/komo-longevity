@@ -6,6 +6,7 @@ const files={
   home:join(root,'site','home','ecosystem-home-v1.js'),
   app:join(root,'site','app','ecosystem-home-v1.js'),
   world:join(root,'site','world','world-one-v1.js'),
+  worldHtml:join(root,'site','world','index.html'),
   life:join(root,'site','life','life-os-v1.js'),
   card:join(root,'site','card','card-v1.js'),
   pulse:join(root,'site','pulse-v12','pulse-ecosystem-home-v1.js')
@@ -20,7 +21,7 @@ const checks=[];
 const pass=(label,ok)=>{checks.push([label,ok]);if(!ok)failures.push(label)};
 
 pass('home and /app share one ecosystem owner',code.home===code.app);
-pass('world remains map-first',code.world.includes("new maplibregl.Map")&&code.world.includes('WHY KŌMØ'));
+pass('world remains map-first',code.world.includes("new maplibregl.Map")&&code.worldHtml.includes('WHY KŌMØ'));
 pass('life uses shared KŌMØ identity',code.life.includes("from '/world/komo-world-auth-v1.js"));
 pass('life checkout is order-request only',code.life.includes('No payment is collected')&&code.life.includes('life_create_order_v1'));
 pass('card exposes future NFC abstraction',code.card.includes('verifyCardTap')&&code.card.includes('KomoCardNfc'));
