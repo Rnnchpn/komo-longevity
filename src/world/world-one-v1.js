@@ -45,7 +45,7 @@ function labelTier(){
   return 'PUBLIC';
 }
 function visibilityClass(item){return item?.visibility==='echelon'?'echelon':item?.visibility==='one'?'one':''}
-function isKomo(place){return String(place?.place_type||'').startsWith('komo_')||String(place?.name||'').startsWith('KŌMØ')}
+function isKomo(place){return String(place?.place_type||'').startsWith('komo_')||String(place?.name||'').startsWith('KŌMØ')}\nfunction isKomoEvent(event){return String(event?.title||'').startsWith('KŌMØ')||String(event?.summary||'').includes('KŌMØ')}
 function formatDate(value){
   if(!value)return'';
   return new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
@@ -173,7 +173,7 @@ function destinationPoint(value,index=0){
 }
 function eventMarkerElement(event,place){
   const wrap=document.createElement('div');wrap.className='poi-wrap event-poi-wrap';
-  const el=document.createElement('button');el.className='poi event-poi';el.type='button';el.innerHTML='<span>✦</span>';el.setAttribute('aria-label','EVENT · '+event.title);
+  const el=document.createElement('button');const komoEvent=isKomoEvent(event);el.className='poi event-poi'+(komoEvent?' komo':'');el.type='button';el.innerHTML='<span>'+(komoEvent?'KØ':'✦')+'</span>';el.setAttribute('aria-label',(komoEvent?'KŌMØ EVENT':'EVENT')+' · '+event.title);
   const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(event.title)+'</b><small>EVENT · '+esc(place?.city||event.destination||'KŌMØ')+'</small>';
   wrap.append(el,label);
   el.addEventListener('click',e=>{e.stopPropagation();renderView('events');setTimeout(()=>document.querySelector('[data-event-request="'+event.id+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}),80)});
@@ -181,7 +181,7 @@ function eventMarkerElement(event,place){
 }
 function experienceMarkerElement(exp,place){
   const wrap=document.createElement('div');wrap.className='poi-wrap experience-poi-wrap';
-  const el=document.createElement('button');el.className='poi experience-poi';el.type='button';el.innerHTML='<span>EXP</span>';el.setAttribute('aria-label','EXPERIENCE · '+exp.title);
+  const el=document.createElement('button');const komoExp=String(exp?.operator_name||'').includes('KŌMØ')||String(exp?.title||'').startsWith('KŌMØ');el.className='poi experience-poi'+(komoExp?' komo':'');el.type='button';el.innerHTML='<span>'+(komoExp?'KØ':'EXP')+'</span>';el.setAttribute('aria-label',(komoExp?'KŌMØ EXPERIENCE':'EXPERIENCE')+' · '+exp.title);
   const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(exp.title)+'</b><small>EXPERIENCE · '+esc(place?.city||exp.destination||'KŌMØ')+'</small>';
   wrap.append(el,label);
   el.addEventListener('click',e=>{e.stopPropagation();renderView('experiences')});
@@ -289,7 +289,7 @@ function renderNow(){
 function eventCard(e){
   const mine=state.attendance.find(a=>a.event_id===e.id);
   const access=visibilityClass(e);
-  return '<article class="event-card"><div class="ey">'+esc(access==='echelon'?'ECHELON EVENT':access==='one'?'MEMBER EVENT':'WORLD EVENT')+'</div><b>'+esc(e.title)+'</b><p>'+esc(formatDate(e.starts_at))+' · '+esc(e.destination)+'</p><p>'+esc(e.summary||'')+'</p>'+(has('event.member.rsvp')?'<button data-event-request="'+e.id+'">'+(mine?'STATUS · '+esc(mine.status.toUpperCase()):'REQUEST ACCESS')+'</button>':'')+'</article>';
+  return '<article class="event-card"><div class="ey">'+esc(access==='echelon'?'ECHELON EVENT':access==='one'?'MEMBER EVENT':isKomoEvent(e)?'KŌMØ EVENT':'WORLD EVENT')+'</div><b>'+esc(e.title)+'</b><p>'+esc(formatDate(e.starts_at))+' · '+esc(e.destination)+'</p><p>'+esc(e.summary||'')+'</p>'+(has('event.member.rsvp')?'<button data-event-request="'+e.id+'">'+(mine?'STATUS · '+esc(mine.status.toUpperCase()):'REQUEST ACCESS')+'</button>':'')+'</article>';
 }
 function experienceCard(x){
   const mine=state.experienceRequests.find(r=>r.experience_id===x.id);
