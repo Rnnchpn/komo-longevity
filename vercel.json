@@ -5,6 +5,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/card/:token",
+      "destination": "/card/?token=:token"
+    },
+    {
       "source": "/command",
       "destination": "/command-v1/"
     },
@@ -217,6 +221,32 @@
   ],
   "headers": [
     {
+      "source": "/card/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
+      "source": "/card",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0, must-revalidate"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        }
+      ]
+    },
+    {
       "source": "/intelligence/:path*",
       "headers": [
         {
@@ -286,7 +316,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "private, no-store, max-age=0, must-revalidate"
+          "value": "public, max-age=0, must-revalidate"
         },
         {
           "key": "Pragma",
@@ -295,10 +325,6 @@
         {
           "key": "Expires",
           "value": "0"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow, noarchive"
         }
       ]
     },
@@ -307,7 +333,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "private, no-store, max-age=0, must-revalidate"
+          "value": "public, max-age=0, must-revalidate"
         },
         {
           "key": "Pragma",
@@ -316,10 +342,6 @@
         {
           "key": "Expires",
           "value": "0"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex, nofollow, noarchive"
         }
       ]
     },

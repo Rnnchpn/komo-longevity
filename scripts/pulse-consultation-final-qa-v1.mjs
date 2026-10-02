@@ -69,7 +69,7 @@ const checks=[
   ['patient dock keeps five canonical destinations',dock.includes("['home','Home'")&&dock.includes("['results','Résultats'")&&dock.includes("['key','Connected'")&&dock.includes("['agenda','Consultations & rendez-vous'")&&dock.includes("['mykomo','My KŌMØ'")],
   ['account is not a patient dock destination',!dock.includes("['account'")&&!html.includes('account-tab-restore-v1.js')],
   ['KŌMØ World visible in My KŌMØ',mykomo.includes('data-mkv5-world')&&mykomo.includes('KŌMØ World')],
-  ['KŌMØ World member map shell',world.includes('KŌMØ World — Your private map')&&world.includes('maplibre-gl@6.11.2')&&world.includes('tiles.openfreemap.org/styles/liberty')&&!world.includes('./world-v1.js')],
+  ['KŌMØ World PUBLIC / ONE / ECHELON shell',world.includes('KŌMØ WORLD')&&world.includes('world-one-v1.js')&&world.includes('maplibre-gl@6.11.2')&&!world.includes('./world-v1.js')],
   ['single consultation runtime owner',!html.includes('pro-agenda-dossier-v1.js')&&!html.includes('booking-directory-map-v1.js')],
   ['single Centre runtime owner',html.includes('center-two-tab-workspace-v1.js')&&!html.includes('center-workspace-v1.js')&&!html.includes('center-command-cockpit-v2.js')]
 ];
