@@ -4,6 +4,8 @@ const state={session:null,profile:null,role:null,access:{authenticated:false,tie
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const has=c=>state.entitlements.has(c);
+const reduceMotion=window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+let exitInFlight=false;
 function toast(m){const e=$('#osToast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),2400)}
 function label(){if(state.access.tier==='one')return state.access.founding?'FOUNDING ONE':'ONE';if(state.access.tier==='echelon')return state.access.founding?'FOUNDING ECHELON':'ECHELON';return state.session?.user?'SIGNED IN':'PUBLIC'}
 function member(){return ['one','echelon'].includes(state.access.tier)}
@@ -30,6 +32,8 @@ async function load(){
 }
 function render(){
   const access=$('#osAccess');access.className='os-access '+(state.access.tier==='one'?'one':state.access.tier==='echelon'?'echelon':'');access.querySelector('span').textContent=label();
+  const planetStatus=$('.planet-copy small');
+  if(planetStatus)planetStatus.textContent=state.access.tier==='echelon'?'ECHELON':state.access.tier==='one'?'ONE':'CONNECTED';
   $('.node-echelon').hidden=state.access.tier!=='echelon';
   ['pulse','moments','card'].forEach(k=>$('.node-'+k)?.classList.toggle('locked',!member()));
   $('#osAsk').hidden=!has('concierge.request');
@@ -39,13 +43,25 @@ function render(){
   else if(state.session?.user){ctx.innerHTML='<span>KŌMØ ID · SIGNED IN</span><p>Your identity is recognised. ONE activates after your first validated KŌMØ assessment.</p>'}
   else ctx.innerHTML='<span>WORLD · LIFE</span><p>Explore the public KŌMØ world. ONE activates after your first validated KŌMØ assessment.</p>';
 }
+function transitionLabel(module){
+  return {world:'WORLD',life:'LIFE',pulse:'PULSE',moments:'MOMENTS',echelon:'ECHELON'}[module]||'KŌMØ';
+}
+function exitTo(module,url){
+  if(exitInFlight){return}
+  exitInFlight=true;
+  const shell=$('#osTransition'),labelEl=$('#osTransitionLabel');
+  if(labelEl)labelEl.textContent=transitionLabel(module);
+  if(shell){shell.classList.add('active');shell.setAttribute('aria-hidden','false')}
+  const delay=reduceMotion?80:560;
+  window.setTimeout(()=>{location.href=url},delay);
+}
 async function go(module){
-  if(module==='world'){analytics('world_opened');location.href='/world/';return}
-  if(module==='life'){analytics('life_opened');location.href='/life/';return}
-  if(module==='moments'){if(!member()){await connectPulse();toast('Sign in to unlock your Moments');return}location.href='/world/?view=moments';return}
-  if(module==='pulse'){if(!state.session?.user){await connectPulse();toast('Pulse opened · confirm your identity');return}analytics('pulse_opened');location.href=pulseUrl();return}
+  if(module==='world'){analytics('world_opened');exitTo(module,'/world/');return}
+  if(module==='life'){analytics('life_opened');exitTo(module,'/life/');return}
+  if(module==='moments'){if(!member()){await connectPulse();toast('Sign in to unlock your Moments');return}exitTo(module,'/world/?view=moments');return}
+  if(module==='pulse'){if(!state.session?.user){await connectPulse();toast('Pulse opened · confirm your identity');return}analytics('pulse_opened');exitTo(module,pulseUrl());return}
   if(module==='card'){if(!member()){await connectPulse();toast('ONE unlocks your KŌMØ Card');return}openYou('card');return}
-  if(module==='echelon'){location.href='/world/?layer=echelon';return}
+  if(module==='echelon'){exitTo(module,'/world/?layer=echelon');return}
 }
 function name(){return state.profile?.display_name||[state.profile?.first_name,state.profile?.last_name].filter(Boolean).join(' ')||state.session?.user?.email?.split('@')[0]||'KŌMØ Member'}
 function fmtMoney(c=0){return new Intl.NumberFormat('en-GB',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(c)/100)}
@@ -89,9 +105,42 @@ async function sendAsk(e){
   const {data,error}=await supabase.from('world_concierge_requests').insert(row).select('id').single();
   if(error){toast('Request could not be sent');return}analytics('ask_komo_created','concierge_request',data.id,{priority:row.priority});closeAsk();e.currentTarget.reset();toast('KŌMØ received your request');
 }
-$$('[data-module]').forEach(b=>b.onclick=()=>go(b.dataset.module));
+function setOrbitFocus(module=''){
+  const orbit=$('#osOrbit');if(!orbit)return;
+  if(module)orbit.dataset.focus=module;else delete orbit.dataset.focus;
+}
+function initPlanetMotion(){
+  const orbit=$('#osOrbit'),home=$('#osHome');if(!orbit||!home)return;
+  home.classList.add('is-entering');
+  window.setTimeout(()=>home.classList.remove('is-entering'),reduceMotion?40:900);
+  if(reduceMotion||!window.matchMedia?.('(pointer:fine)')?.matches)return;
+  let raf=0,targetX=0,targetY=0,currentX=0,currentY=0;
+  const renderTilt=()=>{
+    raf=0;
+    currentX+=(targetX-currentX)*.14;currentY+=(targetY-currentY)*.14;
+    orbit.style.setProperty('--ry',(currentX*5.5).toFixed(2)+'deg');
+    orbit.style.setProperty('--rx',(-currentY*4.5).toFixed(2)+'deg');
+    if(Math.abs(targetX-currentX)>.01||Math.abs(targetY-currentY)>.01)raf=requestAnimationFrame(renderTilt);
+  };
+  const queue=()=>{if(!raf)raf=requestAnimationFrame(renderTilt)};
+  orbit.addEventListener('pointermove',e=>{
+    const r=orbit.getBoundingClientRect();
+    targetX=Math.max(-1,Math.min(1,(e.clientX-(r.left+r.width/2))/(r.width/2)));
+    targetY=Math.max(-1,Math.min(1,(e.clientY-(r.top+r.height/2))/(r.height/2)));
+    queue();
+  },{passive:true});
+  orbit.addEventListener('pointerleave',()=>{targetX=0;targetY=0;queue()},{passive:true});
+}
+$('[data-module]').forEach(b=>{
+  b.onclick=()=>go(b.dataset.module);
+  b.addEventListener('pointerenter',()=>setOrbitFocus(b.dataset.module));
+  b.addEventListener('focus',()=>setOrbitFocus(b.dataset.module));
+  b.addEventListener('pointerleave',()=>setOrbitFocus(''));
+  b.addEventListener('blur',()=>setOrbitFocus(''));
+});
 $('#osAccess').onclick=()=>openYou();$('#osYouMobile').onclick=()=>openYou();$('#osSphere').onclick=()=>openYou();
 $$('[data-you-close]').forEach(x=>x.onclick=closeYou);$('#osAsk').onclick=openAsk;$$('[data-ask-close]').forEach(x=>x.onclick=closeAsk);
 $$('[data-quick]').forEach(b=>b.onclick=()=>{$('#osAskForm textarea').value=b.dataset.quick});$('#osAskForm').addEventListener('submit',sendAsk);
 onSession(()=>load());
+initPlanetMotion();
 load().then(()=>{analytics('ecosystem_opened');const q=new URLSearchParams(location.search);if(q.get('you')==='1')openYou(q.get('section')||'')});
