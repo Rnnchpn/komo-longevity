@@ -23,6 +23,11 @@
     try{sessionStorage.removeItem(AUTH_KEY)}catch{}
   }
   function targetStorage(remember){return remember?localStorage:sessionStorage}
+  function restoreRememberPreference(){
+    const input=document.querySelector('#rememberInput');
+    if(!input)return;
+    try{input.checked=localStorage.getItem(REMEMBER_KEY)==='1'}catch{}
+  }
 
   async function canonicalLogin(event){
     const form=event.target;
@@ -82,5 +87,7 @@
   }
 
   document.addEventListener('submit',canonicalLogin,true);
-  window.KomoCanonicalLogin={version:'1',authKey:AUTH_KEY};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restoreRememberPreference,{once:true});
+  else restoreRememberPreference();
+  window.KomoCanonicalLogin={version:'1.1',authKey:AUTH_KEY};
 })();
