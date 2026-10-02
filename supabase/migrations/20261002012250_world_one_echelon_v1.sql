@@ -386,3 +386,40 @@ from public.assessments a join public.patients p on p.id=a.patient_id
 where a.status='released' and p.patient_user_id is not null
 order by p.patient_user_id,coalesce(a.released_at,a.updated_at,a.created_at) asc
 on conflict(user_id) do nothing;
+
+-- Initial curated Riviera edit. Curation and commercial status remain separate.
+insert into public.world_places(slug,name,destination,city,country_code,latitude,longitude,category,place_type,curation_status,commercial_status,editorial_reason,summary,visibility,required_entitlement,privileges)
+values
+ ('hotel-de-paris-monaco','Hôtel de Paris Monte-Carlo','Monaco','Monaco','MC',43.7391,7.4272,'stay','hotel','selected','none','A Riviera landmark with exceptional service and a central Monte-Carlo location.','A KŌMØ Selected Riviera landmark.','public',null,'{}'),
+ ('thermes-marins-monaco','Thermes Marins Monte-Carlo','Monaco','Monaco','MC',43.7380,7.4278,'recover','wellness','selected','none','A strong recovery and wellness environment in the centre of Monaco.','Recovery and wellness in Monte-Carlo.','public',null,'{}'),
+ ('yacht-club-monaco','Yacht Club de Monaco','Monaco','Monaco','MC',43.7368,7.4258,'meet','yachting','selected','none','A key meeting point in the Riviera yachting ecosystem.','A central Riviera network landmark.','public',null,'{}'),
+ ('hotel-cap-eden-roc','Hôtel du Cap-Eden-Roc','Riviera','Antibes','FR',43.5486,7.1238,'stay','hotel','selected','none','Exceptional Mediterranean setting and strong movement environment.','A KŌMØ Selected Riviera property.','public',null,'{}'),
+ ('port-vauban','Port Vauban','Riviera','Antibes','FR',43.5825,7.1274,'meet','marina','selected','none','A central superyacht hub on the Riviera.','A Riviera yachting landmark.','public',null,'{}'),
+ ('hotel-martinez','Hôtel Martinez','Cannes','Cannes','FR',43.5509,7.0303,'stay','hotel','selected','none','A Croisette landmark with a strong Cannes position.','A KŌMØ Selected Cannes property.','public',null,'{}'),
+ ('carlton-cannes','Carlton Cannes','Cannes','Cannes','FR',43.5510,7.0250,'stay','hotel','selected','none','A historic Cannes address with contemporary hospitality.','A KŌMØ Selected Cannes property.','public',null,'{}'),
+ ('port-canto','Port Canto','Cannes','Cannes','FR',43.5427,7.0352,'meet','marina','selected','none','A practical yacht and meeting point in Cannes.','A Cannes yachting landmark.','public',null,'{}'),
+ ('club-55','Club 55','Saint-Tropez','Ramatuelle','FR',43.2464,6.6634,'eat','restaurant','selected','none','An iconic Pampelonne address with a distinct Riviera identity.','A KŌMØ Selected Pampelonne table.','public',null,'{}'),
+ ('la-vague-d-or','La Vague d’Or','Saint-Tropez','Saint-Tropez','FR',43.2675,6.6438,'eat','restaurant','selected','none','A reference gastronomic experience in Saint-Tropez.','A KŌMØ Selected gastronomic destination.','public',null,'{}'),
+ ('la-reserve-ramatuelle','La Réserve Ramatuelle','Saint-Tropez','Ramatuelle','FR',43.2089,6.6644,'recover','hotel_wellness','selected','none','A calm Mediterranean environment suited to recovery and retreat.','A KŌMØ Selected recovery destination.','public',null,'{}'),
+ ('komo-cannes-service','KŌMØ Cannes','Cannes','Cannes','FR',43.5508,7.0174,'recover','komo_service','selected','none','KŌMØ services delivered across Cannes, hotels, villas and yachts.','Motion, recovery and private KŌMØ services by request.','public',null,'{}'),
+ ('komo-monaco-service','KŌMØ Monaco','Monaco','Monaco','MC',43.7357,7.4251,'recover','komo_service','selected','none','KŌMØ services delivered across Monaco and onboard.','Private KŌMØ services by request.','public',null,'{}'),
+ ('komo-tropez-service','KŌMØ Saint-Tropez','Saint-Tropez','Saint-Tropez','FR',43.2714,6.6390,'recover','komo_service','selected','none','KŌMØ services delivered across Saint-Tropez, villas and yachts.','Private KŌMØ services by request.','public',null,'{}'),
+ ('komo-member-recovery-cannes','KŌMØ Member Recovery','Cannes','Cannes','FR',43.5522,7.0208,'recover','member_service','selected','none','A member-only recovery request layer coordinated by KŌMØ.','Member recovery coordination in Cannes.','one','world.member_places.view','{"label":"MEMBER ACCESS","type":"member"}'),
+ ('komo-private-dining-riviera','KŌMØ Private Dining','Riviera','Cannes','FR',43.5518,7.0157,'experience','private_service','selected','none','Private dining coordinated with Dolce Riviera. Exact location is disclosed after confirmation.','Private dining by request through the KŌMØ network.','echelon','world.private_places.view','{"label":"ECHELON ACCESS","type":"private"}'),
+ ('komo-yacht-villa-service','KŌMØ Yacht & Villa Service','Riviera','Cannes','FR',43.5427,7.0352,'experience','private_service','selected','none','Private KŌMØ services coordinated onboard yachts or at villas.','Private service coordination for ECHELON members.','echelon','world.private_places.view','{"label":"ECHELON ACCESS","type":"private"}')
+on conflict(slug) do update set
+ name=excluded.name,destination=excluded.destination,city=excluded.city,country_code=excluded.country_code,
+ latitude=excluded.latitude,longitude=excluded.longitude,category=excluded.category,place_type=excluded.place_type,
+ curation_status=excluded.curation_status,commercial_status=excluded.commercial_status,
+ editorial_reason=excluded.editorial_reason,summary=excluded.summary,visibility=excluded.visibility,
+ required_entitlement=excluded.required_entitlement,privileges=excluded.privileges,is_active=true,updated_at=now();
+
+insert into public.world_experiences(slug,title,destination,operator_name,summary,why_komo,visibility,required_entitlement,request_mode,is_active)
+values
+ ('komo-member-recovery-riviera','KŌMØ Member Recovery','Riviera','KŌMØ','Recovery coordinated at hotel, villa or yacht.','Designed around the member context and coordinated through KŌMØ.','one','world.member_experiences.view','request',true),
+ ('dolce-private-dinner-riviera','Dolce Riviera Private Dinner','Riviera','Dolce Riviera','A private Mediterranean dining experience coordinated with Dolce Riviera.','A hospitality layer selected for intimate KŌMØ member moments.','echelon','world.private_experiences.view','request',true),
+ ('komo-yacht-day-riviera','Mediterranean Yacht Day','Riviera','KŌMØ × Dolce Riviera','A private day built around the yacht, movement, recovery and hospitality.','A contextual KŌMØ experience for the Riviera.','echelon','world.private_experiences.view','request',true)
+on conflict(slug) do update set
+ title=excluded.title,destination=excluded.destination,operator_name=excluded.operator_name,
+ summary=excluded.summary,why_komo=excluded.why_komo,visibility=excluded.visibility,
+ required_entitlement=excluded.required_entitlement,request_mode=excluded.request_mode,is_active=true,updated_at=now();
