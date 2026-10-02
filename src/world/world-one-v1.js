@@ -6,7 +6,7 @@ const $$=s=>[...document.querySelectorAll(s)];
 const state={
   session:null,profile:null,role:null,access:{authenticated:false,tier:'public',founding:false,entitlements:[]},
   entitlements:new Set(),places:[],events:[],experiences:[],saved:new Set(),passport:[],attendance:[],experienceRequests:[],claims:[],
-  preferences:null,intent:'all',view:'world',selected:null,markers:new Map(),pitched:false,near:null
+  preferences:null,intent:'all',view:'world',momentTab:'upcoming',selected:null,markers:new Map(),pitched:false,near:null
 };
 
 const map=new maplibregl.Map({
@@ -77,8 +77,8 @@ async function loadAccess(){
 async function loadContent(){
   const [placesRes,eventsRes,experiencesRes]=await Promise.all([
     supabase.from('world_places').select('id,slug,name,destination,city,country_code,latitude,longitude,category,place_type,editorial_reason,summary,visibility,privileges,starts_at,ends_at').order('name'),
-    supabase.from('world_events').select('id,slug,title,destination,place_id,summary,starts_at,ends_at,visibility,request_mode,capacity').order('starts_at'),
-    supabase.from('world_experiences').select('id,slug,title,destination,place_id,operator_name,summary,why_komo,visibility,request_mode,available_from,available_until').order('title')
+    supabase.from('world_events').select('id,slug,title,destination,place_id,summary,starts_at,ends_at,visibility,request_mode,capacity,demo,image_url').order('starts_at'),
+    supabase.from('world_experiences').select('id,slug,title,destination,place_id,operator_name,summary,why_komo,visibility,request_mode,available_from,available_until,demo,image_url').order('title')
   ]);
   if(placesRes.error)console.warn('[World places]',placesRes.error);
   if(eventsRes.error)console.warn('[World events]',eventsRes.error);
@@ -186,27 +186,58 @@ function renderNow(){
 function eventCard(e){
   const mine=state.attendance.find(a=>a.event_id===e.id);
   const access=visibilityClass(e);
-  return '<article class="event-card"><div class="ey">'+esc(access==='echelon'?'ECHELON EVENT':access==='one'?'MEMBER EVENT':'WORLD EVENT')+'</div><b>'+esc(e.title)+'</b><p>'+esc(formatDate(e.starts_at))+' · '+esc(e.destination)+'</p><p>'+esc(e.summary||'')+'</p>'+(has('event.member.rsvp')?'<button data-event-request="'+e.id+'">'+(mine?'STATUS · '+esc(mine.status.toUpperCase()):'REQUEST ACCESS')+'</button>':'')+'</article>';
+  return '<article class="event-card '+access+'"><div class="moment-cover '+access+'"><span>'+esc(e.destination||'KŌMØ')+'</span>'+(e.demo?'<em>DEMO</em>':'')+'</div><div class="moment-card-body"><div class="ey">'+esc(access==='echelon'?'ECHELON EVENT':access==='one'?'MEMBER EVENT':'WORLD EVENT')+'</div><b>'+esc(e.title)+'</b><p>'+esc(formatDate(e.starts_at))+' · '+esc(e.destination)+'</p><p>'+esc(e.summary||'')+'</p><div class="moment-actions"><button data-event-view="'+e.id+'">VIEW</button>'+(has('event.member.rsvp')?'<button class="primary" data-event-request="'+e.id+'">'+(mine?'STATUS · '+esc(mine.status.toUpperCase()):'REQUEST ACCESS')+'</button>':'')+'</div></div></article>';
 }
 function experienceCard(x){
   const mine=state.experienceRequests.find(r=>r.experience_id===x.id);
   const access=visibilityClass(x);
-  return '<article class="event-card"><div class="ey">'+esc(access==='echelon'?'ECHELON EXPERIENCE':access==='one'?'MEMBER EXPERIENCE':'KŌMØ EXPERIENCE')+'</div><b>'+esc(x.title)+'</b><p>'+esc(x.destination)+' · '+esc(x.operator_name)+'</p><p>'+esc(x.summary||'')+'</p>'+(has('experience.book')?'<button data-experience-request="'+x.id+'">'+(mine?'STATUS · '+esc(mine.status.toUpperCase()):'REQUEST')+'</button>':'')+'</article>';
+  return '<article class="event-card '+access+'"><div class="moment-cover '+access+'"><span>'+esc(x.destination||'KŌMØ')+'</span>'+(x.demo?'<em>DEMO</em>':'')+'</div><div class="moment-card-body"><div class="ey">'+esc(access==='echelon'?'ECHELON EXPERIENCE':access==='one'?'MEMBER EXPERIENCE':'KŌMØ EXPERIENCE')+'</div><b>'+esc(x.title)+'</b><p>'+esc(x.destination)+' · '+esc(x.operator_name||'KŌMØ')+'</p><p>'+esc(x.summary||'')+'</p><div class="moment-actions"><button data-experience-view="'+x.id+'">VIEW</button>'+(has('experience.book')?'<button class="primary" data-experience-request="'+x.id+'">'+(mine?'STATUS · '+esc(mine.status.toUpperCase()):'REQUEST')+'</button>':'')+'</div></div></article>';
+}
+function eventDetail(e){
+  if(!e)return;
+  analytics('moment_viewed','world_event',e.id,{visibility:e.visibility,demo:!!e.demo});
+  const mine=state.attendance.find(a=>a.event_id===e.id),access=visibilityClass(e);
+  openModal('<button class="modal-close" data-modal-close>×</button><div class="moment-detail-cover '+access+'"><span>'+(e.demo?'DEMO · ':'')+esc(access==='echelon'?'ECHELON EVENT':access==='one'?'MEMBER EVENT':'KŌMØ EVENT')+'</span><h2>'+esc(e.title)+'</h2><p>'+esc(e.destination)+'</p></div><div class="moment-detail-meta"><div><small>DATE</small><b>'+esc(formatDate(e.starts_at))+'</b></div><div><small>GUESTS</small><b>'+esc(e.capacity?String(e.capacity):'CURATED')+'</b></div><div><small>ACCESS</small><b>'+esc(access==='echelon'?'ECHELON':access==='one'?'ONE':'WORLD')+'</b></div></div><div class="moment-detail-copy"><p>'+esc(e.summary||'A KŌMØ moment.')+'</p></div><div class="moment-detail-actions">'+(has('event.member.rsvp')?'<button class="primary" data-event-request="'+e.id+'">'+(mine?'STATUS · '+esc(mine.status.toUpperCase()):'REQUEST ACCESS')+'</button>':'<button data-connect-one>MEMBER ACCESS</button>')+(has('concierge.request')?'<button data-ask-event="'+e.id+'">ASK KŌMØ</button>':'')+'</div>');
+  bindCommon();
+}
+function experienceDetail(x){
+  if(!x)return;
+  analytics('moment_viewed','world_experience',x.id,{visibility:x.visibility,demo:!!x.demo});
+  const mine=state.experienceRequests.find(r=>r.experience_id===x.id),access=visibilityClass(x);
+  openModal('<button class="modal-close" data-modal-close>×</button><div class="moment-detail-cover '+access+'"><span>'+(x.demo?'DEMO · ':'')+esc(access==='echelon'?'ECHELON EXPERIENCE':access==='one'?'MEMBER EXPERIENCE':'KŌMØ EXPERIENCE')+'</span><h2>'+esc(x.title)+'</h2><p>'+esc(x.destination)+' · '+esc(x.operator_name||'KŌMØ')+'</p></div><div class="moment-detail-meta"><div><small>DESTINATION</small><b>'+esc(x.destination||'Riviera')+'</b></div><div><small>ACCESS</small><b>'+esc(access==='echelon'?'ECHELON':access==='one'?'ONE':'WORLD')+'</b></div><div><small>MODE</small><b>'+esc((x.request_mode||'request').toUpperCase())+'</b></div></div><div class="moment-detail-copy"><p>'+esc(x.summary||'')+'</p>'+(x.why_komo?'<div class="why-mini"><small>WHY KŌMØ</small><b>'+esc(x.why_komo)+'</b></div>':'')+'</div><div class="moment-detail-actions">'+(has('experience.book')?'<button class="primary" data-experience-request="'+x.id+'">'+(mine?'STATUS · '+esc(mine.status.toUpperCase()):'REQUEST')+'</button>':'<button data-connect-one>MEMBER ACCESS</button>')+(has('concierge.request')?'<button data-ask-experience="'+x.id+'">ASK KŌMØ</button>':'')+'</div>');
+  bindCommon();
+}
+function passportSummary(){
+  const destinations=new Set(state.passport.map(x=>x.destination).filter(Boolean));
+  const places=state.passport.filter(x=>x.place_id||x.entry_type==='place').length;
+  const experiences=state.passport.filter(x=>x.experience_id||x.event_id||['experience','event'].includes(x.entry_type)).length;
+  return '<section class="passport-summary"><div><span>'+destinations.size+'</span><small>DESTINATIONS</small></div><div><span>'+places+'</span><small>PLACES</small></div><div><span>'+experiences+'</span><small>EXPERIENCES</small></div></section>';
 }
 function renderMoments(){
   if(!member()){renderLocked('YOUR MOMENTS','ONE remembers the KŌMØ moments that become part of your World.','BECOME ONE');return}
-  const requests=[
-    ...state.attendance.map(a=>{const e=state.events.find(x=>x.id===a.event_id);return e?{date:a.requested_at,title:e.title,sub:'Event · '+a.status}:null}).filter(Boolean),
-    ...state.experienceRequests.map(r=>{const x=state.experiences.find(e=>e.id===r.experience_id);return x?{date:r.requested_at,title:x.title,sub:'Experience · '+r.status}:null}).filter(Boolean)
-  ].sort((a,b)=>new Date(b.date)-new Date(a.date));
-  let html='<div class="section-row"><b>Your Moments</b><span>'+requests.length+' active</span></div><div class="moment-list">';
-  html+=requests.length?requests.map(x=>'<article class="moment-card"><div class="ey">'+esc(formatDate(x.date))+'</div><b>'+esc(x.title)+'</b><p>'+esc(x.sub)+'</p></article>').join(''):'<div class="empty">Your requested events and experiences will appear here.</div>';
-  html+='</div><div class="section-row" style="margin-top:14px"><b>KŌMØ Passport</b><span>'+state.passport.length+' moments</span></div><div class="passport-list">';
-  html+=state.passport.length?state.passport.map(x=>'<article class="passport-card"><div class="ey">'+esc((x.entry_type||'MOMENT').toUpperCase())+' · '+esc(formatDate(x.occurred_at))+'</div><b>'+esc(x.title)+'</b><p>'+esc(x.destination||'KŌMØ World')+(x.note?' · '+esc(x.note):'')+'</p></article>').join(''):'<div class="empty">Your Passport is ready. Places visited, events attended and selected KŌMØ moments will build here over time.</div>';
-  html+='</div>';
-  $('#panelTitle').textContent='YOUR MOMENTS';$('#panelCopy').textContent='A contemporary record of the places and experiences that become part of your KŌMØ World.';
+  const now=Date.now();
+  const requested=[
+    ...state.attendance.map(a=>{const e=state.events.find(x=>x.id===a.event_id);return e?{kind:'event',id:e.id,date:e.starts_at||a.requested_at,title:e.title,destination:e.destination,status:a.status}:null}).filter(Boolean),
+    ...state.experienceRequests.map(r=>{const x=state.experiences.find(e=>e.id===r.experience_id);return x?{kind:'experience',id:x.id,date:x.available_from||r.requested_at,title:x.title,destination:x.destination,status:r.status}:null}).filter(Boolean)
+  ].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const upcoming=requested.filter(x=>!x.date||new Date(x.date).getTime()>=now);
+  let html='<div class="moments-tabs"><button data-moment-tab="upcoming" class="'+(state.momentTab==='upcoming'?'active':'')+'">UPCOMING</button><button data-moment-tab="for-you" class="'+(state.momentTab==='for-you'?'active':'')+'">FOR YOU</button><button data-moment-tab="past" class="'+(state.momentTab==='past'?'active':'')+'">PAST</button></div>';
+  if(state.momentTab==='upcoming'){
+    html+='<div class="section-row"><b>Upcoming</b><span>'+upcoming.length+' MOMENTS</span></div><div class="moment-list">';
+    html+=upcoming.length?upcoming.map(x=>'<button class="moment-card moment-row" data-'+x.kind+'-view="'+x.id+'"><div class="ey">'+esc(x.status.toUpperCase())+' · '+esc(formatDate(x.date))+'</div><b>'+esc(x.title)+'</b><p>'+esc(x.destination||'KŌMØ World')+'</p></button>').join(''):'<div class="empty">No upcoming member request yet. Open FOR YOU to see what KŌMØ is surfacing now.</div>';
+    html+='</div>';
+  }else if(state.momentTab==='for-you'){
+    html+='<div class="section-row"><b>For you</b><span>CURATED</span></div><div class="event-list">'+state.events.filter(e=>new Date(e.ends_at).getTime()>=now).map(eventCard).join('')+state.experiences.map(experienceCard).join('')+'</div>';
+  }else{
+    html+='<div class="section-row"><b>Past Moments</b><span>'+state.passport.length+' RECORDED</span></div><div class="passport-list">';
+    html+=state.passport.length?state.passport.map(x=>'<article class="passport-card"><div class="passport-stamp">'+esc((x.destination||'KŌMØ').slice(0,3).toUpperCase())+'</div><div><div class="ey">'+esc((x.entry_type||'MOMENT').toUpperCase())+' · '+esc(formatDate(x.occurred_at))+'</div><b>'+esc(x.title)+'</b><p>'+esc(x.destination||'KŌMØ World')+(x.note?' · '+esc(x.note):'')+'</p></div></article>').join(''):'<div class="empty">Your Passport is ready. Attended experiences and selected KŌMØ moments will appear here — never as points or badges.</div>';
+    html+='</div>';
+  }
+  html+='<div class="passport-head"><div><small>KŌMØ PASSPORT</small><b>Your world, remembered.</b></div><span>ONE</span></div>'+passportSummary();
+  $('#panelTitle').textContent='YOUR MOMENTS';$('#panelCopy').textContent='Curated experiences. Meaningful connections. A quiet record of what becomes part of your World.';
   $('#sideBody').innerHTML=html;bindCommon();
 }
+
 function renderCard(){
   if(!has('world.card.digital.view')){renderLocked('KŌMØ ONE CARD','Your KŌMØ Identity Key is unlocked with ONE after a completed KŌMØ assessment.','BECOME ONE');return}
   analytics('card_viewed');
@@ -296,7 +327,7 @@ async function requestExperience(id){
   if(current)return toast('Experience status · '+current.status);
   const {error}=await supabase.from('world_experience_requests').insert({experience_id:id,user_id:state.session.user.id,status:'requested'});
   if(error)return toast(error.message.includes('row-level')?'This experience is not available with your access.':'Request could not be sent.');
-  toast('Request sent');await loadContent();renderView('now');
+  analytics('event_requested','world_experience',id);toast('Request sent');await loadContent();renderView(state.view==='moments'?'moments':'now');
 }
 async function savePreferences(){
   const interests=$$('.pref-chip input:checked').map(x=>x.value);
@@ -354,12 +385,17 @@ function bindCommon(){
   $$('[data-place]').forEach(el=>el.onclick=()=>openPlace(state.places.find(p=>p.id===el.dataset.place)));
   $$('[data-connect-one]').forEach(el=>el.onclick=startOne);
   $$('[data-save-place]').forEach(el=>el.onclick=()=>toggleSaved(el.dataset.savePlace));
-  $$('[data-event-request]').forEach(el=>el.onclick=()=>requestEvent(el.dataset.eventRequest));
-  $$('[data-experience-request]').forEach(el=>el.onclick=()=>requestExperience(el.dataset.experienceRequest));
+  $('[data-event-request]').forEach(el=>el.onclick=()=>requestEvent(el.dataset.eventRequest));
+  $('[data-experience-request]').forEach(el=>el.onclick=()=>requestExperience(el.dataset.experienceRequest));
+  $('[data-event-view]').forEach(el=>el.onclick=()=>eventDetail(state.events.find(x=>x.id===el.dataset.eventView)));
+  $('[data-experience-view]').forEach(el=>el.onclick=()=>experienceDetail(state.experiences.find(x=>x.id===el.dataset.experienceView)));
+  $('[data-moment-tab]').forEach(el=>el.onclick=()=>{state.momentTab=el.dataset.momentTab;renderMoments()});
   $$('[data-claim-card]').forEach(el=>el.onclick=claimCardModal);
   $$('[data-save-preferences]').forEach(el=>el.onclick=savePreferences);
   $$('[data-sign-out]').forEach(el=>el.onclick=signOut);
-  $$('[data-ask-place]').forEach(el=>el.onclick=()=>{const p=state.places.find(x=>x.id===el.dataset.askPlace);askModal('Help me with '+(p?.name||'this place')+'.')});
+  $('[data-ask-place]').forEach(el=>el.onclick=()=>{const p=state.places.find(x=>x.id===el.dataset.askPlace);askModal('Help me with '+(p?.name||'this place')+'.')});
+  $('[data-ask-event]').forEach(el=>el.onclick=()=>{const e=state.events.find(x=>x.id===el.dataset.askEvent);askModal('Help me with access to '+(e?.title||'this event')+'.')});
+  $('[data-ask-experience]').forEach(el=>el.onclick=()=>{const x=state.experiences.find(v=>v.id===el.dataset.askExperience);askModal('Help me arrange '+(x?.title||'this experience')+'.')});
 }
 function search(term){
   const q=String(term||'').trim().toLowerCase(),box=$('#searchResults');
