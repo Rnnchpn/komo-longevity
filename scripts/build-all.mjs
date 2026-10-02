@@ -162,8 +162,8 @@ const scripts = [
   // Final public-surface pass: it runs after every historical rewrite so the
   // published home, professional landing and contact flow have one owner.
   'scripts/riviera-commercial-v1.mjs',
-  // Ship the stable KŌMØ World V0.13.5 tree as a normal public surface.
-  'scripts/komo-world-v0.mjs',
+  // KŌMØ World is now the member map. The former fictional 3D runtime is archived and not shipped.
+  'scripts/build-world-map-v1.mjs',
   // Absolute last Pulse pass: prevent retired appointment/calendar/map owners
   // from reappearing after historical build layers.
   'scripts/pulse-consultation-runtime-prune-v1.mjs',
