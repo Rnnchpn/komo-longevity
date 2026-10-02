@@ -24,6 +24,7 @@
     .journal-entry{padding:16px 0;border-top:1px solid var(--line)}.journal-entry:first-child{border-top:0}.journal-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:6px}.journal-text{white-space:pre-wrap;color:var(--soft)}.agenda-row{display:grid;grid-template-columns:100px 70px 1fr 120px auto;gap:10px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}.agenda-row:first-child{border-top:0}.agenda-title{font-weight:700}.sync{font-size:11px;color:var(--muted);margin-top:6px}.log{max-height:220px;overflow:auto}.log-item{padding:10px 0;border-top:1px solid var(--line)}.log-item:first-child{border-top:0}.empty{color:var(--muted);padding:12px 0}.footer-note{margin-top:20px;color:#7f877f;font-size:11px}
     @media(max-width:900px){.agenda-row{grid-template-columns:82px 55px 1fr}.agenda-row .agenda-owner,.agenda-row .agenda-actions{grid-column:3}.capture{flex-wrap:wrap}.app{grid-template-columns:1fr}.side{height:auto;position:sticky;z-index:5;padding:14px;border-right:0;border-bottom:1px solid var(--line)}.brand,.sub{display:none}.nav{grid-template-columns:repeat(6,1fr);overflow:auto}.nav button{text-align:center;padding:9px 5px;font-size:11px}.side-foot{display:none}.main{padding:22px 14px 60px}.span8,.span7,.span6,.span5,.span4{grid-column:span 12}.kpis{grid-template-columns:repeat(2,1fr)}.products{grid-template-columns:1fr}.top{align-items:center}.h1{font-size:28px}.priority{font-size:24px}.table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
   </style>
+  <link rel="stylesheet" href="/command-v1/crm.css">
 </head>
 <body>
 <div class="app">
@@ -33,7 +34,7 @@
       <div class="nav-label">Pilotage</div>
       <button class="active" data-view="today">Vue d’ensemble</button>
       <button data-view="agenda">Agenda</button>
-      <button data-view="pipeline">Commercial</button>
+      <button data-view="pipeline">CRM national</button>
       <button data-view="finance">Finance</button>
       <button data-view="journal">Journal</button>
       <div class="nav-label secondary">Structure</div>
@@ -41,7 +42,7 @@
       <button data-view="legal">Juridique</button>
       <button data-view="product">Opérations</button>
     </nav>
-    <div class="side-foot">Espace privé · aucune donnée patient<br>MVP local navigateur v0.2 FR</div>
+    <div class="side-foot">Espace privé · aucune donnée patient<br>CRM national · état partagé</div>
   </aside>
   <main class="main">
     <header class="top">
@@ -88,12 +89,87 @@
     <section id="pipeline" class="section">
       <div class="grid">
         <article class="card span12">
-          <h3>Pipeline commercial</h3>
-          <table class="table"><thead><tr><th>Prospect</th><th>Étape</th><th>€</th><th>Responsable</th><th>Source</th><th>Prochaine action</th></tr></thead><tbody id="deals"></tbody></table>
-          <div class="capture"><input id="dealName" placeholder="Nouveau prospect"><input id="dealValue" type="number" placeholder="€"><button class="btn" id="addDeal">Ajouter</button></div>
+          <h3>CRM national · couverture commerciale</h3>
+          <div class="kpis">
+            <div class="kpi"><b id="crmActiveKpi">0</b><small>Prospects actifs</small></div>
+            <div class="kpi"><b id="crmRegionsKpi">0</b><small>Régions couvertes</small></div>
+            <div class="kpi"><b id="crmValueKpi">0 €</b><small>Pipeline actif</small></div>
+            <div class="kpi"><b id="crmFollowupKpi">0</b><small>Relances à traiter</small></div>
+          </div>
+          <div class="crm-toolbar">
+            <input id="crmSearch" placeholder="Rechercher établissement, professionnel, ville, action…">
+            <select id="crmRegionFilter"><option value="">Toutes les régions</option></select>
+            <select id="crmKindFilter"><option value="">Tous les profils</option><option value="establishment">Établissements</option><option value="professional">Professionnels</option></select>
+            <select id="crmStageFilter"><option value="">Toutes les étapes</option></select>
+            <select id="crmOwnerFilter"><option value="">Tous responsables</option></select>
+          </div>
+          <div class="crm-table-wrap">
+            <table class="table"><thead><tr><th>Compte / contact</th><th>Région</th><th>Type</th><th>Étape</th><th>Responsable</th><th>€</th><th>Prochaine action</th><th></th></tr></thead><tbody id="crmRows"></tbody></table>
+          </div>
+          <div class="meta">Règle CRM : aucun prospect actif sans prochaine action. Cible → Contacté → RDV → Démo → Proposition → Négociation → Gagné / Perdu.</div>
         </article>
-        <article class="card span6"><h3>Règle</h3><div class="priority" style="font-size:22px">Aucun prospect actif sans prochaine action.</div><div class="muted">Cible → Contacté → RDV → Démo → Proposition → Négociation → Gagné / Perdu</div></article>
-        <article class="card span6"><h3>Objectifs de closing vendredi</h3><b>Janet / Calista</b><div class="meta">Pilote ou introduction nominative owner/yacht manager + prochaine étape datée.</div><br><b>Zayd Hassoune</b><div class="meta">Au moins une introduction qualifiée.</div><br><b>Marie Menu / COTE</b><div class="meta">Angle éditorial, deadline et activation digitale/événementielle.</div></article>
+
+        <article class="card span7" id="crmEntityForm">
+          <h3>Fiche CRM · créer / modifier</h3>
+          <input id="crmEntityId" type="hidden">
+          <div class="crm-form">
+            <label class="c8"><span class="crm-label">Nom</span><input id="crmName" placeholder="Établissement ou professionnel"></label>
+            <label class="c4"><span class="crm-label">Nature</span><select id="crmKind"><option value="establishment">Établissement</option><option value="professional">Professionnel</option></select></label>
+            <label class="c4"><span class="crm-label">Type</span><select id="crmSubtype"></select></label>
+            <label class="c4"><span class="crm-label">Région</span><select id="crmRegion"></select></label>
+            <label class="c4"><span class="crm-label">Département</span><input id="crmDepartment" placeholder="06, 75, 69…"></label>
+            <label class="c4"><span class="crm-label">Ville</span><input id="crmCity" placeholder="Cannes"></label>
+            <label class="c4"><span class="crm-label">Étape</span><select id="crmStage"></select></label>
+            <label class="c4"><span class="crm-label">Responsable</span><select id="crmOwner"></select></label>
+            <label class="c4"><span class="crm-label">Priorité</span><select id="crmPriority"><option value="normal">Normale</option><option value="high">Haute</option><option value="critical">Critique</option><option value="low">Basse</option></select></label>
+            <label class="c4"><span class="crm-label">Valeur estimée €</span><input id="crmValue" type="number" min="0" step="100"></label>
+            <label class="c4"><span class="crm-label">Source</span><input id="crmSource" placeholder="Introduction, direct, salon…"></label>
+            <label class="c4"><span class="crm-label">E-mail</span><input id="crmEmail" type="email"></label>
+            <label class="c4"><span class="crm-label">Téléphone</span><input id="crmPhone"></label>
+            <label class="c8"><span class="crm-label">Prochaine action obligatoire</span><input id="crmNext" placeholder="Appeler, envoyer proposition, confirmer pilote…"></label>
+            <label class="c4"><span class="crm-label">Deadline</span><input id="crmNextDate" type="date"></label>
+            <div class="c12 crm-actions"><button class="btn primary" id="crmSaveEntity">Enregistrer la fiche</button><button class="btn ghost" id="crmResetEntity">Nouvelle fiche</button><span class="crm-message" id="crmFormStatus"></span></div>
+          </div>
+        </article>
+
+        <article class="card span5">
+          <h3>Couverture par région</h3>
+          <div id="crmRegionCoverage"></div>
+        </article>
+
+        <article class="card span7">
+          <h3>Note de suivi · historisée</h3>
+          <div class="crm-form">
+            <label class="c6"><span class="crm-label">Compte / contact</span><select id="crmNoteEntity"></select></label>
+            <label class="c3"><span class="crm-label">Type de suivi</span><select id="crmNoteKind"><option value="note">Note</option><option value="call">Appel</option><option value="email">E-mail</option><option value="meeting">Rendez-vous</option><option value="decision">Décision</option><option value="blocker">Blocage</option></select></label>
+            <label class="c3"><span class="crm-label">Journal quotidien</span><span class="crm-sub-pill"><input id="crmJournalize" type="checkbox" checked> Journaliser</span></label>
+            <label class="c12"><span class="crm-label">Compte rendu</span><textarea id="crmNoteText" rows="4" placeholder="Ce qui s’est dit, décision, objection, information utile…"></textarea></label>
+            <label class="c6"><span class="crm-label">Prochaine action</span><input id="crmFollowNext" placeholder="Action décidée"></label>
+            <label class="c3"><span class="crm-label">Deadline</span><input id="crmFollowDate" type="date"></label>
+            <label class="c3"><span class="crm-label">KPI / résultat attendu</span><input id="crmFollowKpi" placeholder="Ex. proposition envoyée"></label>
+            <div class="c12 crm-actions"><button class="btn primary" id="crmAddFollowup">Enregistrer le suivi</button><span id="crmNoteStatus" class="crm-message"></span></div>
+          </div>
+        </article>
+
+        <article class="card span5">
+          <h3>Actions commerciales ouvertes</h3>
+          <div id="crmActions"></div>
+        </article>
+
+        <article class="card span7">
+          <h3>Historique des suivis</h3>
+          <div id="crmNotes"></div>
+        </article>
+
+        <article class="card span5">
+          <h3>Journal e-mail automatique</h3>
+          <div class="meta">Synthèse COMMAND prévue chaque matin à 08:00 · Europe/Paris : priorité, tâches, agenda, CRM, relances et journal.</div>
+          <div id="crmSubscribers" style="margin-top:14px"></div>
+          <div class="capture"><input id="crmSubscriberName" placeholder="Nom"><input id="crmSubscriberEmail" type="email" placeholder="email@domaine.com"><button class="btn" id="crmAddSubscriber">Ajouter</button></div>
+          <div id="crmSubscriberStatus" class="crm-message"></div>
+        </article>
+
+        <div style="display:none" aria-hidden="true"><table><tbody id="deals"></tbody></table><input id="dealName"><input id="dealValue"><button id="addDeal"></button></div>
       </div>
     </section>
 
@@ -446,4 +522,5 @@ document.querySelector('#agendaDate').value=isoToday();
 renderAll();
 loadSharedState();
 </script>
+<script src="/command-v1/crm.js"></script>
 </body></html>
