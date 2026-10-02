@@ -327,7 +327,10 @@ function syncMarkerVisibility(){
 }
 function renderMarkers(){
   for(const marker of state.markers.values())marker.remove();state.markers.clear();
-  filteredPlaces().forEach(p=>{
+  const places=filteredPlaces();
+  document.body.classList.toggle('map-spot-sparse',places.length<=7);
+  document.body.classList.toggle('map-spot-dense',places.length>7);
+  places.forEach(p=>{
     const m=new maplibregl.Marker({element:markerElement(p),anchor:'center'}).setLngLat([p.longitude,p.latitude]).addTo(map);
     state.markers.set(p.id,m);
   });
@@ -342,14 +345,19 @@ function placeCard(p){
   return '<button class="place-card '+(komo?'komo-card':'spot-card')+'" data-place="'+p.id+'"><span class="place-symbol '+vis+' '+(komo?'komo-symbol':'spot-symbol')+'">'+(komo?'KØ':'SPOT')+'</span><span class="place-copy"><b>'+esc(p.name)+'</b><p><strong>'+kind+'</strong> · '+esc(categoryLabel[p.category]||p.category)+' · '+esc(p.city||p.destination)+(near!=null?' · '+near.toFixed(1)+' km':'')+'</p></span><span class="arrow">›</span></button>';
 }
 function renderWorld(){
-  const list=filteredPlaces().slice(0,12);
+  const list=filteredPlaces().slice(0,16);
+  const locations=list.filter(isKomo);
+  const spots=list.filter(isKomoSpot);
   $('#panelTitle').textContent=state.near?'KŌMØ Spots around you':state.intent==='all'?(member()?'My World':(state.destination==='all'?'KŌMØ Spots · Riviera':'KŌMØ Spots · '+state.destination.replace(/-/g,' '))):(categoryLabel[state.intent]||state.intent);
   $('#panelCopy').textContent=state.near
-    ? 'KŌMØ Spots and KŌMØ locations within '+state.nearRadiusKm+' km of your current position. Your location stays in this browser session.'
-    : member()?'Your accessible KŌMØ layer is active. Public and member places are shown together.':'KŌMØ Spots are addresses selected by KŌMØ for their setting, relevance and experience.';
-  let html='<div class="section-row"><b>'+(member()?'YOUR ACCESSIBLE WORLD':'KŌMØ SPOTS')+'</b><span>'+list.length+' visible</span></div><div class="place-list">'+list.map(placeCard).join('')+'</div>';
-  if(!member())html+='<div class="locked-card" style="margin-top:10px"><div class="ey">KŌMØ ONE</div><h3>Make World yours.</h3><p>'+pulseSignInCopy()+'</p><button data-connect-one>DISCOVER ONE</button></div>';
-  else if(state.access.tier==='one')html+='<div class="locked-card" style="margin-top:10px"><div class="ey">KŌMØ ECHELON</div><h3>Another layer exists.</h3><p>ECHELON access is currently assigned privately to selected Founding Members.</p></div>';
+    ? 'Curated KŌMØ Spots and KŌMØ locations within '+state.nearRadiusKm+' km of your position.'
+    : member()?'Your accessible KŌMØ layer is active. Locations and curated Spots appear together.':'KŌMØ Spots are addresses selected for their setting, service and relevance to the KŌMØ experience.';
+  let html='';
+  if(locations.length)html+='<div class="section-row section-komo"><b>KŌMØ LOCATIONS</b><span>'+locations.length+'</span></div><div class="place-list place-list-locations">'+locations.map(placeCard).join('')+'</div>';
+  if(spots.length)html+='<div class="section-row section-spots"><b>KŌMØ SPOTS</b><span>'+spots.length+' curated</span></div><div class="place-list place-list-spots">'+spots.map(placeCard).join('')+'</div>';
+  if(!list.length)html='<div class="empty">No KŌMØ Spot is surfaced here yet.</div>';
+  if(!member())html+='<div class="locked-card" style="margin-top:12px"><div class="ey">KŌMØ ONE</div><h3>Make World yours.</h3><p>'+pulseSignInCopy()+'</p><button data-connect-one>DISCOVER ONE</button></div>';
+  else if(state.access.tier==='one')html+='<div class="locked-card" style="margin-top:12px"><div class="ey">KŌMØ ECHELON</div><h3>Another layer exists.</h3><p>ECHELON access is currently assigned privately to selected Founding Members.</p></div>';
   $('#sideBody').innerHTML=html;
   bindCommon();
 }
@@ -620,7 +628,7 @@ function search(term){
   const q=String(term||'').trim().toLowerCase(),box=$('#searchResults');
   if(!q){box.hidden=true;box.innerHTML='';return}
   const found=state.places.filter(p=>(p.name+' '+p.city+' '+p.destination+' '+p.category).toLowerCase().includes(q)).slice(0,8);
-  box.innerHTML=found.length?found.map(p=>'<button data-search-place="'+p.id+'"><b>'+esc(p.name)+'</b><span>'+esc(categoryLabel[p.category]||p.category)+' · '+esc(p.city||p.destination)+'</span></button>').join(''):'<div class="empty">No KŌMØ Selected place found.</div>';
+  box.innerHTML=found.length?found.map(p=>'<button data-search-place="'+p.id+'"><b>'+esc(p.name)+'</b><span>'+esc(categoryLabel[p.category]||p.category)+' · '+esc(p.city||p.destination)+'</span></button>').join(''):'<div class="empty">No KŌMØ Spot found.</div>';
   box.hidden=false;$$('[data-search-place]').forEach(b=>b.onclick=()=>{box.hidden=true;$('#searchInput').value='';openPlace(state.places.find(p=>p.id===b.dataset.searchPlace))});
 }
 async function nearMe(){
