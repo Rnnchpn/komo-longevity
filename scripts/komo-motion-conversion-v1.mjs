@@ -47,9 +47,9 @@ const locales={
     offersEy:'CHOISIR VOTRE ACCOMPAGNEMENT',offersTitle:'Le bilan est le point de départ',
     offersLead:'Motion permet d’évaluer la fonction. Clinical intervient lorsqu’une consultation médicale est indiquée. Signature organise un accompagnement privé plus large.',
     offers:[
-      ['01','ÉVALUATION FONCTIONNELLE','KŌMØ Motion','Questionnaires, tests fonctionnels, analyse instrumentée et restitution personnalisée.','À partir de 300 €','Réserver Motion','motion'],
-      ['02','PARCOURS MÉDICAL','KŌMØ Clinical','Consultation et interprétation médicale lorsque votre situation le justifie.','À partir de 500 €','Découvrir Clinical','clinical'],
-      ['03','PROGRAMME PRIVÉ','KŌMØ Signature','Un accompagnement coordonné, sur mesure et adapté au lieu de votre choix.','Sur proposition','Découvrir Signature','signature']
+      ['01','ÉVALUATION FONCTIONNELLE','KŌMØ Motion','Questionnaires, tests fonctionnels, analyse instrumentée et restitution personnalisée.','','Réserver Motion','motion'],
+      ['02','PARCOURS MÉDICAL','KŌMØ Clinical','Consultation et interprétation médicale lorsque votre situation le justifie.','','Découvrir Clinical','clinical'],
+      ['03','PROGRAMME PRIVÉ','KŌMØ Signature','Un accompagnement coordonné, sur mesure et adapté au lieu de votre choix.','','Découvrir Signature','signature']
     ],
     note:'Motion Score et Motion Age sont des repères propriétaires KŌMØ et ne constituent pas, à eux seuls, un diagnostic médical.',
     motionHero:'Comprendre comment vous bougez et savoir quoi améliorer',
@@ -74,7 +74,7 @@ const locales={
     receiveLead:'The value of the assessment lies in interpretation and continuity. Results are organised so you can understand what deserves attention now and what can be reassessed later.',
     receive:[['Motion Score','A KŌMØ reference for tracking your functional profile.'],['Motion Age','A complementary KŌMØ reference presented with its limitations.'],['Priorities','The main areas to work on or monitor.'],['Plan','Clear next actions adapted to your context.'],['Pulse','Results, debrief and follow-up in one space.'],['Reassessment','A future checkpoint to compare change over time.']],
     offersEy:'CHOOSE YOUR SUPPORT',offersTitle:'The assessment is the starting point',offersLead:'Motion assesses function. Clinical is used when medical consultation is indicated. Signature organises a broader private programme.',
-    offers:[['01','FUNCTIONAL ASSESSMENT','KŌMØ Motion','Questionnaires, functional tests, instrumented analysis and a personalised debrief.','From €300','Book Motion','motion'],['02','MEDICAL PATHWAY','KŌMØ Clinical','Medical consultation and interpretation when your situation requires it.','From €500','Explore Clinical','clinical'],['03','PRIVATE PROGRAMME','KŌMØ Signature','Coordinated, tailored support in the setting that suits you.','On proposal','Explore Signature','signature']],
+    offers:[['01','FUNCTIONAL ASSESSMENT','KŌMØ Motion','Questionnaires, functional tests, instrumented analysis and a personalised debrief.','','Book Motion','motion'],['02','MEDICAL PATHWAY','KŌMØ Clinical','Medical consultation and interpretation when your situation requires it.','','Explore Clinical','clinical'],['03','PRIVATE PROGRAMME','KŌMØ Signature','Coordinated, tailored support in the setting that suits you.','','Explore Signature','signature']],
     note:'Motion Score and Motion Age are proprietary KŌMØ references and do not constitute a medical diagnosis on their own.',
     motionHero:'Understand how you move and what to improve',motionLead:'KŌMØ Motion combines questionnaires, functional tests and instrumented analysis to explore gait, balance, strength, mobility and muscle control. The session ends with an individual debrief and clear priorities.'
   },
@@ -94,7 +94,7 @@ const locales={
     receiveEy:'TU RESTITUCIÓN',receiveTitle:'No sales con datos brutos',receiveLead:'El valor está en la interpretación y la continuidad. Los resultados se organizan para entender qué merece atención ahora y qué podrá reevaluarse más adelante.',
     receive:[['Motion Score','Referencia KŌMØ para seguir tu perfil funcional.'],['Motion Age','Referencia KŌMØ complementaria presentada con sus límites.'],['Prioridades','Principales puntos a trabajar o vigilar.'],['Plan','Próximas acciones claras y adaptadas al contexto.'],['Pulse','Resultados, restitución y seguimiento en un mismo espacio.'],['Reevaluación','Un futuro punto de control para comparar la evolución.']],
     offersEy:'ELEGIR ACOMPAÑAMIENTO',offersTitle:'La evaluación es el punto de partida',offersLead:'Motion evalúa la función. Clinical interviene cuando está indicada una consulta médica. Signature organiza un acompañamiento privado más amplio.',
-    offers:[['01','EVALUACIÓN FUNCIONAL','KŌMØ Motion','Cuestionarios, pruebas funcionales, análisis instrumentado y restitución personalizada.','Desde 300 €','Reservar Motion','motion'],['02','RECORRIDO MÉDICO','KŌMØ Clinical','Consulta e interpretación médica cuando la situación lo requiere.','Desde 500 €','Descubrir Clinical','clinical'],['03','PROGRAMA PRIVADO','KŌMØ Signature','Acompañamiento coordinado y a medida en el lugar que prefieras.','Bajo propuesta','Descubrir Signature','signature']],
+    offers:[['01','EVALUACIÓN FUNCIONAL','KŌMØ Motion','Cuestionarios, pruebas funcionales, análisis instrumentado y restitución personalizada.','','Reservar Motion','motion'],['02','RECORRIDO MÉDICO','KŌMØ Clinical','Consulta e interpretación médica cuando la situación lo requiere.','','Descubrir Clinical','clinical'],['03','PROGRAMA PRIVADO','KŌMØ Signature','Acompañamiento coordinado y a medida en el lugar que prefieras.','','Descubrir Signature','signature']],
     note:'Motion Score y Motion Age son referencias propietarias KŌMØ y no constituyen por sí solas un diagnóstico médico.',
     motionHero:'Comprender cómo te mueves y saber qué mejorar',motionLead:'KŌMØ Motion combina cuestionarios, pruebas funcionales y análisis instrumentado para explorar marcha, equilibrio, fuerza, movilidad y control muscular. La sesión termina con una restitución individual y prioridades claras.'
   }
@@ -136,7 +136,7 @@ function flowSection(c){
  return `<section class="km-flow"><div class="kt-shell"><p class="kt-ey">${c.measureEy}</p><h2 class="kt-h2">${c.flowTitle}</h2><div class="km-flow-grid">${s}</div></div></section>`;
 }
 function offerSection(c){
- const cards=c.offers.map(([n,e,t,p,price,cta,key],i)=>`<article class="km-offer ${i===1?'km-offer--clinical':i===2?'km-offer--signature':''}"><div class="km-offer-top"><span>${n}</span><span>${e}</span></div><h3>${t}</h3><p>${p}</p><div class="km-offer-foot"><strong>${price}</strong><a href="${href(c,key)}">${cta} →</a></div></article>`).join('');
+ const cards=c.offers.map(([n,e,t,p,_price,cta,key],i)=>`<article class="km-offer ${i===1?'km-offer--clinical':i===2?'km-offer--signature':''}"><div class="km-offer-top"><span>${n}</span><span>${e}</span></div><h3>${t}</h3><p>${p}</p><div class="km-offer-foot"><a href="${href(c,key)}">${cta} →</a></div></article>`).join('');
  return `<section class="km-offers" id="komo-offers"><div class="kt-shell"><div class="km-offer-head"><div><p class="kt-ey">${c.offersEy}</p><h2 class="kt-h2">${c.offersTitle}</h2></div><p class="kt-copy">${c.offersLead}</p></div><div class="km-offer-grid">${cards}</div></div></section>`;
 }
 function receiveSection(c){
