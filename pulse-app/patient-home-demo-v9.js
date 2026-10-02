@@ -248,9 +248,19 @@ async function load(force=false){
  }catch(error){console.warn('[patient-home-command-v9]',error)}finally{state.loading=false}
 }
 
+function ensureHomeHost(){
+ if(route()!=='home')return null;
+ let host=document.querySelector('[data-my-komo-home]');
+ if(host)return host;
+ const root=document.querySelector('#viewRoot');
+ if(!root)return null;
+ root.innerHTML='<div data-my-komo-home data-home-owner="patient-home-command-v1"></div>';
+ return root.querySelector('[data-my-komo-home]');
+}
+
 function render(){
  if(route()!=='home')return;
- const host=document.querySelector('[data-my-komo-home]');
+ const host=ensureHomeHost();
  if(!host)return;
  tuneChrome();
  host.innerHTML=homeMarkup();
@@ -276,6 +286,24 @@ window.addEventListener('komo:session-ready',()=>schedule(20,true));
 window.addEventListener('komo:profile-identity-updated',()=>schedule(20,true));
 window.addEventListener('komo:appointment-updated',()=>schedule(20,true));
 
-function boot(){tuneChrome();schedule(0,false)}
+let mountObserver=null;
+function observeHomeMount(){
+ const root=document.querySelector('#viewRoot');
+ if(!root||mountObserver)return;
+ mountObserver=new MutationObserver(records=>{
+   if(route()!=='home')return;
+   if(records.some(r=>r.type==='childList'&&r.target===root))schedule(0,false);
+ });
+ mountObserver.observe(root,{childList:true});
+}
+function boot(){
+ tuneChrome();
+ observeHomeMount();
+ schedule(0,false);
+ setTimeout(()=>schedule(0,false),120);
+ setTimeout(()=>schedule(0,false),420);
+ setTimeout(()=>schedule(0,false),1100);
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-window.KomoPatientHomeCommand={version:VERSION,refresh:()=>schedule(0,true)};
+window.addEventListener('komo:data-ready',()=>{observeHomeMount();schedule(0,false)});
+window.KomoPatientHomeCommand={version:VERSION,refresh:()=>{observeHomeMount();schedule(0,true)},ensureHomeHost};
