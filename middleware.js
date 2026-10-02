@@ -10,7 +10,6 @@ const COMMAND_USERS = {
   ucalia: '3308429ccb096d68db94915215a0a041d042ad50c6edd0b94ae9149f1ed724af',
   blebeau: 'b60d32cbe1ecc8d599650b72a8d8b6cd567220d004824f62b43ed5f9ff0dff42'
 };
-const INTELLIGENCE_USERS = COMMAND_USERS;
 const STATIC_ORIGIN = 'https://komolongevity.com';
 const STATIC_ASSET_RE = /\.(?:css|js|mjs|svg|png|jpe?g|webp|gif|ico|woff2?|ttf|otf)$/i;
 
@@ -101,34 +100,13 @@ export default async function middleware(request) {
   }
 
 
+  // KŌMØ Intelligence is temporarily open for frictionless access.
+  // Keep it out of search indexes and never cache authenticated/private-style content.
   const isIntelligenceApi = incomingUrl.pathname === '/api/intelligence-live';
   const isIntelligencePath = incomingUrl.pathname === '/intelligence' || incomingUrl.pathname.startsWith('/intelligence/');
   if (isIntelligencePath || isIntelligenceApi) {
-    const authorization = request.headers.get('authorization') || '';
-    let username = '';
-    let password = '';
-    if (authorization.startsWith('Basic ')) {
-      try {
-        const decoded = atob(authorization.slice(6));
-        const separator = decoded.indexOf(':');
-        username = separator >= 0 ? decoded.slice(0, separator).trim().toLowerCase() : '';
-        password = separator >= 0 ? decoded.slice(separator + 1) : '';
-      } catch {}
-    }
-    const expectedHash = INTELLIGENCE_USERS[username];
-    const valid = Boolean(expectedHash && password && (await sha256Hex(username + ':' + password)) === expectedHash);
-    if (!valid) {
-      return new Response('KOMO Intelligence — authentication required', {
-        status: 401,
-        headers: {
-          'WWW-Authenticate': 'Basic realm="KOMO Intelligence", charset="UTF-8"',
-          'Cache-Control': 'private, no-store, max-age=0',
-          'X-Robots-Tag': 'noindex, nofollow, noarchive'
-        }
-      });
-    }
+    // Public for the next few days by product decision; only public/operational yacht data is exposed here.
   }
-
 
   if (hostname === SHOP_HOST) {
     const destination = new URL(incomingUrl.pathname + incomingUrl.search, `https://${LIFE_HOST}`);
