@@ -31,6 +31,7 @@ const css=`
 .kh4-access-panel a:hover{background:rgba(255,255,255,.72)}
 .kh4-access-panel strong{display:block;font-size:12px}
 .kh4-access-panel small{display:block;margin-top:4px;color:#756f66;font-size:9px;line-height:1.45}
+.kt-mobile-menu .kt-menu-link small{display:block;margin-top:4px;color:#777066;font-size:9px;line-height:1.35;font-weight:500}
 .kh4-solutions{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:40px}
 .kh4-solution{display:block;padding:30px;border-radius:24px;text-decoration:none;color:#171a17;background:#fbf8f2;border:1px solid rgba(70,58,46,.12);min-height:260px;transition:transform .28s ease,box-shadow .28s ease,border-color .28s ease}
 .kh4-solution:hover{transform:translateY(-5px);box-shadow:0 22px 55px rgba(64,49,36,.11);border-color:rgba(92,92,71,.32)}
