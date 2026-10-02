@@ -26,35 +26,15 @@ function setHub(open){
 }
 function openInternal(view){
   setHub(false);
+  document.body.classList.add('map-engaged');
   const tab=one('[data-panel-view="'+view+'"]')||one('[data-mobile-view="'+view+'"]');
-  tab?.click();
-}
-function filterNow(kind){
-  openInternal('now');
-  requestAnimationFrame(()=>{
-    all('.side-tabs button').forEach(b=>b.classList.remove('active'));
-    if(kind==='experiences') one('[data-experiences-tab]')?.classList.add('active');
-    else one('[data-panel-view="now"]')?.classList.add('active');
-    const cards=all('#sideBody .event-card');
-    cards.forEach(card=>{
-      const label=(card.querySelector('.ey')?.textContent||'').toUpperCase();
-      const isExp=label.includes('EXPERIENCE');
-      card.style.display=(kind==='experiences'?isExp:!isExp)?'':'none';
-    });
-    const title=one('#panelTitle'),copy=one('#panelCopy');
-    if(kind==='experiences'){
-      if(title)title.textContent='EXPERIENCES';
-      if(copy)copy.textContent='Curated KŌMØ experiences that can be requested, arranged or accessed through the network.';
-    }else{
-      if(title)title.textContent='KŌMØ EVENTS';
-      if(copy)copy.textContent='What is happening across the KŌMØ World — public, member and private layers.';
-    }
-  });
+  if(tab)tab.click();
+  else window.__KOMO_SET_VIEW?.(view);
 }
 function go(target){
   if(target==='world')return openInternal('world');
-  if(target==='events')return filterNow('events');
-  if(target==='experiences')return filterNow('experiences');
+  if(target==='events')return openInternal('events');
+  if(target==='experiences')return openInternal('experiences');
   if(target==='card')return openInternal('card');
   if(target==='life'){location.href='https://life.komolongevity.com/';return}
   if(target==='pulse'){location.href='https://pulse.komolongevity.com/';return}
@@ -72,16 +52,7 @@ function buildDock(){
   }));
 }
 function patchNavigation(){
-  const worldTab=one('[data-panel-view="world"]'); if(worldTab)worldTab.textContent='PLACES';
-  const nowTab=one('[data-panel-view="now"]'); if(nowTab)nowTab.textContent='EVENTS';
   const mobileNow=one('[data-mobile-view="now"]'); if(mobileNow)mobileNow.textContent='EVENTS';
-  const tabs=one('.side-tabs');
-  if(tabs&&!one('[data-experiences-tab]')){
-    const exp=document.createElement('button');
-    exp.type='button';exp.textContent='EXPERIENCES';exp.setAttribute('data-experiences-tab','');
-    exp.addEventListener('click',()=>filterNow('experiences'));
-    nowTab?.insertAdjacentElement('afterend',exp);
-  }
 
   const mobile=one('.mobile-nav');
   if(mobile){
