@@ -6,7 +6,7 @@ const $$=s=>[...document.querySelectorAll(s)];
 const state={
   session:null,profile:null,role:null,access:{authenticated:false,tier:'public',founding:false,entitlements:[]},
   entitlements:new Set(),places:[],events:[],experiences:[],saved:new Set(),passport:[],attendance:[],experienceRequests:[],claims:[],
-  preferences:null,intent:'all',view:'world',selected:null,markers:new Map(),eventMarkers:new Map(),experienceMarkers:new Map(),pitched:false,near:null
+  preferences:null,intent:'all',destination:'all',view:'world',selected:null,markers:new Map(),eventMarkers:new Map(),experienceMarkers:new Map(),pitched:false,near:null
 };
 
 const map=new maplibregl.Map({
@@ -25,6 +25,8 @@ map.touchZoomRotate.enableRotation();
 window.__KOMO_WORLD_MAP=map;
 window.__KOMO_WORLD_STATE=state;
 window.__KOMO_MAPLIBRE=maplibregl;
+window.__KOMO_SET_DESTINATION=(value)=>{state.destination=value||'all';renderMarkers();renderView(state.view);};
+window.__KOMO_SET_VIEW=(value)=>renderView(value);
 
 const categoryLabel={eat:'EAT',stay:'STAY',move:'MOVE',recover:'RECOVER',experience:'EXPERIENCE',meet:'MEET'};
 const categorySymbol={eat:'EAT',stay:'STAY',move:'MOVE',recover:'REC',experience:'EXP',meet:'MEET'};
@@ -130,12 +132,22 @@ function updateIdentityUI(){
   $('#askBtn').classList.toggle('visible',has('concierge.request'));
 }
 
+function normDestination(value){return String(value||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,'').replace(/\s+/g,'-')}
+function matchesDestination(item){
+  if(!state.destination||state.destination==='all')return true;
+  const hay=[item?.destination,item?.city].map(normDestination);
+  const wanted=normDestination(state.destination);
+  if(wanted==='saint-tropez')return hay.some(v=>v.includes('saint-tropez')||v.includes('st-tropez')||v.includes('sainttropez'));
+  return hay.some(v=>v.includes(wanted));
+}
 function filteredPlaces(){
-  let list=state.places;
+  let list=state.places.filter(matchesDestination);
   if(state.intent!=='all')list=list.filter(p=>p.category===state.intent);
   if(state.near)list=[...list].sort((a,b)=>km(state.near.lat,state.near.lng,a.latitude,a.longitude)-km(state.near.lat,state.near.lng,b.latitude,b.longitude));
   return list;
 }
+function filteredEvents(){return state.events.filter(matchesDestination)}
+function filteredExperiences(){return state.experiences.filter(matchesDestination)}
 function markerElement(p){
   const wrap=document.createElement('div');wrap.className='poi-wrap poi-'+(p.category||'other');
   const el=document.createElement('button');
@@ -164,7 +176,7 @@ function eventMarkerElement(event,place){
   const el=document.createElement('button');el.className='poi event-poi';el.type='button';el.innerHTML='<span>✦</span>';el.setAttribute('aria-label','EVENT · '+event.title);
   const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(event.title)+'</b><small>EVENT · '+esc(place?.city||event.destination||'KŌMØ')+'</small>';
   wrap.append(el,label);
-  el.addEventListener('click',e=>{e.stopPropagation();renderView('now');setTimeout(()=>document.querySelector('[data-event-request="'+event.id+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}),80)});
+  el.addEventListener('click',e=>{e.stopPropagation();renderView('events');setTimeout(()=>document.querySelector('[data-event-request="'+event.id+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}),80)});
   return wrap;
 }
 function experienceMarkerElement(exp,place){
@@ -172,13 +184,13 @@ function experienceMarkerElement(exp,place){
   const el=document.createElement('button');el.className='poi experience-poi';el.type='button';el.innerHTML='<span>EXP</span>';el.setAttribute('aria-label','EXPERIENCE · '+exp.title);
   const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(exp.title)+'</b><small>EXPERIENCE · '+esc(place?.city||exp.destination||'KŌMØ')+'</small>';
   wrap.append(el,label);
-  el.addEventListener('click',e=>{e.stopPropagation();window.dispatchEvent(new CustomEvent('komo:open-experiences'));});
+  el.addEventListener('click',e=>{e.stopPropagation();renderView('experiences')});
   return wrap;
 }
 function renderEventMarkers(){
   for(const marker of state.eventMarkers.values())marker.remove();state.eventMarkers.clear();
   const now=Date.now();
-  state.events.filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=now).slice(0,12).forEach((e,index)=>{
+  filteredEvents().filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=now).slice(0,12).forEach((e,index)=>{
     const p=state.places.find(x=>x.id===e.place_id);
     const lngLat=(p?.latitude&&p?.longitude)?[Number(p.longitude),Number(p.latitude)]:destinationPoint(e.destination,index);
     const m=new maplibregl.Marker({element:eventMarkerElement(e,p),anchor:'center',offset:[14,-14]}).setLngLat(lngLat).addTo(map);
@@ -187,7 +199,7 @@ function renderEventMarkers(){
 }
 function renderExperienceMarkers(){
   for(const marker of state.experienceMarkers.values())marker.remove();state.experienceMarkers.clear();
-  state.experiences.slice(0,12).forEach((x,index)=>{
+  filteredExperiences().slice(0,12).forEach((x,index)=>{
     const p=state.places.find(q=>q.id===x.place_id);
     const lngLat=(p?.latitude&&p?.longitude)?[Number(p.longitude),Number(p.latitude)]:destinationPoint(x.destination,index+2);
     const m=new maplibregl.Marker({element:experienceMarkerElement(x,p),anchor:'center',offset:[-14,14]}).setLngLat(lngLat).addTo(map);
@@ -208,6 +220,14 @@ function fitVisibleWorld({duration=650}={}){
       : {top:260,bottom:105,left:85,right:395};
   map.fitBounds(bounds,{padding,maxZoom:mobile?10.8:11.25,duration});
 }
+function syncMarkerVisibility(){
+  const showPlaces=state.view==='world';
+  const showEvents=state.view==='events'||state.view==='now';
+  const showExperiences=state.view==='experiences'||state.view==='now';
+  state.markers.forEach(m=>{m.getElement().style.display=showPlaces?'':'none'});
+  state.eventMarkers.forEach(m=>{m.getElement().style.display=showEvents?'':'none'});
+  state.experienceMarkers.forEach(m=>{m.getElement().style.display=showExperiences?'':'none'});
+}
 function renderMarkers(){
   for(const marker of state.markers.values())marker.remove();state.markers.clear();
   filteredPlaces().forEach(p=>{
@@ -216,6 +236,7 @@ function renderMarkers(){
   });
   renderEventMarkers();
   renderExperienceMarkers();
+  syncMarkerVisibility();
 }
 
 function placeCard(p){
@@ -224,7 +245,7 @@ function placeCard(p){
 }
 function renderWorld(){
   const list=filteredPlaces().slice(0,12);
-  $('#panelTitle').textContent=state.intent==='all'?(member()?'My World':'Selected for the Riviera'):(categoryLabel[state.intent]||state.intent);
+  $('#panelTitle').textContent=state.intent==='all'?(member()?'My World':(state.destination==='all'?'Selected for the Riviera':'Selected in '+state.destination.replace(/-/g,' '))):(categoryLabel[state.intent]||state.intent);
   $('#panelCopy').textContent=member()?'Your accessible KŌMØ layer is active. Public and member places are shown together.':'A small edit of places chosen for their setting, relevance and connection to the KŌMØ world.';
   let html='<div class="section-row"><b>'+(member()?'Your accessible world':'KŌMØ Selected')+'</b><span>'+list.length+' visible</span></div><div class="place-list">'+list.map(placeCard).join('')+'</div>';
   if(!member())html+='<div class="locked-card" style="margin-top:10px"><div class="ey">KŌMØ ONE</div><h3>Make World yours.</h3><p>'+pulseSignInCopy()+'</p><button data-connect-one>DISCOVER ONE</button></div>';
@@ -232,17 +253,37 @@ function renderWorld(){
   $('#sideBody').innerHTML=html;
   bindCommon();
 }
+function renderEvents(){
+  const now=Date.now();
+  const events=filteredEvents().filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=now).slice(0,12);
+  let html='<div class="section-row"><b>Events</b><span>'+events.length+' visible</span></div><div class="event-list">';
+  html+=events.length?events.map(eventCard).join(''):'<div class="empty">No KŌMØ event is being surfaced here right now.</div>';
+  html+='</div>';
+  if(!member())html+='<div class="locked-card" style="margin-top:10px"><div class="ey">MEMBER LAYER</div><h3>More appears when you become ONE.</h3><p>Member events are revealed by your KŌMØ identity.</p><button data-connect-one>BECOME ONE</button></div>';
+  $('#panelTitle').textContent='KŌMØ EVENTS';
+  $('#panelCopy').textContent='What is happening in '+(state.destination==='all'?'the KŌMØ World':state.destination.replace(/-/g,' '))+'.';
+  $('#sideBody').innerHTML=html;bindCommon();
+}
+function renderExperiences(){
+  const ex=filteredExperiences().slice(0,12);
+  let html='<div class="section-row"><b>Experiences</b><span>'+ex.length+' visible</span></div><div class="event-list">';
+  html+=ex.length?ex.map(experienceCard).join(''):'<div class="empty">No KŌMØ experience is being surfaced here right now.</div>';
+  html+='</div>';
+  if(!member())html+='<div class="locked-card" style="margin-top:10px"><div class="ey">MEMBER LAYER</div><h3>More appears when you become ONE.</h3><p>Member experiences are revealed by your KŌMØ identity.</p><button data-connect-one>BECOME ONE</button></div>';
+  $('#panelTitle').textContent='KŌMØ EXPERIENCES';
+  $('#panelCopy').textContent='Things KŌMØ can arrange, request or unlock in '+(state.destination==='all'?'the Riviera':state.destination.replace(/-/g,' '))+'.';
+  $('#sideBody').innerHTML=html;bindCommon();
+}
 function renderNow(){
   const now=Date.now();
-  const events=state.events.filter(e=>new Date(e.ends_at).getTime()>=now).slice(0,8);
-  const ex=state.experiences.slice(0,8);
+  const events=filteredEvents().filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=now).slice(0,6);
+  const ex=filteredExperiences().slice(0,6);
   let html='<div class="section-row"><b>Available now & next</b><span>LIVE EDIT</span></div><div class="event-list">';
   if(events.length)html+=events.map(eventCard).join('');
   if(ex.length)html+=ex.map(experienceCard).join('');
   if(!events.length&&!ex.length)html+='<div class="empty">Nothing is being surfaced right now. World stays quiet when there is nothing relevant to show.</div>';
   html+='</div>';
-  if(!member())html+='<div class="locked-card" style="margin-top:10px"><div class="ey">MEMBER LAYER</div><h3>More appears when you become ONE.</h3><p>Member experiences and events are revealed by your KŌMØ identity.</p><button data-connect-one>BECOME ONE</button></div>';
-  $('#panelTitle').textContent='NOW';$('#panelCopy').textContent='What is relevant now, soon or this week — without filling the map with noise.';
+  $('#panelTitle').textContent='NOW';$('#panelCopy').textContent='What is relevant now, soon or this week.';
   $('#sideBody').innerHTML=html;bindCommon();
 }
 function eventCard(e){
@@ -297,9 +338,17 @@ function renderLocked(title,copy,cta){
 }
 function renderView(view){
   state.view=view;
-  $$('.side-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.panelView===view));
-  $$('.mobile-nav button').forEach(b=>b.classList.toggle('active',b.dataset.mobileView===view));
-  if(view==='world')renderWorld();else if(view==='now')renderNow();else if(view==='moments')renderMoments();else if(view==='card')renderCard();else renderYou();
+  $('.side-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.panelView===view));
+  $('.mobile-nav button').forEach(b=>b.classList.toggle('active',b.dataset.mobileView===view));
+  if(view==='world')renderWorld();
+  else if(view==='events')renderEvents();
+  else if(view==='experiences')renderExperiences();
+  else if(view==='now')renderNow();
+  else if(view==='moments')renderMoments();
+  else if(view==='card')renderCard();
+  else renderYou();
+  syncMarkerVisibility();
+  window.dispatchEvent(new CustomEvent('komo:view-change',{detail:{view:state.view,destination:state.destination}}));
 }
 
 function openPlace(p){
