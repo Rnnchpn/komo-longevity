@@ -7,7 +7,6 @@
   <title>KŌMØ Intelligence Service — Riviera</title>
   <meta name="description" content="KŌMØ Intelligence Service — yacht, network, partner and event intelligence for the Riviera." />
   <link rel="preconnect" href="https://unpkg.com">
-  <link rel="preconnect" href="https://a.basemaps.cartocdn.com">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'" />
   <style>
     :root{
@@ -23,7 +22,7 @@
     #map{position:absolute;inset:0}
     .leaflet-control-zoom{border:0!important;box-shadow:var(--shadow)!important}
     .leaflet-control-zoom a{border:0!important;color:var(--ink)!important}
-    .leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.72)!important}
+    .leaflet-control-attribution{font-size:8px!important;background:rgba(255,255,255,.78)!important;border-radius:8px 0 0 0!important;padding:2px 5px!important}\n    .leaflet-tile-pane{filter:saturate(.68) brightness(1.04) contrast(.94)}
     .topbar{position:absolute;z-index:1000;top:18px;left:18px;right:18px;height:68px;display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.7);border-radius:22px;background:rgba(251,252,249,.89);backdrop-filter:blur(22px);box-shadow:var(--shadow)}
     .brand{display:flex;align-items:center;gap:12px;min-width:270px;padding:0 10px}
     .brand-mark{width:38px;height:38px;border-radius:13px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:12px;letter-spacing:.13em;font-weight:700}
@@ -123,10 +122,24 @@
       .brand{min-width:210px}.brand-copy span{display:none}.sidebar{width:254px}.filters,.map-legend{left:284px}.right-panel{width:300px}.company-drawer,.events-drawer,.network-drawer{left:284px;right:330px}.filters{right:330px}
     }
     @media(max-width:850px){
-      .topbar{top:10px;left:10px;right:10px}.brand{min-width:auto}.brand-copy{display:none}.top-actions .pill-btn:not(.dark){display:none}
-      .sidebar{left:10px;right:10px;top:auto;bottom:10px;width:auto;height:166px;padding:10px}.region-row,.summary{display:none}.nav{border:0}.section-title{margin:7px 2px 5px}.list{display:flex;gap:7px;overflow-x:auto}.action-card{min-width:210px;margin:0}
-      .filters{left:10px;right:10px;top:88px}.right-panel{left:10px;right:10px;top:142px;bottom:184px;width:auto;display:none}.right-panel.open{display:flex}
-      .map-legend,.demo-badge{display:none}.company-drawer,.events-drawer,.network-drawer{inset:142px 10px 184px 10px}.directory-grid{grid-template-columns:1fr 1fr}
+      #app{height:100dvh}
+      .topbar{top:max(8px,env(safe-area-inset-top));left:8px;right:8px;height:58px;padding:6px 8px;border-radius:18px;gap:7px}
+      .brand{min-width:auto;padding:0}.brand-copy{display:none}.brand-mark{width:38px;height:38px;border-radius:12px}
+      .search input{height:40px;border-radius:13px;padding:0 13px;font-size:12px}.search-kbd{display:none}
+      .top-actions{display:none}
+      .filters{left:8px;right:8px;top:calc(max(8px,env(safe-area-inset-top)) + 66px);gap:6px;padding:0 0 4px}
+      .chip{height:36px;padding:0 14px;font-size:11px;background:rgba(255,255,252,.94)}
+      .sidebar{left:8px;right:8px;top:auto;bottom:calc(8px + env(safe-area-inset-bottom));width:auto;height:64px;padding:7px;border-radius:20px}
+      .sidebar>.eyebrow,.region-row,.summary,.sidebar>.section-title,.sidebar>.list{display:none}
+      .nav{height:100%;border:0;padding:0;gap:4px}.nav button{font-size:10px;padding:0 4px;border-radius:13px}
+      .right-panel{left:8px;right:8px;top:calc(max(8px,env(safe-area-inset-top)) + 112px);bottom:calc(80px + env(safe-area-inset-bottom));width:auto;display:none;border-radius:20px}.right-panel.open{display:flex}
+      .map-legend,.demo-badge{display:none}
+      .company-drawer,.events-drawer,.network-drawer{inset:calc(max(8px,env(safe-area-inset-top)) + 112px) 8px calc(80px + env(safe-area-inset-bottom)) 8px;border-radius:20px}
+      .directory-grid{grid-template-columns:1fr 1fr}
+      .leaflet-control-zoom{display:none!important}
+      .leaflet-control-attribution{margin-bottom:calc(78px + env(safe-area-inset-bottom))!important;font-size:7px!important;max-width:72vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .port-cluster{min-width:54px;height:50px;border-radius:16px}
+      .port-cluster strong{font-size:16px}.port-cluster span{font-size:7px;max-width:70px;overflow:hidden;text-overflow:ellipsis}
     }
     @media(max-width:560px){.directory-grid{grid-template-columns:1fr}.top-actions{display:none}.event-card{grid-template-columns:1fr}.event-stats{text-align:left}}
   </style>
@@ -290,30 +303,27 @@
     {name:'KŌMØ Card',type:'Privileges',text:'Future couche de partenaires, invitations et avantages réservés aux membres.',foot:'Coming next'}
   ];
 
-  const map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:8,maxZoom:17,preferCanvas:true}).setView([43.49,6.96],9);
+  const map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:8,maxZoom:17,preferCanvas:true}).setView([43.52,7.03],9);
   L.control.zoom({position:'bottomright'}).addTo(map);
-  let usingFallbackTiles=false;
-  let tileErrors=0;
-  const primaryTiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
-    attribution:'&copy; OpenStreetMap contributors &copy; CARTO',
-    subdomains:'abcd',maxZoom:20,updateWhenIdle:true,keepBuffer:4
-  });
-  primaryTiles.on('tileerror',()=>{
-    tileErrors+=1;
-    if(tileErrors>=4 && !usingFallbackTiles){
-      usingFallbackTiles=true;
-      try{map.removeLayer(primaryTiles)}catch{}
-      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-        attribution:'&copy; OpenStreetMap contributors',maxZoom:19
-      }).addTo(map);
-    }
-  });
-  primaryTiles.addTo(map);
+  const primaryTiles=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; OpenStreetMap contributors',
+    maxZoom:19,updateWhenIdle:true,keepBuffer:4
+  }).addTo(map);
+  if(window.innerWidth<850){map.setView([43.51,7.02],9);}
 
   const yachtLayer=L.layerGroup().addTo(map);
   const companyLayer=L.layerGroup().addTo(map);
   const partnerLayer=L.layerGroup().addTo(map);
   const yachtMarkers=new Map();
+  const REGION_CENTERS={"Monaco · Nice":[43.716,7.345],"Antibes":[43.582,7.127],"Cannes":[43.548,7.026],"Saint-Tropez":[43.271,6.639]};
+  function regionKey(y){
+    const s=((y.port||'')+' '+(y.city||'')).toLowerCase();
+    if(s.includes('saint-tropez')) return 'Saint-Tropez';
+    if(s.includes('cannes')||s.includes('canto')) return 'Cannes';
+    if(s.includes('antibes')||s.includes('vauban')||s.includes('golfe-juan')) return 'Antibes';
+    if(s.includes('monaco')||s.includes('hercule')||s.includes('fontvieille')||s.includes('nice')||s.includes('villefranche')) return 'Monaco · Nice';
+    return 'Riviera';
+  }
   const PORT_CENTERS={"Port Hercule":[43.7369,7.4254],"Port Vauban (Antibes / IYCA)":[43.5824,7.1274],"Port Vauban":[43.5824,7.1274],"Cannes Vieux Port":[43.5501,7.0156],"Port Canto (Cannes)":[43.5427,7.0352],"Port Canto":[43.5427,7.0352],"Golfe-Juan Anchorage":[43.5639,7.0734],"Port de Saint-Tropez":[43.2713,6.6385],"Port de Nice (Lympia)":[43.6963,7.2867],"Port de Nice":[43.6963,7.2867],"Villefranche-sur-Mer Anchorage":[43.6998,7.3156],"Port de Fontvieille":[43.7284,7.4168]};
 
   function yachtIcon(y){
@@ -354,7 +364,28 @@
     warmCount.textContent=exact;
     document.querySelector('.metric:nth-child(2) span').textContent='AIS exact';
 
-    if(map.getZoom()<11){
+    if(map.getZoom()<10){
+      const groups=new Map();
+      filtered.forEach(y=>{
+        const key=regionKey(y);
+        if(!groups.has(key)) groups.set(key,[]);
+        groups.get(key).push(y);
+      });
+      for(const [region,list] of groups){
+        const center=REGION_CENTERS[region]||[
+          list.reduce((sum,y)=>sum+Number(y.lat),0)/list.length,
+          list.reduce((sum,y)=>sum+Number(y.lng),0)/list.length
+        ];
+        const maxLen=Math.max(...list.map(y=>Number(y.length)||0));
+        const m=L.marker(center,{icon:clusterIcon(region,list.length),zIndexOffset:220})
+          .bindTooltip('<b>'+esc(region)+'</b><br>'+list.length+' yachts · '+maxLen+' m max');
+        m.on('click',()=>map.flyTo(center,11,{duration:.6}));
+        m.addTo(yachtLayer);
+      }
+      return;
+    }
+
+    if(map.getZoom()<12){
       const groups=new Map();
       filtered.forEach(y=>{
         const key=y.port||y.city||'Riviera';
@@ -369,7 +400,7 @@
         const maxLen=Math.max(...list.map(y=>Number(y.length)||0));
         const m=L.marker(center,{icon:clusterIcon(port,list.length),zIndexOffset:200})
           .bindTooltip('<b>'+esc(port)+'</b><br>'+list.length+' yachts · '+maxLen+' m max');
-        m.on('click',()=>map.flyTo(center,13,{duration:.65}));
+        m.on('click',()=>map.flyTo(center,13,{duration:.6}));
         m.addTo(yachtLayer);
       }
       return;
