@@ -6,7 +6,7 @@ const $$=s=>[...document.querySelectorAll(s)];
 const state={
   session:null,profile:null,role:null,access:{authenticated:false,tier:'public',founding:false,entitlements:[]},
   entitlements:new Set(),places:[],events:[],experiences:[],saved:new Set(),passport:[],attendance:[],experienceRequests:[],claims:[],
-  preferences:null,intent:'all',view:'world',selected:null,markers:new Map(),pitched:false,near:null
+  preferences:null,intent:'all',view:'world',selected:null,markers:new Map(),eventMarkers:new Map(),pitched:false,near:null
 };
 
 const map=new maplibregl.Map({
@@ -22,9 +22,12 @@ const map=new maplibregl.Map({
 });
 map.dragRotate.enable();
 map.touchZoomRotate.enableRotation();
+window.__KOMO_WORLD_MAP=map;
+window.__KOMO_WORLD_STATE=state;
+window.__KOMO_MAPLIBRE=maplibregl;
 
 const categoryLabel={eat:'EAT',stay:'STAY',move:'MOVE',recover:'RECOVER',experience:'EXPERIENCE',meet:'MEET'};
-const categorySymbol={eat:'E',stay:'S',move:'M',recover:'R',experience:'X',meet:'M'};
+const categorySymbol={eat:'EAT',stay:'STAY',move:'MOVE',recover:'REC',experience:'EXP',meet:'MEET'};
 const preferenceOptions=['Gastronomy','Yachting','Fitness','Recovery','Art','Hotels','Travel','Events','Culture'];
 
 function toast(message){
@@ -101,7 +104,8 @@ async function refreshAll({fly=false}={}){
   renderMarkers();
   renderView(state.view);
   maybeWelcome();
-  if(fly)map.easeTo({center:[7.02,43.49],zoom:9.05,pitch:0,bearing:0,duration:650});
+  if(fly)fitVisibleWorld({duration:650});
+  window.dispatchEvent(new CustomEvent('komo:world-ready',{detail:{places:state.places.length,events:state.events.length,experiences:state.experiences.length,tier:state.access.tier}}));
 }
 
 function maybeWelcome(){
@@ -133,14 +137,42 @@ function filteredPlaces(){
   return list;
 }
 function markerElement(p){
-  const wrap=document.createElement('div');wrap.className='poi-wrap';
+  const wrap=document.createElement('div');wrap.className='poi-wrap poi-'+(p.category||'other');
   const el=document.createElement('button');
   const cls=visibilityClass(p);
-  el.className='poi '+(cls||'')+(isKomo(p)?' komo':'');
-  el.type='button';el.textContent=isKomo(p)?'KØ':categorySymbol[p.category]||'•';el.setAttribute('aria-label',p.name);
-  const label=document.createElement('span');label.className='poi-label';label.textContent=p.name;
+  el.className='poi '+(cls||'')+(isKomo(p)?' komo':'')+' category-'+(p.category||'other');
+  el.type='button';
+  const glyph=isKomo(p)?'KØ':categorySymbol[p.category]||'•';
+  el.innerHTML='<span>'+esc(glyph)+'</span>';
+  el.setAttribute('aria-label',(categoryLabel[p.category]||'KŌMØ')+' · '+p.name);
+  const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(p.name)+'</b><small>'+esc(categoryLabel[p.category]||p.category||'KŌMØ')+'</small>';
   wrap.append(el,label);el.addEventListener('click',e=>{e.stopPropagation();openPlace(p)});
   return wrap;
+}
+function eventMarkerElement(event,place){
+  const wrap=document.createElement('div');wrap.className='poi-wrap event-poi-wrap';
+  const el=document.createElement('button');el.className='poi event-poi';el.type='button';el.innerHTML='<span>✦</span>';el.setAttribute('aria-label','EVENT · '+event.title);
+  const label=document.createElement('span');label.className='poi-label';label.innerHTML='<b>'+esc(event.title)+'</b><small>EVENT · '+esc(place?.city||event.destination||'KŌMØ')+'</small>';
+  wrap.append(el,label);
+  el.addEventListener('click',e=>{e.stopPropagation();renderView('now');setTimeout(()=>document.querySelector('[data-event-request="'+event.id+'"]')?.scrollIntoView({behavior:'smooth',block:'center'}),80)});
+  return wrap;
+}
+function renderEventMarkers(){
+  for(const marker of state.eventMarkers.values())marker.remove();state.eventMarkers.clear();
+  const now=Date.now();
+  state.events.filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=now).slice(0,12).forEach(e=>{
+    const p=state.places.find(x=>x.id===e.place_id);
+    if(!p?.latitude||!p?.longitude)return;
+    const m=new maplibregl.Marker({element:eventMarkerElement(e,p),anchor:'center'}).setLngLat([p.longitude,p.latitude]).addTo(map);
+    state.eventMarkers.set(e.id,m);
+  });
+}
+function visibleMapPlaces(){return filteredPlaces().filter(p=>Number.isFinite(Number(p.latitude))&&Number.isFinite(Number(p.longitude)))}
+function fitVisibleWorld({duration=650}={}){
+  const list=visibleMapPlaces(); if(!list.length)return;
+  const bounds=new maplibregl.LngLatBounds();
+  list.forEach(p=>bounds.extend([Number(p.longitude),Number(p.latitude)]));
+  map.fitBounds(bounds,{padding:{top:285,bottom:105,left:95,right:405},maxZoom:11.25,duration});
 }
 function renderMarkers(){
   for(const marker of state.markers.values())marker.remove();state.markers.clear();
@@ -148,6 +180,7 @@ function renderMarkers(){
     const m=new maplibregl.Marker({element:markerElement(p),anchor:'center'}).setLngLat([p.longitude,p.latitude]).addTo(map);
     state.markers.set(p.id,m);
   });
+  renderEventMarkers();
 }
 
 function placeCard(p){
@@ -382,18 +415,19 @@ function add3DBuildings(){
 map.on('load',async()=>{
   add3DBuildings();
   await refreshAll();
+  fitVisibleWorld({duration:0});
   setTimeout(()=>$('#worldIntro').classList.add('hidden'),700);
 });
-map.on('click',()=>$('#detailSheet').classList.remove('open'));
+map.on('click',()=>{$('#detailSheet').classList.remove('open');document.body.classList.add('map-engaged')});
 
 $$('[data-detail-close]').forEach(x=>x.onclick=()=>{$('#detailSheet').classList.remove('open');$('#detailSheet').setAttribute('aria-hidden','true')});
 $$('[data-modal-close]').forEach(x=>x.onclick=closeModal);
 $$('[data-panel-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.panelView));
 $$('[data-mobile-view]').forEach(b=>b.onclick=()=>renderView(b.dataset.mobileView));
-$$('[data-intent]').forEach(b=>b.onclick=()=>{state.intent=b.dataset.intent;$$('[data-intent]').forEach(x=>x.classList.toggle('active',x===b));renderMarkers();renderView('world')});
+$('[data-intent]').forEach(b=>b.onclick=()=>{state.intent=b.dataset.intent;$('[data-intent]').forEach(x=>x.classList.toggle('active',x===b));renderMarkers();renderView('world');fitVisibleWorld({duration:520});document.body.classList.add('map-engaged')});
 $('#nearBtn').onclick=nearMe;
 $('#viewToggle').onclick=()=>{state.pitched=!state.pitched;map.easeTo({pitch:state.pitched?50:0,bearing:state.pitched?-10:0,duration:600});$('#viewToggle').innerHTML=state.pitched?'2D':'<b>3D</b>'};
-$('#recenterBtn').onclick=()=>{state.near=null;$('#nearBtn').classList.remove('active');$('#nearSummary').classList.remove('open');map.easeTo({center:[7.02,43.49],zoom:9.05,pitch:state.pitched?45:0,bearing:state.pitched?-8:0,duration:700});renderMarkers();renderView(state.view)};
+$('#recenterBtn').onclick=()=>{state.near=null;$('#nearBtn').classList.remove('active');$('#nearSummary').classList.remove('open');state.intent='all';$('[data-intent]').forEach(x=>x.classList.toggle('active',x.dataset.intent==='all'));renderMarkers();renderView('world');fitVisibleWorld({duration:700});document.body.classList.add('map-engaged')};
 $('#searchInput').oninput=e=>search(e.target.value);
 $('#signInBtn').onclick=()=>member()?renderView('card'):startOne();
 $('#memberPill').onclick=()=>renderView(member()?'you':'world');
