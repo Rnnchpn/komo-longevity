@@ -1,286 +1,364 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#18271f" />
-  <meta name="komo-world-version" content="9.1.0-campus-yachting" />
-  <meta name="color-scheme" content="dark" />
-  <title>KŌMØ World · Longevity in Motion</title>
-  <meta name="description" content="KŌMØ World — un espace spatial personnel pour comprendre, suivre et faire évoluer votre mouvement dans le temps." />
-  <link rel="stylesheet" href="./world-v1.css?v=9.1.0-campus-yachting" />
-  <link rel="modulepreload" href="./vendor/three.module.js" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#ecebe5"/>
+  <meta name="robots" content="noindex,nofollow,noarchive"/>
+  <title>KŌMØ World — Your private map</title>
+  <meta name="description" content="KŌMØ World — private member map for places, privileges, experiences and longevity services."/>
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.11.2/dist/maplibre-gl.css"/>
+  <style>
+    :root{
+      --ink:#101613;--muted:#68706c;--paper:#f4f3ee;--glass:rgba(250,249,245,.91);
+      --line:rgba(16,22,19,.10);--green:#183e35;--gold:#9b8158;--sea:#accad1;
+      --shadow:0 18px 55px rgba(12,25,21,.15);--soft:0 8px 24px rgba(12,25,21,.08);
+    }
+    *{box-sizing:border-box}
+    html,body,#app,#map{height:100%;width:100%;margin:0}
+    html,body{overflow:hidden;background:#d7e3e3;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif}
+    button,input{font:inherit}
+    button{cursor:pointer;color:inherit}
+    #app{position:relative}
+    #map{position:absolute;inset:0;background:linear-gradient(145deg,#dfe7e3,#b9ced0)}
+    .maplibregl-canvas{outline:0}
+    .maplibregl-ctrl-bottom-left,.maplibregl-ctrl-bottom-right{z-index:20}
+    .maplibregl-ctrl-attrib{font-size:8px!important;background:rgba(255,255,255,.72)!important;border-radius:8px 0 0 0}
+    .top-shell{position:absolute;z-index:30;top:18px;left:18px;right:18px;display:flex;gap:10px;align-items:center}
+    .topbar{height:64px;flex:1;display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--glass);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.75);box-shadow:var(--shadow);border-radius:21px}
+    .brand{height:46px;min-width:210px;display:flex;align-items:center;gap:11px;padding-right:8px}
+    .brand-mark{width:44px;height:44px;border-radius:14px;background:#101613;color:#fff;display:grid;place-items:center;font-size:13px;font-weight:800;letter-spacing:.12em}
+    .brand-copy b{display:block;font-size:12px;letter-spacing:.15em}.brand-copy span{display:block;color:var(--muted);font-size:10px;margin-top:4px}
+    .product-switch{display:flex;background:#e9e9e4;border-radius:12px;padding:3px;gap:2px}
+    .product-switch button,.product-switch a{height:36px;padding:0 12px;border:0;border-radius:10px;text-decoration:none;display:grid;place-items:center;font-size:10px;font-weight:750;letter-spacing:.08em;color:#5b625e}
+    .product-switch .active{background:#fff;color:#111815;box-shadow:0 3px 10px rgba(0,0,0,.06)}
+    .search{position:relative;flex:1;min-width:160px}
+    .search input{width:100%;height:46px;border:0;outline:0;border-radius:14px;background:#fff;padding:0 48px 0 15px;color:var(--ink);font-size:13px;box-shadow:inset 0 0 0 1px var(--line)}
+    .search .search-icon{position:absolute;right:15px;top:13px;width:19px;height:19px;color:#6d746f}
+    .search-results{position:absolute;left:0;right:0;top:52px;background:rgba(255,255,253,.98);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:7px;display:none;max-height:320px;overflow:auto}
+    .search-results.open{display:block}
+    .search-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border-radius:11px;font-size:11px}.search-item:hover{background:#f0f1ed}.search-item span{color:var(--muted);font-size:9px;text-align:right}
+    .member-btn{height:46px;border:1px solid var(--line);border-radius:14px;background:#101613;color:#fff;padding:0 14px;font-size:10px;font-weight:750;letter-spacing:.06em;white-space:nowrap}
+    .filters{position:absolute;z-index:29;left:18px;right:18px;top:92px;display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;padding:2px 0 8px}.filters::-webkit-scrollbar{display:none}
+    .chip{height:36px;padding:0 14px;border:1px solid rgba(16,22,19,.11);border-radius:999px;background:rgba(255,255,252,.92);backdrop-filter:blur(18px);box-shadow:var(--soft);white-space:nowrap;font-size:10px;color:#4e5752}
+    .chip.active{background:#101613;color:#fff;border-color:#101613}
+    .chip.komo.active{background:var(--green);border-color:var(--green)}
+    .chip.gold.active{background:var(--gold);border-color:var(--gold);color:#fff}
+    .world-status{position:absolute;z-index:26;left:18px;bottom:18px;display:flex;align-items:center;gap:7px;padding:8px 11px;border-radius:12px;background:rgba(255,255,252,.9);backdrop-filter:blur(16px);box-shadow:var(--soft);font-size:9px;color:#5e6762}
+    .status-dot{width:7px;height:7px;border-radius:50%;background:#2ca57c;box-shadow:0 0 0 4px rgba(44,165,124,.12)}
+    .control-stack{position:absolute;z-index:28;right:18px;top:148px;display:flex;flex-direction:column;border-radius:16px;overflow:hidden;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.8)}
+    .control-stack button{width:45px;height:44px;border:0;border-bottom:1px solid var(--line);background:rgba(255,255,253,.95);display:grid;place-items:center;font-size:18px}.control-stack button:last-child{border:0}.control-stack svg{width:19px;height:19px}
+    .sheet{position:absolute;z-index:31;right:18px;bottom:18px;width:340px;max-height:calc(100vh - 158px);background:rgba(251,250,246,.95);backdrop-filter:blur(25px);border:1px solid rgba(255,255,255,.78);box-shadow:var(--shadow);border-radius:25px;overflow:hidden;display:flex;flex-direction:column}
+    .sheet-handle{display:none;width:42px;height:5px;border-radius:99px;background:#c6cbc8;margin:8px auto 2px}
+    .sheet-head{padding:17px 16px 10px}
+    .eyebrow{font-size:8px;letter-spacing:.20em;text-transform:uppercase;color:#69716d;font-weight:800}
+    .sheet-head-row{display:flex;justify-content:space-between;align-items:end;margin-top:5px;gap:8px}.sheet h1{font-size:23px;line-height:1;margin:0;font-weight:650;letter-spacing:-.035em}
+    .member-state{font-size:8px;font-weight:800;letter-spacing:.08em;background:#edf4f0;color:#1f6754;padding:6px 8px;border-radius:999px}
+    .sheet-sub{font-size:10px;color:var(--muted);line-height:1.45;margin:9px 0 0}
+    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:0 14px 12px;border-bottom:1px solid var(--line)}
+    .tabs button{height:34px;border:0;background:transparent;border-radius:11px;font-size:9px;color:#6a726e}.tabs button.active{background:#101613;color:#fff}
+    .sheet-body{padding:12px 14px 14px;overflow:auto}
+    .section-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}.section-row b{font-size:11px}.section-row span{font-size:8px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+    .place-card{border:1px solid var(--line);background:#fff;border-radius:17px;padding:11px;margin-bottom:8px;display:grid;grid-template-columns:46px 1fr auto;gap:10px;align-items:center;transition:.16s}.place-card:hover{transform:translateY(-1px);box-shadow:var(--soft)}
+    .place-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:#eef0ec;color:#203129;font-size:17px}.place-icon.komo{background:#173d34;color:#fff}.place-icon.gold{background:#a28658;color:#fff}
+    .place-copy{min-width:0}.place-copy b{font-size:11px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.place-copy p{font-size:9px;color:var(--muted);margin:4px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.place-card .arrow{font-size:18px;color:#9ba09d}
+    .saved-pill{font-size:7px;padding:4px 6px;border-radius:999px;background:#eef4f0;color:#215b4c;margin-left:5px}
+    .card-view,.life-view,.foryou-view{display:none}.sheet[data-view="card"] .card-view,.sheet[data-view="life"] .life-view,.sheet[data-view="foryou"] .foryou-view{display:block}.sheet[data-view="map"] .map-view{display:block}.sheet[data-view="card"] .map-view,.sheet[data-view="life"] .map-view,.sheet[data-view="foryou"] .map-view{display:none}
+    .member-card{background:linear-gradient(135deg,#151b18,#2a342e 55%,#8f7b59);color:#fff;border-radius:21px;padding:18px;min-height:180px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 18px 38px rgba(12,20,17,.22);position:relative;overflow:hidden}
+    .member-card:after{content:"";position:absolute;width:180px;height:180px;border:1px solid rgba(255,255,255,.14);border-radius:50%;right:-60px;top:-65px}.member-card small{font-size:8px;letter-spacing:.17em;opacity:.68}.member-card strong{font-size:21px;letter-spacing:.13em}.member-card .card-bottom{display:flex;justify-content:space-between;align-items:end}.member-card .card-bottom span{font-size:9px;opacity:.76}.nfc{font-size:25px;opacity:.8}
+    .life-bridge{border-radius:20px;background:#ede9e0;padding:18px;border:1px solid rgba(16,22,19,.07)}.life-bridge h2{font-size:20px;margin:4px 0 7px;letter-spacing:-.03em}.life-bridge p{font-size:10px;color:var(--muted);line-height:1.5}.life-bridge a{height:42px;border-radius:12px;background:#101613;color:#fff;text-decoration:none;display:grid;place-items:center;font-size:10px;font-weight:750;margin-top:14px}
+    .detail{position:absolute;z-index:35;right:18px;bottom:18px;width:365px;max-height:calc(100vh - 110px);border-radius:25px;background:rgba(251,250,247,.97);backdrop-filter:blur(28px);box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.8);overflow:hidden;display:none}.detail.open{display:block}
+    .detail-cover{height:132px;padding:18px;background:linear-gradient(135deg,#173c33,#57746b 60%,#b5b19f);color:#fff;position:relative}.detail-cover.gold{background:linear-gradient(135deg,#4c4437,#9b8158 60%,#d8ccb2)}.detail-close{position:absolute;right:13px;top:13px;width:32px;height:32px;border:0;border-radius:10px;background:rgba(255,255,255,.16);color:#fff;font-size:18px}.detail-cover .eyebrow{color:rgba(255,255,255,.7)}.detail-cover h2{font-size:24px;margin:9px 0 4px;letter-spacing:-.04em}.detail-cover p{font-size:10px;margin:0;color:rgba(255,255,255,.78)}
+    .detail-body{padding:15px;max-height:calc(100vh - 245px);overflow:auto}.detail-meta{display:flex;gap:6px;flex-wrap:wrap}.meta-pill{font-size:8px;border:1px solid var(--line);padding:6px 8px;border-radius:999px;background:#fff}.privilege-box{margin:12px 0;border-radius:17px;padding:13px;background:#f2f3ef;border:1px solid var(--line)}.privilege-box b{font-size:10px}.privilege-box p{font-size:10px;color:var(--muted);line-height:1.45;margin:6px 0 0}.detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}.detail-actions button,.detail-actions a{height:42px;border-radius:12px;border:1px solid var(--line);background:#fff;text-decoration:none;color:var(--ink);display:grid;place-items:center;font-size:10px;font-weight:750}.detail-actions .primary{grid-column:1/-1;background:#101613;color:#fff;border-color:#101613}
+    .poi{width:34px;height:34px;border-radius:12px;background:rgba(255,255,253,.96);border:1.5px solid rgba(15,24,20,.18);box-shadow:0 8px 17px rgba(11,25,20,.18);display:grid;place-items:center;font-size:13px;font-weight:800;color:#1b2823;transition:.18s}.poi:hover{transform:scale(1.08)}
+    .poi.komo{width:39px;height:39px;border-radius:50%;background:#173e35;color:#fff;border:2px solid #fff;box-shadow:0 0 0 5px rgba(24,62,53,.14),0 8px 18px rgba(11,25,20,.2)}.poi.gold{background:#9b8158;color:#fff;border:2px solid #fff}.poi.event{border-radius:50%;background:#101613;color:#fff;border:2px solid #fff}.poi.saved{box-shadow:0 0 0 5px rgba(155,129,88,.22),0 8px 18px rgba(11,25,20,.2)}
+    .poi-label{pointer-events:none;position:absolute;top:39px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(255,255,253,.94);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:7px;font-weight:700;color:#36403b;box-shadow:var(--soft);opacity:0;transition:.15s}.poi-wrap:hover .poi-label{opacity:1}
+    .maplibregl-popup-content{border-radius:16px!important;padding:10px!important;box-shadow:var(--shadow)!important;font-family:inherit!important}
+    .preview-note{position:absolute;z-index:26;left:50%;transform:translateX(-50%);bottom:18px;background:rgba(17,23,20,.82);color:#fff;border-radius:10px;padding:7px 10px;font-size:7px;letter-spacing:.10em;text-transform:uppercase}
+    @media(max-width:900px){
+      .top-shell{top:max(9px,env(safe-area-inset-top));left:9px;right:9px}
+      .topbar{height:62px;padding:7px 8px;border-radius:21px}.brand{min-width:auto}.brand-copy{display:none}.brand-mark{width:46px;height:46px}
+      .product-switch{display:none}.member-btn{display:none}.search input{height:46px;font-size:12px}
+      .filters{left:9px;right:9px;top:calc(max(9px,env(safe-area-inset-top)) + 71px);padding-bottom:5px}.chip{height:38px;padding:0 15px;font-size:11px}
+      .control-stack{right:10px;top:calc(max(9px,env(safe-area-inset-top)) + 124px)}.control-stack button{width:44px;height:43px}
+      .sheet{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));width:auto;max-height:228px;border-radius:27px}.sheet-handle{display:block}.sheet-head{padding:5px 14px 8px}.sheet-head-row{margin-top:2px}.sheet h1{font-size:18px}.sheet-sub{display:none}.member-state{font-size:7px;padding:5px 7px}
+      .tabs{padding:0 12px 9px}.tabs button{height:31px;font-size:9px}.sheet-body{padding:9px 12px 12px}.section-row{margin-bottom:7px}.place-card{min-width:245px;height:68px;margin:0;grid-template-columns:42px 1fr auto;padding:9px;border-radius:16px}.place-icon{width:42px;height:42px}.map-view #placeList,.foryou-view #forYouList{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}.map-view #placeList::-webkit-scrollbar,.foryou-view #forYouList::-webkit-scrollbar{display:none}
+      .detail{left:8px;right:8px;bottom:calc(8px + env(safe-area-inset-bottom));width:auto;max-height:72vh;border-radius:27px}.detail-cover{height:122px}.detail-body{max-height:calc(72vh - 122px)}
+      .world-status,.preview-note{display:none}.maplibregl-ctrl-attrib{font-size:6px!important;max-width:70vw;white-space:nowrap;overflow:hidden}
+    }
+    @media(max-width:520px){.top-shell{right:9px}.topbar{gap:7px}.search input{padding-left:12px}.brand-mark{width:44px;height:44px}.filters{gap:6px}.chip{padding:0 13px}}
+  </style>
 </head>
 <body>
-  <canvas id="world-canvas" aria-label="KŌMØ World"></canvas>
+<div id="app">
+  <div id="map" aria-label="KŌMØ World map"></div>
 
-  <div id="world-loader" class="loader" aria-live="polite">
-    <div class="loader-mark">KŌMØ</div>
-    <div class="loader-copy">WORLD · LONGEVITY IN MOTION</div>
-  </div>
-
-  <header class="world-hud" aria-label="KŌMØ World">
-    <a class="world-brand" href="/" aria-label="KŌMØ">
-      <strong>KŌMØ</strong>
-      <span>WORLD</span>
-    </a>
-    <div class="world-metrics" aria-label="Indicateurs personnels">
-      <div><span>MOTION</span><b id="hud-motion">—</b></div>
-      <div><span>MOTION AGE</span><b id="hud-age">—</b></div>
-    </div>
-    <button id="world-home-toggle" class="world-today" type="button" aria-label="Ouvrir l’accueil KŌMØ">
-      <i></i>
-      <span id="hud-today">AUJOURD'HUI · OUVRIR MY KŌMØ</span>
-    </button>
-    <a class="hud-link" href="/pulse/">PULSE</a>
-    <a class="hud-link hud-life" href="https://life.komolongevity.com/">LIFE</a>
-    <button class="hud-button" id="world-menu-toggle" type="button" aria-label="Ouvrir le menu KŌMØ World">MENU</button>
-    <button class="hud-button" id="language-toggle" type="button" aria-label="Changer de langue">EN</button>
-  </header>
-
-  <div class="location-chip" aria-live="polite">
-    <span><b id="location-name">WORLD ENTRANCE</b><small id="location-purpose">ENTER KŌMØ WORLD</small></span>
-    <i id="location-heading">N</i>
-  </div>
-
-  <button id="journey-hud" class="journey-hud" type="button" aria-label="Ouvrir ma trajectoire KŌMØ">
-    <span class="journey-level"><small id="journey-level-label">TRAJECTORY</small><strong id="journey-level">01</strong></span>
-    <span class="journey-main">
-      <b id="journey-title">MY KŌMØ</b>
-      <i><em id="journey-progress"></em></i>
-      <small id="journey-next">Connectez Pulse pour activer votre trajectoire</small>
-    </span>
-    <span class="journey-xp"><b id="journey-xp">—</b><small id="journey-side-label">NEXT</small></span>
-  </button>
-
-  <button id="health-hud" class="health-hud" type="button" aria-label="Ouvrir mon aperçu mouvement">
-    <span><small>YOUR HEALTH · MOVEMENT</small><strong id="health-status">DÉCOUVERTE</strong></span>
-    <span class="health-domains">
-      <i><b>MUSCLE</b><em id="health-muscle">—</em></i>
-      <i><b>BALANCE</b><em id="health-balance">—</em></i>
-      <i><b>CAPACITY</b><em id="health-capacity">—</em></i>
-    </span>
-    <u id="health-source">DEMO</u>
-  </button>
-
-  <div id="world-reticle" class="world-reticle" aria-hidden="true"><i></i></div>
-
-  <section id="intro" class="intro-card" aria-labelledby="intro-title">
-    <div class="intro-kicker">KŌMØ WORLD</div>
-    <h1 id="intro-title"><span>Comprendre.</span><em>Agir. Suivre.</em></h1>
-    <p>Explorez World librement. Après un bilan KŌMØ, retrouvez ici votre trajectoire, votre action et votre prochain point.</p>
-    <div class="intro-path">
-      <span>DÉCOUVRIR</span><i></i><span>MESURER</span><i></i><span>AGIR</span><i></i><span>SUIVRE</span>
-    </div>
-    <details class="intro-controls-details">
-      <summary>COMMANDES <small>WASD / ZQSD · souris · E</small></summary>
-      <div class="intro-controls" aria-label="Commandes">
-        <span><b>01</b> COURIR <kbd>WASD</kbd></span>
-        <span><b>02</b> REGARDER <em>GLISSER</em></span>
-        <span><b>03</b> INTERAGIR <kbd>E</kbd></span>
-        <span><b>04</b> CAMÉRA <kbd>V</kbd></span>
+  <div class="top-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">KØ</div>
+        <div class="brand-copy"><b>KŌMØ WORLD</b><span>Your private map</span></div>
       </div>
-    </details>
-    <button id="intro-avatar-open" class="intro-avatar-open" type="button">
-      <span>PERSONNAGE</span><strong>Personnaliser mon avatar</strong><em>Style · tenue · apparence</em>
-    </button>
+      <nav class="product-switch" aria-label="KŌMØ destinations">
+        <button class="active">WORLD</button>
+        <a href="https://life.komolongevity.com/">LIFE</a>
+      </nav>
+      <div class="search">
+        <input id="searchInput" autocomplete="off" placeholder="Places, experiences, services…"/>
+        <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+      <button class="member-btn" id="memberBtn">KŌMØ PRIVATE</button>
+    </header>
+  </div>
 
-    <div class="intro-auth" aria-label="Connexion KŌMØ World">
-      <button id="intro-pulse" class="intro-pulse" type="button">
-        <span>PULSE</span><strong>RETROUVER MA TRAJECTOIRE</strong><em>J’ai déjà un compte ou un bilan KŌMØ</em>
-      </button>
-      <div class="intro-auth-separator"><i></i><span>OU</span><i></i></div>
-      <label class="intro-guest-name" for="intro-guest-name">
-        <span>DÉCOUVERTE LIBRE</span>
-        <input id="intro-guest-name" type="text" maxlength="24" autocomplete="nickname" placeholder="Votre prénom ou pseudo" />
-      </label>
-      <button id="intro-enter" class="intro-guest" type="button">DÉCOUVRIR WORLD GRATUITEMENT</button>
-      <small id="intro-auth-note">Découvrir World est gratuit. Votre espace personnel s’active après un bilan KŌMØ.</small>
-      <div id="intro-auth-status" class="intro-auth-status" role="status" aria-live="polite"></div>
+  <div class="filters" id="filters">
+    <button class="chip active" data-filter="all">For You</button>
+    <button class="chip komo" data-filter="komo">KŌMØ</button>
+    <button class="chip" data-filter="eat">Eat</button>
+    <button class="chip" data-filter="stay">Stay</button>
+    <button class="chip" data-filter="wellness">Wellness</button>
+    <button class="chip" data-filter="move">Move</button>
+    <button class="chip" data-filter="yachting">Yachting</button>
+    <button class="chip gold" data-filter="event">Events</button>
+    <button class="chip" data-filter="saved">Saved</button>
+  </div>
+
+  <div class="control-stack">
+    <button id="view3dBtn" aria-label="Vue 3D"><b>3D</b></button>
+    <button id="locateBtn" aria-label="Autour de moi"><svg viewBox="0 0 24 24"><path d="M4 12 20 5l-7 15-2.4-6.6L4 12Z" fill="currentColor"/></svg></button>
+    <button id="resetBtn" aria-label="Recentrer Riviera">⌂</button>
+  </div>
+
+  <aside class="sheet" id="sheet" data-view="map">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <div class="eyebrow">KŌMØ WORLD · RIVIERA</div>
+      <div class="sheet-head-row"><h1>Explore your World</h1><span class="member-state">MEMBER PREVIEW</span></div>
+      <p class="sheet-sub">Une sélection privée de lieux, services, expériences et privilèges autour de vous.</p>
     </div>
-  </section>
-
-  <section id="world-home" class="world-home" aria-hidden="true" aria-label="Accueil KŌMØ World">
-    <div class="world-home-shell">
-      <header class="world-home-head">
-        <div>
-          <span>MY KŌMØ</span>
-          <strong id="world-home-title">Aujourd’hui</strong>
+    <div class="tabs">
+      <button class="active" data-view="map">World</button>
+      <button data-view="foryou">For You</button>
+      <button data-view="card">Card</button>
+      <button data-view="life">Life</button>
+    </div>
+    <div class="sheet-body">
+      <div class="map-view">
+        <div class="section-row"><b>À découvrir maintenant</b><span id="visibleCount">0 places</span></div>
+        <div id="placeList"></div>
+      </div>
+      <div class="foryou-view">
+        <div class="section-row"><b>Selected for you</b><span>RIVIERA</span></div>
+        <div id="forYouList"></div>
+      </div>
+      <div class="card-view">
+        <div class="member-card">
+          <div><small>KŌMØ PRIVATE MEMBERSHIP</small><strong>KŌMØ</strong></div>
+          <div class="card-bottom"><span>WORLD · LIFE · PRIVATE PRIVILEGES</span><span class="nfc">)))</span></div>
         </div>
-        <div class="world-home-head-actions">
-          <span id="world-home-access" class="world-home-access">DISCOVERY</span>
-          <button id="world-home-close" type="button">PASSER EN 3D <em>›</em></button>
+      </div>
+      <div class="life-view">
+        <div class="life-bridge">
+          <div class="eyebrow">KŌMØ LIFE</div><h2>The lifestyle layer.</h2>
+          <p>Boutique, KŌMØ Originals, Selected products, Editions et objets liés à votre membership.</p>
+          <a href="https://life.komolongevity.com/">OPEN KŌMØ LIFE</a>
         </div>
-      </header>
-      <div id="world-home-body" class="world-home-body"></div>
-    </div>
-  </section>
-
-  <aside id="interaction" class="interaction-card" aria-live="polite">
-    <div class="interaction-key">E</div>
-    <div>
-      <strong id="interaction-title"></strong>
-      <span id="interaction-copy"></span>
+      </div>
     </div>
   </aside>
 
-  <aside id="world-panel" class="world-panel" aria-hidden="true">
-    <button id="panel-close" class="panel-close" type="button" aria-label="Fermer">×</button>
-    <div id="panel-kicker" class="panel-kicker"></div>
-    <h2 id="panel-title"></h2>
-    <div id="panel-body" class="panel-body"></div>
-    <div id="panel-actions" class="panel-actions"></div>
+  <aside class="detail" id="detail">
+    <div class="detail-cover" id="detailCover">
+      <button class="detail-close" id="detailClose">×</button>
+      <div class="eyebrow" id="detailEyebrow">KŌMØ SELECTED</div>
+      <h2 id="detailName">Place</h2>
+      <p id="detailSub">Riviera</p>
+    </div>
+    <div class="detail-body">
+      <div class="detail-meta" id="detailMeta"></div>
+      <div class="privilege-box"><b id="privilegeTitle">Member access</b><p id="privilegeText">KŌMØ World privilege preview.</p></div>
+      <div class="detail-actions">
+        <button class="primary" id="saveBtn">Save to my World</button>
+        <a id="directionsBtn" target="_blank" rel="noopener">Directions</a>
+        <button id="shareBtn">Share</button>
+      </div>
+    </div>
   </aside>
 
-  <nav id="world-quick-nav" class="world-quick-nav" aria-label="Navigation rapide">
-    <button type="button" data-fast-travel="hall" data-nav-zone="hall" class="active" aria-current="page"><i aria-hidden="true">⌂</i><span>HALL</span><small>HOME</small></button>
-    <button type="button" data-fast-travel="twin" data-nav-zone="twin"><i aria-hidden="true">◎</i><span>TWIN</span><small>UNDERSTAND</small></button>
-    <button type="button" data-fast-travel="life" data-nav-zone="life"><i aria-hidden="true">◉</i><span>LIFE</span><small>DISCOVER</small></button>
-    <button type="button" data-fast-travel="library" data-nav-zone="library"><i aria-hidden="true">▤</i><span>LIBRARY</span><small>SCIENCE</small></button>
-    <button type="button" data-fast-travel="yacht" data-nav-zone="marina"><i aria-hidden="true">≈</i><span>YACHT</span><small>ONBOARD</small></button>
-    <button type="button" data-fast-travel="upper" data-nav-zone="upper"><i aria-hidden="true">▥</i><span>LEVEL 2</span><small>EXPLORE</small></button>
-  </nav>
+  <div class="world-status"><i class="status-dot"></i><span>WORLD ONLINE · RIVIERA</span></div>
+  <div class="preview-note">MEMBER MAP · CURATED PREVIEW · PARTNER PRIVILEGES REQUIRE VALIDATION</div>
+</div>
 
-  <aside id="world-menu" class="world-menu world-command-center" aria-hidden="true">
-    <div class="world-menu-head">
-      <div class="world-menu-brandblock">
-        <span>KŌMØ WORLD</span>
-        <strong>My KŌMØ</strong>
-      </div>
-      <div class="world-menu-live world-access-chip"><i></i><span id="world-access-state">DISCOVERY</span></div>
-      <button id="world-menu-close" type="button" aria-label="Fermer le menu">×</button>
-    </div>
+<script type="module">
+import * as maplibregl from 'https://unpkg.com/maplibre-gl@6.11.2/dist/maplibre-gl.mjs';
 
-    <section class="world-menu-context" aria-label="Position actuelle">
-      <div>
-        <span>NOW IN</span>
-        <strong id="menu-current-zone">KŌMØ HALL</strong>
-        <small id="menu-current-purpose">VOTRE POINT CENTRAL</small>
-      </div>
-      <i class="world-menu-context-mark">K</i>
-    </section>
+const PLACES=[
+  {id:'komo-cannes',name:'KŌMØ Cannes',kind:'komo',city:'Cannes',lat:43.5508,lng:7.0174,icon:'KØ',tag:'KŌMØ Service',desc:'Motion, recovery and private member services across Cannes.',privilege:'Member service access · availability by request',priority:10},
+  {id:'komo-monaco',name:'KŌMØ Monaco',kind:'komo',city:'Monaco',lat:43.7357,lng:7.4251,icon:'KØ',tag:'KŌMØ Service',desc:'Private longevity and onboard service area for KŌMØ members.',privilege:'Priority member coordination · by request',priority:10},
+  {id:'komo-tropez',name:'KŌMØ Saint-Tropez',kind:'komo',city:'Saint-Tropez',lat:43.2714,lng:6.6390,icon:'KØ',tag:'KŌMØ Service',desc:'Private member services in Saint-Tropez, villas and yachts.',privilege:'Private member coordination · by request',priority:10},
+  {id:'dolce-cap',name:'Dolce Riviera Experience',kind:'event',city:"Cap d'Antibes",lat:43.5574,lng:7.1281,icon:'✦',tag:'Private Experience',desc:'Private Mediterranean dining and curated KŌMØ experiences.',privilege:'Invitation pathway · dates and access confirmed privately',priority:9},
+  {id:'hotel-paris',name:'Hôtel de Paris Monte-Carlo',kind:'stay',city:'Monaco',lat:43.7391,lng:7.4272,icon:'H',tag:'Stay',desc:'Selected landmark stay in the heart of Monte-Carlo.',privilege:'Selected place · KŌMØ privilege not yet activated',priority:8},
+  {id:'thermes-marins',name:'Thermes Marins Monte-Carlo',kind:'wellness',city:'Monaco',lat:43.7380,lng:7.4278,icon:'W',tag:'Wellness',desc:'Wellness and spa destination in Monte-Carlo.',privilege:'Selected place · member pathway coming soon',priority:8},
+  {id:'yacht-club-monaco',name:'Yacht Club de Monaco',kind:'yachting',city:'Monaco',lat:43.7368,lng:7.4258,icon:'Y',tag:'Yachting',desc:'A central Riviera yachting landmark and network destination.',privilege:'Network place · access depends on venue rules',priority:9},
+  {id:'heliport-monaco',name:'Monaco Heliport',kind:'move',city:'Monaco',lat:43.7255,lng:7.4196,icon:'↗',tag:'Move',desc:'Helicopter mobility gateway for Monaco and the Riviera.',privilege:'Mobility point · bookings handled by operator',priority:6},
+  {id:'eden-roc',name:"Hôtel du Cap-Eden-Roc",kind:'stay',city:"Cap d'Antibes",lat:43.5486,lng:7.1238,icon:'H',tag:'Stay',desc:'Selected Riviera hotel and hospitality landmark.',privilege:'Selected place · KŌMØ privilege not yet activated',priority:9},
+  {id:'port-vauban',name:'Port Vauban',kind:'yachting',city:'Antibes',lat:43.5825,lng:7.1274,icon:'Y',tag:'Yachting',desc:'Superyacht marina and Riviera yachting hub.',privilege:'World landmark · marina access per port rules',priority:8},
+  {id:'martinez',name:'Hôtel Martinez',kind:'stay',city:'Cannes',lat:43.5509,lng:7.0303,icon:'H',tag:'Stay',desc:'Selected Croisette hotel in Cannes.',privilege:'Selected place · KŌMØ privilege not yet activated',priority:7},
+  {id:'carlton',name:'Carlton Cannes',kind:'stay',city:'Cannes',lat:43.5510,lng:7.0250,icon:'H',tag:'Stay',desc:'Selected Cannes hospitality landmark.',privilege:'Selected place · KŌMØ privilege not yet activated',priority:7},
+  {id:'port-canto',name:'Port Canto',kind:'yachting',city:'Cannes',lat:43.5427,lng:7.0352,icon:'Y',tag:'Yachting',desc:'Cannes marina and KŌMØ yachting service zone.',privilege:'World landmark · marina access per port rules',priority:8},
+  {id:'cannes-airport',name:'Cannes-Mandelieu Airport',kind:'move',city:'Cannes',lat:43.5464,lng:6.9547,icon:'↗',tag:'Move',desc:'Private aviation gateway serving Cannes and the Riviera.',privilege:'Mobility point · bookings handled by operator',priority:7},
+  {id:'cheval-blanc',name:'Cheval Blanc St-Tropez',kind:'stay',city:'Saint-Tropez',lat:43.2675,lng:6.6439,icon:'H',tag:'Stay',desc:'Selected Saint-Tropez hospitality destination.',privilege:'Selected place · KŌMØ privilege not yet activated',priority:8},
+  {id:'reserve-ramatuelle',name:'La Réserve Ramatuelle',kind:'wellness',city:'Ramatuelle',lat:43.2089,lng:6.6644,icon:'W',tag:'Wellness',desc:'Selected wellness and hospitality destination above the Mediterranean.',privilege:'Selected place · member pathway coming soon',priority:8},
+  {id:'club55',name:'Club 55',kind:'eat',city:'Ramatuelle',lat:43.2464,lng:6.6634,icon:'E',tag:'Eat',desc:'Selected Pampelonne dining landmark.',privilege:'Selected place · reservations subject to venue availability',priority:7},
+  {id:'la-vague',name:'La Vague d’Or',kind:'eat',city:'Saint-Tropez',lat:43.2675,lng:6.6438,icon:'E',tag:'Eat',desc:'Selected gastronomic destination in Saint-Tropez.',privilege:'Selected place · KŌMØ privilege not yet activated',priority:8}
+];
 
-    <p id="world-menu-copy">Comprendre où vous en êtes, savoir quoi faire maintenant et garder le prochain point KŌMØ en vue.</p>
+const saved=new Set(JSON.parse(localStorage.getItem('komo_world_saved')||'[]'));
+let currentFilter='all';
+let selected=null;
+let pitched=true;
+const markers=new Map();
 
-    <button id="world-next-step" class="world-next-step" type="button">
-      <span id="world-next-kicker">PROCHAINE ÉTAPE</span>
-      <b id="world-next-title">Faire un bilan KŌMØ</b>
-      <small id="world-next-meta">Active votre trajectoire personnelle</small>
-      <em>›</em>
-    </button>
+const map=new maplibregl.Map({
+  container:'map',
+  style:'https://tiles.openfreemap.org/styles/liberty',
+  center:[7.03,43.50],
+  zoom:9.1,
+  pitch:48,
+  bearing:-10,
+  antialias:true,
+  attributionControl:true,
+  maxPitch:70
+});
+map.dragRotate.enable();
+map.touchZoomRotate.enableRotation();
 
-    <section class="world-menu-summary" aria-label="Résumé personnel">
-      <div class="summary-score"><span>VOTRE RÉFÉRENCE</span><strong id="menu-motion">—</strong><em>Motion Score</em></div>
-      <div><span>MOTION AGE</span><strong id="menu-age">—</strong><em>Repère fonctionnel</em></div>
-      <div><span>PROCHAIN POINT</span><strong id="journey-menu-level">—</strong><small id="journey-menu-xp">PULSE</small><em>Trajectoire KŌMØ</em></div>
-    </section>
+map.on('load',()=>{
+  try{
+    if(map.getSource('openmaptiles')&&!map.getLayer('komo-3d-buildings')){
+      const labels=map.getStyle().layers.find(l=>l.type==='symbol'&&l.layout&&l.layout['text-field']);
+      map.addLayer({
+        id:'komo-3d-buildings',type:'fill-extrusion',source:'openmaptiles','source-layer':'building',minzoom:14,
+        paint:{
+          'fill-extrusion-color':'#d6d3c9',
+          'fill-extrusion-height':['coalesce',['to-number',['get','render_height']],['to-number',['get','height']],7],
+          'fill-extrusion-base':['coalesce',['to-number',['get','render_min_height']],['to-number',['get','min_height']],0],
+          'fill-extrusion-opacity':.72
+        }
+      },labels?labels.id:undefined);
+    }
+  }catch(e){console.warn('[KOMO World] 3D buildings unavailable',e)}
+  renderMarkers();
+  renderLists();
+});
 
-    <div class="world-menu-primary">
-      <button id="home-toggle" class="primary-home" type="button" data-screen="home"><i>⌂</i><span><b>ACCUEIL</b><small>Aujourd’hui · action · progression</small></span><em>›</em></button>
-      <button id="journey-toggle" class="primary-trajectory" type="button" data-screen="journey"><i>↗</i><span><b>MA TRAJECTOIRE</b><small>Priorité · action · prochain point</small></span><em>›</em></button>
-      <button id="results-toggle" type="button" data-screen="results"><i>◉</i><span><b>MES RÉSULTATS</b><small>Motion · domaines · évolution</small></span><em>›</em></button>
-      <button id="membership-toggle" class="primary-membership" type="button" data-screen="membership"><i>＋</i><span><b>CONTINUER AVEC KŌMØ</b><small>World+ · suivi continu · 24 €/mois</small></span><em>›</em></button>
-      <button id="campus-toggle" type="button" data-screen="campus"><i>⌖</i><span><b>EXPLORER WORLD</b><small>Campus · Marina · Retreat</small></span><em>›</em></button>
-    </div>
+function markerClass(p){
+  if(p.kind==='komo')return 'komo';
+  if(p.kind==='event')return 'event gold';
+  return '';
+}
+function makeMarker(p){
+  const wrap=document.createElement('div');wrap.className='poi-wrap';
+  const el=document.createElement('button');el.className='poi '+markerClass(p)+(saved.has(p.id)?' saved':'');el.type='button';el.textContent=p.icon;el.setAttribute('aria-label',p.name);
+  const label=document.createElement('span');label.className='poi-label';label.textContent=p.name;
+  wrap.append(el,label);
+  el.addEventListener('click',e=>{e.stopPropagation();openPlace(p)});
+  return new maplibregl.Marker({element:wrap,anchor:'center'}).setLngLat([p.lng,p.lat]).addTo(map);
+}
+function matches(p){
+  if(currentFilter==='all')return true;
+  if(currentFilter==='saved')return saved.has(p.id);
+  return p.kind===currentFilter;
+}
+function renderMarkers(){
+  for(const m of markers.values())m.remove();markers.clear();
+  PLACES.filter(matches).forEach(p=>markers.set(p.id,makeMarker(p)));
+  document.getElementById('visibleCount').textContent=PLACES.filter(matches).length+' places';
+}
+function iconClass(p){return p.kind==='komo'?'komo':p.kind==='event'?'gold':''}
+function cardHtml(p){
+  return '<div class="place-card" data-place="'+p.id+'"><div class="place-icon '+iconClass(p)+'">'+p.icon+'</div><div class="place-copy"><b>'+escapeHtml(p.name)+(saved.has(p.id)?'<span class="saved-pill">SAVED</span>':'')+'</b><p>'+escapeHtml(p.tag+' · '+p.city)+'</p></div><span class="arrow">›</span></div>';
+}
+function renderLists(){
+  const visible=PLACES.filter(matches).sort((a,b)=>b.priority-a.priority).slice(0,8);
+  document.getElementById('placeList').innerHTML=visible.map(cardHtml).join('');
+  document.getElementById('forYouList').innerHTML=[...PLACES].sort((a,b)=>b.priority-a.priority).slice(0,8).map(cardHtml).join('');
+  document.querySelectorAll('[data-place]').forEach(el=>el.onclick=()=>openPlace(PLACES.find(p=>p.id===el.dataset.place)));
+  document.getElementById('visibleCount').textContent=PLACES.filter(matches).length+' places';
+}
+function openPlace(p){
+  if(!p)return;selected=p;
+  document.getElementById('detailEyebrow').textContent=(p.kind==='komo'?'KŌMØ MEMBER SERVICE':p.kind==='event'?'PRIVATE EXPERIENCE':'KŌMØ SELECTED');
+  document.getElementById('detailName').textContent=p.name;
+  document.getElementById('detailSub').textContent=p.city+' · '+p.tag;
+  document.getElementById('detailCover').classList.toggle('gold',p.kind==='event');
+  document.getElementById('detailMeta').innerHTML='<span class="meta-pill">'+escapeHtml(p.tag)+'</span><span class="meta-pill">'+escapeHtml(p.city)+'</span><span class="meta-pill">'+(p.kind==='komo'?'Member service':'Curated')+'</span>';
+  document.getElementById('privilegeTitle').textContent=p.kind==='komo'?'KŌMØ member access':p.kind==='event'?'Private experience':'Selected for KŌMØ World';
+  document.getElementById('privilegeText').textContent=p.privilege;
+  document.getElementById('directionsBtn').href='https://maps.apple.com/?daddr='+p.lat+','+p.lng;
+  document.getElementById('saveBtn').textContent=saved.has(p.id)?'Saved in my World':'Save to my World';
+  document.getElementById('detail').classList.add('open');
+  map.easeTo({center:[p.lng,p.lat],zoom:Math.max(map.getZoom(),13),pitch:pitched?55:0,duration:850});
+}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 
-    <section class="world-menu-campus-mini world-destinations">
-      <div class="world-menu-section-head"><span>ONE WORLD</span><b>Campus · Marina · Retreat</b></div>
-      <div class="destination-grid">
-        <button data-fast-travel="hall" data-destination="hall"><i>⌂</i><span>HALL</span><small>Home</small></button>
-        <button data-fast-travel="twin" data-destination="twin"><i>◎</i><span>TWIN</span><small>Understand</small></button>
-        <button data-fast-travel="rehab" data-destination="fitness"><i>△</i><span>FITNESS</span><small>Move</small></button>
-        <button data-fast-travel="arena" data-destination="arena"><i>◇</i><span>ARENA</span><small>Engage</small></button>
-        <button data-fast-travel="life" data-destination="life"><i>◉</i><span>LIFE</span><small>Discover</small></button>
-        <button data-fast-travel="library" data-destination="library"><i>▤</i><span>LIBRARY</span><small>Science</small></button>
-        <button data-fast-travel="recovery" data-destination="recovery"><i>◌</i><span>RECOVERY</span><small>Reset</small></button>
-        <button data-fast-travel="yacht" data-destination="marina"><i>≈</i><span>YACHT / MARINA</span><small>Onboard</small></button>
-        <button data-fast-travel="villa" data-destination="villa"><i>⌂</i><span>RETREAT</span><small>Private Villa</small></button>
-      </div>
-    </section>
+document.querySelectorAll('[data-filter]').forEach(btn=>btn.onclick=()=>{
+  currentFilter=btn.dataset.filter;
+  document.querySelectorAll('[data-filter]').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  renderMarkers();renderLists();
+});
+document.querySelectorAll('.tabs button').forEach(btn=>btn.onclick=()=>{
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  document.getElementById('sheet').dataset.view=btn.dataset.view;
+});
+document.getElementById('detailClose').onclick=()=>document.getElementById('detail').classList.remove('open');
+document.getElementById('saveBtn').onclick=()=>{
+  if(!selected)return;
+  if(saved.has(selected.id))saved.delete(selected.id);else saved.add(selected.id);
+  localStorage.setItem('komo_world_saved',JSON.stringify([...saved]));
+  document.getElementById('saveBtn').textContent=saved.has(selected.id)?'Saved in my World':'Save to my World';
+  renderMarkers();renderLists();
+};
+document.getElementById('shareBtn').onclick=async()=>{
+  if(!selected)return;
+  const payload={title:selected.name,text:selected.name+' · '+selected.city,url:location.href+'#'+selected.id};
+  try{if(navigator.share)await navigator.share(payload);else await navigator.clipboard.writeText(payload.text+' '+payload.url)}catch{}
+};
+document.getElementById('view3dBtn').onclick=()=>{
+  pitched=!pitched;
+  map.easeTo({pitch:pitched?52:0,bearing:pitched?-10:0,duration:700});
+  document.getElementById('view3dBtn').innerHTML=pitched?'<b>3D</b>':'2D';
+};
+document.getElementById('resetBtn').onclick=()=>map.easeTo({center:[7.03,43.50],zoom:9.1,pitch:pitched?48:0,bearing:pitched?-10:0,duration:800});
+document.getElementById('locateBtn').onclick=()=>{
+  if(!navigator.geolocation)return;
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const lng=pos.coords.longitude,lat=pos.coords.latitude;
+    map.easeTo({center:[lng,lat],zoom:13,pitch:pitched?52:0,duration:850});
+    new maplibregl.Marker({color:'#173e35'}).setLngLat([lng,lat]).addTo(map);
+  },()=>{}, {enableHighAccuracy:false,timeout:6000,maximumAge:300000});
+};
+document.getElementById('memberBtn').onclick=()=>{
+  document.querySelector('[data-view="card"]').click();
+};
+const searchInput=document.getElementById('searchInput'),searchResults=document.getElementById('searchResults');
+function search(q){
+  const term=q.trim().toLowerCase();
+  if(!term){searchResults.classList.remove('open');return}
+  const res=PLACES.filter(p=>(p.name+' '+p.city+' '+p.tag+' '+p.kind).toLowerCase().includes(term)).slice(0,8);
+  searchResults.innerHTML=res.map((p,i)=>'<div class="search-item" data-search="'+i+'"><b>'+escapeHtml(p.name)+'</b><span>'+escapeHtml(p.tag+' · '+p.city)+'</span></div>').join('');
+  searchResults.classList.add('open');
+  searchResults.querySelectorAll('[data-search]').forEach((el,i)=>el.onclick=()=>{searchResults.classList.remove('open');searchInput.value=res[i].name;openPlace(res[i])});
+}
+searchInput.oninput=e=>search(e.target.value);
+document.addEventListener('click',e=>{if(!e.target.closest('.search'))searchResults.classList.remove('open')});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.getElementById('detail').classList.remove('open');searchResults.classList.remove('open')}});
 
-    <section class="journey-menu compact world-focus-card">
-      <div class="journey-menu-head">
-        <div><span>CURRENT FOCUS</span><b id="journey-title-menu">PROGRESSION</b></div>
-        <strong id="journey-xp-menu">250 XP</strong>
-      </div>
-      <div class="journey-menu-bar"><i id="journey-menu-progress"></i></div>
-      <p id="journey-menu-next">Prochaine étape</p>
-    </section>
-
-    <details class="world-menu-settings">
-      <summary>WORLD SETTINGS <small>PERSONNALISATION & PERFORMANCE</small></summary>
-      <div class="world-menu-status">
-        <div><span>QUALITÉ</span><b id="quality-status">AUTO</b></div>
-        <div><span>PERFORMANCE</span><b id="fps-status">— FPS</b></div>
-      </div>
-      <div class="world-menu-actions">
-        <button id="avatar-toggle" type="button">AVATAR</button>
-        <button id="camera-toggle" type="button">CAMERA · 1ST</button>
-        <button id="guide-toggle" type="button">GUIDE · ON</button>
-        <button id="quality-toggle" type="button">AUTO QUALITY</button>
-        <button id="controls-toggle" type="button">CONTROLS</button>
-        <button id="challenges-toggle" type="button">CHALLENGES</button>
-        <button id="reset-position" type="button">RESET POSITION</button>
-      </div>
-      <div class="world-menu-controls">
-        <span><kbd>WASD</kbd> MOVE</span><span><kbd>SHIFT</kbd> BOOST</span><span><kbd>E</kbd> ACTION</span><span><kbd>V</kbd> FIRST PERSON</span><span><kbd>G</kbd> GUIDE</span><span><kbd>M</kbd> MENU</span>
-      </div>
-    </details>
-  </aside>
-
-  <div id="travel-fade" class="travel-fade" aria-hidden="true"><span>KŌMØ</span></div>
-
-    <div class="desktop-help" aria-hidden="true">
-    <span><kbd>WASD</kbd> / <kbd>ZQSD</kbd> COURIR</span>
-    <span><kbd>SHIFT</kbd> BOOST</span>
-    <span>GLISSER POUR REGARDER</span>
-    <span><kbd>V</kbd> 1RE PERSONNE</span>
-    <span><kbd>G</kbd> GUIDE</span>
-    <span><kbd>M</kbd> MENU</span>
-  </div>
-
-  <div class="mobile-controls" aria-hidden="true">
-    <div id="joystick-zone" class="joystick-zone">
-      <div class="joystick-base"><div id="joystick-stick" class="joystick-stick"></div></div>
-    </div>
-    <button id="mobile-action" class="mobile-action" type="button">ACTION</button>
-  </div>
-
-  <div id="toast" class="toast" aria-live="polite"></div>
-
-  <noscript>KŌMØ World nécessite JavaScript.</noscript>
-  <script>
-    window.__KOMO_BOOT_ERROR=null;
-    window.__KOMO_REPORT_BOOT_ERROR=function(stage,err){
-      var raw=err&&((err.stack)||(err.message))||String(err||'Unknown error');
-      var payload={stage:stage,error:String(raw),href:location.href,ua:navigator.userAgent,ts:new Date().toISOString()};
-      window.__KOMO_BOOT_ERROR=payload;
-      try{fetch('/api/world-boot-error',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),keepalive:true})}catch(_){}
-      var loader=document.getElementById('world-loader');
-      if(loader){loader.classList.add('hidden');setTimeout(function(){loader.remove()},650)}
-      var status=document.getElementById('intro-auth-status');
-      if(status){
-        var first=String(raw).split('\n')[0].slice(0,260);
-        status.textContent='Erreur moteur 3D · '+first;
-        status.classList.add('error');
-      }
-      document.body.classList.add('world-boot-fallback');
-    };
-    window.addEventListener('error',function(e){
-      if(!window.KomoWorld)window.__KOMO_REPORT_BOOT_ERROR('window-error',e.error||e.message);
-    });
-    window.addEventListener('unhandledrejection',function(e){
-      if(!window.KomoWorld)window.__KOMO_REPORT_BOOT_ERROR('unhandled-rejection',e.reason);
-    });
-    window.__KOMO_BOOT_WATCH=setTimeout(function(){
-      if(window.KomoWorld)return;
-      if(window.__KOMO_BOOT_ERROR)return;
-      window.__KOMO_REPORT_BOOT_ERROR('watchdog','World module did not complete within 8 seconds');
-    },8000);
-  </script>
-  <script type="module">
-    import('./world-v1.js?v=9.1.0-campus-yachting')
-      .catch(function(err){window.__KOMO_REPORT_BOOT_ERROR('module-import',err)});
-  </script>
+if(location.hash){
+  const p=PLACES.find(x=>'#'+x.id===location.hash);
+  if(p)setTimeout(()=>openPlace(p),900);
+}
+</script>
 </body>
 </html>
