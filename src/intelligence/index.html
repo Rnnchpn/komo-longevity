@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f5f6f3" />
+  <title>KŌMØ Intelligence Service — Riviera</title>
+  <meta name="description" content="KŌMØ Intelligence Service — yacht, network, partner and event intelligence for the Riviera." />
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://a.basemaps.cartocdn.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <style>
+    :root{
+      --ink:#111714; --muted:#6d746f; --paper:#f6f6f2; --panel:rgba(255,255,252,.93);
+      --line:rgba(17,23,20,.10); --green:#143e35; --green-2:#235d50; --gold:#a48656;
+      --blue:#dfe9eb; --shadow:0 18px 50px rgba(24,36,31,.12);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;color:var(--ink);background:#dce5e6}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    #app{height:100%;overflow:hidden;position:relative}
+    #map{position:absolute;inset:0}
+    .leaflet-control-zoom{border:0!important;box-shadow:var(--shadow)!important}
+    .leaflet-control-zoom a{border:0!important;color:var(--ink)!important}
+    .leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.72)!important}
+    .topbar{position:absolute;z-index:1000;top:18px;left:18px;right:18px;height:68px;display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid rgba(255,255,255,.7);border-radius:22px;background:rgba(251,252,249,.89);backdrop-filter:blur(22px);box-shadow:var(--shadow)}
+    .brand{display:flex;align-items:center;gap:12px;min-width:270px;padding:0 10px}
+    .brand-mark{width:38px;height:38px;border-radius:13px;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:12px;letter-spacing:.13em;font-weight:700}
+    .brand-copy strong{display:block;font-size:14px;letter-spacing:.12em}
+    .brand-copy span{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+    .search{flex:1;min-width:180px;position:relative}
+    .search input{width:100%;height:46px;border:1px solid var(--line);background:white;border-radius:15px;padding:0 44px 0 16px;outline:none;font-size:13px}
+    .search-kbd{position:absolute;right:11px;top:10px;background:#f1f2ef;border:1px solid var(--line);border-radius:8px;padding:5px 7px;font-size:10px;color:var(--muted)}
+    .top-actions{display:flex;gap:8px}
+    .icon-btn,.pill-btn{height:46px;border:1px solid var(--line);background:#fff;border-radius:14px;color:var(--ink)}
+    .icon-btn{width:46px;font-size:16px}
+    .pill-btn{padding:0 15px;font-size:12px;font-weight:650}
+    .pill-btn.dark{background:var(--ink);color:white;border-color:var(--ink)}
+    .sidebar{position:absolute;z-index:999;left:18px;top:100px;bottom:18px;width:286px;border:1px solid rgba(255,255,255,.7);border-radius:24px;background:var(--panel);backdrop-filter:blur(20px);box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column}
+    .eyebrow{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:750}
+    .region-row{display:flex;align-items:end;justify-content:space-between;margin-top:4px;padding:7px 3px 15px}
+    .region-row h1{font-size:24px;line-height:1;margin:0;font-weight:620;letter-spacing:-.03em}
+    .live{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--green-2);font-weight:700}
+    .dot{width:7px;height:7px;border-radius:50%;background:#27a57c;box-shadow:0 0 0 5px rgba(39,165,124,.11)}
+    .nav{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;border-bottom:1px solid var(--line);padding-bottom:13px}
+    .nav button{border:0;background:transparent;border-radius:10px;padding:8px 2px;font-size:9px;color:var(--muted)}
+    .nav button.active{background:var(--ink);color:white}
+    .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}
+    .metric{padding:11px 10px;border:1px solid var(--line);border-radius:14px;background:#fff}
+    .metric strong{display:block;font-size:18px}
+    .metric span{font-size:9px;color:var(--muted)}
+    .section-title{font-size:11px;font-weight:750;display:flex;justify-content:space-between;align-items:center;margin:12px 2px 7px}
+    .section-title span{color:var(--muted);font-size:9px;font-weight:500}
+    .list{overflow:auto;min-height:0;padding-right:2px}
+    .action-card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:11px;margin-bottom:7px;transition:.18s}
+    .action-card:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(20,30,27,.06)}
+    .action-top{display:flex;justify-content:space-between;gap:8px}
+    .action-card b{font-size:11px}
+    .tag{font-size:8px;letter-spacing:.07em;text-transform:uppercase;color:var(--green-2);background:#edf5f1;border-radius:999px;padding:4px 6px;white-space:nowrap}
+    .action-card p{font-size:10px;line-height:1.35;color:var(--muted);margin:6px 0 9px}
+    .mini-link{border:0;background:transparent;padding:0;color:var(--ink);font-size:10px;font-weight:700}
+    .filters{position:absolute;z-index:998;top:100px;left:318px;right:356px;display:flex;gap:7px;align-items:center;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+    .filters::-webkit-scrollbar{display:none}
+    .chip{white-space:nowrap;border:1px solid rgba(17,23,20,.12);background:rgba(255,255,252,.91);backdrop-filter:blur(18px);height:35px;border-radius:999px;padding:0 13px;font-size:10px;color:#4e5651;box-shadow:0 8px 18px rgba(24,36,31,.06)}
+    .chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
+    .chip.gold.active{background:#8e744b;border-color:#8e744b}
+    .right-panel{position:absolute;z-index:999;right:18px;top:100px;bottom:18px;width:326px;border:1px solid rgba(255,255,255,.7);border-radius:24px;background:var(--panel);backdrop-filter:blur(20px);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+    .panel-cover{height:116px;background:linear-gradient(130deg,#143e35,#729187 60%,#d9d7ca);position:relative;padding:16px;color:#fff}
+    .panel-cover:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% 15%,rgba(255,255,255,.35),transparent 26%)}
+    .close-panel{position:absolute;z-index:2;right:12px;top:12px;border:0;background:rgba(255,255,255,.16);color:white;width:30px;height:30px;border-radius:10px}
+    .panel-cover .eyebrow{color:rgba(255,255,255,.72);position:relative;z-index:1}
+    .panel-cover h2{position:relative;z-index:1;margin:9px 0 0;font-size:25px;letter-spacing:-.04em}
+    .panel-cover p{position:relative;z-index:1;font-size:10px;margin:5px 0 0;color:rgba(255,255,255,.78)}
+    .panel-body{overflow:auto;padding:15px}
+    .facts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+    .fact{border:1px solid var(--line);background:#fff;border-radius:13px;padding:10px}
+    .fact strong{display:block;font-size:13px}.fact span{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+    .relation{margin:12px 0;border:1px solid var(--line);border-radius:15px;background:#fff;padding:12px}
+    .relation-line{display:flex;justify-content:space-between;gap:10px;margin:6px 0;font-size:10px}
+    .relation-line span{color:var(--muted)}
+    .cta-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+    .cta-grid button{height:40px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:10px;font-weight:700}
+    .cta-grid button.primary{grid-column:1/-1;background:var(--ink);color:#fff;border-color:var(--ink)}
+    .privacy-note{font-size:9px;color:var(--muted);line-height:1.45;margin:12px 2px}
+    .map-legend{position:absolute;z-index:997;left:318px;bottom:18px;display:flex;gap:8px;background:rgba(255,255,252,.91);backdrop-filter:blur(18px);padding:9px 12px;border-radius:13px;border:1px solid rgba(255,255,255,.7);box-shadow:var(--shadow);font-size:9px;color:var(--muted)}
+    .legend-key{display:flex;align-items:center;gap:5px}
+    .legend-dot{width:9px;height:9px;border-radius:50%;background:var(--green)}
+    .legend-dot.company{background:#29303d}.legend-dot.partner{background:var(--gold)}
+    .boat-icon{width:30px;height:30px;border-radius:50% 50% 50% 12%;background:#143e35;transform:rotate(45deg);display:grid;place-items:center;border:2px solid rgba(255,255,255,.9);box-shadow:0 4px 12px rgba(15,38,32,.25)}
+    .boat-icon span{transform:rotate(-45deg);color:white;font-size:8px;font-weight:800}
+    .boat-icon.warm{background:#8e744b}
+    .boat-icon.vip{background:#111714;box-shadow:0 0 0 5px rgba(164,134,86,.18),0 4px 12px rgba(15,38,32,.25)}
+    .land-icon{width:25px;height:25px;border-radius:9px;background:#283038;border:2px solid white;box-shadow:0 4px 12px rgba(20,20,20,.22);display:grid;place-items:center;color:#fff;font-size:10px;font-weight:800}
+    .partner-icon{width:25px;height:25px;border-radius:50%;background:#a48656;border:2px solid white;box-shadow:0 4px 12px rgba(20,20,20,.22);display:grid;place-items:center;color:#fff;font-size:11px}
+    .leaflet-tooltip{border:0!important;border-radius:10px!important;box-shadow:0 8px 20px rgba(0,0,0,.12)!important;padding:8px 10px!important;font-size:10px!important}
+    .company-drawer,.events-drawer,.network-drawer{position:absolute;z-index:1001;inset:100px 356px 18px 318px;background:rgba(250,251,248,.95);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.8);border-radius:24px;box-shadow:var(--shadow);padding:18px;display:none;overflow:auto}
+    .company-drawer.open,.events-drawer.open,.network-drawer.open{display:block}
+    .drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .drawer-head h2{font-size:23px;margin:0;letter-spacing:-.03em}.drawer-head button{border:0;background:#fff;border-radius:10px;width:34px;height:34px}
+    .directory-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+    .directory-card{border:1px solid var(--line);border-radius:17px;background:#fff;padding:14px;min-height:125px}
+    .directory-card .type{font-size:8px;text-transform:uppercase;letter-spacing:.11em;color:var(--muted)}
+    .directory-card h3{font-size:14px;margin:8px 0 4px}.directory-card p{font-size:10px;color:var(--muted);line-height:1.4;margin:0}
+    .directory-card .foot{margin-top:14px;display:flex;justify-content:space-between;align-items:center;font-size:9px}
+    .privilege{color:#8e744b;font-weight:700}
+    .event-card{display:grid;grid-template-columns:145px 1fr auto;gap:15px;align-items:center;border:1px solid var(--line);background:white;border-radius:18px;padding:14px;margin-bottom:10px}
+    .event-date{height:88px;border-radius:14px;background:linear-gradient(145deg,#142f29,#8a8b79);color:white;display:flex;flex-direction:column;justify-content:end;padding:12px}
+    .event-date strong{font-size:24px}.event-date span{font-size:9px;text-transform:uppercase;letter-spacing:.1em}
+    .event-copy h3{margin:0 0 6px;font-size:15px}.event-copy p{margin:0;color:var(--muted);font-size:10px;line-height:1.45}
+    .event-stats{text-align:right;font-size:10px}.event-stats strong{display:block;font-size:21px}
+    .search-results{position:absolute;top:52px;left:0;right:0;background:white;border:1px solid var(--line);border-radius:14px;padding:7px;box-shadow:var(--shadow);display:none;max-height:300px;overflow:auto}
+    .search-results.open{display:block}
+    .search-item{padding:10px;border-radius:10px;font-size:11px;display:flex;justify-content:space-between}
+    .search-item:hover{background:#f2f4f1}
+    .search-item span{font-size:9px;color:var(--muted)}
+    .demo-badge{position:absolute;z-index:997;right:366px;bottom:18px;font-size:8px;letter-spacing:.13em;text-transform:uppercase;background:rgba(17,23,20,.82);color:#fff;padding:7px 9px;border-radius:9px}
+    @media(max-width:1100px){
+      .brand{min-width:210px}.brand-copy span{display:none}.sidebar{width:254px}.filters,.map-legend{left:284px}.right-panel{width:300px}.company-drawer,.events-drawer,.network-drawer{left:284px;right:330px}.filters{right:330px}
+    }
+    @media(max-width:850px){
+      .topbar{top:10px;left:10px;right:10px}.brand{min-width:auto}.brand-copy{display:none}.top-actions .pill-btn:not(.dark){display:none}
+      .sidebar{left:10px;right:10px;top:auto;bottom:10px;width:auto;height:166px;padding:10px}.region-row,.summary{display:none}.nav{border:0}.section-title{margin:7px 2px 5px}.list{display:flex;gap:7px;overflow-x:auto}.action-card{min-width:210px;margin:0}
+      .filters{left:10px;right:10px;top:88px}.right-panel{left:10px;right:10px;top:142px;bottom:184px;width:auto;display:none}.right-panel.open{display:flex}
+      .map-legend,.demo-badge{display:none}.company-drawer,.events-drawer,.network-drawer{inset:142px 10px 184px 10px}.directory-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:560px){.directory-grid{grid-template-columns:1fr}.top-actions{display:none}.event-card{grid-template-columns:1fr}.event-stats{text-align:left}}
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="map"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark">KØ</div>
+      <div class="brand-copy"><strong>KŌMØ INTELLIGENCE</strong><span>Private network & yacht service</span></div>
+    </div>
+    <div class="search">
+      <input id="searchInput" placeholder="Yacht, capitaine, société, port ou partenaire…" autocomplete="off" />
+      <span class="search-kbd">⌘K</span>
+      <div id="searchResults" class="search-results"></div>
+    </div>
+    <div class="top-actions">
+      <button class="pill-btn" id="layerBtn">Layers</button>
+      <button class="pill-btn" id="cardBtn">KŌMØ Card</button>
+      <button class="pill-btn dark" id="addBtn">+ Ajouter</button>
+    </div>
+  </header>
+
+  <aside class="sidebar">
+    <div class="eyebrow">Riviera Intelligence</div>
+    <div class="region-row"><h1>Live Riviera</h1><div class="live"><i class="dot"></i> LIVE</div></div>
+    <div class="nav">
+      <button class="active" data-view="map">Carte</button>
+      <button data-view="today">Today</button>
+      <button data-view="network">Network</button>
+      <button data-view="events">Events</button>
+      <button data-view="partners">Partners</button>
+    </div>
+    <div class="summary">
+      <div class="metric"><strong id="visibleYachts">0</strong><span>Yachts</span></div>
+      <div class="metric"><strong id="warmCount">0</strong><span>Warm</span></div>
+      <div class="metric"><strong id="actionCount">6</strong><span>Actions</span></div>
+    </div>
+    <div class="section-title">Priorités aujourd'hui <span>02 OCT</span></div>
+    <div class="list" id="todayList"></div>
+  </aside>
+
+  <div class="filters" id="filters">
+    <button class="chip active" data-filter="all">Tous</button>
+    <button class="chip" data-filter="24-40">24–40 m</button>
+    <button class="chip" data-filter="40-60">40–60 m</button>
+    <button class="chip" data-filter="60-80">60–80 m</button>
+    <button class="chip" data-filter="80+">80 m+</button>
+    <button class="chip" data-toggle="charter">Charter</button>
+    <button class="chip" data-toggle="warm">Réseau KŌMØ</button>
+    <button class="chip gold active" data-layer="companies">Sociétés</button>
+    <button class="chip gold active" data-layer="partners">Privileges</button>
+  </div>
+
+  <aside class="right-panel" id="detailPanel">
+    <div class="panel-cover">
+      <button class="close-panel" id="closePanel">×</button>
+      <div class="eyebrow" id="detailStatus">YACHT PROFILE</div>
+      <h2 id="detailName">M/Y Aurelia</h2>
+      <p id="detailSub">68 m · Monaco · Private</p>
+    </div>
+    <div class="panel-body">
+      <div class="facts">
+        <div class="fact"><strong id="detailLength">68 m</strong><span>LOA</span></div>
+        <div class="fact"><strong id="detailEta">In port</strong><span>ETA</span></div>
+        <div class="fact"><strong id="detailRelation">Warm</strong><span>Relation</span></div>
+      </div>
+      <div class="section-title">Relationship intelligence <span id="detailConfidence">VERIFIED</span></div>
+      <div class="relation">
+        <div class="relation-line"><span>Captain</span><b id="detailCaptain">Known contact</b></div>
+        <div class="relation-line"><span>Management</span><b id="detailManager">Private management</b></div>
+        <div class="relation-line"><span>Introduced by</span><b id="detailIntro">Direct</b></div>
+        <div class="relation-line"><span>Last interaction</span><b id="detailLast">14 days</b></div>
+        <div class="relation-line"><span>Best next action</span><b id="detailNext">Welcome</b></div>
+      </div>
+      <div class="section-title">KŌMØ next action</div>
+      <div class="cta-grid">
+        <button class="primary" id="smartAction">Préparer le message</button>
+        <button>Fiche complète</button>
+        <button>Créer mission</button>
+        <button>Inviter</button>
+        <button>Ajouter note</button>
+      </div>
+      <div class="section-title">Opportunity</div>
+      <div class="relation">
+        <div class="relation-line"><span>Suggested</span><b id="detailOffer">Motion onboard</b></div>
+        <div class="relation-line"><span>Dolce Riviera</span><b id="detailEvent">Private dinner eligible</b></div>
+        <div class="relation-line"><span>KŌMØ Card</span><b>Privileges available</b></div>
+      </div>
+      <p class="privacy-note">KŌMØ Intelligence conserve une séparation stricte entre données relationnelles/opérationnelles et données de santé de Pulse. Les sources et niveaux de confiance seront journalisés au niveau de chaque contact.</p>
+    </div>
+  </aside>
+
+  <div class="map-legend">
+    <div class="legend-key"><i class="legend-dot"></i> Yacht</div>
+    <div class="legend-key"><i class="legend-dot company"></i> Yacht company</div>
+    <div class="legend-key"><i class="legend-dot partner"></i> KŌMØ Privilege</div>
+  </div>
+  <div class="demo-badge">V1 · DEMO DATA · AIS CONNECTOR NEXT</div>
+
+  <section class="company-drawer" id="partnersDrawer">
+    <div class="drawer-head"><div><div class="eyebrow">KŌMØ CARD</div><h2>Private Privileges</h2></div><button data-close="partnersDrawer">×</button></div>
+    <div class="directory-grid" id="partnerGrid"></div>
+  </section>
+  <section class="company-drawer" id="companiesDrawer">
+    <div class="drawer-head"><div><div class="eyebrow">SHORE NETWORK</div><h2>Yachting companies</h2></div><button data-close="companiesDrawer">×</button></div>
+    <div class="directory-grid" id="companyGrid"></div>
+  </section>
+  <section class="events-drawer" id="eventsDrawer">
+    <div class="drawer-head"><div><div class="eyebrow">KŌMØ × DOLCE RIVIERA</div><h2>Private events</h2></div><button data-close="eventsDrawer">×</button></div>
+    <div id="eventList"></div>
+  </section>
+  <section class="network-drawer" id="networkDrawer">
+    <div class="drawer-head"><div><div class="eyebrow">PRIVATE NETWORK</div><h2>Relationship graph</h2></div><button data-close="networkDrawer">×</button></div>
+    <div class="directory-grid" id="networkGrid"></div>
+  </section>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+(() => {
+  const yachts = [
+    {id:'y1',name:'M/Y Aurelia',lat:43.7363,lng:7.4318,length:68,type:'Private',port:'Monaco',eta:'In port',relation:'Warm',priority:'vip',captain:'Known contact',manager:'Private management',intro:'Zayd network',last:'14 days',next:'Welcome',offer:'Motion onboard',event:'Private dinner eligible'},
+    {id:'y2',name:'M/Y Sirocco',lat:43.7392,lng:7.4240,length:47,type:'Charter',port:'Monaco',eta:'In port',relation:'New',priority:'normal',captain:'To identify',manager:'Management listed',intro:'No introduction yet',last:'—',next:'Find warm intro',offer:'Recovery onboard',event:'Captain circle'},
+    {id:'y3',name:'M/Y Altair',lat:43.7254,lng:7.4190,length:91,type:'Private',port:'Cap-d’Ail',eta:'16:40',relation:'Warm',priority:'vip',captain:'Direct contact',manager:'Known manager',intro:'Janet network',last:'42 days',next:'Welcome + invite',offer:'Clinical onboard',event:'Dolce dinner'},
+    {id:'y4',name:'M/Y Cassiopeia',lat:43.5718,lng:7.1222,length:54,type:'Charter',port:'Antibes',eta:'In port',relation:'Warm',priority:'warm',captain:'Known contact',manager:'Charter management',intro:'Broker referral',last:'61 days',next:'Reconnect',offer:'Motion onboard',event:'Captain dinner'},
+    {id:'y5',name:'M/Y Solaris',lat:43.5485,lng:7.0407,length:73,type:'Private',port:'Golfe-Juan',eta:'12:20',relation:'New',priority:'normal',captain:'Public professional contact',manager:'Known company',intro:'Ask partner',last:'—',next:'Request introduction',offer:'KŌMØ introduction',event:'Not yet'},
+    {id:'y6',name:'M/Y Étoile',lat:43.5460,lng:7.0170,length:39,type:'Charter',port:'Cannes',eta:'In port',relation:'Warm',priority:'warm',captain:'Known contact',manager:'Known manager',intro:'Direct',last:'8 days',next:'Offer availability',offer:'Recovery + physio',event:'Thursday dinner'},
+    {id:'y7',name:'M/Y Northstar',lat:43.5394,lng:7.0303,length:82,type:'Private',port:'Cannes',eta:'18:10',relation:'New',priority:'normal',captain:'To identify',manager:'Management listed',intro:'No introduction yet',last:'—',next:'Do nothing',offer:'—',event:'—'},
+    {id:'y8',name:'M/Y Riviera',lat:43.4893,lng:6.9167,length:44,type:'Charter',port:'La Napoule',eta:'In port',relation:'Warm',priority:'warm',captain:'Known contact',manager:'Charter management',intro:'Dolce guest',last:'3 days',next:'Invite',offer:'Motion onboard',event:'Dolce dinner'},
+    {id:'y9',name:'M/Y Azure',lat:43.2860,lng:6.6440,length:61,type:'Private',port:'Saint-Tropez',eta:'In port',relation:'Warm',priority:'vip',captain:'Direct contact',manager:'Private office',intro:'Direct',last:'Yesterday',next:'Follow-up',offer:'Physio onboard',event:'Already invited'},
+    {id:'y10',name:'M/Y Celeste',lat:43.2735,lng:6.6332,length:36,type:'Charter',port:'Saint-Tropez',eta:'14:50',relation:'New',priority:'normal',captain:'To identify',manager:'Charter listing',intro:'Broker route available',last:'—',next:'Ask broker',offer:'Recovery onboard',event:'Captain circle'},
+    {id:'y11',name:'M/Y Meridian',lat:43.2478,lng:6.6731,length:105,type:'Private',port:'Pampelonne',eta:'At anchor',relation:'Warm',priority:'vip',captain:'Known contact',manager:'Family office route',intro:'Zayd network',last:'27 days',next:'Discreet welcome',offer:'Clinical + recovery',event:'Private dinner eligible'},
+    {id:'y12',name:'M/Y Alba',lat:43.4030,lng:6.7660,length:58,type:'Private',port:'En route',eta:'Saint-Tropez 19:15',relation:'New',priority:'normal',captain:'Unknown',manager:'Unknown',intro:'—',last:'—',next:'Do nothing',offer:'—',event:'—'},
+    {id:'y13',name:'M/Y Aria',lat:43.6030,lng:7.1640,length:33,type:'Private',port:'Antibes',eta:'In port',relation:'Warm',priority:'warm',captain:'Known contact',manager:'Known manager',intro:'Direct',last:'19 days',next:'Check-in',offer:'Motion onboard',event:'Dolce lunch'},
+    {id:'y14',name:'M/Y Orion',lat:43.6570,lng:7.2850,length:77,type:'Charter',port:'Nice',eta:'In port',relation:'New',priority:'normal',captain:'Professional contact',manager:'Known company',intro:'Concierge route',last:'—',next:'Intro via concierge',offer:'Recovery onboard',event:'Private dinner eligible'}
+  ];
+
+  const companies = [
+    {name:'Monaco Yacht Brokerage',category:'Broker',city:'Monaco',lat:43.7352,lng:7.4210,relationship:'Warm',detail:'Broker & charter contact layer'},
+    {name:'Monaco Yacht Management',category:'Management',city:'Monaco',lat:43.7345,lng:7.4265,relationship:'Target',detail:'Management & captain introductions'},
+    {name:'Port Hercule Network',category:'Marina / Port',city:'Monaco',lat:43.7358,lng:7.4252,relationship:'Strategic',detail:'Port-side operational network'},
+    {name:'Antibes Yacht Services',category:'Yacht Services',city:'Antibes',lat:43.5811,lng:7.1254,relationship:'Warm',detail:'Crew, provisioning & operations'},
+    {name:'Antibes Crew Network',category:'Crew Agency',city:'Antibes',lat:43.5782,lng:7.1240,relationship:'Target',detail:'Captain & senior crew access'},
+    {name:'Cannes Charter Office',category:'Charter',city:'Cannes',lat:43.5520,lng:7.0188,relationship:'Warm',detail:'Charter managers & brokers'},
+    {name:'Cannes Marine Concierge',category:'Concierge',city:'Cannes',lat:43.5503,lng:7.0199,relationship:'Partner',detail:'Guest and villa coordination'},
+    {name:'Saint-Tropez Yacht Desk',category:'Broker',city:'Saint-Tropez',lat:43.2723,lng:6.6392,relationship:'Target',detail:'Local charter & owner network'},
+    {name:'Golfe de Saint-Tropez Concierge',category:'Concierge',city:'Saint-Tropez',lat:43.2681,lng:6.6401,relationship:'Warm',detail:'Private guest coordination'}
+  ];
+
+  const partners = [
+    {name:'Riviera Palace',category:'Hotel',city:'Monaco',lat:43.7380,lng:7.4260,benefit:'Preferred rate · Priority access',status:'KŌMØ Preferred'},
+    {name:'Mediterranean Table',category:'Restaurant',city:'Cannes',lat:43.5512,lng:7.0147,benefit:'Priority reservation · Welcome experience',status:'Dolce Riviera'},
+    {name:'Private Recovery Studio',category:'Recovery',city:'Antibes',lat:43.5790,lng:7.1170,benefit:'Priority booking · Member privilege',status:'KŌMØ Partner'},
+    {name:'Tropez Beach House',category:'Hospitality',city:'Saint-Tropez',lat:43.2748,lng:6.6388,benefit:'Priority access · Guest experience',status:'KŌMØ Preferred'},
+    {name:'Riviera Driver',category:'Mobility',city:'Cannes / Monaco',lat:43.6640,lng:7.2010,benefit:'Priority dispatch · Preferred terms',status:'KŌMØ Partner'}
+  ];
+
+  const actions = [
+    ['M/Y Altair','Arrive Monaco · 16:40','WELCOME','Welcome + Dolce invitation'],
+    ['M/Y Étoile','Cannes · captain known','SERVICE','Offer onboard availability'],
+    ['M/Y Meridian','Pampelonne · direct network','VIP','Discreet welcome via Zayd'],
+    ['Cannes Charter Office','3 relevant yachts nearby','INTRO','Ask for one introduction'],
+    ['Dolce Riviera Dinner','9 / 12 confirmed','EVENT','Invite 3 relevant guests'],
+    ['M/Y Azure','Service yesterday','FOLLOW-UP','Thank + next checkpoint']
+  ];
+
+  const events = [
+    {date:'08',month:'OCT',name:'Mediterranean Longevity Dinner',place:'Cap d’Antibes · KŌMØ × Dolce Riviera',desc:'12 guests · Mediterranean gastronomy · mobility & longevity experience',confirmed:9,total:12},
+    {date:'17',month:'OCT',name:'Captain’s Table',place:'Cannes · Private',desc:'Senior crew, yacht managers and trusted partners. Relationship-first, no sales presentation.',confirmed:7,total:10},
+    {date:'24',month:'OCT',name:'Riviera Recovery Morning',place:'Saint-Tropez · Private villa',desc:'Motion assessment, recovery and breakfast for selected guests and crew.',confirmed:6,total:8}
+  ];
+
+  const network = [
+    {name:'Zayd Network',type:'Introducer',text:'Broker / owner introductions · Riviera & Middle East',foot:'11 linked relationships'},
+    {name:'Janet Network',type:'Introducer',text:'Yachting relationships · captains, management, events',foot:'8 linked relationships'},
+    {name:'Captain Circle',type:'Circle',text:'Senior crew & captains with direct or warm relationship',foot:'14 contacts'},
+    {name:'Dolce Circle',type:'Circle',text:'Guests hosted through dinners and private experiences',foot:'21 guests'},
+    {name:'KŌMØ Members',type:'Circle',text:'Clients and private members — no medical data surfaced here',foot:'18 members'},
+    {name:'Riviera Partners',type:'Circle',text:'Hospitality, concierge, transport and wellness partners',foot:'12 partners'}
+  ];
+
+  const map = L.map('map',{zoomControl:false,attributionControl:true,minZoom:8,maxZoom:16}).setView([43.48,6.90],9);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{
+    attribution:'&copy; OpenStreetMap contributors &copy; CARTO',
+    subdomains:'abcd',maxZoom:20
+  }).addTo(map);
+
+  const yachtLayer=L.layerGroup().addTo(map);
+  const companyLayer=L.layerGroup().addTo(map);
+  const partnerLayer=L.layerGroup().addTo(map);
+  const markers=new Map();
+
+  function yachtIcon(y){
+    const c=y.priority==='vip'?'vip':y.priority==='warm'?'warm':'';
+    return L.divIcon({className:'',html:'<div class="boat-icon '+c+'"><span>'+y.length+'</span></div>',iconSize:[30,30],iconAnchor:[15,15]});
+  }
+  function landIcon(){return L.divIcon({className:'',html:'<div class="land-icon">Y</div>',iconSize:[25,25],iconAnchor:[12,12]});}
+  function partnerIcon(){return L.divIcon({className:'',html:'<div class="partner-icon">✦</div>',iconSize:[25,25],iconAnchor:[12,12]});}
+
+  function addMarkers(){
+    yachts.forEach(y=>{
+      const m=L.marker([y.lat,y.lng],{icon:yachtIcon(y)}).bindTooltip('<b>'+y.name+'</b><br>'+y.length+' m · '+y.port);
+      m.on('click',()=>selectYacht(y));
+      m.addTo(yachtLayer); markers.set(y.id,m);
+    });
+    companies.forEach((c,i)=>{
+      const m=L.marker([c.lat,c.lng],{icon:landIcon()}).bindTooltip('<b>'+c.name+'</b><br>'+c.category+' · '+c.city);
+      m.on('click',()=>openCompany(c));
+      m.addTo(companyLayer); markers.set('c'+i,m);
+    });
+    partners.forEach((p,i)=>{
+      const m=L.marker([p.lat,p.lng],{icon:partnerIcon()}).bindTooltip('<b>'+p.name+'</b><br>'+p.benefit);
+      m.on('click',()=>openPartners());
+      m.addTo(partnerLayer); markers.set('p'+i,m);
+    });
+  }
+
+  let sizeFilter='all', charterOnly=false, warmOnly=false;
+  function matches(y){
+    if(charterOnly && y.type!=='Charter') return false;
+    if(warmOnly && y.relation!=='Warm') return false;
+    if(sizeFilter==='24-40' && !(y.length>=24&&y.length<40)) return false;
+    if(sizeFilter==='40-60' && !(y.length>=40&&y.length<60)) return false;
+    if(sizeFilter==='60-80' && !(y.length>=60&&y.length<80)) return false;
+    if(sizeFilter==='80+' && y.length<80) return false;
+    return true;
+  }
+  function refreshYachts(){
+    yachtLayer.clearLayers();
+    let count=0,warm=0;
+    yachts.filter(matches).forEach(y=>{
+      const m=markers.get(y.id); m.addTo(yachtLayer); count++; if(y.relation==='Warm') warm++;
+    });
+    document.getElementById('visibleYachts').textContent=count;
+    document.getElementById('warmCount').textContent=warm;
+  }
+
+  function selectYacht(y){
+    document.getElementById('detailPanel').classList.add('open');
+    detailStatus.textContent=(y.priority==='vip'?'PRIORITY RELATION':'YACHT PROFILE')+' · '+y.port.toUpperCase();
+    detailName.textContent=y.name; detailSub.textContent=y.length+' m · '+y.port+' · '+y.type;
+    detailLength.textContent=y.length+' m'; detailEta.textContent=y.eta; detailRelation.textContent=y.relation;
+    detailCaptain.textContent=y.captain; detailManager.textContent=y.manager; detailIntro.textContent=y.intro;
+    detailLast.textContent=y.last; detailNext.textContent=y.next; detailOffer.textContent=y.offer; detailEvent.textContent=y.event;
+    detailConfidence.textContent=y.relation==='Warm'?'RELATIONSHIP DATA':'TO VERIFY';
+    smartAction.textContent=y.next==='Do nothing'?'Aucune sollicitation recommandée':'Préparer · '+y.next;
+    map.panTo([y.lat,y.lng],{animate:true});
+  }
+
+  function openCompany(c){
+    document.querySelector('[data-view="partners"]')?.classList.remove('active');
+    companiesDrawer.classList.add('open');
+  }
+  function closeDrawers(){['partnersDrawer','companiesDrawer','eventsDrawer','networkDrawer'].forEach(id=>document.getElementById(id).classList.remove('open'));}
+
+  function render(){
+    todayList.innerHTML=actions.map(a=>'<div class="action-card"><div class="action-top"><b>'+a[0]+'</b><span class="tag">'+a[2]+'</span></div><p>'+a[1]+'</p><button class="mini-link">'+a[3]+' →</button></div>').join('');
+    companyGrid.innerHTML=companies.map(c=>'<div class="directory-card"><div class="type">'+c.category+' · '+c.city+'</div><h3>'+c.name+'</h3><p>'+c.detail+'</p><div class="foot"><span>'+c.relationship+'</span><b>Open on map →</b></div></div>').join('');
+    partnerGrid.innerHTML=partners.map(p=>'<div class="directory-card"><div class="type">'+p.category+' · '+p.city+'</div><h3>'+p.name+'</h3><p>'+p.benefit+'</p><div class="foot"><span class="privilege">'+p.status+'</span><b>View privilege →</b></div></div>').join('');
+    eventList.innerHTML=events.map(e=>'<div class="event-card"><div class="event-date"><strong>'+e.date+'</strong><span>'+e.month+'</span></div><div class="event-copy"><h3>'+e.name+'</h3><p>'+e.place+'<br>'+e.desc+'</p></div><div class="event-stats"><strong>'+e.confirmed+'/'+e.total+'</strong><span>confirmed</span><br><br><button class="pill-btn">Guest list</button></div></div>').join('');
+    networkGrid.innerHTML=network.map(n=>'<div class="directory-card"><div class="type">'+n.type+'</div><h3>'+n.name+'</h3><p>'+n.text+'</p><div class="foot"><span>'+n.foot+'</span><b>Open graph →</b></div></div>').join('');
+  }
+
+  document.querySelectorAll('.chip[data-filter]').forEach(btn=>btn.addEventListener('click',()=>{
+    document.querySelectorAll('.chip[data-filter]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); sizeFilter=btn.dataset.filter; refreshYachts();
+  }));
+  document.querySelector('[data-toggle="charter"]').addEventListener('click',e=>{charterOnly=!charterOnly;e.currentTarget.classList.toggle('active',charterOnly);refreshYachts()});
+  document.querySelector('[data-toggle="warm"]').addEventListener('click',e=>{warmOnly=!warmOnly;e.currentTarget.classList.toggle('active',warmOnly);refreshYachts()});
+  document.querySelector('[data-layer="companies"]').addEventListener('click',e=>{if(map.hasLayer(companyLayer)){map.removeLayer(companyLayer);e.currentTarget.classList.remove('active')}else{map.addLayer(companyLayer);e.currentTarget.classList.add('active')}});
+  document.querySelector('[data-layer="partners"]').addEventListener('click',e=>{if(map.hasLayer(partnerLayer)){map.removeLayer(partnerLayer);e.currentTarget.classList.remove('active')}else{map.addLayer(partnerLayer);e.currentTarget.classList.add('active')}});
+
+  document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); closeDrawers();
+    const v=b.dataset.view;
+    if(v==='network') networkDrawer.classList.add('open');
+    if(v==='events') eventsDrawer.classList.add('open');
+    if(v==='partners') partnersDrawer.classList.add('open');
+    if(v==='today') document.querySelector('.sidebar .list').scrollTo({top:0,behavior:'smooth'});
+  }));
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>document.getElementById(b.dataset.close).classList.remove('open')));
+  closePanel.addEventListener('click',()=>detailPanel.classList.remove('open'));
+  cardBtn.addEventListener('click',()=>{closeDrawers();partnersDrawer.classList.add('open')});
+  layerBtn.addEventListener('click',()=>{closeDrawers();companiesDrawer.classList.add('open')});
+  addBtn.addEventListener('click',()=>alert('V1: création manuelle du yacht, contact ou partenaire sera reliée à Supabase dans la prochaine itération.'));
+  smartAction.addEventListener('click',()=>alert('Action préparée — la V2 ouvrira le canal relationnel et générera un message contextualisé, toujours avec validation humaine.'));
+
+  const allSearch=[
+    ...yachts.map(y=>({label:y.name,sub:y.length+' m · '+y.port,kind:'yacht',obj:y})),
+    ...companies.map(c=>({label:c.name,sub:c.category+' · '+c.city,kind:'company',obj:c})),
+    ...partners.map(p=>({label:p.name,sub:'KŌMØ Privilege · '+p.city,kind:'partner',obj:p}))
+  ];
+  function doSearch(q){
+    const term=q.trim().toLowerCase();
+    if(!term){searchResults.classList.remove('open');return}
+    const r=allSearch.filter(x=>(x.label+' '+x.sub).toLowerCase().includes(term)).slice(0,8);
+    searchResults.innerHTML=r.map((x,i)=>'<div class="search-item" data-i="'+i+'"><b>'+x.label+'</b><span>'+x.sub+'</span></div>').join('');
+    searchResults.classList.add('open');
+    [...searchResults.children].forEach((el,i)=>el.onclick=()=>{
+      const x=r[i]; searchResults.classList.remove('open'); searchInput.value=x.label;
+      if(x.kind==='yacht'){selectYacht(x.obj); map.setView([x.obj.lat,x.obj.lng],12)}
+      if(x.kind==='company'){closeDrawers();companiesDrawer.classList.add('open');map.setView([x.obj.lat,x.obj.lng],13)}
+      if(x.kind==='partner'){closeDrawers();partnersDrawer.classList.add('open');map.setView([x.obj.lat,x.obj.lng],13)}
+    });
+  }
+  searchInput.addEventListener('input',e=>doSearch(e.target.value));
+  document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();searchInput.focus()}if(e.key==='Escape'){closeDrawers();detailPanel.classList.remove('open');searchResults.classList.remove('open')}});
+  document.addEventListener('click',e=>{if(!e.target.closest('.search'))searchResults.classList.remove('open')});
+
+  render(); addMarkers(); refreshYachts(); selectYacht(yachts[0]);
+})();
+</script>
+</body>
+</html>

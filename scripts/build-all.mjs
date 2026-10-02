@@ -85,6 +85,8 @@ const scripts = [
   'scripts/build-life-v1.mjs',
   // Private CEO cockpit: isolated static surface for command.komolongevity.com.
   'scripts/build-command-v1.mjs',
+  // Private Riviera intelligence surface: yacht radar, network, partners and events.
+  'scripts/build-intelligence-v1.mjs',
   'scripts/muscle-analysis-ui-v1.mjs',
   'scripts/account-booking-privacy-v1.mjs',
   // Wire map assets before the CSS bundle is generated.
