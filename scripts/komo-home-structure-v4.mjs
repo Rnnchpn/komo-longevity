@@ -17,9 +17,9 @@ const css=`
 .kh4-nav>a,.kh4-access>summary{display:flex;align-items:center;min-height:38px;padding:0 12px;border-radius:999px;font-size:11px;font-weight:650;letter-spacing:.005em;color:#2a2e29;text-decoration:none;white-space:nowrap;transition:background .2s ease,color .2s ease,transform .2s ease}
 .kh4-nav>a:hover,.kh4-access>summary:hover{background:rgba(255,255,255,.72);color:#111512}
 .kh4-nav>a:focus-visible,.kh4-access>summary:focus-visible{outline:2px solid rgba(52,72,61,.42);outline-offset:2px}
-.kh4-nav .kh4-world{gap:7px;padding:0 15px;background:#18221d;color:#fff}
-.kh4-nav .kh4-world:before{content:"";width:6px;height:6px;border-radius:50%;background:#b9d8c8;box-shadow:0 0 0 4px rgba(185,216,200,.14)}
-.kh4-nav .kh4-world:hover{background:#24342c;color:#fff}
+.kh4-nav .kh4-world{gap:7px;padding:0 15px;background:#dfe6e5;color:#1f2d28;border:1px solid rgba(63,87,76,.16)}
+.kh4-nav .kh4-world:before{content:"";width:6px;height:6px;border-radius:50%;background:#6f8f80;box-shadow:0 0 0 4px rgba(111,143,128,.12)}
+.kh4-nav .kh4-world:hover{background:#d4dfdc;color:#18231e;border-color:rgba(63,87,76,.24)}
 .kh4-nav .kh4-professionals{color:#54645a}
 .kh4-access{position:relative}
 .kh4-access>summary{list-style:none;cursor:pointer;border:1px solid rgba(42,46,41,.14);background:rgba(255,255,255,.42)}
