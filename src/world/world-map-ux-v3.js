@@ -55,18 +55,21 @@ function setDestination(dest){
   updateSummary();
 }
 function buildModebar(){
+  if($('.world-modebar'))return;
   const n=document.createElement('nav');n.className='world-modebar';n.setAttribute('aria-label','Choose what to explore');
   n.innerHTML='<button class="active" data-mode="places">PLACES</button><button data-mode="events">EVENTS</button><button data-mode="experiences">EXPERIENCES</button>';
   $('#app')?.appendChild(n);
   $$('[data-mode]').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 }
 function buildDestinations(){
+  if($('.world-destinations'))return;
   const n=document.createElement('nav');n.className='world-destinations';n.setAttribute('aria-label','Choose destination');
   n.innerHTML='<button class="active" data-destination="all">RIVIERA</button><button data-destination="cannes">CANNES</button><button data-destination="monaco">MONACO</button><button data-destination="saint-tropez">SAINT-TROPEZ</button>';
   $('#app')?.appendChild(n);
   $$('[data-destination]').forEach(b=>b.onclick=()=>setDestination(b.dataset.destination));
 }
 function buildListToggle(){
+  if($('.world-list-toggle'))return;
   const b=document.createElement('button');b.className='world-list-toggle';b.type='button';b.textContent='HIDE LIST';
   $('#app')?.appendChild(b);
   b.onclick=()=>{const collapsed=document.body.classList.toggle('panel-collapsed');b.textContent=collapsed?'SHOW LIST':'HIDE LIST'};
