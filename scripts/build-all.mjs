@@ -162,6 +162,8 @@ const scripts = [
   // Final public-surface pass: it runs after every historical rewrite so the
   // published home, professional landing and contact flow have one owner.
   'scripts/riviera-commercial-v1.mjs',
+  // Connected KŌMØ OS home: World / Moments / Life / Pulse / Card.
+  'scripts/build-ecosystem-home-v1.mjs',
   // KŌMØ World is now the member map. The former fictional 3D runtime is archived and not shipped.
   'scripts/build-world-map-v1.mjs',
   // Physical/digital KŌMØ Card recognition surface.
