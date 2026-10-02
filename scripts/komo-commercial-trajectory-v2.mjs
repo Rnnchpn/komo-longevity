@@ -65,7 +65,7 @@ const css = `
 .kt-z-underhero{padding:22px 0;border-bottom:1px solid rgba(29,39,32,.13);background:#faf9f6}.kt-z-underhero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.kt-z-proof{display:flex;gap:13px;align-items:center;padding:7px 12px}.kt-z-proof b{font-family:"Iowan Old Style",Baskerville,Georgia,serif;font-size:20px;font-weight:400}.kt-z-proof span{max-width:24ch;color:#626c65;font-size:11px;line-height:1.5}
 .kt-z-section{padding:clamp(72px,9vw,116px) 0}.kt-z-section--sand{background:#f0eee7}.kt-z-section--sage{background:#e8eeea}.kt-z-section--deep{background:#1c2822;color:#f8f8f4}.kt-z-section--deep .kt-ey{color:#b7c5bb}.kt-z-section--deep .kt-copy,.kt-z-section--deep .kt-lead{color:rgba(248,248,244,.72)}
 .kt-z-heading{display:flex;justify-content:space-between;align-items:end;gap:52px}.kt-z-heading>div{max-width:640px}.kt-z-heading .kt-copy{max-width:390px;margin:0}.kt-z-heading .kt-h2{font-size:clamp(38px,5vw,66px)}
-.kt-z-offers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:42px}.kt-z-card{position:relative;overflow:hidden;border-radius:20px;background:#fff;box-shadow:0 14px 42px rgba(31,40,34,.055)}.kt-z-card-media{height:228px;overflow:hidden;background:#e7e7df}.kt-z-card-media img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .55s ease}.kt-z-card:hover .kt-z-card-media img{transform:scale(1.035)}.kt-z-card-body{display:flex;min-height:278px;flex-direction:column;padding:25px 25px 23px}.kt-z-card .kt-kicker{color:#687b6d}.kt-z-card h3{margin:22px 0 0;font:400 clamp(30px,3.2vw,39px)/1 "Iowan Old Style",Baskerville,Georgia,serif;letter-spacing:-.04em}.kt-z-card .kt-copy{margin-top:14px;max-width:36ch}.kt-z-card-meta{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-top:auto;padding-top:27px}.kt-z-card-meta b{font-size:12px;font-weight:650}.kt-z-card-meta a{color:#263b2e;text-decoration:none;font-size:12px;font-weight:750}.kt-z-card--clinical{background:#e8eeea}.kt-z-card--signature{background:#eee7dc}
+.kt-z-offers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:42px}.kt-z-card{position:relative;overflow:hidden;border-radius:20px;background:#fff;box-shadow:0 14px 42px rgba(31,40,34,.055)}.kt-z-card-media{height:228px;overflow:hidden;background:#e7e7df}.kt-z-card-media img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .55s ease}.kt-z-card:hover .kt-z-card-media img{transform:scale(1.035)}.kt-z-card-body{display:flex;min-height:278px;flex-direction:column;padding:25px 25px 23px}.kt-z-card .kt-kicker{color:#687b6d}.kt-z-card h3{margin:22px 0 0;font:400 clamp(30px,3.2vw,39px)/1 "Iowan Old Style",Baskerville,Georgia,serif;letter-spacing:-.04em}.kt-z-card .kt-copy{margin-top:14px;max-width:36ch}.kt-z-card-meta{display:flex;justify-content:flex-end;align-items:end;gap:18px;margin-top:auto;padding-top:27px}.kt-z-card-meta a{color:#263b2e;text-decoration:none;font-size:12px;font-weight:750}.kt-z-card--clinical{background:#e8eeea}.kt-z-card--signature{background:#eee7dc}
 .kt-z-method{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.8fr);gap:clamp(42px,8vw,100px);align-items:center}.kt-z-method-image{height:490px;overflow:hidden;border-radius:22px;background:#d6ddd8}.kt-z-method-image img{width:100%;height:100%;display:block;object-fit:cover}.kt-z-pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:36px;border-top:1px solid var(--kt-line);border-bottom:1px solid var(--kt-line)}.kt-z-pillar{padding:18px 16px 20px 0}.kt-z-pillar b{display:block;color:#718579;font-size:10px;letter-spacing:.12em}.kt-z-pillar strong{display:block;margin-top:18px;font:400 24px/1 "Iowan Old Style",Baskerville,Georgia,serif}.kt-z-pillar p{margin:10px 0 0;color:#646d66;font-size:11px;line-height:1.55}
 .kt-z-orient{display:grid;grid-template-columns:.8fr 1.2fr;gap:60px;align-items:start}.kt-z-options{display:grid;gap:10px}.kt-z-option{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:20px 22px;background:#fff;border:1px solid rgba(29,39,32,.13);border-radius:14px;text-decoration:none;transition:transform .2s ease,border-color .2s ease}.kt-z-option:hover{transform:translateY(-2px);border-color:#728779}.kt-z-option span{color:#758078;font-size:10px;letter-spacing:.12em}.kt-z-option strong{display:block;margin-top:8px;font:400 25px/1 "Iowan Old Style",Baskerville,Georgia,serif}.kt-z-option i{font-style:normal;font-size:18px}
 .kt-z-locations{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:40px}.kt-z-location{position:relative;grid-column:span 2;min-height:280px;overflow:hidden;border-radius:18px;background:#dce2dc;color:white}.kt-z-location:nth-child(1),.kt-z-location:nth-child(4){grid-column:span 3}.kt-z-location img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}.kt-z-location:hover img{transform:scale(1.035)}.kt-z-location:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,24,17,.02) 18%,rgba(12,24,17,.72) 100%)}.kt-z-location-copy{position:absolute;z-index:1;left:23px;right:23px;bottom:22px}.kt-z-location .kt-kicker{color:rgba(255,255,255,.8)}.kt-z-location h3{margin:10px 0 0;font:400 30px/1 "Iowan Old Style",Baskerville,Georgia,serif}.kt-z-location p{margin:9px 0 0;max-width:43ch;color:rgba(255,255,255,.84);font-size:11px;line-height:1.5}
@@ -160,12 +160,12 @@ const localeData = {
     heroSecondary:'Découvrir KŌMØ',
     loginLabel:'Se connecter',
     singleAccount:'Un seul compte KŌMØ vous donne accès à Pulse et, lorsque votre accompagnement le prévoit, à Clinical, Life et World. Vos données et vos étapes restent réunies dans votre parcours.',
-    prices:['Motion · à partir de 300 €','Clinical · consultation à partir de 500 €','Signature · sur proposition'],
+    prices:[],
     proofs:[['Motion','Évaluation fonctionnelle du mouvement'],['Clinical','Consultation médicale quand elle est indiquée'],['Anywhere','Chez vous, en hôtel, à bord ou en retreat']],
     doors:[
-      ['ÉVALUATION FONCTIONNELLE','KŌMØ Motion','Une lecture structurée de la marche, de l’équilibre, de la force et du mouvement. Résultats restitués avec des priorités compréhensibles.','À partir de 300 €','Découvrir Motion','assessment','/assets/images/real-case/komo-six-myodev-sensors.jpeg'],
-      ['ACCOMPAGNEMENT MÉDICAL','KŌMØ Clinical','Un parcours médical conduit par un médecin lorsque l’histoire, les résultats ou les symptômes le justifient.','Consultation à partir de 500 €','Découvrir Clinical','clinical','/assets/images/clinical-pathway-v1.webp'],
-      ['PROGRAMME SUR MESURE','KŌMØ Signature','Un accompagnement coordonné dans le lieu et au rythme qui vous conviennent, pensé autour de vos objectifs.','Sur proposition','Parler de mon projet','signature','/assets/images/hero-mediterranean-motion-v1.webp']
+      ['ÉVALUATION FONCTIONNELLE','KŌMØ Motion','Une lecture structurée de la marche, de l’équilibre, de la force et du mouvement. Résultats restitués avec des priorités compréhensibles.','','Découvrir Motion','assessment','/assets/images/real-case/komo-six-myodev-sensors.jpeg'],
+      ['ACCOMPAGNEMENT MÉDICAL','KŌMØ Clinical','Un parcours médical conduit par un médecin lorsque l’histoire, les résultats ou les symptômes le justifient.','','Découvrir Clinical','clinical','/assets/images/clinical-pathway-v1.webp'],
+      ['PROGRAMME SUR MESURE','KŌMØ Signature','Un accompagnement coordonné dans le lieu et au rythme qui vous conviennent, pensé autour de vos objectifs.','','Parler de mon projet','signature','/assets/images/hero-mediterranean-motion-v1.webp']
     ],
     offerEy:'TROIS FAÇONS DE COMMENCER',
     offerTitle:'Choisir le niveau d’accompagnement adapté',
@@ -248,12 +248,12 @@ const localeData = {
     heroSecondary:'Discover KŌMØ',
     loginLabel:'Sign in',
     singleAccount:'One KŌMØ account connects you to Pulse and, when your pathway calls for them, Clinical, Life and World. Your information and next steps stay together.',
-    prices:['Motion · from €300','Clinical · consultation from €500','Signature · by proposal'],
+    prices:[],
     proofs:[['Motion','Functional movement assessment'],['Clinical','Medical consultation when indicated'],['Anywhere','At home, in hotels, onboard or on retreat']],
     doors:[
-      ['FUNCTIONAL ASSESSMENT','KŌMØ Motion','A structured view of gait, balance, strength and movement, followed by a debrief and clear priorities.','From €300','Explore Motion','assessment','/assets/images/real-case/komo-six-myodev-sensors.jpeg'],
-      ['MEDICAL CARE','KŌMØ Clinical','A physician-led pathway when your history, results or symptoms call for medical input.','Consultation from €500','Explore Clinical','clinical','/assets/images/clinical-pathway-v1.webp'],
-      ['TAILORED PROGRAMME','KŌMØ Signature','A coordinated programme shaped around your goals, chosen setting and preferred pace.','By proposal','Discuss your plans','signature','/assets/images/hero-mediterranean-motion-v1.webp']
+      ['FUNCTIONAL ASSESSMENT','KŌMØ Motion','A structured view of gait, balance, strength and movement, followed by a debrief and clear priorities.','','Explore Motion','assessment','/assets/images/real-case/komo-six-myodev-sensors.jpeg'],
+      ['MEDICAL CARE','KŌMØ Clinical','A physician-led pathway when your history, results or symptoms call for medical input.','','Explore Clinical','clinical','/assets/images/clinical-pathway-v1.webp'],
+      ['TAILORED PROGRAMME','KŌMØ Signature','A coordinated programme shaped around your goals, chosen setting and preferred pace.','','Discuss your plans','signature','/assets/images/hero-mediterranean-motion-v1.webp']
     ],
     offerEy:'THREE WAYS TO BEGIN',
     offerTitle:'Choose the right level of support',
@@ -335,12 +335,12 @@ const localeData = {
     heroSecondary:'Descubrir KŌMØ',
     loginLabel:'Acceder',
     singleAccount:'Una sola cuenta KŌMØ te da acceso a Pulse y, cuando tu recorrido lo requiere, a Clinical, Life y World. Tus datos y próximos pasos permanecen reunidos.',
-    prices:['Motion · desde 300 €','Clinical · consulta desde 500 €','Signature · propuesta personalizada'],
+    prices:[],
     proofs:[['Motion','Evaluación funcional del movimiento'],['Clinical','Consulta médica cuando está indicada'],['Anywhere','En casa, hoteles, a bordo o en retreat']],
     doors:[
-      ['EVALUACIÓN FUNCIONAL','KŌMØ Motion','Una lectura estructurada de la marcha, el equilibrio, la fuerza y el movimiento, seguida de una explicación clara y prioridades.','Desde 300 €','Descubrir Motion','assessment','/assets/images/real-case/komo-six-myodev-sensors.jpeg'],
-      ['ATENCIÓN MÉDICA','KŌMØ Clinical','Un recorrido dirigido por un médico cuando la historia, los resultados o los síntomas requieren una valoración médica.','Consulta desde 500 €','Descubrir Clinical','clinical','/assets/images/clinical-pathway-v1.webp'],
-      ['PROGRAMA A MEDIDA','KŌMØ Signature','Un acompañamiento coordinado según tus objetivos, el lugar elegido y tu ritmo.','Propuesta personalizada','Cuéntanos tu proyecto','signature','/assets/images/hero-mediterranean-motion-v1.webp']
+      ['EVALUACIÓN FUNCIONAL','KŌMØ Motion','Una lectura estructurada de la marcha, el equilibrio, la fuerza y el movimiento, seguida de una explicación clara y prioridades.','','Descubrir Motion','assessment','/assets/images/real-case/komo-six-myodev-sensors.jpeg'],
+      ['ATENCIÓN MÉDICA','KŌMØ Clinical','Un recorrido dirigido por un médico cuando la historia, los resultados o los síntomas requieren una valoración médica.','','Descubrir Clinical','clinical','/assets/images/clinical-pathway-v1.webp'],
+      ['PROGRAMA A MEDIDA','KŌMØ Signature','Un acompañamiento coordinado según tus objetivos, el lugar elegido y tu ritmo.','','Cuéntanos tu proyecto','signature','/assets/images/hero-mediterranean-motion-v1.webp']
     ],
     offerEy:'TRES FORMAS DE EMPEZAR',
     offerTitle:'Elegir el nivel de acompañamiento adecuado',
@@ -564,7 +564,7 @@ function mainReplace(html, body){
   return html.replace('</header>', `</header>${replacement}`);
 }
 function home(c){
-  const offers = c.doors.map(([kick,title,copy,price,cta,key,image],i)=>`<article class="kt-z-card ${i===1?'kt-z-card--clinical':i===2?'kt-z-card--signature':''}"><div class="kt-z-card-media"><img src="${image}" alt="" loading="lazy"></div><div class="kt-z-card-body"><span class="kt-kicker">${kick}</span><h3>${title}</h3><p class="kt-copy">${copy}</p><div class="kt-z-card-meta"><b>${price}</b><a href="${url(c,key)}">${cta} →</a></div></div></article>`).join('');
+  const offers = c.doors.map(([kick,title,copy,_price,cta,key,image],i)=>`<article class="kt-z-card ${i===1?'kt-z-card--clinical':i===2?'kt-z-card--signature':''}"><div class="kt-z-card-media"><img src="${image}" alt="" loading="lazy"></div><div class="kt-z-card-body"><span class="kt-kicker">${kick}</span><h3>${title}</h3><p class="kt-copy">${copy}</p><div class="kt-z-card-meta"><a href="${url(c,key)}">${cta} →</a></div></div></article>`).join('');
   const steps = c.journey.map(([n,t,p])=>`<article class="kt-z-pillar"><b>${n}</b><strong>${t}</strong><p>${p}</p></article>`).join('');
   const locations = c.experiences.map(([kick,title,copy,cta,key,image])=>`<article class="kt-z-location"><img src="${image}" alt="" loading="lazy"><div class="kt-z-location-copy"><span class="kt-kicker">${kick}</span><h3>${title}</h3><p>${copy}</p></div></article>`).join('');
   const questions=c.faq.map(([q,a])=>`<details><summary>${q}</summary><p>${a}</p></details>`).join('');
