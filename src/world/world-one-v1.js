@@ -318,7 +318,7 @@ function fitVisibleWorld({duration=650,maxZoom}={}){
   map.fitBounds(bounds,{padding,maxZoom:maxZoom??(mobile?12.2:12.8),duration});
 }
 function syncMarkerVisibility(){
-  const showPlaces=state.view==='world';
+  const showPlaces=state.view==='world'||state.view==='myworld';
   const showEvents=state.view==='events'||state.view==='now';
   const showExperiences=state.view==='experiences'||state.view==='now';
   state.markers.forEach(m=>{m.getElement().style.display=showPlaces?'':'none'});
@@ -410,6 +410,54 @@ function renderMoments(){
   $('#panelTitle').textContent='YOUR MOMENTS';$('#panelCopy').textContent='A contemporary record of the places and experiences that become part of your KŌMØ World.';
   $('#sideBody').innerHTML=html;bindCommon();
 }
+function worldProgressMetrics(){
+  const saved=state.saved?.size||0;
+  const eventActions=state.attendance?.length||0;
+  const experienceActions=state.experienceRequests?.length||0;
+  const passport=state.passport?.length||0;
+  const interests=(state.preferences?.interests||state.profile?.interests||[]).length;
+  const xp=saved*10+eventActions*20+experienceActions*25+passport*50;
+  const milestones=[
+    {done:saved>0,label:'Save a KŌMØ Spot'},
+    {done:eventActions>0,label:'Join your first event'},
+    {done:experienceActions>0,label:'Request an experience'},
+    {done:passport>0,label:'Add a moment to Passport'},
+    {done:interests>0,label:'Personalise My World'}
+  ];
+  const completed=milestones.filter(x=>x.done).length;
+  const progress=Math.round((completed/milestones.length)*100);
+  const next=milestones.find(x=>!x.done)?.label||'Keep exploring your World';
+  return {saved,eventActions,experienceActions,passport,xp,progress,next,completed,total:milestones.length};
+}
+function renderMyWorld(){
+  const m=worldProgressMetrics();
+  if(!member()){
+    $('#panelTitle').textContent='MY WORLD';
+    $('#panelCopy').textContent='Your personal KŌMØ layer starts with ONE.';
+    $('#sideBody').innerHTML=
+      '<div class="myworld-hero public"><div class="myworld-ring" style="--progress:0deg"><div><b>0%</b><span>WORLD</span></div></div>'+
+      '<div class="myworld-hero-copy"><div class="ey">KŌMØ ONE</div><h3>Make World yours.</h3><p>Save places, collect moments, request experiences and build your KŌMØ Passport.</p></div></div>'+
+      '<div class="myworld-actions"><button class="primary" data-connect-one>BECOME ONE</button><button data-myworld-map>EXPLORE MAP</button></div>';
+    bindCommon();return;
+  }
+  const name=state.profile?.display_name||state.profile?.first_name||'KŌMØ Member';
+  const activeMoments=m.eventActions+m.experienceActions;
+  $('#panelTitle').textContent='MY WORLD';
+  $('#panelCopy').textContent='Your places, moments, progress and KŌMØ identity — in one view.';
+  $('#sideBody').innerHTML=
+    '<section class="myworld-hero"><div class="myworld-ring" style="--progress:'+(m.progress*3.6)+'deg"><div><b>'+m.progress+'%</b><span>WORLD</span></div></div>'+
+      '<div class="myworld-hero-copy"><div class="ey">'+esc(labelTier())+'</div><h3>'+esc(name)+'</h3><p><b>Next:</b> '+esc(m.next)+'</p></div></section>'+
+    '<section class="myworld-xp"><div><span>EXPERIENCE POINTS</span><strong>'+m.xp+' XP</strong><small>Founding progress · based on your real World activity</small></div><div class="xp-orb">✦</div></section>'+
+    '<section class="myworld-stats">'+
+      '<div><b>'+m.saved+'</b><span>SAVED</span></div>'+
+      '<div><b>'+activeMoments+'</b><span>MOMENTS</span></div>'+
+      '<div><b>'+m.passport+'</b><span>PASSPORT</span></div>'+
+      '<div><b>'+m.completed+'/'+m.total+'</b><span>STEPS</span></div>'+
+    '</section>'+
+    '<div class="myworld-actions"><button class="primary" data-myworld-map>OPEN MY MAP</button><button data-myworld-moments>MY MOMENTS</button><button data-myworld-card>MY ONE</button></div>'+
+    '<div class="myworld-progress-note"><span>WORLD PROGRESS</span><div class="myworld-progress-track"><i style="width:'+m.progress+'%"></i></div><b>'+m.progress+'%</b></div>';
+  bindCommon();
+}
 function renderCard(){
   if(!has('world.card.digital.view')){renderLocked('KŌMØ ONE CARD','Your KŌMØ Identity Key is unlocked with ONE after a completed KŌMØ assessment.','BECOME ONE');return}
   const echelon=state.access.tier==='echelon',name=state.profile?.display_name||[state.profile?.first_name,state.profile?.last_name].filter(Boolean).join(' ')||'KŌMØ Member';
@@ -441,6 +489,7 @@ function renderView(view){
   $$('.side-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.panelView===view));
   $$('.mobile-nav button').forEach(b=>b.classList.toggle('active',b.dataset.mobileView===view));
   if(view==='world')renderWorld();
+  else if(view==='myworld')renderMyWorld();
   else if(view==='events')renderEvents();
   else if(view==='experiences')renderExperiences();
   else if(view==='now')renderNow();
@@ -562,7 +611,10 @@ function bindCommon(){
   $$('[data-claim-card]').forEach(el=>el.onclick=claimCardModal);
   $$('[data-save-preferences]').forEach(el=>el.onclick=savePreferences);
   $$('[data-sign-out]').forEach(el=>el.onclick=signOut);
-  $$('[data-ask-place]').forEach(el=>el.onclick=()=>{const p=state.places.find(x=>x.id===el.dataset.askPlace);askModal('Help me with '+(p?.name||'this place')+'.')});
+  $('[data-ask-place]').forEach(el=>el.onclick=()=>{const p=state.places.find(x=>x.id===el.dataset.askPlace);askModal('Help me with '+(p?.name||'this place')+'.')});
+  $('[data-myworld-map]').forEach(el=>el.onclick=()=>renderView('world'));
+  $('[data-myworld-moments]').forEach(el=>el.onclick=()=>renderView('moments'));
+  $('[data-myworld-card]').forEach(el=>el.onclick=()=>renderView('card'));
 }
 function search(term){
   const q=String(term||'').trim().toLowerCase(),box=$('#searchResults');
