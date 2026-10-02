@@ -357,3 +357,65 @@ body[data-world-mode="places"].map-spot-dense.map-zoom-detail .poi-wrap.spot-wra
     display:block!important;opacity:1!important;max-width:128px!important;padding:6px 7px!important
   }
 }
+
+
+/* KŌMØ SPOT category system v3 */
+.category-eat{--spot-accent:#7a5148}
+.category-stay{--spot-accent:#777052}
+.category-move{--spot-accent:#526b67}
+.category-recover{--spot-accent:#6d6480}
+.category-meet{--spot-accent:#7a6552}
+.category-experience{--spot-accent:#77637c}
+.category-other{--spot-accent:#69645d}
+
+.poi.spot{
+  min-width:62px!important;height:40px!important;padding:0 9px 0 7px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;
+  border-left:3px solid var(--spot-accent,#69645d)!important
+}
+.poi.spot .spot-icon{
+  width:17px;height:17px;display:grid;place-items:center;color:var(--spot-accent,#69645d)
+}
+.poi.spot .spot-icon svg{width:17px;height:17px;display:block}
+.poi.spot .spot-word{
+  font-size:6.5px!important;font-weight:950!important;letter-spacing:.12em!important;color:#3c3731
+}
+.poi.komo .komo-glyph{
+  font-size:9px!important;font-weight:950!important;letter-spacing:.06em!important
+}
+.place-symbol.spot-symbol{
+  display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:2px!important;
+  color:var(--spot-accent,#69645d)!important;border-top:2px solid var(--spot-accent,#69645d)!important
+}
+.place-symbol.spot-symbol .spot-card-icon{
+  width:18px;height:18px;display:grid;place-items:center;color:var(--spot-accent,#69645d)
+}
+.place-symbol.spot-symbol .spot-card-icon svg{width:18px;height:18px;display:block}
+.place-symbol.spot-symbol small{
+  font-size:5.5px;line-height:1;font-weight:950;letter-spacing:.13em;color:#524b43
+}
+.place-symbol.komo-symbol .komo-card-glyph{
+  font-size:12px;font-weight:950;letter-spacing:.04em
+}
+.place-card.spot-card:hover{
+  border-color:color-mix(in srgb,var(--spot-accent,#69645d) 28%,transparent)!important
+}
+.place-card.spot-card .place-copy b::after{
+  content:"";display:inline-block;width:5px;height:5px;margin:0 0 2px 7px;border-radius:50%;
+  background:var(--spot-accent,#69645d);opacity:.55
+}
+.world-summary{display:flex!important;flex-wrap:wrap!important;gap:6px!important}
+.world-summary span{
+  border:1px solid rgba(55,49,43,.08)!important;background:rgba(251,249,245,.70)!important;
+  border-radius:999px!important;padding:5px 8px!important
+}
+.world-summary b{font-size:9px!important}
+@media(max-width:820px){
+  .poi.spot{
+    min-width:56px!important;height:36px!important;padding:0 8px 0 6px!important;gap:4px!important
+  }
+  .poi.spot .spot-icon,.poi.spot .spot-icon svg{width:15px;height:15px}
+  .poi.spot .spot-word{font-size:6px!important}
+  .place-symbol.spot-symbol .spot-card-icon,.place-symbol.spot-symbol .spot-card-icon svg{width:17px;height:17px}
+  .place-symbol.spot-symbol small{font-size:5px}
+}

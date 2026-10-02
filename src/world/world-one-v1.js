@@ -33,6 +33,19 @@ window.__KOMO_CLEAR_LOCATION=()=>{state.near=null;clearUserLocation();};
 
 const categoryLabel={eat:'EAT',stay:'STAY',move:'MOVE',recover:'RECOVER',experience:'EXPERIENCE',meet:'MEET'};
 const categorySymbol={eat:'EAT',stay:'STAY',move:'MOVE',recover:'REC',experience:'EXP',meet:'MEET'};
+const spotCategoryLabel={eat:'DINING',stay:'STAY',move:'MOVE',recover:'RECOVERY',experience:'EXPERIENCE',meet:'MEET'};
+function spotIconSvg(category){
+  const common='viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"';
+  const icons={
+    eat:'<svg '+common+'><circle cx="12" cy="12" r="6.2"/><path d="M4.5 5.5v5.2M6.7 5.5v5.2M4.5 8.1h2.2M5.6 10.7v7.8M18.2 5.5v13M15.8 9.2c0-2.1.8-3.7 2.4-3.7"/></svg>',
+    stay:'<svg '+common+'><path d="M4 17.5v-9M20 17.5v-5.4a2 2 0 0 0-2-2H9.5a2 2 0 0 0-2 2v.4M4 13h16M7.5 8.4h3.6"/></svg>',
+    move:'<svg '+common+'><circle cx="7.2" cy="6.2" r="1.8"/><path d="M9 9.2l3.4 2.1 2.3 3.3M11 10.5l-2 4.1-3 2.5M12.4 11.3l3.1-1.3 2-2.1M9 14.6l3 3.2"/></svg>',
+    recover:'<svg '+common+'><path d="M12 3.8v16.4M3.8 12h16.4"/><circle cx="12" cy="12" r="8.2"/></svg>',
+    meet:'<svg '+common+'><circle cx="8.2" cy="8.2" r="2.6"/><circle cx="15.8" cy="8.2" r="2.6"/><path d="M3.8 18c.5-3.1 2.1-4.7 4.4-4.7s3.9 1.6 4.4 4.7M11.4 18c.4-2.6 1.9-4 4.4-4 2.3 0 3.8 1.3 4.4 4"/></svg>',
+    experience:'<svg '+common+'><path d="M12 3.5l2.4 5 5.5.8-4 3.9.9 5.5-4.8-2.6-4.8 2.6.9-5.5-4-3.9 5.5-.8z"/></svg>'
+  };
+  return icons[category]||'<svg '+common+'><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="1.7"/></svg>';
+}
 const preferenceOptions=['Gastronomy','Yachting','Fitness','Recovery','Art','Hotels','Travel','Events','Culture'];
 const worldDestinationCenters={
   all:[7.02,43.53],cannes:[7.0174,43.5528],monaco:[7.4246,43.7384],'saint-tropez':[6.6407,43.2677]
@@ -42,10 +55,12 @@ function updateWorldSummary(){
   const hero=$('.hero-copy');if(!hero)return;
   let box=hero.querySelector('.world-summary');
   if(!box){box=document.createElement('div');box.className='world-summary';hero.appendChild(box)}
-  const places=filteredPlaces().length;
+  const places=filteredPlaces();
+  const locations=places.filter(isKomo).length;
+  const spots=places.filter(isKomoSpot).length;
   const events=filteredEvents().filter(e=>!e.ends_at||new Date(e.ends_at).getTime()>=Date.now()).length;
   const experiences=filteredExperiences().length;
-  box.innerHTML='<span><b>'+places+'</b> places</span><span><b>'+events+'</b> events</span><span><b>'+experiences+'</b> experiences</span>';
+  box.innerHTML='<span><b>'+locations+'</b> KØ</span><span><b>'+spots+'</b> spots</span><span><b>'+events+'</b> events</span><span><b>'+experiences+'</b> experiences</span>';
 }
 function syncWorldControls(){
   const mode=worldModeForView(state.view);
@@ -200,20 +215,22 @@ function filteredPlaces(){
 function filteredEvents(){return state.events.filter(matchesDestination)}
 function filteredExperiences(){return state.experiences.filter(matchesDestination)}
 function markerElement(p){
-  const komo=isKomo(p),spot=isKomoSpot(p);
+  const komo=isKomo(p),spot=isKomoSpot(p),category=p.category||'other';
   const wrap=document.createElement('div');
-  wrap.className='poi-wrap poi-'+(p.category||'other')+(komo?' komo-wrap':'')+(spot?' spot-wrap':'');
+  wrap.className='poi-wrap poi-'+category+(komo?' komo-wrap':'')+(spot?' spot-wrap':'');
   const el=document.createElement('button');
   const cls=visibilityClass(p);
   const nearby=state.near&&km(state.near.lat,state.near.lng,p.latitude,p.longitude)<=state.nearRadiusKm;
-  el.className='poi '+(cls||'')+(komo?' komo':'')+(spot?' spot':'')+(nearby?' nearby':'')+' category-'+(p.category||'other');
+  el.className='poi '+(cls||'')+(komo?' komo':'')+(spot?' spot':'')+(nearby?' nearby':'')+' category-'+category;
   el.type='button';
-  const glyph=komo?'KØ':'SPOT';
-  el.innerHTML='<span>'+esc(glyph)+'</span>';
+  el.innerHTML=komo
+    ? '<span class="komo-glyph">KØ</span>'
+    : '<span class="spot-icon">'+spotIconSvg(category)+'</span><span class="spot-word">SPOT</span>';
   el.setAttribute('aria-label',(komo?'KŌMØ LOCATION':'KŌMØ SPOT')+' · '+p.name);
   const label=document.createElement('span');label.className='poi-label';
   const dist=state.near?km(state.near.lat,state.near.lng,p.latitude,p.longitude):null;
-  const meta=(komo?'KŌMØ LOCATION':'KŌMØ SPOT')+' · '+(categoryLabel[p.category]||p.category||'PLACE')+' · '+(p.city||p.destination||'Riviera')+(dist!=null?' · '+dist.toFixed(1)+' km':'');
+  const categoryName=spotCategoryLabel[category]||categoryLabel[category]||category||'PLACE';
+  const meta=(komo?'KŌMØ LOCATION':'KŌMØ SPOT')+' · '+categoryName+' · '+(p.city||p.destination||'Riviera')+(dist!=null?' · '+dist.toFixed(1)+' km':'');
   label.innerHTML='<b>'+esc(p.name)+'</b><small>'+esc(meta)+'</small>';
   wrap.append(el,label);
   el.addEventListener('click',e=>{e.stopPropagation();openPlace(p)});
@@ -340,9 +357,12 @@ function renderMarkers(){
 }
 
 function placeCard(p){
-  const vis=visibilityClass(p),komo=isKomo(p),near=state.near?km(state.near.lat,state.near.lng,p.latitude,p.longitude):null;
+  const vis=visibilityClass(p),komo=isKomo(p),category=p.category||'other',near=state.near?km(state.near.lat,state.near.lng,p.latitude,p.longitude):null;
   const kind=komo?'KŌMØ LOCATION':'KŌMØ SPOT';
-  return '<button class="place-card '+(komo?'komo-card':'spot-card')+'" data-place="'+p.id+'"><span class="place-symbol '+vis+' '+(komo?'komo-symbol':'spot-symbol')+'">'+(komo?'KØ':'SPOT')+'</span><span class="place-copy"><b>'+esc(p.name)+'</b><p><strong>'+kind+'</strong> · '+esc(categoryLabel[p.category]||p.category)+' · '+esc(p.city||p.destination)+(near!=null?' · '+near.toFixed(1)+' km':'')+'</p></span><span class="arrow">›</span></button>';
+  const symbol=komo
+    ? '<span class="komo-card-glyph">KØ</span>'
+    : '<span class="spot-card-icon">'+spotIconSvg(category)+'</span><small>SPOT</small>';
+  return '<button class="place-card '+(komo?'komo-card':'spot-card')+' category-'+esc(category)+'" data-place="'+p.id+'"><span class="place-symbol '+vis+' '+(komo?'komo-symbol':'spot-symbol')+'">'+symbol+'</span><span class="place-copy"><b>'+esc(p.name)+'</b><p><strong>'+kind+'</strong> · '+esc(spotCategoryLabel[category]||categoryLabel[category]||category)+' · '+esc(p.city||p.destination)+(near!=null?' · '+near.toFixed(1)+' km':'')+'</p></span><span class="arrow">›</span></button>';
 }
 function renderWorld(){
   const list=filteredPlaces().slice(0,16);
@@ -647,8 +667,8 @@ async function nearMe(){
     const nearest=state.places
       .map(p=>({p,d:km(state.near.lat,state.near.lng,p.latitude,p.longitude)}))
       .sort((a,b)=>a.d-b.d)[0];
-    box.innerHTML='<b>You are here · '+nearby.length+' KŌMØ place'+(nearby.length===1?'':'s')+' within '+state.nearRadiusKm+' km</b>'+
-      (nearby.length?'<br>Tap a marker to open it. Distances are shown in the list.':nearest?'<br>Nearest KŌMØ place: '+esc(nearest.p.name)+' · '+nearest.d.toFixed(0)+' km away.':'');
+    box.innerHTML='<b>You are here · '+nearby.length+' KŌMØ Spot'+(nearby.length===1?'':'s')+' within '+state.nearRadiusKm+' km</b>'+
+      (nearby.length?'<br>Tap a marker to open it. Distances are shown in the list.':nearest?'<br>Nearest KŌMØ Spot: '+esc(nearest.p.name)+' · '+nearest.d.toFixed(0)+' km away.':'');
     fitVisibleWorld({duration:750,maxZoom:12.8});
     window.dispatchEvent(new CustomEvent('komo:near-change',{detail:{active:true,count:nearby.length,radiusKm:state.nearRadiusKm}}));
   },err=>{
