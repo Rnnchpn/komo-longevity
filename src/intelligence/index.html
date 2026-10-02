@@ -87,10 +87,11 @@
     .legend-key{display:flex;align-items:center;gap:5px}
     .legend-dot{width:9px;height:9px;border-radius:50%;background:var(--green)}
     .legend-dot.company{background:#29303d}.legend-dot.partner{background:var(--gold)}
-    .boat-icon{width:30px;height:30px;border-radius:50% 50% 50% 12%;background:#143e35;transform:rotate(45deg);display:grid;place-items:center;border:2px solid rgba(255,255,255,.9);box-shadow:0 4px 12px rgba(15,38,32,.25)}
-    .boat-icon span{transform:rotate(-45deg);color:white;font-size:8px;font-weight:800}
-    .boat-icon.warm{background:#8e744b}.boat-icon.exact{background:#111714;box-shadow:0 0 0 5px rgba(20,62,53,.16),0 4px 12px rgba(15,38,32,.25)}
-    .boat-icon.vip{background:#111714;box-shadow:0 0 0 5px rgba(164,134,86,.18),0 4px 12px rgba(15,38,32,.25)}
+    .boat-icon{width:30px;height:30px;position:relative;display:grid;place-items:center;filter:drop-shadow(0 4px 7px rgba(15,38,32,.22))}
+    .boat-icon:before{content:"";position:absolute;inset:2px 6px 7px;background:#143e35;clip-path:polygon(50% 0,100% 100%,50% 78%,0 100%);border-radius:4px}
+    .boat-icon:after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.94);z-index:-1;box-shadow:0 0 0 1px rgba(17,23,20,.08)}
+    .boat-icon span{position:relative;z-index:2;margin-top:2px;color:#fff;font-size:7px;font-weight:850;letter-spacing:-.03em}
+    .boat-icon.exact:before{background:#111714}.boat-icon.exact:after{box-shadow:0 0 0 5px rgba(20,62,53,.14)}
     .land-icon{width:25px;height:25px;border-radius:9px;background:#283038;border:2px solid white;box-shadow:0 4px 12px rgba(20,20,20,.22);display:grid;place-items:center;color:#fff;font-size:10px;font-weight:800}
     .partner-icon{width:25px;height:25px;border-radius:50%;background:#a48656;border:2px solid white;box-shadow:0 4px 12px rgba(20,20,20,.22);display:grid;place-items:center;color:#fff;font-size:11px}
     .leaflet-tooltip{border:0!important;border-radius:10px!important;box-shadow:0 8px 20px rgba(0,0,0,.12)!important;padding:8px 10px!important;font-size:10px!important}
@@ -433,11 +434,13 @@
   }
 
   function updateLiveState(ok){
-    const when = liveMeta.updatedAt ? new Date(liveMeta.updatedAt) : new Date();
-    const time = when.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    const exact = liveMeta.exactAIS ? 'AIS EXACT + PORTS' : 'PORTS LIVE';
-    liveBadge.innerHTML='<i class="dot"></i> '+(ok?'LIVE':'DEGRADED');
-    sourceBadge.textContent=exact+' · '+yachts.length+' YACHTS · '+time;
+    const when=liveMeta.updatedAt?new Date(liveMeta.updatedAt):new Date(FRONTEND_SNAPSHOT_UPDATED);
+    const exact=liveMeta.exactAIS?'AIS EXACT + PORTS':(liveMeta.live?'PORTS LIVE':'SNAPSHOT');
+    const ageMin=Math.max(0,Math.round((Date.now()-when.getTime())/60000));
+    const age=ageMin<2?'à l’instant':ageMin<60?'il y a '+ageMin+' min':ageMin<2880?'il y a '+Math.round(ageMin/60)+' h':when.toLocaleDateString('fr-FR',{day:'2-digit',month:'short'});
+    liveBadge.classList.toggle('degraded',!ok);
+    liveBadge.innerHTML='<i class="dot"></i> '+(ok?'LIVE':'SNAPSHOT');
+    sourceBadge.textContent=exact+' · '+yachts.length+' YACHTS · '+age;
   }
 
   async function loadLive(){
