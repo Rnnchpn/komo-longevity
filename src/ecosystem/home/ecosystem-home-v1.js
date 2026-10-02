@@ -30,7 +30,11 @@ async function load(){
   }
   render();
 }
+function renderContext(){
+  renderContext();
+}
 function render(){
+  const home=$('#osHome');home.classList.toggle('tier-one',state.access.tier==='one');home.classList.toggle('tier-echelon',state.access.tier==='echelon');
   const access=$('#osAccess');access.className='os-access '+(state.access.tier==='one'?'one':state.access.tier==='echelon'?'echelon':'');access.querySelector('span').textContent=label();
   const planetStatus=$('.planet-copy small');
   if(planetStatus)planetStatus.textContent=state.access.tier==='echelon'?'ECHELON':state.access.tier==='one'?'ONE':'CONNECTED';
@@ -110,9 +114,24 @@ async function sendAsk(e){
   const {data,error}=await supabase.from('world_concierge_requests').insert(row).select('id').single();
   if(error){toast('Request could not be sent');return}analytics('ask_komo_created','concierge_request',data.id,{priority:row.priority});closeAsk();e.currentTarget.reset();toast('KŌMØ received your request');
 }
+const moduleContext={
+  world:['WORLD · DISCOVER','A curated map of places that matter — public first, personal with ONE, private with ECHELON.'],
+  moments:['MOMENTS · EXPERIENCE','Events, invitations and experiences selected around your KŌMØ identity.'],
+  life:['LIFE · OWN','A small edit of KŌMØ objects, apparel, performance and travel pieces.'],
+  pulse:['PULSE · HEALTH','Your clinical environment: Motion, trajectory, analyses, reports and appointments.'],
+  card:['CARD · IDENTITY','Your physical and digital KŌMØ key. ONE identifies you; ECHELON expands access.'],
+  echelon:['ECHELON · PRIVATE ACCESS','Private places, private moments and priority human response from KŌMØ.']
+};
 function setOrbitFocus(module=''){
-  const orbit=$('#osOrbit');if(!orbit)return;
-  if(module)orbit.dataset.focus=module;else delete orbit.dataset.focus;
+  const orbit=$('#osOrbit'),ctx=$('#osContext');if(!orbit)return;
+  if(module){
+    orbit.dataset.focus=module;
+    const copy=moduleContext[module];
+    if(ctx&&copy)ctx.innerHTML='<span>'+copy[0]+'</span><p>'+copy[1]+'</p>';
+  }else{
+    delete orbit.dataset.focus;
+    renderContext();
+  }
 }
 function initPlanetMotion(){
   const orbit=$('#osOrbit'),home=$('#osHome');if(!orbit||!home)return;
