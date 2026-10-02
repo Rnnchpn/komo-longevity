@@ -25,7 +25,7 @@ French and Spanish carry the same routes under `/fr/` and `/es/`.
 | Origin | Role | Indexing |
 |---|---|---|
 | `pulse.komolongevity.com` | Authenticated patient and professional platform | Private / noindex |
-| `life.komolongevity.com` | KŌMØ Life public commerce and editorial layer | Public / indexable |
+| `life.komolongevity.com` | Existing commerce surface; no new member identity layer is built here | Public / indexable |
 | `shop.komolongevity.com` | Commerce alias | 308 redirect to `life.komolongevity.com` |
 | `library.komolongevity.com` | Public knowledge entry | Public |
 | `locomotor.komolongevity.com` | Discovery entry for locomotive syndrome content | Canonicalised to main domain content |
@@ -33,19 +33,31 @@ French and Spanish carry the same routes under `/fr/` and `/es/`.
 ## Product hierarchy
 
 ```text
-KŌMØ brand / method / network
-├── KŌMØ Locomo Check       public educational orientation
-├── KŌMØ Clinical Assessment clinician-led assessment
-├── KŌMØ Follow             longitudinal continuity in Pulse
-├── KŌMØ Case               measurement activation for qualified sites
-├── KŌMØ Protocol           shared clinical and operational method
-├── KŌMØ Academy            training and network confidence
-├── KŌMØ Life               physical and cultural commerce layer
-│   ├── KŌMØ Originals      products designed by KŌMØ
-│   ├── KŌMØ Selected       curated third-party longevity products
-│   └── KŌMØ Editions       limited collaborations
-└── White Coast             first local community and retreat chapter
+KŌMØ brand / private network
+├── KŌMØ World             public curated map; no account required
+│   ├── KŌMØ ONE           member identity after a KŌMØ assessment
+│   │   ├── My World
+│   │   ├── Saved Places
+│   │   ├── KŌMØ Passport
+│   │   ├── Member Events / Experiences / Privileges
+│   │   └── KŌMØ ONE Card
+│   └── KŌMØ ECHELON       private World layer / Founding Access
+│       ├── Private Places / Experiences / Events
+│       ├── Ask KŌMØ
+│       ├── Priority permissions
+│       └── KŌMØ ECHELON Card
+├── KŌMØ Card              physical + digital identity key; never medical storage
+├── KŌMØ Pulse             health / clinical / trajectory; separate interface, same KŌMØ identity
+├── KŌMØ Intelligence      internal operations / network / membership cockpit
+├── Dolce Riviera          hospitality / events / real-world execution
+└── KŌMØ Life              existing commerce surface; progressively folded into the broader ecosystem
 ```
+
+Core product rule:
+
+> WORLD SHOWS THE NETWORK. ONE MAKES IT YOURS. ECHELON OPENS WHAT OTHERS CANNOT ACCESS.
+
+World is one map engine with permissioned layers, not three separate products. Health data remains in Pulse and is never used silently to personalise World.
 
 ## Non-negotiable public wording
 
