@@ -45,7 +45,8 @@ function labelTier(){
   return 'PUBLIC';
 }
 function visibilityClass(item){return item?.visibility==='echelon'?'echelon':item?.visibility==='one'?'one':''}
-function isKomo(place){return String(place?.place_type||'').startsWith('komo_')||String(place?.name||'').startsWith('KŌMØ')}\nfunction isKomoEvent(event){return String(event?.title||'').startsWith('KŌMØ')||String(event?.summary||'').includes('KŌMØ')}
+function isKomo(place){return String(place?.place_type||'').startsWith('komo_')||String(place?.name||'').startsWith('KŌMØ')}
+function isKomoEvent(event){return String(event?.title||'').startsWith('KŌMØ')||String(event?.summary||'').includes('KŌMØ')}
 function formatDate(value){
   if(!value)return'';
   return new Intl.DateTimeFormat('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}).format(new Date(value));
