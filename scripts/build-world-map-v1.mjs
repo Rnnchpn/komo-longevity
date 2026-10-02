@@ -1,9 +1,10 @@
-import { mkdir, copyFile } from 'node:fs/promises';
+import { mkdir, copyFile, rm } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const root=process.cwd();
 const source=resolve(root,'src/world');
 const out=resolve(root,'site/world');
+await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 
 for(const file of ['index.html','world-one-v1.css','world-one-v1.js','komo-world-auth-v1.js']){
