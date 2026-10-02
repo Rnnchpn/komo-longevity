@@ -56,7 +56,7 @@ try{
   if(!homeJs.includes('data-khome-v9')||!homeJs.includes("const VERSION='9.2.0-premium-cockpit'"))throw new Error('Home premium runtime contract missing');
   await writeFile(join(pulse,'patient-home-command-v1.js'),homeJs,'utf8');
   await writeFile(join(pulse,'patient-home-command-v1.css'),homeCss,'utf8');
-  const homeToken='20261001-premium-home-v1';
+  const homeToken='20261002-ipad-home-final-v3';
   for(const name of htmlFiles){
     const htmlPath=join(pulse,name);
     let homeHtml=await readFile(htmlPath,'utf8');
