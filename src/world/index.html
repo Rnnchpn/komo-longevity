@@ -53,6 +53,21 @@
     <p>Choose a place, event or experience. KŌMØ only shows what matters.</p>
   </section>
 
+  <nav class="world-modebar" aria-label="Choose what to explore">
+    <button class="active" data-mode="places">PLACES</button>
+    <button data-mode="events">EVENTS</button>
+    <button data-mode="experiences">EXPERIENCES</button>
+  </nav>
+
+  <nav class="world-destinations" aria-label="Choose destination">
+    <button class="active" data-destination="all">RIVIERA</button>
+    <button data-destination="cannes">CANNES</button>
+    <button data-destination="monaco">MONACO</button>
+    <button data-destination="saint-tropez">SAINT-TROPEZ</button>
+  </nav>
+
+  <button class="world-list-toggle" id="worldListToggle" type="button">HIDE LIST</button>
+
   <nav class="intent-bar" id="intentBar" aria-label="Filter places">
     <button class="intent active" data-intent="all">ALL PLACES</button>
     <button class="intent" data-intent="eat">EAT</button>
@@ -125,6 +140,5 @@
 <script src="https://unpkg.com/maplibre-gl@6.11.2/dist/maplibre-gl.js"></script>\n<script src="./supabase-umd-v1.js?v=1"></script>
 <script type="module" src="./world-one-v1.js?v=9"></script>
 <script type="module" src="./world-ecosystem-v1.js?v=6"></script>
-<script type="module" src="./world-map-ux-v3.js?v=7"></script>
 </body>
 </html>
