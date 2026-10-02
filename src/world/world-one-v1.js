@@ -1,8 +1,37 @@
 import {supabase,getSession,getProfile,getAccountRole,connectPulse,disconnectWorld,onSession,pulseUrl} from './komo-world-auth-v1.js?v=1';
 
-const maplibregl=window.maplibregl;
-if(!maplibregl?.Map)throw new Error('[KŌMØ World] MapLibre failed to load.');
 const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+
+async function loadMapLibreScript(src){
+  return new Promise((resolve,reject)=>{
+    const script=document.createElement('script');
+    script.src=src;script.async=true;
+    script.onload=()=>resolve(window.maplibregl);
+    script.onerror=()=>{script.remove();reject(new Error('MapLibre CDN unavailable'))};
+    document.head.appendChild(script);
+  });
+}
+async function loadIOSMapLibre5(){
+  const sources=[
+    'https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js',
+    'https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js'
+  ];
+  let lastError=null;
+  for(const src of sources){
+    try{
+      const lib=await loadMapLibreScript(src);
+      if(lib?.Map)return lib;
+    }catch(error){lastError=error}
+  }
+  throw lastError||new Error('MapLibre 5 could not be loaded');
+}
+
+let maplibregl=window.maplibregl;
+if(isIOS){
+  try{maplibregl=await loadIOSMapLibre5()}
+  catch(error){console.warn('[KŌMØ World] iOS MapLibre fallback failed',error)}
+}
+if(!maplibregl?.Map)throw new Error('[KŌMØ World] MapLibre failed to load.');
 
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
