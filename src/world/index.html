@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.11.2/dist/maplibre-gl.css">
   <link rel="stylesheet" href="./world-one-v1.css?v=1">
   <link rel="stylesheet" href="./world-ecosystem-v1.css?v=1">
-  <link rel="stylesheet" href="./world-map-ux-v2.css?v=4">
+  <link rel="stylesheet" href="./world-map-ux-v3.css?v=1">
 </head>
 <body>
 <div id="app">
@@ -49,17 +49,16 @@
 
   <section class="hero-copy">
     <div class="ey">KŌMØ WORLD</div>
-    <h1>A curated world of places, people & experiences.</h1>
-    <p>Google Maps shows everything. KŌMØ shows what matters.</p>
+    <h1>The Riviera, curated.</h1>
+    <p>Choose a place, event or experience. KŌMØ only shows what matters.</p>
   </section>
 
-  <nav class="intent-bar" id="intentBar" aria-label="Explore by intention">
-    <button class="intent active" data-intent="all">WORLD</button>
+  <nav class="intent-bar" id="intentBar" aria-label="Filter places">
+    <button class="intent active" data-intent="all">ALL PLACES</button>
     <button class="intent" data-intent="eat">EAT</button>
     <button class="intent" data-intent="stay">STAY</button>
     <button class="intent" data-intent="move">MOVE</button>
     <button class="intent" data-intent="recover">RECOVER</button>
-    <button class="intent" data-intent="experience">EXPERIENCE</button>
     <button class="intent" data-intent="meet">MEET</button>
     <button class="intent near" id="nearBtn">NEAR ME</button>
   </nav>
@@ -73,8 +72,9 @@
       <p id="panelCopy">A small edit of places and experiences chosen for their setting, relevance and connection to the KŌMØ world.</p>
     </div>
     <div class="side-tabs">
-      <button class="active" data-panel-view="world">WORLD</button>
-      <button data-panel-view="now">NOW</button>
+      <button class="active" data-panel-view="world">PLACES</button>
+      <button data-panel-view="events">EVENTS</button>
+      <button data-panel-view="experiences">EXPERIENCES</button>
       <button data-panel-view="moments">MOMENTS</button>
       <button data-panel-view="you">YOU</button>
     </div>
@@ -125,6 +125,6 @@
 <script src="./supabase-umd-v1.js?v=1"></script>
 <script type="module" src="./world-one-v1.js?v=4"></script>
 <script type="module" src="./world-ecosystem-v1.js?v=4"></script>
-<script type="module" src="./world-map-ux-v2.js?v=4"></script>
+<script type="module" src="./world-map-ux-v3.js?v=1"></script>
 </body>
 </html>
