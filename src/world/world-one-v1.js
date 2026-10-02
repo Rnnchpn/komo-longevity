@@ -90,6 +90,7 @@ function labelTier(){
 }
 function visibilityClass(item){return item?.visibility==='echelon'?'echelon':item?.visibility==='one'?'one':''}
 function isKomo(place){return String(place?.place_type||'').startsWith('komo_')||String(place?.name||'').startsWith('KŌMØ')}
+function isKomoSpot(place){return !!place&&!isKomo(place)}
 function isKomoEvent(event){return String(event?.title||'').startsWith('KŌMØ')||String(event?.summary||'').includes('KŌMØ')}
 function formatDate(value){
   if(!value)return'';
@@ -199,19 +200,23 @@ function filteredPlaces(){
 function filteredEvents(){return state.events.filter(matchesDestination)}
 function filteredExperiences(){return state.experiences.filter(matchesDestination)}
 function markerElement(p){
-  const wrap=document.createElement('div');wrap.className='poi-wrap poi-'+(p.category||'other')+(isKomo(p)?' komo-wrap':'');
+  const komo=isKomo(p),spot=isKomoSpot(p);
+  const wrap=document.createElement('div');
+  wrap.className='poi-wrap poi-'+(p.category||'other')+(komo?' komo-wrap':'')+(spot?' spot-wrap':'');
   const el=document.createElement('button');
   const cls=visibilityClass(p);
   const nearby=state.near&&km(state.near.lat,state.near.lng,p.latitude,p.longitude)<=state.nearRadiusKm;
-  el.className='poi '+(cls||'')+(isKomo(p)?' komo':'')+(nearby?' nearby':'')+' category-'+(p.category||'other');
+  el.className='poi '+(cls||'')+(komo?' komo':'')+(spot?' spot':'')+(nearby?' nearby':'')+' category-'+(p.category||'other');
   el.type='button';
-  const glyph=isKomo(p)?'KØ':categorySymbol[p.category]||'•';
+  const glyph=komo?'KØ':'SPOT';
   el.innerHTML='<span>'+esc(glyph)+'</span>';
-  el.setAttribute('aria-label',(categoryLabel[p.category]||'KŌMØ')+' · '+p.name);
+  el.setAttribute('aria-label',(komo?'KŌMØ LOCATION':'KŌMØ SPOT')+' · '+p.name);
   const label=document.createElement('span');label.className='poi-label';
   const dist=state.near?km(state.near.lat,state.near.lng,p.latitude,p.longitude):null;
-  label.innerHTML='<b>'+esc(p.name)+'</b><small>'+esc(categoryLabel[p.category]||p.category||'KŌMØ')+(dist!=null?' · '+dist.toFixed(1)+' km':'')+'</small>';
-  wrap.append(el,label);el.addEventListener('click',e=>{e.stopPropagation();openPlace(p)});
+  const meta=(komo?'KŌMØ LOCATION':'KŌMØ SPOT')+' · '+(categoryLabel[p.category]||p.category||'PLACE')+' · '+(p.city||p.destination||'Riviera')+(dist!=null?' · '+dist.toFixed(1)+' km':'');
+  label.innerHTML='<b>'+esc(p.name)+'</b><small>'+esc(meta)+'</small>';
+  wrap.append(el,label);
+  el.addEventListener('click',e=>{e.stopPropagation();openPlace(p)});
   return wrap;
 }
 const destinationCenters={
@@ -332,16 +337,17 @@ function renderMarkers(){
 }
 
 function placeCard(p){
-  const vis=visibilityClass(p),near=state.near?km(state.near.lat,state.near.lng,p.latitude,p.longitude):null;
-  return '<button class="place-card" data-place="'+p.id+'"><span class="place-symbol '+vis+'">'+(isKomo(p)?'KØ':categorySymbol[p.category]||'•')+'</span><span class="place-copy"><b>'+esc(p.name)+'</b><p>'+esc(categoryLabel[p.category]||p.category)+' · '+esc(p.city||p.destination)+(near!=null?' · '+near.toFixed(1)+' km':'')+'</p></span><span class="arrow">›</span></button>';
+  const vis=visibilityClass(p),komo=isKomo(p),near=state.near?km(state.near.lat,state.near.lng,p.latitude,p.longitude):null;
+  const kind=komo?'KŌMØ LOCATION':'KŌMØ SPOT';
+  return '<button class="place-card '+(komo?'komo-card':'spot-card')+'" data-place="'+p.id+'"><span class="place-symbol '+vis+' '+(komo?'komo-symbol':'spot-symbol')+'">'+(komo?'KØ':'SPOT')+'</span><span class="place-copy"><b>'+esc(p.name)+'</b><p><strong>'+kind+'</strong> · '+esc(categoryLabel[p.category]||p.category)+' · '+esc(p.city||p.destination)+(near!=null?' · '+near.toFixed(1)+' km':'')+'</p></span><span class="arrow">›</span></button>';
 }
 function renderWorld(){
   const list=filteredPlaces().slice(0,12);
-  $('#panelTitle').textContent=state.near?'Around you':state.intent==='all'?(member()?'My World':(state.destination==='all'?'Selected for the Riviera':'Selected in '+state.destination.replace(/-/g,' '))):(categoryLabel[state.intent]||state.intent);
+  $('#panelTitle').textContent=state.near?'KŌMØ Spots around you':state.intent==='all'?(member()?'My World':(state.destination==='all'?'KŌMØ Spots · Riviera':'KŌMØ Spots · '+state.destination.replace(/-/g,' '))):(categoryLabel[state.intent]||state.intent);
   $('#panelCopy').textContent=state.near
-    ? 'KŌMØ places within '+state.nearRadiusKm+' km of your current position. Your location stays in this browser session.'
-    : member()?'Your accessible KŌMØ layer is active. Public and member places are shown together.':'A small edit of places chosen for their setting, relevance and connection to the KŌMØ world.';
-  let html='<div class="section-row"><b>'+(member()?'Your accessible world':'KŌMØ Selected')+'</b><span>'+list.length+' visible</span></div><div class="place-list">'+list.map(placeCard).join('')+'</div>';
+    ? 'KŌMØ Spots and KŌMØ locations within '+state.nearRadiusKm+' km of your current position. Your location stays in this browser session.'
+    : member()?'Your accessible KŌMØ layer is active. Public and member places are shown together.':'KŌMØ Spots are addresses selected by KŌMØ for their setting, relevance and experience.';
+  let html='<div class="section-row"><b>'+(member()?'YOUR ACCESSIBLE WORLD':'KŌMØ SPOTS')+'</b><span>'+list.length+' visible</span></div><div class="place-list">'+list.map(placeCard).join('')+'</div>';
   if(!member())html+='<div class="locked-card" style="margin-top:10px"><div class="ey">KŌMØ ONE</div><h3>Make World yours.</h3><p>'+pulseSignInCopy()+'</p><button data-connect-one>DISCOVER ONE</button></div>';
   else if(state.access.tier==='one')html+='<div class="locked-card" style="margin-top:10px"><div class="ey">KŌMØ ECHELON</div><h3>Another layer exists.</h3><p>ECHELON access is currently assigned privately to selected Founding Members.</p></div>';
   $('#sideBody').innerHTML=html;
@@ -450,11 +456,11 @@ function openPlace(p){
   state.selected=p;
   const vis=visibilityClass(p),cover=$('#detailCover');
   cover.className='detail-cover '+vis;
-  $('#detailEy').textContent=vis==='echelon'?'KŌMØ ECHELON':vis==='one'?'KŌMØ ONE':'KŌMØ SELECTED';
+  $('#detailEy').textContent=vis==='echelon'?'KŌMØ ECHELON':vis==='one'?'KŌMØ ONE':isKomo(p)?'KŌMØ LOCATION':'KŌMØ SPOT';
   $('#detailName').textContent=p.name;$('#detailLocation').textContent=(p.city||p.destination)+' · '+(categoryLabel[p.category]||p.category);
   $('#detailWhy').textContent=p.editorial_reason||p.summary||'Selected for its relevance to the KŌMØ World.';
   const privilege=p.privileges&&typeof p.privileges==='object'?p.privileges:{};
-  $('#detailAccess').innerHTML='<b>'+(privilege.label|| (vis==='echelon'?'ECHELON ACCESS':vis==='one'?'MEMBER ACCESS':'KŌMØ SELECTED'))+'</b><p>'+esc(p.summary||'Curated by KŌMØ.')+'</p>';
+  $('#detailAccess').innerHTML='<b>'+(privilege.label|| (vis==='echelon'?'ECHELON ACCESS':vis==='one'?'MEMBER ACCESS':isKomo(p)?'KŌMØ LOCATION':'KŌMØ SPOT'))+'</b><p>'+esc(p.summary||'Address curated by KŌMØ.')+'</p>';
   let actions='';
   if(has('world.saved_places.manage'))actions+='<button class="primary" data-save-place="'+p.id+'">'+(state.saved.has(p.id)?'SAVED TO MY WORLD':'SAVE TO MY WORLD')+'</button>';
   else actions+='<button class="primary" data-connect-one>MAKE WORLD YOURS</button>';
