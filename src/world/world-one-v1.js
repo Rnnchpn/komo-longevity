@@ -2,6 +2,7 @@ import {supabase,getSession,getProfile,getAccountRole,connectPulse,disconnectWor
 
 const maplibregl=window.maplibregl;
 if(!maplibregl?.Map)throw new Error('[KŌMØ World] MapLibre failed to load.');
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
@@ -18,7 +19,7 @@ const map=new maplibregl.Map({
   zoom:9.05,
   pitch:0,
   bearing:0,
-  antialias:true,
+  antialias:!isIOS,
   maxPitch:62,
   attributionControl:true
 });
@@ -687,6 +688,7 @@ async function nearMe(){
 }
 
 function add3DBuildings(){
+  if(isIOS)return;
   try{
     if(!map.getSource('openmaptiles')||map.getLayer('komo-buildings'))return;
     const labels=map.getStyle().layers.find(l=>l.type==='symbol'&&l.layout?.['text-field']);
