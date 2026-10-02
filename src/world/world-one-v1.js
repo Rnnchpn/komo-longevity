@@ -497,7 +497,11 @@ function add3DBuildings(){
   }catch(e){console.warn('[World 3D]',e)}
 }
 
-// Immediate data boot: World content must not depend on the basemap/style load.\n// This keeps places, events and experiences available even if map tiles are slow or blocked.\nvoid refreshAll().catch(error=>console.warn('[World content boot]',error));\n\nmap.on('load',async()=>{
+// Immediate data boot: World content must not depend on the basemap/style load.
+// This keeps places, events and experiences available even if map tiles are slow or blocked.
+void refreshAll().catch(error=>console.warn('[World content boot]',error));
+
+map.on('load',async()=>{
   add3DBuildings();
   await refreshAll();
   fitVisibleWorld({duration:0});
