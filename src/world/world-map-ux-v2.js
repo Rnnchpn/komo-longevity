@@ -43,6 +43,21 @@ function ensureGuide(){
     if(v==='all')$('#recenterBtn')?.click();
   }));
 }
+function ensureDestinations(){
+  if($('.destination-rail'))return;
+  const n=document.createElement('div');n.className='destination-rail';
+  n.innerHTML='<button class="active" data-destination="riviera">RIVIERA</button><button data-destination="cannes">CANNES</button><button data-destination="monaco">MONACO</button><button data-destination="saint-tropez">SAINT-TROPEZ</button>';
+  $('#app')?.appendChild(n);
+  const points={riviera:[7.02,43.49,9.2],cannes:[7.0174,43.5528,12.2],monaco:[7.4246,43.7384,12.2],'saint-tropez':[6.6407,43.2677,11.8]};
+  $('[data-destination]').forEach(b=>b.addEventListener('click',()=>{
+    $('[data-destination]').forEach(x=>x.classList.toggle('active',x===b));
+    document.body.classList.add('map-engaged');
+    const p=points[b.dataset.destination];const m=map();if(!p||!m)return;
+    m.easeTo({center:[p[0],p[1]],zoom:p[2],pitch:0,bearing:0,duration:650});
+  }));
+}
+window.addEventListener('komo:open-experiences',()=>document.querySelector('[data-eco="experiences"]')?.click());
+
 function ensureLegend(){
   if($('.map-legend'))return;
   const n=document.createElement('div');n.className='map-legend';n.innerHTML=
@@ -73,7 +88,7 @@ function markEngaged(){
   document.body.classList.add('map-engaged');
 }
 function init(){
-  ensureGuide();ensureLegend();ensureSummary();enhancePanel();
+  ensureGuide();ensureDestinations();ensureLegend();ensureSummary();enhancePanel();
   const hero=$('.hero-copy');hero?.addEventListener('click',markEngaged,{once:true});
   $('#map')?.addEventListener('pointerdown',markEngaged,{passive:true});
   $('#searchInput')?.addEventListener('focus',markEngaged);
