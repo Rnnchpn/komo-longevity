@@ -174,7 +174,7 @@
       .map-controls button{width:47px;height:46px;border:0;border-bottom:1px solid rgba(16,24,21,.08);background:rgba(255,255,253,.95);font-size:22px;color:#101815;display:grid;place-items:center}.map-controls button:last-child{border-bottom:0}.map-controls svg{width:20px;height:20px}
       .port-cluster{min-width:68px;height:64px;border-radius:22px}.port-cluster strong{font-size:21px}.port-cluster span{font-size:8px;max-width:62px}
     }
-    @media(max-width:560px){.directory-grid{grid-template-columns:1fr}.top-actions{display:none}.event-card{grid-template-columns:1fr}.event-stats{text-align:left}}
+    @media(max-width:560px){.directory-grid{grid-template-columns:1fr}.top-actions{display:flex}.event-card{grid-template-columns:1fr}.event-stats{text-align:left}}
   </style>
 </head>
 <body>
@@ -187,7 +187,7 @@
       <div class="brand-copy"><strong>KŌMØ INTELLIGENCE</strong><span>Private network & yacht service</span></div>
     </div>
     <div class="search">
-      <input id="searchInput" placeholder="Yacht, capitaine, société, port ou partenaire…" autocomplete="off" />
+      <input id="searchInput" placeholder="Yacht, capitaine, société, port…" autocomplete="off" />
       <span class="search-kbd">⌘K</span>
       <div id="searchResults" class="search-results"></div>
     </div>
@@ -355,13 +355,13 @@
   const companyLayer=L.layerGroup().addTo(map);
   const partnerLayer=L.layerGroup().addTo(map);
   const yachtMarkers=new Map();
-  const REGION_CENTERS={"Monaco · Nice":[43.716,7.345],"Antibes":[43.582,7.127],"Cannes":[43.548,7.026],"Saint-Tropez":[43.271,6.639]};
+  const REGION_CENTERS={"Monaco":[43.716,7.345],"Antibes":[43.582,7.127],"Cannes":[43.548,7.026],"Saint-Tropez":[43.271,6.639]};
   function regionKey(y){
     const s=((y.port||'')+' '+(y.city||'')).toLowerCase();
     if(s.includes('saint-tropez')) return 'Saint-Tropez';
     if(s.includes('cannes')||s.includes('canto')) return 'Cannes';
     if(s.includes('antibes')||s.includes('vauban')||s.includes('golfe-juan')) return 'Antibes';
-    if(s.includes('monaco')||s.includes('hercule')||s.includes('fontvieille')||s.includes('nice')||s.includes('villefranche')) return 'Monaco · Nice';
+    if(s.includes('monaco')||s.includes('hercule')||s.includes('fontvieille')||s.includes('nice')||s.includes('villefranche')) return 'Monaco';
     return 'Riviera';
   }
   const PORT_CENTERS={"Port Hercule":[43.7369,7.4254],"Port Vauban (Antibes / IYCA)":[43.5824,7.1274],"Port Vauban":[43.5824,7.1274],"Cannes Vieux Port":[43.5501,7.0156],"Port Canto (Cannes)":[43.5427,7.0352],"Port Canto":[43.5427,7.0352],"Golfe-Juan Anchorage":[43.5639,7.0734],"Port de Saint-Tropez":[43.2713,6.6385],"Port de Nice (Lympia)":[43.6963,7.2867],"Port de Nice":[43.6963,7.2867],"Villefranche-sur-Mer Anchorage":[43.6998,7.3156],"Port de Fontvieille":[43.7284,7.4168]};
