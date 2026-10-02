@@ -46,12 +46,17 @@ function render(){
 function transitionLabel(module){
   return {world:'WORLD',life:'LIFE',pulse:'PULSE',moments:'MOMENTS',echelon:'ECHELON'}[module]||'KŌMØ';
 }
+function resetTransition(){
+  exitInFlight=false;
+  const shell=$('#osTransition');
+  if(shell){shell.classList.remove('active');shell.removeAttribute('data-module');shell.setAttribute('aria-hidden','true')}
+}
 function exitTo(module,url){
   if(exitInFlight){return}
   exitInFlight=true;
   const shell=$('#osTransition'),labelEl=$('#osTransitionLabel');
   if(labelEl)labelEl.textContent=transitionLabel(module);
-  if(shell){shell.classList.add('active');shell.setAttribute('aria-hidden','false')}
+  if(shell){shell.dataset.module=module;shell.classList.add('active');shell.setAttribute('aria-hidden','false')}
   const delay=reduceMotion?80:560;
   window.setTimeout(()=>{location.href=url},delay);
 }
@@ -138,9 +143,19 @@ $('[data-module]').forEach(b=>{
   b.addEventListener('pointerleave',()=>setOrbitFocus(''));
   b.addEventListener('blur',()=>setOrbitFocus(''));
 });
-$('#osAccess').onclick=()=>openYou();$('#osYouMobile').onclick=()=>openYou();$('#osSphere').onclick=()=>openYou();
+$('#osAccess').onclick=()=>$('#osYou').classList.contains('open')?closeYou():openYou();
+$('#osYouMobile').onclick=()=>$('#osYou').classList.contains('open')?closeYou():openYou();
+$('#osSphere').onclick=()=>openYou();
 $$('[data-you-close]').forEach(x=>x.onclick=closeYou);$('#osAsk').onclick=openAsk;$$('[data-ask-close]').forEach(x=>x.onclick=closeAsk);
 $$('[data-quick]').forEach(b=>b.onclick=()=>{$('#osAskForm textarea').value=b.dataset.quick});$('#osAskForm').addEventListener('submit',sendAsk);
+window.addEventListener('pageshow',resetTransition);
+window.addEventListener('pagehide',()=>{const shell=$('#osTransition');if(shell)shell.classList.remove('active')});
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  if($('#osAskShell').classList.contains('open'))closeAsk();
+  if($('#osYou').classList.contains('open'))closeYou();
+});
 onSession(()=>load());
 initPlanetMotion();
+resetTransition();
 load().then(()=>{analytics('ecosystem_opened');const q=new URLSearchParams(location.search);if(q.get('you')==='1')openYou(q.get('section')||'')});
