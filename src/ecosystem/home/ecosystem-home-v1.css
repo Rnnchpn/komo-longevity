@@ -118,3 +118,17 @@
  .os-orbit{--rx:0deg!important;--ry:0deg!important}.os-transition.active .transition-orb,.os-transition.active span{animation:none!important}
  .os-transition.active .transition-orb{transform:scale(8.6);opacity:1}.os-transition.active span{opacity:1;transform:none}
 }
+
+.os-home.tier-one .planet-aura{background:radial-gradient(circle,rgba(255,255,255,.76),rgba(218,199,169,.28) 48%,transparent 72%)}
+.os-home.tier-one .planet-atmosphere{box-shadow:0 0 58px rgba(194,168,132,.32),0 0 116px rgba(255,255,255,.5)}
+.os-home.tier-one .ring-a,.os-home.tier-one .ring-b{border-color:rgba(151,124,89,.2)}
+.os-home.tier-echelon{background:radial-gradient(circle at 50% 43%,rgba(255,255,255,.76),transparent 31%),linear-gradient(145deg,#e7e2da,#f0ece4 54%,#cbc4ba)}
+.os-home.tier-echelon .planet-surface{background:radial-gradient(circle at 31% 24%,rgba(255,255,255,.82) 0 7%,rgba(219,214,205,.7) 19%,transparent 37%),radial-gradient(circle at 68% 70%,rgba(52,49,44,.3),transparent 36%),linear-gradient(145deg,#cfcac2 0%,#aaa59d 38%,#77736d 72%,#4c4944 100%)}
+.os-home.tier-echelon .planet-copy{color:#f8f5ef}.os-home.tier-echelon .planet-copy small{color:#ddd5ca}
+.os-home.tier-echelon .planet-atmosphere{box-shadow:0 0 62px rgba(83,78,70,.22),0 0 120px rgba(255,255,255,.4)}
+.os-home.tier-echelon .os-ring{border-color:rgba(61,58,53,.22)}
+.os-home.tier-echelon .os-context{background:rgba(230,226,219,.72)}
+.os-transition[data-module="life"].active{background:rgba(239,232,221,.97)}
+.os-transition[data-module="pulse"].active{background:rgba(232,236,230,.97)}
+.os-transition[data-module="moments"].active{background:rgba(242,236,227,.97)}
+.os-transition[data-module="echelon"].active{background:rgba(219,216,210,.98)}
