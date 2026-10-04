@@ -247,7 +247,9 @@ const scripts = [
   // Keep the /en/ public surface internally coherent, including legal and CGV routes.
   'scripts/komo-en-legal-aliases-v1.mjs',
   // Final Friday demo hardening: auth recovery, deterministic validation and accessible consent controls.
-  'scripts/pulse-friday-demo-hardening-v1.mjs'
+  'scripts/pulse-friday-demo-hardening-v1.mjs',
+  // Dedicated KŌMØ Experience destination surface. Runs last so earlier public-site mutations cannot overwrite it.
+  'scripts/build-experiences-gstaad-v1.mjs'
 ];
 
 for (const script of scripts) {
