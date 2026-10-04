@@ -7,7 +7,7 @@
   <title>KŌMØ Experiences — Gstaad Winter 26/27</title>
   <meta name="description" content="KŌMØ Experiences Gstaad — winter field operations map for chalet, five-star spa hotels, luxury retail and key people.">
   <link rel="canonical" href="https://komolongevity.com/Experiences/">
-  <link rel="stylesheet" href="/Experiences/styles.css?v=20261004-gstaad-crm-2">
+  <link rel="stylesheet" href="/Experiences/styles.css?v=20261004-gstaad-cloud-1">
 </head>
 <body>
   <header class="topbar">
@@ -19,6 +19,21 @@
       <a href="/world/">World</a>
     </nav>
   </header>
+  <section class="auth-gate" id="authGate" aria-label="Private workspace login">
+    <div class="auth-panel">
+      <div class="auth-mark">KŌMØ</div>
+      <p class="auth-kicker">PRIVATE FIELD OPERATIONS</p>
+      <h1>Gstaad Winter 26/27</h1>
+      <p class="auth-copy">Secure shared access for the KŌMØ team. Use your existing Command credentials.</p>
+      <form id="authForm" autocomplete="on">
+        <label>USERNAME<input id="authUser" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+        <label>PASSWORD<input id="authPassword" name="password" type="password" autocomplete="current-password" required></label>
+        <button id="authSubmit" type="submit"><span>Enter workspace</span><b>↗</b></button>
+        <p class="auth-error" id="authError" role="alert"></p>
+      </form>
+      <div class="auth-foot"><span>Encrypted transport · 12 h session</span><span>KŌMØ COMMAND ACCESS</span></div>
+    </div>
+  </section>
 
   <main class="workspace">
     <section class="map-stage" id="mapStage" aria-label="Gstaad field map">
@@ -90,7 +105,10 @@
     <aside class="operations" aria-label="Gstaad operations">
       <div class="operations-head">
         <div><p>WINTER 01 · FIELD CRM</p><h2>Gstaad Operations</h2></div>
-        <div class="completion"><strong id="validatedCount">0</strong><span>validated</span></div>
+        <div class="head-status">
+          <div class="completion"><strong id="validatedCount">0</strong><span>validated</span></div>
+          <div class="identity"><span id="syncUser">Secure cloud</span><button id="logoutBtn" type="button">Sign out</button></div>
+        </div>
       </div>
 
       <div class="stats" aria-label="Pipeline">
@@ -110,6 +128,10 @@
       <div class="search-row">
         <input id="targetSearch" type="search" placeholder="Search target, brand or role…" autocomplete="off" aria-label="Search targets">
         <span id="resultCount">0</span>
+      </div>
+      <div class="connection-line">
+        <span id="syncStatus"><i></i>Supabase shared state</span>
+        <span id="lastSync">—</span>
       </div>
 
       <div class="target-list" id="targetList"></div>
@@ -145,6 +167,6 @@
       </section>
     </aside>
   </main>
-  <script src="/Experiences/app.js?v=20261004-gstaad-crm-2" defer></script>
+  <script src="/Experiences/app.js?v=20261004-gstaad-cloud-1" defer></script>
 </body>
 </html>

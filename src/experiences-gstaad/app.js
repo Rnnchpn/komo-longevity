@@ -1,77 +1,236 @@
-const targets=[
-{id:"chalet-base",type:"chalet",name:"KŌMØ House — Gstaad",subtitle:"Operational base · private chalet",address:"Gstaad, Switzerland · exact property TBC",objective:"Secure the winter operating base and define reception, assessment, storage and team zones.",priority:"P1",next:"Shortlist 3 chalets and inspect usable rooms, access, parking and equipment storage.",x:43,y:62},
-
-{id:"alpina",type:"hotel",name:"The Alpina Gstaad",subtitle:"5★ · Six Senses Spa",address:"Alpinastrasse 23, 3780 Gstaad, Switzerland",objective:"Hotel + spa partnership · concierge access · wellness introductions.",priority:"P1",next:"Request concierge and spa director introduction before winter opening.",phone:"+41338889888",website:"https://www.thealpinagstaad.ch/",x:70,y:38},
-{id:"bellevue",type:"hotel",name:"Le Grand Bellevue",subtitle:"5★ · Le Grand Spa",address:"Untergstaadstrasse 17, 3780 Gstaad, Switzerland",objective:"Hotel + spa partnership · guest referrals · discreet in-hotel activation.",priority:"P1",next:"Meet concierge / guest relations and spa management.",phone:"+41337480000",website:"https://bellevue-gstaad.ch/",x:64,y:49},
-{id:"ultima",type:"hotel",name:"Ultima Hotel Gstaad",subtitle:"5★ · Spa & private wellness",address:"Gsteigstrasse 70, 3780 Gstaad, Switzerland",objective:"Private wellness partnership · concierge and residence clientele.",priority:"P1",next:"Approach concierge and spa team; qualify private-residence activation.",phone:"+41337480550",website:"https://www.ultima-collection.com/",x:33,y:65},
-{id:"palace",type:"hotel",name:"Gstaad Palace",subtitle:"5★ · Palace Spa",address:"Palacestrasse 28, 3780 Gstaad, Switzerland",objective:"Institutional luxury hotel target · concierge network · private clientele.",priority:"P1",next:"Secure concierge / guest-relations introduction and map key seasonal contacts.",phone:"+41337485000",website:"https://www.palace.ch/",x:59,y:39},
-
-{id:"hermes",type:"shop",name:"Hermès Gstaad",subtitle:"Luxury fashion · leather goods",address:"Hermès Gstaad, Gstaad, Switzerland",objective:"Identify senior sales advisor / personal clienteling contact.",priority:"P1",next:"Visit in person and qualify the advisor with the strongest seasonal client book.",website:"https://www.hermes.com/",x:54,y:49},
-{id:"lv",type:"shop",name:"Louis Vuitton Gstaad",subtitle:"Luxury leather goods · fashion",address:"Louis Vuitton Gstaad, Gstaad, Switzerland",objective:"Identify clienteling / VIC relationship contact.",priority:"P1",next:"Visit boutique and ask for the senior advisor covering recurring Gstaad clients.",website:"https://www.louisvuitton.com/",x:52,y:52},
-{id:"loro",type:"shop",name:"Loro Piana Gstaad",subtitle:"Luxury ready-to-wear",address:"Loro Piana Gstaad, Gstaad, Switzerland",objective:"Build relationship with high-trust client advisor.",priority:"P1",next:"In-person introduction and identify personal-shopping / VIC advisor.",website:"https://www.loropiana.com/",x:58,y:48},
-{id:"ralph",type:"shop",name:"Ralph Lauren Gstaad",subtitle:"Luxury ready-to-wear",address:"Ralph Lauren Gstaad, Gstaad, Switzerland",objective:"Seasonal clienteling and introductions.",priority:"P1",next:"Visit boutique; identify longstanding advisor and Gstaad seasonal network.",website:"https://www.ralphlauren.com/",x:50,y:54},
-{id:"brunello",type:"shop",name:"Brunello Cucinelli Gstaad",subtitle:"Luxury ready-to-wear",address:"Brunello Cucinelli Gstaad, Gstaad, Switzerland",objective:"UHNW clienteling contact and warm introductions.",priority:"P1",next:"Meet boutique team and identify senior advisor / store management.",website:"https://shop.brunellocucinelli.com/",x:49,y:55},
-{id:"moncler",type:"shop",name:"Moncler Gstaad",subtitle:"Luxury alpine fashion",address:"Moncler Gstaad, Gstaad, Switzerland",objective:"Seasonal luxury client network.",priority:"P1",next:"Visit boutique and identify senior client advisor.",website:"https://www.moncler.com/",x:50,y:56},
-{id:"valentino",type:"shop",name:"Valentino Gstaad",subtitle:"Luxury fashion · accessories",address:"Valentino Gstaad, Gstaad, Switzerland",objective:"Clienteling and private-shopping introductions.",priority:"P2",next:"Qualify seasonal setup and senior sales contact.",website:"https://www.valentino.com/",x:55,y:51},
-{id:"dolce",type:"shop",name:"Dolce & Gabbana Gstaad",subtitle:"Luxury fashion",address:"Dolce & Gabbana Gstaad, Gstaad, Switzerland",objective:"Luxury retail and seasonal clienteling network.",priority:"P2",next:"Visit boutique and qualify senior sales contact.",website:"https://www.dolcegabbana.com/",x:55,y:53},
-{id:"lorenz",type:"shop",name:"Maison Lorenz Bach",subtitle:"Independent luxury fashion",address:"Maison Lorenz Bach, Gstaad, Switzerland",objective:"Independent boutique network with strong local client intimacy.",priority:"P1",next:"Prioritise owner / senior advisor introduction.",x:46,y:53},
-{id:"club66",type:"shop",name:"CLUB 66",subtitle:"Fashion · jewellery · lifestyle",address:"CLUB 66, Gstaad, Switzerland",objective:"Local luxury lifestyle connector.",priority:"P1",next:"Meet owner / senior team and map recurring seasonal clients.",x:48,y:50},
-{id:"tonja",type:"shop",name:"Tonja Conceptstore",subtitle:"Concept store · lifestyle",address:"Tonja Conceptstore, Gstaad, Switzerland",objective:"Local style / lifestyle network and referrals.",priority:"P2",next:"Visit and qualify local influence.",x:51,y:48},
-{id:"marina",type:"shop",name:"Marina Anouilh",subtitle:"Concept store · fashion",address:"Marina Anouilh, Gstaad, Switzerland",objective:"Independent clienteling network.",priority:"P2",next:"Visit and identify owner / principal advisor.",x:53,y:47},
-{id:"chopard",type:"shop",name:"Chopard Gstaad",subtitle:"Jewellery · watches",address:"Chopard Gstaad, Gstaad, Switzerland",objective:"High-value jewellery clienteling network.",priority:"P1",next:"Confirm seasonal setup and identify senior contact.",website:"https://www.chopard.com/",x:56,y:46},
-{id:"stebler",type:"shop",name:"Stebler Gstaad AG",subtitle:"Jewellery · watches",address:"Stebler Gstaad AG, Gstaad, Switzerland",objective:"Local watch and jewellery relationship network.",priority:"P1",next:"Meet owner / principal advisor and qualify referral potential.",x:57,y:45},
-{id:"yacht-club",type:"shop",name:"Gstaad Yacht Club",subtitle:"Private club · social node",address:"Gstaad Yacht Club, Gstaad, Switzerland",objective:"High-value social network and private-member introductions.",priority:"P1",next:"Identify member-access route and local connector who can introduce KŌMØ.",website:"https://www.gstaadyachtclub.com/",x:61,y:57},
-{id:"eagle-ski",type:"shop",name:"Eagle Ski Club",subtitle:"Private ski club · social node",address:"Eagle Ski Club, Gstaad, Switzerland",objective:"Seasonal families, ski network and trusted local introductions.",priority:"P1",next:"Identify club leadership and warm introduction route.",x:67,y:61},
-{id:"sportzentrum",type:"shop",name:"Sportzentrum Gstaad",subtitle:"Sport & leisure",address:"Sportzentrum Gstaad, Gstaad, Switzerland",objective:"Local sport ecosystem and possible operational support.",priority:"P2",next:"Visit and map useful management / fitness contacts.",website:"https://www.sportzentrum-gstaad.ch/",x:59,y:60},
-{id:"cinema",type:"shop",name:"Ciné-Theater Gstaad",subtitle:"Culture & leisure",address:"Ciné-Theater Gstaad, Gstaad, Switzerland",objective:"Secondary lifestyle node in the seasonal social map.",priority:"P2",next:"Keep as local lifestyle reference and event-watch location.",x:53,y:58},
-{id:"caprices",type:"shop",name:"Caprices Gstaad",subtitle:"Nightlife · social node",address:"Caprices Gstaad, Gstaad, Switzerland",objective:"Nightlife and seasonal social-network mapping.",priority:"P2",next:"Qualify seasonal opening, management and relevant local introductions.",x:55,y:57},
-
-{id:"person-palace-concierge",type:"person",name:"Concierge Lead — Gstaad Palace",subtitle:"Hotel concierge · name to identify",address:"Gstaad Palace, Palacestrasse 28, Gstaad",objective:"Warm access to repeat guests, chalet owners and seasonal families.",priority:"P1",next:"Identify name, mobile / WhatsApp and preferred introduction route.",x:59,y:39},
-{id:"person-alpina-concierge",type:"person",name:"Concierge Lead — The Alpina",subtitle:"Hotel concierge · name to identify",address:"The Alpina Gstaad, Alpinastrasse 23, Gstaad",objective:"Warm access to hotel clientele and private wellness requests.",priority:"P1",next:"Identify head concierge / guest relations contact.",x:70,y:38},
-{id:"person-bellevue-concierge",type:"person",name:"Concierge Lead — Grand Bellevue",subtitle:"Hotel concierge · name to identify",address:"Le Grand Bellevue, Gstaad",objective:"Warm access to guests and spa clientele.",priority:"P1",next:"Identify concierge / guest-relations lead.",x:64,y:49},
-{id:"person-ultima-concierge",type:"person",name:"Concierge Lead — Ultima",subtitle:"Private hospitality · name to identify",address:"Ultima Hotel Gstaad, Gsteigstrasse 70, Gstaad",objective:"Access to residence-style guests and private requests.",priority:"P1",next:"Identify concierge / butler lead and direct contact route.",x:33,y:65},
-{id:"person-spa",type:"person",name:"Spa Directors — 4 priority hotels",subtitle:"Wellness decision-makers · names to identify",address:"Gstaad, Switzerland",objective:"Clinical / wellness operational partnerships.",priority:"P1",next:"Identify each spa director and create one contact card per person.",x:66,y:44},
-{id:"person-luxury-sales",type:"person",name:"Luxury Saleswomen — Promenade",subtitle:"Client advisors · personal shoppers · mobile sellers",address:"Gstaad Promenade, Gstaad, Switzerland",objective:"Build the high-trust referral layer around recurring seasonal clients.",priority:"P1",next:"During each boutique visit, capture the strongest advisor and who introduced us.",x:51,y:53},
-{id:"person-chalet",type:"person",name:"Private Chalet Concierges",subtitle:"Chalet managers · private concierge",address:"Gstaad / Saanenland, Switzerland",objective:"Access private chalets without relying only on hotels.",priority:"P1",next:"Create the first 10-name private concierge / chalet-manager list.",x:39,y:58},
-{id:"person-connectors",type:"person",name:"Local Connectors",subtitle:"Friends · residents · seasonal habitués",address:"Gstaad, Switzerland",objective:"Convert existing personal relationships into warm local introductions.",priority:"P1",next:"Enter known names and connect each person to hotels / shops they know.",x:45,y:47}
-];
-
+const API="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/gstaad-state";
 const labels={chalet:"Chalet",hotel:"Hotel + Spa",shop:"Luxury / Social",person:"People"};
 const codes={chalet:"CH",hotel:"H",shop:"S",person:"P"};
-const storageKey="komo-gstaad-winter-crm-v2";
-let saved={};try{saved=JSON.parse(localStorage.getItem(storageKey)||"{}")}catch(e){}
-let activeCategory="chalet",activeStatus="all",query="",activeId="chalet-base",mapMode="all";
-const list=document.getElementById("targetList"),layer=document.getElementById("poiLayer"),detail=document.getElementById("detailCard");
+const SESSION_TOKEN="komo:gstaad:session";
+const SESSION_EXPIRY="komo:gstaad:expiry";
+const LEGACY_KEYS=["komo-gstaad-winter-crm-v2","komo-gstaad-winter-crm-v1"];
+let targets=[],token=sessionStorage.getItem(SESSION_TOKEN)||"",currentUser=null;
+let activeCategory="chalet",activeStatus="all",query="",activeId=null,mapMode="all",pollTimer=null,syncing=false,noteTimer=null;
+
+const list=document.getElementById("targetList");
+const layer=document.getElementById("poiLayer");
+const detail=document.getElementById("detailCard");
+const gate=document.getElementById("authGate");
+const notesField=document.getElementById("notesField");
+const connectionLine=document.querySelector(".connection-line");
+
 const esc=v=>String(v||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
-const stateFor=id=>Object.assign({status:"target",note:""},saved[id]||{});
-function persist(id,patch){saved[id]=Object.assign({},stateFor(id),patch);localStorage.setItem(storageKey,JSON.stringify(saved));updateStats()}
-function statusLabel(s){return({target:"Target",introduced:"Introduced",contacted:"Contacted",met:"Met",partner:"Partner",active:"Active",hold:"Hold"})[s]||"Target"}
-function filtered(){return targets.filter(t=>{const s=stateFor(t.id);return t.type===activeCategory&&(activeStatus==="all"||s.status===activeStatus||(activeStatus==="partner"&&s.status==="active"))&&(!query||(t.name+" "+t.subtitle+" "+t.address+" "+t.objective).toLowerCase().includes(query.toLowerCase()))})}
+const statusLabel=s=>({target:"Target",introduced:"Introduced",contacted:"Contacted",met:"Met",partner:"Partner",active:"Active",hold:"Hold"})[s]||"Target";
+const findTarget=id=>targets.find(t=>t.id===id);
+
+function basicEncode(value){
+  const bytes=new TextEncoder().encode(value);
+  let binary="";
+  for(const b of bytes) binary+=String.fromCharCode(b);
+  return btoa(binary);
+}
+async function request(method,body,authorization){
+  const headers={};
+  const auth=authorization||(token?"Bearer "+token:"");
+  if(auth)headers.Authorization=auth;
+  if(body!==undefined)headers["Content-Type"]="application/json";
+  const res=await fetch(API,{method,headers,body:body===undefined?undefined:JSON.stringify(body),cache:"no-store"});
+  let data={};
+  try{data=await res.json()}catch{}
+  if(!res.ok){
+    const error=new Error(data.error||("http_"+res.status));
+    error.status=res.status;
+    throw error;
+  }
+  return data;
+}
+function clearSession(){
+  token="";currentUser=null;
+  sessionStorage.removeItem(SESSION_TOKEN);
+  sessionStorage.removeItem(SESSION_EXPIRY);
+}
+function showGate(message=""){
+  if(pollTimer){clearInterval(pollTimer);pollTimer=null}
+  gate.hidden=false;
+  document.getElementById("authError").textContent=message;
+  setTimeout(()=>document.getElementById("authUser")?.focus(),30);
+}
+function hideGate(){gate.hidden=true}
+function updateConnection(state,label){
+  connectionLine.classList.remove("syncing","error");
+  if(state)connectionLine.classList.add(state);
+  document.getElementById("syncStatus").lastChild.textContent=label||"Supabase shared state";
+}
+function setIdentity(){
+  const label=currentUser?(currentUser.display_name||currentUser.username)+" · "+currentUser.role:"Secure cloud";
+  document.getElementById("syncUser").textContent=label;
+}
+function filtered(){
+  return targets.filter(t=>{
+    const categoryOk=t.type===activeCategory;
+    const statusOk=activeStatus==="all"||t.status===activeStatus||(activeStatus==="partner"&&t.status==="active");
+    const hay=(t.name+" "+t.subtitle+" "+t.address+" "+t.objective).toLowerCase();
+    return categoryOk&&statusOk&&(!query||hay.includes(query.toLowerCase()));
+  });
+}
 function render(){
- const visible=filtered(),ids=new Set(visible.map(t=>t.id));
- document.getElementById("resultCount").textContent=String(visible.length);
- list.innerHTML=visible.length?visible.map(t=>{const s=stateFor(t.id);return '<button class="target-row '+(activeId===t.id?'active':'')+'" data-target-id="'+esc(t.id)+'" data-type="'+t.type+'"><span class="target-icon">'+codes[t.type]+'</span><span class="target-copy"><strong>'+esc(t.name)+'</strong><small>'+esc(t.subtitle)+'</small></span><span class="status-badge" data-status="'+s.status+'">'+statusLabel(s.status)+'</span></button>'}).join(""):'<div class="empty"><strong>No target here.</strong><span>Change category, status or search.</span></div>';
- layer.innerHTML=targets.filter(t=>t.type===activeCategory).map(t=>{const dim=!ids.has(t.id)||(mapMode==="priority"&&t.priority!=="P1");return '<button class="poi '+(activeId===t.id?'active ':'')+(dim?'dim':'')+'" data-poi-id="'+t.id+'" data-priority="'+t.priority+'" data-type="'+t.type+'" style="left:'+t.x+'%;top:'+t.y+'%" aria-label="'+esc(t.name)+'"><span class="poi-pin">'+codes[t.type]+'</span><span class="poi-label">'+esc(t.name)+'</span></button>'}).join("");
- document.querySelectorAll("[data-target-id]").forEach(el=>el.onclick=()=>openTarget(el.dataset.targetId));
- document.querySelectorAll("[data-poi-id]").forEach(el=>el.onclick=()=>openTarget(el.dataset.poiId));
+  const visible=filtered(),ids=new Set(visible.map(t=>t.id));
+  document.getElementById("resultCount").textContent=String(visible.length);
+  list.innerHTML=visible.length?visible.map(t=>'<button class="target-row '+(activeId===t.id?'active':'')+'" data-target-id="'+esc(t.id)+'" data-type="'+esc(t.type)+'"><span class="target-icon">'+codes[t.type]+'</span><span class="target-copy"><strong>'+esc(t.name)+'</strong><small>'+esc(t.subtitle)+'</small></span><span class="status-badge" data-status="'+esc(t.status)+'">'+esc(statusLabel(t.status))+'</span></button>').join(""):'<div class="empty"><strong>No target here.</strong><span>Change category, status or search.</span></div>';
+  layer.innerHTML=targets.filter(t=>t.type===activeCategory).map(t=>{
+    const dim=!ids.has(t.id)||(mapMode==="priority"&&t.priority!=="P1");
+    return '<button class="poi '+(activeId===t.id?'active ':'')+(dim?'dim':'')+'" data-poi-id="'+esc(t.id)+'" data-priority="'+esc(t.priority)+'" data-type="'+esc(t.type)+'" style="left:'+Number(t.x)+'%;top:'+Number(t.y)+'%" aria-label="'+esc(t.name)+'"><span class="poi-pin">'+codes[t.type]+'</span><span class="poi-label">'+esc(t.name)+'</span></button>';
+  }).join("");
+  document.querySelectorAll("[data-target-id]").forEach(el=>el.onclick=()=>openTarget(el.dataset.targetId));
+  document.querySelectorAll("[data-poi-id]").forEach(el=>el.onclick=()=>openTarget(el.dataset.poiId));
 }
-function updateStats(){const states=targets.map(t=>stateFor(t.id).status);document.getElementById("statTargets").textContent=targets.length;document.getElementById("statIntroduced").textContent=states.filter(s=>s==="introduced").length;document.getElementById("statMet").textContent=states.filter(s=>s==="met").length;document.getElementById("statPartners").textContent=states.filter(s=>s==="partner"||s==="active").length;document.getElementById("validatedCount").textContent=states.filter(s=>["met","partner","active"].includes(s)).length}
+function updateStats(){
+  document.getElementById("statTargets").textContent=String(targets.length);
+  document.getElementById("statIntroduced").textContent=String(targets.filter(t=>t.status==="introduced").length);
+  document.getElementById("statMet").textContent=String(targets.filter(t=>t.status==="met").length);
+  document.getElementById("statPartners").textContent=String(targets.filter(t=>t.status==="partner"||t.status==="active").length);
+  document.getElementById("validatedCount").textContent=String(targets.filter(t=>["met","partner","active"].includes(t.status)).length);
+}
+function refreshDetail(preserveNote=false){
+  const t=findTarget(activeId);if(!t)return;
+  document.getElementById("detailType").textContent=(labels[t.type]||t.type).toUpperCase();
+  document.getElementById("detailPriority").textContent=t.priority;
+  document.getElementById("detailName").textContent=t.name;
+  document.getElementById("detailSubtitle").textContent=t.subtitle;
+  document.getElementById("detailAddress").textContent=t.address;
+  document.getElementById("detailObjective").textContent=t.objective;
+  document.getElementById("detailNext").textContent=t.next_action||"";
+  document.getElementById("statusSelect").value=t.status||"target";
+  if(!preserveNote)notesField.value=t.note||"";
+  const directions=document.getElementById("directionsButton");
+  directions.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.address);
+  const phone=document.getElementById("phoneButton");
+  if(t.phone){phone.classList.remove("hidden");phone.href="tel:"+t.phone}else{phone.classList.add("hidden");phone.removeAttribute("href")}
+  const web=document.getElementById("websiteButton");
+  if(t.website){web.classList.remove("hidden");web.href=t.website}else{web.classList.add("hidden");web.removeAttribute("href")}
+}
 function openTarget(id){
- const t=targets.find(v=>v.id===id);if(!t)return;activeId=id;const s=stateFor(id);
- detail.classList.add("open");document.getElementById("detailType").textContent=labels[t.type].toUpperCase();document.getElementById("detailPriority").textContent=t.priority;document.getElementById("detailName").textContent=t.name;document.getElementById("detailSubtitle").textContent=t.subtitle;document.getElementById("detailAddress").textContent=t.address;document.getElementById("detailObjective").textContent=t.objective;document.getElementById("detailNext").textContent=t.next;document.getElementById("statusSelect").value=s.status;document.getElementById("notesField").value=s.note||"";
- const directions=document.getElementById("directionsButton");directions.href="https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(t.address);
- const phone=document.getElementById("phoneButton");if(t.phone){phone.classList.remove("hidden");phone.href="tel:"+t.phone}else{phone.classList.add("hidden");phone.removeAttribute("href")}
- const web=document.getElementById("websiteButton");if(t.website){web.classList.remove("hidden");web.href=t.website}else{web.classList.add("hidden");web.removeAttribute("href")}
- render()
+  if(!findTarget(id))return;
+  activeId=id;detail.classList.add("open");refreshDetail(false);render();
 }
-function switchCategory(c){activeCategory=c;activeStatus="all";query="";document.getElementById("targetSearch").value="";document.querySelectorAll(".category-tab").forEach(b=>b.classList.toggle("active",b.dataset.category===c));document.querySelectorAll(".stat").forEach(b=>b.classList.toggle("active",b.dataset.statusFilter==="all"));activeId=(targets.find(t=>t.type===c)||{}).id||null;detail.classList.remove("open");render()}
-document.querySelectorAll(".category-tab").forEach(b=>b.onclick=()=>switchCategory(b.dataset.category));
-document.querySelectorAll(".stat").forEach(b=>b.onclick=()=>{activeStatus=b.dataset.statusFilter;document.querySelectorAll(".stat").forEach(x=>x.classList.toggle("active",x===b));detail.classList.remove("open");render()});
-document.querySelectorAll(".map-tool").forEach(b=>b.onclick=()=>{mapMode=b.dataset.mapMode;document.querySelectorAll(".map-tool").forEach(x=>x.classList.toggle("active",x===b));document.getElementById("mapStage").classList.toggle("priority-mode",mapMode==="priority");render()});
+function switchCategory(category){
+  activeCategory=category;activeStatus="all";query="";
+  document.getElementById("targetSearch").value="";
+  document.querySelectorAll(".category-tab").forEach(b=>b.classList.toggle("active",b.dataset.category===category));
+  document.querySelectorAll(".stat").forEach(b=>b.classList.toggle("active",b.dataset.statusFilter==="all"));
+  activeId=(targets.find(t=>t.type===category)||{}).id||null;
+  detail.classList.remove("open");render();
+}
+async function syncRemote(silent=false){
+  if(!token||syncing)return;
+  syncing=true;
+  if(!silent)updateConnection("syncing","Syncing…");
+  try{
+    const data=await request("GET");
+    targets=Array.isArray(data.targets)?data.targets:[];
+    currentUser=data.user||currentUser;
+    if(!activeId||!findTarget(activeId))activeId=(targets.find(t=>t.type===activeCategory)||targets[0]||{}).id||null;
+    setIdentity();updateStats();render();
+    if(detail.classList.contains("open")&&activeId)refreshDetail(document.activeElement===notesField);
+    hideGate();
+    document.getElementById("lastSync").textContent=new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    updateConnection("","Live · 5 s sync");
+  }catch(e){
+    if(e.status===401){clearSession();showGate("Session expired. Sign in again.");}
+    else updateConnection("error","Sync unavailable");
+  }finally{syncing=false}
+}
+async function persist(id,patch){
+  const t=findTarget(id);if(!t)return;
+  Object.assign(t,patch,{updated_at:new Date().toISOString(),updated_by:currentUser?.username||"me"});
+  updateStats();render();
+  document.getElementById("saveState").textContent="Saving to Supabase…";
+  try{
+    const data=await request("PATCH",Object.assign({id},patch));
+    const i=targets.findIndex(x=>x.id===id);if(i>=0&&data.target)targets[i]=data.target;
+    updateStats();render();
+    if(detail.classList.contains("open")&&activeId===id)refreshDetail(document.activeElement===notesField);
+    document.getElementById("saveState").textContent="Saved · shared";
+    updateConnection("","Live · 5 s sync");
+  }catch(e){
+    document.getElementById("saveState").textContent="Sync failed";
+    updateConnection("error","Write failed");
+    if(e.status===401){clearSession();showGate("Session expired. Sign in again.");}
+    else setTimeout(()=>syncRemote(true),700);
+  }
+}
+async function migrateLegacy(){
+  if(localStorage.getItem("komo:gstaad:cloud-migrated")==="1")return;
+  let legacy={};
+  for(const key of LEGACY_KEYS){
+    try{const value=JSON.parse(localStorage.getItem(key)||"{}");legacy=Object.assign(legacy,value||{})}catch{}
+  }
+  const updates=[];
+  for(const [id,s] of Object.entries(legacy)){
+    const remote=findTarget(id);
+    if(!remote||!s)continue;
+    const patch={};
+    if(remote.status==="target"&&s.status&&s.status!=="target")patch.status=s.status;
+    if(!remote.note&&s.note)patch.note=s.note;
+    if(Object.keys(patch).length)updates.push(request("PATCH",Object.assign({id},patch)));
+  }
+  if(updates.length){
+    try{await Promise.all(updates);await syncRemote(true)}catch{return}
+  }
+  LEGACY_KEYS.forEach(k=>localStorage.removeItem(k));
+  localStorage.setItem("komo:gstaad:cloud-migrated","1");
+}
+function startPolling(){
+  if(pollTimer)clearInterval(pollTimer);
+  pollTimer=setInterval(()=>{if(document.visibilityState==="visible")syncRemote(true)},5000);
+}
+
+document.getElementById("authForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const user=document.getElementById("authUser").value.trim().toLowerCase();
+  const pass=document.getElementById("authPassword").value;
+  const submit=document.getElementById("authSubmit"),error=document.getElementById("authError");
+  if(!user||!pass)return;
+  submit.disabled=true;error.textContent="";
+  try{
+    const data=await request("POST",undefined,"Basic "+basicEncode(user+":"+pass));
+    token=data.token;currentUser=data.user;
+    sessionStorage.setItem(SESSION_TOKEN,token);
+    sessionStorage.setItem(SESSION_EXPIRY,data.expires_at||"");
+    document.getElementById("authPassword").value="";
+    await syncRemote(false);await migrateLegacy();startPolling();
+  }catch(err){
+    error.textContent=err.status===401?"Incorrect Command credentials.":"Secure connection unavailable.";
+  }finally{submit.disabled=false}
+});
+document.getElementById("logoutBtn").onclick=async()=>{
+  try{if(token)await request("DELETE")}catch{}
+  clearSession();targets=[];activeId=null;updateStats();render();showGate("");
+};
+document.querySelectorAll(".category-tab").forEach(btn=>btn.onclick=()=>switchCategory(btn.dataset.category));
+document.querySelectorAll(".stat").forEach(btn=>btn.onclick=()=>{
+  activeStatus=btn.dataset.statusFilter;
+  document.querySelectorAll(".stat").forEach(b=>b.classList.toggle("active",b===btn));
+  detail.classList.remove("open");render();
+});
+document.querySelectorAll(".map-tool").forEach(btn=>btn.onclick=()=>{
+  mapMode=btn.dataset.mapMode;
+  document.querySelectorAll(".map-tool").forEach(b=>b.classList.toggle("active",b===btn));
+  document.getElementById("mapStage").classList.toggle("priority-mode",mapMode==="priority");render();
+});
 document.getElementById("targetSearch").oninput=e=>{query=e.target.value.trim();detail.classList.remove("open");render()};
 document.getElementById("detailClose").onclick=()=>detail.classList.remove("open");
-document.getElementById("statusSelect").onchange=e=>{if(!activeId)return;persist(activeId,{status:e.target.value});document.getElementById("saveState").textContent="Status saved locally";render()};
-let noteTimer;document.getElementById("notesField").oninput=e=>{if(!activeId)return;clearTimeout(noteTimer);const value=e.target.value;document.getElementById("saveState").textContent="Saving…";noteTimer=setTimeout(()=>{persist(activeId,{note:value});document.getElementById("saveState").textContent="Saved locally"},220)};
-document.getElementById("clearNote").onclick=()=>{if(!activeId)return;document.getElementById("notesField").value="";persist(activeId,{note:""});document.getElementById("saveState").textContent="Note cleared"};
-document.addEventListener("keydown",e=>{if(e.key==="Escape")detail.classList.remove("open")});
-updateStats();render();
+document.getElementById("statusSelect").onchange=e=>{if(activeId)persist(activeId,{status:e.target.value})};
+notesField.oninput=e=>{
+  if(!activeId)return;clearTimeout(noteTimer);
+  const id=activeId,value=e.target.value;
+  document.getElementById("saveState").textContent="Editing…";
+  noteTimer=setTimeout(()=>persist(id,{note:value}),550);
+};
+document.getElementById("clearNote").onclick=()=>{if(!activeId)return;notesField.value="";persist(activeId,{note:""})};
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&gate.hidden)detail.classList.remove("open")});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&token)syncRemote(true)});
+
+(async function boot(){
+  updateStats();render();
+  const expiry=sessionStorage.getItem(SESSION_EXPIRY);
+  if(expiry&&Date.parse(expiry)<=Date.now())clearSession();
+  if(!token){showGate("");return}
+  await syncRemote(false);
+  if(token){await migrateLegacy();startPolling()}
+})();
