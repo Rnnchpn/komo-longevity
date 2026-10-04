@@ -3,204 +3,148 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#ecece8">
-  <title>KŌMØ Experience — Gstaad</title>
-  <meta name="description" content="KŌMØ Experience Gstaad — full-screen operational map for Oyster, in-hotel Motion Lab, luxury hospitality and private mobile experiences.">
+  <meta name="theme-color" content="#f4f4f1">
+  <title>KŌMØ Experiences — Gstaad Winter 26/27</title>
+  <meta name="description" content="KŌMØ Experiences Gstaad — winter field operations map for chalet, five-star spa hotels, luxury retail and key people.">
   <link rel="canonical" href="https://komolongevity.com/Experiences/">
-  <link rel="stylesheet" href="/Experiences/styles.css?v=20261004-fs3">
+  <link rel="stylesheet" href="/Experiences/styles.css?v=20261004-gstaad-crm-2">
 </head>
 <body>
-  <main class="experience" id="experience">
-    <section class="map-stage" id="mapStage" aria-label="KŌMØ Experience Gstaad operational map">
-      <svg class="terrain" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Stylised full-screen map of Gstaad">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="KŌMØ home">KŌMØ</a>
+    <div class="season"><i></i><strong>GSTAAD</strong><span>WINTER 26/27</span></div>
+    <nav aria-label="Primary">
+      <a href="/">Home</a>
+      <a class="active" href="/Experiences/">Experiences</a>
+      <a href="/world/">World</a>
+    </nav>
+  </header>
+
+  <main class="workspace">
+    <section class="map-stage" id="mapStage" aria-label="Gstaad field map">
+      <div class="map-title">
+        <p>KŌMØ EXPERIENCE · FIELD OPERATIONS 01</p>
+        <h1>Gstaad</h1>
+        <span>Winter launch territory</span>
+      </div>
+
+      <div class="map-toolbar" aria-label="Map display">
+        <button class="map-tool active" data-map-mode="all">All targets</button>
+        <button class="map-tool" data-map-mode="priority">Priority only</button>
+      </div>
+
+      <svg class="terrain" viewBox="0 0 1280 860" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Operational map of Gstaad">
         <defs>
-          <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#eeeeda"/>
-            <stop offset=".34" stop-color="#f5f5f1"/>
-            <stop offset="1" stop-color="#e8e8e3"/>
-          </linearGradient>
-          <linearGradient id="ridge" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#bfc1bb" stop-opacity=".82"/>
-            <stop offset=".68" stop-color="#dadbd6" stop-opacity=".38"/>
-            <stop offset="1" stop-color="#f4f4ef" stop-opacity="0"/>
-          </linearGradient>
-          <linearGradient id="town" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#d2d3cd"/>
-            <stop offset="1" stop-color="#bfc0ba"/>
-          </linearGradient>
-          <radialGradient id="coreGlow">
-            <stop offset="0" stop-color="#b9bab4" stop-opacity=".48"/>
-            <stop offset="1" stop-color="#dadbd6" stop-opacity="0"/>
-          </radialGradient>
+          <linearGradient id="town" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#deded9"/><stop offset="1" stop-color="#c8c8c1"/></linearGradient>
+          <linearGradient id="ridge" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c6c7c1" stop-opacity=".74"/><stop offset=".75" stop-color="#eee" stop-opacity=".18"/><stop offset="1" stop-color="#f8f8f5" stop-opacity="0"/></linearGradient>
+          <radialGradient id="coreGlow"><stop offset="0" stop-color="#c5c5bf" stop-opacity=".58"/><stop offset="1" stop-color="#ddd" stop-opacity="0"/></radialGradient>
         </defs>
-        <rect width="1440" height="900" fill="url(#bg)"/>
-        <path class="mountain back" d="M0 210 L93 137 151 181 232 78 310 176 382 91 456 185 548 118 620 193 720 88 813 181 908 122 1001 184 1112 73 1204 177 1301 104 1440 190 V0 H0Z"/>
-        <path class="mountain front" d="M0 293 L106 205 171 255 255 151 333 247 438 174 535 261 634 172 734 248 836 166 940 255 1053 174 1163 242 1268 177 1440 263 V0 H0Z"/>
+        <rect width="1280" height="860" fill="#f8f8f5"/>
+        <path class="mountain back" d="M0 189 L92 123 142 160 214 72 284 154 351 81 415 165 495 109 562 176 651 83 730 162 817 110 903 165 1001 68 1084 157 1168 96 1280 174 V0 H0Z"/>
+        <path class="mountain front" d="M0 270 L92 188 150 235 224 139 295 226 389 159 475 240 564 155 654 231 747 150 841 237 943 157 1042 226 1136 161 1280 244 V0 H0Z"/>
         <g class="contours">
-          <path d="M28 324 C225 282 345 309 486 275 S823 244 1042 300 1298 333 1415 304"/>
-          <path d="M18 358 C240 306 398 337 553 303 S867 274 1073 328 1310 367 1426 343"/>
-          <path d="M13 395 C230 343 392 378 560 343 S901 310 1106 365 1314 404 1435 379"/>
-          <path d="M10 429 C230 383 400 413 586 378 S945 354 1158 400 1340 433 1430 420"/>
+          <path d="M25 307 C211 265 316 292 441 256 S748 225 941 282 1162 313 1260 286"/>
+          <path d="M18 337 C220 286 355 316 493 282 S783 250 960 303 1157 341 1268 318"/>
+          <path d="M13 370 C211 313 354 347 501 313 S813 280 998 334 1164 369 1274 349"/>
+          <path d="M13 402 C211 352 354 382 520 347 S849 323 1041 370 1188 401 1270 391"/>
         </g>
-        <path class="town-boundary" d="M186 382 C323 272 510 254 679 282 C877 253 1061 312 1188 431 C1262 500 1231 642 1124 727 C970 850 703 829 501 803 C317 780 164 713 125 596 C90 493 115 439 186 382Z"/>
-        <ellipse class="core-halo" cx="721" cy="548" rx="420" ry="252"/>
-        <path class="activity-core" d="M353 409 C463 338 627 329 779 354 C928 339 1042 388 1088 471 C1127 544 1066 638 971 684 C837 751 624 733 471 703 C362 682 280 616 274 537 C268 479 297 439 353 409Z"/>
-        <path class="river" d="M77 707 C221 646 339 697 465 653 C605 603 691 667 811 626 C941 580 1065 629 1355 555"/>
+        <path class="town-boundary" d="M168 360 C289 257 456 242 607 267 C782 239 947 294 1061 403 C1128 468 1100 601 1004 682 C868 799 629 780 448 756 C284 735 147 671 112 562 C81 466 103 414 168 360Z"/>
+        <ellipse class="core-halo" cx="643" cy="507" rx="365" ry="236"/>
+        <path class="activity-core" d="M313 386 C410 320 557 313 692 337 C824 323 926 369 967 447 C1002 515 948 603 864 647 C745 711 556 693 420 665 C323 645 250 583 244 510 C239 456 264 414 313 386Z"/>
+        <path class="river" d="M69 662 C196 603 301 651 413 609 C537 562 615 622 721 583 C836 540 946 586 1203 518"/>
         <g class="roads">
-          <path d="M223 603 C409 522 586 495 1096 450"/>
-          <path d="M314 714 C450 588 565 459 743 329"/>
-          <path d="M366 367 C499 470 688 569 996 691"/>
-          <path d="M173 495 C454 488 776 439 1150 498"/>
-          <path d="M532 765 C595 618 781 466 1051 370"/>
-          <path d="M373 632 C555 662 778 670 1058 603"/>
+          <path d="M200 568 C365 492 521 467 973 425"/><path d="M281 668 C401 550 504 430 661 309"/>
+          <path d="M327 346 C445 442 612 535 886 650"/><path d="M154 467 C402 460 688 414 1021 470"/>
+          <path d="M474 715 C530 578 694 436 933 347"/><path d="M333 596 C493 624 691 632 939 568"/>
         </g>
         <g class="minor-roads">
-          <path d="M361 454 C477 515 572 581 644 668"/>
-          <path d="M492 365 C588 434 714 487 927 516"/>
-          <path d="M597 377 C637 471 712 558 842 688"/>
-          <path d="M865 377 C835 464 864 562 959 648"/>
-          <path d="M269 530 C382 574 474 632 554 718"/>
-          <path d="M781 348 C884 409 997 438 1134 446"/>
+          <path d="M321 429 C424 486 508 548 572 630"/><path d="M438 344 C523 409 635 458 824 485"/>
+          <path d="M531 354 C566 442 633 524 748 647"/><path d="M769 354 C742 435 768 526 852 607"/>
         </g>
         <g class="blocks">
-          <rect x="443" y="447" width="72" height="45" rx="7"/><rect x="537" y="424" width="60" height="61" rx="7"/>
-          <rect x="624" y="478" width="86" height="46" rx="7"/><rect x="729" y="431" width="68" height="55" rx="7"/>
-          <rect x="820" y="497" width="91" height="48" rx="7"/><rect x="580" y="575" width="70" height="53" rx="7"/>
-          <rect x="682" y="610" width="81" height="45" rx="7"/><rect x="787" y="593" width="61" height="58" rx="7"/>
-          <rect x="419" y="555" width="64" height="42" rx="7"/><rect x="922" y="423" width="68" height="44" rx="7"/>
-          <rect x="520" y="518" width="54" height="37" rx="6"/><rect x="928" y="560" width="76" height="42" rx="6"/>
-          <rect x="689" y="509" width="58" height="39" rx="6"/><rect x="1008" y="492" width="64" height="40" rx="6"/>
+          <rect x="394" y="421" width="64" height="42" rx="7"/><rect x="478" y="399" width="53" height="57" rx="7"/>
+          <rect x="555" y="450" width="76" height="43" rx="7"/><rect x="648" y="405" width="60" height="51" rx="7"/>
+          <rect x="729" y="468" width="80" height="45" rx="7"/><rect x="516" y="541" width="62" height="50" rx="7"/>
+          <rect x="606" y="574" width="72" height="42" rx="7"/><rect x="699" y="558" width="54" height="55" rx="7"/>
+          <rect x="373" y="522" width="57" height="40" rx="7"/><rect x="819" y="398" width="60" height="41" rx="7"/>
         </g>
-        <g class="district-labels">
-          <text x="470" y="564">PROMENADE</text>
-          <text x="879" y="556">OBERBORT</text>
-          <text x="547" y="673">WISPILEN</text>
-          <text x="914" y="693">GSTEIGSTRASSE</text>
-        </g>
+        <g class="district-labels"><text x="414" y="530">PROMENADE</text><text x="783" y="523">OBERBORT</text><text x="485" y="633">WISPILEN</text><text x="813" y="650">GSTEIGSTRASSE</text></g>
         <g class="peak-labels">
-          <text x="152" y="155">WASSERNGRAT<tspan x="152" dy="18">ALPINE RIDGE</tspan></text>
-          <text x="460" y="124">WISPILE<tspan x="460" dy="18">1,907 M</tspan></text>
-          <text x="930" y="120">EGGLI<tspan x="930" dy="18">1,557 M</tspan></text>
-          <text x="1181" y="207">LA VIDEMANETTE<tspan x="1181" dy="18">2,285 M</tspan></text>
+          <text x="135" y="141">WASSERNGRAT<tspan x="135" dy="18">ALPINE RIDGE</tspan></text>
+          <text x="411" y="113">WISPILE<tspan x="411" dy="18">1,907 M</tspan></text>
+          <text x="821" y="109">EGGLI<tspan x="821" dy="18">1,557 M</tspan></text>
+          <text x="1047" y="191">LA VIDEMANETTE<tspan x="1047" dy="18">2,285 M</tspan></text>
         </g>
-        <text class="gstaad-label" x="658" y="568">G S T A A D</text>
+        <text class="gstaad-label" x="586" y="532">G S T A A D</text>
       </svg>
 
-      <div class="poi-layer" id="poiLayer"></div>
-      <div class="user-position" id="userPosition" hidden><i></i><span>You are here</span></div>
-
-      <header class="glass-nav">
-        <a class="brand" href="/" aria-label="KŌMØ home">KŌMØ</a>
-        <nav aria-label="Primary">
-          <a href="/">Home</a>
-          <a class="active" href="/Experiences/">Experiences</a>
-          <a href="/world/">World</a>
-        </nav>
-        <div class="season"><span class="season-dot"></span><strong>GSTAAD</strong><span>WINTER 26/27</span></div>
-      </header>
-
-      <div class="map-title">
-        <p>KŌMØ EXPERIENCE · DESTINATION 01</p>
-        <h1>Gstaad</h1>
-        <span>One chalet. One in-hotel Motion Lab. Three mobile experience units.</span>
-      </div>
-
-      <aside class="operations" id="operations" aria-label="Gstaad operations">
-        <div class="operations-head">
-          <div><p>FIELD MAP</p><h2>Gstaad Operations</h2></div>
-          <button id="operationsToggle" aria-label="Collapse operations">−</button>
-        </div>
-
-        <div class="stats">
-          <button data-status-filter="all" class="stat active"><strong id="statTargets">0</strong><span>Targets</span></button>
-          <button data-status-filter="introduced" class="stat"><strong id="statIntroduced">0</strong><span>Introduced</span></button>
-          <button data-status-filter="met" class="stat"><strong id="statMet">0</strong><span>Met</span></button>
-          <button data-status-filter="partner" class="stat"><strong id="statPartners">0</strong><span>Partners</span></button>
-        </div>
-
-        <div class="category-tabs" role="tablist" aria-label="Target categories">
-          <button class="category-tab active" data-category="all">All</button>
-          <button class="category-tab" data-category="oyster">Oyster</button>
-          <button class="category-tab" data-category="lab">Motion Lab</button>
-          <button class="category-tab" data-category="hotel">Hotels</button>
-        </div>
-
-        <div class="search-row">
-          <input id="targetSearch" type="search" placeholder="Search Gstaad…" autocomplete="off">
-          <span id="resultCount">0</span>
-        </div>
-        <div class="target-list" id="targetList"></div>
-        <div class="operations-foot"><span>PRIVATE WORKSPACE</span><span>KŌMØ · CH</span></div>
-      </aside>
-
-      <div class="map-controls">
-        <button id="locateBtn" title="Locate me" aria-label="Locate me">◎</button>
-        <button id="priorityBtn" title="Priority mode" aria-label="Priority mode">P1</button>
-        <button id="resetBtn" title="Reset map" aria-label="Reset map">↺</button>
-      </div>
-
-      <section class="fleet-dock" id="fleetDock" aria-label="KŌMØ mobile experience fleet">
-        <div class="fleet-intro"><small>MOBILE EXPERIENCE FLEET</small><strong>3 deployable units</strong><span>Private homes · paid experiences · events</span></div>
-        <button class="fleet-unit" data-fleet="motion"><i>01</i><span><strong>KŌMØ Motion</strong><small>Assessment</small></span></button>
-        <button class="fleet-unit" data-fleet="recovery"><i>02</i><span><strong>KŌMØ Recovery</strong><small>Recovery & care</small></span></button>
-        <button class="fleet-unit" data-fleet="performance"><i>03</i><span><strong>KŌMØ Performance</strong><small>Performance & follow-up</small></span></button>
-      </section>
-
-      <aside class="detail-panel closed" id="detailPanel" aria-live="polite">
-        <button class="detail-close" id="detailClose" aria-label="Close details">×</button>
-        <div class="detail-visual">
-          <div class="visual-ridge one"></div><div class="visual-ridge two"></div>
-          <div class="visual-object" id="visualObject"><i></i><i></i><i></i></div>
-          <span id="detailVisualLabel">KŌMØ · GSTAAD</span>
-        </div>
-        <div class="detail-body">
-          <div class="detail-topline"><span id="detailType">HOTEL</span><b id="detailPriority">P1</b></div>
-          <h2 id="detailName">Gstaad Palace</h2>
-          <p id="detailSubtitle">Luxury hotel · wellness</p>
-
-          <div class="detail-fields">
-            <div><small>LOCATION</small><span id="detailAddress">Gstaad</span></div>
-            <div><small>OBJECTIVE</small><span id="detailObjective">Concierge introduction</span></div>
-          </div>
-
-          <div class="detail-actions">
-            <a id="phoneButton" class="primary hidden">Call concierge ↗</a>
-            <a id="directionsButton" target="_blank" rel="noreferrer">Directions ↗</a>
-            <a id="websiteButton" class="hidden" target="_blank" rel="noreferrer">Website ↗</a>
-          </div>
-
-          <div class="concept-card hidden" id="labConcept">
-            <small>IN-HOTEL MOTION LAB</small>
-            <strong>Identical modular pop-up</strong>
-            <p>Low design barriers define the Lab perimeter. KŌMØ cases become the furniture and technical stations; sensors create the guest movement pathway inside the hotel.</p>
-          </div>
-
-          <label class="field-label" for="statusSelect">PIPELINE</label>
-          <select id="statusSelect">
-            <option value="target">Target</option>
-            <option value="introduced">Introduced</option>
-            <option value="contacted">Contacted</option>
-            <option value="met">Met</option>
-            <option value="partner">Partner</option>
-            <option value="active">Active</option>
-            <option value="hold">Hold</option>
-          </select>
-
-          <label class="field-label" for="notesField">FIELD NOTES</label>
-          <textarea id="notesField" rows="4" placeholder="Names, introductions, next steps…"></textarea>
-          <div class="save-line"><span id="saveState">Saved locally</span><button id="clearNote">Clear</button></div>
-
-          <div class="next-card"><small>NEXT ACTION</small><strong id="detailNext">Qualify concierge and management access.</strong></div>
-        </div>
-      </aside>
+      <div id="poiLayer" class="poi-layer" aria-label="Targets on map"></div>
 
       <div class="map-legend">
-        <span><i class="dot oyster"></i>Oyster Chalet</span>
-        <span><i class="dot lab"></i>Motion Lab</span>
-        <span><i class="dot hotel"></i>Hotel + Spa</span>
+        <span><i class="dot chalet"></i>Chalet</span><span><i class="dot hotel"></i>5★ + Spa</span>
+        <span><i class="dot shop"></i>Luxury / Social</span><span><i class="dot person"></i>People</span>
       </div>
+      <div class="map-footer"><span>PRIVATE WORKSPACE</span><span>KŌMØ · GSTAAD · CH</span></div>
     </section>
+
+    <aside class="operations" aria-label="Gstaad operations">
+      <div class="operations-head">
+        <div><p>WINTER 01 · FIELD CRM</p><h2>Gstaad Operations</h2></div>
+        <div class="completion"><strong id="validatedCount">0</strong><span>validated</span></div>
+      </div>
+
+      <div class="stats" aria-label="Pipeline">
+        <button data-status-filter="all" class="stat active"><strong id="statTargets">0</strong><span>Targets</span></button>
+        <button data-status-filter="introduced" class="stat"><strong id="statIntroduced">0</strong><span>Introduced</span></button>
+        <button data-status-filter="met" class="stat"><strong id="statMet">0</strong><span>Met</span></button>
+        <button data-status-filter="partner" class="stat"><strong id="statPartners">0</strong><span>Partners</span></button>
+      </div>
+
+      <div class="category-tabs" role="tablist" aria-label="Target categories">
+        <button class="category-tab active" data-category="chalet"><span>01</span>Chalet</button>
+        <button class="category-tab" data-category="hotel"><span>02</span>Hotels</button>
+        <button class="category-tab" data-category="shop"><span>03</span>Shops</button>
+        <button class="category-tab" data-category="person"><span>04</span>People</button>
+      </div>
+
+      <div class="search-row">
+        <input id="targetSearch" type="search" placeholder="Search target, brand or role…" autocomplete="off" aria-label="Search targets">
+        <span id="resultCount">0</span>
+      </div>
+
+      <div class="target-list" id="targetList"></div>
+
+      <section class="detail-card" id="detailCard" aria-live="polite">
+        <button class="detail-close" id="detailClose" aria-label="Close target details">×</button>
+        <div class="detail-topline"><span class="type-pill" id="detailType">CHALET</span><span class="priority-pill" id="detailPriority">P1</span></div>
+        <h3 id="detailName">KŌMØ House — Gstaad</h3>
+        <p class="detail-subtitle" id="detailSubtitle">Operational base · private chalet</p>
+
+        <div class="detail-fields">
+          <div><small>LOCATION</small><span id="detailAddress">Gstaad · exact property TBC</span></div>
+          <div><small>OBJECTIVE</small><span id="detailObjective">Secure winter operating base</span></div>
+        </div>
+
+        <div class="detail-actions">
+          <a id="directionsButton" target="_blank" rel="noreferrer">Open map ↗</a>
+          <a id="phoneButton" class="hidden">Call ↗</a>
+          <a id="websiteButton" class="hidden" target="_blank" rel="noreferrer">Website ↗</a>
+        </div>
+
+        <label class="field-label" for="statusSelect">PIPELINE STATUS</label>
+        <select id="statusSelect">
+          <option value="target">Target</option><option value="introduced">Introduced</option><option value="contacted">Contacted</option>
+          <option value="met">Met</option><option value="partner">Partner</option><option value="active">Active</option><option value="hold">Hold</option>
+        </select>
+
+        <label class="field-label" for="notesField">FIELD NOTES</label>
+        <textarea id="notesField" rows="4" placeholder="Names, introductions, next steps…"></textarea>
+        <div class="save-line"><span id="saveState">Saved locally</span><button id="clearNote">Clear note</button></div>
+
+        <div class="next-card"><small>NEXT ACTION</small><strong id="detailNext">Select a chalet and confirm operating constraints.</strong></div>
+      </section>
+    </aside>
   </main>
-  <script src="/Experiences/app.js?v=20261004-fs3" defer></script>
+  <script src="/Experiences/app.js?v=20261004-gstaad-crm-2" defer></script>
 </body>
 </html>
