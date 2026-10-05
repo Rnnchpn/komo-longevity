@@ -29,7 +29,7 @@ footer{text-align:center;color:#686560;font-size:10px;margin-top:19px;letter-spa
   <div class="logo">KŌMØ · PRIVATE</div>
   <div class="hero">
     <h1>PYJAMA CLUB<br><em>HOT</em> EDITION</h1>
-    <p>Une carte, une réponse. Si tu refuses : gage obligatoire. Chaque téléphone garde sa propre édition et son propre score.</p>
+    <p>100 % HOT. Attirance, séduction, dating et confidences. Si tu refuses : gage obligatoire.</p>
   </div>
 
   <div class="card">
@@ -47,7 +47,7 @@ footer{text-align:center;color:#686560;font-size:10px;margin-top:19px;letter-spa
   <div class="card">
     <div class="cat" id="cat">READY</div>
     <div class="question" id="question">Appuie sur « Tirer une carte ».</div>
-    <div class="meta">Les cartes photo concernent uniquement des contenus personnels que tu choisis volontairement de montrer. Rien d’intime ni concernant un tiers sans son accord.</div>
+    <div class="meta">HOT, mais privé : uniquement des contenus personnels que tu choisis volontairement de montrer. Rien d’intime ni concernant un tiers sans son accord.</div>
   </div>
 
   <div class="buttons">
@@ -78,99 +78,94 @@ const PLAYERS={renan:"Renan",ugo:"Ugo",stephanie:"Stéphanie"};
 const raw=new URLSearchParams(location.search).get("player");
 const player=PLAYERS[raw]?raw:"renan";
 const owner=PLAYERS[player];
-const KEY="komo_pyjama_hot_"+player+"_v3";
+const KEY="komo_pyjama_hot_"+player+"_v4";
 
 const decks={
-"🔥 HOT":[
+"🔥 HOT ONLY":[
+"Quelle est la personne que tu as trouvée la plus attirante au premier regard ces derniers mois — sans forcément donner son nom ?",
+"Montre une photo de toi où tu te trouves vraiment très séduisant. Les deux autres expliquent ce qui fonctionne.",
 "Quel est ton plus gros pouvoir de séduction — celui que tu sais exactement quand utiliser ?",
-"Montre une photo de toi où tu te trouves vraiment très séduisant. Les deux autres doivent expliquer pourquoi elle fonctionne.",
-"Parmi nous trois, qui a le plus de chances de séduire quelqu’un sans même essayer ? Classement obligatoire.",
-"Quel est ton red flag préféré — celui que tu vois très bien mais que tu risques quand même d’ignorer ?",
-"Quelle célébrité correspond le mieux à ton type absolu ? Défends ton choix.",
-"Quel compliment peut immédiatement te faire perdre une partie de ton objectivité ?",
-"Quel détail physique ou vestimentaire remarques-tu en premier chez quelqu’un qui te plaît ?",
-"Montre une tenue de ton téléphone que tu porterais pour un rendez-vous où tu veux clairement impressionner.",
+"Quel détail physique te fait immédiatement remarquer quelqu’un ?",
+"Quel détail de style te fait instantanément monter quelqu’un dans ton classement ?",
+"Quel type de regard te fait perdre un peu de contenance ?",
+"Quelle célébrité correspond le mieux à ton type absolu ?",
+"Quel compliment peut vraiment te déstabiliser ?",
+"Quel est ton red flag préféré — celui que tu repères mais qui peut quand même t’attirer ?",
+"Quel type de personnalité t’attire alors que tu sais que ce n’est probablement pas raisonnable ?",
 "Quelle est la chose la plus superficielle qui peut suffire à déclencher ton intérêt ?",
-"Qui autour de cette table aurait le plus de chances de t’entraîner dans une très mauvaise idée à 2 h du matin ?",
-"Quel est ton meilleur talent de flirt : regard, humour, intelligence, style, mystère, audace ou autre ?",
-"Quelle est la dernière personne qui t’a vraiment impressionné au premier regard — sans donner de nom si tu préfères ?",
+"Montre une tenue de ton téléphone que tu porterais si tu voulais clairement impressionner quelqu’un.",
+"Parmi nous trois, qui a le plus de pouvoir de séduction naturel ? Classement obligatoire.",
+"Parmi nous trois, qui flirterait le mieux sans prononcer un seul mot ?",
 "À quel signe précis sais-tu généralement que tu plais à quelqu’un ?",
-"Quel type de personnalité t’attire alors que tu sais pertinemment que ce n’est pas toujours une bonne idée ?",
-"Si ta vie sentimentale était une maison de luxe, laquelle serait-elle aujourd’hui — et pourquoi ?"
-],
-"📸 CAMERA ROLL":[
-"Montre la 7e photo en partant de la fin et raconte exactement le contexte.",
-"Montre une photo récente qui résume le mieux ta vie actuelle.",
-"Montre une photo que les deux autres n’ont jamais vue et qui révèle quelque chose de vrai sur toi.",
-"Montre la photo la plus absurde prise au cours des 30 derniers jours.",
-"Montre une capture d’écran récente que tu peux partager et explique pourquoi tu l’as gardée.",
-"Montre une photo d’un endroit où tu voudrais être demain matin.",
-"Montre une photo d’un achat dont tu es beaucoup trop fier.",
-"Montre une photo où tu étais réellement heureux, sans mise en scène.",
-"Montre une photo qui représente ta définition personnelle de la réussite.",
-"Montre une photo de toi vieille d’au moins cinq ans. Les deux autres disent ce qui a le plus changé.",
-"Choisis une photo qui pourrait devenir la couverture du livre sur ta vie.",
-"Montre une photo qui serait parfaite pour un roast bienveillant de toi.",
-"Montre ta meilleure photo de voyage actuelle.",
-"Montre une photo qui prouve que tu as déjà traversé une phase esthétique discutable.",
-"Montre une photo correspondant à un goût ou une passion que tes associés connaissent mal."
-],
-"🧠 ASSOCIÉS":[
-"Quel est ton plus grand point fort professionnel que les deux autres sous-estiment encore ?",
-"Quel défaut chez toi pourrait réellement mettre un projet commun en danger s’il n’est pas contrôlé ?",
-"Qu’est-ce que tu attends de tes associés mais que tu n’as jamais formulé clairement ?",
-"Qui est le meilleur vendeur, le meilleur opérateur et le meilleur visionnaire ? Un nom par catégorie.",
-"Quelle décision récente aurais-tu prise différemment si tu avais eu le dernier mot ?",
-"Si vous perdez 80 % de vos ressources demain, quelle seule activité gardes-tu ?",
-"Dans cinq ans, quel rôle veux-tu réellement avoir — indépendamment de ton titre actuel ?",
-"Quel conflit potentiel entre vous trois mérite d’être réglé avant même d’exister ?",
-"Sur quelle décision veux-tu conserver un droit de veto absolu ?",
-"À quoi ressemble ta semaine idéale dans dix ans ?",
-"Ton moteur principal est-il gagner, créer, être libre, être reconnu, transmettre, construire ou autre ?",
-"Quelle peur influence le plus tes décisions professionnelles sans que les autres la voient ?",
-"Si tu devais confier ton patrimoine entier à l’un des deux autres pendant un an, qui choisis-tu et pourquoi ?",
-"Quel comportement d’un des deux autres te rassure le plus en période de crise ?",
-"Qu’aimerais-tu que les deux autres disent de toi lorsque tu n’es pas dans la pièce ?"
-],
-"🎯 VÉRITÉ":[
-"Quelle vérité sur toi t’a pris plusieurs années à accepter ?",
-"Quelle est ta plus grosse insécurité actuelle ?",
-"Quel jugement que les gens portent souvent sur toi est au moins partiellement vrai ?",
-"Quelle habitude aimerais-tu que personne autour de cette table ne copie chez toi ?",
-"Quelle décision passée referais-tu exactement de la même façon malgré toutes ses conséquences ?",
-"Quel est le plus grand risque que tu serais prêt à prendre dans les douze prochains mois ?",
-"Quel est ton luxe réellement non négociable ?",
-"Quelle partie de ta personnalité est très différente en privé et en public ?",
-"Quelle est la dernière chose qui t’a rendu sincèrement jaloux ?",
-"Quel échec t’a le plus appris ?",
-"Quelle chose irrationnelle a énormément d’importance pour toi ?",
-"Quel sacrifice professionnel refuses-tu désormais de faire, même pour beaucoup d’argent ?",
-"Quelle somme disponible te ferait te sentir réellement libre ? Donne un chiffre.",
-"Quel est le trait de caractère que tu voudrais corriger avant tes 40 ans ?",
-"Quel est le meilleur conseil qu’une personne t’ait donné et que tu n’as pas suivi assez tôt ?"
+"Quel est ton meilleur talent de flirt : regard, humour, style, intelligence, mystère, audace ou autre ?",
+"Quelle est la situation la plus improbable dans laquelle tu as déjà ressenti une vraie attirance pour quelqu’un ?",
+"Quel est le trait de caractère qui peut rendre quelqu’un immédiatement irrésistible pour toi ?",
+"Quel trait de caractère peut transformer quelqu’un de très beau en personne totalement inintéressante ?",
+"Si tu devais choisir : attraction immédiate ou tension qui monte lentement ?",
+"Qu’est-ce qui est plus séduisant pour toi : confiance absolue ou légère timidité ?",
+"Quel est le type de rendez-vous qui a le plus de chances de te séduire vraiment ?",
+"Quel lieu serait parfait pour ton rendez-vous idéal, sans contrainte de budget ?",
+"Quel est le geste le plus séduisant qu’une personne puisse faire sans te toucher ?",
+"Quel est le message le plus efficace pour te donner envie de revoir quelqu’un ?",
+"Quel comportement te fait immédiatement comprendre que quelqu’un sait séduire ?",
+"Montre une photo de toi que tu n’as pas postée parce qu’elle était peut-être un peu trop séduisante.",
+"Quelle photo de toi utiliserais-tu si ton seul objectif était de provoquer un crush ?",
+"Quel est ton style vestimentaire préféré chez quelqu’un qui t’attire ?",
+"Quel parfum ou type d’odeur te semble particulièrement séduisant ?",
+"Quel accent trouves-tu le plus attirant ?",
+"Quelle voix te fait le plus d’effet : grave, douce, assurée, légèrement cassée ou autre ?",
+"Qu’est-ce qui te séduit le plus : quelqu’un qui te ressemble beaucoup ou quelqu’un qui est ton opposé ?",
+"Quel est le plus gros risque romantique que tu serais réellement capable de prendre ?",
+"Est-ce que tu préfères séduire ou être séduit ? Pourquoi ?",
+"Quel est le moment précis d’un rendez-vous où tu sais généralement si ça va continuer ou non ?",
+"Quel est le plus beau compliment qu’on puisse te faire sur ton physique ?",
+"Quel est le plus beau compliment qu’on puisse te faire sur ta personnalité ?",
+"Quelle qualité chez toi penses-tu être beaucoup plus séduisante que les gens ne le réalisent au départ ?",
+"Quelle faiblesse chez toi peut paradoxalement te rendre plus séduisant ?",
+"Quelle est ta pire habitude quand quelqu’un te plaît vraiment ?",
+"Quelle est la chose la plus ridicule que tu pourrais faire parce que quelqu’un te plaît beaucoup ?",
+"Quelle est la dernière fois où quelqu’un t’a fait réellement rougir ou perdre tes moyens ?",
+"Quelle personne célèbre serait totalement une mauvaise idée pour toi mais exactement ton style ?",
+"Si tu pouvais recevoir un seul message ce soir d’une personne de ton choix, de qui viendrait-il ?",
+"Quel est ton niveau de jalousie réel sur 10 lorsqu’une personne te plaît vraiment ?",
+"Tu préfères quelqu’un très demandé par les autres ou quelqu’un plus discret ?",
+"Quel est le plus gros turn-off lors d’un premier rendez-vous ?",
+"Quel est le plus gros green flag lors d’un premier rendez-vous ?",
+"Qu’est-ce qui est plus séduisant : quelqu’un de très drôle ou quelqu’un de très mystérieux ?",
+"Qu’est-ce qui est plus séduisant : pouvoir, intelligence, beauté, style ou gentillesse ? Classe les cinq.",
+"Quelle est ta faiblesse absolue chez quelqu’un qui te plaît ?",
+"Si les deux autres devaient te présenter quelqu’un, quel critère devraient-ils absolument respecter ?",
+"Quel type de personne tes amis diraient-ils que tu choisis toujours, même quand tu prétends le contraire ?",
+"Quelle est la différence entre la personne qui t’attire et la personne avec qui tu pourrais vraiment construire quelque chose ?",
+"Quel est le type de tension romantique que tu préfères : immédiate, interdite, compétitive, intellectuelle ou très lente ?",
+"Quelle est la chose la plus audacieuse que tu aies déjà dite à quelqu’un qui te plaisait ?",
+"Quelle est la chose la plus audacieuse qu’on t’ait dite et qui ait réellement fonctionné ?",
+"Qui autour de cette table aurait le plus de chances de t’entraîner dans une très mauvaise idée à 2 h du matin ? Pourquoi ?",
+"Si ta vie sentimentale était une maison de luxe aujourd’hui, laquelle serait-elle et pourquoi ?",
+"Si ton pouvoir de séduction avait une signature, ce serait quoi en trois mots ?"
 ]};
 
 const dares=[
-"Fais un pitch de 45 secondes expliquant pourquoi tu es l’associé indispensable de ce trio. Interdiction d’être modeste.",
-"Imite les deux autres, l’un après l’autre, jusqu’à ce qu’ils se reconnaissent.",
-"Les deux autres choisissent une photo de ta pellicule que tu acceptes de montrer : raconte toute l’histoire derrière.",
-"Fais le classement des trois : style, audace et discipline. Un classement différent pour chaque catégorie.",
-"Donne à chacun des deux autres un surnom qui résume parfaitement son rôle réel dans le trio.",
-"Défends pendant 60 secondes une opinion impopulaire que tu as réellement.",
-"Les deux autres choisissent un mot. Fais un discours de CEO d’une minute en plaçant ce mot cinq fois.",
-"Fais une fausse annonce de 20 secondes comme si KŌMØ venait de devenir une licorne.",
-"Donne un conseil de vie sincère et directement utile à chacun des deux autres.",
-"Choisis l’un des deux autres et fais son éloge pendant 30 secondes, sans ironie.",
-"Raconte ton pire achat comme si c’était en réalité un investissement visionnaire.",
-"Invente en 30 secondes la devise officielle de votre trio. Les deux autres votent.",
-"Montre la photo la plus ancienne de ton téléphone que tu acceptes de partager.",
-"Fais 20 secondes de playback théâtral sur la chanson choisie par les deux autres.",
-"Réponds à deux questions flash, une par associé, avec seulement trois secondes de réflexion.",
-"Vends aux deux autres un objet présent dans la pièce comme s’il valait 100 000 €.",
-"Pendant le prochain tour, parle comme si vous étiez tous les trois au conseil d’administration d’un groupe coté.",
-"Décris chacun des deux autres en exactement trois mots : un positif, un dangereux, un hilarant.",
-"Fais une mini-story fictive annonçant votre vie dans dix ans comme si elle venait réellement d’arriver.",
-"Donne ton pronostic sur lequel de vous trois sera le plus difficile à gérer si KŌMØ vaut 500 M€."
+"Regarde chacun des deux autres dans les yeux pendant 10 secondes sans rire.",
+"Fais ton meilleur regard de séduction pendant cinq secondes. Les deux autres donnent une note sur 10.",
+"Donne à chacun des deux autres son meilleur atout de séduction, sans ironie.",
+"Montre la photo de toi que tu utiliserais pour faire craquer quelqu’un.",
+"Improviser pendant 30 secondes ton arrivée parfaite à un premier rendez-vous.",
+"Les deux autres choisissent lequel de tes traits est le plus séduisant. Tu dois défendre leur choix comme si c’était une campagne publicitaire.",
+"Décris ton type idéal en exactement cinq critères, pas un de plus.",
+"Fais un compliment très précis à chacun des deux autres.",
+"Raconte ton meilleur souvenir de flirt en moins de 45 secondes.",
+"Choisis entre les deux autres : qui ferait le meilleur wingman ou wingwoman pour toi, et pourquoi ?",
+"Les deux autres choisissent un mot. Tu dois l’intégrer dans une phrase de flirt crédible.",
+"Fais une fausse présentation de 30 secondes de toi-même comme si tu étais le célibataire le plus convoité de la Côte d’Azur.",
+"Montre une tenue que tu considères comme ton uniforme de séduction.",
+"Fais le classement des trois sur : regard, style, confiance. Un classement par catégorie.",
+"Décris le rendez-vous parfait pour toi en 20 secondes, sans parler d’argent.",
+"Dis quelle célébrité tu inviterais immédiatement à dîner et ce que tu lui proposerais comme programme.",
+"Les deux autres te donnent chacun une phrase de flirt. Tu dois choisir celle qui aurait le plus de chances de fonctionner sur toi.",
+"Donne ton avis sur le pouvoir de séduction de chacun des deux autres en une phrase seulement.",
+"Fais une mini-story de 15 secondes comme si tu venais de rencontrer la personne parfaite.",
+"Choisis le trait de séduction que tu voudrais voler à l’un des deux autres."
 ];
 
 let state={score:0,cards:0,refusals:0,used:{},active:false,dare:false};
