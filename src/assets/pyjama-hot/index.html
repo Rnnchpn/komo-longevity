@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#08080a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>KŌMØ Pyjama Club — HOT Edition</title>
+<style>
+:root{--bg:#08080a;--card:#151518;--card2:#1d1d21;--ink:#f7f2e8;--muted:#a7a39d;--red:#ff355d;--gold:#d7b36d;--green:#58d394}
+*{box-sizing:border-box}html,body{margin:0;background:radial-gradient(circle at 15% 0,rgba(255,53,93,.18),transparent 30%),radial-gradient(circle at 100% 18%,rgba(215,179,109,.11),transparent 33%),var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;min-height:100%}
+body{min-height:100vh}.wrap{max-width:760px;margin:auto;padding:calc(22px + env(safe-area-inset-top)) 16px calc(44px + env(safe-area-inset-bottom))}
+.logo{font-weight:900;letter-spacing:.28em;font-size:12px;color:var(--gold);text-align:center}.hero{text-align:center;padding:12px 0 18px}.hero h1{margin:8px 0 5px;font-size:clamp(38px,12vw,66px);line-height:.88;letter-spacing:-.065em}.hero h1 em{font-family:Georgia,serif;font-weight:400;color:var(--red)}.hero p{margin:10px auto 0;max-width:520px;color:var(--muted);line-height:1.45;font-size:14px}
+.card{background:linear-gradient(180deg,var(--card2),var(--card));border:1px solid rgba(255,255,255,.075);box-shadow:0 20px 60px rgba(0,0,0,.32);border-radius:25px;padding:19px;margin:12px 0}
+.owner{display:flex;justify-content:space-between;gap:14px;align-items:center}.owner-name{font-size:33px;font-weight:900;letter-spacing:-.04em}.pill{display:inline-flex;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.045);padding:7px 10px;border-radius:999px;color:var(--muted);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.cat{font-size:12px;color:var(--gold);font-weight:900;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}.question{font-size:clamp(25px,7.1vw,39px);font-weight:880;line-height:1.05;letter-spacing:-.04em;min-height:235px;display:flex;align-items:center}
+.meta{color:var(--muted);font-size:12px;line-height:1.45;margin-top:10px}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+button,.linkbtn{border:0;border-radius:18px;padding:17px 12px;font-size:15px;font-weight:900;text-align:center;text-decoration:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;cursor:pointer}
+.primary{background:var(--ink);color:#0a0a0b}.refuse{background:var(--red);color:white}.ok{background:var(--green);color:#07130c}.ghost{background:#242429;color:white}.full{width:100%}
+.dare{display:none;border-color:rgba(255,53,93,.45);background:rgba(255,53,93,.08)}.dare h3{margin:0;color:#ff7890;font-size:12px;letter-spacing:.12em;text-transform:uppercase}.dareText{font-size:28px;font-weight:900;line-height:1.06;letter-spacing:-.03em;margin:10px 0 17px}
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}.stat{background:#0f0f11;border-radius:14px;padding:12px;text-align:center}.stat strong{display:block;font-size:21px}.stat span{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.switcher{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:11px}.switcher a{color:white;background:#222227;border-radius:13px;padding:11px 5px;text-align:center;text-decoration:none;font-size:12px;font-weight:850}.switcher a.active{background:var(--gold);color:#111}
+footer{text-align:center;color:#686560;font-size:10px;margin-top:19px;letter-spacing:.08em}
+@media(max-width:520px){.buttons{grid-template-columns:1fr}.question{min-height:260px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">KŌMØ · PRIVATE</div>
+  <div class="hero">
+    <h1>PYJAMA CLUB<br><em>HOT</em> EDITION</h1>
+    <p>Une carte, une réponse. Si tu refuses : gage obligatoire. Chaque téléphone garde sa propre édition et son propre score.</p>
+  </div>
+
+  <div class="card">
+    <div class="owner">
+      <div><div class="pill">Cette édition appartient à</div><div class="owner-name" id="owner">RENAN</div></div>
+      <div class="pill" id="turn">Carte 0</div>
+    </div>
+    <div class="switcher">
+      <a id="link-renan" href="?player=renan">Renan</a>
+      <a id="link-ugo" href="?player=ugo">Ugo</a>
+      <a id="link-stephanie" href="?player=stephanie">Stéphanie</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="cat" id="cat">READY</div>
+    <div class="question" id="question">Appuie sur « Tirer une carte ».</div>
+    <div class="meta">Les cartes photo concernent uniquement des contenus personnels que tu choisis volontairement de montrer. Rien d’intime ni concernant un tiers sans son accord.</div>
+  </div>
+
+  <div class="buttons">
+    <button id="draw" class="primary" onclick="drawCard()">Tirer une carte</button>
+    <button id="refuse" class="refuse" onclick="refuseCard()">Refus → gage</button>
+  </div>
+
+  <div class="card dare" id="dareBox">
+    <h3>Gage obligatoire</h3>
+    <div class="dareText" id="dareText"></div>
+    <button class="ok full" onclick="completeDare()">Gage fait ✓</button>
+  </div>
+
+  <div class="card">
+    <div class="stats">
+      <div class="stat"><strong id="score">0</strong><span>Courage</span></div>
+      <div class="stat"><strong id="cards">0</strong><span>Cartes</span></div>
+      <div class="stat"><strong id="refusals">0</strong><span>Refus</span></div>
+    </div>
+  </div>
+
+  <button class="ghost full" onclick="resetGame()">Réinitialiser mon édition</button>
+  <footer>KŌMØ PYJAMA CLUB · HOT EDITION · PRIVATE</footer>
+</div>
+
+<script>
+const PLAYERS={renan:"Renan",ugo:"Ugo",stephanie:"Stéphanie"};
+const raw=new URLSearchParams(location.search).get("player");
+const player=PLAYERS[raw]?raw:"renan";
+const owner=PLAYERS[player];
+const KEY="komo_pyjama_hot_"+player+"_v3";
+
+const decks={
+"🔥 HOT":[
+"Quel est ton plus gros pouvoir de séduction — celui que tu sais exactement quand utiliser ?",
+"Montre une photo de toi où tu te trouves vraiment très séduisant. Les deux autres doivent expliquer pourquoi elle fonctionne.",
+"Parmi nous trois, qui a le plus de chances de séduire quelqu’un sans même essayer ? Classement obligatoire.",
+"Quel est ton red flag préféré — celui que tu vois très bien mais que tu risques quand même d’ignorer ?",
+"Quelle célébrité correspond le mieux à ton type absolu ? Défends ton choix.",
+"Quel compliment peut immédiatement te faire perdre une partie de ton objectivité ?",
+"Quel détail physique ou vestimentaire remarques-tu en premier chez quelqu’un qui te plaît ?",
+"Montre une tenue de ton téléphone que tu porterais pour un rendez-vous où tu veux clairement impressionner.",
+"Quelle est la chose la plus superficielle qui peut suffire à déclencher ton intérêt ?",
+"Qui autour de cette table aurait le plus de chances de t’entraîner dans une très mauvaise idée à 2 h du matin ?",
+"Quel est ton meilleur talent de flirt : regard, humour, intelligence, style, mystère, audace ou autre ?",
+"Quelle est la dernière personne qui t’a vraiment impressionné au premier regard — sans donner de nom si tu préfères ?",
+"À quel signe précis sais-tu généralement que tu plais à quelqu’un ?",
+"Quel type de personnalité t’attire alors que tu sais pertinemment que ce n’est pas toujours une bonne idée ?",
+"Si ta vie sentimentale était une maison de luxe, laquelle serait-elle aujourd’hui — et pourquoi ?"
+],
+"📸 CAMERA ROLL":[
+"Montre la 7e photo en partant de la fin et raconte exactement le contexte.",
+"Montre une photo récente qui résume le mieux ta vie actuelle.",
+"Montre une photo que les deux autres n’ont jamais vue et qui révèle quelque chose de vrai sur toi.",
+"Montre la photo la plus absurde prise au cours des 30 derniers jours.",
+"Montre une capture d’écran récente que tu peux partager et explique pourquoi tu l’as gardée.",
+"Montre une photo d’un endroit où tu voudrais être demain matin.",
+"Montre une photo d’un achat dont tu es beaucoup trop fier.",
+"Montre une photo où tu étais réellement heureux, sans mise en scène.",
+"Montre une photo qui représente ta définition personnelle de la réussite.",
+"Montre une photo de toi vieille d’au moins cinq ans. Les deux autres disent ce qui a le plus changé.",
+"Choisis une photo qui pourrait devenir la couverture du livre sur ta vie.",
+"Montre une photo qui serait parfaite pour un roast bienveillant de toi.",
+"Montre ta meilleure photo de voyage actuelle.",
+"Montre une photo qui prouve que tu as déjà traversé une phase esthétique discutable.",
+"Montre une photo correspondant à un goût ou une passion que tes associés connaissent mal."
+],
+"🧠 ASSOCIÉS":[
+"Quel est ton plus grand point fort professionnel que les deux autres sous-estiment encore ?",
+"Quel défaut chez toi pourrait réellement mettre un projet commun en danger s’il n’est pas contrôlé ?",
+"Qu’est-ce que tu attends de tes associés mais que tu n’as jamais formulé clairement ?",
+"Qui est le meilleur vendeur, le meilleur opérateur et le meilleur visionnaire ? Un nom par catégorie.",
+"Quelle décision récente aurais-tu prise différemment si tu avais eu le dernier mot ?",
+"Si vous perdez 80 % de vos ressources demain, quelle seule activité gardes-tu ?",
+"Dans cinq ans, quel rôle veux-tu réellement avoir — indépendamment de ton titre actuel ?",
+"Quel conflit potentiel entre vous trois mérite d’être réglé avant même d’exister ?",
+"Sur quelle décision veux-tu conserver un droit de veto absolu ?",
+"À quoi ressemble ta semaine idéale dans dix ans ?",
+"Ton moteur principal est-il gagner, créer, être libre, être reconnu, transmettre, construire ou autre ?",
+"Quelle peur influence le plus tes décisions professionnelles sans que les autres la voient ?",
+"Si tu devais confier ton patrimoine entier à l’un des deux autres pendant un an, qui choisis-tu et pourquoi ?",
+"Quel comportement d’un des deux autres te rassure le plus en période de crise ?",
+"Qu’aimerais-tu que les deux autres disent de toi lorsque tu n’es pas dans la pièce ?"
+],
+"🎯 VÉRITÉ":[
+"Quelle vérité sur toi t’a pris plusieurs années à accepter ?",
+"Quelle est ta plus grosse insécurité actuelle ?",
+"Quel jugement que les gens portent souvent sur toi est au moins partiellement vrai ?",
+"Quelle habitude aimerais-tu que personne autour de cette table ne copie chez toi ?",
+"Quelle décision passée referais-tu exactement de la même façon malgré toutes ses conséquences ?",
+"Quel est le plus grand risque que tu serais prêt à prendre dans les douze prochains mois ?",
+"Quel est ton luxe réellement non négociable ?",
+"Quelle partie de ta personnalité est très différente en privé et en public ?",
+"Quelle est la dernière chose qui t’a rendu sincèrement jaloux ?",
+"Quel échec t’a le plus appris ?",
+"Quelle chose irrationnelle a énormément d’importance pour toi ?",
+"Quel sacrifice professionnel refuses-tu désormais de faire, même pour beaucoup d’argent ?",
+"Quelle somme disponible te ferait te sentir réellement libre ? Donne un chiffre.",
+"Quel est le trait de caractère que tu voudrais corriger avant tes 40 ans ?",
+"Quel est le meilleur conseil qu’une personne t’ait donné et que tu n’as pas suivi assez tôt ?"
+]};
+
+const dares=[
+"Fais un pitch de 45 secondes expliquant pourquoi tu es l’associé indispensable de ce trio. Interdiction d’être modeste.",
+"Imite les deux autres, l’un après l’autre, jusqu’à ce qu’ils se reconnaissent.",
+"Les deux autres choisissent une photo de ta pellicule que tu acceptes de montrer : raconte toute l’histoire derrière.",
+"Fais le classement des trois : style, audace et discipline. Un classement différent pour chaque catégorie.",
+"Donne à chacun des deux autres un surnom qui résume parfaitement son rôle réel dans le trio.",
+"Défends pendant 60 secondes une opinion impopulaire que tu as réellement.",
+"Les deux autres choisissent un mot. Fais un discours de CEO d’une minute en plaçant ce mot cinq fois.",
+"Fais une fausse annonce de 20 secondes comme si KŌMØ venait de devenir une licorne.",
+"Donne un conseil de vie sincère et directement utile à chacun des deux autres.",
+"Choisis l’un des deux autres et fais son éloge pendant 30 secondes, sans ironie.",
+"Raconte ton pire achat comme si c’était en réalité un investissement visionnaire.",
+"Invente en 30 secondes la devise officielle de votre trio. Les deux autres votent.",
+"Montre la photo la plus ancienne de ton téléphone que tu acceptes de partager.",
+"Fais 20 secondes de playback théâtral sur la chanson choisie par les deux autres.",
+"Réponds à deux questions flash, une par associé, avec seulement trois secondes de réflexion.",
+"Vends aux deux autres un objet présent dans la pièce comme s’il valait 100 000 €.",
+"Pendant le prochain tour, parle comme si vous étiez tous les trois au conseil d’administration d’un groupe coté.",
+"Décris chacun des deux autres en exactement trois mots : un positif, un dangereux, un hilarant.",
+"Fais une mini-story fictive annonçant votre vie dans dix ans comme si elle venait réellement d’arriver.",
+"Donne ton pronostic sur lequel de vous trois sera le plus difficile à gérer si KŌMØ vaut 500 M€."
+];
+
+let state={score:0,cards:0,refusals:0,used:{},active:false,dare:false};
+try{const saved=JSON.parse(localStorage.getItem(KEY)||"null");if(saved)state={...state,...saved}}catch(e){}
+Object.keys(decks).forEach(k=>{if(!Array.isArray(state.used[k]))state.used[k]=[]});
+
+const $=id=>document.getElementById(id);
+$("owner").textContent=owner.toUpperCase();
+$("link-"+player).classList.add("active");
+
+function save(){localStorage.setItem(KEY,JSON.stringify(state));renderStats()}
+function renderStats(){$("score").textContent=state.score;$("cards").textContent=state.cards;$("refusals").textContent=state.refusals;$("turn").textContent="Carte "+state.cards}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)]}
+function unused(cat){
+  if(state.used[cat].length>=decks[cat].length)state.used[cat]=[];
+  const choices=decks[cat].map((_,i)=>i).filter(i=>!state.used[cat].includes(i));
+  const i=pick(choices);state.used[cat].push(i);return decks[cat][i];
+}
+function drawCard(){
+  if(state.dare)return;
+  if(state.active){
+    state.score++;state.active=false;save();
+  }
+  const cats=Object.keys(decks);
+  const cat=pick(cats);
+  $("cat").textContent=cat;
+  $("question").textContent=owner+", "+unused(cat);
+  state.cards++;state.active=true;
+  $("draw").textContent="J’ai répondu ✓ → suivante";
+  save();
+}
+function refuseCard(){
+  if(!state.active||state.dare)return;
+  state.refusals++;state.dare=true;
+  $("dareText").textContent=pick(dares);
+  $("dareBox").style.display="block";
+  $("draw").disabled=true;$("refuse").disabled=true;
+  $("draw").style.opacity=.35;$("refuse").style.opacity=.35;
+  save();
+  setTimeout(()=>$("dareBox").scrollIntoView({behavior:"smooth",block:"center"}),80);
+}
+function completeDare(){
+  state.active=false;state.dare=false;
+  $("dareBox").style.display="none";
+  $("draw").disabled=false;$("refuse").disabled=false;
+  $("draw").style.opacity=1;$("refuse").style.opacity=1;
+  $("cat").textContent="GAGE VALIDÉ";
+  $("question").textContent=owner+", tu peux tirer la prochaine carte.";
+  $("draw").textContent="Tirer une carte";
+  save();scrollTo({top:0,behavior:"smooth"});
+}
+function resetGame(){
+  localStorage.removeItem(KEY);
+  state={score:0,cards:0,refusals:0,used:{},active:false,dare:false};
+  Object.keys(decks).forEach(k=>state.used[k]=[]);
+  $("cat").textContent="READY";$("question").textContent="Appuie sur « Tirer une carte ».";
+  $("draw").textContent="Tirer une carte";$("dareBox").style.display="none";save();
+}
+renderStats();
+</script>
+</body></html>
