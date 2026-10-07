@@ -78,10 +78,13 @@ alter table public.pulse_operator_events enable row level security;
 
 revoke all on public.pulse_operator_sessions, public.pulse_operator_steps, public.pulse_operator_events from anon;
 revoke delete on public.pulse_operator_sessions, public.pulse_operator_steps, public.pulse_operator_events from authenticated;
-grant select, insert, update on public.pulse_operator_sessions, public.pulse_operator_steps to authenticated;
-grant select, insert on public.pulse_operator_events to authenticated;
+grant select on public.pulse_operator_sessions, public.pulse_operator_steps, public.pulse_operator_events to authenticated;
 
-create or replace function public.pulse_operator_can_access_patient_v1(p_patient_id uuid)
+create schema if not exists private;
+revoke all on schema private from public;
+grant usage on schema private to authenticated;
+
+create or replace function private.pulse_operator_can_access_patient_v1(p_patient_id uuid)
 returns boolean
 language sql
 stable
@@ -108,21 +111,21 @@ as $$
     );
 $$;
 
-revoke all on function public.pulse_operator_can_access_patient_v1(uuid) from public;
-grant execute on function public.pulse_operator_can_access_patient_v1(uuid) to authenticated;
+revoke all on function private.pulse_operator_can_access_patient_v1(uuid) from public;
+grant execute on function private.pulse_operator_can_access_patient_v1(uuid) to authenticated;
 
 drop policy if exists pulse_operator_sessions_read on public.pulse_operator_sessions;
 create policy pulse_operator_sessions_read
 on public.pulse_operator_sessions
 for select to authenticated
-using (public.pulse_operator_can_access_patient_v1(patient_id));
+using (private.pulse_operator_can_access_patient_v1(patient_id));
 
 drop policy if exists pulse_operator_sessions_insert on public.pulse_operator_sessions;
 create policy pulse_operator_sessions_insert
 on public.pulse_operator_sessions
 for insert to authenticated
 with check (
-  public.pulse_operator_can_access_patient_v1(patient_id)
+  private.pulse_operator_can_access_patient_v1(patient_id)
   and operator_user_id = (select auth.uid())
 );
 
@@ -130,8 +133,8 @@ drop policy if exists pulse_operator_sessions_update on public.pulse_operator_se
 create policy pulse_operator_sessions_update
 on public.pulse_operator_sessions
 for update to authenticated
-using (public.pulse_operator_can_access_patient_v1(patient_id))
-with check (public.pulse_operator_can_access_patient_v1(patient_id));
+using (private.pulse_operator_can_access_patient_v1(patient_id))
+with check (private.pulse_operator_can_access_patient_v1(patient_id));
 
 drop policy if exists pulse_operator_steps_read on public.pulse_operator_steps;
 create policy pulse_operator_steps_read
@@ -141,7 +144,7 @@ using (
   exists (
     select 1 from public.pulse_operator_sessions s
     where s.id = operator_session_id
-      and public.pulse_operator_can_access_patient_v1(s.patient_id)
+      and private.pulse_operator_can_access_patient_v1(s.patient_id)
   )
 );
 
@@ -153,7 +156,7 @@ with check (
   exists (
     select 1 from public.pulse_operator_sessions s
     where s.id = operator_session_id
-      and public.pulse_operator_can_access_patient_v1(s.patient_id)
+      and private.pulse_operator_can_access_patient_v1(s.patient_id)
   )
 );
 
@@ -165,14 +168,14 @@ using (
   exists (
     select 1 from public.pulse_operator_sessions s
     where s.id = operator_session_id
-      and public.pulse_operator_can_access_patient_v1(s.patient_id)
+      and private.pulse_operator_can_access_patient_v1(s.patient_id)
   )
 )
 with check (
   exists (
     select 1 from public.pulse_operator_sessions s
     where s.id = operator_session_id
-      and public.pulse_operator_can_access_patient_v1(s.patient_id)
+      and private.pulse_operator_can_access_patient_v1(s.patient_id)
   )
 );
 
@@ -180,14 +183,14 @@ drop policy if exists pulse_operator_events_read on public.pulse_operator_events
 create policy pulse_operator_events_read
 on public.pulse_operator_events
 for select to authenticated
-using (public.pulse_operator_can_access_patient_v1(patient_id));
+using (private.pulse_operator_can_access_patient_v1(patient_id));
 
 drop policy if exists pulse_operator_events_insert on public.pulse_operator_events;
 create policy pulse_operator_events_insert
 on public.pulse_operator_events
 for insert to authenticated
 with check (
-  public.pulse_operator_can_access_patient_v1(patient_id)
+  private.pulse_operator_can_access_patient_v1(patient_id)
   and actor_user_id = (select auth.uid())
 );
 
@@ -209,7 +212,7 @@ begin
   if v_uid is null then
     raise exception 'Authentication required';
   end if;
-  if not public.pulse_operator_can_access_patient_v1(p_patient_id) then
+  if not private.pulse_operator_can_access_patient_v1(p_patient_id) then
     raise exception 'Operator access denied';
   end if;
 
@@ -341,7 +344,7 @@ begin
   where id = p_session_id;
 
   if v_patient is null then raise exception 'Operator session not found'; end if;
-  if not public.pulse_operator_can_access_patient_v1(v_patient) then
+  if not private.pulse_operator_can_access_patient_v1(v_patient) then
     raise exception 'Operator access denied';
   end if;
 
@@ -454,7 +457,7 @@ begin
   where id=p_session_id;
 
   if v_patient is null then raise exception 'Operator session not found'; end if;
-  if not public.pulse_operator_can_access_patient_v1(v_patient) then
+  if not private.pulse_operator_can_access_patient_v1(v_patient) then
     raise exception 'Operator access denied';
   end if;
 
