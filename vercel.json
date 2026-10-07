@@ -44,7 +44,7 @@
           "value": "pulse.komolongevity.com"
         }
       ],
-      "destination": "/pulse-v12/"
+      "destination": "/pulse-v13/"
     },
     {
       "source": "/(.*)",
@@ -54,7 +54,7 @@
           "value": "pulse.komolongevity.com"
         }
       ],
-      "destination": "/pulse-v12/$1"
+      "destination": "/pulse-v13/$1"
     },
     {
       "source": "/masterclass",
@@ -465,6 +465,19 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        }
+      ]
+    },
+    {
+      "source": "/pulse-v13/:path*",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        },
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
         }
       ]
     }

@@ -43,9 +43,9 @@ const publicLinks = [
 const rewrites = Array.isArray(vercelConfig.rewrites) ? vercelConfig.rewrites : [];
 const headers = Array.isArray(vercelConfig.headers) ? vercelConfig.headers : [];
 const hasPulseHost = (rule) => Array.isArray(rule?.has) && rule.has.some((entry) => entry?.type === 'host' && entry?.value === 'pulse.komolongevity.com');
-const pulseRootRewrite = rewrites.some((rule) => rule?.source === '/' && rule?.destination === '/pulse-v12/' && hasPulseHost(rule));
-const pulseNestedRewrite = rewrites.some((rule) => rule?.source === '/(.*)' && rule?.destination === '/pulse-v12/$1' && hasPulseHost(rule));
-const pulsePrivacyHeaders = headers.some((rule) => rule?.source === '/pulse-v12/:path*' && Array.isArray(rule.headers) && rule.headers.some((header) => header?.key === 'X-Robots-Tag' && header?.value?.includes('noindex')));
+const pulseRootRewrite = rewrites.some((rule) => rule?.source === '/' && ['/pulse-v12/','/pulse-v13/'].includes(rule?.destination) && hasPulseHost(rule));
+const pulseNestedRewrite = rewrites.some((rule) => rule?.source === '/(.*)' && ['/pulse-v12/$1','/pulse-v13/$1'].includes(rule?.destination) && hasPulseHost(rule));
+const pulsePrivacyHeaders = headers.some((rule) => ['/pulse-v12/:path*','/pulse-v13/:path*'].includes(rule?.source) && Array.isArray(rule.headers) && rule.headers.some((header) => header?.key === 'X-Robots-Tag' && header?.value?.includes('noindex')));
 const legacyMotionInputs = ['M-FUN-01','M-FUN-02','M-FUN-03','M-FUN-04','M-FUN-05','M-FUN-06','M-FUN-07'];
 
 const required = [
