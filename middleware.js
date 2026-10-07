@@ -20,7 +20,7 @@ const EXPERIENCE_CLEAN_ROUTES = {
 };
 
 const HOST_APPS = {
-  [PULSE_HOST]: { prefix: '/pulse-v13', private: true, routeHeader: 'X-KOMO-Pulse-Route' },
+  [PULSE_HOST]: { prefix: '/pulse-v12', private: true, routeHeader: 'X-KOMO-Pulse-Route' },
   [LIFE_HOST]: { prefix: '/life-v1', private: false, routeHeader: 'X-KOMO-Life-Route' },
   [EXPERIENCE_HOST]: { prefix: '/experience', private: false, routeHeader: 'X-KOMO-Experience-Route' },
   [COMMAND_HOST]: { prefix: '/command-v1', private: true, routeHeader: 'X-KOMO-Command-Route' },
