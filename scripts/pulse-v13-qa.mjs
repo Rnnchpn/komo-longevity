@@ -10,8 +10,8 @@ const middleware=await readFile(join(root,'middleware.js'),'utf8');
 
 const rewrites=Array.isArray(vercel.rewrites)?vercel.rewrites:[];
 const hostRule=r=>Array.isArray(r?.has)&&r.has.some(h=>h?.type==='host'&&h?.value==='pulse.komolongevity.com');
-const rootV13=rewrites.some(r=>r.source==='/'&&r.destination==='/pulse-v13/'&&hostRule(r));
-const nestedV13=rewrites.some(r=>r.source==='/(.*)'&&r.destination==='/pulse-v13/$1'&&hostRule(r));
+const rootV13=rewrites.some(r=>r.source==='/'&&['/pulse-v13/','/pulse-v14/'].includes(r.destination)&&hostRule(r));
+const nestedV13=rewrites.some(r=>r.source==='/(.*)'&&['/pulse-v13/$1','/pulse-v14/$1'].includes(r.destination)&&hostRule(r));
 
 const checks=[
  ['V13 HTML title',html.includes('<title>KŌMØ Pulse</title>')],
@@ -24,9 +24,9 @@ const checks=[
  ['Motion Age not surfaced',!app.includes('motion_age')],
  ['VALD devices present',['SmartSpeed','ForceDecks','HumanTrak','DynaMo'].every(x=>app.includes(x))],
  ['responsive app',css.includes('@media(max-width:980px)')],
- ['Pulse host root uses V13',rootV13],
- ['Pulse host nested uses V13',nestedV13],
- ['middleware uses V13',middleware.includes("[PULSE_HOST]: { prefix: '/pulse-v13'")]
+ ['Pulse host root uses V13 or newer',rootV13],
+ ['Pulse host nested uses V13 or newer',nestedV13],
+ ['middleware uses V13 or newer',middleware.includes("[PULSE_HOST]: { prefix: '/pulse-v13'")||middleware.includes("[PULSE_HOST]: { prefix: '/pulse-v14'")]
 ];
 const failed=checks.filter(([,ok])=>!ok).map(([n])=>n);
 if(failed.length){console.error('[pulse-v13-qa] failed: '+failed.join(', '));process.exit(1)}
