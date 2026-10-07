@@ -77,7 +77,7 @@ alter table public.pulse_operator_steps enable row level security;
 alter table public.pulse_operator_events enable row level security;
 
 revoke all on public.pulse_operator_sessions, public.pulse_operator_steps, public.pulse_operator_events from anon;
-revoke delete on public.pulse_operator_sessions, public.pulse_operator_steps, public.pulse_operator_events from authenticated;
+revoke insert, update, delete on public.pulse_operator_sessions, public.pulse_operator_steps, public.pulse_operator_events from authenticated;
 grant select on public.pulse_operator_sessions, public.pulse_operator_steps, public.pulse_operator_events to authenticated;
 
 create schema if not exists private;
