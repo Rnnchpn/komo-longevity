@@ -242,7 +242,7 @@ function header(c, locale) {
     ['#motion',c.nav[0]],['#phenotype',c.nav[1]],['#method',c.nav[2]],['#pulse',c.nav[3]],
     [href(locale,'partners'),c.nav[4]]
   ];
-  const langs = [['en','EN','/'],['fr','FR','/fr/'],['es','ES','/es/']];
+  const langs = [['fr','FR','/'],['en','EN','/en/'],['es','ES','/es/']];
   return `<header class="kr-header"><a class="kr-brand" href="${href(locale)}">KŌMØ <small>LONGEVITY</small></a><nav class="kr-nav">${links.map(([u,l])=>`<a href="${u}">${l}</a>`).join('')}<a class="kr-book" href="${href(locale,'contact')}">${c.nav[5]}</a></nav><div class="kr-lang">${langs.map(([id,l,u])=>`<a href="${u}" ${id===locale?'aria-current="page"':''}>${l}</a>`).join('')}</div><details class="kr-mobile"><summary>MENU</summary><div>${links.map(([u,l])=>`<a href="${u}">${l}</a>`).join('')}<a href="${href(locale,'contact')}">${c.nav[5]}</a></div></details></header>`;
 }
 const measureList = (items) => `<ul class="kr-measures">${items.map(([a,b])=>`<li><b>${a}</b><span>${b}</span></li>`).join('')}</ul>`;
