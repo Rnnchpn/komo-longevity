@@ -44,7 +44,7 @@
           "value": "pulse.komolongevity.com"
         }
       ],
-      "destination": "/pulse-v12/"
+      "destination": "/pulse-v13/"
     },
     {
       "source": "/(.*)",
@@ -54,7 +54,7 @@
           "value": "pulse.komolongevity.com"
         }
       ],
-      "destination": "/pulse-v12/$1"
+      "destination": "/pulse-v13/$1"
     },
     {
       "source": "/masterclass",
