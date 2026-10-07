@@ -96,7 +96,7 @@ alter table public.pulse_checkpoints enable row level security;
 revoke all on public.pulse_biological_panels, public.pulse_biomarkers, public.pulse_clinical_gates, public.pulse_checkpoints from anon;
 grant select on public.pulse_biological_panels, public.pulse_biomarkers, public.pulse_clinical_gates, public.pulse_checkpoints to authenticated;
 grant insert, update on public.pulse_checkpoints to authenticated;
-grant insert, update, delete on public.pulse_biological_panels, public.pulse_biomarkers, public.pulse_clinical_gates to authenticated;
+grant insert, update on public.pulse_biological_panels, public.pulse_biomarkers, public.pulse_clinical_gates to authenticated;
 
 create policy pulse_bio_patient_read on public.pulse_biological_panels
 for select to authenticated
@@ -167,23 +167,20 @@ using (
   or exists(select 1 from public.account_roles r where r.user_id=(select auth.uid()) and r.role='admin')
 );
 
-create policy pulse_checkpoints_patient_insert on public.pulse_checkpoints
+create policy pulse_checkpoints_care_insert on public.pulse_checkpoints
 for insert to authenticated
 with check (
-  exists(select 1 from public.patients p where p.id=patient_id and p.patient_user_id=(select auth.uid()))
-  or exists(select 1 from public.patient_care_assignments a where a.patient_id=patient_id and a.professional_user_id=(select auth.uid()) and a.status='active')
+  exists(select 1 from public.patient_care_assignments a where a.patient_id=patient_id and a.professional_user_id=(select auth.uid()) and a.status='active')
   or exists(select 1 from public.account_roles r where r.user_id=(select auth.uid()) and r.role='admin')
 );
 
-create policy pulse_checkpoints_update on public.pulse_checkpoints
+create policy pulse_checkpoints_care_update on public.pulse_checkpoints
 for update to authenticated
 using (
-  exists(select 1 from public.patients p where p.id=patient_id and p.patient_user_id=(select auth.uid()))
-  or exists(select 1 from public.patient_care_assignments a where a.patient_id=patient_id and a.professional_user_id=(select auth.uid()) and a.status='active')
+  exists(select 1 from public.patient_care_assignments a where a.patient_id=patient_id and a.professional_user_id=(select auth.uid()) and a.status='active')
   or exists(select 1 from public.account_roles r where r.user_id=(select auth.uid()) and r.role='admin')
 )
 with check (
-  exists(select 1 from public.patients p where p.id=patient_id and p.patient_user_id=(select auth.uid()))
-  or exists(select 1 from public.patient_care_assignments a where a.patient_id=patient_id and a.professional_user_id=(select auth.uid()) and a.status='active')
+  exists(select 1 from public.patient_care_assignments a where a.patient_id=patient_id and a.professional_user_id=(select auth.uid()) and a.status='active')
   or exists(select 1 from public.account_roles r where r.user_id=(select auth.uid()) and r.role='admin')
 );
