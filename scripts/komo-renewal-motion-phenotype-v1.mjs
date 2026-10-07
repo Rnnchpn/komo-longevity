@@ -295,7 +295,8 @@ async function patch(locale, relative) {
   await writeFile(file, html);
 }
 
-await patch('en', 'index.html');
+await patch('fr', 'index.html');
 await patch('fr', join('fr','index.html'));
+try { await patch('en', join('en','index.html')); } catch {}
 await patch('es', join('es','index.html'));
 console.log('KŌMØ renewal v1 applied — Motion · Phenotype · Pulse.');
