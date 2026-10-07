@@ -249,7 +249,7 @@ begin
       context_class, completeness, started_at, operator_id, created_by
     ) values (
       p_patient_id, 'motion', 'baseline', 'collecting', 'komo-motion-baseline-v1.0',
-      'standard', 0, now(), v_uid, v_uid
+      'A', 0, now(), v_uid, v_uid
     )
     returning id into v_assessment;
   else
