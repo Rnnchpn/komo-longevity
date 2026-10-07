@@ -233,8 +233,8 @@ html{scroll-behavior:smooth}.kr-page{background:var(--kr-bg);color:#f5f0e7;font-
 </style>`;
 
 function href(locale, page='') {
-  const prefix = locale === 'en' ? '' : '/' + locale;
-  if (!page) return prefix ? prefix + '/' : '/';
+  const prefix = locale === 'fr' ? '/fr' : locale === 'es' ? '/es' : '/en';
+  if (!page) return prefix + '/';
   return prefix + '/' + page + '/';
 }
 function header(c, locale) {
