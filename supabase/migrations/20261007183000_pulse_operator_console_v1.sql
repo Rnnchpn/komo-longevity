@@ -2,13 +2,41 @@
 -- KŌMØ Pulse Operator Console V1
 -- Additive POC schema. Requires 20261007170000_pulse_poc_v1_architecture.sql first.
 
+insert into public.protocol_versions
+  (code,label,product_mode,status,configuration,content_hash,effective_from)
+values
+  (
+    'motion-v1.0',
+    'KŌMØ Motion v1.0 — VALD POC',
+    'motion',
+    'draft',
+    '{
+      "source_system":"VALD",
+      "devices":["SmartSpeed","ForceDecks","HumanTrak","DynaMo"],
+      "motion_score_weights":{"locomotion":0.25,"strength":0.25,"function":0.20,"balance":0.15,"mobility":0.15},
+      "motion_age_enabled":false,
+      "clinical_gates_separate":true,
+      "longitudinal_checkpoints":["S2","S6","S12","M6","M12"],
+      "measurement_context":["A","B","C","D"]
+    }'::jsonb,
+    'motion-v1.0-vald-poc-20261007',
+    now()
+  )
+on conflict (code) do update
+set label=excluded.label,
+    product_mode=excluded.product_mode,
+    status=excluded.status,
+    configuration=excluded.configuration,
+    content_hash=excluded.content_hash;
+
+
 create table if not exists public.pulse_operator_sessions (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete restrict,
   patient_id uuid not null references public.patients(id) on delete cascade,
   assessment_id uuid not null references public.assessments(id) on delete cascade,
   operator_user_id uuid not null references auth.users(id),
-  protocol_version text not null default 'komo-motion-baseline-v1.0',
+  protocol_version text not null default 'motion-v1.0',
   status text not null default 'draft'
     check (status in ('draft','running','paused','review','completed','cancelled')),
   current_step_code text,
@@ -248,7 +276,7 @@ begin
       patient_id, product_mode, assessment_type, status, protocol_version,
       context_class, completeness, started_at, operator_id, created_by
     ) values (
-      p_patient_id, 'motion', 'baseline', 'collecting', 'komo-motion-baseline-v1.0',
+      p_patient_id, 'motion', 'baseline', 'collecting', 'motion-v1.0',
       'A', 0, now(), v_uid, v_uid
     )
     returning id into v_assessment;
@@ -275,7 +303,7 @@ begin
       protocol_version, status, current_step_code, started_at
     ) values (
       v_org, p_patient_id, v_assessment, v_uid,
-      'komo-motion-baseline-v1.0', 'running', 'preflight', now()
+      'motion-v1.0', 'running', 'preflight', now()
     )
     returning id into v_session;
 
@@ -295,7 +323,7 @@ begin
       operator_session_id, patient_id, assessment_id, actor_user_id, event_type, payload
     ) values (
       v_session, p_patient_id, v_assessment, v_uid, 'session_started',
-      jsonb_build_object('protocol_version','komo-motion-baseline-v1.0')
+      jsonb_build_object('protocol_version','motion-v1.0')
     );
   else
     update public.pulse_operator_sessions
