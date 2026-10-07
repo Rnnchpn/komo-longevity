@@ -249,7 +249,9 @@ const scripts = [
   // Final Friday demo hardening: auth recovery, deterministic validation and accessible consent controls.
   'scripts/pulse-friday-demo-hardening-v1.mjs',
   // Dedicated KŌMØ Experience destination surface — copied last so no legacy public pass can overwrite it.
-  'scripts/build-experience-gstaad-v1.mjs'
+  'scripts/build-experience-gstaad-v1.mjs',
+  // Clean Pulse V13 is built last and isolated from all V12 legacy mutations.
+  'scripts/build-pulse-v13.mjs'
 ];
 
 for (const script of scripts) {
