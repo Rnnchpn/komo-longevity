@@ -250,6 +250,8 @@ const scripts = [
   'scripts/pulse-friday-demo-hardening-v1.mjs',
   // Dedicated KŌMØ Experience destination surface — copied last so no legacy public pass can overwrite it.
   'scripts/build-experience-gstaad-v1.mjs'
+  // Absolute final patient-product reset: Baseline → Results → Trajectory POC V1.
+  'scripts/pulse-poc-v1-final.mjs'
 ];
 
 for (const script of scripts) {
