@@ -253,7 +253,9 @@ const scripts = [
   // Absolute final patient-product reset: Baseline → Results → Trajectory POC V1.
   'scripts/pulse-poc-v1-final.mjs',
   // Absolute final professional Motion owner: Operator D0 workspace.
-  'scripts/pulse-operator-console-v1-final.mjs'
+  'scripts/pulse-operator-console-v1-final.mjs',
+  // Clean replacement application. This output is isolated from all Pulse V12 legacy patches.
+  'scripts/build-pulse-v13.mjs'
 ];
 
 for (const script of scripts) {
