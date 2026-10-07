@@ -315,6 +315,7 @@ end;
 $$;
 
 revoke all on function public.start_pulse_operator_session_v1(uuid,uuid) from public;
+revoke execute on function public.start_pulse_operator_session_v1(uuid,uuid) from anon;
 grant execute on function public.start_pulse_operator_session_v1(uuid,uuid) to authenticated;
 
 create or replace function public.pulse_operator_step_v1(
@@ -431,6 +432,7 @@ end;
 $$;
 
 revoke all on function public.pulse_operator_step_v1(uuid,text,text,jsonb) from public;
+revoke execute on function public.pulse_operator_step_v1(uuid,text,text,jsonb) from anon;
 grant execute on function public.pulse_operator_step_v1(uuid,text,text,jsonb) to authenticated;
 
 create or replace function public.finalize_pulse_operator_session_v1(p_session_id uuid)
@@ -540,4 +542,5 @@ end;
 $$;
 
 revoke all on function public.finalize_pulse_operator_session_v1(uuid) from public;
+revoke execute on function public.finalize_pulse_operator_session_v1(uuid) from anon;
 grant execute on function public.finalize_pulse_operator_session_v1(uuid) to authenticated;
