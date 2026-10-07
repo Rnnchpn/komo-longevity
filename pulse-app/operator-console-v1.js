@@ -269,8 +269,13 @@ async function finalize(){
  const status=r.data?.status||r.data?.result_status||'review';
  toast(status==='completed'?'D0 finalisé. Checkpoints longitudinaux créés.':'D0 transmis en revue clinique.');
 }
+function labelOperatorNav(){
+ document.querySelectorAll('[data-pro-nav="motion"]').forEach(b=>{const s=b.querySelector('span');if(s&&s.textContent!=='Operator')s.textContent='Operator';b.setAttribute('aria-label','Operator')});
+ document.querySelectorAll('[data-pro-nav="myocare"]').forEach(b=>b.setAttribute('aria-hidden','true'));
+}
 function render(){
  if(!isPro())return;
+ labelOperatorNav();
  const host=document.querySelector('#kcpMotionHost');if(!host||host.hidden)return;
  document.querySelector('#pageEyebrow')&&(document.querySelector('#pageEyebrow').textContent='KŌMØ OPERATOR');
  document.querySelector('#pageTitle')&&(document.querySelector('#pageTitle').textContent='D0 · Motion Baseline');
@@ -278,6 +283,7 @@ function render(){
 }
 async function open(){
  if(!isPro())return;
+ labelOperatorNav();
  const host=document.querySelector('#kcpMotionHost');if(!host)return;
  host.hidden=false;
  if(!S.user||S.loadedFor!==S.user?.id){await load();S.loadedFor=S.user?.id||''}
