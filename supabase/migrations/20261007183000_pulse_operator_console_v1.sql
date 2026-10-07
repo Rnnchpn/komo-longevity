@@ -257,7 +257,8 @@ begin
     from public.assessments
     where id = p_assessment_id
       and patient_id = p_patient_id
-      and product_mode = 'motion';
+      and product_mode = 'motion'
+      and protocol_version = 'motion-v1.0';
     if v_assessment is null then
       raise exception 'Assessment does not belong to this patient';
     end if;
@@ -266,6 +267,7 @@ begin
     from public.assessments
     where patient_id = p_patient_id
       and product_mode = 'motion'
+      and protocol_version = 'motion-v1.0'
       and status in ('draft','scheduled','collecting','review')
     order by created_at desc
     limit 1;
