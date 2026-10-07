@@ -249,13 +249,7 @@ const scripts = [
   // Final Friday demo hardening: auth recovery, deterministic validation and accessible consent controls.
   'scripts/pulse-friday-demo-hardening-v1.mjs',
   // Dedicated KŌMØ Experience destination surface — copied last so no legacy public pass can overwrite it.
-  'scripts/build-experience-gstaad-v1.mjs',
-  // Absolute final patient-product reset: Baseline → Results → Trajectory POC V1.
-  'scripts/pulse-poc-v1-final.mjs',
-  // Absolute final professional Motion owner: Operator D0 workspace.
-  'scripts/pulse-operator-console-v1-final.mjs',
-  // Clean replacement application. This output is isolated from all Pulse V12 legacy patches.
-  'scripts/build-pulse-v13.mjs'
+  'scripts/build-experience-gstaad-v1.mjs'
 ];
 
 for (const script of scripts) {
