@@ -54,11 +54,11 @@ async function loadIdentity(){
 async function loadPatientContext(patient){
  if(!patient){S.assessment=null;S.questionnaires=[];S.scores=[];S.measurements=[];S.programs=[];S.trajectory=[];S.appointments=[];S.bio=[];S.gates=[];S.checkpoints=[];return}
  S.patient=patient;
- const a=(await safe(sb.from('assessments').select('*').eq('patient_id',patient.id).eq('product_mode','motion').order('created_at',{ascending:false}).limit(1))).data||[];S.assessment=a[0]||null;
+ const a=(await safe(sb.from('assessments').select('*').eq('patient_id',patient.id).eq('product_mode','motion').eq('protocol_version','motion-v1.0').order('created_at',{ascending:false}).limit(1))).data||[];S.assessment=a[0]||null;
  S.questionnaires=S.assessment?((await safe(sb.from('questionnaire_sessions').select('*').eq('assessment_id',S.assessment.id).order('created_at',{ascending:false}))).data||[]):[];
  const uid=patient.patient_user_id;
- S.scores=uid?((await safe(sb.from('pulse_score_runs').select('*').eq('user_id',uid).eq('status','released').order('released_at',{ascending:false}).limit(5))).data||[]):[];
- S.measurements=uid?((await safe(sb.from('pulse_measurement_sets').select('*').eq('user_id',uid).order('captured_at',{ascending:false}).limit(20))).data||[]):[];
+ S.scores=uid?((await safe(sb.from('pulse_score_runs').select('*').eq('user_id',uid).eq('status','released').eq('algorithm_version','motion-score-v1.0').order('released_at',{ascending:false}).limit(5))).data||[]):[];
+ S.measurements=uid?((await safe(sb.from('pulse_measurement_sets').select('*').eq('user_id',uid).eq('protocol_version','motion-v1.0').order('captured_at',{ascending:false}).limit(20))).data||[]):[];
  S.programs=uid?((await safe(sb.from('pulse_programs').select('*').eq('user_id',uid).order('created_at',{ascending:false}).limit(5))).data||[]):[];
  S.trajectory=(await safe(sb.from('trajectory_events').select('*').eq('patient_id',patient.id).order('event_date',{ascending:false}).limit(20))).data||[];
  S.appointments=(await safe(sb.from('organization_appointments').select('*').eq('patient_id',patient.id).order('scheduled_start',{ascending:false}).limit(20))).data||[];
