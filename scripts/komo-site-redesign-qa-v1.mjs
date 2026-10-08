@@ -25,7 +25,7 @@ for(const [lang,pages] of Object.entries(routeParts)){
 }
 const assets=['komo-hero-hd-v4.webp','komo-motion-hd-v4.webp','komo-clinical-hd-v4.webp','komo-experience-hd-v4.webp'];
 for(const file of assets){await access(join(root,'assets','images',file));checks++}
-for(const file of ['pulse-v14/index.html','world/index.html','life-v1/index.html']) {await access(join(root,file));checks++}
+for(const file of ['pulse-v13/index.html','world/index.html','life-v1/index.html']) {await access(join(root,file));checks++}
 const xml=await readFile(join(root,'sitemap.xml'),'utf8');
 for(const key of ['fr/motion/','fr/phenotype/','fr/experience/','fr/partenaires/','en/phenotype/','es/fenotipo/']) {if(!xml.includes('https://komolongevity.com/'+key)) throw Error('Sitemap missing '+key);checks++}
 console.log('[komo-site-redesign-qa] PASS · '+checks+' assertions · 21 localized pages + canonical + legal + media + app isolation');
