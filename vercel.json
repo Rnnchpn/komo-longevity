@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/build-all.mjs && node scripts/komo-renewal-motion-phenotype-v1.mjs && node scripts/komo-editorial-polish-v2.mjs",
+  "buildCommand": "node scripts/build-all.mjs && node scripts/komo-renewal-motion-phenotype-v1.mjs && node scripts/komo-editorial-polish-v2.mjs && node scripts/komo-site-art-direction-v3.mjs",
   "outputDirectory": "site",
   "cleanUrls": true,
   "rewrites": [
