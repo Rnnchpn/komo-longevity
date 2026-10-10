@@ -15,7 +15,9 @@ const nestedV13=rewrites.some(r=>r.source==='/(.*)'&&r.destination==='/pulse-v13
 
 const checks=[
  ['V13 HTML title',html.includes('<title>KŌMØ Pulse</title>')],
- ['single application entry',html.includes('./app.js')&&(html.match(/<script/g)||[]).length===1],
+ ['single V13 application module',html.includes('<script type="module" src="./app.js"></script>')&&(html.match(/<script type="module"/g)||[]).length===1],
+ ['Supabase served locally',html.includes('./supabase-umd-v13.js')&&app.includes("from './supabase-local-v13.js'")&&!app.includes('https://esm.sh/')],
+ ['visible startup recovery on Safari',html.includes('komo-boot-status')&&html.includes('komo-boot-retry')&&app.includes('Promise.race')],
  ['single V13 stylesheet',html.includes('./styles.css')],
  ['no legacy Myodev/Myocare HTML',!/myodev|myocare|clinical-motion-v1/i.test(html)],
  ['V1 protocol only',app.includes("protocol_version','motion-v1.0")||app.includes("protocol_version','motion-v1.0'")],
