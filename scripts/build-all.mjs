@@ -255,7 +255,9 @@ const scripts = [
   'scripts/pulse-v13-qa.mjs',
   // Patient-first V14 is isolated and built last. V13 remains available for rollback.
   'scripts/build-pulse-v14.mjs',
-  'scripts/pulse-v14-qa.mjs'
+  'scripts/pulse-v14-qa.mjs',
+  // Canonical commercial, legal and footer pages must ship after all public-home rewrites.
+  'scripts/komo-offers-zoi-2026.mjs'
 ];
 
 for (const script of scripts) {
