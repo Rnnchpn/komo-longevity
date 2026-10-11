@@ -19,7 +19,7 @@ const CSS = [
   ".cm .lead{font-size:clamp(17px,2vw,21px);max-width:700px;color:var(--cm-muted)}.cm .hero{padding:85px 0 66px;background:linear-gradient(120deg,#f8f7f3,#e9eee7)}",
   ".cm .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.cm .section{padding:70px 0}.cm .section.muted{background:#eef0e8}.cm .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px;margin-top:40px}",
   ".cm .grid.plans{grid-template-columns:repeat(4,minmax(0,1fr))}.cm .card{border:1px solid var(--cm-line);border-radius:19px;background:#fff;padding:31px;display:flex;flex-direction:column;min-height:490px}.cm .card.featured{background:#193c2f;color:white;border-color:#193c2f}.cm .card.featured .sub{color:#d8e3d9}",
-  ".cm .price{font-size:24px;font-family:Georgia,serif;margin-top:10px}.cm .sub{font-size:13px;color:var(--cm-muted);line-height:1.75}.cm ul{padding-left:19px}.cm li{margin:10px 0;font-size:13px}.cm .card .actions{margin-top:auto;padding-top:21px}",
+  ".cm .cardlinks{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.cm .textlink{font-size:12px;text-underline-offset:4px;font-weight:700}.cm .spec{padding:15px 18px;border-top:1px solid var(--cm-line);display:grid;grid-template-columns:180px 1fr;gap:14px}.cm .spec strong{font-size:13px}.cm .spec span{font-size:13px;color:var(--cm-muted)}.cm .small-ey{color:#9fb6a6;text-transform:uppercase;font-size:10px;font-weight:800;letter-spacing:.13em}.cm .highlight{padding:28px 32px;background:#e5eee7;border-radius:20px}.cm .photo-note{font-size:12px;color:var(--cm-muted);margin:9px 0}.cm .price{font-size:24px;font-family:Georgia,serif;margin-top:10px}.cm .sub{font-size:13px;color:var(--cm-muted);line-height:1.75}.cm ul{padding-left:19px}.cm li{margin:10px 0;font-size:13px}.cm .card .actions{margin-top:auto;padding-top:21px}",
   ".cm .steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid var(--cm-line);margin-top:33px}.cm .step{padding:25px 21px 16px;border-right:1px solid var(--cm-line)}.cm .step:last-child{border:0}.cm .step b{font-size:11px;color:#52705d}.cm .step h3{font-size:25px}",
   ".cm .two{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}.cm .two img{width:100%;height:auto;max-height:470px;object-fit:contain;border-radius:20px}",
   ".cm .faq details{border-bottom:1px solid var(--cm-line);padding:18px 0}.cm .faq summary{cursor:pointer;font-weight:600}.cm .faq p{font-size:14px;color:var(--cm-muted)}",
@@ -47,25 +47,25 @@ const layout = (title, description, body) => [
 ].join("");
 const cards = [
   {
-    eyebrow:"01 · LE MOUVEMENT", title:"Motion", price:"300 € TTC · tarif de référence",
+    slug:"motion", audience:"Pour mesurer votre mobilité", eyebrow:"01 · LE MOUVEMENT", title:"Motion", price:"300 € TTC · tarif de référence",
     description:"Un état des lieux instrumenté de vos capacités locomotrices, avec une restitution claire.",
     features:["Questionnaire et objectifs fonctionnels","Marche, équilibre, force et contrôle du mouvement selon protocole et matériel disponible","Restitution et rapport fonctionnel","Accès aux résultats dans KŌMØ Pulse selon la formule convenue"],
     action:"Demander un bilan Motion"
   },
   {
-    eyebrow:"02 · LE PHÉNOTYPE",title:"Phenotype",price:"Sur devis",
+    slug:"phenotype", audience:"Pour mesurer votre profil physique", eyebrow:"02 · LE PHÉNOTYPE",title:"Phenotype",price:"Sur devis",
     description:"Une photographie descriptive de votre composition corporelle et d'indicateurs physiques non médicaux.",
     features:["Analyse de composition corporelle selon équipement disponible","Indicateurs cutanés et capillaires selon modules retenus","Habitudes de vie et objectifs","Synthèse descriptive et suivi selon devis, sans examen biologique ni diagnostic"],
     action:"Découvrir Phenotype"
   },
   {
-    eyebrow:"03 · LE BILAN COMBINÉ",title:"Complete",price:"Sur devis",
+    slug:"complete", audience:"Pour une vision fonctionnelle plus globale", eyebrow:"03 · LE BILAN COMBINÉ",title:"Complete",price:"Sur devis",
     description:"Réunir la mesure locomotrice et le phénotype dans un parcours unique, avec un rapport intégré.",
     features:["Évaluation Motion et modules Phenotype","Restitution de vos indicateurs fonctionnels et physiques","Une à trois priorités de progression non thérapeutiques","Checkpoint et Pulse selon la formule souscrite"],
     action:"Composer mon bilan Complete"
   },
   {
-    eyebrow:"04 · SUR MESURE",title:"Private",price:"Sur devis personnalisé",
+    slug:"private", audience:"Pour une expérience dans votre environnement", eyebrow:"04 · SUR MESURE",title:"Private",price:"Sur devis personnalisé",
     description:"Un bilan choisi parmi ces formats, installé dans le lieu de votre choix : villa, hôtel, chalet ou yacht.",
     features:["Déplacement et installation du laboratoire mobile","Contenu de bilan choisi selon espace et objectifs","Restitution privée et rapport","Devis intégrant matériel, logistique et déplacements"],
     action:"Organiser un bilan privé"
@@ -74,7 +74,7 @@ const cards = [
 const cardHtml = (c, i) => [
   "<article class='card",i===2?" featured":"", "'><div class='ey'>",c.eyebrow,"</div><h3>",c.title,"</h3><div class='price'>",c.price,
   "</div><p class='sub'>",c.description,"</p><ul>",c.features.map(s=>"<li>"+s+"</li>").join(""),
-  "</ul><div class='actions'><a class='pill ",i===2?"":"dark","' href='/fr/contact/'>",c.action," ↗</a></div></article>"
+  "</ul><div class='actions cardlinks'><a class='pill ",i===2?"":"dark","' href='/fr/contact/'>",c.action," ↗</a><a class='textlink' href='/fr/check-ups/",c.slug,"/'>Détail du bilan →</a></div></article>"
 ].join("");
 const offerSection = () => [
   "<section class='section' id='bilans'><div class='wrap'><p class='ey'>KŌMØ · LES ÉVALUATIONS</p>",
@@ -97,11 +97,11 @@ const methodSection = () => [
 const proSection = () => [
   "<section class='section' id='motion-case'><div class='wrap two'><div><p class='ey'>KŌMØ CASE · POUR LES PROFESSIONNELS</p>",
   "<h2>Le Motion Lab. Dans une valise.</h2><p class='lead'>Un dispositif mobile pour déployer des bilans fonctionnels instrumentés dans une structure partenaire.</p>",
-  "<p class='sub'>Configuration cible : plateformes de force VALD, dynamomètre DynaMo, solution de capture du mouvement HumanTrak, tablette iPad et accessoires de transport et d'installation. ",
+  "<p class='sub'>Configuration cible sous réserve de confirmation technique et contractuelle : deux plateformes de force VALD ForceDecks, un dynamomètre VALD DynaMo, une solution de capture du mouvement HumanTrak, iPad et accessoires adaptés. ",
   "Les références exactes et le contenu livré seront fixés dans la fiche technique et le devis.</p>",
   "<p class='sub'>Acquisition ou location du matériel, formation opérationnelle, méthode KŌMØ et licence Pulse Pro : des composantes distinctes, configurées pour chaque partenaire.</p>",
   "<div class='row'><a class='pill dark' href='/fr/motion-case/'>Découvrir Motion Case Pro ↗</a><a class='pill' href='/fr/contact/'>Demander une démonstration</a></div></div>",
-  "<img src='/assets/images/real-case/komo-case-open.jpeg' alt='Valise de matériel de bilan fonctionnel KŌMØ' loading='lazy'>",
+  "<div><img src='/assets/images/real-case/komo-case-open.jpeg' alt='Photographie d’un prototype antérieur de laboratoire mobile KŌMØ' loading='lazy'><p class='photo-note'>Photographie d’un prototype antérieur, non contractuelle. Le modèle final VALD fera l’objet de visuels et d’une fiche technique dédiés.</p></div>",
   "</div></section>"
 ].join("");
 const offersPage = layout("Nos bilans fonctionnels", "Découvrez les bilans KŌMØ Motion, Phenotype, Complete et Private, ainsi que notre laboratoire mobile.", [
@@ -127,8 +127,64 @@ const proPage = layout("Motion Case Pro", "Achat ou location d'un laboratoire mo
     ["Méthode & formation","Installation, protocole fonctionnel et formation des équipes selon votre périmètre d'activité."],
     ["Logiciel","Accès Pulse Pro, modules et support aux conditions du contrat de licence souscrit."]
   ].map(x=>"<article class='card' style='min-height:220px'><h3>"+x[0]+"</h3><p class='sub'>"+x[1]+"</p></article>").join(""),
-  "</div><p class='sub'>Vente, location, formation et abonnement logiciel sont chiffrés séparément. Aucun revenu futur ni indication médicale ne sont garantis.</p></div></section>"
+  "</div><div class='highlight' style='margin-top:32px'><p class='ey'>DÉPLOIEMENT PROFESSIONNEL</p><h3>Trois formules d’exploitation.</h3><div class='grid'>",
+  [["Acheter", "Acquisition de la Case et accompagnement d’intégration, selon devis."],["Louer", "Mise à disposition sur durée convenue, avec conditions d’entretien et de restitution."],["Tester", "Déploiement ponctuel ou pilote avant un engagement matériel durable."]].map(x=>"<article style='padding:4px 0'><strong>"+x[0]+"</strong><p class='sub'>"+x[1]+"</p></article>").join(""),
+  "</div><p class='sub'>Vente, location, formation et abonnement logiciel sont chiffrés séparément. Aucun revenu futur ni indication médicale ne sont garantis.</p></div></div></section>"
 ].join(""));
+
+const perOfferDetails = {
+  motion: {
+    headline:"Votre mouvement devient mesurable.",
+    intro:"Marche, équilibre, force et fonction musculaire : un repère quantifié pour comprendre vos capacités actuelles et les comparer dans le temps.",
+    suited:"Vous souhaitez documenter votre condition fonctionnelle, reprendre une activité ou suivre objectivement l'évolution de vos performances quotidiennes.",
+    assessment:"Bilan fonctionnel adapté à vos capacités et à l'environnement, à l'aide des instruments disponibles. Les tests précis et leur faisabilité sont confirmés avant la séance.",
+    output:"Restitution descriptive, rapport Motion et priorités de mouvement non thérapeutiques. Un accès Pulse peut être inclus selon le devis.",
+    follow:"Un nouveau bilan peut permettre une comparaison longitudinale selon un protocole comparable.",
+    boundary:"Aucun acte médical, aucune prescription et aucun diagnostic. En présence de symptômes ou d'une pathologie, une consultation auprès d'un professionnel habilité peut être nécessaire."
+  },
+  phenotype: {
+    headline:"Comprendre votre profil physique.",
+    intro:"Des mesures descriptives de composition corporelle et des indicateurs physiques sélectionnés pour compléter votre perception de votre condition.",
+    suited:"Vous souhaitez disposer de repères physiques reproductibles et suivre des changements au fil de vos routines.",
+    assessment:"Composition corporelle selon les équipements disponibles, indicateurs cutanés ou capillaires et questionnaire d'habitudes de vie, dans la mesure retenue au devis.",
+    output:"Synthèse descriptive et visualisation des indicateurs effectivement relevés.",
+    follow:"Un nouveau passage permet de comparer les mesures dans des conditions méthodologiques similaires.",
+    boundary:"Ce bilan ne comprend ni prélèvement, ni analyse biologique, ni dépistage, ni interprétation médicale. Les appareils et modules définitifs sont précisés avant vente."
+  },
+  complete: {
+    headline:"Deux regards complémentaires sur votre condition.",
+    intro:"La combinaison du bilan locomoteur Motion avec des mesures Phenotype, pour une lecture descriptive intégrée.",
+    suited:"Vous préférez une photographie plus large, articulant performance fonctionnelle, mouvement et profil physique.",
+    assessment:"Les tests Motion et les modules Phenotype indiqués dans le devis, en une session ou plusieurs selon le contexte.",
+    output:"Rapport combiné, restitution et une à trois priorités fonctionnelles et comportementales non médicales.",
+    follow:"Un point d'étape avec répétition de mesures peut être organisé selon vos objectifs et la formule choisie.",
+    boundary:"Ce programme n'est pas un check-up médical complet : il n'inclut pas d'imagerie médicale, de biologie ou de consultation médicale."
+  },
+  private: {
+    headline:"Le laboratoire vient à vous.",
+    intro:"Villa, hôtel, yacht ou chalet : choisissez un bilan Motion, Phenotype ou Complete, et nous organisons son déploiement dans votre environnement.",
+    suited:"Vous souhaitez une intervention privée ou un format réservé à un groupe restreint.",
+    assessment:"Le programme choisi est adapté à la surface disponible, à la stabilité du lieu, à la confidentialité et aux conditions de sécurité.",
+    output:"Restitution dans les conditions du bilan retenu, avec modalités de partage et de confidentialité définies avant la session.",
+    follow:"Organisation possible de rendez-vous successifs ou d'un suivi longitudinal selon contrat.",
+    boundary:"L'éligibilité du site, le matériel réellement transporté, les frais et les conditions d'annulation font partie du devis. Aucune prestation médicale à bord n'est incluse."
+  }
+};
+function detailPage(c) {
+  const d=perOfferDetails[c.slug];
+  return layout(c.title+" — bilan détaillé",c.description,[
+    "<section class='hero'><div class='wrap'><p class='ey'>KŌMØ · BILAN "+c.title.toUpperCase()+"</p><h1>"+d.headline+"</h1><p class='lead'>"+d.intro+"</p>",
+    "<div class='row'><a class='pill dark' href='/fr/contact/'>Demander un devis ou un rendez-vous ↗</a><a class='pill' href='/fr/check-ups/'>Comparer les bilans</a></div></div></section>",
+    "<section class='section'><div class='wrap two'><div><p class='ey'>APERÇU</p><h2>"+c.title+"</h2><p class='lead'>"+c.price+"</p><p class='sub'>"+c.description+"</p>",
+    "<p class='note'>La formule exacte et ses conditions de paiement sont précisées sur votre devis. Il n'y a pas de paiement en ligne sur cette page.</p></div>",
+    "<div class='highlight'><p class='ey'>POUR QUI ?</p><h3>Ce bilan vous correspond si…</h3><p>"+d.suited+"</p></div></div></section>",
+    "<section class='section muted'><div class='wrap'><h2>Ce que comprend votre bilan.</h2><div class='spec'><strong>Avant la session</strong><span>Recueil de vos objectifs et définition du périmètre de mesure.</span></div>",
+    "<div class='spec'><strong>Les mesures</strong><span>"+d.assessment+"</span></div>",
+    "<div class='spec'><strong>Votre restitution</strong><span>"+d.output+"</span></div>",
+    "<div class='spec'><strong>La suite</strong><span>"+d.follow+"</span></div></div></section>",
+    "<section class='section'><div class='wrap'><p class='ey'>TRANSPARENCE</p><h2>Ce que le bilan ne fait pas.</h2><p class='lead'>"+d.boundary+"</p><div class='row'><a class='pill dark' href='/fr/contact/'>Organiser ce bilan</a><a class='pill' href='/fr/cgv/'>Conditions générales</a></div></div></section>"
+  ].join(""));
+}
 const legalSections = [
   ["1. Identité et champ d'application",
     "Les présentes conditions ont vocation à encadrer les prestations fonctionnelles non médicales vendues aux consommateurs par l'entité exploitant la marque KŌMØ Longevity. Adresse déclarée : "+ADDRESS+". Dénomination juridique exacte, forme sociale, capital, numéro SIREN, immatriculation RCS, numéro de TVA le cas échéant, email et téléphone : "+PENDING+". L'identité juridique définitive figurera sur chaque devis et facture. La version applicable est celle acceptée lors de la commande."],
@@ -219,6 +275,7 @@ async function patchHome(relative) {
   await writeFile(fp,html,"utf8");
 }
 await write("fr/check-ups/index.html",offersPage);
+for(const offer of cards) await write("fr/check-ups/"+offer.slug+"/index.html",detailPage(offer));
 await write("fr/motion-case/index.html",proPage);
 await write("fr/cgv/index.html",legalPage);
 await write("fr/cgv-pro/index.html",proLegalPage);
@@ -227,7 +284,7 @@ await patchHome("fr/index.html");
 const sitemapPath=join(SITE,"sitemap.xml");
 try{
   let xml=await readFile(sitemapPath,"utf8");
-  for(const path of ["/fr/check-ups/","/fr/motion-case/","/fr/cgv/","/fr/cgv-pro/"]){
+  for(const path of ["/fr/check-ups/","/fr/check-ups/motion/","/fr/check-ups/phenotype/","/fr/check-ups/complete/","/fr/check-ups/private/","/fr/motion-case/","/fr/cgv/","/fr/cgv-pro/"]){
     if(!xml.includes(BASE+path)) xml=xml.replace("</urlset>","<url><loc>"+BASE+path+"</loc></url></urlset>");
   }
   await writeFile(sitemapPath,xml,"utf8");
