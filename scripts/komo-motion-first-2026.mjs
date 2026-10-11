@@ -164,6 +164,7 @@ async function writeAt(rel,html){let to=join(ROOT,rel);await mkdir(dirname(to),{
 const sitemapEntries=[];
 for(const l of ["fr","en","es"]){let p=paths[l];for(let k of Object.keys(p)){const x=k==="home"?homepage(l):k==="b2c"||k==="b2b"?forms(l,k):page(l,k);await write(p[k],x);sitemapEntries.push(p[k]);}}
 for(const l of ["fr","en","es"]){let contact=l==="fr"?"fr/contact/index.html":l==="en"?"en/contact/index.html":"es/contacto/index.html";await writeAt(contact,choicePage(l));for(const kind of ["pulse-pro","delivery-support","cancellation","cookies"])await writeAt(l+"/"+kind+"/index.html",legalLanding(l,kind));}
+await writeAt("fr/index.html",homepage("fr"));
 await writeAt("fr/check-ups/index.html",page("fr","assessment"));
 await writeAt("fr/check-ups/motion/index.html",page("fr","assessment"));
 await writeAt("fr/check-ups/phenotype/index.html",page("fr","future"));
