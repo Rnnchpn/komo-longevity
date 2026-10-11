@@ -18,7 +18,7 @@ const CSS = [
   ".cm h1,.cm h2,.cm h3{font-family:Georgia,'Times New Roman',serif;font-weight:400;letter-spacing:-.038em;line-height:1.07}.cm h1{font-size:clamp(42px,6vw,80px);margin:17px 0}.cm h2{font-size:clamp(31px,4.5vw,55px);margin:12px 0}.cm h3{font-size:32px;margin:13px 0}",
   ".cm .lead{font-size:clamp(17px,2vw,21px);max-width:700px;color:var(--cm-muted)}.cm .hero{padding:85px 0 66px;background:linear-gradient(120deg,#f8f7f3,#e9eee7)}",
   ".cm .row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.cm .section{padding:70px 0}.cm .section.muted{background:#eef0e8}.cm .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px;margin-top:40px}",
-  ".cm .card{border:1px solid var(--cm-line);border-radius:19px;background:#fff;padding:31px;display:flex;flex-direction:column;min-height:490px}.cm .card.featured{background:#193c2f;color:white;border-color:#193c2f}.cm .card.featured .sub{color:#d8e3d9}",
+  ".cm .grid.plans{grid-template-columns:repeat(4,minmax(0,1fr))}.cm .card{border:1px solid var(--cm-line);border-radius:19px;background:#fff;padding:31px;display:flex;flex-direction:column;min-height:490px}.cm .card.featured{background:#193c2f;color:white;border-color:#193c2f}.cm .card.featured .sub{color:#d8e3d9}",
   ".cm .price{font-size:24px;font-family:Georgia,serif;margin-top:10px}.cm .sub{font-size:13px;color:var(--cm-muted);line-height:1.75}.cm ul{padding-left:19px}.cm li{margin:10px 0;font-size:13px}.cm .card .actions{margin-top:auto;padding-top:21px}",
   ".cm .steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-top:1px solid var(--cm-line);margin-top:33px}.cm .step{padding:25px 21px 16px;border-right:1px solid var(--cm-line)}.cm .step:last-child{border:0}.cm .step b{font-size:11px;color:#52705d}.cm .step h3{font-size:25px}",
   ".cm .two{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}.cm .two img{width:100%;height:auto;max-height:470px;object-fit:contain;border-radius:20px}",
@@ -26,7 +26,7 @@ const CSS = [
   ".cm .legal{padding:70px 0;max-width:890px}.cm .legal section{padding:24px 0;border-bottom:1px solid var(--cm-line)}.cm .legal h2{font:normal 28px/1.2 Georgia,serif}.cm .legal p,.cm .legal li{font-size:14px;line-height:1.8}",
   ".cm .note{padding:18px;border:1px solid #cccfbb;border-radius:12px;background:#f6f3e8;font-size:13px}.cm .footer{padding:40px 0;border-top:1px solid var(--cm-line);font-size:12px;color:#556358}",
   ".cm .footlinks{display:flex;flex-wrap:wrap;gap:12px 23px;margin:15px 0}.cm .footlinks a{text-decoration:none}.cm .cta-band{padding:54px 0;background:#173729;color:white}",
-  "@media(max-width:800px){.cm .grid,.cm .two{grid-template-columns:1fr}.cm .steps{grid-template-columns:1fr 1fr}.cm .nav{gap:12px}.cm .hero{padding:55px 0}}",
+  "@media(max-width:800px){.cm .grid,.cm .grid.plans,.cm .two{grid-template-columns:1fr}.cm .steps{grid-template-columns:1fr 1fr}.cm .nav{gap:12px}.cm .hero{padding:55px 0}}",
   "@media(max-width:500px){.cm .steps{grid-template-columns:1fr}.cm .step{border-right:0;border-bottom:1px solid var(--cm-line)}.cm .card{min-height:0}}"
 ].join("");
 const FOOTLINKS = [
@@ -47,33 +47,39 @@ const layout = (title, description, body) => [
 ].join("");
 const cards = [
   {
-    eyebrow:"01 · VOTRE POINT DE DÉPART", title:"Motion", price:"300 € TTC · tarif de référence",
+    eyebrow:"01 · LE MOUVEMENT", title:"Motion", price:"300 € TTC · tarif de référence",
     description:"Un état des lieux instrumenté de vos capacités locomotrices, avec une restitution claire.",
-    features:["Questionnaire et objectifs fonctionnels","Mesures de marche, équilibre, force et contrôle du mouvement selon protocole et matériel disponible","Restitution et rapport fonctionnel","Accès aux résultats dans KŌMØ Pulse selon la formule convenue"],
+    features:["Questionnaire et objectifs fonctionnels","Marche, équilibre, force et contrôle du mouvement selon protocole et matériel disponible","Restitution et rapport fonctionnel","Accès aux résultats dans KŌMØ Pulse selon la formule convenue"],
     action:"Demander un bilan Motion"
   },
   {
-    eyebrow:"02 · ALLER PLUS LOIN",title:"Motion Advanced",price:"Sur devis",
-    description:"Une évaluation élargie et des points de comparaison pour structurer votre progression.",
-    features:["Évaluation Motion initiale","Explorations fonctionnelles complémentaires selon pertinence","Analyse comparative et priorités de mouvement","Possibilité de checkpoint et suivi Pulse selon devis"],
-    action:"Composer mon programme"
+    eyebrow:"02 · LE PHÉNOTYPE",title:"Phenotype",price:"Sur devis",
+    description:"Une photographie descriptive de votre composition corporelle et d'indicateurs physiques non médicaux.",
+    features:["Analyse de composition corporelle selon équipement disponible","Indicateurs cutanés et capillaires selon modules retenus","Habitudes de vie et objectifs","Synthèse descriptive et suivi selon devis, sans examen biologique ni diagnostic"],
+    action:"Découvrir Phenotype"
   },
   {
-    eyebrow:"03 · SERVICE PRIVÉ",title:"Motion Private",price:"Sur devis personnalisé",
-    description:"Le même niveau de rigueur dans le lieu de votre choix : villa, hôtel, chalet ou yacht.",
-    features:["Déplacement et installation du laboratoire mobile","Évaluation fonctionnelle adaptée à l'espace disponible","Restitution privée et rapport","Devis intégrant logistique et déplacements, avant engagement"],
+    eyebrow:"03 · LE BILAN COMBINÉ",title:"Complete",price:"Sur devis",
+    description:"Réunir la mesure locomotrice et le phénotype dans un parcours unique, avec un rapport intégré.",
+    features:["Évaluation Motion et modules Phenotype","Restitution de vos indicateurs fonctionnels et physiques","Une à trois priorités de progression non thérapeutiques","Checkpoint et Pulse selon la formule souscrite"],
+    action:"Composer mon bilan Complete"
+  },
+  {
+    eyebrow:"04 · SUR MESURE",title:"Private",price:"Sur devis personnalisé",
+    description:"Un bilan choisi parmi ces formats, installé dans le lieu de votre choix : villa, hôtel, chalet ou yacht.",
+    features:["Déplacement et installation du laboratoire mobile","Contenu de bilan choisi selon espace et objectifs","Restitution privée et rapport","Devis intégrant matériel, logistique et déplacements"],
     action:"Organiser un bilan privé"
   }
-];
+]
 const cardHtml = (c, i) => [
-  "<article class='card",i===1?" featured":"", "'><div class='ey'>",c.eyebrow,"</div><h3>",c.title,"</h3><div class='price'>",c.price,
+  "<article class='card",i===2?" featured":"", "'><div class='ey'>",c.eyebrow,"</div><h3>",c.title,"</h3><div class='price'>",c.price,
   "</div><p class='sub'>",c.description,"</p><ul>",c.features.map(s=>"<li>"+s+"</li>").join(""),
-  "</ul><div class='actions'><a class='pill ",i===1?"":"dark","' href='/fr/contact/'>",c.action," ↗</a></div></article>"
+  "</ul><div class='actions'><a class='pill ",i===2?"":"dark","' href='/fr/contact/'>",c.action," ↗</a></div></article>"
 ].join("");
 const offerSection = () => [
   "<section class='section' id='bilans'><div class='wrap'><p class='ey'>KŌMØ · LES ÉVALUATIONS</p>",
-  "<h2>Choisissez votre bilan.</h2><p class='lead'>Trois formats, une même méthode : mesurer, comprendre et suivre votre mobilité. ",
-  "Chaque prestation est définie dans un devis détaillé avant confirmation.</p><div class='grid'>",
+  "<h2>Choisissez votre bilan.</h2><p class='lead'>Quatre formats, une même méthode : mesurer, comprendre et suivre votre mobilité. ",
+  "Chaque prestation est définie dans un devis détaillé avant confirmation.</p><div class='grid plans'>",
   cards.map(cardHtml).join(""),"</div><p class='sub'>Le tarif Motion de 300 € TTC est une référence commerciale à confirmer. ",
   "Le prix contractuel, les options et les frais de déplacement sont ceux de votre devis accepté. Aucune commande payante n'est activée sur cette page.</p>",
   "</div></section>"
@@ -98,7 +104,7 @@ const proSection = () => [
   "<img src='/assets/images/real-case/komo-case-open.jpeg' alt='Valise de matériel de bilan fonctionnel KŌMØ' loading='lazy'>",
   "</div></section>"
 ].join("");
-const offersPage = layout("Nos bilans fonctionnels", "Découvrez les bilans KŌMØ Motion, Motion Advanced et Motion Private, ainsi que notre laboratoire mobile.", [
+const offersPage = layout("Nos bilans fonctionnels", "Découvrez les bilans KŌMØ Motion, Phenotype, Complete et Private, ainsi que notre laboratoire mobile.", [
   "<section class='hero'><div class='wrap'><p class='ey'>KŌMØ LONGEVITY · CANNES & MOBILE</p><h1>Comprendre votre mouvement.<br>Changer votre trajectoire.</h1>",
   "<p class='lead'>Une évaluation fonctionnelle instrumentée, des résultats lisibles et une progression suivie dans le temps. ",
   "À Cannes ou sur votre lieu de séjour.</p><div class='row'><a class='pill dark' href='#bilans'>Voir les bilans</a><a class='pill' href='/fr/contact/'>Parler à notre équipe</a></div></div></section>",
@@ -127,7 +133,7 @@ const legalSections = [
   ["1. Identité et champ d'application",
     "Les présentes conditions ont vocation à encadrer les prestations fonctionnelles non médicales vendues aux consommateurs par l'entité exploitant la marque KŌMØ Longevity. Adresse déclarée : "+ADDRESS+". Dénomination juridique exacte, forme sociale, capital, numéro SIREN, immatriculation RCS, numéro de TVA le cas échéant, email et téléphone : "+PENDING+". L'identité juridique définitive figurera sur chaque devis et facture. La version applicable est celle acceptée lors de la commande."],
   ["2. Description des services",
-    "Motion est une prestation d'évaluation fonctionnelle de la mobilité, de l'équilibre, de la force et du mouvement, selon un protocole détaillé dans le devis. Motion Advanced et Motion Private comportent des modules supplémentaires exclusivement lorsqu'ils figurent dans le devis. Les prestations ne constituent ni un diagnostic ni un traitement médical. Aucun résultat de performance, bénéfice thérapeutique ou amélioration déterminée n'est garanti."],
+    "Motion est une prestation d'évaluation fonctionnelle de la mobilité, de l'équilibre, de la force et du mouvement, selon un protocole détaillé dans le devis. Phenotype et Complete comprennent uniquement les modules de mesure non médicaux énoncés dans le devis. Private désigne un format de déplacement, avec un contenu de bilan expressément choisi. Les prestations ne constituent ni un diagnostic ni un traitement médical. Aucun résultat de performance, bénéfice thérapeutique ou amélioration déterminée n'est garanti."],
   ["3. Devis, commande et conclusion du contrat",
     "La demande de rendez-vous par le site n'est pas une commande. Le consommateur reçoit préalablement un devis précisant l'identité du vendeur, le contenu exact, le lieu, les prérequis, le délai ou la date, le prix TTC et les frais de déplacement, les modalités de paiement et d'annulation. La commande est conclue après acceptation expresse du devis et des présentes conditions. Tout futur paiement en ligne devra afficher clairement une commande avec obligation de paiement."],
   ["4. Prix, facturation et règlement",
