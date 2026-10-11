@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/build-all.mjs && node scripts/komo-public-final-v6.mjs && node scripts/komo-offers-zoi-2026.mjs && node scripts/komo-motion-first-2026.mjs && node scripts/komo-motion-kinetic-world-2026.mjs",
+  "buildCommand": "node scripts/build-all.mjs && node scripts/komo-public-final-v6.mjs && node scripts/komo-offers-zoi-2026.mjs && node scripts/komo-motion-first-2026.mjs && node scripts/komo-motion-kinetic-world-2026.mjs && node scripts/komo-motion-experience-v3-2026.mjs",
   "outputDirectory": "site",
   "cleanUrls": true,
   "rewrites": [
