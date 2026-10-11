@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "node scripts/build-all.mjs && node scripts/komo-public-final-v6.mjs && node scripts/komo-offers-zoi-2026.mjs",
+  "buildCommand": "node scripts/build-all.mjs && node scripts/komo-public-final-v6.mjs && node scripts/komo-offers-zoi-2026.mjs && node scripts/komo-motion-first-2026.mjs",
   "outputDirectory": "site",
   "cleanUrls": true,
   "rewrites": [
@@ -483,6 +483,146 @@
     }
   ],
   "redirects": [
+    {
+      "source": "/fr/check-ups",
+      "destination": "/fr/bilans/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/",
+      "destination": "/fr/bilans/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/motion",
+      "destination": "/fr/bilans/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/motion/",
+      "destination": "/fr/bilans/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/complete",
+      "destination": "/fr/bilans/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/complete/",
+      "destination": "/fr/bilans/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/private",
+      "destination": "/fr/anywhere/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/private/",
+      "destination": "/fr/anywhere/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/phenotype",
+      "destination": "/fr/phenotype/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/check-ups/phenotype/",
+      "destination": "/fr/phenotype/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/experience",
+      "destination": "/fr/experiences/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/experience/",
+      "destination": "/fr/experiences/",
+      "permanent": true
+    },
+    {
+      "source": "/en/experience",
+      "destination": "/en/experiences/",
+      "permanent": true
+    },
+    {
+      "source": "/en/experience/",
+      "destination": "/en/experiences/",
+      "permanent": true
+    },
+    {
+      "source": "/es/experiencia",
+      "destination": "/es/experiencias/",
+      "permanent": true
+    },
+    {
+      "source": "/es/experiencia/",
+      "destination": "/es/experiencias/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/partenaires",
+      "destination": "/fr/professional/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/partenaires/",
+      "destination": "/fr/professional/",
+      "permanent": true
+    },
+    {
+      "source": "/en/partners",
+      "destination": "/en/professional/",
+      "permanent": true
+    },
+    {
+      "source": "/en/partners/",
+      "destination": "/en/professional/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/approche",
+      "destination": "/fr/science/",
+      "permanent": true
+    },
+    {
+      "source": "/fr/approche/",
+      "destination": "/fr/science/",
+      "permanent": true
+    },
+    {
+      "source": "/en/approach",
+      "destination": "/en/science/",
+      "permanent": true
+    },
+    {
+      "source": "/en/approach/",
+      "destination": "/en/science/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo",
+      "destination": "/es/ciencia/",
+      "permanent": true
+    },
+    {
+      "source": "/es/metodo/",
+      "destination": "/es/ciencia/",
+      "permanent": true
+    },
+    {
+      "source": "/es/fenotipo",
+      "destination": "/es/phenotype/",
+      "permanent": true
+    },
+    {
+      "source": "/es/fenotipo/",
+      "destination": "/es/phenotype/",
+      "permanent": true
+    },
     {
       "source": "/fr/world",
       "destination": "/world/",
