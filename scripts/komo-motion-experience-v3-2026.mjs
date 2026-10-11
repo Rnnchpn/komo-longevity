@@ -3,8 +3,8 @@ import {join} from "node:path";
 // KŌMØ Motion commercial V3. Marketing HTML only — never touches Pulse, health records or auth.
 const SITE=join(process.cwd(),"site");
 const ROUTES={
- fr:{home:"/fr/",case:"/fr/motion-case/",b2c:"/fr/demander-un-bilan/",b2b:"/fr/equiper-mon-etablissement/",pulse:"/fr/pulse/"},
- en:{home:"/en/",case:"/en/motion-case/",b2c:"/en/request-assessment/",b2b:"/en/equip-my-business/",pulse:"/en/pulse/"},
+ fr:{home:"/fr/",case:"/fr/motion-case/",b2c:"/fr/demander-bilan/",b2b:"/fr/equiper-etablissement/",pulse:"/fr/pulse/"},
+ en:{home:"/en/",case:"/en/motion-case/",b2c:"/en/request-assessment/",b2b:"/en/equip-your-business/",pulse:"/en/pulse/"},
  es:{home:"/es/",case:"/es/motion-case/",b2c:"/es/solicitar-evaluacion/",b2b:"/es/equipar-centro/",pulse:"/es/pulse/"}
 };
 const T={
@@ -140,8 +140,8 @@ async function edit(path,l,type){
  return html;
 }
 const paths={
- fr:{home:"fr/index.html",case:"fr/motion-case/index.html",forms:["fr/demander-un-bilan/index.html","fr/equiper-mon-etablissement/index.html"]},
- en:{home:"en/index.html",case:"en/motion-case/index.html",forms:["en/request-assessment/index.html","en/equip-my-business/index.html"]},
+ fr:{home:"fr/index.html",case:"fr/motion-case/index.html",forms:["fr/demander-bilan/index.html","fr/equiper-etablissement/index.html"]},
+ en:{home:"en/index.html",case:"en/motion-case/index.html",forms:["en/request-assessment/index.html","en/equip-your-business/index.html"]},
  es:{home:"es/index.html",case:"es/motion-case/index.html",forms:["es/solicitar-evaluacion/index.html","es/equipar-centro/index.html"]}
 };
 let count=0;
