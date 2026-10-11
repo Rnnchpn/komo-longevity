@@ -9,17 +9,17 @@ const ROUTES={
 };
 const T={
  fr:{
- overline:"LE SYSTÈME / MOTION CASE",title:"Une nouvelle manière de mesurer le mouvement.",desc:"Du matériel de mesure fonctionnelle sélectionné pour être déployé sur place, au rythme du patient ou de l’établissement. Une configuration cible, conçue pour une expérience claire et reproductible.",
- status:"CONFIGURATION CIBLE V1 — À VALIDER",visual:"SCHÉMA DE PRINCIPE · NON CONTRACTUEL",
+ overline:"LE SYSTÈME / MOTION CASE",title:"Une nouvelle manière de mesurer le mouvement.",desc:"Du matériel de mesure fonctionnelle sélectionné pour être déployé sur place, au rythme du patient ou de l’établissement. Un système imaginé pour une expérience claire et reproductible.",
+ status:"MOTION CASE / ÉVALUATION FONCTIONNELLE",visual:"ILLUSTRATION / LE SYSTÈME MOTION",
  selector:"EXPLORER LE SYSTÈME",details:"DÉCOUVRIR MOTION CASE",request:"DEMANDER UNE DÉMONSTRATION",book:"ORGANISER UN BILAN",
  label:["01 / FORCE","02 / MESURE","03 / MOUVEMENT","04 / CONTINUITÉ"],
  modules:[
- ["Deux plateformes. Une mesure fonctionnelle.","Deux plateformes VALD ForceDecks Mini envisagées pour analyser certains paramètres de force et d’équilibre, selon les protocoles et licences applicables.","Équipement envisagé. Formats, compatibilités et intégrations à confirmer."],
- ["La force, au plus près du geste.","VALD DynaMo Plus envisagé pour mesurer des performances musculaires et fonctionnelles sélectionnées, avec une restitution adaptée.","Dispositif et mesures dépendant du logiciel et des protocoles retenus."],
- ["Observer le mouvement.","HumanTrak est étudié pour l’analyse fonctionnelle du mouvement avec captation visuelle, selon les conditions techniques et contractuelles.","L’intégration technique avec le système KŌMØ reste à valider."],
- ["Relier un bilan au suivant.","Une restitution fonctionnelle et un suivi longitudinal pensés autour de Pulse, selon les fonctionnalités effectivement disponibles dans la formule choisie.","Écran de démonstration fictif. Aucun résultat réel ou score clinique."],
+ ["Deux plateformes. Une mesure fonctionnelle.","Deux plateformes VALD ForceDecks Mini pour explorer la force et l’équilibre dans le cadre de tests fonctionnels.","Tests, protocoles et équipements définis selon la prestation."],
+ ["La force, au plus près du geste.","VALD DynaMo Plus pour l’exploration de la force au moyen de tests sélectionnés.","Mesures et protocoles précisés selon la prestation."],
+ ["Observer le mouvement.","HumanTrak pour une approche de l’analyse fonctionnelle du mouvement par captation visuelle.","Accès logiciel et modalités d’utilisation définis dans chaque proposition."],
+ ["Relier un bilan au suivant.","Une restitution fonctionnelle et un suivi longitudinal autour de Pulse, selon les fonctions incluses dans l’offre.","Écran de démonstration fictif. Aucun résultat réel ou score clinique."],
  ],
- caveat:"Les visuels sont schématiques. Le conditionnement en une seule valise, les licences et l’intégration logicielle ne sont pas encore confirmés.",
+ caveat:"Illustrations pédagogiques. Composition, équipement et logiciels précisés lors de la démonstration et dans le devis.",
  card:"01 / MOTION CASE",heroAction:"EXPLORER MOTION CASE",pulseTag:"PULSE / DÉMONSTRATION CONCEPTUELLE",pulseTitle:"Un résultat compréhensible. Un suivi possible.",pulseSub:"Une lecture simple des domaines évalués et du prochain point de mesure.",
  pulseTabs:["BILAN INITIAL","DOMAINES","SUIVI"],pulseViews:[
  ["BILAN FONCTIONNEL","Une référence de départ","Marche · Force · Équilibre · Mobilité"],
@@ -33,17 +33,17 @@ const T={
  casePhoto:"Une photographie de prototype antérieur est présentée ailleurs sur cette page ; ce schéma représente uniquement l’architecture de la configuration cible."
  },
  en:{
- overline:"THE SYSTEM / MOTION CASE",title:"A new way to assess movement.",desc:"Functional measurement equipment selected for on-site deployment, at the pace of each client or business. A target configuration designed for a clear, repeatable experience.",
- status:"TARGET V1 CONFIGURATION — TO BE VERIFIED",visual:"CONCEPT DIAGRAM · NON-CONTRACTUAL",
+ overline:"THE SYSTEM / MOTION CASE",title:"A new way to assess movement.",desc:"Functional measurement equipment selected for on-site deployment, at the pace of each client or business. A system designed for a clear, repeatable experience.",
+ status:"MOTION CASE / FUNCTIONAL ASSESSMENT",visual:"ILLUSTRATION / THE MOTION SYSTEM",
  selector:"EXPLORE THE SYSTEM",details:"DISCOVER MOTION CASE",request:"REQUEST A DEMONSTRATION",book:"ARRANGE AN ASSESSMENT",
  label:["01 / FORCE","02 / MEASUREMENT","03 / MOVEMENT","04 / CONTINUITY"],
  modules:[
- ["Two platforms. A functional measurement.","Two VALD ForceDecks Mini platforms are being considered for selected force and balance measures, subject to protocols and licensing.","Proposed equipment. Dimensions, compatibility and integrations to be confirmed."],
- ["Quantifying force through movement.","VALD DynaMo Plus is being considered for selected muscular and functional performance measurements.","Device and measures depend on the agreed software and protocols."],
- ["Observing movement.","HumanTrak is under evaluation for functional movement analysis using visual capture, subject to technical and licensing requirements.","Technical integration into the KŌMØ system has yet to be validated."],
- ["Connect one assessment to the next.","Functional reporting and longitudinal follow-up are envisaged through Pulse, subject to the capabilities enabled for each offering.","Illustrative demo screen only. No real result or clinical score."]
+ ["Two platforms. A functional measurement.","Two VALD ForceDecks Mini platforms for selected functional force and balance assessments.","Equipment and protocols specified for each service."],
+ ["Quantifying force through movement.","VALD DynaMo Plus for selected strength and functional assessments.","Measures and protocols depend on the service provided."],
+ ["Observing movement.","HumanTrak for functional movement analysis using visual capture.","Software access and technical scope are detailed in each proposal."],
+ ["Connect one assessment to the next.","Functional reporting and longitudinal follow-up through Pulse, according to the selected offering.","Illustrative demo screen only. No real result or clinical score."]
  ],
- caveat:"All diagrams are conceptual. Single-case packing, supplier licences and software integrations remain unverified.",
+ caveat:"Illustrative diagrams. Included equipment and software are specified at the demonstration and in the quotation.",
  card:"01 / MOTION CASE",heroAction:"EXPLORE MOTION CASE",pulseTag:"PULSE / CONCEPTUAL PREVIEW",pulseTitle:"Understand a result. Plan the next checkpoint.",pulseSub:"A straightforward view of assessed domains and future reassessments.",
  pulseTabs:["BASELINE","DOMAINS","FOLLOW-UP"],pulseViews:[
  ["FUNCTIONAL BASELINE","The starting point","Gait · Force · Balance · Mobility"],
@@ -57,17 +57,17 @@ const T={
  casePhoto:"A previous prototype photograph is presented elsewhere on this page; this diagram represents the target system architecture only."
  },
  es:{
- overline:"EL SISTEMA / MOTION CASE",title:"Una nueva forma de evaluar el movimiento.",desc:"Equipos de medición funcional seleccionados para desplegarse donde esté el cliente o el establecimiento. Una configuración objetivo pensada para una experiencia clara y repetible.",
- status:"CONFIGURACIÓN OBJETIVO V1 — POR VALIDAR",visual:"ESQUEMA CONCEPTUAL · NO CONTRACTUAL",
+ overline:"EL SISTEMA / MOTION CASE",title:"Una nueva forma de evaluar el movimiento.",desc:"Equipos de medición funcional seleccionados para desplegarse donde esté el cliente o el establecimiento. Un sistema diseñado para una experiencia clara y repetible.",
+ status:"MOTION CASE / EVALUACIÓN FUNCIONAL",visual:"ILUSTRACIÓN / SISTEMA MOTION",
  selector:"EXPLORAR EL SISTEMA",details:"DESCUBRIR MOTION CASE",request:"SOLICITAR UNA DEMOSTRACIÓN",book:"ORGANIZAR UNA EVALUACIÓN",
  label:["01 / FUERZA","02 / MEDICIÓN","03 / MOVIMIENTO","04 / CONTINUIDAD"],
  modules:[
- ["Dos plataformas. Una medición funcional.","Se estudian dos plataformas VALD ForceDecks Mini para mediciones específicas de fuerza y equilibrio, según protocolos y licencias.","Equipo previsto. Dimensiones, compatibilidad e integraciones por confirmar."],
- ["Medir la fuerza en cada gesto.","Se considera VALD DynaMo Plus para evaluar el rendimiento muscular y funcional mediante pruebas seleccionadas.","El equipo y sus mediciones dependen del software y los protocolos."],
- ["Observar el movimiento.","HumanTrak se estudia para el análisis funcional del movimiento con captura visual, según condiciones técnicas y comerciales.","La integración técnica con KŌMØ aún debe validarse."],
- ["Conectar una evaluación con la siguiente.","Informes funcionales y seguimiento longitudinal previstos con Pulse, según las funciones disponibles de cada oferta.","Pantalla ilustrativa. Sin resultados reales ni puntuación clínica."]
+ ["Dos plataformas. Una medición funcional.","Dos plataformas VALD ForceDecks Mini para evaluaciones funcionales de fuerza y equilibrio.","Equipos y protocolos detallados según el servicio."],
+ ["Medir la fuerza en cada gesto.","VALD DynaMo Plus para pruebas seleccionadas de fuerza y función.","Pruebas y protocolos definidos según la prestación."],
+ ["Observar el movimiento.","HumanTrak para el análisis funcional del movimiento con captura visual.","Acceso al software y alcance técnico detallados en cada propuesta."],
+ ["Conectar una evaluación con la siguiente.","Informes funcionales y seguimiento longitudinal con Pulse, según las funciones de cada oferta.","Pantalla ilustrativa. Sin resultados reales ni puntuación clínica."]
  ],
- caveat:"Todos los esquemas son conceptuales. El embalaje en una única maleta, licencias e integración informática aún no están confirmados.",
+ caveat:"Ilustraciones orientativas. Los equipos y programas incluidos se especifican en la demostración y el presupuesto.",
  card:"01 / MOTION CASE",heroAction:"EXPLORAR MOTION CASE",pulseTag:"PULSE / DEMOSTRACIÓN CONCEPTUAL",pulseTitle:"Entender el resultado. Seguir la evolución.",pulseSub:"Una visión sencilla de las áreas evaluadas y de las futuras reevaluaciones.",
  pulseTabs:["REFERENCIA","DOMINIOS","SEGUIMIENTO"],pulseViews:[
  ["REFERENCIA FUNCIONAL","El punto de partida","Marcha · Fuerza · Equilibrio · Movilidad"],
@@ -83,10 +83,10 @@ const T={
 };
 function escapeHtml(s){return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");}
 function illustration(kind){
- if(kind===0)return '<div class="vx-plates" aria-hidden="true"><div class="vx-plate"><i></i><small>VALD</small></div><div class="vx-plate"><i></i><small>VALD</small></div></div><span class="vx-scene-legend">FORCEDECKS MINI · 2 × TARGET</span>';
- if(kind===1)return '<div class="vx-dynamo" aria-hidden="true"><div class="vx-handle"></div><div class="vx-core"><span>VALD</span><strong>DynaMo</strong><b>+</b></div><div class="vx-attachment"></div></div><span class="vx-scene-legend">HANDHELD FORCE · TARGET CONFIGURATION</span>';
- if(kind===2)return '<div class="vx-trak" aria-hidden="true"><svg viewBox="0 0 280 240"><rect x="24" y="18" width="232" height="204" rx="18" fill="none" stroke="currentColor" opacity=".25"/><path d="M48 63H232M48 183H232" stroke="currentColor" opacity=".15"/><circle cx="141" cy="61" r="15" fill="none" stroke="currentColor" stroke-width="3"/><path d="M141 77L136 137M139 100L99 119 73 105M139 100L178 119 204 93M136 137L109 181 92 207M136 137L176 171 194 205" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><g fill="#739a84"><circle cx="139" cy="100" r="5"/><circle cx="99" cy="119" r="5"/><circle cx="178" cy="119" r="5"/><circle cx="136" cy="137" r="5"/><circle cx="109" cy="181" r="5"/><circle cx="176" cy="171" r="5"/></g></svg></div><span class="vx-scene-legend">MOVEMENT ANALYSIS · CONCEPTUAL CAPTURE</span>';
- return '<div class="vx-report-art" aria-hidden="true"><div class="vx-topline">KŌMØ <span>PULSE</span></div><b>FUNCTIONAL BASELINE</b><div class="vx-report-line"><span></span><span></span><span></span><span></span></div><div class="vx-report-bars"><i></i><i></i><i></i><i></i></div><small>ILLUSTRATIVE / NO PATIENT DATA</small></div><span class="vx-scene-legend">PULSE · WORKFLOW SUBJECT TO INTEGRATION</span>';
+ if(kind===0)return '<div class="vx-plates" aria-hidden="true"><div class="vx-plate"><i></i><small>VALD</small></div><div class="vx-plate"><i></i><small>VALD</small></div></div><span class="vx-scene-legend">FORCEDECKS MINI · DEUX PLATEFORMES</span>';
+ if(kind===1)return '<div class="vx-dynamo" aria-hidden="true"><div class="vx-handle"></div><div class="vx-core"><span>VALD</span><strong>DynaMo</strong><b>+</b></div><div class="vx-attachment"></div></div><span class="vx-scene-legend">DYNAMO PLUS · FUNCTIONAL ASSESSMENT</span>';
+ if(kind===2)return '<div class="vx-trak" aria-hidden="true"><svg viewBox="0 0 280 240"><rect x="24" y="18" width="232" height="204" rx="18" fill="none" stroke="currentColor" opacity=".25"/><path d="M48 63H232M48 183H232" stroke="currentColor" opacity=".15"/><circle cx="141" cy="61" r="15" fill="none" stroke="currentColor" stroke-width="3"/><path d="M141 77L136 137M139 100L99 119 73 105M139 100L178 119 204 93M136 137L109 181 92 207M136 137L176 171 194 205" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><g fill="#739a84"><circle cx="139" cy="100" r="5"/><circle cx="99" cy="119" r="5"/><circle cx="178" cy="119" r="5"/><circle cx="136" cy="137" r="5"/><circle cx="109" cy="181" r="5"/><circle cx="176" cy="171" r="5"/></g></svg></div><span class="vx-scene-legend">MOVEMENT ANALYSIS · HUMANTRAK</span>';
+ return '<div class="vx-report-art" aria-hidden="true"><div class="vx-topline">KŌMØ <span>PULSE</span></div><b>FUNCTIONAL BASELINE</b><div class="vx-report-line"><span></span><span></span><span></span><span></span></div><div class="vx-report-bars"><i></i><i></i><i></i><i></i></div><small>ILLUSTRATIVE / NO PATIENT DATA</small></div><span class="vx-scene-legend">PULSE · FOLLOW-UP EXPERIENCE</span>';
 }
 function explorer(l){
  const c=T[l],p=ROUTES[l];
