@@ -263,7 +263,14 @@ async function patchHome(relative) {
   const embedded = offerSection()+methodSection()+proSection();
   // Replace the former generic offer carousel rather than duplicating it.
   const genericOffers = /<section class="kt-z-section" id="komo-offers">[\s\S]*?(?=<section class="kt-z-section kt-z-section--sand">)/;
-  if(genericOffers.test(html)){
+  // Current production V6 has its own two-card storefront. Replace that one
+  // section with the four check-up tiers; preserve its hero, experience,
+  // method, founder, visuals and local navigation.
+  const liveOffers = /<section class="lite-offers" id="bilans">[\\s\\S]*?(?=<section class="lite-experience">)/;
+  if(liveOffers.test(html)) {
+    html = html.replace(liveOffers, "<div id='komo-commerce-offers' class='cm'>"+offerSection()+"</div>");
+    html = html.replace('<section class="lite-founder">', "<div class='cm'>"+proSection()+"</div><section class=\"lite-founder\">");
+  } else if(genericOffers.test(html)){
     html = html.replace(genericOffers, "<div id='komo-commerce-offers' class='cm'>"+embedded+"</div>");
   } else if(html.includes("</main>")) {
     html = html.replace("</main>","<div id='komo-commerce-offers' class='cm'>"+embedded+"</div></main>");
@@ -271,7 +278,8 @@ async function patchHome(relative) {
   // Link the first hero discovery action to the commercial selection page.
   html = html.replace(/(<a class="kt-btn kt-btn--light" href=")\/fr\/(?:signature|motion|offers)\/("[^>]*>)/,"$1/fr/check-ups/$2");
   html = html.replace("</head>","<style id='komo-commerce-v1-style'>"+CSS+stripCSS+"</style></head>");
-  html = html.replace("</body>",strip+"</body>");
+  if(html.includes('class="footer lite-footer"')) html=html.replace("</footer>",strip+"</footer>");
+  else html = html.replace("</body>",strip+"</body>");
   await writeFile(fp,html,"utf8");
 }
 await write("fr/check-ups/index.html",offersPage);
