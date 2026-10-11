@@ -266,7 +266,7 @@ async function patchHome(relative) {
   // Current production V6 has its own two-card storefront. Replace that one
   // section with the four check-up tiers; preserve its hero, experience,
   // method, founder, visuals and local navigation.
-  const liveOffers = /<section class="lite-offers" id="bilans">[\\s\\S]*?(?=<section class="lite-experience">)/;
+  const liveOffers = /<section class="lite-offers" id="bilans">[\s\S]*?(?=<section class="lite-experience">)/;
   if(liveOffers.test(html)) {
     html = html.replace(liveOffers, "<div id='komo-commerce-offers' class='cm'>"+offerSection()+"</div>");
     html = html.replace('<section class="lite-founder">', "<div class='cm'>"+proSection()+"</div><section class=\"lite-founder\">");
