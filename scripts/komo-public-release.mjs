@@ -6,7 +6,8 @@ const pipeline=[
  "scripts/komo-motion-kinetic-world-2026.mjs",
  "scripts/komo-motion-experience-v3-2026.mjs",
  "scripts/komo-motion-design-polish-v4.mjs",
- "scripts/build-pilotage-v1.mjs"
+ "scripts/build-pilotage-v1.mjs",
+ "scripts/pilotage-auth-qa.mjs"
 ];
 for(const script of pipeline){
  console.log("[komo-public-release] "+script);
