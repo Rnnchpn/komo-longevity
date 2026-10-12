@@ -55,7 +55,7 @@ export default async function middleware(request) {
         password = separator >= 0 ? decoded.slice(separator + 1) : '';
       } catch {}
     }
-    const expectedHash = COMMAND_USERS[username];
+    const expectedHash = process.env.KOMO_PILOTAGE_PASSWORD_HASH || '';
     const valid = Boolean(username === 'rchapon' && expectedHash && password &&
       (await sha256Hex(username + ':' + password)) === expectedHash);
     if (!valid) {
