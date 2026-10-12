@@ -38,39 +38,123 @@ export default async function middleware(request) {
   const incomingUrl = new URL(request.url);
   const hostname = (request.headers.get('host') || incomingUrl.hostname).split(':')[0].toLowerCase();
 
-  // KŌMØ Operations /Pilotage is an internal-only prototype.
-  // Reuse the existing founder credential gate while a dedicated role-based backend is being built.
-  // Both canonical and case-insensitive variations are protected, including direct static assets.
-  const pilotageRequestPath = incomingUrl.pathname.toLowerCase();
-  const isPilotagePath = pilotageRequestPath === '/pilotage' || pilotageRequestPath.startsWith('/pilotage/');
+  // KŌMØ Operations: dedicated login page, signed HttpOnly session cookie,
+  // and protected static assets. Command authentication is unchanged.
+  const pilotagePath = incomingUrl.pathname.toLowerCase();
+  const isPilotagePath = pilotagePath === '/pilotage' || pilotagePath.startsWith('/pilotage/');
   if (isPilotagePath) {
-    const authorization = request.headers.get('authorization') || '';
-    let username = '';
-    let password = '';
-    if (authorization.startsWith('Basic ')) {
-      try {
-        const decoded = atob(authorization.slice(6));
-        const separator = decoded.indexOf(':');
-        username = separator >= 0 ? decoded.slice(0, separator).trim().toLowerCase() : '';
-        password = separator >= 0 ? decoded.slice(separator + 1) : '';
-      } catch {}
+    const secret = process.env.KOMO_PILOTAGE_PASSWORD_HASH || '';
+    const isAsset = /\.(css|js|mjs|svg|png|jpe?g|webp|ico|woff2?)$/i.test(incomingUrl.pathname);
+    const noStore = {
+      'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+      'X-Robots-Tag': 'noindex, nofollow, noarchive',
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'no-referrer'
+    };
+    const loginHtml = (failed = false, unavailable = false) => `<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>KŌMØ Operations — Connexion</title>
+<style>
+:root{color-scheme:light}*{box-sizing:border-box}body{margin:0;min-height:100svh;font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#20352a;background:radial-gradient(circle at 20% 10%,#ebf2e9 0,transparent 44%),#f6f6f1;display:flex;justify-content:center;align-items:center;padding:24px}
+main{width:min(445px,100%);background:#fff;border:1px solid #e2e9df;border-radius:18px;padding:clamp(26px,7vw,45px);box-shadow:0 24px 70px rgba(20,42,26,.07)}
+.brand{font-size:28px;font-weight:640;letter-spacing:.21em;color:#1e3b29}.brand i{font-style:normal;color:#88b29a;margin-left:-.1em}
+.eyebrow{margin-top:29px;color:#668773;font-size:10px;font-weight:760;letter-spacing:.18em}
+h1{font:normal clamp(27px,6vw,36px)/1.18 Georgia,serif;letter-spacing:-.03em;margin:12px 0}p{font-size:13px;color:#829184;margin-bottom:26px}
+label{display:block;font-weight:660;font-size:12px;margin:16px 0 7px}
+input{display:block;border:1px solid #d8e3d9;background:#fcfdfb;border-radius:9px;padding:13px 15px;width:100%;outline-offset:2px;color:#254032;font:inherit}
+input:focus{outline:2px solid #9ec5a6;border-color:#7ba68b}
+button{margin-top:23px;width:100%;padding:14px;border:0;border-radius:9px;background:#254832;color:white;font-weight:710;cursor:pointer}
+button:hover{background:#356648}button:focus-visible{outline:3px solid #9fcaa7;outline-offset:3px}
+.error{background:#fff2ee;color:#995248;border:1px solid #f3dcd6;border-radius:8px;padding:11px 13px;font-size:12px}
+.note{margin-top:25px;padding-top:19px;border-top:1px solid #eef0ec;font-size:11px;color:#9ca89e}
+</style>
+</head>
+<body><main>
+<div class="brand">KŌMØ<i>.</i></div>
+<div class="eyebrow">OPERATIONS / PILOTAGE</div>
+<h1>Votre espace de pilotage.</h1>
+<p>Accès privé à la coordination des missions, aux validations et aux encaissements KŌMØ.</p>
+${failed ? '<div class="error" role="alert">Identifiant ou mot de passe incorrect.</div>' : ''}
+${unavailable ? '<div class="error" role="alert">Accès temporairement indisponible. Contactez l’administrateur.</div>' : ''}
+<form method="post" action="/Pilotage/login" autocomplete="on">
+<label for="username">Identifiant</label>
+<input id="username" name="username" type="text" required autocomplete="username" value="rchapon" maxlength="80">
+<label for="password">Mot de passe</label>
+<input id="password" name="password" type="password" required autocomplete="current-password">
+<button type="submit">Accéder au pilotage →</button>
+</form>
+<div class="note">Zone privée · Session protégée · Aucune opération financière réelle dans le prototype.</div>
+</main></body></html>`;
+    const sameValue = (left, right) => {
+      if (typeof left !== 'string' || typeof right !== 'string') return false;
+      let difference = left.length ^ right.length;
+      for (let i = 0; i < Math.max(left.length, right.length); i++) {
+        difference |= (left.charCodeAt(i) || 0) ^ (right.charCodeAt(i) || 0);
+      }
+      return difference === 0;
+    };
+    const signatureFor = async (stamp) => {
+      const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret),
+        { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+      const signed = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode('pilotage-v1:' + stamp));
+      return Array.from(new Uint8Array(signed), b => b.toString(16).padStart(2, '0')).join('');
+    };
+    const cookieName = 'komo_pilotage_session';
+    const cookieHeader = request.headers.get('cookie') || '';
+    const rawCookie = cookieHeader.split(';').map(p => p.trim()).find(p => p.startsWith(cookieName + '='));
+    const session = rawCookie ? rawCookie.slice(cookieName.length + 1) : '';
+    const [stamp, sig] = session.split('.');
+    let sessionValid = false;
+    if (secret && stamp && sig && /^[0-9a-z]{1,14}$/.test(stamp) && /^[0-9a-f]{64}$/.test(sig)) {
+      const created = parseInt(stamp, 36);
+      const now = Date.now();
+      if (Number.isSafeInteger(created) && created < now + 300000 && now - created < 8 * 60 * 60 * 1000) {
+        sessionValid = sameValue(sig, await signatureFor(stamp));
+      }
     }
-    const expectedHash = process.env.KOMO_PILOTAGE_PASSWORD_HASH || '';
-    const valid = Boolean(username === 'rchapon' && expectedHash && password &&
-      (await sha256Hex(username + ':' + password)) === expectedHash);
-    if (!valid) {
-      return new Response('KOMO Operations — acces reserve', {
-        status: 401,
-        headers: {
-          'WWW-Authenticate': 'Basic realm="KOMO Operations", charset="UTF-8"',
-          'Cache-Control': 'private, no-store, max-age=0',
-          'X-Robots-Tag': 'noindex, nofollow, noarchive'
-        }
+    if (pilotagePath === '/pilotage/logout') {
+      const res = Response.redirect(new URL('/Pilotage/', request.url), 303);
+      res.headers.append('Set-Cookie', cookieName + '=; Path=/Pilotage; Max-Age=0; HttpOnly; Secure; SameSite=Lax');
+      Object.entries(noStore).forEach(([key, value]) => res.headers.set(key, value));
+      return res;
+    }
+    if (pilotagePath === '/pilotage/login' && request.method === 'POST') {
+      if (!secret) return new Response(loginHtml(false, true), {
+        status: 503, headers: { ...noStore, 'Content-Type': 'text/html; charset=utf-8' }
+      });
+      let fields;
+      try { fields = await request.formData(); } catch { fields = null; }
+      const user = fields && fields.get('username');
+      const password = fields && fields.get('password');
+      const valid = typeof user === 'string' && user.trim().toLowerCase() === 'rchapon' &&
+        typeof password === 'string' && password.length > 0 && password.length <= 200 &&
+        sameValue(await sha256Hex('rchapon:' + password), secret);
+      if (!valid) return new Response(loginHtml(true), {
+        status: 401, headers: { ...noStore, 'Content-Type': 'text/html; charset=utf-8' }
+      });
+      const issued = Date.now().toString(36);
+      const mac = await signatureFor(issued);
+      const res = Response.redirect(new URL('/Pilotage/', request.url), 303);
+      res.headers.append('Set-Cookie', cookieName + '=' + issued + '.' + mac +
+        '; Path=/Pilotage; Max-Age=28800; HttpOnly; Secure; SameSite=Lax');
+      Object.entries(noStore).forEach(([key, value]) => res.headers.set(key, value));
+      return res;
+    }
+    if (!sessionValid) {
+      if (isAsset) return new Response('Forbidden', { status: 403, headers: noStore });
+      return new Response(loginHtml(false, !secret), {
+        status: secret ? 200 : 503,
+        headers: { ...noStore, 'Content-Type': 'text/html; charset=utf-8' }
       });
     }
+    if (pilotagePath === '/pilotage/login' || pilotagePath === '/pilotage') {
+      return Response.redirect(new URL('/Pilotage/', request.url), 303);
+    }
     const response = next();
-    response.headers.set('Cache-Control', 'private, no-store, max-age=0');
-    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    Object.entries(noStore).forEach(([key, value]) => response.headers.set(key, value));
     return response;
   }
 
