@@ -59,7 +59,7 @@ async function rpc(name,payload){
  return data;
 }
 async function loginViaLink(accessCode){
- var data=await rpc("network_magic_login",{p_link_token:accessCode});
+ var data=await rpc("network_link_login",{p_link:accessCode});
  if(!data||!data.token)throw new Error(data&&data.error?data.error:"Lien d’accès non valide");
  state.token=data.token;state.user=data.username;
  sessionStorage.setItem("komo-network-session",JSON.stringify({token:data.token,username:data.username}));
