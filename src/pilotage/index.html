@@ -47,13 +47,13 @@
       </header>
 
       <div class="workspace">
-        <div class="demo-ribbon" role="status"><span class="demo-marker"></span><strong>Prototype privé</strong><span>Scénarios fictifs · Aucun paiement, SMS ni facture réels ne sont émis</span></div>
+        <div class="demo-ribbon" role="status"><span class="demo-marker"></span><strong>Mode démonstration</strong><span>Scénarios fictifs · Aucun paiement, SMS ni facture réels ne sont émis</span></div>
         <section class="page" data-view="overview">
           <div class="page-header">
             <div>
-              <div class="eyebrow">MISSION CONTROL · FRENCH RIVIERA</div>
-              <h1>Le pilotage, <em>sans friction.</em></h1>
-              <p class="page-lead">Des réservations aux encaissements, une vision complète de chaque mission.</p>
+              <div class="eyebrow">GESTION DES OPÉRATIONS</div>
+              <h1>Tableau de bord</h1>
+              <p class="page-lead">Suivi des missions, des validations et des règlements.</p>
             </div>
             <div class="page-actions"><button type="button" class="btn btn-secondary" id="overview-week">Cette semaine <span>⌄</span></button><button type="button" class="btn btn-primary" data-new-mission>＋ Nouvelle mission</button></div>
           </div>
@@ -61,14 +61,14 @@
 
           <div class="overview-grid">
             <div class="surface mission-board">
-              <div class="section-top"><div><div class="eyebrow">OPERATIONS</div><h2>Missions à coordonner</h2></div><button type="button" class="text-link" data-goto="missions">Tout voir →</button></div>
+              <div class="section-top"><div><div class="eyebrow">OPERATIONS</div><h2>Missions en cours</h2></div><button type="button" class="text-link" data-goto="missions">Tout voir →</button></div>
               <div class="mini-tabs"><button type="button" class="mini-tab active" data-filter="all">Toutes</button><button type="button" class="mini-tab" data-filter="action">À traiter</button><button type="button" class="mini-tab" data-filter="ready">Confirmables</button></div>
               <div class="mission-list" id="overview-missions"></div>
               <div class="board-footer"><span><span class="legend-dot green"></span> Confirmable</span><span><span class="legend-dot amber"></span> Action requise</span><span><span class="legend-dot gray"></span> En attente</span></div>
             </div>
             <div class="right-rail">
               <div class="surface rail-card">
-                <div class="section-top"><div><div class="eyebrow">PRIORITIES</div><h2>Points de vigilance</h2></div><span class="subtle-label" id="alerts-count">—</span></div>
+                <div class="section-top"><div><div class="eyebrow">PRIORITIES</div><h2>Actions en attente</h2></div><span class="subtle-label" id="alerts-count">—</span></div>
                 <div id="alerts-list" class="alerts-list"></div>
               </div>
               <div class="surface rail-card">
@@ -77,30 +77,30 @@
               </div>
             </div>
           </div>
-          <div class="bottom-note"><span>01</span> Une mission devient confirmée uniquement lorsque <strong>Case, équipe, paiement, communication et transport</strong> sont validés.</div>
+          <div class="bottom-note"><span>01</span> Confirmation requise après validation de <strong>Case, équipe, paiement, communication et transport</strong> sont validés.</div>
         </section>
 
         <section class="page" data-view="missions" hidden>
-          <div class="page-header"><div><div class="eyebrow">OPERATIONS / BOOKINGS</div><h1>Missions &amp; <em>validation.</em></h1><p class="page-lead">Chaque réservation passe les cinq contrôles avant confirmation.</p></div><div class="page-actions"><button type="button" class="btn btn-primary" data-new-mission>＋ Nouvelle mission</button></div></div>
+          <div class="page-header"><div><div class="eyebrow">OPERATIONS / BOOKINGS</div><h1>Missions et validations</h1><p class="page-lead">Contrôle du matériel, de l’équipe, du paiement, de la communication et du transport.</p></div><div class="page-actions"><button type="button" class="btn btn-primary" data-new-mission>＋ Nouvelle mission</button></div></div>
           <div class="surface full-surface"><div class="section-top"><div><h2>Réservations</h2><p class="small-text">Sélectionnez une mission pour consulter les contrôles et les paiements.</p></div><select id="mission-filter" class="select"><option value="all">Tous les statuts</option><option value="action">Action requise</option><option value="ready">Confirmables</option><option value="confirmed">Confirmées</option></select></div><div id="all-missions" class="table-wrap"></div></div>
         </section>
 
         <section class="page" data-view="finance" hidden>
-          <div class="page-header"><div><div class="eyebrow">FINANCE / COLLECTIONS</div><h1>Chaque paiement, <em>tracé.</em></h1><p class="page-lead">Lien en ligne, terminal physique, virement ou compte B2B : un suivi unique.</p></div><div class="page-actions"><span class="status-chip neutral">Connexions bancaires non activées</span></div></div>
+          <div class="page-header"><div><div class="eyebrow">FINANCE / COLLECTIONS</div><h1>Paiements et factures</h1><p class="page-lead">Lien en ligne, terminal physique, virement ou compte B2B : un suivi unique.</p></div><div class="page-actions"><span class="status-chip neutral">Connexions bancaires non activées</span></div></div>
           <div class="finance-stats" id="finance-metrics"></div>
           <div class="surface full-surface"><div class="section-top"><div><h2>Encaissements &amp; soldes</h2><p class="small-text">Les actions disponibles simulent uniquement des événements de démonstration.</p></div></div><div id="finance-table" class="table-wrap"></div></div>
           <div class="module-note"><strong>Connecteurs à activer</strong><span>Stripe Checkout · TPE physique · Pennylane · Qonto · relances e-mail/SMS. Aucun connecteur financier n’est opérationnel dans cette version.</span></div>
         </section>
 
         <section class="page" data-view="resources" hidden>
-          <div class="page-header"><div><div class="eyebrow">OPERATIONS / EQUIPMENT</div><h1>Une logistique <em>maîtrisée.</em></h1><p class="page-lead">Localisation déclarée, disponibilité et affectations de chaque Motion Case.</p></div></div>
+          <div class="page-header"><div><div class="eyebrow">OPERATIONS / EQUIPMENT</div><h1>Matériel et intervenants</h1><p class="page-lead">Localisation déclarée, disponibilité et affectations de chaque Motion Case.</p></div></div>
           <div class="resource-grid" id="resources-grid"></div>
           <div class="surface full-surface"><div class="section-top"><div><h2>Équipe mobile</h2><p class="small-text">Disponibilités de démonstration, sans connexion à un calendrier réel.</p></div></div><div id="team-table"></div></div>
         </section>
 
         <section class="page" data-view="partners" hidden>
-          <div class="page-header"><div><div class="eyebrow">NETWORK / PARTNERS</div><h1>Un réseau, <em>un standard.</em></h1><p class="page-lead">Demandes d'apporteurs d'affaires et suivi des prestations éligibles.</p></div></div>
-          <div class="partners-grid"><div class="surface partner-highlight"><div class="partner-monogram">J</div><div class="eyebrow">PARTNER PORTAL / PILOT</div><h2>Janet × KŌMØ</h2><p>Un espace distinct permettra de soumettre des demandes, suivre les réservations et consulter les rémunérations contractuelles sans accès aux informations financières internes.</p><div class="partner-callout">Accès partenaire non encore activé <span>↗</span></div></div><div class="surface partner-principles"><div class="eyebrow">ACCESS PRINCIPLES</div><h2>Des droits strictement séparés.</h2><div class="principle"><span>01</span><div><strong>Direction</strong><p>Planification, finances, exceptions et pilotage.</p></div></div><div class="principle"><span>02</span><div><strong>Apporteurs</strong><p>Leurs seules demandes et le statut des missions apportées.</p></div></div><div class="principle"><span>03</span><div><strong>Intervenants</strong><p>Leurs affectations et informations logistiques nécessaires.</p></div></div></div></div>
+          <div class="page-header"><div><div class="eyebrow">NETWORK / PARTNERS</div><h1>Partenaires commerciaux</h1><p class="page-lead">Demandes d'apporteurs d'affaires et suivi des prestations éligibles.</p></div></div>
+          <div class="partners-grid"><div class="surface partner-highlight"><div class="partner-monogram">J</div><div class="eyebrow">PARTNER PORTAL / PILOT</div><h2>Janet × KŌMØ</h2><p>Un espace distinct permettra de soumettre des demandes, suivre les réservations et consulter les rémunérations contractuelles sans accès aux informations financières internes.</p><div class="partner-callout">Accès partenaire non encore activé <span>↗</span></div></div><div class="surface partner-principles"><div class="eyebrow">ACCESS PRINCIPLES</div><h2>Droits des utilisateurs</h2><div class="principle"><span>01</span><div><strong>Direction</strong><p>Planification, finances, exceptions et pilotage.</p></div></div><div class="principle"><span>02</span><div><strong>Apporteurs</strong><p>Leurs seules demandes et le statut des missions apportées.</p></div></div><div class="principle"><span>03</span><div><strong>Intervenants</strong><p>Leurs affectations et informations logistiques nécessaires.</p></div></div></div></div>
         </section>
       </div>
     </main>
