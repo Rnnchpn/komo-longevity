@@ -73,7 +73,7 @@
     activePage=page;
     document.querySelectorAll('[data-view]').forEach(el=> {el.hidden = el.dataset.view!==page;});
     document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
-    const label = {overview:'Vue d’ensemble',missions:'Missions & planning',finance:'Paiements & factures',resources:'Motion Cases & équipes',partners:'Partenaires'};
+    const label = {overview:'Tableau de bord',missions:'Missions',finance:'Facturation et paiements',resources:'Matériel et équipes',partners:'Partenaires'};
     document.querySelector('#current-crumb').textContent = label[page] || 'Pilotage';
     window.scrollTo({top:0,behavior:'smooth'});
     render();
@@ -88,10 +88,10 @@
     const waiting = missions.filter(m=>m.paymentState==='pending').length;
     const projected = missions.reduce((s,m)=>s+m.amount,0);
     const data = [
-      ['Missions prévues',String(missions.length),'Dossiers fictifs actifs','◫'],
-      ['Confirmées / prêtes',String(confirmed)+' / '+String(ready),'Toutes validations au vert','✓'],
-      ['Paiements attendus',String(waiting),'Dossiers à relancer','◈'],
-      ['Volume planifié',eur.format(projected),'Simulation, non comptabilisé','↗']
+      ['Missions',String(missions.length),'Dossiers créés','◫'],
+      ['Confirmées / validées',String(confirmed)+' / '+String(ready),'Contrôles terminés','✓'],
+      ['Règlements en attente',String(waiting),'Missions non réglées','◈'],
+      ['Montant total',eur.format(projected),'Données de test','↗']
     ];
     document.querySelector('#metrics').innerHTML = data.map(d=>'<div class="metric"><div class="metric-head"><span>'+d[0]+'</span><span class="metric-icon">'+d[3]+'</span></div><div class="metric-number">'+d[1]+'</div><div class="metric-caption">'+d[2]+'</div></div>').join('');
     document.querySelector('#nav-missions-count').textContent = String(missions.length);
@@ -230,10 +230,10 @@
     missions.unshift(createMission(id,location,String(data.get('service')),dt,participants,amount,{case:false,team:false,payment:false,communication:false,transport:false}));
     document.querySelector('#new-mission-dialog').close();
     event.currentTarget.reset();
-    toast('Dossier de démonstration créé pour cette session.');
+    toast('Dossier de test créé.');
     navigate('missions');openDrawer(id);
   });
-  document.querySelector('#overview-week').addEventListener('click',()=>toast('Vue hebdomadaire · démonstration sans calendrier réel.'));
+  
   document.querySelector('#alerts-button').addEventListener('click',()=>{navigate('overview');document.querySelector('#alerts-list').scrollIntoView({behavior:'smooth',block:'center'});});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&selectedId)closeDrawer();});
   function tick(){
