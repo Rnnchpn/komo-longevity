@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#111815">
+  <title>KŌMØ Operations — Pilotage</title>
+  <meta name="description" content="Espace privé KŌMØ Operations — coordination des missions, ressources et paiements.">
+  <link rel="stylesheet" href="/Pilotage/styles.css?v=20261012a">
+  <script defer src="/Pilotage/app.js?v=20261012a"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navigation principale">
+      <div class="brand-panel">
+        <a class="brand" href="/Pilotage/" aria-label="KŌMØ Operations, accueil">KŌMØ<span class="brand-point">.</span></a>
+        <div class="brand-subtitle">OPERATIONS <span>/</span> PILOTAGE</div>
+      </div>
+      <div class="side-overline">WORKSPACE</div>
+      <nav class="side-nav" aria-label="Espaces de travail">
+        <button type="button" class="nav-item active" data-page="overview"><span class="nav-icon">◫</span><span>Vue d’ensemble</span></button>
+        <button type="button" class="nav-item" data-page="missions"><span class="nav-icon">▤</span><span>Missions &amp; planning</span><span id="nav-missions-count" class="nav-count">4</span></button>
+        <button type="button" class="nav-item" data-page="finance"><span class="nav-icon">◈</span><span>Paiements &amp; factures</span></button>
+        <button type="button" class="nav-item" data-page="resources"><span class="nav-icon">▣</span><span>Motion Cases &amp; équipes</span></button>
+        <button type="button" class="nav-item" data-page="partners"><span class="nav-icon">♧</span><span>Partenaires</span></button>
+      </nav>
+      <div class="side-overline nav-divider">QUICK ACCESS</div>
+      <nav class="side-nav side-secondary" aria-label="Accès rapides">
+        <a class="nav-item" href="https://command.komolongevity.com" target="_blank" rel="noopener noreferrer"><span class="nav-icon">↗</span><span>KŌMØ Command</span></a>
+        <a class="nav-item" href="https://pulse.komolongevity.com" target="_blank" rel="noopener noreferrer"><span class="nav-icon">↗</span><span>KŌMØ Pulse</span></a>
+      </nav>
+      <div class="side-footer">
+        <div class="side-footer-row"><span class="presence-dot"></span> Espace sécurisé</div>
+        <div class="side-footer-note">Accès réservé à la direction. Les rôles Janet et équipes seront activés avec la base de données.</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="crumb">KŌMØ <span>/</span> OPERATIONS <span>/</span> <strong id="current-crumb">Vue d’ensemble</strong></div>
+        <div class="topbar-actions">
+          <span class="clock" id="local-clock">Paris · —</span>
+          <button class="icon-button" id="alerts-button" type="button" aria-label="Afficher les alertes">♧ <span class="notification-dot"></span></button>
+          <div class="avatar" title="Direction KŌMØ">K</div>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <div class="demo-ribbon" role="status"><span class="demo-marker"></span><strong>Prototype privé</strong><span>Scénarios fictifs · Aucun paiement, SMS ni facture réels ne sont émis</span></div>
+        <section class="page" data-view="overview">
+          <div class="page-header">
+            <div>
+              <div class="eyebrow">MISSION CONTROL · FRENCH RIVIERA</div>
+              <h1>Le pilotage, <em>sans friction.</em></h1>
+              <p class="page-lead">Des réservations aux encaissements, une vision complète de chaque mission.</p>
+            </div>
+            <div class="page-actions"><button type="button" class="btn btn-secondary" id="overview-week">Cette semaine <span>⌄</span></button><button type="button" class="btn btn-primary" data-new-mission>＋ Nouvelle mission</button></div>
+          </div>
+          <div class="metrics" id="metrics"></div>
+
+          <div class="overview-grid">
+            <div class="surface mission-board">
+              <div class="section-top"><div><div class="eyebrow">OPERATIONS</div><h2>Missions à coordonner</h2></div><button type="button" class="text-link" data-goto="missions">Tout voir →</button></div>
+              <div class="mini-tabs"><button type="button" class="mini-tab active" data-filter="all">Toutes</button><button type="button" class="mini-tab" data-filter="action">À traiter</button><button type="button" class="mini-tab" data-filter="ready">Confirmables</button></div>
+              <div class="mission-list" id="overview-missions"></div>
+              <div class="board-footer"><span><span class="legend-dot green"></span> Confirmable</span><span><span class="legend-dot amber"></span> Action requise</span><span><span class="legend-dot gray"></span> En attente</span></div>
+            </div>
+            <div class="right-rail">
+              <div class="surface rail-card">
+                <div class="section-top"><div><div class="eyebrow">PRIORITIES</div><h2>Points de vigilance</h2></div><span class="subtle-label" id="alerts-count">—</span></div>
+                <div id="alerts-list" class="alerts-list"></div>
+              </div>
+              <div class="surface rail-card">
+                <div class="section-top"><div><div class="eyebrow">RESOURCES</div><h2>Motion Cases</h2></div><button type="button" class="text-link" data-goto="resources">Gérer →</button></div>
+                <div id="cases-overview" class="cases-overview"></div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-note"><span>01</span> Une mission devient confirmée uniquement lorsque <strong>Case, équipe, paiement, communication et transport</strong> sont validés.</div>
+        </section>
+
+        <section class="page" data-view="missions" hidden>
+          <div class="page-header"><div><div class="eyebrow">OPERATIONS / BOOKINGS</div><h1>Missions &amp; <em>validation.</em></h1><p class="page-lead">Chaque réservation passe les cinq contrôles avant confirmation.</p></div><div class="page-actions"><button type="button" class="btn btn-primary" data-new-mission>＋ Nouvelle mission</button></div></div>
+          <div class="surface full-surface"><div class="section-top"><div><h2>Réservations</h2><p class="small-text">Sélectionnez une mission pour consulter les contrôles et les paiements.</p></div><select id="mission-filter" class="select"><option value="all">Tous les statuts</option><option value="action">Action requise</option><option value="ready">Confirmables</option><option value="confirmed">Confirmées</option></select></div><div id="all-missions" class="table-wrap"></div></div>
+        </section>
+
+        <section class="page" data-view="finance" hidden>
+          <div class="page-header"><div><div class="eyebrow">FINANCE / COLLECTIONS</div><h1>Chaque paiement, <em>tracé.</em></h1><p class="page-lead">Lien en ligne, terminal physique, virement ou compte B2B : un suivi unique.</p></div><div class="page-actions"><span class="status-chip neutral">Connexions bancaires non activées</span></div></div>
+          <div class="finance-stats" id="finance-metrics"></div>
+          <div class="surface full-surface"><div class="section-top"><div><h2>Encaissements &amp; soldes</h2><p class="small-text">Les actions disponibles simulent uniquement des événements de démonstration.</p></div></div><div id="finance-table" class="table-wrap"></div></div>
+          <div class="module-note"><strong>Connecteurs à activer</strong><span>Stripe Checkout · TPE physique · Pennylane · Qonto · relances e-mail/SMS. Aucun connecteur financier n’est opérationnel dans cette version.</span></div>
+        </section>
+
+        <section class="page" data-view="resources" hidden>
+          <div class="page-header"><div><div class="eyebrow">OPERATIONS / EQUIPMENT</div><h1>Une logistique <em>maîtrisée.</em></h1><p class="page-lead">Localisation déclarée, disponibilité et affectations de chaque Motion Case.</p></div></div>
+          <div class="resource-grid" id="resources-grid"></div>
+          <div class="surface full-surface"><div class="section-top"><div><h2>Équipe mobile</h2><p class="small-text">Disponibilités de démonstration, sans connexion à un calendrier réel.</p></div></div><div id="team-table"></div></div>
+        </section>
+
+        <section class="page" data-view="partners" hidden>
+          <div class="page-header"><div><div class="eyebrow">NETWORK / PARTNERS</div><h1>Un réseau, <em>un standard.</em></h1><p class="page-lead">Demandes d'apporteurs d'affaires et suivi des prestations éligibles.</p></div></div>
+          <div class="partners-grid"><div class="surface partner-highlight"><div class="partner-monogram">J</div><div class="eyebrow">PARTNER PORTAL / PILOT</div><h2>Janet × KŌMØ</h2><p>Un espace distinct permettra de soumettre des demandes, suivre les réservations et consulter les rémunérations contractuelles sans accès aux informations financières internes.</p><div class="partner-callout">Accès partenaire non encore activé <span>↗</span></div></div><div class="surface partner-principles"><div class="eyebrow">ACCESS PRINCIPLES</div><h2>Des droits strictement séparés.</h2><div class="principle"><span>01</span><div><strong>Direction</strong><p>Planification, finances, exceptions et pilotage.</p></div></div><div class="principle"><span>02</span><div><strong>Apporteurs</strong><p>Leurs seules demandes et le statut des missions apportées.</p></div></div><div class="principle"><span>03</span><div><strong>Intervenants</strong><p>Leurs affectations et informations logistiques nécessaires.</p></div></div></div></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
+  <aside id="mission-drawer" class="drawer" aria-labelledby="drawer-title" aria-modal="true" role="dialog" hidden>
+    <div class="drawer-head"><div><div class="eyebrow">MISSION DETAILS</div><h2 id="drawer-title">Dossier mission</h2></div><button type="button" id="close-drawer" class="close-button" aria-label="Fermer">×</button></div>
+    <div id="drawer-content" class="drawer-content"></div>
+  </aside>
+
+  <dialog id="new-mission-dialog" class="mission-dialog">
+    <form method="dialog" id="new-mission-form">
+      <div class="dialog-header"><div class="eyebrow">NEW BOOKING</div><h2>Nouvelle mission</h2><p>Création d'un dossier fictif, pour tester le circuit opérationnel.</p></div>
+      <label>Prestation <select name="service" required><option value="Motion Session">Motion Session</option><option value="Motion Clinical">Motion Clinical</option><option value="Motion Lab">Motion Lab</option></select></label>
+      <label>Site / mission <input name="location" placeholder="Ex. Yacht · Cannes" maxlength="75" required autocomplete="off"></label>
+      <div class="form-row"><label>Date <input name="date" type="date" required></label><label>Heure <input name="time" type="time" value="10:00" required></label></div>
+      <div class="form-row"><label>Participants <input name="participants" type="number" min="1" max="30" value="2" required></label><label>Montant total fictif (€) <input name="amount" type="number" min="0" max="100000" step="1" value="1000" required></label></div>
+      <div class="dialog-notice">N'inscrivez aucune donnée personnelle ou médicale réelle dans ce prototype.</div>
+      <div class="dialog-actions"><button class="btn btn-secondary" value="cancel" type="button" id="cancel-mission">Annuler</button><button class="btn btn-primary" type="submit">Créer le dossier démo</button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>
