@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>KŌMØ Network — Annuaire & pilotage</title>
+<style>
+:root{--bg:#f5f6f1;--paper:#fff;--line:#e2e7dd;--ink:#17291f;--green:#174b39;--muted:#68786c;--soft:#eaf1e8;--gold:#bf9e62;--red:#ad5a4f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,system-ui,-apple-system,Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}input,select,textarea{border:1px solid #d8dfd5;border-radius:11px;padding:11px 12px;background:white;color:var(--ink);width:100%;outline:0}input:focus,select:focus,textarea:focus{border-color:#307b5a;box-shadow:0 0 0 3px #307b5a17}.button{border:1px solid var(--line);border-radius:12px;padding:10px 15px;background:#fff;color:var(--ink);font-weight:600;white-space:nowrap}.button.primary{background:var(--green);border-color:var(--green);color:white}.button.flat{background:transparent}.button.warn{color:var(--red)}.hidden{display:none!important}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 90% 0%,#d7e4d8,transparent 48%),var(--bg)}.login-card{max-width:430px;width:100%;background:#fff;border-radius:24px;border:1px solid var(--line);padding:42px;box-shadow:0 35px 90px #133e2312}.logo{font-size:29px;letter-spacing:.3em;font-weight:750}.eyebrow{font-size:11px;letter-spacing:.19em;text-transform:uppercase;color:var(--green);font-weight:740}.login-card h1{font:500 32px/1.12 Georgia,serif;margin:22px 0 12px}.hint{color:var(--muted)}.field{display:flex;flex-direction:column;gap:6px}.fields{display:grid;gap:14px}.label{font-size:11px;letter-spacing:.07em;color:var(--muted);font-weight:700;text-transform:uppercase}.error{color:#ad4334;font-size:12px;min-height:20px}.layout{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:100vh}.sidebar{background:#13392d;color:#f6f9f4;padding:30px 18px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}.sidebar .small{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#adc9b7}.sidebar .brand{font-size:25px;letter-spacing:.25em;font-weight:750}.nav{margin-top:40px;display:grid;gap:6px}.nav button{border:0;border-radius:12px;color:#d4e3da;background:transparent;text-align:left;padding:13px 14px;font-size:13px}.nav button.active,.nav button:hover{background:#245541;color:white}.sidebar-bottom{margin-top:auto;border-top:1px solid #ffffff2a;padding:18px 10px 0;font-size:12px;color:#c9dfd0}.sidebar-bottom button{margin-top:12px;background:transparent;color:#c9dfd0;border:1px solid #ffffff4a;border-radius:10px;padding:7px 12px}.main{padding:30px clamp(18px,3vw,58px) 80px;min-width:0}.top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:15px}.top h1{font:500 clamp(28px,3.2vw,45px)/1.15 Georgia,serif;margin:7px 0}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.stat{background:white;padding:20px;border:1px solid var(--line);border-radius:16px}.stat b{display:block;font-size:29px;line-height:1.2;font-weight:600}.stat span{font-size:12px;color:var(--muted)}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:20px;margin-bottom:16px}.toolbar{display:grid;grid-template-columns:minmax(160px,1.8fr) repeat(3,minmax(130px,1fr)) auto;gap:10px}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;min-width:850px}th{text-align:left;color:var(--muted);font-weight:700;text-transform:uppercase;font-size:10px;letter-spacing:.1em;border-bottom:1px solid var(--line);padding:13px 12px}td{border-bottom:1px solid #eef0eb;padding:14px 12px;vertical-align:top;font-size:13px}tr:hover td{background:#fbfcf9}td b{font-weight:680}.secondary{font-size:11px;color:var(--muted);margin-top:4px}.chip{display:inline-block;font-size:11px;border-radius:999px;padding:5px 9px;background:var(--soft);color:#315b3f;white-space:nowrap}.chip.gold{background:#f8f1e2;color:#8a692d}.pill{font-size:11px;padding:4px 8px;border:1px solid var(--line);border-radius:999px;white-space:nowrap}.link{color:var(--green);border:none;background:transparent;font-weight:700;text-decoration:underline;text-decoration-color:#b0c1b1;text-underline-offset:3px}.section-title{font:500 24px Georgia,serif;margin:0 0 16px}.categorygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.category{display:flex;justify-content:space-between;gap:14px;text-align:left;border:1px solid var(--line);background:white;border-radius:16px;padding:20px;color:var(--ink)}.category b{display:block;font-size:14px}.category strong{font-size:23px;color:var(--green)}.projectlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:14px}.project{padding:20px;border:1px solid var(--line);border-radius:17px;background:#fff}.project h3{font-size:18px;margin:7px 0 12px}.project .meter{height:7px;background:#e4ece4;border-radius:20px;overflow:hidden;margin:16px 0}.project .meter i{display:block;height:100%;background:#3f8560}.project .meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px}.project .next{font-size:13px;min-height:44px;margin-top:15px}.editlayer{position:fixed;inset:0;background:#0d2218a3;z-index:20;display:flex;justify-content:flex-end}.drawer{background:#fff;width:min(560px,100%);height:100vh;overflow:auto;padding:28px;box-shadow:-20px 0 65px #13291835}.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.editgrid{display:grid;grid-template-columns:1fr 1fr;gap:13px}.editgrid .span2{grid-column:span 2}.draw-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:25px}.empty{padding:40px 14px;text-align:center;color:var(--muted)}.note{border-left:3px solid #6d9d76;background:#f1f7ef;padding:12px 14px;border-radius:0 10px 10px 0;color:#47654b;font-size:12px}.toggle-nav{display:none}@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:relative;height:auto;padding:15px;display:block}.sidebar .brand{display:inline;font-size:21px}.sidebar .small{display:inline;margin-left:6px}.nav{margin-top:15px;display:flex;gap:4px;overflow:auto}.nav button{white-space:nowrap}.sidebar-bottom{display:none}.main{padding:20px 14px}.stats{grid-template-columns:repeat(2,1fr);margin:17px 0}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:span 2}.editgrid{grid-template-columns:1fr}.editgrid .span2{grid-column:span 1}.login-card{padding:26px}}
+</style></head><body>
+<div id="login" class="login">
+  <form id="loginForm" class="login-card">
+    <div class="logo">KŌMØ</div><div class="eyebrow">Network · Accès équipe</div>
+    <h1>Votre réseau,<br>un seul espace.</h1>
+    <p class="hint">Annuaire privé, projets et suivi commercial partagés entre Renan, Hugo et Stéphanie.</p>
+    <div class="fields" style="margin-top:24px">
+      <label class="field"><span class="label">Identifiant</span><input id="username" autocomplete="username" placeholder="rchapon / ucalia / sganem" required></label>
+      <label class="field"><span class="label">Mot de passe</span><input type="password" id="password" autocomplete="current-password" required></label>
+      <button type="submit" id="loginButton" class="button primary">Accéder à Network →</button>
+      <div id="loginError" class="error" role="alert"></div>
+    </div>
+    <p class="secondary">Accès nominatif · session de 12 h · données chiffrées en transit.</p>
+  </form>
+</div>
+<div id="app" class="layout hidden">
+ <aside class="sidebar">
+  <div class="brand">KŌMØ</div><div class="small">Network</div>
+  <nav id="nav" class="nav">
+   <button data-view="all" class="active">01 · Annuaire A–Z</button>
+   <button data-view="sectors">02 · Activités</button>
+   <button data-view="mine">03 · Mon réseau</button>
+   <button data-view="projects">04 · Chantiers</button>
+  </nav>
+  <div class="sidebar-bottom"><div id="who"></div><div style="margin-top:6px">Répertoire privé · données partagées</div><button id="logout">Se déconnecter</button></div>
+ </aside>
+ <main class="main">
+  <header class="top"><div><div id="kicker" class="eyebrow">COMMAND CENTER · OCTOBRE 2026</div><h1 id="heading">Annuaire général</h1><div id="intro" class="hint">Tous les contacts, classés alphabétiquement.</div></div><div style="display:flex;gap:9px"><button id="export" class="button">Exporter CSV</button><button id="add" class="button primary">+ Nouveau contact</button></div></header>
+  <div class="stats"><div class="stat"><b id="kContact">—</b><span>Contacts / établissements</span></div><div class="stat"><b id="kNetwork">—</b><span>Réseau relationnel</span></div><div class="stat"><b id="kYacht">—</b><span>Yachting & ports</span></div><div class="stat"><b id="kProjects">—</b><span>Chantiers en cours</span></div></div>
+  <div class="card"><div class="toolbar"><input id="search" placeholder="Rechercher un nom, une structure, une ville, une action…"><select id="sector"><option value="">Toutes les activités</option></select><select id="owner"><option value="">Tous les réseaux</option><option value="rchapon">Renan</option><option value="ucalia">Hugo</option><option value="sganem">Stéphanie</option></select><select id="stage"><option value="">Tous les statuts</option></select><button class="button flat" id="clear">Effacer</button></div></div>
+  <section id="content"></section>
+  <p class="secondary">Données issues de l’annuaire Riviera historique et du journal de développement KŌMØ. Les prospects à cibler ne sont pas des relations déjà établies. Aucune donnée patient.</p>
+ </main>
+</div>
+<div id="modal" class="editlayer hidden" role="dialog" aria-modal="true" aria-label="Modifier une fiche"><div class="drawer"><div class="drawer-head"><h2 id="formHeading" class="section-title">Nouvelle fiche</h2><button id="close" type="button" class="button">Fermer ×</button></div><form id="editor"><div id="editFields" class="editgrid"></div><div id="editError" class="error"></div><div class="draw-actions"><button type="button" id="cancel" class="button">Annuler</button><button type="submit" id="save" class="button primary">Enregistrer</button></div></form></div></div>
+<script>
+(function(){
+"use strict";
+var URL_BASE="https://uqlolefsiktbznnymriy.supabase.co/rest/v1/rpc/";
+var KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
+var NAMES={rchapon:"Renan",ucalia:"Hugo",sganem:"Stéphanie"};
+var VIEWS={all:["Annuaire général","Tous les contacts des trois réseaux, classés par ordre alphabétique."],sectors:["Établissements & activités","Naviguer par catégorie professionnelle, de la santé au yachting."],mine:["Mon réseau","Relations personnelles et contacts attribués à votre portefeuille."],projects:["Avancée des chantiers","Suivi de la stratégie commerciale, des pilotes et des opérations."]};
+var state={token:"",user:"",contacts:[],projects:[],view:"all",selectedSector:""};
+var $=function(s){return document.querySelector(s)};
+var esc=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})};
+function option(value,label,selected){return '<option value="'+esc(value)+'"'+(String(value)===String(selected)?' selected':'')+'>'+esc(label)+'</option>'}
+function unique(a){return Array.from(new Set(a.filter(Boolean))).sort(function(a,b){return a.localeCompare(b,"fr")})}
+function toast(message,isError){$("#intro").textContent=message;$("#intro").style.color=isError?"#ad4334":""}
+async function rpc(name,payload){
+ var response=await fetch(URL_BASE+name,{method:"POST",headers:{"Content-Type":"application/json","apikey":KEY,"Cache-Control":"no-store"},body:JSON.stringify(payload)});
+ var data=await response.json().catch(function(){return null});
+ if(!response.ok)throw new Error(data&&data.message?data.message:"Erreur de connexion ("+response.status+")");
+ return data;
+}
+async function login(username,password){
+ var data=await rpc("network_login",{p_username:username,p_password:password});
+ if(!data||!data.token)throw new Error(data&&data.error?data.error:"Connexion refusée");
+ state.token=data.token;state.user=data.username;
+ sessionStorage.setItem("komo-network-session",JSON.stringify({token:data.token,username:data.username}));
+ await load();
+}
+async function load(){
+ try{
+ var d=await rpc("network_snapshot",{p_token:state.token});
+ state.contacts=d.contacts||[];state.projects=d.projects||[];
+ $("#login").classList.add("hidden");$("#app").classList.remove("hidden");
+ $("#who").textContent=(NAMES[state.user]||state.user)+" · "+state.user;
+ render();
+ }catch(e){doLogout(false);throw e;}
+}
+function doLogout(callServer){
+ var old=state.token;state.token="";state.user="";state.contacts=[];state.projects=[];
+ sessionStorage.removeItem("komo-network-session");$("#app").classList.add("hidden");$("#login").classList.remove("hidden");
+ $("#password").value=""; if(callServer&&old)rpc("network_logout",{p_token:old}).catch(function(){});
+}
+function contactsFiltered(){
+ var q=$("#search").value.trim().toLocaleLowerCase("fr"), sector=$("#sector").value,owner=$("#owner").value,stage=$("#stage").value;
+ return state.contacts.filter(function(c){
+ if(state.view==="mine"&&c.owner!==state.user)return false;
+ if(state.selectedSector&&c.sector!==state.selectedSector)return false;
+ if(sector&&c.sector!==sector)return false;if(owner&&c.owner!==owner)return false;if(stage&&c.stage!==stage)return false;
+ if(q&&[c.name,c.company,c.city,c.sector,c.notes,c.next_action,c.email].join(" ").toLocaleLowerCase("fr").indexOf(q)===-1)return false;
+ return true;
+ }).sort(function(a,b){return a.name.localeCompare(b.name,"fr")});
+}
+function pill(name){return '<span class="chip">'+esc(name||"Autre")+'</span>'}
+function table(contacts){
+ if(!contacts.length)return '<div class="card empty">Aucun résultat. Changez les filtres ou créez une fiche.</div>';
+ return '<div class="card tablewrap"><table><thead><tr><th>Contact / Établissement</th><th>Activité</th><th>Réseau</th><th>Statut</th><th>Prochaine action</th><th></th></tr></thead><tbody>'+contacts.map(function(c){
+ return '<tr><td><b>'+esc(c.name)+'</b><div class="secondary">'+esc([c.company,c.city].filter(Boolean).join(" · "))+'</div>'+(c.phone?'<div class="secondary">'+esc(c.phone)+'</div>':'')+'</td><td>'+pill(c.sector)+'</td><td>'+esc(NAMES[c.owner]||"—")+'<div class="secondary">'+(c.relationship==="reseau"?"Réseau personnel":"Prospection")+'</div></td><td><span class="pill">'+esc(c.stage||"À cibler")+'</span></td><td>'+esc(c.next_action||"—")+(c.next_date?'<div class="secondary">'+esc(c.next_date)+'</div>':'')+'</td><td><button class="link" data-contact="'+esc(c.id)+'">Ouvrir</button></td></tr>';
+ }).join("")+'</tbody></table></div>'
+}
+function render(){
+ var v=VIEWS[state.view];$("#heading").textContent=v[0];$("#intro").textContent=v[1];
+ $("#kContact").textContent=state.contacts.length;
+ $("#kNetwork").textContent=state.contacts.filter(function(c){return c.relationship==="reseau"}).length;
+ $("#kYacht").textContent=state.contacts.filter(function(c){return /yacht|port|capitainerie|broker/i.test(c.sector)}).length;
+ $("#kProjects").textContent=state.projects.filter(function(p){return p.stage!=="Terminé"}).length;
+ $("#sector").innerHTML=option("","Toutes les activités","")+unique(state.contacts.map(function(c){return c.sector})).map(function(s){return option(s,s,$("#sector").value)}).join("");
+ var previousStage=$("#stage").value;$("#stage").innerHTML=option("","Tous les statuts","")+unique(state.contacts.map(function(c){return c.stage})).map(function(s){return option(s,s,previousStage)}).join("");
+ document.querySelectorAll("[data-view]").forEach(function(el){el.classList.toggle("active",el.dataset.view===state.view)});
+ $("#add").textContent=state.view==="projects"?"+ Nouveau chantier":"+ Nouveau contact";
+ $("#export").textContent=state.view==="projects"?"Exporter chantiers":"Exporter CSV";
+ $("#owner").value=state.view==="mine"?state.user:$("#owner").value;
+ if(state.view==="projects"){renderProjects();return}
+ if(state.view==="sectors"&&!state.selectedSector){
+ var arr=Object.entries(state.contacts.reduce(function(acc,c){acc[c.sector]=(acc[c.sector]||0)+1;return acc},{})).sort(function(a,b){return a[0].localeCompare(b[0],"fr")});
+ $("#content").innerHTML='<div class="card"><h2 class="section-title">Explorer par secteur</h2><div class="categorygrid">'+arr.map(function(a){return '<button class="category" data-sector="'+esc(a[0])+'"><b>'+esc(a[0])+'</b><strong>'+a[1]+'</strong></button>'}).join("")+'</div></div>';
+ return;
+ }
+ var rows=contactsFiltered();
+ $("#content").innerHTML=(state.selectedSector?'<div style="margin-bottom:14px"><button class="button" id="backSectors">← Tous les secteurs</button> <span class="chip">'+esc(state.selectedSector)+'</span></div>':'')+table(rows);
+}
+function renderProjects(){
+ var own=$("#owner").value,search=$("#search").value.trim().toLocaleLowerCase("fr");
+ var a=state.projects.filter(function(p){return (!own||p.owner===own)&&(!search||[p.name,p.category,p.next_action,p.notes].join(" ").toLocaleLowerCase("fr").includes(search))});
+ a.sort(function(x,y){return x.name.localeCompare(y.name,"fr")});
+ $("#content").innerHTML='<div class="projectlist">'+a.map(function(p){
+ return '<div class="project"><div class="meta"><span>'+esc(p.category)+'</span><span>'+esc(NAMES[p.owner]||"—")+'</span></div><h3>'+esc(p.name)+'</h3><span class="chip">'+esc(p.stage)+'</span><div class="meter"><i style="width:'+Number(p.progress||0)+'%"></i></div><div class="meta"><span>'+Number(p.progress||0)+' %</span><span>'+esc(p.deadline||"")+'</span></div><p class="next">'+esc(p.next_action||"Aucune prochaine action")+'</p><button class="link" data-project="'+esc(p.id)+'">Mettre à jour →</button></div>';
+ }).join("")+'</div>'+(a.length?'':'<div class="empty">Aucun chantier correspondant.</div>');
+}
+function field(name,label,value,type,span,choices){
+ var control='';
+ if(choices)control='<select name="'+name+'">'+choices.map(function(x){return option(x[0],x[1],value)}).join("")+'</select>';
+ else if(type==="textarea")control='<textarea name="'+name+'" rows="3">'+esc(value||"")+'</textarea>';
+ else control='<input name="'+name+'" type="'+(type||"text")+'" value="'+esc(value||"")+'">';
+ return '<label class="field'+(span?" span2":"")+'"><span class="label">'+esc(label)+'</span>'+control+'</label>';
+}
+var ownerOptions=[["rchapon","Renan"],["ucalia","Hugo"],["sganem","Stéphanie"]];
+function openEditor(kind,id){
+ var p=id?(kind==="project"?state.projects:state.contacts).find(function(x){return x.id===id})||{}:{};
+ $("#editor").dataset.kind=kind;$("#editor").dataset.id=id||"";
+ $("#formHeading").textContent=id?"Modifier la fiche":kind==="project"?"Nouveau chantier":"Nouveau contact";
+ var out="";
+ if(kind==="project"){
+ out+=field("name","Chantier",p.name,"text",true);
+ out+=field("category","Pôle",p.category||"Yachting");
+ out+=field("owner","Responsable",p.owner||state.user,null,false,ownerOptions);
+ out+=field("stage","État",p.stage||"À lancer",null,false,["À lancer","Préparation RDV","Prospection","En discussion","En étude","En cours","Structuration","Bloqué","Terminé"].map(function(s){return [s,s]}));
+ out+=field("progress","Avancement (%)",p.progress||0,"number");
+ out+=field("deadline","Échéance",p.deadline||"","date");
+ out+=field("next_action","Prochaine action",p.next_action||"","text",true);
+ out+=field("notes","Notes",p.notes||"","textarea",true);
+ }else{
+ out+=field("name","Nom / établissement",p.name||"","text",true);
+ out+=field("company","Structure / société",p.company||"");
+ out+=field("role","Fonction / interlocuteur",p.role||"");
+ out+=field("sector","Secteur / activité",p.sector||"Yachting");
+ out+=field("city","Ville / région",p.city||"");
+ out+=field("phone","Téléphone",p.phone||"","tel");
+ out+=field("email","E-mail",p.email||"","email");
+ out+=field("owner","Réseau responsable",p.owner||state.user,null,false,ownerOptions);
+ out+=field("relationship","Nature",p.relationship||"reseau",null,false,[["reseau","Relation / réseau personnel"],["prospect","Prospect à cibler"]]);
+ out+=field("stage","Étape commerciale",p.stage||"À cibler",null,false,["À qualifier","À cibler","Contact existant","Contacté","RDV","En discussion","À relancer","Démo","Proposition","Négociation","Gagné","Perdu","Interne"].map(function(s){return [s,s]}));
+ out+=field("priority","Priorité",p.priority||"B",null,false,[["A","A — haute"],["B","B — moyenne"],["C","C — basse"]]);
+ out+=field("next_date","Prochaine date",p.next_date||"","date");
+ out+=field("next_action","Prochaine action",p.next_action||"","text",true);
+ out+=field("notes","Historique / notes",p.notes||"","textarea",true);
+ out+=field("source","Origine du contact",p.source||"","text",true);
+ }
+ $("#editFields").innerHTML=out;$("#editError").textContent="";$("#modal").classList.remove("hidden");
+}
+function closeEditor(){$("#modal").classList.add("hidden")}
+async function saveEditor(e){
+ e.preventDefault();$("#save").disabled=true;$("#editError").textContent="";
+ var fd=new FormData($("#editor")),row={};
+ fd.forEach(function(v,k){row[k]=v}); if($("#editor").dataset.id)row.id=$("#editor").dataset.id;
+ var kind=$("#editor").dataset.kind;
+ try{
+ var result=await rpc(kind==="project"?"network_save_project":"network_save_contact",{p_token:state.token,p_row:row});
+ var items=kind==="project"?state.projects:state.contacts;
+ var index=items.findIndex(function(x){return x.id===result.id});
+ if(index===-1)items.push(result);else items[index]=result;
+ closeEditor();render();toast("Fiche enregistrée · synchronisée avec l’équipe");
+ }catch(err){$("#editError").textContent=err.message}
+ finally{$("#save").disabled=false;}
+}
+function exportCSV(){
+ var fields=state.view==="projects"?["name","category","owner","stage","progress","deadline","next_action","notes"]:["name","company","sector","city","role","phone","email","owner","relationship","stage","next_action","next_date","notes","source"];
+ var list=state.view==="projects"?state.projects:contactsFiltered();
+ var csv=[fields.join(";")].concat(list.map(function(r){return fields.map(function(k){return '"'+String(r[k]==null?"":r[k]).replace(/"/g,'""')+'"'}).join(";")})).join("\r\n");
+ var a=document.createElement("a"),blob=new Blob(["\uFEFF",csv],{type:"text/csv;charset=utf-8"});
+ a.href=URL.createObjectURL(blob);a.download="KOMO-Network-"+state.view+"-"+new Date().toISOString().slice(0,10)+".csv";a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},500);
+}
+$("#loginForm").addEventListener("submit",async function(e){e.preventDefault();$("#loginError").textContent="";$("#loginButton").disabled=true;try{await login($("#username").value.trim().toLowerCase(),$("#password").value)}catch(err){$("#loginError").textContent=err.message}finally{$("#loginButton").disabled=false}});
+$("#logout").onclick=function(){doLogout(true)};
+$("#nav").onclick=function(e){var b=e.target.closest("[data-view]");if(!b)return;state.view=b.dataset.view;state.selectedSector="";$("#search").value="";$("#owner").value="";$("#sector").value="";$("#stage").value="";render()};
+$("#content").onclick=function(e){
+ var t=e.target.closest("[data-contact],[data-project],[data-sector],#backSectors");
+ if(!t)return;
+ if(t.dataset.contact)openEditor("contact",t.dataset.contact);
+ else if(t.dataset.project)openEditor("project",t.dataset.project);
+ else if(t.dataset.sector){state.selectedSector=t.dataset.sector;render()}
+ else if(t.id==="backSectors"){state.selectedSector="";render()}
+};
+$("#add").onclick=function(){openEditor(state.view==="projects"?"project":"contact","")};
+$("#close").onclick=closeEditor;$("#cancel").onclick=closeEditor;
+$("#editor").onsubmit=saveEditor;
+$("#export").onclick=exportCSV;
+$("#clear").onclick=function(){$("#search").value="";$("#sector").value="";$("#owner").value="";$("#stage").value="";state.selectedSector="";render()};
+$("#search").oninput=render;
+$("#sector").onchange=function(){state.selectedSector="";render()};
+$("#owner").onchange=render;$("#stage").onchange=render;
+var stored;try{stored=JSON.parse(sessionStorage.getItem("komo-network-session")||"null")}catch{}
+if(stored&&stored.token){state.token=stored.token;state.user=stored.username;load().catch(function(){})}
+})();
+</script></body></html>
