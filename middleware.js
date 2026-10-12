@@ -38,6 +38,42 @@ export default async function middleware(request) {
   const incomingUrl = new URL(request.url);
   const hostname = (request.headers.get('host') || incomingUrl.hostname).split(':')[0].toLowerCase();
 
+  // KŌMØ Operations /Pilotage is an internal-only prototype.
+  // Reuse the existing founder credential gate while a dedicated role-based backend is being built.
+  // Both canonical and case-insensitive variations are protected, including direct static assets.
+  const pilotageRequestPath = incomingUrl.pathname.toLowerCase();
+  const isPilotagePath = pilotageRequestPath === '/pilotage' || pilotageRequestPath.startsWith('/pilotage/');
+  if (isPilotagePath) {
+    const authorization = request.headers.get('authorization') || '';
+    let username = '';
+    let password = '';
+    if (authorization.startsWith('Basic ')) {
+      try {
+        const decoded = atob(authorization.slice(6));
+        const separator = decoded.indexOf(':');
+        username = separator >= 0 ? decoded.slice(0, separator).trim().toLowerCase() : '';
+        password = separator >= 0 ? decoded.slice(separator + 1) : '';
+      } catch {}
+    }
+    const expectedHash = COMMAND_USERS[username];
+    const valid = Boolean(username === 'rchapon' && expectedHash && password &&
+      (await sha256Hex(username + ':' + password)) === expectedHash);
+    if (!valid) {
+      return new Response('KOMO Operations — acces reserve', {
+        status: 401,
+        headers: {
+          'WWW-Authenticate': 'Basic realm="KOMO Operations", charset="UTF-8"',
+          'Cache-Control': 'private, no-store, max-age=0',
+          'X-Robots-Tag': 'noindex, nofollow, noarchive'
+        }
+      });
+    }
+    const response = next();
+    response.headers.set('Cache-Control', 'private, no-store, max-age=0');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+    return response;
+  }
+
   const isCommandApi = incomingUrl.pathname === '/command-api';
   const isCommandPath = incomingUrl.pathname === '/command' || incomingUrl.pathname.startsWith('/command/');
   if (hostname === COMMAND_HOST || isCommandPath || isCommandApi) {
