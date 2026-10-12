@@ -41,7 +41,8 @@ export default async function middleware(request) {
   // KŌMØ Operations /Pilotage is an internal-only prototype.
   // Reuse the existing founder credential gate while a dedicated role-based backend is being built.
   // Both canonical and case-insensitive variations are protected, including direct static assets.
-  const isPilotagePath = /^\\/pilotage(?:\\/|$)/i.test(incomingUrl.pathname);
+  const pilotageRequestPath = incomingUrl.pathname.toLowerCase();
+  const isPilotagePath = pilotageRequestPath === '/pilotage' || pilotageRequestPath.startsWith('/pilotage/');
   if (isPilotagePath) {
     const authorization = request.headers.get('authorization') || '';
     let username = '';
