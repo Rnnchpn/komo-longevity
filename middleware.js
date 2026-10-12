@@ -55,7 +55,7 @@ export default async function middleware(request) {
     let validSession=false;
     if(sessionKey && cookieValue.includes('.')) {
       const [expires,mac]=cookieValue.split('.');
-      if(/^\\d{10,13}$/.test(expires) && /^[a-f0-9]{64}$/.test(mac||'') && Number(expires)>Date.now()) {
+      if(/^[0-9]{10,13}$/.test(expires) && /^[a-f0-9]{64}$/.test(mac||'') && Number(expires)>Date.now()) {
         validSession=(await sign('rchapon:'+expires))===mac;
       }
     }
@@ -76,7 +76,7 @@ export default async function middleware(request) {
     }
     if(!validSession){
       if(request.method!=='GET' && request.method!=='HEAD')return new Response('Unauthorized',{status:401,headers:{'Cache-Control':'no-store'}});
-      if(pilotagePath!== '/pilotage' && pilotagePath!== '/pilotage/')return new Response('Unauthorized',{status:401,headers:{'Cache-Control':'no-store'}});
+      if(!['/pilotage','/pilotage/','/pilotage/login'].includes(pilotagePath))return new Response('Unauthorized',{status:401,headers:{'Cache-Control':'no-store'}});
       const html=`<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>KŌMØ — Connexion Pilotage</title><style>*{box-sizing:border-box}body{margin:0;background:#f4f5f1;color:#223328;font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;min-height:100vh;display:grid;place-items:center}.login{width:min(420px,calc(100vw - 36px));padding:38px;background:#fff;border:1px solid #e1e7df;border-radius:12px;box-shadow:0 20px 65px #1d342017}.brand{font-size:27px;letter-spacing:.25em;font-weight:700;color:#203e2c}.kicker{font-size:11px;letter-spacing:.17em;color:#819185;margin-top:13px;text-transform:uppercase}h1{margin:37px 0 7px;font-size:25px;font-weight:560}p{color:#879387;font-size:12px;line-height:1.6;margin-bottom:24px}label{display:block;font-size:12px;font-weight:600;margin:17px 0 7px}input{width:100%;padding:12px;border:1px solid #cfdad0;border-radius:7px;color:#213d2a;background:#fff;font:inherit}button{background:#234530;color:#fff;border:0;padding:13px;width:100%;border-radius:7px;font:inherit;font-weight:650;cursor:pointer;margin-top:24px}.error{background:#fff1ee;color:#ac504b;border-radius:6px;padding:11px;margin:18px 0;font-size:12px}</style></head><body><main class="login"><div class="brand">KŌMØ</div><div class="kicker">Gestion des opérations</div><h1>Connexion</h1><p>Accès réservé à l'équipe autorisée.</p>${incomingUrl.searchParams.has('error')?'<div class="error">Identifiant ou mot de passe incorrect.</div>':''}<form method="post" action="/Pilotage/login"><label for="user">Identifiant</label><input id="user" name="username" autocomplete="username" required autofocus><label for="pass">Mot de passe</label><input id="pass" name="password" type="password" autocomplete="current-password" required><button type="submit">Se connecter</button></form></main></body></html>`;
       return new Response(html,{status:200,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'private, no-store','X-Robots-Tag':'noindex, nofollow'}});
     }
