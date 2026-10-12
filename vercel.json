@@ -5,6 +5,14 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/Network",
+      "destination": "/Network/index.html"
+    },
+    {
+      "source": "/Network/",
+      "destination": "/Network/index.html"
+    },
+    {
       "source": "/Pilotage",
       "destination": "/Pilotage/index.html"
     },
@@ -228,6 +236,32 @@
     }
   ],
   "headers": [
+    {
+      "source": "/Network",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/Network/:path*",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow, noarchive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "private, no-store, max-age=0"
+        }
+      ]
+    },
     {
       "source": "/card/:path*",
       "headers": [
