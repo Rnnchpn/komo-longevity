@@ -76,10 +76,30 @@ function domains(){return[
 ]}
 
 async function authView(message=''){
-  $('#app').innerHTML=`<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">VOTRE SANTÉ EN MOUVEMENT</span><h1>Comprendre votre corps.<br><em>Simplement.</em></h1><p>Votre bilan, vos résultats et votre plan KŌMØ réunis au même endroit — sans jargon, étape par étape.</p></div><div class="login-foot">Données privées · Votre espace personnel</div></section><section class="login-panel"><form id="login" class="login-card"><span class="overline">KŌMØ PULSE</span><h2>Bienvenue sur KŌMØ Pulse</h2><p>Connectez-vous pour retrouver vos rendez-vous, votre bilan et votre trajectoire.</p><label><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label><label><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required minlength="6"></label><button class="button primary wide">Se connecter</button><button class="text-button" type="button" id="reset">Mot de passe oublié ?</button>${message?`<div class="form-error">${esc(message)}</div>`:''}</form></section></main>`;
+  $('#app').innerHTML=`<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">VOTRE SANTÉ EN MOUVEMENT</span><h1>Comprendre votre corps.<br><em>Simplement.</em></h1><p>Votre bilan, vos résultats et votre plan KŌMØ réunis au même endroit — sans jargon, étape par étape.</p></div><div class="login-foot">Données privées · Votre espace personnel</div></section><section class="login-panel"><form id="login" class="login-card"><span class="overline">KŌMØ PULSE</span><h2>Bienvenue sur KŌMØ Pulse</h2><p>Connectez-vous pour retrouver vos rendez-vous, votre bilan et votre trajectoire.</p><label><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label><label><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required minlength="6"></label><button class="button primary wide">Se connecter</button><button class="text-button" type="button" id="reset">Mot de passe oublié ?</button><div class="ph-join-line"><span>Vous venez de réserver chez KŌMØ ?</span><button class="text-button" type="button" id="signup">Activer mon espace Pulse →</button></div>${message?`<div class="form-error">${esc(message)}</div>`:''}</form></section></main>`;
   $('#login').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const r=await sb.auth.signInWithPassword({email:String(f.get('email')),password:String(f.get('password'))});if(r.error)return authView('Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.');await boot()};
   $('#reset').onclick=async()=>{const email=prompt('Votre adresse e-mail');if(!email)return;const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});toast(r.error?'Impossible d’envoyer l’e-mail.':'E-mail de réinitialisation envoyé.')};
+  $('#signup').onclick=signUpView;
 }
+function signUpView(){
+  location.hash='inscription';
+  $('#app').innerHTML='<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">VOTRE CONSULTATION KŌMØ</span><h1>Votre rendez-vous.<em>Votre espace.</em></h1><p>Vos réservations et votre suivi KŌMØ au même endroit.</p></div></section><section class="login-panel"><form id="pulseSignup" class="login-card"><span class="overline">APRÈS LA RÉSERVATION</span><h2>Activer mon espace Pulse</h2><p>Utilisez la même adresse e-mail que lors de votre réservation Acuity. Vous recevrez un lien de connexion sécurisé. Seules les réservations confirmées sont associées à votre espace.</p><label><span>E-mail de réservation</span><input type="email" name="email" autocomplete="email" required></label><button class="button primary wide" type="submit">Recevoir mon lien d’accès →</button><p class="ph-signup-privacy">Aucun dossier patient ou professionnel n’est créé automatiquement. Vos rendez-vous n’apparaîtront qu’après vérification.</p><div id="pulseSignupResult" role="status" aria-live="polite"></div><button class="text-button" id="signupBack" type="button">J’ai déjà un accès → Me connecter</button></form></section></main>';
+  $('#signupBack').onclick=()=>{location.hash='';authView()};
+  $('#pulseSignup').onsubmit=async e=>{
+    e.preventDefault();
+    const form=e.currentTarget,email=String(new FormData(form).get('email')||'').trim().toLowerCase(),b=form.querySelector('[type=submit]');
+    if(!email)return;
+    b.disabled=true;
+    try{
+      const r=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:'https://pulse.komolongevity.com/'}});
+      if(r.error)throw r.error;
+      $('#pulseSignupResult').textContent='Si cette adresse est valide, un lien de connexion a été demandé. Ouvrez l’e-mail pour poursuivre.';
+    }catch{
+      $('#pulseSignupResult').textContent='Impossible de demander ce lien actuellement. Vérifiez votre adresse ou contactez contact@komolongevity.com.';
+    }finally{b.disabled=false}
+  };
+}
+
 async function loadIdentity(){
   const u=await sb.auth.getUser();S.user=u.data.user||null;if(!S.user)return false;
   S.profile=(await safe(sb.from('profiles').select('*').eq('id',S.user.id).maybeSingle())).data||{};
@@ -588,7 +608,7 @@ function render(){
   if(S.previewMode){const v=$('#view');v.insertAdjacentHTML('afterbegin',`<div class="ph-preview-banner" role="status"><div><strong>Aperçu patient · Lecture seule</strong><span>Compte administrateur · ${esc(patientName())}. Aucun changement dans son dossier.</span></div><button class="button secondary" id="previewExit">Retour Admin</button></div>`);$('#previewExit').onclick=closePatientPreview}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{if(!await loadIdentity())return authView();await loadAll();render()}catch(e){console.error('[pulse:refresh]',e);toast('Actualisation indisponible. Réessayez.')}finally{S.loading=false}}
-async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();if(!S.patient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
+async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session){if(location.hash==='#inscription')return signUpView();return authView()};await loadIdentity();if(!S.patient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
 window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
 sb.auth.onAuthStateChange((_e,s)=>{if(!s)authView()});
 boot().catch(()=>authView('Une erreur est survenue. Réessayez dans quelques instants.'));
