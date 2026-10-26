@@ -12,8 +12,8 @@ const CENTERS=[
 ];
 const CANNES_REQUEST_URL='mailto:contact@komolongevity.com?subject=Consultation%20KOMO%20Motion%20-%20Cannes';
 const PATIENT_NAV=[['home','Accueil'],['results','Résultats'],['connected','Connected'],['appointments','Rendez-vous'],['mykomo','My KŌMØ']];
-const PRO_NAV=[['operator','Bilan Motion'],['patients','Patients'],['appointments','Agenda']];
-const ADMIN_NAV=[['admin','Tableau de bord'],['patients','Patients'],['appointments','Agenda']];
+const PRO_NAV=[['clients','Clients'],['appointments','Agenda'],['operator','Bilan (démo)'],['patients','Démos']];
+const ADMIN_NAV=[['admin','Pilotage'],['clients','Clients'],['appointments','Agenda'],['patients','Démos']];
 const OP_STEPS=[
  ['preflight','00–05','Sécurité & standardisation','Operator'],
  ['readiness','05–10','Préparation du bilan','Pulse'],
@@ -25,7 +25,7 @@ const OP_STEPS=[
  ['qc_release','45–55','Contrôle qualité','Pulse']
 ];
 
-const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,selfPatient:null,previewMode:false,previewPatientId:null,patients:[],orgAppointments:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
+const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,selfPatient:null,previewMode:false,previewPatientId:null,patients:[],orgAppointments:[],clients:[],clientFilter:'all',clientQuery:'',clientError:null,clientSelected:null,assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
 
 const $=s=>document.querySelector(s);
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -117,7 +117,14 @@ async function loadPro(){
   const os=await safe(sb.from('pulse_operator_sessions').select('*').eq('patient_id',p?.id||'00000000-0000-0000-0000-000000000000').in('status',['draft','running','paused','review']).order('created_at',{ascending:false}).limit(1));
   S.schema.operator=!os.error;S.opSession=os.data?.[0]||null;S.opSteps=S.opSession?((await safe(sb.from('pulse_operator_steps').select('*').eq('operator_session_id',S.opSession.id).order('sequence_order',{ascending:true}))).data||[]):[];
 }
-async function loadAll(){if(S.previewMode&&S.role==='admin'){await loadPro();const authorized=S.patients.find(p=>p.id===S.previewPatientId);if(!authorized){S.previewMode=false;S.previewPatientId=null;S.mode='admin';return}await loadPatientContext(authorized)}else if((S.mode==='pro'||S.mode==='admin')&&hasPro())await loadPro();else await loadPatientContext(S.selfPatient)}
+async function loadCommercialContacts(){
+  if(!hasPro())return;
+  const {data,error}=await safe(sb.from('komo_commercial_contacts')
+    .select('id,center_code,first_name,last_name,email,phone,journey_status,service_code,appointment_at,booking_source,acuity_appointment_id,assigned_user_id,created_at,updated_at')
+    .order('created_at',{ascending:false}).limit(300));
+  S.clients=data||[];S.clientError=error?.message||null;
+}
+async function loadAll(){if(S.previewMode&&S.role==='admin'){await loadPro();const authorized=S.patients.find(p=>p.id===S.previewPatientId);if(!authorized){S.previewMode=false;S.previewPatientId=null;S.mode='admin';return}await loadPatientContext(authorized)}else if((S.mode==='pro'||S.mode==='admin')&&hasPro())await loadPro();else await loadPatientContext(S.selfPatient);if(hasPro())await loadCommercialContacts()}
 
 async function openPatientPreview(id){
   if(S.role!=='admin'){toast('Aperçu réservé à l’administrateur.');return}
@@ -141,6 +148,7 @@ function navIcon(route){
   appointments:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 15h3"/>',
   mykomo:'<circle cx="12" cy="8" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
   admin:'<path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/>',
+  clients:'<circle cx="9" cy="7" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M18 10a3 3 0 1 0-2-5.2M17 14a5 5 0 0 1 4 5"/>',
   patients:'<circle cx="9" cy="7" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M18 10a3 3 0 1 0-2-5.2M17 14a5 5 0 0 1 4 5"/>',
   operator:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 12h8M8 17h5"/>',
   baseline:'<path d="M3 12h4l3-7 4 14 3-7h4"/>',
@@ -382,13 +390,13 @@ function appointments(){
 }
 
 function admin(){
-  heading('Administration KŌMØ','ESPACE ADMINISTRATEUR');
+  heading('Pilotage KŌMØ','GESTION COMMERCIALE · PARIS / CANNES');
   const upcoming=S.orgAppointments.filter(a=>new Date(a.scheduled_start||0)>=new Date()&&a.status!=='cancelled').length;
-  $('#view').innerHTML=`<section class="intro"><h2>${esc(S.org?.name||'Organisation non associée')}</h2><p>Vue administrative limitée aux dossiers et rendez-vous auxquels votre compte est autorisé. Les droits sont vérifiés par la base de données.</p></section>
+  $('#view').innerHTML=`<section class="intro"><h2>Bienvenue dans votre espace KŌMØ.</h2><p>Une seule interface pour les futurs clients, les réservations Paris / Cannes et le suivi des consultations. Les anciens dossiers fictifs sont archivés dans l’onglet Démos.</p></section>
     <section class="ph-three">
-      <article class="ph-card"><span class="overline">DOSSIERS AUTORISÉS</span><h3>Patients</h3><div class="ph-metric">${S.patients.length}</div><p>Patients actifs accessibles à votre organisation.</p><button class="button primary" data-go="patients">Ouvrir les dossiers →</button><button type="button" class="button secondary" id="adminPreviewLaunch" ${!S.patients.length?'disabled':''}>Voir l’espace patient →</button></article>
-      <article class="ph-card"><span class="overline">RENDEZ-VOUS</span><h3>À venir</h3><div class="ph-metric">${upcoming}</div><p>Rendez-vous liés à votre organisation.</p><button class="button secondary" data-go="appointments">Consulter l’agenda →</button></article>
-      <article class="ph-card"><span class="overline">PRÉPARATION</span><h3>Contrôle des accès</h3><div class="ph-metric small">${S.org?'Organisation active':'À configurer'}</div><p>Les fonctions d’ajout d’utilisateurs et de modification des rôles restent désactivées tant qu’elles ne sont pas vérifiées.</p></article>
+      <article class="ph-card"><span class="overline">RÉPERTOIRE COMMERCIAL</span><h3>Futurs clients</h3><div class="ph-metric">${S.clients.length}</div><p>Contacts Paris · Centré et Cannes, dossiers consultables et recherche rapide.</p><button class="button primary" data-go="clients">Gérer les clients →</button><button type="button" class="button secondary" id="adminPreviewLaunch" ${!S.patients.length?'disabled':''}>Voir l’espace patient →</button></article>
+      <article class="ph-card"><span class="overline">RENDEZ-VOUS COMMERCIAUX</span><h3>Confirmés</h3><div class="ph-metric">${S.clients.filter(x=>x.journey_status==="confirme").length}</div><p>Statuts du répertoire, indépendants des dossiers Motion.</p><button class="button secondary" data-go="appointments">Consulter l’agenda →</button></article>
+      <article class="ph-card"><span class="overline">SÉPARATION DES DONNÉES</span><h3>Dossiers Motion</h3><div class="ph-metric small">Démonstration</div><p>Les dossiers de mesures existants sont fictifs. Le répertoire commercial reste distinct.</p></article>
     </section>
     <section class="ph-acuity-status"><div><span class="overline">INTÉGRATION DES RENDEZ-VOUS</span><h3>Acuity Scheduling</h3><p>Vérifiez la connexion de votre compte et identifiez vos calendriers Paris et Cannes. Ce test ne lit aucun rendez-vous et ne modifie aucun dossier patient.</p></div><div class="ph-acuity-action"><button id="acuityConnectionTest" class="button primary" type="button">Tester ma connexion Acuity →</button><div id="acuityConnectionFeedback" role="status" aria-live="polite"></div><button id="acuityAppointmentsRefresh" class="button secondary" type="button">Voir les rendez-vous Acuity →</button><div id="acuityAppointmentsFeedback" role="status" aria-live="polite"></div></div></section><div class="ph-acuity-appointments" id="acuityAppointmentsList" hidden></div>`;
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
@@ -453,9 +461,110 @@ async function loadAcuityAppointments(){
   }catch(e){feedback.textContent=e?.message||'Impossible de consulter le planning.'}
   finally{b.disabled=false;b.textContent='Voir les rendez-vous Acuity →'}
 }
+
+const CLIENT_STAGES=[['nouveau','Nouveau'],['a_confirmer','À confirmer'],['confirme','Confirmé'],['accueilli','Accueilli'],['termine','Terminé'],['annule','Annulé']];
+const CLIENT_SERVICES=[['initial','Motion Initial'],['suivi','Motion Suivi'],['advanced','Motion Advanced']];
+const centerLabel=x=>x==='paris_centre'?'Paris · Centré':x==='cannes'?'Cannes':'—';
+const stageLabel=x=>CLIENT_STAGES.find(y=>y[0]===x)?.[1]||'À vérifier';
+const serviceLabel=x=>CLIENT_SERVICES.find(y=>y[0]===x)?.[1]||'À définir';
+const clientDate=x=>{if(!x)return'Non programmé';const d=new Date(x);return Number.isNaN(d.getTime())?'À confirmer':d.toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Paris'})};
+function clients(){
+  heading('Clients & réservations','GESTION COMMERCIALE · PARIS / CANNES');
+  const admin=S.role==='admin',all=S.clients||[];
+  const total=all.length,confirmed=all.filter(c=>c.journey_status==='confirme').length;
+  const paris=all.filter(c=>c.center_code==='paris_centre').length,cannes=all.filter(c=>c.center_code==='cannes').length;
+  $('#view').innerHTML=`<section class="cc-hero"><div><span class="overline">KŌMØ · VOTRE ESPACE COMMERCIAL</span><h2>Vos futurs clients.<br><em>Un suivi simple.</em></h2><p>Un dossier de contact par personne, deux sites seulement. Réservations, coordonnées et statut du parcours au même endroit. Aucune donnée de santé ici.</p></div>${admin?'<button class="button primary" id="ccNewClient">+ Nouveau client</button>':''}</section>
+    <section class="cc-stats" aria-label="Statistiques clients"><div><span>TOTAL CONTACTS</span><strong>${total}</strong></div><div><span>PARIS · CENTRÉ</span><strong>${paris}</strong></div><div><span>CANNES</span><strong>${cannes}</strong></div><div><span>CONFIRMÉS</span><strong>${confirmed}</strong></div></section>
+    <section class="cc-workspace"><div class="cc-head"><div><h3>Répertoire clients</h3><p>Recherchez un nom ou un contact, filtrez par lieu, puis ouvrez une fiche.</p></div><button class="button secondary" id="ccRefresh">Actualiser</button></div>
+      <div class="cc-controls"><div class="cc-site-tabs" role="group" aria-label="Filtrer les clients par lieu"><button data-client-center="all" class="${S.clientFilter==='all'?'selected':''}">Tous</button><button data-client-center="paris_centre" class="${S.clientFilter==='paris_centre'?'selected':''}">Paris · Centré</button><button data-client-center="cannes" class="${S.clientFilter==='cannes'?'selected':''}">Cannes</button></div><label class="cc-search"><span>Rechercher</span><input id="ccSearch" type="search" autocomplete="off" placeholder="Nom, e-mail ou téléphone…" value="${esc(S.clientQuery)}"></label></div>
+      <div id="ccRecords">${clientRecords()}</div></section>
+    ${S.clientError?`<div class="human-alert" role="alert">Lecture des contacts indisponible : ${esc(S.clientError)}</div>`:''}
+    <section class="cc-policy"><strong>Contacts commerciaux uniquement</strong><p>Ne saisissez pas de symptômes, antécédents, réponses aux questionnaires ni données de santé dans ces fiches. Les dossiers Motion complets restent dans un environnement distinct jusqu’à la validation de leur hébergement et de leurs droits d’accès. Les 8 dossiers fictifs ne sont jamais mélangés aux contacts commerciaux.</p></section>
+    <section class="cc-form" id="ccFormPanel" hidden><div class="cc-form-head"><h3>Nouveau contact KŌMØ</h3><button type="button" id="ccClose" class="text-button">Fermer ×</button></div>
+     <form id="ccCreateForm"><div class="cc-form-grid">
+       <label>Prénom <input name="first_name" maxlength="100" required autocomplete="given-name"></label>
+       <label>Nom <input name="last_name" maxlength="120" required autocomplete="family-name"></label>
+       <label>Adresse e-mail <input name="email" type="email" maxlength="254" autocomplete="email"></label>
+       <label>Téléphone <input name="phone" type="tel" maxlength="40" autocomplete="tel"></label>
+       <label>Lieu <select name="center_code" required><option value="paris_centre">Paris · Centré</option><option value="cannes">Cannes</option></select></label>
+       <label>Prestation <select name="service_code"><option value="">À définir</option>${CLIENT_SERVICES.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select></label>
+       <label>Rendez-vous (facultatif) <input name="appointment_at" type="datetime-local"></label>
+       <label>Statut <select name="journey_status">${CLIENT_STAGES.map(x=>`<option value="${x[0]}">${x[1]}</option>`).join('')}</select></label>
+      </div><p class="cc-form-privacy">N'enregistrez ici que les coordonnées nécessaires à la prise de contact et à l'organisation de la prestation. Informez la personne du traitement de ses données et de ses droits.</p><div class="cc-form-actions"><button class="button secondary" type="button" id="ccCancel">Annuler</button><button class="button primary" type="submit" id="ccSubmit">Créer le dossier commercial</button></div><p id="ccCreateResult" aria-live="polite"></p></form>
+    </section>
+    <section class="cc-profile" id="ccProfile" hidden></section>`;
+  document.querySelectorAll('[data-client-center]').forEach(b=>b.onclick=()=>{S.clientFilter=b.dataset.clientCenter;document.querySelectorAll('[data-client-center]').forEach(x=>x.classList.toggle('selected',x===b));filterClientRecords()});
+  $('#ccSearch').oninput=e=>{S.clientQuery=e.target.value;filterClientRecords()};
+  $('#ccRefresh').onclick=async()=>{await loadCommercialContacts();clients()};
+  $('#ccNewClient')?.addEventListener('click',()=>{const form=$('#ccFormPanel');form.hidden=false;$('#ccProfile').hidden=true;form.scrollIntoView({behavior:'smooth',block:'start'});form.querySelector('input[name="first_name"]').focus()});
+  $('#ccClose')?.addEventListener('click',()=>$('#ccFormPanel').hidden=true);
+  $('#ccCancel')?.addEventListener('click',()=>$('#ccFormPanel').hidden=true);
+  $('#ccCreateForm').onsubmit=saveCommercialContact;
+  bindClientRows();
+}
+function clientRecords(){
+ const rows=S.clients||[];
+ if(!rows.length)return '<div class="cc-empty"><h3>Votre répertoire est prêt.</h3><p>Ajoutez votre premier futur client à Paris ou à Cannes. Les fiches de démonstration ne figurent pas ici.</p></div>';
+ return '<div class="cc-table-head"><span>CLIENT</span><span>CONSULTATION</span><span>RENDEZ-VOUS</span><span>ÉTAT</span></div>'+rows.map(c=>{
+    const name=[c.first_name,c.last_name].filter(Boolean).join(' '),search=[name,c.email||'',c.phone||''].join(' ').toLocaleLowerCase('fr');
+    return `<button type="button" class="cc-record" data-client-id="${esc(c.id)}" data-center="${esc(c.center_code)}" data-search="${esc(search)}"><span class="cc-name"><b>${esc(name)}</b><small>${esc(c.email||c.phone||'Contact à compléter')}</small></span><span>${esc(centerLabel(c.center_code))}</span><span>${esc(clientDate(c.appointment_at))}</span><span class="cc-stage cc-stage-${esc(c.journey_status)}">${esc(stageLabel(c.journey_status))}</span></button>`;
+ }).join('');
+}
+function filterClientRecords(){
+ const q=(S.clientQuery||'').toLocaleLowerCase('fr').trim();
+ let visible=0;
+ document.querySelectorAll('.cc-record').forEach(e=>{const okCenter=S.clientFilter==='all'||e.dataset.center===S.clientFilter;const okText=!q||(e.dataset.search||'').includes(q);e.hidden=!(okCenter&&okText);if(!e.hidden)visible++});
+ const info=$('#ccEmptyFiltered');if(info)info.remove();
+ if(!visible&&S.clients.length){const x=document.createElement('div');x.id='ccEmptyFiltered';x.className='cc-empty';x.textContent='Aucun client ne correspond à ce filtre.';$('#ccRecords').append(x)}
+}
+function bindClientRows(){
+ document.querySelectorAll('[data-client-id]').forEach(x=>x.onclick=()=>openClientProfile(x.dataset.clientId));filterClientRecords();
+}
+function openClientProfile(id){
+ const c=S.clients.find(x=>x.id===id);if(!c)return;
+ S.clientSelected=id;const box=$('#ccProfile');if(!box)return;
+ const name=[c.first_name,c.last_name].filter(Boolean).join(' ');
+ const email=c.email?`<a href="mailto:${encodeURIComponent(c.email)}">${esc(c.email)}</a>`:'Non renseignée';
+ const phone=c.phone?`<a href="tel:${esc(c.phone.replace(/[^+0-9]/g,''))}">${esc(c.phone)}</a>`:'Non renseigné';
+ const admin=S.role==='admin';
+ box.hidden=false;$('#ccFormPanel').hidden=true;
+ box.innerHTML=`<div class="cc-profile-header"><div><span class="overline">FICHE COMMERCIALE · ${esc(centerLabel(c.center_code).toUpperCase())}</span><h3>${esc(name)}</h3><p>${esc(serviceLabel(c.service_code))} · ${esc(stageLabel(c.journey_status))}</p></div><button id="ccCloseProfile" class="text-button">Fermer ×</button></div>
+ <div class="cc-profile-grid"><div><small>E-MAIL</small><strong>${email}</strong></div><div><small>TÉLÉPHONE</small><strong>${phone}</strong></div><div><small>LIEU</small><strong>${esc(centerLabel(c.center_code))}</strong></div><div><small>RENDEZ-VOUS</small><strong>${esc(clientDate(c.appointment_at))}</strong></div><div><small>ORIGINE</small><strong>${c.booking_source==='acuity'?'Acuity':'Ajout manuel'}</strong></div><div><small>CRÉATION</small><strong>${esc(clientDate(c.created_at))}</strong></div></div>
+ ${admin?`<form class="cc-stage-update" id="ccStageForm"><label>Faire évoluer le dossier <select name="journey_status">${CLIENT_STAGES.map(x=>`<option value="${x[0]}" ${x[0]===c.journey_status?'selected':''}>${x[1]}</option>`).join('')}</select></label><button class="button primary" type="submit">Enregistrer le statut</button></form><p id="ccStageResult" role="status"></p>`:''}
+ <p class="cc-profile-caution">Fiche administrative uniquement, sans résultats ni informations de santé. L’accès au bilan Motion nécessite une étape d'activation distincte.</p>`;
+ $('#ccCloseProfile').onclick=()=>{box.hidden=true;S.clientSelected=null};
+ $('#ccStageForm')?.addEventListener('submit',e=>{e.preventDefault();updateClientStage(id,e.target.elements.journey_status.value)});
+ box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+async function updateClientStage(id,status){
+ if(S.role!=='admin'||!CLIENT_STAGES.some(x=>x[0]===status))return;
+ const btn=$('#ccStageForm button');if(btn)btn.disabled=true;
+ const {error}=await sb.from('komo_commercial_contacts').update({journey_status:status,updated_at:new Date().toISOString()}).eq('id',id);
+ if(error){const e=$('#ccStageResult');if(e)e.textContent='Enregistrement impossible : '+error.message;if(btn)btn.disabled=false;return}
+ await loadCommercialContacts();clients();openClientProfile(id);toast('Statut enregistré.');
+}
+async function saveCommercialContact(e){
+ e.preventDefault();if(S.role!=='admin')return;
+ const form=e.currentTarget,result=$('#ccCreateResult'),submit=$('#ccSubmit');
+ submit.disabled=true;result.textContent='';
+ const f=new FormData(form),field=k=>String(f.get(k)||'').trim();
+ const first_name=field('first_name'),last_name=field('last_name'),email=field('email').toLowerCase(),phone=field('phone');
+ if(!first_name||!last_name||(!email&&!phone)){result.textContent='Saisissez le nom et au moins un moyen de contact.';submit.disabled=false;return}
+ const exists=S.clients.some(x=>x.center_code===field('center_code')&&((email&&x.email?.toLowerCase()===email)||(phone&&x.phone===phone))&&x.first_name?.toLowerCase()===first_name.toLowerCase()&&x.last_name?.toLowerCase()===last_name.toLowerCase());
+ if(exists){result.textContent='Une fiche avec ces coordonnées existe déjà pour ce lieu. Vérifiez-la avant de créer un doublon.';submit.disabled=false;return}
+ const rawDate=field('appointment_at');const time=rawDate?new Date(rawDate):null;
+ if(time&&Number.isNaN(time.getTime())){result.textContent='Date ou heure invalide.';submit.disabled=false;return}
+ const payload={first_name,last_name,email:email||null,phone:phone||null,center_code:field('center_code'),service_code:field('service_code')||null,journey_status:field('journey_status'),appointment_at:time?time.toISOString():null,booking_source:'manual',created_by:S.user.id};
+ try{
+  const {data,error}=await sb.from('komo_commercial_contacts').insert(payload).select('id').single();
+  if(error)throw error;
+  await loadCommercialContacts();S.clientFilter='all';S.clientQuery='';clients();if(data?.id)openClientProfile(data.id);toast('Contact commercial créé.');
+ }catch(err){result.textContent='Création impossible : '+(err?.message||'Réessayez.');submit.disabled=false}
+}
+
 function patients(){
-  heading('Patients','DOSSIERS AUTORISÉS');
-  $('#view').innerHTML=`<section class="intro"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><p>Choisissez un dossier pour réaliser le bilan ou, en tant qu’administrateur, voir le même accueil que le patient. L’aperçu est toujours en lecture seule.</p></section><section class="patient-list">${S.patients.length?S.patients.map(p=>`<article class="ph-patient-record"><span class="patient-avatar">${esc((p.first_name||p.last_name||'P').slice(0,1))}</span><div class="ph-patient-details"><strong>${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</strong><small>${esc(p.external_reference||'Patient KŌMØ')}</small></div><div class="ph-patient-actions"><button class="button secondary" data-patient="${p.id}">Ouvrir le bilan</button>${S.role==='admin'?`<button class="button primary" data-preview-patient="${p.id}">Aperçu patient</button>`:''}</div></article>`).join(''):'<article class="empty-state"><h3>Aucun dossier autorisé</h3><p>Un patient doit être associé à votre organisation et accessible selon les droits Supabase.</p></article>'}</section>`;
+  heading('Dossiers Motion · démonstration','DONNÉES SYNTHÉTIQUES UNIQUEMENT');
+  $('#view').innerHTML=`<section class="intro"><h2>Dossiers fictifs historiques.</h2><p>Ces dossiers de démonstration ne sont pas vos futurs clients. Ouvrez l’onglet Clients pour préparer les rendez-vous commerciaux à Paris ou Cannes. Aucun dossier réel de santé ne doit être ajouté ici sans validation préalable.</p></section><section class="patient-list">${S.patients.length?S.patients.map(p=>`<article class="ph-patient-record"><span class="patient-avatar">${esc((p.first_name||p.last_name||'P').slice(0,1))}</span><div class="ph-patient-details"><strong>${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</strong><small>${esc(p.external_reference||'Patient KŌMØ')}</small></div><div class="ph-patient-actions"><button class="button secondary" data-patient="${p.id}">Ouvrir le bilan</button>${S.role==='admin'?`<button class="button primary" data-preview-patient="${p.id}">Aperçu patient</button>`:''}</div></article>`).join(''):'<article class="empty-state"><h3>Aucun dossier autorisé</h3><p>Un patient doit être associé à votre organisation et accessible selon les droits Supabase.</p></article>'}</section>`;
   document.querySelectorAll('[data-patient]').forEach(r=>r.onclick=async()=>{localStorage.setItem('komo_v14_patient',r.dataset.patient);S.previewMode=false;S.previewPatientId=null;S.mode='pro';localStorage.setItem('komo_v14_mode','pro');await loadPro();location.hash='operator';render()});
   document.querySelectorAll('[data-preview-patient]').forEach(r=>r.onclick=()=>openPatientPreview(r.dataset.previewPatient));
 }
@@ -473,7 +582,7 @@ function render(){
   S.route=route();const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)&&!CENTERS.some(x=>x.id===S.route)&&!(S.mode==='patient'&&['baseline','questionnaires','plan'].includes(S.route))){location.hash=allowed[0];return}
   shell();
   if(CENTERS.some(x=>x.id===S.route)){centerDetail(S.route)}
-  else if(S.mode==='admin'&&S.role==='admin'){if(S.route==='admin')admin();else if(S.route==='patients')patients();else appointments()}
+  else if(S.mode==='admin'&&S.role==='admin'){if(S.route==='admin')admin();else if(S.route==='clients')clients();else if(S.route==='clients')clients();else if(S.route==='patients')patients();else appointments()}
   else if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
   else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='questionnaires')questionnaires();else if(S.route==='results')results();else if(S.route==='connected')connected();else if(S.route==='mykomo')mykomo();else if(S.route==='plan')plan();else appointments()}
   if(S.previewMode){const v=$('#view');v.insertAdjacentHTML('afterbegin',`<div class="ph-preview-banner" role="status"><div><strong>Aperçu patient · Lecture seule</strong><span>Compte administrateur · ${esc(patientName())}. Aucun changement dans son dossier.</span></div><button class="button secondary" id="previewExit">Retour Admin</button></div>`);$('#previewExit').onclick=closePatientPreview}
