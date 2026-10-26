@@ -390,9 +390,10 @@ function admin(){
       <article class="ph-card"><span class="overline">RENDEZ-VOUS</span><h3>À venir</h3><div class="ph-metric">${upcoming}</div><p>Rendez-vous liés à votre organisation.</p><button class="button secondary" data-go="appointments">Consulter l’agenda →</button></article>
       <article class="ph-card"><span class="overline">PRÉPARATION</span><h3>Contrôle des accès</h3><div class="ph-metric small">${S.org?'Organisation active':'À configurer'}</div><p>Les fonctions d’ajout d’utilisateurs et de modification des rôles restent désactivées tant qu’elles ne sont pas vérifiées.</p></article>
     </section>
-    <section class="ph-acuity-status"><div><span class="overline">INTÉGRATION DES RENDEZ-VOUS</span><h3>Acuity Scheduling</h3><p>Vérifiez la connexion de votre compte et identifiez vos calendriers Paris et Cannes. Ce test ne lit aucun rendez-vous et ne modifie aucun dossier patient.</p></div><div class="ph-acuity-action"><button id="acuityConnectionTest" class="button primary" type="button">Tester ma connexion Acuity →</button><div id="acuityConnectionFeedback" role="status" aria-live="polite"></div></div></section>`;
+    <section class="ph-acuity-status"><div><span class="overline">INTÉGRATION DES RENDEZ-VOUS</span><h3>Acuity Scheduling</h3><p>Vérifiez la connexion de votre compte et identifiez vos calendriers Paris et Cannes. Ce test ne lit aucun rendez-vous et ne modifie aucun dossier patient.</p></div><div class="ph-acuity-action"><button id="acuityConnectionTest" class="button primary" type="button">Tester ma connexion Acuity →</button><div id="acuityConnectionFeedback" role="status" aria-live="polite"></div><button id="acuityAppointmentsRefresh" class="button secondary" type="button">Voir les rendez-vous Acuity →</button><div id="acuityAppointmentsFeedback" role="status" aria-live="polite"></div></div></section><div class="ph-acuity-appointments" id="acuityAppointmentsList" hidden></div>`;
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
   $('#acuityConnectionTest')?.addEventListener('click',testAcuityConnection);
+  $('#acuityAppointmentsRefresh')?.addEventListener('click',loadAcuityAppointments);
   $('#adminPreviewLaunch')?.addEventListener('click',()=>{if(S.patients[0])openPatientPreview(S.patients[0].id)});
 }
 async function testAcuityConnection(){
@@ -419,6 +420,38 @@ async function testAcuityConnection(){
    target.innerHTML='<strong>Connexion Acuity confirmée.</strong><p>'+calendars.length+' calendrier(s) accessible(s) :</p><ul>'+calendars.map(x=>'<li>'+esc(x.name)+' <small>(ID '+Number(x.id||0)+')</small></li>').join('')+'</ul><p class="ph-acuity-warning">La lecture des calendriers est active. La synchronisation des rendez-vous et leur rapprochement aux dossiers patients ne sont pas encore activés.</p>';
  }catch(e){target.textContent=e?.message||'Vérification indisponible.'}
  finally{button.disabled=false;button.textContent='Tester ma connexion Acuity →'}
+}
+async function loadAcuityAppointments(){
+  const b=$('#acuityAppointmentsRefresh'),feedback=$('#acuityAppointmentsFeedback'),container=$('#acuityAppointmentsList');
+  if(!b||!feedback||!container||S.role!=='admin')return;
+  b.disabled=true;b.textContent='Chargement des rendez-vous…';feedback.textContent='';
+  try{
+    const session=(await sb.auth.getSession()).data.session;
+    if(!session?.access_token)throw new Error('Reconnexion à Pulse nécessaire.');
+    const response=await fetch('https://komolongevity.com/api/acuity-appointments',{
+      method:'GET',headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'
+    });
+    const data=await response.json().catch(()=>({status:'connection_error'}));
+    if(!response.ok||!data.ok){
+      const msg={
+        not_configured:'Vérifiez vos identifiants Acuity dans Vercel et redéployez.',
+        acuity_auth_failed:'Acuity a refusé les identifiants. Vérifiez votre clé API.',
+        admin_only:'Accès réservé à l’administration KŌMØ.',
+        invalid_session:'Votre session a expiré. Reconnectez-vous.',
+        connection_error:'Connexion temporairement indisponible.'
+      };
+      throw new Error(msg[data.status]||'Récupération des rendez-vous indisponible.');
+    }
+    const items=Array.isArray(data.events)?data.events:[];
+    const label=(value)=>esc(String(value||'—'));
+    const at=(value)=>{const d=new Date(value);return Number.isNaN(d.getTime())?'Date indisponible':d.toLocaleString('fr-FR',{dateStyle:'medium',timeStyle:'short',timeZone:'Europe/Paris'})};
+    container.hidden=false;
+    container.innerHTML='<div class="ph-acuity-list-head"><span class="overline">RENDEZ-VOUS ACUITY · LECTURE SEULE</span><h3>'+items.length+' réservation(s) dans la période</h3><p>Du '+label(data.window?.from)+' au '+label(data.window?.to)+'. Ces réservations ne sont pas encore associées automatiquement à des patients dans Pulse.</p></div>'+
+      (items.length?'<div class="ph-acuity-rows">'+items.map(x=>'<article class="ph-acuity-row"><div><strong>'+label(x.name||'Nom indisponible')+'</strong><span>'+label(x.appointment)+' · '+label(x.calendar||'Calendrier sans nom')+'</span></div><div class="ph-acuity-row-end"><strong>'+label(at(x.at))+'</strong><small>'+label(x.canceled?'Annulé':x.noShow?'Absence':'Acuity · non rapproché')+'</small></div></article>').join('')+'</div>':'<p class="ph-acuity-empty">Aucun rendez-vous retourné par Acuity pour cette période.</p>')+
+      (data.maxResultsReached?'<p class="ph-acuity-warning">100 réservations affichées au maximum : vérifiez les autres dates dans Acuity.</p>':'');
+    feedback.textContent='Données Acuity actualisées. Aucune modification effectuée dans Pulse.';
+  }catch(e){feedback.textContent=e?.message||'Impossible de consulter le planning.'}
+  finally{b.disabled=false;b.textContent='Voir les rendez-vous Acuity →'}
 }
 function patients(){
   heading('Patients','DOSSIERS AUTORISÉS');
