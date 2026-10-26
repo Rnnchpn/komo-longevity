@@ -128,9 +128,25 @@ async function closePatientPreview(){
   localStorage.setItem('komo_v14_mode','admin');
   await loadPro();location.hash='admin';render();
 }
+function navIcon(route){
+ const paths={
+  home:'<path d="m3 10 9-7 9 7"/><path d="M5 9v12h14V9"/><path d="M9 21v-7h6v7"/>',
+  results:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M7 15v3M12 10v8M17 7v11"/>',
+  connected:'<rect x="3" y="3" width="18" height="18" rx="4"/><path d="m7 13 3-3 3 4 4-5"/><path d="M7 17h10"/>',
+  appointments:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M8 15h3"/>',
+  mykomo:'<circle cx="12" cy="8" r="4"/><path d="M5 21v-2a7 7 0 0 1 14 0v2"/>',
+  admin:'<path d="M3 3h8v8H3zM13 3h8v8h-8zM3 13h8v8H3zM13 13h8v8h-8z"/>',
+  patients:'<circle cx="9" cy="7" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M18 10a3 3 0 1 0-2-5.2M17 14a5 5 0 0 1 4 5"/>',
+  operator:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8M8 12h8M8 17h5"/>',
+  baseline:'<path d="M3 12h4l3-7 4 14 3-7h4"/>',
+  questionnaires:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+  plan:'<path d="M4 19V5M4 19h16M7 15l4-5 3 2 5-6"/>'
+ };
+ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(paths[route]||paths.home)+'</svg>';
+}
 function navItems(){return S.mode==='admin'&&S.role==='admin'?ADMIN_NAV:S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
-  const nav=navItems().map(([id,label],i)=>`<button data-route="${id}" class="nav-item ${S.route===id?'active':''}"><span class="nav-dot">${i+1}</span><span>${label}</span></button>`).join('');
+  const nav=navItems().map(([id,label],i)=>`<button data-route="${id}" class="nav-item ${S.route===id?'active':''}"><span class="nav-glyph" aria-hidden="true">${navIcon(id)}</span><span>${label}</span></button>`).join('');
   const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'&&!S.previewMode?'active':''}" ${!S.selfPatient?'disabled':''}>Mon compte</button>${S.role==='admin'?`<button data-mode="preview" class="${S.previewMode?'active':''}" ${!S.patients.length?'disabled':''}>Aperçu patient</button>`:''}<button data-mode="pro" class="${S.mode==='pro'?'active':''}">Pro</button>${S.role==='admin'?`<button data-mode="admin" class="${S.mode==='admin'?'active':''}">Admin</button>`:''}</div>`:'';
   $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="ph-head-actions"><button type="button" class="text-button ph-menu-button" id="userMenuToggle" aria-label="Options du compte">Compte</button><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='admin'?'Administration KŌMØ':S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></div></header><div id="ph-account-menu" hidden>${mode}<button id="mobileLogout" class="button secondary">Se déconnecter</button></div><div id="view">${S.previewMode?'<div class="ph-preview-banner" role="status"><div><strong>Aperçu patient · Lecture seule</strong><span>Vous voyez ce que contient ce dossier autorisé. Vous restez connecté en tant qu’administrateur.</span></div><button class="button secondary" id="previewExit">Retour Admin</button></div>':''}</div></main></div>`;
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
