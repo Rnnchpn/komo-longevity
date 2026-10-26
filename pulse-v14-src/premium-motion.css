@@ -207,3 +207,18 @@ button,a{-webkit-tap-highlight-color:transparent}
 @media(max-width:920px){.ph-center-detail-grid{grid-template-columns:1fr}.ph-center-detail-photo{min-height:330px}.ph-center-choices{gap:13px}}
 @media(max-width:650px){.ph-center-choices{grid-template-columns:1fr}.ph-center-choice{grid-template-rows:200px 1fr}.ph-center-body{min-height:220px;padding:23px}.ph-center-body h3{font-size:26px}.ph-centers-heading h2{font-size:39px}.ph-center-detail-grid{gap:13px}.ph-center-detail-photo{min-height:295px;padding:25px}.ph-center-detail-copy{padding:23px;border-radius:25px}.ph-center-detail-photo h2{font-size:36px}.ph-center-detail-facts>div{grid-template-columns:95px minmax(0,1fr)}}
 @media(prefers-reduced-motion:reduce){.ph-center-choice,.ph-center-art:before,.ph-centers-shortcut button{animation:none!important;transition:none!important}.ph-center-choice:hover,.ph-centers-shortcut button:hover{transform:none!important}}
+
+
+/* Admin-only Acuity connection diagnostic */
+.ph-acuity-status{display:grid;grid-template-columns:minmax(0,1fr) minmax(220px,.7fr);gap:24px;padding:27px 30px;margin:20px 0 25px;background:linear-gradient(130deg,#f5f9f2,#fffefa);border:1px solid #dce8dd;border-radius:24px;box-shadow:0 11px 35px rgba(39,68,41,.045);align-items:center}
+.ph-acuity-status h3{font:550 clamp(22px,2.6vw,29px)/1.12 Manrope,sans-serif;letter-spacing:-.045em;margin:3px 0 11px;color:#18452c}
+.ph-acuity-status p{color:#60786a;font-size:12px;line-height:1.7;margin:0}
+.ph-acuity-action{display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.ph-acuity-action button{min-height:48px;width:100%}
+#acuityConnectionFeedback{font-size:12px;line-height:1.65;color:#36553e;width:100%;overflow-wrap:anywhere}
+#acuityConnectionFeedback strong{color:#17472c}
+#acuityConnectionFeedback ul{padding-left:18px;margin:8px 0}
+#acuityConnectionFeedback li{padding-bottom:4px}
+#acuityConnectionFeedback small{color:#6b8170}
+#acuityConnectionFeedback .ph-acuity-warning{padding:11px 13px;border-radius:10px;background:#f4efe3;color:#826940;margin-top:10px}
+@media(max-width:760px){.ph-acuity-status{grid-template-columns:1fr;padding:24px;gap:16px}}
