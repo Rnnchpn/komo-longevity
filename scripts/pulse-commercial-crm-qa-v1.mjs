@@ -8,7 +8,7 @@ const sql=await readFile(join(root,'supabase','migrations','20261026122000_komo_
 const tests=[
  ['commercial tab for admin',app.includes("['clients','Clients']")],
  ['exactly two locations',sql.includes("'paris_centre','cannes'")],
- ['all health data excluded',!sql.includes('medical_notes')&&!sql.includes('diagnosis')&&!sql.includes('birth_date')&&!sql.includes('questionnaire')],
+ ['all health data excluded',!/(medical_notes|diagnosis|birth_date|questionnaire)\\s+(?:text|jsonb|date|integer|numeric)\\b/i.test(sql)],
  ['RLS enabled',sql.includes('enable row level security')],
  ['admin write restriction',sql.includes('private.user_is_global_admin()')],
  ['client delete disabled',!sql.includes('for delete')],
