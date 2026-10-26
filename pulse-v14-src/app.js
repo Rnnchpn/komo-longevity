@@ -180,6 +180,127 @@ function mykomo(){
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
   $('#myLogout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
 }
+
+const PREP_CODES=['KOMO_BASELINE_CORE','KOMO_MOBILITY_25','KOMO_SLEEP_RECOVERY','KOMO_WELLBEING','KOMO_LIFESTYLE','KOMO_HEALTH_HISTORY'];
+const Q={registry:[],active:null,answers:{},busy:false};
+const qDisplay=code=>Q.registry.find(x=>x.code===code)?.configuration?.display_label||Q.registry.find(x=>x.code===code)?.label||code;
+const qSession=code=>S.questionnaires.find(x=>x.instrument_code===code);
+const qOptions=(cfg,it)=>it.options||(
+ it.type==='scale'?cfg.response_scale:
+ it.type==='frequency'?cfg.frequency_options:
+ it.type==='difficulty'?cfg.difficulty_options:
+ it.type==='impact'?cfg.impact_options:
+ it.type==='tri_state'?cfg.default_options:[])||[];
+function qShowItem(code,item,a){
+  if(code==='KOMO_BASELINE_CORE'&&item==='B04_INJURY')return !!a.B04_COUNT&&a.B04_COUNT!=='none';
+  if(code==='KOMO_BASELINE_CORE'&&['B08_DATE','B08_DETAIL'].includes(item))return a.B08===true;
+  if(code==='KOMO_SLEEP_RECOVERY'&&item==='SR10_REASON')return a.SR10===false;
+  return true;
+}
+function qControl(key,it,cfg,old){
+  const type=it.type||'text',opts=type==='yes_no'?[{value:'yes',label:'Oui'},{value:'no',label:'Non'}]:qOptions(cfg,it);
+  if(type==='multi_choice')return `<div class="ph-q-options">${opts.map(o=>`<label><input type="checkbox" name="${esc(key)}" value="${esc(o.value)}" ${Array.isArray(old)&&old.map(String).includes(String(o.value))?'checked':''}><span>${esc(o.label)}</span></label>`).join('')}</div>`;
+  if(opts.length)return `<div class="ph-q-options">${opts.map(o=>{const match=type==='yes_no'?(old===(o.value==='yes')):String(old??'')===String(o.value);return `<label><input type="radio" name="${esc(key)}" value="${esc(o.value)}" ${match?'checked':''}><span>${esc(o.label)}</span></label>`}).join('')}</div>`;
+  if(type==='number')return `<input type="number" name="${esc(key)}" min="${it.min??''}" max="${it.max??''}" step="${it.step??'any'}" value="${old??''}" placeholder="Votre réponse"> ${esc(it.suffix||'')}`;
+  if(type==='date')return `<input type="date" name="${esc(key)}" value="${esc(old||'')}">`;
+  if(type==='text')return `<textarea name="${esc(key)}" rows="2" placeholder="Votre réponse">${esc(old||'')}</textarea>`;
+  return `<input name="${esc(key)}" value="${esc(old??'')}" placeholder="Votre réponse">`;
+}
+function qRaw(form,item,it){
+  if(it.type==='multi_choice')return [...form.querySelectorAll(`[name="${item}"]:checked`)].map(x=>x.value);
+  if(['yes_no','choice','scale','frequency','difficulty','impact','tri_state'].includes(it.type)){
+    const x=form.querySelector(`[name="${item}"]:checked`);
+    if(!x)return undefined;
+    if(it.type==='yes_no')return x.value==='yes';
+    if(['scale','frequency','difficulty','impact'].includes(it.type)&&x.value.trim()!==''&&!Number.isNaN(Number(x.value)))return Number(x.value);
+    return x.value;
+  }
+  const f=form.elements.namedItem(item);
+  if(!f||!f.value)return undefined;
+  return it.type==='number'?Number(f.value):f.value;
+}
+async function questionnaires(){
+  heading('Mes questionnaires','PRÉPARER MON BILAN MOTION');
+  if(!S.assessment){
+    $('#view').innerHTML=`<section class="locked-state"><div class="lock-symbol">01</div><h2>Votre pré-bilan sera bientôt disponible.</h2><p>Votre équipe doit d’abord associer votre rendez-vous à un bilan Motion dans Pulse. Aucun questionnaire n’est perdu.</p><button class="button primary" onclick="location.hash='appointments'">Voir mes rendez-vous</button></section>`;
+    return;
+  }
+  $('#view').innerHTML='<section class="ph-card"><h3>Chargement de vos questionnaires…</h3></section>';
+  if(!Q.registry.length){
+    const r=await safe(sb.from('instrument_registry').select('code,label,version,configuration').in('code',PREP_CODES).eq('can_render',true));
+    if(r.error){$('#view').innerHTML='<section class="info-note"><strong>Questionnaires momentanément indisponibles.</strong><p>Veuillez réessayer depuis Mon bilan.</p></section>';return}
+    Q.registry=r.data||[];
+  }
+  if(route()!=='questionnaires')return;
+  if(!Q.active){
+    $('#view').innerHTML=`<section class="intro"><h2>Quelques questions pour mieux vous connaître.</h2><p>Vous pouvez répondre en plusieurs fois. Vos réponses sont associées à votre dossier et restent modifiables avant votre bilan.</p></section><section class="ph-questions-grid">${PREP_CODES.filter(x=>Q.registry.some(y=>y.code===x)).map((code,i)=>{const ses=qSession(code),done=ses?.status==='completed'||Number(ses?.completeness||0)>=100;return `<button type="button" class="ph-q-tile" data-q-open="${esc(code)}"><span class="overline">${String(i+1).padStart(2,'0')} · ${done?'TERMINÉ':'À RENSEIGNER'}</span><h3>${esc(qDisplay(code))}</h3><p>${esc(Q.registry.find(x=>x.code===code)?.configuration?.intro||'')}</p><span>${done?'✓ Relire mes réponses':ses?`Reprendre · ${Math.round(Number(ses.completeness||0))}%`:'Commencer'} →</span></button>`}).join('')}</section><article class="info-note"><strong>Pourquoi ces questions ?</strong><p>Ces informations donnent du contexte à votre bilan. Elles ne constituent ni diagnostic ni score clinique automatisé.</p></article>`;
+    document.querySelectorAll('[data-q-open]').forEach(b=>b.onclick=()=>{Q.active=b.dataset.qOpen;questionnaires()});
+    return;
+  }
+  const code=Q.active,reg=Q.registry.find(x=>x.code===code);
+  if(!reg){Q.active=null;return questionnaires()}
+  const sess=qSession(code);
+  Q.answers={};
+  if(sess){
+    const a=await safe(sb.from('questionnaire_responses').select('item_code,raw_value').eq('questionnaire_session_id',sess.id));
+    if(a.error)return toast('Impossible de charger vos réponses.');
+    (a.data||[]).forEach(x=>Q.answers[x.item_code]=x.raw_value);
+  }
+  if(route()!=='questionnaires')return;
+  const cfg=reg.configuration||{},order=cfg.item_order||Object.keys(cfg.items||{});
+  const safetyAlert=code==='KOMO_BASELINE_CORE'&&['S01','S02','S03','S04','S05'].some(k=>Q.answers[k]===true);
+  $('#view').innerHTML=`<div class="ph-q-toolbar"><button class="text-button" id="qBack">← Tous les questionnaires</button><span>${Math.round(Number(sess?.completeness||0))}% complété</span></div>
+  <section class="ph-q-sheet"><span class="overline">VOTRE PRÉ-BILAN</span><h2>${esc(cfg.display_label||reg.label)}</h2><p>${esc(cfg.intro||'')}</p>${safetyAlert?'<div class="human-alert">Une réponse de sécurité nécessite un avis professionnel avant tout test physique. En cas de symptôme aigu ou inquiétant, contactez les services médicaux appropriés.</div>':''}
+  <form id="qLiveForm" class="ph-q-form">${order.map(item=>{const it=cfg.items?.[item]||{};return `<div class="ph-q-field" data-q-item="${esc(item)}" ${qShowItem(code,item,Q.answers)?'':'hidden'}><label class="ph-q-label">${esc(it.prompt||item)} ${it.required!==false?'<span aria-label="Obligatoire">*</span>':''}</label>${qControl(item,it,cfg,Q.answers[item])}</div>`}).join('')}
+    <div class="ph-q-actions"><button type="button" class="button secondary" id="qSaveDraft">Enregistrer et reprendre plus tard</button><button class="button primary" type="submit" id="qFinish">Enregistrer et terminer →</button></div>
+    <div class="ph-q-feedback" id="qFeedback" role="status"></div></form></section>`;
+  $('#qBack').onclick=()=>{Q.active=null;questionnaires()};
+  const form=$('#qLiveForm');
+  function current(){
+    const answers={...Q.answers};
+    for(const item of order){const v=qRaw(form,item,cfg.items?.[item]||{});if(v!==undefined)answers[item]=v}
+    return answers;
+  }
+  function refreshQVisibility(){const a=current();for(const item of order){const el=form.querySelector(`[data-q-item="${item}"]`);if(el)el.hidden=!qShowItem(code,item,a)}}
+  form.addEventListener('change',refreshQVisibility);
+  form.onsubmit=e=>{e.preventDefault();saveQuestionnaire(code,form,true)};
+  $('#qSaveDraft').onclick=()=>saveQuestionnaire(code,form,false);
+}
+async function saveQuestionnaire(code,form,complete){
+  if(Q.busy)return;
+  Q.busy=true;const feedback=$('#qFeedback');const buttons=form.querySelectorAll('button');buttons.forEach(x=>x.disabled=true);
+  const reg=Q.registry.find(x=>x.code===code),cfg=reg.configuration||{},order=cfg.item_order||Object.keys(cfg.items||{}),now=new Date().toISOString();
+  try{
+    const answers={...Q.answers};for(const item of order){const raw=qRaw(form,item,cfg.items?.[item]||{});if(raw!==undefined)answers[item]=raw}
+    const visible=order.filter(k=>qShowItem(code,k,answers));
+    const required=visible.filter(k=>cfg.items[k]?.required!==false);
+    const filled=k=>answers[k]!==undefined&&answers[k]!==null&&answers[k]!==''&&(!Array.isArray(answers[k])||answers[k].length>0);
+    const missing=required.filter(k=>!filled(k));
+    const completeness=required.length?Math.round(100*(required.length-missing.length)/required.length):100;
+    let session=qSession(code);
+    if(!session){
+      const r=await sb.from('questionnaire_sessions').insert({assessment_id:S.assessment.id,instrument_code:code,instrument_version:reg.version,status:'in_progress',score_status:'not_scored',completeness:0,started_at:now,created_by:S.user.id}).select().single();
+      if(r.error)throw r.error;session=r.data;
+    }
+    const rows=visible.filter(filled).map(k=>({questionnaire_session_id:session.id,item_code:k,response_code:typeof answers[k]==='string'?answers[k]:null,raw_value:answers[k],normalized_value:answers[k],source:'patient',clinician_verified:false,triggered_by:'PULSE_V15_PATIENT',completed_at:now,updated_at:now}));
+    if(rows.length){
+      const r=await sb.from('questionnaire_responses').upsert(rows,{onConflict:'questionnaire_session_id,item_code'});
+      if(r.error)throw r.error;
+    }
+    const done=missing.length===0;
+    const patch={completeness,status:done?'completed':'in_progress',score_status:'not_scored',completed_at:done?now:null,updated_at:now};
+    const u=await sb.from('questionnaire_sessions').update(patch).eq('id',session.id);
+    if(u.error)throw u.error;
+    S.questionnaires=(await safe(sb.from('questionnaire_sessions').select('*').eq('assessment_id',S.assessment.id))).data||[];
+    Q.answers=answers;
+    if(complete&&missing.length){feedback.textContent=`${missing.length} réponse(s) obligatoire(s) restent à compléter. Vos réponses ont bien été sauvegardées.`;feedback.className='ph-q-feedback ph-q-warn'}
+    else{feedback.textContent='Vos réponses ont été enregistrées.';feedback.className='ph-q-feedback ph-q-success'}
+    if((!complete)||done){Q.active=null;questionnaires();toast('Réponses enregistrées dans votre dossier.')}
+  }catch(err){
+    console.error('[pulse questionnaire]',err);feedback.textContent='Enregistrement impossible. Vos réponses n’ont pas été confirmées : réessayez.';feedback.className='ph-q-feedback ph-q-warn';
+  }finally{buttons.forEach(x=>x.disabled=false);Q.busy=false}
+}
+
 function results(){
   heading('Mes résultats','COMPRENDRE VOTRE MOUVEMENT');
   if(!releasedScore()){
