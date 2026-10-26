@@ -137,6 +137,40 @@ async function loadPro(){
   const os=await safe(sb.from('pulse_operator_sessions').select('*').eq('patient_id',p?.id||'00000000-0000-0000-0000-000000000000').in('status',['draft','running','paused','review']).order('created_at',{ascending:false}).limit(1));
   S.schema.operator=!os.error;S.opSession=os.data?.[0]||null;S.opSteps=S.opSession?((await safe(sb.from('pulse_operator_steps').select('*').eq('operator_session_id',S.opSession.id).order('sequence_order',{ascending:true}))).data||[]):[];
 }
+
+async function loadBookedAccount(){
+  S.bookedAppointments=[];S.bookedLinkStatus='pending_booking';
+  if(!S.user||hasPro()||S.patient)return;
+  const claim=await safe(sb.rpc('claim_my_komo_booking'));
+  S.bookedLinkStatus=claim.data?.status||'pending_booking';
+  const own=await safe(sb.from('komo_commercial_contacts')
+    .select('id,first_name,last_name,center_code,service_code,appointment_at,journey_status')
+    .eq('pulse_user_id',S.user.id).eq('booking_source','acuity')
+    .order('appointment_at',{ascending:true}).limit(30));
+  S.bookedAppointments=own.data||[];
+}
+function bookedPortal(){
+  const records=S.bookedAppointments||[],name=records[0]?.first_name||'';
+  const cards=records.map(x=>{
+    const center=x.center_code==='paris_centre'?'Paris · Centré':x.center_code==='cannes'?'Cannes':'À vérifier';
+    const service=({initial:'Motion Initial',suivi:'Motion Suivi',advanced:'Motion Advanced'})[x.service_code]||'Bilan Motion';
+    const dt=x.appointment_at?new Date(x.appointment_at):null;
+    const formatted=dt&&!Number.isNaN(dt.getTime())?dt.toLocaleString('fr-FR',{dateStyle:'full',timeStyle:'short',timeZone:'Europe/Paris'}):'Date à confirmer';
+    const canceled=x.journey_status==='annule';
+    return '<article class="ph-booked-item"><div><span class="overline">'+esc(center.toUpperCase())+'</span><h3>'+esc(service)+'</h3><p>'+esc(formatted)+'</p></div><span class="ph-center-status">'+(canceled?'Annulé':'Réservé')+'</span></article>';
+  }).join('');
+  const manual=S.bookedLinkStatus==='manual_review';
+  $('#app').innerHTML='<main class="ph-booked-layout"><header class="ph-booked-nav"><a href="https://komolongevity.com/" class="brand">KŌMØ <small>PULSE</small></a><button class="button secondary" id="bookedLogout">Se déconnecter</button></header>'
+    +'<section class="ph-booked-welcome"><span class="overline">VOTRE ESPACE KŌMØ</span><h1>Bienvenue'+(name?', '+esc(name):'')+'.<br><em>Votre mouvement commence ici.</em></h1><p>Retrouvez vos rendez-vous et les prochaines étapes de votre expérience KŌMØ Motion.</p></section>'
+    +(records.length?'<section class="ph-booked-panel"><span class="overline">MES RENDEZ-VOUS</span><h2>Mes consultations</h2><div class="ph-booked-list">'+cards+'</div><p class="ph-booked-info">Pour modifier ou annuler votre réservation, utilisez le lien reçu dans votre e-mail de confirmation Acuity.</p></section>'
+      :'<section class="ph-booked-panel"><span class="overline">CONFIRMATION EN COURS</span><h2>Nous vérifions votre réservation.</h2><p>Votre compte existe, mais nous n’avons pas encore associé de réservation Acuity confirmée à cette adresse e-mail. Votre espace reste privé et aucun dossier d’une autre personne n’est accessible.</p>'
+      +(manual?'<p><strong>Plusieurs personnes utilisent cette adresse : un rapprochement manuel est nécessaire.</strong></p>':'')
+      +'<button id="bookedRetry" class="button primary">Vérifier de nouveau →</button><a class="ph-secondary-link" href="mailto:contact@komolongevity.com">Contacter KŌMØ</a></section>')
+    +'<section class="ph-booked-bottom"><article><span class="overline">PRÉPARATION</span><h3>Votre prochaine étape</h3><p>Les informations pratiques sont disponibles dès la réservation. Les questionnaires et mesures de santé seront ouverts uniquement après validation de leur environnement sécurisé.</p></article><article><span class="overline">COMPTE PERSONNEL</span><h3>Votre accès sécurisé</h3><p>Connecté avec '+esc(S.user?.email||'votre adresse e-mail')+'. Seules vos propres réservations peuvent être liées à ce compte.</p></article></section></main>';
+  $('#bookedLogout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
+  $('#bookedRetry')?.addEventListener('click',async()=>{await loadBookedAccount();bookedPortal()});
+}
+
 async function loadCommercialContacts(){
   if(!hasPro())return;
   const {data,error}=await safe(sb.from('komo_commercial_contacts')
@@ -607,8 +641,8 @@ function render(){
   else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='questionnaires')questionnaires();else if(S.route==='results')results();else if(S.route==='connected')connected();else if(S.route==='mykomo')mykomo();else if(S.route==='plan')plan();else appointments()}
   if(S.previewMode){const v=$('#view');v.insertAdjacentHTML('afterbegin',`<div class="ph-preview-banner" role="status"><div><strong>Aperçu patient · Lecture seule</strong><span>Compte administrateur · ${esc(patientName())}. Aucun changement dans son dossier.</span></div><button class="button secondary" id="previewExit">Retour Admin</button></div>`);$('#previewExit').onclick=closePatientPreview}
 }
-async function refresh(){if(S.loading)return;S.loading=true;try{if(!await loadIdentity())return authView();await loadAll();render()}catch(e){console.error('[pulse:refresh]',e);toast('Actualisation indisponible. Réessayez.')}finally{S.loading=false}}
-async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session){if(location.hash==='#inscription')return signUpView();return authView()};await loadIdentity();if(!S.patient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
-window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
+async function refresh(){if(S.loading)return;S.loading=true;try{if(!await loadIdentity())return authView();if(!S.patient&&!hasPro()){await loadBookedAccount();bookedPortal();return}await loadAll();render()}catch(e){console.error('[pulse:refresh]',e);toast('Actualisation indisponible. Réessayez.')}finally{S.loading=false}}
+async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session){if(location.hash==='#inscription')return signUpView();return authView()};await loadIdentity();if(!S.patient&&!hasPro()){await loadBookedAccount();bookedPortal();return}await loadAll();render()}
+window.addEventListener('hashchange',()=>{if(S.user){if(!S.patient&&!hasPro())bookedPortal();else{S.route=route();render()}}});
 sb.auth.onAuthStateChange((_e,s)=>{if(!s)authView()});
 boot().catch(()=>authView('Une erreur est survenue. Réessayez dans quelques instants.'));
