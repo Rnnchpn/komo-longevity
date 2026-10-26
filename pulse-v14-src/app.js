@@ -4,8 +4,8 @@ const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 
-const PATIENT_NAV=[['home','Aujourd’hui'],['baseline','Mon bilan'],['results','Résultats'],['plan','Mon plan'],['appointments','Rendez-vous']];
-const PRO_NAV=[['operator','Operator'],['patients','Patients'],['appointments','Rendez-vous']];
+const PATIENT_NAV=[['home','Accueil'],['results','Résultats'],['connected','Connected'],['appointments','Rendez-vous'],['mykomo','My KŌMØ']];
+const PRO_NAV=[['operator','Bilan Motion'],['patients','Patients'],['appointments','Agenda']];
 const OP_STEPS=[
  ['preflight','00–05','Sécurité & standardisation','Operator'],
  ['readiness','05–10','Préparation du bilan','Pulse'],
@@ -34,33 +34,29 @@ const subs=()=>score()?.subscores||{};
 const qdone=()=>S.questionnaires.filter(x=>x.status==='completed'||Number(x.completeness||0)>=100).length;
 const bioReady=()=>S.bio.some(x=>['reviewed','released'].includes(x.status));
 const motionReady=()=>S.measurements.length>0;
-const releasedScore=()=>Number.isFinite(Number(score()?.overall_score));
+const releasedScore=()=>score()?.overall_score!==null&&score()?.overall_score!==undefined&&Number.isFinite(Number(score()?.overall_score));
 const visibleGates=()=>S.gates.filter(g=>['open','review_required','referred'].includes(g.status));
 const domainVal=(...keys)=>{for(const k of keys){const v=Number(subs()[k]);if(Number.isFinite(v))return v}return null};
-const futureAppointments=()=>S.appointments.filter(a=>new Date(a.scheduled_start||0).getTime()>=Date.now()).sort((a,b)=>new Date(a.scheduled_start)-new Date(b.scheduled_start));
+const futureAppointments=()=>S.appointments.filter(a=>!['cancelled','canceled'].includes(a.status)&&new Date(a.scheduled_start||0).getTime()>=Date.now()).sort((a,b)=>new Date(a.scheduled_start)-new Date(b.scheduled_start));
 const friendlyAppointmentType=v=>({motion:'Bilan de mouvement',clinical:'Consultation médicale',follow_up:'Suivi',baseline:'Bilan KŌMØ'}[v]||'Rendez-vous KŌMØ');
 const friendlyMode=v=>({onsite:'Sur place',clinic:'En centre',home:'À domicile',yacht:'À bord',villa:'En villa',teleconsultation:'À distance',remote:'À distance'}[v]||'Avec votre équipe KŌMØ');
 const statusLabel=v=>({scheduled:'Confirmé',confirmed:'Confirmé',pending:'En attente',completed:'Terminé',cancelled:'Annulé',review:'En revue',collecting:'En cours',draft:'À démarrer',running:'En cours',ready:'Prêt'}[v]||'En cours');
 
 function patientProgress(){
   const steps=[
-    {id:'questions',label:'Questions',done:qdone()>=1,detail:qdone()?qdone()+' questionnaire(s) terminé(s)':'Quelques minutes pour comprendre votre quotidien'},
-    {id:'biology',label:'Prise de sang',done:bioReady(),detail:bioReady()?'Résultats reçus':'À organiser avec l’équipe'},
-    {id:'motion',label:'Mesures',done:motionReady(),detail:motionReady()?'Mesures enregistrées':'Votre séance de mouvement'},
-    {id:'results',label:'Résultats',done:releasedScore(),detail:releasedScore()?'Disponibles':'Après validation de votre bilan'}
+    {id:'questions',label:'Pré-bilan',done:qdone()>=6,detail:qdone()+' / 6 questionnaires terminés'},
+    {id:'motion',label:'Motion',done:motionReady(),detail:motionReady()?'Mesures enregistrées':'Bilan de mouvement à réaliser'},
+    {id:'results',label:'Résultats',done:releasedScore(),detail:releasedScore()?'Résultats publiés':'Disponibles après validation'}
   ];
   const firstPending=steps.find(x=>!x.done)?.id||'results';
-  const completed=steps.filter(x=>x.done).length;
-  return {steps,firstPending,completed,percent:Math.round(completed/steps.length*100)};
+  return {steps,firstPending,completed:steps.filter(x=>x.done).length,percent:Math.round(steps.filter(x=>x.done).length/steps.length*100)};
 }
 function nextAction(){
-  const p=patientProgress();
-  if(!S.assessment)return {title:'Découvrir votre bilan KŌMØ',text:'Votre équipe préparera votre baseline. Vous pouvez déjà voir comment le parcours se déroule.',label:'Voir mon bilan',route:'baseline'};
-  if(p.firstPending==='questions')return {title:'Compléter votre pré-bilan',text:'Quelques questions nous permettent de personnaliser la suite sans ajouter de tests inutiles.',label:'Continuer mon bilan',route:'baseline'};
-  if(p.firstPending==='biology')return {title:'Organiser votre prise de sang',text:'Cette étape apporte le contexte biologique utile à l’interprétation globale.',label:'Voir cette étape',route:'baseline'};
-  if(p.firstPending==='motion')return {title:'Réaliser vos mesures de mouvement',text:'Une séance guidée mesure votre force, votre équilibre, votre mobilité et votre locomotion.',label:'Voir mon rendez-vous',route:'appointments'};
-  if(p.firstPending==='results')return {title:'Vos résultats sont en validation',text:'Votre équipe vérifie la qualité des mesures avant leur publication dans Pulse.',label:'Comprendre mes résultats',route:'results'};
-  return {title:'Votre bilan est prêt',text:'Découvrez vos points forts, votre priorité et le plan proposé pour les prochaines semaines.',label:'Voir mes résultats',route:'results'};
+  if(!S.assessment)return {title:'Votre espace KŌMØ est prêt',text:'Votre équipe reliera votre premier bilan à votre compte. Vos rendez-vous sont déjà accessibles.',label:'Mes rendez-vous',route:'appointments'};
+  if(qdone()<6)return {title:'Préparez votre bilan Motion',text:'Quelques questions sur votre mobilité, vos habitudes et votre récupération, à compléter avant votre rendez-vous.',label:'Remplir mes questionnaires',route:'questionnaires'};
+  if(!motionReady())return {title:'Votre prochain bilan Motion',text:'Retrouvez votre rendez-vous et les étapes préparatoires de votre évaluation.',label:'Voir mon bilan',route:'baseline'};
+  if(!releasedScore())return {title:'Vos résultats sont en préparation',text:'Votre équipe contrôle les mesures avant leur publication dans Pulse.',label:'Suivre mon bilan',route:'baseline'};
+  return {title:'Votre trajectoire commence ici',text:'Retrouvez vos résultats publiés, votre plan et vos prochaines étapes.',label:'Voir mes résultats',route:'results'};
 }
 function band(v){if(!Number.isFinite(v))return{label:'En attente',class:'neutral'};if(v>=80)return{label:'Solide',class:'good'};if(v>=65)return{label:'Bon niveau',class:'good'};if(v>=50)return{label:'À renforcer',class:'mid'};return{label:'Priorité',class:'warn'}}
 function domains(){return[
@@ -117,10 +113,12 @@ function navItems(){return S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
   const nav=navItems().map(([id,label],i)=>`<button data-route="${id}" class="nav-item ${S.route===id?'active':''}"><span class="nav-dot">${i+1}</span><span>${label}</span></button>`).join('');
   const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'?'active':''}" ${!S.patient?'disabled':''}>Patient</button><button data-mode="pro" class="${S.mode==='pro'?'active':''}">Équipe</button></div>`:'';
-  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div id="view"></div></main></div>`;
+  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="ph-head-actions"><button type="button" class="text-button ph-menu-button" id="userMenuToggle" aria-label="Options du compte">Compte</button><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></div></header><div id="ph-account-menu" hidden><button id="mobileLogout" class="button secondary">Se déconnecter</button></div><div id="view"></div></main></div>`;
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;S.mode=b.dataset.mode;localStorage.setItem('komo_v14_mode',S.mode);location.hash=S.mode==='pro'?'operator':'home';await refresh()});
   $('#logout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
+  $('#userMenuToggle').onclick=()=>{$('#ph-account-menu').hidden=!$('#ph-account-menu').hidden};
+  $('#mobileLogout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
 }
 function heading(title,over='KŌMØ PULSE'){ $('#pageTitle').textContent=title;$('#pageOverline').textContent=over }
 function progressStrip(){
@@ -128,20 +126,59 @@ function progressStrip(){
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
 function patientHome(){
-  heading('Bonjour '+esc(firstName()),'AUJOURD’HUI');
-  const action=nextAction(),next=futureAppointments()[0],sc=Number(score()?.overall_score),b=band(sc);
-  $('#view').innerHTML=`<section class="welcome-card"><div><span class="overline light">VOTRE PROCHAINE ÉTAPE</span><h2>${esc(action.title)}</h2><p>${esc(action.text)}</p><button class="button light" onclick="location.hash='${action.route}'">${esc(action.label)} →</button></div>${releasedScore()?`<div class="score-orb"><small>Motion Score</small><strong>${Math.round(sc)}</strong><span>${b.label}</span></div>`:`<div class="welcome-mark">K</div>`}</section>${progressStrip()}<section class="two-col"><article class="soft-card"><span class="overline">PROCHAIN RENDEZ-VOUS</span>${next?`<h3>${friendlyAppointmentType(next.appointment_type)}</h3><p class="big-date">${fmt(next.scheduled_start)}</p><p>${friendlyMode(next.location_mode)} · ${statusLabel(next.status)}</p><button class="button secondary" onclick="location.hash='appointments'">Voir les détails</button>`:`<h3>Aucun rendez-vous à venir</h3><p>Votre prochain rendez-vous apparaîtra ici dès qu’il sera programmé par l’équipe KŌMØ.</p><button class="button secondary" onclick="location.hash='appointments'">Mes rendez-vous</button>`}</article><article class="soft-card"><span class="overline">À RETENIR</span><h3>${releasedScore()?'Votre bilan est disponible':'Pulse vous guide étape par étape'}</h3><p>${releasedScore()?'Vos résultats sont présentés simplement : vos points forts, votre priorité et votre plan de progression.':'Vous n’avez rien à interpréter seul. Chaque étape se débloque au bon moment et les données sensibles sont revues avant publication.'}</p>${visibleGates().length?`<div class="human-alert">Un élément de votre bilan est actuellement relu par l’équipe. Cela ne signifie pas nécessairement qu’il existe un problème.</div>`:''}</article></section>`;
+  heading('Bienvenue sur KŌMØ Pulse','VOTRE ESPACE PERSONNEL');
+  const ap=futureAppointments()[0],action=nextAction();
+  const n=qdone(),pct=Math.round(100*Math.min(6,n)/6),sc=releasedScore()?Math.round(Number(score().overall_score)):null;
+  const last=S.trajectory?.[0],nextCheck=S.checkpoints?.find(x=>new Date(x.scheduled_at||0).getTime()>=Date.now()&&x.status!=='cancelled');
+  $('#view').innerHTML=`
+   <section class="ph-hero">
+     <div class="ph-photo"><span class="ph-eyebrow">KŌMØ · LONGEVITY IN MOTION</span><h2>Votre santé.<br>Votre mouvement.<br><em>Votre trajectoire.</em></h2><p>Bonjour ${esc(firstName())}. Suivez votre bilan, vos résultats et ce qui compte aujourd’hui.</p></div>
+     <article class="ph-next"><span class="overline">VOTRE PROCHAIN RENDEZ-VOUS</span>${ap?`<h3>${esc(friendlyAppointmentType(ap.appointment_type))}</h3><strong class="ph-date">${fmt(ap.scheduled_start)}</strong><p>${new Date(ap.scheduled_start).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})} · ${esc(friendlyMode(ap.location_mode))}</p><span class="status-label">${esc(statusLabel(ap.status))}</span>`:`<h3>Votre prochain rendez-vous</h3><p>Aucune séance programmée pour le moment. Votre équipe vous accompagnera.</p>`}<button class="button primary" data-go="appointments">Mes rendez-vous →</button></article>
+   </section>
+   <section class="ph-intro"><div><span class="overline">AUJOURD’HUI</span><h2>Voici où vous en êtes.</h2><p>Un regard simple sur votre progression, sans données inventées.</p></div><button class="button secondary" data-go="questionnaires">Préparer mon bilan</button></section>
+   <section class="ph-card-grid">
+     <article class="ph-card"><span class="overline">01 · MOTION</span><h3>Mon Motion Score</h3><div class="ph-metric">${sc===null?'—':sc}<small>${sc===null?'En attente de validation':'/ 100 · publié'}</small></div><p>Vos mesures de mouvement et leur évolution dans le temps.</p><button class="text-button" data-go="results">Voir mes résultats →</button></article>
+     <article class="ph-card"><span class="overline">02 · TRAJECTOIRE</span><h3>Ma progression</h3><div class="ph-metric small">${nextCheck?'Prochaine étape':last?'Suivi disponible':'À construire'}</div><p>${nextCheck?`Prochain contrôle : ${fmt(nextCheck.scheduled_at)}`:last?`Dernier événement : ${fmt(last.event_date)}`:'Votre suivi commencera après votre premier bilan.'}</p><button class="text-button" data-go="plan">Ma trajectoire →</button></article>
+     <article class="ph-card"><span class="overline">03 · CONNECTED</span><h3>Mes données</h3><div class="ph-metric small">${S.measurements.length?'Motion connecté':'À connecter'}</div><p>Accédez à vos mesures réellement disponibles. Aucun chiffre simulé.</p><button class="text-button" data-go="connected">Voir mes données →</button></article>
+     <article class="ph-card"><span class="overline">04 · MY KŌMØ</span><h3>Mon espace</h3><div class="ph-metric small">${n}/6 modules</div><p>${pct}% du pré-bilan renseigné. Votre profil, vos questionnaires et votre plan au même endroit.</p><button class="text-button" data-go="mykomo">Ouvrir My KŌMØ →</button></article>
+   </section>
+   <section class="ph-bottom"><article class="ph-today"><span class="overline">VOTRE PROCHAINE ACTION</span><h3>${esc(action.title)}</h3><p>${esc(action.text)}</p><button class="button primary" data-go="${action.route}">${esc(action.label)} →</button></article><article class="ph-world"><span class="overline">KŌMØ WORLD</span><h3>Le mouvement, au-delà du bilan.</h3><p>Retrouvez l’univers KŌMØ et découvrez les expériences autour de la longévité locomotrice.</p><a href="https://komolongevity.com/" target="_blank" rel="noopener noreferrer">Découvrir KŌMØ →</a></article></section>
+  `;
+  document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>location.hash=b.dataset.go));
 }
 function baseline(){
-  heading('Mon bilan','VOTRE BASELINE KŌMØ');
-  const p=patientProgress();
-  const cards=[
-   ['01','Quelques questions','Santé, sommeil, énergie et mobilité','Elles nous donnent votre contexte avant les mesures.','questions'],
-   ['02','Prise de sang','Votre contexte biologique','Les résultats sont intégrés après réception et revue.','biology'],
-   ['03','Mesures de mouvement','Force, équilibre, mobilité et marche','Une séance guidée, non invasive, réalisée par l’équipe KŌMØ.','motion'],
-   ['04','Vos résultats','Une synthèse claire et personnelle','Votre score et votre plan apparaissent après validation.','results']
-  ];
-  $('#view').innerHTML=`<section class="intro"><h2>Un bilan complet, en quatre étapes simples.</h2><p>Vous n’avez pas besoin de comprendre les appareils ni les algorithmes. Pulse vous indique seulement ce qui est fait, ce qu’il reste à faire et pourquoi.</p></section><section class="journey">${cards.map(([n,title,sub,text,id],i)=>{const st=p.steps[i];return`<article class="journey-card ${st.done?'done':id===p.firstPending?'current':''}"><div class="journey-num">${st.done?'✓':n}</div><div><span class="status-label">${st.done?'Terminé':id===p.firstPending?'Prochaine étape':'À venir'}</span><h3>${title}</h3><strong>${sub}</strong><p>${text}</p>${id==='motion'&&!st.done?`<button class="button secondary" onclick="location.hash='appointments'">Voir mes rendez-vous</button>`:''}${id==='results'&&st.done?`<button class="button primary" onclick="location.hash='results'">Voir mes résultats</button>`:''}</div></article>`}).join('')}</section><article class="info-note"><strong>Ce que nous ne faisons pas</strong><p>Nous ne transformons pas chaque donnée en une note arbitraire. Les informations médicales ou biologiques qui nécessitent une revue restent séparées de votre Motion Score.</p></article>`;
+  heading('Mon bilan Motion','UN PARCOURS SIMPLE');
+  const n=qdone(),last=S.assessment;
+  $('#view').innerHTML=`<section class="intro"><h2>Comprendre votre mouvement. Préparer la suite.</h2><p>Trois étapes, un seul dossier. Vous n’avez pas à interpréter les données seul : l’équipe KŌMØ vérifie ce qui peut être publié.</p></section>
+    <section class="ph-three">
+      <article class="ph-card"><span class="overline">01 · AVANT LA CONSULTATION</span><h3>Mes questionnaires</h3><div class="ph-metric small">${n} / 6</div><p>Mobilité, situation, sommeil, bien-être, mode de vie et contexte personnel.</p><button class="button primary" data-go="questionnaires">${last?'Commencer / continuer':'Voir mon pré-bilan'} →</button></article>
+      <article class="ph-card"><span class="overline">02 · LORS DU RENDEZ-VOUS</span><h3>Mon bilan Motion</h3><div class="ph-metric small">${motionReady()?'Mesures reçues':'À réaliser'}</div><p>Force, fonction, équilibre, locomotion selon les mesures réellement effectuées.</p><button class="button secondary" data-go="appointments">Mes rendez-vous →</button></article>
+      <article class="ph-card"><span class="overline">03 · APRÈS LE BILAN</span><h3>Mes résultats</h3><div class="ph-metric small">${releasedScore()?'Publiés':'En attente'}</div><p>Vos résultats vérifiés et votre trajectoire, disponibles lorsqu’ils sont prêts.</p><button class="button secondary" data-go="results">Consulter →</button></article>
+    </section>
+    <article class="info-note"><strong>Votre confidentialité</strong><p>Chaque questionnaire est associé à votre dossier personnel et soumis aux droits d’accès de Pulse. Les signaux nécessitant une revue sont traités séparément du Motion Score.</p></article>`;
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
+}
+function connected(){
+  heading('Connected','VOS DONNÉES RELIÉES');
+  const m=S.measurements;
+  $('#view').innerHTML=`<section class="intro"><h2>Vos mesures, au même endroit.</h2><p>Nous affichons uniquement les données réellement présentes dans votre dossier. Les appareils et applications qui ne sont pas connectés ne sont jamais présentés comme actifs.</p></section>
+  <section class="ph-three">
+   <article class="ph-card"><span class="overline">KŌMØ MOTION</span><h3>Mesures fonctionnelles</h3><div class="ph-metric small">${m.length?m.length+' relevé(s)':'En attente'}</div><p>Mesures rattachées à votre bilan.</p><button class="button secondary" data-go="results">Mes résultats</button></article>
+   <article class="ph-card"><span class="overline">VALD</span><h3>Force & équilibre</h3><div class="ph-metric small">${m.length?'Vérifier les résultats':'Non relié'}</div><p>Les données VALD ne sont affichées qu’après import et vérification.</p></article>
+   <article class="ph-card"><span class="overline">AUTRES SOURCES</span><h3>Mes objets connectés</h3><div class="ph-metric small">Non connecté</div><p>La connexion de nouvelles sources n’est pas encore active dans cet espace.</p></article>
+  </section>`;document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
+}
+function mykomo(){
+  heading('My KŌMØ','MON ESPACE');
+  const p=S.patient||{},display=esc(patientName()||S.profile?.display_name||'Mon espace');
+  $('#view').innerHTML=`<section class="intro"><h2>Bonjour ${esc(firstName())}.</h2><p>Vos informations personnelles, votre bilan et vos prochains rendez-vous.</p></section>
+    <section class="ph-three">
+     <article class="ph-card"><span class="overline">MON PROFIL</span><h3>${display}</h3><p>${esc(S.user?.email||'')}<br>${p.birth_date?'Date de naissance enregistrée':'Profil à compléter auprès de votre équipe'}</p></article>
+     <article class="ph-card"><span class="overline">MON BILAN</span><h3>Préparer ma consultation</h3><p>${qdone()} questionnaires complétés · bilan ${S.assessment?'relié':'à préparer'}.</p><button class="button primary" data-go="baseline">Mon bilan →</button></article>
+     <article class="ph-card"><span class="overline">MA TRAJECTOIRE</span><h3>Mon plan</h3><p>Votre suivi après le bilan et les rendez-vous à venir.</p><button class="button secondary" data-go="plan">Mon plan →</button></article>
+    </section><section class="ph-account-footer"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener">Confidentialité</a><button class="button secondary" id="myLogout">Se déconnecter</button></section>`;
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
+  $('#myLogout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
 }
 function results(){
   heading('Mes résultats','COMPRENDRE VOTRE MOUVEMENT');
@@ -180,10 +217,10 @@ async function operatorStep(code,action){const payload={qc_status:action==='comp
 async function finalizeOperator(){if(!S.opSession)return toast('Aucune session active.');const r=await sb.rpc('finalize_pulse_operator_session_v1',{p_session_id:S.opSession.id});if(r.error)return toast(r.error.message);toast(r.data?.status==='completed'?'D0 finalisé.':'D0 transmis en revue.');await loadPro();operator()}
 
 function render(){
-  S.route=route();const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
+  S.route=route();const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)&&!(S.mode==='patient'&&['baseline','questionnaires','plan'].includes(S.route))){location.hash=allowed[0];return}
   shell();
   if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
-  else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
+  else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='questionnaires')questionnaires();else if(S.route==='results')results();else if(S.route==='connected')connected();else if(S.route==='mykomo')mykomo();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
 async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();if(!S.patient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
