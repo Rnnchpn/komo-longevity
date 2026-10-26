@@ -32,7 +32,8 @@ const section=`<section id="consultations" aria-label="Les deux consultations K�
 html=html.replaceAll(`href="${acuity}"`, 'href="#consultations"');
 const marker='<section class="bottom">';
 if(!html.includes(marker))throw new Error('Could not find public journey action section');
-html=html.replace(marker,section+'\n'+marker);
+const activation='<section id="pulse-activation" style="scroll-margin-top:110px;margin:27px 0;padding:clamp(25px,4vw,43px);border-radius:23px;background:#244c35;color:#fff"><span style="font-size:11px;letter-spacing:.16em;color:#c8e2cc;font-weight:700">APRÈS VOTRE RÉSERVATION</span><h2 style="margin:13px 0;font:500 clamp(26px,3.7vw,40px)/1.12 Manrope,sans-serif;letter-spacing:-.05em">Activez votre espace KŌMØ Pulse.</h2><p style="font-size:13px;line-height:1.8;max-width:750px;color:#e4efe4">Une fois votre rendez-vous confirmé, utilisez la même adresse e-mail que dans Acuity. Votre lien de connexion est personnel et seuls vos propres rendez-vous apparaîtront après vérification.</p><a href="https://pulse.komolongevity.com/#inscription" class="button light" style="margin-top:12px">Activer mon espace Pulse →</a><p style="margin-top:17px;font-size:11px;color:#c4dcc7">Votre bilan et vos résultats de santé nécessitent une activation distincte de leur espace sécurisé.</p></section>';
+html=html.replace(marker,section+'\n'+activation+'\n'+marker);
 html=html.replace('</head>',style+'</head>');
 await writeFile(path,html,'utf8');
 console.log('[komo-two-consultations] public journey offers Paris Centré and Cannes only');
