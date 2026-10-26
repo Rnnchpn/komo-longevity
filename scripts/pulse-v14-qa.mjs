@@ -5,6 +5,7 @@ const root=process.cwd();
 const html=await readFile(join(root,'site','pulse-v14','index.html'),'utf8');
 const app=await readFile(join(root,'site','pulse-v14','app.js'),'utf8');
 const css=await readFile(join(root,'site','pulse-v14','styles.css'),'utf8');
+const premium=await readFile(join(root,'site','pulse-v14','premium-motion.css'),'utf8');
 const vercel=JSON.parse(await readFile(join(root,'vercel.json'),'utf8'));
 const middleware=await readFile(join(root,'middleware.js'),'utf8');
 const rewrites=Array.isArray(vercel.rewrites)?vercel.rewrites:[];
@@ -28,6 +29,10 @@ const checks=[
  ['motion v1 only',app.includes("motion-v1.0")&&!/myodev|myocare/i.test(app)],
  ['responsive',css.includes('@media(max-width:700px)')&&css.includes('@media(max-width:1000px)')],
  ['reduced motion',css.includes('prefers-reduced-motion')],
+ ['premium stylesheet loaded',html.includes('./premium-motion.css')&&premium.includes('pm-photo-breathe')],
+ ['premium accessibility',premium.includes('prefers-reduced-motion')&&premium.includes(':focus-visible')],
+ ['icon navigation',app.includes('function navIcon(')&&app.includes('nav-glyph')],
+ ['progressive enhancements no extra JS dependency',(html.match(/<script/g)||[]).length===1],
  ['canonical root is V14',rootV14],
  ['canonical nested routes are V14',nestedV14],
  ['middleware points to V14',middleware.includes("[PULSE_HOST]: { prefix: '/pulse-v14'")]
