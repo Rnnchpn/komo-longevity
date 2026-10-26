@@ -18,7 +18,7 @@ const OP_STEPS=[
  ['qc_release','45–55','Contrôle qualité','Pulse']
 ];
 
-const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,selfPatient:null,patients:[],orgAppointments:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
+const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,selfPatient:null,previewMode:false,previewPatientId:null,patients:[],orgAppointments:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
 
 const $=s=>document.querySelector(s);
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -82,7 +82,7 @@ async function loadIdentity(){
   if(hasPro()){
     const mr=(await safe(sb.from('organization_members').select('*,organizations(*)').eq('user_id',S.user.id).eq('status','active'))).data||[];
     S.membership=mr[0]||null;S.org=S.membership?.organizations||null;
-    const saved=localStorage.getItem('komo_v14_mode');S.mode=saved==='patient'&&S.selfPatient?'patient':saved==='admin'&&S.role==='admin'?'admin':'pro';
+    const saved=localStorage.getItem('komo_v14_mode');S.mode=S.previewMode&&S.role==='admin'?'patient':saved==='patient'&&S.selfPatient?'patient':saved==='admin'&&S.role==='admin'?'admin':'pro';
   }else S.mode='patient';
   return true;
 }
@@ -110,18 +110,33 @@ async function loadPro(){
   const os=await safe(sb.from('pulse_operator_sessions').select('*').eq('patient_id',p?.id||'00000000-0000-0000-0000-000000000000').in('status',['draft','running','paused','review']).order('created_at',{ascending:false}).limit(1));
   S.schema.operator=!os.error;S.opSession=os.data?.[0]||null;S.opSteps=S.opSession?((await safe(sb.from('pulse_operator_steps').select('*').eq('operator_session_id',S.opSession.id).order('sequence_order',{ascending:true}))).data||[]):[];
 }
-async function loadAll(){if((S.mode==='pro'||S.mode==='admin')&&hasPro())await loadPro();else await loadPatientContext(S.selfPatient)}
+async function loadAll(){if(S.previewMode&&S.role==='admin'){await loadPro();const authorized=S.patients.find(p=>p.id===S.previewPatientId);if(!authorized){S.previewMode=false;S.previewPatientId=null;S.mode='admin';return}await loadPatientContext(authorized)}else if((S.mode==='pro'||S.mode==='admin')&&hasPro())await loadPro();else await loadPatientContext(S.selfPatient)}
 
+async function openPatientPreview(id){
+  if(S.role!=='admin'){toast('Aperçu réservé à l’administrateur.');return}
+  // Authorization remains entirely in the Supabase RLS; never accept arbitrary IDs.
+  const allowed=S.patients.find(p=>p.id===id);
+  if(!allowed){toast('Ce dossier n’est pas accessible à votre compte.');return}
+  S.previewMode=true;S.previewPatientId=allowed.id;S.mode='patient';Q.active=null;
+  await loadPatientContext(allowed);
+  location.hash='home';render();
+}
+async function closePatientPreview(){
+  S.previewMode=false;S.previewPatientId=null;Q.active=null;S.mode='admin';
+  localStorage.setItem('komo_v14_mode','admin');
+  await loadPro();location.hash='admin';render();
+}
 function navItems(){return S.mode==='admin'&&S.role==='admin'?ADMIN_NAV:S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
   const nav=navItems().map(([id,label],i)=>`<button data-route="${id}" class="nav-item ${S.route===id?'active':''}"><span class="nav-dot">${i+1}</span><span>${label}</span></button>`).join('');
-  const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'?'active':''}" ${!S.selfPatient?'disabled':''}>Patient</button><button data-mode="pro" class="${S.mode==='pro'?'active':''}">Équipe</button>${S.role==='admin'?`<button data-mode="admin" class="${S.mode==='admin'?'active':''}">Admin</button>`:''}</div>`:'';
-  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="ph-head-actions"><button type="button" class="text-button ph-menu-button" id="userMenuToggle" aria-label="Options du compte">Compte</button><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='admin'?'Administration KŌMØ':S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></div></header><div id="ph-account-menu" hidden>${mode}<button id="mobileLogout" class="button secondary">Se déconnecter</button></div><div id="view"></div></main></div>`;
+  const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'&&!S.previewMode?'active':''}" ${!S.selfPatient?'disabled':''}>Mon compte</button>${S.role==='admin'?`<button data-mode="preview" class="${S.previewMode?'active':''}" ${!S.patients.length?'disabled':''}>Aperçu patient</button>`:''}<button data-mode="pro" class="${S.mode==='pro'?'active':''}">Pro</button>${S.role==='admin'?`<button data-mode="admin" class="${S.mode==='admin'?'active':''}">Admin</button>`:''}</div>`:'';
+  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="ph-head-actions"><button type="button" class="text-button ph-menu-button" id="userMenuToggle" aria-label="Options du compte">Compte</button><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='admin'?'Administration KŌMØ':S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></div></header><div id="ph-account-menu" hidden>${mode}<button id="mobileLogout" class="button secondary">Se déconnecter</button></div><div id="view">${S.previewMode?'<div class="ph-preview-banner" role="status"><div><strong>Aperçu patient · Lecture seule</strong><span>Vous voyez ce que contient ce dossier autorisé. Vous restez connecté en tant qu’administrateur.</span></div><button class="button secondary" id="previewExit">Retour Admin</button></div>':''}</div></main></div>`;
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
-  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;S.mode=b.dataset.mode;localStorage.setItem('komo_v14_mode',S.mode);location.hash=S.mode==='pro'?'operator':S.mode==='admin'?'admin':'home';await refresh()});
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;if(b.dataset.mode==='preview'){const p=S.patients.find(x=>x.id===S.previewPatientId)||S.patients[0];if(p)await openPatientPreview(p.id);return}S.previewMode=false;S.previewPatientId=null;S.mode=b.dataset.mode;localStorage.setItem('komo_v14_mode',S.mode);location.hash=S.mode==='pro'?'operator':S.mode==='admin'?'admin':'home';await refresh()});
   $('#logout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
   $('#userMenuToggle').onclick=()=>{$('#ph-account-menu').hidden=!$('#ph-account-menu').hidden};
   $('#mobileLogout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
+  $('#previewExit')?.addEventListener('click',closePatientPreview);
 }
 function heading(title,over='KŌMØ PULSE'){ $('#pageTitle').textContent=title;$('#pageOverline').textContent=over }
 function progressStrip(){
@@ -176,7 +191,7 @@ function mykomo(){
   const p=S.patient||{},display=esc(patientName()||S.profile?.display_name||'Mon espace');
   $('#view').innerHTML=`<section class="intro"><h2>Bonjour ${esc(firstName())}.</h2><p>Vos informations personnelles, votre bilan et vos prochains rendez-vous.</p></section>
     <section class="ph-three">
-     <article class="ph-card"><span class="overline">MON PROFIL</span><h3>${display}</h3><p>${esc(S.user?.email||'')}<br>${p.birth_date?'Date de naissance enregistrée':'Profil à compléter auprès de votre équipe'}</p></article>
+     <article class="ph-card"><span class="overline">MON PROFIL</span><h3>${display}</h3><p>${esc(S.previewMode?(p.email||'Dossier autorisé'):(S.user?.email||''))}<br>${p.birth_date?'Date de naissance enregistrée':'Profil à compléter auprès de votre équipe'}</p></article>
      <article class="ph-card"><span class="overline">MON BILAN</span><h3>Préparer ma consultation</h3><p>${qdone()} questionnaires complétés · bilan ${S.assessment?'relié':'à préparer'}.</p><button class="button primary" data-go="baseline">Mon bilan →</button></article>
      <article class="ph-card"><span class="overline">MA TRAJECTOIRE</span><h3>Mon plan</h3><p>Votre suivi après le bilan et les rendez-vous à venir.</p><button class="button secondary" data-go="plan">Mon plan →</button></article>
     </section><section class="ph-account-footer"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener">Confidentialité</a><button class="button secondary" id="myLogout">Se déconnecter</button></section>`;
@@ -255,10 +270,11 @@ async function questionnaires(){
   $('#view').innerHTML=`<div class="ph-q-toolbar"><button class="text-button" id="qBack">← Tous les questionnaires</button><span>${Math.round(Number(sess?.completeness||0))}% complété</span></div>
   <section class="ph-q-sheet"><span class="overline">VOTRE PRÉ-BILAN</span><h2>${esc(cfg.display_label||reg.label)}</h2><p>${esc(cfg.intro||'')}</p>${safetyAlert?'<div class="human-alert">Une réponse de sécurité nécessite un avis professionnel avant tout test physique. En cas de symptôme aigu ou inquiétant, contactez les services médicaux appropriés.</div>':''}
   <form id="qLiveForm" class="ph-q-form">${order.map(item=>{const it=cfg.items?.[item]||{};return `<div class="ph-q-field" data-q-item="${esc(item)}" ${qShowItem(code,item,Q.answers)?'':'hidden'}><label class="ph-q-label">${esc(it.prompt||item)} ${it.required!==false?'<span aria-label="Obligatoire">*</span>':''}</label>${qControl(item,it,cfg,Q.answers[item])}</div>`}).join('')}
-    <div class="ph-q-actions"><button type="button" class="button secondary" id="qSaveDraft">Enregistrer et reprendre plus tard</button><button class="button primary" type="submit" id="qFinish">Enregistrer et terminer →</button></div>
+    ${S.previewMode?'<div class="ph-preview-form-note">Aperçu administrateur · Réponses en lecture seule. Aucune modification possible.</div>':'<div class="ph-q-actions"><button type="button" class="button secondary" id="qSaveDraft">Enregistrer et reprendre plus tard</button><button class="button primary" type="submit" id="qFinish">Enregistrer et terminer →</button></div>'}
     <div class="ph-q-feedback" id="qFeedback" role="status"></div></form></section>`;
   $('#qBack').onclick=()=>{Q.active=null;questionnaires()};
   const form=$('#qLiveForm');
+  if(S.previewMode){form.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=true);return}
   function current(){
     const answers={...Q.answers};
     for(const item of order){const v=qRaw(form,item,cfg.items?.[item]||{});if(v!==undefined)answers[item]=v}
@@ -270,6 +286,7 @@ async function questionnaires(){
   $('#qSaveDraft').onclick=()=>saveQuestionnaire(code,form,false);
 }
 async function saveQuestionnaire(code,form,complete){
+  if(S.previewMode){toast('Aperçu en lecture seule : enregistrement bloqué.');return}
   if(Q.busy)return;
   Q.busy=true;const feedback=$('#qFeedback');const buttons=form.querySelectorAll('button');buttons.forEach(x=>x.disabled=true);
   const reg=Q.registry.find(x=>x.code===code),cfg=reg.configuration||{},order=cfg.item_order||Object.keys(cfg.items||{}),now=new Date().toISOString();
@@ -332,16 +349,18 @@ function admin(){
   const upcoming=S.orgAppointments.filter(a=>new Date(a.scheduled_start||0)>=new Date()&&a.status!=='cancelled').length;
   $('#view').innerHTML=`<section class="intro"><h2>${esc(S.org?.name||'Organisation non associée')}</h2><p>Vue administrative limitée aux dossiers et rendez-vous auxquels votre compte est autorisé. Les droits sont vérifiés par la base de données.</p></section>
     <section class="ph-three">
-      <article class="ph-card"><span class="overline">DOSSIERS AUTORISÉS</span><h3>Patients</h3><div class="ph-metric">${S.patients.length}</div><p>Patients actifs accessibles à votre organisation.</p><button class="button primary" data-go="patients">Ouvrir les dossiers →</button></article>
+      <article class="ph-card"><span class="overline">DOSSIERS AUTORISÉS</span><h3>Patients</h3><div class="ph-metric">${S.patients.length}</div><p>Patients actifs accessibles à votre organisation.</p><button class="button primary" data-go="patients">Ouvrir les dossiers →</button><button type="button" class="button secondary" id="adminPreviewLaunch" ${!S.patients.length?'disabled':''}>Voir l’espace patient →</button></article>
       <article class="ph-card"><span class="overline">RENDEZ-VOUS</span><h3>À venir</h3><div class="ph-metric">${upcoming}</div><p>Rendez-vous liés à votre organisation.</p><button class="button secondary" data-go="appointments">Consulter l’agenda →</button></article>
       <article class="ph-card"><span class="overline">PRÉPARATION</span><h3>Contrôle des accès</h3><div class="ph-metric small">${S.org?'Organisation active':'À configurer'}</div><p>Les fonctions d’ajout d’utilisateurs et de modification des rôles restent désactivées tant qu’elles ne sont pas vérifiées.</p></article>
     </section>`;
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
+  $('#adminPreviewLaunch')?.addEventListener('click',()=>{if(S.patients[0])openPatientPreview(S.patients[0].id)});
 }
 function patients(){
-  heading('Patients','KŌMØ OPERATOR TEAM');
-  $('#view').innerHTML=`<section class="intro"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><p>Sélectionnez un patient pour ouvrir sa session de mesure.</p></section><section class="patient-list">${S.patients.map(p=>`<button data-patient="${p.id}"><span class="patient-avatar">${esc((p.first_name||p.last_name||'P').slice(0,1))}</span><span><strong>${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</strong><small>${esc(p.external_reference||'Patient KŌMØ')}</small></span><b>→</b></button>`).join('')}</section>`;
-  document.querySelectorAll('[data-patient]').forEach(r=>r.onclick=async()=>{localStorage.setItem('komo_v14_patient',r.dataset.patient);S.mode='pro';localStorage.setItem('komo_v14_mode','pro');await loadPro();location.hash='operator';render()});
+  heading('Patients','DOSSIERS AUTORISÉS');
+  $('#view').innerHTML=`<section class="intro"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><p>Choisissez un dossier pour réaliser le bilan ou, en tant qu’administrateur, voir le même accueil que le patient. L’aperçu est toujours en lecture seule.</p></section><section class="patient-list">${S.patients.length?S.patients.map(p=>`<article class="ph-patient-record"><span class="patient-avatar">${esc((p.first_name||p.last_name||'P').slice(0,1))}</span><div class="ph-patient-details"><strong>${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</strong><small>${esc(p.external_reference||'Patient KŌMØ')}</small></div><div class="ph-patient-actions"><button class="button secondary" data-patient="${p.id}">Ouvrir le bilan</button>${S.role==='admin'?`<button class="button primary" data-preview-patient="${p.id}">Aperçu patient</button>`:''}</div></article>`).join(''):'<article class="empty-state"><h3>Aucun dossier autorisé</h3><p>Un patient doit être associé à votre organisation et accessible selon les droits Supabase.</p></article>'}</section>`;
+  document.querySelectorAll('[data-patient]').forEach(r=>r.onclick=async()=>{localStorage.setItem('komo_v14_patient',r.dataset.patient);S.previewMode=false;S.previewPatientId=null;S.mode='pro';localStorage.setItem('komo_v14_mode','pro');await loadPro();location.hash='operator';render()});
+  document.querySelectorAll('[data-preview-patient]').forEach(r=>r.onclick=()=>openPatientPreview(r.dataset.previewPatient));
 }
 function operator(){
   heading('Session D0','KŌMØ OPERATOR TEAM');
@@ -356,9 +375,11 @@ async function finalizeOperator(){if(!S.opSession)return toast('Aucune session a
 function render(){
   S.route=route();const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)&&!(S.mode==='patient'&&['baseline','questionnaires','plan'].includes(S.route))){location.hash=allowed[0];return}
   shell();
+  if(S.previewMode){const v=$('#view');v.innerHTML='<div class="ph-preview-banner" role="status"><div><strong>Aperçu patient · Lecture seule</strong><span>Vous êtes connecté en tant qu’administrateur. Les modifications sont désactivées.</span></div><button class="button secondary" id="previewExit">Retour Admin</button></div>';}
   if(S.mode==='admin'&&S.role==='admin'){if(S.route==='admin')admin();else if(S.route==='patients')patients();else appointments()}
   else if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
   else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='questionnaires')questionnaires();else if(S.route==='results')results();else if(S.route==='connected')connected();else if(S.route==='mykomo')mykomo();else if(S.route==='plan')plan();else appointments()}
+  if(S.previewMode){const v=$('#view');v.insertAdjacentHTML('afterbegin',`<div class="ph-preview-banner" role="status"><div><strong>Aperçu patient · Lecture seule</strong><span>Compte administrateur · ${esc(patientName())}. Aucun changement dans son dossier.</span></div><button class="button secondary" id="previewExit">Retour Admin</button></div>`);$('#previewExit').onclick=closePatientPreview}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{if(!await loadIdentity())return authView();await loadAll();render()}catch(e){console.error('[pulse:refresh]',e);toast('Actualisation indisponible. Réessayez.')}finally{S.loading=false}}
 async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();if(!S.patient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
