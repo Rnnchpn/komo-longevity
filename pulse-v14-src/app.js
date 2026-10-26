@@ -6,6 +6,7 @@ const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoR
 
 const PATIENT_NAV=[['home','Accueil'],['results','Résultats'],['connected','Connected'],['appointments','Rendez-vous'],['mykomo','My KŌMØ']];
 const PRO_NAV=[['operator','Bilan Motion'],['patients','Patients'],['appointments','Agenda']];
+const ADMIN_NAV=[['admin','Tableau de bord'],['patients','Patients'],['appointments','Agenda']];
 const OP_STEPS=[
  ['preflight','00–05','Sécurité & standardisation','Operator'],
  ['readiness','05–10','Préparation du bilan','Pulse'],
@@ -17,7 +18,7 @@ const OP_STEPS=[
  ['qc_release','45–55','Contrôle qualité','Pulse']
 ];
 
-const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
+const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,selfPatient:null,patients:[],orgAppointments:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
 
 const $=s=>document.querySelector(s);
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -27,7 +28,7 @@ const safe=async q=>{try{const r=await q;return r.error?{data:null,error:r.error
 const toast=m=>{const e=$('#toast');if(!e)return;e.textContent=m;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,3300)};
 const hasPro=()=>['professional','admin'].includes(S.role);
 const patientName=()=>S.patient?([S.patient.preferred_name||S.patient.first_name,S.patient.last_name].filter(Boolean).join(' ')||S.profile?.display_name||''):(S.profile?.display_name||'');
-const firstName=()=>patientName().split(' ')[0]||'Bonjour';
+const firstName=()=>patientName().split(' ')[0]||'Vous';
 const route=()=>location.hash.replace(/^#/,'')||((hasPro()&&S.mode==='pro')?'operator':'home');
 const score=()=>S.scores[0]||null;
 const subs=()=>score()?.subscores||{};
@@ -76,11 +77,12 @@ async function loadIdentity(){
   const u=await sb.auth.getUser();S.user=u.data.user||null;if(!S.user)return false;
   S.profile=(await safe(sb.from('profiles').select('*').eq('id',S.user.id).maybeSingle())).data||{};
   const role=(await safe(sb.from('account_roles').select('role').eq('user_id',S.user.id).maybeSingle())).data;S.role=role?.role||'member';
-  S.patient=(await safe(sb.from('patients').select('*').eq('patient_user_id',S.user.id).maybeSingle())).data||null;
+  S.selfPatient=(await safe(sb.from('patients').select('*').eq('patient_user_id',S.user.id).maybeSingle())).data||null;
+  S.patient=S.selfPatient;
   if(hasPro()){
     const mr=(await safe(sb.from('organization_members').select('*,organizations(*)').eq('user_id',S.user.id).eq('status','active'))).data||[];
     S.membership=mr[0]||null;S.org=S.membership?.organizations||null;
-    const saved=localStorage.getItem('komo_v14_mode');S.mode=saved==='patient'&&S.patient?'patient':'pro';
+    const saved=localStorage.getItem('komo_v14_mode');S.mode=saved==='patient'&&S.selfPatient?'patient':saved==='admin'&&S.role==='admin'?'admin':'pro';
   }else S.mode='patient';
   return true;
 }
@@ -100,22 +102,23 @@ async function loadPatientContext(patient){
   const cr=await safe(sb.from('pulse_checkpoints').select('*').eq('patient_id',patient.id).order('scheduled_at',{ascending:true}).limit(20));S.checkpoints=cr.data||[];
 }
 async function loadPro(){
-  if(!S.org)return;
+  if(!S.org){S.patients=[];S.orgAppointments=[];return;}
   S.patients=(await safe(sb.from('patients').select('*').eq('organization_id',S.org.id).eq('status','active').order('last_name',{ascending:true}))).data||[];
+  S.orgAppointments=(await safe(sb.from('organization_appointments').select('id,patient_id,appointment_type,scheduled_start,scheduled_end,status,location_mode').eq('organization_id',S.org.id).order('scheduled_start',{ascending:false}).limit(100))).data||[];
   const saved=localStorage.getItem('komo_v14_patient');const p=S.patients.find(x=>x.id===saved)||S.patients[0]||null;if(p)localStorage.setItem('komo_v14_patient',p.id);
   await loadPatientContext(p);
   const os=await safe(sb.from('pulse_operator_sessions').select('*').eq('patient_id',p?.id||'00000000-0000-0000-0000-000000000000').in('status',['draft','running','paused','review']).order('created_at',{ascending:false}).limit(1));
   S.schema.operator=!os.error;S.opSession=os.data?.[0]||null;S.opSteps=S.opSession?((await safe(sb.from('pulse_operator_steps').select('*').eq('operator_session_id',S.opSession.id).order('sequence_order',{ascending:true}))).data||[]):[];
 }
-async function loadAll(){if(S.mode==='pro'&&hasPro())await loadPro();else await loadPatientContext(S.patient)}
+async function loadAll(){if((S.mode==='pro'||S.mode==='admin')&&hasPro())await loadPro();else await loadPatientContext(S.selfPatient)}
 
-function navItems(){return S.mode==='pro'?PRO_NAV:PATIENT_NAV}
+function navItems(){return S.mode==='admin'&&S.role==='admin'?ADMIN_NAV:S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
   const nav=navItems().map(([id,label],i)=>`<button data-route="${id}" class="nav-item ${S.route===id?'active':''}"><span class="nav-dot">${i+1}</span><span>${label}</span></button>`).join('');
-  const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'?'active':''}" ${!S.patient?'disabled':''}>Patient</button><button data-mode="pro" class="${S.mode==='pro'?'active':''}">Équipe</button></div>`:'';
-  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="ph-head-actions"><button type="button" class="text-button ph-menu-button" id="userMenuToggle" aria-label="Options du compte">Compte</button><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></div></header><div id="ph-account-menu" hidden><button id="mobileLogout" class="button secondary">Se déconnecter</button></div><div id="view"></div></main></div>`;
+  const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'?'active':''}" ${!S.selfPatient?'disabled':''}>Patient</button><button data-mode="pro" class="${S.mode==='pro'?'active':''}">Équipe</button>${S.role==='admin'?`<button data-mode="admin" class="${S.mode==='admin'?'active':''}">Admin</button>`:''}</div>`:'';
+  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="ph-head-actions"><button type="button" class="text-button ph-menu-button" id="userMenuToggle" aria-label="Options du compte">Compte</button><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></div></header><div id="ph-account-menu" hidden>${mode}<button id="mobileLogout" class="button secondary">Se déconnecter</button></div><div id="view"></div></main></div>`;
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
-  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;S.mode=b.dataset.mode;localStorage.setItem('komo_v14_mode',S.mode);location.hash=S.mode==='pro'?'operator':'home';await refresh()});
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;S.mode=b.dataset.mode;localStorage.setItem('komo_v14_mode',S.mode);location.hash=S.mode==='pro'?'operator':S.mode==='admin'?'admin':'home';await refresh()});
   $('#logout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
   $('#userMenuToggle').onclick=()=>{$('#ph-account-menu').hidden=!$('#ph-account-menu').hidden};
   $('#mobileLogout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
@@ -322,10 +325,21 @@ function appointments(){
   const rows=[...S.appointments].sort((a,b)=>new Date(a.scheduled_start||0)-new Date(b.scheduled_start||0));
   $('#view').innerHTML=`<section class="intro"><h2>${S.mode==='pro'?'Agenda patient':'Retrouvez toutes vos prochaines étapes.'}</h2><p>${S.mode==='pro'?'Les rendez-vous du patient sélectionné.':'Les rendez-vous confirmés par votre équipe apparaissent ici avec leur date et leur format.'}</p></section><section class="appointment-list">${rows.length?rows.map(a=>`<article class="appointment-card ${new Date(a.scheduled_start||0)>=new Date()?'upcoming':'past'}"><div class="date-box"><strong>${fmtShort(a.scheduled_start)}</strong><span>${new Date(a.scheduled_start||0).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span></div><div><span class="status-label">${statusLabel(a.status)}</span><h3>${friendlyAppointmentType(a.appointment_type)}</h3><p>${friendlyMode(a.location_mode)}</p></div></article>`).join(''):`<article class="empty-state"><h3>Aucun rendez-vous programmé</h3><p>Dès qu’un rendez-vous est confirmé, il apparaîtra automatiquement ici.</p><a class="button secondary" href="mailto:contact@komolongevity.com">Contacter l’équipe KŌMØ</a></article>`}</section>`;
 }
+function admin(){
+  heading('Administration KŌMØ','ESPACE ADMINISTRATEUR');
+  const upcoming=S.orgAppointments.filter(a=>new Date(a.scheduled_start||0)>=new Date()&&a.status!=='cancelled').length;
+  $('#view').innerHTML=`<section class="intro"><h2>${esc(S.org?.name||'Organisation non associée')}</h2><p>Vue administrative limitée aux dossiers et rendez-vous auxquels votre compte est autorisé. Les droits sont vérifiés par la base de données.</p></section>
+    <section class="ph-three">
+      <article class="ph-card"><span class="overline">DOSSIERS AUTORISÉS</span><h3>Patients</h3><div class="ph-metric">${S.patients.length}</div><p>Patients actifs accessibles à votre organisation.</p><button class="button primary" data-go="patients">Ouvrir les dossiers →</button></article>
+      <article class="ph-card"><span class="overline">RENDEZ-VOUS</span><h3>À venir</h3><div class="ph-metric">${upcoming}</div><p>Rendez-vous liés à votre organisation.</p><button class="button secondary" data-go="appointments">Consulter l’agenda →</button></article>
+      <article class="ph-card"><span class="overline">PRÉPARATION</span><h3>Contrôle des accès</h3><div class="ph-metric small">${S.org?'Organisation active':'À configurer'}</div><p>Les fonctions d’ajout d’utilisateurs et de modification des rôles restent désactivées tant qu’elles ne sont pas vérifiées.</p></article>
+    </section>`;
+  document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
+}
 function patients(){
   heading('Patients','KŌMØ OPERATOR TEAM');
   $('#view').innerHTML=`<section class="intro"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><p>Sélectionnez un patient pour ouvrir sa session de mesure.</p></section><section class="patient-list">${S.patients.map(p=>`<button data-patient="${p.id}"><span class="patient-avatar">${esc((p.first_name||p.last_name||'P').slice(0,1))}</span><span><strong>${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</strong><small>${esc(p.external_reference||'Patient KŌMØ')}</small></span><b>→</b></button>`).join('')}</section>`;
-  document.querySelectorAll('[data-patient]').forEach(r=>r.onclick=async()=>{localStorage.setItem('komo_v14_patient',r.dataset.patient);await loadPro();location.hash='operator';render()});
+  document.querySelectorAll('[data-patient]').forEach(r=>r.onclick=async()=>{localStorage.setItem('komo_v14_patient',r.dataset.patient);S.mode='pro';localStorage.setItem('komo_v14_mode','pro');await loadPro();location.hash='operator';render()});
 }
 function operator(){
   heading('Session D0','KŌMØ OPERATOR TEAM');
@@ -340,10 +354,11 @@ async function finalizeOperator(){if(!S.opSession)return toast('Aucune session a
 function render(){
   S.route=route();const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)&&!(S.mode==='patient'&&['baseline','questionnaires','plan'].includes(S.route))){location.hash=allowed[0];return}
   shell();
-  if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
+  if(S.mode==='admin'&&S.role==='admin'){if(S.route==='admin')admin();else if(S.route==='patients')patients();else appointments()}
+  else if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
   else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='questionnaires')questionnaires();else if(S.route==='results')results();else if(S.route==='connected')connected();else if(S.route==='mykomo')mykomo();else if(S.route==='plan')plan();else appointments()}
 }
-async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
+async function refresh(){if(S.loading)return;S.loading=true;try{if(!await loadIdentity())return authView();await loadAll();render()}catch(e){console.error('[pulse:refresh]',e);toast('Actualisation indisponible. Réessayez.')}finally{S.loading=false}}
 async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();if(!S.patient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
 window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
 sb.auth.onAuthStateChange((_e,s)=>{if(!s)authView()});
