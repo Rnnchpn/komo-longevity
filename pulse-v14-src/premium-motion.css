@@ -151,3 +151,59 @@ button,a{-webkit-tap-highlight-color:transparent}
  .ph-photo::after{background:rgba(8,29,18,.78)}
  .button.primary{background:#08391b;border-color:#08391b}
 }
+
+
+/* Consultation-first KŌMØ: exactly two public choices, Paris Centré & Cannes. */
+.ph-next-note{display:block;margin-top:12px;font:600 11px/1.5 "DM Sans",sans-serif;color:var(--pm-muted)}
+.ph-centers-shortcut{display:flex;align-items:center;gap:10px;padding:15px 21px;border:1px solid #dfebe1;border-radius:19px;background:#fdfdf9;margin:16px 0 10px;flex-wrap:wrap;box-shadow:0 9px 30px rgba(36,70,42,.034)}
+.ph-centers-shortcut>span{font:800 10px/1.4 "DM Sans",sans-serif;color:#738776;letter-spacing:.13em;margin-right:auto}
+.ph-centers-shortcut button{border:1px solid #d6e3d8;border-radius:999px;background:#f0f5ee;color:#22533a;padding:9px 15px;font:700 12px "DM Sans",sans-serif;transition:transform .3s var(--pm-ease),background .2s}
+.ph-centers-shortcut button b{font-size:15px;margin-left:12px;font-weight:500}
+.ph-centers-shortcut button:hover{transform:translateY(-2px);background:#dcebdd}
+.ph-centers-heading{padding:8px 1px 23px;max-width:760px}
+.ph-centers-heading h2{font:550 clamp(38px,4.8vw,64px)/1.04 Manrope,sans-serif;letter-spacing:-.067em;margin:11px 0 20px}
+.ph-centers-heading h2 em{font-family:Georgia,serif;font-style:italic;color:#456c4d;font-weight:400}
+.ph-centers-heading p{font-size:14px;line-height:1.8;max-width:650px;color:var(--pm-muted)}
+.ph-center-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:19px;margin:10px 0 36px}
+.ph-center-choice{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:235px 1fr;position:relative;isolation:isolate;background:#fffefa;border:1px solid #dfe7de;border-radius:28px;overflow:hidden;box-shadow:0 15px 38px rgba(28,57,36,.05);transition:transform .48s var(--pm-ease),box-shadow .4s var(--pm-ease),border-color .4s ease}
+.ph-center-choice:hover{transform:translateY(-7px);box-shadow:0 29px 66px rgba(32,62,39,.13);border-color:#b9cdbb}
+.ph-center-number{position:absolute;z-index:3;top:19px;right:22px;display:inline-flex;align-items:center;justify-content:center;min-width:63px;padding:8px 9px;border:1px solid rgba(255,255,255,.48);background:rgba(13,37,23,.4);border-radius:100px;backdrop-filter:blur(12px);color:#fff;font:700 11px "DM Sans",sans-serif;letter-spacing:.09em}
+.ph-center-art{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(130deg,#1f4a33,#79957b);padding:29px;display:flex;align-items:flex-end}
+.ph-center-art:before{position:absolute;inset:-5%;z-index:-2;content:"";background:url('./assets/hero-mediterranean-motion-v1.webp') center/cover no-repeat;transition:transform 1.15s var(--pm-slow);transform:scale(1.01)}
+.ph-center-paris .ph-center-art:before{filter:saturate(.85) contrast(1.02)}
+.ph-center-cannes .ph-center-art:before{background-position:center 65%;filter:saturate(1.1) sepia(.16)}
+.ph-center-art:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(10,38,21,.63),transparent 80%)}
+.ph-center-choice:hover .ph-center-art:before{transform:scale(1.08)}
+.ph-center-art span{font:550 22px Manrope;letter-spacing:.21em;color:#fff}
+.ph-center-body{display:flex;flex-direction:column;align-items:flex-start;padding:clamp(24px,3vw,35px);min-height:255px}
+.ph-center-body h3{font:550 clamp(23px,2.5vw,33px)/1.12 Manrope;letter-spacing:-.045em;margin:5px 0 12px}
+.ph-center-body p{font-size:13px;color:var(--pm-muted);line-height:1.7;margin:0 0 16px}
+.ph-center-status{display:inline-flex;align-items:center;gap:7px;margin:0 0 24px;border-radius:100px;padding:7px 11px;background:#e9f0e9;color:#355c40;font:700 10px "DM Sans",sans-serif}
+.ph-center-status:before{content:"";width:6px;height:6px;border-radius:50%;background:#6c9874}
+.ph-center-cannes .ph-center-status{background:#f4efe5;color:#866a43}
+.ph-center-cannes .ph-center-status:before{background:#b09567}
+.ph-center-body .button{margin-top:auto;width:100%;min-height:51px;gap:11px;font-size:12px}
+.ph-appointments-existing{margin-top:30px}
+.ph-appointments-title{margin-bottom:15px;padding-top:20px;border-top:1px solid #dfe8df}
+.ph-appointments-title h3{font:550 27px Manrope;letter-spacing:-.045em;margin:4px 0}
+.ph-center-detail{width:100%}
+.ph-center-detail #backCenters{font-size:13px;margin:8px 0 23px}
+.ph-center-detail-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:22px;align-items:stretch}
+.ph-center-detail-photo{isolation:isolate;position:relative;overflow:hidden;min-height:490px;border-radius:30px;background:linear-gradient(120deg,#204c34,#72866e);padding:clamp(28px,4.2vw,50px);display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+.ph-center-detail-photo:before{content:"";position:absolute;z-index:-2;inset:-7%;background:url('./assets/hero-mediterranean-motion-v1.webp') center/cover no-repeat;animation:pm-photo-breathe 23s ease-in-out infinite alternate}
+.ph-center-detail-photo.is-cannes:before{background-position:center 64%}
+.ph-center-detail-photo:after{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(110deg,rgba(9,33,20,.61),rgba(9,33,20,.1)),linear-gradient(0deg,rgba(12,39,23,.6),transparent 64%)}
+.ph-center-detail-photo>span{font:700 11px "DM Sans",sans-serif;letter-spacing:.2em}
+.ph-center-detail-photo h2{font:500 clamp(37px,4vw,56px)/1.07 Manrope;letter-spacing:-.062em;margin:0}
+.ph-center-detail-copy{padding:clamp(22px,3vw,39px);border:1px solid #e3ebe1;border-radius:30px;background:#fefef9;display:flex;flex-direction:column;align-items:flex-start}
+.ph-center-detail-copy h2{font:550 clamp(32px,3.4vw,46px)/1.12 Manrope;letter-spacing:-.055em;margin:10px 0 18px}
+.ph-center-detail-copy>p{font-size:14px;line-height:1.8;color:var(--pm-muted)}
+.ph-center-detail-facts{width:100%;margin:18px 0 25px;border-top:1px solid #e3ebe1}
+.ph-center-detail-facts>div{display:grid;grid-template-columns:110px minmax(0,1fr);gap:13px;padding:15px 0;border-bottom:1px solid #e3ebe1;font-size:12px;line-height:1.55}
+.ph-center-detail-facts strong{color:#254832}
+.ph-center-detail-facts span{color:#617267}
+.ph-center-detail-copy>.button{min-height:53px;width:100%;font-size:12px}
+.ph-center-footnote{margin-top:15px!important;font-size:11px!important;line-height:1.7!important;color:#6c796f!important}
+@media(max-width:920px){.ph-center-detail-grid{grid-template-columns:1fr}.ph-center-detail-photo{min-height:330px}.ph-center-choices{gap:13px}}
+@media(max-width:650px){.ph-center-choices{grid-template-columns:1fr}.ph-center-choice{grid-template-rows:200px 1fr}.ph-center-body{min-height:220px;padding:23px}.ph-center-body h3{font-size:26px}.ph-centers-heading h2{font-size:39px}.ph-center-detail-grid{gap:13px}.ph-center-detail-photo{min-height:295px;padding:25px}.ph-center-detail-copy{padding:23px;border-radius:25px}.ph-center-detail-photo h2{font-size:36px}.ph-center-detail-facts>div{grid-template-columns:95px minmax(0,1fr)}}
+@media(prefers-reduced-motion:reduce){.ph-center-choice,.ph-center-art:before,.ph-centers-shortcut button{animation:none!important;transition:none!important}.ph-center-choice:hover,.ph-centers-shortcut button:hover{transform:none!important}}
