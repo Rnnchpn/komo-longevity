@@ -3,7 +3,7 @@ import {join} from 'node:path';
 const site=join(process.cwd(),'site');
 const BOOK='https://app.acuityscheduling.com/schedule.php?owner=40696577';
 const PULSE='https://pulse.komolongevity.com/';
-const content=\`<!doctype html>
+const content=`<!doctype html>
 <html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f4f1e9"><meta name="robots" content="index,follow">
 <title>Votre parcours KŌMØ Motion — rendez-vous, Pulse et suivi</title><meta name="description" content="Découvrez votre parcours KŌMØ Motion en cinq étapes : réserver, accéder à Pulse, préparer votre bilan, le réaliser et suivre vos résultats.">
@@ -42,11 +42,11 @@ footer{border-top:1px solid var(--line);padding:30px 24px 45px;max-width:1200px;
 <section class="bottom"><article><span class="label">JE DÉCOUVRE KŌMØ</span><h3>Je souhaite un bilan Motion.</h3><p>Un parcours sur rendez-vous, conçu pour mesurer et suivre votre mouvement.</p><a class="button" href="§{BOOK}" target="_blank" rel="noopener noreferrer">Réserver mon bilan →</a></article><article><span class="label">J’AI DÉJÀ UN COMPTE</span><h3>Je retrouve mon suivi.</h3><p>Accédez à vos questionnaires, rendez-vous enregistrés, résultats publiés et trajectoire.</p><a class="button" href="§{PULSE}">Ouvrir KŌMØ Pulse →</a></article></section>
 <p style="margin:28px 4px 0;color:#727d73;font-size:12px;line-height:1.7">Important : une réservation réalisée sur le planning externe peut nécessiter une validation et une liaison par l’équipe avant d’apparaître dans Pulse. L’espace Motion ne fournit pas de diagnostic médical automatisé.</p>
 </main><footer><span>© 2026 KŌMØ · Longevity in Motion</span><a href="mailto:contact@komolongevity.com">contact@komolongevity.com</a></footer>
-</body></html>\`.replaceAll('§{BOOK}',BOOK).replaceAll('§{PULSE}',PULSE);
+</body></html>`.replaceAll('§{BOOK}',BOOK).replaceAll('§{PULSE}',PULSE);
 await mkdir(join(site,'parcours'),{recursive:true});
 await writeFile(join(site,'parcours','index.html'),content,'utf8');
 
-const banner=\`<aside id="komo-pulse-journey-bridge" aria-label="Parcours Motion et Pulse" style="background:#e4ebe4;color:#213d2b;border-bottom:1px solid #cedbd0;padding:12px 20px;text-align:center;font:500 12px/1.6 'DM Sans',Arial,sans-serif"><strong style="margin-right:9px">Votre parcours KŌMØ Motion</strong><span>Réserver · Préparer dans Pulse · Mesurer · Suivre</span> <a href="/parcours/" style="display:inline-block;margin-left:16px;font-weight:700;text-decoration:underline;color:#244c34">Comprendre les étapes →</a> <a href="§{PULSE}" style="display:inline-block;margin-left:13px;font-weight:700;color:#244c34">Mon espace Pulse →</a></aside>\`.replace('§{PULSE}',PULSE);
+const banner=`<aside id="komo-pulse-journey-bridge" aria-label="Parcours Motion et Pulse" style="background:#e4ebe4;color:#213d2b;border-bottom:1px solid #cedbd0;padding:12px 20px;text-align:center;font:500 12px/1.6 'DM Sans',Arial,sans-serif"><strong style="margin-right:9px">Votre parcours KŌMØ Motion</strong><span>Réserver · Préparer dans Pulse · Mesurer · Suivre</span> <a href="/parcours/" style="display:inline-block;margin-left:16px;font-weight:700;text-decoration:underline;color:#244c34">Comprendre les étapes →</a> <a href="§{PULSE}" style="display:inline-block;margin-left:13px;font-weight:700;color:#244c34">Mon espace Pulse →</a></aside>`.replace('§{PULSE}',PULSE);
 for(const rel of ['index.html','pulse/index.html']){
  const path=join(site,rel);let html;
  try{html=await readFile(path,'utf8')}catch{continue}
@@ -57,7 +57,7 @@ for(const rel of ['index.html','pulse/index.html']){
    else html=html.replace(/<body\b[^>]*>/i,x=>x+banner);
  }
  // Clarify that an enrolled patient opens their actual account through Pulse.
- html=html.replace(/href=(["'])\/pulse\/connexion\/?\1/gi,\`href="$\{PULSE}"\`);
+ html=html.replace(/href=(["'])\/pulse\/connexion\/?\1/gi,'href="'+PULSE+'"');
  html=html.replace(/href=(["'])\/pulse\/inscription\/?\1/gi,'href="/parcours/"');
  await writeFile(path,html,'utf8');
 }
