@@ -260,7 +260,9 @@ const scripts = [
   'scripts/komo-pulse-journey-bridge-v1.mjs',
   'scripts/komo-pulse-premium-experience-v1.mjs',
   'scripts/komo-two-consultations-public-v1.mjs',
+  'scripts/komo-home-booking-first-v1.mjs',
   'scripts/komo-pulse-journey-qa-v1.mjs',
+  'scripts/komo-home-booking-first-qa-v1.mjs',
   'scripts/acuity-connection-qa-v1.mjs',
   'scripts/pulse-commercial-crm-qa-v1.mjs'
 ];
