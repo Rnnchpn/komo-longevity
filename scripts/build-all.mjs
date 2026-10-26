@@ -259,6 +259,7 @@ const scripts = [
   // Connect the KŌMØ public entrypoint to the authenticated patient experience.
   'scripts/komo-pulse-journey-bridge-v1.mjs',
   'scripts/komo-pulse-premium-experience-v1.mjs',
+  'scripts/komo-two-consultations-public-v1.mjs',
   'scripts/komo-pulse-journey-qa-v1.mjs'
 ];
 
