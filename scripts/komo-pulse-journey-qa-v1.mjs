@@ -18,6 +18,8 @@ const checks=[
  ['preview questionnaire readonly',pulse.includes("form.querySelectorAll('input,textarea,select,button').forEach(el=>el.disabled=true)")],
  ['honest sync',page.includes('nécessiter une validation et une liaison par l’équipe')],
  ['editorial motion design',page.includes('experience.css')&&journeyCss.includes('journey-photo')],
+ ['two public consultation cards',page.includes('Consultation Paris — Centré')&&page.includes('Consultation Cannes')&&page.includes('id="consultations"')],
+ ['Cannes request only',page.includes('Demander un rendez-vous à Cannes')&&page.includes('contact@komolongevity.com')],
  ['scroll state without blocking',page.includes('experience.js')&&journeyJs.includes('IntersectionObserver')],
  ['accessibility and contrast',journeyCss.includes('prefers-reduced-motion')&&journeyCss.includes(':focus-visible')]
 ];
