@@ -125,3 +125,14 @@
  .nav-dot{display:none}
  .page{padding-bottom:calc(116px + env(safe-area-inset-bottom))}
 }
+
+
+/* Administrator's read-only rendering of a patient-scoped screen. */
+.ph-preview-banner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 18px;margin:0 0 22px;border:1px solid #b8ccbb;border-radius:16px;background:#e5eee8;color:#183b2b}
+.ph-preview-banner strong{display:block;font:700 13px/1.5 Manrope,sans-serif}.ph-preview-banner span{display:block;font-size:11px;line-height:1.55;color:#395347}
+.ph-preview-banner .button{flex-shrink:0}.ph-preview-form-note{padding:18px;border-radius:12px;background:#f0f4ef;color:#456050;font-size:13px}
+.ph-patient-record{display:grid;grid-template-columns:45px minmax(0,1fr) auto;gap:14px;align-items:center;padding:15px 17px;border-radius:17px;background:var(--paper);border:1px solid var(--line)}
+.ph-patient-details{display:flex;flex-direction:column;gap:5px}.ph-patient-details strong{font:650 14px/1.2 Manrope}.ph-patient-details small{font-size:11px;color:var(--muted)}
+.ph-patient-actions{display:flex;align-items:center;gap:8px}.ph-patient-actions button{font-size:12px;padding:11px 14px}
+.mode-switch{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:4px}.mode-switch button{white-space:normal}
+@media(max-width:650px){.ph-preview-banner{flex-direction:column;align-items:stretch}.ph-preview-banner .button{align-self:flex-start}.ph-patient-record{grid-template-columns:42px minmax(0,1fr)}.ph-patient-actions{grid-column:1/-1;justify-content:flex-end}.ph-patient-actions button{flex:1}.ph-patient-record{padding:13px}}
