@@ -306,3 +306,39 @@ button,a{-webkit-tap-highlight-color:transparent}
 @media(max-width:790px){.cc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cc-table-head{display:none}.cc-record{grid-template-columns:1fr auto;row-gap:9px}.cc-record>.cc-name{grid-column:1/2}.cc-record>span:nth-child(2){grid-column:1/2}.cc-record>span:nth-child(3){grid-column:1/2}.cc-record>.cc-stage{grid-column:2/3;grid-row:1/3;align-self:start}.cc-head{align-items:start}}
 @media(max-width:640px){.cc-hero{flex-direction:column;align-items:stretch;padding:27px 23px}.cc-hero .button{width:100%}.cc-stats{gap:10px}.cc-stats>div{padding:19px}.cc-stats strong{font-size:29px}.cc-site-tabs{width:100%;justify-content:space-around}.cc-site-tabs button{padding:10px 12px;font-size:10px}.cc-search{width:100%}.cc-workspace{padding:17px}.cc-form-grid,.cc-profile-grid{grid-template-columns:1fr}.cc-form-actions button{flex:1}.cc-record{padding:15px 10px}.cc-form,.cc-profile{padding:19px}.cc-head h3{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.cc-record,.cc-hero,.cc-site-tabs button{transition:none!important}}
+
+
+/* Verified-booking registration and nonclinical patient appointment space */
+.ph-join-line{display:flex;flex-direction:column;align-items:flex-start;gap:8px;border-top:1px solid #e0e8df;margin-top:21px;padding-top:19px}
+.ph-join-line>span{font-size:12px;color:#63796c}
+.ph-join-line .text-button{padding:4px 0;font-size:13px;font-weight:750;color:#1d5636}
+.ph-signup-privacy{color:#6f7d71;font-size:11px;line-height:1.7}
+#pulseSignupResult{font-size:12px;line-height:1.65;color:#315d42;min-height:16px}
+.ph-booked-layout{min-height:100dvh;background:#f5f6f0;color:#183727;padding:0 clamp(18px,5vw,68px) 64px;font-family:"DM Sans",sans-serif}
+.ph-booked-nav{max-width:1250px;margin:auto;display:flex;align-items:center;justify-content:space-between;padding:23px 0;border-bottom:1px solid #d9e5d9}
+.ph-booked-nav .brand{font:550 27px Manrope;letter-spacing:.15em;text-decoration:none;color:#183e28}
+.ph-booked-nav .brand small{font-size:9px;letter-spacing:.2em;margin-left:8px;color:#6b856e}
+.ph-booked-welcome,.ph-booked-panel,.ph-booked-bottom{max-width:1250px;margin:20px auto}
+.ph-booked-welcome{padding:clamp(30px,5vw,65px);background:linear-gradient(125deg,#143d29,#376e47);border-radius:28px;color:#fff;min-height:295px;display:flex;flex-direction:column;justify-content:center}
+.ph-booked-welcome .overline{color:#bdd4bc}
+.ph-booked-welcome h1{font:500 clamp(36px,5vw,64px)/1.08 Manrope;letter-spacing:-.07em;margin:16px 0}
+.ph-booked-welcome h1 em{font:italic 400 1em Georgia,serif;color:#d4e6d1}
+.ph-booked-welcome p{font-size:14px;line-height:1.7;max-width:620px;color:#e1ecdf}
+.ph-booked-panel{padding:clamp(23px,3vw,35px);border:1px solid #dfe8db;background:#fefef9;border-radius:23px}
+.ph-booked-panel h2{font:550 clamp(25px,3vw,39px)/1.15 Manrope;letter-spacing:-.05em;margin:10px 0 16px}
+.ph-booked-panel>p{font-size:13px;line-height:1.65;color:#617568;max-width:760px}
+.ph-booked-panel .button{margin:14px 14px 8px 0}
+.ph-booked-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:13px}
+.ph-booked-item{display:flex;align-items:start;justify-content:space-between;gap:15px;border-radius:17px;background:#edf3e9;border:1px solid #d6e5d6;padding:23px}
+.ph-booked-item .overline{color:#52765a}
+.ph-booked-item h3{font:600 20px/1.2 Manrope;margin:11px 0;color:#16412a}
+.ph-booked-item p{font-size:13px;color:#647868;line-height:1.65}
+.ph-booked-item .ph-center-status{margin:0;white-space:nowrap}
+.ph-booked-info{margin-top:15px}
+.ph-booked-bottom{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.ph-booked-bottom article{background:#e9efe5;border-radius:22px;padding:29px}
+.ph-booked-bottom .overline{color:#617f65}
+.ph-booked-bottom h3{font:600 23px/1.2 Manrope;letter-spacing:-.04em;margin:13px 0}
+.ph-booked-bottom p{font-size:13px;line-height:1.75;color:#596f60}
+@media(max-width:700px){.ph-booked-welcome{padding:28px;min-height:250px}.ph-booked-bottom{grid-template-columns:1fr}.ph-booked-nav .brand{font-size:22px}.ph-booked-nav .button{padding:10px 14px;font-size:11px}.ph-booked-item{flex-direction:column}}
+@media(prefers-reduced-motion:reduce){.ph-booked-layout *,#pulseSignup *{animation:none!important;transition:none!important}}
