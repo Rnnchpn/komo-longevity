@@ -102,3 +102,15 @@
  .nav-item{font-size:9px}
  .page-head{gap:8px}.ph-head-actions{gap:5px}
 }
+
+
+@media(min-width:901px){.mode-switch:has(button:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}}
+#ph-account-menu{align-items:center;gap:14px}
+#ph-account-menu .mode-switch{min-width:260px;grid-template-columns:repeat(3,minmax(0,1fr))}
+#ph-account-menu .mode-switch:not(:has(button:nth-child(3))){grid-template-columns:repeat(2,minmax(0,1fr))}
+#ph-account-menu .mode-switch button{font-size:11px}
+@media(max-width:650px){
+ #ph-account-menu:not([hidden]){flex-wrap:wrap;justify-content:space-between;margin:0 0 15px;padding:11px}
+ #ph-account-menu .mode-switch{width:100%;min-width:0}
+ .nav-item{min-height:54px}
+}
