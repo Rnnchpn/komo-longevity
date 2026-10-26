@@ -15,7 +15,7 @@ create table if not exists public.komo_commercial_contacts (
   booking_source text not null default 'manual' check (booking_source in ('manual','acuity')),
   acuity_appointment_id bigint unique,
   assigned_user_id uuid references auth.users(id) on delete set null,
-  created_by uuid not null default (select auth.uid()) references auth.users(id),
+  created_by uuid not null default auth.uid() references auth.users(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   check ((booking_source = 'acuity') or (acuity_appointment_id is null))
