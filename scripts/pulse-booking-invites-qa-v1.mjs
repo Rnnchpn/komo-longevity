@@ -18,7 +18,7 @@ const checks=[
  ['calendar allowlist',webhookSource.includes('ACUITY_PARIS_CALENDAR_ID')&&webhookSource.includes('ACUITY_CANNES_CALENDAR_ID')],
  ['backend requires service role',webhookSource.includes('SUPABASE_SERVICE_ROLE_KEY')],
  ['upsert idempotent',webhookSource.includes('on_conflict=acuity_appointment_id')],
- ['no invitation spam',webhookSource.includes('We do not send a second email')],
+ ['idempotent invitation',webhookSource.includes('reserve_komo_pulse_invitation')&&webhookSource.includes('complete_komo_pulse_invitation')],
  ['RPC verifies email and signup',sql.includes('email_confirmed_at is not null')&&sql.includes('is_anonymous=false')],
  ['deny group email crossover',sql.includes('if v_names>1')],
  ['clinical table unchanged',!sql.includes('alter table public.patients')],

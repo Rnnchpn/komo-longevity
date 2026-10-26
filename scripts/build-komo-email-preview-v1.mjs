@@ -1,0 +1,11 @@
+import {mkdir,writeFile} from 'node:fs/promises';
+import {join} from 'node:path';
+import {renderPulseInvitation} from '../lib/komo-pulse-invitation.mjs';
+const dir=join(process.cwd(),'site','pulse-invitation-preview');
+await mkdir(dir,{recursive:true});
+const mail=renderPulseInvitation({firstName:'Camille'});
+const html=mail.html.replace('<body ', '<body ');
+const banner='<div style="background:#ffffff;padding:13px;text-align:center;font:700 12px Arial,sans-serif;color:#2c5a3b;border-bottom:1px solid #e3eee5">PRÉVISUALISATION KŌMØ — DONNÉES FICTIVES — AUCUN E-MAIL ENVOYÉ</div>';
+const page=html.replace(/<body([^>]*)>/, (m,attrs)=>'<body'+attrs+'>'+banner);
+await writeFile(join(dir,'index.html'),page,'utf8');
+console.log('[komo-invitation-preview] static sample generated; email sender is always contact@komolongevity.com');

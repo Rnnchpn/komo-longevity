@@ -3,6 +3,7 @@
 // pinned PARIS calendar ID have been configured on the server.
 // It NEVER creates clinical patients or transfers intake/questionnaire data.
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import {sendPulseInvitation} from '../lib/komo-pulse-invitation.mjs';
 
 export const config={api:{bodyParser:false}};
 const ROOT='https://uqlolefsiktbznnymriy.supabase.co';
@@ -46,7 +47,7 @@ async function dbRequest(path,secret,method,body){
     headers:{
       apikey:secret,Authorization:'Bearer '+secret,
       'Content-Type':'application/json',
-      Prefer:'resolution=merge-duplicates,return=minimal'
+      Prefer:path.includes('/rpc/')?'return=representation':'resolution=merge-duplicates,return=minimal'
     },
     body:body?JSON.stringify(body):undefined,
     signal:AbortSignal.timeout(10000),
@@ -90,6 +91,13 @@ export default async function handler(req,res){
     const type=clean(a.type,150).toLowerCase();
     const service=type.includes('advanced')?'advanced':type.includes('suivi')||type.includes('follow')?'suivi':type.includes('initial')?'initial':null;
     const canceled=a.canceled===true||action==='canceled';
+    // Never silently migrate an existing booking into a different email owner.
+    const present=await dbRequest('/rest/v1/komo_commercial_contacts?select=email,pulse_invitation_sent_at&acuity_appointment_id=eq.'+bookingId+'&limit=1',dbSecret,'GET');
+    if(!present.ok)return safeReply(res,503,'database_unavailable');
+    const matches=await present.json();
+    const oldContact=Array.isArray(matches)?matches[0]:null;
+    if(oldContact?.email&&String(oldContact.email).toLowerCase()!==email)
+      return safeReply(res,202,'contact_change_requires_review');
     const row={
       center_code:center,first_name:first,last_name:last,email,
       phone:clean(a.phone,40)||null,journey_status:canceled?'annule':'confirme',
@@ -101,10 +109,36 @@ export default async function handler(req,res){
     // while browser-inserted rows require an admin creator under RLS.
     const write=await dbRequest('/rest/v1/komo_commercial_contacts?on_conflict=acuity_appointment_id',dbSecret,'POST',row);
     if(!write.ok){console.error('[acuity-webhook] database write failed:',write.status);return safeReply(res,503,'database_unavailable')}
-    // We do not send a second email here. The Acuity booking confirmation
-    // carries the Pulse registration link and proves which booking triggered it.
-    // The verified email owner must claim the record via the Supabase RPC.
-    return safeReply(res,200,canceled?'booking_canceled':'booking_recorded');
+    if(canceled)return safeReply(res,200,'booking_canceled');
+    if(!process.env.RESEND_API_KEY)
+      return safeReply(res,503,'email_sender_not_configured');
+
+    // Atomic 15-minute lease makes concurrent webhook retries send at most once.
+    const claim=await dbRequest('/rest/v1/rpc/reserve_komo_pulse_invitation',dbSecret,'POST',{p_booking_id:bookingId});
+    if(!claim.ok)return safeReply(res,503,'invitation_queue_unavailable');
+    const reserved=await claim.json().catch(()=>false);
+    if(reserved!==true)return safeReply(res,200,'booking_already_invited_or_pending');
+
+    let sent;
+    try{
+      sent=await sendPulseInvitation({email,firstName:first,bookingId,apiKey:process.env.RESEND_API_KEY});
+    }catch(err){
+      sent={ok:false,code:'email_provider_unavailable'};
+    }
+    if(!sent.ok){
+      // Release the lease only if delivery was explicitly rejected.
+      // On a transport timeout, leave the lease for a safe retry.
+      if(sent.code!=='email_provider_unavailable'){
+        await dbRequest('/rest/v1/rpc/complete_komo_pulse_invitation',dbSecret,'POST',
+          {p_booking_id:bookingId,p_message_id:null,p_sent:false}).catch(()=>{});
+      }
+      return safeReply(res,503,sent.code||'invitation_not_sent');
+    }
+    const done=await dbRequest('/rest/v1/rpc/complete_komo_pulse_invitation',dbSecret,'POST',
+      {p_booking_id:bookingId,p_message_id:sent.id,p_sent:true});
+    if(!done.ok||await done.json().catch(()=>false)!==true)
+      return safeReply(res,503,'invitation_state_unconfirmed');
+    return safeReply(res,200,'booking_recorded_invitation_sent');
   }catch(error){
     console.error('[acuity-webhook] upstream exception:',error?.name||'unknown');
     return safeReply(res,503,'temporarily_unavailable');
