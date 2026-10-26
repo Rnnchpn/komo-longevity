@@ -389,9 +389,36 @@ function admin(){
       <article class="ph-card"><span class="overline">DOSSIERS AUTORISÉS</span><h3>Patients</h3><div class="ph-metric">${S.patients.length}</div><p>Patients actifs accessibles à votre organisation.</p><button class="button primary" data-go="patients">Ouvrir les dossiers →</button><button type="button" class="button secondary" id="adminPreviewLaunch" ${!S.patients.length?'disabled':''}>Voir l’espace patient →</button></article>
       <article class="ph-card"><span class="overline">RENDEZ-VOUS</span><h3>À venir</h3><div class="ph-metric">${upcoming}</div><p>Rendez-vous liés à votre organisation.</p><button class="button secondary" data-go="appointments">Consulter l’agenda →</button></article>
       <article class="ph-card"><span class="overline">PRÉPARATION</span><h3>Contrôle des accès</h3><div class="ph-metric small">${S.org?'Organisation active':'À configurer'}</div><p>Les fonctions d’ajout d’utilisateurs et de modification des rôles restent désactivées tant qu’elles ne sont pas vérifiées.</p></article>
-    </section>`;
+    </section>
+    <section class="ph-acuity-status"><div><span class="overline">INTÉGRATION DES RENDEZ-VOUS</span><h3>Acuity Scheduling</h3><p>Vérifiez la connexion de votre compte et identifiez vos calendriers Paris et Cannes. Ce test ne lit aucun rendez-vous et ne modifie aucun dossier patient.</p></div><div class="ph-acuity-action"><button id="acuityConnectionTest" class="button primary" type="button">Tester ma connexion Acuity →</button><div id="acuityConnectionFeedback" role="status" aria-live="polite"></div></div></section>`;
   document.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>location.hash=b.dataset.go);
+  $('#acuityConnectionTest')?.addEventListener('click',testAcuityConnection);
   $('#adminPreviewLaunch')?.addEventListener('click',()=>{if(S.patients[0])openPatientPreview(S.patients[0].id)});
+}
+async function testAcuityConnection(){
+ const button=$('#acuityConnectionTest'),target=$('#acuityConnectionFeedback');
+ if(!button||!target||S.role!=='admin')return;
+ button.disabled=true;button.textContent='Vérification en cours…';target.textContent='';
+ try{
+   const session=(await sb.auth.getSession()).data.session;
+   if(!session?.access_token)throw new Error('Session Pulse expirée : reconnectez-vous.');
+   const r=await fetch('https://komolongevity.com/api/acuity-connection',{method:'GET',headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+   const result=await r.json().catch(()=>({status:'connection_error'}));
+   if(!r.ok||!result.ok){
+     const feedback={
+       not_configured:'Clé API ou identifiant Acuity manquant sur Vercel. Vérifiez les variables ACUITY_USER_ID et ACUITY_API_KEY, puis redéployez.',
+       acuity_auth_failed:'Identifiants Acuity refusés. Vérifiez votre User ID et votre API Key dans Vercel.',
+       admin_only:'Ce contrôle est réservé au compte administrateur.',
+       invalid_session:'Votre session Pulse a expiré, reconnectez-vous.',
+       acuity_unavailable:'Le service Acuity est momentanément indisponible.',
+       connection_error:'Impossible de vérifier le compte Acuity pour le moment.'
+     };
+     throw new Error(feedback[result.status]||'Connexion Acuity indisponible. Vérifiez la configuration.');
+   }
+   const calendars=Array.isArray(result.calendars)?result.calendars:[];
+   target.innerHTML='<strong>Connexion Acuity confirmée.</strong><p>'+calendars.length+' calendrier(s) accessible(s) :</p><ul>'+calendars.map(x=>'<li>'+esc(x.name)+' <small>(ID '+Number(x.id||0)+')</small></li>').join('')+'</ul><p class="ph-acuity-warning">La lecture des calendriers est active. La synchronisation des rendez-vous et leur rapprochement aux dossiers patients ne sont pas encore activés.</p>';
+ }catch(e){target.textContent=e?.message||'Vérification indisponible.'}
+ finally{button.disabled=false;button.textContent='Tester ma connexion Acuity →'}
 }
 function patients(){
   heading('Patients','DOSSIERS AUTORISÉS');
