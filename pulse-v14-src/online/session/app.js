@@ -117,6 +117,7 @@ function test(){
 function summary(){
  wrap(reportMarkup(state.answers,state.results,state.answers.safety==='yes'));
  bindReport(root,state.answers,state.results,{
+  checkpoint(){persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
   restart(){
    stopTimer();stopCamera(true);clearProgress(store);
