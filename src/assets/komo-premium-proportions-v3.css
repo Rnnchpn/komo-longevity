@@ -1,0 +1,344 @@
+/* KŌMØ · Proportions V3 · 29 October 2026
+   Reconciles historic 2026 hero !important rules with the contemporary storefront.
+   Deliberately conservative typography and consistent optical spacing. */
+:root {
+  --ko3-content: 1120px;
+  --ko3-gutter: clamp(18px,3.2vw,42px);
+  --ko3-cream:#f8f7f1;
+  --ko3-ink:#1c3024;
+  --ko3-muted:#647166;
+  --ko3-soft-shadow:0 15px 45px -23px rgba(29,46,32,.15);
+}
+.ko-premium-v2 .ko-shell{width:min(var(--ko3-content),calc(100% - 2*var(--ko3-gutter)))}
+.ko-premium-v2 .ko-ey{font-size:9px;letter-spacing:.16em;line-height:1.45}
+.ko-premium-v2 .ko-heading h2,.ko-premium-v2 .ko-extra h2{
+  font-size:clamp(35px,4.15vw,54px);
+  line-height:1.05;
+  letter-spacing:-.052em;
+  overflow-wrap:normal;
+  text-wrap:balance
+}
+.ko-premium-v2 .ko-heading>p,.ko-premium-v2 .ko-extra-head>p{font-size:13px;line-height:1.74}
+.ko-premium-v2 .ko-services{padding:clamp(64px,6.2vw,90px) 0 clamp(66px,6.8vw,98px)}
+.ko-premium-v2 .ko-heading{margin-bottom:31px;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(20px,4.5vw,65px);align-items:end}
+.ko-premium-v2 .ko-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch}
+.ko-premium-v2 .ko-card{
+  min-height:495px;
+  padding:27px 25px 24px;
+  border-radius:20px;
+  box-shadow:var(--ko3-soft-shadow)
+}
+.ko-premium-v2 .ko-card h3{
+  margin:24px 0 16px;
+  font-size:clamp(27px,2.35vw,33px);
+  line-height:1.08;
+  letter-spacing:-.045em;
+  text-wrap:balance
+}
+.ko-premium-v2 .ko-card-top{min-height:17px;font-size:9px;letter-spacing:.115em}
+.ko-premium-v2 .ko-cost,.ko-premium-v2 .ko-card .ko-cost{font-size:clamp(34px,3vw,40px);letter-spacing:-.05em;line-height:1.1}
+.ko-premium-v2 .ko-duration{font-size:10px;margin-top:5px}
+.ko-premium-v2 .ko-card>p{
+  font-size:12.3px;
+  line-height:1.69;
+  min-height:84px;
+  margin:17px 0 0;
+  overflow-wrap:break-word
+}
+.ko-premium-v2 .ko-card ul{margin:15px 0 20px}
+.ko-premium-v2 .ko-card li{padding:9px 0;font-size:11.3px;line-height:1.46;color:#556757}
+.ko-premium-v2 .ko-card li:before{padding-right:8px}
+.ko-premium-v2 .ko-action{
+  min-height:44px;
+  padding:10px 12px;
+  font-size:10.6px;
+  line-height:1.35;
+  box-shadow:0 10px 26px -17px rgba(24,39,26,.25);
+  overflow-wrap:anywhere
+}
+.ko-premium-v2 .ko-flow{margin-top:16px;padding:26px 29px;border-radius:19px}
+.ko-premium-v2 .ko-flow>strong{font-size:25px;line-height:1.12}
+.ko-premium-v2 .ko-flow-grid{margin:22px 0 18px;gap:13px}
+.ko-premium-v2 .ko-flow-grid span{padding-top:19px;font-size:11px}
+.ko-premium-v2 .ko-note{font-size:10.7px;line-height:1.7}
+.ko-premium-v2 .ko-prep{font-size:11px;line-height:1.6}
+.ko-premium-v2 .ko-extra{padding:clamp(59px,6.8vw,88px) 0}
+.ko-premium-v2 .ko-extra-grid{margin-top:30px;gap:14px}
+.ko-premium-v2 .ko-extra-item{min-height:203px;padding:24px 25px;border-radius:18px}
+.ko-premium-v2 .ko-extra-item h3{font-size:clamp(23px,2.3vw,29px);line-height:1.12;margin:13px 0 13px}
+.ko-premium-v2 .ko-extra-item p{font-size:11.6px;line-height:1.65}
+.ko-premium-v2 .ko-extra-item a{font-size:11.5px;margin-top:auto}
+
+/* Crucial: the existing photographic home hero uses !important declarations.
+   Keep the approved full-bleed image, but fix its excess height, title size,
+   copy-panel width, button dimensions and conflicting placement rules. */
+.ko-premium-v2 .komo-hero-20260930.kc-hero.kpv-hero.khe-hero{
+  position:relative!important;
+  display:block!important;
+  min-height:clamp(515px,48vw,626px)!important;
+  padding:0!important;
+  overflow:hidden!important;
+  background:#d6dbcf!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kpv-hero-grid{
+  position:absolute!important;
+  inset:0!important;
+  display:block!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  padding:0!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kpv-hero-media{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:0!important;
+  max-width:none!important;
+  aspect-ratio:auto!important;
+  margin:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  background:#cdd6c8!important;
+  animation:none!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kpv-hero-media:before{border:0;border-radius:0}
+.ko-premium-v2 .komo-hero-20260930 .kpv-hero-media:after{
+  display:block!important;
+  background:linear-gradient(90deg,rgba(13,25,16,.13) 0%,rgba(18,27,17,.025) 57%,rgba(18,27,17,0) 100%)
+}
+.ko-premium-v2 .komo-hero-20260930 .kpv-hero-media img{
+  position:absolute!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  min-height:100%!important;
+  max-height:none!important;
+  object-fit:cover!important;
+  object-position:center center!important;
+  filter:saturate(.9) contrast(1.02)!important;
+  transform:scale(1.023) translate3d(0,var(--ko-hero-shift,0px),0)!important;
+  transition:transform 1.25s cubic-bezier(.22,1,.36,1),filter .9s ease!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kpv-hero-media:hover img{
+  filter:saturate(.98) contrast(1.02)!important;
+  transform:scale(1.042) translate3d(0,var(--ko-hero-shift,0px),0)!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kc-hero-copy{
+  position:absolute!important;
+  z-index:2!important;
+  left:clamp(20px,4.2vw,58px)!important;
+  bottom:clamp(22px,3.7vw,46px)!important;
+  top:auto!important;
+  display:flex!important;
+  flex-direction:column!important;
+  justify-content:flex-start!important;
+  width:min(435px,calc(100% - 40px))!important;
+  max-width:435px!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:clamp(22px,2.4vw,30px)!important;
+  border-radius:19px!important;
+  border:1px solid rgba(255,255,255,.77)!important;
+  background:rgba(249,248,242,.94)!important;
+  box-shadow:0 24px 62px -26px rgba(14,24,17,.32)!important;
+  -webkit-backdrop-filter:blur(12px) saturate(125%)!important;
+  backdrop-filter:blur(12px) saturate(125%)!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kc-hero-copy>.ko-ey{margin:0 0 14px;gap:9px;font-size:8px;letter-spacing:.14em}
+.ko-premium-v2 .komo-hero-20260930 .kc-hero-copy>.ko-ey:before{width:22px}
+.ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-title{
+  max-width:100%!important;
+  font-size:clamp(41px,3.85vw,55px)!important;
+  line-height:1.01!important;
+  letter-spacing:-.062em!important;
+  text-wrap:balance;
+  overflow-wrap:normal
+}
+.ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-lead{
+  max-width:100%!important;
+  font-size:13px!important;
+  line-height:1.6!important;
+  margin-top:15px!important;
+  color:#58695d!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-btns{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:7px!important;
+  margin-top:19px!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-btn{
+  display:flex!important;
+  width:100%!important;
+  min-height:42px!important;
+  padding:9px 15px!important;
+  font-size:10.6px!important;
+  line-height:1.35!important;
+  white-space:normal!important;
+  text-align:center!important
+}
+.ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-btn--light{
+  min-height:29px!important;
+  padding:5px 9px!important;
+  border-color:transparent!important;
+  background:transparent!important;
+  box-shadow:none!important
+}
+.ko-premium-v2 .komo-hero-20260930:after{
+  bottom:16px;
+  left:auto;
+  right:clamp(18px,4vw,52px);
+  color:rgba(251,252,248,.86);
+  text-shadow:0 1px 8px rgba(14,24,14,.24);
+  letter-spacing:.15em
+}
+/* Proper header density: enough room for navigation without huge controls. */
+.ko-premium-header.kp-top{min-height:0}
+.ko-premium-header .kp-topin{max-width:1380px}
+.ko-premium-header .kp-brand{font-size:13px;letter-spacing:.16em}
+.ko-premium-header .kh4-nav{gap:1px;padding:4px}
+.ko-premium-header .kh4-nav>a,.ko-premium-header .kh4-access>summary{
+  min-height:33px;
+  padding:0 10px;
+  font-size:10px;
+  line-height:1;
+  color:#34483c!important
+}
+.ko-premium-header .kp-langs a{font-size:10px}
+@media(min-width:1100px){
+ .ko-premium-v2 .ko-card:nth-child(2)>p{min-height:84px}
+ .ko-premium-v2 .ko-card:nth-child(3)>p{min-height:84px}
+}
+@media(max-width:1100px) and (min-width:761px){
+ .ko-premium-v2 .komo-hero-20260930.kc-hero.kpv-hero.khe-hero{min-height:555px!important}
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy{width:min(410px,calc(100% - 40px))!important;max-width:410px!important}
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-title{font-size:clamp(42px,4.4vw,52px)!important}
+ .ko-premium-v2 .ko-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ko-premium-v2 .ko-card{min-height:0}
+ .ko-premium-v2 .ko-card--cannes{grid-column:1/-1}
+ .ko-premium-v2 .ko-card>p{min-height:0}
+ .ko-premium-v2 .ko-extra-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .ko-premium-v2 .ko-extra-item{padding:21px}
+ .ko-premium-v2 .ko-extra-item h3{font-size:24px}
+}
+@media(max-width:760px){
+ .ko-premium-v2 .komo-hero-20260930.kc-hero.kpv-hero.khe-hero{
+   display:block!important;
+   min-height:0!important;
+   padding:0!important;
+   background:#f8f7f1!important
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kpv-hero-grid{
+   position:relative!important;
+   inset:auto!important;
+   display:flex!important;
+   flex-direction:column!important;
+   min-height:0!important;
+   height:auto!important
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kpv-hero-media{
+   position:relative!important;
+   inset:auto!important;
+   order:0!important;
+   flex:none!important;
+   width:100%!important;
+   height:auto!important;
+   min-height:0!important;
+   aspect-ratio:16/9!important;
+   border-radius:0!important;
+   box-shadow:none!important
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kpv-hero-media:after{display:none!important}
+ .ko-premium-v2 .komo-hero-20260930 .kpv-hero-media img{
+   object-position:51% center!important;
+   filter:saturate(.93) contrast(1.01)!important;
+   transform:none!important;
+   transition:none!important
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kpv-hero-media:hover img{transform:none!important}
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy{
+   position:relative!important;
+   order:1!important;
+   top:auto!important;
+   left:auto!important;
+   bottom:auto!important;
+   right:auto!important;
+   width:100%!important;
+   max-width:100%!important;
+   padding:28px var(--ko3-gutter) 38px!important;
+   border:0!important;
+   border-radius:0!important;
+   background:#f8f7f1!important;
+   box-shadow:none!important;
+   -webkit-backdrop-filter:none!important;
+   backdrop-filter:none!important
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-title{
+   font-size:clamp(38px,7vw,49px)!important;
+   line-height:1.045!important;
+   max-width:550px!important
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-lead{
+   font-size:13px!important;
+   margin-top:15px!important;
+   max-width:520px!important
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-btns{
+   display:flex!important;
+   flex-direction:row!important;
+   flex-wrap:wrap!important;
+   align-items:stretch!important;
+   gap:8px!important;
+   max-width:560px
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-btn{
+   width:auto!important;
+   max-width:100%!important;
+   min-height:42px!important;
+   padding:8px 15px!important
+ }
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-btn--light{
+   min-height:42px!important;
+   padding:8px 12px!important;
+   border-color:rgba(33,53,39,.12)!important;
+   background:rgba(255,255,255,.56)!important
+ }
+ .ko-premium-v2 .komo-hero-20260930:after{display:none}
+ .ko-premium-v2 .ko-heading{grid-template-columns:1fr;gap:16px;margin-bottom:26px}
+ .ko-premium-v2 .ko-heading h2,.ko-premium-v2 .ko-extra h2{font-size:clamp(35px,6.4vw,46px)}
+ .ko-premium-v2 .ko-grid,.ko-premium-v2 .ko-extra-grid{grid-template-columns:1fr;gap:12px}
+ .ko-premium-v2 .ko-card,.ko-premium-v2 .ko-card--cannes{
+   grid-column:auto;
+   min-height:0;
+   padding:24px 22px;
+   border-radius:18px
+ }
+ .ko-premium-v2 .ko-card h3{font-size:29px;margin:20px 0 14px}
+ .ko-premium-v2 .ko-card .ko-cost{font-size:36px}
+ .ko-premium-v2 .ko-card>p{margin-top:16px;min-height:0;font-size:12.6px}
+ .ko-premium-v2 .ko-card ul{margin:13px 0 18px}
+ .ko-premium-v2 .ko-card li{font-size:11.8px;padding:8px 0}
+ .ko-premium-v2 .ko-action{min-height:43px}
+ .ko-premium-v2 .ko-extra-item{min-height:0;padding:22px}
+ .ko-premium-v2 .ko-extra-item h3{font-size:25px}
+ .ko-premium-v2 .ko-flow{padding:24px 21px}
+ .ko-premium-v2 .ko-flow-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px 13px}
+}
+@media(max-width:480px){
+ .ko-premium-v2 .komo-hero-20260930 .kpv-hero-media{aspect-ratio:16/9!important}
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy{padding-top:25px!important;padding-bottom:29px!important}
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-title{font-size:clamp(35px,9.3vw,42px)!important}
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-btns{display:grid!important;grid-template-columns:1fr!important;gap:6px!important}
+ .ko-premium-v2 .komo-hero-20260930 .kc-hero-copy .kt-btn{width:100%!important}
+ .ko-premium-v2 .ko-services{padding:62px 0 67px}
+ .ko-premium-v2 .ko-heading h2,.ko-premium-v2 .ko-extra h2{font-size:36px}
+ .ko-premium-v2 .ko-flow-grid{grid-template-columns:1fr;gap:13px}
+ .ko-premium-v2 .ko-flow-grid span{padding-top:13px}
+ .ko-premium-v2 .ko-extra{padding:60px 0}
+}
+@media(prefers-reduced-motion:reduce){
+ .ko-premium-v2 .komo-hero-20260930 .kpv-hero-media img,
+ .ko-premium-v2 .komo-hero-20260930 .kpv-hero-media:hover img{transform:none!important;transition:none!important}
+}
