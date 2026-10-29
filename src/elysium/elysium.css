@@ -537,3 +537,80 @@ body.aesthetic-maison{background:#201c1d;color:#f5ece7;overflow-x:hidden}
  .ae-sc-profile,.ae-sc-ring,.ae-sc-dot{animation:none!important}
  .ae-offer,.ae-offer-motif svg,.ae-offer-motif:before{transition:none!important}
 }
+
+/* Private medical service boutiques — product discovery, detailed pages and medical-boundary disclosure */
+.lv-concept .lv-metrics{align-items:center}
+.longevity-maison .lv-hero-description,.aesthetic-maison .ae-hero-description{max-width:590px}
+.longevity-maison .lv-method-note,.aesthetic-maison .ae-boundary{border-left:1px solid #cbb7986c;padding-left:17px}
+.longevity-maison .lv-offer-cta,.aesthetic-maison .ae-offer-cta{cursor:pointer;min-height:56px}
+.longevity-maison .lv-offer-cta:focus-visible,.aesthetic-maison .ae-offer-cta:focus-visible{outline:2px solid #b99b73;outline-offset:5px}
+.ely-service-detail[hidden]{display:none!important}
+body.ely-service-mode{background:#0e1714;color:#f5eee5}
+body.ely-service-mode.aesthetic-maison{background:#251e20}
+body.ely-service-mode main>section:not(#serviceDetail){display:none!important}
+body.ely-service-mode .footer{display:none}
+.ely-service-detail{display:block;max-width:1430px;min-height:calc(100svh - 77px);padding-top:clamp(33px,5vw,76px);padding-bottom:clamp(60px,6vw,108px);animation:ely-service-appear .55s cubic-bezier(.2,.72,.2,1)}
+@keyframes ely-service-appear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.ely-service-header{display:flex;align-items:center;justify-content:space-between;gap:15px;padding-bottom:23px;border-bottom:1px solid #baa78952}
+.ely-service-back{background:none;color:#e1d0b6;border:0;padding:8px 0;text-align:left;font:600 10px/1.5 var(--sans);letter-spacing:.16em;cursor:pointer}
+.ely-service-back:hover,.ely-service-back:focus-visible{color:#fff}
+.ely-service-eyebrow{font:600 9px/1.4 var(--sans);letter-spacing:.2em;color:#c9af8f}
+.ely-service-layout{display:grid;grid-template-columns:minmax(0,1.16fr) minmax(300px,.72fr);gap:clamp(30px,7vw,100px);margin:66px auto 75px}
+.ely-service-content{max-width:780px}
+.ely-service-mode{color:#c8b698;font:600 10px/1.5 var(--sans);letter-spacing:.18em;text-transform:uppercase}
+.ely-service-title{font:400 clamp(63px,7.2vw,109px)/.9 var(--serif);letter-spacing:-.042em;margin:21px 0 28px;color:#f5eee2}
+.ely-service-summary{font:400 clamp(22px,2.45vw,33px)/1.22 var(--serif);color:#e7ddcb;margin:0 0 25px}
+.ely-service-more{font:400 13px/2 var(--sans);max-width:700px;color:#b9bfb4;margin:0}
+.ely-service-chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:35px}
+.ely-service-chip{border:1px solid #c0ac8b5c;border-radius:100px;padding:11px 15px;color:#d4cab8;font:500 10px/1.45 var(--sans);max-width:100%}
+.ely-service-aside{border:1px solid #c3ac874e;background:radial-gradient(circle at 50% 10%,#b8a88c1c,transparent 65%),#18231eb5;padding:clamp(23px,3vw,39px);align-self:start;position:sticky;top:30px}
+.aesthetic-maison .ely-service-aside{background:radial-gradient(circle at 50% 10%,#cba9a01c,transparent 65%),#36292cc2}
+.ely-service-graphic{height:clamp(156px,19vw,233px);display:grid;place-items:center;color:#cbb899;position:relative}
+.ely-service-graphic:before,.ely-service-graphic:after{content:"";position:absolute;aspect-ratio:1;border-radius:50%;width:175px;border:1px solid #cbb89960;pointer-events:none}
+.ely-service-graphic:after{width:125px;border-style:dashed;border-color:#cbb89930;animation:ely-service-spin 50s linear infinite}
+.ely-service-graphic svg{width:138px;height:138px;max-width:70%;position:relative;z-index:1}
+.aesthetic-maison .ely-service-graphic{color:#d5ada5}
+@keyframes ely-service-spin{to{transform:rotate(360deg)}}
+.ely-service-term{color:#efe8da;font:400 25px/1.13 var(--serif);text-align:center;margin:9px 0 25px}
+.ely-service-request{display:flex;align-items:center;justify-content:center;width:100%;padding:17px 14px;border:1px solid #d4be9b;background:#d6c2a5;color:#202821;font:700 10px/1.6 var(--sans);letter-spacing:.1em;cursor:pointer;transition:background .3s,border-color .3s}
+.ely-service-request:hover{background:#f2e5d1;border-color:#f2e5d1}
+.ely-service-note{font:400 10px/1.85 var(--sans);color:#acb3a8;margin:20px 0 0}
+.ely-service-steps{border-top:1px solid #baa7895c;padding-top:40px}
+.ely-service-steps h2{font:400 clamp(42px,5vw,74px)/.97 var(--serif);letter-spacing:-.03em;margin:19px 0 33px}
+.ely-service-steps-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.ely-service-step{border:1px solid #baa7894f;min-height:125px;padding:22px 23px}
+.ely-service-step>span{font:600 10px var(--sans);color:#d4b995;letter-spacing:.18em}
+.ely-service-step p{font:400 12px/1.85 var(--sans);color:#e6dfd3;margin:16px 0 0}
+.ely-service-legal{color:#b3b9af;font:400 10px/1.95 var(--sans);max-width:920px;margin:36px 0 0;padding-left:16px;border-left:1px solid #cbb8995c}
+@media(max-width:900px){
+ .ely-service-layout{grid-template-columns:1fr;gap:28px;margin:42px 0 54px}
+ .ely-service-aside{position:static;max-width:660px;width:100%;display:grid;grid-template-columns:140px 1fr;gap:10px 20px;align-items:center}
+ .ely-service-graphic{grid-row:span 3;height:180px}
+ .ely-service-graphic:before{width:128px}
+ .ely-service-graphic:after{width:93px}
+ .ely-service-graphic svg{width:105px}
+ .ely-service-term{text-align:left;margin:0;font-size:25px}
+ .ely-service-note{margin:0}
+}
+@media(max-width:680px){
+ .ely-service-detail{padding-top:24px;padding-bottom:66px}
+ .ely-service-header{align-items:flex-start;flex-direction:column-reverse;gap:11px}
+ .ely-service-layout{margin:30px 0 47px}
+ .ely-service-title{font-size:clamp(52px,14vw,74px);margin:18px 0 26px}
+ .ely-service-summary{font-size:27px}
+ .ely-service-more{font-size:12px}
+ .ely-service-chips{margin-top:23px}
+ .ely-service-chip{font-size:9px;padding:10px 12px}
+ .ely-service-aside{display:flex;flex-direction:column;align-items:stretch;padding:24px}
+ .ely-service-graphic{height:156px}
+ .ely-service-term{text-align:center;font-size:26px}
+ .ely-service-steps h2{font-size:52px}
+ .ely-service-steps-grid{grid-template-columns:1fr;gap:10px}
+ .ely-service-step{min-height:0;padding:19px}
+ .ely-service-step p{margin-top:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ely-service-detail{animation:none}
+ .ely-service-graphic:after{animation:none}
+ .ely-service-request{transition:none}
+}
