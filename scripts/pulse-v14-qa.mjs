@@ -9,6 +9,10 @@ const css=await readFile(join(root,'site','pulse-v14','styles.css'),'utf8');
 const onlineHtml=await readFile(join(root,'site','pulse-v14','online','index.html'),'utf8');
 const onlineScript=await readFile(join(root,'site','pulse-v14','online','app.js'),'utf8');
 const onlineCss=await readFile(join(root,'site','pulse-v14','online','styles.css'),'utf8');
+const sessionHtml=await readFile(join(root,'site','pulse-v14','online','session','index.html'),'utf8');
+const sessionJs=await readFile(join(root,'site','pulse-v14','online','session','app.js'),'utf8');
+const sessionCss=await readFile(join(root,'site','pulse-v14','online','session','styles.css'),'utf8');
+const sessionSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session','app.js')],{encoding:'utf8'});
 const onlineSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','app.js')],{encoding:'utf8'});
 const vercel=JSON.parse(await readFile(join(root,'vercel.json'),'utf8'));
 const middleware=await readFile(join(root,'middleware.js'),'utf8');
@@ -41,6 +45,14 @@ const checks=[
  ['Online preflight stops media tracks',onlineScript.includes('getTracks().forEach(track => track.stop())')&&onlineScript.includes("addEventListener('pagehide'")],
  ['Online preflight does not record or upload video',!(/MediaRecorder|fetch\s*\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage/.test(onlineScript))],
  ['Online preflight syntax and responsive layout',onlineSyntax.status===0&&onlineCss.includes('@media(max-width:690px)')],
+ ['tester post-login redirect',app.includes("window.location.assign('/online/session/')")&&app.includes('renanchapon@gmail.com')],
+ ['tester sidebar available only by verified role',app.includes('const isOnlineTester=')&&app.includes('S.role===\'admin\'')&&app.includes('pulse-online-tester-link')],
+ ['authenticated session user lookup',sessionJs.includes('sb.auth.getUser()')&&sessionJs.includes("role.data?.role!=='admin'")],
+ ['session security no public clinical record writes',!(/sb\.from\(.+\.insert\(|localStorage\.setItem|sessionStorage\.setItem|fetch\s*\(/.test(sessionJs))],
+ ['session questionnaire and safety',sessionJs.includes('function questionnaire()')&&sessionJs.includes('function safety()')],
+ ['session manual camera and test timer',sessionJs.includes('getUserMedia({audio:false')&&sessionJs.includes('function test()')&&sessionJs.includes('function summary()')],
+ ['session video stops on navigation',sessionJs.includes("pagehide")&&sessionJs.includes('getTracks().forEach(t=>t.stop())')],
+ ['session ready for desktop and mobile',sessionSyntax.status===0&&sessionHtml.includes('Ma consultation Online')&&sessionCss.includes('@media(max-width:570px)')],
  ['booking-first responsive styles',css.includes('.pulse-offer-list')&&css.includes('.pulse-entry-panel')],
  ['patient title',html.includes('Votre santé en mouvement')],
  ['single entry script',(html.match(/<script/g)||[]).length===1],
