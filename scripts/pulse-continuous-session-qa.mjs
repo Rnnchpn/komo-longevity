@@ -45,6 +45,7 @@ globalThis.window={
  SpeechRecognition:FakeRecognition,
  speechSynthesis:{cancel(){}}
 };
+Object.defineProperty(globalThis,'navigator',{configurable:true,value:{mediaDevices:globalThis.window.mediaDevices}});
 globalThis.document={hidden:false};
 const {sharedMotionMedia}=await import('../pulse-v14-src/online/session/shared-media.js');
 const first=await sharedMotionMedia.ensureCamera();
