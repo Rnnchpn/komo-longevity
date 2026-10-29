@@ -5,6 +5,8 @@ import handler from '../api/pulse-online-verify.js';
 const previousFetch=globalThis.fetch;
 const previousId=process.env.ACUITY_USER_ID;
 const previousKey=process.env.ACUITY_API_KEY;
+const previousFlag=process.env.PULSE_ONLINE_PAID_SESSION_ENABLED;
+delete process.env.PULSE_ONLINE_PAID_SESSION_ENABLED;
 process.env.ACUITY_USER_ID='demo-user';
 process.env.ACUITY_API_KEY='demo-server-secret';
 let identity={id:'demo-auth-uid',email:'booker@example.test',email_confirmed_at:'2026-10-29T12:00:00Z'};
@@ -27,6 +29,11 @@ try{
  let r=await check(request(),200);
  assert.equal(r.body.eligible,true);
  assert.equal(r.body.paid,true);
+ assert.equal(r.body.canStart,false,'commercial access must default to disabled');
+ process.env.PULSE_ONLINE_PAID_SESSION_ENABLED='true';
+ r=await check(request(),200);
+ assert.equal(r.body.canStart,true,'server enables paid entry when explicitly configured');
+ delete process.env.PULSE_ONLINE_PAID_SESSION_ENABLED;
  assert.equal(JSON.stringify(r.body).includes('booker@example'),false);
  assert.ok(fetchCalls.some(u=>u.endsWith('/payments')));
 
@@ -68,4 +75,5 @@ try{
  globalThis.fetch=previousFetch;
  if(previousId===undefined)delete process.env.ACUITY_USER_ID;else process.env.ACUITY_USER_ID=previousId;
  if(previousKey===undefined)delete process.env.ACUITY_API_KEY;else process.env.ACUITY_API_KEY=previousKey;
+ if(previousFlag===undefined)delete process.env.PULSE_ONLINE_PAID_SESSION_ENABLED;else process.env.PULSE_ONLINE_PAID_SESSION_ENABLED=previousFlag;
 }
