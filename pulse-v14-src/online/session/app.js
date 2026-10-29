@@ -15,10 +15,16 @@ const TESTS = [
 const state = {page:0,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const q = selector=>root.querySelector(selector);
+let currentMotionCleanup=null;
 const btn = (id,title,secondary=false)=>'<button type="button" class="action'+(secondary?' secondary':'')+'" id="'+id+'">'+title+'</button>';
 
 function stopTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
 function stopCamera(){
+  if(currentMotionCleanup){
+   const cleanup=currentMotionCleanup;
+   currentMotionCleanup=null;
+   cleanup();
+  }
   state.request++;
   if(state.engine){state.engine.stop();state.engine=null;}
   state.bodyReady=false;
@@ -83,7 +89,7 @@ function safety(){
 function test(){
  const t=TESTS[state.task],record=state.results[t.id]||{value:0,status:'pending',source:'webcam'};
  wrap(motionMarkup(t,state.task,TESTS.length));
- mountMotionController(root,t,record,state,{
+ currentMotionCleanup=mountMotionController(root,t,record,state,{
   advance(){
    state.remaining=0;
    if(state.task<TESTS.length-1)state.task++;
