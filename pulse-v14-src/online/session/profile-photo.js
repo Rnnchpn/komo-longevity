@@ -69,6 +69,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    adjusted,manualCapture:manualCaptured,neck:{...markers.neck},pelvis:{...markers.pelvis},height:frame.height};
   record.status=manualCaptured?'review':'done';record.source='photo locale, repères de surface';
   record.value=offset;
+  callbacks.checkpoint?.();
   q('#value').textContent=offset.toFixed(1)+' %';
   const items=[['Écart horizontal apparent',offset.toFixed(1)+' %'],['Méthode','Photo de profil 2D'],
    ['Repère supérieur','Jonction cou–épaule (estimée)'],['Repère inférieur','Région pelvienne (estimée)']];
@@ -143,6 +144,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  };
  stop.onclick=()=>{stopTracks(true);off.hidden=false;q('#camera-message').textContent='Caméra et microphone arrêtés.';};
  redo.onclick=()=>{
+  sharedMotionMedia.resetReady(task.id);
   stopTracks();base=null;markers=null;frame=null;locked=false;adjusted=false;manualCaptured=false;latestProfile=null;manual.hidden=false;manual.disabled=true;
   snap.hidden=true;snap.style.display='';snap.onpointerdown=null;panel.hidden=true;start.disabled=!consent.checked;
   const editor=panel.querySelector('.profile-editor');editor?.remove();off.hidden=false;
