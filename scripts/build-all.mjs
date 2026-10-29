@@ -264,6 +264,8 @@ const scripts = [
   'scripts/pulse-audio-posture-qa.mjs',
   // Lateral photo and single-leg start/stop tests with synthetic, non-patient landmarks.
   'scripts/pulse-profile-unipodal-qa.mjs',
+  // Patient self-report & reference Motion Score calculation with zero missing-data substitution.
+  'scripts/pulse-intake-motion-score-qa.mjs',
   // Online Acuity payment validation tests; all requests and identities are mocked.
   'scripts/pulse-online-payment-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
