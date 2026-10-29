@@ -920,3 +920,33 @@ body.ely-public-commerce{background:#f6f3ec;color:#283028;font-family:var(--sans
 @media(prefers-reduced-motion:reduce){
  .ely-product-request,.ely-copy-request{transition:none}
 }
+
+
+/* ELYSIUM COLLECTION EDIT — alternating flagship collections rather than a generic 3x3 grid. */
+@media(min-width:1161px){
+ .ely-public-worlds{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+ .ely-public-world:nth-child(1),.ely-public-world:nth-child(2),.ely-public-world:nth-child(7){grid-column:span 2}
+ .ely-public-world:nth-child(1) .ely-public-world-graphic,
+ .ely-public-world:nth-child(2) .ely-public-world-graphic,
+ .ely-public-world:nth-child(7) .ely-public-world-graphic{aspect-ratio:1.95}
+ .ely-public-world:nth-child(1) .ely-public-world-details,
+ .ely-public-world:nth-child(2) .ely-public-world-details,
+ .ely-public-world:nth-child(7) .ely-public-world-details{min-height:155px}
+ .ely-public-world:nth-child(1) h3,
+ .ely-public-world:nth-child(2) h3,
+ .ely-public-world:nth-child(7) h3{font-size:clamp(48px,4.5vw,69px)}
+ .ely-public-world:nth-child(1) .ely-public-world-graphic:before,
+ .ely-public-world:nth-child(2) .ely-public-world-graphic:before,
+ .ely-public-world:nth-child(7) .ely-public-world-graphic:before{width:33%}
+ .ely-public-world:nth-child(1) .ely-public-world-mark,
+ .ely-public-world:nth-child(2) .ely-public-world-mark,
+ .ely-public-world:nth-child(7) .ely-public-world-mark{font-size:clamp(88px,9vw,139px)}
+}
+.ely-public-world-graphic{transition:filter .55s ease}
+.ely-public-world:hover .ely-public-world-graphic{filter:saturate(1.08)}
+.ely-public-world-graphic:before{transition:transform .65s cubic-bezier(.15,.75,.2,1)}
+.ely-public-world:focus-visible{outline:2px solid #899d87;outline-offset:5px}
+.ely-public-world-details h3{line-height:.98}
+@media(prefers-reduced-motion:reduce){
+ .ely-public-world-graphic,.ely-public-world-graphic:before{transition:none}
+}
