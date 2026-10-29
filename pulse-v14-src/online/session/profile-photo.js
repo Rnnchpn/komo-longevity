@@ -76,6 +76,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    adjusted,manualCapture:manualCaptured,neck:{...markers.neck},pelvis:{...markers.pelvis},height:frame.height};
   record.status=manualCaptured?'review':'done';record.source='photo locale, repères de surface';
   record.value=offset;
+  state.results[task.id]=record;
   next.disabled=false;
   callbacks.checkpoint?.();
   q('#value').textContent=offset.toFixed(1)+' %';
@@ -147,7 +148,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
     const f=stability.observe(points,time);latestProfile=f;
     validStreak=f.valid?validStreak+1:0;
     if(validStreak===3)sharedMotionMedia.readyBeep(task.id);
-    manual.disabled=!f.valid;
+    manual.disabled=false;
     validSince=f.valid?(validSince??time):null;
     // Only show the manual escape hatch after a prolonged failed auto-position.
     manual.hidden=false;
@@ -195,13 +196,13 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   snap.hidden=true;snap.style.display='';snap.onpointerdown=null;panel.hidden=true;start.disabled=!consent.checked;
   const editor=panel.querySelector('.profile-editor');editor?.remove();off.hidden=false;
   q('#value').textContent='—';next.disabled=true;redo.hidden=true;
-  record.status='pending';record.posture=null;record.value=null;status.textContent='Pour reprendre, réactivez la caméra et replacez-vous de profil.';
+  record.status='pending';record.posture=null;record.value=null;delete state.results[task.id];callbacks.checkpoint?.();status.textContent='Pour reprendre, réactivez la caméra et replacez-vous de profil.';
  };
  next.disabled=true;
  manual.onclick=()=>{if(!locked&&video.videoWidth)takePhoto(latestProfile?.valid?latestProfile:null,true);};
  q('#go').onclick=()=>{if(!record.posture?.valid)return;stopTracks();callbacks.advance();};
  q('#back').onclick=()=>{stopTracks();callbacks.back();};
- q('#skip').onclick=()=>{stopTracks();record.status='skipped';record.posture=null;callbacks.advance();};
+ q('#skip').onclick=()=>{stopTracks();record.status='skipped';record.posture=null;state.results[task.id]=record;callbacks.checkpoint?.();callbacks.advance();};
  if(sharedMotionMedia.availableCamera()){
   consent.checked=true;start.disabled=false;
   void start.onclick();
