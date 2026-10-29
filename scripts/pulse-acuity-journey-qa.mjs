@@ -136,6 +136,8 @@ assert.ok(session.includes("'/#connexion'"),'correct existing login link after s
 assert.ok(activation.includes('sb.auth.signInWithOtp')&&activation.includes('shouldCreateUser:true'));
 assert.ok(activation.includes('verify-form')&&activation.includes('canStart===true'));
 assert.ok(app.includes(".eq('user_id',S.user.id)"),'owner-scoped dashboard read');
+assert.ok(app.includes("raw!==null&&raw!==undefined&&raw!==''"),'Missing released score cannot appear as 0/100');
+assert.ok(app.includes("if(raw===null||raw===undefined||raw==='')continue"),'Missing domain cannot appear as 0/100');
 assert.ok(Array.isArray(vercel.rewrites),'Vercel route config found');
 const suite=[
  'pulse-online-payment-qa.mjs',
