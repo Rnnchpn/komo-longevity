@@ -1,0 +1,63 @@
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+import {INTAKE_GROUPS,QUESTION_COUNT,scoreIntake} from '../pulse-v14-src/online/session/intake-model.mjs';
+import {buildMotionPassport} from '../pulse-v14-src/online/session/motion-passport.mjs';
+import {buildPdfReportData,PDF_REPORT_VERSION} from '../pulse-v14-src/online/session/pdf-report.js';
+
+const read=p=>readFileSync(p,'utf8');
+const page=read('site/pulse-v14/free/index.html');
+const js=read('site/pulse-v14/free/app.js');
+const css=read('site/pulse-v14/free/styles.css');
+const publicPulse=read('site/pulse-v14/app.js');
+const pdf=read('site/pulse-v14/online/session/pdf-report.js');
+const qa=read('scripts/pulse-v14-qa.mjs');
+
+assert.ok(page.includes('free-motion-app')&&page.includes('./app.js'));
+assert.ok(page.includes('noindex,nofollow')&&page.includes('no-referrer'));
+assert.ok(page.includes('Confidentialité')&&page.includes('non médicale'));
+assert.ok(publicPulse.includes("href:'./free/'")&&publicPulse.includes('pulse-free-entry'));
+assert.ok(publicPulse.includes('appointmentType=99940918')&&publicPulse.includes('49 €'));
+assert.ok(qa.includes('free accessible without booking'));
+assert.ok(js.includes('completeGroup(g,state.answers)')&&js.includes('QUESTIONNAIRE'));
+assert.ok(js.includes('buildMotionPassport(state.answers,state.results,flags())'));
+assert.ok(js.includes("buildPdfReportData(state.answers,state.results,null,flags(),new Date(),{mode:'GRATUIT'})"));
+assert.ok(js.includes('30 secondes')&&js.includes('Date.now()')&&js.includes('status:\'review\''));
+assert.ok(js.includes('if(caution)return')&&js.includes('flags()')&&js.includes('ready.checked'));
+assert.ok(js.includes('Aucun dossier patient')&&js.includes('Aucune inscription'));
+assert.ok(!/fetch\s*\(|XMLHttpRequest|sendBeacon|MediaRecorder|getUserMedia|createClient|localStorage|sessionStorage/.test(js),
+  'The free flow must not make patient record, image or media transmissions');
+assert.ok(css.includes('grid-template-columns')&&css.includes('max-width:590px'));
+assert.ok(pdf.includes("mode:options?.mode==='GRATUIT'?"));
+assert.ok(pdf.includes('DECOUVERTE GRATUITE')&&pdf.includes('Auto-declare, non verifie'));
+assert.ok(pdf.includes('KOMO_Motion_Passeport_Gratuit_'));
+const check=spawnSync(process.execPath,['--check','site/pulse-v14/free/app.js'],{encoding:'utf8'});
+assert.equal(check.status,0,check.stderr);
+const safe=Object.fromEntries(INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>[
+  q.id,Array.isArray(q.options[0])?q.options[0][0]:'0'
+])));
+assert.equal(QUESTION_COUNT,22);
+safe.safety='no';
+const index=scoreIntake(safe);
+assert.equal(index.complete,true);
+assert.equal(index.profileIndex,100);
+const measure={sts:{status:'review',value:12,source:'Auto-comptage, non vérifié'}};
+const passport=buildMotionPassport(safe,measure,false);
+assert.equal(passport.index,100);
+assert.equal(passport.measuredCount,1);
+assert.equal(passport.flaggedCount,1);
+assert.equal(passport.planStatus,'eligible');
+const report=buildPdfReportData(safe,measure,null,false,new Date('2026-10-29'),{mode:'GRATUIT'});
+assert.equal(report.version,PDF_REPORT_VERSION);
+assert.equal(report.mode,'GRATUIT');
+assert.equal(report.questionnaire.index,passport.index);
+assert.equal(report.motion.complete,false,'No motion score fabricated');
+assert.equal(report.motion.score,null);
+assert.equal(report.observations.find(x=>x.id==='sts').value,12);
+assert.equal(report.observations.find(x=>x.id==='sts').status,'review');
+assert.equal(report.observations.filter(x=>x.value!==null).length,1);
+const pain={...safe,pain:'4'};
+assert.equal(buildMotionPassport(pain,{},true).planStatus,'safety_hold');
+const incomplete={...safe}; delete incomplete.walk10;
+assert.equal(buildMotionPassport(incomplete,{},false).index,null);
+console.log('[pulse-free-motion-qa] PASS · public entry, 22 answers, optional self-timed STS, privacy, safe gating, PDF provenance and real score policy');
