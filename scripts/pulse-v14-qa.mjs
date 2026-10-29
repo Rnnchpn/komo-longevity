@@ -13,6 +13,11 @@ const sessionHtml=await readFile(join(root,'site','pulse-v14','online','session'
 const sessionJs=await readFile(join(root,'site','pulse-v14','online','session','app.js'),'utf8');
 const sessionCss=await readFile(join(root,'site','pulse-v14','online','session','styles.css'),'utf8');
 const sessionSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session','app.js')],{encoding:'utf8'});
+const activationHtml=await readFile(join(root,'site','pulse-v14','online','activate','index.html'),'utf8');
+const activationScript=await readFile(join(root,'site','pulse-v14','online','activate','app.js'),'utf8');
+const verifyJs=await readFile(join(root,'api','pulse-online-verify.js'),'utf8');
+const activationSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','activate','app.js')],{encoding:'utf8'});
+const verifySyntax=spawnSync(process.execPath,['--check',join(root,'api','pulse-online-verify.js')],{encoding:'utf8'});
 const onlineSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','app.js')],{encoding:'utf8'});
 const vercel=JSON.parse(await readFile(join(root,'vercel.json'),'utf8'));
 const middleware=await readFile(join(root,'middleware.js'),'utf8');
@@ -53,6 +58,12 @@ const checks=[
  ['session manual camera and test timer',sessionJs.includes('getUserMedia({audio:false')&&sessionJs.includes('function test()')&&sessionJs.includes('function summary()')],
  ['session video stops on navigation',sessionJs.includes("pagehide")&&sessionJs.includes('getTracks().forEach(t=>t.stop())')],
  ['session ready for desktop and mobile',sessionSyntax.status===0&&sessionHtml.includes('Ma consultation Online')&&sessionCss.includes('@media(max-width:570px)')],
+ ['activation link from preparation',onlineHtml.includes('href="/online/activate/"')],
+ ['activation form guarded by verified identity',activationScript.includes('sb.auth.getUser()')&&activationScript.includes('shouldCreateUser:true')&&activationHtml.includes('ACCÈS CONTRÔLÉ')],
+ ['activation client checks paid appointment via server',activationScript.includes('/api/pulse-online-verify')&&activationScript.includes('access_token')&&activationSyntax.status===0],
+ ['server validates Acuity transaction and Supabase identity',verifyJs.includes("'/auth/v1/user'")&&verifyJs.includes('getUser')===false&&verifyJs.includes("'/payments'")===false&&verifyJs.includes("+'/payments'")&&verifyJs.includes('transactionID')&&verifyJs.includes('appointmentTypeID')],
+ ['server verification fails closed on invalid appointment',verifyJs.includes('booking_not_eligible')&&verifyJs.includes('payment_not_confirmed')&&verifyJs.includes('email_not_verified')&&verifySyntax.status===0],
+ ['server uses protected Acuity env',verifyJs.includes('process.env.ACUITY_API_KEY')&&verifyJs.includes('process.env.ACUITY_USER_ID')&&!activationScript.includes('ACUITY_API_KEY')],
  ['booking-first responsive styles',css.includes('.pulse-offer-list')&&css.includes('.pulse-entry-panel')],
  ['patient title',html.includes('Votre santé en mouvement')],
  ['single entry script',(html.match(/<script/g)||[]).length===1],
