@@ -3,6 +3,7 @@
 // Never substitutes questionnaire values for a validated Motion Score.
 import {buildMotionPassport,programProgress,priorityNarrative} from './online/session/motion-passport.mjs';
 import {buildPdfReportData,downloadMotionPdf} from './online/session/pdf-report.js';
+import {restitutionMarkup} from './online/session/restitution.mjs';
 
 const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const numeric=v=>typeof v==='number'&&Number.isFinite(v);
@@ -47,7 +48,7 @@ export function onlineHomeBlock(reports,failed=false){
  if(!reports.length)return '<section class="pp-home pp-empty"><div><p class="pp-eyebrow">VOTRE PASSEPORT DE LONGÉVITÉ LOCOMOTRICE</p><h2>Une première mesure. Puis une trajectoire.</h2><p>Quand votre Bilan Online sera réalisé et sauvegardé, ses résultats et votre feuille de route apparaîtront ici automatiquement.</p><a class="pp-link" href="/online/">Préparer mon bilan Online →</a></div></section>';
  const r=reports[0];
  return '<section class="pp-home"><div class="pp-topline"><span>KŌMØ / MOTION PASSPORT</span><span>'+e(date(r.created_at||r.updated_at))+'</span></div>'+
- '<div class="pp-home-grid">'+summaryBody(r,true)+'</div>'+
+ '<div class="pp-home-grid">'+summaryBody(r,true)+'</div>'+restitutionMarkup({appointmentId:r.appointment_id,compact:true})+
  '<div class="pp-actions"><button type="button" data-route-passport class="pp-button light">Comprendre mon bilan →</button>'+
  '<button type="button" data-route-plan class="pp-button ghost">Voir ma progression</button></div></section>';
 }
@@ -100,7 +101,7 @@ export function onlinePassportPage(reports,selectedId=null,failed=false){
  '<p>Vous retrouvez ici les informations réellement conservées dans votre dossier Pulse. Les observations issues de la webcam sont distinctes du questionnaire et des mesures nécessitant une validation.</p></div>'+
  '<section class="pp-cover"><div class="pp-topline"><span>KŌMØ / MOTION PASSPORT</span><span>'+e(status(r))+'</span></div>'+
  '<div class="pp-home-grid">'+summaryBody(r)+'</div>'+
- '<div class="pp-divider"></div><div class="pp-domain-grid">'+p.domains.map(bar).join('')+'</div></section>'+
+ '<div class="pp-divider"></div><div class="pp-domain-grid">'+p.domains.map(bar).join('')+'</div></section>'+restitutionMarkup({appointmentId:r.appointment_id})+
  '<section class="pp-editorial"><div class="pp-section-title"><span>01 / VOS PRIORITÉS</span><h2>Ce qui mérite votre attention.</h2>'+
  '<p>Il ne s’agit pas de points « mauvais » : ce sont les domaines que vos réponses invitent à explorer en priorité.</p></div>'+
  '<div class="pp-focus-grid">'+(p.focus.length?p.focus.map(focusItem).join(''):'<p>Complétez toutes les réponses pour identifier jusqu’à deux axes prioritaires.</p>')+'</div></section>'+
