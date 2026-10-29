@@ -49,7 +49,14 @@ export default async function handler(req,res) {
   const notMarkedUnpaid=appt.paid!==false&&appt.paid!=='no'&&appt.paid!=='unpaid';
   const paid=Number.isFinite(total)&&total>=TOTAL_EUR&&Number.isFinite(price)&&Math.abs(price-TOTAL_EUR)<0.01&&validBalance&&notMarkedUnpaid;
   if(!paid)return res.status(403).json({error:'payment_not_confirmed'});
-  return res.status(200).json({eligible:true,appointmentType:'online',paid:true,canStart:process.env.PULSE_ONLINE_PAID_SESSION_ENABLED==='true'});
+  // Return the booked slot only after verifying account, appointment and payment.
+  // An offset-free datetime is ambiguous across timezones: don't guess it.
+  const rawStart=String(appt.datetime??'').trim();
+  const appointmentAt=rawStart.length<=65&&/(?:Z|[+-][0-9]{2}:?[0-9]{2})$/i.test(rawStart)&&Number.isFinite(Date.parse(rawStart))?rawStart:null;
+  const rawMinutes=Number(appt.duration);
+  const appointmentMinutes=Number.isInteger(rawMinutes)&&rawMinutes>0&&rawMinutes<=180?rawMinutes:null;
+  return res.status(200).json({eligible:true,appointmentType:'online',paid:true,
+   canStart:process.env.PULSE_ONLINE_PAID_SESSION_ENABLED==='true',appointmentAt,appointmentMinutes});
  }catch(error){
   console.error('[pulse-online-verify] upstream verification unavailable',String(error?.message||error).replace(/[\r\n]/g,' '));
   return res.status(503).json({error:'booking_verification_unavailable'});
