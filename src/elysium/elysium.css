@@ -765,3 +765,188 @@ body.ely-public-commerce{background:#f6f3ec;color:#283028;font-family:var(--sans
  .ely-public-hero-copy h1{font-size:clamp(65px,19.4vw,76px)}
  .ely-world-maison .ely-product-name{font-size:clamp(35px,9.4vw,44px)}
 }
+
+
+/* ELYSIUM V7 — bespoke product merchandising and concierge finish.
+   Intentional hierarchy, an editorial flagship product, restrained material details. */
+.ely-public-commerce .top,.ely-boutique .top,.ely-club-commerce .top{
+ position:sticky;top:0;z-index:40;
+ -webkit-backdrop-filter:saturate(1.04) blur(12px);
+ backdrop-filter:saturate(1.04) blur(12px)
+}
+.ely-public-commerce .top{background:#fbfaf5f3}
+.ely-boutique .top{background:#faf8f3f3}
+.ely-club-commerce .top{background:#fbfaf6f3}
+.ely-public-commerce .ely-public-hero-copy h1,
+.ely-public-commerce .ely-public-section-head h2,
+.ely-boutique .ely-shop-hero-copy h1,
+.ely-boutique .ely-shop-section-head h2{
+ text-wrap:balance
+}
+.ely-public-hero-art{background:linear-gradient(145deg,#e6e8df 0%,#d4ded2 61%,#cdd7ca 100%)}
+.ely-public-art-seal{filter:drop-shadow(15px 25px 30px #334a353b)}
+.ely-public-art-seal:before{background:linear-gradient(117deg,#66816b,#314c3a 39%,#566f5a 72%,#193426)}
+.ely-public-world{border-color:#e4e2da;background:#faf9f5}
+.ely-public-world-graphic{background-image:linear-gradient(135deg,#e4e9e2,#d8dfd4)}
+.ely-public-world-details{min-height:180px}
+.ely-public-world-details h3{letter-spacing:-.032em}
+.ely-public-world-category{max-width:85%;color:#879188}
+.ely-public-world-arrow{font-size:25px}
+.ely-public-membership-card{box-shadow:15px 22px 46px #35503b1b}
+.ely-boutique .ely-shop-hero-inner{padding-block:clamp(40px,4.8vw,70px)}
+.ely-boutique .ely-shop-hero-visual{border-radius:2px}
+.ely-boutique .ely-shop-object-dial{
+ box-shadow:13px 25px 2px #6d736c14,27px 38px 45px #344b3e2b,
+ inset 5px 0 9px #b0bdab1b,inset -4px 0 11px #0000006d
+}
+.ely-shop-section-head{margin-bottom:34px}
+.ely-boutique .ely-product-card{overflow:hidden;background:#fbfaf6}
+.ely-product-visual:before{
+ content:"";position:absolute;inset:16px;border:1px solid #ffffff87;z-index:1;pointer-events:none
+}
+.ely-product-signature{bottom:25px}
+.ely-product-seal{top:25px;left:28px}
+.ely-product-content{display:flex;flex-direction:column}
+.ely-product-category{font-size:9px}
+.ely-product-description{font-size:12px}
+.ely-product-actions{margin-top:auto;gap:18px}
+.ely-product-action-links{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+.ely-product-request{
+ background:transparent;color:var(--shop-deep);border:1px solid #aeb9ad;
+ cursor:pointer;padding:12px 14px;min-height:43px;
+ font:600 10px/1.4 var(--sans);letter-spacing:.09em;
+ transition:border-color .2s,background .2s
+}
+.ely-product-request:hover,.ely-product-request:focus-visible{
+ border-color:var(--shop-deep);background:#ebeee7
+}
+.aesthetic-maison .ely-product-request:hover,.aesthetic-maison .ely-product-request:focus-visible{background:#f0e8e4}
+.ely-product-discover{min-height:43px}
+.ely-selection-count{
+ display:inline-grid;place-items:center;margin-left:9px;
+ border-radius:50%;width:21px;height:21px;
+ font:700 10px/1 var(--sans);background:#d2c6ad;color:#26332a
+}
+/* First service is the hero product, like a luxury launch rather than a tile grid. */
+.ely-shop-grid>.ely-product-featured{
+ grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1.13fr) minmax(0,.87fr);
+ min-height:510px
+}
+.ely-product-featured .ely-product-image-link{height:100%;display:flex}
+.ely-product-featured .ely-product-visual{
+ width:100%;height:100%;min-height:480px;aspect-ratio:auto;
+ background:linear-gradient(135deg,#e0e7df,#c8d4c8)
+}
+.aesthetic-maison .ely-product-featured .ely-product-visual{background:linear-gradient(135deg,#e8ded8,#d6c4bc)}
+.ely-product-featured .ely-product-halo{width:min(47%,270px);box-shadow:0 27px 60px #4559442f}
+.ely-product-featured .ely-product-content{padding:clamp(33px,4vw,65px);justify-content:center}
+.ely-product-featured .ely-product-name{
+ font-size:clamp(58px,6.7vw,99px);line-height:.88;letter-spacing:-.043em;
+ margin:19px 0 23px
+}
+.ely-product-featured .ely-product-description{
+ font-size:13px;line-height:1.85;min-height:0;margin-bottom:38px
+}
+.ely-product-featured .ely-product-actions{margin-top:0}
+.ely-product-featured .ely-product-price{letter-spacing:.11em}
+.ely-product-featured .ely-product-signature{font-size:9px}
+.ely-product-featured .ely-product-seal{font-size:11px}
+.ely-product-card:nth-child(4):last-child{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr}
+.ely-product-card:nth-child(4):last-child .ely-product-visual{height:100%;aspect-ratio:auto;min-height:375px}
+.ely-product-card:nth-child(4):last-child .ely-product-image-link{height:100%}
+.ely-product-card:nth-child(4):last-child .ely-product-content{justify-content:center}
+.ely-boutique .ely-shop-detail-layout{align-items:center}
+.ely-boutique .ely-shop-detail-gallery .ely-product-visual{aspect-ratio:1.1;min-height:440px}
+.ely-boutique .ely-shop-detail-info{max-width:630px}
+.ely-boutique .ely-shop-detail-title{line-height:.91;text-wrap:balance}
+.ely-boutique .ely-shop-detail-buy{min-height:59px}
+.ely-boutique .ely-shop-concierge-strip{
+ background:linear-gradient(110deg,var(--shop-deep),color-mix(in srgb,var(--shop-deep),#526b50 14%))
+}
+.ely-boutique .ely-shop-concierge-small{color:#d4ddc8}
+.ely-copy-request{
+ display:block;cursor:pointer;width:100%;
+ border:1px solid #c7c3b9;background:transparent;color:#3d453f;
+ margin-top:9px;padding:14px 16px;
+ font:600 10px/1.5 var(--sans);letter-spacing:.12em;text-align:center;
+ transition:background .2s,border-color .2s
+}
+.ely-copy-request:hover{background:#eeece6;border-color:#778c7d}
+.ely-boutique .collection-drawer .drawer-inner{box-shadow:-12px 0 70px #11221c20}
+.ely-boutique .collection-drawer .drawer-head{padding-bottom:19px}
+.ely-club-commerce .auth-box{
+ box-shadow:0 24px 75px #213b2810;border-color:#e0e2d6;
+ padding:clamp(29px,4.5vw,50px)
+}
+.ely-club-commerce.elysium-app-mode .ely-orbit-track{border-color:#9fb19880}
+.ely-club-commerce.elysium-app-mode .ely-node{box-shadow:0 12px 30px #334b3823,inset 0 1px #fff}
+.ely-club-commerce.elysium-app-mode .ely-node.is-selected{box-shadow:0 18px 38px #384c3a31,0 0 0 1px #a7bba8a1}
+.ely-club-commerce.elysium-app-mode .ely-app-heading h1{font-size:clamp(42px,5vw,74px)}
+.ely-club-commerce.elysium-app-mode .ely-app-overline{letter-spacing:.29em}
+@media(max-width:1050px){
+ .ely-shop-grid>.ely-product-featured{min-height:420px}
+ .ely-product-featured .ely-product-visual{min-height:400px}
+ .ely-product-featured .ely-product-name{font-size:clamp(53px,6vw,76px)}
+ .ely-product-featured .ely-product-content{padding:35px}
+ .ely-product-actions{flex-direction:column;align-items:stretch}
+ .ely-product-action-links{justify-content:flex-start}
+}
+@media(max-width:720px){
+ .ely-shop-grid>.ely-product-featured,.ely-product-card:nth-child(4):last-child{
+  display:flex;flex-direction:column;min-height:0
+ }
+ .ely-product-featured .ely-product-image-link,.ely-product-card:nth-child(4):last-child .ely-product-image-link{height:auto}
+ .ely-product-featured .ely-product-visual,.ely-product-card:nth-child(4):last-child .ely-product-visual{
+  aspect-ratio:1.28;min-height:0;height:auto
+ }
+ .ely-product-featured .ely-product-content{padding:26px}
+ .ely-product-featured .ely-product-name{font-size:clamp(47px,12vw,70px);margin:13px 0 16px}
+ .ely-product-featured .ely-product-description{margin-bottom:25px;font-size:12px}
+ .ely-product-visual:before{inset:11px}
+ .ely-product-seal{top:18px;left:20px}
+ .ely-product-signature{bottom:17px}
+ .ely-boutique .ely-product-card .ely-product-actions{flex-direction:row;align-items:center}
+ .ely-product-request{padding:11px 12px;font-size:9px}
+ .ely-product-discover{padding:11px 12px;font-size:9px}
+ .ely-product-action-links{gap:6px}
+ .ely-boutique .ely-shop-detail-gallery .ely-product-visual{min-height:0;aspect-ratio:1.28}
+ .ely-club-commerce.elysium-app-mode .ely-app-heading h1{font-size:clamp(38px,9.5vw,55px)}
+}
+@media(max-width:380px){
+ .ely-boutique .ely-product-card .ely-product-actions{flex-direction:column;align-items:stretch}
+ .ely-product-action-links{justify-content:space-between}
+ .ely-product-request,.ely-product-discover{flex:1}
+}
+@media(prefers-reduced-motion:reduce){
+ .ely-product-request,.ely-copy-request{transition:none}
+}
+
+
+/* ELYSIUM COLLECTION EDIT — alternating flagship collections rather than a generic 3x3 grid. */
+@media(min-width:1161px){
+ .ely-public-worlds{grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+ .ely-public-world:nth-child(1),.ely-public-world:nth-child(2),.ely-public-world:nth-child(7){grid-column:span 2}
+ .ely-public-world:nth-child(1) .ely-public-world-graphic,
+ .ely-public-world:nth-child(2) .ely-public-world-graphic,
+ .ely-public-world:nth-child(7) .ely-public-world-graphic{aspect-ratio:1.95}
+ .ely-public-world:nth-child(1) .ely-public-world-details,
+ .ely-public-world:nth-child(2) .ely-public-world-details,
+ .ely-public-world:nth-child(7) .ely-public-world-details{min-height:155px}
+ .ely-public-world:nth-child(1) h3,
+ .ely-public-world:nth-child(2) h3,
+ .ely-public-world:nth-child(7) h3{font-size:clamp(48px,4.5vw,69px)}
+ .ely-public-world:nth-child(1) .ely-public-world-graphic:before,
+ .ely-public-world:nth-child(2) .ely-public-world-graphic:before,
+ .ely-public-world:nth-child(7) .ely-public-world-graphic:before{width:33%}
+ .ely-public-world:nth-child(1) .ely-public-world-mark,
+ .ely-public-world:nth-child(2) .ely-public-world-mark,
+ .ely-public-world:nth-child(7) .ely-public-world-mark{font-size:clamp(88px,9vw,139px)}
+}
+.ely-public-world-graphic{transition:filter .55s ease}
+.ely-public-world:hover .ely-public-world-graphic{filter:saturate(1.08)}
+.ely-public-world-graphic:before{transition:transform .65s cubic-bezier(.15,.75,.2,1)}
+.ely-public-world:focus-visible{outline:2px solid #899d87;outline-offset:5px}
+.ely-public-world-details h3{line-height:.98}
+@media(prefers-reduced-motion:reduce){
+ .ely-public-world-graphic,.ely-public-world-graphic:before{transition:none}
+}

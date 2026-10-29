@@ -248,6 +248,7 @@ function renderPrivateServiceIndex(products,grid){
   const card=serviceElement('article','ely-product-card');
   card.dataset.variant=serviceGroup(p);
   card.dataset.edition=String((i%3)+1);
+  if(i===0&&elysiumShopFilter==='all')card.classList.add('ely-product-featured');
   const visual=serviceGraphic(p);
   const view=serviceElement('button','ely-product-image-link');
   view.type='button';view.setAttribute('aria-label',(lang==='fr'?'Découvrir ':'Explore ')+itemName(p));
@@ -258,9 +259,13 @@ function renderPrivateServiceIndex(products,grid){
   const summary=serviceElement('p','ely-product-description',lang==='fr'?(p.shortFr||p.copyFr):(p.shortEn||p.copyEn));
   const actions=serviceElement('div','ely-product-actions');
   const price=serviceElement('span','ely-product-price',lang==='fr'?'SUR DEMANDE':'ON REQUEST');
-  const link=serviceElement('button','ely-product-discover',lang==='fr'?'DÉCOUVRIR ↗':'DISCOVER ↗');
+  const links=serviceElement('div','ely-product-action-links');
+  const link=serviceElement('button','ely-product-discover',lang==='fr'?'DÉCOUVRIR ↗':'EXPLORE ↗');
   link.type='button';link.addEventListener('click',()=>openProductPage(p));
-  actions.append(price,link);content.append(mode,h,summary,actions);card.append(view,content);grid.append(card);
+  const request=serviceElement('button','ely-product-request',lang==='fr'?'DEMANDER':'ENQUIRE');
+  request.type='button';request.addEventListener('click',()=>addSelection(p,slug));
+  links.append(link,request);actions.append(price,links);
+  content.append(mode,h,summary,actions);card.append(view,content);grid.append(card);
  });
 }
 function renderLongevityProducts(products,grid){renderPrivateServiceIndex(products,grid)}
@@ -368,6 +373,8 @@ function openDrawer(){const dr=$('#selectionDrawer');if(dr){dr.classList.add('op
 function closeDrawer(){const dr=$('#selectionDrawer');if(dr)dr.classList.remove('open')}
 function renderSelection(){
  const container=$('#selectionItems');if(!container)return;
+ const badgeHost=$('#openSelection');
+ if(badgeHost){badgeHost.querySelector('.ely-selection-count')?.remove();const n=readSelection().length;if(n){const badge=serviceElement('span','ely-selection-count',String(n));badge.setAttribute('aria-label',(lang==='fr'?'Prestations sélectionnées : ':'Selected experiences: ')+n);badgeHost.append(badge)}}
  const items=readSelection();container.replaceChildren();
  if(!items.length){const p=document.createElement('p');p.textContent=tt('empty');container.appendChild(p)}
  items.forEach(x=>{const row=document.createElement('div');row.className='selected-line';const title=document.createElement('b');title.textContent=itemName(x);const rm=document.createElement('button');rm.type='button';rm.setAttribute('aria-label','Remove '+x.en);rm.textContent='×';rm.addEventListener('click',()=>{saveSelection(readSelection().filter(i=>i.id!==x.id));renderSelection()});row.append(title,rm);container.appendChild(row)});
@@ -376,12 +383,32 @@ $('#openSelection')?.addEventListener('click',openDrawer);
 $('#closeSelection')?.addEventListener('click',closeDrawer);
 $('#selectionDrawer')?.addEventListener('click',e=>{if(e.target===$('#selectionDrawer'))closeDrawer()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
+function createSelectionEmailBody(){
+ const items=readSelection();
+ const lines=items.map(x=>'• '+(lang==='fr'?(x.fr||x.en):x.en)+' ('+x.world+')').join('\n');
+ const note=($('#selectionNote')?.value||'').trim();
+ return (lang==='fr'?'Bonjour ELYSIUM,':'Hello ELYSIUM,')+'\n\n'
+  +(lang==='fr'?'Mon adresse de membre : ':'My member email: ')+(user?.email||'')+'\n\n'
+  +(lang==='fr'?'Ma sélection :':'My selection:')+'\n'+lines+'\n\n'
+  +(lang==='fr'?'Lieu et dates souhaités (aucune donnée sensible) :':'Preferred location and dates (no sensitive information):')+'\n'+note+'\n\n'
+  +(lang==='fr'?'Merci de me confirmer disponibilités et tarifs.':'Please confirm availability and pricing.');
+}
+const selectionMailButton=$('#sendSelection');
+if(selectionMailButton){
+ const copy=serviceElement('button','ely-copy-request',lang==='fr'?'COPIER MA DEMANDE':'COPY MY REQUEST');
+ copy.type='button';copy.id='copySelection';copy.dataset.fr='COPIER MA DEMANDE';copy.dataset.en='COPY MY REQUEST';
+ selectionMailButton.insertAdjacentElement('afterend',copy);
+ copy.addEventListener('click',async()=>{
+  if(!readSelection().length){say('#selectionResponse',tt('empty'));return}
+  if(!navigator.clipboard?.writeText){say('#selectionResponse',lang==='fr'?'Copie indisponible sur cet appareil.':'Copy is unavailable on this device.',true);return}
+  try{await navigator.clipboard.writeText(createSelectionEmailBody());say('#selectionResponse',lang==='fr'?'Demande copiée.':'Request copied.')}
+  catch{say('#selectionResponse',lang==='fr'?'Copie indisponible.':'Unable to copy.',true)}
+ });
+}
 $('#sendSelection')?.addEventListener('click',()=>{
  const items=readSelection();if(!items.length){say('#selectionResponse',tt('empty'));return}
- const products=items.map(x=>'• '+x.en+' ('+x.world+')').join('\n');
- const message=($('#selectionNote')?.value||'').trim();
- const subject='KŌMØ ELYSIUM — Private member selection';
- const body='Hello KŌMØ ELYSIUM,\n\nMember email: '+(user?.email||'')+'\n\nMy selection:\n'+products+'\n\nNotes (no sensitive data):\n'+message+'\n\nPlease confirm availability, partner details and quotation.';
+ const subject='KŌMØ ELYSIUM — Private request';
+ const body=createSelectionEmailBody();
  say('#selectionResponse',tt('request'));
  location.href='mailto:contact@komolongevity.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
 });
