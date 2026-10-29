@@ -71,14 +71,16 @@ function diary(p,s){
  '<p class="pp-small">'+(prog?'Journal démarré le '+e(date(s.program.startedAt))+'.':'Le suivi apparaît après activation de Pulse Daily dans le bilan Online.')+'</p>'+
  '<p class="pp-small">Les exercices restent des suggestions générales de mouvement. En cas de gêne importante ou de signal de sécurité, demandez un avis adapté avant de commencer.</p></section>';
 }
-function choices(p){
+function choices(p,r){
+ const bookingId=/^[1-9][0-9]{0,11}$/.test(String(r?.appointment_id||''))?String(r.appointment_id):null;
+ const sessionUrl=bookingId?'/online/session/?appointment='+encodeURIComponent(bookingId):'/online/activate/';
  const autonomous=p.planStatus==='eligible';
  return '<div class="pp-choice-grid"><article><span>01 / COMPLÉTER</span><h3>Un bilan Motion plus approfondi</h3><p>Des mesures instrumentées de force, de mobilité et de marche peuvent compléter les observations à distance à Paris ou Cannes.</p>'+
  '<a href="https://app.acuityscheduling.com/schedule.php?owner=40696577" target="_blank" rel="noopener noreferrer">Voir les rendez-vous disponibles →</a></article>'+
  '<article><span>02 / '+(autonomous?'PROGRESSER':'SE FAIRE ACCOMPAGNER')+'</span><h3>'+(autonomous?'Pulse Daily':'Adapter la suite en sécurité')+'</h3>'+
  '<p>'+(autonomous?'Reprenez votre programme de mouvement et votre journal quotidien depuis votre séance Online, lorsque votre accès est toujours autorisé.':
  'En cas de gêne, de risque de chute ou de séance interrompue, ne commencez pas un programme autonome sans un échange individualisé.')+'</p>'+
- (autonomous?'<a href="/online/session/">Accéder à mon bilan Online →</a>':
+ (autonomous?'<a href="'+sessionUrl+'">'+(bookingId?'Reprendre mon bilan et Pulse Daily →':'Retrouver ma réservation Acuity →')+'</a>':
  '<a href="https://app.acuityscheduling.com/schedule.php?owner=40696577" target="_blank" rel="noopener noreferrer">Demander un accompagnement →</a>')+'</article></div>';
 }
 function history(reports,selected){
@@ -107,7 +109,7 @@ export function onlinePassportPage(reports,selectedId=null,failed=false){
  '<details class="pp-method"><summary>Pourquoi mon Motion Score n’est-il pas indiqué ?</summary>'+
  '<p>Le Motion Score fonctionnel de référence repose sur le Sit-to-Stand 30 s, un TUG 3 m standardisé et l’équilibre SPPB, avec des références documentées et une validation de protocole. Le bilan Webcam seul ne fournit pas systématiquement ces éléments. Nous n’inventons donc ni Motion Score ni « âge locomoteur ».</p></details></section>'+
  '<section class="pp-editorial"><div class="pp-section-title"><span>03 / VOTRE PROGRESSION</span><h2>La suite se construit avec vous.</h2></div>'+
- diary(p,s)+choices(p)+'</section>'+
+ diary(p,s)+choices(p,r)+'</section>'+
  '<section class="pp-export"><div><strong>Conserver votre passeport PDF</strong><p>Reconstituer votre rapport depuis les données enregistrées dans Pulse. Le fichier est généré sur cet appareil, puis téléchargé localement.</p></div>'+
  '<button class="pp-button primary" type="button" data-passport-pdf="'+e(r.id)+'">Télécharger mon rapport PDF ↓</button></section>'+
  history(reports,r.id)+'</div>';
@@ -119,7 +121,7 @@ export function onlinePlanPage(reports,failed=false){
  return '<div class="pp-main"><div class="pp-intro"><span class="pp-eyebrow">VOTRE TRAJECTOIRE</span><h2>Votre plan commence par deux priorités.</h2>'+
  '<p>Un programme évolutif doit s’appuyer sur des mesures comparables et votre ressenti. Pulse ne déduit pas d’objectifs médicaux des seules observations webcam.</p></div>'+
  '<div class="pp-focus-grid">'+(p.focus.length?p.focus.map(focusItem).join(''):'<p>Terminez le questionnaire Online pour voir les priorités.</p>')+'</div>'+
- diary(p,s)+choices(p)+'<p class="pp-small">Dernier bilan enregistré : '+e(date(r.updated_at||r.created_at))+'. Retrouvez le détail dans votre passeport.</p>'+
+ diary(p,s)+choices(p,r)+'<p class="pp-small">Dernier bilan enregistré : '+e(date(r.updated_at||r.created_at))+'. Retrouvez le détail dans votre passeport.</p>'+
  '<button type="button" class="pp-button primary" data-route-passport>Voir mon passeport →</button></div>';
 }
 export function onlineResultsPreview(reports){
