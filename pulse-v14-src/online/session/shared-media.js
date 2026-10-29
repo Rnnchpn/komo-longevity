@@ -36,7 +36,7 @@ function detachVideo(video){
  try{video.pause();video.srcObject=null;video.hidden=true;}catch{}
 }
 function stopCamera(){
- cameraEpoch++;
+ beep.cancel();cameraEpoch++;
  if(stream)stream.getTracks().forEach(t=>t.stop());
  stream=null;cameraAllowed=false;readySignaled.clear();
 }
@@ -48,6 +48,8 @@ function readyBeep(taskId){
  return beep.click();
 }
 function resetReady(taskId){readySignaled.delete(taskId);}
+function postureCountdown(onStep,onTop){return beep.countdown(onStep,onTop,{audible:speakerEnabled});}
+function cancelPostureCountdown(){beep.cancel();}
 function getVoice(){
  if(!voice)voice=createVoiceControl({
   onCommand(command){activeVoiceHandler?.onCommand?.(command);},
@@ -85,5 +87,5 @@ export const sharedMotionMedia={
  ensureCamera,availableCamera,attachVideo,detachVideo,stopCamera,stopAll,
  getStream:()=>availableCamera()?stream:null,
  attachVoice,hasVoiceConsent,cameraConsent:()=>cameraAllowed,
- setSpeaker,isSpeakerOn,readyBeep,resetReady,unlockAudio:()=>beep.unlock()
+ setSpeaker,isSpeakerOn,readyBeep,resetReady,postureCountdown,cancelPostureCountdown,unlockAudio:()=>beep.unlock()
 };
