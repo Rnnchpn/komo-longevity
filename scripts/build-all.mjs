@@ -286,6 +286,8 @@ const scripts = [
   'scripts/pulse-online49-report-qa.mjs',
   // Payment authorization is tested with mocked Acuity transactions, never live client data.
   'scripts/pulse-online49-security-qa.mjs',
+  // Fixture-only clinical-safety and recovery scenarios, including offline dossier retry.
+  'scripts/pulse-online49-endtoend-fixtures-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
   'scripts/komo-offers-online-20261029.mjs',
   // Absolute final premium visual layer and regression checks. Business logic untouched.
