@@ -18,7 +18,7 @@
 .portal-decor .stone-left{left:0}.portal-decor .stone-right{right:0;transform:scaleX(-1)}
 .portal-decor .lintel{position:absolute;top:4%;left:9%;right:9%;height:11%;border-top:5px double #cdb58a76;border-bottom:1px solid #d2b79165;box-shadow:0 10px 20px #0007}
 .portal-decor .lintel:before{content:"✦   E L Y S I U M   ✦";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 clamp(11px,1.2vw,16px) 'Cormorant Garamond',Georgia,serif;letter-spacing:.4em;color:#c6ad82b8}
-.portal-doors{position:absolute;inset:17% clamp(24px,12vw,190px) 8%;display:grid;grid-template-columns:1fr 1fr;filter:drop-shadow(0 22px 40px #000a);transform-style:preserve-3d;z-index:2}
+.portal-doors{cursor:pointer;position:absolute;inset:17% clamp(24px,12vw,190px) 8%;display:grid;grid-template-columns:1fr 1fr;filter:drop-shadow(0 22px 40px #000a);transform-style:preserve-3d;z-index:2}
 .door{position:relative;overflow:hidden;background:linear-gradient(93deg,#171f19,#28302a 24%,#1c261f 68%,#121814);border:5px solid #090e0b;transform-style:preserve-3d;backface-visibility:hidden;transition:transform 1.7s cubic-bezier(.24,.74,.18,1)}
 .door-left{transform-origin:left center;box-shadow:inset -7px 0 18px #0009;border-right:2px solid #d5b78570}
 .door-right{transform-origin:right center;box-shadow:inset 7px 0 18px #0009;border-left:2px solid #d5b78570}
@@ -31,7 +31,7 @@
 .escutcheon{position:absolute;top:54%;z-index:5;width:13px;height:64px;background:linear-gradient(90deg,#8c7145,#dfbf88,#8b6a40);box-shadow:0 2px 8px #000b;border-radius:7px}
 .door-left .escutcheon{right:7%}.door-right .escutcheon{left:7%}
 .portal-glow{position:absolute;inset:11% 14%;z-index:0;background:radial-gradient(ellipse at 50% 45%,#ffeedad4,#f5d9ad77 32%,#ccad7344 58%,transparent 78%);opacity:.0;transition:opacity .8s}
-.portal-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:125px;height:125px;border-radius:50%;border:1px solid #e2c69baa;background:radial-gradient(circle at 30% 20%,#4c493b,#151c17 80%);box-shadow:0 0 0 11px #c8aa772a,0 10px 42px #000a;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .5s}
+.portal-badge{cursor:pointer;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:125px;height:125px;border-radius:50%;border:1px solid #e2c69baa;background:radial-gradient(circle at 30% 20%,#4c493b,#151c17 80%);box-shadow:0 0 0 11px #c8aa772a,0 10px 42px #000a;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .5s}
 .portal-badge strong{font:400 63px var(--serif);color:#dac199;line-height:.9}.portal-badge small{font:600 9px var(--sans);letter-spacing:.16em;color:#b3a181}
 .portal-prompt{position:absolute;z-index:10;bottom:6%;left:50%;transform:translateX(-50%);width:min(88vw,340px);border:1px solid #d6bf978c;background:#141c17e8;backdrop-filter:blur(8px);color:#f0e5d6;padding:17px 23px;letter-spacing:.22em;text-transform:uppercase;font:600 10px var(--sans);box-shadow:0 7px 50px #000a}
 .portal-prompt:hover{background:#cbb18a;color:#1b221d}
@@ -85,8 +85,8 @@ const portal=$('#portal');let entered=false;
 function enter(skip=false){if(entered)return;entered=true;try{sessionStorage.setItem('elysium-door-2026','1')}catch(e){}
  if(skip||matchMedia('(prefers-reduced-motion:reduce)').matches){portal.classList.add('gone');portal.setAttribute('aria-hidden','true');return;}
  portal.classList.add('opening');setTimeout(()=>{portal.classList.add('gone');portal.setAttribute('aria-hidden','true');$('#toggleLanguage').focus({preventScroll:true})},1950)}
-$('#openPortal').addEventListener('click',()=>enter());$('#skipPortal').addEventListener('click',()=>enter(true));
+$('#openPortal').addEventListener('click',()=>enter());$('.portal-doors').addEventListener('click',()=>enter());$('.portal-badge').addEventListener('click',()=>enter());$('#skipPortal').addEventListener('click',()=>enter(true));
 document.addEventListener('keydown',e=>{if(!entered&&e.key==='Escape')enter(true)});
-try{if(sessionStorage.getItem('elysium-door-2026')==='1')enter(true)}catch(e){}
+try{if(new URLSearchParams(location.search).get('replay')==='1')sessionStorage.removeItem('elysium-door-2026');else if(sessionStorage.getItem('elysium-door-2026')==='1')enter(true)}catch(e){}
 </script>
 </body></html>
