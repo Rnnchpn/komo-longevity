@@ -32,7 +32,7 @@ const call=async(input,{headers=baseHeaders,method='POST'}={})=>{
   method,headers,body:method==='POST'?JSON.stringify(input):undefined
  });
  const res=await edge(req);
- return {code:res.status,body:await res.json()};
+ return {code:res.status,body:res.status===204?null:await res.json()};
 };
 const snapshot={page:3,task:2,questionStep:4,returnToSummary:false,
  answers:{ageBand:'60-69',goal:'walk',walk10:'2',safety:'no',stairs:'1'},
