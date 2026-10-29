@@ -7,10 +7,10 @@ const root = document.getElementById('online-session-app');
 const TEST_USER_ID = 'eef2c1ed-3872-47a7-84da-0f70b975c96f';
 const PHASES = ['Bienvenue','Questionnaire','Sécurité','Tests guidés','Synthèse'];
 const TESTS = [
-  {id:'sts',name:'Se relever de la chaise',detail:'30 secondes · observer les répétitions',seconds:30,unit:'répétitions',instruction:'Utilisez une chaise stable, contre un mur. Restez à votre rythme et ne forcez pas.'},
-  {id:'heels',name:'Élévations sur les pointes',detail:'20 secondes · observer les répétitions',seconds:20,unit:'répétitions',instruction:'Gardez un appui stable à proximité. Arrêtez-vous en cas d’instabilité.'},
-  {id:'balance',name:'Équilibre statique sécurisé',detail:'10 secondes · observer le maintien',seconds:10,unit:'secondes',instruction:'Près d’un support fixe, yeux ouverts. Ne réalisez pas cet exercice sans un encadrement adapté.'},
-  {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Observation qualitative · sans angle chiffré',seconds:20,unit:'mouvements',instruction:'Levez les bras sans forcer, dans une amplitude confortable.'}
+  {id:'sts',name:'Se relever de la chaise',detail:'30 secondes · observer les répétitions',seconds:30,unit:'répétitions',instruction:'Placez la caméra à hauteur de hanche, de trois-quarts profil, avec tête et pieds visibles. Utilisez une chaise stable, contre un mur, et ne forcez pas.'},
+  {id:'heels',name:'Élévations sur les pointes',detail:'20 secondes · observer les répétitions',seconds:20,unit:'répétitions',instruction:'Placez-vous de profil, pieds et bassin visibles. Gardez un appui stable à proximité. Le comptage est exploratoire et sensible au déplacement du corps.'},
+  {id:'balance',name:'Équilibre statique sécurisé',detail:'10 secondes · observer le maintien',seconds:10,unit:'secondes',instruction:'Près d’un support fixe, yeux ouverts. Le détecteur mesure le temps où votre corps reste visible, pas la stabilité posturale.'},
+  {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Observation qualitative · sans angle chiffré',seconds:20,unit:'mouvements',instruction:'Placez-vous face à la caméra avec épaules et poignets visibles. Levez puis redescendez les deux bras sans forcer.'}
 ];
 const state = {page:0,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
