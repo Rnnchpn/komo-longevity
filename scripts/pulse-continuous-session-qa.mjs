@@ -29,7 +29,7 @@ assert.equal(restored.voice,undefined);
 assert.equal(loadProgress(storage,1_000+4*60*60*1000+1),null,'expires after 4h');
 assert.equal(data.has(PROGRESS_KEY),false);
 saveProgress(storage,{...state,answers:{...state.answers,safety:'yes'}},1_000);
-assert.equal(loadProgress(storage,1_001).page,3,'safe test navigation is permitted for verified safety state');
+assert.equal(loadProgress(storage,1_001).page,2,'safety interruption returns user to safety step');
 clearProgress(storage);assert.equal(loadProgress(storage),null);
 
 let opens=0,stops=0,speechStarts=0,speechStops=0;
