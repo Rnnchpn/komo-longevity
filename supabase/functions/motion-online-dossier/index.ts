@@ -12,7 +12,7 @@ const ANSWER_IDS=new Set([
  'walkingDays','strengthDays','outdoors','breaks','safety'
 ]);
 const CHECKS=new Set(['chair','space','support','device']);
-const STATES=new Set(['done','review','skipped']);
+const STATES=new Set(['pending','done','review','skipped']);
 const VALID_AGE=new Set(['under40','40-49','50-59','60-69','70-79','80plus','undisclosed']);
 const VALID_GOALS=new Set(['independence','walk','strength','confidence','general']);
 const plain=x=>x&&typeof x==='object'&&!Array.isArray(x);
