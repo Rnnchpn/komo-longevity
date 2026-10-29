@@ -52,6 +52,17 @@ r=await call({mode:'save',appointmentId:booking,snapshot:updated,consentAccepted
 assert.equal(r.code,200);assert.equal(row.status,'completed');
 assert.equal(row.snapshot.results.posture.posture.rawPhoto,undefined,'raw photo must not be persisted');
 assert.equal(dbWrites,2);
+const withProgram={...snapshot,program:{version:'KOMO_PULSE_DAILY_V1',startedAt:'2026-10-29',entries:{
+ '2026-10-29':{completed:['walk','chair'],effort:3,note:'Effort confortable'}
+}}};
+r=await call({mode:'save',appointmentId:booking,snapshot:withProgram,
+ consentAccepted:true,consentVersion:CONSENT_VERSION});
+assert.equal(r.code,200,'valid daily journal must be stored');
+assert.equal(row.snapshot.program.entries['2026-10-29'].completed.length,2);
+r=await call({mode:'save',appointmentId:booking,snapshot:{...withProgram,
+ program:{...withProgram.program,entries:{'2026-10-29':{completed:['upload_video'],effort:4,note:''}}}},
+ consentAccepted:true,consentVersion:CONSENT_VERSION});
+assert.equal(r.code,422,'unknown program/media tasks must be blocked');
 const ownerWrites=dbWrites;
 user={...user,id:'user-B'};
 r=await call({mode:'load',appointmentId:booking});
