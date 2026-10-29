@@ -34,7 +34,7 @@ export function motionMarkup(task,index,total){
  '<small id="motion-status" role="status">Activez la caméra et placez-vous entièrement dans le cadre.</small></div></div></div>'+
  '<div class="posture-results" id="posture-results" hidden><strong>Observation posturale frontale · prototype</strong><div class="posture-data" id="posture-data"></div><p>Valeurs en projection 2D, sensibles à l’inclinaison et à la perspective de la caméra. Aucune conclusion médicale ne peut en être tirée.</p></div>'+ 
  '<div class="motion-disclaimer"><strong>Prototype de mesure non validé médicalement.</strong> La webcam estime les articulations et les cycles de mouvement ; les valeurs peuvent être erronées si le cadrage ou l’éclairage sont insuffisants. Aucun diagnostic n’est réalisé. Aucune vidéo n’est enregistrée.</div>'+
- '<div class="manual-review"><span>Corriger le résultat si nécessaire</span><div><button type="button" id="minus" aria-label="Diminuer la valeur">−</button><strong id="manual-value">0</strong><button type="button" id="plus" aria-label="Augmenter la valeur">+</button></div></div>'+
+ (t.id==='posture'?'':'<div class="manual-review"><span>Corriger le résultat si nécessaire</span><div><button type="button" id="minus" aria-label="Diminuer la valeur">−</button><strong id="manual-value">0</strong><button type="button" id="plus" aria-label="Augmenter la valeur">+</button></div></div>')+
  '<div class="actions"><button class="action secondary" type="button" id="back">← Retour</button><button class="action secondary" type="button" id="skip">Ne pas faire ce test</button>'+
  '<button class="action" type="button" id="go">'+(index===total-1?'Voir ma synthèse →':'Test suivant →')+'</button></div><p id="message" class="message" role="status"></p></section>';
 }
