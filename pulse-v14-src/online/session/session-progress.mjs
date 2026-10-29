@@ -3,10 +3,10 @@
 // normative-reference inputs, raw MediaPipe landmarks or PDF files.
 import {INTAKE_GROUPS} from './intake-model.mjs';
 export const PROGRESS_KEY='komo_motion_online_demo_v8';
-export const PROGRESS_VERSION=8;
+export const PROGRESS_VERSION=9;
 const TTL=4*60*60*1000; // four hours, then expire even if tab remains open
 const answerIds=new Set([...INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>q.id)),'safety']);
-const testIds=new Set(['sts','heels','balance','unipodal_left','unipodal_right','arms','posture']);
+const testIds=new Set(['sts','heels','unipodal_left','unipodal_right','arms','posture']);
 const statuses=new Set(['pending','done','review','skipped']);
 const cleanNumber=(n)=>Number.isFinite(n)&&Math.abs(n)<=10000?n:null;
 export function snapshotProgress(state){
@@ -27,7 +27,7 @@ export function snapshotProgress(state){
  }
  return {page:Number.isInteger(state.page)?Math.max(0,Math.min(4,state.page)):0,
   questionStep:Number.isInteger(state.questionStep)?Math.max(0,Math.min(4,state.questionStep)):0,
-  task:Number.isInteger(state.task)?Math.max(0,Math.min(6,state.task)):0,
+  task:Number.isInteger(state.task)?Math.max(0,Math.min(5,state.task)):0,
   answers,results,checks:[...(state.checks||[])].filter(s=>['chair','space','support','device'].includes(s)),
   returnToSummary:Boolean(state.returnToSummary)};
 }
@@ -45,12 +45,18 @@ export function loadProgress(storage,now=Date.now()){
   const raw=storage.getItem(PROGRESS_KEY);
   if(!raw)return null;
   const item=JSON.parse(raw);
-  if(item?.version!==PROGRESS_VERSION||!Number.isFinite(item.expiresAt)||item.expiresAt<=now){
+  if(![8,PROGRESS_VERSION].includes(item?.version)||!Number.isFinite(item.expiresAt)||item.expiresAt<=now){
    clearProgress(storage);return null;
   }
   if(!item.data||typeof item.data!=='object')return null;
   // Sanitize even previously stored or manually modified data.
-  const sanitized=snapshotProgress({...item.data,checks:new Set(item.data.checks)});
+  // Migrate V8 progress (which included the removed 10-second visibility test).
+  const v8Task=Number(item.data.task);
+  const migrating=item.version===8;
+  const task=migrating&&Number.isInteger(v8Task)?
+   (v8Task>=3?v8Task-1:v8Task===2?2:v8Task):item.data.task;
+  const sanitized=snapshotProgress({...item.data,task,checks:new Set(item.data.checks)});
+  if(migrating)saveProgress(storage,{...sanitized,checks:new Set(sanitized.checks)},now);
   if(sanitized.page===3&&sanitized.answers.safety!=='no')sanitized.page=2;
   if(sanitized.page===4&&sanitized.answers.safety!=='no'&&sanitized.answers.safety!=='yes')
    sanitized.page=2;
