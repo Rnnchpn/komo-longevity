@@ -131,7 +131,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   if(frame){draw();showEditor(false);next.disabled=false;}
   else {draw();showEditor(true);panel.hidden=false;next.disabled=true;status.textContent='Photo prise. Touchez successivement le cou, le bassin et la cheville sur la photo.';}
   redo.hidden=false;redo.textContent='Reprendre la photo';
-  status.textContent=manualMode?'Photo prise manuellement : résultat exploratoire à vérifier.':'Photo capturée automatiquement. Vérifiez les deux repères puis continuez.';
+  status.textContent=manualMode?(frame?'Photo prise : repères automatiques à vérifier.':'Photo prise : cliquez sur le cou, puis le bassin, puis la cheville pour afficher le résultat.'):'Photo capturée automatiquement. Vous pouvez continuer.';
   q('#camera-message').textContent=instruction;
  };
  start.onclick=async()=>{
