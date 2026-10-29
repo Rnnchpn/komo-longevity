@@ -257,7 +257,10 @@ const scripts = [
   'scripts/build-pulse-v14.mjs',
   'scripts/pulse-v14-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
-  'scripts/komo-offers-online-20261029.mjs'
+  'scripts/komo-offers-online-20261029.mjs',
+  // Absolute final premium visual layer and regression checks. Business logic untouched.
+  'scripts/komo-premium-storefront-20261029.mjs',
+  'scripts/komo-premium-storefront-qa-20261029.mjs'
 ];
 
 for (const script of scripts) {
