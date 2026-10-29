@@ -12,7 +12,7 @@ export function motionMarkup(task,index,total){
   '<ol class="guide-steps">'+guide.steps.map((step,i)=>'<li><span>'+String(i+1).padStart(2,'0')+'</span><p>'+escapeText(step)+'</p></li>').join('')+'</ol></div>'+
   '<p class="guide-measure"><strong>Ce que la caméra mesure :</strong> '+escapeText(guide.measured)+'</p>'+
   '<p class="guide-audio-status" id="guide-audio-status" role="status"></p></details>';
- return '<section class="paper motion-workspace"><div class="motion-heading"><div><span class="overline">ÉTAPE 03 · TEST '+(index+1)+' / '+total+' · PROGRESSION CONSERVÉE+'</span><h1>'+escapeText(t.name)+'<em>.</em></h1><p>'+escapeText(t.instruction)+'</p></div>'+
+ return '<section class="paper motion-workspace"><div class="motion-heading"><div><span class="overline">ÉTAPE 03 · TEST '+(index+1)+' / '+total+' · PROGRESSION CONSERVÉE</span><h1>'+escapeText(t.name)+'<em>.</em></h1><p>'+escapeText(t.instruction)+'</p></div>'+
  '<span class="pose-tag">ANALYSE CORPORELLE · 33 POINTS</span></div>'+guidance+
  '<div class="test-grid live-capture-layout"><div class="camera pose-camera"><div class="camera-screen" id="camera-screen">'+
  '<video id="live-video" autoplay playsinline muted hidden></video><canvas id="pose-canvas" aria-hidden="true" hidden></canvas>'+
