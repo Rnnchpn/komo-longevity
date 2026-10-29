@@ -8,19 +8,22 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  const q=s=>root.querySelector(s),video=q('#live-video'),overlay=q('#pose-canvas'),off=q('#camera-off');
  const start=q('#start-camera'),stop=q('#stop-camera'),redo=q('#redo-test'),next=q('#go'),consent=q('#pose-consent'),halt=q('#halt-test'),status=q('#motion-status');
  const reader=q('#read-guidance'),distance=q('#distance-view');
- let disposed=false,locked=false,frame=null,base=null,display=null,markers=null,which='neck',adjusted=false,manualCaptured=false,latestProfile=null,validStreak=0;
- const stability=createSideProfileStability(2300);
+ let disposed=false,locked=false,frame=null,base=null,display=null,markers=null,which='neck',adjusted=false,manualCaptured=false,latestProfile=null,validStreak=0,countdownRunning=false,validSince=null;
+ const stability=createSideProfileStability(1250);
+ const countCover=q('#countdown-cover'),countValue=q('#countdown-value');
+ const hideCountdown=()=>{countdownRunning=false;if(countCover)countCover.hidden=true;};
+ const cancelCountdown=()=>{sharedMotionMedia.cancelPostureCountdown();hideCountdown();};
  const snap=document.createElement('canvas');snap.id='profile-photo';snap.className='profile-photo';snap.hidden=true;snap.setAttribute('aria-label','Photo de profil locale avec deux repères de surface');
  q('#camera-screen').append(snap);
  const panel=q('#posture-results'),data=q('#posture-data');
- const instruction='Photo automatique après 2 à 3 secondes immobile, de profil. Ajustez ensuite les repères de surface au toucher si besoin.';
+ const instruction='Mettez-vous simplement de profil, pieds visibles. Un décompte 3, 2, 1 démarre seul quand vous êtes stable. Photo automatique à « Top ! ».';
  q('#camera-live-score').hidden=true;
  q('#camera-hud').hidden=true;
- const manual=q('#start-test');manual.hidden=false;manual.disabled=true;manual.textContent='Prendre la photo (secours)';
+ const manual=q('#start-test');manual.hidden=true;manual.disabled=true;manual.textContent='Prendre la photo (secours)';
  q('#time').textContent='AUTO';
  q('#value').textContent='—';
  q('#value').parentElement.querySelector('.overline').textContent='PHOTO DE PROFIL';
- status.textContent='Autorisez la caméra. Placez-vous de profil, immobile, avec les pieds visibles.';
+ status.textContent='Placez-vous de profil, pieds visibles. Pulse lancera automatiquement 3, 2, 1 et prendra la photo.';
  consent.checked=sharedMotionMedia.cameraConsent();
  consent.onchange=()=>{
   if(!consent.checked)stopTracks(true);
@@ -42,7 +45,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  if(voiceHud){voiceHud.hidden=!sharedMotionMedia.hasVoiceConsent();
   const label=q('#voice-hud-text');if(label&&sharedMotionMedia.hasVoiceConsent())label.textContent='Micro actif · toute la séance';}
  const stopTracks=(release=false)=>{
-  state.request++;
+  cancelCountdown();state.request++;
   if(state.engine){state.engine.stop();state.engine=null;}
   if(release)sharedMotionMedia.stopAll();
   sharedMotionMedia.detachVideo(video);state.stream=sharedMotionMedia.getStream();overlay.hidden=true;
@@ -82,8 +85,8 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   panel.hidden=false;
  };
  const showEditor=()=>{
-  const notes=document.createElement('div');notes.className='profile-editor';notes.innerHTML=
-   '<p>Photo prise automatiquement. Les points sont <strong>des repères de surface approximatifs</strong>, pas C7 ni S1. Pour les corriger, choisissez un point puis touchez la photo.</p>'+
+  const notes=document.createElement('details');notes.className='profile-editor';notes.innerHTML='<summary>Modifier les deux repères (facultatif)</summary>'+ 
+   '<p>Les repères sont approximatifs (ni C7 ni S1). Vous pouvez les corriger en touchant la photo.</p>'+
    '<div class="profile-editor-actions"><button type="button" id="mark-neck" aria-pressed="true">1 · Repère cou/dos</button><button type="button" id="mark-pelvis" aria-pressed="false">2 · Repère bassin</button></div>'+
    '<p>Indice exprimé en % de la hauteur projetée épaule–cheville. Sans calibration ni radiographie, aucune SVA en mm n’est disponible.</p>';
   panel.prepend(notes);
@@ -120,7 +123,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  };
  start.onclick=async()=>{
   if(!consent.checked||disposed)return;
-  const request=++state.request;start.disabled=true;stability.reset();locked=false;panel.hidden=true;
+  const request=++state.request;start.disabled=true;stability.reset();cancelCountdown();locked=false;panel.hidden=true;validSince=null;
   q('#camera-message').textContent='Autorisez la webcam et placez-vous de profil.';
   let stream=null;
   try{
@@ -133,9 +136,36 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
     validStreak=f.valid?validStreak+1:0;
     if(validStreak===3)sharedMotionMedia.readyBeep(task.id);
     manual.disabled=!f.valid;
+    validSince=f.valid?(validSince??time):null;
+    // Only show the manual escape hatch after a prolonged failed auto-position.
+    manual.hidden=!(f.valid&&time-validSince>7000);
     const label=q('#pose-quality'),hud=q('#camera-hud');
-    hud.hidden=false;label.textContent=f.valid?'Profil immobile : '+Math.min(100,Math.floor(f.stableMs/2300*100))+' %':f.message;
-    if(f.ready)takePhoto(f);
+    hud.hidden=false;
+    if(countdownRunning){
+     if(!f.valid||f.stableMs<1250){
+      cancelCountdown();status.textContent='Vous avez bougé : repositionnez-vous. Le décompte repartira tout seul.';
+     }
+     else label.textContent='Position validée · photo dans 3, 2, 1…';
+    }else{
+     label.textContent=f.valid?'Profil correct : '+Math.min(100,Math.floor(f.stableMs/1250*100))+' % · attendez…':f.message;
+     if(f.ready){
+      countdownRunning=true;
+      manual.hidden=true;
+      if(countCover)countCover.hidden=false;
+      status.textContent='Parfait. Restez dans cette position : 3, 2, 1…';
+      void sharedMotionMedia.postureCountdown(v=>{
+       if(!countdownRunning||disposed)return;
+       if(countValue)countValue.textContent=String(v);
+      },()=>{
+       if(!countdownRunning||disposed)return;
+       if(!latestProfile?.valid||latestProfile.stableMs<1250||document.hidden){
+        cancelCountdown();return;
+       }
+       hideCountdown();
+       takePhoto(latestProfile);
+      });
+     }
+    }
    },()=>{stopTracks();q('#camera-message').textContent='Détection interrompue. Réessayez.';});
    if(disposed||request!==state.request){engine.stop();return;}
    state.engine=engine;overlay.hidden=false;
@@ -148,7 +178,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  stop.onclick=()=>{stopTracks(true);off.hidden=false;q('#camera-message').textContent='Caméra et microphone arrêtés.';};
  redo.onclick=()=>{
   sharedMotionMedia.resetReady(task.id);
-  stopTracks();base=null;markers=null;frame=null;locked=false;adjusted=false;manualCaptured=false;latestProfile=null;manual.hidden=false;manual.disabled=true;
+  cancelCountdown();stopTracks();base=null;markers=null;frame=null;locked=false;adjusted=false;manualCaptured=false;latestProfile=null;manual.hidden=false;manual.disabled=true;
   snap.hidden=true;snap.style.display='';snap.onpointerdown=null;panel.hidden=true;start.disabled=!consent.checked;
   const editor=panel.querySelector('.profile-editor');editor?.remove();off.hidden=false;
   q('#value').textContent='—';next.disabled=true;redo.hidden=true;
@@ -166,6 +196,6 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  return ()=>{
   if(disposed)return;disposed=true;stopTracks();
   if('speechSynthesis' in window)window.speechSynthesis.cancel();
-  base=null;markers=null;snap.remove();
+  cancelCountdown();base=null;markers=null;snap.remove();
  };
 }
