@@ -161,3 +161,57 @@ h1,h2,p{margin-top:0}h1{font:400 clamp(42px,5vw,72px)/.99 "Instrument Serif",Geo
 .posture-data strong{font:400 27px "Instrument Serif",Georgia,serif;color:#2e5039}
 @media(max-width:800px){.posture-data{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:510px){.posture-data{grid-template-columns:1fr 1fr}.posture-data>div{padding:13px}.posture-data strong{font-size:23px}.countdown-cover strong{font-size:150px}}
+
+
+/* V5 — camera-first workspace, compact options and automatic lateral photo */
+.online-session-shell:has(.motion-workspace){max-width:1800px;padding:13px clamp(9px,1.4vw,26px) 65px}
+.motion-workspace{padding:clamp(12px,1.6vw,27px)!important}
+.motion-heading{margin-bottom:9px;align-items:center}
+.motion-heading h1{font-size:clamp(30px,3.4vw,52px);margin:5px 0}
+.motion-heading p{font-size:11px;line-height:1.55;margin:0}
+.test-grid.live-capture-layout{gap:10px;margin:10px 0 0}
+.pose-camera .camera-screen{height:min(76vh,880px);min-height:clamp(460px,51vw,720px);max-height:none;aspect-ratio:auto}
+.pose-camera .camera-screen .profile-photo{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;z-index:7;touch-action:manipulation;cursor:crosshair;background:#162b21}
+.pose-camera .pose-consent{margin:7px 12px;padding:8px 10px;border-radius:8px}
+.pose-camera .pose-consent span{font-size:10px;line-height:1.5}
+.pose-camera .camera-actions{padding:9px 12px;gap:7px}
+.pose-camera .camera-actions button{font-size:11px;padding:8px 11px;min-height:35px}
+.pose-camera>.subtle{padding:0 12px 8px;margin:0;font-size:10px}
+.test-guide{padding:10px 16px;margin:6px 0 9px;border-radius:12px}
+.guide-summary{font-size:12px;font-weight:750;color:#30553d;cursor:pointer;list-style-position:inside;line-height:1.6}
+.test-guide[open] .test-guide-heading{margin-top:15px}
+.voice-compact{border-top:1px solid #41694c;background:#1d3e2c;color:#f7f4e7;padding:5px 12px}
+.voice-compact>summary{cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.02em;padding:7px 0}
+.voice-compact>summary span{font-size:10px;font-weight:400;color:#b8cbb7;margin-left:8px}
+.voice-compact[hidden]{display:none!important}
+.voice-compact .voice-setup{margin:0;padding:7px 0 9px;background:transparent;border:0}
+.voice-compact .voice-optin{font-size:10px;line-height:1.5}
+.voice-compact .voice-optin span{font-size:10px}
+.voice-compact .voice-controls{margin:7px 0;gap:9px}
+.voice-compact .voice-controls button{padding:7px 9px;min-height:32px;font-size:10px}
+.voice-compact #voice-state{font-size:10px}
+.voice-compact .voice-phrases{font-size:10px;line-height:1.45;margin:4px 0}
+.voice-compact .sound-optin{padding:7px 9px;margin:6px 0 0;font-size:10px}
+.voice-compact .sound-optin span{font-size:10px}
+.live-controller{min-height:112px;padding:11px 15px}
+.live-controller .time,.live-controller .live-value{font-size:49px}
+.live-controller .go-live{min-height:48px;padding:12px}
+.profile-editor{margin-bottom:15px;padding:13px;border-radius:12px;background:#f8f7ed}
+.profile-editor p{font-size:11px;line-height:1.65;color:#607464}
+.profile-editor-actions{display:flex;gap:9px;flex-wrap:wrap;margin:10px 0}
+.profile-editor-actions button{border:1px solid #a4bd9d;background:#fff;padding:9px 13px;border-radius:9px;font-size:11px;font-weight:700;color:#31563a}
+.profile-editor-actions button[aria-pressed="true"]{background:#244a32;color:#fff;border-color:#244a32}
+.posture-data{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:700px){
+ .online-session-shell:has(.motion-workspace){padding:7px 7px 45px}
+ .motion-workspace{padding:11px!important}
+ .motion-heading .pose-tag{font-size:8px;padding:6px 9px}
+ .pose-camera .camera-screen{height:70vh;min-height:420px;aspect-ratio:auto}
+ .pose-camera .pose-consent{margin:7px 9px}
+ .pose-camera .pose-consent span{font-size:10px}
+ .pose-camera .camera-actions{display:flex;justify-content:space-around}
+ .pose-camera .camera-actions button{width:auto;flex:1}
+ .live-controller{gap:9px;padding:10px}
+ .posture-data{grid-template-columns:1fr 1fr}
+ .profile-editor-actions{display:grid;grid-template-columns:1fr 1fr}
+}

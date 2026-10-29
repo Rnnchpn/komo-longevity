@@ -3,9 +3,13 @@ import {createMovementTracker} from './metrics.mjs';
 import {createVoiceControl} from './voice-control.js';
 import {TEST_GUIDES} from './test-guides.mjs';
 import {createCaptureEnhancements} from './capture-enhancements.js';
+import {mountSideProfilePhoto} from './profile-photo.js';
+import {mountUnipodal} from './unipodal-controller.js';
 
 // Guided browser-only capture. The observer must remain visible to count repetitions.
 export function mountMotionController(root,task,record,state,callbacks){
+ if(task.id==='posture')return mountSideProfilePhoto(root,task,record,state,callbacks);
+ if(task.id==='unipodal_left'||task.id==='unipodal_right')return mountUnipodal(root,task,record,state,callbacks);
  const q=s=>root.querySelector(s);
  const video=q('#live-video'),canvas=q('#pose-canvas'),off=q('#camera-off');
  const on=q('#start-camera'),stop=q('#stop-camera'),go=q('#start-test'),redo=q('#redo-test'),halt=q('#halt-test');

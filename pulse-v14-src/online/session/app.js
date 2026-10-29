@@ -10,8 +10,10 @@ const TESTS = [
   {id:'sts',name:'Se relever de la chaise',detail:'30 secondes · observer les répétitions',seconds:30,unit:'répétitions',instruction:'Placez la caméra à hauteur de hanche, de trois-quarts profil, avec tête et pieds visibles. Utilisez une chaise stable, contre un mur, et ne forcez pas.'},
   {id:'heels',name:'Élévations sur les pointes',detail:'20 secondes · observer les répétitions',seconds:20,unit:'répétitions',instruction:'Placez-vous de profil, pieds et bassin visibles. Gardez un appui stable à proximité. Le comptage est exploratoire et sensible au déplacement du corps.'},
   {id:'balance',name:'Équilibre statique sécurisé',detail:'10 secondes · observer le maintien',seconds:10,unit:'secondes',instruction:'Près d’un support fixe, yeux ouverts. Le détecteur mesure le temps où votre corps reste visible, pas la stabilité posturale.'},
+  {id:'unipodal_left',name:'Équilibre unipodal · appui gauche',detail:'20 secondes maximum · chronomètre automatique',seconds:20,unit:'secondes',instruction:'Debout face à la caméra, appui fixe à portée de main. Soulevez doucement le pied droit ; le chrono part automatiquement lorsque la position est détectée.'},
+  {id:'unipodal_right',name:'Équilibre unipodal · appui droit',detail:'20 secondes maximum · chronomètre automatique',seconds:20,unit:'secondes',instruction:'Debout face à la caméra, appui fixe à portée de main. Soulevez doucement le pied gauche ; le chrono part automatiquement lorsque la position est détectée.'},
   {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Mouvements des bras · 20 secondes',seconds:20,unit:'mouvements',instruction:'Placez-vous face à la caméra avec épaules et poignets visibles. Levez puis redescendez les deux bras sans forcer.'},
-  {id:'posture',name:'Observation de la posture',detail:'Alignement frontal apparent · 8 secondes',seconds:8,unit:'images',instruction:'Placez la caméra bien droite, à hauteur du bassin, face à vous. Gardez tête, épaules, bassin et pieds visibles. Restez dans une position naturelle et confortable.'}
+  {id:'posture',name:'Profil sagittal · photo automatique',detail:'Photo de profil après stabilité · surface 2D',seconds:0,unit:'indice',instruction:'Placez la caméra bien droite à hauteur du bassin, de profil à 90°, avec tête et pieds visibles. Restez immobile environ 3 secondes : la photo se déclenche automatiquement.'}
 ];
 const state = {page:0,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
@@ -46,7 +48,7 @@ function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
   wrap('<div class="intro"><div><span class="overline">VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
   '<p>Bienvenue dans votre expérience KŌMØ Motion Online. Vous allez parcourir le questionnaire, les contrôles de sécurité et les tests guidés, exactement dans l’ordre prévu pour un futur client.</p>'+
-  '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>05</b><small>Modules de mouvement</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
+  '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>07</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
   btn('go','Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
   '<p class="notice">Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.</p>');
   q('#go').onclick=next;
@@ -110,7 +112,7 @@ function summary(){
  const rows=TESTS.map(t=>{
   const r=state.results[t.id];
   let result='Non réalisé';
-  if(r?.status==='done'||r?.status==='review')result=t.id==='posture'?(r.posture?.valid?'Épaules '+r.posture.shoulderTilt+'°, bassin '+r.posture.hipTilt+'° (image 2D)':'Capture insuffisante · à refaire'):r.value+' '+t.unit+' ('+(r.source||'webcam')+(r.status==='review'?', à vérifier':'')+')';
+  if(r?.status==='done'||r?.status==='review')result=t.id==='posture'?(r.posture?.valid?'Écart sagittal de surface '+r.posture.surfaceIndexPct+' % (photo 2D, pas SVA)':'Photo non exploitable · à refaire'):r.value+' '+t.unit+' ('+(r.source||'webcam')+(r.status==='review'?', à vérifier':'')+')';
   return '<div><span>'+esc(t.name)+'</span><strong>'+esc(result)+'</strong></div>';
  }).join('');
  wrap('<div class="paper"><span class="overline">04 / SYNTHÈSE DE DÉMONSTRATION</span><h1>Votre mouvement,<br><em>plus lisible.</em></h1>'+
