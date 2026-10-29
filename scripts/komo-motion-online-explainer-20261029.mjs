@@ -39,7 +39,7 @@ es:{
  note:'Evaluación funcional no médica. Sin diagnóstico, prescripción, edad biológica ni puntuación de longevidad validada. Los resultados dependen de las pruebas completadas.',
  cta:'Descubrir Motion Online · 49 €',label:'KŌMØ · MOTION ONLINE'
 }};
-const style=<style id="komo-online-explainer-style">
+const style=`<style id="komo-online-explainer-style">
 .komo-online-explainer{background:#faf8f2;color:#243127;padding:clamp(64px,8vw,112px) 0;border-top:1px solid #e3e4da}
 .koe-shell{width:min(1110px,calc(100% - 42px));margin:auto}
 .koe-label{font-size:10px;letter-spacing:.18em;font-weight:800;color:#829589;margin:0 0 22px}
@@ -59,7 +59,7 @@ const style=<style id="komo-online-explainer-style">
 .koe-note{font-size:11px;line-height:1.65;color:#737c73;max-width:910px;margin:25px 0 0}
 @media(max-width:850px){.koe-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.koe-next{grid-template-columns:1fr}.koe-next a{justify-self:start}}
 @media(max-width:530px){.koe-shell{width:calc(100% - 30px)}.koe-grid{gap:12px;margin-bottom:42px}.koe-cell strong{font-size:20px}.koe-cell p{font-size:12px}.koe-steps{padding:17px 14px 9px}}
-</style>;
+</style>`;
 function card(title,desc,number=''){return '<article class="koe-cell">'+(number?'<small class="koe-number">'+number+'</small>':'')+'<strong>'+title+'</strong><p>'+desc+'</p></article>';}
 function render(c){return '<section class="komo-online-explainer" id="motion-online-explained" aria-labelledby="koe-title"><div class="koe-shell"><p class="koe-label">'+c.label+'</p><h2 id="koe-title">'+c.h+'</h2><p class="koe-intro">'+c.intro+'</p><h3>'+c.why+'</h3><div class="koe-grid">'+c.dimensions.map(x=>card(...x)).join('')+'</div><h3>'+c.how+'</h3><div class="koe-grid koe-steps">'+c.steps.map(x=>card(x[1],x[2],x[0])).join('')+'</div><div class="koe-next"><div><h3>'+c.nextTitle+'</h3><p>'+c.next+'</p></div><a href="#solutions">'+c.cta+'</a></div><p class="koe-note">'+c.note+'</p></div></section>';}
 for (const [path,lang] of [['index.html','fr'],['fr/index.html','fr'],['en/index.html','en'],['es/index.html','es']]){
