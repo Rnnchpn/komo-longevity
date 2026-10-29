@@ -82,6 +82,15 @@ function dossierView(a,d){
  return '<div><span>'+escape(label)+'</span><strong>'+escape(valid?r.value+' '+unit:'Non mesuré')+'</strong><small>'+
  escape(r.status==='review'?'À vérifier':r.status==='done'?'Enregistré':'Manquant')+'</small></div>';
  }).join('')+'</div>'+
+ '<section class="call-guide"><div class="eyebrow">DÉROULÉ DE RESTITUTION / AIDE-MÉMOIRE</div><h2>Un échange qui débouche sur une action.</h2>'+
+ '<p>Ces cases sont uniquement un guide pendant l’appel ; aucune note n’est enregistrée dans le dossier.</p>'+
+ '<label><input type="checkbox"> Accueillir, confirmer l’objectif du patient et rappeler le cadre non médical.</label>'+
+ '<label><input type="checkbox"> Expliquer la différence entre indice déclaratif et observations webcam.</label>'+
+ '<label><input type="checkbox"> Discuter les résultats à vérifier et écouter les difficultés ressenties.</label>'+
+ '<label><input type="checkbox"> Présenter deux priorités accessibles et une prochaine étape.</label>'+
+ '<label><input type="checkbox"> Orienter vers Pulse Daily si adapté ou vers un bilan Motion instrumenté.</label>'+
+ '<p class="call-guide-note">Si un signal de sécurité ou une gêne importante est présent, ne pas proposer un programme autonome sans échange adapté. Les observations ne constituent pas un diagnostic.</p>'+
+ '<a class="btn secondary" href="https://app.acuityscheduling.com/schedule.php?owner=40696577" target="_blank" rel="noopener noreferrer">Voir les autres prestations KŌMØ ↗</a></section>'+
  '<div class="footnote">La vidéo, les photos et les données brutes webcam ne sont pas archivées. Ne jamais considérer les estimations webcam comme des mesures médicalement validées. Cette page ne permet pas de modifier le dossier.</div></section>';
 }
 function wireList(){
