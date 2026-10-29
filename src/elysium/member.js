@@ -329,7 +329,7 @@ function renderProductRoute(){
  const priceTitle=serviceElement('span','ely-shop-detail-label',fr?'DISPONIBILITÉ & TARIF':'AVAILABILITY & PRICING');
  const price=serviceElement('p','ely-shop-detail-price',fr?'Sur demande':'On request');
  const benefits=serviceElement('ul','ely-shop-detail-points');
- (fr?p.pointsFr:p.pointsEn||[]).forEach(x=>benefits.append(serviceElement('li','',x)));
+ ((fr?p.pointsFr:p.pointsEn)||[]).forEach(x=>benefits.append(serviceElement('li','',x)));
  const medical=['longevity','aesthetic','iv-drip'].includes(slug);
  const action=serviceElement('button','ely-shop-detail-buy',fr?(medical?'DEMANDER CETTE CONSULTATION ↗':'DEMANDER CETTE EXPÉRIENCE ↗'):(medical?'REQUEST THIS CONSULTATION ↗':'REQUEST THIS EXPERIENCE ↗'));
  action.type='button';action.addEventListener('click',()=>addSelection(p,slug));
