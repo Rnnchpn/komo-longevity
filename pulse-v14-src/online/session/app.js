@@ -181,6 +181,14 @@ function summary(){
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
   isPaid:Boolean(paidContext),
+  appointmentId:paidContext?.appointmentId||null,
+  async beforeDownload(){
+   if(!paidContext)return true;
+   persistProgress();
+   const saved=await dossierQueue?.flush();
+   if(!saved)secureSaveStatus('Sauvegarde du bilan à terminer avant téléchargement');
+   return Boolean(saved);
+  },
   getProgram(){return state.program;},
   updateProgram(program){state.program=program;persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
