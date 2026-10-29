@@ -43,8 +43,11 @@ export default async function handler(req,res) {
   // Allow actual processor transactions only, never 'marked paid' or unverified coupons.
   const total=transactions.filter(x=>x.transactionID&&['stripe','paypal','paypal_pro','braintree','authorizenet'].includes(String(x.processor||'').toLowerCase())).reduce((sum,x)=>sum+Number(x.amount||0),0);
   // To avoid mismatched currencies or partially paid bookings, also require the €49 offering.
-  const price=Number(appt.price??appt.cost??TOTAL_EUR);
-  const paid=Number.isFinite(total)&&total>=TOTAL_EUR&&Number.isFinite(price)&&Math.abs(price-TOTAL_EUR)<0.01;
+  const price=Number(appt.price??appt.cost??NaN);
+  const amountDue=appt.amountDue===undefined||appt.amountDue===null?null:Number(appt.amountDue);
+  const validBalance=amountDue===null||(Number.isFinite(amountDue)&&amountDue<=0);
+  const notMarkedUnpaid=appt.paid!==false&&appt.paid!=='no'&&appt.paid!=='unpaid';
+  const paid=Number.isFinite(total)&&total>=TOTAL_EUR&&Number.isFinite(price)&&Math.abs(price-TOTAL_EUR)<0.01&&validBalance&&notMarkedUnpaid;
   if(!paid)return res.status(403).json({error:'payment_not_confirmed'});
   return res.status(200).json({eligible:true,appointmentType:'online',paid:true});
  }catch(error){
