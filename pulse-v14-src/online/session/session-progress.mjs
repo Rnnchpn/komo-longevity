@@ -19,6 +19,14 @@ export function snapshotProgress(state){
   if(!testIds.has(id)||!r||!statuses.has(r.status))continue;
   const record={status:r.status,value:cleanNumber(r.value),quality:cleanNumber(r.quality),
    source:typeof r.source==='string'?r.source.slice(0,80):'webcam'};
+  if(id==='sts'&&r.normative&&typeof r.normative==='object'){
+   const v=r.normative;
+   record.normative={
+    exactAge:Number.isInteger(v.exactAge)&&v.exactAge>=60&&v.exactAge<=94?v.exactAge:null,
+    cohort:['men','women'].includes(v.cohort)?v.cohort:'',
+    protocolConfirmed:v.protocolConfirmed===true
+   };
+  }
   if(id==='posture'&&r.posture?.valid&&Number.isFinite(r.posture.surfaceIndexPct)){
    record.posture={valid:true,surfaceIndexPct:r.posture.surfaceIndexPct,
     method:'photo sagittale 2D',manualCapture:Boolean(r.posture.manualCapture)};
