@@ -9,7 +9,7 @@ const state={page:3,questionStep:4,task:5,returnToSummary:false,
   mediaStream:'SHOULD NOT STORE',rawVideo:'CAMERA FRAMES'},
  posture:{status:'done',value:8.5,posture:{valid:true,surfaceIndexPct:8.5,
   baseImage:'SECRET_IMAGE',neck:{x:.5}}},secret:{status:'done',value:99}},
- stream:{tracks:['VIDEO_BINARY']},engine:'MediaPipe',voice:'audio';
+ stream:{tracks:['VIDEO_BINARY']},engine:'MediaPipe',voice:'audio'};
 assert.equal(saveProgress(storage,state,1_000),true);
 const raw=data.get(PROGRESS_KEY);
 for(const token of ['SHOULD NOT STORE','CAMERA FRAMES','SECRET_IMAGE','VIDEO_BINARY','SECRET','MediaPipe']){
