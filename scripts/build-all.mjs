@@ -264,7 +264,8 @@ const scripts = [
   'scripts/komo-pulse-journey-qa-v1.mjs',
   'scripts/komo-home-booking-first-qa-v1.mjs',
   'scripts/acuity-connection-qa-v1.mjs',
-  'scripts/pulse-commercial-crm-qa-v1.mjs'
+  'scripts/pulse-commercial-crm-qa-v1.mjs',
+  'scripts/pulse-booking-first-access-qa-v1.mjs'
 ];
 
 for (const script of scripts) {
