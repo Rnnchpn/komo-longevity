@@ -6,6 +6,7 @@ const root=process.cwd();
 const html=await readFile(join(root,'site','pulse-v14','index.html'),'utf8');
 const app=await readFile(join(root,'site','pulse-v14','app.js'),'utf8');
 const css=await readFile(join(root,'site','pulse-v14','styles.css'),'utf8');
+const mineralCss=await readFile(join(root,'site','pulse-v14','pulse-graphite-mineral-v1.css'),'utf8');
 const onlineHtml=await readFile(join(root,'site','pulse-v14','online','index.html'),'utf8');
 const onlineScript=await readFile(join(root,'site','pulse-v14','online','app.js'),'utf8');
 const onlineCss=await readFile(join(root,'site','pulse-v14','online','styles.css'),'utf8');
@@ -55,6 +56,10 @@ const rootV14=rewrites.some(r=>r.source==='/'&&r.destination==='/pulse-v14/'&&ho
 const nestedV14=rewrites.some(r=>r.source==='/(.*)'&&r.destination==='/pulse-v14/$1'&&hostRule(r));
 
 const checks=[
+ ['graphite theme loaded after core CSS',html.indexOf('styles.css')>=0&&html.indexOf('pulse-graphite-mineral-v1.css')>html.indexOf('styles.css')],
+ ['entry graphite palette present',mineralCss.includes('#171e2b')&&mineralCss.includes('#aacce8')&&mineralCss.includes('.pulse-entry-panel')],
+ ['login and Acuity buttons remain intact',app.includes('pulseAcuityEntry')&&app.includes('pulseShowLogin')],
+
  ['booking-first cards',['Bilan Gratuit','Bilan Online','Bilan physique Motion'].every(x=>app.includes(x))],
  ['luxury motion art',app.includes('pulse-entry-kinetic')&&app.includes('pulse-offer-art-ring')],
  ['premium onboarding',app.includes('pulse-entry-monogram')&&app.includes('pulse-entry-steps')],
