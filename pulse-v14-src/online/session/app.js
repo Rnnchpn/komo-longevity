@@ -12,6 +12,7 @@ import {verifyPaidSession,getAppointmentFromBrowser,scopedProgressStorage,keepBo
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
+const PULSE_ROOT=location.pathname.startsWith('/pulse-v14/')?'/pulse-v14/':'/';
 const TEST_USER_ID = 'eef2c1ed-3872-47a7-84da-0f70b975c96f';
 const PHASES = ['Bienvenue','Questionnaire','Sécurité','Tests guidés','Synthèse'];
 const TESTS = [
@@ -66,7 +67,7 @@ function wrap(body){
   q('#leave').onclick=async()=>{
   stopTimer();stopCamera(true);
   if(dossierQueue){const saved=await dossierQueue.flush();if(!saved){secureSaveStatus('Enregistrement impossible : ne quittez pas avant de réessayer.');return;}}
-  clearProgress(progressStore);if(paidContext)clearBooking(store);dossierQueue?.destroy();window.location.assign('/');
+  clearProgress(progressStore);if(paidContext)clearBooking(store);dossierQueue?.destroy();window.location.assign(PULSE_ROOT);
  };
 }
 function feedback(text){const e=q('#message');if(e)e.textContent=text;}
@@ -276,7 +277,7 @@ async function boot(){
   const bookingMissing=reason==='booking_required';
   const rawId=new URLSearchParams(location.search).get('appointment')||'';
   const prefilled=/^[1-9][0-9]{0,11}$/.test(rawId)?'?appointment='+encodeURIComponent(rawId):'';
-  const activationLink='/online/activate/'+prefilled;
+  const activationLink=PULSE_ROOT+'online/activate/'+prefilled;
   const title=loginNeeded?'Connectez-vous pour réaliser votre bilan.':pending?'Votre réservation est vérifiée.':'Activez votre accès Online.';
   const message=loginNeeded?'Identifiez-vous sur Pulse avec votre adresse de réservation.':
     pending?'La consultation client est momentanément fermée pendant la mise en service de l’archivage sécurisé des résultats. Votre réservation reste valable.':
@@ -284,7 +285,7 @@ async function boot(){
     'Impossible de vérifier une réservation Online active et intégralement réglée pour ce compte. Vérifiez l’adresse e-mail, le numéro du rendez-vous et le paiement.';
   root.innerHTML='<section class="paper access"><span class="overline">ACCÈS SÉCURISÉ AU BILAN ONLINE</span><h1>'+
    esc(title)+'</h1><p>'+esc(message)+'</p><a class="action" href="'+
-   (loginNeeded?'/?#connexion':activationLink)+'">'+
+   (loginNeeded?PULSE_ROOT+'#connexion':activationLink)+'">'+
    (loginNeeded?'Me connecter à Pulse':'Vérifier ma réservation →')+'</a>'+
    (loginNeeded?'<p class="access-help">Première connexion après réservation ? <a href="'+esc(activationLink)+'">Activez votre compte avec votre e-mail Acuity →</a></p>':'')+
    '<p class="access-help">Besoin d’aide ? <a href="mailto:contact@komolongevity.com">Contacter KŌMØ</a></p></section>';
