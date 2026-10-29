@@ -306,3 +306,55 @@ button,a{-webkit-tap-highlight-color:transparent}
 @media(max-width:790px){.cc-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.cc-table-head{display:none}.cc-record{grid-template-columns:1fr auto;row-gap:9px}.cc-record>.cc-name{grid-column:1/2}.cc-record>span:nth-child(2){grid-column:1/2}.cc-record>span:nth-child(3){grid-column:1/2}.cc-record>.cc-stage{grid-column:2/3;grid-row:1/3;align-self:start}.cc-head{align-items:start}}
 @media(max-width:640px){.cc-hero{flex-direction:column;align-items:stretch;padding:27px 23px}.cc-hero .button{width:100%}.cc-stats{gap:10px}.cc-stats>div{padding:19px}.cc-stats strong{font-size:29px}.cc-site-tabs{width:100%;justify-content:space-around}.cc-site-tabs button{padding:10px 12px;font-size:10px}.cc-search{width:100%}.cc-workspace{padding:17px}.cc-form-grid,.cc-profile-grid{grid-template-columns:1fr}.cc-form-actions button{flex:1}.cc-record{padding:15px 10px}.cc-form,.cc-profile{padding:19px}.cc-head h3{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.cc-record,.cc-hero,.cc-site-tabs button{transition:none!important}}
+
+/* Patient account entry: booking first, activation after verified reservation. */
+.pulse-entry .login-story{background:linear-gradient(153deg,#182a20 0%,#274637 66%,#365645 100%);min-height:100vh}
+.pulse-entry .login-narrative{max-width:670px}
+.pulse-entry .login-narrative h1{font-size:clamp(46px,6.4vw,83px);line-height:1.01}
+.pulse-entry .login-narrative p{max-width:490px;line-height:1.75}
+.pulse-entry .login-panel{padding:clamp(22px,4.5vw,62px);background:#f6f5f0}
+.pulse-entry .pulse-entry-card{max-width:505px;width:100%;border-radius:28px;padding:clamp(26px,4vw,43px);box-shadow:0 24px 70px rgba(36,60,43,.07);border-color:#e2e6df}
+.pulse-entry-card h2{font-size:clamp(27px,2.6vw,38px);line-height:1.12;letter-spacing:-.045em;margin:10px 0 15px}
+.pulse-entry-card .pulse-entry-intro{font-size:15px;line-height:1.6;font-weight:600;color:#34483b;margin:0 0 24px}
+.pulse-entry-card .pulse-entry-primary{min-height:56px;display:flex;justify-content:space-between;gap:14px;border-radius:15px;font-size:13px;font-weight:700;padding:13px 19px;text-align:left}
+.pulse-entry-card .pulse-entry-primary span:last-child{font-size:23px;line-height:1}
+.pulse-entry-card .pulse-entry-note{font-size:12px;line-height:1.7;color:#6b796e;margin:15px 0 13px}
+.pulse-entry-cannes{display:inline-flex;gap:7px;align-items:center;font-size:12px;font-weight:650;text-decoration:underline;text-underline-offset:4px;color:#315a40;line-height:1.55}
+.pulse-entry-divider{display:flex;align-items:center;gap:12px;margin:25px 0 18px;font-size:10px;color:#9aa59b;font-weight:700;letter-spacing:.13em}
+.pulse-entry-divider::before,.pulse-entry-divider::after{content:"";height:1px;flex:1;background:#e0e6dc}
+.pulse-entry .pulse-entry-login-button{min-height:50px;border-radius:14px;font-size:12px;font-weight:700}
+.pulse-existing-login{margin:20px 0 0;padding:23px 21px;border:1px solid #dfe5db;border-radius:17px;background:#f9faf6}
+.pulse-existing-login-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:17px}
+.pulse-existing-login-head h3{margin:0;font:600 19px/1.25 Manrope,sans-serif}
+.pulse-existing-login .pulse-login-form label{display:grid;gap:7px;margin:0 0 13px}
+.pulse-existing-login .pulse-login-form label span{font-size:11px;font-weight:700}
+.pulse-existing-login .pulse-login-form input{background:#fff}
+.pulse-existing-login .pulse-login-form>.button{min-height:48px}
+.pulse-entry-help{margin:25px 0 0!important;padding-top:17px;border-top:1px solid #e1e6df;font-size:11px!important;line-height:1.75!important;color:#7b867b!important}
+.pulse-entry-help a{color:#315b41;font-weight:700;text-underline-offset:3px}
+.pulse-entry-steps{display:grid;gap:0;margin-top:33px;max-width:400px;border-top:1px solid rgba(255,255,255,.18)}
+.pulse-entry-steps>div{display:flex;align-items:center;gap:16px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.16);font-size:12px;color:#e2eee6}
+.pulse-entry-steps b{color:#9fbaa7;font:700 11px Manrope,sans-serif;letter-spacing:.1em}
+@media(max-width:960px){
+ .pulse-entry.login-page{grid-template-columns:1fr}
+ .pulse-entry .login-story{min-height:0;padding:28px 25px 24px;gap:22px}
+ .pulse-entry .login-story .brand{font-size:24px}
+ .pulse-entry .login-narrative h1{font-size:clamp(35px,7vw,51px)}
+ .pulse-entry .login-narrative p{font-size:13px;line-height:1.6}
+ .pulse-entry .login-foot{display:none}
+ .pulse-entry .pulse-entry-steps{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;border:0;margin-top:20px;max-width:none}
+ .pulse-entry .pulse-entry-steps>div{align-items:flex-start;flex-direction:column;gap:6px;font-size:10px;padding:10px 0;border-top:1px solid rgba(255,255,255,.16);border-bottom:0}
+ .pulse-entry .login-panel{padding:20px 16px 36px;display:block}
+ .pulse-entry .pulse-entry-card{margin:0 auto}
+}
+@media(max-width:540px){
+ .pulse-entry .login-story{padding:24px 19px 22px}
+ .pulse-entry .login-narrative h1{font-size:39px}
+ .pulse-entry .login-narrative p{font-size:12px}
+ .pulse-entry .pulse-entry-steps{gap:7px}
+ .pulse-entry .pulse-entry-steps>div{font-size:9px}
+ .pulse-entry .pulse-entry-card{padding:26px 21px;border-radius:23px}
+ .pulse-entry-card h2{font-size:29px}
+ .pulse-entry-card .pulse-entry-primary{font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){.pulse-entry .button{transition:none!important;transform:none!important}}
