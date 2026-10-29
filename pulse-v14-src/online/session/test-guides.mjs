@@ -4,7 +4,7 @@ export const TEST_GUIDES={
   purpose:"Observer votre capacité à vous relever puis à vous rasseoir pendant 30 secondes, à votre rythme.",
   setup:"Chaise solide contre un mur, pieds à plat au sol, caméra fixe de trois-quarts profil : tête, bassin, genoux et pieds visibles.",
   steps:[
-   "Asseyez-vous normalement, pieds posés au sol. Gardez un appui si vous en avez besoin.",
+   "Asseyez-vous pieds à plat, bras croisés si cela vous est possible. Une aide des mains reste possible pour la sécurité, mais empêche une comparaison normative standard.",
    "Quand la silhouette est détectée, dites « C’est parti ». Restez assis pendant le début du décompte.",
    "Relevez-vous, puis rasseyez-vous. Répétez à votre rythme pendant 30 secondes. Arrêtez si une gêne survient."
   ],
@@ -21,17 +21,6 @@ export const TEST_GUIDES={
   ],
   measured:"Le logiciel repère un déplacement vertical apparent du bassin, pas la force des mollets. Ce compteur expérimental peut être erroné.",
   audio:"Test sur la pointe des pieds. Mettez-vous debout, de profil, près d'un support stable. Vérifiez que vos pieds et votre bassin sont visibles. Dites c'est parti, puis montez doucement sur les pointes de pieds et redescendez pendant vingt secondes. Restez près de l'appui et arrêtez si vous ne vous sentez pas stable."
- },
- balance:{
-  purpose:"Vérifier simplement si votre silhouette reste visible pendant 10 secondes en position debout sécurisée.",
-  setup:"Debout, yeux ouverts, près d'un support solide. Ne prenez pas de position difficile ni d'appui précaire.",
-  steps:[
-   "Placez-vous debout près d'un support, yeux ouverts, pieds dans une position confortable.",
-   "Dites « C’est parti » après avoir vérifié la visibilité du corps.",
-   "Restez dans une position confortable pendant 10 secondes. Vous pouvez vous appuyer à tout moment."
-  ],
-  measured:"La webcam calcule la durée où elle voit votre corps : elle ne mesure ni les oscillations posturales ni un risque de chute.",
-  audio:"Test de visibilité en position debout. Placez-vous près d'un support stable, les yeux ouverts. Gardez une position confortable, sans chercher à vous mettre en difficulté. Dites c'est parti et restez visible pendant dix secondes. Ce test ne mesure pas votre équilibre de manière médicale."
  },
  posture:{
   purpose:"Documenter en photographie la position sagittale apparente du cou et du bassin, sans prétendre mesurer la SVA radiographique.",
