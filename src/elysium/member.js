@@ -56,6 +56,24 @@ async function applicationMode(){
  if(data?.length){$('#applicationHistory').style.display='block';$('#applicationHistory').textContent=tt('previous')+' · '+data[0].tier+' · '+data[0].status;}}
  catch(e){}
 }
+// Password login is handled on the ELYSIUM origin so existing KŌMØ users
+// are not redirected to the Pulse site by the Supabase Auth default Site URL.
+$('#passwordLoginForm')?.addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!client){say('#passwordLoginMessage',lang==='fr'?'Connexion indisponible.':'Sign-in unavailable.',true);return}
+ const email=$('#passwordEmail').value.trim(),password=$('#passwordValue').value;
+ const btn=$('#passwordLoginBtn');btn.disabled=true;
+ say('#passwordLoginMessage',lang==='fr'?'Vérification de votre compte…':'Verifying your account…');
+ try{
+  const {error}=await client.auth.signInWithPassword({email,password});
+  if(error)throw error;
+  $('#passwordValue').value='';
+  say('#passwordLoginMessage','');
+  await start();
+ }catch(err){
+  say('#passwordLoginMessage',lang==='fr'?'Adresse ou mot de passe incorrect. Vérifiez vos identifiants KŌMØ.':'Incorrect email or password. Please check your KŌMØ credentials.',true);
+ }finally{btn.disabled=false}
+});
 $('#loginForm')?.addEventListener('submit',async e=>{
  e.preventDefault();const email=$('#email').value.trim();const btn=$('#loginBtn');btn.disabled=true;
  say('#loginMessage',tt('wait'));
