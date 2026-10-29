@@ -1,4 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { createPoseEngine } from './pose-engine.js';
+import { createMovementTracker } from './metrics.mjs';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
@@ -8,9 +10,9 @@ const TESTS = [
   {id:'sts',name:'Se relever de la chaise',detail:'30 secondes · observer les répétitions',seconds:30,unit:'répétitions',instruction:'Utilisez une chaise stable, contre un mur. Restez à votre rythme et ne forcez pas.'},
   {id:'heels',name:'Élévations sur les pointes',detail:'20 secondes · observer les répétitions',seconds:20,unit:'répétitions',instruction:'Gardez un appui stable à proximité. Arrêtez-vous en cas d’instabilité.'},
   {id:'balance',name:'Équilibre statique sécurisé',detail:'10 secondes · observer le maintien',seconds:10,unit:'secondes',instruction:'Près d’un support fixe, yeux ouverts. Ne réalisez pas cet exercice sans un encadrement adapté.'},
-  {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Observation qualitative · sans angle chiffré',seconds:0,unit:'observation',instruction:'Levez les bras sans forcer, dans une amplitude confortable.'}
+  {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Observation qualitative · sans angle chiffré',seconds:20,unit:'mouvements',instruction:'Levez les bras sans forcer, dans une amplitude confortable.'}
 ];
-const state = {page:0,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false};
+const state = {page:0,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const q = selector=>root.querySelector(selector);
 const btn = (id,title,secondary=false)=>'<button type="button" class="action'+(secondary?' secondary':'')+'" id="'+id+'">'+title+'</button>';
@@ -18,6 +20,8 @@ const btn = (id,title,secondary=false)=>'<button type="button" class="action'+(s
 function stopTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
 function stopCamera(){
   state.request++;
+  if(state.engine){state.engine.stop();state.engine=null;}
+  state.bodyReady=false;
   if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
   const v=q('#live-video');
   if(v){v.pause();v.srcObject=null;}
