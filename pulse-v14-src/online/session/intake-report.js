@@ -69,7 +69,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  dailyProgramMarkup(answers,results,blocked,program)+
  (persisted?'<section class="online-consultation-handoff"><span class="overline">BILAN MOTION ONLINE · 49 €</span><h2>Votre échange final en visioconférence</h2><p>Votre première restitution est prête. Lors du rendez-vous, les performances observées, les limites techniques et vos deux axes prioritaires pourront être discutés avec l’opérateur. Retrouvez le lien de visioconférence dans votre confirmation Acuity.</p><p>Le Passeport PDF constitue un compte rendu fonctionnel initial, sans validation professionnelle automatique. Il ne remplace pas une consultation médicale.</p></section>':'')+
  '<p class="notice">'+(persisted?'Les questionnaires et mesures chiffrées de cette réservation à 49 € sont conservés dans votre dossier Pulse privé. Vous pouvez retrouver et régénérer votre passeport depuis cette séance ; le fichier PDF lui-même n’est pas archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
- '<div class="pdf-download-box"><div><strong>'+(persisted?'Mon Passeport Motion Online — 49 €':'Votre rapport Motion, en PDF')+'</strong><p>Questionnaires, quatre domaines, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est généré localement. Les résultats non vérifiés restent signalés.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon Passeport PDF</button></div>'+
+ '<div class="pdf-download-box"><div><strong>'+(persisted?'Mon Passeport Motion Online — 49 €':'Votre rapport Motion, en PDF')+'</strong><p>Questionnaires, quatre domaines, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est généré localement. Les résultats non vérifiés restent signalés.</p></div><div class="report-pdf-actions"><button type="button" class="action" id="download-pdf">↓ Télécharger mon Passeport PDF</button><button type="button" class="action secondary" id="preview-pdf">↗ Ouvrir sur téléphone</button></div></div><div id="pdf-preview-link" class="pdf-preview-link" aria-live="polite"></div>'+
  '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button>'+(persisted?'':'<button type="button" class="action" id="restart">Recommencer la démonstration →</button>')+'</div><p id="report-message" class="message" role="status"></p></section>';
 }
 export function bindReport(root,answers,results,callbacks,blocked=false){
@@ -119,21 +119,55 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
   root.querySelector('#kms-error').textContent=computed.complete?'Résultat calculé. Non enregistré.':'Le score n’est pas disponible tant que toutes les conditions ne sont pas réunies.';
  };
  }
- root.querySelector('#download-pdf').onclick=async()=>{
-  const button=root.querySelector('#download-pdf');
+ let pdfExportInProgress=false;
+ let previewObjectUrl=null;
+ window.addEventListener('pagehide',()=>{if(previewObjectUrl)URL.revokeObjectURL(previewObjectUrl);},{once:true});
+ const downloadButton=root.querySelector('#download-pdf');
+ const previewButton=root.querySelector('#preview-pdf');
+ async function deliverPdf(openOnMobile=false){
+  if(pdfExportInProgress)return;
+  pdfExportInProgress=true;
+  downloadButton.disabled=true;previewButton.disabled=true;
   const message=root.querySelector('#report-message');
-  if(button.disabled)return;
-  button.disabled=true;button.textContent='Création du PDF…';
-  message.textContent='Préparation du rapport sur votre appareil…';
+  const previewSlot=root.querySelector('#pdf-preview-link');
+  const previousDownloadLabel=downloadButton.textContent;
+  const previousPreviewLabel=previewButton.textContent;
+  if(openOnMobile)previewButton.textContent='Préparation de la lecture…';
+  else downloadButton.textContent='Création du PDF…';
+  message.textContent='Préparation du Passeport Motion sur votre appareil…';
   try{
    if(callbacks.isPaid&&!(await callbacks.beforeDownload?.()))throw Error('secure_snapshot_not_saved');
-   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{mode:callbacks.isPaid?'ONLINE49':'DEMONSTRATION',program:callbacks.getProgram?.(),appointmentId:callbacks.appointmentId});
-   const filename=await downloadMotionPdf(payload);
-   message.textContent='Passeport PDF prêt : '+filename+'. Les mesures du bilan sont conservées dans Pulse, pas le PDF lui-même.';
+   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{
+    mode:callbacks.isPaid?'ONLINE49':'DEMONSTRATION',
+    program:callbacks.getProgram?.(),
+    appointmentId:callbacks.appointmentId
+   });
+   if(openOnMobile){
+    const ready=await downloadMotionPdf(payload,{asBlobUrl:true});
+    if(previewObjectUrl)URL.revokeObjectURL(previewObjectUrl);
+    previewObjectUrl=ready.url;
+    const link=document.createElement('a');
+    link.href=ready.url;link.target='_blank';link.rel='noopener noreferrer';
+    link.className='action';link.textContent='Ouvrir mon Passeport PDF dans un nouvel onglet ↗';
+    const tip=document.createElement('p');
+    tip.textContent='Sur iPhone, ouvrez le PDF puis utilisez Partager pour l’enregistrer dans Fichiers.';
+    previewSlot.replaceChildren(link,tip);
+    message.textContent='Votre Passeport PDF est prêt. Touchez le lien ci-dessus pour le consulter.';
+   }else{
+    const filename=await downloadMotionPdf(payload);
+    message.textContent='Passeport PDF prêt : '+filename+'. Les mesures du bilan sont conservées dans Pulse, pas le PDF lui-même.';
+   }
   }catch(error){
-   message.textContent=String(error?.message)==='secure_snapshot_not_saved'?'Sauvegarde sécurisée incomplète : vos résultats doivent être enregistrés dans Pulse avant de générer le PDF. Vérifiez votre connexion.':'La création du PDF a échoué. Vérifiez votre connexion au chargement initial du module, puis réessayez.';
-  }finally{button.disabled=false;button.textContent='↓ Télécharger mon rapport PDF';}
- };
+   message.textContent=String(error?.message)==='secure_snapshot_not_saved'?
+    'Sauvegarde sécurisée incomplète : vos résultats doivent être enregistrés dans Pulse avant de générer le PDF. Vérifiez votre connexion.':
+    'La création du PDF a échoué. Vérifiez votre connexion au chargement du module, puis réessayez ou utilisez Imprimer.';
+  }finally{
+   pdfExportInProgress=false;downloadButton.disabled=false;previewButton.disabled=false;
+   downloadButton.textContent=previousDownloadLabel;previewButton.textContent=previousPreviewLabel;
+  }
+ }
+ downloadButton.onclick=()=>deliverPdf(false);
+ previewButton.onclick=()=>deliverPdf(true);
  root.querySelector('#print-report').onclick=()=>window.print();
  root.querySelector('#copy-report').onclick=async()=>{
   const profile=scoreIntake(answers);
