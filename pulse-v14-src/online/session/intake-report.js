@@ -65,7 +65,7 @@ export function reportMarkup(answers,results,blocked){
  '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section>'+
  '<p class="notice">Mode test : réponses, résultats et calculs restent dans cette page et ne sont pas sauvegardés sur un serveur. Les patients devront disposer d’un compte et d’un dossier rattachés à une réservation réglée avant tout stockage sécurisé.</p>'+
  '<div class="pdf-download-box"><div><strong>Votre rapport Motion, en PDF</strong><p>Questionnaires, sous-scores, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est créé localement et reste sur votre appareil.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon rapport PDF</button></div>'+
- '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
+ '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
 }
 export function bindReport(root,answers,results,callbacks,blocked=false){
  const stsRecord=results.sts;
@@ -124,6 +124,7 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
    message.textContent='La création du PDF a échoué. Vérifiez votre connexion au chargement initial du module, puis réessayez.';
   }finally{button.disabled=false;button.textContent='↓ Télécharger mon rapport PDF';}
  };
+ root.querySelector('#print-report').onclick=()=>window.print();
  root.querySelector('#copy-report').onclick=async()=>{
   const profile=scoreIntake(answers);
   const testValues=Object.fromEntries(Object.entries(results).map(([key,val])=>[key,{value:val.value??null,status:val.status??'inconnu',quality:val.quality??null}]));
