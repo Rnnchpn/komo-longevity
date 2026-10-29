@@ -282,6 +282,8 @@ const scripts = [
   'scripts/pulse-online-dossier-qa.mjs',
   // Motion Passport editorial synthesis, four-week self-report plan and PDF report.
   'scripts/pulse-passport-daily-qa.mjs',
+  // Returning online patients should see their own saved passport in the standard Pulse workspace.
+  'scripts/pulse-online-passport-dashboard-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
   'scripts/komo-offers-online-20261029.mjs',
   // Absolute final premium visual layer and regression checks. Business logic untouched.
