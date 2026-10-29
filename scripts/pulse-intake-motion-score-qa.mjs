@@ -30,7 +30,7 @@ assert.ok(intakeMarkup(best,1).includes('Marcher dehors pendant 10 minutes'));
 assert.ok(intakeMarkup(partial,1).includes('QUESTIONNAIRES'));
 const report=reportMarkup(best,{},false);
 assert.ok(report.includes('Motion Score indisponible'));
-assert.ok(report.includes('Indice de profil déclaré'));
+assert.ok(report.includes('INDICE DE PROFIL DÉCLARÉ'));
 assert.ok(report.includes('TUG'));
 assert.ok(report.includes('SPPB'));
 assert.ok(report.includes('questionnaires')||report.includes('déclaratif'));
