@@ -48,7 +48,7 @@ function paidUser(user,accessToken){
      '<p>Votre accès à la séance Online est disponible. La caméra et le microphone ne seront activés qu’avec votre accord, au début des tests.</p>'+
      '<div class="actions"><a class="action" href="/online/session/?appointment='+encodeURIComponent(id)+'">Commencer mon bilan Motion →</a>'+
      '<a class="action secondary" href="/">Mon espace Pulse</a></div>'+
-     restitutionMarkup({appointmentAt:result.appointmentAt,appointmentId:id,appointmentMinutes:result.appointmentMinutes,compact:true})+
+     restitutionMarkup({appointmentAt:result.appointmentAt,appointmentId:id,appointmentMinutes:result.appointmentMinutes,meetingJoinUrl:result.meetingJoinUrl,compact:true})+
      '<p>Après votre consentement, votre progression sera enregistrée dans votre dossier privé Pulse pour être reprise ultérieurement. Les vidéos et les photos ne seront pas stockées. Le rapport PDF restera téléchargé séparément. Cette prestation ne constitue pas une consultation médicale.</p>');
    }else{
     title('<div class="notice"><strong>✓ Votre réservation Online et votre règlement sont vérifiés.</strong></div>'+
