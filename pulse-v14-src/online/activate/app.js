@@ -40,10 +40,20 @@ function paidUser(user,accessToken){
    const r=await fetch('/api/pulse-online-verify',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+accessToken},body:JSON.stringify({appointmentId:id}),credentials:'omit',cache:'no-store'});
    const result=await r.json();
    if(!r.ok||!result.eligible){b.disabled=false;message(result.error==='payment_not_confirmed'?'Paiement non confirmé par Acuity. Vérifiez votre règlement et contactez-nous si nécessaire.':result.error==='booking_verification_not_configured'||r.status===503?'Service de vérification momentanément indisponible. Contactez contact@komolongevity.com.':'Réservation non vérifiée. Vérifiez que le numéro et votre adresse e-mail correspondent à la confirmation Acuity.');return;}
-   title('<div class="notice" style="background:#e9f3e6;border-color:#4f8a60;color:#2b5a3a"><strong>✓ Votre réservation Online réglée est vérifiée.</strong></div>'+
-   '<p>Votre adresse e-mail a été confirmée. Vous pouvez préparer votre caméra en attendant votre séance accompagnée. Utilisez le lien de visioconférence indiqué dans votre confirmation Acuity pour rejoindre votre intervenant.</p>'+
-   '<div class="actions"><a class="action" href="/online/">Préparer ma webcam →</a><a class="action secondary" href="/">Accéder à Pulse</a></div>'+
-   '<p>Le rattachement automatique du dossier Online, le formulaire confidentiel et la publication des résultats sont en cours de mise en service. Cette vérification ne signifie pas que le dossier clinique est déjà créé.</p>');
+   if(result.canStart===true){
+    // A booking number is not authorization. The session page re-verifies
+    // identity + Acuity payment with the server on every new page load.
+    title('<div class="notice"><strong>✓ Votre réservation et votre règlement sont vérifiés.</strong></div>'+
+     '<p>Votre accès à la séance Online est disponible. La caméra et le microphone ne seront activés qu’avec votre accord, au début des tests.</p>'+
+     '<div class="actions"><a class="action" href="/online/session/?appointment='+encodeURIComponent(id)+'">Commencer mon bilan Motion →</a>'+
+     '<a class="action secondary" href="/">Mon espace Pulse</a></div>'+
+     '<p>Votre progression est temporairement conservée sur cet appareil. Les résultats ne sont pas encore archivés dans un dossier patient ; ce parcours n’est pas une consultation médicale.</p>');
+   }else{
+    title('<div class="notice"><strong>✓ Votre réservation Online et votre règlement sont vérifiés.</strong></div>'+
+     '<p>La consultation en ligne reste temporairement fermée aux comptes clients pendant les derniers contrôles de confidentialité et d’enregistrement des résultats.</p>'+
+     '<p>Votre réservation demeure valable. Utilisez le lien de visioconférence transmis dans la confirmation Acuity pour votre rendez-vous accompagné, ou contactez notre équipe.</p>'+
+     '<div class="actions"><a class="action" href="/">Accéder à Pulse</a><a class="action secondary" href="mailto:contact@komolongevity.com">Nous contacter</a></div>');
+   }
   }catch(error){b.disabled=false;message('Impossible de joindre le système de réservation. Réessayez plus tard.');}
  };
 }
