@@ -2,6 +2,7 @@ import {createPoseEngine} from './pose-engine.js';
 import {createMovementTracker} from './metrics.mjs';
 import {createVoiceControl} from './voice-control.js';
 import {TEST_GUIDES} from './test-guides.mjs';
+import {createCaptureEnhancements} from './capture-enhancements.js';
 
 // Guided browser-only capture. The observer must remain visible to count repetitions.
 export function mountMotionController(root,task,record,state,callbacks){
@@ -19,7 +20,7 @@ export function mountMotionController(root,task,record,state,callbacks){
  const consent=q('#pose-consent');
  consent.onchange=()=>{on.disabled=!consent.checked||Boolean(state.stream);};
  const tracker=createMovementTracker(task.id);
- state.tracker=tracker;state.bodyReady=false;state.sessionActive=false;state.sessionFinished=false;
+ state.tracker=tracker;state.bodyReady=false;state.sessionActive=false;state.sessionFinished=false;state.countdownActive=false;
  let validStreak=0,lastMessageAt=0,disposed=false;
  let readingInstructions=false;
  const voice=createVoiceControl({
@@ -81,6 +82,7 @@ export function mountMotionController(root,task,record,state,callbacks){
   utterance.onerror=()=>{readingInstructions=false;if(q('#guide-audio-status'))q('#guide-audio-status').textContent='Lecture indisponible. Consultez les instructions affichées.';};
   window.speechSynthesis.speak(utterance);
  };
+ const enhancements=createCaptureEnhancements({root,task,voice,state,record});
  const info=s=>{const e=q('#camera-message');if(e)e.textContent=s};
  const status=s=>{const e=q('#motion-status');if(e)e.textContent=s};
  const value=n=>{
@@ -89,21 +91,23 @@ export function mountMotionController(root,task,record,state,callbacks){
  };
  function finish(interrupted=false){
   clearInterval(state.timer);state.timer=null;state.sessionActive=false;state.sessionFinished=true;
-  const stats=tracker.summary();
+  enhancements.stopCountdown();
+  const posture=task.id==='posture'?enhancements.postureSummary():null;
+  const stats=posture?{visibilityRatio:posture.validRatio/100}:tracker.summary();
   if(task.id==='balance')value(task.seconds*stats.visibilityRatio);
-  record.status=!interrupted&&stats.visibilityRatio>=.55?'done':'review';
-  record.quality=Math.round(stats.visibilityRatio*100);record.source='webcam';
+  if(posture){record.posture=posture;value(posture.goodFrames);enhancements.renderPosture(posture);}
+  record.status=!interrupted&&stats.visibilityRatio>=.55&&(!posture||posture.valid)?'done':'review';
+  record.quality=Math.round(stats.visibilityRatio*100);record.source=posture?'posture 2D webcam':'webcam';
   state.results[task.id]=record;
   go.disabled=true;go.textContent=interrupted?'Test arrêté':'Test terminé';redo.hidden=false;halt.hidden=true;
   status(interrupted?'Test arrêté à la voix ou au bouton. Résultat partiel à vérifier ou recommencer.':
    stats.visibilityRatio>=.55?'Mesure automatique terminée. Vérifiez le résultat avant de continuer.':
    'Image partiellement perdue : résultat à vérifier ou recommencer.');
-  if(voice.isEnabled()&&'speechSynthesis' in window&&window.SpeechSynthesisUtterance){
-   try{const u=new SpeechSynthesisUtterance(interrupted?'Test arrêté':'Test terminé');u.lang='fr-FR';u.rate=1;window.speechSynthesis.speak(u);}catch{}
-  }
+  enhancements.completed(interrupted);
  }
  function stopCapture(){
   state.sessionActive=false;
+  enhancements.stopCountdown();
   if(state.timer){clearInterval(state.timer);state.timer=null;}
   state.request++;
   if(state.engine){state.engine.stop();state.engine=null;}
@@ -115,7 +119,7 @@ export function mountMotionController(root,task,record,state,callbacks){
  }
  function sample(points,time){
   if(disposed||document.hidden)return;
-  const result=tracker.observe(points,time);
+  const result=task.id==='posture'?enhancements.detect(points):tracker.observe(points,time);
   validStreak=result.valid?Math.min(9,validStreak+1):0;
   state.bodyReady=validStreak>=3;
   const tag=q('#pose-quality'),hud=q('#camera-hud');
@@ -124,15 +128,18 @@ export function mountMotionController(root,task,record,state,callbacks){
   if(!state.sessionActive&&!state.sessionFinished)go.disabled=!state.bodyReady;
   if(time-lastMessageAt>580){info(result.valid?'33 points détectés · traitement local · caméra fixe':result.message);lastMessageAt=time;}
   if(!state.sessionActive||!result.valid)return;
-  if(task.id!=='balance')value(result.count);
-  else value(Math.min(task.seconds,(time-state.startedAt)/1000)*tracker.summary().visibilityRatio);
+  if(task.id==='posture')value(result.goodFrames||0);
+  else if(task.id!=='balance'){
+   enhancements.onCount(result.count);
+   value(result.count);
+  }else value(Math.min(task.seconds,(time-state.startedAt)/1000)*tracker.summary().visibilityRatio);
  }
  on.onclick=async()=>{
   if(!consent.checked){info('Autorisez d’abord la détection du mouvement.');return;}
   if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){
     info('Caméra indisponible : ouvrez la page avec HTTPS sur un navigateur récent.');return;
   }
-  on.disabled=true;const ticket=++state.request;
+  enhancements.unlock();on.disabled=true;const ticket=++state.request;
   let opened=null;
   try{
    info('Autorisez la caméra puis patientez pendant le chargement du détecteur…');
@@ -157,27 +164,34 @@ export function mountMotionController(root,task,record,state,callbacks){
  };
  stop.onclick=()=>{voice.disable();stopCapture();info('Caméra éteinte. Micro et caméra coupés. Aucune vidéo enregistrée.');status('Activez la caméra pour reprendre.');};
  go.onclick=()=>{
-  if(!state.bodyReady||!state.engine||!state.stream||state.sessionActive)return;
-  tracker.reset();value(0);record.status='pending';record.source='webcam';
-  state.sessionActive=true;state.sessionFinished=false;
-  halt.hidden=false;
-  state.startedAt=performance.now();state.remaining=task.seconds;
-  if(voice.isEnabled()&&'speechSynthesis' in window&&window.SpeechSynthesisUtterance){
-   try{const u=new SpeechSynthesisUtterance('Départ du test');u.lang='fr-FR';window.speechSynthesis.speak(u);}catch{}
-  }
-  go.disabled=true;go.textContent='Analyse en cours…';redo.hidden=true;
-  q('#camera-live-score').hidden=false;
-  status(task.id==='sts'?'Asseyez-vous, puis relevez-vous et rasseyez-vous sans vous précipiter.':
-    'Réalisez les mouvements à votre rythme et en sécurité.');
-  state.timer=setInterval(()=>{
-   if(!state.sessionActive)return;
-   const elapsed=Math.min(task.seconds,(performance.now()-state.startedAt)/1000);
-   state.remaining=Math.max(0,Math.ceil(task.seconds-elapsed));
-   q('#time').textContent=String(state.remaining);
-   if(elapsed>=task.seconds)finish();
-  },100);
+  if(!state.bodyReady||!state.engine||!state.stream||state.sessionActive||state.countdownActive||disposed)return;
+  enhancements.unlock();record.status='pending';record.source='webcam';
+  go.disabled=true;go.textContent='3, 2, 1…';redo.hidden=true;halt.hidden=false;
+  status('Départ dans trois secondes. Attendez « Top ! » avant de bouger.');
+  void enhancements.begin(()=>{
+   if(disposed||!state.stream||!state.engine)return;
+   tracker.reset();enhancements.reset();value(0);
+   state.sessionActive=true;state.sessionFinished=false;
+   state.startedAt=performance.now();state.remaining=task.seconds;
+   go.textContent='Analyse en cours…';
+   q('#camera-live-score').hidden=false;
+   status(task.id==='sts'?'Top ! Relevez-vous puis rasseyez-vous à votre rythme.':
+     task.id==='posture'?'Top ! Restez face à la caméra dans une position naturelle.':
+     'Top ! Réalisez les mouvements doucement et en sécurité.');
+   state.timer=setInterval(()=>{
+    if(!state.sessionActive)return;
+    const elapsed=Math.min(task.seconds,(performance.now()-state.startedAt)/1000);
+    state.remaining=Math.max(0,Math.ceil(task.seconds-elapsed));
+    q('#time').textContent=String(state.remaining);
+    enhancements.onRemaining(state.remaining);
+    if(elapsed>=task.seconds)finish();
+   },100);
+  },()=>{
+    go.disabled=!state.bodyReady;go.textContent='C’est parti →';halt.hidden=true;
+  });
  };
  redo.onclick=()=>{
+  enhancements.stopCountdown();enhancements.reset();
   state.sessionActive=false;state.sessionFinished=false;
   if(state.timer){clearInterval(state.timer);state.timer=null;}
   tracker.reset();state.remaining=task.seconds;value(0);
@@ -185,9 +199,14 @@ export function mountMotionController(root,task,record,state,callbacks){
   go.disabled=!state.bodyReady;go.textContent='C’est parti →';
   redo.hidden=true;halt.hidden=true;status('Prêt pour une nouvelle mesure.');
  };
- q('#plus').onclick=()=>{value((record.value||0)+1);record.source='corrigé manuellement';};
- q('#minus').onclick=()=>{value((record.value||0)-1);record.source='corrigé manuellement';};
- halt.onclick=()=>{if(state.sessionActive)finish(true);};
+ if(task.id!=='posture'){
+  q('#plus').onclick=()=>{value((record.value||0)+1);record.source='corrigé manuellement';};
+  q('#minus').onclick=()=>{value((record.value||0)-1);record.source='corrigé manuellement';};
+ }
+ halt.onclick=()=>{
+  if(state.countdownActive){enhancements.stopCountdown();halt.hidden=true;go.disabled=!state.bodyReady;go.textContent='C’est parti →';status('Départ annulé. Dites « C’est parti » pour recommencer.');}
+  else if(state.sessionActive)finish(true);
+ };
  q('#skip').onclick=()=>{stopCapture();record.status='skipped';record.value=0;record.source='non réalisé';state.results[task.id]=record;callbacks.advance();};
  q('#go').onclick=()=>{
   if(!state.sessionFinished){
@@ -201,7 +220,7 @@ export function mountMotionController(root,task,record,state,callbacks){
  return ()=>{
   if(disposed)return;
   disposed=true;
-  voice.destroy();
+  voice.destroy();enhancements.destroy();
   if('speechSynthesis' in window){try{window.speechSynthesis.cancel();}catch{}}
   stopCapture();
  };
