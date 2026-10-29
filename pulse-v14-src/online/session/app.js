@@ -5,6 +5,7 @@ import { INTAKE_GROUPS } from './intake-model.mjs';
 import { intakeMarkup,bindIntake } from './intake-view.js';
 import { reportMarkup,bindReport } from './intake-report.js';
 import {sharedMotionMedia} from './shared-media.js';
+import {TERMINAL_TEST_STATUSES,testNavigatorMarkup,completedTestMarkup,mountTestNavigation} from './test-navigation.js';
 import {saveProgress,loadProgress,clearProgress} from './session-progress.mjs';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -36,7 +37,7 @@ function stopCamera(release=false){
   }
   state.request++;
   if(state.engine){state.engine.stop();state.engine=null;}
-  state.bodyReady=false;
+  state.bodyReady=false;state.sessionActive=false;state.sessionFinished=false;state.countdownActive=false;
   if(release){sharedMotionMedia.stopAll();state.stream=null;}
   else state.stream=sharedMotionMedia.getStream();
   const v=q('#live-video');
@@ -95,9 +96,36 @@ function safety(){
     next();
   };
 }
+function jumpToTest(index){
+ if(state.page!==3&&state.page!==4)return false;
+ if(state.answers.safety!=='no')return false;
+ if(!Number.isInteger(index)||index<0||index>=TESTS.length)return false;
+ if(state.page===3&&(state.sessionActive||state.countdownActive))return false;
+ state.page=3;state.task=index;state.remaining=0;
+ render();
+ return true;
+}
 function test(){
  const t=TESTS[state.task],record=state.results[t.id]||{value:0,status:'pending',source:'webcam'};
- wrap(motionMarkup(t,state.task,TESTS.length));
+ const existing=TERMINAL_TEST_STATUSES.has(record.status);
+ state.sessionActive=false;state.sessionFinished=false;state.countdownActive=false;
+ const body=existing?completedTestMarkup(t,record):motionMarkup(t,state.task,TESTS.length);
+ wrap(testNavigatorMarkup(TESTS,state.results,state.task)+body);
+ mountTestNavigation(root,TESTS,state.results,jumpToTest,state.task);
+ if(existing){
+  q('#redo-stored-test').onclick=()=>{
+   // The old value is dropped only on explicit retake, never when merely visiting.
+   delete state.results[t.id];
+   sharedMotionMedia.resetReady(t.id);
+   persistProgress();render();
+  };
+  q('#stop-review-camera').onclick=()=>{sharedMotionMedia.stopAll();state.stream=null;q('#stop-review-camera').textContent='Caméra et micro arrêtés';q('#stop-review-camera').disabled=true;};
+  q('#keep-stored-test').onclick=()=>{
+   if(state.task<TESTS.length-1){state.task++;render();}
+   else {state.page=4;render();}
+  };
+  return;
+ }
  currentMotionCleanup=mountMotionController(root,t,record,state,{
   checkpoint(){persistProgress();},
   advance(){
@@ -115,7 +143,10 @@ function test(){
  });
 }
 function summary(){
- wrap(reportMarkup(state.answers,state.results,state.answers.safety==='yes'));
+ const blocked=state.answers.safety==='yes';
+ wrap((blocked?'':testNavigatorMarkup(TESTS,state.results,null))+
+  reportMarkup(state.answers,state.results,blocked));
+ if(!blocked)mountTestNavigation(root,TESTS,state.results,jumpToTest,null);
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},

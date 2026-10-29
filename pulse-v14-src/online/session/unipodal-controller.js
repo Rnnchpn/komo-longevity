@@ -130,13 +130,13 @@ export function mountUnipodal(root,task,record,state,callbacks){
  halt.onclick=()=>{if(started&&!completed)end(true);};
  redo.onclick=()=>{
   sharedMotionMedia.resetReady(task.id);
-  observer.reset();started=false;completed=false;record.status='pending';record.value=0;
+  observer.reset();started=false;completed=false;record.status='pending';record.value=0;delete state.results[task.id];callbacks.checkpoint?.();
   next.disabled=true;redo.hidden=true;halt.hidden=true;
   text('#time','20');text('#value','0.0');text('#camera-reps','0');
   text('#motion-status','Reposez les deux pieds, puis soulevez à nouveau le pied opposé.');
  };
  next.onclick=()=>{if(!completed)return;stopCamera();callbacks.advance();};
- q('#skip').onclick=()=>{stopCamera();record.status='skipped';record.value=0;callbacks.advance();};
+ q('#skip').onclick=()=>{stopCamera();record.status='skipped';record.value=0;record.source='non réalisé';state.results[task.id]=record;callbacks.checkpoint?.();callbacks.advance();};
  q('#back').onclick=()=>{stopCamera();callbacks.back();};
  if(sharedMotionMedia.availableCamera()){
   consent.checked=true;start.disabled=false;

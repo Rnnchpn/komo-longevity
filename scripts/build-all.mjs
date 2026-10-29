@@ -266,6 +266,8 @@ const scripts = [
   'scripts/pulse-profile-unipodal-qa.mjs',
   // Posture fallback and source-linked age norms must not infer unmeasured health outcomes.
   'scripts/pulse-profile-age-qa.mjs',
+  // Revisit any completed test without losing earlier results.
+  'scripts/pulse-test-navigation-qa.mjs',
   // Patient self-report & reference Motion Score calculation with zero missing-data substitution.
   'scripts/pulse-intake-motion-score-qa.mjs',
   // PDF exports must preserve missing Motion Score states and contain all questionnaire answers.
