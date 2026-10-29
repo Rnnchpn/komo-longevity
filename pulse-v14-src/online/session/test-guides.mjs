@@ -24,14 +24,14 @@ export const TEST_GUIDES={
  },
  posture:{
   purpose:"Documenter en photographie la position sagittale apparente du cou et du bassin, sans prétendre mesurer la SVA radiographique.",
-  setup:"Téléphone ou ordinateur fixe, caméra horizontale à hauteur du bassin, exactement de profil (90°). Placez-vous assez loin pour voir épaules, bassin, genoux et pieds.",
+  setup:"Téléphone ou ordinateur posé et immobile, à hauteur du bassin. Placez-vous de profil (90°), à distance suffisante pour montrer les pieds.",
   steps:[
    "Tenez-vous naturellement de profil, sans chercher à vous redresser ni à corriger votre posture.",
-   "Activez la caméra : lorsque la silhouette est bien cadrée et immobile pendant environ trois secondes, la photo est prise automatiquement.",
-   "Regardez la photo et, si nécessaire, ajustez les deux repères de surface en touchant l’image. Vous pouvez reprendre la photo."
+   "Placez-vous et restez tranquille : dès que le profil est reconnu, Pulse prononce « 3, 2, 1, Top ! » et prend la photo automatiquement.",
+   "La photo s’affiche aussitôt. Vous pouvez continuer directement ou ouvrir « Modifier les repères » si nécessaire."
   ],
   measured:"Un indice photographique en pourcentage : distance horizontale apparente entre un repère cervico-thoracique superficiel et un repère pelvien superficiel, divisée par la hauteur apparente épaule–cheville. Ni C7 ni S1 ne sont détectés par la webcam : ce n'est pas une SVA en millimètres et cela ne permet pas de diagnostiquer une scoliose.",
-  audio:"Photo de profil. Placez la caméra immobile à hauteur du bassin et tenez-vous de profil, avec tout le corps visible. Ne cherchez pas à vous redresser. Restez immobile : la photographie se déclenche automatiquement après environ trois secondes de stabilité. Ensuite, vous pourrez ajuster les repères sur l’image. Cette image ne mesure pas la S V A radiographique."
+  audio:"Photo de profil. Tournez-vous de profil à la caméra, avec vos pieds dans le cadre. Restez naturellement immobile. Quand votre position sera correcte, le décompte trois, deux, un, Top démarrera automatiquement. La photo sera prise sans toucher à l’ordinateur. Ce n’est pas une S V A radiographique."
  },
  unipodal_left:{
   purpose:"Observer la durée visible de maintien sur le pied gauche, jusqu’à vingt secondes, sans chercher une performance maximale.",
