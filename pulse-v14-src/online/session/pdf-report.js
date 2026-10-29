@@ -178,6 +178,7 @@ export async function downloadMotionPdf(data){
  pdf.text(pdf.splitTextToSize('Un nouveau bilan a 4-6 semaines aidera a comparer votre trajectoire sur les memes epreuves.',CONTENT-12),M+6,y+15);
  y+=31;
  line('Retrouvez votre passeport dans votre espace prive : pulse.komolongevity.com',{size:8,color:muted});
+ line('Restitution individuelle incluse, facultative et prevue au creneau Acuity. Le premier passeport reste disponible sans cet echange.',{size:8,color:muted,leading:4.5});
  line('KOMO Motion Passport V1 | Interpretation exploratoire non medicale.',{size:7.7,color:muted});
  // PAGE 2 - domain by domain: preserve strengths and discuss changeable habits.
  nextPage();
