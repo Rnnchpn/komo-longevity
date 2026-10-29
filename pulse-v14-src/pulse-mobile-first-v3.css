@@ -317,3 +317,28 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
   transition:none!important;animation:none!important
  }
 }
+
+/* Mobile Safari: prevent auto-zoom in account forms and avoid forced overscroll. */
+@media(max-width:980px){
+ .login-page .login-card input{
+  font-size:16px;min-height:49px;border-radius:11px
+ }
+ .login-page .login-card label span{font-size:12px}
+ .login-page .login-card .button{min-height:49px;font-size:13px}
+ .login-page .login-card .text-button{min-height:44px;font-size:12px}
+ .login-page .login-card .pulse-login-back{min-height:44px;display:flex;align-items:center}
+ .login-page:has(.pulse-entry-panel[hidden]){padding-bottom:env(safe-area-inset-bottom,0px)}
+}
+@media(hover:none) and (pointer:coarse){
+ .login-page:has(.pulse-entry-panel) .pulse-entry-kinetic,
+ .login-page:has(.pulse-entry-panel) .pulse-entry-brand,
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story h1,
+ .login-page:has(.pulse-entry-panel) .pulse-entry-kicker,
+ .login-page:has(.pulse-entry-panel) .pulse-entry-lead,
+ .login-page:has(.pulse-entry-panel) .pulse-offer{animation:none!important;will-change:auto!important}
+}
+@media(max-height:540px) and (orientation:landscape) and (max-width:980px){
+ .pulse-mobile-booking-bar{min-height:54px;bottom:calc(5px + env(safe-area-inset-bottom,0px))}
+ .pulse-mobile-booking-copy strong{font-size:26px}
+ .pulse-mobile-booking-action{min-height:40px}
+}
