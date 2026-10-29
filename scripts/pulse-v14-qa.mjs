@@ -22,6 +22,7 @@ const voiceControl=await readFile(join(root,'site','pulse-v14','online','session
 const voiceCommands=await readFile(join(root,'site','pulse-v14','online','session','voice-commands.mjs'),'utf8');
 const testGuides=await readFile(join(root,'site','pulse-v14','online','session','test-guides.mjs'),'utf8');
 const testNavigator=await readFile(join(root,'site','pulse-v14','online','session','test-navigation.js'),'utf8');
+const paidAccess=await readFile(join(root,'site','pulse-v14','online','session','paid-access.js'),'utf8');
 const intakeModel=await readFile(join(root,'site','pulse-v14','online','session','intake-model.mjs'),'utf8');
 const intakeView=await readFile(join(root,'site','pulse-v14','online','session','intake-view.js'),'utf8');
 const intakeReport=await readFile(join(root,'site','pulse-v14','online','session','intake-report.js'),'utf8');
@@ -77,7 +78,7 @@ const checks=[
  ['Online preflight syntax and responsive layout',onlineSyntax.status===0&&onlineCss.includes('@media(max-width:690px)')],
  ['tester post-login redirect',app.includes("window.location.assign('/online/session/')")&&app.includes('eef2c1ed-3872-47a7-84da-0f70b975c96f')],
  ['tester sidebar available only by verified role',app.includes('const isOnlineTester=')&&app.includes('S.role===\'admin\'')&&app.includes('pulse-online-tester-link')],
- ['authenticated session user lookup',sessionJs.includes('sb.auth.getUser()')&&sessionJs.includes("role.data?.role!=='admin'")],
+ ['authenticated session user lookup',sessionJs.includes('sb.auth.getUser()')&&sessionJs.includes("role.data?.role==='admin'")&&sessionJs.includes('verifyPaidSession({')],
  ['session security no public clinical record writes',!(/sb\.from\(.+\.insert\(|localStorage\.setItem|sessionStorage\.setItem|fetch\s*\(/.test(sessionJs))],
  ['session questionnaire and safety',sessionJs.includes('function questionnaire()')&&sessionJs.includes('function safety()')],
  ['online original self-report replaces four-question demo',sessionJs.includes('intakeMarkup(state.answers,state.questionStep)')&&intakeModel.includes('QUESTIONNAIRE_VERSION')&&intakeModel.includes('walk10')&&intakeView.includes('bindIntake')],
@@ -97,7 +98,7 @@ const checks=[
  ['session video stops on navigation',sessionJs.includes("pagehide")&&sessionJs.includes('stopCamera(true)')&&sharedMedia.includes('stream.getTracks().forEach(t=>t.stop())')],
  ['continuous camera and voice across all tests',sessionJs.includes('stopCamera(state.page!==3)')&&sharedMedia.includes('availableCamera')&&motionController.includes('sharedMotionMedia.ensureCamera()')&&unipodalController.includes('sharedMotionMedia.ensureCamera()')&&profilePhoto.includes('sharedMotionMedia.ensureCamera()')],
  ['position validated audible beep for all test types',motionController.includes('sharedMotionMedia.readyBeep(task.id)')&&unipodalController.includes('sharedMotionMedia.readyBeep(task.id)')&&profilePhoto.includes('sharedMotionMedia.readyBeep(task.id)')],
- ['session-only progress without raw media',sessionJs.includes('loadProgress(store)')&&sessionJs.includes('persistProgress()')&&sessionProgress.includes('PROGRESS_KEY')&&sessionProgress.includes('expiresAt')&&!/MediaRecorder|toDataURL|toBlob/.test(sessionProgress)],
+ ['session-only progress without raw media',sessionJs.includes('loadProgress(progressStore)')&&sessionJs.includes('persistProgress()')&&sessionProgress.includes('PROGRESS_KEY')&&sessionProgress.includes('expiresAt')&&!/MediaRecorder|toDataURL|toBlob/.test(sessionProgress)],
  ['session progress syntax',nodeSyntax('shared-media.js')&&nodeSyntax('session-progress.mjs')],
  ['session ready for desktop and mobile',sessionSyntax.status===0&&sessionHtml.includes('Ma consultation Online')&&sessionCss.includes('@media(max-width:570px)')],
  ['motion pose engine supported browser inference',poseEngine.includes('detectForVideo')&&poseEngine.includes('pose_landmarker_lite.task')&&poseEngine.includes('requestAnimationFrame')&&nodeSyntax('pose-engine.js')],
@@ -117,6 +118,8 @@ const checks=[
  ['speaker is optional and cleaned up',motionView.includes('id="sound-enabled"')&&captureEnhancements.includes('audible:enabled()')&&captureEnhancements.includes('audio.destroy()')],
  ['posture observation and careful summary',postureMetrics.includes('observeFrontalPosture')&&captureEnhancements.includes('postureSummary()')&&sessionJs.includes("id:'posture'")&&intakeReport.includes("id==='posture'")],
  ['posture is non-diagnostic and local',testGuides.includes("posture:{")&&testGuides.includes("scoliose")&&motionView.includes('id="posture-results"')],
+ ['paid online appointment verification is server controlled',sessionJs.includes('verifyPaidSession({')&&paidAccess.includes('/api/pulse-online-verify')&&verifyJs.includes('PULSE_ONLINE_PAID_SESSION_ENABLED')],
+ ['paid sessions are isolated and the commercial gate is closed by default',sessionJs.includes('scopedProgressStorage(store,user.id,bookingId)')&&paidAccess.includes('canStart!==true')&&nodeSyntax('paid-access.js')],
  ['test revisit navigator built for all six exercises',sessionJs.includes('testNavigatorMarkup(TESTS,state.results,state.task)')&&sessionJs.includes('mountTestNavigation(root,TESTS,state.results,jumpToTest')&&testNavigator.includes('data-motion-test')],
  ['saved results are not erased on revisit',sessionJs.includes('completedTestMarkup(t,record)')&&sessionJs.includes('delete state.results[t.id]')&&testNavigator.includes('redo-stored-test')],
  ['review navigation respects safety gate',sessionJs.includes("state.answers.safety!=='no'")&&sessionJs.includes('state.sessionActive||state.countdownActive')],
