@@ -22,7 +22,7 @@ const TESTS = [
   {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Mouvements des bras · 20 secondes',seconds:20,unit:'mouvements',instruction:'Placez-vous face à la caméra avec épaules et poignets visibles. Levez puis redescendez les deux bras sans forcer.'},
   {id:'posture',name:'Posture · photo de profil',detail:'Position correcte → 3, 2, 1, Top → photo',seconds:0,unit:'indice',instruction:'Mettez-vous naturellement de profil, les pieds visibles. Pulse décompte automatiquement puis prend la photo sans aucun clic.'}
 ];
-const state = {page:0,questionStep:0,returnToSummary:false,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
+const state = {page:0,questionStep:0,returnToSummary:false,answers:{},checks:new Set(),task:0,results:{},program:null,timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const q = selector=>root.querySelector(selector);
 let currentMotionCleanup=null;
@@ -176,15 +176,18 @@ function test(){
 function summary(){
  const blocked=state.answers.safety==='yes';
  wrap((blocked?'':testNavigatorMarkup(TESTS,state.results,null))+
-  reportMarkup(state.answers,state.results,blocked,Boolean(paidContext)));
+  reportMarkup(state.answers,state.results,blocked,Boolean(paidContext),state.program));
  if(!blocked)mountTestNavigation(root,TESTS,state.results,jumpToTest,null);
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
+  isPaid:Boolean(paidContext),
+  getProgram(){return state.program;},
+  updateProgram(program){state.program=program;persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
   restart(){
    stopTimer();stopCamera(true);clearProgress(progressStore);
    state.page=0;state.questionStep=0;state.returnToSummary=false;
-   state.task=0;state.answers={};state.checks.clear();state.results={};state.remaining=0;
+   state.task=0;state.answers={};state.checks.clear();state.results={};state.program=null;state.remaining=0;
    render();
   }
  },state.answers.safety==='yes');
@@ -238,7 +241,7 @@ async function boot(){
   const restored=paidContext?(remoteSnapshot?snapshotProgress(remoteSnapshot):null):loadProgress(progressStore);
   if(restored){
    state.page=restored.page;state.questionStep=restored.questionStep;state.task=restored.task;
-   state.answers=restored.answers;state.results=restored.results;
+   state.answers=restored.answers;state.results=restored.results;state.program=restored.program??null;
    state.checks=new Set(restored.checks);state.returnToSummary=restored.returnToSummary;
    if(state.page===3&&state.answers.safety!=='no')state.page=2;
   }

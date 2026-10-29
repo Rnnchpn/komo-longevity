@@ -2,6 +2,7 @@ import {scoreIntake,questionnaireFocus,SCORING_GROUPS,QUESTIONNAIRE_VERSION,inta
 import {calculateMotionScore,MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
 import {buildPdfReportData,downloadMotionPdf} from './pdf-report.js';
 import {normPanelMarkup,bindNormPanel} from './normative-panel.js';
+import {passportMarkup,roadmapMarkup,dailyProgramMarkup,bindDailyProgram} from './passport-view.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=(root,id)=>{const v=root.querySelector('#'+id)?.value?.trim();return v===''||v===undefined?null:Number(v);};
 function domainCards(scored){
@@ -30,13 +31,14 @@ function measurementRows(results){
 function measureInput(id,label,placeholder,step='any',initial=null){
  return '<label class="motion-score-field"><span>'+esc(label)+'</span><input type="number" id="'+esc(id)+'" min="0" step="'+step+'" placeholder="'+esc(placeholder)+'"'+(initial===null?'':' value="'+Number(initial)+'"')+' inputmode="decimal"></label>';
 }
-export function reportMarkup(answers,results,blocked,persisted=false){
+export function reportMarkup(answers,results,blocked,persisted=false,program=null){
  const intake=scoreIntake(answers),p=intakeProgress(answers);
  const focus=questionnaireFocus(answers);
  const chosen=focus.map(f=>esc(f.label)+' ('+f.value+'/100)').join(' · ');
  const sts=results.sts;
  const stsOk=Boolean(sts?.status==='done'&&Number.isInteger(sts.value)&&sts.value>=0);
- return '<section class="paper online-report"><span class="overline">SYNTHÈSE MOTION · QUESTIONNAIRE & OBSERVATIONS</span>'+
+ return '<section class="paper online-report">'+passportMarkup(answers,results,blocked)+
+ '<details class="report-method-details"><summary>Voir le détail des questionnaires et de leur calcul</summary>'+ '<span class="overline">SYNTHÈSE MOTION · QUESTIONNAIRE & OBSERVATIONS</span>'+ 
  '<h1>Votre profil en mouvement<em>.</em></h1>'+
  '<p>Cette restitution distingue vos <strong>réponses personnelles</strong> des mesures fonctionnelles. Les scores déclaratifs sont exploratoires et ne constituent pas des diagnostics.</p>'+
  (blocked?'<div class="notice danger"><strong>Tests interrompus par sécurité.</strong> Le questionnaire demeure informatif, mais aucun Motion Score global ne peut être établi.</div>':'')+
@@ -44,7 +46,7 @@ export function reportMarkup(answers,results,blocked,persisted=false){
  '<p>'+(intake.complete?'Indice calculé à partir de vos réponses uniquement, avec quatre domaines pondérés. <strong>Il ne s’agit pas du Motion Score.</strong>':'Questionnaire incomplet : '+(p.total-p.completed)+' réponse(s) manquante(s).')+'</p></div>'+
  '<div class="intake-domain-grid">'+domainCards(intake)+'</div>'+
  (intake.complete?'<p class="report-context"><strong>Domaines à discuter en priorité :</strong> '+(chosen||'Aucune priorité différenciée')+'. Ils reflètent votre perception et ne traduisent pas à eux seuls une limitation objective.</p>':'')+
- '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
+ '</details>'+ '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
  '<section class="motion-score-zone"><div class="motion-score-heading"><span class="overline">MOTION SCORE · ALGORITHME DE RÉFÉRENCE</span><h2>Le score fonctionnel final</h2><p>Formule définie pour KŌMØ : <strong>40 % Sit-to-Stand · 35 % TUG 3 m · 25 % équilibre SPPB.</strong> Les questionnaires, la posture et l’unipodal ne modifient pas cette formule.</p></div>'+
  '<div class="motion-score-locked"><span id="score-status-icon">○</span><div><strong id="score-status">Motion Score indisponible : mesures complémentaires requises</strong><p id="score-hint">Le TUG standardisé et l’équilibre SPPB n’ont pas été mesurés automatiquement par la webcam. Aucune norme statistique n’a été inventée.</p></div><div class="motion-score-value"><strong id="motion-score-number">—</strong><span>/ 100</span></div></div>'+
  '<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
@@ -63,11 +65,14 @@ export function reportMarkup(answers,results,blocked,persisted=false){
  '<button type="button" class="action" id="compute-motion-score">Calculer avec les mesures vérifiées →</button>'+
  '<p class="message" id="kms-error" role="status"></p></details>'+
  '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section>'+
+ roadmapMarkup(answers,results,blocked)+
+ dailyProgramMarkup(answers,results,blocked,program)+
  '<p class="notice">'+(persisted?'Les réponses et mesures chiffrées de votre bilan sont conservées dans votre dossier Pulse privé. Le PDF est créé et téléchargé localement : il n’est pas encore archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
  '<div class="pdf-download-box"><div><strong>Votre rapport Motion, en PDF</strong><p>Questionnaires, sous-scores, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est créé localement et reste sur votre appareil.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon rapport PDF</button></div>'+
  '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
 }
 export function bindReport(root,answers,results,callbacks,blocked=false){
+ bindDailyProgram(root,answers,results,blocked,callbacks.getProgram||(()=>null),callbacks.updateProgram||(()=>{}));
  bindNormPanel(root,answers,results,()=>callbacks.checkpoint?.());
  const stsRecord=results.sts;
  let computed=null;
@@ -118,7 +123,7 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
   button.disabled=true;button.textContent='Création du PDF…';
   message.textContent='Préparation du rapport sur votre appareil…';
   try{
-   const payload=buildPdfReportData(answers,results,computed,blocked);
+   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{mode:callbacks.isPaid?'PILOTE':'DEMONSTRATION',program:callbacks.getProgram?.()});
    const filename=await downloadMotionPdf(payload);
    message.textContent='Rapport PDF prêt : '+filename+'. Il n’a pas été téléversé sur Pulse.';
   }catch(error){
