@@ -23,6 +23,7 @@ const intakeModel=await readFile(join(root,'site','pulse-v14','online','session'
 const intakeView=await readFile(join(root,'site','pulse-v14','online','session','intake-view.js'),'utf8');
 const intakeReport=await readFile(join(root,'site','pulse-v14','online','session','intake-report.js'),'utf8');
 const motionFormula=await readFile(join(root,'site','pulse-v14','online','session','motion-score.mjs'),'utf8');
+const pdfReport=await readFile(join(root,'site','pulse-v14','online','session','pdf-report.js'),'utf8');
 const audioFeedback=await readFile(join(root,'site','pulse-v14','online','session','audio-feedback.js'),'utf8');
 const postureMetrics=await readFile(join(root,'site','pulse-v14','online','session','posture-metrics.mjs'),'utf8');
 const profilePhoto=await readFile(join(root,'site','pulse-v14','online','session','profile-photo.js'),'utf8');
@@ -80,6 +81,12 @@ const checks=[
  ['final score exact linear formula and gates',motionFormula.includes('40*F+35*M+6.25*B')&&motionFormula.includes('operatorVerified')&&motionFormula.includes('stsP10')&&motionFormula.includes('tugP90')],
  ['no invented motion age or norms',!motionFormula.includes('Motion Age')&&motionFormula.includes('normsSource')&&intakeReport.includes('Aucune norme statistique n’a été inventée')],
  ['intake source scripts parse',nodeSyntax('intake-model.mjs')&&nodeSyntax('intake-view.js')&&nodeSyntax('intake-report.js')&&nodeSyntax('motion-score.mjs')],
+ ['PDF download on final consultation',intakeReport.includes('id="download-pdf"')&&intakeReport.includes('downloadMotionPdf(payload)')],
+ ['PDF includes all questionnaires and observations',pdfReport.includes('INTAKE_GROUPS.map')&&pdfReport.includes('OBSERVATIONS.map')&&pdfReport.includes('Detail des reponses')],
+ ['PDF never fabricates Motion Score',pdfReport.includes('motionScore?.complete===true')&&pdfReport.includes('score:null')&&pdfReport.includes('NON CALCULABLE')],
+ ['PDF generated in browser without submitting data',pdfReport.includes("import('https://esm.sh/jspdf@2.5.2')")&&pdfReport.includes('pdf.save(filename)')&&!/\bfetch\s*\(|XMLHttpRequest|navigator\.sendBeacon/.test(pdfReport)],
+ ['PDF formatter and logic syntactically valid',nodeSyntax('pdf-report.js')],
+
  ['intake layout mobile',sessionCss.includes('.intake-choices')&&sessionCss.includes('.intake-domain-grid')&&sessionCss.includes('.motion-score-locked')],
  ['session auto pose capture and test timer',motionController.includes('getUserMedia({audio:false')&&sessionJs.includes('function test()')&&sessionJs.includes('function summary()')&&motionController.includes('C’est parti →')],
  ['session video stops on navigation',sessionJs.includes("pagehide")&&sessionJs.includes('getTracks().forEach(t=>t.stop())')],
