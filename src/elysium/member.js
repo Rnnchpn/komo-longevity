@@ -247,6 +247,7 @@ function renderPrivateServiceIndex(products,grid){
  filtered.forEach((p,i)=>{
   const card=serviceElement('article','ely-product-card');
   card.dataset.variant=serviceGroup(p);
+  card.dataset.edition=String((i%3)+1);
   const visual=serviceGraphic(p);
   const view=serviceElement('button','ely-product-image-link');
   view.type='button';view.setAttribute('aria-label',(lang==='fr'?'Découvrir ':'Explore ')+itemName(p));
@@ -329,7 +330,11 @@ function renderProductRoute(){
  const priceTitle=serviceElement('span','ely-shop-detail-label',fr?'DISPONIBILITÉ & TARIF':'AVAILABILITY & PRICING');
  const price=serviceElement('p','ely-shop-detail-price',fr?'Sur demande':'On request');
  const benefits=serviceElement('ul','ely-shop-detail-points');
- ((fr?p.pointsFr:p.pointsEn)||[]).forEach(x=>benefits.append(serviceElement('li','',x)));
+ const originalPoints=(fr?p.pointsFr:p.pointsEn)||[];
+ const points=originalPoints.length?originalPoints:(fr
+  ?['Organisation personnalisée','Devis communiqué avant confirmation','Sous réserve de disponibilité']
+  :['Personalised arrangements','Quotation provided before confirmation','Subject to availability']);
+ points.forEach(x=>benefits.append(serviceElement('li','',x)));
  const medical=['longevity','aesthetic','iv-drip'].includes(slug);
  const action=serviceElement('button','ely-shop-detail-buy',fr?(medical?'DEMANDER CETTE CONSULTATION ↗':'DEMANDER CETTE EXPÉRIENCE ↗'):(medical?'REQUEST THIS CONSULTATION ↗':'REQUEST THIS EXPERIENCE ↗'));
  action.type='button';action.addEventListener('click',()=>addSelection(p,slug));
