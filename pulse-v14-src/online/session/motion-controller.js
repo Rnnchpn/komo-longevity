@@ -206,6 +206,8 @@ export function mountMotionController(root,task,record,state,callbacks){
   });
  };
  redo.onclick=()=>{
+  delete state.results[task.id];record.status='pending';record.value=0;
+  callbacks.checkpoint?.();
   sharedMotionMedia.resetReady(task.id);
   enhancements.stopCountdown();enhancements.reset();
   state.sessionActive=false;state.sessionFinished=false;
@@ -216,14 +218,14 @@ export function mountMotionController(root,task,record,state,callbacks){
   redo.hidden=true;halt.hidden=true;status('Prêt pour une nouvelle mesure.');
  };
  if(task.id!=='posture'){
-  q('#plus').onclick=()=>{value((record.value||0)+1);record.source='corrigé manuellement';};
-  q('#minus').onclick=()=>{value((record.value||0)-1);record.source='corrigé manuellement';};
+  q('#plus').onclick=()=>{value((record.value||0)+1);record.source='corrigé manuellement';record.status='review';state.results[task.id]=record;callbacks.checkpoint?.();};
+  q('#minus').onclick=()=>{value((record.value||0)-1);record.source='corrigé manuellement';record.status='review';state.results[task.id]=record;callbacks.checkpoint?.();};
  }
  halt.onclick=()=>{
   if(state.countdownActive){enhancements.stopCountdown();halt.hidden=true;go.disabled=!state.bodyReady;go.textContent='C’est parti →';status('Départ annulé. Dites « C’est parti » pour recommencer.');}
   else if(state.sessionActive)finish(true);
  };
- q('#skip').onclick=()=>{stopCapture();record.status='skipped';record.value=0;record.source='non réalisé';state.results[task.id]=record;callbacks.advance();};
+ q('#skip').onclick=()=>{stopCapture();record.status='skipped';record.value=0;record.source='non réalisé';state.results[task.id]=record;callbacks.checkpoint?.();callbacks.advance();};
  q('#go').onclick=()=>{
   if(!state.sessionFinished){
    q('#message').textContent='Cliquez « C’est parti », terminez le test ou choisissez « Ne pas faire ».';
