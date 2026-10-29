@@ -205,7 +205,7 @@ async function loadOnlineReports(){
   if(!S.user){S.onlineReports=[];S.onlineReadError=false;return;}
   // RLS SELECT user_id=auth.uid() on motion_online_sessions. No direct writes.
   const r=await safe(sb.from('motion_online_sessions')
-    .select('id,status,snapshot,created_at,updated_at')
+    .select('id,appointment_id,status,snapshot,created_at,updated_at')
     .eq('user_id',S.user.id)
     .order('created_at',{ascending:false}).limit(12));
   S.onlineReadError=Boolean(r.error);
