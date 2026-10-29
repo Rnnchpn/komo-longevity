@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 
 const root=process.cwd();
@@ -7,12 +8,23 @@ const app=await readFile(join(root,'site','pulse-v14','app.js'),'utf8');
 const css=await readFile(join(root,'site','pulse-v14','styles.css'),'utf8');
 const vercel=JSON.parse(await readFile(join(root,'vercel.json'),'utf8'));
 const middleware=await readFile(join(root,'middleware.js'),'utf8');
+const appSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','app.js')],{encoding:'utf8'});
 const rewrites=Array.isArray(vercel.rewrites)?vercel.rewrites:[];
 const hostRule=r=>Array.isArray(r?.has)&&r.has.some(h=>h?.type==='host'&&h?.value==='pulse.komolongevity.com');
 const rootV14=rewrites.some(r=>r.source==='/'&&r.destination==='/pulse-v14/'&&hostRule(r));
 const nestedV14=rewrites.some(r=>r.source==='/(.*)'&&r.destination==='/pulse-v14/$1'&&hostRule(r));
 
 const checks=[
+ ['booking-first cards',['Bilan Gratuit','Bilan Online','Bilan physique Motion'].every(x=>app.includes(x))],
+ ['luxury motion art',app.includes('pulse-entry-kinetic')&&app.includes('pulse-offer-art-ring')],
+ ['premium onboarding',app.includes('pulse-entry-monogram')&&app.includes('pulse-entry-steps')],
+ ['luxury motion animations',css.includes('pulseSculptureFloat')&&css.includes('pulseCardReveal')&&css.includes('pulseTimelineGrow')],
+ ['accessible reduced motion',css.includes('@media(prefers-reduced-motion:reduce)')],
+ ['pulse javascript syntax',appSyntax.status===0],
+ ['acuity public scheduling',app.includes('app.acuityscheduling.com/schedule.php?owner=40696577')],
+ ['invitation gated onboarding',app.includes('Aucun compte patient n’est ouvert automatiquement')],
+ ['existing login preserved',app.includes('pulseShowLogin')&&app.includes('signInWithPassword')],
+ ['booking-first responsive styles',css.includes('.pulse-offer-list')&&css.includes('.pulse-entry-panel')],
  ['patient title',html.includes('Votre santé en mouvement')],
  ['single entry script',(html.match(/<script/g)||[]).length===1],
  ['patient navigation',['Aujourd’hui','Mon bilan','Résultats','Mon plan','Rendez-vous'].every(x=>app.includes(x))],
