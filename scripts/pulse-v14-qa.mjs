@@ -12,6 +12,11 @@ const onlineCss=await readFile(join(root,'site','pulse-v14','online','styles.css
 const sessionHtml=await readFile(join(root,'site','pulse-v14','online','session','index.html'),'utf8');
 const sessionJs=await readFile(join(root,'site','pulse-v14','online','session','app.js'),'utf8');
 const sessionCss=await readFile(join(root,'site','pulse-v14','online','session','styles.css'),'utf8');
+const poseEngine=await readFile(join(root,'site','pulse-v14','online','session','pose-engine.js'),'utf8');
+const motionView=await readFile(join(root,'site','pulse-v14','online','session','motion-view.js'),'utf8');
+const motionController=await readFile(join(root,'site','pulse-v14','online','session','motion-controller.js'),'utf8');
+const metrics=await readFile(join(root,'site','pulse-v14','online','session','metrics.mjs'),'utf8');
+const nodeSyntax=file=>spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session',file)],{encoding:'utf8'}).status===0;
 const sessionSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session','app.js')],{encoding:'utf8'});
 const activationHtml=await readFile(join(root,'site','pulse-v14','online','activate','index.html'),'utf8');
 const activationScript=await readFile(join(root,'site','pulse-v14','online','activate','app.js'),'utf8');
@@ -55,9 +60,17 @@ const checks=[
  ['authenticated session user lookup',sessionJs.includes('sb.auth.getUser()')&&sessionJs.includes("role.data?.role!=='admin'")],
  ['session security no public clinical record writes',!(/sb\.from\(.+\.insert\(|localStorage\.setItem|sessionStorage\.setItem|fetch\s*\(/.test(sessionJs))],
  ['session questionnaire and safety',sessionJs.includes('function questionnaire()')&&sessionJs.includes('function safety()')],
- ['session manual camera and test timer',sessionJs.includes('getUserMedia({audio:false')&&sessionJs.includes('function test()')&&sessionJs.includes('function summary()')],
+ ['session auto pose capture and test timer',motionController.includes('getUserMedia({audio:false')&&sessionJs.includes('function test()')&&sessionJs.includes('function summary()')&&motionController.includes('C’est parti →')],
  ['session video stops on navigation',sessionJs.includes("pagehide")&&sessionJs.includes('getTracks().forEach(t=>t.stop())')],
  ['session ready for desktop and mobile',sessionSyntax.status===0&&sessionHtml.includes('Ma consultation Online')&&sessionCss.includes('@media(max-width:570px)')],
+ ['motion pose engine supported browser inference',poseEngine.includes('detectForVideo')&&poseEngine.includes('pose_landmarker_lite.task')&&poseEngine.includes('requestAnimationFrame')&&nodeSyntax('pose-engine.js')],
+ ['pose camera privacy and local overlay',!(/fetch\s*\(|MediaRecorder|localStorage/.test(poseEngine+motionController))&&poseEngine.includes('canvas.getContext')&&motionView.includes('pose-canvas')],
+ ['full-body quality gated start',motionController.includes('validStreak>=3')&&metrics.includes('frameInfo(points,task')&&metrics.includes('visibility')&&nodeSyntax('metrics.mjs')],
+ ['explicit privacy opt-in',motionView.includes('id="pose-consent"')&&motionController.includes('if(!consent.checked)')&&sessionCss.includes('.pose-consent')],
+ ['prominent start and auto counted movements',motionView.includes('C’est parti →')&&motionController.includes('tracker.observe(points,time)')&&motionController.includes('record.status=')],
+ ['automatic 30 second sit-to-stand',sessionJs.includes('seconds:30')&&metrics.includes("task==='sts'")&&metrics.includes('lastCountAt')],
+ ['large responsive webcam',sessionCss.includes('live-capture-layout')&&sessionCss.includes('aspect-ratio:16/9')&&sessionCss.includes('@media(max-width:590px)')],
+ ['modular capture syntax',nodeSyntax('motion-view.js')&&nodeSyntax('motion-controller.js')],
  ['activation link from preparation and home',onlineHtml.includes('href="/online/activate/"')&&app.includes('href="./online/activate/"')&&css.includes('.pulse-entry-activation-link')],
  ['activation form guarded by verified identity',activationScript.includes('sb.auth.getUser()')&&activationScript.includes('shouldCreateUser:true')&&activationHtml.includes('ACCÈS CONTRÔLÉ')],
  ['activation client checks paid appointment via server',activationScript.includes('/api/pulse-online-verify')&&activationScript.includes('access_token')&&activationSyntax.status===0],
