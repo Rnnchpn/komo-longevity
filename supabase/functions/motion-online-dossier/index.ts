@@ -13,6 +13,26 @@ const ANSWER_IDS=new Set([
 ]);
 const CHECKS=new Set(['chair','space','support','device']);
 const STATES=new Set(['pending','done','review','skipped']);
+const EXERCISES=new Set(['walk','chair','balance','mobility','recover']);
+const PROGRAM_VERSION='KOMO_PULSE_DAILY_V1';
+const DATE=/^\d{4}-\d{2}-\d{2}$/;
+function sanitizeProgram(program){
+ if(program===undefined||program===null)return null;
+ if(!plain(program)||program.version!==PROGRAM_VERSION||!DATE.test(program.startedAt||'')||
+  !plain(program.entries)||Object.keys(program.entries).length>28)return undefined;
+ const entries={};
+ for(const [day,raw] of Object.entries(program.entries)){
+  if(!DATE.test(day)||!plain(raw)||!Array.isArray(raw.completed)||raw.completed.length>5||
+    raw.completed.some(v=>!EXERCISES.has(v)))return undefined;
+  const diff=(Date.parse(day+'T12:00:00Z')-Date.parse(program.startedAt+'T12:00:00Z'))/86400000;
+  if(!Number.isInteger(diff)||diff<0||diff>=28)return undefined;
+  const effort=raw.effort===null||raw.effort===undefined?null:raw.effort;
+  if(effort!==null&&!inInt(effort,0,10))return undefined;
+  if(raw.note!==undefined&&!safeText(raw.note,160))return undefined;
+  entries[day]={completed:[...new Set(raw.completed)],effort,note:raw.note||''};
+ }
+ return {version:PROGRAM_VERSION,startedAt:program.startedAt,entries};
+}
 const VALID_AGE=new Set(['under40','40-49','50-59','60-69','70-79','80plus','undisclosed']);
 const VALID_GOALS=new Set(['independence','walk','strength','confidence','general']);
 const plain=x=>x&&typeof x==='object'&&!Array.isArray(x);
@@ -64,8 +84,10 @@ function cleanSnapshot(s){
   }
   results[id]=item;
  }
+ const program=sanitizeProgram(s.program);
+ if(program===undefined)return null;
  return {page:s.page,questionStep:s.questionStep,task:s.task,returnToSummary:s.returnToSummary===true,
-  answers,checks:[...new Set(s.checks)],results};
+  answers,checks:[...new Set(s.checks)],results,program};
 }
 function verifyConfig(){
  const url=Deno.env.get('SUPABASE_URL');
