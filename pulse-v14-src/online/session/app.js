@@ -176,7 +176,7 @@ function test(){
 function summary(){
  const blocked=state.answers.safety==='yes';
  wrap((blocked?'':testNavigatorMarkup(TESTS,state.results,null))+
-  reportMarkup(state.answers,state.results,blocked));
+  reportMarkup(state.answers,state.results,blocked,Boolean(paidContext)));
  if(!blocked)mountTestNavigation(root,TESTS,state.results,jumpToTest,null);
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
