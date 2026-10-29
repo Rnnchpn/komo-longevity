@@ -19,7 +19,7 @@ const itemName=o=>lang==='fr'?(o.fr||o.en):o.en;
 function say(sel,message,isError=false){const x=$(sel);if(x){x.textContent=message;x.classList.toggle('error',isError)}}
 function show(id){const x=$('#'+id);if(x)x.style.display=id==='memberPanel'?'block':'block'}
 function hide(id){const x=$('#'+id);if(x)x.style.display='none'}
-function switchLanguage(){document.documentElement.lang=lang;$$('[data-en]').forEach(el=>{const v=lang==='fr'?el.dataset.fr:el.dataset.en;if(el.closest('.longevity-maison, .aesthetic-maison')&&/<(?:em|br)>/.test(v))el.innerHTML=v;else el.textContent=v});if($('#toggleLanguage'))$('#toggleLanguage').textContent=lang==='en'?'FR':'EN';if(isMaison)renderMaisonMeta();if(isClub&&active)renderClub(null,clubMembership);if(isMaison&&active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);if(isMaison)renderSelection()}
+function switchLanguage(){document.documentElement.lang=lang;$$('[data-en]').forEach(el=>{const v=lang==='fr'?el.dataset.fr:el.dataset.en;if(el.closest('.longevity-maison, .aesthetic-maison')&&/<(?:em|br)>/.test(v))el.innerHTML=v;else el.textContent=v});if($('#toggleLanguage'))$('#toggleLanguage').textContent=lang==='en'?'FR':'EN';if(isMaison)renderMaisonMeta();if(isClub&&active)renderClub(null,clubMembership);if(isMaison&&active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);if(isMaison){renderSelection();if(active&&$('#serviceDetail'))renderProductRoute()}}
 $('#toggleLanguage')?.addEventListener('click',()=>{lang=lang==='fr'?'en':'fr';switchLanguage()});
 function createClient(){if(!window.supabase?.createClient)return null;return window.supabase.createClient(AUTH_URL,AUTH_KEY,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}})}
 async function authorized(worldName){
@@ -182,14 +182,30 @@ function renderClub(worldList,membership){
   }
  },{passive:false});
 }
+const PRIVATE_WORLD_HEADLINES={
+ 'iv-drip':['Medical coordination. Personally arranged.','Une coordination médicale, en privé.'],
+ 'cosmetic-supplements':['The essentials, exceptionally chosen.','L’essentiel, sélectionné pour vous.'],
+ life:['A different way to live.','L’art de vivre, en privé.'],
+ gastronomy:['The exceptional table.','La gastronomie, à votre mesure.'],
+ 'high-luxury':['The rare and the remarkable.','Le rare et l’exceptionnel.'],
+ service:['Consider it arranged.','Tout est dans le détail.'],
+ team:['Your people. Your world.','Vos experts, à votre service.']
+};
 function renderMaisonMeta(){
  if(!world)return;
- document.title=world.full+' · KŌMØ ELYSIUM Private Boutique';
- const heroImg=$('#maisonImage');
- if(heroImg)heroImg.src=world.image;
+ document.title=world.full+' · KŌMØ ELYSIUM';
+ document.body.dataset.world=world.slug;
+ if($('#maisonImage'))$('#maisonImage').src=world.image;
  if($('#crumbName'))$('#crumbName').textContent=world.name;
  if($('#maisonKicker'))$('#maisonKicker').textContent=world.eyebrow;
- if($('#maisonTitle')&&slug!=='longevity')$('#maisonTitle').textContent=world.name;
+ if($('#maisonTitle'))$('#maisonTitle').textContent=world.name;
+ const hero=$('#ely-shop-title');
+ if(hero){hero.replaceChildren(document.createTextNode(world.name));const dot=serviceElement('span','ely-shop-fullstop','.');hero.append(dot)}
+ if($('#elyWorldArtName'))$('#elyWorldArtName').textContent=world.name.toUpperCase();
+ if($('#elyWorldNumber'))$('#elyWorldNumber').textContent=world.no+' / 09';
+ if($('#elyWorldCount'))$('#elyWorldCount').firstChild.textContent=String(world.productCount||3).padStart(2,'0')+' ';
+ const hl=$('#elyWorldHeadline');
+ if(hl){const h=PRIVATE_WORLD_HEADLINES[world.slug]||[world.name,world.name];hl.textContent=h[lang==='fr'?1:0]}
  if($('#maisonDescription'))$('#maisonDescription').textContent=lang==='fr'?world.subtitleFr:world.subtitleEn;
  if($('#collectionDescription'))$('#collectionDescription').textContent=lang==='fr'?world.copyFr:world.copyEn;
 }
@@ -213,9 +229,9 @@ function serviceGraphic(p){
  const seal=serviceElement('span','ely-product-seal','KŌMØ  ELYSIUM');
  const halo=serviceElement('div','ely-product-halo');
  const symbol=document.createElementNS('http://www.w3.org/2000/svg','svg');
- symbol.setAttribute('viewBox','0 0 140 140');symbol.setAttribute('aria-hidden','true');
+ symbol.setAttribute('viewBox',ELYSIUM_SERVICE_GRAPHICS[p.id]?'0 0 140 140':'0 0 120 120');symbol.setAttribute('aria-hidden','true');
  symbol.setAttribute('class','ely-product-symbol');
- const paths=ELYSIUM_SERVICE_GRAPHICS[p.id]||ELYSIUM_SERVICE_GRAPHICS['medical-longevity-followup'];
+ const paths=ELYSIUM_SERVICE_GRAPHICS[p.id]||ELYSIUM_GLYPHS[slug]||ELYSIUM_SERVICE_GRAPHICS['medical-longevity-followup'];
  symbol.innerHTML='<g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">'+paths+'</g>';
  halo.append(symbol);art.append(seal,halo,serviceElement('span','ely-product-signature','THE PRIVATE COLLECTION'));
  return art;
@@ -236,7 +252,7 @@ function renderPrivateServiceIndex(products,grid){
   view.type='button';view.setAttribute('aria-label',(lang==='fr'?'Découvrir ':'Explore ')+itemName(p));
   view.append(visual);view.addEventListener('click',()=>openProductPage(p));
   const content=serviceElement('div','ely-product-content');
-  const mode=serviceElement('span','ely-product-category',lang==='fr'?(p.modeFr||p.tag):(p.modeEn||p.tag));
+  const mode=serviceElement('span','ely-product-category',lang==='fr'?(p.modeFr||p.kind||p.tag):(p.modeEn||p.kind||p.tag));
   const h=serviceElement('h3','ely-product-name',itemName(p));
   const summary=serviceElement('p','ely-product-description',lang==='fr'?(p.shortFr||p.copyFr):(p.shortEn||p.copyEn));
   const actions=serviceElement('div','ely-product-actions');
@@ -249,7 +265,7 @@ function renderPrivateServiceIndex(products,grid){
 function renderLongevityProducts(products,grid){renderPrivateServiceIndex(products,grid)}
 function renderAestheticProducts(products,grid){renderPrivateServiceIndex(products,grid)}
 function initPrivateShopControls(){
- if(!isMaison||!['longevity','aesthetic'].includes(slug))return;
+ if(!isMaison)return;
  const filters=$$('#elyShopFilters [data-boutique-filter]');
  filters.forEach(button=>button.addEventListener('click',()=>{
   const next=button.dataset.boutiqueFilter;
@@ -285,7 +301,7 @@ function closeProductPage(){
  if(list)list.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 }
 function openProductPage(p){
- if(!active||!isMaison||!['longevity','aesthetic'].includes(slug))return;
+ if(!active||!isMaison)return;
  const u=new URL(location.href);
  u.searchParams.set('service',p.id);
  history.pushState({elysiumService:p.id},'',u.pathname+u.search);
@@ -306,7 +322,7 @@ function renderProductRoute(){
  const layout=serviceElement('div','ely-shop-detail-layout');
  const visual=serviceGraphic(p);const gallery=serviceElement('div','ely-shop-detail-gallery');gallery.append(visual);
  const info=serviceElement('div','ely-shop-detail-info');
- const category=serviceElement('span','ely-shop-detail-kicker',fr?(p.modeFr||p.tag):(p.modeEn||p.tag));
+ const category=serviceElement('span','ely-shop-detail-kicker',fr?(p.modeFr||p.kind||p.tag):(p.modeEn||p.kind||p.tag));
  const title=serviceElement('h1','ely-shop-detail-title',itemName(p));
  const desc=serviceElement('p','ely-shop-detail-description',fr?(p.shortFr||p.copyFr):(p.shortEn||p.copyEn));
  const divider=serviceElement('div','ely-shop-detail-divider');
@@ -314,16 +330,17 @@ function renderProductRoute(){
  const price=serviceElement('p','ely-shop-detail-price',fr?'Sur demande':'On request');
  const benefits=serviceElement('ul','ely-shop-detail-points');
  (fr?p.pointsFr:p.pointsEn||[]).forEach(x=>benefits.append(serviceElement('li','',x)));
- const action=serviceElement('button','ely-shop-detail-buy',fr?'DEMANDER CETTE CONSULTATION ↗':'REQUEST THIS CONSULTATION ↗');
+ const medical=['longevity','aesthetic','iv-drip'].includes(slug);
+ const action=serviceElement('button','ely-shop-detail-buy',fr?(medical?'DEMANDER CETTE CONSULTATION ↗':'DEMANDER CETTE EXPÉRIENCE ↗'):(medical?'REQUEST THIS CONSULTATION ↗':'REQUEST THIS EXPERIENCE ↗'));
  action.type='button';action.addEventListener('click',()=>addSelection(p,slug));
  const note=serviceElement('p','ely-shop-detail-terms',fr
-  ?'Un médecin indépendant confirme la faisabilité, le lieu et ses honoraires. Aucun règlement médical en ligne.'
-  :'An independent physician confirms suitability, location and professional fees. No medical checkout.');
+ ?(medical?'Un médecin indépendant confirme la faisabilité, le lieu et ses honoraires. Aucun règlement médical en ligne.':'Disponibilité, prix et modalités confirmés personnellement par le partenaire. Aucun paiement en ligne ici.')
+ :(medical?'An independent physician confirms suitability, location and professional fees. No medical checkout.':'Availability, pricing and arrangements are individually confirmed. No online checkout at this stage.'));
  info.append(category,title,desc,divider,priceTitle,price,benefits,action,note);
  layout.append(gallery,info);
  const foot=serviceElement('p','ely-shop-detail-disclaimer',fr
-  ?'Coordination privée uniquement. Consultations et actes réservés aux médecins habilités, selon les conditions médicales et réglementaires applicables. Ne transmettez pas de données de santé dans votre demande.'
-  :'Private coordination only. Medical consultations and procedures are performed by authorised physicians in suitable medical and regulatory conditions. Do not include health information in requests.');
+ ?(medical?'Coordination uniquement. Tout acte médical relève d’un professionnel habilité, dans des conditions de soin appropriées. Ne transmettez aucune donnée de santé ici.':'Les expériences sont soumises à disponibilité, à vérification du prestataire et à confirmation individuelle. Aucune réservation n’est garantie à ce stade.')
+ :(medical?'Coordination only. All medical care remains the responsibility of authorised professionals in appropriate medical settings. Do not submit health details here.':'All experiences are subject to availability, provider verification and individual confirmation. No booking is guaranteed at this stage.'));
  detail.append(top,layout,foot);
  detail.hidden=false;document.body.classList.add('ely-service-mode');
 }
@@ -333,18 +350,7 @@ function renderProducts(products){
  hide('maisonAccess');const grid=$('#productGrid');grid.replaceChildren();say('#shopMessage','');
  if(slug==='longevity'){renderLongevityProducts(products,grid);renderProductRoute();return;}
  if(slug==='aesthetic'){renderAestheticProducts(products,grid);renderProductRoute();return;}
- products.forEach(p=>{
-  const card=document.createElement('article');card.className='store-card';
-  const photo=document.createElement('div');photo.className='store-image';
-  const img=document.createElement('img');img.src=p.image;img.loading='lazy';img.alt='';
-  photo.appendChild(img);const info=document.createElement('div');info.className='store-info';
-  const small=document.createElement('small');small.textContent=p.tag;
-  const h=document.createElement('h3');h.textContent=itemName(p);
-  const desc=document.createElement('p');desc.textContent=lang==='fr'?p.copyFr:p.copyEn;
-  const footer=document.createElement('footer');const price=document.createElement('span');price.textContent=lang==='fr'?p.priceFr:p.priceEn;
-  const button=document.createElement('button');button.type='button';button.textContent=tt('add');button.addEventListener('click',()=>addSelection(p,world.slug));
-  footer.append(price,button);info.append(small,h,desc,footer);card.append(photo,info);grid.appendChild(card);
- });
+ renderPrivateServiceIndex(products,grid);renderProductRoute();
 }
 function readSelection(){try{return JSON.parse(sessionStorage.getItem('elysium-selection-v2')||'[]')}catch{return []}}
 function saveSelection(items){try{sessionStorage.setItem('elysium-selection-v2',JSON.stringify(items.slice(0,15)))}catch{}}
