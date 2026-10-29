@@ -100,7 +100,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   const ctx=base.getContext('2d');
   ctx.translate(w,0);ctx.scale(-1,1);ctx.drawImage(video,0,0,w,h);
   markers={neck:{x:1-f.neck.x,y:f.neck.y},pelvis:{x:1-f.pelvis.x,y:f.pelvis.y}};
-  stopTracks();off.hidden=true;
+  stopTracks();start.disabled=true;off.hidden=true;
   snap.hidden=false;
   // Make the captured image visually replace the video.
   snap.style.display='block';
@@ -137,7 +137,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  stop.onclick=()=>{stopTracks();off.hidden=false;q('#camera-message').textContent='Caméra arrêtée.';};
  redo.onclick=()=>{
   stopTracks();base=null;markers=null;frame=null;locked=false;adjusted=false;
-  snap.hidden=true;snap.style.display='';snap.onpointerdown=null;panel.hidden=true;
+  snap.hidden=true;snap.style.display='';snap.onpointerdown=null;panel.hidden=true;start.disabled=!consent.checked;
   const editor=panel.querySelector('.profile-editor');editor?.remove();off.hidden=false;
   q('#value').textContent='—';next.disabled=true;redo.hidden=true;
   record.status='pending';record.posture=null;status.textContent='Pour reprendre, réactivez la caméra et replacez-vous de profil.';
