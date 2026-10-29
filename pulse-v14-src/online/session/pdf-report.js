@@ -62,7 +62,7 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
    })),focus:questionnaireFocus(answers),groups},
   observations,motion,ageReference:normativeSummary(answers,results,results.sts?.normative??{}),blocked:Boolean(blocked),
   limitations:[
-   'Bilan fonctionnel non medical - cette demonstration ne constitue pas un diagnostic.',
+   'Bilan fonctionnel non medical - ce rapport ne constitue pas un diagnostic.',
    'Les questionnaires sont propres a KOMO et ne sont pas des instruments cliniquement valides.',
    'Les estimations de la webcam, le comptage et la photo sagittale sont experimentaux.',
    'La photo de surface ne mesure ni C7-S1 ni la SVA radiographique.',
@@ -90,7 +90,7 @@ export async function downloadMotionPdf(data){
   pdf.text('KOMO',M,19);
   pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(218,228,236);
   pdf.text('LONGEVITY IN MOTION',M,26);
-  pdf.text('MOTION ONLINE / '+(data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
+  pdf.text('MOTION ONLINE / '+(data.mode==='PILOTE'?'PASSEPORT PERSONNEL':'DEMONSTRATION'),RIGHT,20,{align:'right'});
   pdf.setTextColor(210,223,233);pdf.text(normal('Date : '+data.date),RIGHT,27,{align:'right'});
   y=49;
  }
@@ -141,7 +141,7 @@ export async function downloadMotionPdf(data){
  pdf.setFontSize(8);pdf.text('OBSERVATIONS : '+passport.measuredCount+'/6',RIGHT-8,y+18,{align:'right'});
  pdf.text('A VERIFIER : '+passport.flaggedCount,RIGHT-8,y+26,{align:'right'});
  y+=50;
- line('Un indice issu de vos reponses, pas une estimation de votre age biologique ou de votre esperance de vie.',
+ line('Lecture : cet indice resume uniquement votre mobilite percue. Il ne calcule ni votre age biologique ni votre esperance de vie.',
   {size:8.4,color:muted,leading:4.5});
  y+=4;
  subheading('LES 4 DOMAINES DU PASSEPORT');
@@ -177,6 +177,7 @@ export async function downloadMotionPdf(data){
  pdf.setFont('helvetica','normal');pdf.setFontSize(8.3);ink(dark);
  pdf.text(pdf.splitTextToSize('Un nouveau bilan a 4-6 semaines aidera a comparer votre trajectoire sur les memes epreuves.',CONTENT-12),M+6,y+15);
  y+=31;
+ line('Retrouvez votre passeport dans votre espace prive : pulse.komolongevity.com',{size:8,color:muted});
  line('KOMO Motion Passport V1 | Interpretation exploratoire non medicale.',{size:7.7,color:muted});
  // PAGE 2 - domain by domain: preserve strengths and discuss changeable habits.
  nextPage();
@@ -242,6 +243,7 @@ export async function downloadMotionPdf(data){
  // PAGE 4 - next action: clinic or daily guided follow-up.
  nextPage();
  title('5. Votre feuille de route');
+ line('Vos choix : approfondir le bilan ou entretenir vos habitudes de mouvement avec un suivi regulier.',{size:9,color:muted,leading:5});
  line('Les deux suites possibles du bilan',{size:11,bold:true,color:green,leading:6});
  y+=6;
  space(35);
@@ -284,6 +286,7 @@ export async function downloadMotionPdf(data){
   {size:8.8,color:dark,leading:5});
  title('Methode et limites');
  for(const phrase of data.limitations)line('- '+phrase,{size:8.0,color:muted,leading:4.3});
+ line('Pour revoir votre bilan, connectez-vous a pulse.komolongevity.com puis ouvrez Mon passeport.',{size:8.7,color:dark});
  line('Versions : '+data.version+' / '+data.motion.version,{size:7.5,color:muted});
  // Include the full original patient responses, with automatic pagination.
  nextPage();title('6. Detail des reponses');
