@@ -15,6 +15,9 @@ for(const script of ['app.js','intake-report.js','pdf-report.js','secure-dossier
  const result=spawnSync(process.execPath,['--check','site/pulse-v14/online/session/'+script],{encoding:'utf8'});
  assert.equal(result.status,0,script+': '+result.stderr);
 }
+assert.ok(app.includes("id=\"check-device\"")&&app.includes("id=\"device-feedback\""),'Visible camera preflight');
+assert.ok(app.includes("getUserMedia({audio:false,video:")&&app.includes("stream?.getTracks().forEach(track=>track.stop())"),'Preflight video track is explicitly stopped');
+assert.ok(css.includes('.online-session-shell .device-preflight')&&css.includes('@media(max-width:640px)'), 'Preflight usable on mobile');
 assert.ok(app.includes('beforeDownload(){')&&app.includes('dossierQueue?.flush()'));
 assert.ok(app.includes('appointmentId:paidContext?.appointmentId||null'));
 assert.ok(app.includes('verifyPaidSession({')&&app.includes('paidContext={userId:user.id,appointmentId:bookingId}'));
