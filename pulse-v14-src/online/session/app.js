@@ -110,7 +110,7 @@ function summary(){
  const rows=TESTS.map(t=>{
   const r=state.results[t.id];
   let result='Non réalisé';
-  if(r?.status==='done'||r?.status==='review')result=r.value+' '+t.unit+' ('+(r.source||'webcam')+(r.status==='review'?', à vérifier':'')+')';
+  if(r?.status==='done'||r?.status==='review')result=t.id==='posture'?(r.posture?.valid?'Épaules '+r.posture.shoulderTilt+'°, bassin '+r.posture.hipTilt+'° (image 2D)':'Capture insuffisante · à refaire'):r.value+' '+t.unit+' ('+(r.source||'webcam')+(r.status==='review'?', à vérifier':'')+')';
   return '<div><span>'+esc(t.name)+'</span><strong>'+esc(result)+'</strong></div>';
  }).join('');
  wrap('<div class="paper"><span class="overline">04 / SYNTHÈSE DE DÉMONSTRATION</span><h1>Votre mouvement,<br><em>plus lisible.</em></h1>'+
