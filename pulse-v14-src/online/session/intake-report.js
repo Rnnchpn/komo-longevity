@@ -14,7 +14,6 @@ function measurementRows(results){
  const labels=[
   ['sts','Se relever de la chaise · 30 s','répétitions'],
   ['heels','Élévations des talons','répétitions'],
-  ['balance','Visibilité debout','secondes'],
   ['unipodal_left','Unipodal gauche','secondes'],
   ['unipodal_right','Unipodal droit','secondes'],
   ['arms','Mouvements des bras','répétitions'],
