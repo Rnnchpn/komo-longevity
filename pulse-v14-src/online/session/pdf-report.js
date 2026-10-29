@@ -53,7 +53,7 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
  const date=generatedAt instanceof Date&&!Number.isNaN(generatedAt.getTime())?
   generatedAt.toISOString().slice(0,10):new Date().toISOString().slice(0,10);
  return {
-  version:PDF_REPORT_VERSION,date,mode:options?.mode==='PILOTE'?'PILOTE':'DEMONSTRATION',
+  version:PDF_REPORT_VERSION,date,mode:options?.mode==='GRATUIT'?'GRATUIT':options?.mode==='PILOTE'?'PILOTE':'DEMONSTRATION',
   passport:buildMotionPassport(answers,results,blocked),
   program:options?.program?.version==='KOMO_PULSE_DAILY_V1'?{progress:programProgress(options.program),startedAt:options.program.startedAt}:null,
   questionnaire:{complete:p.complete,index:p.complete?p.profileIndex:null,
@@ -62,7 +62,7 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
    })),focus:questionnaireFocus(answers),groups},
   observations,motion,ageReference:normativeSummary(answers,results,results.sts?.normative??{}),blocked:Boolean(blocked),
   limitations:[
-   'Bilan fonctionnel non medical - cette demonstration ne constitue pas un diagnostic.',
+   'Bilan fonctionnel exploratoire non medical - ne constitue pas un diagnostic.',
    'Les questionnaires sont propres a KOMO et ne sont pas des instruments cliniquement valides.',
    'Les estimations de la webcam, le comptage et la photo sagittale sont experimentaux.',
    'La photo de surface ne mesure ni C7-S1 ni la SVA radiographique.',
@@ -90,7 +90,7 @@ export async function downloadMotionPdf(data){
   pdf.text('KOMO',M,19);
   pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(220,207,186);
   pdf.text('LONGEVITY IN MOTION',M,26);
-  pdf.text('MOTION ONLINE / '+(data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
+  pdf.text('MOTION ONLINE / '+(data.mode==='GRATUIT'?'DECOUVERTE GRATUITE':data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
   pdf.setTextColor(215,201,181);pdf.text(normal('Date : '+data.date),RIGHT,27,{align:'right'});
   y=49;
  }
@@ -206,10 +206,10 @@ export async function downloadMotionPdf(data){
  // PAGE 3 - factual measures and bounded Motion Score
  nextPage();
  title('4. Vos observations physiques');
- line('Ces observations sont experimentales. Un resultat marque "a verifier" ne peut pas etre presente comme mesure de reference.',
+ line('Les observations webcam ou auto-declarees restent exploratoires. Un resultat a verifier ne peut pas etre presente comme mesure de reference.',
   {size:8.4,color:muted});
  for(const item of data.observations){
-  const quality=item.status==='review'?'Capture a verifier avant interpretation':item.commentary||null;
+  const quality=item.status==='review'?(item.source&&/auto|declar/i.test(item.source)?'Auto-declare, non verifie par un operateur.':'Capture a verifier avant interpretation'):item.commentary||null;
   row(item.label,item.display,quality);
  }
  title('Reperes selon l age - uniquement si comparables');
@@ -309,7 +309,7 @@ export async function downloadMotionPdf(data){
   pdf.text('KOMO MOTION  /  DOCUMENT EXPERIMENTAL NON MEDICAL',M,H-12);
   pdf.text(i+' / '+count,RIGHT,H-12,{align:'right'});
  }
- const filename='KOMO_Motion_Rapport_'+data.date+'.pdf';
+ const filename=(data.mode==='GRATUIT'?'KOMO_Motion_Passeport_Gratuit_':'KOMO_Motion_Rapport_')+data.date+'.pdf';
  pdf.save(filename);
  return filename;
 }
