@@ -33,7 +33,7 @@ const checks=[
  ['online booking shortcut styled',css.includes('.pulse-entry-online-shortcut')],
  ['existing login preserved',app.includes('pulseShowLogin')&&app.includes('signInWithPassword')],
  ['Online preflight accessible from landing',app.includes('href="./online/"')&&css.includes('.pulse-entry-prep-link')],
- ['Online preflight page branded',onlineHtml.includes('Préparer mon Bilan Online')&&onlineHtml.includes('KŌMØ PULSE')],
+ ['Online preflight page branded',onlineHtml.includes('Préparer mon Bilan Online')&&onlineHtml.includes('KŌMØ <span>PULSE</span>')],
  ['Online preflight references verified booking',onlineHtml.includes('owner=40696577&amp;appointmentType=99940918')],
  ['Online preflight safety checklist',onlineHtml.includes('id="ready-checklist"')&&(onlineHtml.match(/data-preflight-check/g)||[]).length===4],
  ['Online preflight camera permission only',onlineScript.includes('navigator.mediaDevices.getUserMedia')&&onlineScript.includes('audio: false')],
