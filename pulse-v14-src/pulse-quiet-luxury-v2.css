@@ -1,0 +1,238 @@
+/* KŌMØ PULSE — QUIET LUXURY 2026
+   Presentation-only design system. No booking, auth, measurements or scoring changes. */
+:root {
+ --bg:#F7F2EA;--paper:#FFFDF8;--ink:#1C1A19;--muted:#6E6A65;
+ --line:#E7DFD2;--forest:#232427;--forest2:#383838;
+ --sage:#F3EEE6;--sage2:#EAE1D5;--sand:#F1E7D9;
+ --gold:#B89B6A;--shadow:0 24px 65px rgba(28,26,25,.065);
+ --lux-ink:#1C1A19;--lux-black:#171718;--lux-charcoal:#232427;
+ --lux-ivory:#F7F2EA;--lux-paper:#FFFDF8;
+ --lux-champagne:#B89B6A;--lux-champagne-light:#D9C6A3;
+ --lux-soft:#E7DFD2;--lux-muted:#6E6A65;
+ --lux-serif:"Cormorant Garamond",Georgia,serif;
+ --lux-sans:"Inter",Arial,sans-serif;
+ --r:17px;--r2:23px;
+}
+html,body {background:var(--lux-ivory);color:var(--lux-ink);font-family:var(--lux-sans);font-size:14px}
+button,input,textarea,select {font-family:var(--lux-sans)}
+button,.button {letter-spacing:.005em}
+.brand,.brand small,.overline,.nav-item,.sidebar-caption,.status-label,
+.pulse-entry-brand-caption,.pulse-entry-secure,.pulse-entry-onboarding-kicker,.pulse-offer-content small{
+ font-family:var(--lux-sans);
+}
+.brand,.pulse-entry-wordmark{letter-spacing:.17em;font-weight:600}
+.overline,.sidebar-caption,.status-label,.pulse-entry-secure{letter-spacing:.15em}
+.page-head h1,.intro h2,.soft-card h3,.journey-card h3,.priority-card h3,
+.domain-head h3,.result-summary strong,.appointment-card h3,.empty-state h3,
+.locked-state h2,.plan-head h2,.operator-head h2,.welcome-card h2{
+ font-family:var(--lux-serif);
+ font-weight:500;letter-spacing:-.022em;
+}
+.page-head h1{font-size:clamp(45px,5.2vw,72px);line-height:.95}
+.soft-card h3,.journey-card h3,.priority-card h3{font-size:clamp(27px,3vw,35px)}
+.button,.nav-item,.mode-switch button {border-radius:11px}
+.button.primary,.nav-item.active {background:#242426;border-color:#242426;color:#FFFDF8}
+.button.light {background:#F9F4EB;color:#242426;border-color:#F9F4EB}
+.button.secondary{background:#F3EEE7;color:#35302D}
+.text-button,.info-note summary{color:#746045}
+a:focus-visible,button:focus-visible,input:focus-visible,[role="button"]:focus-visible{
+ outline:2px solid #AA8C5B;outline-offset:3px
+}
+.login-card input:focus{border-color:#B89B6A;box-shadow:0 0 0 4px rgba(184,155,106,.13)}
+.toast{background:#242426;color:#FFFDF8}
+
+/* Public entry: near-black storytelling, champagne detailing. */
+.login-page:has(.pulse-entry-panel){
+ --pulse-champagne:#B89B6A;--pulse-cream:#FFFDF8;
+ --pulse-ink:#1C1A19;--pulse-forest:#242426;--pulse-display:var(--lux-serif);
+ background:#F7F2EA
+}
+.login-page:has(.pulse-entry-panel) .login-story{
+ background:
+ radial-gradient(ellipse at 10% 4%,rgba(190,165,119,.15),transparent 43%),
+ radial-gradient(ellipse at 97% 85%,rgba(160,142,122,.08),transparent 41%),
+ linear-gradient(143deg,#141415 0%,#232326 53%,#2C2A2A 100%);
+ box-shadow:inset -1px 0 0 rgba(225,204,173,.12)
+}
+.login-page:has(.pulse-entry-panel) .login-story::before{
+ background-image:linear-gradient(90deg,rgba(238,224,198,.028) 1px,transparent 1px),
+ linear-gradient(0deg,rgba(238,224,198,.022) 1px,transparent 1px);opacity:.48
+}
+.login-page:has(.pulse-entry-panel) .login-story::after {
+ border-color:rgba(215,195,153,.18);
+ box-shadow:0 0 0 65px rgba(219,192,150,.019),0 0 0 160px rgba(219,192,150,.011)
+}
+.pulse-entry-brand .brand{font-family:var(--lux-sans);font-weight:550}
+.pulse-entry-brand .brand small,.pulse-entry-brand-caption{color:#D6C7AF}
+.pulse-entry-kicker{color:#CDB68F!important}
+.pulse-entry-kicker i{border-color:#D2B990;background:rgba(202,172,119,.3)}
+.login-page:has(.pulse-entry-panel) .pulse-entry-story h1{
+ font-family:var(--lux-serif)!important;
+ font-size:clamp(74px,7.5vw,116px)!important;
+ font-weight:400!important;line-height:.82!important;
+ letter-spacing:-.045em!important;color:#F7F2EA
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-story h1 em{
+ font-family:var(--lux-serif);color:#D9C6A3;font-weight:400;font-style:italic
+}
+.pulse-entry-story .pulse-entry-lead{font-family:var(--lux-sans);color:#D3CDC5;font-size:13px;line-height:1.8;max-width:535px}
+.pulse-entry-story-footer{border-color:rgba(211,191,161,.16);color:#BFB6A7}
+.pulse-entry-story-footer a{color:#E6DDCF}.pulse-entry-foot-mark{color:#D9C6A3}
+.login-page:has(.pulse-entry-panel) .pulse-offer{
+ background:linear-gradient(117deg,rgba(255,253,248,.075),rgba(255,253,248,.02));
+ border-color:rgba(221,207,184,.20);
+ box-shadow:0 12px 30px rgba(0,0,0,.075);
+ border-radius:16px
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer::before{
+ background:radial-gradient(200px circle at var(--pulse-pointer-x,75%) var(--pulse-pointer-y,15%),rgba(209,181,132,.16),transparent 77%)
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer::after{
+ background:linear-gradient(90deg,transparent,rgba(225,204,159,.36),transparent)
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer:hover,.login-page:has(.pulse-entry-panel) .pulse-offer:focus-visible{
+ border-color:#C6AB7C;background-color:rgba(221,196,155,.07);
+ box-shadow:0 16px 36px rgba(0,0,0,.16)
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer--online{
+ background:linear-gradient(112deg,rgba(195,163,107,.16),rgba(239,214,174,.035));
+ border-color:rgba(220,189,133,.5)
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer--motion{background:linear-gradient(111deg,rgba(198,187,174,.09),transparent)}
+.login-page:has(.pulse-entry-panel) .pulse-offer-number{border-color:rgba(224,203,166,.42);color:#E1CDA7}
+.login-page:has(.pulse-entry-panel) .pulse-offer-art{background:linear-gradient(155deg,rgba(228,204,158,.12),rgba(255,255,255,.015));border-color:rgba(226,209,180,.15)}
+.login-page:has(.pulse-entry-panel) .pulse-offer-art-ring{border-color:rgba(226,204,161,.57)}
+.login-page:has(.pulse-entry-panel) .pulse-offer-art-path{border-color:rgba(226,204,161,.48)}
+.login-page:has(.pulse-entry-panel) .pulse-offer-art-core{background:#D9C6A3;box-shadow:0 0 14px rgba(217,198,163,.34)}
+.login-page:has(.pulse-entry-panel) .pulse-offer-content small{color:#CBB589}
+.login-page:has(.pulse-entry-panel) .pulse-offer-content strong{
+ font-family:var(--lux-serif);font-size:clamp(28px,2.8vw,38px);
+ font-weight:500;color:#F9F4EB;line-height:1
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer-content>span{color:#D7D1C7}
+.login-page:has(.pulse-entry-panel) .pulse-offer-content em{color:#C6BEB1}
+.login-page:has(.pulse-entry-panel) .pulse-offer-arrow{color:#D9C6A3}
+.pulse-entry-kinetic svg{filter:saturate(.62) sepia(.19)}
+.login-page:has(.pulse-entry-panel) .login-panel{
+ background:radial-gradient(circle at 88% 11%,#FFFDF8,transparent 37%),linear-gradient(159deg,#FAF7F1,#EFEAE1)
+}
+.login-page:has(.pulse-entry-panel) .login-panel::before{opacity:.17}
+.login-page:has(.pulse-entry-panel) .pulse-entry-panel{
+ background:linear-gradient(150deg,#FFFDF8,#FBF7F1);border:1px solid #E4DBCE;
+ border-radius:22px;box-shadow:0 33px 85px rgba(29,25,21,.075)
+}
+.pulse-entry-panel::before{background:linear-gradient(90deg,transparent,#B89B6A,transparent)}
+.pulse-entry-wordmark{color:#252323}.pulse-entry-wordmark b{font-family:var(--lux-serif);font-size:20px;color:#92764A}
+.pulse-entry-secure{color:#847D73}.pulse-entry-secure::before{background:#B89B6A;box-shadow:0 0 0 3px rgba(184,155,106,.14)}
+.pulse-entry-monogram{border-color:#DACBB7;background:radial-gradient(circle at 25% 20%,#FFFDF8,#EEE3D3)}
+.pulse-entry-monogram::before{border-color:rgba(184,155,106,.26)}
+.pulse-entry-monogram::after,.pulse-entry-monogram-halo{border-color:rgba(184,155,106,.14)}
+.pulse-entry-monogram-letter{font-family:var(--lux-serif);font-size:49px;color:#322B21}
+.pulse-entry-monogram small{color:#8D806D}
+.pulse-entry-onboarding-kicker{color:#9D855F}
+.login-page:has(.pulse-entry-panel) .pulse-entry-panel h2{
+ font-family:var(--lux-serif);font-size:clamp(53px,4.3vw,68px);
+ font-weight:500;line-height:.84;letter-spacing:-.035em;color:#262323
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-panel h2 em{color:#A48758}
+.pulse-entry-panel-intro{color:#706B63;font-family:var(--lux-sans);line-height:1.75}
+.pulse-entry-steps,.pulse-entry-steps li{border-color:#E6DECF}
+.pulse-entry-steps::before{background:linear-gradient(#B89B6A,#E6DDCF)}
+.pulse-entry-steps li>span{border-color:#DCCDB6;background:#F7F2EA;color:#967649;box-shadow:0 0 0 4px #FBF7F1}
+.pulse-entry-steps li:first-child>span{background:#272626;border-color:#272626;color:#E5CBA1}
+.pulse-entry-steps strong{color:#292724;font-weight:650}
+.pulse-entry-steps small{color:#767068}
+.login-page:has(.pulse-entry-panel) .pulse-booking-button{
+ border-color:#252526;background:linear-gradient(110deg,#1A1A1B,#323133);
+ box-shadow:0 12px 30px rgba(26,26,27,.17);color:#FFFDF8
+}
+.login-page:has(.pulse-entry-panel) .pulse-booking-button:hover,.login-page:has(.pulse-entry-panel) .pulse-booking-button:focus-visible{box-shadow:0 18px 38px rgba(26,26,27,.23)}
+.login-page:has(.pulse-entry-panel) .pulse-booking-button span{color:#D9C6A3}
+.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut{
+ border-color:#E0D4C1;background:linear-gradient(115deg,#F6EFE3,#FFFDF9);color:#42362A
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut strong,.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut span{color:#947345}
+.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut:hover{background:#F3E8D8;border-color:#B89B6A}
+.login-page:has(.pulse-entry-panel) .pulse-entry-activation-link{border-color:#E0D6C7;background:#F6F0E8;color:#665037}
+.login-page:has(.pulse-entry-panel) .pulse-entry-activation-link:hover{background:#EEE4D8;border-color:#CBB78D}
+.login-page:has(.pulse-entry-panel) .pulse-entry-activation-link span{color:#A98A57}
+.login-page:has(.pulse-entry-panel) .pulse-entry-prep-link{color:#76614B}
+.login-page:has(.pulse-entry-panel) .pulse-entry-prep-link:hover{color:#554127;background:#F1E8DC}
+.login-page:has(.pulse-entry-panel) .pulse-entry-prep-link span{color:#B89B6A}
+.login-page:has(.pulse-entry-panel) .pulse-entry-assurance{color:#7D766B}
+.login-page:has(.pulse-entry-panel) .pulse-entry-assurance span{color:#A48758}
+.login-page:has(.pulse-entry-panel) .pulse-entry-login-bridge{border-color:#E4DBCE;color:#6E6A65}
+.login-page:has(.pulse-entry-panel) .pulse-login-link{color:#6A5133;border-color:#D9C6A3}
+.login-page:has(.pulse-entry-panel) .pulse-entry-legal{color:#7D766D}
+.login-page:has(.pulse-entry-panel) .pulse-entry-legal a:hover{color:#665037}
+.login-page:has(.pulse-entry-panel) .login-card{background:#FFFDF8;border-color:#E7DFD2;box-shadow:0 25px 75px rgba(25,23,20,.07)}
+.login-page:has(.pulse-entry-panel) .login-card h2{font-family:var(--lux-serif);font-size:54px}
+.login-page:has(.pulse-entry-panel) .pulse-login-back{color:#725837}
+.login-page:has(.pulse-entry-panel) .login-card input:focus{border-color:#B89B6A;box-shadow:0 0 0 4px rgba(184,155,106,.14)}
+@media(max-width:1350px) and (min-width:791px){
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story h1{font-size:clamp(65px,6vw,96px)!important}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content strong{font-size:clamp(27px,3vw,34px)}
+}
+@media(max-width:790px){
+ .login-page:has(.pulse-entry-panel) .login-story{background:linear-gradient(144deg,#171718,#302D2B)}
+ .login-page:has(.pulse-entry-panel) .login-panel{background:#F7F2EA}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story h1{font-size:clamp(62px,11.5vw,91px)!important;line-height:.86!important}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content strong{font-size:30px}
+}
+@media(max-width:410px){
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story h1{font-size:58px!important}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content strong{font-size:26px}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-panel h2{font-size:52px}
+}
+/* Signed-in patient and professional surfaces */
+.sidebar{background:rgba(255,253,248,.94);border-color:#E7DFD2}
+.nav-item{color:#706A64;font-weight:600}
+.nav-item:hover{background:#F2ECE3}
+.nav-item.active{background:#242426;color:#FFFDF8}
+.nav-dot{background:#F0E8DB;color:#796344}
+.user-chip>span{background:#262526;color:#F7F2EA}
+.welcome-card,.result-hero,.plan-head,.operator-head,.pulse-online-tester-welcome{
+ background:linear-gradient(130deg,#171718 0%,#2D2B2B 100%);
+ border:1px solid rgba(184,155,106,.18);
+ box-shadow:0 18px 48px rgba(22,21,20,.095)
+}
+.welcome-card h2,.plan-head h2{font-size:clamp(49px,6.3vw,86px);line-height:.9}
+.welcome-card p,.result-hero p,.plan-head p,.operator-head p,.pulse-online-tester-welcome p{color:#D9D0C3}
+.welcome-mark{color:#D9C6A3;font-family:var(--lux-serif);font-size:83px;border-color:rgba(217,198,163,.32)}
+.score-orb{background:#F7F2EA;color:#282624;box-shadow:inset 0 0 0 1px #DECDAF}
+.score-orb strong{font-family:var(--lux-serif);font-size:78px}
+.progress-line i,.meter i{background:#B89B6A}
+.progress-step.current{background:#F7F0E6;border-color:#DACBB8}
+.progress-step.done b,.journey-card.done .journey-num{background:#282626;color:#F7F2EA}
+.journey-card.current{border-color:#C9B18B;box-shadow:0 20px 50px rgba(65,54,39,.09)}
+.journey-card.current .status-label{background:#F1E6D5;color:#806137}
+.journey-card.done{background:#FBF7F1}
+.soft-card,.priority-card,.domain-card,.info-note,.checkpoint-card,.progress-card,.appointment-card,
+.journey-card,.patient-list button,.operator-aside,.phase-list article{
+ background:#FFFDF8;border-color:#E7DFD2;box-shadow:0 10px 36px rgba(37,31,24,.035)
+}
+.priority-card.primary-priority{background:#F4EBDE;border-color:#DAC7AD}
+.lock-symbol{background:#F0E5D5;color:#665036}
+.result-score strong{font-family:var(--lux-serif);font-size:clamp(93px,11.5vw,148px);font-weight:400}
+.result-score span{color:#D9C6A3}.result-summary span{color:#D9C6A3}
+.result-summary strong{font-family:var(--lux-serif);font-size:33px;font-weight:500}
+.meter{background:#EEE8DE}
+.phase-list b{background:#F1E8DB;color:#7C6344}
+.patient-avatar{background:#EEE5D7;color:#6A5238}
+.op-step.running,.op-step.complete{background:#F7F0E6;border-color:#D9C6A3}
+.pulse-online-tester-link{background:#F3EBDF;border-color:#D9C6A3;color:#685034}
+.pulse-online-tester-link small{color:#957B58}
+.pulse-online-tester-link:hover{background:#F1E4D0;border-color:#B89B6A}
+.pulse-online-tester-welcome span{color:#D9C6A3}
+.pulse-online-tester-welcome h3{font-family:var(--lux-serif);font-size:39px}
+.button:hover{filter:brightness(.96)}
+@media(max-width:700px){
+ .page-head h1{font-size:48px}
+ .welcome-card h2,.plan-head h2{font-size:55px}
+ .sidebar{background:rgba(255,253,248,.96)}
+ .nav-item.active{background:#242426}
+}
+@media(prefers-reduced-motion:reduce){
+ .login-page:has(.pulse-entry-panel) .pulse-offer,
+ .login-page:has(.pulse-entry-panel) .pulse-booking-button{animation:none!important;transition:none!important;transform:none!important}
+}
