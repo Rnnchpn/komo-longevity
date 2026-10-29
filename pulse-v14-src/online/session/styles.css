@@ -314,3 +314,33 @@ h1,h2,p{margin-top:0}h1{font:400 clamp(42px,5vw,72px)/.99 "Instrument Serif",Geo
  .online-report>h1{font-size:32px!important}
  .intake-result-card,.motion-score-locked,.result-list>div{break-inside:avoid}
 }
+
+
+/* V10 — revisit any test without losing other measurements */
+.motion-test-navigator{margin:16px 0 18px;padding:14px 16px;background:#f3f5ef;border:1px solid #dce5d8;border-radius:17px}
+.motion-test-navigator-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.motion-test-navigator-top strong{font-size:13px;letter-spacing:.015em;color:#2c5138}
+.motion-test-navigator-top span{font-size:11px;color:#66836b;font-weight:650}
+.motion-test-navigator-scroll{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 7px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.motion-test-nav-item{flex:1 0 150px;max-width:250px;min-width:145px;display:grid;grid-template-columns:27px 1fr;grid-template-rows:auto auto;align-items:center;gap:5px 8px;padding:12px 11px;border:1px solid #d6e3d2;background:#fff;border-radius:11px;color:#345b41;text-align:left;cursor:pointer;scroll-snap-align:start;transition:border-color .16s,background .16s}
+.motion-test-nav-item:hover{background:#edf3e9;border-color:#729b77}
+.motion-test-nav-item:focus-visible{outline:3px solid #aa8a5d;outline-offset:2px}
+.motion-test-nav-item.is-active{background:#214b33;color:#fff;border-color:#214b33;cursor:default}
+.motion-test-nav-num{grid-row:1/span 2;display:grid;place-items:center;width:25px;height:25px;border:1px solid currentColor;border-radius:50%;font-size:11px;font-weight:800}
+.motion-test-nav-name{font-size:11px;font-weight:800;line-height:1.3}
+.motion-test-nav-item small{font-size:10px;color:#74897a}
+.motion-test-nav-item.is-active small{color:#d6e6d8}
+.motion-test-nav-item.status-done:not(.is-active) .motion-test-nav-num{background:#dcebe0;border-color:#acd0b7}
+.motion-test-nav-item.status-review:not(.is-active) .motion-test-nav-num{background:#f4e6c7;border-color:#d6bc83}
+.motion-test-nav-item.status-skipped:not(.is-active){opacity:.75}
+.motion-test-nav-info{font-size:11px;color:#a46739;min-height:0;margin:5px 0 0}
+.motion-test-nav-info:empty{display:none}
+.motion-review-existing{background:#f8f9f4;border:1px solid #dce6d6;border-radius:18px;padding:clamp(21px,3vw,40px);margin:15px 0 22px}
+.motion-review-existing h2{font:400 clamp(27px,3vw,42px) "Instrument Serif",Georgia,serif;margin:12px 0 2px;color:#2f553a}
+.motion-review-number{font:400 clamp(37px,5vw,65px) "Instrument Serif",Georgia,serif;color:#1d4931;margin:12px 0}
+.motion-review-existing p{color:#6c806e;font-size:12px;line-height:1.7;max-width:800px}
+.motion-review-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:19px}
+.motion-review-stop{background:transparent;border:1px solid #b8cbb6;border-radius:10px;padding:12px 13px;font-size:11px;font-weight:700;color:#486650;cursor:pointer}
+.motion-review-stop:hover{background:#e4ece1}
+.motion-review-stop:disabled{opacity:.55;cursor:default}
+@media(max-width:680px){.motion-test-navigator{padding:10px;margin:10px 0}.motion-test-nav-item{flex-basis:165px;min-width:165px}.motion-review-actions{flex-direction:column;align-items:stretch}.motion-review-actions .action,.motion-review-stop{width:100%}}
