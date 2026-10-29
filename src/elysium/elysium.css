@@ -736,3 +736,32 @@ body.ely-public-commerce{background:#f6f3ec;color:#283028;font-family:var(--sans
 @media(prefers-reduced-motion:reduce){
  .ely-public-art-seal,.ely-public-world,.ely-public-world-graphic:before,.ely-public-world-arrow{transition:none!important}
 }
+
+
+/* Final visual polish: individually composed graphic editions and small screens. */
+.ely-world-maison .ely-product-card[data-edition="2"] .ely-product-halo{
+ transform:rotate(15deg) scale(.91);border-radius:44% 56% 54% 46%;box-shadow:0 23px 55px #5e6c552e
+}
+.ely-world-maison .ely-product-card[data-edition="3"] .ely-product-halo{
+ transform:rotate(-19deg) scale(.86);border-radius:48% 52% 44% 56%;
+ box-shadow:0 20px 70px #72806b29
+}
+.ely-world-maison .ely-product-card[data-edition="3"] .ely-product-halo:before{border-radius:38% 62% 58% 42%}
+.ely-world-maison .ely-product-card[data-edition="2"] .ely-product-symbol{transform:rotate(-18deg)}
+.ely-world-maison .ely-product-card[data-edition="3"] .ely-product-symbol{transform:rotate(13deg)}
+.ely-world-maison .ely-product-card:hover .ely-product-halo{filter:brightness(1.04)}
+.ely-world-maison[data-world="cosmetic-supplements"] .ely-shop-hero-copy h1{
+ font-size:clamp(54px,7.8vw,132px);overflow-wrap:break-word
+}
+@media(max-width:720px){
+ .ely-public-hero-copy h1{font-size:clamp(76px,17vw,108px)}
+ .ely-boutique .ely-shop-hero-copy h1{font-size:clamp(62px,15.4vw,90px);overflow-wrap:break-word}
+ .ely-world-maison[data-world="cosmetic-supplements"] .ely-shop-hero-copy h1{font-size:clamp(45px,10.6vw,65px)}
+ .ely-world-maison[data-world="high-luxury"] .ely-shop-hero-copy h1{font-size:clamp(59px,14vw,81px)}
+ .ely-public-hero-art{min-height:325px}
+ .ely-public-hero-copy h2{font-size:clamp(40px,9vw,58px)}
+}
+@media(max-width:390px){
+ .ely-public-hero-copy h1{font-size:clamp(65px,19.4vw,76px)}
+ .ely-world-maison .ely-product-name{font-size:clamp(35px,9.4vw,44px)}
+}
