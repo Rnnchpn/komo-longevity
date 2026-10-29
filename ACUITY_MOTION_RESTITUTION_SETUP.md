@@ -27,7 +27,7 @@ L'intervenant se connecte **à l'heure indiquée par Acuity**, jamais automatiqu
 
 Bonjour %first%,
 
-Votre réservation KŌMØ Motion Online est confirmée pour le **%date% à %time%**.
+Votre réservation KŌMØ Motion Online est confirmée pour le **%timetz%**.
 
 **1. Réalisez votre bilan dès maintenant :**
 https://pulse.komolongevity.com/online/activate/?appointment=%appointmentID%
@@ -50,7 +50,7 @@ L'équipe KŌMØ
 
 Bonjour %first%,
 
-Votre échange KŌMØ est prévu **%date% à %time%**.
+Votre échange KŌMØ est prévu **%timetz%**.
 
 Si vous ne l'avez pas encore fait, réalisez votre bilan avant l'échange depuis votre espace Pulse :
 https://pulse.komolongevity.com/
