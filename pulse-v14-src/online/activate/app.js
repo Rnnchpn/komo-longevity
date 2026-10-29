@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import {restitutionMarkup} from '../session/restitution.mjs';
 const sb=createClient('https://uqlolefsiktbznnymriy.supabase.co','sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root=document.querySelector('#activation-app');
 const params=new URLSearchParams(location.search);
@@ -47,11 +48,12 @@ function paidUser(user,accessToken){
      '<p>Votre accès à la séance Online est disponible. La caméra et le microphone ne seront activés qu’avec votre accord, au début des tests.</p>'+
      '<div class="actions"><a class="action" href="/online/session/?appointment='+encodeURIComponent(id)+'">Commencer mon bilan Motion →</a>'+
      '<a class="action secondary" href="/">Mon espace Pulse</a></div>'+
+     restitutionMarkup({appointmentAt:result.appointmentAt,appointmentId:id,appointmentMinutes:result.appointmentMinutes,compact:true})+
      '<p>Après votre consentement, votre progression sera enregistrée dans votre dossier privé Pulse pour être reprise ultérieurement. Les vidéos et les photos ne seront pas stockées. Le rapport PDF restera téléchargé séparément. Cette prestation ne constitue pas une consultation médicale.</p>');
    }else{
     title('<div class="notice"><strong>✓ Votre réservation Online et votre règlement sont vérifiés.</strong></div>'+
      '<p>La consultation en ligne reste temporairement fermée aux comptes clients pendant les derniers contrôles de confidentialité et d’enregistrement des résultats.</p>'+
-     '<p>Votre réservation demeure valable. Utilisez le lien de visioconférence transmis dans la confirmation Acuity pour votre rendez-vous accompagné, ou contactez notre équipe.</p>'+
+     '<p>Votre réservation demeure valable. Si un lien vidéo a été configuré, il figure dans votre confirmation Acuity. Sinon contactez notre équipe.</p>'+
      '<div class="actions"><a class="action" href="/">Accéder à Pulse</a><a class="action secondary" href="mailto:contact@komolongevity.com">Nous contacter</a></div>');
    }
   }catch(error){b.disabled=false;message('Impossible de joindre le système de réservation. Réessayez plus tard.');}
