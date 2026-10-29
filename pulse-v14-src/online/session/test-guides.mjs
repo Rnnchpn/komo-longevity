@@ -33,6 +33,17 @@ export const TEST_GUIDES={
   measured:"La webcam calcule la durée où elle voit votre corps : elle ne mesure ni les oscillations posturales ni un risque de chute.",
   audio:"Test de visibilité en position debout. Placez-vous près d'un support stable, les yeux ouverts. Gardez une position confortable, sans chercher à vous mettre en difficulté. Dites c'est parti et restez visible pendant dix secondes. Ce test ne mesure pas votre équilibre de manière médicale."
  },
+ posture:{
+  purpose:"Observer pendant huit secondes l’alignement apparent de quelques repères de votre silhouette, dans le plan de l’image.",
+  setup:"Caméra fixe à niveau, face à vous, hauteur de bassin, suffisamment éloignée pour voir tête, épaules, bassin, jambes et pieds. Position naturelle et confortable.",
+  steps:[
+   "Placez-vous debout face à l’objectif, pieds écartés confortablement, sans chercher une posture parfaite.",
+   "Vérifiez que la silhouette et les deux épaules sont reconnues. Dites « C’est parti ».",
+   "Restez dans votre position naturelle durant huit secondes ; aucune flexion, étirement ni mouvement forcé n’est demandé."
+  ],
+  measured:"Le logiciel estime les inclinaisons apparentes des lignes des épaules et du bassin, et des décalages dans l’image. La perspective, la rotation ou l’inclinaison du téléphone peuvent les modifier. Cela ne permet pas de détecter une scoliose ou un trouble postural.",
+  audio:"Observation de posture. Placez la caméra bien droite, à hauteur du bassin. Tenez-vous de face, à distance, tête et pieds visibles. Gardez une position naturelle. Quand le corps est correctement détecté, dites : c'est parti. Restez immobile huit secondes, sans vous forcer. Les mesures représentent uniquement votre position apparente dans l’image."
+ },
  arms:{
   purpose:"Observer combien de fois vous levez les deux bras puis les redescendez en 20 secondes.",
   setup:"Face à la caméra, épaules et mains visibles, espace libre autour des bras. Ne forcez pas l'amplitude.",
