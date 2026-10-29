@@ -71,7 +71,7 @@ const checks=[
  ['pulse javascript syntax',appSyntax.status===0],
  ['acuity public scheduling',app.includes('app.acuityscheduling.com/schedule.php?owner=40696577')],
  ['booking promise verified',app.includes('La réservation ne crée pas automatiquement de compte Pulse')&&app.includes('Choisir mon bilan et réserver')],
- ['free clearly upcoming; online bookable',app.includes('Découverte · réservation à venir')&&!app.includes('En ligne · réservation à venir')&&app.includes('30 min · 49 € · réserver en ligne')],
+ ['free accessible without booking; online remains bookable',app.includes('Gratuit · sans compte · disponible maintenant')&&app.includes('href:\'./free/\'')&&app.includes('pulse-free-entry')&&!app.includes('Découverte · réservation à venir')&&app.includes('30 min · 49 € · réserver en ligne')],
  ['Acuity Online type 99940918 deep link',app.includes('owner=40696577&appointmentType=99940918')],
  ['direct online link on card and panel',app.includes('href:onlineBookingUrl,tone:\'online\'')&&app.includes('class="pulse-entry-online-shortcut" href="${onlineBookingUrl}"')],
  ['online booking shortcut styled',css.includes('.pulse-entry-online-shortcut')],
