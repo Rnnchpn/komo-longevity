@@ -458,3 +458,13 @@ h1,h2,p{margin-top:0}h1{font:400 clamp(42px,5vw,72px)/.99 "Instrument Serif",Geo
 .online-session-shell .device-preflight .action{max-width:240px;font-size:12px}
 .online-session-shell #device-feedback{grid-column:1/-1;margin:0;font-size:12px;line-height:1.6;color:#5a6166}
 @media(max-width:640px){.online-session-shell .device-preflight{grid-template-columns:1fr;padding:18px 16px}.online-session-shell .device-preflight .action{max-width:none;width:100%}}
+
+/* Mobile PDF delivery: user-tappable blob preview instead of blocked asynchronous popup. */
+.online-report .report-pdf-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.online-report .pdf-preview-link:empty{display:none}
+.online-report .pdf-preview-link{margin:12px 0 18px;padding:14px 18px;background:#f4f3ee;border-radius:12px;border:1px solid #ded8ce;display:flex;align-items:center;gap:13px;flex-wrap:wrap}
+.online-report .pdf-preview-link a{display:inline-flex;align-items:center;justify-content:center;padding:13px 16px;background:#2b3239;color:#fff9f0;border-radius:8px;font-size:12px;text-decoration:none}
+.online-report .pdf-preview-link p{margin:0;color:#71747a;font-size:12px;line-height:1.6}
+.online-session-shell .access-help{margin:15px 0 0;font-size:12px;line-height:1.7;color:#71777d}
+.online-session-shell .access-help a{color:#445a70;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:640px){.online-report .report-pdf-actions{width:100%;display:grid;grid-template-columns:1fr}.online-report .report-pdf-actions>.action{width:100%;max-width:none}.online-report .pdf-preview-link a{width:100%}}
