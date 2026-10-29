@@ -148,7 +148,7 @@ body.elysium-app-mode::before{content:"";pointer-events:none;position:fixed;inse
  text-align:center;will-change:left,top}
 .ely-node:before{content:"";position:absolute;inset:5px;border:1px solid #c7b28c16;border-radius:12px;pointer-events:none}
 .ely-node:after{content:"";position:absolute;inset:8%;border-radius:50%;z-index:-1;
- background:radial-gradient(circle,var(--node-tint,#cab08b)14,transparent 70%);opacity:.7;pointer-events:none}
+ background:radial-gradient(circle,#cdb18a1c,transparent 70%);opacity:.7;pointer-events:none}
 .ely-node-index{position:absolute;top:11px;left:13px;color:#bcb5a4;font:600 8px/1.2 var(--sans);letter-spacing:.17em}
 .ely-node-glyph{width:72px;height:72px;color:var(--node-tint,#d4b990);filter:drop-shadow(0 0 10px #b8c2b11b);transition:transform .55s ease,filter .55s ease;overflow:visible}
 .ely-node-name{font:400 clamp(16px,1.5vw,20px)/1.1 var(--serif);color:#ede6db;white-space:nowrap}
