@@ -50,16 +50,38 @@ glyph:'trajectory'
 ]
 },
 {
-slug:'aesthetic',no:'02',icon:'✧',name:'Aesthetic',full:'KŌMØ Aesthetic',eyebrow:'THE BEAUTY ATELIER',
-subtitleEn:'Beauty, with discretion.',subtitleFr:'La beauté, dans la discrétion.',
-copyEn:'Refined aesthetic journeys and carefully coordinated private appointments with independent licensed professionals.',
-copyFr:'Des parcours esthétiques raffinés et des rendez-vous privés coordonnés auprès de professionnels indépendants habilités.',
-image:img('photo-1540555700478-4be289fbecef'),background:'linear-gradient(135deg,#40342d,#161513)',
+slug:'aesthetic',no:'02',icon:'✧',name:'Aesthetic',full:'KŌMØ Aesthetic',eyebrow:'THE ART OF SUBTLETY',
+subtitleEn:'Beauty, with discretion.',subtitleFr:'La beauté, avec discrétion.',
+copyEn:'A private aesthetic experience: considered introductions to independent, appropriately licensed specialists, personalised non-medical skin rituals and discreet appointment coordination. Each journey is individual.',
+copyFr:'Une expérience esthétique privée : mise en relation choisie avec des spécialistes indépendants habilités, rituels de soin cutané non médicaux personnalisés et organisation discrète des rendez-vous. Chaque parcours est singulier.',
+image:img('photo-1540555700478-4be289fbecef'),background:'linear-gradient(135deg,#47342f,#1d1a1a)',
 products:[
-product('aesthetic-consultation','Private Aesthetic Consultation','Consultation esthétique privée','PRIVATE CONSULTATION','MEDICAL / PARTNER','photo-1611930022073-b7a4ba5fcccd','A discreet introduction to an authorised aesthetic professional for assessment and individual treatment options.','Une mise en relation confidentielle avec un professionnel de l’esthétique habilité pour une évaluation et des options individualisées.'),
-product('skin-ritual','Bespoke Skin Ritual','Rituel de soin personnalisé','BEAUTY EXPERIENCE','SKIN / CARE','photo-1556228578-0d85b1a4d571','A thoughtful skin-care experience selected around individual preferences and expert guidance.','Une expérience de soin cutané construite autour des préférences personnelles et des conseils d’experts.'),
-product('aesthetic-concierge','Beauty Appointment Concierge','Conciergerie esthétique','CONCIERGE','PRIVATE / APPOINTMENTS','photo-1596462502278-27bfdc403348','Private coordination of aesthetic consultations and related appointments, subject to professional assessment.','Coordination privée des consultations et rendez-vous esthétiques, sous réserve de l’évaluation des professionnels.')
-]},
+{
+...product('aesthetic-consultation','The Private Aesthetic Consultation','La Consultation Esthétique Privée','INDEPENDENT SPECIALIST','01 · PRIVATE CONSULTATION','photo-1611930022073-b7a4ba5fcccd',
+'A discreet introduction to an independent, licensed aesthetic specialist. The professional determines the clinical assessment, treatment suitability and all medical decisions.',
+'Une mise en relation confidentielle avec un spécialiste indépendant habilité en esthétique. Le professionnel réalise l’évaluation clinique et décide seul de l’indication et des éventuels actes médicaux.'),
+pointsEn:['Confidential introduction and appointment coordination','Independent professional assessment','Individual treatment options discussed solely by the clinician'],
+pointsFr:['Mise en relation et coordination confidentielles','Évaluation réalisée par le professionnel indépendant','Options de prise en charge discutées exclusivement avec lui'],
+glyph:'profile',buttonEn:'REQUEST A PRIVATE INTRODUCTION',buttonFr:'DEMANDER UNE MISE EN RELATION'
+},
+{
+...product('skin-ritual','The Bespoke Skin Atelier','L’Atelier de Soin Sur Mesure','NON-MEDICAL BEAUTY RITUAL','02 · SKIN & DAILY CARE','photo-1556228578-0d85b1a4d571',
+'A personalised non-medical skin-care experience shaped around your preferences, textures and daily rituals. Thoughtful selection, discreet guidance and an individual quotation.',
+'Une expérience non médicale de soin cutané pensée autour de vos préférences, des textures et des rituels quotidiens. Sélection soignée, conseils adaptés et devis personnalisé.'),
+pointsEn:['Private preferences and routine discussion','Curated skincare and non-medical care ritual','Flexible format at an agreed location'],
+pointsFr:['Échange privé autour de vos habitudes et préférences','Sélection de soins et rituel non médical','Format adaptable selon le lieu convenu'],
+glyph:'petals',buttonEn:'DISCOVER MY SKIN ATELIER',buttonFr:'DÉCOUVRIR MON ATELIER DE SOIN'
+},
+{
+...product('aesthetic-concierge','The Beauty Concierge','La Conciergerie Beauté','BESPOKE COORDINATION','03 · PRIVATE ORGANISATION','photo-1596462502278-27bfdc403348',
+'One confidential point of contact to help arrange beauty and aesthetic appointments across your itinerary — at your destination, in residence or while travelling. Providers and availability are confirmed individually.',
+'Un interlocuteur confidentiel pour organiser vos rendez-vous beauté et esthétique selon votre itinéraire — à destination, en résidence ou en déplacement. Prestataires et disponibilités confirmés individuellement.'),
+pointsEn:['Personalised appointment coordination','Riviera, Monaco or further destinations on request','Discreet logistics with independently confirmed providers'],
+pointsFr:['Coordination personnalisée des rendez-vous','Riviera, Monaco ou autres destinations sur demande','Logistique discrète et prestataires confirmés indépendamment'],
+glyph:'constellation',buttonEn:'CONTACT THE BEAUTY CONCIERGE',buttonFr:'CONTACTER LA CONCIERGERIE BEAUTÉ'
+}
+]
+},
 {
 slug:'iv-drip',no:'03',icon:'✚',name:'IV Drip',full:'KŌMØ IV Drip',eyebrow:'THE CLINICAL COORDINATION',
 subtitleEn:'Care with clear boundaries.',subtitleFr:'Le soin, avec un cadre rigoureux.',

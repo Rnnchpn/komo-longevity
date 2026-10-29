@@ -19,7 +19,7 @@ const itemName=o=>lang==='fr'?(o.fr||o.en):o.en;
 function say(sel,message,isError=false){const x=$(sel);if(x){x.textContent=message;x.classList.toggle('error',isError)}}
 function show(id){const x=$('#'+id);if(x)x.style.display=id==='memberPanel'?'block':'block'}
 function hide(id){const x=$('#'+id);if(x)x.style.display='none'}
-function switchLanguage(){document.documentElement.lang=lang;$('[data-en]').forEach(el=>{const v=lang==='fr'?el.dataset.fr:el.dataset.en;if(el.closest('.longevity-maison')&&/<(?:em|br)>/.test(v))el.innerHTML=v;else el.textContent=v});if($('#toggleLanguage'))$('#toggleLanguage').textContent=lang==='en'?'FR':'EN';if(isMaison)renderMaisonMeta();if(isClub&&active)renderClub(null,clubMembership);if(isMaison&&active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);if(isMaison)renderSelection()}
+function switchLanguage(){document.documentElement.lang=lang;$('[data-en]').forEach(el=>{const v=lang==='fr'?el.dataset.fr:el.dataset.en;if(el.closest('.longevity-maison, .aesthetic-maison')&&/<(?:em|br)>/.test(v))el.innerHTML=v;else el.textContent=v});if($('#toggleLanguage'))$('#toggleLanguage').textContent=lang==='en'?'FR':'EN';if(isMaison)renderMaisonMeta();if(isClub&&active)renderClub(null,clubMembership);if(isMaison&&active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);if(isMaison)renderSelection()}
 $('#toggleLanguage')?.addEventListener('click',()=>{lang=lang==='fr'?'en':'fr';switchLanguage()});
 function createClient(){if(!window.supabase?.createClient)return null;return window.supabase.createClient(AUTH_URL,AUTH_KEY,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}})}
 async function authorized(worldName){
@@ -192,6 +192,8 @@ function renderMaisonMeta(){
  if($('#maisonTitle')&&slug!=='longevity')$('#maisonTitle').textContent=world.name;
  if($('#maisonDescription'))$('#maisonDescription').textContent=slug==='longevity'
   ?(lang==='fr'?'Une nouvelle lecture de vos capacités fonctionnelles, de vos forces et de votre trajectoire — en toute discrétion.':'A fresh perspective on your functional capacity, strengths and trajectory — with complete discretion.')
+  :slug==='aesthetic'
+  ?(lang==='fr'?'Des expériences soigneusement sélectionnées, des mises en relation confidentielles et une coordination sur mesure.':'Thoughtfully selected experiences, discreet introductions and a bespoke concierge approach.')
   :(lang==='fr'?world.subtitleFr:world.subtitleEn);
  if($('#collectionDescription'))$('#collectionDescription').textContent=lang==='fr'?world.copyFr:world.copyEn;
 }
@@ -227,10 +229,42 @@ function renderLongevityProducts(products,grid){
   card.append(top,motif,eyebrow,h,desc,points,btn);grid.append(card);
  });
 }
+
+const AESTHETIC_OFFER_ART={
+ profile:'<path d="M79 19C56 16 38 33 36 55c-1 11 7 15 2 27-2 5-8 12-13 18l22 1c1 10 9 17 19 17"/><path d="M79 19c20 13 24 29 18 49-5 18-19 32-34 35" opacity=".43"/><path d="M41 67q13-6 23 1m-18 13q9 4 17 0"/><circle cx="50" cy="48" r="3" fill="currentColor" stroke="none"/>',
+ petals:'<path d="M60 60C41 38 48 18 60 15c14 3 19 22 0 45Z"/><path d="M60 60c20-23 42-15 43-1-5 15-28 16-43 1Z"/><path d="M60 60c19 18 12 40-2 43-15-3-17-26 2-43Z"/><path d="M60 60C41 78 20 70 17 56c6-16 27-15 43 4Z"/><circle cx="60" cy="60" r="7"/><path d="M18 102h84" opacity=".25"/>',
+ constellation:'<circle cx="61" cy="59" r="13"/><circle cx="61" cy="16" r="5"/><circle cx="100" cy="42" r="5"/><circle cx="88" cy="96" r="5"/><circle cx="27" cy="89" r="5"/><circle cx="19" cy="39" r="5"/><path d="M61 21v25M74 55l21-11M69 70l16 22M49 67L30 86M49 54L24 41" opacity=".68"/><path d="M61 7v13m0 78v14M6 59h13m84 0h12" opacity=".3"/>'
+};
+function renderAestheticProducts(products,grid){
+ grid.classList.add('ae-offers');
+ products.forEach((p,i)=>{
+  const card=document.createElement('article');card.className='ae-offer ae-offer-'+String(i+1);
+  const top=document.createElement('div');top.className='ae-offer-top';
+  const index=document.createElement('span');index.className='ae-offer-index';index.textContent=String(i+1).padStart(2,'0')+' / 03';
+  const price=document.createElement('span');price.className='ae-offer-price';price.textContent=lang==='fr'?p.priceFr:p.priceEn;
+  top.append(index,price);
+  const motif=document.createElement('div');motif.className='ae-offer-motif';motif.setAttribute('aria-hidden','true');
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 120 120');
+  svg.innerHTML='<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">'+(AESTHETIC_OFFER_ART[p.glyph]||AESTHETIC_OFFER_ART.petals)+'</g>';
+  motif.append(svg);
+  const content=document.createElement('div');content.className='ae-offer-content';
+  const eyebrow=document.createElement('span');eyebrow.className='ae-offer-eyebrow';eyebrow.textContent=p.kind;
+  const h=document.createElement('h3');h.textContent=itemName(p);
+  const desc=document.createElement('p');desc.className='ae-offer-description';desc.textContent=lang==='fr'?p.copyFr:p.copyEn;
+  const ul=document.createElement('ul');ul.className='ae-offer-points';
+  (lang==='fr'?p.pointsFr:p.pointsEn||[]).forEach(point=>{const li=document.createElement('li');li.textContent=point;ul.append(li)});
+  const btn=document.createElement('button');btn.type='button';btn.className='ae-offer-cta';
+  btn.textContent=(lang==='fr'?p.buttonFr:p.buttonEn)||tt('add');
+  btn.addEventListener('click',()=>addSelection(p,'aesthetic'));
+  content.append(eyebrow,h,desc,ul,btn);
+  card.append(top,motif,content);grid.append(card);
+ });
+}
 function renderProducts(products){
  if(!isMaison||!Array.isArray(products))return;
  hide('maisonAccess');const grid=$('#productGrid');grid.replaceChildren();say('#shopMessage','');
  if(slug==='longevity'){renderLongevityProducts(products,grid);return;}
+ if(slug==='aesthetic'){renderAestheticProducts(products,grid);return;}
  products.forEach(p=>{
   const card=document.createElement('article');card.className='store-card';
   const photo=document.createElement('div');photo.className='store-image';
