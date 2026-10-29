@@ -76,9 +76,70 @@ function domains(){return[
 ]}
 
 async function authView(message=''){
-  $('#app').innerHTML=`<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">VOTRE SANTÉ EN MOUVEMENT</span><h1>Comprendre votre corps.<br><em>Simplement.</em></h1><p>Votre bilan, vos résultats et votre plan KŌMØ réunis au même endroit — sans jargon, étape par étape.</p></div><div class="login-foot">Données privées · Votre espace personnel</div></section><section class="login-panel"><form id="login" class="login-card"><span class="overline">KŌMØ PULSE</span><h2>Bienvenue sur KŌMØ Pulse</h2><p>Connectez-vous pour retrouver vos rendez-vous, votre bilan et votre trajectoire.</p><label><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label><label><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required minlength="6"></label><button class="button primary wide">Se connecter</button><button class="text-button" type="button" id="reset">Mot de passe oublié ?</button>${message?`<div class="form-error">${esc(message)}</div>`:''}</form></section></main>`;
-  $('#login').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const r=await sb.auth.signInWithPassword({email:String(f.get('email')),password:String(f.get('password'))});if(r.error)return authView('Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.');await boot()};
-  $('#reset').onclick=async()=>{const email=prompt('Votre adresse e-mail');if(!email)return;const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});toast(r.error?'Impossible d’envoyer l’e-mail.':'E-mail de réinitialisation envoyé.')};
+  // A verified Acuity booking is the entry point for a new Pulse patient.
+  // The team currently handles the invitation and patient-record association.
+  // Never imply an account was created merely because the booking link was clicked.
+  $('#app').innerHTML=`<main class="login-page pulse-entry">
+    <section class="login-story">
+      <div class="brand light">KŌMØ<small>PULSE</small></div>
+      <div class="login-narrative"><span class="overline light">LONGEVITY IN MOTION</span>
+        <h1>Votre mouvement.<br><em>Votre trajectoire.</em></h1>
+        <p>Un espace personnel pour préparer votre bilan Motion, retrouver vos résultats et suivre votre évolution dans le temps.</p>
+        <div class="pulse-entry-steps" aria-label="Votre parcours en trois étapes">
+          <div><b>01</b><span>Je réserve mon bilan</span></div>
+          <div><b>02</b><span>J'active mon espace Pulse</span></div>
+          <div><b>03</b><span>Je prépare mon rendez-vous</span></div>
+        </div>
+      </div>
+      <div class="login-foot">KŌMØ PULSE · Un espace individuel sécurisé</div>
+    </section>
+    <section class="login-panel">
+      <div class="login-card pulse-entry-card">
+        <span class="overline">PREMIÈRE VISITE · KŌMØ PULSE</span>
+        <h2>Bienvenue dans votre espace KŌMØ.</h2>
+        <p class="pulse-entry-intro">Pour créer votre compte, commencez par choisir votre rendez-vous.</p>
+        <a id="createPulseAccount" class="button primary wide pulse-entry-primary" href="${BOOKING_URL}" rel="noopener noreferrer">
+          <span>Créer mon compte · Prendre rendez-vous</span><span aria-hidden="true">→</span>
+        </a>
+        <p class="pulse-entry-note">Vous serez dirigé vers notre calendrier Acuity pour sélectionner votre bilan Motion à Paris. Votre accès Pulse sera activé après confirmation et association de votre réservation par notre équipe.</p>
+        <a class="pulse-entry-cannes" href="${CANNES_REQUEST_URL}">Vous préférez Cannes ? Demander un rendez-vous <span aria-hidden="true">→</span></a>
+        <div class="pulse-entry-divider"><span>OU</span></div>
+        <button class="button secondary wide pulse-entry-login-button" type="button" id="showExistingLogin" aria-controls="existingLogin" aria-expanded="${message?'true':'false'}">J'ai déjà un compte · Me connecter</button>
+        <section class="pulse-existing-login" id="existingLogin" ${message?'':'hidden'}>
+          <div class="pulse-existing-login-head"><h3>Accéder à Pulse</h3><button type="button" class="text-button" id="hideExistingLogin">Retour</button></div>
+          <form id="login" class="pulse-login-form">
+            <label><span>E-mail</span><input name="email" type="email" autocomplete="email" inputmode="email" required></label>
+            <label><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required minlength="6"></label>
+            <button class="button primary wide" type="submit">Se connecter</button>
+            <button class="text-button" type="button" id="reset">Mot de passe oublié ?</button>
+            ${message?'<div class="form-error" role="alert">'+esc(message)+'</div>':''}
+          </form>
+        </section>
+        <p class="pulse-entry-help">Vous avez déjà réservé mais n'avez pas encore reçu votre accès ? <a href="mailto:contact@komolongevity.com?subject=Activation%20de%20mon%20compte%20KOMO%20Pulse">Demander l'activation de mon compte</a>.</p>
+      </div>
+    </section>
+  </main>`;
+  const panel=$('#existingLogin'),toggle=$('#showExistingLogin');
+  function showLogin(visible){
+    panel.hidden=!visible;
+    toggle.setAttribute('aria-expanded',visible?'true':'false');
+    if(visible)panel.querySelector('input[name="email"]')?.focus();
+  }
+  toggle.onclick=()=>showLogin(!panel.hidden);
+  $('#hideExistingLogin').onclick=()=>showLogin(false);
+  $('#login').onsubmit=async e=>{
+    e.preventDefault();
+    const f=new FormData(e.currentTarget);
+    const r=await sb.auth.signInWithPassword({email:String(f.get('email')).trim(),password:String(f.get('password'))});
+    if(r.error)return authView('Connexion impossible. Vérifiez votre e-mail et votre mot de passe.');
+    await boot();
+  };
+  $('#reset').onclick=async()=>{
+    const email=$('#login input[name="email"]')?.value?.trim()||prompt('Votre adresse e-mail');
+    if(!email)return;
+    const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+    toast(r.error?'Impossible d’envoyer l’e-mail.':'Si ce compte existe, un e-mail de réinitialisation a été envoyé.');
+  };
 }
 async function loadIdentity(){
   const u=await sb.auth.getUser();S.user=u.data.user||null;if(!S.user)return false;
