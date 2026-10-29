@@ -255,7 +255,9 @@ const scripts = [
   'scripts/pulse-v13-qa.mjs',
   // Patient-first V14 is isolated and built last. V13 remains available for rollback.
   'scripts/build-pulse-v14.mjs',
-  'scripts/pulse-v14-qa.mjs'
+  'scripts/pulse-v14-qa.mjs',
+  // Verified-paid Online booking contract tests with isolated, mocked API traffic.
+  'scripts/pulse-online-payment-qa.mjs'
 ];
 
 for (const script of scripts) {
