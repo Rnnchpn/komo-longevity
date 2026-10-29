@@ -89,7 +89,7 @@ export function mountUnipodal(root,task,record,state,callbacks){
    const seconds=f.seconds.toFixed(1);record.value=f.seconds;
    text('#value',seconds);text('#camera-reps',seconds);
    text('#time',String(Math.max(0,Math.ceil(20-f.seconds))));
-   if(f.stopped)end(false);
+   if(f.stopped)end(!f.valid);
   }else{
    text('#motion-status',f.lifted?'Pied détecté en l’air · stabilisez-vous sans forcer.':
       'Levez légèrement un pied près d’un appui. Le test démarre quand la position est reconnue.');
