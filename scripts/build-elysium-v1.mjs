@@ -30,10 +30,10 @@ for(const world of WORLDS){
  await writeFile(join(dir,'index.html'),template);
 }
 const home=await readFile(join(out,'index.html'),'utf8');
-if(!home.includes('portal-doors')||!home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/longevity/'))
- throw new Error('[elysium] Parisian portal or €299/Yachting/Longevity content missing');
+if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/longevity/'))
+ throw new Error('[elysium] Unwanted entrance animation or required membership and Longevity content missing');
 const member=await readFile(join(assets,'member.js'),'utf8');
 if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp'))throw new Error('[elysium] secure member client missing');
 const sanitized=await readFile(join(assets,'store-data.mjs'),'utf8');
 if(sanitized.includes('Private Motion Experience')||sanitized.includes('products:['))throw new Error('[elysium] private catalogue leaked in public metadata');
-console.log('[elysium] READY · Parisian portal · members entrance · 9 gated maison routes · 27 private offers');
+console.log('[elysium] READY · direct editorial welcome · members entrance · 9 gated maison routes · 27 private offers');
