@@ -80,7 +80,7 @@ export async function downloadMotionPdf(data){
  if(typeof jsPDF!=='function')throw new Error('pdf_engine_unavailable');
  const pdf=new jsPDF({format:'a4',unit:'mm',compress:true});
  const W=210,H=297,M=18,RIGHT=W-M,CONTENT=W-2*M;
- const green=[32,67,47],dark=[30,52,37],gold=[169,139,91],soft=[242,245,237],muted=[101,119,105];
+ const green=[36,56,76],dark=[37,52,68],gold=[133,156,176],soft=[243,246,248],muted=[95,112,128];
  let y=0;
  const ink=(rgb=dark)=>pdf.setTextColor(...rgb);
  function header(){
@@ -88,10 +88,10 @@ export async function downloadMotionPdf(data){
   pdf.setFillColor(...gold);pdf.rect(M,35,31,1.5,'F');
   pdf.setFont('helvetica','bold');pdf.setFontSize(21);pdf.setTextColor(250,247,236);
   pdf.text('KOMO',M,19);
-  pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(212,225,207);
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(218,228,236);
   pdf.text('LONGEVITY IN MOTION',M,26);
-  pdf.text('MOTION ONLINE  /  RAPPORT DE DEMONSTRATION',RIGHT,20,{align:'right'});
-  pdf.setTextColor(206,222,208);pdf.text(normal('Date : '+data.date),RIGHT,27,{align:'right'});
+  pdf.text('MOTION ONLINE / '+(data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
+  pdf.setTextColor(210,223,233);pdf.text(normal('Date : '+data.date),RIGHT,27,{align:'right'});
   y=49;
  }
  header();
@@ -115,7 +115,7 @@ export async function downloadMotionPdf(data){
  }
  function row(name,value,small=null){
   space(small?17:12);
-  pdf.setDrawColor(223,231,220);pdf.line(M,y+5,RIGHT,y+5);
+  pdf.setDrawColor(217,227,234);pdf.line(M,y+5,RIGHT,y+5);
   pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);ink(dark);
   pdf.text(pdf.splitTextToSize(normal(name),105),M,y);
   pdf.setFont('helvetica','bold');ink(green);pdf.text(normal(value),RIGHT,y,{align:'right'});
@@ -132,11 +132,11 @@ export async function downloadMotionPdf(data){
  y+=4;
  space(44);
  pdf.setFillColor(...green);pdf.roundedRect(M,y,CONTENT,44,4,4,'F');
- pdf.setFont('helvetica','normal');pdf.setFontSize(8.6);pdf.setTextColor(226,237,218);
+ pdf.setFont('helvetica','normal');pdf.setFontSize(8.6);pdf.setTextColor(231,238,243);
  pdf.text('INDICE DE MOBILITE PERCUE',M+8,y+10);
  pdf.setFont('helvetica','bold');pdf.setFontSize(30);pdf.setTextColor(255,250,236);
  pdf.text(passport.index===null?'--':decimal(passport.index,1),M+8,y+29);
- pdf.setFont('helvetica','normal');pdf.setFontSize(12);pdf.setTextColor(220,230,217);
+ pdf.setFont('helvetica','normal');pdf.setFontSize(12);pdf.setTextColor(221,232,240);
  pdf.text('/ 100',M+54,y+28);
  pdf.setFontSize(8);pdf.text('OBSERVATIONS : '+passport.measuredCount+'/6',RIGHT-8,y+18,{align:'right'});
  pdf.text('A VERIFIER : '+passport.flaggedCount,RIGHT-8,y+26,{align:'right'});
@@ -152,8 +152,8 @@ export async function downloadMotionPdf(data){
   pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(muted);
   pdf.text(d.value===null?'Non renseigne':decimal(d.value,1)+'/100',RIGHT,y,{align:'right'});
   y+=3;
-  pdf.setFillColor(223,232,221);pdf.roundedRect(M,y,CONTENT,3.3,1.5,1.5,'F');
-  if(d.value!==null){pdf.setFillColor(86,129,93);pdf.roundedRect(M,y,Math.max(.05,CONTENT*d.value/100),3.3,1.5,1.5,'F');}
+  pdf.setFillColor(220,231,239);pdf.roundedRect(M,y,CONTENT,3.3,1.5,1.5,'F');
+  if(d.value!==null){pdf.setFillColor(99,133,161);pdf.roundedRect(M,y,Math.max(.05,CONTENT*d.value/100),3.3,1.5,1.5,'F');}
   y+=10.2;
  }
  y+=3;
@@ -193,7 +193,7 @@ export async function downloadMotionPdf(data){
   line(d.label+' - '+d.caption+'.',{size:9.1,bold:true,color:dark,leading:5});
   line(d.why,{size:8.6,color:muted,leading:4.5});
   line('Piste d action : '+d.action,{size:8.7,color:dark,leading:4.7});
-  pdf.setDrawColor(221,231,221);pdf.line(M,y+2,RIGHT,y+2);y+=7;
+  pdf.setDrawColor(215,226,234);pdf.line(M,y+2,RIGHT,y+2);y+=7;
  }
  title('3. Vos priorites');
  if(passport.blocked){
@@ -299,12 +299,12 @@ export async function downloadMotionPdf(data){
    pdf.text(questionLines,M+2,y);y+=questionLines.length*4.5;
    pdf.setFont('helvetica','bold');pdf.setFontSize(8.3);ink(green);
    pdf.text(answerLines,M+5,y);y+=answerLines.length*4.3+4;
-   pdf.setDrawColor(233,237,228);pdf.line(M,y,RIGHT,y);y+=4;
+   pdf.setDrawColor(231,235,239);pdf.line(M,y,RIGHT,y);y+=4;
   }
  }
  const count=pdf.getNumberOfPages();
  for(let i=1;i<=count;i++){
-  pdf.setPage(i);pdf.setDrawColor(221,229,219);pdf.line(M,H-17,RIGHT,H-17);
+  pdf.setPage(i);pdf.setDrawColor(214,225,234);pdf.line(M,H-17,RIGHT,H-17);
   pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);ink(muted);
   pdf.text('KOMO MOTION  /  DOCUMENT EXPERIMENTAL NON MEDICAL',M,H-12);
   pdf.text(i+' / '+count,RIGHT,H-12,{align:'right'});
