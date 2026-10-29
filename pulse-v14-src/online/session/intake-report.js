@@ -136,13 +136,13 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
  root.querySelector('#copy-report').onclick=async()=>{
   const profile=scoreIntake(answers);
   const testValues=Object.fromEntries(Object.entries(results).map(([key,val])=>[key,{value:val.value??null,status:val.status??'inconnu',quality:val.quality??null}]));
-  const exportData={type:'KOMO_MOTION_ONLINE_DEMO',questionnaireVersion:profile.version,profileIndex:profile.profileIndex,
+  const exportData={type:callbacks.isPaid?'KOMO_MOTION_ONLINE_PAID':'KOMO_MOTION_ONLINE_DEMO',questionnaireVersion:profile.version,profileIndex:profile.profileIndex,
     domains:profile.domains,motionScore:computed?.complete?computed.score:null,
     motionAlgorithm:computed?.complete?computed.version:null,
-    tests:testValues,notice:'Données de démonstration, non médicales, non sauvegardées.'};
+    tests:testValues,notice:callbacks.isPaid?'Bilan Online non médical : données du dossier Pulse privé, mesures expérimentales à vérifier.':'Données de démonstration, non médicales, non sauvegardées.'};
   try{
    await navigator.clipboard.writeText(JSON.stringify(exportData,null,2));
-   root.querySelector('#report-message').textContent='Synthèse copiée dans votre presse-papiers. Ne la collez pas dans un dossier réel sans contrôle des données.';
+   root.querySelector('#report-message').textContent=callbacks.isPaid?'Synthèse de votre bilan copiée. Conservez ces informations dans un espace approprié et sécurisé.':'Synthèse copiée dans votre presse-papiers. Ne la collez pas dans un dossier réel sans contrôle des données.';
   }catch{
    root.querySelector('#report-message').textContent='Presse-papiers indisponible : consultez les résultats affichés.';
   }
