@@ -3,6 +3,7 @@
 export function createAudioFeedback({onSpeechStart=()=>{},onSpeechEnd=()=>{}}={}){
  const w=typeof window!=='undefined'?window:{};
  let context=null,disposed=false,sequence=0,activeUtterance=null;
+ const pending=new Set();
  const timers=new Set();
  const supportsSpeech=Boolean(w.speechSynthesis&&w.SpeechSynthesisUtterance);
  function unlock(){
@@ -34,7 +35,8 @@ export function createAudioFeedback({onSpeechStart=()=>{},onSpeechEnd=()=>{}}={}
  function wait(ms,token){
   return new Promise(resolve=>{
    if(disposed||token!==sequence){resolve(false);return;}
-   const t=setTimeout(()=>{timers.delete(t);resolve(!disposed&&token===sequence);},ms);
+   const settle=value=>{pending.delete(settle);resolve(value);};pending.add(settle);
+   const t=setTimeout(()=>{timers.delete(t);settle(!disposed&&token===sequence);},ms);
    timers.add(t);
   });
  }
@@ -43,10 +45,11 @@ export function createAudioFeedback({onSpeechStart=()=>{},onSpeechEnd=()=>{}}={}
   return new Promise(resolve=>{
    if(disposed||token!==sequence||!supportsSpeech){resolve(false);return;}
    let settled=false;
+   const settle=value=>{pending.delete(settle);resolve(value);};pending.add(settle);
    const finish=ok=>{
     if(settled)return;
     settled=true;clearTimeout(timeoutId);timers.delete(timeoutId);
-    activeUtterance=null;onSpeechEnd();resolve(ok&&!disposed&&sequence===token);
+    activeUtterance=null;onSpeechEnd();settle(ok&&!disposed&&sequence===token);
    };
    let utterance;
    try{
@@ -54,8 +57,8 @@ export function createAudioFeedback({onSpeechStart=()=>{},onSpeechEnd=()=>{}}={}
     utterance.lang='fr-FR';utterance.rate=rate;utterance.volume=1;
     utterance.onend=()=>finish(true);
     utterance.onerror=()=>finish(false);
-    const timeoutIdUnused=undefined;
-   }catch{resolve(false);return;}
+    
+   }catch{settle(false);return;}
    activeUtterance=utterance;
    const timeoutId=setTimeout(()=>{try{w.speechSynthesis.cancel()}catch{}finish(false);},timeout);
    timers.add(timeoutId);
@@ -63,7 +66,7 @@ export function createAudioFeedback({onSpeechStart=()=>{},onSpeechEnd=()=>{}}={}
    try{w.speechSynthesis.speak(utterance);}catch{finish(false);}
   });
  }
- async function countdown(onStep,onTop){
+ async function countdown(onStep,onTop,{audible=true}={}){
   // Every start cancels earlier countdowns; no delayed countdown can restart a stopped test.
   cancel();
   unlock();
@@ -72,19 +75,19 @@ export function createAudioFeedback({onSpeechStart=()=>{},onSpeechEnd=()=>{}}={}
    if(disposed||token!==sequence)return false;
    onStep(value);
    const begun=performance.now();
-   const spoken=await say(word,{rate:1.24,timeout:830});
+   const spoken=audible?await say(word,{rate:1.24,timeout:830}):false;
    if(disposed||token!==sequence)return false;
-   if(!spoken)tone(value*170+340,.09,.055);
+   if(audible&&!spoken)tone(value*170+340,.09,.055);
    const left=950-(performance.now()-begun);
    if(left>0&&!(await wait(left,token)))return false;
   }
   if(disposed||token!==sequence)return false;
   onStep('TOP !');
-  chime();
+  if(audible)chime();
   // Start measurement on the visual TOP, not after the TTS completes.
   onTop();
   // Speak Top with no dependency on completion.
-  void say('Top !',{rate:1.35,timeout:750});
+  if(audible)void say('Top !',{rate:1.35,timeout:750});
   return true;
  }
  function cancel(){
@@ -92,6 +95,8 @@ export function createAudioFeedback({onSpeechStart=()=>{},onSpeechEnd=()=>{}}={}
   try{w.speechSynthesis?.cancel()}catch{}
   for(const t of timers)clearTimeout(t);
   timers.clear();
+  for(const settle of pending)settle(false);
+  pending.clear();
   activeUtterance=null;
   onSpeechEnd();
  }
