@@ -6,7 +6,7 @@ export function motionMarkup(task,index,total){
  const guide=TEST_GUIDES[t.id];
  const guidance='<section class="test-guide" aria-label="Comprendre le test">'+
   '<div class="test-guide-heading"><div><span class="overline">COMMENT FONCTIONNE CE TEST ?</span><h2>Un mouvement simple, <em>expliqué étape par étape.</em></h2></div>'+
-  '<button class="guide-audio-btn" type="button" id="read-guidance">🔊 Écouter les consignes</button></div>'+
+  '<div class="test-guide-buttons"><button class="guide-audio-btn" type="button" id="read-guidance">🔊 Écouter les consignes</button><button class="guide-audio-btn" type="button" id="distance-view" aria-pressed="false">⛶ Mode à distance</button></div></div>'+
   '<div class="guide-columns"><div class="guide-highlight"><strong>Objectif du test</strong><p>'+escapeText(guide.purpose)+'</p>'+
   '<strong>Comment se placer</strong><p>'+escapeText(guide.setup)+'</p></div>'+
   '<ol class="guide-steps">'+guide.steps.map((step,i)=>'<li><span>'+String(i+1).padStart(2,'0')+'</span><p>'+escapeText(step)+'</p></li>').join('')+'</ol></div>'+
@@ -18,6 +18,7 @@ export function motionMarkup(task,index,total){
  '<video id="live-video" autoplay playsinline muted hidden></video><canvas id="pose-canvas" aria-hidden="true" hidden></canvas>'+
  '<div id="camera-off" class="camera-off"><span>◎</span><strong>Activez votre caméra</strong><small>Le squelette apparaîtra sur votre silhouette.</small></div>'+
  '<div class="camera-hud" id="camera-hud" hidden><span class="camera-hud-dot"></span><strong id="pose-quality">Recherche du corps…</strong><span>33 POINTS</span></div>'+
+ '<div class="voice-hud" id="voice-hud" hidden>🎙 <span id="voice-hud-text">Micro activé</span></div>'+
  '<div class="camera-live-score" id="camera-live-score" hidden><b id="camera-reps">0</b><span id="camera-live-label">'+(t.id==='balance'?'secondes visibles':'répétitions')+'</span></div>'+
  '</div><div class="pose-consent"><label><input type="checkbox" id="pose-consent"><span>J’accepte l’analyse locale de ma silhouette pour ce test et le chargement du moteur MediaPipe, susceptible de transmettre des statistiques techniques à Google. Aucune vidéo n’est envoyée ni sauvegardée.</span></label></div>'+
  '<div class="voice-setup"><label class="voice-optin"><input type="checkbox" id="voice-consent"><span>J’autorise le microphone pour commander le test à distance. La reconnaissance vocale dépend de mon navigateur et peut transmettre ma voix à son fournisseur ; KŌMØ ne conserve aucun audio ni transcription.</span></label>'+ 
