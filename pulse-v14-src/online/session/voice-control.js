@@ -4,7 +4,7 @@ import {parseVoiceCommand} from './voice-commands.mjs';
 // own recognition provider. KŌMØ never stores audio or transcripts in Pulse.
 export function createVoiceControl({onCommand,onStatus}){
  const Ctor=window.SpeechRecognition||window.webkitSpeechRecognition;
- let enabled=false,instance=null,restartTimer=null,starting=false,disposed=false,lastCommandAt=0;
+ let enabled=false,instance=null,restartTimer=null,starting=false,disposed=false,lastCommandAt=-Infinity;
  const supported=Boolean(Ctor);
  const status=(text,state='idle')=>{if(!disposed)onStatus?.(text,state)};
  function clearRetry(){if(restartTimer!==null){clearTimeout(restartTimer);restartTimer=null;}}
@@ -70,7 +70,7 @@ export function createVoiceControl({onCommand,onStatus}){
  function enable(){
   if(!supported){status('Reconnaissance vocale indisponible dans ce navigateur. Les commandes à l’écran restent utilisables.','unsupported');return false;}
   if(disposed)return false;
-  enabled=true;lastCommandAt=0;
+  enabled=true;lastCommandAt=-Infinity;
   listen();
   return true;
  }
