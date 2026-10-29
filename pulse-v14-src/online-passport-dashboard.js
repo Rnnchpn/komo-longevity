@@ -131,7 +131,33 @@ export function onlineResultsPreview(reports){
  return '<section class="pp-inline"><div><span class="pp-eyebrow">BILAN ONLINE</span><h2>Un premier regard sur votre mobilité</h2><p>'+e(p.interpretation)+'</p></div>'+
  '<button class="pp-button secondary" type="button" data-route-passport>Voir mon passeport →</button></section>';
 }
-export function bindOnlinePassportActions(root,reports,toast=()=>{}){
+async function hydrateRestitution(root,getToken){
+ if(typeof getToken!=='function')return;
+ const slots=[...root.querySelectorAll('[data-restitution-appointment]')];
+ if(!slots.length)return;
+ let token;
+ try{token=await getToken()}catch{return}
+ if(!token)return;
+ for(const slot of slots){
+  if(!slot.isConnected)return;
+  const id=slot.getAttribute('data-restitution-appointment');
+  if(!/^[1-9][0-9]{0,11}$/.test(id||''))continue;
+  try{
+   const res=await fetch('/api/pulse-online-verify',{method:'POST',
+    headers:{authorization:'Bearer '+token,'content-type':'application/json'},
+    cache:'no-store',credentials:'omit',body:JSON.stringify({appointmentId:id})});
+   if(!res.ok)continue;
+   const p=await res.json();
+   if(p.eligible!==true||p.paid!==true)continue;
+   if(slot.isConnected){
+    slot.outerHTML=restitutionMarkup({appointmentId:id,appointmentAt:p.appointmentAt,
+     appointmentMinutes:p.appointmentMinutes,meetingJoinUrl:p.meetingJoinUrl,compact:slot.classList.contains('compact')});
+   }
+  }catch{/* Acuity offline: patient keeps the confirmation-email fallback. */}
+ }
+}
+export function bindOnlinePassportActions(root,reports,toast=()=>{},getToken=null){
+ void hydrateRestitution(root,getToken);
  root.querySelectorAll('[data-route-passport]').forEach(b=>b.addEventListener('click',()=>{location.hash='passport'}));
  root.querySelectorAll('[data-route-plan]').forEach(b=>b.addEventListener('click',()=>{location.hash='plan'}));
  root.querySelectorAll('[data-passport-select]').forEach(b=>b.addEventListener('click',()=>{
@@ -140,7 +166,7 @@ export function bindOnlinePassportActions(root,reports,toast=()=>{}){
   url.searchParams.set('bilan',id);
   history.replaceState(null,'',url.pathname+url.search+url.hash);
   root.innerHTML=onlinePassportPage(reports,id);
-  bindOnlinePassportActions(root,reports,toast);
+  bindOnlinePassportActions(root,reports,toast,getToken);
   root.scrollIntoView({block:'start',behavior:'smooth'});
  }));
  root.querySelectorAll('[data-passport-pdf]').forEach(b=>b.addEventListener('click',async()=>{
