@@ -19,6 +19,9 @@ const metrics=await readFile(join(root,'site','pulse-v14','online','session','me
 const voiceControl=await readFile(join(root,'site','pulse-v14','online','session','voice-control.js'),'utf8');
 const voiceCommands=await readFile(join(root,'site','pulse-v14','online','session','voice-commands.mjs'),'utf8');
 const testGuides=await readFile(join(root,'site','pulse-v14','online','session','test-guides.mjs'),'utf8');
+const audioFeedback=await readFile(join(root,'site','pulse-v14','online','session','audio-feedback.js'),'utf8');
+const postureMetrics=await readFile(join(root,'site','pulse-v14','online','session','posture-metrics.mjs'),'utf8');
+const captureEnhancements=await readFile(join(root,'site','pulse-v14','online','session','capture-enhancements.js'),'utf8');
 const nodeSyntax=file=>spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session',file)],{encoding:'utf8'}).status===0;
 const sessionSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session','app.js')],{encoding:'utf8'});
 const activationHtml=await readFile(join(root,'site','pulse-v14','online','activate','index.html'),'utf8');
@@ -76,6 +79,14 @@ const checks=[
  ['spoken instructions and clear test objectives',testGuides.includes('Objectif')===false&&testGuides.includes('Observer votre capacité')&&motionView.includes('COMMENT FONCTIONNE CE TEST')&&motionController.includes('speechSynthesis')],
  ['voice modules syntax',nodeSyntax('voice-control.js')&&nodeSyntax('voice-commands.mjs')&&nodeSyntax('test-guides.mjs')],
  ['voice guidance on phone and distance mode',sessionCss.includes('.voice-setup')&&sessionCss.includes('.voice-hud')&&motionView.includes('Mode à distance')],
+ ['spoken 3 2 1 Top countdown',audioFeedback.includes("['3'")===false&&audioFeedback.includes("'Trois'")&&audioFeedback.includes("'Deux'")&&audioFeedback.includes("'Un'")&&audioFeedback.includes("'Top !'")&&motionView.includes('id="countdown-cover"')],
+ ['click for each detected repetition',captureEnhancements.includes('audio.click()')&&captureEnhancements.includes('onCount(n)')&&motionController.includes('enhancements.onCount(result.count)')],
+ ['speaker remaining-time callouts',audioFeedback.includes('Encore ')&&captureEnhancements.includes('onRemaining')&&motionController.includes('enhancements.onRemaining(state.remaining)')],
+ ['countdown starts timer on Top',motionController.includes('void enhancements.begin(()=>')&&motionController.includes('state.startedAt=performance.now()')&&motionController.includes('state.countdownActive')],
+ ['speaker is optional and cleaned up',motionView.includes('id="sound-enabled"')&&captureEnhancements.includes('audible:enabled()')&&captureEnhancements.includes('audio.destroy()')],
+ ['posture observation and careful summary',postureMetrics.includes('observeFrontalPosture')&&captureEnhancements.includes('postureSummary()')&&sessionJs.includes("id:'posture'")&&sessionJs.includes("r.posture?.valid")],
+ ['posture is non-diagnostic and local',testGuides.includes("posture:{")&&testGuides.includes("scoliose")&&motionView.includes('id="posture-results"')],
+ ['audio posture code parses',nodeSyntax('audio-feedback.js')&&nodeSyntax('capture-enhancements.js')&&nodeSyntax('posture-metrics.mjs')],
  ['test still requires real camera capture before advancing',motionController.includes('if(!state.sessionFinished)')&&motionController.includes("finish(true)")],
  ['prominent start and auto counted movements',motionView.includes('C’est parti →')&&motionController.includes('tracker.observe(points,time)')&&motionController.includes('record.status=')],
  ['automatic 30 second sit-to-stand',sessionJs.includes('seconds:30')&&metrics.includes("task==='sts'")&&metrics.includes('lastCountAt')],
