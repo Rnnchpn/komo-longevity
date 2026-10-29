@@ -49,7 +49,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '</details>'+ '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
  '<section class="motion-score-zone"><div class="motion-score-heading"><span class="overline">MOTION SCORE · ALGORITHME DE RÉFÉRENCE</span><h2>Le score fonctionnel final</h2><p>Formule définie pour KŌMØ : <strong>40 % Sit-to-Stand · 35 % TUG 3 m · 25 % équilibre SPPB.</strong> Les questionnaires, la posture et l’unipodal ne modifient pas cette formule.</p></div>'+
  '<div class="motion-score-locked"><span id="score-status-icon">○</span><div><strong id="score-status">Motion Score indisponible : mesures complémentaires requises</strong><p id="score-hint">Le TUG standardisé et l’équilibre SPPB n’ont pas été mesurés automatiquement par la webcam. Aucune norme statistique n’a été inventée.</p></div><div class="motion-score-value"><strong id="motion-score-number">—</strong><span>/ 100</span></div></div>'+
- '<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
+ (persisted?'':'<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
  '<p>Pour vérifier l’algorithme, renseignez uniquement des mesures issues de protocoles standardisés et un référentiel normatif documenté. <strong>Ne saisissez pas de valeurs fictives dans un vrai dossier patient.</strong></p>'+
  '<div class="motion-input-grid">'+
  measureInput('kms-sts','STS 30 s · répétitions (webcam à confirmer)',stsOk?String(sts.value):'Ex. 12','1',stsOk?sts.value:null)+
@@ -63,7 +63,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '<label class="motion-check"><input id="kms-sts-verified" type="checkbox"><span>Le résultat Sit-to-Stand a été revu et la méthode est jugée exploitable.</span></label>'+
  '<label class="motion-check"><input id="kms-verified" type="checkbox"><span>Le TUG et l’équilibre SPPB ont été réellement mesurés et validés selon leurs protocoles.</span></label>'+
  '<button type="button" class="action" id="compute-motion-score">Calculer avec les mesures vérifiées →</button>'+
- '<p class="message" id="kms-error" role="status"></p></details>'+
+ '<p class="message" id="kms-error" role="status"></p></details>')+
  '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section>'+
  roadmapMarkup(answers,results,blocked)+
  dailyProgramMarkup(answers,results,blocked,program)+
@@ -77,6 +77,7 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
  bindNormPanel(root,answers,results,()=>callbacks.checkpoint?.());
  const stsRecord=results.sts;
  let computed=null;
+ if(!callbacks.isPaid){
  // Prevent a stale, previously computed score after changing a reference or input.
  root.querySelector('.motion-operator-details').addEventListener('input',()=>{
   computed=null;
@@ -117,6 +118,7 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
     'Données manquantes : '+computed.missing.join(' · ');
   root.querySelector('#kms-error').textContent=computed.complete?'Résultat calculé. Non enregistré.':'Le score n’est pas disponible tant que toutes les conditions ne sont pas réunies.';
  };
+ }
  root.querySelector('#download-pdf').onclick=async()=>{
   const button=root.querySelector('#download-pdf');
   const message=root.querySelector('#report-message');
