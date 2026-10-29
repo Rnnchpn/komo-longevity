@@ -25,6 +25,9 @@ assert.ok(!restitutionMarkup({appointmentId:'123456',meetingJoinUrl:'https://bad
 const answers=Object.fromEntries(INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>[q.id,Array.isArray(q.options[0])?q.options[0][0]:'0'])));
 const row={id:'a',appointment_id:'123456',status:'completed',snapshot:{page:4,answers,results:{}}};
 assert.ok(onlineHomeBlock([row]).includes('data-restitution-appointment="123456"'));
+const operatorApp=readFileSync('pulse-v14-src/online/restitutions/app.js','utf8');
+assert.ok(operatorApp.includes('DÉROULÉ DE RESTITUTION'),'Operator needs a guided non-medical call checklist');
+assert.ok(operatorApp.includes('aucune note n’est enregistrée'),'Do not imply unsaved checkmarks are persisted');
 const app=readFileSync('pulse-v14-src/app.js','utf8');
 const dashboard=readFileSync('pulse-v14-src/online-passport-dashboard.js','utf8');
 assert.ok(dashboard.includes('void hydrateRestitution(root,getToken)'), 'live data refresh from secure endpoint');
