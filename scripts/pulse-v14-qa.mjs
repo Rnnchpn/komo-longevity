@@ -28,6 +28,8 @@ const motionFormula=await readFile(join(root,'site','pulse-v14','online','sessio
 const pdfReport=await readFile(join(root,'site','pulse-v14','online','session','pdf-report.js'),'utf8');
 const audioFeedback=await readFile(join(root,'site','pulse-v14','online','session','audio-feedback.js'),'utf8');
 const postureMetrics=await readFile(join(root,'site','pulse-v14','online','session','posture-metrics.mjs'),'utf8');
+const referenceNorms=await readFile(join(root,'site','pulse-v14','online','session','reference-norms.mjs'),'utf8');
+const normPanel=await readFile(join(root,'site','pulse-v14','online','session','normative-panel.js'),'utf8');
 const profilePhoto=await readFile(join(root,'site','pulse-v14','online','session','profile-photo.js'),'utf8');
 const profileGeometry=await readFile(join(root,'site','pulse-v14','online','session','profile-photo-metrics.mjs'),'utf8');
 const unipodalController=await readFile(join(root,'site','pulse-v14','online','session','unipodal-controller.js'),'utf8');
@@ -114,6 +116,10 @@ const checks=[
  ['speaker is optional and cleaned up',motionView.includes('id="sound-enabled"')&&captureEnhancements.includes('audible:enabled()')&&captureEnhancements.includes('audio.destroy()')],
  ['posture observation and careful summary',postureMetrics.includes('observeFrontalPosture')&&captureEnhancements.includes('postureSummary()')&&sessionJs.includes("id:'posture'")&&intakeReport.includes("id==='posture'")],
  ['posture is non-diagnostic and local',testGuides.includes("posture:{")&&testGuides.includes("scoliose")&&motionView.includes('id="posture-results"')],
+ ['posture automatic 3 2 1 and manual backup',profilePhoto.includes('sharedMotionMedia.postureCountdown')&&profilePhoto.includes('manual.onclick')&&profilePhoto.includes('state.results[task.id]=record')],
+ ['age norms and protocol guards',referenceNorms.includes('protocolConfirmed')&&referenceNorms.includes('Rikli & Jones')&&normPanel.includes('norm-exact-age')],
+ ['no visible-only balance step',!sessionJs.includes("id:'balance'")&&!intakeReport.includes("['balance','Visibilité debout'")],
+ ['reference panel syntax',nodeSyntax('normative-panel.js')&&nodeSyntax('reference-norms.mjs')],
  ['auto side photo, not radiographic SVA',profilePhoto.includes('createSideProfileStability')&&profilePhoto.includes('drawImage(video')&&profilePhoto.includes('Photo capturée automatiquement')&&profileGeometry.includes('NOT SVA')&&profileGeometry.includes('NOT mm')],
  ['photo marker correction and in-memory image',profilePhoto.includes('profile-photo')&&profilePhoto.includes('snap.onpointerdown')&&!/fetch\s*\(|localStorage|sessionStorage|toBlob|toDataURL/.test(profilePhoto)],
  ['unipodal both legs, auto timing on foot lift',sessionJs.includes("id:'unipodal_left'")&&sessionJs.includes("id:'unipodal_right'")&&unipodalController.includes('createOneLegObserver')&&unipodalGeometry.includes('at-raisedSince>=850')],
