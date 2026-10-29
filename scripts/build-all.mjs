@@ -258,6 +258,8 @@ const scripts = [
   'scripts/pulse-v14-qa.mjs',
   // Deterministic movement algorithm tests, independent of actual camera hardware.
   'scripts/pulse-pose-metrics-qa.mjs',
+  // Check voice command interpretation and microphone lifecycle without hardware.
+  'scripts/pulse-online-voice-qa.mjs',
   // Online Acuity payment validation tests; all requests and identities are mocked.
   'scripts/pulse-online-payment-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
