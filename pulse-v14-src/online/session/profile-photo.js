@@ -38,6 +38,9 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  };
  // No microphone required for automatic photo; hide legacy voice command controls.
  const voice=q('#voice-panel');if(voice)voice.hidden=true;
+ const voiceHud=q('#voice-hud');
+ if(voiceHud){voiceHud.hidden=!sharedMotionMedia.hasVoiceConsent();
+  const label=q('#voice-hud-text');if(label&&sharedMotionMedia.hasVoiceConsent())label.textContent='Micro actif · toute la séance';}
  const stopTracks=(release=false)=>{
   state.request++;
   if(state.engine){state.engine.stop();state.engine=null;}
