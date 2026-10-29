@@ -83,13 +83,14 @@ function installPulseBookingEntry(){
   // The booking provider is the only public onboarding entry. Pulse never
   // creates a patient identity or grants access from an unverified web form.
   const bookingUrl='https://app.acuityscheduling.com/schedule.php?owner=40696577';
+  const onlineBookingUrl='https://app.acuityscheduling.com/schedule.php?owner=40696577&appointmentType=99940918';
   const story=document.querySelector('.login-story');
   const panel=document.querySelector('.login-panel');
   const form=document.querySelector('#login');
   if(!story||!panel||!form)return;
   const offers=[
     {n:'01',kind:'DÉCOUVRIR',title:'Bilan Gratuit',detail:'Un premier repère de mobilité, simple et accessible.',meta:'Découverte · réservation à venir',href:'https://komolongevity.com/fr/#komo-offers',tone:'free'},
-    {n:'02',kind:'À DISTANCE',title:'Bilan Online',detail:'Votre mouvement évalué lors d’un rendez-vous vidéo accompagné.',meta:'En ligne · réservation à venir',href:'https://komolongevity.com/fr/bilan/',tone:'online'},
+    {n:'02',kind:'À DISTANCE',title:'Bilan Online',detail:'Votre mouvement évalué lors d’un rendez-vous vidéo accompagné.',meta:'30 min · 49 € · réserver en ligne',href:onlineBookingUrl,tone:'online'},
     {n:'03',kind:'EN PRÉSENTIEL',title:'Bilan physique Motion',detail:'Une analyse instrumentée plus approfondie avec l’équipe KŌMØ.',meta:'Paris Centré · réservation ouverte',href:'https://komolongevity.com/fr/bilan/',tone:'motion'}
   ];
   story.innerHTML=`
@@ -100,7 +101,7 @@ function installPulseBookingEntry(){
       <h1>Le mouvement,<br><em>autrement.</em></h1>
       <p class="pulse-entry-lead">Trois expériences pour comprendre votre mouvement. Un seul espace privé pour retrouver vos résultats et suivre votre trajectoire.</p>
       <nav class="pulse-offer-list" aria-label="Les trois bilans KŌMØ">
-        ${offers.map(o=>`<a class="pulse-offer pulse-offer--${o.tone}" href="${o.href}" target="_blank" rel="noopener noreferrer" aria-label="Découvrir ${o.title} sur le site KŌMØ">
+        ${offers.map(o=>`<a class="pulse-offer pulse-offer--${o.tone}" href="${o.href}" target="_blank" rel="noopener noreferrer" aria-label="${o.tone==='online'?'Réserver directement le Bilan Online KŌMØ sur Acuity':'Découvrir '+o.title+' sur le site KŌMØ'}">
           <span class="pulse-offer-number">${o.n}</span><span class="pulse-offer-art" aria-hidden="true"><span class="pulse-offer-art-ring"></span><span class="pulse-offer-art-path"></span><span class="pulse-offer-art-core"></span></span><span class="pulse-offer-content"><small>${o.kind}</small><strong>${o.title}</strong><span>${o.detail}</span><em>${o.meta}</em></span><span class="pulse-offer-arrow" aria-hidden="true">↗</span>
         </a>`).join('')}
       </nav>
@@ -114,13 +115,14 @@ function installPulseBookingEntry(){
     <div class="pulse-entry-monogram" aria-hidden="true"><span class="pulse-entry-monogram-halo"></span><span class="pulse-entry-monogram-letter">K</span><small>LONGEVITY IN MOTION</small></div>
     <span class="overline pulse-entry-onboarding-kicker">BIENVENUE CHEZ KŌMØ</span>
     <h2 id="pulseCreateTitle">Votre espace.<br><em>Votre trajectoire.</em></h2>
-    <p class="pulse-entry-panel-intro">Les réservations Motion en présentiel à Paris sont ouvertes. Le Bilan Gratuit et le Bilan Online seront disponibles après leur activation sur l’agenda.</p>
+    <p class="pulse-entry-panel-intro">Le Bilan Online à 49 € et les bilans Motion à Paris sont ouverts à la réservation. Le Bilan Gratuit sera disponible prochainement.</p>
     <ol class="pulse-entry-steps">
-      <li><span>01</span><div><strong>Réservez votre bilan Motion</strong><small>Choisissez une prestation disponible et votre créneau à Paris.</small></div></li>
+      <li><span>01</span><div><strong>Choisissez votre bilan</strong><small>Online à 49 € en visioconférence, ou Motion en présentiel à Paris.</small></div></li>
       <li><span>02</span><div><strong>Recevez la confirmation</strong><small>Acuity vous confirme directement la réservation par e-mail.</small></div></li>
       <li><span>03</span><div><strong>Accédez à Pulse</strong><small>L’accès personnel sera activé séparément après vérification du dossier.</small></div></li>
     </ol>
-    <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${bookingUrl}" target="_blank" rel="noopener noreferrer">Réserver un bilan Motion à Paris <span aria-hidden="true">↗</span></a>
+    <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${bookingUrl}" target="_blank" rel="noopener noreferrer">Choisir mon bilan et réserver <span aria-hidden="true">↗</span></a>
+    <a class="pulse-entry-online-shortcut" href="${onlineBookingUrl}" target="_blank" rel="noopener noreferrer" aria-label="Réserver directement le Bilan Online de 30 minutes à 49 euros">Réserver directement le Bilan Online <strong>49 €</strong> <span aria-hidden="true">↗</span></a>
     <p class="pulse-entry-assurance"><span aria-hidden="true">◇</span> La réservation ne crée pas automatiquement de compte Pulse. Une confirmation Acuity ne vaut pas activation de l’espace patient.</p>
     <div class="pulse-entry-login-bridge"><span>Vous avez déjà un compte ?</span><button type="button" class="pulse-login-link" id="pulseShowLogin">Se connecter →</button></div>
     <div class="pulse-entry-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
