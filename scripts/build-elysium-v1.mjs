@@ -23,11 +23,13 @@ const publicWorlds=WORLDS.map(({slug,no,icon,name,full,eyebrow,subtitleEn,subtit
 await writeFile(join(assets,'store-data.mjs'),
  'export const WORLDS='+JSON.stringify(publicWorlds)+';\nexport const WORLD_BY_SLUG=Object.fromEntries(WORLDS.map(w=>[w.slug,w]));\n');
 const template=await readFile(join(src,'maison-template.html'),'utf8');
-if(WORLDS.length!==9||WORLDS.some(w=>w.products.length!==3))throw new Error('[elysium] 9 collections and 27 products required');
+const longevityTemplate=await readFile(join(src,'longevity-template.html'),'utf8');
+if(!longevityTemplate.includes('id="productGrid"')||!longevityTemplate.includes('class="longevity-maison"')||longevityTemplate.includes('<img'))throw new Error('[elysium] bespoke photo-free longevity template missing');
+if(WORLDS.length!==9||WORLDS.some(w=>w.products.length!==(w.slug==='longevity'?4:3)))throw new Error('[elysium] nine worlds and four KŌMØ Longevity offers required');
 for(const world of WORLDS){
  const dir=join(out,'maison',world.slug);
  await mkdir(dir,{recursive:true});
- await writeFile(join(dir,'index.html'),template);
+ await writeFile(join(dir,'index.html'),world.slug==='longevity'?longevityTemplate:template);
 }
 const home=await readFile(join(out,'index.html'),'utf8');
 if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/longevity/'))
@@ -36,8 +38,8 @@ const club=await readFile(join(out,'club','index.html'),'utf8');
 if(!club.includes('id="memberWheel"')||!club.includes('class="ely-orbit"')||!club.includes('id="elyOrbitActive"')||club.includes('id="memberCards"'))
  throw new Error('[elysium] interactive orbital member app missing');
 const member=await readFile(join(assets,'member.js'),'utf8');
-if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp'))throw new Error('[elysium] secure member client missing');
+if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp')||!member.includes('renderLongevityProducts'))throw new Error('[elysium] secure member client or Longevity shop renderer missing');
 if(member.includes("photo.src=w.image")||!member.includes('ELYSIUM_GLYPHS')||!member.includes("orbitStep(")||!member.includes("WORLDS.forEach"))throw new Error('[elysium] vector nine-world orbital interaction missing');
 const sanitized=await readFile(join(assets,'store-data.mjs'),'utf8');
 if(sanitized.includes('Private Motion Experience')||sanitized.includes('products:['))throw new Error('[elysium] private catalogue leaked in public metadata');
-console.log('[elysium] READY · nine animated SVG universes · swipe orbit mobile · 9 gated maisons · 27 private offers');
+console.log('[elysium] READY · nine SVG worlds · custom bilingual Longevity maison · 4 Motion experiences · 28 private offers');

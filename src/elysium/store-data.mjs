@@ -5,19 +5,50 @@ const product=(id,en,fr,kind,tag,image,copyEn,copyFr,priceEn='Private quotation'
 });
 export const WORLDS=[
 {
-slug:'longevity',no:'01',icon:'◈',name:'Longevity',full:'KŌMØ Longevity',eyebrow:'THE MOVEMENT ATELIER',
-subtitleEn:'The luxury of knowing yourself.',subtitleFr:'Le luxe de mieux se connaître.',
-copyEn:'A private approach to locomotor longevity. Discover your functional abilities at home or aboard your yacht, then continue the journey with Pulse.',
-copyFr:'Une approche privée de la longévité locomotrice. Mesurez vos capacités fonctionnelles à distance ou à bord et poursuivez votre trajectoire avec Pulse.',
+slug:'longevity',no:'01',icon:'◈',name:'Longevity',full:'KŌMØ Longevity',eyebrow:'LONGEVITY IN MOTION',
+subtitleEn:'Private longevity, through motion.',subtitleFr:'La longévité commence par le mouvement.',
+copyEn:'Understand how you move today, explore your functional capabilities and choose a personal path of progression — online, in Paris or Cannes, or on board.',
+copyFr:'Comprenez votre mouvement aujourd’hui, explorez vos capacités fonctionnelles et choisissez votre parcours de progression — en ligne, à Paris ou Cannes, ou à bord.',
 image:img('photo-1530549387789-4c1017266635'),background:'linear-gradient(115deg,#202b2d,#0b1619)',
 products:[
-product('motion-vip','The Private Motion Experience','Bilan Motion Signature à bord','PRIVATE ASSESSMENT','ON BOARD / PRIVATE RESIDENCE','photo-1518837695005-2083093ee35b',
-'A personalised non-medical functional assessment of movement, balance, strength and mobility, arranged aboard or in a private residence. Individual quotation.','Un bilan fonctionnel non médical personnalisé : mouvement, équilibre, force et mobilité, organisé à bord ou dans une résidence privée. Devis personnalisé.'),
-product('motion-online','Online Motion Passport','Passeport Motion en ligne','ONLINE EXPERIENCE','DIGITAL / BOOK ONLINE','photo-1506126613408-eca07ce68773',
-'A guided online Motion Check with a personal functional report and follow-up direction. Booking through KŌMØ Pulse.','Un Motion Check guidé en ligne avec passeport fonctionnel personnalisé et orientation pour le suivi. Réservation via KŌMØ Pulse.','€49','49 €'),
-product('pulse-continuity','Pulse Private Follow-Up','Suivi privé Pulse','PRIVATE PROGRAMME','MOVEMENT / FOLLOW-UP','photo-1571019613454-1cb2f99b2d8b',
-'A tailored movement follow-up with priorities, daily exercises and re-assessment planning according to your measured capacity.','Un suivi du mouvement sur mesure avec priorités, exercices quotidiens et programmation de réévaluations selon les capacités mesurées.')
-]},
+{
+...product('motion-online','KŌMØ Motion Online','KŌMØ Motion Online','DIGITAL ASSESSMENT','01 · DIGITAL / REMOTE','photo-1506126613408-eca07ce68773',
+'Your first functional longevity insight, wherever you are. A guided non-medical movement assessment, an initial Motion profile and a personal results discussion, with clear next steps.',
+'Votre premier regard sur votre longévité fonctionnelle, où que vous soyez. Une évaluation non médicale guidée du mouvement, un premier profil Motion et une restitution personnalisée avec les prochaines étapes.','49 €','49 €'),
+pointsEn:['Guided functional tests and questionnaires','Initial Motion profile and indicative score','Individual results discussion and next steps'],
+pointsFr:['Tests fonctionnels guidés et questionnaires','Profil Motion et score indicatif','Échange individuel autour des résultats et prochaines étapes'],
+buttonEn:'ENQUIRE ABOUT ONLINE MOTION',buttonFr:'CHOISIR MOTION ONLINE',
+glyph:'pulse'
+},
+{
+...product('motion-signature','KŌMØ Motion Signature','KŌMØ Motion Signature','IN-PERSON ASSESSMENT','02 · PARIS / CANNES','photo-1571019613454-1cb2f99b2d8b',
+'A discreet, in-person functional assessment of strength, balance, mobility and gait. A deeper Motion profile and a personalised explanation, subject to local availability.',
+'Un bilan fonctionnel en présentiel, centré sur la force, l’équilibre, la mobilité et la marche. Un profil Motion approfondi et une restitution personnalisée, selon les disponibilités locales.','From €200','À partir de 200 €'),
+pointsEn:['Paris or Cannes, subject to availability','Strength, balance, mobility and gait testing','Motion report and personalised priorities'],
+pointsFr:['Paris ou Cannes, selon les disponibilités','Tests de force, équilibre, mobilité et marche','Rapport Motion et priorités personnalisées'],
+buttonEn:'REQUEST A PRIVATE ASSESSMENT',buttonFr:'DEMANDER UN BILAN PRIVÉ',
+glyph:'rings'
+},
+{
+...product('motion-vip','KŌMØ On Board','KŌMØ On Board','PRIVATE EXPERIENCE','03 · YACHT / PRIVATE RESIDENCE','photo-1518837695005-2083093ee35b',
+'The private KŌMØ Motion experience delivered aboard your yacht or in residence. Discreet scheduling, optional couple or small-group arrangements and bespoke quotation.',
+'L’expérience KŌMØ Motion à bord de votre yacht ou en résidence privée. Coordination discrète, formats individuels, en couple ou en petit groupe sur demande, et devis personnalisé.','Private quotation','Sur devis'),
+pointsEn:['Yacht, villa or private residence','Dedicated on-site arrangement and confidential feedback','Bespoke coordination and quotation'],
+pointsFr:['Yacht, villa ou résidence privée','Organisation sur site et restitution confidentielle','Coordination et devis sur mesure'],
+buttonEn:'REQUEST THE ON BOARD EXPERIENCE',buttonFr:'DEMANDER UNE EXPÉRIENCE À BORD',
+glyph:'horizon'
+},
+{
+...product('pulse-continuity','KŌMØ Pulse Continuity','KŌMØ Pulse Continuity','CONTINUITY PROGRAMME','04 · ONGOING / PERSONALISED','photo-1571019613454-1cb2f99b2d8b',
+'Extend your Motion experience through guided daily movement, a structured progression plan and planned re-evaluations. Personalised programme details confirmed on request.',
+'Prolongez votre expérience Motion avec des exercices guidés, une progression structurée et des réévaluations planifiées. Le contenu du programme personnalisé est confirmé sur demande.','On request','Sur demande'),
+pointsEn:['Personal movement priorities and routines','Progressive exercises and follow-up','Regular re-evaluation checkpoints'],
+pointsFr:['Priorités de mouvement et routines adaptées','Exercices progressifs et suivi','Points de réévaluation réguliers'],
+buttonEn:'ENQUIRE ABOUT PULSE',buttonFr:'DÉCOUVRIR LE SUIVI PULSE',
+glyph:'trajectory'
+}
+]
+},
 {
 slug:'aesthetic',no:'02',icon:'✧',name:'Aesthetic',full:'KŌMØ Aesthetic',eyebrow:'THE BEAUTY ATELIER',
 subtitleEn:'Beauty, with discretion.',subtitleFr:'La beauté, dans la discrétion.',
