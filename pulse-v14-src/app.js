@@ -26,7 +26,7 @@ const fmtShort=v=>{if(!v)return'—';const d=new Date(v);if(Number.isNaN(d.getTi
 const safe=async q=>{try{const r=await q;return r.error?{data:null,error:r.error}:{data:r.data,error:null}}catch(error){return{data:null,error}}};
 const toast=m=>{const e=$('#toast');if(!e)return;e.textContent=m;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,3300)};
 const hasPro=()=>['professional','admin'].includes(S.role);
-const isOnlineTester=()=>S.user?.email?.toLowerCase()==='renanchapon@gmail.com'&&Boolean(S.user?.email_confirmed_at)&&S.role==='admin';
+const isOnlineTester=()=>S.user?.id==='eef2c1ed-3872-47a7-84da-0f70b975c96f'&&Boolean(S.user?.email_confirmed_at)&&S.role==='admin';
 const patientName=()=>S.patient?([S.patient.preferred_name||S.patient.first_name,S.patient.last_name].filter(Boolean).join(' ')||S.profile?.display_name||''):(S.profile?.display_name||'');
 const firstName=()=>patientName().split(' ')[0]||'Bonjour';
 const route=()=>location.hash.replace(/^#/,'')||((hasPro()&&S.mode==='pro')?'operator':'home');
@@ -74,7 +74,7 @@ function domains(){return[
 
 async function authView(message=''){
   $('#app').innerHTML=`<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">VOTRE SANTÉ EN MOUVEMENT</span><h1>Comprendre votre corps.<br><em>Simplement.</em></h1><p>Votre bilan, vos résultats et votre plan KŌMØ réunis au même endroit — sans jargon, étape par étape.</p></div><div class="login-foot">Données de santé privées · Accès sécurisé</div></section><section class="login-panel"><form id="login" class="login-card"><span class="overline">KŌMØ PULSE</span><h2>Bienvenue</h2><p>Connectez-vous pour reprendre votre parcours là où vous l’avez laissé.</p><label><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label><label><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required minlength="6"></label><button class="button primary wide">Se connecter</button><button class="text-button" type="button" id="reset">Mot de passe oublié ?</button>${message?`<div class="form-error">${esc(message)}</div>`:''}</form></section></main>`;
-  $('#login').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const r=await sb.auth.signInWithPassword({email:String(f.get('email')),password:String(f.get('password'))});if(r.error)return authView('Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.');if(r.data?.user?.email?.toLowerCase()==='renanchapon@gmail.com'&&r.data.user.email_confirmed_at){window.location.assign('/online/session/');return;}await boot()};
+  $('#login').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const r=await sb.auth.signInWithPassword({email:String(f.get('email')),password:String(f.get('password'))});if(r.error)return authView('Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.');if(r.data?.user?.id==='eef2c1ed-3872-47a7-84da-0f70b975c96f'&&r.data.user.email_confirmed_at){window.location.assign('/online/session/');return;}await boot()};
   $('#reset').onclick=async()=>{const email=prompt('Votre adresse e-mail');if(!email)return;const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});toast(r.error?'Impossible d’envoyer l’e-mail.':'E-mail de réinitialisation envoyé.')};
 
   installPulseBookingEntry();
