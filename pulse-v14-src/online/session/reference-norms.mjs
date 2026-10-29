@@ -17,7 +17,7 @@ const ONELEG=[
 ];
 export const ageRanges={
  under40:[0,39],'40-49':[40,49],'50-59':[50,59],
- '60-69':[60,69],'70-79':[70,79],80plus:[80,120],
+ '60-69':[60,69],'70-79':[70,79],'80plus':[80,120],
  undisclosed:null
 };
 const finite=v=>typeof v==='number'&&Number.isFinite(v);
