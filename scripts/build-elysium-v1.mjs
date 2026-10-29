@@ -1,19 +1,39 @@
-import { mkdir, copyFile, readFile } from 'node:fs/promises';
+import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { WORLDS } from '../src/elysium/store-data.mjs';
 
-const source = join(process.cwd(),'src','elysium','index.html');
-const target = join(process.cwd(),'site','elysium','index.html');
-
-const html = await readFile(source,'utf8');
-const required = [
-  'KŌMØ ELYSIUM','KŌMØ Longevity','KŌMØ Aesthetic',
-  'KŌMØ IV Drip','KŌMØ Cosmetic & Supplements','KŌMØ Life',
-  'KŌMØ Gastronomy','KŌMØ High Luxury','KŌMØ Service','KŌMØ Team',
-  '/api/elysium-request'
+const root=process.cwd();
+const src=join(root,'src','elysium');
+const out=join(root,'site','elysium');
+const assets=join(out,'assets');
+await mkdir(join(out,'club'),{recursive:true});
+await mkdir(join(out,'maison'),{recursive:true});
+await mkdir(assets,{recursive:true});
+const copies=[
+ [join(src,'index.html'),join(out,'index.html')],
+ [join(src,'club','index.html'),join(out,'club','index.html')],
+ [join(src,'elysium.css'),join(assets,'elysium.css')],
+ [join(src,'member.js'),join(assets,'member.js')],
+ ['node_modules/@supabase/supabase-js/dist/umd/supabase.js',join(assets,'supabase.js')]
 ];
-for (const item of required) {
-  if (!html.includes(item)) throw new Error('ELYSlUM missing: '+item);
+for(const [from,to] of copies)await copyFile(from,to);
+const publicWorlds=WORLDS.map(({slug,no,icon,name,full,eyebrow,subtitleEn,subtitleFr,copyEn,copyFr,image,background,products})=>({
+ slug,no,icon,name,full,eyebrow,subtitleEn,subtitleFr,copyEn,copyFr,image,background,productCount:products.length
+}));
+await writeFile(join(assets,'store-data.mjs'),
+ 'export const WORLDS='+JSON.stringify(publicWorlds)+';\nexport const WORLD_BY_SLUG=Object.fromEntries(WORLDS.map(w=>[w.slug,w]));\n');
+const template=await readFile(join(src,'maison-template.html'),'utf8');
+if(WORLDS.length!==9||WORLDS.some(w=>w.products.length!==3))throw new Error('[elysium] 9 collections and 27 products required');
+for(const world of WORLDS){
+ const dir=join(out,'maison',world.slug);
+ await mkdir(dir,{recursive:true});
+ await writeFile(join(dir,'index.html'),template);
 }
-await mkdir(join(process.cwd(),'site','elysium'),{recursive:true});
-await copyFile(source,target);
-console.log('[elysium] private collection published at /elysium/ ('+html.length+' bytes)');
+const home=await readFile(join(out,'index.html'),'utf8');
+if(!home.includes('portal-doors')||!home.includes('elysium-door-2026')||!home.includes('THE MAISON'))
+ throw new Error('[elysium] Parisian double-door landing missing');
+const member=await readFile(join(assets,'member.js'),'utf8');
+if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp'))throw new Error('[elysium] secure member client missing');
+const sanitized=await readFile(join(assets,'store-data.mjs'),'utf8');
+if(sanitized.includes('Private Motion Experience')||sanitized.includes('products:['))throw new Error('[elysium] private catalogue leaked in public metadata');
+console.log('[elysium] READY · Parisian portal · members entrance · 9 gated maison routes · 27 private offers');
