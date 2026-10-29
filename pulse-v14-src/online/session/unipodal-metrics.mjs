@@ -33,7 +33,7 @@ export function createOneLegObserver(stance='left',maxMs=20000){
    if(f.lifted){
     lostSince=null;
     if(raisedSince===null)raisedSince=at;
-    if(startedAt===null&&at-raisedSince>=850)startedAt=at; // start once foot held up
+    if(startedAt===null&&at-raisedSince>=850)startedAt=raisedSince; // confirm lift then count from its visible onset
     if(startedAt!==null)maxElapsed=Math.min(maxMs,at-startedAt)/1000;
    }else{
     raisedSince=null;
