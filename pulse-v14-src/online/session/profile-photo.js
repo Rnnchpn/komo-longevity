@@ -52,10 +52,11 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   start.disabled=!consent.checked;stop.disabled=true;state.bodyReady=false;
  };
  const draw=()=>{
-  if(!base||!markers||!markers.neck||!markers.pelvis||!(frame?.height>.2))return;
+  if(!base)return;
   snap.width=base.width;snap.height=base.height;
   const ctx=snap.getContext('2d');
   ctx.drawImage(base,0,0);
+  if(!markers?.neck||!markers?.pelvis||!(frame?.height>.2))return;
   const positions=[['Repère cervical de surface',markers.neck,'#eecf8d'],['Repère pelvien de surface',markers.pelvis,'#b4eac3']];
   ctx.lineWidth=Math.max(3,snap.width/210);
   ctx.setLineDash([Math.max(9,snap.width/80),Math.max(5,snap.width/130)]);
@@ -92,6 +93,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    '<div class="profile-editor-actions"><button type="button" id="mark-neck" aria-pressed="true">1 · Cou / haut du dos</button><button type="button" id="mark-pelvis" aria-pressed="false">2 · Bassin</button>'+(needsManual?'<button type="button" id="mark-ankle" aria-pressed="false">3 · Cheville</button>':'')+'</div>'+ 
    '<p>Indice exprimé en % de la hauteur projetée épaule–cheville. Sans calibration ni radiographie, aucune SVA en mm n’est disponible.</p>';
   panel.prepend(notes);
+  if(needsManual)panel.hidden=false;
   const neck=q('#mark-neck'),pelvis=q('#mark-pelvis'),ankle=q('#mark-ankle');
   const select=name=>{which=name;neck.setAttribute('aria-pressed',String(name==='neck'));pelvis.setAttribute('aria-pressed',String(name==='pelvis'));if(ankle)ankle.setAttribute('aria-pressed',String(name==='ankle'));};
   neck.onclick=()=>select('neck');pelvis.onclick=()=>select('pelvis');if(ankle)ankle.onclick=()=>select('ankle');
@@ -126,7 +128,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   // Make the captured image visually replace the video.
   snap.style.display='block';
   if(frame){draw();showEditor(false);next.disabled=false;}
-  else {showEditor(true);next.disabled=true;status.textContent='Photo prise. Touchez successivement le cou, le bassin et la cheville sur la photo.';}
+  else {draw();showEditor(true);panel.hidden=false;next.disabled=true;status.textContent='Photo prise. Touchez successivement le cou, le bassin et la cheville sur la photo.';}
   redo.hidden=false;redo.textContent='Reprendre la photo';
   status.textContent=manualMode?'Photo prise manuellement : résultat exploratoire à vérifier.':'Photo capturée automatiquement. Vérifiez les deux repères puis continuez.';
   q('#camera-message').textContent=instruction;
@@ -176,7 +178,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
       });
      }
     }
-   },()=>{stopTracks();q('#camera-message').textContent='Détection interrompue. Réessayez.';});
+   },()=>{cancelCountdown();manual.hidden=false;manual.disabled=!video.videoWidth;q('#camera-message').textContent='Détection interrompue : vous pouvez prendre une photo et placer les repères manuellement.';});
    if(disposed||request!==state.request){engine.stop();return;}
    state.engine=engine;overlay.hidden=false;
   }catch(e){
@@ -193,7 +195,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   snap.hidden=true;snap.style.display='';snap.onpointerdown=null;panel.hidden=true;start.disabled=!consent.checked;
   const editor=panel.querySelector('.profile-editor');editor?.remove();off.hidden=false;
   q('#value').textContent='—';next.disabled=true;redo.hidden=true;
-  record.status='pending';record.posture=null;status.textContent='Pour reprendre, réactivez la caméra et replacez-vous de profil.';
+  record.status='pending';record.posture=null;record.value=null;status.textContent='Pour reprendre, réactivez la caméra et replacez-vous de profil.';
  };
  next.disabled=true;
  manual.onclick=()=>{if(!locked&&video.videoWidth)takePhoto(latestProfile?.valid?latestProfile:null,true);};
