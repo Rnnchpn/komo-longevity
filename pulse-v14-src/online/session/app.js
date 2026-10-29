@@ -7,6 +7,7 @@ import { reportMarkup,bindReport } from './intake-report.js';
 import {sharedMotionMedia} from './shared-media.js';
 import {TERMINAL_TEST_STATUSES,testNavigatorMarkup,completedTestMarkup,mountTestNavigation} from './test-navigation.js';
 import {saveProgress,loadProgress,clearProgress} from './session-progress.mjs';
+import {verifyPaidSession,getAppointmentFromBrowser,scopedProgressStorage,keepBooking,clearBooking} from './paid-access.js';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
@@ -25,7 +26,9 @@ const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':
 const q = selector=>root.querySelector(selector);
 let currentMotionCleanup=null;
 const store=(()=>{try{return window.sessionStorage}catch{return null}})();
-function persistProgress(){saveProgress(store,state);}
+let progressStore=store;
+let paidContext=null;
+function persistProgress(){saveProgress(progressStore,state);}
 const btn = (id,title,secondary=false)=>'<button type="button" class="action'+(secondary?' secondary':'')+'" id="'+id+'">'+title+'</button>';
 
 function stopTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
@@ -46,19 +49,19 @@ function stopCamera(release=false){
 function next(){stopTimer();stopCamera(state.page===3);state.page=Math.min(PHASES.length-1,state.page+1);render();}
 function previous(){stopTimer();stopCamera(state.page===3);state.page=Math.max(0,state.page-1);render();}
 function wrap(body){
-  root.innerHTML='<section class="session"><div class="session-top"><span>LONGEVITY IN MOTION · KŌMØ PULSE</span><span class="test-badge">MODE TEST · AUCUN DOSSIER CRÉÉ</span></div>'+
+  root.innerHTML='<section class="session"><div class="session-top"><span>LONGEVITY IN MOTION · KŌMØ PULSE</span><span class="test-badge">'+(paidContext?'BILAN ONLINE · SAUVEGARDE LOCALE UNIQUEMENT':'MODE TEST · AUCUN DOSSIER CRÉÉ')+'</span></div>'+
   '<nav class="steps" aria-label="Étapes de la séance">'+PHASES.map((s,i)=>'<span class="'+(i===state.page?'now':i<state.page?'past':'')+'"><b>'+String(i+1).padStart(2,'0')+'</b>'+s+'</span>').join('')+'</nav>'+
   body+
   '<div class="session-bottom"><p>Démonstration non médicale · progression conservée 4 h dans cet onglet pour reprendre après actualisation. Aucune vidéo ni donnée envoyée au serveur.</p><button id="leave" type="button">Quitter et effacer la progression</button></div></section>';
-  q('#leave').onclick=()=>{stopTimer();stopCamera(true);clearProgress(store);window.location.assign('/')};
+  q('#leave').onclick=()=>{stopTimer();stopCamera(true);clearProgress(progressStore);if(paidContext)clearBooking(store);window.location.assign('/')};
 }
 function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
-  wrap('<div class="intro"><div><span class="overline">VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
+  wrap('<div class="intro"><div><span class="overline">'+(paidContext?'VOTRE BILAN ONLINE · RÉSERVATION VÉRIFIÉE':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
   '<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
   '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
   btn('go','Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
-  '<p class="notice">Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.</p>');
+  '<p class="notice">'+(paidContext?'Bilan fonctionnel non médical en mode pilote : le questionnaire et les mesures restent temporairement sur cet appareil, sans enregistrement sécurisé du dossier patient ni archivage du PDF.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>');
   q('#go').onclick=next;
 }
 function choice(key,title,items){
@@ -151,7 +154,7 @@ function summary(){
   checkpoint(){persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
   restart(){
-   stopTimer();stopCamera(true);clearProgress(store);
+   stopTimer();stopCamera(true);clearProgress(progressStore);
    state.page=0;state.questionStep=0;state.returnToSummary=false;
    state.task=0;state.answers={};state.checks.clear();state.results={};state.remaining=0;
    render();
@@ -172,12 +175,31 @@ window.addEventListener('pagehide',()=>{stopTimer();stopCamera(true)});
 async function boot(){
  try{
   const {data,error}=await sb.auth.getUser();
-  if(error||!data.user)throw Error('login');
+  if(error||!data?.user)throw Error('login');
   const user=data.user;
-  if(user.id!==TEST_USER_ID||!user.email_confirmed_at)throw Error('not_tester');
-  const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();
-  if(role.error||role.data?.role!=='admin')throw Error('not_tester');
-  const restored=loadProgress(store);
+  if(!user.email_confirmed_at)throw Error('email_not_verified');
+  let adminTester=false;
+  if(user.id===TEST_USER_ID){
+   const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();
+   adminTester=!role.error&&role.data?.role==='admin';
+  }
+  if(!adminTester){
+   const session=await sb.auth.getSession();
+   if(!session.data?.session?.access_token)throw Error('login');
+   const bookingId=getAppointmentFromBrowser(window.location.search,store);
+   if(!bookingId)throw Error('booking_required');
+   // No client-controlled role, query parameter or localStorage flag can
+   // bypass the authenticated, current Acuity payment check.
+   const verified=await verifyPaidSession({
+    accessToken:session.data.session.access_token,
+    appointmentId:bookingId
+   });
+   if(!verified.ok)throw Error(verified.error);
+   paidContext={userId:user.id,appointmentId:bookingId};
+   progressStore=scopedProgressStorage(store,user.id,bookingId);
+   keepBooking(store,bookingId);
+  }
+  const restored=loadProgress(progressStore);
   if(restored){
    state.page=restored.page;state.questionStep=restored.questionStep;state.task=restored.task;
    state.answers=restored.answers;state.results=restored.results;
@@ -186,8 +208,19 @@ async function boot(){
   root.addEventListener('change',()=>persistProgress());
   render();
  }catch(error){
-  const signedOut=error.message==='login';
-  root.innerHTML='<section class="paper access"><span class="overline">ACCÈS AU BILAN ONLINE</span><h1>'+(signedOut?'Connectez-vous à Pulse.':'Accès de démonstration réservé.')+'</h1><p>'+(signedOut?'Identifiez-vous sur Pulse avec votre compte testeur, puis choisissez « Ma consultation Online ».':'Le module test nécessite le compte administrateur vérifié. Les réservations payées ne sont pas encore reliées automatiquement à cette page.')+'</p><a class="action" href="/'+(signedOut?'#connexion':'')+'">Retour à Pulse →</a></section>';
+  const reason=String(error?.message||'booking_verification_failed');
+  const loginNeeded=reason==='login';
+  const pending=reason==='paid_session_not_enabled';
+  const bookingMissing=reason==='booking_required';
+  const title=loginNeeded?'Connectez-vous à Pulse.':pending?'Votre réservation est vérifiée.':'Activez votre accès Online.';
+  const message=loginNeeded?'Identifiez-vous sur Pulse avec votre adresse de réservation.':
+    pending?'La consultation client est momentanément fermée pendant la mise en service de l’archivage sécurisé des résultats. Votre réservation reste valable.':
+    bookingMissing?'Pour commencer, vérifiez votre réservation Acuity réglée avec le même compte Pulse.':
+    'Impossible de vérifier une réservation Online active et intégralement réglée pour ce compte. Vérifiez l’adresse e-mail, le numéro du rendez-vous et le paiement.';
+  root.innerHTML='<section class="paper access"><span class="overline">ACCÈS SÉCURISÉ AU BILAN ONLINE</span><h1>'+
+   esc(title)+'</h1><p>'+esc(message)+'</p><a class="action" href="'+
+   (loginNeeded?'/?connexion=1':'/online/activate/')+'">'+
+   (loginNeeded?'Me connecter à Pulse':'Vérifier ma réservation →')+'</a></section>';
  }
 }
 boot();
