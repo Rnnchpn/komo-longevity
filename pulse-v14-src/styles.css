@@ -436,3 +436,8 @@
 .pulse-entry-activation-link{display:flex;justify-content:center;align-items:center;gap:9px;min-height:37px;padding:10px 12px;margin:12px 0 3px;background:rgba(225,234,219,.58);border:1px solid #c9d9c5;border-radius:10px;color:#294c35;text-decoration:none;font-size:11px;font-weight:750;text-align:center}
 .pulse-entry-activation-link:hover,.pulse-entry-activation-link:focus-visible{background:#e0edda;border-color:#9bbd99;outline-offset:3px}
 .pulse-entry-activation-link span{color:#9f875b}
+
+/* Free Motion Check activation: primary on-ramp, paid booking remains available. */
+.pulse-entry-panel .pulse-free-entry{background:#ece0cb!important;color:#292a2a!important;border-color:#cbbda3!important;margin:3px 0 10px;min-height:48px;display:flex;text-align:center}
+.pulse-entry-panel .pulse-free-entry:hover{background:#f4e8d3!important}
+.pulse-entry-panel .pulse-free-entry+.pulse-booking-button{background:#30353a!important;color:#fcf7ef!important;min-height:46px}
