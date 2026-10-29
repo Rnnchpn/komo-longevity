@@ -34,7 +34,7 @@ export function completedTestMarkup(test,record){
  '<p>'+safe(qualifier)+(record?.status==='review'?' · À vérifier avant interprétation.':'')+'</p>'+
  '<p>Vous pouvez conserver ce résultat, revenir à un autre test ou le refaire. Seul « Refaire ce test » remplace le résultat conservé.</p>'+
  '<div class="motion-review-actions"><button type="button" class="action" id="redo-stored-test">Refaire ce test</button>'+
- '<button type="button" class="action secondary" id="keep-stored-test">Conserver et poursuivre</button></div></section>';
+ '<button type="button" class="action secondary" id="keep-stored-test">Conserver et poursuivre</button><button type="button" class="motion-review-stop" id="stop-review-camera">Éteindre caméra et micro</button></div></section>';
 }
 export function mountTestNavigation(root,tests,results,onSelect,selectedIndex=null){
  const notice=root.querySelector('#motion-test-nav-info');
