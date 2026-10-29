@@ -26,8 +26,8 @@ function measurementRows(results){
   return '<div><span>'+esc(title)+'</span><strong>'+esc(value+quality)+'</strong></div>';
  }).join('');
 }
-function measureInput(id,label,placeholder,step='any'){
- return '<label class="motion-score-field"><span>'+esc(label)+'</span><input type="number" id="'+esc(id)+'" min="0" step="'+step+'" placeholder="'+esc(placeholder)+'" inputmode="decimal"></label>';
+function measureInput(id,label,placeholder,step='any',initial=null){
+ return '<label class="motion-score-field"><span>'+esc(label)+'</span><input type="number" id="'+esc(id)+'" min="0" step="'+step+'" placeholder="'+esc(placeholder)+'"'+(initial===null?'':' value="'+Number(initial)+'"')+' inputmode="decimal"></label>';
 }
 export function reportMarkup(answers,results,blocked){
  const intake=scoreIntake(answers),p=intakeProgress(answers);
@@ -49,7 +49,7 @@ export function reportMarkup(answers,results,blocked){
  '<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
  '<p>Pour vérifier l’algorithme, renseignez uniquement des mesures issues de protocoles standardisés et un référentiel normatif documenté. <strong>Ne saisissez pas de valeurs fictives dans un vrai dossier patient.</strong></p>'+
  '<div class="motion-input-grid">'+
- measureInput('kms-sts','STS 30 s · répétitions (webcam à confirmer)',stsOk?String(sts.value):'Ex. 12','1')+
+ measureInput('kms-sts','STS 30 s · répétitions (webcam à confirmer)',stsOk?String(sts.value):'Ex. 12','1',stsOk?sts.value:null)+
  measureInput('kms-tug','TUG 3 mètres · secondes','Temps validé')+
  measureInput('kms-sppb','Équilibre SPPB · 0 à 4','Score 0–4','1')+
  measureInput('kms-sts-p10','Référence STS · P10','P10 répétitions')+
