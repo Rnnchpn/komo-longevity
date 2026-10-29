@@ -123,7 +123,7 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
   button.disabled=true;button.textContent='Création du PDF…';
   message.textContent='Préparation du rapport sur votre appareil…';
   try{
-   const payload=buildPdfReportData(answers,results,computed,blocked);
+   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{mode:callbacks.isPaid?'PILOTE':'DEMONSTRATION',program:callbacks.getProgram?.()});
    const filename=await downloadMotionPdf(payload);
    message.textContent='Rapport PDF prêt : '+filename+'. Il n’a pas été téléversé sur Pulse.';
   }catch(error){
