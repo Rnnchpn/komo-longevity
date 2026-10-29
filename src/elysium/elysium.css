@@ -74,3 +74,10 @@ nav.top{z-index:20;position:relative;display:flex;align-items:center;justify-con
 .longevity-content small{display:block;max-width:530px;margin-top:20px;font-size:10px;color:#d4c8b7;letter-spacing:.04em}
 @media(max-width:850px){.membership-section{padding:75px 0}.membership-top{grid-template-columns:1fr;gap:20px}.membership-offer{min-height:460px}.membership-offer h3{min-height:112px}}
 @media(max-width:680px){.hero-membership-note{gap:10px;margin-top:25px}.hero-membership-note span{font-size:8px;max-width:180px}.hero-membership-note i{display:none}.hero-membership-note span:last-child{flex-basis:100%}.membership-offers{grid-template-columns:1fr}.membership-offer{min-height:auto;padding:32px 26px}.membership-offer h3{min-height:0;font-size:54px}.offer-price strong{font-size:74px}.membership-top h2{font-size:62px}.longevity-first{min-height:600px}.longevity-content h2{font-size:76px}.longevity-content p{font-size:13px}}
+
+/* ELYSIUM — safe alternative to Supabase default Pulse magic-link redirect */
+.email-login-alternative{margin-top:30px;border-top:1px solid #cfbea8;padding-top:20px}
+.email-login-alternative summary{cursor:pointer;font-size:11px;line-height:1.7;font-weight:600;letter-spacing:.06em;color:#6d5c49;padding:6px 0}
+.email-login-alternative summary:hover{color:#1d251e}
+.email-login-alternative>p{max-width:470px;font-size:11px;color:#6b6f66;line-height:1.9}
+#passwordLoginForm .btn{width:100%}
