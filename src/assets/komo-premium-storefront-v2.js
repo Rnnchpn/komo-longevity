@@ -49,7 +49,9 @@
         el.style.setProperty('--ko-stagger', String(Math.min(group,2) * 90) + 'ms');
       }
     });
+    let observerFired = false;
     const io = new IntersectionObserver(entries => {
+      observerFired = true;
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('ko-in-view');
@@ -61,8 +63,10 @@
     requestAnimationFrame(() => home.classList.add('ko-motion-ready'));
     // A fail-open safety net for uncommon observer/webview failures.
     window.setTimeout(() => {
-      elements.forEach(el => el.classList.add('ko-in-view'));
-      io.disconnect();
+      if (!observerFired) {
+        elements.forEach(el => el.classList.add('ko-in-view'));
+        io.disconnect();
+      }
     }, 3500);
   }
 
