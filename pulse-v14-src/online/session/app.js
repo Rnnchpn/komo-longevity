@@ -180,6 +180,7 @@ function summary(){
  if(!blocked)mountTestNavigation(root,TESTS,state.results,jumpToTest,null);
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
+  isPaid:Boolean(paidContext),
   getProgram(){return state.program;},
   updateProgram(program){state.program=program;persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
