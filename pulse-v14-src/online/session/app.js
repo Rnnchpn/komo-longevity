@@ -228,7 +228,7 @@ async function boot(){
     appointmentId:bookingId
    });
    if(!verified.ok)throw Error(verified.error);
-   paidContext={userId:user.id,appointmentId:bookingId,appointmentAt:verified.appointmentAt||null,appointmentMinutes:verified.appointmentMinutes||null};
+   paidContext={userId:user.id,appointmentId:bookingId,appointmentAt:verified.appointmentAt||null,appointmentMinutes:verified.appointmentMinutes||null,meetingJoinUrl:verified.meetingJoinUrl||null};
    progressStore=scopedProgressStorage(store,user.id,bookingId);
    keepBooking(store,bookingId);
    dossierQueue=createDossierQueue({accessToken:session.data.session.access_token,
