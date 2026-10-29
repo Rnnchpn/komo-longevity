@@ -3,55 +3,14 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>KŌMØ ELYSIUM | A Private Maison of Longevity & Lifestyle</title>
-<meta name="description" content="Step inside KŌMØ ELYSIUM. A private members' maison of longevity, exceptional experiences and concierge services for Monaco, the Riviera and life on board.">
+<meta name="description" content="Discover KŌMØ ELYSIUM. A private members' maison of longevity, exceptional experiences and concierge services for Monaco, the Riviera and life on board.">
 <meta name="theme-color" content="#101511">
 <link rel="canonical" href="https://komolongevity.com/elysium/">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/elysium/assets/elysium.css">
-<style>
-/* A Parisian hôtel-particulier entrance: sculpted double doors, antique brass and a central monogram. */
-.portal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#151712;perspective:1700px;transition:opacity .85s,visibility .85s}
-.portal:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 42%,#97845f33,transparent 42%),repeating-linear-gradient(0deg,transparent 0 99px,#c8bba608 100px 101px),linear-gradient(125deg,#242620,#0a100d);z-index:0}
-.portal-decor{position:absolute;inset:0;pointer-events:none;z-index:1}
-.portal-decor .stone-left,.portal-decor .stone-right{position:absolute;top:0;bottom:0;width:clamp(15px,10vw,140px);background:repeating-linear-gradient(90deg,#bfb3a412 0 4px,#12171320 5px 22px),linear-gradient(90deg,#a9a28b2b,#232820);box-shadow:inset -6px 0 15px #0008}
-.portal-decor .stone-left{left:0}.portal-decor .stone-right{right:0;transform:scaleX(-1)}
-.portal-decor .lintel{position:absolute;top:4%;left:9%;right:9%;height:11%;border-top:5px double #cdb58a76;border-bottom:1px solid #d2b79165;box-shadow:0 10px 20px #0007}
-.portal-decor .lintel:before{content:"✦   E L Y S I U M   ✦";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 clamp(11px,1.2vw,16px) 'Cormorant Garamond',Georgia,serif;letter-spacing:.4em;color:#c6ad82b8}
-.portal-doors{cursor:pointer;position:absolute;inset:17% clamp(24px,12vw,190px) 8%;display:grid;grid-template-columns:1fr 1fr;filter:drop-shadow(0 22px 40px #000a);transform-style:preserve-3d;z-index:2}
-.door{position:relative;overflow:hidden;background:linear-gradient(93deg,#171f19,#28302a 24%,#1c261f 68%,#121814);border:5px solid #090e0b;transform-style:preserve-3d;backface-visibility:hidden;transition:transform 1.7s cubic-bezier(.24,.74,.18,1)}
-.door-left{transform-origin:left center;box-shadow:inset -7px 0 18px #0009;border-right:2px solid #d5b78570}
-.door-right{transform-origin:right center;box-shadow:inset 7px 0 18px #0009;border-left:2px solid #d5b78570}
-.door:before{content:"";position:absolute;inset:2.5%;border:2px solid #a991685e;box-shadow:inset 0 0 0 10px #171e19,inset 0 0 0 12px #b39d754d}
-.door:after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(90deg,transparent 0 4px,#ffffff07 5px 6px,transparent 7px 19px);opacity:.35}
-.panel-upper,.panel-middle,.panel-lower{position:absolute;left:12%;right:12%;border:2px double #a58d675f;background:linear-gradient(140deg,#0e1712,#31372f 45%,#151c16);box-shadow:inset 0 0 0 8px #1a221d,inset 0 0 0 9px #aa906653,0 1px 8px #0008}
-.panel-upper{top:8%;height:30%}.panel-middle{top:41%;height:31%}.panel-lower{top:75%;height:17%}
-.panel-upper:after{content:"❦";position:absolute;inset:0;display:grid;place-items:center;color:#a68b5e85;font:400 clamp(32px,5vw,85px) 'Cormorant Garamond',serif}
-.panel-middle:after{content:"";position:absolute;inset:18%;border:1px solid #a98e625c;border-radius:50%;box-shadow:0 0 0 8px #aa905d14}
-.escutcheon{position:absolute;top:54%;z-index:5;width:13px;height:64px;background:linear-gradient(90deg,#8c7145,#dfbf88,#8b6a40);box-shadow:0 2px 8px #000b;border-radius:7px}
-.door-left .escutcheon{right:7%}.door-right .escutcheon{left:7%}
-.portal-glow{position:absolute;inset:11% 14%;z-index:0;background:radial-gradient(ellipse at 50% 45%,#ffeedad4,#f5d9ad77 32%,#ccad7344 58%,transparent 78%);opacity:.0;transition:opacity .8s}
-.portal-badge{cursor:pointer;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:6;width:125px;height:125px;border-radius:50%;border:1px solid #e2c69baa;background:radial-gradient(circle at 30% 20%,#4c493b,#151c17 80%);box-shadow:0 0 0 11px #c8aa772a,0 10px 42px #000a;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .5s}
-.portal-badge strong{font:400 63px var(--serif);color:#dac199;line-height:.9}.portal-badge small{font:600 9px var(--sans);letter-spacing:.16em;color:#b3a181}
-.portal-prompt{position:absolute;z-index:10;bottom:6%;left:50%;transform:translateX(-50%);width:min(88vw,340px);border:1px solid #d6bf978c;background:#141c17e8;backdrop-filter:blur(8px);color:#f0e5d6;padding:17px 23px;letter-spacing:.22em;text-transform:uppercase;font:600 10px var(--sans);box-shadow:0 7px 50px #000a}
-.portal-prompt:hover{background:#cbb18a;color:#1b221d}
-.portal-corner{position:absolute;z-index:8;top:20px;right:25px;background:transparent;border:0;color:#d7c4a9;letter-spacing:.17em;font:500 10px var(--sans);text-transform:uppercase}
-.portal.opening .door-left{transform:rotateY(-108deg)}.portal.opening .door-right{transform:rotateY(108deg)}
-.portal.opening .portal-badge{opacity:0;pointer-events:none}
-.portal.opening .portal-glow{opacity:1}.portal.opening .portal-prompt{opacity:0;pointer-events:none}
-.portal.gone{opacity:0;visibility:hidden;pointer-events:none}
-@media(max-width:700px){.portal-doors{inset:20% 7% 15%}.portal-decor .lintel{top:8%;left:7%;right:7%;height:10%}.portal-badge{width:90px;height:90px}.portal-badge strong{font-size:46px}.portal-prompt{bottom:4%}.panel-upper:after{font-size:42px}}
-@media(prefers-reduced-motion:reduce){.door,.portal,.portal-glow,.portal-badge{transition:none!important}}
-</style>
 </head>
 <body>
-<div class="portal" id="portal" role="dialog" aria-modal="true" aria-label="Enter the Maison ELYSIUM">
-<div class="portal-glow"></div><div class="portal-decor" aria-hidden="true"><span class="stone-left"></span><span class="stone-right"></span><span class="lintel"></span></div>
-<div class="portal-doors" aria-hidden="true"><div class="door door-left"><div class="panel-upper"></div><div class="panel-middle"></div><div class="panel-lower"></div><span class="escutcheon"></span></div><div class="door door-right"><div class="panel-upper"></div><div class="panel-middle"></div><div class="panel-lower"></div><span class="escutcheon"></span></div></div>
-<div class="portal-badge"><strong>K</strong><small>ELYSIUM</small></div>
-<button class="portal-corner" id="skipPortal" type="button">SKIP ↗</button>
-<button class="portal-prompt" id="openPortal" type="button"><span id="portalLabel">OPEN THE DOORS</span> &nbsp; ↗</button>
-</div>
 <nav class="top"><a href="/elysium/" class="brand" aria-label="KŌMØ ELYSIUM"><strong>KŌMØ</strong><em>ELYSIUM</em></a><div class="navlinks"><a href="#maison" data-en="THE CONCEPT" data-fr="LE CONCEPT">THE CONCEPT</a><a href="#membership" data-en="MEMBERSHIP" data-fr="ADHÉSION">MEMBERSHIP</a><button type="button" id="toggleLanguage">FR</button><a class="white-link" href="/elysium/club/" data-en="MEMBERS' ENTRANCE ↗" data-fr="ACCÈS MEMBRES ↗">MEMBERS' ENTRANCE ↗</a></div></nav>
 <main>
 <section class="hero">
@@ -118,18 +77,19 @@
 </div></section>
 </main>
 <footer class="footer wrap"><div><b>KŌMØ <em>ELYSIUM</em></b><p>MONACO · CANNES · SAINT-TROPEZ</p></div><div><a href="https://komolongevity.com">KŌMØ LONGEVITY</a> · <a href="mailto:contact@komolongevity.com">CONTACT</a><p data-en="Membership admission and service requests are subject to confirmation. Healthcare services are provided independently by duly licensed clinicians. Social/dating features, when offered, are adults-only, opt-in and unrelated to any Motion data." data-fr="Adhésion et prestations sous réserve de confirmation. Les soins sont réalisés indépendamment par des professionnels habilités. Les rencontres, si proposées, seront réservées aux adultes volontaires et sans lien avec Motion.">Membership admission and service requests are subject to confirmation. Healthcare services are provided independently by duly licensed clinicians. Social/dating features, when offered, are adults-only, opt-in and unrelated to any Motion data.</p></div></footer>
-<script type="module">
-const $$=(s)=>[...document.querySelectorAll(s)], $=s=>document.querySelector(s);
-const language=new URLSearchParams(location.search).get('lang')==='fr'?'fr':'en';let lang=language;
-
-function applyLang(){document.documentElement.lang=lang;$$('[data-en]').forEach(el=>{const val=el.dataset[lang];if(/<em>|<br>/.test(val))el.innerHTML=val;else el.textContent=val});$('#toggleLanguage').textContent=lang==='en'?'FR':'EN';$('#portalLabel').textContent=lang==='fr'?'OUVRIR LES PORTES':'OPEN THE DOORS'}
-$('#toggleLanguage').addEventListener('click',()=>{lang=lang==='en'?'fr':'en';applyLang()});applyLang();
-const portal=$('#portal');let entered=false;
-function enter(skip=false){if(entered)return;entered=true;try{sessionStorage.setItem('elysium-door-2026','1')}catch(e){}
- if(skip||matchMedia('(prefers-reduced-motion:reduce)').matches){portal.classList.add('gone');portal.setAttribute('aria-hidden','true');return;}
- portal.classList.add('opening');setTimeout(()=>{portal.classList.add('gone');portal.setAttribute('aria-hidden','true');$('#toggleLanguage').focus({preventScroll:true})},1950)}
-$('#openPortal').addEventListener('click',()=>enter());$('.portal-doors').addEventListener('click',()=>enter());$('.portal-badge').addEventListener('click',()=>enter());$('#skipPortal').addEventListener('click',()=>enter(true));
-document.addEventListener('keydown',e=>{if(!entered&&e.key==='Escape')enter(true)});
-try{if(new URLSearchParams(location.search).get('replay')==='1')sessionStorage.removeItem('elysium-door-2026');else if(sessionStorage.getItem('elysium-door-2026')==='1')enter(true)}catch(e){}
+<script>
+const $=(selector)=>[...document.querySelectorAll(selector)];
+let lang=new URLSearchParams(location.search).get('lang')==='fr'?'fr':'en';
+function applyLang(){
+ document.documentElement.lang=lang;
+ $('[data-en]').forEach(el=>{
+  const value=el.dataset[lang];
+  if(/<em>|<br>/.test(value))el.innerHTML=value;
+  else el.textContent=value;
+ });
+ document.querySelector('#toggleLanguage').textContent=lang==='en'?'FR':'EN';
+}
+document.querySelector('#toggleLanguage').addEventListener('click',()=>{lang=lang==='en'?'fr':'en';applyLang()});
+applyLang();
 </script>
 </body></html>
