@@ -262,7 +262,10 @@ const scripts = [
   'scripts/komo-offers-online-20261029.mjs',
   // Absolute final premium visual layer and regression checks. Business logic untouched.
   'scripts/komo-premium-storefront-20261029.mjs',
-  'scripts/komo-premium-storefront-qa-20261029.mjs'
+  'scripts/komo-premium-storefront-qa-20261029.mjs',
+  // Last sizing reconciliation: legacy approved hero !important overrides, mobile proportions.
+  'scripts/komo-premium-proportions-v3.mjs',
+  'scripts/komo-premium-proportions-qa-v3.mjs'
 ];
 
 for (const script of scripts) {
