@@ -119,6 +119,7 @@ function test(){
    sharedMotionMedia.resetReady(t.id);
    persistProgress();render();
   };
+  q('#stop-review-camera').onclick=()=>{sharedMotionMedia.stopAll();state.stream=null;q('#stop-review-camera').textContent='Caméra et micro arrêtés';q('#stop-review-camera').disabled=true;};
   q('#keep-stored-test').onclick=()=>{
    if(state.task<TESTS.length-1){state.task++;render();}
    else {state.page=4;render();}
@@ -142,9 +143,10 @@ function test(){
  });
 }
 function summary(){
- wrap(testNavigatorMarkup(TESTS,state.results,null)+
-  reportMarkup(state.answers,state.results,state.answers.safety==='yes'));
- mountTestNavigation(root,TESTS,state.results,jumpToTest,null);
+ const blocked=state.answers.safety==='yes';
+ wrap((blocked?'':testNavigatorMarkup(TESTS,state.results,null))+
+  reportMarkup(state.answers,state.results,blocked));
+ if(!blocked)mountTestNavigation(root,TESTS,state.results,jumpToTest,null);
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
