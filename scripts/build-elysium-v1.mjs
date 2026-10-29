@@ -30,8 +30,8 @@ for(const world of WORLDS){
  await writeFile(join(dir,'index.html'),template);
 }
 const home=await readFile(join(out,'index.html'),'utf8');
-if(!home.includes('portal-doors')||!home.includes('elysium-door-2026')||!home.includes('THE MAISON'))
- throw new Error('[elysium] Parisian double-door landing missing');
+if(!home.includes('portal-doors')||!home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/longevity/'))
+ throw new Error('[elysium] Parisian portal or €299/Yachting/Longevity content missing');
 const member=await readFile(join(assets,'member.js'),'utf8');
 if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp'))throw new Error('[elysium] secure member client missing');
 const sanitized=await readFile(join(assets,'store-data.mjs'),'utf8');
