@@ -38,6 +38,10 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  const sts=results.sts;
  const stsOk=Boolean(sts?.status==='done'&&Number.isInteger(sts.value)&&sts.value>=0);
  return '<section class="paper online-report">'+passportMarkup(answers,results,blocked)+
+ '<div class="report-reading-guide"><span>COMMENT LIRE CE PASSEPORT</span><h2>Un point de départ, pas une prédiction.</h2>'+
+ '<p>Votre indice décrit ce que vous avez déclaré sur votre mobilité. Les tests webcam constituent des observations complémentaires. Pulse vous aide ensuite à choisir deux priorités et à mesurer votre évolution.</p>'+
+ '<nav class="report-quick-actions" aria-label="Actions après votre bilan"><button class="action" type="button" id="download-pdf-top">Télécharger mon passeport PDF ↓</button>'+
+ '<a class="action secondary" href="https://pulse.komolongevity.com/#passport">Retrouver mon bilan dans Pulse →</a></nav></div>'+
  '<details class="report-method-details"><summary>Voir le détail des questionnaires et de leur calcul</summary>'+ '<span class="overline">SYNTHÈSE MOTION · QUESTIONNAIRE & OBSERVATIONS</span>'+ 
  '<h1>Votre profil en mouvement<em>.</em></h1>'+
  '<p>Cette restitution distingue vos <strong>réponses personnelles</strong> des mesures fonctionnelles. Les scores déclaratifs sont exploratoires et ne constituent pas des diagnostics.</p>'+
@@ -46,7 +50,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '<p>'+(intake.complete?'Indice calculé à partir de vos réponses uniquement, avec quatre domaines pondérés. <strong>Il ne s’agit pas du Motion Score.</strong>':'Questionnaire incomplet : '+(p.total-p.completed)+' réponse(s) manquante(s).')+'</p></div>'+
  '<div class="intake-domain-grid">'+domainCards(intake)+'</div>'+
  (intake.complete?'<p class="report-context"><strong>Domaines à discuter en priorité :</strong> '+(chosen||'Aucune priorité différenciée')+'. Ils reflètent votre perception et ne traduisent pas à eux seuls une limitation objective.</p>':'')+
- '</details>'+ '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
+ '</details>'+'<details class="report-measure-details"><summary>Voir les mesures détaillées des tests et l’algorithme de référence</summary><h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
  '<section class="motion-score-zone"><div class="motion-score-heading"><span class="overline">MOTION SCORE · ALGORITHME DE RÉFÉRENCE</span><h2>Le score fonctionnel final</h2><p>Formule définie pour KŌMØ : <strong>40 % Sit-to-Stand · 35 % TUG 3 m · 25 % équilibre SPPB.</strong> Les questionnaires, la posture et l’unipodal ne modifient pas cette formule.</p></div>'+
  '<div class="motion-score-locked"><span id="score-status-icon">○</span><div><strong id="score-status">Motion Score indisponible : mesures complémentaires requises</strong><p id="score-hint">Le TUG standardisé et l’équilibre SPPB n’ont pas été mesurés automatiquement par la webcam. Aucune norme statistique n’a été inventée.</p></div><div class="motion-score-value"><strong id="motion-score-number">—</strong><span>/ 100</span></div></div>'+
  '<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
@@ -64,7 +68,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '<label class="motion-check"><input id="kms-verified" type="checkbox"><span>Le TUG et l’équilibre SPPB ont été réellement mesurés et validés selon leurs protocoles.</span></label>'+
  '<button type="button" class="action" id="compute-motion-score">Calculer avec les mesures vérifiées →</button>'+
  '<p class="message" id="kms-error" role="status"></p></details>'+
- '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section>'+
+ '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section></details>'+
  roadmapMarkup(answers,results,blocked)+
  dailyProgramMarkup(answers,results,blocked,program)+
  '<p class="notice">'+(persisted?'Les réponses et mesures chiffrées de votre bilan sont conservées dans votre dossier Pulse privé. Le PDF est créé et téléchargé localement : il n’est pas encore archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
@@ -72,6 +76,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
 }
 export function bindReport(root,answers,results,callbacks,blocked=false){
+ root.querySelector('#download-pdf-top')?.addEventListener('click',()=>root.querySelector('#download-pdf')?.click());
  bindDailyProgram(root,answers,results,blocked,callbacks.getProgram||(()=>null),callbacks.updateProgram||(()=>{}));
  bindNormPanel(root,answers,results,()=>callbacks.checkpoint?.());
  const stsRecord=results.sts;
