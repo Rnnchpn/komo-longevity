@@ -1,0 +1,220 @@
+/* KŌMØ Motion Online — mobile-first experience & passport styling, v3.
+   Presentation only: all capture, consent, timers, safety and scoring logic preserved. */
+:root{
+ --lux-ink:#242324;--lux-ivory:#F7F2EA;
+ --lux-gold:#B89B6A;--lux-edge:#E7DFD2;
+}
+html,body{min-width:0;overflow-x:clip}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:is(button,a,input,select,textarea,summary):focus-visible{outline:2px solid #AA8C5B;outline-offset:3px}
+button:disabled,.action:disabled{cursor:not-allowed}
+.online-session-shell,.session,.paper,.content,.panel,.online-report{min-width:0}
+.session{border-radius:19px}
+.intake-track span,.intake-result-track span{background:#B89B6A}
+.intake-group-tabs>span.active{background:#292728;color:#FFFDF8}
+.intake-group-tabs>span.done{background:#F3E9DA;color:#765838}
+.intake-question{background:#FFFDF8;border-color:#E7DFD2}
+.intake-question legend{color:#292727}
+.motion-test-navigator{background:#F7F0E8;border-color:#E7DFD2}
+.motion-test-navigator-top strong{color:#4A3928}
+.motion-test-navigator-top span{color:#857258}
+.motion-test-navigator-scroll{scrollbar-color:#CDBA9B #F7F2EA;scroll-padding:10px}
+.motion-test-navigator-scroll>*{flex-shrink:0}
+.test-guide{background:#F7F0E7;color:#403528;border-color:#E1D4C1}
+.test-guide-heading h2{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(33px,4vw,47px);color:#2C2824}
+.guide-highlight{background:#FFFDF8;border-color:#E7DFD2}
+.guide-highlight strong{color:#544029}.guide-highlight p{color:#6F665D}
+.guide-audio-btn{background:#FFFDF8;border-color:#D0BFA5;color:#51412D}
+.guide-audio-btn:hover,.guide-audio-btn:focus-visible{background:#F3EADC;border-color:#B89B6A}
+.pose-tag{border-color:#D7C8B5;color:#715636}
+.pose-camera{background:#1D1C1D}
+.pose-camera .camera-hud{background:rgba(24,24,25,.91);color:#FFFDF8}
+.camera-hud-dot{background:#D9C6A3;box-shadow:0 0 0 3px rgba(217,198,163,.2)}
+/* The passport is a private luxury publication, not a medical score certificate. */
+.passport-hero{
+ background:radial-gradient(circle at 92% 5%,rgba(203,171,115,.11),transparent 45%),
+            linear-gradient(140deg,#171718 0%,#292829 68%,#34312F 100%);
+ color:#FFFDF8;border:1px solid rgba(217,198,163,.27);
+ border-radius:20px;box-shadow:0 18px 50px rgba(18,17,17,.12)
+}
+.passport-top .overline{color:#D9C6A3}
+.passport-stamp{border-color:rgba(217,198,163,.43);color:#E9DECC}
+.passport-score{border-right-color:rgba(217,198,163,.26)}
+.passport-score small{color:#D9C6A3}
+.passport-big{font-family:"Cormorant Garamond",Georgia,serif;font-weight:500;color:#FFFDF8}
+.passport-big span{font-family:"Inter",Arial,sans-serif;color:#D9C6A3}
+.passport-lead h2{font-family:"Cormorant Garamond",Georgia,serif;font-size:clamp(38px,4.4vw,58px);font-weight:500;color:#FFFDF8}
+.passport-score p,.passport-lead p{color:#D8D0C3}
+.passport-lead .passport-caveat{color:#C9BCA8}
+.passport-observed strong{color:#E2C99F}.passport-observed span{color:#CFC2B3}
+.passport-bars i,.daily-track i{background:#B89B6A}
+.roadmap-domain,.roadmap-choices article,.daily-welcome,.daily-task,
+.online-report .report-method-details{background:#FFFDF8;border-color:#E7DFD2}
+.roadmap-domain strong,.roadmap-priorities strong,.daily-welcome strong,
+.daily-week strong,.daily-checklist legend,.daily-task strong,
+.online-report .report-method-details summary{color:#403327}
+.roadmap-domain p,.roadmap-priorities p,.daily-welcome p,.daily-week p,
+.daily-disclaimer,.daily-hold p,.daily-task em{color:#776B5E}
+.roadmap-domain .roadmap-step{color:#62513A}
+.roadmap-domain-tag.growth{color:#695037;background:#F4E9D8}
+.roadmap-domain-tag.neutral{color:#766D63;background:#F4EEE6}
+.roadmap-priorities{border-color:#C8AA78}
+.roadmap-choices article:first-child{background:#292728;color:#FFFDF8;border-color:#292728}
+.roadmap-choices article:first-child span{color:#D9C6A3}
+.roadmap-choices article h3{font-family:"Cormorant Garamond",Georgia,serif;font-size:37px}
+.roadmap-btn{background:#EDE1D0;color:#534028;min-height:46px}
+.roadmap-btn.secondary{background:#50453A;color:#FFFDF8}
+.pulse-daily{background:linear-gradient(160deg,#F5EDE2,#FFFDF8);border-color:#DFD0BC}
+.daily-heading .overline{color:#94754C}
+.daily-progress strong{font-family:"Cormorant Garamond",Georgia,serif;color:#493B2C}
+.daily-progress span{color:#806D54}
+.daily-track{background:#E8DBCA}
+.daily-task:has(input:checked){background:#F5EBDD;border-color:#CDB692}
+.daily-task input{accent-color:#A98C60}
+.daily-checkin label{color:#59462F}
+.daily-checkin small{color:#85776A}
+.daily-checkin select,.daily-checkin textarea{
+ font:14px "Inter",Arial,sans-serif;border-color:#D5C5AF;color:#40372D;
+ background:#FFFDF8
+}
+.online-report .daily-personal-note{background:#F6EFE5;border-color:#B89B6A;color:#675541}
+.online-report .daily-personal-note strong{color:#453628}
+@media(max-width:980px){
+ .site-header{height:auto;min-height:67px;padding:13px 22px}
+ .wordmark{font-size:22px}.top-link{min-height:44px;display:flex;align-items:center}
+ .intro{min-height:auto;padding:37px 24px;grid-template-columns:1fr}
+ .intro-art{display:none}
+ .intro h1{font-size:clamp(65px,9.2vw,89px)}
+ .intro-desc{font-size:13px;line-height:1.65}
+ .content{padding:25px 19px 55px}
+ .journey{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .sections{grid-template-columns:1fr;gap:15px}
+ .booking-note{padding:23px;gap:13px}
+ .panel{padding:24px;border-radius:18px}
+ .panel h2{font-size:clamp(39px,5vw,53px)}
+ .online-session-shell{padding:24px 19px 55px}
+ .paper{padding:32px 25px}
+ .motion-workspace{padding:24px!important}
+ .test-grid{grid-template-columns:1fr}
+ .guide-columns{grid-template-columns:1fr}
+}
+@media(max-width:700px){
+ .site-header{padding:10px 15px}
+ .wordmark{font-size:20px}
+ .top-link{font-size:11px}
+ .intro{padding:29px 20px 31px}
+ .intro h1{font-size:clamp(62px,12.4vw,80px);line-height:.87;margin:20px 0}
+ .intro-desc{font-size:12.5px}
+ .facts{gap:7px}
+ .facts span{padding:9px 12px;font-size:10px}
+ .content{padding:18px 12px 40px}
+ .journey{gap:8px}
+ .journey-step{padding:13px;min-height:82px;border-radius:12px}
+ .journey-step b{font-size:12px}
+ .journey-step small{font-size:10px}
+ .booking-note{flex-direction:column;align-items:stretch;padding:20px;border-radius:16px}
+ .booking-note h2{font-size:42px}
+ .booking-note .button{width:100%;min-height:48px}
+ .sections{gap:11px}
+ .panel{padding:19px;border-radius:16px}
+ .panel h2{font-size:41px;line-height:.97}
+ .panel-intro{font-size:12px}
+ .check{padding:15px;min-height:55px}
+ .check small{font-size:11px}
+ .camera-viewport{aspect-ratio:4/5;max-height:67svh}
+ .camera-viewport video{object-fit:contain}
+ .camera-viewport:before{inset:10px}
+ .camera-buttons{gap:9px}
+ .camera-buttons .button{min-height:48px;flex:1 1 135px}
+ .outcome{flex-direction:column;align-items:stretch;padding:21px;border-radius:16px}
+ .outcome-side{min-width:0}
+ .outcome h2{font-size:40px}
+ .top{padding:12px 15px;min-height:65px;gap:9px}
+ .top .brand{font-size:20px}
+ .top a{font-size:11px;min-height:40px;display:flex;align-items:center}
+ .online-session-shell{padding:14px 10px 45px;min-height:0}
+ .session{border-radius:15px}
+ .session-top{padding:15px 16px;gap:8px;flex-wrap:wrap;font-size:9.5px}
+ .test-badge{padding:7px 10px;font-size:9px}
+ .steps{grid-template-columns:repeat(3,minmax(0,1fr));padding:11px;gap:7px}
+ .steps span{font-size:10px;min-width:0}
+ .steps b{min-width:25px}
+ .paper{padding:23px 18px 30px}
+ .paper h1,.intake-paper h1{font-size:clamp(46px,11vw,61px);line-height:.9}
+ .paper>p,.intake-subtitle{font-size:12.5px;line-height:1.65}
+ .intro:not(.site-header .intro){padding:27px 20px;gap:15px}
+ .intro-side{display:none}
+ .fact-row{gap:10px;margin-bottom:19px}
+ .fact-row div{min-width:82px}
+ .fact-row b{font-size:22px}
+ .action,.action.secondary{min-height:46px;font-size:12px}
+ .actions{gap:10px;margin-top:24px}
+ .actions>.action,.actions>button{flex:1 1 140px;min-height:48px}
+ .choices{gap:8px}
+ .choices span{min-height:47px;align-items:center;font-size:12px;padding:11px 13px}
+ .checklist{grid-template-columns:1fr;gap:9px}
+ .checklist label{min-height:50px;padding:13px}
+ .test-grid{gap:13px;margin:23px 0}
+ .camera,.pose-camera{border-radius:15px}
+ .camera-screen{aspect-ratio:4/5;min-height:0}
+ .pose-camera .camera-screen{aspect-ratio:4/5;min-height:260px;max-height:67svh}
+ .pose-camera .camera-hud{left:10px;top:10px;max-width:calc(100% - 20px);padding:9px;font-size:10px}
+ .camera-actions{flex-wrap:wrap}
+ .camera-actions button{min-height:44px;padding:10px}
+ .test-controller{padding:22px 14px}
+ .counter button{width:46px;height:46px}
+ .time{font-size:78px}
+ .motion-workspace{padding:15px!important}
+ .motion-heading{flex-direction:column;align-items:flex-start;gap:11px}
+ .motion-heading h1{font-size:49px}
+ .test-guide{padding:17px;border-radius:16px}
+ .test-guide-heading{flex-direction:column;align-items:stretch;gap:11px}
+ .test-guide-heading h2{font-size:39px}
+ .guide-audio-btn{min-height:46px}
+ .guide-columns{grid-template-columns:1fr;gap:11px}
+ .guide-highlight{padding:16px}
+ .intake-paper{padding:19px!important}
+ .intake-question{padding:15px}
+ .intake-group-tabs{gap:6px;margin:17px 0}
+ .intake-group-tabs>span{font-size:10px}
+ .result-list div{gap:12px;padding:14px}
+ .result-list span{flex:1}
+ .result-list strong{max-width:46%;overflow-wrap:anywhere}
+ .session-bottom{padding:16px;flex-wrap:wrap}
+ .session-bottom p{font-size:10px}
+ .foot{padding:18px 13px;flex-wrap:wrap;font-size:9px}
+ .passport-hero{padding:22px 18px;border-radius:15px;margin-bottom:20px}
+ .passport-columns,.passport-bars,.roadmap-domains,.roadmap-choices,.daily-checkin{grid-template-columns:1fr;gap:13px}
+ .passport-columns{margin:18px 0}
+ .passport-score{padding:0 0 15px;border-right:0;border-bottom:1px solid rgba(217,198,163,.31)}
+ .passport-big{font-size:82px;margin:6px 0}
+ .passport-lead h2{font-size:44px;line-height:.96}
+ .passport-observed{gap:8px}
+ .roadmap-domain{padding:17px;min-height:0}
+ .roadmap-choices article{padding:18px}
+ .roadmap-choices article h3{font-size:35px}
+ .pulse-daily{padding:18px;margin:22px 0;border-radius:16px}
+ .daily-task{padding:14px;gap:10px;min-height:54px}
+ .daily-task input{min-width:20px;min-height:20px}
+ .daily-checkin textarea,.daily-checkin select,
+ input[type="email"],input[type="password"],input[type="text"],select,textarea{font-size:16px}
+ .daily-checkin{gap:12px}
+ .online-report .report-method-details{padding:12px}
+ .online-report .report-method-details summary{min-height:44px;display:flex;align-items:center}
+}
+@media(max-width:380px){
+ .intro h1{font-size:59px}
+ .journey{grid-template-columns:1fr}
+ .top .brand{font-size:18px}
+ .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .passport-big{font-size:73px}
+ .test-guide-heading h2{font-size:34px}
+}
+@media print{
+ .passport-hero{background:#FFFDF8!important;border:1px solid #D1C4B3!important;color:#242324!important}
+ .passport-hero *{color:#242324!important}
+ .passport-score{border-color:#D1C4B3!important}
+ .pulse-daily,.roadmap-domain{background:#FFFDF8!important}
+ .action,.camera-buttons,.top{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
