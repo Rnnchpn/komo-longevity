@@ -1,0 +1,121 @@
+/* KŌMØ Longevity — Acuity Scheduling V2
+   À coller dans Acuity > Page Rendez-vous > CSS avancé.
+   Les sélecteurs ci-dessous appartiennent à l'API CSS officielle du nouveau scheduler Acuity.
+   N'est pas actif sur Acuity tant que l'administrateur ne l'a pas enregistré.
+   L'accès CSS avancé nécessite un forfait Acuity compatible (Premium/Powerhouse). */
+
+.business-container {
+  padding: 22px 18px 28px;
+  background: #f7f3eb;
+  border-radius: 22px;
+  margin-bottom: 20px;
+}
+
+.business-name {
+  color: #1f3d30;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 31px;
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+
+.business-description-container {
+  background: #f5f0e7;
+  border: 1px solid #e5ded0;
+  border-radius: 18px;
+  padding: 20px 22px;
+  color: #41574a;
+  line-height: 1.6;
+}
+
+.step-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 29px;
+  line-height: 1.16;
+  font-weight: 400;
+  color: #213b2e;
+  letter-spacing: -0.025em;
+}
+
+.select-label {
+  color: #7e6b4b;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .08em;
+}
+
+.select-item {
+  background: #fdfbf6;
+  border: 1px solid #e4ddcf;
+  border-radius: 17px;
+  margin: 0 0 12px;
+  transition: background-color .24s ease, border-color .24s ease, box-shadow .24s ease;
+}
+
+.select-item-box {
+  border-radius: 17px;
+  padding: 16px;
+}
+
+.select-item:hover,
+.select-item:focus-within {
+  background: #f8f5ed;
+  border-color: #bbaa86;
+  box-shadow: 0 12px 28px rgba(31, 59, 46, .065);
+}
+
+.appointment-type-name {
+  font-family: Georgia, "Times New Roman", serif;
+  color: #223c2f;
+  font-weight: 500;
+  font-size: 21px;
+  letter-spacing: -.02em;
+}
+
+.duration-container {
+  color: #8b7955;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.type-description {
+  color: #53685b;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.time-selection {
+  background: #fbf9f3;
+  color: #264333;
+  border: 1px solid #d8cfbc;
+  border-radius: 12px;
+  transition: background-color .22s ease, color .22s ease, border-color .22s ease;
+}
+
+.time-selection:hover,
+.time-selection.selected-time {
+  background: #284734;
+  border-color: #284734;
+  color: #fffdf5;
+}
+
+.btn {
+  background: #244430;
+  color: #fffaf1;
+  border: 1px solid #244430;
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 13px 20px;
+  transition: filter .2s ease, box-shadow .2s ease;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  filter: brightness(1.12);
+  box-shadow: 0 8px 22px rgba(32, 60, 43, .16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-item, .time-selection, .btn { transition: none; }
+}
