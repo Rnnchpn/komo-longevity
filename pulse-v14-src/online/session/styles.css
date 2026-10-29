@@ -78,3 +78,9 @@ h1,h2,p{margin-top:0}h1{font:400 clamp(42px,5vw,72px)/.99 "Instrument Serif",Geo
 .manual-review strong{min-width:25px;text-align:center;font-size:16px;color:#274a33}
 @media(max-width:930px){.live-controller{grid-template-columns:1fr 1fr}.live-controller .test-start{grid-column:1/-1}.pose-camera .camera-screen{min-height:0}}
 @media(max-width:590px){.motion-heading{display:block}.pose-tag{display:inline-block;margin-top:8px}.pose-camera .camera-screen{aspect-ratio:3/4;min-height:350px}.pose-camera .camera-hud{left:9px;top:9px;padding:8px;gap:7px}.pose-camera .camera-hud strong{font-size:10px}.pose-camera .camera-hud span:last-child{display:none}.camera-live-score{left:10px;bottom:10px}.camera-live-score b{font-size:40px}.live-controller{padding:17px;gap:10px}.live-controller .time,.live-controller .live-value{font-size:49px}.manual-review{flex-direction:column;align-items:stretch}.manual-review>div{justify-content:center}}
+
+
+.pose-consent{margin:0 20px;padding:14px 17px;border:1px solid #a3b99a77;border-radius:12px;background:#203f2f;color:#dce6db}
+.pose-consent label{display:flex;align-items:flex-start;gap:12px;font-size:11px;line-height:1.75;cursor:pointer}
+.pose-consent input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:#c3a975}
+.pose-consent input:focus-visible{outline:3px solid #ddbd80;outline-offset:4px}
