@@ -1,7 +1,7 @@
 # KŌMØ Longevity — Acuity V2 : configuration opérationnelle
 
 **État du 29 octobre 2026 : prêt à appliquer dans le compte Acuity ; non modifié sur Acuity.** 
-Le compte propriétaire de l'agenda est identifié par `owner=40696577`. Sa page publique actuelle porte le nom « Centré Paris x Kōmø Longevity » et expose trois rendez-vous physiques à Paris (200 / 150 / 300 €). La page Acuity nécessite un administrateur connecté pour modifier ses paramètres. Aucun accès administrateur ni API Acuity authentifiée n'était disponible pendant cet audit.
+Le compte propriétaire de l'agenda est identifié par `owner=40696577`. Sa page publique actuelle porte le nom « Centré Paris x Kōmø Longevity » et expose trois rendez-vous physiques à Paris (200 / 150 / 300 €) **et le Bilan Online de 30 minutes à 49 € (type 99940918)**. La page Acuity nécessite un administrateur connecté pour modifier ses paramètres. Aucun accès administrateur ni API Acuity authentifiée n'était disponible pendant cet audit.
 
 ## Organisation cible : un seul agenda patient, trois familles de bilans
 
@@ -13,7 +13,7 @@ Le compte propriétaire de l'agenda est identifié par `owner=40696577`. Sa page
 
 Éviter dans les e-mails et sur la page Acuity les formulations « consultation médicale », « télémédecine » et « compte Pulse créé automatiquement ». Ne pas annoncer de restitution de « Motion Age »/« Motion Score » pour l'Online tant que ce service n'a pas de protocole validé.
 
-### Catégories et prestation à afficher
+### Catégories et prestations à afficher
 
 **01 — DÉCOUVERTE**  
 `KŌMØ · Bilan Découverte` — 0 € ; durée recommandée **10 minutes**, à confirmer. Si le « bilan gratuit » est en réalité un check-up autonome sans créneau, ne pas créer de type Acuity et conserver le questionnaire sur le site.  
@@ -21,9 +21,9 @@ Description : « Une première approche simple du mouvement et de vos habitudes 
 N'activer qu'avec un opérateur, un calendrier et une prestation réellement disponibles. Sinon maintenir privé / masqué.
 
 **02 — À DISTANCE**  
-`KŌMØ · Bilan Online` — **30 minutes, 49 €**, tarif confirmé le 29 octobre 2026. À encaisser en totalité à la réservation une fois le prestataire de paiement connecté.  
+`Bilan Online KŌMØ — 49 €` — **30 minutes, 49 €**, rendez-vous **déjà public** et vérifié sur Acuity le 29 octobre 2026, associé au type **99940918** et au calendrier **14701138**. L'affichage du prix ne prouve pas que le paiement est obligatoirement encaissé : vérifier la configuration Stripe/PayPal dans l'administration. Lien direct exact : `https://app.acuityscheduling.com/schedule.php?owner=40696577&appointmentType=99940918`.  
 Description : « Votre bilan de mouvement à distance, par visioconférence avec un intervenant KŌMØ. Échange guidé, questionnaires et observations fonctionnelles simples, selon votre situation. Restitution claire et prochaines étapes. Ce bilan est non médical, sans examen instrumenté et sans diagnostic. »  
-Prévoir calendrier dédié et lien de visioconférence testé, consentement adapté, conditions d'annulation, paiement configuré et support technique. Ne pas publier tant que la réalisation du bilan et l'envoi des informations ne sont pas opérationnels.
+Prévoir calendrier dédié et lien de visioconférence testé, consentement adapté, conditions d'annulation, paiement configuré et support technique. Prestation déjà publiée dans Acuity : vérifier dès que possible la visioconférence, les prépaiements, la confirmation et le protocole du bilan avant de lui affecter une communication commerciale à grande échelle.
 
 **03 — EN PRÉSENTIEL / PARIS CENTRÉ**  
 Conserver les trois prestations publiques existantes sans changement de prix ni de créneaux avant validation :
@@ -58,7 +58,7 @@ Aucun résultat, question de santé ou donnée de dossier patient dans les e-mai
 
 ## Mise en conformité du parcours Acuity → Pulse : état technique
 
-- Le public Pulse V14 utilise la page Acuity `https://app.acuityscheduling.com/schedule.php?owner=40696577`.
+- Le public Pulse V14 utilise la page Acuity générale `https://app.acuityscheduling.com/schedule.php?owner=40696577` pour choisir une prestation, et le lien direct Bilan Online `https://app.acuityscheduling.com/schedule.php?owner=40696577&appointmentType=99940918` pour préselectionner le rendez-vous à 49 €. Les deux URL sont distinctes et volontairement conservées.
 - Les fonctions SQL `claim_my_komo_booking`, `reserve_komo_pulse_invitation`, `complete_komo_pulse_invitation` existent déjà et les deux dernières sont réservées au rôle serveur.
 - Au 29 octobre 2026, `komo_commercial_contacts` compte **0 entrée** (donc 0 rendez-vous Acuity vérifié, 0 compte Pulse lié, 0 invitation enregistrée). Cela **ne** signifie pas qu'il n'existe aucun rendez-vous dans Acuity ; cela prouve seulement qu'ils ne sont pas synchronisés vers cette table.
 - Aucune fonction Edge nommée webhook Acuity n'a été identifiée. Ne pas supposer qu'une confirmation Acuity signifie une invitation Pulse.
