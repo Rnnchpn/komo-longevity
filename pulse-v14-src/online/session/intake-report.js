@@ -37,7 +37,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  const chosen=focus.map(f=>esc(f.label)+' ('+f.value+'/100)').join(' · ');
  const sts=results.sts;
  const stsOk=Boolean(sts?.status==='done'&&Number.isInteger(sts.value)&&sts.value>=0);
- return '<section class="paper online-report">'+passportMarkup(answers,results,blocked)+
+ return '<section class="paper online-report'+(persisted?' online-report-paid':'')+'">'+passportMarkup(answers,results,blocked)+
  '<details class="report-method-details"><summary>Voir le détail des questionnaires et de leur calcul</summary>'+ '<span class="overline">SYNTHÈSE MOTION · QUESTIONNAIRE & OBSERVATIONS</span>'+ 
  '<h1>Votre profil en mouvement<em>.</em></h1>'+
  '<p>Cette restitution distingue vos <strong>réponses personnelles</strong> des mesures fonctionnelles. Les scores déclaratifs sont exploratoires et ne constituent pas des diagnostics.</p>'+
@@ -67,9 +67,10 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section>'+
  roadmapMarkup(answers,results,blocked)+
  dailyProgramMarkup(answers,results,blocked,program)+
- '<p class="notice">'+(persisted?'Les réponses et mesures chiffrées de votre bilan sont conservées dans votre dossier Pulse privé. Le PDF est créé et téléchargé localement : il n’est pas encore archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
- '<div class="pdf-download-box"><div><strong>Votre rapport Motion, en PDF</strong><p>Questionnaires, sous-scores, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est créé localement et reste sur votre appareil.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon rapport PDF</button></div>'+
- '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
+ (persisted?'<section class="online-consultation-handoff"><span class="overline">BILAN MOTION ONLINE · 49 €</span><h2>Votre échange final en visioconférence</h2><p>Votre première restitution est prête. Lors du rendez-vous, les performances observées, les limites techniques et vos deux axes prioritaires pourront être discutés avec l’opérateur. Retrouvez le lien de visioconférence dans votre confirmation Acuity.</p><p>Le Passeport PDF constitue un compte rendu fonctionnel initial, sans validation professionnelle automatique. Il ne remplace pas une consultation médicale.</p></section>':'')+
+ '<p class="notice">'+(persisted?'Les questionnaires et mesures chiffrées de cette réservation à 49 € sont conservés dans votre dossier Pulse privé. Vous pouvez retrouver et régénérer votre passeport depuis cette séance ; le fichier PDF lui-même n’est pas archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
+ '<div class="pdf-download-box"><div><strong>'+(persisted?'Mon Passeport Motion Online — 49 €':'Votre rapport Motion, en PDF')+'</strong><p>Questionnaires, quatre domaines, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est généré localement. Les résultats non vérifiés restent signalés.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon Passeport PDF</button></div>'+
+ '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button>'+(persisted?'':'<button type="button" class="action" id="restart">Recommencer la démonstration →</button>')+'</div><p id="report-message" class="message" role="status"></p></section>';
 }
 export function bindReport(root,answers,results,callbacks,blocked=false){
  bindDailyProgram(root,answers,results,blocked,callbacks.getProgram||(()=>null),callbacks.updateProgram||(()=>{}));
@@ -123,11 +124,12 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
   button.disabled=true;button.textContent='Création du PDF…';
   message.textContent='Préparation du rapport sur votre appareil…';
   try{
-   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{mode:callbacks.isPaid?'PILOTE':'DEMONSTRATION',program:callbacks.getProgram?.()});
+   if(callbacks.isPaid&&!(await callbacks.beforeDownload?.()))throw Error('secure_snapshot_not_saved');
+   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{mode:callbacks.isPaid?'ONLINE49':'DEMONSTRATION',program:callbacks.getProgram?.(),appointmentId:callbacks.appointmentId});
    const filename=await downloadMotionPdf(payload);
-   message.textContent='Rapport PDF prêt : '+filename+'. Il n’a pas été téléversé sur Pulse.';
+   message.textContent='Passeport PDF prêt : '+filename+'. Les mesures du bilan sont conservées dans Pulse, pas le PDF lui-même.';
   }catch(error){
-   message.textContent='La création du PDF a échoué. Vérifiez votre connexion au chargement initial du module, puis réessayez.';
+   message.textContent=String(error?.message)==='secure_snapshot_not_saved'?'Sauvegarde sécurisée incomplète : vos résultats doivent être enregistrés dans Pulse avant de générer le PDF. Vérifiez votre connexion.':'La création du PDF a échoué. Vérifiez votre connexion au chargement initial du module, puis réessayez.';
   }finally{button.disabled=false;button.textContent='↓ Télécharger mon rapport PDF';}
  };
  root.querySelector('#print-report').onclick=()=>window.print();
@@ -146,5 +148,5 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
   }
  };
  root.querySelector('#back').onclick=callbacks.back;
- root.querySelector('#restart').onclick=callbacks.restart;
+ root.querySelector('#restart')?.addEventListener('click',callbacks.restart);
 }
