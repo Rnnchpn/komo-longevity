@@ -276,6 +276,8 @@ const scripts = [
   'scripts/pulse-continuous-session-qa.mjs',
   // Online Acuity payment validation tests; all requests and identities are mocked.
   'scripts/pulse-online-payment-qa.mjs',
+  // Link Acuity payment to verified Pulse session, never by client-side redirect alone.
+  'scripts/pulse-paid-session-access-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
   'scripts/komo-offers-online-20261029.mjs',
   // Absolute final premium visual layer and regression checks. Business logic untouched.
