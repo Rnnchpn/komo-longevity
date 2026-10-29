@@ -150,10 +150,36 @@ async function openDossier(id){
  }
  root.querySelector('#back')?.addEventListener('click',()=>{root.innerHTML=listView();wireList()});
 }
+function loginView(){
+ root.innerHTML='<section class="operator-login"><div class="eyebrow">ACCÈS OPÉRATEUR · KŌMØ PULSE</div>'+
+ '<h1>Votre salle de restitution.</h1>'+
+ '<p>Connectez-vous avec votre compte administrateur Pulse pour ouvrir une consultation de démonstration. Aucune donnée patient réelle ne sera utilisée.</p>'+
+ '<form id="operator-login" class="operator-login-form"><label>Adresse e-mail<input type="email" autocomplete="email" name="email" placeholder="Votre e-mail Pulse" required></label>'+
+ '<label>Mot de passe<input type="password" autocomplete="current-password" name="password" placeholder="Votre mot de passe" required></label>'+
+ '<button class="btn demo-launch" type="submit">Se connecter et commencer la démonstration →</button>'+
+ '<span id="operator-login-feedback" role="status" class="feedback"></span></form>'+
+ '<a class="operator-login-foot" href="/#connexion">Revenir à la connexion Pulse</a></section>';
+ root.querySelector('#operator-login').onsubmit=async ev=>{
+  ev.preventDefault();
+  const form=ev.currentTarget;const button=form.querySelector('button[type=submit]');
+  if(button.disabled)return;
+  button.disabled=true;
+  const fd=new FormData(form),email=String(fd.get('email')||'').trim(),password=String(fd.get('password')||'');
+  try{
+   const result=await sb.auth.signInWithPassword({email,password});
+   if(result.error)throw Error('invalid_credentials');
+   await boot();
+  }catch{
+   const node=root.querySelector('#operator-login-feedback');
+   if(node)node.textContent='Connexion impossible. Vérifiez vos identifiants ou utilisez la connexion Pulse.';
+   button.disabled=false;
+  }
+ };
+}
 async function boot(){
  const auth=await sb.auth.getUser();
  const user=auth.data?.user;
- if(!user?.email_confirmed_at){root.innerHTML='<div class="loading"><h1>Connexion nécessaire.</h1><p>Connectez-vous à votre compte administrateur Pulse.</p><a class="btn solid" href="/#connexion">Se connecter à Pulse →</a></div>';return}
+ if(!user?.email_confirmed_at){loginView();return}
  const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();
  if(role.error||role.data?.role!=='admin'){
   root.innerHTML='<div class="loading"><h1>Accès réservé.</h1><p>Les restitutions Online sont accessibles uniquement aux administrateurs habilités.</p><a class="btn secondary" href="/">Retour à Pulse</a></div>';return}
