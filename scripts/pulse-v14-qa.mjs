@@ -84,7 +84,7 @@ const checks=[
  ['PDF download on final consultation',intakeReport.includes('id="download-pdf"')&&intakeReport.includes('downloadMotionPdf(payload)')],
  ['PDF includes all questionnaires and observations',pdfReport.includes('INTAKE_GROUPS.map')&&pdfReport.includes('OBSERVATIONS.map')&&pdfReport.includes('Detail des reponses')],
  ['PDF never fabricates Motion Score',pdfReport.includes('motionScore?.complete===true')&&pdfReport.includes('score:null')&&pdfReport.includes('NON CALCULABLE')],
- ['PDF generated in browser without submitting data',pdfReport.includes("import('https://esm.sh/jspdf@2.5.2')")&&pdfReport.includes('pdf.save(filename)')&&!/\bfetch\s*\(|XMLHttpRequest|navigator\.sendBeacon/.test(pdfReport)],
+ ['PDF generated in browser without submitting data',pdfReport.includes("import('https://esm.sh/jspdf@4.2.1')")&&pdfReport.includes('pdf.save(filename)')&&!/\bfetch\s*\(|XMLHttpRequest|navigator\.sendBeacon/.test(pdfReport)],
  ['PDF formatter and logic syntactically valid',nodeSyntax('pdf-report.js')],
 
  ['intake layout mobile',sessionCss.includes('.intake-choices')&&sessionCss.includes('.intake-domain-grid')&&sessionCss.includes('.motion-score-locked')],
