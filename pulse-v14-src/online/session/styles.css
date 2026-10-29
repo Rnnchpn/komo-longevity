@@ -215,3 +215,79 @@ h1,h2,p{margin-top:0}h1{font:400 clamp(42px,5vw,72px)/.99 "Instrument Serif",Geo
  .posture-data{grid-template-columns:1fr 1fr}
  .profile-editor-actions{display:grid;grid-template-columns:1fr 1fr}
 }
+
+
+/* Motion Online V6 — self-completed questionnaires & honest score separation */
+.intake-paper{padding:clamp(24px,4.5vw,64px)}
+.intake-paper h1{font-size:clamp(40px,5.1vw,67px);margin:19px 0 14px}
+.intake-subtitle{color:#708273;font-size:13px;line-height:1.8}
+.intake-bar-top{display:flex;justify-content:space-between;align-items:center;gap:15px}
+.intake-completed{color:#617e68;font-size:12px;font-weight:700}
+.intake-track,.intake-result-track{height:6px;width:100%;background:#e3eadd;border-radius:20px;overflow:hidden}
+.intake-track{margin-top:13px}.intake-track span,.intake-result-track span{height:100%;display:block;background:#3f7553;border-radius:20px;transition:width .2s}
+.intake-group-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:25px 0}
+.intake-group-tabs>span{font-size:10px;padding:8px 10px;color:#819382;background:#f1f3ed;border-radius:9px}
+.intake-group-tabs>span.active{background:#274b34;color:#fff}
+.intake-group-tabs>span.done{background:#e4ede1;color:#3a6945}
+.intake-question-list{display:grid;gap:18px}
+.intake-question{padding:19px 22px;border:1px solid #e0e7dc;border-radius:16px;margin:0;background:#fcfdf9}
+.intake-question legend{float:left;width:100%;padding:0;margin:0 0 15px;font-weight:750;font-size:13px;color:#2e533a;line-height:1.5}
+.intake-question legend span{color:#bc9b6b;margin-right:7px}
+.intake-choices{clear:both;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.intake-option{cursor:pointer;position:relative}
+.intake-option input{position:absolute;opacity:0;pointer-events:none}
+.intake-option span{display:flex;align-items:center;justify-content:center;padding:11px 9px;min-height:45px;border:1px solid #d9e1d5;border-radius:10px;text-align:center;background:white;color:#5b715f;font-size:11px;line-height:1.45;font-weight:600;transition:background .15s,border .15s}
+.intake-option input:checked+span{background:#274e37;border-color:#274e37;color:#fff}
+.intake-option input:focus-visible+span{outline:3px solid #c5a975;outline-offset:3px}
+.intake-disclaimer{font-size:11px;color:#859585;margin-top:19px;line-height:1.8}
+.intake-bottom{display:flex;justify-content:space-between;gap:12px;margin-top:30px}
+.intake-bottom .action{min-width:145px}
+.online-report>p{line-height:1.75}
+.report-hero{display:grid;grid-template-columns:190px 1fr;gap:35px;align-items:center;background:#193e29;color:#f0f0e6;padding:28px 30px;border-radius:20px;margin:25px 0}
+.report-hero>div{display:flex;flex-direction:column;gap:4px}
+.report-hero>div span{font-size:10px;color:#d8c796;letter-spacing:.09em}
+.report-hero>div strong{font:400 83px/1 "Instrument Serif",Georgia,serif}
+.report-hero>div small{font-size:10px;color:#c6d7c7}
+.report-hero>p{color:#c9d8cc;line-height:1.8;font-size:12px;max-width:610px;margin:0}
+.report-hero>p strong{color:#f5e2b8}
+.intake-domain-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.intake-result-card{border:1px solid #dce5d8;padding:18px 20px;border-radius:15px;background:#f9fbf7}
+.intake-result-card>div:first-child{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:14px}
+.intake-result-card span{font-size:11px;color:#5b7562}
+.intake-result-card strong{font-size:15px;color:#2b5137}
+.intake-result-card small{display:block;margin-top:11px;color:#859587;font-size:10px}
+.report-context{border-left:3px solid #bca073;background:#f9f5eb;padding:15px;margin:20px 0;border-radius:0 8px 8px 0;font-size:11px;color:#74725f}
+.report-section-title{font:400 35px "Instrument Serif",Georgia,serif;margin:37px 0 16px}
+.motion-score-zone{margin-top:30px;padding:27px;border-radius:20px;background:#f0f3ec;border:1px solid #d8e3d4}
+.motion-score-heading h2{font:400 40px "Instrument Serif",Georgia,serif;margin:9px 0 8px}
+.motion-score-heading p{font-size:12px;line-height:1.7;color:#607a66}
+.motion-score-locked{display:flex;gap:15px;align-items:center;background:#fffcf7;border:1px solid #dfe4d9;border-radius:16px;padding:21px;margin:22px 0}
+#score-status-icon{width:39px;height:39px;border-radius:50%;display:grid;place-items:center;flex:none;border:1px solid #c6d4bc;color:#66816a;font-size:23px}
+.motion-score-locked>div:nth-child(2){flex:1;min-width:0}
+.motion-score-locked>div:nth-child(2)>strong{font-size:13px;color:#2c553a}
+.motion-score-locked>div:nth-child(2)>p{font-size:11px;color:#7b8a7b;line-height:1.6;margin:7px 0 0}
+.motion-score-value{display:flex;align-items:baseline;gap:3px;flex:none}
+.motion-score-value strong{font:400 65px "Instrument Serif",Georgia,serif;color:#30563a}
+.motion-score-value span{font-size:11px;color:#8b978a}
+.motion-operator-details{background:#fff;padding:17px 20px;border-radius:13px;border:1px solid #dee5d9}
+.motion-operator-details summary{cursor:pointer;font-weight:700;color:#345b41;font-size:12px}
+.motion-operator-details>p{font-size:11px;color:#7b8e7e;line-height:1.7}
+.motion-input-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:20px 0}
+.motion-score-field{display:flex;flex-direction:column;gap:7px;font-size:11px;color:#536f57;line-height:1.5}
+.motion-score-field input{border:1px solid #ccd9ca;border-radius:9px;padding:12px 14px;min-height:43px;background:#fff;color:#21442d;font:inherit;max-width:100%}
+.motion-score-field input:focus-visible{outline:2px solid #bc9c6d}
+.motion-check{display:flex;align-items:flex-start;gap:11px;font-size:11px;color:#647b68;line-height:1.55;margin:15px 0}
+.motion-check input{width:17px;height:17px;flex:none;accent-color:#346c48}
+.motion-operator-details>.action{margin-top:12px}
+.motion-score-disclaimer{font-size:10px;color:#819184;line-height:1.7;margin-top:16px}
+@media(max-width:700px){
+ .intake-paper{padding:20px 16px}.intake-question{padding:17px 13px}
+ .intake-choices{grid-template-columns:1fr 1fr}
+ .intake-option span{min-height:51px}
+ .intake-bottom{flex-direction:column-reverse}.intake-bottom .action{width:100%}
+ .report-hero{grid-template-columns:1fr;gap:15px}
+ .intake-domain-grid{grid-template-columns:1fr}
+ .motion-score-locked{flex-wrap:wrap}
+ .motion-input-grid{grid-template-columns:1fr}
+ .motion-score-value strong{font-size:56px}
+}
