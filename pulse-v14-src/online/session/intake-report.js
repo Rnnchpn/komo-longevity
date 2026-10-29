@@ -3,6 +3,7 @@ import {calculateMotionScore,MOTION_ALGORITHM_VERSION} from './motion-score.mjs'
 import {buildPdfReportData,downloadMotionPdf} from './pdf-report.js';
 import {normPanelMarkup,bindNormPanel} from './normative-panel.js';
 import {passportMarkup,roadmapMarkup,dailyProgramMarkup,bindDailyProgram} from './passport-view.js';
+import {restitutionMarkup} from './restitution.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=(root,id)=>{const v=root.querySelector('#'+id)?.value?.trim();return v===''||v===undefined?null:Number(v);};
 function domainCards(scored){
@@ -31,17 +32,17 @@ function measurementRows(results){
 function measureInput(id,label,placeholder,step='any',initial=null){
  return '<label class="motion-score-field"><span>'+esc(label)+'</span><input type="number" id="'+esc(id)+'" min="0" step="'+step+'" placeholder="'+esc(placeholder)+'"'+(initial===null?'':' value="'+Number(initial)+'"')+' inputmode="decimal"></label>';
 }
-export function reportMarkup(answers,results,blocked,persisted=false,program=null){
+export function reportMarkup(answers,results,blocked,persisted=false,program=null,restitution=null){
  const intake=scoreIntake(answers),p=intakeProgress(answers);
  const focus=questionnaireFocus(answers);
  const chosen=focus.map(f=>esc(f.label)+' ('+f.value+'/100)').join(' · ');
  const sts=results.sts;
  const stsOk=Boolean(sts?.status==='done'&&Number.isInteger(sts.value)&&sts.value>=0);
- return '<section class="paper online-report">'+passportMarkup(answers,results,blocked)+
+ return '<section class="paper online-report">'+passportMarkup(answers,results,blocked)+(persisted?restitutionMarkup({...restitution,compact:false}):'')+
  '<div class="report-reading-guide"><span>COMMENT LIRE CE PASSEPORT</span><h2>Un point de départ, pas une prédiction.</h2>'+
  '<p>Votre indice décrit ce que vous avez déclaré sur votre mobilité. Les tests webcam constituent des observations complémentaires. Pulse vous aide ensuite à choisir deux priorités et à mesurer votre évolution.</p>'+
  '<nav class="report-quick-actions" aria-label="Actions après votre bilan"><button class="action" type="button" id="download-pdf-top">Télécharger mon passeport PDF ↓</button>'+
- '<a class="action secondary" href="https://pulse.komolongevity.com/#passport">Retrouver mon bilan dans Pulse →</a></nav></div>'+
+ '<a class="action secondary" href="/#passport">Retrouver mon bilan dans Pulse →</a></nav></div>'+
  '<details class="report-method-details"><summary>Voir le détail des questionnaires et de leur calcul</summary>'+ '<span class="overline">SYNTHÈSE MOTION · QUESTIONNAIRE & OBSERVATIONS</span>'+ 
  '<h1>Votre profil en mouvement<em>.</em></h1>'+
  '<p>Cette restitution distingue vos <strong>réponses personnelles</strong> des mesures fonctionnelles. Les scores déclaratifs sont exploratoires et ne constituent pas des diagnostics.</p>'+
