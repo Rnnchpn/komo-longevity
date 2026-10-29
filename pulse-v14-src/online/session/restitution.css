@@ -18,3 +18,5 @@
 .restitution-flow .rest-link{display:inline-flex;font-size:12px;font-weight:700;text-decoration:underline;text-underline-offset:4px;color:#2c516f;min-height:38px;align-items:center}
 @media(max-width:680px){.restitution-flow{margin:14px 0 22px;padding:18px;border-radius:17px}.restitution-flow .rest-steps{grid-template-columns:1fr}.restitution-flow .rest-steps>div{padding:14px}.restitution-flow.compact{padding:18px}.restitution-flow .rest-title h2{font-size:28px}}
 @media(prefers-reduced-motion:reduce){.restitution-flow *{animation:none!important;transition:none!important}}
+
+.restitution-flow .rest-join{display:inline-flex;align-items:center;justify-content:center;min-height:42px;background:#344e65;color:#fff;border-radius:11px;padding:11px 16px;font-size:12px;font-weight:750;text-decoration:none;margin-right:12px;margin-bottom:7px}.restitution-flow .rest-action{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
