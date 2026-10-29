@@ -1,6 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import { motionMarkup } from './motion-view.js';
 import { mountMotionController } from './motion-controller.js';
+import { INTAKE_GROUPS } from './intake-model.mjs';
+import { intakeMarkup,bindIntake } from './intake-view.js';
+import { reportMarkup,bindReport } from './intake-report.js';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
@@ -15,7 +18,7 @@ const TESTS = [
   {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Mouvements des bras · 20 secondes',seconds:20,unit:'mouvements',instruction:'Placez-vous face à la caméra avec épaules et poignets visibles. Levez puis redescendez les deux bras sans forcer.'},
   {id:'posture',name:'Profil sagittal · photo automatique',detail:'Photo de profil après stabilité · surface 2D',seconds:0,unit:'indice',instruction:'Placez la caméra bien droite à hauteur du bassin, de profil à 90°, avec tête et pieds visibles. Restez immobile environ 3 secondes : la photo se déclenche automatiquement.'}
 ];
-const state = {page:0,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
+const state = {page:0,questionStep:0,returnToSummary:false,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const q = selector=>root.querySelector(selector);
 let currentMotionCleanup=null;
@@ -47,7 +50,7 @@ function wrap(body){
 function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
   wrap('<div class="intro"><div><span class="overline">VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
-  '<p>Bienvenue dans votre expérience KŌMØ Motion Online. Vous allez parcourir le questionnaire, les contrôles de sécurité et les tests guidés, exactement dans l’ordre prévu pour un futur client.</p>'+
+  '<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
   '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>07</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
   btn('go','Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
   '<p class="notice">Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.</p>');
@@ -57,19 +60,18 @@ function choice(key,title,items){
   return '<fieldset class="question"><legend>'+title+'</legend><div class="choices">'+items.map(x=>'<label><input name="'+key+'" value="'+x[0]+'" type="radio" '+(state.answers[key]===x[0]?'checked':'')+'><span>'+x[1]+'</span></label>').join('')+'</div></fieldset>';
 }
 function questionnaire(){
-  wrap('<div class="paper"><span class="overline">01 / QUESTIONNAIRE</span><h1>Avant de bouger,<br><em>parlons de vous.</em></h1>'+
-  '<p>Quatre questions pour préparer le bilan. Saisissez des réponses fictives dans cet environnement test ; aucune donnée n’est conservée.</p>'+
-  choice('goal','Votre objectif principal ?', [['independence','Préserver mon autonomie'],['walk','Marcher avec aisance'],['strength','Entretenir ma force'],['understand','Comprendre ma mobilité']])+
-  choice('chair','Vous relever d’une chaise semble…',[['easy','Facile'],['medium','Un peu difficile'],['hard','Très difficile']])+
-  choice('stairs','Monter un étage semble…',[['easy','Facile'],['medium','Un peu difficile'],['hard','Très difficile']])+
-  choice('activity','Votre activité physique habituelle ?', [['low','Rarement'],['medium','1 à 3 jours par semaine'],['high','4 jours ou plus par semaine']])+
-  '<div class="actions">'+btn('back','← Retour',true)+btn('go','Vérifier ma sécurité →')+'</div><p class="message" id="message" role="status"></p></div>');
-  ['goal','chair','stairs','activity'].forEach(key=>q('fieldset input[name="'+key+'"]')&&root.querySelectorAll('input[name="'+key+'"]').forEach(el=>el.onchange=()=>{state.answers[key]=el.value}));
-  q('#back').onclick=previous;
-  q('#go').onclick=()=>{
-    if(!['goal','chair','stairs','activity'].every(k=>state.answers[k]))return feedback('Répondez aux quatre questions pour poursuivre.');
-    next();
-  };
+ wrap(intakeMarkup(state.answers,state.questionStep));
+ bindIntake(root,state.answers,state.questionStep,{
+  next(){
+   if(state.questionStep<INTAKE_GROUPS.length-1){state.questionStep++;render();return;}
+   if(state.returnToSummary){state.returnToSummary=false;state.page=4;render();return;}
+   next();
+  },
+  back(){
+   if(state.questionStep>0){state.questionStep--;render();}
+   else {state.returnToSummary=false;previous();}
+  }
+ });
 }
 function safety(){
   const issue=state.answers.safety==='yes';
@@ -108,19 +110,16 @@ function test(){
  });
 }
 function summary(){
- const blocked=state.answers.safety==='yes';
- const rows=TESTS.map(t=>{
-  const r=state.results[t.id];
-  let result='Non réalisé';
-  if(r?.status==='done'||r?.status==='review')result=t.id==='posture'?(r.posture?.valid?'Écart sagittal de surface '+r.posture.surfaceIndexPct+' % (photo 2D, pas SVA)':'Photo non exploitable · à refaire'):r.value+' '+t.unit+' ('+(r.source||'webcam')+(r.status==='review'?', à vérifier':'')+')';
-  return '<div><span>'+esc(t.name)+'</span><strong>'+esc(result)+'</strong></div>';
- }).join('');
- wrap('<div class="paper"><span class="overline">04 / SYNTHÈSE DE DÉMONSTRATION</span><h1>Votre mouvement,<br><em>plus lisible.</em></h1>'+
- (blocked?'<div class="notice danger"><b>Tests suspendus pour raisons de sécurité.</b> Cette démonstration ne fournit pas d’avis médical.</div>':'<p>Voici les observations que l’opérateur pourrait retrouver en fin de séance. Les compteurs et l’observation posturale sont expérimentaux et ne constituent ni mesures cliniques validées, ni diagnostics.</p>')+
- '<div class="result-list">'+rows+'</div><p class="notice">Aucune réponse ni vidéo n’a été enregistrée. Les nombres issus de la détection webcam sont exploratoires et restent uniquement dans cette page. Ils disparaissent lorsque vous la quittez ; ils ne sont pas enregistrés dans un dossier patient.</p>'+
- '<div class="actions">'+btn('back','← Revenir aux tests',true)+btn('restart','Recommencer la démonstration →')+'</div></div>');
- q('#back').onclick=()=>{state.task=0;state.page=blocked?2:3;render()};
- q('#restart').onclick=()=>{stopTimer();stopCamera();state.page=0;state.task=0;state.answers={};state.checks.clear();state.results={};state.remaining=0;render()};
+ wrap(reportMarkup(state.answers,state.results,state.answers.safety==='yes'));
+ bindReport(root,state.answers,state.results,{
+  back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
+  restart(){
+   stopTimer();stopCamera();
+   state.page=0;state.questionStep=0;state.returnToSummary=false;
+   state.task=0;state.answers={};state.checks.clear();state.results={};state.remaining=0;
+   render();
+  }
+ });
 }
 function render(){
  stopTimer();stopCamera();
