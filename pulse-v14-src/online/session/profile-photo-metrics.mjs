@@ -32,7 +32,7 @@ export function createSideProfileStability(requiredMs=2300){
    const f=sideProfileFrame(points);
    if(!f.valid||!Number.isFinite(time)){since=null;last=null;frames=0;return {...f,stableMs:0,ready:false};}
    const pos=[f.shoulder.x,f.shoulder.y,f.hip.x,f.hip.y];
-   const moved=last&&pos.some((v,i)=>Math.abs(last[i]-v)>.007);
+   const moved=last&&pos.some((v,i)=>Math.abs(last[i]-v)>.014);
    if(since===null||moved){since=time;frames=0;}
    last=pos;frames++;
    const stableMs=Math.max(0,time-since);
