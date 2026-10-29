@@ -25,7 +25,7 @@ assert.equal(doc.questionnaire.domains.length,4);
 assert.equal(doc.motion.complete,true);
 assert.equal(doc.motion.score,62);
 assert.equal(doc.motion.source,motion.source);
-assert.equal(doc.observations.length,7);
+assert.equal(doc.observations.length,6);
 assert.ok(doc.observations.find(x=>x.id==='posture').commentary.includes('SVA'));
 assert.equal(doc.observations.find(x=>x.id==='unipodal_left').status,'review');
 assert.ok(doc.limitations.some(x=>x.includes('C7-S1')));

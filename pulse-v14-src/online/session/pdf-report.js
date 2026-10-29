@@ -1,11 +1,11 @@
 import {INTAKE_GROUPS,SCORING_GROUPS,scoreIntake,intakeProgress,questionnaireFocus} from './intake-model.mjs';
 import {MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
+import {normativeSummary} from './reference-norms.mjs';
 
 export const PDF_REPORT_VERSION='KOMO_MOTION_REPORT_V1';
 const OBSERVATIONS=[
  ['sts','Lever de chaise - 30 s','repetitions',0],
  ['heels','Elevation des talons','repetitions',0],
- ['balance','Station debout - visibilite','s',0],
  ['unipodal_left','Unipodal gauche','s',1],
  ['unipodal_right','Unipodal droit','s',1],
  ['arms','Elevation des bras','repetitions',0],
@@ -57,7 +57,7 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
    answered:progress.completed,total:progress.total,domains:SCORING_GROUPS.map(g=>({
     id:g.id,label:g.title,score:p.domains[g.id]??null,weight:g.weight
    })),focus:questionnaireFocus(answers),groups},
-  observations,motion,blocked:Boolean(blocked),
+  observations,motion,ageReference:normativeSummary(answers,results,results.sts?.normative??{}),blocked:Boolean(blocked),
   limitations:[
    'Bilan fonctionnel non medical - cette demonstration ne constitue pas un diagnostic.',
    'Les questionnaires sont propres a KOMO et ne sont pas des instruments cliniquement valides.',
@@ -183,11 +183,22 @@ export async function downloadMotionPdf(data){
   const quality=item.status==='review'?'Mesure a verifier':'';
   row(item.label,item.display,quality||item.commentary||null);
  }
- title('4. Methode et limites');
+ title('4. Comparaison par age (si applicable)');
+ const reference=data.ageReference?.sts;
+ if(reference?.reference){
+  line('Sit-to-Stand 30 s : plage centrale '+reference.reference.lower+' - '+reference.reference.upper+
+   ' repetitions (age '+reference.reference.age+' ans).',{size:8.5});
+  line(reference.comparison||reference.reason,{size:8.5,color:muted});
+ }else line('Sit-to-Stand : norme non applicable (tranche d age, protocole ou groupe de reference manquant).',{size:8.5});
+ const one=data.ageReference?.unipodal?.[0];
+ if(one?.expected!==null&&one?.expected!==undefined)
+  line('Unipodal : moyenne de reference '+one.expected+' s (meilleur de 3 essais jusqu a 45 s). Mesure non comparable au test webcam de 20 s.',{size:8.3,color:muted});
+ line('Sources : sralab.org/rehabilitation-measures (Rikli et Jones 1999 ; Springer et al. 2007).',{size:8.1,color:muted});
+ title('5. Methode et limites');
  for(const phrase of data.limitations)line('- '+phrase,{size:8.3,color:muted,leading:4.8});
  line('Versions : '+data.version+' / '+data.motion.version,{size:7.3,color:muted});
  // Include the full original patient responses, with automatic pagination.
- nextPage();title('5. Detail des reponses');
+ nextPage();title('6. Detail des reponses');
  line('Appendice - questionnaire original KOMO rempli par le participant.',{size:8.4,color:muted});
  for(const group of data.questionnaire.groups){
   subheading(group.name);

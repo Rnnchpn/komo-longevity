@@ -1,6 +1,7 @@
 import {scoreIntake,questionnaireFocus,SCORING_GROUPS,QUESTIONNAIRE_VERSION,intakeProgress} from './intake-model.mjs';
 import {calculateMotionScore,MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
 import {buildPdfReportData,downloadMotionPdf} from './pdf-report.js';
+import {normPanelMarkup,bindNormPanel} from './normative-panel.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=(root,id)=>{const v=root.querySelector('#'+id)?.value?.trim();return v===''||v===undefined?null:Number(v);};
 function domainCards(scored){
@@ -14,7 +15,6 @@ function measurementRows(results){
  const labels=[
   ['sts','Se relever de la chaise · 30 s','répétitions'],
   ['heels','Élévations des talons','répétitions'],
-  ['balance','Visibilité debout','secondes'],
   ['unipodal_left','Unipodal gauche','secondes'],
   ['unipodal_right','Unipodal droit','secondes'],
   ['arms','Mouvements des bras','répétitions'],
@@ -44,7 +44,7 @@ export function reportMarkup(answers,results,blocked){
  '<p>'+(intake.complete?'Indice calculé à partir de vos réponses uniquement, avec quatre domaines pondérés. <strong>Il ne s’agit pas du Motion Score.</strong>':'Questionnaire incomplet : '+(p.total-p.completed)+' réponse(s) manquante(s).')+'</p></div>'+
  '<div class="intake-domain-grid">'+domainCards(intake)+'</div>'+
  (intake.complete?'<p class="report-context"><strong>Domaines à discuter en priorité :</strong> '+(chosen||'Aucune priorité différenciée')+'. Ils reflètent votre perception et ne traduisent pas à eux seuls une limitation objective.</p>':'')+
- '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+
+ '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
  '<section class="motion-score-zone"><div class="motion-score-heading"><span class="overline">MOTION SCORE · ALGORITHME DE RÉFÉRENCE</span><h2>Le score fonctionnel final</h2><p>Formule définie pour KŌMØ : <strong>40 % Sit-to-Stand · 35 % TUG 3 m · 25 % équilibre SPPB.</strong> Les questionnaires, la posture et l’unipodal ne modifient pas cette formule.</p></div>'+
  '<div class="motion-score-locked"><span id="score-status-icon">○</span><div><strong id="score-status">Motion Score indisponible : mesures complémentaires requises</strong><p id="score-hint">Le TUG standardisé et l’équilibre SPPB n’ont pas été mesurés automatiquement par la webcam. Aucune norme statistique n’a été inventée.</p></div><div class="motion-score-value"><strong id="motion-score-number">—</strong><span>/ 100</span></div></div>'+
  '<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
@@ -68,6 +68,7 @@ export function reportMarkup(answers,results,blocked){
  '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
 }
 export function bindReport(root,answers,results,callbacks,blocked=false){
+ bindNormPanel(root,answers,results,()=>callbacks.checkpoint?.());
  const stsRecord=results.sts;
  let computed=null;
  // Prevent a stale, previously computed score after changing a reference or input.

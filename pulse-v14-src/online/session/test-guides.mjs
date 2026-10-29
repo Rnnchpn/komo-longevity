@@ -4,7 +4,7 @@ export const TEST_GUIDES={
   purpose:"Observer votre capacité à vous relever puis à vous rasseoir pendant 30 secondes, à votre rythme.",
   setup:"Chaise solide contre un mur, pieds à plat au sol, caméra fixe de trois-quarts profil : tête, bassin, genoux et pieds visibles.",
   steps:[
-   "Asseyez-vous normalement, pieds posés au sol. Gardez un appui si vous en avez besoin.",
+   "Asseyez-vous pieds à plat, bras croisés si cela vous est possible. Une aide des mains reste possible pour la sécurité, mais empêche une comparaison normative standard.",
    "Quand la silhouette est détectée, dites « C’est parti ». Restez assis pendant le début du décompte.",
    "Relevez-vous, puis rasseyez-vous. Répétez à votre rythme pendant 30 secondes. Arrêtez si une gêne survient."
   ],
@@ -22,27 +22,16 @@ export const TEST_GUIDES={
   measured:"Le logiciel repère un déplacement vertical apparent du bassin, pas la force des mollets. Ce compteur expérimental peut être erroné.",
   audio:"Test sur la pointe des pieds. Mettez-vous debout, de profil, près d'un support stable. Vérifiez que vos pieds et votre bassin sont visibles. Dites c'est parti, puis montez doucement sur les pointes de pieds et redescendez pendant vingt secondes. Restez près de l'appui et arrêtez si vous ne vous sentez pas stable."
  },
- balance:{
-  purpose:"Vérifier simplement si votre silhouette reste visible pendant 10 secondes en position debout sécurisée.",
-  setup:"Debout, yeux ouverts, près d'un support solide. Ne prenez pas de position difficile ni d'appui précaire.",
-  steps:[
-   "Placez-vous debout près d'un support, yeux ouverts, pieds dans une position confortable.",
-   "Dites « C’est parti » après avoir vérifié la visibilité du corps.",
-   "Restez dans une position confortable pendant 10 secondes. Vous pouvez vous appuyer à tout moment."
-  ],
-  measured:"La webcam calcule la durée où elle voit votre corps : elle ne mesure ni les oscillations posturales ni un risque de chute.",
-  audio:"Test de visibilité en position debout. Placez-vous près d'un support stable, les yeux ouverts. Gardez une position confortable, sans chercher à vous mettre en difficulté. Dites c'est parti et restez visible pendant dix secondes. Ce test ne mesure pas votre équilibre de manière médicale."
- },
  posture:{
   purpose:"Documenter en photographie la position sagittale apparente du cou et du bassin, sans prétendre mesurer la SVA radiographique.",
-  setup:"Téléphone ou ordinateur fixe, caméra horizontale à hauteur du bassin, exactement de profil (90°). Placez-vous assez loin pour voir épaules, bassin, genoux et pieds.",
+  setup:"Téléphone ou ordinateur posé et immobile, à hauteur du bassin. Placez-vous de profil (90°), à distance suffisante pour montrer les pieds.",
   steps:[
    "Tenez-vous naturellement de profil, sans chercher à vous redresser ni à corriger votre posture.",
-   "Activez la caméra : lorsque la silhouette est bien cadrée et immobile pendant environ trois secondes, la photo est prise automatiquement.",
-   "Regardez la photo et, si nécessaire, ajustez les deux repères de surface en touchant l’image. Vous pouvez reprendre la photo."
+   "Placez-vous et restez tranquille : dès que le profil est reconnu, Pulse prononce « 3, 2, 1, Top ! » et prend la photo automatiquement.",
+   "La photo s’affiche aussitôt. Vous pouvez continuer directement ou ouvrir « Modifier les repères » si nécessaire."
   ],
   measured:"Un indice photographique en pourcentage : distance horizontale apparente entre un repère cervico-thoracique superficiel et un repère pelvien superficiel, divisée par la hauteur apparente épaule–cheville. Ni C7 ni S1 ne sont détectés par la webcam : ce n'est pas une SVA en millimètres et cela ne permet pas de diagnostiquer une scoliose.",
-  audio:"Photo de profil. Placez la caméra immobile à hauteur du bassin et tenez-vous de profil, avec tout le corps visible. Ne cherchez pas à vous redresser. Restez immobile : la photographie se déclenche automatiquement après environ trois secondes de stabilité. Ensuite, vous pourrez ajuster les repères sur l’image. Cette image ne mesure pas la S V A radiographique."
+  audio:"Photo de profil. Tournez-vous de profil à la caméra, avec vos pieds dans le cadre. Restez naturellement immobile. Quand votre position sera correcte, le décompte trois, deux, un, Top démarrera automatiquement. La photo sera prise sans toucher à l’ordinateur. Ce n’est pas une S V A radiographique."
  },
  unipodal_left:{
   purpose:"Observer la durée visible de maintien sur le pied gauche, jusqu’à vingt secondes, sans chercher une performance maximale.",
