@@ -4,7 +4,7 @@
 import {buildMotionPassport,programProgress,priorityNarrative} from './online/session/motion-passport.mjs';
 import {buildPdfReportData,downloadMotionPdf} from './online/session/pdf-report.js';
 
-const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','"':'&quot;'}[c]));
+const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const numeric=v=>typeof v==='number'&&Number.isFinite(v);
 const fmt=v=>numeric(v)?new Intl.NumberFormat('fr-FR',{maximumFractionDigits:1}).format(v):'—';
 const date=v=>{const d=new Date(v);return Number.isNaN(d.getTime())?'Date à confirmer':new Intl.DateTimeFormat('fr-FR',{day:'numeric',month:'long',year:'numeric'}).format(d)};
