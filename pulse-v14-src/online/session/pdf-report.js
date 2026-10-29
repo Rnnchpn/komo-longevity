@@ -73,7 +73,7 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
 // never passed any user data in a URL or request body.
 export async function downloadMotionPdf(data){
  if(!data||data.version!==PDF_REPORT_VERSION)throw new Error('invalid_report');
- const {jsPDF}=await import('https://esm.sh/jspdf@2.5.2');
+ const {jsPDF}=await import('https://esm.sh/jspdf@4.2.1');
  if(typeof jsPDF!=='function')throw new Error('pdf_engine_unavailable');
  const pdf=new jsPDF({format:'a4',unit:'mm',compress:true});
  const W=210,H=297,M=18,RIGHT=W-M,CONTENT=W-2*M;
