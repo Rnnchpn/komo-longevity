@@ -267,7 +267,7 @@ U.forEach((u,i)=>{
 const a=(-90+i*40)*Math.PI/180,x=50+39*Math.cos(a),y=50+39*Math.sin(a);
 const l=document.createElementNS('http://www.w3.org/2000/svg','line');l.setAttribute('x1','50');l.setAttribute('y1','50');l.setAttribute('x2',x.toFixed(2));l.setAttribute('y2',y.toFixed(2));svg.appendChild(l);
 const b=document.createElement('button');b.type='button';b.className='orbit-node';b.style.left=x+'%';b.style.top=y+'%';b.dataset.index=String(i);b.setAttribute('aria-label','Explore '+u.full);
-const ico=document.createElement('span');ico.className='node-icon';ico.textContent=u.icon;const label=document.createElement('span');label.className='node-name';label.textContent=u.name;b.append(ico,label);orbit.appendChild(b);
+const ico=document.createElement('span');ico.className='node-icon';ico.textContent=u.icon;const label=document.createElement('span');label.className='node-name';label.textContent=u.name==='Cosmetic & Supplements'?'Cosmetic':u.name;b.append(ico,label);orbit.appendChild(b);
 b.addEventListener('click',()=>select(i,true));
 });
 function select(i,scroll){
