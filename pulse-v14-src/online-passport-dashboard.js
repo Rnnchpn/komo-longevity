@@ -72,10 +72,14 @@ function diary(p,s){
  '<p class="pp-small">Les exercices restent des suggestions générales de mouvement. En cas de gêne importante ou de signal de sécurité, demandez un avis adapté avant de commencer.</p></section>';
 }
 function choices(p){
+ const autonomous=p.planStatus==='eligible';
  return '<div class="pp-choice-grid"><article><span>01 / COMPLÉTER</span><h3>Un bilan Motion plus approfondi</h3><p>Des mesures instrumentées de force, de mobilité et de marche peuvent compléter les observations à distance à Paris ou Cannes.</p>'+
  '<a href="https://app.acuityscheduling.com/schedule.php?owner=40696577" target="_blank" rel="noopener noreferrer">Voir les rendez-vous disponibles →</a></article>'+
- '<article><span>02 / PROGRESSER</span><h3>Pulse Daily</h3><p>Reprenez votre programme de mouvement et votre journal quotidien depuis votre séance Online, lorsque votre accès est toujours autorisé.</p>'+
- '<a href="/online/session/">Accéder à mon bilan Online →</a></article></div>';
+ '<article><span>02 / '+(autonomous?'PROGRESSER':'SE FAIRE ACCOMPAGNER')+'</span><h3>'+(autonomous?'Pulse Daily':'Adapter la suite en sécurité')+'</h3>'+
+ '<p>'+(autonomous?'Reprenez votre programme de mouvement et votre journal quotidien depuis votre séance Online, lorsque votre accès est toujours autorisé.':
+ 'En cas de gêne, de risque de chute ou de séance interrompue, ne commencez pas un programme autonome sans un échange individualisé.')+'</p>'+
+ (autonomous?'<a href="/online/session/">Accéder à mon bilan Online →</a>':
+ '<a href="https://app.acuityscheduling.com/schedule.php?owner=40696577" target="_blank" rel="noopener noreferrer">Demander un accompagnement →</a>')+'</article></div>';
 }
 function history(reports,selected){
  if(reports.length<2)return '';
