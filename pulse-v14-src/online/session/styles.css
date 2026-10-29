@@ -84,3 +84,59 @@ h1,h2,p{margin-top:0}h1{font:400 clamp(42px,5vw,72px)/.99 "Instrument Serif",Geo
 .pose-consent label{display:flex;align-items:flex-start;gap:12px;font-size:11px;line-height:1.75;cursor:pointer}
 .pose-consent input{margin-top:3px;width:18px;height:18px;flex:none;accent-color:#c3a975}
 .pose-consent input:focus-visible{outline:3px solid #ddbd80;outline-offset:4px}
+
+
+/* Motion Online V3 — clear test teaching and hands-free voice */
+.test-guide{padding:clamp(21px,2.4vw,32px);margin:18px 0 20px;background:#f3f5ed;border:1px solid #dce6d9;border-radius:22px;color:#294534}
+.test-guide-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:18px}
+.test-guide-heading h2{font:400 clamp(24px,2.6vw,36px)/1.06 "Instrument Serif",Georgia,serif;letter-spacing:-.025em;margin:9px 0 0;color:#254833}
+.test-guide-heading h2 em{color:#ae9068}
+.guide-audio-btn{flex:none;border:1px solid #b9c9b4;background:#fffefa;color:#294f37;padding:13px 19px;border-radius:11px;font-size:12px;font-weight:750;min-height:45px}
+.guide-audio-btn:hover,.guide-audio-btn:focus-visible{background:#e7eee3;border-color:#90ab8b;outline-offset:4px}
+.guide-columns{display:grid;grid-template-columns:minmax(0,.93fr) minmax(0,1.3fr);gap:clamp(20px,4vw,48px)}
+.guide-highlight{background:#fffdf9;border:1px solid #e4e7dc;padding:19px 21px;border-radius:14px}
+.guide-highlight strong{font-size:12px;color:#30573e}
+.guide-highlight p{font-size:12px;line-height:1.75;color:#647869;margin:7px 0 17px}
+.guide-highlight p:last-child{margin-bottom:0}
+.guide-steps{list-style:none;padding:0;margin:0;display:grid;gap:10px}
+.guide-steps li{display:flex;align-items:flex-start;gap:12px;line-height:1.6}
+.guide-steps li span{width:31px;height:31px;display:grid;place-items:center;border-radius:9px;flex:none;background:#dce7d7;font-size:10px;color:#365c40;font-weight:800}
+.guide-steps li p{margin:2px 0 0;font-size:12px;color:#475b4c}
+.guide-measure{font-size:11px;line-height:1.75;color:#657c66;margin:20px 0 0;border-top:1px solid #dfe5d9;padding-top:15px}
+.guide-measure strong{color:#385b40}
+.guide-audio-status{font-size:11px;color:#637863;margin:8px 0 0;min-height:14px}
+.voice-setup{padding:17px 22px;margin:0 20px;background:#244533;border:1px solid #7f9b805c;border-radius:14px;color:#eaf0e6}
+.voice-optin{display:flex;align-items:flex-start;gap:12px;cursor:pointer;font-size:11px;line-height:1.8}
+.voice-optin input{flex:none;width:19px;height:19px;accent-color:#d8bf91;margin-top:3px}
+.voice-optin span{color:#e0e9dc}
+.voice-controls{margin:14px 0 5px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.voice-controls button{border:1px solid #acc3a7;background:#e8f0e5;color:#20432d;border-radius:11px;padding:13px 18px;min-height:47px;font-size:12px;font-weight:800}
+.voice-controls button:not(:disabled):hover{background:#fff}
+.voice-controls button:disabled{opacity:.4;cursor:not-allowed}
+#voice-state{color:#cedfcf;font-size:11px;line-height:1.55;max-width:530px}
+#voice-state[data-state="listening"]{color:#b9f4bb}
+#voice-state[data-state="error"],#voice-state[data-state="unsupported"]{color:#f4bdad}
+.voice-phrases{color:#dce8d9;font-size:12px;line-height:1.75;margin:12px 0 0}
+.voice-phrases strong{white-space:nowrap;color:#f6e9b7}
+.test-start #halt-test{background:#f2ece5;border-color:#bca287;color:#76543b;min-height:43px}
+.test-start #halt-test:hover{background:#fff3e4}
+@media(max-width:860px){.guide-columns{grid-template-columns:1fr;gap:12px}.test-guide-heading{align-items:flex-start;flex-direction:column}.guide-audio-btn{width:100%}}
+@media(max-width:590px){.test-guide{padding:19px 17px}.voice-setup{margin:0 12px;padding:15px}.voice-controls{display:grid;gap:11px}.voice-controls button{width:100%}.voice-phrases{font-size:11px}.test-guide-heading h2{font-size:29px}}
+
+
+/* Full-screen friendly layout and visible microphone state */
+.test-guide-buttons{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;align-items:center}
+.pose-camera .voice-hud{position:absolute;top:65px;right:17px;z-index:5;display:flex;gap:8px;align-items:center;border:1px solid #bcdba48a;border-radius:10px;padding:10px 14px;background:#1f4d37e8;color:#e7f7de;font-size:12px;font-weight:700;box-shadow:0 4px 20px #081c1355}
+.pose-camera .voice-hud[hidden]{display:none!important}
+.motion-workspace.distance-mode .test-guide{padding:12px 17px;margin:9px 0 11px}
+.motion-workspace.distance-mode .test-guide .guide-columns,.motion-workspace.distance-mode .test-guide .guide-measure,.motion-workspace.distance-mode .test-guide .guide-audio-status,.motion-workspace.distance-mode .test-guide-heading h2{display:none}
+.motion-workspace.distance-mode .test-guide-heading{margin-bottom:0}
+.motion-workspace.distance-mode .motion-heading{margin-bottom:11px}
+.motion-workspace.distance-mode .motion-heading p{display:none}
+.motion-workspace.distance-mode .live-controller{background:#e7eee2}
+.motion-workspace.distance-mode .pose-camera .camera-screen{min-height:min(78vh,860px);max-height:none}
+.motion-workspace.distance-mode .test-guide-buttons{display:flex}
+.motion-workspace.distance-mode .motion-disclaimer{font-size:10px;padding:9px 13px}
+.motion-workspace.distance-mode .motion-heading .pose-tag:after{content:' · MODE À DISTANCE'}
+@media(max-width:860px){.test-guide-buttons{width:100%;justify-content:flex-start}.test-guide-buttons .guide-audio-btn{width:auto;flex:1 1 190px}}
+@media(max-width:590px){.test-guide-buttons{display:grid;width:100%;grid-template-columns:1fr}.pose-camera .voice-hud{top:52px;right:9px;font-size:10px;padding:8px 10px}.motion-workspace.distance-mode .pose-camera .camera-screen{min-height:65vh;aspect-ratio:3/4}}

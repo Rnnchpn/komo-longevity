@@ -16,6 +16,9 @@ const poseEngine=await readFile(join(root,'site','pulse-v14','online','session',
 const motionView=await readFile(join(root,'site','pulse-v14','online','session','motion-view.js'),'utf8');
 const motionController=await readFile(join(root,'site','pulse-v14','online','session','motion-controller.js'),'utf8');
 const metrics=await readFile(join(root,'site','pulse-v14','online','session','metrics.mjs'),'utf8');
+const voiceControl=await readFile(join(root,'site','pulse-v14','online','session','voice-control.js'),'utf8');
+const voiceCommands=await readFile(join(root,'site','pulse-v14','online','session','voice-commands.mjs'),'utf8');
+const testGuides=await readFile(join(root,'site','pulse-v14','online','session','test-guides.mjs'),'utf8');
 const nodeSyntax=file=>spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session',file)],{encoding:'utf8'}).status===0;
 const sessionSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session','app.js')],{encoding:'utf8'});
 const activationHtml=await readFile(join(root,'site','pulse-v14','online','activate','index.html'),'utf8');
@@ -67,6 +70,13 @@ const checks=[
  ['pose camera privacy and local overlay',!(/fetch\s*\(|MediaRecorder|localStorage/.test(poseEngine+motionController))&&poseEngine.includes('canvas.getContext')&&motionView.includes('pose-canvas')],
  ['full-body quality gated start',motionController.includes('validStreak>=3')&&metrics.includes('frameInfo(points,task')&&metrics.includes('visibility')&&nodeSyntax('metrics.mjs')],
  ['explicit privacy opt-in',motionView.includes('id="pose-consent"')&&motionController.includes('if(!consent.checked)')&&sessionCss.includes('.pose-consent')],
+ ['voice mic consent independent of camera',motionView.includes('id="voice-consent"')&&motionView.includes('peut transmettre ma voix')&&motionController.includes("voiceConsent.onchange")],
+ ['voice activation and safety command gate',motionView.includes('Activer les commandes vocales')&&motionController.includes("command==='start'")&&motionController.includes('!go.disabled')&&motionController.includes("command==='stop'")],
+ ['voice error and cleanup',voiceControl.includes('not-allowed')&&voiceControl.includes('continuous=true')&&voiceControl.includes('destroy()')&&sessionJs.includes('currentMotionCleanup')],
+ ['spoken instructions and clear test objectives',testGuides.includes('Objectif')===false&&testGuides.includes('Observer votre capacité')&&motionView.includes('COMMENT FONCTIONNE CE TEST')&&motionController.includes('speechSynthesis')],
+ ['voice modules syntax',nodeSyntax('voice-control.js')&&nodeSyntax('voice-commands.mjs')&&nodeSyntax('test-guides.mjs')],
+ ['voice guidance on phone and distance mode',sessionCss.includes('.voice-setup')&&sessionCss.includes('.voice-hud')&&motionView.includes('Mode à distance')],
+ ['test still requires real camera capture before advancing',motionController.includes('if(!state.sessionFinished)')&&motionController.includes("finish(true)")],
  ['prominent start and auto counted movements',motionView.includes('C’est parti →')&&motionController.includes('tracker.observe(points,time)')&&motionController.includes('record.status=')],
  ['automatic 30 second sit-to-stand',sessionJs.includes('seconds:30')&&metrics.includes("task==='sts'")&&metrics.includes('lastCountAt')],
  ['large responsive webcam',sessionCss.includes('live-capture-layout')&&sessionCss.includes('aspect-ratio:16/9')&&sessionCss.includes('@media(max-width:590px)')],
