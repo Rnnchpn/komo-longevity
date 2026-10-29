@@ -10,6 +10,8 @@ const displayTime=s=>{
 };
 const formatDate=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
 const state={token:null,operatorEmail:null,appointments:[],statuses:{},selected:null,busy:false,from:null,to:null,live:false,demo:null};
+const pulseHome=location.pathname.startsWith('/pulse-v14')?'/pulse-v14/':'/';
+for(const a of document.querySelectorAll('.head a[href="/"],.head a[href="/#operator"]'))a.href=pulseHome+(a.getAttribute('href')==='/'?'':'#operator');
 function message(text){const node=root.querySelector('#op-feedback');if(node)node.textContent=text;}
 async function refreshToken(){
  const {data}=await sb.auth.getSession();
@@ -158,7 +160,7 @@ function loginView(){
  '<label>Mot de passe<input type="password" autocomplete="current-password" name="password" placeholder="Votre mot de passe" required></label>'+
  '<button class="btn demo-launch" type="submit">Se connecter et commencer la démonstration →</button>'+
  '<span id="operator-login-feedback" role="status" class="feedback"></span></form>'+
- '<a class="operator-login-foot" href="/#connexion">Revenir à la connexion Pulse</a></section>';
+ '<a class="operator-login-foot" href="'+pulseHome+'#connexion">Revenir à la connexion Pulse</a></section>';
  root.querySelector('#operator-login').onsubmit=async ev=>{
   ev.preventDefault();
   const form=ev.currentTarget;const button=form.querySelector('button[type=submit]');
@@ -182,7 +184,7 @@ async function boot(){
  if(!user?.email_confirmed_at){loginView();return}
  const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();
  if(role.error||role.data?.role!=='admin'){
-  root.innerHTML='<div class="loading"><h1>Accès réservé.</h1><p>Les restitutions Online sont accessibles uniquement aux administrateurs habilités.</p><a class="btn secondary" href="/">Retour à Pulse</a></div>';return}
+  root.innerHTML='<div class="loading"><h1>Accès réservé.</h1><p>Les restitutions Online sont accessibles uniquement aux administrateurs habilités.</p><a class="btn secondary" href="'+pulseHome+'">Retour à Pulse</a></div>';return}
  const session=await sb.auth.getSession();if(!session.data?.session?.access_token)throw Error('login');
  state.token=session.data.session.access_token;
  state.operatorEmail=user.email||null;
@@ -192,4 +194,4 @@ async function boot(){
  const now=new Date(),until=new Date();until.setDate(until.getDate()+14);
  state.from=formatDate(now);state.to=formatDate(until);await reload();
 }
-boot().catch(()=>{root.innerHTML='<div class="loading"><h1>Session indisponible.</h1><p>Reconnectez-vous à Pulse avant d’ouvrir le poste de restitution.</p><a class="btn solid" href="/#connexion">Se connecter</a></div>'});
+boot().catch(()=>{root.innerHTML='<div class="loading"><h1>Session indisponible.</h1><p>Reconnectez-vous à Pulse avant d’ouvrir le poste de restitution.</p><a class="btn solid" href="'+pulseHome+'#connexion">Se connecter</a></div>'});
