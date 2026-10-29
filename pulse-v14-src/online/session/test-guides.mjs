@@ -34,15 +34,37 @@ export const TEST_GUIDES={
   audio:"Test de visibilité en position debout. Placez-vous près d'un support stable, les yeux ouverts. Gardez une position confortable, sans chercher à vous mettre en difficulté. Dites c'est parti et restez visible pendant dix secondes. Ce test ne mesure pas votre équilibre de manière médicale."
  },
  posture:{
-  purpose:"Observer pendant huit secondes l’alignement apparent de quelques repères de votre silhouette, dans le plan de l’image.",
-  setup:"Caméra fixe à niveau, face à vous, hauteur de bassin, suffisamment éloignée pour voir tête, épaules, bassin, jambes et pieds. Position naturelle et confortable.",
+  purpose:"Documenter en photographie la position sagittale apparente du cou et du bassin, sans prétendre mesurer la SVA radiographique.",
+  setup:"Téléphone ou ordinateur fixe, caméra horizontale à hauteur du bassin, exactement de profil (90°). Placez-vous assez loin pour voir épaules, bassin, genoux et pieds.",
   steps:[
-   "Placez-vous debout face à l’objectif, pieds écartés confortablement, sans chercher une posture parfaite.",
-   "Vérifiez que la silhouette et les deux épaules sont reconnues. Dites « C’est parti ».",
-   "Restez dans votre position naturelle durant huit secondes ; aucune flexion, étirement ni mouvement forcé n’est demandé."
+   "Tenez-vous naturellement de profil, sans chercher à vous redresser ni à corriger votre posture.",
+   "Activez la caméra : lorsque la silhouette est bien cadrée et immobile pendant environ trois secondes, la photo est prise automatiquement.",
+   "Regardez la photo et, si nécessaire, ajustez les deux repères de surface en touchant l’image. Vous pouvez reprendre la photo."
   ],
-  measured:"Le logiciel estime les inclinaisons apparentes des lignes des épaules et du bassin, et des décalages dans l’image. La perspective, la rotation ou l’inclinaison du téléphone peuvent les modifier. Cela ne permet pas de détecter une scoliose ou un trouble postural.",
-  audio:"Observation de posture. Placez la caméra bien droite, à hauteur du bassin. Tenez-vous de face, à distance, tête et pieds visibles. Gardez une position naturelle. Quand le corps est correctement détecté, dites : c'est parti. Restez immobile huit secondes, sans vous forcer. Les mesures représentent uniquement votre position apparente dans l’image."
+  measured:"Un indice photographique en pourcentage : distance horizontale apparente entre un repère cervico-thoracique superficiel et un repère pelvien superficiel, divisée par la hauteur apparente épaule–cheville. Ni C7 ni S1 ne sont détectés par la webcam : ce n'est pas une SVA en millimètres.",
+  audio:"Photo de profil. Placez la caméra immobile à hauteur du bassin et tenez-vous de profil, avec tout le corps visible. Ne cherchez pas à vous redresser. Restez immobile : la photographie se déclenche automatiquement après environ trois secondes de stabilité. Ensuite, vous pourrez ajuster les repères sur l’image. Cette image ne mesure pas la S V A radiographique."
+ },
+ unipodal_left:{
+  purpose:"Observer la durée visible de maintien sur le pied gauche, jusqu’à vingt secondes, sans chercher une performance maximale.",
+  setup:"Debout face à la caméra, jambes et chevilles visibles, yeux ouverts. Placez une main à portée d'une table ou rampe fixe ; ne levez jamais le pied si cela semble dangereux.",
+  steps:[
+   "Restez près du support, pieds au sol, puis préparez l’appui gauche.",
+   "Soulevez légèrement le pied droit ; le chronomètre démarre automatiquement lorsque la position semble tenue.",
+   "Reposez votre pied dès que vous le souhaitez : le chronomètre s'arrête. Vous pouvez utiliser l'appui à tout moment."
+  ],
+  measured:"Temps apparent pendant lequel un pied reste visiblement levé. Ce n'est pas un score validé d'équilibre, et une caméra unique ne détecte pas toutes les pertes d'appui ou les prises de support.",
+  audio:"Équilibre sur le pied gauche. Tenez-vous près d’un appui stable, les yeux ouverts. Soulevez légèrement le pied droit quand vous êtes prêt. Le chronomètre part automatiquement. Reposez le pied pour terminer. Ne vous mettez jamais en difficulté."
+ },
+ unipodal_right:{
+  purpose:"Observer la durée visible de maintien sur le pied droit, jusqu’à vingt secondes.",
+  setup:"Debout face à la caméra, jambes et chevilles visibles, yeux ouverts, à portée d’un appui fixe.",
+  steps:[
+   "Placez-vous près du support, puis préparez l’appui droit.",
+   "Soulevez doucement le pied gauche ; le chronomètre démarre automatiquement lorsque la position est détectée.",
+   "Reposez le pied ou utilisez l'appui dès que nécessaire ; aucune performance n’est imposée."
+  ],
+  measured:"Temps apparent en appui droit avec pied gauche visible en l'air ; le résultat est approximatif et ne permet aucune conclusion clinique sur le risque de chute.",
+  audio:"Équilibre sur le pied droit. Debout près d’un appui stable, les yeux ouverts. Soulevez légèrement le pied gauche : le chronomètre démarre automatiquement. Reposez le pied quand vous le souhaitez. La sécurité passe avant toute mesure."
  },
  arms:{
   purpose:"Observer combien de fois vous levez les deux bras puis les redescendez en 20 secondes.",
