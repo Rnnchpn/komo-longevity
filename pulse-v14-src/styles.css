@@ -431,3 +431,8 @@
 .pulse-online-tester-welcome p{font-size:11px;color:#c2d2c3;line-height:1.7;max-width:570px}
 .pulse-online-tester-welcome .button{white-space:nowrap}
 @media(max-width:730px){.pulse-online-tester-welcome{flex-direction:column;align-items:stretch}.pulse-online-tester-welcome .button{white-space:normal;text-align:center}}
+
+
+.pulse-entry-activation-link{display:flex;justify-content:center;align-items:center;gap:9px;min-height:37px;padding:10px 12px;margin:12px 0 3px;background:rgba(225,234,219,.58);border:1px solid #c9d9c5;border-radius:10px;color:#294c35;text-decoration:none;font-size:11px;font-weight:750;text-align:center}
+.pulse-entry-activation-link:hover,.pulse-entry-activation-link:focus-visible{background:#e0edda;border-color:#9bbd99;outline-offset:3px}
+.pulse-entry-activation-link span{color:#9f875b}
