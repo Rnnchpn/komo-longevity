@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { createPoseEngine } from './pose-engine.js';
-import { createMovementTracker } from './metrics.mjs';
+import { motionMarkup } from './motion-view.js';
+import { mountMotionController } from './motion-controller.js';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
@@ -80,77 +80,35 @@ function safety(){
     next();
   };
 }
-function cameraWidget(){
- return '<div class="camera"><div class="camera-screen"><video id="live-video" autoplay muted playsinline hidden></video><div id="camera-off" class="camera-off"><span>◎</span><strong>Caméra éteinte</strong><small>Activation volontaire uniquement</small></div></div>'+
- '<div class="camera-actions">'+btn('start-camera','Activer la webcam')+btn('stop-camera','Éteindre',true)+'</div><p class="subtle" id="camera-message" role="status">Prévisualisation locale, sans enregistrement ni analyse automatique.</p></div>';
-}
-function activateCamera(){
- const start=q('#start-camera'),stop=q('#stop-camera'),video=q('#live-video'),off=q('#camera-off');
- stop.disabled=true;
- start.onclick=async()=>{
-  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){feedback('Caméra indisponible. Utilisez HTTPS avec un navigateur récent.');return;}
-  start.disabled=true;const turn=++state.request;
-  let stream;
-  try{
-   stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}}});
-   if(turn!==state.request){stream.getTracks().forEach(t=>t.stop());return;}
-   state.stream=stream;video.srcObject=stream;video.hidden=false;off.hidden=true;stop.disabled=false;
-   await video.play();
-   state.cameraChecked=true;q('#camera-message').textContent='Caméra activée. L’image reste sur cet appareil et n’est pas enregistrée.';
-  }catch(e){
-   if(stream)stream.getTracks().forEach(t=>t.stop());
-   if(turn!==state.request)return;
-   start.disabled=false;
-   q('#camera-message').textContent=e?.name==='NotAllowedError'?'Autorisation caméra refusée. Vous pouvez continuer sans vidéo.':'Impossible de démarrer la webcam ; elle peut être utilisée par une autre application.';
-  }
- };
- stop.onclick=()=>{stopCamera();video.hidden=true;off.hidden=false;start.disabled=false;stop.disabled=true;q('#camera-message').textContent='Caméra arrêtée.';};
-}
 function test(){
- const t=TESTS[state.task],r=state.results[t.id]||{value:0,status:'pending'};
- const counter=t.id==='arms'?'<select id="counter" aria-label="Observation"><option value="0">Non observée</option><option value="1">Mouvement confortable</option><option value="2">Limitation apparente</option></select>':
-  '<div class="counter"><button id="minus" aria-label="Diminuer le compteur" type="button">−</button><strong id="value">'+r.value+'</strong><button id="plus" aria-label="Augmenter le compteur" type="button">+</button></div>';
- wrap('<div class="paper"><span class="overline">03 / TEST '+(state.task+1)+' SUR '+TESTS.length+'</span><h1>'+esc(t.name)+'<em>.</em></h1><p>'+esc(t.instruction)+'</p>'+
- '<div class="test-grid">'+cameraWidget()+'<div class="test-controller"><span class="overline">OBSERVATION GUIDÉE · TEST</span>'+
- (t.seconds?'<div class="time" id="time">'+(state.remaining||t.seconds)+'</div><small>secondes</small>'+btn('clock','Lancer le chronomètre'):'<p>Observez le geste sans forcer ni mesurer d’angle.</p>')+
- '<div class="count-label">'+(t.id==='arms'?'Observation de l’amplitude':t.unit+' observées')+'</div>'+counter+
- '<p class="subtle">Saisie manuelle. Pas de mesure automatique ni de score médical.</p></div></div>'+
- '<div class="actions">'+btn('back','← Test précédent',true)+btn('skip','Ne pas réaliser ce test',true)+btn('go',state.task===TESTS.length-1?'Voir ma synthèse →':'Test suivant →')+'</div><p class="message" id="message"></p></div>');
- activateCamera();
- if(t.id==='arms')q('#counter').value=String(r.value);
- if(q('#plus')){q('#plus').onclick=()=>{r.value=Math.min(120,r.value+1);q('#value').textContent=r.value};q('#minus').onclick=()=>{r.value=Math.max(0,r.value-1);q('#value').textContent=r.value};}
- const timer=q('#clock');
- if(timer)timer.onclick=()=>{
-  if(state.timer){stopTimer();timer.textContent='Reprendre le chronomètre';return;}
-  if(state.remaining===0)state.remaining=t.seconds;
-  const start=Date.now(),initial=state.remaining;timer.textContent='Pause';
-  state.timer=setInterval(()=>{state.remaining=Math.max(0,Math.ceil(initial-(Date.now()-start)/1000));const el=q('#time');if(el)el.textContent=state.remaining;if(state.remaining===0){stopTimer();timer.textContent='Chronomètre terminé';}},150);
- };
- const advance=skipped=>{
-  if(t.id==='arms')r.value=Number(q('#counter').value);
-  r.status=skipped?'skipped':'done';state.results[t.id]=r;
-  stopTimer();stopCamera();state.remaining=0;
-  if(state.task<TESTS.length-1)state.task++;else state.page=4;
-  render();
- };
- q('#skip').onclick=()=>advance(true);q('#go').onclick=()=>advance(false);
- q('#back').onclick=()=>{
-  stopTimer();stopCamera();state.remaining=0;
-  if(state.task>0)state.task--;else state.page=2;
-  render();
- };
+ const t=TESTS[state.task],record=state.results[t.id]||{value:0,status:'pending',source:'webcam'};
+ wrap(motionMarkup(t,state.task,TESTS.length));
+ mountMotionController(root,t,record,state,{
+  advance(){
+   state.remaining=0;
+   if(state.task<TESTS.length-1)state.task++;
+   else state.page=4;
+   render();
+  },
+  back(){
+   state.remaining=0;
+   if(state.task>0)state.task--;
+   else state.page=2;
+   render();
+  }
+ });
 }
 function summary(){
  const blocked=state.answers.safety==='yes';
  const rows=TESTS.map(t=>{
   const r=state.results[t.id];
   let result='Non réalisé';
-  if(r?.status==='done')result=t.id==='arms'?(r.value===1?'Mouvement confortable':r.value===2?'Limitation apparente':'Non observée'):r.value+' '+t.unit+' (manuel)';
+  if(r?.status==='done'||r?.status==='review')result=r.value+' '+t.unit+' ('+(r.source||'webcam')+(r.status==='review'?', à vérifier':'')+')';
   return '<div><span>'+esc(t.name)+'</span><strong>'+esc(result)+'</strong></div>';
  }).join('');
  wrap('<div class="paper"><span class="overline">04 / SYNTHÈSE DE DÉMONSTRATION</span><h1>Votre mouvement,<br><em>plus lisible.</em></h1>'+
  (blocked?'<div class="notice danger"><b>Tests suspendus pour raisons de sécurité.</b> Cette démonstration ne fournit pas d’avis médical.</div>':'<p>Voici les observations que l’opérateur pourrait retrouver en fin de séance. Ce ne sont pas des mesures cliniquement validées.</p>')+
- '<div class="result-list">'+rows+'</div><p class="notice">Aucune réponse ni vidéo n’a été enregistrée. Les valeurs disparaissent lorsque vous quittez cette page. Le compte-rendu patient, la détection automatique et la synchronisation des réservations seront activés après les validations nécessaires.</p>'+
+ '<div class="result-list">'+rows+'</div><p class="notice">Aucune réponse ni vidéo n’a été enregistrée. Les nombres issus de la détection webcam sont exploratoires et restent uniquement dans cette page. Ils disparaissent lorsque vous la quittez ; ils ne sont pas enregistrés dans un dossier patient.</p>'+
  '<div class="actions">'+btn('back','← Revenir aux tests',true)+btn('restart','Recommencer la démonstration →')+'</div></div>');
  q('#back').onclick=()=>{state.task=0;state.page=blocked?2:3;render()};
  q('#restart').onclick=()=>{stopTimer();stopCamera();state.page=0;state.task=0;state.answers={};state.checks.clear();state.results={};state.remaining=0;render()};
@@ -163,7 +121,7 @@ function render(){
  else if(state.page===3)test();
  else summary();
 }
-document.addEventListener('visibilitychange',()=>{if(document.hidden){stopCamera();const v=q('#live-video');if(v){v.hidden=true;const off=q('#camera-off');if(off)off.hidden=false;const start=q('#start-camera');if(start)start.disabled=false;const stop=q('#stop-camera');if(stop)stop.disabled=true;}}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){state.sessionActive=false;stopTimer();stopCamera();const v=q('#live-video');if(v){v.hidden=true;const off=q('#camera-off');if(off)off.hidden=false;const start=q('#start-camera');if(start)start.disabled=false;const stop=q('#stop-camera');if(stop)stop.disabled=true;}}});
 window.addEventListener('pagehide',()=>{stopTimer();stopCamera()});
 async function boot(){
  try{
