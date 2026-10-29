@@ -114,7 +114,7 @@ function summary(){
   return '<div><span>'+esc(t.name)+'</span><strong>'+esc(result)+'</strong></div>';
  }).join('');
  wrap('<div class="paper"><span class="overline">04 / SYNTHÈSE DE DÉMONSTRATION</span><h1>Votre mouvement,<br><em>plus lisible.</em></h1>'+
- (blocked?'<div class="notice danger"><b>Tests suspendus pour raisons de sécurité.</b> Cette démonstration ne fournit pas d’avis médical.</div>':'<p>Voici les observations que l’opérateur pourrait retrouver en fin de séance. Les compteurs et l'observation posturale sont expérimentaux et ne constituent ni mesures cliniques validées, ni diagnostics.</p>')+
+ (blocked?'<div class="notice danger"><b>Tests suspendus pour raisons de sécurité.</b> Cette démonstration ne fournit pas d’avis médical.</div>':'<p>Voici les observations que l’opérateur pourrait retrouver en fin de séance. Les compteurs et l’observation posturale sont expérimentaux et ne constituent ni mesures cliniques validées, ni diagnostics.</p>')+
  '<div class="result-list">'+rows+'</div><p class="notice">Aucune réponse ni vidéo n’a été enregistrée. Les nombres issus de la détection webcam sont exploratoires et restent uniquement dans cette page. Ils disparaissent lorsque vous la quittez ; ils ne sont pas enregistrés dans un dossier patient.</p>'+
  '<div class="actions">'+btn('back','← Revenir aux tests',true)+btn('restart','Recommencer la démonstration →')+'</div></div>');
  q('#back').onclick=()=>{state.task=0;state.page=blocked?2:3;render()};
