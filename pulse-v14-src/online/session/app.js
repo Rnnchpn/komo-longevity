@@ -2,7 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
-const TEST_EMAIL = 'renanchapon@gmail.com';
+const TEST_USER_ID = 'eef2c1ed-3872-47a7-84da-0f70b975c96f';
 const PHASES = ['Bienvenue','Questionnaire','Sécurité','Tests guidés','Synthèse'];
 const TESTS = [
   {id:'sts',name:'Se relever de la chaise',detail:'30 secondes · observer les répétitions',seconds:30,unit:'répétitions',instruction:'Utilisez une chaise stable, contre un mur. Restez à votre rythme et ne forcez pas.'},
@@ -166,7 +166,7 @@ async function boot(){
   const {data,error}=await sb.auth.getUser();
   if(error||!data.user)throw Error('login');
   const user=data.user;
-  if(user.email?.toLowerCase()!==TEST_EMAIL||!user.email_confirmed_at)throw Error('not_tester');
+  if(user.id!==TEST_USER_ID||!user.email_confirmed_at)throw Error('not_tester');
   const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();
   if(role.error||role.data?.role!=='admin')throw Error('not_tester');
   render();
