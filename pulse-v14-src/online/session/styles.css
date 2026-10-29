@@ -128,12 +128,14 @@ h1,h2,p{margin-top:0}h1{font:400 clamp(42px,5vw,72px)/.99 "Instrument Serif",Geo
 .test-guide-buttons{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;align-items:center}
 .pose-camera .voice-hud{position:absolute;top:65px;right:17px;z-index:5;display:flex;gap:8px;align-items:center;border:1px solid #bcdba48a;border-radius:10px;padding:10px 14px;background:#1f4d37e8;color:#e7f7de;font-size:12px;font-weight:700;box-shadow:0 4px 20px #081c1355}
 .pose-camera .voice-hud[hidden]{display:none!important}
-.motion-workspace.distance-mode .test-guide{display:none}
+.motion-workspace.distance-mode .test-guide{padding:12px 17px;margin:9px 0 11px}
+.motion-workspace.distance-mode .test-guide .guide-columns,.motion-workspace.distance-mode .test-guide .guide-measure,.motion-workspace.distance-mode .test-guide .guide-audio-status,.motion-workspace.distance-mode .test-guide-heading h2{display:none}
+.motion-workspace.distance-mode .test-guide-heading{margin-bottom:0}
 .motion-workspace.distance-mode .motion-heading{margin-bottom:11px}
 .motion-workspace.distance-mode .motion-heading p{display:none}
 .motion-workspace.distance-mode .live-controller{background:#e7eee2}
 .motion-workspace.distance-mode .pose-camera .camera-screen{min-height:min(78vh,860px);max-height:none}
-.motion-workspace.distance-mode .test-guide-buttons{display:none}
+.motion-workspace.distance-mode .test-guide-buttons{display:flex}
 .motion-workspace.distance-mode .motion-disclaimer{font-size:10px;padding:9px 13px}
 .motion-workspace.distance-mode .motion-heading .pose-tag:after{content:' · MODE À DISTANCE'}
 @media(max-width:860px){.test-guide-buttons{width:100%;justify-content:flex-start}.test-guide-buttons .guide-audio-btn{width:auto;flex:1 1 190px}}
