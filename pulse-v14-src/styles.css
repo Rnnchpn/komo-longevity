@@ -369,3 +369,46 @@
   .pulse-entry-steps::before {animation:none!important;transform:none!important}
   .pulse-offer,.pulse-offer-art-ring,.pulse-offer-art-path,.pulse-booking-button{transition:none!important;will-change:auto}
 }
+
+
+/* KŌMØ Pulse — Acuity direct Online booking */
+.pulse-entry-online-shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 12px auto 2px;
+  padding: 12px 13px;
+  border: 1px solid rgba(170, 145, 102, .33);
+  border-radius: 12px;
+  background: linear-gradient(120deg, rgba(244, 238, 221, .68), rgba(255, 251, 242, .62));
+  color: #294536;
+  text-decoration: none;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-align: center;
+  transition: border-color .2s ease, background-color .2s ease, transform .2s ease;
+}
+.pulse-entry-online-shortcut strong {
+  font-size: 11px;
+  color: #936f3f;
+  white-space: nowrap;
+}
+.pulse-entry-online-shortcut span {
+  color: #936f3f;
+  font-size: 15px;
+  transition: transform .2s ease;
+}
+.pulse-entry-online-shortcut:hover,
+.pulse-entry-online-shortcut:focus-visible {
+  border-color: #a78b5c;
+  background: #fffaf0;
+  transform: translateY(-2px);
+  outline-offset: 3px;
+}
+.pulse-entry-online-shortcut:hover span { transform: translate(2px, -2px); }
+@media (prefers-reduced-motion: reduce) {
+  .pulse-entry-online-shortcut,
+  .pulse-entry-online-shortcut span { transition: none!important; }
+}
