@@ -74,5 +74,5 @@ L'équipe KŌMØ
 ## Vérifications avant ouverture
 1. Tester avec un vrai rendez-vous et une adresse contrôlée les notifications Acuity, le lien d'activation, le lien Zoom/Meet et les fuseaux horaires.
 2. Ne pas activer `PULSE_ONLINE_PAID_SESSION_ENABLED` avant validation du paiement réel et des dossiers.
-3. **Blocage actuel :** la RLS `motion_online_sessions_select_owner` permet la lecture au patient, **pas à l'intervenant**. Une solution autorisée de revue opérateur/administrateur et traçabilité de l'accès doit être développée et vérifiée avant toute promesse de lecture du dossier en amont de l'échange. Ne jamais assouplir la RLS globalement.
+3. **Accès opérateur réalisé :** ouvrir `https://pulse.komolongevity.com/online/restitutions/` avec un compte `account_roles.role=admin`. La RLS patient `motion_online_sessions_select_owner` n'a pas été modifiée. Le serveur `motion-online-operator` vérifie le rôle administrateur et journalise chaque accès aux dossiers dans `motion_online_operator_audit` ; il échoue sans journalisation. Aucun compte `professional` ordinaire n'y accède. Les identifiants Acuity ne sont jamais exposés au navigateur. Cet accès doit être validé avec un administrateur réel avant la commercialisation.
 4. Tester l'expérience sur mobile, y compris navigateur qui refuse la caméra, questionnaire incomplet et rendez-vous passé.
