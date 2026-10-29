@@ -41,7 +41,7 @@ export const TEST_GUIDES={
    "Activez la caméra : lorsque la silhouette est bien cadrée et immobile pendant environ trois secondes, la photo est prise automatiquement.",
    "Regardez la photo et, si nécessaire, ajustez les deux repères de surface en touchant l’image. Vous pouvez reprendre la photo."
   ],
-  measured:"Un indice photographique en pourcentage : distance horizontale apparente entre un repère cervico-thoracique superficiel et un repère pelvien superficiel, divisée par la hauteur apparente épaule–cheville. Ni C7 ni S1 ne sont détectés par la webcam : ce n'est pas une SVA en millimètres.",
+  measured:"Un indice photographique en pourcentage : distance horizontale apparente entre un repère cervico-thoracique superficiel et un repère pelvien superficiel, divisée par la hauteur apparente épaule–cheville. Ni C7 ni S1 ne sont détectés par la webcam : ce n'est pas une SVA en millimètres et cela ne permet pas de diagnostiquer une scoliose.",
   audio:"Photo de profil. Placez la caméra immobile à hauteur du bassin et tenez-vous de profil, avec tout le corps visible. Ne cherchez pas à vous redresser. Restez immobile : la photographie se déclenche automatiquement après environ trois secondes de stabilité. Ensuite, vous pourrez ajuster les repères sur l’image. Cette image ne mesure pas la S V A radiographique."
  },
  unipodal_left:{
