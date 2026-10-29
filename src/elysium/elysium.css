@@ -37,3 +37,40 @@ nav.top{z-index:20;position:relative;display:flex;align-items:center;justify-con
 @media(max-width:680px){nav.top{min-height:73px;padding-inline:18px}.brand{gap:8px}.brand strong{font-size:19px}.brand em{font-size:20px;padding-left:10px}.navlinks button{font-size:9px;padding:10px}.navlinks .white-link{padding:10px 9px;font-size:8px}.hero{min-height:730px}.hero h1{font-size:clamp(75px,17vw,115px)}.hero h2{font-size:30px}.hero p{font-size:13px}.public-section{padding-block:67px}.split-intro{grid-template-columns:1fr;gap:15px}.public-heading h2{font-size:65px}.preview-worlds,.plans,.store-grid,.club-collections{grid-template-columns:1fr}.world-preview{min-height:320px}.plan{min-height:auto}.footer{grid-template-columns:1fr}.club-shell{padding-block:50px}.club-intro h1{font-size:67px}.wheel{width:calc(100% + 8px);margin-left:-4px}.wheel-link{width:78px}.wheel-icon{width:38px;height:38px;font-size:23px}.wheel-link small{font-size:8px;line-height:1.15}.wheel-center b{font-size:18px}.wheel-center span{font-size:18px}.maison-hero{min-height:360px}.maison-hero h1{font-size:73px}.dashboard-head{flex-direction:column;align-items:start}.store-info h3{font-size:35px}}
 @media(max-width:360px){.brand em{font-size:17px}.navlinks .white-link{font-size:7px}.wheel-link{width:70px}.wheel-link small{font-size:7px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
+
+/* ELYSIUM · Private membership */
+.hero-membership-note{display:flex;align-items:center;gap:17px;flex-wrap:wrap;max-width:690px;margin-top:29px;padding-top:20px;border-top:1px solid #ddc69b69}
+.hero-membership-note span{color:#e5ddcf;font:600 9px/1.6 var(--sans);letter-spacing:.13em;text-transform:uppercase;max-width:250px}
+.hero-membership-note strong{font:400 29px/1 var(--serif);color:#f6efe5;white-space:nowrap}
+.hero-membership-note i{height:22px;width:1px;background:#cdb38b76}
+.membership-section{background:#eee9df;color:#242a22;padding:100px 0 91px}
+.membership-top{display:grid;grid-template-columns:1.1fr .9fr;gap:8%;align-items:end;margin-bottom:42px}
+.membership-top h2{font:400 clamp(54px,6vw,92px)/.95 var(--serif);letter-spacing:-.035em;margin:20px 0 0}
+.membership-top h2 em{color:#a58b64;font-weight:400}
+.membership-top p{font-size:14px;line-height:2;color:#667064;margin:0 0 7px}
+.membership-offers{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.membership-offer{display:flex;flex-direction:column;align-items:flex-start;background:#faf8f2;color:#222c23;border:1px solid #d8cfbf;padding:clamp(30px,4.2vw,62px);min-height:490px}
+.membership-offer .offer-number{font:600 10px/1.5 var(--sans);text-transform:uppercase;letter-spacing:.17em;color:#8e7451}
+.membership-offer h3{font:400 clamp(43px,4.2vw,66px)/.97 var(--serif);margin:28px 0 23px;min-height:94px;letter-spacing:-.02em}
+.membership-offer h3 em{color:#ac9270;font-weight:400}
+.offer-price{display:flex;align-items:baseline;gap:13px;margin-bottom:20px}
+.offer-price strong{font:400 clamp(46px,5.5vw,88px)/.9 var(--serif);letter-spacing:-.025em}
+.offer-price span{font:600 10px/1.2 var(--sans);letter-spacing:.18em}
+.membership-offer>p{font-size:13px;line-height:2;color:#677066;flex:1;max-width:500px;margin:0 0 31px}
+.membership-offer .btn{width:100%;text-align:center}
+.membership-offer.yachting-offer{background:#222b24;color:#f8f4e9;border-color:#bea47f}
+.yachting-offer .offer-number{color:#d1b891}
+.yachting-offer h3 em{color:#d6b88d}
+.yachting-offer .offer-price strong{color:#e1ccac}
+.yachting-offer>p{color:#dad5c7}
+.membership-terms{font-size:11px;max-width:950px;margin:26px 0 0;color:#747d72;line-height:1.9}
+.longevity-first{min-height:660px;position:relative;display:flex;align-items:center;isolation:isolate;overflow:hidden;background:#1d2a2b}
+.longevity-photo{position:absolute;z-index:-2;inset:0;background-image:url('https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&w=2000&q=83');background-position:center 40%;background-size:cover;filter:saturate(.64)}
+.longevity-overlay{position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,#0e1a18f5 0%,#0e1a18d9 43%,#0e1a182f 100%),linear-gradient(0deg,#121a18 0%,transparent 20%)}
+.longevity-content{width:100%;padding-top:92px;padding-bottom:100px}
+.longevity-content h2{font:400 clamp(65px,9vw,140px)/.94 var(--serif);letter-spacing:-.04em;margin:23px 0}
+.longevity-content h2 em{font-weight:400;color:#c6aa7f}
+.longevity-content p{color:#e8e6ddcf;font-size:14px;line-height:2;max-width:535px;margin-bottom:30px}
+.longevity-content small{display:block;max-width:530px;margin-top:20px;font-size:10px;color:#d4c8b7;letter-spacing:.04em}
+@media(max-width:850px){.membership-section{padding:75px 0}.membership-top{grid-template-columns:1fr;gap:20px}.membership-offer{min-height:460px}.membership-offer h3{min-height:112px}}
+@media(max-width:680px){.hero-membership-note{gap:10px;margin-top:25px}.hero-membership-note span{font-size:8px;max-width:180px}.hero-membership-note i{display:none}.hero-membership-note span:last-child{flex-basis:100%}.membership-offers{grid-template-columns:1fr}.membership-offer{min-height:auto;padding:32px 26px}.membership-offer h3{min-height:0;font-size:54px}.offer-price strong{font-size:74px}.membership-top h2{font-size:62px}.longevity-first{min-height:600px}.longevity-content h2{font-size:76px}.longevity-content p{font-size:13px}}
