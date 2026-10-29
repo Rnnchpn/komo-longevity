@@ -25,7 +25,7 @@ assert.ok(app.includes("sb.from('motion_online_sessions')"),'Read existing priva
 assert.ok(app.includes(".eq('user_id',S.user.id)"),'Owner scoping in client (RLS enforced in database)');
 assert.ok(app.includes("onlineReadError"),'Read errors are not presented as empty data');
 assert.ok(!app.includes("Votre dossier patient n’est pas encore relié."),'Online patients are not orphaned');
-assert.ok(app.includes("bindOnlinePassportActions($('#view'),S.onlineReports,toast)"));
+assert.ok(app.includes("bindOnlinePassportActions($('#view'),S.onlineReports,toast,async()=>"),'Patient Passport refreshes the owner-verified Acuity slot');
 assert.ok(html.includes('online-passport-dashboard.css'),'Dashboard stylesheet loaded');
 assert.ok(css.includes('@media(max-width:600px)'),'Responsive layout');
 assert.ok(css.includes('prefers-reduced-motion'),'Motion accessibility');
