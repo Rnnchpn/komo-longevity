@@ -234,229 +234,272 @@ body.elysium-app-mode::before{content:"";pointer-events:none;position:fixed;inse
 
 
 
-/* ELYSIUM / PRIVATE MAISON — Quiet editorial retail.
-   One brand language, two distinct materials. No product cards or stock imagery. */
+
+/* ELYSIUM / COLLECTIONS · commercial shop V5
+   Independent design inspired by premium European product commerce.
+   Services represented through original editorial object artwork, not product photography. */
 .ely-boutique{
- --boutique-bg:#141c18;--boutique-ink:#f0ebe0;--boutique-accent:#c1ac89;
- --boutique-collection:#f4f0e9;--boutique-copy:#222723;--boutique-rule:#cfc8bb;
- color:var(--boutique-ink);background:var(--boutique-bg);
- overflow-x:hidden
+ --shop-paper:#f4f1ea;--shop-paper-light:#f8f6f1;--shop-ink:#262d28;
+ --shop-muted:#777a72;--shop-line:#ddd9cf;--shop-gallery:#e4e6df;
+ --shop-accent:#51685b;--shop-deep:#16221d;
+ background:var(--shop-paper);color:var(--shop-ink);overflow-x:hidden
 }
 .ely-boutique.aesthetic-maison{
- --boutique-bg:#292121;--boutique-ink:#f5eee8;--boutique-accent:#d4b3a7;
- --boutique-collection:#f5f0ec;--boutique-copy:#302828;--boutique-rule:#d8cbc4
+ --shop-paper:#f4f0ec;--shop-paper-light:#faf7f4;--shop-ink:#352d2d;
+ --shop-muted:#82766f;--shop-line:#e2d6d0;--shop-gallery:#e8dcd8;
+ --shop-accent:#8e6f6b;--shop-deep:#302425;
 }
 .ely-boutique .top{
- min-height:75px;background:var(--boutique-bg);border-bottom:1px solid #ffffff26;
- padding-inline:clamp(18px,4.2vw,70px);position:relative;z-index:30;
+ background:var(--shop-paper-light);min-height:75px;
+ border-bottom:1px solid var(--shop-line);padding-inline:clamp(18px,3.5vw,65px);
+ position:relative;z-index:30
 }
-.ely-boutique .top .brand strong{font-size:21px;letter-spacing:-.05em}
-.ely-boutique .top .brand em{font-size:21px;color:var(--boutique-accent);font-style:normal}
-.ely-boutique .top .navlinks{gap:clamp(12px,2vw,29px)}
-.ely-boutique .top .navlinks>a{
- font:500 9px/1.5 var(--sans);letter-spacing:.14em;color:#ede7dcc7
-}
-.ely-boutique .top .navlinks button{font:600 9px/1.5 var(--sans);letter-spacing:.08em}
+.ely-boutique .top .brand strong{font-size:22px;letter-spacing:-.06em;color:var(--shop-deep)}
+.ely-boutique .top .brand em{font-size:22px;font-style:normal;color:var(--shop-accent)}
+.ely-boutique .top .navlinks{gap:clamp(10px,2vw,30px)}
+.ely-boutique .top .navlinks a{color:var(--shop-ink);font:600 9px/1.5 var(--sans);letter-spacing:.13em}
+.ely-boutique .top .navlinks button{font:600 9px/1.4 var(--sans);color:var(--shop-ink);letter-spacing:.08em}
+.ely-boutique .top .navlinks #toggleLanguage{border-color:var(--shop-line)}
 .ely-boutique .top .navlinks .white-link{
- border:1px solid var(--boutique-accent);color:var(--boutique-ink);
- background:transparent;padding:12px 18px;transition:background .25s,color .25s
+ padding:12px 19px;background:var(--shop-deep);color:#f6f1e9;
+ border:1px solid var(--shop-deep);transition:background .2s,color .2s
 }
-.ely-boutique .top .navlinks .white-link:hover{
- background:var(--boutique-accent);color:var(--boutique-bg)
+.ely-boutique .top .navlinks .white-link:hover{background:transparent;color:var(--shop-deep)}
+.ely-boutique .top .navlinks button:focus-visible,.ely-boutique a:focus-visible{outline:2px solid var(--shop-accent);outline-offset:4px}
+.ely-shop-hero{background:var(--shop-paper);border-bottom:1px solid var(--shop-line)}
+.ely-shop-hero-inner{max-width:1500px;display:grid;grid-template-columns:1fr .91fr;min-height:570px;gap:clamp(25px,4vw,65px);align-items:stretch;padding-block:clamp(38px,5vw,76px)}
+.ely-shop-hero-copy{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding-bottom:10px;min-width:0}
+.ely-shop-crumb{display:flex;justify-content:space-between;gap:18px;width:min(100%,420px);color:var(--shop-muted);font:600 9px/1.7 var(--sans);letter-spacing:.16em;margin-bottom:clamp(37px,5vw,80px)}
+.ely-shop-crumb a{border-bottom:1px solid transparent;transition:border .2s}
+.ely-shop-crumb a:hover{border-color:var(--shop-ink)}
+.ely-shop-kicker{font:600 10px/1.5 var(--sans);color:var(--shop-accent);letter-spacing:.23em}
+.ely-shop-hero-copy h1{font:400 clamp(85px,11.2vw,159px)/.88 var(--serif);letter-spacing:-.065em;color:var(--shop-deep);margin:21px 0 19px}
+.ely-shop-fullstop{color:var(--shop-accent)}
+.ely-shop-headline{font:400 clamp(30px,3.05vw,44px)/1.08 var(--serif);color:var(--shop-ink);letter-spacing:-.02em;margin:0 0 17px;max-width:610px}
+.ely-shop-intro{font:400 13px/1.9 var(--sans);color:var(--shop-muted);max-width:455px;margin:0 0 31px}
+.ely-shop-hero-cta{
+ display:inline-flex;align-items:center;justify-content:center;min-height:49px;padding:15px 25px;
+ background:var(--shop-deep);border:1px solid var(--shop-deep);color:#f5f2e9;
+ font:600 10px/1.5 var(--sans);letter-spacing:.11em;transition:background .25s,color .25s,transform .25s
 }
-.ely-editorial{
- padding-top:clamp(23px,3vw,43px);
- padding-bottom:clamp(34px,3.3vw,50px);
- max-width:1440px;
+.ely-shop-hero-cta:hover{color:var(--shop-deep);background:transparent;transform:translateY(-2px)}
+.ely-shop-hero-foot{display:flex;gap:22px;flex-wrap:wrap;margin-top:clamp(36px,5vw,63px);color:#898982;font:500 8px/1.6 var(--sans);letter-spacing:.17em}
+.ely-shop-hero-visual{
+ display:flex;flex-direction:column;position:relative;align-items:center;justify-content:center;
+ min-height:490px;overflow:hidden;
+ background:linear-gradient(152deg,#e5e8e1 0%,#d9dcd5 56%,#cfd7ce 100%)
 }
-.ely-ed-topline{
- display:flex;justify-content:space-between;align-items:center;gap:24px;
- font:500 9px/1.6 var(--sans);letter-spacing:.18em;color:var(--boutique-accent)
+.aesthetic-maison .ely-shop-hero-visual{background:linear-gradient(155deg,#eee5e0 0%,#e6d8d4 59%,#d5c2bc 100%)}
+.ely-shop-hero-visual:before{
+ content:"";position:absolute;left:-25%;right:-25%;height:47%;bottom:-27%;
+ border-radius:50%;background:radial-gradient(ellipse,#82958866,transparent 70%);
+ filter:blur(34px);pointer-events:none
 }
-.ely-ed-return{display:inline-block;color:var(--boutique-accent);border-bottom:1px solid transparent;padding:6px 0;transition:border-color .3s}
-.ely-ed-return:hover{border-color:var(--boutique-accent)}
-.ely-ed-issue{font:400 19px/1 var(--serif);letter-spacing:.08em}
-.ely-ed-issue i{opacity:.5;font-style:normal}
-.ely-ed-layout{
- display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,.66fr);
- gap:clamp(25px,6vw,100px);align-items:end;padding:clamp(45px,6.2vw,90px) 0 clamp(39px,4.5vw,61px)
+.ely-shop-object{position:relative;display:grid;place-items:center;width:min(100%,470px);height:425px;perspective:1000px}
+.ely-shop-object-dial{
+ position:relative;display:grid;place-items:center;width:min(65%,278px);height:350px;
+ border-radius:3px;transform:rotate(-8deg) rotateY(-11deg);
+ background:linear-gradient(115deg,#1f302a 0%,#13221c 39%,#2e4035 70%,#0f1d19 100%);
+ border:1px solid #7082747c;
+ box-shadow:14px 23px 2px #6d736c19,26px 37px 44px #344b3e38,inset 5px 0 9px #b0bdab14,inset -4px 0 11px #0000006d;
+ transition:transform .8s cubic-bezier(.18,.77,.25,1)
 }
-.ely-ed-kicker{
- font:600 9px/1.5 var(--sans);letter-spacing:.28em;text-transform:uppercase;
- color:var(--boutique-accent)
+.aesthetic-maison .ely-shop-object-dial{
+ background:linear-gradient(110deg,#533e3d,#2d2426 47%,#624a46 82%,#281f21);
+ border-color:#94746d66
 }
-.ely-ed-left h1{
- font:400 clamp(89px,13.8vw,197px)/.78 var(--serif);
- letter-spacing:-.055em;margin:19px 0 0;color:var(--boutique-ink)
+.ely-shop-hero-visual:hover .ely-shop-object-dial{transform:rotate(-4deg) rotateY(-5deg) translateY(-9px)}
+.ely-shop-object-dial:before{
+ content:"";position:absolute;top:0;bottom:0;left:10px;width:2px;background:linear-gradient(180deg,transparent,#b7c3ac55,transparent)
 }
-.ely-ed-period{color:var(--boutique-accent)}
-.ely-ed-right{max-width:380px;padding-bottom:1px}
-.ely-ed-headline{font:400 clamp(31px,3.4vw,47px)/1.02 var(--serif);letter-spacing:-.015em;margin:0 0 18px;color:var(--boutique-ink)}
-.ely-ed-subtitle{font:400 12px/1.9 var(--sans);color:#e9e6d2b6;margin:0}
-.ely-ed-bottom{
- display:flex;justify-content:space-between;align-items:center;gap:12px;padding-top:18px;
- border-top:1px solid #ede0cd36;color:#d4c7ab9c;
- font:500 8px/1.4 var(--sans);letter-spacing:.22em
+.ely-shop-object-inside{
+ position:absolute;inset:22px 19px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ border:1px solid #d6d5c22a;color:#f7f2e8;text-align:center
 }
-.ely-index-section{
- background:var(--boutique-collection);color:var(--boutique-copy);
- min-height:450px;padding:clamp(50px,5.2vw,81px) 0 clamp(65px,6.5vw,100px)
+.ely-shop-object-mark{font:600 17px/1 var(--sans);letter-spacing:.26em;margin-bottom:30px}
+.ely-shop-object-word{font:400 39px/.97 var(--serif);letter-spacing:.17em;text-indent:.17em}
+.ely-shop-object-stroke{height:1px;width:49px;background:#d3cfbc7b;margin:24px 0}
+.ely-shop-object-description{font:500 7px/1.65 var(--sans);letter-spacing:.21em;max-width:145px}
+.ely-shop-object-shade{
+ position:absolute;bottom:1px;left:8%;width:88%;height:40px;border-radius:50%;
+ background:#6d7a704d;filter:blur(18px);transform:rotate(-9deg)
 }
-.ely-index-section>.wrap{max-width:1440px}
-.ely-index-heading{
- display:flex;align-items:end;justify-content:space-between;gap:20px;
- margin-bottom:clamp(27px,4vw,47px)
+.ely-shop-object-orbit{
+ position:absolute;width:330px;height:330px;border:1px solid #9aaa9752;border-radius:50%;
+ transform:rotateX(73deg) rotate(-13deg);bottom:6px;pointer-events:none
 }
-.ely-index-kicker{display:block;font:600 9px/1.5 var(--sans);letter-spacing:.21em;color:#928473}
-.aesthetic-maison .ely-index-kicker{color:#9e7c73}
-.ely-index-heading h2{
- font:400 clamp(51px,5.5vw,77px)/1 var(--serif);
- letter-spacing:-.035em;margin:13px 0 0;color:var(--boutique-copy)
+.ely-shop-visual-caption{position:absolute;bottom:23px;left:25px;right:25px;text-align:center;color:#758276;font:600 9px/1.4 var(--sans);letter-spacing:.18em}
+.aesthetic-maison .ely-shop-visual-caption{color:#886d69}
+.ely-shop-visual-caption span{padding:0 6px}
+.ely-shop-catalogue{padding:clamp(66px,7vw,105px) 0 clamp(82px,9vw,140px);background:var(--shop-paper-light)}
+.ely-shop-catalogue-inner{max-width:1500px}
+.ely-shop-section-head{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:27px}
+.ely-shop-section-kicker{font:600 10px/1.4 var(--sans);color:var(--shop-accent);letter-spacing:.18em}
+.ely-shop-section-head h2{font:400 clamp(51px,5.5vw,83px)/.95 var(--serif);color:var(--shop-ink);margin:17px 0 0;letter-spacing:-.025em}
+.ely-shop-service-count{font:400 32px/1.4 var(--serif);color:#6d786d;display:flex;align-items:center;gap:9px;white-space:nowrap}
+.ely-shop-service-count small{font:600 9px/1 var(--sans);letter-spacing:.14em}
+.ely-shop-tabs{display:flex;gap:5px 19px;flex-wrap:wrap;border-bottom:1px solid var(--shop-line);padding:0 0 19px;margin:4px 0 35px}
+.ely-shop-tabs button{cursor:pointer;border:0;background:none;color:var(--shop-muted);padding:9px 3px 10px;position:relative;font:600 10px/1.2 var(--sans);letter-spacing:.04em}
+.ely-shop-tabs button:after{content:"";position:absolute;bottom:2px;left:3px;right:3px;height:1px;background:transparent;transition:background .2s}
+.ely-shop-tabs button.is-active{color:var(--shop-deep)}
+.ely-shop-tabs button.is-active:after,.ely-shop-tabs button:hover:after{background:var(--shop-accent)}
+.ely-shop-tabs button:focus-visible{outline:2px solid var(--shop-accent);outline-offset:3px}
+.ely-shop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:25px}
+.ely-product-card{min-width:0;background:#fffdfa;border:1px solid var(--shop-line);transition:box-shadow .35s,transform .35s}
+.ely-product-card:hover{box-shadow:0 22px 56px #25382b17;transform:translateY(-4px)}
+.ely-product-image-link{border:0;padding:0;background:transparent;display:block;width:100%;cursor:pointer;text-align:left}
+.ely-product-image-link:focus-visible{outline:2px solid var(--shop-accent);outline-offset:4px}
+.ely-product-visual{
+ position:relative;aspect-ratio:1.46;overflow:hidden;display:flex;align-items:center;justify-content:center;
+ background:linear-gradient(145deg,#e6e9e3 0%,#d9e1d9 100%);color:#50665b
 }
-.ely-index-count{
- white-space:nowrap;color:#9b8d79;font:400 32px/1 var(--serif);
- display:inline-flex;align-items:baseline;gap:9px
+.aesthetic-maison .ely-product-visual{background:linear-gradient(143deg,#eee5e0,#dfd0cb);color:#91746f}
+.ely-product-card[data-variant="onboard"] .ely-product-visual{background:linear-gradient(145deg,#dfe6e3,#ced8d5);color:#526c70}
+.aesthetic-maison .ely-product-card[data-variant="onboard"] .ely-product-visual{background:linear-gradient(145deg,#e2d5d1,#d5c0b9);color:#825c58}
+.ely-product-card[data-variant="other"] .ely-product-visual{background:linear-gradient(150deg,#e7e5da,#dadacb)}
+.aesthetic-maison .ely-product-card[data-variant="other"] .ely-product-visual{background:linear-gradient(148deg,#e6dbd5,#d7c8c2)}
+.ely-product-visual:after{
+ content:"";position:absolute;left:15%;right:15%;bottom:-19%;height:27%;border-radius:50%;
+ background:#687e7647;filter:blur(28px)
 }
-.ely-index-count span{font:600 8px var(--sans);letter-spacing:.13em}
-.ely-service-index{border-top:1px solid var(--boutique-rule)}
-.ely-index-row{
- display:grid;grid-template-columns:64px minmax(0,1fr) 50px;
- align-items:center;gap:clamp(13px,3.3vw,45px);width:100%;
- background:transparent;border:0;border-bottom:1px solid var(--boutique-rule);
- padding:clamp(26px,3vw,40px) clamp(7px,1vw,16px);cursor:pointer;
- color:var(--boutique-copy);text-align:left;transition:background .35s,padding .35s
+.ely-product-seal{position:absolute;top:19px;left:23px;font:600 10px/1 var(--sans);color:#3b5144;letter-spacing:.24em;z-index:2}
+.aesthetic-maison .ely-product-seal{color:#76534c}
+.ely-product-halo{
+ width:min(55%,246px);aspect-ratio:1;display:grid;place-items:center;position:relative;
+ border-radius:50%;background:radial-gradient(circle at 40% 32%,#f8fcf775 0%,#ffffff1e 64%,transparent 100%);
+ border:1px solid #62796d65;box-shadow:inset 0 0 0 17px #ffffff0d,0 28px 50px #566d5821;
+ transform:rotate(-9deg);transition:transform .6s ease,box-shadow .6s
 }
-.ely-index-row:hover,.ely-index-row:focus-visible{background:#dddbc72d;padding-inline:clamp(15px,2vw,28px)}
-.aesthetic-maison .ely-index-row:hover,.aesthetic-maison .ely-index-row:focus-visible{background:#dab4a324}
-.ely-index-row:focus-visible{outline:2px solid #9a8667;outline-offset:-2px}
-.ely-index-number{font:400 24px/1 var(--serif);color:#a89a85;align-self:center}
-.ely-index-information{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
-.ely-index-mode{font:600 8px/1.6 var(--sans);color:#938372;letter-spacing:.19em}
-.ely-index-name{
- font:400 clamp(33px,3.6vw,56px)/.94 var(--serif);
- letter-spacing:-.022em;color:var(--boutique-copy)
-}
-.ely-index-summary{font:400 12px/1.6 var(--sans);color:#7d7c71;max-width:675px;margin-top:4px}
-.ely-index-arrow{
- justify-self:end;font:300 33px/1 var(--serif);color:#9a8468;
- transition:transform .3s,color .3s
-}
-.ely-index-row:hover .ely-index-arrow{transform:translate(5px,-4px);color:#4e4d43}
-.ely-index-note{
- margin-top:28px;display:flex;justify-content:space-between;align-items:center;gap:15px;
- font:400 10px/1.6 var(--sans);color:#8b867b
-}
-.ely-private-gate{max-width:640px;margin:22px 0 36px;background:#f8f5ef;padding:35px}
-.ely-private-gate h3{font:400 42px var(--serif);margin:12px 0}
-.ely-private-gate p{font:400 12px/1.8 var(--sans);color:#6d6c61}
-.ely-private-login{
- display:inline-block;border-bottom:1px solid #8e785c;font:600 10px var(--sans);letter-spacing:.1em;
- padding-bottom:9px;color:#393c32;margin-top:17px
-}
-.ely-boutique-footer{
- max-width:1440px;min-height:114px;display:flex;justify-content:space-between;align-items:start;
- gap:40px;padding-top:32px;padding-bottom:36px;
-}
-.ely-boutique-footer>span{white-space:nowrap;font:600 12px/1 var(--sans);letter-spacing:-.04em}
-.ely-boutique-footer>span em{font:400 15px/1 var(--serif);letter-spacing:.16em;margin-left:9px;color:var(--boutique-accent)}
-.ely-boutique-footer p{font:400 10px/1.8 var(--sans);color:#c7c5b8a8;max-width:520px;margin:0}
-.ely-boutique .drawer-inner{background:#f5f0e7;color:#252b24}
-.ely-boutique.aesthetic-maison .drawer-inner{background:#f8f0ed}
-.ely-request-privacy{font-size:10px;opacity:.65}
+.ely-product-image-link:hover .ely-product-halo{transform:rotate(-2deg) translateY(-5px);box-shadow:inset 0 0 0 17px #ffffff16,0 30px 58px #566d5835}
+.ely-product-halo:before,.ely-product-halo:after{content:"";position:absolute;inset:9px;border:1px solid #637b704d;border-radius:50%}
+.ely-product-halo:after{inset:-16px;border-color:#637b7026}
+.ely-product-symbol{width:55%;height:55%;max-width:145px;position:relative;z-index:1}
+.ely-product-signature{position:absolute;bottom:18px;left:15px;right:15px;text-align:center;font:600 8px/1.5 var(--sans);letter-spacing:.23em;color:#667567}
+.aesthetic-maison .ely-product-signature{color:#846b67}
+.ely-product-content{padding:clamp(24px,2.5vw,37px)}
+.ely-product-category{font:600 9px/1.4 var(--sans);color:var(--shop-accent);letter-spacing:.16em}
+.ely-product-name{font:400 clamp(38px,4vw,57px)/.97 var(--serif);color:var(--shop-ink);letter-spacing:-.035em;margin:13px 0 12px}
+.ely-product-description{font:400 12px/1.85 var(--sans);color:var(--shop-muted);max-width:470px;min-height:45px;margin:0 0 25px}
+.ely-product-actions{display:flex;justify-content:space-between;gap:15px;align-items:center;padding-top:20px;border-top:1px solid var(--shop-line)}
+.ely-product-price{font:500 10px/1.5 var(--sans);color:var(--shop-muted);letter-spacing:.06em}
+.ely-product-discover{border:0;background:var(--shop-deep);color:#f8f4ec;padding:13px 20px;cursor:pointer;font:600 10px/1.4 var(--sans);letter-spacing:.08em;transition:background .25s}
+.ely-product-discover:hover{background:var(--shop-accent)}
+.ely-shop-concierge-strip{background:var(--shop-deep);color:#f5f1e9}
+.ely-shop-concierge-strip .wrap{max-width:1500px;display:flex;justify-content:space-between;align-items:center;gap:25px;padding-block:49px}
+.ely-shop-concierge-small{font:600 9px var(--sans);letter-spacing:.2em;color:#c5b99d}
+.ely-shop-concierge-strip p{font:400 clamp(33px,4vw,52px)/1.1 var(--serif);margin:11px 0 0}
+.ely-shop-concierge-link{background:transparent;border:1px solid #e6dfcd8e;color:#f1ecdf;min-width:220px;padding:16px 21px;cursor:pointer;font:600 9px var(--sans);letter-spacing:.1em}
+.ely-shop-concierge-link:hover{background:#f1ecdf;color:var(--shop-deep)}
+.ely-boutique-footer{display:flex;justify-content:space-between;gap:35px;align-items:start;max-width:1500px;min-height:130px;padding-top:35px;padding-bottom:45px}
+.ely-boutique-footer>span{font:600 13px/1 var(--sans);white-space:nowrap;letter-spacing:-.03em}
+.ely-boutique-footer>span em{font:400 17px var(--serif);margin-left:8px;color:var(--shop-accent)}
+.ely-boutique-footer p{margin:0;font:400 10px/1.9 var(--sans);max-width:560px;color:#827e72}
+.ely-private-gate{max-width:620px;margin:0 0 28px;background:var(--shop-paper);padding:35px;border:1px solid var(--shop-line)}
+.ely-private-gate h3{font:400 43px/1 var(--serif);margin:12px 0}
+.ely-private-gate p{font:400 12px/1.8 var(--sans);color:var(--shop-muted)}
+.ely-shop-signin{display:inline-block;background:var(--shop-deep);padding:15px 22px;margin-top:15px;color:white;font:600 10px var(--sans);letter-spacing:.08em}
+.ely-boutique .drawer-inner{background:#faf7f0;color:#242d28}
+.aesthetic-maison.ely-boutique .drawer-inner{background:#faf6f3}
+.ely-request-privacy{font:400 10px/1.8 var(--sans);color:#8d887f}
 
-/* Detail = a single editorial sheet, not another landing page */
+/* Product detail, a visual product-page layout. No invented checkout. */
 .ely-boutique.ely-service-mode main>section:not(#serviceDetail){display:none!important}
 .ely-boutique.ely-service-mode .ely-boutique-footer{display:none}
 .ely-boutique .ely-service-detail[hidden]{display:none!important}
-.ely-boutique .ely-service-detail{
- max-width:1440px;min-height:calc(100svh - 75px);
- padding-top:clamp(34px,4.5vw,65px);padding-bottom:80px;animation:ely-edit-fade .32s ease-out
+.ely-shop-detail-nav{display:flex;align-items:center;justify-content:space-between;padding:25px 0;color:var(--shop-muted);gap:15px;border-bottom:1px solid var(--shop-line)}
+.ely-shop-detail-back{background:transparent;border:0;padding:8px 0;color:var(--shop-ink);font:600 10px var(--sans);letter-spacing:.14em;cursor:pointer}
+.ely-shop-detail-back:hover{text-decoration:underline;text-underline-offset:5px}
+.ely-shop-detail-ref{font:600 9px var(--sans);letter-spacing:.18em}
+.ely-boutique .ely-service-detail{max-width:1500px;padding-top:0;padding-bottom:85px;min-height:calc(100svh - 75px)}
+.ely-shop-detail-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.86fr);gap:clamp(35px,5.5vw,86px);align-items:start;padding-top:clamp(32px,5vw,70px)}
+.ely-shop-detail-gallery{position:sticky;top:30px}
+.ely-shop-detail-gallery .ely-product-visual{aspect-ratio: .89;min-height:430px}
+.ely-shop-detail-gallery .ely-product-halo{width:min(56%,330px)}
+.ely-shop-detail-gallery .ely-product-symbol{max-width:175px}
+.ely-shop-detail-info{padding-top:clamp(10px,2vw,32px)}
+.ely-shop-detail-kicker{font:600 10px/1.5 var(--sans);letter-spacing:.2em;color:var(--shop-accent)}
+.ely-shop-detail-title{font:400 clamp(60px,7vw,103px)/.9 var(--serif);letter-spacing:-.04em;margin:22px 0 22px;color:var(--shop-ink)}
+.ely-shop-detail-description{font:400 clamp(20px,2.1vw,27px)/1.3 var(--serif);color:#5d645d;max-width:510px;margin:0 0 35px}
+.aesthetic-maison .ely-shop-detail-description{color:#736560}
+.ely-shop-detail-divider{height:1px;background:var(--shop-line);margin-bottom:27px}
+.ely-shop-detail-label{font:600 9px/1.5 var(--sans);color:var(--shop-muted);letter-spacing:.16em}
+.ely-shop-detail-price{font:400 31px/1.1 var(--serif);margin:9px 0 28px}
+.ely-shop-detail-points{list-style:none;padding:0;margin:0 0 31px}
+.ely-shop-detail-points li{border-bottom:1px solid var(--shop-line);padding:11px 0 11px 20px;position:relative;font:400 12px/1.55 var(--sans);color:#616b62}
+.ely-shop-detail-points li:before{content:"·";position:absolute;top:3px;left:0;font-size:23px;color:var(--shop-accent)}
+.ely-shop-detail-buy{display:flex;justify-content:center;align-items:center;width:100%;min-height:56px;background:var(--shop-deep);border:1px solid var(--shop-deep);color:white;cursor:pointer;font:600 11px/1.5 var(--sans);letter-spacing:.11em;transition:background .2s,color .2s}
+.ely-shop-detail-buy:hover{background:transparent;color:var(--shop-deep)}
+.ely-shop-detail-terms{font:400 10px/1.7 var(--sans);color:var(--shop-muted);margin:15px 0 0}
+.ely-shop-detail-disclaimer{font:400 10px/1.85 var(--sans);color:#989387;max-width:760px;border-top:1px solid var(--shop-line);padding-top:25px;margin:55px 0 0}
+@media(max-width:990px){
+ .ely-shop-hero-inner{grid-template-columns:1fr 1fr;min-height:530px}
+ .ely-shop-hero-copy h1{font-size:clamp(75px,10vw,122px)}
+ .ely-shop-object{height:400px}
+ .ely-shop-object-dial{height:310px}
+ .ely-shop-hero-visual{min-height:450px}
+ .ely-shop-detail-layout{gap:30px}
 }
-@keyframes ely-edit-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.ely-edit-detail-head{
- display:flex;justify-content:space-between;align-items:center;gap:20px;
- border-bottom:1px solid #f0e4d13e;padding-bottom:25px;color:var(--boutique-accent)
-}
-.ely-edit-detail-back{background:none;border:0;color:inherit;cursor:pointer;padding:10px 0;font:600 9px/1.3 var(--sans);letter-spacing:.18em}
-.ely-edit-detail-back:hover{color:var(--boutique-ink)}
-.ely-edit-detail-number{font:400 17px var(--serif);letter-spacing:.08em}
-.ely-edit-detail-layout{display:grid;grid-template-columns:1.16fr .64fr;gap:clamp(45px,8vw,140px);padding-top:clamp(63px,8vw,126px);align-items:start}
-.ely-edit-detail-intro{max-width:800px}
-.ely-edit-detail-mode{font:600 9px/1.5 var(--sans);letter-spacing:.25em;color:var(--boutique-accent);margin:0}
-.ely-edit-detail-title{font:400 clamp(69px,9vw,139px)/.84 var(--serif);letter-spacing:-.055em;margin:23px 0 31px;color:var(--boutique-ink)}
-.ely-edit-detail-summary{font:400 clamp(24px,2.75vw,39px)/1.13 var(--serif);max-width:630px;color:#e3e0d5;margin:0}
-.ely-edit-detail-aside{border-top:1px solid #f0e4d145;padding-top:28px}
-.ely-edit-aside-label{font:600 9px var(--sans);letter-spacing:.22em;color:var(--boutique-accent);margin:0 0 21px}
-.ely-edit-steps{list-style:none;counter-reset:medstep;margin:0 0 30px;padding:0}
-.ely-edit-steps li{counter-increment:medstep;position:relative;padding:14px 0 14px 37px;border-bottom:1px solid #f0e4d125;color:#d4d1c7;font:400 12px/1.65 var(--sans)}
-.ely-edit-steps li:before{content:"0" counter(medstep);position:absolute;left:0;top:13px;color:var(--boutique-accent);font:400 18px var(--serif)}
-.ely-edit-request{
- display:flex;align-items:center;justify-content:space-between;gap:15px;width:100%;
- background:var(--boutique-accent);border:1px solid var(--boutique-accent);
- color:var(--boutique-bg);font:700 10px/1.5 var(--sans);letter-spacing:.13em;
- padding:17px 20px;cursor:pointer;transition:background .25s,color .25s
-}
-.ely-edit-request:hover{background:transparent;color:var(--boutique-ink)}
-.ely-edit-note{font:400 10px/1.8 var(--sans);color:#c5c1b49c;margin:18px 0 0}
-.ely-edit-legal{
- border-top:1px solid #f0e4d132;padding-top:17px;max-width:720px;
- font:400 10px/1.8 var(--sans);color:#b9b9ada5;margin:clamp(70px,10vw,154px) 0 0
-}
-@media(max-width:900px){
- .ely-ed-layout{grid-template-columns:1fr;gap:35px;padding:55px 0 50px}
- .ely-ed-right{max-width:600px}
- .ely-ed-left h1{font-size:clamp(98px,14vw,150px)}
- .ely-edit-detail-layout{grid-template-columns:1fr;gap:55px;padding-top:74px}
- .ely-edit-detail-aside{max-width:600px}
- .ely-edit-legal{margin-top:70px}
-}
-@media(max-width:680px){
- .ely-boutique .top{min-height:64px;padding-inline:14px}
- .ely-boutique .top .brand{gap:8px}
- .ely-boutique .top .brand strong{font-size:18px}
- .ely-boutique .top .brand em{font-size:17px;padding-left:8px}
+@media(max-width:720px){
+ .ely-boutique .top{min-height:62px;padding-inline:14px}
+ .ely-boutique .top .brand{gap:7px}
+ .ely-boutique .top .brand strong{font-size:19px}
+ .ely-boutique .top .brand em{font-size:18px;padding-left:9px}
  .ely-boutique .top .navlinks{gap:8px}
  .ely-boutique .top .navlinks>a{display:none}
  .ely-boutique .top .navlinks #signOut{display:none!important}
- .ely-boutique .top .navlinks button{font-size:8px;padding:8px}
- .ely-boutique .top .navlinks .white-link{padding:10px 9px}
- .ely-editorial{padding-top:25px;padding-bottom:33px}
- .ely-ed-layout{padding:52px 0 40px;gap:34px}
- .ely-ed-left h1{font-size:clamp(87px,18.8vw,120px);margin-top:23px}
- .ely-ed-kicker{font-size:8px}
- .ely-ed-headline{font-size:39px;margin:0 0 11px}
- .ely-ed-subtitle{font-size:11px}
- .ely-ed-bottom{font-size:7px;letter-spacing:.12em;padding-top:14px}
- .ely-index-section{padding:46px 0 67px}
- .ely-index-heading{margin-bottom:27px;align-items:center}
- .ely-index-heading h2{font-size:49px}
- .ely-index-count{font-size:23px}
- .ely-index-count span{font-size:7px}
- .ely-index-row{grid-template-columns:30px minmax(0,1fr) 25px;gap:12px;padding:24px 3px}
- .ely-index-row:hover,.ely-index-row:focus-visible{padding-inline:8px}
- .ely-index-number{font-size:19px;align-self:start;margin-top:23px}
- .ely-index-information{gap:7px}
- .ely-index-mode{font-size:7px;letter-spacing:.14em}
- .ely-index-name{font-size:clamp(32px,8.8vw,43px);line-height:.99;overflow-wrap:break-word}
- .ely-index-summary{font-size:11px;line-height:1.55;margin-top:2px}
- .ely-index-arrow{font-size:24px;align-self:center}
- .ely-index-note{align-items:start;flex-direction:column;gap:4px;font-size:9px}
- .ely-boutique-footer{flex-direction:column;gap:15px;padding-top:27px;padding-bottom:33px}
+ .ely-boutique .top .navlinks button{font-size:9px;padding:8px 9px}
+ .ely-boutique .top .navlinks .white-link{padding:10px}
+ .ely-shop-hero-inner{display:flex;flex-direction:column;min-height:0;gap:0;padding-top:27px;padding-bottom:0}
+ .ely-shop-hero-copy{padding:0 0 37px}
+ .ely-shop-crumb{margin-bottom:28px;max-width:100%}
+ .ely-shop-hero-copy h1{font-size:clamp(74px,19vw,112px);margin:18px 0 14px}
+ .ely-shop-kicker{font-size:9px;letter-spacing:.16em}
+ .ely-shop-headline{font-size:clamp(33px,8.4vw,44px);margin-bottom:11px}
+ .ely-shop-intro{font-size:12px;margin-bottom:22px}
+ .ely-shop-hero-cta{min-height:47px;font-size:9px;padding:14px 19px}
+ .ely-shop-hero-foot{margin-top:26px;gap:8px 18px;font-size:7px}
+ .ely-shop-hero-visual{width:calc(100% + 2 * var(--container-pad,18px));min-height:285px;margin-inline:calc(-1 * var(--container-pad,18px))}
+ .ely-shop-object{height:290px;width:100%}
+ .ely-shop-object-dial{height:225px;width:170px;transform:rotate(-7deg) rotateY(-10deg)}
+ .ely-shop-object-inside{inset:13px}
+ .ely-shop-object-mark{font-size:12px;margin-bottom:18px}
+ .ely-shop-object-word{font-size:25px}
+ .ely-shop-object-stroke{margin:16px 0}
+ .ely-shop-object-description{font-size:5px}
+ .ely-shop-object-orbit{width:200px;height:200px}
+ .ely-shop-visual-caption{font-size:7px;bottom:14px}
+ .ely-shop-catalogue{padding:57px 0 80px}
+ .ely-shop-section-head{margin-bottom:23px}
+ .ely-shop-section-head h2{font-size:53px}
+ .ely-shop-service-count{font-size:24px}
+ .ely-shop-service-count small{font-size:7px}
+ .ely-shop-tabs{flex-wrap:nowrap;overflow-x:auto;gap:18px;padding-bottom:12px;margin-bottom:23px;scrollbar-width:none}
+ .ely-shop-tabs::-webkit-scrollbar{display:none}
+ .ely-shop-tabs button{flex:none;white-space:nowrap;font-size:10px}
+ .ely-shop-grid{grid-template-columns:1fr;gap:17px}
+ .ely-product-visual{aspect-ratio:1.43}
+ .ely-product-content{padding:25px}
+ .ely-product-name{font-size:47px}
+ .ely-product-description{min-height:0}
+ .ely-shop-concierge-strip .wrap{flex-direction:column;align-items:flex-start;padding-block:41px}
+ .ely-shop-concierge-strip p{font-size:39px}
+ .ely-shop-concierge-link{min-width:0;width:100%}
+ .ely-boutique-footer{flex-direction:column;gap:15px;padding-block:31px}
  .ely-boutique-footer p{font-size:9px}
- .ely-boutique .ely-service-detail{min-height:calc(100svh - 64px);padding-top:27px;padding-bottom:50px}
- .ely-edit-detail-head{padding-bottom:14px}
- .ely-edit-detail-layout{padding-top:57px;gap:48px}
- .ely-edit-detail-title{font-size:clamp(65px,15.5vw,96px);margin:20px 0 24px}
- .ely-edit-detail-summary{font-size:28px}
- .ely-edit-legal{margin-top:60px}
+ .ely-shop-detail-layout{grid-template-columns:1fr;gap:31px;padding-top:26px}
+ .ely-shop-detail-gallery{position:static}
+ .ely-shop-detail-gallery .ely-product-visual{min-height:0;aspect-ratio:1.32}
+ .ely-shop-detail-title{font-size:clamp(55px,13vw,79px)}
+ .ely-shop-detail-description{font-size:24px}
+ .ely-shop-detail-info{padding-top:0}
+ .ely-shop-detail-disclaimer{margin-top:40px}
 }
-@media(max-width:380px){
- .ely-ed-left h1{font-size:78px}
- .ely-index-heading h2{font-size:44px}
- .ely-index-count{font-size:20px}
- .ely-index-row{gap:8px}
- .ely-index-name{font-size:32px}
+@media(max-width:370px){
+ .ely-shop-hero-copy h1{font-size:71px}
+ .ely-shop-section-head h2{font-size:45px}
+ .ely-shop-service-count small{display:none}
+ .ely-product-name{font-size:41px}
 }
 @media(prefers-reduced-motion:reduce){
- .ely-index-row,.ely-index-arrow,.ely-edit-request,.ely-boutique .ely-service-detail{transition:none!important;animation:none!important}
+ .ely-shop-object-dial,.ely-product-card,.ely-product-halo,.ely-product-discover,.ely-shop-hero-cta{transition:none!important}
 }
