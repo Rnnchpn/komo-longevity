@@ -10,13 +10,21 @@ const displayTime=s=>{
 const formatDate=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
 const state={token:null,appointments:[],statuses:{},selected:null,busy:false,from:null,to:null,live:false};
 function message(text){const node=root.querySelector('#op-feedback');if(node)node.textContent=text;}
+async function refreshToken(){
+ const {data}=await sb.auth.getSession();
+ const token=data?.session?.access_token;
+ if(!token)throw Error('session_expired');
+ state.token=token;return token;
+}
 async function callApi(url){
+ await refreshToken();
  const res=await fetch(url,{headers:{authorization:'Bearer '+state.token},cache:'no-store',credentials:'omit'});
  const json=await res.json().catch(()=>({}));
  if(!res.ok)throw Error(json.error||'api_unavailable');
  return json;
 }
 async function callEdge(payload){
+ await refreshToken();
  const res=await fetch(edge,{method:'POST',headers:{authorization:'Bearer '+state.token,
   apikey:'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n','content-type':'application/json'},
   cache:'no-store',body:JSON.stringify(payload)});
