@@ -11,6 +11,26 @@ Prestation : Bilan Online à 49 €, 30 minutes, Acuity type `99940918`. Bilan f
 - Page Acuity affiche Bilan Online KŌMØ, 30 minutes, 49 €.
 - Non attesté : finalisation du paiement, e-mail de confirmation, création de lien de visioconférence.
 
+## Règle de paiement — à confirmer dans l'administration Acuity
+
+**Objectif commercial : paiement intégral de 49 € pendant la réservation, avant confirmation du rendez-vous.** Le prix public seul ne prouve pas que l'option est activée.
+
+Configuration Acuity : **Paiements → Paiement lors de la réservation** → désactiver « Utiliser le même mode pour tous les types de rendez-vous » si nécessaire → ouvrir **Bilan Online KŌMØ — 49 € (type 99940918)** → « Demander un acompte ou le paiement intégral » → **Paiement intégral** → Enregistrer. Un processeur Stripe, Square ou PayPal doit être connecté.
+
+Parcours cible : Pulse → choisir Online → Acuity (créneau → identité) → encaissement de 49 € → confirmation Acuity et reçu → lien de préparation `https://pulse.komolongevity.com/online/` → bilan guidé → résultats Pulse après activation du compte.
+
+Critères de recette à rejouer depuis le début :
+1. Une personne peut-elle obtenir un créneau de Bilan Online sans avoir réglé 49 € ? Si oui, la configuration du paiement obligatoire n'est pas effective.
+2. Une transaction approuvée déclenche-t-elle une confirmation Acuity claire et un reçu ?
+3. Une transaction refusée empêche-t-elle la confirmation du rendez-vous ?
+4. Le message de confirmation contient-il le lien de préparation et l'accès de visioconférence prévu ?
+5. Après paiement, les données de rendez-vous et le statut `paid` sont-ils vérifiés côté serveur par l'API Acuity avant l'invitation Pulse ? **Non implémenté actuellement.**
+6. Tester également annulation, report, remboursement et rétractation selon les CGV.
+
+Test sans encaissement : Acuity recommande un **code de réduction à 100 %** pour vérifier la navigation et les e-mails. Pour tester véritablement le processeur, Acuity recommande un **petit paiement réel**, suivi d'un remboursement, avec des frais éventuels non restitués. Ne pas simuler un paiement confirmé sur la seule base d'un prix affiché.
+
+Sources : https://help.acuityscheduling.com/hc/fr-fr/articles/28051014042125-Choisir-le-mode-de-paiement-des-rendez-vous-des-clients ; https://help.acuityscheduling.com/hc/fr-fr/articles/16676949879309-Tester-votre-outil-de-prise-de-rendez-vous
+
 ## Étape 1 : préparation matérielle et sécurité — livrée par cette branche
 - URL `https://pulse.komolongevity.com/online/` ; lien « Déjà réservé ? Préparez votre séance et votre webcam » sur la page publique de Pulse.
 - Rappel du lien direct de réservation Acuity, sans faux état « réservation vérifiée ».
