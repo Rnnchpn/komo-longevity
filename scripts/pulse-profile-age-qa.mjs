@@ -1,0 +1,56 @@
+import assert from 'node:assert/strict';
+import {sideProfileFrame,createSideProfileStability,surfaceSagittalIndex} from '../pulse-v14-src/online/session/profile-photo-metrics.mjs';
+import {stsReference,oneLegReference,normativeSummary,SOURCES} from '../pulse-v14-src/online/session/reference-norms.mjs';
+import {normPanelMarkup} from '../pulse-v14-src/online/session/normative-panel.js';
+import {buildPdfReportData} from '../pulse-v14-src/online/session/pdf-report.js';
+const points=()=>Array.from({length:33},()=>({x:.5,y:.5,visibility:.1}));
+function makePose(){
+ const p=points();
+ for(const [id,x,y] of [[11,.49,.23],[12,.5,.24],[23,.46,.53],[24,.47,.53],[27,.48,.92],[28,.49,.92]])
+ p[id]={x,y,visibility:.9};
+ // Knees are occluded: cannot block a valid profile.
+ return p;
+}
+const good=sideProfileFrame(makePose());
+assert.equal(good.valid,true,'profile without a visible knee must pass');
+const stability=createSideProfileStability(900);
+let frame;
+for(let i=0;i<13;i++)frame=stability.observe(makePose(),i*105);
+assert.equal(frame.ready,true,'photo countdown must become ready after stable silhouette');
+const largeMove=makePose();largeMove[11].x+=.09;
+frame=stability.observe(largeMove,1400);
+assert.equal(frame.ready,false,'movement restarts countdown');
+const frontal=makePose();frontal[12].x=.8;
+assert.equal(sideProfileFrame(frontal).valid,false);
+assert.equal(sideProfileFrame(null).valid,false);
+assert.ok(surfaceSagittalIndex({x:.5},{x:.47},.7)>4);
+const sth={status:'done',value:16};
+let r=stsReference({ageBand:'60-69',exactAge:64,cohort:'men',protocolConfirmed:true,record:sth});
+assert.equal(r.status,'within');
+assert.equal(r.reference.lower,14);
+assert.equal(r.reference.upper,19);
+r=stsReference({ageBand:'60-69',exactAge:68,cohort:'women',protocolConfirmed:true,record:{status:'done',value:10}});
+assert.equal(r.status,'below');
+r=stsReference({ageBand:'70-79',exactAge:68,cohort:'men',protocolConfirmed:true,record:sth});
+assert.equal(r.status,'unavailable','age must match questionnaire bracket');
+r=stsReference({ageBand:'60-69',exactAge:64,cohort:'men',protocolConfirmed:false,record:sth});
+assert.equal(r.status,'reference_only','comparison requires protocol gate');
+r=stsReference({ageBand:'60-69',exactAge:64,cohort:'men',protocolConfirmed:true,record:{status:'review',value:16}});
+assert.equal(r.status,'reference_only','unverified webcam count cannot be categorized');
+r=stsReference({ageBand:'under40',exactAge:30,cohort:'men',protocolConfirmed:true,record:sth});
+assert.equal(r.status,'unavailable','no fake age extrapolation');
+const one=oneLegReference('60-69',{status:'done',value:19});
+assert.equal(one.expected,32.1);
+assert.equal(one.comparison,null,'20 second cap prevents direct score comparison');
+assert.equal(oneLegReference('80plus',{status:'done',value:4}).comparison,null);
+const summary=normativeSummary({ageBand:'60-69'},{sts:sth},{exactAge:64,cohort:'men',protocolConfirmed:true});
+assert.equal(summary.sts.comparison,'Dans la plage centrale de référence');
+const markup=normPanelMarkup({ageBand:'60-69'},{sts:sth});
+assert.ok(markup.includes('norm-sts-protocol'));
+assert.ok(markup.includes('norm-exact-age'));
+assert.ok(markup.includes(SOURCES.sts.url));
+const pdf=buildPdfReportData({ageBand:'60-69'}, {sts:{...sth,normative:{exactAge:64,cohort:'men',protocolConfirmed:true}}});
+assert.equal(pdf.ageReference.sts.status,'within');
+assert.equal(pdf.observations.length,6);
+assert.ok(!pdf.observations.some(x=>x.id==='balance'));
+console.log('[pulse-profile-age-qa] side-profile tolerance, move reset, age references, no invalid comparison and PDF passed');
