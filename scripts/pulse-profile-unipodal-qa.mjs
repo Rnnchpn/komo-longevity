@@ -20,7 +20,7 @@ function side(){
  const stable=createSideProfileStability();
  let frame;
  for(let i=0;i<27;i++)frame=stable.observe(side(),i*105);
- assert.equal(frame.ready,true,'stable side auto-photo triggers after ~2.3 s');
+ assert.equal(frame.ready,true,'stable side auto-photo triggers after stable pose');
  stable.reset();
  for(let i=0;i<10;i++)stable.observe(side(),i*100);
  const move=side();move[11].x+=.07;move[12].x+=.07;
