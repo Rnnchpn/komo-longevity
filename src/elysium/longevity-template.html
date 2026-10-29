@@ -1,120 +1,85 @@
 <!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#111715"><meta name="robots" content="noindex,nofollow">
-<title>KŌMØ Longevity | ELYSIUM Private Maison</title>
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#151a16">
+<title>Longevity — KŌMØ ELYSIUM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/elysium/assets/elysium.css">
 </head>
-<body data-elysium="maison" class="longevity-maison">
-<nav class="top lv-nav">
-  <a href="/elysium/club/" class="brand" aria-label="Back to ELYSIUM"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
-  <div class="navlinks">
-    <a href="/elysium/club/" data-en="ALL WORLDS" data-fr="LES NEUF UNIVERS">LES NEUF UNIVERS</a>
-    <button id="toggleLanguage" type="button" aria-label="Change language">EN</button>
-    <button id="signOut" type="button" style="display:none" data-en="SIGN OUT" data-fr="DÉCONNEXION">DÉCONNEXION</button>
-    <button id="openSelection" type="button" class="white-link" data-en="MY SELECTION" data-fr="MA SÉLECTION">MA SÉLECTION</button>
-  </div>
+<body data-elysium="maison" class="longevity-maison ely-boutique">
+<nav class="top ely-boutique-nav" aria-label="ELYSIUM navigation">
+ <a class="brand" href="/elysium/club/" aria-label="ELYSIUM"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
+ <div class="navlinks">
+  <a class="ely-boutique-back" href="/elysium/club/" data-fr="LES NEUF UNIVERS" data-en="THE NINE WORLDS">LES NEUF UNIVERS</a>
+  <button type="button" id="toggleLanguage" aria-label="Changer la langue">EN</button>
+  <button type="button" id="signOut" style="display:none" data-fr="DÉCONNEXION" data-en="SIGN OUT">DÉCONNEXION</button>
+  <button type="button" id="openSelection" class="white-link" data-fr="MA DEMANDE" data-en="MY REQUEST">MA DEMANDE</button>
+ </div>
 </nav>
 <main>
-<section class="lv-hero">
- <div class="wrap lv-hero-layout">
-  <div class="lv-hero-copy">
-   <div class="breadcrumb"><a href="/elysium/club/" data-en="NINE WORLDS" data-fr="NEUF UNIVERS">NEUF UNIVERS</a> <span aria-hidden="true">/</span> <span>01</span> <span aria-hidden="true">/</span> <span id="crumbName">Longevity</span></div>
-   <span class="kicker" id="maisonKicker">LONGEVITY IN MOTION</span>
-   <h1 id="maisonTitle">Longevity<span class="lv-dot">.</span></h1>
-   <p class="lv-hero-statement" data-en="Private medical longevity, wherever you are." data-fr="La longévité commence par le mouvement.">La longévité commence par le mouvement.</p>
-   <p id="maisonDescription" class="lv-hero-description">Private longevity, through motion.</p>
-   <a href="#experiences" class="lv-link" data-en="EXPLORE THE EXPERIENCES" data-fr="DÉCOUVRIR LES EXPÉRIENCES">DÉCOUVRIR LES EXPÉRIENCES <span aria-hidden="true">↗</span></a>
+ <section class="ely-editorial wrap" aria-labelledby="ely-boutique-title">
+  <div class="ely-ed-topline">
+   <a href="/elysium/club/" class="ely-ed-return" data-fr="← RETOUR À ELYSIUM" data-en="← BACK TO ELYSIUM">← RETOUR À ELYSIUM</a>
+   <span class="ely-ed-issue">01 <i>/</i> 09</span>
   </div>
-  <div class="lv-motion-art" aria-hidden="true">
-   <svg viewBox="0 0 540 540" fill="none">
-     <circle class="lv-art-ring lv-art-outer" cx="270" cy="270" r="210"/>
-     <circle class="lv-art-ring lv-art-middle" cx="270" cy="270" r="150"/>
-     <circle class="lv-art-ring lv-art-inner" cx="270" cy="270" r="90"/>
-     <circle cx="270" cy="270" r="13" fill="#d2c09e"/>
-     <path class="lv-art-path" d="M48 296c67 0 83-167 139-167s71 274 117 274 77-213 139-213h49"/>
-     <circle class="lv-art-node" cx="187" cy="129" r="6"/>
-     <circle class="lv-art-node" cx="304" cy="403" r="6"/>
-     <path class="lv-art-axis" d="M270 18v504M18 270h504"/>
-     <path class="lv-art-arc" d="M99 97a242 242 0 0 1 342 0"/>
-   </svg>
-   <div class="lv-art-caption">MOVEMENT <span>·</span> CAPACITY <span>·</span> TIME</div>
+  <div class="ely-ed-layout">
+   <div class="ely-ed-left">
+    <span class="ely-ed-kicker" id="maisonKicker">PRIVATE MEDICAL LONGEVITY</span>
+    <h1 id="ely-boutique-title">Longevity<span class="ely-ed-period">.</span></h1>
+   </div>
+   <div class="ely-ed-right">
+    <p class="ely-ed-headline" data-fr="Votre médecin. Où que vous soyez." data-en="Your physician. Wherever you are.">Votre médecin. Où que vous soyez.</p>
+    <p class="ely-ed-subtitle" id="maisonDescription">En visioconférence, à bord ou en résidence privée.</p>
+   </div>
   </div>
- </div>
-</section>
-
-<section class="lv-concept wrap">
- <div class="lv-concept-title">
-  <span class="lv-eyebrow" data-en="PRIVATE MEDICAL LONGEVITY" data-fr="LONGÉVITÉ MÉDICALE PRIVÉE">UNE AUTRE VISION</span>
-  <h2 data-en="Medicine, made <em>personal.</em>" data-fr="Une médecine <em>plus personnelle.</em>">La longévité se <em>vit en mouvement.</em></h2>
- </div>
- <div class="lv-concept-body">
-  <p data-en="Private medical consultations offer a confidential setting to discuss health history, prevention priorities and suitable next steps with an independent, authorised physician." data-fr="Les consultations médicales privées offrent un cadre confidentiel pour échanger sur les antécédents, les priorités de prévention et les suites possibles avec un médecin indépendant habilité.">La force, l’équilibre, la posture, la mobilité et la marche éclairent notre compréhension des capacités fonctionnelles. KŌMØ transforme ces dimensions en une expérience structurée, accessible et personnelle.</p>
-  <p data-en="A secure medical video appointment or a physician visit on board, in residence or at an appropriate clinic — always subject to the doctor’s clinical judgement and availability." data-fr="En visioconférence médicale sécurisée ou lors d’une visite du médecin à bord, en résidence ou dans un cabinet adapté — toujours selon le jugement clinique du médecin et ses disponibilités.">En ligne, à Paris ou Cannes, en résidence privée ou à bord de votre yacht : une même philosophie, adaptée à votre environnement et à votre rythme.</p>
-  <div class="lv-metrics" aria-label="Consultation formats">
-   <span data-en="TELECONSULTATION" data-fr="TÉLÉCONSULTATION">TÉLÉCONSULTATION</span><span data-en="ON BOARD" data-fr="À BORD">À BORD</span><span data-en="IN PERSON" data-fr="EN PRÉSENTIEL">EN PRÉSENTIEL</span><span data-en="FOLLOW-UP" data-fr="SUIVI">SUIVI</span>
+  <div class="ely-ed-bottom">
+   <span>PRIVATE MEDICAL CONCIERGE</span><span>ELYSIUM · 01</span>
   </div>
- </div>
-</section>
-
-<section class="lv-collection" id="experiences">
- <div class="wrap">
-  <div class="lv-section-head">
-   <span class="lv-eyebrow" data-en="01—04 / PRIVATE EXPERIENCES" data-fr="01—04 / EXPÉRIENCES PRIVÉES">01—04 / EXPÉRIENCES PRIVÉES</span>
-   <h2 id="collectionTitle" data-en="Medical consultations. <em>Your setting.</em>" data-fr="Vos consultations. <em>Votre environnement.</em>">Votre mouvement. <em>Votre expérience.</em></h2>
-   <p id="collectionDescription"></p>
+ </section>
+ <section class="ely-index-section" id="experiences" aria-labelledby="ely-services-title">
+  <div class="wrap">
+   <div class="ely-index-heading">
+    <div>
+     <span class="ely-index-kicker" data-fr="LA COLLECTION PRIVÉE" data-en="THE PRIVATE COLLECTION">LA COLLECTION PRIVÉE</span>
+     <h2 id="ely-services-title" data-fr="Les consultations" data-en="The consultations">Les consultations</h2>
+    </div>
+    <span class="ely-index-count">04 <span data-fr="PRESTATIONS" data-en="SERVICES">PRESTATIONS</span></span>
+   </div>
+   <div id="maisonAccess" class="auth-box ely-private-gate" style="display:none">
+    <span class="ely-index-kicker">PRIVATE ACCESS</span>
+    <h3 data-fr="Réservé aux membres." data-en="For members only.">Réservé aux membres.</h3>
+    <p data-fr="Connectez-vous à ELYSIUM pour découvrir les prestations." data-en="Sign in to ELYSIUM to explore the services.">Connectez-vous à ELYSIUM pour découvrir les prestations.</p>
+    <a href="/elysium/club/" class="ely-private-login" data-fr="ENTRER DANS ELYSIUM ↗" data-en="ENTER ELYSIUM ↗">ENTRER DANS ELYSIUM ↗</a>
+   </div>
+   <div id="productGrid" class="ely-service-index" aria-live="polite"></div>
+   <p id="shopMessage" class="state-message"></p>
+   <div class="ely-index-note">
+    <span data-fr="Une demande. Une réponse personnalisée." data-en="One request. A personal response.">Une demande. Une réponse personnalisée.</span>
+    <span data-fr="Médecins indépendants · Selon disponibilité" data-en="Independent physicians · Subject to availability">Médecins indépendants · Selon disponibilité</span>
+   </div>
   </div>
-  <div class="auth-box lv-private-gate" id="maisonAccess" style="display:none">
-   <span class="lv-eyebrow">ELYSIUM PRIVATE ACCESS</span>
-   <h2 data-en="Your private collection awaits." data-fr="Votre collection privée vous attend.">Votre collection privée vous attend.</h2>
-   <p data-en="Sign in to ELYSIUM to explore the four Longevity experiences and make a confidential request." data-fr="Connectez-vous à ELYSIUM pour découvrir les quatre expériences Longevity et adresser une demande confidentielle.">Connectez-vous à ELYSIUM pour découvrir les quatre expériences Longevity et adresser une demande confidentielle.</p>
-   <a href="/elysium/club/" class="btn ink" data-en="MEMBERS' ENTRANCE ↗" data-fr="ACCÈS MEMBRE ↗">ACCÈS MEMBRE ↗</a>
-  </div>
-  <div id="productGrid" class="lv-offers" aria-live="polite"></div>
-  <div id="shopMessage" class="state-message"></div>
- </div>
-</section>
-
-<section class="lv-why">
- <div class="wrap lv-why-layout">
-  <div class="lv-why-head">
-   <span class="lv-eyebrow" data-en="YOUR MEDICAL JOURNEY" data-fr="VOTRE PARCOURS MÉDICAL">LE PASSEPORT MOTION</span>
-   <h2 data-en="From first contact<br><em>to medical follow-up.</em>" data-fr="Du premier échange<br><em>au suivi médical.</em>">Comprendre aujourd’hui.<br><em>Progresser demain.</em></h2>
-  </div>
-  <div class="lv-why-items">
-   <div><span>01</span><p data-en="Select a medical consultation online, on board or in an appropriate care setting." data-fr="Sélectionnez une consultation médicale en ligne, à bord ou dans un lieu de soins adapté.">Une lecture plus claire de vos points forts et de vos axes de progression.</p></div>
-   <div><span>02</span><p data-en="An independent physician determines the clinical assessment and any required investigations." data-fr="Un médecin indépendant détermine l’évaluation clinique et les éventuels examens nécessaires.">Un profil fonctionnel personnel, avec un score et des priorités de mouvement lorsque le bilan le permet.</p></div>
-   <div><span>03</span><p data-en="A personal medical follow-up may be proposed by the treating physician, subject to their judgement." data-fr="Un suivi médical personnalisé peut être proposé par le médecin traitant selon son appréciation.">Des prochaines étapes concrètes : bilan complémentaire, routines de mouvement ou suivi structuré.</p></div>
-  </div>
- </div>
- <p class="wrap lv-method-note" data-en="Medical services are exclusively performed and billed by independently authorised clinicians. Teleconsultation and care on board require physician approval and appropriate regulatory, clinical and safety conditions. KŌMØ Motion (49 €) remains a separate non-medical functional offering." data-fr="Les services médicaux sont réalisés et facturés exclusivement par des médecins indépendants habilités. Téléconsultation et soins à bord exigent leur accord et des conditions réglementaires, cliniques et de sécurité adaptées. Le bilan KŌMØ Motion à 49 € reste une prestation fonctionnelle non médicale distincte.">Les services médicaux sont réalisés et facturés exclusivement par des médecins indépendants habilités. Téléconsultation et soins à bord exigent leur accord et des conditions de sécurité adaptées. KŌMØ Motion reste une prestation distincte et non médicale.</p>
-</section>
-
-<section class="lv-last">
- <div class="wrap">
-   <span class="lv-eyebrow" data-en="A DISCREET INVITATION" data-fr="UNE INVITATION PRIVÉE">UNE INVITATION PRIVÉE</span>
-   <h2 data-en="Your care. <em>Personally arranged.</em>" data-fr="Vos soins. <em>Organisés personnellement.</em>">La suite vous <em>appartient.</em></h2>
-   <p data-en="Select an appointment request, then the independent doctor confirms suitability, scheduling and professional fees." data-fr="Sélectionnez une demande de rendez-vous, puis le médecin indépendant confirme l’indication, la disponibilité et ses honoraires.">Explorez les possibilités et laissez notre équipe organiser l’expérience adaptée à votre mode de vie.</p>
-   <a href="#experiences" class="lv-link" data-en="CHOOSE AN EXPERIENCE ↗" data-fr="CHOISIR MON EXPÉRIENCE ↗">CHOISIR MON EXPÉRIENCE ↗</a>
- </div>
-</section>
-
-<section id="serviceDetail" class="ely-service-detail wrap" hidden aria-live="polite" aria-label="Private medical service details"></section>
+ </section>
+ <section class="ely-service-detail wrap" id="serviceDetail" hidden aria-live="polite" aria-label="Private service"></section>
 </main>
-<div class="collection-drawer" id="selectionDrawer" role="dialog" aria-modal="true" aria-label="Private selection">
+<footer class="ely-boutique-footer wrap">
+ <span>KŌMØ <em>ELYSIUM</em></span>
+ <p data-fr="Prestations médicales réalisées et facturées par des médecins indépendants habilités. Rendez-vous et honoraires à confirmer. ELYSIUM assure uniquement la coordination." data-en="Medical services are provided and billed by independently authorised physicians. Appointments and fees subject to confirmation. ELYSIUM coordinates only.">Prestations médicales réalisées et facturées par des médecins indépendants habilités. Rendez-vous et honoraires à confirmer. ELYSIUM assure uniquement la coordination.</p>
+</footer>
+<div class="collection-drawer" id="selectionDrawer" role="dialog" aria-modal="true" aria-label="Private request">
  <div class="drawer-inner">
-  <div class="drawer-head"><h2 data-en="Your private selection." data-fr="Votre sélection privée.">Votre sélection privée.</h2><button id="closeSelection" type="button" aria-label="Close">×</button></div>
-  <p data-en="Select an experience and send one confidential enquiry. No payment is taken at this stage." data-fr="Sélectionnez une expérience et transmettez une demande confidentielle. Aucun paiement n’est prélevé ici.">Sélectionnez une expérience et transmettez une demande confidentielle. Aucun paiement n’est prélevé ici.</p>
+  <div class="drawer-head"><h2 data-fr="Votre demande." data-en="Your request.">Votre demande.</h2><button type="button" id="closeSelection" aria-label="Close">×</button></div>
+  <p data-fr="Notre équipe vous répond personnellement. Aucun paiement ici." data-en="Our team will reply personally. No payment is taken here.">Notre équipe vous répond personnellement. Aucun paiement ici.</p>
   <div id="selectionItems"></div>
-  <div class="drawer-foot"><div class="field"><label for="selectionNote" data-en="YOUR REQUEST" data-fr="VOTRE DEMANDE">VOTRE DEMANDE</label><textarea id="selectionNote" placeholder="Location, date and preferences. No medical or sensitive information."></textarea></div>
-   <button class="btn ink" id="sendSelection" type="button" data-en="CONTACT MY CONCIERGE ↗" data-fr="CONTACTER MA CONCIERGERIE ↗">CONTACTER MA CONCIERGERIE ↗</button>
+  <div class="drawer-foot">
+   <div class="field"><label for="selectionNote" data-fr="LIEU ET DATES SOUHAITÉS" data-en="LOCATION AND PREFERRED DATES">LIEU ET DATES SOUHAITÉS</label><textarea id="selectionNote" placeholder="Cannes, Monaco, yacht, résidence…"></textarea></div>
+   <button type="button" class="btn ink" id="sendSelection" data-fr="PRÉPARER MA DEMANDE ↗" data-en="PREPARE MY REQUEST ↗">PRÉPARER MA DEMANDE ↗</button>
    <p id="selectionResponse" role="status"></p>
+   <p class="ely-request-privacy" data-fr="Aucune donnée médicale dans ce formulaire." data-en="Please do not include medical information.">Aucune donnée médicale dans ce formulaire.</p>
   </div>
  </div>
 </div>
-<footer class="footer wrap"><div><b>KŌMØ <em>ELYSIUM</em></b><p>LONGEVITY IN MOTION</p></div><div><p data-en="All experiences are subject to availability and individual confirmation. All clinical services are provided separately by independently licensed physicians." data-fr="Prestations sous réserve de disponibilité et de confirmation individuelle. Les prestations médicales sont réalisées séparément par des médecins indépendants habilités.">Prestations sous réserve de disponibilité et de confirmation individuelle. Les services sont non médicaux, sauf lorsqu’ils sont réalisés séparément par des professionnels habilités.</p></div></footer>
-<script src="/elysium/assets/supabase.js"></script><script type="module" src="/elysium/assets/member.js"></script>
+<script src="/elysium/assets/supabase.js"></script>
+<script type="module" src="/elysium/assets/member.js"></script>
 </body></html>

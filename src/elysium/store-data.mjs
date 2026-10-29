@@ -7,13 +7,13 @@ const medical=p=>({kind:'INDEPENDENT MEDICAL CARE',priceEn:'Physician quotation'
 export const WORLDS=[
 {
 slug:'longevity',no:'01',icon:'◈',name:'Longevity',full:'KŌMØ Longevity',eyebrow:'PRIVATE MEDICAL LONGEVITY',
-subtitleEn:'Private medical consultations, wherever life takes you.',subtitleFr:'Une médecine privée de la longévité, pensée pour votre mobilité.',
+subtitleEn:'By video, on board or in your residence.',subtitleFr:'En visioconférence, à bord ou en résidence privée.',
 copyEn:'A curated pathway to independent medical consultations focused on prevention, assessment and follow-up. Choose a secure teleconsultation, a private medical appointment on board or in residence, or an in-person visit where offered. Medical decisions remain solely with the physician.',
 copyFr:'Un parcours de consultations médicales indépendantes consacré à la prévention, à l’évaluation et au suivi. Téléconsultation sécurisée, rendez-vous privé à bord ou en résidence, ou consultation présentielle selon les disponibilités. Toute décision médicale relève exclusivement du médecin.',
 image:img('photo-1530549387789-4c1017266635'),background:'linear-gradient(115deg,#202b2d,#0b1619)',
 products:[
 medical({
- id:'medical-longevity-online',en:'Private Medical Longevity · Online',fr:'Consultation médicale Longévité · En ligne',
+ id:'medical-longevity-online',en:'Online Consultation',fr:'Consultation en ligne',modeEn:'VIDEO CONSULTATION',modeFr:'EN VISIO',shortEn:'A private consultation with a physician, wherever you are.',shortFr:'Échangez avec un médecin, où que vous soyez.',
  tag:'01 · VIDEO CONSULTATION',glyph:'pulse',
  copyEn:'A private video consultation with an independent qualified physician to discuss your medical history, prevention priorities and appropriate follow-up. The doctor decides whether remote care is suitable.',
  copyFr:'Une consultation en visioconférence sécurisée avec un médecin indépendant habilité, pour aborder les antécédents, les priorités de prévention et le suivi adapté. Le médecin décide si la téléconsultation est indiquée.',
@@ -21,12 +21,12 @@ medical({
  detailFr:'Commencez par un échange médical dédié. Après confirmation de la disponibilité et de la pertinence du format, le médecin réalise la consultation sur sa plateforme de soins adaptée, peut proposer des examens ou un suivi et demeure responsable du dossier médical et de ses décisions.',
  pointsEn:['Secure video appointment with an authorised doctor','Medical history, prevention and personal priorities','Individual clinical plan at the physician’s discretion'],
  pointsFr:['Rendez-vous vidéo sécurisé avec un médecin habilité','Antécédents, prévention et priorités personnelles','Conduite à tenir médicale décidée par le praticien'],
- stepsEn:['Request the appointment without entering health details','Receive the physician’s identity, proposed terms and scheduling','Consult securely with the physician if medically appropriate'],
- stepsFr:['Demandez le rendez-vous sans communiquer de données de santé','Recevez l’identité du médecin, les modalités et un créneau proposé','Consultez sur un canal médical sécurisé si le format est approprié'],
+ stepsEn:["Choose your date.","The physician confirms the appointment.","Consult on a secure medical platform."],
+ stepsFr:["Choisissez votre date.","Le médecin confirme le rendez-vous.","Consultez sur une plateforme médicale sécurisée."],
  buttonEn:'VIEW THE ONLINE CONSULTATION',buttonFr:'DÉCOUVRIR LA TÉLÉCONSULTATION'
 }),
 medical({
- id:'medical-longevity-onboard',en:'Private Physician · On Board',fr:'Médecin privé · À bord',
+ id:'medical-longevity-onboard',en:'Physician On Board',fr:'Médecin à bord',modeEn:'ON BOARD / RESIDENCE',modeFr:'À BORD / RÉSIDENCE',shortEn:'A physician visit on board or in your residence.',shortFr:'Un médecin se déplace sur votre yacht ou en résidence.',
  tag:'02 · YACHT / VILLA / RESIDENCE',glyph:'horizon',
  copyEn:'A discreet request for an independent physician to attend a yacht or private residence for a medical assessment, subject to the setting, local law and clinical safety requirements.',
  copyFr:'Une demande de déplacement d’un médecin indépendant sur un yacht ou en résidence privée pour une évaluation médicale, sous réserve du lieu, du droit applicable et des conditions de sécurité.',
@@ -34,12 +34,12 @@ medical({
  detailFr:'Pensée pour les clients recherchant confidentialité et continuité lors de leurs déplacements. Le médecin vérifie d’abord l’objet de la demande et si le yacht ou la résidence offre un cadre adapté. L’examen, les soins, les documents et les prescriptions relèvent de son exercice médical indépendant.',
  pointsEn:['Physician visit subject to medical suitability','Yacht, villa or residence by individual arrangement','Private logistics and separate physician quotation'],
  pointsFr:['Déplacement sous réserve de pertinence médicale','Yacht, villa ou résidence après organisation individuelle','Logistique discrète et honoraires distincts du médecin'],
- stepsEn:['Specify destination, vessel location and preferred date','Confirm a doctor’s availability and the clinical setting','Receive a separate medical proposal before any appointment'],
- stepsFr:['Indiquez la destination, le lieu du yacht et la date souhaitée','Vérification du médecin disponible et des conditions de soins','Recevez une proposition médicale distincte avant confirmation'],
+ stepsEn:["Share the location and date.","Availability and suitability are checked.","The doctor confirms the visit and fees."],
+ stepsFr:["Précisez le lieu et la date.","La disponibilité et la faisabilité sont vérifiées.","Le médecin confirme sa visite et ses honoraires."],
  buttonEn:'VIEW PRIVATE PHYSICIAN VISIT',buttonFr:'DÉCOUVRIR LA VISITE MÉDICALE À BORD'
 }),
 medical({
- id:'medical-longevity-clinic',en:'Comprehensive Medical Longevity Consultation',fr:'Consultation médicale Longévité approfondie',
+ id:'medical-longevity-clinic',en:'In-Person Consultation',fr:'Consultation en présentiel',modeEn:'PRIVATE APPOINTMENT',modeFr:'EN CABINET',shortEn:'A complete assessment with an independent physician.',shortFr:'Un bilan médical approfondi avec un médecin indépendant.',
  tag:'03 · IN PERSON / BY APPOINTMENT',glyph:'rings',
  copyEn:'An in-person consultation with an independent physician for a considered review of health, preventive priorities and any appropriate examinations or specialist referrals.',
  copyFr:'Une consultation en présentiel avec un médecin indépendant pour une analyse personnalisée de la santé, des priorités préventives et, si nécessaire, d’examens ou d’orientations spécialisées.',
@@ -47,12 +47,12 @@ medical({
  detailFr:'La consultation est organisée auprès d’un professionnel habilité dans un lieu de soins adapté, selon les praticiens et les villes disponibles. Le bilan KŌMØ Motion peut être évoqué comme prestation fonctionnelle non médicale distincte, sans remplacer l’examen clinique.',
  pointsEn:['Independent physician consultation at an appropriate location','Personal medical assessment and possible investigations','Separate optional non-medical KŌMØ Motion assessment'],
  pointsFr:['Consultation par un médecin indépendant dans un lieu adapté','Évaluation médicale et examens éventuels selon indication','Bilan KŌMØ Motion non médical possible en complément séparé'],
- stepsEn:['Request your preferred city and dates','Confirm clinician, professional fees and place of care','Attend the medical consultation and receive physician-led follow-up'],
- stepsFr:['Précisez la ville et les dates souhaitées','Confirmez le praticien, ses honoraires et le lieu de soins','Réalisez la consultation et son suivi sous responsabilité médicale'],
+ stepsEn:["Choose a location and date.","The physician confirms the appointment.","Meet the physician in person."],
+ stepsFr:["Choisissez un lieu et une date.","Le médecin confirme le rendez-vous.","Rencontrez le médecin en consultation."],
  buttonEn:'EXPLORE THE MEDICAL CONSULTATION',buttonFr:'DÉCOUVRIR LA CONSULTATION MÉDICALE'
 }),
 medical({
- id:'medical-longevity-followup',en:'Private Medical Follow-Up',fr:'Suivi médical privé',
+ id:'medical-longevity-followup',en:'Medical Follow-Up',fr:'Suivi médical privé',modeEn:'ONGOING CARE',modeFr:'SUIVI',shortEn:'Individual care, organised over time.',shortFr:'Des rendez-vous et un suivi adaptés à votre situation.',
  tag:'04 · CONTINUITY / CARE PLAN',glyph:'trajectory',
  copyEn:'A follow-up pathway organised around the independent physician’s clinical recommendations, with appointments online or in person where appropriate.',
  copyFr:'Un parcours de suivi organisé autour des recommandations du médecin indépendant, avec des consultations en ligne ou en présentiel lorsque cela est pertinent.',
@@ -60,21 +60,21 @@ medical({
  detailFr:'Un parcours d’organisation confidentielle des consultations à venir, des résultats d’examens prescrits par le médecin et de la continuité des soins. KŌMØ coordonne uniquement la logistique ; seuls les soignants gèrent les données médicales.',
  pointsEn:['Individual medical follow-up determined by the doctor','Remote or in-person appointments as medically appropriate','Concierge assistance for scheduling, not clinical decisions'],
  pointsFr:['Suivi individuel déterminé par le médecin','Rendez-vous à distance ou en présentiel selon indication','Conciergerie pour les rendez-vous, sans décision clinique'],
- stepsEn:['Request a continuity-of-care discussion','Independent clinician confirms the programme and fees','Appointments are planned with the treating medical team'],
- stepsFr:['Demandez un échange sur la continuité des soins','Le médecin confirme le programme et ses honoraires','Les rendez-vous sont organisés avec l’équipe soignante'],
+ stepsEn:["Request a follow-up.","The doctor proposes a suitable plan.","Arrange your next appointments."],
+ stepsFr:["Demandez un suivi.","Le médecin propose un parcours adapté.","Organisez les prochains rendez-vous."],
  buttonEn:'DISCOVER THE FOLLOW-UP PATHWAY',buttonFr:'DÉCOUVRIR LE PARCOURS DE SUIVI'
 })
 ]
 },
 {
 slug:'aesthetic',no:'02',icon:'✧',name:'Aesthetic',full:'KŌMØ Aesthetic',eyebrow:'PRIVATE AESTHETIC MEDICINE',
-subtitleEn:'Private aesthetic medicine, considered at every step.',subtitleFr:'La médecine esthétique privée, dans toute son exigence.',
+subtitleEn:'Medical consultations, online or in person.',subtitleFr:'Consultations médicales, en ligne ou sur place.',
 copyEn:'Confidential medical aesthetic consultations and, where clinically appropriate, physician visits in a suitable private setting. All examinations, decisions and procedures belong to independent authorised doctors.',
 copyFr:'Consultations de médecine esthétique confidentielles et, lorsque cela est médicalement approprié, déplacements d’un médecin dans un lieu privé adapté. Examens, décisions et actes relèvent de médecins indépendants habilités.',
 image:img('photo-1540555700478-4be289fbecef'),background:'linear-gradient(135deg,#47342f,#1d1a1a)',
 products:[
 medical({
- id:'aesthetic-medical-video',en:'Private Aesthetic Medical Video Consultation',fr:'Téléconsultation de médecine esthétique',
+ id:'aesthetic-medical-video',en:'Online Aesthetic Consultation',fr:'Consultation en ligne',modeEn:'VIDEO CONSULTATION',modeFr:'EN VISIO',shortEn:'A private first consultation with an aesthetic physician.',shortFr:'Un premier échange avec un médecin esthétique.',
  tag:'01 · MEDICAL VIDEO CONSULTATION',glyph:'profile',
  copyEn:'An initial medical discussion with an independent aesthetic physician about expectations, medical suitability and the potential need for an in-person examination.',
  copyFr:'Un premier échange médical en visioconférence avec un médecin esthétique indépendant autour des attentes, de la pertinence des options et de la nécessité éventuelle d’un examen présentiel.',
@@ -82,12 +82,12 @@ medical({
  detailFr:'Cette téléconsultation préalable sécurisée permet au médecin d’échanger sur les attentes et les suites possibles. Elle ne garantit aucun acte, et une consultation clinique en présence peut être indispensable avant tout traitement.',
  pointsEn:['Independent licensed aesthetic physician','Discussion of preferences and clinical suitability','In-person consultation arranged if needed'],
  pointsFr:['Médecin esthétique indépendant habilité','Discussion des attentes et de la pertinence médicale','Examen en présentiel organisé si nécessaire'],
- stepsEn:['Request an appointment without sending medical photographs','Confirm doctor, secure platform and consultation terms','Discuss an individual medical pathway with the physician'],
- stepsFr:['Demandez un rendez-vous sans transmettre de photos médicales','Confirmez le médecin, la plateforme et les modalités','Discutez du parcours médical individuel avec le praticien'],
+ stepsEn:["Choose your date.","An aesthetic physician confirms.","Consult by secure video."],
+ stepsFr:["Choisissez une date.","Le médecin esthétique confirme.","Consultez en vidéo sécurisée."],
  buttonEn:'VIEW AESTHETIC TELECONSULTATION',buttonFr:'DÉCOUVRIR LA TÉLÉCONSULTATION ESTHÉTIQUE'
 }),
 medical({
- id:'aesthetic-physician-onboard',en:'Private Aesthetic Physician · On Board',fr:'Médecin esthétique privé · À bord',
+ id:'aesthetic-physician-onboard',en:'Aesthetic Physician On Board',fr:'Médecin à bord',modeEn:'ON BOARD / RESIDENCE',modeFr:'À BORD / RÉSIDENCE',shortEn:'A private medical consultation where you stay.',shortFr:'Une consultation médicale sur votre yacht ou en résidence.',
  tag:'02 · PRIVATE VISIT / ON BOARD',glyph:'constellation',
  copyEn:'Arrange an independent aesthetic physician’s visit to a yacht, villa or residence for a medical consultation, with any procedures strictly dependent on clinical and environmental suitability.',
  copyFr:'Demandez le déplacement d’un médecin esthétique indépendant à bord, en villa ou en résidence pour une consultation médicale ; tout acte éventuel dépend strictement de l’indication et de l’adaptation du lieu.',
@@ -95,12 +95,12 @@ medical({
  detailFr:'Une consultation esthétique médicale confidentielle adaptée à votre déplacement. Le médecin détermine si un examen ou un acte peut être pratiqué en sécurité dans le lieu proposé ; certaines interventions imposent un établissement ou cabinet médical adapté.',
  pointsEn:['Yacht, private residence or villa on request','Independent medical evaluation before any intervention','Provider, safety, fee and venue confirmed separately'],
  pointsFr:['Yacht, résidence privée ou villa sur demande','Évaluation médicale préalable à tout geste éventuel','Prestataire, sécurité, honoraires et lieu validés séparément'],
- stepsEn:['Send only location, timing and logistical preferences','Independent physician reviews feasibility and proposed setting','The physician confirms examination and any eligible care'],
- stepsFr:['Indiquez uniquement le lieu, les dates et la logistique','Le médecin examine la faisabilité et le cadre proposé','Le praticien confirme l’examen et les soins éventuellement possibles'],
+ stepsEn:["Specify the location and date.","The doctor checks suitability.","The visit is confirmed if appropriate."],
+ stepsFr:["Précisez le lieu et la date.","Le médecin vérifie les conditions de soins.","La visite est confirmée si adaptée."],
  buttonEn:'EXPLORE THE ON-BOARD PHYSICIAN VISIT',buttonFr:'DÉCOUVRIR LA VISITE MÉDICALE À BORD'
 }),
 medical({
- id:'aesthetic-medical-pathway',en:'Bespoke Medical Aesthetic Pathway',fr:'Parcours médical esthétique sur mesure',
+ id:'aesthetic-medical-pathway',en:'Private Aesthetic Programme',fr:'Parcours esthétique privé',modeEn:'IN PERSON / FOLLOW-UP',modeFr:'EN PRÉSENTIEL / SUIVI',shortEn:'A tailored medical aesthetic assessment and follow-up.',shortFr:'Une consultation et un suivi esthétique personnalisés.',
  tag:'03 · CONSULTATION & FOLLOW-UP',glyph:'petals',
  copyEn:'An individual medical aesthetic journey with an independent doctor: assessment, suitable treatment options if clinically indicated, and follow-up appointments in an appropriate care setting.',
  copyFr:'Un parcours individualisé de médecine esthétique avec un médecin indépendant : consultation, options éventuelles adaptées après examen et rendez-vous de suivi dans un cadre de soins approprié.',
@@ -108,8 +108,8 @@ medical({
  detailFr:'Le médecin traitant décide des délais, du lieu, des conditions et de l’indication de tout acte médical. ELYSIUM intervient uniquement pour les rendez-vous et la logistique privée ; aucun traitement n’est vendu ou promis à l’avance.',
  pointsEn:['In-person medical assessment where indicated','Individualised discussion of appropriate options','Post-consultation coordination and physician-led follow-up'],
  pointsFr:['Évaluation clinique en présence lorsque nécessaire','Discussion individualisée des options appropriées','Coordination et suivi assurés par le médecin'],
- stepsEn:['Discuss desired location and appointment window','Consult an independent authorised specialist','Plan any medically indicated follow-up with their practice'],
- stepsFr:['Échangez sur le lieu et les créneaux souhaités','Consultez un spécialiste indépendant habilité','Organisez avec son cabinet le suivi médical éventuellement indiqué'],
+ stepsEn:["Request a private consultation.","The physician discusses suitable options.","Arrange follow-up if recommended."],
+ stepsFr:["Demandez une consultation privée.","Le médecin présente les options adaptées.","Organisez le suivi si nécessaire."],
  buttonEn:'VIEW THE PRIVATE AESTHETIC PATHWAY',buttonFr:'DÉCOUVRIR LE PARCOURS ESTHÉTIQUE PRIVÉ'
 })
 ]

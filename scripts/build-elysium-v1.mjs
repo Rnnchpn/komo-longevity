@@ -25,8 +25,8 @@ await writeFile(join(assets,'store-data.mjs'),
 const template=await readFile(join(src,'maison-template.html'),'utf8');
 const longevityTemplate=await readFile(join(src,'longevity-template.html'),'utf8');
 const aestheticTemplate=await readFile(join(src,'aesthetic-template.html'),'utf8');
-if(!aestheticTemplate.includes('id="productGrid"')||!aestheticTemplate.includes('class="aesthetic-maison"')||aestheticTemplate.includes('<img'))throw new Error('[elysium] bespoke photo-free Aesthetic template missing');
-if(!longevityTemplate.includes('id="productGrid"')||!longevityTemplate.includes('class="longevity-maison"')||longevityTemplate.includes('<img'))throw new Error('[elysium] bespoke photo-free longevity template missing');
+if(!aestheticTemplate.includes('id="productGrid"')||!aestheticTemplate.includes('class="aesthetic-maison ely-boutique"')||aestheticTemplate.includes('<img'))throw new Error('[elysium] bespoke photo-free Aesthetic template missing');
+if(!longevityTemplate.includes('id="productGrid"')||!longevityTemplate.includes('class="longevity-maison ely-boutique"')||longevityTemplate.includes('<img'))throw new Error('[elysium] bespoke photo-free longevity template missing');
 if(WORLDS.length!==9||WORLDS.some(w=>w.products.length!==(w.slug==='longevity'?4:3)))throw new Error('[elysium] nine worlds and four KŌMØ Longevity offers required');
 for(const world of WORLDS){
  const dir=join(out,'maison',world.slug);
@@ -39,11 +39,11 @@ if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.incl
 const club=await readFile(join(out,'club','index.html'),'utf8');
 if(!club.includes('id="memberWheel"')||!club.includes('class="ely-orbit"')||!club.includes('id="elyOrbitActive"')||club.includes('id="memberCards"'))
  throw new Error('[elysium] interactive orbital member app missing');
-if(!longevityTemplate.includes('id="serviceDetail"')||!aestheticTemplate.includes('id="serviceDetail"'))throw new Error('[elysium] missing private product detail pages');
+if(!longevityTemplate.includes('id="serviceDetail"')||!aestheticTemplate.includes('id="serviceDetail"')||!longevityTemplate.includes('ely-index-section')||!aestheticTemplate.includes('ely-index-section'))throw new Error('[elysium] ultra-minimal private product index missing');
 if(WORLDS.find(w=>w.slug==='longevity').products.some(p=>!p.id.startsWith('medical-'))||WORLDS.find(w=>w.slug==='aesthetic').products.some(p=>!p.id.startsWith('aesthetic-')))throw new Error('[elysium] medical boutiques must show clinician-led services only');
 const member=await readFile(join(assets,'member.js'),'utf8');
 if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp')||!member.includes('renderLongevityProducts')||!member.includes('renderAestheticProducts')||!member.includes('renderProductRoute')||!member.includes("$$('[data-en]').forEach"))throw new Error('[elysium] secure member client or Longevity shop renderer missing');
 if(member.includes("photo.src=w.image")||!member.includes('ELYSIUM_GLYPHS')||!member.includes("orbitStep(")||!member.includes("WORLDS.forEach"))throw new Error('[elysium] vector nine-world orbital interaction missing');
 const sanitized=await readFile(join(assets,'store-data.mjs'),'utf8');
 if(sanitized.includes('Private Motion Experience')||sanitized.includes('products:['))throw new Error('[elysium] private catalogue leaked in public metadata');
-console.log('[elysium] READY · nine SVG worlds · medical Longevity and Aesthetic boutique detail routes · 28 gated offers');
+console.log('[elysium] READY · nine SVG worlds · two quiet-luxury medical maisons · 7 concise medical service sheets · 28 gated offers');
