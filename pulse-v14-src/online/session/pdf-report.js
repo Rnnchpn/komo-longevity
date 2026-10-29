@@ -1,8 +1,9 @@
 import {INTAKE_GROUPS,SCORING_GROUPS,scoreIntake,intakeProgress,questionnaireFocus} from './intake-model.mjs';
 import {MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
 import {normativeSummary} from './reference-norms.mjs';
+import {buildMotionPassport,programProgress,planTargets} from './motion-passport.mjs';
 
-export const PDF_REPORT_VERSION='KOMO_MOTION_REPORT_V1';
+export const PDF_REPORT_VERSION='KOMO_MOTION_PASSPORT_REPORT_V2';
 const OBSERVATIONS=[
  ['sts','Lever de chaise - 30 s','repetitions',0],
  ['heels','Elevation des talons','repetitions',0],
@@ -24,7 +25,7 @@ function answerLabel(question,value){
  const idx=Number(value);
  return Number.isInteger(idx)&&idx>=0&&idx<question.options.length?question.options[idx]:'Non renseigne';
 }
-export function buildPdfReportData(answers={},results={},motionScore=null,blocked=false,generatedAt=new Date()){
+export function buildPdfReportData(answers={},results={},motionScore=null,blocked=false,generatedAt=new Date(),options={}){
  const p=scoreIntake(answers),progress=intakeProgress(answers);
  const groups=INTAKE_GROUPS.map(g=>({
   id:g.id,name:g.title,score:p.domains[g.id]??null,weight:g.weight??null,
@@ -52,7 +53,9 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
  const date=generatedAt instanceof Date&&!Number.isNaN(generatedAt.getTime())?
   generatedAt.toISOString().slice(0,10):new Date().toISOString().slice(0,10);
  return {
-  version:PDF_REPORT_VERSION,date,mode:'DEMONSTRATION',
+  version:PDF_REPORT_VERSION,date,mode:options?.mode==='PILOTE'?'PILOTE':'DEMONSTRATION',
+  passport:buildMotionPassport(answers,results,blocked),
+  program:options?.program?.version==='KOMO_PULSE_DAILY_V1'?{progress:programProgress(options.program),startedAt:options.program.startedAt}:null,
   questionnaire:{complete:p.complete,index:p.complete?p.profileIndex:null,
    answered:progress.completed,total:progress.total,domains:SCORING_GROUPS.map(g=>({
     id:g.id,label:g.title,score:p.domains[g.id]??null,weight:g.weight
