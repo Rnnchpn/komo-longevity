@@ -6,6 +6,10 @@ const root=process.cwd();
 const html=await readFile(join(root,'site','pulse-v14','index.html'),'utf8');
 const app=await readFile(join(root,'site','pulse-v14','app.js'),'utf8');
 const css=await readFile(join(root,'site','pulse-v14','styles.css'),'utf8');
+const onlineHtml=await readFile(join(root,'site','pulse-v14','online','index.html'),'utf8');
+const onlineScript=await readFile(join(root,'site','pulse-v14','online','app.js'),'utf8');
+const onlineCss=await readFile(join(root,'site','pulse-v14','online','styles.css'),'utf8');
+const onlineSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','app.js')],{encoding:'utf8'});
 const vercel=JSON.parse(await readFile(join(root,'vercel.json'),'utf8'));
 const middleware=await readFile(join(root,'middleware.js'),'utf8');
 const appSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','app.js')],{encoding:'utf8'});
@@ -28,6 +32,14 @@ const checks=[
  ['direct online link on card and panel',app.includes('href:onlineBookingUrl,tone:\'online\'')&&app.includes('class="pulse-entry-online-shortcut" href="${onlineBookingUrl}"')],
  ['online booking shortcut styled',css.includes('.pulse-entry-online-shortcut')],
  ['existing login preserved',app.includes('pulseShowLogin')&&app.includes('signInWithPassword')],
+ ['Online preflight accessible from landing',app.includes('href="./online/"')&&css.includes('.pulse-entry-prep-link')],
+ ['Online preflight page branded',onlineHtml.includes('Préparer mon Bilan Online')&&onlineHtml.includes('KŌMØ <span>PULSE</span>')],
+ ['Online preflight references verified booking',onlineHtml.includes('owner=40696577&amp;appointmentType=99940918')],
+ ['Online preflight safety checklist',onlineHtml.includes('id="ready-checklist"')&&(onlineHtml.match(/data-preflight-check/g)||[]).length===4],
+ ['Online preflight camera permission only',onlineScript.includes('navigator.mediaDevices.getUserMedia')&&onlineScript.includes('audio: false')],
+ ['Online preflight stops media tracks',onlineScript.includes('getTracks().forEach(track => track.stop())')&&onlineScript.includes("addEventListener('pagehide'")],
+ ['Online preflight does not record or upload video',!(/MediaRecorder|fetch\s*\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage/.test(onlineScript))],
+ ['Online preflight syntax and responsive layout',onlineSyntax.status===0&&onlineCss.includes('@media(max-width:690px)')],
  ['booking-first responsive styles',css.includes('.pulse-offer-list')&&css.includes('.pulse-entry-panel')],
  ['patient title',html.includes('Votre santé en mouvement')],
  ['single entry script',(html.match(/<script/g)||[]).length===1],

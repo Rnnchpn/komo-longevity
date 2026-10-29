@@ -412,3 +412,10 @@
   .pulse-entry-online-shortcut,
   .pulse-entry-online-shortcut span { transition: none!important; }
 }
+
+
+/* Pulse Online — guided preflight link in the public entry */
+.pulse-entry-prep-link{display:flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;font-size:10px;font-weight:650;color:#43634c;text-align:center;line-height:1.6;margin:12px auto 2px;padding:9px 8px;border-radius:8px;transition:color .2s ease,background .2s ease}
+.pulse-entry-prep-link:hover,.pulse-entry-prep-link:focus-visible{color:#1c3c2b;background:rgba(207,218,198,.36)}
+.pulse-entry-prep-link span{color:#967d56;font-size:13px}
+@media(prefers-reduced-motion:reduce){.pulse-entry-prep-link{transition:none}}

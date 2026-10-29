@@ -123,6 +123,7 @@ function installPulseBookingEntry(){
     </ol>
     <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${bookingUrl}" target="_blank" rel="noopener noreferrer">Choisir mon bilan et réserver <span aria-hidden="true">↗</span></a>
     <a class="pulse-entry-online-shortcut" href="${onlineBookingUrl}" target="_blank" rel="noopener noreferrer" aria-label="Réserver directement le Bilan Online de 30 minutes à 49 euros">Réserver directement le Bilan Online <strong>49 €</strong> <span aria-hidden="true">↗</span></a>
+    <a class="pulse-entry-prep-link" href="./online/" aria-label="Préparer mon Bilan Online et tester ma webcam"><span aria-hidden="true">◉</span> Déjà réservé ? Préparez votre séance et votre webcam <span aria-hidden="true">→</span></a>
     <p class="pulse-entry-assurance"><span aria-hidden="true">◇</span> La réservation ne crée pas automatiquement de compte Pulse. Une confirmation Acuity ne vaut pas activation de l’espace patient.</p>
     <div class="pulse-entry-login-bridge"><span>Vous avez déjà un compte ?</span><button type="button" class="pulse-login-link" id="pulseShowLogin">Se connecter →</button></div>
     <div class="pulse-entry-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
