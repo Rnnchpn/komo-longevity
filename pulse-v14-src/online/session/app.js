@@ -119,7 +119,7 @@ function summary(){
    state.task=0;state.answers={};state.checks.clear();state.results={};state.remaining=0;
    render();
   }
- });
+ },state.answers.safety==='yes');
 }
 function render(){
  stopTimer();stopCamera();
