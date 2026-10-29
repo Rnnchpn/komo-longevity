@@ -73,10 +73,24 @@ function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
   wrap('<div class="intro"><div><span class="overline">'+(paidContext?'VOTRE BILAN ONLINE · RÉSERVATION VÉRIFIÉE':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
   '<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
-  '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
+  '<div class="fact-row"><div><b>30 min</b><small>Rendez-vous accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+ '<div class="device-preflight"><div><strong>Vérifier mon appareil avant de commencer</strong><p>Installez votre ordinateur ou votre téléphone de façon stable, avec le corps entier visible. La caméra est nécessaire pour les tests, mais le microphone est facultatif.</p></div><button type="button" id="check-device" class="action secondary">Tester ma caméra</button><p id="device-feedback" class="message" role="status">Test facultatif : autorisation de la caméra uniquement pendant la vérification, puis arrêt immédiat.</p></div>'+
   btn('go',paidContext?'Démarrer mon bilan →':'Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
   '<p class="notice">'+(paidContext?'Bilan fonctionnel non médical. Vos réponses et mesures sont enregistrées dans un dossier privé pour reprendre la séance. Le rapport PDF reste téléchargé séparément. Les estimations webcam ne sont pas des diagnostics.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>'+
  (paidContext?'<label class="dossier-consent"><input type="checkbox" id="dossier-consent" '+(paidConsentAccepted?'checked':'')+'><span>J’accepte l’enregistrement sécurisé de mes réponses de mobilité, de douleur et de mes mesures fonctionnelles dans mon espace Pulse, afin de pouvoir reprendre ce bilan. Je comprends que la vidéo, les photos et le microphone ne sont pas enregistrés.</span></label><p class="message" id="dossier-consent-feedback" role="status"></p>':''));
+ const checkDevice=q('#check-device');
+ if(checkDevice)checkDevice.onclick=async()=>{
+  const label=q('#device-feedback');
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){label.textContent='Caméra indisponible ici : utilisez HTTPS dans Safari ou Chrome récent. Vous pouvez néanmoins remplir le questionnaire.';return;}
+  checkDevice.disabled=true;label.textContent='Vérification de la webcam : confirmez l’autorisation demandée par votre navigateur.';
+  let stream=null;
+  try{
+   stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:'user',width:{ideal:720},height:{ideal:480}}});
+   if(!stream.getVideoTracks().some(track=>track.readyState==='live'))throw Error('no_active_video_track');
+   label.textContent='Caméra détectée et fonctionnelle. Elle est immédiatement arrêtée après ce test. Vous pourrez lancer les six épreuves.';
+  }catch(error){
+   label.textContent=error?.name==='NotAllowedError'?'Accès caméra refusé. Autorisez la caméra dans les réglages du navigateur avant les tests.':error?.name==='NotFoundError'?'Aucune caméra détectée. Essayez un autre appareil.':'Test caméra impossible. Vérifiez les permissions, les applications utilisant déjà la webcam et réessayez.';
+  }finally{stream?.getTracks().forEach(track=>track.stop());checkDevice.disabled=false;}
+ };
  q('#go').onclick=async()=>{
   if(!paidContext){next();return;}
   if(!paidConsentAccepted){
