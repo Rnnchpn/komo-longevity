@@ -5,7 +5,6 @@ export const PDF_REPORT_VERSION='KOMO_MOTION_REPORT_V1';
 const OBSERVATIONS=[
  ['sts','Lever de chaise - 30 s','repetitions',0],
  ['heels','Elevation des talons','repetitions',0],
- ['balance','Station debout - visibilite','s',0],
  ['unipodal_left','Unipodal gauche','s',1],
  ['unipodal_right','Unipodal droit','s',1],
  ['arms','Elevation des bras','repetitions',0],
