@@ -111,6 +111,7 @@ export function mountMotionController(root,task,record,state,callbacks){
   record.status=!interrupted&&stats.visibilityRatio>=.55&&(!posture||posture.valid)?'done':'review';
   record.quality=Math.round(stats.visibilityRatio*100);record.source=posture?'posture 2D webcam':'webcam';
   state.results[task.id]=record;
+  callbacks.checkpoint?.();
   go.disabled=true;go.textContent=interrupted?'Test arrêté':'Test terminé';redo.hidden=false;halt.hidden=true;
   status(interrupted?'Test arrêté à la voix ou au bouton. Résultat partiel à vérifier ou recommencer.':
    stats.visibilityRatio>=.55?'Mesure automatique terminée. Vérifiez le résultat avant de continuer.':
@@ -205,6 +206,7 @@ export function mountMotionController(root,task,record,state,callbacks){
   });
  };
  redo.onclick=()=>{
+  sharedMotionMedia.resetReady(task.id);
   enhancements.stopCountdown();enhancements.reset();
   state.sessionActive=false;state.sessionFinished=false;
   if(state.timer){clearInterval(state.timer);state.timer=null;}
