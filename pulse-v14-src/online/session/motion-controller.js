@@ -6,6 +6,8 @@ export function mountMotionController(root,task,record,state,callbacks){
  const q=s=>root.querySelector(s);
  const video=q('#live-video'),canvas=q('#pose-canvas'),off=q('#camera-off');
  const on=q('#start-camera'),stop=q('#stop-camera'),go=q('#start-test'),redo=q('#redo-test');
+ const consent=q('#pose-consent');
+ consent.onchange=()=>{on.disabled=!consent.checked||Boolean(state.stream);};
  const tracker=createMovementTracker(task.id);
  state.tracker=tracker;state.bodyReady=false;state.sessionActive=false;state.sessionFinished=false;
  let validStreak=0,lastMessageAt=0,disposed=false;
@@ -33,7 +35,7 @@ export function mountMotionController(root,task,record,state,callbacks){
   if(state.engine){state.engine.stop();state.engine=null;}
   if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
   video.pause();video.srcObject=null;video.hidden=true;canvas.hidden=true;off.hidden=false;
-  state.bodyReady=false;on.disabled=false;stop.disabled=true;
+  state.bodyReady=false;on.disabled=!consent.checked;stop.disabled=true;
   go.disabled=true;validStreak=0;
  }
  function sample(points,time){
@@ -51,6 +53,7 @@ export function mountMotionController(root,task,record,state,callbacks){
   else value(Math.min(task.seconds,(time-state.startedAt)/1000)*tracker.summary().visibilityRatio);
  }
  on.onclick=async()=>{
+  if(!consent.checked){info('Autorisez d’abord la détection du mouvement.');return;}
   if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){
     info('Caméra indisponible : ouvrez la page avec HTTPS sur un navigateur récent.');return;
   }
