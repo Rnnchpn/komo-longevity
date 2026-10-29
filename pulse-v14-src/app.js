@@ -119,11 +119,12 @@ function installPulseBookingEntry(){
     <p class="pulse-entry-panel-intro">Le Bilan Online à 49 € et les bilans Motion à Paris sont ouverts à la réservation. Le Bilan Gratuit sera disponible prochainement.</p>
     <ol class="pulse-entry-steps">
       <li><span>01</span><div><strong>Choisissez votre bilan</strong><small>Online à 49 € en visioconférence, ou Motion en présentiel à Paris.</small></div></li>
-      <li><span>02</span><div><strong>Recevez la confirmation</strong><small>Acuity vous confirme directement la réservation par e-mail.</small></div></li>
-      <li><span>03</span><div><strong>Accédez à Pulse</strong><small>L’accès personnel sera activé séparément après vérification du dossier.</small></div></li>
+      <li><span>02</span><div><strong>Réglez et recevez la confirmation</strong><small>Le paiement du Bilan Online s’effectue dans Acuity. Conservez l’e-mail de réservation.</small></div></li>
+      <li><span>03</span><div><strong>Activez votre espace Pulse</strong><small>Vérifiez votre adresse e-mail et votre réservation réglée avant de préparer la séance.</small></div></li>
     </ol>
     <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${bookingUrl}" target="_blank" rel="noopener noreferrer">Choisir mon bilan et réserver <span aria-hidden="true">↗</span></a>
     <a class="pulse-entry-online-shortcut" href="${onlineBookingUrl}" target="_blank" rel="noopener noreferrer" aria-label="Réserver directement le Bilan Online de 30 minutes à 49 euros">Réserver directement le Bilan Online <strong>49 €</strong> <span aria-hidden="true">↗</span></a>
+    <a class="pulse-entry-activation-link" href="./online/activate/" aria-label="Après paiement, créer ou retrouver mon accès Pulse">Déjà payé ? Activer mon compte Pulse <span aria-hidden="true">→</span></a>
     <a class="pulse-entry-prep-link" href="./online/" aria-label="Préparer mon Bilan Online et tester ma webcam"><span aria-hidden="true">◉</span> Déjà réservé ? Préparez votre séance et votre webcam <span aria-hidden="true">→</span></a>
     <p class="pulse-entry-assurance"><span aria-hidden="true">◇</span> La réservation ne crée pas automatiquement de compte Pulse. Une confirmation Acuity ne vaut pas activation de l’espace patient.</p>
     <div class="pulse-entry-login-bridge"><span>Vous avez déjà un compte ?</span><button type="button" class="pulse-login-link" id="pulseShowLogin">Se connecter →</button></div>
