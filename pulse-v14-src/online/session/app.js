@@ -10,7 +10,8 @@ const TESTS = [
   {id:'sts',name:'Se relever de la chaise',detail:'30 secondes · observer les répétitions',seconds:30,unit:'répétitions',instruction:'Placez la caméra à hauteur de hanche, de trois-quarts profil, avec tête et pieds visibles. Utilisez une chaise stable, contre un mur, et ne forcez pas.'},
   {id:'heels',name:'Élévations sur les pointes',detail:'20 secondes · observer les répétitions',seconds:20,unit:'répétitions',instruction:'Placez-vous de profil, pieds et bassin visibles. Gardez un appui stable à proximité. Le comptage est exploratoire et sensible au déplacement du corps.'},
   {id:'balance',name:'Équilibre statique sécurisé',detail:'10 secondes · observer le maintien',seconds:10,unit:'secondes',instruction:'Près d’un support fixe, yeux ouverts. Le détecteur mesure le temps où votre corps reste visible, pas la stabilité posturale.'},
-  {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Observation qualitative · sans angle chiffré',seconds:20,unit:'mouvements',instruction:'Placez-vous face à la caméra avec épaules et poignets visibles. Levez puis redescendez les deux bras sans forcer.'}
+  {id:'arms',name:'Mobilité fonctionnelle des bras',detail:'Mouvements des bras · 20 secondes',seconds:20,unit:'mouvements',instruction:'Placez-vous face à la caméra avec épaules et poignets visibles. Levez puis redescendez les deux bras sans forcer.'},
+  {id:'posture',name:'Observation de la posture',detail:'Alignement frontal apparent · 8 secondes',seconds:8,unit:'images',instruction:'Placez la caméra bien droite, à hauteur du bassin, face à vous. Gardez tête, épaules, bassin et pieds visibles. Restez dans une position naturelle et confortable.'}
 ];
 const state = {page:0,answers:{},checks:new Set(),task:0,results:{},timer:null,remaining:0,stream:null,request:0,cameraChecked:false,engine:null,tracker:null,bodyReady:false,sessionActive:false,sessionFinished:false,startedAt:0,validFrameTime:0};
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
@@ -45,7 +46,7 @@ function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
   wrap('<div class="intro"><div><span class="overline">VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
   '<p>Bienvenue dans votre expérience KŌMØ Motion Online. Vous allez parcourir le questionnaire, les contrôles de sécurité et les tests guidés, exactement dans l’ordre prévu pour un futur client.</p>'+
-  '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>04</b><small>Tests fonctionnels</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
+  '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>05</b><small>Modules de mouvement</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
   btn('go','Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
   '<p class="notice">Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.</p>');
   q('#go').onclick=next;
@@ -113,7 +114,7 @@ function summary(){
   return '<div><span>'+esc(t.name)+'</span><strong>'+esc(result)+'</strong></div>';
  }).join('');
  wrap('<div class="paper"><span class="overline">04 / SYNTHÈSE DE DÉMONSTRATION</span><h1>Votre mouvement,<br><em>plus lisible.</em></h1>'+
- (blocked?'<div class="notice danger"><b>Tests suspendus pour raisons de sécurité.</b> Cette démonstration ne fournit pas d’avis médical.</div>':'<p>Voici les observations que l’opérateur pourrait retrouver en fin de séance. Ce ne sont pas des mesures cliniquement validées.</p>')+
+ (blocked?'<div class="notice danger"><b>Tests suspendus pour raisons de sécurité.</b> Cette démonstration ne fournit pas d’avis médical.</div>':'<p>Voici les observations que l’opérateur pourrait retrouver en fin de séance. Les compteurs et l'observation posturale sont expérimentaux et ne constituent ni mesures cliniques validées, ni diagnostics.</p>')+
  '<div class="result-list">'+rows+'</div><p class="notice">Aucune réponse ni vidéo n’a été enregistrée. Les nombres issus de la détection webcam sont exploratoires et restent uniquement dans cette page. Ils disparaissent lorsque vous la quittez ; ils ne sont pas enregistrés dans un dossier patient.</p>'+
  '<div class="actions">'+btn('back','← Revenir aux tests',true)+btn('restart','Recommencer la démonstration →')+'</div></div>');
  q('#back').onclick=()=>{state.task=0;state.page=blocked?2:3;render()};
