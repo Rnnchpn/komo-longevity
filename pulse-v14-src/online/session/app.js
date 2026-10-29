@@ -259,7 +259,7 @@ async function boot(){
     'Impossible de vérifier une réservation Online active et intégralement réglée pour ce compte. Vérifiez l’adresse e-mail, le numéro du rendez-vous et le paiement.';
   root.innerHTML='<section class="paper access"><span class="overline">ACCÈS SÉCURISÉ AU BILAN ONLINE</span><h1>'+
    esc(title)+'</h1><p>'+esc(message)+'</p><a class="action" href="'+
-   (loginNeeded?'/?connexion=1':'/online/activate/')+'">'+
+   (loginNeeded?'/#connexion':'/online/activate/')+'">'+
    (loginNeeded?'Me connecter à Pulse':'Vérifier ma réservation →')+'</a></section>';
  }
 }
