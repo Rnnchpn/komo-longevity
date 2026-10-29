@@ -19,7 +19,7 @@ export default async function handler(req,res){
   if(identityError||!user||user.is_anonymous)return json(res,401,{ok:false,error:'sign_in_required'});
   // Owner access is granted only after Supabase Auth verifies the actual mailbox
   // and reports that the email is confirmed. No client-supplied role/metadata is trusted.
-  const isOwner=user.email?.trim().toLowerCase()==='contact@komolongevity.com' && Boolean(user.email_confirmed_at);
+  const isOwner=user.email?.trim().toLowerCase()==='renanchapon@gmail.com' && Boolean(user.email_confirmed_at);
   if(isOwner){
    const requested=String(req.query?.world||'overview');
    const ent={tier:'maison',status:'active'};
