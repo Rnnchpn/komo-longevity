@@ -66,6 +66,7 @@ const checks=[
  ['motion pose engine supported browser inference',poseEngine.includes('detectForVideo')&&poseEngine.includes('pose_landmarker_lite.task')&&poseEngine.includes('requestAnimationFrame')&&nodeSyntax('pose-engine.js')],
  ['pose camera privacy and local overlay',!(/fetch\s*\(|MediaRecorder|localStorage/.test(poseEngine+motionController))&&poseEngine.includes('canvas.getContext')&&motionView.includes('pose-canvas')],
  ['full-body quality gated start',motionController.includes('validStreak>=3')&&metrics.includes('frameInfo(points,task')&&metrics.includes('visibility')&&nodeSyntax('metrics.mjs')],
+ ['explicit privacy opt-in',motionView.includes('id="pose-consent"')&&motionController.includes('if(!consent.checked)')&&sessionCss.includes('.pose-consent')],
  ['prominent start and auto counted movements',motionView.includes('C’est parti →')&&motionController.includes('tracker.observe(points,time)')&&motionController.includes('record.status=')],
  ['automatic 30 second sit-to-stand',sessionJs.includes('seconds:30')&&metrics.includes("task==='sts'")&&metrics.includes('lastCountAt')],
  ['large responsive webcam',sessionCss.includes('live-capture-layout')&&sessionCss.includes('aspect-ratio:16/9')&&sessionCss.includes('@media(max-width:590px)')],
