@@ -19,6 +19,10 @@ const metrics=await readFile(join(root,'site','pulse-v14','online','session','me
 const voiceControl=await readFile(join(root,'site','pulse-v14','online','session','voice-control.js'),'utf8');
 const voiceCommands=await readFile(join(root,'site','pulse-v14','online','session','voice-commands.mjs'),'utf8');
 const testGuides=await readFile(join(root,'site','pulse-v14','online','session','test-guides.mjs'),'utf8');
+const intakeModel=await readFile(join(root,'site','pulse-v14','online','session','intake-model.mjs'),'utf8');
+const intakeView=await readFile(join(root,'site','pulse-v14','online','session','intake-view.js'),'utf8');
+const intakeReport=await readFile(join(root,'site','pulse-v14','online','session','intake-report.js'),'utf8');
+const motionFormula=await readFile(join(root,'site','pulse-v14','online','session','motion-score.mjs'),'utf8');
 const audioFeedback=await readFile(join(root,'site','pulse-v14','online','session','audio-feedback.js'),'utf8');
 const postureMetrics=await readFile(join(root,'site','pulse-v14','online','session','posture-metrics.mjs'),'utf8');
 const profilePhoto=await readFile(join(root,'site','pulse-v14','online','session','profile-photo.js'),'utf8');
@@ -70,6 +74,13 @@ const checks=[
  ['authenticated session user lookup',sessionJs.includes('sb.auth.getUser()')&&sessionJs.includes("role.data?.role!=='admin'")],
  ['session security no public clinical record writes',!(/sb\.from\(.+\.insert\(|localStorage\.setItem|sessionStorage\.setItem|fetch\s*\(/.test(sessionJs))],
  ['session questionnaire and safety',sessionJs.includes('function questionnaire()')&&sessionJs.includes('function safety()')],
+ ['online original self-report replaces four-question demo',sessionJs.includes('intakeMarkup(state.answers,state.questionStep)')&&intakeModel.includes('QUESTIONNAIRE_VERSION')&&intakeModel.includes('walk10')&&intakeView.includes('bindIntake')],
+ ['questionnaire cannot skip missing answers',intakeView.includes('completeGroup(group,answers)')&&intakeModel.includes('profileIndex=complete?')],
+ ['self-report scored domains and separate final score',intakeModel.includes('SCORING_GROUPS')&&intakeReport.includes('Indice de profil déclaré')&&intakeReport.includes('Motion Score indisponible')],
+ ['final score exact linear formula and gates',motionFormula.includes('40*F+35*M+6.25*B')&&motionFormula.includes('operatorVerified')&&motionFormula.includes('stsP10')&&motionFormula.includes('tugP90')],
+ ['no invented motion age or norms',!motionFormula.includes('Motion Age')&&motionFormula.includes('normsSource')&&intakeReport.includes('Aucune norme statistique n’a été inventée')],
+ ['intake source scripts parse',nodeSyntax('intake-model.mjs')&&nodeSyntax('intake-view.js')&&nodeSyntax('intake-report.js')&&nodeSyntax('motion-score.mjs')],
+ ['intake layout mobile',sessionCss.includes('.intake-choices')&&sessionCss.includes('.intake-domain-grid')&&sessionCss.includes('.motion-score-locked')],
  ['session auto pose capture and test timer',motionController.includes('getUserMedia({audio:false')&&sessionJs.includes('function test()')&&sessionJs.includes('function summary()')&&motionController.includes('C’est parti →')],
  ['session video stops on navigation',sessionJs.includes("pagehide")&&sessionJs.includes('getTracks().forEach(t=>t.stop())')],
  ['session ready for desktop and mobile',sessionSyntax.status===0&&sessionHtml.includes('Ma consultation Online')&&sessionCss.includes('@media(max-width:570px)')],
