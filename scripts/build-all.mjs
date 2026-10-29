@@ -255,7 +255,9 @@ const scripts = [
   'scripts/pulse-v13-qa.mjs',
   // Patient-first V14 is isolated and built last. V13 remains available for rollback.
   'scripts/build-pulse-v14.mjs',
-  'scripts/pulse-v14-qa.mjs'
+  'scripts/pulse-v14-qa.mjs',
+  // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
+  'scripts/komo-offers-online-20261029.mjs'
 ];
 
 for (const script of scripts) {
