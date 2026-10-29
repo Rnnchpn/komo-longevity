@@ -32,7 +32,9 @@ export async function verifyPaidSession({accessToken,appointmentId,fetcher=fetch
   const data=await response.json();
   if(!response.ok||data.eligible!==true)return {ok:false,error:data.error||'booking_verification_failed',http:response.status};
   if(data.canStart!==true)return {ok:false,error:'paid_session_not_enabled',eligible:true};
-  return {ok:true,appointmentId:id};
+  const appointmentAt=typeof data.appointmentAt==='string'&&data.appointmentAt.length<=65?data.appointmentAt:null;
+  const appointmentMinutes=Number.isInteger(data.appointmentMinutes)&&data.appointmentMinutes>0&&data.appointmentMinutes<=180?data.appointmentMinutes:null;
+  return {ok:true,appointmentId:id,...(appointmentAt?{appointmentAt}:{}),...(appointmentMinutes?{appointmentMinutes}:{})};
  }catch{return {ok:false,error:'booking_verification_unavailable'}}
 }
 export function scopedProgressStorage(storage,userId,appointmentId){
