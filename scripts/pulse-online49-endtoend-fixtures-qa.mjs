@@ -117,5 +117,5 @@ assert.ok(app.includes("if(!paidConsentAccepted)"));
 assert.ok(app.includes('root.addEventListener(\'change\',()=>persistProgress())'));
 assert.ok(controller.includes("record.status='skipped'")&&controller.includes("record.status='review'"));
 assert.ok(posture.includes("record.posture={valid:true")||posture.includes("record.posture={valid:true"));
-assert.ok(unipodal.includes("status='skipped'")&&unipodal.includes("status='review'"));
+assert.ok(unipodal.includes("status='skipped'")&&unipodal.includes("?'review':'done'"));
 console.log('[pulse-online49-endtoend-fixtures-qa] PASS · 22 answers, safety, six tests, retake/skips, snapshot, offline retry, paid storage gating');
