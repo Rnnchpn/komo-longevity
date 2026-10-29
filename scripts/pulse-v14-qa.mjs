@@ -35,6 +35,7 @@ const checks=[
  ['Online preflight accessible from landing',app.includes('href="./online/"')&&css.includes('.pulse-entry-prep-link')],
  ['Online preflight page branded',onlineHtml.includes('Préparer mon Bilan Online')&&onlineHtml.includes('KŌMØ <span>PULSE</span>')],
  ['Online preflight references verified booking',onlineHtml.includes('owner=40696577&amp;appointmentType=99940918')],
+ ['Online preflight no unverified payment promise',onlineHtml.includes('49 €</strong> tarif du bilan')&&!onlineHtml.includes('49 €</strong> à la réservation')&&onlineHtml.includes('Cette page ne collecte aucun paiement et ne confirme pas si le rendez-vous est réglé.')],
  ['Online preflight safety checklist',onlineHtml.includes('id="ready-checklist"')&&(onlineHtml.match(/data-preflight-check/g)||[]).length===4],
  ['Online preflight camera permission only',onlineScript.includes('navigator.mediaDevices.getUserMedia')&&onlineScript.includes('audio: false')],
  ['Online preflight stops media tracks',onlineScript.includes('getTracks().forEach(track => track.stop())')&&onlineScript.includes("addEventListener('pagehide'")],
