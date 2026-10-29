@@ -6,7 +6,8 @@ import { intakeMarkup,bindIntake } from './intake-view.js';
 import { reportMarkup,bindReport } from './intake-report.js';
 import {sharedMotionMedia} from './shared-media.js';
 import {TERMINAL_TEST_STATUSES,testNavigatorMarkup,completedTestMarkup,mountTestNavigation} from './test-navigation.js';
-import {saveProgress,loadProgress,clearProgress} from './session-progress.mjs';
+import {saveProgress,loadProgress,clearProgress,snapshotProgress} from './session-progress.mjs';
+import {createDossierQueue,loadSecureDossier} from './secure-dossier.js';
 import {verifyPaidSession,getAppointmentFromBrowser,scopedProgressStorage,keepBooking,clearBooking} from './paid-access.js';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
@@ -28,7 +29,14 @@ let currentMotionCleanup=null;
 const store=(()=>{try{return window.sessionStorage}catch{return null}})();
 let progressStore=store;
 let paidContext=null;
-function persistProgress(){saveProgress(progressStore,state);}
+let dossierQueue=null;
+let paidConsentAccepted=false;
+let dossierStatus='';
+function persistProgress(){
+ saveProgress(progressStore,state);
+ if(paidContext&&paidConsentAccepted)dossierQueue?.enqueue(state);
+}
+function secureSaveStatus(message){dossierStatus=message;const x=q('#remote-save-status');if(x)x.textContent=message;}
 const btn = (id,title,secondary=false)=>'<button type="button" class="action'+(secondary?' secondary':'')+'" id="'+id+'">'+title+'</button>';
 
 function stopTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
@@ -49,20 +57,40 @@ function stopCamera(release=false){
 function next(){stopTimer();stopCamera(state.page===3);state.page=Math.min(PHASES.length-1,state.page+1);render();}
 function previous(){stopTimer();stopCamera(state.page===3);state.page=Math.max(0,state.page-1);render();}
 function wrap(body){
-  root.innerHTML='<section class="session"><div class="session-top"><span>LONGEVITY IN MOTION · KŌMØ PULSE</span><span class="test-badge">'+(paidContext?'BILAN ONLINE · SAUVEGARDE LOCALE UNIQUEMENT':'MODE TEST · AUCUN DOSSIER CRÉÉ')+'</span></div>'+
+  root.innerHTML='<section class="session"><div class="session-top"><span>LONGEVITY IN MOTION · KŌMØ PULSE</span><span class="test-badge">'+(paidContext?'BILAN ONLINE · DOSSIER PRIVÉ':'MODE TEST · AUCUN DOSSIER CRÉÉ')+'</span></div>'+
   '<nav class="steps" aria-label="Étapes de la séance">'+PHASES.map((s,i)=>'<span class="'+(i===state.page?'now':i<state.page?'past':'')+'"><b>'+String(i+1).padStart(2,'0')+'</b>'+s+'</span>').join('')+'</nav>'+
   body+
-  '<div class="session-bottom"><p>Démonstration non médicale · progression conservée 4 h dans cet onglet pour reprendre après actualisation. Aucune vidéo ni donnée envoyée au serveur.</p><button id="leave" type="button">Quitter et effacer la progression</button></div></section>';
-  q('#leave').onclick=()=>{stopTimer();stopCamera(true);clearProgress(progressStore);if(paidContext)clearBooking(store);window.location.assign('/')};
+  '<div class="session-bottom"><p>'+(paidContext?'Votre questionnaire et vos mesures chiffrées sont enregistrés dans votre dossier sécurisé Pulse. Aucune vidéo, photo ni audio n’est archivé.':'Démonstration non médicale · progression conservée 4 h dans cet onglet pour reprendre après actualisation.')+'</p>'+
+ '<span id="remote-save-status" role="status" class="dossier-save-status">'+(paidContext?esc(dossierStatus):'')+'</span>'+
+ '<button id="leave" type="button">'+(paidContext?'Quitter ma séance':'Quitter et effacer la progression')+'</button></div></section>';
+  q('#leave').onclick=async()=>{
+  stopTimer();stopCamera(true);
+  if(dossierQueue){const saved=await dossierQueue.flush();if(!saved){secureSaveStatus('Enregistrement impossible : ne quittez pas avant de réessayer.');return;}}
+  clearProgress(progressStore);if(paidContext)clearBooking(store);dossierQueue?.destroy();window.location.assign('/');
+ };
 }
 function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
   wrap('<div class="intro"><div><span class="overline">'+(paidContext?'VOTRE BILAN ONLINE · RÉSERVATION VÉRIFIÉE':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
   '<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
   '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
-  btn('go','Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
-  '<p class="notice">'+(paidContext?'Bilan fonctionnel non médical en mode pilote : le questionnaire et les mesures restent temporairement sur cet appareil, sans enregistrement sécurisé du dossier patient ni archivage du PDF.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>');
-  q('#go').onclick=next;
+  btn('go',paidContext?'Démarrer mon bilan →':'Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
+  '<p class="notice">'+(paidContext?'Bilan fonctionnel non médical. Vos réponses et mesures sont enregistrées dans un dossier privé pour reprendre la séance. Le rapport PDF reste téléchargé séparément. Les estimations webcam ne sont pas des diagnostics.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>'+
+ (paidContext?'<label class="dossier-consent"><input type="checkbox" id="dossier-consent" '+(paidConsentAccepted?'checked':'')+'><span>J’accepte l’enregistrement sécurisé de mes réponses de mobilité, de douleur et de mes mesures fonctionnelles dans mon espace Pulse, afin de pouvoir reprendre ce bilan. Je comprends que la vidéo, les photos et le microphone ne sont pas enregistrés.</span></label><p class="message" id="dossier-consent-feedback" role="status"></p>':''));
+ q('#go').onclick=async()=>{
+  if(!paidContext){next();return;}
+  if(!paidConsentAccepted){
+   if(!q('#dossier-consent')?.checked){
+    q('#dossier-consent-feedback').textContent='Veuillez accepter l’enregistrement privé du bilan pour continuer.';
+    return;
+   }
+   const button=q('#go');button.disabled=true;
+   const ok=await dossierQueue.firstSave(state);
+   if(!ok){button.disabled=false;q('#dossier-consent-feedback').textContent='Impossible de créer le dossier sécurisé. Vérifiez la connexion et réessayez.';return;}
+   paidConsentAccepted=true;
+  }
+  next();
+ };
 }
 function choice(key,title,items){
   return '<fieldset class="question"><legend>'+title+'</legend><div class="choices">'+items.map(x=>'<label><input name="'+key+'" value="'+x[0]+'" type="radio" '+(state.answers[key]===x[0]?'checked':'')+'><span>'+x[1]+'</span></label>').join('')+'</div></fieldset>';
@@ -148,7 +176,7 @@ function test(){
 function summary(){
  const blocked=state.answers.safety==='yes';
  wrap((blocked?'':testNavigatorMarkup(TESTS,state.results,null))+
-  reportMarkup(state.answers,state.results,blocked));
+  reportMarkup(state.answers,state.results,blocked,Boolean(paidContext)));
  if(!blocked)mountTestNavigation(root,TESTS,state.results,jumpToTest,null);
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
@@ -183,6 +211,7 @@ async function boot(){
    const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();
    adminTester=!role.error&&role.data?.role==='admin';
   }
+  let remoteSnapshot=null;
   if(!adminTester){
    const session=await sb.auth.getSession();
    if(!session.data?.session?.access_token)throw Error('login');
@@ -198,12 +227,20 @@ async function boot(){
    paidContext={userId:user.id,appointmentId:bookingId};
    progressStore=scopedProgressStorage(store,user.id,bookingId);
    keepBooking(store,bookingId);
+   dossierQueue=createDossierQueue({accessToken:session.data.session.access_token,
+    appointmentId:bookingId,onStatus:secureSaveStatus});
+   const server=await loadSecureDossier(session.data.session.access_token,bookingId);
+   if(server.found){
+    paidConsentAccepted=true;remoteSnapshot=server.snapshot;
+    secureSaveStatus('Dossier privé retrouvé dans Pulse');
+   }else clearProgress(progressStore);
   }
-  const restored=loadProgress(progressStore);
+  const restored=paidContext?(remoteSnapshot?snapshotProgress(remoteSnapshot):null):loadProgress(progressStore);
   if(restored){
    state.page=restored.page;state.questionStep=restored.questionStep;state.task=restored.task;
    state.answers=restored.answers;state.results=restored.results;
    state.checks=new Set(restored.checks);state.returnToSummary=restored.returnToSummary;
+   if(state.page===3&&state.answers.safety!=='no')state.page=2;
   }
   root.addEventListener('change',()=>persistProgress());
   render();
