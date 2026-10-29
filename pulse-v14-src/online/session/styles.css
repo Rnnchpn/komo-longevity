@@ -140,3 +140,24 @@ h1,h2,p{margin-top:0}h1{font:400 clamp(42px,5vw,72px)/.99 "Instrument Serif",Geo
 .motion-workspace.distance-mode .motion-heading .pose-tag:after{content:' · MODE À DISTANCE'}
 @media(max-width:860px){.test-guide-buttons{width:100%;justify-content:flex-start}.test-guide-buttons .guide-audio-btn{width:auto;flex:1 1 190px}}
 @media(max-width:590px){.test-guide-buttons{display:grid;width:100%;grid-template-columns:1fr}.pose-camera .voice-hud{top:52px;right:9px;font-size:10px;padding:8px 10px}.motion-workspace.distance-mode .pose-camera .camera-screen{min-height:65vh;aspect-ratio:3/4}}
+
+
+/* Motion Online V4 — speaker-first countdown and exploratory posture observation */
+.countdown-cover{position:absolute;inset:0;z-index:9;background:#142e22df;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;text-align:center;color:#fff;backdrop-filter:blur(4px);pointer-events:none}
+.countdown-cover[hidden]{display:none!important}
+.countdown-cover span{letter-spacing:.24em;font-size:12px;font-weight:800;color:#dbc89a}
+.countdown-cover strong{font:400 clamp(120px,21vw,260px)/.95 "Instrument Serif",Georgia,serif;text-shadow:0 5px 50px #061e1255}
+.countdown-cover small{font-size:16px;color:#e8ece3}
+.sound-optin{margin-top:17px;border:1px solid #8dba8b7b;padding:13px 14px;border-radius:11px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;background:#2e563f}
+.sound-optin input{width:19px;height:19px;flex:none;accent-color:#dec497;margin-top:3px}
+.sound-optin span{color:#f0f0df;font-size:12px;line-height:1.6;font-weight:650}
+.posture-results{background:#edf1e9;border:1px solid #cddbc6;border-radius:18px;margin:20px 0 0;padding:23px}
+.posture-results[hidden]{display:none!important}
+.posture-results>strong{font-size:15px;font-weight:750;color:#31523a}
+.posture-results>p{font-size:11px;color:#6b7c6b;line-height:1.75;margin:16px 0 0}
+.posture-data{margin-top:16px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.posture-data>div{display:flex;flex-direction:column;align-items:flex-start;gap:12px;padding:18px;background:#fffefa;border-radius:14px}
+.posture-data span{font-size:11px;line-height:1.45;color:#728576}
+.posture-data strong{font:400 27px "Instrument Serif",Georgia,serif;color:#2e5039}
+@media(max-width:800px){.posture-data{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:510px){.posture-data{grid-template-columns:1fr 1fr}.posture-data>div{padding:13px}.posture-data strong{font-size:23px}.countdown-cover strong{font-size:150px}}
