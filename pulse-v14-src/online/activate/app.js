@@ -2,6 +2,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const sb=createClient('https://uqlolefsiktbznnymriy.supabase.co','sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root=document.querySelector('#activation-app');
 const params=new URLSearchParams(location.search);
+const PULSE_ROOT=location.pathname.startsWith('/pulse-v14/')?'/pulse-v14/':'/';
 const booking=(params.get('appointment')||'').trim();
 const clean=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function message(text){const x=document.querySelector('#activate-message');if(x)x.textContent=text;}
@@ -12,7 +13,7 @@ function login(){
  '<div class="question"><label for="activate-id">Référence du rendez-vous Acuity</label><input class="activate-input" id="activate-id" name="appointment" type="text" inputmode="numeric" pattern="[0-9]+" value="'+clean(booking)+'" required placeholder="N° de rendez-vous"></div>'+
  '<p>Ce premier e-mail vérifie uniquement votre identité. L’accès à la séance et aux résultats dépendra également de la vérification de votre paiement.</p>'+
  '<button class="action" type="submit" id="send">Recevoir mon lien de connexion →</button><p class="message" id="activate-message" role="status"></p></form>'+
- '<div class="notice">Vous avez déjà un compte Pulse ? <a href="/#connexion">Connectez-vous ici</a>, puis revenez sur cette page pour vérifier votre réservation.</div>');
+ '<div class="notice">Vous avez déjà un compte Pulse ? <a href="'+PULSE_ROOT+'#connexion">Connectez-vous ici</a>, puis revenez sur cette page pour vérifier votre réservation.</div>');
  document.querySelector('#activate-form').onsubmit=async e=>{
   e.preventDefault();const fd=new FormData(e.currentTarget);
   const email=String(fd.get('email')||'').trim().toLowerCase(),id=String(fd.get('appointment')||'').trim();
@@ -20,7 +21,7 @@ function login(){
   const button=document.querySelector('#send');button.disabled=true;
   message('Envoi du lien de connexion…');
   // The redirect contains only a booking ID, never personal or health information.
-  const url=location.origin+'/online/activate/?appointment='+encodeURIComponent(id);
+  const url=location.origin+PULSE_ROOT+'online/activate/?appointment='+encodeURIComponent(id);
   const r=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:url}});
   button.disabled=false;
   message(r.error?'Impossible d’envoyer le lien. Vérifiez vos coordonnées ou contactez l’équipe.':'Si cette adresse peut recevoir nos messages, un lien sécurisé de connexion vient d’être demandé. Vérifiez votre messagerie, puis ouvrez-le sur cet appareil.');
@@ -45,14 +46,14 @@ function paidUser(user,accessToken){
     // identity + Acuity payment with the server on every new page load.
     title('<div class="notice"><strong>✓ Votre réservation et votre règlement sont vérifiés.</strong></div>'+
      '<p>Votre accès à la séance Online est disponible. La caméra et le microphone ne seront activés qu’avec votre accord, au début des tests.</p>'+
-     '<div class="actions"><a class="action" href="/online/session/?appointment='+encodeURIComponent(id)+'">Commencer mon bilan Motion →</a>'+
-     '<a class="action secondary" href="/">Mon espace Pulse</a></div>'+
+     '<div class="actions"><a class="action" href="'+PULSE_ROOT+'online/session/?appointment='+encodeURIComponent(id)+'">Commencer mon bilan Motion →</a>'+
+     '<a class="action secondary" href="'+PULSE_ROOT+'">Mon espace Pulse</a></div>'+
      '<p>Après votre consentement, votre progression sera enregistrée dans votre dossier privé Pulse pour être reprise ultérieurement. Les vidéos et les photos ne seront pas stockées. Le rapport PDF restera téléchargé séparément. Cette prestation ne constitue pas une consultation médicale.</p>');
    }else{
     title('<div class="notice"><strong>✓ Votre réservation Online et votre règlement sont vérifiés.</strong></div>'+
      '<p>La consultation en ligne reste temporairement fermée aux comptes clients pendant les derniers contrôles de confidentialité et d’enregistrement des résultats.</p>'+
      '<p>Votre réservation demeure valable. Utilisez le lien de visioconférence transmis dans la confirmation Acuity pour votre rendez-vous accompagné, ou contactez notre équipe.</p>'+
-     '<div class="actions"><a class="action" href="/">Accéder à Pulse</a><a class="action secondary" href="mailto:contact@komolongevity.com">Nous contacter</a></div>');
+     '<div class="actions"><a class="action" href="'+PULSE_ROOT+'">Accéder à Pulse</a><a class="action secondary" href="mailto:contact@komolongevity.com">Nous contacter</a></div>');
    }
   }catch(error){b.disabled=false;message('Impossible de joindre le système de réservation. Réessayez plus tard.');}
  };

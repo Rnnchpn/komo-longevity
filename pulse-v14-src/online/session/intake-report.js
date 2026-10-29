@@ -37,7 +37,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  const chosen=focus.map(f=>esc(f.label)+' ('+f.value+'/100)').join(' · ');
  const sts=results.sts;
  const stsOk=Boolean(sts?.status==='done'&&Number.isInteger(sts.value)&&sts.value>=0);
- return '<section class="paper online-report">'+passportMarkup(answers,results,blocked)+
+ return '<section class="paper online-report'+(persisted?' online-report-paid':'')+'">'+passportMarkup(answers,results,blocked)+
  '<details class="report-method-details"><summary>Voir le détail des questionnaires et de leur calcul</summary>'+ '<span class="overline">SYNTHÈSE MOTION · QUESTIONNAIRE & OBSERVATIONS</span>'+ 
  '<h1>Votre profil en mouvement<em>.</em></h1>'+
  '<p>Cette restitution distingue vos <strong>réponses personnelles</strong> des mesures fonctionnelles. Les scores déclaratifs sont exploratoires et ne constituent pas des diagnostics.</p>'+
@@ -49,7 +49,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '</details>'+ '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
  '<section class="motion-score-zone"><div class="motion-score-heading"><span class="overline">MOTION SCORE · ALGORITHME DE RÉFÉRENCE</span><h2>Le score fonctionnel final</h2><p>Formule définie pour KŌMØ : <strong>40 % Sit-to-Stand · 35 % TUG 3 m · 25 % équilibre SPPB.</strong> Les questionnaires, la posture et l’unipodal ne modifient pas cette formule.</p></div>'+
  '<div class="motion-score-locked"><span id="score-status-icon">○</span><div><strong id="score-status">Motion Score indisponible : mesures complémentaires requises</strong><p id="score-hint">Le TUG standardisé et l’équilibre SPPB n’ont pas été mesurés automatiquement par la webcam. Aucune norme statistique n’a été inventée.</p></div><div class="motion-score-value"><strong id="motion-score-number">—</strong><span>/ 100</span></div></div>'+
- '<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
+ (persisted?'':'<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
  '<p>Pour vérifier l’algorithme, renseignez uniquement des mesures issues de protocoles standardisés et un référentiel normatif documenté. <strong>Ne saisissez pas de valeurs fictives dans un vrai dossier patient.</strong></p>'+
  '<div class="motion-input-grid">'+
  measureInput('kms-sts','STS 30 s · répétitions (webcam à confirmer)',stsOk?String(sts.value):'Ex. 12','1',stsOk?sts.value:null)+
@@ -63,19 +63,21 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '<label class="motion-check"><input id="kms-sts-verified" type="checkbox"><span>Le résultat Sit-to-Stand a été revu et la méthode est jugée exploitable.</span></label>'+
  '<label class="motion-check"><input id="kms-verified" type="checkbox"><span>Le TUG et l’équilibre SPPB ont été réellement mesurés et validés selon leurs protocoles.</span></label>'+
  '<button type="button" class="action" id="compute-motion-score">Calculer avec les mesures vérifiées →</button>'+
- '<p class="message" id="kms-error" role="status"></p></details>'+
+ '<p class="message" id="kms-error" role="status"></p></details>')+
  '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section>'+
  roadmapMarkup(answers,results,blocked)+
  dailyProgramMarkup(answers,results,blocked,program)+
- '<p class="notice">'+(persisted?'Les réponses et mesures chiffrées de votre bilan sont conservées dans votre dossier Pulse privé. Le PDF est créé et téléchargé localement : il n’est pas encore archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
- '<div class="pdf-download-box"><div><strong>Votre rapport Motion, en PDF</strong><p>Questionnaires, sous-scores, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est créé localement et reste sur votre appareil.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon rapport PDF</button></div>'+
- '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
+ (persisted?'<section class="online-consultation-handoff"><span class="overline">BILAN MOTION ONLINE · 49 €</span><h2>Votre échange final en visioconférence</h2><p>Votre première restitution est prête. Lors du rendez-vous, les performances observées, les limites techniques et vos deux axes prioritaires pourront être discutés avec l’opérateur. Retrouvez le lien de visioconférence dans votre confirmation Acuity.</p><p>Le Passeport PDF constitue un compte rendu fonctionnel initial, sans validation professionnelle automatique. Il ne remplace pas une consultation médicale.</p></section>':'')+
+ '<p class="notice">'+(persisted?'Les questionnaires et mesures chiffrées de cette réservation à 49 € sont conservés dans votre dossier Pulse privé. Vous pouvez retrouver et régénérer votre passeport depuis cette séance ; le fichier PDF lui-même n’est pas archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
+ '<div class="pdf-download-box"><div><strong>'+(persisted?'Mon Passeport Motion Online — 49 €':'Votre rapport Motion, en PDF')+'</strong><p>Questionnaires, quatre domaines, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est généré localement. Les résultats non vérifiés restent signalés.</p></div><div class="report-pdf-actions"><button type="button" class="action" id="download-pdf">↓ Télécharger mon Passeport PDF</button><button type="button" class="action secondary" id="preview-pdf">↗ Ouvrir sur téléphone</button></div></div><div id="pdf-preview-link" class="pdf-preview-link" aria-live="polite"></div>'+
+ '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button>'+(persisted?'':'<button type="button" class="action" id="restart">Recommencer la démonstration →</button>')+'</div><p id="report-message" class="message" role="status"></p></section>';
 }
 export function bindReport(root,answers,results,callbacks,blocked=false){
  bindDailyProgram(root,answers,results,blocked,callbacks.getProgram||(()=>null),callbacks.updateProgram||(()=>{}));
  bindNormPanel(root,answers,results,()=>callbacks.checkpoint?.());
  const stsRecord=results.sts;
  let computed=null;
+ if(!callbacks.isPaid){
  // Prevent a stale, previously computed score after changing a reference or input.
  root.querySelector('.motion-operator-details').addEventListener('input',()=>{
   computed=null;
@@ -116,35 +118,71 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
     'Données manquantes : '+computed.missing.join(' · ');
   root.querySelector('#kms-error').textContent=computed.complete?'Résultat calculé. Non enregistré.':'Le score n’est pas disponible tant que toutes les conditions ne sont pas réunies.';
  };
- root.querySelector('#download-pdf').onclick=async()=>{
-  const button=root.querySelector('#download-pdf');
+ }
+ let pdfExportInProgress=false;
+ let previewObjectUrl=null;
+ window.addEventListener('pagehide',()=>{if(previewObjectUrl)URL.revokeObjectURL(previewObjectUrl);},{once:true});
+ const downloadButton=root.querySelector('#download-pdf');
+ const previewButton=root.querySelector('#preview-pdf');
+ async function deliverPdf(openOnMobile=false){
+  if(pdfExportInProgress)return;
+  pdfExportInProgress=true;
+  downloadButton.disabled=true;previewButton.disabled=true;
   const message=root.querySelector('#report-message');
-  if(button.disabled)return;
-  button.disabled=true;button.textContent='Création du PDF…';
-  message.textContent='Préparation du rapport sur votre appareil…';
+  const previewSlot=root.querySelector('#pdf-preview-link');
+  const previousDownloadLabel=downloadButton.textContent;
+  const previousPreviewLabel=previewButton.textContent;
+  if(openOnMobile)previewButton.textContent='Préparation de la lecture…';
+  else downloadButton.textContent='Création du PDF…';
+  message.textContent='Préparation du Passeport Motion sur votre appareil…';
   try{
-   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{mode:callbacks.isPaid?'PILOTE':'DEMONSTRATION',program:callbacks.getProgram?.()});
-   const filename=await downloadMotionPdf(payload);
-   message.textContent='Rapport PDF prêt : '+filename+'. Il n’a pas été téléversé sur Pulse.';
+   if(callbacks.isPaid&&!(await callbacks.beforeDownload?.()))throw Error('secure_snapshot_not_saved');
+   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{
+    mode:callbacks.isPaid?'ONLINE49':'DEMONSTRATION',
+    program:callbacks.getProgram?.(),
+    appointmentId:callbacks.appointmentId
+   });
+   if(openOnMobile){
+    const ready=await downloadMotionPdf(payload,{asBlobUrl:true});
+    if(previewObjectUrl)URL.revokeObjectURL(previewObjectUrl);
+    previewObjectUrl=ready.url;
+    const link=document.createElement('a');
+    link.href=ready.url;link.target='_blank';link.rel='noopener noreferrer';
+    link.className='action';link.textContent='Ouvrir mon Passeport PDF dans un nouvel onglet ↗';
+    const tip=document.createElement('p');
+    tip.textContent='Sur iPhone, ouvrez le PDF puis utilisez Partager pour l’enregistrer dans Fichiers.';
+    previewSlot.replaceChildren(link,tip);
+    message.textContent='Votre Passeport PDF est prêt. Touchez le lien ci-dessus pour le consulter.';
+   }else{
+    const filename=await downloadMotionPdf(payload);
+    message.textContent='Passeport PDF prêt : '+filename+'. Les mesures du bilan sont conservées dans Pulse, pas le PDF lui-même.';
+   }
   }catch(error){
-   message.textContent='La création du PDF a échoué. Vérifiez votre connexion au chargement initial du module, puis réessayez.';
-  }finally{button.disabled=false;button.textContent='↓ Télécharger mon rapport PDF';}
- };
+   message.textContent=String(error?.message)==='secure_snapshot_not_saved'?
+    'Sauvegarde sécurisée incomplète : vos résultats doivent être enregistrés dans Pulse avant de générer le PDF. Vérifiez votre connexion.':
+    'La création du PDF a échoué. Vérifiez votre connexion au chargement du module, puis réessayez ou utilisez Imprimer.';
+  }finally{
+   pdfExportInProgress=false;downloadButton.disabled=false;previewButton.disabled=false;
+   downloadButton.textContent=previousDownloadLabel;previewButton.textContent=previousPreviewLabel;
+  }
+ }
+ downloadButton.onclick=()=>deliverPdf(false);
+ previewButton.onclick=()=>deliverPdf(true);
  root.querySelector('#print-report').onclick=()=>window.print();
  root.querySelector('#copy-report').onclick=async()=>{
   const profile=scoreIntake(answers);
   const testValues=Object.fromEntries(Object.entries(results).map(([key,val])=>[key,{value:val.value??null,status:val.status??'inconnu',quality:val.quality??null}]));
-  const exportData={type:'KOMO_MOTION_ONLINE_DEMO',questionnaireVersion:profile.version,profileIndex:profile.profileIndex,
+  const exportData={type:callbacks.isPaid?'KOMO_MOTION_ONLINE_PAID':'KOMO_MOTION_ONLINE_DEMO',questionnaireVersion:profile.version,profileIndex:profile.profileIndex,
     domains:profile.domains,motionScore:computed?.complete?computed.score:null,
     motionAlgorithm:computed?.complete?computed.version:null,
-    tests:testValues,notice:'Données de démonstration, non médicales, non sauvegardées.'};
+    tests:testValues,notice:callbacks.isPaid?'Bilan Online non médical : données du dossier Pulse privé, mesures expérimentales à vérifier.':'Données de démonstration, non médicales, non sauvegardées.'};
   try{
    await navigator.clipboard.writeText(JSON.stringify(exportData,null,2));
-   root.querySelector('#report-message').textContent='Synthèse copiée dans votre presse-papiers. Ne la collez pas dans un dossier réel sans contrôle des données.';
+   root.querySelector('#report-message').textContent=callbacks.isPaid?'Synthèse de votre bilan copiée. Conservez ces informations dans un espace approprié et sécurisé.':'Synthèse copiée dans votre presse-papiers. Ne la collez pas dans un dossier réel sans contrôle des données.';
   }catch{
    root.querySelector('#report-message').textContent='Presse-papiers indisponible : consultez les résultats affichés.';
   }
  };
  root.querySelector('#back').onclick=callbacks.back;
- root.querySelector('#restart').onclick=callbacks.restart;
+ root.querySelector('#restart')?.addEventListener('click',callbacks.restart);
 }

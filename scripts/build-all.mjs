@@ -282,6 +282,10 @@ const scripts = [
   'scripts/pulse-online-dossier-qa.mjs',
   // Motion Passport editorial synthesis, four-week self-report plan and PDF report.
   'scripts/pulse-passport-daily-qa.mjs',
+  // Customer 49-euro session: safe snapshot, accurate PDF provenance and video restitution handoff.
+  'scripts/pulse-online49-report-qa.mjs',
+  // Payment authorization is tested with mocked Acuity transactions, never live client data.
+  'scripts/pulse-online49-security-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
   'scripts/komo-offers-online-20261029.mjs',
   // Absolute final premium visual layer and regression checks. Business logic untouched.

@@ -12,6 +12,7 @@ import {verifyPaidSession,getAppointmentFromBrowser,scopedProgressStorage,keepBo
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
+const PULSE_ROOT=location.pathname.startsWith('/pulse-v14/')?'/pulse-v14/':'/';
 const TEST_USER_ID = 'eef2c1ed-3872-47a7-84da-0f70b975c96f';
 const PHASES = ['Bienvenue','Questionnaire','Sécurité','Tests guidés','Synthèse'];
 const TESTS = [
@@ -66,17 +67,31 @@ function wrap(body){
   q('#leave').onclick=async()=>{
   stopTimer();stopCamera(true);
   if(dossierQueue){const saved=await dossierQueue.flush();if(!saved){secureSaveStatus('Enregistrement impossible : ne quittez pas avant de réessayer.');return;}}
-  clearProgress(progressStore);if(paidContext)clearBooking(store);dossierQueue?.destroy();window.location.assign('/');
+  clearProgress(progressStore);if(paidContext)clearBooking(store);dossierQueue?.destroy();window.location.assign(PULSE_ROOT);
  };
 }
 function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
   wrap('<div class="intro"><div><span class="overline">'+(paidContext?'VOTRE BILAN ONLINE · RÉSERVATION VÉRIFIÉE':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
   '<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
-  '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
+  '<div class="fact-row"><div><b>30 min</b><small>Rendez-vous accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+ '<div class="device-preflight"><div><strong>Vérifier mon appareil avant de commencer</strong><p>Installez votre ordinateur ou votre téléphone de façon stable, avec le corps entier visible. La caméra est nécessaire pour les tests, mais le microphone est facultatif.</p></div><button type="button" id="check-device" class="action secondary">Tester ma caméra</button><p id="device-feedback" class="message" role="status">Test facultatif : autorisation de la caméra uniquement pendant la vérification, puis arrêt immédiat.</p></div>'+
   btn('go',paidContext?'Démarrer mon bilan →':'Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
   '<p class="notice">'+(paidContext?'Bilan fonctionnel non médical. Vos réponses et mesures sont enregistrées dans un dossier privé pour reprendre la séance. Le rapport PDF reste téléchargé séparément. Les estimations webcam ne sont pas des diagnostics.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>'+
  (paidContext?'<label class="dossier-consent"><input type="checkbox" id="dossier-consent" '+(paidConsentAccepted?'checked':'')+'><span>J’accepte l’enregistrement sécurisé de mes réponses de mobilité, de douleur et de mes mesures fonctionnelles dans mon espace Pulse, afin de pouvoir reprendre ce bilan. Je comprends que la vidéo, les photos et le microphone ne sont pas enregistrés.</span></label><p class="message" id="dossier-consent-feedback" role="status"></p>':''));
+ const checkDevice=q('#check-device');
+ if(checkDevice)checkDevice.onclick=async()=>{
+  const label=q('#device-feedback');
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){label.textContent='Caméra indisponible ici : utilisez HTTPS dans Safari ou Chrome récent. Vous pouvez néanmoins remplir le questionnaire.';return;}
+  checkDevice.disabled=true;label.textContent='Vérification de la webcam : confirmez l’autorisation demandée par votre navigateur.';
+  let stream=null;
+  try{
+   stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:'user',width:{ideal:720},height:{ideal:480}}});
+   if(!stream.getVideoTracks().some(track=>track.readyState==='live'))throw Error('no_active_video_track');
+   label.textContent='Caméra détectée et fonctionnelle. Elle est immédiatement arrêtée après ce test. Vous pourrez lancer les six épreuves.';
+  }catch(error){
+   label.textContent=error?.name==='NotAllowedError'?'Accès caméra refusé. Autorisez la caméra dans les réglages du navigateur avant les tests.':error?.name==='NotFoundError'?'Aucune caméra détectée. Essayez un autre appareil.':'Test caméra impossible. Vérifiez les permissions, les applications utilisant déjà la webcam et réessayez.';
+  }finally{stream?.getTracks().forEach(track=>track.stop());checkDevice.disabled=false;}
+ };
  q('#go').onclick=async()=>{
   if(!paidContext){next();return;}
   if(!paidConsentAccepted){
@@ -181,6 +196,14 @@ function summary(){
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
   isPaid:Boolean(paidContext),
+  appointmentId:paidContext?.appointmentId||null,
+  async beforeDownload(){
+   if(!paidContext)return true;
+   persistProgress();
+   const saved=await dossierQueue?.flush();
+   if(!saved)secureSaveStatus('Sauvegarde du bilan à terminer avant téléchargement');
+   return Boolean(saved);
+  },
   getProgram(){return state.program;},
   updateProgram(program){state.program=program;persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
@@ -252,15 +275,20 @@ async function boot(){
   const loginNeeded=reason==='login';
   const pending=reason==='paid_session_not_enabled';
   const bookingMissing=reason==='booking_required';
-  const title=loginNeeded?'Connectez-vous à Pulse.':pending?'Votre réservation est vérifiée.':'Activez votre accès Online.';
+  const rawId=new URLSearchParams(location.search).get('appointment')||'';
+  const prefilled=/^[1-9][0-9]{0,11}$/.test(rawId)?'?appointment='+encodeURIComponent(rawId):'';
+  const activationLink=PULSE_ROOT+'online/activate/'+prefilled;
+  const title=loginNeeded?'Connectez-vous pour réaliser votre bilan.':pending?'Votre réservation est vérifiée.':'Activez votre accès Online.';
   const message=loginNeeded?'Identifiez-vous sur Pulse avec votre adresse de réservation.':
     pending?'La consultation client est momentanément fermée pendant la mise en service de l’archivage sécurisé des résultats. Votre réservation reste valable.':
     bookingMissing?'Pour commencer, vérifiez votre réservation Acuity réglée avec le même compte Pulse.':
     'Impossible de vérifier une réservation Online active et intégralement réglée pour ce compte. Vérifiez l’adresse e-mail, le numéro du rendez-vous et le paiement.';
   root.innerHTML='<section class="paper access"><span class="overline">ACCÈS SÉCURISÉ AU BILAN ONLINE</span><h1>'+
    esc(title)+'</h1><p>'+esc(message)+'</p><a class="action" href="'+
-   (loginNeeded?'/?connexion=1':'/online/activate/')+'">'+
-   (loginNeeded?'Me connecter à Pulse':'Vérifier ma réservation →')+'</a></section>';
+   (loginNeeded?PULSE_ROOT+'#connexion':activationLink)+'">'+
+   (loginNeeded?'Me connecter à Pulse':'Vérifier ma réservation →')+'</a>'+
+   (loginNeeded?'<p class="access-help">Première connexion après réservation ? <a href="'+esc(activationLink)+'">Activez votre compte avec votre e-mail Acuity →</a></p>':'')+
+   '<p class="access-help">Besoin d’aide ? <a href="mailto:contact@komolongevity.com">Contacter KŌMØ</a></p></section>';
  }
 }
 boot();
