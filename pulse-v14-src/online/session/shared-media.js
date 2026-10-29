@@ -4,7 +4,7 @@ import {createVoiceControl} from './voice-control.js';
 import {createAudioFeedback} from './audio-feedback.js';
 
 let stream=null,voice=null,activeVoiceHandler=null,voiceStatus={text:'Microphone désactivé',mode:'off'};
-let cameraAllowed=false,microphoneAllowed=false,speakerEnabled=true;
+let cameraAllowed=false,microphoneAllowed=false,speakerEnabled=true,cameraEpoch=0;
 const beep= createAudioFeedback();
 const readySignaled=new Set();
 function availableCamera(){
@@ -15,10 +15,12 @@ function availableCamera(){
 }
 async function ensureCamera(){
  if(availableCamera())return stream;
+ const requestEpoch=cameraEpoch;
  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia)throw Error('camera_unavailable');
  const opened=await navigator.mediaDevices.getUserMedia({
   audio:false,video:{facingMode:'user',width:{ideal:1280},height:{ideal:720},frameRate:{ideal:20,max:24}}
  });
+ if(requestEpoch!==cameraEpoch){opened.getTracks().forEach(t=>t.stop());throw Error('camera_cancelled');}
  if(!opened.getVideoTracks().some(t=>t.readyState==='live')){
   opened.getTracks().forEach(t=>t.stop());throw Error('camera_unavailable');
  }
@@ -34,6 +36,7 @@ function detachVideo(video){
  try{video.pause();video.srcObject=null;video.hidden=true;}catch{}
 }
 function stopCamera(){
+ cameraEpoch++;
  if(stream)stream.getTracks().forEach(t=>t.stop());
  stream=null;cameraAllowed=false;readySignaled.clear();
 }
