@@ -38,7 +38,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  const sts=results.sts;
  const stsOk=Boolean(sts?.status==='done'&&Number.isInteger(sts.value)&&sts.value>=0);
  return '<section class="paper online-report">'+passportMarkup(answers,results,blocked)+
- '<span class="overline">SYNTHÈSE MOTION · QUESTIONNAIRE & OBSERVATIONS</span>'+ 
+ '<details class="report-method-details"><summary>Voir le détail des questionnaires et de leur calcul</summary>'+ '<span class="overline">SYNTHÈSE MOTION · QUESTIONNAIRE & OBSERVATIONS</span>'+ 
  '<h1>Votre profil en mouvement<em>.</em></h1>'+
  '<p>Cette restitution distingue vos <strong>réponses personnelles</strong> des mesures fonctionnelles. Les scores déclaratifs sont exploratoires et ne constituent pas des diagnostics.</p>'+
  (blocked?'<div class="notice danger"><strong>Tests interrompus par sécurité.</strong> Le questionnaire demeure informatif, mais aucun Motion Score global ne peut être établi.</div>':'')+
@@ -46,7 +46,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '<p>'+(intake.complete?'Indice calculé à partir de vos réponses uniquement, avec quatre domaines pondérés. <strong>Il ne s’agit pas du Motion Score.</strong>':'Questionnaire incomplet : '+(p.total-p.completed)+' réponse(s) manquante(s).')+'</p></div>'+
  '<div class="intake-domain-grid">'+domainCards(intake)+'</div>'+
  (intake.complete?'<p class="report-context"><strong>Domaines à discuter en priorité :</strong> '+(chosen||'Aucune priorité différenciée')+'. Ils reflètent votre perception et ne traduisent pas à eux seuls une limitation objective.</p>':'')+
- '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
+ '</details>'+ '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
  '<section class="motion-score-zone"><div class="motion-score-heading"><span class="overline">MOTION SCORE · ALGORITHME DE RÉFÉRENCE</span><h2>Le score fonctionnel final</h2><p>Formule définie pour KŌMØ : <strong>40 % Sit-to-Stand · 35 % TUG 3 m · 25 % équilibre SPPB.</strong> Les questionnaires, la posture et l’unipodal ne modifient pas cette formule.</p></div>'+
  '<div class="motion-score-locked"><span id="score-status-icon">○</span><div><strong id="score-status">Motion Score indisponible : mesures complémentaires requises</strong><p id="score-hint">Le TUG standardisé et l’équilibre SPPB n’ont pas été mesurés automatiquement par la webcam. Aucune norme statistique n’a été inventée.</p></div><div class="motion-score-value"><strong id="motion-score-number">—</strong><span>/ 100</span></div></div>'+
  '<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
