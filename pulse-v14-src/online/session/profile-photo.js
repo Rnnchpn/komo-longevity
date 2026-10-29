@@ -9,7 +9,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  const start=q('#start-camera'),stop=q('#stop-camera'),redo=q('#redo-test'),next=q('#go'),consent=q('#pose-consent'),halt=q('#halt-test'),status=q('#motion-status');
  const reader=q('#read-guidance'),distance=q('#distance-view');
  let disposed=false,locked=false,frame=null,base=null,display=null,markers=null,which='neck',adjusted=false,manualCaptured=false,latestProfile=null,validStreak=0,countdownRunning=false,validSince=null;
- const stability=createSideProfileStability(1250);
+ const stability=createSideProfileStability(900);
  const countCover=q('#countdown-cover'),countValue=q('#countdown-value');
  const hideCountdown=()=>{countdownRunning=false;if(countCover)countCover.hidden=true;};
  const cancelCountdown=()=>{sharedMotionMedia.cancelPostureCountdown();hideCountdown();};
@@ -19,7 +19,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  const instruction='Mettez-vous simplement de profil, pieds visibles. Un décompte 3, 2, 1 démarre seul quand vous êtes stable. Photo automatique à « Top ! ».';
  q('#camera-live-score').hidden=true;
  q('#camera-hud').hidden=true;
- const manual=q('#start-test');manual.hidden=true;manual.disabled=true;manual.textContent='Prendre la photo (secours)';
+ const manual=q('#start-test');manual.hidden=false;manual.disabled=true;manual.textContent='Prendre une photo maintenant';
  q('#time').textContent='AUTO';
  q('#value').textContent='—';
  q('#value').parentElement.querySelector('.overline').textContent='PHOTO DE PROFIL';
@@ -52,7 +52,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   start.disabled=!consent.checked;stop.disabled=true;state.bodyReady=false;
  };
  const draw=()=>{
-  if(!base||!markers)return;
+  if(!base||!markers||!markers.neck||!markers.pelvis||!(frame?.height>.2))return;
   snap.width=base.width;snap.height=base.height;
   const ctx=snap.getContext('2d');
   ctx.drawImage(base,0,0);
@@ -75,6 +75,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    adjusted,manualCapture:manualCaptured,neck:{...markers.neck},pelvis:{...markers.pelvis},height:frame.height};
   record.status=manualCaptured?'review':'done';record.source='photo locale, repères de surface';
   record.value=offset;
+  next.disabled=false;
   callbacks.checkpoint?.();
   q('#value').textContent=offset.toFixed(1)+' %';
   const items=[['Écart horizontal apparent',offset.toFixed(1)+' %'],['Méthode','Photo de profil 2D'],
@@ -84,15 +85,16 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    k.textContent=key;v.textContent=value;cell.append(k,v);data.append(cell);}
   panel.hidden=false;
  };
- const showEditor=()=>{
-  const notes=document.createElement('details');notes.className='profile-editor';notes.innerHTML='<summary>Modifier les deux repères (facultatif)</summary>'+ 
+ const showEditor=(needsManual=false)=>{
+  const notes=document.createElement('details');notes.className='profile-editor';notes.open=needsManual;
+  notes.innerHTML='<summary>'+(needsManual?'Placez trois repères sur la photo':'Modifier les repères (facultatif)')+'</summary>'+ 
    '<p>Les repères sont approximatifs (ni C7 ni S1). Vous pouvez les corriger en touchant la photo.</p>'+
-   '<div class="profile-editor-actions"><button type="button" id="mark-neck" aria-pressed="true">1 · Repère cou/dos</button><button type="button" id="mark-pelvis" aria-pressed="false">2 · Repère bassin</button></div>'+
+   '<div class="profile-editor-actions"><button type="button" id="mark-neck" aria-pressed="true">1 · Cou / haut du dos</button><button type="button" id="mark-pelvis" aria-pressed="false">2 · Bassin</button>'+(needsManual?'<button type="button" id="mark-ankle" aria-pressed="false">3 · Cheville</button>':'')+'</div>'+ 
    '<p>Indice exprimé en % de la hauteur projetée épaule–cheville. Sans calibration ni radiographie, aucune SVA en mm n’est disponible.</p>';
   panel.prepend(notes);
-  const neck=q('#mark-neck'),pelvis=q('#mark-pelvis');
-  const select=name=>{which=name;neck.setAttribute('aria-pressed',String(name==='neck'));pelvis.setAttribute('aria-pressed',String(name==='pelvis'));};
-  neck.onclick=()=>select('neck');pelvis.onclick=()=>select('pelvis');
+  const neck=q('#mark-neck'),pelvis=q('#mark-pelvis'),ankle=q('#mark-ankle');
+  const select=name=>{which=name;neck.setAttribute('aria-pressed',String(name==='neck'));pelvis.setAttribute('aria-pressed',String(name==='pelvis'));if(ankle)ankle.setAttribute('aria-pressed',String(name==='ankle'));};
+  neck.onclick=()=>select('neck');pelvis.onclick=()=>select('pelvis');if(ankle)ankle.onclick=()=>select('ankle');
   snap.onpointerdown=event=>{
    if(!base||!markers)return;
    const box=snap.getBoundingClientRect();
@@ -101,22 +103,30 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    const x=(event.clientX-box.left-(box.width-renderedW)/2)/renderedW;
    const y=(event.clientY-box.top-(box.height-renderedH)/2)/renderedH;
    if(x<0||x>1||y<0||y>1)return;
-   markers[which]={x,y};adjusted=true;draw();
+   markers[which]={x,y};adjusted=true;
+   if(needsManual&&which==='neck')select('pelvis');
+   else if(needsManual&&which==='pelvis')select('ankle');
+   if(needsManual&&markers.neck&&markers.pelvis&&markers.ankle){
+    frame={height:markers.ankle.y-markers.neck.y};
+    if(frame.height>.2){draw();status.textContent='Repères placés. Le résultat de surface est disponible.';}
+    else {next.disabled=true;status.textContent='Placez la cheville plus bas que le cou pour une hauteur exploitable.';}
+   }else draw();
   };
  };
  const takePhoto=(f,manualMode=false)=>{
   if(disposed||locked||!video.videoWidth)return;
-  locked=true;frame=f;manualCaptured=manualMode;
+  locked=true;frame=f?.valid?f:null;manualCaptured=manualMode;
   const w=video.videoWidth,h=video.videoHeight;
   base=document.createElement('canvas');base.width=w;base.height=h;
   const ctx=base.getContext('2d');
   ctx.translate(w,0);ctx.scale(-1,1);ctx.drawImage(video,0,0,w,h);
-  markers={neck:{x:1-f.neck.x,y:f.neck.y},pelvis:{x:1-f.pelvis.x,y:f.pelvis.y}};
+  markers=frame?{neck:{x:1-f.neck.x,y:f.neck.y},pelvis:{x:1-f.pelvis.x,y:f.pelvis.y}}:{neck:null,pelvis:null,ankle:null};
   stopTracks();start.disabled=true;manual.hidden=true;off.hidden=true;
   snap.hidden=false;
   // Make the captured image visually replace the video.
   snap.style.display='block';
-  draw();showEditor();next.disabled=false;
+  if(frame){draw();showEditor(false);next.disabled=false;}
+  else {showEditor(true);next.disabled=true;status.textContent='Photo prise. Touchez successivement le cou, le bassin et la cheville sur la photo.';}
   redo.hidden=false;redo.textContent='Reprendre la photo';
   status.textContent=manualMode?'Photo prise manuellement : résultat exploratoire à vérifier.':'Photo capturée automatiquement. Vérifiez les deux repères puis continuez.';
   q('#camera-message').textContent=instruction;
@@ -129,7 +139,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   try{
    stream=await sharedMotionMedia.ensureCamera();
    if(disposed||request!==state.request)return;
-   state.stream=stream;sharedMotionMedia.attachVideo(video);off.hidden=true;stop.disabled=false;await video.play();
+   state.stream=stream;sharedMotionMedia.attachVideo(video);off.hidden=true;stop.disabled=false;await video.play();manual.disabled=false;
    const engine=await createPoseEngine(video,overlay,(points,time)=>{
     if(disposed||locked||document.hidden)return;
     const f=stability.observe(points,time);latestProfile=f;
@@ -138,16 +148,16 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
     manual.disabled=!f.valid;
     validSince=f.valid?(validSince??time):null;
     // Only show the manual escape hatch after a prolonged failed auto-position.
-    manual.hidden=!(f.valid&&time-validSince>7000);
+    manual.hidden=false;
     const label=q('#pose-quality'),hud=q('#camera-hud');
     hud.hidden=false;
     if(countdownRunning){
-     if(!f.valid||f.stableMs<1250){
+     if(!f.valid||f.stableMs<900){
       cancelCountdown();status.textContent='Vous avez bougé : repositionnez-vous. Le décompte repartira tout seul.';
      }
      else label.textContent='Position validée · photo dans 3, 2, 1…';
     }else{
-     label.textContent=f.valid?'Profil correct : '+Math.min(100,Math.floor(f.stableMs/1250*100))+' % · attendez…':f.message;
+     label.textContent=f.valid?'Profil correct : '+Math.min(100,Math.floor(f.stableMs/900*100))+' % · attendez…':f.message;
      if(f.ready){
       countdownRunning=true;
       manual.hidden=true;
@@ -158,7 +168,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
        if(countValue)countValue.textContent=String(v);
       },()=>{
        if(!countdownRunning||disposed)return;
-       if(!latestProfile?.valid||latestProfile.stableMs<1250||document.hidden){
+       if(!latestProfile?.valid||latestProfile.stableMs<900||document.hidden){
         cancelCountdown();return;
        }
        hideCountdown();
@@ -171,6 +181,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    state.engine=engine;overlay.hidden=false;
   }catch(e){
    if(disposed||request!==state.request)return;
+   if(video.videoWidth&&state.stream){manual.disabled=false;q('#camera-message').textContent='Détection automatique indisponible : utilisez « Prendre une photo maintenant ». ';return;}
    stopTracks();off.hidden=false;
    q('#camera-message').textContent=e.name==='NotAllowedError'?'Autorisation caméra refusée.':'Caméra ou détecteur indisponible. Réessayez.';
   }
@@ -185,7 +196,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   record.status='pending';record.posture=null;status.textContent='Pour reprendre, réactivez la caméra et replacez-vous de profil.';
  };
  next.disabled=true;
- manual.onclick=()=>{if(latestProfile?.valid&&!locked)takePhoto(latestProfile,true);};
+ manual.onclick=()=>{if(!locked&&video.videoWidth)takePhoto(latestProfile?.valid?latestProfile:null,true);};
  q('#go').onclick=()=>{if(!record.posture?.valid)return;stopTracks();callbacks.advance();};
  q('#back').onclick=()=>{stopTracks();callbacks.back();};
  q('#skip').onclick=()=>{stopTracks();record.status='skipped';record.posture=null;callbacks.advance();};
