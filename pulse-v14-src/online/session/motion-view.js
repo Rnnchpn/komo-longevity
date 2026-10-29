@@ -12,7 +12,7 @@ export function motionMarkup(task,index,total){
   '<ol class="guide-steps">'+guide.steps.map((step,i)=>'<li><span>'+String(i+1).padStart(2,'0')+'</span><p>'+escapeText(step)+'</p></li>').join('')+'</ol></div>'+
   '<p class="guide-measure"><strong>Ce que la caméra mesure :</strong> '+escapeText(guide.measured)+'</p>'+
   '<p class="guide-audio-status" id="guide-audio-status" role="status"></p></details>';
- return '<section class="paper motion-workspace"><div class="motion-heading"><div><span class="overline">ÉTAPE 03 · CAPTURE '+(index+1)+' / '+total+'</span><h1>'+escapeText(t.name)+'<em>.</em></h1><p>'+escapeText(t.instruction)+'</p></div>'+
+ return '<section class="paper motion-workspace"><div class="motion-heading"><div><span class="overline">ÉTAPE 03 · TEST '+(index+1)+' / '+total+' · PROGRESSION CONSERVÉE+'</span><h1>'+escapeText(t.name)+'<em>.</em></h1><p>'+escapeText(t.instruction)+'</p></div>'+
  '<span class="pose-tag">ANALYSE CORPORELLE · 33 POINTS</span></div>'+guidance+
  '<div class="test-grid live-capture-layout"><div class="camera pose-camera"><div class="camera-screen" id="camera-screen">'+
  '<video id="live-video" autoplay playsinline muted hidden></video><canvas id="pose-canvas" aria-hidden="true" hidden></canvas>'+
@@ -21,11 +21,11 @@ export function motionMarkup(task,index,total){
  '<div class="voice-hud" id="voice-hud" hidden>🎙 <span id="voice-hud-text">Micro activé</span></div>'+
  '<div class="countdown-cover" id="countdown-cover" hidden><span>PRÉPAREZ-VOUS</span><strong id="countdown-value">3</strong><small>Le test démarre à TOP !</small></div>'+
  '<div class="camera-live-score" id="camera-live-score" hidden><b id="camera-reps">0</b><span id="camera-live-label">'+(t.id==='balance'?'secondes visibles':t.id==='posture'?'photo en cours':t.id.startsWith('unipodal')?'secondes de maintien':'répétitions')+'</span></div>'+
- '</div><div class="pose-consent"><label><input type="checkbox" id="pose-consent"><span>J’accepte l’analyse locale de ma silhouette pour ce test et le chargement du moteur MediaPipe, susceptible de transmettre des statistiques techniques à Google. Aucune vidéo n’est envoyée ni sauvegardée.</span></label></div>'+
- '<details class="voice-compact" id="voice-panel"><summary>🎙 Micro · 🔊 Son <span>Paramètres</span></summary><div class="voice-setup"><label class="voice-optin"><input type="checkbox" id="voice-consent"><span>J’autorise le microphone pour commander le test à distance. La reconnaissance vocale dépend de mon navigateur et peut transmettre ma voix à son fournisseur ; KŌMØ ne conserve aucun audio ni transcription.</span></label>'+ 
+ '</div><div class="pose-consent"><label><input type="checkbox" id="pose-consent"><span>J’autorise la caméra et l’analyse locale de ma silhouette pour l’ensemble des tests Motion et le chargement du moteur MediaPipe, susceptible de transmettre des statistiques techniques à Google. Aucune vidéo n’est envoyée ni sauvegardée.</span></label></div>'+
+ '<details class="voice-compact" id="voice-panel"><summary>🎙 Micro · 🔊 Son <span>Conservés pendant les tests</span></summary><div class="voice-setup"><label class="voice-optin"><input type="checkbox" id="voice-consent"><span>J’autorise le microphone pour commander le test à distance. La reconnaissance vocale dépend de mon navigateur et peut transmettre ma voix à son fournisseur ; KŌMØ ne conserve aucun audio ni transcription.</span></label>'+ 
  '<div class="voice-controls"><button type="button" id="toggle-voice" disabled>🎙 Activer les commandes vocales</button><span id="voice-state" role="status">Microphone désactivé</span></div>'+ 
  '<p class="voice-phrases">Dites : <strong>« C’est parti »</strong> pour lancer · <strong>« Stop »</strong> pour arrêter · <strong>« Recommencer »</strong> pour refaire le test.</p>'+ 
- '<label class="sound-optin"><input id="sound-enabled" type="checkbox" checked><span>🔊 Annonces et clics sonores</span></label></div></details>'+ 
+ '<label class="sound-optin"><input id="sound-enabled" type="checkbox" checked><span>🔊 Annonces, clics et bip de bonne position</span></label></div></details>'+ 
  '<div class="camera-actions"><button type="button" id="start-camera" disabled>Activer ma webcam</button><button type="button" id="stop-camera" disabled>Éteindre la caméra</button></div>'+
  '<p class="subtle" id="camera-message" role="status">Placez-vous suffisamment loin pour montrer le corps entier, caméra fixe et stable.</p></div>'+
  '<div class="test-controller live-controller"><div class="test-stat"><span class="overline">TEMPS RESTANT</span><strong class="time" id="time">'+t.seconds+'</strong><small>secondes</small></div>'+
