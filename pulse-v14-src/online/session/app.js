@@ -4,6 +4,7 @@ import { mountMotionController } from './motion-controller.js';
 import { INTAKE_GROUPS } from './intake-model.mjs';
 import { intakeMarkup,bindIntake } from './intake-view.js';
 import { reportMarkup,bindReport } from './intake-report.js';
+import {restitutionMarkup} from './restitution.mjs';
 import {sharedMotionMedia} from './shared-media.js';
 import {TERMINAL_TEST_STATUSES,testNavigatorMarkup,completedTestMarkup,mountTestNavigation} from './test-navigation.js';
 import {saveProgress,loadProgress,clearProgress,snapshotProgress} from './session-progress.mjs';
@@ -73,10 +74,10 @@ function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
   wrap('<div class="intro"><div><span class="overline">'+(paidContext?'VOTRE BILAN ONLINE · RÉSERVATION VÉRIFIÉE':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
   '<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
-  '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
+  '<div class="fact-row"><div><b>À votre rythme</b><small>Tests autonomes</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
   btn('go',paidContext?'Démarrer mon bilan →':'Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
   '<p class="notice">'+(paidContext?'Bilan fonctionnel non médical. Vos réponses et mesures sont enregistrées dans un dossier privé pour reprendre la séance. Le rapport PDF reste téléchargé séparément. Les estimations webcam ne sont pas des diagnostics.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>'+
- (paidContext?'<label class="dossier-consent"><input type="checkbox" id="dossier-consent" '+(paidConsentAccepted?'checked':'')+'><span>J’accepte l’enregistrement sécurisé de mes réponses de mobilité, de douleur et de mes mesures fonctionnelles dans mon espace Pulse, afin de pouvoir reprendre ce bilan. Je comprends que la vidéo, les photos et le microphone ne sont pas enregistrés.</span></label><p class="message" id="dossier-consent-feedback" role="status"></p>':''));
+ (paidContext?restitutionMarkup({...paidContext,compact:true})+'<label class="dossier-consent"><input type="checkbox" id="dossier-consent" '+(paidConsentAccepted?'checked':'')+'><span>J’accepte l’enregistrement sécurisé de mes réponses de mobilité, de douleur et de mes mesures fonctionnelles dans mon espace Pulse, afin de pouvoir reprendre ce bilan. Je comprends que la vidéo, les photos et le microphone ne sont pas enregistrés.</span></label><p class="message" id="dossier-consent-feedback" role="status"></p>':''));
  q('#go').onclick=async()=>{
   if(!paidContext){next();return;}
   if(!paidConsentAccepted){
@@ -176,7 +177,7 @@ function test(){
 function summary(){
  const blocked=state.answers.safety==='yes';
  wrap((blocked?'':testNavigatorMarkup(TESTS,state.results,null))+
-  reportMarkup(state.answers,state.results,blocked,Boolean(paidContext),state.program));
+  reportMarkup(state.answers,state.results,blocked,Boolean(paidContext),state.program,paidContext));
  if(!blocked)mountTestNavigation(root,TESTS,state.results,jumpToTest,null);
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
@@ -227,7 +228,7 @@ async function boot(){
     appointmentId:bookingId
    });
    if(!verified.ok)throw Error(verified.error);
-   paidContext={userId:user.id,appointmentId:bookingId};
+   paidContext={userId:user.id,appointmentId:bookingId,appointmentAt:verified.appointmentAt||null,appointmentMinutes:verified.appointmentMinutes||null};
    progressStore=scopedProgressStorage(store,user.id,bookingId);
    keepBooking(store,bookingId);
    dossierQueue=createDossierQueue({accessToken:session.data.session.access_token,
