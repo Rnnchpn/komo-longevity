@@ -10,7 +10,7 @@ delete process.env.PULSE_ONLINE_PAID_SESSION_ENABLED;
 process.env.ACUITY_USER_ID='demo-user';
 process.env.ACUITY_API_KEY='demo-server-secret';
 let identity={id:'demo-auth-uid',email:'booker@example.test',email_confirmed_at:'2026-10-29T12:00:00Z'};
-let appointment={id:123456,appointmentTypeID:99940918,email:'booker@example.test',price:'49.00',amountDue:'0',canceled:false,noShow:false};
+let appointment={id:123456,appointmentTypeID:99940918,email:'booker@example.test',price:'49.00',amountDue:'0',canceled:false,noShow:false,datetime:'2026-11-06T14:00:00+0100',duration:30};
 let payments=[{transactionID:'pi_demo',processor:'stripe',amount:'49.00'}];
 let fetchCalls=[];
 globalThis.fetch=async(url,options)=>{
@@ -29,12 +29,19 @@ try{
  let r=await check(request(),200);
  assert.equal(r.body.eligible,true);
  assert.equal(r.body.paid,true);
+ assert.equal(r.body.appointmentAt,'2026-11-06T14:00:00+0100');
+ assert.equal(r.body.appointmentMinutes,30);
+ assert.equal(JSON.stringify(r.body).includes('booker@example'),false);
  assert.equal(r.body.canStart,false,'commercial access must default to disabled');
  process.env.PULSE_ONLINE_PAID_SESSION_ENABLED='true';
  r=await check(request(),200);
  assert.equal(r.body.canStart,true,'server enables paid entry when explicitly configured');
  delete process.env.PULSE_ONLINE_PAID_SESSION_ENABLED;
  assert.equal(JSON.stringify(r.body).includes('booker@example'),false);
+ appointment={...appointment,datetime:'2026-11-06T14:00:00'};
+ const timezoneUnknown=await check(request(),200);
+ assert.equal(timezoneUnknown.body.appointmentAt,null,'Do not guess timezone for offset-free dates');
+ appointment={...appointment,datetime:'2026-11-06T14:00:00+0100'};
  assert.ok(fetchCalls.some(u=>u.endsWith('/payments')));
 
  r=await check({method:'GET',headers:{},body:{}},405);
