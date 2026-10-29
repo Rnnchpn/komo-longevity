@@ -16,12 +16,12 @@ Le compte propriétaire de l'agenda est identifié par `owner=40696577`. Sa page
 ### Catégories et prestation à afficher
 
 **01 — DÉCOUVERTE**  
-`KŌMØ · Bilan Découverte` — 0 € ; durée recommandée 10–15 minutes, **à confirmer**.  
+`KŌMØ · Bilan Découverte` — 0 € ; durée recommandée **10 minutes**, à confirmer. Si le « bilan gratuit » est en réalité un check-up autonome sans créneau, ne pas créer de type Acuity et conserver le questionnaire sur le site.  
 Description : « Une première approche simple du mouvement et de vos habitudes fonctionnelles. Ce rendez-vous découverte vous aide à identifier un point de départ et à choisir la suite du parcours KŌMØ. Évaluation non médicale. »  
 N'activer qu'avec un opérateur, un calendrier et une prestation réellement disponibles. Sinon maintenir privé / masqué.
 
 **02 — À DISTANCE**  
-`KŌMØ · Bilan Online` — durée recommandée 30 minutes ; **prix à confirmer avant activation**, ne pas reprendre de tarif non validé.  
+`KŌMØ · Bilan Online` — **30 minutes, 49 €**, tarif confirmé le 29 octobre 2026. À encaisser en totalité à la réservation une fois le prestataire de paiement connecté.  
 Description : « Votre bilan de mouvement à distance, par visioconférence avec un intervenant KŌMØ. Échange guidé, questionnaires et observations fonctionnelles simples, selon votre situation. Restitution claire et prochaines étapes. Ce bilan est non médical, sans examen instrumenté et sans diagnostic. »  
 Prévoir calendrier dédié et lien de visioconférence testé, consentement adapté, conditions d'annulation, paiement configuré et support technique. Ne pas publier tant que la réalisation du bilan et l'envoi des informations ne sont pas opérationnels.
 
