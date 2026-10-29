@@ -8,6 +8,8 @@ const app=await readFile(join(root,'site','pulse-v14','app.js'),'utf8');
 const css=await readFile(join(root,'site','pulse-v14','styles.css'),'utf8');
 const luxuryCss=await readFile(join(root,'site','pulse-v14','pulse-quiet-luxury-v2.css'),'utf8');
 const onlineLuxuryCss=await readFile(join(root,'site','pulse-v14','online','quiet-luxury-online-v2.css'),'utf8');
+const mobileCss=await readFile(join(root,'site','pulse-v14','pulse-mobile-first-v3.css'),'utf8');
+const onlineMobileCss=await readFile(join(root,'site','pulse-v14','online','mobile-first-online-v3.css'),'utf8');
 const onlineHtml=await readFile(join(root,'site','pulse-v14','online','index.html'),'utf8');
 const onlineScript=await readFile(join(root,'site','pulse-v14','online','app.js'),'utf8');
 const onlineCss=await readFile(join(root,'site','pulse-v14','online','styles.css'),'utf8');
@@ -59,6 +61,14 @@ const rootV14=rewrites.some(r=>r.source==='/'&&r.destination==='/pulse-v14/'&&ho
 const nestedV14=rewrites.some(r=>r.source==='/(.*)'&&r.destination==='/pulse-v14/$1'&&hostRule(r));
 
 const checks=[
+ ['mobile-first styles load after luxury styles',html.indexOf('pulse-mobile-first-v3.css')>html.indexOf('pulse-quiet-luxury-v2.css')&&onlineHtml.indexOf('mobile-first-online-v3.css')>onlineHtml.indexOf('quiet-luxury-online-v2.css')&&sessionHtml.includes('mobile-first-online-v3.css')&&activationHtml.includes('mobile-first-online-v3.css')],
+ ['booking bar reuses verified online Acuity link',app.includes('mobileBooking.href=onlineBookingUrl')&&app.includes('pulse-mobile-booking-bar')&&app.includes('49 €')],
+ ['mobile booking bar does not overlay login',mobileCss.includes('.pulse-entry-panel:not([hidden])')&&app.includes('entry.hidden=visible')],
+ ['iPhone safe area and touchscreen destinations',mobileCss.includes('safe-area-inset-bottom')&&mobileCss.includes('repeat(5,minmax(0,1fr))')&&mobileCss.includes('min-height:54px')],
+ ['mobile signed-in account controls and ARIA nav',app.includes("pulse-mobile-logout")&&app.includes("$('#pulse-mobile-logout').onclick=$('#logout').onclick")&&app.includes('aria-current=')],
+ ['online camera and passport adapt to smartphone',onlineMobileCss.includes('aspect-ratio:4/5')&&onlineMobileCss.includes('.passport-hero')&&onlineMobileCss.includes('.daily-checkin')],
+ ['mobile visual layer honors reduced motion',mobileCss.includes('prefers-reduced-motion')&&onlineMobileCss.includes('prefers-reduced-motion')],
+
  ['quiet luxury stylesheet loaded after canonical CSS',html.indexOf('pulse-quiet-luxury-v2.css')>html.indexOf('styles.css')],
  ['quiet luxury palette and font family',luxuryCss.includes('#171718')&&luxuryCss.includes('#B89B6A')&&html.includes('Cormorant+Garamond')&&html.includes('Inter:wght@')],
  ['online preflight and guided session maintain premium theme',onlineLuxuryCss.includes('.session-top')&&onlineLuxuryCss.includes('.intro')&&onlineHtml.includes('quiet-luxury-online-v2.css')&&sessionHtml.includes('quiet-luxury-online-v2.css')],

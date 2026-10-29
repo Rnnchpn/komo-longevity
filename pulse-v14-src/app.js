@@ -130,6 +130,16 @@ function installPulseBookingEntry(){
     <div class="pulse-entry-login-bridge"><span>Vous avez déjà un compte ?</span><button type="button" class="pulse-login-link" id="pulseShowLogin">Se connecter →</button></div>
     <div class="pulse-entry-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
   panel.prepend(entry);
+  // Mobile only: persistent direct booking entry, hidden when the login form is open.
+  // Same verified Acuity booking link as the main online offer.
+  const mobileBooking=document.createElement('a');
+  mobileBooking.className='pulse-mobile-booking-bar';
+  mobileBooking.href=onlineBookingUrl;
+  mobileBooking.target='_blank';
+  mobileBooking.rel='noopener noreferrer';
+  mobileBooking.setAttribute('aria-label','Réserver le Bilan Online KŌMØ : 49 euros pour 30 minutes');
+  mobileBooking.innerHTML='<span class="pulse-mobile-booking-copy"><small>BILAN ONLINE · 30 MIN</small><strong>49 €</strong></span><span class="pulse-mobile-booking-action">Réserver <span aria-hidden="true">↗</span></span>';
+  document.querySelector('.login-page')?.append(mobileBooking);
   const finePointer=window.matchMedia?.('(hover:hover) and (pointer:fine)');
   if(finePointer?.matches){
     story.querySelectorAll('.pulse-offer').forEach(card=>{
@@ -204,13 +214,14 @@ async function loadAll(){if(S.mode==='pro'&&hasPro())await loadPro();else await 
 
 function navItems(){return S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
-  const nav=navItems().map(([id,label],i)=>`<button data-route="${id}" class="nav-item ${S.route===id?'active':''}"><span class="nav-dot">${i+1}</span><span>${label}</span></button>`).join('');
+  const nav=navItems().map(([id,label],i)=>`<button data-route="${id}" aria-current="${S.route===id?'page':'false'}" class="nav-item ${S.route===id?'active':''}"><span class="nav-dot">${i+1}</span><span>${label}</span></button>`).join('');
   const demoLink=isOnlineTester()?'<a class="pulse-online-tester-link" href="/online/session/">◎ Ma consultation Online <small>Mode test · démarrer</small></a>':'';
   const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'?'active':''}" ${!S.patient?'disabled':''}>Patient</button><button data-mode="pro" class="${S.mode==='pro'?'active':''}">Équipe</button></div>`:'';
-  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div id="view"></div></main></div>`;
+  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div><div class="pulse-mobile-tools">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div></div></header><div id="view"></div></main></div>`;
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;S.mode=b.dataset.mode;localStorage.setItem('komo_v14_mode',S.mode);location.hash=S.mode==='pro'?'operator':'home';await refresh()});
   $('#logout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
+  $('#pulse-mobile-logout').onclick=$('#logout').onclick;
 }
 function heading(title,over='KŌMØ PULSE'){ $('#pageTitle').textContent=title;$('#pageOverline').textContent=over }
 function progressStrip(){
