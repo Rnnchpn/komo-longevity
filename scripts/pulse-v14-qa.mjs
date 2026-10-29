@@ -90,7 +90,7 @@ const checks=[
  ['speaker is optional and cleaned up',motionView.includes('id="sound-enabled"')&&captureEnhancements.includes('audible:enabled()')&&captureEnhancements.includes('audio.destroy()')],
  ['posture observation and careful summary',postureMetrics.includes('observeFrontalPosture')&&captureEnhancements.includes('postureSummary()')&&sessionJs.includes("id:'posture'")&&sessionJs.includes("r.posture?.valid")],
  ['posture is non-diagnostic and local',testGuides.includes("posture:{")&&testGuides.includes("scoliose")&&motionView.includes('id="posture-results"')],
- ['auto side photo, not radiographic SVA',profilePhoto.includes('createSideProfileStability')&&profilePhoto.includes('drawImage(video')&&profilePhoto.includes('Photo capturée automatiquement')&&profileGeometry.includes('NOT SVA')===false&&profileGeometry.includes('NOT mm')],
+ ['auto side photo, not radiographic SVA',profilePhoto.includes('createSideProfileStability')&&profilePhoto.includes('drawImage(video')&&profilePhoto.includes('Photo capturée automatiquement')&&profileGeometry.includes('NOT SVA')&&profileGeometry.includes('NOT mm')],
  ['photo marker correction and in-memory image',profilePhoto.includes('profile-photo')&&profilePhoto.includes('snap.onpointerdown')&&!/fetch\s*\(|localStorage|sessionStorage|toBlob|toDataURL/.test(profilePhoto)],
  ['unipodal both legs, auto timing on foot lift',sessionJs.includes("id:'unipodal_left'")&&sessionJs.includes("id:'unipodal_right'")&&unipodalController.includes('createOneLegObserver')&&unipodalGeometry.includes('at-raisedSince>=850')],
  ['camera-only before auto capture',profilePhoto.includes('consent.checked')&&unipodalController.includes('consent.checked')&&unipodalController.includes('audio:false')],
