@@ -274,15 +274,20 @@ async function boot(){
   const loginNeeded=reason==='login';
   const pending=reason==='paid_session_not_enabled';
   const bookingMissing=reason==='booking_required';
-  const title=loginNeeded?'Connectez-vous à Pulse.':pending?'Votre réservation est vérifiée.':'Activez votre accès Online.';
+  const rawId=new URLSearchParams(location.search).get('appointment')||'';
+  const prefilled=/^[1-9][0-9]{0,11}$/.test(rawId)?'?appointment='+encodeURIComponent(rawId):'';
+  const activationLink='/online/activate/'+prefilled;
+  const title=loginNeeded?'Connectez-vous pour réaliser votre bilan.':pending?'Votre réservation est vérifiée.':'Activez votre accès Online.';
   const message=loginNeeded?'Identifiez-vous sur Pulse avec votre adresse de réservation.':
     pending?'La consultation client est momentanément fermée pendant la mise en service de l’archivage sécurisé des résultats. Votre réservation reste valable.':
     bookingMissing?'Pour commencer, vérifiez votre réservation Acuity réglée avec le même compte Pulse.':
     'Impossible de vérifier une réservation Online active et intégralement réglée pour ce compte. Vérifiez l’adresse e-mail, le numéro du rendez-vous et le paiement.';
   root.innerHTML='<section class="paper access"><span class="overline">ACCÈS SÉCURISÉ AU BILAN ONLINE</span><h1>'+
    esc(title)+'</h1><p>'+esc(message)+'</p><a class="action" href="'+
-   (loginNeeded?'/?connexion=1':'/online/activate/')+'">'+
-   (loginNeeded?'Me connecter à Pulse':'Vérifier ma réservation →')+'</a></section>';
+   (loginNeeded?'/?#connexion':activationLink)+'">'+
+   (loginNeeded?'Me connecter à Pulse':'Vérifier ma réservation →')+'</a>'+
+   (loginNeeded?'<p class="access-help">Première connexion après réservation ? <a href="'+esc(activationLink)+'">Activez votre compte avec votre e-mail Acuity →</a></p>':'')+
+   '<p class="access-help">Besoin d’aide ? <a href="mailto:contact@komolongevity.com">Contacter KŌMØ</a></p></section>';
  }
 }
 boot();
