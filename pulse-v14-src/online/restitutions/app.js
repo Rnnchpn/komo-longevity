@@ -1,5 +1,6 @@
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import {buildMotionPassport} from '../session/motion-passport.mjs';
+import {mountConsultationDemo} from './consultation-demo.mjs';
 const sb=createClient('https://uqlolefsiktbznnymriy.supabase.co','sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root=document.getElementById('operator-app'),edge='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-online-operator';
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -8,7 +9,7 @@ const displayTime=s=>{
  return new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',weekday:'short',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}).format(new Date(s))+' · Paris';
 };
 const formatDate=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
-const state={token:null,appointments:[],statuses:{},selected:null,busy:false,from:null,to:null,live:false};
+const state={token:null,operatorEmail:null,appointments:[],statuses:{},selected:null,busy:false,from:null,to:null,live:false,demo:null};
 function message(text){const node=root.querySelector('#op-feedback');if(node)node.textContent=text;}
 async function refreshToken(){
  const {data}=await sb.auth.getSession();
@@ -42,7 +43,7 @@ function listView(){
  const rows=state.appointments;
  return '<div class="eyebrow">KŌMØ OPERATOR / MOTION ONLINE</div><div class="work-heading"><div><h1>Vos restitutions.</h1>'+
  '<p>Créneaux Acuity, visios et passeports réunis au même endroit. Le rendez-vous reste géré dans Acuity ; cette interface ne modifie jamais ses horaires.</p></div>'+
- '<button type="button" class="btn solid" id="refresh">Actualiser les rendez-vous</button></div>'+
+ '<div class="work-cta-group"><button type="button" class="btn demo-launch" id="launch-demo">◎ Commencer une consultation test</button><button type="button" class="btn solid" id="refresh">Actualiser les rendez-vous</button></div></div>'+
  '<section class="toolbar"><label>Du <input type="date" id="date-from" value="'+escape(state.from)+'"></label>'+
  '<label>Au <input type="date" id="date-to" value="'+escape(state.to)+'"></label>'+
  '<span>'+rows.length+' rendez-vous</span></section>'+
@@ -93,7 +94,19 @@ function dossierView(a,d){
  '<a class="btn secondary" href="https://app.acuityscheduling.com/schedule.php?owner=40696577" target="_blank" rel="noopener noreferrer">Voir les autres prestations KŌMØ ↗</a></section>'+
  '<div class="footnote">La vidéo, les photos et les données brutes webcam ne sont pas archivées. Ne jamais considérer les estimations webcam comme des mesures médicalement validées. Cette page ne permet pas de modifier le dossier.</div></section>';
 }
+function startDemo(){
+ if(state.demo)state.demo.dispose();
+ const url=new URL(location.href);
+ url.searchParams.set('mode','demo');
+ history.replaceState(null,'',url.pathname+url.search+url.hash);
+ state.demo=mountConsultationDemo(root,{operatorEmail:state.operatorEmail,onExit:()=>{
+  state.demo=null;
+  const u=new URL(location.href);u.searchParams.delete('mode');history.replaceState(null,'',u.pathname+u.search+u.hash);
+  void reload();
+ }});
+}
 function wireList(){
+ root.querySelector('#launch-demo')?.addEventListener('click',startDemo);
  root.querySelector('#refresh')?.addEventListener('click',()=>{state.from=root.querySelector('#date-from').value;state.to=root.querySelector('#date-to').value;void reload()});
  root.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>void openDossier(b.dataset.open)));
 }
@@ -118,8 +131,9 @@ async function reload(){
    'La connexion Acuity n’est pas configurée pour cet environnement de prévisualisation. Aucun rendez-vous réel ne peut y être affiché.':
    'Impossible de récupérer les rendez-vous. Vérifiez votre rôle administrateur, votre session et la connexion Acuity.';
   root.innerHTML='<div class="loading"><span>AGENDA INDISPONIBLE</span><h1>Connexion non établie.</h1><p>'+escape(fail)+'</p>'+
-  '<button id="retry" class="btn solid">Réessayer</button></div>';
+  '<div class="work-cta-group"><button id="launch-demo" class="btn demo-launch">◎ Commencer une consultation test</button><button id="retry" class="btn solid">Réessayer</button></div></div>';
   root.querySelector('#retry').onclick=()=>void reload();
+  root.querySelector('#launch-demo').onclick=startDemo;
  }
  state.busy=false;
 }
@@ -145,6 +159,10 @@ async function boot(){
   root.innerHTML='<div class="loading"><h1>Accès réservé.</h1><p>Les restitutions Online sont accessibles uniquement aux administrateurs habilités.</p><a class="btn secondary" href="/">Retour à Pulse</a></div>';return}
  const session=await sb.auth.getSession();if(!session.data?.session?.access_token)throw Error('login');
  state.token=session.data.session.access_token;
+ state.operatorEmail=user.email||null;
+ if(new URLSearchParams(location.search).get('mode')==='demo'){
+  startDemo();return;
+ }
  const now=new Date(),until=new Date();until.setDate(until.getDate()+14);
  state.from=formatDate(now);state.to=formatDate(until);await reload();
 }
