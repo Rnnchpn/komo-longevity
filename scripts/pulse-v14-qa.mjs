@@ -13,6 +13,11 @@ const rootV14=rewrites.some(r=>r.source==='/'&&r.destination==='/pulse-v14/'&&ho
 const nestedV14=rewrites.some(r=>r.source==='/(.*)'&&r.destination==='/pulse-v14/$1'&&hostRule(r));
 
 const checks=[
+ ['booking-first cards',['Bilan Gratuit','Bilan Online','Bilan physique Motion'].every(x=>app.includes(x))],
+ ['acuity public scheduling',app.includes('app.acuityscheduling.com/schedule.php?owner=40696577')],
+ ['invitation gated onboarding',app.includes('Aucun compte patient n’est ouvert automatiquement')],
+ ['existing login preserved',app.includes('pulseShowLogin')&&app.includes('signInWithPassword')],
+ ['booking-first responsive styles',css.includes('.pulse-offer-list')&&css.includes('.pulse-entry-panel')],
  ['patient title',html.includes('Votre santé en mouvement')],
  ['single entry script',(html.match(/<script/g)||[]).length===1],
  ['patient navigation',['Aujourd’hui','Mon bilan','Résultats','Mon plan','Rendez-vous'].every(x=>app.includes(x))],
