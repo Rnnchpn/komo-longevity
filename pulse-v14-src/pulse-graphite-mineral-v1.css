@@ -1,0 +1,227 @@
+/* KŌMØ Pulse — Graphite / mineral blue palette, visual-only first-screen pass.
+   Deliberately loaded AFTER styles.css. No change to Acuity, authentication, or Pulse logic. */
+:root {
+  --bg:#f6f3ee;--paper:#fffdf9;--ink:#222936;--muted:#68717d;--line:#e2e0dc;
+  --forest:#314a68;--forest2:#486788;--sage:#e8edf3;--sage2:#dae5ef;
+  --sand:#efe6db;--gold:#ae8d65;
+  --shadow:0 22px 60px rgba(30,40,59,.075);
+}
+html,body { background:var(--bg); color:var(--ink); }
+.button.primary,.nav-item.active { background:#293e58; border-color:#293e58; color:#fff; }
+.button.light { background:#fffdf9; color:#253c55; }
+.text-button { color:#345b7a; }
+.button:focus-visible,.text-button:focus-visible,.nav-item:focus-visible,
+a:focus-visible,button:focus-visible { outline:2px solid #7ca9d4; outline-offset:3px; }
+.login-card input:focus { border-color:#8ba9c9; box-shadow:0 0 0 4px rgba(91,133,179,.12); }
+.toast { background:#202938; }
+
+/* Public entry — preserve the two-column composition, change the atmosphere. */
+.login-page:has(.pulse-entry-panel) {
+  --pulse-champagne:#c7a879;
+  --pulse-cream:#fffaf4;
+  --pulse-ink:#202838;
+  --pulse-forest:#1f3047;
+  background:#f6f3ee;
+}
+.login-page:has(.pulse-entry-panel) .login-story {
+  background:
+    radial-gradient(ellipse at 5% 0%,rgba(137,178,218,.19),transparent 44%),
+    radial-gradient(ellipse at 90% 89%,rgba(164,181,213,.12),transparent 38%),
+    linear-gradient(145deg,#171e2b 0%,#202c3f 52%,#303b50 100%);
+  box-shadow:inset -1px 0 0 rgba(255,255,255,.12);
+}
+.login-page:has(.pulse-entry-panel) .login-story::before {
+  background-image:
+    linear-gradient(90deg,rgba(235,243,255,.038) 1px,transparent 1px),
+    linear-gradient(0deg,rgba(235,243,255,.027) 1px,transparent 1px);
+  opacity:.65;
+}
+.login-page:has(.pulse-entry-panel) .login-story::after {
+  border-color:rgba(176,207,235,.22);
+  box-shadow:0 0 0 65px rgba(161,189,218,.025),0 0 0 160px rgba(161,189,218,.013);
+}
+.pulse-entry-brand .brand small { color:#b6c8db; }
+.pulse-entry-brand-caption { color:#b7c7dc; }
+.pulse-entry-kicker { color:#d9e4f2!important; }
+.pulse-entry-kicker i { border-color:#99b7d1; background:rgba(162,199,229,.4); }
+.login-page:has(.pulse-entry-panel) .pulse-entry-story h1 { color:#fffaf4; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-story h1 em { color:#aacce8; }
+.pulse-entry-story .pulse-entry-lead { color:#d5dfeb; }
+.pulse-entry-story-footer { border-color:rgba(207,221,239,.2); color:#c0cede; }
+.pulse-entry-story-footer a { color:#ebf4ff; }
+.pulse-entry-foot-mark { color:#bed9ef; }
+
+/* Three offers — the online consultation is emphasised by a mineral-blue line. */
+.login-page:has(.pulse-entry-panel) .pulse-offer {
+  border-color:rgba(204,223,244,.23);
+  background:linear-gradient(111deg,rgba(255,255,255,.092),rgba(255,255,255,.035));
+  box-shadow:0 12px 30px rgba(9,17,34,.12),inset 0 1px 0 rgba(255,255,255,.07);
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer::before {
+  background:radial-gradient(210px circle at var(--pulse-pointer-x,75%) var(--pulse-pointer-y,15%),rgba(145,190,231,.25),transparent 76%);
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer::after {
+  background:linear-gradient(90deg,transparent,rgba(205,227,248,.38),transparent);
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer:hover,
+.login-page:has(.pulse-entry-panel) .pulse-offer:focus-visible {
+  border-color:rgba(174,210,244,.8);background-color:rgba(172,204,233,.1);
+  box-shadow:0 18px 38px rgba(6,13,28,.25),inset 0 1px 0 rgba(255,255,255,.14);
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer--online {
+  background:linear-gradient(110deg,rgba(129,176,216,.20),rgba(212,230,248,.055));
+  border-color:rgba(149,199,239,.58);
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer--motion {
+  background:linear-gradient(110deg,rgba(214,220,235,.12),rgba(255,255,255,.028));
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer-number {
+  border-color:rgba(192,216,240,.45);color:#d6e9f8;
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer-art {
+  background:linear-gradient(150deg,rgba(186,208,232,.16),rgba(222,232,245,.014));
+  border-color:rgba(214,228,243,.2);
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer-art-ring { border-color:rgba(174,210,241,.65); }
+.login-page:has(.pulse-entry-panel) .pulse-offer-art-path { border-color:rgba(216,231,246,.5); }
+.login-page:has(.pulse-entry-panel) .pulse-offer-art-core {
+  background:#b6d9f2;box-shadow:0 0 18px rgba(156,205,245,.5);
+}
+.login-page:has(.pulse-entry-panel) .pulse-offer-content small { color:#a9c9e7; }
+.login-page:has(.pulse-entry-panel) .pulse-offer-content strong { color:#fffaf5; }
+.login-page:has(.pulse-entry-panel) .pulse-offer-content>span { color:#d6e0ec; }
+.login-page:has(.pulse-entry-panel) .pulse-offer-content em { color:#b9cbdc; }
+.login-page:has(.pulse-entry-panel) .pulse-offer-arrow { color:#c8e1f6; }
+
+/* Reservation / activation panel — ivory surfaces, graphite type, blue CTA. */
+.login-page:has(.pulse-entry-panel) .login-panel {
+  background:radial-gradient(ellipse at 88% 12%,#ffffff,transparent 48%),
+             linear-gradient(145deg,#faf8f4,#eeeae6);
+}
+.login-page:has(.pulse-entry-panel) .login-panel::before {
+  background-image:linear-gradient(0deg,transparent 97%,rgba(56,72,95,.045));
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-panel {
+  border:1px solid #e3e3e4;
+  background:linear-gradient(153deg,#fffefd,#f9f7f4);
+  box-shadow:0 30px 90px rgba(32,45,63,.095),inset 0 1px 0 rgba(255,255,255,.95);
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-panel::before {
+  background:linear-gradient(90deg,transparent,rgba(112,155,196,.7),transparent);
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-wordmark { color:#263044; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-wordmark b { color:#57748d; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-secure { color:#5e7284; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-secure::before {
+  background:#789bbd;box-shadow:0 0 0 3px rgba(108,151,192,.13);
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-monogram-letter { color:#35465f; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-monogram {
+  background:radial-gradient(circle at 24% 21%,#ffffff,#e9eaf0);
+  border-color:#d8dce5;
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-monogram::before { border-color:rgba(104,144,190,.2); }
+.login-page:has(.pulse-entry-panel) .pulse-entry-monogram::after { border-color:rgba(104,144,190,.12); }
+.login-page:has(.pulse-entry-panel) .pulse-entry-monogram-halo { border-color:rgba(104,144,190,.18); }
+.login-page:has(.pulse-entry-panel) .pulse-entry-monogram small { color:#7a8698; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-onboarding-kicker { color:#6d87a1; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-panel h2 { color:#263044; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-panel h2 em { color:#7295b3; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-panel-intro { color:#627084; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-steps { border-color:#e1e4e9; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-steps::before {
+  background:linear-gradient(#9bb9d7,#d9e1eb);
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-steps li { border-bottom-color:rgba(210,216,225,.75); }
+.login-page:has(.pulse-entry-panel) .pulse-entry-steps li>span {
+  background:#eef2f7;border-color:#d7e0ea;color:#4b6684;box-shadow:0 0 0 4px #fcfaf7;
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-steps li:first-child>span {
+  background:#314a68;border-color:#314a68;color:#fff;
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-steps strong { color:#2c3445; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-steps small { color:#6a7688; }
+.login-page:has(.pulse-entry-panel) .pulse-booking-button {
+  background:linear-gradient(112deg,#253a55,#34577b 65%,#29435f);
+  border-color:#314a68;
+  box-shadow:0 12px 31px rgba(37,59,88,.22);
+  color:#fff;
+}
+.login-page:has(.pulse-entry-panel) .pulse-booking-button:hover,
+.login-page:has(.pulse-entry-panel) .pulse-booking-button:focus-visible {
+  box-shadow:0 17px 37px rgba(34,55,84,.3);
+}
+.login-page:has(.pulse-entry-panel) .pulse-booking-button span { color:#d6e7f7; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut {
+  border-color:#ccd9e5;
+  background:linear-gradient(120deg,#edf3f9,#fbfcff);
+  color:#304b66;
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut strong,
+.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut span { color:#456f94; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut:hover,
+.login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut:focus-visible {
+  border-color:#8daecf;background:#e8f2fc;
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-activation-link {
+  background:#edf1f7;border-color:#d7e2ec;color:#345879;
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-activation-link:hover,
+.login-page:has(.pulse-entry-panel) .pulse-entry-activation-link:focus-visible {
+  background:#e6eef7;border-color:#b6cce0;
+}
+.login-page:has(.pulse-entry-panel) .pulse-entry-activation-link span { color:#557b9c; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-prep-link { color:#526d85; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-prep-link:hover,
+.login-page:has(.pulse-entry-panel) .pulse-entry-prep-link:focus-visible { color:#294d72;background:#edf3fa; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-prep-link span { color:#749bc0; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-assurance { color:#6a7482; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-assurance span { color:#8eabc6; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-login-bridge { color:#637083;border-color:#e3e6ec; }
+.login-page:has(.pulse-entry-panel) .pulse-login-link { color:#375f84;border-color:#c6d5e3; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-legal { color:#7a8692; }
+.login-page:has(.pulse-entry-panel) .pulse-entry-legal a:hover { color:#365b83; }
+.login-page:has(.pulse-entry-panel) .pulse-existing-login { color:#283448; }
+.login-page:has(.pulse-entry-panel) .pulse-login-back { color:#406689; }
+.login-page:has(.pulse-entry-panel) .login-card {
+  border-color:#e1e3e8;background:#fffefd;
+  box-shadow:0 30px 80px rgba(42,53,75,.1);
+}
+.login-page:has(.pulse-entry-panel) .login-card input:focus {
+  border-color:#94b0cd;box-shadow:0 0 0 4px rgba(120,162,203,.13);
+}
+
+/* After login: visual token coherence for the first patient dashboard.
+   Screens and data stay exactly as they were. */
+.sidebar { background:rgba(255,253,249,.92); }
+.nav-item { color:#677387; }
+.nav-item:hover { background:#eef1f5; }
+.nav-item.active { background:#293e58;color:#fff; }
+.nav-dot { background:rgba(59,92,133,.1); }
+.user-chip>span,.progress-step.done b,.journey-card.done .journey-num { background:#314a68; }
+.welcome-card,.result-hero,.plan-head,.operator-head,.pulse-online-tester-welcome {
+  background:linear-gradient(133deg,#1b2739,#334a68 100%);
+}
+.welcome-card p,.result-hero p,.plan-head p,.operator-head p { color:#d6e0ec; }
+.welcome-mark { color:#f2f5fa; }
+.score-orb { color:#314a68; }
+.progress-line i,.meter i { background:#496e95; }
+.progress-step.current { background:#edf2f8;border-color:#cbd9e8; }
+.journey-card.current { border-color:#a3bad4;box-shadow:0 22px 55px rgba(34,56,86,.12); }
+.journey-card.current .status-label { background:#e6eff9;color:#3b6288; }
+.journey-card.done { background:#f7f9fc; }
+.priority-card.primary-priority { background:#eaf1f9;border-color:#d6e2ee; }
+.lock-symbol { background:#eaf0f7;color:#314a68; }
+.pulse-online-tester-link { background:#edf2f9;border-color:#cbd8e9;color:#355574; }
+.pulse-online-tester-link small { color:#6d87a0; }
+.pulse-online-tester-link:hover,.pulse-online-tester-link:focus-visible { background:#e2edf8;border-color:#adc4de; }
+.pulse-online-tester-welcome p { color:#d6e0ec; }
+
+@media(max-width:790px) {
+  .login-page:has(.pulse-entry-panel) .login-story { background:linear-gradient(144deg,#171e2b 0%,#293b55 100%); }
+  .login-page:has(.pulse-entry-panel) .login-panel { background:#f7f4f0; }
+}
+@media(prefers-reduced-motion:reduce){
+  .login-page:has(.pulse-entry-panel) .pulse-offer,
+  .login-page:has(.pulse-entry-panel) .pulse-booking-button { animation:none!important;transition:none!important;transform:none!important; }
+}
