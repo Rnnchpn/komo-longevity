@@ -6,6 +6,8 @@ const root=process.cwd();
 const html=await readFile(join(root,'site','pulse-v14','index.html'),'utf8');
 const app=await readFile(join(root,'site','pulse-v14','app.js'),'utf8');
 const css=await readFile(join(root,'site','pulse-v14','styles.css'),'utf8');
+const luxuryCss=await readFile(join(root,'site','pulse-v14','pulse-quiet-luxury-v2.css'),'utf8');
+const onlineLuxuryCss=await readFile(join(root,'site','pulse-v14','online','quiet-luxury-online-v2.css'),'utf8');
 const onlineHtml=await readFile(join(root,'site','pulse-v14','online','index.html'),'utf8');
 const onlineScript=await readFile(join(root,'site','pulse-v14','online','app.js'),'utf8');
 const onlineCss=await readFile(join(root,'site','pulse-v14','online','styles.css'),'utf8');
@@ -57,6 +59,10 @@ const rootV14=rewrites.some(r=>r.source==='/'&&r.destination==='/pulse-v14/'&&ho
 const nestedV14=rewrites.some(r=>r.source==='/(.*)'&&r.destination==='/pulse-v14/$1'&&hostRule(r));
 
 const checks=[
+ ['quiet luxury stylesheet loaded after canonical CSS',html.indexOf('pulse-quiet-luxury-v2.css')>html.indexOf('styles.css')],
+ ['quiet luxury palette and font family',luxuryCss.includes('#171718')&&luxuryCss.includes('#B89B6A')&&html.includes('Cormorant+Garamond')&&html.includes('Inter:wght@')],
+ ['online preflight and guided session maintain premium theme',onlineLuxuryCss.includes('.session-top')&&onlineLuxuryCss.includes('.intro')&&onlineHtml.includes('quiet-luxury-online-v2.css')&&sessionHtml.includes('quiet-luxury-online-v2.css')],
+ ['PDF passport remains intact',pdfReport.includes('MOTION PASSPORT')&&pdfReport.includes('const passport=data.passport')&&pdfReport.includes('const green=[36,35,36]')],
  ['booking-first cards',['Bilan Gratuit','Bilan Online','Bilan physique Motion'].every(x=>app.includes(x))],
  ['luxury motion art',app.includes('pulse-entry-kinetic')&&app.includes('pulse-offer-art-ring')],
  ['premium onboarding',app.includes('pulse-entry-monogram')&&app.includes('pulse-entry-steps')],
