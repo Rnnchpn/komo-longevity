@@ -256,6 +256,8 @@ const scripts = [
   // Patient-first V14 is isolated and built last. V13 remains available for rollback.
   'scripts/build-pulse-v14.mjs',
   'scripts/pulse-v14-qa.mjs',
+  // Deterministic movement algorithm tests, independent of actual camera hardware.
+  'scripts/pulse-pose-metrics-qa.mjs',
   // Online Acuity payment validation tests; all requests and identities are mocked.
   'scripts/pulse-online-payment-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
