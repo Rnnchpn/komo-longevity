@@ -1,10 +1,75 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111713"><meta name="robots" content="noindex,nofollow"><title>Private Boutique | KŌMØ ELYSIUM</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet"><link rel="stylesheet" href="/elysium/assets/elysium.css"></head>
-<body data-elysium="maison">
-<nav class="top"><a href="/elysium/" class="brand"><strong>KŌMØ</strong><em>ELYSIUM</em></a><div class="navlinks"><a href="/elysium/club/" data-en="THE NINE WORLDS" data-fr="LES NEUF UNIVERS">THE NINE WORLDS</a><button id="toggleLanguage" type="button">FR</button><button id="signOut" type="button" style="display:none" data-en="SIGN OUT" data-fr="DÉCONNEXION">SIGN OUT</button><button class="white-link" id="openSelection" type="button" data-en="MY SELECTION" data-fr="MA SÉLECTION">MY SELECTION</button></div></nav>
-<main><section class="maison-hero"><img id="maisonImage" alt="" src=""><div class="wrap"><div class="breadcrumb"><a href="/elysium/club/" data-en="THE CLUB" data-fr="LE CLUB">THE CLUB</a> &nbsp; / &nbsp; <span id="crumbName"></span></div><span class="kicker" id="maisonKicker"></span><h1 id="maisonTitle"></h1><p id="maisonDescription"></p></div></section>
-<section class="maison-content wrap"><h2 id="collectionTitle" data-en="The private collection." data-fr="La collection privée.">The private collection.</h2><p id="collectionDescription"></p><div class="auth-box" id="maisonAccess" style="margin:35px 0;display:none"><span class="eyebrow" data-en="PRIVATE MAISON" data-fr="MAISON PRIVÉE">PRIVATE MAISON</span><h2 data-en="Behind the members' doors." data-fr="Derrière les portes du Club.">Behind the members' doors.</h2><p data-en="Explore the private boutique after secure login and approval of your ELYSIUM membership. The products and services are not publicly accessible." data-fr="Découvrez la boutique privée après connexion et validation de votre adhésion ELYSIUM. Les prestations ne sont pas accessibles publiquement.">Explore the private boutique after secure login and approval of your ELYSIUM membership. The products and services are not publicly accessible.</p><a class="btn ink" href="/elysium/club/" data-en="MEMBERS' ENTRANCE ↗" data-fr="ENTRÉE DES MEMBRES ↗">MEMBERS' ENTRANCE ↗</a></div>
-<div class="store-grid" id="productGrid" aria-live="polite"></div>
-<div id="shopMessage" class="state-message"></div></section></main>
-<div class="collection-drawer" id="selectionDrawer" role="dialog" aria-modal="true" aria-label="Private selection"><div class="drawer-inner"><div class="drawer-head"><h2 data-en="Your private selection." data-fr="Votre sélection privée.">Your private selection.</h2><button id="closeSelection" type="button" aria-label="Close">×</button></div><p data-en="Select one or more experiences, then send a single confidential enquiry to your concierge. No payment is taken at this stage." data-fr="Sélectionnez une ou plusieurs expériences, puis transmettez une demande unique à votre concierge. Aucun paiement n’est prélevé à cette étape.">Select one or more experiences, then send a single confidential enquiry to your concierge. No payment is taken at this stage.</p><div id="selectionItems"></div><div class="drawer-foot"><div class="field"><label for="selectionNote" data-en="ANY PARTICULAR REQUEST" data-fr="PRÉCISIONS">ANY PARTICULAR REQUEST</label><textarea id="selectionNote" placeholder="Destination, date or additional information. No medical or sensitive data."></textarea></div><button class="btn ink" id="sendSelection" type="button" data-en="CONTACT MY CONCIERGE ↗" data-fr="CONTACTER MON CONCIERGE ↗">CONTACT MY CONCIERGE ↗</button><p id="selectionResponse" role="status"></p></div></div></div>
-<footer class="footer wrap"><div><b>KŌMØ <em>ELYSIUM</em></b></div><div><p data-en="All private services are subject to supplier agreement, availability, appropriate permissions and a separate quotation. Clinical care is independent and requires assessment by a licensed professional." data-fr="Toutes les prestations privées sont soumises à validation du partenaire, disponibilité, autorisations appropriées et devis distinct. Les soins sont indépendants et nécessitent une évaluation par un professionnel habilité.">All private services are subject to supplier agreement, availability, appropriate permissions and a separate quotation. Clinical care is independent and requires assessment by a licensed professional.</p></div></footer>
-<script src="/elysium/assets/supabase.js"></script><script type="module" src="/elysium/assets/member.js"></script></body></html>
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f6f3ed">
+<title>Private Collection — KŌMØ ELYSIUM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/elysium/assets/elysium.css"></head>
+<body data-elysium="maison" class="ely-boutique ely-world-maison">
+<nav class="top ely-boutique-nav">
+ <a class="brand" href="/elysium/club/" aria-label="ELYSIUM"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
+ <div class="navlinks">
+  <a href="/elysium/club/" data-fr="LES NEUF UNIVERS" data-en="THE NINE WORLDS">LES NEUF UNIVERS</a>
+  <button type="button" id="toggleLanguage" aria-label="Changer de langue">EN</button>
+  <button type="button" id="signOut" style="display:none" data-fr="DÉCONNEXION" data-en="SIGN OUT">DÉCONNEXION</button>
+  <button type="button" id="openSelection" class="white-link" data-fr="MA DEMANDE" data-en="MY REQUEST">MA DEMANDE</button>
+ </div>
+</nav>
+<main>
+ <section class="ely-shop-hero" aria-labelledby="ely-shop-title">
+  <div class="ely-shop-hero-inner wrap">
+   <div class="ely-shop-hero-copy">
+    <div class="ely-shop-crumb"><a href="/elysium/club/" data-fr="ELYSIUM / LES UNIVERS" data-en="ELYSIUM / WORLDS">ELYSIUM / LES UNIVERS</a><span id="elyWorldNumber">03 / 09</span></div>
+    <span class="ely-shop-kicker" id="maisonKicker">THE PRIVATE COLLECTION</span>
+    <h1 id="ely-shop-title">Private<span class="ely-shop-fullstop">.</span></h1>
+    <h2 class="ely-shop-headline" id="elyWorldHeadline" data-fr="Une collection privée." data-en="A private collection.">Une collection privée.</h2>
+    <p class="ely-shop-intro" id="maisonDescription">A selection of exceptional experiences, reserved for you.</p>
+    <a class="ely-shop-hero-cta" href="#collection" data-fr="DÉCOUVRIR LES PRESTATIONS ↗" data-en="EXPLORE THE COLLECTION ↗">DÉCOUVRIR LES PRESTATIONS ↗</a>
+    <div class="ely-shop-hero-foot"><span data-fr="ACCÈS RÉSERVÉ AUX MEMBRES" data-en="EXCLUSIVELY FOR MEMBERS">ACCÈS RÉSERVÉ AUX MEMBRES</span><span>ELYSIUM PRIVATE MAISON</span></div>
+   </div>
+   <div class="ely-shop-hero-visual" aria-hidden="true">
+    <div class="ely-shop-object">
+     <div class="ely-shop-object-shade"></div>
+     <div class="ely-shop-object-dial"><div class="ely-shop-object-inside">
+      <span class="ely-shop-object-mark">KŌMØ</span>
+      <span class="ely-shop-object-word" id="elyWorldArtName">ELYSIUM</span>
+      <span class="ely-shop-object-stroke"></span>
+      <span class="ely-shop-object-description">THE PRIVATE COLLECTION</span>
+     </div></div><span class="ely-shop-object-orbit"></span>
+    </div>
+    <span class="ely-shop-visual-caption">KŌMØ <span>—</span> ELYSIUM</span>
+   </div>
+  </div>
+ </section>
+ <section class="ely-shop-catalogue" id="collection" aria-labelledby="ely-shop-catalogue-title">
+  <div class="wrap ely-shop-catalogue-inner">
+   <div class="ely-shop-section-head"><div>
+    <span class="ely-shop-section-kicker" data-fr="LA COLLECTION PRIVÉE" data-en="THE PRIVATE COLLECTION">LA COLLECTION PRIVÉE</span>
+    <h2 id="ely-shop-catalogue-title" data-fr="Les expériences" data-en="The experiences">Les expériences</h2>
+   </div><span class="ely-shop-service-count" id="elyWorldCount">03 <small data-fr="PRESTATIONS PRIVÉES" data-en="PRIVATE EXPERIENCES">PRESTATIONS PRIVÉES</small></span></div>
+   <div id="maisonAccess" class="auth-box ely-private-gate" style="display:none">
+    <span class="ely-shop-section-kicker">PRIVATE MEMBERSHIP</span>
+    <h3 data-fr="Votre collection privée." data-en="Your private collection.">Votre collection privée.</h3>
+    <p data-fr="Connectez-vous à ELYSIUM pour découvrir les prestations." data-en="Sign in to ELYSIUM to explore the experiences.">Connectez-vous à ELYSIUM pour découvrir les prestations.</p>
+    <a href="/elysium/club/" class="ely-shop-signin" data-fr="ACCÉDER AU CLUB ↗" data-en="ENTER THE CLUB ↗">ACCÉDER AU CLUB ↗</a>
+   </div>
+   <div id="productGrid" class="ely-shop-grid" aria-live="polite"></div><p id="shopMessage" class="state-message"></p>
+  </div>
+ </section>
+ <section class="ely-shop-concierge-strip"><div class="wrap"><div>
+  <span class="ely-shop-concierge-small" data-fr="VOTRE CONCIERGERIE PRIVÉE" data-en="YOUR PRIVATE CONCIERGE">VOTRE CONCIERGERIE PRIVÉE</span>
+  <p data-fr="Une demande particulière ?" data-en="Something more personal?">Une demande particulière ?</p></div>
+  <button type="button" id="conciergeShortcut" class="ely-shop-concierge-link" data-fr="CONTACTER LA CONCIERGERIE ↗" data-en="CONTACT THE CONCIERGE ↗">CONTACTER LA CONCIERGERIE ↗</button>
+ </div></section>
+ <section class="ely-service-detail wrap" id="serviceDetail" hidden aria-live="polite" aria-label="Private service"></section>
+</main>
+<footer class="ely-boutique-footer wrap"><span>KŌMØ <em>ELYSIUM</em></span>
+<p data-fr="Prestations soumises à disponibilité et confirmation du prestataire, devis individualisé. Les actes médicaux éventuels sont réalisés exclusivement par des professionnels indépendants habilités." data-en="Experiences subject to provider availability, confirmation and individual quotation. Any medical care is provided solely by independently authorised professionals.">Prestations soumises à disponibilité et confirmation du prestataire, devis individualisé. Les actes médicaux éventuels sont réalisés exclusivement par des professionnels indépendants habilités.</p></footer>
+<div class="collection-drawer" id="selectionDrawer" role="dialog" aria-modal="true" aria-label="Private selection"><div class="drawer-inner">
+ <div class="drawer-head"><h2 data-fr="Votre demande privée." data-en="Your private request.">Votre demande privée.</h2><button type="button" id="closeSelection" aria-label="Fermer">×</button></div>
+ <p data-fr="Sélectionnez vos expériences. Notre conciergerie vous répond personnellement." data-en="Select your experiences. Our private concierge will reply personally.">Sélectionnez vos expériences. Notre conciergerie vous répond personnellement.</p>
+ <div id="selectionItems"></div><div class="drawer-foot"><div class="field"><label for="selectionNote" data-fr="LIEU ET DATES SOUHAITÉS" data-en="LOCATION AND PREFERRED DATES">LIEU ET DATES SOUHAITÉS</label><textarea id="selectionNote" placeholder="Monaco, Cannes, yacht, villa…"></textarea></div>
+ <button type="button" class="btn ink" id="sendSelection" data-fr="PRÉPARER MA DEMANDE ↗" data-en="PREPARE MY REQUEST ↗">PRÉPARER MA DEMANDE ↗</button><p id="selectionResponse" role="status"></p>
+ <p class="ely-request-privacy" data-fr="Ne transmettez pas de données médicales dans cette demande." data-en="Do not include medical information in this request.">Ne transmettez pas de données médicales dans cette demande.</p>
+ </div></div></div>
+<script src="/elysium/assets/supabase.js"></script><script type="module" src="/elysium/assets/member.js"></script>
+</body></html>
