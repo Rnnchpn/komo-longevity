@@ -1,129 +1,85 @@
 <!doctype html>
-<html lang="fr">
-<head>
+<html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#1c1919"><meta name="robots" content="noindex,nofollow">
-<title>KŌMØ Aesthetic — ELYSIUM Private Maison</title>
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#151a16">
+<title>Aesthetic — KŌMØ ELYSIUM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/elysium/assets/elysium.css">
 </head>
-<body data-elysium="maison" class="aesthetic-maison">
-<nav class="top ae-nav">
- <a href="/elysium/club/" class="brand" aria-label="KŌMØ ELYSIUM — les neuf univers"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
+<body data-elysium="maison" class="aesthetic-maison ely-boutique">
+<nav class="top ely-boutique-nav" aria-label="ELYSIUM navigation">
+ <a class="brand" href="/elysium/club/" aria-label="ELYSIUM"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
  <div class="navlinks">
-  <a href="/elysium/club/" data-en="THE NINE WORLDS" data-fr="LES NEUF UNIVERS">LES NEUF UNIVERS</a>
-  <button type="button" id="toggleLanguage" aria-label="Change language">EN</button>
-  <button type="button" id="signOut" style="display:none" data-en="SIGN OUT" data-fr="DÉCONNEXION">DÉCONNEXION</button>
-  <button type="button" class="white-link" id="openSelection" data-en="MY SELECTION" data-fr="MA SÉLECTION">MA SÉLECTION</button>
+  <a class="ely-boutique-back" href="/elysium/club/" data-fr="LES NEUF UNIVERS" data-en="THE NINE WORLDS">LES NEUF UNIVERS</a>
+  <button type="button" id="toggleLanguage" aria-label="Changer la langue">EN</button>
+  <button type="button" id="signOut" style="display:none" data-fr="DÉCONNEXION" data-en="SIGN OUT">DÉCONNEXION</button>
+  <button type="button" id="openSelection" class="white-link" data-fr="MA DEMANDE" data-en="MY REQUEST">MA DEMANDE</button>
  </div>
 </nav>
 <main>
-<section class="ae-hero" aria-labelledby="ae-title">
- <div class="wrap ae-hero-layout">
-  <div class="ae-hero-copy">
-   <nav class="ae-breadcrumb" aria-label="Fil d'Ariane"><a href="/elysium/club/" data-en="THE NINE WORLDS" data-fr="LES NEUF UNIVERS">LES NEUF UNIVERS</a> <span> / </span><span>02</span><span> / </span><span id="crumbName">Aesthetic</span></nav>
-   <span class="ae-overline" id="maisonKicker">THE ART OF SUBTLETY</span>
-   <h1 id="ae-title">Aesthetic<span>.</span></h1>
-   <p class="ae-lead" data-en="Private aesthetic medicine, without compromise." data-fr="La médecine esthétique privée, sans compromis.">La beauté, dans ce qu’elle a de plus subtil.</p>
-   <p class="ae-hero-description" id="maisonDescription">La beauté, avec discrétion.</p>
-   <a class="ae-link" href="#collection" data-en="DISCOVER THE PRIVATE COLLECTION ↗" data-fr="DÉCOUVRIR LA COLLECTION PRIVÉE ↗">DÉCOUVRIR LA COLLECTION PRIVÉE ↗</a>
+ <section class="ely-editorial wrap" aria-labelledby="ely-boutique-title">
+  <div class="ely-ed-topline">
+   <a href="/elysium/club/" class="ely-ed-return" data-fr="← RETOUR À ELYSIUM" data-en="← BACK TO ELYSIUM">← RETOUR À ELYSIUM</a>
+   <span class="ely-ed-issue">02 <i>/</i> 09</span>
   </div>
-  <div class="ae-sculpture" aria-hidden="true">
-    <svg viewBox="0 0 490 550" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="ae-contour" x1="100" y1="80" x2="385" y2="452" gradientUnits="userSpaceOnUse">
-          <stop stop-color="#eee1d5"/><stop offset=".51" stop-color="#c6a5a0"/><stop offset="1" stop-color="#9e7778"/>
-        </linearGradient>
-        <linearGradient id="ae-inner" x1="95" y1="0" x2="420" y2="460"><stop stop-color="#e9d6ce"/><stop offset="1" stop-color="#9c7570"/></linearGradient>
-      </defs>
-      <ellipse class="ae-sc-ring" cx="244" cy="270" rx="212" ry="251" stroke="#c1a4a0" stroke-opacity=".35"/>
-      <ellipse class="ae-sc-ring ae-sc-ring2" cx="244" cy="270" rx="177" ry="213" stroke="#d2b8ac" stroke-opacity=".23"/>
-      <path class="ae-sc-profile" d="M307 74C244 67 195 91 173 143c-20 47-7 74-8 95-1 21-22 47-35 66-8 10-9 21 10 25l34 7c-6 18-7 29 4 40-3 18 6 30 27 30 22 0 44-8 60-20 16 42 13 60 8 78" stroke="url(#ae-contour)" stroke-width="2.2" stroke-linecap="round"/>
-      <path class="ae-sc-profile ae-sc-profile2" d="M308 74c46 24 71 77 73 134 3 87-24 126-75 160-17 12-35 14-55 16" stroke="url(#ae-inner)" stroke-opacity=".77" stroke-width="1.15"/>
-      <path d="M180 258c16-7 32-7 48 2m-40 9c10 5 22 5 32 0m-44 67c16 3 31 4 45-3" stroke="#e3c5b8" stroke-width="1.3" stroke-linecap="round"/>
-      <path d="M106 433c74-30 168-26 244 8" stroke="#cfb2a8" stroke-opacity=".35" stroke-width="1"/>
-      <path d="M120 460h248" stroke="#cfb2a8" stroke-opacity=".3" stroke-width="1"/>
-      <circle class="ae-sc-dot" cx="173" cy="143" r="4" fill="#cba9a0"/><circle class="ae-sc-dot ae-sc-dot2" cx="272" cy="461" r="4" fill="#e5d2c3"/>
-      <path d="M70 280h65m225-9h63" stroke="#b9a49c" stroke-width=".8" stroke-dasharray="2 6"/>
-    </svg>
-    <div class="ae-sculpture-caption">FORM <span>·</span> LIGHT <span>·</span> BALANCE</div>
-  </div>
- </div>
-</section>
-
-<section class="ae-intro">
- <div class="wrap ae-intro-inner">
-  <div>
-   <span class="ae-overline" data-en="CLINICAL EXPERTISE & DISCRETION" data-fr="EXPERTISE MÉDICALE ET DISCRÉTION">AU-DELÀ DES APPARENCES</span>
-   <h2 data-en="Medical expertise. <em>Private by nature.</em>" data-fr="Une expertise médicale. <em>En toute discrétion.</em>">L’art de la <em>discrétion.</em></h2>
-  </div>
-  <div class="ae-intro-copy">
-   <p data-en="Independent aesthetic physicians can meet you for an initial secure video consultation or, where clinically appropriate, arrange an in-person assessment at a suitable care location or private residence." data-fr="Des médecins esthétiques indépendants peuvent proposer une première consultation vidéo sécurisée ou, lorsque cela est médicalement approprié, un examen en présentiel dans un lieu de soins adapté ou en résidence privée.">La beauté est personnelle. ELYSIUM Aesthetic propose un parcours réfléchi, fondé sur la discrétion, le choix individuel et la liberté d’explorer ses options sans pression.</p>
-   <p id="collectionDescription"></p>
-   <div class="ae-values">
-     <span data-en="MEDICAL CONSULTATION" data-fr="CONSULTATION MÉDICALE">CONSULTATION MÉDICALE</span><span data-en="PRIVATE VISIT" data-fr="DÉPLACEMENT PRIVÉ">DÉPLACEMENT PRIVÉ</span><span data-en="PHYSICIAN FOLLOW-UP" data-fr="SUIVI MÉDICAL">SUIVI MÉDICAL</span>
+  <div class="ely-ed-layout">
+   <div class="ely-ed-left">
+    <span class="ely-ed-kicker" id="maisonKicker">PRIVATE AESTHETIC MEDICINE</span>
+    <h1 id="ely-boutique-title">Aesthetic<span class="ely-ed-period">.</span></h1>
+   </div>
+   <div class="ely-ed-right">
+    <p class="ely-ed-headline" data-fr="La médecine esthétique, en privé." data-en="Aesthetic medicine, privately.">La médecine esthétique, en privé.</p>
+    <p class="ely-ed-subtitle" id="maisonDescription">Consultations médicales discrètes, en ligne ou sur place.</p>
    </div>
   </div>
- </div>
-</section>
-
-<section class="ae-collection" id="collection">
- <div class="wrap">
-  <header class="ae-collection-head">
-   <div class="ae-overline" data-en="THE PRIVATE EDIT · 02 / 09" data-fr="LA SÉLECTION PRIVÉE · 02 / 09">LA SÉLECTION PRIVÉE · 02 / 09</div>
-   <h2 id="collectionTitle" data-en="Private medical <em>consultations.</em>" data-fr="Des consultations <em>médicales privées.</em>">Une sélection pensée <em>pour vous.</em></h2>
-   <p data-en="Choose the private medical consultation that suits your situation: online assessment, physician visit on board or a personalised medical pathway. Each request requires independent physician confirmation." data-fr="Choisissez le format de consultation médicale adapté : évaluation en ligne, déplacement d’un médecin à bord ou parcours médical personnalisé. Chaque demande nécessite la validation indépendante du praticien.">Trois façons de découvrir l’expertise esthétique, les soins cutanés choisis et l’organisation privée. Chaque demande reçoit une réponse personnalisée.</p>
-  </header>
-  <div class="auth-box ae-private-gate" id="maisonAccess" style="display:none">
-    <span class="ae-overline">ELYSIUM MEMBERSHIP</span>
-    <h2 data-en="The private collection awaits." data-fr="La collection privée vous attend.">La collection privée vous attend.</h2>
-    <p data-en="Connect to your membership to view the curated offers and request a private introduction." data-fr="Connectez-vous à votre espace membre pour découvrir les prestations et demander une mise en relation.">Connectez-vous à votre espace membre pour découvrir les prestations et demander une mise en relation.</p>
-    <a href="/elysium/club/" class="btn ink" data-en="ENTER ELYSIUM ↗" data-fr="ACCÉDER À ELYSIUM ↗">ACCÉDER À ELYSIUM ↗</a>
+  <div class="ely-ed-bottom">
+   <span>PRIVATE MEDICAL CONCIERGE</span><span>ELYSIUM · 02</span>
   </div>
-  <div class="ae-offers" id="productGrid" aria-live="polite"></div>
-  <div id="shopMessage" class="state-message"></div>
- </div>
-</section>
-
-<section class="ae-approach">
- <div class="wrap ae-approach-inner">
-  <div class="ae-approach-title">
-   <span class="ae-overline" data-en="THE ELYSIUM APPROACH" data-fr="L’APPROCHE ELYSIUM">L’APPROCHE ELYSIUM</span>
-   <h2 data-en="Considered in <em>every detail.</em>" data-fr="L’attention portée <em>aux détails.</em>">L’attention portée <em>aux détails.</em></h2>
+ </section>
+ <section class="ely-index-section" id="collection" aria-labelledby="ely-services-title">
+  <div class="wrap">
+   <div class="ely-index-heading">
+    <div>
+     <span class="ely-index-kicker" data-fr="LA COLLECTION PRIVÉE" data-en="THE PRIVATE COLLECTION">LA COLLECTION PRIVÉE</span>
+     <h2 id="ely-services-title" data-fr="Les consultations" data-en="The consultations">Les consultations</h2>
+    </div>
+    <span class="ely-index-count">03 <span data-fr="PRESTATIONS" data-en="SERVICES">PRESTATIONS</span></span>
+   </div>
+   <div id="maisonAccess" class="auth-box ely-private-gate" style="display:none">
+    <span class="ely-index-kicker">PRIVATE ACCESS</span>
+    <h3 data-fr="Réservé aux membres." data-en="For members only.">Réservé aux membres.</h3>
+    <p data-fr="Connectez-vous à ELYSIUM pour découvrir les prestations." data-en="Sign in to ELYSIUM to explore the services.">Connectez-vous à ELYSIUM pour découvrir les prestations.</p>
+    <a href="/elysium/club/" class="ely-private-login" data-fr="ENTRER DANS ELYSIUM ↗" data-en="ENTER ELYSIUM ↗">ENTRER DANS ELYSIUM ↗</a>
+   </div>
+   <div id="productGrid" class="ely-service-index" aria-live="polite"></div>
+   <p id="shopMessage" class="state-message"></p>
+   <div class="ely-index-note">
+    <span data-fr="Une demande. Une réponse personnalisée." data-en="One request. A personal response.">Une demande. Une réponse personnalisée.</span>
+    <span data-fr="Médecins indépendants · Selon disponibilité" data-en="Independent physicians · Subject to availability">Médecins indépendants · Selon disponibilité</span>
+   </div>
   </div>
-  <div class="ae-approach-steps">
-   <div><span>01</span><h3 data-en="Discover" data-fr="Découvrir">Découvrir</h3><p data-en="Choose the experience that matches your preferences and priorities." data-fr="Choisissez l’expérience correspondant à vos envies et priorités.">Choisissez l’expérience correspondant à vos envies et priorités.</p></div>
-   <div><span>02</span><h3 data-en="Arrange" data-fr="Organiser">Organiser</h3><p data-en="Our concierge contacts you to discuss location, timing and provider availability." data-fr="Notre conciergerie échange avec vous sur le lieu, le calendrier et les disponibilités.">Notre conciergerie échange avec vous sur le lieu, le calendrier et les disponibilités.</p></div>
-   <div><span>03</span><h3 data-en="Experience" data-fr="Vivre l’expérience">Vivre l’expérience</h3><p data-en="Each service is confirmed separately. Medical consultations are provided independently by authorised professionals." data-fr="Chaque prestation est confirmée séparément. Les consultations médicales sont assurées indépendamment par des professionnels habilités.">Chaque prestation est confirmée séparément. Les consultations médicales sont assurées indépendamment par des professionnels habilités.</p></div>
-  </div>
- </div>
- <p class="wrap ae-boundary" data-en="ELYSIUM coordinates appointments but is not a medical practice. Aesthetic medical procedures, including injections, are performed only by authorised physicians after appropriate examination and informed consent, in a suitable medical setting. No result is guaranteed." data-fr="ELYSIUM coordonne les rendez-vous, sans exercer la médecine. Les actes médicaux esthétiques, notamment les injections, sont réservés aux médecins habilités après examen approprié et consentement éclairé, dans un cadre médical adapté. Aucun résultat n’est garanti.">ELYSIUM organise des mises en relation et des expériences non médicales ; la maison ne réalise pas de consultations médicales et ne garantit aucun résultat thérapeutique. Les indications, prescriptions et actes médicaux relèvent exclusivement des professionnels indépendants habilités.</p>
-</section>
-
-<section class="ae-closing"><div class="wrap">
- <span class="ae-overline" data-en="A PRIVATE INVITATION" data-fr="UNE INVITATION PRIVÉE">UNE INVITATION PRIVÉE</span>
- <h2 data-en="Aesthetic medicine. <em>On your terms.</em>" data-fr="La médecine esthétique. <em>À votre manière.</em>">La beauté. <em>À votre manière.</em></h2>
- <p data-en="Request a private consultation, then discuss any suitable procedures only with the independent medical specialist." data-fr="Demandez une consultation privée puis discutez de tout acte éventuel uniquement avec le médecin indépendant.">Explorez les possibilités à votre rythme. Notre équipe coordonne la suite avec discrétion.</p>
- <a href="#collection" class="ae-link" data-en="EXPLORE THE COLLECTION ↗" data-fr="EXPLORER LA COLLECTION ↗">EXPLORER LA COLLECTION ↗</a>
- </div></section>
-
-<section id="serviceDetail" class="ely-service-detail wrap" hidden aria-live="polite" aria-label="Private medical service details"></section>
+ </section>
+ <section class="ely-service-detail wrap" id="serviceDetail" hidden aria-live="polite" aria-label="Private service"></section>
 </main>
-
-<div class="collection-drawer" id="selectionDrawer" role="dialog" aria-modal="true" aria-label="Private selection">
+<footer class="ely-boutique-footer wrap">
+ <span>KŌMØ <em>ELYSIUM</em></span>
+ <p data-fr="Prestations médicales réalisées et facturées par des médecins indépendants habilités. Rendez-vous et honoraires à confirmer. ELYSIUM assure uniquement la coordination." data-en="Medical services are provided and billed by independently authorised physicians. Appointments and fees subject to confirmation. ELYSIUM coordinates only.">Prestations médicales réalisées et facturées par des médecins indépendants habilités. Rendez-vous et honoraires à confirmer. ELYSIUM assure uniquement la coordination.</p>
+</footer>
+<div class="collection-drawer" id="selectionDrawer" role="dialog" aria-modal="true" aria-label="Private request">
  <div class="drawer-inner">
-  <div class="drawer-head"><h2 data-en="Your private selection." data-fr="Votre sélection privée.">Votre sélection privée.</h2><button type="button" id="closeSelection" aria-label="Close">×</button></div>
-  <p data-en="Select one or more experiences, then contact your concierge. No payment is collected at this stage." data-fr="Sélectionnez une ou plusieurs expériences, puis contactez votre conciergerie. Aucun paiement n’est prélevé ici.">Sélectionnez une ou plusieurs expériences, puis contactez votre conciergerie. Aucun paiement n’est prélevé ici.</p>
+  <div class="drawer-head"><h2 data-fr="Votre demande." data-en="Your request.">Votre demande.</h2><button type="button" id="closeSelection" aria-label="Close">×</button></div>
+  <p data-fr="Notre équipe vous répond personnellement. Aucun paiement ici." data-en="Our team will reply personally. No payment is taken here.">Notre équipe vous répond personnellement. Aucun paiement ici.</p>
   <div id="selectionItems"></div>
   <div class="drawer-foot">
-   <div class="field"><label for="selectionNote" data-en="YOUR PREFERENCES" data-fr="VOS PRÉFÉRENCES">VOS PRÉFÉRENCES</label><textarea id="selectionNote" placeholder="Destination, date or other preferences. Do not include health data."></textarea></div>
-   <button type="button" class="btn ink" id="sendSelection" data-en="CONTACT THE CONCIERGE ↗" data-fr="CONTACTER LA CONCIERGERIE ↗">CONTACTER LA CONCIERGERIE ↗</button>
+   <div class="field"><label for="selectionNote" data-fr="LIEU ET DATES SOUHAITÉS" data-en="LOCATION AND PREFERRED DATES">LIEU ET DATES SOUHAITÉS</label><textarea id="selectionNote" placeholder="Cannes, Monaco, yacht, résidence…"></textarea></div>
+   <button type="button" class="btn ink" id="sendSelection" data-fr="PRÉPARER MA DEMANDE ↗" data-en="PREPARE MY REQUEST ↗">PRÉPARER MA DEMANDE ↗</button>
    <p id="selectionResponse" role="status"></p>
+   <p class="ely-request-privacy" data-fr="Aucune donnée médicale dans ce formulaire." data-en="Please do not include medical information.">Aucune donnée médicale dans ce formulaire.</p>
   </div>
  </div>
 </div>
-<footer class="footer wrap"><div><b>KŌMØ <em>ELYSIUM</em></b><p>THE ART OF SUBTLETY</p></div><div><p data-en="Services subject to availability, individual confirmation and separate quotation. Healthcare services, where applicable, are performed independently by appropriately licensed professionals." data-fr="Prestations soumises à disponibilité, confirmation individuelle et devis séparé. Les soins médicaux éventuels sont réalisés indépendamment par des professionnels habilités.">Prestations soumises à disponibilité, confirmation individuelle et devis séparé. Les soins médicaux éventuels sont réalisés indépendamment par des professionnels habilités.</p></div></footer>
-<script src="/elysium/assets/supabase.js"></script><script type="module" src="/elysium/assets/member.js"></script>
+<script src="/elysium/assets/supabase.js"></script>
+<script type="module" src="/elysium/assets/member.js"></script>
 </body></html>
