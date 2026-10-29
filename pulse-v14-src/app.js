@@ -1,10 +1,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import {onlineHomeBlock,onlinePassportPage,onlinePlanPage,onlineResultsPreview,bindOnlinePassportActions} from './online-passport-dashboard.js';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 
-const PATIENT_NAV=[['home','Aujourd’hui'],['baseline','Mon bilan'],['results','Résultats'],['plan','Mon plan'],['appointments','Rendez-vous']];
+const PATIENT_NAV=[['home','Aujourd’hui'],['baseline','Mon bilan'],['passport','Mon passeport'],['results','Résultats'],['plan','Mon plan'],['appointments','Rendez-vous']];
 const PRO_NAV=[['operator','Operator'],['patients','Patients'],['appointments','Rendez-vous']];
 const OP_STEPS=[
  ['preflight','00–05','Sécurité & standardisation','Operator'],
@@ -17,7 +18,7 @@ const OP_STEPS=[
  ['qc_release','45–55','Contrôle qualité','Pulse']
 ];
 
-const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
+const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],onlineReports:[],onlineReadError:false,schema:{bio:false,operator:false},route:'home',loading:false};
 
 const $=s=>document.querySelector(s);
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -200,7 +201,21 @@ async function loadPro(){
   const os=await safe(sb.from('pulse_operator_sessions').select('*').eq('patient_id',p?.id||'00000000-0000-0000-0000-000000000000').in('status',['draft','running','paused','review']).order('created_at',{ascending:false}).limit(1));
   S.schema.operator=!os.error;S.opSession=os.data?.[0]||null;S.opSteps=S.opSession?((await safe(sb.from('pulse_operator_steps').select('*').eq('operator_session_id',S.opSession.id).order('sequence_order',{ascending:true}))).data||[]):[];
 }
-async function loadAll(){if(S.mode==='pro'&&hasPro())await loadPro();else await loadPatientContext(S.patient)}
+async function loadOnlineReports(){
+  if(!S.user){S.onlineReports=[];S.onlineReadError=false;return;}
+  // RLS SELECT user_id=auth.uid() on motion_online_sessions. No direct writes.
+  const r=await safe(sb.from('motion_online_sessions')
+    .select('id,status,snapshot,created_at,updated_at')
+    .eq('user_id',S.user.id)
+    .order('created_at',{ascending:false}).limit(12));
+  S.onlineReadError=Boolean(r.error);
+  S.onlineReports=(r.data||[]).filter(x=>x&&typeof x.id==='string'&&
+    x.snapshot&&typeof x.snapshot==='object'&&!Array.isArray(x.snapshot));
+}
+async function loadAll(){
+  if(S.mode==='pro'&&hasPro())await loadPro();
+  else{await loadPatientContext(S.patient);await loadOnlineReports();}
+}
 
 function navItems(){return S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
@@ -219,11 +234,27 @@ function progressStrip(){
 }
 function patientHome(){
   heading('Bonjour '+esc(firstName()),'AUJOURD’HUI');
+  if(!S.patient){
+    $('#view').innerHTML=onlineHomeBlock(S.onlineReports,S.onlineReadError)+
+      '<section class="pp-inline"><div><span class="pp-eyebrow">VOTRE ESPACE PERSONNEL</span><h2>Vos résultats restent accessibles après la séance.</h2>'+
+      '<p>Retrouvez vos tests et questionnaires dans « Mon passeport », puis votre journal de progression dans « Mon plan ». Aucun score de longévité n’est déduit de vos réponses.</p></div>'+
+      '<button class="pp-button secondary" type="button" data-route-passport>Voir mes bilans →</button></section>';
+    bindOnlinePassportActions($('#view'),S.onlineReports,toast);
+    return;
+  }
   const action=nextAction(),next=futureAppointments()[0],sc=Number(score()?.overall_score),b=band(sc);
-  $('#view').innerHTML=`${isOnlineTester()?'<section class="pulse-online-tester-welcome"><div><span>PARCOURS ONLINE · TESTEUR</span><h3>Votre consultation Online est prête.</h3><p>Accédez au questionnaire, à la caméra et aux quatre tests guidés. Cette démonstration n’utilise aucune réservation ni donnée patient réelle.</p></div><a class="button light" href="/online/session/">Démarrer ma consultation →</a></section>':''}<section class="welcome-card"><div><span class="overline light">VOTRE PROCHAINE ÉTAPE</span><h2>${esc(action.title)}</h2><p>${esc(action.text)}</p><button class="button light" onclick="location.hash='${action.route}'">${esc(action.label)} →</button></div>${releasedScore()?`<div class="score-orb"><small>Motion Score</small><strong>${Math.round(sc)}</strong><span>${b.label}</span></div>`:`<div class="welcome-mark">K</div>`}</section>${progressStrip()}<section class="two-col"><article class="soft-card"><span class="overline">PROCHAIN RENDEZ-VOUS</span>${next?`<h3>${friendlyAppointmentType(next.appointment_type)}</h3><p class="big-date">${fmt(next.scheduled_start)}</p><p>${friendlyMode(next.location_mode)} · ${statusLabel(next.status)}</p><button class="button secondary" onclick="location.hash='appointments'">Voir les détails</button>`:`<h3>Aucun rendez-vous à venir</h3><p>Votre prochain rendez-vous apparaîtra ici dès qu’il sera programmé par l’équipe KŌMØ.</p><button class="button secondary" onclick="location.hash='appointments'">Mes rendez-vous</button>`}</article><article class="soft-card"><span class="overline">À RETENIR</span><h3>${releasedScore()?'Votre bilan est disponible':'Pulse vous guide étape par étape'}</h3><p>${releasedScore()?'Vos résultats sont présentés simplement : vos points forts, votre priorité et votre plan de progression.':'Vous n’avez rien à interpréter seul. Chaque étape se débloque au bon moment et les données sensibles sont revues avant publication.'}</p>${visibleGates().length?`<div class="human-alert">Un élément de votre bilan est actuellement relu par l’équipe. Cela ne signifie pas nécessairement qu’il existe un problème.</div>`:''}</article></section>`;
+  $('#view').innerHTML=`${onlineHomeBlock(S.onlineReports,S.onlineReadError)}${isOnlineTester()?'<section class="pulse-online-tester-welcome"><div><span>PARCOURS ONLINE · TESTEUR</span><h3>Votre consultation Online est prête.</h3><p>Accédez au questionnaire, à la caméra et aux quatre tests guidés. Cette démonstration n’utilise aucune réservation ni donnée patient réelle.</p></div><a class="button light" href="/online/session/">Démarrer ma consultation →</a></section>':''}<section class="welcome-card"><div><span class="overline light">VOTRE PROCHAINE ÉTAPE</span><h2>${esc(action.title)}</h2><p>${esc(action.text)}</p><button class="button light" onclick="location.hash='${action.route}'">${esc(action.label)} →</button></div>${releasedScore()?`<div class="score-orb"><small>Motion Score</small><strong>${Math.round(sc)}</strong><span>${b.label}</span></div>`:`<div class="welcome-mark">K</div>`}</section>${progressStrip()}<section class="two-col"><article class="soft-card"><span class="overline">PROCHAIN RENDEZ-VOUS</span>${next?`<h3>${friendlyAppointmentType(next.appointment_type)}</h3><p class="big-date">${fmt(next.scheduled_start)}</p><p>${friendlyMode(next.location_mode)} · ${statusLabel(next.status)}</p><button class="button secondary" onclick="location.hash='appointments'">Voir les détails</button>`:`<h3>Aucun rendez-vous à venir</h3><p>Votre prochain rendez-vous apparaîtra ici dès qu’il sera programmé par l’équipe KŌMØ.</p><button class="button secondary" onclick="location.hash='appointments'">Mes rendez-vous</button>`}</article><article class="soft-card"><span class="overline">À RETENIR</span><h3>${releasedScore()?'Votre bilan est disponible':'Pulse vous guide étape par étape'}</h3><p>${releasedScore()?'Vos résultats sont présentés simplement : vos points forts, votre priorité et votre plan de progression.':'Vous n’avez rien à interpréter seul. Chaque étape se débloque au bon moment et les données sensibles sont revues avant publication.'}</p>${visibleGates().length?`<div class="human-alert">Un élément de votre bilan est actuellement relu par l’équipe. Cela ne signifie pas nécessairement qu’il existe un problème.</div>`:''}</article></section>`;
+  bindOnlinePassportActions($('#view'),S.onlineReports,toast);
 }
 function baseline(){
   heading('Mon bilan','VOTRE BASELINE KŌMØ');
+  if(!S.patient){
+    $('#view').innerHTML='<section class="pp-intro"><span class="pp-eyebrow">BILAN ONLINE</span><h2>Une séance, puis un passeport que vous conservez.</h2>'+
+      '<p>Le questionnaire permet de décrire vos habitudes. Les exercices filmés fournissent des observations expérimentales. Votre passeport distingue clairement ces deux sources.</p></section>'+
+      onlineHomeBlock(S.onlineReports,S.onlineReadError);
+    bindOnlinePassportActions($('#view'),S.onlineReports,toast);
+    return;
+  }
   const p=patientProgress();
   const cards=[
    ['01','Quelques questions','Santé, sommeil, énergie et mobilité','Elles nous donnent votre contexte avant les mesures.','questions'],
@@ -235,14 +266,33 @@ function baseline(){
 }
 function results(){
   heading('Mes résultats','COMPRENDRE VOTRE MOUVEMENT');
+  if(!releasedScore()&&S.onlineReports.length){
+    $('#view').innerHTML=onlinePassportPage(S.onlineReports,new URLSearchParams(location.search).get('bilan'),S.onlineReadError);
+    bindOnlinePassportActions($('#view'),S.onlineReports,toast);
+    return;
+  }
+  if(!releasedScore()&&S.onlineReadError){
+    $('#view').innerHTML=onlineHomeBlock([],true);return;
+  }
   if(!releasedScore()){
     $('#view').innerHTML=`<section class="locked-state"><div class="lock-symbol">K</div><span class="overline">RÉSULTATS EN PRÉPARATION</span><h2>Vos résultats ne sont pas encore publiés.</h2><p>Ils apparaîtront ici dès que votre bilan sera complet et vérifié par l’équipe KŌMØ.</p><button class="button primary" onclick="location.hash='home'">Revenir à aujourd’hui</button></section>${progressStrip()}`;return;
   }
   const total=Number(score().overall_score),b=band(total),ds=domains(),valid=ds.filter(([, ,v])=>Number.isFinite(v)).sort((a,b)=>a[2]-b[2]),priority=valid[0],asset=valid.at(-1);
-  $('#view').innerHTML=`<section class="result-hero"><div><span class="overline light">MOTION SCORE</span><div class="result-score"><strong>${Math.round(total)}</strong><span>/100</span></div><div class="score-band ${b.class}">${b.label}</div><p>Une vue synthétique de vos capacités de mouvement à ce moment précis. L’objectif est surtout de suivre votre évolution dans le temps.</p></div><div class="result-summary"><article><span>Votre point fort</span><strong>${esc(asset?.[0]||'—')}</strong></article><article><span>Votre priorité</span><strong>${esc(priority?.[0]||'—')}</strong></article></div></section><section class="domain-grid">${ds.map(([name,desc,v])=>{const bb=band(v);return`<article class="domain-card"><div class="domain-head"><div><h3>${name}</h3><p>${desc}</p></div><strong>${Number.isFinite(v)?Math.round(v):'—'}</strong></div><div class="meter"><i style="width:${Number.isFinite(v)?Math.max(0,Math.min(100,v)):0}%"></i></div><span class="mini-band ${bb.class}">${bb.label}</span></article>`}).join('')}</section><article class="info-note"><strong>Comment lire ces résultats ?</strong><p>Le score sert à suivre votre profil et votre progression. Il ne remplace pas une consultation médicale et ne résume pas à lui seul votre état de santé.</p><details><summary>Voir comment le score est organisé</summary><p>Il combine locomotion, force, fonction, équilibre et mobilité. Les informations médicales nécessitant une revue sont traitées séparément.</p></details></article>`;
+  $('#view').innerHTML=`${onlineResultsPreview(S.onlineReports)}<section class="result-hero"><div><span class="overline light">MOTION SCORE</span><div class="result-score"><strong>${Math.round(total)}</strong><span>/100</span></div><div class="score-band ${b.class}">${b.label}</div><p>Une vue synthétique de vos capacités de mouvement à ce moment précis. L’objectif est surtout de suivre votre évolution dans le temps.</p></div><div class="result-summary"><article><span>Votre point fort</span><strong>${esc(asset?.[0]||'—')}</strong></article><article><span>Votre priorité</span><strong>${esc(priority?.[0]||'—')}</strong></article></div></section><section class="domain-grid">${ds.map(([name,desc,v])=>{const bb=band(v);return`<article class="domain-card"><div class="domain-head"><div><h3>${name}</h3><p>${desc}</p></div><strong>${Number.isFinite(v)?Math.round(v):'—'}</strong></div><div class="meter"><i style="width:${Number.isFinite(v)?Math.max(0,Math.min(100,v)):0}%"></i></div><span class="mini-band ${bb.class}">${bb.label}</span></article>`}).join('')}</section><article class="info-note"><strong>Comment lire ces résultats ?</strong><p>Le score sert à suivre votre profil et votre progression. Il ne remplace pas une consultation médicale et ne résume pas à lui seul votre état de santé.</p><details><summary>Voir comment le score est organisé</summary><p>Il combine locomotion, force, fonction, équilibre et mobilité. Les informations médicales nécessitant une revue sont traitées séparément.</p></details></article>`;
+  bindOnlinePassportActions($('#view'),S.onlineReports,toast);
 }
 function plan(){
   heading('Mon plan','VOTRE TRAJECTOIRE');
+  if(S.onlineReports.length&&!releasedScore()){
+    $('#view').innerHTML=onlinePlanPage(S.onlineReports,S.onlineReadError);
+    bindOnlinePassportActions($('#view'),S.onlineReports,toast);
+    return;
+  }
+  if(S.onlineReadError&&!releasedScore()){$('#view').innerHTML=onlineHomeBlock([],true);return;}
+  if(!S.patient){
+    $('#view').innerHTML=onlinePlanPage(S.onlineReports,S.onlineReadError);
+    bindOnlinePassportActions($('#view'),S.onlineReports,toast);return;
+  }
   if(!releasedScore()){
     $('#view').innerHTML=`<section class="locked-state"><div class="lock-symbol">12</div><span class="overline">VOTRE PLAN PERSONNALISÉ</span><h2>Votre plan sera construit après votre bilan.</h2><p>Il reposera sur 1 à 2 priorités maximum, avec des étapes simples et des points de contrôle.</p><button class="button primary" onclick="location.hash='baseline'">Voir mon bilan</button></section>`;return;
   }
@@ -273,10 +323,10 @@ function render(){
   S.route=route();const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
   shell();
   if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
-  else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
+  else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='passport'){heading('Mon passeport','KŌMØ MOTION PASSPORT');$('#view').innerHTML=onlinePassportPage(S.onlineReports,new URLSearchParams(location.search).get('bilan'),S.onlineReadError);bindOnlinePassportActions($('#view'),S.onlineReports,toast)}else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
-async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();if(!S.patient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
+async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();await loadAll();render()}
 window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
 sb.auth.onAuthStateChange((_e,s)=>{if(!s)authView()});
 boot().catch(()=>authView('Une erreur est survenue. Réessayez dans quelques instants.'));
