@@ -75,5 +75,5 @@ assert.ok(passportView.includes('priorityExercises(passport).map'), 'Daily exerc
 assert.ok(passportView.includes('daily-personal-note'), 'Explain the limited personalization to patient');
 assert.ok(reportHtml.includes('report-method-details'), 'Collapse repeated questionnaire analytics below passport');
 assert.ok(passportCss.includes('linear-gradient(140deg,#202b39'), 'Passport must use graphite rather than forest green');
-assert.ok(pdf.includes('const green=[36,56,76]'), 'PDF must inherit the mineral-blue visual identity');
+assert.ok(pdf.includes('const green=[36,35,36]')&&pdf.includes('gold=[184,155,106]'), 'PDF must inherit the charcoal/champagne visual identity');
 console.log('[pulse-passport-daily-qa] passport, no longevity claims, targeted domains, daily tracking and secure serialization passed');
