@@ -32,7 +32,7 @@ function side(){
 function frontal(rightRaised=false,leftRaised=false){
  const p=pts();
  for(const [i,x,y] of [[11,.40,.19],[12,.6,.19],[23,.43,.46],[24,.57,.46],
-  [25,.43,.65],[26,.57,.65],[27,.43,leftRaised?.72:.91],[28,.57,rightRaised?.72:.91]]){
+  [25,.43,.65],[26,.57,.65],[27,.43,leftRaised ? .72 : .91],[28,.57,rightRaised ? .72 : .91]]){
   p[i]={x,y,visibility:.96};
  }
  return p;
