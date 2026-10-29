@@ -30,7 +30,7 @@ function measurementRows(results){
 function measureInput(id,label,placeholder,step='any',initial=null){
  return '<label class="motion-score-field"><span>'+esc(label)+'</span><input type="number" id="'+esc(id)+'" min="0" step="'+step+'" placeholder="'+esc(placeholder)+'"'+(initial===null?'':' value="'+Number(initial)+'"')+' inputmode="decimal"></label>';
 }
-export function reportMarkup(answers,results,blocked){
+export function reportMarkup(answers,results,blocked,persisted=false){
  const intake=scoreIntake(answers),p=intakeProgress(answers);
  const focus=questionnaireFocus(answers);
  const chosen=focus.map(f=>esc(f.label)+' ('+f.value+'/100)').join(' · ');
@@ -63,7 +63,7 @@ export function reportMarkup(answers,results,blocked){
  '<button type="button" class="action" id="compute-motion-score">Calculer avec les mesures vérifiées →</button>'+
  '<p class="message" id="kms-error" role="status"></p></details>'+
  '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section>'+
- '<p class="notice">Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression. Les patients devront disposer d’un compte et d’un dossier rattachés à une réservation réglée avant tout stockage sécurisé.</p>'+
+ '<p class="notice">'+(persisted?'Les réponses et mesures chiffrées de votre bilan sont conservées dans votre dossier Pulse privé. Le PDF est créé et téléchargé localement : il n’est pas encore archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
  '<div class="pdf-download-box"><div><strong>Votre rapport Motion, en PDF</strong><p>Questionnaires, sous-scores, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est créé localement et reste sur votre appareil.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon rapport PDF</button></div>'+
  '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
 }
