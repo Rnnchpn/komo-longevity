@@ -195,26 +195,76 @@ function renderMaisonMeta(){
 }
 function noAccess(){if(isMaison){document.body.classList.remove('ely-service-mode');if($('#serviceDetail'))$('#serviceDetail').hidden=true;renderMaisonMeta();show('maisonAccess');$('#productGrid').replaceChildren();say('#shopMessage',tt('auth'))}}
 
+
+/* Product-led member shop: original brand graphics, no stock service photography. */
+const ELYSIUM_SERVICE_GRAPHICS={
+ 'medical-longevity-online':'<rect x="22" y="26" width="96" height="82" rx="8"/><path d="M48 124h44M70 108v16"/><circle cx="70" cy="61" r="14"/><path d="M43 91c6-14 18-18 27-18s21 4 27 18"/>',
+ 'medical-longevity-onboard':'<path d="M16 95h108l-17 19H34L16 95Z"/><path d="M47 94V55h37l26 39M56 55V37h32M72 37V19"/><path d="M11 122c11-5 17-5 28 0s17 5 28 0 17-5 28 0 17 5 28 0"/>',
+ 'medical-longevity-clinic':'<rect x="32" y="41" width="75" height="79"/><path d="M51 41V23h39v18M70 50v29M55 65h30M49 119V92h42v27M27 120h86" stroke-linecap="round"/><circle cx="70" cy="14" r="5"/>',
+ 'medical-longevity-followup':'<circle cx="70" cy="70" r="45"/><circle cx="70" cy="70" r="30" stroke-dasharray="3 6"/><path d="M29 78h21l12-24 16 32 13-23h21"/><circle cx="70" cy="24" r="5" fill="currentColor" stroke="none"/>',
+ 'aesthetic-medical-video':'<path d="M80 23c-24-9-45 4-49 31-2 15 7 22 2 34-4 9-12 12-18 21h37c-1 15 5 20 16 20"/><path d="M82 23c28 24 32 62-4 90"/><path d="M39 65c10-4 17-4 24 1M43 88c8 3 14 3 21-1"/>',
+ 'aesthetic-physician-onboard':'<path d="M17 97h107l-18 17H35L17 97Z"/><path d="M45 97V55h49l22 42M58 55V35"/><path d="M17 122c9-5 16-5 25 0s16 5 25 0 16-5 25 0 16 5 25 0"/><path d="M77 38h29M92 23v30"/>',
+ 'aesthetic-medical-pathway':'<path d="M70 16c-13 14-16 29-8 43-20-15-36-11-42 1 0 17 18 24 36 23-13 17-8 35 6 39 16-3 24-19 21-37 19 11 39 4 42-11-5-17-20-23-39-18 9-21 3-36-16-40Z"/><circle cx="70" cy="70" r="12"/>'
+};
+let elysiumShopFilter='all';
+function serviceGraphic(p){
+ const art=serviceElement('div','ely-product-visual');
+ art.setAttribute('aria-hidden','true');
+ const seal=serviceElement('span','ely-product-seal','KŌMØ  ELYSIUM');
+ const halo=serviceElement('div','ely-product-halo');
+ const symbol=document.createElementNS('http://www.w3.org/2000/svg','svg');
+ symbol.setAttribute('viewBox','0 0 140 140');symbol.setAttribute('aria-hidden','true');
+ symbol.setAttribute('class','ely-product-symbol');
+ const paths=ELYSIUM_SERVICE_GRAPHICS[p.id]||ELYSIUM_SERVICE_GRAPHICS['medical-longevity-followup'];
+ symbol.innerHTML='<g fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">'+paths+'</g>';
+ halo.append(symbol);art.append(seal,halo,serviceElement('span','ely-product-signature','THE PRIVATE COLLECTION'));
+ return art;
+}
+function serviceGroup(p){
+ if(p.id.endsWith('online')||p.id.endsWith('video'))return 'online';
+ if(p.id.includes('onboard'))return 'onboard';
+ return 'other';
+}
 function renderPrivateServiceIndex(products,grid){
- grid.classList.add('ely-service-index');
- products.forEach((p,i)=>{
-  const btn=document.createElement('button');
-  btn.type='button';btn.className='ely-index-row';
-  btn.setAttribute('aria-label',(lang==='fr'?'Ouvrir ':'Open ')+itemName(p));
-  const n=serviceElement('span','ely-index-number',String(i+1).padStart(2,'0'));
-  const info=serviceElement('span','ely-index-information');
-  const mode=serviceElement('span','ely-index-mode',lang==='fr'?(p.modeFr||p.tag):(p.modeEn||p.tag));
-  const name=serviceElement('span','ely-index-name',itemName(p));
-  const summary=serviceElement('span','ely-index-summary',lang==='fr'?(p.shortFr||p.copyFr):(p.shortEn||p.copyEn));
-  info.append(mode,name,summary);
-  const arrow=serviceElement('span','ely-index-arrow','↗');arrow.setAttribute('aria-hidden','true');
-  btn.append(n,info,arrow);
-  btn.addEventListener('click',()=>openProductPage(p));
-  grid.append(btn);
+ grid.classList.add('ely-shop-grid');grid.replaceChildren();
+ const filtered=products.filter(p=>elysiumShopFilter==='all'||serviceGroup(p)===elysiumShopFilter);
+ filtered.forEach((p,i)=>{
+  const card=serviceElement('article','ely-product-card');
+  card.dataset.variant=serviceGroup(p);
+  const visual=serviceGraphic(p);
+  const view=serviceElement('button','ely-product-image-link');
+  view.type='button';view.setAttribute('aria-label',(lang==='fr'?'Découvrir ':'Explore ')+itemName(p));
+  view.append(visual);view.addEventListener('click',()=>openProductPage(p));
+  const content=serviceElement('div','ely-product-content');
+  const mode=serviceElement('span','ely-product-category',lang==='fr'?(p.modeFr||p.tag):(p.modeEn||p.tag));
+  const h=serviceElement('h3','ely-product-name',itemName(p));
+  const summary=serviceElement('p','ely-product-description',lang==='fr'?(p.shortFr||p.copyFr):(p.shortEn||p.copyEn));
+  const actions=serviceElement('div','ely-product-actions');
+  const price=serviceElement('span','ely-product-price',lang==='fr'?'SUR DEMANDE':'ON REQUEST');
+  const link=serviceElement('button','ely-product-discover',lang==='fr'?'DÉCOUVRIR ↗':'DISCOVER ↗');
+  link.type='button';link.addEventListener('click',()=>openProductPage(p));
+  actions.append(price,link);content.append(mode,h,summary,actions);card.append(view,content);grid.append(card);
  });
 }
 function renderLongevityProducts(products,grid){renderPrivateServiceIndex(products,grid)}
 function renderAestheticProducts(products,grid){renderPrivateServiceIndex(products,grid)}
+function initPrivateShopControls(){
+ if(!isMaison||!['longevity','aesthetic'].includes(slug))return;
+ const filters=$$('#elyShopFilters [data-boutique-filter]');
+ filters.forEach(button=>button.addEventListener('click',()=>{
+  const next=button.dataset.boutiqueFilter;
+  if(!['all','online','onboard','other'].includes(next))return;
+  elysiumShopFilter=next;
+  filters.forEach(b=>{const yes=b===button;b.classList.toggle('is-active',yes);b.setAttribute('aria-pressed',yes?'true':'false')});
+  if(active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);
+ }));
+ $('#conciergeShortcut')?.addEventListener('click',()=>{
+  const subject='KŌMØ ELYSIUM — Private concierge request';
+  const msg='Hello ELYSIUM,\n\nI would like to arrange a private service.\n\nPreferred location and dates (no medical information):\n\n\nThank you.';
+  location.href='mailto:contact@komolongevity.com?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(msg);
+ });
+}
+initPrivateShopControls();
 
 /* Authenticated, shareable private service pages. No medical records or health data
    are stored in this shopping interface, and no clinical act is sold online. */
@@ -243,44 +293,38 @@ function openProductPage(p){
  window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 }
 function renderProductRoute(){
- const detail=$('#serviceDetail');
- if(!detail||!active)return;
+ const detail=$('#serviceDetail');if(!detail||!active)return;
  const id=new URL(location.href).searchParams.get('service');
- const products=window.__elysiumProductData||[];
- const p=products.find(x=>x.id===id);
- if(!p){
-  document.body.classList.remove('ely-service-mode');
-  detail.hidden=true;detail.replaceChildren();
-  return;
- }
+ const p=(window.__elysiumProductData||[]).find(x=>x.id===id);
+ if(!p){document.body.classList.remove('ely-service-mode');detail.hidden=true;detail.replaceChildren();return}
  detail.replaceChildren();
  const fr=lang==='fr';
- const head=serviceElement('div','ely-edit-detail-head');
- const back=serviceElement('button','ely-edit-detail-back',fr?'← LA COLLECTION':'← THE COLLECTION');
+ const top=serviceElement('div','ely-shop-detail-nav');
+ const back=serviceElement('button','ely-shop-detail-back',fr?'← TOUTES LES PRESTATIONS':'← ALL EXPERIENCES');
  back.type='button';back.addEventListener('click',closeProductPage);
- head.append(back,serviceElement('span','ely-edit-detail-number',(slug==='longevity'?'01':'02')+' / ELYSIUM'));
- const layout=serviceElement('div','ely-edit-detail-layout');
- const intro=serviceElement('div','ely-edit-detail-intro');
- intro.append(
-  serviceElement('p','ely-edit-detail-mode',fr?p.modeFr:p.modeEn),
-  serviceElement('h1','ely-edit-detail-title',itemName(p)),
-  serviceElement('p','ely-edit-detail-summary',fr?(p.shortFr||p.copyFr):(p.shortEn||p.copyEn))
- );
- const aside=serviceElement('div','ely-edit-detail-aside');
- const eyebrow=serviceElement('p','ely-edit-aside-label',fr?'COMMENT CELA SE PASSE':'HOW IT WORKS');
- const steps=serviceElement('ol','ely-edit-steps');
- (fr?p.stepsFr:p.stepsEn||[]).forEach(t=>steps.append(serviceElement('li','',t)));
- const action=serviceElement('button','ely-edit-request',fr?'DEMANDER CE RENDEZ-VOUS ↗':'REQUEST THIS APPOINTMENT ↗');
+ top.append(back,serviceElement('span','ely-shop-detail-ref','KŌMØ / ELYSIUM'));
+ const layout=serviceElement('div','ely-shop-detail-layout');
+ const visual=serviceGraphic(p);const gallery=serviceElement('div','ely-shop-detail-gallery');gallery.append(visual);
+ const info=serviceElement('div','ely-shop-detail-info');
+ const category=serviceElement('span','ely-shop-detail-kicker',fr?(p.modeFr||p.tag):(p.modeEn||p.tag));
+ const title=serviceElement('h1','ely-shop-detail-title',itemName(p));
+ const desc=serviceElement('p','ely-shop-detail-description',fr?(p.shortFr||p.copyFr):(p.shortEn||p.copyEn));
+ const divider=serviceElement('div','ely-shop-detail-divider');
+ const priceTitle=serviceElement('span','ely-shop-detail-label',fr?'DISPONIBILITÉ & TARIF':'AVAILABILITY & PRICING');
+ const price=serviceElement('p','ely-shop-detail-price',fr?'Sur demande':'On request');
+ const benefits=serviceElement('ul','ely-shop-detail-points');
+ (fr?p.pointsFr:p.pointsEn||[]).forEach(x=>benefits.append(serviceElement('li','',x)));
+ const action=serviceElement('button','ely-shop-detail-buy',fr?'DEMANDER CETTE CONSULTATION ↗':'REQUEST THIS CONSULTATION ↗');
  action.type='button';action.addEventListener('click',()=>addSelection(p,slug));
- const note=serviceElement('p','ely-edit-note',fr
-  ?'Disponibilité et honoraires confirmés par le médecin. Aucune donnée de santé dans votre demande.'
-  :'The physician confirms availability and fees. Please share no medical information in your request.');
- aside.append(eyebrow,steps,action,note);
- layout.append(intro,aside);
- const bottom=serviceElement('p','ely-edit-legal',fr
-  ?'Consultation et actes uniquement par un médecin indépendant habilité. Le lieu et la faisabilité sont soumis à sa validation. ELYSIUM assure la coordination, sans paiement d’acte médical.'
-  :'All medical care is provided by an authorised independent physician. The location and feasibility require their approval. ELYSIUM coordinates appointments; no medical payment is taken.');
- detail.append(head,layout,bottom);
+ const note=serviceElement('p','ely-shop-detail-terms',fr
+  ?'Un médecin indépendant confirme la faisabilité, le lieu et ses honoraires. Aucun règlement médical en ligne.'
+  :'An independent physician confirms suitability, location and professional fees. No medical checkout.');
+ info.append(category,title,desc,divider,priceTitle,price,benefits,action,note);
+ layout.append(gallery,info);
+ const foot=serviceElement('p','ely-shop-detail-disclaimer',fr
+  ?'Coordination privée uniquement. Consultations et actes réservés aux médecins habilités, selon les conditions médicales et réglementaires applicables. Ne transmettez pas de données de santé dans votre demande.'
+  :'Private coordination only. Medical consultations and procedures are performed by authorised physicians in suitable medical and regulatory conditions. Do not include health information in requests.');
+ detail.append(top,layout,foot);
  detail.hidden=false;document.body.classList.add('ely-service-mode');
 }
 window.addEventListener('popstate',()=>{if(isMaison&&active&&$('#serviceDetail'))renderProductRoute()});
