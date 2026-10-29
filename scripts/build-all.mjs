@@ -291,7 +291,9 @@ const scripts = [
   'scripts/komo-premium-proportions-v3.mjs',
   'scripts/komo-premium-proportions-qa-v3.mjs',
   // Explain the Motion Online offer after all premium and commercial home owners.
-  'scripts/komo-motion-online-explainer-20261029.mjs'
+  'scripts/komo-motion-online-explainer-20261029.mjs',
+  // Standalone ELYSIUM /elysium/: Monaco private collection, no Pulse or homepage mutations.
+  'scripts/build-elysium-v1.mjs'
 ];
 
 for (const script of scripts) {
