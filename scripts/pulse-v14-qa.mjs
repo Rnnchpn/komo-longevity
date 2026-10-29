@@ -85,7 +85,7 @@ const checks=[
  ['Online preflight stops media tracks',onlineScript.includes('getTracks().forEach(track => track.stop())')&&onlineScript.includes("addEventListener('pagehide'")],
  ['Online preflight does not record or upload video',!(/MediaRecorder|fetch\s*\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage/.test(onlineScript))],
  ['Online preflight syntax and responsive layout',onlineSyntax.status===0&&onlineCss.includes('@media(max-width:690px)')],
- ['tester post-login redirect',app.includes("window.location.assign('/online/session/')")&&app.includes('eef2c1ed-3872-47a7-84da-0f70b975c96f')],
+ ['tester post-login redirect',app.includes("window.location.assign(PULSE_ROOT+'online/session/')")&&app.includes('eef2c1ed-3872-47a7-84da-0f70b975c96f')],
  ['tester sidebar available only by verified role',app.includes('const isOnlineTester=')&&app.includes('S.role===\'admin\'')&&app.includes('pulse-online-tester-link')],
  ['authenticated session user lookup',sessionJs.includes('sb.auth.getUser()')&&sessionJs.includes("role.data?.role==='admin'")&&sessionJs.includes('verifyPaidSession({')],
  ['session security no public clinical record writes',!(/sb\.from\(.+\.insert\(|localStorage\.setItem|sessionStorage\.setItem|fetch\s*\(/.test(sessionJs))],
