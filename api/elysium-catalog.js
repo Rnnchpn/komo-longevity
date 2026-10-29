@@ -17,6 +17,17 @@ export default async function handler(req,res){
  try{
   const {data:{user},error:identityError}=await client.auth.getUser(jwt);
   if(identityError||!user||user.is_anonymous)return json(res,401,{ok:false,error:'sign_in_required'});
+  // Owner access is granted only after Supabase Auth verifies the actual mailbox
+  // and reports that the email is confirmed. No client-supplied role/metadata is trusted.
+  const isOwner=user.email?.trim().toLowerCase()==='contact@komolongevity.com' && Boolean(user.email_confirmed_at);
+  if(isOwner){
+   const requested=String(req.query?.world||'overview');
+   const ent={tier:'maison',status:'active'};
+   if(requested==='overview')return json(res,200,{ok:true,membership:ent,worlds:WORLDS.map(PUBLIC_META)});
+   const world=WORLD_BY_SLUG[requested];
+   if(!world)return json(res,404,{ok:false,error:'world_not_found'});
+   return json(res,200,{ok:true,membership:ent,world:{...PUBLIC_META(world),products:world.products}});
+  }
   const {data:membership,error:dbError}=await client.from('elysium_memberships')
    .select('status,tier,current_period_end,approved_at').eq('user_id',user.id).maybeSingle();
   if(dbError){console.error('[elysium-catalog] entitlement lookup failed',dbError.code);return json(res,503,{ok:false,error:'entitlement_unavailable'});}
