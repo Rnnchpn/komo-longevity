@@ -1,6 +1,6 @@
 import {createPoseEngine} from './pose-engine.js';
 import {createMovementTracker} from './metrics.mjs';
-import {createVoiceControl} from './voice-control.js';
+import {sharedMotionMedia} from './shared-media.js';
 import {TEST_GUIDES} from './test-guides.mjs';
 import {createCaptureEnhancements} from './capture-enhancements.js';
 import {mountSideProfilePhoto} from './profile-photo.js';
@@ -22,12 +22,16 @@ export function mountMotionController(root,task,record,state,callbacks){
   if(active){q('#camera-screen')?.scrollIntoView({behavior:'smooth',block:'center'});}
  };
  const consent=q('#pose-consent');
- consent.onchange=()=>{on.disabled=!consent.checked||Boolean(state.stream);};
+ consent.checked=sharedMotionMedia.cameraConsent();
+ consent.onchange=()=>{
+  if(!consent.checked){sharedMotionMedia.stopCamera();stopCapture();}
+  on.disabled=!consent.checked||Boolean(sharedMotionMedia.getStream());
+ };
  const tracker=createMovementTracker(task.id);
  state.tracker=tracker;state.bodyReady=false;state.sessionActive=false;state.sessionFinished=false;state.countdownActive=false;
  let validStreak=0,lastMessageAt=0,disposed=false;
  let readingInstructions=false;
- const voice=createVoiceControl({
+ const voice=sharedMotionMedia.attachVoice({
   onCommand(command){
    if(disposed)return;
    if(command==='start'){
@@ -53,6 +57,8 @@ export function mountMotionController(root,task,record,state,callbacks){
      mode==='connecting'||mode==='reconnecting'?'🎙 Connexion du microphone…':'🎙 Activer les commandes vocales';
   }
  });
+ voiceConsent.checked=sharedMotionMedia.hasVoiceConsent();
+ voiceButton.disabled=!voice.supported||!voiceConsent.checked;
  voiceConsent.onchange=()=>{
   if(!voiceConsent.checked){voice.disable();voiceButton.disabled=true;}
   else voiceButton.disabled=!voice.supported;
@@ -86,6 +92,8 @@ export function mountMotionController(root,task,record,state,callbacks){
   utterance.onerror=()=>{readingInstructions=false;if(q('#guide-audio-status'))q('#guide-audio-status').textContent='Lecture indisponible. Consultez les instructions affichées.';};
   window.speechSynthesis.speak(utterance);
  };
+ const soundSwitch=q('#sound-enabled');soundSwitch.checked=sharedMotionMedia.isSpeakerOn();
+ soundSwitch.onchange=()=>sharedMotionMedia.setSpeaker(soundSwitch.checked);
  const enhancements=createCaptureEnhancements({root,task,voice,state,record});
  const info=s=>{const e=q('#camera-message');if(e)e.textContent=s};
  const status=s=>{const e=q('#motion-status');if(e)e.textContent=s};
@@ -109,14 +117,15 @@ export function mountMotionController(root,task,record,state,callbacks){
    'Image partiellement perdue : résultat à vérifier ou recommencer.');
   enhancements.completed(interrupted);
  }
- function stopCapture(){
+ function stopCapture(release=false){
   state.sessionActive=false;
   enhancements.stopCountdown();
   if(state.timer){clearInterval(state.timer);state.timer=null;}
   state.request++;
   if(state.engine){state.engine.stop();state.engine=null;}
-  if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
-  video.pause();video.srcObject=null;video.hidden=true;canvas.hidden=true;off.hidden=false;
+  if(release)sharedMotionMedia.stopCamera();
+  sharedMotionMedia.detachVideo(video);state.stream=sharedMotionMedia.getStream();
+  canvas.hidden=true;off.hidden=false;
   state.bodyReady=false;on.disabled=!consent.checked;stop.disabled=true;
   go.disabled=true;validStreak=0;
   halt.hidden=true;
@@ -124,8 +133,10 @@ export function mountMotionController(root,task,record,state,callbacks){
  function sample(points,time){
   if(disposed||document.hidden)return;
   const result=task.id==='posture'?enhancements.detect(points):tracker.observe(points,time);
+  const previousReady=state.bodyReady;
   validStreak=result.valid?Math.min(9,validStreak+1):0;
   state.bodyReady=validStreak>=3;
+  if(state.bodyReady&&!previousReady)sharedMotionMedia.readyBeep(task.id);
   const tag=q('#pose-quality'),hud=q('#camera-hud');
   if(hud)hud.hidden=false;
   if(tag){tag.textContent=result.message;tag.classList.toggle('tracked',state.bodyReady);}
@@ -143,13 +154,13 @@ export function mountMotionController(root,task,record,state,callbacks){
   if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){
     info('Caméra indisponible : ouvrez la page avec HTTPS sur un navigateur récent.');return;
   }
-  enhancements.unlock();on.disabled=true;const ticket=++state.request;
+  enhancements.unlock();sharedMotionMedia.unlockAudio();on.disabled=true;const ticket=++state.request;
   let opened=null;
   try{
    info('Autorisez la caméra puis patientez pendant le chargement du détecteur…');
-   opened=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:'user',width:{ideal:1280},height:{ideal:720},frameRate:{ideal:20,max:24}}});
-   if(ticket!==state.request||disposed){opened.getTracks().forEach(t=>t.stop());return;}
-   state.stream=opened;video.srcObject=opened;video.hidden=false;off.hidden=true;stop.disabled=false;
+   opened=await sharedMotionMedia.ensureCamera();
+   if(ticket!==state.request||disposed)return;
+   state.stream=opened;sharedMotionMedia.attachVideo(video);off.hidden=true;stop.disabled=false;
    await video.play();
    info('Chargement de MediaPipe…');
    const engine=await createPoseEngine(video,canvas,sample,()=>{
@@ -159,14 +170,13 @@ export function mountMotionController(root,task,record,state,callbacks){
    if(ticket!==state.request||disposed){engine.stop();return;}
    state.engine=engine;canvas.hidden=false;info('En cours : placez votre corps entier dans le cadre.');
   }catch(error){
-   if(opened)opened.getTracks().forEach(t=>t.stop());
    if(ticket!==state.request||disposed)return;
    stopCapture();
    info(error?.name==='NotAllowedError'?'Accès refusé : autorisez la caméra depuis les paramètres du navigateur.':
      'La caméra ou le détecteur n’a pas démarré. Vérifiez la connexion et réessayez.');
   }
  };
- stop.onclick=()=>{voice.disable();stopCapture();info('Caméra éteinte. Micro et caméra coupés. Aucune vidéo enregistrée.');status('Activez la caméra pour reprendre.');};
+ stop.onclick=()=>{voice.disable();stopCapture(true);info('Caméra éteinte. Micro et caméra coupés. Aucune vidéo enregistrée.');status('Activez la caméra pour reprendre.');};
  go.onclick=()=>{
   if(!state.bodyReady||!state.engine||!state.stream||state.sessionActive||state.countdownActive||disposed)return;
   enhancements.unlock();record.status='pending';record.source='webcam';
@@ -221,6 +231,11 @@ export function mountMotionController(root,task,record,state,callbacks){
   state.results[task.id]=record;stopCapture();callbacks.advance();
  };
  q('#back').onclick=()=>{stopCapture();callbacks.back();};
+ if(sharedMotionMedia.availableCamera()){
+  consent.checked=true;
+  on.disabled=false;
+  void on.onclick(); // Reattach authorized camera without another permission request.
+ }
  return ()=>{
   if(disposed)return;
   disposed=true;
