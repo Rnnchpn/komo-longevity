@@ -40,7 +40,7 @@ async function start(){
   user=response.data?.user;
   if(!user){if(isClub){hide('loading');show('authPanel')}else noAccess();return}
   const gate=await authorized(isClub?'overview':slug);
-  if(gate.ok){active=true;if(isClub){hide('loading');hide('authPanel');hide('applicationPanel');show('memberPanel');renderClub(gate.worlds,gate.membership)}if(isMaison){renderMaisonMeta();renderProducts(gate.world.products);window.__elysiumProductData=gate.world.products}}
+  if(gate.ok){active=true;if(isClub){hide('loading');hide('authPanel');hide('applicationPanel');show('memberPanel');document.body.classList.add('elysium-app-mode');renderClub(gate.worlds,gate.membership)}if(isMaison){renderMaisonMeta();renderProducts(gate.world.products);window.__elysiumProductData=gate.world.products}}
   else if(gate.error==='membership_required'){if(isClub)await applicationMode();else noAccess();}
   else if(gate.error==='sign_in_required'){if(isClub){hide('loading');show('authPanel')}else noAccess()}
   else{if(isClub){hide('loading');show('authPanel');say('#loginMessage',tt('failed'),true)}else noAccess()}
@@ -91,21 +91,32 @@ $('#applicationForm')?.addEventListener('submit',async e=>{
 });
 $('#signOut')?.addEventListener('click',async()=>{if(client)await client.auth.signOut();location.href='/elysium/club/'});
 function renderClub(worldList,membership){
- const wheel=$('#memberWheel'),grid=$('#memberCards');
- if(!wheel||!grid)return;
- wheel.querySelectorAll('.wheel-link').forEach(x=>x.remove());grid.replaceChildren();
+ const wheel=$('#memberWheel');
+ if(!wheel)return;
+ wheel.querySelectorAll('.ely-frame').forEach(x=>x.remove());
+ const translate={longevity:'Longévité',aesthetic:'Esthétique','iv-drip':'IV Drip','cosmetic-supplements':'Cosmétiques',life:'Lifestyle',gastronomy:'Gastronomie','high-luxury':'Haute Joaillerie',service:'Conciergerie',team:'Équipe'};
  WORLDS.forEach((w,i)=>{
-  const angle=(-90+i*40)*Math.PI/180,x=50+39*Math.cos(angle),y=50+39*Math.sin(angle);
-  const a=document.createElement('a');a.href='/elysium/maison/'+w.slug+'/';a.className='wheel-link';a.style.left=x+'%';a.style.top=y+'%';
-  const em=document.createElement('span');em.className='wheel-icon';em.textContent=w.icon;
-  const label=document.createElement('small');label.textContent=w.name==='Cosmetic & Supplements'?'Cosmetic':w.name;
-  a.append(em,label);wheel.appendChild(a);
-  const card=document.createElement('a');card.href=a.href;card.className='club-collection';
-  const photo=document.createElement('img');photo.src=w.image;photo.alt='';photo.loading='lazy';
-  const info=document.createElement('div');const eyebrow=document.createElement('span');eyebrow.textContent=w.no+' / 09';
-  const title=document.createElement('h3');title.textContent=w.name;info.append(eyebrow,title);card.append(photo,info);grid.appendChild(card);
+  const angle=(-90+i*40)*Math.PI/180;
+  const x=50+39*Math.cos(angle),y=50+36*Math.sin(angle);
+  const a=document.createElement('a');
+  a.href='/elysium/maison/'+w.slug+'/';
+  a.className='ely-frame';
+  a.style.left=x.toFixed(2)+'%';
+  a.style.top=y.toFixed(2)+'%';
+  a.setAttribute('aria-label',w.no+' · '+(lang==='fr'?(translate[w.slug]||w.name):w.name));
+  const img=document.createElement('img');
+  img.src=w.image;img.alt='';img.loading=i<3?'eager':'lazy';img.decoding='async';
+  const index=document.createElement('small');index.className='ely-frame-index';index.textContent=w.no+' / 09';
+  const name=document.createElement('strong');name.className='ely-frame-name';
+  name.textContent=lang==='fr'?(translate[w.slug]||w.name):w.name;
+  const arrow=document.createElement('span');arrow.className='ely-frame-arrow';arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');
+  a.append(img,index,name,arrow);
+  wheel.appendChild(a);
  });
- if(membership)$('#memberBadge').textContent=membership.tier.toUpperCase()+' · '+membership.status.toUpperCase();
+ if(membership){
+  const badge=$('#memberBadge');
+  if(badge)badge.textContent=membership.tier==='maison'?'MAISON PRIVÉE':(lang==='fr'?'ACCÈS MEMBRE':'MEMBER ACCESS');
+ }
 }
 function renderMaisonMeta(){
  if(!world)return;
