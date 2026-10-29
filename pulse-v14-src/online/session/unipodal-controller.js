@@ -24,6 +24,7 @@ export function mountUnipodal(root,task,record,state,callbacks){
   const s=observer.summary();record.value=s.seconds;record.quality=s.quality;
   record.status=interrupted||s.seconds<1.5||s.quality<65?'review':'done';record.source='webcam unipodale, temps apparent';
   state.results[task.id]=record;
+  callbacks.checkpoint?.();
   text('#value',s.seconds.toFixed(1));text('#camera-reps',s.seconds.toFixed(1));
   next.disabled=false;redo.hidden=false;halt.hidden=true;
   text('#motion-status',interrupted?'Capture interrompue. Temps partiel, à vérifier.':'Pied reposé ou test terminé. Vérifiez le temps observé.');
@@ -128,6 +129,7 @@ export function mountUnipodal(root,task,record,state,callbacks){
  stop.onclick=()=>{if(started&&!completed)end(true);voice.disable();stopCamera(true);};
  halt.onclick=()=>{if(started&&!completed)end(true);};
  redo.onclick=()=>{
+  sharedMotionMedia.resetReady(task.id);
   observer.reset();started=false;completed=false;record.status='pending';record.value=0;
   next.disabled=true;redo.hidden=true;halt.hidden=true;
   text('#time','20');text('#value','0.0');text('#camera-reps','0');
