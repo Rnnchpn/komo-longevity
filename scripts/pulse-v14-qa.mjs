@@ -21,6 +21,7 @@ const metrics=await readFile(join(root,'site','pulse-v14','online','session','me
 const voiceControl=await readFile(join(root,'site','pulse-v14','online','session','voice-control.js'),'utf8');
 const voiceCommands=await readFile(join(root,'site','pulse-v14','online','session','voice-commands.mjs'),'utf8');
 const testGuides=await readFile(join(root,'site','pulse-v14','online','session','test-guides.mjs'),'utf8');
+const testNavigator=await readFile(join(root,'site','pulse-v14','online','session','test-navigation.js'),'utf8');
 const intakeModel=await readFile(join(root,'site','pulse-v14','online','session','intake-model.mjs'),'utf8');
 const intakeView=await readFile(join(root,'site','pulse-v14','online','session','intake-view.js'),'utf8');
 const intakeReport=await readFile(join(root,'site','pulse-v14','online','session','intake-report.js'),'utf8');
@@ -116,6 +117,10 @@ const checks=[
  ['speaker is optional and cleaned up',motionView.includes('id="sound-enabled"')&&captureEnhancements.includes('audible:enabled()')&&captureEnhancements.includes('audio.destroy()')],
  ['posture observation and careful summary',postureMetrics.includes('observeFrontalPosture')&&captureEnhancements.includes('postureSummary()')&&sessionJs.includes("id:'posture'")&&intakeReport.includes("id==='posture'")],
  ['posture is non-diagnostic and local',testGuides.includes("posture:{")&&testGuides.includes("scoliose")&&motionView.includes('id="posture-results"')],
+ ['test revisit navigator built for all six exercises',sessionJs.includes('testNavigatorMarkup(TESTS,state.results,state.task)')&&sessionJs.includes('mountTestNavigation(root,TESTS,state.results,jumpToTest')&&testNavigator.includes('data-motion-test')],
+ ['saved results are not erased on revisit',sessionJs.includes('completedTestMarkup(t,record)')&&sessionJs.includes('delete state.results[t.id]')&&testNavigator.includes('redo-stored-test')],
+ ['review navigation respects safety gate',sessionJs.includes("state.answers.safety!=='no'")&&sessionJs.includes('state.sessionActive||state.countdownActive')],
+ ['test navigation script parses',nodeSyntax('test-navigation.js')],
  ['posture automatic 3 2 1 and manual backup',profilePhoto.includes('sharedMotionMedia.postureCountdown')&&profilePhoto.includes('manual.onclick')&&profilePhoto.includes('state.results[task.id]=record')],
  ['age norms and protocol guards',referenceNorms.includes('protocolConfirmed')&&referenceNorms.includes('Rikli & Jones')&&normPanel.includes('norm-exact-age')],
  ['no visible-only balance step',!sessionJs.includes("id:'balance'")&&!intakeReport.includes("['balance','Visibilité debout'")],
