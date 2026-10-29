@@ -23,6 +23,7 @@ const publicWorlds=WORLDS.map(({slug,no,icon,name,full,eyebrow,subtitleEn,subtit
 await writeFile(join(assets,'store-data.mjs'),
  'export const WORLDS='+JSON.stringify(publicWorlds)+';\nexport const WORLD_BY_SLUG=Object.fromEntries(WORLDS.map(w=>[w.slug,w]));\n');
 const template=await readFile(join(src,'maison-template.html'),'utf8');
+if(!template.includes('class="ely-boutique ely-world-maison"')||!template.includes('id="productGrid"')||!template.includes('id="serviceDetail"')||template.includes('<img'))throw new Error('[elysium] universal gated boutique template not ready');
 const longevityTemplate=await readFile(join(src,'longevity-template.html'),'utf8');
 const aestheticTemplate=await readFile(join(src,'aesthetic-template.html'),'utf8');
 if(!aestheticTemplate.includes('id="productGrid"')||!aestheticTemplate.includes('class="aesthetic-maison ely-boutique"')||aestheticTemplate.includes('<img'))throw new Error('[elysium] bespoke photo-free Aesthetic template missing');
@@ -34,7 +35,7 @@ for(const world of WORLDS){
  await writeFile(join(dir,'index.html'),world.slug==='longevity'?longevityTemplate:(world.slug==='aesthetic'?aestheticTemplate:template));
 }
 const home=await readFile(join(out,'index.html'),'utf8');
-if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/longevity/'))
+if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/longevity/')||!home.includes('ely-public-commerce')||(home.match(/class="ely-public-world ely-public-world-/g)||[]).length!==9)
  throw new Error('[elysium] Unwanted entrance animation or required membership and Longevity content missing');
 const club=await readFile(join(out,'club','index.html'),'utf8');
 if(!club.includes('id="memberWheel"')||!club.includes('class="ely-orbit"')||!club.includes('id="elyOrbitActive"')||club.includes('id="memberCards"'))
@@ -42,8 +43,8 @@ if(!club.includes('id="memberWheel"')||!club.includes('class="ely-orbit"')||!clu
 if(!longevityTemplate.includes('id="serviceDetail"')||!aestheticTemplate.includes('id="serviceDetail"')||!longevityTemplate.includes('ely-shop-catalogue')||!aestheticTemplate.includes('ely-shop-catalogue'))throw new Error('[elysium] ultra-minimal private product index missing');
 if(WORLDS.find(w=>w.slug==='longevity').products.some(p=>!p.id.startsWith('medical-'))||WORLDS.find(w=>w.slug==='aesthetic').products.some(p=>!p.id.startsWith('aesthetic-')))throw new Error('[elysium] medical boutiques must show clinician-led services only');
 const member=await readFile(join(assets,'member.js'),'utf8');
-if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp')||!member.includes('renderLongevityProducts')||!member.includes('renderAestheticProducts')||!member.includes('renderProductRoute')||!member.includes('elyShopFilters')||!member.includes('serviceGraphic')||!member.includes("$('[data-en]').forEach"))throw new Error('[elysium] secure member client or Longevity shop renderer missing');
-if(member.includes("photo.src=w.image")||!member.includes('ELYSIUM_GLYPHS')||!member.includes("orbitStep(")||!member.includes("WORLDS.forEach"))throw new Error('[elysium] vector nine-world orbital interaction missing');
+if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp')||!member.includes('renderLongevityProducts')||!member.includes('renderAestheticProducts')||!member.includes('renderPrivateServiceIndex(products,grid);renderProductRoute();')||!member.includes('renderProductRoute')||!member.includes('elyShopFilters')||!member.includes('serviceGraphic')||!member.includes("$('[data-en]').forEach"))throw new Error('[elysium] secure member client or Longevity shop renderer missing');
+if(member.includes("photo.src=w.image")||member.includes('store-card')||!member.includes('ELYSIUM_GLYPHS')||!member.includes("orbitStep(")||!member.includes("WORLDS.forEach"))throw new Error('[elysium] vector nine-world orbital interaction missing');
 const sanitized=await readFile(join(assets,'store-data.mjs'),'utf8');
 if(sanitized.includes('Private Motion Experience')||sanitized.includes('products:['))throw new Error('[elysium] private catalogue leaked in public metadata');
-console.log('[elysium] READY · nine SVG worlds · two commercial private shops · filterable 7-product collection · 28 gated offers');
+console.log('[elysium] READY · 9 private collection shops · premium flagship · porcelain member orbit · 28 gated offers');
