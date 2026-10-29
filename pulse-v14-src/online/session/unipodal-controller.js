@@ -86,7 +86,7 @@ export function mountUnipodal(root,task,record,state,callbacks){
   if(disposed||document.hidden||completed)return;
   lastFrame=time;
   const f=observer.observe(points,time);
-  validStreak=f.valid?validStreak+1:0;
+  validStreak=f.valid&&f.lifted?validStreak+1:0;
   if(validStreak===3)sharedMotionMedia.readyBeep(task.id);
   const hud=q('#camera-hud');hud.hidden=false;
   text('#pose-quality',f.message);
