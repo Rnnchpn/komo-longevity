@@ -81,3 +81,76 @@ nav.top{z-index:20;position:relative;display:flex;align-items:center;justify-con
 .email-login-alternative summary:hover{color:#1d251e}
 .email-login-alternative>p{max-width:470px;font-size:11px;color:#6b6f66;line-height:1.9}
 #passwordLoginForm .btn{width:100%}
+
+/* ELYSIUM PRIVATE APP · one-screen orbital collection; no marketing panels after login */
+body.elysium-app-mode{background:#111814}
+.elysium-app-mode .top{min-height:71px;background:#151b17;border-bottom:1px solid #c9b7982c}
+.elysium-app-mode .top .brand strong{font-size:21px}
+.elysium-app-mode .top .brand em{font-size:22px}
+.elysium-app-mode #returnMaison,.elysium-app-mode .club-intro,.elysium-app-mode .footer{display:none}
+.elysium-app-mode .club-shell{min-height:calc(100svh - 71px);padding:0;background:radial-gradient(ellipse at 50% 47%,#222d25 0%,#171f1a 41%,#101713 80%);overflow:hidden}
+.elysium-app-mode .club-shell>.wrap{max-width:none;padding-inline:clamp(14px,3.6vw,65px)}
+.elysium-app-mode .club-dashboard{max-width:none}
+.ely-app{width:100%;max-width:1440px;min-height:calc(100svh - 71px);margin:auto;display:flex;flex-direction:column;align-items:center;padding:22px 0 20px}
+.ely-app-heading{text-align:center;position:relative;z-index:2}
+.ely-app-overline{font:500 9px/1.4 var(--sans);letter-spacing:.28em;color:#c8b38f;text-transform:uppercase}
+.ely-app-heading h1{font:400 clamp(45px,5.1vw,74px)/.94 var(--serif);letter-spacing:-.025em;margin:11px 0 0;color:#f0e9dd}
+.ely-app-subtitle{font:300 11px/1.6 var(--sans);color:#aaa89e;letter-spacing:.08em;margin:14px 0 0}
+.ely-orbit{position:relative;isolation:isolate;width:min(100%,1120px);height:clamp(550px,calc(100svh - 226px),740px);flex:none;margin:-7px auto 0}
+.ely-orbit-outline{position:absolute;inset:14% 11%;border:1px solid #b79d7344;border-radius:50%;pointer-events:none}
+.ely-orbit-outline:before,.ely-orbit-outline:after{content:"";position:absolute;border:1px solid #af97701f;border-radius:50%;inset:11% 11%}
+.ely-orbit-outline:after{inset:-3%;border-color:#c9ab7e17}
+.ely-orbit-hub{position:absolute;left:50%;top:50%;width:clamp(185px,20vw,264px);aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle at 32% 28%,#28352b,#151e19 64%);border:1px solid #ba9e7396;box-shadow:0 0 0 9px #c4a77912,0 0 0 10px #bca37439,inset 0 0 80px #101712aa,0 18px 42px #070f0bd9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;pointer-events:none;text-align:center}
+.ely-hub-overline{font:500 8px/1.3 var(--sans);letter-spacing:.27em;color:#b8ad9b}
+.ely-orbit-hub strong{font:400 clamp(39px,4vw,59px)/1 var(--serif);letter-spacing:.11em;color:#f5eadd;text-indent:.11em;margin:13px 0}
+.ely-hub-divider{height:1px;width:42px;background:#b69b74}
+.ely-orbit-hub small{font:600 9px/1.5 var(--sans);letter-spacing:.25em;color:#c4b295;margin-top:8px}
+.ely-frame{position:absolute;transform:translate(-50%,-50%);display:block;width:clamp(139px,14vw,184px);height:clamp(142px,13.7vw,168px);overflow:hidden;border:1px solid #bdac8c93;padding:5px;background:#263028;box-shadow:0 11px 28px #0207037a,0 0 0 1px #060d09a8;transition:border-color .5s ease,box-shadow .5s ease,translate .5s cubic-bezier(.2,.7,.2,1);z-index:2}
+.ely-frame:hover,.ely-frame:focus-visible{translate:0 -6px;border-color:#e6c895;box-shadow:0 18px 42px #020703b9,0 0 0 1px #d3b99186;z-index:4}
+.ely-frame:before{content:"";position:absolute;inset:5px;z-index:1;border:1px solid #ffffff40;pointer-events:none}
+.ely-frame:after{content:"";position:absolute;inset:5px;z-index:0;pointer-events:none;background:linear-gradient(180deg,#080f0d36 0%,transparent 34%,#08100cd9 100%)}
+.ely-frame img{position:absolute;inset:5px;width:calc(100% - 10px);height:calc(100% - 10px);object-fit:cover;filter:saturate(.65) contrast(.96) brightness(.86);transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .8s ease}
+.ely-frame:hover img,.ely-frame:focus-visible img{transform:scale(1.045);filter:saturate(.76) contrast(1) brightness(.94)}
+.ely-frame-index{position:absolute;z-index:2;left:15px;top:14px;font:600 8px/1.3 var(--sans);letter-spacing:.18em;color:#fff1d7d9}
+.ely-frame-name{position:absolute;left:13px;right:16px;bottom:14px;z-index:2;font:400 clamp(19px,2.1vw,26px)/.96 var(--serif);color:#fffaf1;text-shadow:0 1px 8px #07100bb0}
+.ely-frame-arrow{position:absolute;right:14px;top:12px;z-index:2;font:400 17px var(--serif);color:#e5d3b6;opacity:.65;transition:opacity .3s}
+.ely-frame:hover .ely-frame-arrow{opacity:1}
+.ely-app-bottom{display:flex;justify-content:space-between;align-items:center;gap:20px;width:min(100%,1060px);padding:9px 12px 0;border-top:1px solid #b4a37f46;color:#b6b4a7;font:500 9px/1.7 var(--sans);letter-spacing:.18em;text-transform:uppercase}
+.ely-app-instruction{color:#e3cc9f}
+.ely-app-membership{color:#c5b390}
+@media(max-width:910px){
+ .elysium-app-mode .club-shell{overflow:visible}
+ .ely-app{padding:32px 0 45px}
+ .ely-orbit{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:12px;width:min(100%,750px);height:auto;min-height:0;margin:24px auto 25px}
+ .ely-orbit-outline{display:none}
+ .ely-orbit-hub{position:relative;grid-column:1/-1;grid-row:1;left:auto;top:auto;transform:none;width:100%;height:148px;aspect-ratio:auto;border-radius:0;background:transparent;box-shadow:none;border:1px solid #bca0785b;gap:0}
+ .ely-orbit-hub strong{font-size:47px;margin:6px 0}
+ .ely-hub-overline{font-size:7px}
+ .ely-orbit-hub small{font-size:8px;margin:4px 0}
+ .ely-frame{position:relative;top:auto!important;left:auto!important;transform:none;width:100%;height:clamp(154px,21vw,214px)}
+ .ely-frame:hover,.ely-frame:focus-visible{translate:0 -3px}
+ .ely-frame-name{font-size:clamp(19px,3vw,28px)}
+ .ely-app-bottom{width:min(100%,750px)}
+}
+@media(max-width:560px){
+ .elysium-app-mode .top{min-height:64px;padding:0 18px}
+ .elysium-app-mode .brand{gap:8px}
+ .elysium-app-mode .brand strong{font-size:19px}
+ .elysium-app-mode .brand em{font-size:19px;padding-left:10px}
+ .elysium-app-mode .navlinks{gap:7px}
+ .elysium-app-mode .navlinks button{font-size:9px;padding:8px 10px}
+ .elysium-app-mode .club-shell>.wrap{padding-inline:13px}
+ .ely-app{padding:27px 0 34px;min-height:calc(100svh - 64px)}
+ .ely-app-heading h1{font-size:50px;margin-top:12px}
+ .ely-app-overline{font-size:8px;letter-spacing:.19em}
+ .ely-app-subtitle{margin:11px 0 0;font-size:11px}
+ .ely-orbit{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:22px auto 18px}
+ .ely-orbit-hub{height:125px}
+ .ely-orbit-hub strong{font-size:39px}
+ .ely-frame{height:174px}
+ .ely-frame-name{font-size:25px}
+ .ely-frame:last-child{grid-column:span 2}
+ .ely-app-bottom{padding:10px 0 0;flex-wrap:wrap;gap:5px 10px;font-size:8px}
+ .ely-app-instruction{order:3;width:100%;text-align:center;letter-spacing:.15em}
+}
+@media(prefers-reduced-motion:reduce){.ely-frame,.ely-frame img,.ely-frame-arrow{transition:none!important}}
