@@ -15,6 +15,8 @@ const sessionCss=await readFile(join(root,'site','pulse-v14','online','session',
 const poseEngine=await readFile(join(root,'site','pulse-v14','online','session','pose-engine.js'),'utf8');
 const motionView=await readFile(join(root,'site','pulse-v14','online','session','motion-view.js'),'utf8');
 const motionController=await readFile(join(root,'site','pulse-v14','online','session','motion-controller.js'),'utf8');
+const sharedMedia=await readFile(join(root,'site','pulse-v14','online','session','shared-media.js'),'utf8');
+const sessionProgress=await readFile(join(root,'site','pulse-v14','online','session','session-progress.mjs'),'utf8');
 const metrics=await readFile(join(root,'site','pulse-v14','online','session','metrics.mjs'),'utf8');
 const voiceControl=await readFile(join(root,'site','pulse-v14','online','session','voice-control.js'),'utf8');
 const voiceCommands=await readFile(join(root,'site','pulse-v14','online','session','voice-commands.mjs'),'utf8');
@@ -88,8 +90,12 @@ const checks=[
  ['PDF formatter and logic syntactically valid',nodeSyntax('pdf-report.js')],
 
  ['intake layout mobile',sessionCss.includes('.intake-choices')&&sessionCss.includes('.intake-domain-grid')&&sessionCss.includes('.motion-score-locked')],
- ['session auto pose capture and test timer',motionController.includes('getUserMedia({audio:false')&&sessionJs.includes('function test()')&&sessionJs.includes('function summary()')&&motionController.includes('C’est parti →')],
- ['session video stops on navigation',sessionJs.includes("pagehide")&&sessionJs.includes('getTracks().forEach(t=>t.stop())')],
+ ['session auto pose capture and test timer',sharedMedia.includes('navigator.mediaDevices.getUserMedia')&&sessionJs.includes('function test()')&&sessionJs.includes('function summary()')&&motionController.includes('C’est parti →')],
+ ['session video stops on navigation',sessionJs.includes("pagehide")&&sessionJs.includes('stopCamera(true)')&&sharedMedia.includes('stream.getTracks().forEach(t=>t.stop())')],
+ ['continuous camera and voice across all tests',sessionJs.includes('stopCamera(state.page!==3)')&&sharedMedia.includes('availableCamera')&&motionController.includes('sharedMotionMedia.ensureCamera()')&&unipodalController.includes('sharedMotionMedia.ensureCamera()')&&profilePhoto.includes('sharedMotionMedia.ensureCamera()')],
+ ['position validated audible beep for all test types',motionController.includes('sharedMotionMedia.readyBeep(task.id)')&&unipodalController.includes('sharedMotionMedia.readyBeep(task.id)')&&profilePhoto.includes('sharedMotionMedia.readyBeep(task.id)')],
+ ['session-only progress without raw media',sessionJs.includes('loadProgress(store)')&&sessionJs.includes('persistProgress()')&&sessionProgress.includes('PROGRESS_KEY')&&sessionProgress.includes('expiresAt')&&!/MediaRecorder|toDataURL|toBlob/.test(sessionProgress)],
+ ['session progress syntax',nodeSyntax('shared-media.js')&&nodeSyntax('session-progress.mjs')],
  ['session ready for desktop and mobile',sessionSyntax.status===0&&sessionHtml.includes('Ma consultation Online')&&sessionCss.includes('@media(max-width:570px)')],
  ['motion pose engine supported browser inference',poseEngine.includes('detectForVideo')&&poseEngine.includes('pose_landmarker_lite.task')&&poseEngine.includes('requestAnimationFrame')&&nodeSyntax('pose-engine.js')],
  ['pose camera privacy and local overlay',!(/fetch\s*\(|MediaRecorder|localStorage/.test(poseEngine+motionController))&&poseEngine.includes('canvas.getContext')&&motionView.includes('pose-canvas')],
@@ -111,7 +117,7 @@ const checks=[
  ['auto side photo, not radiographic SVA',profilePhoto.includes('createSideProfileStability')&&profilePhoto.includes('drawImage(video')&&profilePhoto.includes('Photo capturée automatiquement')&&profileGeometry.includes('NOT SVA')&&profileGeometry.includes('NOT mm')],
  ['photo marker correction and in-memory image',profilePhoto.includes('profile-photo')&&profilePhoto.includes('snap.onpointerdown')&&!/fetch\s*\(|localStorage|sessionStorage|toBlob|toDataURL/.test(profilePhoto)],
  ['unipodal both legs, auto timing on foot lift',sessionJs.includes("id:'unipodal_left'")&&sessionJs.includes("id:'unipodal_right'")&&unipodalController.includes('createOneLegObserver')&&unipodalGeometry.includes('at-raisedSince>=850')],
- ['camera-only before auto capture',profilePhoto.includes('consent.checked')&&unipodalController.includes('consent.checked')&&unipodalController.includes('audio:false')],
+ ['camera-only before auto capture',profilePhoto.includes('consent.checked')&&unipodalController.includes('consent.checked')&&sharedMedia.includes('audio:false')],
  ['large video and compact microphone/audio',sessionCss.includes('.voice-compact')&&sessionCss.includes('height:min(76vh,880px)')&&motionView.includes('id="voice-panel"')],
  ['new side camera controllers parse',nodeSyntax('profile-photo.js')&&nodeSyntax('profile-photo-metrics.mjs')&&nodeSyntax('unipodal-controller.js')&&nodeSyntax('unipodal-metrics.mjs')],
 

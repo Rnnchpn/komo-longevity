@@ -4,6 +4,8 @@ import { mountMotionController } from './motion-controller.js';
 import { INTAKE_GROUPS } from './intake-model.mjs';
 import { intakeMarkup,bindIntake } from './intake-view.js';
 import { reportMarkup,bindReport } from './intake-report.js';
+import {sharedMotionMedia} from './shared-media.js';
+import {saveProgress,loadProgress,clearProgress} from './session-progress.mjs';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
@@ -22,10 +24,12 @@ const state = {page:0,questionStep:0,returnToSummary:false,answers:{},checks:new
 const esc = s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const q = selector=>root.querySelector(selector);
 let currentMotionCleanup=null;
+const store=(()=>{try{return window.sessionStorage}catch{return null}})();
+function persistProgress(){saveProgress(store,state);}
 const btn = (id,title,secondary=false)=>'<button type="button" class="action'+(secondary?' secondary':'')+'" id="'+id+'">'+title+'</button>';
 
 function stopTimer(){if(state.timer){clearInterval(state.timer);state.timer=null;}}
-function stopCamera(){
+function stopCamera(release=false){
   if(currentMotionCleanup){
    const cleanup=currentMotionCleanup;
    currentMotionCleanup=null;
@@ -34,18 +38,19 @@ function stopCamera(){
   state.request++;
   if(state.engine){state.engine.stop();state.engine=null;}
   state.bodyReady=false;
-  if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
+  if(release){sharedMotionMedia.stopAll();state.stream=null;}
+  else state.stream=sharedMotionMedia.getStream();
   const v=q('#live-video');
   if(v){v.pause();v.srcObject=null;}
 }
-function next(){stopTimer();stopCamera();state.page=Math.min(PHASES.length-1,state.page+1);render();}
-function previous(){stopTimer();stopCamera();state.page=Math.max(0,state.page-1);render();}
+function next(){stopTimer();stopCamera(state.page===3);state.page=Math.min(PHASES.length-1,state.page+1);render();}
+function previous(){stopTimer();stopCamera(state.page===3);state.page=Math.max(0,state.page-1);render();}
 function wrap(body){
   root.innerHTML='<section class="session"><div class="session-top"><span>LONGEVITY IN MOTION · KŌMØ PULSE</span><span class="test-badge">MODE TEST · AUCUN DOSSIER CRÉÉ</span></div>'+
   '<nav class="steps" aria-label="Étapes de la séance">'+PHASES.map((s,i)=>'<span class="'+(i===state.page?'now':i<state.page?'past':'')+'"><b>'+String(i+1).padStart(2,'0')+'</b>'+s+'</span>').join('')+'</nav>'+
   body+
-  '<div class="session-bottom"><p>Démonstration non médicale · aucune réponse, vidéo ou mesure enregistrée sur un serveur.</p><button id="leave" type="button">Quitter le mode test</button></div></section>';
-  q('#leave').onclick=()=>{stopTimer();stopCamera();window.location.assign('/')};
+  '<div class="session-bottom"><p>Démonstration non médicale · progression conservée 4 h dans cet onglet pour reprendre après actualisation. Aucune vidéo ni donnée envoyée au serveur.</p><button id="leave" type="button">Quitter et effacer la progression</button></div></section>';
+  q('#leave').onclick=()=>{stopTimer();stopCamera(true);clearProgress(store);window.location.assign('/')};
 }
 function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
@@ -95,6 +100,7 @@ function test(){
  const t=TESTS[state.task],record=state.results[t.id]||{value:0,status:'pending',source:'webcam'};
  wrap(motionMarkup(t,state.task,TESTS.length));
  currentMotionCleanup=mountMotionController(root,t,record,state,{
+  checkpoint(){persistProgress();},
   advance(){
    state.remaining=0;
    if(state.task<TESTS.length-1)state.task++;
@@ -114,7 +120,7 @@ function summary(){
  bindReport(root,state.answers,state.results,{
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
   restart(){
-   stopTimer();stopCamera();
+   stopTimer();stopCamera(true);clearProgress(store);
    state.page=0;state.questionStep=0;state.returnToSummary=false;
    state.task=0;state.answers={};state.checks.clear();state.results={};state.remaining=0;
    render();
@@ -122,15 +128,16 @@ function summary(){
  },state.answers.safety==='yes');
 }
 function render(){
- stopTimer();stopCamera();
+ stopTimer();stopCamera(state.page!==3);
+ persistProgress();
  if(state.page===0)welcome();
  else if(state.page===1)questionnaire();
  else if(state.page===2)safety();
  else if(state.page===3)test();
  else summary();
 }
-document.addEventListener('visibilitychange',()=>{if(document.hidden){state.sessionActive=false;stopTimer();stopCamera();const v=q('#live-video');if(v){v.hidden=true;const off=q('#camera-off');if(off)off.hidden=false;const start=q('#start-camera');if(start)start.disabled=false;const stop=q('#stop-camera');if(stop)stop.disabled=true;}}});
-window.addEventListener('pagehide',()=>{stopTimer();stopCamera()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){state.sessionActive=false;stopTimer();stopCamera(true);persistProgress();const v=q('#live-video');if(v){v.hidden=true;const off=q('#camera-off');if(off)off.hidden=false;const start=q('#start-camera');if(start)start.disabled=false;const stop=q('#stop-camera');if(stop)stop.disabled=true;}}});
+window.addEventListener('pagehide',()=>{stopTimer();stopCamera(true)});
 async function boot(){
  try{
   const {data,error}=await sb.auth.getUser();
@@ -139,6 +146,13 @@ async function boot(){
   if(user.id!==TEST_USER_ID||!user.email_confirmed_at)throw Error('not_tester');
   const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();
   if(role.error||role.data?.role!=='admin')throw Error('not_tester');
+  const restored=loadProgress(store);
+  if(restored){
+   state.page=restored.page;state.questionStep=restored.questionStep;state.task=restored.task;
+   state.answers=restored.answers;state.results=restored.results;
+   state.checks=new Set(restored.checks);state.returnToSummary=restored.returnToSummary;
+  }
+  root.addEventListener('change',()=>persistProgress());
   render();
  }catch(error){
   const signedOut=error.message==='login';

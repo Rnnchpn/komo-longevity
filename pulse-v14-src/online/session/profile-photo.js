@@ -1,4 +1,5 @@
 import {createPoseEngine} from './pose-engine.js';
+import {sharedMotionMedia} from './shared-media.js';
 import {createSideProfileStability,surfaceSagittalIndex} from './profile-photo-metrics.mjs';
 
 // Automatic PHOTO OF SURFACE PROFILE, not radiographic SVA.
@@ -7,7 +8,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  const q=s=>root.querySelector(s),video=q('#live-video'),overlay=q('#pose-canvas'),off=q('#camera-off');
  const start=q('#start-camera'),stop=q('#stop-camera'),redo=q('#redo-test'),next=q('#go'),consent=q('#pose-consent'),halt=q('#halt-test'),status=q('#motion-status');
  const reader=q('#read-guidance'),distance=q('#distance-view');
- let disposed=false,locked=false,frame=null,base=null,display=null,markers=null,which='neck',adjusted=false,manualCaptured=false,latestProfile=null;
+ let disposed=false,locked=false,frame=null,base=null,display=null,markers=null,which='neck',adjusted=false,manualCaptured=false,latestProfile=null,validStreak=0;
  const stability=createSideProfileStability(2300);
  const snap=document.createElement('canvas');snap.id='profile-photo';snap.className='profile-photo';snap.hidden=true;snap.setAttribute('aria-label','Photo de profil locale avec deux repères de surface');
  q('#camera-screen').append(snap);
@@ -20,7 +21,11 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  q('#value').textContent='—';
  q('#value').parentElement.querySelector('.overline').textContent='PHOTO DE PROFIL';
  status.textContent='Autorisez la caméra. Placez-vous de profil, immobile, avec les pieds visibles.';
- consent.onchange=()=>{start.disabled=!consent.checked||Boolean(state.stream);};
+ consent.checked=sharedMotionMedia.cameraConsent();
+ consent.onchange=()=>{
+  if(!consent.checked)stopTracks(true);
+  start.disabled=!consent.checked||Boolean(sharedMotionMedia.getStream());
+ };
  if(reader)reader.onclick=()=>{
   if(!('speechSynthesis' in window)||!window.SpeechSynthesisUtterance)return;
   window.speechSynthesis.cancel();
@@ -33,11 +38,14 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  };
  // No microphone required for automatic photo; hide legacy voice command controls.
  const voice=q('#voice-panel');if(voice)voice.hidden=true;
- const stopTracks=()=>{
+ const voiceHud=q('#voice-hud');
+ if(voiceHud){voiceHud.hidden=!sharedMotionMedia.hasVoiceConsent();
+  const label=q('#voice-hud-text');if(label&&sharedMotionMedia.hasVoiceConsent())label.textContent='Micro actif · toute la séance';}
+ const stopTracks=(release=false)=>{
   state.request++;
   if(state.engine){state.engine.stop();state.engine=null;}
-  if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
-  video.pause();video.srcObject=null;video.hidden=true;overlay.hidden=true;
+  if(release)sharedMotionMedia.stopAll();
+  sharedMotionMedia.detachVideo(video);state.stream=sharedMotionMedia.getStream();overlay.hidden=true;
   start.disabled=!consent.checked;stop.disabled=true;state.bodyReady=false;
  };
  const draw=()=>{
@@ -64,6 +72,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    adjusted,manualCapture:manualCaptured,neck:{...markers.neck},pelvis:{...markers.pelvis},height:frame.height};
   record.status=manualCaptured?'review':'done';record.source='photo locale, repères de surface';
   record.value=offset;
+  callbacks.checkpoint?.();
   q('#value').textContent=offset.toFixed(1)+' %';
   const items=[['Écart horizontal apparent',offset.toFixed(1)+' %'],['Méthode','Photo de profil 2D'],
    ['Repère supérieur','Jonction cou–épaule (estimée)'],['Repère inférieur','Région pelvienne (estimée)']];
@@ -115,12 +124,14 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
   q('#camera-message').textContent='Autorisez la webcam et placez-vous de profil.';
   let stream=null;
   try{
-   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});
-   if(disposed||request!==state.request){stream.getTracks().forEach(t=>t.stop());return;}
-   state.stream=stream;video.srcObject=stream;video.hidden=false;off.hidden=true;stop.disabled=false;await video.play();
+   stream=await sharedMotionMedia.ensureCamera();
+   if(disposed||request!==state.request)return;
+   state.stream=stream;sharedMotionMedia.attachVideo(video);off.hidden=true;stop.disabled=false;await video.play();
    const engine=await createPoseEngine(video,overlay,(points,time)=>{
     if(disposed||locked||document.hidden)return;
     const f=stability.observe(points,time);latestProfile=f;
+    validStreak=f.valid?validStreak+1:0;
+    if(validStreak===3)sharedMotionMedia.readyBeep(task.id);
     manual.disabled=!f.valid;
     const label=q('#pose-quality'),hud=q('#camera-hud');
     hud.hidden=false;label.textContent=f.valid?'Profil immobile : '+Math.min(100,Math.floor(f.stableMs/2300*100))+' %':f.message;
@@ -129,14 +140,14 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    if(disposed||request!==state.request){engine.stop();return;}
    state.engine=engine;overlay.hidden=false;
   }catch(e){
-   if(stream)stream.getTracks().forEach(t=>t.stop());
    if(disposed||request!==state.request)return;
    stopTracks();off.hidden=false;
    q('#camera-message').textContent=e.name==='NotAllowedError'?'Autorisation caméra refusée.':'Caméra ou détecteur indisponible. Réessayez.';
   }
  };
- stop.onclick=()=>{stopTracks();off.hidden=false;q('#camera-message').textContent='Caméra arrêtée.';};
+ stop.onclick=()=>{stopTracks(true);off.hidden=false;q('#camera-message').textContent='Caméra et microphone arrêtés.';};
  redo.onclick=()=>{
+  sharedMotionMedia.resetReady(task.id);
   stopTracks();base=null;markers=null;frame=null;locked=false;adjusted=false;manualCaptured=false;latestProfile=null;manual.hidden=false;manual.disabled=true;
   snap.hidden=true;snap.style.display='';snap.onpointerdown=null;panel.hidden=true;start.disabled=!consent.checked;
   const editor=panel.querySelector('.profile-editor');editor?.remove();off.hidden=false;
@@ -148,6 +159,10 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
  q('#go').onclick=()=>{if(!record.posture?.valid)return;stopTracks();callbacks.advance();};
  q('#back').onclick=()=>{stopTracks();callbacks.back();};
  q('#skip').onclick=()=>{stopTracks();record.status='skipped';record.posture=null;callbacks.advance();};
+ if(sharedMotionMedia.availableCamera()){
+  consent.checked=true;start.disabled=false;
+  void start.onclick();
+ }
  return ()=>{
   if(disposed)return;disposed=true;stopTracks();
   if('speechSynthesis' in window)window.speechSynthesis.cancel();

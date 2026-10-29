@@ -268,6 +268,8 @@ const scripts = [
   'scripts/pulse-intake-motion-score-qa.mjs',
   // PDF exports must preserve missing Motion Score states and contain all questionnaire answers.
   'scripts/pulse-pdf-report-qa.mjs',
+  // One camera, persistent mic, and saved questionnaire/test progression.
+  'scripts/pulse-continuous-session-qa.mjs',
   // Online Acuity payment validation tests; all requests and identities are mocked.
   'scripts/pulse-online-payment-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.

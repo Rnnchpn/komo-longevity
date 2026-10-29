@@ -1,7 +1,7 @@
 import {createPoseEngine} from './pose-engine.js';
 import {createOneLegObserver} from './unipodal-metrics.mjs';
 import {createAudioFeedback} from './audio-feedback.js';
-import {createVoiceControl} from './voice-control.js';
+import {sharedMotionMedia} from './shared-media.js';
 import {TEST_GUIDES} from './test-guides.mjs';
 
 // Automatic observational one-legged stand; video and measurements remain local.
@@ -12,9 +12,11 @@ export function mountUnipodal(root,task,record,state,callbacks){
  const voiceConsent=q('#voice-consent'),voiceButton=q('#toggle-voice'),voiceLabel=q('#voice-state');
  const observer=createOneLegObserver(task.id.endsWith('left')?'left':'right');
  const audio=createAudioFeedback();
- let disposed=false,lastFrame=0,started=false,completed=false;
+ let disposed=false,lastFrame=0,started=false,completed=false,validStreak=0;
  const text=(id,v)=>{const el=q(id);if(el)el.textContent=v;};
- const enabled=()=>Boolean(q('#sound-enabled')?.checked);
+ const soundSwitch=q('#sound-enabled');soundSwitch.checked=sharedMotionMedia.isSpeakerOn();
+ soundSwitch.onchange=()=>sharedMotionMedia.setSpeaker(soundSwitch.checked);
+ const enabled=()=>Boolean(soundSwitch.checked);
  function end(interrupted=false){
   if(completed||!started)return;
   completed=true;state.sessionActive=false;
@@ -22,19 +24,21 @@ export function mountUnipodal(root,task,record,state,callbacks){
   const s=observer.summary();record.value=s.seconds;record.quality=s.quality;
   record.status=interrupted||s.seconds<1.5||s.quality<65?'review':'done';record.source='webcam unipodale, temps apparent';
   state.results[task.id]=record;
+  callbacks.checkpoint?.();
   text('#value',s.seconds.toFixed(1));text('#camera-reps',s.seconds.toFixed(1));
   next.disabled=false;redo.hidden=false;halt.hidden=true;
   text('#motion-status',interrupted?'Capture interrompue. Temps partiel, à vérifier.':'Pied reposé ou test terminé. Vérifiez le temps observé.');
   if(enabled()){audio.chime();void audio.say('Test terminé',{timeout:1200});}
  }
- const stopCamera=()=>{
+ const stopCamera=(release=false)=>{
   state.request++;state.sessionActive=false;
   if(state.timer){clearInterval(state.timer);state.timer=null;}
   if(state.engine){state.engine.stop();state.engine=null;}
-  if(state.stream){state.stream.getTracks().forEach(t=>t.stop());state.stream=null;}
-  video.pause();video.srcObject=null;video.hidden=true;overlay.hidden=true;off.hidden=false;stop.disabled=true;start.disabled=!consent.checked;
+  if(release)sharedMotionMedia.stopAll();
+  sharedMotionMedia.detachVideo(video);state.stream=sharedMotionMedia.getStream();
+  overlay.hidden=true;off.hidden=false;stop.disabled=true;start.disabled=!consent.checked;
  };
- const voice=createVoiceControl({
+ const voice=sharedMotionMedia.attachVoice({
   onCommand(command){
    if(command==='stop'&&state.sessionActive)end(true);
    if(command==='redo'&&completed)redo.click();
@@ -48,12 +52,18 @@ export function mountUnipodal(root,task,record,state,callbacks){
   }
  });
  const voiceButtonEnabled=voice.supported;
+ voiceConsent.checked=sharedMotionMedia.hasVoiceConsent();
+ voiceButton.disabled=!voice.supported||!voiceConsent.checked;
  voiceConsent.onchange=()=>{
   if(!voiceConsent.checked){voice.disable();voiceButton.disabled=true;}
   else voiceButton.disabled=!voiceButtonEnabled;
  };
  voiceButton.onclick=()=>{if(!voiceConsent.checked)return;if(voice.isEnabled())voice.disable();else voice.enable();};
- consent.onchange=()=>{start.disabled=!consent.checked||!!state.stream;};
+ consent.checked=sharedMotionMedia.cameraConsent();
+ consent.onchange=()=>{
+  if(!consent.checked)stopCamera();
+  start.disabled=!consent.checked||Boolean(sharedMotionMedia.getStream());
+ };
  go.hidden=true;q('#time').textContent='20';
  text('#value','0.0');
  q('#value').parentElement.querySelector('.overline').textContent='TEMPS SUR UN PIED (S)';
@@ -76,6 +86,8 @@ export function mountUnipodal(root,task,record,state,callbacks){
   if(disposed||document.hidden||completed)return;
   lastFrame=time;
   const f=observer.observe(points,time);
+  validStreak=f.valid&&f.lifted?validStreak+1:0;
+  if(validStreak===3)sharedMotionMedia.readyBeep(task.id);
   const hud=q('#camera-hud');hud.hidden=false;
   text('#pose-quality',f.message);
   if(!started&&f.started){
@@ -100,9 +112,9 @@ export function mountUnipodal(root,task,record,state,callbacks){
   const ticket=++state.request;start.disabled=true;audio.unlock();
   let stream;
   try{
-   stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});
-   if(disposed||ticket!==state.request){stream.getTracks().forEach(t=>t.stop());return;}
-   state.stream=stream;video.srcObject=stream;video.hidden=false;off.hidden=true;stop.disabled=false;await video.play();
+   stream=await sharedMotionMedia.ensureCamera();
+   if(disposed||ticket!==state.request)return;
+   state.stream=stream;sharedMotionMedia.attachVideo(video);off.hidden=true;stop.disabled=false;await video.play();
    const engine=await createPoseEngine(video,overlay,observe,()=>{
     if(started)end(true);stopCamera();text('#camera-message','Détection interrompue. Réactivez la caméra.');
    });
@@ -110,14 +122,14 @@ export function mountUnipodal(root,task,record,state,callbacks){
    state.engine=engine;overlay.hidden=false;
    text('#camera-message','Vue de face · pieds visibles · support stable à proximité.');
   }catch(e){
-   if(stream)stream.getTracks().forEach(t=>t.stop());
    if(disposed||ticket!==state.request)return;
    stopCamera();text('#camera-message',e.name==='NotAllowedError'?'Accès caméra refusé.':'Caméra non disponible.');
   }
  };
- stop.onclick=()=>{if(started&&!completed)end(true);voice.disable();stopCamera();};
+ stop.onclick=()=>{if(started&&!completed)end(true);voice.disable();stopCamera(true);};
  halt.onclick=()=>{if(started&&!completed)end(true);};
  redo.onclick=()=>{
+  sharedMotionMedia.resetReady(task.id);
   observer.reset();started=false;completed=false;record.status='pending';record.value=0;
   next.disabled=true;redo.hidden=true;halt.hidden=true;
   text('#time','20');text('#value','0.0');text('#camera-reps','0');
@@ -126,6 +138,10 @@ export function mountUnipodal(root,task,record,state,callbacks){
  next.onclick=()=>{if(!completed)return;stopCamera();callbacks.advance();};
  q('#skip').onclick=()=>{stopCamera();record.status='skipped';record.value=0;callbacks.advance();};
  q('#back').onclick=()=>{stopCamera();callbacks.back();};
+ if(sharedMotionMedia.availableCamera()){
+  consent.checked=true;start.disabled=false;
+  void start.onclick();
+ }
  return ()=>{
   if(disposed)return;disposed=true;voice.destroy();audio.destroy();stopCamera();
   if('speechSynthesis' in window)window.speechSynthesis.cancel();
