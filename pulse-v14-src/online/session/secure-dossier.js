@@ -40,7 +40,7 @@ export function createDossierQueue({accessToken,appointmentId,onStatus=()=>{},fe
     written=current;failure=false;
     onStatus('Progression enregistrée dans Pulse','saved');
    }catch{
-    failure=true;last=current;
+    failure=true;if(last===null)last=current; // Never overwrite a newer queued snapshot.
     onStatus('Sauvegarde impossible : vérifiez la connexion avant de quitter cette page.','error');
     break;
    }
