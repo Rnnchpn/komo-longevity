@@ -3,14 +3,14 @@
 <title>Members' Entrance | KŌMØ ELYSIUM</title>
 <meta name="robots" content="noindex,nofollow"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/elysium/assets/elysium.css"></head><body data-elysium="club">
+<link rel="stylesheet" href="/elysium/assets/elysium.css"></head><body data-elysium="club" class="ely-club-commerce">
 <nav class="top"><a href="/elysium/" class="brand"><strong>KŌMØ</strong><em>ELYSIUM</em></a><div class="navlinks"><a href="/elysium/" id="returnMaison" data-en="THE MAISON" data-fr="LA MAISON">THE MAISON</a><button type="button" id="toggleLanguage">FR</button><button type="button" id="signOut" style="display:none" data-en="SIGN OUT" data-fr="DÉCONNEXION">SIGN OUT</button></div></nav>
-<main class="club-shell"><div class="wrap"><header class="club-intro"><span class="kicker" data-en="THE PRIVATE MEMBERS' ENTRANCE" data-fr="ENTRÉE RÉSERVÉE AUX MEMBRES">THE PRIVATE MEMBERS' ENTRANCE</span><h1>ELYSIUM <i style="color:#d3b991;font-weight:400">Privé.</i></h1><p data-en="The ELYSIUM private boutique is open to members for 299 € per year. KŌMØ Yachting clients receive their first year complimentary. Sign in to request access or explore the nine collections if your membership is active." data-fr="La boutique privée ELYSIUM est accessible pour 299 € par an. Les clients KŌMØ Yachting bénéficient de leur première année offerte. Connectez-vous pour demander votre accès ou découvrir les neuf collections si votre adhésion est active.">The ELYSIUM private boutique is open to members for 299 € per year. KŌMØ Yachting clients receive their first year complimentary. Sign in to request access or explore the nine collections if your membership is active.</p></header>
+<main class="club-shell"><div class="wrap"><header class="club-intro"><span class="kicker" data-en="THE PRIVATE MEMBERS' ENTRANCE" data-fr="ENTRÉE RÉSERVÉE AUX MEMBRES">THE PRIVATE MEMBERS' ENTRANCE</span><h1>ELYSIUM <i style="color:#d3b991;font-weight:400">Privé.</i></h1><p data-en="ELYSIUM is a private members’ collection. Access to nine exceptional worlds, with a personal concierge. Membership upon approval." data-fr="ELYSIUM est une collection privée, accessible sur adhésion. Neuf univers d’exception et une conciergerie personnelle.">ELYSIUM is a private members’ collection. Access to nine exceptional worlds, with a personal concierge. Membership upon approval.</p></header>
 <div class="auth-box" id="loading"><span class="eyebrow">ELYSIUM</span><h2 data-en="Verifying your invitation…" data-fr="Vérification de votre invitation…">Verifying your invitation…</h2></div>
 <div class="auth-box" id="authPanel" style="display:none">
 <span class="eyebrow" data-en="01 · SECURE ENTRANCE" data-fr="01 · ENTRÉE SÉCURISÉE">01 · SECURE ENTRANCE</span>
 <h2 data-en="Your private entrance." data-fr="Votre entrée privée.">Your private entrance.</h2>
-<p data-en="Already have a KŌMØ Pulse account? Sign in here with the same email and password. You stay on ELYSIUM and never need to pass through Pulse." data-fr="Vous avez déjà un compte KŌMØ Pulse ? Connectez-vous ici avec les mêmes identifiants. Vous restez dans ELYSIUM, sans passer par Pulse.">Already have a KŌMØ Pulse account? Sign in here with the same email and password. You stay on ELYSIUM and never need to pass through Pulse.</p>
+<p data-en="Use your KŌMØ account to enter the private collection." data-fr="Connectez-vous avec vos identifiants KŌMØ pour accéder à la collection privée.">Use your KŌMØ account to enter the private collection.</p>
 <form id="passwordLoginForm">
 <div class="field"><label for="passwordEmail" data-en="YOUR EMAIL" data-fr="VOTRE E-MAIL">YOUR EMAIL</label><input type="email" id="passwordEmail" required autocomplete="username" placeholder="you@example.com"></div>
 <div class="field"><label for="passwordValue" data-en="PASSWORD" data-fr="MOT DE PASSE">PASSWORD</label><input type="password" id="passwordValue" required autocomplete="current-password"></div>
@@ -24,9 +24,9 @@
 </div>
 <div class="auth-box" id="applicationPanel" style="display:none">
 <span class="eyebrow" data-en="02 · APPLICATION FOR MEMBERSHIP" data-fr="02 · DEMANDE D’ADHÉSION">02 · APPLICATION FOR MEMBERSHIP</span>
-<h2 data-en="An invitation to belong." data-fr="Une invitation à nous rejoindre.">An invitation to belong.</h2>
+<h2 data-en="Your private invitation." data-fr="Votre invitation privée.">Your private invitation.</h2>
 <p id="accountEmail"></p>
-<p data-en="Your KŌMØ account is connected. ELYSIUM membership is 299 € per year, with the first year complimentary for KŌMØ Yachting clients after eligibility is verified. Choose your access below. Membership requests are reviewed personally; no payment is collected here." data-fr="Votre compte KŌMØ est connecté. L’adhésion ELYSIUM coûte 299 € par an, avec une première année offerte aux clients KŌMØ Yachting après vérification de leur statut. Choisissez votre accès ci-dessous. Chaque demande est examinée personnellement ; aucun paiement n’est prélevé ici.">Your KŌMØ account is connected. ELYSIUM membership is 299 € per year, with the first year complimentary for KŌMØ Yachting clients after eligibility is verified. Choose your access below. Membership requests are reviewed personally; no payment is collected here.</p>
+<p data-en="ELYSIUM membership: €299 a year, subject to approval. A complimentary first year is available to verified KŌMØ Yachting clients. No online payment is collected here." data-fr="Adhésion privée : 299 € par an, après validation. Un an offert aux clients KŌMØ Yachting éligibles. Aucun paiement ici.">ELYSIUM membership: €299 a year, subject to approval. A complimentary first year is available to verified KŌMØ Yachting clients. No online payment is collected here.</p>
 <form id="applicationForm">
 <div class="field"><label for="appName" data-en="FULL NAME" data-fr="NOM COMPLET">FULL NAME</label><input required id="appName" maxlength="140" autocomplete="name"></div>
 <div class="field"><label for="appTier" data-en="MEMBERSHIP TIER" data-fr="FORMULE D’ADHÉSION">MEMBERSHIP TIER</label><select id="appTier"><option value="private">ELYSIUM Membership · 299 € / year</option><option value="on_board">KŌMØ Yachting client · first year complimentary</option></select></div>
@@ -42,8 +42,8 @@
 <section class="ely-app" aria-labelledby="ely-app-title">
 <header class="ely-app-heading">
   <div class="ely-app-overline" data-en="KŌMØ · THE PRIVATE UNIVERSE" data-fr="KŌMØ · L’UNIVERS PRIVÉ">KŌMØ · THE PRIVATE UNIVERSE</div>
-  <h1 id="ely-app-title" data-en="Choose your world." data-fr="Choisissez votre univers.">Choose your world.</h1>
-  <p class="ely-app-subtitle" data-en="Nine universes. One exceptional address." data-fr="Neuf univers. Une seule adresse d’exception.">Nine universes. One exceptional address.</p>
+  <h1 id="ely-app-title" data-en="The private worlds." data-fr="Les univers privés.">The private worlds.</h1>
+  <p class="ely-app-subtitle" data-en="Nine collections. One private address." data-fr="Neuf collections. Une adresse privée.">Nine collections. One private address.</p>
 </header>
 <nav class="ely-orbit" id="memberWheel" aria-label="ELYSIUM — nine interactive universes">
   <div class="ely-orbit-aura" aria-hidden="true"></div>
