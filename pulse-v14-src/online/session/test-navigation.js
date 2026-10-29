@@ -1,7 +1,7 @@
 // Motion Online test navigator. Stable IDs preserve existing test results by key.
 // This UI never writes camera data and cannot issue a score.
 export const TERMINAL_TEST_STATUSES=new Set(['done','review','skipped']);
-const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','&#39;'}[c]));
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export function testStatus(result){
  if(result?.status==='done')return {label:'Terminé',code:'done'};
  if(result?.status==='review')return {label:'À vérifier',code:'review'};
