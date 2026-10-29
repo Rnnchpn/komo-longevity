@@ -75,6 +75,74 @@ async function authView(message=''){
   $('#app').innerHTML=`<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">VOTRE SANTÉ EN MOUVEMENT</span><h1>Comprendre votre corps.<br><em>Simplement.</em></h1><p>Votre bilan, vos résultats et votre plan KŌMØ réunis au même endroit — sans jargon, étape par étape.</p></div><div class="login-foot">Données de santé privées · Accès sécurisé</div></section><section class="login-panel"><form id="login" class="login-card"><span class="overline">KŌMØ PULSE</span><h2>Bienvenue</h2><p>Connectez-vous pour reprendre votre parcours là où vous l’avez laissé.</p><label><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label><label><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required minlength="6"></label><button class="button primary wide">Se connecter</button><button class="text-button" type="button" id="reset">Mot de passe oublié ?</button>${message?`<div class="form-error">${esc(message)}</div>`:''}</form></section></main>`;
   $('#login').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const r=await sb.auth.signInWithPassword({email:String(f.get('email')),password:String(f.get('password'))});if(r.error)return authView('Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.');await boot()};
   $('#reset').onclick=async()=>{const email=prompt('Votre adresse e-mail');if(!email)return;const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});toast(r.error?'Impossible d’envoyer l’e-mail.':'E-mail de réinitialisation envoyé.')};
+
+  installPulseBookingEntry();
+}
+
+function installPulseBookingEntry(){
+  // The booking provider is the only public onboarding entry. Pulse never
+  // creates a patient identity or grants access from an unverified web form.
+  const bookingUrl='https://app.acuityscheduling.com/schedule.php?owner=40696577';
+  const story=document.querySelector('.login-story');
+  const panel=document.querySelector('.login-panel');
+  const form=document.querySelector('#login');
+  if(!story||!panel||!form)return;
+  const offers=[
+    {n:'01',kind:'DÉCOUVRIR',title:'Bilan Gratuit',detail:'Un premier repère de mobilité, simple et accessible.',meta:'Premier contact · sans frais',href:'https://komolongevity.com/fr/#komo-offers',tone:'free'},
+    {n:'02',kind:'À DISTANCE',title:'Bilan Online',detail:'Votre mouvement évalué lors d’un rendez-vous vidéo accompagné.',meta:'En ligne · environ 30 min',href:'https://komolongevity.com/fr/bilan/',tone:'online'},
+    {n:'03',kind:'EN PRÉSENTIEL',title:'Bilan physique Motion',detail:'Une analyse instrumentée plus approfondie avec l’équipe KŌMØ.',meta:'Paris ou Cannes · sur rendez-vous',href:'https://komolongevity.com/fr/bilan/',tone:'motion'}
+  ];
+  story.innerHTML=`
+    <div class="pulse-entry-brand"><a class="brand light" href="https://komolongevity.com/fr/" aria-label="Retour au site KŌMØ">KŌMØ<small>PULSE · LONGEVITY IN MOTION</small></a><span class="pulse-entry-brand-caption">VOTRE ESPACE PERSONNEL</span></div>
+    <div class="pulse-entry-story">
+      <span class="overline light">TROIS FAÇONS DE COMMENCER</span>
+      <h1>Le mouvement,<br><em>à votre mesure.</em></h1>
+      <p class="pulse-entry-lead">Découvrez les bilans KŌMØ, puis choisissez votre rendez-vous. Vos résultats et votre progression se retrouvent ensuite dans Pulse.</p>
+      <nav class="pulse-offer-list" aria-label="Les trois bilans KŌMØ">
+        ${offers.map(o=>`<a class="pulse-offer pulse-offer--${o.tone}" href="${o.href}" target="_blank" rel="noopener noreferrer" aria-label="Découvrir ${o.title} sur le site KŌMØ">
+          <span class="pulse-offer-number">${o.n}</span><span class="pulse-offer-content"><small>${o.kind}</small><strong>${o.title}</strong><span>${o.detail}</span><em>${o.meta}</em></span><span class="pulse-offer-arrow" aria-hidden="true">↗</span>
+        </a>`).join('')}
+      </nav>
+    </div>
+    <div class="pulse-entry-story-footer"><span>Un bilan non médical · une progression suivie</span><a href="https://komolongevity.com/fr/" target="_blank" rel="noopener noreferrer">Découvrir KŌMØ ↗</a></div>`;
+  const entry=document.createElement('section');
+  entry.className='pulse-entry-panel';
+  entry.setAttribute('aria-labelledby','pulseCreateTitle');
+  entry.innerHTML=`
+    <div class="pulse-entry-panel-header"><span class="pulse-entry-wordmark">KŌMØ <b>Pulse</b></span><span class="pulse-entry-secure">ESPACE PERSONNEL</span></div>
+    <span class="overline">NOUVEAU CHEZ KŌMØ ?</span>
+    <h2 id="pulseCreateTitle">Créez votre<br>espace patient.</h2>
+    <p class="pulse-entry-panel-intro">Votre inscription commence par une réservation. Choisissez votre bilan et votre créneau directement dans Acuity.</p>
+    <ol class="pulse-entry-steps">
+      <li><span>01</span><div><strong>Choisissez votre bilan</strong><small>Découvrez les offres et les créneaux disponibles dans Acuity.</small></div></li>
+      <li><span>02</span><div><strong>Validez votre adresse e-mail</strong><small>Après vérification du rendez-vous, une invitation vous permet d’activer votre compte.</small></div></li>
+      <li><span>03</span><div><strong>Connectez-vous à Pulse</strong><small>Un espace privé pour vos questionnaires, résultats et suivis.</small></div></li>
+    </ol>
+    <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${bookingUrl}" target="_blank" rel="noopener noreferrer">Créer mon compte et réserver <span aria-hidden="true">↗</span></a>
+    <p class="pulse-entry-assurance">Aucun compte patient n’est ouvert automatiquement avant vérification du rendez-vous et activation par e-mail.</p>
+    <div class="pulse-entry-login-bridge"><span>Vous avez déjà un compte ?</span><button type="button" class="pulse-login-link" id="pulseShowLogin">Se connecter →</button></div>
+    <div class="pulse-entry-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
+  panel.prepend(entry);
+  form.classList.add('pulse-existing-login');
+  const back=document.createElement('button');
+  back.type='button';
+  back.className='pulse-login-back';
+  back.textContent='← Créer mon espace patient';
+  form.prepend(back);
+  const setLogin=visible=>{
+    entry.hidden=visible;
+    form.hidden=!visible;
+    if(visible)form.querySelector('input[name="email"]')?.focus();
+  };
+  entry.querySelector('#pulseShowLogin')?.addEventListener('click',()=>{
+    if(location.hash!=='#connexion')location.hash='connexion';
+    setLogin(true);
+  });
+  back.addEventListener('click',()=>{
+    if(location.hash==='#connexion')history.replaceState(null,'',location.pathname+location.search);
+    setLogin(false);
+  });
+  setLogin(location.hash==='#connexion');
 }
 async function loadIdentity(){
   const u=await sb.auth.getUser();S.user=u.data.user||null;if(!S.user)return false;
