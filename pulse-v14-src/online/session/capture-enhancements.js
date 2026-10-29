@@ -8,7 +8,7 @@ export function createCaptureEnhancements({root,task,voice,state,record}){
  const enabled=()=>Boolean(q('#sound-enabled')?.checked);
  const audio=createAudioFeedback({
   onSpeechStart:()=>{if(voice.isEnabled())voice.suspend();},
-  onSpeechEnd:()=>{if(voice.isEnabled())voice.resume();}
+  onSpeechEnd:()=>{if(!state.countdownActive&&voice.isEnabled())voice.resume();}
  });
  const posture=task.id==='posture'?createPostureRecorder():null;
  const countdownCover=q('#countdown-cover'),number=q('#countdown-value');
@@ -40,7 +40,7 @@ export function createCaptureEnhancements({root,task,voice,state,record}){
    state.countdownActive=false;
    if(countdownCover)countdownCover.hidden=true;
    onTop();
-  });
+  },{audible:enabled()});
   if(!run&&state.countdownActive){state.countdownActive=false;if(countdownCover)countdownCover.hidden=true;onCancel?.();}
   return run;
  }
