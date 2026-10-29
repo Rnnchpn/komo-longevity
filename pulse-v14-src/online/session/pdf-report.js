@@ -122,84 +122,169 @@ export async function downloadMotionPdf(data){
   y+=small?11:9;
   if(small)line(small,{size:7.6,color:muted});
  }
- // Executive first page
- line('VOTRE BILAN EN MOUVEMENT',{size:17,bold:true,color:green,leading:8});
- line('Scores, questionnaires et observations fonctionnelles.',{color:muted,size:9});
+ // PAGE 1 - MOTION PASSPORT: an editorial starting point, not a prognosis.
+ const passport=data.passport;
+ pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(gold);
+ pdf.text('MOTION PASSPORT  /  PREMIER BILAN',M,y);
+ y+=12;
+ line('Votre mouvement. Votre point de depart.',{size:19,bold:true,color:green,leading:8});
+ line('Ce passeport relie vos habitudes, votre ressenti et vos observations fonctionnelles.',{size:8.8,color:muted});
  y+=4;
- if(data.blocked){
-  pdf.setFillColor(250,240,232);pdf.roundedRect(M,y,CONTENT,13,2,2,'F');
-  ink([132,85,63]);pdf.setFont('helvetica','bold');pdf.setFontSize(9);
-  pdf.text('Tests suspendus pour raisons de securite.',M+4,y+8.5);y+=19;
- }
- space(28);
- pdf.setFillColor(...soft);pdf.roundedRect(M,y,CONTENT,30,3,3,'F');
- pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(muted);
- pdf.text('INDICE DE PROFIL DECLARE',M+7,y+9);
- pdf.setFont('helvetica','bold');pdf.setFontSize(25);ink(green);
- pdf.text(data.questionnaire.index===null?'NON CALCULABLE':
-  decimal(data.questionnaire.index,1)+' / 100',M+7,y+23);
- pdf.setFont('helvetica','normal');pdf.setFontSize(8.5);ink(muted);
- pdf.text('Reponses : '+data.questionnaire.answered+' / '+data.questionnaire.total,RIGHT-7,y+18,{align:'right'});
- y+=37;
- line('Cet indice est uniquement declaratif. Il ne constitue pas le Motion Score.',{size:8.3,color:muted});
- title('1. Vos questionnaires');
- for(const g of data.questionnaire.domains){
+ space(44);
+ pdf.setFillColor(...green);pdf.roundedRect(M,y,CONTENT,44,4,4,'F');
+ pdf.setFont('helvetica','normal');pdf.setFontSize(8.6);pdf.setTextColor(226,237,218);
+ pdf.text('INDICE DE MOBILITE PERCUE',M+8,y+10);
+ pdf.setFont('helvetica','bold');pdf.setFontSize(30);pdf.setTextColor(255,250,236);
+ pdf.text(passport.index===null?'--':decimal(passport.index,1),M+8,y+29);
+ pdf.setFont('helvetica','normal');pdf.setFontSize(12);pdf.setTextColor(220,230,217);
+ pdf.text('/ 100',M+54,y+28);
+ pdf.setFontSize(8);pdf.text('OBSERVATIONS : '+passport.measuredCount+'/6',RIGHT-8,y+18,{align:'right'});
+ pdf.text('A VERIFIER : '+passport.flaggedCount,RIGHT-8,y+26,{align:'right'});
+ y+=50;
+ line('Un indice issu de vos reponses, pas une estimation de votre age biologique ou de votre esperance de vie.',
+  {size:8.4,color:muted,leading:4.5});
+ y+=4;
+ subheading('LES 4 DOMAINES DU PASSEPORT');
+ for(const d of passport.domains){
   space(17);
-  pdf.setFont('helvetica','normal');pdf.setFontSize(9.5);ink(dark);
-  pdf.text(normal(g.label),M,y);
-  pdf.setFont('helvetica','bold');ink(green);pdf.text(g.score===null?'Incomplet':
-   decimal(g.score,1)+'/100',RIGHT,y,{align:'right'});
-  y+=4.2;
-  pdf.setFillColor(224,233,223);pdf.roundedRect(M,y,CONTENT,3,1.5,1.5,'F');
-  if(g.score!==null){pdf.setFillColor(66,115,79);pdf.roundedRect(M,y,Math.max(.01,CONTENT*g.score/100),3,1.5,1.5,'F');}
-  y+=11;
+  pdf.setFont('helvetica','bold');pdf.setFontSize(10);ink(green);
+  pdf.text(normal(d.title),M,y);
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(muted);
+  pdf.text(d.value===null?'Non renseigne':decimal(d.value,1)+'/100',RIGHT,y,{align:'right'});
+  y+=3;
+  pdf.setFillColor(223,232,221);pdf.roundedRect(M,y,CONTENT,3.3,1.5,1.5,'F');
+  if(d.value!==null){pdf.setFillColor(86,129,93);pdf.roundedRect(M,y,Math.max(.05,CONTENT*d.value/100),3.3,1.5,1.5,'F');}
+  y+=10.2;
  }
- if(data.questionnaire.focus?.length){
-  const items=data.questionnaire.focus.map(x=>x.label).join(', ');
-  line('Domaines a discuter en priorite : '+items+'.',{size:8.3,color:muted,leading:4.5});
- }
- title('2. Votre Motion Score');
- if(data.motion.complete){
-  space(26);pdf.setFillColor(...green);pdf.roundedRect(M,y,CONTENT,24,2,2,'F');
-  pdf.setFont('helvetica','bold');pdf.setFontSize(20);pdf.setTextColor(255,255,255);
-  pdf.text(String(data.motion.score)+' / 100',M+6,y+15);
-  pdf.setFont('helvetica','normal');pdf.setFontSize(8);
-  pdf.text('Score calculable - donnees declarees verifiees',RIGHT-5,y+15,{align:'right'});
-  y+=30;
-  if(data.motion.subscores){
-   line('Force : '+decimal(data.motion.subscores.strength,1)+'/100  |  Mobilite : '+
-    decimal(data.motion.subscores.mobility,1)+'/100  |  Equilibre : '+
-    decimal(data.motion.subscores.balance,1)+'/100',{size:8.5});
-  }
-  line('Normes : '+data.motion.source,{size:8.2,color:muted});
+ y+=3;
+ subheading('A METTRE EN PREMIER SUR VOTRE FEUILLE DE ROUTE');
+ const focus=passport.focus??[];
+ if(passport.blocked){
+  line('Priorite a la securite : bilan complementaire et conseil professionnel avant les exercices autonomes.',
+   {size:9.4,color:dark,leading:5.3});
+ }else if(!focus.length){
+  line('Completez le questionnaire pour identifier des domaines a travailler.',{size:9.2});
  }else{
-  space(25);pdf.setFillColor(...soft);pdf.roundedRect(M,y,CONTENT,19,2,2,'F');
-  pdf.setFont('helvetica','bold');pdf.setFontSize(13);ink(green);
-  pdf.text('NON CALCULABLE',M+6,y+12);y+=25;
-  for(const item of data.motion.missing||[])line('- '+item,{size:8.7,color:muted,leading:4.7});
+  for(const d of focus){
+   line('- '+d.title+' : '+d.action,{size:9.1,color:dark,leading:5});
+  }
  }
- line('Formule de reference : 40 % STS 30 s + 35 % TUG 3 m + 25 % equilibre SPPB.',{size:8.2,color:muted});
- // Next page for observations and appendix
+ y+=5;
+ space(33);
+ pdf.setFillColor(...soft);pdf.roundedRect(M,y,CONTENT,25,3,3,'F');
+ pdf.setFont('helvetica','bold');pdf.setFontSize(9);ink(green);
+ pdf.text('VOTRE PROCHAIN POINT DE CONTROLE',M+6,y+8);
+ pdf.setFont('helvetica','normal');pdf.setFontSize(8.3);ink(dark);
+ pdf.text(pdf.splitTextToSize('Un nouveau bilan a 4-6 semaines aidera a comparer votre trajectoire sur les memes epreuves.',CONTENT-12),M+6,y+15);
+ y+=31;
+ line('KOMO Motion Passport V1 | Interpretation exploratoire non medicale.',{size:7.7,color:muted});
+ // PAGE 2 - domain by domain: preserve strengths and discuss changeable habits.
  nextPage();
- title('3. Observations de mouvement');
- for(const item of data.observations){
-  const quality=item.status==='review'?'Mesure a verifier':'';
-  row(item.label,item.display,quality||item.commentary||null);
+ title('2. Votre profil, domaine par domaine');
+ line('Ces categories sont des reperes de suivi propres a KOMO. Elles ne sont pas des seuils cliniques ni une classification de risque.',
+  {size:8.5,color:muted,leading:4.6});
+ for(const d of passport.domains){
+  space(39);
+  pdf.setFont('helvetica','bold');pdf.setFontSize(11);ink(green);
+  pdf.text(normal(d.title),M,y);
+  pdf.setFontSize(8);ink(muted);
+  pdf.text(d.value===null?'--':decimal(d.value,1)+'/100',RIGHT,y,{align:'right'});
+  y+=8;
+  line(d.label+' - '+d.caption+'.',{size:9.1,bold:true,color:dark,leading:5});
+  line(d.why,{size:8.6,color:muted,leading:4.5});
+  line('Piste d action : '+d.action,{size:8.7,color:dark,leading:4.7});
+  pdf.setDrawColor(221,231,221);pdf.line(M,y+2,RIGHT,y+2);y+=7;
  }
- title('4. Comparaison par age (si applicable)');
+ title('3. Vos priorites');
+ if(passport.blocked){
+  line('Les mesures ont ete interrompues pour securite. Demandez un avis professionnel avant de demarrer un programme autonome.',{size:9});
+ }else for(const d of passport.focus||[]){
+  line('- '+d.title+' : '+d.action,{size:9.1,leading:5});
+ }
+ line('A entretenir : poursuivre les activites deja confortables selon les capacites individuelles.',
+  {size:8.5,color:muted,leading:4.7});
+ // PAGE 3 - factual measures and bounded Motion Score
+ nextPage();
+ title('4. Vos observations physiques');
+ line('Ces observations sont experimentales. Un resultat marque "a verifier" ne peut pas etre presente comme mesure de reference.',
+  {size:8.4,color:muted});
+ for(const item of data.observations){
+  const quality=item.status==='review'?'Capture a verifier avant interpretation':item.commentary||null;
+  row(item.label,item.display,quality);
+ }
+ title('Reperes selon l age - uniquement si comparables');
  const reference=data.ageReference?.sts;
  if(reference?.reference){
-  line('Sit-to-Stand 30 s : plage centrale '+reference.reference.lower+' - '+reference.reference.upper+
-   ' repetitions (age '+reference.reference.age+' ans).',{size:8.5});
-  line(reference.comparison||reference.reason,{size:8.5,color:muted});
- }else line('Sit-to-Stand : norme non applicable (tranche d age, protocole ou groupe de reference manquant).',{size:8.5});
+  line('Lever de chaise 30 s : plage centrale de reference '+reference.reference.lower+' a '+
+   reference.reference.upper+' repetitions, tranche '+reference.reference.age+' ans.',
+    {size:8.9});
+  line(reference.comparison||reference.reason,{size:8.6,color:muted});
+ }else{
+  line('Le Sit-to-Stand ne peut pas etre classe sans age exact, groupe de reference et protocole confirme.',
+   {size:8.6,color:muted});
+ }
  const one=data.ageReference?.unipodal?.[0];
  if(one?.expected!==null&&one?.expected!==undefined)
-  line('Unipodal : moyenne de reference '+one.expected+' s (meilleur de 3 essais jusqu a 45 s). Mesure non comparable au test webcam de 20 s.',{size:8.3,color:muted});
- line('Sources : sralab.org/rehabilitation-measures (Rikli et Jones 1999 ; Springer et al. 2007).',{size:8.1,color:muted});
- title('5. Methode et limites');
- for(const phrase of data.limitations)line('- '+phrase,{size:8.3,color:muted,leading:4.8});
- line('Versions : '+data.version+' / '+data.motion.version,{size:7.3,color:muted});
+  line('Unipodal : donnees publiees '+one.expected+' s (meilleur de trois essais). Notre test webcam de 20 s n est pas directement comparable.',
+  {size:8.4,color:muted});
+ title('Motion Score fonctionnel - algorithme de reference');
+ if(data.motion.complete){
+  line(String(data.motion.score)+' / 100',{size:23,bold:true,color:green,leading:12});
+  line('Calcul issu de STS 30 s, TUG 3 m et equilibre SPPB, avec mesures, normes et controle de protocole declares.',
+  {size:8.6,color:muted});
+  line('Source : '+data.motion.source,{size:8.1,color:muted});
+ }else{
+  line('NON CALCULABLE A CE STADE',{size:13,bold:true,color:green,leading:7});
+  for(const missing of data.motion.missing||[])line('- '+missing,{size:8.2,color:muted,leading:4.4});
+ }
+ line('Aucun Motion Age ni pronostic individuel de longevite n est deduit de ces tests.',
+  {size:8.1,color:muted});
+ // PAGE 4 - next action: clinic or daily guided follow-up.
+ nextPage();
+ title('5. Votre feuille de route');
+ line('Les deux suites possibles du bilan',{size:11,bold:true,color:green,leading:6});
+ y+=6;
+ space(35);
+ pdf.setFillColor(...soft);pdf.roundedRect(M,y,CONTENT,31,3,3,'F');
+ pdf.setFont('helvetica','bold');pdf.setFontSize(10);ink(green);
+ pdf.text('01 / COMPLETER EN CONSULTATION MOTION',M+6,y+9);
+ y+=15;
+ line('A Paris ou Cannes : analyse instrumentee de la force, des amplitudes et de la marche. Une restitution individualisee permet de confirmer les premieres observations.',
+ {size:8.7,indent:6,width:CONTENT-13,leading:5});
+ y+=12;
+ space(43);
+ pdf.setFillColor(...soft);pdf.roundedRect(M,y,CONTENT,34,3,3,'F');
+ pdf.setFont('helvetica','bold');pdf.setFontSize(10);ink(green);
+ pdf.text('02 / DEMARRER PULSE DAILY',M+6,y+9);
+ y+=15;
+ line('Une routine de mouvements accessibles, avec journal quotidien, ressenti de l effort et point de controle a 4-6 semaines. Ce parcours ne remplace pas une reeducation prescrite.',
+ {size:8.7,indent:6,width:CONTENT-13,leading:5});
+ y+=11;
+ title('Premier cycle Pulse Daily - 4 semaines');
+ if(passport.planStatus!=='eligible'){
+  line('Un programme autonome n est pas propose a ce stade : securite, reponses incompletes ou gene importante. Un echange personnalise est prioritaire.',
+  {size:9.1,color:dark});
+ }else{
+  line('La progression ci-dessous est un exemple de routine de bien-etre a adapter. En cas de difficulte, restez a l etape precedente.',
+   {size:8.7,color:muted});
+  for(let w=1;w<=4;w++){
+   const t=planTargets(w);
+   line('Semaine '+w+' : marche '+t.walkMinutes+' min; chaise '+t.chairRepeats+
+    ' levers possibles; stabilite avec appui '+t.balanceSeconds+' s; mobilite '+t.mobilityMinutes+' min.',
+    {size:8.5,leading:5});
+  }
+ }
+ if(data.program){
+  y+=5;
+  line('Journal Pulse Daily : '+data.program.progress.daysLogged+' jour(s) renseignes sur 28.',
+   {size:9,bold:true});
+ }
+ title('Quand demander un avis ?');
+ line('Arretez l exercice en cas de douleur inhabituelle, malaise, essoufflement disproportionne ou instabilite. Contactez un professionnel adapte.',
+  {size:8.8,color:dark,leading:5});
+ title('Methode et limites');
+ for(const phrase of data.limitations)line('- '+phrase,{size:8.0,color:muted,leading:4.3});
+ line('Versions : '+data.version+' / '+data.motion.version,{size:7.5,color:muted});
  // Include the full original patient responses, with automatic pagination.
  nextPage();title('6. Detail des reponses');
  line('Appendice - questionnaire original KOMO rempli par le participant.',{size:8.4,color:muted});
