@@ -19,7 +19,7 @@ const itemName=o=>lang==='fr'?(o.fr||o.en):o.en;
 function say(sel,message,isError=false){const x=$(sel);if(x){x.textContent=message;x.classList.toggle('error',isError)}}
 function show(id){const x=$('#'+id);if(x)x.style.display=id==='memberPanel'?'block':'block'}
 function hide(id){const x=$('#'+id);if(x)x.style.display='none'}
-function switchLanguage(){document.documentElement.lang=lang;$$('[data-en]').forEach(el=>{el.textContent=lang==='fr'?el.dataset.fr:el.dataset.en});if($('#toggleLanguage'))$('#toggleLanguage').textContent=lang==='en'?'FR':'EN';if(isMaison)renderMaisonMeta();if(isClub&&active)renderClub(null,clubMembership);if(isMaison&&active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);if(isMaison)renderSelection()}
+function switchLanguage(){document.documentElement.lang=lang;$('[data-en]').forEach(el=>{const v=lang==='fr'?el.dataset.fr:el.dataset.en;if(el.closest('.longevity-maison')&&/<(?:em|br)>/.test(v))el.innerHTML=v;else el.textContent=v});if($('#toggleLanguage'))$('#toggleLanguage').textContent=lang==='en'?'FR':'EN';if(isMaison)renderMaisonMeta();if(isClub&&active)renderClub(null,clubMembership);if(isMaison&&active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);if(isMaison)renderSelection()}
 $('#toggleLanguage')?.addEventListener('click',()=>{lang=lang==='fr'?'en':'fr';switchLanguage()});
 function createClient(){if(!window.supabase?.createClient)return null;return window.supabase.createClient(AUTH_URL,AUTH_KEY,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}})}
 async function authorized(worldName){
@@ -185,17 +185,52 @@ function renderClub(worldList,membership){
 function renderMaisonMeta(){
  if(!world)return;
  document.title=world.full+' · KŌMØ ELYSIUM Private Boutique';
- $('#maisonImage').src=world.image;
- $('#crumbName').textContent=world.name;
- $('#maisonKicker').textContent=world.eyebrow;
- $('#maisonTitle').textContent=world.name;
- $('#maisonDescription').textContent=lang==='fr'?world.subtitleFr:world.subtitleEn;
- $('#collectionDescription').textContent=lang==='fr'?world.copyFr:world.copyEn;
+ const heroImg=$('#maisonImage');
+ if(heroImg)heroImg.src=world.image;
+ if($('#crumbName'))$('#crumbName').textContent=world.name;
+ if($('#maisonKicker'))$('#maisonKicker').textContent=world.eyebrow;
+ if($('#maisonTitle')&&slug!=='longevity')$('#maisonTitle').textContent=world.name;
+ if($('#maisonDescription'))$('#maisonDescription').textContent=slug==='longevity'
+  ?(lang==='fr'?'Une nouvelle lecture de vos capacités fonctionnelles, de vos forces et de votre trajectoire — en toute discrétion.':'A fresh perspective on your functional capacity, strengths and trajectory — with complete discretion.')
+  :(lang==='fr'?world.subtitleFr:world.subtitleEn);
+ if($('#collectionDescription'))$('#collectionDescription').textContent=lang==='fr'?world.copyFr:world.copyEn;
 }
 function noAccess(){if(isMaison){renderMaisonMeta();show('maisonAccess');$('#productGrid').replaceChildren();say('#shopMessage',tt('auth'))}}
+
+const LONGEVITY_OFFER_ART={
+ pulse:'<circle cx="60" cy="60" r="41" stroke-dasharray="2 7" opacity=".44"/><path d="M14 65h24l11-26 22 47 13-24h22"/><circle cx="49" cy="39" r="4" fill="currentColor" stroke="none"/>',
+ rings:'<circle cx="60" cy="60" r="38"/><circle cx="60" cy="60" r="25" opacity=".58"/><circle cx="60" cy="60" r="11" opacity=".68"/><path d="M60 9v21M60 90v21M9 60h21M90 60h21"/><circle cx="60" cy="60" r="4" fill="currentColor" stroke="none"/>',
+ horizon:'<path d="M18 77h84M28 85h64M40 92h40"/><path d="M30 77c0-18 13-32 30-32s30 14 30 32"/><path d="M60 17v14M19 37l12 9M101 37l-12 9"/><path d="M30 77l30-16 30 16" opacity=".44"/>',
+ trajectory:'<path d="M14 94h93M22 100V22" opacity=".58"/><path d="M26 85c15 0 13-29 31-29s18 15 29-9l12-24"/><path d="M84 23h14v14"/><circle cx="57" cy="56" r="5" fill="currentColor" stroke="none"/>'
+};
+function renderLongevityProducts(products,grid){
+ grid.classList.add('lv-offers');
+ products.forEach((p,i)=>{
+  const card=document.createElement('article');card.className='lv-offer';
+  const top=document.createElement('div');top.className='lv-offer-top';
+  const index=document.createElement('span');index.className='lv-offer-index';index.textContent=String(i+1).padStart(2,'0')+' / 04';
+  const price=document.createElement('span');price.className='lv-offer-price';price.textContent=lang==='fr'?p.priceFr:p.priceEn;
+  top.append(index,price);
+  const motif=document.createElement('div');motif.className='lv-offer-motif';motif.setAttribute('aria-hidden','true');
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 120 120');
+  svg.innerHTML='<g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">'+(LONGEVITY_OFFER_ART[p.glyph]||LONGEVITY_OFFER_ART.rings)+'</g>';
+  motif.append(svg);
+  const eyebrow=document.createElement('div');eyebrow.className='lv-offer-eyebrow';eyebrow.textContent=p.kind;
+  const h=document.createElement('h3');h.textContent=itemName(p);
+  const desc=document.createElement('p');desc.className='lv-offer-description';desc.textContent=lang==='fr'?p.copyFr:p.copyEn;
+  const points=document.createElement('ul');points.className='lv-offer-points';
+  const list=lang==='fr'?p.pointsFr:p.pointsEn;
+  if(Array.isArray(list))list.forEach(value=>{const li=document.createElement('li');li.textContent=value;points.append(li)});
+  const btn=document.createElement('button');btn.type='button';btn.className='lv-offer-cta';
+  btn.textContent=(lang==='fr'?p.buttonFr:p.buttonEn)||tt('add');
+  btn.addEventListener('click',()=>addSelection(p,'longevity'));
+  card.append(top,motif,eyebrow,h,desc,points,btn);grid.append(card);
+ });
+}
 function renderProducts(products){
  if(!isMaison||!Array.isArray(products))return;
  hide('maisonAccess');const grid=$('#productGrid');grid.replaceChildren();say('#shopMessage','');
+ if(slug==='longevity'){renderLongevityProducts(products,grid);return;}
  products.forEach(p=>{
   const card=document.createElement('article');card.className='store-card';
   const photo=document.createElement('div');photo.className='store-image';
