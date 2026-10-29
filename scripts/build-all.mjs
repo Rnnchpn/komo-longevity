@@ -266,6 +266,8 @@ const scripts = [
   'scripts/pulse-profile-unipodal-qa.mjs',
   // Patient self-report & reference Motion Score calculation with zero missing-data substitution.
   'scripts/pulse-intake-motion-score-qa.mjs',
+  // PDF exports must preserve missing Motion Score states and contain all questionnaire answers.
+  'scripts/pulse-pdf-report-qa.mjs',
   // Online Acuity payment validation tests; all requests and identities are mocked.
   'scripts/pulse-online-payment-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.

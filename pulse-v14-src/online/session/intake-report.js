@@ -1,5 +1,6 @@
 import {scoreIntake,questionnaireFocus,SCORING_GROUPS,QUESTIONNAIRE_VERSION,intakeProgress} from './intake-model.mjs';
 import {calculateMotionScore,MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
+import {buildPdfReportData,downloadMotionPdf} from './pdf-report.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=(root,id)=>{const v=root.querySelector('#'+id)?.value?.trim();return v===''||v===undefined?null:Number(v);};
 function domainCards(scored){
@@ -63,11 +64,27 @@ export function reportMarkup(answers,results,blocked){
  '<p class="message" id="kms-error" role="status"></p></details>'+
  '<p class="motion-score-disclaimer">Algorithme '+esc(MOTION_ALGORITHM_VERSION)+' · score exploratoire non cliniquement validé. S’il manque une mesure, une norme ou une vérification, le résultat reste volontairement vide. Aucun « Motion Age » n’est calculé.</p></section>'+
  '<p class="notice">Mode test : réponses, résultats et calculs restent dans cette page et ne sont pas sauvegardés sur un serveur. Les patients devront disposer d’un compte et d’un dossier rattachés à une réservation réglée avant tout stockage sécurisé.</p>'+
- '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
+ '<div class="pdf-download-box"><div><strong>Votre rapport Motion, en PDF</strong><p>Questionnaires, sous-scores, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est créé localement et reste sur votre appareil.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon rapport PDF</button></div>'+
+ '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
 }
-export function bindReport(root,answers,results,callbacks){
+export function bindReport(root,answers,results,callbacks,blocked=false){
  const stsRecord=results.sts;
  let computed=null;
+ // Prevent a stale, previously computed score after changing a reference or input.
+ root.querySelector('.motion-operator-details').addEventListener('input',()=>{
+  computed=null;
+  root.querySelector('#motion-score-number').textContent='—';
+  root.querySelector('#score-status').textContent='Motion Score à recalculer après toute modification';
+  root.querySelector('#score-hint').textContent='Validez de nouveau les mesures, normes et protocoles avant toute exportation.';
+  root.querySelector('#kms-error').textContent='';
+ });
+ root.querySelector('.motion-operator-details').addEventListener('change',()=>{
+  computed=null;
+  root.querySelector('#motion-score-number').textContent='—';
+  root.querySelector('#score-status').textContent='Motion Score à recalculer après toute modification';
+  root.querySelector('#score-hint').textContent='Validez de nouveau les mesures, normes et protocoles avant toute exportation.';
+  root.querySelector('#kms-error').textContent='';
+ });
  root.querySelector('#compute-motion-score').onclick=()=>{
   const data={
    sts30:number(root,'kms-sts'),tug3m:number(root,'kms-tug'),sppbBalance:number(root,'kms-sppb'),
@@ -81,7 +98,10 @@ export function bindReport(root,answers,results,callbacks){
   if(stsRecord?.status!=='done'||data.sts30!==stsRecord.value){
    data.stsVerified=false;
   }
-  computed=calculateMotionScore(data);
+  computed=blocked||!scoreIntake(answers).complete?
+   {complete:false,score:null,missing:blocked?
+    ['Tests interrompus par securite']:['Questionnaires incomplets'],version:MOTION_ALGORITHM_VERSION}:
+   calculateMotionScore(data);
   const numberEl=root.querySelector('#motion-score-number');
   numberEl.textContent=computed.complete?String(computed.score):'—';
   root.querySelector('#score-status').textContent=computed.complete?'Motion Score calculé · vérification opérateur déclarée':'Motion Score incomplet';
@@ -90,6 +110,21 @@ export function bindReport(root,answers,results,callbacks){
     'Données manquantes : '+computed.missing.join(' · ');
   root.querySelector('#kms-error').textContent=computed.complete?'Résultat calculé. Non enregistré.':'Le score n’est pas disponible tant que toutes les conditions ne sont pas réunies.';
  };
+ root.querySelector('#download-pdf').onclick=async()=>{
+  const button=root.querySelector('#download-pdf');
+  const message=root.querySelector('#report-message');
+  if(button.disabled)return;
+  button.disabled=true;button.textContent='Création du PDF…';
+  message.textContent='Préparation du rapport sur votre appareil…';
+  try{
+   const payload=buildPdfReportData(answers,results,computed,blocked);
+   const filename=await downloadMotionPdf(payload);
+   message.textContent='Rapport PDF prêt : '+filename+'. Il n’a pas été téléversé sur Pulse.';
+  }catch(error){
+   message.textContent='La création du PDF a échoué. Vérifiez votre connexion au chargement initial du module, puis réessayez.';
+  }finally{button.disabled=false;button.textContent='↓ Télécharger mon rapport PDF';}
+ };
+ root.querySelector('#print-report').onclick=()=>window.print();
  root.querySelector('#copy-report').onclick=async()=>{
   const profile=scoreIntake(answers);
   const testValues=Object.fromEntries(Object.entries(results).map(([key,val])=>[key,{value:val.value??null,status:val.status??'inconnu',quality:val.quality??null}]));
