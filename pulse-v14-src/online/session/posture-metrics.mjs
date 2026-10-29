@@ -6,7 +6,7 @@ const clamp=(x,min,max)=>Math.min(max,Math.max(min,x));
 function absoluteLineTilt(a,b){
  const dx=b.x-a.x,dy=b.y-a.y;
  if(Math.abs(dx)<.035)return null;
- return Math.abs(Math.atan2(dy,dx)*180/Math.PI);
+ return Math.abs(Math.atan2(dy,Math.abs(dx))*180/Math.PI);
 }
 function median(list){
  if(!list.length)return null;
