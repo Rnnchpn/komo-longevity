@@ -21,6 +21,10 @@ const voiceCommands=await readFile(join(root,'site','pulse-v14','online','sessio
 const testGuides=await readFile(join(root,'site','pulse-v14','online','session','test-guides.mjs'),'utf8');
 const audioFeedback=await readFile(join(root,'site','pulse-v14','online','session','audio-feedback.js'),'utf8');
 const postureMetrics=await readFile(join(root,'site','pulse-v14','online','session','posture-metrics.mjs'),'utf8');
+const profilePhoto=await readFile(join(root,'site','pulse-v14','online','session','profile-photo.js'),'utf8');
+const profileGeometry=await readFile(join(root,'site','pulse-v14','online','session','profile-photo-metrics.mjs'),'utf8');
+const unipodalController=await readFile(join(root,'site','pulse-v14','online','session','unipodal-controller.js'),'utf8');
+const unipodalGeometry=await readFile(join(root,'site','pulse-v14','online','session','unipodal-metrics.mjs'),'utf8');
 const captureEnhancements=await readFile(join(root,'site','pulse-v14','online','session','capture-enhancements.js'),'utf8');
 const nodeSyntax=file=>spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session',file)],{encoding:'utf8'}).status===0;
 const sessionSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','online','session','app.js')],{encoding:'utf8'});
@@ -86,6 +90,13 @@ const checks=[
  ['speaker is optional and cleaned up',motionView.includes('id="sound-enabled"')&&captureEnhancements.includes('audible:enabled()')&&captureEnhancements.includes('audio.destroy()')],
  ['posture observation and careful summary',postureMetrics.includes('observeFrontalPosture')&&captureEnhancements.includes('postureSummary()')&&sessionJs.includes("id:'posture'")&&sessionJs.includes("r.posture?.valid")],
  ['posture is non-diagnostic and local',testGuides.includes("posture:{")&&testGuides.includes("scoliose")&&motionView.includes('id="posture-results"')],
+ ['auto side photo, not radiographic SVA',profilePhoto.includes('createSideProfileStability')&&profilePhoto.includes('drawImage(video')&&profilePhoto.includes('Photo capturée automatiquement')&&profileGeometry.includes('NOT SVA')===false&&profileGeometry.includes('NOT mm')],
+ ['photo marker correction and in-memory image',profilePhoto.includes('profile-photo')&&profilePhoto.includes('snap.onpointerdown')&&!/fetch\s*\(|localStorage|sessionStorage|toBlob|toDataURL/.test(profilePhoto)],
+ ['unipodal both legs, auto timing on foot lift',sessionJs.includes("id:'unipodal_left'")&&sessionJs.includes("id:'unipodal_right'")&&unipodalController.includes('createOneLegObserver')&&unipodalGeometry.includes('at-raisedSince>=850')],
+ ['camera-only before auto capture',profilePhoto.includes('consent.checked')&&unipodalController.includes('consent.checked')&&unipodalController.includes('audio:false')],
+ ['large video and compact microphone/audio',sessionCss.includes('.voice-compact')&&sessionCss.includes('height:min(76vh,880px)')&&motionView.includes('id="voice-panel"')],
+ ['new side camera controllers parse',nodeSyntax('profile-photo.js')&&nodeSyntax('profile-photo-metrics.mjs')&&nodeSyntax('unipodal-controller.js')&&nodeSyntax('unipodal-metrics.mjs')],
+
  ['audio posture code parses',nodeSyntax('audio-feedback.js')&&nodeSyntax('capture-enhancements.js')&&nodeSyntax('posture-metrics.mjs')],
  ['test still requires real camera capture before advancing',motionController.includes('if(!state.sessionFinished)')&&motionController.includes("finish(true)")],
  ['prominent start and auto counted movements',motionView.includes('C’est parti →')&&motionController.includes('tracker.observe(points,time)')&&motionController.includes('record.status=')],
