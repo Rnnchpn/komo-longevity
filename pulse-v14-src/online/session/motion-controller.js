@@ -8,7 +8,14 @@ export function mountMotionController(root,task,record,state,callbacks){
  const q=s=>root.querySelector(s);
  const video=q('#live-video'),canvas=q('#pose-canvas'),off=q('#camera-off');
  const on=q('#start-camera'),stop=q('#stop-camera'),go=q('#start-test'),redo=q('#redo-test'),halt=q('#halt-test');
- const voiceConsent=q('#voice-consent'),voiceButton=q('#toggle-voice'),voiceState=q('#voice-state'),readButton=q('#read-guidance');
+ const voiceConsent=q('#voice-consent'),voiceButton=q('#toggle-voice'),voiceState=q('#voice-state'),readButton=q('#read-guidance'),distanceButton=q('#distance-view'),voiceHud=q('#voice-hud'),voiceHudText=q('#voice-hud-text');
+ distanceButton.onclick=()=>{
+  const workspace=q('.motion-workspace');
+  const active=workspace.classList.toggle('distance-mode');
+  distanceButton.setAttribute('aria-pressed',String(active));
+  distanceButton.textContent=active?'⛶ Afficher les consignes':'⛶ Mode à distance';
+  if(active){q('#camera-screen')?.scrollIntoView({behavior:'smooth',block:'center'});}
+ };
  const consent=q('#pose-consent');
  consent.onchange=()=>{on.disabled=!consent.checked||Boolean(state.stream);};
  const tracker=createMovementTracker(task.id);
@@ -35,6 +42,8 @@ export function mountMotionController(root,task,record,state,callbacks){
   },
   onStatus(text,mode){
    if(voiceState){voiceState.textContent=text;voiceState.dataset.state=mode;}
+   if(voiceHud){voiceHud.hidden=!['listening','connecting','reconnecting','paused'].includes(mode);}
+   if(voiceHudText){voiceHudText.textContent=mode==='listening'?'À l’écoute':mode==='paused'?'En pause':mode==='connecting'||mode==='reconnecting'?'Connexion…':'Micro inactif';}
    if(voiceButton)voiceButton.textContent=mode==='listening'?'🎙 Désactiver le microphone':
      mode==='connecting'||mode==='reconnecting'?'🎙 Connexion du microphone…':'🎙 Activer les commandes vocales';
   }
@@ -146,13 +155,16 @@ export function mountMotionController(root,task,record,state,callbacks){
      'La caméra ou le détecteur n’a pas démarré. Vérifiez la connexion et réessayez.');
   }
  };
- stop.onclick=()=>{stopCapture();info('Caméra éteinte. Aucune vidéo enregistrée.');status('Activez la caméra pour reprendre.');};
+ stop.onclick=()=>{voice.disable();stopCapture();info('Caméra éteinte. Micro et caméra coupés. Aucune vidéo enregistrée.');status('Activez la caméra pour reprendre.');};
  go.onclick=()=>{
   if(!state.bodyReady||!state.engine||!state.stream||state.sessionActive)return;
   tracker.reset();value(0);record.status='pending';record.source='webcam';
   state.sessionActive=true;state.sessionFinished=false;
   halt.hidden=false;
   state.startedAt=performance.now();state.remaining=task.seconds;
+  if(voice.isEnabled()&&'speechSynthesis' in window&&window.SpeechSynthesisUtterance){
+   try{const u=new SpeechSynthesisUtterance('Départ du test');u.lang='fr-FR';window.speechSynthesis.speak(u);}catch{}
+  }
   go.disabled=true;go.textContent='Analyse en cours…';redo.hidden=true;
   q('#camera-live-score').hidden=false;
   status(task.id==='sts'?'Asseyez-vous, puis relevez-vous et rasseyez-vous sans vous précipiter.':
