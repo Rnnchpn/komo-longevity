@@ -10,8 +10,17 @@
 <div class="auth-box" id="authPanel" style="display:none">
 <span class="eyebrow" data-en="01 · SECURE ENTRANCE" data-fr="01 · ENTRÉE SÉCURISÉE">01 · SECURE ENTRANCE</span>
 <h2 data-en="Your private entrance." data-fr="Votre entrée privée.">Your private entrance.</h2>
-<p data-en="Enter your email address to receive a secure access link. Existing KŌMØ Pulse users can sign in with the same email. Creating an account does not activate a paid ELYSIUM membership." data-fr="Indiquez votre adresse e-mail pour recevoir un lien d’accès sécurisé. Les utilisateurs de Pulse peuvent se connecter avec la même adresse. La création d’un compte n’active pas une adhésion payante à ELYSIUM.">Enter your email address to receive a secure access link. Existing KŌMØ Pulse users can sign in with the same email. Creating an account does not activate a paid ELYSIUM membership.</p>
-<form id="loginForm"><div class="field"><label for="email">EMAIL ADDRESS</label><input type="email" id="email" required autocomplete="email" placeholder="you@example.com"></div><button class="btn ink" id="loginBtn" type="submit" data-en="SEND MY SECURE ACCESS LINK ↗" data-fr="RECEVOIR MON LIEN DE CONNEXION ↗">SEND MY SECURE ACCESS LINK ↗</button></form><p class="state-message" id="loginMessage" role="status"></p>
+<p data-en="Already have a KŌMØ Pulse account? Sign in here with the same email and password. You stay on ELYSIUM and never need to pass through Pulse." data-fr="Vous avez déjà un compte KŌMØ Pulse ? Connectez-vous ici avec les mêmes identifiants. Vous restez dans ELYSIUM, sans passer par Pulse.">Already have a KŌMØ Pulse account? Sign in here with the same email and password. You stay on ELYSIUM and never need to pass through Pulse.</p>
+<form id="passwordLoginForm">
+<div class="field"><label for="passwordEmail" data-en="YOUR EMAIL" data-fr="VOTRE E-MAIL">YOUR EMAIL</label><input type="email" id="passwordEmail" required autocomplete="username" placeholder="you@example.com"></div>
+<div class="field"><label for="passwordValue" data-en="PASSWORD" data-fr="MOT DE PASSE">PASSWORD</label><input type="password" id="passwordValue" required autocomplete="current-password"></div>
+<button class="btn ink" id="passwordLoginBtn" type="submit" data-en="SIGN IN TO ELYSIUM ↗" data-fr="ME CONNECTER À ELYSIUM ↗">SIGN IN TO ELYSIUM ↗</button>
+</form><p class="state-message" id="passwordLoginMessage" role="status"></p>
+<details class="email-login-alternative">
+<summary data-en="No password? Request an email link" data-fr="Pas de mot de passe ? Recevoir un lien par e-mail">No password? Request an email link</summary>
+<p data-en="For a new account, use the email invitation. If the email opens Pulse rather than ELYSIUM, the ELYSIUM callback must first be added in Supabase Auth redirect settings." data-fr="Pour créer un compte, utilisez l’invitation par e-mail. Si le lien ouvre Pulse au lieu d’ELYSIUM, l’adresse de retour ELYSIUM doit d’abord être autorisée dans la configuration Supabase Auth.">For a new account, use the email invitation. If the email opens Pulse rather than ELYSIUM, the ELYSIUM callback must first be added in Supabase Auth redirect settings.</p>
+<form id="loginForm"><div class="field"><label for="email" data-en="YOUR EMAIL" data-fr="VOTRE E-MAIL">YOUR EMAIL</label><input type="email" id="email" required autocomplete="email" placeholder="you@example.com"></div><button class="btn ink" id="loginBtn" type="submit" data-en="SEND MY SECURE ACCESS LINK ↗" data-fr="RECEVOIR MON LIEN DE CONNEXION ↗">SEND MY SECURE ACCESS LINK ↗</button></form><p class="state-message" id="loginMessage" role="status"></p>
+</details>
 </div>
 <div class="auth-box" id="applicationPanel" style="display:none">
 <span class="eyebrow" data-en="02 · APPLICATION FOR MEMBERSHIP" data-fr="02 · DEMANDE D’ADHÉSION">02 · APPLICATION FOR MEMBERSHIP</span>
