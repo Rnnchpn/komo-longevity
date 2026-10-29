@@ -1,0 +1,117 @@
+/* KŌMØ — QUIET LUXURY: Motion Online preparation, activation and session.
+   Visual presentation only. Preserve camera, consent, controls, scores and validation. */
+:root{
+ --ink:#1C1A19;--forest:#242426;--forest-deep:#171718;
+ --cream:#F7F2EA;--ivory:#F7F2EA;--paper:#FFFDF8;
+ --sage:#F2ECE3;--gold:#B89B6A;--line:#E7DFD2;--muted:#716B63;
+ --lux-serif:"Cormorant Garamond",Georgia,serif;
+ --lux-sans:"Inter",Arial,sans-serif
+}
+html,body{background:#F7F2EA;color:#1C1A19;font-family:var(--lux-sans);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font-family:var(--lux-sans)}
+h1,h2,h3,.camera-placeholder strong,.camera-off strong,.intro-side .orb,
+.time,.pulse-online-tester-welcome h3{font-family:var(--lux-serif)}
+h1{font-weight:500;letter-spacing:-.04em}
+h1 em,h2 em{color:#B89B6A}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{
+ outline:2px solid #A98D60;outline-offset:3px
+}
+/* Before appointment — camera preflight */
+.site-header{background:#FFFDF8;border-color:#E7DFD2}
+.wordmark{font-family:var(--lux-sans);font-weight:600}
+.wordmark span{color:#92784F}
+.top-link{color:#655A4A}
+.intro{background:radial-gradient(circle at 9% 0%,rgba(184,155,106,.11),transparent 35%),linear-gradient(136deg,#161617,#2C2B2B);color:#FFFDF8}
+.intro h1{font-size:clamp(67px,8vw,110px);line-height:.85}
+.intro h1 em{color:#D9C6A3}
+.intro-desc{color:#D8D1C7}
+.kicker,.eyebrow{color:#D9C6A3}
+.signal{background:#C6AB7E;box-shadow:0 0 0 5px rgba(184,155,106,.13)}
+.facts span{border-color:rgba(228,208,175,.28);color:#DDD2C2}
+.facts strong{color:#FFFDF8}
+.intro-art svg{filter:saturate(.42) sepia(.2)}
+.journey-step,.booking-note,.panel{background:#FFFDF8;border-color:#E7DFD2;border-radius:17px}
+.journey-step span,.eyebrow{color:#A18355}
+.journey-step small{color:#756F66}
+.journey-step.current{background:#F3EADD;border-color:#D1B98E}
+.booking-note h2,.panel h2,.outcome h2{font-family:var(--lux-serif);font-size:clamp(39px,4vw,55px)}
+.booking-note p,.panel-intro,.outcome p{color:#706A62}
+.panel-number{color:#AD9673}
+.button{border-radius:10px;font-weight:600}
+.button.dark{background:#242426;border-color:#242426;color:#FFFDF8}
+.button.dark:hover:not(:disabled){background:#363538;box-shadow:0 10px 27px rgba(23,23,24,.15)}
+.button.outline{border-color:#CABBAB;color:#5E4B34;background:#FFFDF8}
+.button.outline:hover:not(:disabled){background:#F7F2EA}
+.check{border-color:#E7DFD2}
+.check:hover{border-color:#C5AC83}
+.check-icon{border-color:#BFB2A1}
+.check input:checked~.check-icon{background:#323031;border-color:#323031}
+.check:has(input:checked){background:#F7EFE3;border-color:#CBB48F}
+.safety-notice{background:#F7F0E7;color:#765D3C}
+.camera-viewport{background:radial-gradient(circle,#44403B,#1B1A1B);color:#E7DFD2}
+.camera-viewport video{background:#1C1A19}
+.camera-viewport:before{border-color:rgba(217,198,163,.22)}
+.camera-label{background:rgba(24,24,25,.85)}
+.camera-symbol{color:#D9C6A3;border-color:rgba(217,198,163,.38)}
+.camera-placeholder strong{font-size:37px}
+.camera-placeholder small{color:#D1C6B7}
+.camera-status.is-good{color:#746044}
+.outcome{background:#F3EBDF;border-color:#E0D4C4;border-radius:18px}
+.outcome.is-ready{background:#F1E6D4;border-color:#D2B98E}
+.outcome-seal{color:#9E7D4D;border-color:#CCB48D}
+.is-ready .outcome-seal{background:#242426;border-color:#242426;color:#D9C6A3}
+.progress-track{background:#E6DDCF}
+.progress-track span{background:#B89B6A}
+.privacy,.privacy strong{color:#776D61}
+/* Activated account + guided session */
+.top{background:#FFFDF8;border-color:#E7DFD2}
+.top a{color:#5B4C39}
+.brand small{color:#A18760}
+.foot{border-color:#E7DFD2;color:#857B6D}
+.online-session-shell{background:#F7F2EA}
+.session{background:#FFFDF8;border-color:#E7DFD2;box-shadow:0 24px 65px rgba(33,29,24,.052);border-radius:19px}
+.session-top{background:linear-gradient(120deg,#171718,#30302F);color:#F9F4EB}
+.test-badge{background:rgba(184,155,106,.11);border-color:rgba(217,198,163,.32);color:#E9D8B9}
+.steps{background:#F7F2EA;border-color:#E7DFD2}
+.steps span{color:#8B8277}.steps span.now{color:#5B462C}
+.steps b{border-color:#DBCDB7}.steps span.now b{background:#242426;border-color:#242426;color:#FFFDF8}
+.steps span.past b{background:#F0E5D5;color:#725534}
+.overline{color:#997A50}
+.paper>p,.intro p,.subtle{color:#776E64}
+.intro-side{background:radial-gradient(circle,#393533,#171718);color:#E6DACA;border-radius:16px}
+.intro-side .orb{border-color:rgba(217,198,163,.4);color:#D9C6A3}
+.intro-side p{color:#D4C9B9}
+.fact-row div{border-color:#B89B6A}
+.fact-row b{color:#3D3429}
+.fact-row small{color:#8B8276}
+.action{background:#242426;border-color:#242426;color:#FFFDF8;border-radius:10px;font-weight:650}
+.action:hover:not(:disabled){background:#383738}
+.action.secondary{background:#FFFDF8;border-color:#CBBDA9;color:#62513B}
+.action.secondary:hover:not(:disabled){background:#F5EEE4}
+.notice{background:#F7EFE4;color:#776044;border-color:#B89B6A}
+.question legend{color:#2B2928}
+.choices span{background:#FFFDF8;border-color:#DED5C8;color:#736B62}
+.choices label:hover span{border-color:#B89B6A}
+.choices input:checked+span{background:#242426;border-color:#242426;color:#FFFDF8}
+.checklist label{border-color:#E7DFD2;color:#62594E}
+.checklist input{accent-color:#A98C60}
+.camera{background:#171718}
+.camera-screen{background:radial-gradient(circle,#49443E,#1A1919);color:#EEE2D2}
+.camera-off span{color:#D9C6A3}
+.camera-off strong{font-size:34px}
+.camera-off small,.camera .subtle{color:#D2C7B7}
+.camera-actions button{background:#EFE9E0;color:#45392A}
+.test-controller{background:#F4EEE6}
+.test-controller p{color:#71685D}
+.time{color:#3E3328;font-size:100px}
+.counter button{border-color:#CDBA9B;color:#54412A}
+select{border-color:#D7C8B4;color:#483C2F}
+.result-list,.result-list div{border-color:#E7DFD2}
+.result-list span{color:#746D64}.result-list strong{color:#342C23}
+.session-bottom{background:#FCF8F2;border-color:#E7DFD2}
+.session-bottom p{color:#897F72}.session-bottom button{color:#826238}
+/* Measurements and questionnaires: accent-only remapping, no layout overrides */
+.motion-workspace,.intake-paper,.profile-editor,.posture-results{border-color:#E7DFD2}
+.intake-track,.progress-track{background:#E8DED1}
+.intake-track i,.intake-result-track i{background:#B89B6A}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
