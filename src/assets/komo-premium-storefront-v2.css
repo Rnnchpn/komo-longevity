@@ -166,6 +166,13 @@ html{scroll-behavior:smooth}
  .ko-premium-v2.ko-motion-ready [data-ko-reveal]{transition:opacity .9s var(--ko-ease),transform .9s var(--ko-ease);transition-delay:var(--ko-stagger,0ms)}
  .ko-premium-v2.ko-motion-ready [data-ko-reveal].ko-in-view{opacity:1;transform:translate3d(0,0,0)}
 }
+/* Reveal completion must not suppress the pointer interaction on cards. */
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ .ko-premium-v2.ko-motion-ready .ko-card[data-ko-reveal].ko-in-view:hover{
+  transform:perspective(1400px) translate3d(0,-9px,0) rotateX(var(--ko-rx,0deg)) rotateY(var(--ko-ry,0deg))
+ }
+}
+.ko-premium-header.ko-scrolled{box-shadow:0 9px 33px rgba(25,44,32,.085)}
 @keyframes ko-hero-in{from{opacity:0;transform:translate3d(0,22px,0)}to{opacity:1;transform:translate3d(0,0,0)}}
 @keyframes ko-image-in{from{opacity:0;transform:translate3d(0,30px,0) scale(.96)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
 @media(prefers-reduced-motion:reduce){
