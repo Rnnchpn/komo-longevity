@@ -121,7 +121,7 @@ const checks=[
  ['speaker is optional and cleaned up',motionView.includes('id="sound-enabled"')&&captureEnhancements.includes('audible:enabled()')&&captureEnhancements.includes('audio.destroy()')],
  ['posture observation and careful summary',postureMetrics.includes('observeFrontalPosture')&&captureEnhancements.includes('postureSummary()')&&sessionJs.includes("id:'posture'")&&intakeReport.includes("id==='posture'")],
  ['posture is non-diagnostic and local',testGuides.includes("posture:{")&&testGuides.includes("scoliose")&&motionView.includes('id="posture-results"')],
- ['Motion Passport with honest index, domains and priority interpretation',passportModel.includes('buildMotionPassport')&&passportModel.includes('espérance de vie')&&passportView.includes('passport-hero')&&intakeReport.includes('passportMarkup(answers,results,blocked)')],
+ ['Motion Passport with honest index, domains and priority interpretation',passportModel.includes('buildMotionPassport')&&passportModel.includes('pas une estimation de longévité')&&passportView.includes('passport-hero')&&intakeReport.includes('passportMarkup(answers,results,blocked)')],
  ['Pulse Daily journal binds to persisted progress',sessionJs.includes('updateProgram(program){state.program=program;persistProgress()')&&passportView.includes('data-daily-exercise')&&sessionProgress.includes('cleanProgram(state.program)')],
  ['Motion Passport and program syntax valid',nodeSyntax('motion-passport.mjs')&&nodeSyntax('passport-view.js')],
  ['paid dossier server-only persistence',sessionJs.includes('loadSecureDossier(')&&sessionJs.includes('dossierQueue.firstSave(state)')&&secureDossier.includes('/functions/v1/motion-online-dossier')&&secureDossier.includes('snapshotProgress')],
