@@ -1,0 +1,319 @@
+/* KŌMØ Pulse V14 — mobile-first luxury refinements, 2026-10-29.
+   Loaded last: spacing, touch, safe area, accessibility, no business logic changes. */
+:root{--pulse-touch:46px;--pulse-mobile-ink:#201F20;--pulse-mobile-cream:#F7F2EA}
+html{overflow-x:clip}
+body{min-width:0;overscroll-behavior-x:none}
+#app,.login-page,.app-shell,.page,#view{min-width:0}
+button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
+.button,.pulse-offer,.nav-item,.progress-step{touch-action:manipulation}
+.button:active,.pulse-mobile-booking-bar:active{transform:translateY(1px)}
+.button:focus-visible,.nav-item:focus-visible,.pulse-offer:focus-visible,
+.pulse-mobile-booking-bar:focus-visible{outline:2px solid #B89B6A;outline-offset:3px}
+.pulse-mobile-booking-bar,.pulse-mobile-tools{display:none}
+.page-head h1{overflow-wrap:anywhere}
+.welcome-card,.result-hero,.plan-head{position:relative;overflow:hidden}
+.welcome-card::after,.result-hero::after,.plan-head::after{
+ content:"";position:absolute;top:-100px;right:-80px;width:320px;height:320px;
+ pointer-events:none;border-radius:50%;border:1px solid rgba(217,198,163,.11);
+ box-shadow:0 0 0 43px rgba(217,198,163,.017),0 0 0 100px rgba(217,198,163,.009)
+}
+.welcome-card>*,.result-hero>*,.plan-head>*{position:relative;z-index:1}
+.soft-card,.priority-card,.domain-card,.checkpoint-card,.progress-card,.journey-card,
+.appointment-card{transition:border-color .25s,box-shadow .25s}
+@media(hover:hover) and (pointer:fine){
+ .soft-card:hover,.priority-card:hover,.domain-card:hover{
+  border-color:#D3BD9C;box-shadow:0 17px 45px rgba(37,31,24,.075)
+ }
+}
+@media(min-width:981px){
+ .login-page:has(.pulse-entry-panel) .login-story{padding-left:clamp(34px,5.2vw,90px)}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story{max-width:760px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer{min-height:112px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content strong{font-size:clamp(29px,2.5vw,36px)}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-panel{max-width:505px}
+}
+
+/* Narrow tablet and phone: stacked entry with genuine compact commercial hierarchy. */
+@media(max-width:980px){
+ .login-page:has(.pulse-entry-panel){
+  display:grid;grid-template-columns:minmax(0,1fr);width:100%;
+  min-height:100svh;padding:0 0 calc(86px + env(safe-area-inset-bottom,0px));
+  background:#F7F2EA
+ }
+ .login-page:has(.pulse-entry-panel) .login-story{
+  display:flex;min-height:0;height:auto;
+  padding:calc(25px + env(safe-area-inset-top,0px)) clamp(20px,5vw,44px) 28px;
+  gap:22px;background:linear-gradient(151deg,#151515,#2B2929)
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-entry-kinetic{
+  top:-80px;right:-150px;width:440px;max-width:85%;opacity:.23
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story{margin:0;max-width:none}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story h1{
+  font-size:clamp(67px,9vw,92px)!important;line-height:.84!important;
+  margin:5px 0 14px;max-width:740px
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-entry-lead{
+  max-width:630px;font-size:13px;line-height:1.65;margin:14px 0 19px
+ }
+ .pulse-entry-brand-caption{display:none}
+ .pulse-entry-story-footer{display:none}
+ .pulse-offer-list{grid-template-columns:1fr;gap:8px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer{
+  min-height:88px;display:grid;grid-template-columns:30px minmax(0,1fr) 20px;
+  gap:12px;align-items:center;padding:12px 14px;border-radius:14px;
+  backdrop-filter:none;-webkit-backdrop-filter:none;will-change:auto;
+  transition:background .2s,border-color .2s
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-offer-art{display:none}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-number{width:29px;height:29px;font-size:9px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content{gap:2px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content small{font-size:8px;line-height:1.35}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content strong{
+  font-size:clamp(29px,4.4vw,36px);line-height:.96;letter-spacing:-.025em
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content>span{
+  font-size:11px;line-height:1.4;max-width:none
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content em{font-size:9.5px;line-height:1.35}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-arrow{font-size:19px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer:hover,
+ .login-page:has(.pulse-entry-panel) .pulse-offer:focus-visible{transform:none}
+ .login-page:has(.pulse-entry-panel) .login-panel{
+  min-height:0;display:flex;justify-content:flex-start;
+  padding:24px clamp(16px,5vw,44px) 42px;background:#F7F2EA
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-entry-panel,
+ .login-page:has(.pulse-entry-panel) .login-card{
+  width:min(700px,100%);max-width:none;box-shadow:0 14px 48px rgba(29,25,21,.07)
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-entry-panel{padding:clamp(24px,5vw,38px);border-radius:20px}
+ .pulse-entry-panel-header{margin-bottom:16px}
+ .pulse-entry-monogram{width:65px;height:65px;margin-bottom:12px}
+ .pulse-entry-monogram-letter{font-size:38px}
+ .pulse-entry-monogram small{font-size:3.5px}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-panel h2{
+  font-size:clamp(52px,7vw,73px);line-height:.89;margin-bottom:12px
+ }
+ .pulse-entry-panel-intro{font-size:12px;max-width:590px}
+ .pulse-entry-steps{margin:19px 0}
+ .pulse-entry-steps li{padding:11px 0}
+ .pulse-entry-steps small{font-size:11px}
+ .login-page:has(.pulse-entry-panel) .pulse-booking-button{min-height:53px}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-online-shortcut,
+ .login-page:has(.pulse-entry-panel) .pulse-entry-activation-link{
+  min-height:46px;font-size:12px
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-entry-prep-link{
+  min-height:44px;font-size:11px
+ }
+ .pulse-mobile-booking-bar{
+  display:none;align-items:center;justify-content:space-between;gap:12px;
+  position:fixed;z-index:90;left:12px;right:12px;
+  bottom:calc(10px + env(safe-area-inset-bottom,0px));
+  min-height:68px;padding:10px 11px 10px 17px;
+  background:#FFFDF8;border:1px solid #D9C6A3;border-radius:16px;
+  color:#272322;text-decoration:none;
+  box-shadow:0 14px 50px rgba(18,17,16,.18),0 2px 10px rgba(18,17,16,.08)
+ }
+ .login-page:has(.pulse-entry-panel:not([hidden])) .pulse-mobile-booking-bar{display:flex}
+ .pulse-mobile-booking-copy{display:grid;align-content:center;gap:2px}
+ .pulse-mobile-booking-copy small{font-size:9px;letter-spacing:.14em;font-weight:700;color:#847154}
+ .pulse-mobile-booking-copy strong{
+  font-family:"Cormorant Garamond",Georgia,serif;
+  font-size:33px;font-weight:600;line-height:.95;color:#252222
+ }
+ .pulse-mobile-booking-action{
+  display:flex;align-items:center;justify-content:center;gap:13px;
+  flex:none;padding:0 18px;min-height:46px;border-radius:10px;
+  background:#262526;color:#FFFDF8;font-size:12px;font-weight:650
+ }
+ .pulse-mobile-booking-action span{color:#D9C6A3;font-size:18px}
+ .login-page:has(.pulse-entry-panel[hidden]) .login-panel{
+  align-items:flex-start;min-height:64svh;padding-top:34px
+ }
+ .login-page:has(.pulse-entry-panel[hidden]) .login-card{margin:0 auto;padding:28px}
+}
+
+/* Signed-in Pulse: 5 destinations in a legible mobile bottom bar, not a clipped row. */
+@media(max-width:1000px){
+ .app-shell{display:block;width:100%}
+ .sidebar{
+  position:fixed;z-index:80;top:auto;
+  left:calc(8px + env(safe-area-inset-left,0px));
+  right:calc(8px + env(safe-area-inset-right,0px));
+  bottom:calc(8px + env(safe-area-inset-bottom,0px));
+  width:auto;height:auto;min-height:68px;padding:6px;
+  border:1px solid #D9D1C7;border-radius:17px;
+  background:rgba(255,253,248,.97);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 9px 32px rgba(25,22,18,.19)
+ }
+ .sidebar nav{
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:3px;margin:0;padding:0;overflow:visible
+ }
+ .sidebar nav:has(.nav-item:nth-child(3):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+ .sidebar nav .nav-item{
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  min-width:0;min-height:54px;gap:5px;
+  padding:6px 2px;border-radius:12px;
+  background:transparent;color:#70665B;
+  white-space:normal;overflow-wrap:normal;
+  line-height:1.05;text-align:center;
+  font-family:"Inter",sans-serif;font-size:10px;font-weight:600
+ }
+ .sidebar nav .nav-item::before{
+  display:block;content:"◦";height:18px;
+  font-family:Arial,sans-serif;font-size:21px;line-height:18px;color:#9C8667;font-weight:400
+ }
+ .sidebar nav .nav-item[data-route="home"]::before{content:"⌂";font-size:26px}
+ .sidebar nav .nav-item[data-route="baseline"]::before{content:"◇"}
+ .sidebar nav .nav-item[data-route="results"]::before{content:"◈"}
+ .sidebar nav .nav-item[data-route="plan"]::before{content:"↗"}
+ .sidebar nav .nav-item[data-route="appointments"]::before{content:"◷"}
+ .sidebar nav .nav-item[data-route="operator"]::before{content:"▦"}
+ .sidebar nav .nav-item[data-route="patients"]::before{content:"♙"}
+ .sidebar nav .nav-item.active{
+  color:#FFFDF8;background:#242426;
+  box-shadow:0 3px 12px rgba(30,28,26,.12)
+ }
+ .sidebar nav .nav-item.active::before{color:#D9C6A3}
+ .sidebar nav .nav-dot{display:none}
+ .page{min-height:100svh;padding:28px clamp(16px,3vw,32px) calc(118px + env(safe-area-inset-bottom,0px))}
+ .page-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:20px}
+ .page-head>div:first-child{flex:1 1 100%;min-width:0}
+ .page-head .user-chip{order:2;min-height:44px;padding:5px 10px 5px 5px}
+ .page-head .user-chip div{display:grid}
+ .page-head .user-chip strong{font-size:11px}
+ .page-head .user-chip small{font-size:9px}
+ .pulse-mobile-tools{order:3;display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-left:auto}
+ .pulse-mobile-tools .mode-switch{
+  display:grid;grid-template-columns:1fr 1fr;padding:3px;gap:3px;border-radius:10px;background:#EFE8DF
+ }
+ .pulse-mobile-tools .mode-switch button{min-height:38px;min-width:54px;border-radius:8px;font-size:11px}
+ .pulse-mobile-logout{
+  min-height:44px;border:1px solid #E2D8CA;background:#FFFDF8;color:#665239;
+  border-radius:10px;padding:0 12px;font-size:11px;font-weight:600
+ }
+ .pulse-mobile-logout:focus-visible{outline:2px solid #B89B6A;outline-offset:2px}
+ .page-head h1{font-size:clamp(47px,5.6vw,68px);line-height:.95}
+}
+@media(max-width:700px){
+ .page{padding:20px 14px calc(112px + env(safe-area-inset-bottom,0px))}
+ .page-head{margin-bottom:19px}
+ .page-head h1{font-size:clamp(43px,11vw,59px)}
+ .welcome-card{padding:clamp(25px,6vw,36px);border-radius:21px;gap:18px}
+ .welcome-card h2{font-size:clamp(48px,11.5vw,66px);line-height:.87}
+ .welcome-card p{font-size:13px;line-height:1.65}
+ .welcome-card .button{width:100%;min-height:51px;font-size:12px}
+ .welcome-mark{display:none}
+ .score-orb{
+  display:flex;width:122px;height:122px;align-self:flex-start;
+  border:1px solid #D9C6A3
+ }
+ .score-orb strong{font-size:63px}
+ .progress-card{padding:18px;border-radius:19px;margin-top:12px}
+ .progress-top strong{font-size:16px}
+ .progress-value{font-size:28px}
+ .progress-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ .progress-step{display:grid;grid-template-columns:26px minmax(0,1fr);gap:6px;align-items:center;padding:10px 6px;min-height:67px}
+ .progress-step b{width:25px;height:25px}
+ .progress-step span{font-size:10px}
+ .progress-step small{font-size:9px;line-height:1.28}
+ .two-col,.domain-grid,.three-col,.journey,.operator-grid{gap:11px;margin-top:11px}
+ .soft-card{min-height:auto;padding:21px;border-radius:19px}
+ .soft-card p,.domain-head p,.priority-card p{font-size:12px;line-height:1.6}
+ .soft-card h3{font-size:31px}
+ .intro h2{font-size:clamp(38px,9vw,53px);line-height:.94}
+ .intro p{font-size:13px}
+ .journey-card{grid-template-columns:42px minmax(0,1fr);gap:12px;padding:18px;min-height:auto;border-radius:18px}
+ .journey-num{width:39px;height:39px;font-size:11px}
+ .journey-card h3{font-size:28px}
+ .journey-card p{font-size:12px}
+ .journey-card .button{min-height:46px}
+ .domain-card{padding:19px;border-radius:18px}
+ .result-hero,.plan-head{padding:25px 22px;border-radius:19px}
+ .result-score strong{font-size:103px}
+ .result-summary article{padding:14px}
+ .result-summary strong{font-size:31px}
+ .plan-head h2{font-size:clamp(51px,12vw,70px)}
+ .priority-card{padding:19px;min-height:auto}
+ .appointment-list{gap:10px}
+ .appointment-card{grid-template-columns:84px minmax(0,1fr);gap:11px;padding:12px;border-radius:17px}
+ .date-box{padding:11px 7px;border-radius:11px}
+ .appointment-card h3{font-family:"Cormorant Garamond",Georgia,serif;font-size:27px}
+ .appointment-card p{font-size:11px}
+ .status-label{font-size:9px}
+ .operator-head{padding:24px;border-radius:19px}
+ .operator-head h2{font-family:"Cormorant Garamond",Georgia,serif;font-size:44px}
+ .op-step{gap:10px;padding:12px}
+ .op-actions{display:flex;flex-wrap:wrap;gap:8px}
+ .op-actions button{min-height:44px;font-size:11px;padding:10px}
+ .locked-state{padding:28px 20px;border-radius:19px;min-height:350px}
+ .locked-state h2{font-size:44px}
+ .locked-state .button{min-height:48px}
+ .phase-list article{grid-template-columns:42px minmax(0,1fr);gap:12px;padding:15px}
+ .phase-list b{width:42px;height:42px}
+ .checkpoint-card{padding:19px}
+ .patient-list button{min-height:58px}
+ .page .button{min-height:46px;font-size:12px}
+}
+@media(max-width:440px){
+ .login-page:has(.pulse-entry-panel) .login-story{
+  padding:calc(19px + env(safe-area-inset-top,0px)) 15px 20px;gap:13px
+ }
+ .pulse-entry-brand .brand{font-size:26px}
+ .pulse-entry-brand .brand small{font-size:7px}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story h1{
+  font-size:clamp(59px,15vw,70px)!important;line-height:.83!important;margin:5px 0 9px
+ }
+ .pulse-entry-kicker{font-size:8px;letter-spacing:.14em}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-lead{
+  font-size:11.5px;line-height:1.5;margin:11px 0 15px
+ }
+ .pulse-offer-list{gap:7px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer{
+  min-height:80px;grid-template-columns:25px minmax(0,1fr) 14px;
+  gap:8px;padding:10px 12px;border-radius:12px
+ }
+ .login-page:has(.pulse-entry-panel) .pulse-offer-number{width:24px;height:24px;font-size:8px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content small{font-size:7.5px}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content strong{font-size:clamp(25px,7vw,31px)}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content>span{font-size:10px;line-height:1.28}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content em{font-size:9px;margin-top:1px}
+ .login-page:has(.pulse-entry-panel) .login-panel{padding:20px 12px 38px}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-panel{padding:25px 19px}
+ .pulse-entry-panel-header{gap:6px}
+ .pulse-entry-wordmark{font-size:14px}
+ .pulse-entry-secure{font-size:7px;letter-spacing:.08em}
+ .pulse-entry-monogram{display:none}
+ .login-page:has(.pulse-entry-panel) .pulse-entry-panel h2{font-size:clamp(47px,12vw,59px)}
+ .pulse-entry-steps small{font-size:10px}
+ .pulse-entry-assurance{font-size:10px;line-height:1.55}
+ .pulse-entry-login-bridge{gap:5px;flex-wrap:wrap}
+ .pulse-entry-legal{flex-wrap:wrap}
+ .sidebar{left:calc(6px + env(safe-area-inset-left,0px));right:calc(6px + env(safe-area-inset-right,0px))}
+ .sidebar nav{gap:1px}
+ .sidebar nav .nav-item{font-size:9.5px;padding:6px 1px;letter-spacing:-.01em}
+ .pulse-mobile-tools{gap:5px}
+ .pulse-mobile-logout{padding:0 9px}
+ .page-head .user-chip div{display:none}
+}
+@media(max-width:345px){
+ .login-page:has(.pulse-entry-panel) .pulse-entry-story h1{font-size:54px!important}
+ .login-page:has(.pulse-entry-panel) .pulse-offer-content strong{font-size:23px}
+ .pulse-mobile-booking-action{padding:0 11px;gap:7px}
+ .sidebar nav .nav-item{font-size:8.7px}
+ .progress-steps{grid-template-columns:1fr}
+ .pulse-mobile-logout{font-size:10px}
+}
+@media(hover:none){
+ .pulse-offer:hover{transform:none!important}
+ .button:hover{filter:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .welcome-card,.result-hero,.plan-head,.pulse-offer,.pulse-mobile-booking-bar{
+  transition:none!important;animation:none!important
+ }
+}
