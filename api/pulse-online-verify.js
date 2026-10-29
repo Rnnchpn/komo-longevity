@@ -3,6 +3,7 @@
 // Fail closed on missing configuration, missing transactions or mismatched emails.
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_PUBLISHABLE='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
+import {extractVideoUrl} from './_acuity-video.js';
 const ONLINE_TYPE=99940918;
 const TOTAL_EUR=49;
 export default async function handler(req,res) {
@@ -56,7 +57,8 @@ export default async function handler(req,res) {
   const rawMinutes=Number(appt.duration);
   const appointmentMinutes=Number.isInteger(rawMinutes)&&rawMinutes>0&&rawMinutes<=180?rawMinutes:null;
   return res.status(200).json({eligible:true,appointmentType:'online',paid:true,
-   canStart:process.env.PULSE_ONLINE_PAID_SESSION_ENABLED==='true',appointmentAt,appointmentMinutes});
+   canStart:process.env.PULSE_ONLINE_PAID_SESSION_ENABLED==='true',appointmentAt,appointmentMinutes,
+   meetingJoinUrl:extractVideoUrl(appt.location)});
  }catch(error){
   console.error('[pulse-online-verify] upstream verification unavailable',String(error?.message||error).replace(/[\r\n]/g,' '));
   return res.status(503).json({error:'booking_verification_unavailable'});
