@@ -15,6 +15,11 @@ for(const path of [src+'app.js',src+'online-passport-dashboard.js',
 const app=readFileSync(src+'app.js','utf8');
 const html=readFileSync(src+'index.html','utf8');
 const css=readFileSync(src+'online-passport-dashboard.css','utf8');
+const onlineReport=readFileSync(src+'online/session/intake-report.js','utf8');
+const onlineReportCss=readFileSync(src+'online/session/styles.css','utf8');
+assert.ok(onlineReport.includes('report-reading-guide')&&onlineReport.includes('report-measure-details'),'First page editorial, detailed measurements collapsed');
+assert.ok(onlineReport.includes('download-pdf-top')&&onlineReport.includes('Retrouver mon bilan dans Pulse'),'Direct PDF export and returning patient path');
+assert.ok(onlineReportCss.includes('.report-quick-actions')&&onlineReportCss.includes('.report-measure-details'),'Responsive report readability');
 assert.ok(app.includes("['passport','Mon passeport']"),'Persistent patient nav');
 assert.ok(app.includes("sb.from('motion_online_sessions')"),'Read existing private records');
 assert.ok(app.includes(".eq('user_id',S.user.id)"),'Owner scoping in client (RLS enforced in database)');
