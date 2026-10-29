@@ -125,7 +125,7 @@ export function mountMotionController(root,task,record,state,callbacks){
   const tag=q('#pose-quality'),hud=q('#camera-hud');
   if(hud)hud.hidden=false;
   if(tag){tag.textContent=result.message;tag.classList.toggle('tracked',state.bodyReady);}
-  if(!state.sessionActive&&!state.sessionFinished)go.disabled=!state.bodyReady;
+  if(!state.sessionActive&&!state.sessionFinished&&!state.countdownActive)go.disabled=!state.bodyReady;
   if(time-lastMessageAt>580){info(result.valid?'33 points détectés · traitement local · caméra fixe':result.message);lastMessageAt=time;}
   if(!state.sessionActive||!result.valid)return;
   if(task.id==='posture')value(result.goodFrames||0);
