@@ -46,7 +46,21 @@ export function roadmapMarkup(answers,results,blocked){
  '<p>Une routine douce, un journal quotidien à remplir, des étapes progressives et un point de contrôle à 4–6 semaines.</p>'+
  '<a class="roadmap-btn secondary" href="#pulse-daily">Découvrir mon programme ↓</a></article></div></div></section>';
 }
-const itemsHtml=(program,day,week)=>{
+// Content order only: reflect the weakest self-reported domains without inferring an exercise prescription.
+const priorityExercises=(passport)=>{
+ const byDomain={
+  mobility:['walk','chair','mobility'],
+  comfort:['mobility','recover','walk'],
+  recovery:['recover','mobility','walk'],
+  activity:['walk','chair','balance']
+ };
+ const preferred=[...new Set((passport.focus||[]).flatMap(d=>byDomain[d.id]||[]))];
+ return [...DAILY_EXERCISES].sort((a,b)=>{
+  const ai=preferred.indexOf(a.id),bi=preferred.indexOf(b.id);
+  return (ai<0?99:ai)-(bi<0?99:bi);
+ });
+};
+const itemsHtml=(program,day,week,passport)=>{
  const date=today(),entry=program?.entries?.[date]||{completed:[],effort:null,note:''};
  const weekPlan=planTargets(week);
  const doses={
@@ -58,8 +72,9 @@ const itemsHtml=(program,day,week)=>{
  };
  return '<div class="daily-week"><strong>Semaine '+week+' / 4 · Jour '+day+' / 28</strong>'+
  '<p>Progression indicative : rester à une semaine antérieure si la séance semble difficile. Aucun exercice ne doit déclencher de douleur inhabituelle.</p></div>'+
+ '<p class="daily-personal-note"><strong>Ordre suggéré selon vos réponses :</strong> '+e((passport.focus||[]).map(d=>d.title.toLowerCase()).join(' · ')||'entretien régulier')+'. Choisissez uniquement les activités accessibles ; les quantités restent indicatives.</p>'+ 
  '<fieldset class="daily-checklist"><legend>Mes activités du jour · '+e(date)+'</legend>'+
- DAILY_EXERCISES.map(ex=>'<label class="daily-task"><input type="checkbox" data-daily-exercise="'+ex.id+'" '+
+ priorityExercises(passport).map(ex=>'<label class="daily-task"><input type="checkbox" data-daily-exercise="'+ex.id+'" '+
  (entry.completed?.includes(ex.id)?'checked':'')+'>'+
  '<span><strong>'+e(ex.title)+'</strong><small>'+e(doses[ex.id])+'</small>'+
  '<em>'+e(ex.instruction)+'</em></span></label>').join('')+'</fieldset>'+
@@ -85,7 +100,7 @@ export function dailyProgramMarkup(answers,results,blocked,program=null){
  '<button type="button" class="action" id="start-pulse-daily">Activer mon journal Pulse Daily</button></div>':
  '<div class="daily-live"><div class="daily-progress"><strong>'+progress.daysLogged+' / 28</strong><span>jours avec une activité cochée</span>'+
  '<div class="daily-track"><i style="width:'+progress.percent+'%"></i></div></div>'+
- itemsHtml(record,day,week)+'</div>'):
+ itemsHtml(record,day,week,passport)+'</div>'):
  '<div class="daily-hold"><strong>Programme autonome non proposé pour l’instant</strong>'+
  '<p>'+e(priorityNarrative(passport))+'</p>'+
  '<p>Un échange en consultation permet d’adapter les exercices à votre situation.</p></div>')+
