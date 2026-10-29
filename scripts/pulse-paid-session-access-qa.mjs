@@ -52,6 +52,8 @@ assert.ok(app.includes("progressStore=scopedProgressStorage(store,user.id,bookin
 assert.ok(app.includes('loadSecureDossier(session.data.session.access_token,bookingId)'), 'paid users must load their private dossier');
 assert.ok(app.includes('const restored=paidContext?'), 'paid sessions restore remote data, not another account local state');
 assert.ok(!app.includes("role.data?.role!=='admin'"),'non-admin paid branch must exist');
+assert.ok(app.includes("const activationLink=PULSE_ROOT+'online/activate/'+prefilled"),'preserve a valid booking reference after login and on previews');
+assert.ok(activation.includes("PULSE_ROOT=location.pathname.startsWith('/pulse-v14/')"),'preserve preview and custom-domain routes');
 assert.ok(activation.includes("result.canStart===true"),'client does not link a paid session while disabled');
-assert.ok(activation.includes("href=\"/online/session/?appointment="),'successful payment supplies booking reference');
+assert.ok(activation.includes("href=\"'+PULSE_ROOT+'online/session/?appointment="),'successful payment supplies booking reference');
 console.log('[pulse-paid-session-access-qa] server-verified booking, disabled default gate, per-user isolation and access redirects passed');
