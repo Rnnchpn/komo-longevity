@@ -1,0 +1,57 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+const sb=createClient('https://uqlolefsiktbznnymriy.supabase.co','sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const root=document.querySelector('#activation-app');
+const params=new URLSearchParams(location.search);
+const booking=(params.get('appointment')||'').trim();
+const clean=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function message(text){const x=document.querySelector('#activate-message');if(x)x.textContent=text;}
+function title(content){root.innerHTML='<span class="overline">KŌMØ MOTION ONLINE · ACTIVATION SÉCURISÉE</span><h1>Votre espace.<br><em>Votre mouvement.</em></h1>'+content;}
+function login(){
+ title('<p>Après votre réservation Acuity, identifiez-vous avec la même adresse e-mail que celle utilisée pour le paiement. Vous recevrez un lien de connexion sécurisé par e-mail.</p>'+
+ '<form id="activate-form"><div class="question"><label for="activate-email">Votre adresse e-mail de réservation</label><input class="activate-input" id="activate-email" name="email" type="email" autocomplete="email" required placeholder="vous@exemple.com"></div>'+
+ '<div class="question"><label for="activate-id">Référence du rendez-vous Acuity</label><input class="activate-input" id="activate-id" name="appointment" type="text" inputmode="numeric" pattern="[0-9]+" value="'+clean(booking)+'" required placeholder="N° de rendez-vous"></div>'+
+ '<p>Ce premier e-mail vérifie uniquement votre identité. L’accès à la séance et aux résultats dépendra également de la vérification de votre paiement.</p>'+
+ '<button class="action" type="submit" id="send">Recevoir mon lien de connexion →</button><p class="message" id="activate-message" role="status"></p></form>'+
+ '<div class="notice">Vous avez déjà un compte Pulse ? <a href="/#connexion">Connectez-vous ici</a>, puis revenez sur cette page pour vérifier votre réservation.</div>');
+ document.querySelector('#activate-form').onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(e.currentTarget);
+  const email=String(fd.get('email')||'').trim().toLowerCase(),id=String(fd.get('appointment')||'').trim();
+  if(!/^[1-9][0-9]{0,11}$/.test(id))return message('Vérifiez le numéro de rendez-vous fourni dans votre confirmation Acuity.');
+  const button=document.querySelector('#send');button.disabled=true;
+  message('Envoi du lien de connexion…');
+  // The redirect contains only a booking ID, never personal or health information.
+  const url=location.origin+'/online/activate/?appointment='+encodeURIComponent(id);
+  const r=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true,emailRedirectTo:url}});
+  button.disabled=false;
+  message(r.error?'Impossible d’envoyer le lien. Vérifiez vos coordonnées ou contactez l’équipe.':'Si cette adresse peut recevoir nos messages, un lien sécurisé de connexion vient d’être demandé. Vérifiez votre messagerie, puis ouvrez-le sur cet appareil.');
+ };
+}
+function paidUser(user,accessToken){
+ title('<p>Vous êtes connecté avec <strong>'+clean(user.email)+'</strong>. Nous devons maintenant confirmer votre réservation KŌMØ Online et son règlement avant de poursuivre.</p>'+
+ '<form id="verify-form"><div class="question"><label for="verify-id">Numéro de réservation Acuity</label><input class="activate-input" id="verify-id" type="text" inputmode="numeric" pattern="[0-9]+" value="'+clean(booking)+'" placeholder="Numéro de rendez-vous" required></div>'+
+ '<button class="action" type="submit" id="verify-btn">Vérifier ma réservation réglée →</button><p class="message" id="activate-message" role="status"></p></form>'+
+ '<div class="notice">La vérification utilise votre identité Pulse authentifiée. Elle échoue si l’adresse e-mail ne correspond pas au rendez-vous Acuity, si la prestation est différente, annulée ou si le règlement intégral n’est pas confirmé.</div>');
+ document.querySelector('#verify-form').onsubmit=async e=>{
+  e.preventDefault();
+  const id=String(document.querySelector('#verify-id').value).trim();
+  if(!/^[1-9][0-9]{0,11}$/.test(id))return message('Numéro de réservation invalide.');
+  const b=document.querySelector('#verify-btn');b.disabled=true;message('Vérification du règlement auprès d’Acuity…');
+  try{
+   const r=await fetch('/api/pulse-online-verify',{method:'POST',headers:{'content-type':'application/json',authorization:'Bearer '+accessToken},body:JSON.stringify({appointmentId:id}),credentials:'omit',cache:'no-store'});
+   const result=await r.json();
+   if(!r.ok||!result.eligible){b.disabled=false;message(result.error==='payment_not_confirmed'?'Paiement non confirmé par Acuity. Vérifiez votre règlement et contactez-nous si nécessaire.':result.error==='booking_verification_not_configured'||r.status===503?'Service de vérification momentanément indisponible. Contactez contact@komolongevity.com.':'Réservation non vérifiée. Vérifiez que le numéro et votre adresse e-mail correspondent à la confirmation Acuity.');return;}
+   title('<div class="notice" style="background:#e9f3e6;border-color:#4f8a60;color:#2b5a3a"><strong>✓ Votre réservation Online réglée est vérifiée.</strong></div>'+
+   '<p>Votre adresse e-mail a été confirmée. Vous pouvez préparer votre caméra en attendant votre séance accompagnée. Utilisez le lien de visioconférence indiqué dans votre confirmation Acuity pour rejoindre votre intervenant.</p>'+
+   '<div class="actions"><a class="action" href="/online/">Préparer ma webcam →</a><a class="action secondary" href="/">Accéder à Pulse</a></div>'+
+   '<p>Le rattachement automatique du dossier Online, le formulaire confidentiel et la publication des résultats sont en cours de mise en service. Cette vérification ne signifie pas que le dossier clinique est déjà créé.</p>');
+  }catch(error){b.disabled=false;message('Impossible de joindre le système de réservation. Réessayez plus tard.');}
+ };
+}
+async function boot(){
+ const auth=await sb.auth.getUser();
+ if(!auth.data?.user||!auth.data.user.email_confirmed_at)return login();
+ const session=await sb.auth.getSession();
+ if(!session.data?.session?.access_token)return login();
+ paidUser(auth.data.user,session.data.session.access_token);
+}
+boot().catch(()=>login());
