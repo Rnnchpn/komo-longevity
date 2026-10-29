@@ -100,6 +100,7 @@ function test(){
  const t=TESTS[state.task],record=state.results[t.id]||{value:0,status:'pending',source:'webcam'};
  wrap(motionMarkup(t,state.task,TESTS.length));
  currentMotionCleanup=mountMotionController(root,t,record,state,{
+  checkpoint(){persistProgress();},
   advance(){
    state.remaining=0;
    if(state.task<TESTS.length-1)state.task++;
