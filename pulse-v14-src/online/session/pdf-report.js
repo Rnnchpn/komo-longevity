@@ -76,7 +76,7 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
 // No user data is sent to a server: PDF rendering is performed in the browser.
 // The external library module is loaded on the user's download click, and is
 // never passed any user data in a URL or request body.
-export async function downloadMotionPdf(data,{previewWindow=null}={}){
+export async function downloadMotionPdf(data,{asBlobUrl=false}={}){
  if(!data||data.version!==PDF_REPORT_VERSION)throw new Error('invalid_report');
  const {jsPDF}=await import('https://esm.sh/jspdf@4.2.1');
  if(typeof jsPDF!=='function')throw new Error('pdf_engine_unavailable');
@@ -322,20 +322,12 @@ export async function downloadMotionPdf(data,{previewWindow=null}={}){
   pdf.text(i+' / '+count,RIGHT,H-12,{align:'right'});
  }
  const filename='KOMO_Motion_'+(data.mode==='ONLINE49'?'Passeport_Online49_':'Rapport_')+data.date+'.pdf';
- if(previewWindow){
-  // An iOS/Safari preview tab must be opened synchronously by the user's click,
-  // before the asynchronous PDF engine is loaded, to avoid popup blocking.
-  const blob=pdf.output('blob');
-  const url=URL.createObjectURL(blob);
-  try{
-   if(previewWindow.closed)throw Error('preview_window_closed');
-   previewWindow.location.replace(url);
-   // Free the temporary blob at most when the originating session ends.
-   window.addEventListener('pagehide',()=>URL.revokeObjectURL(url),{once:true});
-  }catch(error){
-   URL.revokeObjectURL(url);
-   throw error;
-  }
- }else pdf.save(filename);
+ if(asBlobUrl){
+  // iOS Safari: render first, then show a user-clickable same-origin blob URL.
+  // The user taps a visible link; no popup or auto-download needs transient activation.
+  // This URL references an in-memory PDF and never uploads its contents.
+  return {filename,url:URL.createObjectURL(pdf.output('blob'))};
+ }
+ pdf.save(filename);
  return filename;
 }
