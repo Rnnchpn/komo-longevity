@@ -93,36 +93,52 @@ function installPulseBookingEntry(){
     {n:'03',kind:'EN PRÉSENTIEL',title:'Bilan physique Motion',detail:'Une analyse instrumentée plus approfondie avec l’équipe KŌMØ.',meta:'Paris ou Cannes · sur rendez-vous',href:'https://komolongevity.com/fr/bilan/',tone:'motion'}
   ];
   story.innerHTML=`
+    <div class="pulse-entry-kinetic" aria-hidden="true"><svg viewBox="0 0 600 600" role="presentation" focusable="false"><defs><radialGradient id="pulseSculpture" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e7d4a6" stop-opacity=".18"/><stop offset="100%" stop-color="#e7d4a6" stop-opacity="0"/></radialGradient></defs><circle cx="300" cy="300" r="285" fill="url(#pulseSculpture)"/><g fill="none" stroke="#d5c49c"><ellipse cx="300" cy="300" rx="215" ry="85" transform="rotate(-38 300 300)" stroke-opacity=".25" stroke-width="1.25"/><ellipse cx="300" cy="300" rx="240" ry="117" transform="rotate(-38 300 300)" stroke-opacity=".15"/><ellipse cx="300" cy="300" rx="265" ry="147" transform="rotate(-38 300 300)" stroke-opacity=".10"/><ellipse cx="300" cy="300" rx="190" ry="67" transform="rotate(36 300 300)" stroke-opacity=".17"/><path d="M125 346C220 205 365 204 472 300" stroke-opacity=".19" stroke-width="2"/></g><circle cx="470" cy="300" r="4" fill="#e1c990"/></svg></div>
     <div class="pulse-entry-brand"><a class="brand light" href="https://komolongevity.com/fr/" aria-label="Retour au site KŌMØ">KŌMØ<small>PULSE · LONGEVITY IN MOTION</small></a><span class="pulse-entry-brand-caption">VOTRE ESPACE PERSONNEL</span></div>
     <div class="pulse-entry-story">
-      <span class="overline light">TROIS FAÇONS DE COMMENCER</span>
-      <h1>Le mouvement,<br><em>à votre mesure.</em></h1>
-      <p class="pulse-entry-lead">Découvrez les bilans KŌMØ, puis choisissez votre rendez-vous. Vos résultats et votre progression se retrouvent ensuite dans Pulse.</p>
+      <span class="overline light pulse-entry-kicker"><i aria-hidden="true"></i> KŌMØ · L'ART DE BOUGER</span>
+      <h1>Le mouvement,<br><em>autrement.</em></h1>
+      <p class="pulse-entry-lead">Trois expériences pour comprendre votre mouvement. Un seul espace privé pour retrouver vos résultats et suivre votre trajectoire.</p>
       <nav class="pulse-offer-list" aria-label="Les trois bilans KŌMØ">
         ${offers.map(o=>`<a class="pulse-offer pulse-offer--${o.tone}" href="${o.href}" target="_blank" rel="noopener noreferrer" aria-label="Découvrir ${o.title} sur le site KŌMØ">
-          <span class="pulse-offer-number">${o.n}</span><span class="pulse-offer-content"><small>${o.kind}</small><strong>${o.title}</strong><span>${o.detail}</span><em>${o.meta}</em></span><span class="pulse-offer-arrow" aria-hidden="true">↗</span>
+          <span class="pulse-offer-number">${o.n}</span><span class="pulse-offer-art" aria-hidden="true"><span class="pulse-offer-art-ring"></span><span class="pulse-offer-art-path"></span><span class="pulse-offer-art-core"></span></span><span class="pulse-offer-content"><small>${o.kind}</small><strong>${o.title}</strong><span>${o.detail}</span><em>${o.meta}</em></span><span class="pulse-offer-arrow" aria-hidden="true">↗</span>
         </a>`).join('')}
       </nav>
     </div>
-    <div class="pulse-entry-story-footer"><span>Un bilan non médical · une progression suivie</span><a href="https://komolongevity.com/fr/" target="_blank" rel="noopener noreferrer">Découvrir KŌMØ ↗</a></div>`;
+    <div class="pulse-entry-story-footer"><span class="pulse-entry-foot-mark">✧</span><span>Un bilan non médical · une progression suivie</span><a href="https://komolongevity.com/fr/" target="_blank" rel="noopener noreferrer">Découvrir KŌMØ ↗</a></div>`;
   const entry=document.createElement('section');
   entry.className='pulse-entry-panel';
   entry.setAttribute('aria-labelledby','pulseCreateTitle');
   entry.innerHTML=`
-    <div class="pulse-entry-panel-header"><span class="pulse-entry-wordmark">KŌMØ <b>Pulse</b></span><span class="pulse-entry-secure">ESPACE PERSONNEL</span></div>
-    <span class="overline">NOUVEAU CHEZ KŌMØ ?</span>
-    <h2 id="pulseCreateTitle">Créez votre<br>espace patient.</h2>
-    <p class="pulse-entry-panel-intro">Votre inscription commence par une réservation. Choisissez votre bilan et votre créneau directement dans Acuity.</p>
+    <div class="pulse-entry-panel-header"><span class="pulse-entry-wordmark">KŌMØ <b>Pulse</b></span><span class="pulse-entry-secure">ACCÈS PRIVÉ · SÉCURISÉ</span></div>
+    <div class="pulse-entry-monogram" aria-hidden="true"><span class="pulse-entry-monogram-halo"></span><span class="pulse-entry-monogram-letter">K</span><small>LONGEVITY IN MOTION</small></div>
+    <span class="overline pulse-entry-onboarding-kicker">BIENVENUE CHEZ KŌMØ</span>
+    <h2 id="pulseCreateTitle">Votre espace.<br><em>Votre trajectoire.</em></h2>
+    <p class="pulse-entry-panel-intro">Votre expérience commence par un rendez-vous. Choisissez votre bilan et votre créneau, puis activez votre espace personnel par e-mail.</p>
     <ol class="pulse-entry-steps">
       <li><span>01</span><div><strong>Choisissez votre bilan</strong><small>Découvrez les offres et les créneaux disponibles dans Acuity.</small></div></li>
       <li><span>02</span><div><strong>Validez votre adresse e-mail</strong><small>Après vérification du rendez-vous, une invitation vous permet d’activer votre compte.</small></div></li>
       <li><span>03</span><div><strong>Connectez-vous à Pulse</strong><small>Un espace privé pour vos questionnaires, résultats et suivis.</small></div></li>
     </ol>
     <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${bookingUrl}" target="_blank" rel="noopener noreferrer">Créer mon compte et réserver <span aria-hidden="true">↗</span></a>
-    <p class="pulse-entry-assurance">Aucun compte patient n’est ouvert automatiquement avant vérification du rendez-vous et activation par e-mail.</p>
+    <p class="pulse-entry-assurance"><span aria-hidden="true">◇</span> Aucun compte patient n’est ouvert automatiquement avant vérification du rendez-vous et activation par e-mail.</p>
     <div class="pulse-entry-login-bridge"><span>Vous avez déjà un compte ?</span><button type="button" class="pulse-login-link" id="pulseShowLogin">Se connecter →</button></div>
     <div class="pulse-entry-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
   panel.prepend(entry);
+  const finePointer=window.matchMedia?.('(hover:hover) and (pointer:fine)');
+  if(finePointer?.matches){
+    story.querySelectorAll('.pulse-offer').forEach(card=>{
+      card.addEventListener('pointermove',event=>{
+        const bounds=card.getBoundingClientRect();
+        card.style.setProperty('--pulse-pointer-x',(event.clientX-bounds.left)+'px');
+        card.style.setProperty('--pulse-pointer-y',(event.clientY-bounds.top)+'px');
+      },{passive:true});
+      card.addEventListener('pointerleave',()=>{
+        card.style.removeProperty('--pulse-pointer-x');
+        card.style.removeProperty('--pulse-pointer-y');
+      });
+    });
+  }
   form.classList.add('pulse-existing-login');
   const back=document.createElement('button');
   back.type='button';
