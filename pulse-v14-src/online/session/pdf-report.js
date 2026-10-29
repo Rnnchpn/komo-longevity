@@ -53,7 +53,9 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
  const date=generatedAt instanceof Date&&!Number.isNaN(generatedAt.getTime())?
   generatedAt.toISOString().slice(0,10):new Date().toISOString().slice(0,10);
  return {
-  version:PDF_REPORT_VERSION,date,mode:options?.mode==='PILOTE'?'PILOTE':'DEMONSTRATION',
+  version:PDF_REPORT_VERSION,date,mode:options?.mode==='ONLINE49'?'ONLINE49':options?.mode==='PILOTE'?'PILOTE':'DEMONSTRATION',
+  appointmentId:options?.mode==='ONLINE49'&&/^[1-9][0-9]{0,11}$/.test(String(options?.appointmentId??''))?String(options.appointmentId):null,
+  reportStatus:options?.mode==='ONLINE49'?'initial_unreviewed':'demo',
   passport:buildMotionPassport(answers,results,blocked),
   program:options?.program?.version==='KOMO_PULSE_DAILY_V1'?{progress:programProgress(options.program),startedAt:options.program.startedAt}:null,
   questionnaire:{complete:p.complete,index:p.complete?p.profileIndex:null,
@@ -62,7 +64,7 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
    })),focus:questionnaireFocus(answers),groups},
   observations,motion,ageReference:normativeSummary(answers,results,results.sts?.normative??{}),blocked:Boolean(blocked),
   limitations:[
-   'Bilan fonctionnel non medical - cette demonstration ne constitue pas un diagnostic.',
+   'Bilan fonctionnel non medical - ce document ne constitue pas un diagnostic.',
    'Les questionnaires sont propres a KOMO et ne sont pas des instruments cliniquement valides.',
    'Les estimations de la webcam, le comptage et la photo sagittale sont experimentaux.',
    'La photo de surface ne mesure ni C7-S1 ni la SVA radiographique.',
@@ -90,7 +92,7 @@ export async function downloadMotionPdf(data){
   pdf.text('KOMO',M,19);
   pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(220,207,186);
   pdf.text('LONGEVITY IN MOTION',M,26);
-  pdf.text('MOTION ONLINE / '+(data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
+  pdf.text('MOTION ONLINE / '+(data.mode==='ONLINE49'?'BILAN ONLINE 49 EUR':data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
   pdf.setTextColor(215,201,181);pdf.text(normal('Date : '+data.date),RIGHT,27,{align:'right'});
   y=49;
  }
@@ -126,9 +128,14 @@ export async function downloadMotionPdf(data){
  const passport=data.passport;
  pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(gold);
  pdf.text('MOTION PASSPORT  /  PREMIER BILAN',M,y);
+ if(data.mode==='ONLINE49'&&data.appointmentId){
+  pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(muted);
+  pdf.text(normal('Dossier de reservation : '+data.appointmentId),RIGHT,y,{align:'right'});
+ }
  y+=12;
  line('Votre mouvement. Votre point de depart.',{size:19,bold:true,color:green,leading:8});
  line('Ce passeport relie vos habitudes, votre ressenti et vos observations fonctionnelles.',{size:8.8,color:muted});
+ if(data.mode==='ONLINE49')line('Compte rendu initial produit apres votre bilan guide en ligne. Les observations restent a discuter pendant la restitution en visioconference.',{size:8.2,color:muted,leading:4.6});
  y+=4;
  space(44);
  pdf.setFillColor(...green);pdf.roundedRect(M,y,CONTENT,44,4,4,'F');
@@ -242,6 +249,11 @@ export async function downloadMotionPdf(data){
  // PAGE 4 - next action: clinic or daily guided follow-up.
  nextPage();
  title('5. Votre feuille de route');
+ if(data.mode==='ONLINE49'){
+  line('Restitution en visioconference',{size:11,bold:true,color:green,leading:6});
+  line('Lors de votre rendez-vous accompagne, reprenez vos resultats et les mesures a verifier avec l operateur. Conservez votre lien de visioconference transmis dans la confirmation Acuity.',{size:8.7,color:muted,leading:5});
+  line('Ce document est un bilan fonctionnel initial : aucune validation professionnelle n est attestee automatiquement.',{size:8.4,color:muted,leading:5});
+ }
  line('Les deux suites possibles du bilan',{size:11,bold:true,color:green,leading:6});
  y+=6;
  space(35);
@@ -306,10 +318,10 @@ export async function downloadMotionPdf(data){
  for(let i=1;i<=count;i++){
   pdf.setPage(i);pdf.setDrawColor(221,209,191);pdf.line(M,H-17,RIGHT,H-17);
   pdf.setFont('helvetica','normal');pdf.setFontSize(7.5);ink(muted);
-  pdf.text('KOMO MOTION  /  DOCUMENT EXPERIMENTAL NON MEDICAL',M,H-12);
+  pdf.text(data.mode==='ONLINE49'?'KOMO MOTION / BILAN ONLINE NON MEDICAL - INITIAL':'KOMO MOTION / DOCUMENT EXPERIMENTAL NON MEDICAL',M,H-12);
   pdf.text(i+' / '+count,RIGHT,H-12,{align:'right'});
  }
- const filename='KOMO_Motion_Rapport_'+data.date+'.pdf';
+ const filename='KOMO_Motion_'+(data.mode==='ONLINE49'?'Passeport_Online49_':'Rapport_')+data.date+'.pdf';
  pdf.save(filename);
  return filename;
 }
