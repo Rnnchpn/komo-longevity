@@ -82,7 +82,7 @@
   if(!['map','yachts','experiences','market'].includes(view))return;
   currentScreen=view;
   document.body.dataset.obView=view;
-  $('#obDock [data-ob-screen]').forEach(btn=>{
+  $$('#obDock [data-ob-screen]').forEach(btn=>{
    const selected=btn.dataset.obScreen===view;
    btn.classList.toggle('is-active',selected);
    btn.setAttribute('aria-current',selected?'page':'false');
@@ -507,10 +507,10 @@
  }
 
  function wire(){
-  $('#obDock [data-ob-screen]').forEach(b=>b.addEventListener('click',()=>chooseScreen(b.dataset.obScreen,{focus:true})));
-  $('#obActivityPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeActivityPage+=Number(b.dataset.step);paginateActivity()}));
-  $('#obMarketPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeMarketPage+=Number(b.dataset.step);paginateMarket()}));
-  $('#obFleetPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeFleetPage+=Number(b.dataset.step);paginateFleet()}));
+  $$('#obDock [data-ob-screen]').forEach(b=>b.addEventListener('click',()=>chooseScreen(b.dataset.obScreen,{focus:true})));
+  $$('#obActivityPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeActivityPage+=Number(b.dataset.step);paginateActivity()}));
+  $$('#obMarketPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeMarketPage+=Number(b.dataset.step);paginateMarket()}));
+  $$('#obFleetPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeFleetPage+=Number(b.dataset.step);paginateFleet()}));
   window.addEventListener('resize',()=>{paginateActivity();paginateMarket();paginateFleet();if(map)requestAnimationFrame(()=>map.invalidateSize())});
 
   $$('#obCities button[data-city]').forEach(btn=>btn.addEventListener('click',()=>setCity(btn.dataset.city)));
