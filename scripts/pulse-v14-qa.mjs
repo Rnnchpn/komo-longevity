@@ -179,6 +179,10 @@ const checks=[
  ['patient title',html.includes('Votre santé en mouvement')],
  ['single entry script',(html.match(/<script/g)||[]).length===1],
  ['approved patient stylesheet loaded after mobile overrides',html.indexOf('pulse-patient-editorial-v1.css')>html.indexOf('pulse-mobile-first-v3.css')],
+
+ ['existing profile photo restored from private user storage',app.includes("avatar_config?.mode==='photo'")&&app.includes("storage.from('profile-avatars').createSignedUrl(path,3600)")&&app.includes('p-account-avatar')&&app.includes('p-overview-photo')],
+ ['authenticated photo is visible on desktop and mobile',editorialCss.includes('.p-overview-photo img')&&editorialCss.includes('.p-greeting-photo img')&&editorialCss.includes('@media(max-width:800px)')],
+ ['no generic marketing welcome slogans',!app.includes('Vos rendez-vous et votre bilan, au même endroit. Rien de plus.')&&!app.includes('Une étape<br>à la fois.')&&!app.includes('La bonne information, au moment où elle est utile.')],
  ['approved one-page patient design',app.includes("const PATIENT_NAV=[['home','Mon espace']]")&&app.includes('function patientHome(){')&&app.includes('p-overview')&&app.includes('p-two-cards')&&app.includes('p-topbar')&&editorialCss.includes('#F5F6F6')],
  ['appointment is actually future, not stale demo',app.includes('const upcoming=chronological.find')&&app.includes('const appointment=inProgress||upcoming')&&app.includes('Aucun rendez-vous à venir')&&!app.includes('appt=next||ordered.at(-1)')],
  ['optional one-page actions and content',app.includes('id="p-preparation"')&&app.includes('id="p-result"')&&app.includes('id="p-history"')&&app.includes('data-p-open="preparation"')],
