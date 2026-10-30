@@ -17,7 +17,7 @@ const OP_STEPS=[
  ['qc_release','45–55','Contrôle qualité','Pulse']
 ];
 
-const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
+const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,ownPatient:null,ownPatients:[],patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
 
 const $=s=>document.querySelector(s);
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -74,7 +74,7 @@ function domains(){return[
 
 async function authView(message=''){
   $('#app').innerHTML=`<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">VOTRE SANTÉ EN MOUVEMENT</span><h1>Comprendre votre corps.<br><em>Simplement.</em></h1><p>Votre bilan, vos résultats et votre plan KŌMØ réunis au même endroit — sans jargon, étape par étape.</p></div><div class="login-foot">Données de santé privées · Accès sécurisé</div></section><section class="login-panel"><form id="login" class="login-card"><span class="overline">KŌMØ PULSE</span><h2>Bienvenue</h2><p>Connectez-vous pour reprendre votre parcours là où vous l’avez laissé.</p><label><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label><label><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required minlength="6"></label><button class="button primary wide">Se connecter</button><button class="text-button" type="button" id="reset">Mot de passe oublié ?</button>${message?`<div class="form-error">${esc(message)}</div>`:''}</form></section></main>`;
-  $('#login').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const r=await sb.auth.signInWithPassword({email:String(f.get('email')),password:String(f.get('password'))});if(r.error)return authView('Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.');if(r.data?.user?.id==='eef2c1ed-3872-47a7-84da-0f70b975c96f'&&r.data.user.email_confirmed_at){window.location.assign('/online/session/');return;}await boot()};
+  $('#login').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const r=await sb.auth.signInWithPassword({email:String(f.get('email')),password:String(f.get('password'))});if(r.error)return authView('Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.');await boot()};
   $('#reset').onclick=async()=>{const email=prompt('Votre adresse e-mail');if(!email)return;const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});toast(r.error?'Impossible d’envoyer l’e-mail.':'E-mail de réinitialisation envoyé.')};
 
   installPulseBookingEntry();
@@ -179,11 +179,24 @@ async function loadIdentity(){
   const u=await sb.auth.getUser();S.user=u.data.user||null;if(!S.user)return false;
   S.profile=(await safe(sb.from('profiles').select('*').eq('id',S.user.id).maybeSingle())).data||{};
   const role=(await safe(sb.from('account_roles').select('role').eq('user_id',S.user.id).maybeSingle())).data;S.role=role?.role||'member';
-  S.patient=(await safe(sb.from('patients').select('*').eq('patient_user_id',S.user.id).maybeSingle())).data||null;
+  // A single authenticated user may have several linked patient records.
+  // Never use maybeSingle() here: duplicates would incorrectly disable patient mode.
+  const own=(await safe(sb.from('patients').select('*').eq('patient_user_id',S.user.id).eq('status','active').order('created_at',{ascending:false}).limit(50))).data||[];
+  S.ownPatients=own.filter(p=>p.patient_user_id===S.user.id);
   if(hasPro()){
     const mr=(await safe(sb.from('organization_members').select('*,organizations(*)').eq('user_id',S.user.id).eq('status','active'))).data||[];
     S.membership=mr[0]||null;S.org=S.membership?.organizations||null;
-    const saved=localStorage.getItem('komo_v14_mode');S.mode=saved==='patient'&&S.patient?'patient':'pro';
+  }else{S.membership=null;S.org=null;}
+  const savedOwnId=localStorage.getItem('komo_v14_self_patient');
+  S.ownPatient=S.ownPatients.find(p=>p.id===savedOwnId)
+    ||S.ownPatients.find(p=>S.org?.id&&p.organization_id===S.org.id)
+    ||S.ownPatients.find(p=>!/(?:^|[-_])DEMO(?:[-_]|$)/i.test(String(p.external_reference||'')))
+    ||S.ownPatients[0]||null;
+  // This is always the logged-in user's own record; pro-selected dossiers never become it.
+  S.patient=S.ownPatient;
+  if(hasPro()){
+    const saved=localStorage.getItem('komo_v14_mode');
+    S.mode=saved==='patient'&&Boolean(S.ownPatient)?'patient':'pro';
   }else S.mode='patient';
   return true;
 }
@@ -210,7 +223,7 @@ async function loadPro(){
   const os=await safe(sb.from('pulse_operator_sessions').select('*').eq('patient_id',p?.id||'00000000-0000-0000-0000-000000000000').in('status',['draft','running','paused','review']).order('created_at',{ascending:false}).limit(1));
   S.schema.operator=!os.error;S.opSession=os.data?.[0]||null;S.opSteps=S.opSession?((await safe(sb.from('pulse_operator_steps').select('*').eq('operator_session_id',S.opSession.id).order('sequence_order',{ascending:true}))).data||[]):[];
 }
-async function loadAll(){if(S.mode==='pro'&&hasPro())await loadPro();else await loadPatientContext(S.patient)}
+async function loadAll(){if(S.mode==='pro'&&hasPro())await loadPro();else await loadPatientContext(S.ownPatient)}
 
 function navItems(){return S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
@@ -221,12 +234,12 @@ function shell(){
   };
   const nav=navItems().map(([id,label],i)=>`<button type="button" data-route="${id}" class="nav-item ${S.route===id?'active':''}" aria-label="${esc(label)}" ${S.route===id?'aria-current="page"':''}><span class="nav-dot" aria-hidden="true">${S.mode==='pro'?(icons[id]||''):i+1}</span><span>${esc(label)}</span></button>`).join('');
   const demoLink=isOnlineTester()?'<a class="pulse-online-tester-link" href="/online/session/">◎ Ma consultation Online <small>Mode test · démarrer</small></a>':'';
-  const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'?'active':''}" ${!S.patient?'disabled':''}>Patient</button><button data-mode="pro" class="${S.mode==='pro'?'active':''}">Équipe</button></div>`:'';
-  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div><div class="pulse-mobile-tools">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div></div></header><div id="view"></div></main></div>`;
+  const mode=hasPro()?`<div class="mode-switch" role="group" aria-label="Choisir votre espace"><button type="button" data-mode="patient" class="${S.mode==='patient'?'active':''}" aria-pressed="${S.mode==='patient'}" ${!S.ownPatient?'disabled title="Aucun dossier personnel lié"':''}>Espace patient</button><button type="button" data-mode="pro" class="${S.mode==='pro'?'active':''}" aria-pressed="${S.mode==='pro'}">Équipe</button></div>`:'';
+  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div class="pulse-mobile-access">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div><div id="view"></div></main></div>`;
   document.querySelector('.app-shell')?.classList.toggle('app-shell-pro',S.mode==='pro');
   document.querySelector('.app-shell')?.setAttribute('data-pulse-view',S.route);
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
-  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;S.mode=b.dataset.mode;localStorage.setItem('komo_v14_mode',S.mode);location.hash=S.mode==='pro'?'operator':'home';await refresh()});
+  document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled||!hasPro())return;const next=b.dataset.mode;if(next==='patient'&&!S.ownPatient)return;S.mode=next;localStorage.setItem('komo_v14_mode',next);history.replaceState(null,'',location.pathname+location.search+'#'+(next==='pro'?'operator':'home'));await refresh()});
   $('#logout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
   $('#pulse-mobile-logout').onclick=$('#logout').onclick;
 }
@@ -332,7 +345,7 @@ function render(){
   else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
-async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();if(!S.patient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
+async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();if(!S.ownPatient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
 window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
 sb.auth.onAuthStateChange((_e,s)=>{if(!s)authView()});
 boot().catch(()=>authView('Une erreur est survenue. Réessayez dans quelques instants.'));

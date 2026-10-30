@@ -507,3 +507,24 @@
   .app-shell-pro .page{padding-inline:12px}
 }
 @media(prefers-reduced-motion:reduce){.op-demo-group summary:before{transition:none}}
+
+
+/* KŌMØ Pulse V14 — role-safe patient/admin switch on mobile (2026-10-30) */
+.pulse-mobile-access{display:none}
+@media(max-width:1000px){
+ .pulse-mobile-access{display:flex;align-items:center;gap:9px;margin:-9px 0 22px;min-width:0}
+ .pulse-mobile-access .mode-switch{min-width:0;flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:3px;padding:4px;border:1px solid #e8e2d9;border-radius:14px;background:#eae6df}
+ .pulse-mobile-access .mode-switch button{min-width:0;min-height:39px;padding:8px 6px;border-radius:10px;color:#756b62;font:600 12px/1.2 "DM Sans",sans-serif;white-space:normal}
+ .pulse-mobile-access .mode-switch button.active{background:#252525;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+ .pulse-mobile-access .mode-switch button:disabled{opacity:.4;cursor:not-allowed}
+ .pulse-mobile-access .pulse-mobile-logout{flex:none;min-height:45px;padding:8px 11px;border:1px solid #e8e2d9;border-radius:12px;background:#fffdf8;color:#655f58;font:600 11px/1.2 "DM Sans",sans-serif;cursor:pointer}
+ .pulse-mobile-access .mode-switch button:focus-visible,.pulse-mobile-access .pulse-mobile-logout:focus-visible{outline:3px solid #a79c8b;outline-offset:2px}
+}
+@media(max-width:700px){
+ .app-shell-pro .pulse-mobile-access{margin:-9px 0 18px}
+ .pulse-mobile-access{margin:-8px 0 18px}
+}
+@media(max-width:360px){
+ .pulse-mobile-access .mode-switch button{font-size:11px}
+ .pulse-mobile-access .pulse-mobile-logout{font-size:10px;padding-inline:8px}
+}
