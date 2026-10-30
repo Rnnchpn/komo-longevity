@@ -950,3 +950,27 @@ body.ely-public-commerce{background:#f6f3ec;color:#283028;font-family:var(--sans
 @media(prefers-reduced-motion:reduce){
  .ely-public-world-graphic,.ely-public-world-graphic:before{transition:none}
 }
+
+
+/* ELYSIUM On Board · featured Riviera destination entry & members launch */
+.ely-riviera-feature{background:linear-gradient(118deg,#253e30,#1a3126 64%,#31523d);color:#f9f5e8;overflow:hidden}
+.ely-riviera-feature-wrap{display:grid;grid-template-columns:.98fr 1.02fr;gap:clamp(36px,7vw,100px);align-items:center;padding-top:clamp(65px,7vw,110px);padding-bottom:clamp(67px,7vw,115px)}
+.ely-riviera-feature .ely-public-kicker{color:#b7c8ac}
+.ely-riviera-feature h2{font:400 clamp(65px,7.6vw,116px)/.86 var(--serif);letter-spacing:-.05em;margin:19px 0 28px}
+.ely-riviera-feature-title p{font:400 13px/1.9 var(--sans);color:#c6d2c5;margin:0}
+.ely-riviera-destinations{border-top:1px solid #d2dec54b}
+.ely-riviera-destinations a{display:grid;grid-template-columns:31px 1fr 24px;gap:13px;align-items:center;border-bottom:1px solid #d2dec54b;padding:17px 4px 17px 0;transition:background .2s,padding .2s}
+.ely-riviera-destinations a:hover{background:#ffffff13;padding-left:13px}
+.ely-riviera-destinations span:first-child{font:400 22px var(--serif);color:#bcccb7}
+.ely-riviera-destinations strong{font:400 clamp(35px,4.4vw,65px)/1 var(--serif);letter-spacing:-.02em}
+.ely-riviera-destinations span:last-child{font:400 25px var(--serif);color:#d4ddcd}
+.ely-riviera-destinations a:focus-visible{outline:2px solid #d6e2ce;outline-offset:4px}
+.ely-onboard-club-entry{display:inline-flex;align-items:center;justify-content:center;max-width:min(100%,480px);margin:14px auto 6px;padding:12px 20px;border:1px solid #a4ba9a;color:#3f6145;background:#f4f7ef;font:600 10px/1.5 var(--sans);letter-spacing:.12em;transition:background .2s}
+.ely-onboard-club-entry:hover{background:#e4ece0}
+@media(max-width:780px){
+ .ely-riviera-feature-wrap{grid-template-columns:1fr;gap:31px}
+ .ely-riviera-feature h2{font-size:clamp(68px,13vw,100px)}
+ .ely-riviera-destinations strong{font-size:clamp(37px,7vw,57px)}
+ .ely-onboard-club-entry{font-size:9px;margin-top:9px;padding:12px 14px;letter-spacing:.06em}
+}
+@media(prefers-reduced-motion:reduce){.ely-riviera-destinations a,.ely-onboard-club-entry{transition:none}}
