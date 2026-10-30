@@ -146,6 +146,10 @@ async function refreshMyItems(){
 async function refreshAdmin(){
  if(!owner)return;
  const host=$('#adminItems');host.replaceChildren();
+ const inquiries=await sb.from('elysium_guest_requests')
+ .select('id,created_at,guest_name,contact_email,city,service,role,yacht_name,requested_date,referral_code,status,logistics_note')
+ .order('created_at',{ascending:false}).limit(60);
+
  const [b,l,c]=await Promise.all([
  sb.from('elysium_brokers').select('user_id,company_name,contact_email,verification_status').order('created_at',{ascending:false}).limit(40),
  sb.from('elysium_yacht_listings').select('id,title,location_city,status,billing_status,broker_user_id').order('created_at',{ascending:false}).limit(60),
@@ -154,6 +158,30 @@ async function refreshAdmin(){
  function action(parent,label,fn){
   const btn=box('button','secondary',label);btn.type='button';btn.addEventListener('click',async()=>{btn.disabled=true;try{await fn();await refreshAdmin()}catch(e){alert(e.message||String(e))}finally{btn.disabled=false}});parent.append(btn);
  }
+
+ if(inquiries.error){
+  host.append(row('DEMANDES CLIENTS','Impossible de charger les nouvelles demandes. '+inquiries.error.message,'ERREUR'));
+ }else if(!(inquiries.data||[]).length){
+  host.append(row('DEMANDES CLIENTS','Aucune demande client à traiter pour le moment.','0 EN ATTENTE'));
+ }
+ (inquiries.data||[]).forEach(x=>{
+  const el=row('CLIENT YACHT · '+x.guest_name,
+   x.service+' · '+x.city+' · '+x.role+(x.yacht_name?' · '+x.yacht_name:'')+
+   (x.requested_date?' · '+x.requested_date:'')+
+   (x.referral_code?' · source '+x.referral_code:'')+
+   '\n'+x.contact_email+(x.logistics_note?' · '+x.logistics_note:''),x.status.toUpperCase());
+  if(x.status==='new'||x.status==='reviewing'){
+   action(el,'MARQUER CONTACTÉ',async()=>{
+    const r=await sb.rpc('elysium_update_guest_request',{p_id:x.id,p_status:'contacted'});
+    if(r.error)throw r.error;
+   });
+  }
+  const mail=box('a','secondary','RÉPONDRE AU CLIENT ↗');
+  mail.href='mailto:'+encodeURIComponent(x.contact_email)+'?subject='+encodeURIComponent('ELYSIUM · Votre demande privée')+
+   '&body='+encodeURIComponent('Bonjour,\nNous revenons vers vous au sujet de votre demande ELYSIUM '+x.service+' à '+x.city+'.\n\n');
+  mail.rel='noopener';el.append(mail);host.append(el);
+ });
+
  (b.data||[]).forEach(x=>{
   const el=row(x.company_name,x.contact_email,x.verification_status);
   if(x.verification_status==='pending')action(el,'VÉRIFIER LE BROKER',async()=>{
