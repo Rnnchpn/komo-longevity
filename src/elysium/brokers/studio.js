@@ -18,7 +18,7 @@ function setBrokerScreen(screen){
  if(screen==='admin'&&!owner)return;
  document.body.dataset.brokerScreen=screen;
  if(screen==='profile')showTab('listings');else if(screen!=='admin')showTab(screen);
- $('#brokerDock [data-broker-screen]').forEach(b=>{
+ $$('#brokerDock [data-broker-screen]').forEach(b=>{
   const active=b.dataset.brokerScreen===screen;
   b.classList.toggle('is-active',active);b.setAttribute('aria-current',active?'page':'false');
  });
@@ -192,7 +192,7 @@ async function refreshAdmin(){
 function safe(fn,msgid){
  return async ev=>{try{await fn(ev)}catch(e){msg(msgid,e.message||String(e))}}
 }
-$('#brokerDock [data-broker-screen]').forEach(b=>b.addEventListener('click',()=>setBrokerScreen(b.dataset.brokerScreen)));
+$$('#brokerDock [data-broker-screen]').forEach(b=>b.addEventListener('click',()=>setBrokerScreen(b.dataset.brokerScreen)));
 $('#listingPrev').addEventListener('click',()=>setYachtStep(yachtStep-1));
 $('#listingNext').addEventListener('click',()=>setYachtStep(yachtStep+1,{validate:true}));
 setYachtStep(1);
