@@ -34,6 +34,7 @@ export function sagittalJointObservations(points,aspect=1,frame=null){
 }
 export function postureDisplay(result){
  const r=result?.posture||null;
+ if(result?.status==='review'&&!r?.valid)return {label:'À vérifier',tone:'neutral',detail:'Observation incertaine. Ne pas interpréter.'};
  if(!['done','review'].includes(result?.status)||!r?.valid)return {label:'Non mesuré',tone:'neutral',detail:'Reprendre la photo si souhaité.'};
  const pct=typeof r.surfaceIndexPct==='number'&&Number.isFinite(r.surfaceIndexPct)?r.surfaceIndexPct:null;
  if(pct===null)return {label:'Non mesuré',tone:'neutral',detail:'Position du profil indisponible.'};
