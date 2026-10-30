@@ -259,7 +259,7 @@ function setShopView(next){
  if(!['intro','collection','yachting'].includes(next))return;
  if(next==='yachting'&&slug!=='yachting')next='collection';
  shopView=next;document.body.dataset.shopScreen=next;
- $('#elyShopDock [data-shop-nav]').forEach(b=>{
+ $$('#elyShopDock [data-shop-nav]').forEach(b=>{
   const active=b.dataset.shopNav===next;b.classList.toggle('is-active',active);
   b.setAttribute('aria-current',active?'page':'false');
  });
@@ -274,15 +274,15 @@ function paginateShop(){
  items.forEach((el,i)=>{el.hidden=!(i>=elysiumCataloguePage*pageSize&&i<(elysiumCataloguePage+1)*pageSize)});
  pager.hidden=pages<=1;
  const label=$('#elyCataloguePage');if(label)label.textContent=String(elysiumCataloguePage+1).padStart(2,'0')+' / '+String(pages).padStart(2,'0');
- $('#elyCataloguePager [data-move]').forEach(b=>{
+ $$('#elyCataloguePager [data-move]').forEach(b=>{
   b.disabled=Number(b.dataset.move)<0?elysiumCataloguePage===0:elysiumCataloguePage>=pages-1;
  });
 }
 function initShopApp(){
  if(!isMaison)return;
  document.body.dataset.shopScreen='intro';
- $('#elyShopDock [data-shop-nav]').forEach(b=>b.addEventListener('click',()=>setShopView(b.dataset.shopNav)));
- $('#elyCataloguePager [data-move]').forEach(b=>b.addEventListener('click',()=>{
+ $$('#elyShopDock [data-shop-nav]').forEach(b=>b.addEventListener('click',()=>setShopView(b.dataset.shopNav)));
+ $$('#elyCataloguePager [data-move]').forEach(b=>b.addEventListener('click',()=>{
   elysiumCataloguePage+=Number(b.dataset.move);paginateShop();
  }));
  document.querySelectorAll('a[href="#collection"]').forEach(a=>a.addEventListener('click',ev=>{
