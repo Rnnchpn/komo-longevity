@@ -50,6 +50,7 @@
   $('#obLanguage').textContent=lang==='fr'?'EN':'FR';
   $('#obSearch').placeholder=txt('Nom du yacht','Yacht name');
   updateStatus();
+  safeStatus(feedState);
   renderCity();
   renderFleet();
   renderActivities();
@@ -489,6 +490,6 @@
  wire();setLanguage(lang);
  if(window.L)initMap();else window.addEventListener('load',initMap,{once:true});
  fetchYachts();fetchMarketplace();
- // Two minute refresh avoids unnecessarily hammering the historic upstream.
+ // Regional AIS refresh: shared 40-second server-side TTL; hidden tabs do not poll.
  setInterval(()=>{if(!document.hidden)fetchYachts()},40000);
 })();
