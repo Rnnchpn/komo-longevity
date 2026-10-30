@@ -177,3 +177,64 @@
 .ob-own-yacht button{flex:none;background:#e8eee6;border:1px solid #bfcfbe;padding:10px 12px;color:#324e38;font:700 9px Manrope,Arial,sans-serif}
 .ob-own-yacht button:hover{background:#d9e7d7}
 @media(max-width:790px){.ob-own-yacht{padding-inline:19px}}
+
+
+/* ELYSIUM MAP STORIES — exploration layers inspired by social maps, composed for luxury. */
+.ob-map-shell{background:#d9e5dc;border:0;box-shadow:0 14px 42px #334b4020}
+.ob-map-shell:after{content:"";position:absolute;inset:0;z-index:350;pointer-events:none;background:linear-gradient(180deg,#ecf2e747,transparent 29%,transparent 63%,#e2e9df3f)}
+.ob-map .leaflet-tile-pane{filter:saturate(.83) brightness(1.13) contrast(.95) sepia(.045)}
+.ob-map .leaflet-control-zoom{border:1px solid #d3dfd1;box-shadow:0 4px 18px #36573b1c}
+.ob-map .leaflet-control-zoom a{color:#345641!important}
+.ob-map-layers{position:absolute;z-index:550;left:18px;bottom:66px;display:flex;gap:7px;max-width:calc(100% - 36px);overflow:auto;scrollbar-width:none}
+.ob-map-layers button{flex:none;border:1px solid #ffffffd8;border-radius:100px;background:#f8faf6eb;color:#3f6246;padding:10px 13px;box-shadow:0 6px 17px #38563e24;font:700 9px/1.3 Manrope,Arial,sans-serif;letter-spacing:.04em;backdrop-filter:blur(12px)}
+.ob-map-layers button.is-active{background:#294e38;color:#fff;border-color:#294e38}
+.ob-map-guide{position:absolute;z-index:440;top:119px;left:18px;font:700 8px/1.5 Manrope,Arial,sans-serif;letter-spacing:.14em;color:#365e43;background:#f6f9f1d7;padding:8px 12px;pointer-events:none}
+.ob-discovery-pin{display:flex;flex-direction:column;align-items:center;filter:drop-shadow(0 6px 12px #38523938)}
+.ob-discovery-avatar{width:58px;height:58px;border-radius:50%;background:linear-gradient(140deg,#fffdf5,#f3eee2);border:3px solid white;box-shadow:0 0 0 2px #86a38b88,0 9px 17px #355b3826;display:grid;place-items:center;color:#6f8969;font:400 37px/1 Cormorant Garamond,Georgia,serif}
+.ob-discovery-pin small{margin-top:2px;white-space:nowrap;max-width:105px;overflow:hidden;text-overflow:ellipsis;text-align:center;background:#fcfcf9e9;color:#385943;border:1px solid #e4ebe1;border-radius:100px;padding:4px 7px;font:700 8px/1.2 Manrope,Arial,sans-serif}
+.ob-discovery-pin:hover .ob-discovery-avatar{transform:scale(1.09);transition:transform .18s}
+.ob-sponsored-pin{border-radius:10px;background:#2e4736;border:2px solid #e3d2b2;box-shadow:0 10px 24px #1b33253d;color:#fbf6e9;text-align:center;padding:5px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ob-sponsored-pin span{font:700 7px/1.3 Manrope,Arial,sans-serif;letter-spacing:.11em;color:#d8bd86}
+.ob-sponsored-pin strong{font:500 11px/1.1 Cormorant Garamond,Georgia,serif;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;width:100%}
+.ob-city{transition:background .2s,box-shadow .2s}
+.ob-city.is-active{background:linear-gradient(135deg,#e1ece4,#eef2e9);box-shadow:inset 0 2px #71967a}
+.ob-map-port{border-radius:14px}
+.ob-geolocate{border-radius:100px}
+.ob-dashboard{border-radius:4px;box-shadow:0 12px 35px #29453315}
+.ob-yacht-row{border-radius:0}
+.ob-activity-highlight{outline:2px solid #739c72!important;outline-offset:4px}
+.ob-marketplace{padding:clamp(65px,7vw,103px) 0 0}
+.ob-market-head{display:flex;align-items:end;justify-content:space-between;gap:24px;border-bottom:1px solid #d9e2d9;padding-bottom:23px}
+.ob-market-head h2{font:400 clamp(53px,6vw,86px)/.95 Cormorant Garamond,Georgia,serif;letter-spacing:-.03em;margin:15px 0 0}
+.ob-market-head>a{border:1px solid #31523b;background:#31523b;color:white;padding:14px 18px;font:700 10px Manrope,Arial,sans-serif;white-space:nowrap}
+.ob-market-info{font:400 11px/1.7 Manrope,Arial,sans-serif;color:#718676;margin:16px 0 27px}
+.ob-market-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.ob-market-empty{grid-column:1/-1;padding:42px 32px;border:1px solid #dbe5d9;background:#f0f4ed;color:#68806b;font:400 12px/1.9 Manrope,Arial,sans-serif}
+.ob-market-card{min-width:0;border:1px solid #e0e7df;background:#fffcf7;display:flex;flex-direction:column}
+.ob-market-image{height:190px;background:linear-gradient(135deg,#dfece8,#c5d7d3);display:grid;place-items:center;font-size:65px;overflow:hidden}
+.ob-market-image img{width:100%;height:100%;object-fit:cover}
+.ob-market-body{padding:24px;display:flex;flex-direction:column;align-items:flex-start;flex:1}
+.ob-market-label{font:700 9px Manrope,Arial,sans-serif;letter-spacing:.12em;color:#936f3f}
+.ob-market-body h3{font:400 43px/.98 Cormorant Garamond,Georgia,serif;letter-spacing:-.02em;margin:14px 0 7px}
+.ob-market-body p{color:#728275;font:400 11px/1.8 Manrope,Arial,sans-serif;margin:0 0 18px}
+.ob-market-body b{font:400 26px Cormorant Garamond,Georgia,serif;margin-top:auto}
+.ob-market-body a{margin-top:20px;font:700 10px Manrope,Arial,sans-serif;letter-spacing:.08em;background:#2f4b37;color:#fff;padding:13px 17px}
+@media(max-width:1120px){.ob-market-list{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:790px){
+ .ob-map-shell{height:64svh;min-height:450px;max-height:700px}
+ .ob-map-layers{left:10px;bottom:55px;max-width:calc(100% - 20px);gap:5px}
+ .ob-map-layers button{font-size:8px;padding:9px 11px}
+ .ob-map-guide{top:94px;left:10px;font-size:7px}
+ .ob-dashboard{max-height:none;min-height:0}
+ .ob-yacht-list{display:flex;overflow-x:auto;overflow-y:hidden;gap:10px;padding:12px 13px;scroll-snap-type:x mandatory;min-height:115px}
+ .ob-yacht-row{flex:0 0 245px;scroll-snap-align:start;border:1px solid #d9e4d7;border-radius:10px;background:#f7faf4;padding:12px 13px;grid-template-columns:29px 1fr 12px}
+ .ob-yacht-placeholder{min-width:100%;padding:18px;min-height:90px}
+ .ob-dashboard-disclaimer{font-size:8px}
+ .ob-market-head{align-items:start;flex-direction:column}
+ .ob-market-head h2{font-size:60px}
+ .ob-market-list{grid-template-columns:1fr}
+ .ob-market-image{height:215px}
+ .ob-discovery-avatar{width:47px;height:47px;font-size:29px}
+ .ob-discovery-pin small{font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){.ob-discovery-avatar,.ob-city{transition:none}}
