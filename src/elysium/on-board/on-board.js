@@ -38,7 +38,8 @@
  const url=new URL(location.href);
  let lang=url.searchParams.get('lang')==='en'?'en':url.searchParams.get('lang')==='fr'?'fr':(navigator.language?.startsWith('fr')?'fr':'en');
  let city=CITY_VALUES.includes(url.searchParams.get('city'))?url.searchParams.get('city'):'monaco';
- let map=null,harbourLayer=null,aisLayer=null,positionLayer=null;
+ let map=null,harbourLayer=null,aisLayer=null,positionLayer=null,activityLayer=null,adLayer=null;
+ let marketListings=[],paidAds=[],enabledLayers={yachts:true,activities:true,ads:true};
  let feed=[],verified=false,filtered=[],size='all',filterText='',selected=null,requestInFlight=false,authClient=null,feedCheckedAt=null;
  const txt=(fr,en)=>lang==='fr'?fr:en;
  const clean=s=>String(s||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
@@ -71,6 +72,7 @@
   renderCity();
   if(map&&mapMove)map.flyTo(DESTINATIONS[city].coords,DESTINATIONS[city].zoom,{duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:0.7});
   renderFleet();
+  if(window.__elyMapMarketCity!==code){window.__elyMapMarketCity=code;fetchMarketplace()}
  }
  function renderCity(){
   const c=DESTINATIONS[city];
@@ -108,8 +110,11 @@
  function renderMapMarkers(){
   if(!map)return;
   harbourLayer.clearLayers();aisLayer.clearLayers();
-  DESTINATIONS[city].ports.forEach(harbourMarker);
-  filtered.filter(y=>y.precision==='ais'&&y.aisRecent).forEach(exactMarker);
+  if(enabledLayers.yachts){
+    DESTINATIONS[city].ports.forEach(harbourMarker);
+    filtered.filter(y=>y.precision==='ais'&&y.aisRecent).forEach(exactMarker);
+  }
+  renderCommercialMarkers();
  }
  function makeYachtRow(y){
   const b=document.createElement('button');b.type='button';b.className='ob-yacht-row';
@@ -216,6 +221,8 @@
   harbourLayer=L.layerGroup().addTo(map);
   aisLayer=L.layerGroup().addTo(map);
   positionLayer=L.layerGroup().addTo(map);
+  activityLayer=L.layerGroup().addTo(map);
+  adLayer=L.layerGroup().addTo(map);
   renderMapMarkers();
   setTimeout(()=>map?.invalidateSize(),200);
  }
@@ -276,7 +283,7 @@
  function renderActivities(){
   const container=$('#obActivityGrid');container.replaceChildren();
   ACTIVITY_DEFS.forEach((e,i)=>{
-   const card=document.createElement('article');card.className='ob-activity';
+   const card=document.createElement('article');card.className='ob-activity';card.dataset.activity=e.slug;
    const art=document.createElement('div');art.className='ob-activity-art';art.setAttribute('aria-hidden','true');
    const motif=document.createElement('span');motif.textContent=e.mark;art.append(motif);
    const body=document.createElement('div');body.className='ob-activity-body';
@@ -290,6 +297,88 @@
    acts.append(link,btn);body.append(cat,h,p,acts);card.append(art,body);container.append(card);
   });
  }
+
+ /* Destination-based discovery pins, not business address or actual yacht coordinates. */
+ function renderCommercialMarkers(){
+  if(!map||!activityLayer||!adLayer)return;
+  activityLayer.clearLayers();adLayer.clearLayers();
+  const base=DESTINATIONS[city].coords;
+  if(enabledLayers.activities){
+   ACTIVITY_DEFS.forEach((exp,i)=>{
+    const angle=(i/ACTIVITY_DEFS.length)*Math.PI*2-.6;
+    const lat=base[0]+Math.sin(angle)*0.013;
+    const lng=base[1]+Math.cos(angle)*0.021;
+    const bubble=L.divIcon({className:'ob-discovery-pin',iconSize:[76,76],iconAnchor:[38,38],
+     html:'<span class="ob-discovery-avatar">'+clean(exp.mark)+'</span><small>'+clean(lang==='fr'?exp.nameFr:exp.nameEn)+'</small>'});
+    const marker=L.marker([lat,lng],{icon:bubble,zIndexOffset:210}).addTo(activityLayer);
+    marker.bindTooltip(txt('Expérience dans ce secteur · position indicative','Experience in this destination · illustrative marker'));
+    marker.on('click',()=>{
+     const item=$('.ob-activity[data-activity="'+exp.slug+'"]');
+     item?.scrollIntoView({behavior:'smooth',block:'center'});
+     item?.classList.add('ob-activity-highlight');
+     setTimeout(()=>item?.classList.remove('ob-activity-highlight'),1600);
+    });
+   });
+  }
+  if(enabledLayers.ads)paidAds.filter(x=>x.placement==='map_spotlight'&&(x.location_city===city||x.location_city==='all')).slice(0,3).forEach((ad,i)=>{
+    const lat=base[0]+0.018+(i*.008),lng=base[1]-0.018+(i*.004);
+    const b=L.divIcon({className:'ob-sponsored-pin',iconSize:[118,51],iconAnchor:[59,26],
+      html:'<span>SPONSORISÉ</span><strong>'+clean(ad.headline).slice(0,45)+'</strong>'});
+    L.marker([lat,lng],{icon:b,zIndexOffset:350}).bindTooltip(txt('Publicité · zone indicative, non AIS','Advertisement · indicative area, not AIS')).on('click',()=>{
+      $('#obMarket')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }).addTo(adLayer);
+  });
+ }
+ const formatOfferPrice=x=>x.price_eur?
+  new Intl.NumberFormat(lang==='fr'?'fr-FR':'en-GB',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(x.price_eur):
+  txt('Sur devis','On request');
+ function renderMarketplace(){
+  const host=$('#obMarketList');host.replaceChildren();
+  const active=marketListings.filter(x=>x.location_city===city||x.location_city==='all');
+  if(!active.length){
+   const empty=document.createElement('div');empty.className='ob-market-empty';
+   empty.textContent=txt('Aucune annonce payante validée pour cette escale. Les brokers peuvent déposer leurs offres dans le Studio.','No approved paid listing in this destination yet. Brokers can submit offers through Broker Studio.');
+   host.append(empty);
+  }
+  const priority=[...active].sort((a,b)=>Number(paidAds.some(ad=>ad.listing_id===b.id))-Number(paidAds.some(ad=>ad.listing_id===a.id)));
+  priority.forEach(x=>{
+   const card=document.createElement('article');card.className='ob-market-card';
+   const art=document.createElement('div');art.className='ob-market-image';
+   if(x.image_url&&/^https:\/\//i.test(x.image_url)){
+    const im=document.createElement('img');im.src=x.image_url;im.alt='';im.loading='lazy';im.referrerPolicy='no-referrer';art.append(im);
+   }else{art.textContent='⛵'}
+   const info=document.createElement('div');info.className='ob-market-body';
+   const tag=document.createElement('span');tag.className='ob-market-label';
+   tag.textContent=paidAds.some(ad=>ad.listing_id===x.id)?'SPONSORISÉ · ANNONCE BROKER':'ANNONCE BROKER · PAYANTE';
+   const h=document.createElement('h3');h.textContent=x.yacht_name;
+   const text=document.createElement('p');text.textContent=x.title+(x.length_m?' · '+x.length_m+' m':'');
+   const price=document.createElement('b');price.textContent=formatOfferPrice(x)+(x.listing_type==='charter'?txt(' · location',' · charter'):'');
+   const cta=document.createElement('a');cta.textContent=txt('DEMANDER LE DOSSIER ↗','ENQUIRE ABOUT THIS YACHT ↗');
+   const body=txt('Bonjour ELYSIUM,\nJe souhaite des informations sur le yacht ','Hello ELYSIUM,\nI would like information about yacht ')+x.yacht_name+
+    '\n'+txt('Escale : ','Destination: ')+DESTINATIONS[city].name+'\n'+txt('Référence : ','Reference: ')+x.id;
+   cta.href='mailto:contact@komolongevity.com?subject='+encodeURIComponent('ELYSIUM Yacht — '+x.yacht_name)+'&body='+encodeURIComponent(body);
+   info.append(tag,h,text,price,cta);card.append(art,info);host.append(card);
+  });
+  const adsHere=paidAds.filter(x=>x.location_city===city||x.location_city==='all');
+  $('#obMarketStatus').textContent=txt(
+   'Sélection de brokers contrôlés · annonces et publicités payantes identifiées · '+active.length+' annonce(s)',
+   'Curated broker listings · paid adverts clearly labelled · '+active.length+' listing(s)');
+  renderCommercialMarkers();
+ }
+ async function fetchMarketplace(){
+  try{
+   const token=await getSession();
+   if(!token){marketListings=[];paidAds=[];renderMarketplace();return}
+   const r=await fetch('/api/elysium-marketplace?city='+encodeURIComponent(city),{
+    headers:{Authorization:'Bearer '+token},cache:'no-store'});
+   if(!r.ok)throw Error('marketplace_unavailable');
+   const data=await r.json();
+   marketListings=Array.isArray(data.listings)?data.listings:[];
+   paidAds=Array.isArray(data.ads)?data.ads:[];
+  }catch(err){marketListings=[];paidAds=[]}
+  renderMarketplace();
+ }
+
  function wire(){
   $$('#obCities button[data-city]').forEach(btn=>btn.addEventListener('click',()=>setCity(btn.dataset.city)));
   $('#obCities').addEventListener('keydown',e=>{
@@ -300,6 +389,11 @@
   });
   $('#obLanguage').addEventListener('click',()=>setLanguage(lang==='fr'?'en':'fr'));
   $('#obLocate').addEventListener('click',locate);
+  $('#obMapLayers [data-layer]').forEach(btn=>btn.addEventListener('click',()=>{
+    const layer=btn.dataset.layer;enabledLayers[layer]=!enabledLayers[layer];
+    btn.classList.toggle('is-active',enabledLayers[layer]);btn.setAttribute('aria-pressed',String(enabledLayers[layer]));
+    renderMapMarkers();
+  }));
   $('#obRefresh').addEventListener('click',fetchYachts);
   $('#obSearch').addEventListener('input',e=>{filterText=e.target.value.trim().toLocaleLowerCase();renderFleet()});
   $$('.ob-length button').forEach(b=>b.addEventListener('click',()=>{
@@ -322,7 +416,7 @@
  }
  wire();setLanguage(lang);
  if(window.L)initMap();else window.addEventListener('load',initMap,{once:true});
- fetchYachts();
+ fetchYachts();fetchMarketplace();
  // Two minute refresh avoids unnecessarily hammering the historic upstream.
  setInterval(()=>{if(!document.hidden)fetchYachts()},120000);
 })();
