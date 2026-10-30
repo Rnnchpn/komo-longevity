@@ -11,33 +11,33 @@ fr:{
  ['Tenir en équilibre','La stabilité debout donne des indications sur le contrôle postural, dans les limites de la vidéo.'],
  ['Bouger librement','Des gestes et une posture visibles permettent une description fonctionnelle, pas une mesure radiographique.'],
  ['Comprendre votre ressenti','Mobilité, activité, sommeil et difficultés perçues complètent ce qui est observable à l’écran.']],
- steps:[['01','Réserver','30 minutes à distance, tarif annoncé de 49 €.'],['02','Se préparer','Questionnaires, espace dégagé, appareil avec caméra et consignes de sécurité.'],['03','Faire les tests','Des mouvements simples devant la caméra, selon les conditions de sécurité et la qualité de la vidéo.'],['04','Faire le point','Échange de restitution sur les observations obtenues, leurs limites et les prochaines étapes.']],
+ steps:[['01','Acheter','Achat en ligne à 39 €, sans réservation d’horaire.'],['02','Se préparer','Questionnaires, espace dégagé, appareil avec caméra et consignes de sécurité.'],['03','Faire les tests','Des mouvements simples devant la caméra, selon les conditions de sécurité et la qualité de la vidéo.'],['04','Faire le point','Synthèse fonctionnelle des tests réalisés, avec leurs limites et les prochaines étapes possibles.']],
  nextTitle:'Un point de départ. Une suite concrète.',
  next:'L’intérêt d’un bilan est aussi de disposer d’une référence pour comparer vos capacités à distance de quelques semaines. Selon vos objectifs, une nouvelle évaluation ou un bilan instrumenté en présentiel à Paris ou à Cannes pourra être envisagé.',
  note:'Bilan fonctionnel non médical. Aucun diagnostic, prescription, âge biologique ou score de longévité validé n’est délivré. La disponibilité des résultats dépend des tests réalisés et de leur qualité.',
- cta:'Découvrir le bilan · 49 €', label:'KŌMØ · MOTION ONLINE'
+ cta:'Découvrir le bilan · 39 €', label:'KŌMØ · MOTION ONLINE'
 },
 en:{
  h:'You know your age.<br><em>How well do you know your movement?</em>',
  intro:'Standing up, keeping your balance and moving your arms are everyday actions that offer complementary signs of functional mobility. Motion Online helps establish a structured starting point without diagnosis or lifespan prediction.',
  why:'Why observe these abilities?',how:'How does it work?',
  dimensions:[['Standing up','An essential daily action, observed through a simple task.'],['Balance','Standing stability can inform a description of postural control, within the limits of video.'],['Movement','Visible movement and posture can be described, not used for radiographic assessment.'],['Your perspective','Answers about mobility, activity, sleep and everyday difficulties add context.']],
- steps:[['01','Book','A 30-minute remote appointment listed at €49.'],['02','Prepare','Questionnaires, clear space, camera and safety instructions.'],['03','Move','Simple camera-guided movements when safe and technically feasible.'],['04','Review','Feedback on observations, limitations and potential next steps.']],
+ steps:[['01','Buy','Online purchase at €39 with no appointment time.'],['02','Prepare','Questionnaires, clear space, camera and safety instructions.'],['03','Move','Simple camera-guided movements when safe and technically feasible.'],['04','Review','Read your functional summary, its limitations and possible next steps.']],
  nextTitle:'A starting point, with a next step.',
  next:'A baseline may be revisited a few weeks later. Depending on your goals, you may request a reassessment or an instrumented session in Paris or Cannes, subject to availability.',
  note:'Non-medical functional assessment. No diagnosis, prescription, biological age or validated longevity score. Results depend on completed tests and observation quality.',
- cta:'Explore Motion Online · €49',label:'KŌMØ · MOTION ONLINE'
+ cta:'Explore Motion Online · €39',label:'KŌMØ · MOTION ONLINE'
 },
 es:{
  h:'Conoces tu edad.<br><em>¿Y tu capacidad de movimiento?</em>',
  intro:'Levantarse, mantener el equilibrio y mover los brazos son gestos cotidianos que ayudan a describir la movilidad funcional. Motion Online permite establecer un punto de partida estructurado, sin diagnóstico ni predicción de longevidad.',
  why:'¿Por qué observar estas capacidades?',how:'¿Cómo funciona?',
  dimensions:[['Levantarse','Un gesto esencial que puede observarse con una prueba sencilla.'],['Equilibrio','La estabilidad de pie permite describir aspectos del control postural, con límites.'],['Movimiento','Los movimientos y la postura visibles no sustituyen mediciones radiográficas.'],['Tu perspectiva','La movilidad, actividad, sueño y dificultades percibidas ofrecen contexto.']],
- steps:[['01','Reservar','Una cita a distancia de 30 minutos, anunciada a 49 €.'],['02','Prepararse','Cuestionarios, espacio libre, cámara y consejos de seguridad.'],['03','Realizar los gestos','Movimientos sencillos cuando sea seguro y técnicamente posible.'],['04','Revisar','Explicación de las observaciones, límites y posibles siguientes pasos.']],
+ steps:[['01','Comprar','Compra online a 39 €, sin reservar horario.'],['02','Prepararse','Cuestionarios, espacio libre, cámara y consejos de seguridad.'],['03','Realizar los gestos','Movimientos sencillos cuando sea seguro y técnicamente posible.'],['04','Revisar','Consulta el resumen funcional, sus límites y próximos pasos.']],
  nextTitle:'Un punto de partida y próximos pasos.',
  next:'Es útil repetir la evaluación unas semanas después. Según tus objetivos, puedes solicitar otra evaluación o una sesión instrumental en París o Cannes, según disponibilidad.',
  note:'Evaluación funcional no médica. Sin diagnóstico, prescripción, edad biológica ni puntuación de longevidad validada. Los resultados dependen de las pruebas completadas.',
- cta:'Descubrir Motion Online · 49 €',label:'KŌMØ · MOTION ONLINE'
+ cta:'Descubrir Motion Online · 39 €',label:'KŌMØ · MOTION ONLINE'
 }};
 const style=`<style id="komo-online-explainer-style">
 .komo-online-explainer{background:#faf8f2;color:#243127;padding:clamp(64px,8vw,112px) 0;border-top:1px solid #e3e4da}

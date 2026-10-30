@@ -276,6 +276,8 @@ const scripts = [
   'scripts/pulse-continuous-session-qa.mjs',
   // Online Acuity payment validation tests; all requests and identities are mocked.
   'scripts/pulse-online-payment-qa.mjs',
+  // Isolated 39 EUR Stripe checkout: paid access, refund and dossier security regression.
+  'scripts/pulse-online-stripe-qa.mjs',
   // Link Acuity payment to verified Pulse session, never by client-side redirect alone.
   'scripts/pulse-paid-session-access-qa.mjs',
   // Patient-owned records: server-only paid-write, consent and no raw media.

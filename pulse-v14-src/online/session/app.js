@@ -8,7 +8,7 @@ import {sharedMotionMedia} from './shared-media.js';
 import {TERMINAL_TEST_STATUSES,testNavigatorMarkup,completedTestMarkup,mountTestNavigation} from './test-navigation.js';
 import {saveProgress,loadProgress,clearProgress,snapshotProgress} from './session-progress.mjs';
 import {createDossierQueue,loadSecureDossier} from './secure-dossier.js';
-import {verifyPaidSession,getAppointmentFromBrowser,scopedProgressStorage,keepBooking,clearBooking} from './paid-access.js';
+import {verifyPaidSession,getAppointmentFromBrowser,scopedProgressStorage,keepBooking,clearBooking,verifyStripePaidSession,getStripeCheckoutFromBrowser,keepStripeCheckout,clearStripeCheckout} from './paid-access.js';
 
 const sb = createClient('https://uqlolefsiktbznnymriy.supabase.co', 'sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n', {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root = document.getElementById('online-session-app');
@@ -66,14 +66,14 @@ function wrap(body){
   q('#leave').onclick=async()=>{
   stopTimer();stopCamera(true);
   if(dossierQueue){const saved=await dossierQueue.flush();if(!saved){secureSaveStatus('Enregistrement impossible : ne quittez pas avant de réessayer.');return;}}
-  clearProgress(progressStore);if(paidContext)clearBooking(store);dossierQueue?.destroy();window.location.assign('/');
+  clearProgress(progressStore);if(paidContext){if(paidContext.provider==='stripe')clearStripeCheckout(store);else clearBooking(store);}dossierQueue?.destroy();window.location.assign('/');
  };
 }
 function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
-  wrap('<div class="intro"><div><span class="overline">'+(paidContext?'VOTRE BILAN ONLINE · RÉSERVATION VÉRIFIÉE':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
+  wrap('<div class="intro"><div><span class="overline">'+(paidContext?'VOTRE BILAN ONLINE · PAIEMENT VÉRIFIÉ':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
   '<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
-  '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
+  '<div class="fact-row"><div><b>À votre rythme</b><small>Bilan autonome</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
   btn('go',paidContext?'Démarrer mon bilan →':'Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
   '<p class="notice">'+(paidContext?'Bilan fonctionnel non médical. Vos réponses et mesures sont enregistrées dans un dossier privé pour reprendre la séance. Le rapport PDF reste téléchargé séparément. Les estimations webcam ne sont pas des diagnostics.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>'+
  (paidContext?'<label class="dossier-consent"><input type="checkbox" id="dossier-consent" '+(paidConsentAccepted?'checked':'')+'><span>J’accepte l’enregistrement sécurisé de mes réponses de mobilité, de douleur et de mes mesures fonctionnelles dans mon espace Pulse, afin de pouvoir reprendre ce bilan. Je comprends que la vidéo, les photos et le microphone ne sont pas enregistrés.</span></label><p class="message" id="dossier-consent-feedback" role="status"></p>':''));
@@ -112,7 +112,7 @@ function questionnaire(){
 function safety(){
   const issue=state.answers.safety==='yes';
   wrap('<div class="paper"><span class="overline">02 / PRÉPARATION & SÉCURITÉ</span><h1>Votre sécurité,<br><em>avant le mouvement.</em></h1>'+
-   '<p>En situation réelle, un opérateur confirme que les tests conviennent à la personne. Aucun exercice ne doit être réalisé seul sur la base de cette page.</p>'+
+   '<p>Ce bilan non médical se fait en autonomie. Si vous avez un doute sur votre capacité à effectuer un mouvement en sécurité, ne le réalisez pas et demandez un avis professionnel adapté.</p>'+
    choice('safety','Malaise, vertiges importants, douleur thoracique, essoufflement inhabituel ou problème récent rendant l’effort risqué ?', [['yes','Oui, au moins un signe'],['no','Non, aucun de ces signes']])+
    (issue?'<div class="notice danger"><b>Tests suspendus.</b> Ne commencez pas les exercices ; demandez un avis professionnel adapté. En cas d’urgence, contactez les secours.</div>':'')+
    '<div class="checklist">'+[['chair','Une chaise stable contre un mur'],['space','Un espace dégagé et éclairé'],['support','Un appui fixe à portée'],['device','Un appareil chargé et stable']].map(item=>'<label><input type="checkbox" value="'+item[0]+'" '+(state.checks.has(item[0])?'checked':'')+'><span>'+item[1]+'</span></label>').join('')+'</div>'+
@@ -218,18 +218,17 @@ async function boot(){
   if(!adminTester){
    const session=await sb.auth.getSession();
    if(!session.data?.session?.access_token)throw Error('login');
-   const bookingId=getAppointmentFromBrowser(window.location.search,store);
+   const stripeId=getStripeCheckoutFromBrowser(window.location.search,store);
+   const bookingId=stripeId||getAppointmentFromBrowser(window.location.search,store);
    if(!bookingId)throw Error('booking_required');
-   // No client-controlled role, query parameter or localStorage flag can
-   // bypass the authenticated, current Acuity payment check.
-   const verified=await verifyPaidSession({
-    accessToken:session.data.session.access_token,
-    appointmentId:bookingId
-   });
+   // Neither booking numbers nor checkout IDs in a URL are access credentials.
+   const verified=stripeId
+    ?await verifyStripePaidSession({accessToken:session.data.session.access_token,sessionId:stripeId})
+    :await verifyPaidSession({accessToken:session.data.session.access_token,appointmentId:bookingId});
    if(!verified.ok)throw Error(verified.error);
-   paidContext={userId:user.id,appointmentId:bookingId};
+   paidContext={userId:user.id,appointmentId:bookingId,provider:stripeId?'stripe':'acuity'};
    progressStore=scopedProgressStorage(store,user.id,bookingId);
-   keepBooking(store,bookingId);
+   if(stripeId)keepStripeCheckout(store,stripeId);else keepBooking(store,bookingId);
    dossierQueue=createDossierQueue({accessToken:session.data.session.access_token,
     appointmentId:bookingId,onStatus:secureSaveStatus});
    const server=await loadSecureDossier(session.data.session.access_token,bookingId);
@@ -252,15 +251,15 @@ async function boot(){
   const loginNeeded=reason==='login';
   const pending=reason==='paid_session_not_enabled';
   const bookingMissing=reason==='booking_required';
-  const title=loginNeeded?'Connectez-vous à Pulse.':pending?'Votre réservation est vérifiée.':'Activez votre accès Online.';
-  const message=loginNeeded?'Identifiez-vous sur Pulse avec votre adresse de réservation.':
-    pending?'La consultation client est momentanément fermée pendant la mise en service de l’archivage sécurisé des résultats. Votre réservation reste valable.':
-    bookingMissing?'Pour commencer, vérifiez votre réservation Acuity réglée avec le même compte Pulse.':
-    'Impossible de vérifier une réservation Online active et intégralement réglée pour ce compte. Vérifiez l’adresse e-mail, le numéro du rendez-vous et le paiement.';
+  const title=loginNeeded?'Connectez-vous à Pulse.':pending?'Votre paiement est vérifié.':'Activez votre accès Online.';
+  const message=loginNeeded?'Identifiez-vous sur Pulse avec votre adresse de paiement.':
+    pending?'L’accès à votre bilan est momentanément fermé pendant la mise en service du stockage sécurisé des résultats. Votre paiement reste valable.':
+    bookingMissing?'Pour commencer, suivez le lien de confirmation de votre achat Stripe et identifiez-vous dans Pulse.':
+    'Impossible de vérifier le paiement avec ce compte. Assurez-vous d’utiliser la même adresse e-mail que lors de votre achat.';
   root.innerHTML='<section class="paper access"><span class="overline">ACCÈS SÉCURISÉ AU BILAN ONLINE</span><h1>'+
    esc(title)+'</h1><p>'+esc(message)+'</p><a class="action" href="'+
-   (loginNeeded?'/?connexion=1':'/online/activate/')+'">'+
-   (loginNeeded?'Me connecter à Pulse':'Vérifier ma réservation →')+'</a></section>';
+   (loginNeeded?'/?connexion=1':'/online/stripe/')+'">'+
+   (loginNeeded?'Me connecter à Pulse':'Vérifier mon paiement →')+'</a></section>';
  }
 }
 boot();
