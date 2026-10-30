@@ -528,3 +528,50 @@
  .pulse-mobile-access .mode-switch button{font-size:11px}
  .pulse-mobile-access .pulse-mobile-logout{font-size:10px;padding-inline:8px}
 }
+
+
+/* Single appointment workspace: the patient has one page, never an admin-style dashboard. */
+.ps-one{max-width:870px;margin:0 auto;display:grid;gap:12px}
+.ps-one-hero{padding:clamp(23px,4vw,40px);border:1px solid #e1d9ce;border-radius:25px;background:#fffdf8;box-shadow:0 16px 50px rgba(29,24,20,.055)}
+.ps-one-eyebrow{display:block;margin-bottom:16px;color:#998268;font:700 10px/1.2 "Inter",sans-serif;letter-spacing:.15em;text-transform:uppercase}
+.ps-one-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}
+.ps-one-heading h2{margin:0;color:#252425;font:500 clamp(32px,4.5vw,52px)/1.02 "Cormorant Garamond",Georgia,serif;letter-spacing:-.025em}
+.ps-one-state{flex:none;padding:9px 12px;border-radius:999px;background:#f1ede6;color:#655d52;font:600 11px/1.2 "Inter",sans-serif;white-space:nowrap}
+.ps-one-appointment{display:flex;flex-wrap:wrap;gap:7px 20px;margin:22px 0 13px;align-items:baseline}
+.ps-one-appointment strong{color:#222;font:600 clamp(17px,2.5vw,21px)/1.2 "Inter",sans-serif}
+.ps-one-appointment span{color:#7c746c;font-size:13px}
+.ps-one-lead{max-width:670px;margin:17px 0 0;color:#777069;font:400 14px/1.65 "Inter",sans-serif}
+.ps-one-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:23px}
+.ps-one-button{display:inline-flex;align-items:center;justify-content:center;min-height:47px;padding:12px 19px;border-radius:12px;border:1px solid #cfc5b7;background:#fffaf2;color:#34302c;font:600 12px/1.3 "Inter",sans-serif;text-decoration:none;text-align:center;cursor:pointer}
+.ps-one-button.primary{background:#252425;color:#fffbf4;border-color:#252425}
+.ps-one-button:focus-visible,.ps-one-details summary:focus-visible,.ps-one-help a:focus-visible{outline:3px solid #bcaa8f;outline-offset:3px}
+.ps-one-details{border:1px solid #e7dfd4;border-radius:17px;background:#fffdfa;overflow:hidden}
+.ps-one-details summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:15px;min-height:74px;padding:15px 20px;cursor:pointer}
+.ps-one-details summary::-webkit-details-marker{display:none}
+.ps-one-details summary>span:first-child{display:grid;gap:5px}
+.ps-one-details summary small{color:#9c8c79;font:700 9px/1.2 "Inter",sans-serif;letter-spacing:.11em}
+.ps-one-details summary strong{color:#252525;font:600 14px/1.25 "Inter",sans-serif}
+.ps-one-chevron{font-size:23px;color:#8f806d;transition:transform .2s ease}
+.ps-one-details[open] .ps-one-chevron{transform:rotate(180deg)}
+.ps-one-detail-body{border-top:1px solid #eee7dd;padding:18px 20px 21px;color:#706a62;font:400 13px/1.6 "Inter",sans-serif}
+.ps-one-detail-body p{margin:0 0 11px}
+.ps-one-detail-body p:last-child{margin-bottom:0}
+.ps-one-note{padding:11px;border-radius:10px;background:#f6f2eb;color:#65594d}
+.ps-one-status{display:flex;align-items:flex-start;gap:12px;padding:16px 20px;border:1px solid #e8e1d7;border-radius:16px;background:#f7f4ee}
+.ps-one-status-dot{flex:none;width:8px;height:8px;margin-top:5px;border-radius:50%;background:#bda988}
+.ps-one-status strong{display:block;color:#2d2b29;font-size:13px}
+.ps-one-status p{margin:5px 0 0;color:#77706a;font-size:12px;line-height:1.5}
+.ps-one-score{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:13px;padding:17px;border-radius:14px;background:#29282a;color:#f8f5f0}
+.ps-one-score small{display:block;color:#cdbb9f;font-size:10px;letter-spacing:.11em}
+.ps-one-score strong{display:block;margin-top:5px;color:#fff;font:500 45px/1 "Cormorant Garamond",Georgia,serif}
+.ps-one-score em{margin-left:5px;color:#c4bbaf;font:400 18px/1 "Inter",sans-serif;font-style:normal}
+.ps-one-score>span{font:600 11px/1.4 "Inter",sans-serif}
+.ps-one-history{display:grid;gap:14px}
+.ps-one-history>div{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:9px;border-bottom:1px solid #eee8e0}
+.ps-one-history>div:last-child{padding-bottom:0;border-bottom:0}
+.ps-one-history strong{font-size:12px;color:#35312d}
+.ps-one-history small{font-size:11px}
+.ps-one-help{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;padding:10px 4px;color:#81796f;font-size:12px}
+.ps-one-help a{font-weight:650;color:#45403c;text-decoration:underline;text-underline-offset:3px}
+.app-shell-patient .page{max-width:none}
+@media(prefers-reduced-motion:reduce){.ps-one-chevron{transition:none}}
