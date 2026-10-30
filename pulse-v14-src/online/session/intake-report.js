@@ -4,6 +4,7 @@ import {buildPdfReportData,downloadMotionPdf} from './pdf-report.js';
 import {normPanelMarkup,bindNormPanel} from './normative-panel.js';
 import {passportMarkup,roadmapMarkup,dailyProgramMarkup,bindDailyProgram} from './passport-view.js';
 import {restitutionMarkup} from './restitution.mjs';
+import {postureDisplay} from './posture-interpretation.mjs';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=(root,id)=>{const v=root.querySelector('#'+id)?.value?.trim();return v===''||v===undefined?null:Number(v);};
 function domainCards(scored){
@@ -24,6 +25,13 @@ function measurementRows(results){
  ];
  return labels.map(([id,title,unit])=>{
   const r=results[id],done=r&&(r.status==='done'||r.status==='review');
+  if(id==='posture'){
+   const p=postureDisplay(r);
+   const knee=p.kneeFlexionDeg===null||p.kneeFlexionDeg===undefined?'Non mesuré':p.kneeFlexionDeg.toFixed(1)+'°';
+   const ankle=p.ankleDeviationDeg===null||p.ankleDeviationDeg===undefined?'Non mesuré':p.ankleDeviationDeg.toFixed(1)+'°';
+   const note=p.compensation==='possible'?' · adaptation possible, à confirmer':'';
+   return '<div><span>Posture visuelle · genou '+esc(knee)+' · cheville '+esc(ankle)+'</span><strong>'+esc(p.label+note)+'</strong></div>';
+  }
   const value=done&&Number.isFinite(Number(r.value))?Number(r.value).toFixed(id.startsWith('unipodal')||id==='posture'?1:0)+' '+unit:'Non réalisé';
   const quality=r?.status==='review'?' · à vérifier':'';
   return '<div><span>'+esc(title)+'</span><strong>'+esc(value+quality)+'</strong></div>';
@@ -39,6 +47,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  const sts=results.sts;
  const stsOk=Boolean(sts?.status==='done'&&Number.isInteger(sts.value)&&sts.value>=0);
  return '<section class="paper online-report">'+passportMarkup(answers,results,blocked)+(persisted?restitutionMarkup({...restitution,compact:false}):'')+
+ '<div class="report-posture-summary"><strong>Votre posture · lecture simplifiée</strong><p>'+esc(postureDisplay(results.posture).label)+' · Bon / Moyen / Mauvais = zones photographiques indicatives, non diagnostiques. Les angles apparents des genoux et chevilles sont affichés uniquement si les points sont suffisamment visibles.</p></div>'+ 
  '<div class="report-reading-guide"><span>COMMENT LIRE CE PASSEPORT</span><h2>Un point de départ, pas une prédiction.</h2>'+
  '<p>Votre indice décrit ce que vous avez déclaré sur votre mobilité. Les tests webcam constituent des observations complémentaires. Pulse vous aide ensuite à choisir deux priorités et à mesurer votre évolution.</p>'+
  '<nav class="report-quick-actions" aria-label="Actions après votre bilan"><button class="action" type="button" id="download-pdf-top">Télécharger mon passeport PDF ↓</button>'+
