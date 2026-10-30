@@ -40,7 +40,7 @@
  let city=CITY_VALUES.includes(url.searchParams.get('city'))?url.searchParams.get('city'):'monaco';
  let map=null,harbourLayer=null,aisLayer=null,positionLayer=null,activityLayer=null,adLayer=null;
  let marketListings=[],paidAds=[],enabledLayers={yachts:true,activities:true,ads:true};
- let feed=[],verified=false,filtered=[],size='all',filterText='',selected=null,requestInFlight=false,authClient=null,feedCheckedAt=null;
+ let feed=[],verified=false,filtered=[],size='all',navFilter='all',filterText='',selected=null,requestInFlight=false,authClient=null,feedCheckedAt=null,feedState='loading';
  const txt=(fr,en)=>lang==='fr'?fr:en;
  const clean=s=>String(s||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
  const boatShape='<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2 25 23 14 17 3 23Z" /></svg>';
@@ -50,6 +50,7 @@
   $('#obLanguage').textContent=lang==='fr'?'EN':'FR';
   $('#obSearch').placeholder=txt('Nom du yacht','Yacht name');
   updateStatus();
+  safeStatus(feedState);
   renderCity();
   renderFleet();
   renderActivities();
@@ -101,10 +102,27 @@
    if(first)highlightYacht(first.id,false);
   });
  }
+ function statusLabel(status){
+  const terms={
+   underway:['EN NAVIGATION','UNDERWAY'],approaching:['EN APPROCHE','APPROACHING'],
+   at_anchor:['AU MOUILLAGE','AT ANCHOR'],in_port:['AU PORT','MOORED'],
+   unclassified:['STATUT INCONNU','UNKNOWN STATUS']
+  };
+  const line=terms[status]||terms.unclassified;return lang==='fr'?line[0]:line[1];
+ }
+ function aisTime(y){
+  if(!y.reportedAt)return '';
+  const t=Date.parse(y.reportedAt);
+  if(!Number.isFinite(t))return '';
+  return new Date(t).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'});
+ }
  function exactMarker(y){
-  const marker=L.divIcon({className:'',iconSize:[30,30],iconAnchor:[15,15],html:'<span class="ob-yacht-marker">'+boatShape+'</span>'});
-  const m=L.marker([y.lat,y.lng],{icon:marker,zIndexOffset:500}).addTo(aisLayer);
-  m.bindTooltip(clean(y.name)+' · '+(y.length||'?')+' m · '+txt('AIS signalé','AIS reported'),{direction:'top'});
+  const rot=Number.isFinite(y.courseDegrees)?y.courseDegrees:0;
+  const icon=L.divIcon({className:'ob-ais-pin',iconSize:[38,38],iconAnchor:[19,19],
+   html:'<span class="ob-ais-vessel is-'+y.status+'"><span style="transform:rotate('+rot+'deg)">'+boatShape+'</span></span>'});
+  const m=L.marker([y.lat,y.lng],{icon,zIndexOffset:500}).addTo(aisLayer);
+  const speed=Number.isFinite(y.speedKnots)?' · '+y.speedKnots+' kn':'';
+  m.bindTooltip(clean(y.name)+' · '+statusLabel(y.status)+speed+' · AIS '+aisTime(y),{direction:'top'});
   m.on('click',()=>highlightYacht(y.id,false));
  }
  function renderMapMarkers(){
@@ -118,24 +136,26 @@
  }
  function makeYachtRow(y){
   const b=document.createElement('button');b.type='button';b.className='ob-yacht-row';
+  b.dataset.status=y.status;
   if(selected?.id===y.id)b.classList.add('is-selected');
   const sym=document.createElement('span');sym.className='ob-boat-small';sym.textContent='⛵';
   const text=document.createElement('span');text.className='ob-yacht-text';
   const name=document.createElement('strong');name.textContent=y.name;
+  const label=document.createElement('span');label.className='ob-status-label is-'+(y.status||'unclassified');
+  label.textContent=statusLabel(y.status);
   const desc=document.createElement('small');
-  desc.textContent=(y.length?y.length+' m · ':'')+y.port+' · '+(
-   y.precision==='ais'&&y.aisRecent?(txt('AIS · ','AIS · ')+new Date(y.reportedAt).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'})):
-   y.precision==='ais'?txt('DERNIER AIS · NON RÉCENT','LAST AIS · NOT RECENT'):
-   txt('PRÉSENCE AU PORT','HARBOUR REPORT'));
-  text.append(name,desc);
+  desc.textContent=(y.length?y.length+' m · ':'')+y.port+' · '+aisTime(y)+
+   (Number.isFinite(y.speedKnots)?' · '+y.speedKnots+' kn':'');
+  text.append(name,label,desc);
   const arrow=document.createElement('span');arrow.textContent='↗';
   b.append(sym,text,arrow);
   b.addEventListener('click',()=>highlightYacht(y.id,true));
   return b;
  }
  function matchingYachts(){
-  return feed.filter(y=>y.city===city&&(size==='all'||Number(y.length)>=Number(size))&&
-   (!filterText||(y.name+' '+y.port).toLocaleLowerCase().includes(filterText)));
+  return feed.filter(y=>y.city===city&&(size==='all'||(Number.isFinite(y.length)&&y.length>=Number(size)))&&
+   (navFilter==='all'||y.status===navFilter)&&
+   (!filterText||(y.name+' '+y.port+' '+(y.destination||'')).toLocaleLowerCase().includes(filterText)));
  }
  function renderFleet(){
   filtered=matchingYachts();
@@ -143,16 +163,27 @@
   const list=$('#obYachtList');list.replaceChildren();
   if(!verified){
    const box=document.createElement('div');box.className='ob-yacht-placeholder';
-   box.textContent=txt('Aucune donnée actuelle vérifiée pour le moment. Les ports et les expériences restent accessibles. Les anciens yachts du projet Intelligence ne sont pas affichés comme présents aujourd’hui.',
-    'No current verified feed. The harbours and experiences remain accessible. Historical Intelligence yacht positions are not presented as current.');
+   box.textContent=feedState==='ais_not_configured'
+    ?txt('Flux AIS en attente d’activation. Les ports, activités et annonces chargent immédiatement. Un abonnement AIS régional est nécessaire pour voir les yachts réellement présents ou en navigation.',
+      'AIS integration awaiting activation. Harbours, experiences and listings remain available immediately. A regional AIS subscription is required for actual yacht locations.')
+    :feedState==='sign_in_required'||feedState==='membership_required'
+    ?txt('Connectez-vous au Club ELYSIUM pour voir les positions AIS. Les ports restent accessibles.',
+      'Sign in to ELYSIUM Club to see AIS yachts. Harbours remain accessible.')
+    :txt('Aucune position AIS vérifiée actuellement. La carte des ports reste utilisable.',
+      'No verified AIS positions are currently available. The harbour map remains usable.');
    list.append(box);
   }else if(!filtered.length){
    const box=document.createElement('div');box.className='ob-yacht-placeholder';
-   box.textContent=txt('Aucun yacht signalé pour ce filtre dans cette escale. Essayez une autre longueur ou un autre port.','No vessels reported for this filter. Try another length or harbour.');
+   box.textContent=txt('Aucun yacht AIS récent pour cette escale ou ce filtre. Essayez une autre catégorie.',
+      'No recent AIS yachts for this destination or filter. Try another category.');
    list.append(box);
   }else{
    filtered.slice(0,90).forEach(y=>list.append(makeYachtRow(y)));
-   if(filtered.length>90){const el=document.createElement('p');el.className='ob-yacht-placeholder';el.textContent=txt('Affinez votre recherche pour voir davantage de yachts.','Refine the search to see more yachts.');list.append(el)}
+   if(filtered.length>90){
+    const msg=document.createElement('p');msg.className='ob-yacht-placeholder';
+    msg.textContent=txt('Affinez votre recherche pour voir davantage de yachts.','Refine your search to see more yachts.');
+    list.append(msg);
+   }
   }
   renderMapMarkers();
  }
@@ -171,21 +202,35 @@
   }
  }
  function safeStatus(type){
-  const a=$('#obFeedDescription');
-  if(type==='login')a.textContent=txt('Connectez-vous à votre club ELYSIUM pour voir les yachts signalés.','Sign in to your ELYSIUM membership to see reported yachts.');
-  if(type==='member')a.textContent=txt('Accès membre confirmé. Actualisation des ports et des positions disponibles.','Member access confirmed. Harbour and vessel updates available.');
-  if(type==='none')a.textContent=txt('Flux de yachts indisponible actuellement. Aucun bateau fictif n’est affiché.','Yacht feed currently unavailable. No fictitious vessels are shown.');
-  if(type==='live')a.textContent=txt('Données des ports signalées. Les marqueurs de port ne représentent jamais une position exacte.','Harbour reports received. Harbour markers never represent exact vessel positions.');
+  const el=$('#obFeedDescription');
+  const messages={
+   loading:['Connexion AIS en cours…','Connecting to AIS…'],
+   sign_in_required:['Accès membre nécessaire pour voir les positions AIS.','Member access required for AIS positions.'],
+   membership_required:['Votre adhésion doit être activée pour accéder aux yachts AIS.','Active membership is required for AIS yachts.'],
+   ais_not_configured:['Le fournisseur AIS n’est pas encore connecté. Les ports et activités restent disponibles.','AIS provider is not connected yet. Harbours and experiences remain available.'],
+   ais_unavailable:['Flux AIS momentanément indisponible. Aucune position ancienne n’est affichée.','AIS feed temporarily unavailable. Stale positions are not displayed.'],
+   live_ais:['AIS actif · positions datées, maximum 15 minutes · actualisation toutes les 40 s.','AIS active · positions up to 15 minutes old · refresh every 40 seconds.']
+  };
+  el.textContent=(messages[type]||messages.ais_unavailable)[lang==='fr'?0:1];
  }
  function updateStatus(){
-  $('#obSourceStatus').textContent=verified
-   ?(txt('CONSULTÉ ','CHECKED ')+(feedCheckedAt?new Date(feedCheckedAt).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'}):'—')+' · '+txt('PORT / AIS','HARBOUR / AIS'))
-   :txt('PORTS · PAS DE YACHTS VÉRIFIÉS','HARBOURS · NO VERIFIED YACHTS');
+  const label=$('#obSourceStatus');
+  if(verified&&feedCheckedAt){
+   label.textContent=txt('AIS · ACTUALISÉ À ','AIS · CHECKED AT ')+
+    new Date(feedCheckedAt).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'});
+  }else{
+   label.textContent=feedState==='ais_not_configured'
+    ?txt('AIS · INTÉGRATION À ACTIVER','AIS · INTEGRATION REQUIRED')
+    :feedState==='loading'?txt('CARTE DISPONIBLE · AIS EN CHARGEMENT','MAP READY · AIS LOADING')
+    :txt('CARTE DES PORTS · AIS NON DISPONIBLE','HARBOUR MAP · AIS UNAVAILABLE');
+  }
  }
  async function getSession(){
   if(!window.supabase?.createClient)return null;
   try{
-   authClient ||=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
+   authClient ||=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE,{
+    auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}
+   });
    const {data:{session}}=await authClient.auth.getSession();
    return session?.access_token||null;
   }catch{return null}
@@ -195,17 +240,37 @@
   requestInFlight=true;$('#obRefresh').disabled=true;
   try{
    const token=await getSession();
-   if(!token){verified=false;feed=[];safeStatus('login');updateStatus();renderFleet();return}
-   const response=await fetch('/api/elysium-yachts',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
-   if(response.status===401||response.status===403){verified=false;feed=[];safeStatus('login');updateStatus();renderFleet();return}
-   if(!response.ok)throw Error('Unable to load yacht feed');
+   if(!token){
+    verified=false;feed=[];feedState='sign_in_required';feedCheckedAt=null;
+    safeStatus(feedState);updateStatus();renderFleet();return;
+   }
+   const controller=new AbortController();
+   const timeout=setTimeout(()=>controller.abort(),7800);
+   let response;
+   try{
+    response=await fetch('/api/elysium-yachts',{
+     headers:{Authorization:'Bearer '+token},cache:'no-store',signal:controller.signal
+    });
+   }finally{clearTimeout(timeout)}
+   if(response.status===401||response.status===403){
+    verified=false;feed=[];feedState=response.status===401?'sign_in_required':'membership_required';
+    feedCheckedAt=null;safeStatus(feedState);updateStatus();renderFleet();return;
+   }
+   if(!response.ok)throw Error('AIS HTTP '+response.status);
    const data=await response.json();
-   verified=data.source==='harbour_and_optional_ais';
-   feedCheckedAt=verified?Date.now():null;
-   feed=Array.isArray(data.yachts)?data.yachts.filter(y=>DESTINATIONS[y.city]&&Number.isFinite(y.lat)&&Number.isFinite(y.lng)):[];
-   safeStatus(verified?'live':'none');updateStatus();renderFleet();
-  }catch(err){verified=false;feed=[];safeStatus('none');updateStatus();renderFleet()}
-  finally{requestInFlight=false;$('#obRefresh').disabled=false}
+   feedState=data.source==='live_ais'?'live_ais':(data.source||'ais_unavailable');
+   verified=feedState==='live_ais';
+   feedCheckedAt=verified&&data.updatedAt?Date.parse(data.updatedAt):null;
+   feed=verified&&Array.isArray(data.yachts)
+    ?data.yachts.filter(y=>DESTINATIONS[y.city]&&Number.isFinite(y.lat)&&Number.isFinite(y.lng)
+     &&y.precision==='ais'&&y.aisRecent&&Number.isFinite(Date.parse(y.reportedAt))
+     &&Date.now()-Date.parse(y.reportedAt)<=15*60000)
+    :[];
+   safeStatus(feedState);updateStatus();renderFleet();
+  }catch(err){
+   verified=false;feed=[];feedState='ais_unavailable';feedCheckedAt=null;
+   safeStatus(feedState);updateStatus();renderFleet();
+  }finally{requestInFlight=false;$('#obRefresh').disabled=false}
  }
  function initMap(){
   if(typeof L==='undefined'){
@@ -215,7 +280,7 @@
   const c=DESTINATIONS[city];
   map=L.map('obMap',{zoomControl:false,minZoom:9,maxZoom:18,scrollWheelZoom:false,preferCanvas:true}).setView(c.coords,c.zoom);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-   attribution:'© OpenStreetMap contributors',maxZoom:19,keepBuffer:3,updateWhenIdle:true
+   attribution:'© OpenStreetMap contributors',maxZoom:19,keepBuffer:1,updateWhenIdle:true
   }).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
   harbourLayer=L.layerGroup().addTo(map);
@@ -224,7 +289,7 @@
   activityLayer=L.layerGroup().addTo(map);
   adLayer=L.layerGroup().addTo(map);
   renderMapMarkers();
-  setTimeout(()=>map?.invalidateSize(),200);
+  requestAnimationFrame(()=>map?.invalidateSize());
  }
  function haversine(a,b,c,d){
   const rad=Math.PI/180,R=6371;
@@ -395,6 +460,14 @@
     renderMapMarkers();
   }));
   $('#obRefresh').addEventListener('click',fetchYachts);
+  $('#obNavigationFilters [data-nav]').forEach(b=>b.addEventListener('click',()=>{
+   navFilter=b.dataset.nav;
+   $('#obNavigationFilters [data-nav]').forEach(x=>{
+    const selected=x===b;x.classList.toggle('is-active',selected);
+    x.setAttribute('aria-pressed',String(selected));
+   });
+   renderFleet();
+  }));
   $('#obSearch').addEventListener('input',e=>{filterText=e.target.value.trim().toLocaleLowerCase();renderFleet()});
   $$('.ob-length button').forEach(b=>b.addEventListener('click',()=>{
    size=b.dataset.size;
@@ -412,11 +485,11 @@
   $('#obManualName').addEventListener('keydown',e=>{if(e.key==='Enter'){$('#obManualSelect').click();e.preventDefault()}});
   $('#obClearVessel').addEventListener('click',()=>{selected=null;$('#obVesselContext').hidden=true;renderFleet()});
   $('#obConcierge').addEventListener('click',()=>requestExperience({nameFr:'Demande sur mesure',nameEn:'Bespoke concierge request'}));
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&verified)fetchYachts()});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)fetchYachts()});
  }
  wire();setLanguage(lang);
  if(window.L)initMap();else window.addEventListener('load',initMap,{once:true});
  fetchYachts();fetchMarketplace();
- // Two minute refresh avoids unnecessarily hammering the historic upstream.
- setInterval(()=>{if(!document.hidden)fetchYachts()},120000);
+ // Regional AIS refresh: shared 40-second server-side TTL; hidden tabs do not poll.
+ setInterval(()=>{if(!document.hidden)fetchYachts()},40000);
 })();
