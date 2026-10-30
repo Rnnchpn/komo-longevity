@@ -1,6 +1,6 @@
 <!doctype html><html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f6f2ec">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0a303c"><meta name="theme-color" content="#f6f2ec">
 <title>ELYSIUM · Broker Studio & Ad Régie</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -40,7 +40,7 @@ h1{font:400 clamp(66px,10vw,129px)/.88 var(--serif);letter-spacing:-.04em;margin
 .legal{border-left:1px solid #a9b7a5;padding-left:16px;margin-top:32px;max-width:780px}
 .flex{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
 @media(max-width:650px){.fields,.steps{grid-template-columns:1fr}.field.wide{grid-column:1}h1{font-size:68px}.panel{padding:21px}nav{padding:13px 17px}}
-</style></head><body>
+</style></head><body data-broker-screen="profile" data-listing-step="1">
 <nav><a href="/elysium/" class="brand"><strong>KŌMØ</strong><em>ELYSIUM</em></a><a href="/elysium/maison/yachting/">← YACHTING</a></nav>
 <main><span class="eyebrow">ELYSIUM · PRIVATE COMMERCIAL DESK</span><h1>Broker Studio.</h1>
 <p class="lead">Présentez vos yachts. Développez votre visibilité auprès des membres ELYSIUM.</p>
@@ -73,7 +73,11 @@ h1{font:400 clamp(66px,10vw,129px)/.88 var(--serif);letter-spacing:-.04em;margin
 <div class="field"><label for="image">PHOTO (URL HTTPS AUTORISÉE)</label><input id="image" type="url" placeholder="https://"></div>
 <div class="field"><label for="external">LIEN BROKER (URL HTTPS)</label><input id="external" type="url" placeholder="https://"></div>
 <div class="field wide"><label><input id="rightToPublish" type="checkbox" required> Je confirme avoir le droit de publier les informations et photographies du yacht, et disposer d’un mandat ou d’une autorisation commerciale appropriée.</label></div>
-</div><div class="actions"><button class="primary" type="submit">SOUMETTRE À VALIDATION ↗</button></div><p class="status" id="listingMessage"></p></form></section>
+</div><div class="actions broker-listing-submit"><button class="primary" type="submit">SOUMETTRE À VALIDATION ↗</button></div>
+ <div id="brokerListingPager" class="broker-form-pager">
+ <button type="button" id="listingPrev">← RETOUR</button><span id="listingStepLabel">ÉTAPE 01 / 03</span><button type="button" id="listingNext">SUIVANT →</button>
+ </div>
+<p class="status" id="listingMessage"></p></form></section>
 <section id="campaigns" class="panel tab" hidden><h2>Publicité ELYSIUM.</h2><p class="note">Emplacements sponsorisés clairement identifiés, réservation sur devis. Pas de mise en ligne automatique avant validation et paiement confirmé.</p>
 <form id="campaignForm"><div class="fields">
 <div class="field"><label for="placement">EMPLACEMENT</label><select id="placement"><option value="map_spotlight">SPOTLIGHT SUR LA CARTE</option><option value="yachting_feature">ANNONCE EN VEDETTE</option><option value="home_feature">COLLECTION D’ACCUEIL</option></select></div>
@@ -90,4 +94,11 @@ h1{font:400 clamp(66px,10vw,129px)/.88 var(--serif);letter-spacing:-.04em;margin
 <div class="list" id="adminItems"></div></section>
 </section>
 <p class="legal note">Les annonces ne sont pas publiées automatiquement. Identité du broker, mandat, autorisation des visuels et documents commerciaux doivent être vérifiés. Aucun paiement n’est encaissé sur cet écran ; les factures et éventuelles confirmations de paiement doivent être traitées par ELYSIUM.</p>
-</main><script src="/elysium/assets/supabase.js"></script><script src="/elysium/brokers/studio.js"></script></body></html>
+</main>
+<nav class="broker-app-dock" id="brokerDock" aria-label="Broker Studio navigation" hidden>
+ <button type="button" data-broker-screen="profile" class="is-active" aria-current="page"><span>◈</span><small>PROFIL</small></button>
+ <button type="button" data-broker-screen="listings" aria-current="false"><span>⌁</span><small>YACHT</small></button>
+ <button type="button" data-broker-screen="campaigns" aria-current="false"><span>✦</span><small>PUBLICITÉ</small></button>
+ <button type="button" data-broker-screen="myitems" aria-current="false"><span>◇</span><small>DOSSIERS</small></button>
+ <button type="button" data-broker-screen="admin" aria-current="false" hidden><span>K</span><small>RÉGIE</small></button>
+</nav><script src="/elysium/assets/supabase.js"></script><script src="/elysium/brokers/studio.js"></script></body></html>
