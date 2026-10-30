@@ -61,13 +61,29 @@
    b.classList.toggle('is-active',yes);b.setAttribute('aria-pressed',String(yes));
   });
   if(chosen){
-   if(vesselFrameCity!==city||reload||!frame.getAttribute('src')){
+   if(vesselFrameCity!==city||reload||!frame.srcdoc){
     vesselFrameCity=city;vesselLoadCounter++;
-    const u=new URL('/elysium/on-board/vesselfinder.html',location.origin);
-    u.searchParams.set('city',city);
-    if(reload)u.searchParams.set('refresh',String(vesselLoadCounter));
+    // Use srcdoc, not a URL on komolongevity.com: the production site
+    // deliberately sends X-Frame-Options: DENY on every HTTP response.
+    // srcdoc avoids framing our own blocked URL. The VesselFinder script
+    // remains isolated, and its own embed policy is respected.
+    const geo=DESTINATIONS[city],height=Math.max(380,Math.round(vendor.clientHeight||550));
+    const lat=geo.coords[0],lon=geo.coords[1];
+    const zoom=city==='cannes'?9:city==='monaco'?12:12;
+    const html='<!doctype html><html><head><meta charset="utf-8">'+
+     '<meta name="viewport" content="width=device-width,initial-scale=1">'+
+     '<style>html,body{margin:0;height:100%;width:100%;background:#031823;overflow:hidden}'+
+     'iframe{max-width:100%}</style></head><body>'+
+     '<script>var width="100%";var height="'+height+'";var latitude="'+lat+'";'+
+     'var longitude="'+lon+'";var zoom="'+zoom+'";var names=true;'+
+     'var centerx='+lon+';var centery='+lat+';<\/script>'+
+     '<script src="https://www.vesselfinder.com/aismap.js"><\/script>'+
+     '</body></html>';
     if(loader){loader.hidden=false;loader.classList.remove('is-error')}
-    frame.src=u.pathname+u.search;
+    // srcdoc is rendered without an HTTP response, so the global DENY
+    // header cannot mistakenly block our own wrapper document.
+    frame.removeAttribute('src');
+    frame.srcdoc=html;
    }
    $('#obSourceStatus').textContent=txt('AIS · VESSELFINDER · DONNÉES TIERCES','AIS · VESSELFINDER · THIRD-PARTY DATA');
   }else{
