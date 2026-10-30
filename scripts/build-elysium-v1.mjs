@@ -7,11 +7,15 @@ const src=join(root,'src','elysium');
 const out=join(root,'site','elysium');
 const assets=join(out,'assets');
 await mkdir(join(out,'club'),{recursive:true});
+await mkdir(join(out,'on-board'),{recursive:true});
 await mkdir(join(out,'maison'),{recursive:true});
 await mkdir(assets,{recursive:true});
 const copies=[
  [join(src,'index.html'),join(out,'index.html')],
  [join(src,'club','index.html'),join(out,'club','index.html')],
+ [join(src,'on-board','index.html'),join(out,'on-board','index.html')],
+ [join(src,'on-board','on-board.css'),join(out,'on-board','on-board.css')],
+ [join(src,'on-board','on-board.js'),join(out,'on-board','on-board.js')],
  [join(src,'elysium.css'),join(assets,'elysium.css')],
  [join(src,'member.js'),join(assets,'member.js')],
  ['node_modules/@supabase/supabase-js/dist/umd/supabase.js',join(assets,'supabase.js')]
@@ -34,6 +38,13 @@ for(const world of WORLDS){
  await mkdir(dir,{recursive:true});
  await writeFile(join(dir,'index.html'),world.slug==='longevity'?longevityTemplate:(world.slug==='aesthetic'?aestheticTemplate:template));
 }
+const onBoard=await readFile(join(out,'on-board','index.html'),'utf8');
+const onBoardJs=await readFile(join(out,'on-board','on-board.js'),'utf8');
+if(!onBoard.includes('data-city="monaco"')||!onBoard.includes('data-city="cannes"')||
+ !onBoard.includes('data-city="saint-tropez"')||!onBoard.includes('id="obMap"')||
+ !onBoardJs.includes('/api/elysium-yachts')||!onBoardJs.includes('navigator.geolocation.getCurrentPosition')||
+ !onBoardJs.includes('renderActivities')||!onBoardJs.includes('source')||onBoardJs.includes('const SNAPSHOT'))
+ throw new Error('[elysium] On Board missing 3 cities, consent-based GPS or member-only verified yachts');
 const home=await readFile(join(out,'index.html'),'utf8');
 if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/longevity/')||!home.includes('ely-public-commerce')||(home.match(/class="ely-public-world ely-public-world-/g)||[]).length!==9)
  throw new Error('[elysium] Unwanted entrance animation or required membership and Longevity content missing');
