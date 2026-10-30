@@ -4,7 +4,7 @@ const product=(id,en,fr,kind,tag,image,copyEn,copyFr,priceEn='Private quotation'
  id,en,fr,kind,tag,image:img(image),copyEn,copyFr,priceEn,priceFr
 });
 const medical=p=>({kind:'INDEPENDENT MEDICAL CARE',priceEn:'Physician quotation',priceFr:'Honoraires sur proposition du médecin',...p});
-export const WORLDS=[
+const LEGACY_WORLDS=[
 {
 slug:'longevity',no:'01',icon:'◈',name:'Longevity',full:'KŌMØ Longevity',eyebrow:'PRIVATE MEDICAL LONGEVITY',
 subtitleEn:'By video, on board or in your residence.',subtitleFr:'En visioconférence, à bord ou en résidence privée.',
@@ -192,4 +192,57 @@ product('pilates','Pilates On Board','Pilates à bord','MOVEMENT EXPERIENCE','YA
 product('mobility','Mobility & Balance Atelier','Atelier mobilité & équilibre','MOVEMENT EXPERIENCE','FUNCTIONAL / PERSONALISED','photo-1517836357463-d25dfeac3438','An individual mobility and balance session for wellbeing and movement. Medical rehabilitation remains separate and licensed.','Séance individuelle de mobilité et équilibre. La rééducation thérapeutique demeure distincte et relève de professionnels habilités.')
 ]}
 ];
+
+/* ELYSIUM V8 · Eight customer-facing departments.
+   Old offers are reused rather than discarded. Historic slugs redirect to these departments. */
+const legacy=Object.fromEntries(LEGACY_WORLDS.map(w=>[w.slug,w]));
+const fashion=(id,en,fr,copyEn,copyFr)=>({id,en,fr,kind:'CURATED LIFESTYLE',tag:'PRIVATE EDITION',copyEn,copyFr,shortEn:copyEn,shortFr:copyFr,priceEn:'On request',priceFr:'Sur demande'});
+const dept=(slug,no,name,icon,eyebrow,subtitleFr,subtitleEn,products)=>({
+ slug,no,name,full:'KŌMØ ELYSIUM · '+name,icon,eyebrow,subtitleFr,subtitleEn,
+ copyFr:subtitleFr,copyEn:subtitleEn,image:'',background:'',products
+});
+export const WORLDS=[
+ dept('medical-longevity','01','Medical Longevity','◈','PRIVATE MEDICAL LONGEVITY',
+  'Consultations privées, Motion, esthétique et suivi.','Private care, Motion, aesthetics and follow-up.',
+  [...legacy.longevity.products,...legacy.aesthetic.products,
+   fashion('motion-functional-check','KŌMØ Motion','Bilan KŌMØ Motion',
+    'Non-medical functional movement assessment, offered separately from consultations.',
+    'Mesure fonctionnelle du mouvement, non médicale et distincte des consultations.')]),
+ dept('iv-drip','02','IV Therapy','✚','PHYSICIAN-LED INFUSION',
+  'Coordination des demandes de perfusion médicale.','Medical infusion consultations and coordination.',
+  legacy['iv-drip'].products),
+ dept('longevity-shop','03','Longevity Shop','◒','THE LONGEVITY EDIT',
+  'Suppléments et cosmétiques sélectionnés.','A considered selection of supplements and cosmetics.',
+  legacy['cosmetic-supplements'].products),
+ dept('lifestyle','04','Lifestyle','∞','THE PRIVATE WARDROBE',
+  'Vêtements, accessoires et pièces choisies.','Clothing, accessories and rare essentials.',
+  [
+   fashion('lifestyle-tailoring','Private Tailoring','Vestiaire sur mesure','Made-to-measure clothing and styling, by private request.','Création vestimentaire et accompagnement sur mesure.'),
+   fashion('lifestyle-accessories','Private Accessories','Accessoires d’exception','Curated leather goods, travel accessories and personal objects.','Maroquinerie, accessoires de voyage et objets choisis.'),
+   fashion('lifestyle-travel','Travel Edit','Sélection voyage','Exceptional pieces designed for travel and life on board.','Pièces remarquables pour le voyage et la vie à bord.')
+  ]),
+ dept('yachting','05','Yachting','⌁','YACHTING & PRIVATE BROKERAGE',
+  'Yachts à vendre ou à louer, brokers et services à bord.','Yacht charter, brokerage and onboard services.',
+  [
+   fashion('yachting-charter','Private Charter','Location de yacht','Personalised yacht charter introductions through approved brokers.','Recherche de yacht à louer auprès de brokers vérifiés.'),
+   fashion('yachting-purchase','Yacht Acquisition','Acquisition de yacht','Discreet introductions to brokers for yacht purchases.','Mise en relation confidentielle pour l’acquisition d’un yacht.'),
+   fashion('yachting-crew','On Board Services','Services à bord','Crew, provisioning and yacht logistics organised on request.','Équipage, approvisionnement et logistique à bord sur demande.')
+  ]),
+ dept('experiences','06','Experiences','✦','THE RIVIERA EXPERIENCE',
+  'Événements, gastronomie, rencontres et expériences privées.','Events, private dining and remarkable Riviera moments.',
+  [...legacy.gastronomy.products,...legacy.life.products]),
+ dept('high-luxury','07','High Luxury','◇','THE EXCEPTIONAL EDIT',
+  'Gemmes, montres, art, automobiles et pièces rares.','Gemstones, watches, art, cars and rare objects.',
+  [...legacy['high-luxury'].products,
+   fashion('high-luxury-art','Private Art','Art & collections','Discreet sourcing of artworks, subject to provenance checks.','Recherche d’œuvres d’art, sous réserve de vérification de provenance.'),
+   fashion('high-luxury-automotive','Automotive Collection','Automobiles de collection','Exceptional automobiles sourced through independent specialists.','Automobiles d’exception auprès de spécialistes indépendants.')]),
+ dept('services','08','Services','☼','PRIVATE SERVICES & CONCIERGE',
+  'Conciergerie, équipes et accompagnement privé.','Private concierge, teams and personal services.',
+  [...legacy.service.products,...legacy.team.products])
+];
 export const WORLD_BY_SLUG=Object.fromEntries(WORLDS.map(w=>[w.slug,w]));
+export const LEGACY_SLUGS={
+ longevity:'medical-longevity',aesthetic:'medical-longevity','cosmetic-supplements':'longevity-shop',
+ life:'experiences',gastronomy:'experiences',service:'services',team:'services'
+};
+
