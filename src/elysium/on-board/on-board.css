@@ -169,3 +169,11 @@
 @media(prefers-reduced-motion:reduce){
  .ob-city,.ob-activity,.ob-activity-actions button{transition:none}
 }
+
+.ob-own-yacht{border-top:1px solid #e1e7dd;padding:12px 25px 16px;background:#f7f8f2}
+.ob-own-yacht label{display:block;font:700 9px/1.5 Manrope,Arial,sans-serif;letter-spacing:.13em;color:#718875;margin-bottom:8px}
+.ob-own-yacht>div{display:flex;gap:7px}
+.ob-own-yacht input{min-width:0;flex:1;border:1px solid #d2ddcf;background:#fff;color:#294432;padding:10px 11px;font:400 11px Manrope,Arial,sans-serif}
+.ob-own-yacht button{flex:none;background:#e8eee6;border:1px solid #bfcfbe;padding:10px 12px;color:#324e38;font:700 9px Manrope,Arial,sans-serif}
+.ob-own-yacht button:hover{background:#d9e7d7}
+@media(max-width:790px){.ob-own-yacht{padding-inline:19px}}
