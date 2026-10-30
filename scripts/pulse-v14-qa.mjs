@@ -90,7 +90,7 @@ const checks=[
  ['Online preflight accessible from landing',app.includes('href="./online/"')&&css.includes('.pulse-entry-prep-link')],
  ['Online preflight page branded',onlineHtml.includes('Préparer mon Bilan Online')&&onlineHtml.includes('KŌMØ <span>PULSE</span>')],
  ['Online preflight points to Stripe checkout',onlineHtml.includes('https://buy.stripe.com/fZucN6bUTeTCd4B4EX0VO00')],
- ['Online preflight discloses manual activation',onlineHtml.includes('39 €</strong> tarif du bilan')&&onlineHtml.includes('L’accès aux tests n’est pas encore activé automatiquement')],
+ ['Online preflight discloses manual activation',onlineHtml.includes('39 €</strong> tarif du bilan')&&onlineHtml.includes('accès aux tests n\'est pas encore activé automatiquement')],
  ['Online preflight safety checklist',onlineHtml.includes('id="ready-checklist"')&&(onlineHtml.match(/data-preflight-check/g)||[]).length===4],
  ['Online preflight camera permission only',onlineScript.includes('navigator.mediaDevices.getUserMedia')&&onlineScript.includes('audio: false')],
  ['Online preflight stops media tracks',onlineScript.includes('getTracks().forEach(track => track.stop())')&&onlineScript.includes("addEventListener('pagehide'")],
