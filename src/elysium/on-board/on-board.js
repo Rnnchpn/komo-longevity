@@ -162,16 +162,27 @@
   const list=$('#obYachtList');list.replaceChildren();
   if(!verified){
    const box=document.createElement('div');box.className='ob-yacht-placeholder';
-   box.textContent=txt('Aucune donnée actuelle vérifiée pour le moment. Les ports et les expériences restent accessibles. Les anciens yachts du projet Intelligence ne sont pas affichés comme présents aujourd’hui.',
-    'No current verified feed. The harbours and experiences remain accessible. Historical Intelligence yacht positions are not presented as current.');
+   box.textContent=feedState==='ais_not_configured'
+    ?txt('Flux AIS en attente d’activation. Les ports, activités et annonces chargent immédiatement. Un abonnement AIS régional est nécessaire pour voir les yachts réellement présents ou en navigation.',
+      'AIS integration awaiting activation. Harbours, experiences and listings remain available immediately. A regional AIS subscription is required for actual yacht locations.')
+    :feedState==='sign_in_required'||feedState==='membership_required'
+    ?txt('Connectez-vous au Club ELYSIUM pour voir les positions AIS. Les ports restent accessibles.',
+      'Sign in to ELYSIUM Club to see AIS yachts. Harbours remain accessible.')
+    :txt('Aucune position AIS vérifiée actuellement. La carte des ports reste utilisable.',
+      'No verified AIS positions are currently available. The harbour map remains usable.');
    list.append(box);
   }else if(!filtered.length){
    const box=document.createElement('div');box.className='ob-yacht-placeholder';
-   box.textContent=txt('Aucun yacht signalé pour ce filtre dans cette escale. Essayez une autre longueur ou un autre port.','No vessels reported for this filter. Try another length or harbour.');
+   box.textContent=txt('Aucun yacht AIS récent pour cette escale ou ce filtre. Essayez une autre catégorie.',
+      'No recent AIS yachts for this destination or filter. Try another category.');
    list.append(box);
   }else{
    filtered.slice(0,90).forEach(y=>list.append(makeYachtRow(y)));
-   if(filtered.length>90){const el=document.createElement('p');el.className='ob-yacht-placeholder';el.textContent=txt('Affinez votre recherche pour voir davantage de yachts.','Refine the search to see more yachts.');list.append(el)}
+   if(filtered.length>90){
+    const msg=document.createElement('p');msg.className='ob-yacht-placeholder';
+    msg.textContent=txt('Affinez votre recherche pour voir davantage de yachts.','Refine your search to see more yachts.');
+    list.append(msg);
+   }
   }
   renderMapMarkers();
  }
@@ -190,21 +201,35 @@
   }
  }
  function safeStatus(type){
-  const a=$('#obFeedDescription');
-  if(type==='login')a.textContent=txt('Connectez-vous à votre club ELYSIUM pour voir les yachts signalés.','Sign in to your ELYSIUM membership to see reported yachts.');
-  if(type==='member')a.textContent=txt('Accès membre confirmé. Actualisation des ports et des positions disponibles.','Member access confirmed. Harbour and vessel updates available.');
-  if(type==='none')a.textContent=txt('Flux de yachts indisponible actuellement. Aucun bateau fictif n’est affiché.','Yacht feed currently unavailable. No fictitious vessels are shown.');
-  if(type==='live')a.textContent=txt('Données des ports signalées. Les marqueurs de port ne représentent jamais une position exacte.','Harbour reports received. Harbour markers never represent exact vessel positions.');
+  const el=$('#obFeedDescription');
+  const messages={
+   loading:['Connexion AIS en cours…','Connecting to AIS…'],
+   sign_in_required:['Accès membre nécessaire pour voir les positions AIS.','Member access required for AIS positions.'],
+   membership_required:['Votre adhésion doit être activée pour accéder aux yachts AIS.','Active membership is required for AIS yachts.'],
+   ais_not_configured:['Le fournisseur AIS n’est pas encore connecté. Les ports et activités restent disponibles.','AIS provider is not connected yet. Harbours and experiences remain available.'],
+   ais_unavailable:['Flux AIS momentanément indisponible. Aucune position ancienne n’est affichée.','AIS feed temporarily unavailable. Stale positions are not displayed.'],
+   live_ais:['AIS actif · positions datées, maximum 15 minutes · actualisation toutes les 40 s.','AIS active · positions up to 15 minutes old · refresh every 40 seconds.']
+  };
+  el.textContent=(messages[type]||messages.ais_unavailable)[lang==='fr'?0:1];
  }
  function updateStatus(){
-  $('#obSourceStatus').textContent=verified
-   ?(txt('CONSULTÉ ','CHECKED ')+(feedCheckedAt?new Date(feedCheckedAt).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'}):'—')+' · '+txt('PORT / AIS','HARBOUR / AIS'))
-   :txt('PORTS · PAS DE YACHTS VÉRIFIÉS','HARBOURS · NO VERIFIED YACHTS');
+  const label=$('#obSourceStatus');
+  if(verified&&feedCheckedAt){
+   label.textContent=txt('AIS · ACTUALISÉ À ','AIS · CHECKED AT ')+
+    new Date(feedCheckedAt).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'});
+  }else{
+   label.textContent=feedState==='ais_not_configured'
+    ?txt('AIS · INTÉGRATION À ACTIVER','AIS · INTEGRATION REQUIRED')
+    :feedState==='loading'?txt('CARTE DISPONIBLE · AIS EN CHARGEMENT','MAP READY · AIS LOADING')
+    :txt('CARTE DES PORTS · AIS NON DISPONIBLE','HARBOUR MAP · AIS UNAVAILABLE');
+  }
  }
  async function getSession(){
   if(!window.supabase?.createClient)return null;
   try{
-   authClient ||=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}});
+   authClient ||=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE,{
+    auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:false}
+   });
    const {data:{session}}=await authClient.auth.getSession();
    return session?.access_token||null;
   }catch{return null}
@@ -214,17 +239,37 @@
   requestInFlight=true;$('#obRefresh').disabled=true;
   try{
    const token=await getSession();
-   if(!token){verified=false;feed=[];safeStatus('login');updateStatus();renderFleet();return}
-   const response=await fetch('/api/elysium-yachts',{headers:{Authorization:'Bearer '+token},cache:'no-store'});
-   if(response.status===401||response.status===403){verified=false;feed=[];safeStatus('login');updateStatus();renderFleet();return}
-   if(!response.ok)throw Error('Unable to load yacht feed');
+   if(!token){
+    verified=false;feed=[];feedState='sign_in_required';feedCheckedAt=null;
+    safeStatus(feedState);updateStatus();renderFleet();return;
+   }
+   const controller=new AbortController();
+   const timeout=setTimeout(()=>controller.abort(),7800);
+   let response;
+   try{
+    response=await fetch('/api/elysium-yachts',{
+     headers:{Authorization:'Bearer '+token},cache:'no-store',signal:controller.signal
+    });
+   }finally{clearTimeout(timeout)}
+   if(response.status===401||response.status===403){
+    verified=false;feed=[];feedState=response.status===401?'sign_in_required':'membership_required';
+    feedCheckedAt=null;safeStatus(feedState);updateStatus();renderFleet();return;
+   }
+   if(!response.ok)throw Error('AIS HTTP '+response.status);
    const data=await response.json();
-   verified=data.source==='harbour_and_optional_ais';
-   feedCheckedAt=verified?Date.now():null;
-   feed=Array.isArray(data.yachts)?data.yachts.filter(y=>DESTINATIONS[y.city]&&Number.isFinite(y.lat)&&Number.isFinite(y.lng)):[];
-   safeStatus(verified?'live':'none');updateStatus();renderFleet();
-  }catch(err){verified=false;feed=[];safeStatus('none');updateStatus();renderFleet()}
-  finally{requestInFlight=false;$('#obRefresh').disabled=false}
+   feedState=data.source==='live_ais'?'live_ais':(data.source||'ais_unavailable');
+   verified=feedState==='live_ais';
+   feedCheckedAt=verified&&data.updatedAt?Date.parse(data.updatedAt):null;
+   feed=verified&&Array.isArray(data.yachts)
+    ?data.yachts.filter(y=>DESTINATIONS[y.city]&&Number.isFinite(y.lat)&&Number.isFinite(y.lng)
+     &&y.precision==='ais'&&y.aisRecent&&Number.isFinite(Date.parse(y.reportedAt))
+     &&Date.now()-Date.parse(y.reportedAt)<=15*60000)
+    :[];
+   safeStatus(feedState);updateStatus();renderFleet();
+  }catch(err){
+   verified=false;feed=[];feedState='ais_unavailable';feedCheckedAt=null;
+   safeStatus(feedState);updateStatus();renderFleet();
+  }finally{requestInFlight=false;$('#obRefresh').disabled=false}
  }
  function initMap(){
   if(typeof L==='undefined'){
