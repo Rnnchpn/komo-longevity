@@ -1,0 +1,171 @@
+
+/* ELYSIUM ON BOARD · Monaco / Cannes / Saint-Tropez
+   The private maritime desk. Map-first, yacht selection, services without noise. */
+.ely-onboard{background:#f7f5ef;color:#263a30;font-family:Manrope,Arial,sans-serif;margin:0;overflow-x:hidden}
+.ely-onboard *{box-sizing:border-box}
+.ely-onboard button,.ely-onboard input{font:inherit}
+.ely-onboard button{cursor:pointer}
+.ely-onboard a{text-decoration:none;color:inherit}
+.ely-onboard [hidden]{display:none!important}
+.ob-header{height:79px;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:0 clamp(20px,4.5vw,75px);background:#faf9f5;border-bottom:1px solid #dadfd5}
+.ob-logo{display:flex;align-items:center;gap:13px;white-space:nowrap}
+.ob-logo strong{font-size:19px;font-weight:700;letter-spacing:-.06em}
+.ob-logo em{font:400 22px Cormorant Garamond,Georgia,serif;font-style:normal;letter-spacing:.15em;color:#748b7b;border-left:1px solid #aebcb0;padding-left:13px}
+.ob-header-line{font-size:9px;color:#829488;letter-spacing:.22em;white-space:nowrap}
+.ob-header-line span{color:#b8ab8c}
+.ob-header-actions{display:flex;align-items:center;gap:12px}
+.ob-member{border:1px solid #c6d2c7;padding:12px 16px;font-size:9px;font-weight:700;letter-spacing:.09em;white-space:nowrap}
+.ob-member:hover{border-color:#233e2c}
+.ob-header-actions button{border:0;background:transparent;color:#455c49;font-size:10px;letter-spacing:.16em;font-weight:700;padding:11px}
+.ob-main{max-width:1700px;margin:0 auto;padding:0 clamp(15px,3.5vw,60px) 80px}
+.ob-intro{display:grid;grid-template-columns:1.3fr .7fr;align-items:end;gap:25px;padding:45px 0 44px}
+.ob-kicker{font-size:9px;font-weight:700;letter-spacing:.2em;color:#7e937e;text-transform:uppercase;line-height:1.6}
+.ob-intro h1{font:400 clamp(90px,11vw,167px)/.83 Cormorant Garamond,Georgia,serif;letter-spacing:-.067em;margin:22px 0 5px}
+.ob-intro h1 span{color:#a2b39c}
+.ob-intro-titles>p{font:400 clamp(27px,3.2vw,47px)/1.05 Cormorant Garamond,Georgia,serif;margin:17px 0 0}
+.ob-intro-aside{justify-self:end;max-width:340px;padding-bottom:8px}
+.ob-intro-aside p{font-size:12px;line-height:1.95;color:#76857b;margin:0}
+.ob-cities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #d4ddd3;margin-bottom:16px;background:#fbfaf6}
+.ob-city{background:transparent;border:0;border-right:1px solid #d4ddd3;display:grid;grid-template-columns:25px 1fr;grid-template-rows:auto auto;column-gap:10px;align-items:start;text-align:left;padding:23px 25px 22px;transition:background .24s,color .24s;color:#354b3b;position:relative}
+.ob-city:last-child{border-right:0}
+.ob-city:before{content:"";position:absolute;bottom:-1px;left:0;right:0;height:3px;background:transparent}
+.ob-city span{grid-row:1/3;font:400 16px Cormorant Garamond,Georgia,serif;color:#9aa99d;padding-top:5px}
+.ob-city strong{font:400 clamp(29px,3vw,43px)/1 Cormorant Garamond,Georgia,serif;letter-spacing:-.02em}
+.ob-city small{font-size:8px;font-weight:600;letter-spacing:.1em;color:#88968b;margin-top:8px}
+.ob-city:hover{background:#eff3ec}
+.ob-city.is-active{background:#e9efe7}
+.ob-city.is-active:before{background:#6c8670}
+.ob-city.is-active strong{color:#1c3928}
+.ob-city:focus-visible,.ob-geolocate:focus-visible,.ob-dashboard button:focus-visible,.ob-activity-grid a:focus-visible{outline:2px solid #7f9c81;outline-offset:3px}
+.ob-experience{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(340px,.76fr);gap:16px;height:clamp(560px,62vw,680px)}
+.ob-map-shell{position:relative;overflow:hidden;background:linear-gradient(135deg,#d4e0dd,#aebec1);border:1px solid #d3ded6}
+.ob-map{position:absolute;inset:0;z-index:1}
+.ob-map .leaflet-container{font-family:Manrope,Arial,sans-serif}
+.ob-map .leaflet-control-attribution{font-size:8px;background:#ffffffd0}
+.ob-map .leaflet-tile-pane{filter:saturate(.65) brightness(1.04) contrast(.94)}
+.ob-map-top{position:absolute;z-index:450;top:18px;left:18px;right:18px;display:flex;justify-content:space-between;gap:12px;align-items:start;pointer-events:none}
+.ob-map-port{padding:16px 18px;min-width:190px;max-width:70%;background:#fbfbf5f0;backdrop-filter:blur(18px);border:1px solid #ffffffc2;box-shadow:0 8px 23px #2b473016;pointer-events:auto}
+.ob-map-port strong{display:block;font:400 39px/1 Cormorant Garamond,Georgia,serif;margin:5px 0;color:#203a2a}
+.ob-map-port small{font-size:9px;color:#6d8575}
+.ob-geolocate{pointer-events:auto;min-height:43px;border:0;background:#253d2d;color:#f6f4e9;padding:12px 15px;font-size:9px!important;font-weight:700!important;letter-spacing:.1em;white-space:nowrap;box-shadow:0 8px 25px #20392b29}
+.ob-geolocate:hover{background:#3d6048}
+.ob-map-footer{position:absolute;z-index:450;bottom:15px;left:15px;right:15px;display:flex;align-items:center;justify-content:space-between;gap:10px;pointer-events:none}
+.ob-map-footer span{max-width:75%;font-size:9px;letter-spacing:.08em;line-height:1.5;color:#3c5848;background:#f7f9f0ec;padding:10px 13px;box-shadow:0 5px 20px #203a2622}
+.ob-map-footer button{pointer-events:auto;border:1px solid #bccdbf;background:#f7f9f0;padding:10px 12px;font-size:9px!important;font-weight:700!important;letter-spacing:.08em;white-space:nowrap}
+.ob-map-error{position:absolute;z-index:3;top:50%;left:50%;transform:translate(-50%,-50%);background:#fffcf5;padding:20px;color:#536c55;font-size:12px}
+.ob-harbour-marker{display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8f8f0;border:2px solid #4f765f;color:#2a4934;border-radius:50%;width:43px;height:43px;box-shadow:0 5px 18px #233f2e3d}
+.ob-harbour-marker b{font:700 11px Manrope,Arial,sans-serif}
+.ob-harbour-marker svg{width:19px;height:19px}
+.ob-harbour-marker.is-filled{background:#274b38;color:#fff;border-color:#e8efe0}
+.ob-yacht-marker{width:28px;height:28px;background:#fffef5;border:1px solid #a99670;border-radius:50%;display:grid;place-items:center;box-shadow:0 5px 13px #26382748}
+.ob-yacht-marker svg{width:18px;height:18px;fill:#816d4c;transform-origin:50% 50%}
+.ob-self-marker{width:20px;height:20px;background:#2c83b8;border:4px solid white;border-radius:50%;box-shadow:0 0 0 9px #327eab33,0 4px 12px #1b3e4b4c}
+.ob-dashboard{display:flex;flex-direction:column;min-height:0;background:#fcfbf8;border:1px solid #e0e3da;overflow:hidden}
+.ob-dashboard-head{padding:24px 25px 15px}
+.ob-count{display:flex;align-items:baseline;gap:13px;margin-top:11px}
+.ob-count strong{font:400 64px/.8 Cormorant Garamond,Georgia,serif;letter-spacing:-.045em;color:#2d4a36}
+.ob-count small{font-size:9px;letter-spacing:.16em;color:#839386}
+.ob-dashboard-head>p{margin:13px 0 0;font-size:10px;line-height:1.7;color:#73877a}
+.ob-search{padding:0 25px 13px}
+.ob-search label{display:block;font-size:9px;font-weight:700;color:#7c917c;letter-spacing:.13em;margin-bottom:9px}
+.ob-search input{width:100%;height:42px;border:1px solid #d6ded2;background:#fff;padding:10px 14px;color:#284032;border-radius:0;font-size:12px}
+.ob-length{display:flex;align-items:center;gap:6px;padding:0 25px 14px;white-space:nowrap;overflow-x:auto}
+.ob-length button{border:1px solid #d3dfd5;background:transparent;padding:9px 11px;font-size:9px;font-weight:600;color:#6e8170}
+.ob-length button.is-active{background:#294735;color:white;border-color:#294735}
+.ob-yacht-list{flex:1;overflow:auto;scrollbar-width:thin;border-top:1px solid #e1e7dd;padding:4px 0}
+.ob-yacht-row{display:grid;grid-template-columns:33px minmax(0,1fr) 24px;gap:12px;align-items:center;width:100%;background:transparent;border:0;border-bottom:1px solid #edf0e9;padding:16px 24px;text-align:left;color:#273b2d;transition:background .15s}
+.ob-yacht-row:hover,.ob-yacht-row.is-selected{background:#edf2ea}
+.ob-yacht-row .ob-boat-small{display:grid;place-items:center;border:1px solid #b2c1b0;width:31px;height:31px;border-radius:50%;font-size:14px}
+.ob-yacht-text strong{display:block;font:400 24px/1 Cormorant Garamond,Georgia,serif}
+.ob-yacht-text small{display:block;margin-top:6px;color:#829084;font-size:9px;line-height:1.45}
+.ob-yacht-row>span:last-child{font-size:18px;color:#9aab97}
+.ob-yacht-placeholder{font-size:12px;line-height:1.8;color:#718274;padding:29px 25px}
+.ob-vessel-context{border-top:1px solid #cfdbd0;background:#eaf0e9;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 25px}
+.ob-vessel-context strong{display:block;font:400 27px Cormorant Garamond,Georgia,serif;overflow-wrap:anywhere}
+.ob-vessel-context button{width:32px;height:32px;border:1px solid #bdd0bc;background:transparent;font-size:20px}
+.ob-dashboard-disclaimer{padding:14px 25px;background:#f2f3ed;color:#859087;font-size:9px;line-height:1.65;border-top:1px solid #e1e7dd}
+.ob-activities{padding:clamp(65px,7vw,103px) 0 20px}
+.ob-activities-head{display:flex;justify-content:space-between;align-items:end;gap:35px;margin-bottom:37px}
+.ob-activities-head h2{font:400 clamp(53px,6vw,87px)/.94 Cormorant Garamond,Georgia,serif;margin:15px 0 0;letter-spacing:-.037em}
+.ob-activities-head>p{max-width:300px;color:#7f9082;font-size:12px;line-height:1.8;margin:0 0 5px}
+.ob-activity-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+.ob-activity{display:flex;flex-direction:column;min-width:0;background:#fdfbf5;border:1px solid #dee4d9;transition:transform .26s,box-shadow .26s}
+.ob-activity:hover{transform:translateY(-4px);box-shadow:0 20px 50px #2a422a15}
+.ob-activity-art{height:185px;background:linear-gradient(135deg,#e4e9df,#cedbd0);position:relative;display:grid;place-items:center;overflow:hidden}
+.ob-activity:nth-child(2n) .ob-activity-art{background:linear-gradient(135deg,#ece6e1,#dbd1c7)}
+.ob-activity:nth-child(3n) .ob-activity-art{background:linear-gradient(135deg,#e1e7e8,#c9d5d1)}
+.ob-activity-art span{font:400 74px Cormorant Garamond,Georgia,serif;color:#738f7d;position:relative;z-index:1}
+.ob-activity-art:before{content:"";position:absolute;border-radius:50%;height:130px;width:130px;border:1px solid #90a6918c;box-shadow:0 0 0 17px #ffffff2e,0 0 0 18px #98a99d55;transform:rotate(17deg)}
+.ob-activity-body{padding:24px 25px 27px;display:flex;flex:1;flex-direction:column}
+.ob-activity-body>span{font-size:9px;letter-spacing:.16em;font-weight:700;color:#7d937f}
+.ob-activity-body h3{font:400 39px/.97 Cormorant Garamond,Georgia,serif;margin:13px 0 10px}
+.ob-activity-body p{font-size:11px;color:#7b887d;line-height:1.8;margin:0 0 20px;flex:1}
+.ob-activity-actions{display:flex;gap:11px;align-items:center;justify-content:space-between;border-top:1px solid #dbe4d9;padding-top:16px}
+.ob-activity-actions a{font-size:10px;font-weight:700;letter-spacing:.08em;white-space:nowrap;color:#244334}
+.ob-activity-actions button{border:1px solid #2d5038;background:#2d5038;color:white;padding:11px 12px;font-size:9px!important;font-weight:700!important;letter-spacing:.08em}
+.ob-activity-foot{margin-top:45px;background:#243c2c;color:#f9f7ec;padding:31px 35px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.ob-activity-foot>span{font:400 29px Cormorant Garamond,Georgia,serif}
+.ob-activity-foot button{background:transparent;border:1px solid #bcc6b5;color:#f7f3e7;padding:16px 19px;font-size:9px!important;font-weight:700!important;letter-spacing:.12em}
+.ob-activity-foot button:hover{background:#f7f3e7;color:#243c2c}
+.ob-legal{margin:25px 0 0;font-size:10px;line-height:1.9;color:#8a988d;max-width:1020px}
+.ob-footer{display:flex;justify-content:space-between;align-items:center;gap:20px;border-top:1px solid #e0e5dc;padding:30px clamp(20px,4.5vw,75px);color:#455d4a}
+.ob-footer>span:first-child{font:700 13px Manrope,Arial,sans-serif}
+.ob-footer em{font:400 21px Cormorant Garamond,Georgia,serif;letter-spacing:.15em;font-style:normal;margin-left:8px}
+.ob-footer a,.ob-footer>span:last-child{font-size:9px;letter-spacing:.15em}
+@media(max-width:1120px){
+ .ob-experience{grid-template-columns:minmax(0,1.3fr) minmax(300px,.85fr)}
+ .ob-activity-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ob-city{padding:19px}
+ .ob-city strong{font-size:34px}
+}
+@media(max-width:790px){
+ .ob-header{height:65px;padding-inline:15px}
+ .ob-logo strong{font-size:17px}
+ .ob-logo em{font-size:18px;padding-left:9px}
+ .ob-header-line{display:none}
+ .ob-member{padding:10px 11px;font-size:8px}
+ .ob-main{padding:0 13px 58px}
+ .ob-intro{grid-template-columns:1fr;gap:12px;padding:33px 3px 29px}
+ .ob-intro h1{font-size:clamp(76px,19vw,126px);margin:20px 0 8px}
+ .ob-intro-titles>p{font-size:35px}
+ .ob-intro-aside{justify-self:start;max-width:520px}
+ .ob-intro-aside p{font-size:11px}
+ .ob-cities{margin-bottom:12px}
+ .ob-city{grid-template-columns:1fr;gap:3px;padding:16px 10px;text-align:center}
+ .ob-city span{grid-row:auto;font-size:13px}
+ .ob-city strong{font-size:clamp(24px,6vw,37px)}
+ .ob-city small{font-size:6px;letter-spacing:.03em;line-height:1.3}
+ .ob-experience{display:flex;flex-direction:column;height:auto;gap:12px}
+ .ob-map-shell{height:clamp(410px,80vw,560px);min-height:410px}
+ .ob-dashboard{max-height:500px;min-height:350px}
+ .ob-dashboard-head{padding:18px 19px 13px}
+ .ob-count strong{font-size:51px}
+ .ob-search{padding:0 19px 12px}
+ .ob-length{padding:0 19px 14px}
+ .ob-yacht-row{padding-inline:19px}
+ .ob-map-top{top:10px;left:10px;right:10px}
+ .ob-map-port{padding:12px 14px;min-width:140px}
+ .ob-map-port strong{font-size:30px}
+ .ob-map-port .ob-kicker{font-size:7px}
+ .ob-geolocate{padding:11px 10px;font-size:8px!important}
+ .ob-map-footer{bottom:10px;left:10px;right:10px}
+ .ob-map-footer span{font-size:8px;padding:9px}
+ .ob-activities{padding-top:68px}
+ .ob-activities-head{flex-direction:column;align-items:start;gap:14px}
+ .ob-activities-head h2{font-size:clamp(52px,12vw,76px)}
+ .ob-activity-grid{grid-template-columns:1fr;gap:13px}
+ .ob-activity-art{height:155px}
+ .ob-activity-body{padding:22px}
+ .ob-activity-foot{flex-direction:column;align-items:stretch;padding:25px}
+ .ob-activity-foot>span{font-size:29px}
+ .ob-footer{flex-wrap:wrap;padding:25px 15px}
+}
+@media(max-width:390px){
+ .ob-city strong{font-size:23px}
+ .ob-city small{display:none}
+ .ob-intro h1{font-size:73px}
+ .ob-map-port small{font-size:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ob-city,.ob-activity,.ob-activity-actions button{transition:none}
+}
