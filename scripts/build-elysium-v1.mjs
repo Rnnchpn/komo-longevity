@@ -10,6 +10,7 @@ await mkdir(join(out,'club'),{recursive:true});
 await mkdir(join(out,'brokers'),{recursive:true});
 await mkdir(join(out,'on-board'),{recursive:true});
 await mkdir(join(out,'request'),{recursive:true});
+await mkdir(join(out,'desk'),{recursive:true});
 await mkdir(join(out,'maison'),{recursive:true});
 await mkdir(assets,{recursive:true});
 const copies=[
@@ -19,6 +20,7 @@ const copies=[
  [join(src,'brokers','studio.js'),join(out,'brokers','studio.js')],
  [join(src,'on-board','index.html'),join(out,'on-board','index.html')],
  [join(src,'request','index.html'),join(out,'request','index.html')],
+ [join(src,'desk','index.html'),join(out,'desk','index.html')],
  [join(src,'on-board','vesselfinder.html'),join(out,'on-board','vesselfinder.html')],
  [join(src,'on-board','on-board.css'),join(out,'on-board','on-board.css')],
  [join(src,'on-board','on-board.js'),join(out,'on-board','on-board.js')],
