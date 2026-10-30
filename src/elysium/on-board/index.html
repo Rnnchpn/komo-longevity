@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f7f5ef">
+<title>ELYSIUM On Board — Riviera</title>
+<meta name="description" content="ELYSIUM On Board : Monaco, Cannes et Saint-Tropez. Retrouvez votre port et vos expériences privées.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/elysium/assets/elysium.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="/elysium/on-board/on-board.css">
+</head>
+<body class="ely-onboard">
+<header class="ob-header">
+ <a class="ob-logo" href="/elysium/"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
+ <span class="ob-header-line">ON BOARD <span>·</span> THE RIVIERA</span>
+ <div class="ob-header-actions"><a href="/elysium/club/" class="ob-member" id="obClubLink">MON CLUB <span aria-hidden="true">↗</span></a><button id="obLanguage" type="button" aria-label="Switch language">EN</button></div>
+</header>
+<main class="ob-main">
+ <section class="ob-intro">
+  <div class="ob-intro-titles"><span class="ob-kicker" data-fr="LA CÔTE D’AZUR · TROIS DESTINATIONS" data-en="THE RIVIERA · THREE DESTINATIONS">LA CÔTE D’AZUR · TROIS DESTINATIONS</span>
+   <h1>On Board<span>.</span></h1><p data-fr="Votre yacht. Votre Riviera." data-en="Your yacht. Your Riviera.">Votre yacht. Votre Riviera.</p>
+  </div>
+  <div class="ob-intro-aside"><p data-fr="Choisissez votre escale, retrouvez les yachts et découvrez vos expériences privées à bord." data-en="Choose your harbour, explore the yachts and discover your private on-board experiences.">Choisissez votre escale, retrouvez les yachts et découvrez vos expériences privées à bord.</p></div>
+ </section>
+ <nav class="ob-cities" aria-label="Choose destination" role="tablist" id="obCities">
+  <button type="button" class="ob-city is-active" role="tab" aria-selected="true" data-city="monaco"><span>01</span><strong>Monaco</strong><small>PORT HERCULE · FONTVIEILLE</small></button>
+  <button type="button" class="ob-city" role="tab" aria-selected="false" data-city="cannes"><span>02</span><strong>Cannes</strong><small>VIEUX PORT · PORT CANTO</small></button>
+  <button type="button" class="ob-city" role="tab" aria-selected="false" data-city="saint-tropez"><span>03</span><strong>Saint-Tropez</strong><small>LE PORT · LE GOLFE</small></button>
+ </nav>
+ <section class="ob-experience" aria-label="Riviera map and yacht directory">
+  <div class="ob-map-shell">
+   <div id="obMap" class="ob-map" role="application" aria-label="Carte interactive des ports de la Riviera"></div>
+   <div class="ob-map-top"><div class="ob-map-port"><span class="ob-kicker" data-fr="VOTRE ESCALE" data-en="YOUR DESTINATION">VOTRE ESCALE</span><strong id="obPortTitle">Monaco</strong><small id="obPortSubtitle">Port Hercule · Fontvieille</small></div>
+     <button type="button" id="obLocate" class="ob-geolocate" data-fr="◎ ME LOCALISER" data-en="◎ LOCATE ME">◎ ME LOCALISER</button>
+   </div>
+   <div class="ob-map-footer"><span id="obSourceStatus" role="status">PORTS · CARTE INTERACTIVE</span><button type="button" id="obRefresh" data-fr="ACTUALISER ↻" data-en="REFRESH ↻">ACTUALISER ↻</button></div>
+   <p id="obMapError" class="ob-map-error" hidden>Carte indisponible.</p>
+  </div>
+  <aside class="ob-dashboard">
+   <div class="ob-dashboard-head"><span class="ob-kicker" data-fr="LA FLOTTE · CE SECTEUR" data-en="THE FLEET · THIS AREA">LA FLOTTE · CE SECTEUR</span>
+    <div class="ob-count"><strong id="obYachtCount">—</strong><small data-fr="YACHTS SIGNALÉS" data-en="REPORTED YACHTS">YACHTS SIGNALÉS</small></div>
+    <p id="obFeedDescription" data-fr="Connexion au service de suivi des ports…" data-en="Connecting to the harbour feed…">Connexion au service de suivi des ports…</p>
+   </div>
+   <div class="ob-search"><label for="obSearch" data-fr="RETROUVER UN YACHT" data-en="FIND A YACHT">RETROUVER UN YACHT</label>
+    <input type="search" id="obSearch" autocomplete="off" maxlength="80" placeholder="Nom du yacht">
+   </div>
+   <div class="ob-length" role="group" aria-label="Yacht length">
+    <button type="button" data-size="all" class="is-active" aria-pressed="true" data-fr="TOUS" data-en="ALL">TOUS</button>
+    <button type="button" data-size="40" aria-pressed="false">40 m +</button>
+    <button type="button" data-size="60" aria-pressed="false">60 m +</button>
+    <button type="button" data-size="80" aria-pressed="false">80 m +</button>
+   </div>
+   <div class="ob-yacht-list" id="obYachtList" aria-live="polite">
+    <div class="ob-yacht-placeholder" data-fr="Les bateaux confirmés apparaîtront ici. Aucune position de démonstration n’est présentée comme actuelle." data-en="Verified reports will appear here. Historical demonstration positions are never shown as current.">Les bateaux confirmés apparaîtront ici. Aucune position de démonstration n’est présentée comme actuelle.</div>
+   </div>
+   <div class="ob-vessel-context" id="obVesselContext" hidden>
+    <div><span class="ob-kicker" data-fr="VOTRE SÉLECTION" data-en="YOUR SELECTION">VOTRE SÉLECTION</span><strong id="obSelectedName"></strong></div>
+    <button type="button" id="obClearVessel" aria-label="Remove selected yacht">×</button>
+   </div>
+   <div class="ob-dashboard-disclaimer" data-fr="Position AIS : dernière position transmise, horodatée. Port : présence signalée, emplacement exact inconnu. La sélection d’un yacht ne vérifie pas que vous êtes à bord." data-en="AIS: last transmitted position, timestamped. Harbour: reported presence only, exact berth unknown. Selecting a yacht does not verify that you are on board.">Position AIS : dernière position transmise, horodatée. Port : présence signalée, emplacement exact inconnu. La sélection d’un yacht ne vérifie pas que vous êtes à bord.</div>
+  </aside>
+ </section>
+ <section class="ob-activities" id="obActivities">
+   <header class="ob-activities-head"><div><span class="ob-kicker" data-fr="ELYSIUM · EXPÉRIENCES SUR DEMANDE" data-en="ELYSIUM · EXPERIENCES ON REQUEST">ELYSIUM · EXPÉRIENCES SUR DEMANDE</span>
+    <h2 data-fr="À bord, à votre mesure." data-en="Made for life on board.">À bord, à votre mesure.</h2></div>
+    <p data-fr="Des prestations privées coordonnées dans votre escale, sous réserve de disponibilité." data-en="Private experiences coordinated at your destination, subject to availability.">Des prestations privées coordonnées dans votre chosen destination.</p>
+   </header>
+   <div class="ob-activity-grid" id="obActivityGrid"></div>
+   <div class="ob-activity-foot"><span data-fr="Une demande particulière ? Notre équipe s’en occupe." data-en="Something more personal? Our concierge will arrange it.">Une demande particulière ? Notre équipe s’en occupe.</span>
+    <button type="button" id="obConcierge" data-fr="CONTACTER MA CONCIERGERIE ↗" data-en="CONTACT MY CONCIERGE ↗">CONTACTER MA CONCIERGERIE ↗</button>
+   </div>
+   <p class="ob-legal" data-fr="La carte est informative et ne permet pas la navigation maritime. La géolocalisation est volontaire, traitée sur votre appareil et n’établit aucun lien entre vous et un navire. Les prestations ne sont pas automatiquement réservées. Les soins médicaux sont assurés séparément par des professionnels habilités." data-en="This map is informational and not for navigation. Location is voluntary, processed on your device, and does not link you to any vessel. Services are not automatically booked. Any medical care is independently delivered by authorised professionals.">La carte est informative et ne permet pas la navigation maritime. La géolocalisation est volontaire, traitée sur votre appareil et n’établit aucun lien entre vous et un navire. Les prestations ne sont pas automatiquement réservées. Les soins médicaux sont assurés séparément par des professionnels habilités.</p>
+ </section>
+</main>
+<footer class="ob-footer"><span>KŌMØ <em>ELYSIUM</em></span><a href="/elysium/club/">PRIVATE MEMBERSHIP ↗</a><span>MONACO · CANNES · SAINT-TROPEZ</span></footer>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
+<script src="/elysium/assets/supabase.js" defer></script>
+<script src="/elysium/on-board/on-board.js" defer></script>
+</body></html>
