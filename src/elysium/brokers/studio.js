@@ -49,7 +49,8 @@ async function saveProfile(ev){
  ev.preventDefault();needLogin();
  const values={user_id:current.id,company_name:val('#company'),contact_name:val('#contact'),
  contact_email:val('#brokerEmail'),website:httpsOrNull('#website'),operating_area:val('#territory')||'Riviera'};
- const r=broker?await sb.from('elysium_brokers').update(values).eq('user_id',current.id):
+ const editValues={...values};delete editValues.user_id;
+ const r=broker?await sb.from('elysium_brokers').update(editValues).eq('user_id',current.id):
  await sb.from('elysium_brokers').insert(values);
  if(r.error)throw r.error;
  msg('#profileMessage','Profil enregistré. Vérification par ELYSIUM en cours.');
