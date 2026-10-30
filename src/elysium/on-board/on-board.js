@@ -61,31 +61,31 @@
    b.classList.toggle('is-active',yes);b.setAttribute('aria-pressed',String(yes));
   });
   if(chosen){
-   if(vesselFrameCity!==city||reload||!frame.srcdoc){
+   if(vesselFrameCity!==city||reload||!frame.getAttribute('src')){
     vesselFrameCity=city;vesselLoadCounter++;
-    // Use srcdoc, not a URL on komolongevity.com: the production site
-    // deliberately sends X-Frame-Options: DENY on every HTTP response.
-    // srcdoc avoids framing our own blocked URL. The VesselFinder script
-    // remains isolated, and its own embed policy is respected.
-    const geo=DESTINATIONS[city],height=Math.max(380,Math.round(vendor.clientHeight||550));
-    const lat=geo.coords[0],lon=geo.coords[1];
-    const zoom=city==='cannes'?9:city==='monaco'?12:12;
-    const html='<!doctype html><html><head><meta charset="utf-8">'+
-     '<meta name="viewport" content="width=device-width,initial-scale=1">'+
-     '<style>html,body{margin:0;height:100%;width:100%;background:#031823;overflow:hidden}'+
-     'iframe{max-width:100%}</style></head><body>'+
-     '<script>var width="100%";var height="'+height+'";var latitude="'+lat+'";'+
-     'var longitude="'+lon+'";var zoom="'+zoom+'";var names=true;'+
-     'var centerx='+lon+';var centery='+lat+';<\/script>'+
-     '<script src="https://www.vesselfinder.com/aismap.js"><\/script>'+
-     '</body></html>';
+    // Official third-party iframe map endpoint. Unlike srcdoc, this gives
+    // VesselFinder a genuine origin and its own map/cookie context.
+    // It DOES NOT grant their scripts access to ELYSIUM or expose member data.
+    const geo=DESTINATIONS[city];
+    const url=new URL('https://www.vesselfinder.com/aismap');
+    url.searchParams.set('zoom',String(city==='cannes'?9:12));
+    url.searchParams.set('lat',String(geo.coords[0]));
+    url.searchParams.set('lon',String(geo.coords[1]));
+    url.searchParams.set('width','100%');
+    url.searchParams.set('height',String(Math.max(420,Math.ceil(vendor.clientHeight||600))));
+    url.searchParams.set('names','true');
+    // The vendor document can use its own storage; its origin is not ours.
+    // A direct map URL avoids a nested script-generated iframe.
     if(loader){loader.hidden=false;loader.classList.remove('is-error')}
-    // srcdoc is rendered without an HTTP response, so the global DENY
-    // header cannot mistakenly block our own wrapper document.
-    frame.removeAttribute('src');
-    frame.srcdoc=html;
+    frame.removeAttribute('srcdoc');
+    frame.src=url.href;
+    const outbound=$('#obVfOutbound');
+    if(outbound)outbound.href=url.href;
+    const updateLink=$('#obVfDirectLink');
+    if(updateLink)updateLink.href=url.href;
    }
    $('#obSourceStatus').textContent=txt('AIS · VESSELFINDER · DONNÉES TIERCES','AIS · VESSELFINDER · THIRD-PARTY DATA');
+   $('#obVfHint')?.removeAttribute('hidden');
   }else{
    updateStatus();
    if(map)requestAnimationFrame(()=>map.invalidateSize({pan:false}));
@@ -142,6 +142,7 @@
   if(view==='experiences')paginateActivity();
   if(view==='market')paginateMarket();
   if(view==='yachts')paginateFleet();
+  if(view==='yachts'&&!verified){mapProvider='vesselfinder';}
   if(view==='map'||view==='yachts')updateMapProvider();
   if(map){requestAnimationFrame(()=>map.invalidateSize({pan:false}));}
   if(focus){const pane=document.querySelector(view==='experiences'?'#obActivities':view==='market'?'#obMarket':view==='yachts'?'#obYachtList':'#obMap');pane?.focus({preventScroll:true});}
@@ -271,6 +272,7 @@
  }
  function renderFleet(){
   filtered=matchingYachts();
+  document.body.dataset.obFeed=verified?'live':'unavailable';
   $('#obYachtCount').textContent=verified?String(filtered.length):'—';
   const list=$('#obYachtList');list.replaceChildren();
   if(!verified){
@@ -281,8 +283,8 @@
     :feedState==='sign_in_required'||feedState==='membership_required'
     ?txt('Connectez-vous au Club ELYSIUM pour voir les positions AIS. Les ports restent accessibles.',
       'Sign in to ELYSIUM Club to see AIS yachts. Harbours remain accessible.')
-    :txt('Aucune position AIS vérifiée actuellement. La carte des ports reste utilisable.',
-      'No verified AIS positions are currently available. The harbour map remains usable.');
+    :txt('Les bateaux sont visibles sur la carte AIS VesselFinder si leur service fournit des positions. Le répertoire ELYSIUM attend une connexion API.',
+      'Ships may be visible on the VesselFinder AIS map. The ELYSIUM yacht directory still requires an API connection.');
    list.append(box);
    if(feedState==='ais_not_configured'||feedState==='ais_unavailable'){
     const open=document.createElement('button');open.type='button';open.className='ob-vf-yachts-cta';

@@ -63,7 +63,10 @@ if(!vfEmbed.includes('https://www.vesselfinder.com/aismap.js')||
  !vfEmbed.includes("var names=true")||!vfEmbed.includes('43.55')||
  !onBoard.includes('id="obVesselFinder"')||!onBoard.includes('id="obMapProvider"')||
  !onBoardJs.includes('function updateMapProvider')||
- !onBoardJs.includes("mapProvider='vesselfinder'"))
+ !onBoardJs.includes("mapProvider='vesselfinder'")||
+ !onBoardJs.includes('frame.src=url.href')||
+ !onBoard.includes('id="obVfDirectLink"')||
+ !onBoard.includes('allow-same-origin'))
  throw new Error('[elysium] VesselFinder iframe embed or provider switch missing');
 
 if(!onBoard.includes('data-city="monaco"')||!onBoard.includes('data-city="cannes"')||
