@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0c303a">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#031823">
 <title>ELYSIUM Riviera — Interactive Private Map</title>
 <meta name="description" content="ELYSIUM On Board : Monaco, Cannes et Saint-Tropez. Retrouvez votre port et vos expériences privées.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -33,6 +33,21 @@
  <section class="ob-experience" aria-label="Riviera map and yacht directory">
   <div class="ob-map-shell">
    <div id="obMap" class="ob-map" role="application" aria-label="Carte interactive des ports de la Riviera"></div>
+   <div class="ob-vf-map" id="obVesselFinder" hidden>
+    <iframe id="obVesselIframe" title="VesselFinder — AIS des bateaux sur la Côte d’Azur"
+     loading="eager" referrerpolicy="strict-origin-when-cross-origin"
+     sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+     allow="fullscreen"></iframe>
+    <div class="ob-vf-attribution" data-fr="CARTE AIS · FOURNIE PAR VESSELFINDER" data-en="AIS MAP · PROVIDED BY VESSELFINDER">CARTE AIS · FOURNIE PAR VESSELFINDER</div>
+    <div class="ob-vf-loading" id="obVfLoading" aria-live="polite">
+     <span>◈</span><strong data-fr="CHARGEMENT DE LA CARTE AIS" data-en="LOADING AIS MAP">CHARGEMENT DE LA CARTE AIS</strong>
+     <small data-fr="Si l'affichage est bloqué, choisissez « CARTE ELYSIUM »." data-en="If the embed is blocked, select ELYSIUM MAP.">Si l'affichage est bloqué, choisissez « CARTE ELYSIUM ».</small>
+    </div>
+   </div>
+   <div class="ob-map-provider-switch" id="obMapProvider" role="group" aria-label="Map data provider">
+    <button type="button" data-map-provider="vesselfinder" class="is-active" aria-pressed="true">◉ AIS VESSELFINDER</button>
+    <button type="button" data-map-provider="elysium" aria-pressed="false" data-fr="✧ CARTE ELYSIUM" data-en="✧ ELYSIUM MAP">✧ CARTE ELYSIUM</button>
+   </div>
    <div class="ob-map-top"><div class="ob-map-port"><span class="ob-kicker" data-fr="VOTRE ESCALE" data-en="YOUR DESTINATION">VOTRE ESCALE</span><strong id="obPortTitle">Monaco</strong><small id="obPortSubtitle">Port Hercule · Fontvieille</small></div>
      <button type="button" id="obLocate" class="ob-geolocate" data-fr="◎ ME LOCALISER" data-en="◎ LOCATE ME">◎ ME LOCALISER</button>
    </div>
