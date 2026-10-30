@@ -53,7 +53,7 @@ export function snapshotProgress(state){
   results[id]=record;
  }
  return {page:Number.isInteger(state.page)?Math.max(0,Math.min(4,state.page)):0,
-  questionStep:Number.isInteger(state.questionStep)?Math.max(0,Math.min(4,state.questionStep)):0,
+  questionStep:Number.isInteger(state.questionStep)?Math.max(0,Math.min(INTAKE_GROUPS.length-1,state.questionStep)):0,
   task:Number.isInteger(state.task)?Math.max(0,Math.min(5,state.task)):0,
   answers,results,checks:[...(state.checks||[])].filter(s=>['chair','space','support','device'].includes(s)),
   returnToSummary:Boolean(state.returnToSummary),program:cleanProgram(state.program)};
