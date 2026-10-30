@@ -974,3 +974,52 @@ body.ely-public-commerce{background:#f6f3ec;color:#283028;font-family:var(--sans
  .ely-onboard-club-entry{font-size:9px;margin-top:9px;padding:12px 14px;letter-spacing:.06em}
 }
 @media(prefers-reduced-motion:reduce){.ely-riviera-destinations a,.ely-onboard-club-entry{transition:none}}
+
+
+/* ELYSIUM V8 — Eight collections + standalone yacht brokerage channel. */
+.ely-public-worlds{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ely-public-world:nth-child(5) .ely-public-world-graphic{
+ background:linear-gradient(135deg,#d4e2e3,#c4d6d5);
+}
+.ely-public-world:nth-child(5) .ely-public-world-mark{color:#678989}
+.ely-public-world:nth-child(5) .ely-public-world-details h3{color:#204c45}
+.ely-world-maison[data-world="medical-longevity"]{--shop-gallery:#dfe8df;--shop-accent:#789783;--shop-deep:#233d2b}
+.ely-world-maison[data-world="longevity-shop"]{--shop-gallery:#e4e2d6;--shop-accent:#9c917a;--shop-deep:#3d392e}
+.ely-world-maison[data-world="lifestyle"]{--shop-gallery:#eee3dc;--shop-accent:#a18b80;--shop-deep:#45362e}
+.ely-world-maison[data-world="yachting"]{--shop-gallery:#d7e6e8;--shop-accent:#7a9da3;--shop-deep:#204044}
+.ely-world-maison[data-world="experiences"]{--shop-gallery:#e9ddd2;--shop-accent:#a08b72;--shop-deep:#443427}
+.ely-world-maison[data-world="services"]{--shop-gallery:#dae5de;--shop-accent:#7b9488;--shop-deep:#2a4737}
+.ely-world-maison[data-world="medical-longevity"] .ely-shop-hero-copy h1{font-size:clamp(68px,9vw,132px)}
+.ely-yachting-channel{padding:clamp(60px,6vw,90px) 0;background:#e7eeeb;border-top:1px solid #d6e1db}
+.ely-yachting-channel[hidden]{display:none!important}
+.ely-yachting-channel-inner{display:flex;align-items:center;justify-content:space-between;gap:45px;margin-bottom:46px}
+.ely-yachting-channel h2{font:400 clamp(62px,7vw,104px)/.9 var(--serif);letter-spacing:-.04em;color:#29483a;margin:19px 0}
+.ely-yachting-channel p{font:400 12px/1.9 var(--sans);color:#678275;max-width:540px;margin:0}
+.ely-yachting-channel-actions{display:grid;gap:12px;min-width:225px}
+.ely-yachting-channel-actions a{display:block;border:1px solid #30513c;color:#f5f5ef;background:#30513c;padding:16px 18px;text-align:center;font:700 10px/1.4 var(--sans);letter-spacing:.09em}
+.ely-yachting-channel-actions a:last-child{background:transparent;color:#30513c}
+.ely-yachting-channel-actions a:hover{filter:brightness(1.08)}
+.ely-yachting-caption{margin:14px 0 24px!important;color:#729081}
+.ely-yachting-listings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+.ely-yachting-item{background:#fdfbf5;border:1px solid #d8e1db;display:flex;flex-direction:column}
+.ely-yachting-visual{height:184px;display:grid;place-items:center;background:linear-gradient(145deg,#d5e3e5,#c3d8d5);font-size:70px;overflow:hidden}
+.ely-yachting-visual img{width:100%;height:100%;object-fit:cover}
+.ely-yachting-content{display:flex;flex-direction:column;align-items:flex-start;gap:11px;padding:25px}
+.ely-yachting-content h3{font:400 42px/.95 var(--serif);margin:0}
+.ely-yachting-content p{font-size:11px}
+.ely-yachting-content a{margin-top:8px}
+.ely-yachting-empty{grid-column:1/-1;max-width:none!important;padding:27px;background:#f4f7f3}
+.ely-club-commerce .ely-app .ely-orbit-hub small{letter-spacing:.06em}
+@media(max-width:950px){
+ .ely-yachting-channel-inner{flex-direction:column;align-items:flex-start;gap:21px}
+ .ely-yachting-channel-actions{width:min(100%,520px)}
+ .ely-yachting-listings{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:720px){
+ .ely-public-worlds{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ely-world-maison[data-world="medical-longevity"] .ely-shop-hero-copy h1{font-size:clamp(53px,13.2vw,79px)}
+ .ely-world-maison[data-world="longevity-shop"] .ely-shop-hero-copy h1{font-size:clamp(57px,13vw,86px)}
+ .ely-world-maison[data-world="yachting"] .ely-shop-hero-copy h1{font-size:clamp(67px,16vw,92px)}
+ .ely-yachting-channel h2{font-size:clamp(65px,14vw,84px)}
+ .ely-yachting-listings{grid-template-columns:1fr}
+}
