@@ -1039,3 +1039,11 @@ body.ely-public-commerce{background:#f6f3ec;color:#283028;font-family:var(--sans
  .ely-club-sponsor-tag{grid-column:1/-1;font-size:7px}
  .ely-club-sponsor-row strong{font-size:22px}
 }
+
+/* Professional gateway — direct access from ELYSIUM's Riviera collection. */
+.ely-riviera-destinations .ely-broker-public-entry{
+ display:flex;justify-content:center;align-items:center;margin-top:21px;
+ padding:15px 12px;border:1px solid #c1d0bc;color:#e6ebdb;
+ font:700 10px/1.5 var(--sans);letter-spacing:.12em;text-align:center;
+}
+.ely-riviera-destinations .ely-broker-public-entry:hover{background:#e8efdf;color:#264231;padding-inline:12px}
