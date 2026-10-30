@@ -9,6 +9,7 @@ const css=await readFile(join(root,'site','pulse-v14','styles.css'),'utf8');
 const luxuryCss=await readFile(join(root,'site','pulse-v14','pulse-quiet-luxury-v2.css'),'utf8');
 const onlineLuxuryCss=await readFile(join(root,'site','pulse-v14','online','quiet-luxury-online-v2.css'),'utf8');
 const mobileCss=await readFile(join(root,'site','pulse-v14','pulse-mobile-first-v3.css'),'utf8');
+const editorialCss=await readFile(join(root,'site','pulse-v14','pulse-patient-editorial-v1.css'),'utf8');
 const onlineMobileCss=await readFile(join(root,'site','pulse-v14','online','mobile-first-online-v3.css'),'utf8');
 const onlineHtml=await readFile(join(root,'site','pulse-v14','online','index.html'),'utf8');
 const onlineScript=await readFile(join(root,'site','pulse-v14','online','app.js'),'utf8');
@@ -97,7 +98,7 @@ const checks=[
  ['Online preflight syntax and responsive layout',onlineSyntax.status===0&&onlineCss.includes('@media(max-width:690px)')],
  ['tester login opens Pulse workspace, online test stays opt-in',!app.includes("window.location.assign('/online/session/')")&&app.includes("const isOnlineTester=")&&app.includes('await boot()')&&app.includes('pulse-online-tester-link')],
  ['admin patient mode uses only own linked records',app.includes('S.ownPatients=own.filter(p=>p.patient_user_id===S.user.id)')&&app.includes('loadPatientContext(S.ownPatient)')&&app.includes("S.mode=saved==='patient'&&Boolean(S.ownPatient)?'patient':'pro'")],
- ['mobile patient/team selector visible and switch safe',app.includes('pulse-mobile-access')&&css.includes('.pulse-mobile-access{display:flex')&&app.includes('history.replaceState(null,')],
+ ['patient/team switch remains accessible',app.includes('p-team-link')&&app.includes("localStorage.setItem('komo_v14_mode','pro')")&&app.includes('history.replaceState(null,')],
  ['tester sidebar available only by verified role',app.includes('const isOnlineTester=')&&app.includes('S.role===\'admin\'')&&app.includes('pulse-online-tester-link')],
  ['authenticated session user lookup',sessionJs.includes('sb.auth.getUser()')&&sessionJs.includes("role.data?.role==='admin'")&&sessionJs.includes('verifyPaidSession({')],
  ['session security no public clinical record writes',!(/sb\.from\(.+\.insert\(|localStorage\.setItem|sessionStorage\.setItem|fetch\s*\(/.test(sessionJs))],
@@ -177,12 +178,13 @@ const checks=[
  ['booking-first responsive styles',css.includes('.pulse-offer-list')&&css.includes('.pulse-entry-panel')],
  ['patient title',html.includes('Votre santé en mouvement')],
  ['single entry script',(html.match(/<script/g)||[]).length===1],
- ['one screen for a patient with a single appointment',app.includes("const PATIENT_NAV=[['home','Mon espace']]")&&app.includes('function patientHome(){')&&app.includes('ps-one-hero')&&app.includes('Mes autres rendez-vous')],
- ['patient experience follows appointment lifecycle',app.includes('isFuture')&&app.includes('isUnderway')&&app.includes('isAppointmentDone')&&app.includes('Résultats non encore publiés')],
- ['patient information is optional, not a mandatory four-stage program',app.includes('id="ps-one-preparation"')&&app.includes('id="ps-one-result"')&&app.includes('Votre suivi Pulse est actif')],
- ['released scores are not made up',app.includes("overall_score!==null")&&app.includes('Aucun score provisoire')&&app.includes('Dernier score publié')===false],
+ ['approved patient stylesheet loaded after mobile overrides',html.indexOf('pulse-patient-editorial-v1.css')>html.indexOf('pulse-mobile-first-v3.css')],
+ ['approved one-page patient design',app.includes("const PATIENT_NAV=[['home','Mon espace']]")&&app.includes('function patientHome(){')&&app.includes('p-overview')&&app.includes('p-two-cards')&&app.includes('p-topbar')&&editorialCss.includes('#F5F6F6')],
+ ['appointment is actually future, not stale demo',app.includes('const upcoming=chronological.find')&&app.includes('const appointment=inProgress||upcoming')&&app.includes('Aucun rendez-vous à venir')&&!app.includes('appt=next||ordered.at(-1)')],
+ ['optional one-page actions and content',app.includes('id="p-preparation"')&&app.includes('id="p-result"')&&app.includes('id="p-history"')&&app.includes('data-p-open="preparation"')],
+ ['released scores shown only after actual publication',app.includes("overall_score!==null")&&app.includes('const published=releasedScore()')&&app.includes('const resultTitle=published?')],
  ['own online sessions and RLS isolated',app.includes("from('motion_online_sessions')")&&app.includes(".eq('user_id',S.user.id)")&&app.includes('S.onlineSessions.length')],
- ['iPhone no five-tab patient dock',mobileCss.includes('.app-shell-patient .sidebar{display:none!important}')&&app.includes("app-shell-patient")],
+ ['patient shell excludes sidebar entirely',app.includes("if(S.mode==='patient'){")&&app.includes('p-editorial')&&app.includes('p-topbar')&&app.includes('return;')&&editorialCss.includes('@media(max-width:520px)')],
  ['legacy patient routes return to the single home',app.includes("history.replaceState(null,'',location.pathname+location.search+'#home')")],
  ['operator preserved',app.includes('D0 ·')===false&&app.includes('Session D0')&&app.includes('finalize_pulse_operator_session_v1')],
  ['motion v1 only',app.includes("motion-v1.0")&&!/myodev|myocare/i.test(app)],
