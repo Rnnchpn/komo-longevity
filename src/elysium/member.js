@@ -206,6 +206,7 @@ function renderMaisonMeta(){
  if($('#maisonImage'))$('#maisonImage').src=world.image;
  if($('#crumbName'))$('#crumbName').textContent=world.name;
  if($('#maisonKicker'))$('#maisonKicker').textContent=world.eyebrow;
+ if($('#elyYachtingChannel'))$('#elyYachtingChannel').hidden=world.slug!=='yachting';
  if($('#maisonTitle'))$('#maisonTitle').textContent=world.name;
  const hero=$('#ely-shop-title');
  if(hero){hero.replaceChildren(document.createTextNode(world.name));const dot=serviceElement('span','ely-shop-fullstop','.');hero.append(dot)}
@@ -367,7 +368,34 @@ function renderProducts(products){
  if(!isMaison||!Array.isArray(products))return;
  hide('maisonAccess');const grid=$('#productGrid');grid.replaceChildren();say('#shopMessage','');
  renderPrivateServiceIndex(products,grid);renderProductRoute();
+ if(slug==='yachting'&&!window.__elyYachtingLoaded){window.__elyYachtingLoaded=true;loadPrivateYachtMarketplace()}
 }
+
+async function loadPrivateYachtMarketplace(){
+ const host=$('#elyYachtingListings');if(!host||!session?.access_token)return;
+ host.replaceChildren(serviceElement('p','ely-yachting-caption',lang==='fr'?'Chargement des annonces vérifiées…':'Loading verified listings…'));
+ try{
+  const r=await fetch('/api/elysium-marketplace?city=all',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  if(!r.ok)throw Error('Listings unavailable');
+  const data=await r.json();host.replaceChildren();
+  if(!data.listings?.length){host.append(serviceElement('p','ely-yachting-empty',lang==='fr'?'Aucune annonce payante validée actuellement. Les brokers peuvent proposer leur sélection dans le Studio.':'No approved paid listings currently. Brokers can submit their collection in the Studio.'));return}
+  data.listings.forEach(p=>{
+   const art=serviceElement('article','ely-yachting-item');
+   const visual=serviceElement('div','ely-yachting-visual');
+   if(/^https:\/\//i.test(p.image_url||'')){
+    const im=document.createElement('img');im.src=p.image_url;im.loading='lazy';im.alt='';im.referrerPolicy='no-referrer';visual.append(im)
+   }else visual.textContent='⛵';
+   const info=serviceElement('div','ely-yachting-content');
+   info.append(serviceElement('span','ely-shop-section-kicker',(data.ads||[]).some(x=>x.listing_id===p.id)?'SPONSORISÉ · BROKER':'ANNONCE BROKER'),
+    serviceElement('h3','',p.yacht_name),
+    serviceElement('p','',p.title+' · '+p.location_city+(p.length_m?' · '+p.length_m+' m':'')));
+   const action=serviceElement('a','ely-shop-signin',lang==='fr'?'DEMANDER LE DOSSIER ↗':'REQUEST DETAILS ↗');
+   action.href='mailto:contact@komolongevity.com?subject='+encodeURIComponent('ELYSIUM Yacht — '+p.yacht_name)+'&body='+encodeURIComponent('Yacht: '+p.yacht_name+'\nReference: '+p.id);
+   info.append(action);art.append(visual,info);host.append(art);
+  });
+ }catch{host.replaceChildren(serviceElement('p','ely-yachting-empty',lang==='fr'?'Annonces indisponibles.':'Listings temporarily unavailable.'))}
+}
+
 function readSelection(){try{return JSON.parse(sessionStorage.getItem('elysium-selection-v2')||'[]')}catch{return []}}
 function saveSelection(items){try{sessionStorage.setItem('elysium-selection-v2',JSON.stringify(items.slice(0,15)))}catch{}}
 function addSelection(p,worldSlug){
