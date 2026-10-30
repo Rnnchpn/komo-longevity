@@ -24,7 +24,7 @@ export default async function handler(req,res){
   let l=client.from('elysium_yacht_listings').select('id,title,yacht_name,listing_type,location_city,length_m,price_eur,price_label,description,image_url,external_url,promoted_until')
     .eq('status','approved').eq('billing_status','paid').gt('paid_until',now).order('created_at',{ascending:false}).limit(80);
   if(city!=='all')l=l.eq('location_city',city);
-  let a=client.from('elysium_ad_campaigns').select('id,listing_id,placement,location_city,headline,creative_url,starts_at,ends_at')
+  let a=client.from('elysium_ad_campaigns').select('id,listing_id,placement,location_city,headline,sponsor_name,creative_url,starts_at,ends_at')
     .eq('status','active').eq('payment_status','paid').lte('starts_at',now).gt('ends_at',now).order('ends_at',{ascending:true}).limit(30);
   if(city!=='all')a=a.in('location_city',[city,'all']);
   const [lr,ar]=await Promise.all([l,a]);
