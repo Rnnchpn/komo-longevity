@@ -39,6 +39,7 @@
  let lang=url.searchParams.get('lang')==='en'?'en':url.searchParams.get('lang')==='fr'?'fr':(navigator.language?.startsWith('fr')?'fr':'en');
  let city=CITY_VALUES.includes(url.searchParams.get('city'))?url.searchParams.get('city'):'monaco';
  let map=null,harbourLayer=null,aisLayer=null,positionLayer=null,activityLayer=null,adLayer=null;
+ let currentScreen='map',activeActivityPage=0,activeMarketPage=0,activeFleetPage=0;
  let marketListings=[],paidAds=[],enabledLayers={yachts:true,activities:true,ads:true};
  let feed=[],verified=false,filtered=[],size='all',navFilter='all',filterText='',selected=null,requestInFlight=false,authClient=null,feedCheckedAt=null,feedState='loading';
  const txt=(fr,en)=>lang==='fr'?fr:en;
@@ -71,10 +72,68 @@
    btn.tabIndex=on?0:-1;
   });
   renderCity();
+  renderFallbackHarbours();
   if(map&&mapMove)map.flyTo(DESTINATIONS[city].coords,DESTINATIONS[city].zoom,{duration:window.matchMedia('(prefers-reduced-motion: reduce)').matches?0:0.7});
   renderFleet();
   if(window.__elyMapMarketCity!==code){window.__elyMapMarketCity=code;fetchMarketplace()}
  }
+
+ function chooseScreen(view,{focus=false}={}){
+  if(!['map','yachts','experiences','market'].includes(view))return;
+  currentScreen=view;
+  document.body.dataset.obView=view;
+  $$('#obDock [data-ob-screen]').forEach(btn=>{
+   const selected=btn.dataset.obScreen===view;
+   btn.classList.toggle('is-active',selected);
+   btn.setAttribute('aria-current',selected?'page':'false');
+  });
+  if(view==='experiences')paginateActivity();
+  if(view==='market')paginateMarket();
+  if(view==='yachts')paginateFleet();
+  if(map){requestAnimationFrame(()=>map.invalidateSize({pan:false}));}
+  if(focus){const pane=document.querySelector(view==='experiences'?'#obActivities':view==='market'?'#obMarket':view==='yachts'?'#obYachtList':'#obMap');pane?.focus({preventScroll:true});}
+ }
+ function pageItems(hostSelector,pagerSelector,page,size){
+  const host=$(hostSelector),pager=$(pagerSelector);if(!host||!pager)return 0;
+  const elements=[...host.children].filter(c=>!c.classList.contains('ob-list-empty'));
+  const count=Math.max(1,Math.ceil(elements.length/size));
+  const index=Math.min(count-1,Math.max(0,page));
+  elements.forEach((e,i)=>{e.hidden=!(i>=index*size&&i<(index+1)*size)});
+  const label=pager.querySelector('[data-page-label]');
+  if(label)label.textContent=String(index+1).padStart(2,'0')+' / '+String(count).padStart(2,'0');
+  const prev=pager.querySelector('[data-step="-1"]'),next=pager.querySelector('[data-step="1"]');
+  if(prev)prev.disabled=index===0;
+  if(next)next.disabled=index>=count-1;
+  pager.hidden=elements.length<=size;
+  return index;
+ }
+ function paginateActivity(){activeActivityPage=pageItems('#obActivityGrid','#obActivityPager',activeActivityPage,innerWidth<760?2:3)}
+ function paginateMarket(){activeMarketPage=pageItems('#obMarketList','#obMarketPager',activeMarketPage,innerWidth<760?1:3)}
+ function paginateFleet(){activeFleetPage=pageItems('#obYachtList','#obFleetPager',activeFleetPage,innerWidth<760?3:5)}
+ function offlineMap(){
+  const host=$('#obMap');if(!host)return;
+  host.setAttribute('data-fallback','true');
+  const scene=document.createElement('div');scene.className='ob-map-fallback';scene.setAttribute('role','group');
+  const info=document.createElement('span');info.className='ob-map-fallback-note';
+  info.textContent=txt('PLAN DES PORTS · FOND CARTOGRAPHIQUE INDISPONIBLE','HARBOUR OVERVIEW · MAP TILES UNAVAILABLE');
+  const insignia=document.createElement('span');insignia.className='ob-map-fallback-signet';insignia.textContent='K';
+  const c=document.createElement('strong');c.className='ob-map-fallback-city';c.textContent=DESTINATIONS[city].name;
+  scene.append(insignia,c,info);host.replaceChildren(scene);
+  renderFallbackHarbours();
+ }
+ function renderFallbackHarbours(){
+  const scene=$('.ob-map-fallback');if(!scene)return;
+  scene.querySelectorAll('button').forEach(b=>b.remove());
+  scene.querySelector('.ob-map-fallback-city').textContent=DESTINATIONS[city].name;
+  DESTINATIONS[city].ports.forEach((p,i)=>{
+   const btn=document.createElement('button');btn.type='button';btn.className='ob-map-fallback-port';
+   btn.style.setProperty('--i',i);
+   btn.textContent='⚓ '+p.name;
+   btn.title=txt('Port · emplacement approximatif','Harbour · illustrative location');
+   btn.addEventListener('click',()=>chooseScreen('yachts',{focus:true}));scene.append(btn);
+  });
+ }
+
  function renderCity(){
   const c=DESTINATIONS[city];
   $('#obPortTitle').textContent=c.name;
@@ -186,6 +245,7 @@
    }
   }
   renderMapMarkers();
+  paginateFleet();
  }
  function highlightYacht(id,zoom){
   const y=feed.find(x=>x.id===id);if(!y)return;
@@ -274,8 +334,7 @@
  }
  function initMap(){
   if(typeof L==='undefined'){
-   $('#obMapError').hidden=false;$('#obMapError').textContent=txt('Carte indisponible. Choisissez une destination et consultez les expériences.','Map unavailable. Choose a destination to explore the experiences.');
-   return;
+   offlineMap();return;
   }
   const c=DESTINATIONS[city];
   map=L.map('obMap',{zoomControl:false,minZoom:9,maxZoom:18,scrollWheelZoom:false,preferCanvas:true}).setView(c.coords,c.zoom);
@@ -361,6 +420,7 @@
    btn.addEventListener('click',()=>requestExperience(e));
    acts.append(link,btn);body.append(cat,h,p,acts);card.append(art,body);container.append(card);
   });
+  paginateActivity();
  }
 
  /* Destination-based discovery pins, not business address or actual yacht coordinates. */
@@ -378,8 +438,10 @@
     const marker=L.marker([lat,lng],{icon:bubble,zIndexOffset:210}).addTo(activityLayer);
     marker.bindTooltip(txt('Expérience dans ce secteur · position indicative','Experience in this destination · illustrative marker'));
     marker.on('click',()=>{
+     activeActivityPage=Math.floor(ACTIVITY_DEFS.indexOf(exp)/(innerWidth<760?2:3));
+     chooseScreen('experiences');
+     paginateActivity();
      const item=$('.ob-activity[data-activity="'+(exp.service||exp.slug)+'"]');
-     item?.scrollIntoView({behavior:'smooth',block:'center'});
      item?.classList.add('ob-activity-highlight');
      setTimeout(()=>item?.classList.remove('ob-activity-highlight'),1600);
     });
@@ -390,7 +452,7 @@
     const b=L.divIcon({className:'ob-sponsored-pin',iconSize:[118,51],iconAnchor:[59,26],
       html:'<span>SPONSORISÉ · '+clean(ad.sponsor_name||'PARTENAIRE').slice(0,30)+'</span><strong>'+clean(ad.headline).slice(0,45)+'</strong>'});
     L.marker([lat,lng],{icon:b,zIndexOffset:350}).bindTooltip(txt('Publicité · zone indicative, non AIS','Advertisement · indicative area, not AIS')).on('click',()=>{
-      $('#obMarket')?.scrollIntoView({behavior:'smooth',block:'start'});
+      chooseScreen('market',{focus:true});
     }).addTo(adLayer);
   });
  }
@@ -428,7 +490,7 @@
   $('#obMarketStatus').textContent=txt(
    'Sélection de brokers contrôlés · annonces et publicités payantes identifiées · '+active.length+' annonce(s)',
    'Curated broker listings · paid adverts clearly labelled · '+active.length+' listing(s)');
-  renderCommercialMarkers();
+  renderCommercialMarkers();paginateMarket();
  }
  async function fetchMarketplace(){
   try{
@@ -445,6 +507,12 @@
  }
 
  function wire(){
+  $$('#obDock [data-ob-screen]').forEach(b=>b.addEventListener('click',()=>chooseScreen(b.dataset.obScreen,{focus:true})));
+  $$('#obActivityPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeActivityPage+=Number(b.dataset.step);paginateActivity()}));
+  $$('#obMarketPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeMarketPage+=Number(b.dataset.step);paginateMarket()}));
+  $$('#obFleetPager [data-step]').forEach(b=>b.addEventListener('click',()=>{activeFleetPage+=Number(b.dataset.step);paginateFleet()}));
+  window.addEventListener('resize',()=>{paginateActivity();paginateMarket();paginateFleet();if(map)requestAnimationFrame(()=>map.invalidateSize())});
+
   $$('#obCities button[data-city]').forEach(btn=>btn.addEventListener('click',()=>setCity(btn.dataset.city)));
   $('#obCities').addEventListener('keydown',e=>{
    if(!['ArrowLeft','ArrowRight'].includes(e.key))return;
@@ -454,15 +522,15 @@
   });
   $('#obLanguage').addEventListener('click',()=>setLanguage(lang==='fr'?'en':'fr'));
   $('#obLocate').addEventListener('click',locate);
-  $('#obMapLayers [data-layer]').forEach(btn=>btn.addEventListener('click',()=>{
+  $$('#obMapLayers [data-layer]').forEach(btn=>btn.addEventListener('click',()=>{
     const layer=btn.dataset.layer;enabledLayers[layer]=!enabledLayers[layer];
     btn.classList.toggle('is-active',enabledLayers[layer]);btn.setAttribute('aria-pressed',String(enabledLayers[layer]));
     renderMapMarkers();
   }));
   $('#obRefresh').addEventListener('click',fetchYachts);
-  $('#obNavigationFilters [data-nav]').forEach(b=>b.addEventListener('click',()=>{
+  $$('#obNavigationFilters [data-nav]').forEach(b=>b.addEventListener('click',()=>{
    navFilter=b.dataset.nav;
-   $('#obNavigationFilters [data-nav]').forEach(x=>{
+   $$('#obNavigationFilters [data-nav]').forEach(x=>{
     const selected=x===b;x.classList.toggle('is-active',selected);
     x.setAttribute('aria-pressed',String(selected));
    });
@@ -480,14 +548,15 @@
    selected={id:'guest-entered',name,port:DESTINATIONS[city].name,city,precision:'self_reported'};
    $('#obSelectedName').textContent=name+' · '+txt('INDIQUÉ PAR LE CLIENT','GUEST-ENTERED');
    $('#obVesselContext').hidden=false;
-   $('.ob-yacht-row').forEach(b=>b.classList.remove('is-selected'));
+   $$('.ob-yacht-row').forEach(b=>b.classList.remove('is-selected'));
   });
   $('#obManualName').addEventListener('keydown',e=>{if(e.key==='Enter'){$('#obManualSelect').click();e.preventDefault()}});
   $('#obClearVessel').addEventListener('click',()=>{selected=null;$('#obVesselContext').hidden=true;renderFleet()});
   $('#obConcierge').addEventListener('click',()=>requestExperience({nameFr:'Demande sur mesure',nameEn:'Bespoke concierge request'}));
+  $('#obConciergeDock').addEventListener('click',()=>requestExperience({nameFr:'Demande sur mesure',nameEn:'Bespoke concierge request'}));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)fetchYachts()});
  }
- wire();setLanguage(lang);
+ wire();setLanguage(lang);chooseScreen('map');
  if(window.L)initMap();else window.addEventListener('load',initMap,{once:true});
  fetchYachts();fetchMarketplace();
  // Regional AIS refresh: shared 40-second server-side TTL; hidden tabs do not poll.

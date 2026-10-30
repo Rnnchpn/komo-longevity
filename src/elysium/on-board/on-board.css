@@ -274,3 +274,281 @@
  .ob-yacht-list{min-height:124px}
 }
 @media(prefers-reduced-motion:reduce){.ob-ais-vessel{transition:none}}
+
+
+/* ELYSIUM 09 — PETROL DEEP-SEA APPLICATION.
+   Original KŌMØ wave monogram, not a replica of any luxury-house marks. */
+.ely-onboard{
+ --ocean:#082b36;--ocean2:#0d3944;--ocean3:#174853;--ocean4:#205965;
+ --foam:#edf2ef;--pearl:#f6f1e5;--gold:#d6bd94;--gold2:#b8945f;--ocean-line:#ffffff27;
+ height:100dvh;max-height:100dvh;min-height:0;overflow:hidden;display:flex;flex-direction:column;
+ background:radial-gradient(ellipse at 75% 12%,#174b57 0%,#0b3440 45%,#082a35 100%);
+ color:var(--pearl);isolation:isolate;
+}
+.ely-onboard:before{
+ content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22148%22%20height%3D%22148%22%20viewBox%3D%220%200%20148%20148%22%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%23d9bc8e%22%20stroke-width%3D%22.8%22%20opacity%3D%22.28%22%3E%0A%3Cpath%20d%3D%22M74%209c-13%2011-13%2023%200%2035%2013-12%2013-24%200-35ZM74%20104c-13%2011-13%2023%200%2035%2013-12%2013-24%200-35Z%22%2F%3E%0A%3Cpath%20d%3D%22M13%2074c12-14%2023-14%2036%200-13%2014-24%2014-36%200ZM99%2074c12-14%2023-14%2036%200-13%2014-24%2014-36%200Z%22%2F%3E%0A%3Cpath%20d%3D%22M53%2053c5-8%2012-12%2021-12s16%204%2021%2012M53%2095c5%208%2012%2012%2021%2012s16-4%2021-12M53%2053c-8%205-12%2012-12%2021s4%2016%2012%2021M95%2053c8%205%2012%2012%2012%2021s-4%2016-12%2021%22%2F%3E%0A%3Ccircle%20cx%3D%2274%22%20cy%3D%2274%22%20r%3D%2213%22%2F%3E%3Cpath%20d%3D%22M68%2063v22m2-11%2012-11m-11%2013%2011%2010%22%2F%3E%0A%3C%2Fg%3E%3Cg%20fill%3D%22%23e2ccac%22%20opacity%3D%22.3%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%22136%22%20cy%3D%22136%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%22136%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%22136%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3C%2Fg%3E%0A%3C%2Fsvg%3E");
+ background-position:20px 12px;background-size:148px 148px;opacity:.28;
+}
+.ely-onboard:after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+ background:radial-gradient(ellipse at 15% 93%,#7ba7ae0d,transparent 47%),
+ repeating-radial-gradient(ellipse at 105% -20%,transparent 0 28px,#d6f2e505 29px 30px,transparent 31px 66px);}
+.ely-onboard .ob-header{flex:none;height:68px;min-height:68px;padding:0 clamp(16px,2.3vw,46px);
+ background:#072833ec;border-bottom:1px solid #dfc39d42;backdrop-filter:blur(24px);color:var(--pearl);z-index:100}
+.ely-onboard .ob-logo strong{font-size:20px;color:#f9f4eb}
+.ely-onboard .ob-logo em{font-size:23px;color:var(--gold);border-left-color:#d7bb876c}
+.ely-onboard .ob-header-line{color:#cbb38d;font-size:9px}
+.ely-onboard .ob-member{color:#f9f3e7;border:1px solid #d6bd9480;background:#143e48;padding:10px 15px}
+.ely-onboard .ob-header-actions button{color:#f5dfb8}
+.ely-onboard .ob-main{flex:1;min-height:0;width:100%;max-width:1850px;
+ padding:10px clamp(12px,2.2vw,36px) 12px;display:grid;grid-template-rows:auto auto minmax(0,1fr);
+ gap:10px;overflow:hidden;position:relative}
+.ely-onboard .ob-intro{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:2px 4px 0;min-height:66px}
+.ely-onboard .ob-intro-titles{display:flex;align-items:baseline;gap:23px;min-width:0}
+.ely-onboard .ob-intro .ob-kicker{display:none}
+.ely-onboard .ob-intro h1{font:400 clamp(49px,5.9vw,91px)/.76 Cormorant Garamond,Georgia,serif;
+ letter-spacing:-.052em;margin:0;color:#faf3e5;white-space:nowrap}
+.ely-onboard .ob-intro h1 span{color:var(--gold)}
+.ely-onboard .ob-intro-titles>p{font:400 20px Cormorant Garamond,Georgia,serif;
+ color:#c7d6d4;white-space:nowrap;margin:0}
+.ely-onboard .ob-intro-aside{max-width:370px;padding:0}
+.ely-onboard .ob-intro-aside p{font-size:10px;line-height:1.6;color:#afc8ca}
+.ely-onboard .ob-cities{min-height:59px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ background:#0c3440e6;border:1px solid #d6bd9452;margin:0;border-radius:13px;overflow:hidden}
+.ely-onboard .ob-city{height:59px;grid-template-columns:22px 1fr;grid-template-rows:1fr auto;
+ column-gap:8px;align-items:center;padding:9px 15px;color:#f7f2e9;border-right:1px solid #d6bd9433}
+.ely-onboard .ob-city span{font:400 18px Cormorant Garamond,Georgia,serif;color:var(--gold);grid-row:1/3;align-self:center;padding:0}
+.ely-onboard .ob-city strong{font:400 clamp(24px,2.9vw,37px)/.84 Cormorant Garamond,Georgia,serif;color:#f5f1e6}
+.ely-onboard .ob-city small{font-size:7px;margin-top:2px;letter-spacing:.08em;color:#a4c0c3;grid-column:2}
+.ely-onboard .ob-city.is-active{background:linear-gradient(115deg,#23525e,#164451);box-shadow:inset 0 3px #d6bd94}
+.ely-onboard .ob-city.is-active:before{height:0}
+.ely-onboard .ob-city:hover{background:#1b4c58}
+.ely-onboard .ob-experience{grid-row:3;display:grid;grid-template-columns:minmax(0,1.65fr) minmax(290px,.72fr);
+ gap:11px;height:100%;min-height:0;max-height:100%;overflow:hidden}
+.ely-onboard .ob-map-shell{height:100%;max-height:100%;min-height:0;border-radius:16px;
+ border:1px solid #d4b98c72;box-shadow:0 12px 45px #020f1866;
+ background:radial-gradient(ellipse at 40% 20%,#407b84,#0e4b58 45%,#0a3845 100%)}
+.ely-onboard .ob-map{background:transparent}
+.ely-onboard .ob-map .leaflet-tile-pane{filter:saturate(.61) sepia(.12) hue-rotate(135deg) brightness(.83) contrast(1.14)}
+.ely-onboard .ob-map-shell:after{background:linear-gradient(180deg,#04232d30,transparent 25%,transparent 68%,#061e2880)}
+.ely-onboard .ob-map-top{top:14px;left:14px;right:14px}
+.ely-onboard .ob-map-port{background:#092d3ce9;color:var(--pearl);border:1px solid #d6bd9470;border-radius:12px;
+ box-shadow:0 8px 30px #051a2666;backdrop-filter:blur(19px);padding:12px 16px}
+.ely-onboard .ob-map-port strong{color:#fcf3e4;font-size:32px}
+.ely-onboard .ob-map-port small{color:#bbd0cd}
+.ely-onboard .ob-kicker{color:var(--gold);letter-spacing:.18em;font-size:8px}
+.ely-onboard .ob-geolocate{background:#d6bd94;border:1px solid #f5ddae;color:#102e39;
+ font-weight:800!important;border-radius:100px;min-height:41px;box-shadow:0 7px 27px #061e2b77}
+.ely-onboard .ob-geolocate:hover{background:#f1d7ae}
+.ely-onboard .ob-map-layers{left:12px;bottom:55px;max-width:calc(100% - 24px)}
+.ely-onboard .ob-map-layers button{background:#082e3eea;color:#f5eddf;border:1px solid #cbba999e;
+ box-shadow:0 7px 20px #061e2b55;backdrop-filter:blur(8px)}
+.ely-onboard .ob-map-layers button.is-active{background:#d9c298;color:#12343b;border-color:#ead5b2}
+.ely-onboard .ob-map-guide{top:96px;left:14px;background:#123b47b5;color:#d7c39c;
+ font-size:8px;border:1px solid #d6bd9444;border-radius:8px}
+.ely-onboard .ob-map-footer span{background:#0a2b39dd;color:#eee2ce;border:1px solid #d6bd9466;border-radius:9px}
+.ely-onboard .ob-map-footer button{background:#163f4c;color:#f4e5cd;border:1px solid #d6bd9499;border-radius:9px}
+.ely-onboard .ob-dashboard{min-height:0;max-height:100%;overflow:hidden;background:#0b3440df;
+ border:1px solid #d6bd9454;border-radius:16px;box-shadow:0 10px 35px #071f2e50}
+.ely-onboard .ob-dashboard-head{padding:14px 18px 7px}
+.ely-onboard .ob-dashboard-head>p{font-size:9px;line-height:1.45;color:#adc7c8;margin-top:7px;min-height:0}
+.ely-onboard .ob-count{margin-top:4px}
+.ely-onboard .ob-count strong{font-size:51px;color:var(--pearl)}
+.ely-onboard .ob-count small{color:#cfbd9f}
+.ely-onboard .ob-search{padding:0 18px 8px}
+.ely-onboard .ob-search label,.ely-onboard .ob-own-yacht label{font-size:8px;color:#d1bb99}
+.ely-onboard .ob-search input,.ely-onboard .ob-own-yacht input{height:36px;min-height:36px;background:#123f4d;
+ border-color:#d6bd944c;color:#f5efdf;border-radius:8px;padding:7px 11px}
+.ely-onboard .ob-search input::placeholder,.ely-onboard .ob-own-yacht input::placeholder{color:#adc3c3}
+.ely-onboard .ob-length,.ely-onboard .ob-navigation-filters{padding:0 18px 7px}
+.ely-onboard .ob-length button,.ely-onboard .ob-navigation-filters button{border:1px solid #d6bd9459;
+ background:#17424e;color:#c7d9d6;border-radius:100px;padding:8px 9px;font-size:8px;white-space:nowrap}
+.ely-onboard .ob-length button.is-active,.ely-onboard .ob-navigation-filters button.is-active{
+ background:var(--gold);color:#14363e;border-color:var(--gold)}
+.ely-onboard .ob-own-yacht{padding:8px 18px;background:#0c3440;border-top:1px solid #d6bd9438}
+.ely-onboard .ob-own-yacht>div{gap:6px}
+.ely-onboard .ob-own-yacht button{background:#d3bd99;color:#12313b;border:0;border-radius:8px}
+.ely-onboard .ob-yacht-list{padding:5px 13px;min-height:0;flex:1;overflow:hidden;border-top:1px solid #d6bd9433}
+.ely-onboard .ob-yacht-row{background:#13404bb8;border:1px solid #d6bd9438;border-radius:9px;
+ margin:5px 0;padding:9px 11px;color:#f6f0e6;min-height:51px}
+.ely-onboard .ob-yacht-row:hover,.ely-onboard .ob-yacht-row.is-selected{background:#28545b}
+.ely-onboard .ob-yacht-text strong{font-size:20px}
+.ely-onboard .ob-yacht-text small{color:#acccca;font-size:8px;margin-top:2px}
+.ely-onboard .ob-yacht-placeholder{padding:16px 8px;font-size:10px;line-height:1.6;color:#bed0c9}
+.ely-onboard .ob-status-label{font-size:7px;padding:3px 7px;margin:3px 0}
+.ely-onboard .ob-vessel-context{background:#183e46;border-color:#d6bd944f;color:#e7eddf;padding:9px 18px}
+.ely-onboard .ob-vessel-context strong{font-size:22px}
+.ely-onboard .ob-dashboard-disclaimer{background:#092b36;color:#91b0af;border-color:#d6bd942c;
+ padding:9px 15px;font-size:8px;line-height:1.3}
+.ely-onboard .ob-map-error{background:#0b3543ed;color:#f1dbb5;border:1px solid #d6bd9475}
+.ely-onboard .ob-harbour-marker{background:#123b47;color:#f2ddb6;border:2px solid #d6bd94}
+.ely-onboard .ob-harbour-marker.is-filled{background:#d6bd94;color:#1b3a42}
+.ely-onboard .ob-discovery-avatar{background:linear-gradient(145deg,#183c46,#2e5960);border-color:#efddbc;
+ color:#f5d6a3;box-shadow:0 0 0 3px #c0a17155,0 7px 21px #082330a6;transition:transform .35s}
+.ely-onboard .ob-discovery-pin small{background:#123843f0;color:#f2e0bf;border:1px solid #d6bd9459}
+.ely-onboard .ob-discovery-pin:hover .ob-discovery-avatar{transform:scale(1.13)}
+.ely-onboard .ob-sponsored-pin{background:#123743;border-color:#dac39c}
+.ely-onboard .ob-ais-vessel.is-underway{background:#24758b}
+.ely-onboard .ob-ais-vessel.is-approaching{background:#ae8048}
+.ely-onboard .ob-ais-vessel.is-at_anchor{background:#667f87}
+.ely-onboard .ob-ais-vessel.is-in_port{background:#386b65}
+/* Four explicit app screens, each stays inside one viewport. */
+.ely-onboard[data-ob-view="map"] .ob-experience{display:grid}
+.ely-onboard[data-ob-view="yachts"] .ob-experience{display:grid;grid-template-columns:minmax(0,.62fr) minmax(0,1fr)}
+.ely-onboard[data-ob-view="yachts"] .ob-dashboard{display:flex}
+.ely-onboard[data-ob-view="experiences"] .ob-experience,
+.ely-onboard[data-ob-view="market"] .ob-experience{display:none}
+.ely-onboard .ob-activities,.ely-onboard .ob-marketplace{display:none;grid-row:3;min-height:0;
+ height:100%;overflow:hidden;margin:0;border:1px solid #d6bd9464;border-radius:16px;
+ padding:clamp(12px,2.6vw,28px);background:linear-gradient(130deg,#0e3844f3,#103945eb)}
+.ely-onboard[data-ob-view="experiences"] .ob-activities{display:flex;flex-direction:column;gap:10px}
+.ely-onboard[data-ob-view="market"] .ob-marketplace{display:flex;flex-direction:column;gap:10px}
+.ely-onboard .ob-activities-head{margin:0;flex:none;align-items:center}
+.ely-onboard .ob-activities-head h2,.ely-onboard .ob-market-head h2{font:400 clamp(35px,3.9vw,61px)/.87 Cormorant Garamond,Georgia,serif;
+ color:#f7f0e5;margin:6px 0 0}
+.ely-onboard .ob-activities-head>p{font-size:9px;color:#bfd0ca;max-width:330px}
+.ely-onboard .ob-activity-grid,.ely-onboard .ob-market-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:11px;flex:1;min-height:0;overflow:hidden}
+.ely-onboard .ob-activity,.ely-onboard .ob-market-card{min-height:0;height:100%;border-radius:12px;
+ background:#f0eee5;border:1px solid #d7c39d;box-shadow:0 6px 20px #051f2a33;overflow:hidden}
+.ely-onboard .ob-activity[hidden],.ely-onboard .ob-market-card[hidden],.ely-onboard .ob-yacht-row[hidden]{display:none!important}
+.ely-onboard .ob-activity-art,.ely-onboard .ob-market-image{height:36%;min-height:0;max-height:190px;flex:none}
+.ely-onboard .ob-activity-body,.ely-onboard .ob-market-body{padding:clamp(12px,1.8vw,22px);min-height:0}
+.ely-onboard .ob-activity-body h3,.ely-onboard .ob-market-body h3{font-size:clamp(30px,3.2vw,47px);margin:7px 0}
+.ely-onboard .ob-activity-body p,.ely-onboard .ob-market-body p{font-size:10px;line-height:1.5;margin-bottom:8px}
+.ely-onboard .ob-activity-actions{padding-top:8px}
+.ely-onboard .ob-activity-actions a,.ely-onboard .ob-activity-actions button{font-size:8px!important}
+.ely-onboard .ob-market-head{flex:none;padding:0 0 12px}
+.ely-onboard .ob-market-head>a{font-size:9px;background:#d6bd94;color:#1b3b44}
+.ely-onboard .ob-market-info{font-size:10px;line-height:1.4;color:#bbcfcc;margin:0;flex:none}
+.ely-onboard .ob-market-empty{color:#e3d5b7;border:1px solid #d6bd9457;background:#154352;
+ padding:26px;font-size:12px;grid-column:1/-1}
+.ely-onboard .ob-market-body b{font-size:22px}
+.ely-onboard .ob-market-body a{margin-top:9px;font-size:8px}
+.ely-onboard .ob-activity-foot,.ely-onboard .ob-legal{display:none}
+.ely-onboard .ob-footer{display:none}
+.ely-onboard .ob-screen-pager{display:flex;gap:12px;justify-content:center;align-items:center;
+ flex:none;min-height:34px;color:var(--gold);font:700 9px Manrope,Arial,sans-serif;letter-spacing:.15em}
+.ely-onboard .ob-screen-pager[hidden]{display:none!important}
+.ely-onboard .ob-screen-pager button{width:35px;height:31px;border:1px solid #d6bd9478;
+ background:#123f4b;color:var(--pearl);border-radius:8px}
+.ely-onboard .ob-screen-pager button:disabled{opacity:.28}
+.ely-onboard .ob-app-dock{flex:none;height:66px;min-height:66px;background:#062631f7;
+ border-top:1px solid #d6bd9460;padding:5px clamp(20px,9vw,190px);display:flex;justify-content:center;
+ gap:clamp(5px,2vw,22px);align-items:stretch;z-index:90}
+.ely-onboard .ob-app-dock button,.ely-onboard .ob-app-dock>a{appearance:none;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;gap:1px;min-width:0;flex:1;max-width:190px;
+ color:#b5c8c6;background:transparent;border:1px solid transparent;border-radius:12px;
+ font:700 8px/1.2 Manrope,Arial,sans-serif;letter-spacing:.13em}
+.ely-onboard .ob-app-dock button.is-active{background:#1a4a55;border-color:#d6bd9468;color:#f8e3c1}
+.ely-onboard .ob-app-dock .ob-dock-glyph{font:400 25px/1 Cormorant Garamond,Georgia,serif;color:#d9bc8e}
+.ely-onboard .ob-app-dock button:hover,.ely-onboard .ob-app-dock>a:hover{background:#1c4f5c}
+/* Decorative fallback, explicitly not an AIS chart. */
+.ely-onboard .ob-map-fallback{height:100%;width:100%;display:grid;place-content:center;gap:14px;text-align:center;
+ position:relative;isolation:isolate;background:
+ repeating-radial-gradient(ellipse at 50% 50%,transparent 0 36px,#9bcbcd19 37px 38px,transparent 39px 82px),
+ linear-gradient(135deg,#174b58,#0b3440)}
+.ely-onboard .ob-map-fallback:before{content:"";position:absolute;inset:0;z-index:-1;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22148%22%20height%3D%22148%22%20viewBox%3D%220%200%20148%20148%22%3E%0A%3Cg%20fill%3D%22none%22%20stroke%3D%22%23d9bc8e%22%20stroke-width%3D%22.8%22%20opacity%3D%22.28%22%3E%0A%3Cpath%20d%3D%22M74%209c-13%2011-13%2023%200%2035%2013-12%2013-24%200-35ZM74%20104c-13%2011-13%2023%200%2035%2013-12%2013-24%200-35Z%22%2F%3E%0A%3Cpath%20d%3D%22M13%2074c12-14%2023-14%2036%200-13%2014-24%2014-36%200ZM99%2074c12-14%2023-14%2036%200-13%2014-24%2014-36%200Z%22%2F%3E%0A%3Cpath%20d%3D%22M53%2053c5-8%2012-12%2021-12s16%204%2021%2012M53%2095c5%208%2012%2012%2021%2012s16-4%2021-12M53%2053c-8%205-12%2012-12%2021s4%2016%2012%2021M95%2053c8%205%2012%2012%2012%2021s-4%2016-12%2021%22%2F%3E%0A%3Ccircle%20cx%3D%2274%22%20cy%3D%2274%22%20r%3D%2213%22%2F%3E%3Cpath%20d%3D%22M68%2063v22m2-11%2012-11m-11%2013%2011%2010%22%2F%3E%0A%3C%2Fg%3E%3Cg%20fill%3D%22%23e2ccac%22%20opacity%3D%22.3%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%22136%22%20cy%3D%22136%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%22136%22%20r%3D%221.5%22%2F%3E%3Ccircle%20cx%3D%22136%22%20cy%3D%2212%22%20r%3D%221.5%22%2F%3E%3C%2Fg%3E%0A%3C%2Fsvg%3E");background-size:148px;opacity:.23}
+.ely-onboard .ob-map-fallback-signet{font:400 170px/.68 Cormorant Garamond,Georgia,serif;color:#d9c0974a}
+.ely-onboard .ob-map-fallback-city{font:400 47px/.9 Cormorant Garamond,Georgia,serif;color:#f3e5ca;z-index:1}
+.ely-onboard .ob-map-fallback-note{font:700 8px Manrope,Arial,sans-serif;letter-spacing:.11em;color:#b7d5d3}
+.ely-onboard .ob-map-fallback-port{display:block;background:#d9bf98;color:#1b3e48;border:1px solid #f1d7ad;
+ padding:8px 14px;border-radius:50px;font:700 9px Manrope,Arial,sans-serif;position:absolute;
+ left:calc(16% + var(--i) * 19%);bottom:calc(18% + var(--i) * 9%);max-width:60%;z-index:3}
+.ely-onboard .ob-map-fallback-port:hover{background:#f5dfb9}
+@media(max-width:980px){
+ .ely-onboard .ob-intro-aside{display:none}
+ .ely-onboard .ob-experience{grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr)}
+ .ely-onboard .ob-activities-head>p{display:none}
+}
+@media(max-width:760px){
+ .ely-onboard .ob-header{height:57px;min-height:57px;padding-inline:13px}
+ .ely-onboard .ob-logo strong{font-size:17px}
+ .ely-onboard .ob-logo em{font-size:18px;padding-left:10px}
+ .ely-onboard .ob-header-line{display:none}
+ .ely-onboard .ob-member{font-size:8px;padding:9px 10px}
+ .ely-onboard .ob-main{padding:8px 9px 7px;gap:7px;grid-template-rows:40px 51px minmax(0,1fr)}
+ .ely-onboard .ob-intro{min-height:0;gap:9px}
+ .ely-onboard .ob-intro h1{font-size:51px}
+ .ely-onboard .ob-intro-titles>p{font-size:14px}
+ .ely-onboard .ob-cities{height:51px;min-height:51px;border-radius:10px}
+ .ely-onboard .ob-city{height:51px;grid-template-columns:1fr;display:flex;align-items:center;justify-content:center;
+ flex-direction:column;gap:0;padding:5px}
+ .ely-onboard .ob-city span{display:none}
+ .ely-onboard .ob-city strong{font-size:25px}
+ .ely-onboard .ob-city small{font-size:6px;letter-spacing:0}
+ .ely-onboard .ob-experience{display:block;height:100%;min-height:0}
+ .ely-onboard .ob-map-shell{height:100%;max-height:100%;min-height:0;border-radius:12px}
+ .ely-onboard[data-ob-view="map"] .ob-dashboard{display:none}
+ .ely-onboard[data-ob-view="yachts"] .ob-experience{display:block}
+ .ely-onboard[data-ob-view="yachts"] .ob-map-shell{display:none}
+ .ely-onboard[data-ob-view="yachts"] .ob-dashboard{height:100%;max-height:100%;border-radius:12px}
+ .ely-onboard .ob-map-port{padding:9px 11px;min-width:135px}
+ .ely-onboard .ob-map-port strong{font-size:28px}
+ .ely-onboard .ob-map-top{top:9px;left:9px;right:9px}
+ .ely-onboard .ob-map-guide{top:83px;left:9px;font-size:7px;max-width:60%}
+ .ely-onboard .ob-geolocate{font-size:7px!important;min-height:35px;padding:10px 9px}
+ .ely-onboard .ob-map-layers{bottom:49px;left:8px;right:8px}
+ .ely-onboard .ob-map-layers button{font-size:7px;padding:9px 11px}
+ .ely-onboard .ob-map-footer{bottom:8px;left:8px;right:8px}
+ .ely-onboard .ob-map-footer span{font-size:7px}
+ .ely-onboard .ob-activities,.ely-onboard .ob-marketplace{padding:12px;gap:7px}
+ .ely-onboard .ob-activities-head h2,.ely-onboard .ob-market-head h2{font-size:43px}
+ .ely-onboard .ob-activity-grid,.ely-onboard .ob-market-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .ely-onboard .ob-activity-art,.ely-onboard .ob-market-image{height:31%;min-height:0}
+ .ely-onboard .ob-activity-body,.ely-onboard .ob-market-body{padding:10px}
+ .ely-onboard .ob-activity-body h3,.ely-onboard .ob-market-body h3{font-size:28px}
+ .ely-onboard .ob-activity-body>span,.ely-onboard .ob-market-label{font-size:7px}
+ .ely-onboard .ob-activity-body p{font-size:9px;line-height:1.3;max-height:3.9em;overflow:hidden}
+ .ely-onboard .ob-activity-actions{gap:6px}
+ .ely-onboard .ob-activity-actions a,.ely-onboard .ob-activity-actions button{font-size:7px!important;padding:6px 8px}
+ .ely-onboard .ob-market-list{grid-template-columns:1fr}
+ .ely-onboard .ob-market-card{display:grid;grid-template-columns:40% 60%}
+ .ely-onboard .ob-market-image{height:100%;max-height:none}
+ .ely-onboard .ob-market-head h2{font-size:42px}
+ .ely-onboard .ob-market-head>a{font-size:7px;padding:9px}
+ .ely-onboard .ob-market-body h3{font-size:33px}
+ .ely-onboard .ob-market-body p{font-size:9px}
+ .ely-onboard .ob-market-body a{padding:8px 9px}
+ .ely-onboard .ob-app-dock{height:63px;min-height:63px;padding:5px 5px calc(env(safe-area-inset-bottom,0px) + 4px);gap:0}
+ .ely-onboard .ob-app-dock button,.ely-onboard .ob-app-dock>a{font-size:7px;letter-spacing:0;max-width:none}
+ .ely-onboard .ob-app-dock .ob-dock-glyph{font-size:22px}
+ .ely-onboard .ob-yacht-list{padding:6px 12px;display:block;overflow:hidden;min-height:0}
+ .ely-onboard .ob-yacht-row{width:100%;flex:none;margin:4px 0;min-height:52px}
+ .ely-onboard .ob-navigation-filters{padding:0 11px 6px;gap:5px}
+ .ely-onboard .ob-navigation-filters button{font-size:7px;padding:7px}
+ .ely-onboard .ob-dashboard-head{padding:10px 13px 5px}
+ .ely-onboard .ob-count strong{font-size:39px}
+ .ely-onboard .ob-dashboard-head>p{font-size:8px;margin:3px 0}
+ .ely-onboard .ob-search{padding:0 12px 5px}
+ .ely-onboard .ob-own-yacht{padding:6px 12px}
+ .ely-onboard .ob-length{padding:0 12px 5px}
+ .ely-onboard .ob-dashboard-disclaimer{font-size:7px;padding:8px 11px}
+}
+@media(max-height:690px){
+ .ely-onboard .ob-intro-titles>p,.ely-onboard .ob-map-guide{display:none}
+ .ely-onboard .ob-dashboard-disclaimer{display:none}
+ .ely-onboard .ob-activity-art{height:25%}
+ .ely-onboard .ob-activity-body p{display:none}
+ .ely-onboard .ob-activity-actions{margin-top:auto}
+ .ely-onboard .ob-main{gap:5px}
+}
+@media(prefers-reduced-motion:reduce){
+ .ely-onboard .ob-discovery-avatar,.ely-onboard .ob-app-dock button,.ely-onboard .ob-city{transition:none!important}
+}
+
+
+/* Deep-water movement, quiet by default and completely optional in reduced-motion mode. */
+@keyframes elyOceanPatternDrift{
+ 0%{background-position:0 0}
+ 50%{background-position:13px -12px}
+ 100%{background-position:0 0}
+}
+@keyframes elyOceanFloat{
+ 0%,100%{transform:translate3d(0,0,0) scale(1)}
+ 50%{transform:translate3d(0,-5px,0) scale(1.018)}
+}
+.ely-onboard:before{animation:elyOceanPatternDrift 46s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+ .ely-onboard:before{animation:none!important}
+}

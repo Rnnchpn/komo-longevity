@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f6f3ed">
+<meta name="theme-color" content="#0a303c">
 <meta name="description" content="ELYSIUM by KŌMØ. Neuf univers privés, une seule conciergerie. Longévité, esthétique, yachting, expériences et pièces d’exception.">
 <link rel="canonical" href="https://komolongevity.com/elysium/">
 <title>ELYSIUM — The Private Maison | KŌMØ</title>
@@ -21,7 +21,7 @@
  </div>
 </nav>
 <main>
- <section class="ely-public-hero">
+ <section class="ely-public-hero ely-view-active" data-scene="home">
   <div class="wrap ely-public-hero-layout">
    <div class="ely-public-hero-copy">
     <span class="ely-public-kicker" data-fr="LA MAISON PRIVÉE · BY KŌMØ" data-en="THE PRIVATE MAISON · BY KŌMØ">LA MAISON PRIVÉE · BY KŌMØ</span>
@@ -44,7 +44,7 @@
   </div>
  </section>
  
- <section class="ely-riviera-feature" aria-labelledby="ely-riviera-title">
+ <section data-scene="riviera" class="ely-riviera-feature" aria-labelledby="ely-riviera-title">
   <div class="wrap ely-riviera-feature-wrap">
    <div class="ely-riviera-feature-title">
     <span class="ely-public-kicker" data-fr="NOUVEAU · ELYSIUM ON BOARD" data-en="NEW · ELYSIUM ON BOARD">NOUVEAU · ELYSIUM ON BOARD</span>
@@ -59,7 +59,7 @@
    </div>
   </div>
  </section>
- <section class="ely-public-collection" id="collections">
+ <section data-scene="collections" class="ely-public-collection" id="collections">
   <div class="wrap">
    <header class="ely-public-section-head"><div>
     <span class="ely-public-kicker" data-fr="ELYSIUM · LES HUIT UNIVERS" data-en="ELYSIUM · THE EIGHT WORLDS">ELYSIUM · LES HUIT UNIVERS</span>
@@ -108,7 +108,7 @@
    <p class="ely-public-collection-note" data-fr="Les prestations sont proposées sous réserve de disponibilité et de confirmation. Accès aux collections sur adhésion approuvée." data-en="Experiences are offered subject to availability and confirmation. Collection access requires approved membership.">Les prestations sont proposées sous réserve de disponibilité et de confirmation. Accès aux collections sur adhésion approuvée.</p>
   </div>
  </section>
- <section class="ely-public-membership" id="membership">
+ <section data-scene="membership" class="ely-public-membership" id="membership">
   <div class="wrap ely-public-membership-layout">
    <div>
     <span class="ely-public-kicker" data-fr="L’ADHÉSION PRIVÉE" data-en="THE PRIVATE MEMBERSHIP">L’ADHÉSION PRIVÉE</span>
@@ -127,6 +127,13 @@
   <p class="wrap ely-public-membership-foot" data-fr="Adhésion sur validation. Aucun paiement de l’adhésion n’est encore encaissé en ligne. Les prestations sont facturées séparément ; les actes médicaux relèvent de médecins indépendants habilités." data-en="Membership by approval. Online membership payment is not yet active. Services are priced separately; medical care is provided by independently licensed physicians.">Adhésion sur validation. Aucun paiement de l’adhésion n’est encore encaissé en ligne. Les prestations sont facturées séparément ; les actes médicaux relèvent de médecins indépendants habilités.</p>
  </section>
 </main>
+<nav class="ely-viewport-dock" id="elyPublicDock" aria-label="ELYSIUM navigation">
+ <button type="button" class="is-active" data-screen="home" aria-current="page"><span>✧</span><small data-fr="ACCUEIL" data-en="HOME">ACCUEIL</small></button>
+ <button type="button" data-screen="riviera" aria-current="false"><span>⌁</span><small>RIVIERA</small></button>
+ <button type="button" data-screen="collections" aria-current="false"><span>◇</span><small data-fr="UNIVERS" data-en="WORLDS">UNIVERS</small></button>
+ <button type="button" data-screen="membership" aria-current="false"><span>K</span><small data-fr="LE CLUB" data-en="THE CLUB">LE CLUB</small></button>
+ <a href="/elysium/on-board/" class="ely-dock-map"><span>◎</span><small data-fr="LA CARTE" data-en="THE MAP">LA CARTE</small></a>
+</nav>
 <footer class="ely-public-footer wrap">
  <div><strong>KŌMØ <em>ELYSIUM</em></strong><small>THE PRIVATE MAISON</small></div>
  <div><a href="/elysium/club/" data-fr="ACCÈS MEMBRE" data-en="MEMBERS">ACCÈS MEMBRE</a><a href="mailto:contact@komolongevity.com">CONTACT</a><span>MONACO · THE RIVIERA</span></div>
@@ -141,5 +148,23 @@ function switchLanguage(){
 }
 document.querySelector('#toggleLanguage').addEventListener('click',()=>{lang=lang==='fr'?'en':'fr';switchLanguage()});
 switchLanguage();
+const SCENES=['home','riviera','collections','membership'];
+function showScene(name){
+ if(!SCENES.includes(name))return;
+ document.body.dataset.scene=name;
+ document.querySelectorAll('main>section[data-scene]').forEach(el=>{
+  const on=el.dataset.scene===name;el.classList.toggle('ely-view-active',on);
+  el.setAttribute('aria-hidden',String(!on));
+ });
+ document.querySelectorAll('#elyPublicDock [data-screen]').forEach(b=>{
+  const on=b.dataset.screen===name;b.classList.toggle('is-active',on);
+  b.setAttribute('aria-current',on?'page':'false');
+ });
+}
+document.querySelectorAll('#elyPublicDock [data-screen]').forEach(btn=>btn.addEventListener('click',()=>showScene(btn.dataset.screen)));
+document.querySelectorAll('a[href="#collections"],a[href="#membership"]').forEach(a=>a.addEventListener('click',event=>{
+ event.preventDefault();showScene(a.getAttribute('href').slice(1));
+}));
+showScene(location.hash==='#collections'?'collections':location.hash==='#membership'?'membership':'home');
 </script>
 </body></html>

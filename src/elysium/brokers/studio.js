@@ -10,6 +10,54 @@ const httpsOrNull=id=>{const v=val(id);if(!v)return null;try{const u=new URL(v);
 const fmt=dt=>dt?new Date(dt).toLocaleDateString('fr-FR'):'—';
 function box(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=String(txt);return e}
 function showTab(name){$$('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));$$('.tab').forEach(el=>el.hidden=el.id!==name)}
+
+let yachtStep=1;
+const RECORD_PAGES={myListings:0,myCampaigns:0,adminItems:0};
+function setBrokerScreen(screen){
+ if(!['profile','listings','campaigns','myitems','admin'].includes(screen))return;
+ if(screen==='admin'&&!owner)return;
+ document.body.dataset.brokerScreen=screen;
+ if(screen==='profile')showTab('listings');else if(screen!=='admin')showTab(screen);
+ $$('#brokerDock [data-broker-screen]').forEach(b=>{
+  const active=b.dataset.brokerScreen===screen;
+  b.classList.toggle('is-active',active);b.setAttribute('aria-current',active?'page':'false');
+ });
+}
+function setYachtStep(n,{validate=false}={}){
+ const next=Math.max(1,Math.min(3,n));
+ if(validate&&next>yachtStep){
+  const fields=[...$('#yachtForm .fields').children].slice((yachtStep===1?0:yachtStep===2?4:7),yachtStep===1?4:yachtStep===2?7:10);
+  for(const field of fields){
+   const el=field.querySelector('input,textarea,select');
+   if(el&&!el.checkValidity()){el.reportValidity();return}
+  }
+ }
+ yachtStep=next;document.body.dataset.listingStep=String(yachtStep);
+ $('#listingStepLabel').textContent='ÉTAPE 0'+yachtStep+' / 03';
+ $('#listingPrev').disabled=yachtStep===1;$('#listingNext').hidden=yachtStep===3;
+}
+function paginateRecord(id,limit){
+ const host=$('#'+id);if(!host)return;
+ const rows=[...host.children].filter(e=>e.classList.contains('entry'));
+ const total=Math.max(1,Math.ceil(rows.length/limit));
+ const page=Math.max(0,Math.min(total-1,RECORD_PAGES[id]||0));
+ RECORD_PAGES[id]=page;
+ rows.forEach((row,i)=>{row.hidden=i<page*limit||i>=(page+1)*limit});
+ let pager=host.nextElementSibling;
+ if(!pager?.classList.contains('broker-record-pager')){
+  pager=document.createElement('div');pager.className='broker-record-pager';host.insertAdjacentElement('afterend',pager);
+  const prev=box('button','','←');prev.type='button';prev.dataset.dir='-1';
+  const label=box('span','','01 / 01');
+  const next=box('button','','→');next.type='button';next.dataset.dir='1';
+  pager.append(prev,label,next);
+  [prev,next].forEach(b=>b.addEventListener('click',()=>{RECORD_PAGES[id]+=Number(b.dataset.dir);paginateRecord(id,limit)}));
+ }
+ pager.hidden=rows.length<=limit;
+ pager.querySelector('span').textContent=String(page+1).padStart(2,'0')+' / '+String(total).padStart(2,'0');
+ pager.querySelector('[data-dir="-1"]').disabled=page===0;
+ pager.querySelector('[data-dir="1"]').disabled=page===total-1;
+}
+
 function row(title,desc,status){const e=box('article','entry');e.append(box('span','pill',status),box('h3','',title),box('p','',desc));return e}
 function needLogin(){if(!current)throw Error('Veuillez vous connecter avant de continuer.')}
 function needBroker(){needLogin();if(!broker)throw Error('Enregistrez d’abord votre profil broker.')}
@@ -18,10 +66,11 @@ async function loadState(){
  const {data:{user},error}=await sb.auth.getUser();
  current=error?null:user;
  $('#signIn').hidden=!!current;$('#workspace').hidden=!current;
- if(!current)return;
+ $('#brokerDock').hidden=!current;if(!current)return;
  $('#whoami').textContent='SESSION BROKER · '+current.email;
  const check=await sb.rpc('elysium_verified_owner');owner=check.data===true;
  $('#adminPanel').hidden=!owner;
+ const adm=$('#brokerDock [data-broker-screen="admin"]');if(adm)adm.hidden=!owner;
  const r=await sb.from('elysium_brokers').select('user_id,company_name,contact_name,contact_email,website,operating_area,verification_status').eq('user_id',current.id).maybeSingle();
  broker=r.data||null;
  if(broker){
@@ -66,7 +115,7 @@ async function submitYacht(ev){
  const {error}=await sb.from('elysium_yacht_listings').insert(values);
  if(error)throw error;
  msg('#listingMessage','Annonce transmise pour vérification. Sa publication est conditionnée au contrôle du mandat et au paiement de l’emplacement.');
- $('#yachtForm').reset();await refreshMyItems();
+ $('#yachtForm').reset();setYachtStep(1);await refreshMyItems();
 }
 async function submitCampaign(ev){
  ev.preventDefault();needBroker();
@@ -92,6 +141,7 @@ async function refreshMyItems(){
  if(!l.data?.length)host.append(box('p','note','Aucune annonce soumise.'));
  (c.data||[]).forEach(x=>ads.append(row(x.headline,x.placement+' · '+x.location_city+' · règlement '+x.payment_status+(x.ends_at?' · échéance '+fmt(x.ends_at):''),x.status.toUpperCase())));
  if(!c.data?.length)ads.append(box('p','note','Aucune campagne.'));
+ paginateRecord('myListings',2);paginateRecord('myCampaigns',2);
 }
 async function refreshAdmin(){
  if(!owner)return;
@@ -137,10 +187,15 @@ async function refreshAdmin(){
   });
   host.append(el);
  });
+ paginateRecord('adminItems',3);
 }
 function safe(fn,msgid){
  return async ev=>{try{await fn(ev)}catch(e){msg(msgid,e.message||String(e))}}
 }
+$$('#brokerDock [data-broker-screen]').forEach(b=>b.addEventListener('click',()=>setBrokerScreen(b.dataset.brokerScreen)));
+$('#listingPrev').addEventListener('click',()=>setYachtStep(yachtStep-1));
+$('#listingNext').addEventListener('click',()=>setYachtStep(yachtStep+1,{validate:true}));
+setYachtStep(1);
 $('#login').addEventListener('click',safe(login,'#authMessage'));
 $('#magicLink').addEventListener('click',safe(magicLink,'#authMessage'));
 $('#logout').addEventListener('click',()=>sb.auth.signOut().then(loadState));

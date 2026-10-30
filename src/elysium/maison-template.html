@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f6f3ed">
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0a303c">
 <title>Private Collection — KŌMØ ELYSIUM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -8,17 +8,17 @@
 <nav class="top ely-boutique-nav">
  <a class="brand" href="/elysium/club/" aria-label="ELYSIUM"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
  <div class="navlinks">
-  <a href="/elysium/club/" data-fr="LES NEUF UNIVERS" data-en="THE NINE WORLDS">LES NEUF UNIVERS</a>
+  <a href="/elysium/club/" data-fr="LES HUIT UNIVERS" data-en="THE EIGHT WORLDS">LES NEUF UNIVERS</a>
   <button type="button" id="toggleLanguage" aria-label="Changer de langue">EN</button>
   <button type="button" id="signOut" style="display:none" data-fr="DÉCONNEXION" data-en="SIGN OUT">DÉCONNEXION</button>
   <button type="button" id="openSelection" class="white-link" data-fr="MA DEMANDE" data-en="MY REQUEST">MA DEMANDE</button>
  </div>
 </nav>
 <main>
- <section class="ely-shop-hero" aria-labelledby="ely-shop-title">
+ <section data-shop-screen="intro" class="ely-shop-hero" aria-labelledby="ely-shop-title">
   <div class="ely-shop-hero-inner wrap">
    <div class="ely-shop-hero-copy">
-    <div class="ely-shop-crumb"><a href="/elysium/club/" data-fr="ELYSIUM / LES UNIVERS" data-en="ELYSIUM / WORLDS">ELYSIUM / LES UNIVERS</a><span id="elyWorldNumber">03 / 09</span></div>
+    <div class="ely-shop-crumb"><a href="/elysium/club/" data-fr="ELYSIUM / LES UNIVERS" data-en="ELYSIUM / WORLDS">ELYSIUM / LES UNIVERS</a><span id="elyWorldNumber">03 / 08</span></div>
     <span class="ely-shop-kicker" id="maisonKicker">THE PRIVATE COLLECTION</span>
     <h1 id="ely-shop-title">Private<span class="ely-shop-fullstop">.</span></h1>
     <h2 class="ely-shop-headline" id="elyWorldHeadline" data-fr="Une collection privée." data-en="A private collection.">Une collection privée.</h2>
@@ -40,7 +40,7 @@
    </div>
   </div>
  </section>
- <section class="ely-yachting-channel" id="elyYachtingChannel" hidden>
+ <section data-shop-screen="yachting" class="ely-yachting-channel" id="elyYachtingChannel" hidden>
   <div class="wrap ely-yachting-channel-inner">
     <div><span class="ely-shop-section-kicker">ELYSIUM · ON BOARD</span>
       <h2 data-fr="La Riviera. En direct." data-en="The Riviera. On your map.">La Riviera. En direct.</h2>
@@ -56,7 +56,7 @@
     <div id="elyYachtingListings" class="ely-yachting-listings"></div>
   </div>
  </section>
- <section class="ely-shop-catalogue" id="collection" aria-labelledby="ely-shop-catalogue-title">
+ <section data-shop-screen="collection" class="ely-shop-catalogue" id="collection" aria-labelledby="ely-shop-catalogue-title">
   <div class="wrap ely-shop-catalogue-inner">
    <div class="ely-shop-section-head"><div>
     <span class="ely-shop-section-kicker" data-fr="LA COLLECTION PRIVÉE" data-en="THE PRIVATE COLLECTION">LA COLLECTION PRIVÉE</span>
@@ -68,7 +68,11 @@
     <p data-fr="Connectez-vous à ELYSIUM pour découvrir les prestations." data-en="Sign in to ELYSIUM to explore the experiences.">Connectez-vous à ELYSIUM pour découvrir les prestations.</p>
     <a href="/elysium/club/" class="ely-shop-signin" data-fr="ACCÉDER AU CLUB ↗" data-en="ENTER THE CLUB ↗">ACCÉDER AU CLUB ↗</a>
    </div>
-   <div id="productGrid" class="ely-shop-grid" aria-live="polite"></div><p id="shopMessage" class="state-message"></p>
+   <div id="productGrid" class="ely-shop-grid" aria-live="polite"></div>
+   <div id="elyCataloguePager" class="ely-catalogue-pager" hidden>
+    <button type="button" data-move="-1" aria-label="Précédent">←</button><span id="elyCataloguePage">01 / 01</span><button type="button" data-move="1" aria-label="Suivant">→</button>
+   </div>
+   <p id="shopMessage" class="state-message"></p>
   </div>
  </section>
  <section class="ely-shop-concierge-strip"><div class="wrap"><div>
@@ -78,6 +82,13 @@
  </div></section>
  <section class="ely-service-detail wrap" id="serviceDetail" hidden aria-live="polite" aria-label="Private service"></section>
 </main>
+<nav class="ely-shop-dock" id="elyShopDock" aria-label="Private collection navigation">
+ <button type="button" data-shop-nav="intro" class="is-active" aria-current="page"><span>✧</span><small data-fr="MAISON" data-en="MAISON">MAISON</small></button>
+ <button type="button" data-shop-nav="collection" aria-current="false"><span>◇</span><small data-fr="COLLECTION" data-en="COLLECTION">COLLECTION</small></button>
+ <button type="button" data-shop-nav="yachting" class="ely-yachting-dock" aria-current="false"><span>⌁</span><small>YACHTING</small></button>
+ <button type="button" data-shop-nav="concierge" aria-current="false"><span>✉</span><small data-fr="CONCIERGERIE" data-en="CONCIERGE">CONCIERGERIE</small></button>
+ <a href="/elysium/club/"><span>K</span><small>CLUB</small></a>
+</nav>
 <footer class="ely-boutique-footer wrap"><span>KŌMØ <em>ELYSIUM</em></span>
 <p data-fr="Prestations soumises à disponibilité et confirmation du prestataire, devis individualisé. Les actes médicaux éventuels sont réalisés exclusivement par des professionnels indépendants habilités." data-en="Experiences subject to provider availability, confirmation and individual quotation. Any medical care is provided solely by independently authorised professionals.">Prestations soumises à disponibilité et confirmation du prestataire, devis individualisé. Les actes médicaux éventuels sont réalisés exclusivement par des professionnels indépendants habilités.</p></footer>
 <div class="collection-drawer" id="selectionDrawer" role="dialog" aria-modal="true" aria-label="Private selection"><div class="drawer-inner">

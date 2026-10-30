@@ -1047,3 +1047,409 @@ body.ely-public-commerce{background:#f6f3ec;color:#283028;font-family:var(--sans
  font:700 10px/1.5 var(--sans);letter-spacing:.12em;text-align:center;
 }
 .ely-riviera-destinations .ely-broker-public-entry:hover{background:#e8efdf;color:#264231;padding-inline:12px}
+
+
+/* ELYSIUM 10 · UNIFIED PETROL MAISON / SINGLE-VIEW WEB APP
+   Bespoke wave/K geometry, deliberately original. */
+body.ely-public-commerce,body.ely-club-commerce,body.ely-world-maison{
+ --ely-blue:#0b303b;--ely-deep:#082730;--ely-slate:#164450;--ely-pearl:#f9f4e9;
+ --ely-champagne:#dcc39a;--ely-gold:#bb9669;--ely-muted:#b5c8c5;
+ --shop-paper:#0b303b;--shop-ink:#f9f4e9;--shop-line:#d8c29957;
+ --shop-accent:#dbc297;--shop-muted:#a9c2c4;--shop-deep:#0b2b35;
+ height:100dvh;min-height:0;max-height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+ background:radial-gradient(ellipse at 80% 12%,#21515c,#0d3540 44%,#082831);
+ color:var(--ely-pearl);position:relative;isolation:isolate;
+}
+body.ely-public-commerce:before,body.ely-club-commerce:before,body.ely-world-maison:before{
+ content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22160%22%20viewBox%3D%220%200%20160%20160%22%3E%3Cg%20stroke%3D%22%23d3ba8f%22%20stroke-width%3D%22.85%22%20fill%3D%22none%22%20opacity%3D%22.29%22%3E%3Cpath%20d%3D%22M80%2013c-12%2010-13%2021%200%2034%2013-13%2012-24%200-34ZM80%20113c-12%2010-13%2021%200%2034%2013-13%2012-24%200-34ZM13%2080c10-12%2021-13%2034%200-13%2013-24%2012-34%200ZM113%2080c10-12%2021-13%2034%200-13%2013-24%2012-34%200Z%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2280%22%20r%3D%2218%22%2F%3E%3Cpath%20d%3D%22M72%2068v25m1-13%2015-13M75%2084l14%2013M54%2054q26-25%2052%200t0%2052q-26%2025-52%200t0-52Z%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23d3ba8f%22%20opacity%3D%22.25%22%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2215%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%22145%22%20cy%3D%22145%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%22145%22%20cy%3D%2215%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%22145%22%20r%3D%222%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");background-size:160px 160px;opacity:.32;
+}
+body.ely-public-commerce:after,body.ely-club-commerce:after,body.ely-world-maison:after{
+ content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+ background:repeating-radial-gradient(ellipse at 100% -10%,transparent 0 41px,#a6e5e508 42px 43px,transparent 44px 87px);
+}
+body.ely-public-commerce nav.top,body.ely-club-commerce nav.top,body.ely-world-maison nav.top{
+ flex:none;min-height:64px;height:64px;background:#072733ed;border-bottom:1px solid #d8c29962;
+ backdrop-filter:blur(18px);position:relative;z-index:30;
+}
+body.ely-public-commerce .brand strong,body.ely-club-commerce .brand strong,body.ely-world-maison .brand strong{color:#fff5e7}
+body.ely-public-commerce .brand em,body.ely-club-commerce .brand em,body.ely-world-maison .brand em{color:#e0c594;border-left-color:#e0c59474}
+body.ely-public-commerce .navlinks a,body.ely-club-commerce .navlinks a,body.ely-world-maison .navlinks a,
+body.ely-club-commerce .navlinks button,body.ely-world-maison .navlinks button{color:#f1e4d3}
+body.ely-public-commerce .navlinks .white-link,body.ely-world-maison .navlinks .white-link{
+ background:#d9be94;color:#0c333f;border:1px solid #e9d5b4}
+body.ely-public-commerce .navlinks #toggleLanguage,body.ely-club-commerce .navlinks button,
+body.ely-world-maison .navlinks #toggleLanguage{border-color:#d9c29978;color:#f4e7cc;background:transparent}
+.ely-public-commerce main,.ely-world-maison main{flex:1;min-height:0;min-width:0;overflow:hidden;position:relative}
+.ely-public-commerce main>section{height:100%;max-height:100%;min-height:0;display:none!important;overflow:hidden;position:relative}
+.ely-public-commerce main>section.ely-view-active{display:block!important;animation:elyOceanEntrance .42s ease both}
+.ely-public-commerce .ely-public-footer,.ely-world-maison .ely-boutique-footer{display:none}
+@keyframes elyOceanEntrance{from{opacity:.4;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes elyMonogramBloom{from{transform:rotate(-13deg) scale(.96)}to{transform:rotate(-7deg) scale(1.02)}}
+@keyframes elyTideGlow{0%,100%{opacity:.43;transform:translate(0,0)}50%{opacity:.78;transform:translate(3px,-5px)}}
+.ely-public-commerce .ely-public-hero{background:transparent}
+.ely-public-commerce .ely-public-hero-layout{height:100%;min-height:0;max-height:100%;padding-block:clamp(15px,3vh,35px);
+ grid-template-columns:1fr minmax(300px,.82fr);align-items:stretch}
+.ely-public-commerce .ely-public-hero-copy{padding:0;min-height:0}
+.ely-public-commerce .ely-public-kicker{color:var(--ely-champagne)}
+.ely-public-commerce .ely-public-hero-copy h1{font-size:clamp(91px,12vw,170px);margin:22px 0;color:#f6f0e4}
+.ely-public-commerce .ely-public-hero-copy h1 span{color:var(--ely-champagne)}
+.ely-public-commerce .ely-public-hero-copy h2{font-size:clamp(37px,4.9vw,67px);color:#f3e4c7;margin-bottom:12px}
+.ely-public-commerce .ely-public-hero-copy>p{font-size:12px;line-height:1.7;color:#b7cecb;max-width:430px}
+.ely-public-commerce .ely-public-hero-footer{color:#b5cfc9;margin-top:clamp(20px,4vh,40px)}
+.ely-public-commerce .ely-public-primary{background:#dec59d;color:#0c333f;border:1px solid #edd7b5}
+.ely-public-commerce .ely-public-primary:hover{background:#f5dfb7;color:#123844}
+.ely-public-commerce .ely-public-secondary{color:#ecd3aa;border-bottom-color:#d8bb8d}
+.ely-public-commerce .ely-public-hero-art{min-height:0;height:100%;border:1px solid #d6bd9472;border-radius:18px;
+ background:radial-gradient(ellipse at 50% 36%,#3a7380,#144653 54%,#0b3440)}
+.ely-public-commerce .ely-public-hero-art:before{content:"";position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22160%22%20viewBox%3D%220%200%20160%20160%22%3E%3Cg%20stroke%3D%22%23d3ba8f%22%20stroke-width%3D%22.85%22%20fill%3D%22none%22%20opacity%3D%22.29%22%3E%3Cpath%20d%3D%22M80%2013c-12%2010-13%2021%200%2034%2013-13%2012-24%200-34ZM80%20113c-12%2010-13%2021%200%2034%2013-13%2012-24%200-34ZM13%2080c10-12%2021-13%2034%200-13%2013-24%2012-34%200ZM113%2080c10-12%2021-13%2034%200-13%2013-24%2012-34%200Z%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2280%22%20r%3D%2218%22%2F%3E%3Cpath%20d%3D%22M72%2068v25m1-13%2015-13M75%2084l14%2013M54%2054q26-25%2052%200t0%2052q-26%2025-52%200t0-52Z%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23d3ba8f%22%20opacity%3D%22.25%22%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2215%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%22145%22%20cy%3D%22145%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%22145%22%20cy%3D%2215%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%22145%22%20r%3D%222%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");background-size:160px;opacity:.24}
+.ely-public-commerce .ely-public-art-seal{width:min(63%,380px);animation:elyMonogramBloom 9s ease-in-out infinite alternate}
+.ely-public-commerce .ely-public-art-seal:before{background:linear-gradient(125deg,#1a4a55,#0a2935 49%,#416775 85%,#0c303b);border:1px solid #e2c398a6}
+.ely-public-commerce .ely-public-seal-ring{border-color:#d6bd94c2;color:#f4e4c7}
+.ely-public-commerce .ely-public-art-small{color:#e3d6bf}
+.ely-public-commerce .ely-public-worlds{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));
+ flex:1;min-height:0;gap:9px}
+.ely-public-commerce .ely-public-collection{background:transparent;padding:0}
+.ely-public-commerce .ely-public-collection>.wrap{height:100%;display:flex;flex-direction:column;
+ padding-block:clamp(11px,2vh,22px);gap:9px}
+.ely-public-commerce .ely-public-section-head{flex:none;margin:0;min-height:0}
+.ely-public-commerce .ely-public-section-head h2{font-size:clamp(42px,5vw,64px);margin:6px 0 0;color:#f3e8d4}
+.ely-public-commerce .ely-public-section-head p{font-size:10px;color:#a8c5c7}
+.ely-public-commerce .ely-public-world{grid-column:auto!important;min-height:0;
+ border:1px solid #d6bd9460;background:#123b48;border-radius:12px;box-shadow:0 7px 22px #041a296b;
+ transition:transform .28s,border-color .28s,background .28s;overflow:hidden}
+.ely-public-commerce .ely-public-world:hover{background:#215564;transform:translateY(-2px);border-color:#e9d3ad}
+.ely-public-commerce .ely-public-world-graphic{
+ flex:none;height:50%;min-height:0;aspect-ratio:auto!important;
+ background:radial-gradient(ellipse at 50% 30%,#386a77,#113c4b)!important}
+.ely-public-commerce .ely-public-world-graphic:before{width:min(32%,72px);border-color:#d6bd9469;box-shadow:0 0 0 10px #e5cd9a16,0 0 0 11px #c9ae7c24}
+.ely-public-commerce .ely-public-world-mark,.ely-public-commerce .ely-public-world:nth-child(2n) .ely-public-world-mark{font-size:clamp(37px,4.6vw,67px)!important;color:#dec59b}
+.ely-public-commerce .ely-public-world-details{flex:1;min-height:0!important;padding:7px 14px 12px}
+.ely-public-commerce .ely-public-world-no{font-size:8px;color:#e3c89c}
+.ely-public-commerce .ely-public-world-details h3,.ely-public-commerce .ely-public-world:nth-child(1) h3,
+.ely-public-commerce .ely-public-world:nth-child(2) h3,.ely-public-commerce .ely-public-world:nth-child(7) h3{
+ font-size:clamp(25px,2.6vw,39px);color:#f4eedf;margin:5px 0 3px;line-height:.91}
+.ely-public-commerce .ely-public-world-category{font-size:7px;color:#accbcc;padding-top:0}
+.ely-public-commerce .ely-public-world-arrow{font-size:17px;right:12px;bottom:11px;color:#e6cea6}
+.ely-public-commerce .ely-public-collection-note{flex:none;margin:0;font-size:8px;color:#a8c3be}
+.ely-public-commerce .ely-riviera-feature{background:transparent}
+.ely-public-commerce .ely-riviera-feature-wrap{height:100%;padding-block:clamp(15px,4vh,45px);align-items:center}
+.ely-public-commerce .ely-riviera-feature h2{font-size:clamp(74px,9vw,130px);margin:19px 0;color:#f7eddf}
+.ely-public-commerce .ely-riviera-feature-title p{color:#b0cfca}
+.ely-public-commerce .ely-riviera-destinations a{color:#e7dfd1;border-color:#d6bd9461}
+.ely-public-commerce .ely-riviera-destinations strong{font-size:clamp(37px,4vw,64px)}
+.ely-public-commerce .ely-riviera-destinations span:first-child{color:#e2c49a}
+.ely-public-commerce .ely-riviera-destinations .ely-broker-public-entry{border-color:#d6bd94a6;color:#f3d9b3}
+.ely-public-commerce .ely-public-membership{background:transparent;padding:0}
+.ely-public-commerce .ely-public-membership-layout{height:calc(100% - 55px);gap:clamp(20px,5vw,70px);
+ grid-template-columns:1fr .82fr;padding-top:15px}
+.ely-public-commerce .ely-public-membership h2{font-size:clamp(63px,6vw,98px);color:#f8efdf;margin:12px 0}
+.ely-public-commerce .ely-public-membership-layout>div:first-child>p{font-size:12px;line-height:1.8;color:#b3ccca;margin:0 0 16px}
+.ely-public-commerce .ely-public-membership-card{min-height:0;height:min(95%,400px);
+ background:linear-gradient(140deg,#194955,#0c2d38);border:1px solid #d9c39b8a;border-radius:16px;
+ padding:clamp(23px,3vw,45px);box-shadow:0 15px 52px #041d2c88}
+.ely-public-commerce .ely-public-price{font-size:clamp(74px,8vw,130px);margin:30px 0 17px;color:#f8e9d0}
+.ely-public-commerce .ely-public-membership-card p{font-size:11px;line-height:1.6}
+.ely-public-commerce .ely-public-membership-foot{margin:0 auto;font-size:8px;color:#a4bebc}
+.ely-public-commerce .ely-viewport-dock,.ely-world-maison .ely-shop-dock{
+ flex:none;height:67px;min-height:67px;display:flex;align-items:stretch;justify-content:center;gap:8px;
+ padding:5px clamp(12px,7vw,140px);border-top:1px solid #d6bd9464;background:#062631f5;z-index:70}
+.ely-public-commerce .ely-viewport-dock button,.ely-public-commerce .ely-viewport-dock a,
+.ely-world-maison .ely-shop-dock button,.ely-world-maison .ely-shop-dock a{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;flex:1;max-width:180px;min-width:0;
+ background:transparent;color:#aec5c6;border:1px solid transparent;border-radius:11px;
+ font:700 8px/1.2 var(--sans);letter-spacing:.11em;cursor:pointer;text-align:center}
+.ely-public-commerce .ely-viewport-dock button span,.ely-public-commerce .ely-viewport-dock a span,
+.ely-world-maison .ely-shop-dock button span,.ely-world-maison .ely-shop-dock a span{
+ font:400 25px/.95 var(--serif);color:#dbbc8f}
+.ely-public-commerce .ely-viewport-dock .is-active,.ely-world-maison .ely-shop-dock .is-active{
+ color:#f2dfb9;background:#1c4d59;border-color:#d6bd9478}
+.ely-public-commerce .ely-viewport-dock button:hover,.ely-world-maison .ely-shop-dock button:hover{background:#214e58}
+/* Fullscreen member entrance and signature eight-world wheel */
+.ely-club-commerce .club-shell{flex:1;min-height:0;height:100%;max-height:100%;overflow:hidden;
+ padding:clamp(8px,2vh,18px) 0;background:transparent}
+.ely-club-commerce .club-shell>.wrap{height:100%;min-height:0;display:flex;flex-direction:column;align-items:center}
+.ely-club-commerce .club-intro{flex:none;max-width:660px;margin:0 auto 10px}
+.ely-club-commerce .club-intro .kicker{color:#d7c29d}
+.ely-club-commerce .club-intro h1{font-size:clamp(47px,6vw,78px);color:#f6efdf;margin:5px 0}
+.ely-club-commerce .club-intro h1 i{color:#d7c29d!important}
+.ely-club-commerce .club-intro p{font-size:10px;line-height:1.5;color:#b7cdcb}
+.ely-club-commerce .auth-box{margin:8px auto;background:#113b47;border:1px solid #d6bd9473;
+ box-shadow:0 15px 40px #041f2d73;color:#f9f1e2;padding:clamp(14px,2vh,27px)}
+.ely-club-commerce .auth-box h2{font-size:35px;color:#f7e9d4;margin:5px 0 9px}
+.ely-club-commerce .auth-box p,.ely-club-commerce .auth-box label{color:#d4d7c8;font-size:10px;line-height:1.4}
+.ely-club-commerce .auth-box input,.ely-club-commerce .auth-box select{min-height:37px;background:#0b2d39;border:1px solid #d6bd9463;color:#f8efdd;padding:7px 10px}
+.ely-club-commerce .auth-box .btn.ink{background:#dac297;border:1px solid #f1dcb8;color:#0b303b;min-height:39px}
+.ely-club-commerce .email-login-alternative summary{color:#eed5b1}
+.ely-club-commerce.elysium-app-mode .club-shell{padding:0;background:transparent}
+.ely-club-commerce.elysium-app-mode .club-intro{display:none}
+.ely-club-commerce.elysium-app-mode .ely-app{height:100%;min-height:0;max-height:100%;
+ padding:clamp(8px,1.7vh,15px) 0;overflow:hidden;gap:2px}
+.ely-club-commerce.elysium-app-mode .ely-app-heading h1{color:#faefda;font-size:clamp(38px,5vw,64px);margin:4px 0}
+.ely-club-commerce.elysium-app-mode .ely-app-subtitle{color:#b3cfc9;font-size:10px}
+.ely-club-commerce.elysium-app-mode .ely-app-overline{color:#dabd90}
+.ely-club-commerce.elysium-app-mode .ely-orbit{height:auto;flex:1;min-height:0;max-height:100%;width:min(100%,900px);margin:0 auto}
+.ely-club-commerce.elysium-app-mode .ely-orbit-track{border-color:#dbbf8c77}
+.ely-club-commerce.elysium-app-mode .ely-orbit-track:before{border-color:#d7c39966}
+.ely-club-commerce.elysium-app-mode .ely-orbit-hub{background:radial-gradient(circle at 30% 25%,#2b6370,#123d4a 61%,#092b35);
+ border-color:#e6cda2;box-shadow:0 0 0 8px #d6c49b22,0 0 0 9px #e4c39573,inset 0 0 38px #071c2c70,0 13px 50px #031c2a99}
+.ely-club-commerce.elysium-app-mode .ely-hub-overline{color:#e4c99f}
+.ely-club-commerce.elysium-app-mode .ely-orbit-hub strong{color:#f8e6c7}
+.ely-club-commerce.elysium-app-mode .ely-node{color:#d7c199!important;background:#123e4b;border-color:#d6bd948c;
+ box-shadow:0 6px 19px #031d2980,inset 0 1px #d5c49f52}
+.ely-club-commerce.elysium-app-mode .ely-node-name{color:#f0e4d0}
+.ely-club-commerce.elysium-app-mode .ely-node-index{color:#ceb48d}
+.ely-club-commerce.elysium-app-mode .ely-node.is-selected,.ely-club-commerce.elysium-app-mode .ely-node:hover{
+ background:#255563;border-color:#efddb7;box-shadow:0 0 0 2px #d6bd9499,0 13px 37px #071d2d99}
+.ely-club-commerce.elysium-app-mode .ely-orbit-toolbar button{background:#123f4a;color:#eed8b4;border-color:#d6bd948f}
+.ely-club-commerce.elysium-app-mode .ely-orbit-toolbar>span{color:#ead6b3}
+.ely-club-commerce.elysium-app-mode .ely-app-bottom{color:#abc9c7;border-color:#d6bd944b}
+.ely-club-commerce.elysium-app-mode .ely-onboard-club-entry{margin:0 auto;padding:8px 14px;flex:none;
+ background:#d6bd94;color:#0c3440;border-color:#ebd4ad;font-size:8px}
+.ely-club-commerce.elysium-app-mode .ely-club-sponsors{max-height:64px;overflow:hidden;flex:none;margin:0 auto;padding:3px}
+.ely-club-commerce.elysium-app-mode .ely-club-sponsor-row{padding:3px;font-size:9px}
+.ely-club-commerce.elysium-app-mode .ely-club-sponsor-row strong{font-size:17px}
+.ely-club-commerce.elysium-app-mode .ely-app-bottom{flex:none;padding:5px 0}
+/* All eight store pages act as fixed screen experiences. */
+.ely-world-maison .ely-shop-hero,
+.ely-world-maison .ely-shop-catalogue,
+.ely-world-maison .ely-yachting-channel,
+.ely-world-maison .ely-service-detail{display:none!important;height:100%;max-height:100%;overflow:hidden;min-height:0}
+.ely-world-maison[data-shop-screen="intro"] .ely-shop-hero{display:block!important}
+.ely-world-maison[data-shop-screen="collection"] .ely-shop-catalogue{display:block!important}
+.ely-world-maison[data-shop-screen="yachting"] .ely-yachting-channel:not([hidden]){display:block!important}
+.ely-world-maison.ely-service-mode .ely-service-detail:not([hidden]){display:flex!important;flex-direction:column}
+.ely-world-maison .ely-shop-concierge-strip{display:none}
+.ely-world-maison .ely-shop-hero{background:transparent;border:0}
+.ely-world-maison .ely-shop-hero-inner{height:100%;min-height:0;max-height:100%;padding-block:clamp(10px,2vh,30px);
+ grid-template-columns:1fr minmax(250px,.82fr);align-items:stretch}
+.ely-world-maison .ely-shop-hero-copy{padding:0}
+.ely-world-maison .ely-shop-crumb{margin-bottom:clamp(15px,3vh,37px);color:#bcceca}
+.ely-world-maison .ely-shop-kicker{color:#d6bd94}
+.ely-world-maison .ely-shop-hero-copy h1{font-size:clamp(68px,8.5vw,130px);color:#f5e9d5}
+.ely-world-maison .ely-shop-hero-copy h2,.ely-world-maison .ely-shop-headline{color:#d7c09a}
+.ely-world-maison .ely-shop-intro{color:#c0d3d0;font-size:12px;max-width:460px}
+.ely-world-maison .ely-shop-hero-cta{color:#0d3440;background:#dec39a;border:1px solid #f2dbb4;padding:14px 18px}
+.ely-world-maison .ely-shop-hero-visual{height:100%;min-height:0;max-height:100%;border:1px solid #d6bd9470;
+ border-radius:18px;background:radial-gradient(ellipse at 45% 36%,#3c7881,#164957 50%,#0b3441)!important}
+.ely-world-maison .ely-shop-hero-visual:before{content:"";position:absolute;inset:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22160%22%20viewBox%3D%220%200%20160%20160%22%3E%3Cg%20stroke%3D%22%23d3ba8f%22%20stroke-width%3D%22.85%22%20fill%3D%22none%22%20opacity%3D%22.29%22%3E%3Cpath%20d%3D%22M80%2013c-12%2010-13%2021%200%2034%2013-13%2012-24%200-34ZM80%20113c-12%2010-13%2021%200%2034%2013-13%2012-24%200-34ZM13%2080c10-12%2021-13%2034%200-13%2013-24%2012-34%200ZM113%2080c10-12%2021-13%2034%200-13%2013-24%2012-34%200Z%22%2F%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2280%22%20r%3D%2218%22%2F%3E%3Cpath%20d%3D%22M72%2068v25m1-13%2015-13M75%2084l14%2013M54%2054q26-25%2052%200t0%2052q-26%2025-52%200t0-52Z%22%2F%3E%3C%2Fg%3E%3Cg%20fill%3D%22%23d3ba8f%22%20opacity%3D%22.25%22%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2215%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%22145%22%20cy%3D%22145%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%22145%22%20cy%3D%2215%22%20r%3D%222%22%2F%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%22145%22%20r%3D%222%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");background-size:160px;opacity:.18}
+.ely-world-maison .ely-shop-hero-foot{color:#a6c4c0}
+.ely-world-maison .ely-shop-section-kicker{color:#d6bd94}
+.ely-world-maison .ely-shop-catalogue{background:transparent;padding:0}
+.ely-world-maison .ely-shop-catalogue-inner{height:100%;max-height:100%;display:flex;flex-direction:column;
+ gap:8px;padding-block:clamp(9px,2vh,20px)}
+.ely-world-maison .ely-shop-section-head{flex:none;margin:0}
+.ely-world-maison .ely-shop-section-head h2{font-size:clamp(39px,4.8vw,67px);color:#f3e7d3;margin:6px 0}
+.ely-world-maison .ely-shop-service-count{color:#e2c89c}
+.ely-world-maison .ely-shop-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+ grid-template-rows:repeat(2,minmax(0,1fr));gap:9px;overflow:hidden}
+.ely-world-maison .ely-product-card{min-height:0;max-height:100%;overflow:hidden;display:grid!important;
+ grid-template-columns:43% minmax(0,57%);grid-column:auto!important;
+ border:1px solid #d6bd946d;background:#113d49;border-radius:11px;color:#f6ebd6;
+ box-shadow:0 5px 20px #061e2e4b;transition:background .25s,transform .25s}
+.ely-world-maison .ely-product-card[hidden]{display:none!important}
+.ely-world-maison .ely-product-card:hover{background:#1e4e5c;transform:translateY(-2px);box-shadow:0 10px 24px #04192366}
+.ely-world-maison .ely-product-image-link{height:100%;min-height:0}
+.ely-world-maison .ely-product-visual,
+.ely-world-maison .ely-product-featured .ely-product-visual{height:100%;min-height:0!important;
+ aspect-ratio:auto!important;background:linear-gradient(145deg,#285867,#123b49)!important;color:#ecd0a0}
+.ely-world-maison .ely-product-halo{width:min(58%,130px);height:auto;aspect-ratio:1;border-color:#d6bd9477;
+ background:#0d354050}
+.ely-world-maison .ely-product-symbol{max-width:65px}
+.ely-world-maison .ely-product-seal{font-size:7px;color:#dcc297;top:10px;left:8px}
+.ely-world-maison .ely-product-signature{font-size:7px;color:#d5bb90;bottom:8px}
+.ely-world-maison .ely-product-content,.ely-world-maison .ely-product-featured .ely-product-content{
+ padding:clamp(12px,1.6vw,23px);justify-content:center;overflow:hidden;min-height:0}
+.ely-world-maison .ely-product-category{font-size:8px;color:#d8c295}
+.ely-world-maison .ely-product-name,.ely-world-maison .ely-product-featured .ely-product-name{
+ color:#f7f0e4;font-size:clamp(24px,2.9vw,43px);line-height:.94;margin:7px 0}
+.ely-world-maison .ely-product-description,.ely-world-maison .ely-product-featured .ely-product-description{
+ font-size:10px;line-height:1.42;color:#b5cfca;max-height:3em;overflow:hidden;min-height:0;margin:0 0 7px}
+.ely-world-maison .ely-product-actions,.ely-world-maison .ely-product-featured .ely-product-actions{gap:5px;margin-top:3px;flex-direction:row;align-items:center}
+.ely-world-maison .ely-product-price{font-size:7px;color:#dfc69d}
+.ely-world-maison .ely-product-action-links{gap:5px}
+.ely-world-maison .ely-product-request,.ely-world-maison .ely-product-discover{min-height:32px;padding:8px 9px;font-size:8px}
+.ely-world-maison .ely-product-request{color:#edd9b5;border-color:#d6bd948e;background:transparent}
+.ely-world-maison .ely-product-discover{background:#d8c29c;color:#0e3440;border-color:#eed4aa}
+.ely-world-maison .ely-catalogue-pager{min-height:34px;display:flex;align-items:center;justify-content:center;gap:13px;color:#e7cfa7;
+ font:700 10px var(--sans);letter-spacing:.12em;flex:none}
+.ely-world-maison .ely-catalogue-pager[hidden]{display:none!important}
+.ely-world-maison .ely-catalogue-pager button{background:#123e4b;color:#f4e4c5;border:1px solid #d6bd9499;border-radius:9px;
+ padding:5px 13px;min-width:45px;height:31px}
+.ely-world-maison .ely-catalogue-pager button:disabled{opacity:.3}
+.ely-world-maison .ely-private-gate{border-color:#d6bd9487;background:#123e4b;color:#f3e7d8}
+.ely-world-maison .ely-yachting-channel{background:transparent;padding:12px 0;border:0}
+.ely-world-maison .ely-yachting-channel>.wrap:first-child{display:flex;height:42%;align-items:center;margin-bottom:10px}
+.ely-world-maison .ely-yachting-channel h2{font-size:clamp(44px,5vw,73px);color:#f5e9d6}
+.ely-world-maison .ely-yachting-channel p{font-size:10px;color:#afcccb}
+.ely-world-maison .ely-yachting-channel-actions a{background:#dec69e;color:#103541}
+.ely-world-maison .ely-yachting-channel-actions a:last-child{color:#f2ddb8;border-color:#d6bd9489;background:transparent}
+.ely-world-maison .ely-yachting-channel>.wrap:last-child{height:calc(58% - 10px);overflow:hidden}
+.ely-world-maison .ely-yachting-listings{height:calc(100% - 40px);overflow:hidden}
+.ely-world-maison .ely-yachting-item{background:#123e49;border-color:#d6bd9459}
+.ely-world-maison .ely-yachting-content h3{color:#f4ead5}
+.ely-world-maison .ely-yachting-content p{color:#bdd2ce}
+.ely-world-maison .ely-service-detail{padding-top:8px;padding-bottom:9px;max-width:1510px}
+.ely-world-maison .ely-shop-detail-nav{padding:8px 0;flex:none;border-color:#d6bd9457}
+.ely-world-maison .ely-shop-detail-back{color:#efd5ad}
+.ely-world-maison .ely-shop-detail-ref{color:#b5ceca}
+.ely-world-maison .ely-shop-detail-layout{padding:7px 0 0;flex:1;min-height:0;display:grid;
+ grid-template-columns:minmax(0,.85fr) minmax(0,1fr);gap:clamp(14px,4vw,46px);align-items:stretch}
+.ely-world-maison .ely-shop-detail-gallery{position:static;min-height:0}
+.ely-world-maison .ely-shop-detail-gallery .ely-product-visual{height:100%;min-height:0!important;
+ aspect-ratio:auto!important;background:linear-gradient(130deg,#27515d,#0f3441);border-radius:14px}
+.ely-world-maison .ely-shop-detail-info{padding:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.ely-world-maison .ely-shop-detail-kicker,.ely-world-maison .ely-shop-detail-label{font-size:8px;color:#d8c29d}
+.ely-world-maison .ely-shop-detail-title{font-size:clamp(41px,5vw,76px);line-height:.88;margin:8px 0;color:#f6ebda}
+.ely-world-maison .ely-shop-detail-description{font-size:11px;line-height:1.6;color:#b7d0ca;margin:3px 0}
+.ely-world-maison .ely-shop-detail-divider{border-color:#d6bd944e;margin:8px 0}
+.ely-world-maison .ely-shop-detail-price{font-size:25px;color:#e5d0ab;margin:4px 0}
+.ely-world-maison .ely-shop-detail-points{display:flex;gap:8px;flex-wrap:wrap;margin:7px 0}
+.ely-world-maison .ely-shop-detail-points li{font-size:9px;line-height:1.3;color:#b8ceca}
+.ely-world-maison .ely-shop-detail-buy{min-height:43px;margin:8px 0;padding:11px 14px;background:#d9bf95;color:#0a313d}
+.ely-world-maison .ely-shop-detail-terms,.ely-world-maison .ely-shop-detail-disclaimer{font-size:9px;line-height:1.35;color:#b1c9c5;margin:6px 0}
+.ely-world-maison .ely-shop-detail-disclaimer{flex:none}
+.ely-world-maison .collection-drawer{z-index:300}
+.ely-world-maison .drawer-inner{background:#0d3441;color:#f4e8d6;border-color:#d6bd9474}
+.ely-world-maison .drawer-head h2{color:#f4e8d6}
+/* Dock visible in product detail, the back action remains inside the single screen. */
+.ely-world-maison .ely-shop-dock .ely-yachting-dock{display:none}
+.ely-world-maison[data-world="yachting"] .ely-shop-dock .ely-yachting-dock{display:flex}
+@media(max-width:760px){
+ body.ely-public-commerce nav.top,body.ely-world-maison nav.top,body.ely-club-commerce nav.top{height:55px;min-height:55px;padding-inline:12px}
+ .ely-public-commerce .brand strong,.ely-club-commerce .brand strong,.ely-world-maison .brand strong{font-size:17px}
+ .ely-public-commerce .brand em,.ely-club-commerce .brand em,.ely-world-maison .brand em{font-size:18px;padding-left:9px}
+ .ely-public-commerce .navlinks,.ely-world-maison .navlinks{gap:7px}
+ .ely-public-commerce .navlinks>a:not(.white-link),.ely-world-maison .navlinks>a{display:none}
+ .ely-public-commerce .navlinks .white-link,.ely-world-maison .navlinks .white-link{font-size:8px;padding:9px}
+ .ely-public-commerce .navlinks button,.ely-world-maison .navlinks button{font-size:8px;padding:9px}
+ .ely-public-commerce .ely-public-hero-layout{display:grid;grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);
+  gap:12px;padding-block:12px}
+ .ely-public-commerce .ely-public-hero-copy{gap:2px}
+ .ely-public-commerce .ely-public-hero-copy h1{font-size:clamp(67px,17vw,99px);margin:5px 0}
+ .ely-public-commerce .ely-public-hero-copy h2{font-size:clamp(34px,8.5vw,53px);margin:4px 0}
+ .ely-public-commerce .ely-public-hero-copy>p{font-size:10px;line-height:1.45}
+ .ely-public-commerce .ely-public-actions{margin-top:8px;gap:9px}
+ .ely-public-commerce .ely-public-actions a{font-size:8px;padding:8px 12px;min-height:33px}
+ .ely-public-commerce .ely-public-hero-footer{display:none}
+ .ely-public-commerce .ely-public-hero-art{width:100%;margin:0;min-height:0;height:100%;max-height:100%;border-radius:14px}
+ .ely-public-commerce .ely-public-art-seal{width:min(49%,170px)}
+ .ely-public-commerce .ely-public-seal-ring strong{font-size:79px}
+ .ely-public-commerce .ely-public-art-small{bottom:12px;font-size:7px}
+ .ely-public-commerce .ely-public-collection>.wrap{padding-block:8px;gap:7px}
+ .ely-public-commerce .ely-public-section-head h2{font-size:46px;margin:0}
+ .ely-public-commerce .ely-public-section-head p{display:none}
+ .ely-public-commerce .ely-public-worlds{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:6px}
+ .ely-public-commerce .ely-public-world-graphic{height:41%;min-height:0}
+ .ely-public-commerce .ely-public-world-mark,.ely-public-commerce .ely-public-world:nth-child(2n) .ely-public-world-mark{font-size:29px!important}
+ .ely-public-commerce .ely-public-world-graphic:before{width:31px}
+ .ely-public-commerce .ely-public-world-details{padding:4px 9px}
+ .ely-public-commerce .ely-public-world-details h3{font-size:clamp(20px,5.7vw,28px)!important;margin:2px 0;line-height:.88}
+ .ely-public-commerce .ely-public-world-no{font-size:7px}
+ .ely-public-commerce .ely-public-world-category{font-size:6px;max-width:93%}
+ .ely-public-commerce .ely-public-world-arrow{right:6px;bottom:6px;font-size:13px}
+ .ely-public-commerce .ely-public-collection-note{font-size:7px;line-height:1.2}
+ .ely-public-commerce .ely-riviera-feature-wrap{display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:20px;padding-block:18px}
+ .ely-public-commerce .ely-riviera-feature h2{font-size:clamp(72px,17vw,112px);margin:11px 0}
+ .ely-public-commerce .ely-riviera-destinations strong{font-size:44px}
+ .ely-public-commerce .ely-riviera-destinations a{padding:10px 0}
+ .ely-public-commerce .ely-riviera-destinations .ely-broker-public-entry{margin-top:14px;padding:11px}
+ .ely-public-commerce .ely-public-membership-layout{display:flex;flex-direction:column;justify-content:center;
+  height:auto;gap:13px;max-height:calc(100% - 43px);padding-top:10px}
+ .ely-public-commerce .ely-public-membership h2{font-size:clamp(56px,13vw,76px);margin:8px 0}
+ .ely-public-commerce .ely-public-membership-layout>div:first-child>p{font-size:10px;margin:0 0 9px}
+ .ely-public-commerce .ely-public-membership-layout .ely-public-primary{font-size:9px;padding:10px;min-height:37px}
+ .ely-public-commerce .ely-public-membership-card{width:100%;min-height:0;height:auto;padding:17px 23px;gap:5px}
+ .ely-public-commerce .ely-public-price{font-size:75px;margin:4px 0}
+ .ely-public-commerce .ely-public-price small{font-size:8px;margin:0}
+ .ely-public-commerce .ely-public-membership-card p{font-size:9px;margin:5px 0}
+ .ely-public-commerce .ely-public-membership-foot{padding-inline:18px;margin:5px auto 0;font-size:7px;line-height:1.3}
+ .ely-public-commerce .ely-viewport-dock,.ely-world-maison .ely-shop-dock{height:63px;min-height:63px;
+  padding:5px 5px calc(env(safe-area-inset-bottom,0px) + 4px);gap:1px}
+ .ely-public-commerce .ely-viewport-dock button,.ely-public-commerce .ely-viewport-dock a,
+ .ely-world-maison .ely-shop-dock button,.ely-world-maison .ely-shop-dock a{font-size:7px;letter-spacing:0}
+ .ely-public-commerce .ely-viewport-dock button span,.ely-public-commerce .ely-viewport-dock a span,
+ .ely-world-maison .ely-shop-dock button span,.ely-world-maison .ely-shop-dock a span{font-size:22px}
+ .ely-club-commerce .club-shell{padding:9px 0}
+ .ely-club-commerce .club-intro h1{font-size:54px;margin:3px 0}
+ .ely-club-commerce .club-intro p{font-size:9px}
+ .ely-club-commerce .auth-box{padding:14px 19px;margin:6px auto}
+ .ely-club-commerce .auth-box h2{font-size:30px}
+ .ely-club-commerce.elysium-app-mode .ely-app-heading h1{font-size:44px}
+ .ely-club-commerce.elysium-app-mode .ely-orbit{flex:1;min-height:0;max-height:100%;width:100%}
+ .ely-club-commerce.elysium-app-mode .ely-app-overline{font-size:8px}
+ .ely-club-commerce.elysium-app-mode .ely-app-bottom{font-size:8px}
+ .ely-world-maison .ely-shop-hero-inner{grid-template-columns:1fr;grid-template-rows:auto minmax(0,1fr);
+  gap:9px;padding-block:9px}
+ .ely-world-maison .ely-shop-crumb{margin-bottom:11px}
+ .ely-world-maison .ely-shop-hero-copy h1{font-size:clamp(48px,12vw,76px)!important;line-height:.87;margin:9px 0}
+ .ely-world-maison .ely-shop-headline{font-size:clamp(27px,8vw,42px);margin:4px 0}
+ .ely-world-maison .ely-shop-intro{font-size:10px;line-height:1.4;margin:4px 0}
+ .ely-world-maison .ely-shop-hero-cta{font-size:9px;padding:10px 13px}
+ .ely-world-maison .ely-shop-hero-foot{display:none}
+ .ely-world-maison .ely-shop-hero-visual{min-height:0;max-height:100%;height:100%}
+ .ely-world-maison .ely-shop-object{transform:scale(.67)}
+ .ely-world-maison .ely-shop-catalogue-inner{padding-block:7px;gap:6px}
+ .ely-world-maison .ely-shop-section-head h2{font-size:43px;margin:2px 0}
+ .ely-world-maison .ely-shop-grid{grid-template-columns:1fr;grid-template-rows:repeat(2,minmax(0,1fr));gap:7px}
+ .ely-world-maison .ely-product-card{grid-template-columns:36% 64%;height:100%}
+ .ely-world-maison .ely-product-content{padding:11px}
+ .ely-world-maison .ely-product-name,.ely-world-maison .ely-product-featured .ely-product-name{font-size:clamp(25px,7vw,36px);margin:4px 0}
+ .ely-world-maison .ely-product-description{font-size:9px;line-height:1.2;max-height:2.4em;margin-bottom:4px}
+ .ely-world-maison .ely-product-category{font-size:7px}
+ .ely-world-maison .ely-product-actions{display:flex;flex-direction:column;align-items:stretch}
+ .ely-world-maison .ely-product-action-links{justify-content:space-between}
+ .ely-world-maison .ely-product-request,.ely-world-maison .ely-product-discover{font-size:7px;padding:7px}
+ .ely-world-maison .ely-product-price{display:none}
+ .ely-world-maison .ely-product-halo{width:75px}
+ .ely-world-maison .ely-product-symbol{width:45px}
+ .ely-world-maison .ely-product-seal{font-size:5px}
+ .ely-world-maison .ely-product-signature{display:none}
+ .ely-world-maison .ely-yachting-channel h2{font-size:47px}
+ .ely-world-maison .ely-yachting-channel>.wrap:first-child{height:55%;flex-direction:column;align-items:start;gap:9px}
+ .ely-world-maison .ely-yachting-channel-actions{width:100%;display:flex;gap:6px}
+ .ely-world-maison .ely-yachting-channel-actions a{flex:1;padding:10px 7px;font-size:7px}
+ .ely-world-maison .ely-yachting-channel>.wrap:last-child{height:calc(45% - 10px)}
+ .ely-world-maison .ely-yachting-listings{grid-template-columns:1fr;max-height:100%}
+ .ely-world-maison .ely-yachting-item:nth-child(n+2){display:none}
+ .ely-world-maison .ely-yachting-visual{height:66px}
+ .ely-world-maison .ely-yachting-content{padding:8px}
+ .ely-world-maison .ely-yachting-content h3{font-size:25px}
+ .ely-world-maison .ely-shop-detail-layout{grid-template-columns:1fr;grid-template-rows:27% minmax(0,1fr);gap:9px}
+ .ely-world-maison .ely-shop-detail-info{justify-content:start}
+ .ely-world-maison .ely-shop-detail-title{font-size:clamp(35px,9vw,52px);margin:4px 0}
+ .ely-world-maison .ely-shop-detail-description{font-size:10px;line-height:1.35}
+ .ely-world-maison .ely-shop-detail-gallery .ely-product-visual{height:100%}
+ .ely-world-maison .ely-shop-detail-gallery .ely-product-halo{width:70px}
+ .ely-world-maison .ely-shop-detail-points{margin:3px 0;gap:5px}
+ .ely-world-maison .ely-shop-detail-points li{font-size:8px}
+ .ely-world-maison .ely-shop-detail-terms{font-size:8px}
+ .ely-world-maison .ely-shop-detail-disclaimer{display:none}
+}
+@media(max-height:680px){
+ .ely-club-commerce .club-intro p{display:none}
+ .ely-club-commerce.elysium-app-mode .ely-app-heading .ely-app-subtitle{display:none}
+ .ely-world-maison .ely-shop-detail-terms{display:none}
+ .ely-public-commerce .ely-public-collection-note{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .ely-public-commerce main>section.ely-view-active{animation:none}
+ .ely-public-commerce .ely-public-art-seal{animation:none}
+ .ely-public-commerce .ely-public-world,.ely-world-maison .ely-product-card{transition:none}
+}
+
+
+/* Deep-water movement, quiet by default and completely optional in reduced-motion mode. */
+@keyframes elyOceanPatternDrift{
+ 0%{background-position:0 0}
+ 50%{background-position:13px -12px}
+ 100%{background-position:0 0}
+}
+@keyframes elyOceanFloat{
+ 0%,100%{transform:translate3d(0,0,0) scale(1)}
+ 50%{transform:translate3d(0,-5px,0) scale(1.018)}
+}
+body.ely-public-commerce:before{animation:elyOceanPatternDrift 46s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+ body.ely-public-commerce:before{animation:none!important}
+}

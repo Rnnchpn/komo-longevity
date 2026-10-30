@@ -232,6 +232,8 @@ const ELYSIUM_SERVICE_GRAPHICS={
  'aesthetic-medical-pathway':'<path d="M70 16c-13 14-16 29-8 43-20-15-36-11-42 1 0 17 18 24 36 23-13 17-8 35 6 39 16-3 24-19 21-37 19 11 39 4 42-11-5-17-20-23-39-18 9-21 3-36-16-40Z"/><circle cx="70" cy="70" r="12"/>'
 };
 let elysiumShopFilter='all';
+let elysiumCataloguePage=0;
+let shopView='intro';
 function serviceGraphic(p){
  const art=serviceElement('div','ely-product-visual');
  art.setAttribute('aria-hidden','true');
@@ -250,6 +252,46 @@ function serviceGroup(p){
  if(p.id.includes('onboard'))return 'onboard';
  return 'other';
 }
+
+function setShopView(next){
+ if(!isMaison)return;
+ if(next==='concierge'){openDrawer();return;}
+ if(!['intro','collection','yachting'].includes(next))return;
+ if(next==='yachting'&&slug!=='yachting')next='collection';
+ shopView=next;document.body.dataset.shopScreen=next;
+ $$('#elyShopDock [data-shop-nav]').forEach(b=>{
+  const active=b.dataset.shopNav===next;b.classList.toggle('is-active',active);
+  b.setAttribute('aria-current',active?'page':'false');
+ });
+ if(next==='collection')paginateShop();
+}
+function paginateShop(){
+ const grid=$('#productGrid'),pager=$('#elyCataloguePager');if(!grid||!pager)return;
+ const items=[...grid.children].filter(x=>x.classList.contains('ely-product-card'));
+ const pageSize=matchMedia('(max-width:760px)').matches?2:4;
+ const pages=Math.max(1,Math.ceil(items.length/pageSize));
+ elysiumCataloguePage=Math.min(pages-1,Math.max(0,elysiumCataloguePage));
+ items.forEach((el,i)=>{el.hidden=!(i>=elysiumCataloguePage*pageSize&&i<(elysiumCataloguePage+1)*pageSize)});
+ pager.hidden=pages<=1;
+ const label=$('#elyCataloguePage');if(label)label.textContent=String(elysiumCataloguePage+1).padStart(2,'0')+' / '+String(pages).padStart(2,'0');
+ $$('#elyCataloguePager [data-move]').forEach(b=>{
+  b.disabled=Number(b.dataset.move)<0?elysiumCataloguePage===0:elysiumCataloguePage>=pages-1;
+ });
+}
+function initShopApp(){
+ if(!isMaison)return;
+ document.body.dataset.shopScreen='intro';
+ $$('#elyShopDock [data-shop-nav]').forEach(b=>b.addEventListener('click',()=>setShopView(b.dataset.shopNav)));
+ $$('#elyCataloguePager [data-move]').forEach(b=>b.addEventListener('click',()=>{
+  elysiumCataloguePage+=Number(b.dataset.move);paginateShop();
+ }));
+ document.querySelectorAll('a[href="#collection"]').forEach(a=>a.addEventListener('click',ev=>{
+  ev.preventDefault();setShopView('collection');
+ }));
+ window.addEventListener('resize',()=>paginateShop());
+}
+initShopApp();
+
 function renderPrivateServiceIndex(products,grid){
  grid.classList.add('ely-shop-grid');grid.replaceChildren();
  const filtered=products.filter(p=>elysiumShopFilter==='all'||serviceGroup(p)===elysiumShopFilter);
@@ -276,6 +318,7 @@ function renderPrivateServiceIndex(products,grid){
   links.append(link,request);actions.append(price,links);
   content.append(mode,h,summary,actions);card.append(view,content);grid.append(card);
  });
+ paginateShop();
 }
 function renderLongevityProducts(products,grid){renderPrivateServiceIndex(products,grid)}
 function renderAestheticProducts(products,grid){renderPrivateServiceIndex(products,grid)}
@@ -285,7 +328,7 @@ function initPrivateShopControls(){
  filters.forEach(button=>button.addEventListener('click',()=>{
   const next=button.dataset.boutiqueFilter;
   if(!['all','online','onboard','other'].includes(next))return;
-  elysiumShopFilter=next;
+  elysiumShopFilter=next;elysiumCataloguePage=0;
   filters.forEach(b=>{const yes=b===button;b.classList.toggle('is-active',yes);b.setAttribute('aria-pressed',yes?'true':'false')});
   if(active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);
  }));
@@ -312,8 +355,7 @@ function closeProductPage(){
  document.body.classList.remove('ely-service-mode');
  const d=$('#serviceDetail');
  if(d){d.hidden=true;d.replaceChildren()}
- const list=document.getElementById('collection');
- if(list)list.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+ setShopView('collection');
 }
 function openProductPage(p){
  if(!active||!isMaison)return;
@@ -321,13 +363,13 @@ function openProductPage(p){
  u.searchParams.set('service',p.id);
  history.pushState({elysiumService:p.id},'',u.pathname+u.search);
  renderProductRoute();
- window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+ document.body.dataset.shopScreen='detail';
 }
 function renderProductRoute(){
  const detail=$('#serviceDetail');if(!detail||!active)return;
  const id=new URL(location.href).searchParams.get('service');
  const p=(window.__elysiumProductData||[]).find(x=>x.id===id);
- if(!p){document.body.classList.remove('ely-service-mode');detail.hidden=true;detail.replaceChildren();return}
+ if(!p){document.body.classList.remove('ely-service-mode');detail.hidden=true;detail.replaceChildren();if(shopView==='intro'&&location.search.includes('service='))setShopView('collection');return}
  detail.replaceChildren();
  const fr=lang==='fr';
  const top=serviceElement('div','ely-shop-detail-nav');
@@ -361,7 +403,7 @@ function renderProductRoute(){
  ?(medical?'Coordination uniquement. Tout acte médical relève d’un professionnel habilité, dans des conditions de soin appropriées. Ne transmettez aucune donnée de santé ici.':'Les expériences sont soumises à disponibilité, à vérification du prestataire et à confirmation individuelle. Aucune réservation n’est garantie à ce stade.')
  :(medical?'Coordination only. All medical care remains the responsibility of authorised professionals in appropriate medical settings. Do not submit health details here.':'All experiences are subject to availability, provider verification and individual confirmation. No booking is guaranteed at this stage.'));
  detail.append(top,layout,foot);
- detail.hidden=false;document.body.classList.add('ely-service-mode');
+ detail.hidden=false;document.body.classList.add('ely-service-mode');document.body.dataset.shopScreen='detail';
 }
 window.addEventListener('popstate',()=>{if(isMaison&&active&&$('#serviceDetail'))renderProductRoute()});
 function renderProducts(products){
