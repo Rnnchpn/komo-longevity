@@ -1023,3 +1023,19 @@ body.ely-public-commerce{background:#f6f3ec;color:#283028;font-family:var(--sans
  .ely-yachting-channel h2{font-size:clamp(65px,14vw,84px)}
  .ely-yachting-listings{grid-template-columns:1fr}
 }
+
+/* ELYSIUM private advertising studio · sponsor identity visible by design. */
+.ely-club-sponsors{width:min(100%,720px);margin:10px auto 17px;border-top:1px solid #aebfac78;padding:14px 6px}
+.ely-club-sponsors[hidden]{display:none!important}
+.ely-club-sponsors>.ely-app-overline{display:block;text-align:center;margin-bottom:10px}
+.ely-club-sponsor-row{display:grid;grid-template-columns:minmax(100px,1fr) minmax(0,2fr) 20px;align-items:center;gap:15px;border-bottom:1px solid #acbeaa71;padding:12px 3px;color:#294633}
+.ely-club-sponsor-tag{font:600 8px/1.5 var(--sans);letter-spacing:.1em;color:#8e8a6e}
+.ely-club-sponsor-row strong{font:400 24px/1 var(--serif);overflow-wrap:anywhere}
+.ely-club-sponsor-row>span:last-child{font-size:20px;text-align:right}
+.ely-club-sponsor-row:hover{background:#eef3ec9e}
+@media(max-width:720px){
+ .ely-club-sponsors{max-width:calc(100% - 24px);margin-block:14px 20px}
+ .ely-club-sponsor-row{grid-template-columns:1fr 15px;gap:3px 11px}
+ .ely-club-sponsor-tag{grid-column:1/-1;font-size:7px}
+ .ely-club-sponsor-row strong{font-size:22px}
+}
