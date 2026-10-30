@@ -9,6 +9,7 @@ const assets=join(out,'assets');
 await mkdir(join(out,'club'),{recursive:true});
 await mkdir(join(out,'brokers'),{recursive:true});
 await mkdir(join(out,'on-board'),{recursive:true});
+await mkdir(join(out,'request'),{recursive:true});
 await mkdir(join(out,'maison'),{recursive:true});
 await mkdir(assets,{recursive:true});
 const copies=[
@@ -17,6 +18,7 @@ const copies=[
  [join(src,'brokers','index.html'),join(out,'brokers','index.html')],
  [join(src,'brokers','studio.js'),join(out,'brokers','studio.js')],
  [join(src,'on-board','index.html'),join(out,'on-board','index.html')],
+ [join(src,'request','index.html'),join(out,'request','index.html')],
  [join(src,'on-board','vesselfinder.html'),join(out,'on-board','vesselfinder.html')],
  [join(src,'on-board','on-board.css'),join(out,'on-board','on-board.css')],
  [join(src,'on-board','on-board.js'),join(out,'on-board','on-board.js')],
@@ -106,3 +108,6 @@ if(member.includes("photo.src=w.image")||member.includes('store-card')||!member.
 const sanitized=await readFile(join(assets,'store-data.mjs'),'utf8');
 if(sanitized.includes('Private Motion Experience')||sanitized.includes('products:['))throw new Error('[elysium] private catalogue leaked in public metadata');
 console.log('[elysium] READY · 8 private collection shops · premium flagship · porcelain member orbit · 8 departments and broker inventory');
+
+const privateRequest=await readFile(join(out,'request','index.html'),'utf8');
+if(!privateRequest.includes("from('elysium_guest_requests').insert(payload)")||!privateRequest.includes('id="consent"')||!privateRequest.includes('referral_code'))throw new Error('[elysium] concierge commercial intake missing');
