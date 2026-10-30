@@ -147,7 +147,7 @@ font-size:8px;font-weight:700;letter-spacing:.08em}
  <button id="lang" type="button" aria-label="Switch language">EN</button></div></header>
 <main>
 <section class="scene active" data-scene="explore" aria-labelledby="guestTitle">
- <div class="hero"><div><span class="eyebrow">ELYSIUM · ON BOARD</span><h1 id="guestTitle">Your Riviera<i>.</i></h1>
+ <div class="hero"><div><span class="eyebrow">ELYSIUM · ON BOARD</span><h1 id="guestTitle"><span data-fr="Votre Riviera" data-en="Your Riviera">Your Riviera</span><i>.</i></h1>
  <p data-fr="Les expériences privées, directement depuis votre yacht." data-en="Private experiences, wherever you are on board.">Private experiences, wherever you are on board.</p></div>
  <div class="memberNote" data-fr="Accès ELYSIUM offert pendant 12 mois aux clients KŌMØ Yachting éligibles, après vérification. Prestations facturées séparément." data-en="12 months complimentary ELYSIUM access for eligible KŌMØ Yachting clients after verification. Services quoted separately.">12 months complimentary ELYSIUM access for eligible KŌMØ Yachting clients after verification. Services quoted separately.</div></div>
  <div class="cities" role="group" aria-label="Your destination">
@@ -268,6 +268,8 @@ $('#requestForm').addEventListener('submit',async ev=>{
  }finally{submit.disabled=false}
 });
 switchCity(destination);setLanguage('en');
+const requestedRole=(params.get('role')||'').toLowerCase();
+if(['guest','captain','assistant','broker'].includes(requestedRole))$('#role').value=requestedRole;
 const requestedService=(params.get('service')||'').toLowerCase();
 if(Object.prototype.hasOwnProperty.call(labels,requestedService))chooseService(requestedService);
 else show('explore');
