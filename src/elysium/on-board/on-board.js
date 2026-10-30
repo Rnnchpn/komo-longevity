@@ -306,6 +306,15 @@
    $$('.ob-length button').forEach(a=>{a.classList.toggle('is-active',a===b);a.setAttribute('aria-pressed',String(a===b))});
    renderFleet();
   }));
+  $('#obManualSelect').addEventListener('click',()=>{
+   const name=$('#obManualName').value.trim().replace(/[<>]/g,'').slice(0,60);
+   if(!name){$('#obManualName').focus();return}
+   selected={id:'guest-entered',name,port:DESTINATIONS[city].name,city,precision:'self_reported'};
+   $('#obSelectedName').textContent=name+' · '+txt('INDIQUÉ PAR LE CLIENT','GUEST-ENTERED');
+   $('#obVesselContext').hidden=false;
+   $('.ob-yacht-row').forEach(b=>b.classList.remove('is-selected'));
+  });
+  $('#obManualName').addEventListener('keydown',e=>{if(e.key==='Enter'){$('#obManualSelect').click();e.preventDefault()}});
   $('#obClearVessel').addEventListener('click',()=>{selected=null;$('#obVesselContext').hidden=true;renderFleet()});
   $('#obConcierge').addEventListener('click',()=>requestExperience({nameFr:'Demande sur mesure',nameEn:'Bespoke concierge request'}));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden&&verified)fetchYachts()});
