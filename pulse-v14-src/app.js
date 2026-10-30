@@ -4,7 +4,7 @@ const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 
-const PATIENT_NAV=[['home','Aujourd’hui'],['baseline','Mon bilan'],['results','Résultats'],['plan','Mon plan'],['appointments','Rendez-vous']];
+const PATIENT_NAV=[['home','Mon espace']];
 const PRO_NAV=[['operator','Operator'],['patients','Patients'],['appointments','Rendez-vous']];
 const OP_STEPS=[
  ['preflight','00–05','Sécurité & standardisation','Operator'],
@@ -17,7 +17,7 @@ const OP_STEPS=[
  ['qc_release','45–55','Contrôle qualité','Pulse']
 ];
 
-const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,ownPatient:null,ownPatients:[],patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],schema:{bio:false,operator:false},route:'home',loading:false};
+const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,ownPatient:null,ownPatients:[],patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],onlineSessions:[],schema:{bio:false,operator:false},route:'home',loading:false};
 
 const $=s=>document.querySelector(s);
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -35,12 +35,12 @@ const subs=()=>score()?.subscores||{};
 const qdone=()=>S.questionnaires.filter(x=>x.status==='completed'||Number(x.completeness||0)>=100).length;
 const bioReady=()=>S.bio.some(x=>['reviewed','released'].includes(x.status));
 const motionReady=()=>S.measurements.length>0;
-const releasedScore=()=>Number.isFinite(Number(score()?.overall_score));
+const releasedScore=()=>score()?.overall_score!==null&&score()?.overall_score!==undefined&&score()?.overall_score!==''&&Number.isFinite(Number(score()?.overall_score))&&Number(score()?.overall_score)>=0&&Number(score()?.overall_score)<=100;
 const visibleGates=()=>S.gates.filter(g=>['open','review_required','referred'].includes(g.status));
-const domainVal=(...keys)=>{for(const k of keys){const v=Number(subs()[k]);if(Number.isFinite(v))return v}return null};
+const domainVal=(...keys)=>{for(const k of keys){const raw=subs()[k];if(raw===null||raw===undefined||raw==='')continue;const v=Number(raw);if(Number.isFinite(v)&&v>=0&&v<=100)return v}return null};
 const futureAppointments=()=>S.appointments.filter(a=>new Date(a.scheduled_start||0).getTime()>=Date.now()).sort((a,b)=>new Date(a.scheduled_start)-new Date(b.scheduled_start));
 const friendlyAppointmentType=v=>({motion:'Bilan de mouvement',clinical:'Consultation médicale',follow_up:'Suivi',baseline:'Bilan KŌMØ'}[v]||'Rendez-vous KŌMØ');
-const friendlyMode=v=>({onsite:'Sur place',clinic:'En centre',home:'À domicile',yacht:'À bord',villa:'En villa',teleconsultation:'À distance',remote:'À distance'}[v]||'Avec votre équipe KŌMØ');
+const friendlyMode=v=>({onsite:'Sur place',in_person:'Au centre',clinic:'En centre',home:'À domicile',yacht:'À bord',villa:'En villa',teleconsultation:'En visioconférence',remote:'À distance'}[v]||'Avec votre équipe KŌMØ');
 const statusLabel=v=>({scheduled:'Confirmé',confirmed:'Confirmé',pending:'En attente',completed:'Terminé',cancelled:'Annulé',review:'En revue',collecting:'En cours',draft:'À démarrer',running:'En cours',ready:'Prêt'}[v]||'En cours');
 
 function patientProgress(){
@@ -223,7 +223,13 @@ async function loadPro(){
   const os=await safe(sb.from('pulse_operator_sessions').select('*').eq('patient_id',p?.id||'00000000-0000-0000-0000-000000000000').in('status',['draft','running','paused','review']).order('created_at',{ascending:false}).limit(1));
   S.schema.operator=!os.error;S.opSession=os.data?.[0]||null;S.opSteps=S.opSession?((await safe(sb.from('pulse_operator_steps').select('*').eq('operator_session_id',S.opSession.id).order('sequence_order',{ascending:true}))).data||[]):[];
 }
-async function loadAll(){if(S.mode==='pro'&&hasPro())await loadPro();else await loadPatientContext(S.ownPatient)}
+async function loadAll(){
+  if(S.mode==='pro'&&hasPro()){S.onlineSessions=[];await loadPro();return}
+  await loadPatientContext(S.ownPatient);
+  // Only metadata for sessions owned by auth.uid(); RLS checks ownership server-side.
+  const ownSessions=await safe(sb.from('motion_online_sessions').select('id,appointment_id,status,created_at,updated_at').eq('user_id',S.user.id).order('created_at',{ascending:false}).limit(15));
+  S.onlineSessions=(ownSessions.data||[]).filter(x=>x&&typeof x.id==='string');
+}
 
 function navItems(){return S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
@@ -237,6 +243,7 @@ function shell(){
   const mode=hasPro()?`<div class="mode-switch" role="group" aria-label="Choisir votre espace"><button type="button" data-mode="patient" class="${S.mode==='patient'?'active':''}" aria-pressed="${S.mode==='patient'}" ${!S.ownPatient?'disabled title="Aucun dossier personnel lié"':''}>Espace patient</button><button type="button" data-mode="pro" class="${S.mode==='pro'?'active':''}" aria-pressed="${S.mode==='pro'}">Équipe</button></div>`:'';
   $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div class="pulse-mobile-access">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div><div id="view"></div></main></div>`;
   document.querySelector('.app-shell')?.classList.toggle('app-shell-pro',S.mode==='pro');
+  document.querySelector('.app-shell')?.classList.toggle('app-shell-patient',S.mode==='patient');
   document.querySelector('.app-shell')?.setAttribute('data-pulse-view',S.route);
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled||!hasPro())return;const next=b.dataset.mode;if(next==='patient'&&!S.ownPatient)return;S.mode=next;localStorage.setItem('komo_v14_mode',next);history.replaceState(null,'',location.pathname+location.search+'#'+(next==='pro'?'operator':'home'));await refresh()});
@@ -249,9 +256,69 @@ function progressStrip(){
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
 function patientHome(){
-  heading('Bonjour '+esc(firstName()),'AUJOURD’HUI');
-  const action=nextAction(),next=futureAppointments()[0],sc=Number(score()?.overall_score),b=band(sc);
-  $('#view').innerHTML=`${isOnlineTester()?'<section class="pulse-online-tester-welcome"><div><span>PARCOURS ONLINE · TESTEUR</span><h3>Votre consultation Online est prête.</h3><p>Accédez au questionnaire, à la caméra et aux quatre tests guidés. Cette démonstration n’utilise aucune réservation ni donnée patient réelle.</p></div><a class="button light" href="/online/session/">Démarrer ma consultation →</a></section>':''}<section class="welcome-card"><div><span class="overline light">VOTRE PROCHAINE ÉTAPE</span><h2>${esc(action.title)}</h2><p>${esc(action.text)}</p><button class="button light" onclick="location.hash='${action.route}'">${esc(action.label)} →</button></div>${releasedScore()?`<div class="score-orb"><small>Motion Score</small><strong>${Math.round(sc)}</strong><span>${b.label}</span></div>`:`<div class="welcome-mark">K</div>`}</section>${progressStrip()}<section class="two-col"><article class="soft-card"><span class="overline">PROCHAIN RENDEZ-VOUS</span>${next?`<h3>${friendlyAppointmentType(next.appointment_type)}</h3><p class="big-date">${fmt(next.scheduled_start)}</p><p>${friendlyMode(next.location_mode)} · ${statusLabel(next.status)}</p><button class="button secondary" onclick="location.hash='appointments'">Voir les détails</button>`:`<h3>Aucun rendez-vous à venir</h3><p>Votre prochain rendez-vous apparaîtra ici dès qu’il sera programmé par l’équipe KŌMØ.</p><button class="button secondary" onclick="location.hash='appointments'">Mes rendez-vous</button>`}</article><article class="soft-card"><span class="overline">À RETENIR</span><h3>${releasedScore()?'Votre bilan est disponible':'Pulse vous guide étape par étape'}</h3><p>${releasedScore()?'Vos résultats sont présentés simplement : vos points forts, votre priorité et votre plan de progression.':'Vous n’avez rien à interpréter seul. Chaque étape se débloque au bon moment et les données sensibles sont revues avant publication.'}</p>${visibleGates().length?`<div class="human-alert">Un élément de votre bilan est actuellement relu par l’équipe. Cela ne signifie pas nécessairement qu’il existe un problème.</div>`:''}</article></section>`;
+  heading('Mon espace','VOTRE RENDEZ-VOUS KŌMØ');
+  const now=Date.now();
+  const valid=(S.appointments||[]).filter(a=>a&&a.status!=='cancelled');
+  const ordered=[...valid].sort((a,b)=>new Date(a.scheduled_start||0)-new Date(b.scheduled_start||0));
+  const next=ordered.find(a=>new Date(a.scheduled_start||0).getTime()>=now&&!['completed','cancelled'].includes(a.status));
+  const appt=next||ordered.at(-1)||null;
+  const isFuture=Boolean(appt&&new Date(appt.scheduled_start||0).getTime()>=now);
+  const isUnderway=Boolean(appt&&['arrived','in_progress'].includes(appt.status));
+  const isOnline=Boolean(appt&&['teleconsultation','remote'].includes(appt.location_mode))||Boolean(!appt&&S.onlineSessions.length);
+  const online=S.onlineSessions[0]||null;
+  const onlineCompleted=online&&['completed','finalized','released'].includes(online.status);
+  const published=releasedScore();
+  const program=S.programs.find(x=>['active','activated','in_progress'].includes(x.status));
+  const isAppointmentDone=Boolean(appt&&(appt.status==='completed'||(!isFuture&&!isUnderway)));
+  const title=appt?friendlyAppointmentType(appt.appointment_type):(online?'Votre bilan Online':'Votre parcours KŌMØ');
+  const isAwaiting=appt&&['scheduled','pending'].includes(appt.status);
+  const status=isUnderway?'Séance en cours':isAwaiting?'À confirmer':isAppointmentDone?'Séance passée':appt?'Rendez-vous confirmé':onlineCompleted?'Séance réalisée':online?'Séance en ligne':'À organiser';
+  const date=appt?fmt(appt.scheduled_start):'';
+  const time=appt&&Number.isFinite(new Date(appt.scheduled_start||'').getTime())?
+    new Date(appt.scheduled_start).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):'';
+  const location=appt?friendlyMode(appt.location_mode):online?'À distance':'';
+  const intake=appt?.intake_status||'';
+  const preparationDone=['submitted','reviewed','completed'].includes(intake)||qdone()>0;
+  const intro=appt?
+    (isUnderway?'Votre équipe réalise le bilan. Les résultats seront disponibles après vérification.':
+      isFuture?'Tout ce qui concerne votre séance est rassemblé ici. Aucune autre rubrique à parcourir.':
+      'Votre séance est passée. Vous retrouverez ici les éléments publiés par l’équipe.'):
+    online?'Accédez à votre bilan en ligne depuis votre espace personnel.':
+    'Votre prochain rendez-vous apparaîtra sur cette page dès qu’il sera lié à votre compte.';
+  const mainButton=online&&!onlineCompleted&&!appt?
+    '<a class="ps-one-button primary" href="/online/session/">Accéder à ma séance →</a>':
+    published&&isAppointmentDone?'<button class="ps-one-button primary" type="button" data-ps-open="result">Voir mon dernier résultat →</button>':
+    appt&&isFuture?'<button class="ps-one-button primary" type="button" data-ps-open="preparation">Préparer mon rendez-vous →</button>':
+    online&&!onlineCompleted?'<a class="ps-one-button primary" href="/online/session/">Accéder à ma séance →</a>':
+    !appt&&!online?'<a class="ps-one-button primary" href="https://app.acuityscheduling.com/schedule.php?owner=40696577">Choisir un rendez-vous →</a>':
+    '<button class="ps-one-button primary" type="button" data-ps-open="preparation">Voir les informations →</button>';
+  const resultSummary=published?(()=>{
+    const total=Number(score().overall_score);
+    const validDomains=domains().filter(([, ,n])=>Number.isFinite(n)).sort((a,b)=>a[2]-b[2]);
+    const best=validDomains.at(-1),focus=validDomains[0];
+    const assessmentReleased=S.assessment?.status==='released';
+    return `<details class="ps-one-details" id="ps-one-result"><summary><span><small>${isFuture?'HISTORIQUE':'RÉSULTATS DISPONIBLES'}</small><strong>Mon dernier bilan publié</strong></span><span class="ps-one-chevron" aria-hidden="true">⌄</span></summary><div class="ps-one-detail-body"><div class="ps-one-score"><div><small>MOTION SCORE · DERNIÈRE PUBLICATION</small><strong>${Math.round(total)}<em>/100</em></strong></div><span>${esc(band(total).label)}</span></div><p>Ce score décrit un état fonctionnel mesuré. Il ne prédit pas l’espérance de vie.</p>${!assessmentReleased?'<p class="ps-one-note">Ce dernier score publié n’est pas nécessairement celui du rendez-vous affiché.</p>':''}${best?`<p><b>Point fort :</b> ${esc(best[0])}</p>`:''}${focus?`<p><b>À améliorer :</b> ${esc(focus[0])}</p>`:''}</div></details>`;
+  })():'';
+  const prepInfo=appt?`<details class="ps-one-details" id="ps-one-preparation"><summary><span><small>${preparationDone?'PRÉPARATION REÇUE':'AVANT LA SÉANCE'}</small><strong>Comment me préparer ?</strong></span><span class="ps-one-chevron" aria-hidden="true">⌄</span></summary><div class="ps-one-detail-body"><p>Prévoyez une tenue confortable et suffisamment d’espace pour les tests de mouvement. Suivez uniquement les consignes envoyées par l’équipe pour votre type de bilan.</p>${isOnline?'<p>Pour un rendez-vous vidéo, utilisez un ordinateur ou un téléphone chargé avec une caméra et une connexion stable. Le lien de connexion est communiqué séparément.</p>':''}<p>${preparationDone?'Votre préparation est enregistrée.':'Si des questionnaires sont nécessaires à votre bilan, l’équipe vous indiquera comment les compléter.'}</p>${isAwaiting?'<p class="ps-one-note">La demande n’est pas encore confirmée. Ne considérez pas le créneau comme définitivement réservé.</p>':''}</div></details>`:'';
+  const reportPending=(!published&&(appt||online))?`<section class="ps-one-status" aria-label="État du compte rendu"><span class="ps-one-status-dot"></span><div><strong>Résultats non encore publiés</strong><p>Ils apparaîtront ici après la séance et leur validation. Aucun score provisoire n’est affiché.</p></div></section>`:'';
+  const optionalProgram=program?`<section class="ps-one-status"><span class="ps-one-status-dot"></span><div><strong>Votre suivi Pulse est actif</strong><p>Un programme est associé à votre compte. Les consignes détaillées restent accessibles depuis votre équipe KŌMØ.</p></div></section>`:'';
+  const other=ordered.filter(x=>x.id!==appt?.id);
+  const previous=other.length?`<details class="ps-one-details"><summary><span><small>HISTORIQUE</small><strong>Mes autres rendez-vous (${other.length})</strong></span><span class="ps-one-chevron" aria-hidden="true">⌄</span></summary><div class="ps-one-detail-body ps-one-history">${other.map(a=>`<div><strong>${esc(friendlyAppointmentType(a.appointment_type))}</strong><small>${esc(fmt(a.scheduled_start))} · ${esc(statusLabel(a.status))}</small></div>`).join('')}</div></details>`:'';
+  const actionHint=appt&&isFuture?'Avant votre rendez-vous':isAppointmentDone?'Après votre rendez-vous':'Mon parcours';
+  $('#view').innerHTML=`<div class="ps-one">
+    <section class="ps-one-hero" aria-label="Votre rendez-vous">
+      <span class="ps-one-eyebrow">${esc(actionHint)}</span>
+      <div class="ps-one-heading"><h2>${esc(title)}</h2><span class="ps-one-state">${esc(status)}</span></div>
+      ${appt?`<div class="ps-one-appointment"><strong>${esc(date)}${time?' · '+esc(time):''}</strong><span>${esc(location)}</span></div>`:online?'<div class="ps-one-appointment"><strong>Bilan en ligne</strong><span>Votre session est liée à votre compte.</span></div>':''}
+      <p class="ps-one-lead">${esc(intro)}</p><div class="ps-one-actions">${mainButton}</div>
+    </section>
+    ${prepInfo}${resultSummary}${reportPending}${optionalProgram}${previous}
+    <div class="ps-one-help"><span>Une question sur votre bilan ?</span><a href="mailto:contact@komolongevity.com">Contacter KŌMØ</a></div>
+  </div>`;
+  document.querySelectorAll('[data-ps-open]').forEach(button=>button.addEventListener('click',()=>{
+    const d=document.getElementById('ps-one-'+button.dataset.psOpen);
+    if(!d)return;d.open=true;d.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }));
 }
 function baseline(){
   heading('Mon bilan','VOTRE BASELINE KŌMØ');
@@ -339,13 +406,19 @@ async function operatorStep(code,action){const payload={qc_status:action==='comp
 async function finalizeOperator(){if(!S.opSession)return toast('Aucune session active.');const r=await sb.rpc('finalize_pulse_operator_session_v1',{p_session_id:S.opSession.id});if(r.error)return toast(r.error.message);toast(r.data?.status==='completed'?'D0 finalisé.':'D0 transmis en revue.');await loadPro();operator()}
 
 function render(){
-  S.route=route();const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
+  S.route=route();
+  if(S.mode==='patient'&&S.route!=='home'){
+    // Older emails and bookmarked links still open the same patient screen.
+    history.replaceState(null,'',location.pathname+location.search+'#home');
+    S.route='home';
+  }
+  const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
   shell();
   if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
   else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
-async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();if(!S.ownPatient&&!hasPro()){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}await loadAll();render()}
+async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();await loadAll();if(!S.ownPatient&&!hasPro()&&!S.onlineSessions.length){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}render()}
 window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
 sb.auth.onAuthStateChange((_e,s)=>{if(!s)authView()});
 boot().catch(()=>authView('Une erreur est survenue. Réessayez dans quelques instants.'));
