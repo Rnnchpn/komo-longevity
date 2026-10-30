@@ -15,22 +15,22 @@
    ports:[{name:'Port de Saint-Tropez',lat:43.2713,lng:6.6385}]}
  };
  const ACTIVITY_DEFS=[
-  {slug:'longevity',service:'medical-longevity-onboard',mark:'✣',
+  {slug:'medical-longevity',service:'medical-longevity-onboard',mark:'✣',
    nameFr:'Médecin à bord',nameEn:'Physician On Board',catFr:'LONGÉVITÉ MÉDICALE',catEn:'MEDICAL LONGEVITY',
    descFr:'Consultation avec un médecin indépendant sur votre yacht ou en résidence.',descEn:'A private consultation with an independent physician on board or in residence.'},
-  {slug:'aesthetic',service:'aesthetic-physician-onboard',mark:'✧',
+  {slug:'medical-longevity',service:'aesthetic-physician-onboard',mark:'✧',
    nameFr:'Médecine esthétique',nameEn:'Aesthetic Medicine',catFr:'CONSULTATION PRIVÉE',catEn:'PRIVATE CONSULTATION',
    descFr:'Une consultation médicale esthétique organisée en toute discrétion.',descEn:'A discreet medical aesthetic consultation arranged privately.'},
   {slug:'iv-drip',mark:'◈',nameFr:'IV & Recovery',nameEn:'IV & Recovery',
    catFr:'ÉVALUATION MÉDICALE',catEn:'MEDICAL ASSESSMENT',
    descFr:'Accès aux prestations proposées par les praticiens habilités, selon indication.',descEn:'Care options from authorised professionals when clinically appropriate.'},
-  {slug:'gastronomy',mark:'◌',nameFr:'Gastronomie privée',nameEn:'Private Gastronomy',
+  {slug:'experiences',mark:'◌',nameFr:'Gastronomie privée',nameEn:'Private Gastronomy',
    catFr:'L’ART DE RECEVOIR',catEn:'PRIVATE DINING',
    descFr:'Expériences et tables sur mesure, à bord ou à terre.',descEn:'Bespoke dining and culinary experiences, on board or on shore.'},
   {slug:'high-luxury',mark:'✦',nameFr:'High Luxury',nameEn:'High Luxury',
    catFr:'SÉLECTION EXCEPTIONNELLE',catEn:'EXCEPTIONAL EDIT',
    descFr:'Pièces rares et expériences privées, à la demande.',descEn:'Rare objects and private experiences, arranged on request.'},
-  {slug:'service',mark:'⌑',nameFr:'Conciergerie',nameEn:'Concierge',
+  {slug:'services',mark:'⌑',nameFr:'Conciergerie',nameEn:'Concierge',
    catFr:'SERVICES PRIVÉS',catEn:'PRIVATE SERVICES',
    descFr:'Votre séjour et vos demandes, coordonnés personnellement.',descEn:'Your stay and private requests, personally coordinated.'}
  ];
@@ -283,7 +283,7 @@
  function renderActivities(){
   const container=$('#obActivityGrid');container.replaceChildren();
   ACTIVITY_DEFS.forEach((e,i)=>{
-   const card=document.createElement('article');card.className='ob-activity';card.dataset.activity=e.slug;
+   const card=document.createElement('article');card.className='ob-activity';card.dataset.activity=e.service||e.slug;
    const art=document.createElement('div');art.className='ob-activity-art';art.setAttribute('aria-hidden','true');
    const motif=document.createElement('span');motif.textContent=e.mark;art.append(motif);
    const body=document.createElement('div');body.className='ob-activity-body';
@@ -313,7 +313,7 @@
     const marker=L.marker([lat,lng],{icon:bubble,zIndexOffset:210}).addTo(activityLayer);
     marker.bindTooltip(txt('Expérience dans ce secteur · position indicative','Experience in this destination · illustrative marker'));
     marker.on('click',()=>{
-     const item=$('.ob-activity[data-activity="'+exp.slug+'"]');
+     const item=$('.ob-activity[data-activity="'+(exp.service||exp.slug)+'"]');
      item?.scrollIntoView({behavior:'smooth',block:'center'});
      item?.classList.add('ob-activity-highlight');
      setTimeout(()=>item?.classList.remove('ob-activity-highlight'),1600);
