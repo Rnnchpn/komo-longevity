@@ -40,7 +40,7 @@ async function start(){
   user=response.data?.user;
   if(!user){if(isClub){hide('loading');show('authPanel')}else noAccess();return}
   const gate=await authorized(isClub?'overview':slug);
-  if(gate.ok){active=true;if(isClub){hide('loading');hide('authPanel');hide('applicationPanel');show('memberPanel');document.body.classList.add('elysium-app-mode');renderClub(gate.worlds,gate.membership)}if(isMaison){window.__elysiumProductData=gate.world.products;renderMaisonMeta();renderProducts(gate.world.products)}}
+  if(gate.ok){active=true;if(isClub){hide('loading');hide('authPanel');hide('applicationPanel');show('memberPanel');document.body.classList.add('elysium-app-mode');renderClub(gate.worlds,gate.membership);loadClubSponsors()}if(isMaison){window.__elysiumProductData=gate.world.products;renderMaisonMeta();renderProducts(gate.world.products)}}
   else if(gate.error==='membership_required'){if(isClub)await applicationMode();else noAccess();}
   else if(gate.error==='sign_in_required'){if(isClub){hide('loading');show('authPanel')}else noAccess()}
   else{if(isClub){hide('loading');show('authPanel');say('#loginMessage',tt('failed'),true)}else noAccess()}
@@ -371,6 +371,28 @@ function renderProducts(products){
  if(slug==='yachting'&&!window.__elyYachtingLoaded){window.__elyYachtingLoaded=true;loadPrivateYachtMarketplace()}
 }
 
+
+async function loadClubSponsors(){
+ const holder=$('#elyClubSponsorItems'),section=$('#elyClubSponsors');
+ if(!holder||!session?.access_token)return;
+ try{
+  const r=await fetch('/api/elysium-marketplace?city=all',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  if(!r.ok)return;
+  const data=await r.json();
+  const sponsors=(data.ads||[]).filter(a=>a.placement==='home_feature').slice(0,3);
+  if(!sponsors.length){section.hidden=true;return}
+  holder.replaceChildren();section.hidden=false;
+  sponsors.forEach(a=>{
+   const row=serviceElement('a','ely-club-sponsor-row');
+   row.href='/elysium/maison/yachting/';
+   row.append(
+    serviceElement('span','ely-club-sponsor-tag','SPONSORISÉ · '+(a.sponsor_name||'PARTENAIRE')),
+    serviceElement('strong','',a.headline),
+    serviceElement('span','','↗')
+   );holder.append(row);
+  });
+ }catch{section.hidden=true}
+}
 async function loadPrivateYachtMarketplace(){
  const host=$('#elyYachtingListings');if(!host||!session?.access_token)return;
  host.replaceChildren(serviceElement('p','ely-yachting-caption',lang==='fr'?'Chargement des annonces vérifiées…':'Loading verified listings…'));
@@ -386,7 +408,7 @@ async function loadPrivateYachtMarketplace(){
     const im=document.createElement('img');im.src=p.image_url;im.loading='lazy';im.alt='';im.referrerPolicy='no-referrer';visual.append(im)
    }else visual.textContent='⛵';
    const info=serviceElement('div','ely-yachting-content');
-   info.append(serviceElement('span','ely-shop-section-kicker',(data.ads||[]).some(x=>x.listing_id===p.id)?'SPONSORISÉ · BROKER':'ANNONCE BROKER'),
+   info.append(serviceElement('span','ely-shop-section-kicker',(data.ads||[]).some(x=>x.listing_id===p.id&&x.placement==='yachting_feature')?'SPONSORISÉ · BROKER':'ANNONCE BROKER'),
     serviceElement('h3','',p.yacht_name),
     serviceElement('p','',p.title+' · '+p.location_city+(p.length_m?' · '+p.length_m+' m':'')));
    const action=serviceElement('a','ely-shop-signin',lang==='fr'?'DEMANDER LE DOSSIER ↗':'REQUEST DETAILS ↗');
