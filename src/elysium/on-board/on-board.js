@@ -553,6 +553,7 @@
   $('#obManualName').addEventListener('keydown',e=>{if(e.key==='Enter'){$('#obManualSelect').click();e.preventDefault()}});
   $('#obClearVessel').addEventListener('click',()=>{selected=null;$('#obVesselContext').hidden=true;renderFleet()});
   $('#obConcierge').addEventListener('click',()=>requestExperience({nameFr:'Demande sur mesure',nameEn:'Bespoke concierge request'}));
+  $('#obConciergeDock').addEventListener('click',()=>requestExperience({nameFr:'Demande sur mesure',nameEn:'Bespoke concierge request'}));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)fetchYachts()});
  }
  wire();setLanguage(lang);chooseScreen('map');
