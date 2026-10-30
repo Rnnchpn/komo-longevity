@@ -323,7 +323,7 @@
   if(enabledLayers.ads)paidAds.filter(x=>x.placement==='map_spotlight'&&(x.location_city===city||x.location_city==='all')).slice(0,3).forEach((ad,i)=>{
     const lat=base[0]+0.018+(i*.008),lng=base[1]-0.018+(i*.004);
     const b=L.divIcon({className:'ob-sponsored-pin',iconSize:[118,51],iconAnchor:[59,26],
-      html:'<span>SPONSORISÉ</span><strong>'+clean(ad.headline).slice(0,45)+'</strong>'});
+      html:'<span>SPONSORISÉ · '+clean(ad.sponsor_name||'PARTENAIRE').slice(0,30)+'</span><strong>'+clean(ad.headline).slice(0,45)+'</strong>'});
     L.marker([lat,lng],{icon:b,zIndexOffset:350}).bindTooltip(txt('Publicité · zone indicative, non AIS','Advertisement · indicative area, not AIS')).on('click',()=>{
       $('#obMarket')?.scrollIntoView({behavior:'smooth',block:'start'});
     }).addTo(adLayer);
