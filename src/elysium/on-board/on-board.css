@@ -552,3 +552,92 @@
 @media(prefers-reduced-motion:reduce){
  .ely-onboard:before{animation:none!important}
 }
+
+
+/* ELYSIUM V10 — MIDNIGHT PETROL / AIS MAP
+   The VesselFinder embed is a third-party surface: no CSS is injected inside it. */
+.ely-onboard{
+ --ocean:#041c28;--ocean2:#062532;--ocean3:#0b3541;--ocean4:#10444e;
+ --foam:#f5eee1;--pearl:#f2ebdc;--gold:#c9af85;--gold2:#b79667;
+ background:radial-gradient(ellipse at 58% -22%,#123948 0%,#071f2d 39%,#031822 79%,#02141e 100%);
+}
+.ely-onboard:before{opacity:.19}
+.ely-onboard:after{background:radial-gradient(ellipse at 5% 95%,#45838d0c,transparent 48%)}
+.ely-onboard .ob-header{background:#031923f5;border-bottom-color:#c8ab7b47;box-shadow:0 8px 40px #01111c66}
+.ely-onboard .ob-cities{background:#061f2bf2;border-color:#c8ae8257}
+.ely-onboard .ob-city{border-right-color:#c8ae823a}
+.ely-onboard .ob-city.is-active{background:linear-gradient(135deg,#133c49,#092c3a);box-shadow:inset 0 3px #c9ae84}
+.ely-onboard .ob-city:hover{background:#143f4b}
+.ely-onboard .ob-map-shell{background:#031823;border-color:#c6aa7a88;box-shadow:0 16px 54px #000e1ab3}
+.ely-onboard .ob-map-port{background:#041d2bf0;border-color:#ccb0877b;box-shadow:0 8px 24px #0016229c}
+.ely-onboard .ob-map-footer span{background:#031923ed;border:1px solid #c5a77765;color:#ebd8b7}
+.ely-onboard .ob-map-footer button{background:#082633;border-color:#c5a7778a;color:#ecd8b4}
+.ely-onboard .ob-app-dock{background:#021722fa;border-top-color:#c9ae845e}
+.ely-onboard .ob-app-dock button.is-active{background:#103a47;border-color:#c7aa7b83}
+.ely-onboard .ob-dashboard,.ely-onboard .ob-marketplace,.ely-onboard .ob-activities{
+ background:linear-gradient(136deg,#082b39f7,#041f2df4);border-color:#c0a67969}
+.ely-onboard .ob-yacht-row{background:#092d3b;color:#f5e9d5}
+.ely-onboard .ob-yacht-row:hover{background:#144251}
+.ely-onboard .ob-market-empty{background:#0d3542;color:#e4d2b6}
+.ely-onboard .ob-map-fallback{background:radial-gradient(ellipse at 50% 30%,#114452,#052330 58%,#031923)}
+.ely-onboard .ob-map-provider-switch{
+ position:absolute;top:91px;right:14px;z-index:800;display:flex;gap:5px;max-width:calc(100% - 28px);
+ padding:5px;border-radius:13px;border:1px solid #c7ad8179;background:#041d2aee;
+ box-shadow:0 8px 35px #001b2ab5;backdrop-filter:blur(18px);
+}
+.ely-onboard .ob-map-provider-switch button{
+ appearance:none;background:transparent;border:1px solid transparent;border-radius:9px;
+ color:#c4d1ca;font:700 9px/1.2 Manrope,Arial,sans-serif;letter-spacing:.065em;
+ padding:10px 13px;white-space:nowrap;
+}
+.ely-onboard .ob-map-provider-switch button.is-active{
+ background:#d0b78c;color:#052333;border-color:#e2caa0;
+}
+.ely-onboard .ob-map-provider-switch button:hover:not(.is-active){color:#faecd8;background:#12404d}
+.ely-onboard .ob-vf-map{
+ position:absolute;inset:0;z-index:80;background:linear-gradient(145deg,#082937,#041923);overflow:hidden;
+}
+.ely-onboard .ob-vf-map[hidden],.ely-onboard .ob-vf-loading[hidden]{display:none!important}
+.ely-onboard .ob-vf-map iframe{display:block;width:100%;height:100%;border:0;background:#061f2d;position:absolute;inset:0}
+.ely-onboard .ob-vf-attribution{
+ position:absolute;right:13px;bottom:68px;z-index:4;border:1px solid #b9976888;border-radius:7px;
+ padding:7px 9px;background:#031824ec;color:#e4ceaa;font:700 8px Manrope,Arial,sans-serif;letter-spacing:.065em;
+ pointer-events:none;
+}
+.ely-onboard .ob-vf-loading{position:absolute;z-index:5;inset:0;pointer-events:none;
+ display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;
+ background:radial-gradient(ellipse at center,#0d3745,#031a27 70%);color:#d4bd93;text-align:center}
+.ely-onboard .ob-vf-loading>span{font:400 72px Cormorant Garamond,Georgia,serif;animation:obVfPulse 2.4s ease-in-out infinite}
+.ely-onboard .ob-vf-loading strong{font-size:10px;letter-spacing:.18em}
+.ely-onboard .ob-vf-loading small{font-size:9px;color:#b2c8c4;max-width:260px;padding:0 15px}
+@keyframes obVfPulse{50%{opacity:.55;transform:scale(1.09)}}
+.ely-onboard[data-ob-map-provider="vesselfinder"] .ob-map-layers,
+.ely-onboard[data-ob-map-provider="vesselfinder"] .ob-map-guide,
+.ely-onboard[data-ob-map-provider="vesselfinder"] .ob-geolocate{display:none!important}
+.ely-onboard[data-ob-map-provider="vesselfinder"] .ob-map-footer{z-index:650}
+.ely-onboard[data-ob-map-provider="elysium"] .ob-map-provider-switch{z-index:800}
+@media(max-width:760px){
+ .ely-onboard .ob-map-provider-switch{top:76px;left:9px;right:auto;max-width:calc(100% - 18px);gap:2px;padding:4px}
+ .ely-onboard .ob-map-provider-switch button{font-size:8px;padding:8px 9px;letter-spacing:0}
+ .ely-onboard .ob-vf-attribution{bottom:58px;right:8px;font-size:7px}
+ .ely-onboard .ob-map-port{max-width:80%;padding:8px 10px}
+ .ely-onboard .ob-map-port strong{font-size:25px}
+ .ely-onboard .ob-map-provider-switch{top:70px}
+}
+@media(max-height:620px){
+ .ely-onboard .ob-map-provider-switch{top:67px}
+ .ely-onboard .ob-vf-attribution{bottom:55px}
+}
+@media(prefers-reduced-motion:reduce){.ely-onboard .ob-vf-loading>span{animation:none}}
+
+
+/* Accessible AIS provider fallback and yacht-directory cross-navigation. */
+.ely-onboard .ob-vf-outbound{position:absolute;z-index:710;right:12px;bottom:103px;
+ padding:7px 10px;border:1px solid #c2a47685;background:#041e2beb;color:#e8d3ad;
+ border-radius:7px;font:700 8px/1.3 Manrope,Arial,sans-serif;letter-spacing:.065em;
+ text-decoration:none;box-shadow:0 5px 21px #00152365}
+.ely-onboard .ob-vf-outbound:hover{background:#0d3948}
+.ely-onboard .ob-vf-yachts-cta{margin:8px 12px;padding:10px 12px;border-radius:8px;
+ background:#d2b88c;color:#062533;border:1px solid #e5cca2;
+ font:700 9px Manrope,Arial,sans-serif;letter-spacing:.055em}
+@media(max-width:760px){.ely-onboard .ob-vf-outbound{bottom:87px;right:7px;font-size:7px}}

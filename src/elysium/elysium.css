@@ -1453,3 +1453,53 @@ body.ely-public-commerce:before{animation:elyOceanPatternDrift 46s ease-in-out i
 @media(prefers-reduced-motion:reduce){
  body.ely-public-commerce:before{animation:none!important}
 }
+
+
+/* ELYSIUM V10 / NIGHT BLUE — a darker, restrained high-luxury visual system */
+body.ely-public-commerce,body.ely-club-commerce,body.ely-world-maison{
+ --ely-blue:#041c28;--ely-deep:#02151e;--ely-slate:#0a2b39;--ely-pearl:#f8f0e2;
+ --ely-champagne:#cbb28b;--ely-gold:#af8d61;--ely-muted:#a9c0bf;
+ --shop-paper:#061d2b;--shop-ink:#f8efe1;--shop-line:#c8ab7950;
+ --shop-accent:#cbb28b;--shop-muted:#a7c2c0;--shop-deep:#031b27;
+ background:radial-gradient(ellipse at 70% -18%,#153c49 0%,#082532 39%,#031823 78%,#02121b 100%);
+}
+body.ely-public-commerce:before,body.ely-club-commerce:before,body.ely-world-maison:before{opacity:.19}
+body.ely-public-commerce:after,body.ely-club-commerce:after,body.ely-world-maison:after{
+ background:radial-gradient(ellipse at 5% 94%,#356c790c,transparent 47%)}
+body.ely-public-commerce nav.top,body.ely-club-commerce nav.top,body.ely-world-maison nav.top{
+ background:#031923f6;border-bottom-color:#c9ad7f4e;box-shadow:0 8px 25px #01121b6b}
+.ely-public-commerce .ely-public-hero-art{
+ background:radial-gradient(ellipse at 35% 20%,#1a4653 0%,#092937 56%,#041b27 96%);
+ border-color:#c7aa7a76;box-shadow:0 14px 47px #000d1873}
+.ely-public-commerce .ely-public-art-seal:before{
+ background:linear-gradient(135deg,#0e3946,#031923 57%,#1e4b54 94%);
+ border-color:#c7aa7a87}
+.ely-public-commerce .ely-public-world,.ely-public-commerce .ely-public-world:nth-child(5){
+ background:#092b38;border-color:#bb9e735b;box-shadow:0 9px 27px #000f1c78}
+.ely-public-commerce .ely-public-world:hover{background:#123d4a;border-color:#dcc59b}
+.ely-public-commerce .ely-public-world-graphic{
+ background:radial-gradient(ellipse at 50% 25%,#21525e 0%,#0b3240 51%,#041d2a 100%)!important}
+.ely-public-commerce .ely-public-membership-card{
+ background:linear-gradient(145deg,#103846,#041f2c 80%);border-color:#c4a6788c}
+.ely-public-commerce .ely-viewport-dock,.ely-world-maison .ely-shop-dock{background:#021722fa;border-color:#c7a7775d}
+.ely-public-commerce .ely-viewport-dock .is-active,.ely-world-maison .ely-shop-dock .is-active{
+ background:#0c3542;border-color:#c9ad8087}
+.ely-club-commerce .club-shell{background:transparent}
+.ely-club-commerce.elysium-app-mode .ely-orbit-hub{
+ background:radial-gradient(circle at 30% 22%,#1d4a55,#092b38 60%,#031923 95%);
+ border-color:#d5ba8f;box-shadow:0 0 0 8px #bca37418,0 0 0 9px #c9a97660,inset 0 0 36px #00111caa,0 15px 47px #000e189c}
+.ely-club-commerce.elysium-app-mode .ely-node{background:#0a2b37;border-color:#c6ab7f8a}
+.ely-club-commerce.elysium-app-mode .ely-node:hover,.ely-club-commerce.elysium-app-mode .ely-node.is-selected{
+ background:#164351;border-color:#dec396}
+.ely-club-commerce .auth-box{background:#092f3c;border-color:#c7a97c91}
+.ely-world-maison .ely-shop-hero-visual{
+ background:radial-gradient(ellipse at 50% 24%,#1b4854,#082a37 58%,#041a27 100%)!important;
+ border-color:#bf9f7075;box-shadow:0 12px 34px #00131d8d}
+.ely-world-maison .ely-product-card{background:#092c39;border-color:#c0a37671;box-shadow:0 10px 26px #000e1b75}
+.ely-world-maison .ely-product-card:hover{background:#123c4a;border-color:#d3b68b}
+.ely-world-maison .ely-product-visual,.ely-world-maison .ely-product-featured .ely-product-visual{
+ background:linear-gradient(140deg,#143f4c,#05212e)!important}
+.ely-world-maison .ely-shop-catalogue{background:transparent}
+.ely-world-maison .ely-yachting-channel-actions a{background:#d1b990;color:#052330}
+.ely-world-maison .ely-service-detail .ely-product-visual{background:linear-gradient(145deg,#143e4b,#041d2a)!important}
+@media(prefers-reduced-motion:reduce){.ely-public-commerce .ely-public-world{transform:none!important}}
