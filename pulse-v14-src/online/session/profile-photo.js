@@ -1,6 +1,7 @@
 import {createPoseEngine} from './pose-engine.js';
 import {sharedMotionMedia} from './shared-media.js';
 import {createSideProfileStability,surfaceSagittalIndex} from './profile-photo-metrics.mjs';
+import {sagittalJointObservations,postureDisplay} from './posture-interpretation.mjs';
 
 // Automatic PHOTO OF SURFACE PROFILE, not radiographic SVA.
 // Photo is an in-memory canvas and vanishes on navigation; no server uploads.
@@ -72,15 +73,22 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    ctx.fillText(title,x+13,Math.max(25,y-12));
   }
   const offset=surfaceSagittalIndex(markers.neck,markers.pelvis,frame.height);
+  const observed=frame?.joints||{kneeFlexionDeg:null,ankleDeviationDeg:null,compensation:'unavailable'};
   record.posture={valid:true,method:'photo sagittale 2D',surfaceIndexPct:offset,
-   adjusted,manualCapture:manualCaptured,neck:{...markers.neck},pelvis:{...markers.pelvis},height:frame.height};
+   adjusted,manualCapture:manualCaptured,kneeFlexionDeg:observed.kneeFlexionDeg,
+   ankleDeviationDeg:observed.ankleDeviationDeg,compensation:observed.compensation,
+   neck:{...markers.neck},pelvis:{...markers.pelvis},height:frame.height};
   record.status=manualCaptured?'review':'done';record.source='photo locale, repères de surface';
   record.value=offset;
   state.results[task.id]=record;
   next.disabled=false;
   callbacks.checkpoint?.();
-  q('#value').textContent=offset.toFixed(1)+' %';
-  const items=[['Écart horizontal apparent',offset.toFixed(1)+' %'],['Méthode','Photo de profil 2D'],
+  const interpretation=postureDisplay(record);
+  q('#value').textContent=interpretation.label;
+  const knee=observed.kneeFlexionDeg===null?'Non disponible':observed.kneeFlexionDeg.toFixed(1)+'°';
+  const ankle=observed.ankleDeviationDeg===null?'Non disponible':observed.ankleDeviationDeg.toFixed(1)+'°';
+  const compensation=observed.compensation==='possible'?'Adaptation posturale possible · à confirmer':observed.compensation==='not_observed'?'Pas d’adaptation apparente détectée':'Non évaluable sur cette photo';
+  const items=[['Lecture visuelle',interpretation.label+' · bon ≤ 3 % / moyen ≤ 7 % / mauvais > 7 %'],['Écart horizontal apparent',offset.toFixed(1)+' %'],['Genou · flexion apparente',knee],['Cheville · écart apparent à 90°',ankle],['Genou + cheville',compensation],['Limites','Seuils de lecture exploratoires, non validés, sans diagnostic'],['Méthode','Photo de profil 2D'],
    ['Repère supérieur','Jonction cou–épaule (estimée)'],['Repère inférieur','Région pelvienne (estimée)']];
   data.replaceChildren();
   for(const [key,value] of items){const cell=document.createElement('div'),k=document.createElement('span'),v=document.createElement('strong');
@@ -145,7 +153,7 @@ export function mountSideProfilePhoto(root,task,record,state,callbacks){
    state.stream=stream;sharedMotionMedia.attachVideo(video);off.hidden=true;stop.disabled=false;await video.play();manual.disabled=false;
    const engine=await createPoseEngine(video,overlay,(points,time)=>{
     if(disposed||locked||document.hidden)return;
-    const f=stability.observe(points,time);latestProfile=f;
+    const f=stability.observe(points,time);latestProfile=f.valid?{...f,joints:sagittalJointObservations(points,video.videoWidth/video.videoHeight,f)}:f;
     validStreak=f.valid?validStreak+1:0;
     if(validStreak===3)sharedMotionMedia.readyBeep(task.id);
     manual.disabled=false;
