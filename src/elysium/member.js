@@ -17,7 +17,7 @@ const tt=(x)=>words[lang][x]||x;
 const escapeHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const itemName=o=>lang==='fr'?(o.fr||o.en):o.en;
 function say(sel,message,isError=false){const x=$(sel);if(x){x.textContent=message;x.classList.toggle('error',isError)}}
-function show(id){const x=$('#'+id);if(x)x.style.display=id==='memberPanel'?'block':'block'}
+function show(id){const x=$('#'+id);if(x)x.style.display=id==='memberPanel'?'flex':'block'}
 function hide(id){const x=$('#'+id);if(x)x.style.display='none'}
 function switchLanguage(){document.documentElement.lang=lang;$$('[data-en]').forEach(el=>{const v=lang==='fr'?el.dataset.fr:el.dataset.en;if(el.closest('.longevity-maison, .aesthetic-maison')&&/<(?:em|br)>/.test(v))el.innerHTML=v;else el.textContent=v});if($('#toggleLanguage'))$('#toggleLanguage').textContent=lang==='en'?'FR':'EN';if(isMaison)renderMaisonMeta();if(isClub&&active)renderClub(null,clubMembership);if(isMaison&&active&&window.__elysiumProductData)renderProducts(window.__elysiumProductData);if(isMaison){renderSelection();if(active&&$('#serviceDetail'))renderProductRoute()}}
 $('#toggleLanguage')?.addEventListener('click',()=>{lang=lang==='fr'?'en':'fr';switchLanguage()});
@@ -131,7 +131,7 @@ function orbitPosition(){
   node.setAttribute('aria-current',i===orbitIndex?'true':'false');
  });
  const selected=WORLDS[orbitIndex],selectedName=orbitTitle(selected);
- if($('#elyOrbitActive'))$('#elyOrbitActive').textContent=selected.no+'  /  09   —   '+selectedName;
+ if($('#elyOrbitActive'))$('#elyOrbitActive').textContent=selected.no+'  /  08   —   '+selectedName;
  if($('#elyOrbitInstruction'))$('#elyOrbitInstruction').textContent=lang==='fr'?'FAITES GLISSER LA ROUE OU CHOISISSEZ UN UNIVERS':'SWIPE THE WHEEL OR CHOOSE A WORLD';
 }
 function orbitStep(delta){

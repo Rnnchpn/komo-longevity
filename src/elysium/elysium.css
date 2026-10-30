@@ -1503,3 +1503,117 @@ body.ely-public-commerce nav.top,body.ely-club-commerce nav.top,body.ely-world-m
 .ely-world-maison .ely-yachting-channel-actions a{background:#d1b990;color:#052330}
 .ely-world-maison .ely-service-detail .ely-product-visual{background:linear-gradient(145deg,#143e4b,#041d2a)!important}
 @media(prefers-reduced-motion:reduce){.ely-public-commerce .ely-public-world{transform:none!important}}
+
+
+/* ELYSIUM V11 — MEMBER ORBIT FIX
+   The authenticated panel must propagate the viewport height through
+   every ancestor. Previously its auto-sized block collapsed the wheel. */
+body.ely-club-commerce.elysium-app-mode{
+ height:100dvh!important;min-height:0!important;max-height:100dvh!important;
+ display:flex!important;flex-direction:column!important;overflow:hidden!important;
+ background:radial-gradient(ellipse at 52% 36%,#0d3541 0%,#041f2b 52%,#02131e 100%)!important;
+ color:#f8efdf!important;
+}
+body.ely-club-commerce.elysium-app-mode::before{opacity:.22!important}
+body.ely-club-commerce.elysium-app-mode nav.top{
+ flex:0 0 63px!important;height:63px!important;min-height:63px!important;
+ background:#031722fa!important;border-bottom:1px solid #c9ae806a!important;
+}
+body.ely-club-commerce.elysium-app-mode nav.top .brand strong{color:#faf0dd!important}
+body.ely-club-commerce.elysium-app-mode nav.top .brand em{color:#d5bc92!important}
+body.ely-club-commerce.elysium-app-mode nav.top button{color:#efdbb7!important;border-color:#c6aa7d96!important;background:#102f3b!important}
+body.ely-club-commerce.elysium-app-mode .club-shell{
+ flex:1 1 auto!important;height:auto!important;min-height:0!important;
+ max-height:calc(100dvh - 63px)!important;overflow:hidden!important;
+ padding:0!important;background:transparent!important;display:flex!important;
+}
+body.ely-club-commerce.elysium-app-mode .club-shell>.wrap{
+ flex:1 1 auto!important;display:flex!important;flex-direction:column!important;
+ min-width:0!important;min-height:0!important;height:100%!important;max-height:100%!important;
+ align-items:stretch!important;justify-content:stretch!important;padding-inline:clamp(12px,2.1vw,30px);
+}
+body.ely-club-commerce.elysium-app-mode #memberPanel{
+ flex:1 1 auto!important;display:flex!important;flex-direction:column!important;
+ min-height:0!important;min-width:0!important;height:100%!important;
+ width:100%!important;max-height:100%!important;margin:0 auto!important;
+ overflow:hidden!important;
+}
+body.ely-club-commerce.elysium-app-mode #memberPanel .ely-app{
+ flex:1 1 auto!important;display:grid!important;
+ grid-template-columns:minmax(0,1fr)!important;
+ grid-template-rows:auto minmax(0,1fr) auto auto auto!important;
+ justify-items:center!important;align-items:center!important;
+ gap:clamp(3px,1vh,9px)!important;
+ height:100%!important;min-height:0!important;max-height:100%!important;
+ width:min(100%,1250px)!important;max-width:1250px!important;
+ padding:clamp(9px,1.7vh,20px) 0 9px!important;margin:0 auto!important;
+ overflow:hidden!important;
+}
+body.ely-club-commerce.elysium-app-mode .ely-app-heading{width:100%;z-index:4}
+body.ely-club-commerce.elysium-app-mode .ely-app-heading h1{
+ font-size:clamp(39px,4.6vw,66px)!important;line-height:.95!important;
+ margin:5px 0 3px!important;color:#f8eddc!important;
+}
+body.ely-club-commerce.elysium-app-mode .ely-app-subtitle{color:#b0c9c5!important}
+body.ely-club-commerce.elysium-app-mode #memberWheel{
+ width:min(100%,1000px)!important;
+ height:100%!important;min-height:0!important;max-height:none!important;
+ margin:0 auto!important;flex:initial!important;
+ align-self:center!important;overflow:visible!important;
+}
+body.ely-club-commerce.elysium-app-mode .ely-orbit-aura{
+ background:radial-gradient(circle,#26566155 0%,#102f3b77 42%,transparent 67%)!important;
+}
+body.ely-club-commerce.elysium-app-mode .ely-orbit-track{
+ border:1px solid #c6ac7b67!important;background:transparent!important;
+}
+body.ely-club-commerce.elysium-app-mode .ely-orbit-hub{width:clamp(140px,17vw,232px)}
+body.ely-club-commerce.elysium-app-mode .ely-node{
+ width:clamp(91px,11vw,141px);height:clamp(99px,12.8vw,148px);
+ border:1px solid #b79d746f;background:#092b37e8;
+}
+body.ely-club-commerce.elysium-app-mode .ely-node-name{font-size:clamp(14px,1.5vw,20px);white-space:normal}
+body.ely-club-commerce.elysium-app-mode .ely-onboard-club-entry{
+ flex:none!important;margin:0!important;padding:9px 16px!important;
+ background:#d0b78d!important;border-color:#dcc69e!important;color:#082632!important;
+ font-size:9px!important;
+}
+body.ely-club-commerce.elysium-app-mode .ely-orbit-toolbar{
+ flex:none!important;min-height:35px!important;margin:0!important;
+}
+body.ely-club-commerce.elysium-app-mode .ely-app-bottom{
+ flex:none!important;padding:6px 12px 0!important;margin:0!important;
+ border-color:#c7ac7b43!important;min-height:25px;
+}
+body.ely-club-commerce.elysium-app-mode .footer{display:none!important}
+body.ely-club-commerce.elysium-app-mode #elyClubSponsors:not([hidden]){
+ max-height:60px!important;padding:0!important;margin:0!important;
+}
+@media(max-width:720px){
+ body.ely-club-commerce.elysium-app-mode nav.top{height:56px!important;min-height:56px!important;flex-basis:56px!important}
+ body.ely-club-commerce.elysium-app-mode .club-shell{max-height:calc(100dvh - 56px)!important}
+ body.ely-club-commerce.elysium-app-mode #memberPanel .ely-app{
+  padding:9px 0!important;gap:4px!important;
+  grid-template-rows:auto minmax(0,1fr) auto auto auto!important}
+ body.ely-club-commerce.elysium-app-mode .ely-app-heading h1{
+  font-size:clamp(33px,8vw,48px)!important}
+ body.ely-club-commerce.elysium-app-mode .ely-app-subtitle{font-size:9px!important}
+ body.ely-club-commerce.elysium-app-mode #memberWheel{width:100%!important}
+ body.ely-club-commerce.elysium-app-mode .ely-node{
+  width:clamp(68px,22vw,91px);height:clamp(77px,24vw,100px);padding:6px}
+ body.ely-club-commerce.elysium-app-mode .ely-node-name{font-size:clamp(11px,3vw,15px);line-height:1.05}
+ body.ely-club-commerce.elysium-app-mode .ely-node-glyph{width:clamp(33px,10vw,53px);height:clamp(33px,10vw,53px)}
+ body.ely-club-commerce.elysium-app-mode .ely-node-index{font-size:7px}
+ body.ely-club-commerce.elysium-app-mode .ely-orbit-hub{width:clamp(116px,36vw,165px)}
+ body.ely-club-commerce.elysium-app-mode .ely-orbit-hub strong{font-size:clamp(25px,7vw,37px)}
+ body.ely-club-commerce.elysium-app-mode .ely-hub-overline{font-size:6px!important}
+ body.ely-club-commerce.elysium-app-mode .ely-hub-inner small{font-size:6px}
+ body.ely-club-commerce.elysium-app-mode .ely-app-bottom>span:first-child{display:none}
+ body.ely-club-commerce.elysium-app-mode .ely-app-bottom{font-size:7px!important}
+}
+@media(max-height:690px){
+ body.ely-club-commerce.elysium-app-mode .ely-app-subtitle{display:none}
+ body.ely-club-commerce.elysium-app-mode .ely-app-bottom{display:none}
+ body.ely-club-commerce.elysium-app-mode #memberPanel .ely-app{
+  grid-template-rows:auto minmax(0,1fr) auto auto!important}
+}
