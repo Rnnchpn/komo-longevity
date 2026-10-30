@@ -17,6 +17,7 @@ const copies=[
  [join(src,'brokers','index.html'),join(out,'brokers','index.html')],
  [join(src,'brokers','studio.js'),join(out,'brokers','studio.js')],
  [join(src,'on-board','index.html'),join(out,'on-board','index.html')],
+ [join(src,'on-board','vesselfinder.html'),join(out,'on-board','vesselfinder.html')],
  [join(src,'on-board','on-board.css'),join(out,'on-board','on-board.css')],
  [join(src,'on-board','on-board.js'),join(out,'on-board','on-board.js')],
  [join(src,'elysium.css'),join(assets,'elysium.css')],
@@ -57,6 +58,14 @@ if(!brokerPage.includes('id="yachtForm"')||!brokerPage.includes('id="campaignFor
  throw new Error('[elysium] broker or advertising studio missing');
 const onBoard=await readFile(join(out,'on-board','index.html'),'utf8');
 const onBoardJs=await readFile(join(out,'on-board','on-board.js'),'utf8');
+const vfEmbed=await readFile(join(out,'on-board','vesselfinder.html'),'utf8');
+if(!vfEmbed.includes('https://www.vesselfinder.com/aismap.js')||
+ !vfEmbed.includes("var names=true")||!vfEmbed.includes('43.55')||
+ !onBoard.includes('id="obVesselFinder"')||!onBoard.includes('id="obMapProvider"')||
+ !onBoardJs.includes('function updateMapProvider')||
+ !onBoardJs.includes("mapProvider='vesselfinder'"))
+ throw new Error('[elysium] VesselFinder iframe embed or provider switch missing');
+
 if(!onBoard.includes('data-city="monaco"')||!onBoard.includes('data-city="cannes"')||
  !onBoard.includes('data-city="saint-tropez"')||!onBoard.includes('id="obMap"')||
  !onBoardJs.includes('/api/elysium-yachts')||!onBoardJs.includes('navigator.geolocation.getCurrentPosition')||
