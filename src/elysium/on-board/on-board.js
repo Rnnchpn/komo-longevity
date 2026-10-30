@@ -40,7 +40,7 @@
  let city=CITY_VALUES.includes(url.searchParams.get('city'))?url.searchParams.get('city'):'monaco';
  let map=null,harbourLayer=null,aisLayer=null,positionLayer=null,activityLayer=null,adLayer=null;
  let marketListings=[],paidAds=[],enabledLayers={yachts:true,activities:true,ads:true};
- let feed=[],verified=false,filtered=[],size='all',filterText='',selected=null,requestInFlight=false,authClient=null,feedCheckedAt=null;
+ let feed=[],verified=false,filtered=[],size='all',navFilter='all',filterText='',selected=null,requestInFlight=false,authClient=null,feedCheckedAt=null,feedState='loading';
  const txt=(fr,en)=>lang==='fr'?fr:en;
  const clean=s=>String(s||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
  const boatShape='<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2 25 23 14 17 3 23Z" /></svg>';
@@ -101,10 +101,27 @@
    if(first)highlightYacht(first.id,false);
   });
  }
+ function statusLabel(status){
+  const terms={
+   underway:['EN NAVIGATION','UNDERWAY'],approaching:['EN APPROCHE','APPROACHING'],
+   at_anchor:['AU MOUILLAGE','AT ANCHOR'],in_port:['AU PORT','MOORED'],
+   unclassified:['STATUT INCONNU','UNKNOWN STATUS']
+  };
+  const line=terms[status]||terms.unclassified;return lang==='fr'?line[0]:line[1];
+ }
+ function aisTime(y){
+  if(!y.reportedAt)return '';
+  const t=Date.parse(y.reportedAt);
+  if(!Number.isFinite(t))return '';
+  return new Date(t).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'});
+ }
  function exactMarker(y){
-  const marker=L.divIcon({className:'',iconSize:[30,30],iconAnchor:[15,15],html:'<span class="ob-yacht-marker">'+boatShape+'</span>'});
-  const m=L.marker([y.lat,y.lng],{icon:marker,zIndexOffset:500}).addTo(aisLayer);
-  m.bindTooltip(clean(y.name)+' · '+(y.length||'?')+' m · '+txt('AIS signalé','AIS reported'),{direction:'top'});
+  const rot=Number.isFinite(y.courseDegrees)?y.courseDegrees:0;
+  const icon=L.divIcon({className:'ob-ais-pin',iconSize:[38,38],iconAnchor:[19,19],
+   html:'<span class="ob-ais-vessel is-'+y.status+'"><span style="transform:rotate('+rot+'deg)">'+boatShape+'</span></span>'});
+  const m=L.marker([y.lat,y.lng],{icon,zIndexOffset:500}).addTo(aisLayer);
+  const speed=Number.isFinite(y.speedKnots)?' · '+y.speedKnots+' kn':'';
+  m.bindTooltip(clean(y.name)+' · '+statusLabel(y.status)+speed+' · AIS '+aisTime(y),{direction:'top'});
   m.on('click',()=>highlightYacht(y.id,false));
  }
  function renderMapMarkers(){
@@ -118,24 +135,26 @@
  }
  function makeYachtRow(y){
   const b=document.createElement('button');b.type='button';b.className='ob-yacht-row';
+  b.dataset.status=y.status;
   if(selected?.id===y.id)b.classList.add('is-selected');
   const sym=document.createElement('span');sym.className='ob-boat-small';sym.textContent='⛵';
   const text=document.createElement('span');text.className='ob-yacht-text';
   const name=document.createElement('strong');name.textContent=y.name;
+  const label=document.createElement('span');label.className='ob-status-label is-'+(y.status||'unclassified');
+  label.textContent=statusLabel(y.status);
   const desc=document.createElement('small');
-  desc.textContent=(y.length?y.length+' m · ':'')+y.port+' · '+(
-   y.precision==='ais'&&y.aisRecent?(txt('AIS · ','AIS · ')+new Date(y.reportedAt).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'})):
-   y.precision==='ais'?txt('DERNIER AIS · NON RÉCENT','LAST AIS · NOT RECENT'):
-   txt('PRÉSENCE AU PORT','HARBOUR REPORT'));
-  text.append(name,desc);
+  desc.textContent=(y.length?y.length+' m · ':'')+y.port+' · '+aisTime(y)+
+   (Number.isFinite(y.speedKnots)?' · '+y.speedKnots+' kn':'');
+  text.append(name,label,desc);
   const arrow=document.createElement('span');arrow.textContent='↗';
   b.append(sym,text,arrow);
   b.addEventListener('click',()=>highlightYacht(y.id,true));
   return b;
  }
  function matchingYachts(){
-  return feed.filter(y=>y.city===city&&(size==='all'||Number(y.length)>=Number(size))&&
-   (!filterText||(y.name+' '+y.port).toLocaleLowerCase().includes(filterText)));
+  return feed.filter(y=>y.city===city&&(size==='all'||(Number.isFinite(y.length)&&y.length>=Number(size)))&&
+   (navFilter==='all'||y.status===navFilter)&&
+   (!filterText||(y.name+' '+y.port+' '+(y.destination||'')).toLocaleLowerCase().includes(filterText)));
  }
  function renderFleet(){
   filtered=matchingYachts();
@@ -215,7 +234,7 @@
   const c=DESTINATIONS[city];
   map=L.map('obMap',{zoomControl:false,minZoom:9,maxZoom:18,scrollWheelZoom:false,preferCanvas:true}).setView(c.coords,c.zoom);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
-   attribution:'© OpenStreetMap contributors',maxZoom:19,keepBuffer:3,updateWhenIdle:true
+   attribution:'© OpenStreetMap contributors',maxZoom:19,keepBuffer:1,updateWhenIdle:true
   }).addTo(map);
   L.control.zoom({position:'bottomright'}).addTo(map);
   harbourLayer=L.layerGroup().addTo(map);
@@ -224,7 +243,7 @@
   activityLayer=L.layerGroup().addTo(map);
   adLayer=L.layerGroup().addTo(map);
   renderMapMarkers();
-  setTimeout(()=>map?.invalidateSize(),200);
+  requestAnimationFrame(()=>map?.invalidateSize());
  }
  function haversine(a,b,c,d){
   const rad=Math.PI/180,R=6371;
@@ -395,6 +414,14 @@
     renderMapMarkers();
   }));
   $('#obRefresh').addEventListener('click',fetchYachts);
+  $('#obNavigationFilters [data-nav]').forEach(b=>b.addEventListener('click',()=>{
+   navFilter=b.dataset.nav;
+   $('#obNavigationFilters [data-nav]').forEach(x=>{
+    const selected=x===b;x.classList.toggle('is-active',selected);
+    x.setAttribute('aria-pressed',String(selected));
+   });
+   renderFleet();
+  }));
   $('#obSearch').addEventListener('input',e=>{filterText=e.target.value.trim().toLocaleLowerCase();renderFleet()});
   $$('.ob-length button').forEach(b=>b.addEventListener('click',()=>{
    size=b.dataset.size;
@@ -412,11 +439,11 @@
   $('#obManualName').addEventListener('keydown',e=>{if(e.key==='Enter'){$('#obManualSelect').click();e.preventDefault()}});
   $('#obClearVessel').addEventListener('click',()=>{selected=null;$('#obVesselContext').hidden=true;renderFleet()});
   $('#obConcierge').addEventListener('click',()=>requestExperience({nameFr:'Demande sur mesure',nameEn:'Bespoke concierge request'}));
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&verified)fetchYachts()});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)fetchYachts()});
  }
  wire();setLanguage(lang);
  if(window.L)initMap();else window.addEventListener('load',initMap,{once:true});
  fetchYachts();fetchMarketplace();
  // Two minute refresh avoids unnecessarily hammering the historic upstream.
- setInterval(()=>{if(!document.hidden)fetchYachts()},120000);
+ setInterval(()=>{if(!document.hidden)fetchYachts()},40000);
 })();
