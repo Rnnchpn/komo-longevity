@@ -1,5 +1,5 @@
 // KŌMØ Motion Online — original, non-validated self-report intake.
-// NOT the GLFS-25 or a licensed reproduction. No diagnosis or medical score.
+// Original KŌMØ self-report, not a licensed or clinically validated instrument.
 export const QUESTIONNAIRE_VERSION='KOMO_MOTION_SELF_REPORT_V1';
 const ease=['Aucune difficulté','Une légère difficulté','Une difficulté modérée','Une grande difficulté','Impossible ou évité'];
 const interference=['Jamais','Rarement','Parfois','Souvent','Presque toujours'];
@@ -9,7 +9,7 @@ export const INTAKE_GROUPS=[
    {id:'ageBand',label:'Votre tranche d’âge',options:[['under40','Moins de 40 ans'],['40-49','40 à 49 ans'],['50-59','50 à 59 ans'],['60-69','60 à 69 ans'],['70-79','70 à 79 ans'],['80plus','80 ans ou plus'],['undisclosed','Je préfère ne pas répondre']]},
    {id:'goal',label:'Quel est votre objectif prioritaire ?',options:[['independence','Préserver mon autonomie'],['walk','Améliorer mon aisance à la marche'],['strength','Entretenir ma force'],['confidence','Me sentir plus sûr de mes mouvements'],['general','Mieux comprendre ma mobilité']]},
  ]},
- {id:'mobility',title:'Votre mobilité au quotidien',subtitle:'Indiquez votre difficulté habituelle, pas votre meilleure performance.',note:'8 questions originales KŌMØ sur la mobilité perçue ; ce n’est pas le GLFS-25 validé.',weight:.45,questions:[
+ {id:'mobility',title:'Votre mobilité au quotidien',subtitle:'Indiquez votre difficulté habituelle, pas votre meilleure performance.',note:'Huit questions KŌMØ sur la mobilité perçue. Indicateur descriptif, pas un diagnostic.',weight:.45,questions:[
   {id:'walk10',label:'Marcher dehors pendant 10 minutes',options:ease},
   {id:'stairs',label:'Monter un étage d’escalier',options:ease},
   {id:'chair',label:'Vous relever d’une chaise sans vous précipiter',options:ease},
@@ -36,25 +36,32 @@ export const INTAKE_GROUPS=[
   {id:'strengthDays',label:'Jours avec un exercice de renforcement adapté',options:['3 jours ou plus','2 jours','1 jour','Moins d’un jour','Jamais']},
   {id:'outdoors',label:'Sorties actives ou déplacements à pied',options:frequency},
   {id:'breaks',label:'Jours où vous avez interrompu une longue période assise pour bouger',options:frequency}
+ ]},
+ {id:'context',title:'Quelques repères complémentaires',subtitle:'Quatre questions facultatives pour mieux comprendre votre situation.',note:'Ces réponses restent descriptives et ne changent pas votre indice de mobilité.',scored:false,optional:true,questions:[
+  {id:'fall12',label:'Avez-vous chuté au cours des 12 derniers mois ?',options:[['0','Aucune chute'],['1','Une chute'],['2','Deux chutes'],['3','Trois chutes ou plus'],['4','Je préfère ne pas répondre']]},
+  {id:'nearFall',label:'Au cours du dernier mois, avez-vous failli tomber ou dû vous rattraper ?',options:[['0','Jamais'],['1','Une fois'],['2','Deux ou trois fois'],['3','Souvent'],['4','Je préfère ne pas répondre']]},
+  {id:'painNow',label:'Quelle intensité avait votre gêne ou douleur habituelle cette semaine ?',options:[['0','Aucune'],['1','Faible (1–3/10)'],['2','Modérée (4–6/10)'],['3','Forte (7–10/10)'],['4','Je préfère ne pas répondre']]},
+  {id:'activeTime',label:'Habituellement, combien de temps passez-vous en mouvement chaque jour ?',options:[['0','60 minutes ou plus'],['1','30 à 59 minutes'],['2','15 à 29 minutes'],['3','Moins de 15 minutes'],['4','Je ne sais pas']]},
  ]}
 ];
 export const SCORING_GROUPS=INTAKE_GROUPS.filter(g=>g.scored!==false);
-export const QUESTION_COUNT=INTAKE_GROUPS.reduce((s,g)=>s+g.questions.length,0);
+export const QUESTION_COUNT=INTAKE_GROUPS.filter(g=>!g.optional).reduce((s,g)=>s+g.questions.length,0);
+export const OPTIONAL_QUESTION_COUNT=INTAKE_GROUPS.filter(g=>g.optional).reduce((s,g)=>s+g.questions.length,0);
 export function completeGroup(group,answers){
- return group.questions.every(q=>Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id]));
+ return group.optional||group.questions.every(q=>Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id]));
 }
 export function validAnswer(q,answer){
  if(Array.isArray(q.options)&&typeof q.options[0]==='string')return Number.isInteger(Number(answer))&&String(Number(answer))===String(answer)&&Number(answer)>=0&&Number(answer)<q.options.length;
  return q.options.some(item=>item[0]===answer);
 }
 export function intakeProgress(answers={}){
- const questions=INTAKE_GROUPS.flatMap(g=>g.questions);
+ const questions=INTAKE_GROUPS.filter(g=>!g.optional).flatMap(g=>g.questions);
  const completed=questions.filter(q=>Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id])).length;
  return {completed,total:questions.length,percent:Math.round(completed/questions.length*100)};
 }
 const round=x=>Math.round(x*10)/10;
 export function scoreIntake(answers={}){
- const missing=INTAKE_GROUPS.flatMap(g=>g.questions.filter(q=>!Object.hasOwn(answers,q.id)||!validAnswer(q,answers[q.id])).map(q=>q.id));
+ const missing=INTAKE_GROUPS.filter(g=>!g.optional).flatMap(g=>g.questions.filter(q=>!Object.hasOwn(answers,q.id)||!validAnswer(q,answers[q.id])).map(q=>q.id));
  const domains={};
  for(const g of SCORING_GROUPS){
   if(!completeGroup(g,answers)){domains[g.id]=null;continue;}
