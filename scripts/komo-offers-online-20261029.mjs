@@ -4,7 +4,7 @@ import { join } from 'node:path';
 // Final, additive commercial presentation layer. Does not modify Pulse, Acuity,
 // patient records, payment, account creation or scientific scoring.
 const site = join(process.cwd(), 'site');
-const acuityOnline = 'https://app.acuityscheduling.com/schedule.php?owner=40696577&amp;appointmentType=99940918';
+const stripeOnline = 'https://buy.stripe.com/fZucN6bUTeTCd4B4EX0VO00';
 const acuityParis = 'https://app.acuityscheduling.com/schedule.php?owner=40696577';
 const pulse = 'https://pulse.komolongevity.com/';
 const mail = 'mailto:contact@komolongevity.com';
@@ -17,17 +17,17 @@ const locales = [
 const copy = {
   fr: {
     title: 'KŌMØ Longevity — Bilans Motion en ligne, à Paris et à Cannes',
-    description: 'Découvrez les bilans fonctionnels non médicaux KŌMØ : en ligne 49 € / 30 min, à Paris chez Centré 200 €, à Cannes et sur site. Réservation via Acuity, suivi dans Pulse.',
+    description: 'Découvrez les bilans fonctionnels non médicaux KŌMØ : en ligne 39 € sans créneau, à Paris chez Centré 200 €, à Cannes et sur site. Paiement Stripe, accès Pulse après vérification.',
     h1: 'Votre mouvement.<br>Votre point de départ.',
     hero: 'Un bilan fonctionnel pour mieux comprendre votre mobilité. À distance ou en présentiel, choisissez l’expérience KŌMØ adaptée à vos objectifs.',
-    heroAction: 'Réserver le bilan en ligne · 49 €', heroOther: 'Comparer les offres',
+    heroAction: 'Acheter le bilan en ligne · 39 €', heroOther: 'Comparer les offres',
     nav: 'Nos offres', eyebrow: 'KŌMØ · OFFRES & RÉSERVATIONS',
     sectionTitle: 'Choisissez votre bilan.', sectionLead: 'Trois formats, une même ambition : observer votre mobilité avec méthode, puis vous donner une suite claire. Les bilans Motion sont non médicaux et non diagnostiques.',
-    popular: 'DISPONIBLE À DISTANCE', onlineLoc: 'CHEZ VOUS · VISIO',
-    onlineTitle: 'Bilan Motion Online', onlineCost: '49 €', onlineDuration: '30 minutes',
-    onlineBody: 'Un entretien fonctionnel et des tests simples guidés en visioconférence. Préparez votre environnement et votre webcam avant la séance dans Pulse.',
-    onlinePoints: ['Questionnaires de mobilité et objectifs', 'Tests fonctionnels réalisables à domicile, supervisés en direct', 'Restitution descriptive et prochaines étapes'],
-    onlineAction: 'Réserver le bilan en ligne',
+    popular: 'DISPONIBLE À DISTANCE', onlineLoc: 'CHEZ VOUS · AUTONOME',
+    onlineTitle: 'Bilan Motion Online', onlineCost: '39 €', onlineDuration: 'Sans horaire · à votre rythme',
+    onlineBody: 'Questionnaires et tests fonctionnels à réaliser en autonomie dans Pulse, avec consignes de sécurité.',
+    onlinePoints: ['Questionnaires de mobilité et objectifs', 'Tests fonctionnels réalisés en autonomie à domicile', 'Restitution descriptive et prochaines étapes'],
+    onlineAction: 'Acheter mon bilan',
     parisLoc: 'PARIS · CENTRÉ', parisTitle: 'Bilan Motion en présentiel', parisCost: '200 €', parisDuration: 'sur rendez-vous',
     parisBody: 'Mesures fonctionnelles de la marche, de l’équilibre, de la mobilité et de la force avec l’équipement disponible sur site et un opérateur KŌMØ.',
     parisPoints: ['Tests standardisés en présentiel', 'Mesures instrumentées selon l’équipement', 'Synthèse et suivi Pulse selon activation'],
@@ -36,30 +36,30 @@ const copy = {
     cannesBody: 'Un bilan fonctionnel organisé sur la Riviera selon le lieu, l’opérateur et l’équipement disponibles.',
     cannesPoints: ['Organisation personnalisée', 'Évaluation fonctionnelle non médicale', 'Restitution et suivi selon la formule'],
     cannesAction: 'Demander un créneau à Cannes',
-    flowTitle: 'Un parcours simple', flow: ['1 · Je choisis et je réserve', '2 · Je reçois la confirmation Acuity', '3 · Je prépare mon bilan dans Pulse', '4 · Je réalise ma séance guidée'],
-    note: 'Bilan Online : la webcam sert actuellement à préparer et cadrer la séance. La détection automatisée du mouvement et un Motion Score webcam validé ne sont pas annoncés comme disponibles. Le paiement, les reports et annulations suivent les conditions affichées par Acuity.',
-    after: 'Déjà réservé ? Préparez votre séance', afterLink: 'Préparation webcam dans Pulse',
+    flowTitle: 'Un parcours simple', flow: ['1 · J’achète le bilan en ligne', '2 · Je reçois ma confirmation Stripe', '3 · Mon accès Pulse est vérifié', '4 · Je réalise mes tests à mon rythme'],
+    note: 'Bilan autonome non médical. Les estimations caméra sont exploratoires. Le règlement est traité par Stripe. À ce stade, l’accès au bilan après paiement est activé après vérification par l’équipe : il n’est pas immédiat ni automatique.',
+    after: 'Vous préparez votre bilan ?', afterLink: 'Préparation webcam dans Pulse',
     extraEyebrow: 'AUTRES OFFRES KŌMØ', extraTitle: 'Pour aller plus loin.', extraText: 'Réévaluation, interventions privées, établissements : une solution adaptée au lieu et au besoin, sur proposition.',
     extra1: 'Suivi Motion · 6 semaines', extra1Desc: 'Comparer deux évaluations dans des conditions aussi reproductibles que possible.', extra1Action: 'Demander un suivi',
     extra2: 'Yachting & Hospitality', extra2Desc: 'Bilans fonctionnels mobiles pour yachts, hôtels, clubs et expériences privées.', extra2Action: 'Organiser une intervention',
     extra3: 'KŌMØ Professional', extra3Desc: 'Motion Case pour les équipes ; Motion Bench en développement et Motion Lab sur étude de faisabilité.', extra3Action: 'Découvrir les solutions professionnelles',
     faq1: 'Le bilan Online est-il une consultation médicale ?', faqa1: 'Non. Il s’agit d’une prestation d’évaluation fonctionnelle non médicale. Aucun diagnostic, prescription ou avis médical n’est délivré.',
     faq2: 'L’analyse automatique par webcam est-elle déjà proposée ?', faqa2: 'Non. Les tests sont guidés par un opérateur ; la préparation de la caméra ne constitue pas une mesure automatisée validée.',
-    faq3: 'Quand puis-je accéder à Pulse ?', faqa3: 'La réservation commence dans Acuity. Le lien de préparation est public ; l’accès à un dossier personnel nécessite ensuite une activation et une vérification d’identité distinctes.'
+    faq3: 'Quand puis-je accéder à Pulse ?', faqa3: 'Après paiement Stripe, contactez contact@komolongevity.com depuis l’adresse d’achat pour vérifier votre paiement et activer Pulse. L’accès n’est pas encore immédiat.'
   },
   en: {
     title: 'KŌMØ Longevity — Online and in-person Motion assessments',
-    description: 'Explore KŌMØ non-medical functional assessments: Online €49 / 30 minutes, in Paris at Centré €200, and in Cannes on request. Book with Acuity and prepare in Pulse.',
+    description: 'Explore KŌMØ non-medical functional assessments: Online €39 with no appointment time, in Paris at Centré €200, and in Cannes on request. Pay with Stripe and access Pulse after verification.',
     h1: 'Your movement.<br>Your starting point.',
     hero: 'A functional assessment to help you understand your mobility. Online or in person, choose the KŌMØ experience that fits your goals.',
-    heroAction: 'Book Online · €49', heroOther: 'Compare options',
+    heroAction: 'Buy Online · €39', heroOther: 'Compare options',
     nav: 'Services', eyebrow: 'KŌMØ · SERVICES & BOOKINGS',
     sectionTitle: 'Choose your assessment.', sectionLead: 'Three formats, one purpose: observe how you move using a structured method and identify practical next steps. Motion assessments are non-medical and non-diagnostic.',
-    popular: 'AVAILABLE REMOTELY', onlineLoc: 'FROM HOME · VIDEO',
-    onlineTitle: 'Motion Online assessment', onlineCost: '€49', onlineDuration: '30 minutes',
-    onlineBody: 'A functional conversation and simple tests guided live by video. Prepare your space and webcam in Pulse before your session.',
-    onlinePoints: ['Mobility questionnaire and goals', 'Simple functional tasks guided live', 'Descriptive feedback and next steps'],
-    onlineAction: 'Book Online',
+    popular: 'AVAILABLE REMOTELY', onlineLoc: 'FROM HOME · SELF-GUIDED',
+    onlineTitle: 'Motion Online assessment', onlineCost: '€39', onlineDuration: 'Sans horaire · à votre rythme',
+    onlineBody: 'Self-guided functional questionnaires and movement tests in Pulse, with safety instructions.',
+    onlinePoints: ['Mobility questionnaire and goals', 'Self-guided functional tests', 'Descriptive feedback and next steps'],
+    onlineAction: 'Purchase Online',
     parisLoc: 'PARIS · CENTRÉ', parisTitle: 'In-person Motion assessment', parisCost: '€200', parisDuration: 'by appointment',
     parisBody: 'Functional assessment of gait, balance, mobility and strength using available onsite equipment with a KŌMØ operator.',
     parisPoints: ['Standardised in-person tests', 'Instrumented measures when available', 'Summary and Pulse follow-up after activation'],
@@ -68,30 +68,30 @@ const copy = {
     cannesBody: 'A functional assessment arranged in the Riviera, subject to venue, operator and equipment availability.',
     cannesPoints: ['Personalised arrangements', 'Non-medical functional assessment', 'Feedback and follow-up per offer'],
     cannesAction: 'Request Cannes availability',
-    flowTitle: 'A simple journey', flow: ['1 · Choose and book', '2 · Get your Acuity confirmation', '3 · Prepare in Pulse', '4 · Attend your guided session'],
-    note: 'Online: the webcam currently helps prepare and frame the video session. Automated movement detection and a validated webcam Motion Score are not advertised as available. Payment and cancellation terms are displayed by Acuity.',
-    after: 'Already booked? Prepare your session', afterLink: 'Webcam preparation in Pulse',
+    flowTitle: 'A simple journey', flow: ['1 · Purchase the assessment', '2 · Receive Stripe confirmation', '3 · Verify Pulse access', '4 · Complete tests at your pace'],
+    note: 'Self-guided non-medical assessment. Video measurements are exploratory. Stripe processes payment. Access after purchase currently requires manual payment verification and is not instantaneous.',
+    after: 'Preparing your assessment?', afterLink: 'Webcam preparation in Pulse',
     extraEyebrow: 'MORE KŌMØ OPTIONS', extraTitle: 'Go further.', extraText: 'Reassessments, private services and facilities: tailored arrangements on request.',
     extra1: 'Motion follow-up · 6 weeks', extra1Desc: 'Compare assessments with consistent conditions wherever possible.', extra1Action: 'Ask about follow-up',
     extra2: 'Yachting & Hospitality', extra2Desc: 'Mobile assessments for yachts, hotels, clubs and private experiences.', extra2Action: 'Arrange an on-site session',
     extra3: 'KŌMØ Professional', extra3Desc: 'Motion Case for teams; Motion Bench in development and Motion Lab subject to feasibility.', extra3Action: 'Explore professional solutions',
     faq1: 'Is Online a medical consultation?', faqa1: 'No. This is a non-medical functional assessment. It does not provide diagnosis, prescriptions or medical advice.',
     faq2: 'Is automated webcam tracking available?', faqa2: 'Not yet. Tasks are guided by an operator; preparing your webcam does not constitute validated automated measurement.',
-    faq3: 'When can I access Pulse?', faqa3: 'Booking begins in Acuity. The preparation link is public; access to a personal record requires separate activation and identity verification.'
+    faq3: 'When can I access Pulse?', faqa3: 'After paying with Stripe, email contact@komolongevity.com from the purchase address so the team can verify payment and activate Pulse. Access is not instant yet.'
   },
   es: {
     title: 'KŌMØ Longevity — Evaluaciones Motion online, París y Cannes',
-    description: 'Evaluaciones funcionales no médicas KŌMØ: Online 49 € / 30 minutos, París Centré 200 €, Cannes bajo consulta. Reservas con Acuity y preparación en Pulse.',
+    description: 'Evaluaciones funcionales no médicas KŌMØ: Online 39 € sans créneauutos, París Centré 200 €, Cannes bajo consulta. Pago con Stripe y acceso Pulse tras verificación.',
     h1: 'Tu movimiento.<br>Tu punto de partida.',
     hero: 'Una evaluación funcional para comprender mejor tu movilidad. Online o presencial, elige la experiencia KŌMØ adecuada para ti.',
-    heroAction: 'Reservar Online · 49 €', heroOther: 'Comparar opciones',
+    heroAction: 'Comprar Online · 39 €', heroOther: 'Comparar opciones',
     nav: 'Servicios', eyebrow: 'KŌMØ · SERVICIOS Y RESERVAS',
     sectionTitle: 'Elige tu evaluación.', sectionLead: 'Tres formatos para observar la movilidad con método y definir los próximos pasos. Las evaluaciones Motion no son médicas ni diagnósticas.',
-    popular: 'DISPONIBLE A DISTANCIA', onlineLoc: 'DESDE CASA · VÍDEO',
-    onlineTitle: 'Evaluación Motion Online', onlineCost: '49 €', onlineDuration: '30 minutos',
-    onlineBody: 'Entrevista funcional y pruebas sencillas guiadas en directo. Prepara tu espacio y webcam en Pulse antes de la sesión.',
-    onlinePoints: ['Cuestionario y objetivos de movilidad', 'Pruebas funcionales guiadas por videollamada', 'Resumen descriptivo y próximos pasos'],
-    onlineAction: 'Reservar Online',
+    popular: 'DISPONIBLE A DISTANCIA', onlineLoc: 'DESDE CASA · AUTÓNOMO',
+    onlineTitle: 'Evaluación Motion Online', onlineCost: '39 €', onlineDuration: 'Sin horario · a tu ritmo',
+    onlineBody: 'Cuestionarios y pruebas funcionales autónomas en Pulse, con instrucciones de seguridad.',
+    onlinePoints: ['Cuestionario y objetivos de movilidad', 'Pruebas funcionales autónomas', 'Resumen descriptivo y próximos pasos'],
+    onlineAction: 'Comprar Online',
     parisLoc: 'PARÍS · CENTRÉ', parisTitle: 'Evaluación Motion presencial', parisCost: '200 €', parisDuration: 'con cita previa',
     parisBody: 'Evaluación funcional de marcha, equilibrio, movilidad y fuerza con el equipo disponible y un operador KŌMØ.',
     parisPoints: ['Pruebas estandarizadas presenciales', 'Mediciones instrumentadas según disponibilidad', 'Resumen y seguimiento Pulse tras activación'],
@@ -100,16 +100,16 @@ const copy = {
     cannesBody: 'Evaluación funcional organizada en la Riviera según lugar, operador y equipo disponibles.',
     cannesPoints: ['Organización personalizada', 'Evaluación funcional no médica', 'Resumen y seguimiento según oferta'],
     cannesAction: 'Consultar disponibilidad en Cannes',
-    flowTitle: 'Un recorrido sencillo', flow: ['1 · Elegir y reservar', '2 · Recibir confirmación Acuity', '3 · Preparar en Pulse', '4 · Realizar sesión guiada'],
-    note: 'Online: la webcam permite preparar y encuadrar la sesión. La detección automática del movimiento y un Motion Score validado por webcam aún no se anuncian como disponibles. El pago y la cancelación siguen las condiciones de Acuity.',
-    after: '¿Ya has reservado? Prepara tu sesión', afterLink: 'Preparación de webcam en Pulse',
+    flowTitle: 'Un recorrido sencillo', flow: ['1 · Comprar la evaluación', '2 · Recibir confirmación Stripe', '3 · Verificar acceso Pulse', '4 · Realizar pruebas a tu ritmo'],
+    note: 'Evaluación autónoma no médica. Las mediciones por cámara son exploratorias. Stripe procesa el pago. El acceso tras la compra requiere verificación manual y aún no es inmediato.',
+    after: '¿Preparas tu evaluación?', afterLink: 'Preparación de webcam en Pulse',
     extraEyebrow: 'OTRAS OFERTAS KŌMØ', extraTitle: 'Continuar.', extraText: 'Seguimiento, experiencias privadas y establecimientos: soluciones adaptadas bajo propuesta.',
     extra1: 'Seguimiento Motion · 6 semanas', extra1Desc: 'Comparar evaluaciones en condiciones reproducibles cuando sea posible.', extra1Action: 'Solicitar seguimiento',
     extra2: 'Yachting & Hospitality', extra2Desc: 'Evaluaciones móviles para yates, hoteles, clubes y experiencias privadas.', extra2Action: 'Organizar una sesión',
     extra3: 'KŌMØ Professional', extra3Desc: 'Motion Case para equipos; Motion Bench en desarrollo y Motion Lab sujeto a viabilidad.', extra3Action: 'Ver soluciones profesionales',
     faq1: '¿Online es una consulta médica?', faqa1: 'No. Es una evaluación funcional no médica, sin diagnóstico, prescripción ni asesoramiento médico.',
     faq2: '¿Existe ya el análisis automático por webcam?', faqa2: 'No. Las pruebas son guiadas por un operador; preparar la cámara no equivale a una medida automática validada.',
-    faq3: '¿Cuándo puedo acceder a Pulse?', faqa3: 'La reserva empieza en Acuity. La preparación es pública; el expediente personal requiere activación y verificación de identidad.'
+    faq3: '¿Cuándo puedo acceder a Pulse?', faqa3: 'Tras pagar con Stripe, escribe a contact@komolongevity.com desde tu correo de compra para verificar el pago y activar Pulse. El acceso aún no es inmediato.'
   }
 };
 const css = [
@@ -156,7 +156,7 @@ function services(c,lang){
  const experience=lang==='fr'?'/fr/experience/':lang==='es'?'/es/experience/':'/experience/';
  return '<section class="ko-services" id="solutions" aria-labelledby="ko-offers-title"><div class="ko-shell">'+
   '<div class="ko-heading"><div><p class="ko-ey">'+c.eyebrow+'</p><h2 id="ko-offers-title">'+c.sectionTitle+'</h2></div><p>'+c.sectionLead+'</p></div>'+
-  '<div class="ko-grid">'+card(c,'online',acuityOnline)+card(c,'paris',acuityParis)+card(c,'cannes',mail+'?subject=KOMO%20Motion%20Cannes')+'</div>'+
+  '<div class="ko-grid">'+card(c,'online',stripeOnline)+card(c,'paris',acuityParis)+card(c,'cannes',mail+'?subject=KOMO%20Motion%20Cannes')+'</div>'+
   '<div class="ko-flow"><strong>'+c.flowTitle+'</strong><div class="ko-flow-grid">'+c.flow.map(s=>'<span>'+s+'</span>').join('')+'</div>'+
   '<p class="ko-note">'+c.note+'</p><a class="ko-prep" href="'+pulse+'online/">'+c.after+' · '+c.afterLink+' →</a></div></div></section>'+
   '<section class="ko-extra"><div class="ko-shell"><div class="ko-extra-head"><div><p class="ko-ey">'+c.extraEyebrow+'</p><h2>'+c.extraTitle+'</h2></div><p>'+c.extraText+'</p></div>'+
@@ -179,7 +179,7 @@ for(const {file,lang} of locales){
  html=html.replace(oldOffer,services(c,lang));
  const hero=/<div class="kc-hero-copy">[\s\S]*?(?=<\/div><figure class="kpv-hero-media">)/;
  if(!hero.test(html))throw new Error('[offers] expected hero copy missing: '+file);
- html=html.replace(hero,'<div class="kc-hero-copy"><p class="ko-ey">'+c.eyebrow+'</p><h1 class="kt-title">'+c.h1+'</h1><p class="kt-lead">'+c.hero+'</p><div class="kt-btns"><a class="kt-btn kt-btn--dark" href="'+acuityOnline+'">'+c.heroAction+'</a><a class="kt-btn kt-btn--light" href="#solutions">'+c.heroOther+' →</a></div>');
+ html=html.replace(hero,'<div class="kc-hero-copy"><p class="ko-ey">'+c.eyebrow+'</p><h1 class="kt-title">'+c.h1+'</h1><p class="kt-lead">'+c.hero+'</p><div class="kt-btns"><a class="kt-btn kt-btn--dark" href="'+stripeOnline+'">'+c.heroAction+'</a><a class="kt-btn kt-btn--light" href="#solutions">'+c.heroOther+' →</a></div>');
  const oldFAQ=/<section class="kt-z-section kt-z-section--sage"><div class="kt-shell kt-z-faq">[\s\S]*?<\/section>/;
  if(oldFAQ.test(html))html=html.replace(oldFAQ,faq(c));
  if(!html.includes(css))html=html.replace('</head>',css+'\n</head>');
@@ -189,7 +189,7 @@ for(const {file,lang} of locales){
  html=html.replace(/<meta property="og:title" content="[^"]*">/,'<meta property="og:title" content="'+c.title+'">');
  html=html.replace(/(<div class="kh4-nav"[^>]*>)/,'$1<a href="#solutions">'+c.nav+'</a>');
  html=html.replace(/(<div class="kt-menu-group"><strong>Services KŌMØ<\/strong>)/,'$1<a class="kt-menu-link" href="#solutions">'+c.nav+'</a>');
- if(!html.includes('appointmentType=99940918'))throw new Error('[offers] online booking URL absent: '+file);
+ if(!html.includes(stripeOnline))throw new Error('[offers] Stripe purchase link missing: '+file);
  if(!html.includes('id="solutions"'))throw new Error('[offers] offers anchor absent: '+file);
  await writeFile(fp,html,'utf8');
  console.log('[komo-offers-online] PASS '+file);
