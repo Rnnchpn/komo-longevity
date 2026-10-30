@@ -71,7 +71,7 @@ async function submitYacht(ev){
 async function submitCampaign(ev){
  ev.preventDefault();needBroker();
  const values={broker_user_id:current.id,placement:val('#placement'),location_city:val('#adCity'),
- headline:val('#adHeadline'),request_days:Number(val('#adDays')),listing_id:val('#adListing')||null};
+ headline:val('#adHeadline'),sponsor_name:broker.company_name,request_days:Number(val('#adDays')),listing_id:val('#adListing')||null};
  const {error}=await sb.from('elysium_ad_campaigns').insert(values);
  if(error)throw error;
  msg('#campaignMessage','Demande publicitaire enregistrée. ELYSIUM vous transmettra un devis et les modalités de paiement.');
