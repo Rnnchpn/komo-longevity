@@ -1,5 +1,6 @@
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import {buildMotionPassport} from '../session/motion-passport.mjs';
+import {postureDisplay} from '../session/posture-interpretation.mjs';
 import {mountConsultationDemo} from './consultation-demo.mjs';
 const sb=createClient('https://uqlolefsiktbznnymriy.supabase.co','sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const root=document.getElementById('operator-app'),edge='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-online-operator';
@@ -71,6 +72,8 @@ function dossierView(a,d){
   ['unipodal_left','Appui gauche','s'],['unipodal_right','Appui droit','s'],
   ['arms','Élévations des bras','rép.'],['posture','Posture (webcam)','indice']];
  const last=d.updatedAt&&Number.isFinite(Date.parse(d.updatedAt))?new Date(d.updatedAt).toLocaleString('fr-FR'):'Date non disponible';
+ const posture=postureDisplay(d.results?.posture);
+ const extraAnswers=[['fall12','Chutes en 12 mois',['Aucune','Une','Deux','Trois ou plus','Non précisé']],['nearFall','Presque-chutes',['Jamais','Une','Deux ou trois','Souvent','Non précisé']],['painNow','Intensité de la gêne',['Aucune','Faible','Modérée','Forte','Non précisé']],['activeTime','Mouvement quotidien',['60 min ou plus','30–59 min','15–29 min','Moins de 15 min','Non précisé']]];
  const cue=p.planStatus!=='eligible'?'<div class="caution">Signal de sécurité ou gêne importante : ne pas recommander de programme autonome avant un échange adapté.</div>':'';
  return back+'<section class="summary"><div class="eyebrow">DOSSIER PRIVATE · LECTURE ADMINISTRATEUR JOURNALISÉE</div>'+
  '<div class="work-heading"><div><h1>'+escape([a.firstName,a.lastName].filter(Boolean).join(' ')||'Bilan Online')+'</h1>'+
@@ -82,9 +85,11 @@ function dossierView(a,d){
  '<article><span>'+escape(x.title)+'</span><strong>'+escape(x.value)+'/100</strong><p>'+escape(x.action)+'</p></article>').join(''):'<p>Questionnaire incomplet. Aucun axe chiffré calculable.</p>')+'</div>'+
  '<h2>Observations à confirmer</h2><div class="tests">'+tests.map(([id,label,unit])=>{
  const r=d.results?.[id]||{},valid=['done','review'].includes(r.status)&&typeof r.value==='number';
- return '<div><span>'+escape(label)+'</span><strong>'+escape(valid?r.value+' '+unit:'Non mesuré')+'</strong><small>'+
+ return '<div><span>'+escape(label)+'</span><strong>'+escape(id==='posture'?posture.label:valid?r.value+' '+unit:'Non mesuré')+'</strong><small>'+
  escape(r.status==='review'?'À vérifier':r.status==='done'?'Enregistré':'Manquant')+'</small></div>';
  }).join('')+'</div>'+
+ '<section class="operator-posture-detail"><h2>Posture · lecture et articulations</h2><p>'+escape(posture.label)+'. Genou : '+escape(posture.kneeFlexionDeg===null||posture.kneeFlexionDeg===undefined?'Non mesuré':posture.kneeFlexionDeg+'°')+' ; cheville : '+escape(posture.ankleDeviationDeg===null||posture.ankleDeviationDeg===undefined?'Non mesurée':posture.ankleDeviationDeg+'°')+'.</p><p>'+escape(posture.compensation==='possible'?'Adaptation posturale possible, à confirmer':posture.compensation==='not_observed'?'Aucune adaptation apparente détectée':'Compensation non évaluable')+' · estimation webcam 2D, sans valeur diagnostique.</p></section>'+
+ '<details class="operator-extra-context"><summary>Questions complémentaires (facultatives)</summary><div class="tests">'+extraAnswers.map(([id,label,options])=>'<div><span>'+escape(label)+'</span><strong>'+escape(options[Number(d.answers?.[id])]||'Non renseigné')+'</strong></div>').join('')+'</div></details>'+
  '<section class="call-guide"><div class="eyebrow">DÉROULÉ DE RESTITUTION / AIDE-MÉMOIRE</div><h2>Un échange qui débouche sur une action.</h2>'+
  '<p>Ces cases sont uniquement un guide pendant l’appel ; aucune note n’est enregistrée dans le dossier.</p>'+
  '<label><input type="checkbox"> Accueillir, confirmer l’objectif du patient et rappeler le cadre non médical.</label>'+
