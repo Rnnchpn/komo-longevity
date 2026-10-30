@@ -60,7 +60,10 @@ const onBoardJs=await readFile(join(out,'on-board','on-board.js'),'utf8');
 if(!onBoard.includes('data-city="monaco"')||!onBoard.includes('data-city="cannes"')||
  !onBoard.includes('data-city="saint-tropez"')||!onBoard.includes('id="obMap"')||
  !onBoardJs.includes('/api/elysium-yachts')||!onBoardJs.includes('navigator.geolocation.getCurrentPosition')||
- !onBoardJs.includes('renderActivities')||!onBoardJs.includes('source')||onBoardJs.includes('const SNAPSHOT'))
+ !onBoardJs.includes('renderActivities')||!onBoardJs.includes('source')||onBoardJs.includes('const SNAPSHOT')||
+ !onBoard.includes('data-nav="underway"')||!onBoard.includes('data-nav="approaching"')||
+ !onBoard.includes('data-nav="at_anchor"')||!onBoard.includes('data-nav="in_port"')||
+ !onBoardJs.includes('source===\'live_ais\'')||!onBoardJs.includes('40000'))
  throw new Error('[elysium] On Board missing 3 cities, consent-based GPS or member-only verified yachts');
 const home=await readFile(join(out,'index.html'),'utf8');
 if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/medical-longevity/')||!home.includes('ely-public-commerce')||(home.match(/class="ely-public-world ely-public-world-/g)||[]).length!==8)
