@@ -267,6 +267,9 @@ $('#requestForm').addEventListener('submit',async ev=>{
     :tr('Impossible d’enregistrer la demande. Contactez contact@komolongevity.com.','Request could not be recorded. Please email contact@komolongevity.com.');
  }finally{submit.disabled=false}
 });
-switchCity(destination);setLanguage('en');show('explore');
+switchCity(destination);setLanguage('en');
+const requestedService=(params.get('service')||'').toLowerCase();
+if(Object.prototype.hasOwnProperty.call(labels,requestedService))chooseService(requestedService);
+else show('explore');
 })();
 </script></body></html>
