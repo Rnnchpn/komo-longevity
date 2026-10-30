@@ -17,7 +17,7 @@ const OP_STEPS=[
  ['qc_release','45–55','Contrôle qualité','Pulse']
 ];
 
-const S={user:null,role:'member',profile:null,mode:'patient',org:null,membership:null,patient:null,ownPatient:null,ownPatients:[],patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],onlineSessions:[],schema:{bio:false,operator:false},route:'home',loading:false};
+const S={user:null,role:'member',profile:null,profilePhotoUrl:'',mode:'patient',org:null,membership:null,patient:null,ownPatient:null,ownPatients:[],patients:[],assessment:null,questionnaires:[],scores:[],measurements:[],programs:[],trajectory:[],appointments:[],bio:[],gates:[],checkpoints:[],opSession:null,opSteps:[],onlineSessions:[],schema:{bio:false,operator:false},route:'home',loading:false};
 
 const $=s=>document.querySelector(s);
 const esc=(v='')=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
@@ -178,6 +178,15 @@ function installPulseBookingEntry(){
 async function loadIdentity(){
   const u=await sb.auth.getUser();S.user=u.data.user||null;if(!S.user)return false;
   S.profile=(await safe(sb.from('profiles').select('*').eq('id',S.user.id).maybeSingle())).data||{};
+  // Private profile photo, read only for the authenticated account.
+  S.profilePhotoUrl='';
+  if(S.profile.avatar_config?.mode==='photo'&&S.profile.avatar_path){
+    const path=String(S.profile.avatar_path).trim().replace(/^profile-avatars\//,'').replace(/^\/+/, '');
+    if(path&&!path.includes('..')&&!/^https?:/i.test(path)&&path.length<250){
+      const signed=await safe(sb.storage.from('profile-avatars').createSignedUrl(path,3600));
+      S.profilePhotoUrl=signed.data?.signedUrl||'';
+    }
+  }
   const role=(await safe(sb.from('account_roles').select('role').eq('user_id',S.user.id).maybeSingle())).data;S.role=role?.role||'member';
   // A single authenticated user may have several linked patient records.
   // Never use maybeSingle() here: duplicates would incorrectly disable patient mode.
@@ -236,12 +245,13 @@ function shell(){
   if(S.mode==='patient'){
     const name=esc(firstName()||'');
     const avatar=esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase());
+    const avatarMarkup=S.profilePhotoUrl?`<img class="p-account-avatar" src="${esc(S.profilePhotoUrl)}" alt="" decoding="async">`:avatar;
     $('#app').innerHTML=`<div class="p-editorial" data-pulse-view="home">
       <header class="p-topbar"><div class="p-topbar-inner">
         <div aria-label="KŌMØ Pulse"><div class="p-wordmark">KŌMØ</div><div class="p-wordmark-sub">PULSE</div></div>
         <div class="p-header-actions"><div class="p-mode"><span class="p-mode-dot"></span>Espace patient</div>
         ${hasPro()?'<button type="button" class="p-team-link" id="p-team-link">Équipe</button>':''}
-        <details class="p-account"><summary aria-label="Options du compte">${avatar}</summary><div class="p-account-popover">
+        <details class="p-account"><summary aria-label="Options du compte">${avatarMarkup}</summary><div class="p-account-popover">
         <span class="p-account-caption">${esc(S.user?.email||name)}</span>
         <button type="button" id="p-logout">Se déconnecter</button></div></details></div>
       </div></header>
@@ -295,6 +305,9 @@ function patientHome(){
   const hasOnline=!appointment&&Boolean(activeOnline);
   const published=releasedScore();
   const first=esc(firstName()||'');
+  const profileImage=S.profilePhotoUrl?`<img src="${esc(S.profilePhotoUrl)}" alt="Photo de profil" decoding="async" loading="lazy">`:'';
+  const heroPhoto=S.profilePhotoUrl?`<aside class="p-overview-side p-overview-photo"><img src="${esc(S.profilePhotoUrl)}" alt="" decoding="async" loading="lazy"></aside>`:
+    '<aside class="p-overview-side p-overview-empty" aria-hidden="true"><div class="p-side-mini">KŌMØ</div></aside>';
   const bookingUrl='https://app.acuityscheduling.com/schedule.php?owner=40696577';
   const label=appointment?'VOTRE PROCHAIN RENDEZ-VOUS':hasOnline?'VOTRE SÉANCE EN LIGNE':published?'VOTRE DERNIER BILAN':'VOTRE PROCHAINE ÉTAPE';
   const title=appointment?friendlyAppointmentType(appointment.appointment_type):hasOnline?'Votre bilan Online':published?'Votre bilan est disponible':'Aucun rendez-vous à venir';
@@ -305,10 +318,10 @@ function patientHome(){
       'Votre demande est enregistrée mais doit encore être confirmée par l’équipe KŌMØ.':
       inProgress?
       'Votre séance est en cours. Votre compte rendu apparaîtra après sa validation.':
-      'Votre rendez-vous est confirmé. Retrouvez les informations utiles pour préparer votre bilan sur cette page.'):
-    hasOnline?'Votre session est liée à votre compte. Vous pouvez reprendre votre bilan guidé en ligne.':
-    published?'Votre compte rendu a été publié. Découvrez vos résultats et les domaines de progression associés.':
-    'Aucune prochaine séance n’est enregistrée pour votre compte. Vous pouvez réserver votre prochain bilan Motion en quelques instants.';
+      'Votre rendez-vous est confirmé.'):
+    hasOnline?'Séance en ligne disponible.':
+    published?'Dernier compte rendu disponible.':
+    'Aucun rendez-vous programmé.';
   const primary=appointment?
     '<button type="button" class="p-primary" data-p-open="preparation">Préparer mon bilan <span>↗</span></button>':
     hasOnline?'<a class="p-primary" href="/online/session/">Accéder à ma séance <span>↗</span></a>':
@@ -322,30 +335,26 @@ function patientHome(){
   const scoredDomains=published?domains().filter(([, ,v])=>Number.isFinite(v)).sort((a,b)=>a[2]-b[2]):[];
   const strength=scoredDomains.at(-1),priority=scoredDomains[0];
   const resultTitle=published?'Compte rendu validé':appointment?'Bilan à venir':'Aucun résultat publié';
-  const resultCopy=published?'Votre dernier bilan est accessible. Les résultats ne sont visibles qu’après leur publication.':appointment?
+  const resultCopy=published?'Dernier bilan publié.':appointment?
     'Votre bilan sera disponible après la séance et sa validation par l’équipe.':
     'Vos résultats apparaîtront ici lorsqu’un bilan aura été réalisé puis validé.';
   const lastPast=history[0]||null;
   const historyTitle=lastPast?friendlyAppointmentType(lastPast.appointment_type):otherUpcoming.length?'Autres rendez-vous':'Historique';
   const historyDate=lastPast?fmtShort(lastPast.scheduled_start):'';
-  const historyCopy=lastPast?'Votre dernier rendez-vous enregistré.':otherUpcoming.length?
-    'Vos autres rendez-vous sont enregistrés dans votre agenda.':'Aucun rendez-vous précédent enregistré.';
+  const historyCopy=lastPast?'Dernier rendez-vous.':otherUpcoming.length?
+    'Autres rendez-vous à venir.':'Aucun rendez-vous passé.';
   $('#view').innerHTML=`
-    <div class="p-page-heading"><div><span class="p-eyebrow">Votre espace personnel</span>
-      <h1>Bonjour ${first}.</h1><p>Vos rendez-vous et votre bilan, au même endroit. Rien de plus.</p></div>
-      <span class="p-page-date">KŌMØ · Longevity in Motion</span></div>
+    <div class="p-page-heading"><div class="p-greeting"><div class="p-greeting-photo">${profileImage}</div>
+      <div><span class="p-eyebrow">Espace personnel</span><h1>Bonjour ${first}.</h1></div></div></div>
     <section class="p-overview" aria-label="Votre prochaine étape">
       <div class="p-overview-main"><span class="p-section-kicker">${esc(label)}</span>
         <div class="p-overview-title-row"><h2>${esc(title)}</h2><span class="p-status">${esc(status)}</span></div>
         <p class="p-overview-copy">${dateText?`${esc(dateText)}<br>`:''}${esc(message)}</p>
         <div class="p-actions">${primary}${secondary}</div>
       </div>
-      <aside class="p-overview-side" aria-hidden="true"><div><span class="p-side-mini">PARCOURS MOTION</span>
-      <div class="p-side-big">Une étape<br>à la fois.</div>
-      <p class="p-side-copy">La bonne information, au moment où elle est utile.</p></div>
-      <div class="p-side-index"><strong>01</strong><span>/ VOTRE ESPACE</span></div></aside>
+      ${heroPhoto}
     </section>
-    <div class="p-section-label"><h3>Votre suivi</h3><small>Informations essentielles</small></div>
+    <div class="p-section-label"><h3>Votre dossier</h3></div>
     <div class="p-two-cards">
       <section class="p-info-card"><div class="p-card-top"><span class="p-card-kicker">RÉSULTATS</span>
         <span class="p-small-symbol" aria-hidden="true">◷</span></div>
