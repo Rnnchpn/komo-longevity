@@ -9,7 +9,7 @@ const TEST_IDS=new Set(['sts','heels','unipodal_left','unipodal_right','arms','p
 const ANSWER_IDS=new Set([
  'ageBand','goal','walk10','stairs','chair','carry','bend','obstacle','turn','stand',
  'pain','fatigue','fear','avoid','sleep','stress','recovered','qol',
- 'walkingDays','strengthDays','outdoors','breaks','safety'
+ 'walkingDays','strengthDays','outdoors','breaks','fall12','nearFall','painNow','activeTime','safety'
 ]);
 const CHECKS=new Set(['chair','space','support','device']);
 const STATES=new Set(['pending','done','review','skipped']);
@@ -52,7 +52,7 @@ function corsHeaders(origin){
 }
 const reply=(payload,status,origin)=>new Response(JSON.stringify(payload),{status,headers:corsHeaders(origin)});
 function cleanSnapshot(s){
- if(!plain(s)||!inInt(s.page,0,4)||!inInt(s.questionStep,0,4)||!inInt(s.task,0,5))return null;
+ if(!plain(s)||!inInt(s.page,0,4)||!inInt(s.questionStep,0,5)||!inInt(s.task,0,5))return null;
  const answers={};
  if(!plain(s.answers))return null;
  for(const [key,value] of Object.entries(s.answers)){
@@ -74,7 +74,12 @@ function cleanSnapshot(s){
   const item={status:r.status,value:r.value??null,quality:r.quality??null,source:r.source??'webcam'};
   if(id==='posture'&&plain(r.posture)&&r.posture.valid===true){
    if(!anyNumber(r.posture.surfaceIndexPct)||Math.abs(r.posture.surfaceIndexPct)>500)return null;
-   item.posture={valid:true,surfaceIndexPct:r.posture.surfaceIndexPct,manualCapture:r.posture.manualCapture===true};
+   const k=r.posture.kneeFlexionDeg,a=r.posture.ankleDeviationDeg;
+   if(k!==null&&k!==undefined&&(!anyNumber(k)||k<0||k>70))return null;
+   if(a!==null&&a!==undefined&&(!anyNumber(a)||a<0||a>65))return null;
+   item.posture={valid:true,surfaceIndexPct:r.posture.surfaceIndexPct,manualCapture:r.posture.manualCapture===true,
+    kneeFlexionDeg:k??null,ankleDeviationDeg:a??null,
+    compensation:['possible','not_observed'].includes(r.posture.compensation)?r.posture.compensation:'unavailable'};
   }
   if(id==='sts'&&plain(r.normative)){
    const n=r.normative;
