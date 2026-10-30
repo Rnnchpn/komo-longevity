@@ -238,3 +238,39 @@
  .ob-discovery-pin small{font-size:7px}
 }
 @media(prefers-reduced-motion:reduce){.ob-discovery-avatar,.ob-city{transition:none}}
+
+
+/* AIS status display: no static or unverified yacht positions rendered as real time. */
+.ob-navigation-filters{display:flex;flex-wrap:nowrap;gap:6px;overflow-x:auto;scrollbar-width:thin;padding:0 25px 14px}
+.ob-navigation-filters button{flex:none;border:1px solid #d2ded3;background:#f9faf7;color:#5a7661;
+ padding:9px 11px;border-radius:100px;font:700 9px/1.3 Manrope,Arial,sans-serif;letter-spacing:.025em}
+.ob-navigation-filters button.is-active{background:#274936;border-color:#274936;color:#f8f6ef}
+.ob-navigation-filters button:focus-visible{outline:2px solid #89aa8f;outline-offset:2px}
+.ob-ais-pin{background:transparent;border:0}
+.ob-ais-vessel{display:grid;place-items:center;width:38px;height:38px;border-radius:50%;
+ border:2px solid #fff;box-shadow:0 4px 14px #233f3854;background:#4e7462;transition:transform .25s}
+.ob-ais-vessel>span{display:grid;place-items:center;width:100%;height:100%}
+.ob-ais-vessel svg{width:21px;height:21px;fill:#fff}
+.ob-ais-vessel.is-underway{background:#2e7b8b}
+.ob-ais-vessel.is-approaching{background:#b97f44;box-shadow:0 0 0 5px #f4c4776b,0 6px 16px #45351f6b}
+.ob-ais-vessel.is-at_anchor{background:#6f8490}
+.ob-ais-vessel.is-in_port{background:#53755a}
+.ob-ais-vessel.is-unclassified{background:#7e827c}
+.ob-status-label{display:inline-block;font:700 8px/1.35 Manrope,Arial,sans-serif;letter-spacing:.065em;
+ padding:4px 7px;border-radius:100px;margin:7px 0 1px;background:#e6ebe7;color:#4d6150}
+.ob-status-label.is-underway{background:#d9eaf0;color:#296a7b}
+.ob-status-label.is-approaching{background:#f5e8d8;color:#956129}
+.ob-status-label.is-at_anchor{background:#e2e8ed;color:#5e7584}
+.ob-status-label.is-in_port{background:#e0eee1;color:#426e4b}
+.ob-yacht-text small{margin-top:6px}
+.ob-dashboard-head>p{min-height:28px}
+.ob-map-shell{background:linear-gradient(150deg,#dce8e3,#c4d8d6)}
+.ob-map-error{width:min(270px,83%);text-align:center}
+@media(max-width:790px){
+ .ob-navigation-filters{padding:0 18px 12px;gap:5px}
+ .ob-navigation-filters button{font-size:8px;padding:9px 10px}
+ .ob-ais-vessel{width:34px;height:34px}
+ .ob-dashboard{max-height:580px}
+ .ob-yacht-list{min-height:124px}
+}
+@media(prefers-reduced-motion:reduce){.ob-ais-vessel{transition:none}}
