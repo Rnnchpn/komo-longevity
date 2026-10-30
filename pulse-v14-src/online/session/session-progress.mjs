@@ -48,7 +48,10 @@ export function snapshotProgress(state){
   }
   if(id==='posture'&&r.posture?.valid&&Number.isFinite(r.posture.surfaceIndexPct)){
    record.posture={valid:true,surfaceIndexPct:r.posture.surfaceIndexPct,
-    method:'photo sagittale 2D',manualCapture:Boolean(r.posture.manualCapture)};
+    method:'photo sagittale 2D',manualCapture:Boolean(r.posture.manualCapture),
+    kneeFlexionDeg:cleanNumber(r.posture.kneeFlexionDeg),
+    ankleDeviationDeg:cleanNumber(r.posture.ankleDeviationDeg),
+    compensation:['possible','not_observed'].includes(r.posture.compensation)?r.posture.compensation:'unavailable'};
   }
   results[id]=record;
  }
