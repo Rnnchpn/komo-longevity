@@ -3,17 +3,20 @@
 import {snapshotProgress} from './session-progress.mjs';
 export const CONSENT_VERSION='KOMO_MOTION_ONLINE_CONSENT_V1';
 const URL='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-online-dossier';
+const STRIPE_URL='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-online-stripe-dossier';
+const STRIPE_SESSION=/^cs_(?:test|live)_[A-Za-z0-9]{8,200}$/;
 const PUBLISHABLE='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 async function request({accessToken,appointmentId,mode,snapshot,fetcher=fetch}){
- if(!/^[1-9][0-9]{0,11}$/.test(String(appointmentId||'')))throw Error('invalid_booking');
+ const stripe=STRIPE_SESSION.test(String(appointmentId||''));
+ if(!stripe&&!/^[1-9][0-9]{0,11}$/.test(String(appointmentId||'')))throw Error('invalid_booking');
  if(typeof accessToken!=='string'||!accessToken)throw Error('authentication_required');
- const input={appointmentId:String(appointmentId),mode};
+ const input=stripe?{checkoutSessionId:String(appointmentId),mode}:{appointmentId:String(appointmentId),mode};
  if(mode==='save'){
   input.consentAccepted=true;
   input.consentVersion=CONSENT_VERSION;
   input.snapshot=snapshotProgress(snapshot);
  }
- const response=await fetcher(URL,{method:'POST',headers:{
+ const response=await fetcher(stripe?STRIPE_URL:URL,{method:'POST',headers:{
   apikey:PUBLISHABLE,authorization:'Bearer '+accessToken,'content-type':'application/json'
  },cache:'no-store',body:JSON.stringify(input)});
  const data=await response.json();
