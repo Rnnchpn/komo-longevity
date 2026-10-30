@@ -260,14 +260,20 @@
   if(!verified){
    const box=document.createElement('div');box.className='ob-yacht-placeholder';
    box.textContent=feedState==='ais_not_configured'
-    ?txt('Flux AIS en attente d’activation. Les ports, activités et annonces chargent immédiatement. Un abonnement AIS régional est nécessaire pour voir les yachts réellement présents ou en navigation.',
-      'AIS integration awaiting activation. Harbours, experiences and listings remain available immediately. A regional AIS subscription is required for actual yacht locations.')
+    ?txt('La carte AIS VesselFinder est accessible dans l’onglet CARTE. Les filtres yachts détaillés nécessitent une connexion API distincte.',
+      'The VesselFinder AIS map is available in the MAP tab. Detailed yacht status filters require a separate API connection.')
     :feedState==='sign_in_required'||feedState==='membership_required'
     ?txt('Connectez-vous au Club ELYSIUM pour voir les positions AIS. Les ports restent accessibles.',
       'Sign in to ELYSIUM Club to see AIS yachts. Harbours remain accessible.')
     :txt('Aucune position AIS vérifiée actuellement. La carte des ports reste utilisable.',
       'No verified AIS positions are currently available. The harbour map remains usable.');
    list.append(box);
+   if(feedState==='ais_not_configured'||feedState==='ais_unavailable'){
+    const open=document.createElement('button');open.type='button';open.className='ob-vf-yachts-cta';
+    open.textContent=txt('VOIR LES BATEAUX SUR LA CARTE AIS ↗','OPEN AIS VESSEL MAP ↗');
+    open.addEventListener('click',()=>{mapProvider='vesselfinder';chooseScreen('map',{focus:true});updateMapProvider()});
+    list.append(open);
+   }
   }else if(!filtered.length){
    const box=document.createElement('div');box.className='ob-yacht-placeholder';
    box.textContent=txt('Aucun yacht AIS récent pour cette escale ou ce filtre. Essayez une autre catégorie.',
