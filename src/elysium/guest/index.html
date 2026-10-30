@@ -1,0 +1,272 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#041c28"><meta name="description" content="ELYSIUM On Board. Private experiences, longevity and personal concierge requests in Cannes, Monaco and Saint-Tropez.">
+<link rel="canonical" href="https://komolongevity.com/elysium/guest/">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>ELYSIUM ON BOARD · Private Guest Services</title>
+<style>
+:root{--deep:#031a25;--petrol:#082b38;--petrol2:#174653;--pearl:#f5eddf;--gold:#d5b98c;--line:#bda07165;--muted:#b4c9c7;--serif:'Cormorant Garamond',Georgia,serif;--sans:Manrope,Arial,sans-serif}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{font-family:var(--sans);background:radial-gradient(ellipse at 75% 4%,#174653 0%,#072734 36%,#031a25 90%);color:var(--pearl);
+display:flex;flex-direction:column;min-height:0;height:100dvh;max-height:100dvh;isolation:isolate}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.22;
+background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='132' height='132' viewBox='0 0 132 132'%3E%3Cg fill='none' stroke='%23c9b28b' stroke-width='.65' opacity='.47'%3E%3Ccircle cx='66' cy='66' r='24'/%3E%3Cpath d='M66 8q-19 20 0 36Q85 28 66 8Zm0 116q-19-20 0-36 19 16 0 36ZM8 66q20-19 36 0Q28 85 8 66Zm116 0q-20-19-36 0 16 19 36 0ZM59 55v23m1-10 12-13m-9 14 12 13'/%3E%3C/g%3E%3C/svg%3E")}
+button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
+header{height:66px;min-height:66px;flex:none;padding:0 clamp(15px,3vw,48px);display:flex;align-items:center;justify-content:space-between;
+border-bottom:1px solid var(--line);background:#021a25e7;gap:12px}
+.brand{display:flex;align-items:baseline;gap:15px}.brand strong{font-size:20px;letter-spacing:-.045em}.brand em{font:400 25px var(--serif);font-style:normal;color:var(--gold);padding-left:15px;border-left:1px solid var(--line)}
+.headlinks{display:flex;align-items:center;gap:15px}.headlinks a{font-size:9px;letter-spacing:.12em;color:#d3cfbf}.headlinks button{border:1px solid var(--line);background:transparent;color:var(--pearl);padding:10px 14px;font-size:9px;letter-spacing:.1em}
+main{flex:1;min-height:0;max-width:1580px;width:100%;margin:auto;padding:clamp(12px,2vh,23px) clamp(14px,3.5vw,54px);overflow:hidden}
+.scene{height:100%;max-height:100%;min-height:0;display:none;overflow:hidden;animation:appear .3s ease both}
+.scene.active{display:flex;flex-direction:column}
+@keyframes appear{from{opacity:.45;transform:translateY(7px)}to{opacity:1;transform:none}}
+.eyebrow{font-size:9px;letter-spacing:.21em;font-weight:700;color:var(--gold);line-height:1.5}
+.hero{display:flex;align-items:end;justify-content:space-between;gap:22px;margin:0 0 15px}
+.hero h1{font:400 clamp(65px,9vw,137px)/.75 var(--serif);margin:14px 0 10px;letter-spacing:-.046em}
+.hero h1 i{font-style:normal;color:var(--gold)}
+.hero p{font:400 clamp(16px,2vw,25px)/1.25 var(--serif);color:#c8d8d3;max-width:530px;margin:0}
+.memberNote{max-width:270px;font-size:10px;line-height:1.65;color:#adc7c7;border-left:1px solid var(--line);padding-left:18px}
+.cities{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 16px;flex:none}
+.cities button{border:1px solid var(--line);background:#0b3441c5;min-width:0;color:var(--pearl);border-radius:10px;
+padding:10px 14px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;transition:.18s}
+.cities button b{font:400 clamp(24px,2.7vw,37px)/.95 var(--serif);white-space:nowrap}
+.cities button span{font-size:8px;color:#b8c9c3;letter-spacing:.06em}
+.cities button.active{background:#254d57;border-color:#e2c99c;color:#fff2d9}
+.cities button:focus-visible,.services button:focus-visible,.dock button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.sectionhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0 0 11px}
+.sectionhead h2{font:400 clamp(30px,3.1vw,49px)/.9 var(--serif);margin:0}
+.sectionhead p{font-size:9px;color:var(--muted);margin:0}
+.services{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:10px;flex:1;min-height:0}
+.services button{background:linear-gradient(135deg,#153e49ec,#092c39);border:1px solid var(--line);
+color:var(--pearl);padding:clamp(12px,1.7vw,23px);border-radius:12px;text-align:left;min-width:0;
+display:flex;flex-direction:column;justify-content:space-between;gap:9px;position:relative;overflow:hidden;transition:background .2s,transform .2s}
+.services button:before{content:"";position:absolute;border:1px solid #cfb2833c;width:105px;height:105px;right:-18px;top:-38px;border-radius:50%;box-shadow:0 0 0 12px #d7bb8c0b,0 0 0 13px #d7bb8c18}
+.services button:hover{background:#23515c;transform:translateY(-2px)}
+.services .symbol{font:400 clamp(33px,4vw,64px)/1 var(--serif);color:var(--gold)}
+.services .name{font:400 clamp(26px,2.7vw,44px)/.9 var(--serif)}
+.services .sub{font-size:9px;line-height:1.5;color:#b6ceca;max-width:270px;margin-top:6px}
+.services .bottom{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.services .arrow{font-size:21px;color:var(--gold)}
+.tagline{margin:10px 0 0;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#b2c7c3;font-size:9px;line-height:1.5}
+.tagline a{font-weight:700;color:#e6c99c}
+.requestTop{flex:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.back{border:1px solid var(--line);background:#0e3945;color:#efd4a9;padding:10px 15px;border-radius:8px;font-size:10px}
+.requestHead{flex:none;padding:clamp(5px,2vh,20px) 0 clamp(12px,2vh,18px);display:flex;justify-content:space-between;align-items:end;gap:20px}
+.requestHead h1{font:400 clamp(51px,7vw,102px)/.82 var(--serif);margin:9px 0 0}
+.requestHead p{font-size:11px;color:#b4cbc8;line-height:1.7;max-width:300px;margin:0}
+form{border:1px solid var(--line);border-radius:14px;background:#0a303deb;min-height:0;flex:1;
+padding:clamp(15px,2.5vw,28px);display:flex;flex-direction:column;justify-content:center;gap:10px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 15px}
+.field{min-width:0}.field label{display:block;font:700 9px/1.5 var(--sans);letter-spacing:.08em;margin-bottom:6px;color:#e2c69a}
+.field input,.field select,.field textarea{width:100%;min-width:0;min-height:42px;color:#f8eedf;
+background:#052631;border:1px solid #bcaa866b;border-radius:7px;padding:10px;font-size:12px;outline-offset:2px}
+.field input::placeholder,.field textarea::placeholder{color:#8aa5a6}
+.field textarea{height:65px;min-height:65px;resize:none}
+.field.wide{grid-column:1/-1}
+.check{display:flex;align-items:flex-start;gap:9px;color:#c5d4cd;font-size:9px;line-height:1.55}
+.check input{margin-top:2px;accent-color:var(--gold)}
+.formfooter{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.formfooter p{font-size:9px;color:#acc4c1;max-width:350px;line-height:1.5;margin:0}
+.primary{border:1px solid #ebd5b0;border-radius:8px;padding:13px 22px;background:#d5ba90;color:#082b36;
+font-size:10px;font-weight:700;letter-spacing:.11em;white-space:nowrap}
+.primary:disabled{opacity:.55;cursor:wait}
+#feedback{font-size:10px;color:#f0c7a1;min-height:16px}
+.success{justify-content:center;align-items:center;text-align:center}
+.success .seal{width:135px;height:135px;display:grid;place-items:center;border:1px solid var(--gold);border-radius:50%;
+box-shadow:0 0 0 12px #d7be9119,0 0 0 13px #c7a77639;margin:0 auto 32px;color:var(--gold);font:400 67px var(--serif)}
+.success h1{font:400 clamp(58px,8vw,112px)/.9 var(--serif);margin:0 0 15px}
+.success p{max-width:570px;color:#bdcfca;font-size:13px;line-height:1.8;margin:0 0 22px}
+.dock{height:68px;min-height:68px;flex:none;display:flex;align-items:stretch;justify-content:center;gap:9px;
+padding:5px clamp(10px,8vw,180px);background:#031924ed;border-top:1px solid var(--line)}
+.dock button,.dock a{flex:1;max-width:200px;min-width:0;border:1px solid transparent;border-radius:10px;
+background:none;color:#b7d0cb;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;
+font-size:8px;font-weight:700;letter-spacing:.08em}
+.dock .glyph{font:400 24px/1 var(--serif);color:#d7be90}
+.dock .is-active{border-color:#d1b48b8f;background:#14414f;color:#f5e6c9}
+.dock button:hover,.dock a:hover{background:#154451}
+.smallLink{font-size:10px;color:#e5cfab;text-decoration:underline;text-underline-offset:4px}
+.hp{position:absolute;left:-9999px;top:-9999px}
+@media(max-width:760px){
+ header{height:55px;min-height:55px;padding:0 12px}
+ .brand{gap:8px}.brand strong{font-size:17px}.brand em{font-size:18px;padding-left:9px}
+ .headlinks{gap:7px}.headlinks a{font-size:8px}.headlinks button{padding:8px 9px;font-size:8px}
+ main{padding:10px 9px 7px}
+ .hero{display:block;margin-bottom:10px}
+ .hero h1{font-size:clamp(63px,17vw,84px);margin:8px 0}
+ .hero p{font-size:17px}
+ .memberNote{display:none}
+ .cities{gap:5px;margin-bottom:9px}
+ .cities button{padding:9px 6px;min-height:49px;flex-direction:column;gap:3px;align-items:center}
+ .cities button b{font-size:clamp(20px,6vw,30px)}
+ .cities button span{display:none}
+ .sectionhead{margin-bottom:8px}.sectionhead h2{font-size:32px}.sectionhead p{display:none}
+ .services{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:6px}
+ .services button{padding:10px;gap:5px;border-radius:10px}
+ .services button:before{width:67px;height:67px}
+ .services .symbol{font-size:34px}
+ .services .name{font-size:clamp(24px,6vw,33px)}
+ .services .sub{display:none}
+ .services .arrow{font-size:18px}
+ .tagline{font-size:8px;line-height:1.3;margin-top:7px}
+ .requestHead{display:block;padding:7px 0 10px}
+ .requestHead h1{font-size:clamp(54px,13vw,75px);margin:6px 0}
+ .requestHead p{font-size:10px;line-height:1.45}
+ form{padding:12px;gap:7px;justify-content:flex-start}
+ .fields{gap:8px 7px}
+ .field label{font-size:7px;margin-bottom:4px;letter-spacing:.02em}
+ .field input,.field select,.field textarea{min-height:35px;padding:7px;font-size:11px}
+ .field textarea{height:48px;min-height:48px}
+ .check{font-size:8px;line-height:1.4}
+ .formfooter{gap:7px}
+ .formfooter p{display:none}
+ .primary{padding:11px 16px;font-size:9px}
+ .dock{height:62px;min-height:62px;padding:5px 4px calc(env(safe-area-inset-bottom,0px) + 3px)}
+ .dock button,.dock a{font-size:7px;letter-spacing:0}
+ .dock .glyph{font-size:22px}
+ .success .seal{width:100px;height:100px;font-size:55px;margin-bottom:23px}
+ .success h1{font-size:60px}
+ .success p{font-size:11px}
+}
+@media(max-height:680px){
+ .hero p,.tagline span{display:none}
+ .hero{margin:0 0 7px}
+ .hero h1{font-size:60px}
+ .services .symbol{font-size:27px}
+ .services .name{font-size:24px}
+ .requestHead h1{font-size:46px}
+ .requestHead p{display:none}
+ form{gap:5px}
+ .field input,.field select,.field textarea{min-height:31px}
+ .field textarea{height:36px;min-height:36px}
+}
+@media(prefers-reduced-motion:reduce){.scene{animation:none}.services button{transition:none}}
+</style></head><body data-city="cannes">
+<header><a class="brand" href="/elysium/"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
+ <div class="headlinks"><a href="/elysium/on-board/" data-fr="LA CARTE" data-en="THE MAP">LA CARTE</a>
+ <button id="lang" type="button" aria-label="Switch language">EN</button></div></header>
+<main>
+<section class="scene active" data-scene="explore" aria-labelledby="guestTitle">
+ <div class="hero"><div><span class="eyebrow">ELYSIUM · ON BOARD</span><h1 id="guestTitle">Your Riviera<i>.</i></h1>
+ <p data-fr="Les expériences privées, directement depuis votre yacht." data-en="Private experiences, wherever you are on board.">Private experiences, wherever you are on board.</p></div>
+ <div class="memberNote" data-fr="Accès ELYSIUM offert pendant 12 mois aux clients KŌMØ Yachting éligibles, après vérification. Prestations facturées séparément." data-en="12 months complimentary ELYSIUM access for eligible KŌMØ Yachting clients after verification. Services quoted separately.">12 months complimentary ELYSIUM access for eligible KŌMØ Yachting clients after verification. Services quoted separately.</div></div>
+ <div class="cities" role="group" aria-label="Your destination">
+ <button type="button" data-city="cannes" class="active" aria-pressed="true"><b>Cannes</b><span>VIEUX PORT · PORT CANTO</span></button>
+ <button type="button" data-city="monaco" aria-pressed="false"><b>Monaco</b><span>PORT HERCULE</span></button>
+ <button type="button" data-city="saint-tropez" aria-pressed="false"><b>Saint-Tropez</b><span>LE PORT · LE GOLFE</span></button>
+ </div>
+ <div class="sectionhead"><h2 data-fr="Que souhaitez-vous organiser ?" data-en="What would you like to arrange?">What would you like to arrange?</h2>
+ <p data-fr="Sélectionnez une prestation · Confirmation après disponibilité" data-en="Choose a service · Availability confirmed personally">Choose a service · Availability confirmed personally</p></div>
+ <div class="services" id="services">
+  <button type="button" data-service="motion"><span class="symbol">◈</span><div class="bottom"><div><div class="name">Motion & Longevity</div><div class="sub" data-fr="Évaluation fonctionnelle, suivi et mouvement à bord." data-en="Functional movement assessment and continuity on board.">Functional movement assessment and continuity on board.</div></div><span class="arrow">↗</span></div></button>
+  <button type="button" data-service="wellness"><span class="symbol">◒</span><div class="bottom"><div><div class="name">Wellness & Recovery</div><div class="sub" data-fr="Récupération et praticiens bien-être, sous réserve de disponibilité." data-en="Recovery and wellness specialists, subject to availability.">Recovery and wellness specialists, subject to availability.</div></div><span class="arrow">↗</span></div></button>
+  <button type="button" data-service="beauty"><span class="symbol">✧</span><div class="bottom"><div><div class="name">Beauty & Aesthetics</div><div class="sub" data-fr="Beauté privée ; tout acte médical nécessite un médecin habilité." data-en="Private beauty; medical procedures require an authorised physician.">Private beauty; medical procedures require an authorised physician.</div></div><span class="arrow">↗</span></div></button>
+  <button type="button" data-service="dining"><span class="symbol">◌</span><div class="bottom"><div><div class="name">Private Dining</div><div class="sub" data-fr="Tables, chefs et expériences gastronomiques sur demande." data-en="Dining, private chefs and culinary experiences on request.">Dining, private chefs and culinary experiences on request.</div></div><span class="arrow">↗</span></div></button>
+  <button type="button" data-service="experiences"><span class="symbol">◇</span><div class="bottom"><div><div class="name">Experiences & Access</div><div class="sub" data-fr="Événements, excursions et moments privés." data-en="Events, excursions and bespoke private moments.">Events, excursions and bespoke private moments.</div></div><span class="arrow">↗</span></div></button>
+  <button type="button" data-service="concierge"><span class="symbol">⌁</span><div class="bottom"><div><div class="name">Private Concierge</div><div class="sub" data-fr="Logistique, équipes et coordination avec le capitaine." data-en="Logistics, specialist teams and captain coordination.">Logistics, specialist teams and captain coordination.</div></div><span class="arrow">↗</span></div></button>
+ </div>
+ <div class="tagline"><span data-fr="CANNES · MONACO · SAINT-TROPEZ · SERVICES SUR DEMANDE" data-en="CANNES · MONACO · SAINT-TROPEZ · SERVICES ON REQUEST">CANNES · MONACO · SAINT-TROPEZ · SERVICES ON REQUEST</span>
+ <a href="/elysium/on-board/" data-fr="VOIR LA CARTE RIVIERA ↗" data-en="EXPLORE THE RIVIERA MAP ↗">EXPLORE THE RIVIERA MAP ↗</a></div>
+</section>
+<section class="scene" data-scene="request" aria-labelledby="requestTitle">
+ <div class="requestTop"><span class="eyebrow" data-fr="UNE DEMANDE · EN TOUTE DISCRÉTION" data-en="ONE REQUEST · HANDLED DISCREETLY">ONE REQUEST · HANDLED DISCREETLY</span>
+ <button id="back" class="back" type="button" data-fr="← RETOUR" data-en="← BACK">← BACK</button></div>
+ <div class="requestHead"><h1 id="requestTitle">Private Request.</h1><p data-fr="Précisez votre escale et comment vous joindre. La disponibilité et le devis vous seront confirmés après examen." data-en="Tell us your destination and how to reach you. Availability and quotation are confirmed after review.">Tell us your destination and how to reach you. Availability and quotation are confirmed after review.</p></div>
+ <form id="requestForm" novalidate>
+  <div class="fields">
+   <div class="field"><label for="role" data-fr="VOUS ÊTES" data-en="I AM">I AM</label>
+    <select id="role" required><option value="guest">YACHT GUEST / OWNER</option><option value="captain">CAPTAIN / CREW</option><option value="assistant">PRIVATE ASSISTANT</option><option value="broker">BROKER / MANAGER</option></select></div>
+   <div class="field"><label for="city" data-fr="ESCALE" data-en="DESTINATION">DESTINATION</label>
+    <select id="city" required><option value="cannes">CANNES</option><option value="monaco">MONACO</option><option value="saint-tropez">SAINT-TROPEZ</option><option value="other">OTHER</option></select></div>
+   <div class="field"><label for="name" data-fr="NOM" data-en="YOUR NAME">YOUR NAME</label><input id="name" autocomplete="name" required minlength="2" maxlength="90" placeholder="First name · Last name"></div>
+   <div class="field"><label for="email">E-MAIL</label><input id="email" type="email" autocomplete="email" required maxlength="180" placeholder="you@example.com"></div>
+   <div class="field"><label for="yacht" data-fr="YACHT (FACULTATIF)" data-en="YACHT (OPTIONAL)">YACHT (OPTIONAL)</label><input id="yacht" maxlength="100" autocomplete="off" placeholder="Yacht name"></div>
+   <div class="field"><label for="date" data-fr="DATE SOUHAITÉE (FACULTATIVE)" data-en="PREFERRED DATE (OPTIONAL)">PREFERRED DATE (OPTIONAL)</label><input id="date" type="date"></div>
+   <div class="field wide"><label for="note" data-fr="PRÉCISIONS LOGISTIQUES (FACULTATIF)" data-en="LOGISTICAL DETAILS (OPTIONAL)">LOGISTICAL DETAILS (OPTIONAL)</label>
+    <textarea id="note" maxlength="350" data-fr-placeholder="Nombre d'invités, durée, créneau… Pas de données médicales." data-en-placeholder="Guests, duration, preferred times… No medical details." placeholder="Guests, duration, preferred times… No medical details."></textarea></div>
+  </div>
+  <div class="check"><input type="checkbox" id="consent" required><label for="consent" data-fr="J'accepte que ces informations soient utilisées uniquement pour traiter cette demande. Aucune réservation n'est confirmée à cette étape." data-en="I agree to these details being used solely to respond to this enquiry. No booking is confirmed at this stage.">I agree to these details being used solely to respond to this enquiry. No booking is confirmed at this stage.</label></div>
+  <div class="formfooter"><p data-fr="Les actes médicaux éventuels sont distincts et relèvent exclusivement de professionnels habilités. Aucun renseignement médical dans ce formulaire." data-en="Any medical services are separate and provided solely by authorised professionals. Do not share medical information in this form.">Any medical services are separate and provided solely by authorised professionals. Do not share medical information in this form.</p>
+   <button id="submit" class="primary" type="submit" data-fr="ENVOYER MA DEMANDE ↗" data-en="SEND PRIVATE ENQUIRY ↗">SEND PRIVATE ENQUIRY ↗</button></div>
+  <div id="feedback" role="status"></div>
+  <input class="hp" id="website" name="website" autocomplete="off" tabindex="-1">
+ </form>
+</section>
+<section class="scene success" data-scene="success" aria-labelledby="successTitle">
+ <div class="seal">K</div><span class="eyebrow">ELYSIUM · PRIVATE DESK</span>
+ <h1 id="successTitle" data-fr="Demande enregistrée." data-en="Request received.">Request received.</h1>
+ <p data-fr="Votre demande a été transmise à notre espace de coordination. Notre équipe reviendra vers vous après examen pour confirmer la faisabilité et les conditions. Aucun service n'est réservé à ce stade." data-en="Your enquiry has been saved to our coordination desk. Our team will review feasibility and conditions before confirming any service. Nothing is booked yet.">Your enquiry has been saved to our coordination desk. Our team will review feasibility and conditions before confirming any service. Nothing is booked yet.</p>
+ <button id="another" type="button" class="primary" data-fr="NOUVELLE DEMANDE ↗" data-en="NEW REQUEST ↗">NEW REQUEST ↗</button>
+</section>
+</main>
+<nav class="dock" aria-label="ELYSIUM app navigation">
+ <button type="button" id="dockServices" class="is-active"><span class="glyph">✧</span><span data-fr="SERVICES" data-en="SERVICES">SERVICES</span></button>
+ <a href="/elysium/on-board/"><span class="glyph">◎</span><span data-fr="CARTE" data-en="MAP">MAP</span></a>
+ <button type="button" id="dockConcierge"><span class="glyph">⌁</span><span>CONCIERGE</span></button>
+ <a href="/elysium/club/"><span class="glyph">◇</span><span>ELYSIUM CLUB</span></a>
+</nav>
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+let lang='en',destination='cannes',service='motion',screen='explore';
+const params=new URLSearchParams(location.search);
+const source=(params.get('ref')||'').replace(/[^a-z0-9_-]/gi,'').slice(0,48);
+const requestedCity=(params.get('city')||'').toLowerCase();
+if(['cannes','monaco','saint-tropez'].includes(requestedCity))destination=requestedCity;
+const labels={motion:'Motion & Longevity',wellness:'Wellness & Recovery',beauty:'Beauty & Aesthetics',dining:'Private Dining',experiences:'Experiences & Access',concierge:'Private Concierge'};
+const en=()=>lang==='en';
+function tr(fr,enText){return en()?enText:fr}
+function show(next){
+ screen=next;
+ $$('.scene').forEach(el=>{const on=el.dataset.scene===next;el.classList.toggle('active',on);el.setAttribute('aria-hidden',String(!on))});
+ $('#dockServices').classList.toggle('is-active',next==='explore');
+ $('#dockConcierge').classList.toggle('is-active',next==='request'&&service==='concierge');
+}
+function switchCity(next){
+ if(!['cannes','monaco','saint-tropez','other'].includes(next))return;
+ destination=next;
+ $$('.cities [data-city]').forEach(b=>{const on=b.dataset.city===next;b.classList.toggle('active',on);b.setAttribute('aria-pressed',String(on))});
+ $('#city').value=next;
+}
+function chooseService(next){
+ service=next;
+ $('#requestTitle').textContent=labels[next]||'Private Request.';
+ show('request');
+}
+function setLanguage(v){
+ lang=v;document.documentElement.lang=v;$('#lang').textContent=en()?'FR':'EN';
+ $$('[data-fr][data-en]').forEach(el=>{el.textContent=el.dataset[v]});
+ $$('[data-fr-placeholder][data-en-placeholder]').forEach(el=>{el.placeholder=el.dataset[v+'Placeholder']});
+}
+$$('.cities [data-city]').forEach(b=>b.addEventListener('click',()=>switchCity(b.dataset.city)));
+$$('.services [data-service]').forEach(b=>b.addEventListener('click',()=>chooseService(b.dataset.service)));
+$('#dockServices').addEventListener('click',()=>show('explore'));
+$('#dockConcierge').addEventListener('click',()=>chooseService('concierge'));
+$('#back').addEventListener('click',()=>show('explore'));
+$('#another').addEventListener('click',()=>{show('explore');$('#requestForm').reset();$('#feedback').textContent='';switchCity(destination)});
+$('#lang').addEventListener('click',()=>setLanguage(en()?'fr':'en'));
+$('#requestForm').addEventListener('submit',async ev=>{
+ ev.preventDefault();const form=$('#requestForm'),submit=$('#submit'),feedback=$('#feedback');
+ if(!form.reportValidity())return;
+ submit.disabled=true;feedback.textContent=tr('Enregistrement de votre demande…','Submitting your request…');
+ const payload={
+ role:$('#role').value,city:$('#city').value,service,name:$('#name').value,
+ email:$('#email').value,yacht:$('#yacht').value,date:$('#date').value,note:$('#note').value,
+ referral:source,consent:$('#consent').checked,website:$('#website').value
+ };
+ try{
+  const response=await fetch('/api/elysium-guest-request',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(payload),credentials:'same-origin'});
+  const body=await response.json().catch(()=>({}));
+  if(!response.ok||!body.ok)throw Error(body.error||'service_unavailable');
+  show('success');form.reset();
+ }catch(e){
+  feedback.textContent=e.message==='too_many_requests'
+    ?tr('Trop de tentatives. Réessayez plus tard.','Too many attempts. Please retry later.')
+    :tr('Impossible d’enregistrer la demande. Contactez contact@komolongevity.com.','Request could not be recorded. Please email contact@komolongevity.com.');
+ }finally{submit.disabled=false}
+});
+switchCity(destination);setLanguage('en');show('explore');
+})();
+</script></body></html>
