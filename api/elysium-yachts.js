@@ -49,13 +49,13 @@ function classify({navStatus,speed,course,lat,lng,port}){
  // AIS navigation status: 0 under way, 1 at anchor, 5 moored.
  // A high velocity or explicit underway state overrides stale/misconfigured mooring flags.
  if(navStatus===1 && speed<1.5)return 'at_anchor';
- if(navStatus===5 && speed<1.2)return 'in_port';
+ if(navStatus===5 && speed<1.2 && port && port.distanceKm<=1)return 'in_port';
  if(speed>=1.5 && port){
   const headingToPort=bearing(lat,lng,port.lat,port.lng);
   if(port.distanceKm<=10 && Number.isFinite(course) && course<=360 &&
      courseGap(course,headingToPort)<=65)return 'approaching';
  }
- if(speed>=1.2||navStatus===0||navStatus===3||navStatus===4||navStatus===8)return 'underway';
+ if(speed>=1.2)return 'underway';
  return 'unclassified';
 }
 function normalise(row,index,now){
