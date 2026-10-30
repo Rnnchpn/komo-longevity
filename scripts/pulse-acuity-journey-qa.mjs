@@ -103,7 +103,7 @@ const pdf=buildPdfReportData(reload.snapshot.answers,reload.snapshot.results,nul
  {mode:'PILOTE',program:reload.snapshot.program});
 assert.equal(pdf.motion.score,null,'no fabricated validated score');
 assert.equal(pdf.passport.index,intake.profileIndex);
-assert.equal(pdf.questionnaire.groups.length,5);
+assert.equal(pdf.questionnaire.groups.length,6);
 assert.equal(pdf.observations.length,6);
 assert.equal(pdf.program.progress.daysLogged,1);
 stage='reopened_from_pulse';
