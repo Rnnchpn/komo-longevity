@@ -40,7 +40,7 @@ async function start(){
   user=response.data?.user;
   if(!user){if(isClub){hide('loading');show('authPanel')}else noAccess();return}
   const gate=await authorized(isClub?'overview':slug);
-  if(gate.ok){active=true;if(isClub){hide('loading');hide('authPanel');hide('applicationPanel');show('memberPanel');document.body.classList.add('elysium-app-mode');renderClub(gate.worlds,gate.membership)}if(isMaison){window.__elysiumProductData=gate.world.products;renderMaisonMeta();renderProducts(gate.world.products)}}
+  if(gate.ok){active=true;if(isClub){hide('loading');hide('authPanel');hide('applicationPanel');show('memberPanel');document.body.classList.add('elysium-app-mode');renderClub(gate.worlds,gate.membership);loadClubSponsors()}if(isMaison){window.__elysiumProductData=gate.world.products;renderMaisonMeta();renderProducts(gate.world.products)}}
   else if(gate.error==='membership_required'){if(isClub)await applicationMode();else noAccess();}
   else if(gate.error==='sign_in_required'){if(isClub){hide('loading');show('authPanel')}else noAccess()}
   else{if(isClub){hide('loading');show('authPanel');say('#loginMessage',tt('failed'),true)}else noAccess()}
@@ -101,12 +101,19 @@ const ELYSIUM_GLYPHS={
  'high-luxury':'<path d="M30 43h60l14 15-44 44-44-44 14-15Z"/><path d="M16 58h88M30 43l17 15 13 44 13-44 17-15M47 58l13-15 13 15"/><path d="M60 12v16M26 20l7 8M95 20l-7 8" opacity=".6"/>',
  service:'<circle cx="60" cy="60" r="13"/><circle cx="60" cy="17" r="5"/><circle cx="98" cy="42" r="5"/><circle cx="87" cy="94" r="5"/><circle cx="27" cy="89" r="5"/><circle cx="19" cy="39" r="5"/><path d="M60 22v25M73 56l20-12M68 70l16 20M49 68L31 85M48 55L23 41" opacity=".6"/><circle cx="60" cy="60" r="35" stroke-dasharray="2 8" opacity=".4"/>',
  team:'<circle cx="60" cy="37" r="13"/><circle cx="32" cy="56" r="10"/><circle cx="88" cy="56" r="10"/><path d="M38 95c0-20 10-30 22-30s22 10 22 30M13 96c0-16 7-24 20-25M107 96c0-16-7-24-20-25"/><circle cx="60" cy="37" r="23" stroke-dasharray="1 8" opacity=".4"/>'
+,
+ 'medical-longevity':'<circle cx="60" cy="60" r="38" stroke-dasharray="2 8" opacity=".48"/><path d="M19 66 C33 66 38 31 48 31 S65 88 75 78 S89 54 101 54"/>',
+ 'longevity-shop':'<rect x="36" y="36" width="48" height="62" rx="5"/><rect x="44" y="22" width="32" height="14" rx="2"/><path d="M41 61h38M41 70h38M51 82h18"/>',
+ lifestyle:'<path d="M30 25 45 15h30l15 10 11 28-19 10-11-19V100H49V44L38 63 19 53Z"/>',
+ yachting:'<path d="M13 87h94l-19 21H36Z"/><path d="M39 87V44h44l18 43M54 44V25h26M67 25V12"/>',
+ experiences:'<circle cx="60" cy="60" r="36"/><circle cx="60" cy="60" r="25" stroke-dasharray="2 7"/><path d="M60 32v57M32 60h57M39 39l42 42M81 39 39 81"/>',
+ services:'<circle cx="60" cy="60" r="13"/><circle cx="60" cy="17" r="5"/><circle cx="98" cy="42" r="5"/><circle cx="87" cy="94" r="5"/><circle cx="27" cy="89" r="5"/><path d="M60 22v25M73 56l20-12M68 70l16 20M49 68L31 85"/>'
 };
 const ELYSIUM_LABELS={
- longevity:['Longevity','Longévité'],aesthetic:['Aesthetic','Esthétique'],
- 'iv-drip':['IV Drip','IV Drip'],'cosmetic-supplements':['Cosmetics','Cosmétiques'],
- life:['Lifestyle','Lifestyle'],gastronomy:['Gastronomy','Gastronomie'],
- 'high-luxury':['High Luxury','High Luxury'],service:['Service','Service'],team:['Team','Équipe']
+ 'medical-longevity':['Medical Longevity','Longévité médicale'],
+ 'iv-drip':['IV Therapy','Perfusions IV'],'longevity-shop':['Longevity Shop','Longevity Shop'],
+ lifestyle:['Lifestyle','Lifestyle'],yachting:['Yachting','Yachting'],
+ experiences:['Experiences','Expériences'],'high-luxury':['High Luxury','High Luxury'],services:['Services','Services']
 };
 let orbitIndex=0,orbitReady=false,clubMembership=null;
 function orbitTitle(w){
@@ -116,7 +123,7 @@ function orbitPosition(){
  const wheel=$('#memberWheel');
  if(!wheel)return;
  wheel.querySelectorAll('.ely-node').forEach((node,i)=>{
-  const angle=(-90+(i-orbitIndex)*40)*Math.PI/180;
+  const angle=(-90+(i-orbitIndex)*(360/WORLDS.length))*Math.PI/180;
   node.style.left=(50+38.6*Math.cos(angle)).toFixed(3)+'%';
   node.style.top=(50+37.5*Math.sin(angle)).toFixed(3)+'%';
   node.style.setProperty('--depth',(Math.sin(angle)+1)/2);
@@ -183,13 +190,14 @@ function renderClub(worldList,membership){
  },{passive:false});
 }
 const PRIVATE_WORLD_HEADLINES={
- 'iv-drip':['Medical coordination. Personally arranged.','Une coordination médicale, en privé.'],
- 'cosmetic-supplements':['The essentials, exceptionally chosen.','L’essentiel, sélectionné pour vous.'],
- life:['A different way to live.','L’art de vivre, en privé.'],
- gastronomy:['The exceptional table.','La gastronomie, à votre mesure.'],
+ 'medical-longevity':['Private medical care, discreetly arranged.','Votre santé, en toute discrétion.'],
+ 'iv-drip':['Individual clinical coordination.','Une coordination médicale personnalisée.'],
+ 'longevity-shop':['Your daily essentials.','Vos essentiels au quotidien.'],
+ lifestyle:['Private style, carefully considered.','Une élégance sur mesure.'],
+ yachting:['Your yacht. Your Riviera.','Votre yacht. Votre Riviera.'],
+ experiences:['Exceptional moments, curated.','Des moments d’exception.'],
  'high-luxury':['The rare and the remarkable.','Le rare et l’exceptionnel.'],
- service:['Consider it arranged.','Tout est dans le détail.'],
- team:['Your people. Your world.','Vos experts, à votre service.']
+ services:['Consider it arranged.','Tout est dans le détail.']
 };
 function renderMaisonMeta(){
  if(!world)return;
@@ -198,11 +206,12 @@ function renderMaisonMeta(){
  if($('#maisonImage'))$('#maisonImage').src=world.image;
  if($('#crumbName'))$('#crumbName').textContent=world.name;
  if($('#maisonKicker'))$('#maisonKicker').textContent=world.eyebrow;
+ if($('#elyYachtingChannel'))$('#elyYachtingChannel').hidden=world.slug!=='yachting';
  if($('#maisonTitle'))$('#maisonTitle').textContent=world.name;
  const hero=$('#ely-shop-title');
  if(hero){hero.replaceChildren(document.createTextNode(world.name));const dot=serviceElement('span','ely-shop-fullstop','.');hero.append(dot)}
  if($('#elyWorldArtName'))$('#elyWorldArtName').textContent=world.name.toUpperCase();
- if($('#elyWorldNumber'))$('#elyWorldNumber').textContent=world.no+' / 09';
+ if($('#elyWorldNumber'))$('#elyWorldNumber').textContent=world.no+' / 08';
  if($('#elyWorldCount'))$('#elyWorldCount').firstChild.textContent=String(world.productCount||3).padStart(2,'0')+' ';
  const hl=$('#elyWorldHeadline');
  if(hl){const h=PRIVATE_WORLD_HEADLINES[world.slug]||[world.name,world.name];hl.textContent=h[lang==='fr'?1:0]}
@@ -303,7 +312,7 @@ function closeProductPage(){
  document.body.classList.remove('ely-service-mode');
  const d=$('#serviceDetail');
  if(d){d.hidden=true;d.replaceChildren()}
- const list=document.getElementById(slug==='longevity'?'experiences':'collection');
+ const list=document.getElementById('collection');
  if(list)list.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
 }
 function openProductPage(p){
@@ -340,7 +349,7 @@ function renderProductRoute(){
   ?['Organisation personnalisée','Devis communiqué avant confirmation','Sous réserve de disponibilité']
   :['Personalised arrangements','Quotation provided before confirmation','Subject to availability']);
  points.forEach(x=>benefits.append(serviceElement('li','',x)));
- const medical=['longevity','aesthetic','iv-drip'].includes(slug);
+ const medical=['medical-longevity','iv-drip'].includes(slug)&&p.id!=='motion-functional-check';
  const action=serviceElement('button','ely-shop-detail-buy',fr?(medical?'DEMANDER CETTE CONSULTATION ↗':'DEMANDER CETTE EXPÉRIENCE ↗'):(medical?'REQUEST THIS CONSULTATION ↗':'REQUEST THIS EXPERIENCE ↗'));
  action.type='button';action.addEventListener('click',()=>addSelection(p,slug));
  const note=serviceElement('p','ely-shop-detail-terms',fr
@@ -358,10 +367,57 @@ window.addEventListener('popstate',()=>{if(isMaison&&active&&$('#serviceDetail')
 function renderProducts(products){
  if(!isMaison||!Array.isArray(products))return;
  hide('maisonAccess');const grid=$('#productGrid');grid.replaceChildren();say('#shopMessage','');
- if(slug==='longevity'){renderLongevityProducts(products,grid);renderProductRoute();return;}
- if(slug==='aesthetic'){renderAestheticProducts(products,grid);renderProductRoute();return;}
  renderPrivateServiceIndex(products,grid);renderProductRoute();
+ if(slug==='yachting'&&!window.__elyYachtingLoaded){window.__elyYachtingLoaded=true;loadPrivateYachtMarketplace()}
 }
+
+
+async function loadClubSponsors(){
+ const holder=$('#elyClubSponsorItems'),section=$('#elyClubSponsors');
+ if(!holder||!session?.access_token)return;
+ try{
+  const r=await fetch('/api/elysium-marketplace?city=all',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  if(!r.ok)return;
+  const data=await r.json();
+  const sponsors=(data.ads||[]).filter(a=>a.placement==='home_feature').slice(0,3);
+  if(!sponsors.length){section.hidden=true;return}
+  holder.replaceChildren();section.hidden=false;
+  sponsors.forEach(a=>{
+   const row=serviceElement('a','ely-club-sponsor-row');
+   row.href='/elysium/maison/yachting/';
+   row.append(
+    serviceElement('span','ely-club-sponsor-tag','SPONSORISÉ · '+(a.sponsor_name||'PARTENAIRE')),
+    serviceElement('strong','',a.headline),
+    serviceElement('span','','↗')
+   );holder.append(row);
+  });
+ }catch{section.hidden=true}
+}
+async function loadPrivateYachtMarketplace(){
+ const host=$('#elyYachtingListings');if(!host||!session?.access_token)return;
+ host.replaceChildren(serviceElement('p','ely-yachting-caption',lang==='fr'?'Chargement des annonces vérifiées…':'Loading verified listings…'));
+ try{
+  const r=await fetch('/api/elysium-marketplace?city=all',{headers:{Authorization:'Bearer '+session.access_token},cache:'no-store'});
+  if(!r.ok)throw Error('Listings unavailable');
+  const data=await r.json();host.replaceChildren();
+  if(!data.listings?.length){host.append(serviceElement('p','ely-yachting-empty',lang==='fr'?'Aucune annonce payante validée actuellement. Les brokers peuvent proposer leur sélection dans le Studio.':'No approved paid listings currently. Brokers can submit their collection in the Studio.'));return}
+  data.listings.forEach(p=>{
+   const art=serviceElement('article','ely-yachting-item');
+   const visual=serviceElement('div','ely-yachting-visual');
+   if(/^https:\/\//i.test(p.image_url||'')){
+    const im=document.createElement('img');im.src=p.image_url;im.loading='lazy';im.alt='';im.referrerPolicy='no-referrer';visual.append(im)
+   }else visual.textContent='⛵';
+   const info=serviceElement('div','ely-yachting-content');
+   info.append(serviceElement('span','ely-shop-section-kicker',(data.ads||[]).some(x=>x.listing_id===p.id&&x.placement==='yachting_feature')?'SPONSORISÉ · BROKER':'ANNONCE BROKER'),
+    serviceElement('h3','',p.yacht_name),
+    serviceElement('p','',p.title+' · '+p.location_city+(p.length_m?' · '+p.length_m+' m':'')));
+   const action=serviceElement('a','ely-shop-signin',lang==='fr'?'DEMANDER LE DOSSIER ↗':'REQUEST DETAILS ↗');
+   action.href='mailto:contact@komolongevity.com?subject='+encodeURIComponent('ELYSIUM Yacht — '+p.yacht_name)+'&body='+encodeURIComponent('Yacht: '+p.yacht_name+'\nReference: '+p.id);
+   info.append(action);art.append(visual,info);host.append(art);
+  });
+ }catch{host.replaceChildren(serviceElement('p','ely-yachting-empty',lang==='fr'?'Annonces indisponibles.':'Listings temporarily unavailable.'))}
+}
+
 function readSelection(){try{return JSON.parse(sessionStorage.getItem('elysium-selection-v2')||'[]')}catch{return []}}
 function saveSelection(items){try{sessionStorage.setItem('elysium-selection-v2',JSON.stringify(items.slice(0,15)))}catch{}}
 function addSelection(p,worldSlug){

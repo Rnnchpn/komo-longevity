@@ -1,0 +1,93 @@
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f6f2ec">
+<title>ELYSIUM · Broker Studio & Ad Régie</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#26382c;--muted:#738172;--paper:#f8f6f0;--line:#dcded5;--serif:'Cormorant Garamond',Georgia,serif;--sans:Manrope,Arial,sans-serif}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans)}[hidden]{display:none!important}
+a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.5;cursor:wait}
+nav{display:flex;justify-content:space-between;align-items:center;gap:20px;min-height:70px;padding:16px max(22px,5vw);border-bottom:1px solid var(--line);background:#fffdf8}
+.brand{display:flex;align-items:center;gap:13px}.brand strong{letter-spacing:-.05em;font-size:20px}.brand em{font:400 24px var(--serif);color:#748d78;font-style:normal}
+nav a:last-child{font-size:10px;letter-spacing:.1em}
+main{width:min(1190px,calc(100% - 36px));margin:auto;padding:clamp(45px,7vw,90px) 0 100px}
+.eyebrow{display:block;font-size:9px;letter-spacing:.22em;font-weight:700;color:#829686}
+h1{font:400 clamp(66px,10vw,129px)/.88 var(--serif);letter-spacing:-.04em;margin:21px 0}
+.lead{font:400 clamp(21px,2.6vw,34px)/1.2 var(--serif);max-width:740px;margin:0 0 45px}
+.note{font-size:11px;line-height:1.8;color:var(--muted)}
+.panel{background:#fffdf8;border:1px solid var(--line);padding:clamp(22px,4vw,40px);margin:17px 0}
+.panel h2{font:400 47px/1 var(--serif);margin:0 0 17px}
+.fields{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.field{min-width:0}.field label{display:block;margin-bottom:7px;font-size:9px;font-weight:700;letter-spacing:.14em}
+.field input,.field select,.field textarea{display:block;width:100%;min-height:47px;border:1px solid var(--line);border-radius:0;background:#fbfaf6;padding:12px;color:var(--ink)}
+.field textarea{height:112px;resize:vertical}.field.wide{grid-column:1/-1}
+.actions{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-top:22px}
+.primary{border:1px solid #2d4635;background:#2d4635;color:#f8f5ec;padding:15px 21px;font-size:10px;font-weight:700;letter-spacing:.1em}
+.secondary{border:1px solid #bacbbd;background:transparent;color:#2e5036;padding:15px 21px;font-size:10px;font-weight:700;letter-spacing:.1em}
+.status{margin-top:17px;font-size:12px;line-height:1.8;color:#4b6954}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:23px 0 30px}
+.steps article{border-top:1px solid #b6c7b6;padding:13px 10px 0}
+.steps article b{font:400 33px var(--serif);display:block}
+.steps article span{font-size:10px;color:#718372;line-height:1.7}
+.tabnav{display:flex;gap:20px;border-bottom:1px solid var(--line);margin-bottom:25px;overflow:auto}
+.tabnav button{border:0;background:none;padding:14px 1px;font-size:11px;font-weight:700;letter-spacing:.05em;white-space:nowrap;color:#849487}
+.tabnav button.active{color:#253e2d;border-bottom:2px solid #253e2d}
+.list{display:grid;gap:10px}.entry{border:1px solid var(--line);padding:19px;background:#faf9f5}
+.entry h3{font:400 30px var(--serif);margin:0 0 7px}
+.entry p{font-size:11px;color:var(--muted);line-height:1.7;margin:5px 0}
+.entry small{font-size:9px;letter-spacing:.07em;color:#57725b}
+.pill{font:700 9px var(--sans);background:#e7eee3;padding:6px 9px;display:inline-block;margin:0 0 7px}
+.legal{border-left:1px solid #a9b7a5;padding-left:16px;margin-top:32px;max-width:780px}
+.flex{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+@media(max-width:650px){.fields,.steps{grid-template-columns:1fr}.field.wide{grid-column:1}h1{font-size:68px}.panel{padding:21px}nav{padding:13px 17px}}
+</style></head><body>
+<nav><a href="/elysium/" class="brand"><strong>KŌMØ</strong><em>ELYSIUM</em></a><a href="/elysium/maison/yachting/">← YACHTING</a></nav>
+<main><span class="eyebrow">ELYSIUM · PRIVATE COMMERCIAL DESK</span><h1>Broker Studio.</h1>
+<p class="lead">Présentez vos yachts. Développez votre visibilité auprès des membres ELYSIUM.</p>
+<div class="steps"><article><b>01</b><span>Créer un profil broker et soumettre un yacht</span></article><article><b>02</b><span>Contrôle de l’annonce et devis publicitaire</span></article><article><b>03</b><span>Publication après confirmation du règlement</span></article></div>
+<section id="signIn" class="panel"><h2>Votre accès professionnel.</h2>
+<div class="fields"><div class="field"><label for="email">E-MAIL PROFESSIONNEL</label><input id="email" type="email" autocomplete="email" placeholder="broker@company.com" required></div>
+<div class="field"><label for="password">MOT DE PASSE (COMPTE EXISTANT)</label><input id="password" type="password" autocomplete="current-password"></div></div>
+<div class="actions"><button class="primary" id="login">ME CONNECTER ↗</button><button class="secondary" id="magicLink">RECEVOIR UN LIEN D’ACCÈS</button></div>
+<p class="note">Le lien de connexion est envoyé à votre adresse e-mail. S’il vous ramène au club, revenez ensuite à cette page.</p><p id="authMessage" class="status" role="status"></p></section>
+<section id="workspace" hidden>
+<div class="flex"><p id="whoami" class="note"></p><button id="logout" class="secondary">DÉCONNEXION</button></div>
+<section class="panel" id="profilePanel"><h2>Votre maison de brokerage.</h2><p class="note" id="verification"></p>
+<form id="brokerForm"><div class="fields">
+<div class="field"><label for="company">SOCIÉTÉ</label><input id="company" required minlength="2" maxlength="120"></div>
+<div class="field"><label for="contact">RESPONSABLE</label><input id="contact" required minlength="2" maxlength="120"></div>
+<div class="field"><label for="brokerEmail">E-MAIL CONTACT</label><input id="brokerEmail" required type="email"></div>
+<div class="field"><label for="website">SITE WEB (HTTPS)</label><input id="website" type="url" placeholder="https://"></div>
+<div class="field wide"><label for="territory">ZONE D’ACTIVITÉ</label><input id="territory" value="Riviera" maxlength="100"></div>
+</div><div class="actions"><button class="primary" type="submit">ENREGISTRER LE PROFIL</button></div><p id="profileMessage" class="status"></p></form></section>
+<div class="tabnav" role="tablist"><button class="active" type="button" data-tab="listings">ANNONCES YACHTS</button><button type="button" data-tab="campaigns">RÉGIE PUBLICITAIRE</button><button type="button" data-tab="myitems">MES DOSSIERS</button></div>
+<section id="listings" class="panel tab"><h2>Nouvelle annonce.</h2>
+<form id="yachtForm"><div class="fields">
+<div class="field"><label for="yachtName">NOM DU YACHT</label><input id="yachtName" required minlength="2" maxlength="100"></div>
+<div class="field"><label for="offerTitle">TITRE DE L’ANNONCE</label><input id="offerTitle" required minlength="6" maxlength="120" placeholder="Superyacht — Riviera charter"></div>
+<div class="field"><label for="listingType">TYPE</label><select id="listingType"><option value="charter">CHARTER</option><option value="sale">VENTE</option></select></div>
+<div class="field"><label for="city">DESTINATION</label><select id="city"><option value="monaco">MONACO</option><option value="cannes">CANNES</option><option value="saint-tropez">SAINT-TROPEZ</option><option value="other">AUTRE</option></select></div>
+<div class="field"><label for="length">LONGUEUR (M)</label><input id="length" type="number" step="0.1" min="5" max="230"></div>
+<div class="field"><label for="price">TARIF INDICATIF (€)</label><input id="price" type="number" min="0" step="100"></div>
+<div class="field wide"><label for="description">DESCRIPTION</label><textarea id="description" required minlength="20" maxlength="1500"></textarea></div>
+<div class="field"><label for="image">PHOTO (URL HTTPS AUTORISÉE)</label><input id="image" type="url" placeholder="https://"></div>
+<div class="field"><label for="external">LIEN BROKER (URL HTTPS)</label><input id="external" type="url" placeholder="https://"></div>
+<div class="field wide"><label><input id="rightToPublish" type="checkbox" required> Je confirme avoir le droit de publier les informations et photographies du yacht, et disposer d’un mandat ou d’une autorisation commerciale appropriée.</label></div>
+</div><div class="actions"><button class="primary" type="submit">SOUMETTRE À VALIDATION ↗</button></div><p class="status" id="listingMessage"></p></form></section>
+<section id="campaigns" class="panel tab" hidden><h2>Publicité ELYSIUM.</h2><p class="note">Emplacements sponsorisés clairement identifiés, réservation sur devis. Pas de mise en ligne automatique avant validation et paiement confirmé.</p>
+<form id="campaignForm"><div class="fields">
+<div class="field"><label for="placement">EMPLACEMENT</label><select id="placement"><option value="map_spotlight">SPOTLIGHT SUR LA CARTE</option><option value="yachting_feature">ANNONCE EN VEDETTE</option><option value="home_feature">COLLECTION D’ACCUEIL</option></select></div>
+<div class="field"><label for="adCity">DESTINATION</label><select id="adCity"><option value="all">TOUTE LA RIVIERA</option><option value="monaco">MONACO</option><option value="cannes">CANNES</option><option value="saint-tropez">SAINT-TROPEZ</option></select></div>
+<div class="field"><label for="adDays">DURÉE SOUHAITÉE</label><select id="adDays"><option value="7">7 JOURS</option><option value="14">14 JOURS</option><option value="30" selected>30 JOURS</option><option value="90">90 JOURS</option></select></div>
+<div class="field"><label for="adListing">ASSOCIER UN YACHT</label><select id="adListing"><option value="">CAMPAGNE INSTITUTIONNELLE</option></select></div>
+<div class="field wide"><label for="adHeadline">MESSAGE PUBLICITAIRE</label><input id="adHeadline" required minlength="6" maxlength="120" placeholder="Private charter — Monaco"></div>
+</div><div class="actions"><button class="primary" type="submit">DEMANDER UN EMPLACEMENT ↗</button></div><p class="status" id="campaignMessage"></p></form>
+<div class="legal note">Publicité expressément signalée « SPONSORISÉ ». Validation éditoriale préalable, calendrier et tarif confirmés par ELYSIUM. Facturation distincte du mandat de brokerage.</div>
+</section>
+<section id="myitems" class="panel tab" hidden><h2>Suivi des dossiers.</h2><div class="list" id="myListings"></div><h2 style="margin-top:35px">Campagnes publicitaires.</h2><div class="list" id="myCampaigns"></div></section>
+<section id="adminPanel" class="panel" hidden><h2>ELYSIUM Régie · Contrôle.</h2><p class="note">Réservé à l’administrateur. Les règlements sont confirmés uniquement après vérification comptable hors ligne.</p>
+<div class="actions"><button id="adminRefresh" class="secondary">ACTUALISER LES DEMANDES</button></div>
+<div class="list" id="adminItems"></div></section>
+</section>
+<p class="legal note">Les annonces ne sont pas publiées automatiquement. Identité du broker, mandat, autorisation des visuels et documents commerciaux doivent être vérifiés. Aucun paiement n’est encaissé sur cet écran ; les factures et éventuelles confirmations de paiement doivent être traitées par ELYSIUM.</p>
+</main><script src="/elysium/assets/supabase.js"></script><script src="/elysium/brokers/studio.js"></script></body></html>
