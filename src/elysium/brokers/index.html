@@ -118,7 +118,11 @@ body:not([data-listing-step="3"]) #yachtForm .broker-listing-submit{display:none
 #myitems .list,#adminItems{max-height:calc((100% - 132px)/2);min-height:0}
 #adminPanel .list{max-height:calc(100% - 135px)}
 #myitems h2:nth-of-type(2){margin-top:9px!important}
-#myitems .entry:nth-child(n+3),#adminItems .entry:nth-child(n+5){display:none}
+.entry[hidden],.broker-record-pager[hidden]{display:none!important}
+.broker-record-pager{display:flex;align-items:center;justify-content:center;gap:12px;min-height:29px;margin:4px 0}
+.broker-record-pager button{width:34px;height:26px;border-radius:7px;border:1px solid #dec79c99;background:#173f4a;color:#dec79c}
+.broker-record-pager button:disabled{opacity:.24}
+.broker-record-pager span{font:700 9px var(--sans);color:#dfc59a}
 @media(max-width:650px){
  main{width:calc(100% - 18px);padding:7px 0}
  h1{font-size:58px}
