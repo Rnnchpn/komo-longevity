@@ -56,7 +56,7 @@
   if(!vendor||!frame)return;
   const chosen=mapProvider==='vesselfinder';
   vendor.hidden=!chosen;
-  $('#obMapProvider [data-map-provider]').forEach(b=>{
+  $$('#obMapProvider [data-map-provider]').forEach(b=>{
    const yes=b.dataset.mapProvider===mapProvider;
    b.classList.toggle('is-active',yes);b.setAttribute('aria-pressed',String(yes));
   });
@@ -575,7 +575,7 @@
    if(mapProvider==='vesselfinder')updateMapProvider({reload:true});
    else fetchYachts();
   });
-  $('#obMapProvider [data-map-provider]').forEach(b=>
+  $$('#obMapProvider [data-map-provider]').forEach(b=>
    b.addEventListener('click',()=>chooseMapProvider(b.dataset.mapProvider)));
   $('#obVesselIframe')?.addEventListener('load',()=>{
    const loading=$('#obVfLoading');if(loading)loading.hidden=true;
