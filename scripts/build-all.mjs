@@ -288,6 +288,7 @@ const scripts = [
   'scripts/pulse-restitution-qa.mjs',
   'scripts/pulse-operator-video-qa.mjs',
   'scripts/pulse-operator-demo-qa.mjs',
+  'scripts/pulse-commercial-posture-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
   'scripts/komo-offers-online-20261029.mjs',
   // Absolute final premium visual layer and regression checks. Business logic untouched.
