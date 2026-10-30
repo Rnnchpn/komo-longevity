@@ -2,6 +2,7 @@ import {INTAKE_GROUPS,SCORING_GROUPS,scoreIntake,intakeProgress,questionnaireFoc
 import {MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
 import {normativeSummary} from './reference-norms.mjs';
 import {buildMotionPassport,programProgress,planTargets} from './motion-passport.mjs';
+import {postureDisplay} from './posture-interpretation.mjs';
 
 export const PDF_REPORT_VERSION='KOMO_MOTION_PASSPORT_REPORT_V2';
 const OBSERVATIONS=[
@@ -35,7 +36,9 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
   const raw=results[id];
   const valid=raw?.status==='done'||raw?.status==='review';
   const value=valid&&Number.isFinite(raw?.value)?raw.value:null;
-  return {id,label,value,display:value===null?'Non realise':decimal(value,precision)+' '+unit,
+  const posture=id==='posture'?postureDisplay(raw):null;
+  const display=posture?posture.label+(posture.offsetPct===undefined?'':' · '+decimal(posture.offsetPct,1)+' %'):value===null?'Non realise':decimal(value,precision)+' '+unit;
+  return {id,label,value,display,posture, 
     status:raw?.status??'missing',source:raw?.source??null,quality:raw?.quality??null,
     commentary:id==='posture'&&valid?'Projection de surface, pas SVA radiographique.':null};
  });
@@ -211,7 +214,10 @@ export async function downloadMotionPdf(data){
  line('Ces observations sont experimentales. Un resultat marque "a verifier" ne peut pas etre presente comme mesure de reference.',
   {size:8.4,color:muted});
  for(const item of data.observations){
-  const quality=item.status==='review'?'Capture a verifier avant interpretation':item.commentary||null;
+  const quality=item.id==='posture'&&item.posture?
+   'Genou '+(item.posture.kneeFlexionDeg===null||item.posture.kneeFlexionDeg===undefined?'non disponible':decimal(item.posture.kneeFlexionDeg,1)+' deg')+
+   ' ; cheville '+(item.posture.ankleDeviationDeg===null||item.posture.ankleDeviationDeg===undefined?'non disponible':decimal(item.posture.ankleDeviationDeg,1)+' deg')+
+   ' ; zones photo non validees cliniquement':item.status==='review'?'Capture a verifier avant interpretation':item.commentary||null;
   row(item.label,item.display,quality);
  }
  title('Reperes selon l age - uniquement si comparables');
