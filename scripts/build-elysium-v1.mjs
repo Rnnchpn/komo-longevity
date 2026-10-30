@@ -52,20 +52,6 @@ for(const [oldSlug,newSlug] of Object.entries(LEGACY_SLUGS)){
 }
 const brokerPage=await readFile(join(out,'brokers','index.html'),'utf8');
 const brokerCode=await readFile(join(out,'brokers','studio.js'),'utf8');
-const themeCss=await readFile(join(assets,'elysium.css'),'utf8');
-const homeApp=await readFile(join(out,'index.html'),'utf8');
-const boutiqueApp=await readFile(join(src,'maison-template.html'),'utf8');
-if(!homeApp.includes('id="elyPublicDock"')||!homeApp.includes('data-scene="riviera"')||
- !boutiqueApp.includes('id="elyShopDock"')||!boutiqueApp.includes('id="elyCataloguePager"')||
- !onBoard.includes('id="obDock"')||!onBoard.includes('id="obFleetPager"')||
- !brokerPage.includes('id="brokerDock"')||!brokerPage.includes('id="brokerListingPager"')||
- !member.includes('function paginateShop')||!onBoardJs.includes('function offlineMap')||
- !themeCss.includes('height:100dvh')||!themeCss.includes('data:image/svg+xml'))
- throw new Error('[elysium] ocean fullscreen app design incomplete');
-if(/(?<!\\$)\\$\\('[^']+'\\)\\.forEach/.test(onBoardJs)||/(?<!\\$)\\$\\('[^']+'\\)\\.forEach/.test(member)||
- /(?<!\\$)\\$\\('[^']+'\\)\\.forEach/.test(brokerCode))
- throw new Error('[elysium] a querySelector was used for a collection, which would break the app');
-
 if(!brokerPage.includes('id="yachtForm"')||!brokerPage.includes('id="campaignForm"')||
  !brokerCode.includes('elysium_ad_campaigns')||!brokerCode.includes('elysium_yacht_listings'))
  throw new Error('[elysium] broker or advertising studio missing');
@@ -88,6 +74,21 @@ if(!club.includes('id="memberWheel"')||!club.includes('class="ely-orbit"')||!clu
 if(!longevityTemplate.includes('id="serviceDetail"')||!aestheticTemplate.includes('id="serviceDetail"')||!longevityTemplate.includes('ely-shop-catalogue')||!aestheticTemplate.includes('ely-shop-catalogue'))throw new Error('[elysium] ultra-minimal private product index missing');
 if(!WORLDS.find(w=>w.slug==='medical-longevity').products.some(p=>p.id==='motion-functional-check')||!WORLDS.find(w=>w.slug==='medical-longevity').products.some(p=>p.id==='aesthetic-medical-video'))throw new Error('[elysium] medical Motion and aesthetics grouping incomplete');
 const member=await readFile(join(assets,'member.js'),'utf8');
+const themeCss=await readFile(join(assets,'elysium.css'),'utf8');
+const homeApp=await readFile(join(out,'index.html'),'utf8');
+const boutiqueApp=await readFile(join(src,'maison-template.html'),'utf8');
+if(!homeApp.includes('id="elyPublicDock"')||!homeApp.includes('data-scene="riviera"')||
+ !boutiqueApp.includes('id="elyShopDock"')||!boutiqueApp.includes('id="elyCataloguePager"')||
+ !onBoard.includes('id="obDock"')||!onBoard.includes('id="obFleetPager"')||
+ !brokerPage.includes('id="brokerDock"')||!brokerPage.includes('id="brokerListingPager"')||
+ !member.includes('function paginateShop')||!onBoardJs.includes('function offlineMap')||
+ !themeCss.includes('height:100dvh')||!themeCss.includes('data:image/svg+xml'))
+ throw new Error('[elysium] ocean fullscreen app design incomplete');
+if(/(?<!\$)\$\('[^']+'\)\.forEach/.test(onBoardJs)||/(?<!\$)\$\('[^']+'\)\.forEach/.test(member)||
+ /(?<!\$)\$\('[^']+'\)\.forEach/.test(brokerCode))
+ throw new Error('[elysium] a querySelector was used for a collection, which would break the app');
+
+
 if(!member.includes('/api/elysium-catalog')||!member.includes('signInWithOtp')||!member.includes('renderLongevityProducts')||!member.includes('renderAestheticProducts')||!member.includes('renderPrivateServiceIndex(products,grid);renderProductRoute();')||!member.includes('renderProductRoute')||!member.includes('elyShopFilters')||!member.includes('serviceGraphic')||!member.includes("$('[data-en]').forEach"))throw new Error('[elysium] secure member client or Longevity shop renderer missing');
 if(member.includes("photo.src=w.image")||member.includes('store-card')||!member.includes('ELYSIUM_GLYPHS')||!member.includes("orbitStep(")||!member.includes("WORLDS.forEach"))throw new Error('[elysium] vector nine-world orbital interaction missing');
 const sanitized=await readFile(join(assets,'store-data.mjs'),'utf8');
