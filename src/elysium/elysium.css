@@ -1437,3 +1437,19 @@ body.ely-world-maison .navlinks #toggleLanguage{border-color:#d9c29978;color:#f4
  .ely-public-commerce .ely-public-art-seal{animation:none}
  .ely-public-commerce .ely-public-world,.ely-world-maison .ely-product-card{transition:none}
 }
+
+
+/* Deep-water movement, quiet by default and completely optional in reduced-motion mode. */
+@keyframes elyOceanPatternDrift{
+ 0%{background-position:0 0}
+ 50%{background-position:13px -12px}
+ 100%{background-position:0 0}
+}
+@keyframes elyOceanFloat{
+ 0%,100%{transform:translate3d(0,0,0) scale(1)}
+ 50%{transform:translate3d(0,-5px,0) scale(1.018)}
+}
+body.ely-public-commerce:before{animation:elyOceanPatternDrift 46s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+ body.ely-public-commerce:before{animation:none!important}
+}
