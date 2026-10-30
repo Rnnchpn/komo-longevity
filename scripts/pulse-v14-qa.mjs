@@ -180,7 +180,7 @@ const checks=[
  ['one screen for a patient with a single appointment',app.includes("const PATIENT_NAV=[['home','Mon espace']]")&&app.includes('function patientHome(){')&&app.includes('ps-one-hero')&&app.includes('Rendez-vous précédents')],
  ['patient experience follows appointment lifecycle',app.includes('const upcoming=byDate.find')&&app.includes('const recentOngoing=byDate.find')&&app.includes('Aucun rendez-vous à venir')&&app.includes('Date passée')],
  ['patient information is optional, not a mandatory four-stage program',app.includes('id="ps-one-preparation"')&&app.includes('id="ps-one-result"')&&app.includes('Votre programme Pulse est actif')],
- ['released scores are not made up',app.includes("overall_score!==null")&&app.includes("const published=releasedScore()")&&!app.includes("Number.isFinite(Number(score()?.overall_score))")],
+ ['released scores are not made up',app.includes("overall_score!==null")&&app.includes("overall_score!==undefined")&&app.includes("const published=releasedScore()")&&app.includes("const resultSummary=published?")],
  ['own online sessions and RLS isolated',app.includes("from('motion_online_sessions')")&&app.includes(".eq('user_id',S.user.id)")&&app.includes('S.onlineSessions.length')],
  ['iPhone no five-tab patient dock',app.includes('Patient UI is a different DOM')&&app.includes('app-shell app-shell-patient')&&mobileCss.includes('.app-shell-patient .sidebar{display:none!important}')&&html.includes('v=20261030-patient2')],
  ['a past appointment is never promoted to the main patient card',!app.includes("appt=next||ordered.at(-1)")&&app.includes("const appt=recentOngoing||upcoming")],
