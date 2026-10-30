@@ -115,3 +115,29 @@ body:has(.p-editorial){background:#F5F6F6}
  .p-editorial .p-history-line{margin-top:10px}
  .p-editorial .p-footer{flex-wrap:wrap;font-size:10px;padding-top:23px}
 }
+
+
+/* Restore the authenticated personal portrait in account and patient home. */
+.p-editorial .p-account>summary{overflow:hidden}
+.p-editorial .p-account-avatar{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+.p-editorial .p-greeting{display:flex;align-items:center;gap:20px;min-width:0}
+.p-editorial .p-greeting>div:last-child{min-width:0}
+.p-editorial .p-greeting-photo{display:none;flex:0 0 74px;width:74px;height:74px;border-radius:50%;border:3px solid #fff;background:#E5EBED;overflow:hidden;box-shadow:0 0 0 1px #D9E0E4}
+.p-editorial .p-greeting-photo:empty{display:none!important}
+.p-editorial .p-greeting-photo img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+.p-editorial .p-overview-photo{position:relative;display:block;padding:0;background:#DDE4E7;min-height:280px}
+.p-editorial .p-overview-photo img{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center 37%}
+.p-editorial .p-overview-photo:after{display:none}
+.p-editorial .p-overview-empty{display:flex;align-items:flex-end;justify-content:flex-start}
+.p-editorial .p-overview-empty:after{display:none}
+@media(max-width:800px){
+ .p-editorial .p-overview-side{display:none}
+ .p-editorial .p-greeting-photo{display:block}
+}
+@media(max-width:520px){
+ .p-editorial .p-page-heading{margin-bottom:23px}
+ .p-editorial .p-greeting{gap:14px}
+ .p-editorial .p-greeting-photo{flex-basis:64px;width:64px;height:64px}
+ .p-editorial .p-page-heading h1{font-size:clamp(30px,8.5vw,39px);margin-top:6px;margin-bottom:0}
+ .p-editorial .p-page-heading .p-eyebrow{font-size:9px}
+}
