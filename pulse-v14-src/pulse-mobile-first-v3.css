@@ -373,28 +373,3 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
  .app-shell-patient .page{padding-inline:12px}
  .ps-one-heading h2{font-size:33px}
 }
-
-
-/* Standalone patient screen: explicitly reset the old fixed mobile dock assumptions. */
-@media(max-width:1000px){
- .app-shell-patient{display:block!important}
- .app-shell-patient .ps-page{width:100%;max-width:760px;padding:18px 16px calc(22px + env(safe-area-inset-bottom,0px))}
- .app-shell-patient .ps-topbar{margin-bottom:17px;min-height:41px}
- .app-shell-patient .ps-brand strong{font-size:19px}
- .app-shell-patient .ps-brand span{font-size:9px}
- .app-shell-patient .ps-one{gap:9px}
- .app-shell-patient .ps-one-hero{padding:19px 18px;border-radius:18px}
- .app-shell-patient .ps-one-heading h1{font-size:clamp(31px,8vw,38px);line-height:1.05}
- .app-shell-patient .ps-one-state{white-space:normal;font-size:10px}
- .app-shell-patient .ps-one-lead{font-size:12px;line-height:1.55}
- .app-shell-patient .ps-one-actions{margin-top:15px}
- .app-shell-patient .ps-one-details summary{min-height:62px}
- .app-shell-patient .ps-one-button{width:100%;min-height:45px}
- .app-shell-patient .ps-one-help{margin-top:2px}
-}
-@media(max-width:390px){
- .app-shell-patient .ps-page{padding-inline:12px}
- .app-shell-patient .ps-one-heading h1{font-size:30px}
- .app-shell-patient .ps-brand{gap:7px}
- .app-shell-patient .ps-top-action{font-size:10px;padding:7px 8px}
-}
