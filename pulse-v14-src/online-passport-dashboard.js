@@ -4,6 +4,7 @@
 import {buildMotionPassport,programProgress,priorityNarrative} from './online/session/motion-passport.mjs';
 import {buildPdfReportData,downloadMotionPdf} from './online/session/pdf-report.js';
 import {restitutionMarkup} from './online/session/restitution.mjs';
+import {postureDisplay} from './online/session/posture-interpretation.mjs';
 
 const e=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const numeric=v=>typeof v==='number'&&Number.isFinite(v);
@@ -56,6 +57,11 @@ function observations(s){
  const results=s.results||{};
  return Object.entries(LABELS).map(([id,meta])=>{
   const r=results[id]||{};
+  if(id==='posture'){
+   const p=postureDisplay(r);
+   const angles=[p.kneeFlexionDeg===null||p.kneeFlexionDeg===undefined?null:'Genou '+fmt(p.kneeFlexionDeg)+'°',p.ankleDeviationDeg===null||p.ankleDeviationDeg===undefined?null:'Cheville '+fmt(p.ankleDeviationDeg)+'°'].filter(Boolean).join(' · ');
+   return '<div class="pp-observation"><div><strong>'+e(meta[0])+'</strong><small>'+e('Lecture indicatrice : '+(angles||'angles non disponibles')+' · seuils non cliniques')+'</small></div><span>'+e(p.label)+'</span></div>';
+  }
   const usable=['done','review'].includes(r.status)&&numeric(r.value);
   const result=usable?(fmt(r.value)+' '+meta[1]):'Non mesuré';
   const qc=r.status==='review'?'À vérifier':r.status==='done'?'Observation enregistrée':'Pas de résultat';
