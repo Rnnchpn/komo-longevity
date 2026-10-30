@@ -436,3 +436,74 @@
 .pulse-entry-activation-link{display:flex;justify-content:center;align-items:center;gap:9px;min-height:37px;padding:10px 12px;margin:12px 0 3px;background:rgba(225,234,219,.58);border:1px solid #c9d9c5;border-radius:10px;color:#294c35;text-decoration:none;font-size:11px;font-weight:750;text-align:center}
 .pulse-entry-activation-link:hover,.pulse-entry-activation-link:focus-visible{background:#e0edda;border-color:#9bbd99;outline-offset:3px}
 .pulse-entry-activation-link span{color:#9f875b}
+
+
+/* KŌMØ Pulse V14 — compact operator directory and mobile workspace (2026-10-30) */
+.op-patients-app{max-width:900px;min-width:0}
+.op-patients-context{margin:0 0 20px}
+.op-patients-kicker{display:block;margin-bottom:7px;color:#83817b;font-size:10px;letter-spacing:.12em;font-weight:700}
+.op-patients-context-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px}
+.op-patients-context h2{min-width:0;margin:0;font:500 clamp(23px,3vw,32px)/1.15 "Instrument Serif",Georgia,serif;letter-spacing:-.02em;overflow-wrap:anywhere}
+.op-patients-count{flex:none;color:#706e69;font-size:12px;white-space:nowrap}
+.op-patients-toolbar{margin:0 0 19px}
+.op-patient-search{display:flex;align-items:center;gap:10px;min-height:47px;width:100%;padding:0 14px;border:1px solid #dedbd3;border-radius:14px;background:#fffefa}
+.op-patient-search:focus-within{outline:2px solid #a79c8b;outline-offset:2px}
+.op-patient-search>span{font:400 26px/1 Georgia,serif;color:#8c8577}
+.op-patient-search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:#252525;font:500 14px/1.3 "DM Sans",sans-serif}
+.op-patient-search input::placeholder{color:#89847c;font-weight:400}
+.op-patients-search-count{margin:8px 2px 0;color:#706e69;font-size:11px}
+.op-patients-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 9px}
+.op-patients-section-head h3{margin:0;font:600 15px/1.2 "DM Sans",sans-serif}
+.op-patients-section-head>span{display:grid;place-items:center;min-width:25px;height:25px;border:1px solid #e2dfd7;border-radius:999px;color:#7d756a;font-size:11px}
+.op-patients-app .patient-list{gap:8px}
+.op-patients-app .patient-list button{min-width:0;grid-template-columns:42px minmax(0,1fr) 19px;gap:12px;padding:10px 13px;min-height:66px;border:1px solid #e5dfd5;border-radius:15px;box-shadow:none;background:#fffefa}
+.op-patients-app .patient-list button[hidden]{display:none!important}
+.op-patients-app .patient-avatar{width:39px;height:39px;font-size:15px;background:#ece6db;color:#645747}
+.op-patients-app .op-patient-detail{display:grid;min-width:0}
+.op-patients-app .patient-list strong{display:block;font:600 13px/1.25 "DM Sans",sans-serif;color:#242422;overflow-wrap:anywhere}
+.op-patients-app .patient-list small{display:block;margin-top:4px;font:400 10px/1.3 "DM Sans",sans-serif;color:#77746e;overflow-wrap:anywhere;word-break:break-word}
+.op-patients-app .op-patient-arrow{font-size:19px;line-height:1;color:#665c51;text-align:right}
+.op-patients-app .patient-list button:focus-visible,.app-shell-pro .nav-item:focus-visible{outline:3px solid #a99b84;outline-offset:2px}
+.op-patients-empty,.op-patients-no-results{margin:0;padding:21px;border-radius:14px;border:1px dashed #ded8cd;background:#fbfaf6;color:#77716a;font-size:12px;line-height:1.5}
+.op-demo-group{margin-top:18px;border-top:1px solid #e7e0d6;padding-top:14px}
+.op-demo-group summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 1px;cursor:pointer;list-style:none;font-size:12px;font-weight:600;color:#6f655a}
+.op-demo-group summary::-webkit-details-marker{display:none}
+.op-demo-group summary:before{content:"▸";display:inline-flex;margin-right:6px;font-size:13px;transition:transform .16s ease}
+.op-demo-group[open] summary:before{transform:rotate(90deg)}
+.op-demo-group summary>span:first-child{margin-right:auto}
+.op-demo-group .patient-list{margin-top:8px}
+.op-demo-count{min-width:24px;min-height:24px;display:grid;place-items:center;padding:0 5px;border-radius:99px;background:#ece6db;font-size:11px}
+.op-patients-no-results{margin-top:12px}
+@media(max-width:1000px){
+  .app-shell-pro .sidebar{left:10px;right:10px;bottom:calc(8px + env(safe-area-inset-bottom));border-radius:19px;padding:6px;min-height:65px;z-index:90}
+  .app-shell-pro .sidebar nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;width:100%;overflow:visible}
+  .app-shell-pro .sidebar .nav-item{min-width:0;width:100%;min-height:53px;display:flex;flex-direction:column;align-items:center;gap:4px;justify-content:center;padding:7px 4px;text-align:center;border-radius:14px;background:transparent;font-size:11px;font-weight:600;white-space:normal}
+  .app-shell-pro .sidebar .nav-item.active{background:#272727;color:#fff;box-shadow:none}
+  .app-shell-pro .sidebar .nav-dot{display:grid;place-items:center;width:22px;height:21px;border-radius:0;background:none!important}
+  .app-shell-pro .sidebar .nav-dot svg{display:block;width:20px;height:20px;stroke:currentColor;stroke-width:1.65;stroke-linecap:round;stroke-linejoin:round}
+  .app-shell-pro .page{padding-bottom:calc(95px + env(safe-area-inset-bottom))}
+}
+@media(max-width:700px){
+  .app-shell-pro .page{padding:18px 16px calc(99px + env(safe-area-inset-bottom))}
+  .app-shell-pro .page-head{align-items:center;gap:12px;margin:0 0 23px}
+  .app-shell-pro .page-head>div:first-child{min-width:0}
+  .app-shell-pro .page-head .overline{margin:0 0 6px;font-size:9px;letter-spacing:.12em;color:#85817a}
+  .app-shell-pro .page-head h1{font:500 clamp(28px,8vw,34px)/1.05 "Instrument Serif",Georgia,serif;letter-spacing:-.025em}
+  .app-shell-pro .page-head .user-chip{flex:0 0 auto;align-self:center;padding:3px;width:40px;height:40px;justify-content:center;border-color:#e6dfd4}
+  .app-shell-pro .page-head .user-chip>span{width:33px;height:33px;font-size:13px;background:#262626}
+  .app-shell-pro .page-head .user-chip>div{display:none}
+  .app-shell-pro .op-patients-context{margin-bottom:16px}
+  .app-shell-pro .op-patients-context-row{align-items:center}
+  .app-shell-pro .op-patients-context h2{font-size:25px;line-height:1.1}
+  .app-shell-pro .op-patients-count{font-size:10px}
+  .app-shell-pro .op-patients-toolbar{margin-bottom:17px}
+  .app-shell-pro .patient-list button{min-height:62px;padding:9px 11px;grid-template-columns:38px minmax(0,1fr) 18px;gap:11px;border-radius:14px}
+  .app-shell-pro .patient-avatar{width:37px;height:37px}
+  .app-shell-pro .op-patients-app .patient-list strong{font-size:12.5px}
+  .app-shell-pro .op-patients-app .patient-list small{font-size:10px}
+}
+@media(max-width:360px){
+  .app-shell-pro .op-patients-context-row{flex-wrap:wrap;gap:6px}
+  .app-shell-pro .page{padding-inline:12px}
+}
+@media(prefers-reduced-motion:reduce){.op-demo-group summary:before{transition:none}}
