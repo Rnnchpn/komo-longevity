@@ -63,7 +63,7 @@ if(!onBoard.includes('data-city="monaco"')||!onBoard.includes('data-city="cannes
  !onBoardJs.includes('renderActivities')||!onBoardJs.includes('source')||onBoardJs.includes('const SNAPSHOT'))
  throw new Error('[elysium] On Board missing 3 cities, consent-based GPS or member-only verified yachts');
 const home=await readFile(join(out,'index.html'),'utf8');
-if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/longevity/')||!home.includes('ely-public-commerce')||(home.match(/class="ely-public-world ely-public-world-/g)||[]).length!==8)
+if(home.includes('portal-doors')||home.includes('elysium-door-2026')||!home.includes('299 €')||!home.includes('KŌMØ Yachting')||!home.includes('/elysium/maison/medical-longevity/')||!home.includes('ely-public-commerce')||(home.match(/class="ely-public-world ely-public-world-/g)||[]).length!==8)
  throw new Error('[elysium] Unwanted entrance animation or required membership and Longevity content missing');
 const club=await readFile(join(out,'club','index.html'),'utf8');
 if(!club.includes('id="memberWheel"')||!club.includes('class="ely-orbit"')||!club.includes('id="elyOrbitActive"')||club.includes('id="memberCards"'))
