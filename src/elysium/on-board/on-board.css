@@ -641,3 +641,30 @@
  background:#d2b88c;color:#062533;border:1px solid #e5cca2;
  font:700 9px Manrope,Arial,sans-serif;letter-spacing:.055em}
 @media(max-width:760px){.ely-onboard .ob-vf-outbound{bottom:87px;right:7px;font-size:7px}}
+
+
+/* AIS map uses a first-party sized panel with an external VesselFinder origin. */
+.ely-onboard .ob-vf-hint{
+ position:absolute;z-index:700;left:10px;bottom:106px;max-width:calc(100% - 185px);
+ padding:8px 12px;border:1px solid #ceb78c85;border-radius:8px;
+ background:#031b27ed;color:#f4e4c8;box-shadow:0 6px 20px #00141e77;
+ display:flex;flex-direction:column;gap:5px;
+}
+.ely-onboard .ob-vf-hint[hidden]{display:none!important}
+.ely-onboard .ob-vf-hint span{font:700 8px/1.3 Manrope,Arial,sans-serif;letter-spacing:.07em}
+.ely-onboard .ob-vf-hint a{font:700 9px/1.4 Manrope,Arial,sans-serif;color:#dfbd8b;text-decoration:underline;text-underline-offset:3px}
+.ely-onboard .ob-vf-hint a:hover{color:#fff0ce}
+.ely-onboard[data-ob-view="yachts"][data-ob-feed="unavailable"] .ob-experience{
+ display:block!important;grid-template-columns:1fr!important;
+}
+.ely-onboard[data-ob-view="yachts"][data-ob-feed="unavailable"] .ob-map-shell{
+ display:block!important;height:100%!important;width:100%!important;
+}
+.ely-onboard[data-ob-view="yachts"][data-ob-feed="unavailable"] .ob-dashboard{display:none!important}
+.ely-onboard[data-ob-view="yachts"][data-ob-feed="unavailable"] .ob-vf-map{display:block}
+@media(max-width:760px){
+ .ely-onboard .ob-vf-hint{bottom:89px;left:7px;max-width:calc(100% - 14px);padding:7px 10px}
+ .ely-onboard .ob-vf-hint span{font-size:7px}
+ .ely-onboard .ob-vf-hint a{font-size:8px}
+ .ely-onboard[data-ob-view="yachts"][data-ob-feed="unavailable"] .ob-map-shell{display:block!important}
+}
