@@ -39,7 +39,7 @@
  let lang=url.searchParams.get('lang')==='en'?'en':url.searchParams.get('lang')==='fr'?'fr':(navigator.language?.startsWith('fr')?'fr':'en');
  let city=CITY_VALUES.includes(url.searchParams.get('city'))?url.searchParams.get('city'):'monaco';
  let map=null,harbourLayer=null,aisLayer=null,positionLayer=null;
- let feed=[],verified=false,filtered=[],size='all',filterText='',selected=null,requestInFlight=false,authClient=null;
+ let feed=[],verified=false,filtered=[],size='all',filterText='',selected=null,requestInFlight=false,authClient=null,feedCheckedAt=null;
  const txt=(fr,en)=>lang==='fr'?fr:en;
  const clean=s=>String(s||'').replace(/[<>&"']/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;',"'":'&#39;'}[c]));
  const boatShape='<svg viewBox="0 0 28 28" aria-hidden="true"><path d="M14 2 25 23 14 17 3 23Z" /></svg>';
@@ -119,7 +119,7 @@
   const name=document.createElement('strong');name.textContent=y.name;
   const desc=document.createElement('small');
   desc.textContent=(y.length?y.length+' m · ':'')+y.port+' · '+(
-   y.precision==='ais'&&y.aisRecent?txt('POSITION AIS · HORODATÉE','AIS · TIMESTAMPED'):
+   y.precision==='ais'&&y.aisRecent?(txt('AIS · ','AIS · ')+new Date(y.reportedAt).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'})):
    y.precision==='ais'?txt('DERNIER AIS · NON RÉCENT','LAST AIS · NOT RECENT'):
    txt('PRÉSENCE AU PORT','HARBOUR REPORT'));
   text.append(name,desc);
@@ -174,7 +174,7 @@
  }
  function updateStatus(){
   $('#obSourceStatus').textContent=verified
-   ?txt('SOURCE · PORTS SIGNALÉS / AIS SI DISPONIBLE','SOURCE · HARBOUR REPORTS / AIS WHEN AVAILABLE')
+   ?(txt('CONSULTÉ ','CHECKED ')+(feedCheckedAt?new Date(feedCheckedAt).toLocaleTimeString(lang==='fr'?'fr-FR':'en-GB',{hour:'2-digit',minute:'2-digit'}):'—')+' · '+txt('PORT / AIS','HARBOUR / AIS'))
    :txt('PORTS · PAS DE YACHTS VÉRIFIÉS','HARBOURS · NO VERIFIED YACHTS');
  }
  async function getSession(){
@@ -196,6 +196,7 @@
    if(!response.ok)throw Error('Unable to load yacht feed');
    const data=await response.json();
    verified=data.source==='harbour_and_optional_ais';
+   feedCheckedAt=verified?Date.now():null;
    feed=Array.isArray(data.yachts)?data.yachts.filter(y=>DESTINATIONS[y.city]&&Number.isFinite(y.lat)&&Number.isFinite(y.lng)):[];
    safeStatus(verified?'live':'none');updateStatus();renderFleet();
   }catch(err){verified=false;feed=[];safeStatus('none');updateStatus();renderFleet()}
