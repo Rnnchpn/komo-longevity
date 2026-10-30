@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="/elysium/on-board/on-board.css?v=ely11">
+<link rel="stylesheet" href="/elysium/on-board/on-board.css?v=ely12">
 </head>
 <body class="ely-onboard" data-ob-view="map">
 <header class="ob-header">
@@ -36,14 +36,19 @@
    <div class="ob-vf-map" id="obVesselFinder" hidden>
     <iframe id="obVesselIframe" title="VesselFinder — AIS des bateaux sur la Côte d’Azur"
      loading="eager" referrerpolicy="strict-origin-when-cross-origin"
-     sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+     sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
      allow="fullscreen"></iframe>
     <div class="ob-vf-attribution" data-fr="CARTE AIS · FOURNIE PAR VESSELFINDER" data-en="AIS MAP · PROVIDED BY VESSELFINDER">CARTE AIS · FOURNIE PAR VESSELFINDER</div>
-    <a class="ob-vf-outbound" href="https://www.vesselfinder.com/" rel="noopener noreferrer" target="_blank"
+    <a class="ob-vf-outbound" id="obVfOutbound" href="https://www.vesselfinder.com/aismap" rel="noopener noreferrer" target="_blank"
      data-fr="OUVRIR VESSELFINDER ↗" data-en="OPEN VESSELFINDER ↗">OUVRIR VESSELFINDER ↗</a>
+    <div class="ob-vf-hint" id="obVfHint" hidden>
+      <span data-fr="CARTE ET POSITIONS FOURNIES PAR VESSELFINDER" data-en="AIS MAP AND VESSEL POSITIONS PROVIDED BY VESSELFINDER">CARTE ET POSITIONS FOURNIES PAR VESSELFINDER</span>
+      <a id="obVfDirectLink" href="https://www.vesselfinder.com/aismap" target="_blank" rel="noopener noreferrer"
+        data-fr="AUCUN BATEAU ? OUVRIR LA CARTE EN DIRECT ↗" data-en="NO SHIPS? OPEN THE LIVE MAP ↗">AUCUN BATEAU ? OUVRIR LA CARTE EN DIRECT ↗</a>
+     </div>
     <div class="ob-vf-loading" id="obVfLoading" aria-live="polite">
      <span>◈</span><strong data-fr="CHARGEMENT DE LA CARTE AIS" data-en="LOADING AIS MAP">CHARGEMENT DE LA CARTE AIS</strong>
-     <small data-fr="Si l'affichage est bloqué, choisissez « CARTE ELYSIUM »." data-en="If the embed is blocked, select ELYSIUM MAP.">Si l'affichage est bloqué, choisissez « CARTE ELYSIUM ».</small>
+     <small data-fr="Si cette carte ne montre aucun bateau, ouvrez-la directement sur VesselFinder." data-en="If no boats are visible here, open the map directly on VesselFinder.">Si l'affichage est bloqué, choisissez « CARTE ELYSIUM ».</small>
     </div>
    </div>
    <div class="ob-map-provider-switch" id="obMapProvider" role="group" aria-label="Map data provider">
@@ -135,5 +140,5 @@
 <footer class="ob-footer"><span>KŌMØ <em>ELYSIUM</em></span><a href="/elysium/club/">PRIVATE MEMBERSHIP ↗</a><span>MONACO · CANNES · SAINT-TROPEZ</span></footer>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <script src="/elysium/assets/supabase.js" defer></script>
-<script src="/elysium/on-board/on-board.js?v=ely11" defer></script>
+<script src="/elysium/on-board/on-board.js?v=ely12" defer></script>
 </body></html>
