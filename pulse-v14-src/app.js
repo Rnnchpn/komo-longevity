@@ -214,10 +214,17 @@ async function loadAll(){if(S.mode==='pro'&&hasPro())await loadPro();else await 
 
 function navItems(){return S.mode==='pro'?PRO_NAV:PATIENT_NAV}
 function shell(){
-  const nav=navItems().map(([id,label],i)=>`<button data-route="${id}" aria-current="${S.route===id?'page':'false'}" class="nav-item ${S.route===id?'active':''}"><span class="nav-dot">${i+1}</span><span>${label}</span></button>`).join('');
+  const icons={
+    operator:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+    patients:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20v-2.1c0-3.4 2.5-5.4 6.5-5.4s6.5 2 6.5 5.4V20H5.5Z"/></svg>',
+    appointments:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2.5"/><path d="M7.5 3.5v4M16.5 3.5v4M3.5 10h17"/></svg>'
+  };
+  const nav=navItems().map(([id,label],i)=>`<button type="button" data-route="${id}" class="nav-item ${S.route===id?'active':''}" aria-label="${esc(label)}" ${S.route===id?'aria-current="page"':''}><span class="nav-dot" aria-hidden="true">${S.mode==='pro'?(icons[id]||''):i+1}</span><span>${esc(label)}</span></button>`).join('');
   const demoLink=isOnlineTester()?'<a class="pulse-online-tester-link" href="/online/session/">◎ Ma consultation Online <small>Mode test · démarrer</small></a>':'';
   const mode=hasPro()?`<div class="mode-switch"><button data-mode="patient" class="${S.mode==='patient'?'active':''}" ${!S.patient?'disabled':''}>Patient</button><button data-mode="pro" class="${S.mode==='pro'?'active':''}">Équipe</button></div>`:'';
   $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div><div class="pulse-mobile-tools">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div></div></header><div id="view"></div></main></div>`;
+  document.querySelector('.app-shell')?.classList.toggle('app-shell-pro',S.mode==='pro');
+  document.querySelector('.app-shell')?.setAttribute('data-pulse-view',S.route);
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled)return;S.mode=b.dataset.mode;localStorage.setItem('komo_v14_mode',S.mode);location.hash=S.mode==='pro'?'operator':'home';await refresh()});
   $('#logout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
@@ -267,8 +274,46 @@ function appointments(){
 }
 function patients(){
   heading('Patients','KŌMØ OPERATOR TEAM');
-  $('#view').innerHTML=`<section class="intro"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><p>Sélectionnez un patient pour ouvrir sa session de mesure.</p></section><section class="patient-list">${S.patients.map(p=>`<button data-patient="${p.id}"><span class="patient-avatar">${esc((p.first_name||p.last_name||'P').slice(0,1))}</span><span><strong>${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</strong><small>${esc(p.external_reference||'Patient KŌMØ')}</small></span><b>→</b></button>`).join('')}</section>`;
-  document.querySelectorAll('[data-patient]').forEach(r=>r.onclick=async()=>{localStorage.setItem('komo_v14_patient',r.dataset.patient);await loadPro();location.hash='operator';render()});
+  const isDemo=p=>/^(?:DEMO|FRIDAY-DEMO|PULSE-MOTION-REPORT-DEMO|E2E[-_]|TEST[-_])/i.test(String(p.external_reference||''))||
+    /^(?:patient k[oō]m[oø] demo|test k[oō]m[oø])/i.test([p.first_name,p.last_name].filter(Boolean).join(' '));
+  const active=S.patients.filter(p=>!isDemo(p));
+  const demos=S.patients.filter(isDemo);
+  const card=p=>{
+    const name=[p.first_name,p.last_name].filter(Boolean).join(' ').trim()||'Patient KŌMØ';
+    const reference=String(p.external_reference||'Dossier KŌMØ');
+    const searchText=(name+' '+reference).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr-FR');
+    return `<button type="button" data-patient="${esc(p.id)}" data-search="${esc(searchText)}" aria-label="Ouvrir le dossier de ${esc(name)}"><span class="patient-avatar" aria-hidden="true">${esc(name.slice(0,1).toUpperCase())}</span><span class="op-patient-detail"><strong>${esc(name)}</strong><small>${esc(reference)}</small></span><span class="op-patient-arrow" aria-hidden="true">→</span></button>`;
+  };
+  $('#view').innerHTML=`<section class="op-patients-app" aria-label="Annuaire des patients">
+    <header class="op-patients-context"><span class="op-patients-kicker">CENTRE ACTUEL</span><div class="op-patients-context-row"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><span class="op-patients-count">${S.patients.length} dossier${S.patients.length>1?'s':''}</span></div></header>
+    <div class="op-patients-toolbar"><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
+    <section class="op-patients-section" aria-label="Dossiers patients"><div class="op-patients-section-head"><h3>Patients</h3><span>${active.length}</span></div>
+    <div class="patient-list" id="opPatientRegular">${active.map(card).join('')||'<p class="op-patients-empty">Aucun dossier patient hors démonstration dans ce centre.</p>'}</div></section>
+    ${demos.length?`<details class="op-demo-group" ${active.length===0?'open':''}><summary><span>Dossiers de démonstration</span><span class="op-demo-count">${demos.length}</span></summary><div class="patient-list" id="opPatientDemos">${demos.map(card).join('')}</div></details>`:''}
+    <p id="opPatientNoResult" class="op-patients-no-results" hidden>Aucun dossier ne correspond à votre recherche.</p>
+  </section>`;
+  document.querySelectorAll('.op-patients-app [data-patient]').forEach(b=>b.onclick=async()=>{
+    localStorage.setItem('komo_v14_patient',b.dataset.patient);
+    await loadPro();
+    location.hash='operator';
+    render();
+  });
+  const input=$('#opPatientSearch');
+  input?.addEventListener('input',()=>{
+    const query=input.value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLocaleLowerCase('fr-FR');
+    let count=0, matchedDemos=0;
+    document.querySelectorAll('.op-patients-app [data-patient]').forEach(button=>{
+      const match=!query||String(button.dataset.search||'').includes(query);
+      button.hidden=!match;
+      if(match){count++;if(button.closest('.op-demo-group'))matchedDemos++;}
+    });
+    const demoGroup=document.querySelector('.op-demo-group');
+    if(demoGroup&&query&&matchedDemos)demoGroup.open=true;
+    const countLabel=$('#opPatientResultCount');
+    if(countLabel){countLabel.hidden=!query;countLabel.textContent=query?count+' résultat'+(count>1?'s':''):'';}
+    const noResult=$('#opPatientNoResult');
+    if(noResult)noResult.hidden=!(query&&count===0);
+  });
 }
 function operator(){
   heading('Session D0','KŌMØ OPERATOR TEAM');
