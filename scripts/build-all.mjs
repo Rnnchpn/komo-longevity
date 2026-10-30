@@ -293,7 +293,11 @@ const scripts = [
   // Explain the Motion Online offer after all premium and commercial home owners.
   'scripts/komo-motion-online-explainer-20261029.mjs',
   // Standalone ELYSIUM /elysium/: Monaco private collection, no Pulse or homepage mutations.
-  'scripts/build-elysium-v1.mjs'
+  'scripts/build-elysium-v1.mjs',
+  // Final SEO pass MUST run after all public and legacy route mutations.
+  // This keeps sitemap.xml / robots.txt aligned with the actually published
+  // canonical URLs and excludes pages marked noindex by later build steps.
+  'scripts/seo-sitemap-v2.mjs'
 ];
 
 for (const script of scripts) {
