@@ -27,7 +27,7 @@ export function sideProfileFrame(points){
  const neck={x:shoulder.x,y:Math.max(.02,shoulder.y-.022)};
  const pelvis={x:hip.x,y:Math.min(.98,hip.y+.010)};
  return {valid:true,reason:'ok',message:'Bien placé ! Ne bougez plus, la photo arrive.',shoulder,hip,ankle,
-   height,neck,pelvis,orientation:visible(points[0])?(points[0].x>shoulder.x?'droite':'gauche'):'indéterminée'};
+   height,neck,pelvis,ix:chosen.ix,orientation:visible(points[0])?(points[0].x>shoulder.x?'droite':'gauche'):'indéterminée'};
 }
 export function surfaceSagittalIndex(neck,pelvis,height){
  if(!neck||!pelvis||!Number.isFinite(neck.x)||!Number.isFinite(pelvis.x)||!Number.isFinite(height)||height<=.2)return null;
