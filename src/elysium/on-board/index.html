@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#f7f5ef">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#0c303a">
 <title>ELYSIUM Riviera — Interactive Private Map</title>
 <meta name="description" content="ELYSIUM On Board : Monaco, Cannes et Saint-Tropez. Retrouvez votre port et vos expériences privées.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,16 +12,16 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="/elysium/on-board/on-board.css">
 </head>
-<body class="ely-onboard">
+<body class="ely-onboard" data-ob-view="map">
 <header class="ob-header">
  <a class="ob-logo" href="/elysium/"><strong>KŌMØ</strong><em>ELYSIUM</em></a>
- <span class="ob-header-line">ON BOARD <span>·</span> THE RIVIERA</span>
+ <span class="ob-header-line">THE RIVIERA · A PRIVATE WORLD</span>
  <div class="ob-header-actions"><a href="/elysium/club/" class="ob-member" id="obClubLink">MON CLUB <span aria-hidden="true">↗</span></a><button id="obLanguage" type="button" aria-label="Switch language">EN</button></div>
 </header>
 <main class="ob-main">
  <section class="ob-intro">
   <div class="ob-intro-titles"><span class="ob-kicker" data-fr="LA CÔTE D’AZUR · TROIS DESTINATIONS" data-en="THE RIVIERA · THREE DESTINATIONS">LA CÔTE D’AZUR · TROIS DESTINATIONS</span>
-   <h1>On Board<span>.</span></h1><p data-fr="Votre yacht. Votre Riviera." data-en="Your yacht. Your Riviera.">Votre yacht. Votre Riviera.</p>
+   <h1>Riviera<span>.</span></h1><p data-fr="Votre yacht. Votre Riviera." data-en="Your yacht. Your Riviera.">Votre yacht. Votre Riviera.</p>
   </div>
   <div class="ob-intro-aside"><p data-fr="Choisissez votre escale, retrouvez les yachts et découvrez vos expériences privées à bord." data-en="Choose your harbour, explore the yachts and discover your private on-board experiences.">Choisissez votre escale, retrouvez les yachts et découvrez vos expériences privées à bord.</p></div>
  </section>
@@ -69,8 +69,11 @@
    <div class="ob-own-yacht"><label for="obManualName" data-fr="VOTRE YACHT N’APPARAÎT PAS ?" data-en="CAN’T FIND YOUR YACHT?">VOTRE YACHT N’APPARAÎT PAS ?</label>
  <div><input type="text" id="obManualName" maxlength="60" autocomplete="off" placeholder="Nom du yacht"><button id="obManualSelect" type="button" data-fr="CHOISIR" data-en="SELECT">CHOISIR</button></div>
  </div>
-   <div class="ob-yacht-list" id="obYachtList" aria-live="polite">
-    <div class="ob-yacht-placeholder" data-fr="Les bateaux confirmés apparaîtront ici. Aucune position de démonstration n’est présentée comme actuelle." data-en="Verified reports will appear here. Historical demonstration positions are never shown as current.">Les bateaux confirmés apparaîtront ici. Aucune position de démonstration n’est présentée comme actuelle.</div>
+   <div class="ob-yacht-list" id="obYachtList" aria-live="polite" tabindex="-1">
+    <div class="ob-yacht-placeholder" data-fr="Les positions AIS vérifiées apparaîtront ici. Les ports restent accessibles." data-en="Verified reports will appear here. Historical demonstration positions are never shown as current.">Les bateaux confirmés apparaîtront ici. Les positions fictives ne sont jamais affichées.</div>
+   </div>
+   <div class="ob-screen-pager" id="obFleetPager" hidden>
+     <button type="button" data-step="-1" aria-label="Previous yachts">←</button><span data-page-label>01 / 01</span><button type="button" data-step="1" aria-label="Next yachts">→</button>
    </div>
    <div class="ob-vessel-context" id="obVesselContext" hidden>
     <div><span class="ob-kicker" data-fr="VOTRE SÉLECTION" data-en="YOUR SELECTION">VOTRE SÉLECTION</span><strong id="obSelectedName"></strong></div>
@@ -86,19 +89,32 @@
   </div>
   <p class="ob-market-info" id="obMarketStatus" data-fr="Les annonces vérifiées et réglées apparaissent ici." data-en="Verified and paid broker listings appear here.">Les annonces vérifiées et réglées apparaissent ici.</p>
   <div class="ob-market-list" id="obMarketList" aria-live="polite"></div>
+   <div class="ob-screen-pager" id="obMarketPager" hidden>
+    <button type="button" data-step="-1" aria-label="Previous listings">←</button><span data-page-label>01 / 01</span><button type="button" data-step="1" aria-label="Next listings">→</button>
+   </div>
  </section>
  <section class="ob-activities" id="obActivities">
    <header class="ob-activities-head"><div><span class="ob-kicker" data-fr="ELYSIUM · EXPÉRIENCES SUR DEMANDE" data-en="ELYSIUM · EXPERIENCES ON REQUEST">ELYSIUM · EXPÉRIENCES SUR DEMANDE</span>
     <h2 data-fr="À bord, à votre mesure." data-en="Made for life on board.">À bord, à votre mesure.</h2></div>
-    <p data-fr="Des prestations privées coordonnées dans votre escale, sous réserve de disponibilité." data-en="Private experiences coordinated at your destination, subject to availability.">Des prestations privées coordonnées dans votre chosen destination.</p>
+    <p data-fr="Des prestations privées coordonnées dans votre escale, sous réserve de disponibilité." data-en="Private experiences coordinated at your destination, subject to availability.">Des prestations privées coordonnées à votre escale.</p>
    </header>
    <div class="ob-activity-grid" id="obActivityGrid"></div>
+   <div class="ob-screen-pager" id="obActivityPager" hidden>
+    <button type="button" data-step="-1" aria-label="Previous experiences">←</button><span data-page-label>01 / 01</span><button type="button" data-step="1" aria-label="Next experiences">→</button>
+   </div>
    <div class="ob-activity-foot"><span data-fr="Une demande particulière ? Notre équipe s’en occupe." data-en="Something more personal? Our concierge will arrange it.">Une demande particulière ? Notre équipe s’en occupe.</span>
     <button type="button" id="obConcierge" data-fr="CONTACTER MA CONCIERGERIE ↗" data-en="CONTACT MY CONCIERGE ↗">CONTACTER MA CONCIERGERIE ↗</button>
    </div>
    <p class="ob-legal" data-fr="La carte est informative et ne permet pas la navigation maritime. La géolocalisation est volontaire, traitée sur votre appareil et n’établit aucun lien entre vous et un navire. Les prestations ne sont pas automatiquement réservées. Les soins médicaux sont assurés séparément par des professionnels habilités." data-en="This map is informational and not for navigation. Location is voluntary, processed on your device, and does not link you to any vessel. Services are not automatically booked. Any medical care is independently delivered by authorised professionals.">La carte est informative et ne permet pas la navigation maritime. La géolocalisation est volontaire, traitée sur votre appareil et n’établit aucun lien entre vous et un navire. Les prestations ne sont pas automatiquement réservées. Les soins médicaux sont assurés séparément par des professionnels habilités.</p>
  </section>
 </main>
+<nav class="ob-app-dock" id="obDock" aria-label="ELYSIUM app navigation">
+ <button type="button" data-ob-screen="map" class="is-active" aria-current="page"><span class="ob-dock-glyph">◎</span><span data-fr="CARTE" data-en="MAP">CARTE</span></button>
+ <button type="button" data-ob-screen="yachts" aria-current="false"><span class="ob-dock-glyph">⌁</span><span>YACHTS</span></button>
+ <button type="button" data-ob-screen="experiences" aria-current="false"><span class="ob-dock-glyph">✧</span><span data-fr="EXPÉRIENCES" data-en="EXPERIENCES">EXPÉRIENCES</span></button>
+ <button type="button" data-ob-screen="market" aria-current="false"><span class="ob-dock-glyph">◇</span><span data-fr="BROKERS" data-en="BROKERS">BROKERS</span></button>
+ <a href="/elysium/club/" class="ob-dock-club"><span class="ob-dock-glyph">K</span><span>CLUB</span></a>
+</nav>
 <footer class="ob-footer"><span>KŌMØ <em>ELYSIUM</em></span><a href="/elysium/club/">PRIVATE MEMBERSHIP ↗</a><span>MONACO · CANNES · SAINT-TROPEZ</span></footer>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
 <script src="/elysium/assets/supabase.js" defer></script>
