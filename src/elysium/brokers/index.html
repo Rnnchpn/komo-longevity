@@ -40,6 +40,114 @@ h1{font:400 clamp(66px,10vw,129px)/.88 var(--serif);letter-spacing:-.04em;margin
 .legal{border-left:1px solid #a9b7a5;padding-left:16px;margin-top:32px;max-width:780px}
 .flex{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
 @media(max-width:650px){.fields,.steps{grid-template-columns:1fr}.field.wide{grid-column:1}h1{font-size:68px}.panel{padding:21px}nav{padding:13px 17px}}
+
+/* Fullscreen broker app, Riviera petrol palette / three-step listing submission */
+body{--blue:#0b303b;--gold:#d8c299;--cream:#f9efdc;--line:#dbc59c66;--muted:#b4cecc;
+ height:100dvh;max-height:100dvh;min-height:0;display:flex;flex-direction:column;overflow:hidden;
+ color:var(--cream);background:radial-gradient(ellipse at 65% 12%,#235662,#0d3541 55%,#082833);}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22160%22%20height%3D%22160%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23d9c299%22%20opacity%3D%22.4%22%20stroke-width%3D%22.9%22%3E%3Ccircle%20cx%3D%2280%22%20cy%3D%2280%22%20r%3D%2218%22%2F%3E%3Cpath%20d%3D%22M80%2015q-24%2026%200%2046%2024-20%200-46ZM80%20145q-24-26%200-46%2024%2020%200%2046ZM15%2080q26-24%2046%200-20%2024-46%200ZM145%2080q-26-24-46%200%2020%2024%2046%200ZM72%2069v24m1-12%2014-12m-11%2015%2013%2012%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");background-size:160px;opacity:.28}
+body nav:not(.broker-app-dock){background:#082833ee;border-color:var(--line);color:var(--cream);height:62px;min-height:62px;flex:none}
+.brand em{color:var(--gold)}
+main{flex:1;min-height:0;max-height:none;padding:clamp(10px,1.7vh,17px) 0;display:flex;flex-direction:column;align-items:stretch;overflow:hidden}
+main>.eyebrow{color:var(--gold)}
+h1{font-size:clamp(47px,6vw,74px);margin:5px 0;color:var(--cream)}
+.lead{font-size:clamp(16px,2.1vw,23px);margin:0 0 9px;color:#bbd0cd}
+.steps{display:none}
+.panel{background:#103b47ed;border:1px solid var(--line);border-radius:13px;
+ box-shadow:0 8px 34px #041d2973;color:var(--cream);padding:clamp(14px,2vh,24px);
+ margin:0;min-height:0}
+.panel h2{font-size:clamp(30px,3.8vw,46px);color:var(--cream);margin:0 0 10px}
+.note,.entry p,.entry small{color:var(--muted);font-size:10px;line-height:1.45}
+.field label{color:#ddc69f}
+.field input,.field select,.field textarea{background:#0b303d;border-color:#d9c29960;border-radius:8px;
+ color:var(--cream);min-height:39px;padding:8px 11px;font-size:11px}
+.field textarea{height:80px}
+.fields{gap:10px}
+.actions{margin-top:10px;gap:9px}
+.primary{background:#dac49c;color:#113440;border-color:#ead4b0;padding:11px 14px;font-size:9px;border-radius:8px}
+.secondary{border-color:#d6bd9488;color:#efddbd;padding:10px 13px;font-size:9px;border-radius:8px}
+.status{font-size:10px;margin-top:7px;color:#bddad4;line-height:1.4}
+#signIn{max-width:780px;width:100%;margin:0 auto;flex:1;max-height:350px;align-self:center}
+#workspace{min-height:0;flex:1;display:flex;flex-direction:column;overflow:hidden}
+#workspace[hidden],#signIn[hidden]{display:none!important}
+#workspace>.flex{flex:none;min-height:29px}
+#workspace>.flex #whoami{margin:0}
+#workspace .tabnav{display:none}
+#workspace>.panel{flex:1;min-height:0;max-height:100%;overflow:hidden}
+body[data-broker-screen="profile"] #workspace>.panel:not(#profilePanel){display:none!important}
+body[data-broker-screen="listings"] #workspace>.panel:not(#listings),
+body[data-broker-screen="campaigns"] #workspace>.panel:not(#campaigns),
+body[data-broker-screen="myitems"] #workspace>.panel:not(#myitems),
+body[data-broker-screen="admin"] #workspace>.panel:not(#adminPanel){display:none!important}
+body[data-broker-screen="admin"] #adminPanel[hidden]{display:none!important}
+body[data-broker-screen="listings"] #listings[hidden],
+body[data-broker-screen="campaigns"] #campaigns[hidden],
+body[data-broker-screen="myitems"] #myitems[hidden]{display:block!important}
+body[data-broker-screen="admin"] #workspace>.panel:not(#adminPanel){display:none!important}
+body[data-broker-screen="listings"] #workspace>.panel#profilePanel,
+body[data-broker-screen="campaigns"] #workspace>.panel#profilePanel,
+body[data-broker-screen="myitems"] #workspace>.panel#profilePanel,
+body[data-broker-screen="admin"] #workspace>.panel#profilePanel{display:none!important}
+body:has(#workspace:not([hidden])) main>.eyebrow,body:has(#workspace:not([hidden])) main>h1,
+body:has(#workspace:not([hidden])) main>.lead{display:none}
+body main>.legal{display:none}
+.broker-app-dock{height:65px;min-height:65px;flex:none;display:flex;align-items:stretch;justify-content:center;
+ gap:7px;background:#062631ed;border-top:1px solid var(--line);padding:5px clamp(8px,7vw,150px)}
+.broker-app-dock[hidden]{display:none!important}
+.broker-app-dock button{flex:1;min-width:0;max-width:170px;border:1px solid transparent;border-radius:10px;
+ color:#acc8c7;background:transparent;display:flex;flex-direction:column;justify-content:center;align-items:center;
+ font:700 8px/1.2 var(--sans);letter-spacing:.07em}
+.broker-app-dock button span{font:400 25px var(--serif);color:var(--gold)}
+.broker-app-dock button.is-active{background:#194956;color:#f6dfbb;border-color:#d6bd9472}
+#yachtForm{display:flex;flex-direction:column;min-height:0;height:calc(100% - 55px)}
+#yachtForm .fields{flex:1;min-height:0;align-content:start}
+#yachtForm .field{display:none}
+body[data-listing-step="1"] #yachtForm .field:nth-child(-n+4){display:block}
+body[data-listing-step="2"] #yachtForm .field:nth-child(n+5):nth-child(-n+7){display:block}
+body[data-listing-step="3"] #yachtForm .field:nth-child(n+8){display:block}
+body[data-listing-step="3"] #yachtForm .broker-listing-submit{display:flex}
+body:not([data-listing-step="3"]) #yachtForm .broker-listing-submit{display:none}
+.broker-form-pager{display:flex;align-items:center;justify-content:center;gap:13px;padding:10px 0}
+.broker-form-pager button{background:#184753;color:#dfc697;border:1px solid #d6bd947b;
+ border-radius:8px;font:700 9px var(--sans);padding:10px 13px}
+.broker-form-pager span{font:700 9px var(--sans);color:#e1c9a1;letter-spacing:.09em}
+.list{min-height:0;overflow:hidden;display:grid;gap:8px}
+.entry{padding:10px;background:#194652;border:1px solid #d6bd9466;border-radius:9px}
+.entry h3{font-size:24px;color:#f6e8d4;margin:2px 0}
+.pill{color:#1b3c47;background:#d6bf96;margin:0 0 4px;font-size:7px}
+#myitems .list,#adminItems{max-height:calc((100% - 132px)/2);min-height:0}
+#adminPanel .list{max-height:calc(100% - 135px)}
+#myitems h2:nth-of-type(2){margin-top:9px!important}
+#myitems .entry:nth-child(n+3),#adminItems .entry:nth-child(n+5){display:none}
+@media(max-width:650px){
+ main{width:calc(100% - 18px);padding:7px 0}
+ h1{font-size:58px}
+ .lead{font-size:17px}
+ .panel{padding:12px;overflow:hidden}
+ .panel h2{font-size:35px;margin:0 0 7px}
+ .fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .field.wide{grid-column:1/-1}
+ .field label{font-size:7px;letter-spacing:.03em;margin-bottom:4px}
+ .field input,.field select,.field textarea{font-size:10px;min-height:34px;padding:6px}
+ .field textarea{height:72px}
+ .actions{margin-top:9px}
+ .broker-app-dock{height:62px;min-height:62px;padding:5px 4px}
+ .broker-app-dock button{font-size:7px;letter-spacing:0}
+ .broker-app-dock button span{font-size:22px}
+ body:has(#workspace:not([hidden])) main>.lead{display:none}
+ #signIn .fields{grid-template-columns:1fr}
+ #workspace>.flex{font-size:8px}
+ #yachtForm{height:calc(100% - 45px)}
+ .broker-form-pager{margin-top:auto}
+}
+@media(max-height:690px){
+ .entry h3{font-size:20px}
+ .panel h2{font-size:30px}
+ .note{font-size:9px}
+ #workspace>.flex{display:none}
+ .field textarea{height:52px}
+}
+
 </style></head><body data-broker-screen="profile" data-listing-step="1">
 <nav><a href="/elysium/" class="brand"><strong>KŌMØ</strong><em>ELYSIUM</em></a><a href="/elysium/maison/yachting/">← YACHTING</a></nav>
 <main><span class="eyebrow">ELYSIUM · PRIVATE COMMERCIAL DESK</span><h1>Broker Studio.</h1>
