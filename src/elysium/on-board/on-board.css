@@ -536,3 +536,19 @@
 @media(prefers-reduced-motion:reduce){
  .ely-onboard .ob-discovery-avatar,.ely-onboard .ob-app-dock button,.ely-onboard .ob-city{transition:none!important}
 }
+
+
+/* Deep-water movement, quiet by default and completely optional in reduced-motion mode. */
+@keyframes elyOceanPatternDrift{
+ 0%{background-position:0 0}
+ 50%{background-position:13px -12px}
+ 100%{background-position:0 0}
+}
+@keyframes elyOceanFloat{
+ 0%,100%{transform:translate3d(0,0,0) scale(1)}
+ 50%{transform:translate3d(0,-5px,0) scale(1.018)}
+}
+.ely-onboard:before{animation:elyOceanPatternDrift 46s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+ .ely-onboard:before{animation:none!important}
+}
