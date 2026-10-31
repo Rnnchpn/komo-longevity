@@ -293,7 +293,9 @@ const scripts = [
   // Explain the Motion Online offer after all premium and commercial home owners.
   'scripts/komo-motion-online-explainer-20261029.mjs',
   // Standalone ELYSIUM /elysium/: Monaco private collection, no Pulse or homepage mutations.
-  'scripts/build-elysium-v1.mjs'
+  'scripts/build-elysium-v1.mjs',
+  // Final public-home conversion layer: 39 € Stripe checkout + Möbius launch asset.
+  'scripts/komo-motion-online-39-mobius-20261031.mjs'
 ];
 
 for (const script of scripts) {
