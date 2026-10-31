@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" role="img" aria-label="KŌMØ Longevity in Motion Online — lancement 39 €">
+<defs>
+  <linearGradient id="paper" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#c9b7a6"/><stop offset=".54" stop-color="#a99481"/><stop offset="1" stop-color="#756b61"/></linearGradient>
+  <linearGradient id="bronze" x1=".01" y1=".12" x2="1" y2=".8"><stop stop-color="#352821"/><stop offset=".14" stop-color="#f5e8d8"/><stop offset=".3" stop-color="#685247"/><stop offset=".52" stop-color="#d7b99c"/><stop offset=".68" stop-color="#322820"/><stop offset=".83" stop-color="#e3c9b5"/><stop offset="1" stop-color="#4f4039"/></linearGradient>
+  <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#211c19"/><stop offset=".25" stop-color="#bfa38d"/><stop offset=".49" stop-color="#f8eee2"/><stop offset=".64" stop-color="#9c7b67"/><stop offset="1" stop-color="#332923"/></linearGradient>
+  <linearGradient id="rose" x1="0" x2="1"><stop stop-color="#c9b6a7" stop-opacity="0"/><stop offset=".55" stop-color="#f6d8ba" stop-opacity=".65"/><stop offset="1" stop-color="#563f32" stop-opacity="0"/></linearGradient>
+  <radialGradient id="mist"><stop stop-color="#dfd0c1" stop-opacity=".8"/><stop offset="1" stop-color="#6c5b4f" stop-opacity="0"/></radialGradient>
+  <filter id="shadow"><feGaussianBlur stdDeviation="8"/></filter>
+  <filter id="soft"><feGaussianBlur stdDeviation="1.5"/></filter>
+</defs>
+<rect width="400" height="600" fill="url(#paper)"/>
+<rect width="400" height="600" fill="url(#mist)"/>
+<ellipse cx="198" cy="465" rx="125" ry="20" fill="#342920" opacity=".24" filter="url(#shadow)"/>
+<!-- Polished twisted ring, rendered as layered sweeping metal ribbons -->
+<g opacity=".95" transform="translate(203 246) rotate(26)">
+ <ellipse rx="107" ry="183" fill="none" stroke="#392e29" stroke-width="68" opacity=".4" filter="url(#shadow)" transform="translate(5 8)"/>
+ <ellipse rx="104" ry="180" fill="none" stroke="url(#bronze)" stroke-width="70"/>
+ <ellipse rx="106" ry="183" fill="none" stroke="#fff7ed" stroke-opacity=".48" stroke-width="2"/>
+ <ellipse rx="101" ry="176" fill="none" stroke="#1c1412" stroke-opacity=".32" stroke-width="2"/>
+ <path d="M-116 -111 C-42 -152 51 -122 89 -49 C126 19 92 74 16 103 C-64 135 -103 168 -55 196" fill="none" stroke="url(#shine)" stroke-width="61" stroke-linecap="round"/>
+ <path d="M-112 -122 C-42 -166 68 -118 91 -62" fill="none" stroke="#fff4e8" stroke-opacity=".62" stroke-width="2.2" filter="url(#soft)"/>
+ <path d="M-53 197 C-14 207 19 202 50 178" fill="none" stroke="#e4c4a5" stroke-opacity=".5" stroke-width="2"/>
+ <path d="M-61 -171 Q-116 -74 -102 40" fill="none" stroke="url(#rose)" stroke-width="11" opacity=".6" />
+</g>
+<g font-family="Helvetica Neue,Arial,sans-serif" fill="#fbf8f2" text-anchor="middle">
+<text x="200" y="39" font-size="20" font-weight="300" letter-spacing="7">KŌMØ</text>
+<text x="200" y="50" font-size="6.1" letter-spacing="3.5">LONGEVITY</text>
+<text x="200" y="196" font-size="46" font-weight="200" letter-spacing="-2.6">Longevity</text>
+<text x="200" y="240" font-size="48" font-weight="200" letter-spacing="-2.7">in Motion</text>
+<text x="200" y="284" font-size="48" font-weight="200" letter-spacing="-2.7">Online</text>
+<text x="200" y="307" font-size="8.2" font-weight="400" letter-spacing="2.6">UN BILAN COMPLET</text>
+<text x="200" y="320" font-size="8.2" font-weight="400" letter-spacing="1.9">POUR MIEUX BOUGER,</text>
+<text x="200" y="333" font-size="8.2" font-weight="400" letter-spacing="1.9">PLUS LONGTEMPS.</text>
+<rect x="122" y="354" width="156" height="55" rx="27.5" fill="#755b48" fill-opacity=".17" stroke="#f4e8df" stroke-opacity=".7" stroke-width=".9"/>
+<text x="200" y="371" font-size="8" letter-spacing="2.8">LANCEMENT</text>
+<text x="200" y="398" font-family="Georgia,serif" font-size="30" font-weight="400">39 €</text>
+<path d="M20 497 H380" stroke="#f2e5da" stroke-opacity=".38"/>
+<g font-size="6.3" letter-spacing=".5" opacity=".95">
+<text x="49" y="528">TESTS</text><text x="49" y="539">PHYSIQUES</text>
+<text x="120" y="528">ANALYSE</text><text x="120" y="539">PERSONNALISÉE</text>
+<text x="201" y="528">RAPPORT</text><text x="201" y="539">COMPLET</text>
+<text x="279" y="528">CONSEILS</text><text x="279" y="539">CONCRETS</text>
+<text x="354" y="528">VISIO</text><text x="354" y="539">INCLUSE</text>
+</g>
+<g fill="none" stroke="#fbf7ef" stroke-width="1.2" opacity=".75">
+<circle cx="49" cy="512" r="5"/><path d="M49 506v-4m-4 18 4-5 4 5"/>
+<path d="M114 518v-10h3v10m3 0v-15h3v15m3 0v-20h3v20"/>
+<rect x="194" y="502" width="14" height="16" rx="1"/><path d="M198 507h7m-7 4h7m-7 4h7"/>
+<circle cx="279" cy="510" r="9"/><path d="m274 510 3 3 6-7"/>
+<rect x="348" y="504" width="15" height="12" rx="1"/><path d="m363 508 6-3v10l-6-3"/>
+</g>
+<text x="200" y="579" font-size="18" font-weight="300" letter-spacing="6">KŌMØ</text>
+<text x="200" y="590" font-size="5.6" letter-spacing="3.5">LONGEVITY</text>
+</g>
+</svg>
