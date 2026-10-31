@@ -1,20 +1,13 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 // Final KŌMØ Motion Online storefront release: price, direct Stripe entry,
-// and the approved Möbius launch artwork. Does not change Pulse payment verification.
+// and a lightweight Möbius launch artwork. Does not change Pulse payment verification.
 const root = process.cwd();
 const site = join(root, 'site');
 const stripe = 'https://buy.stripe.com/fZucN6bUTeTCd4B4EX0VO00';
-const imageUrl = '/assets/images/komo-motion-online-mobius-39.webp';
-const imageParts = [0, 1, 2, 3].map(i => join(root, 'src', 'assets', 'motion-online-mobius', 'part' + i + '.b64'));
-const imageSource = (await Promise.all(imageParts.map(path => readFile(path, 'utf8')))).join('').replace(/\\s+/g, '');
-const asset = Buffer.from(imageSource, 'base64');
-if (asset.length < 10000 || asset.toString('ascii', 0, 4) !== 'RIFF') {
-  throw new Error('[motion-online-39] Missing/corrupt Möbius image');
-}
-await mkdir(join(site, 'assets', 'images'), { recursive: true });
-await writeFile(join(site, 'assets', 'images', 'komo-motion-online-mobius-39.webp'), asset);
+const imageUrl = '/assets/images/komo-motion-online-mobius-39.svg';
+await access(join(site, 'assets', 'images', 'komo-motion-online-mobius-39.svg'));
 
 const copy = {
   fr: {
@@ -67,9 +60,9 @@ for (const [path, lang] of [['index.html','fr'],['fr/index.html','fr'],['en/inde
   }
   // Update price in the commercial home only, including title, card, schema and
   // explainer. In-person prices and all account/medical pages are untouched.
-  html = html.replace(/(?<![0-9])49\\s*(?:€|&euro;)/g, '39 €')
-             .replace(/€\\s*49(?![0-9])/g, '€39');
-  html = html.replace(/https:\/\/app\\.acuityscheduling\\.com\/schedule\\.php\\?owner=40696577(?:&amp;|&)appointmentType=99940918/g, stripe);
+  html = html.replace(/(?<![0-9])49\s*(?:€|&euro;)/g, '39 €')
+             .replace(/€\s*49(?![0-9])/g, '€39');
+  html = html.replace(/https:\/\/app\.acuityscheduling\.com\/schedule\.php\?owner=40696577(?:&amp;|&)appointmentType=99940918/g, stripe);
   // A paid asynchronous flow must not claim Acuity is the online checkout.
   if (lang === 'fr') {
     html = html.replaceAll('Réservation via Acuity, suivi dans Pulse.', 'Paiement sécurisé via Stripe et accès au parcours Pulse.')
@@ -84,12 +77,12 @@ for (const [path, lang] of [['index.html','fr'],['fr/index.html','fr'],['en/inde
   const c = copy[lang];
   const launch = `<section class="k39-launch" id="motion-online-39" aria-labelledby="k39-title"><div class="k39-shell"><a class="k39-visual" href="${stripe}" aria-label="${c.cta}" data-motion-online-checkout="stripe"><img src="${imageUrl}" width="400" height="600" loading="lazy" decoding="async" alt="${c.alt}"></a><div class="k39-copy"><p class="k39-ey">${c.eyebrow}</p><h2 id="k39-title">${c.title}</h2><p class="k39-body">${c.body}</p><a class="k39-action" href="${stripe}" data-motion-online-checkout="stripe">${c.cta} →</a><small class="k39-note">${c.note}</small></div></div></section>`;
   if (!html.includes('id="motion-online-39"')) {
-    html = html.replace('<section class="komo-online-explainer"', launch + '\\n<section class="komo-online-explainer"');
+    html = html.replace('<section class="komo-online-explainer"', launch + '\n<section class="komo-online-explainer"');
   }
   if (!html.includes('id="komo-motion-online-39-style"')) {
-    html = html.replace('</head>', css + '\\n</head>');
+    html = html.replace('</head>', css + '\n</head>');
   }
-  if (!html.includes('id="motion-online-39"') || !html.includes('href="' + stripe + '"') || /(?<![0-9])49\\s*€|€\\s*49/.test(html)) {
+  if (!html.includes('id="motion-online-39"') || !html.includes('href="' + stripe + '"') || /(?<![0-9])49\s*€|€\s*49/.test(html)) {
     throw new Error('[motion-online-39] Price/CTA verification failed: ' + path);
   }
   await writeFile(file, html, 'utf8');
