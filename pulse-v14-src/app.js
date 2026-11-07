@@ -354,6 +354,12 @@ function patientHome(){
       </div>
       ${heroPhoto}
     </section>
+    <section class="p-info-card" style="margin-top:14px">
+      <div class="p-card-top"><span class="p-card-kicker">KŌMØ MOTION · PRÉSENTIEL</span><span class="p-small-symbol" aria-hidden="true">◎</span></div>
+      <h4>Votre séance Motion</h4>
+      <p>Préparez votre bilan, retrouvez les étapes de vos tests et consultez la synthèse après validation de votre opérateur.</p>
+      <a class="p-plain-action" href="./motion-patient-v2/">Ouvrir mon espace Motion ↗</a>
+    </section>
     <div class="p-section-label"><h3>Votre dossier</h3></div>
     <div class="p-two-cards">
       <section class="p-info-card"><div class="p-card-top"><span class="p-card-kicker">RÉSULTATS</span>
