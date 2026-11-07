@@ -24,7 +24,7 @@ const STEPS=[
  {id:'summary',title:'Restitution',mins:[55,60],desc:'Vérification des résultats, commentaires descriptifs et préparation du rapport.',hint:'Aucun Motion Age ni Motion Score propriétaire affiché avant validation.',fields:[['comments','Objectifs et observations non médicales','textarea']]}
 ];
 const labels={valid:'Réalisé selon protocole',unable:'Tenté, non réalisable',unsafe:'Non réalisé — sécurité',refused:'Non réalisé — refus',adapted:'Protocole adapté'};
-let user=null,person=null,assessment=null,session=null,stepRows=[],page=0,forms={},started=0,elapsed=0,timerOn=false,frame=0,busy=false;
+let user=null,person=null,assessment=null,session=null,stepRows=[],page=0,forms={},started=0,elapsed=0,timerOn=false,frame=0,busy=false,demo=false;
 const $=s=>document.querySelector(s), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=v=>v===null||v===undefined||String(v).trim()===''?null:Number(String(v).replace(',','.'));
 const validN=n=>n!==null&&Number.isFinite(n);
@@ -56,7 +56,7 @@ const timers=s.fields.filter(f=>f[2]==='number'&&f[0]!=='finger');$('#timerPanel
 $('#prev').disabled=page===0;$('#next').textContent=page===STEPS.length-1?'Voir le rapport →':'Suivant →';
 $('#fields').querySelectorAll('[data-key]').forEach(el=>el.addEventListener('change',()=>{const k=el.dataset.key;let v=el.type==='checkbox'?el.checked:el.value;if(el.type==='number'){v=num(v);if(v!==null&&(!Number.isFinite(v)||v<Number(el.min)||v>Number(el.max))){el.reportValidity();return}}data(s.id)[k]=v;nav()}));
 }
-async function save(){if(!session||busy)return false;busy=true;$('#saveBadge').textContent='Enregistrement…';try{
+async function save(){if(!session||busy)return false;if(demo){$('#saveBadge').textContent='Démo sans stockage';return true}busy=true;$('#saveBadge').textContent='Enregistrement…';try{
 const s=step(),v=data(s.id);const updated=await sb.rpc('motion_presentiel_v2_save',{p_session_id:session.id,p_step_code:s.id,p_values:v});
 if(updated.error)throw updated.error;$('#saveBadge').textContent='Enregistré';flash('Étape sauvegardée dans Pulse (dossier synthétique).');return true;
 }catch(e){$('#saveBadge').textContent='Erreur';flash('Enregistrement impossible : '+(e?.message||'inconnu')+'. Vérifier la migration serveur V2.',true);return false
@@ -71,10 +71,13 @@ stepRows=a.data||[];
 if(stepRows.length!==STEPS.length)throw Error('Étapes V2 incomplètes');
 for(const row of stepRows)forms[row.step_code]=row.payload?.version===P?row.payload?.values||{}:{};
 render();flash('Dossier synthétique ouvert. Enregistrement sécurisé par les fonctions opérateur Pulse.')}
-async function init(){try{const a=await sb.auth.getUser();user=a.data?.user;if(!user){$('#gateBody').innerHTML='<a class="btn primary" href="../">Se connecter dans Pulse</a>';return}
-const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();if(role.error||!['professional','admin'].includes(role.data?.role)){$('#gateBody').textContent='Accès réservé aux opérateurs professionnels autorisés.';return}
-const p=await sb.from('patients').select('id,first_name,last_name,organization_id,data_classification').eq('data_classification','synthetic').order('created_at',{ascending:false}).limit(50);if(p.error)throw p.error;if(!p.data?.length){$('#gateBody').textContent='Aucun dossier synthétique accessible. Créer d’abord une fiche de démonstration dans Pulse.';return}
-$('#gateBody').innerHTML='<label for="patientSelect" class="muted">Dossier de test autorisé</label><select id="patientSelect" class="wideinput">'+p.data.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.first_name)+' '+esc(x.last_name)+'</option>').join('')+'</select><button id="openPatient" class="btn primary" style="margin-top:13px">Ouvrir la séance de test</button>';
+function startDemo(){demo=true;person={first_name:'Participant',last_name:'fictif'};session={id:'demo'};stepRows=STEPS.map(s=>({id:s.id,step_code:s.id}));forms={};page=0;render();$('#saveBadge').textContent='Démo sans stockage';flash('Mode démonstration : aucune donnée enregistrée, ne saisir aucune information réelle.')}
+function demoButton(){return '<button class="btn primary" id="demoLaunch" type="button">Essayer sans données réelles</button>'}
+function bindDemo(){const b=$('#demoLaunch');if(b)b.onclick=startDemo}
+async function init(){try{const a=await sb.auth.getUser();user=a.data?.user;if(!user){$('#gateBody').innerHTML='<p class="muted">Connectez-vous à Pulse pour retrouver vos dossiers de test ou essayez l’interface en simulation locale.</p><p><a class="btn" href="../">Se connecter dans Pulse</a></p>'+demoButton();bindDemo();return}
+const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();if(role.error||!['professional','admin'].includes(role.data?.role)){$('#gateBody').innerHTML='<p class="muted">Accès aux dossiers réservé aux opérateurs autorisés. La simulation sans stockage reste disponible.</p>'+demoButton();bindDemo();return}
+const p=await sb.from('patients').select('id,first_name,last_name,organization_id,data_classification').eq('data_classification','synthetic').order('created_at',{ascending:false}).limit(50);if(p.error)throw p.error;if(!p.data?.length){$('#gateBody').innerHTML='<p class="muted">Aucun dossier synthétique autorisé accessible. La simulation reste disponible.</p>'+demoButton();bindDemo();return}
+$('#gateBody').innerHTML='<label for="patientSelect" class="muted">Dossier de test autorisé</label><select id="patientSelect" class="wideinput">'+p.data.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.first_name)+' '+esc(x.last_name)+'</option>').join('')+'</select><button id="openPatient" class="btn primary" style="margin-top:13px">Ouvrir la séance de test</button><div style="margin-top:12px">'+demoButton()+'</div>';bindDemo();
 $('#openPatient').onclick=async()=>{try{await startFor(p.data.find(x=>x.id===$('#patientSelect').value))}catch(e){flash('Ouverture impossible : '+(e?.message||'Erreur'),true)}}}
 catch(e){flash('Initialisation impossible : '+(e?.message||'Erreur'),true)}}
 function report(){stop();$('#workspace').classList.add('hide');$('#report').classList.remove('hide');const sc=score();$('#title').textContent='Synthèse';$('#subtitle').textContent='Résultats descriptifs et rapport provisoire';
