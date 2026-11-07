@@ -81,18 +81,16 @@ async function authView(message=''){
 }
 
 function installPulseBookingEntry(){
-  // The booking provider is the only public onboarding entry. Pulse never
-  // creates a patient identity or grants access from an unverified web form.
-  const bookingUrl='https://app.acuityscheduling.com/schedule.php?owner=40696577';
-  const onlineBookingUrl='https://app.acuityscheduling.com/schedule.php?owner=40696577&appointmentType=99940918';
+  // Pulse is a private entry point. All commercial decisions belong on the public site.
+  const onlineOfferUrl='https://komolongevity.com/bilan-en-ligne/';
+  const cannesOfferUrl='https://komolongevity.com/fr/reserver-motion-cannes/';
   const story=document.querySelector('.login-story');
   const panel=document.querySelector('.login-panel');
   const form=document.querySelector('#login');
   if(!story||!panel||!form)return;
   const offers=[
-    {n:'01',kind:'DÉCOUVRIR',title:'Bilan Gratuit',detail:'Un premier repère de mobilité, simple et accessible.',meta:'Découverte · réservation à venir',href:'https://komolongevity.com/fr/#komo-offers',tone:'free'},
-    {n:'02',kind:'À DISTANCE',title:'Bilan Online',detail:'Votre mouvement évalué lors d’un rendez-vous vidéo accompagné.',meta:'30 min · 49 € · réserver en ligne',href:onlineBookingUrl,tone:'online'},
-    {n:'03',kind:'EN PRÉSENTIEL',title:'Bilan physique Motion',detail:'Une analyse instrumentée plus approfondie avec l’équipe KŌMØ.',meta:'Paris Centré · réservation ouverte',href:'https://komolongevity.com/fr/bilan/',tone:'motion'}
+    {n:'01',kind:'EN LIGNE',title:'Motion Online',detail:'Un bilan fonctionnel guidé, réalisable à votre rythme depuis chez vous.',meta:'39 € · paiement unique · découvrir le parcours',href:onlineOfferUrl,tone:'online'},
+    {n:'02',kind:'À CANNES',title:'Motion Présentiel',detail:'Une heure de mesures de la marche, de l’équilibre et de la mobilité.',meta:'60 min · 200 € · demander un créneau',href:cannesOfferUrl,tone:'motion'}
   ];
   story.innerHTML=`
     <div class="pulse-entry-kinetic" aria-hidden="true"><svg viewBox="0 0 600 600" role="presentation" focusable="false"><defs><radialGradient id="pulseSculpture" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e7d4a6" stop-opacity=".18"/><stop offset="100%" stop-color="#e7d4a6" stop-opacity="0"/></radialGradient></defs><circle cx="300" cy="300" r="285" fill="url(#pulseSculpture)"/><g fill="none" stroke="#d5c49c"><ellipse cx="300" cy="300" rx="215" ry="85" transform="rotate(-38 300 300)" stroke-opacity=".25" stroke-width="1.25"/><ellipse cx="300" cy="300" rx="240" ry="117" transform="rotate(-38 300 300)" stroke-opacity=".15"/><ellipse cx="300" cy="300" rx="265" ry="147" transform="rotate(-38 300 300)" stroke-opacity=".10"/><ellipse cx="300" cy="300" rx="190" ry="67" transform="rotate(36 300 300)" stroke-opacity=".17"/><path d="M125 346C220 205 365 204 472 300" stroke-opacity=".19" stroke-width="2"/></g><circle cx="470" cy="300" r="4" fill="#e1c990"/></svg></div>
@@ -100,9 +98,9 @@ function installPulseBookingEntry(){
     <div class="pulse-entry-story">
       <span class="overline light pulse-entry-kicker"><i aria-hidden="true"></i> KŌMØ · L'ART DE BOUGER</span>
       <h1>Le mouvement,<br><em>autrement.</em></h1>
-      <p class="pulse-entry-lead">Trois expériences pour comprendre votre mouvement. Un seul espace privé pour retrouver vos résultats et suivre votre trajectoire.</p>
-      <nav class="pulse-offer-list" aria-label="Les trois bilans KŌMØ">
-        ${offers.map(o=>`<a class="pulse-offer pulse-offer--${o.tone}" href="${o.href}" target="_blank" rel="noopener noreferrer" aria-label="${o.tone==='online'?'Réserver directement le Bilan Online KŌMØ sur Acuity':'Découvrir '+o.title+' sur le site KŌMØ'}">
+      <p class="pulse-entry-lead">Deux parcours pour mieux comprendre votre mouvement. Un espace privé pour accéder à votre suivi et retrouver vos résultats.</p>
+      <nav class="pulse-offer-list" aria-label="Les deux bilans KŌMØ">
+        ${offers.map(o=>`<a class="pulse-offer pulse-offer--${o.tone}" href="${o.href}" target="_blank" rel="noopener noreferrer" aria-label="Découvrir ${o.title} sur le site KŌMØ">
           <span class="pulse-offer-number">${o.n}</span><span class="pulse-offer-art" aria-hidden="true"><span class="pulse-offer-art-ring"></span><span class="pulse-offer-art-path"></span><span class="pulse-offer-art-core"></span></span><span class="pulse-offer-content"><small>${o.kind}</small><strong>${o.title}</strong><span>${o.detail}</span><em>${o.meta}</em></span><span class="pulse-offer-arrow" aria-hidden="true">↗</span>
         </a>`).join('')}
       </nav>
@@ -116,29 +114,27 @@ function installPulseBookingEntry(){
     <div class="pulse-entry-monogram" aria-hidden="true"><span class="pulse-entry-monogram-halo"></span><span class="pulse-entry-monogram-letter">K</span><small>LONGEVITY IN MOTION</small></div>
     <span class="overline pulse-entry-onboarding-kicker">BIENVENUE CHEZ KŌMØ</span>
     <h2 id="pulseCreateTitle">Votre espace.<br><em>Votre trajectoire.</em></h2>
-    <p class="pulse-entry-panel-intro">Le Bilan Online à 49 € et les bilans Motion à Paris sont ouverts à la réservation. Le Bilan Gratuit sera disponible prochainement.</p>
+    <p class="pulse-entry-panel-intro">Découvrez les expériences KŌMØ sur le site officiel puis retrouvez votre parcours dans votre espace privé Pulse.</p>
     <ol class="pulse-entry-steps">
-      <li><span>01</span><div><strong>Choisissez votre bilan</strong><small>Online à 49 € en visioconférence, ou Motion en présentiel à Paris.</small></div></li>
-      <li><span>02</span><div><strong>Réglez et recevez la confirmation</strong><small>Le paiement du Bilan Online s’effectue dans Acuity. Conservez l’e-mail de réservation.</small></div></li>
-      <li><span>03</span><div><strong>Activez votre espace Pulse</strong><small>Vérifiez votre adresse e-mail et votre réservation réglée avant de préparer la séance.</small></div></li>
+      <li><span>01</span><div><strong>Choisissez votre expérience</strong><small>Motion Online à 39 € ou bilan présentiel à Cannes, 60 minutes à 200 €.</small></div></li>
+      <li><span>02</span><div><strong>Suivez le parcours correspondant</strong><small>En ligne : un paiement unique. Cannes : demande de créneau, puis confirmation individuelle.</small></div></li>
+      <li><span>03</span><div><strong>Retrouvez votre espace Pulse</strong><small>Connectez-vous avec votre compte autorisé pour consulter votre parcours et vos résultats disponibles.</small></div></li>
     </ol>
-    <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${bookingUrl}" target="_blank" rel="noopener noreferrer">Choisir mon bilan et réserver <span aria-hidden="true">↗</span></a>
-    <a class="pulse-entry-online-shortcut" href="${onlineBookingUrl}" target="_blank" rel="noopener noreferrer" aria-label="Réserver directement le Bilan Online de 30 minutes à 49 euros">Réserver directement le Bilan Online <strong>49 €</strong> <span aria-hidden="true">↗</span></a>
-    <a class="pulse-entry-activation-link" href="./online/activate/" aria-label="Après paiement, créer ou retrouver mon accès Pulse">Déjà payé ? Activer mon compte Pulse <span aria-hidden="true">→</span></a>
-    <a class="pulse-entry-prep-link" href="./online/" aria-label="Préparer mon Bilan Online et tester ma webcam"><span aria-hidden="true">◉</span> Déjà réservé ? Préparez votre séance et votre webcam <span aria-hidden="true">→</span></a>
-    <p class="pulse-entry-assurance"><span aria-hidden="true">◇</span> La réservation ne crée pas automatiquement de compte Pulse. Une confirmation Acuity ne vaut pas activation de l’espace patient.</p>
+    <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${onlineOfferUrl}" target="_blank" rel="noopener noreferrer">Découvrir Motion Online · 39 € <span aria-hidden="true">↗</span></a>
+    <a class="pulse-entry-online-shortcut" href="${cannesOfferUrl}" target="_blank" rel="noopener noreferrer" aria-label="Découvrir le bilan Motion à Cannes : 60 minutes à 200 euros, demande de créneau">Motion à Cannes <strong>200 € · 60 min</strong> <span aria-hidden="true">↗</span></a>
+    <a class="pulse-entry-activation-link" href="./online/activate/" aria-label="Activer ou retrouver mon accès Pulse">Déjà client ? Activer ou retrouver mon compte Pulse <span aria-hidden="true">→</span></a>
+    <p class="pulse-entry-assurance"><span aria-hidden="true">◇</span> La demande de créneau à Cannes ne vaut pas réservation. Aucun compte Pulse n’est créé automatiquement par ce formulaire.</p>
     <div class="pulse-entry-login-bridge"><span>Vous avez déjà un compte ?</span><button type="button" class="pulse-login-link" id="pulseShowLogin">Se connecter →</button></div>
     <div class="pulse-entry-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
   panel.prepend(entry);
-  // Mobile only: persistent direct booking entry, hidden when the login form is open.
-  // Same verified Acuity booking link as the main online offer.
+  // Mobile only: shortcut to the public online offer, not to the retired Acuity flow.
   const mobileBooking=document.createElement('a');
   mobileBooking.className='pulse-mobile-booking-bar';
-  mobileBooking.href=onlineBookingUrl;
+  mobileBooking.href=onlineOfferUrl;
   mobileBooking.target='_blank';
   mobileBooking.rel='noopener noreferrer';
-  mobileBooking.setAttribute('aria-label','Réserver le Bilan Online KŌMØ : 49 euros pour 30 minutes');
-  mobileBooking.innerHTML='<span class="pulse-mobile-booking-copy"><small>BILAN ONLINE · 30 MIN</small><strong>49 €</strong></span><span class="pulse-mobile-booking-action">Réserver <span aria-hidden="true">↗</span></span>';
+  mobileBooking.setAttribute('aria-label','Découvrir le bilan Motion Online KŌMØ à 39 euros');
+  mobileBooking.innerHTML='<span class="pulse-mobile-booking-copy"><small>MOTION ONLINE</small><strong>39 €</strong></span><span class="pulse-mobile-booking-action">Découvrir <span aria-hidden="true">↗</span></span>';
   document.querySelector('.login-page')?.append(mobileBooking);
   const finePointer=window.matchMedia?.('(hover:hover) and (pointer:fine)');
   if(finePointer?.matches){
@@ -158,7 +154,7 @@ function installPulseBookingEntry(){
   const back=document.createElement('button');
   back.type='button';
   back.className='pulse-login-back';
-  back.textContent='← Retour aux réservations';
+  back.textContent='← Retour aux bilans';
   form.prepend(back);
   const setLogin=visible=>{
     entry.hidden=visible;
