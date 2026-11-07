@@ -87,7 +87,7 @@ const checks=[
  ['online and Cannes offers have distinct destinations',app.includes("href:onlineOfferUrl,tone:'online'")&&app.includes("href:cannesOfferUrl,tone:'motion'")&&app.includes('class="pulse-entry-online-shortcut" href="${cannesOfferUrl}"')],
  ['online booking shortcut styled',css.includes('.pulse-entry-online-shortcut')],
  ['existing login preserved',app.includes('pulseShowLogin')&&app.includes('signInWithPassword')],
- ['Online preflight accessible from landing',app.includes('href="./online/"')&&css.includes('.pulse-entry-prep-link')],
+ ['Online access and activation retained',app.includes('href="./online/activate/"')&&onlineHtml.includes('Préparer mon Bilan Online')],
  ['Online preflight page branded',onlineHtml.includes('Préparer mon Bilan Online')&&onlineHtml.includes('KŌMØ <span>PULSE</span>')],
  ['Online preflight references verified booking',onlineHtml.includes('owner=40696577&amp;appointmentType=99940918')],
  ['Online preflight no unverified payment promise',onlineHtml.includes('49 €</strong> tarif du bilan')&&!onlineHtml.includes('49 €</strong> à la réservation')&&onlineHtml.includes('Cette page ne collecte aucun paiement et ne confirme pas si le rendez-vous est réglé.')],
