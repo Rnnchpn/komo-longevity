@@ -44,7 +44,7 @@ function fmtTime(ms){const t=Math.max(0,ms);return String(Math.floor(t/60000)).p
 function tick(){if(timerOn)$('#clock').textContent=fmtTime(elapsed+performance.now()-started);frame=requestAnimationFrame(tick)}
 function stop(){if(timerOn){elapsed+=performance.now()-started;timerOn=false;cancelAnimationFrame(frame)}$('#clock').textContent=fmtTime(elapsed)}
 function setStepStatus(id){const idx=STEPS.findIndex(s=>s.id===id);const v=data(id);return id==='preflight'?Boolean(v.ready&&v.info):id==='summary'?Boolean(v.comments?.trim()):['valid','unable','unsafe','adapted','refused'].includes(v.status);}
-function nav(){const n=$('#nav');n.innerHTML=STEPS.map((s,i)=>'<button type="button" data-i="'+i+'" class="'+(page===i?'active ':'')+(setStepStatus(s.id)?'done':'')+'">'+String(i+1).padStart(2,'0')+' · '+esc(s.title)+'</button>').join('');n.querySelectorAll('button').forEach(b=>b.onclick=async()=>{await save();page=Number(b.dataset.i);render()})}
+function nav(){const n=$('#nav');n.innerHTML=STEPS.map((s,i)=>'<button type="button" data-i="'+i+'" class="'+(page===i?'active ':'')+(setStepStatus(s.id)?'done':'')+'">'+String(i+1).padStart(2,'0')+' · '+esc(s.title)+'</button>').join('');n.querySelectorAll('button').forEach(b=>b.onclick=async()=>{if(await save()){page=Number(b.dataset.i);$('#report').classList.add('hide');render()}})}
 function field([key,title,kind,max]){const v=data(step().id)[key];if(kind==='check')return '<label class="full check"><input type="checkbox" data-key="'+key+'" '+(v?'checked':'')+'><span>'+esc(title)+'</span></label>';
 if(kind==='status')return '<label class="full"><span>'+esc(title)+'</span><select data-key="'+key+'"><option value="">Sélectionner</option>'+Object.entries(labels).map(([k,t])=>'<option value="'+k+'" '+(v===k?'selected':'')+'>'+esc(t)+'</option>').join('')+'</select></label>';
 if(kind==='textarea')return '<label class="full"><span>'+esc(title)+'</span><textarea data-key="'+key+'" maxlength="1000">'+esc(v??'')+'</textarea></label>';
@@ -56,18 +56,21 @@ const timers=s.fields.filter(f=>f[2]==='number'&&f[0]!=='finger');$('#timerPanel
 $('#prev').disabled=page===0;$('#next').textContent=page===STEPS.length-1?'Voir le rapport →':'Suivant →';
 $('#fields').querySelectorAll('[data-key]').forEach(el=>el.addEventListener('change',()=>{const k=el.dataset.key;let v=el.type==='checkbox'?el.checked:el.value;if(el.type==='number'){v=num(v);if(v!==null&&(!Number.isFinite(v)||v<Number(el.min)||v>Number(el.max))){el.reportValidity();return}}data(s.id)[k]=v;nav()}));
 }
-async function save(){if(!session||busy)return;busy=true;$('#saveBadge').textContent='Enregistrement…';try{const s=step(),v=data(s.id),row=stepRows.find(r=>r.step_code===s.id);if(!row)throw Error('Étape introuvable');const status=setStepStatus(s.id)?'complete':'running';
-const payload={kind:'motion_presentiel_manual',version:P,values:v,updated_at:new Date().toISOString()};
-const upd=await sb.from('pulse_operator_steps').update({payload,status,qc_status:status==='complete'?'pass':'pending',updated_by:user.id}).eq('id',row.id).select('id').single();if(upd.error)throw upd.error;
-const sess=await sb.from('pulse_operator_sessions').update({current_step_code:s.id,status:'running'}).eq('id',session.id).select('id').single();if(sess.error)throw sess.error;
-$('#saveBadge').textContent='Enregistré';flash('Étape sauvegardée dans Pulse (dossier synthétique).')}catch(e){$('#saveBadge').textContent='Erreur';flash('Enregistrement impossible : '+(e?.message||'inconnu'),true)}finally{busy=false}}
-async function startFor(p){person=p;const a=await sb.from('assessments').select('id,created_at').eq('patient_id',p.id).order('created_at',{ascending:false}).limit(1);if(a.error||!a.data?.length){flash('Ce dossier de démonstration doit disposer d’un bilan existant dans Pulse avant de démarrer.',true);return}assessment=a.data[0];
-const prior=await sb.from('pulse_operator_sessions').select('id,protocol_version').eq('patient_id',p.id).eq('protocol_version',P).order('created_at',{ascending:false}).limit(1);if(prior.error)throw prior.error;
-if(prior.data?.length){session=prior.data[0]}else{const ins=await sb.from('pulse_operator_sessions').insert({organization_id:p.organization_id,patient_id:p.id,assessment_id:assessment.id,operator_user_id:user.id,protocol_version:P,status:'draft',readiness:{nonmedical:true,preview:true}}).select('id,protocol_version').single();if(ins.error)throw ins.error;session=ins.data}
-const res=await sb.from('pulse_operator_steps').select('id,step_code,payload').eq('operator_session_id',session.id).order('sequence_order');if(res.error)throw res.error;stepRows=res.data||[];
-const missing=STEPS.filter(s=>!stepRows.some(r=>r.step_code===s.id));if(missing.length){const ins=await sb.from('pulse_operator_steps').insert(missing.map(s=>({operator_session_id:session.id,step_code:s.id,sequence_order:STEPS.indexOf(s)+1,planned_min_start:s.mins[0],planned_min_end:s.mins[1],title:s.title,device_family:null,source_system:'Pulse Manual',required:true,status:'pending',payload:{kind:'motion_presentiel_manual',version:P,values:{}}}))).select('id,step_code,payload');if(ins.error)throw ins.error;stepRows=[...stepRows,...ins.data]}
-for(const r of stepRows)forms[r.step_code]=r.payload?.version===P?r.payload?.values||{}:{};
-render();flash('Session de démonstration ouverte. Les saisies sont rattachées au dossier synthétique autorisé.')}
+async function save(){if(!session||busy)return false;busy=true;$('#saveBadge').textContent='Enregistrement…';try{
+const s=step(),v=data(s.id);const updated=await sb.rpc('motion_presentiel_v2_save',{p_session_id:session.id,p_step_code:s.id,p_values:v});
+if(updated.error)throw updated.error;$('#saveBadge').textContent='Enregistré';flash('Étape sauvegardée dans Pulse (dossier synthétique).');return true;
+}catch(e){$('#saveBadge').textContent='Erreur';flash('Enregistrement impossible : '+(e?.message||'inconnu')+'. Vérifier la migration serveur V2.',true);return false
+}finally{busy=false}}
+async function startFor(p){person=p;
+const opened=await sb.rpc('motion_presentiel_v2_open',{p_patient_id:p.id});
+if(opened.error)throw opened.error;
+session={id:opened.data.session_id};
+const a=await sb.from('pulse_operator_steps').select('id,step_code,payload').eq('operator_session_id',session.id).order('sequence_order');
+if(a.error)throw a.error;
+stepRows=a.data||[];
+if(stepRows.length!==STEPS.length)throw Error('Étapes V2 incomplètes');
+for(const row of stepRows)forms[row.step_code]=row.payload?.version===P?row.payload?.values||{}:{};
+render();flash('Dossier synthétique ouvert. Enregistrement sécurisé par les fonctions opérateur Pulse.')}
 async function init(){try{const a=await sb.auth.getUser();user=a.data?.user;if(!user){$('#gateBody').innerHTML='<a class="btn primary" href="../">Se connecter dans Pulse</a>';return}
 const role=await sb.from('account_roles').select('role').eq('user_id',user.id).maybeSingle();if(role.error||!['professional','admin'].includes(role.data?.role)){$('#gateBody').textContent='Accès réservé aux opérateurs professionnels autorisés.';return}
 const p=await sb.from('patients').select('id,first_name,last_name,organization_id,data_classification').eq('data_classification','synthetic').order('created_at',{ascending:false}).limit(50);if(p.error)throw p.error;if(!p.data?.length){$('#gateBody').textContent='Aucun dossier synthétique accessible. Créer d’abord une fiche de démonstration dans Pulse.';return}
@@ -80,7 +83,7 @@ $('#reportBody').innerHTML='<p><strong>Dossier de démonstration :</strong> '+es
 $('#timerStart').onclick=()=>{if(!timerOn){started=performance.now();timerOn=true;tick()}};
 $('#timerStop').onclick=stop;$('#timerReset').onclick=()=>{stop();elapsed=0;$('#clock').textContent='00:00.00'};
 $('#timerApply').onclick=()=>{stop();if(!elapsed)return;const k=$('#timerTarget').value;if(!k)return;const v=Math.round(elapsed/10)/100;const max=step().fields.find(f=>f[0]===k)?.[3]||120;if(v>max){flash('Temps supérieur au plafond de ce test. Vérifier la mesure.',true);return}data(step().id)[k]=v;render()};
-$('#prev').onclick=async()=>{await save();page=Math.max(0,page-1);render()};
-$('#next').onclick=async()=>{await save();if(page===STEPS.length-1)report();else{page++;render()}};
+$('#prev').onclick=async()=>{if(await save()){page=Math.max(0,page-1);render()}};
+$('#next').onclick=async()=>{if(await save()){if(page===STEPS.length-1)report();else{page++;render()}}};
 $('#save').onclick=save;$('#print').onclick=()=>window.print();$('#back').onclick=()=>{$('#report').classList.add('hide');$('#workspace').classList.remove('hide');render()};init();
 </script></body></html>
