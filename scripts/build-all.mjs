@@ -295,7 +295,9 @@ const scripts = [
   // Standalone ELYSIUM /elysium/: Monaco private collection, no Pulse or homepage mutations.
   'scripts/build-elysium-v1.mjs',
   // Final public-home conversion layer: 39 € Stripe checkout + Möbius launch asset.
-  'scripts/komo-motion-online-39-mobius-20261031.mjs'
+  'scripts/komo-motion-online-39-mobius-20261031.mjs',
+  // French KŌMØ Motion Cannes 60-minute offer: public reservation request page.
+  'scripts/build-motion-cannes-booking-20261107.mjs'
 ];
 
 for (const script of scripts) {
