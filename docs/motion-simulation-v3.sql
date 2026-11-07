@@ -101,8 +101,8 @@ begin
     if p_payload <> (select coalesce(jsonb_object_agg(key,value),'{}'::jsonb)
         from jsonb_each(p_payload) where key in ('goal','activity','sleep','fatigue')) then
       raise exception 'Unexpected questionnaire field'; end if;
-    if not coalesce(p_payload->>'goal','') in ('','marche','equilibre','force','mobilite','general')
-      or not coalesce(p_payload->>'activity','') in ('','faible','moderee','elevee')
+    if coalesce(p_payload->>'goal','') not in ('','marche','equilibre','force','mobilite','general')
+      or coalesce(p_payload->>'activity','') not in ('','faible','moderee','elevee')
       then raise exception 'Invalid questionnaire response'; end if;
     foreach v_key in array array['sleep','fatigue'] loop
       if p_payload ? v_key then
@@ -129,7 +129,7 @@ begin
     v_step:=p_payload->>'step';
     v_vals:=p_payload->'values';
     if v_step not in ('preflight','balance','gait','chair','tug','unipodal','mobility','summary')
-      or jsonb_typeof(v_vals)<>'object'
+      or coalesce(jsonb_typeof(v_vals),'null')<>'object'
       or pg_catalog.octet_length(v_vals::text)>800 then raise exception 'Invalid test'; end if;
 
     for v_key,v_value in select key,value from jsonb_each(v_vals) loop
@@ -169,8 +169,8 @@ begin
           stage='during',step_code=v_step,updated_at=now() where id=v.id;
   elsif v_role='operator' and p_action='release' then
     if v.released then raise exception 'Already released'; end if;
-    if v.measurements->'preflight'->>'safe' <> 'true'
-      or v.measurements->'preflight'->>'informed'<>'true'
+    if coalesce(v.measurements->'preflight'->>'safe','false') <> 'true'
+      or coalesce(v.measurements->'preflight'->>'informed','false') <> 'true'
       then raise exception 'Safety and informed participation must be confirmed'; end if;
     foreach v_test in array array['balance','gait','chair'] loop
       if coalesce(v.measurements->v_test->>'status','') not in
