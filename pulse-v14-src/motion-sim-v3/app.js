@@ -35,13 +35,18 @@ function facts(){return '<div class="facts"><span class="fact"><b>200 €</b> ·
 function banner(){return '<div class="banner">Environnement de démonstration exclusivement. Aucun paiement, aucune réservation réelle, aucune donnée nominative ou de santé réelle. Les liens de rôle permettent d’accéder à cette simulation fictive et expirent après 12 heures.</div>'}
 function layout(inner){$('#app').innerHTML='<div class="app">'+top()+'<main class="shell">'+inner+'<div class="footer">KŌMØ Motion · Simulation V3 · Évaluation fonctionnelle non médicale · Ni diagnostic ni prescription.</div></main></div>'}
 function landing(){layout('<section class="hero"><div class="eyebrow">MAISON EPIGENETIC · CANNES · PARCOURS DE DÉMONSTRATION</div><h1>KŌMØ Motion.<br>Deux écrans. Une séance.</h1><p>Simulez un bilan fonctionnel de 60 minutes à 200 €, de l’accueil au rapport personnalisé. Vous pouvez créer la séance depuis l’interface web opérateur ou depuis l’espace patient.</p>'+facts()+'</section><div class="grid2 equal"><section class="card slate"><div class="eyebrow" style="color:#a8d8df">VOTRE INTERFACE WEB</div><h2>Motion Operator</h2><p>Pilotez la séance, chronométrez la marche et les autres tests, saisissez les mesures puis publiez le rapport.</p><div class="actions"><button id="startOperator" class="btn light">Créer depuis l’opérateur ↗</button></div></section><section class="card"><div class="eyebrow">INTERFACE PARTICIPANT</div><h2>My Motion</h2><p>Préparez le bilan, répondez à quelques questions fictives, voyez les étapes en direct et recevez votre synthèse.</p><div class="actions"><button id="startPatient" class="btn primary">Créer depuis le patient ↗</button></div></section></div>'+banner());
- $('#startOperator').onclick=()=>create('operator');$('#startPatient').onclick=()=>create('patient')}
+ const pref=new URL(location.href).searchParams.get('role');
+if(pref==='operator'||pref==='patient'){
+ const irrelevant=pref==='operator'?'#startPatient':'#startOperator';
+ document.querySelector(irrelevant)?.closest('.card')?.classList.add('hidden');
+ const grid=document.querySelector('.grid2.equal');if(grid)grid.style.gridTemplateColumns='minmax(0,780px)';
+}
+$('#startOperator').onclick=()=>create('operator');$('#startPatient').onclick=()=>create('patient')}
 async function create(origin){if(creating)return;creating=true;toast('Création de la simulation…');try{const r=await rpc('motion_sim_v3_create',{p_origin:origin});const peer=origin==='operator'?'patient':'operator';token=r[origin+'_token'];partner=urlFor(peer,r[peer+'_token']);sessionStorage.setItem('komo_demo_peer_'+r.id,partner);history.replaceState(null,'',location.pathname+'?role='+origin+'#'+token);await load(true);toast('Séance fictive créée. Partagez le lien avec l’autre interface.')}catch(e){toast(e.message,true)}finally{creating=false}}
 async function load(force=false){if(!token||working)return;try{const last=room;const r=await rpc('motion_sim_v3_get',{p_token:token});if(r.synthetic_only!==true)throw Error('Réponse incompatible avec la démonstration');room=r;role=r.role;partner=partner||sessionStorage.getItem('komo_demo_peer_'+r.id)||'';
 const nextRevision=[r.stage,r.step_code,r.progress,r.released,r.patient_ready,r.updated_at].join('|');
 const editing=document.activeElement?.matches('.entryfield, .entryfield *, .field input, .field select, .field textarea')||false;
-if(force||!last||(!editing&&!timerRunning&&nextRevision!==revision))render();
-revision=nextRevision;
+if(force||!last||(!editing&&!timerRunning&&nextRevision!==revision)){render();revision=nextRevision;}
 const st=$('#syncStatus');if(st)st.textContent='Synchronisation active · '+new Date().toLocaleTimeString('fr-FR');
 const ready=$('#readyState');if(ready)ready.textContent=r.patient_ready?'Participant prêt':'En attente du participant';
 }catch(e){if(force||!room){layout('<section class="hero"><h1>Impossible d’ouvrir cette simulation.</h1><p>'+E(e.message)+'</p><div class="actions"><a href="'+E(location.pathname)+'" class="btn primary">Créer une nouvelle séance</a></div></section>');}else toast('Synchronisation temporairement indisponible',true)}}
