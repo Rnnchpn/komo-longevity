@@ -10,6 +10,9 @@ const luxuryCss=await readFile(join(root,'site','pulse-v14','pulse-quiet-luxury-
 const onlineLuxuryCss=await readFile(join(root,'site','pulse-v14','online','quiet-luxury-online-v2.css'),'utf8');
 const mobileCss=await readFile(join(root,'site','pulse-v14','pulse-mobile-first-v3.css'),'utf8');
 const editorialCss=await readFile(join(root,'site','pulse-v14','pulse-patient-editorial-v1.css'),'utf8');
+const maisonCss=await readFile(join(root,'site','pulse-v14','maison-entry-v1.css'),'utf8');
+const maisonJs=await readFile(join(root,'site','pulse-v14','maison-entry-v1.js'),'utf8');
+const maisonSyntax=spawnSync(process.execPath,['--check',join(root,'site','pulse-v14','maison-entry-v1.js')],{encoding:'utf8'});
 const onlineMobileCss=await readFile(join(root,'site','pulse-v14','online','mobile-first-online-v3.css'),'utf8');
 const onlineHtml=await readFile(join(root,'site','pulse-v14','online','index.html'),'utf8');
 const onlineScript=await readFile(join(root,'site','pulse-v14','online','app.js'),'utf8');
@@ -177,7 +180,8 @@ const checks=[
  ['server uses protected Acuity env',verifyJs.includes('process.env.ACUITY_API_KEY')&&verifyJs.includes('process.env.ACUITY_USER_ID')&&!activationScript.includes('ACUITY_API_KEY')],
  ['booking-first responsive styles',css.includes('.pulse-offer-list')&&css.includes('.pulse-entry-panel')],
  ['patient title',html.includes('Votre santé en mouvement')],
- ['single entry script',(html.match(/<script/g)||[]).length===1],
+ ['Maison choice and login script validates',maisonSyntax.status===0&&maisonJs.includes('data-maison-choice="online"')&&maisonJs.includes('data-maison-choice="motion"')&&maisonJs.includes('sessionStorage')&&maisonCss.includes('.maison-choice')],
+ ['canonical app plus isolated Maison patient entry',(html.match(/<script/g)||[]).length===2&&html.includes('src="./maison-entry-v1.js')&&html.includes('src="./app.js')],
  ['approved patient stylesheet loaded after mobile overrides',html.indexOf('pulse-patient-editorial-v1.css')>html.indexOf('pulse-mobile-first-v3.css')],
 
  ['existing profile photo restored from private user storage',app.includes("avatar_config?.mode==='photo'")&&app.includes("storage.from('profile-avatars').createSignedUrl(path,3600)")&&app.includes('p-account-avatar')&&app.includes('p-overview-photo')],
