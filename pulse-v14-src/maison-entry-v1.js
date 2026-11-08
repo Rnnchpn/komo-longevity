@@ -32,13 +32,13 @@
         <h2>Choisissez votre<br><em>consultation.</em></h2>
         <p class="maison-panel-lead">Deux parcours, une approche du mouvement adaptée à vos besoins.</p>
         <div class="maison-choice-list">
-          <a class="maison-choice" href="${online}" aria-label="Découvrir Motion Online à 39 euros avant paiement sécurisé">
+          <a class="maison-choice" data-maison-choice="online" href="${online}" aria-label="Découvrir Motion Online à 39 euros avant paiement sécurisé">
             <span class="maison-choice-top"><small>01 · À DISTANCE</small><strong>39 €</strong></span>
             <span class="maison-choice-title">Motion Online</span>
             <span class="maison-choice-desc">Découvrez le déroulement du bilan, puis accédez au paiement sécurisé Stripe.</span>
             <span class="maison-choice-action">DÉCOUVRIR LE BILAN <b aria-hidden="true">→</b></span>
           </a>
-          <button type="button" class="maison-choice" id="maisonChooseMotion">
+          <button type="button" class="maison-choice" data-maison-choice="motion" id="maisonChooseMotion">
             <span class="maison-choice-top"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></span>
             <span class="maison-choice-title">Motion au centre</span>
             <span class="maison-choice-desc">Marche, équilibre, force et mobilité. Demande d'accès à la consultation.</span>
@@ -165,3 +165,5 @@
   new MutationObserver(render).observe(app,{subtree:true,childList:true});
   render();
 })();
+// The admin request workspace is independent of patient authentication screens.
+import('./operator-requests-v1.js').catch(()=>{});
