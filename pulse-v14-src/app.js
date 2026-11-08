@@ -3,6 +3,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const recoveryLinkDetected=/\btype=recovery\b/.test(location.href)&&/\b(?:access_token|token_hash|code)=/.test(location.href);
+let recoveryActive=recoveryLinkDetected;
 
 const PATIENT_NAV=[['home','Mon espace']];
 const PRO_NAV=[['operator','Operator'],['patients','Patients'],['appointments','Rendez-vous']];
@@ -72,10 +74,64 @@ function domains(){return[
   ['Mobilité','Votre amplitude et qualité de mouvement',domainVal('mobility','movement_quality')]
 ]}
 
+
+function passwordRecoveryView(message=''){
+  recoveryActive=true;
+  $('#app').innerHTML=`<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">ACCÈS SÉCURISÉ</span><h1>Votre espace.<br><em>Votre mot de passe.</em></h1><p>Choisissez un nouveau mot de passe pour continuer votre parcours KŌMØ Pulse.</p></div><div class="login-foot">Vos données restent privées.</div></section><section class="login-panel"><form id="passwordRecovery" class="login-card"><span class="overline">KŌMØ PULSE · SÉCURITÉ</span><h2>Définissez votre mot de passe</h2><p>Votre lien de récupération a été reconnu. Choisissez un nouveau mot de passe de 12 caractères minimum.</p><label><span>Nouveau mot de passe</span><input name="new_password" type="password" autocomplete="new-password" minlength="12" required></label><label><span>Confirmez le mot de passe</span><input name="confirm_password" type="password" autocomplete="new-password" minlength="12" required></label><button class="button primary wide" type="submit">Enregistrer mon nouveau mot de passe</button><p id="recoveryFeedback" role="status" aria-live="polite">${esc(message)}</p></form></section></main>`;
+  $('#passwordRecovery').onsubmit=async e=>{
+    e.preventDefault();
+    const form=e.currentTarget;
+    const password=form.elements.new_password.value;
+    const confirm=form.elements.confirm_password.value;
+    const feedback=$('#recoveryFeedback');
+    if(password.length<12){feedback.textContent='Choisissez au moins 12 caractères.';return}
+    if(password!==confirm){feedback.textContent='Les deux mots de passe ne correspondent pas.';return}
+    const button=form.querySelector('button[type="submit"]');
+    button.disabled=true;feedback.textContent='Mise à jour sécurisée en cours…';
+    try{
+      const {data:session}=await sb.auth.getSession();
+      if(!session?.session){feedback.textContent='Le lien a expiré. Retournez à la connexion et demandez un nouvel e-mail.';button.disabled=false;return}
+      const {error}=await sb.auth.updateUser({password});
+      if(error)throw error;
+      recoveryActive=false;
+      history.replaceState(null,'',location.pathname+location.search+'#home');
+      await boot();
+      toast('Votre nouveau mot de passe a été enregistré.');
+    }catch(error){feedback.textContent='Impossible d’enregistrer le mot de passe. Réessayez avec un nouveau lien si nécessaire.';button.disabled=false}
+  };
+}
+function passwordResetEmailView(){
+  const panel=document.querySelector('.login-panel'),login=document.querySelector('#login');
+  if(!panel||!login)return;
+  const entry=panel.querySelector('.pulse-entry-panel');
+  if(entry)entry.hidden=true;
+  login.hidden=true;
+  panel.querySelector('#resetEmailForm')?.remove();
+  const form=document.createElement('form');
+  form.id='resetEmailForm';form.className='login-card maison-login';
+  form.innerHTML=`<button type="button" class="text-button" id="resetBack">← Revenir à la connexion</button><span class="overline">KŌMØ PULSE · ACCÈS</span><h2>Retrouvez votre compte.</h2><p>Nous vous enverrons un lien sécurisé pour choisir un nouveau mot de passe.</p><label><span>Votre adresse e-mail</span><input name="email" type="email" autocomplete="email" required></label><button type="submit" class="button primary wide">Recevoir un lien de réinitialisation</button><p id="resetFeedback" role="status" aria-live="polite"></p>`;
+  panel.append(form);
+  form.elements.email.value=login.elements.email?.value||'';
+  form.querySelector('#resetBack').onclick=()=>{form.remove();login.hidden=false;login.querySelector('input[name="email"]')?.focus()};
+  form.onsubmit=async e=>{
+    e.preventDefault();
+    const email=form.elements.email.value.trim().toLowerCase();
+    const button=form.querySelector('button[type="submit"]'),feedback=form.querySelector('#resetFeedback');
+    if(!email)return;
+    button.disabled=true;feedback.textContent='Demande en cours…';
+    try{
+      const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});
+      if(error)throw error;
+      feedback.textContent='Demande envoyée. Si cette adresse correspond à un compte, consultez votre boîte e-mail (et les indésirables) puis cliquez sur le lien reçu. Vous pourrez choisir un nouveau mot de passe.';
+    }catch(error){feedback.textContent='La demande n’a pas abouti. Réessayez après quelques instants.'}
+    finally{button.disabled=false}
+  };
+}
+
 async function authView(message=''){
   $('#app').innerHTML=`<main class="login-page"><section class="login-story"><div class="brand light">KŌMØ<small>PULSE</small></div><div><span class="overline light">VOTRE SANTÉ EN MOUVEMENT</span><h1>Comprendre votre corps.<br><em>Simplement.</em></h1><p>Votre bilan, vos résultats et votre plan KŌMØ réunis au même endroit — sans jargon, étape par étape.</p></div><div class="login-foot">Données de santé privées · Accès sécurisé</div></section><section class="login-panel"><form id="login" class="login-card"><span class="overline">KŌMØ PULSE</span><h2>Bienvenue</h2><p>Connectez-vous pour reprendre votre parcours là où vous l’avez laissé.</p><label><span>E-mail</span><input name="email" type="email" autocomplete="email" required></label><label><span>Mot de passe</span><input name="password" type="password" autocomplete="current-password" required minlength="6"></label><button class="button primary wide">Se connecter</button><button class="text-button" type="button" id="reset">Mot de passe oublié ?</button>${message?`<div class="form-error">${esc(message)}</div>`:''}</form></section></main>`;
   $('#login').onsubmit=async e=>{e.preventDefault();const f=new FormData(e.currentTarget);const r=await sb.auth.signInWithPassword({email:String(f.get('email')),password:String(f.get('password'))});if(r.error)return authView('Impossible de vous connecter. Vérifiez votre e-mail et votre mot de passe.');await boot()};
-  $('#reset').onclick=async()=>{const email=prompt('Votre adresse e-mail');if(!email)return;const r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});toast(r.error?'Impossible d’envoyer l’e-mail.':'E-mail de réinitialisation envoyé.')};
+  $('#reset').onclick=passwordResetEmailView;
 
   installPulseBookingEntry();
 }
@@ -533,7 +589,7 @@ function render(){
   else{if(S.route==='home'){if(!S.ownPatient&&!S.onlineSessions.length)patientLobby();else patientHome()}else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
-async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();await loadAll();render()}
+async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();if(recoveryActive)return passwordRecoveryView();await loadIdentity();await loadAll();render()}
 window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
-sb.auth.onAuthStateChange((_e,s)=>{if(!s)authView()});
+sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){recoveryActive=true;passwordRecoveryView();return}if(!session&&event==='SIGNED_OUT')authView()});
 boot().catch(()=>authView('Une erreur est survenue. Réessayez dans quelques instants.'));
