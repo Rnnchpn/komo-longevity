@@ -286,6 +286,51 @@ function progressStrip(){
   const p=patientProgress();
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
+function patientLobby(){
+  const first=esc(S.profile?.first_name||S.profile?.display_name?.split(' ')[0]||S.user?.email?.split('@')[0]||'');
+  const email=esc(S.user?.email||'');
+  const base='https://komolongevity.com/bilan-en-ligne/';
+  $('#view').innerHTML=`<div class="pulse-patient-lobby">
+    <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Votre compte est actif. Choisissez votre bilan pour préparer la prochaine étape de votre parcours.</p></div>
+    <div class="pulse-lobby-options">
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan fonctionnel guidé à distance. Découvrez le protocole, puis accédez au paiement sécurisé.</p><a href="${base}" class="pulse-lobby-action">Découvrir le bilan en ligne <span>→</span></a></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Une évaluation personnalisée de la marche, de l'équilibre, de la force et de la mobilité. Envoyez votre demande à l'opérateur.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyRequest">Faire une demande de bilan <span>→</span></button></article>
+    </div>
+    <section class="pulse-lobby-request" id="pulseLobbyRequestPanel" hidden><div class="pulse-lobby-form-head"><span>DEMANDE DE CONSULTATION · 200 €</span><h2>Préparons votre rendez-vous.</h2><p>Vos informations sont transmises à l'administrateur. La consultation est confirmée seulement après examen de votre demande.</p></div>
+      <form id="pulseLobbyForm">
+      <div class="pulse-lobby-form-grid"><label>Prénom <input name="first_name" required minlength="2" maxlength="80" autocomplete="given-name" value="${esc(S.profile?.first_name||'')}"></label>
+      <label>Nom <input name="last_name" required minlength="2" maxlength="80" autocomplete="family-name" value="${esc(S.profile?.last_name||'')}"></label></div>
+      <label>Adresse e-mail <input type="email" name="email" value="${email}" readonly required></label>
+      <label>Téléphone (facultatif) <input type="tel" name="phone" autocomplete="tel" maxlength="35" value="${esc(S.profile?.phone||'')}"></label>
+      <div class="pulse-lobby-form-grid"><label>Date souhaitée <input type="date" name="preferred_date" required></label>
+      <label>Autre date possible <input type="date" name="alternative_date"></label></div>
+      <label>Plage horaire <select name="preferred_time"><option value="indifferent">Indifférent</option><option value="matin">Matin</option><option value="apres_midi">Après-midi</option><option value="fin_journee">Fin de journée</option></select></label>
+      <label class="pulse-lobby-consent"><input type="checkbox" name="privacy_acknowledged" required><span>J'accepte le traitement de mes coordonnées pour ma demande, conformément à la <a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>. Ne saisissez aucune donnée de santé dans ce formulaire.</span></label>
+      <input class="pulse-lobby-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p id="pulseLobbyFeedback" role="status" aria-live="polite"></p>
+      <button class="pulse-lobby-submit" type="submit">Transmettre ma demande <span>→</span></button></form></section>
+    <p class="pulse-lobby-footnote">La création d'un compte ne vaut ni paiement ni réservation. Votre dossier de suivi sera associé par l'équipe lors de la préparation du bilan.</p>
+  </div>`;
+  const panel=$('#pulseLobbyRequestPanel'),form=$('#pulseLobbyForm'),btn=$('#pulseLobbyRequest');
+  btn.onclick=()=>{panel.hidden=false;panel.scrollIntoView({behavior:'smooth',block:'start'});form.querySelector('input[name="first_name"]').focus()};
+  const day=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Paris'});
+  form.querySelectorAll('input[type="date"]').forEach(input=>input.min=day);
+  form.addEventListener('submit',async e=>{
+    e.preventDefault();if(!form.reportValidity())return;
+    const submit=form.querySelector('button[type="submit"]'),feedback=$('#pulseLobbyFeedback');
+    const data=Object.fromEntries(new FormData(form).entries());
+    const payload={action:'submit',first_name:data.first_name,last_name:data.last_name,email:S.user.email,phone:data.phone,preferred_date:data.preferred_date,alternative_date:data.alternative_date,preferred_time:data.preferred_time,website:data.website,privacy_acknowledged:data.privacy_acknowledged==='on'};
+    submit.disabled=true;feedback.textContent='Enregistrement…';
+    try{
+      const response=await fetch('https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-200-intake',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify(payload)});
+      const json=await response.json();
+      if(!response.ok||!json.ok)throw Error(json.error==='too_many_requests'?'Trop de demandes récentes. Réessayez plus tard.':'Votre demande n’a pas pu être enregistrée. Réessayez.');
+      panel.innerHTML='<div class="pulse-lobby-done"><span aria-hidden="true">✓</span><h2>Votre demande a été reçue.</h2><p>L’équipe KŌMØ va examiner votre demande. Vous serez informé par e-mail après sa validation. Votre rendez-vous n’est pas encore confirmé.</p></div>';
+      btn.disabled=true;btn.textContent='Demande envoyée';
+    }catch(err){feedback.textContent=err.message||'Erreur temporaire'}
+    finally{submit.disabled=false}
+  });
+}
 function patientHome(){
   const now=Date.now();
   const safeDate=v=>{const t=new Date(v||'').getTime();return Number.isFinite(t)?t:null};
@@ -485,10 +530,10 @@ function render(){
   const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
   shell();
   if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
-  else{if(S.route==='home')patientHome();else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
+  else{if(S.route==='home'){if(!S.ownPatient&&!S.onlineSessions.length)patientLobby();else patientHome()}else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
-async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();await loadAll();if(!S.ownPatient&&!hasPro()&&!S.onlineSessions.length){$('#app').innerHTML=`<main class="orphan"><div class="brand">KŌMØ<small>PULSE</small></div><h1>Votre dossier patient n’est pas encore relié.</h1><p>Votre compte existe bien. L’équipe KŌMØ doit simplement terminer l’association avec votre dossier avant l’affichage de vos données.</p><a class="button primary" href="mailto:contact@komolongevity.com">Contacter l’équipe</a><button class="text-button" id="logoutOrphan">Se déconnecter</button></main>`;$('#logoutOrphan').onclick=async()=>{await sb.auth.signOut();authView()};return}render()}
+async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();await loadIdentity();await loadAll();render()}
 window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
 sb.auth.onAuthStateChange((_e,s)=>{if(!s)authView()});
 boot().catch(()=>authView('Une erreur est survenue. Réessayez dans quelques instants.'));
