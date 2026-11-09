@@ -16,7 +16,7 @@ const checks=[
   ['operator creates through protected Edge Function',app.includes("sb.functions.invoke('professional-patient'")&&app.includes("organization_id:S.org.id")&&app.includes("create_account:false")],
   ['creation bound to operator patient directory',app.includes("id=\"opPatientCreateForm\"")&&app.includes("localStorage.setItem('komo_v14_patient',data.patient.id)")&&app.includes("await loadPro()")],
   ['no anonymous patient write',!maison.includes("from('patients')")&&!app.includes("from('patients').insert(")],
-  ['real health records not activated before HDS/security clearance',app.includes("Environnement non validé pour de vraies données de santé")],
+  ['real health records not activated before HDS/security clearance',app.includes("Environnement non validé pour de vraies données de santé")&&app.includes('name="synthetic_attested" required')],
   ['operator layout available',css.includes('.op-create-patient-form')&&css.includes('op-create-patient-grid')]
 ];
 const failed=checks.filter(([,ok])=>!ok);
