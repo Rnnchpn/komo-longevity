@@ -1,0 +1,20 @@
+{
+  "name": "KŌMØ Pulse — Caméra du cabinet",
+  "short_name": "Caméra KŌMØ",
+  "id": "/camera/",
+  "start_url": "/camera/",
+  "scope": "/camera/",
+  "display": "standalone",
+  "background_color": "#122629",
+  "theme_color": "#122629",
+  "lang": "fr",
+  "description": "Ton iPhone devient la caméra du cabinet pour une consultation Motion physique supervisée.",
+  "icons": [
+    {
+      "src": "../icon-motion.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
