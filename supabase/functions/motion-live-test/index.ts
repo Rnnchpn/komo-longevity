@@ -230,7 +230,10 @@ Deno.serve(async(req:Request)=>{
      if(!def||typeof value!=="number"||!Number.isFinite(value)||value<0||value>def.max||
        (def.integer&&!Number.isInteger(value))||(!def.integer&&Math.round(value*10)!==value*10))
       return response(req,{error:"invalid_manual_measurement"},422);
-     results[step]={status:"done",value,unit:def.unit,note,source:"operator_manual_observation",recorded_at:now()};
+     const measurementSource=s(b.measurement_source,60)||"operator_manual_observation";
+     if(!["operator_manual_observation","operator_confirmed_video_estimate"].includes(measurementSource))
+      return response(req,{error:"invalid_measurement_source"},422);
+     results[step]={status:"done",value,unit:def.unit,note,source:measurementSource,recorded_at:now()};
     }
    }else results[step]={status:"skipped",note,recorded_at:now()};
    next=room.step_index+1;
