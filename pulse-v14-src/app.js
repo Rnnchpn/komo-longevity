@@ -308,6 +308,7 @@ function shell(){
         <button type="button" id="p-logout">Se déconnecter</button></div></details></div>
       </div></header>
       <main class="p-main"><div id="view"></div></main>
+      <button type="button" class="pulse-mobile-start-motion" id="pulse-mobile-start-motion">Démarrer bilan Motion <span aria-hidden="true">→</span></button>
     </div>`;
     const team=$('#p-team-link');
     if(team)team.onclick=async()=>{
@@ -318,6 +319,12 @@ function shell(){
     };
     const logout=$('#p-logout');
     if(logout)logout.onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
+    $('#pulse-mobile-start-motion')?.addEventListener('click',async event=>{
+      const button=event.currentTarget;
+      if(button.disabled)return;
+      button.disabled=true;
+      try{await openMotionLivePatient()}finally{button.disabled=false}
+    });
     return;
   }
   const icons={
@@ -328,7 +335,7 @@ function shell(){
   const nav=navItems().map(([id,label],i)=>`<button type="button" data-route="${id}" class="nav-item ${S.route===id?'active':''}" aria-label="${esc(label)}" ${S.route===id?'aria-current="page"':''}><span class="nav-dot" aria-hidden="true">${S.mode==='pro'?(icons[id]||''):i+1}</span><span>${esc(label)}</span></button>`).join('');
   const demoLink=isOnlineTester()?'<a class="pulse-online-tester-link" href="/online/session/">◎ Ma consultation Online <small>Mode test · démarrer</small></a>':'';
   const mode=hasPro()?`<div class="mode-switch" role="group" aria-label="Choisir votre espace"><button type="button" data-mode="patient" class="${S.mode==='patient'?'active':''}" aria-pressed="${S.mode==='patient'}" ${!S.ownPatient?'disabled title="Aucun dossier personnel lié"':''}>Espace patient</button><button type="button" data-mode="pro" class="${S.mode==='pro'?'active':''}" aria-pressed="${S.mode==='pro'}">Équipe</button></div>`:'';
-  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div class="pulse-mobile-access">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div><div id="view"></div></main></div>`;
+  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div class="pulse-mobile-access">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div><div id="view"></div></main><button type="button" class="pulse-mobile-start-motion" id="pulse-mobile-start-motion">Démarrer bilan Motion <span aria-hidden="true">→</span></button></div>`;
   document.querySelector('.app-shell')?.classList.toggle('app-shell-pro',S.mode==='pro');
   document.querySelector('.app-shell')?.classList.toggle('app-shell-patient',S.mode==='patient');
   document.querySelector('.app-shell')?.setAttribute('data-pulse-view',S.route);
@@ -336,6 +343,21 @@ function shell(){
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled||!hasPro())return;const next=b.dataset.mode;if(next==='patient'&&!S.ownPatient)return;S.mode=next;localStorage.setItem('komo_v14_mode',next);history.replaceState(null,'',location.pathname+location.search+'#'+(next==='pro'?'operator':'home'));await refresh()});
   $('#logout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
   $('#pulse-mobile-logout').onclick=$('#logout').onclick;
+  $('#pulse-mobile-start-motion')?.addEventListener('click',async event=>{
+    const selected=S.patients.find(p=>p.id===S.patient?.id);
+    if(!selected){toast('Sélectionnez d’abord un patient.');location.hash='patients';return}
+    if(selected.data_classification!=='synthetic'){
+      toast('Mode test : sélectionnez un dossier fictif avant de démarrer.');
+      location.hash='patients';
+      return;
+    }
+    if(S.opSession){location.hash='operator';return}
+    const name=[selected.first_name,selected.last_name].filter(Boolean).join(' ')||'ce dossier fictif';
+    if(!confirm('Démarrer le bilan Motion pour '+name+' ?'))return;
+    const button=event.currentTarget;button.disabled=true;
+    history.replaceState(null,'',location.pathname+location.search+'#operator');
+    try{await startOperator()}finally{if(button.isConnected)button.disabled=false}
+  });
 }
 function heading(title,over='KŌMØ PULSE'){ $('#pageTitle').textContent=title;$('#pageOverline').textContent=over }
 function progressStrip(){

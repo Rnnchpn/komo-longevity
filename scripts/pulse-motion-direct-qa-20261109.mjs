@@ -8,6 +8,7 @@ const maison=await readFile(join(root,'site/pulse-v14/maison-entry-v1.js'),'utf8
 const css=await readFile(join(root,'site/pulse-v14/styles.css'),'utf8');
 const liveGuest=await readFile(join(root,'site/pulse-v14/motion-live-guest-v1.js'),'utf8');
 const liveCss=await readFile(join(root,'site/pulse-v14/motion-live-guest-v1.css'),'utf8');
+const mobileCss=await readFile(join(root,'site/pulse-v14/pulse-mobile-first-v3.css'),'utf8');
 const liveEdge=await readFile(join(root,'supabase/functions/motion-live-test/index.ts'),'utf8');
 const parse=path=>spawnSync(process.execPath,['--check',join(root,path)],{encoding:'utf8'}).status===0;
 const checks=[
@@ -22,6 +23,9 @@ const checks=[
   ['real health records not activated before HDS/security clearance',app.includes("Environnement non validé pour de vraies données de santé")&&app.includes('name="synthetic_attested" required')],
   ['operator layout available',css.includes('.op-create-patient-form')&&css.includes('op-create-patient-grid')],
   ['Motion start visible on patient page',maison.includes('id="maisonLiveStart"')&&maison.includes("import('./motion-live-guest-v1.js')")],
+  ['single-tap mobile choice opens the live room',maison.includes("matchMedia('(max-width: 850px)')")&&maison.includes('await launchMotion(event.currentTarget)')],
+  ['one-tap mobile action for signed-in patient and operator',app.includes('id="pulse-mobile-start-motion"')&&app.includes("selected.data_classification!=='synthetic'")],
+  ['mobile start CTA stays above the operator bottom navigation',mobileCss.includes('.app-shell-pro .pulse-mobile-start-motion')&&mobileCss.includes('bottom:calc(89px + env(safe-area-inset-bottom,0px))')],
   ['patient live script syntactically valid',parse('site/pulse-v14/motion-live-guest-v1.js')],
   ['guest session has a local video preview only',liveGuest.includes('getUserMedia')&&liveGuest.includes('audio:false')&&!liveGuest.includes('MediaRecorder')&&!liveGuest.includes('RTCPeerConnection')],
   ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(STORAGE,guestToken)')],

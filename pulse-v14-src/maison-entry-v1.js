@@ -41,7 +41,7 @@
             <span class="maison-choice-top"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></span>
             <span class="maison-choice-title">Motion au centre</span>
             <span class="maison-choice-desc">Marche, équilibre, force et mobilité. Votre opérateur ouvre votre dossier directement au centre.</span>
-            <span class="maison-choice-action">ACCÉDER AU PARCOURS <b aria-hidden="true">→</b></span>
+            <span class="maison-choice-action">DÉMARRER LE BILAN <b aria-hidden="true">→</b></span>
           </button>
         </div>
         <p class="maison-choice-note">Aucune demande de création de compte ni validation préalable pour le bilan au centre.</p>
@@ -85,17 +85,26 @@
       if(step)step.textContent=({choice:'01 / VOTRE BILAN',motion:'02 / MOTION AU CENTRE'})[name]||'';
       if(name==='login')login.querySelector('input[name="email"]')?.focus();
     }
-    entry.querySelector('#maisonChooseMotion')?.addEventListener('click',()=>{save('motion');show('motion')});
-    entry.querySelector('#maisonLiveStart')?.addEventListener('click',async event=>{
-      const button=event.currentTarget;
+    async function launchMotion(button){
       if(button.disabled)return;
       button.disabled=true;
       try{
         const module=await import('./motion-live-guest-v1.js');
         await module.openMotionLive();
-      }catch(error){console.error('[Pulse Motion live]',error);alert("Impossible de démarrer la session de test. Vérifiez votre connexion.");}
-      finally{button.disabled=false}
+      }catch(error){
+        console.error('[Pulse Motion live]',error);
+        show('motion');
+        alert("Impossible de démarrer la session de test. Vérifiez votre connexion.");
+      }finally{button.disabled=false}
+    }
+    // On iPhone/Android, choosing Motion is itself the start action.
+    // Keep the explanatory step on larger screens and preserve the 39 € route.
+    entry.querySelector('#maisonChooseMotion')?.addEventListener('click',async event=>{
+      save('motion');
+      if(window.matchMedia('(max-width: 850px)').matches)await launchMotion(event.currentTarget);
+      else show('motion');
     });
+    entry.querySelector('#maisonLiveStart')?.addEventListener('click',event=>launchMotion(event.currentTarget));
     entry.querySelectorAll('[data-maison-login]').forEach(x=>x.addEventListener('click',()=>{
       history.replaceState(null,'',location.pathname+location.search+'#connexion');
       show('login');
