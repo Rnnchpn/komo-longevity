@@ -256,6 +256,8 @@ const scripts = [
   // Patient-first V14 is isolated and built last. V13 remains available for rollback.
   'scripts/build-pulse-v14.mjs',
   'scripts/pulse-v14-qa.mjs',
+  // Simplified Motion entry and protected operator dossier creation (no real health data until compliance clearance).
+  'scripts/pulse-motion-direct-qa-20261109.mjs',
   // Deterministic movement algorithm tests, independent of actual camera hardware.
   'scripts/pulse-pose-metrics-qa.mjs',
   // Check voice command interpretation and microphone lifecycle without hardware.
