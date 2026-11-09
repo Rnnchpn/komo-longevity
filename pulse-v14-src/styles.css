@@ -590,3 +590,5 @@
 .op-create-patient-feedback{color:#a13a33}
 .op-create-patient-form>.button{justify-self:start}
 @media(max-width:620px){.op-create-patient-grid{grid-template-columns:1fr}.op-create-patient-form{padding:18px}.op-patients-toolbar #opPatientCreateToggle{width:100%}}
+
+.op-create-patient-attestation{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5}.op-create-patient-attestation input{width:17px;height:17px;flex:none;margin:2px 0 0}
