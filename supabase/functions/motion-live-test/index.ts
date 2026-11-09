@@ -150,7 +150,7 @@ Deno.serve(async(req:Request)=>{
    if(!x.patient_last_seen_at||Date.now()-new Date(x.patient_last_seen_at).getTime()>12000){
     await db.from("pulse_motion_live_sessions").update({patient_last_seen_at:now()}).eq("id",x.id);
    }
-   return response(req,{ok:true,session:{display_code:x.display_code,status:x.status,
+   return response(req,{ok:true,session:{id:x.id,display_code:x.display_code,status:x.status,
     stage_code:x.stage_code,step_index:x.step_index,progress:x.progress||{},
     operator_connected:!!x.operator_user_id,expires_at:x.expires_at},steps:STEPS});
   }
