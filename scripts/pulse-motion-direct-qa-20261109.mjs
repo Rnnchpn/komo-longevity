@@ -36,7 +36,7 @@ const checks=[
   ['operator layout available',css.includes('.op-create-patient-form')&&css.includes('op-create-patient-grid')],
   ['onsite consultation never triggers patient camera',maison.includes('id="maisonLiveStart"')&&maison.includes('praticien utilise son propre iPhone')&&!maison.includes('launchMotion')&&!maison.includes('getUserMedia')],
   ['public onsite choice opens information instead of streaming',maison.includes("show('motion')")&&!maison.includes("await launchMotion(event.currentTarget)")],
-  ['mobile Operator camera CTA uses dedicated station',app.includes('id="pulse-mobile-start-motion"')&&app.includes("window.location.assign('/camera/')")&&app.includes("selected.data_classification!=='synthetic'")],
+  ['mobile Operator camera CTA uses dedicated station',app.includes('id="pulse-mobile-start-motion"')&&app.includes("window.location.assign('/camera/')")&&app.includes("does NOT require a patient selection")],
   ['mobile start CTA stays above the operator bottom navigation',mobileCss.includes('.app-shell-pro .pulse-mobile-start-motion')&&mobileCss.includes('bottom:calc(89px + env(safe-area-inset-bottom,0px))')],
   ['patient live script syntactically valid',parse('site/pulse-v14/motion-live-guest-v1.js')],
   ['guest shares encrypted live video only after explicit camera activation',liveGuest.includes('getUserMedia')&&liveGuest.includes('RTCPeerConnection')&&liveGuest.includes('guest_signal_push')&&liveGuest.includes('id="mliveCamera"')&&liveGuest.includes('audio:false')&&!liveGuest.includes('MediaRecorder')],
