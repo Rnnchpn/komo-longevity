@@ -194,7 +194,7 @@ const checks=[
  ['own online sessions and RLS isolated',app.includes("from('motion_online_sessions')")&&app.includes(".eq('user_id',S.user.id)")&&app.includes('S.onlineSessions.length')],
  ['patient shell excludes sidebar entirely',app.includes("if(S.mode==='patient'){")&&app.includes('p-editorial')&&app.includes('p-topbar')&&app.includes('return;')&&editorialCss.includes('@media(max-width:520px)')],
  ['legacy patient routes return to the single home',app.includes("history.replaceState(null,'',location.pathname+location.search+'#home')")],
- ['operator preserved',app.includes('D0 ·')===false&&app.includes('Session D0')&&app.includes('finalize_pulse_operator_session_v1')],
+ ['operator preserved, simplified Motion Online consultation',!app.includes('D0')&&app.includes("['operator','Consultation Motion']")&&app.includes('mountOperatorConsultation')&&app.includes("start_pulse_operator_session_v1")],
  ['motion v1 only',app.includes("motion-v1.0")&&!/myodev|myocare/i.test(app)],
  ['responsive',css.includes('@media(max-width:700px)')&&css.includes('@media(max-width:1000px)')],
  ['reduced motion',css.includes('prefers-reduced-motion')],
