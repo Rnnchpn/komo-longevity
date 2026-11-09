@@ -107,7 +107,8 @@ async function sync(){
  try{
   const data=await request({action:"guest_status",guest_token:guestToken});
   live=data.session;
-  if(live.status!=="active"&&peer)resetPeer();
+  if(live.status==="completed"){stopCamera(false);clearInterval(signalTimer);signalTimer=null;}
+  else if(live.status!=="active"&&peer)resetPeer();
   update();
  }catch(error){
   const message=error.message||"Synchronisation momentanément indisponible.";
