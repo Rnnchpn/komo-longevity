@@ -373,3 +373,28 @@ button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}
  .app-shell-patient .page{padding-inline:12px}
  .ps-one-heading h2{font-size:33px}
 }
+
+/* PULSE MOBILE MOTION START 2026-11-09 — one visible, safe quick action. */
+.pulse-mobile-start-motion{display:none}
+@media(max-width:760px){
+  .p-editorial .pulse-mobile-start-motion,
+  .app-shell-pro .pulse-mobile-start-motion{
+    position:fixed;z-index:90;display:flex;align-items:center;justify-content:space-between;
+    left:calc(15px + env(safe-area-inset-left,0px));
+    right:calc(15px + env(safe-area-inset-right,0px));
+    bottom:calc(14px + env(safe-area-inset-bottom,0px));
+    min-height:58px;padding:15px 19px;
+    border:1px solid #1b4246;border-radius:13px;
+    background:#173943;color:#fff;box-shadow:0 12px 34px rgba(7,25,28,.26);
+    font:700 14px/1.25 Inter,system-ui,sans-serif;letter-spacing:.005em;
+    text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent
+  }
+  .pulse-mobile-start-motion span{font-size:22px;line-height:1;margin-left:12px}
+  .pulse-mobile-start-motion:disabled{opacity:.6;cursor:wait}
+  .pulse-mobile-start-motion:focus-visible{outline:3px solid #bda87f;outline-offset:3px}
+  .app-shell-pro .pulse-mobile-start-motion{
+    bottom:calc(89px + env(safe-area-inset-bottom,0px));z-index:85
+  }
+  .p-editorial .p-main{padding-bottom:calc(112px + env(safe-area-inset-bottom,0px))!important}
+  .app-shell-pro .page{padding-bottom:calc(196px + env(safe-area-inset-bottom,0px))!important}
+}
