@@ -51,12 +51,13 @@
         <button type="button" class="maison-login-back" data-maison-back="choice">← Revenir aux bilans</button>
         <span class="maison-panel-label">MOTION AU CENTRE · 200 €</span>
         <h2>Votre bilan Motion.<br><em>Sans démarche préalable.</em></h2>
-        <p class="maison-panel-lead">Lors de votre consultation à Cannes, votre opérateur crée directement votre dossier et vous accompagne dans les tests. Vous n'avez pas besoin de demander la création d'un compte.</p>
+        <p class="maison-panel-lead">Démarrez votre séance sur cet appareil, puis communiquez le code affiché à votre opérateur. Il pourra suivre votre progression en direct et associer votre séance à un dossier fictif.</p>
         <div class="maison-account-actions">
-          <button class="maison-action-primary" type="button" data-maison-login>J'ai déjà un compte · Me connecter <span>→</span></button>
+          <button class="maison-action-primary" type="button" id="maisonLiveStart">Commencer ma consultation Motion <span>→</span></button>
+          <button class="maison-action-secondary" type="button" data-maison-login>J'ai déjà un compte · Me connecter <span>→</span></button>
           <button class="maison-action-secondary" type="button" data-maison-back="choice">Retour aux bilans <span>→</span></button>
         </div>
-        <p class="maison-choice-note">Si vous n'avez pas de compte, l'équipe prépare votre dossier au centre. Un accès privé pourra vous être proposé pour retrouver vos résultats.</p>
+        <p class="maison-choice-note">La session test fonctionne sans compte patient. La caméra reste locale et les données de santé réelles ne sont pas autorisées dans cet environnement.</p>
       </div>
       <div class="maison-panel-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
     old.replaceWith(entry);
@@ -85,6 +86,16 @@
       if(name==='login')login.querySelector('input[name="email"]')?.focus();
     }
     entry.querySelector('#maisonChooseMotion')?.addEventListener('click',()=>{save('motion');show('motion')});
+    entry.querySelector('#maisonLiveStart')?.addEventListener('click',async event=>{
+      const button=event.currentTarget;
+      if(button.disabled)return;
+      button.disabled=true;
+      try{
+        const module=await import('./motion-live-guest-v1.js');
+        await module.openMotionLive();
+      }catch(error){console.error('[Pulse Motion live]',error);alert("Impossible de démarrer la session de test. Vérifiez votre connexion.");}
+      finally{button.disabled=false}
+    });
     entry.querySelectorAll('[data-maison-login]').forEach(x=>x.addEventListener('click',()=>{
       history.replaceState(null,'',location.pathname+location.search+'#connexion');
       show('login');
