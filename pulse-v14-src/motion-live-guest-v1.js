@@ -113,7 +113,11 @@ async function sync(){
   live=data.session;
   if(live.status!=="active"&&peer)resetPeer();
   update();
- }catch(error){feedback(error.message||"Synchronisation momentanément indisponible.");}
+ }catch(error){
+  const message=error.message||"Synchronisation momentanément indisponible.";
+  if(/fermée|expiré/i.test(message)){stopCamera(false);clearInterval(signalTimer);signalTimer=null;}
+  feedback(message);
+ }
 }
 async function primary(){
  if(!guestToken||!live||busy)return;
