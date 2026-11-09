@@ -58,9 +58,12 @@ function renderReady(email){
   opening=true;
   const button=document.getElementById('cameraStart');button.disabled=true;
   try{
-   const module=await import('../motion-live-guest-v1.js?v=20261109-staff-camera-v1');
+   const {data:{session}}=await sb.auth.getSession();
+   if(!session?.user?.id)throw Error('Compte Operator non connecté.');
+   const module=await import('../motion-live-guest-v1.js?v=20261109-staff-camera-v2');
    await module.openMotionLive({
     mode:'operator_camera',
+    ownerId:session.user.id,
     startSession:()=>api({action:'operator_camera_start'}),
     stopSession:session_id=>api({action:'operator_camera_stop',session_id})
    });
