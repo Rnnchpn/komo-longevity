@@ -31,3 +31,23 @@
  .mopv-head small{font-size:8px}
  .mopv-head-actions button{padding:8px}
 }
+
+/* Inline Operator camera: avoid blocking the test controls. */
+.mopv-window.embedded,.mopv-window.embedded.expanded{
+ position:relative;inset:auto;right:auto;left:auto;top:auto;bottom:auto;
+ width:100%;height:auto;max-height:none;box-shadow:none;border-radius:11px;border-color:#4b6666;
+ z-index:auto;margin:0;
+}
+.mopv-window.embedded .mopv-screen,.mopv-window.embedded.expanded .mopv-screen{
+ aspect-ratio:4/5;max-height:min(68dvh,620px);min-height:260px;flex:none;
+}
+.mopv-window.embedded .mopv-screen video{object-fit:contain}
+.mopv-window.embedded .mopv-head{padding:10px 12px}
+.mopv-window.embedded .mopv-head strong{font-size:12px}
+.mopv-window.embedded .mopv-hint{display:none}
+.mopv-window.embedded .mopv-controls{padding:10px}
+.mopv-window.embedded .mopv-head-actions button{font-size:10px;min-height:35px}
+@media(max-width:600px){
+ .mopv-window.embedded,.mopv-window.embedded.expanded{left:auto;right:auto;bottom:auto;top:auto;width:100%;max-height:none}
+ .mopv-window.embedded .mopv-screen{aspect-ratio:4/5;min-height:250px;max-height:65dvh}
+}

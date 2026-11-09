@@ -5,7 +5,15 @@ const SUPABASE_URL=Deno.env.get("SUPABASE_URL")||"";
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 const db=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false}});
 const ORG_ID="cea48f94-24ae-4ddb-ac28-ac289bb1e9ca"; // KŌMØ Cannes, test_only
-const STEPS=["preflight","readiness","smartspeed_10m","forcedecks_quiet_stand","humantrak_mobility","dynamo_grip","forcedecks_sts","qc_release"];
+// Align the supervised remote consultation with the six existing Motion Online tests.
+const STEPS=["sts","heels","unipodal_left","unipodal_right","arms","posture"];
+const LIMITS:Record<string,{max:number;integer:boolean;unit:string}>={
+ sts:{max:100,integer:true,unit:"repetitions"},
+ heels:{max:100,integer:true,unit:"repetitions"},
+ unipodal_left:{max:20,integer:false,unit:"seconds"},
+ unipodal_right:{max:20,integer:false,unit:"seconds"},
+ arms:{max:100,integer:true,unit:"movements"}
+};
 const ORIGINS=new Set(["https://pulse.komolongevity.com","https://komolongevity.com","https://www.komolongevity.com"]);
 const allowedOrigin=(o:string)=>ORIGINS.has(o)||/^https:\/\/komo-longevity-[a-z0-9-]+-rnnchpns-projects\.vercel\.app$/.test(o);
 function headers(req:Request){
@@ -118,7 +126,7 @@ Deno.serve(async(req:Request)=>{
   const code=String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0");
   const {data,error}=await db.from("pulse_motion_live_sessions").insert({
    organization_id:ORG_ID,guest_token_hash:await hash(guestToken),display_code:code,
-   status:"waiting",stage_code:"preflight",step_index:0,progress:{step_status:"pending"},
+   status:"waiting",stage_code:STEPS[0],step_index:0,progress:{step_status:"pending",results:{}},
    patient_last_seen_at:now()
   }).select("id,display_code,status,expires_at").single();
   if(error)return response(req,{error:"session_creation_failed"},503);
@@ -154,20 +162,8 @@ Deno.serve(async(req:Request)=>{
    }).eq("id",x.id).eq("status",x.status);
    return error?response(req,{error:"update_failed"},503):response(req,{ok:true,status:"ready"});
   }
-  if(x.status!=="active")return response(req,{error:"operator_not_connected"},409);
-  if(!["start","complete"].includes(event)||stage!==STEPS[x.step_index])return response(req,{error:"invalid_step"},422);
-  let progress=x.progress||{},next=x.step_index,nextStage=stage,status="active",completedAt:null|string=null;
-  if(event==="complete"){
-   next=Math.min(STEPS.length,next+1);nextStage=STEPS[next]||"finished";
-   progress={...progress,step_status:"pending",completed_steps:[...new Set([...(Array.isArray(progress.completed_steps)?progress.completed_steps:[]),stage])]};
-   if(next===STEPS.length){status="completed";completedAt=now();}
-  }else progress={...progress,step_status:"running"};
-  const {data,error}=await db.from("pulse_motion_live_sessions").update({
-   status,stage_code:nextStage,step_index:next,progress,patient_last_seen_at:now(),
-   updated_at:now(),...(completedAt?{completed_at:completedAt}:{})
-  }).eq("id",x.id).eq("status","active").eq("step_index",x.step_index).select("id").maybeSingle();
-  if(error||!data)return response(req,{error:"stale_state_retry"},409);
-  return response(req,{ok:true,status,stage_code:nextStage,step_index:next});
+  // Once paired, all test timing and validation is controlled exclusively by Operator.
+  return response(req,{error:"operator_controls_tests"},403);
  }
 
  const actor=await operator(req);
@@ -184,6 +180,69 @@ Deno.serve(async(req:Request)=>{
     return response(req,{error:"room_unavailable"},409);
   if(action==="operator_signal_pull")return pullSignals(req,room.id,"guest",b.since);
   return pushSignal(req,room.id,"operator",b);
+ }
+ if(action==="operator_tests_init"||action==="operator_test_update"){
+  const id=s(b.session_id,50);
+  if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const {data:room,error:roomError}=await db.from("pulse_motion_live_sessions").select("*")
+    .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
+  if(roomError||!room)return response(req,{error:"session_not_found"},404);
+  if(room.operator_user_id!==actor.id||!room.patient_id)return response(req,{error:"operator_owner_required"},403);
+  if(room.status!=="active"||new Date(room.expires_at).getTime()<=Date.now())
+   return response(req,{error:"room_unavailable"},409);
+  const {data:patient}=await db.from("patients").select("data_classification,status")
+    .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
+  if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic")
+   return response(req,{error:"synthetic_patient_required"},403);
+  const old=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
+  if(action==="operator_tests_init"){
+   if(STEPS.includes(room.stage_code))return response(req,{ok:true,session:publicRow(room)});
+   const progress={step_status:"pending",results:{},safety_confirmed:false};
+   const {data,error}=await db.from("pulse_motion_live_sessions").update({
+     stage_code:STEPS[0],step_index:0,progress,updated_at:now()
+   }).eq("id",id).eq("status","active").eq("step_index",room.step_index).select("*").maybeSingle();
+   return error||!data?response(req,{error:"initialization_conflict"},409):response(req,{ok:true,session:publicRow(data)});
+  }
+  const step=s(b.step_code,35),event=s(b.event,15);
+  if(!STEPS.includes(step)||room.stage_code!==step||room.step_index!==STEPS.indexOf(step))
+   return response(req,{error:"wrong_test_step"},409);
+  if(!["start","save","skip"].includes(event))return response(req,{error:"invalid_action"},422);
+  if(room.step_index===0&&!old.safety_confirmed&&b.safety_confirmed!==true)
+   return response(req,{error:"safety_check_required"},422);
+  const safety=!!old.safety_confirmed||b.safety_confirmed===true;
+  const results=old.results&&typeof old.results==="object"&&!Array.isArray(old.results)?{...old.results}:{};
+  const note=s(b.note,300);
+  let next=room.step_index,status="active",stage=step,finished:null|string=null;
+  let progress:any={...old,results,safety_confirmed:safety,step_status:event==="start"?"running":"pending",
+   test_started_at:event==="start"?now():null};
+  if(event==="start"){
+   if(old.step_status==="running")return response(req,{ok:true,session:publicRow(room)});
+  }else{
+   if(event==="save"){
+    if(old.step_status!=="running")return response(req,{error:"test_not_started"},409);
+    if(step==="posture"){
+     const observation=s(b.observation,30);
+     if(!["neutral","apparent_offset","not_interpretable"].includes(observation))
+      return response(req,{error:"invalid_posture_observation"},422);
+     results[step]={status:"done",observation,note,source:"operator_visual_observation",recorded_at:now()};
+    }else{
+     const def=LIMITS[step],value=b.value;
+     if(!def||typeof value!=="number"||!Number.isFinite(value)||value<0||value>def.max||
+       (def.integer&&!Number.isInteger(value))||(!def.integer&&Math.round(value*10)!==value*10))
+      return response(req,{error:"invalid_manual_measurement"},422);
+     results[step]={status:"done",value,unit:def.unit,note,source:"operator_manual_observation",recorded_at:now()};
+    }
+   }else results[step]={status:"skipped",note,recorded_at:now()};
+   next=room.step_index+1;
+   if(next>=STEPS.length){status="completed";stage="finished";finished=now();}
+   else stage=STEPS[next];
+  }
+  const {data,error}=await db.from("pulse_motion_live_sessions").update({
+   status,stage_code:stage,step_index:next,progress,updated_at:now(),
+   ...(finished?{completed_at:finished}:{})
+  }).eq("id",id).eq("status","active").eq("stage_code",step).eq("step_index",room.step_index)
+    .eq("updated_at",room.updated_at).select("*").maybeSingle();
+  return error||!data?response(req,{error:"stale_state_retry"},409):response(req,{ok:true,session:publicRow(data)});
  }
  if(action==="operator_list"){
   // Housekeep old SDP/candidates; no raw video is ever stored.

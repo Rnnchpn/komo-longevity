@@ -10,7 +10,7 @@ function loadStyles(){
  if(document.getElementById("mopvStyle"))return;
  const link=document.createElement("link");
  link.id="mopvStyle";link.rel="stylesheet";
- link.href="./motion-live-operator-video-v1.css?v=20261109-tripod-v1";
+ link.href="./motion-live-operator-video-v1.css?v=20261109-motion-online-v1";
  document.head.append(link);
 }
 function releaseConnection(notify){
@@ -102,7 +102,7 @@ async function watch(){
  }catch(error){status("Impossible d’ouvrir le flux : "+(error.message||"erreur réseau"))}
  finally{if(button)button.disabled=false}
 }
-function makePane(){
+function makePane(containerId){
  loadStyles();
  pane=document.createElement("section");
  pane.id="mopvWindow";pane.className="mopv-window";
@@ -117,9 +117,11 @@ function makePane(){
   '<span class="mopv-live-dot">CAMÉRA LIVE · SANS ENREGISTREMENT</span></div>',
   '<div class="mopv-controls"><p id="mopvStatus" role="status" aria-live="polite">Initialisation…</p>',
   '<button type="button" id="mopvRetry">Reconnecter</button></div>',
-  '<p class="mopv-hint">Vous pouvez continuer à contrôler les mesures D0 derrière cette fenêtre. Changez la caméra avant/arrière directement sur le téléphone.</p>'
+  '<p class="mopv-hint">Vous pilotez les tests depuis cet ordinateur. Changez de caméra avant/arrière sur le téléphone.</p>'
  ].join("");
- document.body.append(pane);
+ const target=containerId?document.getElementById(containerId):null;
+ (target||document.body).append(pane);
+ pane.classList.toggle("embedded",!!target);
  get("mopvClose").onclick=close;
  get("mopvRetry").onclick=watch;
  get("mopvExpand").onclick=()=>{
@@ -130,9 +132,16 @@ function makePane(){
 }
 export async function openMotionOperatorVideo(config){
  if(!config||typeof config.signal!=="function"||!config.sessionId)throw Error("Séance caméra non définie");
- if(pane&&roomId===config.sessionId){pane.scrollIntoView({block:"nearest"});return}
+ if(pane&&!pane.isConnected)close();
+ if(pane&&roomId===config.sessionId){
+  const container=config.containerId?document.getElementById(config.containerId):null;
+  (container||document.body).append(pane);
+  pane.classList.toggle("embedded",!!container);
+  pane.classList.remove("expanded");
+  return;
+ }
  close();signal=config.signal;roomId=config.sessionId;
- makePane();
+ makePane(config.containerId);
  await watch();
 }
 window.addEventListener("pagehide",close);

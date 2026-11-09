@@ -3,14 +3,12 @@ const EDGE="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-te
 const KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
 const STORAGE="komo_motion_live_guest_v1";
 const STEPS=[
-  ["preflight","Sécurité et préparation","Installez votre téléphone dans un espace dégagé. Vérifiez que vous pouvez réaliser les mouvements sans risque de chute."],
-  ["readiness","Pré-bilan","Suivez les consignes de l'opérateur pour votre préparation avant les mesures."],
-  ["smartspeed_10m","Marche sur 10 mètres","Lorsque l'opérateur vous l'indique, marchez à votre vitesse habituelle sur le parcours préparé."],
-  ["forcedecks_quiet_stand","Équilibre statique","Restez debout dans les conditions prescrites par l'opérateur, avec une sécurisation adaptée."],
-  ["humantrak_mobility","Mobilité","Suivez le protocole de mobilité indiqué par l'opérateur."],
-  ["dynamo_grip","Force de préhension","Réalisez le test avec l'appareil de mesure sous contrôle de l'opérateur."],
-  ["forcedecks_sts","Sit-to-Stand","Levez-vous et asseyez-vous selon la consigne et la cadence du protocole."],
-  ["qc_release","Vérification finale","L'opérateur vérifie la qualité des mesures. Le compte rendu reste soumis à validation."]
+ ["sts","Se relever de la chaise","Assis sur une chaise stable contre un mur, relevez-vous et rasseyez-vous durant 30 secondes. L'opérateur lance le chronomètre."],
+ ["heels","Élévations sur les pointes","Debout près d'un appui fixe, montez sur les pointes puis redescendez durant 20 secondes."],
+ ["unipodal_left","Équilibre · appui gauche","Près d'un support stable, soulevez légèrement le pied droit. L'opérateur chronomètre jusqu'à 20 secondes."],
+ ["unipodal_right","Équilibre · appui droit","Près d'un support stable, soulevez légèrement le pied gauche. L'opérateur chronomètre jusqu'à 20 secondes."],
+ ["arms","Mobilité des bras","Face à la caméra, levez et redescendez les bras sans douleur pendant 20 secondes."],
+ ["posture","Posture de profil","Mettez-vous naturellement de profil, pieds visibles. L'opérateur observe la posture ; cette image ne mesure pas la SVA radiographique."]
 ];
 let overlay=null,videoStream=null,timer=null,signalTimer=null,guestToken="",live=null,busy=false,opening=false,cameraInfo="Caméra désactivée";
 let facing="environment",peer=null,peerSender=null,peerId="",pendingWatch=null,signalCursor=0,offering=false,wakeLock=null,signalPolling=false;
@@ -29,7 +27,7 @@ async function request(data){
 function injectStyles(){
  if(document.getElementById("mliveStylesheet"))return;
  const style=document.createElement("link");
- style.id="mliveStylesheet";style.rel="stylesheet";style.href="./motion-live-guest-v1.css?v=20261109-tripod-v1";
+ style.id="mliveStylesheet";style.rel="stylesheet";style.href="./motion-live-guest-v1.css?v=20261109-operator-tests-v1";
  document.head.append(style);
 }
 function feedback(s){if(el("mliveFeedback"))el("mliveFeedback").textContent=s||""}
@@ -57,7 +55,7 @@ function makeOverlay(){
       <button class="mlive-button secondary" type="button" id="mliveCamera">Activer et partager la caméra</button>
       <button class="mlive-button secondary" type="button" id="mliveFlip">↻ Passer à la caméra avant</button>
       <button class="mlive-button primary" type="button" id="mlivePrimary" disabled>Connexion…</button>
-      <button class="mlive-button secondary" type="button" id="mliveComplete" hidden>Étape terminée →</button>
+      
     </div>
     <p id="mliveFeedback" class="mlive-feedback" role="status" aria-live="polite"></p>
    </div>
@@ -68,7 +66,7 @@ function makeOverlay(){
  el("mliveCamera").onclick=activateCamera;
  el("mliveFlip").onclick=switchCamera;
  el("mlivePrimary").onclick=primary;
- el("mliveComplete").onclick=complete;
+
  window.addEventListener("pagehide",stopCamera,{once:true});
 }
 function update(){
@@ -78,9 +76,9 @@ function update(){
  el("mliveCode").textContent=live.display_code||"······";
  el("mliveProgress").setAttribute("aria-valuenow",String(Math.round(step/STEPS.length*100)));
  el("mliveProgressBar").style.width=Math.round(step/STEPS.length*100)+"%";
- el("mliveStage").textContent=state==="completed"?"Toutes les étapes parcourues":"Étape "+Math.min(step+1,8)+" / "+STEPS.length;
- const btn=el("mlivePrimary"),done=el("mliveComplete");
- btn.hidden=false;done.hidden=true;btn.disabled=busy;
+ el("mliveStage").textContent=state==="completed"?"Bilan terminé":"Test "+Math.min(step+1,STEPS.length)+" / "+STEPS.length;
+ const btn=el("mlivePrimary");
+ btn.hidden=false;btn.disabled=busy;
  if(state==="waiting"){
   el("mliveTitle").textContent="Votre salle Motion est ouverte.";
   el("mliveDescription").textContent="Transmettez le code à l'opérateur. Vérifiez votre environnement, puis indiquez que vous êtes prêt.";
@@ -90,15 +88,13 @@ function update(){
   el("mliveTitle").textContent="Vous êtes prêt.";
   el("mliveDescription").textContent="L'opérateur voit votre session et doit l'associer à votre dossier avant de lancer le bilan.";
   el("mliveState").textContent="En attente du démarrage";
-  btn.textContent="Prêt · En attente";btn.disabled=true;
+  btn.hidden=true;
  }else if(state==="active"&&cur){
   el("mliveTitle").textContent=cur[1];
   el("mliveDescription").textContent=cur[2];
   el("mliveState").textContent=peer?.connectionState==="connected"?"Caméra connectée à l'ordinateur":"Opérateur connecté · Étapes synchronisées";
-  if(running){
-   btn.hidden=true;done.hidden=false;done.disabled=busy;
-   done.textContent="J'ai terminé cette étape →";
-  }else btn.textContent="Commencer cette étape →";
+  btn.hidden=true;
+  feedback(running?"Test en cours sur l'ordinateur. Suivez les consignes de l'opérateur.":"L'opérateur choisit et lance les tests depuis l'ordinateur.");
  }else{
   el("mliveTitle").textContent="Parcours terminé.";
   el("mliveDescription").textContent="L'opérateur peut désormais contrôler et valider les résultats du bilan. Aucun score n'est publié automatiquement.";
@@ -111,7 +107,8 @@ async function sync(){
  try{
   const data=await request({action:"guest_status",guest_token:guestToken});
   live=data.session;
-  if(live.status!=="active"&&peer)resetPeer();
+  if(live.status==="completed"){stopCamera(false);clearInterval(signalTimer);signalTimer=null;}
+  else if(live.status!=="active"&&peer)resetPeer();
   update();
  }catch(error){
   const message=error.message||"Synchronisation momentanément indisponible.";
@@ -121,19 +118,11 @@ async function sync(){
 }
 async function primary(){
  if(!guestToken||!live||busy)return;
- const event=live.status==="waiting"?"ready":live.status==="active"?"start":null;
+ const event=live.status==="waiting"?"ready":null;
  if(!event)return;
  busy=true;update();
  try{
   await request({action:"guest_event",guest_token:guestToken,event,stage_code:live.stage_code});
-  await syncForced();
- }catch(error){feedback(error.message)}finally{busy=false;update()}
-}
-async function complete(){
- if(!guestToken||live?.status!=="active"||busy)return;
- busy=true;update();
- try{
-  await request({action:"guest_event",guest_token:guestToken,event:"complete",stage_code:live.stage_code});
   await syncForced();
  }catch(error){feedback(error.message)}finally{busy=false;update()}
 }
