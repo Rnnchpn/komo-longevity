@@ -156,7 +156,7 @@ function renderStep(){
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
  (running?'<div class="moc-timer"><div><span>CHRONOMÈTRE</span><strong id="mocClock">'+(t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
- (t.duration?'<button type="button" class="moc-button secondary" id="mocStopClock">Arrêter le chrono</button>':'')+'</div>'+input+
+ (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">Arrêter le chrono</button><button type="button" class="moc-button secondary" id="mocRestartClock">↻ Repartir de '+t.duration+' s</button></div>':'')+'</div>'+input+
  '<div class="moc-auto-feedback" id="mocAutoFeedback">◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
  '<div class="moc-buttons"><button type="button" id="mocSave" class="moc-button primary">Valider et passer au suivant</button>'+
@@ -168,6 +168,7 @@ function renderStep(){
  if(q("mocStart"))q("mocStart").onclick=()=>submit("start");
  if(q("mocSave"))q("mocSave").onclick=()=>submit("save");
  if(q("mocSkip"))q("mocSkip").onclick=()=>submit("skip");
+ if(q("mocRestartClock"))q("mocRestartClock").onclick=()=>submit("restart");
  if(q("mocStopClock"))q("mocStopClock").onclick=()=>{
   if(stoppedAt===null)stoppedAt=Date.now();
   poseTracker?.stopMeasurement();
@@ -244,7 +245,7 @@ async function submit(event){
  try{
   const result=await api(payload);
   room=result.session;
-  if(event==="start"&&room?.progress?.step_status==="running"){
+  if(["start","restart"].includes(event)&&room?.progress?.step_status==="running"){
    // Keep a local start anchor so the first rendered frame is 00:30, not 00:29
    // due to round-trip latency. Subsequent displays remain monotonic.
    clockLocal={key:clockRunKey(room),startedAt:Date.now()};
