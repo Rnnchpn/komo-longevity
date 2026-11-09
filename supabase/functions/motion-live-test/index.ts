@@ -57,14 +57,55 @@ async function guestLookup(req:Request,b:any){
  return {session:data};
 }
 
+// The signaling table has RLS enabled, with no anon/authenticated grants.
+// All SDP messages are short-lived and only accessible via the authorized Edge Function.
+// Video frames are transported end-to-end by WebRTC; they never traverse this API.
+async function pullSignals(req:Request,sessionId:string,other:"operator"|"guest",since:unknown){
+ const cursor=Number(since??0);
+ if(!Number.isSafeInteger(cursor)||cursor<0)return response(req,{error:"invalid_cursor"},422);
+ const {data,error}=await db.from("pulse_motion_live_signals")
+  .select("id,kind,sender,connection_id,payload,created_at")
+  .eq("session_id",sessionId).eq("sender",other).gt("id",cursor)
+  .order("id",{ascending:true}).limit(24);
+ if(error)return response(req,{error:"signals_unavailable"},503);
+ return response(req,{ok:true,signals:data||[]});
+}
+async function pushSignal(req:Request,sessionId:string,sender:"guest"|"operator",b:any){
+ const kind=s(b.kind,12),connectionId=s(b.connection_id,50);
+ if(!uuid(connectionId))return response(req,{error:"invalid_connection"},422);
+ const allowed=sender==="guest"?["offer","stop"]:["watch","answer","stop"];
+ if(!allowed.includes(kind))return response(req,{error:"invalid_signal"},422);
+ let payload:any={};
+ if(kind==="offer"||kind==="answer"){
+  const sdp=b.payload?.sdp;
+  if(typeof sdp!=="string"||sdp.length<20||sdp.length>30000||!sdp.startsWith("v=0"))
+    return response(req,{error:"invalid_sdp"},422);
+  payload={type:kind,sdp};
+ }
+ // Opening a new watch supersedes prior negotiations and minimizes retention.
+ if(kind==="watch"){
+  await db.from("pulse_motion_live_signals").delete().eq("session_id",sessionId);
+  await db.from("pulse_motion_live_signals").delete().lt("created_at",new Date(Date.now()-3*3600000).toISOString());
+ }
+ const {data,error}=await db.from("pulse_motion_live_signals")
+  .insert({session_id:sessionId,sender,connection_id:connectionId,kind,payload})
+  .select("id").single();
+ if(error||!data)return response(req,{error:"signal_delivery_failed"},503);
+ return response(req,{ok:true,id:data.id});
+}
+
 Deno.serve(async(req:Request)=>{
  if(req.method==="OPTIONS")return new Response("ok",{headers:headers(req)});
  if(req.method!=="POST")return response(req,{error:"method_not_allowed"},405);
  const origin=req.headers.get("origin")||"";
  if(origin&&!allowedOrigin(origin))return response(req,{error:"origin_forbidden"},403);
  const cl=Number(req.headers.get("content-length")||0);
- if(cl>4096)return response(req,{error:"payload_too_large"},413);
- let b:any={};try{b=await req.json()}catch{return response(req,{error:"invalid_json"},400)}
+ if(cl>48000)return response(req,{error:"payload_too_large"},413);
+ let b:any={};try{
+  const raw=await req.text();
+  if(raw.length>48000)return response(req,{error:"payload_too_large"},413);
+  b=JSON.parse(raw);
+ }catch{return response(req,{error:"invalid_json"},400)}
  const action=s(b.action,35);
  if(!await testCenter())return response(req,{error:"test_environment_only"},423);
 
@@ -82,6 +123,16 @@ Deno.serve(async(req:Request)=>{
   }).select("id,display_code,status,expires_at").single();
   if(error)return response(req,{error:"session_creation_failed"},503);
   return response(req,{ok:true,...data,guest_token:guestToken,steps:STEPS});
+ }
+
+ // Guest-only video signaling. Session credentials are hashed and never leave this API.
+ // The operator must first pair this guest with a synthetic D0 patient.
+ if(action==="guest_signal_pull"||action==="guest_signal_push"){
+  const found=await guestLookup(req,b);if(found.error)return found.error;
+  const room=found.session;
+  if(room.status!=="active"||!room.operator_user_id)return response(req,{error:"operator_not_connected"},409);
+  if(action==="guest_signal_pull")return pullSignals(req,room.id,"operator",b.since);
+  return pushSignal(req,room.id,"guest",b);
  }
 
  if(action==="guest_status"||action==="guest_event"){
@@ -121,6 +172,19 @@ Deno.serve(async(req:Request)=>{
 
  const actor=await operator(req);
  if(!actor)return response(req,{error:"operator_access_required"},403);
+ if(action==="operator_signal_pull"||action==="operator_signal_push"){
+  const id=s(b.session_id,50);
+  if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const {data:room,error}=await db.from("pulse_motion_live_sessions")
+   .select("id,status,expires_at,operator_user_id,organization_id,patient_id")
+   .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
+  if(error||!room)return response(req,{error:"session_not_found"},404);
+  if(room.operator_user_id!==actor.id)return response(req,{error:"operator_owner_required"},403);
+  if(room.status!=="active"||new Date(room.expires_at).getTime()<=Date.now()||!room.patient_id)
+    return response(req,{error:"room_unavailable"},409);
+  if(action==="operator_signal_pull")return pullSignals(req,room.id,"guest",b.since);
+  return pushSignal(req,room.id,"operator",b);
+ }
  if(action==="operator_list"){
   await db.from("pulse_motion_live_sessions").delete().lt("expires_at",new Date(Date.now()-24*3600000).toISOString());
   const {data,error}=await db.from("pulse_motion_live_sessions").select("id,display_code,status,stage_code,step_index,progress,patient_id,operator_session_id,patient_last_seen_at,created_at,updated_at")
@@ -149,7 +213,9 @@ Deno.serve(async(req:Request)=>{
   const id=s(b.session_id,50);if(!uuid(id))return response(req,{error:"invalid_session"},422);
   const {data,error}=await db.from("pulse_motion_live_sessions").update({status:"closed",completed_at:now(),updated_at:now()})
    .eq("id",id).eq("organization_id",ORG_ID).select("id").maybeSingle();
-  return error||!data?response(req,{error:"close_failed"},409):response(req,{ok:true});
+  if(error||!data)return response(req,{error:"close_failed"},409);
+  await db.from("pulse_motion_live_signals").delete().eq("session_id",id);
+  return response(req,{ok:true});
  }
  return response(req,{error:"unknown_action"},400);
 });
