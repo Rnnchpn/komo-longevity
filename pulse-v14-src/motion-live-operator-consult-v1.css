@@ -107,3 +107,8 @@
 
 .moc-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
 @media(max-width:650px){.moc-head-actions{width:100%;justify-content:space-between}.moc-head-actions .moc-back{flex:1}}
+
+/* Chronomètre : départ explicite à 30 s, décompte jusqu'à zéro, reprise possible. */
+.moc-clock-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}
+.moc-clock-actions .moc-button{padding:10px 12px;min-height:42px}
+@media(max-width:650px){.moc-timer{align-items:flex-start;flex-wrap:wrap}.moc-clock-actions{width:100%;justify-content:flex-start}}
