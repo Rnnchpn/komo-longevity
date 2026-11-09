@@ -28,7 +28,7 @@ const TESTS=[
 ];
 const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
-let poseTracker=null,videoListener=null,stopVideoListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
+let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
 const q=id=>host?.querySelector("#"+id);
 function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message||""}
 function styles(){
@@ -42,7 +42,8 @@ export function disposeOperatorConsultation(){
  if(poll)clearInterval(poll);poll=null;stopClock();
  if(videoListener)window.removeEventListener("pulse:remote-video-ready",videoListener);
  if(stopVideoListener)window.removeEventListener("pulse:remote-video-stopped",stopVideoListener);
- videoListener=null;stopVideoListener=null;
+ if(fullscreenListener)document.removeEventListener("fullscreenchange",fullscreenListener);
+ videoListener=null;stopVideoListener=null;fullscreenListener=null;
  poseTracker?.dispose();poseTracker=null;
  host=null;room=null;api=null;openVideo=null;patient=null;latestSignature="";autoValue=null;manualEdited=false;
 }
@@ -51,7 +52,7 @@ function stageText(result){return result?.status==="done"?"✓":result?.status==
 function makeShell(){
  host.innerHTML='<section class="moc-shell">'+
  '<header class="moc-head"><div><span class="overline">KŌMØ PULSE · CONSULTATION EN DIRECT</span><h2>Consultation Motion</h2>'+
- '<p id="mocPatientLine"></p></div><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></header>'+
+ '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
  '<div class="moc-step-nav" id="mocStepNav" aria-label="Tests Motion"></div>'+
@@ -61,6 +62,14 @@ function makeShell(){
  '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">33 points · Analyse locale sur cet ordinateur · Flux non enregistré · Changement avant/arrière sur l’iPhone.</div>'+
  '</aside></div><p class="moc-bottom-note">Démonstration avec dossier fictif · Résultats saisis manuellement par l’opérateur · Aucune interprétation clinique automatique</p></section>';
  q("mocReturn").onclick=()=>{location.hash="live"};
+ q("mocFullscreen").onclick=async()=>{
+  try{
+   if(document.fullscreenElement)await document.exitFullscreen();
+   else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();
+   else{q("mocFullscreen").textContent="Installer la webapp pour le plein écran";return}
+   if(q("mocFullscreen"))q("mocFullscreen").textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran";
+  }catch(error){if(q("mocFullscreen"))q("mocFullscreen").textContent="Plein écran indisponible"}
+ };
  q("mocPatientLine").textContent=patient ? [patient.first_name,patient.last_name].filter(Boolean).join(" ")+" · Bilan supervisé" : "Sélectionnez un patient fictif";
 }
 function renderWaiting(message){
@@ -270,6 +279,8 @@ export async function mountOperatorConsultation(config){
  host=config.root;api=config.api;openVideo=config.openVideo;patient=config.patient||null;
  if(!host)return;
  styles();makeShell();
+ fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
+ document.addEventListener("fullscreenchange",fullscreenListener);
  try{
   const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261109-live-pose-v1");
   poseTracker=createRemoteMotionTracker({
