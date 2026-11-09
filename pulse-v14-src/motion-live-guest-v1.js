@@ -1,7 +1,10 @@
-// Test-only guest room. Camera is sent through encrypted WebRTC only after the patient enables sharing and an authorized Operator watches. No recording or media upload.
+// The clinician's own iPhone provides a WebRTC camera in the physical consultation.
+// This module also preserves the previous test-room entry for backward compatibility.
+// No recording, audio or video upload. Operator owns all test controls.
 const EDGE="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test";
 const KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
 const STORAGE="komo_motion_live_guest_v1";
+const STAFF_STORAGE="komo_motion_operator_camera_station_v1";
 const STEPS=[
  ["sts","Se relever de la chaise","Assis sur une chaise stable contre un mur, relevez-vous et rasseyez-vous durant 30 secondes. L'opérateur lance le chronomètre."],
  ["heels","Élévations sur les pointes","Debout près d'un appui fixe, montez sur les pointes puis redescendez durant 20 secondes."],
@@ -12,6 +15,7 @@ const STEPS=[
 ];
 let overlay=null,videoStream=null,timer=null,signalTimer=null,guestToken="",live=null,busy=false,opening=false,cameraInfo="Caméra désactivée";
 let facing="environment",peer=null,peerSender=null,peerId="",pendingWatch=null,signalCursor=0,offering=false,wakeLock=null,signalPolling=false;
+let cameraStation=false,stationStart=null,stationStop=null,stationRoomId="";
 const rtcConfig={iceServers:[{urls:"stun:stun.cloudflare.com:3478"}]};
 const el=id=>overlay?.querySelector("#"+id);
 async function request(data){
@@ -27,30 +31,31 @@ async function request(data){
 function injectStyles(){
  if(document.getElementById("mliveStylesheet"))return;
  const style=document.createElement("link");
- style.id="mliveStylesheet";style.rel="stylesheet";style.href="./motion-live-guest-v1.css?v=20261109-operator-tests-v1";
+ style.id="mliveStylesheet";style.rel="stylesheet";
+ style.href=new URL("./motion-live-guest-v1.css?v=20261109-clinic-camera-v1",import.meta.url).href;
  document.head.append(style);
 }
 function feedback(s){if(el("mliveFeedback"))el("mliveFeedback").textContent=s||""}
 function makeOverlay(){
  injectStyles();
  overlay=document.createElement("section");
- overlay.id="mliveOverlay";overlay.className="mlive-overlay";
+ overlay.id="mliveOverlay";overlay.className="mlive-overlay"+(cameraStation?" mlive-staff-camera":"");
  overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");
- overlay.setAttribute("aria-label","Consultation Motion en direct");
+ overlay.setAttribute("aria-label",cameraStation?"Caméra du cabinet — iPhone opérateur":"Consultation Motion en direct");
  overlay.innerHTML=`
-  <header class="mlive-top"><span class="mlive-brand">KŌMØ <small>PULSE · MOTION EN DIRECT</small></span><button type="button" class="mlive-close" id="mliveClose">Fermer ×</button></header>
+  <header class="mlive-top"><span class="mlive-brand">KŌMØ <small>${cameraStation?"CAMÉRA DU CABINET":"PULSE · MOTION EN DIRECT"}</small></span><button type="button" class="mlive-close" id="mliveClose">${cameraStation?"Terminer":"Fermer"} ×</button></header>
   <div class="mlive-main">
    <div class="mlive-camera rear" id="mliveCameraFrame"><video id="mliveVideo" autoplay muted playsinline hidden></video>
-    <div class="mlive-camera-hint" id="mliveCameraHint">Positionnez le téléphone sur son trépied. Activez la caméra arrière pour que l'opérateur puisse voir les mouvements depuis l'ordinateur.</div>
+    <div class="mlive-camera-hint" id="mliveCameraHint">Ton iPhone devient la caméra du cabinet. Installe-le sur le trépied, cadre le corps entier et active la caméra arrière.</div>
     <span class="mlive-camera-label" id="mliveCameraLabel">Caméra désactivée</span></div>
    <div class="mlive-panel">
-    <span class="mlive-eyebrow">CONSULTATION MOTION · CANNES</span>
-    <h2 id="mliveTitle">Ouverture de la session…</h2>
-    <p id="mliveDescription">Votre opérateur va vous accompagner.</p>
-    <div class="mlive-number"><span>CODE À COMMUNIQUER À L'OPÉRATEUR</span><strong id="mliveCode">······</strong></div>
+    <span class="mlive-eyebrow">${cameraStation?"IPHONE OPÉRATEUR · CONSULTATION SUR PLACE":"CONSULTATION MOTION · CANNES"}</span>
+    <h2 id="mliveTitle">Ouverture de la caméra…</h2>
+    <p id="mliveDescription">${cameraStation?"Le patient n’utilise pas ce téléphone. Tous les tests se commandent depuis ton ordinateur.":"Votre opérateur va vous accompagner."}</p>
+    <div class="mlive-number"><span>${cameraStation?"CODE À REPÉRER SUR TON ORDINATEUR":"CODE À COMMUNIQUER À L'OPÉRATEUR"}</span><strong id="mliveCode">······</strong></div>
     <div class="mlive-state"><i></i><span id="mliveState">Connexion…</span></div>
     <div class="mlive-progress" role="progressbar" aria-label="Progression de la consultation" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="mliveProgress"><i id="mliveProgressBar"></i></div>
-    <p class="mlive-stage-line" id="mliveStage">Étape 0 / 8</p>
+    <p class="mlive-stage-line" id="mliveStage">Test 1 / 6</p>
     <div class="mlive-actions">
       <button class="mlive-button secondary" type="button" id="mliveCamera">Activer et partager la caméra</button>
       <button class="mlive-button secondary" type="button" id="mliveFlip">↻ Passer à la caméra avant</button>
@@ -60,9 +65,13 @@ function makeOverlay(){
     <p id="mliveFeedback" class="mlive-feedback" role="status" aria-live="polite"></p>
    </div>
   </div>
-  <footer class="mlive-foot">Mode d'essai avec dossier fictif · Vidéo chiffrée de téléphone à ordinateur, sans enregistrement · Gardez l'écran allumé · Aucune mesure validée automatiquement</footer>`;
+  <footer class="mlive-foot">${cameraStation?"Mode caméra du professionnel, sans compte patient sur l’iPhone.":"Mode d'essai avec dossier fictif."} · Vidéo WebRTC chiffrée, sans enregistrement · Garder l'écran allumé · Essais sur dossiers fictifs uniquement</footer>`;
  document.body.append(overlay);
- el("mliveClose").onclick=close;
+ el("mliveClose").onclick=()=>{
+  const closingId=stationRoomId,stop=stationStop;
+  close();
+  if(cameraStation&&closingId&&stop)Promise.resolve(stop(closingId)).catch(()=>{});
+ };
  el("mliveCamera").onclick=activateCamera;
  el("mliveFlip").onclick=switchCamera;
  el("mlivePrimary").onclick=primary;
@@ -78,8 +87,16 @@ function update(){
  el("mliveProgressBar").style.width=Math.round(step/STEPS.length*100)+"%";
  el("mliveStage").textContent=state==="completed"?"Bilan terminé":"Test "+Math.min(step+1,STEPS.length)+" / "+STEPS.length;
  const btn=el("mlivePrimary");
- btn.hidden=false;btn.disabled=busy;
- if(state==="waiting"){
+ btn.hidden=!!cameraStation;btn.disabled=busy;
+ if(cameraStation){
+  const connected=peer?.connectionState==="connected";
+  el("mliveTitle").textContent=state==="completed"?"Séance terminée.":"Caméra de consultation";
+  el("mliveDescription").textContent=state==="active"?
+   (cur?"Test en cours : "+cur[1]+". La vidéo est envoyée à ton ordinateur ; tu pilotes les mesures là-bas.":"Caméra connectée au poste de consultation.") :
+   "Sur l’ordinateur, ouvre « En direct », sélectionne ton iPhone avec ce code, puis associe le dossier fictif.";
+  el("mliveState").textContent=state==="completed"?"Séance terminée":connected?"◉ Vidéo affichée sur l’ordinateur":state==="active"?"Opérateur associé · connexion vidéo en cours":"En attente de la connexion depuis l’ordinateur";
+  btn.hidden=true;
+ }else if(state==="waiting"){
   el("mliveTitle").textContent="Votre salle Motion est ouverte.";
   el("mliveDescription").textContent="Transmettez le code à l'opérateur. Vérifiez votre environnement, puis indiquez que vous êtes prêt.";
   el("mliveState").textContent="En attente de l'opérateur";
@@ -99,7 +116,7 @@ function update(){
   el("mliveTitle").textContent="Parcours terminé.";
   el("mliveDescription").textContent="L'opérateur peut désormais contrôler et valider les résultats du bilan. Aucun score n'est publié automatiquement.";
   el("mliveState").textContent="Étapes parcourues · Validation en attente";
-  btn.hidden=true;done.hidden=true;
+  btn.hidden=true;
  }
 }
 async function sync(){
@@ -265,26 +282,34 @@ function stopCamera(signal=false){
 function close(){
  clearInterval(timer);timer=null;clearInterval(signalTimer);signalTimer=null;
  stopCamera(true);overlay?.remove();overlay=null;live=null;pendingWatch=null;signalCursor=0;
+ guestToken="";stationRoomId="";
 }
-export async function openMotionLive(){
+export async function openMotionLive(options={}){
  if(opening)return;
  if(overlay){overlay.scrollIntoView({block:"start"});return}
  opening=true;
+ cameraStation=options.mode==="operator_camera";
+ stationStart=typeof options.startSession==="function"?options.startSession:null;
+ stationStop=typeof options.stopSession==="function"?options.stopSession:null;
+ const key=cameraStation?STAFF_STORAGE:STORAGE;
  try{
   makeOverlay();
-  const existing=sessionStorage.getItem(STORAGE);
+  const existing=sessionStorage.getItem(key);
   if(existing&&/^[A-Za-z0-9_-]{43}$/.test(existing)){
    guestToken=existing;
    try{const data=await request({action:"guest_status",guest_token:guestToken});live=data.session;}
-   catch{guestToken="";sessionStorage.removeItem(STORAGE)}
+   catch{guestToken="";sessionStorage.removeItem(key)}
   }
   if(!guestToken){
-   const data=await request({action:"guest_start"});
-   guestToken=data.guest_token;sessionStorage.setItem(STORAGE,guestToken);
-   live={display_code:data.display_code,status:data.status,stage_code:"preflight",step_index:0,progress:{}};
+   if(cameraStation&&!stationStart)throw Error("Identification opérateur requise pour ouvrir la caméra.");
+   const data=cameraStation?await stationStart():await request({action:"guest_start"});
+   guestToken=data.guest_token;sessionStorage.setItem(key,guestToken);
+   live={display_code:data.display_code,status:data.status,stage_code:data.stage_code||STEPS[0][0],step_index:Number(data.step_index)||0,progress:data.progress||{}};
+   stationRoomId=data.id||"";
   }
+  if(cameraStation)el("mlivePrimary").hidden=true;
   update();timer=setInterval(sync,2400);
   signalTimer=setInterval(pollSignals,1100);
- }catch(error){feedback(error.message||"Impossible d'ouvrir la consultation.");el("mliveTitle").textContent="Session momentanément indisponible."}
+ }catch(error){feedback(error.message||"Impossible d'ouvrir la caméra.");if(el("mliveTitle"))el("mliveTitle").textContent="Caméra momentanément indisponible."}
  finally{opening=false}
 }
