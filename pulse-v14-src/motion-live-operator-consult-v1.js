@@ -35,7 +35,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261109-live-pose-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261109-countdown-v2";
  document.head.append(link);
 }
 function stopClock(){
