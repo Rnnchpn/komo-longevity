@@ -40,3 +40,16 @@
  .mlive-panel p{font-size:12px;line-height:1.45}
  .mlive-foot{font-size:9px;padding:9px 14px calc(10px + env(safe-area-inset-bottom))}
 }
+
+/* Tripod camera — rear image is never mirrored; front is mirrored for framing. */
+.mlive-camera.rear video{transform:none}
+.mlive-camera.front video{transform:scaleX(-1)}
+.mlive-camera .mlive-camera-label{pointer-events:none}
+#mliveFlip:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:760px){
+ .mlive-camera{height:48dvh;min-height:210px}
+ .mlive-camera-label{bottom:12px;left:12px;font-size:11px}
+ .mlive-panel .mlive-actions{gap:8px}
+ .mlive-panel .mlive-button{min-height:49px;font-size:13px}
+ .mlive-foot{line-height:1.45}
+}

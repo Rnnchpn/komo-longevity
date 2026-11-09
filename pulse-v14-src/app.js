@@ -318,7 +318,7 @@ function shell(){
       await refresh();
     };
     const logout=$('#p-logout');
-    if(logout)logout.onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
+    if(logout)logout.onclick=async()=>{window.dispatchEvent(new Event('pulse:operator-signout'));await sb.auth.signOut();location.hash='';authView()};
     $('#pulse-mobile-start-motion')?.addEventListener('click',async event=>{
       const button=event.currentTarget;
       if(button.disabled)return;
@@ -341,7 +341,7 @@ function shell(){
   document.querySelector('.app-shell')?.setAttribute('data-pulse-view',S.route);
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled||!hasPro())return;const next=b.dataset.mode;if(next==='patient'&&!S.ownPatient)return;S.mode=next;localStorage.setItem('komo_v14_mode',next);history.replaceState(null,'',location.pathname+location.search+'#'+(next==='pro'?'operator':'home'));await refresh()});
-  $('#logout').onclick=async()=>{await sb.auth.signOut();location.hash='';authView()};
+  $('#logout').onclick=async()=>{window.dispatchEvent(new Event('pulse:operator-signout'));await sb.auth.signOut();location.hash='';authView()};
   $('#pulse-mobile-logout').onclick=$('#logout').onclick;
   $('#pulse-mobile-start-motion')?.addEventListener('click',async event=>{
     const selected=S.patients.find(p=>p.id===S.patient?.id);
@@ -365,7 +365,7 @@ function progressStrip(){
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
 async function openMotionLivePatient(){
-  try{const module=await import('./motion-live-guest-v1.js');await module.openMotionLive();}
+  try{const module=await import('./motion-live-guest-v1.js?v=20261109-tripod-v1');await module.openMotionLive();}
   catch(error){console.error('[Motion live patient]',error);toast('Session Motion momentanément indisponible.');}
 }
 function patientLobby(){
@@ -619,13 +619,19 @@ async function motionLiveAPI(body){
   if(!res.ok||data.error)throw Error(data.error||'Serveur indisponible.');
   return data;
 }
+async function openOperatorCamera(sessionId){
+  try{
+    const camera=await import('./motion-live-operator-video-v1.js');
+    await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI});
+  }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
+}
 function motionLiveMonitor(){
   heading('En direct','KŌMØ OPERATOR · TEST');
   $('#view').innerHTML=`<div class="op-live-dashboard">
-    <header class="op-live-head"><div><span class="overline">SESSION PATIENT SYNCHRONISÉE</span><h2>Consultations en direct</h2><p>Le patient commence sur son téléphone, communique son code à six chiffres, puis vous l'associez à un dossier fictif. Les étapes se synchronisent environ toutes les 2 à 3 secondes.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
+    <header class="op-live-head"><div><span class="overline">SESSION PATIENT SYNCHRONISÉE</span><h2>Consultations en direct</h2><p>Le téléphone sur trépied remplace la webcam : associez son code à un dossier fictif, puis ouvrez la caméra en direct. L'affichage vidéo reste ouvert pendant que vous contrôlez les mesures D0.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
     <div class="op-live-toolbar"><span id="opLiveCount">Connexion aux sessions…</span><button type="button" class="button secondary" id="opLiveNewPatient">+ Créer un dossier fictif</button></div>
     <div id="opLiveRooms" aria-live="polite"><p>Recherche des sessions…</p></div>
-    <p class="op-live-caution">Test exclusivement avec identités fictives. La vidéo et les mesures instrumentales ne sont pas transmises par cette synchronisation. L'opérateur conserve la responsabilité de la validation des tests.</p>
+    <p class="op-live-caution">Mode test avec identités fictives uniquement. Le flux vidéo WebRTC est chiffré et non enregistré ; les mesures instrumentales ne sont pas transférées par cette liaison. Validation des tests par l'opérateur.</p>
   </div>`;
   $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
   $('#opLiveNewPatient').onclick=()=>{clearInterval(motionLiveTimer);motionLiveTimer=null;location.hash='patients'};
@@ -659,11 +665,13 @@ async function loadMotionLiveRooms(force=false){
       <p>${esc(patientName)} · ${esc(stage)}</p>
       <div class="op-live-track"><i style="width:${pct}%"></i></div><small>${pct}% des étapes parcourues · ${room.progress?.step_status==='running'?'Test en cours':'Attente du prochain test'}</small>
       <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et démarrer D0</button>`:`${room.patient_id?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir D0</button>':''}`}
+      ${room.status==='active'&&room.operator_user_id===S.user?.id?'<button type="button" class="button primary" data-live-video="'+esc(room.id)+'">◉ Voir caméra en direct</button>':''}
       <button type="button" class="button secondary" data-live-close="${esc(room.id)}">Clore la salle</button></div>
     </article>`;
    }).join(''):'<div class="op-live-empty">Aucune consultation active. Sur le téléphone du patient : Motion au centre → Commencer ma consultation.</div>';
    for(const select of host.querySelectorAll('[data-live-select]'))if(selected.has(select.dataset.liveSelect))select.value=selected.get(select.dataset.liveSelect);
    host.querySelectorAll('[data-live-attach]').forEach(b=>b.onclick=()=>attachMotionLive(b.dataset.liveAttach,b));
+   host.querySelectorAll('[data-live-video]').forEach(b=>b.onclick=()=>openOperatorCamera(b.dataset.liveVideo));
    host.querySelectorAll('[data-live-operator]').forEach(b=>b.onclick=async()=>{
      localStorage.setItem('komo_v14_patient',b.dataset.liveOperator);
      await loadPro();location.hash='operator';render();
@@ -692,6 +700,7 @@ async function attachMotionLive(id,button){
   localStorage.setItem('komo_v14_patient',patientId);
   toast('Session liée : le patient peut commencer ses tests.');
   await loadPro();motionLiveSignature='';await loadMotionLiveRooms(true);
+  await openOperatorCamera(id);
  }catch(error){toast(error.message||'Association impossible.');button.disabled=false;button.textContent='Associer et démarrer D0'}
 }
 
@@ -707,9 +716,10 @@ async function refreshOperatorLiveStatus(){
    const stage=OP_STEPS.find(x=>x[0]===room.stage_code)?.[2]||'Parcours terminé';
    const pct=Math.round(Math.min(8,Number(room.step_index)||0)/8*100);
    const online=room.patient_last_seen_at&&Date.now()-new Date(room.patient_last_seen_at).getTime()<18000;
-   host.innerHTML='<span class="overline">PATIENT EN DIRECT · '+esc(room.display_code)+'</span><h4>'+esc(stage)+'</h4><p>'+esc(room.status==='active'?'Séance en cours':room.status==='completed'?'Étapes terminées':'Prêt à commencer')+' · '+(online?'Téléphone connecté':'Téléphone hors ligne')+'</p><div class="op-live-track"><i style="width:'+pct+'%"></i></div><button type="button" class="button secondary" data-open-live>Ouvrir le suivi détaillé</button>';
+   host.innerHTML='<span class="overline">PATIENT EN DIRECT · '+esc(room.display_code)+'</span><h4>'+esc(stage)+'</h4><p>'+esc(room.status==='active'?'Séance en cours':room.status==='completed'?'Étapes terminées':'Prêt à commencer')+' · '+(online?'Téléphone connecté':'Téléphone hors ligne')+'</p><div class="op-live-track"><i style="width:'+pct+'%"></i></div>'+(room.status==='active'&&room.operator_user_id===S.user?.id?'<button type="button" class="button primary" data-operator-camera="'+esc(room.id)+'">◉ Voir la caméra du téléphone</button>':'')+'<button type="button" class="button secondary" data-open-live>Ouvrir le suivi détaillé</button>';
   }
   host.querySelector('[data-open-live]')?.addEventListener('click',()=>{location.hash='live';render()});
+  host.querySelector('[data-operator-camera]')?.addEventListener('click',event=>openOperatorCamera(event.currentTarget.dataset.operatorCamera));
  }catch(error){if(host.isConnected)host.textContent='Synchronisation indisponible : '+(error.message||'erreur réseau');}
 }
 function operator(){
@@ -726,6 +736,9 @@ async function finalizeOperator(){if(!S.opSession)return toast('Aucune session a
 
 function render(){
   S.route=route();
+  // Close any remote camera when leaving the two monitored Operator workspaces.
+  if(S.mode!=='pro'||!['live','operator'].includes(S.route))
+    window.dispatchEvent(new Event('pulse:operator-signout'));
   if(S.mode==='patient'&&S.route!=='home'){
     // Older emails and bookmarked links still open the same patient screen.
     history.replaceState(null,'',location.pathname+location.search+'#home');

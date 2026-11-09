@@ -51,13 +51,13 @@
         <button type="button" class="maison-login-back" data-maison-back="choice">← Revenir aux bilans</button>
         <span class="maison-panel-label">MOTION AU CENTRE · 200 €</span>
         <h2>Votre bilan Motion.<br><em>Sans démarche préalable.</em></h2>
-        <p class="maison-panel-lead">Démarrez votre séance sur cet appareil, puis communiquez le code affiché à votre opérateur. Il pourra suivre votre progression en direct et associer votre séance à un dossier fictif.</p>
+        <p class="maison-panel-lead">Installez ce téléphone sur un trépied, ouvrez la caméra arrière puis communiquez le code à l’opérateur. Il verra la vidéo sur son ordinateur tout en pilotant vos tests. Vous pouvez inverser la caméra depuis ce téléphone.</p>
         <div class="maison-account-actions">
           <button class="maison-action-primary" type="button" id="maisonLiveStart">Commencer ma consultation Motion <span>→</span></button>
           <button class="maison-action-secondary" type="button" data-maison-login>J'ai déjà un compte · Me connecter <span>→</span></button>
           <button class="maison-action-secondary" type="button" data-maison-back="choice">Retour aux bilans <span>→</span></button>
         </div>
-        <p class="maison-choice-note">La session test fonctionne sans compte patient. La caméra reste locale et les données de santé réelles ne sont pas autorisées dans cet environnement.</p>
+        <p class="maison-choice-note">En mode test, votre vidéo est diffusée uniquement à l’opérateur associé, par liaison WebRTC chiffrée, sans enregistrement. Aucun dossier de santé réel n’est autorisé.</p>
       </div>
       <div class="maison-panel-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
     old.replaceWith(entry);
@@ -89,7 +89,7 @@
       if(button.disabled)return;
       button.disabled=true;
       try{
-        const module=await import('./motion-live-guest-v1.js');
+        const module=await import('./motion-live-guest-v1.js?v=20261109-tripod-v1');
         await module.openMotionLive();
       }catch(error){
         console.error('[Pulse Motion live]',error);
