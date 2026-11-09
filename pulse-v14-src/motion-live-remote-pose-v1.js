@@ -14,13 +14,13 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
  let video=null,canvas=null,engine=null,disposed=false,generation=0;
  let step="",runKey="",running=false,startedAt=0,duration=0;
  let repetition=null,balance=null,profile=null,frames=0,validFrames=0,latest=null;
- let lastPublish=0,modelLoading=false;
+ let lastPublish=0,modelLoading=false,operatorStopped=false;
  const publish=data=>{
   latest=data;
   try{onUpdate?.(data)}catch(error){console.warn("[Motion pose update]",error)}
  };
  const resetCounters=()=>{
-  frames=0;validFrames=0;latest=null;
+  frames=0;validFrames=0;latest=null;operatorStopped=false;
   repetition=REPETITIONS.has(step)?createMovementTracker(step):null;
   balance=UNIPODAL.has(step)?createOneLegObserver(step==="unipodal_left"?"left":"right",20000):null;
   profile=step==="posture"?createSideProfileStability(900):null;
@@ -35,7 +35,7 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
   let measurement=null,started=false,finished=false,postureIndex=null,stable=false;
   const elapsed=startedAt?Date.now()-startedAt:0;
   // A finished stopwatch must never continue accumulating movements.
-  const withinWindow=running&&(!duration||elapsed<=duration*1000+250);
+  const withinWindow=running&&!operatorStopped&&(!duration||elapsed<=duration*1000+250);
   if(withinWindow&&REPETITIONS.has(step)&&repetition){
    const result=repetition.observe(points,at);
    if(result.valid&&repetition.summary().usable>=5)measurement=result.count;
@@ -103,6 +103,7 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
   startedAt=Date.parse(sessionStartedAt||"")||0;
   duration=Number(maxSeconds)||0;
  }
+ function stopMeasurement(){operatorStopped=true}
  function detach(){
   ++generation;engine?.stop();engine=null;video=null;
   if(canvas){canvas.remove();canvas=null}
@@ -110,5 +111,5 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
   publish({step,runKey,valid:false,message:"Caméra déconnectée",measurement:null,running:false});
  }
  function dispose(){disposed=true;detach();onUpdate=null;onError=null}
- return {attach,detach,dispose,setTest,getLatest:()=>latest,isAttached:()=>!!engine,loading:()=>modelLoading};
+ return {attach,detach,dispose,setTest,stopMeasurement,getLatest:()=>latest,isAttached:()=>!!engine,loading:()=>modelLoading};
 }
