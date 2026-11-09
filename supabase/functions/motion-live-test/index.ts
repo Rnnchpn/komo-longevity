@@ -206,17 +206,18 @@ Deno.serve(async(req:Request)=>{
   const step=s(b.step_code,35),event=s(b.event,15);
   if(!STEPS.includes(step)||room.stage_code!==step||room.step_index!==STEPS.indexOf(step))
    return response(req,{error:"wrong_test_step"},409);
-  if(!["start","save","skip"].includes(event))return response(req,{error:"invalid_action"},422);
+  if(!["start","restart","save","skip"].includes(event))return response(req,{error:"invalid_action"},422);
   if(room.step_index===0&&!old.safety_confirmed&&b.safety_confirmed!==true)
    return response(req,{error:"safety_check_required"},422);
   const safety=!!old.safety_confirmed||b.safety_confirmed===true;
   const results=old.results&&typeof old.results==="object"&&!Array.isArray(old.results)?{...old.results}:{};
   const note=s(b.note,300);
   let next=room.step_index,status="active",stage=step,finished:null|string=null;
-  let progress:any={...old,results,safety_confirmed:safety,step_status:event==="start"?"running":"pending",
-   test_started_at:event==="start"?now():null};
-  if(event==="start"){
-   if(old.step_status==="running")return response(req,{ok:true,session:publicRow(room)});
+  let progress:any={...old,results,safety_confirmed:safety,step_status:["start","restart"].includes(event)?"running":"pending",
+   test_started_at:["start","restart"].includes(event)?now():null};
+  if(event==="start"||event==="restart"){
+   if(event==="start"&&old.step_status==="running")return response(req,{ok:true,session:publicRow(room)});
+   if(event==="restart"&&old.step_status!=="running")return response(req,{error:"test_not_started"},409);
   }else{
    if(event==="save"){
     if(old.step_status!=="running")return response(req,{error:"test_not_started"},409);
