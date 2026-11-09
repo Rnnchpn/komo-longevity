@@ -64,9 +64,9 @@ function makeShell(){
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
  '<div class="moc-step-nav" id="mocStepNav" aria-label="Tests Motion"></div>'+
  '<div id="mocTestBody"><p>Recherche de la consultation…</p></div>'+
- '</section><aside class="moc-camera-column"><div class="moc-camera-heading"><strong>Caméra de l’iPhone</strong><span>Visualisation en direct</span></div>'+
+ '</section><aside class="moc-camera-column"><div class="moc-camera-heading"><strong>Mon iPhone · caméra du cabinet</strong><span>Visualisation en direct</span></div>'+
  '<div id="motionConsultCamera" class="moc-camera-host"></div>'+
- '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">33 points · Analyse locale sur cet ordinateur · Flux non enregistré · Changement avant/arrière sur l’iPhone.</div>'+
+ '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>'+
  '</aside></div><p class="moc-bottom-note">Démonstration avec dossier fictif · Résultats saisis manuellement par l’opérateur · Aucune interprétation clinique automatique</p></section>';
  q("mocReturn").onclick=()=>{location.hash="live"};
  q("mocFullscreen").onclick=async()=>{
@@ -261,11 +261,11 @@ async function refresh(force=false){
  polling=true;
  try{
   const data=await api({action:"operator_list"});
-  const matching=(data.sessions||[]).filter(x=>x.patient_id===patient?.id&&["active","completed"].includes(x.status))
+  const matching=(data.sessions||[]).filter(x=>x.patient_id===patient?.id&&x.progress?.camera_owner==="operator"&&["active","completed"].includes(x.status))
    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   const selected=matching[0]||null;
   if(!selected){
-   room=null;renderWaiting("Ouvrez Motion sur le téléphone, puis associez son code au patient dans En direct.");
+   room=null;renderWaiting("Sur ton iPhone, ouvre pulse.komolongevity.com/camera/ puis associe le code depuis En direct sur cet ordinateur.");
    return;
   }
   if(selected.status==="active"&&!TESTS.some(t=>t.id===selected.stage_code)){
@@ -323,7 +323,7 @@ export async function mountOperatorConsultation(config){
  }catch(error){
   poseStatus="Marqueurs indisponibles : "+(error.message||"chargement échoué");
  }
- if(!patient){renderWaiting("Sélectionnez un dossier fictif pour commencer.");return}
+ if(!patient){renderWaiting("Sélectionne un dossier fictif pour cette consultation physique.");return}
  await refresh(true);
  poll=setInterval(()=>refresh(),2600);
 }
