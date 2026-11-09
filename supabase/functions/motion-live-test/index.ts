@@ -43,7 +43,7 @@ async function operator(req:Request){
 function publicRow(x:any){
  return {id:x.id,display_code:x.display_code,status:x.status,stage_code:x.stage_code,
   step_index:x.step_index,progress:x.progress||{},patient_id:x.patient_id,
-  operator_session_id:x.operator_session_id,patient_last_seen_at:x.patient_last_seen_at,
+  operator_session_id:x.operator_session_id,operator_user_id:x.operator_user_id,patient_last_seen_at:x.patient_last_seen_at,
   created_at:x.created_at,updated_at:x.updated_at};
 }
 async function guestLookup(req:Request,b:any){
@@ -187,7 +187,7 @@ Deno.serve(async(req:Request)=>{
  }
  if(action==="operator_list"){
   await db.from("pulse_motion_live_sessions").delete().lt("expires_at",new Date(Date.now()-24*3600000).toISOString());
-  const {data,error}=await db.from("pulse_motion_live_sessions").select("id,display_code,status,stage_code,step_index,progress,patient_id,operator_session_id,patient_last_seen_at,created_at,updated_at")
+  const {data,error}=await db.from("pulse_motion_live_sessions").select("id,display_code,status,stage_code,step_index,progress,patient_id,operator_session_id,operator_user_id,patient_last_seen_at,created_at,updated_at")
    .eq("organization_id",ORG_ID).gte("expires_at",now()).order("created_at",{ascending:false}).limit(60);
   return error?response(req,{error:"list_failed"},503):response(req,{ok:true,sessions:(data||[]).map(publicRow),steps:STEPS});
  }
