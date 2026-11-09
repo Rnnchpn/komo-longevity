@@ -618,3 +618,9 @@
 .op-live-caution{font-size:11px;line-height:1.6;color:#8d6947}
 .op-live-error{font-size:13px;color:#a6403d}
 @media(max-width:700px){.op-live-head{flex-wrap:wrap}.op-live-room{padding:16px}.op-live-toolbar{flex-wrap:wrap}.op-live-room h3{font-size:30px}.op-live-actions{display:grid}.op-live-actions label,.op-live-actions select{max-width:none;width:100%}}
+
+.p-live-cta{display:flex;align-items:center;justify-content:space-between;gap:22px;border:1px solid #cfbaa1;border-radius:18px;padding:22px 24px;background:linear-gradient(110deg,#f5eee1,#fcfaf6);margin:20px 0 25px}
+.p-live-cta h3{font:500 clamp(24px,2vw,33px)/1.1 "Cormorant Garamond",serif;margin:6px 0 8px;color:#262723}
+.p-live-cta p{max-width:540px;color:#635f57;font-size:12px;line-height:1.6;margin:0}
+.p-live-cta .p-primary{flex:none;cursor:pointer;white-space:nowrap}
+@media(max-width:700px){.p-live-cta{display:grid;padding:18px;gap:14px}.p-live-cta .p-primary{width:100%;justify-content:center}}
