@@ -7,7 +7,7 @@ const recoveryLinkDetected=/\btype=recovery\b/.test(location.href)&&/\b(?:access
 let recoveryActive=recoveryLinkDetected;
 
 const PATIENT_NAV=[['home','Mon espace']];
-const PRO_NAV=[['operator','Operator'],['patients','Patients'],['appointments','Rendez-vous']];
+const PRO_NAV=[['live','En direct'],['operator','Operator'],['patients','Patients'],['appointments','Rendez-vous']];
 const OP_STEPS=[
  ['preflight','00–05','Sécurité & standardisation','Operator'],
  ['readiness','05–10','Préparation du bilan','Pulse'],
@@ -246,7 +246,7 @@ async function loadIdentity(){
   S.ownPatients=own.filter(p=>p.patient_user_id===S.user.id);
   if(hasPro()){
     const mr=(await safe(sb.from('organization_members').select('*,organizations(*)').eq('user_id',S.user.id).eq('status','active'))).data||[];
-    S.membership=mr[0]||null;S.org=S.membership?.organizations||null;
+    S.membership=mr.find(item=>item.organizations?.name==='KŌMØ Cannes')||mr[0]||null;S.org=S.membership?.organizations||null;
   }else{S.membership=null;S.org=null;}
   const savedOwnId=localStorage.getItem('komo_v14_self_patient');
   S.ownPatient=S.ownPatients.find(p=>p.id===savedOwnId)
@@ -342,50 +342,22 @@ function progressStrip(){
   const p=patientProgress();
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
+async function openMotionLivePatient(){
+  try{const module=await import('./motion-live-guest-v1.js');await module.openMotionLive();}
+  catch(error){console.error('[Motion live patient]',error);toast('Session Motion momentanément indisponible.');}
+}
 function patientLobby(){
   const first=esc(S.profile?.first_name||S.profile?.display_name?.split(' ')[0]||S.user?.email?.split('@')[0]||'');
-  const email=esc(S.user?.email||'');
-  const base='https://komolongevity.com/bilan-en-ligne/';
+  const online='https://komolongevity.com/bilan-en-ligne/';
   $('#view').innerHTML=`<div class="pulse-patient-lobby">
-    <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Votre compte est actif. Choisissez votre bilan pour préparer la prochaine étape de votre parcours.</p></div>
+    <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Choisissez le bilan qui vous correspond. Votre espace personnel reste sécurisé.</p></div>
     <div class="pulse-lobby-options">
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan fonctionnel guidé à distance. Découvrez le protocole, puis accédez au paiement sécurisé.</p><a href="${base}" class="pulse-lobby-action">Découvrir le bilan en ligne <span>→</span></a></article>
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Une évaluation personnalisée de la marche, de l'équilibre, de la force et de la mobilité. Envoyez votre demande à l'opérateur.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyRequest">Faire une demande de bilan <span>→</span></button></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan guidé à distance. Découvrez le protocole et accédez au paiement sécurisé.</p><a href="${online}" class="pulse-lobby-action">Découvrir Motion Online <span>→</span></a></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyLiveStart">Commencer ma consultation Motion <span>→</span></button></article>
     </div>
-    <section class="pulse-lobby-request" id="pulseLobbyRequestPanel" hidden><div class="pulse-lobby-form-head"><span>DEMANDE DE CONSULTATION · 200 €</span><h2>Préparons votre rendez-vous.</h2><p>Vos informations sont transmises à l'administrateur. La consultation est confirmée seulement après examen de votre demande.</p></div>
-      <form id="pulseLobbyForm">
-      <div class="pulse-lobby-form-grid"><label>Prénom <input name="first_name" required minlength="2" maxlength="80" autocomplete="given-name" value="${esc(S.profile?.first_name||'')}"></label>
-      <label>Nom <input name="last_name" required minlength="2" maxlength="80" autocomplete="family-name" value="${esc(S.profile?.last_name||'')}"></label></div>
-      <label>Adresse e-mail <input type="email" name="email" value="${email}" readonly required></label>
-      <label>Téléphone (facultatif) <input type="tel" name="phone" autocomplete="tel" maxlength="35" value="${esc(S.profile?.phone||'')}"></label>
-      <div class="pulse-lobby-form-grid"><label>Date souhaitée <input type="date" name="preferred_date" required></label>
-      <label>Autre date possible <input type="date" name="alternative_date"></label></div>
-      <label>Plage horaire <select name="preferred_time"><option value="indifferent">Indifférent</option><option value="matin">Matin</option><option value="apres_midi">Après-midi</option><option value="fin_journee">Fin de journée</option></select></label>
-      <label class="pulse-lobby-consent"><input type="checkbox" name="privacy_acknowledged" required><span>J'accepte le traitement de mes coordonnées pour ma demande, conformément à la <a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>. Ne saisissez aucune donnée de santé dans ce formulaire.</span></label>
-      <input class="pulse-lobby-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <p id="pulseLobbyFeedback" role="status" aria-live="polite"></p>
-      <button class="pulse-lobby-submit" type="submit">Transmettre ma demande <span>→</span></button></form></section>
-    <p class="pulse-lobby-footnote">La création d'un compte ne vaut ni paiement ni réservation. Votre dossier de suivi sera associé par l'équipe lors de la préparation du bilan.</p>
+    <p class="pulse-lobby-footnote">La synchronisation test suit la progression du bilan ; les résultats restent protégés.</p>
   </div>`;
-  const panel=$('#pulseLobbyRequestPanel'),form=$('#pulseLobbyForm'),btn=$('#pulseLobbyRequest');
-  btn.onclick=()=>{panel.hidden=false;panel.scrollIntoView({behavior:'smooth',block:'start'});form.querySelector('input[name="first_name"]').focus()};
-  const day=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Paris'});
-  form.querySelectorAll('input[type="date"]').forEach(input=>input.min=day);
-  form.addEventListener('submit',async e=>{
-    e.preventDefault();if(!form.reportValidity())return;
-    const submit=form.querySelector('button[type="submit"]'),feedback=$('#pulseLobbyFeedback');
-    const data=Object.fromEntries(new FormData(form).entries());
-    const payload={action:'submit',first_name:data.first_name,last_name:data.last_name,email:S.user.email,phone:data.phone,preferred_date:data.preferred_date,alternative_date:data.alternative_date,preferred_time:data.preferred_time,website:data.website,privacy_acknowledged:data.privacy_acknowledged==='on'};
-    submit.disabled=true;feedback.textContent='Enregistrement…';
-    try{
-      const response=await fetch('https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-200-intake',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify(payload)});
-      const json=await response.json();
-      if(!response.ok||!json.ok)throw Error(json.error==='too_many_requests'?'Trop de demandes récentes. Réessayez plus tard.':'Votre demande n’a pas pu être enregistrée. Réessayez.');
-      panel.innerHTML='<div class="pulse-lobby-done"><span aria-hidden="true">✓</span><h2>Votre demande a été reçue.</h2><p>L’équipe KŌMØ va examiner votre demande. Vous serez informé par e-mail après sa validation. Votre rendez-vous n’est pas encore confirmé.</p></div>';
-      btn.disabled=true;btn.textContent='Demande envoyée';
-    }catch(err){feedback.textContent=err.message||'Erreur temporaire'}
-    finally{submit.disabled=false}
-  });
+  $('#pulseLobbyLiveStart')?.addEventListener('click',()=>openMotionLivePatient());
 }
 function patientHome(){
   const now=Date.now();
@@ -451,6 +423,7 @@ function patientHome(){
       </div>
       ${heroPhoto}
     </section>
+    <section class="p-live-cta"><div><span class="p-card-kicker">CONSULTATION MOTION · CANNES</span><h3>Prêt pour votre bilan ?</h3><p>Ouvrez votre salle de consultation test et transmettez votre code à l'opérateur.</p></div><button type="button" class="p-primary" id="pulseHomeLiveStart">Commencer Motion <span>→</span></button></section>
     <div class="p-section-label"><h3>Votre dossier</h3></div>
     <div class="p-two-cards">
       <section class="p-info-card"><div class="p-card-top"><span class="p-card-kicker">RÉSULTATS</span>
@@ -486,6 +459,7 @@ function patientHome(){
     </section>`:''}
     <div class="p-footer"><span>Compte personnel sécurisé · KŌMØ Pulse</span>
     <a href="mailto:contact@komolongevity.com">Besoin d’aide ? Contactez-nous</a></div>`;
+  $('#pulseHomeLiveStart')?.addEventListener('click',()=>openMotionLivePatient());
   document.querySelectorAll('[data-p-open]').forEach(b=>b.addEventListener('click',()=>{
     const target=$('#p-'+b.dataset.pOpen);if(!target)return;
     target.hidden=false;target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});
@@ -537,12 +511,55 @@ function patients(){
   };
   $('#view').innerHTML=`<section class="op-patients-app" aria-label="Annuaire des patients">
     <header class="op-patients-context"><span class="op-patients-kicker">CENTRE ACTUEL</span><div class="op-patients-context-row"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><span class="op-patients-count">${S.patients.length} dossier${S.patients.length>1?'s':''}</span></div></header>
-    <div class="op-patients-toolbar"><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
+    <div class="op-patients-toolbar"><button type="button" class="button primary" id="opPatientCreateToggle">+ Créer un dossier patient</button><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
+    <form id="opPatientCreateForm" class="op-create-patient-form" hidden>
+      <h3>Nouveau dossier patient</h3>
+      <p>Création directe par l'opérateur du centre. Aucun compte patient ou demande préalable nécessaire.</p>
+      <div class="op-create-patient-grid">
+        <label><span>Prénom</span><input name="first_name" autocomplete="off" maxlength="100" required></label>
+        <label><span>Nom</span><input name="last_name" autocomplete="off" maxlength="100" required></label>
+        <label><span>Date de naissance</span><input name="birth_date" type="date" required></label>
+        <label><span>Sexe de référence</span><select name="sex_at_birth"><option value="not_stated">Non renseigné</option><option value="female">Femme</option><option value="male">Homme</option><option value="intersex">Intersexe</option></select></label>
+      </div>
+      <p class="op-create-patient-alert">Environnement non validé pour de vraies données de santé : n'utilisez que des dossiers fictifs tant que les exigences d'hébergement et de sécurité ne sont pas satisfaites.</p>
+      <label class="op-create-patient-attestation"><input type="checkbox" name="synthetic_attested" required> Je confirme utiliser uniquement une identité fictive dans cet environnement non encore autorisé pour les données de santé réelles.</label>
+      <p id="opPatientCreateFeedback" class="op-create-patient-feedback" aria-live="polite"></p>
+      <button class="button primary" type="submit">Créer le dossier et ouvrir la consultation →</button>
+    </form>
     <section class="op-patients-section" aria-label="Dossiers patients"><div class="op-patients-section-head"><h3>Patients</h3><span>${active.length}</span></div>
     <div class="patient-list" id="opPatientRegular">${active.map(card).join('')||'<p class="op-patients-empty">Aucun dossier patient hors démonstration dans ce centre.</p>'}</div></section>
     ${demos.length?`<details class="op-demo-group" ${active.length===0?'open':''}><summary><span>Dossiers de démonstration</span><span class="op-demo-count">${demos.length}</span></summary><div class="patient-list" id="opPatientDemos">${demos.map(card).join('')}</div></details>`:''}
     <p id="opPatientNoResult" class="op-patients-no-results" hidden>Aucun dossier ne correspond à votre recherche.</p>
   </section>`;
+  const createToggle=$('#opPatientCreateToggle'),createForm=$('#opPatientCreateForm');
+  if(createToggle&&createForm){
+    createToggle.addEventListener('click',()=>{
+      createForm.hidden=!createForm.hidden;
+      createToggle.setAttribute('aria-expanded',String(!createForm.hidden));
+      if(!createForm.hidden)createForm.querySelector('[name="first_name"]')?.focus();
+    });
+    createForm.querySelector('[name="birth_date"]').max=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Paris'});
+    createForm.addEventListener('submit',async event=>{
+      event.preventDefault();
+      if(!S.org?.id)return toast('Aucun centre actif pour ce compte.');
+      if(!createForm.reportValidity())return;
+      const fd=new FormData(createForm);
+      const body={action:'create',organization_id:S.org.id,first_name:String(fd.get('first_name')||'').trim(),last_name:String(fd.get('last_name')||'').trim(),birth_date:String(fd.get('birth_date')||''),sex_at_birth:String(fd.get('sex_at_birth')||'not_stated'),create_account:false};
+      const feedback=$('#opPatientCreateFeedback'),submit=createForm.querySelector('[type="submit"]');
+      if(!body.first_name||!body.last_name||!body.birth_date)return;
+      submit.disabled=true;if(feedback)feedback.textContent='Création du dossier…';
+      try{
+        const {data,error}=await sb.functions.invoke('professional-patient',{body});
+        if(error||data?.error||!data?.patient?.id)throw Error(data?.detail||data?.error||error?.message||'Création impossible');
+        localStorage.setItem('komo_v14_patient',data.patient.id);
+        await loadPro();
+        location.hash='operator';render();
+        toast('Dossier créé. La session Motion peut être démarrée.');
+      }catch(error){
+        if(feedback)feedback.textContent=error?.message||'Impossible de créer le dossier.';
+      }finally{submit.disabled=false}
+    });
+  }
   document.querySelectorAll('.op-patients-app [data-patient]').forEach(b=>b.onclick=async()=>{
     localStorage.setItem('komo_v14_patient',b.dataset.patient);
     await loadPro();
@@ -566,11 +583,120 @@ function patients(){
     if(noResult)noResult.hidden=!(query&&count===0);
   });
 }
+// Test-only live pairing monitor. Backend verifies the operator JWT and org membership.
+const MOTION_LIVE_ENDPOINT='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test';
+let motionLiveTimer=null,motionLiveFetching=false,motionLiveSignature='';
+let operatorLiveTimer=null;
+async function motionLiveAPI(body){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.access_token)throw Error('Session Operator expirée. Connectez-vous à nouveau.');
+  const res=await fetch(MOTION_LIVE_ENDPOINT,{method:'POST',cache:'no-store',headers:{
+    'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token
+  },body:JSON.stringify(body)});
+  let data={};try{data=await res.json()}catch{throw Error('Réponse serveur illisible.')}
+  if(!res.ok||data.error)throw Error(data.error||'Serveur indisponible.');
+  return data;
+}
+function motionLiveMonitor(){
+  heading('En direct','KŌMØ OPERATOR · TEST');
+  $('#view').innerHTML=`<div class="op-live-dashboard">
+    <header class="op-live-head"><div><span class="overline">SESSION PATIENT SYNCHRONISÉE</span><h2>Consultations en direct</h2><p>Le patient commence sur son téléphone, communique son code à six chiffres, puis vous l'associez à un dossier fictif. Les étapes se synchronisent environ toutes les 2 à 3 secondes.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
+    <div class="op-live-toolbar"><span id="opLiveCount">Connexion aux sessions…</span><button type="button" class="button secondary" id="opLiveNewPatient">+ Créer un dossier fictif</button></div>
+    <div id="opLiveRooms" aria-live="polite"><p>Recherche des sessions…</p></div>
+    <p class="op-live-caution">Test exclusivement avec identités fictives. La vidéo et les mesures instrumentales ne sont pas transmises par cette synchronisation. L'opérateur conserve la responsabilité de la validation des tests.</p>
+  </div>`;
+  $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
+  $('#opLiveNewPatient').onclick=()=>{clearInterval(motionLiveTimer);motionLiveTimer=null;location.hash='patients'};
+  clearInterval(motionLiveTimer);motionLiveSignature='';
+  loadMotionLiveRooms(true);
+  motionLiveTimer=setInterval(()=>loadMotionLiveRooms(false),2400);
+}
+async function loadMotionLiveRooms(force=false){
+ if(motionLiveFetching||location.hash!=='#live')return;
+ const host=$('#opLiveRooms');if(!host)return;
+ motionLiveFetching=true;
+ try{
+  const data=await motionLiveAPI({action:'operator_list'});
+  const rooms=data.sessions||[];
+  const signature=JSON.stringify(rooms.map(x=>[x.id,x.status,x.stage_code,x.step_index,x.progress?.step_status,x.patient_id,x.updated_at,x.patient_last_seen_at]));
+  const count=$('#opLiveCount');
+  if(count)count.textContent=rooms.filter(x=>['waiting','ready','active'].includes(x.status)).length+' session(s) en cours · actualisation automatique';
+  if(force||signature!==motionLiveSignature){
+   motionLiveSignature=signature;
+   const selected=new Map([...host.querySelectorAll('[data-live-select]')].map(x=>[x.dataset.liveSelect,x.value]));
+   const statusLabels={waiting:'En attente',ready:'Patient prêt',active:'En cours',completed:'Terminé',closed:'Fermé'};
+   const choices=S.patients.filter(p=>p.data_classification==='synthetic'&&p.status==='active');
+   host.innerHTML=rooms.length?rooms.map(room=>{
+    const patient=S.patients.find(p=>p.id===room.patient_id);
+    const online=room.patient_last_seen_at&&Date.now()-new Date(room.patient_last_seen_at).getTime()<18000;
+    const stage=OP_STEPS.find(x=>x[0]===room.stage_code)?.[2]||(room.stage_code==='finished'?'Parcours terminé':'En préparation');
+    const pct=Math.round(Math.min(8,Number(room.step_index)||0)/8*100);
+    const patientName=patient?[patient.first_name,patient.last_name].filter(Boolean).join(' '):'Aucun dossier associé';
+    return `<article class="op-live-room" data-room="${esc(room.id)}">
+      <header><div><span class="overline">CODE PATIENT</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'Téléphone connecté':'Téléphone hors ligne'}</span></header>
+      <p>${esc(patientName)} · ${esc(stage)}</p>
+      <div class="op-live-track"><i style="width:${pct}%"></i></div><small>${pct}% des étapes parcourues · ${room.progress?.step_status==='running'?'Test en cours':'Attente du prochain test'}</small>
+      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et démarrer D0</button>`:`${room.patient_id?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir D0</button>':''}`}
+      <button type="button" class="button secondary" data-live-close="${esc(room.id)}">Clore la salle</button></div>
+    </article>`;
+   }).join(''):'<div class="op-live-empty">Aucune consultation active. Sur le téléphone du patient : Motion au centre → Commencer ma consultation.</div>';
+   for(const select of host.querySelectorAll('[data-live-select]'))if(selected.has(select.dataset.liveSelect))select.value=selected.get(select.dataset.liveSelect);
+   host.querySelectorAll('[data-live-attach]').forEach(b=>b.onclick=()=>attachMotionLive(b.dataset.liveAttach,b));
+   host.querySelectorAll('[data-live-operator]').forEach(b=>b.onclick=async()=>{
+     localStorage.setItem('komo_v14_patient',b.dataset.liveOperator);
+     await loadPro();location.hash='operator';render();
+   });
+   host.querySelectorAll('[data-live-close]').forEach(b=>b.onclick=async()=>{
+     if(!confirm('Fermer cette salle de test ?'))return;
+     b.disabled=true;
+     try{await motionLiveAPI({action:'operator_close',session_id:b.dataset.liveClose});await loadMotionLiveRooms(true)}
+     catch(e){toast(e.message||'Fermeture impossible.');b.disabled=false}
+   });
+  }
+ }catch(error){if(host)host.innerHTML='<p class="op-live-error">'+esc(error.message||'Erreur de synchronisation')+'</p>'}
+ finally{motionLiveFetching=false}
+}
+async function attachMotionLive(id,button){
+ const select=$('#opLiveRooms [data-live-select="'+id+'"]');
+ const patientId=select?.value||'';
+ if(!patientId)return toast('Sélectionnez un dossier fictif.');
+ const patient=S.patients.find(p=>p.id===patientId);
+ if(!patient||patient.data_classification!=='synthetic')return toast('Dossier fictif requis.');
+ button.disabled=true;button.textContent='Association…';
+ try{
+  const result=await sb.rpc('start_pulse_operator_session_v1',{p_patient_id:patientId,p_assessment_id:null});
+  if(result.error||!result.data?.session_id)throw Error(result.error?.message||'Impossible de démarrer D0.');
+  await motionLiveAPI({action:'operator_attach',session_id:id,patient_id:patientId,operator_session_id:result.data.session_id});
+  localStorage.setItem('komo_v14_patient',patientId);
+  toast('Session liée : le patient peut commencer ses tests.');
+  await loadPro();motionLiveSignature='';await loadMotionLiveRooms(true);
+ }catch(error){toast(error.message||'Association impossible.');button.disabled=false;button.textContent='Associer et démarrer D0'}
+}
+
+async function refreshOperatorLiveStatus(){
+ const host=$('#operatorLiveStatus');
+ if(!host||!S.patient)return;
+ try{
+  const data=await motionLiveAPI({action:'operator_list'});
+  if(!host.isConnected)return;
+  const room=(data.sessions||[]).find(x=>x.patient_id===S.patient.id&&['waiting','ready','active','completed'].includes(x.status));
+  if(!room){host.innerHTML='<span class="overline">TÉLÉPHONE PATIENT</span><p>Aucune salle liée à ce dossier.</p><button type="button" class="button secondary" data-open-live>Voir les sessions</button>';}
+  else{
+   const stage=OP_STEPS.find(x=>x[0]===room.stage_code)?.[2]||'Parcours terminé';
+   const pct=Math.round(Math.min(8,Number(room.step_index)||0)/8*100);
+   const online=room.patient_last_seen_at&&Date.now()-new Date(room.patient_last_seen_at).getTime()<18000;
+   host.innerHTML='<span class="overline">PATIENT EN DIRECT · '+esc(room.display_code)+'</span><h4>'+esc(stage)+'</h4><p>'+esc(room.status==='active'?'Séance en cours':room.status==='completed'?'Étapes terminées':'Prêt à commencer')+' · '+(online?'Téléphone connecté':'Téléphone hors ligne')+'</p><div class="op-live-track"><i style="width:'+pct+'%"></i></div><button type="button" class="button secondary" data-open-live>Ouvrir le suivi détaillé</button>';
+  }
+  host.querySelector('[data-open-live]')?.addEventListener('click',()=>{location.hash='live';render()});
+ }catch(error){if(host.isConnected)host.textContent='Synchronisation indisponible : '+(error.message||'erreur réseau');}
+}
 function operator(){
   heading('Session D0','KŌMØ OPERATOR TEAM');
   const by=new Map(S.opSteps.map(x=>[x.step_code,x]));
-  $('#view').innerHTML=`<section class="operator-head"><div><span class="overline light">PATIENT</span><h2>${esc(patientName()||'Patient')}</h2><p>Session guidée · environ 55 minutes · acquisition standardisée.</p></div><div class="operator-head-actions"><button class="button light" id="startOp">${S.opSession?'Reprendre D0':'Démarrer D0'}</button><button class="button outline-light" onclick="location.hash='patients'">Changer</button></div></section><section class="operator-grid"><div>${OP_STEPS.map(([code,time,title,device])=>{const st=by.get(code),status=st?.status||'pending';return`<article class="op-step ${status}"><div class="op-time">${time}</div><div><span>${device}</span><h3>${title}</h3></div><div class="op-actions"><b>${statusLabel(status)}</b>${S.opSession&&['pending','ready'].includes(status)?`<button data-step="${code}" data-action="start">Démarrer</button>`:''}${S.opSession&&status==='running'?`<button data-step="${code}" data-action="complete">Valider</button><button data-step="${code}" data-action="flag">À revoir</button>`:''}${S.opSession&&['complete','review'].includes(status)?`<button data-step="${code}" data-action="reset">Réouvrir</button>`:''}</div></article>`}).join('')}<button class="button primary wide" id="finalizeOp" ${!S.opSession?'disabled':''}>Finaliser D0</button></div><aside class="operator-aside"><span class="overline">ÉTAT DU DOSSIER</span><div class="simple-row"><span>Questionnaires</span><strong>${qdone()}</strong></div><div class="simple-row"><span>Biologie</span><strong>${bioReady()?'Prête':'En attente'}</strong></div><div class="simple-row"><span>Mesures</span><strong>${motionReady()?'Reçues':'En cours'}</strong></div><div class="simple-row"><span>Revue</span><strong>${visibleGates().length}</strong></div></aside></section>`;
+  $('#view').innerHTML=`<section class="operator-head"><div><span class="overline light">PATIENT</span><h2>${esc(patientName()||'Patient')}</h2><p>Session guidée · environ 55 minutes · acquisition standardisée.</p></div><div class="operator-head-actions"><button class="button light" id="startOp">${S.opSession?'Reprendre D0':'Démarrer D0'}</button><button class="button outline-light" onclick="location.hash='patients'">Changer</button></div></section><section class="operator-grid"><div>${OP_STEPS.map(([code,time,title,device])=>{const st=by.get(code),status=st?.status||'pending';return`<article class="op-step ${status}"><div class="op-time">${time}</div><div><span>${device}</span><h3>${title}</h3></div><div class="op-actions"><b>${statusLabel(status)}</b>${S.opSession&&['pending','ready'].includes(status)?`<button data-step="${code}" data-action="start">Démarrer</button>`:''}${S.opSession&&status==='running'?`<button data-step="${code}" data-action="complete">Valider</button><button data-step="${code}" data-action="flag">À revoir</button>`:''}${S.opSession&&['complete','review'].includes(status)?`<button data-step="${code}" data-action="reset">Réouvrir</button>`:''}</div></article>`}).join('')}<button class="button primary wide" id="finalizeOp" ${!S.opSession?'disabled':''}>Finaliser D0</button></div><aside class="operator-aside"><span class="overline">ÉTAT DU DOSSIER</span><div class="simple-row"><span>Questionnaires</span><strong>${qdone()}</strong></div><div class="simple-row"><span>Biologie</span><strong>${bioReady()?'Prête':'En attente'}</strong></div><div class="simple-row"><span>Mesures</span><strong>${motionReady()?'Reçues':'En cours'}</strong></div><div class="simple-row"><span>Revue</span><strong>${visibleGates().length}</strong></div><section class="op-live-mini" id="operatorLiveStatus">Recherche du téléphone…</section></aside></section>`;
   $('#startOp')?.addEventListener('click',startOperator);$('#finalizeOp')?.addEventListener('click',finalizeOperator);document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>operatorStep(b.dataset.step,b.dataset.action));
+  clearInterval(operatorLiveTimer);refreshOperatorLiveStatus();
+  operatorLiveTimer=setInterval(()=>refreshOperatorLiveStatus(),2600);
 }
 async function startOperator(){const r=await sb.rpc('start_pulse_operator_session_v1',{p_patient_id:S.patient.id,p_assessment_id:S.assessment?.id||null});if(r.error)return toast(r.error.message);await loadPro();operator();toast('Session D0 démarrée.')}
 async function operatorStep(code,action){const payload={qc_status:action==='complete'?'pass':action==='flag'?'review':'pending'};const r=await sb.rpc('pulse_operator_step_v1',{p_session_id:S.opSession.id,p_step_code:code,p_action:action,p_payload:payload});if(r.error)return toast(r.error.message);await loadPro();operator()}
@@ -585,7 +711,9 @@ function render(){
   }
   const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
   shell();
-  if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
+  if(S.route!=='live'&&motionLiveTimer){clearInterval(motionLiveTimer);motionLiveTimer=null;}
+  if(S.route!=='operator'&&operatorLiveTimer){clearInterval(operatorLiveTimer);operatorLiveTimer=null;}
+  if(S.mode==='pro'){if(S.route==='live')motionLiveMonitor();else if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
   else{if(S.route==='home'){if(!S.ownPatient&&!S.onlineSessions.length)patientLobby();else patientHome()}else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}

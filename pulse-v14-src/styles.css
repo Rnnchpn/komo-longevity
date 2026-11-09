@@ -575,3 +575,57 @@
 .ps-one-help a{font-weight:650;color:#45403c;text-decoration:underline;text-underline-offset:3px}
 .app-shell-patient .page{max-width:none}
 @media(prefers-reduced-motion:reduce){.ps-one-chevron{transition:none}}
+
+/* Operator: patient record is created directly by the authenticated center operator. */
+.op-patients-toolbar{flex-wrap:wrap;gap:12px}
+.op-patients-toolbar #opPatientCreateToggle{white-space:nowrap;min-height:44px}
+.op-create-patient-form[hidden]{display:none!important}
+.op-create-patient-form{display:grid;gap:16px;margin:0 0 24px;padding:24px;border:1px solid rgba(147,133,103,.25);border-radius:18px;background:#faf8f3;color:#272724}
+.op-create-patient-form h3{margin:0;font-size:25px;font-weight:500}
+.op-create-patient-form p{margin:0;font-size:13px;line-height:1.5}
+.op-create-patient-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.op-create-patient-grid label{display:grid;gap:7px;font-size:12px;font-weight:600}
+.op-create-patient-grid input,.op-create-patient-grid select{width:100%;min-width:0;box-sizing:border-box;padding:13px;border-radius:10px;border:1px solid #ccc7bb;background:#fff;color:#262624;font:inherit}
+.op-create-patient-form .op-create-patient-alert{border-left:3px solid #ad8155;padding:8px 12px;color:#725530;background:#f5ede2}
+.op-create-patient-feedback{color:#a13a33}
+.op-create-patient-form>.button{justify-self:start}
+@media(max-width:620px){.op-create-patient-grid{grid-template-columns:1fr}.op-create-patient-form{padding:18px}.op-patients-toolbar #opPatientCreateToggle{width:100%}}
+
+.op-create-patient-attestation{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5}.op-create-patient-attestation input{width:17px;height:17px;flex:none;margin:2px 0 0}
+
+/* Operator Motion Live workspace — test-only synchronized sessions */
+.op-live-dashboard{display:grid;gap:20px;max-width:1080px}
+.op-live-head{display:flex;justify-content:space-between;gap:18px;align-items:start}
+.op-live-head h2{font:500 clamp(32px,3.3vw,48px)/1.05 "Cormorant Garamond",serif;margin:8px 0}
+.op-live-head p{max-width:690px;font-size:13px;line-height:1.6;color:#627068}
+.op-live-head>.button{flex:none}
+.op-live-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.op-live-toolbar span{font-size:12px;color:#59665e}
+#opLiveRooms{display:grid;gap:15px}
+.op-live-room{display:grid;gap:14px;padding:24px;background:#f9f6f1;border:1px solid #ded7ca;border-radius:20px}
+.op-live-room>header{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.op-live-room h3{font:600 38px Inter,system-ui,sans-serif;letter-spacing:.13em;margin:4px 0 0;font-variant-numeric:tabular-nums}
+.op-live-room>p{margin:0;font-size:13px}
+.op-live-room>small{font-size:11px;color:#6a746c}
+.op-live-tag{display:inline-flex;padding:7px 12px;border:1px solid #bbc8bc;border-radius:999px;font-size:11px;color:#31483e;background:#edf1e9}
+.op-live-track{height:7px;background:#e4e0d7;border-radius:999px;overflow:hidden}
+.op-live-track i{display:block;height:100%;background:#9a8768;transition:width .3s}
+.op-live-actions{display:flex;align-items:end;flex-wrap:wrap;gap:10px}
+.op-live-actions label{display:grid;gap:6px;min-width:200px;font-size:11px}
+.op-live-actions select{padding:11px;border:1px solid #bfbdb4;border-radius:10px;background:white;font:inherit;color:#252b28;max-width:300px}
+.op-live-actions .button{min-height:42px}
+.op-live-empty{border:1px dashed #bab8ae;border-radius:18px;padding:36px 22px;font-size:13px;color:#56645d;background:#faf9f5}
+.op-live-caution{font-size:11px;line-height:1.6;color:#8d6947}
+.op-live-error{font-size:13px;color:#a6403d}
+@media(max-width:700px){.op-live-head{flex-wrap:wrap}.op-live-room{padding:16px}.op-live-toolbar{flex-wrap:wrap}.op-live-room h3{font-size:30px}.op-live-actions{display:grid}.op-live-actions label,.op-live-actions select{max-width:none;width:100%}}
+
+.p-live-cta{display:flex;align-items:center;justify-content:space-between;gap:22px;border:1px solid #cfbaa1;border-radius:18px;padding:22px 24px;background:linear-gradient(110deg,#f5eee1,#fcfaf6);margin:20px 0 25px}
+.p-live-cta h3{font:500 clamp(24px,2vw,33px)/1.1 "Cormorant Garamond",serif;margin:6px 0 8px;color:#262723}
+.p-live-cta p{max-width:540px;color:#635f57;font-size:12px;line-height:1.6;margin:0}
+.p-live-cta .p-primary{flex:none;cursor:pointer;white-space:nowrap}
+@media(max-width:700px){.p-live-cta{display:grid;padding:18px;gap:14px}.p-live-cta .p-primary{width:100%;justify-content:center}}
+
+.op-live-mini{display:grid;gap:9px;padding:14px 0;margin-top:18px;border-top:1px solid #d5d3cc}
+.op-live-mini h4{font:600 16px/1.3 Inter,system-ui,sans-serif;margin:0}
+.op-live-mini p{font-size:11px;line-height:1.5;color:#5d6b62;margin:0}
+.op-live-mini .button{justify-self:start;font-size:11px}
