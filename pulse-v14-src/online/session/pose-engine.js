@@ -22,7 +22,7 @@ async function model(){
  })();
  try{return await modelPromise}catch(error){modelPromise=null;throw error;}
 }
-function overlay(canvas,points){
+function overlay(canvas,points,mirror=true){
  const c=canvas.getContext('2d',{alpha:true});
  if(!c)return;
  const w=canvas.width,h=canvas.height;
@@ -31,17 +31,17 @@ function overlay(canvas,points){
  c.lineWidth=Math.max(2,w/285);c.strokeStyle='rgba(221,207,164,.94)';c.shadowColor='rgba(18,46,30,.75)';c.shadowBlur=8;
  for(const [a,b] of EDGES){
    if(!show(points[a])||!show(points[b]))continue;
-   c.beginPath();c.moveTo((1-points[a].x)*w,points[a].y*h);c.lineTo((1-points[b].x)*w,points[b].y*h);c.stroke();
+   c.beginPath();c.moveTo((mirror?1-points[a].x:points[a].x)*w,points[a].y*h);c.lineTo((mirror?1-points[b].x:points[b].x)*w,points[b].y*h);c.stroke();
  }
  c.shadowBlur=0;
  for(let i=0;i<points.length;i++){
    if(!show(points[i]))continue;
-   const x=(1-points[i].x)*w,y=points[i].y*h;
+   const x=(mirror?1-points[i].x:points[i].x)*w,y=points[i].y*h;
    c.beginPath();c.arc(x,y,Math.max(2.4,w/180),0,Math.PI*2);
    c.fillStyle='#c9f1c4';c.fill();c.strokeStyle='#193b2c';c.lineWidth=1.25;c.stroke();
  }
 }
-export async function createPoseEngine(video,canvas,onFrame,onFailure){
+export async function createPoseEngine(video,canvas,onFrame,onFailure,options={}){
  const landmarker=await model();
  let running=true,raf=0,lastTimestamp=-1,lastSample=0,errors=0;
  const tick=()=>{
@@ -57,7 +57,7 @@ export async function createPoseEngine(video,canvas,onFrame,onFailure){
    try{
      const result=landmarker.detectForVideo(video,now);
      const points=result.landmarks?.[0]||null;
-     overlay(canvas,points);
+     overlay(canvas,points,options.mirror!==false);
      onFrame(points,now);
      errors=0;
    }catch(e){

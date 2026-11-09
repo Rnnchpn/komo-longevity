@@ -12,6 +12,10 @@ const operatorVideo=await readFile(join(root,'site/pulse-v14/motion-live-operato
 const operatorVideoCss=await readFile(join(root,'site/pulse-v14/motion-live-operator-video-v1.css'),'utf8');
 const consult=await readFile(join(root,'site/pulse-v14/motion-live-operator-consult-v1.js'),'utf8');
 const consultCss=await readFile(join(root,'site/pulse-v14/motion-live-operator-consult-v1.css'),'utf8');
+const remotePose=await readFile(join(root,'site/pulse-v14/motion-live-remote-pose-v1.js'),'utf8');
+const poseEngine=await readFile(join(root,'site/pulse-v14/online/session/pose-engine.js'),'utf8');
+const manifest=JSON.parse(await readFile(join(root,'site/pulse-v14/manifest.webmanifest'),'utf8'));
+const webappIndex=await readFile(join(root,'site/pulse-v14/index.html'),'utf8');
 const onlineSession=await readFile(join(root,'site/pulse-v14/online/session/app.js'),'utf8');
 const mobileCss=await readFile(join(root,'site/pulse-v14/pulse-mobile-first-v3.css'),'utf8');
 const liveEdge=await readFile(join(root,'supabase/functions/motion-live-test/index.ts'),'utf8');
@@ -50,7 +54,17 @@ const checks=[
   ['Operator consultation embeds paired phone camera',app.includes('id="motionConsultRoot"')&&app.includes('openOperatorCamera')&&consult.includes('id="motionConsultCamera"')],
   ['live server verifies operator role and center',liveEdge.includes('db.auth.getUser(jwt)')&&liveEdge.includes('organization_members')&&liveEdge.includes('synthetic_patient_required')],
   ['live session token hashed, RLS protected by migration',liveEdge.includes('crypto.subtle.digest("SHA-256"')&&liveEdge.includes('guest_token_hash')],
-  ['live UI readable on mobile',liveCss.includes('max-width:760px')&&liveCss.includes('.mlive-camera.rear video')&&css.includes('.op-live-room')]
+  ['live UI readable on mobile',liveCss.includes('max-width:760px')&&liveCss.includes('.mlive-camera.rear video')&&css.includes('.op-live-room')],
+  ['remote tracking module parses',parse('site/pulse-v14/motion-live-remote-pose-v1.js')],
+  ['pose markers reuse existing MediaPipe in Operator only',remotePose.includes("import {createPoseEngine} from './online/session/pose-engine.js'")&&remotePose.includes('mirror:false')&&poseEngine.includes('detectForVideo')&&poseEngine.includes('options.mirror!==false')],
+  ['all six Motion Online tests connected to original frame trackers',remotePose.includes('createMovementTracker')&&remotePose.includes('createOneLegObserver')&&remotePose.includes('createSideProfileStability')&&['sts','heels','arms','unipodal_left','unipodal_right','posture'].every(id=>remotePose.includes('"'+id+'"'))],
+  ['WebRTC source not computer local camera',operatorVideo.includes('pulse:remote-video-ready')&&operatorVideo.includes('pulse:remote-video-stopped')&&remotePose.includes('attach(nextVideo)')&&!remotePose.includes('getUserMedia')&&!remotePose.includes('MediaRecorder')],
+  ['live skeleton canvas matches unmirrored stream',remotePose.includes('moc-pose-overlay')&&consultCss.includes('canvas.moc-pose-overlay')&&consultCss.includes('object-fit:contain')],
+  ['measured estimate auto-fills with editable override',consult.includes('payload.measurement_source')&&consult.includes('manualEdited')&&consult.includes('reading?.measurement')&&consult.includes('mocValue')],
+  ['server stores only operator-confirmed estimates',liveEdge.includes('operator_confirmed_video_estimate')&&liveEdge.includes('invalid_measurement_source')&&liveEdge.includes('room.operator_user_id!==actor.id')],
+  ['desktop consultation uses viewport app shell',consultCss.includes('height:100dvh')&&consultCss.includes('overflow:hidden')&&consultCss.includes('moc-camera-host')],
+  ['installable webapp manifest',manifest.display==='standalone'&&manifest.start_url.includes('#operator')&&webappIndex.includes('rel="manifest"')&&manifest.icons.some(x=>x.src.includes('icon-motion.svg'))]
+
 ];
 const failed=checks.filter(([,ok])=>!ok);
 for(const [name,ok] of checks)console.log(`[motion-direct] ${ok?'PASS':'FAIL'} ${name}`);

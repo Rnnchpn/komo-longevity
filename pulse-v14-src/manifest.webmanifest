@@ -1,0 +1,21 @@
+{
+  "name": "KŌMØ Pulse — Consultation Motion",
+  "short_name": "KŌMØ Pulse",
+  "description": "Consultation Motion supervisée : téléphone connecté, marqueurs corporels et tests locomoteurs.",
+  "id": "/pulse-motion",
+  "start_url": "/?app=motion#operator",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#122629",
+  "theme_color": "#122629",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "./icon-motion.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
