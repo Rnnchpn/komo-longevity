@@ -365,7 +365,7 @@ function progressStrip(){
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
 async function openMotionLivePatient(){
-  try{const module=await import('./motion-live-guest-v1.js');await module.openMotionLive();}
+  try{const module=await import('./motion-live-guest-v1.js?v=20261109-tripod-v1');await module.openMotionLive();}
   catch(error){console.error('[Motion live patient]',error);toast('Session Motion momentanément indisponible.');}
 }
 function patientLobby(){
