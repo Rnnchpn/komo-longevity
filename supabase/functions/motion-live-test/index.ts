@@ -150,7 +150,7 @@ Deno.serve(async(req:Request)=>{
    if(!x.patient_last_seen_at||Date.now()-new Date(x.patient_last_seen_at).getTime()>12000){
     await db.from("pulse_motion_live_sessions").update({patient_last_seen_at:now()}).eq("id",x.id);
    }
-   return response(req,{ok:true,session:{display_code:x.display_code,status:x.status,
+   return response(req,{ok:true,session:{id:x.id,display_code:x.display_code,status:x.status,
     stage_code:x.stage_code,step_index:x.step_index,progress:x.progress||{},
     operator_connected:!!x.operator_user_id,expires_at:x.expires_at},steps:STEPS});
   }
@@ -168,6 +168,37 @@ Deno.serve(async(req:Request)=>{
 
  const actor=await operator(req);
  if(!actor)return response(req,{error:"operator_access_required"},403);
+ // Physical consultation: the clinician's OWN iPhone acts as a dedicated camera.
+ // A valid Operator JWT is required even to create the room. Only fictional patients
+ // can subsequently be linked in this test-only environment.
+ if(action==="operator_camera_start"){
+  const {count,error:countError}=await db.from("pulse_motion_live_sessions").select("id",{head:true,count:"exact"})
+   .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id).in("status",["ready","active"])
+   .gte("expires_at",now());
+  if(countError)return response(req,{error:"temporarily_unavailable"},503);
+  if((count||0)>=6)return response(req,{error:"too_many_active_cameras"},429);
+  const guestToken=randomToken();
+  const displayCode=String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0");
+  const {data,error}=await db.from("pulse_motion_live_sessions").insert({
+   organization_id:ORG_ID,guest_token_hash:await hash(guestToken),display_code:displayCode,
+   operator_user_id:actor.id,status:"ready",stage_code:STEPS[0],step_index:0,
+   progress:{step_status:"pending",results:{},camera_owner:"operator"},
+   patient_last_seen_at:now()
+  }).select("id,display_code,status,expires_at,stage_code,step_index,progress").single();
+  if(error)return response(req,{error:"camera_creation_failed"},503);
+  return response(req,{ok:true,...data,guest_token:guestToken,steps:STEPS});
+ }
+ if(action==="operator_camera_stop"){
+  const id=s(b.session_id,50);
+  if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const {data,error}=await db.from("pulse_motion_live_sessions").update({
+   status:"closed",completed_at:now(),updated_at:now()
+  }).eq("id",id).eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+   .in("status",["ready","active"]).select("id").maybeSingle();
+  if(error||!data)return response(req,{error:"camera_close_failed"},409);
+  await db.from("pulse_motion_live_signals").delete().eq("session_id",id);
+  return response(req,{ok:true});
+ }
  if(action==="operator_signal_pull"||action==="operator_signal_push"){
   const id=s(b.session_id,50);
   if(!uuid(id))return response(req,{error:"invalid_session"},422);
@@ -262,12 +293,14 @@ Deno.serve(async(req:Request)=>{
   const [{data:patient},{data:op},{data:room}]=await Promise.all([
    db.from("patients").select("id,organization_id,status,data_classification").eq("id",patientId).maybeSingle(),
    db.from("pulse_operator_sessions").select("id,patient_id,operator_user_id,organization_id,status").eq("id",opId).maybeSingle(),
-   db.from("pulse_motion_live_sessions").select("id,status,patient_id,expires_at").eq("id",id).eq("organization_id",ORG_ID).maybeSingle()
+   db.from("pulse_motion_live_sessions").select("id,status,patient_id,expires_at,operator_user_id").eq("id",id).eq("organization_id",ORG_ID).maybeSingle()
   ]);
   if(!patient||patient.organization_id!==ORG_ID||patient.status!=="active"||patient.data_classification!=="synthetic")return response(req,{error:"synthetic_patient_required"},403);
   if(!op||op.patient_id!==patientId||op.organization_id!==ORG_ID||(!["running","draft","paused"].includes(op.status)))return response(req,{error:"operator_session_mismatch"},409);
   if(actor.role!=="admin"&&op.operator_user_id!==actor.id)return response(req,{error:"operator_owner_required"},403);
   if(!room||room.patient_id||!["waiting","ready"].includes(room.status)||new Date(room.expires_at).getTime()<Date.now())return response(req,{error:"room_unavailable"},409);
+  // A camera created from an Operator's iPhone may be paired ONLY by that same owner.
+  if(room.operator_user_id&&room.operator_user_id!==actor.id)return response(req,{error:"camera_owner_required"},403);
   const {data,error}=await db.from("pulse_motion_live_sessions").update({
    patient_id:patientId,operator_session_id:opId,operator_user_id:actor.id,status:"active",
    operator_last_seen_at:now(),updated_at:now()
@@ -277,7 +310,7 @@ Deno.serve(async(req:Request)=>{
  if(action==="operator_close"){
   const id=s(b.session_id,50);if(!uuid(id))return response(req,{error:"invalid_session"},422);
   const {data,error}=await db.from("pulse_motion_live_sessions").update({status:"closed",completed_at:now(),updated_at:now()})
-   .eq("id",id).eq("organization_id",ORG_ID).select("id").maybeSingle();
+   .eq("id",id).eq("organization_id",ORG_ID).eq("operator_user_id",actor.id).select("id").maybeSingle();
   if(error||!data)return response(req,{error:"close_failed"},409);
   await db.from("pulse_motion_live_signals").delete().eq("session_id",id);
   return response(req,{ok:true});

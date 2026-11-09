@@ -306,7 +306,7 @@ function shell(){
         <button type="button" id="p-logout">Se déconnecter</button></div></details></div>
       </div></header>
       <main class="p-main"><div id="view"></div></main>
-      <button type="button" class="pulse-mobile-start-motion" id="pulse-mobile-start-motion">Démarrer bilan Motion <span aria-hidden="true">→</span></button>
+      <button type="button" class="pulse-mobile-start-motion" id="pulse-mobile-start-motion">Bilan Motion au centre <span aria-hidden="true">→</span></button>
     </div>`;
     const team=$('#p-team-link');
     if(team)team.onclick=async()=>{
@@ -333,7 +333,7 @@ function shell(){
   const nav=navItems().map(([id,label],i)=>`<button type="button" data-route="${id}" class="nav-item ${S.route===id?'active':''}" aria-label="${esc(label)}" ${S.route===id?'aria-current="page"':''}><span class="nav-dot" aria-hidden="true">${S.mode==='pro'?(icons[id]||''):i+1}</span><span>${esc(label)}</span></button>`).join('');
   const demoLink=isOnlineTester()?'<a class="pulse-online-tester-link" href="/online/session/">◎ Ma consultation Online <small>Mode test · démarrer</small></a>':'';
   const mode=hasPro()?`<div class="mode-switch" role="group" aria-label="Choisir votre espace"><button type="button" data-mode="patient" class="${S.mode==='patient'?'active':''}" aria-pressed="${S.mode==='patient'}" ${!S.ownPatient?'disabled title="Aucun dossier personnel lié"':''}>Espace patient</button><button type="button" data-mode="pro" class="${S.mode==='pro'?'active':''}" aria-pressed="${S.mode==='pro'}">Équipe</button></div>`:'';
-  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div class="pulse-mobile-access">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div><div id="view"></div></main><button type="button" class="pulse-mobile-start-motion" id="pulse-mobile-start-motion">Démarrer bilan Motion <span aria-hidden="true">→</span></button></div>`;
+  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div><div class="user-chip"><span>${esc((firstName()||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div class="pulse-mobile-access">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div><div id="view"></div></main><button type="button" class="pulse-mobile-start-motion" id="pulse-mobile-start-motion">Bilan Motion au centre <span aria-hidden="true">→</span></button></div>`;
   document.querySelector('.app-shell')?.classList.toggle('app-shell-pro',S.mode==='pro');
   document.querySelector('.app-shell')?.classList.toggle('app-shell-patient',S.mode==='patient');
   document.querySelector('.app-shell')?.setAttribute('data-pulse-view',S.route);
@@ -341,15 +341,9 @@ function shell(){
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled||!hasPro())return;const next=b.dataset.mode;if(next==='patient'&&!S.ownPatient)return;S.mode=next;localStorage.setItem('komo_v14_mode',next);history.replaceState(null,'',location.pathname+location.search+'#'+(next==='pro'?'operator':'home'));await refresh()});
   $('#logout').onclick=async()=>{window.dispatchEvent(new Event('pulse:operator-signout'));await sb.auth.signOut();location.hash='';authView()};
   $('#pulse-mobile-logout').onclick=$('#logout').onclick;
-  $('#pulse-mobile-start-motion')?.addEventListener('click',async event=>{
-    const selected=S.patients.find(p=>p.id===S.patient?.id);
-    if(!selected){toast('Sélectionnez d’abord un patient.');location.hash='patients';return}
-    if(selected.data_classification!=='synthetic'){
-      toast('Mode test : sélectionnez un dossier fictif avant de démarrer.');
-      location.hash='patients';
-      return;
-    }
-    location.hash='operator';
+  $('#pulse-mobile-start-motion')?.addEventListener('click',()=>{
+    // Operator iPhone is the clinic's webcam: it does NOT require a patient selection.
+    window.location.assign('/camera/');
   });
 }
 function heading(title,over='KŌMØ PULSE'){ $('#pageTitle').textContent=title;$('#pageOverline').textContent=over }
@@ -358,8 +352,7 @@ function progressStrip(){
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
 async function openMotionLivePatient(){
-  try{const module=await import('./motion-live-guest-v1.js?v=20261109-motion-online-v1');await module.openMotionLive();}
-  catch(error){console.error('[Motion live patient]',error);toast('Session Motion momentanément indisponible.');}
+  toast('Le bilan sur place est piloté par le professionnel avec son propre iPhone. Aucun accès caméra patient nécessaire.');
 }
 function patientLobby(){
   const first=esc(S.profile?.first_name||S.profile?.display_name?.split(' ')[0]||S.user?.email?.split('@')[0]||'');
@@ -368,7 +361,7 @@ function patientLobby(){
     <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Choisissez le bilan qui vous correspond. Votre espace personnel reste sécurisé.</p></div>
     <div class="pulse-lobby-options">
       <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan guidé à distance. Découvrez le protocole et accédez au paiement sécurisé.</p><a href="${online}" class="pulse-lobby-action">Découvrir Motion Online <span>→</span></a></article>
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyLiveStart">Commencer ma consultation Motion <span>→</span></button></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyLiveStart">Comment se déroule le bilan <span>→</span></button></article>
     </div>
     <p class="pulse-lobby-footnote">La synchronisation test suit la progression du bilan ; les résultats restent protégés.</p>
   </div>`;
@@ -438,7 +431,7 @@ function patientHome(){
       </div>
       ${heroPhoto}
     </section>
-    <section class="p-live-cta"><div><span class="p-card-kicker">CONSULTATION MOTION · CANNES</span><h3>Prêt pour votre bilan ?</h3><p>Ouvrez votre salle de consultation test et transmettez votre code à l'opérateur.</p></div><button type="button" class="p-primary" id="pulseHomeLiveStart">Commencer Motion <span>→</span></button></section>
+    <section class="p-live-cta"><div><span class="p-card-kicker">CONSULTATION MOTION · CANNES</span><h3>Prêt pour votre bilan ?</h3><p>Le professionnel mène la consultation sur l’ordinateur et utilise son propre iPhone comme caméra. Votre téléphone n’est pas nécessaire.</p></div><button type="button" class="p-primary" id="pulseHomeLiveStart">Informations sur le bilan <span>→</span></button></section>
     <div class="p-section-label"><h3>Votre dossier</h3></div>
     <div class="p-two-cards">
       <section class="p-info-card"><div class="p-card-top"><span class="p-card-kicker">RÉSULTATS</span>
@@ -614,19 +607,24 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261109-live-pose-v1');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261109-staff-camera-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
 function motionLiveMonitor(){
   heading('En direct','KŌMØ OPERATOR · TEST');
   $('#view').innerHTML=`<div class="op-live-dashboard">
-    <header class="op-live-head"><div><span class="overline">SESSION PATIENT SYNCHRONISÉE</span><h2>Consultations en direct</h2><p>Le téléphone sur trépied remplace la webcam : associez son code à un dossier fictif, puis ouvrez la caméra en direct. La vidéo et les six tests Motion Online se pilotent ensemble dans « Consultation Motion ».</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
-    <div class="op-live-toolbar"><span id="opLiveCount">Connexion aux sessions…</span><button type="button" class="button secondary" id="opLiveNewPatient">+ Créer un dossier fictif</button></div>
+    <header class="op-live-head"><div><span class="overline">CONSULTATION PHYSIQUE · DEUX APPAREILS</span><h2>Connecter mon iPhone</h2><p><strong>Sur ton iPhone :</strong> ouvre <strong>pulse.komolongevity.com/camera/</strong> et connecte-toi avec ton compte Operator. <strong>Sur l’ordinateur :</strong> associe la caméra à ton dossier fictif puis réalise les six tests. Le patient n’utilise pas son téléphone.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
+    <div class="op-live-toolbar"><span id="opLiveCount">Recherche de ton iPhone…</span><button type="button" class="button secondary" id="opLiveCopyCameraLink">Copier le lien iPhone</button><button type="button" class="button secondary" id="opLiveNewPatient">+ Dossier fictif</button></div>
     <div id="opLiveRooms" aria-live="polite"><p>Recherche des sessions…</p></div>
-    <p class="op-live-caution">Mode test avec identités fictives uniquement. Le flux vidéo WebRTC est chiffré et non enregistré ; les mesures instrumentales ne sont pas transférées par cette liaison. Validation des tests par l'opérateur.</p>
+    <p class="op-live-caution">Test de consultation physique : ton iPhone est le capteur vidéo du cabinet ; aucune connexion patient sur le téléphone. Vidéo WebRTC sans enregistrement. Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.</p>
   </div>`;
   $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
+  $('#opLiveCopyCameraLink').onclick=async()=>{
+    const url='https://pulse.komolongevity.com/camera/';
+    try{await navigator.clipboard.writeText(url);toast('Lien caméra copié. Ouvre-le sur ton iPhone.')}
+    catch{window.prompt('Copie ce lien sur ton iPhone :',url)}
+  };
   $('#opLiveNewPatient').onclick=()=>{clearInterval(motionLiveTimer);motionLiveTimer=null;location.hash='patients'};
   clearInterval(motionLiveTimer);motionLiveSignature='';
   loadMotionLiveRooms(true);
@@ -638,14 +636,14 @@ async function loadMotionLiveRooms(force=false){
  motionLiveFetching=true;
  try{
   const data=await motionLiveAPI({action:'operator_list'});
-  const rooms=data.sessions||[];
+  const rooms=(data.sessions||[]).filter(x=>x.operator_user_id===S.user?.id&&x.progress?.camera_owner==='operator');
   const signature=JSON.stringify(rooms.map(x=>[x.id,x.status,x.stage_code,x.step_index,x.progress?.step_status,x.patient_id,x.updated_at,x.patient_last_seen_at]));
   const count=$('#opLiveCount');
   if(count)count.textContent=rooms.filter(x=>['waiting','ready','active'].includes(x.status)).length+' session(s) en cours · actualisation automatique';
   if(force||signature!==motionLiveSignature){
    motionLiveSignature=signature;
    const selected=new Map([...host.querySelectorAll('[data-live-select]')].map(x=>[x.dataset.liveSelect,x.value]));
-   const statusLabels={waiting:'En attente',ready:'Patient prêt',active:'En cours',completed:'Terminé',closed:'Fermé'};
+   const statusLabels={waiting:'En attente',ready:'iPhone prêt',active:'Caméra connectée',completed:'Terminé',closed:'Fermé'};
    const choices=S.patients.filter(p=>p.data_classification==='synthetic'&&p.status==='active');
    host.innerHTML=rooms.length?rooms.map(room=>{
     const patient=S.patients.find(p=>p.id===room.patient_id);
@@ -654,14 +652,17 @@ async function loadMotionLiveRooms(force=false){
     const pct=Math.round(Math.min(6,Number(room.step_index)||0)/6*100);
     const patientName=patient?[patient.first_name,patient.last_name].filter(Boolean).join(' '):'Aucun dossier associé';
     return `<article class="op-live-room" data-room="${esc(room.id)}">
-      <header><div><span class="overline">CODE PATIENT</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'Téléphone connecté':'Téléphone hors ligne'}</span></header>
+      <header><div><span class="overline">CODE DE TON IPHONE</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'iPhone connecté':'iPhone hors ligne'}</span></header>
       <p>${esc(patientName)} · ${esc(stage)}</p>
       <div class="op-live-track"><i style="width:${pct}%"></i></div><small>${pct}% des étapes parcourues · ${room.progress?.step_status==='running'?'Test en cours':'Attente du prochain test'}</small>
       <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir consultation</button>':''}`}
       <button type="button" class="button secondary" data-live-close="${esc(room.id)}">Clore la salle</button></div>
     </article>`;
-   }).join(''):'<div class="op-live-empty">Aucune consultation active. Sur le téléphone du patient : Motion au centre → Commencer ma consultation.</div>';
-   for(const select of host.querySelectorAll('[data-live-select]'))if(selected.has(select.dataset.liveSelect))select.value=selected.get(select.dataset.liveSelect);
+   }).join(''):'<div class="op-live-empty">Aucune caméra détectée. Sur ton iPhone, ouvre pulse.komolongevity.com/camera/ puis appuie sur « Ouvrir la caméra ».</div>';
+   for(const select of host.querySelectorAll('[data-live-select]')){
+    if(selected.has(select.dataset.liveSelect))select.value=selected.get(select.dataset.liveSelect);
+    else if(S.patient?.data_classification==='synthetic')select.value=S.patient.id;
+   }
    host.querySelectorAll('[data-live-attach]').forEach(b=>b.onclick=()=>attachMotionLive(b.dataset.liveAttach,b));
    host.querySelectorAll('[data-live-operator]').forEach(b=>b.onclick=async()=>{
      localStorage.setItem('komo_v14_patient',b.dataset.liveOperator);
@@ -690,7 +691,7 @@ async function attachMotionLive(id,button){
   await motionLiveAPI({action:'operator_attach',session_id:id,patient_id:patientId,operator_session_id:result.data.session_id});
   localStorage.setItem('komo_v14_patient',patientId);
   toast('Téléphone associé. La consultation est prête.');
-  await loadPro();motionLiveSignature='';location.hash='operator';render();
+  await loadPro();motionLiveSignature='';location.hash='operator';
  }catch(error){toast(error.message||'Association impossible.');button.disabled=false;button.textContent='Associer et ouvrir la consultation'}
 }
 
@@ -701,12 +702,12 @@ async function refreshOperatorLiveStatus(){
   const data=await motionLiveAPI({action:'operator_list'});
   if(!host.isConnected)return;
   const room=(data.sessions||[]).find(x=>x.patient_id===S.patient.id&&['waiting','ready','active','completed'].includes(x.status));
-  if(!room){host.innerHTML='<span class="overline">TÉLÉPHONE PATIENT</span><p>Aucune salle liée à ce dossier.</p><button type="button" class="button secondary" data-open-live>Voir les sessions</button>';}
+  if(!room){host.innerHTML='<span class="overline">IPHONE DU PRATICIEN</span><p>Aucune caméra liée à ce dossier.</p><button type="button" class="button secondary" data-open-live>Voir les sessions</button>';}
   else{
    const stage=OP_STEPS.find(x=>x[0]===room.stage_code)?.[2]||'Parcours terminé';
    const pct=Math.round(Math.min(6,Number(room.step_index)||0)/6*100);
    const online=room.patient_last_seen_at&&Date.now()-new Date(room.patient_last_seen_at).getTime()<18000;
-   host.innerHTML='<span class="overline">PATIENT EN DIRECT · '+esc(room.display_code)+'</span><h4>'+esc(stage)+'</h4><p>'+esc(room.status==='active'?'Séance en cours':room.status==='completed'?'Étapes terminées':'Prêt à commencer')+' · '+(online?'Téléphone connecté':'Téléphone hors ligne')+'</p><div class="op-live-track"><i style="width:'+pct+'%"></i></div>'+(room.status==='active'&&room.operator_user_id===S.user?.id?'<button type="button" class="button primary" data-operator-camera="'+esc(room.id)+'">◉ Voir la caméra du téléphone</button>':'')+'<button type="button" class="button secondary" data-open-live>Ouvrir le suivi détaillé</button>';
+   host.innerHTML='<span class="overline">CAMÉRA DU CABINET · '+esc(room.display_code)+'</span><h4>'+esc(stage)+'</h4><p>'+esc(room.status==='active'?'Séance en cours':room.status==='completed'?'Étapes terminées':'Prêt à commencer')+' · '+(online?'Téléphone connecté':'Téléphone hors ligne')+'</p><div class="op-live-track"><i style="width:'+pct+'%"></i></div>'+(room.status==='active'&&room.operator_user_id===S.user?.id?'<button type="button" class="button primary" data-operator-camera="'+esc(room.id)+'">◉ Voir la caméra du téléphone</button>':'')+'<button type="button" class="button secondary" data-open-live>Ouvrir le suivi détaillé</button>';
   }
   host.querySelector('[data-open-live]')?.addEventListener('click',()=>{location.hash='live';render()});
   host.querySelector('[data-operator-camera]')?.addEventListener('click',event=>openOperatorCamera(event.currentTarget.dataset.operatorCamera));
@@ -714,11 +715,11 @@ async function refreshOperatorLiveStatus(){
 }
 let motionConsultModule=null;
 async function operator(){
-  heading('Consultation Motion','KŌMØ PULSE · TESTS MOTION ONLINE');
+  heading('Consultation Motion','KŌMØ PULSE · CONSULTATION AU CABINET');
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261109-countdown-v2');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261109-staff-camera-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,openVideo:openOperatorCamera});
   }catch(error){console.error('[Motion consultation]',error);if(root?.isConnected)root.textContent='Consultation indisponible : '+(error.message||'erreur réseau')}

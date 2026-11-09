@@ -51,13 +51,13 @@
         <button type="button" class="maison-login-back" data-maison-back="choice">← Revenir aux bilans</button>
         <span class="maison-panel-label">MOTION AU CENTRE · 200 €</span>
         <h2>Votre bilan Motion.<br><em>Sans démarche préalable.</em></h2>
-        <p class="maison-panel-lead">Installez ce téléphone sur un trépied, ouvrez la caméra arrière puis communiquez le code à l’opérateur. Il verra la vidéo sur son ordinateur tout en pilotant vos tests. Vous pouvez inverser la caméra depuis ce téléphone.</p>
+        <p class="maison-panel-lead">La consultation se déroule intégralement au centre. Le praticien utilise son propre iPhone sur trépied comme caméra, pilote les tests depuis l’ordinateur et vous accompagne personnellement. Vous n’avez pas à utiliser votre téléphone ni à créer de compte pour être évalué.</p>
         <div class="maison-account-actions">
-          <button class="maison-action-primary" type="button" id="maisonLiveStart">Commencer ma consultation Motion <span>→</span></button>
+          <button class="maison-action-primary" type="button" id="maisonLiveStart">Accéder à mon espace, si je dispose d’un compte <span>→</span></button>
           <button class="maison-action-secondary" type="button" data-maison-login>J'ai déjà un compte · Me connecter <span>→</span></button>
           <button class="maison-action-secondary" type="button" data-maison-back="choice">Retour aux bilans <span>→</span></button>
         </div>
-        <p class="maison-choice-note">En mode test, votre vidéo est diffusée uniquement à l’opérateur associé, par liaison WebRTC chiffrée, sans enregistrement. Aucun dossier de santé réel n’est autorisé.</p>
+        <p class="maison-choice-note">Le matériel de capture appartient au centre. Le système de synchronisation actuel reste réservé aux démonstrations sur dossiers fictifs, sans enregistrement vidéo.</p>
       </div>
       <div class="maison-panel-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
     old.replaceWith(entry);
@@ -85,26 +85,16 @@
       if(step)step.textContent=({choice:'01 / VOTRE BILAN',motion:'02 / MOTION AU CENTRE'})[name]||'';
       if(name==='login')login.querySelector('input[name="email"]')?.focus();
     }
-    async function launchMotion(button){
-      if(button.disabled)return;
-      button.disabled=true;
-      try{
-        const module=await import('./motion-live-guest-v1.js?v=20261109-motion-online-v1');
-        await module.openMotionLive();
-      }catch(error){
-        console.error('[Pulse Motion live]',error);
-        show('motion');
-        alert("Impossible de démarrer la session de test. Vérifiez votre connexion.");
-      }finally{button.disabled=false}
-    }
-    // On iPhone/Android, choosing Motion is itself the start action.
-    // Keep the explanatory step on larger screens and preserve the 39 € route.
-    entry.querySelector('#maisonChooseMotion')?.addEventListener('click',async event=>{
+    // Onsite assessments use the CLINICIAN'S equipment only.
+    // The public booking page must never access a patient's phone camera.
+    entry.querySelector('#maisonChooseMotion')?.addEventListener('click',()=>{
       save('motion');
-      if(window.matchMedia('(max-width: 850px)').matches)await launchMotion(event.currentTarget);
-      else show('motion');
+      show('motion');
     });
-    entry.querySelector('#maisonLiveStart')?.addEventListener('click',event=>launchMotion(event.currentTarget));
+    entry.querySelector('#maisonLiveStart')?.addEventListener('click',()=>{
+      history.replaceState(null,'',location.pathname+location.search+'#connexion');
+      show('login');
+    });
     entry.querySelectorAll('[data-maison-login]').forEach(x=>x.addEventListener('click',()=>{
       history.replaceState(null,'',location.pathname+location.search+'#connexion');
       show('login');

@@ -19,6 +19,9 @@ const webappIndex=await readFile(join(root,'site/pulse-v14/index.html'),'utf8');
 const onlineSession=await readFile(join(root,'site/pulse-v14/online/session/app.js'),'utf8');
 const mobileCss=await readFile(join(root,'site/pulse-v14/pulse-mobile-first-v3.css'),'utf8');
 const liveEdge=await readFile(join(root,'supabase/functions/motion-live-test/index.ts'),'utf8');
+const staffCameraHtml=await readFile(join(root,'site/pulse-v14/camera/index.html'),'utf8');
+const staffCameraJs=await readFile(join(root,'site/pulse-v14/camera/camera.js'),'utf8');
+const staffCameraManifest=JSON.parse(await readFile(join(root,'site/pulse-v14/camera/manifest.webmanifest'),'utf8'));
 const parse=path=>spawnSync(process.execPath,['--check',join(root,path)],{encoding:'utf8'}).status===0;
 const checks=[
   ['entry scripts parse',parse('site/pulse-v14/app.js')&&parse('site/pulse-v14/maison-entry-v1.js')],
@@ -31,9 +34,9 @@ const checks=[
   ['no anonymous patient write',!maison.includes("from('patients')")&&!app.includes("from('patients').insert(")],
   ['real health records not activated before HDS/security clearance',app.includes("Environnement non validé pour de vraies données de santé")&&app.includes('name="synthetic_attested" required')],
   ['operator layout available',css.includes('.op-create-patient-form')&&css.includes('op-create-patient-grid')],
-  ['Motion start visible on patient page',maison.includes('id="maisonLiveStart"')&&maison.includes("import('./motion-live-guest-v1.js?v=20261109-motion-online-v1')")],
-  ['single-tap mobile choice opens the live room',maison.includes("matchMedia('(max-width: 850px)')")&&maison.includes('await launchMotion(event.currentTarget)')],
-  ['one-tap mobile action for signed-in patient and operator',app.includes('id="pulse-mobile-start-motion"')&&app.includes("selected.data_classification!=='synthetic'")],
+  ['onsite consultation never triggers patient camera',maison.includes('id="maisonLiveStart"')&&maison.includes('praticien utilise son propre iPhone')&&!maison.includes('launchMotion')&&!maison.includes('getUserMedia')],
+  ['public onsite choice opens information instead of streaming',maison.includes("show('motion')")&&!maison.includes("await launchMotion(event.currentTarget)")],
+  ['mobile Operator camera CTA uses dedicated station',app.includes('id="pulse-mobile-start-motion"')&&app.includes("window.location.assign('/camera/')")&&app.includes("does NOT require a patient selection")],
   ['mobile start CTA stays above the operator bottom navigation',mobileCss.includes('.app-shell-pro .pulse-mobile-start-motion')&&mobileCss.includes('bottom:calc(89px + env(safe-area-inset-bottom,0px))')],
   ['patient live script syntactically valid',parse('site/pulse-v14/motion-live-guest-v1.js')],
   ['guest shares encrypted live video only after explicit camera activation',liveGuest.includes('getUserMedia')&&liveGuest.includes('RTCPeerConnection')&&liveGuest.includes('guest_signal_push')&&liveGuest.includes('id="mliveCamera"')&&liveGuest.includes('audio:false')&&!liveGuest.includes('MediaRecorder')],
@@ -47,10 +50,10 @@ const checks=[
   ['Edge denies unpaired sessions and unrelated operators',liveEdge.includes('room.operator_user_id!==actor.id')&&liveEdge.includes('room.status!=="active"')&&liveEdge.includes('guestLookup(req,b)')],
   ['Edge allows only constrained WebRTC SDP and no video bytes',liveEdge.includes('pulse_motion_live_signals')&&liveEdge.includes('invalid_sdp')&&liveEdge.includes('octet')===false],
 
-  ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(STORAGE,guestToken)')],
+  ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(key,guestToken)')],
   ['patient marks ready; Operator alone controls stages',liveGuest.includes('action:"guest_event"')&&!liveGuest.includes('event:"complete"')&&liveGuest.includes('event=live.status==="waiting"?"ready":null')],
   ['operator live nav and pairing enabled',app.includes("['live','En direct']")&&app.includes("function motionLiveMonitor()")&&app.includes("action:'operator_attach'")&&app.includes("start_pulse_operator_session_v1")],
-  ['signed-in patient can start live Motion',app.includes('id="pulseLobbyLiveStart"')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")],
+  ['physical Motion never uses patient phone',app.includes('id="pulseLobbyLiveStart"')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")&&app.includes('Aucun accès caméra patient nécessaire')],
   ['Operator consultation embeds paired phone camera',app.includes('id="motionConsultRoot"')&&app.includes('openOperatorCamera')&&consult.includes('id="motionConsultCamera"')],
   ['live server verifies operator role and center',liveEdge.includes('db.auth.getUser(jwt)')&&liveEdge.includes('organization_members')&&liveEdge.includes('synthetic_patient_required')],
   ['live session token hashed, RLS protected by migration',liveEdge.includes('crypto.subtle.digest("SHA-256"')&&liveEdge.includes('guest_token_hash')],
@@ -64,7 +67,18 @@ const checks=[
   ['server stores only operator-confirmed estimates',liveEdge.includes('operator_confirmed_video_estimate')&&liveEdge.includes('invalid_measurement_source')&&liveEdge.includes('room.operator_user_id!==actor.id')],
   ['timer counts down from the original test duration and can restart',consult.includes('clockLocal={key:clockRunKey(room),startedAt:Date.now()}')&&consult.includes('Math.ceil(task.duration-elapsedMs/1000)')&&consult.includes('Math.max(0,Math.min(task.duration,')&&consult.includes('mocRestartClock')&&consult.includes('stoppedAt??Date.now()')&&liveEdge.includes('["start","restart","save","skip"]')],
   ['desktop consultation uses viewport app shell',consultCss.includes('height:100dvh')&&consultCss.includes('overflow:hidden')&&consultCss.includes('moc-camera-host')],
-  ['installable webapp manifest',manifest.display==='standalone'&&manifest.start_url.includes('#operator')&&webappIndex.includes('rel="manifest"')&&manifest.icons.some(x=>x.src.includes('icon-motion.svg'))]
+  ['installable webapp manifest',manifest.display==='standalone'&&manifest.start_url.includes('#operator')&&webappIndex.includes('rel="manifest"')&&manifest.icons.some(x=>x.src.includes('icon-motion.svg'))],
+  ['operator iPhone camera page and login script parse',parse('site/pulse-v14/camera/camera.js')&&staffCameraHtml.includes('CAMÉRA DU CABINET')&&staffCameraJs.includes('signInWithPassword')],
+  ['dedicated iPhone camera starts with operator JWT',staffCameraJs.includes("action:'operator_camera_start'")&&staffCameraJs.includes("Authorization:'Bearer '+session.access_token")&&staffCameraJs.includes('mode:\'operator_camera\'')],
+  ['iPhone user can stop camera room after reloading',staffCameraJs.includes("action:'operator_camera_stop'")&&liveGuest.includes('stationRoomId=data.session?.id')&&liveEdge.includes('id:x.id,display_code:x.display_code')],
+  ['camera pairing belongs only to same Operator',liveEdge.includes('room.operator_user_id!==actor.id')&&liveEdge.includes('camera_owner_required')&&liveEdge.includes('operator_camera_start')],
+  ['room recovery scoped to authenticated clinician',liveGuest.includes("STAFF_STORAGE+':'+String(options.ownerId||'unknown')")&&staffCameraJs.includes('ownerId:session.user.id')],
+  ['desktop discovers only own clinician camera',app.includes("x.progress?.camera_owner==='operator'")&&app.includes('CODE DE TON IPHONE')&&app.includes('/camera/')],
+  ['iPhone camera station renders without patient actions',liveGuest.includes('mlive-staff-camera')&&liveGuest.includes('cameraStation')&&liveGuest.includes('CAMÉRA DU CABINET')],
+  ['clinic camera app is standalone',staffCameraManifest.display==='standalone'&&staffCameraManifest.start_url==='/camera/'&&staffCameraHtml.includes('manifest.webmanifest')],
+  ['unrelated Operator cannot close connected camera',liveEdge.includes('.eq("operator_user_id",actor.id).select("id")')],
+  ['patient entry no longer launches personal camera',!maison.includes('guest_start')&&!maison.includes("openMotionLive()")&&app.includes('Aucun accès caméra patient nécessaire')]
+
 
 ];
 const failed=checks.filter(([,ok])=>!ok);

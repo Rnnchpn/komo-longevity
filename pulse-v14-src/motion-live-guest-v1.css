@@ -53,3 +53,29 @@
  .mlive-panel .mlive-button{min-height:49px;font-size:13px}
  .mlive-foot{line-height:1.45}
 }
+
+/* Clinician iPhone = pure camera station, not a patient terminal. */
+.mlive-staff-camera .mlive-progress,.mlive-staff-camera .mlive-stage-line{display:none}
+.mlive-staff-camera .mlive-number{border-color:#a9956b;background:#142a2a}
+.mlive-staff-camera .mlive-number strong{font-variant-numeric:tabular-nums}
+.mlive-staff-camera .mlive-panel h2{font-size:clamp(27px,3vw,42px)}
+.mlive-staff-camera .mlive-panel p{font-size:12px}
+@media(max-width:760px){
+ .mlive-staff-camera{height:100dvh;overflow:auto}
+ .mlive-staff-camera .mlive-main{flex:1;display:flex;flex-direction:column;padding:8px 10px 10px;gap:9px}
+ .mlive-staff-camera .mlive-camera{height:min(55dvh,560px);min-height:240px;flex:none}
+ .mlive-staff-camera .mlive-panel{padding:12px 14px;gap:8px;flex:1}
+ .mlive-staff-camera .mlive-panel h2{font-size:27px}
+ .mlive-staff-camera .mlive-number{padding:9px 12px}
+ .mlive-staff-camera .mlive-number strong{font-size:32px}
+ .mlive-staff-camera .mlive-number>span{font-size:9px}
+ .mlive-staff-camera .mlive-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}
+ .mlive-staff-camera .mlive-button{min-height:48px;padding:10px 8px;font-size:11px}
+ .mlive-staff-camera .mlive-button.primary[hidden]{display:none}
+ .mlive-staff-camera .mlive-state{font-size:11px}
+ .mlive-staff-camera .mlive-foot{padding:8px 12px calc(12px + env(safe-area-inset-bottom))}
+}
+@media(max-width:400px){
+ .mlive-staff-camera .mlive-actions{grid-template-columns:1fr}
+ .mlive-staff-camera .mlive-camera{height:44dvh}
+}

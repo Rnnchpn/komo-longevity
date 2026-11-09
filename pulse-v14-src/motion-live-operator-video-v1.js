@@ -101,7 +101,7 @@ async function watch(){
     status("Flux interrompu. Vérifiez le Wi-Fi et appuyez sur Reconnecter.");
    }
   };
-  status("Demande envoyée au téléphone · activez le partage caméra sur l’iPhone.");
+  status("Demande envoyée à ton iPhone · active sa caméra depuis /camera/.");
   await signal({action:"operator_signal_push",session_id:roomId,connection_id:current,kind:"watch"});
   if(pc!==p)return;
   pollTimer=setInterval(poll,1050);poll();
@@ -114,12 +114,12 @@ function makePane(containerId){
  pane.id="mopvWindow";pane.className="mopv-window";
  pane.setAttribute("role","region");pane.setAttribute("aria-label","Caméra Motion connectée");
  pane.innerHTML=[
-  '<div class="mopv-head"><div><small>KŌMØ PULSE · OPERATOR</small><strong>Caméra du téléphone</strong></div>',
+  '<div class="mopv-head"><div><small>KŌMØ PULSE · CONSULTATION PHYSIQUE</small><strong>Mon iPhone · caméra du cabinet</strong></div>',
   '<div class="mopv-head-actions"><button type="button" id="mopvExpand" aria-label="Agrandir la vidéo">Agrandir</button>',
   '<button type="button" id="mopvClose" aria-label="Fermer le flux vidéo">Fermer ×</button></div></div>',
   '<div class="mopv-screen"><video autoplay muted playsinline id="mopvVideo" hidden></video>',
   '<div id="mopvPlaceholder" class="mopv-placeholder"><div class="mopv-symbol">◉</div>',
-  '<strong>En attente de la caméra</strong><p>Sur le téléphone, ouvrez Motion puis activez le partage.</p></div>',
+  '<strong>En attente de mon iPhone</strong><p>Sur ton iPhone, ouvre /camera/, connecte-toi en Operator et active le partage.</p></div>',
   '<span class="mopv-live-dot">CAMÉRA LIVE · SANS ENREGISTREMENT</span></div>',
   '<div class="mopv-controls"><p id="mopvStatus" role="status" aria-live="polite">Initialisation…</p>',
   '<button type="button" id="mopvRetry">Reconnecter</button></div>',
