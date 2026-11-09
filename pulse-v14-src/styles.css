@@ -592,3 +592,29 @@
 @media(max-width:620px){.op-create-patient-grid{grid-template-columns:1fr}.op-create-patient-form{padding:18px}.op-patients-toolbar #opPatientCreateToggle{width:100%}}
 
 .op-create-patient-attestation{display:flex;align-items:flex-start;gap:10px;font-size:12px;line-height:1.5}.op-create-patient-attestation input{width:17px;height:17px;flex:none;margin:2px 0 0}
+
+/* Operator Motion Live workspace — test-only synchronized sessions */
+.op-live-dashboard{display:grid;gap:20px;max-width:1080px}
+.op-live-head{display:flex;justify-content:space-between;gap:18px;align-items:start}
+.op-live-head h2{font:500 clamp(32px,3.3vw,48px)/1.05 "Cormorant Garamond",serif;margin:8px 0}
+.op-live-head p{max-width:690px;font-size:13px;line-height:1.6;color:#627068}
+.op-live-head>.button{flex:none}
+.op-live-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.op-live-toolbar span{font-size:12px;color:#59665e}
+#opLiveRooms{display:grid;gap:15px}
+.op-live-room{display:grid;gap:14px;padding:24px;background:#f9f6f1;border:1px solid #ded7ca;border-radius:20px}
+.op-live-room>header{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.op-live-room h3{font:600 38px Inter,system-ui,sans-serif;letter-spacing:.13em;margin:4px 0 0;font-variant-numeric:tabular-nums}
+.op-live-room>p{margin:0;font-size:13px}
+.op-live-room>small{font-size:11px;color:#6a746c}
+.op-live-tag{display:inline-flex;padding:7px 12px;border:1px solid #bbc8bc;border-radius:999px;font-size:11px;color:#31483e;background:#edf1e9}
+.op-live-track{height:7px;background:#e4e0d7;border-radius:999px;overflow:hidden}
+.op-live-track i{display:block;height:100%;background:#9a8768;transition:width .3s}
+.op-live-actions{display:flex;align-items:end;flex-wrap:wrap;gap:10px}
+.op-live-actions label{display:grid;gap:6px;min-width:200px;font-size:11px}
+.op-live-actions select{padding:11px;border:1px solid #bfbdb4;border-radius:10px;background:white;font:inherit;color:#252b28;max-width:300px}
+.op-live-actions .button{min-height:42px}
+.op-live-empty{border:1px dashed #bab8ae;border-radius:18px;padding:36px 22px;font-size:13px;color:#56645d;background:#faf9f5}
+.op-live-caution{font-size:11px;line-height:1.6;color:#8d6947}
+.op-live-error{font-size:13px;color:#a6403d}
+@media(max-width:700px){.op-live-head{flex-wrap:wrap}.op-live-room{padding:16px}.op-live-toolbar{flex-wrap:wrap}.op-live-room h3{font-size:30px}.op-live-actions{display:grid}.op-live-actions label,.op-live-actions select{max-width:none;width:100%}}
