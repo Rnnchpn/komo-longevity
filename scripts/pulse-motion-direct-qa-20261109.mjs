@@ -50,7 +50,7 @@ const checks=[
   ['Edge denies unpaired sessions and unrelated operators',liveEdge.includes('room.operator_user_id!==actor.id')&&liveEdge.includes('room.status!=="active"')&&liveEdge.includes('guestLookup(req,b)')],
   ['Edge allows only constrained WebRTC SDP and no video bytes',liveEdge.includes('pulse_motion_live_signals')&&liveEdge.includes('invalid_sdp')&&liveEdge.includes('octet')===false],
 
-  ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(STORAGE,guestToken)')],
+  ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(key,guestToken)')],
   ['patient marks ready; Operator alone controls stages',liveGuest.includes('action:"guest_event"')&&!liveGuest.includes('event:"complete"')&&liveGuest.includes('event=live.status==="waiting"?"ready":null')],
   ['operator live nav and pairing enabled',app.includes("['live','En direct']")&&app.includes("function motionLiveMonitor()")&&app.includes("action:'operator_attach'")&&app.includes("start_pulse_operator_session_v1")],
   ['physical Motion never uses patient phone',app.includes('id="pulseLobbyLiveStart"')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")&&app.includes('Aucun accès caméra patient nécessaire')],
