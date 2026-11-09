@@ -28,16 +28,23 @@ const TESTS=[
 ];
 const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
+let clockKey="",clockLocal=null;
 let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
 const q=id=>host?.querySelector("#"+id);
 function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message||""}
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261109-live-pose-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261109-countdown-v2";
  document.head.append(link);
 }
-function stopClock(){if(clock)clearInterval(clock);clock=null;stoppedAt=null}
+function stopClock(){
+ if(clock)clearInterval(clock);
+ clock=null;stoppedAt=null;clockKey="";clockLocal=null;
+}
+function clockRunKey(session){
+ return session?.id+":"+session?.step_index+":"+(session?.progress?.test_started_at||"");
+}
 export function disposeOperatorConsultation(){
  if(poll)clearInterval(poll);poll=null;stopClock();
  if(videoListener)window.removeEventListener("pulse:remote-video-ready",videoListener);
@@ -103,20 +110,25 @@ function renderSummary(){
 function timeDisplay(){
  const task=currentTest(),node=q("mocClock");
  if(!node||!task||!task.duration||room?.progress?.step_status!=="running")return;
- const start=Date.parse(room.progress.test_started_at||"");
- if(!Number.isFinite(start)){node.textContent="00:00";return}
- const at=stoppedAt??Date.now();
- const elapsed=Math.max(0,(at-start)/1000);
- const remaining=Math.max(0,task.duration-elapsed);
- node.textContent="00:"+String(Math.ceil(remaining)).padStart(2,"0");
- node.classList.toggle("finished",remaining<=0);
- if(remaining<=0&&stoppedAt===null)stoppedAt=start+task.duration*1000;
- // Do not invent 20 seconds when the camera has not actually observed a held stance.
+ const serverStart=Date.parse(room.progress?.test_started_at||"");
+ // On clicking Démarrer, begin visibly at exactly 00:30 (or 00:20 for shorter tests).
+ // On reload/reconnect, resume from the server timestamp rather than restarting.
+ const start=clockLocal?.key===clockRunKey(room)?clockLocal.startedAt:serverStart;
+ if(!Number.isFinite(start)){node.textContent="00:"+String(task.duration).padStart(2,"0");return}
+ const elapsedMs=Math.max(0,(stoppedAt??Date.now())-start);
+ const remaining=Math.max(0,Math.min(task.duration,Math.ceil(task.duration-elapsedMs/1000)));
+ node.textContent="00:"+String(remaining).padStart(2,"0");
+ node.classList.toggle("finished",remaining===0);
+ if(remaining===0&&stoppedAt===null)stoppedAt=start+task.duration*1000;
+ // The optical measurement is never replaced by a fictitious 20-second value.
 }
 function setClock(){
- if(clock)clearInterval(clock);clock=null;stoppedAt=null;
+ if(clock)clearInterval(clock);
+ clock=null;
+ const key=clockRunKey(room);
+ if(clockKey!==key){clockKey=key;stoppedAt=null;}
  if(room?.progress?.step_status==="running"&&currentTest()?.duration){
-  timeDisplay();clock=setInterval(timeDisplay,160);
+  timeDisplay();clock=setInterval(timeDisplay,100);
  }
 }
 function renderStep(){
@@ -144,7 +156,7 @@ function renderStep(){
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
  (running?'<div class="moc-timer"><div><span>CHRONOMÈTRE</span><strong id="mocClock">'+(t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
- (t.duration?'<button type="button" class="moc-button secondary" id="mocStopClock">Arrêter le chrono</button>':'')+'</div>'+input+
+ (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">Arrêter le chrono</button><button type="button" class="moc-button secondary" id="mocRestartClock">↻ Repartir de '+t.duration+' s</button></div>':'')+'</div>'+input+
  '<div class="moc-auto-feedback" id="mocAutoFeedback">◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
  '<div class="moc-buttons"><button type="button" id="mocSave" class="moc-button primary">Valider et passer au suivant</button>'+
@@ -156,6 +168,7 @@ function renderStep(){
  if(q("mocStart"))q("mocStart").onclick=()=>submit("start");
  if(q("mocSave"))q("mocSave").onclick=()=>submit("save");
  if(q("mocSkip"))q("mocSkip").onclick=()=>submit("skip");
+ if(q("mocRestartClock"))q("mocRestartClock").onclick=()=>submit("restart");
  if(q("mocStopClock"))q("mocStopClock").onclick=()=>{
   if(stoppedAt===null)stoppedAt=Date.now();
   poseTracker?.stopMeasurement();
@@ -232,6 +245,11 @@ async function submit(event){
  try{
   const result=await api(payload);
   room=result.session;
+  if(["start","restart"].includes(event)&&room?.progress?.step_status==="running"){
+   // Keep a local start anchor so the first rendered frame is 00:30, not 00:29
+   // due to round-trip latency. Subsequent displays remain monotonic.
+   clockLocal={key:clockRunKey(room),startedAt:Date.now()};
+  }
   latestSignature="";
   renderStep();
   if(event==="save")setStatus("Résultat enregistré.");

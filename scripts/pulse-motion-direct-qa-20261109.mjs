@@ -62,6 +62,7 @@ const checks=[
   ['live skeleton canvas matches unmirrored stream',remotePose.includes('moc-pose-overlay')&&consultCss.includes('canvas.moc-pose-overlay')&&consultCss.includes('object-fit:contain')],
   ['measured estimate auto-fills with editable override',consult.includes('payload.measurement_source')&&consult.includes('manualEdited')&&consult.includes('reading?.measurement')&&consult.includes('mocValue')],
   ['server stores only operator-confirmed estimates',liveEdge.includes('operator_confirmed_video_estimate')&&liveEdge.includes('invalid_measurement_source')&&liveEdge.includes('room.operator_user_id!==actor.id')],
+  ['timer counts down from the original test duration and can restart',consult.includes('clockLocal={key:clockRunKey(room),startedAt:Date.now()}')&&consult.includes('Math.ceil(task.duration-elapsedMs/1000)')&&consult.includes('Math.max(0,Math.min(task.duration,')&&consult.includes('mocRestartClock')&&consult.includes('stoppedAt??Date.now()')&&liveEdge.includes('["start","restart","save","skip"]')],
   ['desktop consultation uses viewport app shell',consultCss.includes('height:100dvh')&&consultCss.includes('overflow:hidden')&&consultCss.includes('moc-camera-host')],
   ['installable webapp manifest',manifest.display==='standalone'&&manifest.start_url.includes('#operator')&&webappIndex.includes('rel="manifest"')&&manifest.icons.some(x=>x.src.includes('icon-motion.svg'))]
 
