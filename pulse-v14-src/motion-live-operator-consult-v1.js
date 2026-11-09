@@ -28,18 +28,23 @@ const TESTS=[
 ];
 const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
+let poseTracker=null,videoListener=null,stopVideoListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
 const q=id=>host?.querySelector("#"+id);
 function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message||""}
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261109-motion-online-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261109-live-pose-v1";
  document.head.append(link);
 }
 function stopClock(){if(clock)clearInterval(clock);clock=null;stoppedAt=null}
 export function disposeOperatorConsultation(){
  if(poll)clearInterval(poll);poll=null;stopClock();
- host=null;room=null;api=null;openVideo=null;patient=null;latestSignature="";
+ if(videoListener)window.removeEventListener("pulse:remote-video-ready",videoListener);
+ if(stopVideoListener)window.removeEventListener("pulse:remote-video-stopped",stopVideoListener);
+ videoListener=null;stopVideoListener=null;
+ poseTracker?.dispose();poseTracker=null;
+ host=null;room=null;api=null;openVideo=null;patient=null;latestSignature="";autoValue=null;manualEdited=false;
 }
 function currentTest(){return TESTS[Number(room?.step_index)]||null}
 function stageText(result){return result?.status==="done"?"✓":result?.status==="skipped"?"—":"·"}
@@ -53,7 +58,7 @@ function makeShell(){
  '<div id="mocTestBody"><p>Recherche de la consultation…</p></div>'+
  '</section><aside class="moc-camera-column"><div class="moc-camera-heading"><strong>Caméra de l’iPhone</strong><span>Visualisation en direct</span></div>'+
  '<div id="motionConsultCamera" class="moc-camera-host"></div>'+
- '<div class="moc-camera-foot">L’image reste sur ce poste pendant la séance. Aucun enregistrement. Caméra avant/arrière : depuis l’iPhone.</div>'+
+ '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">33 points · Analyse locale sur cet ordinateur · Flux non enregistré · Changement avant/arrière sur l’iPhone.</div>'+
  '</aside></div><p class="moc-bottom-note">Démonstration avec dossier fictif · Résultats saisis manuellement par l’opérateur · Aucune interprétation clinique automatique</p></section>';
  q("mocReturn").onclick=()=>{location.hash="live"};
  q("mocPatientLine").textContent=patient ? [patient.first_name,patient.last_name].filter(Boolean).join(" ")+" · Bilan supervisé" : "Sélectionnez un patient fictif";
@@ -82,7 +87,7 @@ function renderSummary(){
  q("mocStepNav").innerHTML=TESTS.map((t,i)=>'<span class="moc-step done">'+stageText(results[t.id])+' '+HTML(t.title)+'</span>').join("");
  q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">CONSULTATION TERMINÉE</span><h3>Synthèse des observations</h3>'+
  '<div class="moc-recap">'+TESTS.map(t=>'<div><span>'+HTML(t.title)+'</span><strong>'+HTML(formatResult(results[t.id],t))+'</strong></div>').join("")+'</div>'+
- '<p class="moc-help">Cette synthèse décrit les observations manuelles de la séance test ; aucun score ni rapport clinique n’est généré automatiquement.</p>'+
+ '<p class="moc-help">Observations vidéo exploratoires vérifiées par l’opérateur. Aucun diagnostic, Motion Score ou rapport clinique automatique.</p>'+
  '<button type="button" class="moc-button secondary" id="mocBackRooms">Retour aux consultations</button></section>';
  q("mocBackRooms").onclick=()=>{location.hash="live"};
 }
@@ -97,7 +102,7 @@ function timeDisplay(){
  node.textContent="00:"+String(Math.ceil(remaining)).padStart(2,"0");
  node.classList.toggle("finished",remaining<=0);
  if(remaining<=0&&stoppedAt===null)stoppedAt=start+task.duration*1000;
- if(task.unit==="seconds"&&remaining<=0&&q("mocValue")&&!q("mocValue").value)q("mocValue").value=String(task.duration);
+ // Do not invent 20 seconds when the camera has not actually observed a held stance.
 }
 function setClock(){
  if(clock)clearInterval(clock);clock=null;stoppedAt=null;
@@ -118,6 +123,8 @@ function renderStep(){
  '<b>'+HTML(i<idx?stageText(results[item.id]):String(i+1))+'</b><span>'+HTML(item.title)+'</span></div>').join("");
  const running=room.progress?.step_status==="running";
  const safety=idx===0&&!room.progress?.safety_confirmed;
+ autoValue=null;manualEdited=false;
+ poseTracker?.setTest(t.id,room.progress?.test_started_at,running,t.duration);
  const input=t.id==="posture"?
   '<label class="moc-field">Observation (sans mesure radiographique)<select id="mocObservation">'+
   '<option value="">Choisir une observation</option><option value="neutral">Alignement apparent neutre</option>'+
@@ -129,24 +136,62 @@ function renderStep(){
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
  (running?'<div class="moc-timer"><div><span>CHRONOMÈTRE</span><strong id="mocClock">'+(t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
  (t.duration?'<button type="button" class="moc-button secondary" id="mocStopClock">Arrêter le chrono</button>':'')+'</div>'+input+
+ '<div class="moc-auto-feedback" id="mocAutoFeedback">◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
  '<div class="moc-buttons"><button type="button" id="mocSave" class="moc-button primary">Valider et passer au suivant</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>'
  :'<div class="moc-buttons"><button type="button" id="mocStart" class="moc-button primary">'+(t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>')+
  '<p id="mocStatus" class="moc-status" role="status" aria-live="polite"></p></section>';
+ if(q("mocValue"))q("mocValue").addEventListener("input",()=>{manualEdited=true});
  if(q("mocStart"))q("mocStart").onclick=()=>submit("start");
  if(q("mocSave"))q("mocSave").onclick=()=>submit("save");
  if(q("mocSkip"))q("mocSkip").onclick=()=>submit("skip");
  if(q("mocStopClock"))q("mocStopClock").onclick=()=>{
   if(stoppedAt===null)stoppedAt=Date.now();
+  poseTracker?.stopMeasurement();
+  const observed=poseTracker?.getLatest();
+  if(observed?.measurement!==null&&Number.isFinite(observed?.measurement)&&q("mocValue")&&!manualEdited)
+    q("mocValue").value=String(observed.measurement);
   const start=Date.parse(room.progress.test_started_at||"");
-  if(t.unit==="seconds"&&Number.isFinite(start)&&q("mocValue")){
-   q("mocValue").value=String(Math.min(20,Math.max(0,Math.round((stoppedAt-start)/100)/10)));
+  if(t.unit==="seconds"&&Number.isFinite(start)&&q("mocValue")&&!q("mocValue").value){
+   // Optical balance data may be missing; only a manual operator measurement can fill it.
+   setStatus("Aucune durée détectée. Vous pouvez saisir votre chronométrage manuel.");
   }
   timeDisplay();
  };
  setClock();
+ updatePosePanel(poseTracker?.getLatest());
+}
+function updatePosePanel(reading){
+ const indicator=q("mocPoseIndicator"),feedback=q("mocAutoFeedback");
+ const ready=reading?.valid&&reading.frames>=5;
+ const message=reading?.message||poseStatus;
+ if(indicator)indicator.textContent=(ready?"● Corps détecté · ":"◌ Recherche du corps · ")+message;
+ const t=currentTest(),running=room?.progress?.step_status==="running";
+ if(!running||!feedback)return;
+ const detected=reading?.measurement;
+ if(t?.id==="posture"){
+  const index=Number.isFinite(reading?.postureIndex)?reading.postureIndex:null;
+  feedback.textContent=index!==null&&reading?.stable?
+   "Repères stables · décalage sagittal apparent : "+index+" % (indice 2D, non SVA). Confirmez l’observation ci-dessous.":
+   "Marqueurs visibles. Placez-vous strictement de profil puis contrôlez l’alignement.";
+  return;
+ }
+ if(ready&&detected!==null&&Number.isFinite(detected)){
+  autoValue=detected;
+  const input=q("mocValue");
+  if(input&&!manualEdited)input.value=String(detected);
+  feedback.textContent="◉ Estimation vidéo : "+detected+" "+t.unit+" · Qualité du suivi "+reading.quality+" %. Valeur modifiable avant validation.";
+ }else{
+  feedback.textContent="◌ "+message+" · Ajustez le cadrage ou saisissez manuellement si nécessaire.";
+ }
+}
+async function attachPoseVideo(video){
+ if(!poseTracker||!video?.srcObject)return;
+ poseStatus="Chargement du moteur MediaPipe sur l’ordinateur…";
+ updatePosePanel(null);
+ await poseTracker.attach(video);
 }
 async function submit(event){
  if(busy||!room||!currentTest())return;
@@ -163,6 +208,8 @@ async function submit(event){
    const raw=q("mocValue")?.value;
    if(raw===""||raw===undefined){setStatus("Saisissez le résultat observé.");return}
    payload.value=Number(raw);
+   payload.measurement_source=!manualEdited&&Number.isFinite(autoValue)&&payload.value===autoValue?
+    "operator_confirmed_video_estimate":"operator_manual_observation";
    if(!Number.isFinite(payload.value)||payload.value<0||payload.value>(t.unit==="seconds"?20:100)||
      (t.type==="count"&&!Number.isInteger(payload.value))){
     setStatus("La valeur saisie n’est pas valide.");return
@@ -203,7 +250,14 @@ async function refresh(force=false){
    latestSignature=signature;
    renderStep();
   }
-  if(openVideo&&room.status==="active")await openVideo(room.id,"motionConsultCamera");
+  if(openVideo&&room.status==="active"){
+   await openVideo(room.id,"motionConsultCamera");
+   const liveVideo=document.querySelector("#motionConsultCamera #mopvVideo");
+   if(liveVideo?.srcObject&&!poseTracker?.isAttached()&&!poseTracker?.loading()&&Date.now()-poseRetryAt>12000){
+    poseRetryAt=Date.now();
+    await attachPoseVideo(liveVideo);
+   }
+  }
   if(room.status==="completed"&&openVideo){
    // Completed room no longer accepts video signaling; stop any existing camera.
    window.dispatchEvent(new Event("pulse:operator-signout"));
@@ -216,6 +270,30 @@ export async function mountOperatorConsultation(config){
  host=config.root;api=config.api;openVideo=config.openVideo;patient=config.patient||null;
  if(!host)return;
  styles();makeShell();
+ try{
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261109-live-pose-v1");
+  poseTracker=createRemoteMotionTracker({
+   onUpdate:updatePosePanel,
+   onError:message=>{
+    if(message)poseStatus=message;
+    const node=q("mocPoseIndicator");
+    if(node&&message)node.textContent="⚠ "+message;
+   }
+  });
+  videoListener=e=>{
+   if(e.detail?.sessionId===room?.id)void attachPoseVideo(e.detail.video);
+  };
+  stopVideoListener=e=>{
+   if(e.detail?.sessionId===room?.id){
+    poseTracker?.detach();
+    poseStatus="Caméra déconnectée · reconnectez le téléphone.";
+   }
+  };
+  window.addEventListener("pulse:remote-video-ready",videoListener);
+  window.addEventListener("pulse:remote-video-stopped",stopVideoListener);
+ }catch(error){
+  poseStatus="Marqueurs indisponibles : "+(error.message||"chargement échoué");
+ }
  if(!patient){renderWaiting("Sélectionnez un dossier fictif pour commencer.");return}
  await refresh(true);
  poll=setInterval(()=>refresh(),2600);
