@@ -297,7 +297,7 @@ export async function openMotionLive(options={}){
   const existing=sessionStorage.getItem(key);
   if(existing&&/^[A-Za-z0-9_-]{43}$/.test(existing)){
    guestToken=existing;
-   try{const data=await request({action:"guest_status",guest_token:guestToken});live=data.session;}
+   try{const data=await request({action:"guest_status",guest_token:guestToken});live=data.session;stationRoomId=data.session?.id||"";}
    catch{guestToken="";sessionStorage.removeItem(key)}
   }
   if(!guestToken){
