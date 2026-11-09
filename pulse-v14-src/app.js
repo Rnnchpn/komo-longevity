@@ -727,7 +727,7 @@ async function operator(){
 function render(){
   S.route=route();
   // Close any remote camera when leaving the two monitored Operator workspaces.
-  if(S.mode!=='pro'||!['live','operator'].includes(S.route))
+  if(S.mode!=='pro'||S.route!=='operator')
     window.dispatchEvent(new Event('pulse:operator-signout'));
   if(S.mode==='patient'&&S.route!=='home'){
     // Older emails and bookmarked links still open the same patient screen.
