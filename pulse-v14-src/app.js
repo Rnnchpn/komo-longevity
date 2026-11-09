@@ -341,14 +341,8 @@ function shell(){
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled||!hasPro())return;const next=b.dataset.mode;if(next==='patient'&&!S.ownPatient)return;S.mode=next;localStorage.setItem('komo_v14_mode',next);history.replaceState(null,'',location.pathname+location.search+'#'+(next==='pro'?'operator':'home'));await refresh()});
   $('#logout').onclick=async()=>{window.dispatchEvent(new Event('pulse:operator-signout'));await sb.auth.signOut();location.hash='';authView()};
   $('#pulse-mobile-logout').onclick=$('#logout').onclick;
-  $('#pulse-mobile-start-motion')?.addEventListener('click',async event=>{
-    const selected=S.patients.find(p=>p.id===S.patient?.id);
-    if(!selected){toast('Sélectionnez d’abord un patient.');location.hash='patients';return}
-    if(selected.data_classification!=='synthetic'){
-      toast('Mode test : sélectionnez un dossier fictif avant de démarrer.');
-      location.hash='patients';
-      return;
-    }
+  $('#pulse-mobile-start-motion')?.addEventListener('click',()=>{
+    // Operator iPhone is the clinic's webcam: it does NOT require a patient selection.
     window.location.assign('/camera/');
   });
 }
@@ -367,7 +361,7 @@ function patientLobby(){
     <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Choisissez le bilan qui vous correspond. Votre espace personnel reste sécurisé.</p></div>
     <div class="pulse-lobby-options">
       <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan guidé à distance. Découvrez le protocole et accédez au paiement sécurisé.</p><a href="${online}" class="pulse-lobby-action">Découvrir Motion Online <span>→</span></a></article>
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyLiveStart">Commencer ma consultation Motion <span>→</span></button></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyLiveStart">Comment se déroule le bilan <span>→</span></button></article>
     </div>
     <p class="pulse-lobby-footnote">La synchronisation test suit la progression du bilan ; les résultats restent protégés.</p>
   </div>`;
@@ -437,7 +431,7 @@ function patientHome(){
       </div>
       ${heroPhoto}
     </section>
-    <section class="p-live-cta"><div><span class="p-card-kicker">CONSULTATION MOTION · CANNES</span><h3>Prêt pour votre bilan ?</h3><p>Ouvrez votre salle de consultation test et transmettez votre code à l'opérateur.</p></div><button type="button" class="p-primary" id="pulseHomeLiveStart">Commencer Motion <span>→</span></button></section>
+    <section class="p-live-cta"><div><span class="p-card-kicker">CONSULTATION MOTION · CANNES</span><h3>Prêt pour votre bilan ?</h3><p>Le professionnel mène la consultation sur l’ordinateur et utilise son propre iPhone comme caméra. Votre téléphone n’est pas nécessaire.</p></div><button type="button" class="p-primary" id="pulseHomeLiveStart">Informations sur le bilan <span>→</span></button></section>
     <div class="p-section-label"><h3>Votre dossier</h3></div>
     <div class="p-two-cards">
       <section class="p-info-card"><div class="p-card-top"><span class="p-card-kicker">RÉSULTATS</span>
