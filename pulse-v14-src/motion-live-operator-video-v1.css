@@ -1,0 +1,33 @@
+/* KŌMØ Motion — floating remote iPhone camera, while D0 remains clickable. */
+.mopv-window{position:fixed;z-index:45000;right:18px;bottom:18px;width:min(540px,46vw);max-height:calc(100dvh - 36px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #52676b;border-radius:18px;background:#122529;color:#f6f3e9;box-shadow:0 24px 85px rgba(5,18,19,.46);font-family:Inter,system-ui,sans-serif}
+.mopv-window.expanded{right:20px;bottom:20px;width:min(1000px,85vw);max-height:calc(100dvh - 40px)}
+.mopv-head{padding:12px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#14282c;border-bottom:1px solid #365052}
+.mopv-head>div:first-child{display:grid;gap:3px}
+.mopv-head small{font-size:9px;letter-spacing:.13em;color:#c9b893;font-weight:650}
+.mopv-head strong{font-size:15px;font-weight:700;line-height:1.25}
+.mopv-head-actions{display:flex;gap:6px}
+.mopv-head-actions button{padding:9px 11px;min-height:38px;border:1px solid #6a8083;border-radius:9px;background:transparent;color:#fff;font:600 11px Inter,system-ui,sans-serif;cursor:pointer}
+.mopv-screen{position:relative;width:100%;aspect-ratio:16/10;max-height:calc(100dvh - 195px);min-height:190px;overflow:hidden;background:#050e0f;display:grid;place-items:center}
+.mopv-window.expanded .mopv-screen{aspect-ratio:16/9}
+.mopv-screen video{width:100%;height:100%;object-fit:contain;position:absolute;inset:0;background:#050e0f}
+.mopv-screen video[hidden]{display:none}
+.mopv-placeholder{text-align:center;max-width:280px;padding:20px;color:#d8e2df}
+.mopv-placeholder[hidden]{display:none}
+.mopv-symbol{font-size:50px;color:#bfad8b;opacity:.75;margin-bottom:14px}
+.mopv-placeholder strong{font:550 25px/1.1 "Cormorant Garamond",Georgia,serif}
+.mopv-placeholder p{font-size:12px;line-height:1.6;color:#bacac4}
+.mopv-live-dot{position:absolute;left:12px;top:12px;z-index:2;border:1px solid #9caf9b78;background:#102019bb;color:#ebeee4;border-radius:99px;padding:7px 10px;font:650 9px/1.2 Inter,system-ui,sans-serif;letter-spacing:.07em;pointer-events:none}
+.mopv-controls{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:10px 14px}
+.mopv-controls p{margin:0;flex:1;min-width:0;font-size:11px;line-height:1.5;color:#d5dfd9}
+.mopv-controls button{border:0;border-radius:9px;background:#d3b888;color:#1b2824;font:700 11px Inter,system-ui,sans-serif;padding:12px 13px;cursor:pointer}
+.mopv-controls button:disabled{opacity:.55;cursor:wait}
+.mopv-hint{margin:0;padding:0 14px 12px;color:#a6bab5;font-size:10px;line-height:1.5}
+@media(max-width:850px){
+ .mopv-window,.mopv-window.expanded{left:10px;right:10px;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:auto;max-height:calc(100dvh - 120px);border-radius:15px}
+ .mopv-window.expanded{top:calc(8px + env(safe-area-inset-top,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));max-height:none}
+ .mopv-window .mopv-screen{aspect-ratio:16/10;min-height:170px;max-height:46dvh}
+ .mopv-window.expanded .mopv-screen{flex:1;max-height:none}
+ .mopv-hint{display:none}
+ .mopv-head small{font-size:8px}
+ .mopv-head-actions button{padding:8px}
+}
