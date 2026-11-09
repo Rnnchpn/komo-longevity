@@ -89,7 +89,7 @@
       if(button.disabled)return;
       button.disabled=true;
       try{
-        const module=await import('./motion-live-guest-v1.js');
+        const module=await import('./motion-live-guest-v1.js?v=20261109-tripod-v1');
         await module.openMotionLive();
       }catch(error){
         console.error('[Pulse Motion live]',error);
