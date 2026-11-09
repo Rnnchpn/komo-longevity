@@ -246,7 +246,7 @@ async function loadIdentity(){
   S.ownPatients=own.filter(p=>p.patient_user_id===S.user.id);
   if(hasPro()){
     const mr=(await safe(sb.from('organization_members').select('*,organizations(*)').eq('user_id',S.user.id).eq('status','active'))).data||[];
-    S.membership=mr[0]||null;S.org=S.membership?.organizations||null;
+    S.membership=mr.find(item=>item.organizations?.name==='KŌMØ Cannes')||mr[0]||null;S.org=S.membership?.organizations||null;
   }else{S.membership=null;S.org=null;}
   const savedOwnId=localStorage.getItem('komo_v14_self_patient');
   S.ownPatient=S.ownPatients.find(p=>p.id===savedOwnId)
@@ -515,6 +515,7 @@ function patients(){
         <label><span>Sexe de référence</span><select name="sex_at_birth"><option value="not_stated">Non renseigné</option><option value="female">Femme</option><option value="male">Homme</option><option value="intersex">Intersexe</option></select></label>
       </div>
       <p class="op-create-patient-alert">Environnement non validé pour de vraies données de santé : n'utilisez que des dossiers fictifs tant que les exigences d'hébergement et de sécurité ne sont pas satisfaites.</p>
+      <label class="op-create-patient-attestation"><input type="checkbox" name="synthetic_attested" required> Je confirme utiliser uniquement une identité fictive dans cet environnement non encore autorisé pour les données de santé réelles.</label>
       <p id="opPatientCreateFeedback" class="op-create-patient-feedback" aria-live="polite"></p>
       <button class="button primary" type="submit">Créer le dossier et ouvrir la consultation →</button>
     </form>
