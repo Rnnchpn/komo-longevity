@@ -342,6 +342,10 @@ function progressStrip(){
   const p=patientProgress();
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
+async function openMotionLivePatient(){
+  try{const module=await import('./motion-live-guest-v1.js');await module.openMotionLive();}
+  catch(error){console.error('[Motion live patient]',error);toast('Session Motion momentanément indisponible.');}
+}
 function patientLobby(){
   const first=esc(S.profile?.first_name||S.profile?.display_name?.split(' ')[0]||S.user?.email?.split('@')[0]||'');
   const online='https://komolongevity.com/bilan-en-ligne/';
@@ -349,10 +353,11 @@ function patientLobby(){
     <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Choisissez le bilan qui vous correspond. Votre espace personnel reste sécurisé.</p></div>
     <div class="pulse-lobby-options">
       <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan guidé à distance. Découvrez le protocole et accédez au paiement sécurisé.</p><a href="${online}" class="pulse-lobby-action">Découvrir Motion Online <span>→</span></a></article>
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><p>Présentez-vous auprès de votre opérateur pour commencer.</p></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyLiveStart">Commencer ma consultation Motion <span>→</span></button></article>
     </div>
-    <p class="pulse-lobby-footnote">Un dossier clinique et ses résultats ne sont accessibles qu'aux personnes autorisées.</p>
+    <p class="pulse-lobby-footnote">La synchronisation test suit la progression du bilan ; les résultats restent protégés.</p>
   </div>`;
+  $('#pulseLobbyLiveStart')?.addEventListener('click',()=>openMotionLivePatient());
 }
 function patientHome(){
   const now=Date.now();
@@ -418,6 +423,7 @@ function patientHome(){
       </div>
       ${heroPhoto}
     </section>
+    <section class="p-live-cta"><div><span class="p-card-kicker">CONSULTATION MOTION · CANNES</span><h3>Prêt pour votre bilan ?</h3><p>Ouvrez votre salle de consultation test et transmettez votre code à l'opérateur.</p></div><button type="button" class="p-primary" id="pulseHomeLiveStart">Commencer Motion <span>→</span></button></section>
     <div class="p-section-label"><h3>Votre dossier</h3></div>
     <div class="p-two-cards">
       <section class="p-info-card"><div class="p-card-top"><span class="p-card-kicker">RÉSULTATS</span>
@@ -453,6 +459,7 @@ function patientHome(){
     </section>`:''}
     <div class="p-footer"><span>Compte personnel sécurisé · KŌMØ Pulse</span>
     <a href="mailto:contact@komolongevity.com">Besoin d’aide ? Contactez-nous</a></div>`;
+  $('#pulseHomeLiveStart')?.addEventListener('click',()=>openMotionLivePatient());
   document.querySelectorAll('[data-p-open]').forEach(b=>b.addEventListener('click',()=>{
     const target=$('#p-'+b.dataset.pOpen);if(!target)return;
     target.hidden=false;target.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'start'});
