@@ -144,9 +144,12 @@ export async function openMotionOperatorVideo(config){
  if(pane&&!pane.isConnected)close();
  if(pane&&roomId===config.sessionId){
   const container=config.containerId?document.getElementById(config.containerId):null;
-  (container||document.body).append(pane);
-  pane.classList.toggle("embedded",!!container);
-  pane.classList.remove("expanded");
+  const target=container||document.body;
+  // Polling must not reparent the video or close the pose canvas each time.
+  if(pane.parentElement!==target){
+   target.append(pane);
+   pane.classList.toggle("embedded",!!container);
+  }
   return;
  }
  close();signal=config.signal;roomId=config.sessionId;
