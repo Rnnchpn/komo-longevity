@@ -624,3 +624,8 @@
 .p-live-cta p{max-width:540px;color:#635f57;font-size:12px;line-height:1.6;margin:0}
 .p-live-cta .p-primary{flex:none;cursor:pointer;white-space:nowrap}
 @media(max-width:700px){.p-live-cta{display:grid;padding:18px;gap:14px}.p-live-cta .p-primary{width:100%;justify-content:center}}
+
+.op-live-mini{display:grid;gap:9px;padding:14px 0;margin-top:18px;border-top:1px solid #d5d3cc}
+.op-live-mini h4{font:600 16px/1.3 Inter,system-ui,sans-serif;margin:0}
+.op-live-mini p{font-size:11px;line-height:1.5;color:#5d6b62;margin:0}
+.op-live-mini .button{justify-self:start;font-size:11px}
