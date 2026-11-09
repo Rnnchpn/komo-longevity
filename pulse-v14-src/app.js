@@ -7,7 +7,7 @@ const recoveryLinkDetected=/\btype=recovery\b/.test(location.href)&&/\b(?:access
 let recoveryActive=recoveryLinkDetected;
 
 const PATIENT_NAV=[['home','Mon espace']];
-const PRO_NAV=[['operator','Operator'],['patients','Patients'],['appointments','Rendez-vous']];
+const PRO_NAV=[['live','En direct'],['operator','Operator'],['patients','Patients'],['appointments','Rendez-vous']];
 const OP_STEPS=[
  ['preflight','00–05','Sécurité & standardisation','Operator'],
  ['readiness','05–10','Préparation du bilan','Pulse'],
@@ -576,6 +576,95 @@ function patients(){
     if(noResult)noResult.hidden=!(query&&count===0);
   });
 }
+// Test-only live pairing monitor. Backend verifies the operator JWT and org membership.
+const MOTION_LIVE_ENDPOINT='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test';
+let motionLiveTimer=null,motionLiveFetching=false,motionLiveSignature='';
+async function motionLiveAPI(body){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.access_token)throw Error('Session Operator expirée. Connectez-vous à nouveau.');
+  const res=await fetch(MOTION_LIVE_ENDPOINT,{method:'POST',cache:'no-store',headers:{
+    'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token
+  },body:JSON.stringify(body)});
+  let data={};try{data=await res.json()}catch{throw Error('Réponse serveur illisible.')}
+  if(!res.ok||data.error)throw Error(data.error||'Serveur indisponible.');
+  return data;
+}
+function motionLiveMonitor(){
+  heading('En direct','KŌMØ OPERATOR · TEST');
+  $('#view').innerHTML=`<div class="op-live-dashboard">
+    <header class="op-live-head"><div><span class="overline">SESSION PATIENT SYNCHRONISÉE</span><h2>Consultations en direct</h2><p>Le patient commence sur son téléphone, communique son code à six chiffres, puis vous l'associez à un dossier fictif. Les étapes se synchronisent environ toutes les 2 à 3 secondes.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
+    <div class="op-live-toolbar"><span id="opLiveCount">Connexion aux sessions…</span><button type="button" class="button secondary" id="opLiveNewPatient">+ Créer un dossier fictif</button></div>
+    <div id="opLiveRooms" aria-live="polite"><p>Recherche des sessions…</p></div>
+    <p class="op-live-caution">Test exclusivement avec identités fictives. La vidéo et les mesures instrumentales ne sont pas transmises par cette synchronisation. L'opérateur conserve la responsabilité de la validation des tests.</p>
+  </div>`;
+  $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
+  $('#opLiveNewPatient').onclick=()=>{clearInterval(motionLiveTimer);motionLiveTimer=null;location.hash='patients'};
+  clearInterval(motionLiveTimer);motionLiveSignature='';
+  loadMotionLiveRooms(true);
+  motionLiveTimer=setInterval(()=>loadMotionLiveRooms(false),2400);
+}
+async function loadMotionLiveRooms(force=false){
+ if(motionLiveFetching||location.hash!=='#live')return;
+ const host=$('#opLiveRooms');if(!host)return;
+ motionLiveFetching=true;
+ try{
+  const data=await motionLiveAPI({action:'operator_list'});
+  const rooms=data.sessions||[];
+  const signature=JSON.stringify(rooms.map(x=>[x.id,x.status,x.stage_code,x.step_index,x.progress?.step_status,x.patient_id,x.updated_at,x.patient_last_seen_at]));
+  const count=$('#opLiveCount');
+  if(count)count.textContent=rooms.filter(x=>['waiting','ready','active'].includes(x.status)).length+' session(s) en cours · actualisation automatique';
+  if(force||signature!==motionLiveSignature){
+   motionLiveSignature=signature;
+   const selected=new Map([...host.querySelectorAll('[data-live-select]')].map(x=>[x.dataset.liveSelect,x.value]));
+   const statusLabels={waiting:'En attente',ready:'Patient prêt',active:'En cours',completed:'Terminé',closed:'Fermé'};
+   const choices=S.patients.filter(p=>p.data_classification==='synthetic'&&p.status==='active');
+   host.innerHTML=rooms.length?rooms.map(room=>{
+    const patient=S.patients.find(p=>p.id===room.patient_id);
+    const online=room.patient_last_seen_at&&Date.now()-new Date(room.patient_last_seen_at).getTime()<18000;
+    const stage=OP_STEPS.find(x=>x[0]===room.stage_code)?.[2]||(room.stage_code==='finished'?'Parcours terminé':'En préparation');
+    const pct=Math.round(Math.min(8,Number(room.step_index)||0)/8*100);
+    const patientName=patient?[patient.first_name,patient.last_name].filter(Boolean).join(' '):'Aucun dossier associé';
+    return `<article class="op-live-room" data-room="${esc(room.id)}">
+      <header><div><span class="overline">CODE PATIENT</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'Téléphone connecté':'Téléphone hors ligne'}</span></header>
+      <p>${esc(patientName)} · ${esc(stage)}</p>
+      <div class="op-live-track"><i style="width:${pct}%"></i></div><small>${pct}% des étapes parcourues · ${room.progress?.step_status==='running'?'Test en cours':'Attente du prochain test'}</small>
+      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et démarrer D0</button>`:`${room.patient_id?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir D0</button>':''}`}
+      <button type="button" class="button secondary" data-live-close="${esc(room.id)}">Clore la salle</button></div>
+    </article>`;
+   }).join(''):'<div class="op-live-empty">Aucune consultation active. Sur le téléphone du patient : Motion au centre → Commencer ma consultation.</div>';
+   for(const select of host.querySelectorAll('[data-live-select]'))if(selected.has(select.dataset.liveSelect))select.value=selected.get(select.dataset.liveSelect);
+   host.querySelectorAll('[data-live-attach]').forEach(b=>b.onclick=()=>attachMotionLive(b.dataset.liveAttach,b));
+   host.querySelectorAll('[data-live-operator]').forEach(b=>b.onclick=async()=>{
+     localStorage.setItem('komo_v14_patient',b.dataset.liveOperator);
+     await loadPro();location.hash='operator';render();
+   });
+   host.querySelectorAll('[data-live-close]').forEach(b=>b.onclick=async()=>{
+     if(!confirm('Fermer cette salle de test ?'))return;
+     b.disabled=true;
+     try{await motionLiveAPI({action:'operator_close',session_id:b.dataset.liveClose});await loadMotionLiveRooms(true)}
+     catch(e){toast(e.message||'Fermeture impossible.');b.disabled=false}
+   });
+  }
+ }catch(error){if(host)host.innerHTML='<p class="op-live-error">'+esc(error.message||'Erreur de synchronisation')+'</p>'}
+ finally{motionLiveFetching=false}
+}
+async function attachMotionLive(id,button){
+ const select=$('#opLiveRooms [data-live-select="'+id+'"]');
+ const patientId=select?.value||'';
+ if(!patientId)return toast('Sélectionnez un dossier fictif.');
+ const patient=S.patients.find(p=>p.id===patientId);
+ if(!patient||patient.data_classification!=='synthetic')return toast('Dossier fictif requis.');
+ button.disabled=true;button.textContent='Association…';
+ try{
+  const result=await sb.rpc('start_pulse_operator_session_v1',{p_patient_id:patientId,p_assessment_id:null});
+  if(result.error||!result.data?.session_id)throw Error(result.error?.message||'Impossible de démarrer D0.');
+  await motionLiveAPI({action:'operator_attach',session_id:id,patient_id:patientId,operator_session_id:result.data.session_id});
+  localStorage.setItem('komo_v14_patient',patientId);
+  toast('Session liée : le patient peut commencer ses tests.');
+  await loadPro();motionLiveSignature='';await loadMotionLiveRooms(true);
+ }catch(error){toast(error.message||'Association impossible.');button.disabled=false;button.textContent='Associer et démarrer D0'}
+}
+
 function operator(){
   heading('Session D0','KŌMØ OPERATOR TEAM');
   const by=new Map(S.opSteps.map(x=>[x.step_code,x]));
@@ -595,7 +684,8 @@ function render(){
   }
   const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
   shell();
-  if(S.mode==='pro'){if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
+  if(S.route!=='live'&&motionLiveTimer){clearInterval(motionLiveTimer);motionLiveTimer=null;}
+  if(S.mode==='pro'){if(S.route==='live')motionLiveMonitor();else if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
   else{if(S.route==='home'){if(!S.ownPatient&&!S.onlineSessions.length)patientLobby();else patientHome()}else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
