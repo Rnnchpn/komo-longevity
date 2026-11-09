@@ -213,7 +213,8 @@ Deno.serve(async(req:Request)=>{
   const results=old.results&&typeof old.results==="object"&&!Array.isArray(old.results)?{...old.results}:{};
   const note=s(b.note,300);
   let next=room.step_index,status="active",stage=step,finished:null|string=null;
-  let progress:any={...old,results,safety_confirmed:safety,step_status:event==="start"?"running":"pending"};
+  let progress:any={...old,results,safety_confirmed:safety,step_status:event==="start"?"running":"pending",
+   test_started_at:event==="start"?now():null};
   if(event==="start"){
    if(old.step_status==="running")return response(req,{ok:true,session:publicRow(room)});
   }else{
