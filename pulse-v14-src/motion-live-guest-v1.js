@@ -13,7 +13,7 @@ const STEPS=[
   ["qc_release","Vérification finale","L'opérateur vérifie la qualité des mesures. Le compte rendu reste soumis à validation."]
 ];
 let overlay=null,videoStream=null,timer=null,signalTimer=null,guestToken="",live=null,busy=false,opening=false,cameraInfo="Caméra désactivée";
-let facing="environment",peer=null,peerSender=null,peerId="",pendingWatch=null,signalCursor=0,offering=false,wakeLock=null;
+let facing="environment",peer=null,peerSender=null,peerId="",pendingWatch=null,signalCursor=0,offering=false,wakeLock=null,signalPolling=false;
 const rtcConfig={iceServers:[{urls:"stun:stun.cloudflare.com:3478"}]};
 const el=id=>overlay?.querySelector("#"+id);
 async function request(data){
@@ -190,7 +190,8 @@ async function makeOffer(){
  finally{offering=false;cameraLabel()}
 }
 async function pollSignals(){
- if(!overlay||!guestToken||live?.status!=="active")return;
+ if(!overlay||!guestToken||live?.status!=="active"||signalPolling)return;
+ signalPolling=true;
  try{
   const data=await request({action:"guest_signal_pull",guest_token:guestToken,since:signalCursor});
   for(const msg of data.signals||[]){
@@ -208,6 +209,7 @@ async function pollSignals(){
    }
   }
  }catch(error){feedback("Vidéo : "+(error.message||"connexion momentanément indisponible"))}
+ finally{signalPolling=false}
 }
 async function getVideo(facingMode){
  return navigator.mediaDevices.getUserMedia({
