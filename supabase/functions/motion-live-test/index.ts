@@ -186,6 +186,8 @@ Deno.serve(async(req:Request)=>{
   return pushSignal(req,room.id,"operator",b);
  }
  if(action==="operator_list"){
+  // Housekeep old SDP/candidates; no raw video is ever stored.
+  await db.from("pulse_motion_live_signals").delete().lt("created_at",new Date(Date.now()-3*3600000).toISOString());
   await db.from("pulse_motion_live_sessions").delete().lt("expires_at",new Date(Date.now()-24*3600000).toISOString());
   const {data,error}=await db.from("pulse_motion_live_sessions").select("id,display_code,status,stage_code,step_index,progress,patient_id,operator_session_id,operator_user_id,patient_last_seen_at,created_at,updated_at")
    .eq("organization_id",ORG_ID).gte("expires_at",now()).order("created_at",{ascending:false}).limit(60);
