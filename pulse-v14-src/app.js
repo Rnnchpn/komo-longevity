@@ -736,6 +736,9 @@ async function finalizeOperator(){if(!S.opSession)return toast('Aucune session a
 
 function render(){
   S.route=route();
+  // Close any remote camera when leaving the two monitored Operator workspaces.
+  if(S.mode!=='pro'||!['live','operator'].includes(S.route))
+    window.dispatchEvent(new Event('pulse:operator-signout'));
   if(S.mode==='patient'&&S.route!=='home'){
     // Older emails and bookmarked links still open the same patient screen.
     history.replaceState(null,'',location.pathname+location.search+'#home');
