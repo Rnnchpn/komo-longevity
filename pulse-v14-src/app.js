@@ -344,48 +344,15 @@ function progressStrip(){
 }
 function patientLobby(){
   const first=esc(S.profile?.first_name||S.profile?.display_name?.split(' ')[0]||S.user?.email?.split('@')[0]||'');
-  const email=esc(S.user?.email||'');
-  const base='https://komolongevity.com/bilan-en-ligne/';
+  const online='https://komolongevity.com/bilan-en-ligne/';
   $('#view').innerHTML=`<div class="pulse-patient-lobby">
-    <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Votre compte est actif. Choisissez votre bilan pour préparer la prochaine étape de votre parcours.</p></div>
+    <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Choisissez le bilan qui vous correspond. Votre espace personnel reste sécurisé.</p></div>
     <div class="pulse-lobby-options">
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan fonctionnel guidé à distance. Découvrez le protocole, puis accédez au paiement sécurisé.</p><a href="${base}" class="pulse-lobby-action">Découvrir le bilan en ligne <span>→</span></a></article>
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Une évaluation personnalisée de la marche, de l'équilibre, de la force et de la mobilité. Envoyez votre demande à l'opérateur.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyRequest">Faire une demande de bilan <span>→</span></button></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan guidé à distance. Découvrez le protocole et accédez au paiement sécurisé.</p><a href="${online}" class="pulse-lobby-action">Découvrir Motion Online <span>→</span></a></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><p>Présentez-vous auprès de votre opérateur pour commencer.</p></article>
     </div>
-    <section class="pulse-lobby-request" id="pulseLobbyRequestPanel" hidden><div class="pulse-lobby-form-head"><span>DEMANDE DE CONSULTATION · 200 €</span><h2>Préparons votre rendez-vous.</h2><p>Vos informations sont transmises à l'administrateur. La consultation est confirmée seulement après examen de votre demande.</p></div>
-      <form id="pulseLobbyForm">
-      <div class="pulse-lobby-form-grid"><label>Prénom <input name="first_name" required minlength="2" maxlength="80" autocomplete="given-name" value="${esc(S.profile?.first_name||'')}"></label>
-      <label>Nom <input name="last_name" required minlength="2" maxlength="80" autocomplete="family-name" value="${esc(S.profile?.last_name||'')}"></label></div>
-      <label>Adresse e-mail <input type="email" name="email" value="${email}" readonly required></label>
-      <label>Téléphone (facultatif) <input type="tel" name="phone" autocomplete="tel" maxlength="35" value="${esc(S.profile?.phone||'')}"></label>
-      <div class="pulse-lobby-form-grid"><label>Date souhaitée <input type="date" name="preferred_date" required></label>
-      <label>Autre date possible <input type="date" name="alternative_date"></label></div>
-      <label>Plage horaire <select name="preferred_time"><option value="indifferent">Indifférent</option><option value="matin">Matin</option><option value="apres_midi">Après-midi</option><option value="fin_journee">Fin de journée</option></select></label>
-      <label class="pulse-lobby-consent"><input type="checkbox" name="privacy_acknowledged" required><span>J'accepte le traitement de mes coordonnées pour ma demande, conformément à la <a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">politique de confidentialité</a>. Ne saisissez aucune donnée de santé dans ce formulaire.</span></label>
-      <input class="pulse-lobby-honeypot" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <p id="pulseLobbyFeedback" role="status" aria-live="polite"></p>
-      <button class="pulse-lobby-submit" type="submit">Transmettre ma demande <span>→</span></button></form></section>
-    <p class="pulse-lobby-footnote">La création d'un compte ne vaut ni paiement ni réservation. Votre dossier de suivi sera associé par l'équipe lors de la préparation du bilan.</p>
+    <p class="pulse-lobby-footnote">Un dossier clinique et ses résultats ne sont accessibles qu'aux personnes autorisées.</p>
   </div>`;
-  const panel=$('#pulseLobbyRequestPanel'),form=$('#pulseLobbyForm'),btn=$('#pulseLobbyRequest');
-  btn.onclick=()=>{panel.hidden=false;panel.scrollIntoView({behavior:'smooth',block:'start'});form.querySelector('input[name="first_name"]').focus()};
-  const day=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Paris'});
-  form.querySelectorAll('input[type="date"]').forEach(input=>input.min=day);
-  form.addEventListener('submit',async e=>{
-    e.preventDefault();if(!form.reportValidity())return;
-    const submit=form.querySelector('button[type="submit"]'),feedback=$('#pulseLobbyFeedback');
-    const data=Object.fromEntries(new FormData(form).entries());
-    const payload={action:'submit',first_name:data.first_name,last_name:data.last_name,email:S.user.email,phone:data.phone,preferred_date:data.preferred_date,alternative_date:data.alternative_date,preferred_time:data.preferred_time,website:data.website,privacy_acknowledged:data.privacy_acknowledged==='on'};
-    submit.disabled=true;feedback.textContent='Enregistrement…';
-    try{
-      const response=await fetch('https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-200-intake',{method:'POST',headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY},body:JSON.stringify(payload)});
-      const json=await response.json();
-      if(!response.ok||!json.ok)throw Error(json.error==='too_many_requests'?'Trop de demandes récentes. Réessayez plus tard.':'Votre demande n’a pas pu être enregistrée. Réessayez.');
-      panel.innerHTML='<div class="pulse-lobby-done"><span aria-hidden="true">✓</span><h2>Votre demande a été reçue.</h2><p>L’équipe KŌMØ va examiner votre demande. Vous serez informé par e-mail après sa validation. Votre rendez-vous n’est pas encore confirmé.</p></div>';
-      btn.disabled=true;btn.textContent='Demande envoyée';
-    }catch(err){feedback.textContent=err.message||'Erreur temporaire'}
-    finally{submit.disabled=false}
-  });
 }
 function patientHome(){
   const now=Date.now();
@@ -537,12 +504,54 @@ function patients(){
   };
   $('#view').innerHTML=`<section class="op-patients-app" aria-label="Annuaire des patients">
     <header class="op-patients-context"><span class="op-patients-kicker">CENTRE ACTUEL</span><div class="op-patients-context-row"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><span class="op-patients-count">${S.patients.length} dossier${S.patients.length>1?'s':''}</span></div></header>
-    <div class="op-patients-toolbar"><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
+    <div class="op-patients-toolbar"><button type="button" class="button primary" id="opPatientCreateToggle">+ Créer un dossier patient</button><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
+    <form id="opPatientCreateForm" class="op-create-patient-form" hidden>
+      <h3>Nouveau dossier patient</h3>
+      <p>Création directe par l'opérateur du centre. Aucun compte patient ou demande préalable nécessaire.</p>
+      <div class="op-create-patient-grid">
+        <label><span>Prénom</span><input name="first_name" autocomplete="off" maxlength="100" required></label>
+        <label><span>Nom</span><input name="last_name" autocomplete="off" maxlength="100" required></label>
+        <label><span>Date de naissance</span><input name="birth_date" type="date" required></label>
+        <label><span>Sexe de référence</span><select name="sex_at_birth"><option value="not_stated">Non renseigné</option><option value="female">Femme</option><option value="male">Homme</option><option value="intersex">Intersexe</option></select></label>
+      </div>
+      <p class="op-create-patient-alert">Environnement non validé pour de vraies données de santé : n'utilisez que des dossiers fictifs tant que les exigences d'hébergement et de sécurité ne sont pas satisfaites.</p>
+      <p id="opPatientCreateFeedback" class="op-create-patient-feedback" aria-live="polite"></p>
+      <button class="button primary" type="submit">Créer le dossier et ouvrir la consultation →</button>
+    </form>
     <section class="op-patients-section" aria-label="Dossiers patients"><div class="op-patients-section-head"><h3>Patients</h3><span>${active.length}</span></div>
     <div class="patient-list" id="opPatientRegular">${active.map(card).join('')||'<p class="op-patients-empty">Aucun dossier patient hors démonstration dans ce centre.</p>'}</div></section>
     ${demos.length?`<details class="op-demo-group" ${active.length===0?'open':''}><summary><span>Dossiers de démonstration</span><span class="op-demo-count">${demos.length}</span></summary><div class="patient-list" id="opPatientDemos">${demos.map(card).join('')}</div></details>`:''}
     <p id="opPatientNoResult" class="op-patients-no-results" hidden>Aucun dossier ne correspond à votre recherche.</p>
   </section>`;
+  const createToggle=$('#opPatientCreateToggle'),createForm=$('#opPatientCreateForm');
+  if(createToggle&&createForm){
+    createToggle.addEventListener('click',()=>{
+      createForm.hidden=!createForm.hidden;
+      createToggle.setAttribute('aria-expanded',String(!createForm.hidden));
+      if(!createForm.hidden)createForm.querySelector('[name="first_name"]')?.focus();
+    });
+    createForm.querySelector('[name="birth_date"]').max=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Paris'});
+    createForm.addEventListener('submit',async event=>{
+      event.preventDefault();
+      if(!S.org?.id)return toast('Aucun centre actif pour ce compte.');
+      if(!createForm.reportValidity())return;
+      const fd=new FormData(createForm);
+      const body={action:'create',organization_id:S.org.id,first_name:String(fd.get('first_name')||'').trim(),last_name:String(fd.get('last_name')||'').trim(),birth_date:String(fd.get('birth_date')||''),sex_at_birth:String(fd.get('sex_at_birth')||'not_stated'),create_account:false};
+      const feedback=$('#opPatientCreateFeedback'),submit=createForm.querySelector('[type="submit"]');
+      if(!body.first_name||!body.last_name||!body.birth_date)return;
+      submit.disabled=true;if(feedback)feedback.textContent='Création du dossier…';
+      try{
+        const {data,error}=await sb.functions.invoke('professional-patient',{body});
+        if(error||data?.error||!data?.patient?.id)throw Error(data?.detail||data?.error||error?.message||'Création impossible');
+        localStorage.setItem('komo_v14_patient',data.patient.id);
+        await loadPro();
+        location.hash='operator';render();
+        toast('Dossier créé. La session Motion peut être démarrée.');
+      }catch(error){
+        if(feedback)feedback.textContent=error?.message||'Impossible de créer le dossier.';
+      }finally{submit.disabled=false}
+    });
+  }
   document.querySelectorAll('.op-patients-app [data-patient]').forEach(b=>b.onclick=async()=>{
     localStorage.setItem('komo_v14_patient',b.dataset.patient);
     await loadPro();
