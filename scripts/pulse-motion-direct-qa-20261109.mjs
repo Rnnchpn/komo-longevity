@@ -27,6 +27,8 @@ const checks=[
   ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(STORAGE,guestToken)')],
   ['patient can mark steps and ready status',liveGuest.includes('action:"guest_event"')&&liveGuest.includes('event:"complete"')],
   ['operator live nav and pairing enabled',app.includes("['live','En direct']")&&app.includes("function motionLiveMonitor()")&&app.includes("action:'operator_attach'")&&app.includes("start_pulse_operator_session_v1")],
+  ['signed-in patient can start live Motion',app.includes('id="pulseLobbyLiveStart"')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")],
+  ['Operator D0 displays the ongoing guest stage',app.includes('id="operatorLiveStatus"')&&app.includes('refreshOperatorLiveStatus()')],
   ['live server verifies operator role and center',liveEdge.includes('db.auth.getUser(jwt)')&&liveEdge.includes('organization_members')&&liveEdge.includes('synthetic_patient_required')],
   ['live session token hashed, RLS protected by migration',liveEdge.includes('crypto.subtle.digest("SHA-256"')&&liveEdge.includes('guest_token_hash')],
   ['live UI readable on mobile',liveCss.includes('max-width:760px')&&css.includes('.op-live-room')]
