@@ -291,7 +291,8 @@ export async function openMotionLive(options={}){
  cameraStation=options.mode==="operator_camera";
  stationStart=typeof options.startSession==="function"?options.startSession:null;
  stationStop=typeof options.stopSession==="function"?options.stopSession:null;
- const key=cameraStation?STAFF_STORAGE:STORAGE;
+ // Stored room tokens are isolated by the signed-in clinician, never shared across accounts.
+ const key=cameraStation?STAFF_STORAGE+':'+String(options.ownerId||'unknown'):STORAGE;
  try{
   makeOverlay();
   const existing=sessionStorage.getItem(key);
