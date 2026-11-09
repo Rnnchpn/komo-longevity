@@ -104,3 +104,6 @@
  .moc-pose-indicator{font-size:10px}
  .moc-auto-feedback{font-size:11px}
 }
+
+.moc-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:9px;flex-wrap:wrap}
+@media(max-width:650px){.moc-head-actions{width:100%;justify-content:space-between}.moc-head-actions .moc-back{flex:1}}
