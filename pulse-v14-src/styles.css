@@ -575,3 +575,18 @@
 .ps-one-help a{font-weight:650;color:#45403c;text-decoration:underline;text-underline-offset:3px}
 .app-shell-patient .page{max-width:none}
 @media(prefers-reduced-motion:reduce){.ps-one-chevron{transition:none}}
+
+/* Operator: patient record is created directly by the authenticated center operator. */
+.op-patients-toolbar{flex-wrap:wrap;gap:12px}
+.op-patients-toolbar #opPatientCreateToggle{white-space:nowrap;min-height:44px}
+.op-create-patient-form[hidden]{display:none!important}
+.op-create-patient-form{display:grid;gap:16px;margin:0 0 24px;padding:24px;border:1px solid rgba(147,133,103,.25);border-radius:18px;background:#faf8f3;color:#272724}
+.op-create-patient-form h3{margin:0;font-size:25px;font-weight:500}
+.op-create-patient-form p{margin:0;font-size:13px;line-height:1.5}
+.op-create-patient-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.op-create-patient-grid label{display:grid;gap:7px;font-size:12px;font-weight:600}
+.op-create-patient-grid input,.op-create-patient-grid select{width:100%;min-width:0;box-sizing:border-box;padding:13px;border-radius:10px;border:1px solid #ccc7bb;background:#fff;color:#262624;font:inherit}
+.op-create-patient-form .op-create-patient-alert{border-left:3px solid #ad8155;padding:8px 12px;color:#725530;background:#f5ede2}
+.op-create-patient-feedback{color:#a13a33}
+.op-create-patient-form>.button{justify-self:start}
+@media(max-width:620px){.op-create-patient-grid{grid-template-columns:1fr}.op-create-patient-form{padding:18px}.op-patients-toolbar #opPatientCreateToggle{width:100%}}
