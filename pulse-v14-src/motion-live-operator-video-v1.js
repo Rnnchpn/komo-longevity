@@ -10,14 +10,16 @@ function loadStyles(){
  if(document.getElementById("mopvStyle"))return;
  const link=document.createElement("link");
  link.id="mopvStyle";link.rel="stylesheet";
- link.href="./motion-live-operator-video-v1.css?v=20261109-motion-online-v1";
+ link.href="./motion-live-operator-video-v1.css?v=20261109-remote-pose-v1";
  document.head.append(link);
 }
 function releaseConnection(notify){
  const prev=connectionId;
  clearInterval(pollTimer);pollTimer=null;
  if(pc){pc.ontrack=null;pc.onconnectionstatechange=null;pc.close();pc=null}
- const video=get("mopvVideo");if(video){video.srcObject=null;video.hidden=true}
+ const video=get("mopvVideo");
+ if(video?.srcObject)window.dispatchEvent(new CustomEvent("pulse:remote-video-stopped",{detail:{sessionId:roomId}}));
+ if(video){video.srcObject=null;video.hidden=true}
  get("mopvPlaceholder")?.removeAttribute("hidden");
  connectionId="";cursor=0;answering=false;polling=false;
  if(notify&&prev&&signal&&roomId){
@@ -87,13 +89,17 @@ async function watch(){
    video.srcObject=event.streams[0]||new MediaStream([event.track]);
    video.hidden=false;
    if(placeholder)placeholder.hidden=true;
+   // Pose detection uses the actual WebRTC video element (no new camera request).
+   window.dispatchEvent(new CustomEvent("pulse:remote-video-ready",{detail:{video,sessionId:roomId}}));
    video.play().catch(()=>status("Cliquez dans la vidéo pour activer la lecture."));
   };
   p.onconnectionstatechange=()=>{
    if(pc!==p)return;
    if(p.connectionState==="connected")status("DIRECT · Caméra de l’iPhone connectée");
-   else if(p.connectionState==="failed"||p.connectionState==="disconnected")
+   else if(p.connectionState==="failed"||p.connectionState==="disconnected"){
+    window.dispatchEvent(new CustomEvent("pulse:remote-video-stopped",{detail:{sessionId:roomId}}));
     status("Flux interrompu. Vérifiez le Wi-Fi et appuyez sur Reconnecter.");
+   }
   };
   status("Demande envoyée au téléphone · activez le partage caméra sur l’iPhone.");
   await signal({action:"operator_signal_push",session_id:roomId,connection_id:current,kind:"watch"});
@@ -128,7 +134,10 @@ function makePane(containerId){
   pane.classList.toggle("expanded");
   get("mopvExpand").textContent=pane.classList.contains("expanded")?"Réduire":"Agrandir";
  };
- get("mopvVideo").onclick=()=>get("mopvVideo")?.play().catch(()=>{});
+ get("mopvVideo").onclick=()=>{
+  const element=get("mopvVideo");
+  element?.play().then(()=>window.dispatchEvent(new CustomEvent("pulse:remote-video-ready",{detail:{video:element,sessionId:roomId}}))).catch(()=>{});
+ };
 }
 export async function openMotionOperatorVideo(config){
  if(!config||typeof config.signal!=="function"||!config.sessionId)throw Error("Séance caméra non définie");
