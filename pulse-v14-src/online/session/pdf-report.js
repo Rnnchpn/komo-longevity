@@ -1,6 +1,6 @@
 import {INTAKE_GROUPS,SCORING_GROUPS,scoreIntake,intakeProgress,questionnaireFocus} from './intake-model.mjs';
 import {MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
-import {normativeSummary} from './reference-norms.mjs';
+import {normativeSummary} from './reference-norms.mjs?v=20261110-balance30-v1';
 import {buildMotionPassport,programProgress,planTargets} from './motion-passport.mjs';
 
 export const PDF_REPORT_VERSION='KOMO_MOTION_PASSPORT_REPORT_V2';
