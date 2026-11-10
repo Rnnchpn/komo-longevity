@@ -17,11 +17,27 @@ export function oneLegFrame(points,stance='left'){
  if(indices.some(i=>points[i].x<.018||points[i].x>.982||points[i].y<.018||points[i].y>.982))
   return {valid:false,lifted:false,grounded:false,message:'Recadrez : une articulation est coupée.'};
  const rise=(support.y-free.y)/height;
- // Hysteresis leaves a neutral region between confirmed lift and confirmed contact.
- // A small absolute 2D ankle difference alone is insufficient to trigger a lift.
- const lifted=rise>.072&&(support.y-free.y)>.034;
- const grounded=rise<.033||(support.y-free.y)<.014;
+ const ankleGap=support.y-free.y;
+ // A raised ankle is not enough if the other foot's toe/heel is still planted.
+ // Use optional heel and toe landmarks for corroboration without requiring
+ // them when the camera does not reliably track footwear.
+ const corroborations=[];
+ for(const [left,right] of [[29,30],[31,32]]){
+  const fixed=points[onLeft?left:right],moving=points[onLeft?right:left];
+  if(good(fixed)&&good(moving)){
+   const gap=fixed.y-moving.y;
+   corroborations.push({lifted:gap/height>.052&&gap>.023,
+    grounded:gap/height<.024||gap<.010});
+  }
+ }
+ // Hysteresis prevents the trigger from flipping for subtle ankle jitter.
+ const ankleLift=rise>.072&&ankleGap>.034;
+ const footLift=corroborations.length===0||corroborations.some(p=>p.lifted);
+ const lifted=ankleLift&&footLift;
+ const grounded=rise<.033||ankleGap<.014||
+  corroborations.length===2&&corroborations.every(p=>p.grounded);
  return {valid:true,lifted,grounded,footRise:rise,height,
+   footEvidence:corroborations.length,
    message:lifted?'Appui sur '+(onLeft?'la jambe gauche':'la jambe droite')+' détecté.':
      grounded?'Deux pieds au sol · soulevez le pied opposé.':
      'Position intermédiaire · stabilisez l’appui.'};
