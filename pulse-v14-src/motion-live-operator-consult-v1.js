@@ -113,6 +113,119 @@ function formatResult(result,task){
  }
  return Number.isFinite(result.value)?String(result.value)+" "+task.unit:"Résultat enregistré";
 }
+function updatePanelTabs(){
+ const names={tests:"mocTabTests",questionnaire:"mocTabQuestionnaire",report:"mocTabReport"};
+ for(const [key,id] of Object.entries(names)){
+  const button=q(id);if(!button)continue;
+  button.classList.toggle("active",panelMode===key);
+  button.setAttribute("aria-selected",String(panelMode===key));
+ }
+ const summary=extras?.questionnaireState(questionnaireAnswers);
+ if(q("mocTabQuestionnaire")&&summary){
+  q("mocTabQuestionnaire").textContent="Questionnaires · "+summary.progress.completed+"/"+summary.progress.total;
+ }
+}
+function switchPanel(next){
+ if(!["tests","questionnaire","report"].includes(next)||!host)return;
+ voice?.abortCountdown();countdownPending=false;
+ panelMode=next;
+ if(q("mocStepNav"))q("mocStepNav").hidden=next!=="tests";
+ updatePanelTabs();
+ if(next==="tests")renderStep();
+ else if(next==="questionnaire")renderQuestionnaireSection();
+ else renderReportSection();
+}
+function questionnaireNote(text){
+ const status=q("mocIntakeState");
+ if(status)status.textContent=text;
+}
+function scheduleQuestionnaireSave(){
+ if(questionnaireTimer)clearTimeout(questionnaireTimer);
+ questionnaireTimer=setTimeout(()=>{
+  questionnaireTimer=null;
+  void saveQuestionnaire().catch(error=>questionnaireNote("Sauvegarde échouée : "+(error.message||"réessayer")+". Les réponses restent affichées."));
+ },750);
+}
+async function saveQuestionnaire(){
+ if(questionnaireTimer){clearTimeout(questionnaireTimer);questionnaireTimer=null}
+ if(questionnaireSaveInFlight){
+  await questionnaireSaveInFlight;
+  if(questionnaireDirty)return saveQuestionnaire();
+  return;
+ }
+ if(!room||!questionnaireDirty)return;
+ const snapshot=JSON.stringify(questionnaireAnswers),sessionId=room.id;
+ questionnaireSaveInFlight=(async()=>{
+  const result=await api({action:"operator_questionnaire_save",session_id:sessionId,
+   answers:JSON.parse(snapshot)});
+  if(room?.id===sessionId){
+   room.progress={...room.progress,questionnaire:result.session.progress.questionnaire};
+  }
+  if(JSON.stringify(questionnaireAnswers)===snapshot)questionnaireDirty=false;
+ })();
+ try{
+  await questionnaireSaveInFlight;
+  questionnaireNote("Réponses enregistrées.");
+ }finally{
+  questionnaireSaveInFlight=null;
+  if(questionnaireDirty)scheduleQuestionnaireSave();
+ }
+}
+function renderQuestionnaireSection(){
+ if(!host||!extras)return;
+ stopClockIfNotRunning();
+ const progress=extras.questionnaireState(questionnaireAnswers).progress;
+ q("mocProgressText").textContent="Questionnaire · "+progress.completed+"/"+progress.total+" réponses";
+ q("mocProgressFill").style.width=progress.percent+"%";
+ q("mocStepNav").hidden=true;
+ extras.renderClinicQuestionnaire(q("mocTestBody"),questionnaireAnswers,questionnaireIndex,{
+  onChange:()=>{
+   questionnaireDirty=true;
+   scheduleQuestionnaireSave();
+   updatePanelTabs();
+  },
+  onNext:()=>{questionnaireIndex=Math.min(4,questionnaireIndex+1);renderQuestionnaireSection()},
+  onPrevious:()=>{questionnaireIndex=Math.max(0,questionnaireIndex-1);renderQuestionnaireSection()},
+  onTests:()=>switchPanel("tests")
+ });
+}
+function stopClockIfNotRunning(){
+ // The running measurement continues while the operator enters questionnaire answers.
+ if(room?.progress?.step_status!=="running"&&clock){clearInterval(clock);clock=null;}
+}
+function renderReportSection(){
+ if(!host||!extras)return;
+ const results=room?.progress?.results||{};
+ const report=extras.clinicReportSummary(questionnaireAnswers,results);
+ q("mocProgressText").textContent="Rapport · "+report.recorded+" tests mesurés, "+report.skipped+" non réalisés";
+ q("mocProgressFill").style.width=(Math.min(6,report.recorded+report.skipped)/6*100)+"%";
+ q("mocStepNav").hidden=true;
+ const finished=room?.status==="completed";
+ q("mocTestBody").innerHTML='<section class="moc-test moc-report-section">'+
+  '<span class="moc-kicker">KŌMØ MOTION · SYNTHÈSE DE DÉMONSTRATION</span>'+
+  '<h3>Votre rapport de consultation</h3>'+
+  '<div class="moc-recap">'+TESTS.map(t=>'<div><span>'+HTML(t.title)+'</span><strong>'+HTML(formatResult(results[t.id],t))+'</strong></div>').join("")+'</div>'+
+  '<p class="moc-report-meta">Questionnaires : '+report.answered+' / '+report.total+' réponses'+
+  (report.complete?' · complets':' · incomplets, signalés dans le PDF')+'.</p>'+
+  '<p class="moc-help">Compte rendu descriptif du bilan Motion physique. Les estimations de mouvement sur vidéo 2D restent expérimentales ; pas de diagnostic ni de Motion Score sans les mesures standardisées nécessaires.</p>'+
+  '<div class="moc-buttons"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le rapport PDF</button>'+
+  '<button type="button" class="moc-button secondary" id="mocReportQuestionnaire">Compléter les questionnaires</button></div>'+
+  (!finished?'<p class="moc-status">Terminez ou indiquez non réalisé pour chaque test avant de générer le rapport.</p>':'')+
+  '<p id="mocReportStatus" class="moc-status" role="status"></p></section>';
+ q("mocReportQuestionnaire").onclick=()=>switchPanel("questionnaire");
+ const button=q("mocDownloadPdf");
+ if(button)button.onclick=async()=>{
+  button.disabled=true;
+  const status=q("mocReportStatus");
+  try{
+   if(questionnaireDirty)await saveQuestionnaire();
+   status.textContent="Création du PDF sur cet ordinateur…";
+   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date());
+   status.textContent="Rapport créé : "+filename;
+  }catch(error){status.textContent="Impossible de générer le PDF : "+(error.message||"erreur de chargement")}
+  finally{if(button.isConnected)button.disabled=false}
+ };
+}
 function renderSummary(){
  stopClock();
  const results=room?.progress?.results||{};
