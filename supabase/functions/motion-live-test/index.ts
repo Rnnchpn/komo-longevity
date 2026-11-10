@@ -212,6 +212,55 @@ Deno.serve(async(req:Request)=>{
   if(action==="operator_signal_pull")return pullSignals(req,room.id,"guest",b.since);
   return pushSignal(req,room.id,"operator",b);
  }
+
+ // The existing KŌMØ Motion Online questionnaire can be filled at the operator's
+ // workstation before, during or after the six tests (synthetic data only).
+ // Save only whitelisted answers. No video, landmarks, images or audio are stored.
+ if(action==="operator_questionnaire_save"){
+  const id=s(b.session_id,50);
+  if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const {data:room,error:roomError}=await db.from("pulse_motion_live_sessions").select("*")
+   .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
+  if(roomError||!room)return response(req,{error:"session_not_found"},404);
+  if(room.operator_user_id!==actor.id||!room.patient_id)return response(req,{error:"operator_owner_required"},403);
+  if(!["active","completed"].includes(room.status)||new Date(room.expires_at).getTime()<=Date.now())
+   return response(req,{error:"room_unavailable"},409);
+  const {data:patient}=await db.from("patients").select("data_classification,status")
+   .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
+  if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic")
+   return response(req,{error:"synthetic_patient_required"},403);
+  const answers=b.answers;
+  if(!answers||typeof answers!=="object"||Array.isArray(answers))
+   return response(req,{error:"invalid_questionnaire"},422);
+  // 22 original self-report items from online/session/intake-model.mjs.
+  const profile:Record<string,string[]>={
+   ageBand:["under40","40-49","50-59","60-69","70-79","80plus","undisclosed"],
+   goal:["independence","walk","strength","confidence","general"]
+  };
+  const rating=new Set(["walk10","stairs","chair","carry","bend","obstacle","turn","stand",
+   "pain","fatigue","fear","avoid","sleep","stress","recovered","qol",
+   "walkingDays","strengthDays","outdoors","breaks"]);
+  const entries=Object.entries(answers);
+  if(entries.length>22)return response(req,{error:"questionnaire_too_large"},422);
+  const cleaned:Record<string,string>={};
+  for(const [key,value] of entries){
+   if(typeof value!=="string"||value.length>30)return response(req,{error:"invalid_answer"},422);
+   if(profile[key]){
+    if(!profile[key].includes(value))return response(req,{error:"invalid_answer"},422);
+   }else if(rating.has(key)){
+    if(!["0","1","2","3","4"].includes(value))return response(req,{error:"invalid_answer"},422);
+   }else return response(req,{error:"unknown_question"},422);
+   cleaned[key]=value;
+  }
+  const previous=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
+  const progress={...previous,questionnaire:{version:"KOMO_MOTION_SELF_REPORT_V1",answers:cleaned,
+    updated_at:now(),entered_by:"operator"}};
+  const {data,error}=await db.from("pulse_motion_live_sessions").update({progress,updated_at:now()})
+   .eq("id",id).eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+   .eq("updated_at",room.updated_at).select("*").maybeSingle();
+  return error||!data?response(req,{error:"questionnaire_conflict_retry"},409):
+   response(req,{ok:true,session:publicRow(data)});
+ }
  if(action==="operator_tests_init"||action==="operator_test_update"){
   const id=s(b.session_id,50);
   if(!uuid(id))return response(req,{error:"invalid_session"},422);
