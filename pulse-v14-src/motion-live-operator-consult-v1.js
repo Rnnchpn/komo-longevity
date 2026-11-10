@@ -568,7 +568,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261109-live-pose-v1");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261110-live-hud-v1");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{
