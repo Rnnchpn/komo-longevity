@@ -65,7 +65,7 @@ function ready(code,accepted){
 }
 async function poll(){
  try{const d=await api('patient_checkin_status');
-  if(d.state==='invited')form();
+  if(d.state==='invited'&&!document.getElementById('checkinForm'))form();
   else if(d.state==='ready'){if(!document.querySelector('.ready-code'))ready(d.code,false)}
   else if(d.state==='accepted'){ready(d.code,true);clearInterval(interval);interval=null}
  }catch(error){
