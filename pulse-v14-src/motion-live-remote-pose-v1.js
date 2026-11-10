@@ -1,7 +1,7 @@
 // KŌMØ Pulse — experimental 2D body landmarks, computed ONLY on the Operator browser.
 // The paired iPhone provides an encrypted WebRTC stream. No raw video, skeleton or frame is uploaded.
 import {createPoseEngine} from './online/session/pose-engine.js';
-import {createMovementTracker,frameInfo} from './online/session/metrics.mjs';
+import {createMovementTracker,frameInfo} from './online/session/metrics.mjs?v=20261110-live-hud-v1';
 import {createOneLegObserver,oneLegFrame} from './online/session/unipodal-metrics.mjs';
 import {createSideProfileStability,sideProfileFrame,surfaceSagittalIndex} from './online/session/profile-photo-metrics.mjs';
 
