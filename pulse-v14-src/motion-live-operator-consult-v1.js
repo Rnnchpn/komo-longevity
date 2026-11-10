@@ -271,7 +271,9 @@ function timeDisplay(){
     reading.balanceState==="completed"?"ESSAI TERMINÉ": "APPUI DÉTECTÉ · MESURE EN COURS";
   if(reading?.balanceState==="completed"&&!clockCompletedNotified){
    clockCompletedNotified=true;poseTracker?.stopMeasurement();
-   voice?.complete();
+   // "Temps écoulé" is reserved for actually reaching the 30 s ceiling.
+   // Early foot contact, compensations and lost tracking must not announce 30 s.
+   if(reading.balanceReason==="limit")voice?.complete();
    setStatus(balanceReasonText(reading.balanceReason));
   }
   return;
