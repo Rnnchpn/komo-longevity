@@ -234,8 +234,19 @@ export async function downloadMotionPdf(data){
  }
  const one=data.ageReference?.unipodal?.[0];
  if(one?.expected!==null&&one?.expected!==undefined)
-  line('Unipodal : donnees publiees '+one.expected+' s (meilleur de trois essais). Notre test webcam de 20 s n est pas directement comparable.',
+  line('Unipodal : donnees publiees '+one.expected+' s (meilleur de 3 essais, plafond de 45 s). Notre test video de 30 s n est pas directement comparable.',
   {size:8.4,color:muted});
+ const left=data.observations.find(item=>item.id==='unipodal_left');
+ const right=data.observations.find(item=>item.id==='unipodal_right');
+ if(left&&right&&left.value!==null&&right.value!==null){
+  const delta=Math.abs(left.value-right.value);
+  line('Equilibre yeux ouverts (max 30 s par cote) : gauche '+decimal(left.value,1)+' s, droit '+decimal(right.value,1)+' s ; ecart descriptif '+decimal(delta,1)+' s.',
+   {size:8.8,color:muted});
+  line('Repere des 10 s : association de cohorte, pas prediction de risque individuel ou d esperance de vie.',
+   {size:8.3,color:muted});
+  line('Video 2D exploratoire. Arret a la reprise d appui, appui externe, au retour du pied au sol ou a 30 s. Verifier tout incident de capture.',
+   {size:8.1,color:muted});
+ }
  title('Motion Score fonctionnel - algorithme de reference');
  if(data.motion.complete){
   line(String(data.motion.score)+' / 100',{size:23,bold:true,color:green,leading:12});
