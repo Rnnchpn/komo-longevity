@@ -2,7 +2,8 @@
 // The physician/operator edits all fields on the desktop; nothing is collected on the iPhone.
 // This module has no access to camera frames, audio or WebRTC signaling.
 import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './online/session/intake-model.mjs';
-import {buildPdfReportData,downloadMotionPdf} from './online/session/pdf-report.js?v=20261110-balance30-v1';
+import {buildClinicPassport} from './motion-live-clinic-passport-v2.mjs';
+import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -59,13 +60,10 @@ export function clinicReportSummary(answers={},results={}){
  return {answered:progress.completed,total:progress.total,complete:score.complete,profileIndex:score.profileIndex,
   recorded:done,skipped,totalTests:ids.length};
 }
+export function clinicPassport(answers={},results={},date=new Date(),options={}){
+ return buildClinicPassport(answers,results,{date,subject:options.subject||'Dossier fictif'});
+}
 export async function downloadClinicReport(answers={},results={},generatedAt=new Date(),options={}){
- const mapped={...results};
- // A surface posture observation is qualitative; never turn it into a false SVA value.
- if(mapped.posture?.status==='done'&&!Number.isFinite(mapped.posture?.value)){
-  mapped.posture={...mapped.posture};
- }
- const data=buildPdfReportData(answers,mapped,null,false,generatedAt,{mode:'CABINET',
-  subject:String(options?.subject||'Dossier fictif').slice(0,90)});
- return downloadMotionPdf(data);
+ const passport=clinicPassport(answers,results,generatedAt,options);
+ return downloadClinicPassport(passport);
 }

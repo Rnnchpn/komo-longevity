@@ -414,3 +414,70 @@
  .moc-camera-host{min-height:460px}
  .mopv-window.embedded .mopv-screen{min-height:400px}
 }
+
+/* MOTION PASSPORT V2 — editorial report with a right-hand cover rather than dead video. */
+.moc-passport-section h3{font-size:clamp(30px,2.6vw,38px);margin:7px 0 9px}
+.moc-passport-section h4{
+ font:500 23px/1.05 "Cormorant Garamond",Georgia,serif;
+ margin:20px 0 11px;color:#253d34
+}
+.moc-passport-section>.moc-help{max-width:60ch;font-size:11px;line-height:1.6}
+.moc-passport-facts{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:15px 0 18px;
+}
+.moc-passport-facts>div{min-width:0;background:#f0ebe1;border-radius:10px;padding:12px 9px}
+.moc-passport-facts strong{display:block;font:750 clamp(23px,3vw,36px)/1 Inter,system-ui,sans-serif;color:#213b32}
+.moc-passport-facts span{display:block;color:#777266;font-size:9px;margin-top:5px}
+.moc-passport-insight{
+ color:#3c4a40;border-left:3px solid #bea67d;background:#f5f1e8;
+ padding:10px 12px;margin:8px 0;border-radius:0 9px 9px 0;
+ font:500 11px/1.65 Inter,system-ui,sans-serif
+}
+.moc-passport-priority{
+ display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;
+ padding:12px 0;border-bottom:1px solid #e3dbcd
+}
+.moc-passport-priority>span{font:750 11px/1.6 Inter,system-ui,sans-serif;color:#b69a69}
+.moc-passport-priority strong{font-size:12px;color:#263b31}
+.moc-passport-priority p{font:500 11px/1.6 Inter,system-ui,sans-serif;margin:5px 0;color:#535b52}
+.moc-passport-priority small{font-size:9px;color:#887a64}
+.moc-show-passport .moc-camera-heading,
+.moc-show-passport .moc-camera-host,
+.moc-show-passport .moc-pose-indicator,
+.moc-show-passport .moc-camera-foot{display:none!important}
+.moc-show-passport .moc-passport-aside{
+ flex:1;min-height:0;display:flex;align-items:stretch;justify-content:stretch;
+}
+.moc-passport-aside[hidden]{display:none!important}
+.moc-passport-visual{
+ background:radial-gradient(circle at 80% 30%,#24413a 0%,#142b27 43%,#10241f 100%);
+ color:#f4efe5;border:1px solid #6b7764;border-radius:13px;min-height:500px;
+ width:100%;display:flex;flex-direction:column;padding:clamp(25px,4vw,52px);
+ box-shadow:inset 0 0 0 1px #122c29
+}
+.moc-passport-visual>span{color:#d1b887;font-size:10px;letter-spacing:.18em;font-weight:750}
+.moc-passport-visual>strong{font:600 clamp(28px,4vw,44px)/1 Georgia,serif;letter-spacing:.10em;margin:16px 0 0;color:#f5f0e5}
+.moc-passport-visual>i{
+ font:400 clamp(48px,7vw,100px)/.92 "Cormorant Garamond",Georgia,serif;
+ margin:auto 0 15px;letter-spacing:-.03em;color:#f6f0e6
+}
+.moc-passport-visual>p{color:#e1d4bc;font:450 12px/1.7 Inter,system-ui,sans-serif;margin:0 0 25px}
+.moc-passport-line{width:100%;height:1px;background:#a58e66}
+.moc-passport-ident{display:flex;justify-content:space-between;gap:16px;margin:18px 0;color:#c8b593}
+.moc-passport-ident span{font-size:9px;letter-spacing:.06em}
+.moc-passport-ident b{font-size:12px;font-variant-numeric:tabular-nums}
+.moc-passport-visual-metrics{display:flex;gap:28px;margin:12px 0 16px}
+.moc-passport-visual-metrics strong{display:block;font-size:35px;font-variant-numeric:tabular-nums}
+.moc-passport-visual-metrics span{font-size:10px;letter-spacing:.1em;color:#c8b593}
+.moc-passport-visual>small{font-size:9px;line-height:1.5;color:#b6baa9;margin-top:auto}
+@media(max-width:1050px){
+ .moc-passport-visual{min-height:420px}
+ .moc-passport-visual>i{margin:35px 0;font-size:72px}
+}
+@media(max-width:650px){
+ .moc-passport-facts{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .moc-passport-facts strong{font-size:23px}
+ .moc-passport-facts span{font-size:8px}
+ .moc-passport-visual{padding:25px;min-height:340px}
+ .moc-passport-visual>i{font-size:60px}
+}

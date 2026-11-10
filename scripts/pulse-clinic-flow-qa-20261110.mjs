@@ -19,7 +19,7 @@ for(const name of ['motion-live-clinic-extras-v1.js','motion-live-clinic-voice-v
  const result=parses('site/pulse-v14/'+name);
  assert.equal(result.status,0,name+' syntax: '+result.stderr);
 }
-assert.ok(extras.includes('INTAKE_GROUPS')&&extras.includes('downloadMotionPdf'));
+assert.ok(extras.includes('INTAKE_GROUPS')&&extras.includes('downloadClinicPassport')&&extras.includes('buildClinicPassport'));
 assert.ok(voice.includes('createVoiceControl')&&voice.includes('createAudioFeedback'));
 assert.ok(consult.includes('mocVoice')&&consult.includes('handleVoiceAction')&&consult.includes('startWithCountdown'));
 assert.ok(consult.includes('mocTabQuestionnaire')&&consult.includes('mocTabReport')&&consult.includes('saveQuestionnaire'));
