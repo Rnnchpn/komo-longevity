@@ -13,7 +13,7 @@ export const questionnaireCount=QUESTION_COUNT;
 export function questionnaireState(answers={}){
  return {progress:intakeProgress(answers),score:scoreIntake(answers)};
 }
-export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNext,onPrevious,onTests}={}){
+export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNext,onPrevious,onComplete,onTests,onSave}={}){
  const index=Math.max(0,Math.min(INTAKE_GROUPS.length-1,Number(page)||0));
  const group=INTAKE_GROUPS[index];
  const progress=intakeProgress(answers);
@@ -30,9 +30,10 @@ export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNex
    }).join('');
    return '<fieldset class="moc-question"><legend>'+(n+1)+'. '+esc(question.label)+'</legend><div class="moc-question-choices">'+options+'</div></fieldset>';
   }).join('')+'</div><p class="moc-help">'+esc(group.note)+'</p>'+
-  '<p id="mocIntakeState" class="moc-status" role="status" aria-live="polite">Réponses enregistrées automatiquement dans la séance de démonstration.</p>'+
-  '<div class="moc-buttons"><button type="button" id="mocIntakePrev" class="moc-button secondary">'+(index?'← Précédent':'← Tests')+'</button>'+
-  '<button type="button" id="mocIntakeNext" class="moc-button primary">'+(index===INTAKE_GROUPS.length-1?'Terminer les questionnaires':'Section suivante →')+'</button></div>'+
+  '<p id="mocIntakeState" class="moc-status" role="status" aria-live="polite">Les modifications sont sauvegardées sur le serveur. Vérifiez la confirmation avant de quitter.</p>'+
+  '<div class="moc-buttons"><button type="button" id="mocIntakeSave" class="moc-button secondary">✓ Enregistrer les réponses</button>'+
+  '<button type="button" id="mocIntakePrev" class="moc-button secondary">'+(index?'← Précédent':'← Tests')+'</button>'+
+  '<button type="button" id="mocIntakeNext" class="moc-button primary">'+(index===INTAKE_GROUPS.length-1?'Enregistrer et voir le rapport →':'Enregistrer et continuer →')+'</button></div>'+
   '</section>';
  for(const question of group.questions){
   for(const input of root.querySelectorAll('input[name="'+question.id+'"]')){
@@ -47,9 +48,9 @@ export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNex
   }
  }
  root.querySelector('#mocIntakePrev').onclick=()=>index===0?onTests?.():onPrevious?.();
+ root.querySelector('#mocIntakeSave').onclick=()=>onSave?.();
  root.querySelector('#mocIntakeNext').onclick=()=>{
-  // Partial groups can be revisited. Report will explicitly label unanswered items.
-  if(index===INTAKE_GROUPS.length-1)onTests?.();
+  if(index===INTAKE_GROUPS.length-1)onComplete?.();
   else onNext?.();
  };
 }
