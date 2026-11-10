@@ -39,7 +39,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261110-video-measures-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261110-passport-v2";
  document.head.append(link);
 }
 function stopClock(){
@@ -345,7 +345,10 @@ function timeDisplay(){
 }
 function renderStep(){
  if(!host||!room)return;
- if(room.status==="completed"||room.stage_code==="finished"){renderSummary();return}
+ if(room.status==="completed"||room.stage_code==="finished"){
+  if(extras){panelMode="report";renderReportSection()}else renderSummary();
+  return
+ }
  const t=currentTest();
  if(!t){renderWaiting("La session doit être initialisée dans les tests Motion Online.");return}
  const results=room.progress?.results||{};
