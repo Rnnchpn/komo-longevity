@@ -25,7 +25,7 @@ assert.equal(report.outcomes.motionScore,null);
 assert.equal(report.outcomes.motionAge,null);
 assert.equal(report.outcomes.lifeExpectancy,null);
 assert.equal(report.measures[0].display,'15 levers / 30 s');
-assert.equal(report.measures[1].display,'11 répétitions');
+assert.equal(report.measures[1].display,'11 répétitions / 20 s');
 assert.equal(report.measures[2].display,'28,9 s / 30 s');
 assert.equal(report.measures[3].display,'30 s / 30 s');
 assert.equal(report.measures[5].display,'Alignement apparent neutre');
