@@ -59,12 +59,13 @@ export function clinicReportSummary(answers={},results={}){
  return {answered:progress.completed,total:progress.total,complete:score.complete,profileIndex:score.profileIndex,
   recorded:done,skipped,totalTests:ids.length};
 }
-export async function downloadClinicReport(answers={},results={},generatedAt=new Date()){
+export async function downloadClinicReport(answers={},results={},generatedAt=new Date(),options={}){
  const mapped={...results};
  // A surface posture observation is qualitative; never turn it into a false SVA value.
  if(mapped.posture?.status==='done'&&!Number.isFinite(mapped.posture?.value)){
   mapped.posture={...mapped.posture};
  }
- const data=buildPdfReportData(answers,mapped,null,false,generatedAt,{mode:'CABINET'});
+ const data=buildPdfReportData(answers,mapped,null,false,generatedAt,{mode:'CABINET',
+  subject:String(options?.subject||'Dossier fictif').slice(0,90)});
  return downloadMotionPdf(data);
 }
