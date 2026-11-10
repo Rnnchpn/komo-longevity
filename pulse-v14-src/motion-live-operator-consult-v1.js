@@ -351,9 +351,11 @@ function updatePosePanel(reading){
    const previous=autoValue;
    autoValue=detected;
    if(tile){
-    tile.textContent=String(detected);
+    // Avoid repeating screen-reader announcements 6 times a second;
+    // announce only genuine changes in the count.
+    if(tile.textContent!==String(detected))tile.textContent=String(detected);
     tile.classList.toggle("moc-count-verified",ready);
-    if(detected>0&&detected!==previous&&tile.animate)
+    if(detected>0&&detected>previous&&tile.animate)
      tile.animate([{transform:"scale(1.17)"},{transform:"scale(1)"}],{duration:240,easing:"ease-out"});
    }
    if(input&&!manualEdited)input.value=String(detected);
