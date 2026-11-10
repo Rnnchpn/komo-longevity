@@ -135,7 +135,9 @@ Deno.serve(async(req:Request)=>{
   }
   if(state!=="invited"||room.status!=="waiting")return response(req,{error:"already_submitted"},409);
   const alias=s(b.alias,32),ageBand=s(b.age_band,16),goal=s(b.goal,20);
-  if(!/^[\p{L}][\p{L} 0-9'-]{1,31}$/u.test(alias)||
+  // No free-text identities may be entered while the centre is test-only.
+  // Only server-approved fictitious aliases can be stored.
+  if(!["Camille","Alex","Morgan","Sacha","Noa"].includes(alias)||
     !["under40","40-49","50-59","60-69","70-79","80plus"].includes(ageBand)||
     !["independence","walk","strength","confidence","general"].includes(goal)||
     b.synthetic_attested!==true)
