@@ -260,6 +260,8 @@ const scripts = [
   'scripts/pulse-motion-direct-qa-20261109.mjs',
   // Supervised physical consultation: voice, questionnaire, video counters, PDF.
   'scripts/pulse-clinic-flow-qa-20261110.mjs',
+  // Evidence-aware consultant passport, PDF renderer and 0/22 questionnaire regression.
+  'scripts/pulse-clinic-passport-v2-qa-20261110.mjs',
   // Inline iPhone video, huge countdown and real-time STS count regression.
   'scripts/pulse-live-hud-qa-20261110.mjs',
   // Clinician-supervised single-leg stance: 30 seconds starts on foot lift.
