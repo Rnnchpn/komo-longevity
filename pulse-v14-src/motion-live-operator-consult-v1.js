@@ -258,7 +258,15 @@ function renderReportSection(){
    more.map(nutritionCard).join('')+
    '<p class="moc-help">'+HTML(plan.review)+'</p></details>'+
   '<p class="moc-report-guard">Proposition éducative : la vidéo et le questionnaire ne permettent ni diagnostic de carence, ni prescription de compléments. Vérification clinique nécessaire.</p>'+
-  '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger mon passeport + programme PDF</button>'+
+  '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le passeport complet (5 catégories)</button>'+
+  '<div class="moc-category-export"><label for="mocExportCategory">Exporter une grande catégorie</label>'+
+   '<select id="mocExportCategory" aria-label="Choisir la catégorie">'+
+    '<option value="synthese">1 · Synthèse et diagramme</option>'+
+    '<option value="tests">2 · Tests et qualité de mesure</option>'+
+    '<option value="exercices">3 · Exercices à domicile</option>'+
+    '<option value="nutrition">4 · Nutrition et compléments</option>'+
+    '<option value="suivi">5 · Suivi à 6 semaines</option></select>'+
+   '<button class="moc-button secondary" id="mocDownloadChapter"'+(!finished?' disabled':'')+'>↓ Exporter cette catégorie</button></div>'+
   '<button type="button" class="moc-button secondary" id="mocReportQuestionnaire">Questionnaires</button></div>'+
   (!finished?'<p class="moc-status">Terminez les six épreuves pour exporter le document.</p>':'')+
   '<p id="mocReportStatus" class="moc-status" role="status"></p></section>';
@@ -281,19 +289,23 @@ function renderReportSection(){
  }
  updatePanelTabs();
  q("mocReportQuestionnaire").onclick=()=>switchPanel("questionnaire");
- const button=q("mocDownloadPdf");
- if(button)button.onclick=async()=>{
-  button.disabled=true;
+ const button=q("mocDownloadPdf"),chapter=q("mocDownloadChapter");
+ const exportPdf=async(type,clicked)=>{
+  if(!clicked)return;
+  clicked.disabled=true;
   const status=q("mocReportStatus");
   try{
    if(questionnaireDirty)await saveQuestionnaire();
-   status.textContent="Création du passeport et de votre programme sur cet ordinateur…";
-   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),{subject:label,simulated});
-   status.textContent="Passeport téléchargé : "+filename;
+   status.textContent="Préparation du PDF "+(type==="all"?"complet":"par catégorie")+"…";
+   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),
+    {subject:label,simulated,category:type});
+   status.textContent="Fichier exporté : "+filename;
   }catch(error){
    status.textContent="Export indisponible : "+(error.message||"erreur de chargement");
-  }finally{if(button.isConnected)button.disabled=false}
+  }finally{if(clicked.isConnected)clicked.disabled=false}
  };
+ if(button)button.onclick=()=>exportPdf("all",button);
+ if(chapter)chapter.onclick=()=>exportPdf(q("mocExportCategory")?.value||"synthese",chapter);
 }
 
 function renderSummary(){
