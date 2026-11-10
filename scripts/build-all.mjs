@@ -260,6 +260,8 @@ const scripts = [
   'scripts/pulse-motion-direct-qa-20261109.mjs',
   // Supervised physical consultation: voice, questionnaire, video counters, PDF.
   'scripts/pulse-clinic-flow-qa-20261110.mjs',
+  // Inline iPhone video, huge countdown and real-time STS count regression.
+  'scripts/pulse-live-hud-qa-20261110.mjs',
   // Deterministic movement algorithm tests, independent of actual camera hardware.
   'scripts/pulse-pose-metrics-qa.mjs',
   // Check voice command interpretation and microphone lifecycle without hardware.

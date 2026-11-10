@@ -212,3 +212,136 @@
  .moc-question-choices{display:grid;grid-template-columns:1fr}
  .moc-question-choice{min-height:44px}
 }
+
+/* Motion Live 2026-11-10: visible rep counter + large camera and countdown */
+@media(min-width:1051px){
+ .app-shell[data-pulse-view="operator"] .moc-grid{
+   grid-template-columns:minmax(390px,.84fr) minmax(420px,1.16fr);
+   gap:12px;
+ }
+ .app-shell[data-pulse-view="operator"] .page{
+   padding:10px 12px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-head{
+   margin-bottom:7px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-head h2{
+   font-size:29px;
+   margin:3px 0 0;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-overview{
+   padding:12px 15px 8px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-step-nav{
+   padding:6px 10px 8px;
+   gap:5px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-step{
+   min-height:34px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-camera-column{
+   padding:9px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-camera-heading{
+   padding:4px 2px 9px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-camera-host{
+   min-height:320px;
+ }
+ .app-shell[data-pulse-view="operator"] .mopv-window.embedded,
+ .app-shell[data-pulse-view="operator"] .mopv-window.embedded .mopv-screen{
+   min-height:320px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-camera-foot{
+   display:none;
+ }
+}
+.moc-test:has(.moc-live-hud){
+ display:flex;
+ flex-direction:column;
+}
+.moc-test:has(.moc-live-hud) > .moc-kicker{order:0}
+.moc-test:has(.moc-live-hud) > h3{order:1;margin:5px 0 9px}
+.moc-test:has(.moc-live-hud) > .moc-live-hud{order:2}
+.moc-test:has(.moc-live-hud) > .moc-guide{order:3}
+.moc-test:has(.moc-live-hud) > .moc-auto-feedback{order:4}
+.moc-test:has(.moc-live-hud) > .moc-field{order:5}
+.moc-test:has(.moc-live-hud) > .moc-buttons{order:6}
+.moc-test:has(.moc-live-hud) > .moc-status{order:7}
+.moc-live-hud{
+ position:sticky;
+ top:0;
+ z-index:3;
+ padding:0 0 8px;
+ background:#fdfaf5;
+}
+.moc-live-hud .moc-timer{
+ display:grid;
+ grid-template-columns:minmax(0,1.25fr) minmax(105px,.75fr);
+ gap:8px 12px;
+ align-items:center;
+ min-height:168px;
+ padding:14px 16px;
+ margin:0;
+ border:1px solid #bca98a;
+ background:#f2eee7;
+}
+.moc-clock-figure,.moc-rep-figure{display:grid;align-content:center;gap:4px;min-width:0}
+.moc-clock-figure > span,.moc-rep-figure > span{
+ font:750 10px/1.2 Inter,system-ui,sans-serif;
+ letter-spacing:.10em;
+ color:#746854;
+}
+.moc-clock-figure strong{
+ font:720 clamp(60px,5.4vw,84px)/1.05 Inter,system-ui,sans-serif;
+ letter-spacing:-.055em;
+ font-variant-numeric:tabular-nums;
+ color:#212723;
+ white-space:nowrap;
+}
+.moc-clock-figure strong.finished{color:#9f684c}
+.moc-rep-figure{
+ min-height:106px;
+ text-align:center;
+ padding:5px 5px 5px 12px;
+ border-left:1px solid #c8bca9;
+}
+.moc-rep-figure strong{
+ font:760 clamp(76px,6.9vw,108px)/.92 Inter,system-ui,sans-serif;
+ letter-spacing:-.06em;
+ font-variant-numeric:tabular-nums;
+ color:#49584c;
+}
+.moc-rep-figure strong.moc-count-verified{color:#1a684a}
+.moc-rep-figure small{
+ font:500 9px/1.35 Inter,system-ui,sans-serif;
+ color:#7d776a;
+}
+.moc-live-hud .moc-clock-actions{
+ grid-column:1 / -1;
+ justify-content:flex-start;
+ padding-top:4px;
+}
+.moc-live-hud .moc-clock-actions .moc-button{min-height:36px;font-size:10px;padding:8px 10px}
+.moc-test:has(.moc-live-hud) .moc-guide{gap:6px;margin:0 0 8px}
+.moc-test:has(.moc-live-hud) .moc-guide>div{padding:9px 12px}
+.moc-test:has(.moc-live-hud) .moc-guide p{line-height:1.4;margin-top:3px}
+.moc-test:has(.moc-live-hud) .moc-auto-feedback{margin:6px 0 8px}
+@media(max-width:1180px){
+ .moc-clock-figure strong{font-size:clamp(52px,5.4vw,72px)}
+ .moc-rep-figure strong{font-size:clamp(68px,6.7vw,88px)}
+ .moc-live-hud .moc-timer{padding:12px;grid-template-columns:minmax(0,1.15fr) minmax(100px,.85fr)}
+}
+@media(max-width:1050px){
+ .moc-live-hud .moc-timer{grid-template-columns:minmax(0,1.2fr) minmax(110px,.8fr)}
+ .moc-clock-figure strong{font-size:clamp(58px,10vw,86px)}
+ .moc-rep-figure strong{font-size:clamp(68px,12vw,100px)}
+ .moc-camera-host{min-height:420px}
+ .mopv-window.embedded .mopv-screen{min-height:350px}
+}
+@media(max-width:500px){
+ .moc-live-hud .moc-timer{grid-template-columns:minmax(0,1fr) minmax(86px,.7fr);padding:10px}
+ .moc-clock-figure strong{font-size:clamp(48px,12vw,63px)}
+ .moc-rep-figure strong{font-size:clamp(56px,17vw,80px)}
+ .moc-rep-figure > span,.moc-clock-figure > span{font-size:9px}
+}
