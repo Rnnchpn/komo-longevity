@@ -1,7 +1,7 @@
 // Published external reference values, not diagnoses.
 // STS: Rikli & Jones (1999) age/sex 25th–75th percentiles:
 // https://www.sralab.org/rehabilitation-measures/30-second-sit-stand-test
-// One leg: Springer et al (2007) best of 3 up to 45 s:
+// One leg: Springer et al (2007) best of 3 up to 45 s; webcam 30-s data not interchangeable:
 // https://www.sralab.org/rehabilitation-measures/single-leg-stance-or-one-legged-stance-test
 export const NORM_VERSION='KOMO_AGE_REFERENCE_V1';
 export const SOURCES={
@@ -47,7 +47,7 @@ export function stsReference({ageBand,exactAge=null,cohort='',protocolConfirmed=
  return {status:count<lo?'below':count>hi?'above':'within',comparison:label,reference,source:SOURCES.sts,
   reason:'Comparaison indicative P25–P75, webcam non étalonnée ; pas une évaluation clinique du risque de chute.'};
 }
-export function oneLegReference(ageBand,record){
+export function oneLegReference(ageBand,record,ceilingSeconds=20){
  const range=ageRanges[ageBand]??null;
  // Under-40 questionnaire band includes ages <18, so do not assume the 18–39 cohort.
  const row=range?ONELEG.find(r=>range[0]>=r[0]&&range[1]<=r[1]):null;
@@ -55,14 +55,14 @@ export function oneLegReference(ageBand,record){
  return {status:row?'descriptive':'unavailable',comparison:null,
   observed:valid?record.value:null,
   expected:row?row[2]:null,age:row?row[0]+'–'+row[1]:null,source:SOURCES.unipodal,
-  reason:row?'Référence du meilleur de 3 essais jusqu’à 45 s. Pulse mesure un seul essai plafonné à 20 s : aucune classification « normal/anormal » n’est possible.':
+  reason:row?'Référence du meilleur de 3 essais jusqu’à 45 s. Pulse mesure un essai vidéo plafonné à '+(ceilingSeconds===30?'30':'20')+' s : ni percentile individuel, ni classification « normal/anormal » sans protocole comparable.':
     'Groupe d’âge non comparable au protocole publié ou âge non renseigné.'};
 }
 export function normativeSummary(answers={},results={},options={}){
  const sts=stsReference({ageBand:answers.ageBand,exactAge:options.exactAge??null,
   cohort:options.cohort??'',protocolConfirmed:options.protocolConfirmed===true,
   record:results.sts});
- const unipodal=['unipodal_left','unipodal_right'].map(id=>({id,...oneLegReference(answers.ageBand,results[id])}));
+ const unipodal=['unipodal_left','unipodal_right'].map(id=>({id,...oneLegReference(answers.ageBand,results[id],options.balanceCeiling===30?30:20)}));
  const uncalibrated=[
  {id:'heels',label:'Élévation des talons',reason:'Compteur webcam exploratoire : aucun seuil d’âge transférable à ce protocole.'},
  {id:'arms',label:'Élévation des bras',reason:'Compteur webcam exploratoire : aucune amplitude ou norme clinique équivalente mesurée.'},

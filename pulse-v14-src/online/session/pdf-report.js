@@ -1,6 +1,6 @@
 import {INTAKE_GROUPS,SCORING_GROUPS,scoreIntake,intakeProgress,questionnaireFocus} from './intake-model.mjs';
 import {MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
-import {normativeSummary} from './reference-norms.mjs';
+import {normativeSummary} from './reference-norms.mjs?v=20261110-balance30-v1';
 import {buildMotionPassport,programProgress,planTargets} from './motion-passport.mjs';
 
 export const PDF_REPORT_VERSION='KOMO_MOTION_PASSPORT_REPORT_V2';
@@ -64,7 +64,7 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
    answered:progress.completed,total:progress.total,domains:SCORING_GROUPS.map(g=>({
     id:g.id,label:g.title,score:p.domains[g.id]??null,weight:g.weight
    })),focus:questionnaireFocus(answers),groups},
-  observations,motion,ageReference:normativeSummary(answers,results,results.sts?.normative??{}),blocked:Boolean(blocked),
+  observations,motion,ageReference:normativeSummary(answers,results,{...(results.sts?.normative??{}),balanceCeiling:options?.mode==='CABINET'?30:20}),blocked:Boolean(blocked),
   limitations:[
    'Bilan fonctionnel non medical - cette demonstration ne constitue pas un diagnostic.',
    'Les questionnaires sont propres a KOMO et ne sont pas des instruments cliniquement valides.',
@@ -234,8 +234,19 @@ export async function downloadMotionPdf(data){
  }
  const one=data.ageReference?.unipodal?.[0];
  if(one?.expected!==null&&one?.expected!==undefined)
-  line('Unipodal : donnees publiees '+one.expected+' s (meilleur de trois essais). Notre test webcam de 20 s n est pas directement comparable.',
+  line('Unipodal : donnees publiees '+one.expected+' s (meilleur de 3 essais, plafond de 45 s). Ce test video ne permet pas une comparaison directe.',
   {size:8.4,color:muted});
+ const left=data.observations.find(item=>item.id==='unipodal_left');
+ const right=data.observations.find(item=>item.id==='unipodal_right');
+ if(left&&right&&left.value!==null&&right.value!==null){
+  const delta=Math.abs(left.value-right.value);
+  line('Equilibre yeux ouverts (max 30 s par cote) : gauche '+decimal(left.value,1)+' s, droit '+decimal(right.value,1)+' s ; ecart descriptif '+decimal(delta,1)+' s.',
+   {size:8.8,color:muted});
+  line('Repere des 10 s : association de cohorte, pas prediction de risque individuel ou d esperance de vie.',
+   {size:8.3,color:muted});
+  line('Video 2D exploratoire. Arret a la reprise d appui, appui externe, au retour du pied au sol ou a 30 s. Verifier tout incident de capture.',
+   {size:8.1,color:muted});
+ }
  title('Motion Score fonctionnel - algorithme de reference');
  if(data.motion.complete){
   line(String(data.motion.score)+' / 100',{size:23,bold:true,color:green,leading:12});

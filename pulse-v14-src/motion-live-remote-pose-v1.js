@@ -2,7 +2,7 @@
 // The paired iPhone provides an encrypted WebRTC stream. No raw video, skeleton or frame is uploaded.
 import {createPoseEngine} from './online/session/pose-engine.js';
 import {createMovementTracker,frameInfo} from './online/session/metrics.mjs?v=20261110-live-hud-v1';
-import {createOneLegObserver,oneLegFrame} from './online/session/unipodal-metrics.mjs';
+import {createOneLegObserver,oneLegFrame} from './online/session/unipodal-metrics.mjs?v=20261110-balance30-v1';
 import {createSideProfileStability,sideProfileFrame,surfaceSagittalIndex} from './online/session/profile-photo-metrics.mjs';
 
 const REPETITIONS=new Set(["sts","heels","arms"]);
@@ -22,7 +22,7 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
  const resetCounters=()=>{
   frames=0;validFrames=0;latest=null;operatorStopped=false;
   repetition=REPETITIONS.has(step)?createMovementTracker(step):null;
-  balance=UNIPODAL.has(step)?createOneLegObserver(step==="unipodal_left"?"left":"right",20000):null;
+  balance=UNIPODAL.has(step)?createOneLegObserver(step==="unipodal_left"?"left":"right",30000):null;
   profile=step==="posture"?createSideProfileStability(900):null;
  };
  const frame=(points,at)=>{
@@ -33,6 +33,7 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
    frameInfo(points,step||"sts");
   if(info.valid)validFrames++;
   let measurement=null,started=false,finished=false,postureIndex=null,stable=false,phase="initial";
+  let balanceState="",balanceReason="",balanceQuality=0,balanceElapsed=0;
   const elapsed=startedAt?Date.now()-startedAt:0;
   // A finished stopwatch must never continue accumulating movements.
   const withinWindow=running&&!operatorStopped&&(!duration||elapsed<=duration*1000+250);
@@ -45,11 +46,15 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
     phase=result.phase||"initial";
    }
    if(repetition.summary().usable>=5)measurement=repetition.summary().count;
-  }else if(withinWindow&&UNIPODAL.has(step)&&balance){
-   const result=balance.observe(points,at);
+  }else if(UNIPODAL.has(step)&&balance){
+   // Operator starts a WAITING state; the 30-second measurement itself starts
+   // only after 500 ms of a confirmed free-foot lift, not when "Armer" is clicked.
+   if(running&&!operatorStopped)balance.observe(points,at);
    const summary=balance.summary();
    started=summary.started;finished=summary.completed;
-   if(started&&summary.quality>=40)measurement=Math.min(20,round1(summary.seconds));
+   balanceState=summary.state;balanceReason=summary.reason;
+   balanceQuality=summary.quality;balanceElapsed=summary.seconds;
+   if(started)measurement=Math.min(30,round1(summary.seconds));
   }else if(step==="posture"&&profile&&info.valid){
    const result=profile.observe(points,at);
    stable=result.ready;
@@ -63,7 +68,8 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
    publish({
     step,runKey,valid:!!info.valid,message:info.message||"Silhouette non exploitable",
     quality:Math.round(validFrames/Math.max(frames,1)*100),frames,validFrames,
-    running,measurement,phase,started,finished,stable,postureIndex
+    running,measurement,phase,started,finished,stable,postureIndex,
+    balanceState,balanceReason,balanceQuality,balanceElapsed
    });
   }
  };

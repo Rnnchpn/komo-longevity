@@ -10,7 +10,7 @@ export function mountUnipodal(root,task,record,state,callbacks){
  const q=s=>root.querySelector(s),video=q('#live-video'),overlay=q('#pose-canvas'),off=q('#camera-off');
  const start=q('#start-camera'),stop=q('#stop-camera'),go=q('#start-test'),redo=q('#redo-test'),halt=q('#halt-test'),next=q('#go'),consent=q('#pose-consent');
  const voiceConsent=q('#voice-consent'),voiceButton=q('#toggle-voice'),voiceLabel=q('#voice-state');
- const observer=createOneLegObserver(task.id.endsWith('left')?'left':'right');
+ const observer=createOneLegObserver(task.id.endsWith('left')?'left':'right',20000); // legacy Motion Online remains 20 s; cabinet uses 30 s
  const audio=createAudioFeedback();
  let disposed=false,lastFrame=0,started=false,completed=false,validStreak=0;
  const text=(id,v)=>{const el=q(id);if(el)el.textContent=v;};

@@ -345,3 +345,25 @@
  .moc-rep-figure strong{font-size:clamp(56px,17vw,80px)}
  .moc-rep-figure > span,.moc-clock-figure > span{font-size:9px}
 }
+
+/* 30 s single-leg stance: time begins with visually confirmed foot lift. */
+.moc-balance-figure strong{
+ font-size:clamp(45px,5.4vw,78px);
+ letter-spacing:-.045em;
+}
+.moc-balance-figure small{
+ font-size:9px;
+ font-weight:750;
+ letter-spacing:.05em;
+ color:#54634e;
+}
+.moc-balance-reference{
+ order:4;
+ border-left:3px solid #9cae9f;
+ background:#f0f3ed;
+ padding:9px 12px;
+ color:#4c6051;
+ font:500 11px/1.55 Inter,system-ui,sans-serif;
+ margin:4px 0 8px;
+}
+.moc-test:has(.moc-live-hud) .moc-balance-reference + .moc-auto-feedback{order:4}
