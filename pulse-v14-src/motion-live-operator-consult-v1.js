@@ -133,7 +133,9 @@ function formatResult(result,task){
  if(task.id==="posture"){
   return {"neutral":"Alignement apparent neutre","apparent_offset":"Décalage apparent","not_interpretable":"Non interprétable"}[result.observation]||"Observation enregistrée";
  }
- return Number.isFinite(result.value)?String(result.value)+" "+task.unit:"Résultat enregistré";
+ return Number.isFinite(result.value)?String(result.value)+" "+task.unit+
+  (["heels","arms"].includes(task.id)?" / "+(result.duration_seconds===30?30:20)+" s":""):
+  "Résultat enregistré";
 }
 function updatePanelTabs(){
  const preview=panelMode==="report"&&room?.status==="completed";
@@ -313,6 +315,9 @@ function renderReportSection(){
    '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses</span></div>'+
    '<div><strong>6 sem.</strong><span>programme proposé</span></div></div>'+
   '<h4>Votre profil en bref</h4>'+
+  '<p class="moc-report-answers-state">'+(passport.questionnaire.answered===22?
+   '✓ Questionnaire complet : 22 réponses prises en compte.':
+   '⚠ '+passport.questionnaire.answered+'/22 réponses · complétez le questionnaire pour un rapport intégral.')+'</p>'+
   '<div class="moc-passport-highlights">'+reasons+'</div>'+
   '<h4>Tests réalisés</h4><div class="moc-results-compact">'+passport.measures.map(resultCard).join('')+'</div>'+
   '<div class="moc-action-section-title"><h4>Exercices à la maison</h4><small>Progression à adapter et valider</small></div>'+
@@ -326,14 +331,15 @@ function renderReportSection(){
    more.map(nutritionCard).join('')+
    '<p class="moc-help">'+HTML(plan.review)+'</p></details>'+
   '<p class="moc-report-guard">Proposition éducative : la vidéo et le questionnaire ne permettent ni diagnostic de carence, ni prescription de compléments. Vérification clinique nécessaire.</p>'+
-  '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le passeport complet (5 catégories)</button>'+
+  '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le passeport complet (6 catégories)</button>'+
   '<div class="moc-category-export"><label for="mocExportCategory">Exporter une grande catégorie</label>'+
    '<select id="mocExportCategory" aria-label="Choisir la catégorie">'+
     '<option value="synthese">1 · Synthèse et diagramme</option>'+
     '<option value="tests">2 · Tests et qualité de mesure</option>'+
     '<option value="exercices">3 · Exercices à domicile</option>'+
     '<option value="nutrition">4 · Nutrition et compléments</option>'+
-    '<option value="suivi">5 · Suivi à 6 semaines</option></select>'+
+    '<option value="suivi">5 · Suivi à 6 semaines</option>'+
+    '<option value="questionnaire">6 · Questionnaire détaillé (22 réponses)</option></select>'+
    '<button class="moc-button secondary" id="mocDownloadChapter"'+(!finished?' disabled':'')+'>↓ Exporter cette catégorie</button></div>'+
   '<button type="button" class="moc-button secondary" id="mocReportQuestionnaire">Questionnaires</button></div>'+
   (!finished?'<p class="moc-status">Terminez les six épreuves pour exporter le document.</p>':'')+
@@ -363,13 +369,29 @@ function renderReportSection(){
   clicked.disabled=true;
   const status=q("mocReportStatus");
   try{
-   if(questionnaireDirty)await saveQuestionnaire();
-   status.textContent="Préparation du PDF "+(type==="all"?"complet":"par catégorie")+"…";
-   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),
-    {subject:label,simulated,category:type});
-   status.textContent="Fichier exporté : "+filename;
+   // Await ANY in-flight autosave, even if the dirty flag is already cleared.
+   await saveQuestionnaire();
+   if(questionnaireDirty)throw Error("Questionnaire non enregistré. Réessayez dans l'onglet Questionnaires.");
+   status.textContent="Vérification des réponses enregistrées sur le serveur…";
+   const data=await api({action:"operator_list"});
+   const persisted=(data.sessions||[]).find(x=>x.id===room.id&&x.patient_id===patient?.id);
+   if(!persisted)throw Error("Dossier introuvable sur le serveur");
+   const confirmed={...(persisted.progress?.questionnaire?.answers||{})};
+   const expected=questionnaireAnswers;
+   if(Object.keys(expected).some(k=>confirmed[k]!==expected[k])||
+    Object.keys(confirmed).length!==Object.keys(expected).length)
+    throw Error("Questionnaire en cours de synchronisation. Enregistrez les réponses puis réessayez.");
+   const progress=extras.questionnaireState(confirmed).progress;
+   if(progress.completed<progress.total&&!window.confirm(
+    "Le questionnaire contient "+progress.completed+"/"+progress.total+
+    " réponses. Exporter tout de même un passeport marqué INCOMPLET ?"))return;
+   status.textContent="Création du PDF "+(type==="all"?"complet (toutes sections)":"par catégorie")+"…";
+   const filename=await extras.downloadClinicReport(confirmed,persisted.progress?.results||{},new Date(),
+    {subject:label,simulated:persisted.progress?.questionnaire?.simulated===true,category:type});
+   status.textContent="✓ PDF généré à partir de "+progress.completed+"/"+progress.total+
+    " réponses confirmées : "+filename;
   }catch(error){
-   status.textContent="Export indisponible : "+(error.message||"erreur de chargement");
+   status.textContent="Export indisponible : "+(error.message||"erreur de synchronisation");
   }finally{if(clicked.isConnected)clicked.disabled=false}
  };
  if(button)button.onclick=()=>exportPdf("all",button);
