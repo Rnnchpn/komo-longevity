@@ -117,6 +117,39 @@ Deno.serve(async(req:Request)=>{
  const action=s(b.action,35);
  if(!await testCenter())return response(req,{error:"test_environment_only"},423);
 
+ // Appointment-free, account-free CHECK-IN for a clinician-issued one-time invitation.
+ // Restricted to synthetic identity aliases in this non-clinical test environment.
+ // The invitation token is random (256-bit), its database copy is SHA-256 hashed.
+ // Patient phone/tablet NEVER requests a camera or controls the clinical tests.
+ if(action==="patient_checkin_status"||action==="patient_checkin_submit"){
+  const found=await guestLookup(req,b);if(found.error)return found.error;
+  const room=found.session,progress=room.progress||{},record=progress.patient_checkin;
+  if(!record||progress.camera_owner==="operator"||!room.operator_user_id)
+   return response(req,{error:"invalid_invitation"},404);
+  const state=s(record.state,16);
+  if(action==="patient_checkin_status"){
+   if(!room.patient_last_seen_at||Date.now()-new Date(room.patient_last_seen_at).getTime()>12000)
+    await db.from("pulse_motion_live_sessions").update({patient_last_seen_at:now()}).eq("id",room.id);
+   return response(req,{ok:true,state,code:room.display_code,
+    alias:state==="invited"?"":s(record.alias,32),expires_at:room.expires_at});
+  }
+  if(state!=="invited"||room.status!=="waiting")return response(req,{error:"already_submitted"},409);
+  const alias=s(b.alias,32),ageBand=s(b.age_band,16),goal=s(b.goal,20);
+  if(!/^[\p{L}][\p{L} 0-9'-]{1,31}$/u.test(alias)||
+    !["under40","40-49","50-59","60-69","70-79","80plus"].includes(ageBand)||
+    !["independence","walk","strength","confidence","general"].includes(goal)||
+    b.synthetic_attested!==true)
+   return response(req,{error:"invalid_demo_details"},422);
+  const next={...progress,patient_checkin:{state:"ready",alias,age_band:ageBand,
+    goal,synthetic:true,submitted_at:now()}};
+  const {data,error}=await db.from("pulse_motion_live_sessions")
+   .update({status:"ready",progress:next,patient_last_seen_at:now(),updated_at:now()})
+   .eq("id",room.id).eq("status","waiting").eq("updated_at",room.updated_at)
+   .select("id,display_code").maybeSingle();
+  return error||!data?response(req,{error:"already_submitted"},409):
+   response(req,{ok:true,state:"ready",code:data.display_code});
+ }
+
  if(action==="guest_start"){
   const {count,error:countError}=await db.from("pulse_motion_live_sessions").select("id",{head:true,count:"exact"})
    .eq("organization_id",ORG_ID).gte("created_at",new Date(Date.now()-5*60000).toISOString());
@@ -168,6 +201,54 @@ Deno.serve(async(req:Request)=>{
 
  const actor=await operator(req);
  if(!actor)return response(req,{error:"operator_access_required"},403);
+ // Operator creates the short-lived check-in invitation on the workstation,
+ // not an anonymously enumerable public patient register.
+ if(action==="operator_checkin_invite"){
+  const {count,error:countError}=await db.from("pulse_motion_live_sessions")
+   .select("id",{head:true,count:"exact"}).eq("organization_id",ORG_ID)
+   .eq("operator_user_id",actor.id).eq("status","waiting")
+   .gte("expires_at",now());
+  if(countError)return response(req,{error:"temporarily_unavailable"},503);
+  if((count||0)>=8)return response(req,{error:"too_many_pending_invites"},429);
+  const token=randomToken(),code=String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0");
+  const {data,error}=await db.from("pulse_motion_live_sessions").insert({
+   organization_id:ORG_ID,guest_token_hash:await hash(token),
+   display_code:code,operator_user_id:actor.id,status:"waiting",
+   stage_code:"checkin",step_index:0,
+   progress:{kind:"patient_checkin",patient_checkin:{state:"invited",synthetic:true}},
+   expires_at:new Date(Date.now()+90*60000).toISOString()
+  }).select("id,display_code,expires_at").single();
+  return error||!data?response(req,{error:"invite_creation_failed"},503):
+   response(req,{ok:true,id:data.id,code:data.display_code,expires_at:data.expires_at,
+    url:"https://pulse.komolongevity.com/commencer/?invitation="+encodeURIComponent(token)});
+ }
+ if(action==="operator_checkin_claim"){
+  const id=s(b.session_id,50),patientId=s(b.patient_id,50),operatorSessionId=s(b.operator_session_id,50);
+  if(!uuid(id)||!uuid(patientId)||!uuid(operatorSessionId))
+   return response(req,{error:"invalid_identifiers"},422);
+  const [{data:room},{data:patient},{data:op}]=await Promise.all([
+   db.from("pulse_motion_live_sessions").select("*").eq("id",id).eq("organization_id",ORG_ID).maybeSingle(),
+   db.from("patients").select("id,data_classification,status,organization_id").eq("id",patientId).eq("organization_id",ORG_ID).maybeSingle(),
+   db.from("pulse_operator_sessions").select("id,patient_id,operator_user_id,status,organization_id").eq("id",operatorSessionId).eq("organization_id",ORG_ID).maybeSingle()
+  ]);
+  if(!room||room.operator_user_id!==actor.id||room.progress?.kind!=="patient_checkin"||
+     room.progress?.patient_checkin?.state!=="ready"||room.status!=="ready"||
+     new Date(room.expires_at).getTime()<=Date.now())
+   return response(req,{error:"checkin_not_ready"},409);
+  if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic"||
+     !op||op.patient_id!==patientId||op.operator_user_id!==actor.id||
+     !["running","draft","paused"].includes(op.status))
+   return response(req,{error:"synthetic_patient_required"},403);
+  const progress={...room.progress,patient_checkin:{...room.progress.patient_checkin,
+    state:"accepted",accepted_at:now()}};
+  const {data,error}=await db.from("pulse_motion_live_sessions").update({
+   patient_id:patientId,operator_session_id:operatorSessionId,
+   progress,updated_at:now()
+  }).eq("id",id).eq("status","ready").is("patient_id",null)
+   .eq("updated_at",room.updated_at).select("id").maybeSingle();
+  return error||!data?response(req,{error:"claim_conflict"},409):
+   response(req,{ok:true,id,patient_id:patientId});
+ }
  // Physical consultation: the clinician's OWN iPhone acts as a dedicated camera.
  // A valid Operator JWT is required even to create the room. Only fictional patients
  // can subsequently be linked in this test-only environment.
@@ -388,8 +469,26 @@ Deno.serve(async(req:Request)=>{
   if(!room||room.patient_id||!["waiting","ready"].includes(room.status)||new Date(room.expires_at).getTime()<Date.now())return response(req,{error:"room_unavailable"},409);
   // A camera created from an Operator's iPhone may be paired ONLY by that same owner.
   if(room.operator_user_id&&room.operator_user_id!==actor.id)return response(req,{error:"camera_owner_required"},403);
+  const checkinId=s(b.checkin_id,50);
+  let initialProgress:Record<string,unknown>|null=null;
+  if(checkinId){
+   if(!uuid(checkinId))return response(req,{error:"invalid_checkin"},422);
+   const {data:checkin}=await db.from("pulse_motion_live_sessions").select("id,progress,patient_id,operator_user_id")
+    .eq("id",checkinId).eq("organization_id",ORG_ID).maybeSingle();
+   if(!checkin||checkin.patient_id!==patientId||checkin.operator_user_id!==actor.id||
+     checkin.progress?.patient_checkin?.state!=="accepted"||checkin.progress?.kind!=="patient_checkin")
+    return response(req,{error:"checkin_mismatch"},403);
+   initialProgress={...(room.progress||{}),
+    intake_source:"patient_demo_checkin",checkin_id:checkin.id,
+    questionnaire:{version:"KOMO_MOTION_SELF_REPORT_V1",simulated:true,
+      entered_by:"patient_demo_checkin",answers:{
+       ageBand:checkin.progress.patient_checkin.age_band,
+       goal:checkin.progress.patient_checkin.goal
+      },updated_at:now()}};
+  }
   const {data,error}=await db.from("pulse_motion_live_sessions").update({
    patient_id:patientId,operator_session_id:opId,operator_user_id:actor.id,status:"active",
+   ...(initialProgress?{progress:initialProgress}:{}),
    operator_last_seen_at:now(),updated_at:now()
   }).eq("id",id).is("patient_id",null).in("status",["waiting","ready"]).select("id").maybeSingle();
   return error||!data?response(req,{error:"attach_conflict"},409):response(req,{ok:true,id});
