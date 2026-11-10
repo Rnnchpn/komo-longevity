@@ -127,6 +127,10 @@ function updatePanelTabs(){
 }
 function switchPanel(next){
  if(!["tests","questionnaire","report"].includes(next)||!host)return;
+ if(panelMode==="tests"&&next!=="tests"&&room?.progress?.step_status==="running"){
+  setStatus("Terminez et validez ce test avant d’ouvrir les questionnaires ou le rapport, afin de conserver le comptage.");
+  return;
+ }
  voice?.abortCountdown();countdownPending=false;
  panelMode=next;
  if(q("mocStepNav"))q("mocStepNav").hidden=next!=="tests";
@@ -168,7 +172,7 @@ async function saveQuestionnaire(){
   questionnaireNote("Réponses enregistrées.");
  }finally{
   questionnaireSaveInFlight=null;
-  if(questionnaireDirty)scheduleQuestionnaireSave();
+  if(questionnaireDirty&&host?.isConnected)scheduleQuestionnaireSave();
  }
 }
 function renderQuestionnaireSection(){
