@@ -493,3 +493,82 @@
 .moc-passport-domains span{font:550 10px/1.35 Inter,system-ui,sans-serif;color:#4d6356}
 .moc-passport-domains strong{font:800 13px/1.3 Inter,system-ui,sans-serif;color:#234e3e;white-space:nowrap}
 @media(max-width:540px){.moc-passport-domains{grid-template-columns:1fr}}
+
+/* KŌMØ Motion Passport · visually driven home program (2026-11-10) */
+.moc-action-report{padding:16px 20px!important}
+.moc-action-report h3{font-size:clamp(30px,3vw,41px);line-height:1.05;margin:4px 0 14px}
+.moc-action-report h4{font:500 22px/1.08 "Cormorant Garamond",Georgia,serif;margin:15px 0 9px;color:#253e32}
+.moc-action-report .moc-demo-warning{margin:9px 0;padding:8px 10px;font-size:10px}
+.moc-action-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.moc-action-metrics>div{border-top:2px solid #bfa77d;background:#f1eee7;border-radius:6px;padding:9px 10px;min-width:0}
+.moc-action-metrics strong{display:block;font:750 clamp(20px,2.6vw,31px)/1.1 Inter,system-ui,sans-serif;color:#243a30;font-variant-numeric:tabular-nums}
+.moc-action-metrics span{display:block;margin-top:3px;font-size:9px;color:#787669}
+.moc-passport-highlights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.moc-passport-highlight{border:1px solid #e6ded1;border-radius:9px;padding:9px;background:#fffcf7;min-width:0}
+.moc-passport-highlight small{display:block;color:#917c5d;font-weight:700;font-size:9px;margin-bottom:5px}
+.moc-passport-highlight strong{display:block;font-size:10px;line-height:1.5;color:#343d35}
+.moc-results-compact{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.moc-passport-result{padding:10px 11px;background:#f1eee7;border-radius:8px;min-width:0;display:grid;gap:4px}
+.moc-passport-result span{font-size:10px;color:#7a746a}
+.moc-passport-result strong{font:750 13px/1.3 Inter,system-ui,sans-serif;color:#2d392f}
+.moc-action-section-title{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.moc-action-section-title small{color:#7a7e72;font-size:9px}
+.moc-exercise-grid,.moc-nutrition-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.moc-exercise-card{background:#fbf8f1;border:1px solid #e0d8c9;border-radius:10px;padding:11px 12px;display:grid;align-content:start;gap:5px}
+.moc-exercise-card>div{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.moc-exercise-card strong{color:#203d32;font-weight:750;font-size:11px}
+.moc-exercise-card small{color:#93866f;font-size:9px}
+.moc-exercise-card b{color:#213d30;font-size:16px;font-variant-numeric:tabular-nums}
+.moc-exercise-card span{font-size:9px;color:#827d70}
+.moc-exercise-card p{font-size:10px;line-height:1.5;margin:2px 0 0;color:#535f54}
+.moc-nutrition-card{padding:10px 11px;border:1px solid #dedace;border-radius:10px;background:#fbf8f3;display:grid;align-content:start;gap:5px}
+.moc-nutrition-card>div{display:flex;align-items:baseline;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.moc-nutrition-card strong{font-size:11px;color:#203d32}
+.moc-nutrition-card em{font-size:9px;color:#947b56;font-style:normal;font-weight:750}
+.moc-nutrition-card p{font-size:10px;line-height:1.55;margin:0;color:#4b584f}
+.moc-nutrition-card small{font-size:9px;line-height:1.45;color:#807b6e}
+.moc-report-details{border:1px solid #e2d8cb;background:#fbf8f2;border-radius:10px;padding:10px 12px;margin:10px 0}
+.moc-report-details summary{cursor:pointer;font-size:11px;font-weight:700;color:#405a4c;min-height:25px}
+.moc-report-details[open]{display:grid;gap:9px}
+.moc-report-details[open] .moc-exercise-card,.moc-report-details[open] .moc-nutrition-card{margin:0}
+.moc-report-guard{padding:10px 12px;border-left:2px solid #b39f79;background:#f6f0e6;font-size:10px;line-height:1.55;color:#736856;margin:14px 0}
+.moc-report-actions{display:grid;gap:8px;margin-top:12px}
+.moc-report-actions>.moc-button.primary{width:100%;white-space:normal;min-height:50px}
+.moc-show-passport .moc-camera-column{background:#faf8f2!important;border-color:#e4ddcf!important;color:#253c32!important}
+.moc-show-passport .moc-passport-aside{display:block;overflow:auto;min-height:0}
+.moc-report-aside-card{background:#faf8f2;border:0;box-shadow:none;border-radius:14px;padding:18px 16px;min-height:100%;color:#273f32}
+.moc-radar-title{display:grid;gap:5px}
+.moc-radar-title small{font:750 9px/1.5 Inter,system-ui,sans-serif;letter-spacing:.12em;color:#a28a62}
+.moc-radar-title strong{font:500 clamp(24px,2.4vw,32px)/1.1 "Cormorant Garamond",Georgia,serif;color:#244233}
+.moc-radar-svg{width:100%;max-width:400px;height:auto;display:block;margin:0 auto}
+.moc-radar-unavailable{padding:25px 12px;text-align:center;font-size:11px;color:#66736b}
+.moc-radar-disclaimer{font-size:9px;line-height:1.55;color:#79796e;max-width:50ch;margin:5px 0 14px}
+.moc-radar-divider{height:1px;background:#ded8cc;margin:15px 0 19px}
+.moc-action-timeline{margin-top:14px;display:grid;gap:10px}
+.moc-action-phase{display:grid;grid-template-columns:33px minmax(0,1fr);gap:10px;align-items:start}
+.moc-action-phase>span{font:600 15px/1.3 Georgia,serif;color:#b29b73}
+.moc-action-phase>div{border-left:2px solid #d6cab3;padding:0 0 8px 12px}
+.moc-action-phase small{display:block;font:750 9px/1.4 Inter,system-ui,sans-serif;color:#9a865e;letter-spacing:.04em}
+.moc-action-phase strong{display:block;font-size:12px;line-height:1.5;color:#2b4033}
+.moc-action-phase p{margin:4px 0 0;font-size:10px;line-height:1.55;color:#646f63}
+.moc-aside-followup{display:grid;gap:5px;background:#243d33;color:#f4f0e6;border-radius:11px;margin:12px 0;padding:13px 15px}
+.moc-aside-followup strong{font-size:11px}
+.moc-aside-followup span{font-size:10px;line-height:1.5;color:#d6d7c7}
+@media(min-width:1051px){
+ .app-shell[data-pulse-view="operator"] .moc-show-passport .moc-grid{grid-template-columns:minmax(440px,.94fr) minmax(380px,1.06fr)}
+ .app-shell[data-pulse-view="operator"] .moc-action-report{padding:12px 15px!important}
+ .moc-show-passport .moc-camera-column{padding:4px}
+}
+@media(max-width:1100px){
+ .moc-passport-highlights{grid-template-columns:1fr}
+ .moc-exercise-grid,.moc-nutrition-grid{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+ .moc-action-report{padding:15px!important}
+ .moc-action-metrics{gap:5px}
+ .moc-action-metrics>div{padding:8px}
+ .moc-action-metrics strong{font-size:21px}
+ .moc-results-compact{grid-template-columns:1fr}
+ .moc-exercise-grid,.moc-nutrition-grid{grid-template-columns:1fr}
+ .moc-report-aside-card{padding:15px 12px}
+}
