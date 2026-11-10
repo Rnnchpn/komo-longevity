@@ -6,11 +6,20 @@ const get=id=>pane?.querySelector("#"+id);
 function status(message){
  const node=get("mopvStatus");if(node)node.textContent=message;
 }
+function videoReady(video){
+ return !!video&&video.videoWidth>0&&video.videoHeight>0&&video.readyState>=2;
+}
+function refreshVideoStatus(){
+ const video=get("mopvVideo");
+ if(pc?.connectionState!=="connected")return;
+ if(videoReady(video))status("DIRECT · Image de ton iPhone affichée");
+ else status("Liaison établie · attente des images de l’iPhone. Garder sa caméra ouverte.");
+}
 function loadStyles(){
  if(document.getElementById("mopvStyle"))return;
  const link=document.createElement("link");
  link.id="mopvStyle";link.rel="stylesheet";
- link.href="./motion-live-operator-video-v1.css?v=20261109-remote-pose-v1";
+ link.href="./motion-live-operator-video-v1.css?v=20261110-visible-video-v1";
  document.head.append(link);
 }
 function releaseConnection(notify){
@@ -18,6 +27,7 @@ function releaseConnection(notify){
  clearInterval(pollTimer);pollTimer=null;
  if(pc){pc.ontrack=null;pc.onconnectionstatechange=null;pc.close();pc=null}
  const video=get("mopvVideo");
+ if(video){video.onloadeddata=null;video.onplaying=null}
  if(video?.srcObject)window.dispatchEvent(new CustomEvent("pulse:remote-video-stopped",{detail:{sessionId:roomId}}));
  if(video){video.srcObject=null;video.hidden=true}
  get("mopvPlaceholder")?.removeAttribute("hidden");
@@ -88,15 +98,23 @@ async function watch(){
    if(!video)return;
    video.srcObject=event.streams[0]||new MediaStream([event.track]);
    video.hidden=false;
+   video.onloadeddata=refreshVideoStatus;
+   video.onplaying=refreshVideoStatus;
    if(placeholder)placeholder.hidden=true;
    // Pose detection uses the actual WebRTC video element (no new camera request).
    window.dispatchEvent(new CustomEvent("pulse:remote-video-ready",{detail:{video,sessionId:roomId}}));
-   video.play().catch(()=>status("Cliquez dans la vidéo pour activer la lecture."));
+   video.play().then(refreshVideoStatus).catch(()=>status("Lecture vidéo bloquée : cliquez sur l’image pour la démarrer."));
   };
   p.onconnectionstatechange=()=>{
    if(pc!==p)return;
-   if(p.connectionState==="connected")status("DIRECT · Caméra de l’iPhone connectée");
-   else if(p.connectionState==="failed"||p.connectionState==="disconnected"){
+   if(p.connectionState==="connected"){
+    refreshVideoStatus();
+    setTimeout(()=>{
+     if(pc!==p)return;
+     if(!videoReady(get("mopvVideo")))
+      status("Liaison connectée sans image. Vérifie que la caméra iPhone est active, puis clique « Reconnecter ».");
+    },4500);
+   }else if(p.connectionState==="failed"||p.connectionState==="disconnected"){
     window.dispatchEvent(new CustomEvent("pulse:remote-video-stopped",{detail:{sessionId:roomId}}));
     status("Flux interrompu. Vérifiez le Wi-Fi et appuyez sur Reconnecter.");
    }
