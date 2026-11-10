@@ -24,7 +24,9 @@ export function frameInfo(points,task='sts'){
  if(!usable)return {valid:false,message:'Montrez épaules, bassin, genoux et chevilles dans le cadre.'};
  // Shoulder-to-ankle span guards against a person being too small in the image.
  const span=Math.max(...usable.map(p=>p.y))-Math.min(...usable.map(p=>p.y));
- if(span<.35)return {valid:false,message:'Reculez la caméra et montrez votre corps entier.'};
+ // A clinician-owned vertical phone feed can put a full visible body in ~30% of the frame.
+ // Still require shoulder, hip, knee and ankle visibility and stable joint transitions.
+ if(span<.28)return {valid:false,message:'Rapprochez légèrement le trépied, personne entière et jambes visibles.'};
  if(usable.some(p=>p.x<.015||p.x>.985||p.y<.018||p.y>.982))return {valid:false,message:'Recadrez : les articulations sont coupées.'};
  const sides=[LEFT,RIGHT].map(m=>sidePoints(points,m,['hip','knee','ankle'])).filter(Boolean);
  const kneeAngle=sides.length?sides.map(s=>jointAngle(...s)).filter(Number.isFinite).sort((a,b)=>a-b)[0]:null;
