@@ -67,7 +67,7 @@ export function clinicPassport(answers={},results={},date=new Date(),options={})
 }
 export async function downloadClinicReport(answers={},results={},generatedAt=new Date(),options={}){
  const passport=clinicPassport(answers,results,generatedAt,options);
- return downloadClinicPassport(passport);
+ return downloadClinicPassport(passport,options.category||'all');
 }
 
 export function clinicRadar(plan){return clinicRadarMarkup(plan)}
