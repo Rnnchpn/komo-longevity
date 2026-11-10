@@ -10,8 +10,8 @@ const STEPS=["sts","heels","unipodal_left","unipodal_right","arms","posture"];
 const LIMITS:Record<string,{max:number;integer:boolean;unit:string}>={
  sts:{max:100,integer:true,unit:"repetitions"},
  heels:{max:100,integer:true,unit:"repetitions"},
- unipodal_left:{max:20,integer:false,unit:"seconds"},
- unipodal_right:{max:20,integer:false,unit:"seconds"},
+ unipodal_left:{max:30,integer:false,unit:"seconds"},
+ unipodal_right:{max:30,integer:false,unit:"seconds"},
  arms:{max:100,integer:true,unit:"movements"}
 };
 const ORIGINS=new Set(["https://pulse.komolongevity.com","https://komolongevity.com","https://www.komolongevity.com"]);
@@ -314,7 +314,19 @@ Deno.serve(async(req:Request)=>{
      const measurementSource=s(b.measurement_source,60)||"operator_manual_observation";
      if(!["operator_manual_observation","operator_confirmed_video_estimate"].includes(measurementSource))
       return response(req,{error:"invalid_measurement_source"},422);
-     results[step]={status:"done",value,unit:def.unit,note,source:measurementSource,recorded_at:now()};
+     const balanceMeta=(step==="unipodal_left"||step==="unipodal_right")?
+       {
+        protocol:"SOLEO_EYES_OPEN_30S_OPERATOR_SUPERVISED_V1",
+        camera_quality:measurementSource==="operator_confirmed_video_estimate"&&
+         Number.isInteger(b.measurement_quality)&&b.measurement_quality>=0&&b.measurement_quality<=100?
+          b.measurement_quality:null,
+        stop_reason:measurementSource==="operator_confirmed_video_estimate"&&
+         ["foot_contact","limit","camera_lost","ambiguous_contact","operator_end"].includes(b.stop_reason)?
+         b.stop_reason:null,
+        ceiling_30s:value===30
+       }:{};
+     results[step]={status:"done",value,unit:def.unit,note,source:measurementSource,
+      ...balanceMeta,recorded_at:now()};
     }
    }else results[step]={status:"skipped",note,recorded_at:now()};
    next=room.step_index+1;
