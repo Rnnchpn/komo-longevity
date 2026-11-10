@@ -61,6 +61,15 @@ export function createOneLegObserver(stance='left',maxMs=30000){
   const f=oneLegFrame(points,stance);
   if(!Number.isFinite(at)||lastAt!==null&&at<lastAt)
    return {...f,...summary(),message:'Image irrégulière · mesure à vérifier.'};
+  // The video stream can freeze without emitting invalid frames. In that case
+  // stop at the last observed frame, not the timestamp of video recovery.
+  if(lastAt!==null&&at-lastAt>700){
+   if(state==='running'){
+    done(lastAt,'camera_lost');
+    lastAt=at;return {...sample(f,at),message:'Flux vidéo interrompu · mesure à vérifier.'};
+   }
+   if(state==='candidate'){state='waiting';liftSince=null;}
+  }
   lastAt=at;allFrames++;
   if(state==='completed')return sample(f,at);
   if(state==='running')attemptFrames++;
