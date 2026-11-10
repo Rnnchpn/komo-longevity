@@ -361,6 +361,8 @@ async function attachPoseVideo(video){
 }
 async function startWithCountdown(action="start"){
  if(!room||panelMode!=="tests"||countdownPending||busy||!["start","restart"].includes(action))return;
+ if(action==="start"&&room.progress?.step_status==="running"){setStatus("Le chronomètre fonctionne déjà.");return}
+ if(action==="restart"&&room.progress?.step_status!=="running"){setStatus("Le test n’a pas encore démarré.");return}
  if(room.step_index===0&&!room.progress?.safety_confirmed&&!q("mocSafety")?.checked){
   setStatus("Vérifiez et confirmez les conditions de sécurité avant de lancer le premier test.");
   return;
@@ -446,8 +448,12 @@ async function submit(event){
    clockLocal={key:clockRunKey(room),startedAt:Date.now()};
   }
   latestSignature="";
-  renderStep();
-  if(event==="save")setStatus("Résultat enregistré.");
+  if(room.status==="completed"){
+   panelMode="report";updatePanelTabs();renderReportSection();
+  }else if(panelMode==="tests")renderStep();
+  else if(panelMode==="questionnaire")renderQuestionnaireSection();
+  else renderReportSection();
+  if(event==="save"&&panelMode==="tests")setStatus("Résultat enregistré.");
  }catch(error){setStatus((error.message||"Impossible d’enregistrer")+" · Réessayez.");}
  finally{busy=false;host?.querySelectorAll(".moc-button").forEach(b=>b.disabled=false)}
 }
@@ -467,10 +473,16 @@ async function refresh(force=false){
    const initialized=await api({action:"operator_tests_init",session_id:selected.id});
    room=initialized.session;
   }else room=selected;
+  if(!questionnaireDirty&&!questionnaireSaveInFlight){
+   questionnaireAnswers={...(room.progress?.questionnaire?.answers||{})};
+  }
+  updatePanelTabs();
   const signature=JSON.stringify([room.id,room.stage_code,room.step_index,room.status,room.progress?.step_status,room.progress?.safety_confirmed,room.progress?.test_started_at,room.progress?.results]);
   if(force||signature!==latestSignature){
    latestSignature=signature;
-   renderStep();
+   if(panelMode==="tests")renderStep();
+   else if(panelMode==="report")renderReportSection();
+   // Do not tear down the questionnaire while typing answers.
   }
   if(openVideo&&room.status==="active"){
    await openVideo(room.id,"motionConsultCamera");
@@ -492,6 +504,30 @@ export async function mountOperatorConsultation(config){
  host=config.root;api=config.api;openVideo=config.openVideo;patient=config.patient||null;
  if(!host)return;
  styles();makeShell();
+ try{
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-clinic-complete-v1");
+  updatePanelTabs();
+ }catch(error){
+  const note=q("mocVoiceState");
+  if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
+ }
+ try{
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261110-clinic-complete-v1");
+  voice=createClinicVoice({
+   onAction:handleVoiceAction,
+   onStatus:(text,state)=>{
+    const note=q("mocVoiceState");if(note)note.textContent=text;
+    const button=q("mocVoice");
+    if(button){
+     button.textContent=["listening","connecting","reconnecting","paused"].includes(state)?"🎙 Couper la voix":"🎙 Activer la voix";
+     button.setAttribute("aria-pressed",String(["listening","connecting","reconnecting","paused"].includes(state)));
+    }
+   }
+  });
+  if(!voice.supported&&q("mocVoice"))q("mocVoice").disabled=true;
+ }catch(error){
+  const note=q("mocVoiceState");if(note)note.textContent="Commandes vocales indisponibles : "+(error.message||"chargement");
+ }
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  try{
