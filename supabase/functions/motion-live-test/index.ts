@@ -401,9 +401,13 @@ Deno.serve(async(req:Request)=>{
   const safety=!!old.safety_confirmed||b.safety_confirmed===true;
   // Explicit duration follows the CURRENT client protocol. Previous 20 s
   // implementations remain labeled 20 s when no duration was supplied.
+  const starting=["start","restart"].includes(event);
   const protocolDuration=step==="posture"?0:
-   (step==="heels"||step==="arms")?(b.duration_seconds===30?30:20):30;
-  if(b.duration_seconds!==undefined&&b.duration_seconds!==protocolDuration)
+   (step==="heels"||step==="arms")?
+     (starting?(b.duration_seconds===30?30:20):
+       (old.test_duration_seconds===30?30:20)):30;
+  // The duration can change only when starting a new test, never at result save.
+  if(starting&&b.duration_seconds!==undefined&&b.duration_seconds!==protocolDuration)
    return response(req,{error:"invalid_test_duration"},422);
   const results=old.results&&typeof old.results==="object"&&!Array.isArray(old.results)?{...old.results}:{};
   const note=s(b.note,300);
