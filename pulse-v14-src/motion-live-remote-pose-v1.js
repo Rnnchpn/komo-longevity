@@ -1,8 +1,8 @@
 // KŌMØ Pulse — experimental 2D body landmarks, computed ONLY on the Operator browser.
 // The paired iPhone provides an encrypted WebRTC stream. No raw video, skeleton or frame is uploaded.
-import {createPoseEngine} from './online/session/pose-engine.js';
-import {createMovementTracker,frameInfo} from './online/session/metrics.mjs?v=20261110-live-hud-v1';
-import {createOneLegObserver,oneLegFrame} from './online/session/unipodal-metrics.mjs?v=20261110-balance30-v1';
+import {createPoseEngine} from './online/session/pose-engine.js?v=20261110-video-measures-v1';
+import {createMovementTracker,frameInfo} from './online/session/metrics.mjs?v=20261110-video-measures-v1';
+import {createOneLegObserver,oneLegFrame} from './online/session/unipodal-metrics.mjs?v=20261110-video-measures-v1';
 import {createSideProfileStability,sideProfileFrame,surfaceSagittalIndex} from './online/session/profile-photo-metrics.mjs';
 
 const REPETITIONS=new Set(["sts","heels","arms"]);
@@ -91,7 +91,7 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
     if(current!==generation||disposed)return;
     engine=null;
     onError?.("Suivi interrompu : vérifiez le flux caméra puis reconnectez. "+(error?.message||""));
-   },{mirror:false});
+   },{mirror:false,accuracy:"full"});
    if(current!==generation||disposed||video!==nextVideo){
     instance.stop();return false;
    }
