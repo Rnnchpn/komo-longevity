@@ -402,6 +402,33 @@ function updatePosePanel(reading){
   }
   return;
  }
+ if(isBalance(t)){
+  const state=reading?.balanceState||"waiting";
+  const elapsed=reading?.started&&Number.isFinite(reading.balanceElapsed)?
+   Math.min(30,Math.max(0,reading.balanceElapsed)):null;
+  const quality=Number.isFinite(reading?.balanceQuality)?reading.balanceQuality:0;
+  const input=q("mocValue");
+  // Keep the most recent visible measurement. Require confidence and operator
+  // confirmation before storing it as a video-derived result.
+  if(elapsed!==null){
+   autoValue=elapsed;
+   if(input&&!manualEdited)input.value=String(elapsed);
+  }
+  if(state==="waiting"||state==="candidate"){
+   feedback.textContent=state==="candidate"?
+    "◌ Pied levé détecté · stabilisation en cours, départ automatique.":
+    "◌ Suivi armé. Soulevez le pied opposé à la jambe d’appui. Le chrono ne démarre pas avant la détection.";
+  }else if(state==="running"){
+   feedback.textContent="◉ Appui détecté : "+elapsed?.toFixed(1)+" / 30 s · Qualité vidéo "+quality+
+    "% · Arrêt au retour du pied au sol. Le praticien peut interrompre l’essai.";
+  }else if(state==="completed"){
+   feedback.textContent="✓ "+balanceReasonText(reading.balanceReason)+" Durée estimée : "+
+    elapsed?.toFixed(1)+" s · Qualité du suivi : "+quality+
+    "%. Vérifiez l’image avant de valider.";
+  }else feedback.textContent="◌ Suivi vidéo indisponible : mesure manuelle possible.";
+  timeDisplay();
+  return;
+ }
  if(t?.id==="posture"){
   const index=Number.isFinite(reading?.postureIndex)?reading.postureIndex:null;
   feedback.textContent=index!==null&&reading?.stable?
