@@ -7,12 +7,12 @@ const recoveryLinkDetected=/\btype=recovery\b/.test(location.href)&&/\b(?:access
 let recoveryActive=recoveryLinkDetected;
 
 const PATIENT_NAV=[['home','Mon espace']];
-const PRO_NAV=[['live','En direct'],['operator','Consultation Motion'],['patients','Patients'],['appointments','Rendez-vous']];
+const PRO_NAV=[['live','Nouvelle consultation'],['operator','Consultation Motion'],['patients','Patients'],['appointments','Rendez-vous']];
 const OP_STEPS=[
  ['sts','30 s','Se relever de la chaise','Motion Online'],
  ['heels','20 s','Élévations sur les pointes','Motion Online'],
- ['unipodal_left','20 s','Équilibre · pied gauche','Motion Online'],
- ['unipodal_right','20 s','Équilibre · pied droit','Motion Online'],
+ ['unipodal_left','30 s','Équilibre · pied gauche','Motion Online'],
+ ['unipodal_right','30 s','Équilibre · pied droit','Motion Online'],
  ['arms','20 s','Mobilité des bras','Motion Online'],
  ['posture','Observation','Posture de profil','Motion Online']
 ];
@@ -612,14 +612,47 @@ async function openOperatorCamera(sessionId,containerId){
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
 function motionLiveMonitor(){
-  heading('En direct','KŌMØ OPERATOR · TEST');
+  heading('Préparer une consultation','KŌMØ OPERATOR · CENTRE · DÉMONSTRATION');
   $('#view').innerHTML=`<div class="op-live-dashboard">
-    <header class="op-live-head"><div><span class="overline">CONSULTATION PHYSIQUE · DEUX APPAREILS</span><h2>Connecter mon iPhone</h2><p><strong>Sur ton iPhone :</strong> ouvre <strong>pulse.komolongevity.com/camera/</strong> et connecte-toi avec ton compte Operator. <strong>Sur l’ordinateur :</strong> associe la caméra à ton dossier fictif puis réalise les six tests. Le patient n’utilise pas son téléphone.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
-    <div class="op-live-toolbar"><span id="opLiveCount">Recherche de ton iPhone…</span><button type="button" class="button secondary" id="opLiveCopyCameraLink">Copier le lien iPhone</button><button type="button" class="button secondary" id="opLiveNewPatient">+ Dossier fictif</button></div>
-    <div id="opLiveRooms" aria-live="polite"><p>Recherche des sessions…</p></div>
+    <header class="op-live-head"><div><span class="overline">CONSULTATION MOTION · 3 ÉTAPES</span><h2>Une consultation. Deux appareils.</h2><p>Le participant remplit une courte préparation, <strong>ton iPhone filme depuis le trépied</strong> et tu pilotes tous les tests sur cet ordinateur. Pas de compte participant ni de caméra patient.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
+    <div class="op-live-checklist"><div><b>01</b><span><strong>Préparer le participant</strong><small>Un lien, quelques informations fictives</small></span></div><div><b>02</b><span><strong>Connecter ton iPhone</strong><small>Caméra arrière · trépied</small></span></div><div><b>03</b><span><strong>Débuter les tests</strong><small>Mesures, questionnaire, passeport</small></span></div></div>
+    <div class="op-live-toolbar"><button type="button" class="button primary" id="opLiveCreateCheckin">+ Nouvelle consultation</button><button type="button" class="button secondary" id="opLiveCopyCameraLink">Connecter mon iPhone</button><button type="button" class="button secondary" id="opLiveNewPatient">Créer un dossier manuellement</button><span id="opLiveCount" aria-live="polite">Synchronisation…</span></div>
+    <div id="opLiveInvite" class="op-checkin-invitation" hidden></div>
+    <section class="op-checkin-section"><h3>Participants prêts à commencer</h3><div id="opCheckinQueue" aria-live="polite"><p>Recherche des préparations…</p></div></section>
+    <section class="op-checkin-section"><h3>Caméra du cabinet</h3><div id="opLiveRooms" aria-live="polite"><p>Recherche de l’iPhone…</p></div></section>
     <p class="op-live-caution">Test de consultation physique : ton iPhone est le capteur vidéo du cabinet ; aucune connexion patient sur le téléphone. Vidéo WebRTC sans enregistrement. Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.</p>
   </div>`;
   $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
+  $('#opLiveCreateCheckin').onclick=async()=>{
+    const button=$('#opLiveCreateCheckin');button.disabled=true;
+    try{
+      const r=await motionLiveAPI({action:'operator_checkin_invite'});
+      const invite=$('#opLiveInvite');if(!invite)return;
+      invite.hidden=false;
+      invite.innerHTML='<strong>Invitation prête</strong><p>Ouvre ce lien sur une tablette ou transmets-le au participant pour qu’il prépare son dossier fictif sans compte.</p>'+
+       '<canvas id="opLiveInviteQr" width="176" height="176" aria-label="QR code pour ouvrir la préparation sur tablette" hidden></canvas>'+
+       '<input id="opLiveInviteUrl" readonly value="'+esc(r.url)+'" aria-label="Lien de préparation">'+
+       '<div class="op-live-actions"><button type="button" class="button primary" id="opLiveInviteCopy">Copier le lien</button>'+
+       '<a class="button secondary" href="'+esc(r.url)+'" target="_blank" rel="noopener noreferrer">Ouvrir le formulaire</a></div>';
+      // Generate QR locally in-browser: the invitation token is never sent to an external QR API.
+      void import('https://esm.sh/qrcode@1.5.4').then(async module=>{
+       const qr=module.default?.toCanvas||module.toCanvas;
+       const canvas=$('#opLiveInviteQr');
+       if(canvas&&typeof qr==='function'){
+        await qr(canvas,r.url,{width:176,margin:2,color:{dark:'#203e32',light:'#ffffff'}});
+        canvas.hidden=false;
+       }
+      }).catch(()=>{});
+      $('#opLiveInviteCopy').onclick=async()=>{
+       try{await navigator.clipboard.writeText(r.url);toast('Lien de préparation copié.')}
+       catch{const input=$('#opLiveInviteUrl');input?.select();toast('Sélectionne et copie le lien.')}
+      };
+      toast('Invitation créée. Le participant peut commencer.');
+      loadMotionLiveRooms(true);
+    }catch(error){toast('Préparation impossible : '+(error.message||'réessayer'))}
+    finally{button.disabled=false}
+  };
+
   $('#opLiveCopyCameraLink').onclick=async()=>{
     const url='https://pulse.komolongevity.com/camera/';
     try{await navigator.clipboard.writeText(url);toast('Lien caméra copié. Ouvre-le sur ton iPhone.')}
@@ -636,12 +669,39 @@ async function loadMotionLiveRooms(force=false){
  motionLiveFetching=true;
  try{
   const data=await motionLiveAPI({action:'operator_list'});
-  const rooms=(data.sessions||[]).filter(x=>x.operator_user_id===S.user?.id&&x.progress?.camera_owner==='operator');
-  const signature=JSON.stringify(rooms.map(x=>[x.id,x.status,x.stage_code,x.step_index,x.progress?.step_status,x.patient_id,x.updated_at,x.patient_last_seen_at]));
+  const owned=(data.sessions||[]).filter(x=>x.operator_user_id===S.user?.id);
+  const rooms=owned.filter(x=>x.progress?.camera_owner==='operator');
+  const checkins=owned.filter(x=>x.progress?.kind==='patient_checkin');
+  const signature=JSON.stringify([
+   ...rooms.map(x=>[x.id,x.status,x.stage_code,x.step_index,x.progress?.step_status,x.patient_id,x.updated_at,x.patient_last_seen_at]),
+   ...checkins.map(x=>[x.id,x.status,x.patient_id,x.progress?.patient_checkin?.state,x.updated_at])
+  ]);
   const count=$('#opLiveCount');
-  if(count)count.textContent=rooms.filter(x=>['waiting','ready','active'].includes(x.status)).length+' session(s) en cours · actualisation automatique';
+  if(count)count.textContent=checkins.filter(x=>x.progress?.patient_checkin?.state==='ready').length+
+   ' participant(s) prêt(s) · '+rooms.filter(x=>['waiting','ready','active'].includes(x.status)).length+
+   ' caméra(s) en cours';
   if(force||signature!==motionLiveSignature){
    motionLiveSignature=signature;
+   const queue=$('#opCheckinQueue');
+   if(queue){
+    const visible=checkins.filter(x=>['invited','ready','accepted'].includes(x.progress?.patient_checkin?.state)&&x.status!=='closed');
+    queue.innerHTML=visible.length?visible.map(room=>{
+      const p=room.progress.patient_checkin,code=esc(room.display_code);
+      const status=p.state==='accepted'?'Dossier prêt':p.state==='ready'?'Prêt à démarrer':'Préparation attendue';
+      const label=p.alias?esc(p.alias)+' · '+esc(p.age_band||''):'Lien transmis · en attente du participant';
+      return '<article class="op-live-room op-checkin-card"><header><div><span class="overline">PRÉPARATION PARTICIPANT · '+code+'</span>'+
+       '<h3>'+esc(status)+'</h3></div><span class="op-live-tag">'+esc(p.state==='accepted'?'Prêt':p.state==='ready'?'À confirmer':'En attente')+'</span></header>'+
+       '<p>'+label+'</p>'+
+       (p.state==='ready'?'<button type="button" class="button primary" data-checkin-accept="'+esc(room.id)+'">Confirmer et démarrer →</button>':
+        p.state==='accepted'&&room.patient_id?'<button type="button" class="button secondary" data-checkin-open="'+esc(room.patient_id)+'">Reprendre ce dossier</button>':'')+
+       '</article>';
+    }).join(''):'<div class="op-live-empty">Aucun participant en attente. Clique sur « Nouvelle consultation » pour créer son lien de préparation.</div>';
+    queue.querySelectorAll('[data-checkin-accept]').forEach(btn=>btn.onclick=()=>acceptMotionCheckin(btn.dataset.checkinAccept,btn));
+    queue.querySelectorAll('[data-checkin-open]').forEach(btn=>btn.onclick=async()=>{
+      localStorage.setItem('komo_v14_patient',btn.dataset.checkinOpen);
+      await loadPro();location.hash='operator';render();
+    });
+   }
    const selected=new Map([...host.querySelectorAll('[data-live-select]')].map(x=>[x.dataset.liveSelect,x.value]));
    const statusLabels={waiting:'En attente',ready:'iPhone prêt',active:'Caméra connectée',completed:'Terminé',closed:'Fermé'};
    const choices=S.patients.filter(p=>p.data_classification==='synthetic'&&p.status==='active');
@@ -678,6 +738,58 @@ async function loadMotionLiveRooms(force=false){
  }catch(error){if(host)host.innerHTML='<p class="op-live-error">'+esc(error.message||'Erreur de synchronisation')+'</p>'}
  finally{motionLiveFetching=false}
 }
+const DEMO_DOB_BY_AGE={
+ under40:'1993-01-01','40-49':'1982-01-01','50-59':'1972-01-01',
+ '60-69':'1962-01-01','70-79':'1952-01-01', '80plus':'1942-01-01'
+};
+async function acceptMotionCheckin(checkinId,button){
+ if(!S.org?.id)return toast('Aucun centre associé à ton compte.');
+ if(button.disabled)return;
+ button.disabled=true;button.textContent='Préparation du dossier…';
+ try{
+  const list=await motionLiveAPI({action:'operator_list'});
+  const intake=(list.sessions||[]).find(x=>x.id===checkinId&&
+   x.operator_user_id===S.user?.id&&x.progress?.patient_checkin?.state==='ready');
+  if(!intake)throw Error('Cette préparation a déjà été prise en charge.');
+  const checkin=intake.progress.patient_checkin;
+  const birthDate=DEMO_DOB_BY_AGE[checkin.age_band];
+  if(!birthDate||!checkin.synthetic)throw Error('Seuls les dossiers fictifs sont autorisés.');
+  if(!confirm('Créer un dossier fictif pour « '+checkin.alias+' Démo » et ouvrir la consultation ?'))return;
+  const {data, error}=await sb.functions.invoke('professional-patient',{body:{
+   action:'create',organization_id:S.org.id,
+   first_name:checkin.alias,last_name:'Démo',birth_date:birthDate,
+   sex_at_birth:'not_stated',create_account:false
+  }});
+  if(error||data?.error||!data?.patient?.id)
+   throw Error(data?.detail||data?.error||error?.message||'Création du dossier impossible.');
+  const patientId=data.patient.id;
+  const op=await sb.rpc('start_pulse_operator_session_v1',{p_patient_id:patientId,p_assessment_id:null});
+  if(op.error||!op.data?.session_id)throw Error(op.error?.message||'Préparation du bilan impossible.');
+  await motionLiveAPI({action:'operator_checkin_claim',session_id:checkinId,patient_id:patientId,
+   operator_session_id:op.data.session_id});
+  sessionStorage.setItem('komo_pending_motion_checkin',JSON.stringify({checkinId,patientId}));
+  localStorage.setItem('komo_v14_patient',patientId);
+  await loadPro();
+  // Pair the unique available clinician-owned camera automatically. More than
+  // one camera requires explicit selection to prevent accidental cross-pairing.
+  const latest=await motionLiveAPI({action:'operator_list'});
+  const ready=(latest.sessions||[]).filter(x=>x.progress?.camera_owner==='operator'&&
+   x.operator_user_id===S.user?.id&&!x.patient_id&&
+   ['waiting','ready'].includes(x.status)&&new Date(x.created_at).getTime()>Date.now()-2*3600000);
+  if(ready.length===1){
+   await motionLiveAPI({action:'operator_attach',session_id:ready[0].id,patient_id:patientId,
+    operator_session_id:op.data.session_id,checkin_id:checkinId});
+   sessionStorage.removeItem('komo_pending_motion_checkin');
+   toast('Dossier et iPhone liés. La consultation peut commencer.');
+   location.hash='operator';render();
+  }else{
+   toast(ready.length?'Plusieurs iPhone détectés : choisis celui du cabinet.':
+     'Dossier prêt. Active la caméra de ton iPhone pour commencer.');
+   motionLiveSignature='';await loadMotionLiveRooms(true);
+  }
+ }catch(error){toast(error.message||'Impossible de préparer le bilan.')}
+ finally{if(button.isConnected){button.disabled=false;button.textContent='Confirmer et démarrer →'}}
+}
 async function attachMotionLive(id,button){
  const select=$('#opLiveRooms [data-live-select="'+id+'"]');
  const patientId=select?.value||'';
@@ -688,7 +800,14 @@ async function attachMotionLive(id,button){
  try{
   const result=await sb.rpc('start_pulse_operator_session_v1',{p_patient_id:patientId,p_assessment_id:null});
   if(result.error||!result.data?.session_id)throw Error(result.error?.message||'Impossible de préparer la consultation.');
-  await motionLiveAPI({action:'operator_attach',session_id:id,patient_id:patientId,operator_session_id:result.data.session_id});
+  let checkin_id='';
+  try{
+    const pending=JSON.parse(sessionStorage.getItem('komo_pending_motion_checkin')||'null');
+    if(pending?.patientId===patientId&&typeof pending.checkinId==='string')checkin_id=pending.checkinId;
+  }catch{}
+  await motionLiveAPI({action:'operator_attach',session_id:id,patient_id:patientId,operator_session_id:result.data.session_id,
+   ...(checkin_id?{checkin_id}:{})});
+  if(checkin_id)sessionStorage.removeItem('komo_pending_motion_checkin');
   localStorage.setItem('komo_v14_patient',patientId);
   toast('Téléphone associé. La consultation est prête.');
   await loadPro();motionLiveSignature='';location.hash='operator';

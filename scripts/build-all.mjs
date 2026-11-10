@@ -258,6 +258,8 @@ const scripts = [
   'scripts/pulse-v14-qa.mjs',
   // Simplified Motion entry and protected operator dossier creation (no real health data until compliance clearance).
   'scripts/pulse-motion-direct-qa-20261109.mjs',
+  // Patient-ready no-login consultation invitation, secure operator handoff, clinician camera.
+  'scripts/pulse-simple-consultation-qa-20261110.mjs',
   // Supervised physical consultation: voice, questionnaire, video counters, PDF.
   'scripts/pulse-clinic-flow-qa-20261110.mjs',
   // Evidence-aware consultant passport, PDF renderer and 0/22 questionnaire regression.

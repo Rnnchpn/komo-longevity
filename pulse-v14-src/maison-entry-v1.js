@@ -50,10 +50,10 @@
       <div class="maison-screen maison-account-screen" data-maison-screen="motion" hidden>
         <button type="button" class="maison-login-back" data-maison-back="choice">← Revenir aux bilans</button>
         <span class="maison-panel-label">MOTION AU CENTRE · 200 €</span>
-        <h2>Votre bilan Motion.<br><em>Sans démarche préalable.</em></h2>
-        <p class="maison-panel-lead">La consultation se déroule intégralement au centre. Le praticien utilise son propre iPhone sur trépied comme caméra, pilote les tests depuis l’ordinateur et vous accompagne personnellement. Vous n’avez pas à utiliser votre téléphone ni à créer de compte pour être évalué.</p>
+        <h2>Votre bilan Motion.<br><em>Prêt en quelques instants.</em></h2>
+        <p class="maison-panel-lead">Au centre, le praticien vous transmet un lien de préparation. Vous sélectionnez un profil fictif de démonstration, indiquez votre objectif et cliquez sur « Je suis prêt ». Le praticien ouvre ensuite la consultation sur son ordinateur et utilise son propre iPhone sur trépied. Aucun compte participant ni caméra personnelle ne sont nécessaires.</p>
         <div class="maison-account-actions">
-          <button class="maison-action-primary" type="button" id="maisonLiveStart">Accéder à mon espace, si je dispose d’un compte <span>→</span></button>
+          <button class="maison-action-primary" type="button" id="maisonLiveStart">Je dispose déjà d’un compte · Me connecter <span>→</span></button>
           <button class="maison-action-secondary" type="button" data-maison-login>J'ai déjà un compte · Me connecter <span>→</span></button>
           <button class="maison-action-secondary" type="button" data-maison-back="choice">Retour aux bilans <span>→</span></button>
         </div>

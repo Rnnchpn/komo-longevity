@@ -34,7 +34,7 @@ const checks=[
   ['no anonymous patient write',!maison.includes("from('patients')")&&!app.includes("from('patients').insert(")],
   ['real health records not activated before HDS/security clearance',app.includes("Environnement non validé pour de vraies données de santé")&&app.includes('name="synthetic_attested" required')],
   ['operator layout available',css.includes('.op-create-patient-form')&&css.includes('op-create-patient-grid')],
-  ['onsite consultation never triggers patient camera',maison.includes('id="maisonLiveStart"')&&maison.includes('praticien utilise son propre iPhone')&&!maison.includes('launchMotion')&&!maison.includes('getUserMedia')],
+  ['onsite consultation never triggers patient camera',maison.includes('id="maisonLiveStart"')&&maison.includes('son propre iPhone sur trépied')&&!maison.includes('launchMotion')&&!maison.includes('getUserMedia')],
   ['public onsite choice opens information instead of streaming',maison.includes("show('motion')")&&!maison.includes("await launchMotion(event.currentTarget)")],
   ['mobile Operator camera CTA uses dedicated station',app.includes('id="pulse-mobile-start-motion"')&&app.includes("window.location.assign('/camera/')")&&app.includes("does NOT require a patient selection")],
   ['mobile start CTA stays above the operator bottom navigation',mobileCss.includes('.app-shell-pro .pulse-mobile-start-motion')&&mobileCss.includes('bottom:calc(89px + env(safe-area-inset-bottom,0px))')],
@@ -54,7 +54,7 @@ const checks=[
 
   ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(key,guestToken)')],
   ['patient marks ready; Operator alone controls stages',liveGuest.includes('action:"guest_event"')&&!liveGuest.includes('event:"complete"')&&liveGuest.includes('event=live.status==="waiting"?"ready":null')],
-  ['operator live nav and pairing enabled',app.includes("['live','En direct']")&&app.includes("function motionLiveMonitor()")&&app.includes("action:'operator_attach'")&&app.includes("start_pulse_operator_session_v1")],
+  ['operator live nav and pairing enabled',app.includes("['live','Nouvelle consultation']")&&app.includes("function motionLiveMonitor()")&&app.includes("action:'operator_attach'")&&app.includes("start_pulse_operator_session_v1")],
   ['physical Motion never uses patient phone',app.includes('id="pulseLobbyLiveStart"')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")&&app.includes('Aucun accès caméra patient nécessaire')],
   ['Operator consultation embeds paired phone camera',app.includes('id="motionConsultRoot"')&&app.includes('openOperatorCamera')&&consult.includes('id="motionConsultCamera"')],
   ['live server verifies operator role and center',liveEdge.includes('db.auth.getUser(jwt)')&&liveEdge.includes('organization_members')&&liveEdge.includes('synthetic_patient_required')],
