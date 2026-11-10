@@ -60,7 +60,7 @@ function renderReady(email){
   try{
    const {data:{session}}=await sb.auth.getSession();
    if(!session?.user?.id)throw Error('Compte Operator non connecté.');
-   const module=await import('../motion-live-guest-v1.js?v=20261110-balance30-v1');
+   const module=await import('../motion-live-guest-v1.js?v=20261110-persist-report-v3');
    await module.openMotionLive({
     mode:'operator_camera',
     ownerId:session.user.id,
