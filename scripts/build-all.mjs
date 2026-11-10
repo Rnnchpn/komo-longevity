@@ -258,6 +258,8 @@ const scripts = [
   'scripts/pulse-v14-qa.mjs',
   // Simplified Motion entry and protected operator dossier creation (no real health data until compliance clearance).
   'scripts/pulse-motion-direct-qa-20261109.mjs',
+  // Supervised physical consultation: voice, questionnaire, video counters, PDF.
+  'scripts/pulse-clinic-flow-qa-20261110.mjs',
   // Deterministic movement algorithm tests, independent of actual camera hardware.
   'scripts/pulse-pose-metrics-qa.mjs',
   // Check voice command interpretation and microphone lifecycle without hardware.
