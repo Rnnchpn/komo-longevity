@@ -1,0 +1,33 @@
+/* KŌMØ Pulse consultation guide · operator-first, synthetic-only onboarding. */
+.op-live-dashboard{max-width:none!important}
+.op-live-checklist{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0 18px}
+.op-live-checklist>div{display:flex;align-items:flex-start;gap:12px;background:#fdfbf6;border:1px solid #e7decf;border-radius:13px;padding:15px}
+.op-live-checklist b{font:500 27px/1 Georgia,serif;color:#b69e74}
+.op-live-checklist strong{display:block;font-size:12px;color:#293c33;line-height:1.5}
+.op-live-checklist small{display:block;font-size:10px;color:#8d8476;line-height:1.6}
+.op-live-toolbar{flex-wrap:wrap!important;gap:9px}
+#opLiveCreateCheckin{background:#203d30;border-color:#203d30}
+#opLiveCount{font-size:11px;color:#6b7168}
+.op-checkin-invitation{background:#e8efe7;border:1px solid #acbda9;border-radius:13px;padding:16px 18px;margin:12px 0 20px}
+.op-checkin-invitation[hidden]{display:none!important}
+.op-checkin-invitation>strong{color:#203e31;font-size:14px}
+.op-checkin-invitation p{color:#596b5e;font-size:11px;line-height:1.6;max-width:65ch;margin:6px 0 11px}
+.op-checkin-invitation input{border:1px solid #becdbb;border-radius:8px;background:#fff;
+ width:100%;padding:12px;font:500 12px Inter,system-ui,sans-serif;color:#284332;min-height:44px}
+.op-checkin-invitation .op-live-actions{margin-top:11px;display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.op-checkin-invitation .button{display:inline-flex;justify-content:center;align-items:center;min-height:42px;cursor:pointer;text-decoration:none}
+.op-checkin-section{margin:21px 0}
+.op-checkin-section>h3{font:400 clamp(25px,2.8vw,32px)/1.2 "Cormorant Garamond",Georgia,serif;
+ color:#273a2e;margin:0 0 14px}
+#opCheckinQueue{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:12px}
+.op-checkin-card{margin:0!important;min-height:145px}
+.op-checkin-card header h3{font-size:22px}
+.op-checkin-card .button{margin-top:13px;min-height:44px}
+#opCheckinQueue>.op-live-empty{grid-column:1/-1}
+@media(max-width:850px){
+ .op-live-checklist{grid-template-columns:1fr;gap:7px}
+ .op-live-checklist>div{padding:11px 12px;gap:11px}
+ .op-live-checklist b{font-size:22px}
+ #opCheckinQueue{grid-template-columns:1fr}
+ .op-live-toolbar>.button{width:100%}
+}
