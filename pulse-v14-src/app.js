@@ -630,9 +630,19 @@ function motionLiveMonitor(){
       const invite=$('#opLiveInvite');if(!invite)return;
       invite.hidden=false;
       invite.innerHTML='<strong>Invitation prête</strong><p>Ouvre ce lien sur une tablette ou transmets-le au participant pour qu’il prépare son dossier fictif sans compte.</p>'+
+       '<canvas id="opLiveInviteQr" width="176" height="176" aria-label="QR code pour ouvrir la préparation sur tablette" hidden></canvas>'+
        '<input id="opLiveInviteUrl" readonly value="'+esc(r.url)+'" aria-label="Lien de préparation">'+
        '<div class="op-live-actions"><button type="button" class="button primary" id="opLiveInviteCopy">Copier le lien</button>'+
        '<a class="button secondary" href="'+esc(r.url)+'" target="_blank" rel="noopener noreferrer">Ouvrir le formulaire</a></div>';
+      // Generate QR locally in-browser: the invitation token is never sent to an external QR API.
+      void import('https://esm.sh/qrcode@1.5.4').then(async module=>{
+       const qr=module.default?.toCanvas||module.toCanvas;
+       const canvas=$('#opLiveInviteQr');
+       if(canvas&&typeof qr==='function'){
+        await qr(canvas,r.url,{width:176,margin:2,color:{dark:'#203e32',light:'#ffffff'}});
+        canvas.hidden=false;
+       }
+      }).catch(()=>{});
       $('#opLiveInviteCopy').onclick=async()=>{
        try{await navigator.clipboard.writeText(r.url);toast('Lien de préparation copié.')}
        catch{const input=$('#opLiveInviteUrl');input?.select();toast('Sélectionne et copie le lien.')}
