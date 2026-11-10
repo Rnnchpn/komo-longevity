@@ -97,6 +97,11 @@ export async function downloadMotionPdf(data){
   pdf.text(data.mode==='CABINET'?'CONSULTATION AU CABINET / DEMO':'MOTION ONLINE / '+(data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
   pdf.setTextColor(215,201,181);pdf.text(normal('Date : '+data.date),RIGHT,27,{align:'right'});
   y=49;
+  if(data.mode==='CABINET'){
+   pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(muted);
+   pdf.text(normal('Dossier de demonstration : '+(data.subject||'sans identifiant')).slice(0,110),M,y);
+   y+=7;
+  }
  }
  header();
  function nextPage(){pdf.addPage();header();}
