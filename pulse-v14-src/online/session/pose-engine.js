@@ -3,24 +3,37 @@
 const MEDIAPIPE_VERSION='0.10.21';
 const LIB='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@'+MEDIAPIPE_VERSION+'/vision_bundle.mjs';
 const WASM='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@'+MEDIAPIPE_VERSION+'/wasm';
-const MODEL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const MODEL_LITE='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const MODEL_FULL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
 const EDGES=[[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[24,26],[25,27],[26,28],[27,29],[28,30],[27,31],[28,32]];
 const show=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&(p.visibility??1)>=.55;
-let modelPromise=null;
-async function model(){
- if(modelPromise)return modelPromise;
- modelPromise=(async()=>{
+// Keep the proven Lite model as the default for patient-owned devices.
+// The clinician's desktop requests Full precision and falls back to Lite if
+// GPU, CPU or the Full model cannot load. Models stay local to the browser.
+const modelPromises=new Map();
+async function model(accuracy="lite"){
+ const preference=accuracy==="full"?"full":"lite";
+ if(!modelPromises.has(preference)){
+  modelPromises.set(preference,(async()=>{
    const {PoseLandmarker,FilesetResolver}=await import(LIB);
    const wasm=await FilesetResolver.forVisionTasks(WASM);
-   let landmarker;
-   try{
-     landmarker=await PoseLandmarker.createFromOptions(wasm,{baseOptions:{modelAssetPath:MODEL,delegate:'GPU'},runningMode:'VIDEO',numPoses:1,minPoseDetectionConfidence:.55,minPosePresenceConfidence:.55,minTrackingConfidence:.5});
-   }catch{
-     landmarker=await PoseLandmarker.createFromOptions(wasm,{baseOptions:{modelAssetPath:MODEL,delegate:'CPU'},runningMode:'VIDEO',numPoses:1,minPoseDetectionConfidence:.55,minPosePresenceConfidence:.55,minTrackingConfidence:.5});
+   let lastError=null;
+   for(const asset of (preference==="full"?[MODEL_FULL,MODEL_LITE]:[MODEL_LITE])){
+    for(const delegate of ["GPU","CPU"]){
+     try{
+      return await PoseLandmarker.createFromOptions(wasm,{
+       baseOptions:{modelAssetPath:asset,delegate},runningMode:"VIDEO",
+       numPoses:1,minPoseDetectionConfidence:.55,
+       minPosePresenceConfidence:.55,minTrackingConfidence:.5
+      });
+     }catch(error){lastError=error}
+    }
    }
-   return landmarker;
- })();
- try{return await modelPromise}catch(error){modelPromise=null;throw error;}
+   throw lastError||new Error("Pose Landmarker indisponible");
+  })());
+ }
+ try{return await modelPromises.get(preference)}
+ catch(error){modelPromises.delete(preference);throw error}
 }
 function overlay(canvas,points,mirror=true){
  const c=canvas.getContext('2d',{alpha:true});
@@ -42,14 +55,16 @@ function overlay(canvas,points,mirror=true){
  }
 }
 export async function createPoseEngine(video,canvas,onFrame,onFailure,options={}){
- const landmarker=await model();
+ const landmarker=await model(options.accuracy||"lite");
  let running=true,raf=0,lastTimestamp=-1,lastSample=0,errors=0;
  const tick=()=>{
    if(!running)return;
    raf=requestAnimationFrame(tick);
    if(document.hidden||video.readyState<2||!video.videoWidth)return;
    const now=performance.now();
-   if(now-lastSample<95||video.currentTime===lastTimestamp)return;
+   // A 70 ms acquisition ceiling retains intermediate knee transitions while
+   // avoiding duplicate decoded frames and blocking slow CPUs.
+   if(now-lastSample<70||video.currentTime===lastTimestamp)return;
    lastSample=now;lastTimestamp=video.currentTime;
    if(canvas.width!==video.videoWidth||canvas.height!==video.videoHeight){
      canvas.width=video.videoWidth;canvas.height=video.videoHeight;
