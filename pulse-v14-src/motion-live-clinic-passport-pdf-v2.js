@@ -71,17 +71,17 @@ export async function downloadClinicPassport(report){
  newPage('Premiere evaluation fonctionnelle','Votre passeport locomoteur');
  block('Mesurer le mouvement. Documenter les capacites. Suivre une trajectoire.',{size:10,clr:ink.muted});
  y+=6;
- rect(M,y,C,51,ink.dark,3);
+ rect(M,y,C,46,ink.dark,3);
  txt('LE CORPS EN MOUVEMENT',M+10,y+11,{size:8,bold:true,clr:ink.brass});
  txt(String(report.measured)+'/6',M+9,y+34,{size:31,bold:true,clr:ink.white});
  txt('tests enregistres',M+55,y+28,{size:10,clr:ink.white});
  txt(report.questionnaire.answered+'/22  reponses',M+55,y+37,{size:9,clr:ink.brass});
  txt('POINT DE DEPART - NON DIAGNOSTIQUE',R-9,y+12,{size:7.2,clr:ink.white,align:'right'});
- y+=62;
+ y+=53;
  const cells=report.measures;
  for(let i=0;i<6;i++){
-  const x=M+(i%2)*((C-6)/2+6),w=(C-6)/2,h=35;
-  const at=y+Math.floor(i/2)*42;
+  const x=M+(i%2)*((C-6)/2+6),w=(C-6)/2,h=33;
+  const at=y+Math.floor(i/2)*38;
   rect(x,at,w,h,ink.sand,2);
   txt(('0'+(i+1)).slice(-2),x+7,at+8,{size:7.5,bold:true,clr:ink.brass});
   txt(cells[i].short,x+7,at+15,{size:8.5,clr:ink.dark});
@@ -92,17 +92,11 @@ export async function downloadClinicPassport(report){
   font('helvetica','bold',i===5?10:15);color(ink.dark);
   pdf.text(ls.slice(0,2),x+7,at+26);
  }
- y+=3*42+9;
- sectionTitle('La synthese en trois points');
- for(const insight of report.findings.slice(0,3)){
-  need(20);rect(M,y-4,1.6,9,ink.brass);
-  block(insight,{size:9,width:C-7,x:M+6,gap:4.6,spacing:5});
- }
- need(20);
- y+=5;
+ y+=3*38+7;
+ need(24);
  rect(M,y,C,20,ink.sand,2);
  txt('QUESTIONNAIRE : '+(report.questionnaire.complete?'COMPLET':'A COMPLETER'),M+7,y+8,{size:9,bold:true,clr:ink.dark});
- txt(report.questionnaire.answered+' / '+report.questionnaire.total+' reponses  |  Sans reponses, aucun profil global n est calcule.',M+7,y+14.5,{size:7.9,clr:ink.muted});
+ txt(report.questionnaire.answered+' / '+report.questionnaire.total+' reponses. Aucun score global en cas de donnees incompletes.',M+7,y+14.5,{size:7.9,clr:ink.muted});
  y+=25;
  // PAGE 2: factual results and provenance.
  newPage('Resultats / six epreuves','Le profil fonctionnel');
