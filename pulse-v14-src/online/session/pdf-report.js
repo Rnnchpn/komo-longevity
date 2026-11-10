@@ -35,9 +35,12 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
   const raw=results[id];
   const valid=raw?.status==='done'||raw?.status==='review';
   const value=valid&&Number.isFinite(raw?.value)?raw.value:null;
-  return {id,label,value,display:value===null?'Non realise':decimal(value,precision)+' '+unit,
+  const postureQualitative=id==='posture'&&valid&&raw?.observation?
+   ({neutral:'Alignement apparent neutre',apparent_offset:'Décalage apparent',not_interpretable:'Non interprétable'}[raw.observation]||'Observation à vérifier'):null;
+  return {id,label,value,display:postureQualitative||(
+     value===null?'Non realise':decimal(value,precision)+' '+unit),
     status:raw?.status??'missing',source:raw?.source??null,quality:raw?.quality??null,
-    commentary:id==='posture'&&valid?'Projection de surface, pas SVA radiographique.':null};
+    commentary:id==='posture'&&valid?'Observation 2D de surface, pas SVA radiographique.':null};
  });
  const scoreValid=!blocked&&p.complete&&motionScore?.complete===true&&
   Number.isInteger(motionScore?.score)&&motionScore.score>=0&&motionScore.score<=100&&
@@ -53,7 +56,8 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
  const date=generatedAt instanceof Date&&!Number.isNaN(generatedAt.getTime())?
   generatedAt.toISOString().slice(0,10):new Date().toISOString().slice(0,10);
  return {
-  version:PDF_REPORT_VERSION,date,mode:options?.mode==='PILOTE'?'PILOTE':'DEMONSTRATION',
+  version:PDF_REPORT_VERSION,date,mode:options?.mode==='CABINET'?'CABINET':options?.mode==='PILOTE'?'PILOTE':'DEMONSTRATION',
+  subject:typeof options?.subject==='string'?options.subject.trim().slice(0,100):'',
   passport:buildMotionPassport(answers,results,blocked),
   program:options?.program?.version==='KOMO_PULSE_DAILY_V1'?{progress:programProgress(options.program),startedAt:options.program.startedAt}:null,
   questionnaire:{complete:p.complete,index:p.complete?p.profileIndex:null,
@@ -90,9 +94,14 @@ export async function downloadMotionPdf(data){
   pdf.text('KOMO',M,19);
   pdf.setFont('helvetica','normal');pdf.setFontSize(8);pdf.setTextColor(220,207,186);
   pdf.text('LONGEVITY IN MOTION',M,26);
-  pdf.text('MOTION ONLINE / '+(data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
+  pdf.text(data.mode==='CABINET'?'CONSULTATION AU CABINET / DEMO':'MOTION ONLINE / '+(data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
   pdf.setTextColor(215,201,181);pdf.text(normal('Date : '+data.date),RIGHT,27,{align:'right'});
   y=49;
+  if(data.mode==='CABINET'){
+   pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(muted);
+   pdf.text(normal('Dossier de demonstration : '+(data.subject||'sans identifiant')).slice(0,110),M,y);
+   y+=7;
+  }
  }
  header();
  function nextPage(){pdf.addPage();header();}
@@ -309,7 +318,7 @@ export async function downloadMotionPdf(data){
   pdf.text('KOMO MOTION  /  DOCUMENT EXPERIMENTAL NON MEDICAL',M,H-12);
   pdf.text(i+' / '+count,RIGHT,H-12,{align:'right'});
  }
- const filename='KOMO_Motion_Rapport_'+data.date+'.pdf';
+ const filename='KOMO_Motion_'+(data.mode==='CABINET'?'Consultation_Cabinet_Demo_':'Rapport_')+data.date+'.pdf';
  pdf.save(filename);
  return filename;
 }

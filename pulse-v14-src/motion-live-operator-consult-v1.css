@@ -177,3 +177,38 @@
   .mopv-window.embedded{min-height:300px;flex:1 1 auto}
   .mopv-window.embedded .mopv-screen{min-height:240px;flex:1 1 auto}
 }
+
+/* Consultation physique intégrée : 3 onglets, contrôle vocal, 22 réponses et rapport PDF. */
+.moc-head-actions{gap:7px}
+#mocVoice[aria-pressed="true"]{border-color:#94b399;background:#e6efe6;color:#29533b}
+.moc-mode-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:-6px 0 12px}
+.moc-mode-tab{min-height:42px;border-radius:10px;border:1px solid #ddd2c3;background:#f7f3ed;color:#625b50;font:650 11px/1.2 Inter,system-ui,sans-serif;padding:9px;cursor:pointer}
+.moc-mode-tab.active{background:#292b29;color:white;border-color:#292b29}
+.moc-voice-state{margin:-3px 0 12px;color:#77766c;font:500 10px/1.45 Inter,system-ui,sans-serif;min-height:14px}
+.moc-questionnaire{padding-top:19px}
+.moc-question-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.moc-question-head>span:last-child{font:700 10px/1 Inter,system-ui,sans-serif;color:#8a7b65}
+.moc-question-list{display:grid;gap:12px;margin:16px 0}
+.moc-question{border:1px solid #e4dbd0;border-radius:13px;padding:12px;margin:0;background:#faf8f3;min-width:0}
+.moc-question legend{font-size:12px;font-weight:700;line-height:1.4;padding:0 5px;color:#33332e}
+.moc-question-choices{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+.moc-question-choice{display:inline-flex;align-items:center;gap:6px;border:1px solid #e0d8cd;border-radius:10px;background:white;padding:9px 10px;font:500 11px/1.3 Inter,system-ui,sans-serif;cursor:pointer}
+.moc-question-choice:has(input:checked){background:#e9efe7;border-color:#87a08b;color:#294735}
+.moc-question-choice input{accent-color:#53765f;margin:0;flex:none}
+.moc-questionnaire .moc-help{margin:12px 0}
+.moc-report-meta{padding:13px;background:#eee8de;border-radius:10px;font-weight:700;font-size:12px}
+.moc-report-section .moc-recap{margin-bottom:15px}
+.moc-report-section .moc-button.primary{background:#1e342c;border-color:#1e342c}
+@media(min-width:1051px){
+ .app-shell[data-pulse-view="operator"] .moc-head{margin-bottom:8px}
+ .app-shell[data-pulse-view="operator"] .moc-mode-tabs,
+ .app-shell[data-pulse-view="operator"] .moc-voice-state{flex:none}
+ .app-shell[data-pulse-view="operator"] .moc-mode-tabs{margin-bottom:8px}
+ .app-shell[data-pulse-view="operator"] .moc-voice-state{margin-bottom:7px}
+}
+@media(max-width:660px){
+ .moc-mode-tabs{gap:4px}
+ .moc-mode-tab{font-size:10px;padding:7px 4px}
+ .moc-question-choices{display:grid;grid-template-columns:1fr}
+ .moc-question-choice{min-height:44px}
+}
