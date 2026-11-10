@@ -4,6 +4,7 @@
 import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './online/session/intake-model.mjs';
 import {buildClinicPassport} from './motion-live-clinic-passport-v2.mjs?v=20261110-simulated-intake-v1';
 import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js';
+import {clinicRadarMarkup} from './motion-live-clinic-action-plan-v1.mjs';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -68,3 +69,5 @@ export async function downloadClinicReport(answers={},results={},generatedAt=new
  const passport=clinicPassport(answers,results,generatedAt,options);
  return downloadClinicPassport(passport);
 }
+
+export function clinicRadar(plan){return clinicRadarMarkup(plan)}
