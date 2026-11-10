@@ -31,7 +31,7 @@ let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",
 let clockKey="",clockLocal=null;
 let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
 let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0;
-let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null,questionnaireNavigating=false;
+let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null,questionnaireNavigating=false,questionnairePersistedAt=0;
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
 let videoFocus=false;
 const q=id=>host?.querySelector("#"+id);
@@ -55,7 +55,7 @@ export function disposeOperatorConsultation(){
  if(poll)clearInterval(poll);poll=null;stopClock();
  if(questionnaireTimer)clearTimeout(questionnaireTimer);questionnaireTimer=null;
  voice?.destroy();voice=null;countdownPending=false;
- extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;questionnaireNavigating=false;
+ extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;questionnaireNavigating=false;questionnairePersistedAt=0;
  if(videoListener)window.removeEventListener("pulse:remote-video-ready",videoListener);
  if(stopVideoListener)window.removeEventListener("pulse:remote-video-stopped",stopVideoListener);
  if(fullscreenListener)document.removeEventListener("fullscreenchange",fullscreenListener);
@@ -77,6 +77,7 @@ function makeShell(){
  '<header class="moc-head"><div><span class="overline">KŌMØ PULSE · CONSULTATION EN DIRECT</span><h2>Consultation Motion</h2>'+
  '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice">🎙 Activer la voix</button><button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Agrandir la vidéo sans recadrer le corps">▣ Vidéo XXL</button><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
  '<nav class="moc-mode-tabs" aria-label="Sections de la consultation"><button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true">Tests Motion</button><button type="button" id="mocTabQuestionnaire" class="moc-mode-tab">Questionnaires</button><button type="button" id="mocTabReport" class="moc-mode-tab">Rapport PDF</button></nav>'+
+ '<p class="moc-save-indicator" id="mocIntakeSaveStatus" role="status" aria-live="polite">Questionnaire · en attente de réponses</p>'+
  '<p class="moc-voice-state" id="mocVoiceState" role="status">Micro éteint · Dites « C’est parti », « Stop », « Recommence » ou « Suivant » après activation. Le navigateur peut traiter la voix via son fournisseur ; aucun audio n’est enregistré par Pulse.</p>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
@@ -87,7 +88,11 @@ function makeShell(){
  '<div id="motionConsultCamera" class="moc-camera-host"></div>'+
  '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>'+
  '</aside></div><p class="moc-bottom-note">Démonstration avec dossier fictif · Résultats saisis manuellement par l’opérateur · Aucune interprétation clinique automatique</p></section>';
- q("mocReturn").onclick=()=>{location.hash="live"};
+ q("mocReturn").onclick=async()=>{
+  try{await saveQuestionnaire();if(questionnaireDirty)return}
+  catch(error){questionnaireNote("Sauvegarde échouée : "+error.message);return}
+  location.hash="live";
+ };
  q("mocVideoFocus").onclick=()=>{
   videoFocus=!videoFocus;
   host.closest(".app-shell")?.classList.toggle("moc-video-xxl",videoFocus);
@@ -210,6 +215,8 @@ async function saveQuestionnaire(){
     }
     if(room?.id===sessionId){
      room.progress={...room.progress,questionnaire:result.session.progress.questionnaire};
+     questionnairePersistedAt=Math.max(questionnairePersistedAt,
+      Date.parse(result.session.progress.questionnaire.updated_at)||0);
     }
     if(JSON.stringify(questionnaireAnswers)===snapshot)questionnaireDirty=false;
     questionnaireNote("✓ "+Object.keys(stored).length+"/22 réponses enregistrées sur le serveur");
@@ -720,10 +727,22 @@ async function refresh(force=false){
    room=initialized.session;
   }else room=selected;
   if(!questionnaireDirty&&!questionnaireSaveInFlight){
-   questionnaireAnswers={...(room.progress?.questionnaire?.answers||{})};
+   const stored=room.progress?.questionnaire;
+   const serverTime=Date.parse(stored?.updated_at||"")||0;
+   if(serverTime>=questionnairePersistedAt){
+    questionnaireAnswers={...(stored?.answers||{})};
+    questionnairePersistedAt=serverTime;
+   }else if(questionnairePersistedAt){
+    // A delayed polling response predating last successful save ACK is ignored.
+    room.progress={...room.progress,questionnaire:{
+     ...stored,answers:{...questionnaireAnswers},
+     updated_at:new Date(questionnairePersistedAt).toISOString()
+    }};
+   }
   }
   updatePanelTabs();
-  const signature=JSON.stringify([room.id,room.stage_code,room.step_index,room.status,room.progress?.step_status,room.progress?.safety_confirmed,room.progress?.test_started_at,room.progress?.results]);
+  const signature=JSON.stringify([room.id,room.stage_code,room.step_index,room.status,room.progress?.step_status,room.progress?.safety_confirmed,room.progress?.test_started_at,room.progress?.results,
+   room.progress?.questionnaire?.updated_at,room.progress?.questionnaire?.answers]);
   if(force||signature!==latestSignature){
    latestSignature=signature;
    if(panelMode==="tests")renderStep();
