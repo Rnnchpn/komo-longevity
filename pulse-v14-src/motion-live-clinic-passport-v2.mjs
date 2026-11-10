@@ -34,9 +34,12 @@ function objective(row={},test){
  const value=status==='done'||status==='review'?safeNumber(row.value):null;
  const observation=test.id==='posture'&&['done','review'].includes(status)?
   (names[row.observation]||'Observation à vérifier'):null;
+ const timedCount=(test.id==='heels'||test.id==='arms')&&finite(value);
+ const durationSeconds=timedCount?(row?.duration_seconds===30?30:20):
+  test.id==='sts'?30:test.id.startsWith('unipodal')?30:null;
  const display=test.id==='posture'?(observation||'Non documenté'):
   value===null?(status==='skipped'?'Non réalisé':'Non documenté'):
-   n(value)+' '+test.unit;
+   n(value)+' '+test.unit+(timedCount?' / '+durationSeconds+' s':'');
  const source=row?.source==='operator_confirmed_video_estimate'?'Estimation vidéo confirmée par l’opérateur':
    row?.source==='operator_manual_observation'?'Saisie manuelle par l’opérateur':
    row?.source==='operator_visual_observation'?'Observation de l’opérateur':
@@ -46,7 +49,7 @@ function objective(row={},test){
  const incident=['camera_lost','ambiguous_contact'].includes(row?.stop_reason);
  const review=status==='review'||(quality!==null&&quality<65)||incident||observation==='Non interprétable';
  const note=safe(row?.note);
- return {...test,status,value,observation,display,source,quality,review,
+ return {...test,status,value,observation,display,durationSeconds,source,quality,review,
   stopReason:typeof row?.stop_reason==='string'?row.stop_reason:null,
   note,measured:status==='done'||status==='review',
   ceiling:finite(value)&&test.id.startsWith('unipodal')&&value>=29.95};
