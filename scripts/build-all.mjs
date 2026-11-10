@@ -264,6 +264,8 @@ const scripts = [
   'scripts/pulse-live-hud-qa-20261110.mjs',
   // Clinician-supervised single-leg stance: 30 seconds starts on foot lift.
   'scripts/pulse-balance-30-qa-20261110.mjs',
+  // Video XXL and robust calibrated keypoint measurement regression.
+  'scripts/pulse-measurement-xxl-qa-20261110.mjs',
   // Deterministic movement algorithm tests, independent of actual camera hardware.
   'scripts/pulse-pose-metrics-qa.mjs',
   // Check voice command interpretation and microphone lifecycle without hardware.
