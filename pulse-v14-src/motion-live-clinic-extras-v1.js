@@ -61,7 +61,8 @@ export function clinicReportSummary(answers={},results={}){
   recorded:done,skipped,totalTests:ids.length};
 }
 export function clinicPassport(answers={},results={},date=new Date(),options={}){
- return buildClinicPassport(answers,results,{date,subject:options.subject||'Dossier fictif'});
+ return buildClinicPassport(answers,results,{date,subject:options.subject||'Dossier fictif',
+  simulated:options.simulated===true});
 }
 export async function downloadClinicReport(answers={},results={},generatedAt=new Date(),options={}){
  const passport=clinicPassport(answers,results,generatedAt,options);
