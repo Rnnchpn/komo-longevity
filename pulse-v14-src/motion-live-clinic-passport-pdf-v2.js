@@ -1,4 +1,4 @@
-// KŌMØ Motion Passport — five large independent categories.
+// KŌMØ Motion Passport — six complete categories, including 22 answers.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
 import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261110-visual-plan-v1';
 const cleaner=value=>String(value??'')
@@ -10,12 +10,13 @@ const fmt=n=>Number.isFinite(n)?(Number.isInteger(n)?String(n):n.toFixed(1).repl
 const P={dark:[28,52,42],gold:[180,146,94],paper:[251,249,245],sand:[242,237,228],
  text:[43,54,46],muted:[110,118,108],line:[219,215,203],pale:[225,234,224],white:[255,255,253]};
 export const CLINIC_PASSPORT_EXPORTS=[
- {value:'all',label:'Passeport complet (5 catégories)'},
+ {value:'all',label:'Passeport complet (6 catégories)'},
  {value:'synthese',label:'1. Synthèse & diagramme'},
  {value:'tests',label:'2. Résultats & qualité de mesure'},
  {value:'exercices',label:'3. Exercices à domicile'},
  {value:'nutrition',label:'4. Nutrition & compléments'},
- {value:'suivi',label:'5. Suivi à 6 semaines'}
+ {value:'suivi',label:'5. Suivi à 6 semaines'},
+ {value:'questionnaire',label:'6. Questionnaire détaillé (22 réponses)'}
 ];
 export async function downloadClinicPassport(report,category='all'){
  if(report?.version!==CLINIC_PASSPORT_VERSION||!report.actionPlan)
@@ -49,7 +50,7 @@ export async function downloadClinicPassport(report,category='all'){
   txt('MOTION PASSPORT',M+27,15,{sz:8,bold:true,col:P.muted});
   txt('BILAN / CABINET',R,15,{sz:8,col:P.muted,align:'right'});
   line(M,22,R,22);
-  txt('CATEGORIE '+index+' / 05',M,33,{sz:8,bold:true,col:P.gold});
+  txt('CATEGORIE '+index+' / 06',M,33,{sz:8,bold:true,col:P.gold});
   txt(title,M,46,{sz:23,serif:true});
   if(subtitle)words(subtitle,M,55,C,{sz:8.5,lh:4.4,max:2,col:P.muted});
  };
@@ -163,26 +164,29 @@ export async function downloadClinicPassport(report,category='all'){
   txt('Arreter en cas de malaise, chute, douleur ou intolerance.',M,268,{sz:8.7,col:P.muted});
  }
  function nutrition(){
-  page(4,'Nutrition & complements','L alimentation et le renforcement priment sur les complements.');
-  let y=68;
+  page(4,'Nutrition & complements','Options sous conditions : la nutrition et le mouvement restent prioritaires.');
+  const foodW=86,foodY=67;
   plan.food.forEach((a,i)=>{
-   box(M,y,C,30,P.pale,3);
-   txt((i+1)+'. '+a.title,M+7,y+9,{sz:10,bold:true});
-   words(a.text,M+7,y+17,C-14,{sz:8.2,lh:4,max:3});
-   y+=32;
+   const x=M+i*92;
+   box(x,foodY,foodW,45,P.pale,3);
+   txt(a.title,x+6,foodY+9,{sz:9.5,bold:true});
+   words(a.text,x+6,foodY+17,foodW-12,{sz:7.2,lh:3.7,max:4});
+   words(a.action,x+6,foodY+35,foodW-12,{sz:7.1,lh:3.3,max:2,col:P.muted});
   });
-  txt('COMPLEMENTS : DECISION CONDITIONNELLE',M,y+5,{sz:8.5,bold:true,col:P.gold});
-  y+=14;
+  txt('COMPLEMENTS · INDICATIONS ET PRECAUTIONS',M,124,
+   {sz:8.5,bold:true,col:P.gold});
   plan.supplements.forEach((a,i)=>{
-   const h=21;
-   box(M,y,C,h,P.sand,2);
-   txt(a.name,M+7,y+8,{sz:9.5,bold:true});
-   txt(a.status,R-7,y+8,{sz:7.5,col:P.gold,align:'right'});
-   words(a.benefit,M+7,y+15,C-14,{sz:7.2,lh:3.5,max:1});
-   y+=h+3;
+   const x=M+(i%2)*92,y=132+Math.floor(i/2)*47;
+   box(x,y,86,43,P.sand,2);
+   txt(a.name,x+5,y+8,{sz:9.1,bold:true});
+   txt(a.status,x+5,y+14,{sz:7.5,col:P.gold});
+   words(a.benefit,x+5,y+21,76,{sz:7,lh:3.2,max:3});
+   words('Prudence : '+a.guard,x+5,y+32,76,{sz:6.7,lh:3.1,max:3,col:P.muted});
   });
-  words('Aucune prescription automatique : verifier apports, fonction renale, traitements et indications.',M,270,C,{sz:7.5,col:P.muted,max:2});
+  words('Aucune prescription automatique. Examen clinique, traitements, bilan nutritionnel et facteurs de risque sont a verifier avant tout conseil individualise.',
+   M,273,C,{sz:7.2,col:P.muted,lh:3.4,max:2});
  }
+
  function suivi(){
   page(5,'Suivi sur six semaines','Progression graduelle et controle des resultats dans des conditions comparables.');
   let y=70;
@@ -200,8 +204,43 @@ export async function downloadClinicPassport(report,category='all'){
    txt(m.value+' '+m.unit,R,yy,{sz:8.5,bold:true,align:'right'});
   });
  }
- const renderers={synthese,tests,exercices,nutrition,suivi};
- const chapters=category==='all'?['synthese','tests','exercices','nutrition','suivi']:[category];
+ function questionnaire(){
+  const groups=report.questionnaire.groups||[];
+  const printGroups=(subset,part)=>{
+   page(6,part===1?'Questionnaire : autonomie':'Questionnaire : habitudes',
+    'Reponses exactes enregistrees. '+report.questionnaire.answered+' / '+report.questionnaire.total+
+    ' · '+(report.simulated?'Reponses fictives pour demonstration.':'Profil auto-declare exploratoire.'));
+   let y=69,serial=part===1?0:10;
+   for(const g of subset){
+    txt(g.label.toUpperCase(),M,y,{sz:10,bold:true,col:P.gold});
+    if(Number.isFinite(g.score))txt(fmt(g.score)+' / 100',R,y,
+      {sz:8,bold:true,align:'right',col:P.gold});
+    y+=8;
+    for(const item of g.items){
+     serial+=1;
+     if(y>267)throw Error('questionnaire_pdf_page_overflow');
+     txt(String(serial).padStart(2,'0'),M,y,{sz:8,bold:true,col:P.gold});
+     const afterQuestion=words(item.question,M+11,y,C-13,{sz:8.4,lh:4.0,max:2});
+     const afterAnswer=words(item.answer,M+11,afterQuestion+0.2,C-13,
+      {sz:8.2,lh:3.8,max:2,bold:true,
+       col:item.answer==='Non renseigné'?P.muted:P.dark});
+     y=afterAnswer+3.1;
+     line(M+11,y-1,R,y-1,P.line,.22);
+     y+=3.3;
+    }
+    y+=3;
+   }
+   if(part===2){
+    txt('METHODE ET LIMITES',M,266,{sz:8,bold:true,col:P.gold});
+    words('Mesures exploratoires validees par l operateur ; questionnaire KŌMØ non diagnostique. Recontrole sous conditions identiques. Aucun age biologique deduit.',
+     M,274,C,{sz:7.2,lh:3.3,max:2,col:P.muted});
+   }
+  };
+  printGroups(groups.slice(0,2),1);
+  printGroups(groups.slice(2),2);
+ }
+ const renderers={synthese,tests,exercices,nutrition,suivi,questionnaire};
+ const chapters=category==='all'?['synthese','tests','exercices','nutrition','suivi','questionnaire']:[category];
  for(const chapter of chapters)renderers[chapter]();
  footer();
  const name='KOMO_Motion_'+(category==='all'?'Passeport_Complet':category)+
