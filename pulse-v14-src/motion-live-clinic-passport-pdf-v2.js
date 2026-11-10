@@ -126,20 +126,20 @@ export async function downloadClinicPassport(report,category='all'){
  }
  function tests(){
   page(2,'Resultats & qualite','Les valeurs brutes sont distinctes des questionnaires et normes externes.');
-  let y=70;
+  let y=65;
   report.measures.forEach((m,i)=>{
-   box(M,y,C,29,P.sand,2);
+   box(M,y,C,26,P.sand,2);
    txt('0'+(i+1)+'  '+m.name,M+7,y+9,{sz:10,bold:true});
    txt(m.display,R-7,y+9,{sz:m.id==='posture'?8.5:11,bold:true,align:'right'});
    words('Origine : '+m.source+(m.quality===null?'':' / suivi '+m.quality+' %')+
      (m.review?' / VERIFICATION NECESSAIRE':''),M+7,y+16,C-14,
      {sz:7.7,lh:3.6,max:2,col:m.review?P.gold:P.muted});
-   y+=34;
+   y+=29;
   });
   if(report.balance){
-   txt('EQUILIBRE BILATERAL',M,278-28,{sz:8.2,bold:true,col:P.gold});
+   txt('EQUILIBRE BILATERAL',M,250,{sz:8.2,bold:true,col:P.gold});
    words('Gauche '+fmt(report.balance.left)+' s / droite '+fmt(report.balance.right)+
-    ' s. '+report.balance.interpretation,M,278-21,C,{sz:8,lh:4,max:3});
+    ' s. '+report.balance.interpretation,M,259,C,{sz:8,lh:4,max:3});
   }
  }
  function exercises(){
@@ -166,22 +166,22 @@ export async function downloadClinicPassport(report,category='all'){
   page(4,'Nutrition & complements','L alimentation et le renforcement priment sur les complements.');
   let y=68;
   plan.food.forEach((a,i)=>{
-   box(M,y,C,31,P.pale,3);
+   box(M,y,C,30,P.pale,3);
    txt((i+1)+'. '+a.title,M+7,y+9,{sz:10,bold:true});
    words(a.text,M+7,y+17,C-14,{sz:8.2,lh:4,max:3});
-   y+=36;
+   y+=32;
   });
   txt('COMPLEMENTS : DECISION CONDITIONNELLE',M,y+5,{sz:8.5,bold:true,col:P.gold});
   y+=14;
   plan.supplements.forEach((a,i)=>{
-   const h=25;
+   const h=21;
    box(M,y,C,h,P.sand,2);
    txt(a.name,M+7,y+8,{sz:9.5,bold:true});
    txt(a.status,R-7,y+8,{sz:7.5,col:P.gold,align:'right'});
-   words(a.benefit,M+7,y+15,C-14,{sz:7.7,lh:3.7,max:2});
+   words(a.benefit,M+7,y+15,C-14,{sz:7.2,lh:3.5,max:1});
    y+=h+3;
   });
-  words('Aucune supplementation automatique : verifier apports, poids, age exact, fonction renale, traitements et indications avant recommandation personnalisee.',M,266,C,{sz:8,col:P.muted,max:3});
+  words('Aucune prescription automatique : verifier apports, fonction renale, traitements et indications.',M,270,C,{sz:7.5,col:P.muted,max:2});
  }
  function suivi(){
   page(5,'Suivi sur six semaines','Progression graduelle et controle des resultats dans des conditions comparables.');
