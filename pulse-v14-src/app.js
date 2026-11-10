@@ -7,7 +7,7 @@ const recoveryLinkDetected=/\btype=recovery\b/.test(location.href)&&/\b(?:access
 let recoveryActive=recoveryLinkDetected;
 
 const PATIENT_NAV=[['home','Mon espace']];
-const PRO_NAV=[['live','En direct'],['operator','Consultation Motion'],['patients','Patients'],['appointments','Rendez-vous']];
+const PRO_NAV=[['live','Nouvelle consultation'],['operator','Consultation Motion'],['patients','Patients'],['appointments','Rendez-vous']];
 const OP_STEPS=[
  ['sts','30 s','Se relever de la chaise','Motion Online'],
  ['heels','20 s','Élévations sur les pointes','Motion Online'],
