@@ -1,7 +1,7 @@
 // Published external reference values, not diagnoses.
 // STS: Rikli & Jones (1999) age/sex 25th–75th percentiles:
 // https://www.sralab.org/rehabilitation-measures/30-second-sit-stand-test
-// One leg: Springer et al (2007) best of 3 up to 45 s:
+// One leg: Springer et al (2007) best of 3 up to 45 s; webcam 30-s data not interchangeable:
 // https://www.sralab.org/rehabilitation-measures/single-leg-stance-or-one-legged-stance-test
 export const NORM_VERSION='KOMO_AGE_REFERENCE_V1';
 export const SOURCES={
@@ -55,7 +55,7 @@ export function oneLegReference(ageBand,record){
  return {status:row?'descriptive':'unavailable',comparison:null,
   observed:valid?record.value:null,
   expected:row?row[2]:null,age:row?row[0]+'–'+row[1]:null,source:SOURCES.unipodal,
-  reason:row?'Référence du meilleur de 3 essais jusqu’à 45 s. Pulse mesure un seul essai plafonné à 20 s : aucune classification « normal/anormal » n’est possible.':
+  reason:row?'Référence du meilleur de 3 essais jusqu’à 45 s. Pulse mesure un essai vidéo plafonné à 30 s : ni percentile individuel, ni classification « normal/anormal » sans protocole comparable.':
     'Groupe d’âge non comparable au protocole publié ou âge non renseigné.'};
 }
 export function normativeSummary(answers={},results={},options={}){
