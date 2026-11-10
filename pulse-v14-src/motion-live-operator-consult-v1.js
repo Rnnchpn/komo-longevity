@@ -33,12 +33,13 @@ let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListene
 let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0;
 let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null;
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
+let videoFocus=false;
 const q=id=>host?.querySelector("#"+id);
 function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message||""}
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261110-balance30-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261110-video-measures-v1";
  document.head.append(link);
 }
 function stopClock(){
@@ -49,6 +50,8 @@ function clockRunKey(session){
  return session?.id+":"+session?.step_index+":"+(session?.progress?.test_started_at||"");
 }
 export function disposeOperatorConsultation(){
+ host?.closest(".app-shell")?.classList.remove("moc-video-xxl");
+ videoFocus=false;
  if(poll)clearInterval(poll);poll=null;stopClock();
  if(questionnaireTimer)clearTimeout(questionnaireTimer);questionnaireTimer=null;
  voice?.destroy();voice=null;countdownPending=false;
@@ -72,7 +75,7 @@ function stageText(result){return result?.status==="done"?"✓":result?.status==
 function makeShell(){
  host.innerHTML='<section class="moc-shell">'+
  '<header class="moc-head"><div><span class="overline">KŌMØ PULSE · CONSULTATION EN DIRECT</span><h2>Consultation Motion</h2>'+
- '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice">🎙 Activer la voix</button><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
+ '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice">🎙 Activer la voix</button><button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Agrandir la vidéo sans recadrer le corps">▣ Vidéo XXL</button><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
  '<nav class="moc-mode-tabs" aria-label="Sections de la consultation"><button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true">Tests Motion</button><button type="button" id="mocTabQuestionnaire" class="moc-mode-tab">Questionnaires</button><button type="button" id="mocTabReport" class="moc-mode-tab">Rapport PDF</button></nav>'+
  '<p class="moc-voice-state" id="mocVoiceState" role="status">Micro éteint · Dites « C’est parti », « Stop », « Recommence » ou « Suivant » après activation. Le navigateur peut traiter la voix via son fournisseur ; aucun audio n’est enregistré par Pulse.</p>'+
  '<div class="moc-grid"><section class="moc-tests">'+
@@ -84,6 +87,12 @@ function makeShell(){
  '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>'+
  '</aside></div><p class="moc-bottom-note">Démonstration avec dossier fictif · Résultats saisis manuellement par l’opérateur · Aucune interprétation clinique automatique</p></section>';
  q("mocReturn").onclick=()=>{location.hash="live"};
+ q("mocVideoFocus").onclick=()=>{
+  videoFocus=!videoFocus;
+  host.closest(".app-shell")?.classList.toggle("moc-video-xxl",videoFocus);
+  q("mocVideoFocus").setAttribute("aria-pressed",String(videoFocus));
+  q("mocVideoFocus").textContent=videoFocus?"▣ Quitter la vidéo XXL":"▣ Vidéo XXL";
+ };
  q("mocTabTests").onclick=()=>switchPanel("tests");
  q("mocTabQuestionnaire").onclick=()=>switchPanel("questionnaire");
  q("mocTabReport").onclick=()=>switchPanel("report");
