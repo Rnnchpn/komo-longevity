@@ -255,7 +255,7 @@ Deno.serve(async(req:Request)=>{
  if(action==="operator_camera_start"){
   const {count,error:countError}=await db.from("pulse_motion_live_sessions").select("id",{head:true,count:"exact"})
    .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id).in("status",["ready","active"])
-   .gte("expires_at",now());
+   .contains("progress",{camera_owner:"operator"}).gte("expires_at",now());
   if(countError)return response(req,{error:"temporarily_unavailable"},503);
   if((count||0)>=6)return response(req,{error:"too_many_active_cameras"},429);
   const guestToken=randomToken();
@@ -461,7 +461,7 @@ Deno.serve(async(req:Request)=>{
   const [{data:patient},{data:op},{data:room}]=await Promise.all([
    db.from("patients").select("id,organization_id,status,data_classification").eq("id",patientId).maybeSingle(),
    db.from("pulse_operator_sessions").select("id,patient_id,operator_user_id,organization_id,status").eq("id",opId).maybeSingle(),
-   db.from("pulse_motion_live_sessions").select("id,status,patient_id,expires_at,operator_user_id").eq("id",id).eq("organization_id",ORG_ID).maybeSingle()
+   db.from("pulse_motion_live_sessions").select("id,status,patient_id,expires_at,operator_user_id,progress").eq("id",id).eq("organization_id",ORG_ID).maybeSingle()
   ]);
   if(!patient||patient.organization_id!==ORG_ID||patient.status!=="active"||patient.data_classification!=="synthetic")return response(req,{error:"synthetic_patient_required"},403);
   if(!op||op.patient_id!==patientId||op.organization_id!==ORG_ID||(!["running","draft","paused"].includes(op.status)))return response(req,{error:"operator_session_mismatch"},409);
