@@ -74,7 +74,7 @@ assert.ok(remote.includes('createOneLegObserver(step==="unipodal_left"?"left":"r
 assert.ok(remote.includes('balance.observe(points,at)')&&remote.includes('balanceState'));
 assert.ok(edge.includes('unipodal_left:{max:30')&&edge.includes('unipodal_right:{max:30'));
 assert.ok(edge.includes('SOLEO_EYES_OPEN_30S_OPERATOR_SUPERVISED_V1'));
-assert.ok(norm.includes('un essai vidéo plafonné à 30 s'));
+assert.ok(norm.includes('ceilingSeconds===30'));
 assert.ok(!pdf.includes('test webcam de 20 s'));
 const results={
  unipodal_left:{status:'done',value:30,unit:'seconds',source:'operator_confirmed_video_estimate',
