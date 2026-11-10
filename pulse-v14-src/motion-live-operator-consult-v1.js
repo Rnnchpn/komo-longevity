@@ -38,7 +38,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261110-clinic-complete-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261110-live-hud-v1";
  document.head.append(link);
 }
 function stopClock(){
@@ -303,8 +303,9 @@ function renderStep(){
  '<div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
- (running?'<div class="moc-timer"><div><span>CHRONOMÈTRE</span><strong id="mocClock">'+(t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
- (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">Arrêter le chrono</button><button type="button" class="moc-button secondary" id="mocRestartClock">↻ Repartir de '+t.duration+' s</button></div>':'')+'</div>'+input+
+ (running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>CHRONOMÈTRE</span><strong id="mocClock" aria-live="off">'+(t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
+ (t.type==="count"?'<div class="moc-rep-figure"><span>'+ (t.id==="sts"?"LEVERS EN DIRECT":"RÉPÉTITIONS EN DIRECT")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong><small>Estimation vidéo · à confirmer</small></div>':'')+
+ (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">Arrêter</button><button type="button" class="moc-button secondary" id="mocRestartClock">↻ Repartir de '+t.duration+' s</button></div>':'')+'</div></div>'+input+
  '<div class="moc-auto-feedback" id="mocAutoFeedback">◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
  '<div class="moc-buttons"><button type="button" id="mocSave" class="moc-button primary">Valider et passer au suivant</button>'+
@@ -336,12 +337,41 @@ function renderStep(){
 }
 function updatePosePanel(reading){
  const indicator=q("mocPoseIndicator"),feedback=q("mocAutoFeedback");
- const ready=reading?.valid&&reading.frames>=5;
+ const ready=!!reading?.valid&&reading.frames>=5;
  const message=reading?.message||poseStatus;
- if(indicator)indicator.textContent=(ready?"● Corps détecté · ":"◌ Recherche du corps · ")+message;
+ if(indicator)indicator.textContent=(ready?"● Corps détecté · ":"◌ Ajuster le cadrage · ")+message;
  const t=currentTest(),running=room?.progress?.step_status==="running";
  if(!running||!feedback)return;
  const detected=reading?.measurement;
+ // The actual optical counter is updated on every pose result (~160 ms).
+ // Keep already counted repetitions when a landmark is temporarily occluded.
+ if(t?.type==="count"){
+  const tile=q("mocLiveCount"),input=q("mocValue");
+  if(Number.isFinite(detected)&&detected>=0){
+   const previous=autoValue;
+   autoValue=detected;
+   if(tile){
+    tile.textContent=String(detected);
+    tile.classList.toggle("moc-count-verified",ready);
+    if(detected>0&&detected!==previous&&tile.animate)
+     tile.animate([{transform:"scale(1.17)"},{transform:"scale(1)"}],{duration:240,easing:"ease-out"});
+   }
+   if(input&&!manualEdited)input.value=String(detected);
+  }else if(tile){
+   tile.textContent=String(Number.isFinite(autoValue)?autoValue:0);
+   tile.classList.remove("moc-count-verified");
+  }
+  if(ready&&Number.isFinite(autoValue)){
+   feedback.textContent="◉ Comptage vidéo en direct : "+autoValue+" "+t.unit+" · "+
+    (reading?.phase==="seated"?"Assis détecté · relevez-vous":reading?.phase==="standing"?"Debout détecté · rasseyez-vous":message)+
+    ". Corrigez la valeur avant de valider si nécessaire.";
+  }else{
+   feedback.textContent="◌ "+message+
+    (Number.isFinite(autoValue)?" · "+autoValue+" mouvements déjà comptés et conservés.":" · Le comptage démarre après détection d’une posture assise, de profil.")+
+    " Saisie manuelle possible.";
+  }
+  return;
+ }
  if(t?.id==="posture"){
   const index=Number.isFinite(reading?.postureIndex)?reading.postureIndex:null;
   feedback.textContent=index!==null&&reading?.stable?
