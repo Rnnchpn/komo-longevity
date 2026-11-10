@@ -161,7 +161,7 @@ const checks=[
  ['reference panel syntax',nodeSyntax('normative-panel.js')&&nodeSyntax('reference-norms.mjs')],
  ['auto side photo, not radiographic SVA',profilePhoto.includes('createSideProfileStability')&&profilePhoto.includes('drawImage(video')&&profilePhoto.includes('Photo capturée automatiquement')&&profileGeometry.includes('NOT SVA')&&profileGeometry.includes('NOT mm')],
  ['photo marker correction and in-memory image',profilePhoto.includes('profile-photo')&&profilePhoto.includes('snap.onpointerdown')&&!/fetch\s*\(|localStorage|sessionStorage|toBlob|toDataURL/.test(profilePhoto)],
- ['unipodal both legs, auto timing on foot lift',sessionJs.includes("id:'unipodal_left'")&&sessionJs.includes("id:'unipodal_right'")&&unipodalController.includes('createOneLegObserver')&&unipodalGeometry.includes('at-raisedSince>=850')],
+ ['unipodal both legs, auto timing on foot lift',sessionJs.includes("id:'unipodal_left'")&&sessionJs.includes("id:'unipodal_right'")&&unipodalController.includes("createOneLegObserver(task.id.endsWith('left')?'left':'right',20000)")&&unipodalGeometry.includes('at-liftSince>=500')],
  ['camera-only before auto capture',profilePhoto.includes('consent.checked')&&unipodalController.includes('consent.checked')&&sharedMedia.includes('audio:false')],
  ['large video and compact microphone/audio',sessionCss.includes('.voice-compact')&&sessionCss.includes('height:min(76vh,880px)')&&motionView.includes('id="voice-panel"')],
  ['new side camera controllers parse',nodeSyntax('profile-photo.js')&&nodeSyntax('profile-photo-metrics.mjs')&&nodeSyntax('unipodal-controller.js')&&nodeSyntax('unipodal-metrics.mjs')],
