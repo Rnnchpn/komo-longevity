@@ -43,7 +43,7 @@ assert.equal(blank.outcomes.motionAge,null);
 assert.ok(blank.actionPlan.supplements.some(x=>x.status.includes('Non prioritaire')),'without intake avoid recommending creatine');
 const noBalance=buildClinicActionPlan(answers,passport.measures,null,passport.questionnaire);
 assert.ok(noBalance.exercises.find(x=>x.key==='balance').relevance.includes('référence'));
-const categories=['all','synthese','tests','exercices','nutrition','suivi'];
+const categories=['all','synthese','tests','exercices','nutrition','suivi','questionnaire'];
 assert.deepEqual(CLINIC_PASSPORT_EXPORTS.map(x=>x.value),categories);
 assert.equal(typeof downloadClinicPassport,'function');
 const read=path=>readFile(join(process.cwd(),path),'utf8');
@@ -56,7 +56,7 @@ assert.ok(ui.includes('exportPdf("all",button)'));
 assert.ok(ui.includes('clinicRadar(plan)'));
 for(const category of categories)assert.ok(pdf.includes(category));
 assert.ok(pdf.includes('pdf.save(name)')&&pdf.includes('const chapters=category==='));
-assert.ok(pdf.includes('function nutrition()')&&pdf.includes('function exercises()'));
+assert.ok(pdf.includes('function nutrition()')&&pdf.includes('function exercises()')&&pdf.includes('function questionnaire()'));
 assert.ok(extras.includes("options.category||'all'"));
 assert.ok(css.includes('.moc-category-export')&&css.includes('.moc-radar-svg'));
 for(const f of ['motion-live-clinic-action-plan-v1.mjs','motion-live-clinic-passport-v2.mjs',
