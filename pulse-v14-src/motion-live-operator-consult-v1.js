@@ -224,7 +224,8 @@ function renderReportSection(){
   try{
    if(questionnaireDirty)await saveQuestionnaire();
    status.textContent="Création du PDF sur cet ordinateur…";
-   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date());
+   const label=patient?[patient.first_name,patient.last_name].filter(Boolean).join(' '):'Dossier fictif';
+   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),{subject:label});
    status.textContent="Rapport créé : "+filename;
   }catch(error){status.textContent="Impossible de générer le PDF : "+(error.message||"erreur de chargement")}
   finally{if(button.isConnected)button.disabled=false}
