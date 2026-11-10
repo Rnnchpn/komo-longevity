@@ -661,7 +661,7 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-passport-v2");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-simulated-intake-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
