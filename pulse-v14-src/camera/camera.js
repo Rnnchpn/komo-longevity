@@ -47,10 +47,10 @@ function renderReady(email){
  root.innerHTML='<span class="camera-overline">MATÉRIEL DU PRATICIEN · CONSULTATION PHYSIQUE</span>'+
  '<h1>Ton iPhone.<br><em>La caméra Motion.</em></h1>'+
  '<p class="camera-account">Compte Operator : <strong>'+esc(email)+'</strong></p>'+
- '<ol class="camera-steps"><li>Pose ton iPhone sur le trépied, caméra arrière vers le patient.</li>'+
- '<li>Active la caméra, puis repère le code affiché ici sur ton ordinateur dans <strong>En direct</strong>.</li>'+
- '<li>Sur l’ordinateur, associe la caméra au dossier fictif puis pilote tous les tests Motion.</li></ol>'+
- '<button type="button" id="cameraStart" class="camera-button">Ouvrir la caméra de mon iPhone</button>'+
+ '<ol class="camera-steps"><li>Place ton iPhone sur le trépied, caméra arrière vers le participant.</li>'+
+ '<li>Active la caméra. Elle apparaît automatiquement sur l’ordinateur dans <strong>Nouvelle consultation</strong>.</li>'+
+ '<li>Si une seule caméra est disponible, Pulse pourra l’associer au dossier préparé. Change avant/arrière directement sur ton iPhone.</li></ol>'+
+ '<button type="button" id="cameraStart" class="camera-button">Activer la caméra du cabinet</button>'+
  '<button type="button" id="cameraLogout" class="camera-button secondary">Changer de compte</button>'+
  '<p class="camera-status" id="cameraStatus" role="status"></p>';
  document.getElementById('cameraStart').onclick=async()=>{
