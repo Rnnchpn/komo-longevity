@@ -340,17 +340,35 @@ Deno.serve(async(req:Request)=>{
    }else return response(req,{error:"unknown_question"},422);
    cleaned[key]=value;
   }
-  const previous=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
-  const previouslySimulated=previous.questionnaire?.simulated===true;
-  const progress={...previous,questionnaire:{version:"KOMO_MOTION_SELF_REPORT_V1",answers:cleaned,
-    updated_at:now(),entered_by:"operator",
+  // Optimistic-retry: the test clock / stage can update the SAME progress JSONB.
+  // Reload progress before every attempt and keep tests, signals and check-in fields.
+  // Never report success before Postgres confirms all submitted answers were saved.
+  for(let attempt=0;attempt<6;attempt++){
+   const {data:latest,error:readError}=await db.from("pulse_motion_live_sessions")
+    .select("*").eq("id",id).eq("organization_id",ORG_ID)
+    .eq("operator_user_id",actor.id).maybeSingle();
+   if(readError||!latest)return response(req,{error:"questionnaire_reload_failed"},503);
+   if(latest.status!=="active"&&latest.status!=="completed")
+    return response(req,{error:"room_unavailable"},409);
+   const prior=latest.progress&&typeof latest.progress==="object"&&!Array.isArray(latest.progress)?
+    latest.progress:{};
+   const previouslySimulated=prior.questionnaire?.simulated===true||prior.intake_source==="patient_demo_checkin";
+   const nextProgress={...prior,questionnaire:{
+    ...prior.questionnaire,version:"KOMO_MOTION_SELF_REPORT_V1",
+    answers:cleaned,updated_at:now(),entered_by:"operator",
     simulated:previouslySimulated,
-    ...(previouslySimulated?{simulation_note:"Contient des réponses de démonstration générées artificiellement"}:{})}};
-  const {data,error}=await db.from("pulse_motion_live_sessions").update({progress,updated_at:now()})
-   .eq("id",id).eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
-   .eq("updated_at",room.updated_at).select("*").maybeSingle();
-  return error||!data?response(req,{error:"questionnaire_conflict_retry"},409):
-   response(req,{ok:true,session:publicRow(data)});
+    ...(previouslySimulated?{simulation_note:"Réponses du scénario de démonstration"}:{})
+   }};
+   const {data:saved,error:saveError}=await db.from("pulse_motion_live_sessions")
+    .update({progress:nextProgress,updated_at:now()})
+    .eq("id",id).eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+    .eq("updated_at",latest.updated_at).select("*").maybeSingle();
+   if(saveError)return response(req,{error:"questionnaire_storage_failed"},503);
+   if(saved)return response(req,{ok:true,answered_count:Object.keys(cleaned).length,
+    questionnaire_saved_at:saved.progress?.questionnaire?.updated_at||null,
+    session:publicRow(saved)});
+  }
+  return response(req,{error:"questionnaire_conflict_retry"},409);
  }
  if(action==="operator_tests_init"||action==="operator_test_update"){
   const id=s(b.session_id,50);
@@ -368,7 +386,7 @@ Deno.serve(async(req:Request)=>{
   const old=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
   if(action==="operator_tests_init"){
    if(STEPS.includes(room.stage_code))return response(req,{ok:true,session:publicRow(room)});
-   const progress={step_status:"pending",results:{},safety_confirmed:false};
+   const progress={...old,step_status:"pending",results:old.results||{},safety_confirmed:!!old.safety_confirmed};
    const {data,error}=await db.from("pulse_motion_live_sessions").update({
      stage_code:STEPS[0],step_index:0,progress,updated_at:now()
    }).eq("id",id).eq("status","active").eq("step_index",room.step_index).select("*").maybeSingle();
@@ -381,11 +399,18 @@ Deno.serve(async(req:Request)=>{
   if(room.step_index===0&&!old.safety_confirmed&&b.safety_confirmed!==true)
    return response(req,{error:"safety_check_required"},422);
   const safety=!!old.safety_confirmed||b.safety_confirmed===true;
+  // Explicit duration follows the CURRENT client protocol. Previous 20 s
+  // implementations remain labeled 20 s when no duration was supplied.
+  const protocolDuration=step==="posture"?0:
+   (step==="heels"||step==="arms")?(b.duration_seconds===30?30:20):30;
+  if(b.duration_seconds!==undefined&&b.duration_seconds!==protocolDuration)
+   return response(req,{error:"invalid_test_duration"},422);
   const results=old.results&&typeof old.results==="object"&&!Array.isArray(old.results)?{...old.results}:{};
   const note=s(b.note,300);
   let next=room.step_index,status="active",stage=step,finished:null|string=null;
   let progress:any={...old,results,safety_confirmed:safety,step_status:["start","restart"].includes(event)?"running":"pending",
-   test_started_at:["start","restart"].includes(event)?now():null};
+   test_started_at:["start","restart"].includes(event)?now():null,
+   test_duration_seconds:["start","restart"].includes(event)?protocolDuration:old.test_duration_seconds??protocolDuration};
   if(event==="start"||event==="restart"){
    if(event==="start"&&old.step_status==="running")return response(req,{ok:true,session:publicRow(room)});
    if(event==="restart"&&old.step_status!=="running")return response(req,{error:"test_not_started"},409);
@@ -417,6 +442,7 @@ Deno.serve(async(req:Request)=>{
         ceiling_30s:value===30
        }:{};
      results[step]={status:"done",value,unit:def.unit,note,source:measurementSource,
+      duration_seconds:old.test_duration_seconds??protocolDuration,
       ...balanceMeta,recorded_at:now()};
     }
    }else results[step]={status:"skipped",note,recorded_at:now()};
