@@ -31,3 +31,9 @@
  #opCheckinQueue{grid-template-columns:1fr}
  .op-live-toolbar>.button{width:100%}
 }
+
+.op-checkin-invitation:after{content:"";display:block;clear:both}
+.op-checkin-invitation canvas{float:right;max-width:176px;height:auto;margin:0 0 12px 20px;
+ padding:6px;background:white;border-radius:11px;border:1px solid #c7d7c3}
+.op-checkin-invitation canvas[hidden]{display:none}
+@media(max-width:650px){.op-checkin-invitation canvas{float:none;margin:0 auto 12px;display:block}}
