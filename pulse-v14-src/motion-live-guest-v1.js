@@ -8,8 +8,8 @@ const STAFF_STORAGE="komo_motion_operator_camera_station_v1";
 const STEPS=[
  ["sts","Se relever de la chaise","Assis sur une chaise stable contre un mur, relevez-vous et rasseyez-vous durant 30 secondes. L'opérateur lance le chronomètre."],
  ["heels","Élévations sur les pointes","Debout près d'un appui fixe, montez sur les pointes puis redescendez durant 20 secondes."],
- ["unipodal_left","Équilibre · appui gauche","Près d'un support stable, soulevez légèrement le pied droit. L'opérateur chronomètre jusqu'à 20 secondes."],
- ["unipodal_right","Équilibre · appui droit","Près d'un support stable, soulevez légèrement le pied gauche. L'opérateur chronomètre jusqu'à 20 secondes."],
+ ["unipodal_left","Équilibre · appui gauche","Sur sol ferme, yeux ouverts, soulevez le pied droit. Le décompte démarre automatiquement quand le pied est levé, jusqu'à 30 secondes maximum."],
+ ["unipodal_right","Équilibre · appui droit","Sur sol ferme, yeux ouverts, soulevez le pied gauche. Le décompte démarre automatiquement quand le pied est levé, jusqu'à 30 secondes maximum."],
  ["arms","Mobilité des bras","Face à la caméra, levez et redescendez les bras sans douleur pendant 20 secondes."],
  ["posture","Posture de profil","Mettez-vous naturellement de profil, pieds visibles. L'opérateur observe la posture ; cette image ne mesure pas la SVA radiographique."]
 ];
