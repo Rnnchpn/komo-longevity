@@ -39,7 +39,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261110-visual-plan-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261110-persist-report-v3";
  document.head.append(link);
 }
 function stopClock(){
@@ -792,7 +792,7 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-visual-plan-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-persist-report-v3");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
