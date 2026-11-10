@@ -218,7 +218,12 @@ export async function downloadClinicPassport(report,category='all'){
     y+=8;
     for(const item of g.items){
      serial+=1;
-     if(y>267)throw Error('questionnaire_pdf_page_overflow');
+     if(y>250){
+      page(6,'Questionnaire (suite)','Réponses enregistrées / vérifiables');
+      y=69;
+      txt(g.label.toUpperCase()+' (SUITE)',M,y,{sz:9,bold:true,col:P.gold});
+      y+=8;
+     }
      txt(String(serial).padStart(2,'0'),M,y,{sz:8,bold:true,col:P.gold});
      const afterQuestion=words(item.question,M+11,y,C-13,{sz:8.4,lh:4.0,max:2});
      const afterAnswer=words(item.answer,M+11,afterQuestion+0.2,C-13,
@@ -230,10 +235,10 @@ export async function downloadClinicPassport(report,category='all'){
     }
     y+=3;
    }
-   if(part===2){
-    txt('METHODE ET LIMITES',M,266,{sz:8,bold:true,col:P.gold});
-    words('Mesures exploratoires validees par l operateur ; questionnaire KŌMØ non diagnostique. Recontrole sous conditions identiques. Aucun age biologique deduit.',
-     M,274,C,{sz:7.2,lh:3.3,max:2,col:P.muted});
+   if(part===2&&y<252){
+    txt('METHODE ET LIMITES',M,y+3,{sz:8,bold:true,col:P.gold});
+    words('Mesures exploratoires validees par l operateur ; questionnaire non diagnostique. Aucun age biologique deduit.',
+     M,y+10,C,{sz:7.2,lh:3.3,max:2,col:P.muted});
    }
   };
   printGroups(groups.slice(0,2),1);
