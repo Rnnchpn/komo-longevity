@@ -1,6 +1,6 @@
 // Premium A4 clinical-style Motion Passport for supervised fictional KŌMØ sessions.
 // Browser-only PDF creation. No questionnaire, biometrics or report is uploaded.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261110-simulated-intake-v1';
 const latin=x=>String(x??'').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/Ō/g,'O').replace(/ō/g,'o').replace(/ø/g,'o')
  .replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
