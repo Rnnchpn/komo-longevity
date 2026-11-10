@@ -29,7 +29,10 @@ export function frameInfo(points,task='sts'){
  if(span<.28)return {valid:false,message:'Rapprochez légèrement le trépied, personne entière et jambes visibles.'};
  if(usable.some(p=>p.x<.015||p.x>.985||p.y<.018||p.y>.982))return {valid:false,message:'Recadrez : les articulations sont coupées.'};
  const sides=[LEFT,RIGHT].map(m=>sidePoints(points,m,['hip','knee','ankle'])).filter(Boolean);
- const kneeAngle=sides.length?sides.map(s=>jointAngle(...s)).filter(Number.isFinite).sort((a,b)=>a-b)[0]:null;
+ // Mean of visible left/right angles attenuates isolated keypoint jumps.
+ // If only one leg is visible, use that leg rather than inventing the other.
+ const angles=sides.map(s=>jointAngle(...s)).filter(Number.isFinite);
+ const kneeAngle=angles.length?angles.reduce((sum,v)=>sum+v,0)/angles.length:null;
  if(task==='sts'&&!Number.isFinite(kneeAngle))return {valid:false,message:'Mettez-vous légèrement de profil pour voir genou et cheville.'};
  const shoulder=usable[0],hip=usable[1],knee=usable[2],ankle=usable[3];
  const wrists=sidePoints(points,LEFT,['shoulder','wrist'])&&sidePoints(points,RIGHT,['shoulder','wrist']);
@@ -49,6 +52,13 @@ export function createMovementTracker(task){
  }
  function observe(points,at){
    if(!Number.isFinite(at)||at<s.lastAt)return {valid:false,count:s.count,message:'Image irrégulière'};
+   // Never bridge an unseen 650+ ms interval into a new completed repetition.
+   // A returning silhouette must re-establish the starting posture.
+   if(s.lastValidAt&&at-s.lastValidAt>650){
+    s.candidate=null;s.candidateAt=at;
+    if(task==='sts'||task==='arms')s.phase='initial';
+    if(task==='heels'){s.phase='initial';s.baseline=null;}
+   }
    s.lastAt=at;s.samples++;
    const f=frameInfo(points,task);
    if(!f.valid){s.candidate=null;return {...f,count:s.count,phase:s.phase};}

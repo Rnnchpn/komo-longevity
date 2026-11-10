@@ -367,3 +367,50 @@
  margin:4px 0 8px;
 }
 .moc-test:has(.moc-live-hud) .moc-balance-reference + .moc-auto-feedback{order:4}
+
+/* Clinician XXL video: preserve full-body coordinates and leg landmarks.
+   No object-fit:cover cropping; camera must show the complete feet. */
+@media(min-width:1051px){
+ .app-shell[data-pulse-view="operator"] .moc-grid{
+   grid-template-columns:minmax(370px,.72fr) minmax(0,1.32fr);
+   gap:10px;
+ }
+ .app-shell[data-pulse-view="operator"] .moc-camera-column{padding:7px}
+ .app-shell[data-pulse-view="operator"] .moc-camera-heading{padding:3px 3px 5px}
+ .app-shell[data-pulse-view="operator"] .mopv-window.embedded .mopv-screen video{
+   object-fit:contain;
+ }
+ .app-shell[data-pulse-view="operator"].moc-video-xxl{
+   grid-template-columns:minmax(0,1fr);
+ }
+ .app-shell[data-pulse-view="operator"].moc-video-xxl > .sidebar{
+   display:none;
+ }
+ .app-shell[data-pulse-view="operator"].moc-video-xxl .page{
+   padding:8px 10px;
+ }
+ .app-shell[data-pulse-view="operator"].moc-video-xxl .moc-grid{
+   grid-template-columns:minmax(365px,.66fr) minmax(0,1.75fr);
+ }
+ .app-shell[data-pulse-view="operator"].moc-video-xxl .moc-head{
+   margin-bottom:4px;
+ }
+ .app-shell[data-pulse-view="operator"].moc-video-xxl .moc-head h2{
+   font-size:26px;
+ }
+ .app-shell[data-pulse-view="operator"].moc-video-xxl .moc-mode-tabs{
+   margin-bottom:4px;
+ }
+ .app-shell[data-pulse-view="operator"].moc-video-xxl .moc-voice-state{
+   margin-bottom:4px;
+ }
+}
+#mocVideoFocus[aria-pressed="true"]{
+ background:#1f3530;
+ color:#f9f4e9;
+ border-color:#1f3530;
+}
+@media(max-width:1050px){
+ .moc-camera-host{min-height:460px}
+ .mopv-window.embedded .mopv-screen{min-height:400px}
+}
