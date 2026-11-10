@@ -164,27 +164,32 @@ export async function downloadClinicPassport(report,category='all'){
   txt('Arreter en cas de malaise, chute, douleur ou intolerance.',M,268,{sz:8.7,col:P.muted});
  }
  function nutrition(){
-  page(4,'Nutrition & complements','Options sous conditions : la nutrition et le mouvement restent prioritaires.');
-  const foodW=86,foodY=67;
+  // Two spacious pages avoid truncating supplement contraindications.
+  page(4,'Nutrition & apports','Priorite aux aliments, a l exercice adapte et aux habitudes durables.');
   plan.food.forEach((a,i)=>{
-   const x=M+i*92;
-   box(x,foodY,foodW,45,P.pale,3);
-   txt(a.title,x+6,foodY+9,{sz:9.5,bold:true});
-   words(a.text,x+6,foodY+17,foodW-12,{sz:7.2,lh:3.7,max:4});
-   words(a.action,x+6,foodY+35,foodW-12,{sz:7.1,lh:3.3,max:2,col:P.muted});
+   const y=70+i*75;
+   box(M,y,C,67,P.pale,3);
+   txt((i+1)+'. '+a.title,M+9,y+13,{sz:12,bold:true,col:P.dark});
+   words(a.text,M+9,y+26,C-18,{sz:9,lh:5,max:4});
+   txt('ACTION PRATIQUE',M+9,y+46,{sz:7.8,bold:true,col:P.gold});
+   words(a.action,M+9,y+54,C-18,{sz:8.3,lh:4,max:2});
   });
-  txt('COMPLEMENTS · INDICATIONS ET PRECAUTIONS',M,124,
-   {sz:8.5,bold:true,col:P.gold});
+  box(M,224,C,43,P.sand,3);
+  txt('DECISION NUTRITIONNELLE',M+9,236,{sz:9,bold:true,col:P.gold});
+  words('Les resultats Motion ne permettent pas d identifier une carence vitaminique ou une insuffisance proteique. Le poids, les apports, les symptomes, les traitements et les antecedents sont indispensables avant toute recommandation individualisee.',
+   M+9,246,C-18,{sz:8.5,lh:4.6,max:4,col:P.muted});
+
+  page(4,'Complements & precautions','Options a discuter, jamais prescrites automatiquement par le questionnaire ou la camera.');
   plan.supplements.forEach((a,i)=>{
-   const x=M+(i%2)*92,y=132+Math.floor(i/2)*47;
-   box(x,y,86,43,P.sand,2);
-   txt(a.name,x+5,y+8,{sz:9.1,bold:true});
-   txt(a.status,x+5,y+14,{sz:7.5,col:P.gold});
-   words(a.benefit,x+5,y+21,76,{sz:7,lh:3.2,max:3});
-   words('Prudence : '+a.guard,x+5,y+32,76,{sz:6.7,lh:3.1,max:3,col:P.muted});
+   const y=69+i*39.6;
+   box(M,y,C,36,P.sand,2);
+   txt(a.name,M+8,y+9,{sz:10.5,bold:true,col:P.dark});
+   txt(a.status,R-8,y+9,{sz:8,bold:true,col:P.gold,align:'right'});
+   words(a.benefit,M+8,y+17,C-16,{sz:8,lh:4.1,max:2});
+   words('Prudence : '+a.guard,M+8,y+28,C-16,{sz:7.7,lh:3.8,max:2,col:P.muted});
   });
-  words('Aucune prescription automatique. Examen clinique, traitements, bilan nutritionnel et facteurs de risque sont a verifier avant tout conseil individualise.',
-   M,273,C,{sz:7.2,col:P.muted,lh:3.4,max:2});
+  words('Verifier la fonction renale, les traitements et les indications avant toute option proteique, vitaminee ou de creatine.',
+   M,275,C,{sz:7.7,lh:3.6,max:2,col:P.muted});
  }
 
  function suivi(){
