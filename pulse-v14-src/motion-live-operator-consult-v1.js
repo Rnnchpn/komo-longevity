@@ -234,9 +234,11 @@ function renderSummary(){
  q("mocStepNav").innerHTML=TESTS.map((t,i)=>'<span class="moc-step done">'+stageText(results[t.id])+' '+HTML(t.title)+'</span>').join("");
  q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">CONSULTATION TERMINÉE</span><h3>Synthèse des observations</h3>'+
  '<div class="moc-recap">'+TESTS.map(t=>'<div><span>'+HTML(t.title)+'</span><strong>'+HTML(formatResult(results[t.id],t))+'</strong></div>').join("")+'</div>'+
- '<p class="moc-help">Observations vidéo exploratoires vérifiées par l’opérateur. Aucun diagnostic, Motion Score ou rapport clinique automatique.</p>'+
- '<button type="button" class="moc-button secondary" id="mocBackRooms">Retour aux consultations</button></section>';
- q("mocBackRooms").onclick=()=>{location.hash="live"};
+ '<p class="moc-help">Les six tests sont traités. Tu peux maintenant compléter le questionnaire et télécharger le rapport descriptif PDF.</p>'+
+ '<div class="moc-buttons"><button type="button" class="moc-button primary" id="mocGoReport">Consulter le rapport PDF →</button>'+
+ '<button type="button" class="moc-button secondary" id="mocGoQuestionnaire">Questionnaires</button></div></section>';
+ q("mocGoReport").onclick=()=>switchPanel("report");
+ q("mocGoQuestionnaire").onclick=()=>switchPanel("questionnaire");
 }
 function timeDisplay(){
  const task=currentTest(),node=q("mocClock");
@@ -250,14 +252,24 @@ function timeDisplay(){
  const remaining=Math.max(0,Math.min(task.duration,Math.ceil(task.duration-elapsedMs/1000)));
  node.textContent="00:"+String(remaining).padStart(2,"0");
  node.classList.toggle("finished",remaining===0);
- if(remaining===0&&stoppedAt===null)stoppedAt=start+task.duration*1000;
+ if(remaining!==previousMilestone){
+  previousMilestone=remaining;
+  if(remaining>0&&remaining<task.duration)voice?.milestone(remaining);
+ }
+ if(remaining===0&&!clockCompletedNotified){
+  clockCompletedNotified=true;
+  if(stoppedAt===null)stoppedAt=start+task.duration*1000;
+  poseTracker?.stopMeasurement();
+  voice?.complete();
+  setStatus("Temps écoulé. Vérifiez le compteur vidéo ou saisissez la mesure manuellement, puis validez.");
+ }
  // The optical measurement is never replaced by a fictitious 20-second value.
 }
 function setClock(){
  if(clock)clearInterval(clock);
  clock=null;
  const key=clockRunKey(room);
- if(clockKey!==key){clockKey=key;stoppedAt=null;}
+ if(clockKey!==key){clockKey=key;stoppedAt=null;previousMilestone=null;clockCompletedNotified=false;}
  if(room?.progress?.step_status==="running"&&currentTest()?.duration){
   timeDisplay();clock=setInterval(timeDisplay,100);
  }
@@ -296,12 +308,13 @@ function renderStep(){
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>')+
  '<p id="mocStatus" class="moc-status" role="status" aria-live="polite"></p></section>';
  if(q("mocValue"))q("mocValue").addEventListener("input",()=>{manualEdited=true});
- if(q("mocStart"))q("mocStart").onclick=()=>submit("start");
+ if(q("mocStart"))q("mocStart").onclick=()=>startWithCountdown("start");
  if(q("mocSave"))q("mocSave").onclick=()=>submit("save");
  if(q("mocSkip"))q("mocSkip").onclick=()=>submit("skip");
- if(q("mocRestartClock"))q("mocRestartClock").onclick=()=>submit("restart");
+ if(q("mocRestartClock"))q("mocRestartClock").onclick=()=>startWithCountdown("restart");
  if(q("mocStopClock"))q("mocStopClock").onclick=()=>{
   if(stoppedAt===null)stoppedAt=Date.now();
+  voice?.abortCountdown();
   poseTracker?.stopMeasurement();
   const observed=poseTracker?.getLatest();
   if(observed?.measurement!==null&&Number.isFinite(observed?.measurement)&&q("mocValue")&&!manualEdited)
@@ -345,6 +358,57 @@ async function attachPoseVideo(video){
  poseStatus="Chargement du moteur MediaPipe sur l’ordinateur…";
  updatePosePanel(null);
  await poseTracker.attach(video);
+}
+async function startWithCountdown(action="start"){
+ if(!room||panelMode!=="tests"||countdownPending||busy||!["start","restart"].includes(action))return;
+ if(room.step_index===0&&!room.progress?.safety_confirmed&&!q("mocSafety")?.checked){
+  setStatus("Vérifiez et confirmez les conditions de sécurité avant de lancer le premier test.");
+  return;
+ }
+ const latest=poseTracker?.getLatest();
+ if(!latest?.valid){
+  setStatus("Aucun corps détecté pour l’instant. Cadrez la personne entière : comptage vidéo indisponible sinon (saisie manuelle possible).");
+ }
+ const session=room.id,step=room.step_index;
+ countdownPending=true;
+ const button=q(action==="restart"?"mocRestartClock":"mocStart");
+ if(button)button.disabled=true;
+ try{
+  const started=await voice?.countdown(()=>{
+   if(room?.id===session&&room.step_index===step&&panelMode==="tests")
+    void submit(action);
+  },value=>setStatus(value==="TOP !"?"TOP !":"Départ dans "+value+"…"));
+  // Browser without voice module: start using the existing on-screen button.
+  if(!voice&&room?.id===session&&room.step_index===step)await submit(action);
+  if(!started&&voice)setStatus("Départ annulé. Tu peux relancer le chronomètre.");
+ }finally{
+  countdownPending=false;
+  if(button?.isConnected)button.disabled=false;
+ }
+}
+function handleVoiceAction(command){
+ if(!host||!room||panelMode!=="tests"){
+  const node=q("mocVoiceState");if(node)node.textContent="Commande reconnue, mais ouvre « Tests Motion » pour agir.";
+  return;
+ }
+ if(command==="start")return void startWithCountdown("start");
+ if(command==="stop"){
+  const stop=q("mocStopClock");
+  if(stop)stop.click();
+  else setStatus("Aucun chronomètre en cours.");
+  return;
+ }
+ if(command==="redo"){
+  const restart=q("mocRestartClock");
+  if(restart)restart.click();
+  else setStatus("Pour recommencer, lance d’abord ce test.");
+  return;
+ }
+ if(command==="next"){
+  const next=q("mocSave");
+  if(next)next.click();
+  else setStatus("Termine la mesure avant de passer au test suivant.");
+ }
 }
 async function submit(event){
  if(busy||!room||!currentTest())return;
