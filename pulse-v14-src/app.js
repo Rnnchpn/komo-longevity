@@ -10,10 +10,10 @@ const PATIENT_NAV=[['home','Mon espace']];
 const PRO_NAV=[['live','Nouvelle consultation'],['operator','Consultation Motion'],['patients','Patients'],['appointments','Rendez-vous']];
 const OP_STEPS=[
  ['sts','30 s','Se relever de la chaise','Motion Online'],
- ['heels','20 s','Élévations sur les pointes','Motion Online'],
+ ['heels','30 s','Élévations sur les pointes','Motion Online'],
  ['unipodal_left','30 s','Équilibre · pied gauche','Motion Online'],
  ['unipodal_right','30 s','Équilibre · pied droit','Motion Online'],
- ['arms','20 s','Mobilité des bras','Motion Online'],
+ ['arms','30 s','Mobilité des bras','Motion Online'],
  ['posture','Observation','Posture de profil','Motion Online']
 ];
 
@@ -838,7 +838,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261110-visual-plan-v1');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261110-persist-report-v3');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,openVideo:openOperatorCamera});
   }catch(error){console.error('[Motion consultation]',error);if(root?.isConnected)root.textContent='Consultation indisponible : '+(error.message||'erreur réseau')}

@@ -267,6 +267,8 @@ const scripts = [
   'scripts/pulse-passport-simulation-qa-20261110.mjs',
   // Complete visual home plan and independent section PDFs.
   'scripts/pulse-category-export-qa-20261110.mjs',
+  // Save/restore all questionnaire answers before export, 6-category passport and 30-second trials.
+  'scripts/pulse-questionnaire-durable-qa-20261110.mjs',
   // Inline iPhone video, huge countdown and real-time STS count regression.
   'scripts/pulse-live-hud-qa-20261110.mjs',
   // Clinician-supervised single-leg stance: 30 seconds starts on foot lift.

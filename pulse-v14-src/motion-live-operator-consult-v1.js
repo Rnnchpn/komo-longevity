@@ -5,9 +5,9 @@ const TESTS=[
   setup:"Chaise stable contre un mur, caméra de trois-quarts profil, tête et pieds visibles.",
   instruction:"Comptez les levers complets pendant 30 secondes. Bras croisés si possible, sans compromettre la sécurité.",
   label:"Nombre de levers complets"},
- {id:"heels",title:"Élévations sur les pointes",duration:20,unit:"répétitions",type:"count",
+ {id:"heels",title:"Élévations sur les pointes",duration:30,unit:"répétitions",type:"count",
   setup:"Debout de profil, pieds et bassin visibles, à proximité d'un support fixe.",
-  instruction:"Comptez les élévations complètes sur les pointes pendant 20 secondes. Arrêtez en cas d'instabilité.",
+  instruction:"Comptez les élévations complètes sur les pointes pendant 30 secondes, en gardant le support accessible. Arrêtez en cas d'instabilité.",
   label:"Nombre d'élévations"},
  {id:"unipodal_left",title:"Équilibre · pied gauche",duration:30,unit:"seconds",type:"balance",
   setup:"Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.",
@@ -17,9 +17,9 @@ const TESTS=[
   setup:"Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.",
   instruction:"Armez le suivi puis soulevez le pied GAUCHE sans toucher l'autre jambe. Le chronomètre démarre au lever du pied et s'arrête au retour d'appui, à une compensation ou après 30 s.",
   label:"Appui unipodal droit (secondes)"},
- {id:"arms",title:"Mobilité des bras",duration:20,unit:"mouvements",type:"count",
+ {id:"arms",title:"Mobilité des bras",duration:30,unit:"mouvements",type:"count",
   setup:"Face à la caméra, bras et poignets visibles, espace libre autour du corps.",
-  instruction:"Comptez les cycles de lever et abaisser les bras pendant 20 secondes, sans amplitude douloureuse.",
+  instruction:"Comptez les cycles de lever et abaisser les bras pendant 30 secondes, sans amplitude douloureuse.",
   label:"Nombre de mouvements"},
  {id:"posture",title:"Posture de profil",duration:0,unit:"observation",
   setup:"Profil strict, pieds visibles, téléphone à hauteur du bassin, caméra immobile.",
@@ -31,7 +31,7 @@ let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",
 let clockKey="",clockLocal=null;
 let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
 let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0;
-let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null;
+let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null,questionnaireNavigating=false,questionnairePersistedAt=0;
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
 let videoFocus=false;
 const q=id=>host?.querySelector("#"+id);
@@ -39,7 +39,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261110-visual-plan-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261110-persist-report-v3";
  document.head.append(link);
 }
 function stopClock(){
@@ -55,7 +55,7 @@ export function disposeOperatorConsultation(){
  if(poll)clearInterval(poll);poll=null;stopClock();
  if(questionnaireTimer)clearTimeout(questionnaireTimer);questionnaireTimer=null;
  voice?.destroy();voice=null;countdownPending=false;
- extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;
+ extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;questionnaireNavigating=false;questionnairePersistedAt=0;
  if(videoListener)window.removeEventListener("pulse:remote-video-ready",videoListener);
  if(stopVideoListener)window.removeEventListener("pulse:remote-video-stopped",stopVideoListener);
  if(fullscreenListener)document.removeEventListener("fullscreenchange",fullscreenListener);
@@ -77,6 +77,7 @@ function makeShell(){
  '<header class="moc-head"><div><span class="overline">KŌMØ PULSE · CONSULTATION EN DIRECT</span><h2>Consultation Motion</h2>'+
  '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice">🎙 Activer la voix</button><button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Agrandir la vidéo sans recadrer le corps">▣ Vidéo XXL</button><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
  '<nav class="moc-mode-tabs" aria-label="Sections de la consultation"><button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true">Tests Motion</button><button type="button" id="mocTabQuestionnaire" class="moc-mode-tab">Questionnaires</button><button type="button" id="mocTabReport" class="moc-mode-tab">Rapport PDF</button></nav>'+
+ '<p class="moc-save-indicator" id="mocIntakeSaveStatus" role="status" aria-live="polite">Questionnaire · en attente de réponses</p>'+
  '<p class="moc-voice-state" id="mocVoiceState" role="status">Micro éteint · Dites « C’est parti », « Stop », « Recommence » ou « Suivant » après activation. Le navigateur peut traiter la voix via son fournisseur ; aucun audio n’est enregistré par Pulse.</p>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
@@ -87,7 +88,11 @@ function makeShell(){
  '<div id="motionConsultCamera" class="moc-camera-host"></div>'+
  '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>'+
  '</aside></div><p class="moc-bottom-note">Démonstration avec dossier fictif · Résultats saisis manuellement par l’opérateur · Aucune interprétation clinique automatique</p></section>';
- q("mocReturn").onclick=()=>{location.hash="live"};
+ q("mocReturn").onclick=async()=>{
+  try{await saveQuestionnaire();if(questionnaireDirty)return}
+  catch(error){questionnaireNote("Sauvegarde échouée : "+error.message);return}
+  location.hash="live";
+ };
  q("mocVideoFocus").onclick=()=>{
   videoFocus=!videoFocus;
   host.closest(".app-shell")?.classList.toggle("moc-video-xxl",videoFocus);
@@ -128,7 +133,9 @@ function formatResult(result,task){
  if(task.id==="posture"){
   return {"neutral":"Alignement apparent neutre","apparent_offset":"Décalage apparent","not_interpretable":"Non interprétable"}[result.observation]||"Observation enregistrée";
  }
- return Number.isFinite(result.value)?String(result.value)+" "+task.unit:"Résultat enregistré";
+ return Number.isFinite(result.value)?String(result.value)+" "+task.unit+
+  (["heels","arms"].includes(task.id)?" / "+(result.duration_seconds===30?30:20)+" s":""):
+  "Résultat enregistré";
 }
 function updatePanelTabs(){
  const preview=panelMode==="report"&&room?.status==="completed";
@@ -145,30 +152,44 @@ function updatePanelTabs(){
   q("mocTabQuestionnaire").textContent="Questionnaires · "+summary.progress.completed+"/"+summary.progress.total;
  }
 }
-function switchPanel(next){
- if(!["tests","questionnaire","report"].includes(next)||!host)return;
+async function switchPanel(next){
+ if(!["tests","questionnaire","report"].includes(next)||!host||questionnaireNavigating)return;
  if(panelMode==="tests"&&next!=="tests"&&room?.progress?.step_status==="running"){
   setStatus("Terminez et validez ce test avant d’ouvrir les questionnaires ou le rapport, afin de conserver le comptage.");
   return;
  }
- voice?.abortCountdown();countdownPending=false;
- panelMode=next;
- if(q("mocStepNav"))q("mocStepNav").hidden=next!=="tests";
- updatePanelTabs();
- if(next==="tests")renderStep();
- else if(next==="questionnaire")renderQuestionnaireSection();
- else renderReportSection();
+ questionnaireNavigating=true;
+ try{
+  if(panelMode==="questionnaire"&&next!=="questionnaire"){
+   await saveQuestionnaire();
+   if(questionnaireDirty)throw Error("Veuillez confirmer l'enregistrement avant de quitter.");
+  }
+  voice?.abortCountdown();countdownPending=false;
+  panelMode=next;
+  if(q("mocStepNav"))q("mocStepNav").hidden=next!=="tests";
+  updatePanelTabs();
+  if(next==="tests")renderStep();
+  else if(next==="questionnaire")renderQuestionnaireSection();
+  else renderReportSection();
+ }catch(error){
+  questionnaireNote("Réponses non enregistrées : "+(error.message||"Réessayez")+". Veuillez réessayer.");
+ }finally{questionnaireNavigating=false}
 }
-function questionnaireNote(text){
+function questionnaireNote(message){
  const status=q("mocIntakeState");
- if(status)status.textContent=text;
+ if(status)status.textContent=message;
+ const global=q("mocIntakeSaveStatus");
+ if(global)global.textContent=message;
 }
 function scheduleQuestionnaireSave(){
  if(questionnaireTimer)clearTimeout(questionnaireTimer);
  questionnaireTimer=setTimeout(()=>{
   questionnaireTimer=null;
-  void saveQuestionnaire().catch(error=>questionnaireNote("Sauvegarde échouée : "+(error.message||"réessayer")+". Les réponses restent affichées."));
- },750);
+  void saveQuestionnaire().catch(error=>{
+   questionnaireNote("NON ENREGISTRÉ : "+(error.message||"Connexion impossible")+
+    ". Les réponses restent visibles. Cliquez sur « Enregistrer les réponses ».");
+  });
+ },450);
 }
 async function saveQuestionnaire(){
  if(questionnaireTimer){clearTimeout(questionnaireTimer);questionnaireTimer=null}
@@ -179,20 +200,50 @@ async function saveQuestionnaire(){
  }
  if(!room||!questionnaireDirty)return;
  const snapshot=JSON.stringify(questionnaireAnswers),sessionId=room.id;
+ questionnaireNote("Enregistrement sur le serveur…");
  questionnaireSaveInFlight=(async()=>{
-  const result=await api({action:"operator_questionnaire_save",session_id:sessionId,
-   answers:JSON.parse(snapshot)});
-  if(room?.id===sessionId){
-   room.progress={...room.progress,questionnaire:result.session.progress.questionnaire};
+  let lastError=null;
+  for(let attempt=0;attempt<4;attempt++){
+   try{
+    const result=await api({action:"operator_questionnaire_save",session_id:sessionId,
+     answers:JSON.parse(snapshot)});
+    const stored=result.session?.progress?.questionnaire?.answers;
+    // Round-trip: never claim success until ALL submitted values match the persisted ones.
+    if(!stored||JSON.stringify(stored)!==snapshot){
+     // JSON object key order is not guaranteed: check each answer instead.
+     if(!stored||Object.entries(JSON.parse(snapshot)).some(([k,v])=>stored[k]!==v)||
+       Object.keys(stored).length!==Object.keys(JSON.parse(snapshot)).length)
+      throw Error("Réponses non confirmées par le serveur");
+    }
+    if(room?.id===sessionId){
+     room.progress={...room.progress,questionnaire:result.session.progress.questionnaire};
+     questionnairePersistedAt=Math.max(questionnairePersistedAt,
+      Date.parse(result.session.progress.questionnaire.updated_at)||0);
+    }
+    if(JSON.stringify(questionnaireAnswers)===snapshot)questionnaireDirty=false;
+    questionnaireNote("✓ "+Object.keys(stored).length+"/22 réponses enregistrées sur le serveur");
+    return;
+   }catch(error){
+    lastError=error;
+    const message=String(error?.message||"");
+    if(attempt<3&&/conflict|stale|retry|tempora|network|Failed to fetch/i.test(message)){
+     await new Promise(resolve=>setTimeout(resolve,180*(attempt+1)));
+     continue;
+    }
+    break;
+   }
   }
-  if(JSON.stringify(questionnaireAnswers)===snapshot)questionnaireDirty=false;
+  throw lastError||Error("Sauvegarde impossible");
  })();
- try{
-  await questionnaireSaveInFlight;
-  questionnaireNote("Réponses enregistrées.");
- }finally{
+ try{await questionnaireSaveInFlight}
+ finally{
   questionnaireSaveInFlight=null;
-  if(questionnaireDirty&&host?.isConnected)scheduleQuestionnaireSave();
+  if(questionnaireDirty&&host?.isConnected&&!questionnaireTimer){
+   // Only reschedule when the first accepted snapshot was stale because the
+   // operator entered additional answers during the request.
+   // On server failure the visible retry button is the deliberate fallback.
+   // This prevents infinite retries that hide persistent 409/503 errors.
+  }
  }
 }
 function renderQuestionnaireSection(){
@@ -207,12 +258,31 @@ function renderQuestionnaireSection(){
    questionnaireDirty=true;
    scheduleQuestionnaireSave();
    updatePanelTabs();
+   const current=extras.questionnaireState(questionnaireAnswers).progress;
+   q("mocProgressText").textContent="Questionnaire · "+current.completed+"/"+current.total+" réponses";
+   q("mocProgressFill").style.width=current.percent+"%";
+   questionnaireNote("Modifications en attente · sauvegarde automatique…");
   },
-  onNext:()=>{questionnaireIndex=Math.min(4,questionnaireIndex+1);renderQuestionnaireSection()},
-  onPrevious:()=>{questionnaireIndex=Math.max(0,questionnaireIndex-1);renderQuestionnaireSection()},
-  onTests:()=>switchPanel("tests")
+  onNext:async()=>{
+   try{await saveQuestionnaire();if(questionnaireDirty)return}catch(error){
+    questionnaireNote("Sauvegarde échouée : "+error.message+". Réessayez.");return;
+   }
+   questionnaireIndex=Math.min(4,questionnaireIndex+1);renderQuestionnaireSection();
+  },
+  onPrevious:async()=>{
+   try{await saveQuestionnaire();if(questionnaireDirty)return}catch(error){
+    questionnaireNote("Sauvegarde échouée : "+error.message+". Réessayez.");return;
+   }
+   questionnaireIndex=Math.max(0,questionnaireIndex-1);renderQuestionnaireSection();
+  },
+  onComplete:()=>switchPanel("report"),
+  onTests:()=>switchPanel("tests"),
+  onSave:()=>saveQuestionnaire().catch(error=>{
+   questionnaireNote("Sauvegarde échouée : "+error.message+". Réessayez.");
+  })
  });
 }
+
 function stopClockIfNotRunning(){
  // The running measurement continues while the operator enters questionnaire answers.
  if(room?.progress?.step_status!=="running"&&clock){clearInterval(clock);clock=null;}
@@ -245,6 +315,9 @@ function renderReportSection(){
    '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses</span></div>'+
    '<div><strong>6 sem.</strong><span>programme proposé</span></div></div>'+
   '<h4>Votre profil en bref</h4>'+
+  '<p class="moc-report-answers-state">'+(passport.questionnaire.answered===22?
+   '✓ Questionnaire complet : 22 réponses prises en compte.':
+   '⚠ '+passport.questionnaire.answered+'/22 réponses · complétez le questionnaire pour un rapport intégral.')+'</p>'+
   '<div class="moc-passport-highlights">'+reasons+'</div>'+
   '<h4>Tests réalisés</h4><div class="moc-results-compact">'+passport.measures.map(resultCard).join('')+'</div>'+
   '<div class="moc-action-section-title"><h4>Exercices à la maison</h4><small>Progression à adapter et valider</small></div>'+
@@ -258,14 +331,15 @@ function renderReportSection(){
    more.map(nutritionCard).join('')+
    '<p class="moc-help">'+HTML(plan.review)+'</p></details>'+
   '<p class="moc-report-guard">Proposition éducative : la vidéo et le questionnaire ne permettent ni diagnostic de carence, ni prescription de compléments. Vérification clinique nécessaire.</p>'+
-  '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le passeport complet (5 catégories)</button>'+
+  '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le passeport complet (6 catégories)</button>'+
   '<div class="moc-category-export"><label for="mocExportCategory">Exporter une grande catégorie</label>'+
    '<select id="mocExportCategory" aria-label="Choisir la catégorie">'+
     '<option value="synthese">1 · Synthèse et diagramme</option>'+
     '<option value="tests">2 · Tests et qualité de mesure</option>'+
     '<option value="exercices">3 · Exercices à domicile</option>'+
     '<option value="nutrition">4 · Nutrition et compléments</option>'+
-    '<option value="suivi">5 · Suivi à 6 semaines</option></select>'+
+    '<option value="suivi">5 · Suivi à 6 semaines</option>'+
+    '<option value="questionnaire">6 · Questionnaire détaillé (22 réponses)</option></select>'+
    '<button class="moc-button secondary" id="mocDownloadChapter"'+(!finished?' disabled':'')+'>↓ Exporter cette catégorie</button></div>'+
   '<button type="button" class="moc-button secondary" id="mocReportQuestionnaire">Questionnaires</button></div>'+
   (!finished?'<p class="moc-status">Terminez les six épreuves pour exporter le document.</p>':'')+
@@ -295,13 +369,29 @@ function renderReportSection(){
   clicked.disabled=true;
   const status=q("mocReportStatus");
   try{
-   if(questionnaireDirty)await saveQuestionnaire();
-   status.textContent="Préparation du PDF "+(type==="all"?"complet":"par catégorie")+"…";
-   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),
-    {subject:label,simulated,category:type});
-   status.textContent="Fichier exporté : "+filename;
+   // Await ANY in-flight autosave, even if the dirty flag is already cleared.
+   await saveQuestionnaire();
+   if(questionnaireDirty)throw Error("Questionnaire non enregistré. Réessayez dans l'onglet Questionnaires.");
+   status.textContent="Vérification des réponses enregistrées sur le serveur…";
+   const data=await api({action:"operator_list"});
+   const persisted=(data.sessions||[]).find(x=>x.id===room.id&&x.patient_id===patient?.id);
+   if(!persisted)throw Error("Dossier introuvable sur le serveur");
+   const confirmed={...(persisted.progress?.questionnaire?.answers||{})};
+   const expected=questionnaireAnswers;
+   if(Object.keys(expected).some(k=>confirmed[k]!==expected[k])||
+    Object.keys(confirmed).length!==Object.keys(expected).length)
+    throw Error("Questionnaire en cours de synchronisation. Enregistrez les réponses puis réessayez.");
+   const progress=extras.questionnaireState(confirmed).progress;
+   if(progress.completed<progress.total&&!window.confirm(
+    "Le questionnaire contient "+progress.completed+"/"+progress.total+
+    " réponses. Exporter tout de même un passeport marqué INCOMPLET ?"))return;
+   status.textContent="Création du PDF "+(type==="all"?"complet (toutes sections)":"par catégorie")+"…";
+   const filename=await extras.downloadClinicReport(confirmed,persisted.progress?.results||{},new Date(),
+    {subject:label,simulated:persisted.progress?.questionnaire?.simulated===true,category:type});
+   status.textContent="✓ PDF généré à partir de "+progress.completed+"/"+progress.total+
+    " réponses confirmées : "+filename;
   }catch(error){
-   status.textContent="Export indisponible : "+(error.message||"erreur de chargement");
+   status.textContent="Export indisponible : "+(error.message||"erreur de synchronisation");
   }finally{if(clicked.isConnected)clicked.disabled=false}
  };
  if(button)button.onclick=()=>exportPdf("all",button);
@@ -350,18 +440,19 @@ function timeDisplay(){
  }
  const serverStart=Date.parse(room.progress?.test_started_at||"");
  const start=clockLocal?.key===clockRunKey(room)?clockLocal.startedAt:serverStart;
- if(!Number.isFinite(start)){node.textContent="00:"+String(task.duration).padStart(2,"0");return}
+ if(!Number.isFinite(start)){node.textContent="00:"+String(Number(room?.progress?.test_duration_seconds)||task.duration).padStart(2,"0");return}
  const elapsedMs=Math.max(0,(stoppedAt??Date.now())-start);
- const remaining=Math.max(0,Math.min(task.duration,Math.ceil(task.duration-elapsedMs/1000)));
+ const duration=Number(room?.progress?.test_duration_seconds)||task.duration;
+ const remaining=Math.max(0,Math.min(duration,Math.ceil(duration-elapsedMs/1000)));
  node.textContent="00:"+String(remaining).padStart(2,"0");
  node.classList.toggle("finished",remaining===0);
  if(remaining!==previousMilestone){
   previousMilestone=remaining;
-  if(remaining>0&&remaining<task.duration)voice?.milestone(remaining);
+  if(remaining>0&&remaining<duration)voice?.milestone(remaining);
  }
  if(remaining===0&&!clockCompletedNotified){
   clockCompletedNotified=true;
-  if(stoppedAt===null)stoppedAt=start+task.duration*1000;
+  if(stoppedAt===null)stoppedAt=start+duration*1000;
   poseTracker?.stopMeasurement();
   voice?.complete();
   setStatus("Temps écoulé. Vérifiez le compteur vidéo ou saisissez la mesure manuellement, puis validez.");
@@ -392,7 +483,8 @@ function renderStep(){
  const running=room.progress?.step_status==="running";
  const safety=idx===0&&!room.progress?.safety_confirmed;
  autoValue=null;manualEdited=false;
- poseTracker?.setTest(t.id,room.progress?.test_started_at,running,t.duration);
+ poseTracker?.setTest(t.id,room.progress?.test_started_at,running,
+  Number(room.progress?.test_duration_seconds)||t.duration);
  const input=t.id==="posture"?
   '<label class="moc-field">Observation (sans mesure radiographique)<select id="mocObservation">'+
   '<option value="">Choisir une observation</option><option value="neutral">Alignement apparent neutre</option>'+
@@ -592,6 +684,7 @@ async function submit(event){
  const t=currentTest();const safety=!!room.progress?.safety_confirmed||!!q("mocSafety")?.checked;
  if(room.step_index===0&&!safety){setStatus("Confirmez d’abord la sécurité du test.");return}
  const payload={action:"operator_test_update",session_id:room.id,step_code:t.id,event,safety_confirmed:safety};
+ if(["start","restart"].includes(event))payload.duration_seconds=t.duration;
  if(event==="save"){
   const note=q("mocNote")?.value||"";
   payload.note=note;
@@ -656,10 +749,22 @@ async function refresh(force=false){
    room=initialized.session;
   }else room=selected;
   if(!questionnaireDirty&&!questionnaireSaveInFlight){
-   questionnaireAnswers={...(room.progress?.questionnaire?.answers||{})};
+   const stored=room.progress?.questionnaire;
+   const serverTime=Date.parse(stored?.updated_at||"")||0;
+   if(serverTime>=questionnairePersistedAt){
+    questionnaireAnswers={...(stored?.answers||{})};
+    questionnairePersistedAt=serverTime;
+   }else if(questionnairePersistedAt){
+    // A delayed polling response predating last successful save ACK is ignored.
+    room.progress={...room.progress,questionnaire:{
+     ...stored,answers:{...questionnaireAnswers},
+     updated_at:new Date(questionnairePersistedAt).toISOString()
+    }};
+   }
   }
   updatePanelTabs();
-  const signature=JSON.stringify([room.id,room.stage_code,room.step_index,room.status,room.progress?.step_status,room.progress?.safety_confirmed,room.progress?.test_started_at,room.progress?.results]);
+  const signature=JSON.stringify([room.id,room.stage_code,room.step_index,room.status,room.progress?.step_status,room.progress?.safety_confirmed,room.progress?.test_started_at,room.progress?.results,
+   room.progress?.questionnaire?.updated_at,room.progress?.questionnaire?.answers]);
   if(force||signature!==latestSignature){
    latestSignature=signature;
    if(panelMode==="tests")renderStep();
@@ -687,7 +792,7 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-visual-plan-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-persist-report-v3");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");

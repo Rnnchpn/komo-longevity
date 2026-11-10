@@ -1,6 +1,6 @@
-// KŌMØ Motion Passport — five large independent categories.
+// KŌMØ Motion Passport — six complete categories, including 22 answers.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261110-visual-plan-v1';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261110-persist-report-v3';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑]/g,'-')
@@ -10,12 +10,13 @@ const fmt=n=>Number.isFinite(n)?(Number.isInteger(n)?String(n):n.toFixed(1).repl
 const P={dark:[28,52,42],gold:[180,146,94],paper:[251,249,245],sand:[242,237,228],
  text:[43,54,46],muted:[110,118,108],line:[219,215,203],pale:[225,234,224],white:[255,255,253]};
 export const CLINIC_PASSPORT_EXPORTS=[
- {value:'all',label:'Passeport complet (5 catégories)'},
+ {value:'all',label:'Passeport complet (6 catégories)'},
  {value:'synthese',label:'1. Synthèse & diagramme'},
  {value:'tests',label:'2. Résultats & qualité de mesure'},
  {value:'exercices',label:'3. Exercices à domicile'},
  {value:'nutrition',label:'4. Nutrition & compléments'},
- {value:'suivi',label:'5. Suivi à 6 semaines'}
+ {value:'suivi',label:'5. Suivi à 6 semaines'},
+ {value:'questionnaire',label:'6. Questionnaire détaillé (22 réponses)'}
 ];
 export async function downloadClinicPassport(report,category='all'){
  if(report?.version!==CLINIC_PASSPORT_VERSION||!report.actionPlan)
@@ -49,7 +50,7 @@ export async function downloadClinicPassport(report,category='all'){
   txt('MOTION PASSPORT',M+27,15,{sz:8,bold:true,col:P.muted});
   txt('BILAN / CABINET',R,15,{sz:8,col:P.muted,align:'right'});
   line(M,22,R,22);
-  txt('CATEGORIE '+index+' / 05',M,33,{sz:8,bold:true,col:P.gold});
+  txt('CATEGORIE '+index+' / 06',M,33,{sz:8,bold:true,col:P.gold});
   txt(title,M,46,{sz:23,serif:true});
   if(subtitle)words(subtitle,M,55,C,{sz:8.5,lh:4.4,max:2,col:P.muted});
  };
@@ -163,26 +164,34 @@ export async function downloadClinicPassport(report,category='all'){
   txt('Arreter en cas de malaise, chute, douleur ou intolerance.',M,268,{sz:8.7,col:P.muted});
  }
  function nutrition(){
-  page(4,'Nutrition & complements','L alimentation et le renforcement priment sur les complements.');
-  let y=68;
+  // Two spacious pages avoid truncating supplement contraindications.
+  page(4,'Nutrition & apports','Priorite aux aliments, a l exercice adapte et aux habitudes durables.');
   plan.food.forEach((a,i)=>{
-   box(M,y,C,30,P.pale,3);
-   txt((i+1)+'. '+a.title,M+7,y+9,{sz:10,bold:true});
-   words(a.text,M+7,y+17,C-14,{sz:8.2,lh:4,max:3});
-   y+=32;
+   const y=70+i*75;
+   box(M,y,C,67,P.pale,3);
+   txt((i+1)+'. '+a.title,M+9,y+13,{sz:12,bold:true,col:P.dark});
+   words(a.text,M+9,y+26,C-18,{sz:9,lh:5,max:4});
+   txt('ACTION PRATIQUE',M+9,y+46,{sz:7.8,bold:true,col:P.gold});
+   words(a.action,M+9,y+54,C-18,{sz:8.3,lh:4,max:2});
   });
-  txt('COMPLEMENTS : DECISION CONDITIONNELLE',M,y+5,{sz:8.5,bold:true,col:P.gold});
-  y+=14;
+  box(M,224,C,43,P.sand,3);
+  txt('DECISION NUTRITIONNELLE',M+9,236,{sz:9,bold:true,col:P.gold});
+  words('Les resultats Motion ne permettent pas d identifier une carence vitaminique ou une insuffisance proteique. Le poids, les apports, les symptomes, les traitements et les antecedents sont indispensables avant toute recommandation individualisee.',
+   M+9,246,C-18,{sz:8.5,lh:4.6,max:4,col:P.muted});
+
+  page(4,'Complements & precautions','Options a discuter, jamais prescrites automatiquement par le questionnaire ou la camera.');
   plan.supplements.forEach((a,i)=>{
-   const h=21;
-   box(M,y,C,h,P.sand,2);
-   txt(a.name,M+7,y+8,{sz:9.5,bold:true});
-   txt(a.status,R-7,y+8,{sz:7.5,col:P.gold,align:'right'});
-   words(a.benefit,M+7,y+15,C-14,{sz:7.2,lh:3.5,max:1});
-   y+=h+3;
+   const y=69+i*39.6;
+   box(M,y,C,36,P.sand,2);
+   txt(a.name,M+8,y+9,{sz:10.5,bold:true,col:P.dark});
+   txt(a.status,R-8,y+9,{sz:8,bold:true,col:P.gold,align:'right'});
+   words(a.benefit,M+8,y+17,C-16,{sz:8,lh:4.1,max:2});
+   words('Prudence : '+a.guard,M+8,y+28,C-16,{sz:7.7,lh:3.8,max:2,col:P.muted});
   });
-  words('Aucune prescription automatique : verifier apports, fonction renale, traitements et indications.',M,270,C,{sz:7.5,col:P.muted,max:2});
+  words('Verifier la fonction renale, les traitements et les indications avant toute option proteique, vitaminee ou de creatine.',
+   M,275,C,{sz:7.7,lh:3.6,max:2,col:P.muted});
  }
+
  function suivi(){
   page(5,'Suivi sur six semaines','Progression graduelle et controle des resultats dans des conditions comparables.');
   let y=70;
@@ -200,8 +209,48 @@ export async function downloadClinicPassport(report,category='all'){
    txt(m.value+' '+m.unit,R,yy,{sz:8.5,bold:true,align:'right'});
   });
  }
- const renderers={synthese,tests,exercices,nutrition,suivi};
- const chapters=category==='all'?['synthese','tests','exercices','nutrition','suivi']:[category];
+ function questionnaire(){
+  const groups=report.questionnaire.groups||[];
+  const printGroups=(subset,part)=>{
+   page(6,part===1?'Questionnaire : autonomie':'Questionnaire : habitudes',
+    'Reponses exactes enregistrees. '+report.questionnaire.answered+' / '+report.questionnaire.total+
+    ' · '+(report.simulated?'Reponses fictives pour demonstration.':'Profil auto-declare exploratoire.'));
+   let y=69,serial=part===1?0:10;
+   for(const g of subset){
+    txt(g.label.toUpperCase(),M,y,{sz:10,bold:true,col:P.gold});
+    if(Number.isFinite(g.score))txt(fmt(g.score)+' / 100',R,y,
+      {sz:8,bold:true,align:'right',col:P.gold});
+    y+=8;
+    for(const item of g.items){
+     serial+=1;
+     if(y>250){
+      page(6,'Questionnaire (suite)','Réponses enregistrées / vérifiables');
+      y=69;
+      txt(g.label.toUpperCase()+' (SUITE)',M,y,{sz:9,bold:true,col:P.gold});
+      y+=8;
+     }
+     txt(String(serial).padStart(2,'0'),M,y,{sz:8,bold:true,col:P.gold});
+     const afterQuestion=words(item.question,M+11,y,C-13,{sz:8.4,lh:4.0,max:2});
+     const afterAnswer=words(item.answer,M+11,afterQuestion+0.2,C-13,
+      {sz:8.2,lh:3.8,max:2,bold:true,
+       col:item.answer==='Non renseigné'?P.muted:P.dark});
+     y=afterAnswer+3.1;
+     line(M+11,y-1,R,y-1,P.line,.22);
+     y+=3.3;
+    }
+    y+=3;
+   }
+   if(part===2&&y<252){
+    txt('METHODE ET LIMITES',M,y+3,{sz:8,bold:true,col:P.gold});
+    words('Mesures exploratoires validees par l operateur ; questionnaire non diagnostique. Aucun age biologique deduit.',
+     M,y+10,C,{sz:7.2,lh:3.3,max:2,col:P.muted});
+   }
+  };
+  printGroups(groups.slice(0,2),1);
+  printGroups(groups.slice(2),2);
+ }
+ const renderers={synthese,tests,exercices,nutrition,suivi,questionnaire};
+ const chapters=category==='all'?['synthese','tests','exercices','nutrition','suivi','questionnaire']:[category];
  for(const chapter of chapters)renderers[chapter]();
  footer();
  const name='KOMO_Motion_'+(category==='all'?'Passeport_Complet':category)+
