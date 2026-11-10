@@ -30,23 +30,29 @@ const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
 let clockKey="",clockLocal=null;
 let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
+let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0;
+let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null;
+let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
 const q=id=>host?.querySelector("#"+id);
 function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message||""}
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261110-visible-video-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261110-clinic-complete-v1";
  document.head.append(link);
 }
 function stopClock(){
  if(clock)clearInterval(clock);
- clock=null;stoppedAt=null;clockKey="";clockLocal=null;
+ clock=null;stoppedAt=null;clockKey="";clockLocal=null;previousMilestone=null;clockCompletedNotified=false;
 }
 function clockRunKey(session){
  return session?.id+":"+session?.step_index+":"+(session?.progress?.test_started_at||"");
 }
 export function disposeOperatorConsultation(){
  if(poll)clearInterval(poll);poll=null;stopClock();
+ if(questionnaireTimer)clearTimeout(questionnaireTimer);questionnaireTimer=null;
+ voice?.destroy();voice=null;countdownPending=false;
+ extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;
  if(videoListener)window.removeEventListener("pulse:remote-video-ready",videoListener);
  if(stopVideoListener)window.removeEventListener("pulse:remote-video-stopped",stopVideoListener);
  if(fullscreenListener)document.removeEventListener("fullscreenchange",fullscreenListener);
@@ -59,7 +65,9 @@ function stageText(result){return result?.status==="done"?"✓":result?.status==
 function makeShell(){
  host.innerHTML='<section class="moc-shell">'+
  '<header class="moc-head"><div><span class="overline">KŌMØ PULSE · CONSULTATION EN DIRECT</span><h2>Consultation Motion</h2>'+
- '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
+ '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice">🎙 Activer la voix</button><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
+ '<nav class="moc-mode-tabs" aria-label="Sections de la consultation"><button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true">Tests Motion</button><button type="button" id="mocTabQuestionnaire" class="moc-mode-tab">Questionnaires</button><button type="button" id="mocTabReport" class="moc-mode-tab">Rapport PDF</button></nav>'+
+ '<p class="moc-voice-state" id="mocVoiceState" role="status">Micro éteint · Dites « C’est parti », « Stop », « Recommence » ou « Suivant » après activation. Le navigateur peut traiter la voix via son fournisseur ; aucun audio n’est enregistré par Pulse.</p>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
  '<div class="moc-step-nav" id="mocStepNav" aria-label="Tests Motion"></div>'+
@@ -69,6 +77,15 @@ function makeShell(){
  '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>'+
  '</aside></div><p class="moc-bottom-note">Démonstration avec dossier fictif · Résultats saisis manuellement par l’opérateur · Aucune interprétation clinique automatique</p></section>';
  q("mocReturn").onclick=()=>{location.hash="live"};
+ q("mocTabTests").onclick=()=>switchPanel("tests");
+ q("mocTabQuestionnaire").onclick=()=>switchPanel("questionnaire");
+ q("mocTabReport").onclick=()=>switchPanel("report");
+ q("mocVoice").onclick=()=>{
+  if(!voice)return;
+  const active=voice.toggle();
+  q("mocVoice").textContent=active?"🎙 Couper la voix":"🎙 Activer la voix";
+  q("mocVoice").setAttribute("aria-pressed",String(active));
+ };
  q("mocFullscreen").onclick=async()=>{
   try{
    if(document.fullscreenElement)await document.exitFullscreen();
@@ -78,6 +95,7 @@ function makeShell(){
   }catch(error){if(q("mocFullscreen"))q("mocFullscreen").textContent="Plein écran indisponible"}
  };
  q("mocPatientLine").textContent=patient ? [patient.first_name,patient.last_name].filter(Boolean).join(" ")+" · Bilan supervisé" : "Sélectionnez un patient fictif";
+ updatePanelTabs();
 }
 function renderWaiting(message){
  if(!host)return;
