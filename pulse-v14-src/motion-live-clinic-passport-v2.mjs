@@ -54,6 +54,9 @@ export function buildClinicPassport(answers={},results={},options={}){
  const date=options.date instanceof Date&&!Number.isNaN(options.date.getTime())?
   options.date.toISOString().slice(0,10):new Date().toISOString().slice(0,10);
  const subject=safe(options.subject||'Dossier de démonstration').slice(0,100);
+ const simulated=options.simulated===true;
+ const profile={ageBand:answers.ageBand||null,goal:answers.goal||null};
+ const rating=key=>Object.hasOwn(answers,key)&&/^[0-4]$/.test(String(answers[key]))?Number(answers[key]):null;
  const measures=T.map(t=>objective(results[t.id],t));
  const measured=measures.filter(x=>x.measured).length,skipped=measures.filter(x=>x.status==='skipped').length;
  const flagged=measures.filter(x=>x.review);
@@ -92,6 +95,17 @@ export function buildClinicPassport(answers={},results={},options={}){
   'Le questionnaire est incomplet ('+progress.completed+'/22) ; aucune conclusion sur le ressenti, les habitudes ou un indice locomoteur déclaré n’est calculée.'
  );
  else messages.push('Les réponses déclaratives complètent les tests physiques ; leurs indices KŌMØ sont exploratoires et non diagnostiques.');
+ if(simulated)messages.unshift('Simulation pédagogique : les 22 réponses déclaratives ont été inventées et ne proviennent pas d’un patient interrogé.');
+ if(questionnaire.complete){
+  if(rating('chair')===0&&finite(measures[0].value))
+   messages.push('Le transfert assis-debout est objectivé par '+n(measures[0].value)+' levers, tandis que la difficulté de lever de chaise déclarée est nulle : concordance descriptive, sans comparaison normative.');
+  if(rating('bend')>=2&&rating('pain')>=1)
+   messages.push('L’autonomie globale déclarée est plutôt préservée, mais la flexion du tronc est décrite comme difficile et une gêne intervient parfois : cette discordance mérite une observation fonctionnelle ciblée.');
+  if(rating('strengthDays')>=3)
+   messages.push('L’habitude de renforcement apparaît faible malgré une capacité de mouvement documentée : les objectifs doivent porter sur la régularité et non sur un âge locomoteur inféré.');
+  if([rating('sleep'),rating('stress'),rating('recovered')].some(v=>v!==null&&v>=2))
+   messages.push('Sommeil, stress et récupération sont décrits comme perturbateurs intermittents ; ces facteurs rapportés sont à suivre séparément des résultats instrumentaux.');
+ }
  const priorities=[];
  if(!questionnaire.complete)priorities.push({
   title:'Compléter la dimension vécue',
@@ -103,6 +117,28 @@ export function buildClinicPassport(answers={},results={},options={}){
   detail:'Revoir la vidéo ou le compte rendu opérateur des épreuves '+flagged.map(x=>x.name.toLowerCase()).join(', ')+'. Une qualité insuffisante ne doit pas être présentée comme une performance certaine.',
   basis:flagged.length+' mesure(s) à vérifier'
  });
+ if(questionnaire.complete){
+  if(rating('strengthDays')!==null&&rating('strengthDays')>=2){
+   priorities.push({title:'Instaurer un renforcement régulier',
+    detail:'Discuter d’un renforcement progressif adapté, idéalement sur au moins deux jours distincts par semaine selon les recommandations d’activité physique. Suivre la fréquence réelle et la tolérance.',
+    basis:'Objectif : '+(profile.goal==='strength'?'entretenir la force':'mobilité')+' · renforcement déclaré : '+(rating('strengthDays')===3?'moins d’un jour':'rare')+' par semaine'});
+  }
+  if(rating('bend')!==null&&rating('bend')>=2&&rating('pain')!==null&&rating('pain')>=1){
+   priorities.push({title:'Explorer la flexion et les gênes associées',
+    detail:'Observer la flexion, le ramassage d’objet et les compensations, et discuter du contexte de la gêne. Aucun diagnostic rachidien ne découle de cette réponse ni de la photo de profil.',
+    basis:'Flexion déclarée difficile · gêne intermittente'});
+  }
+  if([rating('sleep'),rating('stress'),rating('recovered')].some(v=>v!==null&&v>=2)){
+   priorities.push({title:'Documenter la récupération',
+    detail:'Suivre sommeil, stress perçu et récupération après effort avec des observations simples. Adapter la progression de l’activité aux possibilités sans attribuer ces plaintes aux mesures vidéo.',
+    basis:'Sommeil / stress / récupération : parfois limitants'});
+  }
+  if(rating('breaks')!==null&&rating('breaks')>=2){
+   priorities.push({title:'Rendre les interruptions de sédentarité régulières',
+    detail:'Introduire des pauses actives réalisables dans la journée, puis vérifier leur fréquence lors du prochain bilan.',
+    basis:'Pauses actives déclarées : seulement 1–2 jours par semaine'});
+  }
+ }
  if(balance&&!balance.tenSecondBoth)priorities.push({
   title:'Recontrôler la stabilité',
   detail:'Reprendre l’appui unipodal avec sécurité et appui disponible. Si la difficulté se confirme, envisager un examen fonctionnel standardisé par un professionnel.',
@@ -129,7 +165,8 @@ export function buildClinicPassport(answers={},results={},options={}){
   detail:'Répéter les mêmes épreuves et conditions à 4–6 semaines. Si l’objectif est un bilan locomoteur complet, ajouter vitesse de marche, force de préhension et une évaluation standardisée de l’équilibre.',
   basis:'Comparaison longitudinale à protocole constant'
  });
- const selected=priorities.slice(0,4);
+ const recheck=priorities.find(x=>x.title==='Standardiser le prochain contrôle');
+ const selected=[...priorities.filter(x=>x!==recheck).slice(0,3),...(recheck?[recheck]:[])];
  const evidence=[
   {name:'30-second Chair Stand — CDC STEADI',url:'https://www.cdc.gov/steadi/media/pdfs/STEADI-Assessment-30Sec-508.pdf',
    meaning:'Référence de protocole ; aucune comparaison d’âge sans âge exact, groupe de référence et hauteur de chaise conformes.'},
@@ -139,20 +176,24 @@ export function buildClinicPassport(answers={},results={},options={}){
   {name:'Araújo et al. BJSM 2022 — Appui unipodal 10 s',
    url:'https://bjsm.bmj.com/content/56/17/975',
    meaning:'Association observée en cohorte, non transposable en pronostic individuel.'},
+  {name:'OMS — Activité physique et renforcement',
+   url:'https://www.who.int/initiatives/behealthy/physical-activity/',
+   meaning:'Le renforcement musculaire deux fois ou plus par semaine est une recommandation générale ; adapter la progression au contexte.'},
   {name:'Springer et al. — Single leg stance, SRAlab',
    url:'https://www.sralab.org/rehabilitation-measures/single-leg-stance-or-one-legged-stance-test',
    meaning:'Meilleur de trois essais jusqu’à 45 s, non comparable directement à un essai vidéo plafonné à 30 s.'}
  ];
  const report={
   version:CLINIC_PASSPORT_VERSION,
-  date,subject,mode:'CABINET_DEMO',
+  date,subject,mode:'CABINET_DEMO',profile,simulated,
   measures,measured,skipped,flagged:flagged.length,
   questionnaire:{answered:progress.completed,total:progress.total,complete:questionnaire.complete,
-   index:questionnaire.complete?questionnaire.profileIndex:null,groups},
+   simulated,index:questionnaire.complete?questionnaire.profileIndex:null,groups},
   balance,findings:messages,priorities:selected,evidence,
   outcomes:{motionScore:null,motionAge:null,lifeExpectancy:null},
   recheck:'4 à 6 semaines',
   limitations:[
+   ...(simulated?['Les réponses au questionnaire ont été générées artificiellement pour une démonstration : elles ne constituent aucune déclaration patient.']:[]),
    'Évaluation fonctionnelle exploratoire réalisée dans un environnement de démonstration sur dossier fictif.',
    'Les valeurs vidéo et les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques.',
    'Aucun Motion Score ou Motion Age : vitesse de marche, TUG, SPPB, normes et conditions instrumentales nécessaires manquantes.',

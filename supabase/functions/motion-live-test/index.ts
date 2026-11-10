@@ -223,7 +223,12 @@ Deno.serve(async(req:Request)=>{
    .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
   if(roomError||!room)return response(req,{error:"session_not_found"},404);
   if(room.operator_user_id!==actor.id||!room.patient_id)return response(req,{error:"operator_owner_required"},403);
-  if(!["active","completed"].includes(room.status)||new Date(room.expires_at).getTime()<=Date.now())
+  // The video room may expire, but a completed synthetic report remains editable
+  // by its owning Operator for 30 days (no ability to reopen the camera).
+  const completedAt=new Date(room.completed_at||room.updated_at).getTime();
+  if(!["active","completed"].includes(room.status)||
+   room.status==="active"&&new Date(room.expires_at).getTime()<=Date.now()||
+   room.status==="completed"&&(!Number.isFinite(completedAt)||completedAt<Date.now()-30*86400000))
    return response(req,{error:"room_unavailable"},409);
   const {data:patient}=await db.from("patients").select("data_classification,status")
    .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
@@ -253,8 +258,11 @@ Deno.serve(async(req:Request)=>{
    cleaned[key]=value;
   }
   const previous=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
+  const previouslySimulated=previous.questionnaire?.simulated===true;
   const progress={...previous,questionnaire:{version:"KOMO_MOTION_SELF_REPORT_V1",answers:cleaned,
-    updated_at:now(),entered_by:"operator"}};
+    updated_at:now(),entered_by:"operator",
+    simulated:previouslySimulated,
+    ...(previouslySimulated?{simulation_note:"Contient des réponses de démonstration générées artificiellement"}:{})}};
   const {data,error}=await db.from("pulse_motion_live_sessions").update({progress,updated_at:now()})
    .eq("id",id).eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
    .eq("updated_at",room.updated_at).select("*").maybeSingle();
@@ -341,12 +349,30 @@ Deno.serve(async(req:Request)=>{
   return error||!data?response(req,{error:"stale_state_retry"},409):response(req,{ok:true,session:publicRow(data)});
  }
  if(action==="operator_list"){
-  // Housekeep old SDP/candidates; no raw video is ever stored.
+  // Historical completed *synthetic* consultations remain available for 30 days.
+  // Camera signaling stays ephemeral. Never revive WebRTC sessions or guest tokens.
   await db.from("pulse_motion_live_signals").delete().lt("created_at",new Date(Date.now()-3*3600000).toISOString());
-  await db.from("pulse_motion_live_sessions").delete().lt("expires_at",new Date(Date.now()-24*3600000).toISOString());
-  const {data,error}=await db.from("pulse_motion_live_sessions").select("id,display_code,status,stage_code,step_index,progress,patient_id,operator_session_id,operator_user_id,patient_last_seen_at,created_at,updated_at")
-   .eq("organization_id",ORG_ID).gte("expires_at",now()).order("created_at",{ascending:false}).limit(60);
-  return error?response(req,{error:"list_failed"},503):response(req,{ok:true,sessions:(data||[]).map(publicRow),steps:STEPS});
+  const old24=new Date(Date.now()-24*3600000).toISOString();
+  const old30=new Date(Date.now()-30*86400000).toISOString();
+  await Promise.all([
+   db.from("pulse_motion_live_sessions").delete().lt("expires_at",old24).neq("status","completed"),
+   db.from("pulse_motion_live_sessions").delete().lt("completed_at",old30).eq("status","completed")
+  ]);
+  const fields="id,display_code,status,stage_code,step_index,progress,patient_id,operator_session_id,operator_user_id,patient_last_seen_at,created_at,updated_at";
+  const [current,history]=await Promise.all([
+   db.from("pulse_motion_live_sessions").select(fields).eq("organization_id",ORG_ID)
+    .eq("operator_user_id",actor.id).gte("expires_at",now())
+    .order("created_at",{ascending:false}).limit(60),
+   db.from("pulse_motion_live_sessions").select(fields).eq("organization_id",ORG_ID)
+    .eq("operator_user_id",actor.id).eq("status","completed").gte("completed_at",old30)
+    .order("created_at",{ascending:false}).limit(60)
+  ]);
+  if(current.error||history.error)return response(req,{error:"list_failed"},503);
+  const unique=new Map<string,Record<string,unknown>>();
+  for(const item of [...(current.data||[]),...(history.data||[])])unique.set(item.id,item);
+  const sessions=[...unique.values()].sort((a,b)=>
+   new Date(String(b.created_at)).getTime()-new Date(String(a.created_at)).getTime()).slice(0,60);
+  return response(req,{ok:true,sessions:sessions.map(publicRow),steps:STEPS});
  }
  if(action==="operator_attach"){
   const id=s(b.session_id,50),patientId=s(b.patient_id,50),opId=s(b.operator_session_id,50);

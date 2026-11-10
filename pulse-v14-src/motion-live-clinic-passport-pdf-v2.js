@@ -1,6 +1,6 @@
 // Premium A4 clinical-style Motion Passport for supervised fictional KŌMØ sessions.
 // Browser-only PDF creation. No questionnaire, biometrics or report is uploaded.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261110-simulated-intake-v1';
 const latin=x=>String(x??'').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/Ō/g,'O').replace(/ō/g,'o').replace(/ø/g,'o')
  .replace(/[‘’]/g,"'").replace(/[“”]/g,'"')
@@ -63,7 +63,7 @@ export async function downloadClinicPassport(report){
   const pages=pdf.getNumberOfPages();
   for(let i=1;i<=pages;i++){
    pdf.setPage(i);stroke(ink.line);pdf.line(M,H-18,R,H-18);
-   txt('KOMO PULSE / PASSEPORT EXPERIMENTAL - DOSSIER FICTIF',M,H-12.5,{size:7,clr:ink.muted});
+   txt(report.simulated?'KOMO PULSE / 22 REPONSES FICTIVES / AUCUN PATIENT REEL':'KOMO PULSE / PASSEPORT EXPERIMENTAL - DOSSIER FICTIF',M,H-12.5,{size:7,clr:ink.muted});
    txt(String(i).padStart(2,'0')+' / '+String(pages).padStart(2,'0'),R,H-12.5,{size:7,bold:true,clr:ink.dark,align:'right'});
   }
  }
@@ -75,7 +75,7 @@ export async function downloadClinicPassport(report){
  txt('LE CORPS EN MOUVEMENT',M+10,y+11,{size:8,bold:true,clr:ink.brass});
  txt(String(report.measured)+'/6',M+9,y+34,{size:31,bold:true,clr:ink.white});
  txt('tests enregistres',M+55,y+28,{size:10,clr:ink.white});
- txt(report.questionnaire.answered+'/22  reponses',M+55,y+37,{size:9,clr:ink.brass});
+ txt(report.questionnaire.answered+'/22  '+(report.simulated?'reponses inventees':'reponses'),M+55,y+37,{size:9,clr:ink.brass});
  txt('POINT DE DEPART - NON DIAGNOSTIQUE',R-9,y+12,{size:7.2,clr:ink.white,align:'right'});
  y+=53;
  const cells=report.measures;
@@ -95,7 +95,7 @@ export async function downloadClinicPassport(report){
  y+=3*38+7;
  need(24);
  rect(M,y,C,20,ink.sand,2);
- txt('QUESTIONNAIRE : '+(report.questionnaire.complete?'COMPLET':'A COMPLETER'),M+7,y+8,{size:9,bold:true,clr:ink.dark});
+ txt('QUESTIONNAIRE : '+(report.simulated?'SIMULE':report.questionnaire.complete?'COMPLET':'A COMPLETER'),M+7,y+8,{size:9,bold:true,clr:ink.dark});
  txt(report.questionnaire.answered+' / '+report.questionnaire.total+' reponses. Aucun score global en cas de donnees incompletes.',M+7,y+14.5,{size:7.9,clr:ink.muted});
  y+=25;
  // PAGE 2: factual results and provenance.
@@ -150,12 +150,12 @@ export async function downloadClinicPassport(report){
  txt('4 - 6 semaines / conditions identiques, memes tests et mesures confirmees',M+8,y+15.5,{size:8.5,clr:ink.white});
  y+=28;
  // PAGE 4: questionnaires; if incomplete, never invent responses.
- newPage('Autoevaluation / donnees declarees','Le regard du participant');
- block('La mobilite percue et les facteurs de vie quotidienne sont distincts des mesures physiques. Les questions KŌMØ sont exploratoires, non diagnostiques.',{size:9,clr:ink.muted});
+ newPage(report.simulated?'Autoevaluation / scenario fictif':'Autoevaluation / donnees declarees',report.simulated?'Questionnaire fictif':'Le regard du participant');
+ block(report.simulated?'Ces 22 reponses ont ete inventees pour simuler une restitution. Elles ne proviennent pas d un patient et ne doivent pas etre interpretees comme ses declarations.':'La mobilite percue et les facteurs de vie quotidienne sont distincts des mesures physiques. Les questions KŌMØ sont exploratoires, non diagnostiques.',{size:9,clr:report.simulated?ink.warning:ink.muted});
  y+=5;
  rect(M,y,C,31,ink.dark,2);
  txt(report.questionnaire.answered+' / '+report.questionnaire.total,M+9,y+19,{size:23,bold:true,clr:ink.white});
- txt('reponses disponibles',M+74,y+18,{size:10,clr:ink.white});
+ txt(report.simulated?'reponses entierement simulees':'reponses disponibles',M+74,y+18,{size:10,clr:ink.white});
  y+=42;
  if(report.questionnaire.answered===0){
   sectionTitle('Aucune reponse enregistree');
@@ -175,7 +175,7 @@ export async function downloadClinicPassport(report){
  }
  if(report.questionnaire.complete){
   need(25);sectionTitle('Indice declare exploratoire');
-  block(format(report.questionnaire.index)+' / 100 · Indicateur interne du questionnaire KŌMØ : non valide, sans equivalence avec un age biologique ou un risque individuel.',{size:9});
+  block(format(report.questionnaire.index)+' / 100 · Indicateur interne exploratoire et non valide. '+(report.simulated?'Calcule ici uniquement pour des reponses fictives. ':'')+'Sans equivalence avec un age biologique, une maladie ou un risque individuel.',{size:9});
  }
  // PAGE 5 - references + rigorous limits, repeatability frame.
  newPage('Methode / tracabilite','Un passeport, pas un diagnostic');

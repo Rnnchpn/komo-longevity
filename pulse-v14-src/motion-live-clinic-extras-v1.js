@@ -2,7 +2,7 @@
 // The physician/operator edits all fields on the desktop; nothing is collected on the iPhone.
 // This module has no access to camera frames, audio or WebRTC signaling.
 import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './online/session/intake-model.mjs';
-import {buildClinicPassport} from './motion-live-clinic-passport-v2.mjs';
+import {buildClinicPassport} from './motion-live-clinic-passport-v2.mjs?v=20261110-simulated-intake-v1';
 import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -61,7 +61,8 @@ export function clinicReportSummary(answers={},results={}){
   recorded:done,skipped,totalTests:ids.length};
 }
 export function clinicPassport(answers={},results={},date=new Date(),options={}){
- return buildClinicPassport(answers,results,{date,subject:options.subject||'Dossier fictif'});
+ return buildClinicPassport(answers,results,{date,subject:options.subject||'Dossier fictif',
+  simulated:options.simulated===true});
 }
 export async function downloadClinicReport(answers={},results={},generatedAt=new Date(),options={}){
  const passport=clinicPassport(answers,results,generatedAt,options);
