@@ -32,13 +32,19 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
    UNIPODAL.has(step)?oneLegFrame(points,step==="unipodal_left"?"left":"right"):
    frameInfo(points,step||"sts");
   if(info.valid)validFrames++;
-  let measurement=null,started=false,finished=false,postureIndex=null,stable=false;
+  let measurement=null,started=false,finished=false,postureIndex=null,stable=false,phase="initial";
   const elapsed=startedAt?Date.now()-startedAt:0;
   // A finished stopwatch must never continue accumulating movements.
   const withinWindow=running&&!operatorStopped&&(!duration||elapsed<=duration*1000+250);
-  if(withinWindow&&REPETITIONS.has(step)&&repetition){
-   const result=repetition.observe(points,at);
-   if(result.valid&&repetition.summary().usable>=5)measurement=result.count;
+  if(REPETITIONS.has(step)&&repetition){
+   // Keep the last confirmed repetition count even if an individual frame is
+   // obstructed, the pose is momentarily lost or the countdown has finished.
+   // Only ACCEPT a new repetition while inside the active timed window.
+   if(withinWindow){
+    const result=repetition.observe(points,at);
+    phase=result.phase||"initial";
+   }
+   if(repetition.summary().usable>=5)measurement=repetition.summary().count;
   }else if(withinWindow&&UNIPODAL.has(step)&&balance){
    const result=balance.observe(points,at);
    const summary=balance.summary();
@@ -57,7 +63,7 @@ export function createRemoteMotionTracker({onUpdate,onError}={}){
    publish({
     step,runKey,valid:!!info.valid,message:info.message||"Silhouette non exploitable",
     quality:Math.round(validFrames/Math.max(frames,1)*100),frames,validFrames,
-    running,measurement,started,finished,stable,postureIndex
+    running,measurement,phase,started,finished,stable,postureIndex
    });
   }
  };
