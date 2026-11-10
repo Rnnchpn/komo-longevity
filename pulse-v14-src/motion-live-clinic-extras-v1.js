@@ -2,7 +2,7 @@
 // The physician/operator edits all fields on the desktop; nothing is collected on the iPhone.
 // This module has no access to camera frames, audio or WebRTC signaling.
 import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './online/session/intake-model.mjs';
-import {buildPdfReportData,downloadMotionPdf} from './online/session/pdf-report.js';
+import {buildPdfReportData,downloadMotionPdf} from './online/session/pdf-report.js?v=20261110-balance30-v1';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
