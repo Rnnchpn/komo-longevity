@@ -23,7 +23,10 @@ function form(){
  '<p>Renseignez quelques éléments pour préparer une séance Motion. Aucun compte, aucun mot de passe, aucune caméra demandée sur cet appareil.</p>'+
  '<div class="checkin-notice"><strong>Mode démonstration :</strong> utilisez uniquement un pseudonyme et un profil fictif. Ne saisissez ni nom réel, ni information médicale.</div>'+
  '<form id="checkinForm">'+
- '<label>Pseudonyme fictif<input name="alias" type="text" placeholder="Ex. Camille Démo" maxlength="32" autocomplete="off" required></label>'+
+ '<label>Identité fictive<select name="alias" required><option value="">Choisir un personnage de démonstration</option>'+
+ '<option value="Camille">Camille Démo</option><option value="Alex">Alex Démo</option>'+
+ '<option value="Morgan">Morgan Démo</option><option value="Sacha">Sacha Démo</option>'+
+ '<option value="Noa">Noa Démo</option></select></label>'+
  '<label>Tranche d’âge fictive<select name="age_band" required><option value="">Sélectionner</option>'+
  '<option value="under40">Moins de 40 ans</option><option value="40-49">40–49 ans</option>'+
  '<option value="50-59">50–59 ans</option><option value="60-69">60–69 ans</option>'+
