@@ -76,13 +76,13 @@ for(const p of paths){
 const pdf=await readFile(join(process.cwd(),paths[1]),'utf8');
 const ui=await readFile(join(process.cwd(),paths[3]),'utf8');
 const css=await readFile(join(process.cwd(),'site/pulse-v14/motion-live-operator-consult-v1.css'),'utf8');
-assert.ok(pdf.includes('pdf.save(filename)'));
-assert.ok(pdf.includes('report.evidence')&&pdf.includes('report.limitations'));
-assert.ok(pdf.includes('report.questionnaire.answered===0'));
-assert.ok(pdf.includes('Aucun score global'));
+assert.ok(pdf.includes('pdf.save(name)'));
+assert.ok(pdf.includes('CLINIC_PASSPORT_EXPORTS')&&pdf.includes('const chapters=category==='));
+assert.ok(pdf.includes('Questionnaire incomplet')&&pdf.includes('drawRadar'));
+assert.ok(pdf.includes('sans score clinique invente'));
 assert.ok(ui.includes('extras.clinicPassport(')&&ui.includes('extras.downloadClinicReport('));
 assert.ok(ui.includes('mocPassportAside')&&ui.includes('moc-show-passport'));
-assert.ok(ui.includes('Télécharger mon passeport PDF'));
+assert.ok(ui.includes('Télécharger le passeport complet')&&ui.includes('mocExportCategory'));
 assert.ok(css.includes('.moc-passport-visual')&&css.includes('.moc-show-passport'));
 assert.equal(typeof downloadClinicReport,'function');
 console.log('[pulse-clinic-passport-v2-qa] PASS factual 6 tests, censored 30-s balance, 0/22, 22/22, measured provenance, premium PDF and auto-open UX');

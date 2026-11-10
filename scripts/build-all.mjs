@@ -263,6 +263,8 @@ const scripts = [
   // Evidence-aware consultant passport, PDF renderer and 0/22 questionnaire regression.
   'scripts/pulse-clinic-passport-v2-qa-20261110.mjs',
   'scripts/pulse-passport-simulation-qa-20261110.mjs',
+  // Complete visual home plan and independent section PDFs.
+  'scripts/pulse-category-export-qa-20261110.mjs',
   // Inline iPhone video, huge countdown and real-time STS count regression.
   'scripts/pulse-live-hud-qa-20261110.mjs',
   // Clinician-supervised single-leg stance: 30 seconds starts on foot lift.

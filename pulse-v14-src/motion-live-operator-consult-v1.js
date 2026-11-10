@@ -39,7 +39,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261110-simulated-intake-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261110-visual-plan-v1";
  document.head.append(link);
 }
 function stopClock(){
@@ -220,66 +220,92 @@ function stopClockIfNotRunning(){
 function renderReportSection(){
  if(!host||!extras||!room)return;
  const results=room.progress?.results||{};
- const report=extras.clinicReportSummary(questionnaireAnswers,results);
+ const summary=extras.clinicReportSummary(questionnaireAnswers,results);
  const label=patient?[patient.first_name,patient.last_name].filter(Boolean).join(" "):"Dossier fictif";
  const simulated=room.progress?.questionnaire?.simulated===true;
  const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,simulated});
- q("mocProgressText").textContent="Passeport · "+report.recorded+" tests enregistrés · "+report.answered+"/"+report.total+" réponses";
- q("mocProgressFill").style.width=(Math.min(6,report.recorded+report.skipped)/6*100)+"%";
+ const plan=passport.actionPlan;
+ q("mocProgressText").textContent="Passeport · "+summary.recorded+"/6 tests · "+summary.answered+"/22 réponses";
+ q("mocProgressFill").style.width=(Math.min(6,summary.recorded+summary.skipped)/6*100)+"%";
  q("mocStepNav").hidden=true;
  const finished=room.status==="completed";
- const card=(t)=>'<div><span>'+HTML(t.title)+'</span><strong>'+HTML(formatResult(results[t.id],t))+'</strong></div>';
- const insights=passport.findings.map(x=>'<div class="moc-passport-insight">'+HTML(x)+'</div>').join("");
- const priorities=passport.priorities.map((p,i)=>'<div class="moc-passport-priority"><span>0'+(i+1)+'</span><div><strong>'+HTML(p.title)+'</strong><p>'+HTML(p.detail)+'</p><small>'+HTML(p.basis)+'</small></div></div>').join("");
- q("mocTestBody").innerHTML='<section class="moc-test moc-report-section moc-passport-section">'+
-  '<span class="moc-kicker">KŌMØ · MOTION PASSPORT · CONSULTATION AU CABINET</span>'+
-  '<h3>Votre passeport locomoteur</h3>'+
-  '<p class="moc-help">Un point de départ fonctionnel documenté. Les conclusions portent sur les mesures réellement observées, sans diagnostic ou âge biologique automatisé.</p>'+
-  (simulated?'<p class="moc-demo-warning">MODE DÉMONSTRATION · Les 22 réponses au questionnaire sont entièrement fictives et ne représentent aucune déclaration d’un patient.</p>':'')+
-  '<div class="moc-passport-facts">'+
-    '<div><strong>'+passport.measured+'/6</strong><span>tests enregistrés</span></div>'+
-    '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses au questionnaire</span></div>'+
-    '<div><strong>'+passport.flagged+'</strong><span>mesures à vérifier</span></div>'+
-  '</div>'+
-  '<div class="moc-recap">'+TESTS.map(card).join("")+'</div>'+
-  (passport.questionnaire.complete?'<h4>Profil déclaré'+(simulated?' (simulé)':'')+'</h4>'+
-   '<p class="moc-help">Indice auto-déclaré exploratoire : '+passport.questionnaire.index+'/100 · questionnaire KŌMØ non validé, sans valeur diagnostique.</p>'+
-   '<div class="moc-passport-domains">'+passport.questionnaire.groups.filter(g=>g.score!==null).map(g=>
-     '<div><span>'+HTML(g.label)+'</span><strong>'+g.score+'/100</strong></div>').join('')+'</div>':'')+
-  '<h4>Ce que montrent les résultats</h4>'+insights+
-  '<h4>Priorités de suivi</h4>'+priorities+
-  '<p class="moc-report-meta">'+(report.complete?'Questionnaire complet — volet autoévaluation disponible.':'Questionnaire incomplet : il sera signalé dans le passeport, sans score inventé.')+'</p>'+
-  '<div class="moc-buttons"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger mon passeport PDF</button>'+
-  '<button type="button" class="moc-button secondary" id="mocReportQuestionnaire">Compléter les questionnaires</button></div>'+
-  (!finished?'<p class="moc-status">Terminez les six tests pour télécharger le passeport.</p>':'')+
+ const resultCard=t=>'<div class="moc-passport-result"><span>'+HTML(t.short)+'</span><strong>'+HTML(t.display)+'</strong></div>';
+ const exerciseCard=e=>'<div class="moc-exercise-card"><div><strong>'+HTML(e.title)+'</strong><small>'+HTML(e.purpose)+'</small></div>'+
+  '<b>'+HTML(e.dose)+'</b><span>'+HTML(e.frequency)+'</span><p>'+HTML(e.instructions)+'</p></div>';
+ const nutritionCard=item=>'<div class="moc-nutrition-card"><div><strong>'+HTML(item.name)+'</strong><em>'+HTML(item.status)+'</em></div>'+
+  '<p>'+HTML(item.benefit)+'</p><small>'+HTML(item.guard)+'</small></div>';
+ const essentials=plan.supplements.filter(s=>['protein','creatine','vitd'].includes(s.id));
+ const more=plan.supplements.filter(s=>!['protein','creatine','vitd'].includes(s.id));
+ const reasons=plan.highlights.map((x,i)=>'<div class="moc-passport-highlight"><small>'+HTML(x.label)+'</small><strong>'+HTML(x.value)+'</strong></div>').join('');
+ q("mocTestBody").innerHTML='<section class="moc-test moc-report-section moc-passport-section moc-action-report">'+
+  '<span class="moc-kicker">KŌMØ MOTION PASSPORT · SIX-WEEK ACTION PLAN</span>'+
+  '<h3>Votre feuille de route</h3>'+
+  (simulated?'<p class="moc-demo-warning">SCÉNARIO FICTIF · Réponses simulées, aucun avis médical individualisé.</p>':'')+
+  '<div class="moc-action-metrics"><div><strong>'+passport.measured+'/6</strong><span>tests réalisés</span></div>'+
+   '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses</span></div>'+
+   '<div><strong>6 sem.</strong><span>programme proposé</span></div></div>'+
+  '<h4>Votre profil en bref</h4>'+
+  '<div class="moc-passport-highlights">'+reasons+'</div>'+
+  '<h4>Tests réalisés</h4><div class="moc-results-compact">'+passport.measures.map(resultCard).join('')+'</div>'+
+  '<div class="moc-action-section-title"><h4>Exercices à la maison</h4><small>Progression à adapter et valider</small></div>'+
+  '<div class="moc-exercise-grid">'+plan.exercises.slice(0,4).map(exerciseCard).join('')+'</div>'+
+  '<details class="moc-report-details"><summary>Marche, progression et consignes complémentaires</summary>'+
+   plan.exercises.slice(4).map(exerciseCard).join('')+'<p class="moc-help">'+HTML(plan.safeguards)+'</p></details>'+
+  '<h4>Nutrition et compléments</h4>'+
+  '<p class="moc-help">Des options conditionnelles, pas une ordonnance automatique. Priorité à l’exercice et aux apports alimentaires.</p>'+
+  '<div class="moc-nutrition-grid">'+essentials.map(nutritionCard).join('')+'</div>'+
+  '<details class="moc-report-details"><summary>B12, oméga-3 et conditions de sécurité</summary>'+
+   more.map(nutritionCard).join('')+
+   '<p class="moc-help">'+HTML(plan.review)+'</p></details>'+
+  '<p class="moc-report-guard">Proposition éducative : la vidéo et le questionnaire ne permettent ni diagnostic de carence, ni prescription de compléments. Vérification clinique nécessaire.</p>'+
+  '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le passeport complet (5 catégories)</button>'+
+  '<div class="moc-category-export"><label for="mocExportCategory">Exporter une grande catégorie</label>'+
+   '<select id="mocExportCategory" aria-label="Choisir la catégorie">'+
+    '<option value="synthese">1 · Synthèse et diagramme</option>'+
+    '<option value="tests">2 · Tests et qualité de mesure</option>'+
+    '<option value="exercices">3 · Exercices à domicile</option>'+
+    '<option value="nutrition">4 · Nutrition et compléments</option>'+
+    '<option value="suivi">5 · Suivi à 6 semaines</option></select>'+
+   '<button class="moc-button secondary" id="mocDownloadChapter"'+(!finished?' disabled':'')+'>↓ Exporter cette catégorie</button></div>'+
+  '<button type="button" class="moc-button secondary" id="mocReportQuestionnaire">Questionnaires</button></div>'+
+  (!finished?'<p class="moc-status">Terminez les six épreuves pour exporter le document.</p>':'')+
   '<p id="mocReportStatus" class="moc-status" role="status"></p></section>';
  const aside=q("mocPassportAside");
  if(aside){
-  aside.innerHTML='<div class="moc-passport-visual">'+
-   '<span>01 / DOCUMENT PERSONNALISÉ</span>'+
-   '<strong>KŌMØ</strong>'+
-   '<i>MOTION<br>PASSPORT</i>'+
-   '<p>Le mouvement comme point de départ.<br>La progression comme perspective.</p>'+
-   '<div class="moc-passport-line"></div>'+
-   '<div class="moc-passport-ident"><span>ÉDITION CABINET · DEMONSTRATION</span><b>'+passport.date+'</b></div>'+
-   '<div class="moc-passport-visual-metrics"><div><strong>'+passport.measured+'/6</strong><span>TESTS</span></div>'+
-    '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>RÉPONSES</span></div></div>'+
-   '<small>'+(simulated?'22 réponses fictives pour démonstration · ':'')+'Compte rendu descriptif · Aucun pronostic individuel.</small></div>';
+  const timeline=plan.timeline.map((p,i)=>'<div class="moc-action-phase"><span>0'+(i+1)+'</span>'+
+   '<div><small>'+HTML(p.weeks)+'</small><strong>'+HTML(p.title)+'</strong>'+
+   '<p>'+HTML(p.tasks[0])+'</p></div></div>').join('');
+  aside.innerHTML='<div class="moc-report-aside-card">'+
+   '<div class="moc-radar-title"><small>QUESTIONNAIRE · 4 DOMAINES</small><strong>Votre profil de mouvement</strong></div>'+
+   extras.clinicRadar(plan)+
+   '<p class="moc-radar-disclaimer">'+(simulated?'Réponses fictives · ':'')+'Indice interne exploratoire, sans norme clinique ni valeur diagnostique.</p>'+
+   '<div class="moc-radar-divider"></div>'+
+   '<div class="moc-radar-title"><small>PROGRESSION</small><strong>6 semaines, 3 étapes</strong></div>'+
+   '<div class="moc-action-timeline">'+timeline+'</div>'+
+   '<div class="moc-aside-followup"><strong>Contrôle à 6 semaines</strong>'+
+   '<span>Mêmes tests · mêmes conditions · évolution des habitudes</span></div>'+
+   '<p class="moc-radar-disclaimer">'+HTML(plan.review)+'</p>'+
+   '</div>';
  }
  updatePanelTabs();
  q("mocReportQuestionnaire").onclick=()=>switchPanel("questionnaire");
- const button=q("mocDownloadPdf");
- if(button)button.onclick=async()=>{
-  button.disabled=true;
+ const button=q("mocDownloadPdf"),chapter=q("mocDownloadChapter");
+ const exportPdf=async(type,clicked)=>{
+  if(!clicked)return;
+  clicked.disabled=true;
   const status=q("mocReportStatus");
   try{
    if(questionnaireDirty)await saveQuestionnaire();
-   status.textContent="Création de votre passeport PDF sur cet ordinateur…";
-   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),{subject:label,simulated});
-   status.textContent="Passeport créé : "+filename;
-  }catch(error){status.textContent="Impossible de générer le passeport : "+(error.message||"erreur de chargement")}
-  finally{if(button.isConnected)button.disabled=false}
+   status.textContent="Préparation du PDF "+(type==="all"?"complet":"par catégorie")+"…";
+   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),
+    {subject:label,simulated,category:type});
+   status.textContent="Fichier exporté : "+filename;
+  }catch(error){
+   status.textContent="Export indisponible : "+(error.message||"erreur de chargement");
+  }finally{if(clicked.isConnected)clicked.disabled=false}
  };
+ if(button)button.onclick=()=>exportPdf("all",button);
+ if(chapter)chapter.onclick=()=>exportPdf(q("mocExportCategory")?.value||"synthese",chapter);
 }
 
 function renderSummary(){
@@ -661,7 +687,7 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-simulated-intake-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261110-visual-plan-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");

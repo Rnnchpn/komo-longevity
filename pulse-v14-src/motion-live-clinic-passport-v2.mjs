@@ -1,6 +1,7 @@
 // Clinical-style *descriptive* passport for supervised KŌMØ Motion demos.
 // No medical diagnosis, validated score, biological age or survival estimate.
 import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer} from './online/session/intake-model.mjs';
+import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
  {id:'sts',name:'Lever de chaise',short:'Force fonctionnelle',unit:'levers / 30 s',
@@ -183,13 +184,16 @@ export function buildClinicPassport(answers={},results={},options={}){
    url:'https://www.sralab.org/rehabilitation-measures/single-leg-stance-or-one-legged-stance-test',
    meaning:'Meilleur de trois essais jusqu’à 45 s, non comparable directement à un essai vidéo plafonné à 30 s.'}
  ];
+ const actionPlan=buildClinicActionPlan(answers,measures,balance,{
+   complete:questionnaire.complete,groups
+ },{simulated});
  const report={
   version:CLINIC_PASSPORT_VERSION,
   date,subject,mode:'CABINET_DEMO',profile,simulated,
   measures,measured,skipped,flagged:flagged.length,
   questionnaire:{answered:progress.completed,total:progress.total,complete:questionnaire.complete,
    simulated,index:questionnaire.complete?questionnaire.profileIndex:null,groups},
-  balance,findings:messages,priorities:selected,evidence,
+  balance,findings:messages,priorities:selected,evidence,actionPlan,
   outcomes:{motionScore:null,motionAge:null,lifeExpectancy:null},
   recheck:'4 à 6 semaines',
   limitations:[

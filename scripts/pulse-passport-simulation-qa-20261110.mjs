@@ -52,6 +52,6 @@ assert.ok(edge.includes('30*86400000'));
 const ui=await readFile(join(process.cwd(),'site/pulse-v14/motion-live-operator-consult-v1.js'),'utf8');
 const pdf=await readFile(join(process.cwd(),'site/pulse-v14/motion-live-clinic-passport-pdf-v2.js'),'utf8');
 assert.ok(ui.includes('moc-demo-warning')&&ui.includes('questionnaire?.simulated===true'));
-assert.ok(ui.includes('moc-passport-domains')&&ui.includes('simulated}'));
-assert.ok(pdf.includes('22 REPONSES FICTIVES')&&pdf.includes('Questionnaire fictif'));
+assert.ok(ui.includes('moc-radar-svg')===false&&ui.includes('clinicRadar(plan)')&&ui.includes('simulated}'));
+assert.ok(pdf.includes('22 REPONSES FICTIVES')&&pdf.includes('CATEGORIE'));
 console.log('[pulse-passport-simulation-qa] PASS saved 22 fictitious answers, 75/100 declared index, test/subjective cross-analysis, 30-day report history and provenance');
