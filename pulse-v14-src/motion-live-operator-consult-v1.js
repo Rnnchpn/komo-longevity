@@ -9,14 +9,14 @@ const TESTS=[
   setup:"Debout de profil, pieds et bassin visibles, à proximité d'un support fixe.",
   instruction:"Comptez les élévations complètes sur les pointes pendant 20 secondes. Arrêtez en cas d'instabilité.",
   label:"Nombre d'élévations"},
- {id:"unipodal_left",title:"Équilibre · pied gauche",duration:20,unit:"seconds",
-  setup:"Debout près d'un appui stable, face à la caméra, pieds visibles.",
-  instruction:"Le patient soulève doucement le pied droit. Chronométrez l'appui gauche, au maximum 20 secondes.",
-  label:"Durée maintenue (secondes)"},
- {id:"unipodal_right",title:"Équilibre · pied droit",duration:20,unit:"seconds",
-  setup:"Debout près d'un appui stable, face à la caméra, pieds visibles.",
-  instruction:"Le patient soulève doucement le pied gauche. Chronométrez l'appui droit, au maximum 20 secondes.",
-  label:"Durée maintenue (secondes)"},
+ {id:"unipodal_left",title:"Équilibre · pied gauche",duration:30,unit:"seconds",type:"balance",
+  setup:"Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.",
+  instruction:"Armez le suivi puis soulevez le pied DROIT sans toucher l'autre jambe. Le chronomètre démarre au lever du pied et s'arrête au retour d'appui, à une compensation ou après 30 s.",
+  label:"Appui unipodal gauche (secondes)"},
+ {id:"unipodal_right",title:"Équilibre · pied droit",duration:30,unit:"seconds",type:"balance",
+  setup:"Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.",
+  instruction:"Armez le suivi puis soulevez le pied GAUCHE sans toucher l'autre jambe. Le chronomètre démarre au lever du pied et s'arrête au retour d'appui, à une compensation ou après 30 s.",
+  label:"Appui unipodal droit (secondes)"},
  {id:"arms",title:"Mobilité des bras",duration:20,unit:"mouvements",type:"count",
   setup:"Face à la caméra, bras et poignets visibles, espace libre autour du corps.",
   instruction:"Comptez les cycles de lever et abaisser les bras pendant 20 secondes, sans amplitude douloureuse.",
@@ -61,6 +61,13 @@ export function disposeOperatorConsultation(){
  host=null;room=null;api=null;openVideo=null;patient=null;latestSignature="";autoValue=null;manualEdited=false;
 }
 function currentTest(){return TESTS[Number(room?.step_index)]||null}
+const isBalance=t=>t?.type==="balance";
+const balanceReasonText=reason=>({
+ foot_contact:"Le pied libre a été reposé. Mesure terminée.",
+ limit:"30 secondes atteintes. Plafond de l’essai.",
+ camera_lost:"Repères perdus. Vérifiez la durée avant validation.",
+ ambiguous_contact:"Retour d’appui incertain. Vérifiez la mesure."
+}[reason]||"Appui interrompu · vérifiez le résultat.");
 function stageText(result){return result?.status==="done"?"✓":result?.status==="skipped"?"—":"·"}
 function makeShell(){
  host.innerHTML='<section class="moc-shell">'+
@@ -248,9 +255,28 @@ function renderSummary(){
 function timeDisplay(){
  const task=currentTest(),node=q("mocClock");
  if(!node||!task||!task.duration||room?.progress?.step_status!=="running")return;
+ if(isBalance(task)){
+  // The operator ARMING this test never starts the stopwatch.
+  // Time comes exclusively from the camera's confirmed single-leg lift.
+  const reading=poseTracker?.getLatest();
+  const elapsed=reading?.step===task.id&&reading?.started&&Number.isFinite(reading.balanceElapsed)?
+    Math.min(30,Math.max(0,reading.balanceElapsed)):null;
+  const remaining=elapsed===null?30:Math.max(0,Math.ceil(30-elapsed));
+  node.textContent="00:"+String(remaining).padStart(2,"0");
+  node.classList.toggle("finished",reading?.balanceState==="completed");
+  const live=q("mocLiveBalance");
+  if(live)live.textContent=elapsed===null?"—":elapsed.toFixed(1)+" s";
+  const state=q("mocBalanceState");
+  if(state)state.textContent=elapsed===null?"EN ATTENTE DU PIED LEVÉ":
+    reading.balanceState==="completed"?"ESSAI TERMINÉ": "APPUI DÉTECTÉ · MESURE EN COURS";
+  if(reading?.balanceState==="completed"&&!clockCompletedNotified){
+   clockCompletedNotified=true;poseTracker?.stopMeasurement();
+   voice?.complete();
+   setStatus(balanceReasonText(reading.balanceReason));
+  }
+  return;
+ }
  const serverStart=Date.parse(room.progress?.test_started_at||"");
- // On clicking Démarrer, begin visibly at exactly 00:30 (or 00:20 for shorter tests).
- // On reload/reconnect, resume from the server timestamp rather than restarting.
  const start=clockLocal?.key===clockRunKey(room)?clockLocal.startedAt:serverStart;
  if(!Number.isFinite(start)){node.textContent="00:"+String(task.duration).padStart(2,"0");return}
  const elapsedMs=Math.max(0,(stoppedAt??Date.now())-start);
@@ -268,9 +294,7 @@ function timeDisplay(){
   voice?.complete();
   setStatus("Temps écoulé. Vérifiez le compteur vidéo ou saisissez la mesure manuellement, puis validez.");
  }
- // The optical measurement is never replaced by a fictitious 20-second value.
-}
-function setClock(){
+}function setClock(){
  if(clock)clearInterval(clock);
  clock=null;
  const key=clockRunKey(room);
@@ -298,19 +322,21 @@ function renderStep(){
   '<label class="moc-field">Observation (sans mesure radiographique)<select id="mocObservation">'+
   '<option value="">Choisir une observation</option><option value="neutral">Alignement apparent neutre</option>'+
   '<option value="apparent_offset">Décalage sagittal apparent</option><option value="not_interpretable">Image non interprétable</option></select></label>'
-  :'<label class="moc-field">'+HTML(t.label)+'<div class="moc-input-unit"><input id="mocValue" type="number" inputmode="decimal" min="0" max="'+(t.unit==="seconds"?"20":"100")+'" step="'+(t.unit==="seconds"?"0.1":"1")+'" placeholder="Saisir une valeur"><span>'+HTML(t.unit)+'</span></div></label>';
+  :'<label class="moc-field">'+HTML(t.label)+'<div class="moc-input-unit"><input id="mocValue" type="number" inputmode="decimal" min="0" max="'+(t.unit==="seconds"?String(t.duration):"100")+'" step="'+(t.unit==="seconds"?"0.1":"1")+'" placeholder="Saisir une valeur"><span>'+HTML(t.unit)+'</span></div></label>';
  q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">TEST '+(idx+1)+' / '+TESTS.length+'</span><h3>'+HTML(t.title)+'</h3>'+
  '<div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
  (running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>CHRONOMÈTRE</span><strong id="mocClock" aria-live="off">'+(t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
+ (t.type==="balance"?'<div class="moc-rep-figure moc-balance-figure"><span>TEMPS MAINTENU</span><strong id="mocLiveBalance" aria-live="off">—</strong><small id="mocBalanceState">EN ATTENTE DU PIED LEVÉ</small></div>':'')+
  (t.type==="count"?'<div class="moc-rep-figure"><span>'+ (t.id==="sts"?"LEVERS EN DIRECT":"RÉPÉTITIONS EN DIRECT")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong><small>Estimation vidéo · à confirmer</small></div>':'')+
- (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">Arrêter</button><button type="button" class="moc-button secondary" id="mocRestartClock">↻ Repartir de '+t.duration+' s</button></div>':'')+'</div></div>'+input+
+ (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">'+(isBalance(t)?"Arrêter l’essai":"Arrêter")+'</button><button type="button" class="moc-button secondary" id="mocRestartClock">'+(isBalance(t)?"↻ Refaire l’essai":"↻ Repartir de "+t.duration+" s")+'</button></div>':'')+'</div></div>'+input+
+ (isBalance(t)?'<p class="moc-balance-reference">Yeux ouverts · 30 s maximum · durée réelle depuis le pied levé · 10 s = repère descriptif, non diagnostique. Arrêter en cas de perte d’équilibre ou de recours à un appui.</p>':'')+
  '<div class="moc-auto-feedback" id="mocAutoFeedback">◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
  '<div class="moc-buttons"><button type="button" id="mocSave" class="moc-button primary">Valider et passer au suivant</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>'
- :'<div class="moc-buttons"><button type="button" id="mocStart" class="moc-button primary">'+(t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button>'+
+ :'<div class="moc-buttons"><button type="button" id="mocStart" class="moc-button primary">'+(isBalance(t)?"Armer le suivi · départ automatique":t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>')+
  '<p id="mocStatus" class="moc-status" role="status" aria-live="polite"></p></section>';
  if(q("mocValue"))q("mocValue").addEventListener("input",()=>{manualEdited=true});
@@ -326,7 +352,9 @@ function renderStep(){
   if(observed?.measurement!==null&&Number.isFinite(observed?.measurement)&&q("mocValue")&&!manualEdited)
     q("mocValue").value=String(observed.measurement);
   const start=Date.parse(room.progress.test_started_at||"");
-  if(t.unit==="seconds"&&Number.isFinite(start)&&q("mocValue")&&!q("mocValue").value){
+  if(isBalance(t)&&!q("mocValue")?.value){
+   setStatus("Essai interrompu. Si la caméra n’a pas obtenu de mesure exploitable, saisissez la durée observée manuellement.");
+  }else if(t.unit==="seconds"&&Number.isFinite(start)&&q("mocValue")&&!q("mocValue").value){
    // Optical balance data may be missing; only a manual operator measurement can fill it.
    setStatus("Aucune durée détectée. Vous pouvez saisir votre chronométrage manuel.");
   }
@@ -406,7 +434,15 @@ async function startWithCountdown(action="start"){
  }
  const latest=poseTracker?.getLatest();
  if(!latest?.valid){
-  setStatus("Aucun corps détecté pour l’instant. Cadrez la personne entière : comptage vidéo indisponible sinon (saisie manuelle possible).");
+  setStatus(isBalance(currentTest())?
+   "Vérifiez que les deux chevilles sont visibles. L’essai ne démarrera qu’après le pied levé.":
+   "Aucun corps détecté pour l’instant. Cadrez la personne entière : comptage vidéo indisponible sinon (saisie manuelle possible).");
+ }
+ if(isBalance(currentTest())){
+  // Don't play a 3-2-1 timed start: the patient determines the lift onset.
+  await submit(action);
+  if(room?.progress?.step_status==="running")setStatus("Suivi armé. Levez le pied opposé : le chrono partira automatiquement.");
+  return;
  }
  const session=room.id,step=room.step_index;
  countdownPending=true;
@@ -466,7 +502,14 @@ async function submit(event){
    payload.value=Number(raw);
    payload.measurement_source=!manualEdited&&Number.isFinite(autoValue)&&payload.value===autoValue?
     "operator_confirmed_video_estimate":"operator_manual_observation";
-   if(!Number.isFinite(payload.value)||payload.value<0||payload.value>(t.unit==="seconds"?20:100)||
+   if(isBalance(t)){
+    const reading=poseTracker?.getLatest();
+    if(payload.measurement_source==="operator_confirmed_video_estimate"){
+     payload.measurement_quality=Number.isInteger(reading?.balanceQuality)?reading.balanceQuality:0;
+     payload.stop_reason=reading?.balanceReason||"operator_end";
+    }
+   }
+   if(!Number.isFinite(payload.value)||payload.value<0||payload.value>(t.unit==="seconds"?t.duration:100)||
      (t.type==="count"&&!Number.isInteger(payload.value))){
     setStatus("La valeur saisie n’est pas valide.");return
    }
