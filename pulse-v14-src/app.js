@@ -10,10 +10,10 @@ const PATIENT_NAV=[['home','Mon espace']];
 const PRO_NAV=[['live','Nouvelle consultation'],['operator','Consultation Motion'],['patients','Patients'],['appointments','Rendez-vous']];
 const OP_STEPS=[
  ['sts','30 s','Se relever de la chaise','Motion Online'],
- ['heels','20 s','Élévations sur les pointes','Motion Online'],
+ ['heels','30 s','Élévations sur les pointes','Motion Online'],
  ['unipodal_left','30 s','Équilibre · pied gauche','Motion Online'],
  ['unipodal_right','30 s','Équilibre · pied droit','Motion Online'],
- ['arms','20 s','Mobilité des bras','Motion Online'],
+ ['arms','30 s','Mobilité des bras','Motion Online'],
  ['posture','Observation','Posture de profil','Motion Online']
 ];
 
