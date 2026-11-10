@@ -222,7 +222,8 @@ function renderReportSection(){
  const results=room.progress?.results||{};
  const report=extras.clinicReportSummary(questionnaireAnswers,results);
  const label=patient?[patient.first_name,patient.last_name].filter(Boolean).join(" "):"Dossier fictif";
- const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label});
+ const simulated=room.progress?.questionnaire?.simulated===true;
+ const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,simulated});
  q("mocProgressText").textContent="Passeport · "+report.recorded+" tests enregistrés · "+report.answered+"/"+report.total+" réponses";
  q("mocProgressFill").style.width=(Math.min(6,report.recorded+report.skipped)/6*100)+"%";
  q("mocStepNav").hidden=true;
@@ -234,12 +235,17 @@ function renderReportSection(){
   '<span class="moc-kicker">KŌMØ · MOTION PASSPORT · CONSULTATION AU CABINET</span>'+
   '<h3>Votre passeport locomoteur</h3>'+
   '<p class="moc-help">Un point de départ fonctionnel documenté. Les conclusions portent sur les mesures réellement observées, sans diagnostic ou âge biologique automatisé.</p>'+
+  (simulated?'<p class="moc-demo-warning">MODE DÉMONSTRATION · Les 22 réponses au questionnaire sont entièrement fictives et ne représentent aucune déclaration d’un patient.</p>':'')+
   '<div class="moc-passport-facts">'+
     '<div><strong>'+passport.measured+'/6</strong><span>tests enregistrés</span></div>'+
     '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses au questionnaire</span></div>'+
     '<div><strong>'+passport.flagged+'</strong><span>mesures à vérifier</span></div>'+
   '</div>'+
   '<div class="moc-recap">'+TESTS.map(card).join("")+'</div>'+
+  (passport.questionnaire.complete?'<h4>Profil déclaré'+(simulated?' (simulé)':'')+'</h4>'+
+   '<p class="moc-help">Indice auto-déclaré exploratoire : '+passport.questionnaire.index+'/100 · questionnaire KŌMØ non validé, sans valeur diagnostique.</p>'+
+   '<div class="moc-passport-domains">'+passport.questionnaire.groups.filter(g=>g.score!==null).map(g=>
+     '<div><span>'+HTML(g.label)+'</span><strong>'+g.score+'/100</strong></div>').join('')+'</div>':'')+
   '<h4>Ce que montrent les résultats</h4>'+insights+
   '<h4>Priorités de suivi</h4>'+priorities+
   '<p class="moc-report-meta">'+(report.complete?'Questionnaire complet — volet autoévaluation disponible.':'Questionnaire incomplet : il sera signalé dans le passeport, sans score inventé.')+'</p>'+
@@ -258,7 +264,7 @@ function renderReportSection(){
    '<div class="moc-passport-ident"><span>ÉDITION CABINET · DEMONSTRATION</span><b>'+passport.date+'</b></div>'+
    '<div class="moc-passport-visual-metrics"><div><strong>'+passport.measured+'/6</strong><span>TESTS</span></div>'+
     '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>RÉPONSES</span></div></div>'+
-   '<small>Compte rendu descriptif et exploratoire · Aucun pronostic individuel.</small></div>';
+   '<small>'+(simulated?'22 réponses fictives pour démonstration · ':'')+'Compte rendu descriptif · Aucun pronostic individuel.</small></div>';
  }
  updatePanelTabs();
  q("mocReportQuestionnaire").onclick=()=>switchPanel("questionnaire");
@@ -269,7 +275,7 @@ function renderReportSection(){
   try{
    if(questionnaireDirty)await saveQuestionnaire();
    status.textContent="Création de votre passeport PDF sur cet ordinateur…";
-   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),{subject:label});
+   const filename=await extras.downloadClinicReport(questionnaireAnswers,results,new Date(),{subject:label,simulated});
    status.textContent="Passeport créé : "+filename;
   }catch(error){status.textContent="Impossible de générer le passeport : "+(error.message||"erreur de chargement")}
   finally{if(button.isConnected)button.disabled=false}
