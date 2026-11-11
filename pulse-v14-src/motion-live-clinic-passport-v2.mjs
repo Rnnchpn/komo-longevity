@@ -7,9 +7,9 @@ const T=[
  {id:'sts',name:'Lever de chaise',short:'Force fonctionnelle',unit:'levers / 30 s',
   method:'30 secondes, chaise stable, bras croisés si possible. Compter les levers complets.',
   caveat:'Valeur de suivi ; comparaison normative uniquement avec âge exact, groupe de référence et protocole confirmé.'},
- {id:'heels',name:'Élévation sur les pointes',short:'Endurance distale',unit:'répétitions',
-  method:'Élévations contrôlées des talons, caméra stable, amplitude observée par le professionnel.',
-  caveat:'Sans amplitude mesurée ni protocole standardisé, pas de percentile ni diagnostic de force du triceps sural.'},
+ {id:'two_step',name:'Two-Step Test',short:'Deux grands pas',unit:'cm',
+  method:'Deux essais manuels des deux plus grands pas sans saut, pieds joints à l’arrêt. Retenir la meilleure distance mesurée au sol.',
+  caveat:'Indice = meilleure distance / taille (cm), uniquement si la taille est renseignée. Les seuils cliniques exigent un protocole standardisé et une interprétation contextualisée.'},
  {id:'unipodal_left',name:'Équilibre · jambe gauche',short:'Stabilité gauche',unit:'s / 30 s',
   method:'Appui unipodal yeux ouverts, début au lever du pied droit, maximum 30 secondes.',
   caveat:'Mesure plafonnée à 30 s, avec détection vidéo 2D et contrôle visuel de l’opérateur.'},
@@ -23,6 +23,9 @@ const T=[
   method:'Observation visuelle de profil, à partir d’une image 2D non calibrée.',
   caveat:'Aucune mesure de SVA C7–S1 radiographique, d’angle pelvien ou de déformation rachidienne.'}
 ];
+const LEGACY_HEELS={id:'heels',name:'Élévation sur les pointes (ancien protocole)',short:'Endurance distale',unit:'répétitions',
+ method:'Ancien test de mollets, non assimilable au Two-Step Test.',
+ caveat:'Mesure historique conservée pour traçabilité ; ne pas la comparer au Two-Step Test.'};
 const names={neutral:'Alignement apparent neutre',apparent_offset:'Décalage apparent',not_interpretable:'Non interprétable'};
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round1=x=>Math.round(x*10)/10;
@@ -49,7 +52,9 @@ function objective(row={},test){
  const incident=['camera_lost','ambiguous_contact'].includes(row?.stop_reason);
  const review=status==='review'||(quality!==null&&quality<65)||incident||observation==='Non interprétable';
  const note=safe(row?.note);
- return {...test,status,value,observation,display,durationSeconds,source,quality,review,
+ const twoStepIndex=test.id==='two_step'&&finite(row?.two_step_index)?row.two_step_index:null;
+ const attemptsCm=test.id==='two_step'&&Array.isArray(row?.attempts_cm)?row.attempts_cm.slice(0,2):null;
+ return {...test,status,value,observation,display,durationSeconds,source,quality,review,twoStepIndex,attemptsCm,
   stopReason:typeof row?.stop_reason==='string'?row.stop_reason:null,
   note,measured:status==='done'||status==='review',
   ceiling:finite(value)&&test.id.startsWith('unipodal')&&value>=29.95};
@@ -61,7 +66,8 @@ export function buildClinicPassport(answers={},results={},options={}){
  const simulated=options.simulated===true;
  const profile={ageBand:answers.ageBand||null,goal:answers.goal||null};
  const rating=key=>Object.hasOwn(answers,key)&&/^[0-4]$/.test(String(answers[key]))?Number(answers[key]):null;
- const measures=T.map(t=>objective(results[t.id],t));
+ const measures=T.map(t=>t.id==='two_step'&&!results.two_step&&results.heels?
+  objective(results.heels,LEGACY_HEELS):objective(results[t.id],t));
  const measured=measures.filter(x=>x.measured).length,skipped=measures.filter(x=>x.status==='skipped').length;
  const flagged=measures.filter(x=>x.review);
  const bL=measures[2],bR=measures[3];
@@ -89,6 +95,13 @@ export function buildClinicPassport(answers={},results={},options={}){
  const messages=[];
  if(measured===6)messages.push('Les six épreuves ont été enregistrées ; ce bilan constitue un point de départ fonctionnel pour les contrôles ultérieurs.');
  else messages.push(measured+' des six épreuves disposent d’un résultat ; les tests non réalisés restent signalés.');
+ const twoStep=measures.find(m=>m.id==='two_step');
+ if(twoStep?.measured){
+  messages.push('Two-Step Test : meilleure distance manuelle '+n(twoStep.value)+' cm'+
+   (twoStep.twoStepIndex!==null?' ; indice distance/taille = '+n(twoStep.twoStepIndex)+'.':
+    ' ; indice non calculé faute de taille renseignée.')+
+   ' Résultat descriptif, à contextualiser selon protocole et population de référence.');
+ }
  if(balance){
   messages.push(balance.tenSecondBoth?
    'Le repère descriptif des 10 secondes est atteint sur les deux appuis, dans les conditions de cette séance.':
@@ -172,6 +185,8 @@ export function buildClinicPassport(answers={},results={},options={}){
  const recheck=priorities.find(x=>x.title==='Standardiser le prochain contrôle');
  const selected=[...priorities.filter(x=>x!==recheck).slice(0,3),...(recheck?[recheck]:[])];
  const evidence=[
+  {name:'Japanese Orthopaedic Association — Two-Step Test',url:'https://locomo-joa.jp/en',
+   meaning:'Deux essais de deux pas maximaux sans déséquilibre, meilleure distance en cm divisée par la taille en cm.'},
   {name:'30-second Chair Stand — CDC STEADI',url:'https://www.cdc.gov/steadi/media/pdfs/STEADI-Assessment-30Sec-508.pdf',
    meaning:'Référence de protocole ; aucune comparaison d’âge sans âge exact, groupe de référence et hauteur de chaise conformes.'},
   {name:'Rikli & Jones — 30 s STS, normes synthétisées par SRAlab',
@@ -205,6 +220,7 @@ export function buildClinicPassport(answers={},results={},options={}){
    'Les valeurs vidéo et les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques.',
    'Aucun Motion Score ou Motion Age : vitesse de marche, TUG, SPPB, normes et conditions instrumentales nécessaires manquantes.',
    'Les durées d’équilibre sont plafonnées à 30 s. Une valeur de 30 s n’est pas une mesure au-delà de ce plafond.',
+   'Le Two-Step Test est mesuré manuellement ; son indice n’est calculé que si la taille est renseignée, sans inférence diagnostique automatique.',
    'Une photo de profil 2D ne constitue pas une mesure radiographique de l’équilibre sagittal (SVA).',
    'Le rapport ne prédit ni chute, ni maladie, ni espérance de vie ; toute interprétation exige le contexte clinique.'
   ]
