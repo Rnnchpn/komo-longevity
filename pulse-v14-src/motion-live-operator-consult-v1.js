@@ -5,10 +5,10 @@ const TESTS=[
   setup:"Chaise stable contre un mur, caméra de trois-quarts profil, tête et pieds visibles.",
   instruction:"Comptez les levers complets pendant 30 secondes. Bras croisés si possible, sans compromettre la sécurité.",
   label:"Nombre de levers complets"},
- {id:"heels",title:"Élévations sur les pointes",duration:30,unit:"répétitions",type:"count",
-  setup:"Debout de profil, pieds et bassin visibles, à proximité d'un support fixe.",
-  instruction:"Comptez les élévations complètes sur les pointes pendant 30 secondes, en gardant le support accessible. Arrêtez en cas d'instabilité.",
-  label:"Nombre d'élévations"},
+ {id:"two_step",title:"Two-Step Test · deux grands pas",duration:0,unit:"cm",type:"manual_two_step",
+  setup:"Sol plat antidérapant, ruban métrique au sol, ligne de départ, opérateur à proximité et espace dégagé.",
+  instruction:"Depuis la ligne, faire deux pas aussi amples que possible, sans courir ni sauter, puis joindre les pieds. Mesurer la distance entre la ligne et les pointes des pieds. Réaliser deux essais et retenir le meilleur. Recommencer tout essai avec perte d’équilibre.",
+  label:"Meilleure distance des deux pas"},
  {id:"unipodal_left",title:"Équilibre · pied gauche",duration:30,unit:"seconds",type:"balance",
   setup:"Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.",
   instruction:"Armez le suivi puis soulevez le pied DROIT sans toucher l'autre jambe. Le chronomètre démarre au lever du pied et s'arrête au retour d'appui, à une compensation ou après 30 s.",
@@ -35,7 +35,7 @@ let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=n
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
 let videoFocus=false,videoLive=false;
 const q=id=>host?.querySelector("#"+id);
-const SHORT_TEST_NAMES={sts:"Chaise",heels:"Mollets",unipodal_left:"Équilibre G.",unipodal_right:"Équilibre D.",arms:"Bras",posture:"Posture"};
+const SHORT_TEST_NAMES={sts:"Chaise",two_step:"Two-Step",unipodal_left:"Équilibre G.",unipodal_right:"Équilibre D.",arms:"Bras",posture:"Posture"};
 function updateCameraLinkState(){
  const badge=q("mocCameraState");if(!badge)return;
  const video=q("mopvVideo");
@@ -517,9 +517,16 @@ function renderStep(){
  const running=room.progress?.step_status==="running";
  const safety=idx===0&&!room.progress?.safety_confirmed;
  autoValue=null;manualEdited=false;
- poseTracker?.setTest(t.id,room.progress?.test_started_at,running,
+ if(t.id==="two_step")poseTracker?.stopMeasurement();
+ else poseTracker?.setTest(t.id,room.progress?.test_started_at,running,
   Number(room.progress?.test_duration_seconds)||t.duration);
- const input=t.id==="posture"?
+ const input=t.id==="two_step"?
+  '<div class="moc-two-step-fields"><p class="moc-help">Saisie opérateur · deux essais, meilleure distance retenue. Indice = distance / taille.</p>'+
+  '<label class="moc-field">Essai 1 · distance (cm)<input id="mocTwoStep1" type="number" min="1" max="650" step="0.1" inputmode="decimal" placeholder="ex. 240"></label>'+
+  '<label class="moc-field">Essai 2 · distance (cm)<input id="mocTwoStep2" type="number" min="1" max="650" step="0.1" inputmode="decimal" placeholder="ex. 252"></label>'+
+  '<label class="moc-field">Taille (cm) · facultative<input id="mocTwoStepHeight" type="number" min="100" max="230" step="0.1" inputmode="decimal" placeholder="ex. 175"></label>'+
+  '<p id="mocTwoStepComputed" class="moc-status">Renseignez les deux distances ; la meilleure sera retenue.</p></div>'
+  :t.id==="posture"?
   '<label class="moc-field">Observation (sans mesure radiographique)<select id="mocObservation">'+
   '<option value="">Choisir une observation</option><option value="neutral">Alignement apparent neutre</option>'+
   '<option value="apparent_offset">Décalage sagittal apparent</option><option value="not_interpretable">Image non interprétable</option></select></label>'
@@ -528,19 +535,34 @@ function renderStep(){
  '<details class="moc-instructions" '+(!running?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div></details>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
- (running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>CHRONOMÈTRE</span><strong id="mocClock" aria-live="off">'+(t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
+ (running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
  (t.type==="balance"?'<div class="moc-rep-figure moc-balance-figure"><span>TEMPS MAINTENU</span><strong id="mocLiveBalance" aria-live="off">—</strong><small id="mocBalanceState">EN ATTENTE DU PIED LEVÉ</small></div>':'')+
  (t.type==="count"?'<div class="moc-rep-figure"><span>'+ (t.id==="sts"?"LEVERS EN DIRECT":"RÉPÉTITIONS EN DIRECT")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong><small>Estimation vidéo · à confirmer</small></div>':'')+
  (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">'+(isBalance(t)?"Arrêter l’essai":"Arrêter")+'</button><button type="button" class="moc-button secondary" id="mocRestartClock">'+(isBalance(t)?"↻ Refaire l’essai":"↻ Repartir de "+t.duration+" s")+'</button></div>':'')+'</div></div>'+input+
  (isBalance(t)?'<p class="moc-balance-reference">Yeux ouverts · 30 s maximum · durée réelle depuis le pied levé · 10 s = repère descriptif, non diagnostique. Arrêter en cas de perte d’équilibre ou de recours à un appui.</p>':'')+
- '<div class="moc-auto-feedback" id="mocAutoFeedback">◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.</div>'+
+ '<div class="moc-auto-feedback" id="mocAutoFeedback">'+(t.id==="two_step"?"Deux distances mesurées manuellement ; la caméra ne détermine pas cette valeur.":"◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.")+'</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
  '<div class="moc-buttons"><button type="button" id="mocSave" class="moc-button primary">Valider et passer au suivant</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>'
- :'<div class="moc-buttons"><button type="button" id="mocStart" class="moc-button primary">'+(isBalance(t)?"Armer le suivi · départ automatique":t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button>'+
+ :'<div class="moc-buttons"><button type="button" id="mocStart" class="moc-button primary">'+(isBalance(t)?"Armer le suivi · départ automatique":t.id==="two_step"?"Commencer la saisie des deux essais":t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>')+
  '<p id="mocStatus" class="moc-status" role="status" aria-live="polite"></p></section>';
  if(q("mocValue"))q("mocValue").addEventListener("input",()=>{manualEdited=true});
+ if(t.id==="two_step"){
+  const update=()=>{
+   manualEdited=true;
+   const a=Number(q("mocTwoStep1")?.value),b=Number(q("mocTwoStep2")?.value);
+   const height=Number(q("mocTwoStepHeight")?.value);
+   const valid=(v)=>Number.isFinite(v)&&v>0&&v<=650;
+   const best=valid(a)&&valid(b)?Math.max(a,b):null;
+   const note=q("mocTwoStepComputed");
+   if(note)note.textContent=best===null?"Renseignez deux essais valides (1–650 cm).":
+    "Meilleure distance : "+best.toLocaleString("fr-FR")+" cm"+
+    (q("mocTwoStepHeight")?.value&&height>=100&&height<=230?
+     " · Indice Two-Step : "+(best/height).toFixed(2).replace(".",","):" · Taille non renseignée : indice non calculé");
+  };
+  ["mocTwoStep1","mocTwoStep2","mocTwoStepHeight"].forEach(id=>q(id)?.addEventListener("input",update));
+ }
  if(q("mocStart"))q("mocStart").onclick=()=>startWithCountdown("start");
  if(q("mocSave"))q("mocSave").onclick=()=>submit("save");
  if(q("mocSkip"))q("mocSkip").onclick=()=>submit("skip");
@@ -571,6 +593,7 @@ function updatePosePanel(reading){
  if(indicator)indicator.textContent=ready?"● Corps détecté · "+message:
   (!videoLive?"○ Image indisponible · active la caméra sur l’iPhone et vérifie le flux.":"◌ Ajuste le cadrage · "+message);
  const t=currentTest(),running=room?.progress?.step_status==="running";
+ if(t?.id==="two_step"){if(feedback)feedback.textContent="Two-Step Test : mesure manuelle des deux essais, sans estimation par caméra.";return}
  if(!running||!feedback)return;
  const detected=reading?.measurement;
  // The actual optical counter is updated on every pose result (~160 ms).
@@ -661,6 +684,9 @@ async function startWithCountdown(action="start"){
   setStatus("Vérifiez et confirmez les conditions de sécurité avant de lancer le premier test.");
   return;
  }
+ if(currentTest()?.id==="two_step"){
+  await submit(action);return;
+ }
  const latest=poseTracker?.getLatest();
  if(!latest?.valid){
   setStatus(isBalance(currentTest())?
@@ -723,7 +749,19 @@ async function submit(event){
  if(event==="save"){
   const note=q("mocNote")?.value||"";
   payload.note=note;
-  if(t.id==="posture"){
+  if(t.id==="two_step"){
+   const rawA=q("mocTwoStep1")?.value,rawB=q("mocTwoStep2")?.value,rawH=q("mocTwoStepHeight")?.value;
+   const a=Number(rawA),b=Number(rawB),height=rawH?Number(rawH):null;
+   const valid=v=>Number.isFinite(v)&&v>=1&&v<=650&&Math.round(v*10)===v*10;
+   if(!rawA||!rawB||!valid(a)||!valid(b)||
+     (height!==null&&(!Number.isFinite(height)||height<100||height>230||Math.round(height*10)!==height*10))){
+    setStatus("Saisissez les distances des deux essais (cm) et, si connue, une taille valide.");return;
+   }
+   payload.value=Math.max(a,b);
+   payload.attempts_cm=[a,b];
+   if(height!==null)payload.height_cm=height;
+   payload.measurement_source="operator_manual_observation";
+  }else if(t.id==="posture"){
    payload.observation=q("mocObservation")?.value||"";
    if(!payload.observation){setStatus("Choisissez une observation pour ce test.");return}
   }else{
