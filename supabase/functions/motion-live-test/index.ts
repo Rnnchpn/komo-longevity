@@ -251,36 +251,135 @@ Deno.serve(async(req:Request)=>{
   return error||!data?response(req,{error:"claim_conflict"},409):
    response(req,{ok:true,id,patient_id:patientId});
  }
+ // ONE desktop-created physical consultation. This room is already bound to an
+ // Operator-owned synthetic patient + authorised operator session BEFORE the iPhone
+ // starts. No QR code and no additional video room: the iPhone joins this room.
+ if(action==="operator_consultation_prepare"){
+  const patientId=s(b.patient_id,50),opId=s(b.operator_session_id,50);
+  if(!uuid(patientId)||!uuid(opId))return response(req,{error:"invalid_identifiers"},422);
+  const [{data:patient},{data:op},{data:pending,error:pendingError}]=await Promise.all([
+   db.from("patients").select("id,organization_id,status,data_classification")
+    .eq("id",patientId).eq("organization_id",ORG_ID).maybeSingle(),
+   db.from("pulse_operator_sessions").select("id,organization_id,patient_id,operator_user_id,status")
+    .eq("id",opId).eq("organization_id",ORG_ID).maybeSingle(),
+   db.from("pulse_motion_live_sessions").select("id,status,patient_id,operator_session_id,progress,display_code,expires_at")
+    .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+    .in("status",["waiting","ready","active"]).gte("expires_at",now())
+    .order("created_at",{ascending:false}).limit(10)
+  ]);
+  if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic")
+   return response(req,{error:"synthetic_patient_required"},403);
+  if(!op||op.patient_id!==patientId||op.operator_user_id!==actor.id||
+   !["draft","running","paused"].includes(op.status))
+   return response(req,{error:"operator_session_mismatch"},403);
+  if(pendingError)return response(req,{error:"temporarily_unavailable"},503);
+  // Idempotency: reopening the same prepared consultation is safe.
+  const rooms=pending||[];
+  if(rooms.length){
+   const same=rooms.find(x=>x.progress?.kind==="physical_consultation"&&
+    x.patient_id===patientId&&x.operator_session_id===opId);
+   if(same&&rooms.length===1)return response(req,{ok:true,reused:true,
+    session_id:same.id,display_code:same.display_code,status:same.status});
+   return response(req,{error:"consultation_already_pending"},409);
+  }
+  const token=randomToken();
+  const code=String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0");
+  const {data:created,error}=await db.from("pulse_motion_live_sessions").insert({
+   organization_id:ORG_ID,operator_user_id:actor.id,patient_id:patientId,operator_session_id:opId,
+   guest_token_hash:await hash(token),display_code:code,
+   status:"waiting",stage_code:STEPS[0],step_index:0,
+   progress:{kind:"physical_consultation",camera_owner:"operator",camera_state:"awaiting_phone",
+    step_status:"pending",results:{},safety_confirmed:false},
+   expires_at:new Date(Date.now()+4*3600000).toISOString()
+  }).select("id,status,display_code").single();
+  if(error||!created)return response(req,{error:"consultation_creation_failed"},503);
+  return response(req,{ok:true,session_id:created.id,display_code:created.display_code,status:created.status});
+ }
+ // Explicit fresh-start action for the current Operator's test-only unfinished
+ // consultations. Completed reports remain untouched. No other owner's rooms
+ // or real patient data can be affected.
+ if(action==="operator_reset_demo_sessions"){
+  const {data:rooms,error:listError}=await db.from("pulse_motion_live_sessions")
+   .select("id,patient_id,operator_session_id")
+   .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+   .in("status",["waiting","ready","active","closed"]).limit(100);
+  if(listError)return response(req,{error:"reset_unavailable"},503);
+  const patientIds=[...new Set((rooms||[]).map(x=>x.patient_id).filter(Boolean))];
+  if(patientIds.length){
+   const {data:patients,error:patientError}=await db.from("patients")
+    .select("id,data_classification").in("id",patientIds);
+   if(patientError||!patients||patients.length!==patientIds.length||
+    patients.some(p=>p.data_classification!=="synthetic"))
+    return response(req,{error:"synthetic_patient_required"},403);
+  }
+  const ids=(rooms||[]).map(x=>x.id);
+  if(ids.length){
+   const {error:deleteError}=await db.from("pulse_motion_live_sessions").delete()
+    .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+    .in("id",ids);
+   if(deleteError)return response(req,{error:"reset_delete_failed"},503);
+  }
+  const opIds=[...new Set((rooms||[]).map(x=>x.operator_session_id).filter(Boolean))];
+  if(opIds.length)await db.from("pulse_operator_sessions").update({status:"cancelled",updated_at:now()})
+   .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+   .in("id",opIds).in("status",["draft","running","paused"]);
+  return response(req,{ok:true,removed:ids.length,completed_preserved:true});
+ }
  // Physical consultation: the clinician's OWN iPhone acts as a dedicated camera.
  // A valid Operator JWT is required even to create the room. Only fictional patients
  // can subsequently be linked in this test-only environment.
  if(action==="operator_camera_start"){
-  const {count,error:countError}=await db.from("pulse_motion_live_sessions").select("id",{head:true,count:"exact"})
-   .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id).in("status",["ready","active"])
-   .contains("progress",{camera_owner:"operator"}).gte("expires_at",now());
-  if(countError)return response(req,{error:"temporarily_unavailable"},503);
-  if((count||0)>=6)return response(req,{error:"too_many_active_cameras"},429);
+  // Join the one room prepared by this Operator from their computer.
+  // Never create standalone iPhone rooms: that caused accumulating sessions.
+  const {data:rows,error:readError}=await db.from("pulse_motion_live_sessions")
+   .select("*").eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+   .in("status",["waiting","active"]).gte("expires_at",now())
+   .contains("progress",{kind:"physical_consultation"})
+   .order("created_at",{ascending:false}).limit(3);
+  if(readError)return response(req,{error:"temporarily_unavailable"},503);
+  if(!rows?.length)return response(req,{error:"consultation_not_prepared"},409);
+  if(rows.length!==1)return response(req,{error:"multiple_pending_consultations"},409);
+  const room=rows[0];
+  if(!room.patient_id||!room.operator_session_id)return response(req,{error:"consultation_unbound"},409);
+  if(room.status==="active"&&room.progress?.camera_state==="online"&&
+   room.patient_last_seen_at&&Date.now()-new Date(room.patient_last_seen_at).getTime()<18000)
+   return response(req,{error:"camera_already_connected"},409);
   const guestToken=randomToken();
-  const displayCode=String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0");
-  const {data,error}=await db.from("pulse_motion_live_sessions").insert({
-   organization_id:ORG_ID,guest_token_hash:await hash(guestToken),display_code:displayCode,
-   operator_user_id:actor.id,status:"ready",stage_code:STEPS[0],step_index:0,
-   progress:{step_status:"pending",results:{},camera_owner:"operator"},
-   patient_last_seen_at:now()
-  }).select("id,display_code,status,expires_at,stage_code,step_index,progress").single();
-  if(error)return response(req,{error:"camera_creation_failed"},503);
-  return response(req,{ok:true,...data,guest_token:guestToken,steps:STEPS});
+  const progress={...room.progress,camera_owner:"operator",camera_state:"online",
+   camera_started_at:now()};
+  const {data,error}=await db.from("pulse_motion_live_sessions")
+   .update({guest_token_hash:await hash(guestToken),status:"active",
+    progress,patient_last_seen_at:now(),updated_at:now()})
+   .eq("id",room.id).eq("operator_user_id",actor.id)
+   .eq("updated_at",room.updated_at).select("*").maybeSingle();
+  if(error||!data)return response(req,{error:"camera_pairing_retry"},409);
+  await db.from("pulse_motion_live_signals").delete().eq("session_id",room.id);
+  return response(req,{ok:true,...publicRow(data),expires_at:data.expires_at,
+   guest_token:guestToken,steps:STEPS,paired_automatically:true});
  }
  if(action==="operator_camera_stop"){
   const id=s(b.session_id,50);
   if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const {data:room}=await db.from("pulse_motion_live_sessions").select("*")
+   .eq("id",id).eq("organization_id",ORG_ID)
+   .eq("operator_user_id",actor.id).maybeSingle();
+  if(!room)return response(req,{error:"session_not_found"},404);
+  if(room.status==="completed")return response(req,{ok:true,already_completed:true});
+  if(!["ready","active"].includes(room.status))return response(req,{error:"room_unavailable"},409);
+  const isPrepared=room.progress?.kind==="physical_consultation";
+  const nextProgress=isPrepared?{...room.progress,camera_state:"offline",
+   camera_stopped_at:now()}:room.progress;
   const {data,error}=await db.from("pulse_motion_live_sessions").update({
-   status:"closed",completed_at:now(),updated_at:now()
+   ...(isPrepared?{
+    // Stop only the video, never discard tests/questionnaire when iPhone closes.
+    guest_token_hash:await hash(randomToken()),progress:nextProgress
+   }:{status:"closed",completed_at:now()}),
+   updated_at:now()
   }).eq("id",id).eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
    .in("status",["ready","active"]).select("id").maybeSingle();
   if(error||!data)return response(req,{error:"camera_close_failed"},409);
   await db.from("pulse_motion_live_signals").delete().eq("session_id",id);
-  return response(req,{ok:true});
+  return response(req,{ok:true,consultation_preserved:isPrepared});
  }
  if(action==="operator_signal_pull"||action==="operator_signal_push"){
   const id=s(b.session_id,50);
