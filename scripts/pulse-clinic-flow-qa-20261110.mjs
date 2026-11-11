@@ -26,7 +26,9 @@ assert.ok(consult.includes('mocTabQuestionnaire')&&consult.includes('mocTabRepor
 assert.ok(consult.includes('operator_questionnaire_save')&&edge.includes('operator_questionnaire_save'));
 assert.ok(edge.includes('room.operator_user_id!==actor.id')&&edge.includes('synthetic_patient_required'));
 assert.ok(edge.includes('questionnaire_conflict_retry')&&edge.includes('unknown_question'));
-assert.ok(edge.includes('["active","completed"].includes(room.status)'));
+assert.ok(edge.includes('["waiting","ready","active","completed"].includes(room.status)'));
+assert.ok(edge.includes('questionnaire_stale_snapshot'));
+assert.ok(consult.includes('Object.assign(questionnaireAnswers,serverAnswers)'));
 assert.ok(consult.includes('room.status==="completed"')&&consult.includes('downloadClinicReport'));
 assert.ok(css.includes('moc-question-choices')&&css.includes('moc-mode-tab'));
 const commands={
