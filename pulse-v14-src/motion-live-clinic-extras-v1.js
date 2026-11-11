@@ -14,49 +14,69 @@ export function questionnaireState(answers={}){
  return {progress:intakeProgress(answers),score:scoreIntake(answers)};
 }
 export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNext,onPrevious,onComplete,onTests,onSave}={}){
- const index=Math.max(0,Math.min(INTAKE_GROUPS.length-1,Number(page)||0));
- const group=INTAKE_GROUPS[index];
+ // A single clearly numbered form: all 22 items must remain discoverable.
  const progress=intakeProgress(answers);
- root.innerHTML='<section class="moc-test moc-questionnaire">'+
-  '<div class="moc-question-head"><span class="moc-kicker">QUESTIONNAIRES KŌMØ · '+(index+1)+' / '+INTAKE_GROUPS.length+'</span>'+
-  '<span id="mocIntakeProgress">'+progress.completed+' / '+progress.total+' réponses</span></div>'+
-  '<h3>'+esc(group.title)+'</h3><p class="moc-help">'+esc(group.subtitle)+'</p>'+
-  '<div class="moc-question-list">'+group.questions.map((question,n)=>{
-   const options=question.options.map((item,i)=>{
+ let index=0;
+ const sections=INTAKE_GROUPS.map(group=>{
+  const questions=group.questions.map(question=>{
+   index+=1;
+   const choices=question.options.map((item,i)=>{
     const value=Array.isArray(item)?item[0]:String(i);
     const label=Array.isArray(item)?item[1]:item;
-    const checked=String(answers[question.id]??'')===String(value)?' checked':'';
-    return '<label class="moc-question-choice"><input type="radio" name="'+esc(question.id)+'" value="'+esc(value)+'"'+checked+'><span>'+esc(label)+'</span></label>';
+    return '<label class="moc-question-choice"><input type="radio" name="'+esc(question.id)+
+     '" value="'+esc(value)+'"'+(String(answers[question.id]??'')===String(value)?' checked':'')+
+     '><span>'+esc(label)+'</span></label>';
    }).join('');
-   return '<fieldset class="moc-question"><legend>'+(n+1)+'. '+esc(question.label)+'</legend><div class="moc-question-choices">'+options+'</div></fieldset>';
-  }).join('')+'</div><p class="moc-help">'+esc(group.note)+'</p>'+
-  '<p id="mocIntakeState" class="moc-status" role="status" aria-live="polite">Les modifications sont sauvegardées sur le serveur. Vérifiez la confirmation avant de quitter.</p>'+
-  '<div class="moc-buttons"><button type="button" id="mocIntakeSave" class="moc-button secondary">✓ Enregistrer les réponses</button>'+
-  '<button type="button" id="mocIntakePrev" class="moc-button secondary">'+(index?'← Précédent':'← Tests')+'</button>'+
-  '<button type="button" id="mocIntakeNext" class="moc-button primary">'+(index===INTAKE_GROUPS.length-1?'Enregistrer et voir le rapport →':'Enregistrer et continuer →')+'</button></div>'+
-  '</section>';
- for(const question of group.questions){
-  for(const input of root.querySelectorAll('input[name="'+question.id+'"]')){
+   return '<fieldset class="moc-question" id="mocQuestion-'+esc(question.id)+'"><legend>'+
+    String(index).padStart(2,'0')+'. '+esc(question.label)+'</legend>'+
+    '<div class="moc-question-choices">'+choices+'</div></fieldset>';
+  }).join('');
+  return '<section class="moc-question-group" id="mocGroup-'+esc(group.id)+'">'+
+   '<h4>'+esc(group.title)+'</h4><p class="moc-help">'+esc(group.subtitle)+'</p>'+
+   '<div class="moc-question-list">'+questions+'</div>'+
+   '<p class="moc-help">'+esc(group.note)+'</p></section>';
+ }).join('');
+ root.innerHTML='<section class="moc-test moc-questionnaire moc-questionnaire-all">'+
+  '<div class="moc-question-head"><span class="moc-kicker">QUESTIONNAIRE KŌMØ · 22 QUESTIONS SUR UNE PAGE</span>'+
+  '<strong id="mocIntakeProgress">'+progress.completed+' / '+QUESTION_COUNT+' réponses</strong></div>'+
+  '<h3>Vos 22 réponses</h3><p class="moc-help">Les cinq catégories sont accessibles ci-dessous. Répondez à chaque item puis vérifiez l’enregistrement avant l’export PDF.</p>'+
+  '<nav class="moc-question-jumps" aria-label="Accéder à une catégorie">'+
+   INTAKE_GROUPS.map((g,i)=>'<a href="#mocGroup-'+esc(g.id)+'" data-group="'+esc(g.id)+'">'+
+    (i+1)+'. '+esc(g.title)+'</a>').join('')+'</nav>'+
+  sections+
+  '<p id="mocIntakeState" class="moc-status" role="status" aria-live="polite">Les réponses se sauvegardent automatiquement. Attendez la confirmation du serveur.</p>'+
+  '<div class="moc-buttons moc-questionnaire-actions">'+
+  '<button type="button" id="mocIntakeSave" class="moc-button secondary">Enregistrer les réponses</button>'+
+  '<button type="button" id="mocIntakePrev" class="moc-button secondary">Retour aux tests</button>'+
+  '<button type="button" id="mocIntakeNext" class="moc-button primary">Enregistrer et voir le rapport →</button>'+
+  '</div></section>';
+ for(const group of INTAKE_GROUPS)for(const question of group.questions){
+  root.querySelectorAll('input[name="'+question.id+'"]').forEach(input=>{
    input.onchange=()=>{
     if(!validAnswer(question,input.value))return;
     answers[question.id]=input.value;
     root.querySelector('#mocIntakeProgress').textContent=
      intakeProgress(answers).completed+' / '+QUESTION_COUNT+' réponses';
-    const note=root.querySelector('#mocIntakeState');if(note)note.textContent='Enregistrement des réponses…';
+    const note=root.querySelector('#mocIntakeState');
+    if(note)note.textContent='Enregistrement sur le serveur…';
     onChange?.(answers);
    };
-  }
+  });
  }
- root.querySelector('#mocIntakePrev').onclick=()=>index===0?onTests?.():onPrevious?.();
+ root.querySelectorAll('.moc-question-jumps a').forEach(link=>{
+  link.onclick=event=>{
+   event.preventDefault();
+   const target=root.querySelector('#mocGroup-'+link.dataset.group);
+   target?.scrollIntoView({behavior:'smooth',block:'start'});
+  };
+ });
+ root.querySelector('#mocIntakePrev').onclick=()=>onTests?.();
  root.querySelector('#mocIntakeSave').onclick=()=>onSave?.();
- root.querySelector('#mocIntakeNext').onclick=()=>{
-  if(index===INTAKE_GROUPS.length-1)onComplete?.();
-  else onNext?.();
- };
+ root.querySelector('#mocIntakeNext').onclick=()=>onComplete?.();
 }
 export function clinicReportSummary(answers={},results={}){
  const {progress,score}=questionnaireState(answers);
- const ids=['sts','heels','unipodal_left','unipodal_right','arms','posture'];
+ const ids=['sts',results.two_step?'two_step':'heels','unipodal_left','unipodal_right','arms','posture'];
  const done=ids.filter(id=>results[id]?.status==='done').length;
  const skipped=ids.filter(id=>results[id]?.status==='skipped').length;
  return {answered:progress.completed,total:progress.total,complete:score.complete,profileIndex:score.profileIndex,
