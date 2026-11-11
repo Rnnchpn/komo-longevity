@@ -39,7 +39,7 @@ function loadStyles(){
  if(document.getElementById("mopvStyle"))return;
  const link=document.createElement("link");
  link.id="mopvStyle";link.rel="stylesheet";
- link.href="./motion-live-operator-video-v1.css?v=20261110-visible-video-v1";
+ link.href="./motion-live-operator-video-v1.css?v=20261111-clean-screen-v1";
  document.head.append(link);
 }
 function releaseConnection(notify){
