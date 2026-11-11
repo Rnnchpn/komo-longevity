@@ -104,9 +104,13 @@ export async function downloadClinicPassport(report,category='all'){
   page(1,'Synthese & diagramme','Les resultats sont presentes sans score clinique invente.');
   metric(M,67,54,'Tests realises',report.measured+'/6');
   metric(M+62,67,54,'Questionnaire',report.questionnaire.answered+'/22');
-  metric(M+124,67,54,'Programme','6 semaines');
+  metric(M+124,67,54,'Indice declare',report.questionnaire.complete?
+   fmt(report.questionnaire.index)+'/100':'Incomplet');
   box(M,102,112,120,P.sand,3);drawRadar(M+4,110);
-  txt('INDICES EXPLORATOIRES',M+7,213,{sz:7,bold:true,col:P.muted});
+  txt('POINTS DE GENE : '+(report.questionnaire.complete?
+   fmt(report.questionnaire.rawPoints)+' / '+fmt(report.questionnaire.maxPoints):'INCOMPLET'),
+   M+7,212,{sz:7,bold:true,col:P.muted});
+  txt('20 ITEMS COTES / NON VALIDE',M+7,219,{sz:6.7,col:P.muted});
   txt('MESURES OBSERVEES',M+120,109,{sz:8,bold:true,col:P.gold});
   report.measures.forEach((m,i)=>{
    const yy=120+i*16.3;
@@ -215,10 +219,15 @@ export async function downloadClinicPassport(report,category='all'){
    page(6,part===1?'Questionnaire : autonomie':'Questionnaire : habitudes',
     'Reponses exactes enregistrees. '+report.questionnaire.answered+' / '+report.questionnaire.total+
     ' · '+(report.simulated?'Reponses fictives pour demonstration.':'Profil auto-declare exploratoire.'));
-   let y=69,serial=part===1?0:10;
+   txt(report.questionnaire.complete?
+    'TOTAL : '+fmt(report.questionnaire.rawPoints)+'/'+fmt(report.questionnaire.maxPoints)+
+    ' pts de difficulte | Indice pondere : '+fmt(report.questionnaire.index)+'/100':
+    'QUESTIONNAIRE INCOMPLET : aucun score global calcule.',M,65,{sz:7.8,bold:true,col:P.dark});
+   let y=76,serial=part===1?0:10;
    for(const g of subset){
     txt(g.label.toUpperCase(),M,y,{sz:10,bold:true,col:P.gold});
-    if(Number.isFinite(g.score))txt(fmt(g.score)+' / 100',R,y,
+    if(Number.isFinite(g.score))txt(fmt(g.points)+'/'+fmt(g.maxPoints)+
+      ' pts  |  '+fmt(g.score)+'/100',R,y,
       {sz:8,bold:true,align:'right',col:P.gold});
     y+=8;
     for(const item of g.items){
@@ -231,9 +240,13 @@ export async function downloadClinicPassport(report,category='all'){
      }
      txt(String(serial).padStart(2,'0'),M,y,{sz:8,bold:true,col:P.gold});
      const afterQuestion=words(item.question,M+11,y,C-13,{sz:8.4,lh:4.0,max:2});
-     const afterAnswer=words(item.answer,M+11,afterQuestion+0.2,C-13,
+     const answerY=afterQuestion+0.2;
+     const afterAnswer=words(item.answer,M+11,answerY,C-43,
       {sz:8.2,lh:3.8,max:2,bold:true,
        col:item.answer==='Non renseigné'?P.muted:P.dark});
+     txt(item.maxPoints===null?'Contexte':item.points===null?
+       '- / 4 pts':fmt(item.points)+' / 4 pts',R,answerY,
+      {sz:7.8,bold:true,align:'right',col:P.gold});
      y=afterAnswer+3.1;
      line(M+11,y-1,R,y-1,P.line,.22);
      y+=3.3;
@@ -242,8 +255,8 @@ export async function downloadClinicPassport(report,category='all'){
    }
    if(part===2&&y<252){
     txt('METHODE ET LIMITES',M,y+3,{sz:8,bold:true,col:P.gold});
-    words('Mesures exploratoires validees par l operateur ; questionnaire non diagnostique. Aucun age biologique deduit.',
-     M,y+10,C,{sz:7.2,lh:3.3,max:2,col:P.muted});
+    words('20 items notes 0 (favorable) a 4 (limitation maximale), 2 reponses de contexte non notees. Indice pondere sur 100 : plus haut = moins de limitations declarees. Barème proprietaire non valide ; aucun diagnostic.',
+     M,y+10,C,{sz:7.2,lh:3.3,max:4,col:P.muted});
    }
   };
   printGroups(groups.slice(0,2),1);
