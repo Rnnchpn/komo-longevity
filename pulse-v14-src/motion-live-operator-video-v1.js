@@ -1,7 +1,7 @@
 // Operator-side, test-only live camera monitor. No recording, snapshots or audio.
 const RTC={iceServers:[{urls:"stun:stun.cloudflare.com:3478"}]};
 let pane=null,pc=null,pollTimer=null,signal=null,roomId="",connectionId="",cursor=0;
-let startedAt=0,polling=false,answering=false;
+let startedAt=0,polling=false,answering=false,videoNotified=false,remoteTrack=null;
 const get=id=>pane?.querySelector("#"+id);
 function status(message){
  const node=get("mopvStatus");if(node)node.textContent=message;
@@ -9,11 +9,31 @@ function status(message){
 function videoReady(video){
  return !!video&&video.videoWidth>0&&video.videoHeight>0&&video.readyState>=2;
 }
+function showStreamState(live){
+ if(!pane)return;
+ pane.dataset.streamState=live?"live":"waiting";
+ const placeholder=get("mopvPlaceholder");
+ if(placeholder)placeholder.hidden=live;
+ const badge=get("mopvLiveDot");
+ if(badge)badge.textContent=live?"● VIDÉO EN DIRECT":"○ EN ATTENTE DE L’IMAGE";
+ const video=get("mopvVideo");
+ if(video&&!video.srcObject)video.hidden=true;
+}
 function refreshVideoStatus(){
  const video=get("mopvVideo");
- if(pc?.connectionState!=="connected")return;
- if(videoReady(video))status("DIRECT · Image de ton iPhone affichée");
- else status("Liaison établie · attente des images de l’iPhone. Garder sa caméra ouverte.");
+ if(!videoReady(video)){
+  showStreamState(false);
+  if(pc?.connectionState==="connected")
+   status("iPhone relié, mais aucune image reçue. Vérifie la caméra, l’autorisation et l’écran actif sur l’iPhone.");
+  return;
+ }
+ showStreamState(true);
+ if(!videoNotified){
+  videoNotified=true;
+  window.dispatchEvent(new CustomEvent("pulse:remote-video-ready",{detail:{video,sessionId:roomId}}));
+ }
+ status(pc?.connectionState==="connected"?"● DIRECT · Image de ton iPhone affichée":
+  "Image reçue · finalisation de la liaison vidéo…");
 }
 function loadStyles(){
  if(document.getElementById("mopvStyle"))return;
@@ -26,11 +46,13 @@ function releaseConnection(notify){
  const prev=connectionId;
  clearInterval(pollTimer);pollTimer=null;
  if(pc){pc.ontrack=null;pc.onconnectionstatechange=null;pc.close();pc=null}
+ if(remoteTrack){remoteTrack.onmute=null;remoteTrack.onunmute=null;remoteTrack.onended=null;remoteTrack=null}
+ videoNotified=false;
  const video=get("mopvVideo");
- if(video){video.onloadeddata=null;video.onplaying=null}
+ if(video){video.onloadeddata=null;video.onplaying=null;video.onloadedmetadata=null}
  if(video?.srcObject)window.dispatchEvent(new CustomEvent("pulse:remote-video-stopped",{detail:{sessionId:roomId}}));
  if(video){video.srcObject=null;video.hidden=true}
- get("mopvPlaceholder")?.removeAttribute("hidden");
+ showStreamState(false);
  connectionId="";cursor=0;answering=false;polling=false;
  if(notify&&prev&&signal&&roomId){
   signal({action:"operator_signal_push",session_id:roomId,connection_id:prev,kind:"stop"}).catch(()=>{});
@@ -94,16 +116,35 @@ async function watch(){
   const p=new RTCPeerConnection(RTC);pc=p;
   p.ontrack=event=>{
    if(pc!==p)return;
-   const video=get("mopvVideo"),placeholder=get("mopvPlaceholder");
+   const video=get("mopvVideo");
    if(!video)return;
+   videoNotified=false;
+   remoteTrack=event.track;
+   remoteTrack.onmute=()=>{
+    if(pc!==p)return;
+    videoNotified=false;
+    showStreamState(false);
+    window.dispatchEvent(new CustomEvent("pulse:remote-video-stopped",{detail:{sessionId:roomId}}));
+    status("Caméra interrompue sur l’iPhone. Vérifie son écran et relance le partage si nécessaire.");
+   };
+   remoteTrack.onunmute=()=>{if(pc===p)refreshVideoStatus()};
+   remoteTrack.onended=()=>{
+    if(pc!==p)return;
+    videoNotified=false;
+    showStreamState(false);
+    window.dispatchEvent(new CustomEvent("pulse:remote-video-stopped",{detail:{sessionId:roomId}}));
+    status("La caméra iPhone est arrêtée. Active-la à nouveau depuis le téléphone.");
+   };
    video.srcObject=event.streams[0]||new MediaStream([event.track]);
    video.hidden=false;
+   showStreamState(false);
+   video.onloadedmetadata=refreshVideoStatus;
    video.onloadeddata=refreshVideoStatus;
    video.onplaying=refreshVideoStatus;
-   if(placeholder)placeholder.hidden=true;
-   // Pose detection uses the actual WebRTC video element (no new camera request).
-   window.dispatchEvent(new CustomEvent("pulse:remote-video-ready",{detail:{video,sessionId:roomId}}));
-   video.play().then(refreshVideoStatus).catch(()=>status("Lecture vidéo bloquée : cliquez sur l’image pour la démarrer."));
+   // Actual pose processing only starts AFTER the first decodable video frame,
+   // never on the existence of a video track alone.
+   video.play().then(refreshVideoStatus).catch(()=>
+    status("Lecture bloquée par le navigateur. Clique sur « Démarrer la vidéo » dans l’encart."));
   };
   p.onconnectionstatechange=()=>{
    if(pc!==p)return;
@@ -115,8 +156,10 @@ async function watch(){
       status("Liaison connectée sans image. Vérifie que la caméra iPhone est active, puis clique « Reconnecter ».");
     },4500);
    }else if(p.connectionState==="failed"||p.connectionState==="disconnected"){
+    videoNotified=false;
+    showStreamState(false);
     window.dispatchEvent(new CustomEvent("pulse:remote-video-stopped",{detail:{sessionId:roomId}}));
-    status("Flux interrompu. Vérifiez le Wi-Fi et appuyez sur Reconnecter.");
+    status("Flux interrompu. Vérifie que l’iPhone partage toujours sa caméra, puis clique sur Reconnecter.");
    }
   };
   status("Demande envoyée à ton iPhone · active sa caméra depuis /camera/.");
@@ -129,7 +172,7 @@ async function watch(){
 function makePane(containerId){
  loadStyles();
  pane=document.createElement("section");
- pane.id="mopvWindow";pane.className="mopv-window";
+ pane.id="mopvWindow";pane.className="mopv-window";pane.dataset.streamState="waiting";
  pane.setAttribute("role","region");pane.setAttribute("aria-label","Caméra Motion connectée");
  pane.innerHTML=[
   '<div class="mopv-head"><div><small>KŌMØ PULSE · CONSULTATION PHYSIQUE</small><strong>Mon iPhone · caméra du cabinet</strong></div>',
@@ -137,8 +180,9 @@ function makePane(containerId){
   '<button type="button" id="mopvClose" aria-label="Fermer le flux vidéo">Fermer ×</button></div></div>',
   '<div class="mopv-screen"><video autoplay muted playsinline id="mopvVideo" hidden></video>',
   '<div id="mopvPlaceholder" class="mopv-placeholder"><div class="mopv-symbol">◉</div>',
-  '<strong>En attente de mon iPhone</strong><p>Sur ton iPhone, ouvre /camera/, connecte-toi en Operator et active le partage.</p></div>',
-  '<span class="mopv-live-dot">CAMÉRA LIVE · SANS ENREGISTREMENT</span></div>',
+  '<strong>En attente de la caméra</strong><p>Sur ton iPhone : ouvre <b>pulse.komolongevity.com/camera/</b>, connecte-toi et clique sur <b>Activer la caméra</b>. Garde Safari ouvert.</p>',
+  '<button type="button" id="mopvPlay" class="mopv-play">Démarrer la vidéo</button></div>',
+  '<span id="mopvLiveDot" class="mopv-live-dot">○ EN ATTENTE DE L’IMAGE</span></div>',
   '<div class="mopv-controls"><p id="mopvStatus" role="status" aria-live="polite">Initialisation…</p>',
   '<button type="button" id="mopvRetry">Reconnecter</button></div>',
   '<p class="mopv-hint">Vous pilotez les tests depuis cet ordinateur. Changez de caméra avant/arrière sur le téléphone.</p>'
@@ -148,13 +192,18 @@ function makePane(containerId){
  pane.classList.toggle("embedded",!!target);
  get("mopvClose").onclick=close;
  get("mopvRetry").onclick=watch;
+ get("mopvPlay").onclick=()=>{
+  const video=get("mopvVideo");
+  if(!video?.srcObject){void watch();return}
+  video.play().then(refreshVideoStatus).catch(()=>status("Lecture vidéo indisponible. Reconnecte l’iPhone."));
+ };
  get("mopvExpand").onclick=()=>{
   pane.classList.toggle("expanded");
   get("mopvExpand").textContent=pane.classList.contains("expanded")?"Réduire":"Agrandir";
  };
  get("mopvVideo").onclick=()=>{
   const element=get("mopvVideo");
-  element?.play().then(()=>window.dispatchEvent(new CustomEvent("pulse:remote-video-ready",{detail:{video:element,sessionId:roomId}}))).catch(()=>{});
+  element?.play().then(refreshVideoStatus).catch(()=>{});
  };
 }
 export async function openMotionOperatorVideo(config){
