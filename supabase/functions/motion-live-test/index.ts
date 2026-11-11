@@ -427,8 +427,9 @@ Deno.serve(async(req:Request)=>{
   // The video room may expire, but a completed synthetic report remains editable
   // by its owning Operator for 30 days (no ability to reopen the camera).
   const completedAt=new Date(room.completed_at||room.updated_at).getTime();
-  if(!["active","completed"].includes(room.status)||
-   room.status==="active"&&new Date(room.expires_at).getTime()<=Date.now()||
+  // Intake can start before the operator's iPhone camera is connected.
+  if(!["waiting","ready","active","completed"].includes(room.status)||
+   room.status!=="completed"&&new Date(room.expires_at).getTime()<=Date.now()||
    room.status==="completed"&&(!Number.isFinite(completedAt)||completedAt<Date.now()-30*86400000))
    return response(req,{error:"room_unavailable"},409);
   const {data:patient}=await db.from("patients").select("data_classification,status")
@@ -466,10 +467,15 @@ Deno.serve(async(req:Request)=>{
     .select("*").eq("id",id).eq("organization_id",ORG_ID)
     .eq("operator_user_id",actor.id).maybeSingle();
    if(readError||!latest)return response(req,{error:"questionnaire_reload_failed"},503);
-   if(latest.status!=="active"&&latest.status!=="completed")
+   if(!["waiting","ready","active","completed"].includes(latest.status)||
+     latest.status!=="completed"&&new Date(latest.expires_at).getTime()<=Date.now())
     return response(req,{error:"room_unavailable"},409);
    const prior=latest.progress&&typeof latest.progress==="object"&&!Array.isArray(latest.progress)?
     latest.progress:{};
+   // An older browser snapshot must never delete already saved answers.
+   const priorAnswers=prior.questionnaire?.answers||{};
+   if(Object.keys(priorAnswers).some(key=>!Object.prototype.hasOwnProperty.call(cleaned,key)))
+    return response(req,{error:"questionnaire_stale_snapshot"},409);
    const previouslySimulated=prior.questionnaire?.simulated===true||prior.intake_source==="patient_demo_checkin";
    const nextProgress={...prior,questionnaire:{
     ...prior.questionnaire,version:"KOMO_MOTION_SELF_REPORT_V1",

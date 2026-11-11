@@ -712,3 +712,27 @@
  .moc-questionnaire-all .moc-question-choices{grid-template-columns:1fr}
  .moc-questionnaire-actions{position:static}
 }
+
+
+/* 2026-11-11 — transparent, non-diagnostic scoring of all 22 responses. */
+.moc-points-summary,.moc-scoring-result{
+ border:1px solid #ded8cc;border-radius:12px;background:#f4f1eb;
+ padding:13px 15px;margin:10px 0 18px;color:#333934
+}
+.moc-points-head{display:flex;flex-direction:column;gap:7px}
+.moc-points-head strong,.moc-scoring-result strong{font:700 13px/1.4 Inter,system-ui,sans-serif}
+.moc-points-head small,.moc-scoring-result p{
+ margin:0;color:#726d64;font:500 11px/1.55 Inter,system-ui,sans-serif
+}
+.moc-point-domains,.moc-domain-points{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.moc-point-domains span,.moc-domain-point{
+ background:#fbfaf7;border:1px solid #e3dbd0;border-radius:9px;padding:10px 11px;
+ font:500 11px/1.5 Inter,system-ui,sans-serif;color:#4b514d
+}
+.moc-point-domains span b{font-weight:700}
+.moc-domain-point{display:flex;flex-direction:column;gap:3px}
+.moc-domain-point strong{color:#293c31;font-size:13px}
+.moc-domain-point small{font-size:10px;color:#706c64}
+.moc-answer-points{font:700 10px/1.2 Inter,system-ui,sans-serif;color:#4c6955;white-space:nowrap}
+.moc-question-choice{gap:8px}
+@media(max-width:650px){.moc-point-domains,.moc-domain-points{grid-template-columns:1fr}}

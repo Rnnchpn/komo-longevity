@@ -30,7 +30,7 @@ const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
 let clockKey="",clockLocal=null;
 let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
-let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0;
+let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0,preferredSessionId="";
 let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null,questionnaireNavigating=false,questionnairePersistedAt=0;
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
 let videoFocus=false,videoLive=false;
@@ -77,7 +77,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261111-two-step-pdf-v2";
+ link.href="./motion-live-operator-consult-v1.css?v=20261111-questionnaire-points-v1";
  document.head.append(link);
 }
 function stopClock(){
@@ -93,7 +93,7 @@ export function disposeOperatorConsultation(){
  if(poll)clearInterval(poll);poll=null;stopClock();
  if(questionnaireTimer)clearTimeout(questionnaireTimer);questionnaireTimer=null;
  voice?.destroy();voice=null;countdownPending=false;
- extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;questionnaireNavigating=false;questionnairePersistedAt=0;
+ extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;questionnaireNavigating=false;questionnairePersistedAt=0;preferredSessionId="";
  if(videoListener)window.removeEventListener("pulse:remote-video-ready",videoListener);
  if(stopVideoListener)window.removeEventListener("pulse:remote-video-stopped",stopVideoListener);
  if(fullscreenListener)document.removeEventListener("fullscreenchange",fullscreenListener);
@@ -341,17 +341,28 @@ function renderReportSection(){
  const essentials=plan.supplements.filter(s=>['protein','creatine','vitd'].includes(s.id));
  const more=plan.supplements.filter(s=>!['protein','creatine','vitd'].includes(s.id));
  const reasons=plan.highlights.map((x,i)=>'<div class="moc-passport-highlight"><small>'+HTML(x.label)+'</small><strong>'+HTML(x.value)+'</strong></div>').join('');
+ const pointGroups=passport.questionnaire.groups.filter(g=>g.maxPoints!==null).map(g=>
+  '<div class="moc-domain-point"><span>'+HTML(g.label)+'</span><strong>'+
+  (g.points===null?'À compléter':g.points+'/'+g.maxPoints+' points')+'</strong>'+
+  '<small>'+(g.score===null?'Score indisponible':g.score+'/100 · indice déclaré')+'</small></div>').join('');
  q("mocTestBody").innerHTML='<section class="moc-test moc-report-section moc-passport-section moc-action-report">'+
   '<span class="moc-kicker">KŌMØ MOTION PASSPORT · SIX-WEEK ACTION PLAN</span>'+
   '<h3>Votre feuille de route</h3>'+
   (simulated?'<p class="moc-demo-warning">SCÉNARIO FICTIF · Réponses simulées, aucun avis médical individualisé.</p>':'')+
   '<div class="moc-action-metrics"><div><strong>'+passport.measured+'/6</strong><span>tests réalisés</span></div>'+
-   '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses</span></div>'+
-   '<div><strong>6 sem.</strong><span>programme proposé</span></div></div>'+
+   '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses enregistrées</span></div>'+
+   '<div><strong>'+(passport.questionnaire.complete?passport.questionnaire.index+'/100':'—')+
+   '</strong><span>indice fonctionnel déclaré</span></div></div>'+
   '<h4>Votre profil en bref</h4>'+
   '<p class="moc-report-answers-state">'+(passport.questionnaire.answered===22?
    '✓ Questionnaire complet : 22 réponses prises en compte.':
    '⚠ '+passport.questionnaire.answered+'/22 réponses · complétez le questionnaire pour un rapport intégral.')+'</p>'+
+  '<div class="moc-scoring-result"><strong>'+(passport.questionnaire.complete?
+   passport.questionnaire.rawPoints+'/'+passport.questionnaire.maxPoints+
+   ' points de difficulté · indice '+passport.questionnaire.index+'/100':
+   'Score global indisponible tant que les 22 réponses ne sont pas enregistrées')+
+   '</strong><p>20 réponses notées de 0 à 4 ; âge et objectif descriptifs. Plus les points de difficulté sont élevés, plus le profil déclaré est limité. L’indice pondéré sur 100 suit la direction inverse. Barème KŌMØ non validé ; distinct du Motion Score.</p></div>'+
+  '<div class="moc-domain-points">'+pointGroups+'</div>'+
   '<div class="moc-passport-highlights">'+reasons+'</div>'+
   '<h4>Tests réalisés</h4><div class="moc-results-compact">'+passport.measures.map(resultCard).join('')+'</div>'+
   '<div class="moc-action-section-title"><h4>Exercices à la maison</h4><small>Progression à adapter et valider</small></div>'+
@@ -810,13 +821,31 @@ async function refresh(force=false){
  polling=true;
  try{
   const data=await api({action:"operator_list"});
-  const matching=(data.sessions||[]).filter(x=>x.patient_id===patient?.id&&x.progress?.camera_owner==="operator"&&["active","completed"].includes(x.status))
+  const matching=(data.sessions||[]).filter(x=>x.patient_id===patient?.id&&x.progress?.camera_owner==="operator"&&
+   ["waiting","ready","active","completed"].includes(x.status))
    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
-  const selected=matching[0]||null;
+  // The operator may enter answers before the iPhone connects. An existing active
+  // consultation takes priority over archived reports; otherwise honor the explicit
+  // room opened in the live-session dashboard, not an unrelated newer report.
+  const selected=matching.find(x=>["waiting","ready","active"].includes(x.status))||
+   matching.find(x=>x.id===preferredSessionId)||matching[0]||null;
   if(!selected){
    room=null;renderWaiting("Crée une consultation sur l’ordinateur, puis active /camera/ sur l’iPhone : liaison automatique sans code.");
    return;
   }
+  if(room?.id&&room.id!==selected.id&&(questionnaireDirty||questionnaireSaveInFlight)){
+   try{await saveQuestionnaire()}catch(error){
+    questionnaireNote("Impossible de changer de dossier : réponses non enregistrées. "+(error.message||""));
+    return;
+   }
+   if(questionnaireDirty)return;
+  }
+  if(room?.id!==selected.id){
+   // Never mix questionnaire answers from two different consultation sessions.
+   questionnaireAnswers={};questionnairePersistedAt=0;questionnaireDirty=false;
+   latestSignature="";
+  }
+  preferredSessionId=selected.id;
   if(selected.status==="active"&&!TESTS.some(t=>t.id===selected.stage_code)){
    const initialized=await api({action:"operator_tests_init",session_id:selected.id});
    room=initialized.session;
@@ -825,7 +854,14 @@ async function refresh(force=false){
    const stored=room.progress?.questionnaire;
    const serverTime=Date.parse(stored?.updated_at||"")||0;
    if(serverTime>=questionnairePersistedAt){
-    questionnaireAnswers={...(stored?.answers||{})};
+    // Keep the same object referenced by the radio-input onchange callbacks.
+    // Replacing it every 2.6s made visible choices update a detached object
+    // while autosave serialized the newly assigned (stale) questionnaireAnswers.
+    const serverAnswers=stored?.answers||{};
+    for(const key of Object.keys(questionnaireAnswers)){
+     if(!Object.prototype.hasOwnProperty.call(serverAnswers,key))delete questionnaireAnswers[key];
+    }
+    Object.assign(questionnaireAnswers,serverAnswers);
     questionnairePersistedAt=serverTime;
    }else if(questionnairePersistedAt){
     // A delayed polling response predating last successful save ACK is ignored.
@@ -862,10 +898,11 @@ async function refresh(force=false){
 export async function mountOperatorConsultation(config){
  disposeOperatorConsultation();
  host=config.root;api=config.api;openVideo=config.openVideo;patient=config.patient||null;
+ preferredSessionId=config.preferredSessionId||"";
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261111-two-step-pdf-v2");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261111-questionnaire-points-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");

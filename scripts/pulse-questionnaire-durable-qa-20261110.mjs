@@ -3,8 +3,11 @@ import {readFile} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {join} from 'node:path';
 import {buildClinicPassport} from '../pulse-v14-src/motion-live-clinic-passport-v2.mjs';
-import {INTAKE_GROUPS,intakeProgress} from '../pulse-v14-src/online/session/intake-model.mjs';
+import {INTAKE_GROUPS,intakeProgress,scoreIntake,questionPoints,
+ MAX_QUESTIONNAIRE_POINTS,SCORED_QUESTION_COUNT} from '../pulse-v14-src/online/session/intake-model.mjs';
 import {CLINIC_PASSPORT_EXPORTS} from '../pulse-v14-src/motion-live-clinic-passport-pdf-v2.js';
+import {questionnairePointsMarkup} from '../pulse-v14-src/motion-live-clinic-extras-v1.js';
+import {buildPdfReportData} from '../pulse-v14-src/online/session/pdf-report.js';
 const read=path=>readFile(join(process.cwd(),path),'utf8');
 const files=[
  'site/pulse-v14/motion-live-operator-consult-v1.js',
@@ -28,6 +31,37 @@ const answers={ageBand:'60-69',goal:'strength',walk10:'0',stairs:'1',chair:'0',c
  outdoors:'1',breaks:'2'};
 assert.equal(intakeProgress(answers).completed,22);
 assert.equal(INTAKE_GROUPS.length,5);
+assert.equal(SCORED_QUESTION_COUNT,20);
+assert.equal(MAX_QUESTIONNAIRE_POINTS,80);
+assert.equal(intakeProgress(answers).completed,22);
+const scores=scoreIntake(answers);
+assert.equal(scores.complete,true);
+assert.equal(scores.rawPoints,22);
+assert.equal(scores.maxPoints,80);
+assert.equal(scores.profileIndex,75);
+assert.equal(scores.domainPoints.mobility.points,4);
+assert.equal(scores.domainPoints.comfort.points,4);
+assert.equal(scores.domainPoints.recovery.points,7);
+assert.equal(scores.domainPoints.activity.points,7);
+assert.equal(questionPoints(INTAKE_GROUPS[0].questions[0],answers.ageBand),null);
+assert.equal(questionPoints(INTAKE_GROUPS[1].questions[0],answers.walk10),0);
+assert.equal(questionPoints(INTAKE_GROUPS[1].questions[1],answers.stairs),1);
+const favorable=Object.fromEntries(INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>
+ [q.id,Array.isArray(q.options[0])?q.options[0][0]:'0'])));
+const mostLimited=Object.fromEntries(INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>
+ [q.id,Array.isArray(q.options[0])?q.options[0][0]:'4'])));
+assert.equal(scoreIntake(favorable).rawPoints,0);
+assert.equal(scoreIntake(favorable).profileIndex,100);
+assert.equal(scoreIntake(mostLimited).rawPoints,80);
+assert.equal(scoreIntake(mostLimited).profileIndex,0);
+const incomplete={...answers};delete incomplete.stairs;
+assert.equal(scoreIntake(incomplete).complete,false);
+assert.equal(scoreIntake(incomplete).rawPoints,null);
+assert.equal(scoreIntake(incomplete).profileIndex,null);
+assert.equal(scoreIntake(incomplete).domainPoints.mobility.points,null);
+assert.equal(scoreIntake({...answers,stairs:'999'}).rawPoints,null);
+assert.ok(questionnairePointsMarkup(answers).includes('22 / 80 points de difficulté'));
+assert.ok(questionnairePointsMarkup(incomplete).includes('Indice en attente'));
 const oldResults={
  sts:{status:'done',value:15,source:'operator_manual_observation'},
  heels:{status:'done',value:11,source:'operator_confirmed_video_estimate'},
@@ -40,6 +74,20 @@ const old=buildClinicPassport(answers,oldResults,{simulated:true,date:new Date('
 assert.equal(old.measured,6);
 assert.equal(old.questionnaire.answered,22);
 assert.equal(old.questionnaire.groups.reduce((n,g)=>n+g.items.length,0),22);
+assert.equal(old.questionnaire.rawPoints,22);
+assert.equal(old.questionnaire.maxPoints,80);
+assert.equal(old.questionnaire.index,75);
+assert.equal(old.questionnaire.groups[0].items[0].points,null);
+assert.equal(old.questionnaire.groups[0].items[1].points,null);
+assert.equal(old.questionnaire.groups[1].items.find(x=>x.id==='stairs').points,1);
+assert.equal(old.questionnaire.groups[1].points,4);
+assert.equal(old.questionnaire.groups[1].maxPoints,32);
+const online=buildPdfReportData(answers,oldResults);
+assert.equal(online.questionnaire.rawPoints,22);
+assert.equal(online.questionnaire.maxPoints,80);
+assert.equal(online.questionnaire.groups.reduce((n,g)=>n+g.answers.length,0),22);
+assert.equal(online.questionnaire.groups[0].answers[0].points,null);
+assert.equal(online.questionnaire.groups[1].answers[1].points,1);
 assert.equal(old.measures[1].durationSeconds,20);
 assert.equal(old.measures[4].durationSeconds,20);
 assert.ok(old.measures[1].display.includes('/ 20 s'));
@@ -56,11 +104,19 @@ assert.deepEqual(CLINIC_PASSPORT_EXPORTS.map(x=>x.value),
  ['all','synthese','tests','exercices','nutrition','suivi','questionnaire']);
 assert.ok(pdf.includes('function questionnaire()')&&pdf.includes('plan.supplements.forEach'));
 assert.ok(pdf.includes('a.guard')&&pdf.includes('report.questionnaire.groups'));
+assert.ok(pdf.includes('item.points')&&pdf.includes('g.points'));
+assert.ok(pdf.includes('report.questionnaire.rawPoints'));
+assert.ok(extras.includes('mocScoreSummary')&&extras.includes('moc-answer-points'));
+assert.ok(ui.includes('pointGroups')&&ui.includes('passport.questionnaire.rawPoints'));
+const onlinePdf=await read('site/pulse-v14/online/session/pdf-report.js');
+assert.ok(onlinePdf.includes('item.points')&&onlinePdf.includes('data.questionnaire.rawPoints'));
 assert.ok(pdf.includes('printGroups(groups.slice(0,2),1)')&&pdf.includes('printGroups(groups.slice(2),2)'));
 assert.ok(pdf.includes('const chapters=category===')&&pdf.includes("'questionnaire'"));
 assert.ok(ui.includes('await saveQuestionnaire()'));
 assert.ok(ui.includes('Object.entries(JSON.parse(snapshot))'));
 assert.ok(ui.includes('questionnairePersistedAt')&&ui.includes('serverTime>=questionnairePersistedAt'));
+assert.ok(ui.includes('Object.assign(questionnaireAnswers,serverAnswers)'));
+assert.ok(!ui.includes('questionnaireAnswers={...(stored?.answers||{})}'));
 assert.ok(ui.includes('Vérification des réponses enregistrées sur le serveur'));
 assert.ok(ui.includes('persisted.progress?.questionnaire?.answers'));
 assert.ok(ui.includes('PDF généré à partir de'));
@@ -78,4 +134,4 @@ assert.ok(edge.includes('test_duration_seconds')&&edge.includes('duration_second
 assert.ok(edge.includes('.eq("updated_at",latest.updated_at)'));
 assert.ok(edge.includes('synthetic_patient_required'));
 assert.ok(!pdf.includes('age biologique calcule'));
-console.log('[pulse-questionnaire-durable-qa] PASS: 22 answers, server-confirmed autosave, polling race guard, 6-category PDF, supplements, exercise timeline and 30s/20s provenance');
+console.log('[pulse-questionnaire-durable-qa] PASS: all 22 response texts, 20 scored items, bounds 0/80 and 100/100, profile context excluded, missing-data safety, autosave and clinic/online PDF scoring');

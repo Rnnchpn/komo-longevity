@@ -40,6 +40,15 @@ export const INTAKE_GROUPS=[
 ];
 export const SCORING_GROUPS=INTAKE_GROUPS.filter(g=>g.scored!==false);
 export const QUESTION_COUNT=INTAKE_GROUPS.reduce((s,g)=>s+g.questions.length,0);
+export const QUESTIONNAIRE_POINTS_VERSION='KOMO_MOTION_SELF_REPORT_POINTS_V1';
+// Two contextual answers (age band and goal) have no severity points.
+export const SCORED_QUESTION_COUNT=SCORING_GROUPS.reduce((sum,g)=>sum+g.questions.length,0);
+export const MAX_QUESTIONNAIRE_POINTS=4*SCORED_QUESTION_COUNT;
+export function questionPoints(question,answer){
+ if(!question||!Array.isArray(question.options)||typeof question.options[0]!=='string'||
+  !validAnswer(question,answer))return null;
+ return Number(answer); // 0 = least difficulty, 4 = most difficulty / least activity.
+}
 export function completeGroup(group,answers){
  return group.questions.every(q=>Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id]));
 }
@@ -54,17 +63,27 @@ export function intakeProgress(answers={}){
 }
 const round=x=>Math.round(x*10)/10;
 export function scoreIntake(answers={}){
- const missing=INTAKE_GROUPS.flatMap(g=>g.questions.filter(q=>!Object.hasOwn(answers,q.id)||!validAnswer(q,answers[q.id])).map(q=>q.id));
- const domains={};
+ const missing=INTAKE_GROUPS.flatMap(g=>g.questions.filter(q=>
+  !Object.hasOwn(answers,q.id)||!validAnswer(q,answers[q.id])).map(q=>q.id));
+ const domains={},domainPoints={};
  for(const g of SCORING_GROUPS){
-  if(!completeGroup(g,answers)){domains[g.id]=null;continue;}
-  const total=g.questions.reduce((s,q)=>s+Number(answers[q.id]),0);
-  domains[g.id]=round(100*(1-total/(4*g.questions.length)));
+  const answered=g.questions.filter(q=>questionPoints(q,answers[q.id])!==null).length;
+  const maximum=4*g.questions.length;
+  const points=answered===g.questions.length?
+   g.questions.reduce((sum,q)=>sum+questionPoints(q,answers[q.id]),0):null;
+  domainPoints[g.id]={points,maximum,answered,total:g.questions.length,weight:g.weight};
+  domains[g.id]=points===null?null:round(100*(1-points/maximum));
  }
+ // Do not publish a partial composite score: all 22 responses must be valid.
  const complete=missing.length===0;
- const profileIndex=complete?round(SCORING_GROUPS.reduce((s,g)=>s+g.weight*domains[g.id],0)):null;
- return {version:QUESTIONNAIRE_VERSION,complete,missing,domains,profileIndex,
-   label:'Indice de profil déclaré — exploratoire',isValidated:false};
+ const rawPoints=complete?
+  SCORING_GROUPS.reduce((sum,g)=>sum+domainPoints[g.id].points,0):null;
+ const profileIndex=complete?round(SCORING_GROUPS.reduce(
+  (sum,g)=>sum+g.weight*domains[g.id],0)):null;
+ return {version:QUESTIONNAIRE_VERSION,scoringVersion:QUESTIONNAIRE_POINTS_VERSION,
+  complete,missing,domains,domainPoints,rawPoints,maxPoints:MAX_QUESTIONNAIRE_POINTS,
+  scoredQuestions:SCORED_QUESTION_COUNT,descriptiveQuestions:QUESTION_COUNT-SCORED_QUESTION_COUNT,
+  profileIndex,label:'Indice fonctionnel déclaré KŌMØ — exploratoire',isValidated:false};
 }
 export function questionnaireFocus(answers){
  const s=scoreIntake(answers);

@@ -660,8 +660,9 @@ function motionLiveMonitor(){
     const result=await sb.rpc('start_pulse_operator_session_v1',
       {p_patient_id:patientId,p_assessment_id:null});
     if(result.error||!result.data?.session_id)throw Error(result.error?.message||'Impossible de préparer le bilan.');
-    await motionLiveAPI({action:'operator_consultation_prepare',
+    const prepared=await motionLiveAPI({action:'operator_consultation_prepare',
       patient_id:patientId,operator_session_id:result.data.session_id});
+    if(prepared.session_id)sessionStorage.setItem('komo_motion_consult_room_'+patientId,prepared.session_id);
     localStorage.setItem('komo_v14_patient',patientId);
     $('#opLiveStartHelp').textContent='✓ Consultation prête. Active maintenant la caméra sur ton iPhone.';
     motionLiveSignature='';await loadMotionLiveRooms(true);
@@ -775,7 +776,7 @@ async function loadMotionLiveRooms(force=false){
       <header><div><span class="overline">SESSION MOTION · ASSOCIATION AUTOMATIQUE</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'iPhone connecté':'iPhone hors ligne'}</span></header>
       <p>${esc(patientName)} · ${esc(stage)}</p>
       <div class="op-live-track"><i style="width:${pct}%"></i></div><small>${pct}% des étapes parcourues · ${room.progress?.step_status==='running'?'Test en cours':'Attente du prochain test'}</small>
-      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?(room.status==='active'?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir les tests Motion →</button>':'<span class="op-live-waiting">En attente de la caméra du cabinet</span>'):''}`}
+      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?(room.status==='active'?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir les tests Motion →</button>':'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Remplir le questionnaire →</button>'):''}`}
       <button type="button" class="button secondary" data-live-close="${esc(room.id)}">Clore la salle</button></div>
     </article>`;
    }).join(''):'<div class="op-live-empty">Aucun bilan en cours. Choisis un dossier fictif sur cet ordinateur et clique sur « Démarrer une nouvelle consultation ».</div>';
@@ -785,7 +786,10 @@ async function loadMotionLiveRooms(force=false){
    }
    host.querySelectorAll('[data-live-attach]').forEach(b=>b.onclick=()=>attachMotionLive(b.dataset.liveAttach,b));
    host.querySelectorAll('[data-live-operator]').forEach(b=>b.onclick=async()=>{
-     localStorage.setItem('komo_v14_patient',b.dataset.liveOperator);
+     const patientId=b.dataset.liveOperator;
+     const roomId=b.closest('[data-room]')?.dataset.room;
+     if(roomId)sessionStorage.setItem('komo_motion_consult_room_'+patientId,roomId);
+     localStorage.setItem('komo_v14_patient',patientId);
      await loadPro();location.hash='operator';render();
    });
    host.querySelectorAll('[data-live-close]').forEach(b=>b.onclick=async()=>{
@@ -827,8 +831,9 @@ async function acceptMotionCheckin(checkinId,button){
   if(op.error||!op.data?.session_id)throw Error(op.error?.message||'Préparation du bilan impossible.');
   await motionLiveAPI({action:'operator_checkin_claim',session_id:checkinId,patient_id:patientId,
    operator_session_id:op.data.session_id});
-  await motionLiveAPI({action:'operator_consultation_prepare',
+  const prepared=await motionLiveAPI({action:'operator_consultation_prepare',
    patient_id:patientId,operator_session_id:op.data.session_id,checkin_id:checkinId});
+  if(prepared.session_id)sessionStorage.setItem('komo_motion_consult_room_'+patientId,prepared.session_id);
   localStorage.setItem('komo_v14_patient',patientId);
   await loadPro();
   toast('Consultation préparée. Active la caméra sur ton iPhone.');
@@ -884,9 +889,11 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261111-two-step-pdf-v2');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261111-questionnaire-points-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
-      await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,openVideo:openOperatorCamera});
+      await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
+        openVideo:openOperatorCamera,preferredSessionId:S.patient?.id?
+         sessionStorage.getItem('komo_motion_consult_room_'+S.patient.id):null});
   }catch(error){console.error('[Motion consultation]',error);if(root?.isConnected)root.textContent='Consultation indisponible : '+(error.message||'erreur réseau')}
 }
 

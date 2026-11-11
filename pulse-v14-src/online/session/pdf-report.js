@@ -1,4 +1,4 @@
-import {INTAKE_GROUPS,SCORING_GROUPS,scoreIntake,intakeProgress,questionnaireFocus} from './intake-model.mjs';
+import {INTAKE_GROUPS,SCORING_GROUPS,scoreIntake,intakeProgress,questionnaireFocus,questionPoints} from './intake-model.mjs?v=20261111-questionnaire-points-v1';
 import {MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
 import {normativeSummary} from './reference-norms.mjs?v=20261110-balance30-v1';
 import {buildMotionPassport,programProgress,planTargets} from './motion-passport.mjs';
@@ -29,7 +29,11 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
  const p=scoreIntake(answers),progress=intakeProgress(answers);
  const groups=INTAKE_GROUPS.map(g=>({
   id:g.id,name:g.title,score:p.domains[g.id]??null,weight:g.weight??null,
-  answers:g.questions.map(q=>({question:q.label,answer:answerLabel(q,answers[q.id])}))
+  points:p.domainPoints[g.id]?.points??null,
+  maxPoints:p.domainPoints[g.id]?.maximum??null,
+  answers:g.questions.map(q=>({question:q.label,answer:answerLabel(q,answers[q.id]),
+   points:g.scored===false?null:questionPoints(q,answers[q.id]),
+   maxPoints:g.scored===false?null:4}))
  }));
  const observations=OBSERVATIONS.map(([id,label,unit,precision])=>{
   const raw=results[id];
@@ -61,8 +65,10 @@ export function buildPdfReportData(answers={},results={},motionScore=null,blocke
   passport:buildMotionPassport(answers,results,blocked),
   program:options?.program?.version==='KOMO_PULSE_DAILY_V1'?{progress:programProgress(options.program),startedAt:options.program.startedAt}:null,
   questionnaire:{complete:p.complete,index:p.complete?p.profileIndex:null,
+   rawPoints:p.rawPoints,maxPoints:p.maxPoints,scoringVersion:p.scoringVersion,
    answered:progress.completed,total:progress.total,domains:SCORING_GROUPS.map(g=>({
-    id:g.id,label:g.title,score:p.domains[g.id]??null,weight:g.weight
+    id:g.id,label:g.title,score:p.domains[g.id]??null,weight:g.weight,
+    points:p.domainPoints[g.id]?.points??null,maxPoints:p.domainPoints[g.id]?.maximum??null
    })),focus:questionnaireFocus(answers),groups},
   observations,motion,ageReference:normativeSummary(answers,results,{...(results.sts?.normative??{}),balanceCeiling:options?.mode==='CABINET'?30:20}),blocked:Boolean(blocked),
   limitations:[
@@ -307,18 +313,30 @@ export async function downloadMotionPdf(data){
  line('Versions : '+data.version+' / '+data.motion.version,{size:7.5,color:muted});
  // Include the full original patient responses, with automatic pagination.
  nextPage();title('6. Detail des reponses');
- line('Appendice - questionnaire original KOMO rempli par le participant.',{size:8.4,color:muted});
+ line('Appendice - 22 reponses exactes (20 notees de 0 a 4, age et objectif descriptifs).',
+  {size:8.4,color:muted});
+ line(data.questionnaire.complete?'TOTAL : '+data.questionnaire.rawPoints+'/'+
+  data.questionnaire.maxPoints+' pts de difficulte ; indice pondere '+
+  decimal(data.questionnaire.index,1)+'/100':
+  'Questionnaire incomplet : aucun score composite calcule.',
+  {size:9,bold:true,color:green});
  for(const group of data.questionnaire.groups){
   subheading(group.name);
+  if(group.maxPoints!==null)line(group.points===null?'Domaine incomplet':
+   group.points+'/'+group.maxPoints+' pts de difficulte ; indice '+decimal(group.score,1)+'/100',
+    {size:8.2,color:muted});
   for(const item of group.answers){
    const questionLines=pdf.splitTextToSize(normal(item.question),CONTENT-10);
-   const answerLines=pdf.splitTextToSize(normal(item.answer),CONTENT-15);
+   const answerLines=pdf.splitTextToSize(normal(item.answer),CONTENT-45);
    const h=questionLines.length*4.5+answerLines.length*4.3+4;
    space(h+3);
    pdf.setFont('helvetica','normal');pdf.setFontSize(8.6);ink(dark);
    pdf.text(questionLines,M+2,y);y+=questionLines.length*4.5;
    pdf.setFont('helvetica','bold');pdf.setFontSize(8.3);ink(green);
-   pdf.text(answerLines,M+5,y);y+=answerLines.length*4.3+4;
+   pdf.text(answerLines,M+5,y);
+   pdf.text(item.maxPoints===null?'Contexte':item.points===null?'- / 4 pts':
+    item.points+' / 4 pts',RIGHT,y,{align:'right'});
+   y+=answerLines.length*4.3+4;
    pdf.setDrawColor(231,222,210);pdf.line(M,y,RIGHT,y);y+=4;
   }
  }
