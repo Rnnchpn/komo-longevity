@@ -113,7 +113,7 @@ export async function downloadClinicPassport(report,category='all'){
    box(M+118,yy-7,60,14,P.sand,2);
    txt(m.short,M+121,yy-2,{sz:7.4,col:P.muted});
    txt(m.id==='posture'?'Observation qualitative':m.value===null?'Non mesure':
-    fmt(m.value)+(m.id.startsWith('unipodal')?' s':' reps'),M+121,yy+3.6,
+    fmt(m.value)+(m.id.startsWith('unipodal')?' s':m.id==='two_step'?' cm':' reps'),M+121,yy+3.6,
     {sz:8.5,bold:true});
   });
   txt('LECTURE RAPIDE',M,235,{sz:8,bold:true,col:P.gold});
@@ -156,7 +156,7 @@ export async function downloadClinicPassport(report,category='all'){
    txt(e.frequency,x+7,y+31,{sz:8,col:P.muted});
    words(e.instructions,x+7,y+40,74,{sz:8,lh:4,max:3});
   });
-  const walk=plan.exercises[4];
+  const walk=plan.exercises[4]||{title:'Marche adaptée',dose:'Selon tolérance',frequency:'Plusieurs fois par semaine'};
   box(M,217,C,29,P.pale,3);
   txt('EN COMPLEMENT · '+walk.title,M+7,226,{sz:9,bold:true});
   txt(walk.dose+' · '+walk.frequency,M+7,235,{sz:10});
@@ -249,7 +249,7 @@ export async function downloadClinicPassport(report,category='all'){
   printGroups(groups.slice(0,2),1);
   printGroups(groups.slice(2),2);
  }
- const renderers={synthese,tests,exercices,nutrition,suivi,questionnaire};
+ const renderers={synthese,tests,exercices:exercises,nutrition,suivi,questionnaire};
  const chapters=category==='all'?['synthese','tests','exercices','nutrition','suivi','questionnaire']:[category];
  for(const chapter of chapters)renderers[chapter]();
  footer();
