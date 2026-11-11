@@ -596,3 +596,83 @@
 .moc-questionnaire #mocIntakeSave{background:#e9eee6;border-color:#bfcdbb;color:#2f5540;}
 .moc-questionnaire #mocIntakeSave:hover{background:#dbe8db;}
 @media(max-width:650px){.moc-save-indicator{margin:5px 6px}.moc-questionnaire #mocIntakeSave{width:100%}}
+
+
+/* Consultation simplifiée : vidéo hors écran par défaut, jamais display:none
+   sur le flux MediaPipe afin de préserver les frames WebRTC et le tracking. */
+.moc-video-hidden .moc-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:0!important}
+.moc-video-hidden .moc-tests{width:100%;min-width:0;max-width:none!important}
+.moc-video-hidden .moc-camera-column{
+ position:fixed!important;left:-12000px!important;top:0!important;
+ width:480px!important;height:650px!important;max-width:480px!important;
+ min-height:650px!important;opacity:0!important;pointer-events:none!important;
+ z-index:-10!important;overflow:hidden!important;display:flex!important;
+ flex-direction:column!important;transform:none!important;
+}
+.moc-video-hidden .moc-camera-host,
+.moc-video-hidden .mopv-window.embedded,
+.moc-video-hidden .mopv-window.embedded .mopv-screen{
+ width:100%!important;height:480px!important;min-height:480px!important;
+ display:flex!important;flex:0 0 auto!important;max-height:none!important;
+}
+.moc-video-hidden .mopv-window.embedded .mopv-screen video:not([hidden]){
+ display:block!important;object-fit:contain!important;
+}
+.moc-video-preview .moc-grid{grid-template-columns:minmax(0,1fr) minmax(380px,.9fr)!important;gap:12px!important}
+.moc-camera-state{font:700 10px/1.35 Inter,system-ui,sans-serif;color:#b7c9c2}
+.moc-camera-state[data-state="live"]{color:#b9e2c7}
+.moc-camera-state[data-state="connecting"]{color:#ead3a1}
+.moc-camera-banner{display:flex;align-items:center;gap:10px;background:#f1f4ee;
+ border:1px solid #d8e3d6;color:#4d6858;border-radius:10px;padding:9px 14px;
+ margin:0 0 10px;font:700 11px/1.45 Inter,system-ui,sans-serif}
+.moc-camera-banner[data-state="live"]{background:#e5f1e6;border-color:#c4ddc5;color:#286044}
+.moc-camera-banner[data-state="connecting"]{background:#faf3e6;border-color:#e6d7bd;color:#826a47}
+.moc-camera-banner[data-state="offline"]{background:#f9f0ec;border-color:#ecd9cb;color:#845f4a}
+.moc-camera-banner[data-state="completed"]{background:#edf0eb;color:#536458}
+.moc-save-indicator[hidden],#mocVideoFocus[hidden]{display:none!important}
+.moc-step-nav{grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:8px 12px}
+.moc-step{min-height:51px;padding:7px 6px;display:grid;justify-items:center;
+ align-items:center;text-align:center;gap:3px;font-size:10px}
+.moc-step span{display:block;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+ width:100%;max-width:120px;font-weight:650}
+.moc-overview{padding:12px 16px 6px}
+.moc-test{padding:18px clamp(15px,2.7vw,30px)}
+.moc-test h3{margin:5px 0 12px;font-size:clamp(29px,3.2vw,43px)}
+.moc-instructions{background:#f6f1e8;border:1px solid #e6ded1;border-radius:11px;
+ padding:10px 12px;margin:9px 0 14px}
+.moc-instructions>summary{cursor:pointer;font:700 11px/1.4 Inter,system-ui,sans-serif;
+ color:#635746;min-height:20px}
+.moc-instructions .moc-guide{display:grid;grid-template-columns:1fr 1fr;gap:8px;
+ margin:11px 0 0}
+.moc-instructions .moc-guide>div{padding:10px;background:#fffaf4}
+.moc-instructions .moc-guide p{font-size:10px;line-height:1.5;margin-top:4px}
+.moc-live-hud{grid-template-columns:minmax(220px,1.5fr) minmax(165px,1fr)!important;
+ column-gap:12px!important}
+.moc-clock-figure strong{font-size:clamp(72px,9vw,120px)!important;
+ line-height:.94!important;letter-spacing:-.045em!important}
+.moc-rep-figure strong{font-size:clamp(48px,6vw,90px)!important;line-height:1!important}
+.moc-clock-actions{display:flex!important;gap:6px!important;flex-wrap:wrap!important}
+.moc-clock-actions .moc-button{min-height:43px;padding:10px 13px}
+.moc-test>.moc-buttons .moc-button.primary{min-height:52px;padding:14px 20px}
+.moc-test>.moc-buttons .moc-button{font-size:12px}
+.moc-voice-state{font-size:10px;line-height:1.35;margin:2px 0 9px}
+.moc-show-passport .moc-camera-column{position:relative!important;left:auto!important;
+ top:auto!important;width:auto!important;height:auto!important;opacity:1!important;
+ pointer-events:auto!important;z-index:auto!important}
+.moc-show-passport .moc-passport-aside{display:block!important}
+.moc-show-passport .moc-passport-aside[hidden]{display:none!important}
+@media(max-width:1050px){
+ .moc-video-preview .moc-grid{grid-template-columns:minmax(0,1fr)!important}
+ .moc-step-nav{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .moc-live-hud{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:650px){
+ .moc-step-nav{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+ .moc-step{min-height:45px}
+ .moc-test{padding:15px}
+ .moc-instructions .moc-guide{grid-template-columns:1fr}
+ .moc-live-hud{grid-template-columns:1fr!important}
+ .moc-clock-figure strong{font-size:72px!important}
+ .moc-rep-figure strong{font-size:60px!important}
+ .moc-head{margin-bottom:10px}
+}

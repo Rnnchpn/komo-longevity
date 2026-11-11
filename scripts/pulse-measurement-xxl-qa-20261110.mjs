@@ -16,7 +16,8 @@ for(const name of ['pose-engine.js','metrics.mjs','unipodal-metrics.mjs']){
  const check=spawnSync(process.execPath,['--check',path],{encoding:'utf8'});
  assert.equal(check.status,0,name+': '+check.stderr);
 }
-assert.ok(ui.includes('id="mocVideoFocus"')&&ui.includes('classList.toggle("moc-video-xxl"'));
+assert.ok(ui.includes('id="mocVideoFocus"')&&ui.includes('moc-video-hidden')&&ui.includes('updateConsultationLayout()'),
+ 'video is hidden by default during tests and available on demand without stopping pose');
 assert.ok(styles.includes('.moc-video-xxl > .sidebar')&&styles.includes('grid-template-columns:minmax(365px,.66fr) minmax(0,1.75fr)'));
 assert.ok(styles.includes('object-fit:contain'),'full-body frame must never be cropped');
 assert.ok(remote.includes('accuracy:"full"')&&engine.includes('pose_landmarker_full.task'));
@@ -65,4 +66,4 @@ for(let t=1400;t<=1800;t+=100)counter.observe(seated(true),t);
 counter.observe(seated(false),3300);
 for(let t=3400;t<=3900;t+=100)counter.observe(seated(false),t);
 assert.equal(counter.summary().count,1,'camera freeze between seated and standing cannot fabricate a rise');
-console.log('[pulse-measurement-xxl-qa] PASS: Full model fallback, expanded uncropped camera, heel/toe proof, dropped-frame protection and STS recovery');
+console.log('[pulse-measurement-xxl-qa] PASS: Full model fallback, optional uncropped camera, heel/toe proof, dropped-frame protection and STS recovery');
