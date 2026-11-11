@@ -19,9 +19,9 @@ for(const path of ['site/pulse-v14/motion-live-operator-consult-v1.js',
  const r=spawnSync(process.execPath,['--check',join(process.cwd(),path)],{encoding:'utf8'});
  assert.equal(r.status,0,path+': '+r.stderr);
 }
-assert.ok(index.includes('app.js?v=20261111-two-step-pdf-v2'));
+assert.ok(index.includes('app.js?v=20261111-questionnaire-points-v1'));
 assert.ok(app.includes('operator-video-v1.js?v=20261111-two-step-pdf-v2'));
-assert.ok(app.includes('operator-consult-v1.js?v=20261111-two-step-pdf-v2'));
+assert.ok(app.includes('operator-consult-v1.js?v=20261111-questionnaire-points-v1'));
 assert.ok(ui.includes('moc-camera-banner')&&ui.includes('mocCameraBanner'));
 assert.ok(ui.includes('moc-video-hidden')&&ui.includes('panelMode==="questionnaire"'));
 assert.ok(ui.includes('const preview=panelMode==="tests"&&videoFocus'));
