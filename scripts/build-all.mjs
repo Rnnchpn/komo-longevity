@@ -262,6 +262,8 @@ const scripts = [
   'scripts/pulse-simple-consultation-qa-20261110.mjs',
   // Desktop creates ONE synthetic consultation and the clinician iPhone joins it (never creates duplicate video room).
   'scripts/pulse-clean-consultation-qa-20261111.mjs',
+  // No visible camera during test/questionnaire; actual decoded iPhone frames trigger pose and the complete PDF stays synchronized.
+  'scripts/pulse-clean-screen-qa-20261111.mjs',
   // Supervised physical consultation: voice, questionnaire, video counters, PDF.
   'scripts/pulse-clinic-flow-qa-20261110.mjs',
   // Evidence-aware consultant passport, PDF renderer and 0/22 questionnaire regression.
