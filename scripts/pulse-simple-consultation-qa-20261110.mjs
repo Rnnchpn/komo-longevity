@@ -41,12 +41,13 @@ assert.ok(app.includes("action:'operator_checkin_invite'"));
 assert.ok(app.includes("action:'operator_checkin_claim'"));
 assert.ok(app.includes("sb.functions.invoke('professional-patient'"));
 assert.ok(app.includes("start_pulse_operator_session_v1"));
-assert.ok(app.includes("checkin_id:checkinId"));
-assert.ok(app.includes('ready.length===1'),'only auto-connect when exactly one camera is available');
-assert.ok(app.includes("sessionStorage.setItem('komo_pending_motion_checkin'"));
+assert.ok(app.includes("action:'operator_consultation_prepare'"));
+assert.ok(edge.includes('if(rows.length!==1)')&&edge.includes('paired_automatically:true'),
+ 'only one existing prepared consultation can be joined by the iPhone');
+assert.ok(app.includes("action:'operator_reset_demo_sessions'"));
 assert.ok(app.includes("localStorage.setItem('komo_v14_patient',patientId)"));
 assert.ok(app.includes("operator_list")&&app.includes('opCheckinQueue'));
 assert.ok(app.includes('/camera/')&&camera.includes("action:'operator_camera_start'"));
 assert.ok(styles.includes('.op-live-checklist')&&styles.includes('.op-checkin-invitation'));
 assert.ok(html.includes('pulse-consultation-flow-v1.css')&&html.includes('checkin-v1'));
-console.log('[pulse-simple-consultation-qa] PASS invitation token, fictitious form, 3-step operator queue, unique iPhone pairing, security and no patient-camera requests');
+console.log('[pulse-simple-consultation-qa] PASS optional fictitious check-in, desktop-prepared consultation, unique iPhone auto-join, reset and no patient-camera requests');
