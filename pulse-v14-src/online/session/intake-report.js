@@ -1,6 +1,6 @@
-import {scoreIntake,questionnaireFocus,SCORING_GROUPS,QUESTIONNAIRE_VERSION,intakeProgress} from './intake-model.mjs';
+import {scoreIntake,questionnaireFocus,SCORING_GROUPS,QUESTIONNAIRE_VERSION,intakeProgress} from './intake-model.mjs?v=20261111-questionnaire-points-v1';
 import {calculateMotionScore,MOTION_ALGORITHM_VERSION} from './motion-score.mjs';
-import {buildPdfReportData,downloadMotionPdf} from './pdf-report.js';
+import {buildPdfReportData,downloadMotionPdf} from './pdf-report.js?v=20261111-questionnaire-points-v1';
 import {normPanelMarkup,bindNormPanel} from './normative-panel.js';
 import {passportMarkup,roadmapMarkup,dailyProgramMarkup,bindDailyProgram} from './passport-view.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -9,7 +9,10 @@ function domainCards(scored){
  return SCORING_GROUPS.map(g=>{
   const value=scored.domains[g.id];
   return '<div class="intake-result-card"><div><span>'+esc(g.title)+'</span><strong>'+ (value===null?'—':value.toFixed(1)+' / 100')+'</strong></div>'+
-   '<div class="intake-result-track"><span style="width:'+(value??0)+'%"></span></div><small>Déclaratif · poids '+Math.round(g.weight*100)+' % dans l’indice questionnaire</small></div>';
+   '<div class="intake-result-track"><span style="width:'+(value??0)+'%"></span></div><small>'+
+   (scored.domainPoints[g.id].points===null?'Réponses incomplètes':
+    scored.domainPoints[g.id].points+'/'+scored.domainPoints[g.id].maximum+' points de difficulté')+
+   ' · poids '+Math.round(g.weight*100)+' % dans l’indice questionnaire</small></div>';
  }).join('');
 }
 function measurementRows(results){
@@ -42,8 +45,10 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '<h1>Votre profil en mouvement<em>.</em></h1>'+
  '<p>Cette restitution distingue vos <strong>réponses personnelles</strong> des mesures fonctionnelles. Les scores déclaratifs sont exploratoires et ne constituent pas des diagnostics.</p>'+
  (blocked?'<div class="notice danger"><strong>Tests interrompus par sécurité.</strong> Le questionnaire demeure informatif, mais aucun Motion Score global ne peut être établi.</div>':'')+
- '<div class="report-hero"><div><span>INDICE DE PROFIL DÉCLARÉ</span><strong>'+(intake.complete?intake.profileIndex.toFixed(1):'—')+'</strong><small>/ 100 · '+esc(QUESTIONNAIRE_VERSION)+'</small></div>'+
- '<p>'+(intake.complete?'Indice calculé à partir de vos réponses uniquement, avec quatre domaines pondérés. <strong>Il ne s’agit pas du Motion Score.</strong>':'Questionnaire incomplet : '+(p.total-p.completed)+' réponse(s) manquante(s).')+'</p></div>'+
+ '<div class="report-hero"><div><span>INDICE FONCTIONNEL DÉCLARÉ</span><strong>'+(intake.complete?intake.profileIndex.toFixed(1):'—')+'</strong><small>/ 100 · '+esc(QUESTIONNAIRE_VERSION)+'</small></div>'+
+ '<p>'+(intake.complete?
+   '<strong>'+intake.rawPoints+'/'+intake.maxPoints+' points de difficulté.</strong> 20 réponses notées de 0 (favorable) à 4 (limitation maximale) et 2 réponses descriptives. Indice pondéré : plus élevé = moins de limitations déclarées. <strong>Il ne s’agit pas du Motion Score.</strong>':
+   'Questionnaire incomplet : '+(p.total-p.completed)+' réponse(s) manquante(s). Aucun score global n’est produit.')+'</p></div>'+
  '<div class="intake-domain-grid">'+domainCards(intake)+'</div>'+
  (intake.complete?'<p class="report-context"><strong>Domaines à discuter en priorité :</strong> '+(chosen||'Aucune priorité différenciée')+'. Ils reflètent votre perception et ne traduisent pas à eux seuls une limitation objective.</p>':'')+
  '</details>'+ '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
@@ -134,8 +139,9 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
  root.querySelector('#copy-report').onclick=async()=>{
   const profile=scoreIntake(answers);
   const testValues=Object.fromEntries(Object.entries(results).map(([key,val])=>[key,{value:val.value??null,status:val.status??'inconnu',quality:val.quality??null}]));
-  const exportData={type:'KOMO_MOTION_ONLINE_DEMO',questionnaireVersion:profile.version,profileIndex:profile.profileIndex,
-    domains:profile.domains,motionScore:computed?.complete?computed.score:null,
+  const exportData={type:'KOMO_MOTION_ONLINE_DEMO',questionnaireVersion:profile.version,scoringVersion:profile.scoringVersion,
+    rawPoints:profile.rawPoints,maxPoints:profile.maxPoints,profileIndex:profile.profileIndex,
+    domainPoints:profile.domainPoints,domains:profile.domains,motionScore:computed?.complete?computed.score:null,
     motionAlgorithm:computed?.complete?computed.version:null,
     tests:testValues,notice:'Données de démonstration, non médicales, non sauvegardées.'};
   try{
