@@ -817,26 +817,12 @@ async function acceptMotionCheckin(checkinId,button){
   if(op.error||!op.data?.session_id)throw Error(op.error?.message||'Préparation du bilan impossible.');
   await motionLiveAPI({action:'operator_checkin_claim',session_id:checkinId,patient_id:patientId,
    operator_session_id:op.data.session_id});
-  sessionStorage.setItem('komo_pending_motion_checkin',JSON.stringify({checkinId,patientId}));
+  await motionLiveAPI({action:'operator_consultation_prepare',
+   patient_id:patientId,operator_session_id:op.data.session_id});
   localStorage.setItem('komo_v14_patient',patientId);
   await loadPro();
-  // Pair the unique available clinician-owned camera automatically. More than
-  // one camera requires explicit selection to prevent accidental cross-pairing.
-  const latest=await motionLiveAPI({action:'operator_list'});
-  const ready=(latest.sessions||[]).filter(x=>x.progress?.camera_owner==='operator'&&
-   x.operator_user_id===S.user?.id&&!x.patient_id&&
-   ['waiting','ready'].includes(x.status)&&new Date(x.created_at).getTime()>Date.now()-2*3600000);
-  if(ready.length===1){
-   await motionLiveAPI({action:'operator_attach',session_id:ready[0].id,patient_id:patientId,
-    operator_session_id:op.data.session_id,checkin_id:checkinId});
-   sessionStorage.removeItem('komo_pending_motion_checkin');
-   toast('Dossier et iPhone liés. La consultation peut commencer.');
-   location.hash='operator';render();
-  }else{
-   toast(ready.length?'Plusieurs iPhone détectés : choisis celui du cabinet.':
-     'Dossier prêt. Active la caméra de ton iPhone pour commencer.');
-   motionLiveSignature='';await loadMotionLiveRooms(true);
-  }
+  toast('Consultation préparée. Active la caméra sur ton iPhone.');
+  motionLiveSignature='';await loadMotionLiveRooms(true);
  }catch(error){toast(error.message||'Impossible de préparer le bilan.')}
  finally{if(button.isConnected){button.disabled=false;button.textContent='Confirmer et démarrer →'}}
 }
