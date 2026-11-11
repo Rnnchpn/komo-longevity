@@ -676,3 +676,39 @@
  .moc-rep-figure strong{font-size:60px!important}
  .moc-head{margin-bottom:10px}
 }
+
+
+/* 2026-11-11: all 22 self-report items visible, accessible and grouped. */
+.moc-questionnaire-all .moc-question-group{
+ border-top:1px solid #e5dccf;padding:14px 0 6px;margin-top:12px;scroll-margin-top:86px
+}
+.moc-questionnaire-all .moc-question-group h4{
+ font:600 21px/1.15 "Cormorant Garamond",Georgia,serif;color:#26372e;margin:0 0 3px
+}
+.moc-questionnaire-all .moc-question-jumps{
+ display:flex;flex-wrap:wrap;gap:6px;position:sticky;top:0;z-index:5;
+ background:#fdfaf5;padding:10px 0;border-bottom:1px solid #ded7cb
+}
+.moc-questionnaire-all .moc-question-jumps a{
+ border:1px solid #ded5c8;border-radius:100px;padding:8px 11px;
+ color:#365446;background:#f8f5ef;font:650 10px/1.2 Inter,system-ui,sans-serif;
+ text-decoration:none
+}
+.moc-questionnaire-all .moc-question-jumps a:hover{background:#e7eee7}
+.moc-questionnaire-all .moc-question-head strong{font:750 13px Inter,system-ui,sans-serif;color:#2b5841}
+.moc-questionnaire-all .moc-question-choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr))}
+.moc-questionnaire-all .moc-question-choice{min-height:43px}
+.moc-questionnaire-actions{position:sticky;bottom:0;z-index:7;background:#fdfaf5;
+ padding:12px 0;border-top:1px solid #ded7cb}
+.moc-test:has(.moc-live-hud)>.moc-instructions{order:3}
+.moc-test:has(.moc-live-hud)>.moc-two-step-fields{order:5}
+.moc-two-step-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+ padding:14px;background:#f4f0e7;border:1px solid #e1d6c6;border-radius:12px}
+.moc-two-step-fields>.moc-help,.moc-two-step-fields>#mocTwoStepComputed{grid-column:1/-1;margin:0}
+.moc-two-step-fields .moc-field{margin:0}
+.moc-two-step-fields input{display:block;min-height:48px;width:100%;font-size:18px}
+@media(max-width:650px){
+ .moc-two-step-fields{grid-template-columns:1fr}
+ .moc-questionnaire-all .moc-question-choices{grid-template-columns:1fr}
+ .moc-questionnaire-actions{position:static}
+}
