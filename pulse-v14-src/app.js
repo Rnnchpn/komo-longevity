@@ -720,16 +720,16 @@ async function loadMotionLiveRooms(force=false){
  try{
   const data=await motionLiveAPI({action:'operator_list'});
   const owned=(data.sessions||[]).filter(x=>x.operator_user_id===S.user?.id);
-  const rooms=owned.filter(x=>x.progress?.camera_owner==='operator');
+  const rooms=owned.filter(x=>x.progress?.camera_owner==='operator'&&['waiting','ready','active'].includes(x.status));
   const checkins=owned.filter(x=>x.progress?.kind==='patient_checkin');
   const signature=JSON.stringify([
    ...rooms.map(x=>[x.id,x.status,x.stage_code,x.step_index,x.progress?.step_status,x.patient_id,x.updated_at,x.patient_last_seen_at]),
    ...checkins.map(x=>[x.id,x.status,x.patient_id,x.progress?.patient_checkin?.state,x.updated_at])
   ]);
   const count=$('#opLiveCount');
-  if(count)count.textContent=checkins.filter(x=>x.progress?.patient_checkin?.state==='ready').length+
-   ' participant(s) prêt(s) · '+rooms.filter(x=>['waiting','ready','active'].includes(x.status)).length+
-   ' caméra(s) en cours';
+  if(count)count.textContent=rooms.length===0?'Aucun bilan en cours · prêt pour une nouvelle consultation':
+   (rooms.some(x=>x.status==='active')?'✓ Caméra associée · consultation en cours':
+    '✓ Consultation créée · attente de ton iPhone');
   if(force||signature!==motionLiveSignature){
    motionLiveSignature=signature;
    const queue=$('#opCheckinQueue');
@@ -762,13 +762,13 @@ async function loadMotionLiveRooms(force=false){
     const pct=Math.round(Math.min(6,Number(room.step_index)||0)/6*100);
     const patientName=patient?[patient.first_name,patient.last_name].filter(Boolean).join(' '):'Aucun dossier associé';
     return `<article class="op-live-room" data-room="${esc(room.id)}">
-      <header><div><span class="overline">CODE DE TON IPHONE</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'iPhone connecté':'iPhone hors ligne'}</span></header>
+      <header><div><span class="overline">SESSION MOTION · ASSOCIATION AUTOMATIQUE</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'iPhone connecté':'iPhone hors ligne'}</span></header>
       <p>${esc(patientName)} · ${esc(stage)}</p>
       <div class="op-live-track"><i style="width:${pct}%"></i></div><small>${pct}% des étapes parcourues · ${room.progress?.step_status==='running'?'Test en cours':'Attente du prochain test'}</small>
-      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir consultation</button>':''}`}
+      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?(room.status==='active'?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir les tests Motion →</button>':'<span class="op-live-waiting">En attente de la caméra du cabinet</span>'):''}`}
       <button type="button" class="button secondary" data-live-close="${esc(room.id)}">Clore la salle</button></div>
     </article>`;
-   }).join(''):'<div class="op-live-empty">Aucune caméra détectée. Sur ton iPhone, ouvre pulse.komolongevity.com/camera/ puis appuie sur « Ouvrir la caméra ».</div>';
+   }).join(''):'<div class="op-live-empty">Aucun bilan en cours. Choisis un dossier fictif sur cet ordinateur et clique sur « Démarrer une nouvelle consultation ».</div>';
    for(const select of host.querySelectorAll('[data-live-select]')){
     if(selected.has(select.dataset.liveSelect))select.value=selected.get(select.dataset.liveSelect);
     else if(S.patient?.data_classification==='synthetic')select.value=S.patient.id;
