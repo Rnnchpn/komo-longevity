@@ -45,7 +45,9 @@ const checks=[
   ['iPhone video reception is distinguished from connection alone',operatorVideo.includes('function videoReady(')&&operatorVideo.includes('video.videoWidth>0')&&operatorVideo.includes('Liaison connectée sans image')&&operatorVideo.includes('video.onloadeddata=refreshVideoStatus')],
   ['video monitor embedded with Motion Online controls',parse('site/pulse-v14/motion-live-operator-video-v1.js')&&operatorVideo.includes('operator_signal_pull')&&operatorVideo.includes('operator_signal_push')&&operatorVideo.includes('containerId')&&operatorVideoCss.includes('.mopv-window.embedded')],
   ['operator consultation module and user controls parse',parse('site/pulse-v14/motion-live-operator-consult-v1.js')&&consult.includes('mocSave')&&consult.includes('mocStopClock')&&consult.includes('mocSafety')&&consultCss.includes('.moc-grid')],
-  ['six supervised tests match existing Motion Online',["sts","heels","unipodal_left","unipodal_right","arms","posture"].every(id=>consult.includes('id:"'+id+'"')&&onlineSession.includes("id:'"+id+"'"))],
+  ['six supervised tests include manual Two-Step',["sts","two_step","unipodal_left","unipodal_right","arms","posture"].every(id=>
+   consult.includes('id:"'+id+'"'))&&onlineSession.includes("id:'heels'")&&
+   liveEdge.includes('const STEPS=["sts","two_step"')&&liveEdge.includes('invalid_two_step_attempts')],
   ['Operator runs tests, not phone',consult.includes('operator_test_update')&&app.includes('mountOperatorConsultation')&&liveEdge.includes('operator_controls_tests')],
   ['D0 interface removed',!app.includes('D0')&&app.includes("['operator','Consultation Motion']")],
   ['Edge validates manual results and enforces test owner',liveEdge.includes('invalid_manual_measurement')&&liveEdge.includes('room.operator_user_id!==actor.id')&&liveEdge.includes('safety_check_required')],
@@ -62,7 +64,7 @@ const checks=[
   ['live UI readable on mobile',liveCss.includes('max-width:760px')&&liveCss.includes('.mlive-camera.rear video')&&css.includes('.op-live-room')],
   ['remote tracking module parses',parse('site/pulse-v14/motion-live-remote-pose-v1.js')],
   ['pose markers reuse existing MediaPipe in Operator only',remotePose.includes("import {createPoseEngine} from './online/session/pose-engine.js?v=20261110-video-measures-v1'")&&remotePose.includes('mirror:false')&&poseEngine.includes('detectForVideo')&&poseEngine.includes('options.mirror!==false')],
-  ['all six Motion Online tests connected to original frame trackers',remotePose.includes('createMovementTracker')&&remotePose.includes('createOneLegObserver')&&remotePose.includes('createSideProfileStability')&&['sts','heels','arms','unipodal_left','unipodal_right','posture'].every(id=>remotePose.includes('"'+id+'"'))],
+  ['video-capable tests retain pose tracking, Two-Step remains manual',remotePose.includes('createMovementTracker')&&remotePose.includes('createOneLegObserver')&&remotePose.includes('createSideProfileStability')&&['sts','arms','unipodal_left','unipodal_right','posture'].every(id=>remotePose.includes('"'+id+'"'))&&consult.includes('t.id==="two_step"')],
   ['WebRTC source not computer local camera',operatorVideo.includes('pulse:remote-video-ready')&&operatorVideo.includes('pulse:remote-video-stopped')&&remotePose.includes('attach(nextVideo)')&&!remotePose.includes('getUserMedia')&&!remotePose.includes('MediaRecorder')],
   ['live skeleton canvas matches unmirrored stream',remotePose.includes('moc-pose-overlay')&&consultCss.includes('canvas.moc-pose-overlay')&&consultCss.includes('object-fit:contain')],
   ['measured estimate auto-fills with editable override',consult.includes('payload.measurement_source')&&consult.includes('manualEdited')&&consult.includes('reading?.measurement')&&consult.includes('mocValue')],
