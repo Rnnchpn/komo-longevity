@@ -77,7 +77,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261110-persist-report-v3";
+ link.href="./motion-live-operator-consult-v1.css?v=20261111-clean-screen-v1";
  document.head.append(link);
 }
 function stopClock(){
