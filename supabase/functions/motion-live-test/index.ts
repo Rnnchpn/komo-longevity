@@ -265,6 +265,7 @@ Deno.serve(async(req:Request)=>{
    db.from("pulse_motion_live_sessions").select("id,status,patient_id,operator_session_id,progress,display_code,expires_at")
     .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
     .in("status",["waiting","ready","active"]).gte("expires_at",now())
+    .contains("progress",{camera_owner:"operator"})
     .order("created_at",{ascending:false}).limit(10)
   ]);
   if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic")
