@@ -889,7 +889,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261111-two-step-pdf-v2');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261111-questionnaire-points-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         openVideo:openOperatorCamera,preferredSessionId:S.patient?.id?
