@@ -30,7 +30,7 @@ const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
 let clockKey="",clockLocal=null;
 let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListener=null,autoValue=null,manualEdited=false,poseStatus="En attente du flux iPhone",poseRetryAt=0;
-let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0;
+let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0,preferredSessionId="";
 let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null,questionnaireNavigating=false,questionnairePersistedAt=0;
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
 let videoFocus=false,videoLive=false;
@@ -93,7 +93,7 @@ export function disposeOperatorConsultation(){
  if(poll)clearInterval(poll);poll=null;stopClock();
  if(questionnaireTimer)clearTimeout(questionnaireTimer);questionnaireTimer=null;
  voice?.destroy();voice=null;countdownPending=false;
- extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;questionnaireNavigating=false;questionnairePersistedAt=0;
+ extras=null;panelMode="tests";questionnaireAnswers={};questionnaireIndex=0;questionnaireDirty=false;questionnaireSaveInFlight=null;questionnaireNavigating=false;questionnairePersistedAt=0;preferredSessionId="";
  if(videoListener)window.removeEventListener("pulse:remote-video-ready",videoListener);
  if(stopVideoListener)window.removeEventListener("pulse:remote-video-stopped",stopVideoListener);
  if(fullscreenListener)document.removeEventListener("fullscreenchange",fullscreenListener);
@@ -810,13 +810,31 @@ async function refresh(force=false){
  polling=true;
  try{
   const data=await api({action:"operator_list"});
-  const matching=(data.sessions||[]).filter(x=>x.patient_id===patient?.id&&x.progress?.camera_owner==="operator"&&["active","completed"].includes(x.status))
+  const matching=(data.sessions||[]).filter(x=>x.patient_id===patient?.id&&x.progress?.camera_owner==="operator"&&
+   ["waiting","ready","active","completed"].includes(x.status))
    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
-  const selected=matching[0]||null;
+  // The operator may enter answers before the iPhone connects. An existing active
+  // consultation takes priority over archived reports; otherwise honor the explicit
+  // room opened in the live-session dashboard, not an unrelated newer report.
+  const selected=matching.find(x=>["waiting","ready","active"].includes(x.status))||
+   matching.find(x=>x.id===preferredSessionId)||matching[0]||null;
   if(!selected){
    room=null;renderWaiting("Crée une consultation sur l’ordinateur, puis active /camera/ sur l’iPhone : liaison automatique sans code.");
    return;
   }
+  if(room?.id&&room.id!==selected.id&&(questionnaireDirty||questionnaireSaveInFlight)){
+   try{await saveQuestionnaire()}catch(error){
+    questionnaireNote("Impossible de changer de dossier : réponses non enregistrées. "+(error.message||""));
+    return;
+   }
+   if(questionnaireDirty)return;
+  }
+  if(room?.id!==selected.id){
+   // Never mix questionnaire answers from two different consultation sessions.
+   questionnaireAnswers={};questionnairePersistedAt=0;questionnaireDirty=false;
+   latestSignature="";
+  }
+  preferredSessionId=selected.id;
   if(selected.status==="active"&&!TESTS.some(t=>t.id===selected.stage_code)){
    const initialized=await api({action:"operator_tests_init",session_id:selected.id});
    room=initialized.session;
@@ -862,6 +880,7 @@ async function refresh(force=false){
 export async function mountOperatorConsultation(config){
  disposeOperatorConsultation();
  host=config.root;api=config.api;openVideo=config.openVideo;patient=config.patient||null;
+ preferredSessionId=config.preferredSessionId||"";
  if(!host)return;
  styles();makeShell();
  try{
