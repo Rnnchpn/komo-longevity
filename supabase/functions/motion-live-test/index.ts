@@ -6,10 +6,10 @@ const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 const db=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false}});
 const ORG_ID="cea48f94-24ae-4ddb-ac28-ac289bb1e9ca"; // KŌMØ Cannes, test_only
 // Align the supervised remote consultation with the six existing Motion Online tests.
-const STEPS=["sts","heels","unipodal_left","unipodal_right","arms","posture"];
+const STEPS=["sts","two_step","unipodal_left","unipodal_right","arms","posture"];
 const LIMITS:Record<string,{max:number;integer:boolean;unit:string}>={
  sts:{max:100,integer:true,unit:"repetitions"},
- heels:{max:100,integer:true,unit:"repetitions"},
+ two_step:{max:650,integer:false,unit:"cm"},
  unipodal_left:{max:30,integer:false,unit:"seconds"},
  unipodal_right:{max:30,integer:false,unit:"seconds"},
  arms:{max:100,integer:true,unit:"movements"}
@@ -520,7 +520,7 @@ Deno.serve(async(req:Request)=>{
   // Explicit duration follows the CURRENT client protocol. Previous 20 s
   // implementations remain labeled 20 s when no duration was supplied.
   const starting=["start","restart"].includes(event);
-  const protocolDuration=step==="posture"?0:
+  const protocolDuration=(step==="posture"||step==="two_step")?0:
    (step==="heels"||step==="arms")?
      (starting?(b.duration_seconds===30?30:20):
        (old.test_duration_seconds===30?30:20)):30;
@@ -539,7 +539,24 @@ Deno.serve(async(req:Request)=>{
   }else{
    if(event==="save"){
     if(old.step_status!=="running")return response(req,{error:"test_not_started"},409);
-    if(step==="posture"){
+    if(step==="two_step"){
+     const attempts=b.attempts_cm;
+     if(!Array.isArray(attempts)||attempts.length!==2||
+       attempts.some((x:unknown)=>typeof x!=="number"||!Number.isFinite(x)||x<1||x>650||
+         Math.round(x*10)!==x*10))
+       return response(req,{error:"invalid_two_step_attempts"},422);
+     const best=Math.max(...attempts);
+     const height=b.height_cm;
+     if(height!==undefined&&(typeof height!=="number"||!Number.isFinite(height)||
+       height<100||height>230||Math.round(height*10)!==height*10))
+       return response(req,{error:"invalid_height_cm"},422);
+     if(b.value!==best||b.measurement_source!=="operator_manual_observation")
+       return response(req,{error:"two_step_requires_manual_best_attempt"},422);
+     results[step]={status:"done",value:best,unit:"cm",source:"operator_manual_observation",
+       attempts_cm:attempts,height_cm:height??null,
+       two_step_index:height?Math.round(best/height*1000)/1000:null,
+       note,protocol:"TWO_STEP_TWO_TRIALS_OPERATOR_V1",recorded_at:now()};
+    }else if(step==="posture"){
      const observation=s(b.observation,30);
      if(!["neutral","apparent_offset","not_interpretable"].includes(observation))
       return response(req,{error:"invalid_posture_observation"},422);
