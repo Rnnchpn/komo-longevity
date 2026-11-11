@@ -283,6 +283,24 @@ Deno.serve(async(req:Request)=>{
     session_id:same.id,display_code:same.display_code,status:same.status});
    return response(req,{error:"consultation_already_pending"},409);
   }
+  // Optional pre-consultation preparation preserves the participant's two
+  // synthetic questionnaire answers in the SAME physical consultation.
+  const checkinId=s(b.checkin_id,50);
+  let initialQuestionnaire:Record<string,unknown>={};
+  if(checkinId){
+   if(!uuid(checkinId))return response(req,{error:"invalid_checkin"},422);
+   const {data:checkin}=await db.from("pulse_motion_live_sessions")
+    .select("id,patient_id,operator_user_id,progress").eq("id",checkinId)
+    .eq("organization_id",ORG_ID).maybeSingle();
+   const intake=checkin?.progress?.patient_checkin;
+   if(!checkin||checkin.patient_id!==patientId||checkin.operator_user_id!==actor.id||
+    checkin.progress?.kind!=="patient_checkin"||intake?.state!=="accepted"||
+    intake.synthetic!==true)
+    return response(req,{error:"invalid_checkin"},403);
+   initialQuestionnaire={questionnaire:{version:"KOMO_MOTION_SELF_REPORT_V1",
+    answers:{ageBand:intake.age_band,goal:intake.goal},simulated:true,
+    entered_by:"patient_demo_checkin",updated_at:now()}};
+  }
   const token=randomToken();
   const code=String(crypto.getRandomValues(new Uint32Array(1))[0]%1000000).padStart(6,"0");
   const {data:created,error}=await db.from("pulse_motion_live_sessions").insert({
@@ -290,7 +308,7 @@ Deno.serve(async(req:Request)=>{
    guest_token_hash:await hash(token),display_code:code,
    status:"waiting",stage_code:STEPS[0],step_index:0,
    progress:{kind:"physical_consultation",camera_owner:"operator",camera_state:"awaiting_phone",
-    step_status:"pending",results:{},safety_confirmed:false},
+    step_status:"pending",results:{},safety_confirmed:false,...initialQuestionnaire},
    expires_at:new Date(Date.now()+4*3600000).toISOString()
   }).select("id,status,display_code").single();
   if(error||!created)return response(req,{error:"consultation_creation_failed"},503);
