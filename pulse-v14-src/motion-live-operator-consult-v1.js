@@ -341,17 +341,28 @@ function renderReportSection(){
  const essentials=plan.supplements.filter(s=>['protein','creatine','vitd'].includes(s.id));
  const more=plan.supplements.filter(s=>!['protein','creatine','vitd'].includes(s.id));
  const reasons=plan.highlights.map((x,i)=>'<div class="moc-passport-highlight"><small>'+HTML(x.label)+'</small><strong>'+HTML(x.value)+'</strong></div>').join('');
+ const pointGroups=passport.questionnaire.groups.filter(g=>g.maxPoints!==null).map(g=>
+  '<div class="moc-domain-point"><span>'+HTML(g.label)+'</span><strong>'+
+  (g.points===null?'À compléter':g.points+'/'+g.maxPoints+' points')+'</strong>'+
+  '<small>'+(g.score===null?'Score indisponible':g.score+'/100 · indice déclaré')+'</small></div>').join('');
  q("mocTestBody").innerHTML='<section class="moc-test moc-report-section moc-passport-section moc-action-report">'+
   '<span class="moc-kicker">KŌMØ MOTION PASSPORT · SIX-WEEK ACTION PLAN</span>'+
   '<h3>Votre feuille de route</h3>'+
   (simulated?'<p class="moc-demo-warning">SCÉNARIO FICTIF · Réponses simulées, aucun avis médical individualisé.</p>':'')+
   '<div class="moc-action-metrics"><div><strong>'+passport.measured+'/6</strong><span>tests réalisés</span></div>'+
-   '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses</span></div>'+
-   '<div><strong>6 sem.</strong><span>programme proposé</span></div></div>'+
+   '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses enregistrées</span></div>'+
+   '<div><strong>'+(passport.questionnaire.complete?passport.questionnaire.index+'/100':'—')+
+   '</strong><span>indice fonctionnel déclaré</span></div></div>'+
   '<h4>Votre profil en bref</h4>'+
   '<p class="moc-report-answers-state">'+(passport.questionnaire.answered===22?
    '✓ Questionnaire complet : 22 réponses prises en compte.':
    '⚠ '+passport.questionnaire.answered+'/22 réponses · complétez le questionnaire pour un rapport intégral.')+'</p>'+
+  '<div class="moc-scoring-result"><strong>'+(passport.questionnaire.complete?
+   passport.questionnaire.rawPoints+'/'+passport.questionnaire.maxPoints+
+   ' points de difficulté · indice '+passport.questionnaire.index+'/100':
+   'Score global indisponible tant que les 22 réponses ne sont pas enregistrées')+
+   '</strong><p>20 réponses notées de 0 à 4 ; âge et objectif descriptifs. Plus les points de difficulté sont élevés, plus le profil déclaré est limité. L’indice pondéré sur 100 suit la direction inverse. Barème KŌMØ non validé ; distinct du Motion Score.</p></div>'+
+  '<div class="moc-domain-points">'+pointGroups+'</div>'+
   '<div class="moc-passport-highlights">'+reasons+'</div>'+
   '<h4>Tests réalisés</h4><div class="moc-results-compact">'+passport.measures.map(resultCard).join('')+'</div>'+
   '<div class="moc-action-section-title"><h4>Exercices à la maison</h4><small>Progression à adapter et valider</small></div>'+
@@ -891,7 +902,7 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261111-two-step-pdf-v2");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261111-questionnaire-points-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
