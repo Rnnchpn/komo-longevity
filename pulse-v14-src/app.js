@@ -602,7 +602,17 @@ async function motionLiveAPI(body){
     'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token
   },body:JSON.stringify(body)});
   let data={};try{data=await res.json()}catch{throw Error('Réponse serveur illisible.')}
-  if(!res.ok||data.error)throw Error(data.error||'Serveur indisponible.');
+  if(!res.ok||data.error){
+   const explain={
+    consultation_already_pending:'Une consultation est déjà ouverte. Réinitialise les essais en cours avant de recommencer.',
+    consultation_not_prepared:'Crée d’abord la consultation sur ton ordinateur.',
+    synthetic_patient_required:'Seuls les dossiers fictifs sont autorisés dans cette version de test.',
+    operator_session_mismatch:'La consultation ne correspond pas au dossier sélectionné.',
+    reset_delete_failed:'Le nettoyage a échoué. Réessaie depuis la page Nouvelle consultation.',
+    camera_pairing_retry:'La caméra est en cours de connexion. Réessaie dans un instant.'
+   };
+   throw Error(explain[data.error]||data.error||'Serveur indisponible.');
+  }
   return data;
 }
 async function openOperatorCamera(sessionId,containerId){
@@ -818,7 +828,7 @@ async function acceptMotionCheckin(checkinId,button){
   await motionLiveAPI({action:'operator_checkin_claim',session_id:checkinId,patient_id:patientId,
    operator_session_id:op.data.session_id});
   await motionLiveAPI({action:'operator_consultation_prepare',
-   patient_id:patientId,operator_session_id:op.data.session_id});
+   patient_id:patientId,operator_session_id:op.data.session_id,checkin_id:checkinId});
   localStorage.setItem('komo_v14_patient',patientId);
   await loadPro();
   toast('Consultation préparée. Active la caméra sur ton iPhone.');
