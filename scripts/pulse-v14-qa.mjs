@@ -108,7 +108,7 @@ const checks=[
  ['session questionnaire and safety',sessionJs.includes('function questionnaire()')&&sessionJs.includes('function safety()')],
  ['online original self-report replaces four-question demo',sessionJs.includes('intakeMarkup(state.answers,state.questionStep)')&&intakeModel.includes('QUESTIONNAIRE_VERSION')&&intakeModel.includes('walk10')&&intakeView.includes('bindIntake')],
  ['questionnaire cannot skip missing answers',intakeView.includes('completeGroup(group,answers)')&&intakeModel.includes('profileIndex=complete?')],
- ['self-report scored domains and separate final score',intakeModel.includes('SCORING_GROUPS')&&intakeReport.includes('INDICE DE PROFIL DÉCLARÉ')&&intakeReport.includes('Motion Score indisponible')],
+ ['self-report scored domains and separate final score',intakeModel.includes('SCORING_GROUPS')&&intakeReport.includes('INDICE FONCTIONNEL DÉCLARÉ')&&intakeReport.includes('intake.rawPoints')&&intakeReport.includes('Motion Score indisponible')],
  ['final score exact linear formula and gates',motionFormula.includes('40*F+35*M+6.25*B')&&motionFormula.includes('operatorVerified')&&motionFormula.includes('stsP10')&&motionFormula.includes('tugP90')],
  ['no invented motion age or norms',!motionFormula.includes('Motion Age')&&motionFormula.includes('normsSource')&&intakeReport.includes('Aucune norme statistique n’a été inventée')],
  ['intake source scripts parse',nodeSyntax('intake-model.mjs')&&nodeSyntax('intake-view.js')&&nodeSyntax('intake-report.js')&&nodeSyntax('motion-score.mjs')],
