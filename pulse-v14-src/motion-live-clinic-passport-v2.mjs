@@ -1,6 +1,6 @@
 // Clinical-style *descriptive* passport for supervised KŌMØ Motion demos.
 // No medical diagnosis, validated score, biological age or survival estimate.
-import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './online/session/intake-model.mjs';
+import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './online/session/intake-model.mjs?v=20261111-questionnaire-points-v1';
 import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
