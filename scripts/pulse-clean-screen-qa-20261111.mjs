@@ -19,9 +19,9 @@ for(const path of ['site/pulse-v14/motion-live-operator-consult-v1.js',
  const r=spawnSync(process.execPath,['--check',join(process.cwd(),path)],{encoding:'utf8'});
  assert.equal(r.status,0,path+': '+r.stderr);
 }
-assert.ok(index.includes('app.js?v=20261111-clean-screen-v1'));
-assert.ok(app.includes('operator-video-v1.js?v=20261111-clean-screen-v1'));
-assert.ok(app.includes('operator-consult-v1.js?v=20261111-clean-screen-v1'));
+assert.ok(index.includes('app.js?v=20261111-two-step-pdf-v2'));
+assert.ok(app.includes('operator-video-v1.js?v=20261111-two-step-pdf-v2'));
+assert.ok(app.includes('operator-consult-v1.js?v=20261111-two-step-pdf-v2'));
 assert.ok(ui.includes('moc-camera-banner')&&ui.includes('mocCameraBanner'));
 assert.ok(ui.includes('moc-video-hidden')&&ui.includes('panelMode==="questionnaire"'));
 assert.ok(ui.includes('const preview=panelMode==="tests"&&videoFocus'));
@@ -57,6 +57,10 @@ assert.equal(complete.questionnaire.answered,22);
 assert.equal(complete.measured,6);
 assert.equal(complete.questionnaire.groups.reduce((n,g)=>n+g.items.length,0),22);
 assert.ok(complete.actionPlan.exercises.length>=4);
+assert.ok(ui.includes('two_step')&&edge.includes('two_step'));
+assert.ok(ui.includes('mocTwoStep1')&&ui.includes('mocTwoStep2'));
+assert.ok(uiCss.includes('.moc-questionnaire-all'));
+assert.ok(complete.questionnaire.total===22);
 assert.ok(complete.actionPlan.supplements.some(x=>x.guard&&x.guard.length>30));
 const partial=buildClinicPassport({},results,{simulated:true});
 assert.equal(partial.questionnaire.answered,0);
