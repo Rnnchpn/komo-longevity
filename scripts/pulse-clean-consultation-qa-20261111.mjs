@@ -65,7 +65,10 @@ assert.ok(!reset.includes('"completed"')&&!reset.includes("'completed'"));
 assert.ok(ui.includes("action:'operator_reset_demo_sessions'"));
 assert.ok(ui.includes('id="opLiveReset"'));
 assert.ok(ui.includes("['waiting','ready','active'].includes(x.status)"));
-assert.ok(ui.includes('op-live-waiting'));
+// The Operator can complete the questionnaire before the iPhone pairs.
+assert.ok(ui.includes('Remplir le questionnaire →'));
+assert.ok(ui.includes('komo_motion_consult_room_'));
+assert.ok(edge.includes('"waiting","ready","active","completed"'));
 assert.ok(ui.includes('SESSION MOTION · ASSOCIATION AUTOMATIQUE'));
 assert.ok(ui.includes("action:'operator_checkin_invite'"),'optional fictitious check-in retained');
 assert.ok(styles.includes('.op-start-panel'));
