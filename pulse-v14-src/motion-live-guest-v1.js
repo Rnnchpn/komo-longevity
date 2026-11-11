@@ -298,7 +298,14 @@ export async function openMotionLive(options={}){
   const existing=sessionStorage.getItem(key);
   if(existing&&/^[A-Za-z0-9_-]{43}$/.test(existing)){
    guestToken=existing;
-   try{const data=await request({action:"guest_status",guest_token:guestToken});live=data.session;stationRoomId=data.session?.id||"";}
+   try{
+    const data=await request({action:"guest_status",guest_token:guestToken});
+    // Completed/legacy camera tokens must never block the next desktop-prepared
+    // consultation. A fresh camera token is issued for the new single room.
+    if(cameraStation&&(data.session?.status!=="active"||data.session?.progress?.kind!=="physical_consultation"))
+     throw Error("stale_staff_camera_session");
+    live=data.session;stationRoomId=data.session?.id||"";
+   }
    catch{guestToken="";sessionStorage.removeItem(key)}
   }
   if(!guestToken){

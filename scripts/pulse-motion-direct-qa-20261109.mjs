@@ -75,7 +75,7 @@ const checks=[
   ['iPhone user can stop camera room after reloading',staffCameraJs.includes("action:'operator_camera_stop'")&&liveGuest.includes('stationRoomId=data.session?.id')&&liveEdge.includes('id:x.id,display_code:x.display_code')],
   ['camera pairing belongs only to same Operator',liveEdge.includes('room.operator_user_id!==actor.id')&&liveEdge.includes('camera_owner_required')&&liveEdge.includes('operator_camera_start')],
   ['room recovery scoped to authenticated clinician',liveGuest.includes("STAFF_STORAGE+':'+String(options.ownerId||'unknown')")&&staffCameraJs.includes('ownerId:session.user.id')],
-  ['desktop discovers only own clinician camera',app.includes("x.progress?.camera_owner==='operator'")&&app.includes('CODE DE TON IPHONE')&&app.includes('/camera/')],
+  ['desktop discovers only own clinician camera',app.includes("x.progress?.camera_owner==='operator'")&&app.includes('SESSION MOTION · ASSOCIATION AUTOMATIQUE')&&app.includes('/camera/')],
   ['iPhone camera station renders without patient actions',liveGuest.includes('mlive-staff-camera')&&liveGuest.includes('cameraStation')&&liveGuest.includes('CAMÉRA DU CABINET')],
   ['clinic camera app is standalone',staffCameraManifest.display==='standalone'&&staffCameraManifest.start_url==='/camera/'&&staffCameraHtml.includes('manifest.webmanifest')],
   ['unrelated Operator cannot close connected camera',liveEdge.includes('.eq("operator_user_id",actor.id).select("id")')],

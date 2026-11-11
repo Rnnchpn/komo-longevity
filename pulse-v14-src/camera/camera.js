@@ -18,7 +18,13 @@ async function api(payload){
  if(!res.ok||data.error)throw Error({
   operator_access_required:'Ce compte n’a pas l’accès Opérateur.',
   too_many_active_cameras:'Trop de caméras ouvertes. Termine une séance sur ton iPhone avant d’en ouvrir une autre.',
-  test_environment_only:'Ce dispositif est réservé aux tests avec dossiers fictifs.'
+  test_environment_only:'Ce dispositif est réservé aux tests avec dossiers fictifs.',
+  consultation_not_prepared:'Commence par créer ta consultation sur l’ordinateur, dans « Nouvelle consultation ». Ensuite, active la caméra ici.',
+  consultation_already_pending:'Une consultation est déjà prête sur l’ordinateur.',
+  camera_already_connected:'La caméra est déjà connectée. Ferme l’ancienne session de caméra avant de recommencer.',
+  camera_pairing_retry:'Association momentanément occupée. Retente l’activation.',
+  consultation_unbound:'Le dossier n’est pas encore prêt sur l’ordinateur.',
+  multiple_pending_consultations:'Plusieurs séances de test sont présentes. Réinitialise-les sur l’ordinateur avant de recommencer.'
  }[data.error]||data.error||'Connexion impossible');
  return data;
 }
@@ -47,9 +53,9 @@ function renderReady(email){
  root.innerHTML='<span class="camera-overline">MATÉRIEL DU PRATICIEN · CONSULTATION PHYSIQUE</span>'+
  '<h1>Ton iPhone.<br><em>La caméra Motion.</em></h1>'+
  '<p class="camera-account">Compte Operator : <strong>'+esc(email)+'</strong></p>'+
- '<ol class="camera-steps"><li>Place ton iPhone sur le trépied, caméra arrière vers le participant.</li>'+
- '<li>Active la caméra. Elle apparaît automatiquement sur l’ordinateur dans <strong>Nouvelle consultation</strong>.</li>'+
- '<li>Si une seule caméra est disponible, Pulse pourra l’associer au dossier préparé. Change avant/arrière directement sur ton iPhone.</li></ol>'+
+ '<ol class="camera-steps"><li>Sur ton ordinateur, clique d’abord sur « Démarrer une nouvelle consultation ».</li>'+
+ '<li>Place ton iPhone sur le trépied et active la caméra arrière ici.</li>'+
+ '<li>Pulse relie automatiquement les deux appareils à la même consultation, sans code. Tu peux changer avant/arrière sur cet iPhone.</li></ol>'+
  '<button type="button" id="cameraStart" class="camera-button">Activer la caméra du cabinet</button>'+
  '<button type="button" id="cameraLogout" class="camera-button secondary">Changer de compte</button>'+
  '<p class="camera-status" id="cameraStatus" role="status"></p>';
@@ -60,7 +66,7 @@ function renderReady(email){
   try{
    const {data:{session}}=await sb.auth.getSession();
    if(!session?.user?.id)throw Error('Compte Operator non connecté.');
-   const module=await import('../motion-live-guest-v1.js?v=20261110-persist-report-v3');
+   const module=await import('../motion-live-guest-v1.js?v=20261111-clean-consultation-v2');
    await module.openMotionLive({
     mode:'operator_camera',
     ownerId:session.user.id,

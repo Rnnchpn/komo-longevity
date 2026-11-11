@@ -602,7 +602,17 @@ async function motionLiveAPI(body){
     'Content-Type':'application/json',apikey:SUPABASE_KEY,Authorization:'Bearer '+session.access_token
   },body:JSON.stringify(body)});
   let data={};try{data=await res.json()}catch{throw Error('Réponse serveur illisible.')}
-  if(!res.ok||data.error)throw Error(data.error||'Serveur indisponible.');
+  if(!res.ok||data.error){
+   const explain={
+    consultation_already_pending:'Une consultation est déjà ouverte. Réinitialise les essais en cours avant de recommencer.',
+    consultation_not_prepared:'Crée d’abord la consultation sur ton ordinateur.',
+    synthetic_patient_required:'Seuls les dossiers fictifs sont autorisés dans cette version de test.',
+    operator_session_mismatch:'La consultation ne correspond pas au dossier sélectionné.',
+    reset_delete_failed:'Le nettoyage a échoué. Réessaie depuis la page Nouvelle consultation.',
+    camera_pairing_retry:'La caméra est en cours de connexion. Réessaie dans un instant.'
+   };
+   throw Error(explain[data.error]||data.error||'Serveur indisponible.');
+  }
   return data;
 }
 async function openOperatorCamera(sessionId,containerId){
@@ -614,15 +624,65 @@ async function openOperatorCamera(sessionId,containerId){
 function motionLiveMonitor(){
   heading('Préparer une consultation','KŌMØ OPERATOR · CENTRE · DÉMONSTRATION');
   $('#view').innerHTML=`<div class="op-live-dashboard">
-    <header class="op-live-head"><div><span class="overline">CONSULTATION MOTION · 3 ÉTAPES</span><h2>Une consultation. Deux appareils.</h2><p>Le participant remplit une courte préparation, <strong>ton iPhone filme depuis le trépied</strong> et tu pilotes tous les tests sur cet ordinateur. Pas de compte participant ni de caméra patient.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
-    <div class="op-live-checklist"><div><b>01</b><span><strong>Préparer le participant</strong><small>Un lien, quelques informations fictives</small></span></div><div><b>02</b><span><strong>Connecter ton iPhone</strong><small>Caméra arrière · trépied</small></span></div><div><b>03</b><span><strong>Débuter les tests</strong><small>Mesures, questionnaire, passeport</small></span></div></div>
-    <div class="op-live-toolbar"><button type="button" class="button primary" id="opLiveCreateCheckin">+ Nouvelle consultation</button><button type="button" class="button secondary" id="opLiveCopyCameraLink">Connecter mon iPhone</button><button type="button" class="button secondary" id="opLiveNewPatient">Créer un dossier manuellement</button><span id="opLiveCount" aria-live="polite">Synchronisation…</span></div>
+    <header class="op-live-head"><div><span class="overline">CONSULTATION MOTION · DEUX APPAREILS</span><h2>Nouvelle consultation</h2><p>Crée la consultation sur cet ordinateur, puis active la caméra depuis ton iPhone sur trépied. <strong>Les deux appareils se lient sans code.</strong></p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
+    <div class="op-live-checklist"><div><b>01</b><span><strong>Créer la consultation</strong><small>Sur l’ordinateur, avec un dossier fictif</small></span></div><div><b>02</b><span><strong>Activer l’iPhone</strong><small>Caméra sur trépied, liaison automatique</small></span></div><div><b>03</b><span><strong>Faire le bilan</strong><small>Tests, questionnaires, PDF</small></span></div></div>
+    <section class="op-start-panel"><div><span class="overline">ÉTAPE 1 · SUR L’ORDINATEUR</span><h3>Une consultation propre</h3><p>Choisis un dossier fictif puis commence. Pulse n’ouvrira qu’une seule séance.</p></div><label>Patient de démonstration<select id="opLivePatientChoice"></select></label><button type="button" class="button primary" id="opLiveBegin">Démarrer une nouvelle consultation →</button><p class="op-start-help" id="opLiveStartHelp" role="status">Les bilans terminés restent archivés.</p></section>
+    <div class="op-live-toolbar"><button type="button" class="button secondary" id="opLiveCopyCameraLink">Étape 2 · Copier le lien iPhone</button><button type="button" class="button secondary" id="opLiveReset">Réinitialiser les essais en cours</button><button type="button" class="button secondary" id="opLiveNewPatient">Gérer les dossiers</button><span id="opLiveCount" aria-live="polite">Synchronisation…</span></div>
+    <details class="op-live-advanced"><summary>Option avancée : préparation fictive par QR code</summary><button type="button" class="button secondary" id="opLiveCreateCheckin">Créer une invitation fictive</button>
     <div id="opLiveInvite" class="op-checkin-invitation" hidden></div>
-    <section class="op-checkin-section"><h3>Participants prêts à commencer</h3><div id="opCheckinQueue" aria-live="polite"><p>Recherche des préparations…</p></div></section>
-    <section class="op-checkin-section"><h3>Caméra du cabinet</h3><div id="opLiveRooms" aria-live="polite"><p>Recherche de l’iPhone…</p></div></section>
+    <section class="op-checkin-section"><h3>Préparations reçues</h3><div id="opCheckinQueue" aria-live="polite"><p>Recherche des préparations…</p></div></section></details>
+    <section class="op-checkin-section"><h3>Consultation à démarrer</h3><div id="opLiveRooms" aria-live="polite"><p>Recherche de l’iPhone…</p></div></section>
     <p class="op-live-caution">Test de consultation physique : ton iPhone est le capteur vidéo du cabinet ; aucune connexion patient sur le téléphone. Vidéo WebRTC sans enregistrement. Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.</p>
   </div>`;
   $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
+  const demoPatients=S.patients.filter(p=>p.data_classification==='synthetic'&&p.status==='active');
+  const patientChoice=$('#opLivePatientChoice');
+  if(patientChoice){
+   patientChoice.innerHTML=demoPatients.map(p=>'<option value="'+esc(p.id)+'">'+esc([p.first_name,p.last_name].filter(Boolean).join(' '))+'</option>').join('');
+   if(S.patient?.data_classification==='synthetic'&&demoPatients.some(p=>p.id===S.patient.id))patientChoice.value=S.patient.id;
+   if(!demoPatients.length){
+    $('#opLiveBegin').disabled=true;
+    $('#opLiveStartHelp').textContent='Aucun dossier fictif : crée un dossier de démonstration dans Patients.';
+   }
+  }
+  $('#opLiveBegin').onclick=async()=>{
+   const button=$('#opLiveBegin'),patientId=$('#opLivePatientChoice')?.value||'';
+   const patient=S.patients.find(p=>p.id===patientId&&p.data_classification==='synthetic'&&p.status==='active');
+   if(!patient)return toast('Sélectionne un dossier fictif actif.');
+   button.disabled=true;button.textContent='Création de la consultation…';
+   try{
+    const active=await motionLiveAPI({action:'operator_list'});
+    if((active.sessions||[]).some(x=>x.operator_user_id===S.user?.id&&
+      ['waiting','ready','active'].includes(x.status)&&x.progress?.kind==='physical_consultation')){
+     toast('Une consultation est déjà prête. Utilise-la ou réinitialise les essais en cours.');
+     await loadMotionLiveRooms(true);return;
+    }
+    const result=await sb.rpc('start_pulse_operator_session_v1',
+      {p_patient_id:patientId,p_assessment_id:null});
+    if(result.error||!result.data?.session_id)throw Error(result.error?.message||'Impossible de préparer le bilan.');
+    await motionLiveAPI({action:'operator_consultation_prepare',
+      patient_id:patientId,operator_session_id:result.data.session_id});
+    localStorage.setItem('komo_v14_patient',patientId);
+    $('#opLiveStartHelp').textContent='✓ Consultation prête. Active maintenant la caméra sur ton iPhone.';
+    motionLiveSignature='';await loadMotionLiveRooms(true);
+    toast('Consultation créée, iPhone attendu.');
+   }catch(error){toast(error.message||'Création impossible.')}
+   finally{if(button.isConnected){button.disabled=false;button.textContent='Démarrer une nouvelle consultation →'}}
+  };
+  $('#opLiveReset').onclick=async()=>{
+   if(!confirm('Supprimer les essais fictifs non terminés ? Les rapports terminés seront conservés.'))return;
+   const button=$('#opLiveReset');button.disabled=true;
+   try{
+    const result=await motionLiveAPI({action:'operator_reset_demo_sessions'});
+    sessionStorage.removeItem('komo_pending_motion_checkin');
+    motionLiveSignature='';
+    $('#opLiveStartHelp').textContent='✓ '+result.removed+' session(s) supprimée(s). Nouvelle consultation possible.';
+    await loadMotionLiveRooms(true);
+    toast('Essais nettoyés. Tu peux recommencer.');
+   }catch(error){toast(error.message||'Réinitialisation impossible.')}
+   finally{if(button.isConnected)button.disabled=false}
+  };
+
   $('#opLiveCreateCheckin').onclick=async()=>{
     const button=$('#opLiveCreateCheckin');button.disabled=true;
     try{
@@ -670,16 +730,16 @@ async function loadMotionLiveRooms(force=false){
  try{
   const data=await motionLiveAPI({action:'operator_list'});
   const owned=(data.sessions||[]).filter(x=>x.operator_user_id===S.user?.id);
-  const rooms=owned.filter(x=>x.progress?.camera_owner==='operator');
+  const rooms=owned.filter(x=>x.progress?.camera_owner==='operator'&&['waiting','ready','active'].includes(x.status));
   const checkins=owned.filter(x=>x.progress?.kind==='patient_checkin');
   const signature=JSON.stringify([
    ...rooms.map(x=>[x.id,x.status,x.stage_code,x.step_index,x.progress?.step_status,x.patient_id,x.updated_at,x.patient_last_seen_at]),
    ...checkins.map(x=>[x.id,x.status,x.patient_id,x.progress?.patient_checkin?.state,x.updated_at])
   ]);
   const count=$('#opLiveCount');
-  if(count)count.textContent=checkins.filter(x=>x.progress?.patient_checkin?.state==='ready').length+
-   ' participant(s) prêt(s) · '+rooms.filter(x=>['waiting','ready','active'].includes(x.status)).length+
-   ' caméra(s) en cours';
+  if(count)count.textContent=rooms.length===0?'Aucun bilan en cours · prêt pour une nouvelle consultation':
+   (rooms.some(x=>x.status==='active')?'✓ Caméra associée · consultation en cours':
+    '✓ Consultation créée · attente de ton iPhone');
   if(force||signature!==motionLiveSignature){
    motionLiveSignature=signature;
    const queue=$('#opCheckinQueue');
@@ -712,13 +772,13 @@ async function loadMotionLiveRooms(force=false){
     const pct=Math.round(Math.min(6,Number(room.step_index)||0)/6*100);
     const patientName=patient?[patient.first_name,patient.last_name].filter(Boolean).join(' '):'Aucun dossier associé';
     return `<article class="op-live-room" data-room="${esc(room.id)}">
-      <header><div><span class="overline">CODE DE TON IPHONE</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'iPhone connecté':'iPhone hors ligne'}</span></header>
+      <header><div><span class="overline">SESSION MOTION · ASSOCIATION AUTOMATIQUE</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'iPhone connecté':'iPhone hors ligne'}</span></header>
       <p>${esc(patientName)} · ${esc(stage)}</p>
       <div class="op-live-track"><i style="width:${pct}%"></i></div><small>${pct}% des étapes parcourues · ${room.progress?.step_status==='running'?'Test en cours':'Attente du prochain test'}</small>
-      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir consultation</button>':''}`}
+      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?(room.status==='active'?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir les tests Motion →</button>':'<span class="op-live-waiting">En attente de la caméra du cabinet</span>'):''}`}
       <button type="button" class="button secondary" data-live-close="${esc(room.id)}">Clore la salle</button></div>
     </article>`;
-   }).join(''):'<div class="op-live-empty">Aucune caméra détectée. Sur ton iPhone, ouvre pulse.komolongevity.com/camera/ puis appuie sur « Ouvrir la caméra ».</div>';
+   }).join(''):'<div class="op-live-empty">Aucun bilan en cours. Choisis un dossier fictif sur cet ordinateur et clique sur « Démarrer une nouvelle consultation ».</div>';
    for(const select of host.querySelectorAll('[data-live-select]')){
     if(selected.has(select.dataset.liveSelect))select.value=selected.get(select.dataset.liveSelect);
     else if(S.patient?.data_classification==='synthetic')select.value=S.patient.id;
@@ -767,26 +827,12 @@ async function acceptMotionCheckin(checkinId,button){
   if(op.error||!op.data?.session_id)throw Error(op.error?.message||'Préparation du bilan impossible.');
   await motionLiveAPI({action:'operator_checkin_claim',session_id:checkinId,patient_id:patientId,
    operator_session_id:op.data.session_id});
-  sessionStorage.setItem('komo_pending_motion_checkin',JSON.stringify({checkinId,patientId}));
+  await motionLiveAPI({action:'operator_consultation_prepare',
+   patient_id:patientId,operator_session_id:op.data.session_id,checkin_id:checkinId});
   localStorage.setItem('komo_v14_patient',patientId);
   await loadPro();
-  // Pair the unique available clinician-owned camera automatically. More than
-  // one camera requires explicit selection to prevent accidental cross-pairing.
-  const latest=await motionLiveAPI({action:'operator_list'});
-  const ready=(latest.sessions||[]).filter(x=>x.progress?.camera_owner==='operator'&&
-   x.operator_user_id===S.user?.id&&!x.patient_id&&
-   ['waiting','ready'].includes(x.status)&&new Date(x.created_at).getTime()>Date.now()-2*3600000);
-  if(ready.length===1){
-   await motionLiveAPI({action:'operator_attach',session_id:ready[0].id,patient_id:patientId,
-    operator_session_id:op.data.session_id,checkin_id:checkinId});
-   sessionStorage.removeItem('komo_pending_motion_checkin');
-   toast('Dossier et iPhone liés. La consultation peut commencer.');
-   location.hash='operator';render();
-  }else{
-   toast(ready.length?'Plusieurs iPhone détectés : choisis celui du cabinet.':
-     'Dossier prêt. Active la caméra de ton iPhone pour commencer.');
-   motionLiveSignature='';await loadMotionLiveRooms(true);
-  }
+  toast('Consultation préparée. Active la caméra sur ton iPhone.');
+  motionLiveSignature='';await loadMotionLiveRooms(true);
  }catch(error){toast(error.message||'Impossible de préparer le bilan.')}
  finally{if(button.isConnected){button.disabled=false;button.textContent='Confirmer et démarrer →'}}
 }
