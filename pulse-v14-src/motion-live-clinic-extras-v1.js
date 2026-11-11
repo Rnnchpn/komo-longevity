@@ -1,9 +1,9 @@
 // Reuse the existing Motion Online questionnaires and PDF engine for supervised clinic demos.
 // The physician/operator edits all fields on the desktop; nothing is collected on the iPhone.
 // This module has no access to camera frames, audio or WebRTC signaling.
-import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './online/session/intake-model.mjs';
-import {buildClinicPassport} from './motion-live-clinic-passport-v2.mjs?v=20261111-two-step-pdf-v2';
-import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js?v=20261111-two-step-pdf-v2';
+import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './online/session/intake-model.mjs?v=20261111-questionnaire-points-v1';
+import {buildClinicPassport} from './motion-live-clinic-passport-v2.mjs?v=20261111-questionnaire-points-v1';
+import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js?v=20261111-questionnaire-points-v1';
 import {clinicRadarMarkup} from './motion-live-clinic-action-plan-v1.mjs?v=20261111-two-step-pdf-v2';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
