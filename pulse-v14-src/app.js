@@ -614,15 +614,65 @@ async function openOperatorCamera(sessionId,containerId){
 function motionLiveMonitor(){
   heading('Préparer une consultation','KŌMØ OPERATOR · CENTRE · DÉMONSTRATION');
   $('#view').innerHTML=`<div class="op-live-dashboard">
-    <header class="op-live-head"><div><span class="overline">CONSULTATION MOTION · 3 ÉTAPES</span><h2>Une consultation. Deux appareils.</h2><p>Le participant remplit une courte préparation, <strong>ton iPhone filme depuis le trépied</strong> et tu pilotes tous les tests sur cet ordinateur. Pas de compte participant ni de caméra patient.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
-    <div class="op-live-checklist"><div><b>01</b><span><strong>Préparer le participant</strong><small>Un lien, quelques informations fictives</small></span></div><div><b>02</b><span><strong>Connecter ton iPhone</strong><small>Caméra arrière · trépied</small></span></div><div><b>03</b><span><strong>Débuter les tests</strong><small>Mesures, questionnaire, passeport</small></span></div></div>
-    <div class="op-live-toolbar"><button type="button" class="button primary" id="opLiveCreateCheckin">+ Nouvelle consultation</button><button type="button" class="button secondary" id="opLiveCopyCameraLink">Connecter mon iPhone</button><button type="button" class="button secondary" id="opLiveNewPatient">Créer un dossier manuellement</button><span id="opLiveCount" aria-live="polite">Synchronisation…</span></div>
+    <header class="op-live-head"><div><span class="overline">CONSULTATION MOTION · DEUX APPAREILS</span><h2>Nouvelle consultation</h2><p>Crée la consultation sur cet ordinateur, puis active la caméra depuis ton iPhone sur trépied. <strong>Les deux appareils se lient sans code.</strong></p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
+    <div class="op-live-checklist"><div><b>01</b><span><strong>Créer la consultation</strong><small>Sur l’ordinateur, avec un dossier fictif</small></span></div><div><b>02</b><span><strong>Activer l’iPhone</strong><small>Caméra sur trépied, liaison automatique</small></span></div><div><b>03</b><span><strong>Faire le bilan</strong><small>Tests, questionnaires, PDF</small></span></div></div>
+    <section class="op-start-panel"><div><span class="overline">ÉTAPE 1 · SUR L’ORDINATEUR</span><h3>Une consultation propre</h3><p>Choisis un dossier fictif puis commence. Pulse n’ouvrira qu’une seule séance.</p></div><label>Patient de démonstration<select id="opLivePatientChoice"></select></label><button type="button" class="button primary" id="opLiveBegin">Démarrer une nouvelle consultation →</button><p class="op-start-help" id="opLiveStartHelp" role="status">Les bilans terminés restent archivés.</p></section>
+    <div class="op-live-toolbar"><button type="button" class="button secondary" id="opLiveCopyCameraLink">Étape 2 · Copier le lien iPhone</button><button type="button" class="button secondary" id="opLiveReset">Réinitialiser les essais en cours</button><button type="button" class="button secondary" id="opLiveNewPatient">Gérer les dossiers</button><span id="opLiveCount" aria-live="polite">Synchronisation…</span></div>
+    <details class="op-live-advanced"><summary>Option avancée : préparation fictive par QR code</summary><button type="button" class="button secondary" id="opLiveCreateCheckin">Créer une invitation fictive</button>
     <div id="opLiveInvite" class="op-checkin-invitation" hidden></div>
-    <section class="op-checkin-section"><h3>Participants prêts à commencer</h3><div id="opCheckinQueue" aria-live="polite"><p>Recherche des préparations…</p></div></section>
-    <section class="op-checkin-section"><h3>Caméra du cabinet</h3><div id="opLiveRooms" aria-live="polite"><p>Recherche de l’iPhone…</p></div></section>
+    <section class="op-checkin-section"><h3>Préparations reçues</h3><div id="opCheckinQueue" aria-live="polite"><p>Recherche des préparations…</p></div></section></details>
+    <section class="op-checkin-section"><h3>Consultation à démarrer</h3><div id="opLiveRooms" aria-live="polite"><p>Recherche de l’iPhone…</p></div></section>
     <p class="op-live-caution">Test de consultation physique : ton iPhone est le capteur vidéo du cabinet ; aucune connexion patient sur le téléphone. Vidéo WebRTC sans enregistrement. Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.</p>
   </div>`;
   $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
+  const demoPatients=S.patients.filter(p=>p.data_classification==='synthetic'&&p.status==='active');
+  const patientChoice=$('#opLivePatientChoice');
+  if(patientChoice){
+   patientChoice.innerHTML=demoPatients.map(p=>'<option value="'+esc(p.id)+'">'+esc([p.first_name,p.last_name].filter(Boolean).join(' '))+'</option>').join('');
+   if(S.patient?.data_classification==='synthetic'&&demoPatients.some(p=>p.id===S.patient.id))patientChoice.value=S.patient.id;
+   if(!demoPatients.length){
+    $('#opLiveBegin').disabled=true;
+    $('#opLiveStartHelp').textContent='Aucun dossier fictif : crée un dossier de démonstration dans Patients.';
+   }
+  }
+  $('#opLiveBegin').onclick=async()=>{
+   const button=$('#opLiveBegin'),patientId=$('#opLivePatientChoice')?.value||'';
+   const patient=S.patients.find(p=>p.id===patientId&&p.data_classification==='synthetic'&&p.status==='active');
+   if(!patient)return toast('Sélectionne un dossier fictif actif.');
+   button.disabled=true;button.textContent='Création de la consultation…';
+   try{
+    const active=await motionLiveAPI({action:'operator_list'});
+    if((active.sessions||[]).some(x=>x.operator_user_id===S.user?.id&&
+      ['waiting','ready','active'].includes(x.status)&&x.progress?.kind==='physical_consultation')){
+     toast('Une consultation est déjà prête. Utilise-la ou réinitialise les essais en cours.');
+     await loadMotionLiveRooms(true);return;
+    }
+    const result=await sb.rpc('start_pulse_operator_session_v1',
+      {p_patient_id:patientId,p_assessment_id:null});
+    if(result.error||!result.data?.session_id)throw Error(result.error?.message||'Impossible de préparer le bilan.');
+    await motionLiveAPI({action:'operator_consultation_prepare',
+      patient_id:patientId,operator_session_id:result.data.session_id});
+    localStorage.setItem('komo_v14_patient',patientId);
+    $('#opLiveStartHelp').textContent='✓ Consultation prête. Active maintenant la caméra sur ton iPhone.';
+    motionLiveSignature='';await loadMotionLiveRooms(true);
+    toast('Consultation créée, iPhone attendu.');
+   }catch(error){toast(error.message||'Création impossible.')}
+   finally{if(button.isConnected){button.disabled=false;button.textContent='Démarrer une nouvelle consultation →'}}
+  };
+  $('#opLiveReset').onclick=async()=>{
+   if(!confirm('Supprimer les essais fictifs non terminés ? Les rapports terminés seront conservés.'))return;
+   const button=$('#opLiveReset');button.disabled=true;
+   try{
+    const result=await motionLiveAPI({action:'operator_reset_demo_sessions'});
+    sessionStorage.removeItem('komo_pending_motion_checkin');
+    motionLiveSignature='';
+    $('#opLiveStartHelp').textContent='✓ '+result.removed+' session(s) supprimée(s). Nouvelle consultation possible.';
+    await loadMotionLiveRooms(true);
+    toast('Essais nettoyés. Tu peux recommencer.');
+   }catch(error){toast(error.message||'Réinitialisation impossible.')}
+   finally{if(button.isConnected)button.disabled=false}
+  };
+
   $('#opLiveCreateCheckin').onclick=async()=>{
     const button=$('#opLiveCreateCheckin');button.disabled=true;
     try{
