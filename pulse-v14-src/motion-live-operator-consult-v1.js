@@ -33,8 +33,37 @@ let poseTracker=null,videoListener=null,stopVideoListener=null,fullscreenListene
 let extras=null,voice=null,panelMode="tests",questionnaireAnswers={},questionnaireIndex=0;
 let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=null,questionnaireNavigating=false,questionnairePersistedAt=0;
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
-let videoFocus=false;
+let videoFocus=false,videoLive=false;
 const q=id=>host?.querySelector("#"+id);
+const SHORT_TEST_NAMES={sts:"Chaise",heels:"Mollets",unipodal_left:"Équilibre G.",unipodal_right:"Équilibre D.",arms:"Bras",posture:"Posture"};
+function updateCameraLinkState(){
+ const badge=q("mocCameraState");if(!badge)return;
+ const video=q("mopvVideo");
+ const hasFrames=!!video?.srcObject&&video.videoWidth>0&&video.videoHeight>0&&video.readyState>=2;
+ const seen=Date.parse(room?.patient_last_seen_at||"");
+ const online=Number.isFinite(seen)&&Date.now()-seen<18000;
+ const live=room?.status==="active"&&(videoLive||hasFrames);
+ badge.dataset.state=room?.status==="completed"?"completed":live?"live":online?"connecting":"offline";
+ badge.textContent=room?.status==="completed"?"Bilan terminé":live?"● iPhone · image reçue":
+  online?"◌ iPhone relié · image en attente":"○ iPhone non connecté";
+}
+function updateConsultationLayout(){
+ if(!host)return;
+ const isReport=panelMode==="report";
+ const preview=panelMode==="tests"&&videoFocus&&room?.status!=="completed";
+ host.classList.toggle("moc-video-hidden",!preview&&!isReport);
+ host.classList.toggle("moc-video-preview",preview);
+ host.classList.toggle("moc-show-passport",isReport);
+ const aside=q("mocPassportAside");if(aside)aside.hidden=!isReport;
+ const button=q("mocVideoFocus");
+ if(button){
+  button.hidden=panelMode!=="tests"||room?.status==="completed";
+  button.textContent=videoFocus?"Masquer la caméra":"Voir la caméra";
+  button.setAttribute("aria-pressed",String(videoFocus));
+ }
+ updateCameraLinkState();
+}
+
 function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message||""}
 function styles(){
  if(document.getElementById("mocStyles"))return;
@@ -51,7 +80,7 @@ function clockRunKey(session){
 }
 export function disposeOperatorConsultation(){
  host?.closest(".app-shell")?.classList.remove("moc-video-xxl");
- videoFocus=false;
+ videoFocus=false;videoLive=false;
  if(poll)clearInterval(poll);poll=null;stopClock();
  if(questionnaireTimer)clearTimeout(questionnaireTimer);questionnaireTimer=null;
  voice?.destroy();voice=null;countdownPending=false;
@@ -75,15 +104,15 @@ function stageText(result){return result?.status==="done"?"✓":result?.status==
 function makeShell(){
  host.innerHTML='<section class="moc-shell">'+
  '<header class="moc-head"><div><span class="overline">KŌMØ PULSE · CONSULTATION EN DIRECT</span><h2>Consultation Motion</h2>'+
- '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice">🎙 Activer la voix</button><button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Agrandir la vidéo sans recadrer le corps">▣ Vidéo XXL</button><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
+ '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice">🎙 Activer la voix</button><button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Afficher temporairement la caméra pour régler le cadrage">Voir la caméra</button><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
  '<nav class="moc-mode-tabs" aria-label="Sections de la consultation"><button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true">Tests Motion</button><button type="button" id="mocTabQuestionnaire" class="moc-mode-tab">Questionnaires</button><button type="button" id="mocTabReport" class="moc-mode-tab">Rapport PDF</button></nav>'+
  '<p class="moc-save-indicator" id="mocIntakeSaveStatus" role="status" aria-live="polite">Questionnaire · en attente de réponses</p>'+
- '<p class="moc-voice-state" id="mocVoiceState" role="status">Micro éteint · Dites « C’est parti », « Stop », « Recommence » ou « Suivant » après activation. Le navigateur peut traiter la voix via son fournisseur ; aucun audio n’est enregistré par Pulse.</p>'+
+ '<p class="moc-voice-state" id="mocVoiceState" role="status">Voix désactivée · Active-la pour dire « C’est parti », « Stop » ou « Suivant ». Aucun audio n’est enregistré par Pulse.</p>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
- '<div class="moc-step-nav" id="mocStepNav" aria-label="Tests Motion"></div>'+
+ '<div class="moc-step-nav" id="mocStepNav" aria-label="Progression des six tests Motion"></div>'+
  '<div id="mocTestBody"><p>Recherche de la consultation…</p></div>'+
- '</section><aside class="moc-camera-column"><div class="moc-camera-heading"><strong>Mon iPhone · caméra du cabinet</strong><span>Visualisation en direct</span></div>'+
+ '</section><aside class="moc-camera-column"><div class="moc-camera-heading"><strong>iPhone · caméra du cabinet</strong><span id="mocCameraState" class="moc-camera-state" data-state="offline" role="status">○ iPhone non connecté</span></div>'+
  '<div id="mocPassportAside" class="moc-passport-aside" hidden></div>'+
  '<div id="motionConsultCamera" class="moc-camera-host"></div>'+
  '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>'+
@@ -93,12 +122,7 @@ function makeShell(){
   catch(error){questionnaireNote("Sauvegarde échouée : "+error.message);return}
   location.hash="live";
  };
- q("mocVideoFocus").onclick=()=>{
-  videoFocus=!videoFocus;
-  host.closest(".app-shell")?.classList.toggle("moc-video-xxl",videoFocus);
-  q("mocVideoFocus").setAttribute("aria-pressed",String(videoFocus));
-  q("mocVideoFocus").textContent=videoFocus?"▣ Quitter la vidéo XXL":"▣ Vidéo XXL";
- };
+ q("mocVideoFocus").onclick=()=>{videoFocus=!videoFocus;updateConsultationLayout();};
  q("mocTabTests").onclick=()=>switchPanel("tests");
  q("mocTabQuestionnaire").onclick=()=>switchPanel("questionnaire");
  q("mocTabReport").onclick=()=>switchPanel("report");
@@ -138,9 +162,9 @@ function formatResult(result,task){
   "Résultat enregistré";
 }
 function updatePanelTabs(){
- const preview=panelMode==="report"&&room?.status==="completed";
- host?.classList.toggle("moc-show-passport",preview);
- const aside=q("mocPassportAside");if(aside)aside.hidden=!preview;
+ updateConsultationLayout();
+ const saveNote=q("mocIntakeSaveStatus");
+ if(saveNote)saveNote.hidden=panelMode==="tests"&&!questionnaireDirty;
  const names={tests:"mocTabTests",questionnaire:"mocTabQuestionnaire",report:"mocTabReport"};
  for(const [key,id] of Object.entries(names)){
   const button=q(id);if(!button)continue;
@@ -478,8 +502,8 @@ function renderStep(){
  const idx=room.step_index;
  q("mocProgressText").textContent="Test "+(idx+1)+" sur "+TESTS.length;
  q("mocProgressFill").style.width=(idx/TESTS.length*100)+"%";
- q("mocStepNav").innerHTML=TESTS.map((item,i)=>'<div class="moc-step '+(i===idx?"current":i<idx?"done":"")+'">'+
- '<b>'+HTML(i<idx?stageText(results[item.id]):String(i+1))+'</b><span>'+HTML(item.title)+'</span></div>').join("");
+ q("mocStepNav").innerHTML=TESTS.map((item,i)=>'<div class="moc-step '+(i===idx?"current":i<idx?"done":"")+'" title="'+HTML(item.title)+'"'+(i===idx?' aria-current="step"':'')+'>'+
+ '<b>'+HTML(i<idx?stageText(results[item.id]):String(i+1))+'</b><span>'+HTML(SHORT_TEST_NAMES[item.id]||item.title)+'</span></div>').join("");
  const running=room.progress?.step_status==="running";
  const safety=idx===0&&!room.progress?.safety_confirmed;
  autoValue=null;manualEdited=false;
@@ -491,8 +515,8 @@ function renderStep(){
   '<option value="apparent_offset">Décalage sagittal apparent</option><option value="not_interpretable">Image non interprétable</option></select></label>'
   :'<label class="moc-field">'+HTML(t.label)+'<div class="moc-input-unit"><input id="mocValue" type="number" inputmode="decimal" min="0" max="'+(t.unit==="seconds"?String(t.duration):"100")+'" step="'+(t.unit==="seconds"?"0.1":"1")+'" placeholder="Saisir une valeur"><span>'+HTML(t.unit)+'</span></div></label>';
  q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">TEST '+(idx+1)+' / '+TESTS.length+'</span><h3>'+HTML(t.title)+'</h3>'+
- '<div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
- '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div>'+
+ '<details class="moc-instructions" '+(!running?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
+ '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div></details>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
  (running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>CHRONOMÈTRE</span><strong id="mocClock" aria-live="off">'+(t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
  (t.type==="balance"?'<div class="moc-rep-figure moc-balance-figure"><span>TEMPS MAINTENU</span><strong id="mocLiveBalance" aria-live="off">—</strong><small id="mocBalanceState">EN ATTENTE DU PIED LEVÉ</small></div>':'')+
@@ -534,7 +558,8 @@ function updatePosePanel(reading){
  const indicator=q("mocPoseIndicator"),feedback=q("mocAutoFeedback");
  const ready=!!reading?.valid&&reading.frames>=5;
  const message=reading?.message||poseStatus;
- if(indicator)indicator.textContent=(ready?"● Corps détecté · ":"◌ Ajuster le cadrage · ")+message;
+ if(indicator)indicator.textContent=ready?"● Corps détecté · "+message:
+  (!videoLive?"○ Image indisponible · active la caméra sur l’iPhone et vérifie le flux.":"◌ Ajuste le cadrage · "+message);
  const t=currentTest(),running=room?.progress?.step_status==="running";
  if(!running||!feedback)return;
  const detected=reading?.measurement;
@@ -741,7 +766,7 @@ async function refresh(force=false){
    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
   const selected=matching[0]||null;
   if(!selected){
-   room=null;renderWaiting("Sur ton iPhone, ouvre pulse.komolongevity.com/camera/ puis associe le code depuis En direct sur cet ordinateur.");
+   room=null;renderWaiting("Crée une consultation sur l’ordinateur, puis active /camera/ sur l’iPhone : liaison automatique sans code.");
    return;
   }
   if(selected.status==="active"&&!TESTS.some(t=>t.id===selected.stage_code)){
@@ -762,7 +787,7 @@ async function refresh(force=false){
     }};
    }
   }
-  updatePanelTabs();
+  updatePanelTabs();updateCameraLinkState();
   const signature=JSON.stringify([room.id,room.stage_code,room.step_index,room.status,room.progress?.step_status,room.progress?.safety_confirmed,room.progress?.test_started_at,room.progress?.results,
    room.progress?.questionnaire?.updated_at,room.progress?.questionnaire?.answers]);
   if(force||signature!==latestSignature){
@@ -828,12 +853,16 @@ export async function mountOperatorConsultation(config){
    }
   });
   videoListener=e=>{
-   if(e.detail?.sessionId===room?.id)void attachPoseVideo(e.detail.video);
+   if(e.detail?.sessionId===room?.id){
+    videoLive=true;updateCameraLinkState();void attachPoseVideo(e.detail.video);
+   }
   };
   stopVideoListener=e=>{
    if(e.detail?.sessionId===room?.id){
-    poseTracker?.detach();
-    poseStatus="Caméra déconnectée · reconnectez le téléphone.";
+    videoLive=false;updateCameraLinkState();poseTracker?.detach();
+    poseStatus="Caméra interrompue · reconnecte ton iPhone.";
+    const indicator=q("mocPoseIndicator");
+    if(indicator)indicator.textContent="○ Caméra déconnectée · mesures automatiques en pause.";
    }
   };
   window.addEventListener("pulse:remote-video-ready",videoListener);
