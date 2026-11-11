@@ -26,6 +26,8 @@ export function buildClinicActionPlan(answers={},measures=[],balance=null,questi
    'Consolider les capacités fonctionnelles'):'Mesures physiques disponibles — questionnaire à compléter';
  const strengths=[];
  if(results.sts?.measured)strengths.push(label(results.sts.value)+' levers / 30 s');
+ if(results.two_step?.measured)strengths.push('Two-Step : '+label(results.two_step.value)+' cm'+
+  (results.two_step.twoStepIndex!==null?' (indice '+label(results.two_step.twoStepIndex)+')':''));
  if(balance&&balance.tenSecondBoth)strengths.push('équilibre au moins 10 s des deux côtés');
  const highlights=[
   {label:'Point d’appui',value:strengths.length?strengths.join(' · '):'Mesures à compléter'},
@@ -42,7 +44,8 @@ export function buildClinicActionPlan(answers={},measures=[],balance=null,questi
    frequency:'2 jours/semaine',instructions:'Debout face à un plan stable, monter sur les pointes et redescendre lentement.',
    progression:'Augmenter progressivement les répétitions avant de diminuer l’aide des mains.',
    caution:'Maintenir une prise d’appui stable ; éviter en cas de douleur ou perte d’équilibre.',
-   relevance:results.heels?.measured?'Élévations observées : '+label(results.heels.value)+'.':'Amplitude à confirmer par le professionnel.'},
+   relevance:results.heels?.measured?'Élévations observées (ancien protocole) : '+label(results.heels.value)+'.':
+    'Exercice éducatif proposé indépendamment du Two-Step Test, à adapter selon la stabilité.'},
   {key:'hinge',title:'Charnière de hanches',purpose:'Flexion fonctionnelle',dose:'2 × 6–8 mouvements',
    frequency:'3 jours/semaine',instructions:'Mains sur les hanches, basculer doucement le bassin en gardant le dos confortable, puis se redresser.',
    progression:'Ajouter une tâche légère de prise d’objet à hauteur adaptée seulement si indolore.',
@@ -99,7 +102,9 @@ export function buildClinicActionPlan(answers={},measures=[],balance=null,questi
  const monitoring=[
   {name:'Levers en 30 s',value:results.sts?.measured?label(results.sts.value):'—',unit:'répétitions'},
   {name:'Appui gauche / droit',value:balance?label(balance.left)+' / '+label(balance.right):'—',unit:'secondes'},
-  {name:'Renforcement',value:strengthLow?'moins de 1 j/sem déclaré':'à documenter',unit:'jours/semaine'},
+  {name:'Two-Step Test',value:results.two_step?.measured?
+   label(results.two_step.value)+(results.two_step.twoStepIndex!==null?' (indice '+label(results.two_step.twoStepIndex)+')':''):
+   '—',unit:'cm'},
   {name:'Récupération',value:recoveryConcern?'à explorer':'à documenter',unit:'autoévaluation'}
  ];
  return {version:'KOMO_CLINIC_HOME_PLAN_V1',headline,axis,highlights,emphasis,
