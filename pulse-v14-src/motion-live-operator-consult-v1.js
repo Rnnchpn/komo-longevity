@@ -44,8 +44,17 @@ function updateCameraLinkState(){
  const online=Number.isFinite(seen)&&Date.now()-seen<18000;
  const live=room?.status==="active"&&(videoLive||hasFrames);
  badge.dataset.state=room?.status==="completed"?"completed":live?"live":online?"connecting":"offline";
- badge.textContent=room?.status==="completed"?"Bilan terminé":live?"● iPhone · image reçue":
+ const label=room?.status==="completed"?"Bilan terminé":live?"● iPhone · image reçue":
   online?"◌ iPhone relié · image en attente":"○ iPhone non connecté";
+ badge.textContent=label;
+ const banner=q("mocCameraBanner");
+ if(banner){
+  banner.dataset.state=badge.dataset.state;
+  banner.textContent=label+(live?" · Le suivi du mouvement fonctionne en arrière-plan.":
+   online?" · Vérifie l'autorisation et garde l'écran de l'iPhone actif.":
+   room?.status==="completed"?" · Rapport disponible.":
+   " · Active la caméra du cabinet sur ton iPhone.");
+ }
 }
 function updateConsultationLayout(){
  if(!host)return;
@@ -107,6 +116,7 @@ function makeShell(){
  '<p id="mocPatientLine"></p></div><div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice">🎙 Activer la voix</button><button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Afficher temporairement la caméra pour régler le cadrage">Voir la caméra</button><button type="button" class="moc-back" id="mocFullscreen">⛶ Plein écran</button><button type="button" class="moc-back" id="mocReturn">Sessions en direct</button></div></header>'+
  '<nav class="moc-mode-tabs" aria-label="Sections de la consultation"><button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true">Tests Motion</button><button type="button" id="mocTabQuestionnaire" class="moc-mode-tab">Questionnaires</button><button type="button" id="mocTabReport" class="moc-mode-tab">Rapport PDF</button></nav>'+
  '<p class="moc-save-indicator" id="mocIntakeSaveStatus" role="status" aria-live="polite">Questionnaire · en attente de réponses</p>'+
+ '<p class="moc-camera-banner" id="mocCameraBanner" role="status" aria-live="polite" data-state="offline">○ iPhone non connecté · Active la caméra du cabinet.</p>'+
  '<p class="moc-voice-state" id="mocVoiceState" role="status">Voix désactivée · Active-la pour dire « C’est parti », « Stop » ou « Suivant ». Aucun audio n’est enregistré par Pulse.</p>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
