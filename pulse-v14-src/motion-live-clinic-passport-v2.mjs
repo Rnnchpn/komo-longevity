@@ -1,6 +1,6 @@
 // Clinical-style *descriptive* passport for supervised KŌMØ Motion demos.
 // No medical diagnosis, validated score, biological age or survival estimate.
-import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer} from './online/session/intake-model.mjs';
+import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './online/session/intake-model.mjs';
 import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
@@ -85,8 +85,13 @@ export function buildClinicPassport(answers={},results={},options={}){
  const groups=INTAKE_GROUPS.map(g=>({
   id:g.id,label:g.title,
   score:questionnaire.domains[g.id]??null,
+  points:questionnaire.domainPoints[g.id]?.points??null,
+  maxPoints:questionnaire.domainPoints[g.id]?.maximum??null,
+  weight:questionnaire.domainPoints[g.id]?.weight??null,
   items:g.questions.map(q=>({
-   question:q.label,
+   id:q.id,question:q.label,
+   points:g.scored===false?null:questionPoints(q,answers[q.id]),
+   maxPoints:g.scored===false?null:4,
    answer:Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id])?
     (Array.isArray(q.options[0])?q.options.find(([key])=>key===answers[q.id])?.[1]:
      q.options[Number(answers[q.id])]):'Non renseigné'
@@ -210,7 +215,11 @@ export function buildClinicPassport(answers={},results={},options={}){
   date,subject,mode:'CABINET_DEMO',profile,simulated,
   measures,measured,skipped,flagged:flagged.length,
   questionnaire:{answered:progress.completed,total:progress.total,complete:questionnaire.complete,
-   simulated,index:questionnaire.complete?questionnaire.profileIndex:null,groups},
+   simulated,index:questionnaire.complete?questionnaire.profileIndex:null,
+   rawPoints:questionnaire.rawPoints,maxPoints:questionnaire.maxPoints,
+   scoringVersion:questionnaire.scoringVersion,
+   scoredQuestions:questionnaire.scoredQuestions,descriptiveQuestions:questionnaire.descriptiveQuestions,
+   groups},
   balance,findings:messages,priorities:selected,evidence,actionPlan,
   outcomes:{motionScore:null,motionAge:null,lifeExpectancy:null},
   recheck:'4 à 6 semaines',
