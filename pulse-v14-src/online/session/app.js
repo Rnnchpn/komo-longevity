@@ -1,9 +1,9 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
 import { motionMarkup } from './motion-view.js';
 import { mountMotionController } from './motion-controller.js';
-import { INTAKE_GROUPS } from './intake-model.mjs';
+import { INTAKE_GROUPS } from './intake-model.mjs?v=20261111-questionnaire-points-v1';
 import { intakeMarkup,bindIntake } from './intake-view.js';
-import { reportMarkup,bindReport } from './intake-report.js';
+import { reportMarkup,bindReport } from './intake-report.js?v=20261111-questionnaire-points-v1';
 import {sharedMotionMedia} from './shared-media.js';
 import {TERMINAL_TEST_STATUSES,testNavigatorMarkup,completedTestMarkup,mountTestNavigation} from './test-navigation.js';
 import {saveProgress,loadProgress,clearProgress,snapshotProgress} from './session-progress.mjs';
