@@ -3,11 +3,12 @@ import {readFile} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {join} from 'node:path';
 const read=p=>readFile(join(process.cwd(),p),'utf8');
-const [ui,iphone,edge,html,cameraHtml,styles]=await Promise.all([
+const [ui,iphone,edge,html,cameraHtml,styles,videoStation]=await Promise.all([
  'site/pulse-v14/app.js','site/pulse-v14/camera/camera.js',
  'supabase/functions/motion-live-test/index.ts',
  'site/pulse-v14/index.html','site/pulse-v14/camera/index.html',
- 'site/pulse-v14/pulse-consultation-flow-v1.css'
+ 'site/pulse-v14/pulse-consultation-flow-v1.css',
+ 'site/pulse-v14/motion-live-guest-v1.js'
 ].map(read));
 for(const file of ['site/pulse-v14/app.js','site/pulse-v14/camera/camera.js']){
  const result=spawnSync(process.execPath,['--check',join(process.cwd(),file)],{encoding:'utf8'});
@@ -39,6 +40,9 @@ assert.ok(cameraStart.includes('.update({'));
 assert.ok(!cameraStart.includes('.insert('),'iPhone must never create a second room');
 assert.ok(cameraStart.includes('paired_automatically:true'));
 assert.ok(iphone.includes("action:'operator_camera_start'"));
+assert.ok(videoStation.includes('stale_staff_camera_session'));
+assert.ok(videoStation.includes('data.session?.progress?.kind!=="physical_consultation"'));
+assert.ok(iphone.includes('20261111-clean-consultation-v2'));
 assert.ok(iphone.includes('consultation_not_prepared'));
 assert.ok(iphone.includes('sans code'));
 // Camera reconnect must not wipe the current test or questionnaire.
@@ -66,5 +70,5 @@ assert.ok(ui.includes('SESSION MOTION · ASSOCIATION AUTOMATIQUE'));
 assert.ok(ui.includes("action:'operator_checkin_invite'"),'optional fictitious check-in retained');
 assert.ok(styles.includes('.op-start-panel'));
 assert.ok(html.includes('20261111-clean-consultation-v1'));
-assert.ok(cameraHtml.includes('20261111-clean-consultation-v1'));
+assert.ok(cameraHtml.includes('20261111-clean-consultation-v2'));
 console.log('[pulse-clean-consultation-qa] PASS desktop-owned single synthetic session, zero duplicate phone room, automatic camera pairing, reconnect, reset and protected completed history');
