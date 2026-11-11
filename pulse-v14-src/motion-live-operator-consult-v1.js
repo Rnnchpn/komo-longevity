@@ -843,7 +843,14 @@ async function refresh(force=false){
    const stored=room.progress?.questionnaire;
    const serverTime=Date.parse(stored?.updated_at||"")||0;
    if(serverTime>=questionnairePersistedAt){
-    questionnaireAnswers={...(stored?.answers||{})};
+    // Keep the same object referenced by the radio-input onchange callbacks.
+    // Replacing it every 2.6s made visible choices update a detached object
+    // while autosave serialized the newly assigned (stale) questionnaireAnswers.
+    const serverAnswers=stored?.answers||{};
+    for(const key of Object.keys(questionnaireAnswers)){
+     if(!Object.prototype.hasOwnProperty.call(serverAnswers,key))delete questionnaireAnswers[key];
+    }
+    Object.assign(questionnaireAnswers,serverAnswers);
     questionnairePersistedAt=serverTime;
    }else if(questionnairePersistedAt){
     // A delayed polling response predating last successful save ACK is ignored.
