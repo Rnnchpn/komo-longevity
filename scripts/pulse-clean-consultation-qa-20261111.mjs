@@ -3,12 +3,13 @@ import {readFile} from 'node:fs/promises';
 import {spawnSync} from 'node:child_process';
 import {join} from 'node:path';
 const read=p=>readFile(join(process.cwd(),p),'utf8');
-const [ui,iphone,edge,html,cameraHtml,styles,videoStation]=await Promise.all([
+const [ui,iphone,edge,html,cameraHtml,styles,videoStation,consult]=await Promise.all([
  'site/pulse-v14/app.js','site/pulse-v14/camera/camera.js',
  'supabase/functions/motion-live-test/index.ts',
  'site/pulse-v14/index.html','site/pulse-v14/camera/index.html',
  'site/pulse-v14/pulse-consultation-flow-v1.css',
- 'site/pulse-v14/motion-live-guest-v1.js'
+ 'site/pulse-v14/motion-live-guest-v1.js',
+ 'site/pulse-v14/motion-live-operator-consult-v1.js'
 ].map(read));
 for(const file of ['site/pulse-v14/app.js','site/pulse-v14/camera/camera.js']){
  const result=spawnSync(process.execPath,['--check',join(process.cwd(),file)],{encoding:'utf8'});
@@ -69,6 +70,11 @@ assert.ok(ui.includes("['waiting','ready','active'].includes(x.status)"));
 assert.ok(ui.includes('Remplir le questionnaire →'));
 assert.ok(ui.includes('komo_motion_consult_room_'));
 assert.ok(edge.includes('"waiting","ready","active","completed"'));
+// Polling may update saved answers without detaching form handlers from their
+// questionnaireAnswers object; every subsequent change must reach autosave.
+assert.ok(consult.includes('Object.assign(questionnaireAnswers,serverAnswers)'));
+assert.ok(!consult.includes('questionnaireAnswers={...(stored?.answers||{})}'));
+assert.ok(consult.includes('scheduleQuestionnaireSave()'));
 assert.ok(ui.includes('SESSION MOTION · ASSOCIATION AUTOMATIQUE'));
 assert.ok(ui.includes("action:'operator_checkin_invite'"),'optional fictitious check-in retained');
 assert.ok(styles.includes('.op-start-panel'));
