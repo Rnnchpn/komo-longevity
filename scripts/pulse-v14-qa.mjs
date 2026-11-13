@@ -19,6 +19,7 @@ const onlineScript=await readFile(join(root,'site','pulse-v14','online','app.js'
 const onlineCss=await readFile(join(root,'site','pulse-v14','online','styles.css'),'utf8');
 const sessionHtml=await readFile(join(root,'site','pulse-v14','online','session','index.html'),'utf8');
 const sessionJs=await readFile(join(root,'site','pulse-v14','online','session','app.js'),'utf8');
+const guestAccess=await readFile(join(root,'site','pulse-v14','online','session','guest-access.js'),'utf8');
 const sessionCss=await readFile(join(root,'site','pulse-v14','online','session','styles.css'),'utf8');
 const poseEngine=await readFile(join(root,'site','pulse-v14','online','session','pose-engine.js'),'utf8');
 const motionView=await readFile(join(root,'site','pulse-v14','online','session','motion-view.js'),'utf8');
@@ -104,6 +105,7 @@ const checks=[
  ['patient/team switch remains accessible',app.includes('p-team-link')&&app.includes("localStorage.setItem('komo_v14_mode','pro')")&&app.includes('history.replaceState(null,')],
  ['tester sidebar available only by verified role',app.includes('const isOnlineTester=')&&app.includes('S.role===\'admin\'')&&app.includes('pulse-online-tester-link')],
  ['authenticated session user lookup',sessionJs.includes('sb.auth.getUser()')&&sessionJs.includes("role.data?.role==='admin'")&&sessionJs.includes('verifyPaidSession({')],
+ ['guest invitations isolated in dedicated access module',nodeSyntax('guest-access.js')&&guestAccess.includes('motion-online-guest')&&guestAccess.includes('snapshotProgress')&&sessionJs.includes("from './guest-access.js'")],
  ['session security no public clinical record writes',!(/sb\.from\(.+\.insert\(|localStorage\.setItem|sessionStorage\.setItem|fetch\s*\(/.test(sessionJs))],
  ['session questionnaire and safety',sessionJs.includes('function questionnaire()')&&sessionJs.includes('function safety()')],
  ['online original self-report replaces four-question demo',sessionJs.includes('intakeMarkup(state.answers,state.questionStep)')&&intakeModel.includes('QUESTIONNAIRE_VERSION')&&intakeModel.includes('walk10')&&intakeView.includes('bindIntake')],
