@@ -57,7 +57,7 @@ function stopCamera(release=false){
 function next(){stopTimer();stopCamera(state.page===3);state.page=Math.min(PHASES.length-1,state.page+1);render();}
 function previous(){stopTimer();stopCamera(state.page===3);state.page=Math.max(0,state.page-1);render();}
 function wrap(body){
-  root.innerHTML='<section class="session"><div class="session-top"><span>LONGEVITY IN MOTION · KŌMØ PULSE</span><span class="test-badge">'+(paidContext?'BILAN ONLINE · DOSSIER PRIVÉ':'MODE TEST · AUCUN DOSSIER CRÉÉ')+'</span></div>'+
+  root.innerHTML='<section class="session"><div class="session-top"><span>LONGEVITY IN MOTION · KŌMØ PULSE</span><span class="test-badge">'+(guestContext?'INVITATION PRIVÉE · SANS PAIEMENT':paidContext?'BILAN ONLINE · DOSSIER PRIVÉ':'MODE TEST · AUCUN DOSSIER CRÉÉ')+'</span></div>'+
   '<nav class="steps" aria-label="Étapes de la séance">'+PHASES.map((s,i)=>'<span class="'+(i===state.page?'now':i<state.page?'past':'')+'"><b>'+String(i+1).padStart(2,'0')+'</b>'+s+'</span>').join('')+'</nav>'+
   body+
   '<div class="session-bottom"><p>'+(paidContext?'Votre questionnaire et vos mesures chiffrées sont enregistrés dans votre dossier sécurisé Pulse. Aucune vidéo, photo ni audio n’est archivé.':'Démonstration non médicale · progression conservée 4 h dans cet onglet pour reprendre après actualisation.')+'</p>'+
@@ -71,12 +71,12 @@ function wrap(body){
 }
 function feedback(text){const e=q('#message');if(e)e.textContent=text;}
 function welcome(){
-  wrap('<div class="intro"><div><span class="overline">'+(paidContext?'VOTRE BILAN ONLINE · RÉSERVATION VÉRIFIÉE':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
-  '<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
+  wrap('<div class="intro"><div><span class="overline">'+(guestContext?'VOTRE BILAN ONLINE · INVITATION PERSONNELLE':paidContext?'VOTRE BILAN ONLINE · RÉSERVATION VÉRIFIÉE':'VOTRE BILAN ONLINE · TESTEUR VÉRIFIÉ')+'</span><h1>Votre mouvement.<br><em>Votre point de départ.</em></h1>'+
+  (guestContext?'<p class="notice"><strong>Bienvenue '+esc(guestContext.name)+'.</strong> Votre accès personnel est prêt pour '+esc(guestContext.label)+'. Aucun paiement, ni création de compte.</p>':'')+'<p>Votre bilan commence par des questionnaires que vous remplissez vous-même, puis se poursuit par les contrôles de sécurité et les tests fonctionnels. Votre profil déclaré sera restitué séparément du Motion Score fondé sur les mesures.</p>'+
   '<div class="fact-row"><div><b>30 min</b><small>Bilan accompagné</small></div><div><b>06</b><small>Modules observés</small></div><div><b>0</b><small>Vidéo enregistrée</small></div></div>'+
   btn('go',paidContext?'Démarrer mon bilan →':'Démarrer ma consultation test →')+'</div><aside class="intro-side"><span class="orb">K</span><p>Une expérience fluide et guidée : chaque étape vous explique ce qu’il faut faire, avant de passer à la suivante.</p></aside></div>'+
-  '<p class="notice">'+(paidContext?'Bilan fonctionnel non médical. Vos réponses et mesures sont enregistrées dans un dossier privé pour reprendre la séance. Le rapport PDF reste téléchargé séparément. Les estimations webcam ne sont pas des diagnostics.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>'+
- (paidContext?'<label class="dossier-consent"><input type="checkbox" id="dossier-consent" '+(paidConsentAccepted?'checked':'')+'><span>J’accepte l’enregistrement sécurisé de mes réponses de mobilité, de douleur et de mes mesures fonctionnelles dans mon espace Pulse, afin de pouvoir reprendre ce bilan. Je comprends que la vidéo, les photos et le microphone ne sont pas enregistrés.</span></label><p class="message" id="dossier-consent-feedback" role="status"></p>':''));
+  '<p class="notice">'+(guestContext?'Séance invitée personnelle : votre progression est enregistrée dans un dossier privé temporaire. Le PDF se télécharge sur votre appareil. Les mesures webcam sont exploratoires, non diagnostiques. Ne partagez pas votre lien.':paidContext?'Bilan fonctionnel non médical. Vos réponses et mesures sont enregistrées dans un dossier privé pour reprendre la séance. Le rapport PDF reste téléchargé séparément. Les estimations webcam ne sont pas des diagnostics.':'Cette version est réservée à votre compte testeur. Elle n’implique aucun paiement, n’ouvre aucun accès patient tiers et ne constitue pas une consultation médicale. Utilisez des réponses fictives.')+'</p>'+
+ (paidContext?'<label class="dossier-consent"><input type="checkbox" id="dossier-consent" '+(paidConsentAccepted?'checked':'')+'><span>J’accepte l’enregistrement sécurisé de mes réponses de mobilité, de douleur et de mes mesures fonctionnelles dans mon dossier privé Pulse, afin de pouvoir reprendre ce bilan. Je comprends que la vidéo, les photos et le microphone ne sont pas enregistrés.</span></label><p class="message" id="dossier-consent-feedback" role="status"></p>':''));
  q('#go').onclick=async()=>{
   if(!paidContext){next();return;}
   if(!paidConsentAccepted){
@@ -203,8 +203,76 @@ function render(){
 }
 document.addEventListener('visibilitychange',()=>{if(document.hidden){state.sessionActive=false;stopTimer();stopCamera(true);persistProgress();const v=q('#live-video');if(v){v.hidden=true;const off=q('#camera-off');if(off)off.hidden=false;const start=q('#start-camera');if(start)start.disabled=false;const stop=q('#stop-camera');if(stop)stop.disabled=true;}}});
 window.addEventListener('pagehide',()=>{stopTimer();stopCamera(true)});
+
+const GUEST_ENDPOINT='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-online-guest';
+const GUEST_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
+const GUEST_CONSENT='KOMO_MOTION_ONLINE_CONSENT_V1';
+const guestInvite=new URLSearchParams(window.location.search).get('invite')||'';
+let guestContext=null;
+async function guestRequest(action,snapshot=null){
+ if(!/^[A-Za-z0-9_-]{43}$/.test(guestInvite))throw Error('invitation_invalide');
+ const payload={action,invite:guestInvite};
+ if(action==='save'){payload.snapshot=snapshot;payload.consentAccepted=true;payload.consentVersion=GUEST_CONSENT;}
+ const response=await fetch(GUEST_ENDPOINT,{method:'POST',cache:'no-store',credentials:'omit',
+  headers:{'Content-Type':'application/json',apikey:GUEST_KEY},body:JSON.stringify(payload)});
+ let data={};try{data=await response.json()}catch{throw Error('serveur_indisponible')}
+ if(!response.ok||data.ok!==true)throw Error(data.error||'invitation_indisponible');
+ return data;
+}
+function createGuestQueue(){
+ let last=null,inflight=false,timer=null,destroyed=false,failed=false;
+ const encode=s=>JSON.stringify(snapshotProgress(s));
+ async function drain(){
+  if(destroyed||inflight||last===null)return;
+  inflight=true;
+  while(!destroyed&&last!==null){
+   const current=last;last=null;secureSaveStatus('Enregistrement sécurisé…');
+   try{await guestRequest('save',JSON.parse(current));failed=false;secureSaveStatus('Progression enregistrée dans Pulse');}
+   catch{failed=true;if(last===null)last=current;secureSaveStatus('Enregistrement indisponible : conservez cette page ouverte et vérifiez la connexion.');break;}
+  }
+  inflight=false;
+ }
+ return {
+  enqueue(state){if(destroyed)return;last=encode(state);if(timer)clearTimeout(timer);timer=setTimeout(()=>{timer=null;void drain()},450);},
+  async firstSave(state){
+   try{secureSaveStatus('Ouverture de votre dossier privé…');await guestRequest('save',snapshotProgress(state));
+    failed=false;secureSaveStatus('Dossier privé ouvert et sécurisé');return true;
+   }catch{secureSaveStatus('Impossible de créer le dossier : vérifiez votre connexion.');return false;}
+  },
+  async flush(){
+   if(timer){clearTimeout(timer);timer=null;}
+   await drain();
+   if(inflight){while(inflight)await new Promise(resolve=>setTimeout(resolve,35));}
+   return !failed&&last===null;
+  },
+  destroy(){destroyed=true;if(timer)clearTimeout(timer);last=null;}
+ };
+}
+
 async function boot(){
  try{
+
+  // An invitation token grants access to exactly one temporary patient session.
+  // Standard paid access and the administrator demo remain unchanged.
+  if(guestInvite){
+   const guest=await guestRequest('load');
+   guestContext={name:String(guest.patientLabel||''),label:String(guest.sessionLabel||'')};
+   paidContext={guest:true};
+   progressStore=scopedProgressStorage(store,'guest',guestInvite);
+   dossierQueue=createGuestQueue();
+   if(guest.found&&guest.snapshot){
+    paidConsentAccepted=true;
+    const restored=snapshotProgress(guest.snapshot);
+    state.page=restored.page;state.questionStep=restored.questionStep;state.task=restored.task;
+    state.answers=restored.answers;state.results=restored.results;
+    state.program=restored.program??null;state.checks=new Set(restored.checks);
+    state.returnToSummary=restored.returnToSummary;
+    if(state.page===3&&state.answers.safety!=='no')state.page=2;
+    secureSaveStatus('Dossier privé retrouvé · progression conservée');
+   }else clearProgress(progressStore);
+   root.addEventListener('change',()=>persistProgress());
+   render();return;
+  }
   const {data,error}=await sb.auth.getUser();
   if(error||!data?.user)throw Error('login');
   const user=data.user;
@@ -248,6 +316,7 @@ async function boot(){
   root.addEventListener('change',()=>persistProgress());
   render();
  }catch(error){
+  if(guestInvite){root.innerHTML='<section class="paper access"><span class="overline">INVITATION PRIVÉE MOTION ONLINE</span><h1>Accès indisponible.</h1><p>Ce lien est expiré ou la connexion au dossier est momentanément indisponible. Contactez KŌMØ pour obtenir un nouvel accès.</p><a class="action" href="mailto:contact@komolongevity.com">Contacter KŌMØ →</a></section>';return;}
   const reason=String(error?.message||'booking_verification_failed');
   const loginNeeded=reason==='login';
   const pending=reason==='paid_session_not_enabled';
