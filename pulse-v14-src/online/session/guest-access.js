@@ -8,7 +8,7 @@ export async function guestRequest(action,snapshot=null){
  if(!/^[A-Za-z0-9_-]{43}$/.test(guestInvite))throw Error('invitation_invalide');
  const payload={action,invite:guestInvite};
  if(action==='save'){payload.snapshot=snapshot;payload.consentAccepted=true;payload.consentVersion=GUEST_CONSENT;}
- const response=await fetch(GUEST_ENDPOINT,{method:'POST',cache:'no-store',credentials:'omit',
+ const response=await fetch(GUEST_ENDPOINT,{method:'POST',cache:'no-store',credentials:'omit',keepalive:true,
   headers:{'Content-Type':'application/json',apikey:GUEST_KEY},body:JSON.stringify(payload)});
  let data={};try{data=await response.json()}catch{throw Error('serveur_indisponible')}
  if(!response.ok||data.ok!==true)throw Error(data.error||'invitation_indisponible');
@@ -28,7 +28,7 @@ export function createGuestQueue(onStatus=()=>{}){
   inflight=false;
  }
  return {
-  enqueue(state){if(destroyed)return;last=encode(state);if(timer)clearTimeout(timer);timer=setTimeout(()=>{timer=null;void drain()},450);},
+  enqueue(state){if(destroyed)return;last=encode(state);if(timer)clearTimeout(timer);timer=setTimeout(()=>{timer=null;void drain()},80);},
   async firstSave(state){
    try{onStatus('Ouverture de votre dossier privé…');await guestRequest('save',snapshotProgress(state));
     failed=false;onStatus('Dossier privé ouvert et sécurisé');return true;

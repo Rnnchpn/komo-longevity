@@ -103,9 +103,13 @@ export async function downloadMotionPdf(data){
   pdf.text(data.mode==='CABINET'?'CONSULTATION AU CABINET / DEMO':'MOTION ONLINE / '+(data.mode==='PILOTE'?'BILAN PILOTE':'DEMONSTRATION'),RIGHT,20,{align:'right'});
   pdf.setTextColor(215,201,181);pdf.text(normal('Date : '+data.date),RIGHT,27,{align:'right'});
   y=49;
-  if(data.mode==='CABINET'){
+  if(data.subject){
+   pdf.setFont('helvetica','bold');pdf.setFontSize(9);ink(green);
+   pdf.text(normal('Bilan de : '+data.subject).slice(0,110),M,y);
+   y+=9;
+  }else if(data.mode==='CABINET'){
    pdf.setFont('helvetica','normal');pdf.setFontSize(8);ink(muted);
-   pdf.text(normal('Dossier de demonstration : '+(data.subject||'sans identifiant')).slice(0,110),M,y);
+   pdf.text('Dossier de demonstration non nominatif',M,y);
    y+=7;
   }
  }
@@ -347,7 +351,8 @@ export async function downloadMotionPdf(data){
   pdf.text('KOMO MOTION  /  DOCUMENT EXPERIMENTAL NON MEDICAL',M,H-12);
   pdf.text(i+' / '+count,RIGHT,H-12,{align:'right'});
  }
- const filename='KOMO_Motion_'+(data.mode==='CABINET'?'Consultation_Cabinet_Demo_':'Rapport_')+data.date+'.pdf';
+ const patientFile=normal(data.subject||'').replace(/[^A-Za-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,55);
+ const filename='KOMO_Motion_'+(patientFile?patientFile+'_':data.mode==='CABINET'?'Consultation_Cabinet_Demo_':'Rapport_')+data.date+'.pdf';
  pdf.save(filename);
  return filename;
 }

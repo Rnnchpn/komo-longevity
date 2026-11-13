@@ -20,7 +20,7 @@ export function intakeMarkup(answers={},step=0){
  '<button type="button" class="action" id="intake-next">'+(step===INTAKE_GROUPS.length-1?'Vérifier ma sécurité →':'Continuer →')+'</button></div>'+
  '<p class="message" id="intake-error" role="status"></p></section>';
 }
-export function bindIntake(root,answers,step,{next,back,rerender}){
+export function bindIntake(root,answers,step,{next,back,rerender,onAnswer=()=>{}}){
  const group=INTAKE_GROUPS[step];
  for(const question of group.questions){
   const choices=[...root.querySelectorAll('input[name="'+question.id+'"]')];
@@ -29,6 +29,7 @@ export function bindIntake(root,answers,step,{next,back,rerender}){
   if(selected)selected.checked=true;
   for(const el of choices)el.onchange=()=>{
    answers[question.id]=el.value;
+   onAnswer(question.id,el.value);
    const completed=root.querySelector('.intake-completed');
    if(completed){
     const p=intakeProgress(answers);

@@ -54,7 +54,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  '</details>'+ '<h2 class="report-section-title">Votre bilan webcam</h2><div class="result-list">'+measurementRows(results)+'</div>'+normPanelMarkup(answers,results)+
  '<section class="motion-score-zone"><div class="motion-score-heading"><span class="overline">MOTION SCORE · ALGORITHME DE RÉFÉRENCE</span><h2>Le score fonctionnel final</h2><p>Formule définie pour KŌMØ : <strong>40 % Sit-to-Stand · 35 % TUG 3 m · 25 % équilibre SPPB.</strong> Les questionnaires, la posture et l’unipodal ne modifient pas cette formule.</p></div>'+
  '<div class="motion-score-locked"><span id="score-status-icon">○</span><div><strong id="score-status">Motion Score indisponible : mesures complémentaires requises</strong><p id="score-hint">Le TUG standardisé et l’équilibre SPPB n’ont pas été mesurés automatiquement par la webcam. Aucune norme statistique n’a été inventée.</p></div><div class="motion-score-value"><strong id="motion-score-number">—</strong><span>/ 100</span></div></div>'+
- '<details class="motion-operator-details"><summary>Calculateur contrôlé · mode test administrateur</summary>'+
+ '<details class="motion-operator-details"><summary>Calculateur contrôlé · contrôle professionnel</summary>'+
  '<p>Pour vérifier l’algorithme, renseignez uniquement des mesures issues de protocoles standardisés et un référentiel normatif documenté. <strong>Ne saisissez pas de valeurs fictives dans un vrai dossier patient.</strong></p>'+
  '<div class="motion-input-grid">'+
  measureInput('kms-sts','STS 30 s · répétitions (webcam à confirmer)',stsOk?String(sts.value):'Ex. 12','1',stsOk?sts.value:null)+
@@ -74,7 +74,7 @@ export function reportMarkup(answers,results,blocked,persisted=false,program=nul
  dailyProgramMarkup(answers,results,blocked,program)+
  '<p class="notice">'+(persisted?'Les réponses et mesures chiffrées de votre bilan sont conservées dans votre dossier Pulse privé. Le PDF est créé et téléchargé localement : il n’est pas encore archivé sur Pulse.':'Mode test : réponses et résultats de démonstration conservés pendant quatre heures au maximum dans cet onglet pour reprendre après actualisation ; aucune donnée n’est sauvegardée sur un serveur. Le bouton Quitter efface cette progression.')+'</p>'+
  '<div class="pdf-download-box"><div><strong>Votre rapport Motion, en PDF</strong><p>Questionnaires, sous-scores, observations webcam et Motion Score uniquement s’il a pu être calculé. Le fichier est créé localement et reste sur votre appareil.</p></div><button type="button" class="action" id="download-pdf">↓ Télécharger mon rapport PDF</button></div>'+
- '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button><button type="button" class="action" id="restart">Recommencer la démonstration →</button></div><p id="report-message" class="message" role="status"></p></section>';
+ '<div class="actions"><button type="button" class="action secondary" id="back">← Revoir mes réponses</button><button type="button" class="action secondary" id="print-report">Imprimer / Enregistrer en PDF</button><button type="button" class="action secondary" id="copy-report">Copier la synthèse</button>'+(persisted?'':'<button type="button" class="action" id="restart">Recommencer la démonstration →</button>')+'</div><p id="report-message" class="message" role="status"></p></section>';
 }
 export function bindReport(root,answers,results,callbacks,blocked=false){
  bindDailyProgram(root,answers,results,blocked,callbacks.getProgram||(()=>null),callbacks.updateProgram||(()=>{}));
@@ -128,22 +128,27 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
   button.disabled=true;button.textContent='Création du PDF…';
   message.textContent='Préparation du rapport sur votre appareil…';
   try{
-   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{mode:callbacks.isPaid?'PILOTE':'DEMONSTRATION',program:callbacks.getProgram?.()});
+   if(callbacks.isPaid){
+    message.textContent='Vérification de la sauvegarde des réponses…';
+    if(!(await callbacks.flush?.()))throw new Error('save_pending');
+    message.textContent='Les réponses sont enregistrées. Création du rapport PDF…';
+   }
+   const payload=buildPdfReportData(answers,results,computed,blocked,new Date(),{mode:callbacks.isPaid?'PILOTE':'DEMONSTRATION',subject:callbacks.subject||'',program:callbacks.getProgram?.()});
    const filename=await downloadMotionPdf(payload);
    message.textContent='Rapport PDF prêt : '+filename+'. Il n’a pas été téléversé sur Pulse.';
   }catch(error){
-   message.textContent='La création du PDF a échoué. Vérifiez votre connexion au chargement initial du module, puis réessayez.';
+   message.textContent=error?.message==='save_pending'?'Enregistrement du dossier non confirmé : rapport non exporté. Vérifiez votre connexion et réessayez.':'La création du PDF a échoué. Vérifiez votre connexion au chargement initial du module, puis réessayez.';
   }finally{button.disabled=false;button.textContent='↓ Télécharger mon rapport PDF';}
  };
  root.querySelector('#print-report').onclick=()=>window.print();
  root.querySelector('#copy-report').onclick=async()=>{
   const profile=scoreIntake(answers);
   const testValues=Object.fromEntries(Object.entries(results).map(([key,val])=>[key,{value:val.value??null,status:val.status??'inconnu',quality:val.quality??null}]));
-  const exportData={type:'KOMO_MOTION_ONLINE_DEMO',questionnaireVersion:profile.version,scoringVersion:profile.scoringVersion,
+  const exportData={type:callbacks.isPaid?'KOMO_MOTION_ONLINE_PATIENT':'KOMO_MOTION_ONLINE_DEMO',questionnaireVersion:profile.version,scoringVersion:profile.scoringVersion,
     rawPoints:profile.rawPoints,maxPoints:profile.maxPoints,profileIndex:profile.profileIndex,
     domainPoints:profile.domainPoints,domains:profile.domains,motionScore:computed?.complete?computed.score:null,
     motionAlgorithm:computed?.complete?computed.version:null,
-    tests:testValues,notice:'Données de démonstration, non médicales, non sauvegardées.'};
+    tests:testValues,notice:callbacks.isPaid?'Données de bilan fonctionnel non médical, sauvegardées dans Pulse.':'Données de démonstration, non médicales, non sauvegardées.'};
   try{
    await navigator.clipboard.writeText(JSON.stringify(exportData,null,2));
    root.querySelector('#report-message').textContent='Synthèse copiée dans votre presse-papiers. Ne la collez pas dans un dossier réel sans contrôle des données.';
@@ -152,5 +157,5 @@ export function bindReport(root,answers,results,callbacks,blocked=false){
   }
  };
  root.querySelector('#back').onclick=callbacks.back;
- root.querySelector('#restart').onclick=callbacks.restart;
+ if(root.querySelector('#restart'))root.querySelector('#restart').onclick=callbacks.restart;
 }

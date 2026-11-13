@@ -99,6 +99,7 @@ function choice(key,title,items){
 function questionnaire(){
  wrap(intakeMarkup(state.answers,state.questionStep));
  bindIntake(root,state.answers,state.questionStep,{
+  onAnswer(){persistProgress();},
   next(){
    if(state.questionStep<INTAKE_GROUPS.length-1){state.questionStep++;render();return;}
    if(state.returnToSummary){state.returnToSummary=false;state.page=4;render();return;}
@@ -182,6 +183,8 @@ function summary(){
  bindReport(root,state.answers,state.results,{
   checkpoint(){persistProgress();},
   isPaid:Boolean(paidContext),
+  subject:guestContext?.name||'',
+  async flush(){return dossierQueue?dossierQueue.flush():true;},
   getProgram(){return state.program;},
   updateProgram(program){state.program=program;persistProgress();},
   back(){state.returnToSummary=true;state.page=1;state.questionStep=0;render();},
@@ -202,8 +205,8 @@ function render(){
  else if(state.page===3)test();
  else summary();
 }
-document.addEventListener('visibilitychange',()=>{if(document.hidden){state.sessionActive=false;stopTimer();stopCamera(true);persistProgress();const v=q('#live-video');if(v){v.hidden=true;const off=q('#camera-off');if(off)off.hidden=false;const start=q('#start-camera');if(start)start.disabled=false;const stop=q('#stop-camera');if(stop)stop.disabled=true;}}});
-window.addEventListener('pagehide',()=>{stopTimer();stopCamera(true)});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){void dossierQueue?.flush();state.sessionActive=false;stopTimer();stopCamera(true);persistProgress();const v=q('#live-video');if(v){v.hidden=true;const off=q('#camera-off');if(off)off.hidden=false;const start=q('#start-camera');if(start)start.disabled=false;const stop=q('#stop-camera');if(stop)stop.disabled=true;}}});
+window.addEventListener('pagehide',()=>{void dossierQueue?.flush();stopTimer();stopCamera(true)});
 
 let guestContext=null;
 async function boot(){
