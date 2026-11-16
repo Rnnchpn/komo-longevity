@@ -78,7 +78,7 @@ export function createMovementTracker(task){
      }else if(pose==='standing'&&transition('standing',at,230)){
        if(s.phase==='seated'){
          const rise=Number.isFinite(s.seatedHipHeight)?f.ankleY-f.hipY-s.seatedHipHeight:0;
-         const required=Math.max(.027,.048*f.scale);
+         const required=Math.max(.012,.045*f.scale);
          if(rise>=required&&at-s.lastCountAt>950){
            s.count++;s.lastCountAt=at;s.phase='standing';s.seatedHipHeight=null;
            message='Lever complet compté · rasseyez-vous';
