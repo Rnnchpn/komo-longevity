@@ -45,7 +45,7 @@ export function frameInfo(points,task='sts'){
 }
 export function createMovementTracker(task){
  const s={count:0,phase:'initial',candidate:null,candidateAt:0,lastCountAt:-Infinity,lastAt:0,
-   samples:0,usable:0,baseline:null,lastValidAt:0};
+   samples:0,usable:0,baseline:null,seatedHipHeight:null,lastValidAt:0};
  function transition(next,at,stableMs=200){
    if(s.candidate!==next){s.candidate=next;s.candidateAt=at;return false;}
    return at-s.candidateAt>=stableMs;
@@ -57,6 +57,7 @@ export function createMovementTracker(task){
    if(s.lastValidAt&&at-s.lastValidAt>650){
     s.candidate=null;s.candidateAt=at;
     if(task==='sts'||task==='arms')s.phase='initial';
+    if(task==='sts')s.seatedHipHeight=null;
     if(task==='heels'){s.phase='initial';s.baseline=null;}
    }
    s.lastAt=at;s.samples++;
@@ -67,10 +68,25 @@ export function createMovementTracker(task){
    if(task==='sts'){
      // Record one complete seated -> standing transition, ignore camera jitter.
      const pose=f.kneeAngle<=120?'seated':f.kneeAngle>=154?'standing':'transition';
-     if(pose==='seated'&&transition('seated',at,230)){s.phase='seated';message='Assis détecté · relevez-vous';}
-     else if(pose==='standing'&&transition('standing',at,230)){
-       if(s.phase==='seated'&&at-s.lastCountAt>950){s.count++;s.lastCountAt=at;message='Lever compté · asseyez-vous';}
-       s.phase='standing';
+     if(pose==='seated'&&transition('seated',at,230)){
+       // Anchor the seated pelvis relative to the ankle, not to the camera frame.
+       // A knee-angle change alone is insufficient evidence of a complete rise.
+       const height=f.ankleY-f.hipY;
+       s.seatedHipHeight=s.phase==='seated'&&Number.isFinite(s.seatedHipHeight)?
+         .85*s.seatedHipHeight+.15*height:height;
+       s.phase='seated';message='Assis détecté · relevez-vous';
+     }else if(pose==='standing'&&transition('standing',at,230)){
+       if(s.phase==='seated'){
+         const rise=Number.isFinite(s.seatedHipHeight)?f.ankleY-f.hipY-s.seatedHipHeight:0;
+         const required=Math.max(.027,.048*f.scale);
+         if(rise>=required&&at-s.lastCountAt>950){
+           s.count++;s.lastCountAt=at;s.phase='standing';s.seatedHipHeight=null;
+           message='Lever complet compté · rasseyez-vous';
+         }else if(rise<required){
+           // Hold the seated phase until a real pelvis elevation is confirmed.
+           message='Genou tendu, mais lever incomplet : redressez complètement le bassin';
+         }
+       }else s.phase='standing';
      }else if(pose==='transition'){s.candidate=null;message='Mouvement suivi';}
      if(s.phase==='initial')message='Asseyez-vous, de profil, pour initialiser';
    }else if(task==='arms'){
@@ -99,5 +115,5 @@ export function createMovementTracker(task){
    }
    return {...f,count:s.count,phase:s.phase,message,usable:s.usable,samples:s.samples};
  }
- return {observe,summary:()=>({count:s.count,usable:s.usable,samples:s.samples,visibilityRatio:s.samples?s.usable/s.samples:0}),reset:()=>{s.count=0;s.phase='initial';s.candidate=null;s.candidateAt=0;s.lastCountAt=-Infinity;s.lastAt=0;s.samples=0;s.usable=0;s.baseline=null;s.lastValidAt=0;}};
+ return {observe,summary:()=>({count:s.count,usable:s.usable,samples:s.samples,visibilityRatio:s.samples?s.usable/s.samples:0}),reset:()=>{s.count=0;s.phase='initial';s.candidate=null;s.candidateAt=0;s.lastCountAt=-Infinity;s.lastAt=0;s.samples=0;s.usable=0;s.baseline=null;s.seatedHipHeight=null;s.lastValidAt=0;}};
 }
