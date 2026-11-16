@@ -11,7 +11,8 @@ const [ui,css,pose]=await Promise.all([
 assert.ok(ui.includes('id="mocLiveCount"'),'large real-time count visible');
 assert.ok(ui.includes('moc-clock-figure')&&ui.includes('moc-rep-figure'),'dual HUD');
 assert.ok(ui.includes('detected>previous')&&ui.includes('tile.textContent!==String(detected)'),'updates only when real repetitions increase');
-assert.ok(ui.includes('if(input&&!manualEdited)input.value=String(detected)'),'manual entry never overwritten');
+assert.ok(ui.includes('if(input&&!manualEdited&&videoQualityUsable(reading,t))input.value=String(detected)'),
+ 'manual entry never overwritten and low-quality video cannot auto-populate the value');
 assert.ok(ui.includes('moc-count-verified'),'detection state visible');
 assert.ok(css.includes('grid-template-columns:minmax(390px,.84fr) minmax(420px,1.16fr)'),'camera gets majority of desktop width');
 assert.ok(css.includes('font-size:clamp(60px,5.4vw,84px)')||css.includes('clamp(60px,5.4vw,84px)'),'large stopwatch');
