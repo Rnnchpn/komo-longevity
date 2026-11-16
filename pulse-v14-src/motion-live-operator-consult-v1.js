@@ -103,6 +103,14 @@ export function disposeOperatorConsultation(){
 }
 function currentTest(){return TESTS[Number(room?.step_index)]||null}
 const isBalance=t=>t?.type==="balance";
+// Pragmatic video QA gate, not a medically validated accuracy threshold.
+// Manual entries remain possible when a camera is absent or tracking is uncertain.
+function videoQualityUsable(reading,test){
+ if(!reading||reading.step!==test?.id||reading.frames<30||reading.quality<70)return false;
+ if(test?.type==="balance")return reading.started&&reading.balanceQuality>=70&&
+  !["camera_lost","ambiguous_contact"].includes(reading.balanceReason);
+ return Number.isFinite(reading.measurement)&&reading.validFrames>=20;
+}
 const balanceReasonText=reason=>({
  foot_contact:"Le pied libre a été reposé. Mesure terminée.",
  limit:"30 secondes atteintes. Plafond de l’essai.",
@@ -622,12 +630,12 @@ function updatePosePanel(reading){
     if(detected>0&&detected>previous&&tile.animate)
      tile.animate([{transform:"scale(1.17)"},{transform:"scale(1)"}],{duration:240,easing:"ease-out"});
    }
-   if(input&&!manualEdited)input.value=String(detected);
+   if(input&&!manualEdited&&videoQualityUsable(reading,t))input.value=String(detected);
   }else if(tile){
    tile.textContent=String(Number.isFinite(autoValue)?autoValue:0);
    tile.classList.remove("moc-count-verified");
   }
-  if(ready&&Number.isFinite(autoValue)){
+  if(ready&&Number.isFinite(autoValue)&&videoQualityUsable(reading,t)){
    feedback.textContent="◉ Comptage vidéo en direct : "+autoValue+" "+t.unit+" · "+
     (reading?.phase==="seated"?"Assis détecté · relevez-vous":reading?.phase==="standing"?"Debout détecté · rasseyez-vous":message)+
     ". Corrigez la valeur avant de valider si nécessaire.";
@@ -648,7 +656,7 @@ function updatePosePanel(reading){
   // confirmation before storing it as a video-derived result.
   if(elapsed!==null){
    autoValue=elapsed;
-   if(input&&!manualEdited)input.value=String(elapsed);
+   if(input&&!manualEdited&&videoQualityUsable(reading,t))input.value=String(elapsed);
   }
   if(state==="waiting"||state==="candidate"){
    feedback.textContent=state==="candidate"?
@@ -779,10 +787,14 @@ async function submit(event){
    const raw=q("mocValue")?.value;
    if(raw===""||raw===undefined){setStatus("Saisissez le résultat observé.");return}
    payload.value=Number(raw);
-   payload.measurement_source=!manualEdited&&Number.isFinite(autoValue)&&payload.value===autoValue?
+   const reading=poseTracker?.getLatest();
+   const videoUsable=videoQualityUsable(reading,t);
+   if(!manualEdited&&Number.isFinite(autoValue)&&!videoUsable){
+    setStatus("Suivi vidéo insuffisant ou interrompu : vérifiez le mouvement et saisissez manuellement le résultat avant validation.");return;
+   }
+   payload.measurement_source=!manualEdited&&videoUsable&&Number.isFinite(autoValue)&&payload.value===autoValue?
     "operator_confirmed_video_estimate":"operator_manual_observation";
    if(isBalance(t)){
-    const reading=poseTracker?.getLatest();
     if(payload.measurement_source==="operator_confirmed_video_estimate"){
      payload.measurement_quality=Number.isInteger(reading?.balanceQuality)?reading.balanceQuality:0;
      payload.stop_reason=reading?.balanceReason||"operator_end";
