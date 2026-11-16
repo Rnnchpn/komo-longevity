@@ -279,6 +279,7 @@ const scripts = [
   'scripts/pulse-balance-30-qa-20261110.mjs',
   // Video XXL and robust calibrated keypoint measurement regression.
   'scripts/pulse-measurement-xxl-qa-20261110.mjs',
+  'scripts/pulse-physical-measures-qa-20261116.mjs',
   // Deterministic movement algorithm tests, independent of actual camera hardware.
   'scripts/pulse-pose-metrics-qa.mjs',
   // Check voice command interpretation and microphone lifecycle without hardware.
