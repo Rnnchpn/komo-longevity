@@ -1,6 +1,10 @@
 // KŌMØ Pulse — supervised Motion Online tests; video capture on the phone, manual observations by Operator.
 // Test-only. No automated clinical interpretation or diagnostic Motion Score.
 import {INSTRUMENTED_STEPS,V2_ORDER,SIDE_OPTIONS,deriveInstrumented,validateInstrumented} from './motion-v2-instrumented.mjs?v=20261120-v2';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261120-v2';
+// Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
+let trajectoryState={key:'',data:null,loading:false};
+const isRealDossier=()=>patient?.data_classification==='health_data';
 const BASE_TESTS=[
  {id:"sts",title:"Se relever de la chaise",duration:30,unit:"répétitions",type:"count",
   setup:"Chaise stable contre un mur, caméra de trois-quarts profil, tête et pieds visibles.",
@@ -60,9 +64,9 @@ function updateCameraLinkState(){
  const banner=q("mocCameraBanner");
  if(banner){
   banner.dataset.state=badge.dataset.state;
-  banner.textContent=label+(live?" · Le suivi du mouvement fonctionne en arrière-plan.":
+  banner.textContent=label+(room?.status==="completed"?" · Rapport disponible : télécharge le PDF et remets-le au patient. Tu peux fermer la caméra de l’iPhone.":
+   live?" · Le suivi du mouvement fonctionne en arrière-plan.":
    online?" · Vérifie l'autorisation et garde l'écran de l'iPhone actif.":
-   room?.status==="completed"?" · Rapport disponible.":
    " · Active la caméra du cabinet sur ton iPhone.");
  }
 }
@@ -87,7 +91,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261111-questionnaire-points-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261120-hiro-v1";
  document.head.append(link);
 }
 function stopClock(){
@@ -138,13 +142,13 @@ function makeShell(){
  '<p class="moc-voice-state" id="mocVoiceState" role="status">Voix désactivée · Active-la pour dire « C’est parti », « Stop » ou « Suivant ». Aucun audio n’est enregistré par Pulse.</p>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
- '<div class="moc-step-nav" id="mocStepNav" aria-label="Progression des six tests Motion"></div>'+
+ '<div class="moc-step-nav" id="mocStepNav" aria-label="Progression des étapes Motion"></div>'+
  '<div id="mocTestBody"><p>Recherche de la consultation…</p></div>'+
  '</section><aside class="moc-camera-column"><div class="moc-camera-heading"><strong>iPhone · caméra du cabinet</strong><span id="mocCameraState" class="moc-camera-state" data-state="offline" role="status">○ iPhone non connecté</span></div>'+
  '<div id="mocPassportAside" class="moc-passport-aside" hidden></div>'+
  '<div id="motionConsultCamera" class="moc-camera-host"></div>'+
  '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>'+
- '</aside></div><p class="moc-bottom-note">Démonstration avec dossier fictif · Résultats saisis manuellement par l’opérateur · Aucune interprétation clinique automatique</p></section>';
+ '</aside></div><p class="moc-bottom-note">'+(isRealDossier()?'Consultation réelle · dossier pseudonymisé':'Démonstration avec dossier fictif')+' · Résultats validés par l’opérateur · Aucune interprétation clinique automatique</p></section>';
  q("mocReturn").onclick=async()=>{
   try{await saveQuestionnaire();if(questionnaireDirty)return}
   catch(error){questionnaireNote("Sauvegarde échouée : "+error.message);return}
@@ -168,7 +172,7 @@ function makeShell(){
    if(q("mocFullscreen"))q("mocFullscreen").textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran";
   }catch(error){if(q("mocFullscreen"))q("mocFullscreen").textContent="Plein écran indisponible"}
  };
- q("mocPatientLine").textContent=patient ? [patient.first_name,patient.last_name].filter(Boolean).join(" ")+" · Bilan supervisé" : "Sélectionnez un patient fictif";
+ q("mocPatientLine").textContent=patient ? [patient.first_name,patient.last_name].filter(Boolean).join(" ")+" · Bilan supervisé" : "Sélectionnez un patient";
  updatePanelTabs();
 }
 function renderWaiting(message){
@@ -339,16 +343,57 @@ function stopClockIfNotRunning(){
  // The running measurement continues while the operator enters questionnaire answers.
  if(room?.progress?.step_status!=="running"&&clock){clearInterval(clock);clock=null;}
 }
+function trajectoryKey(){return patient&&room?patient.id+':'+room.id+':'+room.status:'';}
+async function loadTrajectory(force){
+ const key=trajectoryKey();if(!key||!api)return null;
+ if(!force&&(trajectoryState.loading||trajectoryState.key===key))return trajectoryState.data;
+ trajectoryState={key:trajectoryState.key,data:trajectoryState.data,loading:true};
+ try{
+  const data=await api({action:"operator_patient_history",patient_id:patient.id});
+  const built=buildTrajectory(data.sessions||[]);
+  trajectoryState={key,data:built,loading:false};
+  const node=q("mocTrajectory");if(node)node.innerHTML=trajectoryMarkup(built);
+  return built;
+ }catch(error){
+  trajectoryState={key,data:null,loading:false};
+  const node=q("mocTrajectory");if(node)node.innerHTML='<p class="moc-help">Trajectoire indisponible : '+HTML(error.message||'erreur réseau')+'</p>';
+  return null;
+ }
+}
+function instrumentedMarkup(rows=[]){
+ const done=rows.filter(r=>r.status!=='missing');
+ if(!done.length)return '';
+ return '<h4>Mesures instrumentées</h4><div class="moc-instrumented-list">'+done.map(r=>
+  '<div class="moc-instrumented-row"><div><strong>'+HTML(r.name)+'</strong><small>'+HTML(r.device||'')+'</small></div>'+
+  '<span>'+(r.status==='skipped'?'Non réalisé':(r.lines||[]).map(HTML).join('<br>'))+'</span></div>').join('')+'</div>';
+}
+function trajectoryMarkup(t){
+ if(!t)return '<h4>Trajectoire</h4><p class="moc-help">Chargement de l’historique du patient…</p>';
+ if(!t.points.length)return '<h4>Trajectoire</h4><p class="moc-help">Première consultation : elle deviendra le point de départ (J0) dès qu’elle sera terminée.</p>';
+ const head='<h4>Trajectoire '+t.points.map(p=>HTML(p.label)).join(' → ')+'</h4><p class="moc-trajectory-headline">'+HTML(trajectoryHeadline(t))+'</p>';
+ if(t.points.length<2)return head;
+ const pts=t.points.slice(-4);
+ const rows=t.rows.map(r=>'<tr><th scope="row">'+HTML(r.label)+(r.unit?' <small>'+HTML(r.unit)+'</small>':'')+'</th>'+
+  r.display.slice(-pts.length).map((v,i,a)=>'<td'+(i===a.length-1?' class="is-last"':'')+'>'+HTML(v)+'</td>').join('')+
+  '<td class="moc-delta is-'+HTML(r.verdict||'none')+'">'+HTML(r.deltaDisplay)+(r.notable?' ●':'')+'</td></tr>').join('');
+ return head+'<div class="moc-trajectory-table-wrap"><table class="moc-trajectory-table"><thead><tr><th>Mesure</th>'+
+  pts.map(p=>'<th>'+HTML(p.label)+'<small>'+HTML(frDate(p.date))+'</small></th>').join('')+'<th>Écart</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+  '<p class="moc-help">● changement supérieur au repère publié (marche 0,1 m/s · chaise 2 levers · préhension 50 N). Autres écarts : descriptifs.</p>'+
+  (t.warnings||[]).map(w=>'<p class="moc-trajectory-warning">⚠ '+HTML(w)+'</p>').join('');
+}
 function renderReportSection(){
  if(!host||!extras||!room)return;
  const results=room.progress?.results||{};
  const summary=extras.clinicReportSummary(questionnaireAnswers,results);
  const label=patient?[patient.first_name,patient.last_name].filter(Boolean).join(" "):"Dossier fictif";
  const simulated=room.progress?.questionnaire?.simulated===true;
- const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,simulated});
+ const trajectory=trajectoryState.key===trajectoryKey()?trajectoryState.data:null;
+ const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,trajectory,simulated});
  const plan=passport.actionPlan;
- q("mocProgressText").textContent="Passeport · "+summary.recorded+"/6 tests · "+summary.answered+"/22 réponses";
- q("mocProgressFill").style.width=(Math.min(6,summary.recorded+summary.skipped)/6*100)+"%";
+ const doneAll=TESTS.filter(t=>results[t.id]?.status==="done").length;
+ const skippedAll=TESTS.filter(t=>results[t.id]?.status==="skipped").length;
+ q("mocProgressText").textContent="Passeport · "+doneAll+"/"+TESTS.length+" étapes · "+summary.answered+"/22 réponses";
+ q("mocProgressFill").style.width=(Math.min(TESTS.length,doneAll+skippedAll)/TESTS.length*100)+"%";
  q("mocStepNav").hidden=true;
  const finished=room.status==="completed";
  const resultCard=t=>'<div class="moc-passport-result"><span>'+HTML(t.short)+'</span><strong>'+HTML(t.display)+'</strong></div>';
@@ -367,7 +412,7 @@ function renderReportSection(){
   '<span class="moc-kicker">KŌMØ MOTION PASSPORT · SIX-WEEK ACTION PLAN</span>'+
   '<h3>Votre feuille de route</h3>'+
   (simulated?'<p class="moc-demo-warning">SCÉNARIO FICTIF · Réponses simulées, aucun avis médical individualisé.</p>':'')+
-  '<div class="moc-action-metrics"><div><strong>'+passport.measured+'/6</strong><span>tests réalisés</span></div>'+
+  '<div class="moc-action-metrics"><div><strong>'+doneAll+'/'+TESTS.length+'</strong><span>étapes réalisées</span></div>'+
    '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses enregistrées</span></div>'+
    '<div><strong>'+(passport.questionnaire.complete?passport.questionnaire.index+'/100':'—')+
    '</strong><span>indice fonctionnel déclaré</span></div></div>'+
@@ -383,6 +428,8 @@ function renderReportSection(){
   '<div class="moc-domain-points">'+pointGroups+'</div>'+
   '<div class="moc-passport-highlights">'+reasons+'</div>'+
   '<h4>Tests réalisés</h4><div class="moc-results-compact">'+passport.measures.map(resultCard).join('')+'</div>'+
+  instrumentedMarkup(passport.instrumented)+
+  '<div id="mocTrajectory" class="moc-trajectory">'+trajectoryMarkup(trajectory)+'</div>'+
   '<div class="moc-action-section-title"><h4>Exercices à la maison</h4><small>Progression à adapter et valider</small></div>'+
   '<div class="moc-exercise-grid">'+plan.exercises.slice(0,4).map(exerciseCard).join('')+'</div>'+
   '<details class="moc-report-details"><summary>Marche, progression et consignes complémentaires</summary>'+
@@ -405,7 +452,7 @@ function renderReportSection(){
     '<option value="questionnaire">6 · Questionnaire détaillé (22 réponses)</option></select>'+
    '<button class="moc-button secondary" id="mocDownloadChapter"'+(!finished?' disabled':'')+'>↓ Exporter cette catégorie</button></div>'+
   '<button type="button" class="moc-button secondary" id="mocReportQuestionnaire">Questionnaires</button></div>'+
-  (!finished?'<p class="moc-status">Terminez les six épreuves pour exporter le document.</p>':'')+
+  (!finished?'<p class="moc-status">Terminez les '+TESTS.length+' étapes (réalisées ou passées) pour exporter le document.</p>':'')+
   '<p id="mocReportStatus" class="moc-status" role="status"></p></section>';
  const aside=q("mocPassportAside");
  if(aside){
@@ -425,6 +472,7 @@ function renderReportSection(){
    '</div>';
  }
  updatePanelTabs();
+ if(trajectoryState.key!==trajectoryKey())void loadTrajectory(false);
  q("mocReportQuestionnaire").onclick=()=>switchPanel("questionnaire");
  const button=q("mocDownloadPdf"),chapter=q("mocDownloadChapter");
  const exportPdf=async(type,clicked)=>{
@@ -449,8 +497,9 @@ function renderReportSection(){
     "Le questionnaire contient "+progress.completed+"/"+progress.total+
     " réponses. Exporter tout de même un passeport marqué INCOMPLET ?"))return;
    status.textContent="Création du PDF "+(type==="all"?"complet (toutes sections)":"par catégorie")+"…";
+   const history=await loadTrajectory(true);
    const filename=await extras.downloadClinicReport(confirmed,persisted.progress?.results||{},new Date(),
-    {subject:label,simulated:persisted.progress?.questionnaire?.simulated===true,category:type});
+    {subject:label,simulated:persisted.progress?.questionnaire?.simulated===true,category:type,trajectory:history});
    status.textContent="✓ PDF généré à partir de "+progress.completed+"/"+progress.total+
     " réponses confirmées : "+filename;
   }catch(error){
@@ -565,11 +614,17 @@ function renderStep(){
   '<option value="">Choisir une observation</option><option value="neutral">Alignement apparent neutre</option>'+
   '<option value="apparent_offset">Décalage sagittal apparent</option><option value="not_interpretable">Image non interprétable</option></select></label>'
   :'<label class="moc-field">'+HTML(t.label)+'<div class="moc-input-unit"><input id="mocValue" type="number" inputmode="decimal" min="0" max="'+(t.unit==="seconds"?String(t.duration):"100")+'" step="'+(t.unit==="seconds"?"0.1":"1")+'" placeholder="Saisir une valeur"><span>'+HTML(t.unit)+'</span></div></label>';
- q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">TEST '+(idx+1)+' / '+TESTS.length+'</span><h3>'+HTML(t.title)+'</h3>'+
- '<details class="moc-instructions" '+(!running?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
+ // Saisies manuelles (VALD, mètre, chrono, Two-Step) : champs visibles d'emblée, un seul clic « Valider ».
+ const manual=isFields(t)||t.id==="two_step";
+ const manualTail='<div class="moc-auto-feedback" id="mocAutoFeedback">'+(isFields(t)?"Valeurs recopiées depuis l’appareil ; la caméra ne détermine pas ces mesures.":"Deux distances mesurées au ruban ; la caméra ne détermine pas cette valeur.")+'</div>'+
+  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Douleur, aide utilisée, essai invalide…"></textarea></label>'+
+  '<div class="moc-buttons"><button type="button" id="mocSave" class="moc-button primary">Valider et passer au suivant</button>'+
+  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>';
+ q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">TEST '+(idx+1)+' / '+TESTS.length+(manual&&t.device?' · '+HTML(t.device):'')+'</span><h3>'+HTML(t.title)+'</h3>'+
+ '<details class="moc-instructions" '+(!running||manual?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div></details>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
- (running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"||isFields(t)?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":isFields(t)?"Saisie":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
+ (manual?input+manualTail:running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"||isFields(t)?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":isFields(t)?"Saisie":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
  (t.type==="balance"?'<div class="moc-rep-figure moc-balance-figure"><span>TEMPS MAINTENU</span><strong id="mocLiveBalance" aria-live="off">—</strong><small id="mocBalanceState">EN ATTENTE DU PIED LEVÉ</small></div>':'')+
  (t.type==="count"?'<div class="moc-rep-figure"><span>'+ (t.id==="sts"?"LEVERS EN DIRECT":"RÉPÉTITIONS EN DIRECT")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong><small>Estimation vidéo · à confirmer</small></div>':'')+
  (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">'+(isBalance(t)?"Arrêter l’essai":"Arrêter")+'</button><button type="button" class="moc-button secondary" id="mocRestartClock">'+(isBalance(t)?"↻ Refaire l’essai":"↻ Repartir de "+t.duration+" s")+'</button></div>':'')+'</div></div>'+input+
@@ -843,9 +898,16 @@ async function submit(event){
  }
  if(event==="skip")payload.note=q("mocNote")?.value||"";
  if(event==="skip"&&!confirm("Marquer ce test comme non réalisé et continuer ?"))return;
+ const needsStart=event==="save"&&(isFields(t)||t.id==="two_step")&&room.progress?.step_status!=="running";
  busy=true;
  host.querySelectorAll(".moc-button").forEach(b=>{if(b.id!=="mocReturn")b.disabled=true});
  try{
+  if(needsStart){
+   // Le serveur exige un état « en cours » avant l'enregistrement : démarrage implicite.
+   const started=await api({action:"operator_test_update",session_id:room.id,step_code:t.id,event:"start",
+    safety_confirmed:safety,duration_seconds:t.duration});
+   if(started?.session)room=started.session;
+  }
   const result=await api(payload);
   room=result.session;
   if(["start","restart"].includes(event)&&room?.progress?.step_status==="running"){
@@ -949,7 +1011,7 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261111-questionnaire-points-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261120-hiro-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
@@ -1002,7 +1064,7 @@ export async function mountOperatorConsultation(config){
  }catch(error){
   poseStatus="Marqueurs indisponibles : "+(error.message||"chargement échoué");
  }
- if(!patient){renderWaiting("Sélectionne un dossier fictif pour cette consultation physique.");return}
+ if(!patient){renderWaiting("Sélectionne le dossier du patient pour cette consultation physique.");return}
  await refresh(true);
  poll=setInterval(()=>refresh(),2600);
 }

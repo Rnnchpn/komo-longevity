@@ -1,9 +1,9 @@
 // KŌMØ Motion Passport — six complete categories, including 22 answers.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261111-questionnaire-points-v1';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261120-hiro-v1';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
- .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑]/g,'-')
+ .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
  .replace(/[•·]/g,'-').replace(/[≤]/g,'<=').replace(/[≥]/g,'>=')
  .replace(/[^\x20-\x7e\xa0-\xff]/g,' ');
 const fmt=n=>Number.isFinite(n)?(Number.isInteger(n)?String(n):n.toFixed(1).replace('.',',')):'-';
@@ -64,7 +64,7 @@ export async function downloadClinicPassport(report,category='all'){
   for(let i=1;i<=count;i++){
    pdf.setPage(i);line(M,282,R,282);
    txt(report.simulated?'DEMONSTRATION / 22 REPONSES FICTIVES / AUCUN PATIENT REEL':
-    'PASSEPORT EXPERIMENTAL - VALIDATION OPERATEUR REQUISE',
+    'BILAN FONCTIONNEL KOMO MOTION - MESURES VALIDEES PAR LE PRATICIEN - DOCUMENT NON DIAGNOSTIQUE',
     M,288,{sz:6.8,col:P.muted});
    txt(String(i).padStart(2,'0')+' / '+String(count).padStart(2,'0'),R,288,
     {sz:7,bold:true,align:'right'});
@@ -163,6 +163,35 @@ export async function downloadClinicPassport(report,category='all'){
    let yy=y+12.5;lines.forEach(l=>{txt(l,M+7,yy,{sz:8.1,col:r.status==='skipped'?P.muted:P.text});yy+=4.3;});
    y+=h+3;
   });
+ }
+ function trajectoire(){
+  // J0 -> S6 -> S12 : memes tests, memes conditions. Ecarts descriptifs, aucun score composite.
+  const t=report.trajectory;
+  if(!t||!Array.isArray(t.points)||t.points.length<2||!t.rows?.length)return;
+  page('5B','Trajectoire','Evolution de vos mesures entre les consultations : '+t.points.map(p=>p.label+' ('+p.date.split('-').reverse().join('/')+')').join(' -> ')+'.');
+  const pts=t.points.slice(-4),cols=pts.length;
+  const labelW=70,deltaW=26,colW=(C-labelW-deltaW)/cols;
+  let y=68;
+  box(M,y-6,C,9,P.dark,1.5);
+  txt('MESURE',M+3,y,{sz:7.2,bold:true,col:P.white});
+  pts.forEach((p,i)=>txt(p.label,M+labelW+colW*i+colW/2,y,{sz:7.2,bold:true,col:P.white,align:'center'}));
+  txt('ECART',R-3,y,{sz:7.2,bold:true,col:P.white,align:'right'});
+  y+=9;
+  t.rows.forEach((r,idx)=>{
+   if(y>262){page('5B','Trajectoire (suite)','');y=68;}
+   if(idx%2===0)box(M,y-5.2,C,8,P.sand);
+   txt(r.label+(r.unit?' ('+r.unit+')':''),M+3,y,{sz:7.6});
+   const vals=r.display.slice(-cols);
+   vals.forEach((v,i)=>txt(v,M+labelW+colW*i+colW/2,y,{sz:7.8,bold:i===vals.length-1,align:'center'}));
+   const col=r.verdict==='favorable'?P.dark:r.verdict==='defavorable'?[150,70,50]:P.muted;
+   txt(r.deltaDisplay+(r.notable?' *':''),R-3,y,{sz:7.8,bold:true,col,align:'right'});
+   y+=8;
+  });
+  y+=4;
+  words('* Changement superieur au repere publie de changement cliniquement pertinent (vitesse de marche 0,1 m/s ; lever de chaise 2 levers ; prehension 50 N, environ 5 kg). Les autres ecarts sont descriptifs.',
+   M,y,C,{sz:7,lh:3.4,max:3,col:P.muted});
+  y+=12;
+  (t.warnings||[]).forEach(w=>{y=words('Comparabilite : '+w,M,y,C,{sz:7,lh:3.4,max:2,col:[150,70,50]})+1;});
  }
  function exercises(){
   page(3,'Exercices a domicile','Programme educatif a adapter avec un professionnel selon la securite et les symptomes.');
@@ -279,12 +308,13 @@ export async function downloadClinicPassport(report,category='all'){
   printGroups(groups.slice(0,2),1);
   printGroups(groups.slice(2),2);
  }
- const renderers={synthese,tests,instruments,exercices:exercises,nutrition,suivi,questionnaire};
- const chapters=category==='all'?['synthese','tests','instruments','exercices','nutrition','suivi','questionnaire']:
-  category==='tests'?['tests','instruments']:[category];
+ const renderers={synthese,tests,instruments,trajectoire,exercices:exercises,nutrition,suivi,questionnaire};
+ const chapters=category==='all'?['synthese','tests','instruments','trajectoire','exercices','nutrition','suivi','questionnaire']:
+  category==='tests'?['tests','instruments']:category==='suivi'?['suivi','trajectoire']:[category];
  for(const chapter of chapters)renderers[chapter]();
  footer();
- const name='KOMO_Motion_'+(category==='all'?'Passeport_Complet':category)+
+ const code=cleaner(report.subject||'').replace(/[^A-Za-z0-9-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40);
+ const name='KOMO_Motion_'+(code?code+'_':'')+(category==='all'?'Passeport_Complet':category)+
   '_'+report.date+'.pdf';
  pdf.save(name);
  return name;

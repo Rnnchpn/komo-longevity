@@ -75,7 +75,7 @@ function makeOverlay(){
     <p id="mliveFeedback" class="mlive-feedback" role="status" aria-live="polite"></p>
    </div>
   </div>
-  <footer class="mlive-foot">${cameraStation?"Mode caméra du professionnel, sans compte patient sur l’iPhone.":"Mode d'essai avec dossier fictif."} · Vidéo WebRTC chiffrée, sans enregistrement · Garder l'écran allumé · Essais sur dossiers fictifs uniquement</footer>`;
+  <footer class="mlive-foot">${cameraStation?"Mode caméra du professionnel, sans compte patient sur l’iPhone.":"Mode d'essai avec dossier fictif."} · Vidéo WebRTC chiffrée, sans enregistrement · Garder l'écran allumé · Aucune image conservée</footer>`;
  document.body.append(overlay);
  el("mliveClose").onclick=()=>{
   const closingId=stationRoomId,stop=stationStop;

@@ -19,6 +19,7 @@ async function api(payload){
   operator_access_required:'Ce compte n’a pas l’accès Opérateur.',
   too_many_active_cameras:'Trop de caméras ouvertes. Termine une séance sur ton iPhone avant d’en ouvrir une autre.',
   test_environment_only:'Ce dispositif est réservé aux tests avec dossiers fictifs.',
+  center_unavailable:'Ce lieu de consultation n’est pas ouvert dans PULSE.',
   consultation_not_prepared:'Commence par créer ta consultation sur l’ordinateur, dans « Nouvelle consultation ». Ensuite, active la caméra ici.',
   consultation_already_pending:'Une consultation est déjà prête sur l’ordinateur.',
   camera_already_connected:'La caméra est déjà connectée. Ferme l’ancienne session de caméra avant de recommencer.',
@@ -66,7 +67,7 @@ function renderReady(email){
   try{
    const {data:{session}}=await sb.auth.getSession();
    if(!session?.user?.id)throw Error('Compte Operator non connecté.');
-   const module=await import('../motion-live-guest-v1.js?v=20261111-clean-consultation-v2');
+   const module=await import('../motion-live-guest-v1.js?v=20261120-hiro-v1');
    await module.openMotionLive({
     mode:'operator_camera',
     ownerId:session.user.id,

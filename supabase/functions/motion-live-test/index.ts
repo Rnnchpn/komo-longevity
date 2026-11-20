@@ -4,7 +4,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")||"";
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 const db=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false}});
-const ORG_ID="cea48f94-24ae-4ddb-ac28-ac289bb1e9ca"; // KŌMØ Cannes, test_only
+// Centre de démonstration / répétition (données fictives uniquement).
+const DEFAULT_ORG_ID="cea48f94-24ae-4ddb-ac28-ac289bb1e9ca"; // KŌMØ Cannes, test_only
+// Multi-centres (20/11/2026) : un centre "production_enabled" (ex. KŌMØ Beausoleil — Clinique HIRO)
+// accepte des dossiers réels pseudonymisés (patients.data_classification="health_data").
+// Un centre "test_only" n'accepte que des patients fictifs. Tout autre statut est refusé.
+const MEMBER_ROLES=["owner","clinical_admin","physician","operator","coordinator"];
+type Center={id:string;clinical_data_status:"test_only"|"production_enabled"};
 // KŌMØ Motion — protocole de consultation V2 (20/11/2026) : 13 étapes, de la moins à la plus exigeante.
 // Les étapes "instrumentées" sont saisies par l'opérateur (valeurs VALD recopiées, chrono, mètre).
 // Spécification dupliquée dans pulse-v14-src/motion-v2-instrumented.mjs : modifier les deux ensemble.
@@ -72,22 +78,34 @@ const tokenRe=/^[A-Za-z0-9_-]{43}$/;
 const now=()=>new Date().toISOString();
 const randomToken=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const hash=async(v:string)=>Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(v)))).map(x=>x.toString(16).padStart(2,"0")).join("");
-async function testCenter(){
- const {data,error}=await db.from("organizations").select("id,status,clinical_data_status").eq("id",ORG_ID).maybeSingle();
- return !error&&data?.status==="active"&&data?.clinical_data_status==="test_only";
+async function centerInfo(id:string):Promise<Center|null>{
+ if(!uuid(id))return null;
+ const {data,error}=await db.from("organizations").select("id,status,clinical_data_status").eq("id",id).maybeSingle();
+ if(error||!data||data.status!=="active"||!["test_only","production_enabled"].includes(data.clinical_data_status))return null;
+ return {id:data.id,clinical_data_status:data.clinical_data_status};
 }
+// Identity only: account role admin/professional. Centre membership is checked per request.
 async function operator(req:Request){
  const jwt=(req.headers.get("authorization")||"").replace(/^Bearer\s+/i,"");
  if(!jwt||jwt===req.headers.get("apikey"))return null;
  const {data,error}=await db.auth.getUser(jwt);
  const user=data?.user;if(error||!user)return null;
- const [{data:role},{data:member}]=await Promise.all([
-  db.from("account_roles").select("role").eq("user_id",user.id).maybeSingle(),
-  db.from("organization_members").select("role,status").eq("user_id",user.id).eq("organization_id",ORG_ID).eq("status","active").maybeSingle()
- ]);
+ const {data:role}=await db.from("account_roles").select("role").eq("user_id",user.id).maybeSingle();
  if(!["admin","professional"].includes(role?.role||""))return null;
- if(!member||!["owner","clinical_admin","physician","operator","coordinator"].includes(member.role))return null;
  return {id:user.id,role:role.role};
+}
+async function isMember(userId:string,orgId:string){
+ const {data:member}=await db.from("organization_members").select("role,status")
+  .eq("user_id",userId).eq("organization_id",orgId).eq("status","active").maybeSingle();
+ return !!member&&MEMBER_ROLES.includes(member.role);
+}
+async function eligibleCenters(userId:string){
+ const {data:rows}=await db.from("organization_members").select("organization_id,role,status")
+  .eq("user_id",userId).eq("status","active");
+ const ids=(rows||[]).filter((x:any)=>MEMBER_ROLES.includes(x.role)).map((x:any)=>x.organization_id);
+ const out:string[]=[];
+ for(const id of ids){if(await centerInfo(id))out.push(id);}
+ return out;
 }
 function publicRow(x:any){
  return {id:x.id,display_code:x.display_code,status:x.status,stage_code:x.stage_code,
@@ -156,7 +174,15 @@ Deno.serve(async(req:Request)=>{
   b=JSON.parse(raw);
  }catch{return response(req,{error:"invalid_json"},400)}
  const action=s(b.action,35);
- if(!await testCenter())return response(req,{error:"test_environment_only"},423);
+ const requestedOrg=s(b.organization_id,50);
+ if(requestedOrg&&!uuid(requestedOrg))return response(req,{error:"invalid_organization"},422);
+ // Per-request centre. Never a module-level mutable: requests run concurrently.
+ let ORG_ID=DEFAULT_ORG_ID;
+ let center=null as Center|null;
+ const useCenter=async(id:string)=>{center=await centerInfo(id);if(center)ORG_ID=center.id;return center;};
+ // Patient allowed in this centre: fictitious everywhere, real (pseudonymised) only in production centres.
+ const patientAllowed=(p:any)=>!!p&&p.status==="active"&&(p.data_classification==="synthetic"||
+  (p.data_classification==="health_data"&&center?.clinical_data_status==="production_enabled"));
 
  // Appointment-free, account-free CHECK-IN for a clinician-issued one-time invitation.
  // Restricted to synthetic identity aliases in this non-clinical test environment.
@@ -165,6 +191,8 @@ Deno.serve(async(req:Request)=>{
  if(action==="patient_checkin_status"||action==="patient_checkin_submit"){
   const found=await guestLookup(req,b);if(found.error)return found.error;
   const room=found.session,progress=room.progress||{},record=progress.patient_checkin;
+  if((await useCenter(room.organization_id))?.clinical_data_status!=="test_only")
+   return response(req,{error:"test_environment_only"},423);
   if(!record||progress.camera_owner==="operator"||!room.operator_user_id)
    return response(req,{error:"invalid_invitation"},404);
   const state=s(record.state,16);
@@ -194,6 +222,8 @@ Deno.serve(async(req:Request)=>{
  }
 
  if(action==="guest_start"){
+  if((await useCenter(DEFAULT_ORG_ID))?.clinical_data_status!=="test_only")
+   return response(req,{error:"test_environment_only"},423);
   const {count,error:countError}=await db.from("pulse_motion_live_sessions").select("id",{head:true,count:"exact"})
    .eq("organization_id",ORG_ID).gte("created_at",new Date(Date.now()-5*60000).toISOString());
   if(countError)return response(req,{error:"temporarily_unavailable"},503);
@@ -214,6 +244,7 @@ Deno.serve(async(req:Request)=>{
  if(action==="guest_signal_pull"||action==="guest_signal_push"){
   const found=await guestLookup(req,b);if(found.error)return found.error;
   const room=found.session;
+  if(!await useCenter(room.organization_id))return response(req,{error:"center_unavailable"},423);
   if(room.status!=="active"||!room.operator_user_id)return response(req,{error:"operator_not_connected"},409);
   if(action==="guest_signal_pull")return pullSignals(req,room.id,"operator",b.since);
   return pushSignal(req,room.id,"guest",b);
@@ -222,6 +253,7 @@ Deno.serve(async(req:Request)=>{
  if(action==="guest_status"||action==="guest_event"){
   const result=await guestLookup(req,b);if(result.error)return result.error;
   const x=result.session;
+  if(!await useCenter(x.organization_id))return response(req,{error:"center_unavailable"},423);
   if(action==="guest_status"){
    if(!x.patient_last_seen_at||Date.now()-new Date(x.patient_last_seen_at).getTime()>12000){
     await db.from("pulse_motion_live_sessions").update({patient_last_seen_at:now()}).eq("id",x.id);
@@ -244,8 +276,27 @@ Deno.serve(async(req:Request)=>{
 
  const actor=await operator(req);
  if(!actor)return response(req,{error:"operator_access_required"},403);
+ // Centre resolution: explicit organization_id (console), else the room's centre (iPhone
+ // camera actions carry only session_id), else every eligible centre for camera start.
+ let scope:string[]=[];
+ if(requestedOrg)scope=[requestedOrg];
+ else{
+  const sid=s(b.session_id,50);
+  if(uuid(sid)){
+   const {data:r}=await db.from("pulse_motion_live_sessions").select("organization_id").eq("id",sid).maybeSingle();
+   if(r?.organization_id)scope=[r.organization_id];
+  }
+ }
+ if(!scope.length&&action==="operator_camera_start")scope=await eligibleCenters(actor.id);
+ if(!scope.length)scope=[DEFAULT_ORG_ID];
+ if(scope.length===1){
+  if(!await useCenter(scope[0]))return response(req,{error:"center_unavailable"},423);
+  if(!await isMember(actor.id,ORG_ID))return response(req,{error:"operator_access_required"},403);
+ }
  // Operator creates the short-lived check-in invitation on the workstation,
  // not an anonymously enumerable public patient register.
+ if((action==="operator_checkin_invite"||action==="operator_checkin_claim")&&center?.clinical_data_status!=="test_only")
+  return response(req,{error:"checkin_test_only"},409);
  if(action==="operator_checkin_invite"){
   const {count,error:countError}=await db.from("pulse_motion_live_sessions")
    .select("id",{head:true,count:"exact"}).eq("organization_id",ORG_ID)
@@ -278,7 +329,7 @@ Deno.serve(async(req:Request)=>{
      room.progress?.patient_checkin?.state!=="ready"||room.status!=="ready"||
      new Date(room.expires_at).getTime()<=Date.now())
    return response(req,{error:"checkin_not_ready"},409);
-  if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic"||
+  if(!patientAllowed(patient)||
      !op||op.patient_id!==patientId||op.operator_user_id!==actor.id||
      !["running","draft","paused"].includes(op.status))
    return response(req,{error:"synthetic_patient_required"},403);
@@ -309,7 +360,7 @@ Deno.serve(async(req:Request)=>{
     .contains("progress",{camera_owner:"operator"})
     .order("created_at",{ascending:false}).limit(10)
   ]);
-  if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic")
+  if(!patientAllowed(patient))
    return response(req,{error:"synthetic_patient_required"},403);
   if(!op||op.patient_id!==patientId||op.operator_user_id!==actor.id||
    !["draft","running","paused"].includes(op.status))
@@ -360,10 +411,27 @@ Deno.serve(async(req:Request)=>{
  // or real patient data can be affected.
  if(action==="operator_reset_demo_sessions"){
   const {data:rooms,error:listError}=await db.from("pulse_motion_live_sessions")
-   .select("id,patient_id,operator_session_id")
+   .select("id,patient_id,operator_session_id,status")
    .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
    .in("status",["waiting","ready","active","closed"]).limit(100);
   if(listError)return response(req,{error:"reset_unavailable"},503);
+  if(center?.clinical_data_status==="production_enabled"){
+   // Real dossiers are never deleted: unfinished rooms are closed, completed reports untouched.
+   const open=(rooms||[]).filter((x:any)=>x.status!=="closed").map((x:any)=>x.id);
+   if(open.length){
+    const {error:closeError}=await db.from("pulse_motion_live_sessions")
+     .update({status:"closed",completed_at:now(),updated_at:now()})
+     .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id).in("id",open)
+     .in("status",["waiting","ready","active"]);
+    if(closeError)return response(req,{error:"reset_close_failed"},503);
+    for(const id of open)await db.from("pulse_motion_live_signals").delete().eq("session_id",id);
+   }
+   const opIds=[...new Set((rooms||[]).map((x:any)=>x.operator_session_id).filter(Boolean))];
+   if(opIds.length)await db.from("pulse_operator_sessions").update({status:"cancelled",updated_at:now()})
+    .eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+    .in("id",opIds).in("status",["draft","running","paused"]);
+   return response(req,{ok:true,removed:0,closed:open.length,completed_preserved:true});
+  }
   const patientIds=[...new Set((rooms||[]).map(x=>x.patient_id).filter(Boolean))];
   if(patientIds.length){
    const {data:patients,error:patientError}=await db.from("patients")
@@ -391,8 +459,9 @@ Deno.serve(async(req:Request)=>{
  if(action==="operator_camera_start"){
   // Join the one room prepared by this Operator from their computer.
   // Never create standalone iPhone rooms: that caused accumulating sessions.
+  if(!scope.length)return response(req,{error:"consultation_not_prepared"},409);
   const {data:rows,error:readError}=await db.from("pulse_motion_live_sessions")
-   .select("*").eq("organization_id",ORG_ID).eq("operator_user_id",actor.id)
+   .select("*").in("organization_id",scope).eq("operator_user_id",actor.id)
    .in("status",["waiting","active"]).gte("expires_at",now())
    .contains("progress",{kind:"physical_consultation"})
    .order("created_at",{ascending:false}).limit(3);
@@ -400,6 +469,8 @@ Deno.serve(async(req:Request)=>{
   if(!rows?.length)return response(req,{error:"consultation_not_prepared"},409);
   if(rows.length!==1)return response(req,{error:"multiple_pending_consultations"},409);
   const room=rows[0];
+  if(!await useCenter(room.organization_id)||!await isMember(actor.id,ORG_ID))
+   return response(req,{error:"operator_access_required"},403);
   if(!room.patient_id||!room.operator_session_id)return response(req,{error:"consultation_unbound"},409);
   if(room.status==="active"&&room.progress?.camera_state==="online"&&
    room.patient_last_seen_at&&Date.now()-new Date(room.patient_last_seen_at).getTime()<18000)
@@ -475,7 +546,7 @@ Deno.serve(async(req:Request)=>{
    return response(req,{error:"room_unavailable"},409);
   const {data:patient}=await db.from("patients").select("data_classification,status")
    .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
-  if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic")
+  if(!patientAllowed(patient))
    return response(req,{error:"synthetic_patient_required"},403);
   const answers=b.answers;
   if(!answers||typeof answers!=="object"||Array.isArray(answers))
@@ -546,7 +617,7 @@ Deno.serve(async(req:Request)=>{
    return response(req,{error:"room_unavailable"},409);
   const {data:patient}=await db.from("patients").select("data_classification,status")
     .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
-  if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic")
+  if(!patientAllowed(patient))
    return response(req,{error:"synthetic_patient_required"},403);
   const old=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
   if(action==="operator_tests_init"){
@@ -655,9 +726,11 @@ Deno.serve(async(req:Request)=>{
   await db.from("pulse_motion_live_signals").delete().lt("created_at",new Date(Date.now()-3*3600000).toISOString());
   const old24=new Date(Date.now()-24*3600000).toISOString();
   const old30=new Date(Date.now()-30*86400000).toISOString();
-  await Promise.all([
-   db.from("pulse_motion_live_sessions").delete().lt("expires_at",old24).neq("status","completed"),
-   db.from("pulse_motion_live_sessions").delete().lt("completed_at",old30).eq("status","completed")
+  const production=center?.clinical_data_status==="production_enabled";
+  // Purge ONLY fictitious rehearsal rooms of THIS test centre. Real dossiers are never purged here.
+  if(!production)await Promise.all([
+   db.from("pulse_motion_live_sessions").delete().eq("organization_id",ORG_ID).lt("expires_at",old24).neq("status","completed"),
+   db.from("pulse_motion_live_sessions").delete().eq("organization_id",ORG_ID).lt("completed_at",old30).eq("status","completed")
   ]);
   const fields="id,display_code,status,stage_code,step_index,progress,patient_id,operator_session_id,operator_user_id,patient_last_seen_at,created_at,updated_at";
   const [current,history]=await Promise.all([
@@ -665,7 +738,7 @@ Deno.serve(async(req:Request)=>{
     .eq("operator_user_id",actor.id).gte("expires_at",now())
     .order("created_at",{ascending:false}).limit(60),
    db.from("pulse_motion_live_sessions").select(fields).eq("organization_id",ORG_ID)
-    .eq("operator_user_id",actor.id).eq("status","completed").gte("completed_at",old30)
+    .eq("operator_user_id",actor.id).eq("status","completed").gte("completed_at",production?"2000-01-01T00:00:00Z":old30)
     .order("created_at",{ascending:false}).limit(60)
   ]);
   if(current.error||history.error)return response(req,{error:"list_failed"},503);
@@ -673,7 +746,22 @@ Deno.serve(async(req:Request)=>{
   for(const item of [...(current.data||[]),...(history.data||[])])unique.set(item.id,item);
   const sessions=[...unique.values()].sort((a,b)=>
    new Date(String(b.created_at)).getTime()-new Date(String(a.created_at)).getTime()).slice(0,60);
-  return response(req,{ok:true,sessions:sessions.map(publicRow),steps:STEPS});
+  return response(req,{ok:true,sessions:sessions.map(publicRow),steps:STEPS,
+   center:{id:ORG_ID,clinical_data_status:center?.clinical_data_status}});
+ }
+ // Trajectory J0 → S6 → S12: every completed consultation of ONE patient in this centre.
+ if(action==="operator_patient_history"){
+  const patientId=s(b.patient_id,50);
+  if(!uuid(patientId))return response(req,{error:"invalid_identifiers"},422);
+  const {data:patient}=await db.from("patients").select("id,data_classification,status")
+   .eq("id",patientId).eq("organization_id",ORG_ID).maybeSingle();
+  if(!patientAllowed(patient))return response(req,{error:"synthetic_patient_required"},403);
+  const {data,error}=await db.from("pulse_motion_live_sessions")
+   .select("id,display_code,status,stage_code,step_index,progress,patient_id,operator_session_id,operator_user_id,patient_last_seen_at,created_at,updated_at,completed_at")
+   .eq("organization_id",ORG_ID).eq("patient_id",patientId).eq("status","completed")
+   .order("completed_at",{ascending:true}).limit(24);
+  if(error)return response(req,{error:"history_unavailable"},503);
+  return response(req,{ok:true,sessions:(data||[]).map((x:any)=>({...publicRow(x),completed_at:x.completed_at}))});
  }
  if(action==="operator_attach"){
   const id=s(b.session_id,50),patientId=s(b.patient_id,50),opId=s(b.operator_session_id,50);
@@ -683,7 +771,7 @@ Deno.serve(async(req:Request)=>{
    db.from("pulse_operator_sessions").select("id,patient_id,operator_user_id,organization_id,status").eq("id",opId).maybeSingle(),
    db.from("pulse_motion_live_sessions").select("id,status,patient_id,expires_at,operator_user_id,progress").eq("id",id).eq("organization_id",ORG_ID).maybeSingle()
   ]);
-  if(!patient||patient.organization_id!==ORG_ID||patient.status!=="active"||patient.data_classification!=="synthetic")return response(req,{error:"synthetic_patient_required"},403);
+  if(!patient||patient.organization_id!==ORG_ID||!patientAllowed(patient))return response(req,{error:"synthetic_patient_required"},403);
   if(!op||op.patient_id!==patientId||op.organization_id!==ORG_ID||(!["running","draft","paused"].includes(op.status)))return response(req,{error:"operator_session_mismatch"},409);
   if(actor.role!=="admin"&&op.operator_user_id!==actor.id)return response(req,{error:"operator_owner_required"},403);
   if(!room||room.patient_id||!["waiting","ready"].includes(room.status)||new Date(room.expires_at).getTime()<Date.now())return response(req,{error:"room_unavailable"},409);

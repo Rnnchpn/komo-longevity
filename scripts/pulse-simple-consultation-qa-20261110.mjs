@@ -30,7 +30,10 @@ assert.ok(edge.includes('if(action==="operator_checkin_claim")'));
 assert.ok(edge.includes('room.operator_user_id!==actor.id')&&edge.includes('op.operator_user_id!==actor.id'));
 assert.ok(edge.includes('new Uint8Array(32)')&&edge.includes('guest_token_hash:await hash(token)'));
 assert.ok(edge.includes('["Camille","Alex","Morgan","Sacha","Noa"].includes(alias)'));
-assert.ok(edge.includes('synthetic_attested')&&edge.includes('patient.data_classification!=="synthetic"'));
+// 20/11/2026 : check-in QR réservé aux centres test ; patients réels uniquement en centre production_enabled.
+assert.ok(edge.includes('synthetic_attested')&&edge.includes('p.data_classification==="synthetic"||')&&
+ edge.includes('(p.data_classification==="health_data"&&center?.clinical_data_status==="production_enabled")')&&
+ edge.includes('if((action==="operator_checkin_invite"||action==="operator_checkin_claim")&&center?.clinical_data_status!=="test_only")'));
 assert.ok(edge.includes('checkin.progress?.patient_checkin?.state!=="accepted"'));
 assert.ok(edge.includes('camera_owner:"operator"')&&edge.includes('camera_owner:"operator"'));
 assert.ok(edge.includes('initialProgress')&&edge.includes('checkin_id'));

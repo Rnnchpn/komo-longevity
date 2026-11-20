@@ -629,3 +629,11 @@
 .op-live-mini h4{font:600 16px/1.3 Inter,system-ui,sans-serif;margin:0}
 .op-live-mini p{font-size:11px;line-height:1.5;color:#5d6b62;margin:0}
 .op-live-mini .button{justify-self:start;font-size:11px}
+
+/* Lieu de consultation (20/11/2026) */
+.center-switch{display:grid;gap:5px;font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#7c8580}
+.center-switch select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:11px;background:#fff;font:600 11px/1.3 inherit;color:var(--ink);text-transform:none;letter-spacing:0}
+.center-badge{align-self:center;margin-left:auto;margin-right:10px;padding:7px 12px;border-radius:999px;font-size:10px;font-weight:750;white-space:nowrap}
+.center-badge.is-real{background:#203e32;color:#fff}
+.center-badge.is-demo{background:#f3e7cf;color:#7a5a21}
+@media (max-width:760px){.center-badge{display:none}}

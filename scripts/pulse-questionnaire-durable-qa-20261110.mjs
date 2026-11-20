@@ -125,7 +125,8 @@ assert.ok(extras.includes('onComplete?.()')&&extras.includes('mocIntakeSave'));
 assert.ok(ui.includes('onComplete:()=>switchPanel("report")'));
 assert.ok(ui.includes('duration:30')&&ui.includes('payload.duration_seconds=t.duration'));
 assert.ok(iphone.includes('durant 30 secondes')&&iphone.includes('pendant 30 secondes'));
-assert.ok(app.includes("['heels','30 s'")&&app.includes("['arms','30 s'"));
+// Protocole V2 (20/11/2026) : l'ancien test « heels » n'est plus proposé (historique conservé côté rapport).
+assert.ok(app.includes("['sts','30 s'")&&app.includes("['arms','30 s'")&&app.includes("['dynamo_grip','3 essais'"));
 assert.ok(edge.includes('for(let attempt=0;attempt<6;attempt++)'));
 assert.ok(edge.includes('const nextProgress={...prior,questionnaire:'));
 assert.ok(edge.includes('answered_count:Object.keys(cleaned).length'));

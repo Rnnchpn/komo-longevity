@@ -22,7 +22,9 @@ assert.ok(ui.includes("start_pulse_operator_session_v1"));
 assert.ok(ui.includes("data_classification==='synthetic'"));
 assert.ok(ui.includes("localStorage.setItem('komo_v14_patient',patientId)"));
 assert.ok(edge.includes('if(action==="operator_consultation_prepare")'));
-assert.ok(edge.includes('if(!patient||patient.status!=="active"||patient.data_classification!=="synthetic")'));
+// 20/11/2026 : fictif partout ; réel pseudonymisé seulement dans un centre production_enabled.
+assert.ok(edge.includes('if(!patientAllowed(patient))')&&edge.includes('const patientAllowed=(p:any)=>!!p&&p.status==="active"&&(p.data_classification==="synthetic"||'));
+assert.ok(!/data_classification!==\"synthetic\"\)\s*\n\s*return response\(req,\{error:"synthetic_patient_required"\},403\);\n\s*if\(!op/.test(edge));
 assert.ok(edge.includes('op.operator_user_id!==actor.id'));
 assert.ok(edge.includes('guest_token_hash:await hash(token)'));
 assert.ok(edge.includes('status:"waiting",stage_code:STEPS[0]'));
@@ -43,7 +45,7 @@ assert.ok(cameraStart.includes('paired_automatically:true'));
 assert.ok(iphone.includes("action:'operator_camera_start'"));
 assert.ok(videoStation.includes('stale_staff_camera_session'));
 assert.ok(videoStation.includes('data.session?.progress?.kind!=="physical_consultation"'));
-assert.ok(iphone.includes('20261111-clean-consultation-v2'));
+assert.ok(iphone.includes('20261120-hiro-v1'));
 assert.ok(iphone.includes('consultation_not_prepared'));
 assert.ok(iphone.includes('sans code'));
 // Camera reconnect must not wipe the current test or questionnaire.
@@ -79,5 +81,5 @@ assert.ok(ui.includes('SESSION MOTION · ASSOCIATION AUTOMATIQUE'));
 assert.ok(ui.includes("action:'operator_checkin_invite'"),'optional fictitious check-in retained');
 assert.ok(styles.includes('.op-start-panel'));
 assert.ok(html.includes('20261111-clean-consultation-v1'));
-assert.ok(cameraHtml.includes('20261111-clean-consultation-v2'));
+assert.ok(cameraHtml.includes('20261120-hiro-v1'));
 console.log('[pulse-clean-consultation-qa] PASS desktop-owned single synthetic session, zero duplicate phone room, automatic camera pairing, reconnect, reset and protected completed history');

@@ -736,3 +736,26 @@
 .moc-answer-points{font:700 10px/1.2 Inter,system-ui,sans-serif;color:#4c6955;white-space:nowrap}
 .moc-question-choice{gap:8px}
 @media(max-width:650px){.moc-point-domains,.moc-domain-points{grid-template-columns:1fr}}
+
+/* V2 · 20/11/2026 — mesures instrumentées et trajectoire J0 → S6 → S12 */
+.moc-instrumented-list{display:grid;gap:6px;margin:4px 0 14px}
+.moc-instrumented-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:10px;padding:10px 12px;background:#f1eee7;border-radius:8px;align-items:start}
+.moc-instrumented-row strong{display:block;font:750 12.5px/1.3 Inter,system-ui,sans-serif;color:#2d392f}
+.moc-instrumented-row small{display:block;font-size:10px;color:#7a746a;margin-top:2px}
+.moc-instrumented-row span{font-size:11.5px;line-height:1.45;color:#2d392f}
+.moc-trajectory{margin:6px 0 16px;padding:14px 14px 10px;border:1px solid #e3ddd1;border-radius:12px;background:#fbfaf6}
+.moc-trajectory h4{margin:0 0 4px}
+.moc-trajectory-headline{margin:0 0 10px;font:650 12.5px/1.45 Inter,system-ui,sans-serif;color:#203e32}
+.moc-trajectory-table-wrap{overflow-x:auto}
+.moc-trajectory-table{width:100%;border-collapse:collapse;font-size:11.5px}
+.moc-trajectory-table th,.moc-trajectory-table td{padding:7px 8px;border-bottom:1px solid #ebe6dc;text-align:center;white-space:nowrap}
+.moc-trajectory-table thead th{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#7a746a;font-weight:700}
+.moc-trajectory-table thead th small{display:block;text-transform:none;letter-spacing:0;font-weight:500}
+.moc-trajectory-table tbody th{text-align:left;font-weight:600;color:#2d392f;white-space:normal}
+.moc-trajectory-table tbody th small{color:#7a746a;font-weight:500}
+.moc-trajectory-table td.is-last{font-weight:750;color:#203e32}
+.moc-delta{font-weight:750}
+.moc-delta.is-favorable{color:#1f6b45}
+.moc-delta.is-defavorable{color:#9a4a32}
+.moc-delta.is-stable,.moc-delta.is-none{color:#7a746a}
+.moc-trajectory-warning{margin:6px 0 0;font-size:11px;color:#9a4a32}
