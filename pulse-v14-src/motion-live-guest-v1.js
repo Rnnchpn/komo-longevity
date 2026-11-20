@@ -42,7 +42,7 @@ function injectStyles(){
  if(document.getElementById("mliveStylesheet"))return;
  const style=document.createElement("link");
  style.id="mliveStylesheet";style.rel="stylesheet";
- style.href=new URL("./motion-live-guest-v1.css?v=20261121-protocol-v2",import.meta.url).href;
+ style.href=new URL("./motion-live-guest-v1.css?v=20261121-workspace-v1",import.meta.url).href;
  document.head.append(style);
 }
 function feedback(s){if(el("mliveFeedback"))el("mliveFeedback").textContent=s||""}
@@ -59,7 +59,7 @@ function makeOverlay(){
     <div class="mlive-camera-hint" id="mliveCameraHint">Ton iPhone devient la caméra du cabinet. Installe-le sur le trépied, cadre le corps entier et active la caméra arrière.</div>
     <span class="mlive-camera-label" id="mliveCameraLabel">Caméra désactivée</span></div>
    <div class="mlive-panel">
-    <span class="mlive-eyebrow">${cameraStation?"IPHONE OPÉRATEUR · CONSULTATION SUR PLACE":"CONSULTATION MOTION · CANNES"}</span>
+    <span class="mlive-eyebrow">${cameraStation?"iPhone du cabinet":"Consultation Motion"}</span>
     <h2 id="mliveTitle">Ouverture de la caméra…</h2>
     <p id="mliveDescription">${cameraStation?"Le patient n’utilise pas ce téléphone. Tous les tests se commandent depuis ton ordinateur.":"Votre opérateur va vous accompagner."}</p>
     <div class="mlive-number"><span>${cameraStation?"CODE À REPÉRER SUR TON ORDINATEUR":"CODE À COMMUNIQUER À L'OPÉRATEUR"}</span><strong id="mliveCode">······</strong></div>

@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261121-protocol-v2';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261121-workspace-v1';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -8,7 +8,10 @@ const recoveryLinkDetected=/\btype=recovery\b/.test(location.href)&&/\b(?:access
 let recoveryActive=recoveryLinkDetected;
 
 const PATIENT_NAV=[['home','Mon espace']];
-const PRO_NAV=[['live','Nouvelle consultation'],['operator','Consultation Motion'],['patients','Patients'],['appointments','Rendez-vous']];
+// Navigation praticien : trois entrées. La console (#operator) prolonge « Consultation ».
+const PRO_NAV=[['live','Consultation'],['patients','Patients'],['appointments','Rendez-vous']];
+const PRO_ROUTES=['live','operator','patients','appointments'];
+const navActive=id=>S.route===id||(id==='live'&&S.route==='operator');
 // Étapes de consultation : source unique motion-protocol.mjs (ordre, libellés, appareils).
 const OP_STEPS=PROTOCOL_STEPS.map(x=>[x.id,x.trials,x.title,x.device]);
 // Centre réel : dossiers pseudonymisés (code + année de naissance). Centre test : dossiers fictifs.
@@ -329,11 +332,20 @@ function shell(){
     return;
   }
   const icons={
+    live:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12.5h4.2l2.3-5.5 4 11 2.4-5.5H21"/></svg>',
     operator:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="3.5" width="16" height="17" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
     patients:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 20v-2.1c0-3.4 2.5-5.4 6.5-5.4s6.5 2 6.5 5.4V20H5.5Z"/></svg>',
     appointments:'<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="15" rx="2.5"/><path d="M7.5 3.5v4M16.5 3.5v4M3.5 10h17"/></svg>'
   };
-  const nav=navItems().map(([id,label],i)=>`<button type="button" data-route="${id}" class="nav-item ${S.route===id?'active':''}" aria-label="${esc(label)}" ${S.route===id?'aria-current="page"':''}><span class="nav-dot" aria-hidden="true">${S.mode==='pro'?(icons[id]||''):i+1}</span><span>${esc(label)}</span></button>`).join('');
+  // Changement de page sans reconstruire le cadre : seule la vue change (navigation fluide).
+  const existing=document.querySelector('.app-shell.app-shell-pro');
+  if(S.mode==='pro'&&existing&&existing.dataset.org===String(S.org?.id||'')&&$('#view')){
+    existing.setAttribute('data-pulse-view',S.route);
+    existing.querySelectorAll('.sidebar [data-route]').forEach(b=>{const on=navActive(b.dataset.route);b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+    $('#view').innerHTML='';
+    return;
+  }
+  const nav=navItems().map(([id,label],i)=>`<button type="button" data-route="${id}" class="nav-item ${navActive(id)?'active':''}" aria-label="${esc(label)}" ${navActive(id)?'aria-current="page"':''}><span class="nav-dot" aria-hidden="true">${S.mode==='pro'?(icons[id]||''):i+1}</span><span>${esc(label)}</span></button>`).join('');
   // Offre Online retirée le 20/11/2026 : plus de raccourci de test Online dans la barre latérale.
   const demoLink='';
   const mode=hasPro()?`<div class="mode-switch" role="group" aria-label="Choisir votre espace"><button type="button" data-mode="patient" class="${S.mode==='patient'?'active':''}" aria-pressed="${S.mode==='patient'}" ${!S.ownPatient?'disabled title="Aucun dossier personnel lié"':''}>Espace patient</button><button type="button" data-mode="pro" class="${S.mode==='pro'?'active':''}" aria-pressed="${S.mode==='pro'}">Équipe</button></div>`:'';
@@ -342,6 +354,7 @@ function shell(){
   document.querySelector('.app-shell')?.classList.toggle('app-shell-pro',S.mode==='pro');
   document.querySelector('.app-shell')?.classList.toggle('app-shell-patient',S.mode==='patient');
   document.querySelector('.app-shell')?.setAttribute('data-pulse-view',S.route);
+  if(S.mode==='pro')document.querySelector('.app-shell').dataset.org=String(S.org?.id||'');
   document.querySelectorAll('[data-route]').forEach(b=>b.onclick=()=>{location.hash=b.dataset.route});
   document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=async()=>{if(b.disabled||!hasPro())return;const next=b.dataset.mode;if(next==='patient'&&!S.ownPatient)return;S.mode=next;localStorage.setItem('komo_v14_mode',next);history.replaceState(null,'',location.pathname+location.search+'#'+(next==='pro'?'operator':'home'));await refresh()});
   $('#logout').onclick=async()=>{window.dispatchEvent(new Event('pulse:operator-signout'));await sb.auth.signOut();location.hash='';authView()};
@@ -522,20 +535,24 @@ function nextPseudoCode(){
   return prefix+'-'+d+'-'+String((used.length?Math.max(...used):0)+1).padStart(2,'0');
 }
 function patients(){
-  heading('Patients','KŌMØ OPERATOR TEAM');
+  heading('Patients',isProductionCenter()?'Dossiers pseudonymisés':'Dossiers fictifs de démonstration');
   const isDemo=p=>/^(?:DEMO|FRIDAY-DEMO|PULSE-MOTION-REPORT-DEMO|E2E[-_]|TEST[-_])/i.test(String(p.external_reference||''))||
     /^(?:patient k[oō]m[oø] demo|test k[oō]m[oø])/i.test([p.first_name,p.last_name].filter(Boolean).join(' '));
   const active=S.patients.filter(p=>!isDemo(p));
   const demos=S.patients.filter(isDemo);
   const card=p=>{
-    const name=[p.first_name,p.last_name].filter(Boolean).join(' ').trim()||'Patient KŌMØ';
-    const reference=String(p.external_reference||'Dossier KŌMØ');
-    const searchText=(name+' '+reference).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr-FR');
-    return `<button type="button" data-patient="${esc(p.id)}" data-search="${esc(searchText)}" aria-label="Ouvrir le dossier de ${esc(name)}"><span class="patient-avatar" aria-hidden="true">${esc(name.slice(0,1).toUpperCase())}</span><span class="op-patient-detail"><strong>${esc(name)}</strong><small>${esc(reference)}</small></span><span class="op-patient-arrow" aria-hidden="true">→</span></button>`;
+    // Dossier réel : le code HIRO-AAMMJJ-NN est l'identité affichée (aucun nom dans PULSE).
+    const pseudo=p.first_name==='Client'&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(String(p.last_name||''));
+    const name=pseudo?String(p.last_name):([p.first_name,p.last_name].filter(Boolean).join(' ').trim()||'Patient KŌMØ');
+    const year=String(p.birth_date||'').slice(0,4);
+    const sex={female:'Femme',male:'Homme'}[p.sex_at_birth]||'';
+    const detail=[year&&('Né·e en '+year),sex,p.created_at&&('dossier du '+new Date(p.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}))].filter(Boolean).join(' · ')||String(p.external_reference||'Dossier KŌMØ');
+    const searchText=(name+' '+detail+' '+String(p.external_reference||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr-FR');
+    return `<button type="button" data-patient="${esc(p.id)}" data-search="${esc(searchText)}" aria-label="Consultation pour ${esc(name)}"><span class="patient-avatar" aria-hidden="true">${esc(pseudo?name.split('-').pop():name.slice(0,1).toUpperCase())}</span><span class="op-patient-detail"><strong>${esc(name)}</strong><small>${esc(detail)}</small></span><span class="op-patient-arrow">Consultation</span></button>`;
   };
   $('#view').innerHTML=`<section class="op-patients-app" aria-label="Annuaire des patients">
     <header class="op-patients-context"><span class="op-patients-kicker">${isProductionCenter()?'CENTRE ACTUEL · CONSULTATION RÉELLE (DOSSIERS PSEUDONYMISÉS)':'CENTRE ACTUEL · DÉMONSTRATION (DOSSIERS FICTIFS)'}</span><div class="op-patients-context-row"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><span class="op-patients-count">${S.patients.length} dossier${S.patients.length>1?'s':''}</span></div></header>
-    <div class="op-patients-toolbar"><button type="button" class="button primary" id="opPatientCreateToggle">+ Créer un dossier patient</button><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
+    <div class="op-patients-toolbar"><button type="button" class="button primary" id="opPatientCreateToggle">Nouveau patient</button><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
     ${isProductionCenter()?`<form id="opPatientCreateForm" class="op-create-patient-form op-create-patient-form--real" hidden data-real-center="1">
       <h3>Nouveau patient · ${esc(S.org?.name||'')}</h3>
       <p>Dossier pseudonymisé : PULSE ne reçoit <strong>ni nom, ni prénom, ni date exacte</strong>. Inscris le code ci-dessous sur la fiche papier du patient (classeur de la clinique).</p>
@@ -593,9 +610,11 @@ function patients(){
         const {data,error}=await sb.functions.invoke('professional-patient',{body});
         if(error||data?.error||!data?.patient?.id)throw Error(data?.detail||data?.error||error?.message||'Création impossible');
         localStorage.setItem('komo_v14_patient',data.patient.id);
+        // Le dossier créé ouvre directement sa consultation (aucun clic supplémentaire).
+        sessionStorage.setItem('komo_autostart_patient',data.patient.id);
         await loadPro();
-        location.hash=real?'live':'operator';render();
-        toast(real?'Dossier '+code+' créé. Clique sur « Démarrer une nouvelle consultation ».':'Dossier créé. La session Motion peut être démarrée.');
+        location.hash='live';
+        toast(real?'Dossier '+code+' créé · ouverture de la consultation.':'Dossier créé · ouverture de la consultation.');
       }catch(error){
         if(feedback)feedback.textContent=error?.message||'Impossible de créer le dossier.';
       }finally{submit.disabled=false}
@@ -604,8 +623,8 @@ function patients(){
   document.querySelectorAll('.op-patients-app [data-patient]').forEach(b=>b.onclick=async()=>{
     localStorage.setItem('komo_v14_patient',b.dataset.patient);
     await loadPro();
-    location.hash='operator';
-    render();
+    // Un patient choisi mène à sa consultation : reprise si elle existe, sinon démarrage.
+    location.hash='live';
   });
   const input=$('#opPatientSearch');
   input?.addEventListener('input',()=>{
@@ -627,6 +646,9 @@ function patients(){
 // Test-only live pairing monitor. Backend verifies the operator JWT and org membership.
 const MOTION_LIVE_ENDPOINT='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test';
 let motionLiveTimer=null,motionLiveFetching=false,motionLiveSignature='';
+const liveRoomSeen=new Map();
+// Libellé d'un dossier : le code pour un dossier réel (aucun nom dans PULSE), le nom pour un dossier fictif.
+const patientLabel=p=>p?.first_name==='Client'&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(String(p?.last_name||''))?String(p.last_name):[p?.first_name,p?.last_name].filter(Boolean).join(' ');
 let operatorLiveTimer=null;
 async function motionLiveAPI(body){
   const {data:{session}}=await sb.auth.getSession();
@@ -655,28 +677,40 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261121-protocol-v2');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261121-workspace-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
 function motionLiveMonitor(){
-  heading('Préparer une consultation','KŌMØ OPERATOR · '+(isProductionCenter()?'CONSULTATION RÉELLE':'DÉMONSTRATION'));
-  $('#view').innerHTML=`<div class="op-live-dashboard">
-    <header class="op-live-head"><div><span class="overline">CONSULTATION MOTION · DEUX APPAREILS</span><h2>Nouvelle consultation</h2><p>Crée la consultation sur cet ordinateur, puis active la caméra depuis ton iPhone sur trépied. <strong>Les deux appareils se lient sans code.</strong></p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
-    <div class="op-live-checklist"><div><b>01</b><span><strong>Créer la consultation</strong><small>Sur l’ordinateur, ${isProductionCenter()?'avec le code dossier du patient':'avec un dossier fictif'}</small></span></div><div><b>02</b><span><strong>Activer l’iPhone</strong><small>Caméra sur trépied, liaison automatique</small></span></div><div><b>03</b><span><strong>Faire le bilan</strong><small>Tests, questionnaires, PDF</small></span></div></div>
-    <section class="op-start-panel"><div><span class="overline">ÉTAPE 1 · SUR L’ORDINATEUR</span><h3>Une consultation propre</h3><p>${isProductionCenter()?'Choisis le code dossier du patient présent':'Choisis un dossier fictif'} puis commence. Pulse n’ouvrira qu’une seule séance.</p></div><label>${isProductionCenter()?'Patient (code dossier)':'Patient de démonstration'}<select id="opLivePatientChoice"></select></label><button type="button" class="button primary" id="opLiveBegin">Démarrer une nouvelle consultation →</button><p class="op-start-help" id="opLiveStartHelp" role="status">Les bilans terminés restent archivés.</p></section>
-    <div class="op-live-toolbar"><button type="button" class="button secondary" id="opLiveCopyCameraLink">Étape 2 · Copier le lien iPhone</button><button type="button" class="button secondary" id="opLiveReset">${isProductionCenter()?'Clore les consultations en cours':'Réinitialiser les essais en cours'}</button><button type="button" class="button secondary" id="opLiveNewPatient">Gérer les dossiers</button><span id="opLiveCount" aria-live="polite">Synchronisation…</span></div>
-    <details class="op-live-advanced" ${isProductionCenter()?'hidden':''}><summary>Option avancée : préparation fictive par QR code</summary><button type="button" class="button secondary" id="opLiveCreateCheckin">Créer une invitation fictive</button>
+  heading('Consultation',isProductionCenter()?'Consultation réelle':'Démonstration');
+  const real=isProductionCenter();
+  $('#view').innerHTML=`<div class="op-live-dashboard" data-live-state="start">
+    <ol class="op-journey" aria-label="Étapes de la consultation">
+      <li data-journey="patient"><b>1</b><span>Patient</span></li>
+      <li data-journey="camera"><b>2</b><span>iPhone</span></li>
+      <li data-journey="tests"><b>3</b><span>Tests</span></li>
+      <li data-journey="questionnaire"><b>4</b><span>Questionnaire</span></li>
+      <li data-journey="report"><b>5</b><span>Rapport</span></li>
+    </ol>
+    <header class="op-live-head"><div><h2>Nouvelle consultation</h2><p>Choisis le patient présent, puis active la caméra sur l’iPhone : les deux appareils se relient seuls, sans code.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
+    <section class="op-start-panel"><div><h3>Qui consultes-tu ?</h3><p>${real?'Code dossier du patient présent (créé dans Patients).':'Dossier fictif de démonstration.'}</p></div><label>${real?'Patient (code dossier)':'Patient de démonstration'}<select id="opLivePatientChoice"></select></label><button type="button" class="button primary" id="opLiveBegin">Démarrer la consultation</button><p class="op-start-help" id="opLiveStartHelp" role="status">Une seule consultation à la fois · les bilans terminés restent archivés.</p></section>
+    <section class="op-checkin-section op-rooms-section"><h3>Consultation en cours</h3><div id="opLiveRooms" aria-live="polite"><p>Recherche de la consultation…</p></div></section>
+    <section class="op-iphone-card" aria-label="Sur l’iPhone">
+      <h3>Sur l’iPhone, posé sur son trépied</h3>
+      <ol><li>Ouvre <strong>pulse.komolongevity.com/camera</strong> avec le même compte.</li><li>Appuie sur <strong>Activer la caméra du cabinet</strong>, puis autorise la caméra.</li><li>Ici, la consultation passe à <strong>iPhone connecté</strong> et les tests s’ouvrent.</li></ol>
+      <button type="button" class="button secondary" id="opLiveCopyCameraLink">Copier le lien de l’iPhone</button>
+    </section>
+    <div class="op-live-toolbar"><span id="opLiveCount" aria-live="polite">Synchronisation…</span><button type="button" class="button secondary" id="opLiveReset">${real?'Clore les consultations en cours':'Réinitialiser les essais en cours'}</button><button type="button" class="button secondary" id="opLiveNewPatient">Gérer les dossiers</button></div>
+    <details class="op-live-advanced" ${real?'hidden':''}><summary>Option avancée : préparation fictive par QR code</summary><button type="button" class="button secondary" id="opLiveCreateCheckin">Créer une invitation fictive</button>
     <div id="opLiveInvite" class="op-checkin-invitation" hidden></div>
     <section class="op-checkin-section"><h3>Préparations reçues</h3><div id="opCheckinQueue" aria-live="polite"><p>Recherche des préparations…</p></div></section></details>
-    <section class="op-checkin-section"><h3>Consultation à démarrer</h3><div id="opLiveRooms" aria-live="polite"><p>Recherche de l’iPhone…</p></div></section>
-    <p class="op-live-caution">${isProductionCenter()?'Consultation réelle : ton iPhone est le capteur vidéo du cabinet, sans enregistrement (WebRTC). PULSE ne contient que le code dossier ; l’identité reste sur la fiche papier. Chaque mesure est validée par toi avant d’être retenue.':'Test de consultation physique : ton iPhone est le capteur vidéo du cabinet ; aucune connexion patient sur le téléphone. Vidéo WebRTC sans enregistrement. Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.'}</p>
+    <p class="op-live-caution">${real?'Consultation réelle : l’iPhone sert de caméra du cabinet, sans enregistrement (WebRTC). PULSE ne contient que le code dossier ; l’identité reste sur la fiche papier. Chaque mesure est validée par toi avant d’être retenue.':'Démonstration : l’iPhone sert de caméra du cabinet, sans enregistrement (WebRTC). Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.'}</p>
   </div>`;
   $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
   const demoPatients=S.patients.filter(consultablePatient);
   const patientChoice=$('#opLivePatientChoice');
   if(patientChoice){
-   patientChoice.innerHTML=demoPatients.map(p=>'<option value="'+esc(p.id)+'">'+esc([p.first_name,p.last_name].filter(Boolean).join(' '))+'</option>').join('');
+   patientChoice.innerHTML=demoPatients.map(p=>'<option value="'+esc(p.id)+'">'+esc(patientLabel(p))+'</option>').join('');
    if(consultablePatient(S.patient)&&demoPatients.some(p=>p.id===S.patient.id))patientChoice.value=S.patient.id;
    if(!demoPatients.length){
     $('#opLiveBegin').disabled=true;
@@ -706,7 +740,7 @@ function motionLiveMonitor(){
     motionLiveSignature='';await loadMotionLiveRooms(true);
     toast('Consultation créée, iPhone attendu.');
    }catch(error){toast(error.message||'Création impossible.')}
-   finally{if(button.isConnected){button.disabled=false;button.textContent='Démarrer une nouvelle consultation →'}}
+   finally{if(button.isConnected){button.disabled=false;button.textContent='Démarrer la consultation'}}
   };
   $('#opLiveReset').onclick=async()=>{
    if(!confirm(isProductionCenter()?'Clore les consultations non terminées ? Rien n’est supprimé : les rapports terminés restent dans le dossier.':'Supprimer les essais fictifs non terminés ? Les rapports terminés seront conservés.'))return;
@@ -758,6 +792,13 @@ function motionLiveMonitor(){
     catch{window.prompt('Copie ce lien sur ton iPhone :',url)}
   };
   $('#opLiveNewPatient').onclick=()=>{clearInterval(motionLiveTimer);motionLiveTimer=null;location.hash='patients'};
+  // Dossier tout juste créé : la consultation démarre seule.
+  const autostart=sessionStorage.getItem('komo_autostart_patient');
+  if(autostart&&patientChoice&&[...patientChoice.options].some(o=>o.value===autostart)){
+   sessionStorage.removeItem('komo_autostart_patient');
+   patientChoice.value=autostart;
+   setTimeout(()=>{if(!$('#opLiveBegin')?.disabled)$('#opLiveBegin')?.click()},80);
+  }
   clearInterval(motionLiveTimer);motionLiveSignature='';
   loadMotionLiveRooms(true);
   motionLiveTimer=setInterval(()=>loadMotionLiveRooms(false),2400);
@@ -807,17 +848,36 @@ async function loadMotionLiveRooms(force=false){
    host.innerHTML=rooms.length?rooms.map(room=>{
     const patient=S.patients.find(p=>p.id===room.patient_id);
     const online=room.patient_last_seen_at&&Date.now()-new Date(room.patient_last_seen_at).getTime()<18000;
+    const linked=room.status==='active'&&online;
+    const done=Math.min(OP_STEPS.length,Number(room.step_index)||0);
     const stage=OP_STEPS.find(x=>x[0]===room.stage_code)?.[2]||(room.stage_code==='finished'?'Parcours terminé':'En préparation');
-    const pct=Math.round(Math.min(OP_STEPS.length,Number(room.step_index)||0)/OP_STEPS.length*100);
-    const patientName=patient?[patient.first_name,patient.last_name].filter(Boolean).join(' '):'Aucun dossier associé';
-    return `<article class="op-live-room" data-room="${esc(room.id)}">
-      <header><div><span class="overline">SESSION MOTION · ASSOCIATION AUTOMATIQUE</span><h3>${esc(room.display_code)}</h3></div><span class="op-live-tag">${esc(statusLabels[room.status]||room.status)} · ${online?'iPhone connecté':'iPhone hors ligne'}</span></header>
-      <p>${esc(patientName)} · ${esc(stage)}</p>
-      <div class="op-live-track"><i style="width:${pct}%"></i></div><small>${pct}% des étapes parcourues · ${room.progress?.step_status==='running'?'Test en cours':'Attente du prochain test'}</small>
-      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?(room.status==='active'?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir les tests Motion →</button>':'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Remplir le questionnaire →</button>'):''}`}
-      <button type="button" class="button secondary" data-live-close="${esc(room.id)}">Clore la salle</button></div>
+    const pct=Math.round(done/OP_STEPS.length*100);
+    const patientName=patient?patientLabel(patient):'Aucun dossier associé';
+    const detail=room.status==='active'?(done?'Test '+(done+1)+' sur '+OP_STEPS.length+' · '+stage:'Prête pour le premier test'):'En attente de l’iPhone';
+    return `<article class="op-live-room ${linked?'is-linked':'is-waiting'}" data-room="${esc(room.id)}">
+      <header><div><h3>${esc(patientName)}</h3><p>${esc(detail)}</p></div><span class="op-live-tag" data-state="${linked?'live':online?'connecting':'offline'}">${linked?'iPhone connecté':online?'iPhone en connexion':'iPhone non connecté'}</span></header>
+      ${done?`<div class="op-live-track" aria-label="${pct} % des tests"><i style="width:${pct}%"></i></div>`:''}
+      <div class="op-live-actions">${!room.patient_id&&['waiting','ready'].includes(room.status)?`<label>Associer à un dossier fictif<select data-live-select="${esc(room.id)}"><option value="">Choisir un patient</option>${choices.map(p=>`<option value="${esc(p.id)}">${esc([p.first_name,p.last_name].filter(Boolean).join(' '))}</option>`).join('')}</select></label><button type="button" class="button primary" data-live-attach="${esc(room.id)}">Associer et ouvrir la consultation</button>`:`${room.patient_id?(room.status==='active'?'<button type="button" class="button primary" data-live-operator="'+esc(room.patient_id)+'">Ouvrir les tests Motion</button>':'<button type="button" class="button secondary" data-live-operator="'+esc(room.patient_id)+'">Commencer par le questionnaire</button>'):''}`}
+      <button type="button" class="button quiet" data-live-close="${esc(room.id)}">Clore</button></div>
     </article>`;
-   }).join(''):'<div class="op-live-empty">Aucun bilan en cours. Choisis un dossier fictif sur cet ordinateur et clique sur « Démarrer une nouvelle consultation ».</div>';
+   }).join(''):'<div class="op-live-empty">Aucune consultation en cours.</div>';
+   // Parcours : 1 Patient → 2 iPhone → 3 Tests. L'écran s'adapte à l'étape atteinte.
+   const dashboard=document.querySelector('.op-live-dashboard');
+   const current=rooms[0];
+   const linkedRoom=rooms.find(r=>r.status==='active'&&r.patient_last_seen_at&&Date.now()-new Date(r.patient_last_seen_at).getTime()<18000);
+   const state=!current?'start':linkedRoom?'linked':'waiting';
+   if(dashboard){
+    dashboard.dataset.liveState=state;
+    const steps={patient:state==='start'?'current':'done',camera:state==='waiting'?'current':state==='linked'?'done':'',tests:state==='linked'?'current':''};
+    dashboard.querySelectorAll('[data-journey]').forEach(li=>{li.dataset.state=steps[li.dataset.journey]||''});
+   }
+   // iPhone tout juste relié : la console s'ouvre d'elle-même (une seule fois par consultation).
+   if(linkedRoom?.patient_id&&liveRoomSeen.get(linkedRoom.id)==='waiting'&&!sessionStorage.getItem('komo_auto_open_'+linkedRoom.id)){
+    sessionStorage.setItem('komo_auto_open_'+linkedRoom.id,'1');
+    toast('iPhone connecté · ouverture des tests.');
+    setTimeout(()=>{if(location.hash==='#live')host.querySelector('[data-room="'+linkedRoom.id+'"] [data-live-operator]')?.click()},900);
+   }
+   for(const r of rooms)liveRoomSeen.set(r.id,r.status==='active'&&r.patient_last_seen_at&&Date.now()-new Date(r.patient_last_seen_at).getTime()<18000?'linked':'waiting');
    for(const select of host.querySelectorAll('[data-live-select]')){
     if(selected.has(select.dataset.liveSelect))select.value=selected.get(select.dataset.liveSelect);
     else if(consultablePatient(S.patient))select.value=S.patient.id;
@@ -927,7 +987,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261121-protocol-v2');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261121-workspace-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         openVideo:openOperatorCamera,preferredSessionId:S.patient?.id?
@@ -945,7 +1005,7 @@ function render(){
     history.replaceState(null,'',location.pathname+location.search+'#home');
     S.route='home';
   }
-  const allowed=navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
+  const allowed=S.mode==='pro'?PRO_ROUTES:navItems().map(x=>x[0]);if(!allowed.includes(S.route)){location.hash=allowed[0];return}
   if(S.route!=='operator')motionConsultModule?.disposeOperatorConsultation();
   shell();
   if(S.route!=='live'&&motionLiveTimer){clearInterval(motionLiveTimer);motionLiveTimer=null;}
@@ -955,6 +1015,15 @@ function render(){
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
 async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();if(recoveryActive)return passwordRecoveryView();await loadIdentity();await loadAll();render()}
-window.addEventListener('hashchange',()=>{if(S.user){S.route=route();render()}});
+window.addEventListener('hashchange',()=>{
+  if(!S.user)return;
+  S.route=route();
+  // Transition courte entre les écrans praticien ; désactivée si l'utilisateur réduit les animations.
+  const calm=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if(S.mode==='pro'&&document.startViewTransition&&!calm&&!document.hidden){
+    const t=document.startViewTransition(()=>render());
+    for(const p of [t.ready,t.finished,t.updateCallbackDone])p?.catch?.(()=>{});
+  }else render();
+});
 sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){recoveryActive=true;passwordRecoveryView();return}if(!session&&event==='SIGNED_OUT')authView()});
 boot().catch(()=>authView('Une erreur est survenue. Réessayez dans quelques instants.'));

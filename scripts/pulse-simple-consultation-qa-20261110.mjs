@@ -39,7 +39,7 @@ assert.ok(edge.includes('camera_owner:"operator"')&&edge.includes('camera_owner:
 assert.ok(edge.includes('initialProgress')&&edge.includes('checkin_id'));
 assert.ok(edge.includes('operator_camera_start')&&edge.includes('operator_attach'));
 assert.ok(edge.includes('contains("progress",{camera_owner:"operator"})'));
-assert.ok(app.includes("['live','Nouvelle consultation']"));
+assert.ok(app.includes("['live','Consultation']"));
 assert.ok(app.includes("action:'operator_checkin_invite'"));
 assert.ok(app.includes("action:'operator_checkin_claim'"));
 assert.ok(app.includes("sb.functions.invoke('professional-patient'"));
@@ -52,5 +52,5 @@ assert.ok(app.includes("localStorage.setItem('komo_v14_patient',patientId)"));
 assert.ok(app.includes("operator_list")&&app.includes('opCheckinQueue'));
 assert.ok(app.includes('/camera/')&&camera.includes("action:'operator_camera_start'"));
 assert.ok(styles.includes('.op-live-checklist')&&styles.includes('.op-checkin-invitation'));
-assert.ok(html.includes('pulse-consultation-flow-v1.css')&&html.includes('maison-entry-v1.js?v=20261121-protocol-v2'));
+assert.ok(html.includes('pulse-consultation-flow-v1.css')&&html.includes('maison-entry-v1.js?v='));
 console.log('[pulse-simple-consultation-qa] PASS optional fictitious check-in, desktop-prepared consultation, unique iPhone auto-join, reset and no patient-camera requests');

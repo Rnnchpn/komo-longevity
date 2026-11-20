@@ -79,3 +79,9 @@
  .mlive-staff-camera .mlive-actions{grid-template-columns:1fr}
  .mlive-staff-camera .mlive-camera{height:44dvh}
 }
+/* 21/11/2026 — caméra du cabinet : liaison automatique, aucun code à recopier ; une action principale. */
+.mlive-staff-camera .mlive-number{display:none}
+.mlive-staff-camera .mlive-eyebrow{letter-spacing:.02em;text-transform:none;font-size:13px}
+.mlive-staff-camera #mliveCamera:not([hidden]){background:#f3efe6;color:#173943;border-color:#f3efe6;font-weight:700;min-height:56px;font-size:16px}
+.mlive-staff-camera .mlive-state{font-size:15px}
+.mlive-staff-camera:has(#mliveVideo:not([hidden])) #mliveCamera{background:transparent;color:#e9e4d8;border-color:rgba(233,228,216,.35);font-size:14px;min-height:48px}

@@ -1,0 +1,365 @@
+/* KŌMØ PULSE — espace praticien (21/11/2026).
+   Dernière couche CSS chargée : elle définit la mise en page et l'apparence de l'espace
+   praticien (classe .app-shell-pro). L'espace patient et la page d'accueil ne sont pas touchés.
+   Principe : un instrument calme. Une seule chose se remarque, le rail du protocole ;
+   tout le reste s'efface derrière la mesure en cours. */
+
+:root{
+ --pw-ink:#173943;          /* pétrole KŌMØ : texte, action principale */
+ --pw-ink-2:#4b5f63;        /* texte secondaire */
+ --pw-muted:#7b8386;
+ --pw-canvas:#f3f1ec;       /* fond de travail */
+ --pw-panel:#ffffff;
+ --pw-sunken:#f7f5f1;
+ --pw-line:#e2ddd4;
+ --pw-line-strong:#cdc5b7;
+ --pw-bronze:#8a7352;       /* étape en cours, sélection, focus */
+ --pw-bronze-soft:#f2ece2;
+ --pw-sage:#2e6a55;         /* fait, relié, en direct */
+ --pw-sage-soft:#e5efe9;
+ --pw-clay:#a35f2a;         /* attention, non réalisé */
+ --pw-clay-soft:#f7ede3;
+ --pw-serif:"Cormorant Garamond",Georgia,serif;
+ --pw-sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
+ --pw-shadow:0 1px 2px rgba(23,57,67,.05),0 10px 28px rgba(23,57,67,.06);
+ --pw-ease:cubic-bezier(.2,.7,.2,1);
+}
+
+/* ── Cadre ─────────────────────────────────────────────────────────────── */
+body:has(.app-shell-pro){background:var(--pw-canvas)}
+.app-shell.app-shell-pro{background:var(--pw-canvas);color:var(--pw-ink);font-family:var(--pw-sans);
+ grid-template-columns:216px minmax(0,1fr)}
+.app-shell.app-shell-pro :focus-visible{outline:2px solid var(--pw-bronze);outline-offset:2px}
+.app-shell.app-shell-pro .sidebar{background:var(--pw-panel);border-right:1px solid var(--pw-line);
+ padding:26px 14px 18px;display:flex;flex-direction:column;gap:26px}
+.app-shell.app-shell-pro .sidebar .brand{font:600 19px/1 var(--pw-sans);letter-spacing:.24em;color:var(--pw-ink);padding:0 10px}
+.app-shell.app-shell-pro .sidebar .brand small{display:block;margin-top:7px;font-size:9px;letter-spacing:.32em;color:var(--pw-bronze)}
+.app-shell.app-shell-pro .sidebar-caption{display:none}
+.app-shell.app-shell-pro .sidebar nav{display:grid;gap:2px}
+.app-shell.app-shell-pro .sidebar .nav-item{display:flex;align-items:center;gap:11px;width:100%;min-height:42px;padding:0 10px;
+ border:0;border-radius:10px;background:none;color:var(--pw-ink-2);font:500 14px/1 var(--pw-sans);text-align:left;
+ transition:background .15s var(--pw-ease),color .15s var(--pw-ease)}
+.app-shell.app-shell-pro .sidebar .nav-item:hover{background:var(--pw-sunken);color:var(--pw-ink)}
+.app-shell.app-shell-pro .sidebar .nav-item.active{background:var(--pw-ink);color:#fff}
+.app-shell.app-shell-pro .sidebar .nav-dot{width:20px;height:20px;display:grid;place-items:center;flex:none;background:none!important;border:0;border-radius:0;color:inherit}
+.app-shell.app-shell-pro .sidebar .nav-dot svg{width:20px;height:20px;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.app-shell.app-shell-pro .sidebar-bottom{margin-top:auto;display:grid;gap:12px}
+.app-shell.app-shell-pro .center-switch{font:500 11px/1.3 var(--pw-sans);letter-spacing:0;text-transform:none;color:var(--pw-muted);gap:6px}
+.app-shell.app-shell-pro .center-switch select{min-height:40px;border-radius:10px;border-color:var(--pw-line);font:500 13px var(--pw-sans);color:var(--pw-ink);text-overflow:ellipsis}
+.app-shell.app-shell-pro .sidebar .mode-switch{display:none}
+.app-shell.app-shell-pro .logout{justify-self:start;padding:6px 10px;font:500 12px var(--pw-sans);color:var(--pw-muted)}
+
+/* En-tête de page : titre sobre, contexte du centre, compte. */
+.app-shell.app-shell-pro .page{padding:26px clamp(20px,3vw,44px) 40px}
+.app-shell.app-shell-pro .page-head{display:flex;align-items:center;gap:16px;margin:0 0 22px;max-width:1160px}
+.app-shell.app-shell-pro .page-head .overline{display:block;font:500 12px/1.3 var(--pw-sans);letter-spacing:0;text-transform:none;color:var(--pw-bronze);margin:0 0 4px}
+.app-shell.app-shell-pro .page-head h1{font:500 40px/1.02 var(--pw-serif);letter-spacing:-.01em;color:var(--pw-ink);margin:0}
+.app-shell.app-shell-pro .center-badge{margin-left:auto;margin-right:0;padding:7px 12px;border-radius:999px;font:600 12px/1 var(--pw-sans)}
+.app-shell.app-shell-pro .center-badge.is-real{background:var(--pw-sage-soft);color:var(--pw-sage)}
+.app-shell.app-shell-pro .center-badge.is-demo{background:var(--pw-clay-soft);color:var(--pw-clay)}
+.app-shell.app-shell-pro .user-chip{border:1px solid var(--pw-line);background:var(--pw-panel);border-radius:999px;padding:4px 12px 4px 4px;gap:8px}
+.app-shell.app-shell-pro .user-chip>span{background:var(--pw-ink);color:#fff}
+.app-shell.app-shell-pro .user-chip small{color:var(--pw-muted)}
+
+/* Boutons communs */
+.app-shell.app-shell-pro .button{min-height:44px;padding:0 18px;border-radius:10px;font:600 14px/1 var(--pw-sans);letter-spacing:0;
+ transition:background .15s var(--pw-ease),border-color .15s var(--pw-ease),transform .1s}
+.app-shell.app-shell-pro .button:active{transform:translateY(1px)}
+.app-shell.app-shell-pro .button.primary{background:var(--pw-ink);border:1px solid var(--pw-ink);color:#fff}
+.app-shell.app-shell-pro .button.primary:hover{background:#0f2b33}
+.app-shell.app-shell-pro .button.secondary{background:var(--pw-panel);border:1px solid var(--pw-line-strong);color:var(--pw-ink)}
+.app-shell.app-shell-pro .button.secondary:hover{border-color:var(--pw-ink)}
+.app-shell.app-shell-pro .button.quiet{background:none;border:1px solid transparent;color:var(--pw-muted)}
+.app-shell.app-shell-pro .button.quiet:hover{color:var(--pw-ink);border-color:var(--pw-line)}
+.app-shell.app-shell-pro .button:disabled{opacity:.5;cursor:progress}
+
+/* ── Parcours de consultation (pages Consultation et console) ─────────── */
+.op-journey,.moc-journey{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:0;counter-reset:none}
+.op-journey li,.moc-journey-step,.moc-journey .moc-mode-tab{position:relative;display:flex;align-items:center;gap:8px;
+ color:var(--pw-muted);font:500 13px/1 var(--pw-sans);white-space:nowrap}
+.op-journey li+li::before,.moc-journey>*+*::before{content:"";display:block;width:clamp(14px,2.2vw,34px);height:1px;background:var(--pw-line-strong);margin:0 10px 0 2px}
+.op-journey b,.moc-journey b{width:24px;height:24px;flex:none;display:grid;place-items:center;border-radius:50%;
+ border:1px solid var(--pw-line-strong);background:var(--pw-panel);font:600 11px/1 var(--pw-sans);color:var(--pw-muted)}
+.op-journey li[data-state="current"],.moc-journey [data-state="current"],.moc-journey .moc-mode-tab.active{color:var(--pw-ink);font-weight:600}
+.op-journey li[data-state="current"] b,.moc-journey [data-state="current"] b,.moc-journey .moc-mode-tab.active b{background:var(--pw-ink);border-color:var(--pw-ink);color:#fff}
+.op-journey li[data-state="done"],.moc-journey [data-state="done"]{color:var(--pw-sage)}
+.op-journey li[data-state="done"] b,.moc-journey [data-state="done"] b{background:var(--pw-sage);border-color:var(--pw-sage);color:#fff;font-size:0}
+.op-journey li[data-state="done"] b::after,.moc-journey [data-state="done"] b::after{content:"✓";font-size:12px}
+.moc-journey .moc-mode-tab.active[data-state="done"] b{background:var(--pw-ink);border-color:var(--pw-ink)}
+
+/* ── Patients ─────────────────────────────────────────────────────────── */
+.app-shell-pro .op-patients-app{max-width:1160px;display:grid;gap:18px}
+.app-shell-pro .op-patients-context{display:none}
+.app-shell-pro .op-patients-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;margin:0}
+.app-shell-pro .op-patients-toolbar #opPatientCreateToggle{order:2}
+.app-shell-pro .op-patient-search{order:1;display:flex;align-items:center;gap:10px;min-height:46px;margin:0;padding:0 14px;
+ background:var(--pw-panel);border:1px solid var(--pw-line);border-radius:12px}
+.app-shell-pro .op-patient-search span{color:var(--pw-muted);font-size:16px}
+.app-shell-pro .op-patient-search input{border:0;outline:0;background:none;width:100%;font:500 14px var(--pw-sans);color:var(--pw-ink);padding:0}
+.app-shell-pro .op-patients-search-count{grid-column:1/-1;order:3;margin:0;color:var(--pw-muted);font-size:12px}
+.app-shell-pro .op-create-patient-form{background:var(--pw-panel);border:1px solid var(--pw-line);border-radius:16px;padding:24px 26px;box-shadow:var(--pw-shadow);margin:0}
+.app-shell-pro .op-create-patient-form h3{font:500 26px/1.1 var(--pw-serif);margin:0 0 6px;color:var(--pw-ink)}
+.app-shell-pro .op-create-patient-form>p{font-size:13px;line-height:1.55;color:var(--pw-ink-2);max-width:72ch;margin:0 0 16px}
+.app-shell-pro .op-create-patient-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.app-shell-pro .op-create-patient-grid label span{display:block;font:600 12px/1.3 var(--pw-sans);color:var(--pw-ink-2);margin-bottom:6px}
+.app-shell-pro .op-create-patient-grid input,.app-shell-pro .op-create-patient-grid select{width:100%;min-height:46px;padding:0 12px;border:1px solid var(--pw-line-strong);border-radius:10px;background:#fff;font:500 15px var(--pw-sans);color:var(--pw-ink)}
+.app-shell-pro .op-create-patient-grid input[name="pseudo_code"]{font:600 16px var(--pw-sans);letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.app-shell-pro .op-create-patient-attestation{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;font-size:13px;line-height:1.5;color:var(--pw-ink-2)}
+.app-shell-pro .op-create-patient-attestation input{width:18px;height:18px;accent-color:var(--pw-ink);flex:none;margin-top:1px}
+.app-shell-pro .op-create-patient-form .button.primary{margin-top:18px}
+.app-shell-pro .op-patients-section-head{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 8px}
+.app-shell-pro .op-patients-section-head h3{font:600 13px var(--pw-sans);color:var(--pw-ink-2);margin:0}
+.app-shell-pro .op-patients-section-head span{font:600 12px var(--pw-sans);color:var(--pw-muted)}
+.app-shell-pro .patient-list{display:grid;gap:0;background:var(--pw-panel);border:1px solid var(--pw-line);border-radius:14px;overflow:hidden}
+.app-shell-pro .patient-list>button{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:center;gap:14px;width:100%;
+ min-height:64px;padding:10px 16px;border:0;border-bottom:1px solid var(--pw-line);border-radius:0;background:none;text-align:left;color:var(--pw-ink);
+ transition:background .12s var(--pw-ease)}
+.app-shell-pro .patient-list>button:last-child{border-bottom:0}
+.app-shell-pro .patient-list>button:hover{background:var(--pw-sunken)}
+.app-shell-pro .patient-list>button[hidden]{display:none}
+.app-shell-pro .patient-avatar{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:var(--pw-bronze-soft);color:var(--pw-bronze);font:600 13px var(--pw-sans);font-variant-numeric:tabular-nums}
+.app-shell-pro .op-patient-detail strong{display:block;font:600 15px/1.25 var(--pw-sans);letter-spacing:.01em;font-variant-numeric:tabular-nums}
+.app-shell-pro .op-patient-detail small{display:block;margin-top:3px;font:400 12px/1.3 var(--pw-sans);color:var(--pw-muted)}
+.app-shell-pro .op-patient-arrow{font:600 13px var(--pw-sans);color:var(--pw-ink);padding:8px 12px;border:1px solid var(--pw-line-strong);border-radius:9px;background:var(--pw-panel)}
+.app-shell-pro .patient-list>button:hover .op-patient-arrow{background:var(--pw-ink);border-color:var(--pw-ink);color:#fff}
+.app-shell-pro .op-patients-empty{margin:0;padding:22px 18px;color:var(--pw-muted);font-size:14px}
+.app-shell-pro .op-demo-group{background:none;border:0;padding:0}
+.app-shell-pro .op-demo-group summary{cursor:pointer;display:flex;gap:8px;align-items:center;font:600 13px var(--pw-sans);color:var(--pw-ink-2);padding:6px 2px 10px}
+
+/* ── Consultation : préparation et liaison de l'iPhone ───────────────── */
+.app-shell-pro .op-live-dashboard{max-width:1160px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(300px,.75fr);gap:18px;align-items:start}
+.app-shell-pro .op-live-dashboard>.op-journey{grid-column:1/-1;margin:0 0 4px}
+.app-shell-pro .op-live-head{display:none}
+.app-shell-pro .op-start-panel,.app-shell-pro .op-rooms-section,.app-shell-pro .op-iphone-card{background:var(--pw-panel);border:1px solid var(--pw-line);border-radius:16px;padding:24px 26px;margin:0;box-shadow:var(--pw-shadow)}
+.app-shell-pro .op-start-panel{grid-column:1;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 16px;align-items:end}
+.app-shell-pro .op-start-panel>div{grid-column:1/-1}
+.app-shell-pro .op-start-panel h3,.app-shell-pro .op-rooms-section h3,.app-shell-pro .op-iphone-card h3{font:500 26px/1.1 var(--pw-serif);color:var(--pw-ink);margin:0 0 4px}
+.app-shell-pro .op-start-panel p{margin:0;color:var(--pw-ink-2);font-size:13px;line-height:1.5}
+.app-shell-pro .op-start-panel label{display:grid;gap:6px;font:600 12px var(--pw-sans);color:var(--pw-ink-2)}
+.app-shell-pro .op-start-panel select{min-height:48px;padding:0 12px;border:1px solid var(--pw-line-strong);border-radius:10px;background:#fff;font:600 15px var(--pw-sans);color:var(--pw-ink);font-variant-numeric:tabular-nums}
+.app-shell-pro .op-start-panel #opLiveBegin{min-height:48px;padding:0 22px}
+.app-shell-pro .op-start-panel .op-start-help{grid-column:1/-1;font-size:12px;color:var(--pw-muted)}
+.app-shell-pro .op-rooms-section{grid-column:1}
+.app-shell-pro .op-iphone-card{grid-column:2;grid-row:2 / span 2;background:var(--pw-ink);border-color:var(--pw-ink);color:#e9efee}
+.app-shell-pro .op-iphone-card h3{color:#fff}
+.app-shell-pro .op-iphone-card ol{margin:14px 0 18px;padding:0 0 0 20px;display:grid;gap:10px;font-size:14px;line-height:1.5;color:#d6e0df}
+.app-shell-pro .op-iphone-card strong{color:#fff;font-weight:600}
+.app-shell-pro .op-iphone-card .button.secondary{background:transparent;color:#fff;border-color:rgba(255,255,255,.35);width:100%}
+.app-shell-pro .op-iphone-card .button.secondary:hover{border-color:#fff}
+/* Selon l'étape : sans consultation → choix du patient ; consultation créée → elle passe devant. */
+.app-shell-pro .op-live-dashboard:not([data-live-state="start"]) .op-start-panel{display:none}
+.app-shell-pro .op-live-dashboard[data-live-state="start"] .op-rooms-section{display:none}
+.app-shell-pro .op-live-dashboard[data-live-state="linked"] .op-iphone-card{background:var(--pw-sage-soft);border-color:var(--pw-sage-soft);color:var(--pw-sage)}
+.app-shell-pro .op-live-dashboard[data-live-state="linked"] .op-iphone-card h3,
+.app-shell-pro .op-live-dashboard[data-live-state="linked"] .op-iphone-card strong{color:var(--pw-sage)}
+.app-shell-pro .op-live-dashboard[data-live-state="linked"] .op-iphone-card ol{color:var(--pw-ink-2)}
+.app-shell-pro .op-live-dashboard[data-live-state="linked"] .op-iphone-card .button{display:none}
+.app-shell-pro .op-live-room{border:0;background:none;padding:0;margin:14px 0 0;box-shadow:none}
+.app-shell-pro .op-live-room header{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.app-shell-pro .op-live-room h3{font:600 22px/1.15 var(--pw-sans)!important;letter-spacing:.02em;font-variant-numeric:tabular-nums;margin:0!important}
+.app-shell-pro .op-live-room header p{margin:4px 0 0;color:var(--pw-ink-2);font-size:14px}
+.app-shell-pro .op-live-tag{flex:none;display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;font:600 12px/1 var(--pw-sans);background:var(--pw-sunken);color:var(--pw-muted)}
+.app-shell-pro .op-live-tag::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+.app-shell-pro .op-live-tag[data-state="live"]{background:var(--pw-sage-soft);color:var(--pw-sage)}
+.app-shell-pro .op-live-tag[data-state="connecting"]{background:var(--pw-bronze-soft);color:var(--pw-bronze)}
+.app-shell-pro .op-live-room.is-waiting .op-live-tag::before{animation:pw-breathe 1.6s ease-in-out infinite}
+.app-shell-pro .op-live-track{height:4px;border-radius:4px;background:var(--pw-sunken);margin:16px 0 0;overflow:hidden}
+.app-shell-pro .op-live-track i{display:block;height:100%;background:var(--pw-sage)}
+.app-shell-pro .op-live-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.app-shell-pro .op-live-actions [data-live-operator].primary{min-height:50px;padding:0 24px;font-size:15px}
+.app-shell-pro .op-live-empty{color:var(--pw-muted);font-size:14px;padding:6px 0}
+.app-shell-pro .op-live-toolbar{grid-column:1;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}
+.app-shell-pro .op-live-toolbar #opLiveCount{flex:1 1 100%;font-size:12px;color:var(--pw-muted)}
+.app-shell-pro .op-live-toolbar .button{min-height:38px;font-size:13px}
+.app-shell-pro .op-live-advanced,.app-shell-pro .op-live-caution{grid-column:1/-1}
+.app-shell-pro .op-live-caution{font-size:12px;line-height:1.55;color:var(--pw-muted);max-width:90ch;margin:4px 0 0}
+#opLiveRefresh{display:none}
+@keyframes pw-breathe{50%{opacity:.25}}
+
+/* ── Console de consultation ─────────────────────────────────────────── */
+.app-shell.app-shell-pro[data-pulse-view="operator"] .page{padding:14px clamp(14px,1.6vw,24px) 14px}
+.app-shell.app-shell-pro[data-pulse-view="operator"] .page-head{display:none}
+.app-shell-pro .moc-shell{color:var(--pw-ink);font-family:var(--pw-sans)}
+.app-shell-pro .moc-head{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:12px 18px;margin:0 0 12px;padding:2px 4px 0}
+.app-shell-pro .moc-head>.moc-journey{grid-column:1/-1;grid-row:2;justify-content:flex-start}
+.app-shell-pro .moc-identity h2{font:500 30px/1 var(--pw-serif)!important;font-variant-numeric:lining-nums tabular-nums;letter-spacing:.01em;color:var(--pw-ink);margin:0!important}
+.app-shell-pro .moc-identity p{margin:5px 0 0;font:500 12px/1.3 var(--pw-sans);color:var(--pw-muted)}
+.app-shell-pro .moc-journey{display:flex!important;border:0;background:none;padding:0;margin:0;grid-template-columns:none}
+.app-shell-pro .moc-journey .moc-mode-tab{min-height:40px;padding:0 10px 0 4px;border:0;border-radius:999px;background:none;cursor:pointer;
+ font:500 13px/1 var(--pw-sans);color:var(--pw-ink-2);transition:background .15s var(--pw-ease)}
+.app-shell-pro .moc-journey .moc-mode-tab:hover{background:var(--pw-panel)}
+.app-shell-pro .moc-journey .moc-mode-tab.active{background:var(--pw-panel);box-shadow:var(--pw-shadow)}
+.app-shell-pro .moc-journey .moc-mode-tab small{font:600 11px/1 var(--pw-sans);color:var(--pw-muted);font-variant-numeric:tabular-nums}
+.app-shell-pro .moc-journey .moc-mode-tab small:empty{display:none}
+.app-shell-pro .moc-journey-step{padding:0 4px}
+.app-shell-pro .moc-head-actions{display:flex;gap:6px;flex-wrap:nowrap}
+.app-shell-pro .moc-back{min-height:36px;padding:0 12px;border-radius:9px;border:1px solid var(--pw-line);background:var(--pw-panel);
+ color:var(--pw-ink-2);font:500 13px/1 var(--pw-sans);white-space:nowrap}
+.app-shell-pro .moc-back:hover{color:var(--pw-ink);border-color:var(--pw-line-strong)}
+.app-shell-pro .moc-back[aria-pressed="true"]{background:var(--pw-ink);border-color:var(--pw-ink);color:#fff}
+.app-shell-pro #mocReturn{color:var(--pw-muted);border-color:transparent;background:none}
+
+/* Une seule ligne d'état, discrète. */
+.app-shell-pro .moc-statusbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;margin:0 0 10px;padding:0 6px;min-height:20px}
+.app-shell-pro .moc-statusbar>p{margin:0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important;
+ font:500 12px/1.4 var(--pw-sans)!important;color:var(--pw-muted)!important}
+.app-shell-pro .moc-statusbar>p[hidden]{display:none}
+.app-shell-pro .moc-camera-banner[data-state="live"]{color:var(--pw-sage)!important}
+.app-shell-pro .moc-camera-banner[data-state="offline"]{color:var(--pw-clay)!important}
+.app-shell-pro .moc-voice-state{display:none}
+.app-shell-pro .moc-shell:has(#mocVoice[aria-pressed="true"]) .moc-voice-state{display:block}
+
+/* Grille : console + caméra (à droite, uniquement quand elle est demandée). */
+.app-shell-pro .moc-tests,.app-shell-pro .moc-camera-column{border-radius:16px}
+.app-shell-pro .moc-tests{background:var(--pw-panel);border:1px solid var(--pw-line);box-shadow:var(--pw-shadow)}
+.app-shell-pro .moc-camera-column{background:#0f262b;border-color:#0f262b}
+
+/* Le rail du protocole : la pièce maîtresse. */
+@media(min-width:1001px){
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .moc-tests{display:grid!important;grid-template-columns:236px minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr);overflow:hidden}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .moc-tests:has(.moc-step-nav[hidden]),
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .moc-tests:has(.moc-step-nav:empty){grid-template-columns:minmax(0,1fr)}
+ .app-shell-pro .moc-overview{grid-column:1;grid-row:1;padding:20px 18px 10px 22px;border-right:1px solid var(--pw-line);background:var(--pw-sunken)}
+ .app-shell-pro .moc-tests:has(.moc-step-nav[hidden]) .moc-overview,
+ .app-shell-pro .moc-tests:has(.moc-step-nav:empty) .moc-overview{display:none}
+ .app-shell-pro .moc-step-nav{grid-column:1;grid-row:2;min-height:0;overflow:auto;border-right:1px solid var(--pw-line);border-bottom:0!important;background:var(--pw-sunken);padding:4px 10px 18px 12px!important}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] #mocTestBody{grid-column:2;grid-row:1 / span 2;min-height:0;overflow:auto;overscroll-behavior:contain}
+ .app-shell-pro .moc-tests:has(.moc-step-nav[hidden]) #mocTestBody,
+ .app-shell-pro .moc-tests:has(.moc-step-nav:empty) #mocTestBody{grid-column:1}
+}
+.app-shell-pro .moc-overview{font:600 12px/1.3 var(--pw-sans);letter-spacing:0;color:var(--pw-ink-2)}
+.app-shell-pro .moc-progress{height:3px;margin-top:10px;background:var(--pw-line);border-radius:3px}
+.app-shell-pro .moc-progress i{background:var(--pw-sage)}
+.app-shell-pro .moc-step-nav{display:block!important;grid-template-columns:none!important}
+.app-shell-pro .moc-step-nav[hidden]{display:none!important}
+.app-shell-pro .moc-rail-block{margin:12px 0 0}
+.app-shell-pro .moc-rail-title{margin:0 0 4px 10px;font:600 11px/1.3 var(--pw-sans);color:var(--pw-bronze)}
+.app-shell-pro .moc-rail-block ol{list-style:none;margin:0;padding:0;position:relative}
+.app-shell-pro .moc-rail-block ol::before{content:"";position:absolute;left:22px;top:14px;bottom:14px;width:1px;background:var(--pw-line-strong)}
+.app-shell-pro .moc-rail-block .moc-step{position:relative;display:flex;align-items:center;gap:10px;min-height:38px;margin:0;padding:5px 8px 5px 10px;
+ border:0;border-radius:9px;background:none;color:var(--pw-ink-2);font:500 13px/1.2 var(--pw-sans)}
+.app-shell-pro .moc-rail-block .moc-step b{position:relative;z-index:1;width:24px;height:24px;flex:none;display:grid;place-items:center;border-radius:50%;
+ border:1px solid var(--pw-line-strong);background:var(--pw-panel);color:var(--pw-muted);font:600 11px/1 var(--pw-sans)}
+.app-shell-pro .moc-rail-block .moc-step{justify-content:flex-start;text-align:left;flex-direction:row}
+.app-shell-pro .moc-rail-block .moc-step span{display:grid;gap:2px;min-width:0;justify-items:start;text-align:left}
+.app-shell-pro .moc-rail-block .moc-step small{font:400 11px/1.2 var(--pw-sans);color:var(--pw-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app-shell-pro .moc-rail-block .moc-step.done{color:var(--pw-ink-2)}
+.app-shell-pro .moc-rail-block .moc-step.done b{background:var(--pw-sage);border-color:var(--pw-sage);color:#fff}
+.app-shell-pro .moc-rail-block .moc-step.skipped b{border-style:dashed;border-color:var(--pw-clay);color:var(--pw-clay)}
+.app-shell-pro .moc-rail-block .moc-step.skipped small{color:var(--pw-clay)}
+.app-shell-pro .moc-rail-block .moc-step.current{background:var(--pw-panel);color:var(--pw-ink);font-weight:600;box-shadow:0 0 0 1px var(--pw-line),0 6px 16px rgba(23,57,67,.08)}
+.app-shell-pro .moc-rail-block .moc-step.current b{width:28px;height:28px;margin-left:-2px;background:var(--pw-ink);border-color:var(--pw-ink);color:#fff;font-size:12px;
+ box-shadow:0 0 0 4px var(--pw-bronze-soft)}
+.app-shell-pro .moc-rail-block .moc-step.current small{color:var(--pw-bronze)}
+
+/* Carte du test en cours */
+.app-shell-pro .moc-test{display:flex;flex-direction:column;padding:26px clamp(20px,3vw,40px) 0;min-height:100%}
+.app-shell-pro .moc-test>.moc-kicker{order:0;font:500 12px/1.4 var(--pw-sans);letter-spacing:0;text-transform:none;color:var(--pw-bronze)}
+.app-shell-pro .moc-test>h3{order:1;font:500 clamp(34px,3.2vw,46px)/1.02 var(--pw-serif);letter-spacing:-.01em;color:var(--pw-ink);margin:6px 0 18px}
+.app-shell-pro .moc-test>.moc-live-hud{order:2}
+.app-shell-pro .moc-test>.moc-instructions,.app-shell-pro .moc-test>.moc-guide{order:3}
+.app-shell-pro .moc-test>.moc-safety{order:3}
+.app-shell-pro .moc-test>.moc-balance-reference{order:4}
+.app-shell-pro .moc-test>.moc-auto-feedback{order:4}
+.app-shell-pro .moc-test>.moc-two-step-fields,.app-shell-pro .moc-test>.moc-field{order:5}
+.app-shell-pro .moc-test>.moc-skip-panel{order:6}
+.app-shell-pro .moc-test>.moc-status{order:7}
+.app-shell-pro .moc-test>.moc-buttons{order:9}
+.app-shell-pro .moc-instructions{background:none;border:0;padding:0;margin:0 0 18px}
+.app-shell-pro .moc-instructions>summary{cursor:pointer;list-style:none;font:600 13px/1 var(--pw-sans);color:var(--pw-ink-2);padding:6px 0;margin:0 0 10px}
+.app-shell-pro .moc-instructions>summary::-webkit-details-marker{display:none}
+.app-shell-pro .moc-instructions>summary::before{content:"▾";display:inline-block;margin-right:8px;color:var(--pw-muted);transition:transform .15s}
+.app-shell-pro .moc-instructions:not([open])>summary::before{transform:rotate(-90deg)}
+.app-shell-pro .moc-instructions .moc-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+.app-shell-pro .moc-instructions .moc-guide>div{background:var(--pw-sunken);border:0;border-radius:12px;padding:14px 16px}
+.app-shell-pro .moc-instructions .moc-guide strong{display:block;font:600 12px/1.3 var(--pw-sans);color:var(--pw-ink-2)}
+.app-shell-pro .moc-instructions .moc-guide p{font:400 14px/1.55 var(--pw-sans);color:var(--pw-ink);margin:6px 0 0}
+/* « À dire au patient » : la phrase se lit d'un coup d'œil, à voix haute. */
+.app-shell-pro .moc-instructions .moc-guide>div:nth-child(2):nth-last-child(2){background:var(--pw-bronze-soft)}
+.app-shell-pro .moc-instructions .moc-guide>div:nth-child(2):nth-last-child(2) p{font:500 italic 19px/1.4 var(--pw-serif);color:var(--pw-ink)}
+.app-shell-pro .moc-safety{background:var(--pw-clay-soft);border:1px solid #ecd7c3;border-radius:12px;padding:14px 16px;font:500 14px/1.5 var(--pw-sans);color:var(--pw-ink);margin:0 0 18px}
+.app-shell-pro .moc-safety input{width:20px;height:20px;accent-color:var(--pw-ink)}
+.app-shell-pro .moc-two-step-fields{background:none!important;border:0!important;padding:0!important;gap:14px 16px!important}
+.app-shell-pro .moc-two-step-fields .moc-help{font:400 13px/1.5 var(--pw-sans);color:var(--pw-muted)}
+.app-shell-pro .moc-field{font:600 13px/1.4 var(--pw-sans);color:var(--pw-ink-2);margin:0 0 14px}
+.app-shell-pro .moc-field input,.app-shell-pro .moc-field select,.app-shell-pro .moc-field textarea{min-height:52px;margin-top:7px;padding:0 14px;border:1px solid var(--pw-line-strong);border-radius:11px;
+ background:#fff;font:500 18px var(--pw-sans);color:var(--pw-ink);font-variant-numeric:tabular-nums;transition:border-color .12s,box-shadow .12s}
+.app-shell-pro .moc-field select{font-size:15px}
+.app-shell-pro .moc-field textarea{min-height:64px;padding:12px 14px;font-size:14px}
+.app-shell-pro .moc-field input:focus,.app-shell-pro .moc-field select:focus,.app-shell-pro .moc-field textarea:focus{outline:0;border-color:var(--pw-ink);box-shadow:0 0 0 3px rgba(23,57,67,.12)}
+.app-shell-pro .moc-input-unit span{font:500 13px var(--pw-sans);color:var(--pw-muted)}
+.app-shell-pro .moc-auto-feedback{background:none;border:0;border-left:2px solid var(--pw-line-strong);border-radius:0;padding:2px 0 2px 12px;margin:2px 0 16px;font:400 12px/1.5 var(--pw-sans);color:var(--pw-muted)}
+.app-shell-pro #mocFieldsComputed,.app-shell-pro #mocTwoStepComputed{font:600 14px/1.4 var(--pw-sans);color:var(--pw-sage)}
+.app-shell-pro .moc-status{min-height:0;margin:0 0 8px;font:600 13px/1.4 var(--pw-sans);color:var(--pw-clay)}
+.app-shell-pro .moc-status:empty{display:none}
+.app-shell-pro .moc-skip-panel{border-color:#ecd7c3;background:var(--pw-clay-soft);margin:0 0 14px}
+
+/* Barre d'action fixe en bas de la carte : la décision suivante est toujours visible. */
+.app-shell-pro .moc-test:is(:has(#mocSave),:has(#mocStart),:has(#mocIntakeNext))>.moc-buttons{position:sticky;bottom:0;z-index:3;display:flex;align-items:center;justify-content:flex-end;gap:10px;
+ margin:auto calc(-1 * clamp(20px,3vw,40px)) 0;padding:14px clamp(20px,3vw,40px);background:rgba(255,255,255,.94);
+ backdrop-filter:blur(8px);border-top:1px solid var(--pw-line)}
+.app-shell-pro .moc-test>.moc-buttons #mocSkip{margin-right:auto}
+.app-shell-pro .moc-test:not(:has(#mocSave)):not(:has(#mocStart)):not(:has(#mocIntakeNext))>.moc-buttons{margin-top:16px}
+.app-shell-pro .moc-button{min-height:48px;padding:0 20px;border-radius:11px;font:600 14px/1 var(--pw-sans);letter-spacing:0}
+.app-shell-pro .moc-button.primary{background:var(--pw-ink);border-color:var(--pw-ink);color:#fff;display:inline-flex;align-items:center;gap:12px}
+.app-shell-pro .moc-button.primary:hover{background:#0f2b33}
+.app-shell-pro .moc-button.secondary{background:var(--pw-panel);border:1px solid var(--pw-line-strong);color:var(--pw-ink-2)}
+.app-shell-pro .moc-button kbd{font:600 11px/1 var(--pw-sans);padding:4px 6px;border-radius:5px;background:rgba(255,255,255,.16);color:rgba(255,255,255,.85)}
+.app-shell-pro .moc-live-hud .moc-buttons,.app-shell-pro .moc-clock-actions{position:static;background:none;border:0;padding:0;margin:0}
+
+/* Questionnaire et rapport : même langage visuel. */
+.app-shell-pro .moc-mode-tab b{font-variant-numeric:tabular-nums}
+.app-shell-pro .moc-question{background:var(--pw-panel);border-color:var(--pw-line)}
+.app-shell-pro .moc-question-choice{border-color:var(--pw-line-strong);font:500 13px/1.3 var(--pw-sans)}
+
+/* Changement de page : fondu court (désactivé si l'utilisateur réduit les animations). */
+::view-transition-old(root),::view-transition-new(root){animation-duration:.16s;animation-timing-function:var(--pw-ease)}
+@media(prefers-reduced-motion:reduce){
+ .app-shell-pro *{transition:none!important;animation:none!important}
+}
+
+/* ── Tablette et téléphone ───────────────────────────────────────────── */
+@media(max-width:1180px){
+ .app-shell-pro .moc-journey{overflow-x:auto;padding-bottom:2px}
+ .app-shell-pro .op-journey li+li::before,.app-shell-pro .moc-journey>*+*::before{width:14px;margin:0 6px 0 0}
+}
+@media(max-width:1000px){
+ .app-shell.app-shell-pro{grid-template-columns:1fr}
+ .app-shell-pro .op-live-dashboard{grid-template-columns:1fr}
+ .app-shell-pro .op-iphone-card{grid-column:1;grid-row:auto}
+ .app-shell-pro .op-journey{overflow-x:auto}
+ .app-shell-pro .op-journey li span{display:none}
+ .app-shell-pro .op-journey li[data-state="current"] span{display:inline}
+ .app-shell-pro .moc-step-nav{display:flex!important;overflow-x:auto;gap:6px;padding:10px!important}
+ .app-shell-pro .moc-rail-block{display:contents}
+ .app-shell-pro .moc-rail-title{display:none}
+ .app-shell-pro .moc-rail-block ol{display:contents}
+ .app-shell-pro .moc-rail-block ol::before{display:none}
+ .app-shell-pro .moc-rail-block .moc-step{flex:none}
+ .app-shell-pro .moc-rail-block .moc-step:not(.current) span{display:none}
+ .app-shell-pro .moc-instructions .moc-guide{grid-template-columns:1fr}
+ .app-shell-pro .op-create-patient-grid{grid-template-columns:1fr}
+ .app-shell-pro .moc-head-actions .moc-back{padding:0 10px}
+}
+@media(max-width:700px){
+ .app-shell-pro .op-patients-toolbar{grid-template-columns:1fr}
+ .app-shell-pro .op-patients-toolbar #opPatientCreateToggle{order:0}
+ .app-shell-pro .op-start-panel{grid-template-columns:1fr}
+ .app-shell-pro .moc-test>.moc-buttons{flex-wrap:wrap}
+ .app-shell-pro .moc-test>.moc-buttons .moc-button{flex:1 1 auto}
+ .app-shell-pro .moc-button kbd{display:none}
+}
+.app-shell-pro .moc-test:not(:has(#mocSave)):not(:has(#mocStart)):not(:has(#mocIntakeNext)){padding-bottom:26px}
+
+/* Pendant la consultation, le menu se replie en icônes : la place va à la mesure. */
+@media(min-width:1001px){
+ .app-shell.app-shell-pro[data-pulse-view="operator"]{grid-template-columns:68px minmax(0,1fr)}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar{padding:24px 10px;align-items:center}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar .brand{font-size:0;padding:0;text-align:center}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar .brand::before{content:"K";font:600 20px/1 var(--pw-sans);letter-spacing:0}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar .brand small{display:none}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar .nav-item{width:44px;padding:0;justify-content:center}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar .nav-item>span:not(.nav-dot){display:none}
+ .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar-bottom{display:none}
+}

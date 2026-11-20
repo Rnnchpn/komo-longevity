@@ -51,7 +51,7 @@ const checks=[
  ['booking-first responsive styles',css.includes('.pulse-offer-list')&&css.includes('.pulse-entry-panel')],
  ['patient title',html.includes('Votre santé en mouvement')],
  ['Maison choice and login script validates',maisonSyntax.status===0&&maisonJs.includes('data-maison-choice="hiro"')&&maisonJs.includes('data-maison-choice="cannes"')&&maisonJs.includes('id="maisonChooseMotion"')&&maisonJs.includes('sessionStorage')&&maisonCss.includes('.maison-choice')],
- ['consultation console reads the standard protocol',app.includes("from './motion-protocol.mjs")&&app.includes('PROTOCOL_STEPS')&&app.includes("start_pulse_operator_session_v1")&&app.includes("['operator','Consultation Motion']")],
+ ['consultation console reads the standard protocol',app.includes("from './motion-protocol.mjs")&&app.includes('PROTOCOL_STEPS')&&app.includes("start_pulse_operator_session_v1")&&app.includes("['live','Consultation']")],
  ['canonical app plus isolated Maison patient entry',(html.match(/<script/g)||[]).length===2&&html.includes('src="./maison-entry-v1.js')&&html.includes('src="./app.js')],
  ['approved patient stylesheet loaded after mobile overrides',html.indexOf('pulse-patient-editorial-v1.css')>html.indexOf('pulse-mobile-first-v3.css')],
 

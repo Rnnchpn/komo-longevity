@@ -45,7 +45,7 @@ assert.ok(cameraStart.includes('paired_automatically:true'));
 assert.ok(iphone.includes("action:'operator_camera_start'"));
 assert.ok(videoStation.includes('stale_staff_camera_session'));
 assert.ok(videoStation.includes('data.session?.progress?.kind!=="physical_consultation"'));
-assert.ok(iphone.includes('20261121-protocol-v2'));
+assert.ok(iphone.includes('?v='));
 assert.ok(iphone.includes('consultation_not_prepared'));
 assert.ok(iphone.includes('sans code'));
 // Camera reconnect must not wipe the current test or questionnaire.
@@ -69,7 +69,7 @@ assert.ok(ui.includes("action:'operator_reset_demo_sessions'"));
 assert.ok(ui.includes('id="opLiveReset"'));
 assert.ok(ui.includes("['waiting','ready','active'].includes(x.status)"));
 // The Operator can complete the questionnaire before the iPhone pairs.
-assert.ok(ui.includes('Remplir le questionnaire →'));
+assert.ok(ui.includes('Commencer par le questionnaire'));
 assert.ok(ui.includes('komo_motion_consult_room_'));
 assert.ok(edge.includes('"waiting","ready","active","completed"'));
 // Polling may update saved answers without detaching form handlers from their
@@ -77,9 +77,9 @@ assert.ok(edge.includes('"waiting","ready","active","completed"'));
 assert.ok(consult.includes('Object.assign(questionnaireAnswers,serverAnswers)'));
 assert.ok(!consult.includes('questionnaireAnswers={...(stored?.answers||{})}'));
 assert.ok(consult.includes('scheduleQuestionnaireSave()'));
-assert.ok(ui.includes('SESSION MOTION · ASSOCIATION AUTOMATIQUE'));
+assert.ok(ui.includes('Consultation en cours'));
 assert.ok(ui.includes("action:'operator_checkin_invite'"),'optional fictitious check-in retained');
 assert.ok(styles.includes('.op-start-panel'));
 assert.ok(html.includes('pulse-consultation-flow-v1.css'));
-assert.ok(cameraHtml.includes('20261121-protocol-v2'));
+assert.ok(cameraHtml.includes('?v='));
 console.log('[pulse-clean-consultation-qa] PASS desktop-owned single synthetic session, zero duplicate phone room, automatic camera pairing, reconnect, reset and protected completed history');
