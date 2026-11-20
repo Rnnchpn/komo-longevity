@@ -1,4 +1,4 @@
-// KŌMØ Motion Online — original, non-validated self-report intake.
+// KŌMØ Motion — original, non-validated self-report intake.
 // NOT the GLFS-25 or a licensed reproduction. No diagnosis or medical score.
 export const QUESTIONNAIRE_VERSION='KOMO_MOTION_SELF_REPORT_V1';
 const ease=['Aucune difficulté','Une légère difficulté','Une difficulté modérée','Une grande difficulté','Impossible ou évité'];

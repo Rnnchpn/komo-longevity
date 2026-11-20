@@ -497,6 +497,26 @@
   ],
   "redirects": [
     {
+      "source": "/pulse-v12",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": false
+    },
+    {
+      "source": "/pulse-v12/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": false
+    },
+    {
+      "source": "/pulse-v13",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": false
+    },
+    {
+      "source": "/pulse-v13/:path*",
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": false
+    },
+    {
       "source": "/fr/world",
       "destination": "/world/",
       "permanent": true

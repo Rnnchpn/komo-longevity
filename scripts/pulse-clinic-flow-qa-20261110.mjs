@@ -2,11 +2,10 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {INTAKE_GROUPS,scoreIntake,intakeProgress} from '../pulse-v14-src/online/session/intake-model.mjs';
-import {buildPdfReportData} from '../pulse-v14-src/online/session/pdf-report.js';
+import {INTAKE_GROUPS,scoreIntake,intakeProgress} from '../pulse-v14-src/motion-engine/intake-model.mjs';
 import {clinicReportSummary,questionnaireState} from '../pulse-v14-src/motion-live-clinic-extras-v1.js';
-import {parseVoiceCommand} from '../pulse-v14-src/online/session/voice-commands.mjs';
-import {createMovementTracker} from '../pulse-v14-src/online/session/metrics.mjs';
+import {parseVoiceCommand} from '../pulse-v14-src/motion-engine/voice-commands.mjs';
+import {createMovementTracker} from '../pulse-v14-src/motion-engine/metrics.mjs';
 const root=process.cwd();
 const read=path=>readFile(join(root,path),'utf8');
 const consult=await read('site/pulse-v14/motion-live-operator-consult-v1.js');
@@ -59,16 +58,16 @@ const summary=clinicReportSummary(answers,results);
 assert.equal(summary.recorded,5);
 assert.equal(summary.skipped,1);
 assert.equal(summary.answered,22);
-const report=buildPdfReportData(answers,results,null,false,new Date('2026-11-10T10:00:00Z'),{mode:'CABINET'});
+// Rapport de cabinet : passeport clinique (le moteur PDF de l'ancienne offre à distance est retiré).
+const {buildClinicPassport}=await import('../pulse-v14-src/motion-live-clinic-passport-v2.mjs');
+const report=buildClinicPassport(answers,results,{date:new Date('2026-11-10T10:00:00Z'),subject:'HIRO-261110-01',real:true});
 assert.equal(report.mode,'CABINET');
 assert.equal(report.questionnaire.answered,22);
-assert.equal(report.questionnaire.groups.reduce((total,g)=>total+g.answers.length,0),22);
-assert.equal(report.motion.complete,false,'must not synthesize unmeasured TUG/SPPB');
-assert.equal(report.observations.find(x=>x.id==='sts').value,13);
-assert.equal(report.observations.find(x=>x.id==='posture').display,'Décalage apparent');
-const partial=buildPdfReportData(missing,results,null,false,new Date(),{mode:'CABINET'});
+assert.equal(report.outcomes.motionScore,null,'must not synthesize a Motion Score');
+assert.equal(report.measures.find(x=>x.id==='sts').value,13);
+assert.ok(report.measures.find(x=>x.id==='posture').display.startsWith('Décalage'));
+const partial=buildClinicPassport(missing,results,{date:new Date()});
 assert.equal(partial.questionnaire.complete,false);
-assert.equal(partial.motion.complete,false);
 // A seated-to-standing series with valid landmarks increments once, never
 // on stationary standing or when the person leaves the field of view.
 const empty=()=>Array.from({length:33},()=>({x:.4,y:.5,visibility:.1}));

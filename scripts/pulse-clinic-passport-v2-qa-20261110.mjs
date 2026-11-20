@@ -4,7 +4,7 @@ import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {buildClinicPassport,CLINIC_PASSPORT_VERSION} from '../pulse-v14-src/motion-live-clinic-passport-v2.mjs';
 import {clinicPassport,downloadClinicReport,clinicReportSummary} from '../pulse-v14-src/motion-live-clinic-extras-v1.js';
-import {INTAKE_GROUPS} from '../pulse-v14-src/online/session/intake-model.mjs';
+import {INTAKE_GROUPS} from '../pulse-v14-src/motion-engine/intake-model.mjs';
 
 const results={
  sts:{status:'done',value:15,unit:'repetitions',source:'operator_confirmed_video_estimate'},

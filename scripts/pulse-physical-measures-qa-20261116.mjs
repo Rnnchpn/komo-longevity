@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createMovementTracker} from '../pulse-v14-src/online/session/metrics.mjs';
+import {createMovementTracker} from '../pulse-v14-src/motion-engine/metrics.mjs';
 
 // Synthetic frames test state-machine safeguards, not clinical measurement accuracy.
 const empty=()=>Array.from({length:33},()=>({x:.5,y:.5,visibility:.08}));

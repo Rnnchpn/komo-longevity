@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {parseVoiceCommand,normalizeSpeech} from '../pulse-v14-src/online/session/voice-commands.mjs';
-import {createVoiceControl} from '../pulse-v14-src/online/session/voice-control.js';
+import {parseVoiceCommand,normalizeSpeech} from '../pulse-v14-src/motion-engine/voice-commands.mjs';
+import {createVoiceControl} from '../pulse-v14-src/motion-engine/voice-control.js';
 
 const expected=[
  ["C'est parti",'start'],["c’est parti !",'start'],["Komo, c'est parti",'start'],

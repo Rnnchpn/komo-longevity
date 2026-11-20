@@ -1,4 +1,4 @@
-// KŌMØ Motion Online — spoken countdown, timed prompts and short local click.
+// KŌMØ Motion — spoken countdown, timed prompts and short local click.
 // This code synthesizes sound without loading or storing recordings.
 export function createAudioFeedback({onSpeechStart=()=>{},onSpeechEnd=()=>{}}={}){
  const w=typeof window!=='undefined'?window:{};

@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { SPEC } from "./protocol.ts";
 
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")||"";
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
@@ -11,23 +12,16 @@ const DEFAULT_ORG_ID="cea48f94-24ae-4ddb-ac28-ac289bb1e9ca"; // KŌMØ Cannes, t
 // Un centre "test_only" n'accepte que des patients fictifs. Tout autre statut est refusé.
 const MEMBER_ROLES=["owner","clinical_admin","physician","operator","coordinator"];
 type Center={id:string;clinical_data_status:"test_only"|"production_enabled"};
-// KŌMØ Motion — protocole de consultation V2 (20/11/2026) : 13 étapes, de la moins à la plus exigeante.
-// Les étapes "instrumentées" sont saisies par l'opérateur (valeurs VALD recopiées, chrono, mètre).
-// Spécification dupliquée dans pulse-v14-src/motion-v2-instrumented.mjs : modifier les deux ensemble.
-const STEPS=["anthropometry","gait_4m","two_step","fd_quiet_stand","sts","fd_sts",
- "unipodal_left","unipodal_right","dynamo_grip","dynamo_knee_ext","dynamo_hip_abd","arms","posture"];
+// KŌMØ Motion — protocole standardisé (source unique : pulse-v14-src/motion-protocol.mjs,
+// copie générée dans ./protocol.ts par scripts/motion-protocol-sync.mjs ; ne jamais dupliquer ici).
+const STEPS:string[]=SPEC.steps.map((x:any)=>x.id);
+const STEP_SPEC:Record<string,any>=Object.fromEntries(SPEC.steps.map((x:any)=>[x.id,x]));
+const SKIP_REASONS:string[]=SPEC.skip_reasons;
+const PROTOCOL_STAMP={id:SPEC.protocol.id,version:SPEC.protocol.version,code:SPEC.protocol.code,
+ mode:SPEC.protocol.mode,device_set:SPEC.protocol.device_set,test_order:STEPS};
 type FieldSpec={key:string;min:number;max:number;decimals:number;optional?:boolean};
-const INSTRUMENTED:Record<string,{fields:FieldSpec[];side?:string;pair?:[string,string]}>={
- anthropometry:{fields:[{key:"height_cm",min:100,max:230,decimals:1},{key:"body_mass_kg",min:25,max:250,decimals:1}]},
- gait_4m:{fields:[{key:"gait_4m_s_1",min:1,max:30,decimals:2},{key:"gait_4m_s_2",min:1,max:30,decimals:2}]},
- fd_quiet_stand:{fields:[{key:"fd_qs_excursion_mm",min:0,max:10000,decimals:1},{key:"fd_qs_ellipse_mm2",min:0,max:100000,decimals:1},
-  {key:"fd_qs_asym_pct",min:0,max:100,decimals:1}],side:"fd_qs_asym_side"},
- fd_sts:{fields:[{key:"fd_sts_asym_pct",min:0,max:100,decimals:1}],side:"fd_sts_asym_side"},
- dynamo_grip:{fields:[{key:"grip_left_n",min:0,max:1500,decimals:1},{key:"grip_right_n",min:0,max:1500,decimals:1}],pair:["grip_left_n","grip_right_n"]},
- dynamo_knee_ext:{fields:[{key:"knee_ext_left_n",min:0,max:2500,decimals:1},{key:"knee_ext_right_n",min:0,max:2500,decimals:1},
-  {key:"knee_pad_distance_cm",min:0,max:60,decimals:1,optional:true}],pair:["knee_ext_left_n","knee_ext_right_n"]},
- dynamo_hip_abd:{fields:[{key:"hip_abd_left_n",min:0,max:2000,decimals:1},{key:"hip_abd_right_n",min:0,max:2000,decimals:1}],pair:["hip_abd_left_n","hip_abd_right_n"]}
-};
+const INSTRUMENTED:Record<string,{fields:FieldSpec[];choices:{key:string;options:string[]}[];pair?:[string,string]}>=
+ Object.fromEntries(SPEC.steps.filter((x:any)=>x.kind==="fields").map((x:any)=>[x.id,{fields:x.fields,choices:x.choices||[],pair:x.pair}]));
 const roundTo=(x:number,d:number)=>Math.round(x*10**d)/10**d;
 function validateInstrumented(step:string,raw:any){
  const spec=INSTRUMENTED[step];if(!spec||!raw||typeof raw!=="object"||Array.isArray(raw))return null;
@@ -38,9 +32,9 @@ function validateInstrumented(step:string,raw:any){
   if(typeof v!=="number"||!Number.isFinite(v)||v<f.min||v>f.max||Math.abs(roundTo(v,f.decimals)-v)>1e-9)return null;
   fields[f.key]=v;
  }
- if(spec.side){
-  if(!["left","right","balanced"].includes(raw[spec.side]))return null;
-  fields[spec.side]=raw[spec.side];
+ for(const c of spec.choices){
+  if(typeof raw[c.key]!=="string"||!c.options.includes(raw[c.key]))return null;
+  fields[c.key]=raw[c.key];
  }
  const derived:Record<string,number|string>={};
  if(step==="gait_4m"){
@@ -54,13 +48,11 @@ function validateInstrumented(step:string,raw:any){
  }
  return {fields,derived};
 }
-const LIMITS:Record<string,{max:number;integer:boolean;unit:string}>={
- sts:{max:100,integer:true,unit:"repetitions"},
- two_step:{max:650,integer:false,unit:"cm"},
- unipodal_left:{max:30,integer:false,unit:"seconds"},
- unipodal_right:{max:30,integer:false,unit:"seconds"},
- arms:{max:100,integer:true,unit:"movements"}
-};
+// Étapes à valeur unique (chrono + compteur, équilibre, Two-Step) : bornes du protocole.
+const LIMITS:Record<string,{max:number;integer:boolean;unit:string}>=Object.fromEntries(
+ SPEC.steps.filter((x:any)=>["count","balance"].includes(x.kind)).map((x:any)=>[x.id,{max:x.max,integer:x.integer,unit:x.unit}]));
+const TWO_STEP_MAX:number=STEP_SPEC.two_step?.max??650;
+const POSTURE_OPTIONS:string[]=STEP_SPEC.posture?.options||[];
 const ORIGINS=new Set(["https://pulse.komolongevity.com","https://komolongevity.com","https://www.komolongevity.com"]);
 const allowedOrigin=(o:string)=>ORIGINS.has(o)||/^https:\/\/komo-longevity-[a-z0-9-]+-rnnchpns-projects\.vercel\.app$/.test(o);
 function headers(req:Request){
@@ -400,7 +392,7 @@ Deno.serve(async(req:Request)=>{
    guest_token_hash:await hash(token),display_code:code,
    status:"waiting",stage_code:STEPS[0],step_index:0,
    progress:{kind:"physical_consultation",camera_owner:"operator",camera_state:"awaiting_phone",
-    step_status:"pending",results:{},safety_confirmed:false,...initialQuestionnaire},
+    step_status:"pending",results:{},safety_confirmed:false,protocol:{...PROTOCOL_STAMP,stamped_at:now()},...initialQuestionnaire},
    expires_at:new Date(Date.now()+4*3600000).toISOString()
   }).select("id,status,display_code").single();
   if(error||!created)return response(req,{error:"consultation_creation_failed"},503);
@@ -621,8 +613,16 @@ Deno.serve(async(req:Request)=>{
    return response(req,{error:"synthetic_patient_required"},403);
   const old=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
   if(action==="operator_tests_init"){
-   if(STEPS.includes(room.stage_code))return response(req,{ok:true,session:publicRow(room)});
-   const progress={...old,step_status:"pending",results:old.results||{},safety_confirmed:!!old.safety_confirmed};
+   if(STEPS.includes(room.stage_code)&&old.protocol)return response(req,{ok:true,session:publicRow(room)});
+   if(STEPS.includes(room.stage_code)){
+    // Session préparée avant la standardisation : on y appose le protocole sans toucher aux résultats.
+    const {data,error}=await db.from("pulse_motion_live_sessions").update({
+      progress:{...old,protocol:{...PROTOCOL_STAMP,stamped_at:now()}},updated_at:now()
+    }).eq("id",id).eq("updated_at",room.updated_at).select("*").maybeSingle();
+    return error||!data?response(req,{ok:true,session:publicRow(room)}):response(req,{ok:true,session:publicRow(data)});
+   }
+   const progress={...old,step_status:"pending",results:old.results||{},safety_confirmed:!!old.safety_confirmed,
+    protocol:old.protocol||{...PROTOCOL_STAMP,stamped_at:now()}};
    const {data,error}=await db.from("pulse_motion_live_sessions").update({
      stage_code:STEPS[0],step_index:0,progress,updated_at:now()
    }).eq("id",id).eq("status","active").eq("step_index",room.step_index).select("*").maybeSingle();
@@ -638,15 +638,15 @@ Deno.serve(async(req:Request)=>{
   // Explicit duration follows the CURRENT client protocol. Previous 20 s
   // implementations remain labeled 20 s when no duration was supplied.
   const starting=["start","restart"].includes(event);
-  const protocolDuration=(step==="posture"||step==="two_step"||INSTRUMENTED[step])?0:
-   (step==="heels"||step==="arms")?
-     (starting?(b.duration_seconds===30?30:20):
-       (old.test_duration_seconds===30?30:20)):30;
+  const protocolDuration:number=STEP_SPEC[step]?.duration||0;
   // The duration can change only when starting a new test, never at result save.
   if(starting&&b.duration_seconds!==undefined&&b.duration_seconds!==protocolDuration)
    return response(req,{error:"invalid_test_duration"},422);
   const results=old.results&&typeof old.results==="object"&&!Array.isArray(old.results)?{...old.results}:{};
   const note=s(b.note,300);
+  const skipReason=s(b.skip_reason,30);
+  if(event==="skip"&&!SKIP_REASONS.includes(skipReason))return response(req,{error:"skip_reason_required"},422);
+  const stamp={protocol:PROTOCOL_STAMP.code,protocol_version:PROTOCOL_STAMP.version};
   let next=room.step_index,status="active",stage=step,finished:null|string=null;
   let progress:any={...old,results,safety_confirmed:safety,step_status:["start","restart"].includes(event)?"running":"pending",
    test_started_at:["start","restart"].includes(event)?now():null,
@@ -662,11 +662,11 @@ Deno.serve(async(req:Request)=>{
      if(!checked||b.measurement_source!=="operator_manual_entry")
       return response(req,{error:"invalid_instrumented_entry"},422);
      results[step]={status:"done",fields:checked.fields,derived:checked.derived,
-       source:"operator_manual_entry",protocol:"KOMO_MOTION_V2",note,recorded_at:now()};
+       source:"operator_manual_entry",...stamp,note,recorded_at:now()};
     }else if(step==="two_step"){
      const attempts=b.attempts_cm;
      if(!Array.isArray(attempts)||attempts.length!==2||
-       attempts.some((x:unknown)=>typeof x!=="number"||!Number.isFinite(x)||x<1||x>650||
+       attempts.some((x:unknown)=>typeof x!=="number"||!Number.isFinite(x)||x<1||x>TWO_STEP_MAX||
          Math.round(x*10)!==x*10))
        return response(req,{error:"invalid_two_step_attempts"},422);
      const best=Math.max(...attempts);
@@ -679,12 +679,12 @@ Deno.serve(async(req:Request)=>{
      results[step]={status:"done",value:best,unit:"cm",source:"operator_manual_observation",
        attempts_cm:attempts,height_cm:height??null,
        two_step_index:height?Math.round(best/height*1000)/1000:null,
-       note,protocol:"TWO_STEP_TWO_TRIALS_OPERATOR_V1",recorded_at:now()};
+       note,method:"TWO_STEP_TWO_TRIALS_OPERATOR_V1",...stamp,recorded_at:now()};
     }else if(step==="posture"){
      const observation=s(b.observation,30);
-     if(!["neutral","apparent_offset","not_interpretable"].includes(observation))
+     if(!POSTURE_OPTIONS.includes(observation))
       return response(req,{error:"invalid_posture_observation"},422);
-     results[step]={status:"done",observation,note,source:"operator_visual_observation",recorded_at:now()};
+     results[step]={status:"done",observation,note,source:"operator_visual_observation",...stamp,recorded_at:now()};
     }else{
      const def=LIMITS[step],value=b.value;
      if(!def||typeof value!=="number"||!Number.isFinite(value)||value<0||value>def.max||
@@ -695,7 +695,7 @@ Deno.serve(async(req:Request)=>{
       return response(req,{error:"invalid_measurement_source"},422);
      const balanceMeta=(step==="unipodal_left"||step==="unipodal_right")?
        {
-        protocol:"SOLEO_EYES_OPEN_30S_OPERATOR_SUPERVISED_V1",
+        method:"SOLEO_EYES_OPEN_30S_OPERATOR_SUPERVISED_V1",
         camera_quality:measurementSource==="operator_confirmed_video_estimate"&&
          Number.isInteger(b.measurement_quality)&&b.measurement_quality>=0&&b.measurement_quality<=100?
           b.measurement_quality:null,
@@ -706,9 +706,9 @@ Deno.serve(async(req:Request)=>{
        }:{};
      results[step]={status:"done",value,unit:def.unit,note,source:measurementSource,
       duration_seconds:old.test_duration_seconds??protocolDuration,
-      ...balanceMeta,recorded_at:now()};
+      ...balanceMeta,...stamp,recorded_at:now()};
     }
-   }else results[step]={status:"skipped",note,recorded_at:now()};
+   }else results[step]={status:"skipped",reason:skipReason,note,...stamp,recorded_at:now()};
    next=room.step_index+1;
    if(next>=STEPS.length){status="completed";stage="finished";finished=now();}
    else stage=STEPS[next];

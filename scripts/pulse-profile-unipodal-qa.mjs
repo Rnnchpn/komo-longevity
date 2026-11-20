@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import {sideProfileFrame,surfaceSagittalIndex,createSideProfileStability} from '../pulse-v14-src/online/session/profile-photo-metrics.mjs';
-import {oneLegFrame,createOneLegObserver} from '../pulse-v14-src/online/session/unipodal-metrics.mjs';
+import {sideProfileFrame,surfaceSagittalIndex,createSideProfileStability} from '../pulse-v14-src/motion-engine/profile-photo-metrics.mjs';
+import {oneLegFrame,createOneLegObserver} from '../pulse-v14-src/motion-engine/unipodal-metrics.mjs';
 const pts=()=>Array.from({length:33},()=>({x:.5,y:.5,visibility:0.12}));
 function side(){
  const p=pts();

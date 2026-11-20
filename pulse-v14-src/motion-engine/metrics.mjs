@@ -1,4 +1,4 @@
-// KŌMØ Motion Online — exploratory motion counters, entirely local.
+// KŌMØ Motion — exploratory motion counters, entirely local.
 // NOT a diagnostic tool; no Motion Score, ROM in degrees or clinically validated thresholds.
 const LEFT={shoulder:11,hip:23,knee:25,ankle:27,heel:29,wrist:15};
 const RIGHT={shoulder:12,hip:24,knee:26,ankle:28,heel:30,wrist:16};

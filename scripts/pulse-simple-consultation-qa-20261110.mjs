@@ -52,5 +52,5 @@ assert.ok(app.includes("localStorage.setItem('komo_v14_patient',patientId)"));
 assert.ok(app.includes("operator_list")&&app.includes('opCheckinQueue'));
 assert.ok(app.includes('/camera/')&&camera.includes("action:'operator_camera_start'"));
 assert.ok(styles.includes('.op-live-checklist')&&styles.includes('.op-checkin-invitation'));
-assert.ok(html.includes('pulse-consultation-flow-v1.css')&&html.includes('checkin-v1'));
+assert.ok(html.includes('pulse-consultation-flow-v1.css')&&html.includes('maison-entry-v1.js?v=20261121-protocol-v2'));
 console.log('[pulse-simple-consultation-qa] PASS optional fictitious check-in, desktop-prepared consultation, unique iPhone auto-join, reset and no patient-camera requests');

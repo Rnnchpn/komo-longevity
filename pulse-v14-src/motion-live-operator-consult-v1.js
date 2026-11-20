@@ -1,43 +1,15 @@
-// KŌMØ Pulse — supervised Motion Online tests; video capture on the phone, manual observations by Operator.
-// Test-only. No automated clinical interpretation or diagnostic Motion Score.
-import {INSTRUMENTED_STEPS,V2_ORDER,SIDE_OPTIONS,deriveInstrumented,validateInstrumented} from './motion-v2-instrumented.mjs?v=20261120-v2';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261120-v2';
+// KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
+// Vidéo sur l'iPhone, valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
+import {PROTOCOL,STEPS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel} from './motion-protocol.mjs?v=20261121-protocol-v2';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261121-protocol-v2';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
-const BASE_TESTS=[
- {id:"sts",title:"Se relever de la chaise",duration:30,unit:"répétitions",type:"count",
-  setup:"Chaise stable contre un mur, caméra de trois-quarts profil, tête et pieds visibles.",
-  instruction:"Comptez les levers complets pendant 30 secondes. Bras croisés si possible, sans compromettre la sécurité.",
-  label:"Nombre de levers complets"},
- {id:"two_step",title:"Two-Step Test · deux grands pas",duration:0,unit:"cm",type:"manual_two_step",
-  setup:"Sol plat antidérapant, ruban métrique au sol, ligne de départ, opérateur à proximité et espace dégagé.",
-  instruction:"Depuis la ligne, faire deux pas aussi amples que possible, sans courir ni sauter, puis joindre les pieds. Mesurer la distance entre la ligne et les pointes des pieds. Réaliser deux essais et retenir le meilleur. Recommencer tout essai avec perte d’équilibre.",
-  label:"Meilleure distance des deux pas"},
- {id:"unipodal_left",title:"Équilibre · pied gauche",duration:30,unit:"seconds",type:"balance",
-  setup:"Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.",
-  instruction:"Armez le suivi puis soulevez le pied DROIT sans toucher l'autre jambe. Le chronomètre démarre au lever du pied et s'arrête au retour d'appui, à une compensation ou après 30 s.",
-  label:"Appui unipodal gauche (secondes)"},
- {id:"unipodal_right",title:"Équilibre · pied droit",duration:30,unit:"seconds",type:"balance",
-  setup:"Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.",
-  instruction:"Armez le suivi puis soulevez le pied GAUCHE sans toucher l'autre jambe. Le chronomètre démarre au lever du pied et s'arrête au retour d'appui, à une compensation ou après 30 s.",
-  label:"Appui unipodal droit (secondes)"},
- {id:"arms",title:"Mobilité des bras",duration:30,unit:"mouvements",type:"count",
-  setup:"Face à la caméra, bras et poignets visibles, espace libre autour du corps.",
-  instruction:"Comptez les cycles de lever et abaisser les bras pendant 30 secondes, sans amplitude douloureuse.",
-  label:"Nombre de mouvements"},
- {id:"posture",title:"Posture de profil",duration:0,unit:"observation",
-  setup:"Profil strict, pieds visibles, téléphone à hauteur du bassin, caméra immobile.",
-  instruction:"Observez l'alignement sagittal apparent. Une caméra 2D ne mesure pas la SVA radiographique.",
-  label:"Observation visuelle"}
-];
-// Protocole V2 : tests iPhone existants + saisies VALD et anthropométrie, dans l’ordre officiel.
-const TESTS=V2_ORDER.map(id=>{
- const base=BASE_TESTS.find(t=>t.id===id);if(base)return base;
- const spec=INSTRUMENTED_STEPS[id];
- return {id,title:spec.title,duration:0,unit:"",type:"fields",setup:spec.setup,instruction:spec.instruction,
-  label:spec.title,fields:spec.fields,side:spec.side||null,device:spec.device};
-});
+// Tests dérivés du protocole standardisé (ordre, libellés, consignes, bornes) : aucune copie locale.
+const TYPE_BY_KIND={fields:"fields",two_step:"manual_two_step",count:"count",balance:"balance",observation:undefined};
+const TESTS=STEPS.map(s=>({id:s.id,title:s.title,duration:s.duration||0,unit:s.ui_unit||"",type:TYPE_BY_KIND[s.kind],
+ setup:s.setup,instruction:s.instruction,script:s.script||"",label:s.label||s.title,device:s.device,trials:s.trials,
+ ...(s.kind==="fields"?{fields:s.fields,choices:s.choices||[]}:{})}));
 const isFields=t=>t?.type==="fields";
 const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
@@ -48,8 +20,7 @@ let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=n
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
 let videoFocus=false,videoLive=false;
 const q=id=>host?.querySelector("#"+id);
-const SHORT_TEST_NAMES={sts:"Chaise",two_step:"Two-Step",unipodal_left:"Équilibre G.",unipodal_right:"Équilibre D.",arms:"Bras",posture:"Posture",
- ...Object.fromEntries(Object.entries(INSTRUMENTED_STEPS).map(([k,v])=>[k,v.short]))};
+const SHORT_TEST_NAMES=Object.fromEntries(STEPS.map(s=>[s.id,s.short]));
 function updateCameraLinkState(){
  const badge=q("mocCameraState");if(!badge)return;
  const video=q("mopvVideo");
@@ -91,7 +62,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261120-hiro-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261121-protocol-v2";
  document.head.append(link);
 }
 function stopClock(){
@@ -185,10 +156,8 @@ function renderWaiting(message){
 }
 function formatResult(result,task){
  if(!result)return "Non effectué";
- if(result.status==="skipped")return "Non réalisé";
- if(task.id==="posture"){
-  return {"neutral":"Alignement apparent neutre","apparent_offset":"Décalage apparent","not_interpretable":"Non interprétable"}[result.observation]||"Observation enregistrée";
- }
+ if(result.status==="skipped")return skippedText(result.reason);
+ if(task.id==="posture")return optionLabel(POSTURE_OPTIONS,result.observation)||"Observation enregistrée";
  return Number.isFinite(result.value)?String(result.value)+" "+task.unit+
   (["heels","arms"].includes(task.id)?" / "+(result.duration_seconds===30?30:20)+" s":""):
   "Résultat enregistré";
@@ -365,7 +334,7 @@ function instrumentedMarkup(rows=[]){
  if(!done.length)return '';
  return '<h4>Mesures instrumentées</h4><div class="moc-instrumented-list">'+done.map(r=>
   '<div class="moc-instrumented-row"><div><strong>'+HTML(r.name)+'</strong><small>'+HTML(r.device||'')+'</small></div>'+
-  '<span>'+(r.status==='skipped'?'Non réalisé':(r.lines||[]).map(HTML).join('<br>'))+'</span></div>').join('')+'</div>';
+  '<span>'+(r.lines||[]).map(HTML).join('<br>')+'</span></div>').join('')+'</div>';
 }
 function trajectoryMarkup(t){
  if(!t)return '<h4>Trajectoire</h4><p class="moc-help">Chargement de l’historique du patient…</p>';
@@ -388,7 +357,7 @@ function renderReportSection(){
  const label=patient?[patient.first_name,patient.last_name].filter(Boolean).join(" "):"Dossier fictif";
  const simulated=room.progress?.questionnaire?.simulated===true;
  const trajectory=trajectoryState.key===trajectoryKey()?trajectoryState.data:null;
- const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,trajectory,simulated});
+ const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,trajectory,simulated,real:isRealDossier()});
  const plan=passport.actionPlan;
  const doneAll=TESTS.filter(t=>results[t.id]?.status==="done").length;
  const skippedAll=TESTS.filter(t=>results[t.id]?.status==="skipped").length;
@@ -499,7 +468,7 @@ function renderReportSection(){
    status.textContent="Création du PDF "+(type==="all"?"complet (toutes sections)":"par catégorie")+"…";
    const history=await loadTrajectory(true);
    const filename=await extras.downloadClinicReport(confirmed,persisted.progress?.results||{},new Date(),
-    {subject:label,simulated:persisted.progress?.questionnaire?.simulated===true,category:type,trajectory:history});
+    {subject:label,simulated:persisted.progress?.questionnaire?.simulated===true,real:isRealDossier(),category:type,trajectory:history});
    status.textContent="✓ PDF généré à partir de "+progress.completed+"/"+progress.total+
     " réponses confirmées : "+filename;
   }catch(error){
@@ -585,7 +554,7 @@ function renderStep(){
   return
  }
  const t=currentTest();
- if(!t){renderWaiting("La session doit être initialisée dans les tests Motion Online.");return}
+ if(!t){renderWaiting("La consultation doit d’abord être ouverte depuis « Nouvelle consultation ».");return}
  const results=room.progress?.results||{};
  const idx=room.step_index;
  q("mocProgressText").textContent="Test "+(idx+1)+" sur "+TESTS.length;
@@ -600,8 +569,9 @@ function renderStep(){
   Number(room.progress?.test_duration_seconds)||t.duration);
  const input=isFields(t)?
   '<div class="moc-two-step-fields"><p class="moc-help">Saisie opérateur · '+HTML(t.device||"")+'. Valeurs recopiées telles qu’affichées ; laisser vide plutôt que deviner.</p>'+
-  t.fields.map(f=>'<label class="moc-field">'+HTML(f.label)+(f.optional?" · facultatif":"")+'<div class="moc-input-unit"><input data-field="'+f.key+'" type="number" min="'+f.min+'" max="'+f.max+'" step="'+f.step+'" inputmode="decimal" placeholder="—"><span>'+HTML(f.unit)+'</span></div></label>').join("")+
-  (t.side?'<label class="moc-field">'+HTML(t.side.label)+'<select data-side="'+t.side.key+'"><option value="">Choisir</option>'+SIDE_OPTIONS.map(([k,l])=>'<option value="'+k+'">'+l+'</option>').join("")+'</select></label>':"")+
+  t.fields.map(f=>'<label class="moc-field">'+HTML(f.label)+(f.optional?" · facultatif":"")+'<div class="moc-input-unit"><input data-field="'+f.key+'" type="number" min="'+f.min+'" max="'+f.max+'" step="'+fieldStep(f)+'" inputmode="decimal" placeholder="—"><span>'+HTML(f.unit)+'</span></div></label>').join("")+
+  (t.choices||[]).map(c=>'<label class="moc-field">'+HTML(c.label)+'<select data-choice="'+c.key+'"><option value="">Choisir</option>'+
+   c.options.map(([k,l])=>'<option value="'+k+'"'+(c.default===k?' selected':'')+'>'+HTML(l)+'</option>').join("")+'</select></label>').join("")+
   '<p id="mocFieldsComputed" class="moc-status"></p></div>'
   :t.id==="two_step"?
   '<div class="moc-two-step-fields"><p class="moc-help">Saisie opérateur · deux essais, meilleure distance retenue. Indice = distance / taille.</p>'+
@@ -611,8 +581,7 @@ function renderStep(){
   '<p id="mocTwoStepComputed" class="moc-status">Renseignez les deux distances ; la meilleure sera retenue.</p></div>'
   :t.id==="posture"?
   '<label class="moc-field">Observation (sans mesure radiographique)<select id="mocObservation">'+
-  '<option value="">Choisir une observation</option><option value="neutral">Alignement apparent neutre</option>'+
-  '<option value="apparent_offset">Décalage sagittal apparent</option><option value="not_interpretable">Image non interprétable</option></select></label>'
+  '<option value="">Choisir une observation</option>'+POSTURE_OPTIONS.map(([k,l])=>'<option value="'+k+'">'+HTML(l)+'</option>').join("")+'</select></label>'
   :'<label class="moc-field">'+HTML(t.label)+'<div class="moc-input-unit"><input id="mocValue" type="number" inputmode="decimal" min="0" max="'+(t.unit==="seconds"?String(t.duration):"100")+'" step="'+(t.unit==="seconds"?"0.1":"1")+'" placeholder="Saisir une valeur"><span>'+HTML(t.unit)+'</span></div></label>';
  // Saisies manuelles (VALD, mètre, chrono, Two-Step) : champs visibles d'emblée, un seul clic « Valider ».
  const manual=isFields(t)||t.id==="two_step";
@@ -622,6 +591,7 @@ function renderStep(){
   '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>';
  q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">TEST '+(idx+1)+' / '+TESTS.length+(manual&&t.device?' · '+HTML(t.device):'')+'</span><h3>'+HTML(t.title)+'</h3>'+
  '<details class="moc-instructions" '+(!running||manual?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
+ (t.script?'<div><strong>À dire au patient</strong><p>'+HTML(t.script)+'</p></div>':'')+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div></details>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
  (manual?input+manualTail:running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"||isFields(t)?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":isFields(t)?"Saisie":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
@@ -635,7 +605,13 @@ function renderStep(){
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>'
  :'<div class="moc-buttons"><button type="button" id="mocStart" class="moc-button primary">'+(isBalance(t)?"Armer le suivi · départ automatique":t.id==="two_step"?"Commencer la saisie des deux essais":isFields(t)?"Commencer la saisie":t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>')+
+ '<div id="mocSkipPanel" class="moc-skip-panel" hidden><label class="moc-field">Motif du test non réalisé<select id="mocSkipReason"><option value="">Choisir un motif</option>'+
+  SKIP_REASONS.map(([k,l])=>'<option value="'+k+'">'+HTML(l)+'</option>').join("")+'</select></label>'+
+  '<div class="moc-buttons"><button type="button" id="mocSkipConfirm" class="moc-button primary">Confirmer · test non réalisé</button>'+
+  '<button type="button" id="mocSkipCancel" class="moc-button secondary">Annuler</button></div></div>'+
  '<p id="mocStatus" class="moc-status" role="status" aria-live="polite"></p></section>';
+ if(q("mocSkipConfirm"))q("mocSkipConfirm").onclick=()=>submit("skip");
+ if(q("mocSkipCancel"))q("mocSkipCancel").onclick=()=>{const p=q("mocSkipPanel");if(p)p.hidden=true};
  if(q("mocValue"))q("mocValue").addEventListener("input",()=>{manualEdited=true});
  if(t.id==="two_step"){
   const update=()=>{
@@ -666,7 +642,7 @@ function renderStep(){
  }
  if(q("mocStart"))q("mocStart").onclick=()=>startWithCountdown("start");
  if(q("mocSave"))q("mocSave").onclick=()=>submit("save");
- if(q("mocSkip"))q("mocSkip").onclick=()=>submit("skip");
+ if(q("mocSkip"))q("mocSkip").onclick=()=>openSkipPanel();
  if(q("mocRestartClock"))q("mocRestartClock").onclick=()=>startWithCountdown("restart");
  if(q("mocStopClock"))q("mocStopClock").onclick=()=>{
   if(stoppedAt===null)stoppedAt=Date.now();
@@ -841,6 +817,10 @@ function handleVoiceAction(command){
   else setStatus("Termine la mesure avant de passer au test suivant.");
  }
 }
+function openSkipPanel(){
+ const p=q("mocSkipPanel");if(!p)return;
+ p.hidden=false;q("mocSkipReason")?.focus();p.scrollIntoView?.({block:"nearest"});
+}
 async function submit(event){
  if(busy||!room||!currentTest())return;
  const t=currentTest();const safety=!!room.progress?.safety_confirmed||!!q("mocSafety")?.checked;
@@ -853,7 +833,7 @@ async function submit(event){
   if(isFields(t)){
    const raw={};
    host.querySelectorAll("[data-field]").forEach(el=>{if(el.value!=="")raw[el.dataset.field]=Number(el.value)});
-   host.querySelectorAll("[data-side]").forEach(el=>{if(el.value)raw[el.dataset.side]=el.value});
+   host.querySelectorAll("[data-choice]").forEach(el=>{if(el.value)raw[el.dataset.choice]=el.value});
    const checked=validateInstrumented(t.id,raw);
    if(!checked.ok){setStatus("Saisie incomplète ou hors limites ("+checked.error.replace(/_/g," ")+"). Corrigez ou marquez le test non réalisé.");return}
    payload.fields=checked.fields;
@@ -896,8 +876,11 @@ async function submit(event){
    }
   }
  }
- if(event==="skip")payload.note=q("mocNote")?.value||"";
- if(event==="skip"&&!confirm("Marquer ce test comme non réalisé et continuer ?"))return;
+ if(event==="skip"){
+  payload.note=q("mocNote")?.value||q("mocSkipNote")?.value||"";
+  payload.skip_reason=q("mocSkipReason")?.value||"";
+  if(!SKIP_REASONS.some(([k])=>k===payload.skip_reason)){openSkipPanel();setStatus("Choisissez le motif du test non réalisé.");return}
+ }
  const needsStart=event==="save"&&(isFields(t)||t.id==="two_step")&&room.progress?.step_status!=="running";
  busy=true;
  host.querySelectorAll(".moc-button").forEach(b=>{if(b.id!=="mocReturn")b.disabled=true});
@@ -1011,14 +994,14 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261120-hiro-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261121-protocol-v2");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261110-clinic-complete-v1");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261121-protocol-v2");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1037,7 +1020,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261110-video-measures-v1");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261121-protocol-v2");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{

@@ -13,10 +13,10 @@ const operatorVideoCss=await readFile(join(root,'site/pulse-v14/motion-live-oper
 const consult=await readFile(join(root,'site/pulse-v14/motion-live-operator-consult-v1.js'),'utf8');
 const consultCss=await readFile(join(root,'site/pulse-v14/motion-live-operator-consult-v1.css'),'utf8');
 const remotePose=await readFile(join(root,'site/pulse-v14/motion-live-remote-pose-v1.js'),'utf8');
-const poseEngine=await readFile(join(root,'site/pulse-v14/online/session/pose-engine.js'),'utf8');
+const poseEngine=await readFile(join(root,'site/pulse-v14/motion-engine/pose-engine.js'),'utf8');
 const manifest=JSON.parse(await readFile(join(root,'site/pulse-v14/manifest.webmanifest'),'utf8'));
 const webappIndex=await readFile(join(root,'site/pulse-v14/index.html'),'utf8');
-const onlineSession=await readFile(join(root,'site/pulse-v14/online/session/app.js'),'utf8');
+const protocol=await readFile(join(root,'site/pulse-v14/motion-protocol.mjs'),'utf8');
 const mobileCss=await readFile(join(root,'site/pulse-v14/pulse-mobile-first-v3.css'),'utf8');
 const liveEdge=await readFile(join(root,'supabase/functions/motion-live-test/index.ts'),'utf8');
 const staffCameraHtml=await readFile(join(root,'site/pulse-v14/camera/index.html'),'utf8');
@@ -25,8 +25,8 @@ const staffCameraManifest=JSON.parse(await readFile(join(root,'site/pulse-v14/ca
 const parse=path=>spawnSync(process.execPath,['--check',join(root,path)],{encoding:'utf8'}).status===0;
 const checks=[
   ['entry scripts parse',parse('site/pulse-v14/app.js')&&parse('site/pulse-v14/maison-entry-v1.js')],
-  ['online offer preserved',maison.includes('data-maison-choice="online"')&&maison.includes('39 €')],
-  ['onsite Motion is direct',maison.includes('data-maison-choice="motion"')&&maison.includes("show('motion')")],
+  ['remote offer retired, two consultation places',!maison.includes('39 €')&&!maison.includes('bilan-en-ligne')&&maison.includes('data-maison-choice="hiro"')&&maison.includes('data-maison-choice="cannes"')],
+  ['onsite Motion explained directly',maison.includes('id="maisonChooseMotion"')&&maison.includes("show('motion')")],
   ['no account request or approval form',!maison.includes('maisonRequestForm')&&!maison.includes('maisonNewAccount')&&!maison.includes("operator-requests-v1.js")],
   ['existing patient login preserved',maison.includes("show('login')")&&app.includes("signInWithPassword")],
   ['operator creates through protected Edge Function',app.includes("sb.functions.invoke('professional-patient'")&&app.includes("organization_id:S.org.id")&&app.includes("create_account:false")],
@@ -34,7 +34,7 @@ const checks=[
   ['no anonymous patient write',!maison.includes("from('patients')")&&!app.includes("from('patients').insert(")],
   ['real health records not activated before HDS/security clearance',app.includes("Environnement non validé pour de vraies données de santé")&&app.includes('name="synthetic_attested" required')],
   ['operator layout available',css.includes('.op-create-patient-form')&&css.includes('op-create-patient-grid')],
-  ['onsite consultation never triggers patient camera',maison.includes('id="maisonLiveStart"')&&maison.includes('son propre iPhone sur trépied')&&!maison.includes('launchMotion')&&!maison.includes('getUserMedia')],
+  ['onsite consultation never triggers patient camera',maison.includes('id="maisonLiveStart"')&&maison.includes('iPhone fixé sur trépied')&&!maison.includes('launchMotion')&&!maison.includes('getUserMedia')],
   ['public onsite choice opens information instead of streaming',maison.includes("show('motion')")&&!maison.includes("await launchMotion(event.currentTarget)")],
   ['mobile Operator camera CTA uses dedicated station',app.includes('id="pulse-mobile-start-motion"')&&app.includes("window.location.assign('/camera/')")&&app.includes("does NOT require a patient selection")],
   ['mobile start CTA stays above the operator bottom navigation',mobileCss.includes('.app-shell-pro .pulse-mobile-start-motion')&&mobileCss.includes('bottom:calc(89px + env(safe-area-inset-bottom,0px))')],
@@ -46,11 +46,11 @@ const checks=[
   ['video monitor embedded with Motion Online controls',parse('site/pulse-v14/motion-live-operator-video-v1.js')&&operatorVideo.includes('operator_signal_pull')&&operatorVideo.includes('operator_signal_push')&&operatorVideo.includes('containerId')&&operatorVideoCss.includes('.mopv-window.embedded')],
   ['operator consultation module and user controls parse',parse('site/pulse-v14/motion-live-operator-consult-v1.js')&&consult.includes('mocSave')&&consult.includes('mocStopClock')&&consult.includes('mocSafety')&&consultCss.includes('.moc-grid')],
   // Protocole V2 (20/11/2026) : 6 tests iPhone + 7 saisies instrumentées, 13 étapes dans l'ordre officiel.
-  ['V2 protocol: six supervised iPhone tests plus instrumented VALD entries',["sts","two_step","unipodal_left","unipodal_right","arms","posture"].every(id=>
-   consult.includes('id:"'+id+'"'))&&onlineSession.includes("id:'heels'")&&
-   consult.includes('V2_ORDER')&&consult.includes('validateInstrumented')&&
-   liveEdge.includes('const STEPS=["anthropometry","gait_4m","two_step"')&&liveEdge.includes('invalid_two_step_attempts')&&
-   liveEdge.includes('invalid_instrumented_entry')],
+  // Protocole standardisé (21/11/2026) : 13 étapes définies une seule fois (motion-protocol.mjs), lues par la console et le serveur.
+  ['standard protocol: 13 steps defined once, read by console and server',["anthropometry","gait_4m","two_step","fd_quiet_stand","sts","fd_sts","unipodal_left","unipodal_right","dynamo_grip","dynamo_knee_ext","dynamo_hip_abd","arms","posture"].every(id=>
+   protocol.includes("id:'"+id+"'"))&&consult.includes("from './motion-protocol.mjs")&&consult.includes('validateInstrumented')&&
+   liveEdge.includes('import { SPEC } from "./protocol.ts"')&&liveEdge.includes('invalid_two_step_attempts')&&
+   liveEdge.includes('invalid_instrumented_entry')&&liveEdge.includes('skip_reason_required')],
   ['Operator runs tests, not phone',consult.includes('operator_test_update')&&app.includes('mountOperatorConsultation')&&liveEdge.includes('operator_controls_tests')],
   ['D0 interface removed',!app.includes('D0')&&app.includes("['operator','Consultation Motion']")],
   ['Edge validates manual results and enforces test owner',liveEdge.includes('invalid_manual_measurement')&&liveEdge.includes('room.operator_user_id!==actor.id')&&liveEdge.includes('safety_check_required')],
@@ -60,13 +60,13 @@ const checks=[
   ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(key,guestToken)')],
   ['patient marks ready; Operator alone controls stages',liveGuest.includes('action:"guest_event"')&&!liveGuest.includes('event:"complete"')&&liveGuest.includes('event=live.status==="waiting"?"ready":null')],
   ['operator live nav and pairing enabled',app.includes("['live','Nouvelle consultation']")&&app.includes("function motionLiveMonitor()")&&app.includes("action:'operator_attach'")&&app.includes("start_pulse_operator_session_v1")],
-  ['physical Motion never uses patient phone',app.includes('id="pulseLobbyLiveStart"')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")&&app.includes('Aucun accès caméra patient nécessaire')],
+  ['physical Motion never uses patient phone',!app.includes('getUserMedia')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")&&app.includes('Aucun accès caméra patient nécessaire')],
   ['Operator consultation embeds paired phone camera',app.includes('id="motionConsultRoot"')&&app.includes('openOperatorCamera')&&consult.includes('id="motionConsultCamera"')],
   ['live server verifies operator role and center',liveEdge.includes('db.auth.getUser(jwt)')&&liveEdge.includes('organization_members')&&liveEdge.includes('synthetic_patient_required')],
   ['live session token hashed, RLS protected by migration',liveEdge.includes('crypto.subtle.digest("SHA-256"')&&liveEdge.includes('guest_token_hash')],
   ['live UI readable on mobile',liveCss.includes('max-width:760px')&&liveCss.includes('.mlive-camera.rear video')&&css.includes('.op-live-room')],
   ['remote tracking module parses',parse('site/pulse-v14/motion-live-remote-pose-v1.js')],
-  ['pose markers reuse existing MediaPipe in Operator only',remotePose.includes("import {createPoseEngine} from './online/session/pose-engine.js?v=20261110-video-measures-v1'")&&remotePose.includes('mirror:false')&&poseEngine.includes('detectForVideo')&&poseEngine.includes('options.mirror!==false')],
+  ['pose markers reuse existing MediaPipe in Operator only',remotePose.includes("import {createPoseEngine} from './motion-engine/pose-engine.js?v=")&&remotePose.includes('mirror:false')&&poseEngine.includes('detectForVideo')&&poseEngine.includes('options.mirror!==false')],
   ['video-capable tests retain pose tracking, Two-Step remains manual',remotePose.includes('createMovementTracker')&&remotePose.includes('createOneLegObserver')&&remotePose.includes('createSideProfileStability')&&['sts','arms','unipodal_left','unipodal_right','posture'].every(id=>remotePose.includes('"'+id+'"'))&&consult.includes('t.id==="two_step"')],
   ['WebRTC source not computer local camera',operatorVideo.includes('pulse:remote-video-ready')&&operatorVideo.includes('pulse:remote-video-stopped')&&remotePose.includes('attach(nextVideo)')&&!remotePose.includes('getUserMedia')&&!remotePose.includes('MediaRecorder')],
   ['live skeleton canvas matches unmirrored stream',remotePose.includes('moc-pose-overlay')&&consultCss.includes('canvas.moc-pose-overlay')&&consultCss.includes('object-fit:contain')],

@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261121-protocol-v2';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -8,22 +9,8 @@ let recoveryActive=recoveryLinkDetected;
 
 const PATIENT_NAV=[['home','Mon espace']];
 const PRO_NAV=[['live','Nouvelle consultation'],['operator','Consultation Motion'],['patients','Patients'],['appointments','Rendez-vous']];
-// KŌMØ Motion V2 (20/11/2026) : 13 étapes, ordre identique au serveur motion-live-test.
-const OP_STEPS=[
- ['anthropometry','Saisie','Taille et poids','Mètre · balance'],
- ['gait_4m','2 essais','Marche 4 m','Chronomètre'],
- ['two_step','2 essais','Test des deux pas','Mètre'],
- ['fd_quiet_stand','30 s','Équilibre statique','ForceDecks'],
- ['sts','30 s','Se relever de la chaise','iPhone'],
- ['fd_sts','5 rép.','Lever de chaise sur plateformes','ForceDecks'],
- ['unipodal_left','30 s','Équilibre · pied gauche','iPhone'],
- ['unipodal_right','30 s','Équilibre · pied droit','iPhone'],
- ['dynamo_grip','3 essais','Force de préhension','DynaMo'],
- ['dynamo_knee_ext','3 essais','Extension du genou','DynaMo'],
- ['dynamo_hip_abd','3 essais','Abduction de hanche','DynaMo'],
- ['arms','30 s','Mobilité des bras','iPhone'],
- ['posture','Observation','Posture de profil','iPhone']
-];
+// Étapes de consultation : source unique motion-protocol.mjs (ordre, libellés, appareils).
+const OP_STEPS=PROTOCOL_STEPS.map(x=>[x.id,x.trials,x.title,x.device]);
 // Centre réel : dossiers pseudonymisés (code + année de naissance). Centre test : dossiers fictifs.
 const isProductionCenter=()=>S.org?.clinical_data_status==='production_enabled';
 const consultablePatient=p=>!!p&&p.status==='active'&&(p.data_classification==='synthetic'||(p.data_classification==='health_data'&&isProductionCenter()));
@@ -148,15 +135,16 @@ async function authView(message=''){
 
 function installPulseBookingEntry(){
   // Pulse is a private entry point. All commercial decisions belong on the public site.
-  const onlineOfferUrl='https://komolongevity.com/bilan-en-ligne/';
+  // Deux lieux de consultation (20/11/2026) : Clinique HIRO à Beausoleil, Maison Epigenetic à Cannes.
+  const hiroUrl='https://komolongevity.com/fr/contact/';
   const cannesOfferUrl='https://komolongevity.com/fr/reserver-motion-cannes/';
   const story=document.querySelector('.login-story');
   const panel=document.querySelector('.login-panel');
   const form=document.querySelector('#login');
   if(!story||!panel||!form)return;
   const offers=[
-    {n:'01',kind:'EN LIGNE',title:'Motion Online',detail:'Un bilan fonctionnel guidé, réalisable à votre rythme depuis chez vous.',meta:'39 € · paiement unique · découvrir le parcours',href:onlineOfferUrl,tone:'online'},
-    {n:'02',kind:'À CANNES',title:'Motion Présentiel',detail:'Une heure de mesures de la marche, de l’équilibre et de la mobilité.',meta:'60 min · 200 € · demander un créneau',href:cannesOfferUrl,tone:'motion'}
+    {n:'01',kind:'BEAUSOLEIL · MONACO',title:'Clinique HIRO',detail:'Bilan KŌMØ Motion supervisé : marche, équilibre, force, plateformes VALD.',meta:'Sur rendez-vous · nous contacter',href:hiroUrl,tone:'online'},
+    {n:'02',kind:'CANNES',title:'Maison Epigenetic',detail:'Le même protocole et les mêmes appareils, avec un contrôle à 6 et 12 semaines.',meta:'Demander un créneau',href:cannesOfferUrl,tone:'motion'}
   ];
   story.innerHTML=`
     <div class="pulse-entry-kinetic" aria-hidden="true"><svg viewBox="0 0 600 600" role="presentation" focusable="false"><defs><radialGradient id="pulseSculpture" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#e7d4a6" stop-opacity=".18"/><stop offset="100%" stop-color="#e7d4a6" stop-opacity="0"/></radialGradient></defs><circle cx="300" cy="300" r="285" fill="url(#pulseSculpture)"/><g fill="none" stroke="#d5c49c"><ellipse cx="300" cy="300" rx="215" ry="85" transform="rotate(-38 300 300)" stroke-opacity=".25" stroke-width="1.25"/><ellipse cx="300" cy="300" rx="240" ry="117" transform="rotate(-38 300 300)" stroke-opacity=".15"/><ellipse cx="300" cy="300" rx="265" ry="147" transform="rotate(-38 300 300)" stroke-opacity=".10"/><ellipse cx="300" cy="300" rx="190" ry="67" transform="rotate(36 300 300)" stroke-opacity=".17"/><path d="M125 346C220 205 365 204 472 300" stroke-opacity=".19" stroke-width="2"/></g><circle cx="470" cy="300" r="4" fill="#e1c990"/></svg></div>
@@ -164,8 +152,8 @@ function installPulseBookingEntry(){
     <div class="pulse-entry-story">
       <span class="overline light pulse-entry-kicker"><i aria-hidden="true"></i> KŌMØ · L'ART DE BOUGER</span>
       <h1>Le mouvement,<br><em>autrement.</em></h1>
-      <p class="pulse-entry-lead">Deux parcours pour mieux comprendre votre mouvement. Un espace privé pour accéder à votre suivi et retrouver vos résultats.</p>
-      <nav class="pulse-offer-list" aria-label="Les deux bilans KŌMØ">
+      <p class="pulse-entry-lead">Un bilan KŌMØ Motion, deux lieux de consultation. Le même protocole, pour suivre votre progression dans le temps.</p>
+      <nav class="pulse-offer-list" aria-label="Les deux lieux de consultation KŌMØ">
         ${offers.map(o=>`<a class="pulse-offer pulse-offer--${o.tone}" href="${o.href}" target="_blank" rel="noopener noreferrer" aria-label="Découvrir ${o.title} sur le site KŌMØ">
           <span class="pulse-offer-number">${o.n}</span><span class="pulse-offer-art" aria-hidden="true"><span class="pulse-offer-art-ring"></span><span class="pulse-offer-art-path"></span><span class="pulse-offer-art-core"></span></span><span class="pulse-offer-content"><small>${o.kind}</small><strong>${o.title}</strong><span>${o.detail}</span><em>${o.meta}</em></span><span class="pulse-offer-arrow" aria-hidden="true">↗</span>
         </a>`).join('')}
@@ -180,27 +168,26 @@ function installPulseBookingEntry(){
     <div class="pulse-entry-monogram" aria-hidden="true"><span class="pulse-entry-monogram-halo"></span><span class="pulse-entry-monogram-letter">K</span><small>LONGEVITY IN MOTION</small></div>
     <span class="overline pulse-entry-onboarding-kicker">BIENVENUE CHEZ KŌMØ</span>
     <h2 id="pulseCreateTitle">Votre espace.<br><em>Votre trajectoire.</em></h2>
-    <p class="pulse-entry-panel-intro">Découvrez les expériences KŌMØ sur le site officiel puis retrouvez votre parcours dans votre espace privé Pulse.</p>
+    <p class="pulse-entry-panel-intro">Le bilan KŌMØ Motion se réalise en cabinet, à la Clinique HIRO de Beausoleil ou à la Maison Epigenetic de Cannes.</p>
     <ol class="pulse-entry-steps">
-      <li><span>01</span><div><strong>Choisissez votre expérience</strong><small>Motion Online à 39 € ou bilan présentiel à Cannes, 60 minutes à 200 €.</small></div></li>
-      <li><span>02</span><div><strong>Suivez le parcours correspondant</strong><small>En ligne : un paiement unique. Cannes : demande de créneau, puis confirmation individuelle.</small></div></li>
-      <li><span>03</span><div><strong>Retrouvez votre espace Pulse</strong><small>Connectez-vous avec votre compte autorisé pour consulter votre parcours et vos résultats disponibles.</small></div></li>
+      <li><span>01</span><div><strong>Choisissez votre lieu</strong><small>Clinique HIRO à Beausoleil ou Maison Epigenetic à Cannes.</small></div></li>
+      <li><span>02</span><div><strong>Votre bilan en cabinet</strong><small>Environ une heure : marche, équilibre, force, plateformes de mesure VALD et questionnaire.</small></div></li>
+      <li><span>03</span><div><strong>Vos résultats et votre suivi</strong><small>Votre rapport vous est remis à la fin du bilan ; un contrôle est proposé à 6 et 12 semaines.</small></div></li>
     </ol>
-    <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${onlineOfferUrl}" target="_blank" rel="noopener noreferrer">Découvrir Motion Online · 39 € <span aria-hidden="true">↗</span></a>
-    <a class="pulse-entry-online-shortcut" href="${cannesOfferUrl}" target="_blank" rel="noopener noreferrer" aria-label="Découvrir le bilan Motion à Cannes : 60 minutes à 200 euros, demande de créneau">Motion à Cannes <strong>200 € · 60 min</strong> <span aria-hidden="true">↗</span></a>
-    <a class="pulse-entry-activation-link" href="./online/activate/" aria-label="Activer ou retrouver mon accès Pulse">Déjà client ? Activer ou retrouver mon compte Pulse <span aria-hidden="true">→</span></a>
-    <p class="pulse-entry-assurance"><span aria-hidden="true">◇</span> La demande de créneau à Cannes ne vaut pas réservation. Aucun compte Pulse n’est créé automatiquement par ce formulaire.</p>
+    <a id="pulseAcuityEntry" class="button primary wide pulse-booking-button" href="${cannesOfferUrl}" target="_blank" rel="noopener noreferrer">Demander un créneau à Cannes <span aria-hidden="true">↗</span></a>
+    <a class="pulse-entry-online-shortcut" href="${hiroUrl}" target="_blank" rel="noopener noreferrer" aria-label="Prendre contact pour un bilan à la Clinique HIRO, Beausoleil">Clinique HIRO · <strong>Beausoleil</strong> <span aria-hidden="true">↗</span></a>
+    <p class="pulse-entry-assurance"><span aria-hidden="true">◇</span> Une demande de créneau ne vaut pas réservation. Aucun compte Pulse n’est créé automatiquement.</p>
     <div class="pulse-entry-login-bridge"><span>Vous avez déjà un compte ?</span><button type="button" class="pulse-login-link" id="pulseShowLogin">Se connecter →</button></div>
     <div class="pulse-entry-legal"><a href="https://komolongevity.com/fr/confidentialite/" target="_blank" rel="noopener noreferrer">Confidentialité</a><a href="https://komolongevity.com/fr/mentions-legales/" target="_blank" rel="noopener noreferrer">Mentions légales</a></div>`;
   panel.prepend(entry);
   // Mobile only: shortcut to the public online offer, not to the retired Acuity flow.
   const mobileBooking=document.createElement('a');
   mobileBooking.className='pulse-mobile-booking-bar';
-  mobileBooking.href=onlineOfferUrl;
+  mobileBooking.href=cannesOfferUrl;
   mobileBooking.target='_blank';
   mobileBooking.rel='noopener noreferrer';
-  mobileBooking.setAttribute('aria-label','Découvrir le bilan Motion Online KŌMØ à 39 euros');
-  mobileBooking.innerHTML='<span class="pulse-mobile-booking-copy"><small>MOTION ONLINE</small><strong>39 €</strong></span><span class="pulse-mobile-booking-action">Découvrir <span aria-hidden="true">↗</span></span>';
+  mobileBooking.setAttribute('aria-label','Demander un créneau pour un bilan KŌMØ Motion');
+  mobileBooking.innerHTML='<span class="pulse-mobile-booking-copy"><small>BILAN KŌMØ MOTION</small><strong>En cabinet</strong></span><span class="pulse-mobile-booking-action">Demander un créneau <span aria-hidden="true">↗</span></span>';
   document.querySelector('.login-page')?.append(mobileBooking);
   const finePointer=window.matchMedia?.('(hover:hover) and (pointer:fine)');
   if(finePointer?.matches){
@@ -301,11 +288,9 @@ async function loadPro(){
   S.schema.operator=!os.error;S.opSession=os.data?.[0]||null;S.opSteps=S.opSession?((await safe(sb.from('pulse_operator_steps').select('*').eq('operator_session_id',S.opSession.id).order('sequence_order',{ascending:true}))).data||[]):[];
 }
 async function loadAll(){
-  if(S.mode==='pro'&&hasPro()){S.onlineSessions=[];await loadPro();return}
+  if(S.mode==='pro'&&hasPro()){await loadPro();return}
   await loadPatientContext(S.ownPatient);
   // Only metadata for sessions owned by auth.uid(); RLS checks ownership server-side.
-  const ownSessions=await safe(sb.from('motion_online_sessions').select('id,appointment_id,status,created_at,updated_at').eq('user_id',S.user.id).order('created_at',{ascending:false}).limit(15));
-  S.onlineSessions=(ownSessions.data||[]).filter(x=>x&&typeof x.id==='string');
 }
 
 function navItems(){return S.mode==='pro'?PRO_NAV:PATIENT_NAV}
@@ -384,16 +369,14 @@ async function openMotionLivePatient(){
 }
 function patientLobby(){
   const first=esc(S.profile?.first_name||S.profile?.display_name?.split(' ')[0]||S.user?.email?.split('@')[0]||'');
-  const online='https://komolongevity.com/bilan-en-ligne/';
   $('#view').innerHTML=`<div class="pulse-patient-lobby">
-    <div class="pulse-lobby-intro"><span>MAISON EPIGENETIC · KŌMØ PULSE</span><h1>Bienvenue ${first}.</h1><p>Choisissez le bilan qui vous correspond. Votre espace personnel reste sécurisé.</p></div>
+    <div class="pulse-lobby-intro"><span>KŌMØ PULSE · BILAN MOTION</span><h1>Bienvenue ${first}.</h1><p>Le bilan KŌMØ Motion se réalise en cabinet. Votre espace personnel reste sécurisé.</p></div>
     <div class="pulse-lobby-options">
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · EN LIGNE</small><strong>39 €</strong></div><h2>Motion Online</h2><p>Un bilan guidé à distance. Découvrez le protocole et accédez au paiement sécurisé.</p><a href="${online}" class="pulse-lobby-action">Découvrir Motion Online <span>→</span></a></article>
-      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES · 60 MIN</small><strong>200 €</strong></div><h2>Motion au centre</h2><p>Marche, équilibre, force et mobilité. Votre opérateur crée directement votre dossier lors de la consultation : aucune demande de compte à déposer.</p><button type="button" class="pulse-lobby-action pulse-lobby-action-outline" id="pulseLobbyLiveStart">Comment se déroule le bilan <span>→</span></button></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>01 · BEAUSOLEIL</small><strong>HIRO</strong></div><h2>Clinique HIRO</h2><p>Marche, équilibre, force et plateformes VALD. Votre praticien crée votre dossier lors de la consultation.</p><a href="https://komolongevity.com/fr/contact/" class="pulse-lobby-action" target="_blank" rel="noopener noreferrer">Nous contacter <span>→</span></a></article>
+      <article class="pulse-lobby-option"><div class="pulse-lobby-type"><small>02 · CANNES</small><strong>Maison Epigenetic</strong></div><h2>Maison Epigenetic</h2><p>Le même protocole et les mêmes appareils, avec un contrôle à 6 et 12 semaines.</p><a href="https://komolongevity.com/fr/reserver-motion-cannes/" class="pulse-lobby-action" target="_blank" rel="noopener noreferrer">Demander un créneau <span>→</span></a></article>
     </div>
-    <p class="pulse-lobby-footnote">La synchronisation test suit la progression du bilan ; les résultats restent protégés.</p>
+    <p class="pulse-lobby-footnote">Vos résultats vous sont remis par votre praticien à la fin du bilan.</p>
   </div>`;
-  $('#pulseLobbyLiveStart')?.addEventListener('click',()=>openMotionLivePatient());
 }
 function patientHome(){
   const now=Date.now();
@@ -405,9 +388,7 @@ function patientHome(){
   const appointment=inProgress||upcoming;
   const history=[...all].filter(a=>a.id!==appointment?.id&&safeDate(a.scheduled_start)<now).sort((a,b)=>safeDate(b.scheduled_start)-safeDate(a.scheduled_start));
   const otherUpcoming=chronological.filter(a=>a.id!==appointment?.id&&safeDate(a.scheduled_start)>=now);
-  const activeOnline=(S.onlineSessions||[]).find(x=>!['completed','finalized','released','cancelled'].includes(x.status));
-  const lastOnline=(S.onlineSessions||[])[0]||null;
-  const hasOnline=!appointment&&Boolean(activeOnline);
+  const hasOnline=false; // offre à distance retirée (20/11/2026)
   const published=releasedScore();
   const first=esc(firstName()||'');
   const profileImage=S.profilePhotoUrl?`<img src="${esc(S.profilePhotoUrl)}" alt="Photo de profil" decoding="async" loading="lazy">`:'';
@@ -429,7 +410,6 @@ function patientHome(){
     'Aucun rendez-vous programmé.';
   const primary=appointment?
     '<button type="button" class="p-primary" data-p-open="preparation">Préparer mon bilan <span>↗</span></button>':
-    hasOnline?'<a class="p-primary" href="/online/session/">Accéder à ma séance <span>↗</span></a>':
     published?'<button type="button" class="p-primary" data-p-open="result">Consulter mon bilan <span>↗</span></button>':
     `<a class="p-primary" href="${bookingUrl}">Prendre rendez-vous <span>↗</span></a>`;
   const secondary=history.length?
@@ -675,7 +655,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261111-two-step-pdf-v2');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261121-protocol-v2');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -947,7 +927,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261120-hiro-v1');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261121-protocol-v2');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         openVideo:openOperatorCamera,preferredSessionId:S.patient?.id?
@@ -971,7 +951,7 @@ function render(){
   if(S.route!=='live'&&motionLiveTimer){clearInterval(motionLiveTimer);motionLiveTimer=null;}
   if(S.route!=='operator'&&operatorLiveTimer){clearInterval(operatorLiveTimer);operatorLiveTimer=null;}
   if(S.mode==='pro'){if(S.route==='live')motionLiveMonitor();else if(S.route==='operator')operator();else if(S.route==='patients')patients();else appointments()}
-  else{if(S.route==='home'){if(!S.ownPatient&&!S.onlineSessions.length)patientLobby();else patientHome()}else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
+  else{if(S.route==='home'){if(!S.ownPatient)patientLobby();else patientHome()}else if(S.route==='baseline')baseline();else if(S.route==='results')results();else if(S.route==='plan')plan();else appointments()}
 }
 async function refresh(){if(S.loading)return;S.loading=true;try{await loadIdentity();await loadAll();render()}finally{S.loading=false}}
 async function boot(){const session=(await sb.auth.getSession()).data.session;if(!session)return authView();if(recoveryActive)return passwordRecoveryView();await loadIdentity();await loadAll();render()}

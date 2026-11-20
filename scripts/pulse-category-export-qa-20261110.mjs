@@ -5,7 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {buildClinicPassport} from '../pulse-v14-src/motion-live-clinic-passport-v2.mjs';
 import {buildClinicActionPlan,clinicRadarMarkup} from '../pulse-v14-src/motion-live-clinic-action-plan-v1.mjs';
 import {CLINIC_PASSPORT_EXPORTS,downloadClinicPassport} from '../pulse-v14-src/motion-live-clinic-passport-pdf-v2.js';
-import {INTAKE_GROUPS} from '../pulse-v14-src/online/session/intake-model.mjs';
+import {INTAKE_GROUPS} from '../pulse-v14-src/motion-engine/intake-model.mjs';
 
 const answers={ageBand:'60-69',goal:'strength',walk10:'0',stairs:'1',chair:'0',
  carry:'1',bend:'2',obstacle:'0',turn:'0',stand:'0',pain:'2',fatigue:'1',

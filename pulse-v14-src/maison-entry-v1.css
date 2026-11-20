@@ -201,3 +201,4 @@ body .login-page.maison-entry .maison-login .button.primary{
 @media(prefers-reduced-motion:reduce){
   body .login-page.maison-entry .maison-choice{transition:none;transform:none!important}
 }
+body .login-page.maison-entry button.maison-how{display:block;background:none;border:0;padding:0;cursor:pointer;text-align:left;text-decoration:underline;text-underline-offset:3px;font:inherit;font-size:10px;color:#173943}

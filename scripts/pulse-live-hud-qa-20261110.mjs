@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
-import {createMovementTracker,frameInfo} from '../pulse-v14-src/online/session/metrics.mjs';
+import {createMovementTracker,frameInfo} from '../pulse-v14-src/motion-engine/metrics.mjs';
 const root=process.cwd();
 const [ui,css,pose]=await Promise.all([
  'site/pulse-v14/motion-live-operator-consult-v1.js',

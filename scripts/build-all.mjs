@@ -255,6 +255,8 @@ const scripts = [
   'scripts/pulse-v13-qa.mjs',
   // Patient-first V14 is isolated and built last. V13 remains available for rollback.
   'scripts/build-pulse-v14.mjs',
+  // 21/11/2026 : protocole unique, version unique, aucun fichier orphelin, aucune trace Online.
+  'scripts/pulse-v14-standard-qa.mjs',
   'scripts/pulse-v14-qa.mjs',
   // Simplified Motion entry and protected operator dossier creation (no real health data until compliance clearance).
   'scripts/pulse-motion-direct-qa-20261109.mjs',
@@ -288,24 +290,6 @@ const scripts = [
   'scripts/pulse-audio-posture-qa.mjs',
   // Lateral photo and single-leg start/stop tests with synthetic, non-patient landmarks.
   'scripts/pulse-profile-unipodal-qa.mjs',
-  // Posture fallback and source-linked age norms must not infer unmeasured health outcomes.
-  'scripts/pulse-profile-age-qa.mjs',
-  // Revisit any completed test without losing earlier results.
-  'scripts/pulse-test-navigation-qa.mjs',
-  // Patient self-report & reference Motion Score calculation with zero missing-data substitution.
-  'scripts/pulse-intake-motion-score-qa.mjs',
-  // PDF exports must preserve missing Motion Score states and contain all questionnaire answers.
-  'scripts/pulse-pdf-report-qa.mjs',
-  // One camera, persistent mic, and saved questionnaire/test progression.
-  'scripts/pulse-continuous-session-qa.mjs',
-  // Online Acuity payment validation tests; all requests and identities are mocked.
-  'scripts/pulse-online-payment-qa.mjs',
-  // Link Acuity payment to verified Pulse session, never by client-side redirect alone.
-  'scripts/pulse-paid-session-access-qa.mjs',
-  // Patient-owned records: server-only paid-write, consent and no raw media.
-  'scripts/pulse-online-dossier-qa.mjs',
-  // Motion Passport editorial synthesis, four-week self-report plan and PDF report.
-  'scripts/pulse-passport-daily-qa.mjs',
   // Absolute final storefront pass: consistent online/on-site Motion offers for FR/EN/ES.
   'scripts/komo-offers-online-20261029.mjs',
   // Absolute final premium visual layer and regression checks. Business logic untouched.
@@ -322,6 +306,8 @@ const scripts = [
   'scripts/komo-motion-online-39-mobius-20261031.mjs',
   // French KŌMØ Motion Cannes 60-minute offer: public reservation request page.
   'scripts/build-motion-cannes-booking-20261107.mjs',
+  // 21/11/2026 : une seule PULSE publiée (v14) ; v12 et v13 ne sont plus servies.
+  'scripts/pulse-retire-legacy-generations.mjs',
   // 20/11/2026 : retrait de l'offre Online et du Motion Age — doit rester la toute dernière passe.
   'scripts/komo-retire-motion-online-20261120.mjs'
 ];

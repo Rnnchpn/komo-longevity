@@ -1,33 +1,33 @@
 // Clinical-style *descriptive* passport for supervised KŌMØ Motion demos.
 // No medical diagnosis, validated score, biological age or survival estimate.
-import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './online/session/intake-model.mjs?v=20261120-hiro-v1';
-import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs';
-import {instrumentedRows,MOTION_PROTOCOL_VERSION} from './motion-v2-instrumented.mjs?v=20261120-v2';
+import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './motion-engine/intake-model.mjs?v=20261121-protocol-v2';
+import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs?v=20261121-protocol-v2';
+import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText} from './motion-protocol.mjs?v=20261121-protocol-v2';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
- {id:'sts',name:'Lever de chaise',short:'Force fonctionnelle',unit:'levers / 30 s',
+ {id:'sts',name:stepById('sts').title,short:'Force fonctionnelle',unit:'levers / 30 s',
   method:'30 secondes, chaise stable, bras croisés si possible. Compter les levers complets.',
   caveat:'Valeur de suivi ; comparaison normative uniquement avec âge exact, groupe de référence et protocole confirmé.'},
- {id:'two_step',name:'Two-Step Test',short:'Deux grands pas',unit:'cm',
+ {id:'two_step',name:stepById('two_step').title,short:'Deux grands pas',unit:'cm',
   method:'Deux essais manuels des deux plus grands pas sans saut, pieds joints à l’arrêt. Retenir la meilleure distance mesurée au sol.',
   caveat:'Indice = meilleure distance / taille (cm), uniquement si la taille est renseignée. Les seuils cliniques exigent un protocole standardisé et une interprétation contextualisée.'},
- {id:'unipodal_left',name:'Équilibre · jambe gauche',short:'Stabilité gauche',unit:'s / 30 s',
+ {id:'unipodal_left',name:stepById('unipodal_left').title,short:'Stabilité gauche',unit:'s / 30 s',
   method:'Appui unipodal yeux ouverts, début au lever du pied droit, maximum 30 secondes.',
   caveat:'Mesure plafonnée à 30 s, avec détection vidéo 2D et contrôle visuel de l’opérateur.'},
- {id:'unipodal_right',name:'Équilibre · jambe droite',short:'Stabilité droite',unit:'s / 30 s',
+ {id:'unipodal_right',name:stepById('unipodal_right').title,short:'Stabilité droite',unit:'s / 30 s',
   method:'Appui unipodal yeux ouverts, début au lever du pied gauche, maximum 30 secondes.',
   caveat:'Une perte de repères ou prise d’appui non détectée impose une vérification manuelle.'},
- {id:'arms',name:'Mobilité des bras',short:'Contrôle proximal',unit:'mouvements',
+ {id:'arms',name:stepById('arms').title,short:'Contrôle proximal',unit:'mouvements',
   method:'Élévations bilatérales suivies par caméra, sans goniométrie ni force instrumentée.',
   caveat:'Le nombre de répétitions ne quantifie pas une amplitude articulaire ni une puissance musculaire.'},
- {id:'posture',name:'Posture sagittale',short:'Alignement de surface',unit:'',
+ {id:'posture',name:stepById('posture').title,short:'Alignement de surface',unit:'',
   method:'Observation visuelle de profil, à partir d’une image 2D non calibrée.',
   caveat:'Aucune mesure de SVA C7–S1 radiographique, d’angle pelvien ou de déformation rachidienne.'}
 ];
 const LEGACY_HEELS={id:'heels',name:'Élévation sur les pointes (ancien protocole)',short:'Endurance distale',unit:'répétitions',
  method:'Ancien test de mollets, non assimilable au Two-Step Test.',
  caveat:'Mesure historique conservée pour traçabilité ; ne pas la comparer au Two-Step Test.'};
-const names={neutral:'Alignement apparent neutre',apparent_offset:'Décalage apparent',not_interpretable:'Non interprétable'};
+const names=Object.fromEntries(POSTURE_OPTIONS);
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round1=x=>Math.round(x*10)/10;
 const n=x=>finite(x)?x.toFixed(Number.isInteger(x)?0:1).replace('.',','):'—';
@@ -42,7 +42,7 @@ function objective(row={},test){
  const durationSeconds=timedCount?(row?.duration_seconds===30?30:20):
   test.id==='sts'?30:test.id.startsWith('unipodal')?30:null;
  const display=test.id==='posture'?(observation||'Non documenté'):
-  value===null?(status==='skipped'?'Non réalisé':'Non documenté'):
+  value===null?(status==='skipped'?skippedText(row?.reason):'Non documenté'):
    n(value)+' '+test.unit+(timedCount?' / '+durationSeconds+' s':'');
  const source=row?.source==='operator_confirmed_video_estimate'?'Estimation vidéo confirmée par l’opérateur':
    row?.source==='operator_manual_observation'?'Saisie manuelle par l’opérateur':
@@ -64,6 +64,7 @@ export function buildClinicPassport(answers={},results={},options={}){
  const date=options.date instanceof Date&&!Number.isNaN(options.date.getTime())?
   options.date.toISOString().slice(0,10):new Date().toISOString().slice(0,10);
  const subject=safe(options.subject||'Dossier de démonstration').slice(0,100);
+ const real=options.real===true;
  const simulated=options.simulated===true;
  const profile={ageBand:answers.ageBand||null,goal:answers.goal||null};
  const rating=key=>Object.hasOwn(answers,key)&&/^[0-4]$/.test(String(answers[key]))?Number(answers[key]):null;
@@ -213,9 +214,10 @@ export function buildClinicPassport(answers={},results={},options={}){
  },{simulated});
  const report={
   version:CLINIC_PASSPORT_VERSION,
-  date,subject,mode:'CABINET_DEMO',profile,simulated,
+  date,subject,mode:real?'CABINET':'CABINET_DEMO',real,profile,simulated,
   measures,measured,skipped,flagged:flagged.length,
-  protocol:MOTION_PROTOCOL_VERSION,instrumented:instrumentedRows(results),
+  protocol:MOTION_PROTOCOL_VERSION,protocolVersion:PROTOCOL.version,conditions:acquisitionConditions(results),
+  instrumented:instrumentedRows(results),
   trajectory:options.trajectory&&Array.isArray(options.trajectory.points)?options.trajectory:null,
   questionnaire:{answered:progress.completed,total:progress.total,complete:questionnaire.complete,
    simulated,index:questionnaire.complete?questionnaire.profileIndex:null,
@@ -228,7 +230,8 @@ export function buildClinicPassport(answers={},results={},options={}){
   recheck:'4 à 6 semaines',
   limitations:[
    ...(simulated?['Les réponses au questionnaire ont été générées artificiellement pour une démonstration : elles ne constituent aucune déclaration patient.']:[]),
-   'Évaluation fonctionnelle exploratoire réalisée dans un environnement de démonstration sur dossier fictif.',
+   real?'Évaluation fonctionnelle descriptive réalisée en cabinet, sur dossier pseudonymisé, selon le protocole '+PROTOCOL.code+' '+PROTOCOL.version+'.':
+    'Évaluation fonctionnelle exploratoire réalisée dans un environnement de démonstration sur dossier fictif.',
    'Les valeurs vidéo et les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques.',
    'Aucun Motion Score ou Motion Age : vitesse de marche, TUG, SPPB, normes et conditions instrumentales nécessaires manquantes.',
    'Les durées d’équilibre sont plafonnées à 30 s. Une valeur de 30 s n’est pas une mesure au-delà de ce plafond.',

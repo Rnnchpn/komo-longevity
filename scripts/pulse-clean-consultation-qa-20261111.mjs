@@ -45,7 +45,7 @@ assert.ok(cameraStart.includes('paired_automatically:true'));
 assert.ok(iphone.includes("action:'operator_camera_start'"));
 assert.ok(videoStation.includes('stale_staff_camera_session'));
 assert.ok(videoStation.includes('data.session?.progress?.kind!=="physical_consultation"'));
-assert.ok(iphone.includes('20261120-hiro-v1'));
+assert.ok(iphone.includes('20261121-protocol-v2'));
 assert.ok(iphone.includes('consultation_not_prepared'));
 assert.ok(iphone.includes('sans code'));
 // Camera reconnect must not wipe the current test or questionnaire.
@@ -80,6 +80,6 @@ assert.ok(consult.includes('scheduleQuestionnaireSave()'));
 assert.ok(ui.includes('SESSION MOTION · ASSOCIATION AUTOMATIQUE'));
 assert.ok(ui.includes("action:'operator_checkin_invite'"),'optional fictitious check-in retained');
 assert.ok(styles.includes('.op-start-panel'));
-assert.ok(html.includes('20261111-clean-consultation-v1'));
-assert.ok(cameraHtml.includes('20261120-hiro-v1'));
+assert.ok(html.includes('pulse-consultation-flow-v1.css'));
+assert.ok(cameraHtml.includes('20261121-protocol-v2'));
 console.log('[pulse-clean-consultation-qa] PASS desktop-owned single synthetic session, zero duplicate phone room, automatic camera pairing, reconnect, reset and protected completed history');

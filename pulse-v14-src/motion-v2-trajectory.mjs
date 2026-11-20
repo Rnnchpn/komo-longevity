@@ -56,7 +56,7 @@ export function buildTrajectory(sessions=[],options={}){
  const done=(Array.isArray(sessions)?sessions:[])
   .filter(x=>x&&x.status==='completed'&&x.progress?.results&&typeof x.progress.results==='object')
   .map(x=>({id:x.id,code:x.display_code||'',date:new Date(x.completed_at||x.updated_at||x.created_at),
-   results:x.progress.results}))
+   results:x.progress.results,protocol:x.progress.protocol?.version||null}))
   .filter(x=>!Number.isNaN(x.date.getTime()))
   .sort((a,b)=>a.date-b.date)
   .slice(-(options.max||4));
@@ -72,6 +72,13 @@ export function buildTrajectory(sessions=[],options={}){
  const pads=done.map(x=>F(x.results,'dynamo_knee_ext','knee_pad_distance_cm')).filter(finite);
  if(pads.length>1&&Math.max(...pads)-Math.min(...pads)>1)
   warnings.push('Extension de genou : position du pad différente entre les séances (écart > 1 cm) ; comparaison des forces à prendre avec prudence.');
+ // Conditions standardisées : chaussage et version du protocole identiques à chaque séance.
+ const footwear=done.map(x=>F(x.results,'anthropometry','footwear')).filter(Boolean);
+ if(new Set(footwear).size>1)
+  warnings.push('Chaussage différent entre les séances : marche, équilibre et plateformes à comparer avec prudence.');
+ const versions=done.map(x=>x.protocol).filter(Boolean);
+ if(new Set(versions).size>1)
+  warnings.push('Version du protocole différente entre les séances ('+[...new Set(versions)].join(', ')+').');
  const sources=done.map(x=>x.results?.sts?.source).filter(Boolean);
  if(new Set(sources).size>1)
   warnings.push('Lever de chaise : comptage vidéo et comptage manuel mélangés selon les séances.');

@@ -1,4 +1,4 @@
-/* KŌMØ Pulse Motion Online — supervised desktop consultation */
+/* KŌMØ Pulse — console de consultation Motion (ordinateur du cabinet) */
 .moc-shell{padding:0 0 20px;color:#222523}
 .moc-head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px}
 .moc-head h2{font:500 clamp(27px,3vw,40px)/1.08 "Cormorant Garamond",Georgia,serif;margin:7px 0 4px;color:#232422}
@@ -759,3 +759,8 @@
 .moc-delta.is-defavorable{color:#9a4a32}
 .moc-delta.is-stable,.moc-delta.is-none{color:#7a746a}
 .moc-trajectory-warning{margin:6px 0 0;font-size:11px;color:#9a4a32}
+/* Test non réalisé : motif obligatoire (protocole standardisé). */
+.moc-skip-panel{margin:14px 0 0;padding:14px 16px;border:1px solid rgba(138,115,82,.35);border-radius:14px;background:#fbf7ef}
+.moc-skip-panel .moc-buttons{margin-top:10px}
+.moc-instructions .moc-guide:has(>div:nth-child(3)){grid-template-columns:1fr 1fr 1fr}
+@media(max-width:900px){.moc-instructions .moc-guide:has(>div:nth-child(3)){grid-template-columns:1fr}}

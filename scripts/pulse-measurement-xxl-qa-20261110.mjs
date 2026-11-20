@@ -2,17 +2,17 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {oneLegFrame,createOneLegObserver} from '../pulse-v14-src/online/session/unipodal-metrics.mjs';
-import {createMovementTracker} from '../pulse-v14-src/online/session/metrics.mjs';
+import {oneLegFrame,createOneLegObserver} from '../pulse-v14-src/motion-engine/unipodal-metrics.mjs';
+import {createMovementTracker} from '../pulse-v14-src/motion-engine/metrics.mjs';
 const root=process.cwd(),load=path=>readFile(join(root,path),'utf8');
 const [ui,styles,remote,engine]=await Promise.all([
  'site/pulse-v14/motion-live-operator-consult-v1.js',
  'site/pulse-v14/motion-live-operator-consult-v1.css',
  'site/pulse-v14/motion-live-remote-pose-v1.js',
- 'site/pulse-v14/online/session/pose-engine.js'
+ 'site/pulse-v14/motion-engine/pose-engine.js'
 ].map(load));
 for(const name of ['pose-engine.js','metrics.mjs','unipodal-metrics.mjs']){
- const path=join(root,'site/pulse-v14/online/session',name);
+ const path=join(root,'site/pulse-v14/motion-engine',name);
  const check=spawnSync(process.execPath,['--check',path],{encoding:'utf8'});
  assert.equal(check.status,0,name+': '+check.stderr);
 }

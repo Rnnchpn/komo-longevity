@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {createMovementTracker,frameInfo,jointAngle} from '../pulse-v14-src/online/session/metrics.mjs';
+import {createMovementTracker,frameInfo,jointAngle} from '../pulse-v14-src/motion-engine/metrics.mjs';
 const empty=()=>Array.from({length:33},()=>({x:.4,y:.5,visibility:.1}));
 function person(mode='seated'){
  const p=empty();

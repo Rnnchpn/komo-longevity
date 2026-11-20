@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — six complete categories, including 22 answers.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261120-hiro-v1';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261121-protocol-v2';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -25,7 +25,7 @@ export async function downloadClinicPassport(report,category='all'){
  const {jsPDF}=await import('https://esm.sh/jspdf@4.2.1');
  const pdf=new jsPDF({format:'a4',unit:'mm',compress:true});
  pdf.setProperties({title:'KOMO Motion Passport - '+category+' - '+report.date,
-   subject:'Bilan fonctionnel et programme educatif de demonstration',author:'KOMO Pulse'});
+   subject:report.real?'Bilan fonctionnel KOMO Motion - protocole '+(report.protocol||'')+' '+(report.protocolVersion||''):'Bilan fonctionnel KOMO Motion - demonstration',author:'KOMO Pulse'});
  const plan=report.actionPlan,W=210,H=297,M=16,R=194,C=178;
  const fill=c=>pdf.setFillColor(...c),ink=c=>pdf.setTextColor(...c),stroke=c=>pdf.setDrawColor(...c);
  const font=(sz=9,bold=false,serif=false)=>{pdf.setFont(serif?'times':'helvetica',bold?'bold':'normal');pdf.setFontSize(sz)};
@@ -154,7 +154,7 @@ export async function downloadClinicPassport(report,category='all'){
   page('2B','Mesures instrumentees','Valeurs saisies depuis ForceDecks, DynaMo, metre et chronometre. Valeurs personnelles de depart, sans norme ni score composite.');
   let y=65;
   rows.forEach(r=>{
-   const lines=r.status==='skipped'?['Non realise'+(r.note?' : '+r.note:'')]:(r.lines.length?r.lines:['Aucune valeur']);
+   const lines=r.status==='skipped'?[...(r.lines||['Non realise']),...(r.note?['Note : '+r.note]:[])]:(r.lines.length?r.lines:['Aucune valeur']);
    const h=11+lines.length*4.3;
    if(y+h>274){page('2B','Mesures instrumentees (suite)','');y=65;}
    box(M,y,C,h,P.sand,2);

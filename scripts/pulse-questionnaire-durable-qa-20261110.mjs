@@ -4,10 +4,9 @@ import {spawnSync} from 'node:child_process';
 import {join} from 'node:path';
 import {buildClinicPassport} from '../pulse-v14-src/motion-live-clinic-passport-v2.mjs';
 import {INTAKE_GROUPS,intakeProgress,scoreIntake,questionPoints,
- MAX_QUESTIONNAIRE_POINTS,SCORED_QUESTION_COUNT} from '../pulse-v14-src/online/session/intake-model.mjs';
+ MAX_QUESTIONNAIRE_POINTS,SCORED_QUESTION_COUNT} from '../pulse-v14-src/motion-engine/intake-model.mjs';
 import {CLINIC_PASSPORT_EXPORTS} from '../pulse-v14-src/motion-live-clinic-passport-pdf-v2.js';
 import {questionnairePointsMarkup} from '../pulse-v14-src/motion-live-clinic-extras-v1.js';
-import {buildPdfReportData} from '../pulse-v14-src/online/session/pdf-report.js';
 const read=path=>readFile(join(process.cwd(),path),'utf8');
 const files=[
  'site/pulse-v14/motion-live-operator-consult-v1.js',
@@ -82,12 +81,6 @@ assert.equal(old.questionnaire.groups[0].items[1].points,null);
 assert.equal(old.questionnaire.groups[1].items.find(x=>x.id==='stairs').points,1);
 assert.equal(old.questionnaire.groups[1].points,4);
 assert.equal(old.questionnaire.groups[1].maxPoints,32);
-const online=buildPdfReportData(answers,oldResults);
-assert.equal(online.questionnaire.rawPoints,22);
-assert.equal(online.questionnaire.maxPoints,80);
-assert.equal(online.questionnaire.groups.reduce((n,g)=>n+g.answers.length,0),22);
-assert.equal(online.questionnaire.groups[0].answers[0].points,null);
-assert.equal(online.questionnaire.groups[1].answers[1].points,1);
 assert.equal(old.measures[1].durationSeconds,20);
 assert.equal(old.measures[4].durationSeconds,20);
 assert.ok(old.measures[1].display.includes('/ 20 s'));
@@ -108,8 +101,6 @@ assert.ok(pdf.includes('item.points')&&pdf.includes('g.points'));
 assert.ok(pdf.includes('report.questionnaire.rawPoints'));
 assert.ok(extras.includes('mocScoreSummary')&&extras.includes('moc-answer-points'));
 assert.ok(ui.includes('pointGroups')&&ui.includes('passport.questionnaire.rawPoints'));
-const onlinePdf=await read('site/pulse-v14/online/session/pdf-report.js');
-assert.ok(onlinePdf.includes('item.points')&&onlinePdf.includes('data.questionnaire.rawPoints'));
 assert.ok(pdf.includes('printGroups(groups.slice(0,2),1)')&&pdf.includes('printGroups(groups.slice(2),2)'));
 assert.ok(pdf.includes('const chapters=category===')&&pdf.includes("'questionnaire'"));
 assert.ok(ui.includes('await saveQuestionnaire()'));
@@ -123,10 +114,10 @@ assert.ok(ui.includes('PDF généré à partir de'));
 assert.ok(ui.includes('mocIntakeSaveStatus'));
 assert.ok(extras.includes('onComplete?.()')&&extras.includes('mocIntakeSave'));
 assert.ok(ui.includes('onComplete:()=>switchPanel("report")'));
-assert.ok(ui.includes('duration:30')&&ui.includes('payload.duration_seconds=t.duration'));
+assert.ok(ui.includes('duration:s.duration||0')&&ui.includes('payload.duration_seconds=t.duration'));
 assert.ok(iphone.includes('durant 30 secondes')&&iphone.includes('pendant 30 secondes'));
 // Protocole V2 (20/11/2026) : l'ancien test « heels » n'est plus proposé (historique conservé côté rapport).
-assert.ok(app.includes("['sts','30 s'")&&app.includes("['arms','30 s'")&&app.includes("['dynamo_grip','3 essais'"));
+assert.ok(app.includes('PROTOCOL_STEPS.map(x=>[x.id,x.trials,x.title,x.device])'));
 assert.ok(edge.includes('for(let attempt=0;attempt<6;attempt++)'));
 assert.ok(edge.includes('const nextProgress={...prior,questionnaire:'));
 assert.ok(edge.includes('answered_count:Object.keys(cleaned).length'));
