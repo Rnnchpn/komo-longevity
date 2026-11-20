@@ -5,8 +5,49 @@ const SUPABASE_URL=Deno.env.get("SUPABASE_URL")||"";
 const SERVICE_KEY=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";
 const db=createClient(SUPABASE_URL,SERVICE_KEY,{auth:{persistSession:false}});
 const ORG_ID="cea48f94-24ae-4ddb-ac28-ac289bb1e9ca"; // KŌMØ Cannes, test_only
-// Align the supervised remote consultation with the six existing Motion Online tests.
-const STEPS=["sts","two_step","unipodal_left","unipodal_right","arms","posture"];
+// KŌMØ Motion — protocole de consultation V2 (20/11/2026) : 13 étapes, de la moins à la plus exigeante.
+// Les étapes "instrumentées" sont saisies par l'opérateur (valeurs VALD recopiées, chrono, mètre).
+// Spécification dupliquée dans pulse-v14-src/motion-v2-instrumented.mjs : modifier les deux ensemble.
+const STEPS=["anthropometry","gait_4m","two_step","fd_quiet_stand","sts","fd_sts",
+ "unipodal_left","unipodal_right","dynamo_grip","dynamo_knee_ext","dynamo_hip_abd","arms","posture"];
+type FieldSpec={key:string;min:number;max:number;decimals:number;optional?:boolean};
+const INSTRUMENTED:Record<string,{fields:FieldSpec[];side?:string;pair?:[string,string]}>={
+ anthropometry:{fields:[{key:"height_cm",min:100,max:230,decimals:1},{key:"body_mass_kg",min:25,max:250,decimals:1}]},
+ gait_4m:{fields:[{key:"gait_4m_s_1",min:1,max:30,decimals:2},{key:"gait_4m_s_2",min:1,max:30,decimals:2}]},
+ fd_quiet_stand:{fields:[{key:"fd_qs_excursion_mm",min:0,max:10000,decimals:1},{key:"fd_qs_ellipse_mm2",min:0,max:100000,decimals:1},
+  {key:"fd_qs_asym_pct",min:0,max:100,decimals:1}],side:"fd_qs_asym_side"},
+ fd_sts:{fields:[{key:"fd_sts_asym_pct",min:0,max:100,decimals:1}],side:"fd_sts_asym_side"},
+ dynamo_grip:{fields:[{key:"grip_left_n",min:0,max:1500,decimals:1},{key:"grip_right_n",min:0,max:1500,decimals:1}],pair:["grip_left_n","grip_right_n"]},
+ dynamo_knee_ext:{fields:[{key:"knee_ext_left_n",min:0,max:2500,decimals:1},{key:"knee_ext_right_n",min:0,max:2500,decimals:1},
+  {key:"knee_pad_distance_cm",min:0,max:60,decimals:1,optional:true}],pair:["knee_ext_left_n","knee_ext_right_n"]},
+ dynamo_hip_abd:{fields:[{key:"hip_abd_left_n",min:0,max:2000,decimals:1},{key:"hip_abd_right_n",min:0,max:2000,decimals:1}],pair:["hip_abd_left_n","hip_abd_right_n"]}
+};
+const roundTo=(x:number,d:number)=>Math.round(x*10**d)/10**d;
+function validateInstrumented(step:string,raw:any){
+ const spec=INSTRUMENTED[step];if(!spec||!raw||typeof raw!=="object"||Array.isArray(raw))return null;
+ const fields:Record<string,number|string>={};
+ for(const f of spec.fields){
+  const v=raw[f.key];
+  if(v===undefined||v===null){if(f.optional)continue;return null;}
+  if(typeof v!=="number"||!Number.isFinite(v)||v<f.min||v>f.max||Math.abs(roundTo(v,f.decimals)-v)>1e-9)return null;
+  fields[f.key]=v;
+ }
+ if(spec.side){
+  if(!["left","right","balanced"].includes(raw[spec.side]))return null;
+  fields[spec.side]=raw[spec.side];
+ }
+ const derived:Record<string,number|string>={};
+ if(step==="gait_4m"){
+  const mean=((fields.gait_4m_s_1 as number)+(fields.gait_4m_s_2 as number))/2;
+  derived.gait_mean_s=roundTo(mean,2);derived.gait_speed_ms=roundTo(4/mean,2);
+ }
+ if(spec.pair){
+  const l=fields[spec.pair[0]] as number,r=fields[spec.pair[1]] as number;
+  if(l>0&&r>0){derived.lsi_pct=roundTo(100*Math.min(l,r)/Math.max(l,r),1);
+   derived.weaker_side=l<r?"left":r<l?"right":"balanced";}
+ }
+ return {fields,derived};
+}
 const LIMITS:Record<string,{max:number;integer:boolean;unit:string}>={
  sts:{max:100,integer:true,unit:"repetitions"},
  two_step:{max:650,integer:false,unit:"cm"},
@@ -526,7 +567,7 @@ Deno.serve(async(req:Request)=>{
   // Explicit duration follows the CURRENT client protocol. Previous 20 s
   // implementations remain labeled 20 s when no duration was supplied.
   const starting=["start","restart"].includes(event);
-  const protocolDuration=(step==="posture"||step==="two_step")?0:
+  const protocolDuration=(step==="posture"||step==="two_step"||INSTRUMENTED[step])?0:
    (step==="heels"||step==="arms")?
      (starting?(b.duration_seconds===30?30:20):
        (old.test_duration_seconds===30?30:20)):30;
@@ -545,7 +586,13 @@ Deno.serve(async(req:Request)=>{
   }else{
    if(event==="save"){
     if(old.step_status!=="running")return response(req,{error:"test_not_started"},409);
-    if(step==="two_step"){
+    if(INSTRUMENTED[step]){
+     const checked=validateInstrumented(step,b.fields);
+     if(!checked||b.measurement_source!=="operator_manual_entry")
+      return response(req,{error:"invalid_instrumented_entry"},422);
+     results[step]={status:"done",fields:checked.fields,derived:checked.derived,
+       source:"operator_manual_entry",protocol:"KOMO_MOTION_V2",note,recorded_at:now()};
+    }else if(step==="two_step"){
      const attempts=b.attempts_cm;
      if(!Array.isArray(attempts)||attempts.length!==2||
        attempts.some((x:unknown)=>typeof x!=="number"||!Number.isFinite(x)||x<1||x>650||

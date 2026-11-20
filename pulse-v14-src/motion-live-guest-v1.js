@@ -5,14 +5,24 @@ const EDGE="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-te
 const KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
 const STORAGE="komo_motion_live_guest_v1";
 const STAFF_STORAGE="komo_motion_operator_camera_station_v1";
+// Protocole V2 (20/11/2026) : l'iPhone affiche l'étape par son code, jamais par sa position.
 const STEPS=[
- ["sts","Se relever de la chaise","Assis sur une chaise stable contre un mur, relevez-vous et rasseyez-vous durant 30 secondes. L'opérateur lance le chronomètre."],
- ["heels","Élévations sur les pointes","Debout près d'un appui fixe, montez sur les pointes puis redescendez durant 30 secondes."],
- ["unipodal_left","Équilibre · appui gauche","Sur sol ferme, yeux ouverts, soulevez le pied droit. Le décompte démarre automatiquement quand le pied est levé, jusqu'à 30 secondes maximum."],
- ["unipodal_right","Équilibre · appui droit","Sur sol ferme, yeux ouverts, soulevez le pied gauche. Le décompte démarre automatiquement quand le pied est levé, jusqu'à 30 secondes maximum."],
+ ["anthropometry","Taille et masse","Mesure de la taille et pesée sur les plateformes. L'opérateur saisit les valeurs."],
+ ["gait_4m","Marche 4 m","Marchez à votre allure habituelle, comme dans la rue, sur le couloir balisé. Deux passages."],
+ ["two_step","Two-Step · deux grands pas","Depuis la ligne, faites deux pas aussi grands que possible sans sauter, puis joignez les pieds. Deux essais."],
+ ["fd_quiet_stand","Équilibre sur plateformes","Mains sur les hanches, regard devant : restez aussi immobile que possible pendant 30 secondes."],
+ ["sts","Se relever de la chaise","Bras croisés, relevez-vous et rasseyez-vous autant de fois que possible durant 30 secondes."],
+ ["fd_sts","Lever de chaise sur plateformes","Un pied sur chaque plateforme, mains croisées : trois levers lents, avec une pause immobile entre chaque."],
+ ["unipodal_left","Équilibre · appui gauche","Sur sol ferme, yeux ouverts, soulevez le pied droit. Le décompte démarre quand le pied est levé, jusqu'à 30 secondes."],
+ ["unipodal_right","Équilibre · appui droit","Sur sol ferme, yeux ouverts, soulevez le pied gauche. Le décompte démarre quand le pied est levé, jusqu'à 30 secondes."],
+ ["dynamo_grip","Force de la main","Assis, coude à 90° : serrez la poignée le plus fort possible. Trois essais de chaque côté."],
+ ["dynamo_knee_ext","Force du genou","Assis au bord de la table : poussez la jambe vers l'avant contre l'appareil. Trois essais de chaque côté."],
+ ["dynamo_hip_abd","Force de la hanche","Allongé sur le dos : écartez la jambe contre l'appareil. Trois essais de chaque côté."],
  ["arms","Mobilité des bras","Face à la caméra, levez et redescendez les bras sans douleur pendant 30 secondes."],
- ["posture","Posture de profil","Mettez-vous naturellement de profil, pieds visibles. L'opérateur observe la posture ; cette image ne mesure pas la SVA radiographique."]
+ ["posture","Posture de profil","Mettez-vous naturellement de profil, pieds visibles. Cette image ne mesure pas la SVA radiographique."],
+ ["heels","Élévations sur les pointes","Ancien test conservé pour les séances antérieures."]
 ];
+const V2_STEP_COUNT=13;
 let overlay=null,videoStream=null,timer=null,signalTimer=null,guestToken="",live=null,busy=false,opening=false,cameraInfo="Caméra désactivée";
 let facing="environment",peer=null,peerSender=null,peerId="",pendingWatch=null,signalCursor=0,offering=false,wakeLock=null,signalPolling=false;
 let cameraStation=false,stationStart=null,stationStop=null,stationRoomId="";
@@ -81,11 +91,11 @@ function makeOverlay(){
 function update(){
  if(!overlay||!live)return;
  const state=live.status,step=Number(live.step_index)||0;
- const cur=STEPS[step],running=live.progress?.step_status==="running";
+ const cur=STEPS.find(x=>x[0]===live.stage_code)||null,running=live.progress?.step_status==="running";
  el("mliveCode").textContent=live.display_code||"······";
- el("mliveProgress").setAttribute("aria-valuenow",String(Math.round(step/STEPS.length*100)));
- el("mliveProgressBar").style.width=Math.round(step/STEPS.length*100)+"%";
- el("mliveStage").textContent=state==="completed"?"Bilan terminé":"Test "+Math.min(step+1,STEPS.length)+" / "+STEPS.length;
+ el("mliveProgress").setAttribute("aria-valuenow",String(Math.round(step/V2_STEP_COUNT*100)));
+ el("mliveProgressBar").style.width=Math.round(step/V2_STEP_COUNT*100)+"%";
+ el("mliveStage").textContent=state==="completed"?"Bilan terminé":"Test "+Math.min(step+1,V2_STEP_COUNT)+" / "+V2_STEP_COUNT;
  const btn=el("mlivePrimary");
  btn.hidden=!!cameraStation;btn.disabled=busy;
  if(cameraStation){

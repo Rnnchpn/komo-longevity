@@ -2,6 +2,7 @@
 // No medical diagnosis, validated score, biological age or survival estimate.
 import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './online/session/intake-model.mjs?v=20261111-questionnaire-points-v1';
 import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs';
+import {instrumentedRows,MOTION_PROTOCOL_VERSION} from './motion-v2-instrumented.mjs?v=20261120-v2';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
  {id:'sts',name:'Lever de chaise',short:'Force fonctionnelle',unit:'levers / 30 s',
@@ -214,6 +215,7 @@ export function buildClinicPassport(answers={},results={},options={}){
   version:CLINIC_PASSPORT_VERSION,
   date,subject,mode:'CABINET_DEMO',profile,simulated,
   measures,measured,skipped,flagged:flagged.length,
+  protocol:MOTION_PROTOCOL_VERSION,instrumented:instrumentedRows(results),
   questionnaire:{answered:progress.completed,total:progress.total,complete:questionnaire.complete,
    simulated,index:questionnaire.complete?questionnaire.profileIndex:null,
    rawPoints:questionnaire.rawPoints,maxPoints:questionnaire.maxPoints,

@@ -1,6 +1,7 @@
 // KŌMØ Pulse — supervised Motion Online tests; video capture on the phone, manual observations by Operator.
 // Test-only. No automated clinical interpretation or diagnostic Motion Score.
-const TESTS=[
+import {INSTRUMENTED_STEPS,V2_ORDER,SIDE_OPTIONS,deriveInstrumented,validateInstrumented} from './motion-v2-instrumented.mjs?v=20261120-v2';
+const BASE_TESTS=[
  {id:"sts",title:"Se relever de la chaise",duration:30,unit:"répétitions",type:"count",
   setup:"Chaise stable contre un mur, caméra de trois-quarts profil, tête et pieds visibles.",
   instruction:"Comptez les levers complets pendant 30 secondes. Bras croisés si possible, sans compromettre la sécurité.",
@@ -26,6 +27,14 @@ const TESTS=[
   instruction:"Observez l'alignement sagittal apparent. Une caméra 2D ne mesure pas la SVA radiographique.",
   label:"Observation visuelle"}
 ];
+// Protocole V2 : tests iPhone existants + saisies VALD et anthropométrie, dans l’ordre officiel.
+const TESTS=V2_ORDER.map(id=>{
+ const base=BASE_TESTS.find(t=>t.id===id);if(base)return base;
+ const spec=INSTRUMENTED_STEPS[id];
+ return {id,title:spec.title,duration:0,unit:"",type:"fields",setup:spec.setup,instruction:spec.instruction,
+  label:spec.title,fields:spec.fields,side:spec.side||null,device:spec.device};
+});
+const isFields=t=>t?.type==="fields";
 const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
 let clockKey="",clockLocal=null;
@@ -35,7 +44,8 @@ let questionnaireDirty=false,questionnaireTimer=null,questionnaireSaveInFlight=n
 let countdownPending=false,previousMilestone=null,clockCompletedNotified=false;
 let videoFocus=false,videoLive=false;
 const q=id=>host?.querySelector("#"+id);
-const SHORT_TEST_NAMES={sts:"Chaise",two_step:"Two-Step",unipodal_left:"Équilibre G.",unipodal_right:"Équilibre D.",arms:"Bras",posture:"Posture"};
+const SHORT_TEST_NAMES={sts:"Chaise",two_step:"Two-Step",unipodal_left:"Équilibre G.",unipodal_right:"Équilibre D.",arms:"Bras",posture:"Posture",
+ ...Object.fromEntries(Object.entries(INSTRUMENTED_STEPS).map(([k,v])=>[k,v.short]))};
 function updateCameraLinkState(){
  const badge=q("mocCameraState");if(!badge)return;
  const video=q("mopvVideo");
@@ -536,10 +546,15 @@ function renderStep(){
  const running=room.progress?.step_status==="running";
  const safety=idx===0&&!room.progress?.safety_confirmed;
  autoValue=null;manualEdited=false;
- if(t.id==="two_step")poseTracker?.stopMeasurement();
+ if(t.id==="two_step"||isFields(t))poseTracker?.stopMeasurement();
  else poseTracker?.setTest(t.id,room.progress?.test_started_at,running,
   Number(room.progress?.test_duration_seconds)||t.duration);
- const input=t.id==="two_step"?
+ const input=isFields(t)?
+  '<div class="moc-two-step-fields"><p class="moc-help">Saisie opérateur · '+HTML(t.device||"")+'. Valeurs recopiées telles qu’affichées ; laisser vide plutôt que deviner.</p>'+
+  t.fields.map(f=>'<label class="moc-field">'+HTML(f.label)+(f.optional?" · facultatif":"")+'<div class="moc-input-unit"><input data-field="'+f.key+'" type="number" min="'+f.min+'" max="'+f.max+'" step="'+f.step+'" inputmode="decimal" placeholder="—"><span>'+HTML(f.unit)+'</span></div></label>').join("")+
+  (t.side?'<label class="moc-field">'+HTML(t.side.label)+'<select data-side="'+t.side.key+'"><option value="">Choisir</option>'+SIDE_OPTIONS.map(([k,l])=>'<option value="'+k+'">'+l+'</option>').join("")+'</select></label>':"")+
+  '<p id="mocFieldsComputed" class="moc-status"></p></div>'
+  :t.id==="two_step"?
   '<div class="moc-two-step-fields"><p class="moc-help">Saisie opérateur · deux essais, meilleure distance retenue. Indice = distance / taille.</p>'+
   '<label class="moc-field">Essai 1 · distance (cm)<input id="mocTwoStep1" type="number" min="1" max="650" step="0.1" inputmode="decimal" placeholder="ex. 240"></label>'+
   '<label class="moc-field">Essai 2 · distance (cm)<input id="mocTwoStep2" type="number" min="1" max="650" step="0.1" inputmode="decimal" placeholder="ex. 252"></label>'+
@@ -554,16 +569,16 @@ function renderStep(){
  '<details class="moc-instructions" '+(!running?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div></details>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
- (running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
+ (running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"||isFields(t)?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":isFields(t)?"Saisie":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
  (t.type==="balance"?'<div class="moc-rep-figure moc-balance-figure"><span>TEMPS MAINTENU</span><strong id="mocLiveBalance" aria-live="off">—</strong><small id="mocBalanceState">EN ATTENTE DU PIED LEVÉ</small></div>':'')+
  (t.type==="count"?'<div class="moc-rep-figure"><span>'+ (t.id==="sts"?"LEVERS EN DIRECT":"RÉPÉTITIONS EN DIRECT")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong><small>Estimation vidéo · à confirmer</small></div>':'')+
  (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">'+(isBalance(t)?"Arrêter l’essai":"Arrêter")+'</button><button type="button" class="moc-button secondary" id="mocRestartClock">'+(isBalance(t)?"↻ Refaire l’essai":"↻ Repartir de "+t.duration+" s")+'</button></div>':'')+'</div></div>'+input+
  (isBalance(t)?'<p class="moc-balance-reference">Yeux ouverts · 30 s maximum · durée réelle depuis le pied levé · 10 s = repère descriptif, non diagnostique. Arrêter en cas de perte d’équilibre ou de recours à un appui.</p>':'')+
- '<div class="moc-auto-feedback" id="mocAutoFeedback">'+(t.id==="two_step"?"Deux distances mesurées manuellement ; la caméra ne détermine pas cette valeur.":"◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.")+'</div>'+
+ '<div class="moc-auto-feedback" id="mocAutoFeedback">'+(isFields(t)?"Valeurs saisies par l’opérateur ; la caméra ne détermine pas ces mesures.":t.id==="two_step"?"Deux distances mesurées manuellement ; la caméra ne détermine pas cette valeur.":"◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.")+'</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
  '<div class="moc-buttons"><button type="button" id="mocSave" class="moc-button primary">Valider et passer au suivant</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>'
- :'<div class="moc-buttons"><button type="button" id="mocStart" class="moc-button primary">'+(isBalance(t)?"Armer le suivi · départ automatique":t.id==="two_step"?"Commencer la saisie des deux essais":t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button>'+
+ :'<div class="moc-buttons"><button type="button" id="mocStart" class="moc-button primary">'+(isBalance(t)?"Armer le suivi · départ automatique":t.id==="two_step"?"Commencer la saisie des deux essais":isFields(t)?"Commencer la saisie":t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button>'+
  '<button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button></div>')+
  '<p id="mocStatus" class="moc-status" role="status" aria-live="polite"></p></section>';
  if(q("mocValue"))q("mocValue").addEventListener("input",()=>{manualEdited=true});
@@ -581,6 +596,18 @@ function renderStep(){
      " · Indice Two-Step : "+(best/height).toFixed(2).replace(".",","):" · Taille non renseignée : indice non calculé");
   };
   ["mocTwoStep1","mocTwoStep2","mocTwoStepHeight"].forEach(id=>q(id)?.addEventListener("input",update));
+ }
+ if(isFields(t)){
+  const preview=()=>{
+   manualEdited=true;
+   const raw={};host.querySelectorAll("[data-field]").forEach(el=>{if(el.value!=="")raw[el.dataset.field]=Number(el.value)});
+   const d=deriveInstrumented(t.id,raw),out=q("mocFieldsComputed");if(!out)return;
+   const parts=[];
+   if(Number.isFinite(d.gait_speed_ms))parts.push("Vitesse : "+String(d.gait_speed_ms).replace(".",",")+" m/s");
+   if(Number.isFinite(d.lsi_pct))parts.push("Symétrie : "+String(d.lsi_pct).replace(".",",")+" %"+(d.weaker_side==="balanced"?"":" · côté plus faible : "+(d.weaker_side==="left"?"gauche":"droit")));
+   out.textContent=parts.join(" · ");
+  };
+  host.querySelectorAll("[data-field]").forEach(el=>el.addEventListener("input",preview));
  }
  if(q("mocStart"))q("mocStart").onclick=()=>startWithCountdown("start");
  if(q("mocSave"))q("mocSave").onclick=()=>submit("save");
@@ -768,7 +795,15 @@ async function submit(event){
  if(event==="save"){
   const note=q("mocNote")?.value||"";
   payload.note=note;
-  if(t.id==="two_step"){
+  if(isFields(t)){
+   const raw={};
+   host.querySelectorAll("[data-field]").forEach(el=>{if(el.value!=="")raw[el.dataset.field]=Number(el.value)});
+   host.querySelectorAll("[data-side]").forEach(el=>{if(el.value)raw[el.dataset.side]=el.value});
+   const checked=validateInstrumented(t.id,raw);
+   if(!checked.ok){setStatus("Saisie incomplète ou hors limites ("+checked.error.replace(/_/g," ")+"). Corrigez ou marquez le test non réalisé.");return}
+   payload.fields=checked.fields;
+   payload.measurement_source="operator_manual_entry";
+  }else if(t.id==="two_step"){
    const rawA=q("mocTwoStep1")?.value,rawB=q("mocTwoStep2")?.value,rawH=q("mocTwoStepHeight")?.value;
    const a=Number(rawA),b=Number(rawB),height=rawH?Number(rawH):null;
    const valid=v=>Number.isFinite(v)&&v>=1&&v<=650&&Math.round(v*10)===v*10;

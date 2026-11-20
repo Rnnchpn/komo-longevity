@@ -147,6 +147,23 @@ export async function downloadClinicPassport(report,category='all'){
     ' s. '+report.balance.interpretation,M,259,C,{sz:8,lh:4,max:3});
   }
  }
+ function instruments(){
+  // Protocole V2 : valeurs VALD, chrono et mètre saisies par l'opérateur. Aucune norme ni score.
+  const rows=(report.instrumented||[]).filter(r=>r.status!=='missing');
+  if(!rows.length)return;
+  page('2B','Mesures instrumentees','Valeurs saisies depuis ForceDecks, DynaMo, metre et chronometre. Valeurs personnelles de depart, sans norme ni score composite.');
+  let y=65;
+  rows.forEach(r=>{
+   const lines=r.status==='skipped'?['Non realise'+(r.note?' : '+r.note:'')]:(r.lines.length?r.lines:['Aucune valeur']);
+   const h=11+lines.length*4.3;
+   if(y+h>274){page('2B','Mesures instrumentees (suite)','');y=65;}
+   box(M,y,C,h,P.sand,2);
+   txt(r.name,M+7,y+7.5,{sz:9.6,bold:true});
+   if(r.device)txt(r.device,R-7,y+7.5,{sz:7.2,col:P.muted,align:'right'});
+   let yy=y+12.5;lines.forEach(l=>{txt(l,M+7,yy,{sz:8.1,col:r.status==='skipped'?P.muted:P.text});yy+=4.3;});
+   y+=h+3;
+  });
+ }
  function exercises(){
   page(3,'Exercices a domicile','Programme educatif a adapter avec un professionnel selon la securite et les symptomes.');
   txt('4 EXERCICES PRINCIPAUX',M,67,{sz:8.5,bold:true,col:P.gold});
@@ -262,8 +279,9 @@ export async function downloadClinicPassport(report,category='all'){
   printGroups(groups.slice(0,2),1);
   printGroups(groups.slice(2),2);
  }
- const renderers={synthese,tests,exercices:exercises,nutrition,suivi,questionnaire};
- const chapters=category==='all'?['synthese','tests','exercices','nutrition','suivi','questionnaire']:[category];
+ const renderers={synthese,tests,instruments,exercices:exercises,nutrition,suivi,questionnaire};
+ const chapters=category==='all'?['synthese','tests','instruments','exercices','nutrition','suivi','questionnaire']:
+  category==='tests'?['tests','instruments']:[category];
  for(const chapter of chapters)renderers[chapter]();
  footer();
  const name='KOMO_Motion_'+(category==='all'?'Passeport_Complet':category)+
