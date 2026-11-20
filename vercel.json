@@ -1036,6 +1036,68 @@
       "source": "/es/partners/deployment/:path*",
       "destination": "/es/partners/",
       "permanent": true
+    },
+    {
+      "source": "/bilan-en-ligne",
+      "destination": "/fr/motion/",
+      "permanent": false
+    },
+    {
+      "source": "/bilan-en-ligne/:path*",
+      "destination": "/fr/motion/",
+      "permanent": false
+    },
+    {
+      "source": "/fr/bilan-en-ligne",
+      "destination": "/fr/motion/",
+      "permanent": false
+    },
+    {
+      "source": "/fr/bilan-en-ligne/:path*",
+      "destination": "/fr/motion/",
+      "permanent": false
+    },
+    {
+      "source": "/en/motion-online",
+      "destination": "/motion/",
+      "permanent": false
+    },
+    {
+      "source": "/en/motion-online/:path*",
+      "destination": "/motion/",
+      "permanent": false
+    },
+    {
+      "source": "/es/motion-online",
+      "destination": "/es/motion/",
+      "permanent": false
+    },
+    {
+      "source": "/es/motion-online/:path*",
+      "destination": "/es/motion/",
+      "permanent": false
+    },
+    {
+      "source": "/online",
+      "has": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        }
+      ],
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": false
+    },
+    {
+      "source": "/online/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        }
+      ],
+      "destination": "https://pulse.komolongevity.com/",
+      "permanent": false
     }
   ],
   "alias": [

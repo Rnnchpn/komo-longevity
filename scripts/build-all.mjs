@@ -321,7 +321,9 @@ const scripts = [
   // Final public-home conversion layer: 39 € Stripe checkout + Möbius launch asset.
   'scripts/komo-motion-online-39-mobius-20261031.mjs',
   // French KŌMØ Motion Cannes 60-minute offer: public reservation request page.
-  'scripts/build-motion-cannes-booking-20261107.mjs'
+  'scripts/build-motion-cannes-booking-20261107.mjs',
+  // 20/11/2026 : retrait de l'offre Online et du Motion Age — doit rester la toute dernière passe.
+  'scripts/komo-retire-motion-online-20261120.mjs'
 ];
 
 for (const script of scripts) {
