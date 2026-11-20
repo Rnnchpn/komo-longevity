@@ -1,7 +1,7 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
 // Vidéo sur l'iPhone, valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,BLOCKS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel} from './motion-protocol.mjs?v=20261121-workspace-v1';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261121-workspace-v1';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261121-stations-v1';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261121-stations-v1';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
@@ -9,7 +9,13 @@ const isRealDossier=()=>patient?.data_classification==='health_data';
 const TYPE_BY_KIND={fields:"fields",two_step:"manual_two_step",count:"count",balance:"balance",observation:undefined};
 const TESTS=STEPS.map(s=>({id:s.id,title:s.title,duration:s.duration||0,unit:s.ui_unit||"",type:TYPE_BY_KIND[s.kind],
  setup:s.setup,instruction:s.instruction,script:s.script||"",label:s.label||s.title,device:s.device,trials:s.trials,
+ block:s.block,vald:s.vald||null,walkway:!!s.walkway,dynamo:!!s.dynamo,pair:s.pair||null,
  ...(s.kind==="fields"?{fields:s.fields,choices:s.choices||[]}:{})}));
+// Unité affichée par l'écran DynaMo (N ou kg) : mémorisée sur cet ordinateur, enregistrement toujours en N.
+const DYNAMO_UNIT_KEY="komo_dynamo_unit";
+let dynamoUnit=(()=>{try{return localStorage.getItem(DYNAMO_UNIT_KEY)==="kg"?"kg":"N"}catch{return "N"}})();
+// Chronomètre de marche intégré (Départ / Arrivée) : remplit le passage 1 puis le passage 2.
+let gaitChrono={startedAt:null,timer:null};
 const isFields=t=>t?.type==="fields";
 const HTML=s=>String(s??"").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
 let host=null,api=null,openVideo=null,patient=null,room=null,latestSignature="",poll=null,clock=null,busy=false,stoppedAt=null,polling=false;
@@ -64,7 +70,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261121-workspace-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261121-stations-v1";
  // Le design de l'espace praticien (pulse-workspace.css) reste la dernière couche.
  const workspace=document.querySelector("link[data-pulse-workspace]");
  if(workspace)document.head.insertBefore(link,workspace);else document.head.append(link);
@@ -77,6 +83,7 @@ function clockRunKey(session){
  return session?.id+":"+session?.step_index+":"+(session?.progress?.test_started_at||"");
 }
 export function disposeOperatorConsultation(){
+ stopGaitChrono();
  host?.closest(".app-shell")?.classList.remove("moc-video-xxl");
  videoFocus=false;videoLive=false;
  if(poll)clearInterval(poll);poll=null;stopClock();
@@ -90,7 +97,10 @@ export function disposeOperatorConsultation(){
  poseTracker?.dispose();poseTracker=null;
  host=null;room=null;api=null;openVideo=null;patient=null;latestSignature="";autoValue=null;manualEdited=false;
 }
-function currentTest(){return TESTS[Number(room?.step_index)]||null}
+// Étape en cours lue par son code (navigation libre), jamais par sa seule position.
+function currentTest(){return TESTS.find(t=>t.id===room?.stage_code)||null}
+const testIndex=t=>TESTS.indexOf(t);
+const treatedCount=results=>TESTS.filter(t=>["done","skipped"].includes(results?.[t.id]?.status)).length;
 const isBalance=t=>t?.type==="balance";
 // Pragmatic video QA gate, not a medically validated accuracy threshold.
 // Manual entries remain possible when a camera is absent or tracking is uncertain.
@@ -107,19 +117,120 @@ const balanceReasonText=reason=>({
  ambiguous_contact:"Retour d’appui incertain. Vérifiez la mesure."
 }[reason]||"Appui interrompu · vérifiez le résultat.");
 function stageText(result){return result?.status==="done"?"✓":result?.status==="skipped"?"—":"·"}
-// Rail du protocole : les 13 tests regroupés par bloc (A → D), l'étape en cours mise en avant.
-function railMarkup(idx,results={}){
+// Rail du protocole : les 13 tests regroupés par station (A → E). Chaque test est cliquable :
+// revenir corriger une valeur ou faire un test plus tôt. Bloqué pendant un chronomètre en cours.
+function railMarkup(idx,results={},locked=false){
  let html="",block="";
  TESTS.forEach((t,i)=>{
-  const b=STEPS[i].block;
-  if(b!==block){if(block)html+="</ol></div>";block=b;html+='<div class="moc-rail-block"><p class="moc-rail-title">'+HTML(BLOCKS[b]||"")+'</p><ol>';}
+  const b=t.block;
+  if(b!==block){
+   if(block)html+="</ol></div>";block=b;const st=STATIONS[b]||{};
+   html+='<div class="moc-rail-block"><p class="moc-rail-title"><span>'+HTML(b)+'</span>'+HTML(st.label||"")+
+    '<small>'+HTML(st.camera?CAMERA_LABELS[st.camera]:"Sans iPhone")+'</small></p><ol>';
+  }
   const r=results[t.id];
-  const state=i===idx?"current":r?.status==="skipped"?"skipped":r?.status==="done"||i<idx?"done":"";
-  html+='<li class="moc-step '+state+'" title="'+HTML(t.title)+'"'+(i===idx?' aria-current="step"':'')+'>'+
-   '<b>'+(state==="done"?"✓":state==="skipped"?"–":String(i+1))+'</b><span>'+HTML(SHORT_TEST_NAMES[t.id]||t.title)+
-   '<small>'+HTML(state==="skipped"?"Non réalisé":t.trials||"")+'</small></span></li>';
+  const state=i===idx?"current":r?.status==="skipped"?"skipped":r?.status==="done"?"done":"";
+  const label='<b>'+(state==="done"?"✓":state==="skipped"?"–":String(i+1))+'</b><span>'+HTML(SHORT_TEST_NAMES[t.id]||t.title)+
+   '<small>'+HTML(state==="skipped"?"Non réalisé":state==="done"?"Enregistré · corriger":t.trials||"")+'</small></span>';
+  html+='<li class="moc-step '+state+'"'+(i===idx?' aria-current="step"':'')+'>'+
+   (i===idx?'<span class="moc-step-inner" title="'+HTML(t.title)+'">'+label+'</span>':
+    '<button type="button" class="moc-step-inner" data-goto="'+t.id+'"'+(locked?' disabled':'')+' title="'+
+    HTML(locked?"Arrête d’abord le test en cours":state?"Revenir sur « "+t.title+" »":"Faire « "+t.title+" » maintenant")+'">'+label+'</button>')+'</li>';
  });
  return html+(block?"</ol></div>":"");
+}
+async function gotoStep(stepId){
+ if(!room||busy||!stepId||stepId===room.stage_code)return;
+ if(room.progress?.step_status==="running"&&currentTest()?.duration){setStatus("Arrête d’abord le test en cours.");return}
+ busy=true;
+ try{
+  stopGaitChrono();
+  const result=await api({action:"operator_test_goto",session_id:room.id,step_code:stepId});
+  room=result.session;latestSignature="";
+  if(room.status==="completed"){panelMode="report";updatePanelTabs();renderReportSection();return}
+  if(panelMode!=="tests"){panelMode="tests";if(q("mocStepNav"))q("mocStepNav").hidden=false;}
+  updatePanelTabs();renderStep();
+  const t=currentTest();
+  if(t&&room.progress?.results?.[t.id])setStatus("Valeur déjà enregistrée affichée : une nouvelle validation la remplace.");
+ }catch(error){setStatus((error.message||"Impossible d’ouvrir ce test")+" · Réessaie.")}
+ finally{busy=false}
+}
+function bindGaitChrono(){
+ const go=q("mocGaitGo"),time=q("mocGaitTime"),hint=q("mocGaitHint");if(!go)return;
+ const fmt=sec=>sec.toFixed(2).replace(".",",")+" s";
+ const target=()=>["gait_4m_s_1","gait_4m_s_2"].map(k=>host.querySelector('[data-field="'+k+'"]')).find(el=>el&&el.value==="");
+ const label=()=>{const next=target();go.textContent=gaitChrono.startedAt?"Arrivée":next?.dataset.field.endsWith("_2")?"Départ · passage 2":"Départ";};
+ go.onclick=()=>{
+  if(!gaitChrono.startedAt){
+   if(!target()){hint.textContent="Les deux passages sont saisis. Efface un temps pour refaire ce passage.";return}
+   gaitChrono.startedAt=performance.now();
+   gaitChrono.timer=setInterval(()=>{if(time&&gaitChrono.startedAt)time.textContent=fmt((performance.now()-gaitChrono.startedAt)/1000)},50);
+   go.dataset.running="true";hint.textContent="Appuie sur Arrivée quand le premier pied franchit la ligne des 4 m.";label();return;
+  }
+  const sec=Math.round((performance.now()-gaitChrono.startedAt)/10)/100;
+  stopGaitChrono();go.dataset.running="false";
+  if(time)time.textContent=fmt(sec);
+  if(sec<1||sec>30){hint.textContent=(sec<1?"Moins d’une seconde":"Plus de 30 secondes")+" : temps non retenu. Recommence le passage ou saisis-le à la main.";label();return}
+  const el=target();
+  if(el){el.value=sec.toFixed(2);el.dispatchEvent(new Event("input",{bubbles:true}));}
+  hint.textContent=target()?"Passage 1 noté. Ramène le patient au départ, puis Départ pour le passage 2.":"Deux passages notés. Vérifie les temps, puis valide.";
+  label();
+ };
+ label();
+}
+function fieldErrorText(t,error){
+ const key=String(error||"").replace(/^(missing|invalid|precision)_/,"");
+ const f=(t.fields||[]).find(x=>x.key===key),c=(t.choices||[]).find(x=>x.key===key);
+ const name=f?.label||c?.label||"une valeur";
+ if(error.startsWith("missing_"))return "Il manque : "+name+".";
+ if(error.startsWith("precision_"))return name+" : trop de décimales.";
+ if(f)return name+" hors limites ("+f.min+" à "+f.max+" "+f.unit+(t.dynamo&&f.unit==="N"&&dynamoUnit==="kg"?", après conversion des kg":"")+").";
+ return "Saisie incomplète ou hors limites.";
+}
+function stopGaitChrono(){
+ if(gaitChrono.timer)clearInterval(gaitChrono.timer);
+ gaitChrono={startedAt:null,timer:null};
+}
+// Bandeau de station : où se trouve le patient et où placer l'iPhone. Mis en avant au premier test de la station.
+function stationMarkup(t){
+ const st=STATIONS[t.block];if(!st)return "";
+ const idx=testIndex(t),first=TESTS[idx-1]?.block!==t.block;
+ return '<div class="moc-station" data-first="'+first+'" data-camera="'+(st.camera||"none")+'">'+
+  '<div><small>Station '+HTML(t.block)+(first?' · nouvelle station':'')+'</small><strong>'+HTML(st.label)+'</strong>'+
+  '<p><b>'+HTML(st.camera?CAMERA_LABELS[st.camera]:"iPhone non utilisé")+'</b> · '+HTML(st.place)+'</p></div>'+
+  (st.camera?'<button type="button" class="moc-button secondary" id="mocStationFrame">'+(videoFocus?"Masquer le cadrage":"Vérifier le cadrage")+'</button>':'')+
+ '</div>';
+}
+// Encadré « Dans l'app VALD » : test à lancer, réglages, valeurs à recopier (libellés VALD).
+function valdMarkup(t){
+ if(!t.vald)return "";
+ const read=(t.fields||[]).filter(f=>f.vald).map(f=>'<li><span>'+HTML(f.vald)+'</span><b>→ '+HTML(f.label)+'</b></li>').join("");
+ return '<div class="moc-vald"><p class="moc-vald-title">Dans l’app '+HTML(t.vald.app)+'</p>'+
+  '<p><b>Test :</b> '+HTML(t.vald.test)+(t.vald.settings?' · '+HTML(t.vald.settings):'')+'</p>'+
+  (read?'<ul>'+read+'</ul>':'')+(t.vald.tip?'<p class="moc-vald-tip">'+HTML(t.vald.tip)+'</p>':'')+'</div>';
+}
+// Couloir de marche : 2 m d'élan · 4 m chronométrés · 2 m pour ralentir, et chronomètre intégré.
+function walkwayMarkup(){
+ return '<div class="moc-walkway" aria-hidden="true"><span>2 m d’élan</span><b>4 m chronométrés</b><span>2 m pour ralentir</span></div>'+
+  '<div class="moc-gait-chrono"><button type="button" id="mocGaitGo" class="moc-button primary">Départ</button>'+
+  '<strong id="mocGaitTime" aria-live="off">0,00 s</strong>'+
+  '<p id="mocGaitHint">Appuie sur Départ quand le premier pied franchit la ligne des 0 m (barre d’espace possible).</p></div>';
+}
+function dynamoUnitMarkup(){
+ return '<div class="moc-unit-switch" role="group" aria-label="Unité affichée par DynaMo"><span>Écran DynaMo en</span>'+
+  ['N','kg'].map(u=>'<button type="button" data-unit="'+u+'" aria-pressed="'+(dynamoUnit===u)+'">'+u+'</button>').join("")+'</div>';
+}
+function fieldUnit(t,f){return t.dynamo&&f.unit==="N"?dynamoUnit:f.unit}
+// Valeurs saisies, converties dans les unités du protocole (DynaMo kg → N).
+function readFields(t){
+ const raw={};
+ host.querySelectorAll("[data-field]").forEach(el=>{
+  if(el.value==="")return;
+  const f=(t.fields||[]).find(x=>x.key===el.dataset.field);let v=Number(el.value);
+  if(f&&t.dynamo&&f.unit==="N")v=toNewton(v,dynamoUnit);
+  raw[el.dataset.field]=v;
+ });
+ return raw;
 }
 function makeShell(){
  host.innerHTML='<section class="moc-shell">'+
@@ -176,6 +287,10 @@ function makeShell(){
  q("mocPatientLine").textContent=patient?(isRealDossier()?"Consultation réelle":"Démonstration")+" · protocole "+PROTOCOL.code+" "+PROTOCOL.version:"Sélectionnez un patient";
  // Entrée = « Valider et passer au suivant » quand la saisie est complète (hors zone de notes).
  host.addEventListener("keydown",event=>{
+  // Barre d'espace = Départ / Arrivée du chronomètre de marche (hors champ de saisie).
+  if(event.key===" "&&panelMode==="tests"&&q("mocGaitGo")&&!event.target?.matches?.("input,textarea,select,button,summary")){
+   event.preventDefault();q("mocGaitGo").click();return;
+  }
   if(event.key!=="Enter"||event.isComposing||event.shiftKey||event.altKey||event.metaKey||event.ctrlKey)return;
   const target=event.target;
   if(!target?.matches?.("#mocTestBody input")||panelMode!=="tests")return;
@@ -187,7 +302,7 @@ function makeShell(){
 function renderWaiting(message){
  if(!host)return;
  q("mocStepNav").innerHTML="";
- q("mocTestBody").innerHTML='<section class="moc-empty"><h3>Préparer la consultation</h3><p>'+HTML(message)+'</p><button type="button" id="mocGoLive" class="moc-button primary">Ouvrir les sessions en direct</button></section>';
+ q("mocTestBody").innerHTML='<section class="moc-empty"><h3>Préparer la consultation</h3><p>'+HTML(message)+'</p><button type="button" id="mocGoLive" class="moc-button primary">Retour à Consultation</button></section>';
  q("mocGoLive").onclick=()=>{location.hash="live"};
  q("mocProgressText").textContent="En attente d’un téléphone associé";
  q("mocProgressFill").style.width="0%";
@@ -195,6 +310,12 @@ function renderWaiting(message){
 function formatResult(result,task){
  if(!result)return "Non effectué";
  if(result.status==="skipped")return skippedText(result.reason);
+ if(task.type==="fields"&&result.fields){
+  const parts=(task.fields||[]).filter(f=>Number.isFinite(result.fields[f.key]))
+   .map(f=>f.label.replace(" · meilleur essai","")+" "+String(result.fields[f.key]).replace(".",",")+" "+f.unit);
+  return parts.join(" · ")||"Résultat enregistré";
+ }
+ if(task.id==="two_step"&&Number.isFinite(result.value))return String(result.value).replace(".",",")+" cm (meilleur essai)";
  if(task.id==="posture")return optionLabel(POSTURE_OPTIONS,result.observation)||"Observation enregistrée";
  return Number.isFinite(result.value)?String(result.value)+" "+task.unit+
   (["heels","arms"].includes(task.id)?" / "+(result.duration_seconds===30?30:20)+" s":""):
@@ -441,6 +562,9 @@ function renderReportSection(){
   '<div class="moc-passport-highlights">'+reasons+'</div>'+
   '<h4>Tests réalisés</h4><div class="moc-results-compact">'+passport.measures.map(resultCard).join('')+'</div>'+
   instrumentedMarkup(passport.instrumented)+
+  '<div class="moc-correct-report"><label class="moc-field">Corriger un test<select id="mocCorrectStep">'+
+   TESTS.map(t=>'<option value="'+t.id+'">'+HTML(t.title)+'</option>').join("")+'</select></label>'+
+   '<button type="button" class="moc-button secondary" id="mocCorrectGo">Rouvrir ce test</button></div>'+
   '<div id="mocTrajectory" class="moc-trajectory">'+trajectoryMarkup(trajectory)+'</div>'+
   '<div class="moc-action-section-title"><h4>Exercices à la maison</h4><small>Progression à adapter et valider</small></div>'+
   '<div class="moc-exercise-grid">'+plan.exercises.slice(0,4).map(exerciseCard).join('')+'</div>'+
@@ -486,6 +610,7 @@ function renderReportSection(){
  updatePanelTabs();
  if(trajectoryState.key!==trajectoryKey())void loadTrajectory(false);
  q("mocReportQuestionnaire").onclick=()=>switchPanel("questionnaire");
+ if(q("mocCorrectGo"))q("mocCorrectGo").onclick=()=>gotoStep(q("mocCorrectStep")?.value);
  const button=q("mocDownloadPdf"),chapter=q("mocDownloadChapter");
  const exportPdf=async(type,clicked)=>{
   if(!clicked)return;
@@ -530,7 +655,7 @@ function renderSummary(){
  q("mocStepNav").innerHTML=TESTS.map((t,i)=>'<span class="moc-step done">'+stageText(results[t.id])+' '+HTML(t.title)+'</span>').join("");
  q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">CONSULTATION TERMINÉE</span><h3>Synthèse des observations</h3>'+
  '<div class="moc-recap">'+TESTS.map(t=>'<div><span>'+HTML(t.title)+'</span><strong>'+HTML(formatResult(results[t.id],t))+'</strong></div>').join("")+'</div>'+
- '<p class="moc-help">Les six tests sont traités. Tu peux maintenant compléter le questionnaire et télécharger le rapport descriptif PDF.</p>'+
+ '<p class="moc-help">Les '+TESTS.length+' tests sont traités. Tu peux maintenant compléter le questionnaire et télécharger le rapport descriptif PDF.</p>'+
  '<div class="moc-buttons"><button type="button" class="moc-button primary" id="mocGoReport">Consulter le rapport PDF →</button>'+
  '<button type="button" class="moc-button secondary" id="mocGoQuestionnaire">Questionnaires</button></div></section>';
  q("mocGoReport").onclick=()=>switchPanel("report");
@@ -597,25 +722,33 @@ function renderStep(){
   return
  }
  const t=currentTest();
- if(!t){renderWaiting("La consultation doit d’abord être ouverte depuis « Nouvelle consultation ».");return}
+ if(!t){renderWaiting("La consultation doit d’abord être démarrée depuis la page Consultation.");return}
  const results=room.progress?.results||{};
- const idx=room.step_index;
- q("mocProgressText").textContent="Test "+(idx+1)+" sur "+TESTS.length;
- q("mocProgressFill").style.width=(idx/TESTS.length*100)+"%";
- q("mocStepNav").innerHTML=railMarkup(idx,results);
- if(q("mocTabTestsCount"))q("mocTabTestsCount").textContent=idx+"/"+TESTS.length;
+ const idx=testIndex(t),treated=treatedCount(results);
  const running=room.progress?.step_status==="running";
- const safety=idx===0&&!room.progress?.safety_confirmed;
+ const existing=results[t.id]||null;
+ const later=nextPendingStep(results,t.id);
+ const laterTest=TESTS.find(x=>x.id===later)||null;
+ q("mocProgressText").textContent=treated+" test"+(treated>1?"s":"")+" sur "+TESTS.length+" enregistré"+(treated>1?"s":"")+" · "+(STATIONS[t.block]?.label||"");
+ q("mocProgressFill").style.width=(treated/TESTS.length*100)+"%";
+ q("mocStepNav").innerHTML=railMarkup(idx,results,running&&!!t.duration);
+ q("mocStepNav").querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>gotoStep(b.dataset.goto));
+ if(q("mocTabTestsCount"))q("mocTabTestsCount").textContent=treated+"/"+TESTS.length;
+ if(t.id!=="gait_4m")stopGaitChrono();
+ const safety=!room.progress?.safety_confirmed;
  autoValue=null;manualEdited=false;
  if(t.id==="two_step"||isFields(t))poseTracker?.stopMeasurement();
  else poseTracker?.setTest(t.id,room.progress?.test_started_at,running,
   Number(room.progress?.test_duration_seconds)||t.duration);
  const input=isFields(t)?
-  '<div class="moc-two-step-fields"><p class="moc-help">Saisie opérateur · '+HTML(t.device||"")+'. Valeurs recopiées telles qu’affichées ; laisser vide plutôt que deviner.</p>'+
-  t.fields.map(f=>'<label class="moc-field">'+HTML(f.label)+(f.optional?" · facultatif":"")+'<div class="moc-input-unit"><input data-field="'+f.key+'" type="number" min="'+f.min+'" max="'+f.max+'" step="'+fieldStep(f)+'" inputmode="decimal" placeholder="—"><span>'+HTML(f.unit)+'</span></div></label>').join("")+
+  '<div class="moc-two-step-fields">'+(t.walkway?walkwayMarkup():'')+(t.dynamo?dynamoUnitMarkup():'')+
+  '<p class="moc-help">Valeurs recopiées telles qu’affichées ; laisser vide plutôt que deviner.</p>'+
+  t.fields.map(f=>{const u=fieldUnit(t,f);return '<label class="moc-field">'+HTML(f.label)+(f.optional?" · facultatif":"")+
+   (f.vald?'<small class="moc-field-vald">'+HTML(t.vald?.app||"VALD")+' : '+HTML(f.vald)+'</small>':'')+
+   '<div class="moc-input-unit"><input data-field="'+f.key+'" type="number" min="'+f.min+'" step="'+(u==="kg"?"0.01":fieldStep(f))+'" inputmode="decimal" placeholder="—"><span data-unit-label="'+f.key+'">'+HTML(u)+'</span></div></label>'}).join("")+
   (t.choices||[]).map(c=>'<label class="moc-field">'+HTML(c.label)+'<select data-choice="'+c.key+'"><option value="">Choisir</option>'+
    c.options.map(([k,l])=>'<option value="'+k+'"'+(c.default===k?' selected':'')+'>'+HTML(l)+'</option>').join("")+'</select></label>').join("")+
-  '<p id="mocFieldsComputed" class="moc-status"></p></div>'
+  '<p id="mocFieldsComputed" class="moc-status"></p><ul id="mocWarnings" class="moc-warnings" hidden></ul></div>'
   :t.id==="two_step"?
   '<div class="moc-two-step-fields"><p class="moc-help">Saisie opérateur · deux essais, meilleure distance retenue. Indice = distance / taille.</p>'+
   '<label class="moc-field">Essai 1 · distance (cm)<input id="mocTwoStep1" type="number" min="1" max="650" step="0.1" inputmode="decimal" placeholder="ex. 240"></label>'+
@@ -628,25 +761,37 @@ function renderStep(){
   :'<label class="moc-field">'+HTML(t.label)+'<div class="moc-input-unit"><input id="mocValue" type="number" inputmode="decimal" min="0" max="'+(t.unit==="seconds"?String(t.duration):"100")+'" step="'+(t.unit==="seconds"?"0.1":"1")+'" placeholder="Saisir une valeur"><span>'+HTML(t.unit)+'</span></div></label>';
  // Saisies manuelles (VALD, mètre, chrono, Two-Step) : champs visibles d'emblée, un seul clic « Valider ».
  const manual=isFields(t)||t.id==="two_step";
+ const allTreated=treated>=TESTS.length;
+ const saveLabel=existing?(laterTest?"Enregistrer la correction":"Enregistrer et revenir au rapport"):"Valider et passer au suivant";
+ const laterButton=laterTest?'<button type="button" id="mocLater" class="moc-button secondary" title="Faire « '+HTML(laterTest.title)+' » maintenant et revenir ensuite">'+
+   (existing?'Revenir à « '+HTML(SHORT_TEST_NAMES[laterTest.id]||laterTest.title)+' »':'Plus tard')+'</button>':
+  existing&&allTreated?'<button type="button" id="mocResume" class="moc-button secondary">Annuler la correction</button>':'';
+ const correction=existing?.status==="done"&&!manual&&!running?
+  '<details class="moc-correct"><summary>Corriger la valeur sans refaire le test</summary>'+
+  (t.id==="posture"?'<label class="moc-field">Observation<select id="mocObservation"><option value="">Choisir une observation</option>'+
+    POSTURE_OPTIONS.map(([k,l])=>'<option value="'+k+'">'+HTML(l)+'</option>').join("")+'</select></label>':
+   '<label class="moc-field">'+HTML(t.label)+'<div class="moc-input-unit"><input id="mocValue" type="number" inputmode="decimal" min="0" step="'+(t.unit==="seconds"?"0.1":"1")+'"><span>'+HTML(t.unit)+'</span></div></label>')+
+  '<button type="button" id="mocSave" class="moc-button primary">'+saveLabel+'</button></details>':'';
  const manualTail='<div class="moc-auto-feedback" id="mocAutoFeedback">'+(isFields(t)?"Valeurs recopiées depuis l’appareil ; la caméra ne détermine pas ces mesures.":"Deux distances mesurées au ruban ; la caméra ne détermine pas cette valeur.")+'</div>'+
   '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Douleur, aide utilisée, essai invalide…"></textarea></label>'+
-  '<div class="moc-buttons moc-actionbar"><button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button>'+
-  '<button type="button" id="mocSave" class="moc-button primary" aria-keyshortcuts="Enter">Valider et passer au suivant<kbd aria-hidden="true">Entrée</kbd></button></div>';
- q("mocTestBody").innerHTML='<section class="moc-test"><span class="moc-kicker">Test '+(idx+1)+' sur '+TESTS.length+(t.device?' · '+HTML(t.device):'')+(t.trials?' · '+HTML(t.trials):'')+'</span><h3>'+HTML(t.title)+'</h3>'+
+  '<div class="moc-buttons moc-actionbar"><button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button>'+laterButton+
+  '<button type="button" id="mocSave" class="moc-button primary" aria-keyshortcuts="Enter">'+saveLabel+'<kbd aria-hidden="true">Entrée</kbd></button></div>';
+ q("mocTestBody").innerHTML='<section class="moc-test">'+stationMarkup(t)+'<span class="moc-kicker">Test '+(idx+1)+' sur '+TESTS.length+(t.device?' · '+HTML(t.device):'')+(t.trials?' · '+HTML(t.trials):'')+'</span><h3>'+HTML(t.title)+'</h3>'+
+ (existing?'<p class="moc-existing" data-status="'+HTML(existing.status)+'">'+(existing.status==="skipped"?"Marqué non réalisé":"Déjà enregistré")+' : <b>'+HTML(formatResult(existing,t))+'</b>. Une nouvelle validation remplace ce résultat.</p>':'')+
  '<details class="moc-instructions" '+(!running||manual?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
  (t.script?'<div><strong>À dire au patient</strong><p>'+HTML(t.script)+'</p></div>':'')+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div></details>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
- (manual?input+manualTail:running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"||isFields(t)?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":isFields(t)?"Saisie":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
+ (manual?valdMarkup(t)+input+manualTail:running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"||isFields(t)?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":isFields(t)?"Saisie":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
  (t.type==="balance"?'<div class="moc-rep-figure moc-balance-figure"><span>TEMPS MAINTENU</span><strong id="mocLiveBalance" aria-live="off">—</strong><small id="mocBalanceState">EN ATTENTE DU PIED LEVÉ</small></div>':'')+
  (t.type==="count"?'<div class="moc-rep-figure"><span>'+ (t.id==="sts"?"LEVERS EN DIRECT":"RÉPÉTITIONS EN DIRECT")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong><small>Estimation vidéo · à confirmer</small></div>':'')+
  (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">'+(isBalance(t)?"Arrêter l’essai":"Arrêter")+'</button><button type="button" class="moc-button secondary" id="mocRestartClock">'+(isBalance(t)?"↻ Refaire l’essai":"↻ Repartir de "+t.duration+" s")+'</button></div>':'')+'</div></div>'+input+
  (isBalance(t)?'<p class="moc-balance-reference">Yeux ouverts · 30 s maximum · durée réelle depuis le pied levé · 10 s = repère descriptif, non diagnostique. Arrêter en cas de perte d’équilibre ou de recours à un appui.</p>':'')+
  '<div class="moc-auto-feedback" id="mocAutoFeedback">'+(isFields(t)?"Valeurs saisies par l’opérateur ; la caméra ne détermine pas ces mesures.":t.id==="two_step"?"Deux distances mesurées manuellement ; la caméra ne détermine pas cette valeur.":"◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.")+'</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
- '<div class="moc-buttons moc-actionbar"><button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button>'+
- '<button type="button" id="mocSave" class="moc-button primary" aria-keyshortcuts="Enter">Valider et passer au suivant<kbd aria-hidden="true">Entrée</kbd></button></div>'
- :'<div class="moc-buttons moc-actionbar"><button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button><button type="button" id="mocStart" class="moc-button primary">'+(isBalance(t)?"Armer le suivi · départ automatique":t.id==="two_step"?"Commencer la saisie des deux essais":isFields(t)?"Commencer la saisie":t.duration?"Démarrer le chronomètre":"Commencer l’observation")+'</button></div>')+
+ '<div class="moc-buttons moc-actionbar"><button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button>'+laterButton+
+ '<button type="button" id="mocSave" class="moc-button primary" aria-keyshortcuts="Enter">'+saveLabel+'<kbd aria-hidden="true">Entrée</kbd></button></div>'
+ :correction+'<div class="moc-buttons moc-actionbar"><button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button>'+laterButton+'<button type="button" id="mocStart" class="moc-button primary">'+(isBalance(t)?"Armer le suivi · départ automatique":t.id==="two_step"?"Commencer la saisie des deux essais":isFields(t)?"Commencer la saisie":t.duration?(existing?"Refaire le test · chronomètre":"Démarrer le chronomètre"):(existing?"Refaire l’observation":"Commencer l’observation"))+'</button></div>')+
  '<div id="mocSkipPanel" class="moc-skip-panel" hidden><label class="moc-field">Motif du test non réalisé<select id="mocSkipReason"><option value="">Choisir un motif</option>'+
   SKIP_REASONS.map(([k,l])=>'<option value="'+k+'">'+HTML(l)+'</option>').join("")+'</select></label>'+
   '<div class="moc-buttons"><button type="button" id="mocSkipConfirm" class="moc-button primary">Confirmer · test non réalisé</button>'+
@@ -673,15 +818,68 @@ function renderStep(){
  if(isFields(t)){
   const preview=()=>{
    manualEdited=true;
-   const raw={};host.querySelectorAll("[data-field]").forEach(el=>{if(el.value!=="")raw[el.dataset.field]=Number(el.value)});
+   const raw=readFields(t);
    const d=deriveInstrumented(t.id,raw),out=q("mocFieldsComputed");if(!out)return;
    const parts=[];
+   if(t.dynamo&&dynamoUnit==="kg"){
+    const conv=(t.fields||[]).filter(f=>f.unit==="N"&&Number.isFinite(raw[f.key])).map(f=>(f.key.includes("left")?"G ":"D ")+String(raw[f.key]).replace(".",",")+" N");
+    if(conv.length)parts.push("Enregistré en newtons : "+conv.join(" · "));
+   }
+   const warn=q("mocWarnings");
+   if(warn){
+    const list=plausibilityWarnings(t.id,raw);
+    if(t.dynamo&&dynamoUnit==="kg"&&[...host.querySelectorAll("[data-field]")].some(el=>{const f=t.fields.find(x=>x.key===el.dataset.field);return f?.unit==="N"&&Number(el.value)>150}))
+     list.push("Valeur très haute pour des kilos : l’écran DynaMo est-il réglé en N ? Utilise la bascule N / kg.");
+    warn.innerHTML=list.map(x=>"<li>"+HTML(x)+"</li>").join("");warn.hidden=!list.length;
+   }
    if(Number.isFinite(d.gait_speed_ms))parts.push("Vitesse : "+String(d.gait_speed_ms).replace(".",",")+" m/s");
    if(Number.isFinite(d.lsi_pct))parts.push("Symétrie : "+String(d.lsi_pct).replace(".",",")+" %"+(d.weaker_side==="balanced"?"":" · côté plus faible : "+(d.weaker_side==="left"?"gauche":"droit")));
    out.textContent=parts.join(" · ");
   };
   host.querySelectorAll("[data-field]").forEach(el=>el.addEventListener("input",preview));
+  // Bascule d'unité DynaMo : convertit les valeurs déjà saisies, mémorise le choix.
+  host.querySelectorAll(".moc-unit-switch [data-unit]").forEach(b=>b.onclick=()=>{
+   const next=b.dataset.unit==="kg"?"kg":"N";if(next===dynamoUnit)return;
+   host.querySelectorAll("[data-field]").forEach(el=>{
+    const f=t.fields.find(x=>x.key===el.dataset.field);if(!f||f.unit!=="N"||el.value==="")return;
+    const n=toNewton(Number(el.value),dynamoUnit);el.value=String(fromNewton(n,next));
+   });
+   dynamoUnit=next;try{localStorage.setItem(DYNAMO_UNIT_KEY,next)}catch{}
+   host.querySelectorAll(".moc-unit-switch [data-unit]").forEach(x=>x.setAttribute("aria-pressed",String(x.dataset.unit===next)));
+   t.fields.filter(f=>f.unit==="N").forEach(f=>{const label=host.querySelector('[data-unit-label="'+f.key+'"]');if(label)label.textContent=next;
+    const input=host.querySelector('[data-field="'+f.key+'"]');if(input)input.step=next==="kg"?"0.01":fieldStep(f);});
+   preview();
+  });
+  if(t.walkway)bindGaitChrono();
+  if(existing?.status==="done"&&existing.fields){
+   host.querySelectorAll("[data-field]").forEach(el=>{
+    const v=existing.fields[el.dataset.field];if(!Number.isFinite(v))return;
+    const f=t.fields.find(x=>x.key===el.dataset.field);
+    el.value=String(t.dynamo&&f?.unit==="N"?fromNewton(v,dynamoUnit):v);
+   });
+   host.querySelectorAll("[data-choice]").forEach(el=>{const v=existing.fields[el.dataset.choice];if(v)el.value=v});
+   preview();manualEdited=false;
+  }
  }
+ // Correction : valeurs déjà enregistrées remises dans les champs.
+ if(existing?.status==="done"){
+  if(t.id==="two_step"&&Array.isArray(existing.attempts_cm)){
+   if(q("mocTwoStep1"))q("mocTwoStep1").value=String(existing.attempts_cm[0]);
+   if(q("mocTwoStep2"))q("mocTwoStep2").value=String(existing.attempts_cm[1]);
+   if(q("mocTwoStepHeight")&&Number.isFinite(existing.height_cm))q("mocTwoStepHeight").value=String(existing.height_cm);
+   q("mocTwoStep1")?.dispatchEvent(new Event("input"));manualEdited=false;
+  }
+  if(!running&&q("mocValue")&&Number.isFinite(existing.value))q("mocValue").value=String(existing.value);
+  if(!running&&q("mocObservation")&&existing.observation)q("mocObservation").value=existing.observation;
+ }
+ if(existing&&q("mocNote")&&existing.note)q("mocNote").value=existing.note;
+ if(q("mocLater"))q("mocLater").onclick=()=>gotoStep(later);
+ if(q("mocResume"))q("mocResume").onclick=()=>gotoStep("finished");
+ if(q("mocStationFrame"))q("mocStationFrame").onclick=()=>{
+  videoFocus=!videoFocus;updateConsultationLayout();
+  q("mocStationFrame").textContent=videoFocus?"Masquer le cadrage":"Vérifier le cadrage";
+ };
+ if(q("mocObservation")&&!running)q("mocObservation").addEventListener("change",()=>{manualEdited=true});
  if(q("mocStart"))q("mocStart").onclick=()=>startWithCountdown("start");
  if(q("mocSave"))q("mocSave").onclick=()=>submit("save");
  if(q("mocSkip"))q("mocSkip").onclick=()=>openSkipPanel();
@@ -799,7 +997,7 @@ async function startWithCountdown(action="start"){
  if(!room||panelMode!=="tests"||countdownPending||busy||!["start","restart"].includes(action))return;
  if(action==="start"&&room.progress?.step_status==="running"){setStatus("Le chronomètre fonctionne déjà.");return}
  if(action==="restart"&&room.progress?.step_status!=="running"){setStatus("Le test n’a pas encore démarré.");return}
- if(room.step_index===0&&!room.progress?.safety_confirmed&&!q("mocSafety")?.checked){
+ if(!room.progress?.safety_confirmed&&!q("mocSafety")?.checked){
   setStatus("Vérifiez et confirmez les conditions de sécurité avant de lancer le premier test.");
   return;
  }
@@ -866,18 +1064,17 @@ function openSkipPanel(){
 async function submit(event){
  if(busy||!room||!currentTest())return;
  const t=currentTest();const safety=!!room.progress?.safety_confirmed||!!q("mocSafety")?.checked;
- if(room.step_index===0&&!safety){setStatus("Confirmez d’abord la sécurité du test.");return}
+ if(!safety){setStatus("Coche d’abord la vérification de sécurité.");q("mocSafety")?.focus();return}
  const payload={action:"operator_test_update",session_id:room.id,step_code:t.id,event,safety_confirmed:safety};
  if(["start","restart"].includes(event))payload.duration_seconds=t.duration;
  if(event==="save"){
   const note=q("mocNote")?.value||"";
   payload.note=note;
   if(isFields(t)){
-   const raw={};
-   host.querySelectorAll("[data-field]").forEach(el=>{if(el.value!=="")raw[el.dataset.field]=Number(el.value)});
+   const raw=readFields(t);
    host.querySelectorAll("[data-choice]").forEach(el=>{if(el.value)raw[el.dataset.choice]=el.value});
    const checked=validateInstrumented(t.id,raw);
-   if(!checked.ok){setStatus("Saisie incomplète ou hors limites ("+checked.error.replace(/_/g," ")+"). Corrigez ou marquez le test non réalisé.");return}
+   if(!checked.ok){setStatus(fieldErrorText(t,checked.error)+" Corrige, ou marque le test non réalisé.");return}
    payload.fields=checked.fields;
    payload.measurement_source="operator_manual_entry";
   }else if(t.id==="two_step"){
@@ -923,7 +1120,8 @@ async function submit(event){
   payload.skip_reason=q("mocSkipReason")?.value||"";
   if(!SKIP_REASONS.some(([k])=>k===payload.skip_reason)){openSkipPanel();setStatus("Choisissez le motif du test non réalisé.");return}
  }
- const needsStart=event==="save"&&(isFields(t)||t.id==="two_step")&&room.progress?.step_status!=="running";
+ // Saisie directe ou correction sans refaire le test : démarrage implicite exigé par le serveur.
+ const needsStart=event==="save"&&room.progress?.step_status!=="running";
  busy=true;
  host.querySelectorAll(".moc-button").forEach(b=>{if(b.id!=="mocReturn")b.disabled=true});
  try{
@@ -1036,14 +1234,14 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261121-workspace-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261121-stations-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261121-workspace-v1");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261121-stations-v1");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1062,7 +1260,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261121-workspace-v1");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261121-stations-v1");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{

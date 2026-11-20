@@ -1,8 +1,8 @@
 // Clinical-style *descriptive* passport for supervised KŌMØ Motion demos.
 // No medical diagnosis, validated score, biological age or survival estimate.
-import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './motion-engine/intake-model.mjs?v=20261121-workspace-v1';
-import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs?v=20261121-workspace-v1';
-import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText} from './motion-protocol.mjs?v=20261121-workspace-v1';
+import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './motion-engine/intake-model.mjs?v=20261121-stations-v1';
+import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs?v=20261121-stations-v1';
+import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText} from './motion-protocol.mjs?v=20261121-stations-v1';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
  {id:'sts',name:stepById('sts').title,short:'Force fonctionnelle',unit:'levers / 30 s',

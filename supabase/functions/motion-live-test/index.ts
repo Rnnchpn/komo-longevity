@@ -598,14 +598,16 @@ Deno.serve(async(req:Request)=>{
   }
   return response(req,{error:"questionnaire_conflict_retry"},409);
  }
- if(action==="operator_tests_init"||action==="operator_test_update"){
+ if(action==="operator_tests_init"||action==="operator_test_update"||action==="operator_test_goto"){
   const id=s(b.session_id,50);
   if(!uuid(id))return response(req,{error:"invalid_session"},422);
   const {data:room,error:roomError}=await db.from("pulse_motion_live_sessions").select("*")
     .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
   if(roomError||!room)return response(req,{error:"session_not_found"},404);
   if(room.operator_user_id!==actor.id||!room.patient_id)return response(req,{error:"operator_owner_required"},403);
-  if(room.status!=="active"||new Date(room.expires_at).getTime()<=Date.now())
+  // Une consultation terminée peut être rouverte pour corriger un test, tant que la salle n'a pas expiré.
+  const reopening=action==="operator_test_goto"&&room.status==="completed";
+  if((room.status!=="active"&&!reopening)||new Date(room.expires_at).getTime()<=Date.now())
    return response(req,{error:"room_unavailable"},409);
   const {data:patient}=await db.from("patients").select("data_classification,status")
     .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
@@ -629,10 +631,32 @@ Deno.serve(async(req:Request)=>{
    return error||!data?response(req,{error:"initialization_conflict"},409):response(req,{ok:true,session:publicRow(data)});
   }
   const step=s(b.step_code,35),event=s(b.event,15);
-  if(!STEPS.includes(step)||room.stage_code!==step||room.step_index!==STEPS.indexOf(step))
+  if(action==="operator_test_goto"){
+   // Navigation libre : revenir corriger un test ou en reporter un. Les résultats déjà saisis restent
+   // en place jusqu'à leur remplacement ; un chronomètre en cours est simplement abandonné.
+   const done=old.results&&typeof old.results==="object"?old.results:{};
+   if(step==="finished"){
+    // Correction annulée : la consultation redevient terminée si les 13 tests ont un résultat.
+    if(!STEPS.every(id=>done[id]))return response(req,{error:"tests_incomplete"},409);
+    const {data,error}=await db.from("pulse_motion_live_sessions").update({
+      status:"completed",stage_code:"finished",step_index:STEPS.length,completed_at:now(),
+      progress:{...old,step_status:"pending",test_started_at:null},updated_at:now()
+    }).eq("id",id).eq("updated_at",room.updated_at).select("*").maybeSingle();
+    return error||!data?response(req,{error:"stale_state_retry"},409):response(req,{ok:true,session:publicRow(data)});
+   }
+   if(!STEPS.includes(step))return response(req,{error:"wrong_test_step"},409);
+   if(room.stage_code===step&&room.status==="active")return response(req,{ok:true,session:publicRow(room)});
+   const {data,error}=await db.from("pulse_motion_live_sessions").update({
+     status:"active",stage_code:step,step_index:STEPS.indexOf(step),completed_at:null,
+     progress:{...old,step_status:"pending",test_started_at:null},updated_at:now()
+   }).eq("id",id).eq("updated_at",room.updated_at).select("*").maybeSingle();
+   return error||!data?response(req,{error:"stale_state_retry"},409):response(req,{ok:true,session:publicRow(data)});
+  }
+  if(!STEPS.includes(step)||room.stage_code!==step)
    return response(req,{error:"wrong_test_step"},409);
   if(!["start","restart","save","skip"].includes(event))return response(req,{error:"invalid_action"},422);
-  if(room.step_index===0&&!old.safety_confirmed&&b.safety_confirmed!==true)
+  // Sécurité confirmée une fois par consultation, quel que soit le premier test réalisé.
+  if(!old.safety_confirmed&&b.safety_confirmed!==true)
    return response(req,{error:"safety_check_required"},422);
   const safety=!!old.safety_confirmed||b.safety_confirmed===true;
   // Explicit duration follows the CURRENT client protocol. Previous 20 s
@@ -709,9 +733,11 @@ Deno.serve(async(req:Request)=>{
       ...balanceMeta,...stamp,recorded_at:now()};
     }
    }else results[step]={status:"skipped",reason:skipReason,note,...stamp,recorded_at:now()};
-   next=room.step_index+1;
-   if(next>=STEPS.length){status="completed";stage="finished";finished=now();}
-   else stage=STEPS[next];
+   // Suivant = premier test sans résultat après celui-ci, puis depuis le début (ordre libre).
+   const from=STEPS.indexOf(step);
+   const pending=[...STEPS.slice(from+1),...STEPS.slice(0,from)].find(id=>!results[id]);
+   if(!pending){status="completed";stage="finished";next=STEPS.length;finished=now();}
+   else{stage=pending;next=STEPS.indexOf(pending);}
   }
   const {data,error}=await db.from("pulse_motion_live_sessions").update({
    status,stage_code:stage,step_index:next,progress,updated_at:now(),

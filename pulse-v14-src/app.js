@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261121-workspace-v1';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261121-stations-v1';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -677,9 +677,28 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261121-workspace-v1');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261121-stations-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
+}
+// Préparation de la salle (protocole v2.1) : coches mémorisées sur cet ordinateur pour la journée.
+const ROOM_PREP=[
+ ['forcedecks','<b>ForceDecks</b> : les deux plateformes allumées, appairées à l’app, posées à plat'],
+ ['height','<b>Taille</b> : toise ou ruban fixé au mur'],
+ ['chair','<b>Chaise</b> d’environ 43 cm, sans accoudoirs, calée contre le mur'],
+ ['walkway','<b>Couloir</b> : 4 m balisés au sol, 2 m libres avant et après, ruban pour le Two-Step'],
+ ['dynamo','<b>DynaMo Plus</b> chargé, poignée et pad à portée, table d’examen libre'],
+ ['iphone','<b>iPhone</b> chargé sur son trépied, page /camera ouverte']
+];
+function bindRoomPrep(){
+ const key='komo_room_prep_'+new Date().toISOString().slice(0,10);
+ let saved={};try{saved=JSON.parse(localStorage.getItem(key)||'{}')||{}}catch{}
+ const boxes=[...document.querySelectorAll('[data-prep]')];
+ const count=()=>{const n=boxes.filter(b=>b.checked).length;const el=$('#opPrepCount');
+  if(el){el.textContent=n===boxes.length?'Tout est prêt':n+' / '+boxes.length;el.dataset.ready=String(n===boxes.length)}};
+ boxes.forEach(b=>{b.checked=!!saved[b.dataset.prep];b.onchange=()=>{saved[b.dataset.prep]=b.checked;
+  try{localStorage.setItem(key,JSON.stringify(saved))}catch{};count()}});
+ count();
 }
 function motionLiveMonitor(){
   heading('Consultation',isProductionCenter()?'Consultation réelle':'Démonstration');
@@ -694,6 +713,10 @@ function motionLiveMonitor(){
     </ol>
     <header class="op-live-head"><div><h2>Nouvelle consultation</h2><p>Choisis le patient présent, puis active la caméra sur l’iPhone : les deux appareils se relient seuls, sans code.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
     <section class="op-start-panel"><div><h3>Qui consultes-tu ?</h3><p>${real?'Code dossier du patient présent (créé dans Patients).':'Dossier fictif de démonstration.'}</p></div><label>${real?'Patient (code dossier)':'Patient de démonstration'}<select id="opLivePatientChoice"></select></label><button type="button" class="button primary" id="opLiveBegin">Démarrer la consultation</button><p class="op-start-help" id="opLiveStartHelp" role="status">Une seule consultation à la fois · les bilans terminés restent archivés.</p></section>
+    <section class="op-prep" aria-label="Préparer la salle"><div class="op-prep-head"><h3>Salle prête ?</h3><span id="opPrepCount"></span></div>
+      <p>À cocher avant de faire entrer le patient. Les tests suivent cet ordre : plateformes, posture et marche, équilibre et bras, DynaMo, chaise.</p>
+      <ul class="op-prep-list">${ROOM_PREP.map(([id,label])=>'<li><label><input type="checkbox" data-prep="'+id+'"><span>'+label+'</span></label></li>').join('')}</ul>
+    </section>
     <section class="op-checkin-section op-rooms-section"><h3>Consultation en cours</h3><div id="opLiveRooms" aria-live="polite"><p>Recherche de la consultation…</p></div></section>
     <section class="op-iphone-card" aria-label="Sur l’iPhone">
       <h3>Sur l’iPhone, posé sur son trépied</h3>
@@ -707,6 +730,7 @@ function motionLiveMonitor(){
     <p class="op-live-caution">${real?'Consultation réelle : l’iPhone sert de caméra du cabinet, sans enregistrement (WebRTC). PULSE ne contient que le code dossier ; l’identité reste sur la fiche papier. Chaque mesure est validée par toi avant d’être retenue.':'Démonstration : l’iPhone sert de caméra du cabinet, sans enregistrement (WebRTC). Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.'}</p>
   </div>`;
   $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
+  bindRoomPrep();
   const demoPatients=S.patients.filter(consultablePatient);
   const patientChoice=$('#opLivePatientChoice');
   if(patientChoice){
@@ -987,7 +1011,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261121-workspace-v1');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261121-stations-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         openVideo:openOperatorCamera,preferredSessionId:S.patient?.id?

@@ -7,7 +7,7 @@
 
 export const PROTOCOL={
  id:'KOMO_MOTION',
- version:'2.0.0',
+ version:'2.1.0',
  code:'KOMO_MOTION_V2',
  mode:'CORE',
  label:'KŌMØ Motion · consultation supervisée',
@@ -41,72 +41,88 @@ export const POSTURE_OPTIONS=[
 const FOOTWEAR=[['barefoot','Pieds nus'],['socks','Chaussettes'],['shoes','Chaussures']];
 const WALKING_AID=[['none','Aucune'],['cane','Canne'],['walker','Déambulateur'],['other','Autre']];
 
-export const BLOCKS={
- A:'Mesures de base',
- B:'Plateformes ForceDecks',
- C:'Équilibre et forces',
- D:'Bras et posture'
+// Stations de la consultation (v2.1) : le patient change de poste 5 fois, l'iPhone 3 fois.
+// camera : placement de l'iPhone pendant la station (null = iPhone non utilisé).
+export const STATIONS={
+ A:{label:'Plateformes ForceDecks',camera:null,
+  place:'Taille au mur, puis le patient monte sur les deux plateformes et y reste pour les trois tests.'},
+ B:{label:'Posture et marche',camera:'profile',
+  place:'iPhone sur trépied, perpendiculaire au couloir, à 3 m environ, à hauteur du bassin, cadré sur le milieu des 4 m.'},
+ C:{label:'Équilibre et bras',camera:'front',
+  place:'iPhone de face, à 3 m environ, à hauteur du bassin : corps entier visible, chevilles comprises.'},
+ D:{label:'Force · DynaMo',camera:null,
+  place:'Chaise et table d’examen. Ouvre l’app DynaMo ; l’iPhone n’est pas utilisé.'},
+ E:{label:'Lever de chaise',camera:'three_quarter',
+  place:'Chaise de 43 cm sans accoudoirs contre le mur ; iPhone de trois-quarts à 2–3 m, tête et pieds visibles.'}
 };
+export const CAMERA_LABELS={profile:'iPhone de profil',front:'iPhone de face',three_quarter:'iPhone de trois-quarts'};
+export const BLOCKS=Object.fromEntries(Object.entries(STATIONS).map(([k,v])=>[k,v.label]));
 
-// Les 13 étapes, dans l'ordre officiel (du moins au plus exigeant).
+// Les 13 étapes, dans l'ordre officiel v2.1 : regroupées par station, le statique avant l'effort,
+// la force maximale avant l'endurance (le lever de chaise 30 s, le plus fatigant, est en dernier).
 // kind : fields (saisie d'appareil) · two_step · count (chrono + compteur vidéo) · balance · observation.
-// fields[].decimals = précision acceptée par le serveur ; choices = listes fermées.
+// fields[].decimals = précision acceptée par le serveur ; fields[].vald = libellé affiché par l'app VALD.
+// choices = listes fermées ; vald (étape) = test à lancer et réglages dans l'app VALD.
 export const STEPS=[
  {id:'anthropometry',block:'A',kind:'fields',title:'Taille et masse',short:'Mensurations',
-  device:'Mètre · pesée ForceDecks',trials:'1 mesure',duration:0,
-  setup:'Pieds nus ou chaussettes, dos au mur pour la taille. Masse lue sur la pesée ForceDecks (plateformes à zéro).',
-  script:'« Je mesure votre taille, puis je vous pèse. »',
-  instruction:'Saisir la taille, la masse, le chaussage et l’aide de marche : ces conditions sont reprises à chaque contrôle.',
+  device:'Toise murale · pesée ForceDecks',trials:'1 mesure',duration:0,
+  setup:'Taille : pieds nus ou en chaussettes, talons, fesses et épaules contre le mur, regard horizontal. Masse : plateformes à zéro, le patient monte un pied sur chaque et reste immobile.',
+  script:'« Je mesure votre taille. Montez ensuite sur les deux plateformes et restez immobile. »',
+  instruction:'Saisir la taille, la masse lue dans l’app ForceDecks, le chaussage et l’aide de marche : ces conditions sont reprises à chaque contrôle.',
+  vald:{app:'ForceDecks',test:'Pesée de début de test (Quiet Stand)',read:'Poids affiché après la pesée'},
   fields:[
    {key:'height_cm',label:'Taille',unit:'cm',min:100,max:230,decimals:1},
-   {key:'body_mass_kg',label:'Masse',unit:'kg',min:25,max:250,decimals:1}
+   {key:'body_mass_kg',label:'Masse',unit:'kg',min:25,max:250,decimals:1,vald:'Poids · pesée ForceDecks'}
   ],
   choices:[
    {key:'footwear',label:'Chaussage pendant le bilan',options:FOOTWEAR},
    {key:'walking_aid',label:'Aide de marche',options:WALKING_AID,default:'none'}
   ]},
- {id:'gait_4m',block:'A',kind:'fields',title:'Marche 4 m · allure habituelle',short:'Marche 4 m',
-  device:'Chronomètre · iPhone de profil',trials:'2 passages',duration:0,
-  setup:'Couloir droit : 2 m d’élan, 4 m mesurés au ruban, 2 m de décélération. Aide de marche notée.',
-  script:'« Marchez à votre allure habituelle, comme dans la rue. »',
-  instruction:'Chrono au franchissement de la ligne de départ puis d’arrivée par le premier pied. Deux passages ; la vitesse est calculée sur la moyenne.',
+ {id:'fd_quiet_stand',block:'A',kind:'fields',title:'Quiet Stand 30 s · ForceDecks',short:'Quiet Stand',
+  device:'2 ForceDecks Mini',trials:'1 essai de 30 s',duration:0,
+  setup:'Le patient reste sur les plateformes : pieds à largeur d’épaules sur les repères, mains sur les hanches, buste droit, regard devant.',
+  script:'« Gardez les pieds fixes et restez aussi immobile que possible pendant 30 secondes. »',
+  instruction:'Lancer le test dans l’app ForceDecks, puis recopier les trois valeurs affichées. Le L ou R après l’asymétrie indique le côté le plus chargé.',
+  vald:{app:'ForceDecks',test:'Quiet Stand (QSB)',settings:'Durée 30 s · yeux ouverts · surface ferme',
+   tip:'Si l’ellipse ou l’asymétrie de force n’apparaît pas, ajoute-les une fois aux résultats instantanés du test, ou lis-les dans VALD Hub.'},
+  fields:[
+   {key:'fd_qs_excursion_mm',label:'Déplacement total du centre de pression',unit:'mm',min:0,max:10000,decimals:1,vald:'Total Excursion [mm]'},
+   {key:'fd_qs_ellipse_mm2',label:'Aire de l’ellipse',unit:'mm²',min:0,max:100000,decimals:1,vald:'Area of CoP Ellipse [mm²]'},
+   {key:'fd_qs_asym_pct',label:'Asymétrie de force moyenne',unit:'%',min:0,max:100,decimals:1,vald:'Mean Force Asymmetry [% L,R]'}
+  ],
+  choices:[{key:'fd_qs_asym_side',label:'Côté le plus chargé (L ou R affiché)',options:SIDE_OPTIONS}]},
+ {id:'fd_sts',block:'A',kind:'fields',title:'Sit-to-Stand · ForceDecks',short:'STS plateformes',
+  device:'2 ForceDecks Mini · chaise',trials:'3 répétitions',duration:0,
+  setup:'Chaise stable d’environ 43 cm, sans accoudoirs, contre le mur. Plateformes juste devant sans la toucher, un pied sur chaque, largeur de hanches. Plateformes à zéro avant que le patient y pose les pieds.',
+  script:'« Bras croisés sur la poitrine. Restez immobile, levez-vous, restez debout une seconde, rasseyez-vous. »',
+  instruction:'Immobile 2 à 3 s avant et entre chaque répétition, 1 s debout immobile. Trois répétitions contrôlées, puis recopier l’asymétrie au lever.',
+  vald:{app:'ForceDecks',test:'Sit to Stand',settings:'Hauteur de chaise saisie · 3 répétitions · bras croisés'},
+  fields:[
+   {key:'fd_sts_asym_pct',label:'Asymétrie de force au lever',unit:'%',min:0,max:100,decimals:1,vald:'Asymétrie de force en phase de lever [% L,R]'}
+  ],
+  choices:[{key:'fd_sts_asym_side',label:'Côté dominant (L ou R affiché)',options:SIDE_OPTIONS}]},
+ {id:'posture',block:'B',kind:'observation',title:'Posture de profil · observation',short:'Posture',
+  device:'iPhone de profil',trials:'1 observation',duration:0,unit:'observation',ui_unit:'observation',
+  options:POSTURE_OPTIONS,
+  setup:'Le patient se place au milieu du couloir, strictement de profil, pieds visibles ; iPhone immobile à hauteur du bassin.',
+  script:'« Tenez-vous debout comme d’habitude, bras le long du corps, regard devant. »',
+  instruction:'Observer l’alignement sagittal apparent. Une caméra 2D ne mesure pas la SVA radiographique.',
+  label:'Observation visuelle'},
+ {id:'gait_4m',block:'B',kind:'fields',title:'Marche 4 m · allure habituelle',short:'Marche 4 m',
+  device:'Chronomètre PULSE · couloir balisé',trials:'2 passages',duration:0,walkway:true,
+  setup:'Couloir droit : 2 m d’élan, 4 m chronométrés entre deux repères au sol, 2 m pour ralentir. Chaussage et aide de marche identiques au début du bilan.',
+  script:'« Marchez à votre allure habituelle, comme dans la rue, jusqu’au bout du couloir. »',
+  instruction:'Départ quand le premier pied franchit la ligne des 0 m, arrivée quand le premier pied franchit la ligne des 4 m. Deux passages ; la vitesse est calculée sur la moyenne.',
   fields:[
    {key:'gait_4m_s_1',label:'Passage 1',unit:'s',min:1,max:30,decimals:2},
    {key:'gait_4m_s_2',label:'Passage 2',unit:'s',min:1,max:30,decimals:2}
   ]},
- {id:'two_step',block:'A',kind:'two_step',title:'Two-Step · deux grands pas',short:'Two-Step',
+ {id:'two_step',block:'B',kind:'two_step',title:'Two-Step · deux grands pas',short:'Two-Step',
   device:'Ruban métrique',trials:'2 essais',duration:0,unit:'cm',ui_unit:'cm',max:650,integer:false,
-  setup:'Sol plat antidérapant, ruban métrique au sol, ligne de départ, opérateur à proximité et espace dégagé.',
+  setup:'Même couloir : ruban métrique au sol depuis une ligne de départ, sol antidérapant, praticien à proximité.',
   script:'« Depuis la ligne, faites deux pas aussi grands que possible, sans courir ni sauter, puis joignez les pieds. »',
   instruction:'Mesurer la distance entre la ligne et la pointe des pieds. Deux essais, le meilleur est retenu. Recommencer tout essai avec perte d’équilibre.',
   label:'Meilleure distance des deux pas'},
- {id:'fd_quiet_stand',block:'B',kind:'fields',title:'Quiet Stand 30 s · ForceDecks',short:'Quiet Stand',
-  device:'2 ForceDecks Mini',trials:'1 essai de 30 s',duration:0,
-  setup:'Plateformes à zéro. Pieds à largeur d’épaules sur les repères au sol. Mains sur les hanches, buste droit, regard devant.',
-  script:'« Gardez les pieds fixes et restez aussi immobile que possible. »',
-  instruction:'30 s yeux ouverts, lancé dans VALD. Recopier les valeurs affichées par VALD.',
-  fields:[
-   {key:'fd_qs_excursion_mm',label:'Déplacement total du centre de pression',unit:'mm',min:0,max:10000,decimals:1},
-   {key:'fd_qs_ellipse_mm2',label:'Aire de l’ellipse',unit:'mm²',min:0,max:100000,decimals:1},
-   {key:'fd_qs_asym_pct',label:'Asymétrie de force moyenne',unit:'%',min:0,max:100,decimals:1}
-  ],
-  choices:[{key:'fd_qs_asym_side',label:'Côté le plus chargé',options:SIDE_OPTIONS}]},
- {id:'sts',block:'B',kind:'count',title:'Lever de chaise 30 s',short:'Chaise 30 s',
-  device:'iPhone de trois-quarts · chaise',trials:'1 essai de 30 s',duration:30,unit:'repetitions',ui_unit:'répétitions',
-  max:100,integer:true,
-  setup:'Chaise stable contre un mur, caméra de trois-quarts profil, tête et pieds visibles.',
-  script:'« Levez-vous et asseyez-vous complètement, le plus de fois possible en 30 secondes, bras croisés si possible. »',
-  instruction:'Démarrer le chronomètre. Comparer le compteur vidéo aux levers complets observés et corriger si besoin.',
-  label:'Nombre de levers complets'},
- {id:'fd_sts',block:'B',kind:'fields',title:'Sit-to-Stand-to-Sit · ForceDecks',short:'STS plateformes',
-  device:'2 ForceDecks Mini · chaise',trials:'3 répétitions',duration:0,
-  setup:'Plateformes juste devant la chaise sans la toucher, un pied sur chaque. Hauteur de chaise saisie dans VALD, plateformes à zéro.',
-  script:'« Mains croisées sur la poitrine. Restez immobile, levez-vous, restez debout une seconde, rasseyez-vous. »',
-  instruction:'Immobile 2 à 3 s avant et entre chaque répétition, 1 s debout immobile. Trois répétitions contrôlées.',
-  fields:[
-   {key:'fd_sts_asym_pct',label:'Asymétrie de force au lever (affichée par VALD)',unit:'%',min:0,max:100,decimals:1}
-  ],
-  choices:[{key:'fd_sts_asym_side',label:'Côté dominant',options:SIDE_OPTIONS}]},
  {id:'unipodal_left',block:'C',kind:'balance',title:'Équilibre · appui pied gauche',short:'Équilibre G',
   device:'iPhone de face',trials:'1 essai, 30 s max',duration:30,unit:'seconds',ui_unit:'seconds',max:30,integer:false,
   setup:'Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.',
@@ -119,50 +135,53 @@ export const STEPS=[
   script:'« Levez le pied gauche sans toucher l’autre jambe et tenez le plus longtemps possible. Je reste à côté de vous. »',
   instruction:'Armer le suivi : le chronomètre démarre au lever du pied et s’arrête au retour d’appui, à une compensation ou après 30 s.',
   label:'Appui unipodal droit (secondes)'},
- {id:'dynamo_grip',block:'C',kind:'fields',title:'Préhension · DynaMo',short:'Préhension',
-  device:'DynaMo Plus · poignée',trials:'1 essai à 50 % + 3 maximaux par côté',duration:0,
-  setup:'Assis, coude à 90°, épaule contre le corps, poignet neutre. DynaMo horizontal en configuration préhension.',
-  script:'« 3, 2, 1 — serrez, serrez, serrez… et relâchez. »',
-  instruction:'Un essai à 50 %, puis 3 essais maximaux par côté en alternant, 30 s de repos. Saisir le meilleur essai valide.',
-  pair:['grip_left_n','grip_right_n'],
-  fields:[
-   {key:'grip_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:1500,decimals:1},
-   {key:'grip_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:1500,decimals:1}
-  ]},
- {id:'dynamo_knee_ext',block:'C',kind:'fields',title:'Extension de genou · DynaMo',short:'Genou',
-  device:'DynaMo Plus · pad',trials:'3 essais maximaux par côté',duration:0,
-  setup:'Assis au bord de la table, hanches et genoux à 90°, pieds sans contact avec le sol, bras croisés. Pad sur la face antérieure du tibia.',
-  script:'« 3, 2, 1 — poussez, poussez, poussez… et relâchez. »',
-  instruction:'3 essais de 3 à 5 s par côté, 30 s de repos. Arrêt immédiat si douleur. Même distance pad–malléole à chaque séance.',
-  pair:['knee_ext_left_n','knee_ext_right_n'],
-  fields:[
-   {key:'knee_ext_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:2500,decimals:1},
-   {key:'knee_ext_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:2500,decimals:1},
-   {key:'knee_pad_distance_cm',label:'Distance pad – malléole',unit:'cm',min:0,max:60,decimals:1,optional:true}
-  ]},
- {id:'dynamo_hip_abd',block:'C',kind:'fields',title:'Abduction de hanche · DynaMo',short:'Hanche',
-  device:'DynaMo Plus · pad',trials:'3 essais maximaux par côté',duration:0,
-  setup:'Allongé sur le dos, jambe tendue. Pad sur la face latérale de la jambe juste au-dessus de la malléole, même point à chaque séance.',
-  script:'« 3, 2, 1 — poussez vers l’extérieur… et relâchez. »',
-  instruction:'3 essais de 3 à 5 s par côté, 30 s de repos. Arrêt immédiat si douleur.',
-  pair:['hip_abd_left_n','hip_abd_right_n'],
-  fields:[
-   {key:'hip_abd_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:2000,decimals:1},
-   {key:'hip_abd_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:2000,decimals:1}
-  ]},
- {id:'arms',block:'D',kind:'count',title:'Élévation des bras 30 s',short:'Bras',
+ {id:'arms',block:'C',kind:'count',title:'Élévation des bras 30 s',short:'Bras',
   device:'iPhone de face',trials:'1 essai de 30 s',duration:30,unit:'movements',ui_unit:'mouvements',max:100,integer:true,
-  setup:'Face à la caméra, bras et poignets visibles, espace libre autour du corps.',
+  setup:'Même placement que l’équilibre : face à la caméra, bras et poignets visibles, espace libre autour du corps.',
   script:'« Levez et abaissez les bras en cycles complets, le plus de fois possible en 30 secondes, sans aller jusqu’à la douleur. »',
   instruction:'Démarrer le chronomètre. Comparer le compteur aux cycles complets observés et corriger si besoin.',
   label:'Nombre de mouvements'},
- {id:'posture',block:'D',kind:'observation',title:'Posture de profil · observation',short:'Posture',
-  device:'iPhone de profil',trials:'1 observation',duration:0,unit:'observation',ui_unit:'observation',
-  options:POSTURE_OPTIONS,
-  setup:'Profil strict, pieds visibles, téléphone à hauteur du bassin, caméra immobile.',
-  script:'« Tenez-vous debout comme d’habitude, regard devant. »',
-  instruction:'Observer l’alignement sagittal apparent. Une caméra 2D ne mesure pas la SVA radiographique.',
-  label:'Observation visuelle'}
+ {id:'dynamo_grip',block:'D',kind:'fields',title:'Préhension · DynaMo',short:'Préhension',
+  device:'DynaMo Plus · poignée',trials:'1 essai à 50 % + 3 maximaux par côté',duration:0,dynamo:true,
+  setup:'Assis, coude à 90°, épaule contre le corps, poignet neutre. DynaMo Plus avec la poignée de préhension.',
+  script:'« 3, 2, 1 — serrez, serrez, serrez… et relâchez. »',
+  instruction:'Un essai à 50 %, puis 3 essais maximaux par côté en alternant, 30 s de repos. Saisir le meilleur essai valide de chaque côté.',
+  vald:{app:'DynaMo',test:'Grip (préhension)',settings:'Position neutre · 3 essais par côté'},
+  pair:['grip_left_n','grip_right_n'],
+  fields:[
+   {key:'grip_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:1500,decimals:1,vald:'Force max · gauche'},
+   {key:'grip_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:1500,decimals:1,vald:'Force max · droite'}
+  ]},
+ {id:'dynamo_knee_ext',block:'D',kind:'fields',title:'Extension de genou · DynaMo',short:'Genou',
+  device:'DynaMo Plus · pad',trials:'3 essais maximaux par côté',duration:0,dynamo:true,
+  setup:'Assis au bord de la table, hanches et genoux à 90°, pieds sans contact avec le sol, bras croisés. Pad sur la face antérieure du tibia.',
+  script:'« 3, 2, 1 — poussez, poussez, poussez… et relâchez. »',
+  instruction:'3 essais de 3 à 5 s par côté, 30 s de repos. Arrêt immédiat si douleur. Même distance pad–malléole à chaque séance.',
+  vald:{app:'DynaMo',test:'Knee Extension (extension de genou)',settings:'Assis 90° · 3 essais par côté'},
+  pair:['knee_ext_left_n','knee_ext_right_n'],
+  fields:[
+   {key:'knee_ext_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:2500,decimals:1,vald:'Force max · gauche'},
+   {key:'knee_ext_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:2500,decimals:1,vald:'Force max · droite'},
+   {key:'knee_pad_distance_cm',label:'Distance pad – malléole',unit:'cm',min:0,max:60,decimals:1,optional:true}
+  ]},
+ {id:'dynamo_hip_abd',block:'D',kind:'fields',title:'Abduction de hanche · DynaMo',short:'Hanche',
+  device:'DynaMo Plus · pad',trials:'3 essais maximaux par côté',duration:0,dynamo:true,
+  setup:'Allongé sur le dos, jambe tendue. Pad sur la face latérale de la jambe juste au-dessus de la malléole, même point à chaque séance.',
+  script:'« 3, 2, 1 — poussez vers l’extérieur… et relâchez. »',
+  instruction:'3 essais de 3 à 5 s par côté, 30 s de repos. Arrêt immédiat si douleur.',
+  vald:{app:'DynaMo',test:'Hip Abduction (abduction de hanche)',settings:'Décubitus dorsal · 3 essais par côté'},
+  pair:['hip_abd_left_n','hip_abd_right_n'],
+  fields:[
+   {key:'hip_abd_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:2000,decimals:1,vald:'Force max · gauche'},
+   {key:'hip_abd_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:2000,decimals:1,vald:'Force max · droite'}
+  ]},
+ {id:'sts',block:'E',kind:'count',title:'Lever de chaise 30 s',short:'Chaise 30 s',
+  device:'iPhone de trois-quarts · chaise',trials:'1 essai de 30 s',duration:30,unit:'repetitions',ui_unit:'répétitions',
+  max:100,integer:true,
+  setup:'Chaise d’environ 43 cm sans accoudoirs, contre le mur, plateformes retirées. Assis au milieu de l’assise, pieds à plat, bras croisés. iPhone de trois-quarts, tête et pieds visibles.',
+  script:'« Levez-vous complètement et rasseyez-vous, le plus de fois possible en 30 secondes, bras croisés. »',
+  instruction:'Démarrer le chronomètre. Comparer le compteur vidéo aux levers complets observés et corriger si besoin.',
+  label:'Nombre de levers complets'}
 ];
 export const STEP_IDS=STEPS.map(s=>s.id);
 export const V2_ORDER=STEP_IDS;
@@ -212,6 +231,41 @@ export function validateInstrumented(stepId,raw={}){
   fields[c.key]=v;
  }
  return {ok:true,fields};
+}
+// DynaMo : l'écran peut afficher N, kg ou lb ; PULSE enregistre toujours en newtons.
+export const KGF_TO_N=9.80665;
+export const toNewton=(value,unit)=>unit==='kg'?round(value*KGF_TO_N,1):value;
+export const fromNewton=(value,unit)=>unit==='kg'?round(value/KGF_TO_N,2):value;
+// Contrôles de vraisemblance NON bloquants : faute de frappe, mauvaise unité, essai non représentatif.
+// Ce ne sont pas des normes cliniques ; aucun message n'interprète le résultat du patient.
+const DYNAMO_LOW_N={dynamo_grip:50,dynamo_knee_ext:40,dynamo_hip_abd:30};
+export function plausibilityWarnings(stepId,f={}){
+ const w=[];
+ if(stepId==='anthropometry'&&finite(f.height_cm)&&finite(f.body_mass_kg)){
+  const ratio=f.body_mass_kg/((f.height_cm/100)**2);
+  if(ratio<14||ratio>55)w.push('Taille et masse à vérifier : le rapport entre les deux est inhabituel.');
+ }
+ if(stepId==='gait_4m'&&finite(f.gait_4m_s_1)&&finite(f.gait_4m_s_2)&&f.gait_4m_s_1>0&&f.gait_4m_s_2>0){
+  const a=f.gait_4m_s_1,b=f.gait_4m_s_2,gap=Math.abs(a-b)/Math.min(a,b);
+  if(gap>0.2)w.push('Écart de '+Math.round(gap*100)+' % entre les deux passages : refais un passage si l’un n’était pas représentatif.');
+  const speed=4/((a+b)/2);
+  if(speed<0.2||speed>2.5)w.push('Vitesse inhabituelle : vérifie les deux temps.');
+ }
+ const spec=INSTRUMENTED_STEPS[stepId];
+ if(spec?.dynamo&&spec.pair){
+  const low=DYNAMO_LOW_N[stepId]||0;
+  if(spec.pair.some(k=>finite(f[k])&&f[k]>0&&f[k]<low))
+   w.push('Valeur très basse pour des newtons : l’écran DynaMo est-il réglé en kg ? Utilise la bascule N / kg.');
+  const sym=symmetry(f[spec.pair[0]],f[spec.pair[1]]);
+  if(sym&&sym.lsi_pct<60)w.push('Plus de 40 % d’écart entre gauche et droite : vérifie la saisie (côtés, unité).');
+ }
+ return w;
+}
+// Prochain test à faire : le premier sans résultat après le test courant, puis depuis le début.
+export function nextPendingStep(results={},fromId){
+ const from=STEP_IDS.indexOf(fromId);
+ const order=[...STEP_IDS.slice(from+1),...STEP_IDS.slice(0,Math.max(0,from))];
+ return order.find(id=>!results[id])||null;
 }
 // Lignes descriptives pour le rapport et le PDF : valeur, unité, conditions ; aucune norme inventée.
 export function instrumentedRows(results={}){

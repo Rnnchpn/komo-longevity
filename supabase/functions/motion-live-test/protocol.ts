@@ -3,7 +3,7 @@
 export const SPEC:any={
  "protocol": {
   "id": "KOMO_MOTION",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "code": "KOMO_MOTION_V2",
   "mode": "CORE",
   "device_set": [
@@ -54,34 +54,6 @@ export const SPEC:any={
    ]
   },
   {
-   "id": "gait_4m",
-   "kind": "fields",
-   "duration": 0,
-   "fields": [
-    {
-     "key": "gait_4m_s_1",
-     "min": 1,
-     "max": 30,
-     "decimals": 2
-    },
-    {
-     "key": "gait_4m_s_2",
-     "min": 1,
-     "max": 30,
-     "decimals": 2
-    }
-   ],
-   "choices": []
-  },
-  {
-   "id": "two_step",
-   "kind": "two_step",
-   "duration": 0,
-   "unit": "cm",
-   "max": 650,
-   "integer": false
-  },
-  {
    "id": "fd_quiet_stand",
    "kind": "fields",
    "duration": 0,
@@ -117,14 +89,6 @@ export const SPEC:any={
    ]
   },
   {
-   "id": "sts",
-   "kind": "count",
-   "duration": 30,
-   "unit": "repetitions",
-   "max": 100,
-   "integer": true
-  },
-  {
    "id": "fd_sts",
    "kind": "fields",
    "duration": 0,
@@ -148,6 +112,44 @@ export const SPEC:any={
    ]
   },
   {
+   "id": "posture",
+   "kind": "observation",
+   "duration": 0,
+   "options": [
+    "neutral",
+    "apparent_offset",
+    "not_interpretable"
+   ]
+  },
+  {
+   "id": "gait_4m",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "gait_4m_s_1",
+     "min": 1,
+     "max": 30,
+     "decimals": 2
+    },
+    {
+     "key": "gait_4m_s_2",
+     "min": 1,
+     "max": 30,
+     "decimals": 2
+    }
+   ],
+   "choices": []
+  },
+  {
+   "id": "two_step",
+   "kind": "two_step",
+   "duration": 0,
+   "unit": "cm",
+   "max": 650,
+   "integer": false
+  },
+  {
    "id": "unipodal_left",
    "kind": "balance",
    "duration": 30,
@@ -162,6 +164,14 @@ export const SPEC:any={
    "unit": "seconds",
    "max": 30,
    "integer": false
+  },
+  {
+   "id": "arms",
+   "kind": "count",
+   "duration": 30,
+   "unit": "movements",
+   "max": 100,
+   "integer": true
   },
   {
    "id": "dynamo_grip",
@@ -243,22 +253,12 @@ export const SPEC:any={
    ]
   },
   {
-   "id": "arms",
+   "id": "sts",
    "kind": "count",
    "duration": 30,
-   "unit": "movements",
+   "unit": "repetitions",
    "max": 100,
    "integer": true
-  },
-  {
-   "id": "posture",
-   "kind": "observation",
-   "duration": 0,
-   "options": [
-    "neutral",
-    "apparent_offset",
-    "not_interpretable"
-   ]
   }
  ],
  "skip_reasons": [

@@ -23,6 +23,9 @@ const STEPS=[
  ["heels","Élévations sur les pointes","Ancien test conservé pour les séances antérieures."]
 ];
 const V2_STEP_COUNT=13;
+// Placement de l'iPhone du cabinet par test (protocole v2.1, stations B, C et E).
+const PLACEMENT={posture:"de profil",gait_4m:"de profil",two_step:"de profil",unipodal_left:"de face",unipodal_right:"de face",arms:"de face",sts:"de trois-quarts"};
+const placementText=code=>PLACEMENT[code]?"Place l’iPhone "+PLACEMENT[code]+", à hauteur du bassin, corps entier visible.":"Ce test n’utilise pas la caméra : laisse l’iPhone en place.";
 let overlay=null,videoStream=null,timer=null,signalTimer=null,guestToken="",live=null,busy=false,opening=false,cameraInfo="Caméra désactivée";
 let facing="environment",peer=null,peerSender=null,peerId="",pendingWatch=null,signalCursor=0,offering=false,wakeLock=null,signalPolling=false;
 let cameraStation=false,stationStart=null,stationStop=null,stationRoomId="";
@@ -42,7 +45,7 @@ function injectStyles(){
  if(document.getElementById("mliveStylesheet"))return;
  const style=document.createElement("link");
  style.id="mliveStylesheet";style.rel="stylesheet";
- style.href=new URL("./motion-live-guest-v1.css?v=20261121-workspace-v1",import.meta.url).href;
+ style.href=new URL("./motion-live-guest-v1.css?v=20261121-stations-v1",import.meta.url).href;
  document.head.append(style);
 }
 function feedback(s){if(el("mliveFeedback"))el("mliveFeedback").textContent=s||""}
@@ -102,7 +105,7 @@ function update(){
   const connected=peer?.connectionState==="connected";
   el("mliveTitle").textContent=state==="completed"?"Séance terminée.":"Caméra de consultation";
   el("mliveDescription").textContent=state==="active"?
-   (cur?"Test en cours : "+cur[1]+". La vidéo est envoyée à ton ordinateur ; tu pilotes les mesures là-bas.":"Caméra connectée au poste de consultation.") :
+   (cur?"Test en cours : "+cur[1]+". "+placementText(cur[0])+" Tu pilotes les mesures sur l’ordinateur.":"Caméra connectée au poste de consultation.") :
    "Sur l’ordinateur, ouvre « En direct », sélectionne ton iPhone avec ce code, puis associe le dossier fictif.";
   el("mliveState").textContent=state==="completed"?"Séance terminée":connected?"◉ Vidéo affichée sur l’ordinateur":state==="active"?"Opérateur associé · connexion vidéo en cours":"En attente de la connexion depuis l’ordinateur";
   btn.hidden=true;
