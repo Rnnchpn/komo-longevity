@@ -580,7 +580,7 @@ function patients(){
       <button class="button primary" type="submit">Créer le dossier et ouvrir la consultation →</button>
     </form>`}
     <section class="op-patients-section" aria-label="Dossiers patients"><div class="op-patients-section-head"><h3>Patients</h3><span>${active.length}</span></div>
-    <div class="patient-list" id="opPatientRegular">${active.map(card).join('')||'<p class="op-patients-empty">Aucun dossier patient hors démonstration dans ce centre.</p>'}</div></section>
+    <div class="patient-list" id="opPatientRegular">${active.map(card).join('')||'<p class="op-patients-empty">Aucun patient pour l’instant. Crée le premier dossier avec « Nouveau patient ».</p>'}</div></section>
     ${demos.length?`<details class="op-demo-group" ${active.length===0?'open':''}><summary><span>Dossiers de démonstration</span><span class="op-demo-count">${demos.length}</span></summary><div class="patient-list" id="opPatientDemos">${demos.map(card).join('')}</div></details>`:''}
     <p id="opPatientNoResult" class="op-patients-no-results" hidden>Aucun dossier ne correspond à votre recherche.</p>
   </section>`;

@@ -30,6 +30,7 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
 .app-shell.app-shell-pro{background:var(--pw-canvas);color:var(--pw-ink);font-family:var(--pw-sans);
  grid-template-columns:216px minmax(0,1fr)}
 .app-shell.app-shell-pro :focus-visible{outline:2px solid var(--pw-bronze);outline-offset:2px}
+@media(min-width:1001px){
 .app-shell.app-shell-pro .sidebar{background:var(--pw-panel);border-right:1px solid var(--pw-line);
  padding:26px 14px 18px;display:flex;flex-direction:column;gap:26px}
 .app-shell.app-shell-pro .sidebar .brand{font:600 19px/1 var(--pw-sans);letter-spacing:.24em;color:var(--pw-ink);padding:0 10px}
@@ -48,6 +49,19 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
 .app-shell.app-shell-pro .center-switch select{min-height:40px;border-radius:10px;border-color:var(--pw-line);font:500 13px var(--pw-sans);color:var(--pw-ink);text-overflow:ellipsis}
 .app-shell.app-shell-pro .sidebar .mode-switch{display:none}
 .app-shell.app-shell-pro .logout{justify-self:start;padding:6px 10px;font:500 12px var(--pw-sans);color:var(--pw-muted)}
+
+}
+/* Tablette verticale et téléphone : barre d'onglets en bas, icônes du protocole. */
+@media(max-width:1000px){
+ .app-shell.app-shell-pro .sidebar .brand,.app-shell.app-shell-pro .sidebar-caption,.app-shell.app-shell-pro .sidebar-bottom{display:none}
+ .app-shell.app-shell-pro .sidebar nav .nav-item::before{display:none}
+ .app-shell.app-shell-pro .sidebar nav .nav-dot{display:grid;place-items:center;width:22px;height:22px;background:none!important}
+ .app-shell.app-shell-pro .sidebar nav .nav-dot svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+ .app-shell.app-shell-pro .sidebar nav .nav-item{font:600 11px/1.1 var(--pw-sans);color:var(--pw-ink-2)}
+ .app-shell.app-shell-pro .sidebar nav .nav-item.active{background:var(--pw-ink);color:#fff}
+ .app-shell-pro .pulse-mobile-access .mode-switch:has(button[data-mode="patient"]:disabled){display:none}
+ .app-shell-pro .pulse-mobile-access{justify-content:flex-end}
+}
 
 /* En-tête de page : titre sobre, contexte du centre, compte. */
 .app-shell.app-shell-pro .page{padding:26px clamp(20px,3vw,44px) 40px}
@@ -362,4 +376,8 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
  .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar .nav-item{width:44px;padding:0;justify-content:center}
  .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar .nav-item>span:not(.nav-dot){display:none}
  .app-shell.app-shell-pro[data-pulse-view="operator"] .sidebar-bottom{display:none}
+}
+@media(max-width:1000px){
+ /* Sur tablette verticale, la barre d'action reste au-dessus des onglets du bas. */
+ .app-shell-pro .moc-test:is(:has(#mocSave),:has(#mocStart),:has(#mocIntakeNext))>.moc-buttons{bottom:calc(78px + env(safe-area-inset-bottom,0px));border-radius:14px;margin-bottom:12px;border:1px solid var(--pw-line);box-shadow:var(--pw-shadow)}
 }
