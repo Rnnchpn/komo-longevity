@@ -515,6 +515,21 @@ function trajectoryMarkup(t){
   '<p class="moc-help">● changement supérieur au repère publié (marche 0,1 m/s · chaise 2 levers · préhension 50 N). Autres écarts : descriptifs.</p>'+
   (t.warnings||[]).map(w=>'<p class="moc-trajectory-warning">⚠ '+HTML(w)+'</p>').join('');
 }
+// Âge (année de naissance) et sexe de référence : situent chaque capacité par rapport à son repère publié.
+function patientProfile(){return patient?{birth_date:patient.birth_date||null,sex_at_birth:patient.sex_at_birth||null}:null}
+const ZONE_TEXT={priority:"Priorité",consolidate:"À consolider",solid:"Solide",follow:"Suivi",missing:"Non mesuré"};
+function capacityMarkup(c){
+ const shown=c.measures.filter(m=>m.value!==null&&m.value!==undefined).slice(0,2);
+ return '<div class="moc-capacity is-'+HTML(c.zone)+'"><div class="moc-capacity-head"><strong>'+HTML(c.name)+'</strong>'+
+  '<span class="moc-zone is-'+HTML(c.zone)+'">'+HTML(ZONE_TEXT[c.zone]||"")+'</span></div>'+
+  (shown.length?shown.map(m=>'<p class="moc-capacity-value"><b>'+HTML(m.label)+' : '+HTML(m.value)+(m.unit?' '+HTML(m.unit):'')+'</b> <small>'+HTML(m.reference)+'</small></p>').join(""):
+   '<p class="moc-capacity-value"><small>Non mesuré lors de ce bilan</small></p>')+
+  '<p class="moc-capacity-why">'+HTML(c.why)+'</p></div>';
+}
+function priorityMarkup(p,i){
+ return '<li class="moc-priority"><span class="moc-priority-rank">'+(i+1)+'</span><div><strong>'+HTML(p.name)+'</strong>'+
+  '<p>'+HTML(p.why)+'</p><p class="moc-priority-goal">Objectif à 6 semaines : <b>'+HTML(p.objective)+'</b></p></div></li>';
+}
 function renderReportSection(){
  if(!host||!extras||!room)return;
  const results=room.progress?.results||{};
@@ -522,8 +537,9 @@ function renderReportSection(){
  const label=patient?[patient.first_name,patient.last_name].filter(Boolean).join(" "):"Dossier fictif";
  const simulated=room.progress?.questionnaire?.simulated===true;
  const trajectory=trajectoryState.key===trajectoryKey()?trajectoryState.data:null;
- const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,trajectory,simulated,real:isRealDossier()});
+ const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,trajectory,simulated,real:isRealDossier(),patient:patientProfile()});
  const plan=passport.actionPlan;
+ const lp=passport.longevity;
  const doneAll=TESTS.filter(t=>results[t.id]?.status==="done").length;
  const skippedAll=TESTS.filter(t=>results[t.id]?.status==="skipped").length;
  q("mocProgressText").textContent="Passeport · "+doneAll+"/"+TESTS.length+" étapes · "+summary.answered+"/22 réponses";
@@ -531,7 +547,7 @@ function renderReportSection(){
  q("mocStepNav").hidden=true;
  const finished=room.status==="completed";
  const resultCard=t=>'<div class="moc-passport-result"><span>'+HTML(t.short)+'</span><strong>'+HTML(t.display)+'</strong></div>';
- const exerciseCard=e=>'<div class="moc-exercise-card"><div><strong>'+HTML(e.title)+'</strong><small>'+HTML(e.purpose)+'</small></div>'+
+ const exerciseCard=e=>'<div class="moc-exercise-card"><div><strong>'+HTML(e.title)+'</strong><small>'+HTML(e.relevance||e.purpose)+'</small></div>'+
   '<b>'+HTML(e.dose)+'</b><span>'+HTML(e.frequency)+'</span><p>'+HTML(e.instructions)+'</p></div>';
  const nutritionCard=item=>'<div class="moc-nutrition-card"><div><strong>'+HTML(item.name)+'</strong><em>'+HTML(item.status)+'</em></div>'+
   '<p>'+HTML(item.benefit)+'</p><small>'+HTML(item.guard)+'</small></div>';
@@ -543,13 +559,20 @@ function renderReportSection(){
   (g.points===null?'À compléter':g.points+'/'+g.maxPoints+' points')+'</strong>'+
   '<small>'+(g.score===null?'Score indisponible':g.score+'/100 · indice déclaré')+'</small></div>').join('');
  q("mocTestBody").innerHTML='<section class="moc-test moc-report-section moc-passport-section moc-action-report">'+
-  '<span class="moc-kicker">KŌMØ MOTION PASSPORT · SIX-WEEK ACTION PLAN</span>'+
+  '<span class="moc-kicker">KŌMØ MOTION · PASSEPORT ET PROGRAMME 6 SEMAINES</span>'+
   '<h3>Votre feuille de route</h3>'+
+  '<p class="moc-capacity-headline">'+HTML(lp.headline)+'</p>'+
   (simulated?'<p class="moc-demo-warning">SCÉNARIO FICTIF · Réponses simulées, aucun avis médical individualisé.</p>':'')+
   '<div class="moc-action-metrics"><div><strong>'+doneAll+'/'+TESTS.length+'</strong><span>étapes réalisées</span></div>'+
    '<div><strong>'+passport.questionnaire.answered+'/22</strong><span>réponses enregistrées</span></div>'+
    '<div><strong>'+(passport.questionnaire.complete?passport.questionnaire.index+'/100':'—')+
    '</strong><span>indice fonctionnel déclaré</span></div></div>'+
+  '<h4>Vos capacités</h4>'+
+  (patient&&(!patient.sex_at_birth||patient.sex_at_birth==='not_stated')?'<p class="moc-help">Sexe non précisé dans le dossier : les repères les plus prudents sont appliqués.</p>':'')+
+  '<div class="moc-capacity-list">'+lp.capacities.map(capacityMarkup).join("")+'</div>'+
+  (lp.priorities.length?'<h4>Vos '+lp.priorities.length+' priorités</h4><ol class="moc-priority-list">'+lp.priorities.map(priorityMarkup).join("")+'</ol>':
+   '<p class="moc-help">Aucune priorité : capacités mesurées solides, programme d’entretien.</p>')+
+  '<details class="moc-report-details"><summary>Questionnaire : profil déclaré</summary>'+
   '<h4>Votre profil en bref</h4>'+
   '<p class="moc-report-answers-state">'+(passport.questionnaire.answered===22?
    '✓ Questionnaire complet : 22 réponses prises en compte.':
@@ -560,6 +583,7 @@ function renderReportSection(){
    'Score global indisponible tant que les 22 réponses ne sont pas enregistrées')+
    '</strong><p>20 réponses notées de 0 à 4 ; âge et objectif descriptifs. Plus les points de difficulté sont élevés, plus le profil déclaré est limité. L’indice pondéré sur 100 suit la direction inverse. Barème KŌMØ non validé ; distinct du Motion Score.</p></div>'+
   '<div class="moc-domain-points">'+pointGroups+'</div>'+
+  '</details>'+
   '<div class="moc-passport-highlights">'+reasons+'</div>'+
   '<h4>Tests réalisés</h4><div class="moc-results-compact">'+passport.measures.map(resultCard).join('')+'</div>'+
   instrumentedMarkup(passport.instrumented)+
@@ -567,7 +591,7 @@ function renderReportSection(){
    TESTS.map(t=>'<option value="'+t.id+'">'+HTML(t.title)+'</option>').join("")+'</select></label>'+
    '<button type="button" class="moc-button secondary" id="mocCorrectGo">Rouvrir ce test</button></div>'+
   '<div id="mocTrajectory" class="moc-trajectory">'+trajectoryMarkup(trajectory)+'</div>'+
-  '<div class="moc-action-section-title"><h4>Exercices à la maison</h4><small>Progression à adapter et valider</small></div>'+
+  '<div class="moc-action-section-title"><h4>Programme maison</h4><small>'+HTML(plan.schedule||"Progression à adapter et valider")+'</small></div>'+
   '<div class="moc-exercise-grid">'+plan.exercises.slice(0,4).map(exerciseCard).join('')+'</div>'+
   '<details class="moc-report-details"><summary>Marche, progression et consignes complémentaires</summary>'+
    plan.exercises.slice(4).map(exerciseCard).join('')+'<p class="moc-help">'+HTML(plan.safeguards)+'</p></details>'+
@@ -581,11 +605,11 @@ function renderReportSection(){
   '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le passeport complet (6 catégories)</button>'+
   '<div class="moc-category-export"><label for="mocExportCategory">Exporter une grande catégorie</label>'+
    '<select id="mocExportCategory" aria-label="Choisir la catégorie">'+
-    '<option value="synthese">1 · Synthèse et diagramme</option>'+
-    '<option value="tests">2 · Tests et qualité de mesure</option>'+
-    '<option value="exercices">3 · Exercices à domicile</option>'+
-    '<option value="nutrition">4 · Nutrition et compléments</option>'+
-    '<option value="suivi">5 · Suivi à 6 semaines</option>'+
+    '<option value="synthese">1 · Vos capacités</option>'+
+    '<option value="exercices">2 · Priorités et programme maison</option>'+
+    '<option value="tests">3 · Résultats détaillés</option>'+
+    '<option value="suivi">4 · Suivi à 6 semaines</option>'+
+    '<option value="nutrition">5 · Nutrition et compléments</option>'+
     '<option value="questionnaire">6 · Questionnaire détaillé (22 réponses)</option></select>'+
    '<button class="moc-button secondary" id="mocDownloadChapter"'+(!finished?' disabled':'')+'>↓ Exporter cette catégorie</button></div>'+
   '<button type="button" class="moc-button secondary" id="mocReportQuestionnaire">Questionnaires</button></div>'+
@@ -637,7 +661,7 @@ function renderReportSection(){
    status.textContent="Création du PDF "+(type==="all"?"complet (toutes sections)":"par catégorie")+"…";
    const history=await loadTrajectory(true);
    const filename=await extras.downloadClinicReport(confirmed,persisted.progress?.results||{},new Date(),
-    {subject:label,simulated:persisted.progress?.questionnaire?.simulated===true,real:isRealDossier(),category:type,trajectory:history});
+    {subject:label,simulated:persisted.progress?.questionnaire?.simulated===true,real:isRealDossier(),category:type,trajectory:history,patient:patientProfile()});
    status.textContent="✓ PDF généré à partir de "+progress.completed+"/"+progress.total+
     " réponses confirmées : "+filename;
   }catch(error){

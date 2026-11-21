@@ -102,7 +102,8 @@ export function clinicReportSummary(answers={},results={}){
 }
 export function clinicPassport(answers={},results={},date=new Date(),options={}){
  return buildClinicPassport(answers,results,{date,subject:options.subject||'Dossier fictif',
-  simulated:options.simulated===true,real:options.real===true,trajectory:options.trajectory||null});
+  simulated:options.simulated===true,real:options.real===true,trajectory:options.trajectory||null,
+  patient:options.patient?{birth_date:options.patient.birth_date||null,sex_at_birth:options.patient.sex_at_birth||null}:null});
 }
 export async function downloadClinicReport(answers={},results={},generatedAt=new Date(),options={}){
  const passport=clinicPassport(answers,results,generatedAt,options);

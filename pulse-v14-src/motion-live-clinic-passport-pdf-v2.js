@@ -1,4 +1,4 @@
-// KŌMØ Motion Passport — six complete categories, including 22 answers.
+// KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
 import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261121-forcedecks-v1';
 const cleaner=value=>String(value??'')
@@ -11,11 +11,11 @@ const P={dark:[28,52,42],gold:[180,146,94],paper:[251,249,245],sand:[242,237,228
  text:[43,54,46],muted:[110,118,108],line:[219,215,203],pale:[225,234,224],white:[255,255,253]};
 export const CLINIC_PASSPORT_EXPORTS=[
  {value:'all',label:'Passeport complet (6 catégories)'},
- {value:'synthese',label:'1. Synthèse & diagramme'},
- {value:'tests',label:'2. Résultats & qualité de mesure'},
- {value:'exercices',label:'3. Exercices à domicile'},
- {value:'nutrition',label:'4. Nutrition & compléments'},
- {value:'suivi',label:'5. Suivi à 6 semaines'},
+ {value:'synthese',label:'1. Vos capacités'},
+ {value:'exercices',label:'2. Priorités & programme maison'},
+ {value:'tests',label:'3. Résultats détaillés & qualité de mesure'},
+ {value:'suivi',label:'4. Suivi à 6 semaines'},
+ {value:'nutrition',label:'5. Nutrition & compléments'},
  {value:'questionnaire',label:'6. Questionnaire détaillé (22 réponses)'}
 ];
 export async function downloadClinicPassport(report,category='all'){
@@ -54,6 +54,15 @@ export async function downloadClinicPassport(report,category='all'){
   txt(title,M,46,{sz:23,serif:true});
   if(subtitle)words(subtitle,M,55,C,{sz:8.5,lh:4.4,max:2,col:P.muted});
  };
+ const ZONE_STYLE={priority:{fill:[150,70,50],ink:P.white,label:'PRIORITE'},
+  consolidate:{fill:P.gold,ink:P.white,label:'A CONSOLIDER'},solid:{fill:P.dark,ink:P.white,label:'SOLIDE'},
+  follow:{fill:P.pale,ink:P.dark,label:'SUIVI'},missing:{fill:P.line,ink:P.muted,label:'NON MESURE'}};
+ const pill=(zone,xRight,y)=>{
+  const z=ZONE_STYLE[zone]||ZONE_STYLE.missing;font(6.8,true);
+  const w=pdf.getTextWidth(z.label)+7;
+  box(xRight-w,y-4.4,w,6.4,z.fill,3.2);txt(z.label,xRight-w/2,y,{sz:6.8,bold:true,col:z.ink,align:'center'});
+ };
+ const lp=report.longevity||{capacities:[],priorities:[],exercises:[],objectives:[]};
  const metric=(x,y,w,label,value)=>{
   box(x,y,w,26,P.sand,2);
   txt(label.toUpperCase(),x+6,y+8,{sz:7,bold:true,col:P.muted});
@@ -100,37 +109,60 @@ export async function downloadClinicPassport(report,category='all'){
   txt(axes[3].short,x+4,y+52,{sz:8,bold:true});
   txt(fmt(axes[3].value),x+4,y+59,{sz:7.5,col:P.gold});
  }
- function synthese(){
-  page(1,'Synthese & diagramme','Les resultats sont presentes sans score clinique invente.');
-  metric(M,67,54,'Tests realises',report.measured+'/6');
-  metric(M+62,67,54,'Questionnaire',report.questionnaire.answered+'/22');
-  metric(M+124,67,54,'Indice declare',report.questionnaire.complete?
-   fmt(report.questionnaire.index)+'/100':'Incomplet');
-  box(M,102,112,120,P.sand,3);drawRadar(M+4,110);
-  txt('POINTS DE GENE : '+(report.questionnaire.complete?
-   fmt(report.questionnaire.rawPoints)+' / '+fmt(report.questionnaire.maxPoints):'INCOMPLET'),
-   M+7,212,{sz:7,bold:true,col:P.muted});
-  txt('20 ITEMS COTES / NON VALIDE',M+7,219,{sz:6.7,col:P.muted});
-  txt('MESURES OBSERVEES',M+120,109,{sz:8,bold:true,col:P.gold});
-  report.measures.forEach((m,i)=>{
-   const yy=120+i*16.3;
-   box(M+118,yy-7,60,14,P.sand,2);
-   txt(m.short,M+121,yy-2,{sz:7.4,col:P.muted});
-   txt(m.id==='posture'?'Observation qualitative':m.value===null?'Non mesure':
-    fmt(m.value)+(m.id.startsWith('unipodal')?' s':m.id==='two_step'?' cm':' reps'),M+121,yy+3.6,
-    {sz:8.5,bold:true});
+ function capacites(){
+  page(1,'Vos capacites','Cinq capacites liees a l autonomie et a la longevite, chacune situee par rapport a un repere publie.');
+  const small=(x,y,w,label,value)=>{box(x,y,w,19,P.sand,2);
+   txt(label.toUpperCase(),x+5,y+6.5,{sz:6.6,bold:true,col:P.muted});txt(value,x+5,y+15,{sz:12.5,bold:true,col:P.dark});};
+  small(M,63,56,'Tests realises',(report.steps?report.steps.done+'/'+report.steps.total:report.measured));
+  small(M+61,63,56,'Priorites',lp.priorities.length?String(lp.priorities.length):'Entretien');
+  small(M+122,63,56,'Controle','6 semaines');
+  words(lp.headline||'',M,90,C,{sz:10.5,lh:4.6,max:1,bold:true,col:P.dark});
+  let y=96;
+  lp.capacities.forEach(c=>{
+   box(M,y,C,33,P.sand,2.5);
+   txt(c.name,M+6,y+8,{sz:10.5,bold:true,col:P.dark});
+   pill(c.zone,R-5,y+8);
+   const shown=c.measures.filter(m=>m.value!==null&&m.value!==undefined).slice(0,2);
+   if(!shown.length)txt('Non mesure lors de ce bilan',M+6,y+14.5,{sz:8,col:P.muted});
+   shown.forEach((m,i)=>{
+    const v=m.label+' : '+m.value+(m.unit?' '+m.unit:'');
+    txt(v,M+6,y+14.5+i*5,{sz:8.2,bold:true});
+    font(8.2,true);txt('('+m.reference+')',M+8+pdf.getTextWidth(cleaner(v)),y+14.5+i*5,{sz:7,col:P.muted});
+   });
+   words(c.why,M+6,y+25.2,C-12,{sz:7,lh:3.4,max:2,col:P.muted});
+   y+=35;
   });
-  txt('LECTURE RAPIDE',M,235,{sz:8,bold:true,col:P.gold});
-  let y=245;
-  for(const highlight of plan.highlights){
-   txt(highlight.label,M,y,{sz:7.5,bold:true,col:P.muted});
-   y=words(highlight.value,M+35,y,C-37,{sz:8.7,lh:4,max:2,bold:true})+5;
+ }
+ function priorites(){
+  page(2,'Vos priorites','Ce qui compte le plus pour votre autonomie, et l objectif a atteindre au controle des 6 semaines.');
+  let y=66;
+  if(!lp.priorities.length){
+   box(M,y,C,40,P.pale,3);
+   txt('Vos capacites mesurees sont solides',M+8,y+12,{sz:12,bold:true,col:P.dark});
+   words('Le programme ci-apres sert a les garder. Objectifs : '+lp.objectives.map(o=>o.target).join(' ; ')+'.',M+8,y+22,C-16,{sz:8.6,lh:4.4,max:3});
+   y+=46;
   }
-  txt(report.simulated?'PROFIL FICTIF / NON DIAGNOSTIQUE':'BILAN EXPLORATOIRE / NON DIAGNOSTIQUE',
-   R,271,{sz:7.3,col:P.gold,align:'right'});
+  lp.priorities.forEach((p,i)=>{
+   box(M,y,C,58,P.sand,3);
+   txt('0'+(i+1),M+7,y+11,{sz:9,bold:true,col:P.gold});
+   txt(p.name,M+17,y+11,{sz:14,bold:true,serif:true,col:P.dark});
+   pill(p.zone,R-6,y+10);
+   txt('POURQUOI C EST IMPORTANT',M+7,y+20,{sz:6.8,bold:true,col:P.gold});
+   words(p.why,M+7,y+25,C-14,{sz:8,lh:3.9,max:2});
+   txt('CE QUE NOUS AVONS MESURE',M+7,y+35,{sz:6.8,bold:true,col:P.gold});
+   words(p.basis||'Mesures du bilan',M+7,y+40,C-14,{sz:7.6,lh:3.7,max:1,col:P.muted});
+   box(M+7,y+44,C-14,10,P.white,2);
+   txt('OBJECTIF A 6 SEMAINES',M+11,y+50.5,{sz:6.8,bold:true,col:P.muted});
+   txt(p.objective,R-11,y+50.5,{sz:9.6,bold:true,col:P.dark,align:'right'});
+   y+=62;
+  });
+  box(M,Math.max(y,252)-2,C,22,P.pale,3);
+  const yy=Math.max(y,252);
+  txt('VOTRE RYTHME',M+8,yy+5,{sz:7,bold:true,col:P.gold});
+  words((plan.schedule||'')+' '+(lp.recheck||''),M+8,yy+10.5,C-16,{sz:8.2,lh:4,max:2});
  }
  function tests(){
-  page(2,'Resultats & qualite','Les valeurs brutes sont distinctes des questionnaires et normes externes.');
+  page(3,'Resultats detailles','Les valeurs brutes sont distinctes des questionnaires et normes externes.');
   let y=65;
   report.measures.forEach((m,i)=>{
    box(M,y,C,26,P.sand,2);
@@ -151,12 +183,12 @@ export async function downloadClinicPassport(report,category='all'){
   // Protocole V2 : valeurs VALD, chrono et mètre saisies par l'opérateur. Aucune norme ni score.
   const rows=(report.instrumented||[]).filter(r=>r.status!=='missing');
   if(!rows.length)return;
-  page('2B','Mesures instrumentees','Valeurs saisies depuis ForceDecks, DynaMo, metre et chronometre. Valeurs personnelles de depart, sans norme ni score composite.');
+  page('3B','Mesures instrumentees','Valeurs saisies depuis ForceDecks, DynaMo, metre et chronometre. Valeurs personnelles de depart, sans norme ni score composite.');
   let y=65;
   rows.forEach(r=>{
    const lines=r.status==='skipped'?[...(r.lines||['Non realise']),...(r.note?['Note : '+r.note]:[])]:(r.lines.length?r.lines:['Aucune valeur']);
    const h=11+lines.length*4.3;
-   if(y+h>274){page('2B','Mesures instrumentees (suite)','');y=65;}
+   if(y+h>274){page('3B','Mesures instrumentees (suite)','');y=65;}
    box(M,y,C,h,P.sand,2);
    txt(r.name,M+7,y+7.5,{sz:9.6,bold:true});
    if(r.device)txt(r.device,R-7,y+7.5,{sz:7.2,col:P.muted,align:'right'});
@@ -168,7 +200,7 @@ export async function downloadClinicPassport(report,category='all'){
   // J0 -> S6 -> S12 : memes tests, memes conditions. Ecarts descriptifs, aucun score composite.
   const t=report.trajectory;
   if(!t||!Array.isArray(t.points)||t.points.length<2||!t.rows?.length)return;
-  page('5B','Trajectoire','Evolution de vos mesures entre les consultations : '+t.points.map(p=>p.label+' ('+p.date.split('-').reverse().join('/')+')').join(' -> ')+'.');
+  page('4B','Trajectoire','Evolution de vos mesures entre les consultations : '+t.points.map(p=>p.label+' ('+p.date.split('-').reverse().join('/')+')').join(' -> ')+'.');
   const pts=t.points.slice(-4),cols=pts.length;
   const labelW=70,deltaW=26,colW=(C-labelW-deltaW)/cols;
   let y=68;
@@ -178,7 +210,7 @@ export async function downloadClinicPassport(report,category='all'){
   txt('ECART',R-3,y,{sz:7.2,bold:true,col:P.white,align:'right'});
   y+=9;
   t.rows.forEach((r,idx)=>{
-   if(y>262){page('5B','Trajectoire (suite)','');y=68;}
+   if(y>262){page('4B','Trajectoire (suite)','');y=68;}
    if(idx%2===0)box(M,y-5.2,C,8,P.sand);
    txt(r.label+(r.unit?' ('+r.unit+')':''),M+3,y,{sz:7.6});
    const vals=r.display.slice(-cols);
@@ -194,19 +226,21 @@ export async function downloadClinicPassport(report,category='all'){
   (t.warnings||[]).forEach(w=>{y=words('Comparabilite : '+w,M,y,C,{sz:7,lh:3.4,max:2,col:[150,70,50]})+1;});
  }
  function exercises(){
-  page(3,'Exercices a domicile','Programme educatif a adapter avec un professionnel selon la securite et les symptomes.');
-  txt('4 EXERCICES PRINCIPAUX',M,67,{sz:8.5,bold:true,col:P.gold});
-  const work=plan.exercises.slice(0,4);
+  page(2,'Votre programme maison','Choisi a partir de vos resultats. Une chaise, un mur, un plan de travail : 20 minutes, 3 fois par semaine.');
+  txt('4 EXERCICES CIBLES',M,67,{sz:8.5,bold:true,col:P.gold});
+  const work=plan.exercises.filter(e=>e.key!=='walk').slice(0,4);
   work.forEach((e,i)=>{
    const col=i%2,row=Math.floor(i/2),x=M+col*91,y=73+row*68;
    box(x,y,87,63,P.sand,3);
    txt('0'+(i+1),x+7,y+10,{sz:8,bold:true,col:P.gold});
    txt(e.title,x+18,y+10,{sz:10,bold:true});
-   txt(e.dose,x+7,y+23,{sz:15,bold:true,col:P.dark});
-   txt(e.frequency,x+7,y+31,{sz:8,col:P.muted});
-   words(e.instructions,x+7,y+40,74,{sz:8,lh:4,max:3});
+   if(e.relevance)txt(e.relevance,x+18,y+15.5,{sz:6.8,bold:true,col:P.gold});
+   txt(e.dose,x+7,y+26,{sz:13.5,bold:true,col:P.dark});
+   txt(e.frequency,x+7,y+32.5,{sz:8,col:P.muted});
+   words(e.instructions,x+7,y+40,74,{sz:7.8,lh:3.8,max:3});
+   if(e.progression)words('Ensuite : '+e.progression,x+7,y+55,74,{sz:7,lh:3.4,max:2,col:P.muted});
   });
-  const walk=plan.exercises[4]||{title:'Marche adaptée',dose:'Selon tolérance',frequency:'Plusieurs fois par semaine'};
+  const walk=plan.exercises.find(e=>e.key==='walk')||plan.exercises[4]||{title:'Marche adaptée',dose:'Selon tolérance',frequency:'Plusieurs fois par semaine'};
   box(M,217,C,29,P.pale,3);
   txt('EN COMPLEMENT · '+walk.title,M+7,226,{sz:9,bold:true});
   txt(walk.dose+' · '+walk.frequency,M+7,235,{sz:10});
@@ -215,7 +249,7 @@ export async function downloadClinicPassport(report,category='all'){
  }
  function nutrition(){
   // Two spacious pages avoid truncating supplement contraindications.
-  page(4,'Nutrition & apports','Priorite aux aliments, a l exercice adapte et aux habitudes durables.');
+  page(5,'Nutrition & apports','Priorite aux aliments, a l exercice adapte et aux habitudes durables.');
   plan.food.forEach((a,i)=>{
    const y=70+i*75;
    box(M,y,C,67,P.pale,3);
@@ -229,7 +263,7 @@ export async function downloadClinicPassport(report,category='all'){
   words('Les resultats Motion ne permettent pas d identifier une carence vitaminique ou une insuffisance proteique. Le poids, les apports, les symptomes, les traitements et les antecedents sont indispensables avant toute recommandation individualisee.',
    M+9,246,C-18,{sz:8.5,lh:4.6,max:4,col:P.muted});
 
-  page(4,'Complements & precautions','Options a discuter, jamais prescrites automatiquement par le questionnaire ou la camera.');
+  page(5,'Complements & precautions','Options a discuter, jamais prescrites automatiquement par le questionnaire ou la camera.');
   plan.supplements.forEach((a,i)=>{
    const y=69+i*39.6;
    box(M,y,C,36,P.sand,2);
@@ -243,7 +277,7 @@ export async function downloadClinicPassport(report,category='all'){
  }
 
  function suivi(){
-  page(5,'Suivi sur six semaines','Progression graduelle et controle des resultats dans des conditions comparables.');
+  page(4,'Suivi sur six semaines','Progression graduelle et controle des resultats dans des conditions comparables.');
   let y=70;
   plan.timeline.forEach((t,i)=>{
    box(M,y,C,48,P.sand,3);
@@ -252,15 +286,25 @@ export async function downloadClinicPassport(report,category='all'){
    t.tasks.forEach((task,j)=>words('- '+task,M+8,y+27+j*5,C-16,{sz:7.8,lh:4.1,max:1}));
    y+=55;
   });
-  txt('A REEVALUER',M,239,{sz:8.5,bold:true,col:P.gold});
+  txt('VOS OBJECTIFS A 6 SEMAINES',M,239,{sz:8.5,bold:true,col:P.gold});
+  if(!plan.monitoring.length)txt('Objectifs fixes au prochain bilan.',M,248,{sz:8.5,col:P.muted});
   plan.monitoring.forEach((m,i)=>{
    const yy=248+i*7.6;
    txt(m.name,M,yy,{sz:8.5});
-   txt(m.value+' '+m.unit,R,yy,{sz:8.5,bold:true,align:'right'});
+   txt(m.value+(m.unit?' '+m.unit:''),R,yy,{sz:8.5,bold:true,align:'right'});
   });
  }
  function questionnaire(){
   const groups=report.questionnaire.groups||[];
+  if(report.questionnaire.complete){
+   page(6,'Votre ressenti','Questionnaire en 22 reponses : ce que vous vivez au quotidien, a cote de ce que nous avons mesure.');
+   box(M,66,112,120,P.sand,3);drawRadar(M+4,74);
+   txt('POINTS DE GENE : '+fmt(report.questionnaire.rawPoints)+' / '+fmt(report.questionnaire.maxPoints),M+7,176,{sz:7,bold:true,col:P.muted});
+   txt('20 ITEMS COTES / NON VALIDE',M+7,182,{sz:6.7,col:P.muted});
+   txt('INDICE DECLARE',M+122,74,{sz:7,bold:true,col:P.muted});
+   txt(fmt(report.questionnaire.index)+'/100',M+122,86,{sz:17,bold:true,col:P.dark});
+   words('Plus haut = moins de limitations declarees. Bareme KOMO interne, distinct des mesures et sans valeur diagnostique.',M+122,96,54,{sz:7.6,lh:3.8,max:6,col:P.muted});
+  }
   const printGroups=(subset,part)=>{
    page(6,part===1?'Questionnaire : autonomie':'Questionnaire : habitudes',
     'Reponses exactes enregistrees. '+report.questionnaire.answered+' / '+report.questionnaire.total+
@@ -308,9 +352,10 @@ export async function downloadClinicPassport(report,category='all'){
   printGroups(groups.slice(0,2),1);
   printGroups(groups.slice(2),2);
  }
- const renderers={synthese,tests,instruments,trajectoire,exercices:exercises,nutrition,suivi,questionnaire};
- const chapters=category==='all'?['synthese','tests','instruments','trajectoire','exercices','nutrition','suivi','questionnaire']:
-  category==='tests'?['tests','instruments']:category==='suivi'?['suivi','trajectoire']:[category];
+ const renderers={synthese:capacites,tests,instruments,trajectoire,priorites,exercices:exercises,nutrition,suivi,questionnaire};
+ const chapters=category==='all'?['synthese','priorites','exercices','tests','instruments','suivi','trajectoire','nutrition','questionnaire']:
+  category==='tests'?['tests','instruments']:category==='suivi'?['suivi','trajectoire']:
+  category==='exercices'?['priorites','exercices']:[category];
  for(const chapter of chapters)renderers[chapter]();
  footer();
  const code=cleaner(report.subject||'').replace(/[^A-Za-z0-9-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,40);

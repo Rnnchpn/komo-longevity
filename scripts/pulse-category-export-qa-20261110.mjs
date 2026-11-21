@@ -25,13 +25,16 @@ assert.equal(passport.actionPlan.axis.length,4);
 assert.deepEqual(passport.actionPlan.axis.map(x=>x.value),[87.5,75,56.3,56.3]);
 assert.equal(passport.actionPlan.timeline.length,3);
 assert.equal(passport.actionPlan.exercises.length,5);
-assert.ok(passport.actionPlan.exercises.some(x=>x.key==='hinge'));
+// Programme maison issu des mesures (moteur KOMO_LONGEVITY_PLAN_V1) : le lever de chaise reste le socle.
+assert.equal(passport.longevity.version,'KOMO_LONGEVITY_PLAN_V1');
 assert.ok(passport.actionPlan.exercises.some(x=>x.key==='chair'));
+assert.equal(passport.actionPlan.exercises.at(-1).key,'walk');
 assert.ok(passport.actionPlan.supplements.every(x=>x.guard?.length>25));
 assert.ok(passport.actionPlan.supplements.find(x=>x.id==='vitd').guard.includes('systématiques')||
  passport.actionPlan.supplements.find(x=>x.id==='vitd').guard.includes('systématique'));
 assert.ok(passport.actionPlan.review.includes('valider'));
-assert.ok(passport.actionPlan.highlights.some(x=>x.value.includes('renforcement')));
+assert.ok(passport.actionPlan.highlights.some(x=>x.label==='Vos priorités'));
+assert.ok(passport.actionPlan.timeline.every(t=>!t.tasks.join(' ').includes('six tests')));
 const radar=clinicRadarMarkup(passport.actionPlan);
 assert.ok(radar.includes('role="img"')&&radar.includes('<polygon'));
 assert.ok(radar.includes('87.5')&&radar.includes('56.3'));
@@ -43,7 +46,7 @@ assert.equal(blank.outcomes.motionAge,null);
 assert.ok(blank.actionPlan.supplements.some(x=>x.status.includes('Non prioritaire')),'without intake avoid recommending creatine');
 const noBalance=buildClinicActionPlan(answers,passport.measures,null,passport.questionnaire);
 assert.ok(noBalance.exercises.find(x=>x.key==='balance').relevance.includes('référence'));
-const categories=['all','synthese','tests','exercices','nutrition','suivi','questionnaire'];
+const categories=['all','synthese','exercices','tests','suivi','nutrition','questionnaire'];
 assert.deepEqual(CLINIC_PASSPORT_EXPORTS.map(x=>x.value),categories);
 assert.equal(typeof downloadClinicPassport,'function');
 const read=path=>readFile(join(process.cwd(),path),'utf8');

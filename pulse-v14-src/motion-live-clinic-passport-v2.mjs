@@ -2,7 +2,8 @@
 // No medical diagnosis, validated score, biological age or survival estimate.
 import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './motion-engine/intake-model.mjs?v=20261121-forcedecks-v1';
 import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs?v=20261121-forcedecks-v1';
-import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText} from './motion-protocol.mjs?v=20261121-forcedecks-v1';
+import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText,STEP_IDS} from './motion-protocol.mjs?v=20261121-forcedecks-v1';
+import {buildLongevityPlan,profileFrom,ZONES} from './motion-longevity-plan.mjs?v=20261121-forcedecks-v1';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
  {id:'sts',name:stepById('sts').title,short:'Force fonctionnelle',unit:'levers / 30 s',
@@ -61,8 +62,11 @@ function objective(row={},test){
   ceiling:finite(value)&&test.id.startsWith('unipodal')&&value>=29.95};
 }
 export function buildClinicPassport(answers={},results={},options={}){
- const date=options.date instanceof Date&&!Number.isNaN(options.date.getTime())?
-  options.date.toISOString().slice(0,10):new Date().toISOString().slice(0,10);
+ const when=options.date instanceof Date&&!Number.isNaN(options.date.getTime())?options.date:new Date();
+ const date=when.toISOString().slice(0,10);
+ // Du résultat à l'action : zones par capacité, 3 priorités, programme maison, objectifs à 6 semaines.
+ const longevity=buildLongevityPlan(results,profileFrom(options.patient||{},when));
+ const stepsDone=STEP_IDS.filter(id=>results[id]?.status==='done').length,stepsTotal=STEP_IDS.length;
  const subject=safe(options.subject||'Dossier de démonstration').slice(0,100);
  const real=options.real===true;
  const simulated=options.simulated===true;
@@ -100,8 +104,9 @@ export function buildClinicPassport(answers={},results={},options={}){
   }))
  }));
  const messages=[];
- if(measured===6)messages.push('Les six épreuves ont été enregistrées ; ce bilan constitue un point de départ fonctionnel pour les contrôles ultérieurs.');
- else messages.push(measured+' des six épreuves disposent d’un résultat ; les tests non réalisés restent signalés.');
+ messages.push(stepsDone+' étapes sur '+stepsTotal+' disposent d’un résultat'+(stepsDone===stepsTotal?
+  ' : ce bilan est le point de départ du contrôle à 6 semaines.':' ; les tests non réalisés restent signalés.'));
+ messages.push(longevity.headline);
  const twoStep=measures.find(m=>m.id==='two_step');
  if(twoStep?.measured){
   messages.push('Two-Step Test : meilleure distance manuelle '+n(twoStep.value)+' cm'+
@@ -131,7 +136,11 @@ export function buildClinicPassport(answers={},results={},options={}){
    messages.push('Sommeil, stress et récupération sont décrits comme perturbateurs intermittents ; ces facteurs rapportés sont à suivre séparément des résultats instrumentaux.');
  }
  const priorities=[];
- if(!questionnaire.complete)priorities.push({
+ const measuredPriorities=longevity.priorities.map(p=>({id:p.id,zone:p.zone,objective:p.objective,
+  title:p.name+' · '+ZONES[p.zone].label.toLowerCase(),
+  detail:p.why+' Objectif à 6 semaines : '+p.objective+'.',
+  basis:p.basis||'Mesures du bilan'}));
+ if(!questionnaire.complete&&!measuredPriorities.length)priorities.push({
   title:'Compléter la dimension vécue',
   detail:'Renseigner les '+(progress.total-progress.completed)+' réponses manquantes pour documenter difficultés, douleur, confiance, récupération et activité.',
   basis:'Questionnaires '+progress.completed+'/'+progress.total
@@ -163,16 +172,6 @@ export function buildClinicPassport(answers={},results={},options={}){
     basis:'Pauses actives déclarées : seulement 1–2 jours par semaine'});
   }
  }
- if(balance&&!balance.tenSecondBoth)priorities.push({
-  title:'Recontrôler la stabilité',
-  detail:'Reprendre l’appui unipodal avec sécurité et appui disponible. Si la difficulté se confirme, envisager un examen fonctionnel standardisé par un professionnel.',
-  basis:'Appui gauche '+n(balance.left)+' s / droit '+n(balance.right)+' s'
- });
- else if(balance&&(balance.ceilingLeft||balance.ceilingRight))priorities.push({
-  title:'Suivre l’équilibre sans effet plafond',
-  detail:'Les mesures proches de 30 secondes sont plafonnées : ne pas interpréter une différence minime comme une anomalie. Ajouter si nécessaire un outil validé complémentaire.',
-  basis:'Plafond du protocole atteint'
- });
  if(questionnaire.complete){
   const domains=Object.entries(questionnaire.domains).filter(([,v])=>finite(v)).sort((a,b)=>a[1]-b[1]);
   if(domains.length){
@@ -186,12 +185,23 @@ export function buildClinicPassport(answers={},results={},options={}){
  }
  priorities.push({
   title:'Standardiser le prochain contrôle',
-  detail:'Répéter les mêmes épreuves et conditions à 4–6 semaines. Si l’objectif est un bilan locomoteur complet, ajouter vitesse de marche, force de préhension et une évaluation standardisée de l’équilibre.',
-  basis:'Comparaison longitudinale à protocole constant'
+  detail:'Refaire les mêmes tests à 6 semaines, dans les mêmes conditions (chaise, chaussures, moment de la journée) : c’est la comparaison qui montre le progrès.',
+  basis:'Même protocole '+PROTOCOL.code+' '+PROTOCOL.version
  });
  const recheck=priorities.find(x=>x.title==='Standardiser le prochain contrôle');
- const selected=[...priorities.filter(x=>x!==recheck).slice(0,3),...(recheck?[recheck]:[])];
+ const reliability=priorities.find(x=>x.title==='Contrôler la fiabilité des captures');
+ const others=priorities.filter(x=>x!==recheck&&x!==reliability);
+ const selected=[...(reliability?[reliability]:[]),...measuredPriorities,
+  ...others.slice(0,Math.max(0,3-measuredPriorities.length)),...(recheck?[recheck]:[])];
  const evidence=[
+  {name:'Studenski et al. JAMA 2011 — Vitesse de marche et survie',url:'https://pubmed.ncbi.nlm.nih.gov/21205966/',
+   meaning:'Chaque 0,1 m/s de plus est associé à un risque de décès plus faible ; association de cohorte, pas un pronostic individuel.'},
+  {name:'EWGSOP2 — Force basse et performance physique',url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC9219260/',
+   meaning:'Repères de préhension (< 27 kg homme, < 16 kg femme) et de vitesse de marche (≤ 0,8 m/s).'},
+  {name:'PURE, Lancet 2015 — Force de préhension',url:'https://pubmed.ncbi.nlm.nih.gov/25982160/',
+   meaning:'Chaque 5 kg de moins est associé à une mortalité plus élevée, toutes causes.'},
+  {name:'Cochrane 2019 — Exercice et prévention des chutes',url:'https://pubmed.ncbi.nlm.nih.gov/30703272/',
+   meaning:'Les programmes d’équilibre et de renforcement réduisent le nombre de chutes d’environ un quart.'},
   {name:'Japanese Orthopaedic Association — Two-Step Test',url:'https://locomo-joa.jp/en',
    meaning:'Deux essais de deux pas maximaux sans déséquilibre, meilleure distance en cm divisée par la taille en cm.'},
   {name:'30-second Chair Stand — CDC STEADI',url:'https://www.cdc.gov/steadi/media/pdfs/STEADI-Assessment-30Sec-508.pdf',
@@ -212,10 +222,30 @@ export function buildClinicPassport(answers={},results={},options={}){
  const actionPlan=buildClinicActionPlan(answers,measures,balance,{
    complete:questionnaire.complete,groups
  },{simulated});
+ // Le programme maison découle des mesures ; le questionnaire garde la nutrition et le ressenti.
+ const strong=longevity.capacities.filter(c=>c.zone==='solid').map(c=>c.name);
+ actionPlan.headline=longevity.headline;
+ actionPlan.exercises=longevity.exercises;
+ actionPlan.highlights=[
+  {label:'Vos priorités',value:longevity.priorities.length?longevity.priorities.map(p=>p.name).join(' · '):'Entretien de vos capacités'},
+  {label:'Vos atouts',value:strong.length?strong.join(' · '):'À construire pendant les 6 semaines'},
+  {label:'Objectifs à 6 semaines',value:longevity.objectives.map(o=>o.target).join(' · ')||'Fixés au prochain bilan'}
+ ];
+ actionPlan.timeline=[
+  {weeks:'Semaines 1–2',title:'Apprendre',focus:'Les gestes justes, avec appui',
+   tasks:['3 séances de 20 min : les 4 exercices du programme','Marche quotidienne de 20 min','Noter chaque séance et toute gêne']},
+  {weeks:'Semaines 3–4',title:'Progresser',focus:'Augmenter quand c’est facile',
+   tasks:['+2 répétitions ou une série de plus si l’exercice est aisé','Équilibre : réduire l’appui des mains','Allonger les phases de marche rapide']},
+  {weeks:'Semaines 5–6',title:'Consolider',focus:'Installer la routine',
+   tasks:['Garder 3 séances par semaine','Marche jusqu’à 30 min si bien tolérée','Contrôle : mêmes tests, mêmes conditions']}
+ ];
+ actionPlan.monitoring=longevity.objectives.map(o=>({name:o.name,value:o.target,unit:''}));
+ actionPlan.schedule=longevity.schedule;
+ actionPlan.review='Programme proposé à partir des mesures, à valider et adapter par le praticien selon les symptômes, les traitements et le risque de chute.';
  const report={
   version:CLINIC_PASSPORT_VERSION,
   date,subject,mode:real?'CABINET':'CABINET_DEMO',real,profile,simulated,
-  measures,measured,skipped,flagged:flagged.length,
+  measures,measured,skipped,flagged:flagged.length,steps:{done:stepsDone,total:stepsTotal},longevity,
   protocol:MOTION_PROTOCOL_VERSION,protocolVersion:PROTOCOL.version,conditions:acquisitionConditions(results),
   instrumented:instrumentedRows(results),
   trajectory:options.trajectory&&Array.isArray(options.trajectory.points)?options.trajectory:null,
@@ -227,13 +257,14 @@ export function buildClinicPassport(answers={},results={},options={}){
    groups},
   balance,findings:messages,priorities:selected,evidence,actionPlan,
   outcomes:{motionScore:null,motionAge:null,lifeExpectancy:null},
-  recheck:'4 à 6 semaines',
+  recheck:'6 semaines',
   limitations:[
    ...(simulated?['Les réponses au questionnaire ont été générées artificiellement pour une démonstration : elles ne constituent aucune déclaration patient.']:[]),
    real?'Évaluation fonctionnelle descriptive réalisée en cabinet, sur dossier pseudonymisé, selon le protocole '+PROTOCOL.code+' '+PROTOCOL.version+'.':
     'Évaluation fonctionnelle exploratoire réalisée dans un environnement de démonstration sur dossier fictif.',
    'Les valeurs vidéo et les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques.',
-   'Aucun Motion Score ou Motion Age : vitesse de marche, TUG, SPPB, normes et conditions instrumentales nécessaires manquantes.',
+   'Aucun score composite ni « âge du mouvement » : chaque capacité est située par rapport à son propre repère publié, ou suivie dans le temps.',
+   'Les repères (EWGSOP2, AWGS, Rikli & Jones, Araújo, JOA) sont des seuils de population : ils hiérarchisent le programme, ils ne posent pas de diagnostic.',
    'Les durées d’équilibre sont plafonnées à 30 s. Une valeur de 30 s n’est pas une mesure au-delà de ce plafond.',
    'Le Two-Step Test est mesuré manuellement ; son indice n’est calculé que si la taille est renseignée, sans inférence diagnostique automatique.',
    'Une photo de profil 2D ne constitue pas une mesure radiographique de l’équilibre sagittal (SVA).',
