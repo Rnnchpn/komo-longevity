@@ -44,7 +44,7 @@ assert.ok(ui.includes('Vérification des réponses enregistrées sur le serveur'
 assert.ok(ui.includes('persisted.progress?.questionnaire?.answers'));
 assert.ok(edge.includes('for(let attempt=0;attempt<6;attempt++)')&&edge.includes('answered_count:Object.keys(cleaned).length'));
 assert.deepEqual(CLINIC_PASSPORT_EXPORTS.map(x=>x.value),
- ['all','synthese','tests','exercices','nutrition','suivi','questionnaire']);
+ ['all','synthese','exercices','tests','suivi','nutrition','questionnaire']);
 const answers={ageBand:'60-69',goal:'strength',walk10:'0',stairs:'1',chair:'0',carry:'1',
  bend:'2',obstacle:'0',turn:'0',stand:'0',pain:'2',fatigue:'1',fear:'0',avoid:'1',
  sleep:'2',stress:'2',recovered:'2',qol:'1',walkingDays:'1',strengthDays:'3',

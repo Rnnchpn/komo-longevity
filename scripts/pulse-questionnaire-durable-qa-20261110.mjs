@@ -94,7 +94,7 @@ assert.ok(updated.measures[4].display.includes('/ 30 s'));
 assert.equal(updated.questionnaire.index,75);
 assert.equal(updated.actionPlan.timeline.length,3);
 assert.deepEqual(CLINIC_PASSPORT_EXPORTS.map(x=>x.value),
- ['all','synthese','tests','exercices','nutrition','suivi','questionnaire']);
+ ['all','synthese','exercices','tests','suivi','nutrition','questionnaire']);
 assert.ok(pdf.includes('function questionnaire()')&&pdf.includes('plan.supplements.forEach'));
 assert.ok(pdf.includes('a.guard')&&pdf.includes('report.questionnaire.groups'));
 assert.ok(pdf.includes('item.points')&&pdf.includes('g.points'));
