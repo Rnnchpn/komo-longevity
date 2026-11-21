@@ -79,7 +79,7 @@ const css=await readFile(join(process.cwd(),'site/pulse-v14/motion-live-operator
 assert.ok(pdf.includes('pdf.save(name)'));
 assert.ok(pdf.includes('CLINIC_PASSPORT_EXPORTS')&&pdf.includes('const chapters=category==='));
 assert.ok(pdf.includes('Questionnaire incomplet')&&pdf.includes('drawRadar'));
-assert.ok(pdf.includes('sans score clinique invente'));
+assert.ok(pdf.includes('sans score clinique inventé'));
 assert.ok(ui.includes('extras.clinicPassport(')&&ui.includes('extras.downloadClinicReport('));
 assert.ok(ui.includes('mocPassportAside')&&ui.includes('moc-show-passport'));
 assert.ok(ui.includes('Télécharger le passeport complet')&&ui.includes('mocExportCategory'));
