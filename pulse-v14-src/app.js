@@ -731,7 +731,7 @@ const ROOM_PREP=[
  ['forcedecks','<b>ForceDecks</b> : les deux plateformes allumées, appairées à l’app, posées à plat'],
  ['height','<b>Taille</b> : toise ou ruban fixé au mur'],
  ['chair','<b>Chaise</b> d’environ 43 cm, sans accoudoirs, calée contre le mur'],
- ['walkway','<b>Couloir</b> : 4 m balisés au sol, 2 m libres avant et après, ruban pour le Two-Step'],
+ ['walkway','<b>Couloir</b> : ligne de départ, ligne à 4 m, repère à 6 m (scotch au sol), ruban pour le Two-Step'],
  ['dynamo','<b>DynaMo Plus</b> chargé, poignée et pad à portée, table d’examen libre'],
  ['iphone','<b>iPhone</b> chargé sur son trépied, page /camera ouverte']
 ];

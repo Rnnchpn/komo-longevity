@@ -83,6 +83,10 @@ export function buildTrajectory(sessions=[],options={}){
  const versions=done.map(x=>x.protocol).filter(Boolean);
  if(new Set(versions).size>1)
   warnings.push('Version du protocole différente entre les séances ('+[...new Set(versions)].join(', ')+').');
+ // Marche : départ lancé (avant v2.3) et départ arrêté (SPPB) diffèrent de 0,1 à 0,2 m/s.
+ const gaitMethods=done.map(x=>x.results?.gait_4m?.status==='done'?(x.results.gait_4m.method||'GAIT_4M_DYNAMIC_START_MEAN'):null).filter(Boolean);
+ if(new Set(gaitMethods).size>1)
+  warnings.push('Marche : départ lancé (ancien protocole) et départ arrêté mélangés ; l’écart attendu (0,1 à 0,2 m/s) empêche de comparer les vitesses.');
  const sources=done.map(x=>x.results?.sts?.source).filter(Boolean);
  if(new Set(sources).size>1)
   warnings.push('Lever de chaise : comptage vidéo et comptage manuel mélangés selon les séances.');

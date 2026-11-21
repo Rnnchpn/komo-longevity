@@ -7,7 +7,7 @@
 
 export const PROTOCOL={
  id:'KOMO_MOTION',
- version:'2.2.0',
+ version:'2.3.0',
  code:'KOMO_MOTION_V2',
  mode:'CORE',
  label:'KŌMØ Motion · consultation supervisée',
@@ -110,11 +110,15 @@ export const STEPS=[
   script:'« Tenez-vous debout comme d’habitude, bras le long du corps, regard devant. »',
   instruction:'Observer l’alignement sagittal apparent. Une caméra 2D ne mesure pas la SVA radiographique.',
   label:'Observation visuelle'},
- {id:'gait_4m',block:'B',kind:'fields',title:'Marche 4 m · allure habituelle',short:'Marche 4 m',
-  device:'Chronomètre PULSE · couloir balisé',trials:'2 passages',duration:0,walkway:true,
-  setup:'Couloir droit : 2 m d’élan, 4 m chronométrés entre deux repères au sol, 2 m pour ralentir. Chaussage et aide de marche identiques au début du bilan.',
-  script:'« Marchez à votre allure habituelle, comme dans la rue, jusqu’au bout du couloir. »',
-  instruction:'Départ quand le premier pied franchit la ligne des 0 m, arrivée quand le premier pied franchit la ligne des 4 m. Deux passages ; la vitesse est calculée sur la moyenne.',
+ // Marche 4 m (v2.3) : protocole SPPB, celui des repères EWGSOP2 et des cohortes de survie.
+ // Départ arrêté, chrono au premier mouvement, arrivée quand un pied a entièrement franchi les 4 m,
+ // deux passages, le plus rapide est retenu. Un départ lancé donne 0,1 à 0,2 m/s de plus : non comparable.
+ {id:'gait_4m',block:'B',kind:'fields',title:'Marche 4 m · départ arrêté',short:'Marche 4 m',
+  device:'Chronomètre PULSE · couloir balisé',trials:'2 passages, le plus rapide retenu',duration:0,walkway:true,
+  method:'GAIT_4M_STANDING_START_BEST_OF_2',
+  setup:'Couloir droit et dégagé : ligne de départ à 0 m, ligne d’arrivée à 4 m, un repère 2 m plus loin (6 m) pour que le patient ne ralentisse pas avant l’arrivée. Chaussage et aide de marche identiques au début du bilan.',
+  script:'« Pointes des pieds juste derrière la ligne. Au signal, marchez à votre allure habituelle, comme dans la rue, jusqu’au repère au bout. Prêt ? Partez. »',
+  instruction:'Démarre le chrono au premier mouvement du pied, pas au signal. Arrête-le dès qu’un pied a entièrement franchi la ligne des 4 m. Tiens-toi derrière le patient, un peu sur le côté. Deux passages : PULSE retient le plus rapide.',
   fields:[
    {key:'gait_4m_s_1',label:'Passage 1',unit:'s',min:1,max:30,decimals:2},
    {key:'gait_4m_s_2',label:'Passage 2',unit:'s',min:1,max:30,decimals:2}
@@ -209,8 +213,9 @@ export function symmetry(left,right){
 export function deriveInstrumented(stepId,fields={}){
  const d={};
  if(stepId==='gait_4m'&&finite(fields.gait_4m_s_1)&&finite(fields.gait_4m_s_2)){
-  const mean=(fields.gait_4m_s_1+fields.gait_4m_s_2)/2;
-  d.gait_mean_s=round(mean,2);d.gait_speed_ms=round(4/mean,2);
+  // Standard SPPB : le passage le plus rapide fait foi ; la moyenne reste affichée pour information.
+  const best=Math.min(fields.gait_4m_s_1,fields.gait_4m_s_2),mean=(fields.gait_4m_s_1+fields.gait_4m_s_2)/2;
+  d.gait_best_s=round(best,2);d.gait_mean_s=round(mean,2);d.gait_speed_ms=round(4/best,2);
  }
  const pair=INSTRUMENTED_STEPS[stepId]?.pair;
  if(pair){const sym=symmetry(fields[pair[0]],fields[pair[1]]);if(sym)Object.assign(d,sym);}
@@ -249,8 +254,8 @@ export function plausibilityWarnings(stepId,f={}){
  }
  if(stepId==='gait_4m'&&finite(f.gait_4m_s_1)&&finite(f.gait_4m_s_2)&&f.gait_4m_s_1>0&&f.gait_4m_s_2>0){
   const a=f.gait_4m_s_1,b=f.gait_4m_s_2,gap=Math.abs(a-b)/Math.min(a,b);
-  if(gap>0.2)w.push('Écart de '+Math.round(gap*100)+' % entre les deux passages : refais un passage si l’un n’était pas représentatif.');
-  const speed=4/((a+b)/2);
+  if(gap>0.15)w.push('Écart de '+Math.round(gap*100)+' % entre les deux passages. PULSE retient le plus rapide : s’il te paraît trop rapide (chrono lancé en retard, patient qui accélère), refais-le.');
+  const speed=4/Math.min(a,b);
   if(speed<0.2||speed>2.5)w.push('Vitesse inhabituelle : vérifie les deux temps.');
  }
  const spec=INSTRUMENTED_STEPS[stepId];
@@ -281,7 +286,8 @@ export function instrumentedRows(results={}){
   const f=r.fields||{},d=r.derived||{};const lines=[];
   for(const field of spec.fields)if(finite(f[field.key]))lines.push(field.label+' : '+String(f[field.key]).replace('.',',')+' '+field.unit);
   for(const c of spec.choices||[])if(f[c.key])lines.push(c.label+' : '+(optionLabel(c.options,f[c.key])||'—'));
-  if(finite(d.gait_speed_ms))lines.push('Vitesse de marche : '+String(d.gait_speed_ms).replace('.',',')+' m/s');
+  if(finite(d.gait_speed_ms))lines.push('Vitesse de marche : '+String(d.gait_speed_ms).replace('.',',')+' m/s'+
+   (r.method==='GAIT_4M_STANDING_START_BEST_OF_2'?' (départ arrêté, meilleur passage)':' (ancien protocole, départ lancé)'));
   if(finite(d.lsi_pct))lines.push('Symétrie : '+String(d.lsi_pct).replace('.',',')+' %'+
    (d.weaker_side==='balanced'?' (équilibrée)':' (côté plus faible : '+(d.weaker_side==='left'?'gauche':'droit')+')'));
   rows.push({id,name:spec.title,device:spec.device,status:'done',note:r.note||'',lines});
@@ -317,6 +323,7 @@ export function serverSpec(){
    }
    if(['count','balance','two_step'].includes(s.kind)){out.unit=s.unit;out.max=s.max;out.integer=!!s.integer;}
    if(s.kind==='observation')out.options=s.options.map(([k])=>k);
+   if(s.method)out.method=s.method;
    return out;
   }),
   skip_reasons:SKIP_REASONS.map(([k])=>k)

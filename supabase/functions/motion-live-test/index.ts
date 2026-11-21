@@ -38,8 +38,9 @@ function validateInstrumented(step:string,raw:any){
  }
  const derived:Record<string,number|string>={};
  if(step==="gait_4m"){
-  const mean=((fields.gait_4m_s_1 as number)+(fields.gait_4m_s_2 as number))/2;
-  derived.gait_mean_s=roundTo(mean,2);derived.gait_speed_ms=roundTo(4/mean,2);
+  // Protocole v2.3 (SPPB) : départ arrêté, le passage le plus rapide fait foi.
+  const a=fields.gait_4m_s_1 as number,b=fields.gait_4m_s_2 as number,best=Math.min(a,b);
+  derived.gait_best_s=roundTo(best,2);derived.gait_mean_s=roundTo((a+b)/2,2);derived.gait_speed_ms=roundTo(4/best,2);
  }
  if(spec.pair){
   const l=fields[spec.pair[0]] as number,r=fields[spec.pair[1]] as number;
@@ -686,6 +687,7 @@ Deno.serve(async(req:Request)=>{
      if(!checked||b.measurement_source!=="operator_manual_entry")
       return response(req,{error:"invalid_instrumented_entry"},422);
      results[step]={status:"done",fields:checked.fields,derived:checked.derived,
+       ...(STEP_SPEC[step]?.method?{method:STEP_SPEC[step].method}:{}),
        source:"operator_manual_entry",...stamp,note,recorded_at:now()};
     }else if(step==="two_step"){
      const attempts=b.attempts_cm;

@@ -3,7 +3,7 @@
 export const SPEC:any={
  "protocol": {
   "id": "KOMO_MOTION",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "code": "KOMO_MOTION_V2",
   "mode": "CORE",
   "device_set": [
@@ -151,7 +151,8 @@ export const SPEC:any={
      "decimals": 2
     }
    ],
-   "choices": []
+   "choices": [],
+   "method": "GAIT_4M_STANDING_START_BEST_OF_2"
   },
   {
    "id": "two_step",

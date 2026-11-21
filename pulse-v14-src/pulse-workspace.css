@@ -399,6 +399,15 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
 .app-shell-pro .moc-gait-chrono .moc-button[data-running="true"]{background:var(--pw-sage);border-color:var(--pw-sage)}
 .app-shell-pro .moc-gait-chrono strong{font:600 32px/1 var(--pw-sans);font-variant-numeric:tabular-nums;color:var(--pw-ink);min-width:5.2ch}
 .app-shell-pro .moc-gait-chrono p{margin:0;font:400 13px/1.45 var(--pw-sans);color:var(--pw-ink-2)}
+.app-shell-pro .moc-gait-chrono .moc-button{touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.app-shell-pro .moc-gait-passages{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.app-shell-pro .moc-gait-passage{display:flex;align-items:baseline;gap:10px;min-height:44px;padding:8px 12px;border-radius:10px;background:var(--pw-paper,#fff);border:1px solid var(--pw-line)}
+.app-shell-pro .moc-gait-passage span{font:600 12px/1.2 var(--pw-sans);color:var(--pw-muted)}
+.app-shell-pro .moc-gait-passage b{font:600 17px/1.2 var(--pw-sans);font-variant-numeric:tabular-nums;color:var(--pw-ink)}
+.app-shell-pro .moc-gait-passage small{font:400 13px/1.2 var(--pw-sans);color:var(--pw-ink-2);font-variant-numeric:tabular-nums}
+.app-shell-pro .moc-gait-passage.is-best{border-color:var(--pw-sage);box-shadow:inset 3px 0 0 var(--pw-sage)}
+.app-shell-pro .moc-gait-redo{margin-left:auto;border:0;background:none;padding:6px 4px;font:600 13px/1 var(--pw-sans);color:var(--pw-ink);text-decoration:underline;cursor:pointer}
+.app-shell-pro .moc-gait-retained{grid-column:1/-1;margin:0;font:400 14px/1.4 var(--pw-sans);color:var(--pw-ink)}
 /* Choix fermés (côté, chaussage, aide de marche) : boutons à toucher. */
 .app-shell-pro .moc-choice{grid-column:1/-1;border:0;margin:0 0 4px;padding:0;min-width:0;display:flex;flex-wrap:wrap;gap:6px}
 .app-shell-pro .moc-choice legend{width:100%;padding:0;margin:0 0 6px;font:600 13px/1.4 var(--pw-sans);color:var(--pw-ink-2)}
@@ -455,6 +464,13 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
  .app-shell-pro .moc-gait-chrono{grid-template-columns:1fr auto}
  .app-shell-pro .moc-gait-chrono p{grid-column:1/-1}
  .app-shell-pro .moc-gait-chrono .moc-button{min-width:0}
+}
+/* Téléphone du praticien : le chrono se tient d'une main, derrière le patient. */
+@media (max-width:640px){
+ .app-shell-pro .moc-gait-chrono{grid-template-columns:1fr;padding:12px}
+ .app-shell-pro .moc-gait-chrono .moc-button{width:100%;min-height:96px;font-size:22px;border-radius:14px}
+ .app-shell-pro .moc-gait-chrono strong{font-size:40px;text-align:center}
+ .app-shell-pro .moc-gait-passages{grid-template-columns:1fr}
 }
 
 /* Questionnaire et rapport : même langage visuel. */

@@ -155,28 +155,57 @@ async function gotoStep(stepId){
  }catch(error){setStatus((error.message||"Impossible d’ouvrir ce test")+" · Réessaie.")}
  finally{busy=false}
 }
+// Chronomètre de marche (protocole v2.3, standard SPPB) : départ arrêté, deux passages, le plus rapide retenu.
+// Déclenchement à l'appui (pointerdown) et non au relâcher : le délai du clic fausserait la vitesse.
 function bindGaitChrono(){
- const go=q("mocGaitGo"),time=q("mocGaitTime"),hint=q("mocGaitHint");if(!go)return;
+ const go=q("mocGaitGo"),time=q("mocGaitTime"),hint=q("mocGaitHint"),list=q("mocGaitPassages");if(!go)return;
+ const KEYS=["gait_4m_s_1","gait_4m_s_2"];
+ const input=k=>host.querySelector('[data-field="'+k+'"]');
+ const val=k=>{const v=parseFloat(String(input(k)?.value||"").replace(",","."));return Number.isFinite(v)&&v>0?v:null};
  const fmt=sec=>sec.toFixed(2).replace(".",",")+" s";
- const target=()=>["gait_4m_s_1","gait_4m_s_2"].map(k=>host.querySelector('[data-field="'+k+'"]')).find(el=>el&&el.value==="");
+ const speed=sec=>(4/sec).toFixed(2).replace(".",",")+" m/s";
+ const target=()=>KEYS.map(input).find(el=>el&&el.value==="");
  const label=()=>{const next=target();go.textContent=gaitChrono.startedAt?"Arrivée":next?.dataset.field.endsWith("_2")?"Départ · passage 2":"Départ";};
- go.onclick=()=>{
+ const render=()=>{
+  if(!list)return;
+  const a=val(KEYS[0]),b=val(KEYS[1]),best=a&&b?(a<=b?0:1):null;
+  list.innerHTML=KEYS.map((k,i)=>{const v=val(k);
+   return '<div class="moc-gait-passage'+(best===i?' is-best':'')+'"><span>Passage '+(i+1)+'</span>'+
+    (v?'<b>'+fmt(v)+'</b><small>'+speed(v)+'</small><button type="button" class="moc-gait-redo" data-gait-redo="'+k+'">Refaire</button>':
+     '<small>à chronométrer</small>')+'</div>';}).join("")+
+   (best!==null?'<p class="moc-gait-retained">Vitesse retenue : <b>'+speed(Math.min(a,b))+'</b> · passage '+(best+1)+', le plus rapide</p>':'');
+  list.querySelectorAll("[data-gait-redo]").forEach(btn=>btn.onclick=()=>{
+   const el=input(btn.dataset.gaitRedo);if(!el)return;
+   stopGaitChrono();go.dataset.running="false";
+   el.value="";el.dispatchEvent(new Event("input",{bubbles:true}));
+   if(time)time.textContent=fmt(0);
+   hint.textContent="Passage "+(btn.dataset.gaitRedo.endsWith("_1")?"1":"2")+" à refaire : pointes des pieds derrière la ligne, « Prêt ? Partez. », puis Départ au premier mouvement.";
+   label();
+  });
+ };
+ const toggle=()=>{
   if(!gaitChrono.startedAt){
-   if(!target()){hint.textContent="Les deux passages sont saisis. Efface un temps pour refaire ce passage.";return}
+   if(!target()){hint.textContent="Les deux passages sont chronométrés. « Refaire » sur un passage pour le recommencer.";return}
    gaitChrono.startedAt=performance.now();
    gaitChrono.timer=setInterval(()=>{if(time&&gaitChrono.startedAt)time.textContent=fmt((performance.now()-gaitChrono.startedAt)/1000)},50);
-   go.dataset.running="true";hint.textContent="Appuie sur Arrivée quand le premier pied franchit la ligne des 4 m.";label();return;
+   go.dataset.running="true";hint.textContent="Arrivée dès qu’un pied a entièrement franchi la ligne des 4 m.";label();return;
   }
-  const sec=Math.round((performance.now()-gaitChrono.startedAt)/10)/100;
+  const elapsed=(performance.now()-gaitChrono.startedAt)/1000;
+  if(elapsed<0.6)return; // double appui involontaire : le chrono continue
+  const sec=Math.round(elapsed*100)/100;
   stopGaitChrono();go.dataset.running="false";
   if(time)time.textContent=fmt(sec);
   if(sec<1||sec>30){hint.textContent=(sec<1?"Moins d’une seconde":"Plus de 30 secondes")+" : temps non retenu. Recommence le passage ou saisis-le à la main.";label();return}
   const el=target();
   if(el){el.value=sec.toFixed(2);el.dispatchEvent(new Event("input",{bubbles:true}));}
-  hint.textContent=target()?"Passage 1 noté. Ramène le patient au départ, puis Départ pour le passage 2.":"Deux passages notés. Vérifie les temps, puis valide.";
-  label();
+  hint.textContent=target()?"Passage 1 : "+speed(sec)+". Ramène le patient derrière la ligne, puis Départ pour le passage 2.":"Deux passages chronométrés : PULSE retient le plus rapide. Vérifie, puis valide.";
+  label();render();
  };
- label();
+ let lastPointer=0;
+ go.onpointerdown=e=>{if(e.button>0)return;e.preventDefault();lastPointer=performance.now();toggle();};
+ go.onclick=()=>{if(performance.now()-lastPointer<800)return;toggle();};
+ KEYS.forEach(k=>input(k)?.addEventListener("input",render));
+ label();render();
 }
 function fieldErrorText(t,error){
  const key=String(error||"").replace(/^(missing|invalid|precision)_/,"");
@@ -210,12 +239,13 @@ function valdMarkup(t){
 // Consignes repliables : si le praticien les replie, elles restent repliées aux tests suivants.
 const INSTRUCTIONS_KEY="komo_consult_instructions";
 const instructionsOpen=()=>{try{return localStorage.getItem(INSTRUCTIONS_KEY)!=="closed"}catch{return true}};
-// Couloir de marche : 2 m d'élan · 4 m chronométrés · 2 m pour ralentir, et chronomètre intégré.
+// Couloir de marche (v2.3) : départ arrêté à 0 m · 4 m chronométrés · repère à 6 m pour ne pas ralentir avant l'arrivée.
 function walkwayMarkup(){
- return '<div class="moc-walkway" aria-hidden="true"><span>2 m d’élan</span><b>4 m chronométrés</b><span>2 m pour ralentir</span></div>'+
+ return '<div class="moc-walkway" aria-hidden="true"><span>Départ arrêté · 0 m</span><b>4 m chronométrés</b><span>Repère · 6 m</span></div>'+
   '<div class="moc-gait-chrono"><button type="button" id="mocGaitGo" class="moc-button primary">Départ</button>'+
   '<strong id="mocGaitTime" aria-live="off">0,00 s</strong>'+
-  '<p id="mocGaitHint">Appuie sur Départ quand le premier pied franchit la ligne des 0 m (barre d’espace possible).</p></div>';
+  '<p id="mocGaitHint">Dis « Prêt ? Partez. », puis appuie sur Départ au premier mouvement du pied, pas au signal (barre d’espace possible).</p>'+
+  '<div id="mocGaitPassages" class="moc-gait-passages" aria-live="polite"></div></div>';
 }
 function dynamoUnitMarkup(){
  return '<div class="moc-unit-switch" role="group" aria-label="Unité affichée par DynaMo"><span>Écran DynaMo en</span>'+
