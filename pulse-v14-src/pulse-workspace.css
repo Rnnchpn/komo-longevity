@@ -399,6 +399,15 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
 .app-shell-pro .moc-gait-chrono .moc-button[data-running="true"]{background:var(--pw-sage);border-color:var(--pw-sage)}
 .app-shell-pro .moc-gait-chrono strong{font:600 32px/1 var(--pw-sans);font-variant-numeric:tabular-nums;color:var(--pw-ink);min-width:5.2ch}
 .app-shell-pro .moc-gait-chrono p{margin:0;font:400 13px/1.45 var(--pw-sans);color:var(--pw-ink-2)}
+/* Choix fermés (côté, chaussage, aide de marche) : boutons à toucher. */
+.app-shell-pro .moc-choice{grid-column:1/-1;border:0;margin:0 0 4px;padding:0;min-width:0;display:flex;flex-wrap:wrap;gap:6px}
+.app-shell-pro .moc-choice legend{width:100%;padding:0;margin:0 0 6px;font:600 13px/1.4 var(--pw-sans);color:var(--pw-ink-2)}
+.app-shell-pro .moc-choice label{position:relative;display:block}
+.app-shell-pro .moc-choice input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.app-shell-pro .moc-choice span{display:grid;place-items:center;min-height:44px;padding:0 16px;border:1px solid var(--pw-line-strong);border-radius:10px;background:#fff;
+ font:600 14px/1.1 var(--pw-sans);color:var(--pw-ink-2);transition:background .12s,border-color .12s,color .12s}
+.app-shell-pro .moc-choice input:checked+span{background:var(--pw-ink);border-color:var(--pw-ink);color:#fff}
+.app-shell-pro .moc-choice input:focus-visible+span{outline:2px solid var(--pw-bronze);outline-offset:2px}
 /* Unité de l'écran DynaMo. */
 .app-shell-pro .moc-unit-switch{grid-column:1/-1;display:flex;align-items:center;gap:6px;font:500 13px var(--pw-sans);color:var(--pw-ink-2)}
 .app-shell-pro .moc-unit-switch span{margin-right:4px}

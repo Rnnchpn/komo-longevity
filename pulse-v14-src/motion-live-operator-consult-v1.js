@@ -1,7 +1,7 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
 // Vidéo sur l'iPhone, valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,STATIONS,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261121-stations-v1';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261121-stations-v1';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261121-forcedecks-v1';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261121-forcedecks-v1';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
@@ -70,7 +70,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261121-stations-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261121-forcedecks-v1";
  // Le design de l'espace praticien (pulse-workspace.css) reste la dernière couche.
  const workspace=document.querySelector("link[data-pulse-workspace]");
  if(workspace)document.head.insertBefore(link,workspace);else document.head.append(link);
@@ -747,8 +747,8 @@ function renderStep(){
   t.fields.map(f=>{const u=fieldUnit(t,f);return '<label class="moc-field">'+HTML(f.label)+(f.optional?" · facultatif":"")+
    (f.vald?'<small class="moc-field-vald">'+HTML(t.vald?.app||"VALD")+' affiche : <b>'+HTML(f.vald)+'</b></small>':'')+
    '<div class="moc-input-unit"><input data-field="'+f.key+'" type="number" min="'+f.min+'" step="'+(u==="kg"?"0.01":fieldStep(f))+'" inputmode="decimal" placeholder="—"><span data-unit-label="'+f.key+'">'+HTML(u)+'</span></div></label>'}).join("")+
-  (t.choices||[]).map(c=>'<label class="moc-field">'+HTML(c.label)+'<select data-choice="'+c.key+'"><option value="">Choisir</option>'+
-   c.options.map(([k,l])=>'<option value="'+k+'"'+(c.default===k?' selected':'')+'>'+HTML(l)+'</option>').join("")+'</select></label>').join("")+
+  (t.choices||[]).map(c=>'<fieldset class="moc-choice" data-choice="'+c.key+'"><legend>'+HTML(c.label)+'</legend>'+
+   c.options.map(([k,l])=>'<label><input type="radio" name="choice-'+c.key+'" value="'+k+'"'+(c.default===k?' checked':'')+'><span>'+HTML(l)+'</span></label>').join("")+'</fieldset>').join("")+
   '<p id="mocFieldsComputed" class="moc-status"></p><ul id="mocWarnings" class="moc-warnings" hidden></ul></div>'
   :t.id==="two_step"?
   '<div class="moc-two-step-fields"><p class="moc-help">Saisie opérateur · deux essais, meilleure distance retenue. Indice = distance / taille.</p>'+
@@ -858,7 +858,7 @@ function renderStep(){
     const f=t.fields.find(x=>x.key===el.dataset.field);
     el.value=String(t.dynamo&&f?.unit==="N"?fromNewton(v,dynamoUnit):v);
    });
-   host.querySelectorAll("[data-choice]").forEach(el=>{const v=existing.fields[el.dataset.choice];if(v)el.value=v});
+   host.querySelectorAll("[data-choice]").forEach(el=>{const v=existing.fields[el.dataset.choice];const r=v&&el.querySelector('input[value="'+v+'"]');if(r)r.checked=true});
    preview();manualEdited=false;
   }
  }
@@ -1076,7 +1076,7 @@ async function submit(event){
   payload.note=note;
   if(isFields(t)){
    const raw=readFields(t);
-   host.querySelectorAll("[data-choice]").forEach(el=>{if(el.value)raw[el.dataset.choice]=el.value});
+   host.querySelectorAll("[data-choice]").forEach(el=>{const v=el.querySelector("input:checked")?.value;if(v)raw[el.dataset.choice]=v});
    const checked=validateInstrumented(t.id,raw);
    if(!checked.ok){setStatus(fieldErrorText(t,checked.error)+" Corrige, ou marque le test non réalisé.");return}
    payload.fields=checked.fields;
@@ -1238,14 +1238,14 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261121-stations-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261121-forcedecks-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261121-stations-v1");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261121-forcedecks-v1");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1264,7 +1264,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261121-stations-v1");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261121-forcedecks-v1");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{

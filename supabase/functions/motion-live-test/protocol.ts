@@ -3,7 +3,7 @@
 export const SPEC:any={
  "protocol": {
   "id": "KOMO_MOTION",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "code": "KOMO_MOTION_V2",
   "mode": "CORE",
   "device_set": [
@@ -59,15 +59,21 @@ export const SPEC:any={
    "duration": 0,
    "fields": [
     {
-     "key": "fd_qs_excursion_mm",
+     "key": "fd_qs_cop_ml_mm",
      "min": 0,
-     "max": 10000,
+     "max": 1000,
      "decimals": 1
     },
     {
-     "key": "fd_qs_ellipse_mm2",
+     "key": "fd_qs_cop_ap_mm",
      "min": 0,
-     "max": 100000,
+     "max": 1000,
+     "decimals": 1
+    },
+    {
+     "key": "fd_qs_velocity_mms",
+     "min": 0,
+     "max": 1000,
      "decimals": 1
     },
     {
@@ -93,6 +99,12 @@ export const SPEC:any={
    "kind": "fields",
    "duration": 0,
    "fields": [
+    {
+     "key": "fd_sts_time_to_stand_s",
+     "min": 0,
+     "max": 20,
+     "decimals": 2
+    },
     {
      "key": "fd_sts_asym_pct",
      "min": 0,

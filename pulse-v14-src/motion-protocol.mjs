@@ -7,7 +7,7 @@
 
 export const PROTOCOL={
  id:'KOMO_MOTION',
- version:'2.1.0',
+ version:'2.2.0',
  code:'KOMO_MOTION_V2',
  mode:'CORE',
  label:'KŌMØ Motion · consultation supervisée',
@@ -45,7 +45,7 @@ const WALKING_AID=[['none','Aucune'],['cane','Canne'],['walker','Déambulateur']
 // camera : placement de l'iPhone pendant la station (null = iPhone non utilisé).
 export const STATIONS={
  A:{label:'Plateformes ForceDecks',camera:null,
-  place:'Taille au mur, puis le patient monte sur les deux plateformes et y reste pour les trois tests.'},
+  place:'Chaise contre le mur, plateformes juste devant. Taille au mur, puis pesée et Quiet Stand debout sur les plateformes, puis Sit to Stand assis. App ForceDecks ouverte, profil au code PULSE.'},
  B:{label:'Posture et marche',camera:'profile',
   place:'iPhone sur trépied, perpendiculaire au couloir, à 3 m environ, à hauteur du bassin, cadré sur le milieu des 4 m.'},
  C:{label:'Équilibre et bras',camera:'front',
@@ -66,10 +66,10 @@ export const BLOCKS=Object.fromEntries(Object.entries(STATIONS).map(([k,v])=>[k,
 export const STEPS=[
  {id:'anthropometry',block:'A',kind:'fields',title:'Taille et masse',short:'Mensurations',
   device:'Toise murale · pesée ForceDecks',trials:'1 mesure',duration:0,
-  setup:'Taille : pieds nus ou en chaussettes, talons, fesses et épaules contre le mur, regard horizontal. Masse : plateformes à zéro, le patient monte un pied sur chaque et reste immobile.',
+  setup:'Taille : pieds nus ou en chaussettes, talons, fesses et épaules contre le mur, regard horizontal. Masse : dans l’app ForceDecks, choisir le test Quiet Stand, mettre à zéro sans personne sur les plateformes, puis le patient monte un pied sur chaque et reste immobile : l’app le pèse.',
   script:'« Je mesure votre taille. Montez ensuite sur les deux plateformes et restez immobile. »',
   instruction:'Saisir la taille, la masse lue dans l’app ForceDecks, le chaussage et l’aide de marche : ces conditions sont reprises à chaque contrôle.',
-  vald:{app:'ForceDecks',test:'Pesée de début de test (Quiet Stand)',read:'Poids affiché après la pesée'},
+  vald:{app:'ForceDecks',test:'Pesée au début du Quiet Stand',settings:'Zéro sans personne sur les plateformes, puis pesée'},
   fields:[
    {key:'height_cm',label:'Taille',unit:'cm',min:100,max:230,decimals:1},
    {key:'body_mass_kg',label:'Masse',unit:'kg',min:25,max:250,decimals:1,vald:'Poids · pesée ForceDecks'}
@@ -80,27 +80,29 @@ export const STEPS=[
   ]},
  {id:'fd_quiet_stand',block:'A',kind:'fields',title:'Quiet Stand 30 s · ForceDecks',short:'Quiet Stand',
   device:'2 ForceDecks Mini',trials:'1 essai de 30 s',duration:0,
-  setup:'Le patient reste sur les plateformes : pieds à largeur d’épaules sur les repères, mains sur les hanches, buste droit, regard devant.',
-  script:'« Gardez les pieds fixes et restez aussi immobile que possible pendant 30 secondes. »',
-  instruction:'Lancer le test dans l’app ForceDecks, puis recopier les trois valeurs affichées. Le L ou R après l’asymétrie indique le côté le plus chargé.',
-  vald:{app:'ForceDecks',test:'Quiet Stand (QSB)',settings:'Durée 30 s · yeux ouverts · surface ferme',
-   tip:'Si l’ellipse ou l’asymétrie de force n’apparaît pas, ajoute-les une fois aux résultats instantanés du test, ou lis-les dans VALD Hub.'},
+  setup:'Le patient reste sur les plateformes après la pesée : un pied sur chaque, à largeur d’épaules, mains sur les hanches, buste droit, regard devant. La chaise est derrière lui.',
+  script:'« Mains sur les hanches, regardez devant vous. Gardez les pieds fixes et restez aussi immobile que possible pendant 30 secondes. »',
+  instruction:'Lancer l’enregistrement (compte à rebours de 3 s), attendre les 30 s, puis recopier les 4 valeurs de l’écran de résultats, de haut en bas. Le L ou R après l’asymétrie indique le côté le plus chargé.',
+  vald:{app:'ForceDecks',test:'Balance › Quiet Stand',settings:'Exercise Length 30 s · aucune option cochée (yeux ouverts, sol stable)',
+   tip:'Ce sont les 4 métriques affichées par défaut depuis la version de juillet 2026 de l’app. Si l’écran en montre d’autres, rétablis les métriques par défaut dans les réglages des résultats.'},
   fields:[
-   {key:'fd_qs_excursion_mm',label:'Déplacement total du centre de pression',unit:'mm',min:0,max:10000,decimals:1,vald:'Total Excursion [mm]'},
-   {key:'fd_qs_ellipse_mm2',label:'Aire de l’ellipse',unit:'mm²',min:0,max:100000,decimals:1,vald:'Area of CoP Ellipse [mm²]'},
-   {key:'fd_qs_asym_pct',label:'Asymétrie de force moyenne',unit:'%',min:0,max:100,decimals:1,vald:'Mean Force Asymmetry [% L,R]'}
+   {key:'fd_qs_cop_ml_mm',label:'Oscillation latérale',unit:'mm',min:0,max:1000,decimals:1,vald:'CoP Range, Medial-Lateral – Bilateral'},
+   {key:'fd_qs_cop_ap_mm',label:'Oscillation avant-arrière',unit:'mm',min:0,max:1000,decimals:1,vald:'CoP Range, Anterior-Posterior – Bilateral'},
+   {key:'fd_qs_velocity_mms',label:'Vitesse moyenne du centre de pression',unit:'mm/s',min:0,max:1000,decimals:1,vald:'Mean Velocity'},
+   {key:'fd_qs_asym_pct',label:'Asymétrie de charge',unit:'%',min:0,max:100,decimals:1,vald:'Mean Force – Asymmetry'}
   ],
   choices:[{key:'fd_qs_asym_side',label:'Côté le plus chargé (L ou R affiché)',options:SIDE_OPTIONS}]},
- {id:'fd_sts',block:'A',kind:'fields',title:'Sit-to-Stand · ForceDecks',short:'STS plateformes',
+ {id:'fd_sts',block:'A',kind:'fields',title:'Sit to Stand to Sit · ForceDecks',short:'STS plateformes',
   device:'2 ForceDecks Mini · chaise',trials:'3 répétitions',duration:0,
-  setup:'Chaise stable d’environ 43 cm, sans accoudoirs, contre le mur. Plateformes juste devant sans la toucher, un pied sur chaque, largeur de hanches. Plateformes à zéro avant que le patient y pose les pieds.',
-  script:'« Bras croisés sur la poitrine. Restez immobile, levez-vous, restez debout une seconde, rasseyez-vous. »',
-  instruction:'Immobile 2 à 3 s avant et entre chaque répétition, 1 s debout immobile. Trois répétitions contrôlées, puis recopier l’asymétrie au lever.',
-  vald:{app:'ForceDecks',test:'Sit to Stand',settings:'Hauteur de chaise saisie · 3 répétitions · bras croisés'},
+  setup:'Le patient descend des plateformes pour la mise à zéro. Chaise d’environ 43 cm, sans accoudoirs, contre le mur ; plateformes juste devant sans la toucher. Pesée debout sur les plateformes, puis assis, un pied sur chaque, bras croisés sur la poitrine.',
+  script:'« Bras croisés. Restez immobile. Penchez-vous en avant, levez-vous, restez debout une seconde, rasseyez-vous, puis restez immobile. On le fait trois fois. »',
+  instruction:'2 à 3 s immobile avant et entre chaque répétition, 1 s debout immobile. Après la 3e, arrêter l’enregistrement et recopier les 2 premières valeurs de l’écran (moyenne des répétitions si l’app l’affiche).',
+  vald:{app:'ForceDecks',test:'Functional › Sit to Stand to Sit',settings:'Hauteur de chaise 0,43 m · 3 répétitions'},
   fields:[
-   {key:'fd_sts_asym_pct',label:'Asymétrie de force au lever',unit:'%',min:0,max:100,decimals:1,vald:'Asymétrie de force en phase de lever [% L,R]'}
+   {key:'fd_sts_time_to_stand_s',label:'Temps pour se lever',unit:'s',min:0,max:20,decimals:2,vald:'Time to Stand'},
+   {key:'fd_sts_asym_pct',label:'Asymétrie de force au lever',unit:'%',min:0,max:100,decimals:1,vald:'Mean Standing Force – Asymmetry'}
   ],
-  choices:[{key:'fd_sts_asym_side',label:'Côté dominant (L ou R affiché)',options:SIDE_OPTIONS}]},
+  choices:[{key:'fd_sts_asym_side',label:'Côté le plus chargé (L ou R affiché)',options:SIDE_OPTIONS}]},
  {id:'posture',block:'B',kind:'observation',title:'Posture de profil · observation',short:'Posture',
   device:'iPhone de profil',trials:'1 observation',duration:0,unit:'observation',ui_unit:'observation',
   options:POSTURE_OPTIONS,
