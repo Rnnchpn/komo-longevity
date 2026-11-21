@@ -67,7 +67,7 @@ function renderReady(email){
   try{
    const {data:{session}}=await sb.auth.getSession();
    if(!session?.user?.id)throw Error('Compte Operator non connecté.');
-   const module=await import('../motion-live-guest-v1.js?v=20261121-forcedecks-v1');
+   const module=await import('../motion-live-guest-v1.js?v=20261121-longevity-v1');
    await module.openMotionLive({
     mode:'operator_camera',
     ownerId:session.user.id,
