@@ -146,7 +146,7 @@ async function gotoStep(stepId){
  try{
   stopGaitChrono();
   const result=await api({action:"operator_test_goto",session_id:room.id,step_code:stepId});
-  room=result.session;latestSignature="";
+  room=result.session;latestSignature="";lastMutationAt=performance.now();discardDraft=true;
   if(room.status==="completed"){panelMode="report";updatePanelTabs();renderReportSection();return}
   if(panelMode!=="tests"){panelMode="tests";if(q("mocStepNav"))q("mocStepNav").hidden=false;}
   updatePanelTabs();renderStep();
@@ -187,14 +187,14 @@ function bindGaitChrono(){
   if(!gaitChrono.startedAt){
    if(!target()){hint.textContent="Les deux passages sont chronométrés. « Refaire » sur un passage pour le recommencer.";return}
    gaitChrono.startedAt=performance.now();
-   gaitChrono.timer=setInterval(()=>{if(time&&gaitChrono.startedAt)time.textContent=fmt((performance.now()-gaitChrono.startedAt)/1000)},50);
+   gaitChrono.timer=setInterval(()=>{const el=q("mocGaitTime");if(el&&gaitChrono.startedAt)el.textContent=fmt((performance.now()-gaitChrono.startedAt)/1000)},50);
    go.dataset.running="true";hint.textContent="Arrivée dès qu’un pied a entièrement franchi la ligne des 4 m.";label();return;
   }
   const elapsed=(performance.now()-gaitChrono.startedAt)/1000;
   if(elapsed<0.6)return; // double appui involontaire : le chrono continue
   const sec=Math.round(elapsed*100)/100;
   stopGaitChrono();go.dataset.running="false";
-  if(time)time.textContent=fmt(sec);
+  if(q("mocGaitTime"))q("mocGaitTime").textContent=fmt(sec);
   if(sec<1||sec>30){hint.textContent=(sec<1?"Moins d’une seconde":"Plus de 30 secondes")+" : temps non retenu. Recommence le passage ou saisis-le à la main.";label();return}
   const el=target();
   if(el){el.value=sec.toFixed(2);el.dispatchEvent(new Event("input",{bubbles:true}));}
@@ -205,6 +205,7 @@ function bindGaitChrono(){
  go.onpointerdown=e=>{if(e.button>0)return;e.preventDefault();lastPointer=performance.now();toggle();};
  go.onclick=()=>{if(performance.now()-lastPointer<800)return;toggle();};
  KEYS.forEach(k=>input(k)?.addEventListener("input",render));
+ if(gaitChrono.startedAt){go.dataset.running="true";hint.textContent="Arrivée dès qu’un pied a entièrement franchi la ligne des 4 m.";}
  label();render();
 }
 function fieldErrorText(t,error){
@@ -770,7 +771,31 @@ function timeDisplay(){
   timeDisplay();clock=setInterval(timeDisplay,100);
  }
 }
+// Saisie en cours protégée : un rafraîchissement (poll, retour serveur) ne doit jamais effacer
+// ce que le praticien vient de taper. Le brouillon n'est abandonné qu'après validation, saut ou reprise.
+let renderedStepId=null,discardDraft=false,lastMutationAt=0;
+function captureDraft(id){
+ const d={id,fields:{},choices:{},inputs:{}};
+ host.querySelectorAll("[data-field]").forEach(el=>{if(el.value!=="")d.fields[el.dataset.field]=el.value});
+ host.querySelectorAll("[data-choice]").forEach(el=>{const v=el.querySelector("input:checked")?.value;if(v)d.choices[el.dataset.choice]=v});
+ ["mocNote","mocTwoStep1","mocTwoStep2","mocTwoStepHeight","mocObservation"].forEach(k=>{const el=q(k);if(el&&el.value!=="")d.inputs[k]=el.value});
+ return Object.keys(d.fields).length||Object.keys(d.choices).length||Object.keys(d.inputs).length?d:null;
+}
+function restoreDraft(d){
+ Object.entries(d.fields).forEach(([k,v])=>{const el=host.querySelector('[data-field="'+k+'"]');if(el&&el.value!==v){el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))}});
+ Object.entries(d.choices).forEach(([k,v])=>{const r=host.querySelector('[data-choice="'+k+'"] input[value="'+v+'"]');if(r&&!r.checked){r.checked=true;r.dispatchEvent(new Event("change",{bubbles:true}))}});
+ Object.entries(d.inputs).forEach(([k,v])=>{const el=q(k);if(el&&el.value!==v){el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}});
+}
 function renderStep(){
+ const draftFor=room&&host&&!discardDraft?currentTest()?.id:null;
+ const draft=draftFor&&renderedStepId===draftFor?captureDraft(draftFor):null;
+ discardDraft=false;
+ renderStepView();
+ const shown=room&&room.status!=="completed"&&room.stage_code!=="finished"?currentTest()?.id||null:null;
+ renderedStepId=shown;
+ if(draft&&shown===draft.id)restoreDraft(draft);
+}
+function renderStepView(){
  if(!host||!room)return;
  if(room.status==="completed"||room.stage_code==="finished"){
   if(extras){panelMode="report";renderReportSection()}else renderSummary();
@@ -905,7 +930,6 @@ function renderStep(){
     const input=host.querySelector('[data-field="'+f.key+'"]');if(input)input.step=next==="kg"?"0.01":fieldStep(f);});
    preview();
   });
-  if(t.walkway)bindGaitChrono();
   if(existing?.status==="done"&&existing.fields){
    host.querySelectorAll("[data-field]").forEach(el=>{
     const v=existing.fields[el.dataset.field];if(!Number.isFinite(v))return;
@@ -915,6 +939,7 @@ function renderStep(){
    host.querySelectorAll("[data-choice]").forEach(el=>{const v=existing.fields[el.dataset.choice];const r=v&&el.querySelector('input[value="'+v+'"]');if(r)r.checked=true});
    preview();manualEdited=false;
   }
+  if(t.walkway)bindGaitChrono();
  }
  // Correction : valeurs déjà enregistrées remises dans les champs.
  if(existing?.status==="done"){
@@ -1190,7 +1215,8 @@ async function submit(event){
    if(started?.session)room=started.session;
   }
   const result=await api(payload);
-  room=result.session;
+  room=result.session;lastMutationAt=performance.now();
+  if(event!=="start")discardDraft=true;
   if(["start","restart"].includes(event)&&room?.progress?.step_status==="running"){
    // Keep a local start anchor so the first rendered frame is 00:30, not 00:29
    // due to round-trip latency. Subsequent displays remain monotonic.
@@ -1209,8 +1235,11 @@ async function submit(event){
 async function refresh(force=false){
  if(!host?.isConnected||!api||polling)return;
  polling=true;
+ const pollStartedAt=performance.now();
  try{
   const data=await api({action:"operator_list"});
+  // Réponse partie avant la dernière action locale : périmée, on l'ignore (évite d'afficher un état ancien).
+  if(pollStartedAt<lastMutationAt)return;
   const matching=(data.sessions||[]).filter(x=>x.patient_id===patient?.id&&x.progress?.camera_owner==="operator"&&
    ["waiting","ready","active","completed"].includes(x.status))
    .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
