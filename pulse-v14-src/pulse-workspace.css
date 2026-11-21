@@ -429,6 +429,17 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
 .app-shell-pro .op-prep-list input{width:20px;height:20px;margin:1px 0 0;flex:none;accent-color:var(--pw-sage)}
 .app-shell-pro .op-prep-list b{color:var(--pw-ink);font-weight:600}
 .app-shell-pro .op-prep-list input:checked+span{color:var(--pw-muted)}
+@media (max-width:640px){
+ /* Console sur téléphone : en-tête sur une colonne, actions en ligne défilante. */
+ .app-shell-pro .moc-head{grid-template-columns:minmax(0,1fr)}
+ .app-shell-pro .moc-head>.moc-journey{grid-row:3}
+ .app-shell-pro .moc-head-actions{grid-row:2;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+ .app-shell-pro .moc-head-actions .moc-back{flex:none;min-height:38px;font-size:13px}
+ .app-shell-pro .moc-identity h2{font-size:26px!important;white-space:nowrap}
+ .app-shell-pro .moc-identity p{white-space:normal}
+ .app-shell-pro .moc-test>.moc-station{flex-direction:column;align-items:stretch;gap:10px}
+ .app-shell-pro .moc-station .moc-button{width:100%}
+}
 @media (max-width:1000px){
  .app-shell-pro .op-prep{grid-column:1/-1}
  .app-shell-pro .moc-station{flex-wrap:wrap}
