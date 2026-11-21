@@ -204,11 +204,12 @@ function stationMarkup(t){
 // Encadré « Dans l'app VALD » : test à lancer, réglages, valeurs à recopier (libellés VALD).
 function valdMarkup(t){
  if(!t.vald)return "";
- const read=(t.fields||[]).filter(f=>f.vald).map(f=>'<li><span>'+HTML(f.vald)+'</span><b>→ '+HTML(f.label)+'</b></li>').join("");
- return '<div class="moc-vald"><p class="moc-vald-title">Dans l’app '+HTML(t.vald.app)+'</p>'+
-  '<p><b>Test :</b> '+HTML(t.vald.test)+(t.vald.settings?' · '+HTML(t.vald.settings):'')+'</p>'+
-  (read?'<ul>'+read+'</ul>':'')+(t.vald.tip?'<p class="moc-vald-tip">'+HTML(t.vald.tip)+'</p>':'')+'</div>';
+ return '<div class="moc-vald"><p><span class="moc-vald-title">Dans l’app '+HTML(t.vald.app)+'</span> <b>'+HTML(t.vald.test)+'</b>'+
+  (t.vald.settings?' · '+HTML(t.vald.settings):'')+'</p>'+(t.vald.tip?'<p class="moc-vald-tip">'+HTML(t.vald.tip)+'</p>':'')+'</div>';
 }
+// Consignes repliables : si le praticien les replie, elles restent repliées aux tests suivants.
+const INSTRUCTIONS_KEY="komo_consult_instructions";
+const instructionsOpen=()=>{try{return localStorage.getItem(INSTRUCTIONS_KEY)!=="closed"}catch{return true}};
 // Couloir de marche : 2 m d'élan · 4 m chronométrés · 2 m pour ralentir, et chronomètre intégré.
 function walkwayMarkup(){
  return '<div class="moc-walkway" aria-hidden="true"><span>2 m d’élan</span><b>4 m chronométrés</b><span>2 m pour ralentir</span></div>'+
@@ -742,9 +743,9 @@ function renderStep(){
   Number(room.progress?.test_duration_seconds)||t.duration);
  const input=isFields(t)?
   '<div class="moc-two-step-fields">'+(t.walkway?walkwayMarkup():'')+(t.dynamo?dynamoUnitMarkup():'')+
-  '<p class="moc-help">Valeurs recopiées telles qu’affichées ; laisser vide plutôt que deviner.</p>'+
+  '<p class="moc-help">'+(t.walkway?'Le chronomètre remplit les deux passages ; tu peux aussi saisir les temps à la main.':'Valeurs recopiées telles qu’affichées ; laisser vide plutôt que deviner.')+'</p>'+
   t.fields.map(f=>{const u=fieldUnit(t,f);return '<label class="moc-field">'+HTML(f.label)+(f.optional?" · facultatif":"")+
-   (f.vald?'<small class="moc-field-vald">'+HTML(t.vald?.app||"VALD")+' : '+HTML(f.vald)+'</small>':'')+
+   (f.vald?'<small class="moc-field-vald">'+HTML(t.vald?.app||"VALD")+' affiche : <b>'+HTML(f.vald)+'</b></small>':'')+
    '<div class="moc-input-unit"><input data-field="'+f.key+'" type="number" min="'+f.min+'" step="'+(u==="kg"?"0.01":fieldStep(f))+'" inputmode="decimal" placeholder="—"><span data-unit-label="'+f.key+'">'+HTML(u)+'</span></div></label>'}).join("")+
   (t.choices||[]).map(c=>'<label class="moc-field">'+HTML(c.label)+'<select data-choice="'+c.key+'"><option value="">Choisir</option>'+
    c.options.map(([k,l])=>'<option value="'+k+'"'+(c.default===k?' selected':'')+'>'+HTML(l)+'</option>').join("")+'</select></label>').join("")+
@@ -778,7 +779,7 @@ function renderStep(){
   '<button type="button" id="mocSave" class="moc-button primary" aria-keyshortcuts="Enter">'+saveLabel+'<kbd aria-hidden="true">Entrée</kbd></button></div>';
  q("mocTestBody").innerHTML='<section class="moc-test">'+stationMarkup(t)+'<span class="moc-kicker">Test '+(idx+1)+' sur '+TESTS.length+(t.device?' · '+HTML(t.device):'')+(t.trials?' · '+HTML(t.trials):'')+'</span><h3>'+HTML(t.title)+'</h3>'+
  (existing?'<p class="moc-existing" data-status="'+HTML(existing.status)+'">'+(existing.status==="skipped"?"Marqué non réalisé":"Déjà enregistré")+' : <b>'+HTML(formatResult(existing,t))+'</b>. Une nouvelle validation remplace ce résultat.</p>':'')+
- '<details class="moc-instructions" '+(!running||manual?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
+ '<details class="moc-instructions" '+((!running||manual)&&instructionsOpen()?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
  (t.script?'<div><strong>À dire au patient</strong><p>'+HTML(t.script)+'</p></div>':'')+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div></details>'+
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
@@ -873,6 +874,9 @@ function renderStep(){
   if(!running&&q("mocObservation")&&existing.observation)q("mocObservation").value=existing.observation;
  }
  if(existing&&q("mocNote")&&existing.note)q("mocNote").value=existing.note;
+ host.querySelector(".moc-instructions")?.addEventListener("toggle",e=>{
+  try{localStorage.setItem(INSTRUCTIONS_KEY,e.currentTarget.open?"open":"closed")}catch{}
+ });
  if(q("mocLater"))q("mocLater").onclick=()=>gotoStep(later);
  if(q("mocResume"))q("mocResume").onclick=()=>gotoStep("finished");
  if(q("mocStationFrame"))q("mocStationFrame").onclick=()=>{
