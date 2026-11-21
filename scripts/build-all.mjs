@@ -271,6 +271,7 @@ const scripts = [
   // Evidence-aware consultant passport, PDF renderer and 0/22 questionnaire regression.
   'scripts/pulse-clinic-passport-v2-qa-20261110.mjs',
   'scripts/pulse-passport-simulation-qa-20261110.mjs',
+  'scripts/pulse-longevity-plan-qa-20261121.mjs',
   // Complete visual home plan and independent section PDFs.
   'scripts/pulse-category-export-qa-20261110.mjs',
   // Save/restore all questionnaire answers before export, 6-category passport and 30-second trials.
