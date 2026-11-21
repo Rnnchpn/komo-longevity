@@ -534,6 +534,24 @@ function nextPseudoCode(){
   const used=S.patients.map(p=>String(p.last_name||'')).filter(x=>x.startsWith(prefix+'-'+d+'-')).map(x=>Number(x.slice(-2))||0);
   return prefix+'-'+d+'-'+String((used.length?Math.max(...used):0)+1).padStart(2,'0');
 }
+// Réponse d'erreur d'une fonction serveur : le corps JSON est dans error.context (supabase-js).
+async function functionErrorBody(error,data){
+  if(data?.error)return data;
+  try{const r=error?.context;if(r&&typeof r.json==='function')return await r.clone().json()}catch{}
+  return {error:error?.message||'unknown'};
+}
+const PATIENT_ERRORS={
+  patient_code_exists:'Ce code existe déjà. Le numéro suivant est proposé : appuie de nouveau sur « Créer ».',
+  invalid_patient_fields:'Vérifie l’année de naissance et le sexe.',
+  professional_required:'Ce compte n’est pas un compte praticien.',
+  patient_create_scope_required:'Ton rôle dans ce centre ne permet pas de créer un dossier.',
+  active_organization_required:'Ce centre n’est pas actif. Choisis un autre centre.',
+  center_data_status_unavailable:'Ce centre n’accepte pas encore de dossiers.',
+  unauthorized:'Ta session a expiré : reconnecte-toi, puis recommence.'
+};
+function patientErrorText(info){
+  return PATIENT_ERRORS[info?.error]||'Le dossier n’a pas pu être créé (réf. '+String(info?.error||'inconnue').slice(0,40)+'). Réessaie dans un instant ; si cela persiste, préviens-moi avec cette référence.';
+}
 function patients(){
   heading('Patients',isProductionCenter()?'Dossiers pseudonymisés':'Dossiers fictifs de démonstration');
   const isDemo=p=>/^(?:DEMO|FRIDAY-DEMO|PULSE-MOTION-REPORT-DEMO|E2E[-_]|TEST[-_])/i.test(String(p.external_reference||''))||
@@ -553,18 +571,22 @@ function patients(){
   $('#view').innerHTML=`<section class="op-patients-app" aria-label="Annuaire des patients">
     <header class="op-patients-context"><span class="op-patients-kicker">${isProductionCenter()?'CENTRE ACTUEL · CONSULTATION RÉELLE (DOSSIERS PSEUDONYMISÉS)':'CENTRE ACTUEL · DÉMONSTRATION (DOSSIERS FICTIFS)'}</span><div class="op-patients-context-row"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><span class="op-patients-count">${S.patients.length} dossier${S.patients.length>1?'s':''}</span></div></header>
     <div class="op-patients-toolbar"><button type="button" class="button primary" id="opPatientCreateToggle">Nouveau patient</button><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
-    ${isProductionCenter()?`<form id="opPatientCreateForm" class="op-create-patient-form op-create-patient-form--real" hidden data-real-center="1">
-      <h3>Nouveau patient · ${esc(S.org?.name||'')}</h3>
-      <p>Dossier pseudonymisé : PULSE ne reçoit <strong>ni nom, ni prénom, ni date exacte</strong>. Inscris le code ci-dessous sur la fiche papier du patient (classeur de la clinique).</p>
-      <div class="op-create-patient-grid">
-        <label><span>Code dossier</span><input name="pseudo_code" autocomplete="off" maxlength="40" required pattern="[A-Z]{2,6}-[0-9]{6}-[0-9]{2}" value="${esc(nextPseudoCode())}"></label>
-        <label><span>Année de naissance</span><input name="birth_year" type="number" inputmode="numeric" min="1920" max="${new Date().getFullYear()-18}" required></label>
-        <label><span>Sexe de référence</span><select name="sex_at_birth" required><option value="female">Femme</option><option value="male">Homme</option><option value="not_stated">Non renseigné</option></select></label>
+    ${isProductionCenter()?`<form id="opPatientCreateForm" class="op-create-patient-form op-create-patient-form--real" ${S.patients.length?'hidden':''} data-real-center="1" novalidate>
+      <h3>Nouveau patient</h3>
+      <div class="op-create-code"><span>Code à noter sur la fiche papier</span><strong id="opPatientCodeView">${esc(nextPseudoCode())}</strong>
+        <input type="hidden" name="pseudo_code" value="${esc(nextPseudoCode())}"></div>
+      <div class="op-create-patient-grid op-create-patient-grid--simple">
+        <label><span>Année de naissance</span><input name="birth_year" type="number" inputmode="numeric" min="1920" max="${new Date().getFullYear()-18}" placeholder="ex. 1962" autocomplete="off"></label>
+        <fieldset class="op-sex-choice"><legend>Sexe</legend>
+          <label><input type="radio" name="sex_at_birth" value="female"><span>Femme</span></label>
+          <label><input type="radio" name="sex_at_birth" value="male"><span>Homme</span></label>
+          <label><input type="radio" name="sex_at_birth" value="not_stated"><span>Non précisé</span></label>
+        </fieldset>
       </div>
-      <label class="op-create-patient-attestation"><input type="checkbox" name="consent_collected" required> Consentement écrit recueilli (fiche KŌMØ signée : bilan, données pseudonymisées, envoi du rapport).</label>
-      <label class="op-create-patient-attestation"><input type="checkbox" name="safety_screened" required> Questionnaire de sécurité vérifié (aucune contre-indication aux tests d'effort et d'équilibre).</label>
+      <label class="op-create-patient-attestation"><input type="checkbox" name="consent_collected"> Fiche KŌMØ signée : consentement recueilli et questionnaire de sécurité vérifié.</label>
       <p id="opPatientCreateFeedback" class="op-create-patient-feedback" aria-live="polite"></p>
-      <button class="button primary" type="submit">Créer le dossier et préparer la consultation →</button>
+      <button class="button primary" type="submit">Créer et démarrer la consultation</button>
+      <p class="op-create-privacy">PULSE ne reçoit ni nom, ni prénom, ni date exacte : seulement ce code, l’année de naissance et le sexe.</p>
     </form>`:`<form id="opPatientCreateForm" class="op-create-patient-form" hidden>
       <h3>Nouveau dossier patient</h3>
       <p>Création directe par l'opérateur du centre. Aucun compte patient ou demande préalable nécessaire.</p>
@@ -596,11 +618,24 @@ function patients(){
     createForm.addEventListener('submit',async event=>{
       event.preventDefault();
       if(!S.org?.id)return toast('Aucun centre actif pour ce compte.');
-      if(!createForm.reportValidity())return;
       const fd=new FormData(createForm);
       const real=createForm.dataset.realCenter==='1';
+      const feedbackNode=$('#opPatientCreateFeedback');
+      if(real){
+        // Une seule consigne à la fois, en clair, sur le champ à compléter.
+        const y=Number(fd.get('birth_year')||0),maxYear=new Date().getFullYear()-18;
+        const missing=!(y>=1920&&y<=maxYear)?['birth_year','Indique l’année de naissance (entre 1920 et '+maxYear+').']:
+          !fd.get('sex_at_birth')?['sex_at_birth','Choisis le sexe.']:
+          !fd.get('consent_collected')?['consent_collected','Coche la fiche signée pour continuer.']:null;
+        if(missing){if(feedbackNode)feedbackNode.textContent=missing[1];createForm.querySelector('[name="'+missing[0]+'"]')?.focus();return}
+      }else if(!createForm.reportValidity())return;
       const code=String(fd.get('pseudo_code')||'').trim().toUpperCase(),year=Number(fd.get('birth_year')||0);
-      if(real&&S.patients.some(p=>String(p.last_name||'').toUpperCase()===code))return toast('Ce code existe déjà : choisis le numéro suivant.');
+      if(real&&S.patients.some(p=>String(p.last_name||'').toUpperCase()===code)){
+        // Code déjà utilisé sur ce poste : le numéro suivant est pris automatiquement.
+        const next=nextPseudoCode();createForm.querySelector('[name="pseudo_code"]').value=next;
+        const view=$('#opPatientCodeView');if(view)view.textContent=next;
+        if(feedbackNode)feedbackNode.textContent='Code mis à jour : '+next+'. Appuie de nouveau sur « Créer ».';return;
+      }
       const body=real?{action:'create',organization_id:S.org.id,first_name:'Client',last_name:code,birth_date:`${year}-01-01`,sex_at_birth:String(fd.get('sex_at_birth')||'not_stated'),create_account:false}
         :{action:'create',organization_id:S.org.id,first_name:String(fd.get('first_name')||'').trim(),last_name:String(fd.get('last_name')||'').trim(),birth_date:String(fd.get('birth_date')||''),sex_at_birth:String(fd.get('sex_at_birth')||'not_stated'),create_account:false};
       const feedback=$('#opPatientCreateFeedback'),submit=createForm.querySelector('[type="submit"]');
@@ -608,7 +643,15 @@ function patients(){
       submit.disabled=true;if(feedback)feedback.textContent='Création du dossier…';
       try{
         const {data,error}=await sb.functions.invoke('professional-patient',{body});
-        if(error||data?.error||!data?.patient?.id)throw Error(data?.detail||data?.error||error?.message||'Création impossible');
+        if(error||data?.error||!data?.patient?.id){
+          const info=await functionErrorBody(error,data);
+          if(info.error==='patient_code_exists'&&real){
+            // Code déjà pris (autre poste, double appui) : on recharge et on propose le suivant.
+            await loadPro();const next=nextPseudoCode();
+            createForm.querySelector('[name="pseudo_code"]').value=next;const view=$('#opPatientCodeView');if(view)view.textContent=next;
+          }
+          throw Error(patientErrorText(info));
+        }
         localStorage.setItem('komo_v14_patient',data.patient.id);
         // Le dossier créé ouvre directement sa consultation (aucun clic supplémentaire).
         sessionStorage.setItem('komo_autostart_patient',data.patient.id);

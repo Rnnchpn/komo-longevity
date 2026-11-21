@@ -121,6 +121,31 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
 .app-shell-pro .op-create-patient-attestation{display:flex;gap:10px;align-items:flex-start;margin:12px 0 0;font-size:13px;line-height:1.5;color:var(--pw-ink-2)}
 .app-shell-pro .op-create-patient-attestation input{width:18px;height:18px;accent-color:var(--pw-ink);flex:none;margin-top:1px}
 .app-shell-pro .op-create-patient-form .button.primary{margin-top:18px}
+/* Création rapide (centre réel) : code affiché, année, sexe en un toucher, une seule case. */
+.app-shell-pro .op-create-patient-form--real{display:grid;gap:16px;max-width:620px}
+.app-shell-pro .op-create-patient-form--real h3{margin:0}
+.app-shell-pro .op-create-code{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px;padding:14px 16px;border-radius:12px;background:var(--pw-bronze-soft)}
+.app-shell-pro .op-create-code span{font:500 13px/1.3 var(--pw-sans);color:var(--pw-ink-2)}
+.app-shell-pro .op-create-code strong{font:600 24px/1.1 var(--pw-sans);letter-spacing:.05em;color:var(--pw-ink);font-variant-numeric:tabular-nums}
+.app-shell-pro .op-create-patient-grid--simple{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);align-items:end;gap:16px}
+.app-shell-pro .op-create-patient-grid--simple input{min-height:52px;font:600 20px var(--pw-sans);font-variant-numeric:tabular-nums}
+.app-shell-pro .op-sex-choice{border:0;margin:0;padding:0;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.app-shell-pro .op-sex-choice legend{grid-column:1/-1;padding:0;margin:0 0 6px;font:600 12px/1.3 var(--pw-sans);color:var(--pw-ink-2)}
+.app-shell-pro .op-sex-choice label{position:relative;display:block}
+.app-shell-pro .op-sex-choice input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.app-shell-pro .op-sex-choice span{display:grid;place-items:center;min-height:52px;padding:0 6px;border:1px solid var(--pw-line-strong);border-radius:11px;background:#fff;
+ font:600 15px/1.1 var(--pw-sans);color:var(--pw-ink-2);text-align:center;transition:background .12s,border-color .12s,color .12s}
+.app-shell-pro .op-sex-choice input:checked+span{background:var(--pw-ink);border-color:var(--pw-ink);color:#fff}
+.app-shell-pro .op-sex-choice input:focus-visible+span{outline:2px solid var(--pw-bronze);outline-offset:2px}
+.app-shell-pro .op-create-patient-form--real .op-create-patient-attestation{margin:0;padding:14px 16px;border:1px solid var(--pw-line);border-radius:12px;font-size:14px;color:var(--pw-ink);cursor:pointer}
+.app-shell-pro .op-create-patient-form--real .op-create-patient-attestation input{width:22px;height:22px}
+.app-shell-pro .op-create-patient-form--real .op-create-patient-feedback{margin:0;font:600 14px/1.45 var(--pw-sans);color:var(--pw-clay)}
+.app-shell-pro .op-create-patient-form--real .op-create-patient-feedback:empty{display:none}
+.app-shell-pro .op-create-patient-form--real .button.primary{margin:0;min-height:56px;font-size:16px;width:100%}
+.app-shell-pro .op-create-privacy{margin:0!important;font-size:12px!important;color:var(--pw-muted)!important}
+@media (max-width:560px){
+ .app-shell-pro .op-create-patient-grid--simple{grid-template-columns:1fr}
+}
 .app-shell-pro .op-patients-section-head{display:flex;align-items:center;justify-content:space-between;margin:6px 2px 8px}
 .app-shell-pro .op-patients-section-head h3{font:600 13px var(--pw-sans);color:var(--pw-ink-2);margin:0}
 .app-shell-pro .op-patients-section-head span{font:600 12px var(--pw-sans);color:var(--pw-muted)}
