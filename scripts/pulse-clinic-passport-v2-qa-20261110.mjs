@@ -49,7 +49,7 @@ const q=buildClinicPassport({},low);
 assert.equal(q.flagged,1);
 assert.equal(q.balance.tenSecondBoth,false);
 assert.ok(q.priorities.some(x=>x.title.includes('fiabilité')));
-assert.ok(q.priorities.some(x=>x.title.includes('stabilité')));
+assert.ok(q.priorities.some(x=>x.id==='balance'&&x.zone==='priority'),'appui < 10 s : équilibre en priorité');
 assert.ok(q.measures[3].source.includes('manuelle'));
 assert.equal(q.measures[2].review,true);
 const missing=buildClinicPassport({},{...results,arms:{status:'skipped'}});

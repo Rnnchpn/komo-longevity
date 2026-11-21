@@ -132,6 +132,8 @@ export async function downloadClinicPassport(report,category='all'){
    words(c.why,M+6,y+25.2,C-12,{sz:7,lh:3.4,max:2,col:P.muted});
    y+=35;
   });
+  txt('Reperes de population, presentes sans score clinique invente ni age du mouvement : ils orientent le programme, ils ne posent pas de diagnostic.',
+   M,Math.min(y+3,277),{sz:6.6,col:P.muted});
  }
  function priorites(){
   page(2,'Vos priorites','Ce qui compte le plus pour votre autonomie, et l objectif a atteindre au controle des 6 semaines.');

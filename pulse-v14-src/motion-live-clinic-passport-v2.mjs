@@ -140,7 +140,7 @@ export function buildClinicPassport(answers={},results={},options={}){
   title:p.name+' · '+ZONES[p.zone].label.toLowerCase(),
   detail:p.why+' Objectif à 6 semaines : '+p.objective+'.',
   basis:p.basis||'Mesures du bilan'}));
- if(!questionnaire.complete&&!measuredPriorities.length)priorities.push({
+ if(!questionnaire.complete)priorities.push({
   title:'Compléter la dimension vécue',
   detail:'Renseigner les '+(progress.total-progress.completed)+' réponses manquantes pour documenter difficultés, douleur, confiance, récupération et activité.',
   basis:'Questionnaires '+progress.completed+'/'+progress.total
