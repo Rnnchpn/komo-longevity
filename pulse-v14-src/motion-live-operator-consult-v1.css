@@ -787,9 +787,16 @@
 .moc-priority strong{font-size:12px;color:#203d32}
 .moc-priority p{margin:3px 0 0;font-size:10px;line-height:1.5;color:#535f54}
 .moc-priority .moc-priority-goal{color:#203d32;font-size:11px}
-/* Compteur « +1 lever » (v2.4, sans caméra) : gros bouton tactile, correction −1 discrète. */
-.moc-tap-figure{grid-template-columns:1fr auto;align-items:center;gap:6px 10px}
-.moc-tap-figure > span,.moc-tap-figure > strong{grid-column:1}
-.moc-tap-figure .moc-tap-plus{grid-column:2;grid-row:1 / span 2;min-width:132px;min-height:96px;font-size:22px;font-weight:760;touch-action:manipulation}
-.moc-tap-figure .moc-tap-minus{grid-column:2;min-height:36px;font-size:15px}
-@media (max-width:720px){.moc-tap-figure .moc-tap-plus{min-width:110px;min-height:88px}}
+/* Compteur « +1 lever » (v2.4, sans caméra) : sous le chrono, gros bouton tactile, correction −1 à côté. */
+.moc-live-hud .moc-timer:has(.moc-tap-figure){grid-template-columns:minmax(0,1fr)}
+.moc-rep-figure.moc-tap-figure{grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:6px 12px;
+ text-align:left;border-left:0;border-top:1px solid #c8bca9;padding:10px 0 0;min-height:0}
+.moc-tap-figure > span{grid-column:1 / -1}
+.moc-tap-figure > strong{grid-column:1;grid-row:2;min-width:1.4em;text-align:center}
+.moc-tap-figure .moc-tap-plus{grid-column:2;grid-row:2;width:100%;min-height:92px;font-size:24px;font-weight:760;touch-action:manipulation}
+.moc-tap-figure .moc-tap-minus{grid-column:3;grid-row:2;min-width:58px;min-height:92px;font-size:18px;touch-action:manipulation}
+/* iPhone (v2.4) : console épurée, sans voix ni plein écran. */
+@media(max-width:720px){
+ #mocVoice,#mocFullscreen,#mocVoiceState{display:none!important}
+ .moc-station[data-first="false"] p{display:none}
+}

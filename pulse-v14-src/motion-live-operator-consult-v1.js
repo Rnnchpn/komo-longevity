@@ -314,7 +314,7 @@ function stationMarkup(t){
  const idx=testIndex(t),first=TESTS[idx-1]?.block!==t.block;
  return '<div class="moc-station" data-first="'+first+'" data-camera="'+(st.camera||"none")+'">'+
   '<div><small>Station '+HTML(t.block)+(first?' · nouvelle station':'')+'</small><strong>'+HTML(st.label)+'</strong>'+
-  '<p><b>'+HTML(st.camera?CAMERA_LABELS[st.camera]:"iPhone non utilisé")+'</b> · '+HTML(st.place)+'</p></div>'+
+  '<p>'+(st.camera?'<b>'+HTML(CAMERA_LABELS[st.camera])+'</b> · ':'')+HTML(st.place)+'</p></div>'+
   (st.camera?'<button type="button" class="moc-button secondary" id="mocStationFrame">'+(videoFocus?"Masquer le cadrage":"Vérifier le cadrage")+'</button>':'')+
  '</div>';
 }
@@ -1086,6 +1086,7 @@ function renderStepView(){
  updatePosePanel(poseTracker?.getLatest());
 }
 function updatePosePanel(reading){
+ if(!CAMERA_USED)return; // v2.4 : sans caméra, rien à afficher (et le compteur « +1 » ne doit pas être écrasé).
  const indicator=q("mocPoseIndicator"),feedback=q("mocAutoFeedback");
  const ready=!!reading?.valid&&reading.frames>=5;
  const message=reading?.message||poseStatus;
