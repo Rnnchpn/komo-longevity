@@ -686,8 +686,11 @@ Deno.serve(async(req:Request)=>{
      const checked=validateInstrumented(step,b.fields);
      if(!checked||b.measurement_source!=="operator_manual_entry")
       return response(req,{error:"invalid_instrumented_entry"},422);
+     // Valeur principale (ex. durée tenue sur un pied) recopiée en value : passeport, trajectoire et plan la lisent.
+     const vf=STEP_SPEC[step]?.value_field,main=vf?checked.fields[vf]:undefined;
      results[step]={status:"done",fields:checked.fields,derived:checked.derived,
        ...(STEP_SPEC[step]?.method?{method:STEP_SPEC[step].method}:{}),
+       ...(typeof main==="number"?{value:main,unit:"seconds"}:{}),
        source:"operator_manual_entry",...stamp,note,recorded_at:now()};
     }else if(step==="two_step"){
      const attempts=b.attempts_cm;

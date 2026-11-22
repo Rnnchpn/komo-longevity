@@ -7,17 +7,17 @@ import {buildLongevityPlan,profileFrom,ZONES} from './motion-longevity-plan.mjs?
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
  {id:'sts',name:stepById('sts').title,short:'Force fonctionnelle',unit:'levers / 30 s',
-  method:'30 secondes, chaise stable, bras croisés si possible. Compter les levers complets.',
-  caveat:'Valeur de suivi ; comparaison normative uniquement avec âge exact, groupe de référence et protocole confirmé.'},
+  method:'30 secondes, chaise stable de 43 cm, bras croisés si possible. Compter les levers complets. La puissance des jambes (W/kg) en est calculée avec la taille (équation d’Alcazar).',
+  caveat:'Valeur de suivi ; comparaison normative uniquement avec âge exact, groupe de référence et protocole confirmé. La puissance est une estimation, pas une mesure directe.'},
  {id:'two_step',name:stepById('two_step').title,short:'Deux grands pas',unit:'cm',
   method:'Deux essais manuels des deux plus grands pas sans saut, pieds joints à l’arrêt. Retenir la meilleure distance mesurée au sol.',
   caveat:'Indice = meilleure distance / taille (cm), uniquement si la taille est renseignée. Les seuils cliniques exigent un protocole standardisé et une interprétation contextualisée.'},
  {id:'unipodal_left',name:stepById('unipodal_left').title,short:'Stabilité gauche',unit:'s / 30 s',
-  method:'Appui unipodal yeux ouverts, début au lever du pied droit, maximum 30 secondes.',
-  caveat:'Mesure plafonnée à 30 s, avec détection vidéo 2D et contrôle visuel de l’opérateur.'},
+  method:'Appui unipodal yeux ouverts sur plateforme ForceDecks, chronométré par l’opérateur du lever du pied droit jusqu’au pied posé, maximum 30 secondes, meilleur de deux essais.',
+  caveat:'Mesure plafonnée à 30 s ; les oscillations de la plateforme ne sont relevées que pour un essai tenu 30 s.'},
  {id:'unipodal_right',name:stepById('unipodal_right').title,short:'Stabilité droite',unit:'s / 30 s',
-  method:'Appui unipodal yeux ouverts, début au lever du pied gauche, maximum 30 secondes.',
-  caveat:'Une perte de repères ou prise d’appui non détectée impose une vérification manuelle.'},
+  method:'Appui unipodal yeux ouverts sur plateforme ForceDecks, chronométré par l’opérateur du lever du pied gauche jusqu’au pied posé, maximum 30 secondes, meilleur de deux essais.',
+  caveat:'Mesure plafonnée à 30 s ; un pied qui touche le sol ou l’autre jambe, ou une main qui se pose, arrête le chrono.'},
  {id:'arms',name:stepById('arms').title,short:'Contrôle proximal',unit:'mouvements',
   method:'Élévations bilatérales suivies par caméra, sans goniométrie ni force instrumentée.',
   caveat:'Le nombre de répétitions ne quantifie pas une amplitude articulaire ni une puissance musculaire.'},
@@ -48,6 +48,7 @@ function objective(row={},test){
  const source=row?.source==='operator_confirmed_video_estimate'?'Estimation vidéo confirmée par l’opérateur':
    row?.source==='operator_manual_observation'?'Saisie manuelle par l’opérateur':
    row?.source==='operator_visual_observation'?'Observation de l’opérateur':
+   row?.source==='operator_manual_entry'?'Saisie de l’opérateur (appareil ou chrono PULSE)':
    'Origine non précisée';
  const quality=Number.isInteger(row?.camera_quality)&&row.camera_quality>=0&&row.camera_quality<=100?
   row.camera_quality:null;
@@ -85,7 +86,7 @@ export function buildClinicPassport(answers={},results={},options={}){
   // If either value is at the 30 s ceiling, difference is censored.
   interpretation:bL.ceiling||bR.ceiling?
    'Au moins un côté atteint le plafond de 30 s : l’écart est descriptif et ne permet pas de quantifier une véritable asymétrie.':
-   'Écart inter-latéral descriptif, sans seuil pathologique validé pour cette méthode vidéo.'
+   'Écart inter-latéral descriptif, sans seuil pathologique validé : seul le repère des 10 secondes est utilisé.'
  }:null;
  const progress=intakeProgress(answers),questionnaire=scoreIntake(answers);
  const groups=INTAKE_GROUPS.map(g=>({
@@ -217,7 +218,13 @@ export function buildClinicPassport(answers={},results={},options={}){
    meaning:'Le renforcement musculaire deux fois ou plus par semaine est une recommandation générale ; adapter la progression au contexte.'},
   {name:'Springer et al. — Single leg stance, SRAlab',
    url:'https://www.sralab.org/rehabilitation-measures/single-leg-stance-or-one-legged-stance-test',
-   meaning:'Meilleur de trois essais jusqu’à 45 s, non comparable directement à un essai vidéo plafonné à 30 s.'}
+   meaning:'Meilleur de trois essais jusqu’à 45 s, non comparable directement à un essai plafonné à 30 s.'},
+  {name:'Alcazar et al. Sci Rep 2020 — Puissance au lever de chaise 30 s',
+   url:'https://pubmed.ncbi.nlm.nih.gov/33004970/',
+   meaning:'Équation validée contre la presse de jambes : puissance estimée à partir de la taille, de la hauteur de chaise et du nombre de levers.'},
+  {name:'Alcazar et al. J Cachexia Sarcopenia Muscle 2021 — Puissance relative',
+   url:'https://pmc.ncbi.nlm.nih.gov/articles/PMC8350203/',
+   meaning:'Puissance basse sous 2,6 W/kg (homme) et 2,1 W/kg (femme), associée aux limitations de mobilité ; changement important à partir de 0,42 et 0,33 W/kg.'}
  ];
  const actionPlan=buildClinicActionPlan(answers,measures,balance,{
    complete:questionnaire.complete,groups
@@ -262,9 +269,10 @@ export function buildClinicPassport(answers={},results={},options={}){
    ...(simulated?['Les réponses au questionnaire ont été générées artificiellement pour une démonstration : elles ne constituent aucune déclaration patient.']:[]),
    real?'Évaluation fonctionnelle descriptive réalisée en cabinet, sur dossier pseudonymisé, selon le protocole '+PROTOCOL.code+' '+PROTOCOL.version+'.':
     'Évaluation fonctionnelle exploratoire réalisée dans un environnement de démonstration sur dossier fictif.',
-   'Les valeurs vidéo et les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques.',
+   'Les comptages vidéo et les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques.',
+   'La puissance des jambes est estimée par une équation publiée à partir du lever de chaise et de la taille ; ce n’est pas une mesure directe.',
    'Aucun score composite ni « âge du mouvement » : chaque capacité est située par rapport à son propre repère publié, ou suivie dans le temps.',
-   'Les repères (EWGSOP2, AWGS, Rikli & Jones, Araújo, JOA) sont des seuils de population : ils hiérarchisent le programme, ils ne posent pas de diagnostic.',
+   'Les repères (EWGSOP2, AWGS, Rikli & Jones, Araújo, JOA, Alcazar) sont des seuils de population : ils hiérarchisent le programme, ils ne posent pas de diagnostic.',
    'Les durées d’équilibre sont plafonnées à 30 s. Une valeur de 30 s n’est pas une mesure au-delà de ce plafond.',
    'Le Two-Step Test est mesuré manuellement ; son indice n’est calculé que si la taille est renseignée, sans inférence diagnostique automatique.',
    'Une photo de profil 2D ne constitue pas une mesure radiographique de l’équilibre sagittal (SVA).',

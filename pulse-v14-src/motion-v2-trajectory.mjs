@@ -5,6 +5,8 @@
 // la marge d'erreur de la mesure (changement minimal détectable publié, ou marge de prudence quand
 // aucune valeur n'existe pour nos appareils). En dessous, la mesure est « stable ».
 // mdc : en unité de la mesure · mdcPct : en % de la valeur de départ · cross : seuil dont le franchissement compte.
+// mdcBySex : marge propre au sexe (options.sex), mdc sinon.
+import {stsPowerOf} from './motion-protocol.mjs?v=20261122-repro-v1';
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round=(x,d=1)=>Math.round(x*10**d)/10**d;
 const maxOf=(a,b)=>finite(a)&&finite(b)?Math.max(a,b):finite(a)?a:finite(b)?b:null;
@@ -21,6 +23,9 @@ export const TRAJECTORY_METRICS=[
  // ≈ 2 levers : différence minimale détectable du lever de chaise.
  {id:'sts_30s',label:'Levers de chaise en 30 s',unit:'levers',decimals:0,better:'higher',mdc:2,
   get:r=>V(r,'sts')},
+ // Puissance relative estimée (Alcazar) : changement cliniquement important 0,42 W/kg (homme), 0,33 (femme).
+ {id:'sts_power',label:'Puissance des jambes (estimée)',unit:'W/kg',decimals:2,better:'higher',mdc:0.42,
+  mdcBySex:{male:0.42,female:0.33},get:r=>stsPowerOf(r||{})},
  // 25 cm : changement minimal détectable du Two-Step chez l'adulte âgé (Sawaya 2025 : 25 à 30 cm).
  {id:'two_step',label:'Two-Step (meilleur essai)',unit:'cm',decimals:0,better:'higher',mdc:25,
   get:r=>V(r,'two_step')},
@@ -29,6 +34,11 @@ export const TRAJECTORY_METRICS=[
   get:r=>minOf(V(r,'unipodal_left'),V(r,'unipodal_right'))},
  {id:'qs_velocity',label:'Quiet Stand · vitesse du centre de pression',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
   get:r=>F(r,'fd_quiet_stand','fd_qs_velocity_mms')},
+ {id:'qs_ec_velocity',label:'Quiet Stand yeux fermés · vitesse du centre de pression',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
+  get:r=>F(r,'fd_quiet_stand_ec','fd_qsec_velocity_mms')},
+ // Appui sur un pied, plateforme : seulement pour un essai tenu 30 s ; on suit le côté le plus instable.
+ {id:'sls_velocity',label:'Appui sur un pied · vitesse du centre de pression (côté le plus instable)',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
+  get:r=>maxOf(F(r,'unipodal_left','sls_left_velocity_mms'),F(r,'unipodal_right','sls_right_velocity_mms'))},
  {id:'qs_asym',label:'Quiet Stand · asymétrie de charge',unit:'%',decimals:1,better:'lower',mdc:10,
   get:r=>F(r,'fd_quiet_stand','fd_qs_asym_pct')},
  {id:'fd_sts_time',label:'Lever sur plateformes · temps pour se lever',unit:'s',decimals:2,better:'lower',mdcPct:20,
@@ -45,6 +55,10 @@ export const TRAJECTORY_METRICS=[
   get:r=>maxOf(F(r,'dynamo_knee_ext','knee_ext_left_n'),F(r,'dynamo_knee_ext','knee_ext_right_n'))},
  {id:'knee_lsi',label:'Extension de genou · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
   get:r=>D(r,'dynamo_knee_ext','lsi_pct')},
+ {id:'hip_flex_best',label:'Flexion de hanche · meilleur côté',unit:'N',decimals:0,better:'higher',mdcPct:20,
+  get:r=>maxOf(F(r,'dynamo_hip_flex','hip_flex_left_n'),F(r,'dynamo_hip_flex','hip_flex_right_n'))},
+ {id:'hip_flex_lsi',label:'Flexion de hanche · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
+  get:r=>D(r,'dynamo_hip_flex','lsi_pct')},
  {id:'hip_best',label:'Abduction de hanche · meilleur côté',unit:'N',decimals:0,better:'higher',mdcPct:20,
   get:r=>maxOf(F(r,'dynamo_hip_abd','hip_abd_left_n'),F(r,'dynamo_hip_abd','hip_abd_right_n'))},
  {id:'hip_lsi',label:'Abduction de hanche · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
@@ -95,6 +109,9 @@ export function buildTrajectory(sessions=[],options={}){
  const gaitMethods=done.map(x=>x.results?.gait_4m?.status==='done'?(x.results.gait_4m.method||'GAIT_4M_DYNAMIC_START_MEAN'):null).filter(Boolean);
  if(new Set(gaitMethods).size>1)
   warnings.push('Marche : départ lancé (ancien protocole) et départ arrêté mélangés ; l’écart attendu (0,1 à 0,2 m/s) empêche de comparer les vitesses.');
+ const hipMethods=done.map(x=>x.results?.dynamo_hip_abd?.status==='done'?(x.results.dynamo_hip_abd.method||'HIP_ABD_SUPINE'):null).filter(Boolean);
+ if(new Set(hipMethods).size>1)
+  warnings.push('Abduction de hanche : mesure allongée (ancien protocole) et mesure assise mélangées ; les forces ne sont pas comparables.');
  const sources=done.map(x=>x.results?.sts?.source).filter(Boolean);
  if(new Set(sources).size>1)
   warnings.push('Lever de chaise : comptage vidéo et comptage manuel mélangés selon les séances.');
@@ -110,7 +127,8 @@ export function buildTrajectory(sessions=[],options={}){
    const eps=10**-(m.decimals)/2;
    direction=Math.abs(delta)<eps?'flat':delta>0?'up':'down';
    // Changement réel : au-delà de la marge d'erreur, ou franchissement du seuil de la mesure (10 s d'appui).
-   const margin=finite(m.mdc)?m.mdc:finite(m.mdcPct)&&values[firstIdx]?Math.abs(values[firstIdx])*m.mdcPct/100:null;
+   const mdc=m.mdcBySex&&finite(m.mdcBySex[options.sex])?m.mdcBySex[options.sex]:m.mdc;
+   const margin=finite(mdc)?mdc:finite(m.mdcPct)&&values[firstIdx]?Math.abs(values[firstIdx])*m.mdcPct/100:null;
    const crossed=finite(m.cross)&&(values[firstIdx]<m.cross)!==(values[lastIdx]<m.cross);
    notable=direction!=='flat'&&((finite(margin)&&Math.abs(delta)>=margin-1e-9)||crossed);
    if(m.better==='neutral'||direction==='flat'||!notable)verdict='stable';

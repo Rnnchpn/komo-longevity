@@ -4,6 +4,8 @@ import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {buildLongevityPlan,assessCapacities,profileFrom,LONGEVITY_PLAN_VERSION} from '../pulse-v14-src/motion-longevity-plan.mjs';
 import {buildClinicPassport} from '../pulse-v14-src/motion-live-clinic-passport-v2.mjs';
+import {stsRelativePower,stsRepsForPower,stsPowerOf} from '../pulse-v14-src/motion-protocol.mjs';
+import {buildTrajectory} from '../pulse-v14-src/motion-v2-trajectory.mjs';
 const zone=(plan,id)=>plan.capacities.find(c=>c.id===id).zone;
 const r={
  gait_4m:{status:'done',fields:{gait_4m_s_1:4.6,gait_4m_s_2:4.4},derived:{gait_speed_ms:0.89}},
@@ -53,15 +55,38 @@ assert.equal(z({dynamo_grip:{status:'done',fields:{grip_left_n:250,grip_right_n:
 assert.equal(z({unipodal_left:{status:'done',value:30},unipodal_right:{status:'done',value:30}},{}).balance,'solid');
 assert.equal(z({unipodal_left:{status:'done',value:30},unipodal_right:{status:'done',value:12}},{}).balance,'consolidate');
 assert.equal(z({posture:{status:'done',observation:'apparent_offset'}},{}).symmetry,'consolidate');
+// Puissance des jambes (22/11/2026, Alcazar) : 0,9 × g × (0,5 × taille − 0,43 m) × levers / 15, en W/kg.
+assert.equal(stsRelativePower(175,14),3.67);
+assert.equal(stsRelativePower(160,0),null,'zéro lever : pas de puissance inventée');
+assert.equal(stsRelativePower(80,10),null,'taille hors bornes');
+assert.equal(stsRepsForPower(160,2.1),10);
+const weakLegs=assessCapacities({anthropometry:{status:'done',fields:{height_cm:160,body_mass_kg:60}},sts:{status:'done',value:6}},{sex:'female',age:70});
+const legs=weakLegs.capacities.find(c=>c.id==='legs');
+const pm=legs.measures.find(m=>m.label.startsWith('Puissance'));
+assert.equal(pm.value,'1,3');assert.equal(pm.unit,'W/kg');assert.equal(pm.zone,'priority');
+assert.ok(pm.reference.includes('2,1 W/kg'),'seuil femme 2,1 W/kg');
+assert.equal(buildLongevityPlan({anthropometry:{status:'done',fields:{height_cm:160,body_mass_kg:60}},sts:{status:'done',value:6}},{sex:'female',age:70})
+ .priorities.find(p=>p.id==='legs').objective,'Au moins 8 levers en 30 s, puis 10 (seuil de puissance, visé à 12 semaines)');
+assert.equal(legs.measures.find(m=>m.label.startsWith('Puissance')).reference.includes('2,6'),false);
+assert.ok(assessCapacities({anthropometry:{status:'done',fields:{height_cm:178}},sts:{status:'done',value:15}},{sex:'male',age:66})
+ .capacities.find(c=>c.id==='legs').measures.find(m=>m.label.startsWith('Puissance')).reference.includes('2,6 W/kg'),'seuil homme 2,6 W/kg');
+// Trajectoire : la puissance ne compte comme progrès qu'au-delà du changement important du sexe (0,33 W/kg femme).
+const sess=(day,reps)=>({id:'s'+day,status:'completed',completed_at:new Date(Date.UTC(2026,10,24)+day*86400000).toISOString(),
+ progress:{protocol:{version:'2.4.0'},results:{anthropometry:{status:'done',fields:{height_cm:160}},sts:{status:'done',value:reps}}}});
+assert.equal(stsPowerOf(sess(0,10).progress.results),2.18);
+const trajF=buildTrajectory([sess(0,10),sess(42,12)],{sex:'female'}).rows.find(x=>x.id==='sts_power');
+assert.equal(trajF.verdict,'favorable','+0,44 W/kg ≥ 0,33 chez la femme');
+const trajM=buildTrajectory([sess(0,10),sess(42,11)],{sex:'male'}).rows.find(x=>x.id==='sts_power');
+assert.equal(trajM.verdict,'stable','+0,22 W/kg < 0,42 chez l’homme');
 // Bilan sans mesure : pas de « capacités solides » inventées.
 const empty=buildLongevityPlan({},{});
 assert.equal(empty.priorities.length,0);
 assert.ok(empty.headline.startsWith('Mesures incomplètes'));
-// Le passeport porte le plan et les mots du protocole actuel (13 étapes), sans « six épreuves ».
+// Le passeport porte le plan et les mots du protocole actuel (15 étapes), sans « six épreuves ».
 const passport=buildClinicPassport({},r,{date:new Date('2026-11-24T10:00:00Z'),real:true,subject:'Client HIRO-261124-01',
  patient:{sex_at_birth:'female',birth_date:'1953-01-01'}});
 assert.equal(passport.longevity.profile.age,73);
-assert.equal(passport.steps.total,13);
+assert.equal(passport.steps.total,15);
 assert.ok(!JSON.stringify(passport).includes('six épreuves'));
 assert.ok(!JSON.stringify(passport).match(/âge du mouvement »? (est|vaut)|Motion Age :/));
 assert.deepEqual(passport.priorities.filter(p=>p.zone).map(p=>p.id),['balance','symmetry','walk']);
@@ -70,4 +95,4 @@ const src=await readFile(join(process.cwd(),'site/pulse-v14/motion-live-clinic-p
 assert.ok(src.includes('function capacites()')&&src.includes('function priorites()'),'pages capacités et priorités dans le PDF');
 const consult=await readFile(join(process.cwd(),'site/pulse-v14/motion-live-operator-consult-v1.js'),'utf8');
 assert.ok(consult.includes('sex_at_birth')&&consult.includes('moc-capacity'),'console : profil patient transmis et capacités affichées');
-console.log('[pulse-longevity-plan-qa] PASS zones par repère publié, 3 priorités, programme maison dosé, objectifs S6, passeport 13 étapes');
+console.log('[pulse-longevity-plan-qa] PASS zones par repère publié, 3 priorités, programme maison dosé, objectifs S6, puissance des jambes, passeport 15 étapes');

@@ -46,8 +46,9 @@ const checks=[
   ['video monitor embedded with Motion Online controls',parse('site/pulse-v14/motion-live-operator-video-v1.js')&&operatorVideo.includes('operator_signal_pull')&&operatorVideo.includes('operator_signal_push')&&operatorVideo.includes('containerId')&&operatorVideoCss.includes('.mopv-window.embedded')],
   ['operator consultation module and user controls parse',parse('site/pulse-v14/motion-live-operator-consult-v1.js')&&consult.includes('mocSave')&&consult.includes('mocStopClock')&&consult.includes('mocSafety')&&consultCss.includes('.moc-grid')],
   // Protocole V2 (20/11/2026) : 6 tests iPhone + 7 saisies instrumentées, 13 étapes dans l'ordre officiel.
-  // Protocole standardisé (21/11/2026) : 13 étapes définies une seule fois (motion-protocol.mjs), lues par la console et le serveur.
-  ['standard protocol: 13 steps defined once, read by console and server',["anthropometry","gait_4m","two_step","fd_quiet_stand","sts","fd_sts","unipodal_left","unipodal_right","dynamo_grip","dynamo_knee_ext","dynamo_hip_abd","arms","posture"].every(id=>
+  // Protocole standardisé (21/11/2026) : étapes définies une seule fois (motion-protocol.mjs), lues par la console et le serveur.
+  // v2.4 (22/11/2026) : 15 étapes, force assise d'abord, équilibre sur plateformes, yeux fermés, flexion de hanche.
+  ['standard protocol: 15 steps defined once, read by console and server',["dynamo_hip_flex","dynamo_knee_ext","dynamo_hip_abd","dynamo_grip","anthropometry","fd_quiet_stand","fd_quiet_stand_ec","fd_sts","unipodal_left","unipodal_right","posture","gait_4m","two_step","arms","sts"].every(id=>
    protocol.includes("id:'"+id+"'"))&&consult.includes("from './motion-protocol.mjs")&&consult.includes('validateInstrumented')&&
    liveEdge.includes('import { SPEC } from "./protocol.ts"')&&liveEdge.includes('invalid_two_step_attempts')&&
    liveEdge.includes('invalid_instrumented_entry')&&liveEdge.includes('skip_reason_required')],

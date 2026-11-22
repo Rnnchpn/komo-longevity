@@ -10,6 +10,7 @@ const TYPE_BY_KIND={fields:"fields",two_step:"manual_two_step",count:"count",bal
 const TESTS=STEPS.map(s=>({id:s.id,title:s.title,duration:s.duration||0,unit:s.ui_unit||"",type:TYPE_BY_KIND[s.kind],
  setup:s.setup,instruction:s.instruction,script:s.script||"",label:s.label||s.title,device:s.device,trials:s.trials,
  block:s.block,vald:s.vald||null,walkway:!!s.walkway,dynamo:!!s.dynamo,pair:s.pair||null,
+ holdTimer:!!s.holdTimer,valueField:s.value_field||null,
  ...(s.kind==="fields"?{fields:s.fields,choices:s.choices||[]}:{})}));
 // Unité affichée par l'écran DynaMo (N ou kg) : mémorisée sur cet ordinateur, enregistrement toujours en N.
 const DYNAMO_UNIT_KEY="komo_dynamo_unit";
@@ -117,7 +118,7 @@ const balanceReasonText=reason=>({
  ambiguous_contact:"Retour d’appui incertain. Vérifiez la mesure."
 }[reason]||"Appui interrompu · vérifiez le résultat.");
 function stageText(result){return result?.status==="done"?"✓":result?.status==="skipped"?"—":"·"}
-// Rail du protocole : les 13 tests regroupés par station (A → E). Chaque test est cliquable :
+// Rail du protocole : les 15 tests regroupés par station (A → E). Chaque test est cliquable :
 // revenir corriger une valeur ou faire un test plus tôt. Bloqué pendant un chronomètre en cours.
 function railMarkup(idx,results={},locked=false){
  let html="",block="";
@@ -144,7 +145,7 @@ async function gotoStep(stepId){
  if(room.progress?.step_status==="running"&&currentTest()?.duration){setStatus("Arrête d’abord le test en cours.");return}
  busy=true;
  try{
-  stopGaitChrono();
+  stopGaitChrono();stopHoldChrono();
   const result=await api({action:"operator_test_goto",session_id:room.id,step_code:stepId});
   room=result.session;latestSignature="";lastMutationAt=performance.now();discardDraft=true;
   if(room.status==="completed"){panelMode="report";updatePanelTabs();renderReportSection();return}
@@ -207,6 +208,75 @@ function bindGaitChrono(){
  KEYS.forEach(k=>input(k)?.addEventListener("input",render));
  if(gaitChrono.startedAt){go.dataset.running="true";hint.textContent="Arrivée dès qu’un pied a entièrement franchi la ligne des 4 m.";}
  label();render();
+}
+// Appui sur un pied (plateformes) : « Départ » au pied levé, « Pied posé » au retour d'appui, arrêt seul à 30 s.
+// Chaque essai est listé ; la durée retenue (champ principal) est toujours le meilleur.
+let holdChrono={startedAt:null,timer:null,auto:null,attempts:[],step:null};
+function stopHoldChrono(){
+ if(holdChrono.timer)clearInterval(holdChrono.timer);
+ if(holdChrono.auto)clearTimeout(holdChrono.auto);
+ holdChrono.startedAt=null;holdChrono.timer=null;holdChrono.auto=null;
+}
+function holdMarkup(){
+ return '<div class="moc-gait-chrono moc-hold-chrono"><button type="button" id="mocHoldGo" class="moc-button primary">Départ · pied levé</button>'+
+  '<strong id="mocHoldTime" aria-live="off">0,0 s</strong>'+
+  '<p id="mocHoldHint">Lance l’enregistrement ForceDecks, puis appuie au moment où le pied quitte le sol (barre d’espace possible). 30 s maximum.</p>'+
+  '<div id="mocHoldAttempts" class="moc-gait-passages" aria-live="polite"></div></div>';
+}
+function bindHoldChrono(t){
+ const go=q("mocHoldGo");if(!go||!t.valueField)return;
+ const field=()=>host.querySelector('[data-field="'+t.valueField+'"]');
+ if(holdChrono.step!==t.id){stopHoldChrono();holdChrono.attempts=[];holdChrono.step=t.id;}
+ const fmt=v=>v.toFixed(1).replace(".",",")+" s";
+ const render=()=>{
+  const list=q("mocHoldAttempts"),button=q("mocHoldGo");if(!list||!button)return;
+  const best=holdChrono.attempts.length?Math.max(...holdChrono.attempts):null;
+  list.innerHTML=holdChrono.attempts.map((v,i)=>'<div class="moc-gait-passage'+(v===best?' is-best':'')+'"><span>Essai '+(i+1)+'</span><b>'+fmt(v)+'</b>'+
+   (v>=30?'<small>30 s tenues</small>':'')+'</div>').join('')+
+   (best!==null?'<p class="moc-gait-retained">Durée retenue : <b>'+fmt(best)+'</b>'+(holdChrono.attempts.length>1?' · le meilleur essai':'')+
+    ' <button type="button" class="moc-gait-redo" id="mocHoldReset">Effacer les essais</button></p>':'');
+  button.textContent=holdChrono.startedAt?"Pied posé":holdChrono.attempts.length?"Départ · essai "+(holdChrono.attempts.length+1):"Départ · pied levé";
+  const reset=q("mocHoldReset");
+  if(reset)reset.onclick=()=>{stopHoldChrono();holdChrono.attempts=[];const f=field();
+   if(f){f.value="";f.dispatchEvent(new Event("input",{bubbles:true}))}
+   if(q("mocHoldTime"))q("mocHoldTime").textContent=fmt(0);
+   if(q("mocHoldHint"))q("mocHoldHint").textContent="Essais effacés : lance l’enregistrement ForceDecks, puis « Départ » au pied levé.";render();};
+ };
+ const finish=sec=>{
+  stopHoldChrono();
+  const v=Math.min(30,Math.round(sec*10)/10);
+  holdChrono.attempts.push(v);
+  const best=Math.max(...holdChrono.attempts),f=field();
+  if(f){f.value=best.toFixed(1);f.dispatchEvent(new Event("input",{bubbles:true}))}
+  const button=q("mocHoldGo"),hint=q("mocHoldHint");
+  if(button)button.dataset.running="false";
+  if(q("mocHoldTime"))q("mocHoldTime").textContent=fmt(v);
+  if(hint)hint.textContent=v>=30?"30 s tenues : recopie les valeurs de la plateforme, puis valide.":
+   holdChrono.attempts.length<2?"Pied posé à "+fmt(v)+" : fais un 2e essai, PULSE garde le meilleur. Laisse les oscillations vides si aucun essai n’atteint 30 s.":
+   "La durée retenue est le meilleur essai. Laisse les oscillations vides si aucun essai n’atteint 30 s, puis valide.";
+  render();
+ };
+ const toggle=()=>{
+  if(!holdChrono.startedAt){
+   holdChrono.startedAt=performance.now();
+   holdChrono.timer=setInterval(()=>{const el=q("mocHoldTime");if(el&&holdChrono.startedAt)el.textContent=fmt(Math.min(30,(performance.now()-holdChrono.startedAt)/1000))},100);
+   holdChrono.auto=setTimeout(()=>finish(30),30000);
+   const button=q("mocHoldGo");if(button)button.dataset.running="true";
+   const hint=q("mocHoldHint");if(hint)hint.textContent="« Pied posé » dès que le pied touche le sol ou l’autre jambe, ou qu’une main se pose. Arrêt automatique à 30 s.";
+   render();return;
+  }
+  const elapsed=(performance.now()-holdChrono.startedAt)/1000;
+  if(elapsed<0.6)return; // double appui involontaire
+  finish(elapsed);
+ };
+ let lastPointer=0;
+ go.onpointerdown=e=>{if(e.button>0)return;e.preventDefault();lastPointer=performance.now();toggle();};
+ go.onclick=()=>{if(performance.now()-lastPointer<800)return;toggle();};
+ // Correction d'un test déjà enregistré : la durée retenue apparaît comme essai unique.
+ const current=parseFloat(field()?.value||"");
+ if(!holdChrono.attempts.length&&Number.isFinite(current))holdChrono.attempts=[current];
+ if(holdChrono.startedAt)go.dataset.running="true";
+ render();
 }
 function fieldErrorText(t,error){
  const key=String(error||"").replace(/^(missing|invalid|precision)_/,"");
@@ -320,8 +390,9 @@ function makeShell(){
  // Entrée = « Valider et passer au suivant » quand la saisie est complète (hors zone de notes).
  host.addEventListener("keydown",event=>{
   // Barre d'espace = Départ / Arrivée du chronomètre de marche (hors champ de saisie).
-  if(event.key===" "&&panelMode==="tests"&&q("mocGaitGo")&&!event.target?.matches?.("input,textarea,select,button,summary")){
-   event.preventDefault();q("mocGaitGo").click();return;
+  const chronoButton=q("mocGaitGo")||q("mocHoldGo");
+  if(event.key===" "&&panelMode==="tests"&&chronoButton&&!event.target?.matches?.("input,textarea,select,button,summary")){
+   event.preventDefault();chronoButton.click();return;
   }
   if(event.key!=="Enter"||event.isComposing||event.shiftKey||event.altKey||event.metaKey||event.ctrlKey)return;
   const target=event.target;
@@ -515,7 +586,7 @@ async function loadTrajectory(force){
  trajectoryState={key:trajectoryState.key,data:trajectoryState.data,loading:true};
  try{
   const data=await api({action:"operator_patient_history",patient_id:patient.id});
-  const built=buildTrajectory(data.sessions||[]);
+  const built=buildTrajectory(data.sessions||[],{sex:patient?.sex_at_birth||null});
   trajectoryState={key,data:built,loading:false};
   const node=q("mocTrajectory");if(node)node.innerHTML=trajectoryMarkup(built);
   return built;
@@ -815,14 +886,15 @@ function renderStepView(){
  q("mocStepNav").querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>gotoStep(b.dataset.goto));
  if(q("mocTabTestsCount"))q("mocTabTestsCount").textContent=treated+"/"+TESTS.length;
  if(t.id!=="gait_4m")stopGaitChrono();
+ if(!t.holdTimer)stopHoldChrono();
  const safety=!room.progress?.safety_confirmed;
  autoValue=null;manualEdited=false;
  if(t.id==="two_step"||isFields(t))poseTracker?.stopMeasurement();
  else poseTracker?.setTest(t.id,room.progress?.test_started_at,running,
   Number(room.progress?.test_duration_seconds)||t.duration);
  const input=isFields(t)?
-  '<div class="moc-two-step-fields">'+(t.walkway?walkwayMarkup():'')+(t.dynamo?dynamoUnitMarkup():'')+
-  '<p class="moc-help">'+(t.walkway?'Le chronomètre remplit les deux passages ; tu peux aussi saisir les temps à la main.':'Valeurs recopiées telles qu’affichées ; laisser vide plutôt que deviner.')+'</p>'+
+  '<div class="moc-two-step-fields">'+(t.walkway?walkwayMarkup():'')+(t.holdTimer?holdMarkup():'')+(t.dynamo?dynamoUnitMarkup():'')+
+  '<p class="moc-help">'+(t.walkway?'Le chronomètre remplit les deux passages ; tu peux aussi saisir les temps à la main.':t.holdTimer?'Le chronomètre remplit la durée tenue (le meilleur essai) ; les oscillations se recopient depuis l’écran ForceDecks.':'Valeurs recopiées telles qu’affichées ; laisser vide plutôt que deviner.')+'</p>'+
   t.fields.map(f=>{const u=fieldUnit(t,f);return '<label class="moc-field">'+HTML(f.label)+(f.optional?" · facultatif":"")+
    (f.vald?'<small class="moc-field-vald">'+HTML(t.vald?.app||"VALD")+' affiche : <b>'+HTML(f.vald)+'</b></small>':'')+
    '<div class="moc-input-unit"><input data-field="'+f.key+'" type="number" min="'+f.min+'" step="'+(u==="kg"?"0.01":fieldStep(f))+'" inputmode="decimal" placeholder="—"><span data-unit-label="'+f.key+'">'+HTML(u)+'</span></div></label>'}).join("")+
@@ -940,6 +1012,7 @@ function renderStepView(){
    preview();manualEdited=false;
   }
   if(t.walkway)bindGaitChrono();
+  if(t.holdTimer)bindHoldChrono(t);
  }
  // Correction : valeurs déjà enregistrées remises dans les champs.
  if(existing?.status==="done"){

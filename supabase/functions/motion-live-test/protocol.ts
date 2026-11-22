@@ -3,7 +3,7 @@
 export const SPEC:any={
  "protocol": {
   "id": "KOMO_MOTION",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "code": "KOMO_MOTION_V2",
   "mode": "CORE",
   "device_set": [
@@ -16,20 +16,124 @@ export const SPEC:any={
  },
  "steps": [
   {
+   "id": "dynamo_hip_flex",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "hip_flex_left_n",
+     "min": 0,
+     "max": 2000,
+     "decimals": 1
+    },
+    {
+     "key": "hip_flex_right_n",
+     "min": 0,
+     "max": 2000,
+     "decimals": 1
+    }
+   ],
+   "choices": [],
+   "pair": [
+    "hip_flex_left_n",
+    "hip_flex_right_n"
+   ]
+  },
+  {
+   "id": "dynamo_knee_ext",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "knee_ext_left_n",
+     "min": 0,
+     "max": 2500,
+     "decimals": 1
+    },
+    {
+     "key": "knee_ext_right_n",
+     "min": 0,
+     "max": 2500,
+     "decimals": 1
+    },
+    {
+     "key": "knee_pad_distance_cm",
+     "min": 0,
+     "max": 60,
+     "decimals": 1,
+     "optional": true
+    }
+   ],
+   "choices": [],
+   "pair": [
+    "knee_ext_left_n",
+    "knee_ext_right_n"
+   ]
+  },
+  {
+   "id": "dynamo_hip_abd",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "hip_abd_left_n",
+     "min": 0,
+     "max": 2000,
+     "decimals": 1
+    },
+    {
+     "key": "hip_abd_right_n",
+     "min": 0,
+     "max": 2000,
+     "decimals": 1
+    }
+   ],
+   "choices": [],
+   "pair": [
+    "hip_abd_left_n",
+    "hip_abd_right_n"
+   ],
+   "method": "HIP_ABD_SEATED_90"
+  },
+  {
+   "id": "dynamo_grip",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "grip_left_n",
+     "min": 0,
+     "max": 1500,
+     "decimals": 1
+    },
+    {
+     "key": "grip_right_n",
+     "min": 0,
+     "max": 1500,
+     "decimals": 1
+    }
+   ],
+   "choices": [],
+   "pair": [
+    "grip_left_n",
+    "grip_right_n"
+   ]
+  },
+  {
    "id": "anthropometry",
    "kind": "fields",
    "duration": 0,
    "fields": [
     {
-     "key": "height_cm",
-     "min": 100,
-     "max": 230,
-     "decimals": 1
-    },
-    {
      "key": "body_mass_kg",
      "min": 25,
      "max": 250,
+     "decimals": 1
+    },
+    {
+     "key": "height_cm",
+     "min": 100,
+     "max": 230,
      "decimals": 1
     }
    ],
@@ -95,6 +199,32 @@ export const SPEC:any={
    ]
   },
   {
+   "id": "fd_quiet_stand_ec",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "fd_qsec_cop_ml_mm",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1
+    },
+    {
+     "key": "fd_qsec_cop_ap_mm",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1
+    },
+    {
+     "key": "fd_qsec_velocity_mms",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1
+    }
+   ],
+   "choices": []
+  },
+  {
    "id": "fd_sts",
    "kind": "fields",
    "duration": 0,
@@ -122,6 +252,80 @@ export const SPEC:any={
      ]
     }
    ]
+  },
+  {
+   "id": "unipodal_left",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "sls_left_hold_s",
+     "min": 0,
+     "max": 30,
+     "decimals": 1
+    },
+    {
+     "key": "sls_left_velocity_mms",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "optional": true
+    },
+    {
+     "key": "sls_left_cop_ml_mm",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "optional": true
+    },
+    {
+     "key": "sls_left_cop_ap_mm",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "optional": true
+    }
+   ],
+   "choices": [],
+   "method": "SLS_FORCEDECKS_EO_30S_BEST_OF_2",
+   "value_field": "sls_left_hold_s"
+  },
+  {
+   "id": "unipodal_right",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "sls_right_hold_s",
+     "min": 0,
+     "max": 30,
+     "decimals": 1
+    },
+    {
+     "key": "sls_right_velocity_mms",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "optional": true
+    },
+    {
+     "key": "sls_right_cop_ml_mm",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "optional": true
+    },
+    {
+     "key": "sls_right_cop_ap_mm",
+     "min": 0,
+     "max": 1000,
+     "decimals": 1,
+     "optional": true
+    }
+   ],
+   "choices": [],
+   "method": "SLS_FORCEDECKS_EO_30S_BEST_OF_2",
+   "value_field": "sls_right_hold_s"
   },
   {
    "id": "posture",
@@ -163,107 +367,12 @@ export const SPEC:any={
    "integer": false
   },
   {
-   "id": "unipodal_left",
-   "kind": "balance",
-   "duration": 30,
-   "unit": "seconds",
-   "max": 30,
-   "integer": false
-  },
-  {
-   "id": "unipodal_right",
-   "kind": "balance",
-   "duration": 30,
-   "unit": "seconds",
-   "max": 30,
-   "integer": false
-  },
-  {
    "id": "arms",
    "kind": "count",
    "duration": 30,
    "unit": "movements",
    "max": 100,
    "integer": true
-  },
-  {
-   "id": "dynamo_grip",
-   "kind": "fields",
-   "duration": 0,
-   "fields": [
-    {
-     "key": "grip_left_n",
-     "min": 0,
-     "max": 1500,
-     "decimals": 1
-    },
-    {
-     "key": "grip_right_n",
-     "min": 0,
-     "max": 1500,
-     "decimals": 1
-    }
-   ],
-   "choices": [],
-   "pair": [
-    "grip_left_n",
-    "grip_right_n"
-   ]
-  },
-  {
-   "id": "dynamo_knee_ext",
-   "kind": "fields",
-   "duration": 0,
-   "fields": [
-    {
-     "key": "knee_ext_left_n",
-     "min": 0,
-     "max": 2500,
-     "decimals": 1
-    },
-    {
-     "key": "knee_ext_right_n",
-     "min": 0,
-     "max": 2500,
-     "decimals": 1
-    },
-    {
-     "key": "knee_pad_distance_cm",
-     "min": 0,
-     "max": 60,
-     "decimals": 1,
-     "optional": true
-    }
-   ],
-   "choices": [],
-   "pair": [
-    "knee_ext_left_n",
-    "knee_ext_right_n"
-   ]
-  },
-  {
-   "id": "dynamo_hip_abd",
-   "kind": "fields",
-   "duration": 0,
-   "fields": [
-    {
-     "key": "hip_abd_left_n",
-     "min": 0,
-     "max": 2000,
-     "decimals": 1
-    },
-    {
-     "key": "hip_abd_right_n",
-     "min": 0,
-     "max": 2000,
-     "decimals": 1
-    }
-   ],
-   "choices": [],
-   "pair": [
-    "hip_abd_left_n",
-    "hip_abd_right_n"
-   ]
   },
   {
    "id": "sts",

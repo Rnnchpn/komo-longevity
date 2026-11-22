@@ -64,14 +64,18 @@ const [ui,remote,edge,protocol]=await Promise.all([
  'supabase/functions/motion-live-test/index.ts',
  'site/pulse-v14/motion-protocol.mjs'
 ].map(p=>readFile(join(process.cwd(),p),'utf8')));
-assert.ok(protocol.includes("kind:'balance'")&&protocol.includes("duration:30,unit:'seconds'")&&ui.includes('balance:"balance"'));
+// v2.4 (22/11/2026) : l'appui unipodal se fait sur plateforme ForceDecks, chronométré dans PULSE (meilleur de 2,
+// 30 s max). Le suivi vidéo de l'appui reste dans le code pour les dossiers antérieurs.
+assert.ok(protocol.includes("{id:'unipodal_left',block:'B',kind:'fields'")&&protocol.includes("holdTimer:true")&&
+ protocol.includes("method:'SLS_FORCEDECKS_EO_30S_BEST_OF_2'")&&ui.includes('balance:"balance"')&&ui.includes('bindHoldChrono'));
 assert.ok(ui.includes('isBalance(currentTest())')&&ui.includes('await submit(action)'));
 assert.ok(ui.includes('Le chrono ne démarre pas avant la détection')||ui.includes('le chrono ne démarre'));
 assert.ok(ui.includes('balanceElapsed')&&ui.includes('mocLiveBalance'));
 assert.ok(ui.includes('payload.measurement_quality'));
 assert.ok(remote.includes('createOneLegObserver(step==="unipodal_left"?"left":"right",30000)'));
 assert.ok(remote.includes('balance.observe(points,at)')&&remote.includes('balanceState'));
-assert.ok(protocol.includes("id:'unipodal_left'")&&protocol.includes("max:30,integer:false")&&edge.includes('SPEC.steps.filter((x:any)=>["count","balance"].includes(x.kind))'));
+assert.ok(protocol.includes("value_field:'sls_left_hold_s'")&&protocol.includes("{key:'sls_left_hold_s',label:'Durée tenue (meilleur essai)',unit:'s',min:0,max:30,decimals:1}")&&
+ edge.includes('STEP_SPEC[step]?.value_field')&&edge.includes('SPEC.steps.filter((x:any)=>["count","balance"].includes(x.kind))'));
 assert.ok(edge.includes('SOLEO_EYES_OPEN_30S_OPERATOR_SUPERVISED_V1'));
 const results={
  unipodal_left:{status:'done',value:30,unit:'seconds',source:'operator_confirmed_video_estimate',

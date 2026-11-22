@@ -7,24 +7,26 @@ const STORAGE="komo_motion_live_guest_v1";
 const STAFF_STORAGE="komo_motion_operator_camera_station_v1";
 // Protocole V2 (20/11/2026) : l'iPhone affiche l'étape par son code, jamais par sa position.
 const STEPS=[
- ["anthropometry","Taille et masse","Mesure de la taille et pesée sur les plateformes. L'opérateur saisit les valeurs."],
+ ["dynamo_hip_flex","Force de la hanche · flexion","Assis au bord de la table : montez le genou vers le plafond contre l'appareil. Trois essais de chaque côté."],
+ ["dynamo_knee_ext","Force du genou","Assis au bord de la table : poussez la jambe vers l'avant contre l'appareil. Trois essais de chaque côté."],
+ ["dynamo_hip_abd","Force de la hanche · écartement","Assis au bord de la table : écartez le genou vers l'extérieur contre l'appareil. Trois essais de chaque côté."],
+ ["dynamo_grip","Force de la main","Assis, coude à 90° : serrez la poignée le plus fort possible. Trois essais de chaque côté."],
+ ["anthropometry","Poids et taille","Pesée sur les plateformes, puis mesure de la taille au mur. L'opérateur saisit les valeurs."],
+ ["fd_quiet_stand","Équilibre sur plateformes","Mains sur les hanches, regard devant : restez aussi immobile que possible pendant 30 secondes."],
+ ["fd_quiet_stand_ec","Équilibre yeux fermés","Même position, yeux fermés : restez aussi immobile que possible pendant 30 secondes. Le praticien est à côté de vous."],
+ ["fd_sts","Lever de chaise sur plateformes","Un pied sur chaque plateforme, mains croisées : trois levers lents, avec une pause immobile entre chaque."],
+ ["unipodal_left","Équilibre · appui gauche","Sur la plateforme, yeux ouverts, soulevez le pied droit et tenez jusqu'à 30 secondes."],
+ ["unipodal_right","Équilibre · appui droit","Sur la plateforme, yeux ouverts, soulevez le pied gauche et tenez jusqu'à 30 secondes."],
+ ["posture","Posture de profil","Mettez-vous naturellement de profil, pieds visibles. Cette image ne mesure pas la SVA radiographique."],
  ["gait_4m","Marche 4 m","Marchez à votre allure habituelle, comme dans la rue, sur le couloir balisé. Deux passages."],
  ["two_step","Two-Step · deux grands pas","Depuis la ligne, faites deux pas aussi grands que possible sans sauter, puis joignez les pieds. Deux essais."],
- ["fd_quiet_stand","Équilibre sur plateformes","Mains sur les hanches, regard devant : restez aussi immobile que possible pendant 30 secondes."],
- ["sts","Se relever de la chaise","Bras croisés, relevez-vous et rasseyez-vous autant de fois que possible durant 30 secondes."],
- ["fd_sts","Lever de chaise sur plateformes","Un pied sur chaque plateforme, mains croisées : trois levers lents, avec une pause immobile entre chaque."],
- ["unipodal_left","Équilibre · appui gauche","Sur sol ferme, yeux ouverts, soulevez le pied droit. Le décompte démarre quand le pied est levé, jusqu'à 30 secondes."],
- ["unipodal_right","Équilibre · appui droit","Sur sol ferme, yeux ouverts, soulevez le pied gauche. Le décompte démarre quand le pied est levé, jusqu'à 30 secondes."],
- ["dynamo_grip","Force de la main","Assis, coude à 90° : serrez la poignée le plus fort possible. Trois essais de chaque côté."],
- ["dynamo_knee_ext","Force du genou","Assis au bord de la table : poussez la jambe vers l'avant contre l'appareil. Trois essais de chaque côté."],
- ["dynamo_hip_abd","Force de la hanche","Allongé sur le dos : écartez la jambe contre l'appareil. Trois essais de chaque côté."],
  ["arms","Mobilité des bras","Face à la caméra, levez et redescendez les bras sans douleur pendant 30 secondes."],
- ["posture","Posture de profil","Mettez-vous naturellement de profil, pieds visibles. Cette image ne mesure pas la SVA radiographique."],
+ ["sts","Se relever de la chaise","Bras croisés, relevez-vous et rasseyez-vous autant de fois que possible durant 30 secondes."],
  ["heels","Élévations sur les pointes","Ancien test conservé pour les séances antérieures."]
 ];
-const V2_STEP_COUNT=13;
-// Placement de l'iPhone du cabinet par test (protocole v2.1, stations B, C et E).
-const PLACEMENT={posture:"de profil",gait_4m:"de profil",two_step:"de profil",unipodal_left:"de face",unipodal_right:"de face",arms:"de face",sts:"de trois-quarts"};
+const V2_STEP_COUNT=15;
+// Placement de l'iPhone du cabinet par test (protocole v2.4 : stations C, D et E ; force et plateformes sans caméra).
+const PLACEMENT={posture:"de profil",gait_4m:"de profil",two_step:"de profil",arms:"de face",sts:"de trois-quarts"};
 const placementText=code=>PLACEMENT[code]?"Place l’iPhone "+PLACEMENT[code]+", à hauteur du bassin, corps entier visible.":"Ce test n’utilise pas la caméra : laisse l’iPhone en place.";
 let overlay=null,videoStream=null,timer=null,signalTimer=null,guestToken="",live=null,busy=false,opening=false,cameraInfo="Caméra désactivée";
 let facing="environment",peer=null,peerSender=null,peerId="",pendingWatch=null,signalCursor=0,offering=false,wakeLock=null,signalPolling=false;
