@@ -309,6 +309,8 @@ const scripts = [
   'scripts/build-motion-cannes-booking-20261107.mjs',
   // 21/11/2026 : une seule PULSE publiée (v14) ; v12 et v13 ne sont plus servies.
   'scripts/pulse-retire-legacy-generations.mjs',
+  // 22/11/2026 : couches du site public (sélecteur flottant v1, pages Motion = protocole PULSE, scripts valides).
+  'scripts/komo-site-layers-cleanup-20261122.mjs',
   // 20/11/2026 : retrait de l'offre Online et du Motion Age — doit rester la toute dernière passe.
   'scripts/komo-retire-motion-online-20261120.mjs'
 ];

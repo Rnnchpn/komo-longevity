@@ -447,7 +447,8 @@ function meta(html, title, description, seo){
     const alternates=Object.entries(seo.alternates).map(([lang,path])=>`<link rel="alternate" hreflang="${lang}" href="https://komolongevity.com${path}">`).join('\n');
     html=html.replace('</head>',`${alternates}\n<link rel="alternate" hreflang="x-default" href="https://komolongevity.com${seo.alternates.fr}">\n</head>`);
   }
-  html = html.replace(/\s*<style id="komo-commercial-trajectory-v2-style">[\s\S]*?<\/style>\s*(?=<\/head>)/,'');
+  // 22/11/2026 : retirer TOUTES les copies précédentes (pas seulement celle juste avant </head>) : sinon la feuille s'empile.
+  html = html.replace(/\s*<style id="komo-commercial-trajectory-v2-style">[\s\S]*?<\/style>/g,'');
   return html.replace('</head>', css+'\n</head>');
 }
 function url(c,key){ return c.paths[key] || key; }
@@ -533,8 +534,8 @@ function motionRuntime(){
     document.documentElement.classList.add('kt-motion-ready');
     if(reduce||!('IntersectionObserver'in window))targets.forEach(el=>el.classList.add('kt-in'));
     else{const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('kt-in');io.unobserve(e.target)}}),{threshold:.09,rootMargin:'0px 0px -7% 0px'});targets.forEach(el=>io.observe(el))}
-    const path=location.pathname.replace(/\/+$/,'')||'/';
-    document.querySelectorAll('.kt-simple-link,.kt-menu-link').forEach(a=>{try{const u=new URL(a.href,location.href);if(u.origin===location.origin){const p=u.pathname.replace(/\/+$/,'')||'/';if(p===path)a.classList.add('is-current')}}catch{}});
+    const path=location.pathname.replace(/[/]+$/,'')||'/';
+    document.querySelectorAll('.kt-simple-link,.kt-menu-link').forEach(a=>{try{const u=new URL(a.href,location.href);if(u.origin===location.origin){const p=u.pathname.replace(/[/]+$/,'')||'/';if(p===path)a.classList.add('is-current')}}catch{}});
     const close=()=>document.querySelectorAll('.kt-mega[open]').forEach(d=>d.removeAttribute('open'));
     document.addEventListener('pointerdown',e=>{if(!e.target.closest('.kt-mega'))close()});
     document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
