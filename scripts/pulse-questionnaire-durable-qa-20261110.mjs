@@ -29,7 +29,8 @@ const answers={ageBand:'60-69',goal:'strength',walk10:'0',stairs:'1',chair:'0',c
  sleep:'2',stress:'2',recovered:'2',qol:'1',walkingDays:'1',strengthDays:'3',
  outdoors:'1',breaks:'2'};
 assert.equal(intakeProgress(answers).completed,22);
-assert.equal(INTAKE_GROUPS.length,5);
+assert.equal(INTAKE_GROUPS.filter(g=>!g.optional).length,5,'5 catégories attendues ; « Santé et longévité » est facultative');
+assert.equal(INTAKE_GROUPS.length,6);
 assert.equal(SCORED_QUESTION_COUNT,20);
 assert.equal(MAX_QUESTIONNAIRE_POINTS,80);
 assert.equal(intakeProgress(answers).completed,22);
