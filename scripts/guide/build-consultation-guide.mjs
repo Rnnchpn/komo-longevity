@@ -118,6 +118,8 @@ const PANNES=[
  ['Le patient voit « Ce lien n’est plus valide »','Le QR a été renouvelé ou a plus de 30 jours : « QR patient », puis « Nouveau QR », et fais-le scanner à nouveau.'],
  ['Message « consultation déjà en cours »','Un ancien bilan non terminé est resté ouvert : menu Consultation, puis « Clore » sur sa carte. Rien n’est supprimé.'],
  ['VALD ou DynaMo en panne','« Test non réalisé », motif « Appareil indisponible », et reprogramme ces tests au contrôle.'],
+ ['Une valeur de la feuille est illisible ou manque','Claude te la demande avant d’enregistrer : réponds avec la valeur, ou « non réalisé » et le motif.'],
+ ['Erreur vue après la transcription','Dis-la à Claude : seule la valeur corrigée est réécrite, le reste du bilan ne bouge pas. Ou corrige-la dans la console.'],
  ['Valeur mal saisie après validation','Touche le test dans la liste des tests (ou « Corriger un test » dans le rapport) : il s’ouvre avec ses valeurs, tu corriges et tu valides.']
 ];
 
@@ -205,7 +207,7 @@ table.summary td:first-child{width:20%}
  <div class="facts"><div><strong>${N}</strong><span>tests en ${NS} stations</span></div><div><strong>≈ 35 min</strong><span>de tests</span></div><div><strong>6 semaines</strong><span>jusqu’au contrôle</span></div></div>
  <div class="flow"><ol>
   <li>Préparer la salle et les appareils</li><li>Accueillir et vérifier la sécurité</li><li>Créer le dossier pseudonymisé</li><li>Ouvrir la consultation, QR au patient</li>
-  <li>Faire les ${N} tests, station par station</li><li>Compléter le questionnaire</li><li>Restituer et remettre le passeport</li><li>Revoir le patient à 6 semaines</li>
+  <li>Faire les ${N} tests, notés sur la feuille de mesures</li><li>Compléter le questionnaire</li><li>Restituer et remettre le passeport</li><li>Revoir le patient à 6 semaines</li>
  </ol></div>
  <p class="version">Protocole ${e(PROTOCOL.code)} ${e(PROTOCOL.version)} · version du ${DATE} · document interne, non diagnostique</p>
 </div>
@@ -221,7 +223,7 @@ table.summary td:first-child{width:20%}
   '<b>Toise</b> ou ruban fixé au mur pour la taille.',
   '<b>DynaMo Plus</b> chargé, poignée et pad à portée, table d’examen libre.',
   '<b>Ton iPhone</b> chargé, PULSE ouvert et connecté, mode Ne pas déranger. Apps VALD (ForceDecks, DynaMo) ouvertes sur leur appareil habituel.',
-  '<b>Fiche papier</b> : identité, consentement, correspondance avec le code.'
+  '<b>Fiches papier</b> : la fiche patient (identité, consentement, correspondance avec le code) et la feuille de mesures, avec un stylo noir. Chronomètre de l’iPhone à portée de main.'
  ])}
  <div class="two">
   <div><h4>Ton iPhone : il suffit</h4>${steps([
@@ -270,7 +272,8 @@ table.summary td:first-child{width:20%}
  <div class="note"><b>Dans la console, chaque test suit le même ordre :</b> le bandeau de station dit où installer le patient ; « Installation et consignes » reprend ce guide ; tu saisis, puis « Valider et passer au suivant ». Les numéros en haut permettent d’ouvrir n’importe quel test, et « Plus tard » de le reporter à la fin.</div>
  <div class="note warn"><b>Arrêter un test.</b> Douleur, vertige, malaise, perte d’équilibre, essoufflement anormal : tu arrêtes, tu rassures, tu fais asseoir. « Test non réalisé » avec son motif passe au suivant. Un test impossible n’est pas un échec : le rapport l’indique sans valeur inventée.</div>
  <p class="kicker" style="margin-top:7mm">Étape 5</p><h2>Les ${N} tests, station par station</h2>
- <p class="intro">Le patient passe par ${NS} postes : assis à la table, sur les plateformes, dans le couloir, puis sur la chaise. Chaque test se lit de haut en bas : installer, dire, faire, saisir.</p>
+ <p class="intro">Le patient passe par ${NS} postes : assis à la table, sur les plateformes, dans le couloir, puis sur la chaise. Chaque test se lit de haut en bas : installer, dire, faire, noter.</p>
+ <div class="note"><b>Où noter les valeurs.</b> Sur la <b>feuille de mesures</b>, ligne par ligne, dans l’ordre de PULSE ; marche et appui sur un pied au chronomètre de l’iPhone, levers de chaise comptés à voix haute. À la fin, la feuille est transcrite dans PULSE (page suivant les tests). La saisie directe dans la console reste possible : même résultat.</div>
 </section>
 <section class="part">
  <p class="kicker">Avant les tests</p><h2>Les repères de longévité en un coup d’œil</h2>
@@ -278,6 +281,21 @@ table.summary td:first-child{width:20%}
  ${summaryTable()}
 </section>
 <section class="part tests">${stationsMarkup()}</section>
+
+<section class="part">
+ <p class="kicker">Fin de l’étape 5</p><h2>La feuille de mesures dans PULSE</h2>
+ <p class="intro">Pendant que le patient termine son questionnaire sur son téléphone, la feuille est transcrite dans sa consultation PULSE. Compte 3 à 5 minutes.</p>
+ ${steps([
+  'Relis la feuille : code PULSE, case « Sécurité vérifiée », N ou kg pour chaque ligne DynaMo, côté le plus chargé, deux essais par pied, deux passages de marche, nombre de levers. Un test non fait : case « Non réalisé » et motif dans les notes.',
+  'Photo de la <b>feuille de mesures seulement</b> : page entière, à plat, nette, sans reflet. Jamais la fiche patient (nom, signature).',
+  'Envoie la photo à Claude, dans la conversation habituelle.',
+  'Claude te renvoie un récapitulatif : chaque valeur, les conversions des kg, les symétries, la vitesse de marche, et les valeurs à vérifier. Compare-le à ta feuille, puis réponds « OK » ou corrige.',
+  'Claude enregistre seulement après ton « OK », puis vérifie que chaque valeur enregistrée correspond au récapitulatif.',
+  'Ta console passe sur le <b>Rapport</b> et le téléphone du patient affiche ses résultats : place à la restitution (étape 7).'
+ ])}
+ <div class="note"><b>Les règles restent celles de PULSE</b> : mêmes bornes, mêmes calculs, même passeport, même trajectoire à 6 semaines. Chaque valeur garde la trace de sa transcription depuis la feuille. Une valeur illisible n’est jamais devinée : Claude te la demande.</div>
+ <div class="note warn"><b>Si Claude ne répond pas</b>, saisis toi-même la feuille dans la console, dans les 4 heures : onglet Tests, touche chaque test dans la liste et recopie ses valeurs. Au-delà, Claude peut encore la transcrire jusqu’à 7 jours après la consultation : le patient repart et reçoit ses résultats sur son lien.</div>
+</section>
 
 <section class="part">
  <p class="kicker">Étape 6</p><h2>Questionnaire</h2>

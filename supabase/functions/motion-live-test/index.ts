@@ -691,6 +691,73 @@ Deno.serve(async(req:Request)=>{
   }
   return response(req,{error:"questionnaire_conflict_retry"},409);
  }
+ if(action==="operator_results_bulk"){
+  // Transcription de la feuille de mesures (22/11/2026) : les résultats notés sur papier pendant la consultation
+  // sont enregistrés en une fois, après relecture par le praticien. Mêmes bornes et mêmes calculs que la saisie
+  // test par test ; si une seule valeur est invalide, rien n'est enregistré. Les tests laissés vides restent à faire,
+  // les résultats déjà enregistrés et non renvoyés sont conservés. Possible jusqu'à 7 jours après la création de la
+  // consultation (la salle « en direct » expire après 4 h, la feuille peut être transcrite plus tard).
+  const id=s(b.session_id,50);
+  if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const {data:room,error:roomError}=await db.from("pulse_motion_live_sessions").select("*")
+    .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
+  if(roomError||!room)return response(req,{error:"session_not_found"},404);
+  if(room.operator_user_id!==actor.id||!room.patient_id)return response(req,{error:"operator_owner_required"},403);
+  if(!["active","completed"].includes(room.status)||!(Date.now()-new Date(room.created_at).getTime()<=7*86400000))
+   return response(req,{error:"room_unavailable"},409);
+  const {data:patient}=await db.from("patients").select("data_classification,status")
+    .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
+  if(!patientAllowed(patient))return response(req,{error:"synthetic_patient_required"},403);
+  const old=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
+  if(!old.safety_confirmed&&b.safety_confirmed!==true)return response(req,{error:"safety_check_required"},422);
+  const by=b.transcribed_by===undefined?"practitioner":s(b.transcribed_by,20);
+  if(!["practitioner","assistant"].includes(by))return response(req,{error:"invalid_bulk_entry",detail:"transcribed_by"},422);
+  const entries=b.entries;
+  if(!entries||typeof entries!=="object"||Array.isArray(entries))return response(req,{error:"invalid_bulk_entry"},422);
+  const ids=Object.keys(entries);
+  if(!ids.length||ids.length>STEPS.length||ids.some(x=>!STEPS.includes(x)))
+   return response(req,{error:"invalid_bulk_entry",step:ids.find(x=>!STEPS.includes(x))||null},422);
+  const bad=(step:string,detail:string)=>response(req,{error:"invalid_bulk_entry",step,detail},422);
+  const results=old.results&&typeof old.results==="object"&&!Array.isArray(old.results)?{...old.results}:{};
+  const stamp={protocol:PROTOCOL_STAMP.code,protocol_version:PROTOCOL_STAMP.version};
+  const at=now();
+  for(const step of ids){
+   const e=entries[step];
+   if(!e||typeof e!=="object"||Array.isArray(e))return bad(step,"invalid_entry");
+   // Note absente = note déjà enregistrée conservée (une correction ne l'efface pas).
+   const note=e.note===undefined?(typeof results[step]?.note==="string"?results[step].note:""):s(e.note,300);
+   if(e.skip_reason!==undefined){
+    const reason=s(e.skip_reason,30);
+    if(!SKIP_REASONS.includes(reason))return bad(step,"skip_reason_required");
+    results[step]={status:"skipped",reason,note,entry_mode:"paper_transcription",...stamp,recorded_at:at};
+   }else if(INSTRUMENTED[step]){
+    const checked=validateInstrumented(step,e.fields);
+    if(!checked)return bad(step,"invalid_fields");
+    const vf=STEP_SPEC[step]?.value_field,main=vf?checked.fields[vf]:undefined;
+    results[step]={status:"done",fields:checked.fields,derived:checked.derived,
+      ...(STEP_SPEC[step]?.method?{method:STEP_SPEC[step].method}:{}),
+      ...(typeof main==="number"?{value:main,unit:"seconds"}:{}),
+      source:"operator_manual_entry",entry_mode:"paper_transcription",...stamp,note,recorded_at:at};
+   }else if(LIMITS[step]){
+    const def=LIMITS[step],value=e.value;
+    if(typeof value!=="number"||!Number.isFinite(value)||value<0||value>def.max||
+      (def.integer&&!Number.isInteger(value))||(!def.integer&&Math.round(value*10)!==value*10))
+     return bad(step,"invalid_value");
+    results[step]={status:"done",value,unit:def.unit,note,source:"operator_manual_observation",
+      duration_seconds:STEP_SPEC[step]?.duration||0,entry_mode:"paper_transcription",...stamp,recorded_at:at};
+   }else return bad(step,"unsupported_step");
+  }
+  const pending=STEPS.find(x=>!results[x]);
+  const progress={...old,results,safety_confirmed:true,step_status:"pending",test_started_at:null,
+    protocol:old.protocol||{...PROTOCOL_STAMP,stamped_at:at},
+    paper_transcription:{at,by,steps:[...new Set([...(old.paper_transcription?.steps||[]),...ids])]}};
+  const {data,error}=await db.from("pulse_motion_live_sessions").update({
+    status:pending?"active":"completed",stage_code:pending||"finished",
+    step_index:pending?STEPS.indexOf(pending):STEPS.length,completed_at:pending?null:at,progress,updated_at:at
+  }).eq("id",id).eq("updated_at",room.updated_at).select("*").maybeSingle();
+  return error||!data?response(req,{error:"stale_state_retry"},409):
+   response(req,{ok:true,saved:ids.length,remaining:STEPS.filter(x=>!results[x]).length,session:publicRow(data)});
+ }
  if(action==="operator_tests_init"||action==="operator_test_update"||action==="operator_test_goto"){
   const id=s(b.session_id,50);
   if(!uuid(id))return response(req,{error:"invalid_session"},422);

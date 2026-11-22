@@ -100,11 +100,11 @@ table{width:100%;border-collapse:collapse}
 .fld{margin-right:2mm}
 .cond{display:grid;grid-template-columns:28mm 1fr;gap:1.6mm 2mm;align-items:center}
 .cond>span{font-weight:600;color:var(--ink)}
-.notes{border:1px solid var(--line);border-radius:2mm;padding:2.5mm 3mm;margin-top:2.5mm;height:18mm}
+.notes{border:1px solid var(--line);border-radius:2mm;padding:2.5mm 3mm;margin-top:2.5mm;height:14mm}
 </style></head><body>
 
 <div class="sheet">
- <div class="top"><div class="brand">KŌMØ MOTION · Clinique HIRO</div><div class="keep">À conserver dans le dossier du cabinet. Ne jamais saisir, photographier ni scanner dans PULSE.</div></div>
+ <div class="top"><div class="brand">KŌMØ MOTION · Clinique HIRO</div><div class="keep">À conserver dans le dossier du cabinet. Ne jamais saisir, photographier ni transmettre.</div></div>
  <h1>Fiche patient</h1><p class="sub">Identité, sécurité et consentement · une fiche par bilan</p>
  <div class="code"><b>Code PULSE</b><span class="digits">HIRO –<i></i><i></i><i></i><i></i><i></i><i></i>–<i></i><i></i></span>
   <span>Date ${blank(26)}</span><span>Heure ${blank(14)}</span></div>
@@ -146,13 +146,14 @@ table{width:100%;border-collapse:collapse}
 
 <div class="sheet">
  <div class="top"><div class="brand">KŌMØ MOTION · Clinique HIRO</div><div class="keep">Feuille sans nom : code seulement.</div></div>
- <h1>Feuille de mesures</h1><p class="sub">Pour noter les valeurs à la main si PULSE est indisponible, puis les saisir dans la console. Mêmes tests, même ordre.</p>
+ <h1>Feuille de mesures</h1><p class="sub">Les valeurs se notent ici pendant les tests, dans l’ordre de PULSE. À la fin : une photo de cette page seulement, pour la transcription dans PULSE.</p>
  <div class="code"><b>Code PULSE</b><span class="digits">HIRO –<i></i><i></i><i></i><i></i><i></i><i></i>–<i></i><i></i></span><span>Date ${blank(24)}</span><span>Praticien ${blank(22)}</span></div>
+ <div class="row" style="margin-top:1.6mm"><span class="opt">${box}<b>Sécurité vérifiée</b>&nbsp;et fiche patient signée</span><span class="hint">Chiffres bien formés, virgule nette (3,38) ; une erreur se barre et se réécrit à côté.</span></div>
  <table class="measures"><thead><tr><th></th><th>Test</th><th>Valeurs</th><th>Non réalisé</th></tr></thead><tbody>
  ${(()=>{let out='',cur=null,n=0;for(const s of STEPS){n++;if(s.block!==cur){cur=s.block;out+='<tr class="station"><td colspan="4">Station '+s.block+' · '+e(STATIONS[s.block].label)+'</td></tr>';}out+=measureRow(s,n);}return out;})()}
  </tbody></table>
  <div class="notes"><b>Notes</b> <span class="hint">motif d’un test non réalisé (sécurité, douleur, refus, appareil indisponible…), incident, observation</span></div>
- <div class="foot"><span>Préhension, genou, hanche : cocher N ou kg selon l’écran du DynaMo ; PULSE convertit les kg.</span><span>${e(PROTOCOL.code)} ${e(PROTOCOL.version)}</span></div>
+ <div class="foot"><span>DynaMo : cocher N ou kg selon l’écran. Photo : page entière, à plat, nette ; jamais la fiche patient.</span><span>${e(PROTOCOL.code)} ${e(PROTOCOL.version)}</span></div>
 </div>
 </body></html>`;
 
