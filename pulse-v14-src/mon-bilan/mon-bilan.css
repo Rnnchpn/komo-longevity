@@ -1,0 +1,46 @@
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#eeece6;color:#263a31;font-family:Inter,system-ui,-apple-system,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.mb-layout{max-width:720px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:max(18px,env(safe-area-inset-top)) 18px max(24px,env(safe-area-inset-bottom))}
+.mb-top{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #d9d0bf;padding:6px 0 16px}
+.mb-brand{font:600 23px/.9 Georgia,serif;letter-spacing:.07em;color:#1f3c2e}
+.mb-brand small{font:700 8.5px/1 Inter,system-ui,sans-serif;letter-spacing:.14em;color:#9a855e}
+.mb-code{font:700 12px/1 Inter,system-ui,sans-serif;letter-spacing:.08em;color:#5e6a5f}
+.mb-app{flex:1;padding:22px 0 10px}
+.mb-loading{color:#6f7169;font-size:14px}
+.mb-card{background:#fdfbf6;border:1px solid #e6ded1;border-radius:18px;padding:22px 20px;margin:0 0 16px;box-shadow:0 14px 40px rgba(37,45,37,.05)}
+.mb-over{display:block;font-size:10px;font-weight:750;letter-spacing:.14em;color:#a58a63;margin:0 0 10px}
+h1{font:400 34px/1.08 Georgia,serif;letter-spacing:-.025em;margin:0 0 10px;color:#1f3c2e}
+h2{font:400 24px/1.15 Georgia,serif;margin:0 0 8px;color:#1f3c2e}
+p{font-size:15px;line-height:1.6;color:#4f5a52;margin:0 0 12px}
+.mb-muted{color:#7a7c72;font-size:13px}
+.mb-progress{height:8px;border-radius:9px;background:#e6dfd2;overflow:hidden;margin:6px 0 8px}
+.mb-progress i{display:block;height:100%;background:#224337;border-radius:9px;transition:width .4s ease}
+.mb-steps{display:flex;justify-content:space-between;font-size:13px;color:#5e6a5f;font-weight:600}
+.mb-group{margin:22px 0 8px}
+.mb-group h3{font:700 12px/1.3 Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#a58a63;margin:0 0 4px}
+.mb-group .mb-sub{font-size:13px;color:#7a7c72;margin:0 0 10px}
+fieldset.mb-q{border:1px solid #e6ded1;border-radius:14px;background:#fff;margin:0 0 10px;padding:14px 14px 6px}
+fieldset.mb-q legend{padding:0 4px;font-size:15px;font-weight:650;color:#263a31;line-height:1.35}
+fieldset.mb-q.is-done{border-color:#b9cbbd;background:#fbfdfb}
+.mb-opts{display:grid;gap:7px;margin-top:8px}
+.mb-opts label{display:flex;align-items:center;gap:10px;min-height:46px;padding:10px 12px;border:1px solid #e1d9ca;border-radius:12px;font-size:15px;color:#2f4237;background:#fdfbf6;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mb-opts input{width:20px;height:20px;accent-color:#224337;flex:none}
+.mb-opts label:has(input:checked){border-color:#224337;background:#e8efe9;font-weight:650}
+.mb-save{position:sticky;bottom:0;margin:10px -18px 0;padding:12px 18px max(12px,env(safe-area-inset-bottom));background:rgba(238,236,230,.96);border-top:1px solid #d9d0bf;font-size:13px;font-weight:600;color:#3d5446;backdrop-filter:blur(8px)}
+.mb-save[data-state="error"]{color:#9b4a32}
+.mb-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border:0;border-radius:14px;background:#224337;color:#fff;font:700 16px/1 Inter,system-ui,sans-serif;cursor:pointer;margin:6px 0 10px;text-decoration:none}
+.mb-btn.secondary{background:#fff;color:#224337;border:1px solid #c9bfae}
+.mb-btn:disabled{opacity:.55}
+.mb-cap{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:12px 0;border-top:1px solid #ece5d8}
+.mb-cap:first-of-type{border-top:0}
+.mb-cap strong{font-size:16px;color:#1f3c2e}
+.mb-cap span.mb-zone{font-size:11px;font-weight:750;letter-spacing:.06em;padding:5px 9px;border-radius:99px;align-self:start;background:#ece7db;color:#5e5a4c}
+.mb-zone[data-zone="priority"]{background:#f3dfd3;color:#8d4329}
+.mb-zone[data-zone="consolidate"]{background:#f3ead1;color:#7a5d1d}
+.mb-zone[data-zone="solid"]{background:#dfeadf;color:#28553a}
+.mb-cap small{grid-column:1 / -1;font-size:13px;color:#5e6a5f;line-height:1.5}
+.mb-prio{padding:12px 14px;border-radius:12px;background:#f5f1e8;margin:0 0 8px}
+.mb-prio b{display:block;color:#1f3c2e;font-size:15px}
+.mb-prio span{font-size:14px;color:#4f5a52}
+.mb-foot{font-size:11.5px;line-height:1.55;color:#8a8a80;border-top:1px solid #d9d0bf;padding-top:14px}

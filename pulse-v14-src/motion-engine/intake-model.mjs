@@ -36,10 +36,23 @@ export const INTAKE_GROUPS=[
   {id:'strengthDays',label:'Jours avec un exercice de renforcement adapté',options:['3 jours ou plus','2 jours','1 jour','Moins d’un jour','Jamais']},
   {id:'outdoors',label:'Sorties actives ou déplacements à pied',options:frequency},
   {id:'breaks',label:'Jours où vous avez interrompu une longue période assise pour bouger',options:frequency}
+ ]},
+ // 22/11/2026 : 5 questions FACULTATIVES, descriptives (sans points ni indice), parmi les repères de longévité
+ // les plus documentés : chute récente, activité physique hebdomadaire, temps assis, tabac, nombre de médicaments.
+ // Elles ne comptent ni dans les 22 réponses attendues ni dans l'indice déclaré.
+ {id:'health',title:'Santé et longévité',subtitle:'Facultatif : cinq repères qui aident à préciser votre programme.',note:'Réponses descriptives, sans score ; elles ne servent pas de diagnostic.',scored:false,optional:true,questions:[
+  {id:'falls12',label:'Chutes au cours des 12 derniers mois',options:[['0','Aucune'],['1','Une'],['2plus','Deux ou plus']]},
+  {id:'activityMinutes',label:'Activité d’intensité modérée (marche rapide, vélo, natation) par semaine',options:[['lt60','Moins d’1 heure'],['60to149','D’1 heure à 2 h 30'],['150plus','2 h 30 ou plus']]},
+  {id:'sittingHours',label:'Temps passé assis par jour, hors sommeil',options:[['lt6','Moins de 6 heures'],['6to8','De 6 à 8 heures'],['gt8','Plus de 8 heures']]},
+  {id:'smoking',label:'Tabac',options:[['never','Je n’ai jamais fumé'],['former','J’ai arrêté'],['current','Je fume']]},
+  {id:'medications',label:'Médicaments pris chaque jour, sur ordonnance',options:[['0to2','0 à 2'],['3to4','3 à 4'],['5plus','5 ou plus']]}
  ]}
 ];
+// Questions attendues (les groupes facultatifs n'entrent ni dans la complétude ni dans l'indice).
+export const REQUIRED_GROUPS=INTAKE_GROUPS.filter(g=>!g.optional);
+export const OPTIONAL_GROUPS=INTAKE_GROUPS.filter(g=>g.optional);
 export const SCORING_GROUPS=INTAKE_GROUPS.filter(g=>g.scored!==false);
-export const QUESTION_COUNT=INTAKE_GROUPS.reduce((s,g)=>s+g.questions.length,0);
+export const QUESTION_COUNT=REQUIRED_GROUPS.reduce((s,g)=>s+g.questions.length,0);
 export const QUESTIONNAIRE_POINTS_VERSION='KOMO_MOTION_SELF_REPORT_POINTS_V1';
 // Two contextual answers (age band and goal) have no severity points.
 export const SCORED_QUESTION_COUNT=SCORING_GROUPS.reduce((sum,g)=>sum+g.questions.length,0);
@@ -57,13 +70,13 @@ export function validAnswer(q,answer){
  return q.options.some(item=>item[0]===answer);
 }
 export function intakeProgress(answers={}){
- const questions=INTAKE_GROUPS.flatMap(g=>g.questions);
+ const questions=REQUIRED_GROUPS.flatMap(g=>g.questions);
  const completed=questions.filter(q=>Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id])).length;
  return {completed,total:questions.length,percent:Math.round(completed/questions.length*100)};
 }
 const round=x=>Math.round(x*10)/10;
 export function scoreIntake(answers={}){
- const missing=INTAKE_GROUPS.flatMap(g=>g.questions.filter(q=>
+ const missing=REQUIRED_GROUPS.flatMap(g=>g.questions.filter(q=>
   !Object.hasOwn(answers,q.id)||!validAnswer(q,answers[q.id])).map(q=>q.id));
  const domains={},domainPoints={};
  for(const g of SCORING_GROUPS){

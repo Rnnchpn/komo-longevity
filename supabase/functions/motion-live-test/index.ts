@@ -106,6 +106,62 @@ function publicRow(x:any){
   operator_session_id:x.operator_session_id,operator_user_id:x.operator_user_id,patient_last_seen_at:x.patient_last_seen_at,
   created_at:x.created_at,updated_at:x.updated_at};
 }
+// Questionnaire : 22 questions + 5 questions facultatives « Santé et longévité » (22/11/2026).
+// Même liste que pulse-v14-src/motion-engine/intake-model.mjs (contrôlée par le build).
+const ANSWER_CHOICES:Record<string,string[]>={
+ ageBand:["under40","40-49","50-59","60-69","70-79","80plus","undisclosed"],
+ goal:["independence","walk","strength","confidence","general"],
+ falls12:["0","1","2plus"],activityMinutes:["lt60","60to149","150plus"],sittingHours:["lt6","6to8","gt8"],
+ smoking:["never","former","current"],medications:["0to2","3to4","5plus"]
+};
+const RATING_KEYS=new Set(["walk10","stairs","chair","carry","bend","obstacle","turn","stand",
+ "pain","fatigue","fear","avoid","sleep","stress","recovered","qol",
+ "walkingDays","strengthDays","outdoors","breaks"]);
+const MAX_ANSWERS=Object.keys(ANSWER_CHOICES).length+RATING_KEYS.size;
+function cleanAnswers(answers:any):{cleaned?:Record<string,string>;error?:string}{
+ if(!answers||typeof answers!=="object"||Array.isArray(answers))return {error:"invalid_questionnaire"};
+ const entries=Object.entries(answers);
+ if(entries.length>MAX_ANSWERS)return {error:"questionnaire_too_large"};
+ const cleaned:Record<string,string>={};
+ for(const [key,value] of entries){
+  if(typeof value!=="string"||value.length>30)return {error:"invalid_answer"};
+  if(ANSWER_CHOICES[key]){if(!ANSWER_CHOICES[key].includes(value))return {error:"invalid_answer"};}
+  else if(RATING_KEYS.has(key)){if(!["0","1","2","3","4"].includes(value))return {error:"invalid_answer"};}
+  else return {error:"unknown_question"};
+  cleaned[key]=value;
+ }
+ return {cleaned};
+}
+// Lien patient (QR remis en consultation) : le patient remplit le questionnaire sur son téléphone puis
+// retrouve ses résultats. Jeton aléatoire de 256 bits, seule son empreinte est stockée, 30 jours, sans compte.
+const PATIENT_LINK_DAYS=30;
+async function patientLinkLookup(req:Request,b:any){
+ const token=s(b.patient_token,80);
+ if(!tokenRe.test(token))return {error:response(req,{error:"invalid_patient_link"},401)};
+ const tokenHash=await hash(token);
+ const {data,error}=await db.from("pulse_motion_live_sessions").select("*")
+  .contains("progress",{patient_link:{token_hash:tokenHash}}).limit(2);
+ if(error)return {error:response(req,{error:"temporarily_unavailable"},503)};
+ const rows=data||[];
+ if(rows.length!==1)return {error:response(req,{error:"patient_link_not_found"},404)};
+ const room=rows[0],link=room.progress?.patient_link;
+ if(!link||link.token_hash!==tokenHash||!(new Date(link.expires_at).getTime()>Date.now()))
+  return {error:response(req,{error:"patient_link_expired"},410)};
+ if(!["active","completed"].includes(room.status))return {error:response(req,{error:"patient_link_closed"},410)};
+ return {room,tokenHash};
+}
+function patientView(room:any,patient:any){
+ const p=room.progress||{},results=p.results&&typeof p.results==="object"?p.results:{};
+ const code=typeof patient?.last_name==="string"&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(patient.last_name)?patient.last_name:null;
+ return {status:room.status,stage_code:room.stage_code,steps:STEPS,completed_at:room.completed_at||null,code,
+  patient:{birth_date:patient?.birth_date||null,sex_at_birth:patient?.sex_at_birth||null,
+   real:patient?.data_classification==="health_data"},
+  questionnaire:{answers:p.questionnaire?.answers||{},updated_at:p.questionnaire?.updated_at||null,
+   simulated:p.questionnaire?.simulated===true},
+  tests_done:STEPS.filter(id=>["done","skipped"].includes(results[id]?.status)).length,
+  results:room.status==="completed"?results:null,
+  link_expires_at:p.patient_link?.expires_at||null};
+}
 async function guestLookup(req:Request,b:any){
  const token=s(b.guest_token,80);
  if(!tokenRe.test(token))return {error:response(req,{error:"invalid_guest_token"},401)};
@@ -267,6 +323,39 @@ Deno.serve(async(req:Request)=>{
   return response(req,{error:"operator_controls_tests"},403);
  }
 
+ // Téléphone du patient (lien du QR) : statut, questionnaire, résultats. Aucune authentification de compte.
+ if(action==="patient_link_status"||action==="patient_questionnaire_save"){
+  const found=await patientLinkLookup(req,b);
+  if(found.error)return found.error;
+  const room=found.room;
+  if(!await useCenter(room.organization_id))return response(req,{error:"center_unavailable"},423);
+  const {data:patient}=await db.from("patients").select("id,last_name,birth_date,sex_at_birth,data_classification,status")
+   .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
+  if(!patientAllowed(patient))return response(req,{error:"patient_unavailable"},403);
+  if(action==="patient_link_status")return response(req,{ok:true,...patientView(room,patient)});
+  const checked=cleanAnswers(b.answers);
+  if(checked.error)return response(req,{error:checked.error},422);
+  const cleaned=checked.cleaned as Record<string,string>;
+  for(let attempt=0;attempt<6;attempt++){
+   const {data:latest,error:readError}=await db.from("pulse_motion_live_sessions").select("*")
+    .eq("id",room.id).maybeSingle();
+   if(readError||!latest)return response(req,{error:"questionnaire_reload_failed"},503);
+   const prior=latest.progress&&typeof latest.progress==="object"&&!Array.isArray(latest.progress)?latest.progress:{};
+   if(prior.patient_link?.token_hash!==found.tokenHash||!["active","completed"].includes(latest.status))
+    return response(req,{error:"patient_link_expired"},410);
+   const priorAnswers=prior.questionnaire?.answers||{};
+   if(Object.keys(priorAnswers).some(key=>!Object.prototype.hasOwnProperty.call(cleaned,key)))
+    return response(req,{error:"questionnaire_stale_snapshot",...patientView(latest,patient)},409);
+   const nextProgress={...prior,questionnaire:{...prior.questionnaire,version:"KOMO_MOTION_SELF_REPORT_V1",
+    answers:cleaned,updated_at:now(),entered_by:"patient",simulated:prior.questionnaire?.simulated===true}};
+   const {data:saved,error:saveError}=await db.from("pulse_motion_live_sessions")
+    .update({progress:nextProgress,updated_at:now()}).eq("id",room.id)
+    .eq("updated_at",latest.updated_at).select("*").maybeSingle();
+   if(saveError)return response(req,{error:"questionnaire_storage_failed"},503);
+   if(saved)return response(req,{ok:true,answered_count:Object.keys(cleaned).length,...patientView(saved,patient)});
+  }
+  return response(req,{error:"questionnaire_conflict_retry"},409);
+ }
  const actor=await operator(req);
  if(!actor)return response(req,{error:"operator_access_required"},403);
  // Centre resolution: explicit organization_id (console), else the room's centre (iPhone
@@ -524,6 +613,27 @@ Deno.serve(async(req:Request)=>{
  // The existing KŌMØ Motion Online questionnaire can be filled at the operator's
  // workstation before, during or after the six tests (synthetic data only).
  // Save only whitelisted answers. No video, landmarks, images or audio are stored.
+// QR du patient : crée (ou renouvelle) le lien personnel de la consultation ; l'ancien lien cesse de fonctionner.
+ if(action==="operator_patient_link"){
+  const id=s(b.session_id,50);
+  if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const {data:room,error:roomError}=await db.from("pulse_motion_live_sessions").select("*")
+   .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
+  if(roomError||!room)return response(req,{error:"session_not_found"},404);
+  if(room.operator_user_id!==actor.id||!room.patient_id)return response(req,{error:"operator_owner_required"},403);
+  if(!["active","completed"].includes(room.status))return response(req,{error:"room_unavailable"},409);
+  const {data:patient}=await db.from("patients").select("data_classification,status")
+   .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
+  if(!patientAllowed(patient))return response(req,{error:"synthetic_patient_required"},403);
+  const token=randomToken(),expiresAt=new Date(Date.now()+PATIENT_LINK_DAYS*864e5).toISOString();
+  const old=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
+  const {data,error}=await db.from("pulse_motion_live_sessions").update({
+    progress:{...old,patient_link:{token_hash:await hash(token),created_at:now(),expires_at:expiresAt}},updated_at:now()
+   }).eq("id",id).eq("updated_at",room.updated_at).select("*").maybeSingle();
+  if(error||!data)return response(req,{error:"stale_state_retry"},409);
+  return response(req,{ok:true,token,url:"https://pulse.komolongevity.com/mon-bilan/#t="+token,
+   expires_at:expiresAt,session:publicRow(data)});
+ }
  if(action==="operator_questionnaire_save"){
   const id=s(b.session_id,50);
   if(!uuid(id))return response(req,{error:"invalid_session"},422);
@@ -543,29 +653,9 @@ Deno.serve(async(req:Request)=>{
    .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
   if(!patientAllowed(patient))
    return response(req,{error:"synthetic_patient_required"},403);
-  const answers=b.answers;
-  if(!answers||typeof answers!=="object"||Array.isArray(answers))
-   return response(req,{error:"invalid_questionnaire"},422);
-  // 22 original self-report items from online/session/intake-model.mjs.
-  const profile:Record<string,string[]>={
-   ageBand:["under40","40-49","50-59","60-69","70-79","80plus","undisclosed"],
-   goal:["independence","walk","strength","confidence","general"]
-  };
-  const rating=new Set(["walk10","stairs","chair","carry","bend","obstacle","turn","stand",
-   "pain","fatigue","fear","avoid","sleep","stress","recovered","qol",
-   "walkingDays","strengthDays","outdoors","breaks"]);
-  const entries=Object.entries(answers);
-  if(entries.length>22)return response(req,{error:"questionnaire_too_large"},422);
-  const cleaned:Record<string,string>={};
-  for(const [key,value] of entries){
-   if(typeof value!=="string"||value.length>30)return response(req,{error:"invalid_answer"},422);
-   if(profile[key]){
-    if(!profile[key].includes(value))return response(req,{error:"invalid_answer"},422);
-   }else if(rating.has(key)){
-    if(!["0","1","2","3","4"].includes(value))return response(req,{error:"invalid_answer"},422);
-   }else return response(req,{error:"unknown_question"},422);
-   cleaned[key]=value;
-  }
+  const checked=cleanAnswers(b.answers);
+  if(checked.error)return response(req,{error:checked.error},422);
+  const cleaned=checked.cleaned as Record<string,string>;
   // Optimistic-retry: the test clock / stage can update the SAME progress JSONB.
   // Reload progress before every attempt and keep tests, signals and check-in fields.
   // Never report success before Postgres confirms all submitted answers were saved.

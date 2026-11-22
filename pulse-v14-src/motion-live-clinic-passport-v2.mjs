@@ -96,8 +96,10 @@ export function buildClinicPassport(answers={},results={},options={}){
    'Écart inter-latéral descriptif, sans seuil pathologique validé : seul le repère des 10 secondes est utilisé.'
  }:null;
  const progress=intakeProgress(answers),questionnaire=scoreIntake(answers);
- const groups=INTAKE_GROUPS.map(g=>({
-  id:g.id,label:g.title,
+ // Groupe facultatif (« Santé et longévité ») : présent seulement si au moins une réponse a été donnée.
+ const answeredIn=g=>g.questions.some(q=>Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id]));
+ const groups=INTAKE_GROUPS.filter(g=>!g.optional||answeredIn(g)).map(g=>({
+  id:g.id,label:g.title,optional:!!g.optional,
   score:questionnaire.domains[g.id]??null,
   points:questionnaire.domainPoints[g.id]?.points??null,
   maxPoints:questionnaire.domainPoints[g.id]?.maximum??null,
@@ -128,6 +130,13 @@ export function buildClinicPassport(answers={},results={},options={}){
    'Le repère descriptif des 10 secondes n’est pas atteint sur au moins un côté, à confirmer avec un protocole standardisé.');
   messages.push(balance.interpretation);
  }else messages.push('Le profil d’équilibre bilatéral ne peut pas encore être interprété : une durée est manquante.');
+ // Repères déclaratifs de longévité (facultatifs) : associations décrites, jamais un diagnostic.
+ if(answers.falls12==='1'||answers.falls12==='2plus')
+  messages.push('Chute déclarée au cours des 12 derniers mois : une chute récente est associée à un risque plus élevé de nouvelle chute ; l’équilibre et la force des jambes sont à travailler en priorité.');
+ if(answers.activityMinutes==='lt60'||answers.activityMinutes==='60to149')
+  messages.push('Activité modérée déclarée sous les 150 minutes par semaine recommandées par l’OMS : l’augmenter progressivement est l’un des leviers les plus associés à la longévité.');
+ if(answers.sittingHours==='gt8')
+  messages.push('Plus de 8 heures assis par jour déclarées : interrompre les longues périodes assises par quelques minutes de marche est conseillé.');
  if(!questionnaire.complete)messages.push(
   'Le questionnaire est incomplet ('+progress.completed+'/22) ; aucune conclusion sur le ressenti, les habitudes ou un indice locomoteur déclaré n’est calculée.'
  );

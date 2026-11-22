@@ -351,6 +351,55 @@ function readFields(t){
  });
  return raw;
 }
+// QR patient (22/11/2026) : le patient scanne, remplit le questionnaire sur son téléphone et y retrouve
+// ses résultats en fin de bilan. Le lien est gardé pour la consultation : rouvrir le panneau ne le change pas,
+// seul « Nouveau QR » le remplace (l'ancien lien cesse alors de fonctionner).
+const qrStoreKey=()=>"komo_patient_qr_"+(room?.id||"");
+function storedPatientLink(){try{const v=JSON.parse(sessionStorage.getItem(qrStoreKey())||"null");return v&&new Date(v.expires_at)>new Date()?v:null}catch{return null}}
+async function drawQr(url){
+ const canvas=q("mocQrCanvas");if(!canvas)return;
+ try{const module=await import("https://esm.sh/qrcode@1.5.4");const draw=module.default?.toCanvas||module.toCanvas;
+  if(typeof draw!=="function")throw Error("qr");
+  await draw(canvas,url,{width:240,margin:2,color:{dark:"#16352c",light:"#ffffff"}});canvas.hidden=false;}
+ catch{canvas.hidden=true;const f=q("mocQrFallback");if(f)f.hidden=false}
+}
+async function showPatientQr(renew){
+ const box=q("mocPatientQr");if(!box)return;
+ if(!room){box.hidden=false;box.innerHTML='<p class="moc-help">Ouvre d’abord la consultation du patient.</p>';return}
+ box.hidden=false;
+ let link=renew?null:storedPatientLink();
+ if(!link&&!renew&&room.progress?.patient_link){
+  box.innerHTML='<div class="moc-qr-card"><div><h3>Un QR a déjà été remis pour cette consultation</h3><p class="moc-help">Créé le '+
+   HTML(new Date(room.progress.patient_link.created_at).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}))+
+   ' sur un autre écran. Le patient garde son lien. Un nouveau QR le remplace : l’ancien lien cessera de fonctionner.</p>'+
+   '<div class="moc-buttons"><button type="button" class="moc-button primary" id="mocQrRenew">Créer un nouveau QR</button><button type="button" class="moc-button secondary" id="mocQrClose">Fermer</button></div></div></div>';
+  q("mocQrRenew").onclick=()=>showPatientQr(true);q("mocQrClose").onclick=()=>{box.hidden=true};return;
+ }
+ if(!link){
+  box.innerHTML='<p class="moc-help">Préparation du QR…</p>';
+  try{
+   const r=await api({action:"operator_patient_link",session_id:room.id});
+   lastMutationAt=performance.now();
+   link={url:r.url,expires_at:r.expires_at};
+   try{sessionStorage.setItem(qrStoreKey(),JSON.stringify(link))}catch{}
+   if(r.session)room=r.session;
+  }catch(error){box.innerHTML='<p class="moc-help">QR indisponible : '+HTML(error.message||"erreur réseau")+'. Réessaie.</p>';return}
+ }
+ box.innerHTML='<div class="moc-qr-card"><canvas id="mocQrCanvas" width="240" height="240" aria-label="QR code à scanner par le patient"></canvas>'+
+  '<div><h3>Questionnaire sur le téléphone du patient</h3><ol class="moc-qr-steps">'+
+  '<li>Le patient vise ce QR avec l’appareil photo de son téléphone.</li>'+
+  '<li>Il répond aux questions pendant les tests : ses réponses arrivent dans l’onglet Questionnaire.</li>'+
+  '<li>À la fin du bilan, il retrouve sur la même page ses résultats et son passeport PDF.</li></ol>'+
+  '<p class="moc-help">Lien personnel valable jusqu’au '+HTML(new Date(link.expires_at).toLocaleDateString("fr-FR"))+', sans compte ni nom.</p>'+
+  '<p class="moc-help" id="mocQrFallback" hidden>QR indisponible sur cet écran : copie le lien et envoie-le par ta messagerie sécurisée.</p>'+
+  '<div class="moc-buttons"><button type="button" class="moc-button secondary" id="mocQrCopy">Copier le lien</button>'+
+  '<button type="button" class="moc-button secondary" id="mocQrRenew">Nouveau QR</button>'+
+  '<button type="button" class="moc-button secondary" id="mocQrClose">Fermer</button></div></div></div>';
+ q("mocQrCopy").onclick=async()=>{try{await navigator.clipboard.writeText(link.url);q("mocQrCopy").textContent="Lien copié"}catch{window.prompt("Lien du patient :",link.url)}};
+ q("mocQrRenew").onclick=()=>{if(confirm("Créer un nouveau QR ? Le lien déjà scanné par le patient ne fonctionnera plus."))showPatientQr(true)};
+ q("mocQrClose").onclick=()=>{box.hidden=true};
+ await drawQr(link.url);
+}
 function makeShell(){
  host.innerHTML='<section class="moc-shell">'+
  '<header class="moc-head"><div class="moc-identity"><h2 id="mocPatientCode">Consultation Motion</h2>'+
@@ -362,12 +411,13 @@ function makeShell(){
  '<button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true"><b>'+(CAMERA_USED?3:2)+'</b><span>Tests</span><small id="mocTabTestsCount"></small></button>'+
  '<button type="button" id="mocTabQuestionnaire" class="moc-mode-tab"><b>'+(CAMERA_USED?4:3)+'</b><span>Questionnaire</span><small id="mocTabQuestionnaireCount"></small></button>'+
  '<button type="button" id="mocTabReport" class="moc-mode-tab"><b>'+(CAMERA_USED?5:4)+'</b><span>Rapport</span></button></nav>'+
- '<div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice" aria-pressed="false">Voix</button>'+(CAMERA_USED?'<button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Afficher la caméra pour régler le cadrage">Voir la caméra</button>':'')+'<button type="button" class="moc-back" id="mocFullscreen" title="Plein écran">Plein écran</button><button type="button" class="moc-back" id="mocReturn" title="Revenir à la page Consultation">Quitter</button></div></header>'+
+ '<div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice" aria-pressed="false">Voix</button>'+(CAMERA_USED?'<button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Afficher la caméra pour régler le cadrage">Voir la caméra</button>':'')+'<button type="button" class="moc-back moc-qr-btn" id="mocPatientQrBtn" title="QR à scanner par le patient : questionnaire et résultats sur son téléphone">QR patient</button><button type="button" class="moc-back" id="mocFullscreen" title="Plein écran">Plein écran</button><button type="button" class="moc-back" id="mocReturn" title="Revenir à la page Consultation">Quitter</button></div></header>'+
  '<div class="moc-statusbar">'+
  '<p class="moc-camera-banner" id="mocCameraBanner" role="status" aria-live="polite" data-state="offline"'+(CAMERA_USED?'':' hidden')+'>○ iPhone non connecté · Active la caméra du cabinet.</p>'+
  '<p class="moc-save-indicator" id="mocIntakeSaveStatus" role="status" aria-live="polite">Questionnaire · en attente de réponses</p>'+
  '<p class="moc-voice-state" id="mocVoiceState" role="status">Voix désactivée · Active-la pour dire « C’est parti », « Stop » ou « Suivant ». Aucun audio n’est enregistré par Pulse.</p>'+
  '</div>'+
+ '<section class="moc-patient-qr" id="mocPatientQr" hidden aria-live="polite"></section>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
  '<div class="moc-step-nav" id="mocStepNav" aria-label="Progression des étapes Motion"></div>'+
@@ -383,6 +433,7 @@ function makeShell(){
   location.hash="live";
  };
  if(q("mocVideoFocus"))q("mocVideoFocus").onclick=()=>{videoFocus=!videoFocus;updateConsultationLayout();};
+ q("mocPatientQrBtn").onclick=()=>{const box=q("mocPatientQr");if(box&&!box.hidden){box.hidden=true;return}showPatientQr(false)};
  q("mocTabTests").onclick=()=>switchPanel("tests");
  q("mocTabQuestionnaire").onclick=()=>switchPanel("questionnaire");
  q("mocTabReport").onclick=()=>switchPanel("report");
