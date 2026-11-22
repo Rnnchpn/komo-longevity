@@ -45,9 +45,9 @@ assert.equal(scores.domainPoints.activity.points,7);
 assert.equal(questionPoints(INTAKE_GROUPS[0].questions[0],answers.ageBand),null);
 assert.equal(questionPoints(INTAKE_GROUPS[1].questions[0],answers.walk10),0);
 assert.equal(questionPoints(INTAKE_GROUPS[1].questions[1],answers.stairs),1);
-const favorable=Object.fromEntries(INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>
+const favorable=Object.fromEntries(INTAKE_GROUPS.filter(g=>!g.optional).flatMap(g=>g.questions.map(q=>
  [q.id,Array.isArray(q.options[0])?q.options[0][0]:'0'])));
-const mostLimited=Object.fromEntries(INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>
+const mostLimited=Object.fromEntries(INTAKE_GROUPS.filter(g=>!g.optional).flatMap(g=>g.questions.map(q=>
  [q.id,Array.isArray(q.options[0])?q.options[0][0]:'4'])));
 assert.equal(scoreIntake(favorable).rawPoints,0);
 assert.equal(scoreIntake(favorable).profileIndex,100);

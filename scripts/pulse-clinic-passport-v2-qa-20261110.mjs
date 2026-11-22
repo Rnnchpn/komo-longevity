@@ -56,7 +56,7 @@ const missing=buildClinicPassport({},{...results,arms:{status:'skipped'}});
 assert.equal(missing.measured,5);
 assert.equal(missing.skipped,1);
 assert.equal(missing.measures[4].display,'Non réalisé');
-const full=Object.fromEntries(INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>[
+const full=Object.fromEntries(INTAKE_GROUPS.filter(g=>!g.optional).flatMap(g=>g.questions.map(q=>[
  q.id,Array.isArray(q.options[0])?q.options[0][0]:'0'
 ])));
 const complete=buildClinicPassport(full,results);

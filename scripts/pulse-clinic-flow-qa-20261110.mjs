@@ -37,10 +37,14 @@ const commands={
  'Suivant':'next'
 };
 for(const [phrase,command] of Object.entries(commands))assert.equal(parseVoiceCommand(phrase),command);
-const answers=Object.fromEntries(INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>[
+const answers=Object.fromEntries(INTAKE_GROUPS.filter(g=>!g.optional).flatMap(g=>g.questions.map(q=>[
  q.id,Array.isArray(q.options[0])?q.options[0][0]:'0'
 ])));
 assert.equal(Object.keys(answers).length,22);
+// 22/11/2026 : 5 questions facultatives « Santé et longévité », hors complétude et hors indice.
+const healthGroup=INTAKE_GROUPS.find(g=>g.id==='health');
+assert.ok(healthGroup?.optional&&healthGroup.scored===false&&healthGroup.questions.length===5);
+assert.equal(intakeProgress({...answers,falls12:'1'}).completed,22,'les questions facultatives ne changent pas le compte');
 assert.equal(intakeProgress(answers).completed,22);
 assert.equal(questionnaireState(answers).score.complete,true);
 const missing={...answers};delete missing.sleep;
