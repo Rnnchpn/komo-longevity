@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261121-gait-v1';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261122-repro-v1';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -722,7 +722,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261121-gait-v1');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261122-repro-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -1056,7 +1056,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261121-gait-v1');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261122-repro-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         openVideo:openOperatorCamera,preferredSessionId:S.patient?.id?
