@@ -62,7 +62,7 @@ const checks=[
   ['patient opens waiting room with secure token',liveGuest.includes('action:"guest_start"')&&liveGuest.includes('guest_token')&&liveGuest.includes('sessionStorage.setItem(key,guestToken)')],
   ['patient marks ready; Operator alone controls stages',liveGuest.includes('action:"guest_event"')&&!liveGuest.includes('event:"complete"')&&liveGuest.includes('event=live.status==="waiting"?"ready":null')],
   ['operator live nav and pairing enabled',app.includes("['live','Consultation']")&&app.includes("function motionLiveMonitor()")&&app.includes("action:'operator_attach'")&&app.includes("start_pulse_operator_session_v1")],
-  ['physical Motion never uses patient phone',!app.includes('getUserMedia')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")&&app.includes('Aucun accès caméra patient nécessaire')],
+  ['physical Motion never uses patient phone',!app.includes('getUserMedia')&&app.includes('id="pulseHomeLiveStart"')&&app.includes("openMotionLivePatient()")&&app.includes('Votre téléphone n’est pas nécessaire')],
   ['Operator consultation embeds paired phone camera',app.includes('id="motionConsultRoot"')&&app.includes('openOperatorCamera')&&consult.includes('id="motionConsultCamera"')],
   ['live server verifies operator role and center',liveEdge.includes('db.auth.getUser(jwt)')&&liveEdge.includes('organization_members')&&liveEdge.includes('synthetic_patient_required')],
   ['live session token hashed, RLS protected by migration',liveEdge.includes('crypto.subtle.digest("SHA-256"')&&liveEdge.includes('guest_token_hash')],
@@ -86,7 +86,7 @@ const checks=[
   ['iPhone camera station renders without patient actions',liveGuest.includes('mlive-staff-camera')&&liveGuest.includes('cameraStation')&&liveGuest.includes('CAMÉRA DU CABINET')],
   ['clinic camera app is standalone',staffCameraManifest.display==='standalone'&&staffCameraManifest.start_url==='/camera/'&&staffCameraHtml.includes('manifest.webmanifest')],
   ['unrelated Operator cannot close connected camera',liveEdge.includes('.eq("operator_user_id",actor.id).select("id")')],
-  ['patient entry no longer launches personal camera',!maison.includes('guest_start')&&!maison.includes("openMotionLive()")&&app.includes('Aucun accès caméra patient nécessaire')]
+  ['patient entry no longer launches personal camera',!maison.includes('guest_start')&&!maison.includes("openMotionLive()")&&app.includes('Votre téléphone n’est pas nécessaire')]
 
 
 ];
