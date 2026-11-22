@@ -543,7 +543,7 @@ function trajectoryMarkup(t){
   '<td class="moc-delta is-'+HTML(r.verdict||'none')+'">'+HTML(r.deltaDisplay)+(r.notable?' ●':'')+'</td></tr>').join('');
  return head+'<div class="moc-trajectory-table-wrap"><table class="moc-trajectory-table"><thead><tr><th>Mesure</th>'+
   pts.map(p=>'<th>'+HTML(p.label)+'<small>'+HTML(frDate(p.date))+'</small></th>').join('')+'<th>Écart</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-  '<p class="moc-help">● changement supérieur au repère publié (marche 0,1 m/s · chaise 2 levers · préhension 50 N). Autres écarts : descriptifs.</p>'+
+  '<p class="moc-help">● changement réel : au-delà de la marge d’erreur de la mesure (marche 0,1 m/s · chaise 2 levers · préhension 50 N · Two-Step 25 cm · franchissement des 10 s d’appui · environ 20 % pour le DynaMo et les plateformes). En dessous : « stable ».</p>'+
   (t.warnings||[]).map(w=>'<p class="moc-trajectory-warning">⚠ '+HTML(w)+'</p>').join('');
 }
 // Âge (année de naissance) et sexe de référence : situent chaque capacité par rapport à son repère publié.

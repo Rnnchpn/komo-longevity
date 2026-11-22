@@ -82,7 +82,7 @@ export const STEPS=[
   device:'2 ForceDecks Mini',trials:'1 essai de 30 s',duration:0,
   setup:'Le patient reste sur les plateformes après la pesée : un pied sur chaque, à largeur d’épaules, mains sur les hanches, buste droit, regard devant. La chaise est derrière lui.',
   script:'« Mains sur les hanches, regardez devant vous. Gardez les pieds fixes et restez aussi immobile que possible pendant 30 secondes. »',
-  instruction:'Lancer l’enregistrement (compte à rebours de 3 s), attendre les 30 s, puis recopier les 4 valeurs de l’écran de résultats, de haut en bas. Le L ou R après l’asymétrie indique le côté le plus chargé.',
+  instruction:'Lancer l’enregistrement (compte à rebours de 3 s), attendre les 30 s, puis recopier les 4 valeurs de l’écran de résultats, de haut en bas. Le L ou R après l’asymétrie indique le côté le plus chargé. La vitesse du centre de pression est la valeur la plus reproductible : c’est elle qu’on suit.',
   vald:{app:'ForceDecks',test:'Balance › Quiet Stand',settings:'Exercise Length 30 s · aucune option cochée (yeux ouverts, sol stable)',
    tip:'Ce sont les 4 métriques affichées par défaut depuis la version de juillet 2026 de l’app. Si l’écran en montre d’autres, rétablis les métriques par défaut dans les réglages des résultats.'},
   fields:[
@@ -130,16 +130,16 @@ export const STEPS=[
   instruction:'Mesurer la distance entre la ligne et la pointe des pieds. Deux essais, le meilleur est retenu. Recommencer tout essai avec perte d’équilibre.',
   label:'Meilleure distance des deux pas'},
  {id:'unipodal_left',block:'C',kind:'balance',title:'Équilibre · appui pied gauche',short:'Équilibre G',
-  device:'iPhone de face',trials:'1 essai, 30 s max',duration:30,unit:'seconds',ui_unit:'seconds',max:30,integer:false,
+  device:'iPhone de face',trials:'1 à 2 essais, 30 s max, le meilleur retenu',duration:30,unit:'seconds',ui_unit:'seconds',max:30,integer:false,
   setup:'Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.',
   script:'« Levez le pied droit sans toucher l’autre jambe et tenez le plus longtemps possible. Je reste à côté de vous. »',
-  instruction:'Armer le suivi : le chronomètre démarre au lever du pied et s’arrête au retour d’appui, à une compensation ou après 30 s.',
+  instruction:'Armer le suivi : le chronomètre démarre au lever du pied et s’arrête au retour d’appui, à une compensation ou après 30 s. Moins de 30 s : note le temps, « Recommencer » pour un 2e essai, puis valide le meilleur des deux.',
   label:'Appui unipodal gauche (secondes)'},
  {id:'unipodal_right',block:'C',kind:'balance',title:'Équilibre · appui pied droit',short:'Équilibre D',
-  device:'iPhone de face',trials:'1 essai, 30 s max',duration:30,unit:'seconds',ui_unit:'seconds',max:30,integer:false,
+  device:'iPhone de face',trials:'1 à 2 essais, 30 s max, le meilleur retenu',duration:30,unit:'seconds',ui_unit:'seconds',max:30,integer:false,
   setup:'Sol ferme, yeux ouverts, pieds nus si possible, face à la caméra. Appui stable accessible, praticien à proximité.',
   script:'« Levez le pied gauche sans toucher l’autre jambe et tenez le plus longtemps possible. Je reste à côté de vous. »',
-  instruction:'Armer le suivi : le chronomètre démarre au lever du pied et s’arrête au retour d’appui, à une compensation ou après 30 s.',
+  instruction:'Armer le suivi : le chronomètre démarre au lever du pied et s’arrête au retour d’appui, à une compensation ou après 30 s. Moins de 30 s : note le temps, « Recommencer » pour un 2e essai, puis valide le meilleur des deux.',
   label:'Appui unipodal droit (secondes)'},
  {id:'arms',block:'C',kind:'count',title:'Élévation des bras 30 s',short:'Bras',
   device:'iPhone de face',trials:'1 essai de 30 s',duration:30,unit:'movements',ui_unit:'mouvements',max:100,integer:true,
@@ -159,10 +159,10 @@ export const STEPS=[
    {key:'grip_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:1500,decimals:1,vald:'Force max · droite'}
   ]},
  {id:'dynamo_knee_ext',block:'D',kind:'fields',title:'Extension de genou · DynaMo',short:'Genou',
-  device:'DynaMo Plus · pad',trials:'3 essais maximaux par côté',duration:0,dynamo:true,
+  device:'DynaMo Plus · pad',trials:'1 essai à 50 % + 3 maximaux par côté',duration:0,dynamo:true,
   setup:'Assis au bord de la table, hanches et genoux à 90°, pieds sans contact avec le sol, bras croisés. Pad sur la face antérieure du tibia.',
   script:'« 3, 2, 1 — poussez, poussez, poussez… et relâchez. »',
-  instruction:'3 essais de 3 à 5 s par côté, 30 s de repos. Arrêt immédiat si douleur. Même distance pad–malléole à chaque séance.',
+  instruction:'Un essai à 50 % pour apprendre le geste, puis 3 essais de 3 à 5 s par côté, 30 s de repos. Saisir le meilleur. Arrêt immédiat si douleur. Même distance pad–malléole à chaque séance.',
   vald:{app:'DynaMo',test:'Knee Extension (extension de genou)',settings:'Assis 90° · 3 essais par côté'},
   pair:['knee_ext_left_n','knee_ext_right_n'],
   fields:[
@@ -171,10 +171,10 @@ export const STEPS=[
    {key:'knee_pad_distance_cm',label:'Distance pad – malléole',unit:'cm',min:0,max:60,decimals:1,optional:true}
   ]},
  {id:'dynamo_hip_abd',block:'D',kind:'fields',title:'Abduction de hanche · DynaMo',short:'Hanche',
-  device:'DynaMo Plus · pad',trials:'3 essais maximaux par côté',duration:0,dynamo:true,
+  device:'DynaMo Plus · pad',trials:'1 essai à 50 % + 3 maximaux par côté',duration:0,dynamo:true,
   setup:'Allongé sur le dos, jambe tendue. Pad sur la face latérale de la jambe juste au-dessus de la malléole, même point à chaque séance.',
   script:'« 3, 2, 1 — poussez vers l’extérieur… et relâchez. »',
-  instruction:'3 essais de 3 à 5 s par côté, 30 s de repos. Arrêt immédiat si douleur.',
+  instruction:'Un essai à 50 % pour apprendre le geste, puis 3 essais de 3 à 5 s par côté, 30 s de repos. Saisir le meilleur. Arrêt immédiat si douleur.',
   vald:{app:'DynaMo',test:'Hip Abduction (abduction de hanche)',settings:'Décubitus dorsal · 3 essais par côté'},
   pair:['hip_abd_left_n','hip_abd_right_n'],
   fields:[
@@ -186,7 +186,7 @@ export const STEPS=[
   max:100,integer:true,
   setup:'Chaise d’environ 43 cm sans accoudoirs, contre le mur, plateformes retirées. Assis au milieu de l’assise, pieds à plat, bras croisés. iPhone de trois-quarts, tête et pieds visibles.',
   script:'« Levez-vous complètement et rasseyez-vous, le plus de fois possible en 30 secondes, bras croisés. »',
-  instruction:'Démarrer le chronomètre. Comparer le compteur vidéo aux levers complets observés et corriger si besoin.',
+  instruction:'Avant le chrono, 1 à 2 levers d’essai pour montrer le geste (ils ne comptent pas). Démarrer le chronomètre. Comparer le compteur vidéo aux levers complets observés et corriger si besoin.',
   label:'Nombre de levers complets'}
 ];
 export const STEP_IDS=STEPS.map(s=>s.id);

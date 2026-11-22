@@ -222,7 +222,7 @@ export async function downloadClinicPassport(report,category='all'){
    y+=8;
   });
   y+=4;
-  words('* Changement superieur au repere publie de changement cliniquement pertinent (vitesse de marche 0,1 m/s ; lever de chaise 2 levers ; prehension 50 N, environ 5 kg). Les autres ecarts sont descriptifs.',
+  words('* Changement réel : au-delà de la marge d’erreur de la mesure (marche 0,1 m/s ; chaise 2 levers ; préhension 50 N ; Two-Step 25 cm ; franchissement des 10 s d’appui ; environ 20 % pour le DynaMo et les plateformes). Un écart plus petit est affiché stable : il peut venir de la mesure elle-même.',
    M,y,C,{sz:7,lh:3.4,max:3,col:P.muted});
   y+=12;
   (t.warnings||[]).forEach(w=>{y=words('Comparabilite : '+w,M,y,C,{sz:7,lh:3.4,max:2,col:[150,70,50]})+1;});

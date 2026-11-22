@@ -1,8 +1,10 @@
 // KŌMØ Motion — trajectoire J0 → S6 → S12 (20 novembre 2026).
 // Compare les consultations TERMINÉES d'un même patient, métrique par métrique.
 // Descriptif uniquement : pas de score composite, pas d'âge, pas de diagnostic.
-// Un « changement net » n'est signalé que pour les métriques disposant d'un repère publié
-// de changement cliniquement pertinent ; sinon l'écart est affiché sans qualificatif.
+// Reproductibilité (22/11/2026) : un écart n'est qualifié (progrès / recul, point ●) que s'il dépasse
+// la marge d'erreur de la mesure (changement minimal détectable publié, ou marge de prudence quand
+// aucune valeur n'existe pour nos appareils). En dessous, la mesure est « stable ».
+// mdc : en unité de la mesure · mdcPct : en % de la valeur de départ · cross : seuil dont le franchissement compte.
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round=(x,d=1)=>Math.round(x*10**d)/10**d;
 const maxOf=(a,b)=>finite(a)&&finite(b)?Math.max(a,b):finite(a)?a:finite(b)?b:null;
@@ -13,33 +15,39 @@ const V=(r,step)=>r?.[step]?.status==='done'?r[step]?.value:undefined;
 
 // better: 'higher' | 'lower' | 'neutral'. threshold: changement pertinent publié (même unité).
 export const TRAJECTORY_METRICS=[
- {id:'gait_speed',label:'Vitesse de marche (4 m)',unit:'m/s',decimals:2,better:'higher',threshold:0.1,
+ // 0,1 m/s : changement important (Perera 2006), dans la fourchette des MDC publiés (0,08 à 0,2 m/s).
+ {id:'gait_speed',label:'Vitesse de marche (4 m)',unit:'m/s',decimals:2,better:'higher',mdc:0.1,
   get:r=>D(r,'gait_4m','gait_speed_ms')},
- {id:'sts_30s',label:'Levers de chaise en 30 s',unit:'levers',decimals:0,better:'higher',threshold:2,
+ // ≈ 2 levers : différence minimale détectable du lever de chaise.
+ {id:'sts_30s',label:'Levers de chaise en 30 s',unit:'levers',decimals:0,better:'higher',mdc:2,
   get:r=>V(r,'sts')},
- {id:'two_step',label:'Two-Step (meilleur essai)',unit:'cm',decimals:0,better:'higher',
+ // 25 cm : changement minimal détectable du Two-Step chez l'adulte âgé (Sawaya 2025 : 25 à 30 cm).
+ {id:'two_step',label:'Two-Step (meilleur essai)',unit:'cm',decimals:0,better:'higher',mdc:25,
   get:r=>V(r,'two_step')},
- {id:'balance_min',label:'Équilibre unipodal · côté le plus faible',unit:'s',decimals:1,better:'higher',
+ // Appui unipodal : MDC publié ≈ 23 à 26 s, inutilisable en secondes ; seul le franchissement des 10 s compte.
+ {id:'balance_min',label:'Équilibre unipodal · côté le plus faible',unit:'s',decimals:1,better:'higher',mdc:24,cross:10,
   get:r=>minOf(V(r,'unipodal_left'),V(r,'unipodal_right'))},
- {id:'qs_velocity',label:'Quiet Stand · vitesse du centre de pression',unit:'mm/s',decimals:1,better:'lower',
+ {id:'qs_velocity',label:'Quiet Stand · vitesse du centre de pression',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
   get:r=>F(r,'fd_quiet_stand','fd_qs_velocity_mms')},
- {id:'qs_asym',label:'Quiet Stand · asymétrie de charge',unit:'%',decimals:1,better:'lower',
+ {id:'qs_asym',label:'Quiet Stand · asymétrie de charge',unit:'%',decimals:1,better:'lower',mdc:10,
   get:r=>F(r,'fd_quiet_stand','fd_qs_asym_pct')},
- {id:'fd_sts_time',label:'Lever sur plateformes · temps pour se lever',unit:'s',decimals:2,better:'lower',
+ {id:'fd_sts_time',label:'Lever sur plateformes · temps pour se lever',unit:'s',decimals:2,better:'lower',mdcPct:20,
   get:r=>F(r,'fd_sts','fd_sts_time_to_stand_s')},
- {id:'fd_sts_asym',label:'Lever sur plateformes · asymétrie',unit:'%',decimals:1,better:'lower',
+ {id:'fd_sts_asym',label:'Lever sur plateformes · asymétrie',unit:'%',decimals:1,better:'lower',mdc:10,
   get:r=>F(r,'fd_sts','fd_sts_asym_pct')},
- {id:'grip_best',label:'Préhension · meilleur côté',unit:'N',decimals:0,better:'higher',threshold:50,
+ // ≈ 5 kg (50 N) : différence minimale chez l'adulte âgé (4,7 à 6 kg selon les études).
+ {id:'grip_best',label:'Préhension · meilleur côté',unit:'N',decimals:0,better:'higher',mdc:50,
   get:r=>maxOf(F(r,'dynamo_grip','grip_left_n'),F(r,'dynamo_grip','grip_right_n'))},
- {id:'grip_lsi',label:'Préhension · symétrie',unit:'%',decimals:0,better:'higher',
+ {id:'grip_lsi',label:'Préhension · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
   get:r=>D(r,'dynamo_grip','lsi_pct')},
- {id:'knee_best',label:'Extension de genou · meilleur côté',unit:'N',decimals:0,better:'higher',
+ // Dynamomètre à main, membres inférieurs : erreur de 18 % et plus selon les études → marge de 20 %.
+ {id:'knee_best',label:'Extension de genou · meilleur côté',unit:'N',decimals:0,better:'higher',mdcPct:20,
   get:r=>maxOf(F(r,'dynamo_knee_ext','knee_ext_left_n'),F(r,'dynamo_knee_ext','knee_ext_right_n'))},
- {id:'knee_lsi',label:'Extension de genou · symétrie',unit:'%',decimals:0,better:'higher',
+ {id:'knee_lsi',label:'Extension de genou · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
   get:r=>D(r,'dynamo_knee_ext','lsi_pct')},
- {id:'hip_best',label:'Abduction de hanche · meilleur côté',unit:'N',decimals:0,better:'higher',
+ {id:'hip_best',label:'Abduction de hanche · meilleur côté',unit:'N',decimals:0,better:'higher',mdcPct:20,
   get:r=>maxOf(F(r,'dynamo_hip_abd','hip_abd_left_n'),F(r,'dynamo_hip_abd','hip_abd_right_n'))},
- {id:'hip_lsi',label:'Abduction de hanche · symétrie',unit:'%',decimals:0,better:'higher',
+ {id:'hip_lsi',label:'Abduction de hanche · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
   get:r=>D(r,'dynamo_hip_abd','lsi_pct')},
  {id:'body_mass',label:'Masse',unit:'kg',decimals:1,better:'neutral',
   get:r=>F(r,'anthropometry','body_mass_kg')}
@@ -101,11 +109,14 @@ export function buildTrajectory(sessions=[],options={}){
    deltaPct=values[firstIdx]!==0?100*delta/Math.abs(values[firstIdx]):null;
    const eps=10**-(m.decimals)/2;
    direction=Math.abs(delta)<eps?'flat':delta>0?'up':'down';
-   notable=finite(m.threshold)&&Math.abs(delta)>=m.threshold;
-   if(m.better==='neutral'||direction==='flat')verdict='stable';
+   // Changement réel : au-delà de la marge d'erreur, ou franchissement du seuil de la mesure (10 s d'appui).
+   const margin=finite(m.mdc)?m.mdc:finite(m.mdcPct)&&values[firstIdx]?Math.abs(values[firstIdx])*m.mdcPct/100:null;
+   const crossed=finite(m.cross)&&(values[firstIdx]<m.cross)!==(values[lastIdx]<m.cross);
+   notable=direction!=='flat'&&((finite(margin)&&Math.abs(delta)>=margin-1e-9)||crossed);
+   if(m.better==='neutral'||direction==='flat'||!notable)verdict='stable';
    else verdict=(direction==='up')===(m.better==='higher')?'favorable':'defavorable';
   }
-  return {id:m.id,label:m.label,unit:m.unit,decimals:m.decimals,better:m.better,threshold:m.threshold??null,
+  return {id:m.id,label:m.label,unit:m.unit,decimals:m.decimals,better:m.better,threshold:m.mdc??null,
    values,display:values.map(v=>fmt(v,m.decimals)),delta,deltaPct:finite(deltaPct)?round(deltaPct,0):null,
    deltaDisplay:signed(delta,m.decimals),direction,notable,verdict,available};
  }).filter(r=>r.available>0);
@@ -119,10 +130,12 @@ export function buildTrajectory(sessions=[],options={}){
 export function trajectoryHeadline(t){
  if(!t?.points?.length)return 'Aucune consultation terminée.';
  if(t.points.length===1)return 'Consultation de départ (J0) enregistrée'+(t.nextControl?' · contrôle conseillé vers le '+frDate(t.nextControl):'')+'.';
- const fav=t.rows.filter(r=>r.verdict==='favorable').length,def=t.rows.filter(r=>r.verdict==='defavorable').length;
+ const fav=t.rows.filter(r=>r.verdict==='favorable'),def=t.rows.filter(r=>r.verdict==='defavorable');
+ const stable=t.rows.filter(r=>r.verdict==='stable'&&r.better!=='neutral').length;
  const span=t.points[0].label+' → '+t.points[t.points.length-1].label;
- return span+' : '+fav+' indicateur'+(fav>1?'s':'')+' en progrès, '+def+' en recul'+
-  (t.rows.some(r=>r.notable)?' · changement net sur '+t.rows.filter(r=>r.notable).map(r=>r.label.toLowerCase()).join(', '):'')+'.';
+ return span+' : '+(fav.length?'progrès réel sur '+fav.map(r=>r.label.toLowerCase()).join(', '):'aucun progrès au-delà de la marge d’erreur')+
+  (def.length?' · recul réel sur '+def.map(r=>r.label.toLowerCase()).join(', '):'')+
+  ' · '+stable+' mesure'+(stable>1?'s':'')+' stable'+(stable>1?'s':'')+' (écart dans la marge d’erreur).';
 }
 export function frDate(iso){
  const d=new Date(iso+'T12:00:00Z');

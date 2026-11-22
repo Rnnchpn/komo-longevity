@@ -30,6 +30,12 @@ assert.equal(zone(plan,'symmetry'),'priority');
 assert.deepEqual(plan.priorities.map(p=>p.id),['balance','symmetry','walk']);
 assert.ok(plan.priorities.every(p=>p.why.length>40&&p.objective&&p.basis));
 assert.equal(plan.priorities[0].objective,'10 s sur chaque pied');
+// Reproductibilité : aucun objectif plus petit que la marge d'erreur de sa mesure.
+const good=buildLongevityPlan({two_step:{status:'done',value:200,two_step_index:1.2},gait_4m:{status:'done',derived:{gait_speed_ms:1.1}},
+ unipodal_left:{status:'done',value:14},unipodal_right:{status:'done',value:30},dynamo_grip:{status:'done',fields:{grip_left_n:300,grip_right_n:310}}},{sex:'female',age:66});
+const obj=Object.fromEntries(good.capacities.map(c=>[c.id,c]));
+assert.ok(JSON.stringify(good.objectives).includes('indice ≥ 1,3')||good.priorities.some(p=>p.objective.includes('1,3')));
+assert.ok(!JSON.stringify(good).match(/\+2 kg|\+10 cm|\+5 s/),'objectifs sous la marge d’erreur interdits');
 assert.equal(plan.priorities[2].objective,'Vitesse de marche ≥ 0,99 m/s');
 assert.equal(plan.exercises.length,5);
 assert.ok(plan.exercises.some(e=>e.key==='chair'),'le lever de chaise reste le socle');

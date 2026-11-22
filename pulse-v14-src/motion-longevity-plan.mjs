@@ -161,18 +161,24 @@ const EX={
 const BY_CAPACITY={walk:['brisk','lunge'],legs:['chair','calf'],balance:['stand','tandem'],strength:['grip','knee'],symmetry:['hip','posture']};
 const RELEVANCE=['walk','legs','balance','strength','symmetry'];
 
+// Objectifs calés sur la reproductibilité (22/11/2026) : un objectif plus petit que la marge d'erreur
+// de la mesure ne pourrait pas être distingué du hasard au contrôle. Marche 0,1 m/s, chaise 2 levers,
+// Two-Step et équilibre en franchissement de repère, préhension 5 kg (visée à 12 semaines).
 function objective(c,ctx){
  if(c.id==='walk'){
   if(ctx.speed!==null&&ctx.speed<1.0)return 'Vitesse de marche ≥ '+fr(ctx.speed+0.1,2)+' m/s';
-  if(ctx.twoIdx!==null&&ctx.twoIdx<1.3&&finite(ctx.two))return 'Two-Step ≥ '+fr(ctx.two+10,0)+' cm';
-  return ctx.speed!==null?'Vitesse de marche ≥ '+fr(ctx.speed+0.05,2)+' m/s':'Mesurer la vitesse de marche';
+  if(ctx.twoIdx!==null&&ctx.twoIdx<1.3)return 'Two-Step : indice ≥ '+(ctx.twoIdx<1.1?'1,1':'1,3');
+  return ctx.speed!==null?'Vitesse de marche maintenue ≥ '+fr(ctx.speed,2)+' m/s':'Mesurer la vitesse de marche';
  }
  if(c.id==='legs')return ctx.chair!==null?'Au moins '+(ctx.chair+2)+' levers en 30 s':'Mesurer le lever de chaise';
  if(c.id==='balance'){
   if(ctx.weak===null)return 'Mesurer l’appui sur un pied';
-  return ctx.weak<10?'10 s sur chaque pied':ctx.weak<30?Math.min(30,Math.round(ctx.weak+5))+' s sur le pied le plus faible':'Garder 30 s de chaque côté';
+  return ctx.weak<10?'10 s sur chaque pied':ctx.weak<30?'30 s sur chaque pied':'Garder 30 s de chaque côté';
  }
- if(c.id==='strength')return ctx.gripKg!==null?'Préhension ≥ '+fr(Math.max(ctx.gripKg+2,ctx.gripKg<ctx.low?ctx.low:0),1)+' kg':'Mesurer la préhension';
+ if(c.id==='strength'){
+  if(ctx.gripKg===null)return 'Mesurer la préhension';
+  return ctx.gripKg<ctx.low?'Préhension ≥ '+ctx.low+' kg':'Préhension : +5 kg, visé à 12 semaines';
+ }
  if(c.id==='symmetry'){
   if(ctx.weakestLsi&&ctx.weakestLsi[1]<90)return ctx.weakestLsi[0]+' : côté faible ≥ 90 % du côté fort';
   if(ctx.largestAsym&&ctx.largestAsym[1]>10)return ctx.largestAsym[0]+' : asymétrie ≤ 10 %';
