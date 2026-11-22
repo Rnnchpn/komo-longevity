@@ -1,6 +1,7 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
-// Vidéo sur l'iPhone, valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,STATIONS,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261122-repro-v1';
+// v2.4 : sans caméra (plateformes, DynaMo, chrono et compteur PULSE). Le code vidéo reste pour Human Track.
+// Valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
+import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261122-repro-v1';
 import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261122-repro-v1';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
@@ -10,7 +11,7 @@ const TYPE_BY_KIND={fields:"fields",two_step:"manual_two_step",count:"count",bal
 const TESTS=STEPS.map(s=>({id:s.id,title:s.title,duration:s.duration||0,unit:s.ui_unit||"",type:TYPE_BY_KIND[s.kind],
  setup:s.setup,instruction:s.instruction,script:s.script||"",label:s.label||s.title,device:s.device,trials:s.trials,
  block:s.block,vald:s.vald||null,walkway:!!s.walkway,dynamo:!!s.dynamo,pair:s.pair||null,
- holdTimer:!!s.holdTimer,valueField:s.value_field||null,
+ holdTimer:!!s.holdTimer,valueField:s.value_field||null,tapCounter:!!s.tapCounter,
  ...(s.kind==="fields"?{fields:s.fields,choices:s.choices||[]}:{})}));
 // Unité affichée par l'écran DynaMo (N ou kg) : mémorisée sur cet ordinateur, enregistrement toujours en N.
 const DYNAMO_UNIT_KEY="komo_dynamo_unit";
@@ -29,6 +30,7 @@ let videoFocus=false,videoLive=false;
 const q=id=>host?.querySelector("#"+id);
 const SHORT_TEST_NAMES=Object.fromEntries(STEPS.map(s=>[s.id,s.short]));
 function updateCameraLinkState(){
+ if(!CAMERA_USED){const banner=q("mocCameraBanner");if(banner)banner.hidden=true;return;}
  const badge=q("mocCameraState");if(!badge)return;
  const video=q("mopvVideo");
  const hasFrames=!!video?.srcObject&&video.videoWidth>0&&video.videoHeight>0&&video.readyState>=2;
@@ -60,7 +62,7 @@ function updateConsultationLayout(){
  const aside=q("mocPassportAside");if(aside)aside.hidden=!isReport;
  const button=q("mocVideoFocus");
  if(button){
-  button.hidden=panelMode!=="tests"||room?.status==="completed";
+  button.hidden=!CAMERA_USED||panelMode!=="tests"||room?.status==="completed";
   button.textContent=videoFocus?"Masquer la caméra":"Voir la caméra";
   button.setAttribute("aria-pressed",String(videoFocus));
  }
@@ -217,6 +219,21 @@ function stopHoldChrono(){
  if(holdChrono.auto)clearTimeout(holdChrono.auto);
  holdChrono.startedAt=null;holdChrono.timer=null;holdChrono.auto=null;
 }
+// Compteur « +1 » (v2.4, sans caméra) : l'opérateur compte chaque lever complet pendant les 30 s.
+// Le total va dans le champ de valeur, toujours modifiable avant validation.
+function bindTapCounter(){
+ const plus=q("mocTapPlus"),minus=q("mocTapMinus");if(!plus)return;
+ const read=()=>{const v=parseInt(q("mocValue")?.value||"0",10);return Number.isFinite(v)&&v>0?v:0};
+ const write=n=>{const v=Math.max(0,Math.min(100,n));const input=q("mocValue");
+  if(input){input.value=String(v);manualEdited=true;}
+  const tile=q("mocLiveCount");if(tile)tile.textContent=String(v);};
+ write(read());
+ let lastPointer=0;
+ plus.onpointerdown=e=>{if(e.button>0)return;e.preventDefault();lastPointer=performance.now();write(read()+1);};
+ plus.onclick=()=>{if(performance.now()-lastPointer<800)return;write(read()+1);};
+ if(minus)minus.onclick=()=>write(read()-1);
+ q("mocValue")?.addEventListener("input",()=>{const tile=q("mocLiveCount");if(tile)tile.textContent=String(read());});
+}
 function holdMarkup(){
  return '<div class="moc-gait-chrono moc-hold-chrono"><button type="button" id="mocHoldGo" class="moc-button primary">Départ · pied levé</button>'+
   '<strong id="mocHoldTime" aria-live="off">0,0 s</strong>'+
@@ -341,13 +358,13 @@ function makeShell(){
  // Parcours de la consultation : 1 Patient · 2 iPhone · 3 Tests · 4 Questionnaire · 5 Rapport.
  '<nav class="moc-mode-tabs moc-journey" aria-label="Étapes de la consultation">'+
  '<span class="moc-journey-step" data-state="done"><b>1</b><span>Patient</span></span>'+
- '<span class="moc-journey-step" id="mocJourneyCamera" data-state=""><b>2</b><span>iPhone</span></span>'+
- '<button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true"><b>3</b><span>Tests</span><small id="mocTabTestsCount"></small></button>'+
- '<button type="button" id="mocTabQuestionnaire" class="moc-mode-tab"><b>4</b><span>Questionnaire</span><small id="mocTabQuestionnaireCount"></small></button>'+
- '<button type="button" id="mocTabReport" class="moc-mode-tab"><b>5</b><span>Rapport</span></button></nav>'+
- '<div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice" aria-pressed="false">Voix</button><button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Afficher la caméra pour régler le cadrage">Voir la caméra</button><button type="button" class="moc-back" id="mocFullscreen" title="Plein écran">Plein écran</button><button type="button" class="moc-back" id="mocReturn" title="Revenir à la page Consultation">Quitter</button></div></header>'+
+ (CAMERA_USED?'<span class="moc-journey-step" id="mocJourneyCamera" data-state=""><b>2</b><span>iPhone</span></span>':'')+
+ '<button type="button" id="mocTabTests" class="moc-mode-tab" aria-selected="true"><b>'+(CAMERA_USED?3:2)+'</b><span>Tests</span><small id="mocTabTestsCount"></small></button>'+
+ '<button type="button" id="mocTabQuestionnaire" class="moc-mode-tab"><b>'+(CAMERA_USED?4:3)+'</b><span>Questionnaire</span><small id="mocTabQuestionnaireCount"></small></button>'+
+ '<button type="button" id="mocTabReport" class="moc-mode-tab"><b>'+(CAMERA_USED?5:4)+'</b><span>Rapport</span></button></nav>'+
+ '<div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice" aria-pressed="false">Voix</button>'+(CAMERA_USED?'<button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Afficher la caméra pour régler le cadrage">Voir la caméra</button>':'')+'<button type="button" class="moc-back" id="mocFullscreen" title="Plein écran">Plein écran</button><button type="button" class="moc-back" id="mocReturn" title="Revenir à la page Consultation">Quitter</button></div></header>'+
  '<div class="moc-statusbar">'+
- '<p class="moc-camera-banner" id="mocCameraBanner" role="status" aria-live="polite" data-state="offline">○ iPhone non connecté · Active la caméra du cabinet.</p>'+
+ '<p class="moc-camera-banner" id="mocCameraBanner" role="status" aria-live="polite" data-state="offline"'+(CAMERA_USED?'':' hidden')+'>○ iPhone non connecté · Active la caméra du cabinet.</p>'+
  '<p class="moc-save-indicator" id="mocIntakeSaveStatus" role="status" aria-live="polite">Questionnaire · en attente de réponses</p>'+
  '<p class="moc-voice-state" id="mocVoiceState" role="status">Voix désactivée · Active-la pour dire « C’est parti », « Stop » ou « Suivant ». Aucun audio n’est enregistré par Pulse.</p>'+
  '</div>'+
@@ -355,17 +372,17 @@ function makeShell(){
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
  '<div class="moc-step-nav" id="mocStepNav" aria-label="Progression des étapes Motion"></div>'+
  '<div id="mocTestBody"><p>Recherche de la consultation…</p></div>'+
- '</section><aside class="moc-camera-column"><div class="moc-camera-heading"><strong>iPhone · caméra du cabinet</strong><span id="mocCameraState" class="moc-camera-state" data-state="offline" role="status">○ iPhone non connecté</span></div>'+
+ '</section><aside class="moc-camera-column">'+(CAMERA_USED?'<div class="moc-camera-heading"><strong>iPhone · caméra du cabinet</strong><span id="mocCameraState" class="moc-camera-state" data-state="offline" role="status">○ iPhone non connecté</span></div>':'')+
  '<div id="mocPassportAside" class="moc-passport-aside" hidden></div>'+
- '<div id="motionConsultCamera" class="moc-camera-host"></div>'+
- '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>'+
+ (CAMERA_USED?'<div id="motionConsultCamera" class="moc-camera-host"></div>'+
+ '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>':'')+
  '</aside></div><p class="moc-bottom-note">'+(isRealDossier()?'Consultation réelle · dossier pseudonymisé':'Démonstration avec dossier fictif')+' · Résultats validés par l’opérateur · Aucune interprétation clinique automatique</p></section>';
  q("mocReturn").onclick=async()=>{
   try{await saveQuestionnaire();if(questionnaireDirty)return}
   catch(error){questionnaireNote("Sauvegarde échouée : "+error.message);return}
   location.hash="live";
  };
- q("mocVideoFocus").onclick=()=>{videoFocus=!videoFocus;updateConsultationLayout();};
+ if(q("mocVideoFocus"))q("mocVideoFocus").onclick=()=>{videoFocus=!videoFocus;updateConsultationLayout();};
  q("mocTabTests").onclick=()=>switchPanel("tests");
  q("mocTabQuestionnaire").onclick=()=>switchPanel("questionnaire");
  q("mocTabReport").onclick=()=>switchPanel("report");
@@ -390,7 +407,7 @@ function makeShell(){
  // Entrée = « Valider et passer au suivant » quand la saisie est complète (hors zone de notes).
  host.addEventListener("keydown",event=>{
   // Barre d'espace = Départ / Arrivée du chronomètre de marche (hors champ de saisie).
-  const chronoButton=q("mocGaitGo")||q("mocHoldGo");
+  const chronoButton=q("mocGaitGo")||q("mocHoldGo")||q("mocTapPlus");
   if(event.key===" "&&panelMode==="tests"&&chronoButton&&!event.target?.matches?.("input,textarea,select,button,summary")){
    event.preventDefault();chronoButton.click();return;
   }
@@ -407,7 +424,7 @@ function renderWaiting(message){
  q("mocStepNav").innerHTML="";
  q("mocTestBody").innerHTML='<section class="moc-empty"><h3>Préparer la consultation</h3><p>'+HTML(message)+'</p><button type="button" id="mocGoLive" class="moc-button primary">Retour à Consultation</button></section>';
  q("mocGoLive").onclick=()=>{location.hash="live"};
- q("mocProgressText").textContent="En attente d’un téléphone associé";
+ q("mocProgressText").textContent=CAMERA_USED?"En attente d’un téléphone associé":"En attente de la consultation";
  q("mocProgressFill").style.width="0%";
 }
 function formatResult(result,task){
@@ -831,7 +848,8 @@ function timeDisplay(){
   if(stoppedAt===null)stoppedAt=start+duration*1000;
   poseTracker?.stopMeasurement();
   voice?.complete();
-  setStatus("Temps écoulé. Vérifiez le compteur vidéo ou saisissez la mesure manuellement, puis validez.");
+  setStatus(CAMERA_USED?"Temps écoulé. Vérifiez le compteur vidéo ou saisissez la mesure manuellement, puis validez.":
+   "Temps écoulé. Vérifie le total des levers (lever à plus de mi-hauteur = compté), puis valide.");
  }
 }function setClock(){
  if(clock)clearInterval(clock);
@@ -865,6 +883,9 @@ function renderStep(){
  const shown=room&&room.status!=="completed"&&room.stage_code!=="finished"?currentTest()?.id||null:null;
  renderedStepId=shown;
  if(draft&&shown===draft.id)restoreDraft(draft);
+ // Compteur « +1 » : le chiffre affiché suit la valeur restaurée après un rafraîchissement.
+ const tile=q("mocTapPlus")&&q("mocLiveCount"),value=q("mocValue");
+ if(tile&&value)tile.textContent=String(parseInt(value.value||"0",10)||0);
 }
 function renderStepView(){
  if(!host||!room)return;
@@ -924,7 +945,7 @@ function renderStepView(){
     POSTURE_OPTIONS.map(([k,l])=>'<option value="'+k+'">'+HTML(l)+'</option>').join("")+'</select></label>':
    '<label class="moc-field">'+HTML(t.label)+'<div class="moc-input-unit"><input id="mocValue" type="number" inputmode="decimal" min="0" step="'+(t.unit==="seconds"?"0.1":"1")+'"><span>'+HTML(t.unit)+'</span></div></label>')+
   '<button type="button" id="mocSave" class="moc-button primary">'+saveLabel+'</button></details>':'';
- const manualTail='<div class="moc-auto-feedback" id="mocAutoFeedback">'+(isFields(t)?"Valeurs recopiées depuis l’appareil ; la caméra ne détermine pas ces mesures.":"Deux distances mesurées au ruban ; la caméra ne détermine pas cette valeur.")+'</div>'+
+ const manualTail='<div class="moc-auto-feedback" id="mocAutoFeedback">'+(isFields(t)?(t.walkway?"Temps chronométrés dans PULSE.":t.holdTimer?"Durée chronométrée dans PULSE, oscillations recopiées depuis ForceDecks.":"Valeurs recopiées depuis l’appareil."):"Deux distances mesurées au ruban.")+'</div>'+
   '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Douleur, aide utilisée, essai invalide…"></textarea></label>'+
   '<div class="moc-buttons moc-actionbar"><button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button>'+laterButton+
   '<button type="button" id="mocSave" class="moc-button primary" aria-keyshortcuts="Enter">'+saveLabel+'<kbd aria-hidden="true">Entrée</kbd></button></div>';
@@ -936,10 +957,14 @@ function renderStepView(){
  (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
  (manual?valdMarkup(t)+input+manualTail:running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"||isFields(t)?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":isFields(t)?"Saisie":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
  (t.type==="balance"?'<div class="moc-rep-figure moc-balance-figure"><span>TEMPS MAINTENU</span><strong id="mocLiveBalance" aria-live="off">—</strong><small id="mocBalanceState">EN ATTENTE DU PIED LEVÉ</small></div>':'')+
- (t.type==="count"?'<div class="moc-rep-figure"><span>'+ (t.id==="sts"?"LEVERS EN DIRECT":"RÉPÉTITIONS EN DIRECT")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong><small>Estimation vidéo · à confirmer</small></div>':'')+
+ (t.type==="count"&&t.tapCounter&&!CAMERA_USED?'<div class="moc-rep-figure moc-tap-figure"><span>'+(t.id==="sts"?"LEVERS COMPTÉS":"RÉPÉTITIONS COMPTÉES")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong>'+
+  '<button type="button" id="mocTapPlus" class="moc-button primary moc-tap-plus">+1 lever</button><button type="button" id="mocTapMinus" class="moc-button secondary moc-tap-minus" aria-label="Retirer un lever">−1</button></div>':
+ t.type==="count"?'<div class="moc-rep-figure"><span>'+ (t.id==="sts"?"LEVERS EN DIRECT":"RÉPÉTITIONS EN DIRECT")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong><small>Estimation vidéo · à confirmer</small></div>':'')+
  (t.duration?'<div class="moc-clock-actions"><button type="button" class="moc-button secondary" id="mocStopClock">'+(isBalance(t)?"Arrêter l’essai":"Arrêter")+'</button><button type="button" class="moc-button secondary" id="mocRestartClock">'+(isBalance(t)?"↻ Refaire l’essai":"↻ Repartir de "+t.duration+" s")+'</button></div>':'')+'</div></div>'+input+
  (isBalance(t)?'<p class="moc-balance-reference">Yeux ouverts · 30 s maximum · durée réelle depuis le pied levé · 10 s = repère descriptif, non diagnostique. Arrêter en cas de perte d’équilibre ou de recours à un appui.</p>':'')+
- '<div class="moc-auto-feedback" id="mocAutoFeedback">'+(isFields(t)?"Valeurs saisies par l’opérateur ; la caméra ne détermine pas ces mesures.":t.id==="two_step"?"Deux distances mesurées manuellement ; la caméra ne détermine pas cette valeur.":"◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.")+'</div>'+
+ '<div class="moc-auto-feedback" id="mocAutoFeedback">'+(isFields(t)?"Valeurs saisies par l’opérateur.":t.id==="two_step"?"Deux distances mesurées manuellement.":
+  t.tapCounter&&!CAMERA_USED?"Appuie sur « +1 lever » à chaque lever complet (barre d’espace possible). Le total reste modifiable avant validation.":
+  "◌ Marqueurs en cours de chargement. En attendant, saisie manuelle possible.")+'</div>'+
  '<label class="moc-field">Notes (facultatif)<textarea id="mocNote" rows="2" maxlength="300" placeholder="Qualité de l’observation, aide utilisée, remarque…"></textarea></label>'+
  '<div class="moc-buttons moc-actionbar"><button type="button" id="mocSkip" class="moc-button secondary">Test non réalisé</button>'+laterButton+
  '<button type="button" id="mocSave" class="moc-button primary" aria-keyshortcuts="Enter">'+saveLabel+'<kbd aria-hidden="true">Entrée</kbd></button></div>'
@@ -952,6 +977,7 @@ function renderStepView(){
  if(q("mocSkipConfirm"))q("mocSkipConfirm").onclick=()=>submit("skip");
  if(q("mocSkipCancel"))q("mocSkipCancel").onclick=()=>{const p=q("mocSkipPanel");if(p)p.hidden=true};
  if(q("mocValue"))q("mocValue").addEventListener("input",()=>{manualEdited=true});
+ if(q("mocTapPlus"))bindTapCounter();
  if(t.id==="two_step"){
   const update=()=>{
    manualEdited=true;
@@ -1322,7 +1348,8 @@ async function refresh(force=false){
   const selected=matching.find(x=>["waiting","ready","active"].includes(x.status))||
    matching.find(x=>x.id===preferredSessionId)||matching[0]||null;
   if(!selected){
-   room=null;renderWaiting("Crée une consultation sur l’ordinateur, puis active /camera/ sur l’iPhone : liaison automatique sans code.");
+   room=null;renderWaiting(CAMERA_USED?"Crée une consultation sur l’ordinateur, puis active /camera/ sur l’iPhone : liaison automatique sans code.":
+    "Crée la consultation depuis la page Consultation : les tests s’ouvrent directement, sans iPhone.");
    return;
   }
   if(room?.id&&room.id!==selected.id&&(questionnaireDirty||questionnaireSaveInFlight)){
@@ -1372,7 +1399,7 @@ async function refresh(force=false){
    else if(panelMode==="report")renderReportSection();
    // Do not tear down the questionnaire while typing answers.
   }
-  if(openVideo&&room.status==="active"){
+  if(CAMERA_USED&&openVideo&&room.status==="active"){
    await openVideo(room.id,"motionConsultCamera");
    const liveVideo=document.querySelector("#motionConsultCamera #mopvVideo");
    if(liveVideo?.srcObject&&!poseTracker?.isAttached()&&!poseTracker?.loading()&&Date.now()-poseRetryAt>12000){
@@ -1380,7 +1407,7 @@ async function refresh(force=false){
     await attachPoseVideo(liveVideo);
    }
   }
-  if(room.status==="completed"&&openVideo){
+  if(CAMERA_USED&&room.status==="completed"&&openVideo){
    // Completed room no longer accepts video signaling; stop any existing camera.
    window.dispatchEvent(new Event("pulse:operator-signout"));
   }
@@ -1419,7 +1446,7 @@ export async function mountOperatorConsultation(config){
  }
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
- try{
+ if(CAMERA_USED)try{
   const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261122-repro-v1");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,

@@ -9,7 +9,7 @@ const T=[
  {id:'sts',name:stepById('sts').title,short:'Force fonctionnelle',unit:'levers / 30 s',
   method:'30 secondes, chaise stable de 43 cm, bras croisés si possible. Compter les levers complets. La puissance des jambes (W/kg) en est calculée avec la taille (équation d’Alcazar).',
   caveat:'Valeur de suivi ; comparaison normative uniquement avec âge exact, groupe de référence et protocole confirmé. La puissance est une estimation, pas une mesure directe.'},
- {id:'two_step',name:stepById('two_step').title,short:'Deux grands pas',unit:'cm',
+ {id:'two_step',name:stepById('two_step')?.title||'Two-Step · deux grands pas',short:'Deux grands pas',unit:'cm',
   method:'Deux essais manuels des deux plus grands pas sans saut, pieds joints à l’arrêt. Retenir la meilleure distance mesurée au sol.',
   caveat:'Indice = meilleure distance / taille (cm), uniquement si la taille est renseignée. Les seuils cliniques exigent un protocole standardisé et une interprétation contextualisée.'},
  {id:'unipodal_left',name:stepById('unipodal_left').title,short:'Stabilité gauche',unit:'s / 30 s',
@@ -18,13 +18,20 @@ const T=[
  {id:'unipodal_right',name:stepById('unipodal_right').title,short:'Stabilité droite',unit:'s / 30 s',
   method:'Appui unipodal yeux ouverts sur plateforme ForceDecks, chronométré par l’opérateur du lever du pied gauche jusqu’au pied posé, maximum 30 secondes, meilleur de deux essais.',
   caveat:'Mesure plafonnée à 30 s ; un pied qui touche le sol ou l’autre jambe, ou une main qui se pose, arrête le chrono.'},
- {id:'arms',name:stepById('arms').title,short:'Contrôle proximal',unit:'mouvements',
+ {id:'arms',name:stepById('arms')?.title||'Élévation des bras 30 s (ancien protocole)',short:'Contrôle proximal',unit:'mouvements',
   method:'Élévations bilatérales suivies par caméra, sans goniométrie ni force instrumentée.',
   caveat:'Le nombre de répétitions ne quantifie pas une amplitude articulaire ni une puissance musculaire.'},
- {id:'posture',name:stepById('posture').title,short:'Alignement de surface',unit:'',
+ {id:'posture',name:stepById('posture')?.title||'Posture de profil (ancien protocole)',short:'Alignement de surface',unit:'',
   method:'Observation visuelle de profil, à partir d’une image 2D non calibrée.',
   caveat:'Aucune mesure de SVA C7–S1 radiographique, d’angle pelvien ou de déformation rachidienne.'}
 ];
+// v2.4 (sans caméra) : seuls les tests du protocole actuel sont listés ; un ancien test (Two-Step, bras,
+// posture, pointes) n'apparaît que s'il a un résultat dans la consultation (dossiers antérieurs).
+export function passportTestIds(results={}){
+ const legacy=id=>!!results?.[id];
+ return T.map(t=>t.id==='two_step'&&!STEP_IDS.includes('two_step')&&!results?.two_step&&results?.heels?'heels':t.id)
+  .filter(id=>STEP_IDS.includes(id)||legacy(id));
+}
 const LEGACY_HEELS={id:'heels',name:'Élévation sur les pointes (ancien protocole)',short:'Endurance distale',unit:'répétitions',
  method:'Ancien test de mollets, non assimilable au Two-Step Test.',
  caveat:'Mesure historique conservée pour traçabilité ; ne pas la comparer au Two-Step Test.'};
@@ -73,12 +80,12 @@ export function buildClinicPassport(answers={},results={},options={}){
  const simulated=options.simulated===true;
  const profile={ageBand:answers.ageBand||null,goal:answers.goal||null};
  const rating=key=>Object.hasOwn(answers,key)&&/^[0-4]$/.test(String(answers[key]))?Number(answers[key]):null;
- const measures=T.map(t=>t.id==='two_step'&&!results.two_step&&results.heels?
-  objective(results.heels,LEGACY_HEELS):objective(results[t.id],t));
+ const ids=passportTestIds(results);
+ const measures=ids.map(id=>id==='heels'?objective(results.heels,LEGACY_HEELS):objective(results[id],T.find(t=>t.id===id)));
  const measured=measures.filter(x=>x.measured).length,skipped=measures.filter(x=>x.status==='skipped').length;
  const flagged=measures.filter(x=>x.review);
- const bL=measures[2],bR=measures[3];
- const both=finite(bL.value)&&finite(bR.value);
+ const bL=measures.find(m=>m.id==='unipodal_left'),bR=measures.find(m=>m.id==='unipodal_right');
+ const both=finite(bL?.value)&&finite(bR?.value);
  const balance=both?{
   left:bL.value,right:bR.value,min:Math.min(bL.value,bR.value),
   delta:round1(Math.abs(bL.value-bR.value)),ceilingLeft:bL.ceiling,ceilingRight:bR.ceiling,
@@ -127,8 +134,9 @@ export function buildClinicPassport(answers={},results={},options={}){
  else messages.push('Les réponses déclaratives complètent les tests physiques ; leurs indices KŌMØ sont exploratoires et non diagnostiques.');
  if(simulated)messages.unshift('Simulation pédagogique : les 22 réponses déclaratives ont été inventées et ne proviennent pas d’un patient interrogé.');
  if(questionnaire.complete){
-  if(rating('chair')===0&&finite(measures[0].value))
-   messages.push('Le transfert assis-debout est objectivé par '+n(measures[0].value)+' levers, tandis que la difficulté de lever de chaise déclarée est nulle : concordance descriptive, sans comparaison normative.');
+  const chairMeasure=measures.find(m=>m.id==='sts');
+  if(rating('chair')===0&&finite(chairMeasure?.value))
+   messages.push('Le transfert assis-debout est objectivé par '+n(chairMeasure.value)+' levers, tandis que la difficulté de lever de chaise déclarée est nulle : concordance descriptive, sans comparaison normative.');
   if(rating('bend')>=2&&rating('pain')>=1)
    messages.push('L’autonomie globale déclarée est plutôt préservée, mais la flexion du tronc est décrite comme difficile et une gêne intervient parfois : cette discordance mérite une observation fonctionnelle ciblée.');
   if(rating('strengthDays')>=3)

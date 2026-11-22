@@ -2,7 +2,7 @@
 // The physician/operator edits all fields on the desktop; nothing is collected on the iPhone.
 // This module has no access to camera frames, audio or WebRTC signaling.
 import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './motion-engine/intake-model.mjs?v=20261122-repro-v1';
-import {buildClinicPassport} from './motion-live-clinic-passport-v2.mjs?v=20261122-repro-v1';
+import {buildClinicPassport,passportTestIds} from './motion-live-clinic-passport-v2.mjs?v=20261122-repro-v1';
 import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js?v=20261122-repro-v1';
 import {clinicRadarMarkup} from './motion-live-clinic-action-plan-v1.mjs?v=20261122-repro-v1';
 
@@ -93,7 +93,7 @@ export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNex
 }
 export function clinicReportSummary(answers={},results={}){
  const {progress,score}=questionnaireState(answers);
- const ids=['sts',results.two_step?'two_step':'heels','unipodal_left','unipodal_right','arms','posture'];
+ const ids=passportTestIds(results);
  const done=ids.filter(id=>results[id]?.status==='done').length;
  const skipped=ids.filter(id=>results[id]?.status==='skipped').length;
  return {answered:progress.completed,total:progress.total,complete:score.complete,profileIndex:score.profileIndex,

@@ -391,8 +391,10 @@ Deno.serve(async(req:Request)=>{
   const {data:created,error}=await db.from("pulse_motion_live_sessions").insert({
    organization_id:ORG_ID,operator_user_id:actor.id,patient_id:patientId,operator_session_id:opId,
    guest_token_hash:await hash(token),display_code:code,
-   status:"waiting",stage_code:STEPS[0],step_index:0,
-   progress:{kind:"physical_consultation",camera_owner:"operator",camera_state:"awaiting_phone",
+   // v2.4 (22/11/2026) : consultation sans caméra. La salle est active dès sa création ; l'iPhone
+   // peut encore s'y relier plus tard (operator_camera_start), mais les tests ne l'attendent plus.
+   status:"active",stage_code:STEPS[0],step_index:0,
+   progress:{kind:"physical_consultation",camera_owner:"operator",camera_state:"not_used",
     step_status:"pending",results:{},safety_confirmed:false,protocol:{...PROTOCOL_STAMP,stamped_at:now()},...initialQuestionnaire},
    expires_at:new Date(Date.now()+4*3600000).toISOString()
   }).select("id,status,display_code").single();

@@ -62,6 +62,8 @@ export function assessCapacities(results={},profile={}){
  const powerLow=STS_POWER_LOW[sex||'female'],powerMcid=STS_POWER_MCID[sex||'female'];
  const powerZone=power===null?'missing':power<powerLow?'priority':power<powerLow+powerMcid?'consolidate':'solid';
  const powerRepsLow=power!==null&&power<powerLow?stsRepsForPower(height,powerLow):null;
+ // Saut vertical (CMJ) : puissance mesurée par les plateformes, suivie dans le temps (pas de repère validé ici).
+ const cmjPower=F(results,'fd_cmj','cmj_peak_power_wkg'),cmjHeight=F(results,'fd_cmj','cmj_height_cm');
  // Équilibre
  const bl=V(results,'unipodal_left'),br=V(results,'unipodal_right');
  const weak=bl!==null&&br!==null?Math.min(bl,br):bl??br;
@@ -80,10 +82,11 @@ export function assessCapacities(results={},profile={}){
  const kl=F(results,'dynamo_knee_ext','knee_ext_left_n'),kr=F(results,'dynamo_knee_ext','knee_ext_right_n');
  const hl=F(results,'dynamo_hip_abd','hip_abd_left_n'),hr=F(results,'dynamo_hip_abd','hip_abd_right_n');
  const fl=F(results,'dynamo_hip_flex','hip_flex_left_n'),fr2=F(results,'dynamo_hip_flex','hip_flex_right_n');
+ const kfl=F(results,'dynamo_knee_flex','knee_flex_left_n'),kfr=F(results,'dynamo_knee_flex','knee_flex_right_n');
  // Symétrie et posture
- const lsis=[['Préhension',D(results,'dynamo_grip','lsi_pct')],['Genou',D(results,'dynamo_knee_ext','lsi_pct')],
+ const lsis=[['Préhension',D(results,'dynamo_grip','lsi_pct')],['Extension de genou',D(results,'dynamo_knee_ext','lsi_pct')],['Flexion de genou',D(results,'dynamo_knee_flex','lsi_pct')],
   ['Flexion de hanche',D(results,'dynamo_hip_flex','lsi_pct')],['Abduction de hanche',D(results,'dynamo_hip_abd','lsi_pct')]].filter(([,v])=>v!==null);
- const asyms=[['Charge debout',qsAsym],['Lever sur plateformes',F(results,'fd_sts','fd_sts_asym_pct')]].filter(([,v])=>v!==null);
+ const asyms=[['Charge debout',qsAsym],['Lever sur plateformes',F(results,'fd_sts','fd_sts_asym_pct')],['Saut vertical',F(results,'fd_cmj','cmj_asym_pct')]].filter(([,v])=>v!==null);
  const posture=done(results,'posture')?.observation||null;
  const symZones=[...lsis.map(([,v])=>v<80?'priority':v<90?'consolidate':'solid'),
   ...asyms.map(([,v])=>v>20?'priority':v>10?'consolidate':'solid'),
@@ -96,12 +99,14 @@ export function assessCapacities(results={},profile={}){
   {id:'walk',name:'Marche',zone:worst(speedZone,twoZone),
    why:'Chaque 0,1 m/s de vitesse de marche en plus est associé à 12 % de risque de décès en moins (34 485 personnes suivies). Elle progresse avec la marche rapide et la force des jambes.',
    measures:[measure('Vitesse de marche',speed===null?null:fr(speed,2),'m/s',speedZone,'repère : 0,8 et 1,0 m/s'),
-    measure('Two-Step (indice)',twoIdx===null?null:fr(twoIdx,2),'',twoZone,'repère : 1,1 et 1,3')]},
+    ...(two?[measure('Two-Step (indice)',twoIdx===null?null:fr(twoIdx,2),'',twoZone,'repère : 1,1 et 1,3')]:[])]},
   {id:'legs',name:'Force des jambes',zone:worst(chairZone,powerZone==='missing'?null:powerZone),
    why:'Se lever, monter un escalier, se relever : c’est la puissance des jambes qui garde autonome. Une puissance basse au lever de chaise est associée à un risque de décès plus que doublé sur 9 ans ; elle progresse en quelques semaines.',
    measures:[measure('Levers de chaise en 30 s',chair,'levers',chairZone,'repère '+CHAIR_BANDS[bi]+' ans'+(age!==null&&age<60?' (le plus proche)':'')+' : '+below+' et '+standard+sexNote),
     measure('Puissance des jambes (estimée)',power===null?null:fr(power,1),'W/kg',powerZone,'repère : '+fr(powerLow,1)+' W/kg'+sexNote+' · calculée avec la taille'),
-    measure('Temps pour se lever (plateformes)',tts===null?null:fr(tts,2),'s',tts===null?'missing':'follow','suivi personnel')]},
+    measure('Temps pour se lever (plateformes)',tts===null?null:fr(tts,2),'s',tts===null?'missing':'follow','suivi personnel'),
+    measure('Saut vertical · puissance',cmjPower===null?null:fr(cmjPower,1),'W/kg',cmjPower===null?'missing':'follow',
+     (cmjHeight===null?'':'hauteur '+fr(cmjHeight,1)+' cm · ')+'mesurée par les plateformes · suivi personnel')]},
   {id:'balance',name:'Équilibre',zone:worst(balZone,qsZone==='consolidate'?'consolidate':null)||balZone,
    why:'Ne pas tenir 10 s sur un pied est associé à un risque de décès 1,8 fois plus élevé sur 7 ans (1 702 personnes suivies). L’équilibre s’entraîne : un quart de chutes en moins.',
    measures:[measure('Appui sur un pied (côté faible)',weak===null?null:fr(weak,1),'s',balZone,'repère : 10 s, maximum 30 s'),
@@ -113,17 +118,19 @@ export function assessCapacities(results={},profile={}){
    why:'Chaque 5 kg de force de main en moins est associé à 16 % de mortalité en plus (139 691 personnes suivies). La force se regagne à tout âge.',
    measures:[measure('Préhension (meilleur côté)',gripKg===null?null:fr(gripKg,1),'kg',gripZone,'repère : '+low+' kg'+sexNote),
     measure('Extension de genou (meilleur côté)',kl===null&&kr===null?null:fr(Math.max(kl??0,kr??0),0),'N','follow','suivi personnel'),
+    measure('Flexion de genou (meilleur côté)',kfl===null&&kfr===null?null:fr(Math.max(kfl??0,kfr??0),0),'N','follow','suivi personnel'),
     measure('Flexion de hanche (meilleur côté)',fl===null&&fr2===null?null:fr(Math.max(fl??0,fr2??0),0),'N','follow','suivi personnel'),
     measure('Abduction de hanche assise (meilleur côté)',hl===null&&hr===null?null:fr(Math.max(hl??0,hr??0),0),'N','follow','suivi personnel')]},
-  {id:'symmetry',name:'Symétrie et posture',zone:symZones.length?worst(...symZones):'missing',
-   why:'Un côté plus faible ou une posture penchée concentrent les contraintes et exposent aux chutes de côté. L’écart se réduit en travaillant le côté faible en premier.',
+  {id:'symmetry',name:'Symétrie',zone:symZones.length?worst(...symZones):'missing',
+   why:'Un côté plus faible concentre les contraintes et expose aux chutes de côté. L’écart se réduit en travaillant le côté faible en premier.',
    measures:[measure('Côté faible / côté fort',weakestLsi?fr(weakestLsi[1],0):null,'%',weakestLsi?(weakestLsi[1]<80?'priority':weakestLsi[1]<90?'consolidate':'solid'):'missing',
      weakestLsi?weakestLsi[0]+' · repère : 90 %':'repère : 90 %'),
     measure('Plus grande asymétrie d’appui',largestAsym?fr(largestAsym[1],1):null,'%',largestAsym?(largestAsym[1]>20?'priority':largestAsym[1]>10?'consolidate':'solid'):'missing',
      largestAsym?largestAsym[0]+' · repère : 10 %':'repère : 10 %'),
-    measure('Posture de profil',posture==='apparent_offset'?'décalage apparent':posture==='neutral'?'alignement neutre':posture?'non interprétable':null,'',
-     posture==='apparent_offset'?'consolidate':posture?'solid':'missing','observation'),
-    measure('Élévation des bras 30 s',arms,'mouvements',arms===null?'missing':'follow','suivi personnel')]}
+    // Anciens tests caméra (avant v2.4) : affichés seulement s'ils ont été mesurés.
+    ...(posture?[measure('Posture de profil',posture==='apparent_offset'?'décalage apparent':posture==='neutral'?'alignement neutre':'non interprétable','',
+     posture==='apparent_offset'?'consolidate':'solid','observation')]:[]),
+    ...(arms!==null?[measure('Élévation des bras 30 s',arms,'mouvements','follow','suivi personnel')]:[])]}
  ];
  const context={speed,twoIdx,two:two?.value??null,chair,below,standard,power,powerLow,powerRepsLow,weak,bl,br,gripKg,low,weakestLsi,largestAsym,posture,qsAsym};
  return {capacities,context};

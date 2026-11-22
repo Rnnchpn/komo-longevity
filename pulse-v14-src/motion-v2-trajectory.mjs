@@ -43,6 +43,11 @@ export const TRAJECTORY_METRICS=[
   get:r=>F(r,'fd_quiet_stand','fd_qs_asym_pct')},
  {id:'fd_sts_time',label:'Lever sur plateformes · temps pour se lever',unit:'s',decimals:2,better:'lower',mdcPct:20,
   get:r=>F(r,'fd_sts','fd_sts_time_to_stand_s')},
+ // Saut vertical : test très reproductible chez l'adulte âgé (erreur de l'ordre de 5 %) → marge de prudence 10 %.
+ {id:'cmj_power',label:'Saut vertical · puissance maximale',unit:'W/kg',decimals:1,better:'higher',mdcPct:10,
+  get:r=>F(r,'fd_cmj','cmj_peak_power_wkg')},
+ {id:'cmj_height',label:'Saut vertical · hauteur',unit:'cm',decimals:1,better:'higher',mdcPct:10,
+  get:r=>F(r,'fd_cmj','cmj_height_cm')},
  {id:'fd_sts_asym',label:'Lever sur plateformes · asymétrie',unit:'%',decimals:1,better:'lower',mdc:10,
   get:r=>F(r,'fd_sts','fd_sts_asym_pct')},
  // ≈ 5 kg (50 N) : différence minimale chez l'adulte âgé (4,7 à 6 kg selon les études).
@@ -55,6 +60,10 @@ export const TRAJECTORY_METRICS=[
   get:r=>maxOf(F(r,'dynamo_knee_ext','knee_ext_left_n'),F(r,'dynamo_knee_ext','knee_ext_right_n'))},
  {id:'knee_lsi',label:'Extension de genou · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
   get:r=>D(r,'dynamo_knee_ext','lsi_pct')},
+ {id:'knee_flex_best',label:'Flexion de genou · meilleur côté',unit:'N',decimals:0,better:'higher',mdcPct:20,
+  get:r=>maxOf(F(r,'dynamo_knee_flex','knee_flex_left_n'),F(r,'dynamo_knee_flex','knee_flex_right_n'))},
+ {id:'knee_flex_lsi',label:'Flexion de genou · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
+  get:r=>D(r,'dynamo_knee_flex','lsi_pct')},
  {id:'hip_flex_best',label:'Flexion de hanche · meilleur côté',unit:'N',decimals:0,better:'higher',mdcPct:20,
   get:r=>maxOf(F(r,'dynamo_hip_flex','hip_flex_left_n'),F(r,'dynamo_hip_flex','hip_flex_right_n'))},
  {id:'hip_flex_lsi',label:'Flexion de hanche · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,

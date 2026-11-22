@@ -82,11 +82,11 @@ assert.equal(trajM.verdict,'stable','+0,22 W/kg < 0,42 chez l’homme');
 const empty=buildLongevityPlan({},{});
 assert.equal(empty.priorities.length,0);
 assert.ok(empty.headline.startsWith('Mesures incomplètes'));
-// Le passeport porte le plan et les mots du protocole actuel (15 étapes), sans « six épreuves ».
+// Le passeport porte le plan et les mots du protocole actuel (14 étapes), sans « six épreuves ».
 const passport=buildClinicPassport({},r,{date:new Date('2026-11-24T10:00:00Z'),real:true,subject:'Client HIRO-261124-01',
  patient:{sex_at_birth:'female',birth_date:'1953-01-01'}});
 assert.equal(passport.longevity.profile.age,73);
-assert.equal(passport.steps.total,15);
+assert.equal(passport.steps.total,14);
 assert.ok(!JSON.stringify(passport).includes('six épreuves'));
 assert.ok(!JSON.stringify(passport).match(/âge du mouvement »? (est|vaut)|Motion Age :/));
 assert.deepEqual(passport.priorities.filter(p=>p.zone).map(p=>p.id),['balance','symmetry','walk']);
@@ -95,4 +95,4 @@ const src=await readFile(join(process.cwd(),'site/pulse-v14/motion-live-clinic-p
 assert.ok(src.includes('function capacites()')&&src.includes('function priorites()'),'pages capacités et priorités dans le PDF');
 const consult=await readFile(join(process.cwd(),'site/pulse-v14/motion-live-operator-consult-v1.js'),'utf8');
 assert.ok(consult.includes('sex_at_birth')&&consult.includes('moc-capacity'),'console : profil patient transmis et capacités affichées');
-console.log('[pulse-longevity-plan-qa] PASS zones par repère publié, 3 priorités, programme maison dosé, objectifs S6, puissance des jambes, passeport 15 étapes');
+console.log('[pulse-longevity-plan-qa] PASS zones par repère publié, 3 priorités, programme maison dosé, objectifs S6, puissance des jambes, passeport 14 étapes');

@@ -22,7 +22,7 @@ if(process.argv.includes('--check')){
   console.error('[motion-protocol] la copie serveur diverge de la source : lancer node scripts/motion-protocol-sync.mjs');
   process.exit(1);
  }
- if(STEPS.length!==15)throw new Error("[motion-protocol] 15 étapes attendues");
+ if(STEPS.length!==14)throw new Error("[motion-protocol] 14 étapes attendues");
  console.log('[motion-protocol] PASS '+PROTOCOL.code+' '+PROTOCOL.version+' · serveur synchronisé · '+STEPS.length+' étapes');
 }else{
  await writeFile(target,body);

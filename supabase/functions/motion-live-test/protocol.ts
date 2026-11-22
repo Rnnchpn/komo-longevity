@@ -9,7 +9,6 @@ export const SPEC:any={
   "device_set": [
    "forcedecks_mini",
    "dynamo_plus",
-   "iphone_camera",
    "stopwatch",
    "tape"
   ]
@@ -68,6 +67,30 @@ export const SPEC:any={
    "pair": [
     "knee_ext_left_n",
     "knee_ext_right_n"
+   ]
+  },
+  {
+   "id": "dynamo_knee_flex",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "knee_flex_left_n",
+     "min": 0,
+     "max": 2000,
+     "decimals": 1
+    },
+    {
+     "key": "knee_flex_right_n",
+     "min": 0,
+     "max": 2000,
+     "decimals": 1
+    }
+   ],
+   "choices": [],
+   "pair": [
+    "knee_flex_left_n",
+    "knee_flex_right_n"
    ]
   },
   {
@@ -328,14 +351,31 @@ export const SPEC:any={
    "value_field": "sls_right_hold_s"
   },
   {
-   "id": "posture",
-   "kind": "observation",
+   "id": "fd_cmj",
+   "kind": "fields",
    "duration": 0,
-   "options": [
-    "neutral",
-    "apparent_offset",
-    "not_interpretable"
-   ]
+   "fields": [
+    {
+     "key": "cmj_height_cm",
+     "min": 0,
+     "max": 80,
+     "decimals": 1
+    },
+    {
+     "key": "cmj_peak_power_wkg",
+     "min": 0,
+     "max": 100,
+     "decimals": 1
+    },
+    {
+     "key": "cmj_asym_pct",
+     "min": 0,
+     "max": 100,
+     "decimals": 1,
+     "optional": true
+    }
+   ],
+   "choices": []
   },
   {
    "id": "gait_4m",
@@ -357,22 +397,6 @@ export const SPEC:any={
    ],
    "choices": [],
    "method": "GAIT_4M_STANDING_START_BEST_OF_2"
-  },
-  {
-   "id": "two_step",
-   "kind": "two_step",
-   "duration": 0,
-   "unit": "cm",
-   "max": 650,
-   "integer": false
-  },
-  {
-   "id": "arms",
-   "kind": "count",
-   "duration": 30,
-   "unit": "movements",
-   "max": 100,
-   "integer": true
   },
   {
    "id": "sts",
