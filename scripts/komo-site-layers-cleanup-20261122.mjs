@@ -26,7 +26,8 @@ async function pages(dir,out=[]){
 }
 
 // 1. Sélecteur flottant v1
-const ECO=[/\s*<link rel="stylesheet" href="\/assets\/ecosystem-public-v1\.css\?v=1">/g,/\s*<script defer src="\/assets\/ecosystem-public-v1\.js\?v=1"><\/script>/g];
+// Toutes les versions de cache (?v=1, ?v=…) : une passe de cache-busting réécrit l'étiquette après l'injection.
+const ECO=[/\s*<link rel="stylesheet" href="\/assets\/ecosystem-public-v1\.css(?:\?v=[^"]*)?">/g,/\s*<script defer src="\/assets\/ecosystem-public-v1\.js(?:\?v=[^"]*)?"><\/script>/g];
 let cleaned=0;
 for(const p of await pages(site)){
  const h=await readFile(p,'utf8');
