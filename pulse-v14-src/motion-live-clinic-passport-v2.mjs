@@ -156,7 +156,7 @@ export function buildClinicPassport(answers={},results={},options={}){
  });
  if(flagged.length)priorities.push({
   title:'Contrôler la fiabilité des captures',
-  detail:'Revoir la vidéo ou le compte rendu opérateur des épreuves '+flagged.map(x=>x.name.toLowerCase()).join(', ')+'. Une qualité insuffisante ne doit pas être présentée comme une performance certaine.',
+  detail:'Revoir le compte rendu opérateur des épreuves '+flagged.map(x=>x.name.toLowerCase()).join(', ')+'. Une qualité insuffisante ne doit pas être présentée comme une performance certaine.',
   basis:flagged.length+' mesure(s) à vérifier'
  });
  if(questionnaire.complete){
@@ -277,7 +277,7 @@ export function buildClinicPassport(answers={},results={},options={}){
    ...(simulated?['Les réponses au questionnaire ont été générées artificiellement pour une démonstration : elles ne constituent aucune déclaration patient.']:[]),
    real?'Évaluation fonctionnelle descriptive réalisée en cabinet, sur dossier pseudonymisé, selon le protocole '+PROTOCOL.code+' '+PROTOCOL.version+'.':
     'Évaluation fonctionnelle exploratoire réalisée dans un environnement de démonstration sur dossier fictif.',
-   'Les comptages vidéo et les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques.',
+   'Les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques ; les mesures proviennent des plateformes ForceDecks, du DynaMo et du chrono, sans caméra.',
    'La puissance des jambes est estimée par une équation publiée à partir du lever de chaise et de la taille ; ce n’est pas une mesure directe.',
    'Aucun score composite ni « âge du mouvement » : chaque capacité est située par rapport à son propre repère publié, ou suivie dans le temps.',
    'Les repères (EWGSOP2, AWGS, Rikli & Jones, Araújo, JOA, Alcazar) sont des seuils de population : ils hiérarchisent le programme, ils ne posent pas de diagnostic.',

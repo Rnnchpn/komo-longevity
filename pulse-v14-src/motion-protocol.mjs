@@ -75,7 +75,7 @@ export const STEPS=[
    {key:'hip_flex_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:2000,decimals:1,vald:'Force max · gauche'},
    {key:'hip_flex_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:2000,decimals:1,vald:'Force max · droite'}
   ]},
- {id:'dynamo_knee_ext',block:'A',kind:'fields',title:'Extension de genou · DynaMo',short:'Genou',
+ {id:'dynamo_knee_ext',block:'A',kind:'fields',title:'Extension de genou · DynaMo',short:'Extension genou',
   device:'DynaMo Plus · pad',trials:'1 essai à 50 % + 3 maximaux par côté',duration:0,dynamo:true,
   setup:'Assis au bord de la table, hanches et genoux à 90°, pieds sans contact avec le sol, bras croisés. Pad sur la face antérieure du tibia.',
   script:'« 3, 2, 1 — poussez, poussez, poussez… et relâchez. »',

@@ -265,7 +265,7 @@ export async function downloadClinicPassport(report,category='all'){
   words('Les resultats Motion ne permettent pas d identifier une carence vitaminique ou une insuffisance proteique. Le poids, les apports, les symptomes, les traitements et les antecedents sont indispensables avant toute recommandation individualisee.',
    M+9,246,C-18,{sz:8.5,lh:4.6,max:4,col:P.muted});
 
-  page(5,'Compléments & précautions','Options à discuter, jamais prescrites automatiquement par le questionnaire ou la caméra.');
+  page(5,'Compléments & précautions','Options à discuter, jamais prescrites automatiquement par le questionnaire ou les mesures.');
   plan.supplements.forEach((a,i)=>{
    const y=69+i*39.6;
    box(M,y,C,36,P.sand,2);

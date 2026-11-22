@@ -129,7 +129,7 @@ function railMarkup(idx,results={},locked=false){
   if(b!==block){
    if(block)html+="</ol></div>";block=b;const st=STATIONS[b]||{};
    html+='<div class="moc-rail-block"><p class="moc-rail-title"><span>'+HTML(b)+'</span>'+HTML(st.label||"")+
-    '<small>'+HTML(st.camera?CAMERA_LABELS[st.camera]:"Sans iPhone")+'</small></p><ol>';
+    (st.camera?'<small>'+HTML(CAMERA_LABELS[st.camera])+'</small>':'')+'</p><ol>';
   }
   const r=results[t.id];
   const state=i===idx?"current":r?.status==="skipped"?"skipped":r?.status==="done"?"done":"";
@@ -868,12 +868,15 @@ function captureDraft(id){
  host.querySelectorAll("[data-field]").forEach(el=>{if(el.value!=="")d.fields[el.dataset.field]=el.value});
  host.querySelectorAll("[data-choice]").forEach(el=>{const v=el.querySelector("input:checked")?.value;if(v)d.choices[el.dataset.choice]=v});
  ["mocNote","mocTwoStep1","mocTwoStep2","mocTwoStepHeight","mocObservation"].forEach(k=>{const el=q(k);if(el&&el.value!=="")d.inputs[k]=el.value});
- return Object.keys(d.fields).length||Object.keys(d.choices).length||Object.keys(d.inputs).length?d:null;
+ // La case de sécurité cochée survit aussi à un rafraîchissement (sinon « Coche d'abord… » au moment de valider).
+ if(q("mocSafety")?.checked)d.safety=true;
+ return Object.keys(d.fields).length||Object.keys(d.choices).length||Object.keys(d.inputs).length||d.safety?d:null;
 }
 function restoreDraft(d){
  Object.entries(d.fields).forEach(([k,v])=>{const el=host.querySelector('[data-field="'+k+'"]');if(el&&el.value!==v){el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}))}});
  Object.entries(d.choices).forEach(([k,v])=>{const r=host.querySelector('[data-choice="'+k+'"] input[value="'+v+'"]');if(r&&!r.checked){r.checked=true;r.dispatchEvent(new Event("change",{bubbles:true}))}});
  Object.entries(d.inputs).forEach(([k,v])=>{const el=q(k);if(el&&el.value!==v){el.value=v;el.dispatchEvent(new Event("input",{bubbles:true}));el.dispatchEvent(new Event("change",{bubbles:true}))}});
+ if(d.safety&&q("mocSafety")&&!q("mocSafety").checked)q("mocSafety").checked=true;
 }
 function renderStep(){
  const draftFor=room&&host&&!discardDraft?currentTest()?.id:null;

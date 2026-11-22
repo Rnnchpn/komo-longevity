@@ -378,7 +378,7 @@ function progressStrip(){
   return `<div class="progress-card"><div class="progress-top"><div><span class="overline">VOTRE BILAN</span><strong>${p.completed}/4 étapes terminées</strong></div><span class="progress-value">${p.percent}%</span></div><div class="progress-line"><i style="width:${p.percent}%"></i></div><div class="progress-steps">${p.steps.map((s,i)=>`<button class="progress-step ${s.done?'done':s.id===p.firstPending?'current':''}" onclick="location.hash='${s.id==='results'?'results':s.id==='motion'?'appointments':'baseline'}'"><b>${s.done?'✓':i+1}</b><span>${s.label}<small>${s.detail}</small></span></button>`).join('')}</div></div>`;
 }
 async function openMotionLivePatient(){
-  toast('Le bilan sur place est piloté par le professionnel avec son propre iPhone. Aucun accès caméra patient nécessaire.');
+  toast('Le bilan sur place est piloté par le professionnel, sans caméra. Votre téléphone n’est pas nécessaire.');
 }
 function patientLobby(){
   const first=esc(S.profile?.first_name||S.profile?.display_name?.split(' ')[0]||S.user?.email?.split('@')[0]||'');
@@ -452,7 +452,7 @@ function patientHome(){
       </div>
       ${heroPhoto}
     </section>
-    <section class="p-live-cta"><div><span class="p-card-kicker">CONSULTATION MOTION · CANNES</span><h3>Prêt pour votre bilan ?</h3><p>Le professionnel mène la consultation sur l’ordinateur et utilise son propre iPhone comme caméra. Votre téléphone n’est pas nécessaire.</p></div><button type="button" class="p-primary" id="pulseHomeLiveStart">Informations sur le bilan <span>→</span></button></section>
+    <section class="p-live-cta"><div><span class="p-card-kicker">CONSULTATION MOTION · CANNES</span><h3>Prêt pour votre bilan ?</h3><p>Le professionnel mène la consultation avec des plateformes de force et un dynamomètre, sans caméra. Votre téléphone n’est pas nécessaire.</p></div><button type="button" class="p-primary" id="pulseHomeLiveStart">Informations sur le bilan <span>→</span></button></section>
     <div class="p-section-label"><h3>Votre dossier</h3></div>
     <div class="p-two-cards">
       <section class="p-info-card"><div class="p-card-top"><span class="p-card-kicker">RÉSULTATS</span>
@@ -765,7 +765,7 @@ function motionLiveMonitor(){
     <details class="op-live-advanced" ${real?'hidden':''}><summary>Option avancée : préparation fictive par QR code</summary><button type="button" class="button secondary" id="opLiveCreateCheckin">Créer une invitation fictive</button>
     <div id="opLiveInvite" class="op-checkin-invitation" hidden></div>
     <section class="op-checkin-section"><h3>Préparations reçues</h3><div id="opCheckinQueue" aria-live="polite"><p>Recherche des préparations…</p></div></section></details>
-    <p class="op-live-caution">${real?'Consultation réelle, sans caméra : les mesures viennent des plateformes, du DynaMo et du chrono PULSE. PULSE ne contient que le code dossier ; l’identité reste sur la fiche papier. Chaque mesure est validée par toi avant d’être retenue.':'Démonstration : l’iPhone sert de caméra du cabinet, sans enregistrement (WebRTC). Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.'}</p>
+    <p class="op-live-caution">${real?'Consultation réelle, sans caméra : les mesures viennent des plateformes, du DynaMo et du chrono PULSE. PULSE ne contient que le code dossier ; l’identité reste sur la fiche papier. Chaque mesure est validée par toi avant d’être retenue.':'Démonstration, sans caméra : plateformes, DynaMo et chrono PULSE. Dossiers fictifs uniquement ; résultats exploratoires confirmés par l’opérateur.'}</p>
   </div>`;
   $('#opLiveRefresh').onclick=()=>loadMotionLiveRooms(true);
   bindRoomPrep();
