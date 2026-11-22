@@ -28,7 +28,9 @@ const SAFETY=[
 function measureRow(s,n){
  const st=s.block+String(n);
  let cells='';
- if(s.id==='anthropometry')cells='Taille '+blank(16,'cm')+'Masse '+blank(16,'kg')+'<br>Chaussage '+opts(['pieds nus','chaussettes','chaussures'])+' Aide '+opts(['aucune','canne','déambulateur','autre']);
+ if(s.id==='anthropometry')cells='Masse '+blank(16,'kg')+'Taille '+blank(16,'cm')+'<br>Chaussage '+opts(['pieds nus','chaussettes','chaussures'])+' Aide '+opts(['aucune','canne','déambulateur','autre']);
+ else if(s.kind==='fields'&&s.holdTimer)cells='Essai 1 '+blank(14,'s')+'Essai 2 '+blank(14,'s')+'<span class="hint">30 s max · le meilleur est retenu</span><br>'+
+  '<span class="fld">Vitesse CoP '+blank(13,'mm/s')+'</span><span class="hint">seulement si 30 s tenues</span>';
  else if(s.kind==='fields'&&s.walkway)cells='Passage 1 '+blank(16,'s')+'Passage 2 '+blank(16,'s')+'<span class="hint">le plus rapide est retenu</span>';
  else if(s.kind==='fields'&&s.pair){
   const [l,r]=s.pair;const f=k=>s.fields.find(x=>x.key===k);
@@ -39,7 +41,7 @@ function measureRow(s,n){
   (s.choices||[]).map(c=>'<span class="fld">Côté le plus chargé '+opts(['G','D','équilibré'])+'</span>').join('');
  else if(s.kind==='two_step')cells='Essai 1 '+blank(16,'cm')+'Essai 2 '+blank(16,'cm')+'Taille '+blank(14,'cm');
  else if(s.kind==='balance')cells='Essai 1 '+blank(14,'s')+'Essai 2 '+blank(14,'s')+'<span class="hint">30 s max · le meilleur est retenu</span>';
- else if(s.kind==='count')cells=blank(18,s.ui_unit||s.unit);
+ else if(s.kind==='count')cells=blank(18,'levers')+'<span class="hint">levers complets en 30 s, mi-hauteur à la fin = compté</span>';
  else if(s.kind==='observation')cells=opts(s.options.map(([,l])=>l));
  return '<tr><td class="no">'+st+'</td><td class="name">'+e(s.title)+'</td><td class="vals">'+cells+'</td><td class="nr">'+box+'</td></tr>';
 }
@@ -89,16 +91,16 @@ table{width:100%;border-collapse:collapse}
 .foot{margin-top:2mm;font-size:7.6pt;color:var(--muted);display:flex;justify-content:space-between}
 .measures{margin-top:2mm}
 .measures th{text-align:left;font-size:7.8pt;color:var(--muted);font-weight:600;border-bottom:1.5px solid var(--ink);padding:1mm 1.5mm}
-.measures td{border-bottom:1px solid #e4dccf;padding:1.05mm 1.5mm;vertical-align:middle}
+.measures td{border-bottom:1px solid #e4dccf;padding:.8mm 1.5mm;vertical-align:middle}
 .measures td.no{width:8mm;font-weight:600;color:var(--gold)}
 .measures td.name{width:43mm;font-weight:600;color:var(--ink);line-height:1.25}
 .measures td.nr{width:9mm;text-align:center}
-.measures td.vals{line-height:1.95;font-size:8.4pt}
+.measures td.vals{line-height:1.75;font-size:8.2pt}
 .measures .station td{background:var(--sand);font-weight:600;color:var(--ink);padding:.9mm 1.5mm;font-size:8.2pt}
 .fld{margin-right:2mm}
 .cond{display:grid;grid-template-columns:28mm 1fr;gap:1.6mm 2mm;align-items:center}
 .cond>span{font-weight:600;color:var(--ink)}
-.notes{border:1px solid var(--line);border-radius:2mm;padding:2.5mm 3mm;margin-top:2.5mm;height:24mm}
+.notes{border:1px solid var(--line);border-radius:2mm;padding:2.5mm 3mm;margin-top:2.5mm;height:18mm}
 </style></head><body>
 
 <div class="sheet">
@@ -128,7 +130,7 @@ table{width:100%;border-collapse:collapse}
 
  <h2>Information</h2>
  <div class="info">
-  <p>Le bilan KŌMØ Motion mesure la force, l’équilibre et la marche avec des plateformes de force, un dynamomètre, un chronomètre et une caméra qui suit le mouvement. Aucune image n’est enregistrée par PULSE. Les résultats sont situés par rapport à des repères publiés : ils ne constituent pas un diagnostic. Vous pouvez interrompre un test à tout moment.</p>
+  <p>Le bilan KŌMØ Motion mesure la force, l’équilibre et la marche avec des plateformes de force, un dynamomètre et un chronomètre. Aucune image n’est prise. Les résultats sont situés par rapport à des repères publiés : ils ne constituent pas un diagnostic. Vous pouvez interrompre un test à tout moment.</p>
   <p>Vos résultats sont enregistrés dans le logiciel KŌMØ PULSE et dans l’application VALD sous un code, sans votre nom. Seule cette fiche, conservée au cabinet, relie votre nom à ce code. Responsable du traitement : Dr Renan Chapon (KŌMØ). Vous pouvez demander l’accès, la rectification ou l’effacement de vos données, ou vous opposer à leur traitement : contact@komolongevity.com. Vous pouvez aussi saisir la CNIL.</p>
  </div>
  <div class="consent">

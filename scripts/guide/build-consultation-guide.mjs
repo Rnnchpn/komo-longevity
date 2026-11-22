@@ -1,5 +1,5 @@
 // Guide de consultation pas à pas (PDF A4) — KŌMØ Motion, Clinique HIRO.
-// Les 13 tests sont générés depuis pulse-v14-src/motion-protocol.mjs : le guide imprimé et la console
+// Les tests sont générés depuis pulse-v14-src/motion-protocol.mjs (v2.4 : sans caméra, tout depuis l'iPhone) : le guide imprimé et la console
 // disent toujours la même chose. Usage : node scripts/guide/build-consultation-guide.mjs [sortie.pdf]
 import {writeFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
@@ -13,7 +13,8 @@ const here=dirname(fileURLToPath(import.meta.url));
 const OUT=process.argv[2]||join(here,'KOMO_Motion_Guide_consultation.pdf');
 const DATE='22 novembre 2026';
 const e=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const unitFr={cm:'cm',kg:'kg',N:'N',s:'s','%':'%',mm:'mm','mm/s':'mm/s'};
+const unitFr={cm:'cm',kg:'kg',N:'N',s:'s','%':'%',mm:'mm','mm/s':'mm/s','W/kg':'W/kg'};
+const N=STEPS.length,NS=new Set(STEPS.map(s=>s.block)).size;
 
 function enterMarkup(s){
  if(s.kind==='fields'){
@@ -21,12 +22,13 @@ function enterMarkup(s){
    (x.vald?' <span class="vald">VALD : '+e(x.vald)+'</span>':'')+(x.optional?' <span class="opt">facultatif</span>':'')+'</li>');
   const c=(s.choices||[]).map(x=>'<li><b>'+e(x.label)+'</b> : '+x.options.map(([,l])=>e(l)).join(', ')+'</li>');
   const extra=s.dynamo?['<li>Écran DynaMo en kg ? Bascule « N / kg » dans PULSE : la conversion est automatique.</li>']:
-   s.walkway?['<li>Le chronomètre PULSE remplit les deux passages ; la vitesse retenue (le plus rapide) s’affiche.</li>']:[];
+   s.walkway?['<li>Le chronomètre PULSE remplit les deux passages ; la vitesse retenue (le plus rapide) s’affiche.</li>']:
+   s.holdTimer?['<li>Le chrono PULSE (« Départ · pied levé » / « Pied posé ») remplit la durée, meilleur des essais ; arrêt automatique à 30 s.</li>']:[];
   return '<ul>'+[...f,...c,...extra].join('')+'</ul>';
  }
  if(s.kind==='two_step')return '<ul><li><b>Distance de chaque essai</b> (cm), de la ligne à la pointe des pieds</li><li><b>Taille</b> (cm) : PULSE retient le meilleur essai et calcule l’indice</li></ul>';
  if(s.kind==='balance')return '<ul><li><b>Durée</b> (s, 30 s au maximum) : celle du suivi vidéo, confirmée ou corrigée à ton observation</li></ul>';
- if(s.kind==='count')return '<ul><li><b>'+e(s.label)+'</b> : le compteur vidéo, confirmé ou corrigé</li></ul>';
+ if(s.kind==='count')return '<ul><li><b>'+e(s.label)+'</b> : un appui sur « +1 lever » par lever complet pendant les 30 s ; le total reste modifiable. PULSE en calcule la puissance des jambes avec la taille.</li></ul>';
  if(s.kind==='observation')return '<ul><li>Une observation : '+s.options.map(([,l])=>e(l)).join(' · ')+'</li></ul>';
  return '';
 }
@@ -53,7 +55,7 @@ function testCard(s,n){
  const st=STATIONS[s.block];
  return '<article class="test">'+
   '<header><span class="num">'+String(n).padStart(2,'0')+'</span><div><h3>'+e(s.title)+'</h3>'+
-  '<p class="meta">'+e(s.device)+' · '+e(s.trials)+(/iPhone/.test(s.device)?'':st.camera?' · '+e(CAMERA_LABELS[st.camera]):' · iPhone non utilisé')+'</p></div></header>'+
+  '<p class="meta">'+e(s.device)+' · '+e(s.trials)+(st.camera?' · '+e(CAMERA_LABELS[st.camera]):'')+(s.optionalTest?' · <b>seulement si le patient est à l’aise</b>':'')+'</p></div></header>'+
   (s.walkway?corridor:'')+
   '<dl>'+
    '<dt>Installer</dt><dd>'+e(s.setup)+'</dd>'+
@@ -69,8 +71,8 @@ function stationsMarkup(){
  return blocks.map(b=>{
   const st=STATIONS[b],tests=STEPS.filter(s=>s.block===b);
   const head='<div class="station-head"><p class="kicker">Station '+e(b)+'</p><h2>'+e(st.label)+'</h2>'+
-   '<p class="place"><b>'+e(st.camera?CAMERA_LABELS[st.camera]:'iPhone non utilisé')+'.</b> '+e(st.place)+'</p></div>';
-  const note=b==='A'?'<p class="note"><b>Profil du patient dans ForceDecks, une fois par patient.</b> Nom = le code PULSE (HIRO-AAMMJJ-NN), date de naissance = 1<sup>er</sup> janvier de son année de naissance, sexe. Jamais le vrai nom : VALD Hub est un cloud hors de PULSE. Au contrôle, reprends le même profil.</p>':'';
+   '<p class="place">'+(st.camera?'<b>'+e(CAMERA_LABELS[st.camera])+'.</b> ':'')+e(st.place)+'</p></div>';
+  const note=b==='A'?'<p class="note"><b>Profil du patient dans VALD (DynaMo et ForceDecks), une fois par patient.</b> Nom = le code PULSE (HIRO-AAMMJJ-NN), date de naissance = 1<sup>er</sup> janvier de son année de naissance, sexe. Jamais le vrai nom : VALD Hub est un cloud hors de PULSE. Au contrôle, reprends le même profil.</p>':'';
   const cards=tests.map(t=>testCard(t,++n));
   return '<section class="station"><div class="station-lead">'+head+note+cards[0]+'</div>'+cards.slice(1).join('')+'</section>';
  }).join('');
@@ -81,21 +83,22 @@ const checks=items=>'<ul class="checks">'+items.map(x=>'<li><span class="box"></
 const REPRO=[
  ['Marche 4 m','bonne','≥ 0,1 m/s','départ arrêté, 2 passages, le plus rapide retenu, même chronométreur'],
  ['Lever de chaise 30 s','bonne','≥ 2 levers','1 à 2 levers d’essai avant le chrono, même chaise'],
+ ['Puissance des jambes (calculée)','bonne','≥ 0,42 W/kg (homme), 0,33 (femme)','même chaise de 43 cm, même taille mesurée'],
  ['Préhension','excellente','≥ 5 kg (50 N)','essai à 50 %, puis 3 essais par main, même position'],
- ['Two-Step','bonne','≥ 25 cm','2 essais, le meilleur retenu'],
+ ['Saut vertical (CMJ)','excellente','≥ 10 %','mains sur les hanches, 3 sauts, le meilleur retenu'],
  ['Appui sur un pied','bonne pour classer, faible en secondes','franchir les 10 s','jusqu’à 2 essais par côté, le meilleur retenu'],
  ['Genou et hanche (DynaMo)','bonne','≥ 20 %','essai à 50 %, 3 essais, même position du pad'],
- ['Quiet Stand','bonne pour la vitesse','≥ 20 % sur la vitesse','même position des pieds, même consigne'],
+ ['Quiet Stand (yeux ouverts et fermés)','bonne pour la vitesse','≥ 20 % sur la vitesse','même position des pieds, même consigne'],
  ['Lever sur plateformes','non publiée pour ce test','≥ 20 % ou 10 points','suivi descriptif']
 ];
 const PANNES=[
- ['L’iPhone n’envoie pas d’image','Vérifie le Wi-Fi et l’autorisation caméra de Safari, puis refais « Activer la caméra du cabinet ». Les tests sans caméra (mensurations, marche, VALD, DynaMo, posture à l’œil) continuent normalement.'],
- ['Caméra indisponible pour la chaise, l’équilibre ou les bras','Compte et chronomètre à la main, puis saisis la valeur : PULSE accepte la saisie manuelle.'],
- ['La page se fige ou l’ordinateur redémarre','Rouvre PULSE : la consultation est sauvegardée sur le serveur 4 heures et reprend à l’étape en cours, dans le menu Consultation sous « Consultation en cours ».'],
- ['L’iPhone se ferme en cours de bilan','Rien n’est perdu : fermer la caméra ne supprime ni les tests ni le questionnaire. Rouvre la page caméra.'],
+ ['Tu passes à l’app VALD, ou le téléphone se verrouille','Rien n’est perdu : PULSE garde les valeurs déjà tapées et la consultation reste sur le serveur. Reviens dans Safari, la page reprend où tu en étais.'],
+ ['Tu as oublié d’appuyer sur « +1 lever »','Corrige le total dans le champ avant de valider : c’est ton comptage qui fait foi.'],
+ ['Le chrono de l’appui sur un pied est parti trop tôt','« Effacer les essais », puis recommence : PULSE garde le meilleur essai valable.'],
+ ['La page se fige ou le téléphone redémarre','Rouvre PULSE : la consultation est sauvegardée sur le serveur 4 heures et reprend à l’étape en cours (menu Consultation, « Consultation en cours »).'],
  ['Message « consultation déjà en cours »','Un ancien bilan non terminé est resté ouvert : menu Consultation, puis « Clore » sur sa carte. Rien n’est supprimé.'],
  ['VALD ou DynaMo en panne','« Test non réalisé », motif « Appareil indisponible », et reprogramme ces tests au contrôle.'],
- ['Valeur mal saisie après validation','Clique sur le test dans la liste de gauche (ou « Corriger un test » dans le rapport) : il s’ouvre avec ses valeurs, tu corriges et tu valides.']
+ ['Valeur mal saisie après validation','Touche le test dans la liste des tests (ou « Corriger un test » dans le rapport) : il s’ouvre avec ses valeurs, tu corriges et tu valides.']
 ];
 
 const html=`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>KŌMØ Motion · Guide de consultation pas à pas</title><style>
@@ -170,11 +173,11 @@ td:first-child,th:first-child{width:24%}
 <div class="cover">
  <div class="brand">KŌMØ MOTION</div>
  <div class="title"><p class="kicker">Clinique HIRO, Beausoleil</p><h1>Guide de consultation<br>pas à pas</h1></div>
- <p class="lead">Tout ce qu’il faut faire, dire et saisir, de la préparation de la salle au passeport remis au patient. Les 13 tests sont repris mot pour mot de la console PULSE.</p>
- <div class="facts"><div><strong>13</strong><span>tests en 5 stations</span></div><div><strong>≈ 45 min</strong><span>de tests</span></div><div><strong>6 semaines</strong><span>jusqu’au contrôle</span></div></div>
+ <p class="lead">Tout ce qu’il faut faire, dire et saisir, de la préparation de la salle au passeport remis au patient. Sans caméra : tout se pilote depuis ton iPhone. Les ${N} tests sont repris mot pour mot de la console PULSE.</p>
+ <div class="facts"><div><strong>${N}</strong><span>tests en ${NS} stations</span></div><div><strong>≈ 35 min</strong><span>de tests</span></div><div><strong>6 semaines</strong><span>jusqu’au contrôle</span></div></div>
  <div class="flow"><ol>
-  <li>Préparer la salle et les appareils</li><li>Accueillir et vérifier la sécurité</li><li>Créer le dossier pseudonymisé</li><li>Ouvrir la consultation et l’iPhone</li>
-  <li>Faire les 13 tests, station par station</li><li>Compléter le questionnaire</li><li>Restituer et remettre le passeport</li><li>Revoir le patient à 6 semaines</li>
+  <li>Préparer la salle et les appareils</li><li>Accueillir et vérifier la sécurité</li><li>Créer le dossier pseudonymisé</li><li>Ouvrir la consultation</li>
+  <li>Faire les ${N} tests, station par station</li><li>Compléter le questionnaire</li><li>Restituer et remettre le passeport</li><li>Revoir le patient à 6 semaines</li>
  </ol></div>
  <p class="version">Protocole ${e(PROTOCOL.code)} ${e(PROTOCOL.version)} · version du ${DATE} · document interne, non diagnostique</p>
 </div>
@@ -185,33 +188,30 @@ td:first-child,th:first-child{width:24%}
  <h4>Salle et matériel</h4>
  ${checks([
   '<b>Couloir</b> droit d’au moins 6 m : scotch au sol à 0 m (départ), 4 m (arrivée) et 6 m (repère), mesurés au ruban. Sol plat, antidérapant, dégagé.',
-  '<b>Ruban métrique</b> au sol pour le Two-Step.',
   '<b>Chaise</b> d’environ 43 cm, sans accoudoirs, calée contre un mur.',
   '<b>ForceDecks</b> : les deux plateformes allumées, appairées à l’app, posées à plat sur leurs repères.',
   '<b>Toise</b> ou ruban fixé au mur pour la taille.',
   '<b>DynaMo Plus</b> chargé, poignée et pad à portée, table d’examen libre.',
-  '<b>iPhone</b> chargé sur son trépied, en portrait, mode Ne pas déranger.',
+  '<b>Ton iPhone</b> chargé, PULSE ouvert et connecté, mode Ne pas déranger. Apps VALD (ForceDecks, DynaMo) ouvertes sur leur appareil habituel.',
   '<b>Fiche papier</b> : identité, consentement, correspondance avec le code.'
  ])}
  <div class="two">
-  <div><h4>Ordinateur</h4>${steps([
-   'Ouvre pulse.komolongevity.com, « Connectez-vous » en bas de la page, compte professionnel.',
-   'Dans la colonne de gauche, sous « Lieu de consultation », choisis <b>KŌMØ Beausoleil — Clinique HIRO</b>. Le badge doit dire « consultation réelle » ; « démonstration » veut dire Cannes.',
-   'Laisse l’onglet ouvert sur « Patients ».'])}</div>
-  <div><h4>iPhone de la salle</h4>${steps([
-   'Sur trépied, en portrait, secteur ou batterie au-dessus de 60 %, luminosité basse.',
-   'Safari sur pulse.komolongevity.com/camera/, connecté avec le même compte que l’ordinateur.',
-   'N’active pas encore la caméra : la consultation n’existe pas encore.'])}</div>
+  <div><h4>Ton iPhone : il suffit</h4>${steps([
+   'Safari sur pulse.komolongevity.com, « Connectez-vous » en bas de la page, compte professionnel. Astuce : « Partager › Sur l’écran d’accueil » pour l’ouvrir comme une app.',
+   'Sous « Lieu de consultation », choisis <b>KŌMØ Beausoleil — Clinique HIRO</b>. Le badge doit dire « consultation réelle » ; « démonstration » veut dire Cannes.',
+   'Laisse PULSE ouvert sur « Patients ». Batterie au-dessus de 60 %.'])}</div>
+  <div><h4>Ordinateur (facultatif)</h4>${steps([
+   'Même adresse, même compte : tout ce que fait l’iPhone, l’ordinateur le fait aussi, sur un plus grand écran.',
+   'Les deux restent synchronisés : tu peux saisir les valeurs VALD sur l’ordinateur et chronométrer la marche sur l’iPhone.',
+   'Aucune caméra, aucun trépied : les mesures viennent des plateformes, du DynaMo et du chrono PULSE.'])}</div>
  </div>
- <h4>Ton téléphone</h4>
- <p>Connecte-toi aussi à PULSE sur ton propre téléphone : c’est le chronomètre de la marche, que tu tiens en marchant derrière le patient.</p>
 
  </section>
 
 <section class="part">
  <p class="kicker">Étape 2</p><h2>Accueil et sécurité</h2>
  <p>Installe le patient, explique en une phrase :</p>
- <blockquote>« Nous allons mesurer votre force, votre équilibre et votre marche, avec des appareils de précision et une caméra qui suit seulement le mouvement. Rien n’est filmé ni enregistré par PULSE. Vous pouvez arrêter à tout moment. Je serai à côté de vous pour chaque test. »</blockquote>
+ <blockquote>« Nous allons mesurer votre force, votre équilibre et votre marche, avec des plateformes de force et un dynamomètre. Rien n’est filmé. Vous pouvez arrêter à tout moment. Je serai à côté de vous pour chaque test. »</blockquote>
  ${checks([
   '<b>Consentement</b> recueilli sur la fiche papier signée.',
   '<b>Dépistage de sécurité</b> : douleur thoracique, malaise ou chute récents, intervention récente, décompensation cardiaque ou respiratoire, douleur aiguë. Au moindre doute, pas de force maximale ni d’équilibre.',
@@ -232,17 +232,15 @@ td:first-child,th:first-child{width:24%}
 </section>
 
 <section class="part">
- <p class="kicker">Étape 4</p><h2>Ouvrir la consultation et l’iPhone</h2>
+ <p class="kicker">Étape 4</p><h2>Ouvrir la consultation</h2>
  ${steps([
-  'PULSE ouvre la page Consultation tout seul : le parcours passe à « 2 iPhone », la carte indique « En attente de l’iPhone ». Pour un patient déjà créé : Patients → « Consultation » sur sa ligne → « Démarrer la consultation ».',
-  'Sur l’iPhone : « Activer la caméra du cabinet », puis « Activer et partager la caméra », et accepte l’autorisation.',
-  'Sur l’ordinateur, la console des tests s’ouvre dès que l’iPhone est relié. Sinon : « Ouvrir les tests Motion » dans la carte.',
+  'Après « Créer et démarrer la consultation », PULSE ouvre directement les tests : rien d’autre à relier. Pour un patient déjà créé : Patients → « Consultation » sur sa ligne → « Démarrer la consultation ».',
   'Coche la case de sécurité (espace dégagé, appui accessible, pas de contre-indication évidente) : sans elle, le premier test ne démarre pas.'
  ])}
- <div class="note"><b>Dans la console, chaque test suit le même ordre :</b> le bandeau de station dit où placer le patient et l’iPhone ; les cartes Installation, À dire au patient et Consigne reprennent ce guide ; tu saisis, puis « Valider ». La liste de gauche permet d’ouvrir n’importe quel test, et « Plus tard » de le reporter à la fin.</div>
+ <div class="note"><b>Dans la console, chaque test suit le même ordre :</b> le bandeau de station dit où installer le patient ; « Installation et consignes » reprend ce guide ; tu saisis, puis « Valider et passer au suivant ». Les numéros en haut permettent d’ouvrir n’importe quel test, et « Plus tard » de le reporter à la fin.</div>
  <div class="note warn"><b>Arrêter un test.</b> Douleur, vertige, malaise, perte d’équilibre, essoufflement anormal : tu arrêtes, tu rassures, tu fais asseoir. « Test non réalisé » avec son motif passe au suivant. Un test impossible n’est pas un échec : le rapport l’indique sans valeur inventée.</div>
- <p class="kicker" style="margin-top:7mm">Étape 5</p><h2>Les 13 tests, station par station</h2>
- <p class="intro">Le patient change de poste cinq fois et l’iPhone trois fois. Chaque test se lit de haut en bas : installer, dire, faire, saisir.</p>
+ <p class="kicker" style="margin-top:7mm">Étape 5</p><h2>Les ${N} tests, station par station</h2>
+ <p class="intro">Le patient passe par ${NS} postes : assis à la table, sur les plateformes, dans le couloir, puis sur la chaise. Chaque test se lit de haut en bas : installer, dire, faire, saisir.</p>
 </section>
 <section class="part tests">${stationsMarkup()}</section>
 
@@ -255,10 +253,10 @@ td:first-child,th:first-child{width:24%}
  ])}
  <p class="kicker" style="margin-top:7mm">Étape 7</p><h2>Restitution et passeport</h2>
  ${steps([
-  'Onglet <b>Rapport</b> : tourne l’écran vers le patient. En tête, <b>Vos capacités</b> : marche, force des jambes, équilibre, force musculaire, symétrie et posture, chacune dans sa zone (priorité, à consolider, solide) avec son repère et la raison pour laquelle elle compte.',
+  'Onglet <b>Rapport</b> : tourne l’écran vers le patient. En tête, <b>Vos capacités</b> : marche, force des jambes, équilibre, force musculaire et symétrie, chacune dans sa zone (priorité, à consolider, solide) avec son repère et la raison pour laquelle elle compte.',
   'Présente les <b>3 priorités</b> et leur objectif à 6 semaines, puis le <b>programme maison</b> : 4 exercices et la marche quotidienne.',
   'Montre chaque exercice en salle, une ou deux répétitions. Un exercice déjà fait une fois est un exercice qu’on refait à la maison.',
-  '« Télécharger le passeport complet ». Le PDF (environ 13 pages) arrive dans les Téléchargements ; feuillette-le avant de l’imprimer.',
+  '« Télécharger le passeport complet ». Sur l’iPhone, le PDF s’ouvre : « Partager › Imprimer » (AirPrint) ou « Enregistrer dans Fichiers ». Feuillette-le avant de l’imprimer.',
   'Remets-le imprimé, en main propre, et ajoute le prénom à la main : le fichier ne porte que le code. Par voie numérique, uniquement ta messagerie de santé sécurisée.',
   'Prends le rendez-vous de contrôle à 6 semaines avant que le patient parte.'
  ])}
@@ -269,7 +267,7 @@ td:first-child,th:first-child{width:24%}
 <section class="part">
  <p class="kicker">Étape 8</p><h2>Contrôle à 6 semaines</h2>
  ${steps([
-  'Patients → le même code HIRO → « Consultation » → « Démarrer la consultation », et refais exactement les 13 tests.',
+  'Patients → le même code HIRO → « Consultation » → « Démarrer la consultation », et refais exactement les ${N} tests.',
   'Mêmes conditions : même moment de la journée, même praticien si possible, mêmes chaussures, même chaise, même distance du pad au genou, même profil ForceDecks.',
   'Le rapport affiche la <b>trajectoire J0 → S6</b> : une ligne par mesure, l’écart, et un point vert quand le changement dépasse la marge d’erreur de la mesure.',
   'Si les conditions diffèrent (chaussures, protocole, pad), PULSE affiche un avertissement : lis-le avant de commenter.'
