@@ -36,7 +36,8 @@ const checks=[
   ['operator layout available',css.includes('.op-create-patient-form')&&css.includes('op-create-patient-grid')],
   ['onsite consultation never triggers patient camera',maison.includes('id="maisonLiveStart"')&&maison.includes('iPhone fixé sur trépied')&&!maison.includes('launchMotion')&&!maison.includes('getUserMedia')],
   ['public onsite choice opens information instead of streaming',maison.includes("show('motion')")&&!maison.includes("await launchMotion(event.currentTarget)")],
-  ['mobile Operator camera CTA uses dedicated station',app.includes('id="pulse-mobile-start-motion"')&&app.includes("window.location.assign('/camera/')")&&app.includes("does NOT require a patient selection")],
+  // v2.4 (22/11/2026) : plus de caméra ; sur téléphone, le bouton ouvre la console de consultation.
+  ['mobile CTA opens the consultation console (no camera)',app.includes('id="pulse-mobile-start-motion"')&&app.includes("location.hash='operator';render();")&&!app.includes('Utiliser cet iPhone comme caméra')],
   ['mobile start CTA stays above the operator bottom navigation',mobileCss.includes('.app-shell-pro .pulse-mobile-start-motion')&&mobileCss.includes('bottom:calc(89px + env(safe-area-inset-bottom,0px))')],
   ['patient live script syntactically valid',parse('site/pulse-v14/motion-live-guest-v1.js')],
   ['guest shares encrypted live video only after explicit camera activation',liveGuest.includes('getUserMedia')&&liveGuest.includes('RTCPeerConnection')&&liveGuest.includes('guest_signal_push')&&liveGuest.includes('id="mliveCamera"')&&liveGuest.includes('audio:false')&&!liveGuest.includes('MediaRecorder')],
@@ -47,8 +48,8 @@ const checks=[
   ['operator consultation module and user controls parse',parse('site/pulse-v14/motion-live-operator-consult-v1.js')&&consult.includes('mocSave')&&consult.includes('mocStopClock')&&consult.includes('mocSafety')&&consultCss.includes('.moc-grid')],
   // Protocole V2 (20/11/2026) : 6 tests iPhone + 7 saisies instrumentées, 13 étapes dans l'ordre officiel.
   // Protocole standardisé (21/11/2026) : étapes définies une seule fois (motion-protocol.mjs), lues par la console et le serveur.
-  // v2.4 (22/11/2026) : 15 étapes, force assise d'abord, équilibre sur plateformes, yeux fermés, flexion de hanche.
-  ['standard protocol: 15 steps defined once, read by console and server',["dynamo_hip_flex","dynamo_knee_ext","dynamo_hip_abd","dynamo_grip","anthropometry","fd_quiet_stand","fd_quiet_stand_ec","fd_sts","unipodal_left","unipodal_right","posture","gait_4m","two_step","arms","sts"].every(id=>
+  // v2.4 (22/11/2026) : 14 étapes sans caméra, force assise d'abord, plateformes (yeux fermés, un pied, saut), marche, chaise.
+  ['standard protocol: 14 steps defined once, read by console and server',["dynamo_hip_flex","dynamo_knee_ext","dynamo_knee_flex","dynamo_hip_abd","dynamo_grip","anthropometry","fd_quiet_stand","fd_quiet_stand_ec","fd_sts","unipodal_left","unipodal_right","fd_cmj","gait_4m","sts"].every(id=>
    protocol.includes("id:'"+id+"'"))&&consult.includes("from './motion-protocol.mjs")&&consult.includes('validateInstrumented')&&
    liveEdge.includes('import { SPEC } from "./protocol.ts"')&&liveEdge.includes('invalid_two_step_attempts')&&
    liveEdge.includes('invalid_instrumented_entry')&&liveEdge.includes('skip_reason_required')],
