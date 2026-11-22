@@ -272,6 +272,8 @@ const scripts = [
   'scripts/pulse-clinic-passport-v2-qa-20261110.mjs',
   'scripts/pulse-passport-simulation-qa-20261110.mjs',
   'scripts/pulse-longevity-plan-qa-20261121.mjs',
+  // 22/11/2026 : QR patient (questionnaire et résultats sur le téléphone du patient).
+  'scripts/pulse-patient-link-qa-20261122.mjs',
   // Complete visual home plan and independent section PDFs.
   'scripts/pulse-category-export-qa-20261110.mjs',
   // Save/restore all questionnaire answers before export, 6-category passport and 30-second trials.
