@@ -8,6 +8,7 @@ import {createRequire} from 'node:module';
 // puppeteer-core est installé dans l'outillage local (hors dépendances du site).
 const puppeteer=createRequire(process.env.PUPPETEER_HOME||'/home/claude/tools/')('puppeteer-core');
 import {PROTOCOL,STEPS,STATIONS,CAMERA_LABELS} from '../../pulse-v14-src/motion-protocol.mjs';
+import {forStep,CHAIR_NORMS} from './longevity-reference.mjs';
 
 const here=dirname(fileURLToPath(import.meta.url));
 const OUT=process.argv[2]||join(here,'KOMO_Motion_Guide_consultation.pdf');
@@ -62,7 +63,24 @@ function testCard(s,n){
    '<dt>Dire</dt><dd class="say">'+e(s.script)+'</dd>'+
    '<dt>Faire</dt><dd>'+doMarkup(s)+'</dd>'+
    '<dt>Saisir</dt><dd>'+enterMarkup(s)+'</dd>'+
-  '</dl></article>';
+  '</dl>'+longevityMarkup(s)+'</article>';
+}
+// Bloc « longévité » de chaque test : pourquoi, repères, objectif, comment progresser, contrôle à 6 semaines.
+function longevityMarkup(s){
+ const L=forStep(s.id);if(!L)return '';
+ const chair=s.id==='sts'?'<table class="norms"><thead><tr><th>Âge</th>'+CHAIR_NORMS.bands.map(b=>'<th>'+b+'</th>').join('')+'</tr></thead><tbody>'+
+  [['Femme · sous la moyenne','female','below'],['Femme · standard d’autonomie','female','standard'],['Homme · sous la moyenne','male','below'],['Homme · standard d’autonomie','male','standard']]
+   .map(([l,sx,k])=>'<tr><td>'+l+'</td>'+CHAIR_NORMS[sx][k].map(v=>'<td>'+v+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'';
+ return '<div class="longevity"><p class="lk">Longévité</p><dl class="ldl">'+
+  '<dt>Pourquoi</dt><dd>'+e(L.why)+'</dd><dt>Repères</dt><dd>'+e(L.ref)+'</dd><dt>Objectif</dt><dd><b>'+e(L.target)+'</b></dd>'+
+  (L.improve&&L.improve!=='—'?'<dt>Progresser</dt><dd>'+e(L.improve)+'</dd>':'')+'<dt>À 6 semaines</dt><dd>'+e(L.control)+'</dd></dl>'+chair+'</div>';
+}
+// Tableau de synthèse des repères (une ligne par mesure de longévité).
+function summaryTable(){
+ const rows=[['Vitesse de marche 4 m','gait_4m'],['Lever de chaise 30 s','sts'],['Préhension','dynamo_grip'],['Appui sur un pied','unipodal_left'],
+  ['Saut vertical (CMJ)','fd_cmj'],['Force hanche et genou (DynaMo)','dynamo_knee_ext'],['Équilibre debout (plateformes)','fd_quiet_stand']];
+ return '<table class="summary"><thead><tr><th>Mesure</th><th>Repère</th><th>Objectif</th><th>Changement réel à 6 semaines</th></tr></thead><tbody>'+
+  rows.map(([n,id])=>{const L=forStep(id);return '<tr><td>'+e(n)+'</td><td>'+e(L.ref.replace(', tableau ci-dessous',', tableau dans la fiche du test'))+'</td><td>'+e(L.target)+'</td><td>'+e(L.control)+'</td></tr>'}).join('')+'</tbody></table>';
 }
 function stationsMarkup(){
  // Une section par station ; l'en-tête, la note et la 1re carte restent groupés (jamais d'en-tête orphelin).
@@ -96,6 +114,8 @@ const PANNES=[
  ['Tu as oublié d’appuyer sur « +1 lever »','Corrige le total dans le champ avant de valider : c’est ton comptage qui fait foi.'],
  ['Le chrono de l’appui sur un pied est parti trop tôt','« Effacer les essais », puis recommence : PULSE garde le meilleur essai valable.'],
  ['La page se fige ou le téléphone redémarre','Rouvre PULSE : la consultation est sauvegardée sur le serveur 4 heures et reprend à l’étape en cours (menu Consultation, « Consultation en cours »).'],
+ ['Le patient n’arrive pas à scanner le QR','Vérifie la luminosité de ton écran ; sinon « Copier le lien » et envoie-le par ta messagerie sécurisée. Sans téléphone, remplis le questionnaire avec lui dans la console.'],
+ ['Le patient voit « Ce lien n’est plus valide »','Le QR a été renouvelé ou a plus de 30 jours : « QR patient », puis « Nouveau QR », et fais-le scanner à nouveau.'],
  ['Message « consultation déjà en cours »','Un ancien bilan non terminé est resté ouvert : menu Consultation, puis « Clore » sur sa carte. Rien n’est supprimé.'],
  ['VALD ou DynaMo en panne','« Test non réalisé », motif « Appareil indisponible », et reprogramme ces tests au contrôle.'],
  ['Valeur mal saisie après validation','Touche le test dans la liste des tests (ou « Corriger un test » dans le rapport) : il s’ouvre avec ses valeurs, tu corriges et tu valides.']
@@ -168,6 +188,14 @@ tr{break-inside:avoid}
 td:first-child{font-weight:600;color:var(--ink)}
 td:first-child,th:first-child{width:24%}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:7mm}
+.longevity{margin-top:2.4mm;border-top:1px dashed var(--line);padding-top:2.2mm}
+.longevity .lk{font-size:8.2pt;font-weight:600;color:var(--ink);margin:0 0 1.2mm;letter-spacing:.02em}
+.ldl{display:grid;grid-template-columns:17mm 1fr;gap:1.2mm 3mm;margin:0;font-size:9pt}
+.ldl dt{font-size:8.2pt;font-weight:600;color:#4f6b5a}
+table.norms{font-size:7.8pt;margin:2mm 0 0}
+table.norms td,table.norms th{padding:1mm 1.2mm;text-align:center}
+table.norms td:first-child,table.norms th:first-child{text-align:left;width:34%}
+table.summary td:first-child{width:20%}
 </style></head><body>
 
 <div class="cover">
@@ -176,7 +204,7 @@ td:first-child,th:first-child{width:24%}
  <p class="lead">Tout ce qu’il faut faire, dire et saisir, de la préparation de la salle au passeport remis au patient. Sans caméra : tout se pilote depuis ton iPhone. Les ${N} tests sont repris mot pour mot de la console PULSE.</p>
  <div class="facts"><div><strong>${N}</strong><span>tests en ${NS} stations</span></div><div><strong>≈ 35 min</strong><span>de tests</span></div><div><strong>6 semaines</strong><span>jusqu’au contrôle</span></div></div>
  <div class="flow"><ol>
-  <li>Préparer la salle et les appareils</li><li>Accueillir et vérifier la sécurité</li><li>Créer le dossier pseudonymisé</li><li>Ouvrir la consultation</li>
+  <li>Préparer la salle et les appareils</li><li>Accueillir et vérifier la sécurité</li><li>Créer le dossier pseudonymisé</li><li>Ouvrir la consultation, QR au patient</li>
   <li>Faire les ${N} tests, station par station</li><li>Compléter le questionnaire</li><li>Restituer et remettre le passeport</li><li>Revoir le patient à 6 semaines</li>
  </ol></div>
  <p class="version">Protocole ${e(PROTOCOL.code)} ${e(PROTOCOL.version)} · version du ${DATE} · document interne, non diagnostique</p>
@@ -235,20 +263,27 @@ td:first-child,th:first-child{width:24%}
  <p class="kicker">Étape 4</p><h2>Ouvrir la consultation</h2>
  ${steps([
   'Après « Créer et démarrer la consultation », PULSE ouvre directement les tests : rien d’autre à relier. Pour un patient déjà créé : Patients → « Consultation » sur sa ligne → « Démarrer la consultation ».',
+  '<b>QR patient</b> (bouton vert en haut de la console) : montre-le au patient. Il le vise avec l’appareil photo de son téléphone : sa page « Mon bilan » s’ouvre, sans compte ni nom.',
   'Coche la case de sécurité (espace dégagé, appui accessible, pas de contre-indication évidente) : sans elle, le premier test ne démarre pas.'
  ])}
+ <div class="note"><b>Le lien du patient</b> est personnel, valable 30 jours. Le patient y répond au questionnaire pendant les tests, puis y retrouve ses résultats et son passeport PDF à la fin du bilan. Rouvrir le QR montre le même lien ; « Nouveau QR » le remplace (l’ancien cesse de fonctionner).</div>
  <div class="note"><b>Dans la console, chaque test suit le même ordre :</b> le bandeau de station dit où installer le patient ; « Installation et consignes » reprend ce guide ; tu saisis, puis « Valider et passer au suivant ». Les numéros en haut permettent d’ouvrir n’importe quel test, et « Plus tard » de le reporter à la fin.</div>
  <div class="note warn"><b>Arrêter un test.</b> Douleur, vertige, malaise, perte d’équilibre, essoufflement anormal : tu arrêtes, tu rassures, tu fais asseoir. « Test non réalisé » avec son motif passe au suivant. Un test impossible n’est pas un échec : le rapport l’indique sans valeur inventée.</div>
  <p class="kicker" style="margin-top:7mm">Étape 5</p><h2>Les ${N} tests, station par station</h2>
  <p class="intro">Le patient passe par ${NS} postes : assis à la table, sur les plateformes, dans le couloir, puis sur la chaise. Chaque test se lit de haut en bas : installer, dire, faire, saisir.</p>
+</section>
+<section class="part">
+ <p class="kicker">Avant les tests</p><h2>Les repères de longévité en un coup d’œil</h2>
+ <p class="intro">Chaque test du guide dit pourquoi il compte pour la longévité, son repère, l’objectif à viser et ce qui compte comme un vrai progrès au contrôle. Les repères sont des seuils de population : ils orientent le programme, ils ne posent pas de diagnostic.</p>
+ ${summaryTable()}
 </section>
 <section class="part tests">${stationsMarkup()}</section>
 
 <section class="part">
  <p class="kicker">Étape 6</p><h2>Questionnaire</h2>
  ${steps([
-  'Onglet <b>Questionnaire</b> : 22 questions sur une page, en cinq catégories. Lis-les au patient ou laisse-le répondre à l’écran.',
-  'Chaque réponse s’enregistre toute seule ; attends le message de confirmation du serveur.',
+  'Le patient répond <b>sur son téléphone</b> pendant les tests (QR de l’étape 4) : 22 questions en cinq catégories, plus 5 questions facultatives « Santé et longévité » (chute dans l’année, activité, temps assis, tabac, médicaments).',
+  'Ses réponses arrivent dans l’onglet <b>Questionnaire</b> de la console. Sans téléphone, lis-les-lui et réponds à sa place, au même endroit.',
   '« Enregistrer et voir le rapport ». Un questionnaire incomplet reste possible : le passeport le signale.'
  ])}
  <p class="kicker" style="margin-top:7mm">Étape 7</p><h2>Restitution et passeport</h2>
@@ -258,6 +293,7 @@ td:first-child,th:first-child{width:24%}
   'Montre chaque exercice en salle, une ou deux répétitions. Un exercice déjà fait une fois est un exercice qu’on refait à la maison.',
   '« Télécharger le passeport complet ». Sur l’iPhone, le PDF s’ouvre : « Partager › Imprimer » (AirPrint) ou « Enregistrer dans Fichiers ». Feuillette-le avant de l’imprimer.',
   'Remets-le imprimé, en main propre, et ajoute le prénom à la main : le fichier ne porte que le code. Par voie numérique, uniquement ta messagerie de santé sécurisée.',
+  'Sur son téléphone, la page « Mon bilan » affiche aussitôt ses capacités, ses priorités, son programme maison et le bouton pour télécharger son passeport.',
   'Prends le rendez-vous de contrôle à 6 semaines avant que le patient parte.'
  ])}
  <blockquote>« Voici votre point de départ. Ce ne sont pas des diagnostics, ce sont des repères. Votre marche est solide. Votre équilibre est sous les 10 secondes d’un côté : dans les études, c’est associé à un risque plus élevé. La bonne nouvelle, c’est que ça s’entraîne. Voici vos exercices, et nous refaisons les mêmes mesures dans 6 semaines pour voir ce qui a bougé. »</blockquote>
@@ -271,6 +307,13 @@ td:first-child,th:first-child{width:24%}
   'Mêmes conditions : même moment de la journée, même praticien si possible, mêmes chaussures, même chaise, même distance du pad au genou, même profil ForceDecks.',
   'Le rapport affiche la <b>trajectoire J0 → S6</b> : une ligne par mesure, l’écart, et un point vert quand le changement dépasse la marge d’erreur de la mesure.',
   'Si les conditions diffèrent (chaussures, protocole, pad), PULSE affiche un avertissement : lis-le avant de commenter.'
+ ])}
+ <h4>Entre les deux bilans : faire progresser</h4>
+ ${steps([
+  '<b>Le programme maison</b> découle des mesures : 4 exercices ciblés sur les priorités (le lever de chaise reste toujours le socle), plus la marche quotidienne. 3 séances de 20 minutes par semaine, l’équilibre tous les jours.',
+  '<b>Progression</b> : semaines 1–2, apprendre les gestes avec appui ; semaines 3–4, +2 répétitions ou une série quand c’est facile ; semaines 5–6, consolider la routine.',
+  '<b>Activité</b> : viser progressivement 150 minutes d’activité modérée par semaine (OMS) et couper les longues périodes assises.',
+  '<b>Au contrôle</b>, les objectifs fixés à J0 sont relus un par un : atteint, en progrès réel, ou stable. On ajuste le programme et on fixe le rendez-vous suivant (12 semaines).'
  ])}
  <h4>Reproductibilité : ce qui compte comme un vrai changement</h4>
  <p>Refaire un test ne donne jamais exactement le même chiffre. PULSE ne parle de progrès qu’au-delà de la marge d’erreur publiée pour chaque mesure ; en dessous, il affiche « stable ».</p>
