@@ -819,3 +819,14 @@
 .moc-release[data-state="released"] b{color:#1f5a3f}
 .moc-release .moc-release-mail{display:block;margin:12px 0 0}
 .moc-release .moc-release-mail input{width:100%;margin-top:6px}
+
+/* Consentement et sécurité (23/11/2026) */
+.moc-consent-state{margin:0;font-size:12.5px;line-height:1.45;color:#5a5f57}
+.moc-consent-state[data-state="ok"]{color:#1f5a3f;font-weight:600}
+.moc-consent-state[data-state="waiting"]{color:#8a5a1f}
+.moc-consent-here{margin-left:6px;border:0;background:none;padding:0;color:#16352c;text-decoration:underline;font:inherit;cursor:pointer}
+.moc-consent-item{display:flex;gap:10px;align-items:flex-start;margin:10px 0;font-size:14px;line-height:1.4}
+.moc-consent-item input{width:22px;height:22px;flex:none;accent-color:#16352c}
+.moc-safety-block{margin:12px 0;padding:12px 14px;border:1px solid #d8d0bf;border-radius:12px;background:#fbfaf6}
+.moc-safety-block ol{margin:8px 0 8px 18px;padding:0;font-size:13px;line-height:1.5}
+.moc-safety-block .moc-safety{margin-top:8px}

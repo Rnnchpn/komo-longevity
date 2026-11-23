@@ -22,7 +22,7 @@ const modelIds=INTAKE_GROUPS.flatMap(g=>g.questions.map(q=>q.id));
 assert.deepEqual([...Object.keys(choices),...ratings].sort(),[...modelIds].sort(),'aucune clé serveur hors modèle');
 assert.equal(QUESTION_COUNT,22);
 // 2. Lien patient côté serveur : jeton haché, 30 jours, actions sans compte limitées au lien.
-for(const s of ['operator_patient_link','patient_link_status','patient_questionnaire_save','PATIENT_LINK_DAYS=30',
+for(const s of ['operator_patient_link','patient_link_status','patient_questionnaire_save','PATIENT_LINK_DAYS=60',
  'contains("progress",{patient_link:{token_hash:tokenHash}})','entered_by:"patient"','results:released?results:null',
  'const released=room.status==="completed"&&typeof p.patient_release?.released_at==="string"','action==="operator_patient_release"'])
  assert.ok(edge.includes(s),'serveur : '+s);

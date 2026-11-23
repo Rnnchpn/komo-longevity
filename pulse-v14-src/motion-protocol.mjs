@@ -257,6 +257,33 @@ export const COMPLEMENTS=[
 ];
 export const COMPLEMENT_IDS=COMPLEMENTS.map(s=>s.id);
 export const complementById=id=>COMPLEMENTS.find(s=>s.id===id)||null;
+// Consentement électronique (23/11/2026) : donné par le patient sur son téléphone (page « Mon bilan », après le QR),
+// ou sur l'iPhone du praticien s'il n'a pas de smartphone. Horodaté dans la consultation. Même texte que la fiche papier.
+export const CONSENT={
+ version:'KOMO_CONSENT_V1',
+ info:[
+  'Le bilan KŌMØ Motion mesure la force, l’équilibre et la marche (plateformes de force, dynamomètre, chronomètre) et, si vous l’acceptez, votre posture sur une photo de profil qui n’est pas conservée. Les résultats sont situés par rapport à des repères publiés : ce n’est pas un diagnostic. Vous pouvez interrompre un test à tout moment.',
+  'Vos résultats sont conservés dans votre dossier KŌMØ PULSE ; dans l’application VALD, seulement sous un code. Les mesures et la photo sont analysées sous ce code avec un outil d’intelligence artificielle (Claude, Anthropic). Votre bilan vous est envoyé par e-mail : un lien personnel, sans résultat dans le message. Responsable du traitement : Dr Renan Chapon (KŌMØ). Accès, rectification, effacement, opposition : contact@komolongevity.com ; vous pouvez aussi saisir la CNIL.'
+ ],
+ items:[
+  {key:'assessment',required:true,label:'J’ai lu ces informations, j’ai pu poser mes questions et j’accepte de réaliser le bilan.'},
+  {key:'retention',label:'J’accepte la conservation de mes résultats pour les comparer à mes bilans de contrôle.'},
+  {key:'photo',label:'J’accepte la photo de profil pour mesurer ma posture (photo non conservée).'},
+  {key:'email',label:'J’accepte de recevoir le lien vers mon bilan par e-mail.'}
+ ]
+};
+// Questions de sécurité posées par le praticien avant le premier test (console).
+export const SAFETY_QUESTIONS=[
+ 'Douleur thoracique, palpitations ou essoufflement inhabituel ces dernières semaines',
+ 'Malaise, perte de connaissance ou chute dans les 3 derniers mois',
+ 'Intervention chirurgicale, fracture ou prothèse récente (moins de 3 mois)',
+ 'Insuffisance cardiaque ou respiratoire mal équilibrée',
+ 'Tension artérielle non contrôlée',
+ 'Douleur aiguë actuelle : dos, hanche, genou, épaule ou main',
+ 'Ostéoporose sévère connue',
+ 'Vertiges ou trouble de l’équilibre connu'
+];
+export const consentSummary=c=>!c?'':[c.choices?.photo?'photo ✓':'photo ✗',c.choices?.email?'e-mail ✓':'e-mail ✗',c.choices?.retention?'conservation ✓':'conservation ✗'].join(' · ');
 export const STEP_IDS=STEPS.map(s=>s.id);
 export const V2_ORDER=STEP_IDS;
 export const stepById=id=>STEPS.find(s=>s.id===id)||null;

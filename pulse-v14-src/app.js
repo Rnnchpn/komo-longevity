@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261123-passeport-v8';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261123-consentement-v1';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -598,7 +598,7 @@ function patients(){
           <label><input type="radio" name="sex_at_birth" value="not_stated"><span>Non précisé</span></label>
         </fieldset>
       </div>
-      <label class="op-create-patient-attestation"><input type="checkbox" name="consent_collected"> Fiche KŌMØ signée : consentement recueilli et questionnaire de sécurité vérifié.</label>
+      <label class="op-create-patient-attestation"><input type="checkbox" name="consent_collected"> Patient informé de l’objet du bilan. Il donnera son accord sur son téléphone, juste après le QR (ou sur cet iPhone).</label>
       <p id="opPatientCreateFeedback" class="op-create-patient-feedback" aria-live="polite"></p>
       <button class="button primary" type="submit">Créer et démarrer la consultation</button>
       <p class="op-create-privacy">Nom, prénom, date de naissance et e-mail restent dans PULSE. Dans VALD et sur la feuille de mesures : uniquement le code.</p>
@@ -647,7 +647,7 @@ function patients(){
           !(/^\d{4}-\d{2}-\d{2}$/.test(bd)&&y>=1920&&y<=maxYear)?['birth_date','Indique la date de naissance (patient majeur, né après 1920).']:
           mail&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)?['email','Vérifie l’adresse e-mail.']:
           !fd.get('sex_at_birth')?['sex_at_birth','Choisis le sexe.']:
-          !fd.get('consent_collected')?['consent_collected','Coche la fiche signée pour continuer.']:null;
+          !fd.get('consent_collected')?['consent_collected','Coche la case d’information du patient pour continuer.']:null;
         if(missing){if(feedbackNode)feedbackNode.textContent=missing[1];createForm.querySelector('[name="'+missing[0]+'"]')?.focus();return}
       }else if(!createForm.reportValidity())return;
       const code=String(fd.get('pseudo_code')||'').trim().toUpperCase();
@@ -743,7 +743,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261123-passeport-v8');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261123-consentement-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -1072,7 +1072,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261123-passeport-v8');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261123-consentement-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         practitioner:String(S.profile?.display_name||[S.profile?.first_name,S.profile?.last_name].filter(Boolean).join(' ')||'').trim(),

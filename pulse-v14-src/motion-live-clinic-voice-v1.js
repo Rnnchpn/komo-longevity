@@ -1,8 +1,8 @@
 // Commandes vocales de la console, sur l’ORDINATEUR DU PRATICIEN uniquement.
 // Browser speech recognition may be provided by the browser vendor; no audio or
 // transcripts are transmitted to KŌMØ Pulse or stored in its database.
-import {createVoiceControl} from './motion-engine/voice-control.js?v=20261123-passeport-v8';
-import {createAudioFeedback} from './motion-engine/audio-feedback.js?v=20261123-passeport-v8';
+import {createVoiceControl} from './motion-engine/voice-control.js?v=20261123-consentement-v1';
+import {createAudioFeedback} from './motion-engine/audio-feedback.js?v=20261123-consentement-v1';
 
 export function createClinicVoice({onAction,onStatus}={}){
  let disposed=false,voice=null,sequence=0;

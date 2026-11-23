@@ -1,9 +1,9 @@
 // KŌMØ Pulse — « Mon bilan » sur le téléphone du patient (22/11/2026).
 // Ouvert par le QR remis en consultation : le patient remplit le questionnaire pendant les tests,
 // puis retrouve ses résultats et son passeport PDF à la fin du bilan. Pas de compte, pas de nom :
-// le lien porte un jeton personnel de 256 bits (30 jours), retiré de la barre d'adresse dès l'ouverture.
-import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261123-passeport-v8';
-import {STEPS} from '../motion-protocol.mjs?v=20261123-passeport-v8';
+// le lien porte un jeton personnel de 256 bits (60 jours), retiré de la barre d'adresse dès l'ouverture.
+import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261123-consentement-v1';
+import {STEPS,CONSENT} from '../motion-protocol.mjs?v=20261123-consentement-v1';
 const EDGE="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test";
 const KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
 const STORE="komo_mon_bilan_v1";
@@ -81,6 +81,23 @@ function questionnaireCard(collapsed){
  return collapsed?'<details class="mb-card"><summary><b>Vos réponses au questionnaire</b> · '+n+' / '+QUESTION_COUNT+'</summary>'+inner+'</details>':
   '<div class="mb-card">'+inner+'</div>';
 }
+// Consentement électronique (23/11/2026) : avant le questionnaire, horodaté dans la consultation.
+function consentCard(){
+ return '<div class="mb-card"><span class="mb-over">AVANT DE COMMENCER</span><h1>Votre accord</h1>'+
+  CONSENT.info.map(t=>'<p class="mb-muted">'+esc(t)+'</p>').join('')+
+  '<div class="mb-consent">'+CONSENT.items.map(it=>'<label class="mb-check"><input type="checkbox" data-consent="'+esc(it.key)+'"><span>'+esc(it.label)+(it.required?' <b>(nécessaire)</b>':'')+'</span></label>').join('')+'</div>'+
+  '<button type="button" class="mb-btn" id="mbConsentGo">Valider mes choix</button><p class="mb-muted" id="mbConsentStatus" role="status"></p></div>';
+}
+function bindConsent(){
+ document.getElementById("mbConsentGo").onclick=async e=>{
+  const st=document.getElementById("mbConsentStatus"),button=e.currentTarget,consents={};
+  app.querySelectorAll("[data-consent]").forEach(i=>{consents[i.dataset.consent]=i.checked});
+  if(!consents.assessment){st.textContent="Cochez la première case pour réaliser le bilan.";return}
+  button.disabled=true;st.textContent="Enregistrement…";
+  try{view=await call({action:"patient_consent_save",consents});shownState="";await render();window.scrollTo(0,0);}
+  catch(err){st.textContent="Enregistrement impossible : vérifiez la connexion, puis réessayez.";button.disabled=false}
+ };
+}
 function reviewCard(){
  const done=view.tests_done||0,total=(view.steps||STEPS).length;
  return '<div class="mb-card"><span class="mb-over">BILAN TERMINÉ</span><h1>Vos résultats sont en relecture</h1>'+
@@ -90,7 +107,7 @@ function reviewCard(){
   '<p class="mb-muted">Vous pouvez fermer cette page et la rouvrir plus tard depuis ce téléphone.</p></div>';
 }
 async function resultsCard(){
- extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261123-passeport-v8");
+ extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261123-consentement-v1");
  const passport=extras.clinicPassport(answers,view.results||{},new Date(view.completed_at||Date.now()),
   {subject:view.name||view.code||"Mon bilan KŌMØ",real:!!view.patient?.real,patient:view.patient});
  const lp=passport.longevity,zones={priority:"Priorité",consolidate:"À consolider",solid:"Solide",follow:"Suivi",missing:"Non mesuré"};
@@ -112,6 +129,10 @@ async function resultsCard(){
 async function render(){
  if(!view)return;
  codeEl.textContent=view.name||view.code||"";
+ if(!view.consent){
+  if(shownState==="consent")return;
+  shownState="consent";app.innerHTML=consentCard();bindConsent();return;
+ }
  // Résultats visibles seulement après validation du praticien (view.released).
  const state=view.status!=="completed"?"active":view.released?"completed":"review";
  if(state===shownState&&state==="review")return;
@@ -147,7 +168,7 @@ async function render(){
 function showInvalid(){
  clearInterval(poll);try{localStorage.removeItem(STORE)}catch{}
  app.innerHTML='<div class="mb-card"><span class="mb-over">LIEN INDISPONIBLE</span><h1>Ce lien n’est plus valide.</h1>'+
-  '<p>Il a peut-être été renouvelé ou a dépassé 30 jours. Utilisez le lien reçu par e-mail, ou demandez-en un nouveau à votre praticien.</p></div>';
+  '<p>Il a peut-être été renouvelé ou a dépassé 60 jours. Utilisez le lien reçu par e-mail, ou demandez-en un nouveau à votre praticien.</p></div>';
 }
 async function refresh(){
  try{

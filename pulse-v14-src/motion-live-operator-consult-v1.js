@@ -1,8 +1,8 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
 // v2.4 : sans caméra (plateformes, DynaMo, chrono et compteur PULSE). Le code vidéo reste pour Human Track.
 // Valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-passeport-v8';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-passeport-v8';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep,CONSENT,SAFETY_QUESTIONS,consentSummary} from './motion-protocol.mjs?v=20261123-consentement-v1';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-consentement-v1';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
@@ -73,7 +73,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261123-passeport-v8";
+ link.href="./motion-live-operator-consult-v1.css?v=20261123-consentement-v1";
  // Le design de l'espace praticien (pulse-workspace.css) reste la dernière couche.
  const workspace=document.querySelector("link[data-pulse-workspace]");
  if(workspace)document.head.insertBefore(link,workspace);else document.head.append(link);
@@ -388,7 +388,7 @@ async function showPatientQr(renew){
  box.innerHTML='<div class="moc-qr-card"><canvas id="mocQrCanvas" width="240" height="240" aria-label="QR code à scanner par le patient"></canvas>'+
   '<div><h3>Questionnaire sur le téléphone du patient</h3><ol class="moc-qr-steps">'+
   '<li>Le patient vise ce QR avec l’appareil photo de son téléphone.</li>'+
-  '<li>Il répond aux questions pendant les tests : ses réponses arrivent dans l’onglet Questionnaire.</li>'+
+  '<li>Il lit l’information et donne son accord, puis répond aux questions pendant les tests : ses réponses arrivent dans l’onglet Questionnaire.</li>'+
   '<li>Après ta validation (onglet Rapport, « Envoi au patient »), il retrouve sur la même page ses résultats et son passeport PDF.</li></ol>'+
   '<p class="moc-help">Lien personnel valable jusqu’au '+HTML(new Date(link.expires_at).toLocaleDateString("fr-FR"))+', sans compte.</p>'+
   '<p class="moc-help" id="mocQrFallback" hidden>QR indisponible sur cet écran : copie le lien et envoie-le par ta messagerie sécurisée.</p>'+
@@ -414,10 +414,12 @@ function makeShell(){
  '<div class="moc-head-actions"><button type="button" class="moc-back" id="mocVoice" aria-pressed="false">Voix</button>'+(CAMERA_USED?'<button type="button" class="moc-back" id="mocVideoFocus" aria-pressed="false" title="Afficher la caméra pour régler le cadrage">Voir la caméra</button>':'')+'<button type="button" class="moc-back moc-qr-btn" id="mocPatientQrBtn" title="QR à scanner par le patient : questionnaire et résultats sur son téléphone">QR patient</button><button type="button" class="moc-back" id="mocFullscreen" title="Plein écran">Plein écran</button><button type="button" class="moc-back" id="mocReturn" title="Revenir à la page Consultation">Quitter</button></div></header>'+
  '<div class="moc-statusbar">'+
  '<p class="moc-camera-banner" id="mocCameraBanner" role="status" aria-live="polite" data-state="offline"'+(CAMERA_USED?'':' hidden')+'>○ iPhone non connecté · Active la caméra du cabinet.</p>'+
+ '<p class="moc-consent-state" id="mocConsentState" role="status" aria-live="polite"></p>'+
  '<p class="moc-save-indicator" id="mocIntakeSaveStatus" role="status" aria-live="polite">Questionnaire · en attente de réponses</p>'+
  '<p class="moc-voice-state" id="mocVoiceState" role="status">Voix désactivée · Active-la pour dire « C’est parti », « Stop » ou « Suivant ». Aucun audio n’est enregistré par Pulse.</p>'+
  '</div>'+
  '<section class="moc-patient-qr" id="mocPatientQr" hidden aria-live="polite"></section>'+
+ '<section class="moc-patient-qr" id="mocConsentPanel" hidden aria-live="polite"></section>'+
  '<div class="moc-grid"><section class="moc-tests">'+
  '<div class="moc-overview"><span id="mocProgressText">Chargement…</span><div class="moc-progress"><i id="mocProgressFill"></i></div></div>'+
  '<div class="moc-step-nav" id="mocStepNav" aria-label="Progression des étapes Motion"></div>'+
@@ -741,6 +743,7 @@ function bindRelease(){
  if(q("mocReleaseLink"))q("mocReleaseLink").onclick=()=>{showPatientQr(false);q("mocPatientQr")?.scrollIntoView({block:"start",behavior:"smooth"})};
  if(q("mocReleaseMail"))q("mocReleaseMail").onclick=async e=>{
   const button=e.currentTarget,status=q("mocReleaseStatus"),email=String(q("mocReleaseEmail")?.value||"").trim().toLowerCase();
+  if(room.progress?.consent?.choices?.email===false){if(status)status.textContent="Le patient n’a pas accepté l’envoi par e-mail : remets-lui le PDF sur son téléphone, ou imprimé.";return}
   if(!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]{2,}$/.test(email)){if(status)status.textContent="Indique l’adresse e-mail du patient.";q("mocReleaseEmail")?.focus();return}
   button.disabled=true;
   try{
@@ -758,6 +761,35 @@ function bindRelease(){
    if(status)status.textContent="✓ E-mail prêt dans Mail : vérifie l’adresse, puis appuie sur Envoyer.";
   }catch(error){if(status)status.textContent="E-mail indisponible : "+(error.message||"erreur réseau")+". Réessaie.";}
   finally{button.disabled=false}
+ };
+}
+// Consentement (23/11/2026) : statut dans la console ; saisie sur cet iPhone pour un patient sans smartphone.
+function updateConsentState(){
+ const el=q("mocConsentState");if(!el||!room)return;
+ const c=room.progress?.consent;
+ if(c?.at){el.dataset.state="ok";el.textContent="✓ Consentement du patient · "+new Date(c.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})+" · "+consentSummary(c);return}
+ if(el.dataset.state==="waiting")return;
+ el.dataset.state="waiting";
+ el.innerHTML='○ Consentement en attente : le patient le donne sur son téléphone, juste après le QR. <button type="button" class="moc-consent-here" id="mocConsentHere">Sans smartphone : sur cet iPhone</button>';
+ q("mocConsentHere").onclick=showConsentPanel;
+}
+function showConsentPanel(){
+ const box=q("mocConsentPanel");if(!box||!room)return;box.hidden=false;
+ box.innerHTML='<div class="moc-qr-card"><div><h3>Consentement du patient</h3>'+CONSENT.info.map(t=>'<p class="moc-help">'+HTML(t)+'</p>').join('')+
+  CONSENT.items.map(it=>'<label class="moc-consent-item"><input type="checkbox" data-consent="'+HTML(it.key)+'"><span>'+HTML(it.label)+(it.required?' <b>(nécessaire)</b>':'')+'</span></label>').join('')+
+  '<p class="moc-help">Tends l’iPhone au patient : il lit et coche lui-même.</p>'+
+  '<div class="moc-buttons"><button type="button" class="moc-button primary" id="mocConsentSave">Enregistrer le consentement</button><button type="button" class="moc-button secondary" id="mocConsentClose">Fermer</button></div>'+
+  '<p class="moc-status" id="mocConsentStatus" role="status"></p></div></div>';
+ box.scrollIntoView({block:"start",behavior:"smooth"});
+ q("mocConsentClose").onclick=()=>{box.hidden=true};
+ q("mocConsentSave").onclick=async e=>{
+  const button=e.currentTarget,st=q("mocConsentStatus"),consents={};
+  box.querySelectorAll("[data-consent]").forEach(i=>{consents[i.dataset.consent]=i.checked});
+  if(!consents.assessment){st.textContent="La première case est nécessaire pour réaliser le bilan.";return}
+  button.disabled=true;
+  try{const r=await api({action:"operator_consent_save",session_id:room.id,consents});lastMutationAt=performance.now();
+   if(r.session)room=r.session;box.hidden=true;updateConsentState();}
+  catch(error){st.textContent="Échec : "+(error.message||"erreur réseau")+". Réessaie.";button.disabled=false}
  };
 }
 // E-mail au patient : lien personnel seulement, aucune donnée de santé dans le message.
@@ -1083,7 +1115,9 @@ function renderStepView(){
  '<details class="moc-instructions" '+((!running||manual)&&instructionsOpen()?'open':'')+'><summary>Installation et consignes de sécurité</summary><div class="moc-guide"><div><strong>Installation</strong><p>'+HTML(t.setup)+'</p></div>'+
  (t.script?'<div><strong>À dire au patient</strong><p>'+HTML(t.script)+'</p></div>':'')+
  '<div><strong>Consigne</strong><p>'+HTML(t.instruction)+'</p></div></div></details>'+
- (safety?'<label class="moc-safety"><input type="checkbox" id="mocSafety"> Conditions de sécurité vérifiées : espace dégagé, appui accessible, absence de contre-indication évidente au test.</label>':'')+
+ (safety?'<div class="moc-safety-block"><strong>Avant le premier test, demande au patient :</strong><ol>'+SAFETY_QUESTIONS.map(x=>'<li>'+HTML(x)+'</li>').join('')+'</ol>'+
+  '<p class="moc-help">Un « oui » : pas de test de force maximale ni d’équilibre sans ta décision ; adapter, reporter ou orienter.</p>'+
+  '<label class="moc-safety"><input type="checkbox" id="mocSafety"> Questions posées : aucun « oui », ou décision prise. Espace dégagé, appui à portée de main.</label></div>':'')+
  (manual?valdMarkup(t)+input+manualTail:running?'<div class="moc-live-hud"><div class="moc-timer"><div class="moc-clock-figure"><span>'+(t.id==="two_step"||isFields(t)?"MESURE MANUELLE":"CHRONOMÈTRE")+'</span><strong id="mocClock" aria-live="off">'+(t.id==="two_step"?"2 essais":isFields(t)?"Saisie":t.duration?"00:"+String(t.duration).padStart(2,"0"):"Observation")+'</strong></div>'+
  (t.type==="balance"?'<div class="moc-rep-figure moc-balance-figure"><span>TEMPS MAINTENU</span><strong id="mocLiveBalance" aria-live="off">—</strong><small id="mocBalanceState">EN ATTENTE DU PIED LEVÉ</small></div>':'')+
  (t.type==="count"&&t.tapCounter&&!CAMERA_USED?'<div class="moc-rep-figure moc-tap-figure"><span>'+(t.id==="sts"?"LEVERS COMPTÉS":"RÉPÉTITIONS COMPTÉES")+'</span><strong id="mocLiveCount" role="status" aria-live="polite" aria-atomic="true">0</strong>'+
@@ -1520,7 +1554,7 @@ async function refresh(force=false){
     }};
    }
   }
-  updatePanelTabs();updateCameraLinkState();
+  updatePanelTabs();updateCameraLinkState();updateConsentState();
   const signature=JSON.stringify([room.id,room.stage_code,room.step_index,room.status,room.progress?.step_status,room.progress?.safety_confirmed,room.progress?.test_started_at,room.progress?.results,
    room.progress?.questionnaire?.updated_at,room.progress?.questionnaire?.answers]);
   if(force||signature!==latestSignature){
@@ -1551,14 +1585,14 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-passeport-v8");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-consentement-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-passeport-v8");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-consentement-v1");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1577,7 +1611,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  if(CAMERA_USED)try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-passeport-v8");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-consentement-v1");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{

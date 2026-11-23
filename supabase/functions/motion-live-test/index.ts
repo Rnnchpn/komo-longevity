@@ -136,7 +136,21 @@ function cleanAnswers(answers:any):{cleaned?:Record<string,string>;error?:string
 }
 // Lien patient (QR remis en consultation) : le patient remplit le questionnaire sur son téléphone puis
 // retrouve ses résultats. Jeton aléatoire de 256 bits, seule son empreinte est stockée, 30 jours, sans compte.
-const PATIENT_LINK_DAYS=30;
+// 60 jours (23/11/2026) : le lien couvre le programme de 6 semaines et le contrôle.
+const PATIENT_LINK_DAYS=60;
+// Consentement électronique : même version et mêmes clés que CONSENT dans pulse-v14-src/motion-protocol.mjs.
+const CONSENT_VERSION="KOMO_CONSENT_V1";
+const CONSENT_KEYS=["assessment","retention","photo","email"];
+function cleanConsent(c:any){
+ if(!c||typeof c!=="object"||Array.isArray(c))return null;
+ if(Object.keys(c).some(k=>!CONSENT_KEYS.includes(k))||CONSENT_KEYS.some(k=>typeof c[k]!=="boolean"))return null;
+ if(c.assessment!==true)return null;
+ return {assessment:true,retention:c.retention,photo:c.photo,email:c.email};
+}
+function withConsent(prior:any,choices:any,by:string){
+ return {...prior,consent:{version:CONSENT_VERSION,at:now(),by,choices,
+  ...(prior.consent?.at?{previous:{at:prior.consent.at,by:prior.consent.by,choices:prior.consent.choices}}:{})}};
+}
 async function patientLinkLookup(req:Request,b:any){
  const token=s(b.patient_token,80);
  if(!tokenRe.test(token))return {error:response(req,{error:"invalid_patient_link"},401)};
@@ -169,6 +183,7 @@ function patientView(room:any,patient:any){
    simulated:p.questionnaire?.simulated===true},
   tests_done:STEPS.filter(id=>["done","skipped"].includes(results[id]?.status)).length,
   results:released?results:null,released,released_at:released?p.patient_release.released_at:null,
+  consent:p.consent?.at?{at:p.consent.at,by:p.consent.by,choices:p.consent.choices}:null,
   link_expires_at:p.patient_link?.expires_at||null};
 }
 async function guestLookup(req:Request,b:any){
@@ -333,7 +348,7 @@ Deno.serve(async(req:Request)=>{
  }
 
  // Téléphone du patient (lien du QR) : statut, questionnaire, résultats. Aucune authentification de compte.
- if(action==="patient_link_status"||action==="patient_questionnaire_save"){
+ if(action==="patient_link_status"||action==="patient_questionnaire_save"||action==="patient_consent_save"){
   const found=await patientLinkLookup(req,b);
   if(found.error)return found.error;
   const room=found.room;
@@ -342,6 +357,23 @@ Deno.serve(async(req:Request)=>{
    .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
   if(!patientAllowed(patient))return response(req,{error:"patient_unavailable"},403);
   if(action==="patient_link_status")return response(req,{ok:true,...patientView(room,patient)});
+  if(action==="patient_consent_save"){
+   const choices=cleanConsent(b.consents);
+   if(!choices)return response(req,{error:"invalid_consent"},422);
+   for(let attempt=0;attempt<6;attempt++){
+    const {data:latest,error:readError}=await db.from("pulse_motion_live_sessions").select("*").eq("id",room.id).maybeSingle();
+    if(readError||!latest)return response(req,{error:"consent_reload_failed"},503);
+    const prior=latest.progress&&typeof latest.progress==="object"&&!Array.isArray(latest.progress)?latest.progress:{};
+    if(prior.patient_link?.token_hash!==found.tokenHash||!["active","completed"].includes(latest.status))
+     return response(req,{error:"patient_link_expired"},410);
+    const {data:saved,error:saveError}=await db.from("pulse_motion_live_sessions")
+     .update({progress:withConsent(prior,choices,"patient"),updated_at:now()}).eq("id",room.id)
+     .eq("updated_at",latest.updated_at).select("*").maybeSingle();
+    if(saveError)return response(req,{error:"consent_storage_failed"},503);
+    if(saved)return response(req,{ok:true,...patientView(saved,patient)});
+   }
+   return response(req,{error:"consent_conflict_retry"},409);
+  }
   const checked=cleanAnswers(b.answers);
   if(checked.error)return response(req,{error:checked.error},422);
   const cleaned=checked.cleaned as Record<string,string>;
@@ -642,6 +674,26 @@ Deno.serve(async(req:Request)=>{
   if(error||!data)return response(req,{error:"stale_state_retry"},409);
   return response(req,{ok:true,token,url:"https://pulse.komolongevity.com/mon-bilan/#t="+token,
    expires_at:expiresAt,session:publicRow(data)});
+ }
+ if(action==="operator_consent_save"){
+  // Patient sans smartphone : il lit et coche sur l'iPhone du praticien.
+  const id=s(b.session_id,50);
+  if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const choices=cleanConsent(b.consents);
+  if(!choices)return response(req,{error:"invalid_consent"},422);
+  const {data:room,error:roomError}=await db.from("pulse_motion_live_sessions").select("*")
+   .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
+  if(roomError||!room)return response(req,{error:"session_not_found"},404);
+  if(room.operator_user_id!==actor.id||!room.patient_id)return response(req,{error:"operator_owner_required"},403);
+  if(!["active","completed"].includes(room.status))return response(req,{error:"room_unavailable"},409);
+  const {data:patient}=await db.from("patients").select("data_classification,status")
+   .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
+  if(!patientAllowed(patient))return response(req,{error:"synthetic_patient_required"},403);
+  const old=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?room.progress:{};
+  const {data,error}=await db.from("pulse_motion_live_sessions").update({progress:withConsent(old,choices,"practitioner_device"),updated_at:now()})
+   .eq("id",id).eq("updated_at",room.updated_at).select("*").maybeSingle();
+  if(error||!data)return response(req,{error:"stale_state_retry"},409);
+  return response(req,{ok:true,session:publicRow(data)});
  }
  if(action==="operator_patient_release"){
   // Validation du praticien : rend les résultats visibles sur la page « Mon bilan » du patient (release:false les masque).
