@@ -133,7 +133,7 @@ const lab = [
   grid(['Poste', 'Ce qui est mesuré', 'Instrument'], [
     ['A · force, assis', 'Flexion et abduction de hanche, extension et flexion de genou, préhension ; gauche et droite, et leur symétrie', 'DynaMo Plus'],
     ['B · plateformes', 'Masse, équilibre debout yeux ouverts et fermés, lever de chaise, appui sur un pied, saut vertical si le patient est à l’aise', 'Deux ForceDecks Mini'],
-    ['Photo de profil', 'Alignement de la tête, du tronc, du bassin et du genou ; photo mesurée puis effacée', 'iPhone'],
+    ['Photo de profil', 'Alignement de la tête, du tronc, du bassin et du genou ; photo mesurée puis effacée', 'Tablette'],
     ['C · marche', 'Vitesse de marche sur 4 m, départ arrêté, meilleur de deux passages', 'Chronomètre PULSE'],
     ['D · chaise', 'Levers en 30 secondes, d’où la puissance des jambes', 'Chaise de 43 cm'],
     ['Questionnaire', '22 questions sur la vie quotidienne, la douleur et les habitudes, plus 5 sur la santé', 'Téléphone du patient']
@@ -181,7 +181,7 @@ const doors = [
 const setup = [
   kicker('Mise en place'), H1('Une mise en place légère'),
   H2('Ce que KŌMØ met à disposition'),
-  bullet([['Un Motion Case en prêt ', { bold: true, color: INK }], 'pour la durée convenue : deux ForceDecks Mini, un DynaMo Plus, un iPhone avec PULSE et les applications VALD, sous réserve des conditions d’utilisation des équipements VALD.']),
+  bullet([['Un Motion Case en prêt ', { bold: true, color: INK }], 'pour la durée convenue : deux ForceDecks Mini, un DynaMo Plus et une tablette avec PULSE et les applications VALD, sous réserve des conditions d’utilisation des équipements VALD.']),
   bullet([['Une formation ', { bold: true, color: INK }], 'du membre de l’équipe que vous choisissez : deux demi-journées, puis trois bilans supervisés avant de travailler seul.']),
   bullet([['PULSE ', { bold: true, color: INK }], ': un espace opérateur, une vue du centre et un espace patient, avec consentement électronique, questionnaire sur le téléphone du patient, passeport PDF et trajectoire.']),
   bullet([['Les protocoles et les supports ', { bold: true, color: INK }], ': protocole Motion, réglages VALD, guide de consultation, fiches de soin, et un contrôle qualité mensuel des données.']),
