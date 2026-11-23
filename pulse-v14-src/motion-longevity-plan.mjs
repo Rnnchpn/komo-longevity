@@ -4,7 +4,7 @@
 // Sources des repères : EWGSOP2 (préhension, marche), AWGS 2019 (marche 1,0 m/s), Rikli & Jones / CDC STEADI
 // (lever de chaise 30 s), Araujo BJSM 2022 (appui unipodal 10 s), JOA (Two-Step), VALD (asymétrie > 10 %),
 // Alcazar 2020–2021 (puissance relative au lever de chaise : équation, seuils 2,6 / 2,1 W/kg, MCID).
-import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261122-sanscamera-v1';
+import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261123-quietstand-v1';
 export const LONGEVITY_PLAN_VERSION='KOMO_LONGEVITY_PLAN_V1';
 export const ZONES={
  priority:{label:'Priorité',rank:3},
@@ -74,6 +74,11 @@ export function assessCapacities(results={},profile={}){
  const romberg=qsVel!==null&&qsEcVel!==null&&qsVel>0?qsEcVel/qsVel:null;
  const slsVel=maxOrNull(F(results,'unipodal_left','sls_left_velocity_mms'),F(results,'unipodal_right','sls_right_velocity_mms'));
  const qsZone=qsAsym===null?(qsVel===null?'missing':'follow'):qsAsym>10?'consolidate':'solid';
+ // Répartition du poids, plus parlante pour le patient : ForceDecks calcule l'asymétrie sur la jambe la plus chargée
+ // ((fort − faible) / fort), donc la part de la jambe la plus chargée vaut 1 / (2 − asymétrie).
+ const qsSide=done(results,'fd_quiet_stand')?.fields?.fd_qs_asym_side;
+ const qsShare=qsAsym!==null&&qsAsym>0&&(qsSide==='left'||qsSide==='right')?
+  Math.round(100/(2-qsAsym/100))+' % du poids sur la jambe '+(qsSide==='left'?'gauche':'droite'):null;
  // Force (préhension = repère publié ; genou et hanche = suivi)
  const gl=F(results,'dynamo_grip','grip_left_n'),gr=F(results,'dynamo_grip','grip_right_n');
  const gripN=gl!==null&&gr!==null?Math.max(gl,gr):gl??gr,gripKg=gripN===null?null:gripN/KGF;
@@ -113,7 +118,7 @@ export function assessCapacities(results={},profile={}){
     measure('Oscillations debout',qsVel===null?null:fr(qsVel,1),'mm/s',qsVel===null?'missing':'follow','suivi personnel'),
     measure('Yeux fermés / yeux ouverts',romberg===null?null:fr(romberg,1),'×',romberg===null?'missing':'follow','part de la vue · suivi personnel'),
     measure('Oscillations sur un pied (côté le plus instable)',slsVel===null?null:fr(slsVel,1),'mm/s',slsVel===null?'missing':'follow','essai tenu 30 s · suivi personnel'),
-    measure('Asymétrie de charge debout',qsAsym===null?null:fr(qsAsym,1),'%',qsZone,'repère : 10 %')]},
+    measure('Asymétrie de charge debout',qsAsym===null?null:fr(qsAsym,1),'%',qsZone,'repère : 10 %'+(qsShare?' · '+qsShare:''))]},
   {id:'strength',name:'Force musculaire',zone:gripZone,
    why:'Chaque 5 kg de force de main en moins est associé à 16 % de mortalité en plus (139 691 personnes suivies). La force se regagne à tout âge.',
    measures:[measure('Préhension (meilleur côté)',gripKg===null?null:fr(gripKg,1),'kg',gripZone,'repère : '+low+' kg'+sexNote),

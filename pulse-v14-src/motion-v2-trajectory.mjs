@@ -6,7 +6,7 @@
 // aucune valeur n'existe pour nos appareils). En dessous, la mesure est « stable ».
 // mdc : en unité de la mesure · mdcPct : en % de la valeur de départ · cross : seuil dont le franchissement compte.
 // mdcBySex : marge propre au sexe (options.sex), mdc sinon.
-import {stsPowerOf} from './motion-protocol.mjs?v=20261122-sanscamera-v1';
+import {stsPowerOf} from './motion-protocol.mjs?v=20261123-quietstand-v1';
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round=(x,d=1)=>Math.round(x*10**d)/10**d;
 const maxOf=(a,b)=>finite(a)&&finite(b)?Math.max(a,b):finite(a)?a:finite(b)?b:null;

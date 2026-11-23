@@ -142,21 +142,21 @@ export const STEPS=[
   device:'2 ForceDecks Mini',trials:'1 essai de 30 s',duration:0,
   setup:'Le patient remonte sur les plateformes après la taille : un pied sur chaque, à largeur d’épaules, mains sur les hanches, buste droit, regard devant. La chaise est derrière lui.',
   script:'« Mains sur les hanches, regardez devant vous. Gardez les pieds fixes et restez aussi immobile que possible pendant 30 secondes. »',
-  instruction:'Lancer l’enregistrement (compte à rebours de 3 s), attendre les 30 s, puis recopier les 4 valeurs de l’écran de résultats, de haut en bas. Le L ou R après l’asymétrie indique le côté le plus chargé. La vitesse du centre de pression est la valeur la plus reproductible : c’est elle qu’on suit.',
+  instruction:'Attendre que le patient soit immobile, puis lancer l’enregistrement (compte à rebours de 3 s) et attendre les 30 s sans lui parler. Ne jamais se tester soi-même en tenant l’iPad : le moindre geste fausse la mesure. Recopier les 3 oscillations (CoP Range ML et AP, Mean Velocity) et l’asymétrie de la carte Mean Force. Côté le plus chargé = Left ou Right, celui dont la force est la plus haute sur cette carte ; les « Right » des cartes CoP ne comptent pas. La vitesse du centre de pression est la valeur la plus reproductible : c’est elle qu’on suit.',
   vald:{app:'ForceDecks',test:'Balance › Quiet Stand',settings:'Exercise Length 30 s · aucune option cochée (yeux ouverts, sol stable)',
-   tip:'Ce sont les 4 métriques affichées par défaut depuis la version de juillet 2026 de l’app. Si l’écran en montre d’autres, rétablis les métriques par défaut dans les réglages des résultats.'},
+   tip:'L’écran affiche 5 cartes : Mean Force – Asymmetry, Area of CoP Ellipse, Mean Velocity, CoP Range ML et AP. L’aire de l’ellipse et les asymétries des cartes CoP ne se recopient pas. Ordre de grandeur debout immobile : 10 à 20 mm/s ; une valeur bien plus haute signale un mouvement pendant l’enregistrement.'},
   fields:[
    {key:'fd_qs_cop_ml_mm',label:'Oscillation latérale',unit:'mm',min:0,max:1000,decimals:1,vald:'CoP Range, Medial-Lateral – Bilateral'},
    {key:'fd_qs_cop_ap_mm',label:'Oscillation avant-arrière',unit:'mm',min:0,max:1000,decimals:1,vald:'CoP Range, Anterior-Posterior – Bilateral'},
    {key:'fd_qs_velocity_mms',label:'Vitesse moyenne du centre de pression',unit:'mm/s',min:0,max:1000,decimals:1,vald:'Mean Velocity'},
    {key:'fd_qs_asym_pct',label:'Asymétrie de charge',unit:'%',min:0,max:100,decimals:1,vald:'Mean Force – Asymmetry'}
   ],
-  choices:[{key:'fd_qs_asym_side',label:'Côté le plus chargé (L ou R affiché)',options:SIDE_OPTIONS}]},
+  choices:[{key:'fd_qs_asym_side',label:'Côté le plus chargé (force la plus haute)',options:SIDE_OPTIONS}]},
  {id:'fd_quiet_stand_ec',block:'B',kind:'fields',title:'Quiet Stand yeux fermés · ForceDecks',short:'Yeux fermés',
   device:'2 ForceDecks Mini',trials:'1 essai de 30 s',duration:0,
   setup:'Même position que le Quiet Stand : un pied sur chaque plateforme, mains sur les hanches. Praticien tout près, mains prêtes, sans toucher.',
   script:'« Même position. Fermez les yeux et restez aussi immobile que possible pendant 30 secondes. Je suis juste à côté de vous. »',
-  instruction:'Cocher « Eyes Closed » dans les réglages, lancer l’enregistrement, puis recopier les 3 valeurs. Si le patient ouvre les yeux, déplace un pied ou se rattrape : arrêter et marquer le test non réalisé, motif « Sécurité ». Comparé aux yeux ouverts, il montre à quel point l’équilibre dépend de la vue.',
+  instruction:'Cocher « Eyes Closed » dans les réglages, lancer l’enregistrement une fois le patient immobile, puis recopier les 3 oscillations (CoP Range ML et AP, Mean Velocity). Si le patient ouvre les yeux, déplace un pied ou se rattrape : arrêter et marquer le test non réalisé, motif « Sécurité ». Comparé aux yeux ouverts, il montre à quel point l’équilibre dépend de la vue.',
   vald:{app:'ForceDecks',test:'Balance › Quiet Stand',settings:'Exercise Length 30 s · option Eyes Closed cochée'},
   fields:[
    {key:'fd_qsec_cop_ml_mm',label:'Oscillation latérale',unit:'mm',min:0,max:1000,decimals:1,vald:'CoP Range, Medial-Lateral – Bilateral'},
@@ -173,7 +173,7 @@ export const STEPS=[
    {key:'fd_sts_time_to_stand_s',label:'Temps pour se lever',unit:'s',min:0,max:20,decimals:2,vald:'Time to Stand'},
    {key:'fd_sts_asym_pct',label:'Asymétrie de force au lever',unit:'%',min:0,max:100,decimals:1,vald:'Mean Standing Force – Asymmetry'}
   ],
-  choices:[{key:'fd_sts_asym_side',label:'Côté le plus chargé (L ou R affiché)',options:SIDE_OPTIONS}]},
+  choices:[{key:'fd_sts_asym_side',label:'Côté le plus chargé (force la plus haute)',options:SIDE_OPTIONS}]},
  {id:'unipodal_left',block:'B',kind:'fields',title:'Appui pied gauche · ForceDecks',short:'Appui G',
   device:'1 ForceDecks Mini',trials:'1 à 2 essais, 30 s max, le meilleur retenu',duration:0,holdTimer:true,
   value_field:'sls_left_hold_s',method:'SLS_FORCEDECKS_EO_30S_BEST_OF_2',
@@ -333,6 +333,12 @@ export function plausibilityWarnings(stepId,f={}){
  if(spec?.value_field&&finite(f[spec.value_field])&&f[spec.value_field]<29.95&&
   spec.fields.some(x=>x.optional&&finite(f[x.key])))
   w.push('Essai tenu moins de 30 s : les oscillations de la plateforme ne sont pas comparables, laisse-les vides.');
+ // Debout immobile, la vitesse du centre de pression est de l'ordre de 10 à 20 mm/s et les oscillations de quelques
+ // centimètres : bien au-delà, l'enregistrement contient un mouvement (montée sur les plateformes, parole, bras).
+ const QS=stepId==='fd_quiet_stand'?{v:'fd_qs_velocity_mms',ml:'fd_qs_cop_ml_mm',ap:'fd_qs_cop_ap_mm',vmax:40}:
+  stepId==='fd_quiet_stand_ec'?{v:'fd_qsec_velocity_mms',ml:'fd_qsec_cop_ml_mm',ap:'fd_qsec_cop_ap_mm',vmax:60}:null;
+ if(QS&&((finite(f[QS.v])&&f[QS.v]>QS.vmax)||(finite(f[QS.ap])&&f[QS.ap]>100)||(finite(f[QS.ml])&&f[QS.ml]>60)))
+  w.push('Oscillations bien plus grandes qu’un appui immobile (en général 10 à 20 mm/s et quelques centimètres) : l’enregistrement contient sans doute un mouvement (montée sur les plateformes, parole, bras, regard vers l’écran). Refais l’essai, patient immobile avant de lancer.');
  if(stepId==='fd_cmj'&&((finite(f.cmj_height_cm)&&f.cmj_height_cm>60)||(finite(f.cmj_peak_power_wkg)&&f.cmj_peak_power_wkg>75)))
   w.push('Valeur de saut inhabituelle : vérifie la métrique recopiée (hauteur en cm, puissance en W/kg).');
  if(spec?.dynamo&&spec.pair){
