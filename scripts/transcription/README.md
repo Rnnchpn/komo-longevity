@@ -100,7 +100,7 @@ Exécuter `CODE.sql` via le connecteur Supabase :
 
 Exécuter `CODE.controle.sql`. Le résultat attendu est `conforme = true`, avec le bon nombre de tests et le statut `completed` si les 14 tests sont traités.
 
-Prévenir ensuite le praticien. La console passe au Rapport au prochain rafraîchissement, et la page « Mon bilan » du patient affiche ses résultats.
+Prévenir ensuite le praticien. La console passe au Rapport au prochain rafraîchissement. La page « Mon bilan » du patient affiche « en relecture » : les résultats n'y apparaissent qu'après « Valider et rendre visible au patient » (bas du Rapport, action serveur `operator_patient_release`). Claude ne valide jamais à la place du praticien.
 
 ## Limites
 

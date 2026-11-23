@@ -2,8 +2,8 @@
 // Ouvert par le QR remis en consultation : le patient remplit le questionnaire pendant les tests,
 // puis retrouve ses résultats et son passeport PDF à la fin du bilan. Pas de compte, pas de nom :
 // le lien porte un jeton personnel de 256 bits (30 jours), retiré de la barre d'adresse dès l'ouverture.
-import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261123-quietstand-v1';
-import {STEPS} from '../motion-protocol.mjs?v=20261123-quietstand-v1';
+import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261123-envoi-v1';
+import {STEPS} from '../motion-protocol.mjs?v=20261123-envoi-v1';
 const EDGE="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test";
 const KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
 const STORE="komo_mon_bilan_v1";
@@ -71,7 +71,7 @@ function statusCard(){
   '<div class="mb-steps"><span>Tests réalisés</span><span id="mbTests">'+done+' / '+total+'</span></div>'+
   '<div class="mb-progress"><i id="mbTestsBar" style="width:'+Math.round(done/total*100)+'%"></i></div>'+
   '<p>Pendant les tests, répondez au questionnaire ci-dessous : '+QUESTION_COUNT+' questions, environ 5 minutes. Vos réponses arrivent directement chez votre praticien.</p>'+
-  '<p class="mb-muted">Vos résultats et votre passeport apparaîtront sur cette page à la fin du bilan. Gardez-la ouverte ou rouvrez-la plus tard depuis ce téléphone.</p></div>';
+  '<p class="mb-muted">Vos résultats et votre passeport apparaîtront sur cette page après la relecture de votre praticien. Gardez-la ouverte ou rouvrez-la plus tard depuis ce téléphone.</p></div>';
 }
 function questionnaireCard(collapsed){
  const n=answeredRequired();
@@ -81,8 +81,16 @@ function questionnaireCard(collapsed){
  return collapsed?'<details class="mb-card"><summary><b>Vos réponses au questionnaire</b> · '+n+' / '+QUESTION_COUNT+'</summary>'+inner+'</details>':
   '<div class="mb-card">'+inner+'</div>';
 }
+function reviewCard(){
+ const done=view.tests_done||0,total=(view.steps||STEPS).length;
+ return '<div class="mb-card"><span class="mb-over">BILAN TERMINÉ</span><h1>Vos résultats sont en relecture</h1>'+
+  '<div class="mb-steps"><span>Tests réalisés</span><span>'+done+' / '+total+'</span></div>'+
+  '<div class="mb-progress"><i style="width:100%"></i></div>'+
+  '<p>Votre praticien relit vos mesures avant de vous les remettre. Elles apparaîtront ici, avec votre programme et votre passeport PDF, dès qu’il les aura validées.</p>'+
+  '<p class="mb-muted">Vous pouvez fermer cette page et la rouvrir plus tard depuis ce téléphone.</p></div>';
+}
 async function resultsCard(){
- extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261123-quietstand-v1");
+ extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261123-envoi-v1");
  const passport=extras.clinicPassport(answers,view.results||{},new Date(view.completed_at||Date.now()),
   {subject:view.code||"Mon bilan KŌMØ",real:!!view.patient?.real,patient:view.patient});
  const lp=passport.longevity,zones={priority:"Priorité",consolidate:"À consolider",solid:"Solide",follow:"Suivi",missing:"Non mesuré"};
@@ -104,7 +112,9 @@ async function resultsCard(){
 async function render(){
  if(!view)return;
  codeEl.textContent=view.code||"";
- const state=view.status==="completed"?"completed":"active";
+ // Résultats visibles seulement après validation du praticien (view.released).
+ const state=view.status!=="completed"?"active":view.released?"completed":"review";
+ if(state===shownState&&state==="review")return;
  if(state===shownState&&state==="active"){
   // Mise à jour légère : ne pas redessiner le questionnaire pendant la saisie.
   const done=view.tests_done||0,total=(view.steps||STEPS).length;
@@ -124,6 +134,10 @@ async function render(){
    catch(err){st.textContent="Le PDF n’a pas pu être préparé : réessayez dans un instant."}
    finally{b.disabled=false;b.textContent="Télécharger mon passeport (PDF)"}
   };
+ }else if(state==="review"){
+  const complete=answeredRequired()>=QUESTION_COUNT;
+  app.innerHTML=reviewCard()+questionnaireCard(complete)+'<div class="mb-save" id="mbSave" role="status"></div>';
+  setSave(complete?saveLabel():"Vous pouvez encore compléter le questionnaire · "+answeredRequired()+" / "+QUESTION_COUNT);
  }else{
   app.innerHTML=statusCard()+questionnaireCard(false)+'<div class="mb-save" id="mbSave" role="status"></div>';
   setSave(answeredRequired()?saveLabel():"Vos réponses s’enregistrent automatiquement.");
@@ -143,10 +157,10 @@ async function refresh(){
    const before=JSON.stringify(answers);
    answers={...answers,...(r.questionnaire?.answers||{})};
    // Réponse ajoutée ou corrigée par le praticien : on redessine le questionnaire (hors saisie en cours).
-   if(before!==JSON.stringify(answers)&&shownState==="active")shownState="";
+   if(before!==JSON.stringify(answers)&&shownState!=="completed")shownState="";
   }
   await render();
-  if(r.status==="completed"){clearInterval(poll);poll=null}
+  if(r.status==="completed"&&r.released){clearInterval(poll);poll=null}
  }catch(e){
   if(["patient_link_expired","patient_link_not_found","patient_link_closed","invalid_patient_link"].includes(e.code))showInvalid();
   else if(!view)app.innerHTML='<div class="mb-card"><h2>Connexion impossible</h2><p>Vérifiez votre connexion Internet : la page réessaie toute seule.</p></div>';
@@ -156,6 +170,6 @@ if(!token){
  app.innerHTML='<div class="mb-card"><span class="mb-over">MON BILAN KŌMØ</span><h1>Scannez le QR code de votre consultation.</h1><p>Votre praticien vous le montre au début du bilan. Il ouvre cette page avec votre questionnaire, puis vos résultats.</p></div>';
 }else{
  await refresh();
- poll=setInterval(refresh,5000);
+ poll=setInterval(()=>{if(!document.hidden)refresh()},5000);
  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refresh()});
 }

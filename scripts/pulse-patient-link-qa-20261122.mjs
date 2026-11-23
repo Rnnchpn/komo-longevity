@@ -23,7 +23,8 @@ assert.deepEqual([...Object.keys(choices),...ratings].sort(),[...modelIds].sort(
 assert.equal(QUESTION_COUNT,22);
 // 2. Lien patient côté serveur : jeton haché, 30 jours, actions sans compte limitées au lien.
 for(const s of ['operator_patient_link','patient_link_status','patient_questionnaire_save','PATIENT_LINK_DAYS=30',
- 'contains("progress",{patient_link:{token_hash:tokenHash}})','entered_by:"patient"','results:room.status==="completed"?results:null'])
+ 'contains("progress",{patient_link:{token_hash:tokenHash}})','entered_by:"patient"','results:released?results:null',
+ 'const released=room.status==="completed"&&typeof p.patient_release?.released_at==="string"','action==="operator_patient_release"'])
  assert.ok(edge.includes(s),'serveur : '+s);
 assert.ok(edge.indexOf('action==="patient_link_status"')<edge.indexOf('const actor=await operator(req)'),'actions patient avant l’authentification praticien');
 // 3. Page « Mon bilan » : publiée, sans référent ni indexation, jeton retiré de l'adresse.
@@ -32,6 +33,9 @@ assert.ok(js.includes('history.replaceState(null,"",location.pathname)'),'jeton 
 assert.ok(!/email|e-mail|prénom/i.test(js.replace(/\/\/.*$/gm,'')),'aucune demande d’identité');
 
 assert.ok(release.includes("'mon-bilan/index.html'"));
+// 3b. Envoi au patient (23/11/2026) : résultats visibles seulement après la validation du praticien.
+assert.ok(js.includes('view.released?"completed":"review"')&&js.includes('Vos résultats sont en relecture'),'page patient : état « en relecture »');
+assert.ok(consult.includes('id="mocReleaseGo"')&&consult.includes('operator_patient_release'),'console : bouton de validation');
 // 4. Console : bouton « QR patient », lien conservé pendant la consultation.
 assert.ok(consult.includes('id="mocPatientQrBtn"')&&consult.includes('operator_patient_link')&&consult.includes('komo_patient_qr_'));
-console.log('[pulse-patient-link-qa] PASS questionnaire serveur = modèle ('+modelIds.length+' questions dont '+(modelIds.length-QUESTION_COUNT)+' facultatives), lien patient 30 jours sans compte, page Mon bilan, QR dans la console');
+console.log('[pulse-patient-link-qa] PASS questionnaire serveur = modèle ('+modelIds.length+' questions dont '+(modelIds.length-QUESTION_COUNT)+' facultatives), lien patient 30 jours sans compte, page Mon bilan, résultats après validation du praticien, QR dans la console');

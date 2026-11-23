@@ -153,13 +153,15 @@ async function patientLinkLookup(req:Request,b:any){
 function patientView(room:any,patient:any){
  const p=room.progress||{},results=p.results&&typeof p.results==="object"?p.results:{};
  const code=typeof patient?.last_name==="string"&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(patient.last_name)?patient.last_name:null;
+ // Envoi au patient (23/11/2026) : les résultats n'apparaissent sur « Mon bilan » qu'après validation du praticien.
+ const released=room.status==="completed"&&typeof p.patient_release?.released_at==="string";
  return {status:room.status,stage_code:room.stage_code,steps:STEPS,completed_at:room.completed_at||null,code,
   patient:{birth_date:patient?.birth_date||null,sex_at_birth:patient?.sex_at_birth||null,
    real:patient?.data_classification==="health_data"},
   questionnaire:{answers:p.questionnaire?.answers||{},updated_at:p.questionnaire?.updated_at||null,
    simulated:p.questionnaire?.simulated===true},
   tests_done:STEPS.filter(id=>["done","skipped"].includes(results[id]?.status)).length,
-  results:room.status==="completed"?results:null,
+  results:released?results:null,released,released_at:released?p.patient_release.released_at:null,
   link_expires_at:p.patient_link?.expires_at||null};
 }
 async function guestLookup(req:Request,b:any){
@@ -633,6 +635,26 @@ Deno.serve(async(req:Request)=>{
   if(error||!data)return response(req,{error:"stale_state_retry"},409);
   return response(req,{ok:true,token,url:"https://pulse.komolongevity.com/mon-bilan/#t="+token,
    expires_at:expiresAt,session:publicRow(data)});
+ }
+ if(action==="operator_patient_release"){
+  // Validation du praticien : rend les résultats visibles sur la page « Mon bilan » du patient (release:false les masque).
+  const id=s(b.session_id,50),release=b.release!==false;
+  if(!uuid(id))return response(req,{error:"invalid_session"},422);
+  const {data:room,error:roomError}=await db.from("pulse_motion_live_sessions").select("*")
+   .eq("id",id).eq("organization_id",ORG_ID).maybeSingle();
+  if(roomError||!room)return response(req,{error:"session_not_found"},404);
+  if(room.operator_user_id!==actor.id||!room.patient_id)return response(req,{error:"operator_owner_required"},403);
+  if(release&&room.status!=="completed")return response(req,{error:"consultation_not_completed"},409);
+  if(!["active","completed"].includes(room.status))return response(req,{error:"room_unavailable"},409);
+  const {data:patient}=await db.from("patients").select("data_classification,status")
+   .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
+  if(!patientAllowed(patient))return response(req,{error:"synthetic_patient_required"},403);
+  const old=room.progress&&typeof room.progress==="object"&&!Array.isArray(room.progress)?{...room.progress}:{};
+  if(release)old.patient_release={released_at:now(),by:"practitioner"};else delete old.patient_release;
+  const {data,error}=await db.from("pulse_motion_live_sessions").update({progress:old,updated_at:now()})
+   .eq("id",id).eq("updated_at",room.updated_at).select("*").maybeSingle();
+  if(error||!data)return response(req,{error:"stale_state_retry"},409);
+  return response(req,{ok:true,released:release,session:publicRow(data)});
  }
  if(action==="operator_questionnaire_save"){
   const id=s(b.session_id,50);

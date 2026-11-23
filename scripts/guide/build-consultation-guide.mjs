@@ -268,7 +268,7 @@ table.summary td:first-child{width:20%}
   '<b>QR patient</b> (bouton vert en haut de la console) : montre-le au patient. Il le vise avec l’appareil photo de son téléphone : sa page « Mon bilan » s’ouvre, sans compte ni nom.',
   'Coche la case de sécurité (espace dégagé, appui accessible, pas de contre-indication évidente) : sans elle, le premier test ne démarre pas.'
  ])}
- <div class="note"><b>Le lien du patient</b> est personnel, valable 30 jours. Le patient y répond au questionnaire pendant les tests, puis y retrouve ses résultats et son passeport PDF à la fin du bilan. Rouvrir le QR montre le même lien ; « Nouveau QR » le remplace (l’ancien cesse de fonctionner).</div>
+ <div class="note"><b>Le lien du patient</b> est personnel, valable 30 jours. Le patient y répond au questionnaire pendant les tests, puis y retrouve ses résultats et son passeport PDF <b>après ta validation</b> (étape 7). Rouvrir le QR montre le même lien ; « Nouveau QR » le remplace (l’ancien cesse de fonctionner).</div>
  <div class="note"><b>Dans la console, chaque test suit le même ordre :</b> le bandeau de station dit où installer le patient ; « Installation et consignes » reprend ce guide ; tu saisis, puis « Valider et passer au suivant ». Les numéros en haut permettent d’ouvrir n’importe quel test, et « Plus tard » de le reporter à la fin.</div>
  <div class="note warn"><b>Arrêter un test.</b> Douleur, vertige, malaise, perte d’équilibre, essoufflement anormal : tu arrêtes, tu rassures, tu fais asseoir. « Test non réalisé » avec son motif passe au suivant. Un test impossible n’est pas un échec : le rapport l’indique sans valeur inventée.</div>
  <p class="kicker" style="margin-top:7mm">Étape 5</p><h2>Les ${N} tests, station par station</h2>
@@ -291,10 +291,10 @@ table.summary td:first-child{width:20%}
   'Envoie la photo à Claude, dans la conversation habituelle.',
   'Claude te renvoie un récapitulatif : chaque valeur, les conversions des kg, les symétries, la vitesse de marche, et les valeurs à vérifier. Compare-le à ta feuille, puis réponds « OK » ou corrige.',
   'Claude enregistre seulement après ton « OK », puis vérifie que chaque valeur enregistrée correspond au récapitulatif.',
-  'Ta console passe sur le <b>Rapport</b> et le téléphone du patient affiche ses résultats : place à la restitution (étape 7).'
+  'Ta console passe sur le <b>Rapport</b>. Le téléphone du patient affiche « en relecture » : rien ne lui est montré avant ta validation (étape 7).'
  ])}
  <div class="note"><b>Les règles restent celles de PULSE</b> : mêmes bornes, mêmes calculs, même passeport, même trajectoire à 6 semaines. Chaque valeur garde la trace de sa transcription depuis la feuille. Une valeur illisible n’est jamais devinée : Claude te la demande.</div>
- <div class="note warn"><b>Si Claude ne répond pas</b>, saisis toi-même la feuille dans la console, dans les 4 heures : onglet Tests, touche chaque test dans la liste et recopie ses valeurs. Au-delà, Claude peut encore la transcrire jusqu’à 7 jours après la consultation : le patient repart et reçoit ses résultats sur son lien.</div>
+ <div class="note warn"><b>Si Claude ne répond pas</b>, saisis toi-même la feuille dans la console, dans les 4 heures : onglet Tests, touche chaque test dans la liste et recopie ses valeurs. Au-delà, Claude peut encore la transcrire jusqu’à 7 jours après la consultation : le patient repart et reçoit ses résultats sur son lien dès que tu les valides.</div>
 </section>
 
 <section class="part">
@@ -311,7 +311,7 @@ table.summary td:first-child{width:20%}
   'Montre chaque exercice en salle, une ou deux répétitions. Un exercice déjà fait une fois est un exercice qu’on refait à la maison.',
   '« Télécharger le passeport complet ». Sur l’iPhone, le PDF s’ouvre : « Partager › Imprimer » (AirPrint) ou « Enregistrer dans Fichiers ». Feuillette-le avant de l’imprimer.',
   'Remets-le imprimé, en main propre, et ajoute le prénom à la main : le fichier ne porte que le code. Par voie numérique, uniquement ta messagerie de santé sécurisée.',
-  'Sur son téléphone, la page « Mon bilan » affiche aussitôt ses capacités, ses priorités, son programme maison et le bouton pour télécharger son passeport.',
+  'Relu et d’accord ? En bas du Rapport, <b>« Valider et rendre visible au patient »</b>. Sa page « Mon bilan » affiche alors ses capacités, ses priorités, son programme maison et le bouton pour télécharger son passeport. Il a déjà son lien s’il a scanné le QR ; sinon « Lien du patient », à envoyer par ta messagerie sécurisée. « Masquer au patient » retire l’accès si besoin.',
   'Prends le rendez-vous de contrôle à 6 semaines avant que le patient parte.'
  ])}
  <blockquote>« Voici votre point de départ. Ce ne sont pas des diagnostics, ce sont des repères. Votre marche est solide. Votre équilibre est sous les 10 secondes d’un côté : dans les études, c’est associé à un risque plus élevé. La bonne nouvelle, c’est que ça s’entraîne. Voici vos exercices, et nous refaisons les mêmes mesures dans 6 semaines pour voir ce qui a bougé. »</blockquote>

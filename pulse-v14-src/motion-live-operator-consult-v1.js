@@ -1,8 +1,8 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
 // v2.4 : sans caméra (plateformes, DynaMo, chrono et compteur PULSE). Le code vidéo reste pour Human Track.
 // Valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-quietstand-v1';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-quietstand-v1';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-envoi-v1';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-envoi-v1';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
@@ -73,7 +73,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261123-quietstand-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261123-envoi-v1";
  // Le design de l'espace praticien (pulse-workspace.css) reste la dernière couche.
  const workspace=document.querySelector("link[data-pulse-workspace]");
  if(workspace)document.head.insertBefore(link,workspace);else document.head.append(link);
@@ -389,7 +389,7 @@ async function showPatientQr(renew){
   '<div><h3>Questionnaire sur le téléphone du patient</h3><ol class="moc-qr-steps">'+
   '<li>Le patient vise ce QR avec l’appareil photo de son téléphone.</li>'+
   '<li>Il répond aux questions pendant les tests : ses réponses arrivent dans l’onglet Questionnaire.</li>'+
-  '<li>À la fin du bilan, il retrouve sur la même page ses résultats et son passeport PDF.</li></ol>'+
+  '<li>Après ta validation (onglet Rapport, « Envoi au patient »), il retrouve sur la même page ses résultats et son passeport PDF.</li></ol>'+
   '<p class="moc-help">Lien personnel valable jusqu’au '+HTML(new Date(link.expires_at).toLocaleDateString("fr-FR"))+', sans compte ni nom.</p>'+
   '<p class="moc-help" id="mocQrFallback" hidden>QR indisponible sur cet écran : copie le lien et envoie-le par ta messagerie sécurisée.</p>'+
   '<div class="moc-buttons"><button type="button" class="moc-button secondary" id="mocQrCopy">Copier le lien</button>'+
@@ -700,6 +700,34 @@ function priorityMarkup(p,i){
  return '<li class="moc-priority"><span class="moc-priority-rank">'+(i+1)+'</span><div><strong>'+HTML(p.name)+'</strong>'+
   '<p>'+HTML(p.why)+'</p><p class="moc-priority-goal">Objectif à 6 semaines : <b>'+HTML(p.objective)+'</b></p></div></li>';
 }
+// Envoi au patient (23/11/2026) : la page « Mon bilan » n'affiche les résultats qu'après cette validation.
+function releaseMarkup(finished){
+ const at=room.progress?.patient_release?.released_at,hasLink=!!room.progress?.patient_link;
+ const when=at?new Date(at).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"";
+ const state=!finished?"waiting":at?"released":"ready";
+ return '<section class="moc-release" id="mocRelease" data-state="'+state+'"><h4>Envoi au patient</h4>'+
+  (state==="waiting"?'<p class="moc-help">Le patient verra ses résultats sur sa page « Mon bilan » après ta validation, une fois les '+TESTS.length+' étapes terminées.</p>':
+   state==="released"?'<p><b>✓ Visible par le patient depuis le '+HTML(when)+'</b> : résultats, programme et passeport PDF sur sa page « Mon bilan ».</p>'+
+    '<p class="moc-help">'+(hasLink?'Il a déjà son lien (QR de la consultation) : il lui suffit de rouvrir la page.':'Aucun lien n’a encore été remis : crée-le avec « Lien du patient » et envoie-le par ta messagerie sécurisée.')+'</p>'+
+    '<div class="moc-buttons"><button type="button" class="moc-button secondary" id="mocReleaseLink">Lien du patient</button>'+
+    '<button type="button" class="moc-button secondary" id="mocReleaseUndo">Masquer au patient</button></div>':
+   '<p><b>Le patient ne voit pas encore ses résultats.</b> Relis le rapport, corrige un test si besoin, puis valide.</p>'+
+    '<div class="moc-buttons"><button type="button" class="moc-button primary" id="mocReleaseGo">Valider et rendre visible au patient</button></div>')+
+  '<p class="moc-status" id="mocReleaseStatus" role="status"></p></section>';
+}
+function bindRelease(){
+ const set=async(release,button)=>{
+  const status=q("mocReleaseStatus");if(button)button.disabled=true;
+  if(status)status.textContent=release?"Validation…":"Masquage…";
+  try{const r=await api({action:"operator_patient_release",session_id:room.id,release});
+   lastMutationAt=performance.now();if(r.session)room=r.session;renderReportSection();
+   const after=q("mocReleaseStatus");if(after)after.textContent=release?"✓ Validé : le patient voit ses résultats.":"Résultats masqués : le patient voit « en relecture ».";}
+  catch(error){if(status)status.textContent="Échec : "+(error.message||"erreur réseau")+". Réessaie.";if(button)button.disabled=false}
+ };
+ if(q("mocReleaseGo"))q("mocReleaseGo").onclick=e=>set(true,e.currentTarget);
+ if(q("mocReleaseUndo"))q("mocReleaseUndo").onclick=e=>{if(confirm("Masquer les résultats au patient ? Sa page « Mon bilan » affichera « en relecture » jusqu’à ta prochaine validation."))set(false,e.currentTarget)};
+ if(q("mocReleaseLink"))q("mocReleaseLink").onclick=()=>{showPatientQr(false);q("mocPatientQr")?.scrollIntoView({block:"start",behavior:"smooth"})};
+}
 function renderReportSection(){
  if(!host||!extras||!room)return;
  const results=room.progress?.results||{};
@@ -772,6 +800,7 @@ function renderReportSection(){
    more.map(nutritionCard).join('')+
    '<p class="moc-help">'+HTML(plan.review)+'</p></details>'+
   '<p class="moc-report-guard">Proposition éducative : la vidéo et le questionnaire ne permettent ni diagnostic de carence, ni prescription de compléments. Vérification clinique nécessaire.</p>'+
+  releaseMarkup(finished)+
   '<div class="moc-buttons moc-report-actions"><button type="button" class="moc-button primary" id="mocDownloadPdf"'+(!finished?' disabled':'')+'>↓ Télécharger le passeport complet (6 catégories)</button>'+
   '<div class="moc-category-export"><label for="mocExportCategory">Exporter une grande catégorie</label>'+
    '<select id="mocExportCategory" aria-label="Choisir la catégorie">'+
@@ -805,6 +834,7 @@ function renderReportSection(){
  updatePanelTabs();
  if(trajectoryState.key!==trajectoryKey())void loadTrajectory(false);
  q("mocReportQuestionnaire").onclick=()=>switchPanel("questionnaire");
+ bindRelease();
  if(q("mocCorrectGo"))q("mocCorrectGo").onclick=()=>gotoStep(q("mocCorrectStep")?.value);
  const button=q("mocDownloadPdf"),chapter=q("mocDownloadChapter");
  const exportPdf=async(type,clicked)=>{
@@ -1476,14 +1506,14 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-quietstand-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-envoi-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-quietstand-v1");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-envoi-v1");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1502,7 +1532,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  if(CAMERA_USED)try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-quietstand-v1");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-envoi-v1");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{
