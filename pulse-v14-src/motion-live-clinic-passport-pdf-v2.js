@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v4';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v5';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -241,7 +241,8 @@ export async function downloadClinicPassport(report,category='all'){
   const stable=t.rows.filter(r=>r.verdict==='stable'&&r.better!=='neutral').length;
   const brief=[fav.length?'Progrès réels : '+fav.map(r=>r.label.toLowerCase()+' ('+r.deltaDisplay+(r.unit?' '+r.unit:'')+')').join(', ')+'.':'Pas encore de progrès au-delà de la marge d’erreur de la mesure.',
    def.length?'À surveiller : '+def.map(r=>r.label.toLowerCase()+' ('+r.deltaDisplay+(r.unit?' '+r.unit:'')+')').join(', ')+'.':'',
-   stable+' mesure'+(stable>1?'s':'')+' stable'+(stable>1?'s':'')+' : l’écart reste dans la marge d’erreur.'].filter(Boolean).join(' ');
+   stable+' mesure'+(stable>1?'s':'')+' stable'+(stable>1?'s':'')+' : l’écart reste dans la marge d’erreur.',
+   'Le tableau montre les mesures principales ; toutes les valeurs sont dans les pages « Vos résultats ».'].filter(Boolean).join(' ');
   font(8.4);const bl=pdf.splitTextToSize(cleaner(brief),C-14).length;
   box(M,63,C,11+bl*4.2,P.pale,3);
   txt('EN BREF',M+7,69.5,{sz:7.4,bold:true,col:P.dark});
@@ -252,7 +253,10 @@ export async function downloadClinicPassport(report,category='all'){
   pts.forEach((p,i)=>txt(p.label,M+labelW+colW*i+colW/2,y,{sz:7.2,bold:true,col:P.white,align:'center'}));
   txt('ÉVOLUTION',R-3,y,{sz:7.2,bold:true,col:P.white,align:'right'});
   y+=9;
-  t.rows.forEach((r,idx)=>{
+  // Le tableau garde les mesures clés et tout changement réel ; les autres sont résumées dans « En bref ».
+  const KEY=new Set(['gait_speed','sts_30s','sts_power','balance_min','qs_velocity','qs_ec_velocity','sls_velocity','cmj_power','grip_best','knee_best','head_forward']);
+  const shownRows=t.rows.filter(r=>KEY.has(r.id)||r.notable);
+  shownRows.forEach((r,idx)=>{
    if(y>262){page('Votre trajectoire','Vos progrès mesurés (suite)','');y=68;}
    if(idx%2===0)box(M,y-5.2,C,8,P.sand);
    txt(r.label+(r.unit?' ('+r.unit+')':''),M+3,y,{sz:7.6});

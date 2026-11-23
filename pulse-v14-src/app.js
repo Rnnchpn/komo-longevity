@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261123-passeport-v4';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261123-passeport-v5';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -743,7 +743,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261123-passeport-v4');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261123-passeport-v5');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -1072,7 +1072,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261123-passeport-v4');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261123-passeport-v5');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         practitioner:String(S.profile?.display_name||[S.profile?.first_name,S.profile?.last_name].filter(Boolean).join(' ')||'').trim(),
