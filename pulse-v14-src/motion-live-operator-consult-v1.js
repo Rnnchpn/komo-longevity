@@ -1,8 +1,8 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
 // v2.4 : sans caméra (plateformes, DynaMo, chrono et compteur PULSE). Le code vidéo reste pour Human Track.
 // Valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-envoi-v1';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-envoi-v1';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-envoi-v2';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-envoi-v2';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
@@ -73,7 +73,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261123-envoi-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261123-envoi-v2";
  // Le design de l'espace praticien (pulse-workspace.css) reste la dernière couche.
  const workspace=document.querySelector("link[data-pulse-workspace]");
  if(workspace)document.head.insertBefore(link,workspace);else document.head.append(link);
@@ -703,7 +703,7 @@ function priorityMarkup(p,i){
 // Envoi au patient (23/11/2026) : la page « Mon bilan » n'affiche les résultats qu'après cette validation.
 function releaseMarkup(finished){
  const at=room.progress?.patient_release?.released_at,hasLink=!!room.progress?.patient_link;
- const when=at?new Date(at).toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"}):"";
+ const when=at?new Date(at).toLocaleDateString("fr-FR")+" à "+new Date(at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}):"";
  const state=!finished?"waiting":at?"released":"ready";
  return '<section class="moc-release" id="mocRelease" data-state="'+state+'"><h4>Envoi au patient</h4>'+
   (state==="waiting"?'<p class="moc-help">Le patient verra ses résultats sur sa page « Mon bilan » après ta validation, une fois les '+TESTS.length+' étapes terminées.</p>':
@@ -1506,14 +1506,14 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-envoi-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-envoi-v2");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-envoi-v1");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-envoi-v2");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1532,7 +1532,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  if(CAMERA_USED)try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-envoi-v1");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-envoi-v2");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{

@@ -4,7 +4,7 @@
 // Sources des repères : EWGSOP2 (préhension, marche), AWGS 2019 (marche 1,0 m/s), Rikli & Jones / CDC STEADI
 // (lever de chaise 30 s), Araujo BJSM 2022 (appui unipodal 10 s), JOA (Two-Step), VALD (asymétrie > 10 %),
 // Alcazar 2020–2021 (puissance relative au lever de chaise : équation, seuils 2,6 / 2,1 W/kg, MCID).
-import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261123-envoi-v1';
+import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261123-envoi-v2';
 export const LONGEVITY_PLAN_VERSION='KOMO_LONGEVITY_PLAN_V1';
 export const ZONES={
  priority:{label:'Priorité',rank:3},
@@ -103,11 +103,11 @@ export function assessCapacities(results={},profile={}){
  const capacities=[
   {id:'walk',name:'Marche',zone:worst(speedZone,twoZone),
    why:'Chaque 0,1 m/s de vitesse de marche en plus est associé à 12 % de risque de décès en moins (34 485 personnes suivies). Elle progresse avec la marche rapide et la force des jambes.',
-   measures:[measure('Vitesse de marche',speed===null?null:fr(speed,2),'m/s',speedZone,'repère : 0,8 et 1,0 m/s'),
-    ...(two?[measure('Two-Step (indice)',twoIdx===null?null:fr(twoIdx,2),'',twoZone,'repère : 1,1 et 1,3')]:[])]},
+   measures:[measure('Vitesse de marche',speed===null?null:fr(speed,2),'m/s',speedZone,'repère : 1,0 m/s ou plus · priorité sous 0,8'),
+    ...(two?[measure('Two-Step (indice)',twoIdx===null?null:fr(twoIdx,2),'',twoZone,'repère : 1,3 ou plus · priorité sous 1,1')]:[])]},
   {id:'legs',name:'Force des jambes',zone:worst(chairZone,powerZone==='missing'?null:powerZone),
    why:'Se lever, monter un escalier, se relever : c’est la puissance des jambes qui garde autonome. Une puissance basse au lever de chaise est associée à un risque de décès plus que doublé sur 9 ans ; elle progresse en quelques semaines.',
-   measures:[measure('Levers de chaise en 30 s',chair,'levers',chairZone,'repère '+CHAIR_BANDS[bi]+' ans'+(age!==null&&age<60?' (le plus proche)':'')+' : '+below+' et '+standard+sexNote),
+   measures:[measure('Levers de chaise en 30 s',chair,'levers',chairZone,'repère '+CHAIR_BANDS[bi]+' ans'+(age!==null&&age<60?' (le plus proche)':'')+' : '+standard+' levers ou plus · priorité sous '+below+sexNote),
     measure('Puissance des jambes (estimée)',power===null?null:fr(power,1),'W/kg',powerZone,'repère : '+fr(powerLow,1)+' W/kg'+sexNote+' · calculée avec la taille'),
     measure('Temps pour se lever (plateformes)',tts===null?null:fr(tts,2),'s',tts===null?'missing':'follow','suivi personnel'),
     measure('Saut vertical · puissance',cmjPower===null?null:fr(cmjPower,1),'W/kg',cmjPower===null?'missing':'follow',
@@ -119,7 +119,7 @@ export function assessCapacities(results={},profile={}){
     measure('Yeux fermés / yeux ouverts',romberg===null?null:fr(romberg,1),'×',romberg===null?'missing':'follow','part de la vue · suivi personnel'),
     measure('Oscillations sur un pied (côté le plus instable)',slsVel===null?null:fr(slsVel,1),'mm/s',slsVel===null?'missing':'follow','essai tenu 30 s · suivi personnel'),
     measure('Asymétrie de charge debout',qsAsym===null?null:fr(qsAsym,1),'%',qsZone,'repère : 10 %'+(qsShare?' · '+qsShare:''))]},
-  {id:'strength',name:'Force musculaire',zone:gripZone,
+  {id:'strength',name:'Force musculaire',zone:gripZone!=='missing'?gripZone:[kl,kr,kfl,kfr,fl,fr2,hl,hr].some(x=>x!==null)?'follow':'missing',
    why:'Chaque 5 kg de force de main en moins est associé à 16 % de mortalité en plus (139 691 personnes suivies). La force se regagne à tout âge.',
    measures:[measure('Préhension (meilleur côté)',gripKg===null?null:fr(gripKg,1),'kg',gripZone,'repère : '+low+' kg'+sexNote),
     measure('Extension de genou (meilleur côté)',kl===null&&kr===null?null:fr(Math.max(kl??0,kr??0),0),'N','follow','suivi personnel'),
