@@ -1,10 +1,10 @@
 // Questionnaire et rapport PDF de la consultation KŌMØ Motion en cabinet.
 // The physician/operator edits all fields on the desktop; nothing is collected on the iPhone.
 // This module has no access to camera frames, audio or WebRTC signaling.
-import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './motion-engine/intake-model.mjs?v=20261123-identite-v1';
-import {buildClinicPassport,passportTestIds} from './motion-live-clinic-passport-v2.mjs?v=20261123-identite-v1';
-import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js?v=20261123-identite-v1';
-import {clinicRadarMarkup} from './motion-live-clinic-action-plan-v1.mjs?v=20261123-identite-v1';
+import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './motion-engine/intake-model.mjs?v=20261123-identite-v2';
+import {buildClinicPassport,passportTestIds} from './motion-live-clinic-passport-v2.mjs?v=20261123-identite-v2';
+import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js?v=20261123-identite-v2';
+import {clinicRadarMarkup} from './motion-live-clinic-action-plan-v1.mjs?v=20261123-identite-v2';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 

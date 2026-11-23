@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261123-identite-v1';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261123-identite-v2';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -14,7 +14,7 @@ const PRO_ROUTES=['live','operator','patients','appointments'];
 const navActive=id=>S.route===id||(id==='live'&&S.route==='operator');
 // Étapes de consultation : source unique motion-protocol.mjs (ordre, libellés, appareils).
 const OP_STEPS=PROTOCOL_STEPS.map(x=>[x.id,x.trials,x.title,x.device]);
-// Centre réel : dossiers pseudonymisés (code + année de naissance). Centre test : dossiers fictifs.
+// Centre réel : dossiers nominatifs depuis le 23/11/2026 (prénom, nom, e-mail + code HIRO pour VALD). Centre test : dossiers fictifs.
 const isProductionCenter=()=>S.org?.clinical_data_status==='production_enabled';
 const consultablePatient=p=>!!p&&p.status==='active'&&(p.data_classification==='synthetic'||(p.data_classification==='health_data'&&isProductionCenter()));
 const centerLabel=o=>o?(o.name+(o.clinical_data_status==='production_enabled'?'':' · démonstration')):'Centre KŌMØ';
@@ -349,7 +349,7 @@ function shell(){
   const demoLink='';
   const mode=hasPro()?`<div class="mode-switch" role="group" aria-label="Choisir votre espace"><button type="button" data-mode="patient" class="${S.mode==='patient'?'active':''}" aria-pressed="${S.mode==='patient'}" ${!S.ownPatient?'disabled title="Aucun dossier personnel lié"':''}>Espace patient</button><button type="button" data-mode="pro" class="${S.mode==='pro'?'active':''}" aria-pressed="${S.mode==='pro'}">Équipe</button></div>`:'';
   const centerSwitch=S.mode==='pro'&&S.memberships.length?`<label class="center-switch"><span>Lieu de consultation</span><select id="centerSwitch" aria-label="Lieu de consultation">${S.memberships.map(m=>`<option value="${esc(m.organization_id)}" ${m.organization_id===S.org?.id?'selected':''}>${esc(centerLabel(m.organizations))}</option>`).join('')}</select></label>`:'';
-  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${centerSwitch}${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div>${S.mode==='pro'&&S.org?`<span class="center-badge ${isProductionCenter()?'is-real':'is-demo'}" title="${isProductionCenter()?'Dossiers réels pseudonymisés':'Dossiers fictifs uniquement'}">${esc(S.org.name)} · ${isProductionCenter()?'consultation réelle':'démonstration'}</span>`:''}<div class="user-chip"><span>${esc(((S.mode==='pro'?(S.profile?.first_name||S.profile?.display_name):firstName())||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(S.mode==='pro'?(S.profile?.first_name||String(S.profile?.display_name||'').split(' ')[0]||'Équipe'):firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div class="pulse-mobile-access">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div><div id="view"></div></main><button type="button" class="pulse-mobile-start-motion" id="pulse-mobile-start-motion">Consultation sur ce téléphone <span aria-hidden="true">→</span></button></div>`;
+  $('#app').innerHTML=`<div class="app-shell"><aside class="sidebar"><div><div class="brand">KŌMØ<small>PULSE</small></div><p class="sidebar-caption">Votre santé en mouvement</p></div><nav>${nav}</nav><div class="sidebar-bottom">${centerSwitch}${demoLink}${mode}<button class="text-button logout" id="logout">Se déconnecter</button></div></aside><main class="page"><header class="page-head"><div><span class="overline" id="pageOverline"></span><h1 id="pageTitle"></h1></div>${S.mode==='pro'&&S.org?`<span class="center-badge ${isProductionCenter()?'is-real':'is-demo'}" title="${isProductionCenter()?'Dossiers patients réels':'Dossiers fictifs uniquement'}">${esc(S.org.name)} · ${isProductionCenter()?'consultation réelle':'démonstration'}</span>`:''}<div class="user-chip"><span>${esc(((S.mode==='pro'?(S.profile?.first_name||S.profile?.display_name):firstName())||S.user?.email||'K').slice(0,1).toUpperCase())}</span><div><strong>${esc(S.mode==='pro'?(S.profile?.first_name||String(S.profile?.display_name||'').split(' ')[0]||'Équipe'):firstName())}</strong><small>${S.mode==='pro'?'Équipe KŌMØ':'Espace patient'}</small></div></div></header><div class="pulse-mobile-access">${mode}<button type="button" id="pulse-mobile-logout" class="pulse-mobile-logout" aria-label="Se déconnecter de Pulse">Déconnexion</button></div><div id="view"></div></main><button type="button" class="pulse-mobile-start-motion" id="pulse-mobile-start-motion">Consultation sur ce téléphone <span aria-hidden="true">→</span></button></div>`;
   document.querySelector('.app-shell')?.classList.toggle('app-shell-pro',S.mode==='pro');
   document.querySelector('.app-shell')?.classList.toggle('app-shell-patient',S.mode==='patient');
   document.querySelector('.app-shell')?.setAttribute('data-pulse-view',S.route);
@@ -743,7 +743,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261123-identite-v1');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261123-identite-v2');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -1072,7 +1072,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261123-identite-v1');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261123-identite-v2');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         practitioner:String(S.profile?.display_name||[S.profile?.first_name,S.profile?.last_name].filter(Boolean).join(' ')||'').trim(),

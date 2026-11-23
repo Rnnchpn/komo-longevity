@@ -1,8 +1,8 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
 // v2.4 : sans caméra (plateformes, DynaMo, chrono et compteur PULSE). Le code vidéo reste pour Human Track.
 // Valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-identite-v1';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-identite-v1';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-identite-v2';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-identite-v2';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
@@ -73,7 +73,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261123-identite-v1";
+ link.href="./motion-live-operator-consult-v1.css?v=20261123-identite-v2";
  // Le design de l'espace praticien (pulse-workspace.css) reste la dernière couche.
  const workspace=document.querySelector("link[data-pulse-workspace]");
  if(workspace)document.head.insertBefore(link,workspace);else document.head.append(link);
@@ -390,7 +390,7 @@ async function showPatientQr(renew){
   '<li>Le patient vise ce QR avec l’appareil photo de son téléphone.</li>'+
   '<li>Il répond aux questions pendant les tests : ses réponses arrivent dans l’onglet Questionnaire.</li>'+
   '<li>Après ta validation (onglet Rapport, « Envoi au patient »), il retrouve sur la même page ses résultats et son passeport PDF.</li></ol>'+
-  '<p class="moc-help">Lien personnel valable jusqu’au '+HTML(new Date(link.expires_at).toLocaleDateString("fr-FR"))+', sans compte ni nom.</p>'+
+  '<p class="moc-help">Lien personnel valable jusqu’au '+HTML(new Date(link.expires_at).toLocaleDateString("fr-FR"))+', sans compte.</p>'+
   '<p class="moc-help" id="mocQrFallback" hidden>QR indisponible sur cet écran : copie le lien et envoie-le par ta messagerie sécurisée.</p>'+
   '<div class="moc-buttons"><button type="button" class="moc-button secondary" id="mocQrCopy">Copier le lien</button>'+
   '<button type="button" class="moc-button secondary" id="mocQrRenew">Nouveau QR</button>'+
@@ -426,7 +426,7 @@ function makeShell(){
  '<div id="mocPassportAside" class="moc-passport-aside" hidden></div>'+
  (CAMERA_USED?'<div id="motionConsultCamera" class="moc-camera-host"></div>'+
  '<div class="moc-pose-indicator" id="mocPoseIndicator" role="status">◌ Chargement des marqueurs…</div><div class="moc-camera-foot">Ton iPhone fournit uniquement la vidéo · 33 points analysés ici · Contrôle des tests et des mesures sur cet ordinateur.</div>':'')+
- '</aside></div><p class="moc-bottom-note">'+(isRealDossier()?'Consultation réelle · dossier pseudonymisé':'Démonstration avec dossier fictif')+' · Résultats validés par l’opérateur · Aucune interprétation clinique automatique</p></section>';
+ '</aside></div><p class="moc-bottom-note">'+(isRealDossier()?'Consultation réelle':'Démonstration avec dossier fictif')+' · Résultats validés par l’opérateur · Aucune interprétation clinique automatique</p></section>';
  q("mocReturn").onclick=async()=>{
   try{await saveQuestionnaire();if(questionnaireDirty)return}
   catch(error){questionnaireNote("Sauvegarde échouée : "+error.message);return}
@@ -1551,14 +1551,14 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-identite-v1");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-identite-v2");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-identite-v1");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-identite-v2");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1577,7 +1577,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  if(CAMERA_USED)try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-identite-v1");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-identite-v2");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{

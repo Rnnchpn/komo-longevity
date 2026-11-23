@@ -1,9 +1,9 @@
 // Clinical-style *descriptive* passport for supervised KŌMØ Motion demos.
 // No medical diagnosis, validated score, biological age or survival estimate.
-import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './motion-engine/intake-model.mjs?v=20261123-identite-v1';
-import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs?v=20261123-identite-v1';
-import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText,STEP_IDS} from './motion-protocol.mjs?v=20261123-identite-v1';
-import {buildLongevityPlan,profileFrom,ZONES} from './motion-longevity-plan.mjs?v=20261123-identite-v1';
+import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './motion-engine/intake-model.mjs?v=20261123-identite-v2';
+import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs?v=20261123-identite-v2';
+import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText,STEP_IDS} from './motion-protocol.mjs?v=20261123-identite-v2';
+import {buildLongevityPlan,profileFrom,ZONES} from './motion-longevity-plan.mjs?v=20261123-identite-v2';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
  {id:'sts',name:stepById('sts').title,short:'Force fonctionnelle',unit:'levers / 30 s',
@@ -284,7 +284,7 @@ export function buildClinicPassport(answers={},results={},options={}){
   recheck:'6 semaines',
   limitations:[
    ...(simulated?['Les réponses au questionnaire ont été générées artificiellement pour une démonstration : elles ne constituent aucune déclaration patient.']:[]),
-   real?'Évaluation fonctionnelle descriptive réalisée en cabinet, sur dossier pseudonymisé, selon le protocole '+PROTOCOL.code+' '+PROTOCOL.version+'.':
+   real?'Évaluation fonctionnelle descriptive réalisée en cabinet, selon le protocole '+PROTOCOL.code+' '+PROTOCOL.version+'.':
     'Évaluation fonctionnelle exploratoire réalisée dans un environnement de démonstration sur dossier fictif.',
    'Les questionnaires propriétaires KŌMØ n’ont pas été validés comme outils diagnostiques ; les mesures proviennent des plateformes ForceDecks, du DynaMo et du chrono, sans caméra.',
    'La puissance des jambes est estimée par une équation publiée à partir du lever de chaise et de la taille ; ce n’est pas une mesure directe.',
