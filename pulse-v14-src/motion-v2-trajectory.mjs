@@ -6,7 +6,7 @@
 // aucune valeur n'existe pour nos appareils). En dessous, la mesure est « stable ».
 // mdc : en unité de la mesure · mdcPct : en % de la valeur de départ · cross : seuil dont le franchissement compte.
 // mdcBySex : marge propre au sexe (options.sex), mdc sinon.
-import {stsPowerOf} from './motion-protocol.mjs?v=20261123-passeport-v3';
+import {stsPowerOf} from './motion-protocol.mjs?v=20261123-passeport-v4';
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round=(x,d=1)=>Math.round(x*10**d)/10**d;
 const maxOf=(a,b)=>finite(a)&&finite(b)?Math.max(a,b):finite(a)?a:finite(b)?b:null;
@@ -30,25 +30,25 @@ export const TRAJECTORY_METRICS=[
  {id:'two_step',label:'Two-Step (meilleur essai)',unit:'cm',decimals:0,better:'higher',mdc:25,
   get:r=>V(r,'two_step')},
  // Appui unipodal : MDC publié ≈ 23 à 26 s, inutilisable en secondes ; seul le franchissement des 10 s compte.
- {id:'balance_min',label:'Équilibre unipodal · côté le plus faible',unit:'s',decimals:1,better:'higher',mdc:24,cross:10,
+ {id:'balance_min',label:'Sur un pied · côté le plus faible',unit:'s',decimals:1,better:'higher',mdc:24,cross:10,
   get:r=>minOf(V(r,'unipodal_left'),V(r,'unipodal_right'))},
- {id:'qs_velocity',label:'Quiet Stand · vitesse du centre de pression',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
+ {id:'qs_velocity',label:'Debout immobile · vitesse d’oscillation',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
   get:r=>F(r,'fd_quiet_stand','fd_qs_velocity_mms')},
- {id:'qs_ec_velocity',label:'Quiet Stand yeux fermés · vitesse du centre de pression',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
+ {id:'qs_ec_velocity',label:'Yeux fermés · vitesse d’oscillation',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
   get:r=>F(r,'fd_quiet_stand_ec','fd_qsec_velocity_mms')},
  // Appui sur un pied, plateforme : seulement pour un essai tenu 30 s ; on suit le côté le plus instable.
- {id:'sls_velocity',label:'Appui sur un pied · vitesse du centre de pression (côté le plus instable)',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
+ {id:'sls_velocity',label:'Sur un pied · vitesse d’oscillation',unit:'mm/s',decimals:1,better:'lower',mdcPct:20,
   get:r=>maxOf(F(r,'unipodal_left','sls_left_velocity_mms'),F(r,'unipodal_right','sls_right_velocity_mms'))},
- {id:'qs_asym',label:'Quiet Stand · asymétrie de charge',unit:'%',decimals:1,better:'lower',mdc:10,
+ {id:'qs_asym',label:'Debout · asymétrie de charge',unit:'%',decimals:1,better:'lower',mdc:10,
   get:r=>F(r,'fd_quiet_stand','fd_qs_asym_pct')},
- {id:'fd_sts_time',label:'Lever sur plateformes · temps pour se lever',unit:'s',decimals:2,better:'lower',mdcPct:20,
+ {id:'fd_sts_time',label:'Lever (plateformes) · temps',unit:'s',decimals:2,better:'lower',mdcPct:20,
   get:r=>F(r,'fd_sts','fd_sts_time_to_stand_s')},
  // Saut vertical : test très reproductible chez l'adulte âgé (erreur de l'ordre de 5 %) → marge de prudence 10 %.
  {id:'cmj_power',label:'Saut vertical · puissance maximale',unit:'W/kg',decimals:1,better:'higher',mdcPct:10,
   get:r=>F(r,'fd_cmj','cmj_peak_power_wkg')},
  {id:'cmj_height',label:'Saut vertical · hauteur',unit:'cm',decimals:1,better:'higher',mdcPct:10,
   get:r=>F(r,'fd_cmj','cmj_height_cm')},
- {id:'fd_sts_asym',label:'Lever sur plateformes · asymétrie',unit:'%',decimals:1,better:'lower',mdc:10,
+ {id:'fd_sts_asym',label:'Lever (plateformes) · asymétrie',unit:'%',decimals:1,better:'lower',mdc:10,
   get:r=>F(r,'fd_sts','fd_sts_asym_pct')},
  // ≈ 5 kg (50 N) : différence minimale chez l'adulte âgé (4,7 à 6 kg selon les études).
  {id:'grip_best',label:'Préhension · meilleur côté',unit:'N',decimals:0,better:'higher',mdc:50,
