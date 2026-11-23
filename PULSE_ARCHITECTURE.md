@@ -56,3 +56,21 @@ Toutes les références locales portent la même étiquette `?v=`. Pour la chang
 - **Autres applications :** `world-card`, `world-admin`, `gstaad-state`, `command-state`, `pulse-notify` (API), `myocare-webhook` (partenaire, signé HMAC).
 - **Ancienne offre à distance**, à désactiver une fois le lien Stripe coupé : `motion-online-guest`, `motion-online-dossier`, `motion-online-operator`, `motion-online-stripe-dossier`, `motion-200-intake`.
 - **Ancienne PULSE v12**, inertes car elles exigent un JWT et ne sont plus appelées : `admin-*`, `center-*`, `professional-admin`, `professional-dashboard`, `professional-application`, `patient-intake`, `motion-journey-status`, `komo-operator-*`, `myocare-admin`, `privacy-*`, `pulse-config-health`, `temp-check`, `komo-founder-run-v1`. `komo-openai-health-v1` est déjà désactivée (HTTP 410).
+
+## Réservation publique en ligne (23 novembre 2026)
+
+| Élément | Emplacement | Rôle |
+| --- | --- | --- |
+| Page | `src/pages/rendez-vous-hiro.html` → `/fr/rendez-vous-hiro/` | Choix de la prestation, du jour et de l'heure ; gestion par lien privé `#gerer=…`. Aperçu sans réservation : `?demo=1`. |
+| Liens courts | `/hiro` (bio Instagram, `src=instagram`), `/rdv` | Construits par `scripts/build-rendez-vous-hiro-20261123.mjs`. |
+| Fonction | `supabase/functions/booking-public/` (sans JWT) | `config`, `slots`, `book`, `manage`, `cancel`, `cron`. E-mails Resend depuis `contact@komolongevity.com` + fichier `.ics`. |
+| Données | `booking_centers`, `booking_offers`, `public_bookings` + `organization_booking_hours` / `organization_booking_blackouts` | Identité de contact et créneau uniquement, **séparées des dossiers patients**. Lecture réservée à l'équipe du centre (RLS). |
+| Tâche planifiée | `cron` `komo-booking-notifications` (toutes les heures, minute 7) | Rappel la veille, invitation au contrôle à partir de J+28. |
+
+Réglages courants (SQL) :
+- Ouvrir / fermer : `update booking_centers set is_open = true where public_slug = 'hiro';`
+- Tarif : `update booking_offers set price_cents = 25000 where code = 'initial' and organization_id = (select organization_id from booking_centers where public_slug = 'hiro');`
+- Horaires : lignes `organization_booking_hours` (ISO : 1 = lundi). Absence : ligne `organization_booking_blackouts`.
+- Adresse affichée dans les e-mails : `booking_centers.address_text`.
+
+Envoi d'e-mails : la clé Resend est en place, mais le domaine `komolongevity.com` doit être vérifié dans Resend (enregistrements DNS chez GoDaddy) pour que les e-mails partent.

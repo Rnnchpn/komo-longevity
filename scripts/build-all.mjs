@@ -309,6 +309,7 @@ const scripts = [
   'scripts/komo-motion-online-39-mobius-20261031.mjs',
   // French KŌMØ Motion Cannes 60-minute offer: public reservation request page.
   'scripts/build-motion-cannes-booking-20261107.mjs',
+  'scripts/build-rendez-vous-hiro-20261123.mjs',
   // 21/11/2026 : une seule PULSE publiée (v14) ; v12 et v13 ne sont plus servies.
   'scripts/pulse-retire-legacy-generations.mjs',
   // 22/11/2026 : couches du site public (sélecteur flottant v1, pages Motion = protocole PULSE, scripts valides).
