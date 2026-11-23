@@ -47,7 +47,7 @@ function injectStyles(){
  if(document.getElementById("mliveStylesheet"))return;
  const style=document.createElement("link");
  style.id="mliveStylesheet";style.rel="stylesheet";
- style.href=new URL("./motion-live-guest-v1.css?v=20261123-passeport-v5",import.meta.url).href;
+ style.href=new URL("./motion-live-guest-v1.css?v=20261123-passeport-v6",import.meta.url).href;
  document.head.append(style);
 }
 function feedback(s){if(el("mliveFeedback"))el("mliveFeedback").textContent=s||""}

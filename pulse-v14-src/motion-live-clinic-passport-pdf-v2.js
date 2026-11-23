@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v5';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v6';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -267,7 +267,7 @@ export async function downloadClinicPassport(report,category='all'){
    y+=8;
   });
   y+=4;
-  words('* Changement réel : au-delà de la marge d’erreur de la mesure (marche 0,1 m/s ; chaise 2 levers ; préhension 50 N ; Two-Step 25 cm ; franchissement des 10 s d’appui ; environ 20 % pour le DynaMo et les plateformes). Un écart plus petit est affiché stable : il peut venir de la mesure elle-même.',
+  words('* Changement réel : au-delà de la marge d’erreur de la mesure (marche 0,1 m/s ; chaise 2 levers ; préhension 50 N ; franchissement des 10 s sur un pied ; posture 5° ; environ 20 % pour les autres forces et les plateformes). Un écart plus petit est affiché stable : il peut venir de la mesure elle-même.',
    M,y,C,{sz:7,lh:3.4,max:3,col:P.muted});
   y+=12;
   (t.warnings||[]).forEach(w=>{y=words('Comparabilite : '+w,M,y,C,{sz:7,lh:3.4,max:2,col:[150,70,50]})+1;});

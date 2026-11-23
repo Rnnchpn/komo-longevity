@@ -1,8 +1,8 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
 // v2.4 : sans caméra (plateformes, DynaMo, chrono et compteur PULSE). Le code vidéo reste pour Human Track.
 // Valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-passeport-v5';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-passeport-v5';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-passeport-v6';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-passeport-v6';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
@@ -73,7 +73,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261123-passeport-v5";
+ link.href="./motion-live-operator-consult-v1.css?v=20261123-passeport-v6";
  // Le design de l'espace praticien (pulse-workspace.css) reste la dernière couche.
  const workspace=document.querySelector("link[data-pulse-workspace]");
  if(workspace)document.head.insertBefore(link,workspace);else document.head.append(link);
@@ -1551,14 +1551,14 @@ export async function mountOperatorConsultation(config){
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-passeport-v5");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-passeport-v6");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-passeport-v5");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-passeport-v6");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1577,7 +1577,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  if(CAMERA_USED)try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-passeport-v5");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-passeport-v6");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{
