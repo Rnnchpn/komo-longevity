@@ -30,7 +30,8 @@ assert.ok(edge.indexOf('action==="patient_link_status"')<edge.indexOf('const act
 // 3. Page « Mon bilan » : publiée, sans référent ni indexation, jeton retiré de l'adresse.
 assert.ok(page.includes('name="referrer" content="no-referrer"')&&page.includes('noindex'));
 assert.ok(js.includes('history.replaceState(null,"",location.pathname)'),'jeton retiré de la barre d’adresse');
-assert.ok(!/email|e-mail|prénom/i.test(js.replace(/\/\/.*$/gm,'')),'aucune demande d’identité');
+// La page ne demande jamais d'identité : aucun champ nom, prénom ou e-mail (elle peut afficher le nom transmis par le serveur).
+assert.ok(!/type=\\?"email\\?"|name=\\?"(?:email|first_name|last_name|prenom|nom)\\?"/i.test(js),'aucune demande d’identité');
 
 assert.ok(release.includes("'mon-bilan/index.html'"));
 // 3b. Envoi au patient (23/11/2026) : résultats visibles seulement après la validation du praticien.
