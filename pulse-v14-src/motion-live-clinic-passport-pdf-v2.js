@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v6';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v7';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -130,31 +130,66 @@ export async function downloadClinicPassport(report,category='all'){
   txt(axes[3].short,x+4,y+52,{sz:8,bold:true});
   txt(fmt(axes[3].value),x+4,y+59,{sz:7.5,col:P.gold});
  }
+ // Jauge (23/11/2026) : zones priorité / à consolider / solide, valeur du patient (rond) et objectif à 6 semaines (repère doré).
+ const ZT={priority:[230,196,184],consolidate:[238,222,190],solid:[196,218,203]};
+ const gnum=(v,d)=>(Math.round(v*10**d)/10**d).toFixed(d).replace('.',',');
+ const gauge=(x,y,w,g,opt={})=>{
+  if(!g)return;
+  const h=opt.h||3.4,pos=v=>x+w*Math.max(0,Math.min(1,(v-g.min)/(g.max-g.min)));
+  const c1=pos(g.cuts[0]),c2=pos(g.cuts[1]),cd=g.unit==='m/s'?1:0;
+  box(x,y,w,h,ZT.solid,1.7);box(x,y,c2-x,h,ZT.consolidate,1.7);box(x,y,c1-x,h,ZT.priority,1.7);
+  if(c1>x+2)box(c1-1.7,y,1.8,h,ZT.consolidate);if(c2>x+2&&c2<x+w-2)box(c2-1.7,y,1.8,h,ZT.solid);
+  txt(gnum(g.cuts[0],cd),c1,y+h+3.4,{sz:6,col:P.muted,align:'center'});
+  txt(gnum(g.cuts[1],cd),c2,y+h+3.4,{sz:6,col:P.muted,align:'center'});
+  if(opt.target!==false&&g.target!==null){
+   const tx=pos(g.target);stroke(P.gold);pdf.setLineWidth(.7);pdf.line(tx,y-1.6,tx,y+h+1.2);
+   fill(P.gold);pdf.triangle(tx-1.8,y-3.6,tx+1.8,y-3.6,tx,y-1.3,'F');
+   if(opt.targetLabel)txt('objectif '+gnum(g.target,g.decimals>1?2:g.decimals)+' '+g.unit,Math.min(tx+2.6,x+w-1),y-1.9,{sz:6.2,bold:true,col:P.gold,align:tx+30>x+w?'right':'left'});
+  }
+  const vx=pos(g.value);fill(P.white);pdf.circle(vx,y+h/2,2.7,'F');fill(P.dark);pdf.circle(vx,y+h/2,2.0,'F');
+  if(opt.valueLabel)txt(gnum(g.value,g.decimals>1?2:g.decimals)+' '+g.unit,vx,y-2.4,{sz:6.8,bold:true,col:P.dark,align:'center'});
+ };
+ const legend=(x,y)=>{
+  [['priority','Priorité'],['consolidate','À consolider'],['solid','Solide']].forEach(([z,l],i)=>{
+   const xx=x+i*27;box(xx,y-2.4,6,2.8,ZT[z],1.2);txt(l,xx+7.5,y,{sz:6.6,col:P.muted});});
+  fill(P.dark);pdf.circle(x+86,y-1,1.6,'F');txt('vous',x+89,y,{sz:6.6,col:P.muted});
+  fill(P.gold);pdf.triangle(x+100,y-2.6,x+103.4,y-2.6,x+101.7,y-0.4,'F');txt('objectif à 6 semaines',x+105,y,{sz:6.6,col:P.muted});
+ };
  function capacites(){
-  page('Votre bilan du '+frShort(report.date),'Vos capacités','Cinq capacités liées à l’autonomie et à la longévité, chacune située par rapport à un repère publié.');
-  const small=(x,y,w,label,value)=>{box(x,y,w,19,P.sand,2);
-   txt(label.toUpperCase(),x+5,y+6.5,{sz:6.6,bold:true,col:P.muted});txt(value,x+5,y+15,{sz:12.5,bold:true,col:P.dark});};
-  small(M,63,56,'Tests réalisés',(report.steps?report.steps.done+'/'+report.steps.total:report.measured));
-  small(M+61,63,56,'Priorités',lp.priorities.length?String(lp.priorities.length):'Entretien');
-  small(M+122,63,56,'Contrôle à 6 semaines',frShort(addDays(report.date,42)));
-  words(lp.headline||'',M,90,C,{sz:10.5,lh:4.6,max:1,bold:true,col:P.dark});
-  let y=96;
+  page('','','');
+  // Bandeau : nom, date, chiffres clés.
+  box(M,26,C,31,P.dark,3.5);
+  txt('PASSEPORT KŌMØ MOTION · BILAN DU '+frShort(report.date),M+8,34.5,{sz:7.2,bold:true,col:P.gold});
+  txt(report.subject||'Votre bilan',M+8,46.5,{sz:19,serif:true,col:P.white});
+  txt('Évaluation fonctionnelle · mesures validées par votre praticien',M+8,53,{sz:7.2,col:[196,208,199]});
+  [[report.steps?report.steps.done+'/'+report.steps.total:String(report.measured),'tests'],
+   [lp.priorities.length?String(lp.priorities.length):'0','priorités'],
+   [frShort(addDays(report.date,42)),'contrôle']].forEach(([v,l],i)=>{
+   const xx=M+112+i*22.5;if(i)line(xx-3,32,xx-3,52,[70,96,84],.3);
+   txt(v,xx,43,{sz:i===2?8.6:13,bold:true,col:P.white});txt(l.toUpperCase(),xx,49.5,{sz:6,bold:true,col:P.gold});});
+  txt('Vos capacités',M,67,{sz:17,serif:true,col:P.dark});
+  words(lp.headline||'',M+46,66.5,C-46,{sz:9,lh:4,max:1,bold:true,col:P.dark});
+  legend(M,75);
+  let y=80;
   lp.capacities.forEach(c=>{
-   box(M,y,C,33,P.sand,2.5);
-   txt(c.name,M+6,y+8,{sz:10.5,bold:true,col:P.dark});
-   pill(c.zone,R-5,y+8);
+   box(M,y,C,36,P.sand,2.5);
+   txt(c.name,M+6,y+7.5,{sz:10.5,bold:true,col:P.dark});
+   pill(c.zone,R-5,y+7.5);
    const shown=c.measures.filter(m=>m.value!==null&&m.value!==undefined).slice(0,2);
-   if(!shown.length)txt('Non mesuré lors de ce bilan',M+6,y+14.5,{sz:8,col:P.muted});
-   shown.forEach((m,i)=>{
-    const v=m.label+' : '+m.value+(m.unit?' '+m.unit:'');
-    txt(v,M+6,y+14.5+i*5,{sz:8.2,bold:true});
-    font(8.2,true);txt('('+m.reference+')',M+8+pdf.getTextWidth(cleaner(v)),y+14.5+i*5,{sz:7,col:P.muted});
-   });
-   words(c.why,M+6,y+25.2,C-12,{sz:7,lh:3.4,max:2,col:P.muted});
-   y+=35;
+   if(!shown.length)txt('Non mesuré lors de ce bilan',M+6,y+15,{sz:8,col:P.muted});
+   const m1=shown[0],m2=shown[1];
+   if(m1){txt(m1.value+(m1.unit?' '+m1.unit:''),M+6,y+15.5,{sz:12.5,bold:true,col:P.dark});
+    words(m1.label+' · '+m1.reference,M+6,y+20,86,{sz:6.6,lh:3,max:1,col:P.muted});}
+   if(m2)words(m2.label+' : '+m2.value+(m2.unit?' '+m2.unit:'')+' ('+m2.reference+')',M+6,y+24.5,90,{sz:7,lh:3.2,max:1,bold:false,col:P.text});
+   if(c.gauge){
+    txt(c.gauge.label,M+98,y+13.2,{sz:6.4,col:P.muted});
+    gauge(M+98,y+17,C-104,c.gauge,{valueLabel:false});
+   }else if(shown.length)words('Suivi personnel : pas de repère publié, on compare vos mesures d’un bilan à l’autre.',M+98,y+15,C-104,{sz:6.8,lh:3.2,max:2,col:P.muted});
+   words(c.why,M+6,y+29.8,C-12,{sz:6.4,lh:3,max:2,col:P.muted});
+   y+=37.6;
   });
   txt('Repères de population, présentés sans score clinique inventé ni âge du mouvement : ils orientent le programme, ils ne posent pas de diagnostic.',
-   M,Math.min(y+3,277),{sz:6.6,col:P.muted});
+   M,Math.min(y+3,278),{sz:6.4,col:P.muted});
  }
  function priorites(){
   page('Vos priorités','Ce qui compte le plus','Ce qui compte le plus pour votre autonomie, et l’objectif à atteindre au contrôle des 6 semaines.');
@@ -165,22 +200,25 @@ export async function downloadClinicPassport(report,category='all'){
    words('Le programme ci-après sert à les garder. Objectifs : '+lp.objectives.map(o=>o.target).join(' ; ')+'.',M+8,y+22,C-16,{sz:8.6,lh:4.4,max:3});
    y+=46;
   }
+  if(lp.priorities.length){legend(M,y-1.5);y+=2;}
   lp.priorities.forEach((p,i)=>{
-   box(M,y,C,58,P.sand,3);
+   const g=(lp.capacities.find(c=>c.id===p.id)||{}).gauge;
+   box(M,y,C,60,P.sand,3);
    txt('0'+(i+1),M+7,y+11,{sz:9,bold:true,col:P.gold});
    txt(p.name,M+17,y+11,{sz:14,bold:true,serif:true,col:P.dark});
    pill(p.zone,R-6,y+10);
-   txt('POURQUOI C’EST IMPORTANT',M+7,y+20,{sz:6.8,bold:true,col:P.gold});
-   words(p.why,M+7,y+25,C-14,{sz:8,lh:3.9,max:2});
-   txt('CE QUE NOUS AVONS MESURÉ',M+7,y+35,{sz:6.8,bold:true,col:P.gold});
-   words(p.basis||'Mesures du bilan',M+7,y+40,C-14,{sz:7.6,lh:3.7,max:1,col:P.muted});
-   box(M+7,y+44,C-14,10,P.white,2);
-   txt('OBJECTIF À 6 SEMAINES',M+11,y+50.5,{sz:6.8,bold:true,col:P.muted});
-   txt(p.objective,R-11,y+50.5,{sz:9.6,bold:true,col:P.dark,align:'right'});
-   y+=62;
+   txt('POURQUOI C’EST IMPORTANT',M+7,y+18.5,{sz:6.8,bold:true,col:P.gold});
+   words(p.why,M+7,y+22.6,C-14,{sz:7.8,lh:3.6,max:2});
+   txt('OÙ VOUS EN ÊTES',M+7,y+31.5,{sz:6.8,bold:true,col:P.gold});
+   words(p.basis||'Mesures du bilan',M+34,y+31.5,C-41,{sz:7,lh:3.3,max:1,col:P.muted});
+   if(g){gauge(M+9,y+38.5,C-18,g,{valueLabel:true,targetLabel:true});}
+   box(M+7,y+48,C-14,9.5,P.white,2);
+   txt('OBJECTIF À 6 SEMAINES',M+11,y+54,{sz:6.8,bold:true,col:P.muted});
+   txt(p.objective,R-11,y+54,{sz:9.4,bold:true,col:P.dark,align:'right'});
+   y+=63;
   });
-  box(M,Math.max(y,252)-2,C,22,P.pale,3);
-  const yy=Math.max(y,252);
+  box(M,Math.max(y,254)-2,C,22,P.pale,3);
+  const yy=Math.max(y,254);
   txt('VOTRE RYTHME',M+8,yy+5,{sz:7,bold:true,col:P.gold});
   words((plan.schedule||'')+' '+(lp.recheck||''),M+8,yy+10.5,C-16,{sz:8.2,lh:4,max:2});
  }
@@ -218,7 +256,8 @@ export async function downloadClinicPassport(report,category='all'){
   rows.forEach(r=>{
    const lines=r.status==='skipped'?[...(r.lines||['Non realise']),...(r.note?['Note : '+r.note]:[])]:(r.lines.length?r.lines:['Aucune valeur']);
    const plain=PLAIN[r.id]||'';
-   const h=11+(plain?4.4:0)+lines.length*4.3;
+   let h=11+(plain?4.4:0)+lines.length*4.3;
+   if(r.pair||r.hold)h=Math.max(h,27);
    if(y+h>274){page('Vos résultats',title+' (suite)','');y=65;}
    box(M,y,C,h,P.sand,2);
    txt(String(r.name).replace(/ - (ForceDecks|DynaMo)$/,'').replace(/ · (ForceDecks|DynaMo)$/,''),M+7,y+7.5,{sz:9.6,bold:true});
@@ -226,6 +265,23 @@ export async function downloadClinicPassport(report,category='all'){
    let yy=y+12.5;
    if(plain){txt(plain,M+7,yy,{sz:7.6,col:P.gold});yy+=4.4;}
    lines.forEach(l=>{txt(l,M+7,yy,{sz:8.1,col:r.status==='skipped'?P.muted:P.text});yy+=4.3;});
+   // Barres : gauche / droite (le côté le plus faible en doré) ; tenue sur un pied sur 30 s, repère 10 s.
+   const bx=R-74,bw=54;
+   if(r.pair){
+    const mx=Math.max(r.pair.left,r.pair.right)*1.08||1;
+    [['G',r.pair.left],['D',r.pair.right]].forEach(([l,v],i)=>{
+     const by=y+17.5+i*5.2,weak=v<Math.max(r.pair.left,r.pair.right);
+     txt(l,bx-3,by+2.3,{sz:6.8,bold:true,col:P.muted,align:'right'});
+     box(bx,by,bw,3,P.white,1.4);box(bx,by,Math.max(2,bw*v/mx),3,weak?P.gold:P.dark,1.4);
+     txt(gnum(v,0)+' N',bx+bw+2,by+2.4,{sz:6.8,bold:true,col:P.dark});});
+   }
+   if(r.hold){
+    const by=y+19.5,t=bx+bw*r.hold.cut/r.hold.max;
+    box(bx,by,bw,3,P.white,1.4);box(bx,by,Math.max(2,bw*Math.min(r.hold.value,30)/30),3,r.hold.value<10?[150,70,50]:P.dark,1.4);
+    stroke(P.gold);pdf.setLineWidth(.6);pdf.line(t,by-1.5,t,by+4.5);
+    txt('10 s',t,by-2.3,{sz:6,bold:true,col:P.gold,align:'center'});txt('30 s',bx+bw,by-2.3,{sz:6,col:P.muted,align:'right'});
+    txt(gnum(r.hold.value,1)+' s',bx+bw+2,by+2.4,{sz:6.8,bold:true,col:P.dark});
+   }
    y+=h+3;
   });
  }
@@ -235,7 +291,7 @@ export async function downloadClinicPassport(report,category='all'){
   if(!t||!Array.isArray(t.points)||t.points.length<2||!t.rows?.length)return;
   page('Votre trajectoire','Vos progrès mesurés','Évolution de vos mesures entre les consultations : '+t.points.map(p=>p.label+' ('+p.date.split('-').reverse().join('/')+')').join(' -> ')+'.');
   const pts=t.points.slice(-4),cols=pts.length;
-  const labelW=70,deltaW=26,colW=(C-labelW-deltaW)/cols;
+  const labelW=70,deltaW=22,sparkW=26,colW=(C-labelW-deltaW-sparkW)/cols;
   // En bref : les progrès réels en clair, avant le tableau complet.
   const fav=t.rows.filter(r=>r.verdict==='favorable'),def=t.rows.filter(r=>r.verdict==='defavorable');
   const stable=t.rows.filter(r=>r.verdict==='stable'&&r.better!=='neutral').length;
@@ -251,6 +307,7 @@ export async function downloadClinicPassport(report,category='all'){
   box(M,y-6,C,9,P.dark,1.5);
   txt('MESURE',M+3,y,{sz:7.2,bold:true,col:P.white});
   pts.forEach((p,i)=>txt(p.label,M+labelW+colW*i+colW/2,y,{sz:7.2,bold:true,col:P.white,align:'center'}));
+  txt('COURBE',R-deltaW-sparkW/2,y,{sz:7.2,bold:true,col:P.white,align:'center'});
   txt('ÉVOLUTION',R-3,y,{sz:7.2,bold:true,col:P.white,align:'right'});
   y+=9;
   // Le tableau garde les mesures clés et tout changement réel ; les autres sont résumées dans « En bref ».
@@ -263,6 +320,15 @@ export async function downloadClinicPassport(report,category='all'){
    const vals=r.display.slice(-cols);
    vals.forEach((v,i)=>txt(v,M+labelW+colW*i+colW/2,y,{sz:7.8,bold:i===vals.length-1,align:'center'}));
    const col=r.verdict==='favorable'?P.dark:r.verdict==='defavorable'?[150,70,50]:P.muted;
+   // Mini-courbe : une valeur par consultation ; point final vert (progrès réel), rouge (recul réel) ou gris (stable).
+   const sv=r.values.slice(-cols),fin=sv.filter(v=>Number.isFinite(v));
+   if(fin.length>1){
+    const lo=Math.min(...fin),hi=Math.max(...fin),sx=R-deltaW-sparkW+3,sw=sparkW-6;
+    const P2=(v,i)=>[sx+sw*(sv.length>1?i/(sv.length-1):0),y-0.6-(hi>lo?(v-lo)/(hi-lo):0.5)*4.2];
+    let prev=null;sv.forEach((v,i)=>{if(!Number.isFinite(v))return;const q=P2(v,i);if(prev)line(prev[0],prev[1],q[0],q[1],P.muted,.5);prev=q;});
+    sv.forEach((v,i)=>{if(!Number.isFinite(v))return;const q=P2(v,i),last=i===sv.length-1;
+     fill(last?(r.verdict==='favorable'?[40,120,80]:r.verdict==='defavorable'?[150,70,50]:P.muted):P.muted);pdf.circle(q[0],q[1],last?1.1:.7,'F');});
+   }
    txt(r.deltaDisplay+(r.notable?' *':''),R-3,y,{sz:7.8,bold:true,col,align:'right'});
    y+=8;
   });

@@ -397,7 +397,10 @@ export function instrumentedRows(results={}){
    (r.method==='GAIT_4M_STANDING_START_BEST_OF_2'?' (départ arrêté, meilleur passage)':' (ancien protocole, départ lancé)'));
   if(finite(d.lsi_pct))lines.push('Symétrie : '+String(d.lsi_pct).replace('.',',')+' %'+
    (d.weaker_side==='balanced'?' (équilibrée)':' (côté plus faible : '+(d.weaker_side==='left'?'gauche':'droit')+')'));
-  rows.push({id,name:spec.title,device:spec.device,status:'done',note:r.note||'',lines});
+  // Données pour les barres du passeport : gauche / droite (DynaMo) et durée sur un pied (sur 30 s).
+  const pair=spec.pair&&finite(f[spec.pair[0]])&&finite(f[spec.pair[1]])?{left:f[spec.pair[0]],right:f[spec.pair[1]],unit:'N'}:null;
+  const hold=spec.value_field&&finite(f[spec.value_field])?{value:f[spec.value_field],max:30,cut:10,unit:'s'}:null;
+  rows.push({id,name:spec.title,device:spec.device,status:'done',note:r.note||'',lines,...(pair?{pair}:{}),...(hold?{hold}:{})});
  }
  return rows;
 }

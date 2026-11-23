@@ -4,7 +4,7 @@
 // Sources des repères : EWGSOP2 (préhension, marche), AWGS 2019 (marche 1,0 m/s), Rikli & Jones / CDC STEADI
 // (lever de chaise 30 s), Araujo BJSM 2022 (appui unipodal 10 s), JOA (Two-Step), VALD (asymétrie > 10 %),
 // Alcazar 2020–2021 (puissance relative au lever de chaise : équation, seuils 2,6 / 2,1 W/kg, MCID).
-import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261123-passeport-v6';
+import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261123-passeport-v7';
 export const LONGEVITY_PLAN_VERSION='KOMO_LONGEVITY_PLAN_V1';
 export const ZONES={
  priority:{label:'Priorité',rank:3},
@@ -142,6 +142,19 @@ export function assessCapacities(results={},profile={}){
     ...(headFwd!==null?[measure('Avancée de la tête (photo de profil)',fr(headFwd,0),'°','follow','oreille par rapport à l’épaule · suivi personnel')]:[]),
     ...(arms!==null?[measure('Élévation des bras 30 s',arms,'mouvements','follow','suivi personnel')]:[])]}
  ];
+ // Jauges du passeport (23/11/2026) : valeur du patient sur une échelle à trois zones (priorité, à consolider,
+ // solide) et objectif à 6 semaines, avec les mêmes seuils que les zones ci-dessus. Plus haut = mieux pour toutes.
+ const G=(value,min,max,cuts,unit,decimals,target,label)=>value===null||value===undefined?null:
+  {value,min,max,cuts,unit,decimals,target:finite(target)?target:null,label};
+ const gauges={
+  walk:G(speed,0.4,1.6,[0.8,1.0],'m/s',2,speed!==null&&speed<1.0?speed+0.1:null,'Vitesse de marche'),
+  legs:G(chair,0,Math.max(standard+8,(chair??0)+4),[below,standard],'levers',0,chair!==null?chair+2:null,'Levers de chaise en 30 s'),
+  balance:G(weak,0,30,[10,29.95],'s',1,weak!==null&&weak<10?10:weak!==null&&weak<29.95?30:null,'Sur un pied, côté faible'),
+  strength:G(gripKg,0,low+25,[low,low+5],'kg',1,gripKg!==null&&gripKg<low?low:null,'Préhension, meilleur côté'),
+  symmetry:G(weakestLsi?weakestLsi[1]:null,60,100,[80,90],'%',0,weakestLsi&&weakestLsi[1]<90?90:null,
+   weakestLsi?weakestLsi[0]+', côté faible / côté fort':'')
+ };
+ capacities.forEach(c=>{c.gauge=gauges[c.id]||null});
  const context={speed,twoIdx,two:two?.value??null,chair,below,standard,power,powerLow,powerRepsLow,weak,bl,br,gripKg,low,weakestLsi,largestAsym,posture,headFwd,qsAsym};
  return {capacities,context};
 }
