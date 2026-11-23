@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v7';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v8';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -144,7 +144,7 @@ export async function downloadClinicPassport(report,category='all'){
   if(opt.target!==false&&g.target!==null){
    const tx=pos(g.target);stroke(P.gold);pdf.setLineWidth(.7);pdf.line(tx,y-1.6,tx,y+h+1.2);
    fill(P.gold);pdf.triangle(tx-1.8,y-3.6,tx+1.8,y-3.6,tx,y-1.3,'F');
-   if(opt.targetLabel)txt('objectif '+gnum(g.target,g.decimals>1?2:g.decimals)+' '+g.unit,Math.min(tx+2.6,x+w-1),y-1.9,{sz:6.2,bold:true,col:P.gold,align:tx+30>x+w?'right':'left'});
+   if(opt.targetLabel)txt('objectif '+gnum(g.target,Number.isInteger(g.target)?0:g.decimals>1?2:g.decimals)+' '+g.unit,Math.min(tx+2.6,x+w-1),y-1.9,{sz:6.2,bold:true,col:P.gold,align:tx+30>x+w?'right':'left'});
   }
   const vx=pos(g.value);fill(P.white);pdf.circle(vx,y+h/2,2.7,'F');fill(P.dark);pdf.circle(vx,y+h/2,2.0,'F');
   if(opt.valueLabel)txt(gnum(g.value,g.decimals>1?2:g.decimals)+' '+g.unit,vx,y-2.4,{sz:6.8,bold:true,col:P.dark,align:'center'});
@@ -159,7 +159,7 @@ export async function downloadClinicPassport(report,category='all'){
   page('','','');
   // Bandeau : nom, date, chiffres clés.
   box(M,26,C,31,P.dark,3.5);
-  txt('PASSEPORT KŌMØ MOTION · BILAN DU '+frShort(report.date),M+8,34.5,{sz:7.2,bold:true,col:P.gold});
+  txt('PASSEPORT KOMO MOTION · BILAN DU '+frShort(report.date),M+8,34.5,{sz:7.2,bold:true,col:P.gold});
   txt(report.subject||'Votre bilan',M+8,46.5,{sz:19,serif:true,col:P.white});
   txt('Évaluation fonctionnelle · mesures validées par votre praticien',M+8,53,{sz:7.2,col:[196,208,199]});
   [[report.steps?report.steps.done+'/'+report.steps.total:String(report.measured),'tests'],
