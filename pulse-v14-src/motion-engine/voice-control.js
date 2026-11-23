@@ -1,4 +1,4 @@
-import {parseVoiceCommand} from './voice-commands.mjs?v=20261123-consentement-v1';
+import {parseVoiceCommand} from './voice-commands.mjs?v=20261123-posture-v1';
 
 // SpeechRecognition requests microphone access; the browser may send speech to its
 // own recognition provider. KŌMØ never stores audio or transcripts in Pulse.

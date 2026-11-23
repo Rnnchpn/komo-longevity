@@ -427,7 +427,11 @@ export function instrumentedRows(results={}){
   // Données pour les barres du passeport : gauche / droite (DynaMo) et durée sur un pied (sur 30 s).
   const pair=spec.pair&&finite(f[spec.pair[0]])&&finite(f[spec.pair[1]])?{left:f[spec.pair[0]],right:f[spec.pair[1]],unit:'N'}:null;
   const hold=spec.value_field&&finite(f[spec.value_field])?{value:f[spec.value_field],max:30,cut:10,unit:'s'}:null;
-  rows.push({id,name:spec.title,device:spec.device,status:'done',note:r.note||'',lines,...(pair?{pair}:{}),...(hold?{hold}:{})});
+  // Photo de profil : angles pour la silhouette du passeport (degrés, positif = vers l'avant).
+  const profile=id==='posture_photo'&&finite(f.pp_head_forward_deg)&&finite(f.pp_trunk_lean_deg)&&finite(f.pp_hip_shift_deg)?
+   {head:f.pp_head_forward_deg,trunk:f.pp_trunk_lean_deg,hip:f.pp_hip_shift_deg,knee:finite(f.pp_knee_flex_deg)?f.pp_knee_flex_deg:0,
+    global:finite(f.pp_global_lean_deg)?f.pp_global_lean_deg:null,observation:f.pp_observation||null}:null;
+  rows.push({id,name:spec.title,device:spec.device,status:'done',note:r.note||'',lines,...(pair?{pair}:{}),...(hold?{hold}:{}),...(profile?{profile}:{})});
  }
  return rows;
 }
