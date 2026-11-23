@@ -243,26 +243,25 @@ export async function downloadClinicPassport(report,category='all'){
  // Silhouette de profil (photo de posture) : oreille, épaule, hanche, genou, cheville reliés, tournés vers la droite
  // (vers l'avant), et la verticale passant par la cheville. Angles mesurés sur la photo ; dessin schématique.
  function profileFigure(a,ax,ay,H){
-  const rad=d=>d*Math.PI/180,legL=H*.52,trunkL=H*.31,neckL=H*.12;
+  const rad=d=>d*Math.PI/180,legL=H*.52,trunkL=H*.32,neckL=H*.16;
   const hip=[ax+legL*Math.sin(rad(a.hip)),ay-legL*Math.cos(rad(a.hip))];
   const sh=[hip[0]+trunkL*Math.sin(rad(a.trunk)),hip[1]-trunkL*Math.cos(rad(a.trunk))];
   const ear=[sh[0]+neckL*Math.sin(rad(a.head)),sh[1]-neckL*Math.cos(rad(a.head))];
   // Genou : au milieu de la jambe, décalé vers l'avant s'il est fléchi, vers l'arrière s'il est en extension.
   const mx=(ax+hip[0])/2,my=(ay+hip[1])/2,dx=hip[0]-ax,dy=hip[1]-ay,len=Math.hypot(dx,dy)||1,off=(legL/2)*Math.tan(rad(Math.max(-25,Math.min(40,a.knee))/2));
   const knee=[mx+off*(-dy/len),my+off*(dx/len)];
-  stroke(P.gold);pdf.setLineWidth(.35);pdf.setLineDashPattern([1.2,1],0);pdf.line(ax,ay+1.5,ax,ear[1]-5);pdf.setLineDashPattern([],0);
-  txt('verticale',ax+1,ear[1]-5.5,{sz:5.6,col:P.gold});
-  stroke(P.dark);pdf.setLineWidth(1.1);
+  stroke(P.gold);pdf.setLineWidth(.35);pdf.setLineDashPattern([1.2,1],0);pdf.line(ax,ay+1.5,ax,ear[1]-4.5);pdf.setLineDashPattern([],0);
+  stroke(P.dark);pdf.setLineWidth(.8);
   pdf.line(ax,ay,ax+5,ay);[[ax,ay,knee],[...knee,hip],[...hip,sh],[...sh,ear]].forEach(([x1,y1,b])=>pdf.line(x1,y1,b[0],b[1]));
   pdf.setLineWidth(.2);
-  fill(P.white);pdf.circle(ear[0]+.6,ear[1]-1.2,3.1,'F');stroke(P.dark);pdf.setLineWidth(.9);pdf.circle(ear[0]+.6,ear[1]-1.2,3.1,'S');pdf.setLineWidth(.2);
-  [ear,sh,hip,knee,[ax,ay]].forEach(q=>{fill(P.dark);pdf.circle(q[0],q[1],.95,'F');});
+  fill(P.white);pdf.circle(ear[0]+.5,ear[1]-1,2.5,'F');stroke(P.dark);pdf.setLineWidth(.7);pdf.circle(ear[0]+.5,ear[1]-1,2.5,'S');pdf.setLineWidth(.2);
+  [ear,sh,hip,knee,[ax,ay]].forEach(q=>{fill(P.dark);pdf.circle(q[0],q[1],.8,'F');});
   // Angle de la tête : verticale à l'épaule et ligne épaule-oreille.
   stroke(P.gold);pdf.setLineWidth(.35);pdf.setLineDashPattern([.8,.8],0);pdf.line(sh[0],sh[1],sh[0],sh[1]-neckL-1);pdf.setLineDashPattern([],0);
-  txt('tête '+gnum(a.head,1)+'°',ear[0]+5,ear[1]+1.5,{sz:6.6,bold:true,col:P.dark});
+  txt('tête '+gnum(a.head,1)+'°',ear[0]+4.5,ear[1]+1,{sz:6.6,bold:true,col:P.dark});
   txt('tronc '+gnum(a.trunk,1)+'°',sh[0]+4,(sh[1]+hip[1])/2+1,{sz:6,col:P.muted});
   txt('genou '+gnum(a.knee,1)+'°',knee[0]+3.5,knee[1]+1,{sz:6,col:P.muted});
-  txt('schéma, d’après la photo',ax-8,ay+4.6,{sz:5.6,col:P.muted});
+  txt('pointillés : verticale · schéma d’après la photo',ax+2,ay+5,{sz:5.6,col:P.muted,align:'center'});
   pdf.setLineWidth(.2);
  }
  function instruments(){
@@ -283,7 +282,7 @@ export async function downloadClinicPassport(report,category='all'){
    const plain=PLAIN[r.id]||'';
    let h=11+(plain?4.4:0)+lines.length*4.3;
    if(r.pair||r.hold)h=Math.max(h,27);
-   if(r.profile)h=Math.max(h,50);
+   if(r.profile)h=Math.max(h,52);
    if(y+h>274){page('Vos résultats',title+' (suite)','');y=65;}
    box(M,y,C,h,P.sand,2);
    txt(String(r.name).replace(/ - (ForceDecks|DynaMo)$/,'').replace(/ · (ForceDecks|DynaMo)$/,''),M+7,y+7.5,{sz:9.6,bold:true});
@@ -308,7 +307,7 @@ export async function downloadClinicPassport(report,category='all'){
     txt('10 s',t,by-2.3,{sz:6,bold:true,col:P.gold,align:'center'});txt('30 s',bx+bw,by-2.3,{sz:6,col:P.muted,align:'right'});
     txt(gnum(r.hold.value,1)+' s',bx+bw+2,by+2.4,{sz:6.8,bold:true,col:P.dark});
    }
-   if(r.profile)profileFigure(r.profile,R-46,y+h-6,h-15);
+   if(r.profile)profileFigure(r.profile,R-44,y+h-9,h-25);
    y+=h+3;
   });
  }
