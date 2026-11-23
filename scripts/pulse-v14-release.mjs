@@ -51,7 +51,18 @@ for(const f of textFiles){
  }
  graph.set(f,refs);
 }
-const seen=new Set(),stack=ENTRIES.filter(e=>fileSet.has(e));
+// Pages partenaires (liens privés, non référencés) : chaque page est une entrée ; ses documents (PDF, Word)
+// comptent comme chargés s'ils sont liés depuis la page de leur dossier.
+const PARTNER_PAGES=files.filter(f=>/^partenaires\/[a-z0-9-]+\/index\.html$/.test(f));
+const partnerDocs=new Set();
+for(const page of PARTNER_PAGES){
+ const src=await readFile(join(root,page),'utf8'),dir=posix.dirname(page);
+ for(const m of src.matchAll(/href="([A-Za-z0-9_.-]+\.(?:pdf|docx))"/g)){
+  const f=dir+'/'+m[1];
+  if(fileSet.has(f))partnerDocs.add(f);else broken.push(page+' → '+m[1]);
+ }
+}
+const seen=new Set(partnerDocs),stack=[...ENTRIES,...PARTNER_PAGES].filter(e=>fileSet.has(e));
 while(stack.length){const f=stack.pop();if(seen.has(f))continue;seen.add(f);for(const r of graph.get(f)||[])stack.push(r);}
 const orphans=files.filter(f=>!seen.has(f));
 const errors=[];
