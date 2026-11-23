@@ -6,7 +6,7 @@
 // aucune valeur n'existe pour nos appareils). En dessous, la mesure est « stable ».
 // mdc : en unité de la mesure · mdcPct : en % de la valeur de départ · cross : seuil dont le franchissement compte.
 // mdcBySex : marge propre au sexe (options.sex), mdc sinon.
-import {stsPowerOf} from './motion-protocol.mjs?v=20261123-identite-v2';
+import {stsPowerOf} from './motion-protocol.mjs?v=20261123-passeport-v3';
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round=(x,d=1)=>Math.round(x*10**d)/10**d;
 const maxOf=(a,b)=>finite(a)&&finite(b)?Math.max(a,b):finite(a)?a:finite(b)?b:null;
@@ -82,6 +82,7 @@ export const TRAJECTORY_METRICS=[
 // J0 = première consultation terminée. S6 ≈ 6 semaines (35–56 j), S12 ≈ 12 semaines (70–100 j).
 export function timepointLabel(days){
  if(!finite(days)||days<3)return 'J0';
+ if(days>=21&&days<35)return 'J30';
  if(days>=35&&days<=56)return 'S6';
  if(days>=70&&days<=100)return 'S12';
  if(days>=150&&days<=210)return 'M6';

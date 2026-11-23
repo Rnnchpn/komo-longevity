@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-identite-v2';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-passeport-v3';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -10,14 +10,34 @@ const fmt=n=>Number.isFinite(n)?(Number.isInteger(n)?String(n):n.toFixed(1).repl
 const P={dark:[28,52,42],gold:[180,146,94],paper:[251,249,245],sand:[242,237,228],
  text:[43,54,46],muted:[110,118,108],line:[219,215,203],pale:[225,234,224],white:[255,255,253]};
 export const CLINIC_PASSPORT_EXPORTS=[
- {value:'all',label:'Passeport complet (6 catégories)'},
- {value:'synthese',label:'1. Vos capacités'},
+ {value:'all',label:'Passeport complet'},
+ {value:'synthese',label:'1. Votre bilan'},
  {value:'exercices',label:'2. Priorités & programme maison'},
- {value:'tests',label:'3. Résultats détaillés & qualité de mesure'},
- {value:'suivi',label:'4. Suivi à 6 semaines'},
+ {value:'tests',label:'3. Vos résultats en détail'},
+ {value:'suivi',label:'4. Votre trajectoire : 30 jours et 6 semaines'},
  {value:'nutrition',label:'5. Nutrition & compléments'},
  {value:'questionnaire',label:'6. Questionnaire détaillé (22 réponses)'}
 ];
+// Explication en une phrase de chaque test, pour le patient (23/11/2026).
+const PLAIN={
+ dynamo_hip_flex:'Force pour lever la cuisse : monter une marche, enjamber un obstacle.',
+ dynamo_knee_ext:'Force pour tendre le genou : se lever d’une chaise, monter les escaliers.',
+ dynamo_knee_flex:'Force à l’arrière de la cuisse : elle stabilise le genou pendant la marche.',
+ dynamo_hip_abd:'Force pour écarter la jambe : elle garde le bassin stable quand on est sur un pied.',
+ dynamo_grip:'Force de la main : un repère de la force générale.',
+ anthropometry:'Vos conditions de mesure, reprises à l’identique au contrôle.',
+ fd_quiet_stand:'Debout immobile 30 s : plus vos oscillations sont petites et lentes, plus votre équilibre est économe.',
+ fd_quiet_stand_ec:'Le même test les yeux fermés : il montre la part de la vue dans votre équilibre.',
+ fd_sts:'Se lever d’une chaise sur les plateformes : rapidité, et répartition de l’effort entre gauche et droite.',
+ unipodal_left:'Tenir sur le pied gauche, jusqu’à 30 s. Repère : au moins 10 s.',
+ unipodal_right:'Tenir sur le pied droit, jusqu’à 30 s. Repère : au moins 10 s.',
+ fd_cmj:'Saut sur place : la puissance des jambes, qui baisse avec l’âge et se travaille.',
+ gait_4m:'Marche sur 4 m à votre allure habituelle : la vitesse de marche est un repère majeur de santé.',
+ sts:'Se lever et se rasseoir le plus de fois possible en 30 s : la force des jambes au quotidien.',
+ posture_photo:'Votre alignement debout, de profil, mesuré sur photo : un repère de suivi, pas un diagnostic.'
+};
+const addDays=(iso,days)=>{const d=new Date(String(iso)+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+days);return d.toISOString().slice(0,10)};
+const frShort=iso=>{const [y,m,d]=String(iso||'').split('-');return d&&m&&y?d+'/'+m+'/'+y:'-'};
 export async function downloadClinicPassport(report,category='all'){
  if(report?.version!==CLINIC_PASSPORT_VERSION||!report.actionPlan)
   throw Error('invalid_clinic_passport');
@@ -51,7 +71,7 @@ export async function downloadClinicPassport(report,category='all'){
   // Nom du patient en en-tête de chaque page (dossiers nominatifs depuis le 23/11/2026).
   txt((report.subject?cleaner(report.subject).toUpperCase().slice(0,40)+'  ·  ':'')+'BILAN / CABINET',R,15,{sz:8,col:P.muted,align:'right'});
   line(M,22,R,22);
-  txt('CATEGORIE '+index+' / 06',M,33,{sz:8,bold:true,col:P.gold});
+  txt(String(index).toUpperCase(),M,33,{sz:8,bold:true,col:P.gold});
   txt(title,M,46,{sz:23,serif:true});
   if(subtitle)words(subtitle,M,55,C,{sz:8.5,lh:4.4,max:2,col:P.muted});
  };
@@ -111,12 +131,12 @@ export async function downloadClinicPassport(report,category='all'){
   txt(fmt(axes[3].value),x+4,y+59,{sz:7.5,col:P.gold});
  }
  function capacites(){
-  page(1,'Vos capacités','Cinq capacités liées à l’autonomie et à la longévité, chacune située par rapport à un repère publié.');
+  page('Votre bilan du '+frShort(report.date),'Vos capacités','Cinq capacités liées à l’autonomie et à la longévité, chacune située par rapport à un repère publié.');
   const small=(x,y,w,label,value)=>{box(x,y,w,19,P.sand,2);
    txt(label.toUpperCase(),x+5,y+6.5,{sz:6.6,bold:true,col:P.muted});txt(value,x+5,y+15,{sz:12.5,bold:true,col:P.dark});};
   small(M,63,56,'Tests réalisés',(report.steps?report.steps.done+'/'+report.steps.total:report.measured));
   small(M+61,63,56,'Priorités',lp.priorities.length?String(lp.priorities.length):'Entretien');
-  small(M+122,63,56,'Contrôle','6 semaines');
+  small(M+122,63,56,'Contrôle à 6 semaines',frShort(addDays(report.date,42)));
   words(lp.headline||'',M,90,C,{sz:10.5,lh:4.6,max:1,bold:true,col:P.dark});
   let y=96;
   lp.capacities.forEach(c=>{
@@ -137,7 +157,7 @@ export async function downloadClinicPassport(report,category='all'){
    M,Math.min(y+3,277),{sz:6.6,col:P.muted});
  }
  function priorites(){
-  page(2,'Vos priorités','Ce qui compte le plus pour votre autonomie, et l’objectif à atteindre au contrôle des 6 semaines.');
+  page('Vos priorités','Ce qui compte le plus','Ce qui compte le plus pour votre autonomie, et l’objectif à atteindre au contrôle des 6 semaines.');
   let y=66;
   if(!lp.priorities.length){
    box(M,y,C,40,P.pale,3);
@@ -185,17 +205,27 @@ export async function downloadClinicPassport(report,category='all'){
  function instruments(){
   // Protocole V2 : valeurs VALD, chrono et mètre saisies par l'opérateur. Aucune norme ni score.
   const rows=(report.instrumented||[]).filter(r=>r.status!=='missing');
+  // Lever de chaise 30 s (compteur) : ajouté à sa place, en fin de protocole, avant la photo de profil.
+  const chair=(report.measures||[]).find(m=>m.id==='sts');
+  if(chair&&chair.display&&chair.display!=='—'){
+   const row={id:'sts',name:chair.name,device:'Chaise 43 cm · compteur',status:'done',lines:['Levers complets en 30 s : '+chair.display]};
+   const at=rows.findIndex(r=>r.id==='posture_photo');at<0?rows.push(row):rows.splice(at,0,row);
+  }
   if(!rows.length)return;
-  page('3B','Mesures instrumentées','Valeurs saisies depuis ForceDecks, DynaMo, mètre et chronomètre : votre point de départ personnel.');
+  const title='Vos résultats en détail',sub='Chaque test, ce qu’il mesure et vos valeurs : votre point de départ, à comparer au contrôle.';
+  page('Vos résultats',title,sub);
   let y=65;
   rows.forEach(r=>{
    const lines=r.status==='skipped'?[...(r.lines||['Non realise']),...(r.note?['Note : '+r.note]:[])]:(r.lines.length?r.lines:['Aucune valeur']);
-   const h=11+lines.length*4.3;
-   if(y+h>274){page('3B','Mesures instrumentées (suite)','');y=65;}
+   const plain=PLAIN[r.id]||'';
+   const h=11+(plain?4.4:0)+lines.length*4.3;
+   if(y+h>274){page('Vos résultats',title+' (suite)','');y=65;}
    box(M,y,C,h,P.sand,2);
-   txt(r.name,M+7,y+7.5,{sz:9.6,bold:true});
+   txt(String(r.name).replace(/ - (ForceDecks|DynaMo)$/,'').replace(/ · (ForceDecks|DynaMo)$/,''),M+7,y+7.5,{sz:9.6,bold:true});
    if(r.device)txt(r.device,R-7,y+7.5,{sz:7.2,col:P.muted,align:'right'});
-   let yy=y+12.5;lines.forEach(l=>{txt(l,M+7,yy,{sz:8.1,col:r.status==='skipped'?P.muted:P.text});yy+=4.3;});
+   let yy=y+12.5;
+   if(plain){txt(plain,M+7,yy,{sz:7.6,col:P.gold});yy+=4.4;}
+   lines.forEach(l=>{txt(l,M+7,yy,{sz:8.1,col:r.status==='skipped'?P.muted:P.text});yy+=4.3;});
    y+=h+3;
   });
  }
@@ -203,17 +233,17 @@ export async function downloadClinicPassport(report,category='all'){
   // J0 -> S6 -> S12 : memes tests, memes conditions. Ecarts descriptifs, aucun score composite.
   const t=report.trajectory;
   if(!t||!Array.isArray(t.points)||t.points.length<2||!t.rows?.length)return;
-  page('4B','Trajectoire','Évolution de vos mesures entre les consultations : '+t.points.map(p=>p.label+' ('+p.date.split('-').reverse().join('/')+')').join(' -> ')+'.');
+  page('Votre trajectoire','Vos progrès mesurés','Évolution de vos mesures entre les consultations : '+t.points.map(p=>p.label+' ('+p.date.split('-').reverse().join('/')+')').join(' -> ')+'.');
   const pts=t.points.slice(-4),cols=pts.length;
   const labelW=70,deltaW=26,colW=(C-labelW-deltaW)/cols;
   let y=68;
   box(M,y-6,C,9,P.dark,1.5);
   txt('MESURE',M+3,y,{sz:7.2,bold:true,col:P.white});
   pts.forEach((p,i)=>txt(p.label,M+labelW+colW*i+colW/2,y,{sz:7.2,bold:true,col:P.white,align:'center'}));
-  txt('ECART',R-3,y,{sz:7.2,bold:true,col:P.white,align:'right'});
+  txt('ÉVOLUTION',R-3,y,{sz:7.2,bold:true,col:P.white,align:'right'});
   y+=9;
   t.rows.forEach((r,idx)=>{
-   if(y>262){page('4B','Trajectoire (suite)','');y=68;}
+   if(y>262){page('Votre trajectoire','Vos progrès mesurés (suite)','');y=68;}
    if(idx%2===0)box(M,y-5.2,C,8,P.sand);
    txt(r.label+(r.unit?' ('+r.unit+')':''),M+3,y,{sz:7.6});
    const vals=r.display.slice(-cols);
@@ -228,8 +258,65 @@ export async function downloadClinicPassport(report,category='all'){
   y+=12;
   (t.warnings||[]).forEach(w=>{y=words('Comparabilite : '+w,M,y,C,{sz:7,lh:3.4,max:2,col:[150,70,50]})+1;});
  }
+ // Trajectoire prévue (23/11/2026) : aujourd'hui → 30 jours (habitudes installées) → 6 semaines (mesures de contrôle).
+ // À 30 jours, on vérifie la pratique et non des chiffres : un écart de mesure aussi court resterait dans la marge
+ // d'erreur. À 6 semaines, l'objectif est mesuré dans les mêmes conditions.
+ function planTrajectory(){
+  const d0=report.date,d30=addDays(d0,30),d42=addDays(d0,42);
+  const second=report.trajectory?.points?.length>1;
+  page('Votre trajectoire','Aujourd’hui, 30 jours, 6 semaines','Où vous en êtes aujourd’hui, ce que vous faites pendant 30 jours, et ce que nous mesurerons ensemble à 6 semaines.');
+  // Frise.
+  const x1=M+16,x2=M+C/2,x3=R-16,yl=78;
+  line(x1,yl,x3,yl,P.line,1.4);
+  [[x1,P.dark,'AUJOURD’HUI',frShort(d0)],[x2,P.gold,'30 JOURS',frShort(d30)],[x3,P.dark,'6 SEMAINES',frShort(d42)+' · contrôle']]
+   .forEach(([x,c,l,d])=>{fill(c);pdf.circle(x,yl,3.2,'F');txt(l,x,yl+9,{sz:8,bold:true,col:P.dark,align:'center'});txt(d,x,yl+14,{sz:7.6,col:P.muted,align:'center'});});
+  txt('Sem. 1-2 : apprendre · Sem. 3-4 : progresser',(x1+x2)/2,yl-5,{sz:7.4,col:P.gold,align:'center'});
+  txt('Sem. 5-6 : consolider',(x2+x3)/2,yl-5,{sz:7.4,col:P.gold,align:'center'});
+  // Tableau : une ligne par capacité.
+  const cols=[38,34,54,52],xs=[M,M+38,M+72,M+126];
+  let y=103;
+  box(M,y-5.5,C,9,P.dark,1.5);
+  ['CAPACITÉ','AUJOURD’HUI','À 30 JOURS : VOUS FAITES','À 6 SEMAINES : OBJECTIF'].forEach((h,i)=>txt(h,xs[i]+3,y,{sz:6.8,bold:true,col:P.white}));
+  y+=8;
+  const prio=Object.fromEntries((lp.priorities||[]).map(p=>[p.id,p]));
+  const objective=c=>prio[c.id]?.objective||(lp.objectives||[]).find(o=>o.name===c.name)?.target||'Garder ce niveau';
+  const walk=(lp.exercises||[]).find(e=>e.key==='walk');
+  const habit=c=>{const e=(lp.exercises||[]).find(x=>x.capacity===c.id&&x.key!=='walk')||(c.id==='walk'?walk:null);
+   return e?e.title+' · '+e.frequency:c.id==='strength'?'Serrer et porter · 3 fois par semaine':'Marche quotidienne'};
+  const ZL={priority:'Priorité',consolidate:'À consolider',solid:'Solide',follow:'Suivi',missing:'Non mesuré'};
+  const ZC={priority:[150,70,50],consolidate:P.gold,solid:P.dark,follow:P.muted,missing:P.muted};
+  (lp.capacities||[]).forEach((c,i)=>{
+   const m=c.measures.find(x=>x.value!==null&&x.value!==undefined);
+   const h=17;
+   if(i%2===0)box(M,y-4.5,C,h,P.sand);
+   words(c.name,xs[0]+3,y,cols[0]-5,{sz:8.6,lh:3.8,max:2,bold:true,col:P.dark});
+   txt(ZL[c.zone]||'',xs[0]+3,y+(c.name.length>18?8:4.4),{sz:6.8,bold:true,col:ZC[c.zone]||P.muted});
+   if(m){txt(m.value+(m.unit?' '+m.unit:''),xs[1]+3,y,{sz:9.5,bold:true,col:P.dark});
+    words(m.label,xs[1]+3,y+4.4,cols[1]-5,{sz:6.8,lh:3.2,max:2,col:P.muted});}
+   else txt('Non mesuré',xs[1]+3,y,{sz:8.2,col:P.muted});
+   words(habit(c),xs[2]+3,y,cols[2]-5,{sz:8,lh:3.7,max:3});
+   words(objective(c),xs[3]+3,y,cols[3]-5,{sz:8,lh:3.7,max:3,bold:!!prio[c.id],col:P.dark});
+   y+=h;
+  });
+  // À 30 jours : la pratique, à cocher par le patient.
+  y+=4;
+  const checks=['12 séances du programme faites (3 par semaine, environ 20 minutes)',
+   (walk?'Marche : '+walk.dose+', '+walk.frequency:'Marche presque tous les jours'),
+   'Exercices devenus faciles : passer à l’étape « Ensuite » de chaque fiche',
+   'Douleur qui persiste, malaise ou chute : appeler le cabinet avant de continuer'];
+  const hb=12+checks.length*6.4;
+  box(M,y,C,hb,P.pale,3);
+  txt('À 30 JOURS, LE '+frShort(d30)+' : COCHEZ',M+7,y+8,{sz:7.8,bold:true,col:P.dark});
+  checks.forEach((t,i)=>{const yy=y+15+i*6.4;stroke(P.dark);pdf.setLineWidth(.35);pdf.rect(M+7,yy-3.2,3.6,3.6);
+   txt(t,M+14,yy,{sz:8.4});});
+  y+=hb+5;
+  box(M,y,C,25,P.sand,3);
+  txt('À 6 SEMAINES, LE '+frShort(d42)+' : '+(second?'PROCHAIN ':'')+'CONTRÔLE',M+7,y+8,{sz:7.8,bold:true,col:P.dark});
+  words('Mêmes tests, mêmes conditions : pieds nus, même heure si possible. Un progrès compte quand il dépasse la marge d’erreur de la mesure : +0,1 m/s à la marche, +2 levers de chaise, franchir 10 s sur un pied, environ 20 % pour la force.',
+   M+7,y+14,C-14,{sz:8,lh:3.9,max:3,col:P.text});
+ }
  function exercises(){
-  page(2,'Votre programme maison','Choisi à partir de vos résultats. Une chaise, un mur, un plan de travail : 20 minutes, 3 fois par semaine.');
+  page('Votre programme','Votre programme maison','Choisi à partir de vos résultats. Une chaise, un mur, un plan de travail : 20 minutes, 3 fois par semaine.');
   txt('4 EXERCICES CIBLÉS',M,67,{sz:8.5,bold:true,col:P.gold});
   const work=plan.exercises.filter(e=>e.key!=='walk').slice(0,4);
   work.forEach((e,i)=>{
@@ -254,7 +341,7 @@ export async function downloadClinicPassport(report,category='all'){
  }
  function nutrition(){
   // Two spacious pages avoid truncating supplement contraindications.
-  page(5,'Nutrition & apports','Priorité aux aliments, à l’exercice adapté et aux habitudes durables.');
+  page('Nutrition','Nutrition & apports','Priorité aux aliments, à l’exercice adapté et aux habitudes durables.');
   plan.food.forEach((a,i)=>{
    const y=70+i*75;
    box(M,y,C,67,P.pale,3);
@@ -268,7 +355,7 @@ export async function downloadClinicPassport(report,category='all'){
   words('Les resultats Motion ne permettent pas d identifier une carence vitaminique ou une insuffisance proteique. Le poids, les apports, les symptomes, les traitements et les antecedents sont indispensables avant toute recommandation individualisee.',
    M+9,246,C-18,{sz:8.5,lh:4.6,max:4,col:P.muted});
 
-  page(5,'Compléments & précautions','Options à discuter, jamais prescrites automatiquement par le questionnaire ou les mesures.');
+  page('Nutrition','Compléments & précautions','Options à discuter, jamais prescrites automatiquement par le questionnaire ou les mesures.');
   plan.supplements.forEach((a,i)=>{
    const y=69+i*39.6;
    box(M,y,C,36,P.sand,2);
@@ -302,7 +389,7 @@ export async function downloadClinicPassport(report,category='all'){
  function questionnaire(){
   const groups=report.questionnaire.groups||[];
   if(report.questionnaire.complete){
-   page(6,'Votre ressenti','Questionnaire en 22 réponses : ce que vous vivez au quotidien, à côté de ce que nous avons mesuré.');
+   page('Annexe · questionnaire','Votre ressenti','Questionnaire en 22 réponses : ce que vous vivez au quotidien, à côté de ce que nous avons mesuré.');
    box(M,66,112,120,P.sand,3);drawRadar(M+4,74);
    txt('POINTS DE GÊNE : '+fmt(report.questionnaire.rawPoints)+' / '+fmt(report.questionnaire.maxPoints),M+7,176,{sz:7,bold:true,col:P.muted});
    txt('20 ITEMS COTES / NON VALIDE',M+7,182,{sz:6.7,col:P.muted});
@@ -311,7 +398,7 @@ export async function downloadClinicPassport(report,category='all'){
    words('Plus haut = moins de limitations déclarées. Barème KOMO interne, distinct des mesures et sans valeur diagnostique.',M+122,96,54,{sz:7.6,lh:3.8,max:6,col:P.muted});
   }
   const printGroups=(subset,part)=>{
-   page(6,part===1?'Questionnaire : autonomie':'Questionnaire : habitudes',
+   page('Annexe · questionnaire',part===1?'Questionnaire : autonomie':'Questionnaire : habitudes',
     'Reponses exactes enregistrees. '+report.questionnaire.answered+' / '+report.questionnaire.total+
     ' · '+(report.simulated?'Reponses fictives pour demonstration.':'Profil auto-declare exploratoire.'));
    txt(report.questionnaire.complete?
@@ -328,7 +415,7 @@ export async function downloadClinicPassport(report,category='all'){
     for(const item of g.items){
      serial+=1;
      if(y>250){
-      page(6,'Questionnaire (suite)','Réponses enregistrées / vérifiables');
+      page('Annexe · questionnaire','Questionnaire (suite)','Réponses enregistrées / vérifiables');
       y=69;
       txt(g.label.toUpperCase()+' (SUITE)',M,y,{sz:9,bold:true,col:P.gold});
       y+=8;
@@ -357,9 +444,9 @@ export async function downloadClinicPassport(report,category='all'){
   printGroups(groups.slice(0,2),1);
   printGroups(groups.slice(2),2);
  }
- const renderers={synthese:capacites,tests,instruments,trajectoire,priorites,exercices:exercises,nutrition,suivi,questionnaire};
- const chapters=category==='all'?['synthese','priorites','exercices','tests','instruments','suivi','trajectoire','nutrition','questionnaire']:
-  category==='tests'?['tests','instruments']:category==='suivi'?['suivi','trajectoire']:
+ const renderers={synthese:capacites,instruments,trajectoire,plan:planTrajectory,priorites,exercices:exercises,nutrition,questionnaire};
+ const chapters=category==='all'?['synthese','priorites','plan','trajectoire','exercices','instruments','nutrition','questionnaire']:
+  category==='tests'?['instruments']:category==='suivi'?['plan','trajectoire']:
   category==='exercices'?['priorites','exercices']:[category];
  for(const chapter of chapters)renderers[chapter]();
  footer();
