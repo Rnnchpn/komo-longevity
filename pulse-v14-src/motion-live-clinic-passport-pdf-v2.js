@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-envoi-v2';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-envoi-v3';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -237,7 +237,9 @@ export async function downloadClinicPassport(report,category='all'){
    txt('0'+(i+1),x+7,y+10,{sz:8,bold:true,col:P.gold});
    txt(e.title,x+18,y+10,{sz:10,bold:true});
    if(e.relevance)txt(e.relevance,x+18,y+15.5,{sz:6.8,bold:true,col:P.gold});
-   txt(e.dose,x+7,y+26,{sz:13.5,bold:true,col:P.dark});
+   // Dose longue (ex. « 3 × 12 par côté, côté faible en premier ») : police réduite pour rester dans la carte.
+   let doseSz=13.5;font(doseSz,true);while(doseSz>9&&pdf.getTextWidth(cleaner(e.dose))>74){doseSz-=.5;font(doseSz,true)}
+   txt(e.dose,x+7,y+26,{sz:doseSz,bold:true,col:P.dark});
    txt(e.frequency,x+7,y+32.5,{sz:8,col:P.muted});
    words(e.instructions,x+7,y+40,74,{sz:7.8,lh:3.8,max:3});
    if(e.progression)words('Ensuite : '+e.progression,x+7,y+55,74,{sz:7,lh:3.4,max:2,col:P.muted});
