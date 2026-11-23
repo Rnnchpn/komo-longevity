@@ -76,6 +76,12 @@ export const LONGEVITY={
   target:'≥ 1,0 m/s ; sinon +0,1 m/s au contrôle.',
   improve:'Marche rapide fractionnée 3 fois par semaine, grands pas avec appui.',
   control:'Changement réel : ≥ 0,1 m/s (départ arrêté, meilleur de deux passages, même chronométreur).'},
+ posture_photo:{
+  why:'Une posture voûtée, tête en avant, est associée à plus de difficultés pour marcher, se pencher et se lever, et à une mortalité plus élevée (Kado 2004 : 1 353 personnes, risque 1,44 fois plus élevé).',
+  ref:'Pas de norme validée pour les angles mesurés sur une photo : suivi personnel, même cadrage à chaque séance.',
+  target:'En cas de décalage apparent : avancée de la tête réduite d’au moins 5°.',
+  improve:'Redressement contre le mur chaque jour, menton rentré ; renforcement du haut du dos.',
+  control:'Changement réel : ≥ 5° (en dessous, l’écart peut venir du cadrage de la photo).'},
  sts:{
   why:'Le lever de chaise donne la puissance des jambes : une puissance basse est associée à un risque de décès plus que doublé sur 9 ans (cohorte de Tolède).',
   ref:'Puissance basse sous 2,6 W/kg (homme) et 2,1 W/kg (femme) ; levers selon l’âge (Rikli & Jones, tableau ci-dessous).',
