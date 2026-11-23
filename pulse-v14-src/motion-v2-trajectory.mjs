@@ -6,7 +6,7 @@
 // aucune valeur n'existe pour nos appareils). En dessous, la mesure est « stable ».
 // mdc : en unité de la mesure · mdcPct : en % de la valeur de départ · cross : seuil dont le franchissement compte.
 // mdcBySex : marge propre au sexe (options.sex), mdc sinon.
-import {stsPowerOf} from './motion-protocol.mjs?v=20261123-envoi-v3';
+import {stsPowerOf} from './motion-protocol.mjs?v=20261123-identite-v1';
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round=(x,d=1)=>Math.round(x*10**d)/10**d;
 const maxOf=(a,b)=>finite(a)&&finite(b)?Math.max(a,b):finite(a)?a:finite(b)?b:null;
@@ -72,6 +72,9 @@ export const TRAJECTORY_METRICS=[
   get:r=>maxOf(F(r,'dynamo_hip_abd','hip_abd_left_n'),F(r,'dynamo_hip_abd','hip_abd_right_n'))},
  {id:'hip_lsi',label:'Abduction de hanche · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
   get:r=>D(r,'dynamo_hip_abd','lsi_pct')},
+ // Photo de profil (complément) : erreur de mesure de quelques degrés selon le cadrage → marge de 5°.
+ {id:'head_forward',label:'Posture · avancée de la tête (photo)',unit:'°',decimals:0,better:'lower',mdc:5,
+  get:r=>F(r,'posture_photo','pp_head_forward_deg')},
  {id:'body_mass',label:'Masse',unit:'kg',decimals:1,better:'neutral',
   get:r=>F(r,'anthropometry','body_mass_kg')}
 ];

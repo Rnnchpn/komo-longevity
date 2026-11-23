@@ -817,3 +817,5 @@
 .moc-release[data-state="ready"]{border-color:#b39f79;background:#f6f0e6}
 .moc-release[data-state="released"]{border-color:#9db8a8;background:#eef5f0}
 .moc-release[data-state="released"] b{color:#1f5a3f}
+.moc-release .moc-release-mail{display:block;margin:12px 0 0}
+.moc-release .moc-release-mail input{width:100%;margin-top:6px}

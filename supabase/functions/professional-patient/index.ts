@@ -1,7 +1,8 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 // Création d'un dossier patient par un professionnel du centre (version en production, v6).
-// Centre "production_enabled" : dossier pseudonymisé (health_data). Centre "test_only" : dossier fictif.
+// Centre "production_enabled" : dossier réel (health_data) avec prénom, nom, date de naissance, e-mail et code
+// HIRO-AAMMJJ-NN (research_subject_code, utilisé dans VALD et sur la feuille de mesures). Centre "test_only" : dossier fictif.
 const U=Deno.env.get("SUPABASE_URL")??"",A=Deno.env.get("SUPABASE_ANON_KEY")??"",S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
 const ORIGINS=new Set(["https://pulse.komolongevity.com","https://komolongevity.com"]);
 const ELIGIBLE_ROLES=new Set(["owner","clinical_admin","physician","operator","coordinator"]);
@@ -30,8 +31,11 @@ Deno.serve(async(req:Request)=>{
  const organizationId=String(body.organization_id??"").trim();
  const firstName=String(body.first_name??"").trim().slice(0,100),lastName=String(body.last_name??"").trim().slice(0,100);
  const birthDate=String(body.birth_date??"").trim(),sexAtBirth=String(body.sex_at_birth??"").trim();
+ const code=String(body.research_subject_code??"").trim().toUpperCase(),email=String(body.email??"").trim().toLowerCase().slice(0,200);
  if(!organizationId||!firstName||!lastName||!/^\d{4}-\d{2}-\d{2}$/.test(birthDate)||!SEX_VALUES.has(sexAtBirth))
   return json(req,{error:"invalid_patient_fields"},400);
+ if(code&&!/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(code))return json(req,{error:"invalid_patient_code"},400);
+ if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email))return json(req,{error:"invalid_patient_email"},400);
  const [roleResult,membershipResult,orgResult]=await Promise.all([
   svc.from("account_roles").select("role").eq("user_id",actor.id).maybeSingle(),
   svc.from("organization_members").select("role,status,access_scope").eq("organization_id",organizationId).eq("user_id",actor.id).eq("status","active").maybeSingle(),
@@ -46,13 +50,21 @@ Deno.serve(async(req:Request)=>{
  if(!["test_only","production_enabled"].includes(org.clinical_data_status))return json(req,{error:"center_data_status_unavailable"},409);
  if(!isAdmin&&(!membership||!ELIGIBLE_ROLES.has(membership.role)))return json(req,{error:"patient_create_scope_required"},403);
  // Un même code dossier ne peut exister deux fois dans un centre (double appui, deux postes).
- const duplicate=await svc.from("patients").select("id").eq("organization_id",organizationId).eq("first_name",firstName)
-  .eq("last_name",lastName).neq("status","archived").limit(1).maybeSingle();
- if(duplicate.data&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(lastName))return json(req,{error:"patient_code_exists"},409);
+ if(code){
+  const [byCode,legacy]=await Promise.all([
+   svc.from("patients").select("id").eq("organization_id",organizationId).eq("research_subject_code",code).neq("status","archived").limit(1).maybeSingle(),
+   svc.from("patients").select("id").eq("organization_id",organizationId).eq("last_name",code).neq("status","archived").limit(1).maybeSingle()]);
+  if(byCode.data||legacy.data)return json(req,{error:"patient_code_exists"},409);
+ }else{
+  const duplicate=await svc.from("patients").select("id").eq("organization_id",organizationId).eq("first_name",firstName)
+   .eq("last_name",lastName).neq("status","archived").limit(1).maybeSingle();
+  if(duplicate.data&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(lastName))return json(req,{error:"patient_code_exists"},409);
+ }
  const externalReference=`POC-${Date.now()}-${crypto.randomUUID().slice(0,8)}`,now=new Date().toISOString();
  const classification=org.clinical_data_status==="test_only"?"synthetic":"health_data";
  const patientInsert=await svc.from("patients").insert({organization_id:organizationId,external_reference:externalReference,
   first_name:firstName,last_name:lastName,birth_date:birthDate,sex_at_birth:sexAtBirth,locale:"fr-FR",status:"active",
+  research_subject_code:code||null,email:email||null,
   created_by:actor.id,data_classification:classification,
   synthetic_attested_at:classification==="synthetic"?now:null,synthetic_attested_by:classification==="synthetic"?actor.id:null
  }).select("*").single();

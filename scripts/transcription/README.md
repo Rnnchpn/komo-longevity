@@ -22,11 +22,13 @@ Une valeur illisible ou ambiguë n'est jamais devinée : on la demande au pratic
 
 ### 2. Retrouver la consultation
 
+Depuis le 23/11/2026, le dossier porte le prénom, le nom et l'e-mail du patient ; le code HIRO est dans `research_subject_code` (anciens dossiers : dans `last_name`). La requête ne sélectionne jamais le nom : le récapitulatif ne montre que le code.
+
 Requête SQL via le connecteur Supabase, projet `uqlolefsiktbznnymriy`. Elle prend la dernière consultation du code :
 
 ```sql
 select jsonb_build_object(
- 'code', p.last_name,
+ 'code', coalesce(p.research_subject_code, p.last_name),
  'session', jsonb_build_object('id',s.id,'organization_id',s.organization_id,'operator_user_id',s.operator_user_id,'patient_id',s.patient_id,
    'operator_session_id',s.operator_session_id,'display_code',s.display_code,'status',s.status,'stage_code',s.stage_code,'step_index',s.step_index,
    'created_at',s.created_at,'updated_at',s.updated_at,'expires_at',s.expires_at,'completed_at',s.completed_at,
@@ -35,7 +37,7 @@ select jsonb_build_object(
  'patient', jsonb_build_object('data_classification',p.data_classification,'status',p.status,'sex_at_birth',p.sex_at_birth),
  'center', jsonb_build_object('clinical_data_status',o.clinical_data_status,'name',o.name)) as saisie
 from pulse_motion_live_sessions s join patients p on p.id=s.patient_id join organizations o on o.id=s.organization_id
-where p.last_name = 'HIRO-AAMMJJ-NN' and s.status in ('active','completed')
+where coalesce(p.research_subject_code, p.last_name) = 'HIRO-AAMMJJ-NN' and s.status in ('active','completed')
 order by s.created_at desc limit 1;
 ```
 

@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261123-envoi-v3';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261123-identite-v1';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -527,11 +527,22 @@ function appointments(){
   $('#view').innerHTML=`<section class="intro"><h2>${S.mode==='pro'?'Agenda patient':'Retrouvez toutes vos prochaines étapes.'}</h2><p>${S.mode==='pro'?'Les rendez-vous du patient sélectionné.':'Les rendez-vous confirmés par votre équipe apparaissent ici avec leur date et leur format.'}</p></section><section class="appointment-list">${rows.length?rows.map(a=>`<article class="appointment-card ${new Date(a.scheduled_start||0)>=new Date()?'upcoming':'past'}"><div class="date-box"><strong>${fmtShort(a.scheduled_start)}</strong><span>${new Date(a.scheduled_start||0).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</span></div><div><span class="status-label">${statusLabel(a.status)}</span><h3>${friendlyAppointmentType(a.appointment_type)}</h3><p>${friendlyMode(a.location_mode)}</p></div></article>`).join(''):`<article class="empty-state"><h3>Aucun rendez-vous programmé</h3><p>Dès qu’un rendez-vous est confirmé, il apparaîtra automatiquement ici.</p><a class="button secondary" href="mailto:contact@komolongevity.com">Contacter l’équipe KŌMØ</a></article>`}</section>`;
 }
 // HIRO-AAMMJJ-NN : préfixe du centre, date du jour (Europe/Paris), numéro d'ordre du jour.
+// Code du dossier (HIRO-AAMMJJ-NN) : sert pour VALD et la feuille de mesures. Depuis le 23/11/2026, le dossier
+// porte aussi le prénom, le nom et l'e-mail du patient ; le code est dans research_subject_code.
+const CODE_RE=/^[A-Z]{2,6}-\d{6}-\d{2}$/;
+function codeOf(p){
+  const c=String(p?.research_subject_code||'').toUpperCase();if(CODE_RE.test(c))return c;
+  return p?.first_name==='Client'&&CODE_RE.test(String(p?.last_name||''))?String(p.last_name):'';
+}
+function nameOf(p){
+  const legacy=p?.first_name==='Client'&&CODE_RE.test(String(p?.last_name||''));
+  return legacy?'':[p?.first_name,p?.last_name].filter(Boolean).join(' ').trim();
+}
 function nextPseudoCode(){
   const slug=String(S.org?.slug||'');
   const prefix=/hiro/.test(slug)?'HIRO':/epigenetic|maison/.test(slug)?'MEC':'KOMO';
   const d=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Paris'}).replace(/-/g,'').slice(2);
-  const used=S.patients.map(p=>String(p.last_name||'')).filter(x=>x.startsWith(prefix+'-'+d+'-')).map(x=>Number(x.slice(-2))||0);
+  const used=S.patients.map(codeOf).filter(x=>x.startsWith(prefix+'-'+d+'-')).map(x=>Number(x.slice(-2))||0);
   return prefix+'-'+d+'-'+String((used.length?Math.max(...used):0)+1).padStart(2,'0');
 }
 // Réponse d'erreur d'une fonction serveur : le corps JSON est dans error.context (supabase-js).
@@ -553,30 +564,34 @@ function patientErrorText(info){
   return PATIENT_ERRORS[info?.error]||'Le dossier n’a pas pu être créé (réf. '+String(info?.error||'inconnue').slice(0,40)+'). Réessaie dans un instant ; si cela persiste, préviens-moi avec cette référence.';
 }
 function patients(){
-  heading('Patients',isProductionCenter()?'Dossiers pseudonymisés':'Dossiers fictifs de démonstration');
+  heading('Patients',isProductionCenter()?'Dossiers patients':'Dossiers fictifs de démonstration');
   const isDemo=p=>/^(?:DEMO|FRIDAY-DEMO|PULSE-MOTION-REPORT-DEMO|E2E[-_]|TEST[-_])/i.test(String(p.external_reference||''))||
     /^(?:patient k[oō]m[oø] demo|test k[oō]m[oø])/i.test([p.first_name,p.last_name].filter(Boolean).join(' '));
   const active=S.patients.filter(p=>!isDemo(p));
   const demos=S.patients.filter(isDemo);
   const card=p=>{
-    // Dossier réel : le code HIRO-AAMMJJ-NN est l'identité affichée (aucun nom dans PULSE).
-    const pseudo=p.first_name==='Client'&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(String(p.last_name||''));
-    const name=pseudo?String(p.last_name):([p.first_name,p.last_name].filter(Boolean).join(' ').trim()||'Patient KŌMØ');
+    // Dossier réel : prénom et nom, avec le code HIRO-AAMMJJ-NN (VALD, feuille de mesures). Anciens dossiers : le code seul.
+    const code=codeOf(p),full=nameOf(p),pseudo=!full&&!!code;
+    const name=full||code||'Patient KŌMØ';
     const year=String(p.birth_date||'').slice(0,4);
+    const born=/-01-01$/.test(String(p.birth_date||''))?(year&&('Né·e en '+year)):(p.birth_date?'Né·e le '+new Date(p.birth_date+'T12:00:00').toLocaleDateString('fr-FR'):'');
     const sex={female:'Femme',male:'Homme'}[p.sex_at_birth]||'';
-    const detail=[year&&('Né·e en '+year),sex,p.created_at&&('dossier du '+new Date(p.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}))].filter(Boolean).join(' · ')||String(p.external_reference||'Dossier KŌMØ');
+    const detail=[full&&code,born,sex,p.created_at&&('dossier du '+new Date(p.created_at).toLocaleDateString('fr-FR',{day:'numeric',month:'short'}))].filter(Boolean).join(' · ')||String(p.external_reference||'Dossier KŌMØ');
     const searchText=(name+' '+detail+' '+String(p.external_reference||'')).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('fr-FR');
     return `<button type="button" data-patient="${esc(p.id)}" data-search="${esc(searchText)}" aria-label="Consultation pour ${esc(name)}"><span class="patient-avatar" aria-hidden="true">${esc(pseudo?name.split('-').pop():name.slice(0,1).toUpperCase())}</span><span class="op-patient-detail"><strong>${esc(name)}</strong><small>${esc(detail)}</small></span><span class="op-patient-arrow">Consultation</span></button>`;
   };
   $('#view').innerHTML=`<section class="op-patients-app" aria-label="Annuaire des patients">
-    <header class="op-patients-context"><span class="op-patients-kicker">${isProductionCenter()?'CENTRE ACTUEL · CONSULTATION RÉELLE (DOSSIERS PSEUDONYMISÉS)':'CENTRE ACTUEL · DÉMONSTRATION (DOSSIERS FICTIFS)'}</span><div class="op-patients-context-row"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><span class="op-patients-count">${S.patients.length} dossier${S.patients.length>1?'s':''}</span></div></header>
+    <header class="op-patients-context"><span class="op-patients-kicker">${isProductionCenter()?'CENTRE ACTUEL · CONSULTATION RÉELLE':'CENTRE ACTUEL · DÉMONSTRATION (DOSSIERS FICTIFS)'}</span><div class="op-patients-context-row"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><span class="op-patients-count">${S.patients.length} dossier${S.patients.length>1?'s':''}</span></div></header>
     <div class="op-patients-toolbar"><button type="button" class="button primary" id="opPatientCreateToggle">Nouveau patient</button><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
     ${isProductionCenter()?`<form id="opPatientCreateForm" class="op-create-patient-form op-create-patient-form--real" ${S.patients.length?'hidden':''} data-real-center="1" novalidate>
       <h3>Nouveau patient</h3>
-      <div class="op-create-code"><span>Code à noter sur la fiche papier</span><strong id="opPatientCodeView">${esc(nextPseudoCode())}</strong>
+      <div class="op-create-code"><span>Code pour VALD et la feuille de mesures</span><strong id="opPatientCodeView">${esc(nextPseudoCode())}</strong>
         <input type="hidden" name="pseudo_code" value="${esc(nextPseudoCode())}"></div>
       <div class="op-create-patient-grid op-create-patient-grid--simple">
-        <label><span>Année de naissance</span><input name="birth_year" type="number" inputmode="numeric" min="1920" max="${new Date().getFullYear()-18}" placeholder="ex. 1962" autocomplete="off"></label>
+        <label><span>Prénom</span><input name="first_name" autocomplete="off" autocapitalize="words" maxlength="100"></label>
+        <label><span>Nom</span><input name="last_name" autocomplete="off" autocapitalize="characters" maxlength="100"></label>
+        <label><span>Date de naissance</span><input name="birth_date" type="date" min="1920-01-01" max="${new Date().getFullYear()-18}-12-31"></label>
+        <label><span>E-mail du patient</span><input name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="200" placeholder="pour lui envoyer son bilan"></label>
         <fieldset class="op-sex-choice"><legend>Sexe</legend>
           <label><input type="radio" name="sex_at_birth" value="female"><span>Femme</span></label>
           <label><input type="radio" name="sex_at_birth" value="male"><span>Homme</span></label>
@@ -586,7 +601,7 @@ function patients(){
       <label class="op-create-patient-attestation"><input type="checkbox" name="consent_collected"> Fiche KŌMØ signée : consentement recueilli et questionnaire de sécurité vérifié.</label>
       <p id="opPatientCreateFeedback" class="op-create-patient-feedback" aria-live="polite"></p>
       <button class="button primary" type="submit">Créer et démarrer la consultation</button>
-      <p class="op-create-privacy">PULSE ne reçoit ni nom, ni prénom, ni date exacte : seulement ce code, l’année de naissance et le sexe.</p>
+      <p class="op-create-privacy">Nom, prénom, date de naissance et e-mail restent dans PULSE. Dans VALD et sur la feuille de mesures : uniquement le code.</p>
     </form>`:`<form id="opPatientCreateForm" class="op-create-patient-form" hidden>
       <h3>Nouveau dossier patient</h3>
       <p>Création directe par l'opérateur du centre. Aucun compte patient ou demande préalable nécessaire.</p>
@@ -625,20 +640,26 @@ function patients(){
       const feedbackNode=$('#opPatientCreateFeedback');
       if(real){
         // Une seule consigne à la fois, en clair, sur le champ à compléter.
-        const y=Number(fd.get('birth_year')||0),maxYear=new Date().getFullYear()-18;
-        const missing=!(y>=1920&&y<=maxYear)?['birth_year','Indique l’année de naissance (entre 1920 et '+maxYear+').']:
+        const bd=String(fd.get('birth_date')||''),y=Number(bd.slice(0,4)),maxYear=new Date().getFullYear()-18;
+        const mail=String(fd.get('email')||'').trim();
+        const missing=!String(fd.get('first_name')||'').trim()?['first_name','Indique le prénom.']:
+          !String(fd.get('last_name')||'').trim()?['last_name','Indique le nom.']:
+          !(/^\d{4}-\d{2}-\d{2}$/.test(bd)&&y>=1920&&y<=maxYear)?['birth_date','Indique la date de naissance (patient majeur, né après 1920).']:
+          mail&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(mail)?['email','Vérifie l’adresse e-mail.']:
           !fd.get('sex_at_birth')?['sex_at_birth','Choisis le sexe.']:
           !fd.get('consent_collected')?['consent_collected','Coche la fiche signée pour continuer.']:null;
         if(missing){if(feedbackNode)feedbackNode.textContent=missing[1];createForm.querySelector('[name="'+missing[0]+'"]')?.focus();return}
       }else if(!createForm.reportValidity())return;
-      const code=String(fd.get('pseudo_code')||'').trim().toUpperCase(),year=Number(fd.get('birth_year')||0);
-      if(real&&S.patients.some(p=>String(p.last_name||'').toUpperCase()===code)){
+      const code=String(fd.get('pseudo_code')||'').trim().toUpperCase();
+      if(real&&S.patients.some(p=>codeOf(p)===code)){
         // Code déjà utilisé sur ce poste : le numéro suivant est pris automatiquement.
         const next=nextPseudoCode();createForm.querySelector('[name="pseudo_code"]').value=next;
         const view=$('#opPatientCodeView');if(view)view.textContent=next;
         if(feedbackNode)feedbackNode.textContent='Code mis à jour : '+next+'. Appuie de nouveau sur « Créer ».';return;
       }
-      const body=real?{action:'create',organization_id:S.org.id,first_name:'Client',last_name:code,birth_date:`${year}-01-01`,sex_at_birth:String(fd.get('sex_at_birth')||'not_stated'),create_account:false}
+      const body=real?{action:'create',organization_id:S.org.id,first_name:String(fd.get('first_name')||'').trim(),last_name:String(fd.get('last_name')||'').trim(),
+          birth_date:String(fd.get('birth_date')||''),sex_at_birth:String(fd.get('sex_at_birth')||'not_stated'),
+          email:String(fd.get('email')||'').trim().toLowerCase(),research_subject_code:code,create_account:false}
         :{action:'create',organization_id:S.org.id,first_name:String(fd.get('first_name')||'').trim(),last_name:String(fd.get('last_name')||'').trim(),birth_date:String(fd.get('birth_date')||''),sex_at_birth:String(fd.get('sex_at_birth')||'not_stated'),create_account:false};
       const feedback=$('#opPatientCreateFeedback'),submit=createForm.querySelector('[type="submit"]');
       if(!body.first_name||!body.last_name||!body.birth_date)return;
@@ -659,7 +680,7 @@ function patients(){
         sessionStorage.setItem('komo_autostart_patient',data.patient.id);
         await loadPro();
         location.hash='live';
-        toast(real?'Dossier '+code+' créé · ouverture de la consultation.':'Dossier créé · ouverture de la consultation.');
+        toast(real?'Dossier '+body.first_name+' '+body.last_name+' ('+code+') créé · ouverture de la consultation.':'Dossier créé · ouverture de la consultation.');
       }catch(error){
         if(feedback)feedback.textContent=error?.message||'Impossible de créer le dossier.';
       }finally{submit.disabled=false}
@@ -692,8 +713,8 @@ function patients(){
 const MOTION_LIVE_ENDPOINT='https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test';
 let motionLiveTimer=null,motionLiveFetching=false,motionLiveSignature='';
 const liveRoomSeen=new Map();
-// Libellé d'un dossier : le code pour un dossier réel (aucun nom dans PULSE), le nom pour un dossier fictif.
-const patientLabel=p=>p?.first_name==='Client'&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(String(p?.last_name||''))?String(p.last_name):[p?.first_name,p?.last_name].filter(Boolean).join(' ');
+// Libellé d'un dossier : prénom et nom ; le code seul pour un ancien dossier pseudonymisé.
+const patientLabel=p=>nameOf(p)||codeOf(p);
 let operatorLiveTimer=null;
 async function motionLiveAPI(body){
   const {data:{session}}=await sb.auth.getSession();
@@ -722,7 +743,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261123-envoi-v3');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261123-identite-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -1051,9 +1072,10 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261123-envoi-v3');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261123-identite-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
+        practitioner:String(S.profile?.display_name||[S.profile?.first_name,S.profile?.last_name].filter(Boolean).join(' ')||'').trim(),
         openVideo:openOperatorCamera,preferredSessionId:S.patient?.id?
          sessionStorage.getItem('komo_motion_consult_room_'+S.patient.id):null});
   }catch(error){console.error('[Motion consultation]',error);if(root?.isConnected)root.textContent='Consultation indisponible : '+(error.message||'erreur réseau')}

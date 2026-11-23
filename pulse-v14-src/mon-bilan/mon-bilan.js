@@ -2,8 +2,8 @@
 // Ouvert par le QR remis en consultation : le patient remplit le questionnaire pendant les tests,
 // puis retrouve ses résultats et son passeport PDF à la fin du bilan. Pas de compte, pas de nom :
 // le lien porte un jeton personnel de 256 bits (30 jours), retiré de la barre d'adresse dès l'ouverture.
-import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261123-envoi-v3';
-import {STEPS} from '../motion-protocol.mjs?v=20261123-envoi-v3';
+import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261123-identite-v1';
+import {STEPS} from '../motion-protocol.mjs?v=20261123-identite-v1';
 const EDGE="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test";
 const KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
 const STORE="komo_mon_bilan_v1";
@@ -90,9 +90,9 @@ function reviewCard(){
   '<p class="mb-muted">Vous pouvez fermer cette page et la rouvrir plus tard depuis ce téléphone.</p></div>';
 }
 async function resultsCard(){
- extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261123-envoi-v3");
+ extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261123-identite-v1");
  const passport=extras.clinicPassport(answers,view.results||{},new Date(view.completed_at||Date.now()),
-  {subject:view.code||"Mon bilan KŌMØ",real:!!view.patient?.real,patient:view.patient});
+  {subject:view.name||view.code||"Mon bilan KŌMØ",real:!!view.patient?.real,patient:view.patient});
  const lp=passport.longevity,zones={priority:"Priorité",consolidate:"À consolider",solid:"Solide",follow:"Suivi",missing:"Non mesuré"};
  const caps=lp.capacities.map(c=>{
   const m=c.measures.find(x=>x.value!==null&&x.value!==undefined);
@@ -102,7 +102,7 @@ async function resultsCard(){
  const prios=lp.priorities.length?lp.priorities.map(p=>'<div class="mb-prio"><b>'+esc(p.name)+'</b><span>Objectif à 6 semaines : '+esc(p.objective)+'</span></div>').join(""):
   '<p>Vos capacités sont solides : le programme vise à les garder.</p>';
  const ex=(passport.actionPlan?.exercises||[]).map(e=>'<div class="mb-prio"><b>'+esc(e.title)+'</b><span>'+esc(e.dose)+' · '+esc(e.frequency)+'</span></div>').join("");
- return '<div class="mb-card"><span class="mb-over">BILAN TERMINÉ</span><h1>Vos résultats</h1><p>'+esc(lp.headline)+'</p>'+caps+'</div>'+
+ return '<div class="mb-card"><span class="mb-over">BILAN TERMINÉ</span><h1>'+(view.first_name?'Vos résultats, '+esc(view.first_name):'Vos résultats')+'</h1><p>'+esc(lp.headline)+'</p>'+caps+'</div>'+
   '<div class="mb-card"><h2>Vos priorités</h2>'+prios+'</div>'+
   (ex?'<div class="mb-card"><h2>Votre programme maison</h2><p class="mb-muted">Proposé par votre praticien, à adapter avec lui. Arrêtez en cas de douleur ou de malaise.</p>'+ex+'</div>':'')+
   '<div class="mb-card"><h2>Votre passeport</h2><p>Le document complet : mesures, repères, programme et suivi.</p>'+
@@ -111,7 +111,7 @@ async function resultsCard(){
 }
 async function render(){
  if(!view)return;
- codeEl.textContent=view.code||"";
+ codeEl.textContent=view.name||view.code||"";
  // Résultats visibles seulement après validation du praticien (view.released).
  const state=view.status!=="completed"?"active":view.released?"completed":"review";
  if(state===shownState&&state==="review")return;
@@ -129,7 +129,7 @@ async function render(){
   setSave(complete?saveLabel():"Complétez le questionnaire pour un passeport complet · "+answeredRequired()+" / "+QUESTION_COUNT);
   document.getElementById("mbPdf").onclick=async e=>{
    const b=e.currentTarget,st=document.getElementById("mbPdfStatus");b.disabled=true;b.textContent="Préparation du PDF…";
-   try{await extras.downloadClinicReport(answers,view.results||{},new Date(),{subject:view.code||"Mon bilan KŌMØ",real:!!view.patient?.real,patient:view.patient,category:"all"});
+   try{await extras.downloadClinicReport(answers,view.results||{},new Date(),{subject:view.name||view.code||"Mon bilan KŌMØ",real:!!view.patient?.real,patient:view.patient,category:"all"});
     st.textContent="✓ Passeport prêt. Sur iPhone : « Partager » pour l’enregistrer dans Fichiers ou l’imprimer.";}
    catch(err){st.textContent="Le PDF n’a pas pu être préparé : réessayez dans un instant."}
    finally{b.disabled=false;b.textContent="Télécharger mon passeport (PDF)"}
@@ -147,7 +147,7 @@ async function render(){
 function showInvalid(){
  clearInterval(poll);try{localStorage.removeItem(STORE)}catch{}
  app.innerHTML='<div class="mb-card"><span class="mb-over">LIEN INDISPONIBLE</span><h1>Ce lien n’est plus valide.</h1>'+
-  '<p>Il a peut-être été renouvelé ou a dépassé 30 jours. Demandez à votre praticien de vous montrer un nouveau QR code.</p></div>';
+  '<p>Il a peut-être été renouvelé ou a dépassé 30 jours. Utilisez le lien reçu par e-mail, ou demandez-en un nouveau à votre praticien.</p></div>';
 }
 async function refresh(){
  try{

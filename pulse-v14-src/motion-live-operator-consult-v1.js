@@ -1,8 +1,8 @@
 // KŌMØ Pulse — console de consultation Motion (opérateur, ordinateur du cabinet).
 // v2.4 : sans caméra (plateformes, DynaMo, chrono et compteur PULSE). Le code vidéo reste pour Human Track.
 // Valeurs validées par l'opérateur. Aucune interprétation clinique automatique.
-import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-envoi-v3';
-import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-envoi-v3';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_USED,CAMERA_LABELS,INSTRUMENTED_STEPS,SKIP_REASONS,POSTURE_OPTIONS,fieldStep,deriveInstrumented,validateInstrumented,skippedText,optionLabel,plausibilityWarnings,toNewton,fromNewton,nextPendingStep} from './motion-protocol.mjs?v=20261123-identite-v1';
+import {buildTrajectory,trajectoryHeadline,frDate} from './motion-v2-trajectory.mjs?v=20261123-identite-v1';
 // Trajectoire J0 → S6 → S12 : consultations terminées du même patient dans le même centre.
 let trajectoryState={key:'',data:null,loading:false};
 const isRealDossier=()=>patient?.data_classification==='health_data';
@@ -73,7 +73,7 @@ function setStatus(message){if(q("mocStatus"))q("mocStatus").textContent=message
 function styles(){
  if(document.getElementById("mocStyles"))return;
  const link=document.createElement("link");link.id="mocStyles";link.rel="stylesheet";
- link.href="./motion-live-operator-consult-v1.css?v=20261123-envoi-v3";
+ link.href="./motion-live-operator-consult-v1.css?v=20261123-identite-v1";
  // Le design de l'espace praticien (pulse-workspace.css) reste la dernière couche.
  const workspace=document.querySelector("link[data-pulse-workspace]");
  if(workspace)document.head.insertBefore(link,workspace);else document.head.append(link);
@@ -451,10 +451,10 @@ function makeShell(){
    if(q("mocFullscreen"))q("mocFullscreen").textContent=document.fullscreenElement?"Réduire":"Plein écran";
   }catch(error){if(q("mocFullscreen"))q("mocFullscreen").textContent="Plein écran indisponible"}
  };
- const pseudo=patient?.first_name==="Client"&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(String(patient?.last_name||""));
- const code=patient?(pseudo?String(patient.last_name):[patient.first_name,patient.last_name].filter(Boolean).join(" ")):"";
- q("mocPatientCode").textContent=code||"Consultation Motion";
- q("mocPatientLine").textContent=patient?(isRealDossier()?"Consultation réelle":"Démonstration")+" · protocole "+PROTOCOL.code+" "+PROTOCOL.version:"Sélectionnez un patient";
+ // En-tête : prénom et nom du patient, puis le code (VALD, feuille de mesures).
+ const code=patientCode(),name=patientName();
+ q("mocPatientCode").textContent=name||code||"Consultation Motion";
+ q("mocPatientLine").textContent=patient?[name&&code,isRealDossier()?"Consultation réelle":"Démonstration","protocole "+PROTOCOL.code+" "+PROTOCOL.version].filter(Boolean).join(" · "):"Sélectionnez un patient";
  // Entrée = « Valider et passer au suivant » quand la saisie est complète (hors zone de notes).
  host.addEventListener("keydown",event=>{
   // Barre d'espace = Départ / Arrivée du chronomètre de marche (hors champ de saisie).
@@ -687,6 +687,16 @@ function trajectoryMarkup(t){
 }
 // Âge (année de naissance) et sexe de référence : situent chaque capacité par rapport à son repère publié.
 function patientProfile(){return patient?{birth_date:patient.birth_date||null,sex_at_birth:patient.sex_at_birth||null}:null}
+// Identité (23/11/2026) : prénom et nom dans le dossier, code HIRO-AAMMJJ-NN dans research_subject_code.
+// Anciens dossiers pseudonymisés : prénom « Client » et code en guise de nom.
+function patientCode(){
+ const c=String(patient?.research_subject_code||"").toUpperCase();if(/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(c))return c;
+ return patient?.first_name==="Client"&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(String(patient?.last_name||""))?String(patient.last_name):"";
+}
+function patientName(){
+ if(!patient||(patient.first_name==="Client"&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(String(patient.last_name||""))))return "";
+ return [patient.first_name,patient.last_name].filter(Boolean).join(" ").trim();
+}
 const ZONE_TEXT={priority:"Priorité",consolidate:"À consolider",solid:"Solide",follow:"Suivi",missing:"Non mesuré"};
 function capacityMarkup(c){
  const shown=c.measures.filter(m=>m.value!==null&&m.value!==undefined).slice(0,2);
@@ -708,7 +718,9 @@ function releaseMarkup(finished){
  return '<section class="moc-release" id="mocRelease" data-state="'+state+'"><h4>Envoi au patient</h4>'+
   (state==="waiting"?'<p class="moc-help">Le patient verra ses résultats sur sa page « Mon bilan » après ta validation, une fois les '+TESTS.length+' étapes terminées.</p>':
    state==="released"?'<p><b>✓ Visible par le patient depuis le '+HTML(when)+'</b> : résultats, programme et passeport PDF sur sa page « Mon bilan ».</p>'+
-    '<p class="moc-help">'+(hasLink?'Il a déjà son lien (QR de la consultation) : il lui suffit de rouvrir la page.':'Aucun lien n’a encore été remis : crée-le avec « Lien du patient » et envoie-le par ta messagerie sécurisée.')+'</p>'+
+    '<label class="moc-field moc-release-mail">E-mail du patient<input type="email" id="mocReleaseEmail" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="200" value="'+HTML(patient?.email||"")+'" placeholder="adresse du patient"></label>'+
+    '<div class="moc-buttons"><button type="button" class="moc-button primary" id="mocReleaseMail">Envoyer le bilan par e-mail</button></div>'+
+    '<p class="moc-help">Mail s’ouvre, prêt à envoyer depuis ton adresse : un lien personnel vers sa page et son PDF, aucun résultat dans l’e-mail. '+(hasLink?'Le patient a aussi déjà son lien (QR de la consultation).':'')+'</p>'+
     '<div class="moc-buttons"><button type="button" class="moc-button secondary" id="mocReleaseLink">Lien du patient</button>'+
     '<button type="button" class="moc-button secondary" id="mocReleaseUndo">Masquer au patient</button></div>':
    '<p><b>Le patient ne voit pas encore ses résultats.</b> Relis le rapport, corrige un test si besoin, puis valide.</p>'+
@@ -727,12 +739,45 @@ function bindRelease(){
  if(q("mocReleaseGo"))q("mocReleaseGo").onclick=e=>set(true,e.currentTarget);
  if(q("mocReleaseUndo"))q("mocReleaseUndo").onclick=e=>{if(confirm("Masquer les résultats au patient ? Sa page « Mon bilan » affichera « en relecture » jusqu’à ta prochaine validation."))set(false,e.currentTarget)};
  if(q("mocReleaseLink"))q("mocReleaseLink").onclick=()=>{showPatientQr(false);q("mocPatientQr")?.scrollIntoView({block:"start",behavior:"smooth"})};
+ if(q("mocReleaseMail"))q("mocReleaseMail").onclick=async e=>{
+  const button=e.currentTarget,status=q("mocReleaseStatus"),email=String(q("mocReleaseEmail")?.value||"").trim().toLowerCase();
+  if(!/^[^\s@,;]+@[^\s@,;]+\.[^\s@,;]{2,}$/.test(email)){if(status)status.textContent="Indique l’adresse e-mail du patient.";q("mocReleaseEmail")?.focus();return}
+  button.disabled=true;
+  try{
+   let link=storedPatientLink();
+   if(!link){
+    // Lien créé sur un autre écran : on ne peut pas le relire (seule son empreinte est stockée). Un nouveau lien le remplace.
+    if(room.progress?.patient_link&&!confirm("Un lien a déjà été remis sur un autre écran. L’e-mail contiendra un nouveau lien et l’ancien cessera de fonctionner. Continuer ?")){button.disabled=false;return}
+    if(status)status.textContent="Préparation du lien…";
+    const r=await api({action:"operator_patient_link",session_id:room.id});
+    lastMutationAt=performance.now();link={url:r.url,expires_at:r.expires_at};
+    try{sessionStorage.setItem(qrStoreKey(),JSON.stringify(link))}catch{}
+    if(r.session)room=r.session;
+   }
+   const mailto=patientMailUrl(email,link);host.dataset.lastMailto=mailto;location.href=mailto;
+   if(status)status.textContent="✓ E-mail prêt dans Mail : vérifie l’adresse, puis appuie sur Envoyer.";
+  }catch(error){if(status)status.textContent="E-mail indisponible : "+(error.message||"erreur réseau")+". Réessaie.";}
+  finally{button.disabled=false}
+ };
+}
+// E-mail au patient : lien personnel seulement, aucune donnée de santé dans le message.
+function patientMailUrl(email,link){
+ const first=patientName()?String(patient?.first_name||"").trim():"";
+ const day=new Date(room.progress?.patient_release?.released_at||Date.now()).toLocaleDateString("fr-FR");
+ const until=new Date(link.expires_at).toLocaleDateString("fr-FR");
+ const body=[(first?"Bonjour "+first+",":"Bonjour,"),"",
+  "Votre bilan KŌMØ Motion du "+day+" est disponible sur votre page personnelle :",link.url,"",
+  "Vous y trouverez vos résultats, vos priorités, votre programme pour les 6 prochaines semaines et votre passeport à télécharger en PDF.","",
+  "Ce lien vous est personnel et reste valable jusqu’au "+until+". Merci de ne pas le transférer.","",
+  "Rendez-vous dans 6 semaines pour le contrôle : mêmes tests, mêmes conditions, pour mesurer vos progrès.","",
+  "Bien à vous,",practitioner||"KŌMØ"].join("\n");
+ return "mailto:"+email+"?subject="+encodeURIComponent("Votre bilan KŌMØ Motion")+"&body="+encodeURIComponent(body);
 }
 function renderReportSection(){
  if(!host||!extras||!room)return;
  const results=room.progress?.results||{};
  const summary=extras.clinicReportSummary(questionnaireAnswers,results);
- const label=patient?[patient.first_name,patient.last_name].filter(Boolean).join(" "):"Dossier fictif";
+ const label=patient?(patientName()||patientCode()||"Patient"):"Dossier fictif";
  const simulated=room.progress?.questionnaire?.simulated===true;
  const trajectory=trajectoryState.key===trajectoryKey()?trajectoryState.data:null;
  const passport=extras.clinicPassport(questionnaireAnswers,results,new Date(),{subject:label,trajectory,simulated,real:isRealDossier(),patient:patientProfile()});
@@ -943,7 +988,7 @@ function timeDisplay(){
 }
 // Saisie en cours protégée : un rafraîchissement (poll, retour serveur) ne doit jamais effacer
 // ce que le praticien vient de taper. Le brouillon n'est abandonné qu'après validation, saut ou reprise.
-let renderedStepId=null,discardDraft=false,lastMutationAt=0;
+let renderedStepId=null,discardDraft=false,lastMutationAt=0,practitioner="";
 function captureDraft(id){
  const d={id,fields:{},choices:{},inputs:{}};
  host.querySelectorAll("[data-field]").forEach(el=>{if(el.value!=="")d.fields[el.dataset.field]=el.value});
@@ -1501,19 +1546,19 @@ async function refresh(force=false){
 }
 export async function mountOperatorConsultation(config){
  disposeOperatorConsultation();
- host=config.root;api=config.api;openVideo=config.openVideo;patient=config.patient||null;
+ host=config.root;api=config.api;openVideo=config.openVideo;patient=config.patient||null;practitioner=String(config.practitioner||"");
  preferredSessionId=config.preferredSessionId||"";
  if(!host)return;
  styles();makeShell();
  try{
-  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-envoi-v3");
+  extras=await import("./motion-live-clinic-extras-v1.js?v=20261123-identite-v1");
   updatePanelTabs();
  }catch(error){
   const note=q("mocVoiceState");
   if(note)note.textContent="Questionnaires et rapport temporairement indisponibles : "+(error.message||"chargement");
  }
  try{
-  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-envoi-v3");
+  const {createClinicVoice}=await import("./motion-live-clinic-voice-v1.js?v=20261123-identite-v1");
   voice=createClinicVoice({
    onAction:handleVoiceAction,
    onStatus:(text,state)=>{
@@ -1532,7 +1577,7 @@ export async function mountOperatorConsultation(config){
  fullscreenListener=()=>{const button=q("mocFullscreen");if(button)button.textContent=document.fullscreenElement?"↙ Quitter le plein écran":"⛶ Plein écran"};
  document.addEventListener("fullscreenchange",fullscreenListener);
  if(CAMERA_USED)try{
-  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-envoi-v3");
+  const {createRemoteMotionTracker}=await import("./motion-live-remote-pose-v1.js?v=20261123-identite-v1");
   poseTracker=createRemoteMotionTracker({
    onUpdate:updatePosePanel,
    onError:message=>{

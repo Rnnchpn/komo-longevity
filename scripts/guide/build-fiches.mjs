@@ -85,7 +85,8 @@ table{width:100%;border-collapse:collapse}
 .consent .opt{display:flex;white-space:normal;margin:0 0 1.6mm;align-items:flex-start}
 .consent .opt .box{flex:none;margin-top:.5mm}
 .sign{display:grid;grid-template-columns:1fr 1fr;gap:8mm;margin-top:2.5mm}
-.sign div{border:1px solid var(--line);border-radius:2mm;padding:2.5mm 3mm;height:20mm}
+.sign div{border:1px solid var(--line);border-radius:2mm;padding:2.5mm 3mm;height:17mm}
+.consent-pair{display:flex;gap:6mm}
 .sign b{display:block;margin-bottom:1mm}
 .sign span{color:var(--muted);font-size:7.8pt}
 .foot{margin-top:2mm;font-size:7.6pt;color:var(--muted);display:flex;justify-content:space-between}
@@ -100,11 +101,11 @@ table{width:100%;border-collapse:collapse}
 .fld{margin-right:2mm}
 .cond{display:grid;grid-template-columns:28mm 1fr;gap:1.6mm 2mm;align-items:center}
 .cond>span{font-weight:600;color:var(--ink)}
-.notes{border:1px solid var(--line);border-radius:2mm;padding:2.5mm 3mm;margin-top:2.5mm;height:14mm}
+.notes{border:1px solid var(--line);border-radius:2mm;padding:2.5mm 3mm;margin-top:2mm;height:12mm}
 </style></head><body>
 
 <div class="sheet">
- <div class="top"><div class="brand">KŌMØ MOTION · Clinique HIRO</div><div class="keep">À conserver dans le dossier du cabinet. Ne jamais saisir, photographier ni transmettre.</div></div>
+ <div class="top"><div class="brand">KŌMØ MOTION · Clinique HIRO</div><div class="keep">À conserver dans le dossier du cabinet. Ne jamais photographier ni transmettre.</div></div>
  <h1>Fiche patient</h1><p class="sub">Identité, sécurité et consentement · une fiche par bilan</p>
  <div class="code"><b>Code PULSE</b><span class="digits">HIRO –<i></i><i></i><i></i><i></i><i></i><i></i>–<i></i><i></i></span>
   <span>Date ${blank(26)}</span><span>Heure ${blank(14)}</span></div>
@@ -114,7 +115,8 @@ table{width:100%;border-collapse:collapse}
  <div class="grid">
   <div class="row"><label>Nom</label>${blank(10)}</div><div class="row"><label>Prénom</label>${blank(10)}</div>
   <div class="row"><label>Date de naissance</label>${blank(10)}</div><div class="row"><label>Sexe</label>&nbsp;${opts(['Femme','Homme','Non précisé'])}</div>
-  <div class="row"><label>Téléphone</label>${blank(10)}</div><div class="row"><label>Médecin traitant</label>${blank(10)}</div>
+  <div class="row"><label>Téléphone</label>${blank(10)}</div><div class="row"><label>E-mail</label>${blank(10)}</div>
+  <div class="row"><label>Médecin traitant</label>${blank(10)}</div>
  </div>
 
  <h2>Sécurité · à vérifier avant les tests</h2>
@@ -130,18 +132,20 @@ table{width:100%;border-collapse:collapse}
 
  <h2>Information</h2>
  <div class="info">
-  <p>Le bilan KŌMØ Motion mesure la force, l’équilibre et la marche avec des plateformes de force, un dynamomètre et un chronomètre. Aucune image n’est prise. Les résultats sont situés par rapport à des repères publiés : ils ne constituent pas un diagnostic. Vous pouvez interrompre un test à tout moment.</p>
-  <p>Vos résultats sont enregistrés dans le logiciel KŌMØ PULSE et dans l’application VALD sous un code, sans votre nom. Seule cette fiche, conservée au cabinet, relie votre nom à ce code. Responsable du traitement : Dr Renan Chapon (KŌMØ). Vous pouvez demander l’accès, la rectification ou l’effacement de vos données, ou vous opposer à leur traitement : contact@komolongevity.com. Vous pouvez aussi saisir la CNIL.</p>
+  <p>Le bilan KŌMØ Motion mesure la force, l’équilibre et la marche (plateformes de force, dynamomètre, chronomètre) et, si vous l’acceptez, votre posture sur une photo de profil qui n’est pas conservée. Les résultats sont situés par rapport à des repères publiés : ce n’est pas un diagnostic. Vous pouvez interrompre un test à tout moment.</p>
+  <p>Vos résultats sont conservés dans votre dossier KŌMØ PULSE ; dans l’application VALD, seulement sous un code. Les mesures et la photo sont analysées sous ce code avec un outil d’intelligence artificielle (Claude, Anthropic). Votre bilan vous est envoyé par e-mail : un lien personnel, sans résultat dans le message. Responsable du traitement : Dr Renan Chapon (KŌMØ). Accès, rectification, effacement, opposition : contact@komolongevity.com ; vous pouvez aussi saisir la CNIL.</p>
  </div>
  <div class="consent">
   <span class="opt">${box}<span>J’ai reçu ces informations, j’ai pu poser mes questions et j’accepte de réaliser le bilan.</span></span>
-  <span class="opt">${box}<span>J’accepte que mes résultats, enregistrés sous code, soient conservés pour comparer avec mes bilans de contrôle.</span></span>
+  <span class="opt">${box}<span>J’accepte la conservation de mes résultats pour les comparer à mes bilans de contrôle.</span></span>
+  <div class="consent-pair"><span class="opt">${box}<span>J’accepte la photo de profil (non conservée).</span></span>
+  <span class="opt">${box}<span>J’accepte de recevoir le lien vers mon bilan par e-mail.</span></span></div>
  </div>
  <div class="sign">
   <div><b>Patient</b><span>Date et signature</span></div>
   <div><b>Praticien</b><span>Nom, date et signature</span></div>
  </div>
- <div class="foot"><span>Fiche signée → dans PULSE, cocher « Fiche KŌMØ signée : consentement recueilli et questionnaire de sécurité vérifié ».</span><span>${e(PROTOCOL.code)} ${e(PROTOCOL.version)}</span></div>
+ <div class="foot"><span>Fiche signée → dans PULSE, cocher « Fiche KŌMØ signée » à la création du dossier.</span><span>${e(PROTOCOL.code)} ${e(PROTOCOL.version)}</span></div>
 </div>
 
 <div class="sheet">
@@ -152,6 +156,7 @@ table{width:100%;border-collapse:collapse}
  <table class="measures"><thead><tr><th></th><th>Test</th><th>Valeurs</th><th>Non réalisé</th></tr></thead><tbody>
  ${(()=>{let out='',cur=null,n=0;for(const s of STEPS){n++;if(s.block!==cur){cur=s.block;out+='<tr class="station"><td colspan="4">Station '+s.block+' · '+e(STATIONS[s.block].label)+'</td></tr>';}out+=measureRow(s,n);}return out;})()}
  </tbody></table>
+ <div class="row" style="margin-top:1.4mm"><span class="opt">${box}<b>Photo de profil</b>&nbsp;envoyée à Claude</span><span class="opt">${box}non réalisée</span><span class="hint">pieds nus, côté droit, iPhone vertical à 3 m, corps entier</span></div>
  <div class="notes"><b>Notes</b> <span class="hint">motif d’un test non réalisé (sécurité, douleur, refus, appareil indisponible…), incident, observation</span></div>
  <div class="foot"><span>DynaMo : cocher N ou kg selon l’écran. Photo : page entière, à plat, nette ; jamais la fiche patient.</span><span>${e(PROTOCOL.code)} ${e(PROTOCOL.version)}</span></div>
 </div>

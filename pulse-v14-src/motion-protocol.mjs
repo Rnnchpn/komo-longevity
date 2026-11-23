@@ -234,6 +234,29 @@ export const STEPS=[
   instruction:'Avant le chrono, 1 à 2 levers d’essai pour montrer le geste (ils ne comptent pas). Démarrer le chronomètre au « Partez », puis appuyer sur « +1 lever » à chaque lever complet (debout, hanches et genoux tendus). Si le patient est à plus de mi-hauteur à la fin des 30 s, le lever compte. PULSE en calcule la puissance des jambes avec la taille.',
   label:'Nombre de levers complets'}
 ];
+// Compléments (23/11/2026) : mesures hors des 14 étapes ; elles ne comptent pas dans « tests réalisés » et ne
+// bloquent ni la fin de la consultation ni l'envoi au patient.
+// posture_photo : photo de profil prise par le praticien, mesurée par Claude (points du corps détectés sur la photo),
+// relue par le praticien. La photo n'est conservée nulle part : seules les mesures et l'observation sont enregistrées.
+// Angles en degrés par rapport à la verticale ; positif = vers l'avant.
+export const COMPLEMENTS=[
+ {id:'posture_photo',block:'P',kind:'fields',title:'Posture de profil · photo',short:'Posture (photo)',
+  device:'Photo de profil · points du corps',trials:'1 photo',duration:0,
+  setup:'Pieds nus, short ou vêtements près du corps, cheveux dégagés de l’oreille. Debout de profil, côté droit vers l’appareil, poids sur les deux pieds, bras relâchés le long du corps, regard droit devant. Mur uni derrière, sol dégagé.',
+  script:'« Tenez-vous debout naturellement, comme d’habitude, sans vous redresser. Regardez droit devant vous. Ne bougez plus. »',
+  instruction:'iPhone en vertical, tenu droit (pas penché), à hauteur de hanche, à 3 m du patient ; tout le corps dans l’image, de la tête aux pieds, sans zoom. Une seule photo, envoyée à Claude, qui la mesure puis l’efface. Même cadrage au contrôle de 6 semaines.',
+  fields:[
+   {key:'pp_head_forward_deg',label:'Avancée de la tête (oreille / épaule)',unit:'°',min:-45,max:80,decimals:1},
+   {key:'pp_trunk_lean_deg',label:'Inclinaison du tronc (épaule / hanche)',unit:'°',min:-45,max:45,decimals:1},
+   {key:'pp_hip_shift_deg',label:'Position du bassin (hanche / cheville)',unit:'°',min:-45,max:45,decimals:1},
+   {key:'pp_knee_flex_deg',label:'Flexion du genou (négatif : genou en arrière)',unit:'°',min:-30,max:60,decimals:1},
+   {key:'pp_global_lean_deg',label:'Inclinaison globale (oreille / cheville)',unit:'°',min:-30,max:30,decimals:1}
+  ],
+  choices:[{key:'pp_observation',label:'Observation',options:POSTURE_OPTIONS},
+   {key:'pp_side',label:'Côté photographié',options:[['right','Droit'],['left','Gauche']]}]}
+];
+export const COMPLEMENT_IDS=COMPLEMENTS.map(s=>s.id);
+export const complementById=id=>COMPLEMENTS.find(s=>s.id===id)||null;
 export const STEP_IDS=STEPS.map(s=>s.id);
 export const V2_ORDER=STEP_IDS;
 export const stepById=id=>STEPS.find(s=>s.id===id)||null;
@@ -359,14 +382,16 @@ export function nextPendingStep(results={},fromId){
 // Lignes descriptives pour le rapport et le PDF : valeur, unité, conditions ; aucune norme inventée.
 export function instrumentedRows(results={}){
  const rows=[];
- for(const spec of STEPS){
+ for(const spec of [...STEPS,...COMPLEMENTS]){
   if(spec.kind!=='fields')continue;
   const id=spec.id,r=results[id];
+  // Complément absent (ex. pas de photo de profil) : rien à afficher.
+  if(!r&&COMPLEMENT_IDS.includes(id))continue;
   if(!r){rows.push({id,name:spec.title,device:spec.device,status:'missing',lines:[]});continue;}
   if(r.status==='skipped'){rows.push({id,name:spec.title,device:spec.device,status:'skipped',
    reason:r.reason||'',note:r.note||'',lines:[skippedText(r.reason)]});continue;}
   const f=r.fields||{},d=r.derived||{};const lines=[];
-  for(const field of spec.fields)if(finite(f[field.key]))lines.push(field.label+' : '+String(f[field.key]).replace('.',',')+' '+field.unit);
+  for(const field of spec.fields)if(finite(f[field.key]))lines.push(field.label+' : '+String(f[field.key]).replace('.',',').replace('-','−')+(field.unit==='°'?'°':' '+field.unit));
   for(const c of spec.choices||[])if(f[c.key])lines.push(c.label+' : '+(optionLabel(c.options,f[c.key])||'—'));
   if(finite(d.gait_speed_ms))lines.push('Vitesse de marche : '+String(d.gait_speed_ms).replace('.',',')+' m/s'+
    (r.method==='GAIT_4M_STANDING_START_BEST_OF_2'?' (départ arrêté, meilleur passage)':' (ancien protocole, départ lancé)'));
@@ -392,23 +417,25 @@ export const CONDITION_LABELS={
 };
 
 // Spécification transmise au serveur (générée, jamais éditée à la main côté serveur).
+function serverStep(s){
+ const out={id:s.id,kind:s.kind,duration:s.duration||0};
+ if(s.kind==='fields'){
+  out.fields=s.fields.map(f=>({key:f.key,min:f.min,max:f.max,decimals:f.decimals,...(f.optional?{optional:true}:{})}));
+  out.choices=(s.choices||[]).map(c=>({key:c.key,options:c.options.map(([k])=>k)}));
+  if(s.pair)out.pair=s.pair;
+ }
+ if(['count','balance','two_step'].includes(s.kind)){out.unit=s.unit;out.max=s.max;out.integer=!!s.integer;}
+ if(s.kind==='observation')out.options=s.options.map(([k])=>k);
+ if(s.method)out.method=s.method;
+ if(s.value_field)out.value_field=s.value_field;
+ return out;
+}
 export function serverSpec(){
  return {
   protocol:{id:PROTOCOL.id,version:PROTOCOL.version,code:PROTOCOL.code,mode:PROTOCOL.mode,
    device_set:PROTOCOL.device_set.map(d=>d.id)},
-  steps:STEPS.map(s=>{
-   const out={id:s.id,kind:s.kind,duration:s.duration||0};
-   if(s.kind==='fields'){
-    out.fields=s.fields.map(f=>({key:f.key,min:f.min,max:f.max,decimals:f.decimals,...(f.optional?{optional:true}:{})}));
-    out.choices=(s.choices||[]).map(c=>({key:c.key,options:c.options.map(([k])=>k)}));
-    if(s.pair)out.pair=s.pair;
-   }
-   if(['count','balance','two_step'].includes(s.kind)){out.unit=s.unit;out.max=s.max;out.integer=!!s.integer;}
-   if(s.kind==='observation')out.options=s.options.map(([k])=>k);
-   if(s.method)out.method=s.method;
-   if(s.value_field)out.value_field=s.value_field;
-   return out;
-  }),
+  steps:STEPS.map(serverStep),
+  complements:COMPLEMENTS.map(serverStep),
   skip_reasons:SKIP_REASONS.map(([k])=>k)
  };
 }

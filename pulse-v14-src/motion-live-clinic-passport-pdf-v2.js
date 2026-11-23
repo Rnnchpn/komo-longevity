@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-envoi-v3';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-identite-v1';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -48,7 +48,8 @@ export async function downloadClinicPassport(report,category='all'){
   box(0,0,W,H,P.paper);box(0,0,W,3,P.dark);
   txt('KOMO',M,16,{sz:16,bold:true,serif:true});
   txt('MOTION PASSPORT',M+27,15,{sz:8,bold:true,col:P.muted});
-  txt('BILAN / CABINET',R,15,{sz:8,col:P.muted,align:'right'});
+  // Nom du patient en en-tête de chaque page (dossiers nominatifs depuis le 23/11/2026).
+  txt((report.subject?cleaner(report.subject).toUpperCase().slice(0,40)+'  ·  ':'')+'BILAN / CABINET',R,15,{sz:8,col:P.muted,align:'right'});
   line(M,22,R,22);
   txt('CATEGORIE '+index+' / 06',M,33,{sz:8,bold:true,col:P.gold});
   txt(title,M,46,{sz:23,serif:true});

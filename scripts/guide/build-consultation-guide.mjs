@@ -7,7 +7,7 @@ import {dirname,join} from 'node:path';
 import {createRequire} from 'node:module';
 // puppeteer-core est installé dans l'outillage local (hors dépendances du site).
 const puppeteer=createRequire(process.env.PUPPETEER_HOME||'/home/claude/tools/')('puppeteer-core');
-import {PROTOCOL,STEPS,STATIONS,CAMERA_LABELS} from '../../pulse-v14-src/motion-protocol.mjs';
+import {PROTOCOL,STEPS,STATIONS,CAMERA_LABELS,COMPLEMENTS} from '../../pulse-v14-src/motion-protocol.mjs';
 import {forStep,CHAIR_NORMS} from './longevity-reference.mjs';
 
 const here=dirname(fileURLToPath(import.meta.url));
@@ -206,8 +206,8 @@ table.summary td:first-child{width:20%}
  <p class="lead">Tout ce qu’il faut faire, dire et saisir, de la préparation de la salle au passeport remis au patient. Sans caméra : tout se pilote depuis ton iPhone. Les ${N} tests sont repris mot pour mot de la console PULSE.</p>
  <div class="facts"><div><strong>${N}</strong><span>tests en ${NS} stations</span></div><div><strong>≈ 35 min</strong><span>de tests</span></div><div><strong>6 semaines</strong><span>jusqu’au contrôle</span></div></div>
  <div class="flow"><ol>
-  <li>Préparer la salle et les appareils</li><li>Accueillir et vérifier la sécurité</li><li>Créer le dossier pseudonymisé</li><li>Ouvrir la consultation, QR au patient</li>
-  <li>Faire les ${N} tests, notés sur la feuille de mesures</li><li>Compléter le questionnaire</li><li>Restituer et remettre le passeport</li><li>Revoir le patient à 6 semaines</li>
+  <li>Préparer la salle et les appareils</li><li>Accueillir et vérifier la sécurité</li><li>Créer le dossier patient</li><li>Ouvrir la consultation, QR au patient</li>
+  <li>Faire les ${N} tests, notés sur la feuille de mesures</li><li>Compléter le questionnaire</li><li>Restituer, valider, envoyer par e-mail</li><li>Revoir le patient à 6 semaines</li>
  </ol></div>
  <p class="version">Protocole ${e(PROTOCOL.code)} ${e(PROTOCOL.version)} · version du ${DATE} · document interne, non diagnostique</p>
 </div>
@@ -250,12 +250,12 @@ table.summary td:first-child{width:20%}
 </section>
 
  <p class="kicker" style="margin-top:7mm">Étape 3</p><h2>Créer le dossier</h2>
- <p class="intro">Le dossier est pseudonymisé : aucun nom dans PULSE, seulement un code et l’année de naissance. La correspondance code ↔ patient reste sur la fiche papier.</p>
+ <p class="intro">Le dossier porte le prénom, le nom, la date de naissance et l’e-mail du patient. PULSE lui donne aussi un code : c’est ce code, jamais le nom, qui va dans VALD, sur la feuille de mesures et dans ce que tu envoies à Claude.</p>
  ${steps([
   'Colonne de gauche (barre du bas sur téléphone) → <b>Patients</b>.',
   'S’il n’y a encore aucun dossier, le formulaire est déjà ouvert ; sinon, « Nouveau patient ».',
-  'Le code <b>HIRO-AAMMJJ-NN</b> s’affiche en grand : recopie-le sur la fiche papier.',
-  'Tape l’année de naissance, puis touche « Femme », « Homme » ou « Non précisé ». Le sexe et l’âge choisissent les repères du passeport ; « Non précisé » applique les plus prudents.',
+  'Le code <b>HIRO-AAMMJJ-NN</b> s’affiche en grand : recopie-le sur la fiche patient et la feuille de mesures.',
+  'Tape le prénom, le nom, la date de naissance et l’<b>e-mail</b> (il sert à lui envoyer son bilan), puis touche « Femme », « Homme » ou « Non précisé ». Le sexe et l’âge choisissent les repères du passeport ; « Non précisé » applique les plus prudents.',
   'Coche « Fiche KŌMØ signée : consentement recueilli et questionnaire de sécurité vérifié ».',
   '« Créer et démarrer la consultation ». S’il manque quelque chose, PULSE l’écrit juste au-dessus du bouton.'
  ])}
@@ -298,6 +298,20 @@ table.summary td:first-child{width:20%}
 </section>
 
 <section class="part">
+ <p class="kicker">Complément</p><h2>Photo de profil · posture</h2>
+ <p class="intro">Au début de la station B, pieds nus, avant de monter sur les plateformes. Seulement si le patient a coché la photo sur sa fiche. Elle ne compte pas dans les ${N} tests et ne bloque rien.</p>
+ ${steps([
+  e(COMPLEMENTS[0].setup),
+  e(COMPLEMENTS[0].instruction),
+  'Dis : '+e(COMPLEMENTS[0].script),
+  'Envoie la photo à Claude avec le <b>code</b> du patient dans le message, jamais son nom.',
+  'Claude te renvoie la photo annotée (oreille, épaule, hanche, genou, cheville) et les angles : avancée de la tête, inclinaison du tronc, position du bassin, genou. Tu relis, puis « OK ».',
+  'Les mesures arrivent dans le Rapport (« Symétrie et posture ») ; la photo est effacée. Coche la case sur la feuille de mesures.'
+ ])}
+ <div class="note">La posture est décrite, jamais diagnostiquée : « alignement neutre », « décalage apparent » ou « non interprétable ». Au contrôle, même cadrage ; un écart de moins de 5° n’est pas interprété.</div>
+</section>
+
+<section class="part">
  <p class="kicker">Étape 6</p><h2>Questionnaire</h2>
  ${steps([
   'Le patient répond <b>sur son téléphone</b> pendant les tests (QR de l’étape 4) : 22 questions en cinq catégories, plus 5 questions facultatives « Santé et longévité » (chute dans l’année, activité, temps assis, tabac, médicaments).',
@@ -310,8 +324,9 @@ table.summary td:first-child{width:20%}
   'Présente les <b>3 priorités</b> et leur objectif à 6 semaines, puis le <b>programme maison</b> : 4 exercices et la marche quotidienne.',
   'Montre chaque exercice en salle, une ou deux répétitions. Un exercice déjà fait une fois est un exercice qu’on refait à la maison.',
   '« Télécharger le passeport complet ». Sur l’iPhone, le PDF s’ouvre : « Partager › Imprimer » (AirPrint) ou « Enregistrer dans Fichiers ». Feuillette-le avant de l’imprimer.',
-  'Remets-le imprimé, en main propre, et ajoute le prénom à la main : le fichier ne porte que le code. Par voie numérique, uniquement ta messagerie de santé sécurisée.',
-  'Relu et d’accord ? En bas du Rapport, <b>« Valider et rendre visible au patient »</b>. Sa page « Mon bilan » affiche alors ses capacités, ses priorités, son programme maison et le bouton pour télécharger son passeport. Il a déjà son lien s’il a scanné le QR ; sinon « Lien du patient », à envoyer par ta messagerie sécurisée. « Masquer au patient » retire l’accès si besoin.',
+  'Si tu veux, remets-le imprimé : il porte le nom du patient. Jamais en pièce jointe d’un e-mail : l’envoi se fait par lien (ci-dessous).',
+  'Relu et d’accord ? En bas du Rapport, <b>« Valider et rendre visible au patient »</b>. Sa page « Mon bilan » affiche alors ses capacités, ses priorités, son programme maison et le bouton pour télécharger son passeport. « Masquer au patient » retire l’accès si besoin.',
+  '<b>« Envoyer le bilan par e-mail »</b> : Mail s’ouvre sur l’iPhone avec son adresse, l’objet et son lien personnel (30 jours). Aucun résultat dans le message : tout est derrière le lien, avec le PDF et le programme des 6 semaines. Vérifie l’adresse, puis « Envoyer ».',
   'Prends le rendez-vous de contrôle à 6 semaines avant que le patient parte.'
  ])}
  <blockquote>« Voici votre point de départ. Ce ne sont pas des diagnostics, ce sont des repères. Votre marche est solide. Votre équilibre est sous les 10 secondes d’un côté : dans les études, c’est associé à un risque plus élevé. La bonne nouvelle, c’est que ça s’entraîne. Voici vos exercices, et nous refaisons les mêmes mesures dans 6 semaines pour voir ce qui a bougé. »</blockquote>

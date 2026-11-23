@@ -15,13 +15,15 @@ type Center={id:string;clinical_data_status:"test_only"|"production_enabled"};
 // KŌMØ Motion — protocole standardisé (source unique : pulse-v14-src/motion-protocol.mjs,
 // copie générée dans ./protocol.ts par scripts/motion-protocol-sync.mjs ; ne jamais dupliquer ici).
 const STEPS:string[]=SPEC.steps.map((x:any)=>x.id);
-const STEP_SPEC:Record<string,any>=Object.fromEntries(SPEC.steps.map((x:any)=>[x.id,x]));
+// Compléments (posture sur photo, 23/11/2026) : hors des 14 étapes, enregistrés par la transcription seulement.
+const COMPLEMENTS:string[]=(SPEC.complements||[]).map((x:any)=>x.id);
+const STEP_SPEC:Record<string,any>=Object.fromEntries([...SPEC.steps,...(SPEC.complements||[])].map((x:any)=>[x.id,x]));
 const SKIP_REASONS:string[]=SPEC.skip_reasons;
 const PROTOCOL_STAMP={id:SPEC.protocol.id,version:SPEC.protocol.version,code:SPEC.protocol.code,
  mode:SPEC.protocol.mode,device_set:SPEC.protocol.device_set,test_order:STEPS};
 type FieldSpec={key:string;min:number;max:number;decimals:number;optional?:boolean};
 const INSTRUMENTED:Record<string,{fields:FieldSpec[];choices:{key:string;options:string[]}[];pair?:[string,string]}>=
- Object.fromEntries(SPEC.steps.filter((x:any)=>x.kind==="fields").map((x:any)=>[x.id,{fields:x.fields,choices:x.choices||[],pair:x.pair}]));
+ Object.fromEntries([...SPEC.steps,...(SPEC.complements||[])].filter((x:any)=>x.kind==="fields").map((x:any)=>[x.id,{fields:x.fields,choices:x.choices||[],pair:x.pair}]));
 const roundTo=(x:number,d:number)=>Math.round(x*10**d)/10**d;
 function validateInstrumented(step:string,raw:any){
  const spec=INSTRUMENTED[step];if(!spec||!raw||typeof raw!=="object"||Array.isArray(raw))return null;
@@ -152,10 +154,15 @@ async function patientLinkLookup(req:Request,b:any){
 }
 function patientView(room:any,patient:any){
  const p=room.progress||{},results=p.results&&typeof p.results==="object"?p.results:{};
- const code=typeof patient?.last_name==="string"&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(patient.last_name)?patient.last_name:null;
+ // Code du dossier : research_subject_code (dossiers nominatifs, 23/11/2026) ou ancien format (nom = code).
+ const rsc=typeof patient?.research_subject_code==="string"?patient.research_subject_code:"";
+ const legacy=typeof patient?.last_name==="string"&&/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(patient.last_name);
+ const code=/^[A-Z]{2,6}-\d{6}-\d{2}$/.test(rsc)?rsc:legacy?patient.last_name:null;
+ const name=legacy?null:[patient?.first_name,patient?.last_name].filter((x:any)=>typeof x==="string"&&x.trim()).join(" ").slice(0,120)||null;
  // Envoi au patient (23/11/2026) : les résultats n'apparaissent sur « Mon bilan » qu'après validation du praticien.
  const released=room.status==="completed"&&typeof p.patient_release?.released_at==="string";
  return {status:room.status,stage_code:room.stage_code,steps:STEPS,completed_at:room.completed_at||null,code,
+  first_name:legacy?null:(typeof patient?.first_name==="string"?patient.first_name.slice(0,60):null),name,
   patient:{birth_date:patient?.birth_date||null,sex_at_birth:patient?.sex_at_birth||null,
    real:patient?.data_classification==="health_data"},
   questionnaire:{answers:p.questionnaire?.answers||{},updated_at:p.questionnaire?.updated_at||null,
@@ -331,7 +338,7 @@ Deno.serve(async(req:Request)=>{
   if(found.error)return found.error;
   const room=found.room;
   if(!await useCenter(room.organization_id))return response(req,{error:"center_unavailable"},423);
-  const {data:patient}=await db.from("patients").select("id,last_name,birth_date,sex_at_birth,data_classification,status")
+  const {data:patient}=await db.from("patients").select("id,first_name,last_name,research_subject_code,birth_date,sex_at_birth,data_classification,status")
    .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
   if(!patientAllowed(patient))return response(req,{error:"patient_unavailable"},403);
   if(action==="patient_link_status")return response(req,{ok:true,...patientView(room,patient)});
@@ -737,8 +744,9 @@ Deno.serve(async(req:Request)=>{
   const entries=b.entries;
   if(!entries||typeof entries!=="object"||Array.isArray(entries))return response(req,{error:"invalid_bulk_entry"},422);
   const ids=Object.keys(entries);
-  if(!ids.length||ids.length>STEPS.length||ids.some(x=>!STEPS.includes(x)))
-   return response(req,{error:"invalid_bulk_entry",step:ids.find(x=>!STEPS.includes(x))||null},422);
+  const known=(x:string)=>STEPS.includes(x)||COMPLEMENTS.includes(x);
+  if(!ids.length||ids.length>STEPS.length+COMPLEMENTS.length||ids.some(x=>!known(x)))
+   return response(req,{error:"invalid_bulk_entry",step:ids.find(x=>!known(x))||null},422);
   const bad=(step:string,detail:string)=>response(req,{error:"invalid_bulk_entry",step,detail},422);
   const results=old.results&&typeof old.results==="object"&&!Array.isArray(old.results)?{...old.results}:{};
   const stamp={protocol:PROTOCOL_STAMP.code,protocol_version:PROTOCOL_STAMP.version};
@@ -756,10 +764,12 @@ Deno.serve(async(req:Request)=>{
     const checked=validateInstrumented(step,e.fields);
     if(!checked)return bad(step,"invalid_fields");
     const vf=STEP_SPEC[step]?.value_field,main=vf?checked.fields[vf]:undefined;
+    const photo=COMPLEMENTS.includes(step);
     results[step]={status:"done",fields:checked.fields,derived:checked.derived,
       ...(STEP_SPEC[step]?.method?{method:STEP_SPEC[step].method}:{}),
       ...(typeof main==="number"?{value:main,unit:"seconds"}:{}),
-      source:"operator_manual_entry",entry_mode:"paper_transcription",...stamp,note,recorded_at:at};
+      source:photo?"photo_measurement":"operator_manual_entry",entry_mode:photo?"photo_measurement":"paper_transcription",
+      ...(photo?{photo_retained:false}:{}),...stamp,note,recorded_at:at};
    }else if(LIMITS[step]){
     const def=LIMITS[step],value=e.value;
     if(typeof value!=="number"||!Number.isFinite(value)||value<0||value>def.max||

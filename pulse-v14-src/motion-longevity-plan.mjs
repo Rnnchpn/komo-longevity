@@ -4,7 +4,7 @@
 // Sources des repères : EWGSOP2 (préhension, marche), AWGS 2019 (marche 1,0 m/s), Rikli & Jones / CDC STEADI
 // (lever de chaise 30 s), Araujo BJSM 2022 (appui unipodal 10 s), JOA (Two-Step), VALD (asymétrie > 10 %),
 // Alcazar 2020–2021 (puissance relative au lever de chaise : équation, seuils 2,6 / 2,1 W/kg, MCID).
-import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261123-envoi-v3';
+import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261123-identite-v1';
 export const LONGEVITY_PLAN_VERSION='KOMO_LONGEVITY_PLAN_V1';
 export const ZONES={
  priority:{label:'Priorité',rank:3},
@@ -92,10 +92,13 @@ export function assessCapacities(results={},profile={}){
  const lsis=[['Préhension',D(results,'dynamo_grip','lsi_pct')],['Extension de genou',D(results,'dynamo_knee_ext','lsi_pct')],['Flexion de genou',D(results,'dynamo_knee_flex','lsi_pct')],
   ['Flexion de hanche',D(results,'dynamo_hip_flex','lsi_pct')],['Abduction de hanche',D(results,'dynamo_hip_abd','lsi_pct')]].filter(([,v])=>v!==null);
  const asyms=[['Charge debout',qsAsym],['Lever sur plateformes',F(results,'fd_sts','fd_sts_asym_pct')],['Saut vertical',F(results,'fd_cmj','cmj_asym_pct')]].filter(([,v])=>v!==null);
- const posture=done(results,'posture')?.observation||null;
+ // Posture : photo de profil (complément 23/11/2026) ou ancien test caméra.
+ const pp=done(results,'posture_photo')?.fields||null;
+ const posture=pp?.pp_observation||done(results,'posture')?.observation||null;
+ const headFwd=finite(pp?.pp_head_forward_deg)?pp.pp_head_forward_deg:null;
  const symZones=[...lsis.map(([,v])=>v<80?'priority':v<90?'consolidate':'solid'),
   ...asyms.map(([,v])=>v>20?'priority':v>10?'consolidate':'solid'),
-  ...(posture?[posture==='apparent_offset'?'consolidate':'solid']:[])];
+  ...(posture==='apparent_offset'?['consolidate']:posture==='neutral'?['solid']:[])];
  const weakestLsi=lsis.slice().sort((a,b)=>a[1]-b[1])[0]||null;
  const largestAsym=asyms.slice().sort((a,b)=>b[1]-a[1])[0]||null;
  const arms=V(results,'arms');
@@ -126,18 +129,20 @@ export function assessCapacities(results={},profile={}){
     measure('Flexion de genou (meilleur côté)',kfl===null&&kfr===null?null:fr(Math.max(kfl??0,kfr??0),0),'N','follow','suivi personnel'),
     measure('Flexion de hanche (meilleur côté)',fl===null&&fr2===null?null:fr(Math.max(fl??0,fr2??0),0),'N','follow','suivi personnel'),
     measure('Abduction de hanche assise (meilleur côté)',hl===null&&hr===null?null:fr(Math.max(hl??0,hr??0),0),'N','follow','suivi personnel')]},
-  {id:'symmetry',name:'Symétrie',zone:symZones.length?worst(...symZones):'missing',
-   why:'Un côté plus faible concentre les contraintes et expose aux chutes de côté. L’écart se réduit en travaillant le côté faible en premier.',
+  {id:'symmetry',name:posture?'Symétrie et posture':'Symétrie',zone:symZones.length?worst(...symZones):'missing',
+   why:'Un côté plus faible concentre les contraintes et expose aux chutes de côté. L’écart se réduit en travaillant le côté faible en premier.'+
+    (posture?' La photo de profil décrit l’alignement debout, sans valeur de diagnostic : elle guide les exercices de posture.':''),
    measures:[measure('Côté faible / côté fort',weakestLsi?fr(weakestLsi[1],0):null,'%',weakestLsi?(weakestLsi[1]<80?'priority':weakestLsi[1]<90?'consolidate':'solid'):'missing',
      weakestLsi?weakestLsi[0]+' · repère : 90 %':'repère : 90 %'),
     measure('Plus grande asymétrie d’appui',largestAsym?fr(largestAsym[1],1):null,'%',largestAsym?(largestAsym[1]>20?'priority':largestAsym[1]>10?'consolidate':'solid'):'missing',
      largestAsym?largestAsym[0]+' · repère : 10 %':'repère : 10 %'),
     // Anciens tests caméra (avant v2.4) : affichés seulement s'ils ont été mesurés.
     ...(posture?[measure('Posture de profil',posture==='apparent_offset'?'décalage apparent':posture==='neutral'?'alignement neutre':'non interprétable','',
-     posture==='apparent_offset'?'consolidate':'solid','observation')]:[]),
+     posture==='apparent_offset'?'consolidate':posture==='neutral'?'solid':'follow',pp?'observation sur photo, relue par le praticien':'observation')]:[]),
+    ...(headFwd!==null?[measure('Avancée de la tête (photo de profil)',fr(headFwd,0),'°','follow','oreille par rapport à l’épaule · suivi personnel')]:[]),
     ...(arms!==null?[measure('Élévation des bras 30 s',arms,'mouvements','follow','suivi personnel')]:[])]}
  ];
- const context={speed,twoIdx,two:two?.value??null,chair,below,standard,power,powerLow,powerRepsLow,weak,bl,br,gripKg,low,weakestLsi,largestAsym,posture,qsAsym};
+ const context={speed,twoIdx,two:two?.value??null,chair,below,standard,power,powerLow,powerRepsLow,weak,bl,br,gripKg,low,weakestLsi,largestAsym,posture,headFwd,qsAsym};
  return {capacities,context};
 }
 
@@ -218,7 +223,8 @@ function objective(c,ctx){
  if(c.id==='symmetry'){
   if(ctx.weakestLsi&&ctx.weakestLsi[1]<90)return ctx.weakestLsi[0]+' : côté faible ≥ 90 % du côté fort';
   if(ctx.largestAsym&&ctx.largestAsym[1]>10)return ctx.largestAsym[0]+' : asymétrie ≤ 10 %';
-  return ctx.posture==='apparent_offset'?'Posture de profil : redressement visible':'Garder l’équilibre gauche-droite';
+  if(ctx.posture==='apparent_offset')return ctx.headFwd!==null&&ctx.headFwd>5?'Avancée de la tête ≤ '+fr(ctx.headFwd-5,0)+'° sur la photo de profil':'Posture de profil : redressement visible';
+  return 'Garder l’équilibre gauche-droite';
  }
  return '';
 }

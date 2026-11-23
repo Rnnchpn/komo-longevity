@@ -13,7 +13,7 @@
 // Usage : deno run -A scripts/transcription/pulse-transcribe.ts saisie.json [sortie.sql]
 // Format de saisie.json et procédure complète : scripts/transcription/README.md
 import {DB,USERS} from "./fake-supabase.ts";
-import {STEPS as PROTOCOL_STEPS,toNewton,plausibilityWarnings,stsRelativePower} from "../../pulse-v14-src/motion-protocol.mjs";
+import {STEPS as PROTOCOL_STEPS,COMPLEMENTS,toNewton,plausibilityWarnings,stsRelativePower} from "../../pulse-v14-src/motion-protocol.mjs";
 
 const here=new URL(".",import.meta.url).pathname;
 const EDGE=here+"../../supabase/functions/motion-live-test/";
@@ -25,7 +25,8 @@ if(!session?.id||!session?.organization_id||!session?.operator_user_id||!session
  throw Error("session incomplète : coller le résultat de row_to_json(s) (voir README)");
 
 // ---- 1. Valeurs de la feuille → format du serveur (unités, meilleur essai, décimales) ----
-const STEP=Object.fromEntries((PROTOCOL_STEPS as any[]).map(s=>[s.id,s]));
+// Les compléments (posture sur photo) passent par le même chemin que les tests de la feuille.
+const STEP=Object.fromEntries(([...PROTOCOL_STEPS,...COMPLEMENTS] as any[]).map(s=>[s.id,s]));
 const fmt=(v:number,d=1)=>Number.isFinite(v)?String(Math.round(v*10**d)/10**d).replace(".",","):"—";
 const entries:Record<string,any>={};
 const warnings:Record<string,string[]>={};
@@ -95,8 +96,9 @@ const code=input.code||"(code PULSE)";
 lines.push("Transcription · "+code+" · "+Object.keys(entries).length+" test(s) · consultation "+
  (row.status==="completed"?"terminée après écriture":"encore "+out.remaining+" test(s) à faire"));
 const height=R.anthropometry?.fields?.height_cm;
-for(const st of PROTOCOL_STEPS as any[]){
+for(const st of [...PROTOCOL_STEPS,...COMPLEMENTS] as any[]){
  const r=R[st.id];
+ if(!entries[st.id]&&!(PROTOCOL_STEPS as any[]).includes(st)){if(r)lines.push("  · "+st.title+" : déjà enregistré, inchangé");continue;}
  if(!entries[st.id]){lines.push("  · "+st.title+" : "+(r?(r.status==="skipped"?"déjà noté non réalisé":"déjà enregistré, inchangé"):"à faire"));continue;}
  if(r.status==="skipped"){lines.push("  ✓ "+st.title+" : non réalisé ("+r.reason+")"+(r.note?" · "+r.note:""));continue;}
  const parts:string[]=[];

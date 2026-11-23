@@ -407,6 +407,62 @@ export const SPEC:any={
    "integer": true
   }
  ],
+ "complements": [
+  {
+   "id": "posture_photo",
+   "kind": "fields",
+   "duration": 0,
+   "fields": [
+    {
+     "key": "pp_head_forward_deg",
+     "min": -45,
+     "max": 80,
+     "decimals": 1
+    },
+    {
+     "key": "pp_trunk_lean_deg",
+     "min": -45,
+     "max": 45,
+     "decimals": 1
+    },
+    {
+     "key": "pp_hip_shift_deg",
+     "min": -45,
+     "max": 45,
+     "decimals": 1
+    },
+    {
+     "key": "pp_knee_flex_deg",
+     "min": -30,
+     "max": 60,
+     "decimals": 1
+    },
+    {
+     "key": "pp_global_lean_deg",
+     "min": -30,
+     "max": 30,
+     "decimals": 1
+    }
+   ],
+   "choices": [
+    {
+     "key": "pp_observation",
+     "options": [
+      "neutral",
+      "apparent_offset",
+      "not_interpretable"
+     ]
+    },
+    {
+     "key": "pp_side",
+     "options": [
+      "right",
+      "left"
+     ]
+    }
+   ]
+  }
+ ],
  "skip_reasons": [
   "safety",
   "pain",
