@@ -20,10 +20,10 @@ const V=(r,step)=>r?.[step]?.status==='done'?r[step]?.value:undefined;
 export const TRAJECTORY_METRICS=[
  // Douleur et incapacité déclarées (24/11/2026) : get(results, answers). Changement minimal important :
  // 2 points sur 10 pour l'EVA, 10 points pour l'ODI (Ostelo 2008).
- {id:'eva_back',label:'Douleur lombaire (EVA)',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaBack')},
- {id:'eva_leg',label:'Douleur du membre inférieur (EVA)',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaLeg')},
- {id:'eva_general',label:'Douleur générale (EVA)',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaGeneral')},
- {id:'odi',label:'Incapacité lombaire (ODI)',unit:'%',decimals:0,better:'lower',mdc:10,get:(r,a)=>odiScore(a||{}).score},
+ {id:'eva_back',label:'Douleur lombaire · EVA',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaBack')},
+ {id:'eva_leg',label:'Douleur du membre inférieur · EVA',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaLeg')},
+ {id:'eva_general',label:'Douleur générale · EVA',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaGeneral')},
+ {id:'odi',label:'Incapacité lombaire · ODI',unit:'%',decimals:0,better:'lower',mdc:10,get:(r,a)=>odiScore(a||{}).score},
  // 0,1 m/s : changement important (Perera 2006), dans la fourchette des MDC publiés (0,08 à 0,2 m/s).
  {id:'gait_speed',label:'Vitesse de marche (4 m)',unit:'m/s',decimals:2,better:'higher',mdc:0.1,
   get:r=>D(r,'gait_4m','gait_speed_ms')},

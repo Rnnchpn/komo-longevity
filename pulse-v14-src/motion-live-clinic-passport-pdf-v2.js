@@ -513,6 +513,8 @@ export async function downloadClinicPassport(report,category='all'){
     'QUESTIONNAIRE INCOMPLET : aucun score global calcule.',M,65,{sz:7.8,bold:true,col:P.dark});
    let y=76,serial=part===1?0:10;
    for(const g of subset){
+    // Pas de titre de groupe seul en bas de page.
+    if(y>236){page('Annexe · questionnaire','Questionnaire (suite)','Réponses enregistrées / vérifiables');y=69;}
     txt(g.label.toUpperCase(),M,y,{sz:10,bold:true,col:P.gold});
     if(Number.isFinite(g.score))txt(fmt(g.points)+'/'+fmt(g.maxPoints)+
       ' pts  |  '+fmt(g.score)+'/100',R,y,
