@@ -21,7 +21,7 @@ const B=[
  ['Extension de genou','●','●','●','◐','●'],
  ['Flexion de genou','●','●','●','◐','●'],
  ['Abduction de hanche','●','◐','◐','●','●'],
- ['Préhension','●','●','●','●','●'],
+ ['Flexion du coude (DynaMo)','●','●','●','●','●'],
  ['Station B · plateformes ForceDecks'],
  ['Masse et taille','●','●','●','●','●'],
  ['Photo de profil · posture','○','●','○','○','○'],
@@ -45,7 +45,7 @@ const batteryTable='<table class="matrix"><thead><tr><th>Mesure</th><th>Profil 1
 
 // ── Critères suivis par profil (changement réel = au-delà de la marge d'erreur de la mesure) ──
 const CRITERIA=[
- ['Profil 1 · asymptomatique','Vitesse de marche, levers de chaise en 30 s, appui sur un pied, préhension, symétries','marche ≥ 0,1 m/s · chaise ≥ 2 levers · franchissement des 10 s sur un pied · préhension ≥ 5 kg'],
+ ['Profil 1 · asymptomatique','Vitesse de marche, levers de chaise en 30 s, appui sur un pied, forces au DynaMo, symétries','marche ≥ 0,1 m/s · chaise ≥ 2 levers · franchissement des 10 s sur un pied · forces ≥ 20 %'],
  ['Profil 2 · rachis','Douleur, ODI (lombaire) ou NDI (cervical), lever de chaise, équilibre yeux fermés, posture, marche','douleur ≥ 2 points sur 10 · ODI ≥ 10 points · équilibre ≥ 20 % · posture ≥ 5° · chaise ≥ 2 levers'],
  ['Profil 2 · hanche','Douleur, HOOS-12, abduction et flexion de hanche du côté atteint, symétrie, lever, marche','douleur ≥ 2 points · force ≥ 20 % · symétrie ≥ 10 points · marche ≥ 0,1 m/s'],
  ['Profil 2 · genou','Douleur, KOOS-12, extension et flexion de genou du côté atteint, symétrie, levers en 30 s, marche','douleur ≥ 2 points · force ≥ 20 % · symétrie ≥ 10 points · chaise ≥ 2 levers'],
@@ -216,7 +216,7 @@ table.trace td:first-child{width:22%}
  <ol class="steps">
   <li><b>Mêmes tests, mêmes conditions</b> à chaque temps : même opérateur si possible, mêmes chaussures, même chaise de 43 cm, même position du pad, même profil VALD, même moment de la journée. PULSE signale les écarts de conditions.</li>
   <li><b>Une valeur manquante reste manquante</b> : test « non réalisé » avec son motif, jamais une estimation.</li>
-  <li><b>Un changement ne compte qu’au-delà de la marge d’erreur</b> de la mesure (marche 0,1 m/s, chaise 2 levers, préhension 5 kg, environ 20 % pour les forces). En dessous, PULSE affiche « stable ».</li>
+  <li><b>Un changement ne compte qu’au-delà de la marge d’erreur</b> de la mesure (marche 0,1 m/s, chaise 2 levers, environ 20 % pour les forces). En dessous, PULSE affiche « stable ».</li>
  </ol>
 </section>
 

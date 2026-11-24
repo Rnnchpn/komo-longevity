@@ -88,7 +88,7 @@ const deroule=doc('KŌMØ Motion · Déroulé de la consultation',`
   '<b>Couloir</b> droit d’au moins 6 m : scotch au sol à 0 m (départ), 4 m (arrivée) et 6 m (repère), mesurés au ruban.',
   '<b>Chaise</b> d’environ 43 cm, sans accoudoirs, calée contre un mur.',
   '<b>ForceDecks</b> : deux plateformes allumées, appairées, posées à plat ; un appui (mur, dossier) à portée de main.',
-  '<b>DynaMo Plus</b> chargé, poignée et pad prêts, table d’examen libre. <b>Toise</b> ou ruban au mur.',
+  '<b>DynaMo Plus</b> chargé, pad, palme et pad courbe prêts, table d’examen libre. <b>Toise</b> ou ruban au mur.',
   '<b>Mur uni</b> et sol dégagé sur 3 m pour la photo de profil.',
   '<b>iPhone</b> chargé (plus de 60 %), mode Ne pas déranger, apps ForceDecks et DynaMo ouvertes.'
  ])}
@@ -291,13 +291,13 @@ function stationsMarkup(){
   return '<section class="station"><div class="station-lead">'+head+note+cards[0]+'</div>'+cards.slice(1).join('')+'</section>';
  }).join('');
 }
-const SUMMARY=[['Vitesse de marche 4 m','gait_4m'],['Lever de chaise 30 s','sts'],['Préhension','dynamo_grip'],['Appui sur un pied','unipodal_left'],
+const SUMMARY=[['Vitesse de marche 4 m','gait_4m'],['Lever de chaise 30 s','sts'],['Flexion du coude','dynamo_elbow_flex'],['Appui sur un pied','unipodal_left'],
  ['Saut vertical (CMJ)','fd_cmj'],['Force hanche et genou (DynaMo)','dynamo_knee_ext'],['Équilibre debout (plateformes)','fd_quiet_stand'],['Posture de profil (photo)','posture_photo']];
 const REPRO=[
  ['Marche 4 m','bonne','≥ 0,1 m/s','départ arrêté, 2 passages, le plus rapide retenu, même chronométreur'],
  ['Lever de chaise 30 s','bonne','≥ 2 levers','1 à 2 levers d’essai avant le chrono, même chaise'],
  ['Puissance des jambes (calculée)','bonne','≥ 0,42 W/kg (homme), 0,33 (femme)','même chaise de 43 cm, même taille mesurée'],
- ['Préhension','excellente','≥ 5 kg (50 N)','essai à 50 %, puis 3 essais par main, même position'],
+ ['Flexion du coude (DynaMo)','bonne','≥ 20 %','essai à 50 %, puis 3 essais par côté, coude à 90° contre le corps, pad au même endroit'],
  ['Saut vertical (CMJ)','excellente','≥ 10 %','mains sur les hanches, 3 sauts, le meilleur retenu'],
  ['Appui sur un pied','bonne pour classer, faible en secondes','franchir les 10 s','jusqu’à 2 essais par côté, le meilleur retenu'],
  ['Genou et hanche (DynaMo)','bonne','≥ 20 %','essai à 50 %, 3 essais, même position du pad'],
@@ -334,7 +334,7 @@ const protocole=doc('KŌMØ Motion · Protocole complet',`
   '<b>Sécurité</b> : les 8 questions de la console, un appui à portée de main pour tout test debout, toi à côté.'
  ])}
  <h4>Matériel</h4>
- <p>DynaMo Plus (poignée et pad), 2 ForceDecks Mini, toise ou ruban mural, chaise de 43 cm, couloir balisé à 0, 4 et 6 m, iPhone avec PULSE et les apps VALD, mur uni pour la photo, formulaires ODI officiels imprimés.</p>
+ <p>DynaMo Plus (pad, palme et pad courbe), 2 ForceDecks Mini, toise ou ruban mural, chaise de 43 cm, couloir balisé à 0, 4 et 6 m, iPhone avec PULSE et les apps VALD, mur uni pour la photo, formulaires ODI officiels imprimés.</p>
  <div class="block"><p class="kicker">En un coup d’œil</p><h2>Les repères de longévité</h2>
  <p class="intro">Seuils de population : ils orientent le programme, ils ne posent pas de diagnostic.</p>
  ${table(['Mesure','Repère','Objectif','Changement réel à 6 semaines'],SUMMARY.map(([n,id])=>{const L=forStep(id);return [e(n),e(L.ref.replace(', tableau ci-dessous',', tableau dans la fiche du test')),e(L.target),e(L.control)]}),'summary')}</div>
@@ -364,7 +364,7 @@ const protocole=doc('KŌMØ Motion · Protocole complet',`
  <p class="kicker">Au contrôle</p><h2>Reproductibilité : ce qui compte comme un vrai changement</h2>
  <p>Refaire un test ne donne jamais exactement le même chiffre. PULSE ne parle de progrès qu’au-delà de la marge d’erreur de chaque mesure ; en dessous, il affiche « stable ».</p>
  ${table(['Mesure','Fiabilité','Changement réel','Ce qui la rend fiable'],REPRO.map(r=>r.map(e)))}
- <p class="muted small">Appui sur un pied : l’écart en secondes devrait dépasser 24 s pour être sûr ; seul le franchissement des 10 s compte. La préhension progresse lentement : +5 kg se visent à 12 semaines.</p>
+ <p class="muted small">Appui sur un pied : l’écart en secondes devrait dépasser 24 s pour être sûr ; seul le franchissement des 10 s compte.</p>
  <h4>Conditions du contrôle</h4>
  ${steps2(['Même patient dans PULSE, même profil VALD, mêmes ${N} tests dans le même ordre.'.replace('${N}',N),
   'Mêmes chaussures, même chaise, même distance du pad, même moment de la journée, même cadrage de la photo.',
@@ -393,7 +393,7 @@ const EXS=[
   ['Équilibre sur un pied','Appui sur un pied (ForceDecks)','Ne pas tenir 10 s sur un pied est associé à un risque de décès 1,8 fois plus élevé. Les exercices d’équilibre réduisent les chutes d’environ un quart.','10 s de chaque côté, puis 30 s'],
   ['Marche talon-pointe','Équilibre en mouvement','Entraîne l’équilibre pendant la marche, là où surviennent la plupart des chutes. Programme d’équilibre et fonctionnel : − 23 % de chutes (Cochrane 2019).','oscillations stables ou en baisse']]},
  {cap:'Force musculaire',items:[
-  ['Serrer et porter','Préhension (DynaMo)','La force de la main reflète la force globale : chaque 5 kg en moins est associé à 16 % de mortalité en plus. Porter deux sacs entraîne aussi le tronc et la marche chargée.','+ 5 kg, visés à 12 semaines'],
+  ['Serrer et porter','Flexion du coude (DynaMo)','Dans PURE, chaque 5 kg de force de main en moins est associé à 16 % de mortalité en plus. Porter deux sacs entraîne aussi le tronc.','force + 20 %'],
   ['Extension de genou assis','Extension de genou (DynaMo)','Le quadriceps sert à se lever, monter un escalier, se rattraper ; une force basse est associée aux limitations de mobilité et à une mortalité plus élevée.','côté faible ≥ 90 % du côté fort']]},
  {cap:'Symétrie et posture',items:[
   ['Écart de jambe sur le côté','Abduction de hanche (DynaMo), symétrie','Les abducteurs tiennent le bassin à chaque pas ; leur faiblesse favorise les chutes sur le côté, les plus à risque de fracture de hanche. Le côté faible travaille en premier.','côté faible ≥ 90 % du côté fort'],
@@ -430,7 +430,7 @@ ${exTable}
  <li><b>Marche</b> : « Marcher un peu plus vite, c’est l’un des meilleurs signes de bonne santé qu’on connaisse. »</li>
  <li><b>Jambes</b> : « Se lever d’une chaise sans les mains, c’est garder son autonomie. »</li>
  <li><b>Équilibre</b> : « L’équilibre s’entraîne à tout âge, et c’est ce qui évite les chutes. »</li>
- <li><b>Force</b> : « La force de la main reflète celle de tout le corps. »</li>
+ <li><b>Force</b> : « Garder de la force, c’est pouvoir porter et se relever seul. »</li>
  <li><b>Posture</b> : « Se redresser soulage le dos et aide à marcher plus droit. »</li>
 </ul>
 <h4>Sources</h4>

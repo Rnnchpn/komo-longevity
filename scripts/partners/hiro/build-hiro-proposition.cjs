@@ -131,7 +131,7 @@ const lab = [
   kicker('Le bilan Motion'), H1('Ce que mesure le Motion Lab'),
   P('Un protocole standardisé de 14 tests en quatre postes, plus une photo de profil pour la posture. Les mesures viennent d’instruments, pas d’une impression : plateformes de force, dynamomètre, chronomètre.'),
   grid(['Poste', 'Ce qui est mesuré', 'Instrument'], [
-    ['A · force, assis', 'Flexion et abduction de hanche, extension et flexion de genou, préhension ; gauche et droite, et leur symétrie', 'DynaMo Plus'],
+    ['A · force, assis', 'Flexion et abduction de hanche, extension et flexion de genou, flexion du coude ; gauche et droite, et leur symétrie', 'DynaMo Plus'],
     ['B · plateformes', 'Masse, équilibre debout yeux ouverts et fermés, lever de chaise, appui sur un pied, saut vertical si le patient est à l’aise', 'Deux ForceDecks Mini'],
     ['Photo de profil', 'Alignement de la tête, du tronc, du bassin et du genou ; photo mesurée puis effacée', 'Tablette'],
     ['C · marche', 'Vitesse de marche sur 4 m, départ arrêté, meilleur de deux passages', 'Chronomètre PULSE'],

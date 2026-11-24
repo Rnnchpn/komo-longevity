@@ -27,6 +27,13 @@ export const LONGEVITY={
   target:'Côté faible ≥ 90 % du côté fort.',
   improve:'Écart de jambe sur le côté debout, appui des mains ; élastique aux genoux.',
   control:'Changement réel : ≥ 20 % de force ; symétrie : ≥ 10 points.'},
+ // v2.5.0 (24/11/2026) : flexion du coude à la place de la préhension.
+ dynamo_elbow_flex:{
+  why:'Les fléchisseurs du coude servent à porter, tirer, se relever en s’aidant des bras. Ce test remplace la préhension faute de poignée : il suit la force du haut du corps, sans seuil de longévité publié.',
+  ref:'Pas de repère de longévité publié : suivi personnel et symétrie gauche-droite.',
+  target:'Côté faible ≥ 90 % du côté fort ; force en hausse au contrôle.',
+  improve:'Flexion des coudes avec deux bouteilles d’eau ou un élastique ; porter deux sacs chargés.',
+  control:'Changement réel : ≥ 20 % de force ; symétrie : ≥ 10 points.'},
  dynamo_grip:{
   why:'La force de la main reflète la force globale : chaque 5 kg en moins est associé à 16 % de mortalité en plus (PURE, 139 691 personnes).',
   ref:'Force basse (EWGSOP2) : moins de 27 kg chez l’homme, moins de 16 kg chez la femme.',
