@@ -137,18 +137,18 @@ const lab = [
     ['C · marche', 'Vitesse de marche sur 4 m, départ arrêté, meilleur de deux passages', 'Chronomètre PULSE'],
     ['D · chaise', 'Levers en 30 secondes, d’où la puissance des jambes', 'Chaise de 43 cm'],
     ['Questionnaire', '22 questions sur la vie quotidienne, la douleur et les habitudes, plus 5 sur la santé', 'Téléphone du patient'],
-    ['Douleur et incapacité', 'Douleur (EVA de 0 à 10) lombaire, du membre inférieur et générale ; Oswestry (ODI), version française officielle sous licence', 'Téléphone ; formulaire ODI']
+    ['Douleur', 'EVA lombaire, du membre inférieur et générale ; ODI officiel, sous licence', 'Téléphone ; ODI']
   ], [2000, 5638, 2000]),
   spacer(160),
   H2('Ce que le patient reçoit'),
   P('Après relecture et validation par le praticien, le patient retrouve sur son téléphone un passeport PDF : ses capacités situées par rapport à des repères publiés, ses trois priorités avec un objectif à six semaines, son programme maison, puis, à chaque contrôle, sa trajectoire. L’e-mail ne contient qu’un lien personnel, jamais de résultat.'),
   new Table({ width: { size: W, type: WidthType.DXA }, columnWidths: [4819, 4819], layout: TableLayoutType.FIXED, rows: [
     new TableRow({ cantSplit: true, children: [
-      new TableCell({ width: { size: 4819, type: WidthType.DXA }, borders: noBorders, margins: { top: 80, bottom: 40, left: 0, right: 160 }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [img(IMG1, 196, 277)] }), P('Fin du premier bilan : capacités, repères, priorités', { size: 16, color: MUTED, align: AlignmentType.CENTER, after: 0, line: 240 })] }),
-      new TableCell({ width: { size: 4819, type: WidthType.DXA }, borders: noBorders, margins: { top: 80, bottom: 40, left: 160, right: 0 }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [img(IMG2, 196, 277)] }), P('Contrôle à six semaines : les progrès qui dépassent la marge d’erreur', { size: 16, color: MUTED, align: AlignmentType.CENTER, after: 0, line: 240 })] })
+      new TableCell({ width: { size: 4819, type: WidthType.DXA }, borders: noBorders, margins: { top: 80, bottom: 40, left: 0, right: 160 }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [img(IMG1, 180, 254)] }), P('Fin du premier bilan : capacités, repères, priorités', { size: 16, color: MUTED, align: AlignmentType.CENTER, after: 0, line: 240 })] }),
+      new TableCell({ width: { size: 4819, type: WidthType.DXA }, borders: noBorders, margins: { top: 80, bottom: 40, left: 160, right: 0 }, children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [img(IMG2, 180, 254)] }), P('Contrôle à six semaines : les progrès qui dépassent la marge d’erreur', { size: 16, color: MUTED, align: AlignmentType.CENTER, after: 0, line: 240 })] })
     ] })
   ] }),
-  P('Exemple produit par PULSE, pour une patiente fictive. Le bilan décrit des capacités : il ne pose pas de diagnostic et ne calcule ni score global ni « âge du mouvement ».', { size: 16, color: MUTED, align: AlignmentType.CENTER, before: 80 }),
+  P('Exemple PULSE, patiente fictive. Des capacités : ni diagnostic, ni score global, ni « âge du mouvement ».', { size: 16, color: MUTED, align: AlignmentType.CENTER, before: 80 }),
   pageBreak()
 ];
 
@@ -249,7 +249,7 @@ const pilot = [
 
 const next = [
   H2('Ce que nous arrêtons ensemble avant de démarrer'),
-  grid(['Sujet', 'À définir'], [
+  grid(['Sujet', 'Contenu'], [
     ['Convention', 'Durée et inventaire du prêt, assurance du matériel, responsabilité civile professionnelle de chacun, conditions d’utilisation VALD, facturation et TVA.'],
     ['Consentement', 'Ajout d’une case de partage des résultats avec l’équipe médicale HIRO ; consentement de HIRO pour ses soins.'],
     ['Données', 'Rôles de chacun au sens du RGPD inscrits dans la convention ; hébergement, durée de conservation et registre déjà validés avec le DPO.'],

@@ -1,0 +1,350 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>KŌMØ × HIRO · Parcours mesurés · protocoles communs</title><style>
+@page{size:A4;margin:17mm 16mm 18mm 16mm}
+:root{--ink:#1c342a;--ink2:#3f4a42;--muted:#6b6f66;--gold:#8a6d3f;--goldl:#b4925e;--sand:#f5f1ea;--line:#e2d9ca;--sage:#e3ebe2;--red:#963f2f}
+*{box-sizing:border-box}
+html{font-family:Inter,sans-serif;font-size:9.6pt;line-height:1.48;color:var(--ink2);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0}
+h1,h2,h3{font-family:"Crimson Text",Georgia,serif;color:var(--ink);font-weight:600;margin:0}
+h1{font-size:34pt;line-height:1.05;letter-spacing:-.01em}
+h2{font-size:19pt;line-height:1.15;margin-bottom:2mm}
+h3{font-size:13.5pt;line-height:1.2}
+h4{font-size:10.2pt;color:var(--ink);margin:5mm 0 2mm;font-weight:600;break-after:avoid}
+p{margin:0 0 2.2mm}
+b{color:var(--ink);font-weight:600}
+.kicker{font-size:8.6pt;font-weight:600;color:var(--gold);margin:0 0 1mm}
+.muted{color:var(--muted)}
+.small{font-size:8.4pt}
+.cover{height:257mm;display:flex;flex-direction:column;page-break-after:always}
+.cover .brand{font-family:"Crimson Text",serif;font-size:15pt;color:var(--ink);letter-spacing:.06em}
+.cover .title{margin-top:40mm}
+.cover .lead{font-size:12pt;line-height:1.5;color:var(--ink2);max-width:132mm;margin-top:6mm}
+.cover .facts{margin-top:10mm;display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;max-width:150mm}
+.cover .facts div{border-top:2px solid var(--ink);padding-top:2.5mm}
+.cover .facts strong{display:block;font-family:"Crimson Text",serif;font-size:20pt;color:var(--ink);line-height:1}
+.cover .facts span{font-size:8.8pt;color:var(--muted)}
+.cover .flow{margin-top:auto;border-top:1px solid var(--line);padding-top:5mm}
+.flow ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:3mm 5mm;counter-reset:f}
+.flow li{counter-increment:f;font-size:9pt;line-height:1.35}
+.flow li::before{content:counter(f);display:block;font-family:"Crimson Text",serif;font-size:16pt;color:var(--goldl);line-height:1;margin-bottom:1mm}
+.cover .version{margin-top:5mm;font-size:8.4pt;color:var(--muted)}
+section.part{page-break-before:always}
+.cover+section.part{page-break-before:auto}
+.block{margin-top:7mm;break-inside:avoid-page}
+.intro{font-size:10.4pt;color:var(--ink2);max-width:156mm;margin-bottom:4mm}
+ol.steps{margin:0 0 3mm;padding:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:0 0 2.2mm 8.5mm;break-inside:avoid}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:-.2mm;width:5.6mm;height:5.6mm;border-radius:50%;background:var(--ink);color:#fff;font-size:8pt;font-weight:600;display:grid;place-items:center}
+ul{margin:0;padding-left:4.5mm}
+ul li{margin-bottom:1mm}
+.checks{list-style:none;padding:0;columns:2;column-gap:8mm}
+.checks li{display:flex;gap:2.5mm;break-inside:avoid;margin-bottom:2mm}
+.checks .box{flex:none;width:3.6mm;height:3.6mm;border:1.2px solid var(--ink);border-radius:.8mm;margin-top:.5mm}
+.checks.one{columns:1}
+blockquote{margin:2mm 0 4mm;padding:3mm 4mm;border-left:3px solid var(--goldl);background:var(--sand);font-family:"Crimson Text",serif;font-size:11.6pt;line-height:1.42;color:var(--ink);break-inside:avoid}
+.note{border:1px solid var(--line);border-radius:2mm;padding:3mm 4mm;margin:0 0 4mm;font-size:9.2pt;break-inside:avoid}
+.note.warn{border-color:#c9b48d;background:#fbf7ef}
+.note.ok{border-color:#b9cdbb;background:#f1f6f0}
+.station{margin-top:7mm}
+.station:first-of-type{margin-top:0}
+.station-head{border-bottom:2px solid var(--ink);padding-bottom:2.5mm;margin-bottom:4mm;break-after:avoid;page-break-after:avoid}
+.station-lead{break-inside:avoid;page-break-inside:avoid}
+.station-head .place{margin:1.5mm 0 0;font-size:9.4pt}
+article.test{border:1px solid var(--line);border-radius:2.4mm;padding:3.6mm 4.2mm 2.4mm;margin-bottom:4mm;break-inside:avoid;page-break-inside:avoid}
+article.test.breakable{break-inside:auto;page-break-inside:auto}
+article.test header{display:flex;gap:3.4mm;align-items:flex-start;margin-bottom:2.6mm}
+.num{flex:none;width:9mm;height:9mm;border-radius:50%;background:var(--ink);color:#fff;font-weight:600;font-size:9.6pt;display:grid;place-items:center}
+.num.alt{background:var(--goldl)}
+.meta{margin:.6mm 0 0;font-size:8.6pt;color:var(--muted)}
+dl{display:grid;grid-template-columns:17mm 1fr;gap:1.8mm 3mm;margin:0}
+dt{font-size:8.6pt;font-weight:600;color:var(--gold);padding-top:.3mm}
+dd{margin:0}
+dd p:last-child,dd ul:last-child{margin-bottom:0}
+dd.say{font-family:"Crimson Text",serif;font-size:11.2pt;line-height:1.38;color:var(--ink)}
+.vald-box{background:var(--sand);border-radius:1.6mm;padding:2mm 3mm;font-size:8.9pt;margin-top:1.5mm}
+.vald{color:var(--muted);font-size:8.5pt}
+.opt{color:var(--gold);font-size:8.3pt}
+.corridor{width:100%;height:auto;margin:0 0 2.8mm}
+table{width:100%;border-collapse:collapse;font-size:8.9pt;margin:2mm 0 4mm}
+th{text-align:left;font-weight:600;color:var(--ink);border-bottom:1.5px solid var(--ink);padding:1.6mm 2mm;vertical-align:bottom}
+td{border-bottom:1px solid var(--line);padding:1.8mm 2mm;vertical-align:top}
+tr{break-inside:avoid}
+td:first-child{font-weight:600;color:var(--ink)}
+td:first-child,th:first-child{width:24%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:7mm}
+.longevity{margin-top:2.4mm;border-top:1px dashed var(--line);padding-top:2.2mm}
+.longevity .lk{font-size:8.2pt;font-weight:600;color:var(--ink);margin:0 0 1.2mm;letter-spacing:.02em}
+.ldl{display:grid;grid-template-columns:17mm 1fr;gap:1.2mm 3mm;margin:0;font-size:9pt}
+.ldl dt{font-size:8.2pt;font-weight:600;color:#4f6b5a}
+table.norms{font-size:7.8pt;margin:2mm 0 0}
+table.norms td,table.norms th{padding:1mm 1.2mm;text-align:center}
+table.norms td:first-child,table.norms th:first-child{text-align:left;width:34%}
+table.summary td:first-child{width:20%}
+table.timeline td:first-child,table.timeline th:first-child{width:17mm;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.timeline td:nth-child(2){font-weight:600;color:var(--ink);width:44mm}
+table.timeline tr.stage td{background:var(--sand)}
+table.stations td:last-child{white-space:nowrap}
+.phone{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin:2mm 0 5mm}
+.phone div{border:1px solid var(--line);border-radius:3mm;padding:3mm 3.4mm;font-size:8.8pt;break-inside:avoid}
+.phone strong{display:block;font-family:"Crimson Text",serif;font-size:12pt;color:var(--ink);margin-bottom:1mm;line-height:1.15}
+.phone .when{display:block;font-size:7.8pt;font-weight:600;color:var(--gold);margin-bottom:1mm}
+.consent-items{list-style:none;padding:0;margin:1mm 0 0}
+.consent-items li{display:flex;gap:2.5mm;margin-bottom:1.6mm}
+.consent-items .box{flex:none;width:3.4mm;height:3.4mm;border:1.2px solid var(--ink);border-radius:.8mm;margin-top:.6mm}
+.req{font-size:7.8pt;font-weight:600;color:var(--gold)}
+</style></head><body>
+<style>
+.cover .title{margin-top:30mm}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
+.card{border:1px solid var(--line);border-radius:2.4mm;padding:3.4mm 4mm;break-inside:avoid}
+.card h3{font-size:13pt;margin-bottom:1.4mm}
+.card .tag{display:inline-block;font-size:7.6pt;font-weight:600;padding:.5mm 2mm;border-radius:3mm;margin-bottom:1.6mm}
+.tag.open{background:#e3ebe2;color:#1c342a}.tag.cond{background:#fbf3e4;color:#8a6d3f}.tag.later{background:#efefec;color:#6b6f66}
+.profiles{display:grid;grid-template-columns:repeat(3,1fr);gap:4mm;margin:2mm 0 4mm}
+.profiles .card p{font-size:8.8pt;margin-bottom:1.6mm}
+.profiles .card .k{font-size:7.8pt;font-weight:600;color:var(--gold);margin:0}
+table.matrix{font-size:8.6pt;margin:1mm 0 2mm}
+table.matrix th{text-align:center;font-size:8.2pt;line-height:1.25}
+table.matrix th:first-child{text-align:left}
+table.matrix th span{display:inline-block;font-weight:500;color:var(--muted);font-size:7.8pt}
+table.matrix th.grp span{width:33%}
+table.matrix td{padding:1.15mm 2mm}
+table.matrix td:first-child{width:36%;font-weight:500;color:var(--ink2)}
+table.matrix td.c{text-align:center;width:12.8%}
+table.matrix tr.band td{background:var(--sand);font-weight:600;color:var(--ink);font-size:8.2pt;padding:1mm 2mm}
+.d{display:inline-block;width:3.3mm;height:3.3mm;border-radius:50%;vertical-align:-.5mm;box-sizing:border-box}.d.on{background:var(--ink)}.d.half{border:1.3px solid var(--ink);background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}.d.opt{border:1.3px solid var(--muted)}.d.off{width:3.3mm;height:0;border-radius:0;border-top:1.3px solid #c9c4b8;vertical-align:.6mm}
+.legend .d{margin-right:1.2mm}
+.txt{font-size:7.6pt;color:var(--ink);font-weight:600}
+.legend{display:flex;gap:6mm;font-size:8.2pt;color:var(--muted);margin:0 0 3mm;flex-wrap:wrap}
+table.ev td:first-child{width:21%}table.ev td:nth-child(2){width:17%}table.ev td:last-child{width:15%}
+.cert{display:inline-block;font-size:7.6pt;font-weight:600;padding:.5mm 2mm;border-radius:3mm;white-space:nowrap}
+.cert.m{background:#e3ebe2;color:#1c342a}.cert.f{background:#fbf3e4;color:#8a6d3f}.cert.tf{background:#f6e7e3;color:#963f2f}
+.tl{width:100%;height:auto;margin:1mm 0 3mm}
+.gate{list-style:none;padding:0;margin:2mm 0 3mm;counter-reset:g}
+.gate li{counter-increment:g;display:grid;grid-template-columns:8mm 1fr;gap:2mm;margin-bottom:2.2mm;break-inside:avoid}
+.gate li::before{content:counter(g);width:6mm;height:6mm;border-radius:50%;border:1.5px solid var(--gold);color:var(--gold);font-weight:700;font-size:8.4pt;display:grid;place-items:center}
+.pilot{display:grid;grid-template-columns:24mm repeat(3,1fr);gap:2mm;margin:2mm 0 4mm;font-size:8.8pt}
+.pilot div{border-radius:2mm;padding:2.6mm 3mm;min-height:15mm}
+.pilot .h{background:none;padding:0;min-height:0;font-weight:600;color:var(--ink);font-size:8.4pt;align-self:end}
+.pilot .r{background:none;font-weight:600;color:var(--ink);display:flex;align-items:center;padding:0}
+.pilot .o{background:#e3ebe2}.pilot .p{background:#fbf3e4;border:1px dashed #c9b48d}
+.pilot b{display:block;font-size:9.2pt}
+.gantt{font-size:7.6pt;margin:2mm 0 4mm}
+.gh,.gr{display:grid;grid-template-columns:44mm 1fr;align-items:center}
+.gh{grid-template-columns:44mm repeat(20,1fr);color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:1mm;margin-bottom:1mm}
+.gh span{white-space:nowrap;overflow:visible;font-size:6.6pt}
+.gr{padding:1mm 0;border-bottom:1px dashed #eee6d8}
+.gr>span{font-size:8.2pt;color:var(--ink);font-weight:500}
+.gbar{position:relative;height:4.2mm}
+.gbar i{position:absolute;top:0;height:100%;border-radius:2mm}
+.gbar i.v{background:#1c342a}.gbar i.a{background:#b4925e}.gbar i.b{background:#8fae96}.gbar i.o{background:repeating-linear-gradient(45deg,#e2d9ca 0 3px,#f5f1ea 3px 6px)}
+table.valid td:first-child,table.valid th:first-child{width:72%;font-weight:500;color:var(--ink2)}
+table.valid td:nth-child(2),table.valid td:nth-child(3){width:20mm;white-space:nowrap}
+table.trace td:first-child{width:22%}
+.blank td{height:14mm}
+.blank td:first-child,.blank th:first-child{width:36%}
+.sources{font-size:7.6pt;color:var(--muted);padding-left:4mm;columns:2;column-gap:8mm}
+.sources li{margin-bottom:1mm;break-inside:avoid}
+.big{font-family:"Crimson Text",serif;font-size:15pt;line-height:1.3;color:var(--ink);margin:0 0 4mm}
+.done{color:#2f6b4a;font-weight:700}
+</style>
+
+<div class="cover">
+ <div class="brand">KŌMØ × HIRO</div>
+ <div class="title"><p class="kicker">Clinique HIRO · Beausoleil / Monaco · document de travail partagé</p><h1>Parcours mesurés<br>Protocoles communs</h1></div>
+ <p class="lead">Ce que mesure KŌMØ, quand, et pour quel patient, autour des soins décidés par HIRO. Trois profils, deux axes de soin, une même séquence J0 · J30 · S6, et un pilote de six cas pour l’hiver 2027.</p>
+ <div class="facts"><div><strong>3</strong><span>profils de patients</span></div><div><strong>2 axes</strong><span>ozonothérapie · PAPIMI sous conditions</span></div><div><strong>J0 · J30 · S6</strong><span>mêmes mesures à chaque temps</span></div></div>
+ <div class="flow"><ol>
+  <li>Le principe et les deux portes d’entrée</li><li>Le calendrier commun</li><li>Les trois profils</li><li>La batterie Motion par profil</li>
+  <li>Ozonothérapie</li><li>PAPIMI : conditions d’ouverture</li><li>Données, sécurité, consentement</li><li>Le pilote et les validations</li>
+ </ol></div>
+ <p class="version">Version 1.0 du 24 novembre 2026 · remplace la synthèse « Parcours ozone / PAPIMI / profils » · protocole Motion KOMO_MOTION_V2 2.4.0 · cadrage opérationnel, pas un protocole médical de traitement</p>
+</div>
+
+<section class="part">
+ <p class="kicker">1 · Le principe</p><h2>HIRO traite, KŌMØ mesure</h2>
+ <p class="big">Le choix d’un soin relève exclusivement du médecin HIRO. KŌMØ mesure les capacités locomotrices avant et après, avec les mêmes tests et dans les mêmes conditions, et rend une trajectoire lisible au patient et au médecin.</p>
+ <svg class="tl" viewBox="0 0 700 132" role="img" aria-label="Deux portes d'entrée vers la même séquence">
+ <rect x="10" y="10" width="200" height="44" rx="8" fill="#1c342a"/><text x="110" y="29" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Assess first</text><text x="110" y="45" text-anchor="middle" font-size="9.5" fill="#e3ebe2">le patient commence par KŌMØ</text>
+ <rect x="10" y="78" width="200" height="44" rx="8" fill="#b4925e"/><text x="110" y="97" text-anchor="middle" font-size="12" font-weight="700" fill="#fff">Treat first</text><text x="110" y="113" text-anchor="middle" font-size="9.5" fill="#fff">le patient commence par HIRO</text>
+ <path d="M210 32 C 250 32, 250 66, 290 66 M210 100 C 250 100, 250 66, 290 66" fill="none" stroke="#1c342a" stroke-width="1.6"/>
+ <rect x="290" y="44" width="400" height="44" rx="8" fill="#f5f1ea" stroke="#d9cfbf"/>
+ <text x="490" y="63" text-anchor="middle" font-size="11.5" font-weight="700" fill="#1c342a">J0 · décision HIRO · séances · J30 · S6</text>
+ <text x="490" y="79" text-anchor="middle" font-size="9.5" fill="#6b6f66">même séquence, mêmes mesures, mêmes conditions</text>
+</svg>
+ <div class="pair">
+  <div class="card"><h3>Ce que ce document fixe</h3><ul>
+   <li>Les trois profils et la batterie Motion de chacun, test par test.</li>
+   <li>Le calendrier J0 · J30 · S6 et ses fenêtres.</li>
+   <li>Ce que HIRO consigne pour chaque soin.</li>
+   <li>Les conditions d’ouverture de l’axe PAPIMI.</li>
+   <li>Le pilote de six cas et les validations avant le premier patient.</li></ul></div>
+  <div class="card"><h3>Ce qu’il ne fixe pas</h3><ul>
+   <li>Les indications, contre-indications, doses et nombres de séances : décisions HIRO.</li>
+   <li>Un diagnostic : le bilan Motion décrit des capacités.</li>
+   <li>Une preuve d’efficacité : une évolution mesurée chez un patient n’attribue pas un effet au soin.</li></ul></div>
+ </div>
+ <h4>Trois règles qui rendent les mesures comparables</h4>
+ <ol class="steps">
+  <li><b>Mêmes tests, mêmes conditions</b> à chaque temps : même opérateur si possible, mêmes chaussures, même chaise de 43 cm, même position du pad, même profil VALD, même moment de la journée. PULSE signale les écarts de conditions.</li>
+  <li><b>Une valeur manquante reste manquante</b> : test « non réalisé » avec son motif, jamais une estimation.</li>
+  <li><b>Un changement ne compte qu’au-delà de la marge d’erreur</b> de la mesure (marche 0,1 m/s, chaise 2 levers, préhension 5 kg, environ 20 % pour les forces). En dessous, PULSE affiche « stable ».</li>
+ </ol>
+</section>
+
+<section class="part">
+ <p class="kicker">2 · Le calendrier commun</p><h2>J0 · J30 · S6</h2>
+ <svg class="tl" viewBox="0 0 700 150" role="img" aria-label="Calendrier : J0 bilan, décision HIRO, séances, J30, S6, S12 facultatif">
+ <line x1="40" y1="60" x2="664" y2="60" stroke="#d9cfbf" stroke-width="2"/>
+ <rect x="150" y="52" width="170" height="16" rx="8" fill="#e3ebe2"/>
+ <text x="235" y="64" text-anchor="middle" font-size="10" font-weight="600" fill="#1c342a">séances HIRO</text>
+ <circle cx="40" cy="60" r="11" fill="#1c342a" stroke="none" stroke-width="2" />
+ <text x="40" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#1c342a">J0</text>
+ <text x="40" y="92" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c342a">Bilan Motion</text>
+ <text x="40" y="107" text-anchor="middle" font-size="9.5" fill="#6b6f66">avant la 1re séance</text><circle cx="130" cy="60" r="7" fill="#b4925e" stroke="none" stroke-width="2" />
+ <text x="130" y="40" text-anchor="middle" font-size="10" font-weight="700" fill="#8a6d3f"></text>
+ <text x="130" y="92" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c342a">Décision HIRO</text>
+ <text x="130" y="107" text-anchor="middle" font-size="9.5" fill="#6b6f66">indication, éligibilité</text><circle cx="390" cy="60" r="11" fill="#1c342a" stroke="none" stroke-width="2" />
+ <text x="390" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#1c342a">J30</text>
+ <text x="390" y="92" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c342a">Contrôle Motion</text>
+ <text x="390" y="107" text-anchor="middle" font-size="9.5" fill="#6b6f66">jour 21 à 34</text><circle cx="500" cy="60" r="11" fill="#1c342a" stroke="none" stroke-width="2" />
+ <text x="500" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#1c342a">S6</text>
+ <text x="500" y="92" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c342a">Contrôle Motion</text>
+ <text x="500" y="107" text-anchor="middle" font-size="9.5" fill="#6b6f66">jour 35 à 56</text><circle cx="640" cy="60" r="11" fill="#fff" stroke="#1c342a" stroke-width="2" stroke-dasharray="3 2"/>
+ <text x="640" y="34" text-anchor="middle" font-size="13" font-weight="700" fill="#1c342a">S12</text>
+ <text x="640" y="92" text-anchor="middle" font-size="10.5" font-weight="600" fill="#1c342a">Facultatif</text>
+ <text x="640" y="107" text-anchor="middle" font-size="9.5" fill="#6b6f66">jour 70 à 100</text>
+ <text x="350" y="140" text-anchor="middle" font-size="9.5" fill="#6b6f66">Les jours se comptent depuis J0. Fenêtres reprises de PULSE : un contrôle hors fenêtre est affiché avec sa date réelle (J+n).</text>
+</svg>
+ <table><thead><tr><th>Temps</th><th>Quand</th><th>Contenu</th></tr></thead><tbody><tr><td>J0</td><td>Avant la première séance : dans les 7 jours qui précèdent (Assess first), ou le jour même avant le soin (Treat first).</td><td>Batterie complète du profil, douleur et questionnaires, objectifs, conditions de test. Programme maison KŌMØ remis.</td></tr><tr><td>Décision</td><td>Après J0.</td><td>Le médecin HIRO pose ou non l’indication. Le bilan Motion peut l’éclairer ; il ne la pose pas.</td></tr><tr><td>Séances</td><td>Selon le schéma HIRO.</td><td>Chaque séance est consignée par HIRO (section 5). Le calendrier réel prime sur le calendrier prévu.</td></tr><tr><td>J30</td><td>Jour 21 à 34 après J0 (cible : jour 30).</td><td>Mêmes tests que J0, douleur, tolérance, suivi du programme, événements intercurrents.</td></tr><tr><td>S6</td><td>Jour 35 à 56 (cible : jour 42).</td><td>Batterie complète, comparaison à J0, trajectoire, priorités pour la suite.</td></tr><tr><td>S12</td><td>Jour 70 à 100, facultatif.</td><td>Recommandé pour le profil 2 : l’effet de l’ozone intra-articulaire décrit dans les synthèses est maximal vers 2 mois et diminue ensuite.</td></tr></tbody></table>
+ <div class="note warn"><b>J0 après une première séance.</b> Si un patient arrive après avoir déjà reçu un soin (porte Treat first tardive), son premier bilan n’est pas un point de départ. PULSE l’enregistre normalement ; la fiche HIRO précise la date de la première séance et l’analyse le classe à part.</div>
+ <div class="note"><b>Le programme maison KŌMØ est une co-intervention.</b> Chaque bilan remet 4 exercices et la marche quotidienne. Il est donné à tous les patients, parce qu’il fait partie du bilan, et son suivi est noté à J30 et S6. C’est une raison de plus pour ne jamais attribuer une évolution au seul soin HIRO.</div>
+</section>
+
+<section class="part">
+ <p class="kicker">3 · Les profils</p><h2>Trois profils de patients</h2>
+ <div class="profiles">
+  <div class="card"><p class="k">Profil 1</p><h3>Asymptomatique</h3><p>Pas de plainte locomotrice. Veut connaître son niveau, repérer un déficit ou une asymétrie, suivre sa trajectoire.</p><p class="k">Vigilance</p><p>L’absence de symptôme n’est pas une indication de soin. Un soin HIRO repose sur une décision médicale propre.</p></div>
+  <div class="card"><p class="k">Profil 2</p><h3>Pathologie locomotrice</h3><p>Plainte douloureuse ou fonctionnelle : rachis (lombalgie, radiculalgie, cervicalgie), hanche, genou (gonarthrose). Imagerie et diagnostic posés par le médecin.</p><p class="k">Vigilance</p><p>Aucun test imposé s’il réveille la douleur ; le motif est noté.</p></div>
+  <div class="card"><p class="k">Profil 3</p><h3>Sportif</h3><p>Amateur ou confirmé, avec ou sans gêne. Veut mesurer sa force, sa puissance, ses asymétries et suivre une reprise.</p><p class="k">Vigilance</p><p>Pas de seuil non validé appliqué à un sportif ; suivi personnel d’abord.</p></div>
+ </div>
+ <h4>Critères d’inclusion et de non-inclusion communs</h4>
+ <div class="pair">
+  <div class="card"><b>Inclusion</b><ul class="small"><li>Majeur, volontaire, informé ; consentement KŌMØ donné et, pour le soin, consentement HIRO.</li><li>Capable de se tenir debout et de marcher 4 m sans aide humaine.</li><li>Disponible pour J30 et S6.</li></ul></div>
+  <div class="card"><b>Non-inclusion</b><ul class="small"><li>Un « oui » aux 8 questions de sécurité de la console sans décision médicale.</li><li>Douleur aiguë non explorée, fracture ou chirurgie de moins de 3 mois.</li><li>Grossesse pour les tests de force maximale ; contre-indications propres au soin HIRO.</li></ul></div>
+ </div>
+ <h4>Ce que l’on suit pour chaque profil</h4>
+ <table><thead><tr><th>Profil</th><th>Mesures suivies</th><th>Changement réel à partir de</th></tr></thead><tbody><tr><td>Profil 1 · asymptomatique</td><td>Vitesse de marche, levers de chaise en 30 s, appui sur un pied, préhension, symétries</td><td>marche ≥ 0,1 m/s · chaise ≥ 2 levers · franchissement des 10 s sur un pied · préhension ≥ 5 kg</td></tr><tr><td>Profil 2 · rachis</td><td>Douleur, ODI (lombaire) ou NDI (cervical), lever de chaise, équilibre yeux fermés, posture, marche</td><td>douleur ≥ 2 points sur 10 · ODI ≥ 10 points · équilibre ≥ 20 % · posture ≥ 5° · chaise ≥ 2 levers</td></tr><tr><td>Profil 2 · hanche</td><td>Douleur, HOOS-12, abduction et flexion de hanche du côté atteint, symétrie, lever, marche</td><td>douleur ≥ 2 points · force ≥ 20 % · symétrie ≥ 10 points · marche ≥ 0,1 m/s</td></tr><tr><td>Profil 2 · genou</td><td>Douleur, KOOS-12, extension et flexion de genou du côté atteint, symétrie, levers en 30 s, marche</td><td>douleur ≥ 2 points · force ≥ 20 % · symétrie ≥ 10 points · chaise ≥ 2 levers</td></tr><tr><td>Profil 3 · sportif</td><td>Saut vertical, forces segmentaires, asymétries, appui sur un pied, gêne à l’effort</td><td>saut ≥ 10 % · force ≥ 20 % · asymétrie ≥ 10 points</td></tr></tbody></table>
+ <p class="small muted">Douleur et ODI : changement minimal important de 2 points sur 10 et de 10 points (consensus international, lombalgie). Seuils des mesures Motion : reproductibilité publiée de chaque test, reprise dans PULSE.</p>
+</section>
+
+<section class="part">
+ <p class="kicker">4 · La batterie Motion</p><h2>Test par test, selon le profil</h2>
+ <p class="intro">Le protocole Motion compte 14 tests en 4 stations, plus la photo de profil. Le profil décide de ce qui est systématique, de ce qui dépend de la tolérance et de ce qui n’est pas fait. Un test non fait est saisi « non réalisé » avec son motif, pour que les trois temps restent comparables.</p>
+ <div class="legend"><span><span class="d on"></span> systématique</span><span><span class="d half"></span> si toléré, sans réveiller la douleur</span><span><span class="d opt"></span> facultatif</span><span><span class="d off"></span> non réalisé</span></div>
+ <table class="matrix"><thead><tr><th>Mesure</th><th>Profil 1<br><span>Asymptomatique</span></th><th colspan="3" class="grp">Profil 2 · pathologie locomotrice<br><span>Rachis</span><span>Hanche</span><span>Genou</span></th><th>Profil 3<br><span>Sportif</span></th></tr></thead><tbody><tr class="band"><td colspan="6">Station A · force au DynaMo, assis</td></tr><tr><td>Flexion de hanche</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Extension de genou</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Flexion de genou</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Abduction de hanche</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Préhension</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td></tr><tr class="band"><td colspan="6">Station B · plateformes ForceDecks</td></tr><tr><td>Masse et taille</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Photo de profil · posture</td><td class="c"><span class="d opt"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d opt"></span></td><td class="c"><span class="d opt"></span></td><td class="c"><span class="d opt"></span></td></tr><tr><td>Équilibre debout, yeux ouverts</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Équilibre debout, yeux fermés</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Lever sur plateformes (asymétrie)</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Appui sur un pied, gauche et droit</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Saut vertical (CMJ)</td><td class="c"><span class="d opt"></span></td><td class="c"><span class="d off"></span></td><td class="c"><span class="d off"></span></td><td class="c"><span class="d off"></span></td><td class="c"><span class="d on"></span></td></tr><tr class="band"><td colspan="6">Stations C et D</td></tr><tr><td>Marche 4 m, départ arrêté</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Lever de chaise 30 s</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d half"></span></td><td class="c"><span class="d on"></span></td></tr><tr class="band"><td colspan="6">Questionnaires</td></tr><tr><td>Questionnaire KŌMØ (22 + 5)</td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td></tr><tr><td>Douleur EVA : lombaire, membre inférieur, générale</td><td class="c"><span class="d opt"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d on"></span></td><td class="c"><span class="d opt"></span></td></tr><tr><td>Questionnaire validé de la pathologie</td><td class="c"><span class="d off"></span></td><td class="c"><span class="txt">ODI ou NDI</span></td><td class="c"><span class="txt">HOOS-12</span></td><td class="c"><span class="txt">KOOS-12</span></td><td class="c"><span class="txt">selon la blessure</span></td></tr></tbody></table>
+ <p class="small muted">Photo de profil : seulement si le patient l’a acceptée dans son consentement ; photo mesurée puis effacée. EVA et ODI : dans PULSE depuis le 24 novembre 2026 (EVA sur le téléphone du patient ; ODI officiel, version française sous licence Mapi Research Trust, rempli par le patient et saisi par le praticien). NDI, HOOS-12 et KOOS-12 : ajoutés s’ils sont retenus (section 10).</p>
+</section>
+
+<section class="part">
+ <p class="kicker">5 · Axe 1</p><h2>Ozonothérapie</h2>
+ <p><span class="tag open" style="font-size:8pt;font-weight:600;padding:.6mm 2.4mm;border-radius:3mm;background:#e3ebe2">ouvert au pilote</span></p>
+ <p class="intro">Premier axe de la collaboration. HIRO décrit plusieurs modalités : injections locales (articulations, muscles, tendons), injections rachidiennes pour hernie et sciatique, et une ozonothérapie dite hyperbare à haute concentration, avec un dépistage du déficit en G6PD avant traitement. Le schéma de chaque patient est décidé et consigné par HIRO ; KŌMØ n’en impose aucun.</p>
+ <table class="trace"><thead><tr><th>Profil</th><th>Situation où HIRO peut envisager l’ozone</th><th>Ce que KŌMØ mesure en priorité</th></tr></thead><tbody><tr><td>Profil 1</td><td>Pas d’indication démontrée chez une personne sans symptôme. Si HIRO propose un soin, c’est sa décision ; aucun bénéfice n’est annoncé.</td><td>Batterie complète, à titre de référence.</td></tr><tr><td>Profil 2 · genou</td><td>Gonarthrose douloureuse : voie intra-articulaire ou péri-articulaire.</td><td>Douleur, KOOS-12, extension de genou et symétrie, levers en 30 s, marche. S12 recommandé.</td></tr><tr><td>Profil 2 · rachis</td><td>Hernie discale avec radiculalgie, imagerie concordante. Voie choisie par HIRO ; la voie paravertébrale est décrite comme la plus sûre.</td><td>Douleur, ODI ou NDI, équilibre yeux fermés, lever de chaise, posture, marche.</td></tr><tr><td>Profil 2 · hanche</td><td>Selon l’indication HIRO ; données publiées plus rares que pour le genou.</td><td>Douleur, HOOS-12, abduction et flexion de hanche, symétrie, marche.</td></tr><tr><td>Profil 3</td><td>Douleur tendineuse ou musculaire, selon l’indication HIRO.</td><td>Force segmentaire du côté concerné, asymétries, saut, gêne à l’effort.</td></tr></tbody></table>
+ <h4>Ce que HIRO consigne pour chaque patient</h4>
+ <table class="trace"><thead><tr><th>Élément</th><th>À renseigner</th></tr></thead><tbody><tr><td>Indication</td><td>Motif clinique, objectif du soin, médecin HIRO qui pose l’indication.</td></tr><tr><td>Éligibilité</td><td>Contre-indications vérifiées selon les procédures HIRO, dont le dépistage du déficit en G6PD.</td></tr><tr><td>Modalité</td><td>Technique exacte : locale (intra-articulaire, péri-articulaire, musculaire, tendineuse), rachidienne (paravertébrale, foraminale, intradiscale) ou systémique ; guidage éventuel.</td></tr><tr><td>Paramètres</td><td>Concentration (µg/mL), volume (mL) par site, nombre de sites ; pour la voie systémique, nombre de passages. Valeurs réellement administrées.</td></tr><tr><td>Calendrier</td><td>Date de chaque séance, nombre total, interruptions ou adaptations.</td></tr><tr><td>Tolérance</td><td>Effets indésirables, inconfort, arrêt ou modification ; conduite tenue.</td></tr><tr><td>Contexte</td><td>Antalgiques, infiltrations, kinésithérapie, activité physique, programme maison KŌMØ (suivi ou non), événements intercurrents.</td></tr></tbody></table>
+</section>
+
+<section class="part">
+ <p class="kicker">6 · Axe 2</p><h2>PAPIMI</h2>
+ <p><span style="font-size:8pt;font-weight:600;padding:.6mm 2.4mm;border-radius:3mm;background:#fbf3e4;color:#8a6d3f">exploratoire · ouvert seulement si les 5 conditions sont remplies</span></p>
+ <p class="intro">Le PAPIMI est un appareil à champ électromagnétique pulsé fabriqué à Athènes. Il n’a pas d’essai clinique solide à son nom ; il n’est pas autorisé aux États-Unis et Santé Canada recommande au public de ne pas l’utiliser. La famille des champs pulsés a, elle, un bénéfice modeste et à court terme dans la gonarthrose. Le mesurer n’a donc de sens que dans un cadre strict.</p>
+ <h4>Conditions d’ouverture de l’axe</h4>
+ <ol class="gate">
+  <li><span><b>Documents du dispositif</b> fournis par HIRO : déclaration de conformité et marquage CE au titre du règlement (UE) 2017/745, certificat de l’organisme notifié si la classe l’exige, notice et destination revendiquée par le fabricant.</span></li>
+  <li><span><b>Usage dans cette destination seulement</b>, chez des patients du profil 2, en complément de leur prise en charge, jamais à sa place.</span></li>
+  <li><span><b>Information spécifique du patient</b> sur le niveau de preuve, dans le consentement au soin recueilli par HIRO.</span></li>
+  <li><span><b>Aucune communication</b> de KŌMØ ou de HIRO associant le PAPIMI aux mesures Motion ou à leurs résultats.</span></li>
+  <li><span><b>Matériovigilance</b> : tout incident signalé selon les obligations de HIRO.</span></li>
+ </ol>
+ <div class="note warn"><b>Date de décision : 12 décembre 2026.</b> Si une condition manque, l’axe n’ouvre pas au pilote et ses cas sont réattribués à l’ozone (profil 2, genou et rachis). Les mesures Motion, elles, restent proposées à tous les patients.</div>
+ <h4>Si l’axe ouvre : ce que HIRO consigne</h4>
+ <table class="trace"><thead><tr><th>Élément</th><th>À renseigner</th></tr></thead><tbody><tr><td>Dispositif</td><td>Fabricant, modèle, numéro de série, version ; marquage CE et destination revendiquée par le fabricant (copie au dossier).</td></tr><tr><td>Indication</td><td>Motif et objectif définis par le médecin HIRO, dans la destination du dispositif.</td></tr><tr><td>Paramètres</td><td>Réglages réellement utilisés, zone traitée, durée de chaque séance.</td></tr><tr><td>Calendrier</td><td>Dates, nombre et fréquence des séances.</td></tr><tr><td>Opérateur</td><td>Professionnel qui réalise la séance et médecin qui la supervise.</td></tr><tr><td>Tolérance</td><td>Symptômes pendant et après, incidents, arrêt ; signalement de matériovigilance s’il y a lieu.</td></tr></tbody></table>
+ <p>Mêmes temps (J0, J30, S6), même batterie que le profil 2, mêmes règles de lecture.</p>
+</section>
+
+<section class="part">
+ <p class="kicker">7 · Ce que disent les études</p><h2>Niveau de preuve des soins envisagés</h2>
+ <p class="intro">Pour que chacun parle des soins avec les mêmes mots, au patient comme entre médecins. Synthèses publiées jusqu’en 2026 ; certitude estimée d’après les auteurs des revues.</p>
+ <table class="ev"><thead><tr><th>Soin</th><th>Situation étudiée</th><th>Ce que montrent les synthèses</th><th>Certitude</th></tr></thead><tbody><tr><td>Ozone intra-articulaire</td><td>Gonarthrose</td><td>Supérieur au placebo, pas supérieur à l’acide hyaluronique. Effet sur la douleur à court terme (1 à 2 mois), maximal vers 2 mois.</td><td><span class="cert f">faible</span></td></tr><tr><td>Ozone rachidien</td><td>Hernie discale lombaire</td><td>Injections intradiscales : 8 essais, 1 744 patients, environ 2 points de douleur sur 10 en faveur de l’ozone face aux traitements comparés, à court terme. Essais hétérogènes. La voie intradiscale a été associée à des complications graves ; la voie intramusculaire paravertébrale est présentée comme plus sûre.</td><td><span class="cert m">faible à modérée</span></td></tr><tr><td>Ozone systémique à haute dose</td><td>Prévention, « optimisation »</td><td>Pas d’essai contrôlé identifié sur des critères cliniques ; approche discutée parmi les ozonothérapeutes eux-mêmes. Aucune indication démontrée chez une personne sans symptôme.</td><td><span class="cert tf">très faible</span></td></tr><tr><td>Champs électromagnétiques pulsés (famille)</td><td>Gonarthrose</td><td>Bénéfice à court terme sur la douleur et la fonction contre placebo ; pas supérieur à la kinésithérapie.</td><td><span class="cert f">faible</span></td></tr><tr><td>PAPIMI (appareil)</td><td>—</td><td>Aucun essai solide identifié sur cet appareil. Non autorisé aux États-Unis faute d’autorisation de la FDA ; Santé Canada recommande au public de ne pas l’utiliser.</td><td><span class="cert tf">non évaluable</span></td></tr><tr><td>Photobiomodulation</td><td>Gonarthrose</td><td>Baisse de la douleur et de l’incapacité aux doses recommandées.</td><td><span class="cert f">faible</span></td></tr><tr><td>IHHT (hypoxie-hyperoxie)</td><td>Patients âgés, avec entraînement</td><td>Petits essais : gain supplémentaire au test de marche de 6 minutes quand l’IHHT précède l’entraînement.</td><td><span class="cert f">faible</span></td></tr></tbody></table>
+ <h4>Plus tard : les autres soins HIRO</h4>
+ <p>La photobiomodulation et l’IHHT pourraient devenir les axes 3 et 4 après le pilote, avec la même méthode. L’IHHT se mesure naturellement avec Motion : les essais l’associent à l’entraînement, et ce sont la marche, la puissance et la force qui progressent.</p>
+ <h4>Ce que l’on dit au patient</h4>
+ <blockquote>« Le médecin de HIRO vous propose un soin. De notre côté, nous mesurons votre force, votre équilibre et votre marche avant et après, pour suivre votre évolution. Ces mesures montrent comment vous allez ; à elles seules, elles ne disent pas ce qui a marché. »</blockquote>
+</section>
+
+<section class="part">
+ <p class="kicker">8 · Cadre</p><h2>Données, sécurité, consentement</h2>
+ <table><thead><tr><th></th><th>HIRO</th><th>KŌMØ</th></tr></thead><tbody><tr><td><b>Décide</b></td><td>Indication, éligibilité, schéma et surveillance du soin</td><td>Batterie Motion selon le profil, conditions de test</td></tr><tr><td><b>Réalise</b></td><td>Les soins</td><td>Les bilans J0, J30, S6 (Dr Chapon ou opérateur HIRO formé et certifié)</td></tr><tr><td><b>Consigne</b></td><td>Fiche de traçabilité du soin, sous le code HIRO du patient</td><td>Mesures dans PULSE, motifs des tests non réalisés</td></tr><tr><td><b>Restitue</b></td><td>Avis médical et suite des soins</td><td>Passeport PDF, trajectoire, programme maison, après validation</td></tr><tr><td><b>Signale</b></td><td>Événements indésirables du soin ; matériovigilance</td><td>Incident pendant un test, transmis au médecin HIRO le jour même</td></tr></tbody></table>
+ <div class="pair">
+  <div class="card"><h3>Données</h3><ul class="small">
+   <li>Dossier PULSE nominatif ; serveurs à Paris (UE). Dans VALD et dans ce qui est transmis pour analyse, seulement le code HIRO.</li>
+   <li>Consentement électronique horodaté sur le téléphone du patient ; lien personnel valable 60 jours ; résultats visibles après validation.</li>
+   <li>À ajouter avant le pilote : une case de consentement au partage des résultats avec l’équipe médicale HIRO.</li>
+   <li>Hébergement, durée de conservation et registre des traitements : validés avec le DPO.</li></ul></div>
+  <div class="card"><h3>Recherche ou soins ?</h3><ul class="small">
+   <li>Suivre des patients et leur rendre leurs résultats relève du soin.</li>
+   <li>Publier une série de cas réutilise des données de soins : information des patients et cadre de la CNIL (méthodologie de référence MR-004), selon l’avis du DPO.</li>
+   <li>Ajouter des mesures pour la seule recherche ou randomiser relèverait de la loi Jardé (comité de protection des personnes) : hors du pilote.</li></ul></div>
+ </div>
+ <div class="note warn"><b>Sécurité pendant les tests.</b> Les 8 questions de la console avant le premier test ; appui à portée de main ; arrêt sur douleur, vertige ou malaise. Tout incident est noté dans PULSE et transmis au médecin HIRO le jour même.</div>
+</section>
+
+<section class="part">
+ <p class="kicker">9 · Le pilote</p><h2>Six cas, trois temps, une synthèse commune</h2>
+ <p class="intro">Format retenu : un cas par profil et par axe. Chaque cas est analysé seul. L’objectif est de vérifier la faisabilité et la qualité des mesures, pas de conclure sur un soin.</p>
+ <div class="pilot">
+  <div class="h"></div><div class="h">Profil 1 · asymptomatique</div><div class="h">Profil 2 · pathologie locomotrice</div><div class="h">Profil 3 · sportif</div>
+  <div class="r">Ozone</div><div class="o"><b>Cas 1</b>référence, sans indication présumée</div><div class="o"><b>Cas 2</b>genou ou rachis</div><div class="o"><b>Cas 3</b>selon indication HIRO</div>
+  <div class="r">PAPIMI</div><div class="p"><b>Cas 4</b>sous conditions (section 6)</div><div class="p"><b>Cas 5</b>sous conditions</div><div class="p"><b>Cas 6</b>sous conditions</div>
+ </div>
+ <p class="small muted">Cases pointillées : si l’axe PAPIMI n’ouvre pas le 12 décembre, les cas 4 à 6 deviennent des cas ozone du profil 2 (un genou, un rachis, un au choix de HIRO).</p>
+ <h4>Calendrier</h4>
+ <div class="gantt"><div class="gh"><span></span><span>23 nov</span><span></span><span>déc.</span><span></span><span></span><span></span><span>janv.</span><span></span><span></span><span></span><span>févr.</span><span></span><span></span><span></span><span>mars</span><span></span><span></span><span></span><span></span><span>avr.</span></div><div class="gr"><span>Validations conjointes</span><div class="gbar"><i class="v" style="left:0%;width:15%"></i></div></div><div class="gr"><span>Formation de l’opérateur</span><div class="gbar"><i class="v" style="left:15%;width:5%"></i></div></div><div class="gr"><span>Inclusions et bilans J0</span><div class="gbar"><i class="a" style="left:30%;width:20%"></i></div></div><div class="gr"><span>Contrôles J30</span><div class="gbar"><i class="b" style="left:45%;width:25%"></i></div></div><div class="gr"><span>Contrôles S6</span><div class="gbar"><i class="b" style="left:55.00000000000001%;width:25%"></i></div></div><div class="gr"><span>Synthèse commune et décision</span><div class="gbar"><i class="v" style="left:80%;width:10%"></i></div></div><div class="gr"><span>S12 facultatifs</span><div class="gbar"><i class="o" style="left:75%;width:25%"></i></div></div><p class="small muted" style="margin-top:2mm">Fêtes de fin d’année : aucun J0 entre le 21 décembre et le 3 janvier, pour que les contrôles tombent dans leur fenêtre.</p></div>
+ <h4>Ce que chaque partenaire reçoit à la fin</h4>
+ <ul>
+  <li>Pour chaque cas : la trajectoire J0 · J30 · S6 (et S12), les tests non réalisés et leurs motifs, la fiche de soin HIRO, les co-interventions.</li>
+  <li>Une synthèse de faisabilité : durée des bilans, part des contrôles réalisés dans leur fenêtre, part des tests réalisés, incidents, avis des patients.</li>
+  <li>Une décision commune : continuer, élargir (registre de tous les patients mesurés, axes 3 et 4), ou arrêter.</li>
+ </ul>
+</section>
+
+<section class="part">
+ <p class="kicker">10 · Avant le premier patient</p><h2>Validations conjointes</h2>
+ <table class="valid"><thead><tr><th>Validation</th><th>Qui</th><th>Pour le</th></tr></thead><tbody><tr><td>Licence de l’ODI (Mapi Research Trust) ; EVA et ODI en service dans PULSE</td><td>KŌMØ</td><td><span class="done">Fait</span></td></tr><tr><td>Relecture juridique du consentement et de la convention ; avis de l’Ordre ; avis du DPO</td><td>KŌMØ</td><td><span class="done">Fait</span></td></tr><tr><td>Confirmer les axes ouverts au pilote (ozone ; PAPIMI selon la section 6)</td><td>HIRO</td><td>5 déc.</td></tr><tr><td>Transmettre les documents du PAPIMI : marquage CE, destination, notice, réglages</td><td>HIRO</td><td>5 déc.</td></tr><tr><td>Valider indications, contre-indications et fiche de traçabilité de chaque soin</td><td>HIRO</td><td>12 déc.</td></tr><tr><td>Ajouter NDI, HOOS-12 et KOOS-12 à PULSE s’ils sont retenus pour le pilote</td><td>KŌMØ</td><td>12 déc.</td></tr><tr><td>Ajouter au consentement le partage des résultats avec l’équipe médicale HIRO</td><td>KŌMØ</td><td>12 déc.</td></tr><tr><td>Signer la convention HIRO × KŌMØ et l’assurance du matériel</td><td>Ensemble</td><td>15 déc.</td></tr><tr><td>Former et certifier l’opérateur HIRO (3 bilans supervisés)</td><td>KŌMØ</td><td>19 déc.</td></tr></tbody></table>
+ </section>
+<section class="part">
+ <p class="kicker">Annexe</p><h2>Fiche de soin HIRO</h2>
+ <p class="intro">Une par patient et par axe, tenue par HIRO sous le code HIRO du patient, jamais son nom. Elle rejoint son dossier KŌMØ pour la synthèse du pilote, avec son accord.</p>
+ <table class="blank"><tbody>
+  <tr><td>Code HIRO du patient · profil · axe</td><td></td></tr><tr><td>Médecin HIRO · indication</td><td></td></tr><tr><td>Éligibilité vérifiée (dont G6PD) · date</td><td></td></tr><tr><td>Modalité, voie, guidage</td><td></td></tr><tr><td>Paramètres réellement administrés</td><td></td></tr><tr><td>Séances : dates</td><td></td></tr><tr><td>Tolérance, événements indésirables</td><td></td></tr><tr><td>Co-interventions · programme maison KŌMØ suivi</td><td></td></tr>
+ </tbody></table>
+</section>
+
+<section class="part">
+ <h2>Sources</h2>
+ <ol class="sources">
+  <li>Proposition de collaboration HIRO Monaco × KŌMØ Longevity, novembre 2026 ; synthèse « Parcours ozone, PAPIMI, profils », 24 novembre 2026.</li>
+  <li>HIRO Monaco : pages « Optimisation » et « Ozonothérapie hyperbare » (hiromonaco.com), consultées en novembre 2026.</li>
+  <li>Protocole KŌMØ Motion KOMO_MOTION_V2 2.4.0 et règles de reproductibilité de PULSE.</li>
+  <li>Ozone intra-articulaire et gonarthrose : méta-analyse, J Pain Res 2018;11:2537-50 ; ozone contre acide hyaluronique, méta-analyse 2020 (PMID 32766391) ; effet dans le temps, Front Pain Res 2026.</li>
+  <li>Ozone et hernie discale lombaire : Cao et al., Front Pain Res 2025;6:1668752 ; Franzini et al., protocoles SIOOT, J Imaging 2025;11:428.</li>
+  <li>Ozone systémique à haute dose : Franzini et al., lettre, Transl Med Commun 2022;7:26.</li>
+  <li>Champs électromagnétiques pulsés et arthrose : méta-analyse, Phys Ther 2020;100:1118-31 ; Viganò et al., méta-analyse gonarthrose (PMID 32508140).</li>
+  <li>PAPIMI : FDA (absence d’autorisation, enquête 2001–2005) ; Santé Canada, avis public de 2007 ; synthèse encyclopédique « Pap-Ion Magnetic Inductor ».</li>
+  <li>Photobiomodulation et gonarthrose : Stausholm et al., BMJ Open 2019.</li>
+  <li>IHHT chez le patient âgé : essai randomisé, 34 patients de 64 à 92 ans, 2017 (PMC5651371) ; essai randomisé avant entraînement sur cycloergomètre, 2022 (PMC9178199).</li>
+  <li>Changements minimaux importants (douleur, ODI) : Ostelo et al., Spine 2008.</li>
+  <li>Règlement (UE) 2017/745 relatif aux dispositifs médicaux ; CNIL, méthodologie de référence MR-004 ; loi n° 2012-300 (Jardé).</li>
+ </ol>
+ <p class="small muted" style="margin-top:6mm">Document de cadrage opérationnel préparé par KŌMØ Longevity pour l’équipe HIRO. Les indications, contre-indications et modalités des soins relèvent des médecins HIRO. Toute diffusion scientifique suppose une qualification réglementaire préalable.</p>
+</section></body></html>
