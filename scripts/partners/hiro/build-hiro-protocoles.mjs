@@ -35,7 +35,7 @@ const B=[
  ['Lever de chaise 30 s','●','◐','◐','◐','●'],
  ['Questionnaires'],
  ['Questionnaire KŌMØ (22 + 5)','●','●','●','●','●'],
- ['Douleur 0–10, au repos et pendant les tests','○','●','●','●','○'],
+ ['Douleur EVA : lombaire, membre inférieur, générale','○','●','●','●','○'],
  ['Questionnaire validé de la pathologie','—','ODI ou NDI','HOOS-12','KOOS-12','selon la blessure']
 ];
 const sym={'●':'<span class="d on"></span>','◐':'<span class="d half"></span>','○':'<span class="d opt"></span>','—':'<span class="d off"></span>'};
@@ -111,7 +111,7 @@ const VALID=[
  ['Confirmer les axes ouverts au pilote (ozone ; PAPIMI selon la section 6)','HIRO','5 déc.'],
  ['Transmettre les documents du PAPIMI : marquage CE, destination, notice, réglages','HIRO','5 déc.'],
  ['Valider indications, contre-indications et fiche de traçabilité de chaque soin','HIRO','12 déc.'],
- ['Ajouter à PULSE la douleur 0–10 et les questionnaires validés (ODI, NDI, HOOS-12, KOOS-12)','KŌMØ','12 déc.'],
+ ['Obtenir la licence de l’ODI (Mapi Research Trust) ; ajouter NDI, HOOS-12 et KOOS-12 à PULSE s’ils sont retenus (EVA et ODI : faits)','KŌMØ','12 déc.'],
  ['Ajouter au consentement le partage des résultats avec l’équipe médicale HIRO','KŌMØ','12 déc.'],
  ['Convention HIRO × KŌMØ, assurance, relecture juridique, transmission à l’Ordre','Ensemble','15 déc.'],
  ['Qualifier l’usage des données (soins seuls, ou série de cas publiée) avec le DPO','Ensemble','15 déc.'],
@@ -255,7 +255,7 @@ table.trace td:first-child{width:22%}
  <p class="intro">Le protocole Motion compte ${N} tests en 4 stations, plus la photo de profil. Le profil décide de ce qui est systématique, de ce qui dépend de la tolérance et de ce qui n’est pas fait. Un test non fait est saisi « non réalisé » avec son motif, pour que les trois temps restent comparables.</p>
  <div class="legend"><span>${sym['●']} systématique</span><span>${sym['◐']} si toléré, sans réveiller la douleur</span><span>${sym['○']} facultatif</span><span>${sym['—']} non réalisé</span></div>
  ${batteryTable}
- <p class="small muted">Photo de profil : seulement si le patient l’a acceptée dans son consentement ; photo mesurée puis effacée. Douleur 0–10 et questionnaires validés : à intégrer dans PULSE avant le premier patient du pilote (section 10) ; droits d’utilisation de chaque questionnaire à vérifier.</p>
+ <p class="small muted">Photo de profil : seulement si le patient l’a acceptée dans son consentement ; photo mesurée puis effacée. EVA et ODI : dans PULSE depuis le 24 novembre 2026 (EVA sur le téléphone du patient ; ODI saisi par le praticien d’après le formulaire officiel). NDI, HOOS-12 et KOOS-12 : à ajouter s’ils sont retenus (section 10).</p>
 </section>
 
 <section class="part">
