@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261124-compteur-chaise-v1';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261124-licences-v1';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -542,6 +542,9 @@ export async function downloadClinicPassport(report,category='all'){
      line(M+11,y-1,R,y-1,P.line,.22);
      y+=3.3;
     }
+    // Mention de droits de l'instrument (ODI, sous licence).
+    if(g.credit){if(y>256){page('Annexe · questionnaire','Questionnaire (suite)','Réponses enregistrées / vérifiables');y=69;}
+     y=words(g.credit,M+11,y,C-13,{sz:6.8,lh:3,max:2,col:P.muted})+2;}
     y+=3;
    }
    if(part===2&&y<252){

@@ -359,7 +359,25 @@ Deno.serve(async(req:Request)=>{
   const {data:patient}=await db.from("patients").select("id,first_name,last_name,research_subject_code,birth_date,sex_at_birth,data_classification,status")
    .eq("id",room.patient_id).eq("organization_id",ORG_ID).maybeSingle();
   if(!patientAllowed(patient))return response(req,{error:"patient_unavailable"},403);
-  if(action==="patient_link_status")return response(req,{ok:true,...patientView(room,patient)});
+  if(action==="patient_link_status"){
+   const view:any=patientView(room,patient);
+   // Trajectoire du passeport patient (24/11/2026) : ses séances terminées ET validées par le praticien, jusqu'à
+   // celle-ci incluse. Envoyée seulement sur demande (téléchargement du PDF), pas à chaque rafraîchissement.
+   if(view.released&&b.include_history===true){
+    const {data:rows,error:historyError}=await db.from("pulse_motion_live_sessions")
+     .select("id,display_code,status,progress,completed_at")
+     .eq("organization_id",ORG_ID).eq("patient_id",room.patient_id).eq("status","completed")
+     .order("completed_at",{ascending:true}).limit(24);
+    if(historyError)return response(req,{error:"history_unavailable"},503);
+    const until=new Date(room.completed_at||0).getTime();
+    view.history=(rows||[]).filter((x:any)=>typeof x.progress?.patient_release?.released_at==="string"&&
+      new Date(x.completed_at).getTime()<=until).slice(-4)
+     .map((x:any)=>({id:x.id,display_code:x.display_code,status:"completed",completed_at:x.completed_at,
+      progress:{results:x.progress.results||{},questionnaire:{answers:x.progress.questionnaire?.answers||{}},
+       protocol:{version:x.progress.protocol?.version||null}}}));
+   }
+   return response(req,{ok:true,...view});
+  }
   if(action==="patient_consent_save"){
    const choices=cleanConsent(b.consents);
    if(!choices)return response(req,{error:"invalid_consent"},422);

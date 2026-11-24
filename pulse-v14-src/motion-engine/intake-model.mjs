@@ -59,9 +59,9 @@ export const INTAKE_GROUPS=[
   {id:'evaGeneral',label:'Douleur générale',options:EVA_OPTIONS,eva:true}
  ]},
  // ODI (Oswestry Disability Index) : 10 rubriques notées de 0 à 5, saisies par le praticien d'après le formulaire
- // officiel (version française validée, Vogler 2008 ; licence Mapi Research Trust). Le texte des réponses n'est
- // pas reproduit ici. Score = total / (5 × rubriques renseignées) × 100, calculé à partir de 8 rubriques.
- {id:'odi',title:'Oswestry (ODI)',subtitle:'Retentissement d’une douleur du dos ou de la jambe : 10 rubriques notées de 0 à 5, d’après le formulaire officiel rempli par le patient.',note:'Formulaire ODI officiel, version française validée (licence Mapi Research Trust). Score en % : 0–20 incapacité minime, 21–40 modérée, 41–60 sévère, au-delà de 60 très sévère. Changement réel : 10 points.',scored:false,optional:true,practitionerOnly:true,odi:true,
+ // officiel (version française validée, Vogler 2008), utilisé sous licence Mapi Research Trust. Le texte des
+ // réponses reste sur le formulaire officiel. Score = total / (5 × rubriques renseignées) × 100, calculé à partir de 8 rubriques.
+ {id:'odi',title:'Oswestry (ODI)',subtitle:'Retentissement d’une douleur du dos ou de la jambe : 10 rubriques notées de 0 à 5, d’après le formulaire officiel rempli par le patient.',credit:'Oswestry Disability Index © Jeremy Fairbank, 1980 · version française validée, utilisée sous licence Mapi Research Trust.',note:'Formulaire ODI officiel, version française validée, utilisé sous licence Mapi Research Trust. Score en % : 0–20 incapacité minime, 21–40 modérée, 41–60 sévère, au-delà de 60 très sévère. Changement réel : 10 points.',scored:false,optional:true,practitionerOnly:true,odi:true,
   questions:['Intensité de la douleur','Soins personnels (se laver, s’habiller)','Soulever des charges','Marche','Position assise','Position debout','Sommeil','Vie sexuelle','Vie sociale','Déplacements et voyages']
    .map((label,i)=>({id:'odi'+(i+1),label,options:ODI_OPTIONS}))}
 ];

@@ -111,10 +111,11 @@ const VALID=[
  ['Confirmer les axes ouverts au pilote (ozone ; PAPIMI selon la section 6)','HIRO','5 déc.'],
  ['Transmettre les documents du PAPIMI : marquage CE, destination, notice, réglages','HIRO','5 déc.'],
  ['Valider indications, contre-indications et fiche de traçabilité de chaque soin','HIRO','12 déc.'],
- ['Obtenir la licence de l’ODI (Mapi Research Trust) ; ajouter NDI, HOOS-12 et KOOS-12 à PULSE s’ils sont retenus (EVA et ODI : faits)','KŌMØ','12 déc.'],
+ ['Licence de l’ODI (Mapi Research Trust) ; EVA et ODI en service dans PULSE','KŌMØ','Fait'],
+ ['Ajouter NDI, HOOS-12 et KOOS-12 à PULSE s’ils sont retenus pour le pilote','KŌMØ','12 déc.'],
  ['Ajouter au consentement le partage des résultats avec l’équipe médicale HIRO','KŌMØ','12 déc.'],
- ['Convention HIRO × KŌMØ, assurance, relecture juridique, transmission à l’Ordre','Ensemble','15 déc.'],
- ['Qualifier l’usage des données (soins seuls, ou série de cas publiée) avec le DPO','Ensemble','15 déc.'],
+ ['Relecture juridique du consentement et de la convention ; avis de l’Ordre ; avis du DPO','KŌMØ','Fait'],
+ ['Signer la convention HIRO × KŌMØ et l’assurance du matériel','Ensemble','15 déc.'],
  ['Former et certifier l’opérateur HIRO (3 bilans supervisés)','KŌMØ','19 déc.']
 ];
 const GANTT=[
@@ -180,6 +181,7 @@ table.trace td:first-child{width:22%}
 .sources{font-size:7.6pt;color:var(--muted);padding-left:4mm;columns:2;column-gap:8mm}
 .sources li{margin-bottom:1mm;break-inside:avoid}
 .big{font-family:"Crimson Text",serif;font-size:15pt;line-height:1.3;color:var(--ink);margin:0 0 4mm}
+.done{color:#2f6b4a;font-weight:700}
 </style>
 
 <div class="cover">
@@ -255,7 +257,7 @@ table.trace td:first-child{width:22%}
  <p class="intro">Le protocole Motion compte ${N} tests en 4 stations, plus la photo de profil. Le profil décide de ce qui est systématique, de ce qui dépend de la tolérance et de ce qui n’est pas fait. Un test non fait est saisi « non réalisé » avec son motif, pour que les trois temps restent comparables.</p>
  <div class="legend"><span>${sym['●']} systématique</span><span>${sym['◐']} si toléré, sans réveiller la douleur</span><span>${sym['○']} facultatif</span><span>${sym['—']} non réalisé</span></div>
  ${batteryTable}
- <p class="small muted">Photo de profil : seulement si le patient l’a acceptée dans son consentement ; photo mesurée puis effacée. EVA et ODI : dans PULSE depuis le 24 novembre 2026 (EVA sur le téléphone du patient ; ODI saisi par le praticien d’après le formulaire officiel). NDI, HOOS-12 et KOOS-12 : à ajouter s’ils sont retenus (section 10).</p>
+ <p class="small muted">Photo de profil : seulement si le patient l’a acceptée dans son consentement ; photo mesurée puis effacée. EVA et ODI : dans PULSE depuis le 24 novembre 2026 (EVA sur le téléphone du patient ; ODI officiel, version française sous licence Mapi Research Trust, rempli par le patient et saisi par le praticien). NDI, HOOS-12 et KOOS-12 : ajoutés s’ils sont retenus (section 10).</p>
 </section>
 
 <section class="part">
@@ -315,10 +317,10 @@ table.trace td:first-child{width:22%}
    <li>Dossier PULSE nominatif ; serveurs à Paris (UE). Dans VALD et dans ce qui est transmis pour analyse, seulement le code HIRO.</li>
    <li>Consentement électronique horodaté sur le téléphone du patient ; lien personnel valable 60 jours ; résultats visibles après validation.</li>
    <li>À ajouter avant le pilote : une case de consentement au partage des résultats avec l’équipe médicale HIRO.</li>
-   <li>À vérifier avec le DPO : hébergement certifié HDS, durée de conservation, registre des traitements.</li></ul></div>
+   <li>Hébergement, durée de conservation et registre des traitements : validés avec le DPO.</li></ul></div>
   <div class="card"><h3>Recherche ou soins ?</h3><ul class="small">
    <li>Suivre des patients et leur rendre leurs résultats relève du soin.</li>
-   <li>Publier une série de cas réutilise des données de soins : information des patients et cadre de la CNIL (méthodologie de référence MR-004) à valider.</li>
+   <li>Publier une série de cas réutilise des données de soins : information des patients et cadre de la CNIL (méthodologie de référence MR-004), selon l’avis du DPO.</li>
    <li>Ajouter des mesures pour la seule recherche ou randomiser relèverait de la loi Jardé (comité de protection des personnes) : hors du pilote.</li></ul></div>
  </div>
  <div class="note warn"><b>Sécurité pendant les tests.</b> Les 8 questions de la console avant le premier test ; appui à portée de main ; arrêt sur douleur, vertige ou malaise. Tout incident est noté dans PULSE et transmis au médecin HIRO le jour même.</div>
@@ -345,7 +347,7 @@ table.trace td:first-child{width:22%}
 
 <section class="part">
  <p class="kicker">10 · Avant le premier patient</p><h2>Validations conjointes</h2>
- ${table(['Validation','Qui','Pour le'],VALID.map(r=>[e(r[0]),e(r[1]),e(r[2])]),'valid')}
+ ${table(['Validation','Qui','Pour le'],[...VALID.filter(r=>r[2]==='Fait'),...VALID.filter(r=>r[2]!=='Fait')].map(r=>[e(r[0]),e(r[1]),r[2]==='Fait'?'<span class="done">Fait</span>':e(r[2])]),'valid')}
  </section>
 <section class="part">
  <p class="kicker">Annexe</p><h2>Fiche de soin HIRO</h2>

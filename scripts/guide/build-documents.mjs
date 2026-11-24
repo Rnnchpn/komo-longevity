@@ -33,11 +33,11 @@ const TIMELINE=[
  ['0 – 5','Dossier','Prénom, nom, date de naissance, e-mail, sexe. Le code HIRO s’affiche : il sert à créer le profil VALD.'],
  ['5 – 8','Consentement','QR patient : le patient lit et coche sur son téléphone. La console affiche ✓ et l’heure.'],
  ['8 – 10','Sécurité','Les 8 questions de la console, puis la case de sécurité.'],
- ['10 – 22','Station A','Force au DynaMo, tout assis : 5 tests. Le patient commence son questionnaire entre deux tests.'],
+ ['10 – 22','Station A','Force au DynaMo, tout assis : 5 tests. Entre deux tests, le patient note sa douleur puis commence son questionnaire.'],
  ['22 – 24','Photo de profil','Pieds nus, de profil, une photo envoyée à Claude avec le code.'],
  ['24 – 37','Station B','Plateformes ForceDecks : masse et taille, équilibre, lever, appui sur un pied, saut si à l’aise.'],
  ['37 – 44','Stations C et D','Marche 4 m (2 passages), puis lever de chaise 30 s.'],
- ['44 – 48','Relecture','Le patient finit son questionnaire. Tu relis le Rapport ; Claude te rend la posture à valider.'],
+ ['44 – 48','Relecture','Le patient finit son questionnaire (et l’ODI s’il a mal au dos ou à la jambe). Tu relis le Rapport ; Claude te rend la posture à valider.'],
  ['48 – 60','Restitution','Capacités, 3 priorités, programme maison montré en salle. Validation, remise sur son téléphone, e-mail, rendez-vous à 6 semaines.']
 ];
 const PANNES=[
@@ -98,7 +98,7 @@ const deroule=doc('KŌMØ Motion · Déroulé de la consultation',`
   'Sous « Lieu de consultation », choisis <b>KŌMØ Beausoleil — Clinique HIRO</b>. Le badge doit dire « consultation réelle » (« démonstration » veut dire Cannes).',
   'Laisse PULSE ouvert sur « Patients ». Un ordinateur peut afficher la même consultation en même temps, si tu préfères saisir sur un grand écran.'
  ])}
- <div class="note"><b>Papier : aucun.</b> En secours seulement (réseau coupé), garde une feuille de mesures imprimée dans un tiroir : tu y notes les valeurs et tu les saisis plus tard.</div>
+ <div class="note"><b>Papier : le formulaire ODI officiel seulement</b> (version française fournie avec la licence Mapi Research Trust), quelques exemplaires imprimés pour les patients qui ont mal au dos ou à la jambe. En secours (réseau coupé), garde aussi une feuille de mesures dans un tiroir : tu y notes les valeurs et tu les saisis plus tard.</div>
 
  <div class="block"><p class="kicker">Étape 2</p><h2>Créer le dossier</h2>
  ${steps([
@@ -153,8 +153,9 @@ const deroule=doc('KŌMØ Motion · Déroulé de la consultation',`
 <section class="part">
  <p class="kicker">Étape 6</p><h2>Questionnaire</h2>
  ${steps([
-  'Le patient répond <b>sur son téléphone</b>, entre deux tests : 22 questions, plus 5 questions facultatives « Santé et longévité » (chutes, activité, temps assis, tabac, médicaments).',
+  'Le patient répond <b>sur son téléphone</b>, entre deux tests. D’abord <b>sa douleur</b>, trois réglettes de 0 à 10 : lombaire, membre inférieur, générale. Puis 22 questions, et 5 questions facultatives « Santé et longévité » (chutes, activité, temps assis, tabac, médicaments).',
   'Ses réponses arrivent dans l’onglet <b>Questionnaire</b> de la console. Sans téléphone, lis-les-lui et réponds au même endroit.',
+  '<b>Douleur du dos ou de la jambe</b> : remets-lui le <b>formulaire ODI officiel</b>. Il coche une phrase par rubrique. Dans l’onglet Questionnaire, rubrique « Oswestry (ODI) », tu reportes la note de chaque rubrique (0 à 5) : le score en % s’affiche dès 8 rubriques.',
   'Un questionnaire incomplet n’empêche rien : le passeport le signale.'
  ])}
 
@@ -185,7 +186,8 @@ const deroule=doc('KŌMØ Motion · Déroulé de la consultation',`
  ${steps([
   'Patients › le même patient › « Consultation » › « Démarrer la consultation ». Pas de nouveau dossier. Nouveau « QR patient » : il redonne son consentement sur son téléphone en quelques secondes.',
   'Mêmes conditions : même moment de la journée, mêmes chaussures, même chaise, même distance du pad au genou, même profil VALD, même cadrage de la photo.',
-  'Le Rapport affiche la trajectoire : une ligne par mesure, l’écart, et un point vert quand le changement dépasse la marge d’erreur de la mesure.',
+  'Mêmes questionnaires : les trois douleurs sur son téléphone et, s’il l’a rempli à J0, le formulaire ODI.',
+  'Le Rapport affiche la trajectoire : une ligne par mesure, l’écart, et un point vert quand le changement dépasse la marge d’erreur (douleur 2 points, ODI 10 points). Le passeport du patient reprend la même page « Vos progrès mesurés ».',
   'Relis les objectifs un par un (atteint, en progrès, stable), ajuste le programme, fixe le rendez-vous suivant.'
  ])}</div>
 </section>
@@ -301,7 +303,9 @@ const REPRO=[
  ['Genou et hanche (DynaMo)','bonne','≥ 20 %','essai à 50 %, 3 essais, même position du pad'],
  ['Quiet Stand (yeux ouverts et fermés)','bonne pour la vitesse','≥ 20 % sur la vitesse','même position des pieds, même consigne'],
  ['Lever sur plateformes','non publiée pour ce test','≥ 20 % ou 10 points','suivi descriptif'],
- ['Posture de profil (photo)','dépend du cadrage','≥ 5°','iPhone vertical à 3 m, hauteur de hanche, même côté, pieds nus']
+ ['Posture de profil (photo)','dépend du cadrage','≥ 5°','iPhone vertical à 3 m, hauteur de hanche, même côté, pieds nus'],
+ ['Douleur (EVA de 0 à 10)','bonne','≥ 2 points','même réglette, notée avant les tests'],
+ ['Incapacité lombaire (ODI)','bonne','≥ 10 points','formulaire officiel, au moins 8 rubriques remplies']
 ];
 const protocole=doc('KŌMØ Motion · Protocole complet',`
 <div class="cover">
@@ -330,7 +334,7 @@ const protocole=doc('KŌMØ Motion · Protocole complet',`
   '<b>Sécurité</b> : les 8 questions de la console, un appui à portée de main pour tout test debout, toi à côté.'
  ])}
  <h4>Matériel</h4>
- <p>DynaMo Plus (poignée et pad), 2 ForceDecks Mini, toise ou ruban mural, chaise de 43 cm, couloir balisé à 0, 4 et 6 m, iPhone avec PULSE et les apps VALD, mur uni pour la photo.</p>
+ <p>DynaMo Plus (poignée et pad), 2 ForceDecks Mini, toise ou ruban mural, chaise de 43 cm, couloir balisé à 0, 4 et 6 m, iPhone avec PULSE et les apps VALD, mur uni pour la photo, formulaires ODI officiels imprimés.</p>
  <div class="block"><p class="kicker">En un coup d’œil</p><h2>Les repères de longévité</h2>
  <p class="intro">Seuils de population : ils orientent le programme, ils ne posent pas de diagnostic.</p>
  ${table(['Mesure','Repère','Objectif','Changement réel à 6 semaines'],SUMMARY.map(([n,id])=>{const L=forStep(id);return [e(n),e(L.ref.replace(', tableau ci-dessous',', tableau dans la fiche du test')),e(L.target),e(L.control)]}),'summary')}</div>
@@ -340,6 +344,21 @@ const protocole=doc('KŌMØ Motion · Protocole complet',`
  <p class="kicker">Complément · début de la station B</p><h2>Photo de profil · posture</h2>
  <p class="intro">Hors des ${N} tests : elle ne bloque ni la fin de la consultation ni l’envoi au patient. La photo n’est conservée nulle part ; seules les mesures, relues par toi, sont enregistrées.</p>
  ${postureCard()}
+</section>
+<section class="part">
+ <p class="kicker">Complément · questionnaire</p><h2>Douleur et incapacité : EVA et ODI</h2>
+ <p class="intro">Hors des ${N} tests, comme la posture. Ils décrivent ce que le patient ressent ; les tests décrivent ce qu’il fait. Les deux ensemble montrent si un soin change la vie quotidienne.</p>
+ ${table(['','Douleur (EVA)','Oswestry (ODI)'],[
+  ['<b>Pour qui</b>','Tous les patients','Douleur lombaire, avec ou sans douleur de jambe'],
+  ['<b>Qui remplit</b>','Le patient, sur son téléphone, en premier','Le patient, sur le formulaire officiel imprimé ; tu reportes ses notes dans la console'],
+  ['<b>Contenu</b>','Trois réglettes de 0 (aucune douleur) à 10 (douleur maximale) : lombaire, membre inférieur, générale','10 rubriques de la vie quotidienne, chacune notée de 0 à 5'],
+  ['<b>Résultat</b>','La note sur 10, telle quelle','Total ÷ (5 × rubriques remplies) × 100, à partir de 8 rubriques : 0–20 % minime, 21–40 % modérée, 41–60 % sévère, au-delà très sévère'],
+  ['<b>Vrai changement</b>','2 points','10 points']
+ ])}
+ ${steps2(['Consigne de l’EVA : « Notez votre douleur en ce moment, de 0, aucune douleur, à 10, douleur maximale. » Le patient touche la note sur son téléphone.',
+  'ODI : pas d’aide pour choisir la phrase. Une rubrique sans objet (vie sexuelle, par exemple) reste vide ; le score se calcule sur les rubriques remplies.',
+  'Au contrôle : mêmes questionnaires, au même moment de la consultation.'])}
+ <p class="small muted">Oswestry Disability Index © Jeremy Fairbank, 1980 · version française validée, utilisée sous licence Mapi Research Trust. Le texte du formulaire n’est pas reproduit ici : il est imprimé à partir du fichier fourni avec la licence. Changements minimaux importants : Ostelo et al., Spine 2008.</p>
 </section>
 <section class="part">
  <p class="kicker">Au contrôle</p><h2>Reproductibilité : ce qui compte comme un vrai changement</h2>

@@ -136,7 +136,8 @@ const lab = [
     ['Photo de profil', 'Alignement de la tête, du tronc, du bassin et du genou ; photo mesurée puis effacée', 'Tablette'],
     ['C · marche', 'Vitesse de marche sur 4 m, départ arrêté, meilleur de deux passages', 'Chronomètre PULSE'],
     ['D · chaise', 'Levers en 30 secondes, d’où la puissance des jambes', 'Chaise de 43 cm'],
-    ['Questionnaire', '22 questions sur la vie quotidienne, la douleur et les habitudes, plus 5 sur la santé', 'Téléphone du patient']
+    ['Questionnaire', '22 questions sur la vie quotidienne, la douleur et les habitudes, plus 5 sur la santé', 'Téléphone du patient'],
+    ['Douleur et incapacité', 'Douleur (EVA de 0 à 10) lombaire, du membre inférieur et générale ; Oswestry (ODI), version française officielle sous licence', 'Téléphone ; formulaire ODI']
   ], [2000, 5638, 2000]),
   spacer(160),
   H2('Ce que le patient reçoit'),
@@ -251,8 +252,8 @@ const next = [
   grid(['Sujet', 'À définir'], [
     ['Convention', 'Durée et inventaire du prêt, assurance du matériel, responsabilité civile professionnelle de chacun, conditions d’utilisation VALD, facturation et TVA.'],
     ['Consentement', 'Ajout d’une case de partage des résultats avec l’équipe médicale HIRO ; consentement de HIRO pour ses soins.'],
-    ['Données', 'Rôles de chacun au sens du RGPD, hébergement de données de santé, durée de conservation, avis du DPO.'],
-    ['Déontologie', 'Relecture juridique de la convention et transmission au conseil départemental de l’Ordre des médecins ; aucune communication publique sans accord commun.'],
+    ['Données', 'Rôles de chacun au sens du RGPD inscrits dans la convention ; hébergement, durée de conservation et registre déjà validés avec le DPO.'],
+    ['Déontologie', 'Convention et consentement relus par notre avocat, avis de l’Ordre des médecins obtenu ; aucune communication publique sans accord commun.'],
     ['Soins', 'Axes ouverts, indications et contre-indications, fiche de traçabilité ; documents réglementaires du PAPIMI.']
   ], [2200, 7438]),
   pageBreak(),
