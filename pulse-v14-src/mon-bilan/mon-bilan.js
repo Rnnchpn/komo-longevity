@@ -2,8 +2,8 @@
 // Ouvert par le QR remis en consultation : le patient remplit le questionnaire pendant les tests,
 // puis retrouve ses résultats et son passeport PDF à la fin du bilan. Pas de compte, pas de nom :
 // le lien porte un jeton personnel de 256 bits (60 jours), retiré de la barre d'adresse dès l'ouverture.
-import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261124-douleur-odi-v1';
-import {STEPS,CONSENT} from '../motion-protocol.mjs?v=20261124-douleur-odi-v1';
+import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261124-compteur-chaise-v1';
+import {STEPS,CONSENT} from '../motion-protocol.mjs?v=20261124-compteur-chaise-v1';
 const EDGE="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test";
 const KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
 const STORE="komo_mon_bilan_v1";
@@ -116,7 +116,7 @@ function reviewCard(){
   '<p class="mb-muted">Vous pouvez fermer cette page et la rouvrir plus tard depuis ce téléphone.</p></div>';
 }
 async function resultsCard(){
- extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261124-douleur-odi-v1");
+ extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261124-compteur-chaise-v1");
  const passport=extras.clinicPassport(answers,view.results||{},new Date(view.completed_at||Date.now()),
   {subject:view.name||view.code||"Mon bilan KŌMØ",real:!!view.patient?.real,patient:view.patient});
  const lp=passport.longevity,zones={priority:"Priorité",consolidate:"À consolider",solid:"Solide",follow:"Suivi",missing:"Non mesuré"};
