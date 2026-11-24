@@ -30,7 +30,10 @@ const answers={ageBand:'60-69',goal:'strength',walk10:'0',stairs:'1',chair:'0',c
  outdoors:'1',breaks:'2'};
 assert.equal(intakeProgress(answers).completed,22);
 assert.equal(INTAKE_GROUPS.filter(g=>!g.optional).length,5,'5 catégories attendues ; « Santé et longévité » est facultative');
-assert.equal(INTAKE_GROUPS.length,6);
+// 24/11/2026 : + « Vos douleurs » (EVA ×3) et « Oswestry (ODI) », facultatifs et non notés.
+assert.equal(INTAKE_GROUPS.length,8);
+assert.deepEqual(INTAKE_GROUPS.filter(g=>g.optional).map(g=>g.id),['health','pain','odi']);
+assert.ok(INTAKE_GROUPS.filter(g=>g.optional).every(g=>g.scored===false),'groupes facultatifs hors de l’indice');
 assert.equal(SCORED_QUESTION_COUNT,20);
 assert.equal(MAX_QUESTIONNAIRE_POINTS,80);
 assert.equal(intakeProgress(answers).completed,22);
