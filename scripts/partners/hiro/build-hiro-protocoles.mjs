@@ -376,3 +376,5 @@ table.trace td:first-child{width:22%}
  <p class="small muted" style="margin-top:6mm">Document de cadrage opérationnel préparé par KŌMØ Longevity pour l’équipe HIRO. Les indications, contre-indications et modalités des soins relèvent des médecins HIRO. Toute diffusion scientifique suppose une qualification réglementaire préalable.</p>
 </section>`);
 await renderPdf(html,OUT,'KŌMØ × HIRO · Parcours mesurés · protocoles communs · v1.0 · '+DATE);
+// Le HTML intermédiaire ne doit pas rester dans le dossier publié (fichier orphelin pour la QA de release).
+await (await import('node:fs/promises')).rm(OUT.replace(/\.pdf$/,'.html'),{force:true});
