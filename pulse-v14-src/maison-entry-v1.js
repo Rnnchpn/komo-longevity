@@ -53,7 +53,7 @@
         <button type="button" class="maison-login-back" data-maison-back="choice">← Revenir aux lieux</button>
         <span class="maison-panel-label">LE BILAN KŌMØ MOTION</span>
         <h2>Une heure en cabinet.<br><em>Rien à installer.</em></h2>
-        <p class="maison-panel-lead">Votre praticien crée votre dossier et conduit treize mesures : marche, équilibre, force de préhension, de genou et de hanche, plateformes de force VALD et questionnaire. Un iPhone fixé sur trépied suit le mouvement, sans enregistrement vidéo. Votre rapport vous est remis à la fin du bilan, puis un contrôle est proposé à 6 et 12 semaines.</p>
+        <p class="maison-panel-lead">Votre praticien crée votre dossier et conduit quatorze mesures : marche, équilibre, force des bras, des genoux et des hanches, plateformes de force VALD et questionnaire. Un iPhone fixé sur trépied suit le mouvement, sans enregistrement vidéo. Votre rapport vous est remis à la fin du bilan, puis un contrôle est proposé à 6 et 12 semaines.</p>
         <div class="maison-account-actions">
           <button class="maison-action-primary" type="button" id="maisonLiveStart">Praticien · se connecter <span>→</span></button>
           <button class="maison-action-secondary" type="button" data-maison-back="choice">Retour aux lieux <span>→</span></button>

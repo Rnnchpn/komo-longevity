@@ -4,7 +4,7 @@
 // Sources des repères : EWGSOP2 (préhension, marche), AWGS 2019 (marche 1,0 m/s), Rikli & Jones / CDC STEADI
 // (lever de chaise 30 s), Araujo BJSM 2022 (appui unipodal 10 s), JOA (Two-Step), VALD (asymétrie > 10 %),
 // Alcazar 2020–2021 (puissance relative au lever de chaise : équation, seuils 2,6 / 2,1 W/kg, MCID).
-import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261124-licences-v1';
+import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261124-flexion-coude-v1';
 export const LONGEVITY_PLAN_VERSION='KOMO_LONGEVITY_PLAN_V1';
 export const ZONES={
  priority:{label:'Priorité',rank:3},
@@ -88,8 +88,10 @@ export function assessCapacities(results={},profile={}){
  const hl=F(results,'dynamo_hip_abd','hip_abd_left_n'),hr=F(results,'dynamo_hip_abd','hip_abd_right_n');
  const fl=F(results,'dynamo_hip_flex','hip_flex_left_n'),fr2=F(results,'dynamo_hip_flex','hip_flex_right_n');
  const kfl=F(results,'dynamo_knee_flex','knee_flex_left_n'),kfr=F(results,'dynamo_knee_flex','knee_flex_right_n');
+ // Flexion du coude (v2.5.0, 24/11/2026) : remplace la préhension ; pas de repère publié, suivi personnel.
+ const el=F(results,'dynamo_elbow_flex','elbow_flex_left_n'),er=F(results,'dynamo_elbow_flex','elbow_flex_right_n');
  // Symétrie et posture
- const lsis=[['Préhension',D(results,'dynamo_grip','lsi_pct')],['Extension de genou',D(results,'dynamo_knee_ext','lsi_pct')],['Flexion de genou',D(results,'dynamo_knee_flex','lsi_pct')],
+ const lsis=[['Préhension',D(results,'dynamo_grip','lsi_pct')],['Flexion du coude',D(results,'dynamo_elbow_flex','lsi_pct')],['Extension de genou',D(results,'dynamo_knee_ext','lsi_pct')],['Flexion de genou',D(results,'dynamo_knee_flex','lsi_pct')],
   ['Flexion de hanche',D(results,'dynamo_hip_flex','lsi_pct')],['Abduction de hanche',D(results,'dynamo_hip_abd','lsi_pct')]].filter(([,v])=>v!==null);
  const asyms=[['Charge debout',qsAsym],['Lever sur plateformes',F(results,'fd_sts','fd_sts_asym_pct')],['Saut vertical',F(results,'fd_cmj','cmj_asym_pct')]].filter(([,v])=>v!==null);
  // Posture : photo de profil (complément 23/11/2026) ou ancien test caméra.
@@ -122,9 +124,11 @@ export function assessCapacities(results={},profile={}){
     measure('Yeux fermés / yeux ouverts',romberg===null?null:fr(romberg,1),'×',romberg===null?'missing':'follow','part de la vue · suivi personnel'),
     measure('Oscillations sur un pied (côté le plus instable)',slsVel===null?null:fr(slsVel,1),'mm/s',slsVel===null?'missing':'follow','essai tenu 30 s · suivi personnel'),
     measure('Asymétrie de charge debout',qsAsym===null?null:fr(qsAsym,1),'%',qsZone,'repère : 10 %'+(qsShare?' · '+qsShare:''))]},
-  {id:'strength',name:'Force musculaire',zone:gripZone!=='missing'?gripZone:[kl,kr,kfl,kfr,fl,fr2,hl,hr].some(x=>x!==null)?'follow':'missing',
-   why:'Chaque 5 kg de force de main en moins est associé à 16 % de mortalité en plus (139 691 personnes suivies). La force se regagne à tout âge.',
-   measures:[measure('Préhension (meilleur côté)',gripKg===null?null:fr(gripKg,1),'kg',gripZone,'repère : '+low+' kg'+sexNote),
+  {id:'strength',name:'Force musculaire',zone:gripZone!=='missing'?gripZone:[kl,kr,kfl,kfr,fl,fr2,hl,hr,el,er].some(x=>x!==null)?'follow':'missing',
+   why:gripKg!==null?'Chaque 5 kg de force de main en moins est associé à 16 % de mortalité en plus (139 691 personnes suivies). La force se regagne à tout âge.':
+    'La force musculaire est associée à l’autonomie et à la longévité. Ces tests n’ont pas de seuil publié : on suit votre progression et l’équilibre entre la droite et la gauche. La force se regagne à tout âge.',
+   measures:[...(gripKg!==null?[measure('Préhension (meilleur côté)',fr(gripKg,1),'kg',gripZone,'repère : '+low+' kg'+sexNote)]:[]),
+    ...(el!==null||er!==null?[measure('Flexion du coude (meilleur côté)',fr(Math.max(el??0,er??0),0),'N','follow','suivi personnel')]:[]),
     measure('Extension de genou (meilleur côté)',kl===null&&kr===null?null:fr(Math.max(kl??0,kr??0),0),'N','follow','suivi personnel'),
     measure('Flexion de genou (meilleur côté)',kfl===null&&kfr===null?null:fr(Math.max(kfl??0,kfr??0),0),'N','follow','suivi personnel'),
     measure('Flexion de hanche (meilleur côté)',fl===null&&fr2===null?null:fr(Math.max(fl??0,fr2??0),0),'N','follow','suivi personnel'),
@@ -230,7 +234,7 @@ function objective(c,ctx){
   return ctx.weak<10?'10 s sur chaque pied':ctx.weak<30?'30 s sur chaque pied':'Garder 30 s de chaque côté';
  }
  if(c.id==='strength'){
-  if(ctx.gripKg===null)return 'Mesurer la préhension';
+  if(ctx.gripKg===null)return 'Force : un gain de plus de 20 % au contrôle';
   return ctx.gripKg<ctx.low?'Préhension ≥ '+ctx.low+' kg':'Préhension : +5 kg, visé à 12 semaines';
  }
  if(c.id==='symmetry'){

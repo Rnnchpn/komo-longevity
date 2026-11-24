@@ -6,8 +6,8 @@
 // aucune valeur n'existe pour nos appareils). En dessous, la mesure est « stable ».
 // mdc : en unité de la mesure · mdcPct : en % de la valeur de départ · cross : seuil dont le franchissement compte.
 // mdcBySex : marge propre au sexe (options.sex), mdc sinon.
-import {stsPowerOf} from './motion-protocol.mjs?v=20261124-licences-v1';
-import {odiScore,evaValue} from './motion-engine/intake-model.mjs?v=20261124-licences-v1';
+import {stsPowerOf} from './motion-protocol.mjs?v=20261124-flexion-coude-v1';
+import {odiScore,evaValue} from './motion-engine/intake-model.mjs?v=20261124-flexion-coude-v1';
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round=(x,d=1)=>Math.round(x*10**d)/10**d;
 const maxOf=(a,b)=>finite(a)&&finite(b)?Math.max(a,b):finite(a)?a:finite(b)?b:null;
@@ -62,6 +62,11 @@ export const TRAJECTORY_METRICS=[
   get:r=>maxOf(F(r,'dynamo_grip','grip_left_n'),F(r,'dynamo_grip','grip_right_n'))},
  {id:'grip_lsi',label:'Préhension · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
   get:r=>D(r,'dynamo_grip','lsi_pct')},
+ // Flexion du coude (v2.5.0) : dynamomètre à main → marge de 20 % comme les autres forces.
+ {id:'elbow_best',label:'Flexion du coude · meilleur côté',unit:'N',decimals:0,better:'higher',mdcPct:20,
+  get:r=>maxOf(F(r,'dynamo_elbow_flex','elbow_flex_left_n'),F(r,'dynamo_elbow_flex','elbow_flex_right_n'))},
+ {id:'elbow_lsi',label:'Flexion du coude · symétrie',unit:'%',decimals:0,better:'higher',mdc:10,
+  get:r=>D(r,'dynamo_elbow_flex','lsi_pct')},
  // Dynamomètre à main, membres inférieurs : erreur de 18 % et plus selon les études → marge de 20 %.
  {id:'knee_best',label:'Extension de genou · meilleur côté',unit:'N',decimals:0,better:'higher',mdcPct:20,
   get:r=>maxOf(F(r,'dynamo_knee_ext','knee_ext_left_n'),F(r,'dynamo_knee_ext','knee_ext_right_n'))},

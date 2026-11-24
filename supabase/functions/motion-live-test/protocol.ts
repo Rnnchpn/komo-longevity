@@ -3,7 +3,7 @@
 export const SPEC:any={
  "protocol": {
   "id": "KOMO_MOTION",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "code": "KOMO_MOTION_V2",
   "mode": "CORE",
   "device_set": [
@@ -119,18 +119,18 @@ export const SPEC:any={
    "method": "HIP_ABD_SEATED_90"
   },
   {
-   "id": "dynamo_grip",
+   "id": "dynamo_elbow_flex",
    "kind": "fields",
    "duration": 0,
    "fields": [
     {
-     "key": "grip_left_n",
+     "key": "elbow_flex_left_n",
      "min": 0,
      "max": 1500,
      "decimals": 1
     },
     {
-     "key": "grip_right_n",
+     "key": "elbow_flex_right_n",
      "min": 0,
      "max": 1500,
      "decimals": 1
@@ -138,8 +138,8 @@ export const SPEC:any={
    ],
    "choices": [],
    "pair": [
-    "grip_left_n",
-    "grip_right_n"
+    "elbow_flex_left_n",
+    "elbow_flex_right_n"
    ]
   },
   {

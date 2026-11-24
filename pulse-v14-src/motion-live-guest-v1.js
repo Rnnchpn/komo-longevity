@@ -10,7 +10,7 @@ const STEPS=[
  ["dynamo_hip_flex","Force de la hanche · flexion","Assis au bord de la table : montez le genou vers le plafond contre l'appareil. Trois essais de chaque côté."],
  ["dynamo_knee_ext","Force du genou","Assis au bord de la table : poussez la jambe vers l'avant contre l'appareil. Trois essais de chaque côté."],
  ["dynamo_hip_abd","Force de la hanche · écartement","Assis au bord de la table : écartez le genou vers l'extérieur contre l'appareil. Trois essais de chaque côté."],
- ["dynamo_grip","Force de la main","Assis, coude à 90° : serrez la poignée le plus fort possible. Trois essais de chaque côté."],
+ ["dynamo_elbow_flex","Force du bras","Assis, coude à 90°, paume vers le haut : poussez vers le haut contre le pad. Trois essais de chaque côté."],
  ["anthropometry","Poids et taille","Pesée sur les plateformes, puis mesure de la taille au mur. L'opérateur saisit les valeurs."],
  ["fd_quiet_stand","Équilibre sur plateformes","Mains sur les hanches, regard devant : restez aussi immobile que possible pendant 30 secondes."],
  ["fd_quiet_stand_ec","Équilibre yeux fermés","Même position, yeux fermés : restez aussi immobile que possible pendant 30 secondes. Le praticien est à côté de vous."],
@@ -47,7 +47,7 @@ function injectStyles(){
  if(document.getElementById("mliveStylesheet"))return;
  const style=document.createElement("link");
  style.id="mliveStylesheet";style.rel="stylesheet";
- style.href=new URL("./motion-live-guest-v1.css?v=20261124-licences-v1",import.meta.url).href;
+ style.href=new URL("./motion-live-guest-v1.css?v=20261124-flexion-coude-v1",import.meta.url).href;
  document.head.append(style);
 }
 function feedback(s){if(el("mliveFeedback"))el("mliveFeedback").textContent=s||""}

@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261124-licences-v1';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261124-flexion-coude-v1';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -25,6 +25,7 @@ const PLAIN={
  dynamo_knee_flex:'Force à l’arrière de la cuisse : elle stabilise le genou pendant la marche.',
  dynamo_hip_abd:'Force pour écarter la jambe : elle garde le bassin stable quand on est sur un pied.',
  dynamo_grip:'Force de la main : un repère de la force générale.',
+ dynamo_elbow_flex:'Force du bras : suivie d’une séance à l’autre, côté par côté.',
  anthropometry:'Vos conditions de mesure, reprises à l’identique au contrôle.',
  fd_quiet_stand:'Debout immobile 30 s : plus vos oscillations sont petites et lentes, plus votre équilibre est économe.',
  fd_quiet_stand_ec:'Le même test les yeux fermés : il montre la part de la vue dans votre équilibre.',
@@ -337,7 +338,7 @@ export async function downloadClinicPassport(report,category='all'){
   txt('ÉVOLUTION',R-3,y,{sz:7.2,bold:true,col:P.white,align:'right'});
   y+=9;
   // Le tableau garde les mesures clés et tout changement réel ; les autres sont résumées dans « En bref ».
-  const KEY=new Set(['eva_back','eva_leg','eva_general','odi','gait_speed','sts_30s','sts_power','balance_min','qs_velocity','qs_ec_velocity','sls_velocity','cmj_power','grip_best','knee_best','head_forward']);
+  const KEY=new Set(['eva_back','eva_leg','eva_general','odi','gait_speed','sts_30s','sts_power','balance_min','qs_velocity','qs_ec_velocity','sls_velocity','cmj_power','grip_best','elbow_best','knee_best','head_forward']);
   const shownRows=t.rows.filter(r=>KEY.has(r.id)||r.notable);
   shownRows.forEach((r,idx)=>{
    if(y>262){page('Votre trajectoire','Vos progrès mesurés (suite)','');y=68;}

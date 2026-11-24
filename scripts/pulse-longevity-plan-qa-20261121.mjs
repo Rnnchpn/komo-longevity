@@ -52,6 +52,8 @@ assert.equal(z({sts:{status:'done',value:13}},{sex:'male',age:62}).legs,'priorit
 assert.equal(z({sts:{status:'done',value:17}},{sex:'male',age:62}).legs,'solid');
 assert.equal(z({sts:{status:'done',value:12}},{sex:'female',age:45}).legs,'consolidate','moins de 60 ans : tranche 60–64');
 assert.equal(z({dynamo_grip:{status:'done',fields:{grip_left_n:250,grip_right_n:260}}},{sex:'male'}).strength,'priority','26,5 kg < 27 kg');
+// v2.5.0 : la flexion du coude remplace la préhension ; sans repère publié, la force est « suivie », jamais « priorité ».
+assert.equal(z({dynamo_elbow_flex:{status:'done',fields:{elbow_flex_left_n:120,elbow_flex_right_n:140},derived:{lsi_pct:85.7}}},{sex:'male'}).strength,'follow','flexion du coude : suivi');
 assert.equal(z({unipodal_left:{status:'done',value:30},unipodal_right:{status:'done',value:30}},{}).balance,'solid');
 assert.equal(z({unipodal_left:{status:'done',value:30},unipodal_right:{status:'done',value:12}},{}).balance,'consolidate');
 assert.equal(z({posture:{status:'done',observation:'apparent_offset'}},{}).symmetry,'consolidate');

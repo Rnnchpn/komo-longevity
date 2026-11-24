@@ -49,7 +49,7 @@ const checks=[
   // Protocole V2 (20/11/2026) : 6 tests iPhone + 7 saisies instrumentées, 13 étapes dans l'ordre officiel.
   // Protocole standardisé (21/11/2026) : étapes définies une seule fois (motion-protocol.mjs), lues par la console et le serveur.
   // v2.4 (22/11/2026) : 14 étapes sans caméra, force assise d'abord, plateformes (yeux fermés, un pied, saut), marche, chaise.
-  ['standard protocol: 14 steps defined once, read by console and server',["dynamo_hip_flex","dynamo_knee_ext","dynamo_knee_flex","dynamo_hip_abd","dynamo_grip","anthropometry","fd_quiet_stand","fd_quiet_stand_ec","fd_sts","unipodal_left","unipodal_right","fd_cmj","gait_4m","sts"].every(id=>
+  ['standard protocol: 14 steps defined once, read by console and server',["dynamo_hip_flex","dynamo_knee_ext","dynamo_knee_flex","dynamo_hip_abd","dynamo_elbow_flex","anthropometry","fd_quiet_stand","fd_quiet_stand_ec","fd_sts","unipodal_left","unipodal_right","fd_cmj","gait_4m","sts"].every(id=>
    protocol.includes("id:'"+id+"'"))&&consult.includes("from './motion-protocol.mjs")&&consult.includes('validateInstrumented')&&
    liveEdge.includes('import { SPEC } from "./protocol.ts"')&&liveEdge.includes('invalid_two_step_attempts')&&
    liveEdge.includes('invalid_instrumented_entry')&&liveEdge.includes('skip_reason_required')],

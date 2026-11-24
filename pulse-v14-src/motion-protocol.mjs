@@ -7,7 +7,7 @@
 
 export const PROTOCOL={
  id:'KOMO_MOTION',
- version:'2.4.0',
+ version:'2.5.0',
  code:'KOMO_MOTION_V2',
  mode:'CORE',
  label:'KŌMØ Motion · consultation supervisée',
@@ -46,7 +46,7 @@ const WALKING_AID=[['none','Aucune'],['cane','Canne'],['walker','Déambulateur']
 // camera : placement d'une caméra pendant la station (null partout depuis v2.4 ; gardé pour Human Track).
 export const STATIONS={
  A:{label:'Force · DynaMo, tout assis',camera:null,
-  place:'Patient assis au bord de la table d’examen, pieds sans contact avec le sol, du début à la fin de la station : flexion de hanche, extension puis flexion de genou, abduction de hanche, puis préhension. Ouvre l’app DynaMo, profil au code PULSE.'},
+  place:'Patient assis au bord de la table d’examen, pieds sans contact avec le sol, du début à la fin de la station : flexion de hanche, extension puis flexion de genou, abduction de hanche, puis flexion du coude. Ouvre l’app DynaMo, profil au code PULSE.'},
  B:{label:'Plateformes ForceDecks · équilibre',camera:null,
   place:'Chaise contre le mur, plateformes juste devant, un appui (mur ou dossier) à portée de main. Pesée sur les plateformes, taille au mur, équilibre debout (yeux ouverts puis fermés), Sit to Stand assis, appui sur un pied, puis saut vertical si le patient est à l’aise. App ForceDecks ouverte, profil au code PULSE.'},
  C:{label:'Marche 4 m',camera:null,
@@ -113,16 +113,20 @@ export const STEPS=[
    {key:'hip_abd_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:2000,decimals:1,vald:'Force max · gauche'},
    {key:'hip_abd_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:2000,decimals:1,vald:'Force max · droite'}
   ]},
- {id:'dynamo_grip',block:'A',kind:'fields',title:'Préhension · DynaMo',short:'Préhension',
-  device:'DynaMo Plus · poignée',trials:'1 essai à 50 % + 3 maximaux par côté',duration:0,dynamo:true,
-  setup:'Toujours assis au bord de la table, coude à 90°, épaule contre le corps, poignet neutre, avant-bras libre. DynaMo Plus avec la poignée de préhension.',
-  script:'« 3, 2, 1 — serrez, serrez, serrez… et relâchez. »',
-  instruction:'Un essai à 50 %, puis 3 essais maximaux par côté en alternant, 30 s de repos. Saisir le meilleur essai valide de chaque côté.',
-  vald:{app:'DynaMo',test:'Grip (préhension)',settings:'Position neutre · 3 essais par côté'},
-  pair:['grip_left_n','grip_right_n'],
+ // v2.5.0 (24/11/2026) : la flexion du coude au DynaMo (palme + pad courbe, protocole VALD « 90° Elbow Flexion –
+ // Wrist Supinated – Seated – Compression ») remplace la préhension, faute de poignée de préhension. Pas de repère
+ // de longévité publié pour ce test : force et symétrie suivies d'une séance à l'autre. La préhension reste lue
+ // dans les anciens bilans.
+ {id:'dynamo_elbow_flex',block:'A',kind:'fields',title:'Flexion du coude · DynaMo',short:'Flexion du coude',
+  device:'DynaMo Plus · palme et pad courbe',trials:'1 essai à 50 % + 3 maximaux par côté',duration:0,dynamo:true,
+  setup:'Toujours assis au bord de la table, bras le long du corps, coude à 90°, avant-bras en supination (paume vers le haut). DynaMo Plus vertical : pad courbe sur la face antérieure de l’avant-bras, juste au-dessus du poignet ; ta main sur la palme. Assis à côté du patient : une main appuie le DynaMo vers le bas, l’autre maintient le bras contre le corps.',
+  script:'« 3, 2, 1 — poussez vers le haut contre le pad, poussez, poussez… et relâchez. »',
+  instruction:'Un essai à 50 %, puis 3 essais maximaux de 3 à 5 s par côté en alternant, 30 s de repos. Tu résistes sans laisser l’avant-bras monter ; le coude reste à 90° contre le corps et l’épaule ne se soulève pas. Saisir le meilleur essai de chaque côté. Si le patient est plus fort que toi, cale ton coude contre ton corps. Arrêt immédiat si douleur.',
+  vald:{app:'DynaMo',test:'Elbow Flexion (flexion du coude) · 90°, supination, assis, compression',settings:'Palme + pad courbe · 3 essais par côté'},
+  pair:['elbow_flex_left_n','elbow_flex_right_n'],
   fields:[
-   {key:'grip_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:1500,decimals:1,vald:'Force max · gauche'},
-   {key:'grip_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:1500,decimals:1,vald:'Force max · droite'}
+   {key:'elbow_flex_left_n',label:'Gauche · meilleur essai',unit:'N',min:0,max:1500,decimals:1,vald:'Force max · gauche'},
+   {key:'elbow_flex_right_n',label:'Droite · meilleur essai',unit:'N',min:0,max:1500,decimals:1,vald:'Force max · droite'}
   ]},
  {id:'anthropometry',block:'B',kind:'fields',title:'Masse et taille',short:'Poids et taille',
   device:'Toise murale · pesée ForceDecks',trials:'1 mesure',duration:0,
@@ -366,7 +370,7 @@ export const toNewton=(value,unit)=>unit==='kg'?round(value*KGF_TO_N,1):value;
 export const fromNewton=(value,unit)=>unit==='kg'?round(value/KGF_TO_N,2):value;
 // Contrôles de vraisemblance NON bloquants : faute de frappe, mauvaise unité, essai non représentatif.
 // Ce ne sont pas des normes cliniques ; aucun message n'interprète le résultat du patient.
-const DYNAMO_LOW_N={dynamo_grip:50,dynamo_knee_ext:40,dynamo_knee_flex:30,dynamo_hip_flex:30,dynamo_hip_abd:30};
+const DYNAMO_LOW_N={dynamo_grip:50,dynamo_elbow_flex:30,dynamo_knee_ext:40,dynamo_knee_flex:30,dynamo_hip_flex:30,dynamo_hip_abd:30};
 export function plausibilityWarnings(stepId,f={}){
  const w=[];
  if(stepId==='anthropometry'&&finite(f.height_cm)&&finite(f.body_mass_kg)){
