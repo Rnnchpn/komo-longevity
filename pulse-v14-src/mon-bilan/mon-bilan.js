@@ -2,8 +2,8 @@
 // Ouvert par le QR remis en consultation : le patient remplit le questionnaire pendant les tests,
 // puis retrouve ses résultats et son passeport PDF à la fin du bilan. Pas de compte, pas de nom :
 // le lien porte un jeton personnel de 256 bits (60 jours), retiré de la barre d'adresse dès l'ouverture.
-import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261123-posture-v1';
-import {STEPS,CONSENT} from '../motion-protocol.mjs?v=20261123-posture-v1';
+import {INTAKE_GROUPS,intakeProgress,validAnswer,QUESTION_COUNT} from '../motion-engine/intake-model.mjs?v=20261124-douleur-odi-v1';
+import {STEPS,CONSENT} from '../motion-protocol.mjs?v=20261124-douleur-odi-v1';
 const EDGE="https://uqlolefsiktbznnymriy.supabase.co/functions/v1/motion-live-test";
 const KEY="sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n";
 const STORE="komo_mon_bilan_v1";
@@ -29,11 +29,20 @@ function saveLabel(){const n=answeredRequired();
 function questionMarkup(q,optional){
  const opts=(Array.isArray(q.options[0])?q.options:q.options.map((l,i)=>[String(i),l]));
  const has=Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id]);
- return '<fieldset class="mb-q'+(has?" is-done":"")+'" data-q="'+esc(q.id)+'"><legend>'+esc(q.label)+(optional?' <span class="mb-muted">· facultatif</span>':'')+'</legend><div class="mb-opts">'+
-  opts.map(([k,l])=>'<label><input type="radio" name="q-'+esc(q.id)+'" value="'+esc(k)+'"'+(answers[q.id]===k?" checked":"")+'><span>'+esc(l)+'</span></label>').join("")+'</div></fieldset>';
+ // EVA : une réglette de 0 à 10, avec ses deux repères.
+ const scale=q.eva?'<div class="mb-eva-ends" aria-hidden="true"><span>Aucune douleur</span><span>Douleur maximale</span></div>':'';
+ return '<fieldset class="mb-q'+(q.eva?" mb-eva":"")+(has?" is-done":"")+'" data-q="'+esc(q.id)+'"><legend>'+esc(q.label)+(optional&&!q.eva?' <span class="mb-muted">· facultatif</span>':'')+'</legend><div class="mb-opts">'+
+  opts.map(([k,l])=>'<label><input type="radio" name="q-'+esc(q.id)+'" value="'+esc(k)+'"'+(answers[q.id]===k?" checked":"")+(q.eva?' aria-label="'+esc(q.label+" : "+k+" sur 10")+'"':'')+'><span>'+esc(l)+'</span></label>').join("")+'</div>'+scale+'</fieldset>';
+}
+// Groupes montrés au patient : la douleur juste après le profil ; l'ODI (saisi par le praticien) n'apparaît pas.
+function patientGroups(){
+ const list=INTAKE_GROUPS.filter(g=>!g.practitionerOnly),pain=list.find(g=>g.eva);
+ if(!pain)return list;
+ const rest=list.filter(g=>g!==pain),at=rest.findIndex(g=>g.id==='profile');
+ rest.splice(at+1,0,pain);return rest;
 }
 function questionnaireMarkup(){
- return INTAKE_GROUPS.map(g=>'<section class="mb-group" id="mbGroup-'+esc(g.id)+'"><h3>'+esc(g.title)+'</h3><p class="mb-sub">'+esc(g.subtitle||"")+'</p>'+
+ return patientGroups().map(g=>'<section class="mb-group" id="mbGroup-'+esc(g.id)+'"><h3>'+esc(g.title)+'</h3><p class="mb-sub">'+esc(g.subtitle||"")+'</p>'+
   g.questions.map(q=>questionMarkup(q,!!g.optional)).join("")+'</section>').join("");
 }
 function bindQuestions(){
@@ -107,7 +116,7 @@ function reviewCard(){
   '<p class="mb-muted">Vous pouvez fermer cette page et la rouvrir plus tard depuis ce téléphone.</p></div>';
 }
 async function resultsCard(){
- extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261123-posture-v1");
+ extras=extras||await import("../motion-live-clinic-extras-v1.js?v=20261124-douleur-odi-v1");
  const passport=extras.clinicPassport(answers,view.results||{},new Date(view.completed_at||Date.now()),
   {subject:view.name||view.code||"Mon bilan KŌMØ",real:!!view.patient?.real,patient:view.patient});
  const lp=passport.longevity,zones={priority:"Priorité",consolidate:"À consolider",solid:"Solide",follow:"Suivi",missing:"Non mesuré"};

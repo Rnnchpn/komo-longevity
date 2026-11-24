@@ -6,7 +6,8 @@
 // aucune valeur n'existe pour nos appareils). En dessous, la mesure est « stable ».
 // mdc : en unité de la mesure · mdcPct : en % de la valeur de départ · cross : seuil dont le franchissement compte.
 // mdcBySex : marge propre au sexe (options.sex), mdc sinon.
-import {stsPowerOf} from './motion-protocol.mjs?v=20261123-posture-v1';
+import {stsPowerOf} from './motion-protocol.mjs?v=20261124-douleur-odi-v1';
+import {odiScore,evaValue} from './motion-engine/intake-model.mjs?v=20261124-douleur-odi-v1';
 const finite=x=>typeof x==='number'&&Number.isFinite(x);
 const round=(x,d=1)=>Math.round(x*10**d)/10**d;
 const maxOf=(a,b)=>finite(a)&&finite(b)?Math.max(a,b):finite(a)?a:finite(b)?b:null;
@@ -17,6 +18,12 @@ const V=(r,step)=>r?.[step]?.status==='done'?r[step]?.value:undefined;
 
 // better: 'higher' | 'lower' | 'neutral'. threshold: changement pertinent publié (même unité).
 export const TRAJECTORY_METRICS=[
+ // Douleur et incapacité déclarées (24/11/2026) : get(results, answers). Changement minimal important :
+ // 2 points sur 10 pour l'EVA, 10 points pour l'ODI (Ostelo 2008).
+ {id:'eva_back',label:'Douleur lombaire (EVA)',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaBack')},
+ {id:'eva_leg',label:'Douleur du membre inférieur (EVA)',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaLeg')},
+ {id:'eva_general',label:'Douleur générale (EVA)',unit:'sur 10',decimals:0,better:'lower',mdc:2,get:(r,a)=>evaValue(a,'evaGeneral')},
+ {id:'odi',label:'Incapacité lombaire (ODI)',unit:'%',decimals:0,better:'lower',mdc:10,get:(r,a)=>odiScore(a||{}).score},
  // 0,1 m/s : changement important (Perera 2006), dans la fourchette des MDC publiés (0,08 à 0,2 m/s).
  {id:'gait_speed',label:'Vitesse de marche (4 m)',unit:'m/s',decimals:2,better:'higher',mdc:0.1,
   get:r=>D(r,'gait_4m','gait_speed_ms')},
@@ -95,7 +102,7 @@ export function buildTrajectory(sessions=[],options={}){
  const done=(Array.isArray(sessions)?sessions:[])
   .filter(x=>x&&x.status==='completed'&&x.progress?.results&&typeof x.progress.results==='object')
   .map(x=>({id:x.id,code:x.display_code||'',date:new Date(x.completed_at||x.updated_at||x.created_at),
-   results:x.progress.results,protocol:x.progress.protocol?.version||null}))
+   results:x.progress.results,answers:x.progress.questionnaire?.answers||{},protocol:x.progress.protocol?.version||null}))
   .filter(x=>!Number.isNaN(x.date.getTime()))
   .sort((a,b)=>a.date-b.date)
   .slice(-(options.max||4));
@@ -129,7 +136,7 @@ export function buildTrajectory(sessions=[],options={}){
  if(new Set(sources).size>1)
   warnings.push('Lever de chaise : comptage vidéo et comptage manuel mélangés selon les séances.');
  const rows=TRAJECTORY_METRICS.map(m=>{
-  const values=done.map(x=>{const v=m.get(x.results);return finite(v)?v:null;});
+  const values=done.map(x=>{const v=m.get(x.results,x.answers);return finite(v)?v:null;});
   const firstIdx=values.findIndex(finite);
   let lastIdx=-1;for(let i=values.length-1;i>=0;i--)if(finite(values[i])){lastIdx=i;break;}
   const available=values.filter(finite).length;
@@ -164,8 +171,8 @@ export function trajectoryHeadline(t){
  const fav=t.rows.filter(r=>r.verdict==='favorable'),def=t.rows.filter(r=>r.verdict==='defavorable');
  const stable=t.rows.filter(r=>r.verdict==='stable'&&r.better!=='neutral').length;
  const span=t.points[0].label+' → '+t.points[t.points.length-1].label;
- return span+' : '+(fav.length?'progrès réel sur '+fav.map(r=>r.label.toLowerCase()).join(', '):'aucun progrès au-delà de la marge d’erreur')+
-  (def.length?' · recul réel sur '+def.map(r=>r.label.toLowerCase()).join(', '):'')+
+ return span+' : '+(fav.length?'progrès réel sur '+fav.map(r=>(r.label.charAt(0).toLowerCase()+r.label.slice(1))).join(', '):'aucun progrès au-delà de la marge d’erreur')+
+  (def.length?' · recul réel sur '+def.map(r=>(r.label.charAt(0).toLowerCase()+r.label.slice(1))).join(', '):'')+
   ' · '+stable+' mesure'+(stable>1?'s':'')+' stable'+(stable>1?'s':'')+' (écart dans la marge d’erreur).';
 }
 export function frDate(iso){

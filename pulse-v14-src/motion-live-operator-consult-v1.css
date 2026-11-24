@@ -830,3 +830,14 @@
 .moc-safety-block{margin:12px 0;padding:12px 14px;border:1px solid #d8d0bf;border-radius:12px;background:#fbfaf6}
 .moc-safety-block ol{margin:8px 0 8px 18px;padding:0;font-size:13px;line-height:1.5}
 .moc-safety-block .moc-safety{margin-top:8px}
+
+/* EVA 0–10 et ODI 0–5 (24/11/2026) : réglettes compactes dans le questionnaire de la console. */
+.moc-questionnaire-all .moc-question-choices.moc-scale{display:grid;gap:4px}
+.moc-questionnaire-all .moc-question-choices.moc-scale-11{grid-template-columns:repeat(11,minmax(0,1fr))}
+.moc-questionnaire-all .moc-question-choices.moc-scale-6{grid-template-columns:repeat(6,minmax(0,1fr));max-width:420px}
+.moc-question-choices.moc-scale .moc-question-choice{position:relative;justify-content:center;min-height:40px;padding:6px 0;font-size:13px;font-weight:600}
+.moc-question-choices.moc-scale .moc-question-choice input{position:absolute;opacity:0;width:1px;height:1px}
+.moc-question-choices.moc-scale .moc-question-choice:has(input:checked){background:#1f3a30;border-color:#1f3a30;color:#fff}
+.moc-question-choices.moc-scale .moc-question-choice:has(input:focus-visible){outline:2px solid #b4925e;outline-offset:2px}
+.moc-scale-ends{display:flex;justify-content:space-between;font-size:11px;color:#7a7f75;margin:5px 2px 0}
+.moc-odi-score{margin:10px 0 4px;padding:10px 12px;border-radius:10px;background:#eef3ee;font-size:13px;color:#263a31}

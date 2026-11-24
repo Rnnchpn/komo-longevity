@@ -1,10 +1,10 @@
 // Questionnaire et rapport PDF de la consultation KŌMØ Motion en cabinet.
 // The physician/operator edits all fields on the desktop; nothing is collected on the iPhone.
 // This module has no access to camera frames, audio or WebRTC signaling.
-import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer} from './motion-engine/intake-model.mjs?v=20261123-posture-v1';
-import {buildClinicPassport,passportTestIds} from './motion-live-clinic-passport-v2.mjs?v=20261123-posture-v1';
-import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js?v=20261123-posture-v1';
-import {clinicRadarMarkup} from './motion-live-clinic-action-plan-v1.mjs?v=20261123-posture-v1';
+import {INTAKE_GROUPS, QUESTION_COUNT, intakeProgress, scoreIntake, validAnswer, odiScore} from './motion-engine/intake-model.mjs?v=20261124-douleur-odi-v1';
+import {buildClinicPassport,passportTestIds} from './motion-live-clinic-passport-v2.mjs?v=20261124-douleur-odi-v1';
+import {downloadClinicPassport} from './motion-live-clinic-passport-pdf-v2.js?v=20261124-douleur-odi-v1';
+import {clinicRadarMarkup} from './motion-live-clinic-action-plan-v1.mjs?v=20261124-douleur-odi-v1';
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -27,6 +27,12 @@ export function questionnairePointsMarkup(answers={}){
  return '<div class="moc-points-head"><strong>'+headline+'</strong><small>'+detail+
   '</small></div>'+(domains?'<div class="moc-point-domains">'+domains+'</div>':'');
 }
+// ODI : score en % dès 8 rubriques renseignées.
+export function odiMarkup(answers={}){
+ const o=odiScore(answers);
+ return o.score===null?'ODI : '+o.answered+' / 10 rubriques ; le score s’affiche à partir de 8.':
+  '<b>ODI : '+o.score+' %</b> · '+esc(o.level)+' · '+o.answered+' / 10 rubriques';
+}
 export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNext,onPrevious,onComplete,onTests,onSave}={}){
  // A single clearly numbered form: all 22 items must remain discoverable.
  const progress=intakeProgress(answers);
@@ -42,13 +48,16 @@ export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNex
      '><span>'+esc(label)+'</span>'+
      (group.scored===false?'':'<small class="moc-answer-points">'+i+' pt</small>')+'</label>';
    }).join('');
+   const scale=question.eva?' moc-scale moc-scale-11':group.odi?' moc-scale moc-scale-6':'';
    return '<fieldset class="moc-question" id="mocQuestion-'+esc(question.id)+'"><legend>'+
     String(index).padStart(2,'0')+'. '+esc(question.label)+'</legend>'+
-    '<div class="moc-question-choices">'+choices+'</div></fieldset>';
+    '<div class="moc-question-choices'+scale+'">'+choices+'</div>'+
+    (question.eva?'<p class="moc-scale-ends"><span>0 · aucune douleur</span><span>10 · douleur maximale</span></p>':'')+'</fieldset>';
   }).join('');
   return '<section class="moc-question-group" id="mocGroup-'+esc(group.id)+'">'+
    '<h4>'+esc(group.title)+'</h4><p class="moc-help">'+esc(group.subtitle)+'</p>'+
    '<div class="moc-question-list">'+questions+'</div>'+
+   (group.odi?'<p class="moc-odi-score" id="mocOdiScore" aria-live="polite">'+odiMarkup(answers)+'</p>':'')+
    '<p class="moc-help">'+esc(group.note)+'</p></section>';
  }).join('');
  root.innerHTML='<section class="moc-test moc-questionnaire moc-questionnaire-all">'+
@@ -74,6 +83,7 @@ export function renderClinicQuestionnaire(root,answers={},page=0,{onChange,onNex
     root.querySelector('#mocIntakeProgress').textContent=
      intakeProgress(answers).completed+' / '+QUESTION_COUNT+' réponses';
     root.querySelector('#mocScoreSummary').innerHTML=questionnairePointsMarkup(answers);
+    const odi=root.querySelector('#mocOdiScore');if(odi)odi.innerHTML=odiMarkup(answers);
     const note=root.querySelector('#mocIntakeState');
     if(note)note.textContent='Enregistrement sur le serveur…';
     onChange?.(answers);

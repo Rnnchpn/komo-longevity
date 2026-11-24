@@ -4,6 +4,10 @@ export const QUESTIONNAIRE_VERSION='KOMO_MOTION_SELF_REPORT_V1';
 const ease=['Aucune difficulté','Une légère difficulté','Une difficulté modérée','Une grande difficulté','Impossible ou évité'];
 const interference=['Jamais','Rarement','Parfois','Souvent','Presque toujours'];
 const frequency=['5 jours ou plus / semaine','3 à 4 jours / semaine','1 à 2 jours / semaine','Moins d’un jour / semaine','Jamais'];
+const EVA_OPTIONS=Array.from({length:11},(_,i)=>[String(i),String(i)]);
+const ODI_OPTIONS=Array.from({length:6},(_,i)=>[String(i),String(i)]);
+export const EVA_IDS=['evaBack','evaLeg','evaGeneral'];
+export const ODI_IDS=Array.from({length:10},(_,i)=>'odi'+(i+1));
 export const INTAKE_GROUPS=[
  {id:'profile',title:'Votre profil',subtitle:'Quelques repères pour comprendre vos attentes.',note:'Les réponses ne sont pas utilisées comme diagnostic.',scored:false,questions:[
    {id:'ageBand',label:'Votre tranche d’âge',options:[['under40','Moins de 40 ans'],['40-49','40 à 49 ans'],['50-59','50 à 59 ans'],['60-69','60 à 69 ans'],['70-79','70 à 79 ans'],['80plus','80 ans ou plus'],['undisclosed','Je préfère ne pas répondre']]},
@@ -46,7 +50,20 @@ export const INTAKE_GROUPS=[
   {id:'sittingHours',label:'Temps passé assis par jour, hors sommeil',options:[['lt6','Moins de 6 heures'],['6to8','De 6 à 8 heures'],['gt8','Plus de 8 heures']]},
   {id:'smoking',label:'Tabac',options:[['never','Je n’ai jamais fumé'],['former','J’ai arrêté'],['current','Je fume']]},
   {id:'medications',label:'Médicaments pris chaque jour, sur ordonnance',options:[['0to2','0 à 2'],['3to4','3 à 4'],['5plus','5 ou plus']]}
- ]}
+ ]},
+ // 24/11/2026 : douleur (EVA de 0 à 10) et ODI. FACULTATIFS : hors des 22 réponses attendues et hors de l'indice.
+ // EVA : douleur moyenne des 7 derniers jours ; changement réel ≥ 2 points (Ostelo 2008).
+ {id:'pain',title:'Vos douleurs',subtitle:'Facultatif : votre douleur moyenne ces 7 derniers jours, de 0 (aucune douleur) à 10 (douleur maximale imaginable).',note:'Échelles visuelles analogiques (EVA) de 0 à 10. Un écart de 2 points ou plus entre deux bilans compte comme un changement réel.',scored:false,optional:true,eva:true,questions:[
+  {id:'evaBack',label:'Douleur lombaire (bas du dos)',options:EVA_OPTIONS,eva:true},
+  {id:'evaLeg',label:'Douleur du membre inférieur (hanche, cuisse, genou, jambe, pied)',options:EVA_OPTIONS,eva:true},
+  {id:'evaGeneral',label:'Douleur générale',options:EVA_OPTIONS,eva:true}
+ ]},
+ // ODI (Oswestry Disability Index) : 10 rubriques notées de 0 à 5, saisies par le praticien d'après le formulaire
+ // officiel (version française validée, Vogler 2008 ; licence Mapi Research Trust). Le texte des réponses n'est
+ // pas reproduit ici. Score = total / (5 × rubriques renseignées) × 100, calculé à partir de 8 rubriques.
+ {id:'odi',title:'Oswestry (ODI)',subtitle:'Retentissement d’une douleur du dos ou de la jambe : 10 rubriques notées de 0 à 5, d’après le formulaire officiel rempli par le patient.',note:'Formulaire ODI officiel, version française validée (licence Mapi Research Trust). Score en % : 0–20 incapacité minime, 21–40 modérée, 41–60 sévère, au-delà de 60 très sévère. Changement réel : 10 points.',scored:false,optional:true,practitionerOnly:true,odi:true,
+  questions:['Intensité de la douleur','Soins personnels (se laver, s’habiller)','Soulever des charges','Marche','Position assise','Position debout','Sommeil','Vie sexuelle','Vie sociale','Déplacements et voyages']
+   .map((label,i)=>({id:'odi'+(i+1),label,options:ODI_OPTIONS}))}
 ];
 // Questions attendues (les groupes facultatifs n'entrent ni dans la complétude ni dans l'indice).
 export const REQUIRED_GROUPS=INTAKE_GROUPS.filter(g=>!g.optional);
@@ -104,3 +121,14 @@ export function questionnaireFocus(answers){
  return [...SCORING_GROUPS].sort((a,b)=>s.domains[a.id]-s.domains[b.id]).slice(0,2)
  .map(g=>({domain:g.id,label:g.title,value:s.domains[g.id]}));
 }
+
+// ODI en % (Fairbank 2000) : total / (5 × rubriques renseignées) × 100 ; non calculé sous 8 rubriques.
+export function odiScore(answers={}){
+ const vals=ODI_IDS.map(id=>answers[id]).filter(v=>typeof v==='string'&&/^[0-5]$/.test(v)).map(Number);
+ if(vals.length<8)return {score:null,answered:vals.length,total:10};
+ const score=Math.round(vals.reduce((a,b)=>a+b,0)/(5*vals.length)*100);
+ const level=score<=20?'incapacité minime':score<=40?'incapacité modérée':score<=60?'incapacité sévère':'incapacité très sévère';
+ return {score,answered:vals.length,total:10,level};
+}
+// EVA (0–10) : valeur entière ou null.
+export const evaValue=(answers,id)=>typeof answers?.[id]==='string'&&/^(10|[0-9])$/.test(answers[id])?Number(answers[id]):null;

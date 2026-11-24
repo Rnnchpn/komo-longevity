@@ -27,6 +27,13 @@ fieldset.mb-q.is-done{border-color:#b9cbbd;background:#fbfdfb}
 .mb-opts label{display:flex;align-items:center;gap:10px;min-height:46px;padding:10px 12px;border:1px solid #e1d9ca;border-radius:12px;font-size:15px;color:#2f4237;background:#fdfbf6;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .mb-opts input{width:20px;height:20px;accent-color:#224337;flex:none}
 .mb-opts label:has(input:checked){border-color:#224337;background:#e8efe9;font-weight:650}
+/* EVA 0–10 (24/11/2026) : une réglette de 11 cases, la case choisie en vert. */
+.mb-eva .mb-opts{grid-template-columns:repeat(11,1fr);gap:3px}
+.mb-eva .mb-opts label{position:relative;justify-content:center;min-height:44px;padding:0;border-radius:8px;font-size:15px;font-variant-numeric:tabular-nums}
+.mb-eva .mb-opts input{position:absolute;opacity:0;width:1px;height:1px;margin:0}
+.mb-eva .mb-opts label:has(input:checked){background:#224337;border-color:#224337;color:#fff}
+.mb-eva .mb-opts label:has(input:focus-visible){outline:2px solid #b4925e;outline-offset:2px}
+.mb-eva-ends{display:flex;justify-content:space-between;font-size:12px;color:#7a7f75;margin:6px 2px 8px}
 .mb-save{position:sticky;bottom:0;margin:10px -18px 0;padding:12px 18px max(12px,env(safe-area-inset-bottom));background:rgba(238,236,230,.96);border-top:1px solid #d9d0bf;font-size:13px;font-weight:600;color:#3d5446;backdrop-filter:blur(8px)}
 .mb-save[data-state="error"]{color:#9b4a32}
 .mb-btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border:0;border-radius:14px;background:#224337;color:#fff;font:700 16px/1 Inter,system-ui,sans-serif;cursor:pointer;margin:6px 0 10px;text-decoration:none}

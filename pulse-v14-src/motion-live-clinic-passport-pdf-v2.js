@@ -1,6 +1,6 @@
 // KŌMØ Motion Passport — vos capacités, vos 3 priorités, votre programme maison et vos objectifs à 6 semaines.
 // Browser-only jsPDF output. Never send questionnaire, camera or PDF to a server.
-import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261123-posture-v1';
+import {CLINIC_PASSPORT_VERSION} from './motion-live-clinic-passport-v2.mjs?v=20261124-douleur-odi-v1';
 const cleaner=value=>String(value??'')
  .replace(/[Ōōø]/g,'o').replace(/œ/g,'oe').replace(/Œ/g,'OE')
  .replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–‑−]/g,'-').replace(/²/g,'2').replace(/³/g,'3')
@@ -321,8 +321,8 @@ export async function downloadClinicPassport(report,category='all'){
   // En bref : les progrès réels en clair, avant le tableau complet.
   const fav=t.rows.filter(r=>r.verdict==='favorable'),def=t.rows.filter(r=>r.verdict==='defavorable');
   const stable=t.rows.filter(r=>r.verdict==='stable'&&r.better!=='neutral').length;
-  const brief=[fav.length?'Progrès réels : '+fav.map(r=>r.label.toLowerCase()+' ('+r.deltaDisplay+(r.unit?' '+r.unit:'')+')').join(', ')+'.':'Pas encore de progrès au-delà de la marge d’erreur de la mesure.',
-   def.length?'À surveiller : '+def.map(r=>r.label.toLowerCase()+' ('+r.deltaDisplay+(r.unit?' '+r.unit:'')+')').join(', ')+'.':'',
+  const brief=[fav.length?'Progrès réels : '+fav.map(r=>(r.label.charAt(0).toLowerCase()+r.label.slice(1))+' ('+r.deltaDisplay+(r.unit?' '+r.unit:'')+')').join(', ')+'.':'Pas encore de progrès au-delà de la marge d’erreur de la mesure.',
+   def.length?'À surveiller : '+def.map(r=>(r.label.charAt(0).toLowerCase()+r.label.slice(1))+' ('+r.deltaDisplay+(r.unit?' '+r.unit:'')+')').join(', ')+'.':'',
    stable+' mesure'+(stable>1?'s':'')+' stable'+(stable>1?'s':'')+' : l’écart reste dans la marge d’erreur.',
    'Le tableau montre les mesures principales ; toutes les valeurs sont dans les pages « Vos résultats ».'].filter(Boolean).join(' ');
   font(8.4);const bl=pdf.splitTextToSize(cleaner(brief),C-14).length;
@@ -337,7 +337,7 @@ export async function downloadClinicPassport(report,category='all'){
   txt('ÉVOLUTION',R-3,y,{sz:7.2,bold:true,col:P.white,align:'right'});
   y+=9;
   // Le tableau garde les mesures clés et tout changement réel ; les autres sont résumées dans « En bref ».
-  const KEY=new Set(['gait_speed','sts_30s','sts_power','balance_min','qs_velocity','qs_ec_velocity','sls_velocity','cmj_power','grip_best','knee_best','head_forward']);
+  const KEY=new Set(['eva_back','eva_leg','eva_general','odi','gait_speed','sts_30s','sts_power','balance_min','qs_velocity','qs_ec_velocity','sls_velocity','cmj_power','grip_best','knee_best','head_forward']);
   const shownRows=t.rows.filter(r=>KEY.has(r.id)||r.notable);
   shownRows.forEach((r,idx)=>{
    if(y>262){page('Votre trajectoire','Vos progrès mesurés (suite)','');y=68;}
@@ -359,7 +359,7 @@ export async function downloadClinicPassport(report,category='all'){
    y+=8;
   });
   y+=4;
-  words('* Changement réel : au-delà de la marge d’erreur de la mesure (marche 0,1 m/s ; chaise 2 levers ; préhension 50 N ; franchissement des 10 s sur un pied ; posture 5° ; environ 20 % pour les autres forces et les plateformes). Un écart plus petit est affiché stable : il peut venir de la mesure elle-même.',
+  words('* Changement réel : au-delà de la marge d’erreur de la mesure (douleur 2 points ; ODI 10 points ; marche 0,1 m/s ; chaise 2 levers ; préhension 50 N ; franchissement des 10 s sur un pied ; posture 5° ; environ 20 % pour les autres forces et les plateformes). Un écart plus petit est affiché stable : il peut venir de la mesure elle-même.',
    M,y,C,{sz:7,lh:3.4,max:3,col:P.muted});
   y+=12;
   (t.warnings||[]).forEach(w=>{y=words('Comparabilite : '+w,M,y,C,{sz:7,lh:3.4,max:2,col:[150,70,50]})+1;});
@@ -517,6 +517,7 @@ export async function downloadClinicPassport(report,category='all'){
     if(Number.isFinite(g.score))txt(fmt(g.points)+'/'+fmt(g.maxPoints)+
       ' pts  |  '+fmt(g.score)+'/100',R,y,
       {sz:8,bold:true,align:'right',col:P.gold});
+    else if(g.headline)txt(g.headline,R,y,{sz:8,bold:true,align:'right',col:P.dark});
     y+=8;
     for(const item of g.items){
      serial+=1;
@@ -532,7 +533,7 @@ export async function downloadClinicPassport(report,category='all'){
      const afterAnswer=words(item.answer,M+11,answerY,C-43,
       {sz:8.2,lh:3.8,max:2,bold:true,
        col:item.answer==='Non renseigné'?P.muted:P.dark});
-     txt(item.maxPoints===null?'Contexte':item.points===null?
+     txt(item.tag?item.tag:item.maxPoints===null?'Contexte':item.points===null?
        '- / 4 pts':fmt(item.points)+' / 4 pts',R,answerY,
       {sz:7.8,bold:true,align:'right',col:P.gold});
      y=afterAnswer+3.1;

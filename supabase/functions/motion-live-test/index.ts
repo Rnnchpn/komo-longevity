@@ -114,7 +114,10 @@ const ANSWER_CHOICES:Record<string,string[]>={
  ageBand:["under40","40-49","50-59","60-69","70-79","80plus","undisclosed"],
  goal:["independence","walk","strength","confidence","general"],
  falls12:["0","1","2plus"],activityMinutes:["lt60","60to149","150plus"],sittingHours:["lt6","6to8","gt8"],
- smoking:["never","former","current"],medications:["0to2","3to4","5plus"]
+ smoking:["never","former","current"],medications:["0to2","3to4","5plus"],
+ // 24/11/2026 : douleur (EVA 0–10 : lombaire, membre inférieur, générale) et ODI (10 rubriques notées 0–5).
+ ...Object.fromEntries(["evaBack","evaLeg","evaGeneral"].map(k=>[k,Array.from({length:11},(_,i)=>String(i))])),
+ ...Object.fromEntries(Array.from({length:10},(_,i)=>["odi"+(i+1),["0","1","2","3","4","5"]]))
 };
 const RATING_KEYS=new Set(["walk10","stairs","chair","carry","bend","obstacle","turn","stand",
  "pain","fatigue","fear","avoid","sleep","stress","recovered","qol",

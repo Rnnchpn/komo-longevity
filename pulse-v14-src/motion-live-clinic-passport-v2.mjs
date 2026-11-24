@@ -1,9 +1,9 @@
 // Clinical-style *descriptive* passport for supervised KŌMØ Motion demos.
 // No medical diagnosis, validated score, biological age or survival estimate.
-import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints} from './motion-engine/intake-model.mjs?v=20261123-posture-v1';
-import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs?v=20261123-posture-v1';
-import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText,STEP_IDS} from './motion-protocol.mjs?v=20261123-posture-v1';
-import {buildLongevityPlan,profileFrom,ZONES} from './motion-longevity-plan.mjs?v=20261123-posture-v1';
+import {INTAKE_GROUPS,intakeProgress,scoreIntake,validAnswer,questionPoints,odiScore} from './motion-engine/intake-model.mjs?v=20261124-douleur-odi-v1';
+import {buildClinicActionPlan} from './motion-live-clinic-action-plan-v1.mjs?v=20261124-douleur-odi-v1';
+import {instrumentedRows,acquisitionConditions,MOTION_PROTOCOL_VERSION,PROTOCOL,stepById,POSTURE_OPTIONS,skippedText,STEP_IDS} from './motion-protocol.mjs?v=20261124-douleur-odi-v1';
+import {buildLongevityPlan,profileFrom,ZONES} from './motion-longevity-plan.mjs?v=20261124-douleur-odi-v1';
 export const CLINIC_PASSPORT_VERSION='KOMO_MOTION_CLINIC_PASSPORT_V2';
 const T=[
  {id:'sts',name:stepById('sts').title,short:'Force fonctionnelle',unit:'levers / 30 s',
@@ -104,14 +104,16 @@ export function buildClinicPassport(answers={},results={},options={}){
   points:questionnaire.domainPoints[g.id]?.points??null,
   maxPoints:questionnaire.domainPoints[g.id]?.maximum??null,
   weight:questionnaire.domainPoints[g.id]?.weight??null,
-  items:g.questions.map(q=>({
-   id:q.id,question:q.label,
-   points:g.scored===false?null:questionPoints(q,answers[q.id]),
-   maxPoints:g.scored===false?null:4,
-   answer:Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id])?
-    (Array.isArray(q.options[0])?q.options.find(([key])=>key===answers[q.id])?.[1]:
-     q.options[Number(answers[q.id])]):'Non renseigné'
-  }))
+  // EVA et ODI (24/11/2026) : la valeur sur son échelle, et le score ODI en tête du groupe.
+  headline:g.odi?(o=>o.score===null?'ODI non calculé ('+o.answered+'/10)':'ODI '+o.score+' % · '+o.level)(odiScore(answers)):null,
+  items:g.questions.map(q=>{
+   const ok=Object.hasOwn(answers,q.id)&&validAnswer(q,answers[q.id]);
+   return {id:q.id,question:q.label,tag:q.eva?'EVA':g.odi?'ODI':null,
+    points:g.scored===false?null:questionPoints(q,answers[q.id]),
+    maxPoints:g.scored===false?null:4,
+    answer:!ok?'Non renseigné':q.eva?answers[q.id]+' / 10':g.odi?answers[q.id]+' / 5':
+     (Array.isArray(q.options[0])?q.options.find(([key])=>key===answers[q.id])?.[1]:q.options[Number(answers[q.id])])};
+  })
  }));
  const messages=[];
  messages.push(stepsDone+' étapes sur '+stepsTotal+' disposent d’un résultat'+(stepsDone===stepsTotal?
