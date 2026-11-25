@@ -1118,6 +1118,186 @@
       ],
       "destination": "https://pulse.komolongevity.com/",
       "permanent": false
+    },
+    {
+      "source": "/fr/reserver-motion-cannes",
+      "destination": "/fr/reserver/?lieu=cannes",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/fr/reserver-motion-cannes/:path*",
+      "destination": "/fr/reserver/?lieu=cannes",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/motion-cannes",
+      "destination": "/fr/cannes/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/motion-cannes/:path*",
+      "destination": "/fr/cannes/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/motion-monaco",
+      "destination": "/fr/monaco/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/reserver",
+      "destination": "/fr/reserver/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/fr/motion",
+      "destination": "/fr/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/fr/motion/:path*",
+      "destination": "/fr/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/motion",
+      "destination": "/en/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/motion/:path*",
+      "destination": "/en/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/es/motion",
+      "destination": "/es/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
+    },
+    {
+      "source": "/es/motion/:path*",
+      "destination": "/es/",
+      "permanent": false,
+      "missing": [
+        {
+          "type": "host",
+          "value": "pulse.komolongevity.com"
+        },
+        {
+          "type": "host",
+          "value": "experience.komolongevity.com"
+        }
+      ]
     }
   ],
   "alias": [

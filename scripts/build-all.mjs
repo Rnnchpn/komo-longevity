@@ -313,8 +313,11 @@ const scripts = [
   'scripts/pulse-retire-legacy-generations.mjs',
   // 22/11/2026 : couches du site public (sélecteur flottant v1, pages Motion = protocole PULSE, scripts valides).
   'scripts/komo-site-layers-cleanup-20261122.mjs',
-  // 20/11/2026 : retrait de l'offre Online et du Motion Age — doit rester la toute dernière passe.
-  'scripts/komo-retire-motion-online-20261120.mjs'
+  // 20/11/2026 : retrait de l'offre Online et du Motion Age.
+  'scripts/komo-retire-motion-online-20261120.mjs',
+  // 25/11/2026 : refonte du site public (accueil, réservation, Monaco, Cannes en FR/EN/ES).
+  // Toute dernière passe : remplace les accueils générés par les couches historiques.
+  'scripts/komo-refonte-riviera-20261125.mjs'
 ];
 
 for (const script of scripts) {
