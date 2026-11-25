@@ -6,7 +6,7 @@ import { readFile, writeFile, readdir, stat } from 'node:fs/promises';
 import { join, relative, dirname, posix } from 'node:path';
 
 const root=join(process.cwd(),'pulse-v14-src');
-const ENTRIES=['index.html','camera/index.html','commencer/index.html','mon-bilan/index.html','manifest.webmanifest','camera/manifest.webmanifest'];
+const ENTRIES=['index.html','camera/index.html','commencer/index.html','mon-bilan/index.html','flash/index.html','hiro-motion-first/index.html','manifest.webmanifest','camera/manifest.webmanifest'];
 const TEXT=/\.(html|js|mjs|css|webmanifest)$/;
 const REF=/(["'`(])((?:\.\.?\/)[A-Za-z0-9_./-]+\.(?:m?js|css|svg|webmanifest|png|webp|jpg))(?:\?v=[A-Za-z0-9_.-]+)?(?=["'`)])/g;
 
