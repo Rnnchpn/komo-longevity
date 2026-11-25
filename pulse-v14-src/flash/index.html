@@ -94,6 +94,9 @@ input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
    <div style="margin-top:12px"><label>Sexe (repères par âge et sexe)</label>
     <div class="seg" role="group" aria-label="Repère de préhension"><button type="button" data-sex="female" aria-pressed="true">Femme</button><button type="button" data-sex="male" aria-pressed="false">Homme</button></div>
    </div>
+   <div style="margin-top:12px"><label>Langue du rapport</label>
+    <div class="seg" role="group" aria-label="Langue du rapport"><button type="button" data-lang="fr" aria-pressed="true">Français</button><button type="button" data-lang="en" aria-pressed="false">English</button></div>
+   </div>
    <label class="check"><input type="checkbox" id="consent" checked><span>La personne accepte de recevoir son mini-rapport par e-mail.</span></label>
    <p class="hint">3 questions avant de commencer : douleur en ce moment ? opération ou blessure récente ? vertiges ? Un oui, et on saute le test concerné.</p>
    <p id="patientError" class="status err" role="alert" hidden></p>
@@ -146,6 +149,7 @@ input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
  <section id="stepReport" hidden>
   <article class="card report" id="report"></article>
   <div class="card no-print">
+   <div style="margin-bottom:12px"><span class="hint" style="margin-right:8px">Langue du rapport</span><div class="seg" role="group" aria-label="Langue du rapport"><button type="button" data-report-lang="fr">Français</button><button type="button" data-report-lang="en">English</button></div></div>
    <p id="sendStatus" class="status" role="status" style="margin-top:0"></p>
    <div class="actions">
     <button type="button" class="btn" id="sendAuto">Envoyer par e-mail</button>
@@ -158,7 +162,7 @@ input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
 </main>
 
 <script type="module">
-import { flashModel, flashText, ageAt, ZONE_LABEL, BOOKING_URL, SOURCES } from './flash-norms.mjs?v=20261125-flash-normes-v1';
+import { flashModel, flashText, ageAt, fmtDate, REPORT, BOOKING_URL } from './flash-norms.mjs?v=20261125-flash-bilingue-v1';
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const FLASH_ENDPOINT=SUPABASE_URL+'/functions/v1/flash-report';
@@ -177,7 +181,7 @@ const fr=(x,d=1)=>x==null?'—':x.toLocaleString('fr-FR',{minimumFractionDigits:
 const uid=()=>(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2));
 
 let C=null; // consultation en cours
-let sex='female',unit='N',emailReady=false;
+let sex='female',lang='fr',unit='N',emailReady=false;
 
 // ── Liste de la soirée (cet appareil uniquement) ──
 const loadEvening=()=>{try{return JSON.parse(localStorage.getItem(STORE)||'[]')||[]}catch{return []}};
@@ -211,8 +215,11 @@ async function checkEmail(){
 }
 
 // ── Étape 1 ──
+const setLang=v=>{lang=v==='en'?'en':'fr';document.querySelectorAll('[data-lang]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.lang===lang)))};
+document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+document.querySelectorAll('[data-report-lang]').forEach(b=>b.onclick=()=>{if(!C)return;C.lang=b.dataset.reportLang==='en'?'en':'fr';upsertEvening(C);showReport()});
 document.querySelectorAll('[data-sex]').forEach(b=>b.onclick=()=>{sex=b.dataset.sex;document.querySelectorAll('[data-sex]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
-function fillPatient(c){$('#firstName').value=c.firstName||'';$('#lastName').value=c.lastName||'';$('#phone').value=c.phone||'';$('#email').value=c.email||'';$('#birthDate').value=c.birthDate||'';$('#consent').checked=!!c.consent;sex=c.sex||'female';document.querySelectorAll('[data-sex]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.sex===sex)))}
+function fillPatient(c){setLang(c.lang);$('#firstName').value=c.firstName||'';$('#lastName').value=c.lastName||'';$('#phone').value=c.phone||'';$('#email').value=c.email||'';$('#birthDate').value=c.birthDate||'';$('#consent').checked=!!c.consent;sex=c.sex||'female';document.querySelectorAll('[data-sex]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.sex===sex)))}
 function show(id){['#stepPatient','#stepTests','#stepReport'].forEach(s=>$(s).hidden=s!==id);window.scrollTo(0,0)}
 $('#patientForm').onsubmit=e=>{
  e.preventDefault();
@@ -222,7 +229,7 @@ $('#patientForm').onsubmit=e=>{
  if(!birthDate||ageAt(birthDate)==null){err.textContent='Indique la date de naissance (adulte de 18 à 100 ans) : les repères dépendent de l’âge.';err.hidden=false;return}
  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){err.textContent='L’adresse e-mail semble incomplète.';err.hidden=false;return}
  if(!email&&!phone){err.textContent='Ajoute au moins un téléphone ou un e-mail pour pouvoir la recontacter.';err.hidden=false;return}
- C=Object.assign(C||{id:uid(),createdAt:new Date().toISOString(),values:{},sent:null},{firstName,lastName,phone,email,consent,sex,birthDate});
+ C=Object.assign(C||{id:uid(),createdAt:new Date().toISOString(),values:{},sent:null},{firstName,lastName,phone,email,consent,sex,birthDate,lang});
  $('#testsTitle').textContent='Tests · '+firstName;
  upsertEvening(C);show('#stepTests');
 };
@@ -273,18 +280,22 @@ $('#finish').onclick=()=>{
 
 // ── Mini-rapport ──
 const ageOf=c=>ageAt(c.birthDate,c.createdAt);
-const model=c=>flashModel(c.values||{},c.sex,ageOf(c));
-const dateText=c=>new Date(c.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+const RL=c=>c.lang==='en'?'en':'fr';
+const R=c=>REPORT[RL(c)];
+const model=c=>flashModel(c.values||{},c.sex,ageOf(c),RL(c));
+const dateText=c=>fmtDate(c.createdAt,RL(c));
 const signature='KŌMØ Longevity';
 function qrSvg(){return '<svg viewBox="-2 -2 '+(QR_SIZE+4)+' '+(QR_SIZE+4)+'" role="img" aria-label="QR code de réservation" shape-rendering="crispEdges"><rect x="-2" y="-2" width="'+(QR_SIZE+4)+'" height="'+(QR_SIZE+4)+'" fill="#fff"/><path d="'+QR_PATH+'" fill="#1c342a"/></svg>'}
 function showReport(){
- const m=model(C),age=ageOf(C);
- $('#report').innerHTML='<h1>Votre mini-bilan KŌMØ Motion</h1><p class="meta">'+esc(C.firstName+' '+(C.lastName||''))+(age!=null?' · '+age+' ans':'')+' · '+esc(dateText(C))+' · 5 minutes, 3 tests</p>'
-  +m.measures.map(x=>'<div class="m"><div class="row"><div><div class="name">'+esc(x.name)+'</div><div class="val">'+esc(x.value)+'</div></div><span class="badge z-'+x.zone+'">'+ZONE_LABEL[x.zone]+'</span></div><div class="norm">'+esc(x.norm)+'</div><div class="mean z-line-'+x.zone+'">'+esc(x.meaning)+'</div></div>').join('')
-  +'<div class="focus">'+(m.strength?'<p><b>Votre point fort ce soir :</b> '+esc(m.strength.name.toLowerCase())+'.</p>':'')
-  +(m.focus?'<p><b>À regarder de plus près :</b> '+esc(m.focus.name.toLowerCase())+'.</p>':'<p>Tout est solide ce soir : le bilan complet fixe votre point de départ et suit votre trajectoire.</p>')+'</div>'
-  +'<div class="book"><div><h3>Aller plus loin : le bilan complet</h3><p style="margin:6px 0 10px">14 mesures en une heure, un passeport de mouvement et un programme de 6 semaines, avec des contrôles à 6 et 12 semaines.</p><a class="btn" href="'+BOOKING_URL+'" target="_blank" rel="noopener">Réserver mon bilan complet</a></div>'+qrSvg()+'</div>'
-  +'<p class="fine">Mesures de démonstration réalisées en 5 minutes : elles ne constituent pas un diagnostic médical. '+esc(SOURCES)+'</p>';
+ const m=model(C),age=ageOf(C),T=R(C);
+ $('#report').setAttribute('lang',RL(C));
+ document.querySelectorAll('[data-report-lang]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.reportLang===RL(C))));
+ $('#report').innerHTML='<h1>'+esc(T.title)+'</h1><p class="meta">'+esc(T.meta(C.firstName+' '+(C.lastName||''),age,dateText(C)))+'</p>'
+  +m.measures.map(x=>'<div class="m"><div class="row"><div><div class="name">'+esc(x.name)+'</div><div class="val">'+esc(x.value)+'</div></div><span class="badge z-'+x.zone+'">'+esc(T.zone[x.zone])+'</span></div><div class="norm">'+esc(x.norm)+'</div><div class="mean z-line-'+x.zone+'">'+esc(x.meaning)+'</div></div>').join('')
+  +'<div class="focus">'+(m.strength?'<p><b>'+esc(T.strength)+'</b> '+esc(m.strength.name.toLowerCase())+'.</p>':'')
+  +(m.focus?'<p><b>'+esc(T.focus)+'</b> '+esc(m.focus.name.toLowerCase())+'.</p>':'<p>'+esc(T.allSolid)+'</p>')+'</div>'
+  +'<div class="book"><div><h3>'+esc(T.bookTitle)+'</h3><p style="margin:6px 0 10px">'+esc(T.bookText)+'</p><a class="btn" href="'+BOOKING_URL+'" target="_blank" rel="noopener">'+esc(T.bookCta)+'</a></div>'+qrSvg()+'</div>'
+  +'<p class="fine">'+esc(T.disclaimer+' '+T.sources)+'</p>';
  fillTests(C.values||{});
  const st=$('#sendStatus');
  st.className='status'+(C.sent==='auto'?' ok':'');
@@ -297,7 +308,7 @@ function showReport(){
 async function sendAuto(){
  const st=$('#sendStatus'),btn=$('#sendAuto');btn.disabled=true;st.className='status';st.textContent='Envoi en cours…';
  try{
-  await callFlash({action:'send',consultationId:C.id,resend:C.sent==='auto',date:C.createdAt,age:ageOf(C),
+  await callFlash({action:'send',consultationId:C.id,resend:C.sent==='auto',date:C.createdAt,age:ageOf(C),lang:RL(C),
    patient:{firstName:C.firstName,lastName:C.lastName||'',email:C.email},values:C.values,sex:C.sex});
   C.sent='auto';upsertEvening(C);st.className='status ok';st.textContent='✓ Rapport envoyé à '+C.email+'.';btn.textContent='Renvoyer par e-mail';
  }catch(e){st.className='status err';st.textContent='Envoi impossible ('+e.code+'). Utilise « Ouvrir dans Gmail ».'}
@@ -308,8 +319,8 @@ $('#sendAuto').onclick=sendAuto;
 // ── Gmail : l'app Gmail sur iPad et iPhone, sinon Gmail dans le navigateur ──
 $('#sendGmail').onclick=()=>{
  if(!C||!C.email)return;
- const subject='Votre mini-bilan KŌMØ Motion du '+dateText(C);
- const body=flashText(C,model(C),dateText(C),signature);
+ const subject=R(C).subject(dateText(C));
+ const body=flashText(C,model(C),dateText(C),signature,ageOf(C));
  const web='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(C.email)+'&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  if(C.sent!=='auto'){C.sent='mail';upsertEvening(C)}
@@ -323,21 +334,21 @@ $('#sendGmail').onclick=()=>{
 const pdfClean=t=>String(t??'').replace(/Ō/g,'O').replace(/ō/g,'o').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–]/g,'-').replace(/[•]/g,'-').replace(/≥/g,'>=').replace(/≤/g,'<=').replace(/[^\x20-\x7e\xa0-\xff·]/g,' ');
 async function buildPdf(){
  const {jsPDF}=await import('https://esm.sh/jspdf@4.2.1');
- const m=model(C),age=ageOf(C),doc=new jsPDF({unit:'mm',format:'a4'});
+ const m=model(C),age=ageOf(C),T=R(C),doc=new jsPDF({unit:'mm',format:'a4'});
  const W=210,X=18,TW=W-2*X,ink=[28,52,42],muted=[107,111,102],line=[226,217,202];
  const zc={solid:[[47,107,74],[228,239,231]],consolidate:[[138,90,18],[246,236,217]],priority:[[155,52,38],[246,225,220]],reference:[[74,90,106],[231,236,241]]};
  let y=20;
  const page=need=>{if(y+need>282){doc.addPage();y=20}};
  const text=(t,size,color,style,maxW)=>{doc.setFont('helvetica',style||'normal');doc.setFontSize(size);doc.setTextColor(...(color||ink));const rows=doc.splitTextToSize(pdfClean(t),maxW||TW);page(rows.length*size*0.42+1);doc.text(rows,X,y);y+=rows.length*size*0.42;return rows.length};
  doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(...ink);doc.text('KOMØ',X,y);y+=12;
- text('MINI-BILAN · KOMØ MOTION',8,muted,'bold');y+=3;
- doc.setFont('times','normal');doc.setFontSize(22);doc.setTextColor(...ink);doc.text(pdfClean('Votre mini-bilan du '+dateText(C)),X,y);y+=8;
- text(C.firstName+' '+(C.lastName||'')+(age!=null?' · '+age+' ans':'')+' · 5 minutes, 3 tests',10,muted);y+=4;
+ text(T.eyebrow,8,muted,'bold');y+=3;
+ doc.setFont('times','normal');doc.setFontSize(22);doc.setTextColor(...ink);doc.text(pdfClean(T.heading(dateText(C))),X,y);y+=8;
+ text(T.meta(C.firstName+' '+(C.lastName||''),age,dateText(C)),10,muted);y+=4;
  for(const x of m.measures){
   doc.setFont('helvetica','normal');doc.setFontSize(9);
   const need=8+doc.splitTextToSize(pdfClean(x.norm),TW).length*4+doc.splitTextToSize(pdfClean(x.meaning),TW-4).length*4+10;page(need);
   doc.setDrawColor(...line);doc.line(X,y,W-X,y);y+=6;
-  const [fg,bg]=zc[x.zone],lab=pdfClean(ZONE_LABEL[x.zone]);doc.setFont('helvetica','bold');doc.setFontSize(8);const bw=doc.getTextWidth(lab)+6;
+  const [fg,bg]=zc[x.zone],lab=pdfClean(T.zone[x.zone]);doc.setFont('helvetica','bold');doc.setFontSize(8);const bw=doc.getTextWidth(lab)+6;
   doc.setFillColor(...bg);doc.roundedRect(W-X-bw,y-4,bw,6,3,3,'F');doc.setTextColor(...fg);doc.text(lab,W-X-bw+3,y);
   text(x.name,11,ink,'bold',TW-bw-4);y+=1;text(x.value,11,ink,'normal',TW-bw-4);y+=1.5;
   text(x.norm,9,[63,74,66]);y+=1;
@@ -345,25 +356,25 @@ async function buildPdf(){
   y+=4;
  }
  page(30);doc.setFillColor(245,241,234);
- const fs=[(m.strength?'Votre point fort ce soir : '+m.strength.name.toLowerCase()+'.':null),(m.focus?'À regarder de plus près : '+m.focus.name.toLowerCase()+'.':'Tout est solide ce soir : le bilan complet fixe votre point de départ.')].filter(Boolean);
+ const fs=[(m.strength?T.strength+' '+m.strength.name.toLowerCase()+'.':null),(m.focus?T.focus+' '+m.focus.name.toLowerCase()+'.':T.allSolid)].filter(Boolean);
  doc.roundedRect(X,y,TW,6+fs.length*5.5,3,3,'F');y+=6.5;fs.forEach(f=>{text(f,10,ink,'bold');y+=1.3});y+=6;
  page(46);const by=y;doc.setFillColor(227,235,226);doc.roundedRect(X,by,TW,42,3,3,'F');y=by+9;
- doc.setFont('times','normal');doc.setFontSize(15);doc.setTextColor(...ink);doc.text('Aller plus loin : le bilan complet',X+5,y);y+=6;
+ doc.setFont('times','normal');doc.setFontSize(15);doc.setTextColor(...ink);doc.text(pdfClean(T.bookTitle),X+5,y);y+=6;
  doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(63,74,66);
- doc.text(doc.splitTextToSize(pdfClean('14 mesures en une heure, un passeport de mouvement et un programme de 6 semaines, avec des contrôles à 6 et 12 semaines.'),TW-48),X+5,y);y+=13;
- doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);doc.textWithLink('Réserver mon bilan complet : '+BOOKING_URL.replace('https://',''),X+5,y,{url:BOOKING_URL});
+ doc.text(doc.splitTextToSize(pdfClean(T.bookText),TW-48),X+5,y);y+=13;
+ doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);doc.textWithLink(pdfClean(T.bookCta+(RL(C)==='en'?': ':' : ')+BOOKING_URL.replace('https://','')),X+5,y,{url:BOOKING_URL});
  // QR code
  const q=34,qx=W-X-q-4,qy=by+4,mod=q/QR_SIZE;doc.setFillColor(255,255,255);doc.rect(qx-1.5,qy-1.5,q+3,q+3,'F');doc.setFillColor(...ink);
  for(const mm of QR_PATH.matchAll(/M(\d+) (\d+)/g))doc.rect(qx+Number(mm[1])*mod,qy+Number(mm[2])*mod,mod+0.02,mod+0.02,'F');
- y=by+50;text('Mesures de démonstration réalisées en 5 minutes : elles ne constituent pas un diagnostic médical. '+SOURCES,7.5,muted);
- return new File([doc.output('blob')],pdfClean(('mini-bilan-komo-'+C.firstName+'-'+(C.lastName||'')).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''))+'.pdf',{type:'application/pdf'});
+ y=by+50;text(T.disclaimer+' '+T.sources,7.5,muted);
+ return new File([doc.output('blob')],pdfClean((T.file+'-'+C.firstName+'-'+(C.lastName||'')).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''))+'.pdf',{type:'application/pdf'});
 }
 $('#savePdf').onclick=async()=>{
  const btn=$('#savePdf'),st=$('#sendStatus');btn.disabled=true;const label=btn.textContent;btn.textContent='Création du PDF…';
  try{
   const file=await buildPdf();
   if(navigator.canShare&&navigator.canShare({files:[file]})){
-   try{await navigator.share({files:[file],title:'Mini-bilan KŌMØ Motion'});st.className='status ok';st.textContent='✓ PDF prêt : choisis Gmail, Fichiers ou AirDrop.';return}
+   try{await navigator.share({files:[file],title:R(C).title});st.className='status ok';st.textContent='✓ PDF prêt : choisis Gmail, Fichiers ou AirDrop.';return}
    catch(e){if(e&&e.name==='AbortError')return}
   }
   const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();
@@ -373,7 +384,7 @@ $('#savePdf').onclick=async()=>{
 };
 $('#editTests').onclick=()=>show('#stepTests');
 $('#nextPatient').onclick=()=>{
- C=null;$('#patientForm').reset();$('#consent').checked=true;
+ C=null;$('#patientForm').reset();$('#consent').checked=true;setLang('fr');
  ['gripR','gripL','qsVel','qsAsym','slsL','slsR'].forEach(id=>$('#'+id).value='');$('#qsSide').value='';
  ['slsLclock','slsRclock'].forEach(id=>$('#'+id).textContent='0,0 s');
  unit='N';document.querySelectorAll('[data-unit]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.unit==='N')));updateKg();
@@ -385,7 +396,7 @@ renderEvening();checkEmail();
 try{const pre=JSON.parse(sessionStorage.getItem('komo_flash_prefill')||'null');
  if(pre&&pre.firstName){sessionStorage.removeItem('komo_flash_prefill');
   C={id:uid(),createdAt:new Date().toISOString(),values:{},sent:null,firstName:String(pre.firstName).slice(0,60),lastName:String(pre.lastName||'').slice(0,60),
-   phone:String(pre.phone||'').slice(0,30),email:String(pre.email||'').slice(0,120),consent:!!pre.consent,sex:pre.sex==='male'?'male':'female',birthDate:/^\d{4}-\d{2}-\d{2}$/.test(pre.birthDate||'')?pre.birthDate:''};
+   phone:String(pre.phone||'').slice(0,30),email:String(pre.email||'').slice(0,120),consent:!!pre.consent,sex:pre.sex==='male'?'male':'female',birthDate:/^\d{4}-\d{2}-\d{2}$/.test(pre.birthDate||'')?pre.birthDate:'',lang:pre.lang==='en'?'en':'fr'};
   fillPatient(C);upsertEvening(C);$('#testsTitle').textContent='Tests · '+C.firstName;show(ageAt(C.birthDate)==null?'#stepPatient':'#stepTests')}}catch{}
 </script>
 </body>

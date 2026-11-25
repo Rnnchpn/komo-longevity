@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261125-flash-normes-v1';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261125-flash-bilingue-v1';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -603,6 +603,10 @@ function patients(){
         <label><input type="radio" name="sex" value="female" checked><span>Femme</span></label>
         <label><input type="radio" name="sex" value="male"><span>Homme</span></label>
       </fieldset>
+      <fieldset class="op-sex-choice op-sex-choice--two"><legend>Langue du rapport</legend>
+        <label><input type="radio" name="lang" value="fr" checked><span>Français</span></label>
+        <label><input type="radio" name="lang" value="en"><span>English</span></label>
+      </fieldset>
       <label class="op-create-patient-attestation"><input type="checkbox" name="consent" checked> La personne accepte de recevoir son mini-rapport par e-mail.</label>
       <p id="opFlashCreateFeedback" class="op-create-patient-feedback" aria-live="polite"></p>
       <button class="button primary" type="submit">Démarrer la consultation flash →</button>
@@ -674,7 +678,7 @@ function patients(){
       email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)?['email','Vérifie l’adresse e-mail.']:
       !email&&!phone?['phone','Ajoute un téléphone ou un e-mail pour pouvoir la recontacter.']:null;
     if(missing){if(fb)fb.textContent=missing[1];flashForm.querySelector('[name="'+missing[0]+'"]')?.focus();return}
-    try{sessionStorage.setItem('komo_flash_prefill',JSON.stringify({firstName,lastName,phone,email,birthDate,sex:fd.get('sex')==='male'?'male':'female',consent:!!fd.get('consent')}))}catch{}
+    try{sessionStorage.setItem('komo_flash_prefill',JSON.stringify({firstName,lastName,phone,email,birthDate,lang:fd.get('lang')==='en'?'en':'fr',sex:fd.get('sex')==='male'?'male':'female',consent:!!fd.get('consent')}))}catch{}
     location.href='./flash/';
   });
   if(createToggle&&createForm){
@@ -794,7 +798,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261125-flash-normes-v1');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261125-flash-bilingue-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -1124,7 +1128,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261125-flash-normes-v1');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261125-flash-bilingue-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         practitioner:String(S.profile?.display_name||[S.profile?.first_name,S.profile?.last_name].filter(Boolean).join(' ')||'').trim(),
