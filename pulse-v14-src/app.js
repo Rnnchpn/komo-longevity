@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261125-consultation-flash-v1';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261125-flash-normes-v1';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -595,10 +595,11 @@ function patients(){
       <div class="op-create-patient-grid op-flash-grid">
         <label><span>Prénom</span><input name="first_name" autocomplete="off" autocapitalize="words" maxlength="60"></label>
         <label><span>Nom</span><input name="last_name" autocomplete="off" autocapitalize="words" maxlength="60"></label>
+        <label><span>Date de naissance</span><input name="birth_date" type="date" min="1920-01-01" max="${new Date().getFullYear()-18}-12-31"></label>
         <label><span>Téléphone</span><input name="phone" type="tel" inputmode="tel" autocomplete="off" maxlength="30"></label>
         <label><span>E-mail</span><input name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="120" placeholder="pour lui envoyer son mini-rapport"></label>
       </div>
-      <fieldset class="op-sex-choice op-sex-choice--two"><legend>Repère de préhension</legend>
+      <fieldset class="op-sex-choice op-sex-choice--two"><legend>Sexe (repères par âge et sexe)</legend>
         <label><input type="radio" name="sex" value="female" checked><span>Femme</span></label>
         <label><input type="radio" name="sex" value="male"><span>Homme</span></label>
       </fieldset>
@@ -666,12 +667,14 @@ function patients(){
     event.preventDefault();
     const fd=new FormData(flashForm),fb=$('#opFlashCreateFeedback');
     const firstName=String(fd.get('first_name')||'').trim(),lastName=String(fd.get('last_name')||'').trim();
-    const phone=String(fd.get('phone')||'').trim(),email=String(fd.get('email')||'').trim().toLowerCase();
+    const phone=String(fd.get('phone')||'').trim(),email=String(fd.get('email')||'').trim().toLowerCase(),birthDate=String(fd.get('birth_date')||'');
+    const by=Number(birthDate.slice(0,4)),thisYear=new Date().getFullYear();
     const missing=!firstName?['first_name','Indique le prénom.']:
+      !(/^\d{4}-\d{2}-\d{2}$/.test(birthDate)&&by>=thisYear-100&&by<=thisYear-18)?['birth_date','Indique la date de naissance : les repères dépendent de l’âge.']:
       email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)?['email','Vérifie l’adresse e-mail.']:
       !email&&!phone?['phone','Ajoute un téléphone ou un e-mail pour pouvoir la recontacter.']:null;
     if(missing){if(fb)fb.textContent=missing[1];flashForm.querySelector('[name="'+missing[0]+'"]')?.focus();return}
-    try{sessionStorage.setItem('komo_flash_prefill',JSON.stringify({firstName,lastName,phone,email,sex:fd.get('sex')==='male'?'male':'female',consent:!!fd.get('consent')}))}catch{}
+    try{sessionStorage.setItem('komo_flash_prefill',JSON.stringify({firstName,lastName,phone,email,birthDate,sex:fd.get('sex')==='male'?'male':'female',consent:!!fd.get('consent')}))}catch{}
     location.href='./flash/';
   });
   if(createToggle&&createForm){
@@ -791,7 +794,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261125-consultation-flash-v1');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261125-flash-normes-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -1121,7 +1124,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261125-consultation-flash-v1');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261125-flash-normes-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         practitioner:String(S.profile?.display_name||[S.profile?.first_name,S.profile?.last_name].filter(Boolean).join(' ')||'').trim(),

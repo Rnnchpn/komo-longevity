@@ -58,6 +58,9 @@ input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
 .m .name{font-weight:600;color:var(--ink)}
 .m .val{font-variant-numeric:tabular-nums;color:var(--ink);margin-top:2px}
 .m .why{font-size:14px;color:var(--muted);margin-top:4px}
+.m .norm{font-size:14px;color:var(--ink2);margin-top:6px}
+.m .mean{font-size:14px;color:var(--ink2);margin-top:4px;padding-left:10px;border-left:3px solid var(--line)}
+.m .mean.z-line-priority{border-left-color:var(--bad)}.m .mean.z-line-consolidate{border-left-color:var(--warn)}.m .mean.z-line-solid{border-left-color:var(--good)}
 .focus{background:var(--sand);border-radius:12px;padding:12px 14px;margin:12px 0}
 .focus p{margin:4px 0}
 .book{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;background:var(--sage);border-radius:12px;padding:14px 16px;margin-top:12px}
@@ -84,10 +87,11 @@ input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
    <div class="grid">
     <label>Prénom<input type="text" id="firstName" required maxlength="60" autocapitalize="words"></label>
     <label>Nom<input type="text" id="lastName" maxlength="60" autocapitalize="words"></label>
+    <label>Date de naissance<input type="date" id="birthDate" min="1920-01-01"></label>
     <label>Téléphone<input type="tel" id="phone" maxlength="30" inputmode="tel"></label>
     <label>E-mail<input type="email" id="email" maxlength="120" inputmode="email" autocapitalize="off" spellcheck="false"></label>
    </div>
-   <div style="margin-top:12px"><label>Repère de préhension</label>
+   <div style="margin-top:12px"><label>Sexe (repères par âge et sexe)</label>
     <div class="seg" role="group" aria-label="Repère de préhension"><button type="button" data-sex="female" aria-pressed="true">Femme</button><button type="button" data-sex="male" aria-pressed="false">Homme</button></div>
    </div>
    <label class="check"><input type="checkbox" id="consent" checked><span>La personne accepte de recevoir son mini-rapport par e-mail.</span></label>
@@ -145,8 +149,8 @@ input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
    <p id="sendStatus" class="status" role="status" style="margin-top:0"></p>
    <div class="actions">
     <button type="button" class="btn" id="sendAuto">Envoyer par e-mail</button>
-    <a class="btn secondary" id="sendMail" href="#">Ouvrir dans Mail</a>
-    <button type="button" class="btn secondary" id="printReport">Imprimer / PDF</button>
+    <button type="button" class="btn secondary" id="sendGmail">Ouvrir dans Gmail</button>
+    <button type="button" class="btn secondary" id="savePdf">Enregistrer le PDF</button>
    </div>
    <div class="actions" style="margin-top:14px"><button type="button" class="btn secondary" id="editTests">← Corriger les valeurs</button><button type="button" class="btn" id="nextPatient">Consultation suivante</button></div>
   </div>
@@ -154,15 +158,12 @@ input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
 </main>
 
 <script type="module">
+import { flashModel, flashText, ageAt, ZONE_LABEL, BOOKING_URL, SOURCES } from './flash-norms.mjs?v=20261125-flash-normes-v1';
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
 const FLASH_ENDPOINT=SUPABASE_URL+'/functions/v1/flash-report';
-const BOOKING_URL='https://rdv-consultation.vercel.app';
 const STORE='komo-flash-evening-v1';
 const KGF=9.80665;
-const GRIP_LOW={female:16,male:27};
-const ZONE_LABEL={solid:'Solide',consolidate:'À consolider',priority:'Priorité',reference:'Repère personnel'};
-const RANK={priority:0,consolidate:1,reference:2,solid:3};
 const QR_SIZE=29;
 const QR_PATH='M0 0h1v1h-1zM1 0h1v1h-1zM2 0h1v1h-1zM3 0h1v1h-1zM4 0h1v1h-1zM5 0h1v1h-1zM6 0h1v1h-1zM9 0h1v1h-1zM11 0h1v1h-1zM12 0h1v1h-1zM14 0h1v1h-1zM17 0h1v1h-1zM18 0h1v1h-1zM19 0h1v1h-1zM22 0h1v1h-1zM23 0h1v1h-1zM24 0h1v1h-1zM25 0h1v1h-1zM26 0h1v1h-1zM27 0h1v1h-1zM28 0h1v1h-1zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h1v1h-1zM9 1h1v1h-1zM13 1h1v1h-1zM18 1h1v1h-1zM19 1h1v1h-1zM20 1h1v1h-1zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM3 2h1v1h-1zM4 2h1v1h-1zM6 2h1v1h-1zM10 2h1v1h-1zM11 2h1v1h-1zM12 2h1v1h-1zM15 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h1v1h-1zM25 2h1v1h-1zM26 2h1v1h-1zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h1v1h-1zM3 3h1v1h-1zM4 3h1v1h-1zM6 3h1v1h-1zM11 3h1v1h-1zM13 3h1v1h-1zM18 3h1v1h-1zM22 3h1v1h-1zM24 3h1v1h-1zM25 3h1v1h-1zM26 3h1v1h-1zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h1v1h-1zM3 4h1v1h-1zM4 4h1v1h-1zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM11 4h1v1h-1zM12 4h1v1h-1zM13 4h1v1h-1zM16 4h1v1h-1zM17 4h1v1h-1zM18 4h1v1h-1zM19 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM25 4h1v1h-1zM26 4h1v1h-1zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM11 5h1v1h-1zM12 5h1v1h-1zM14 5h1v1h-1zM15 5h1v1h-1zM18 5h1v1h-1zM19 5h1v1h-1zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h1v1h-1zM1 6h1v1h-1zM2 6h1v1h-1zM3 6h1v1h-1zM4 6h1v1h-1zM5 6h1v1h-1zM6 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM25 6h1v1h-1zM26 6h1v1h-1zM27 6h1v1h-1zM28 6h1v1h-1zM9 7h1v1h-1zM10 7h1v1h-1zM12 7h1v1h-1zM15 7h1v1h-1zM17 7h1v1h-1zM19 7h1v1h-1zM20 7h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM12 8h1v1h-1zM17 8h1v1h-1zM18 8h1v1h-1zM24 8h1v1h-1zM27 8h1v1h-1zM0 9h1v1h-1zM1 9h1v1h-1zM3 9h1v1h-1zM5 9h1v1h-1zM7 9h1v1h-1zM8 9h1v1h-1zM11 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM16 9h1v1h-1zM20 9h1v1h-1zM21 9h1v1h-1zM22 9h1v1h-1zM25 9h1v1h-1zM28 9h1v1h-1zM1 10h1v1h-1zM2 10h1v1h-1zM3 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM17 10h1v1h-1zM22 10h1v1h-1zM23 10h1v1h-1zM24 10h1v1h-1zM26 10h1v1h-1zM27 10h1v1h-1zM28 10h1v1h-1zM0 11h1v1h-1zM5 11h1v1h-1zM7 11h1v1h-1zM8 11h1v1h-1zM9 11h1v1h-1zM10 11h1v1h-1zM13 11h1v1h-1zM14 11h1v1h-1zM15 11h1v1h-1zM17 11h1v1h-1zM19 11h1v1h-1zM22 11h1v1h-1zM24 11h1v1h-1zM27 11h1v1h-1zM1 12h1v1h-1zM4 12h1v1h-1zM6 12h1v1h-1zM11 12h1v1h-1zM12 12h1v1h-1zM14 12h1v1h-1zM17 12h1v1h-1zM20 12h1v1h-1zM21 12h1v1h-1zM22 12h1v1h-1zM25 12h1v1h-1zM27 12h1v1h-1zM28 12h1v1h-1zM1 13h1v1h-1zM2 13h1v1h-1zM4 13h1v1h-1zM5 13h1v1h-1zM9 13h1v1h-1zM11 13h1v1h-1zM14 13h1v1h-1zM16 13h1v1h-1zM17 13h1v1h-1zM18 13h1v1h-1zM20 13h1v1h-1zM21 13h1v1h-1zM22 13h1v1h-1zM23 13h1v1h-1zM25 13h1v1h-1zM28 13h1v1h-1zM0 14h1v1h-1zM3 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM9 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM17 14h1v1h-1zM20 14h1v1h-1zM21 14h1v1h-1zM25 14h1v1h-1zM27 14h1v1h-1zM28 14h1v1h-1zM3 15h1v1h-1zM4 15h1v1h-1zM8 15h1v1h-1zM10 15h1v1h-1zM12 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM19 15h1v1h-1zM20 15h1v1h-1zM22 15h1v1h-1zM25 15h1v1h-1zM27 15h1v1h-1zM0 16h1v1h-1zM1 16h1v1h-1zM5 16h1v1h-1zM6 16h1v1h-1zM7 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM16 16h1v1h-1zM17 16h1v1h-1zM21 16h1v1h-1zM22 16h1v1h-1zM23 16h1v1h-1zM25 16h1v1h-1zM27 16h1v1h-1zM28 16h1v1h-1zM1 17h1v1h-1zM3 17h1v1h-1zM4 17h1v1h-1zM11 17h1v1h-1zM12 17h1v1h-1zM13 17h1v1h-1zM16 17h1v1h-1zM17 17h1v1h-1zM20 17h1v1h-1zM21 17h1v1h-1zM22 17h1v1h-1zM25 17h1v1h-1zM26 17h1v1h-1zM28 17h1v1h-1zM0 18h1v1h-1zM2 18h1v1h-1zM4 18h1v1h-1zM6 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM11 18h1v1h-1zM14 18h1v1h-1zM16 18h1v1h-1zM20 18h1v1h-1zM21 18h1v1h-1zM24 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM1 19h1v1h-1zM2 19h1v1h-1zM3 19h1v1h-1zM7 19h1v1h-1zM9 19h1v1h-1zM10 19h1v1h-1zM13 19h1v1h-1zM14 19h1v1h-1zM16 19h1v1h-1zM17 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM25 19h1v1h-1zM27 19h1v1h-1zM0 20h1v1h-1zM3 20h1v1h-1zM5 20h1v1h-1zM6 20h1v1h-1zM8 20h1v1h-1zM9 20h1v1h-1zM11 20h1v1h-1zM12 20h1v1h-1zM14 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM17 20h1v1h-1zM19 20h1v1h-1zM20 20h1v1h-1zM21 20h1v1h-1zM22 20h1v1h-1zM23 20h1v1h-1zM24 20h1v1h-1zM8 21h1v1h-1zM12 21h1v1h-1zM14 21h1v1h-1zM17 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM26 21h1v1h-1zM27 21h1v1h-1zM28 21h1v1h-1zM0 22h1v1h-1zM1 22h1v1h-1zM2 22h1v1h-1zM3 22h1v1h-1zM4 22h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM12 22h1v1h-1zM13 22h1v1h-1zM16 22h1v1h-1zM17 22h1v1h-1zM18 22h1v1h-1zM19 22h1v1h-1zM20 22h1v1h-1zM22 22h1v1h-1zM24 22h1v1h-1zM25 22h1v1h-1zM27 22h1v1h-1zM28 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM15 23h1v1h-1zM16 23h1v1h-1zM17 23h1v1h-1zM20 23h1v1h-1zM24 23h1v1h-1zM25 23h1v1h-1zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h1v1h-1zM3 24h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM10 24h1v1h-1zM11 24h1v1h-1zM12 24h1v1h-1zM15 24h1v1h-1zM16 24h1v1h-1zM17 24h1v1h-1zM20 24h1v1h-1zM21 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM28 24h1v1h-1zM0 25h1v1h-1zM2 25h1v1h-1zM3 25h1v1h-1zM4 25h1v1h-1zM6 25h1v1h-1zM9 25h1v1h-1zM10 25h1v1h-1zM16 25h1v1h-1zM17 25h1v1h-1zM23 25h1v1h-1zM24 25h1v1h-1zM26 25h1v1h-1zM27 25h1v1h-1zM28 25h1v1h-1zM0 26h1v1h-1zM2 26h1v1h-1zM3 26h1v1h-1zM4 26h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM14 26h1v1h-1zM17 26h1v1h-1zM18 26h1v1h-1zM19 26h1v1h-1zM20 26h1v1h-1zM21 26h1v1h-1zM23 26h1v1h-1zM24 26h1v1h-1zM25 26h1v1h-1zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM10 27h1v1h-1zM11 27h1v1h-1zM12 27h1v1h-1zM13 27h1v1h-1zM15 27h1v1h-1zM16 27h1v1h-1zM17 27h1v1h-1zM18 27h1v1h-1zM20 27h1v1h-1zM21 27h1v1h-1zM23 27h1v1h-1zM24 27h1v1h-1zM27 27h1v1h-1zM0 28h1v1h-1zM1 28h1v1h-1zM2 28h1v1h-1zM3 28h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM9 28h1v1h-1zM11 28h1v1h-1zM12 28h1v1h-1zM13 28h1v1h-1zM16 28h1v1h-1zM17 28h1v1h-1zM19 28h1v1h-1zM20 28h1v1h-1zM21 28h1v1h-1zM24 28h1v1h-1zM25 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1z';
 
@@ -211,16 +212,17 @@ async function checkEmail(){
 
 // ── Étape 1 ──
 document.querySelectorAll('[data-sex]').forEach(b=>b.onclick=()=>{sex=b.dataset.sex;document.querySelectorAll('[data-sex]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
-function fillPatient(c){$('#firstName').value=c.firstName||'';$('#lastName').value=c.lastName||'';$('#phone').value=c.phone||'';$('#email').value=c.email||'';$('#consent').checked=!!c.consent;sex=c.sex||'female';document.querySelectorAll('[data-sex]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.sex===sex)))}
+function fillPatient(c){$('#firstName').value=c.firstName||'';$('#lastName').value=c.lastName||'';$('#phone').value=c.phone||'';$('#email').value=c.email||'';$('#birthDate').value=c.birthDate||'';$('#consent').checked=!!c.consent;sex=c.sex||'female';document.querySelectorAll('[data-sex]').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.sex===sex)))}
 function show(id){['#stepPatient','#stepTests','#stepReport'].forEach(s=>$(s).hidden=s!==id);window.scrollTo(0,0)}
 $('#patientForm').onsubmit=e=>{
  e.preventDefault();
- const firstName=$('#firstName').value.trim(),lastName=$('#lastName').value.trim(),phone=$('#phone').value.trim(),email=$('#email').value.trim(),consent=$('#consent').checked;
+ const firstName=$('#firstName').value.trim(),lastName=$('#lastName').value.trim(),phone=$('#phone').value.trim(),email=$('#email').value.trim(),consent=$('#consent').checked,birthDate=$('#birthDate').value;
  const err=$('#patientError');err.hidden=true;
  if(!firstName){err.textContent='Le prénom est nécessaire pour le rapport.';err.hidden=false;return}
+ if(!birthDate||ageAt(birthDate)==null){err.textContent='Indique la date de naissance (adulte de 18 à 100 ans) : les repères dépendent de l’âge.';err.hidden=false;return}
  if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){err.textContent='L’adresse e-mail semble incomplète.';err.hidden=false;return}
  if(!email&&!phone){err.textContent='Ajoute au moins un téléphone ou un e-mail pour pouvoir la recontacter.';err.hidden=false;return}
- C=Object.assign(C||{id:uid(),createdAt:new Date().toISOString(),values:{},sent:null},{firstName,lastName,phone,email,consent,sex});
+ C=Object.assign(C||{id:uid(),createdAt:new Date().toISOString(),values:{},sent:null},{firstName,lastName,phone,email,consent,sex,birthDate});
  $('#testsTitle').textContent='Tests · '+firstName;
  upsertEvening(C);show('#stepTests');
 };
@@ -270,76 +272,105 @@ $('#finish').onclick=()=>{
 };
 
 // ── Mini-rapport ──
-function model(c){
- const v=c.values||{},out=[];
- if(v.gripR!=null||v.gripL!=null){
-  const best=Math.max(v.gripR??0,v.gripL??0),low=GRIP_LOW[c.sex]||16;
-  const zone=best<low?'priority':best<low+5?'consolidate':'solid';
-  let sym=null,symZone=null;
-  if(v.gripR!=null&&v.gripL!=null){sym=Math.round(Math.min(v.gripR,v.gripL)/Math.max(v.gripR,v.gripL)*100);symZone=sym<80?'priority':sym<90?'consolidate':'solid'}
-  out.push({key:'grip',name:'Force de préhension',zone,
-   value:'Droite '+fr(v.gripR)+' kg · Gauche '+fr(v.gripL)+' kg',
-   why:'La force de la main reflète la force musculaire de tout le corps.'});
-  if(sym!=null)out.push({key:'symmetry',name:'Symétrie des mains',zone:symZone,value:fr(sym,0)+' % (main la plus faible / la plus forte)',why:'Un écart marqué entre les deux côtés se travaille en priorité du côté faible.'});
- }
- if(v.qsVel!=null||v.qsAsym!=null){
-  const zone=v.qsAsym!=null&&v.qsAsym>10?'consolidate':'reference';
-  const side=v.qsSide==='left'?' à gauche':v.qsSide==='right'?' à droite':'';
-  out.push({key:'quiet_stand',name:'Équilibre debout, yeux fermés',zone,
-   value:[v.qsVel!=null?'Oscillation '+fr(v.qsVel)+' mm/s':null,v.qsAsym!=null?'charge décalée de '+fr(v.qsAsym)+' %'+side:null].filter(Boolean).join(' · '),
-   why:'Sans la vue, l’équilibre repose sur l’oreille interne et sur les capteurs des pieds et des articulations. Cette valeur sert de point de départ.'});
- }
- if(v.slsL!=null||v.slsR!=null){
-  const l=v.slsL,r=v.slsR,weak=Math.min(l??30,r??30);
-  const zone=weak<10?'priority':(l!=null&&r!=null&&l>=29.95&&r>=29.95)?'solid':'consolidate';
-  out.push({key:'single_leg',name:'Appui sur une jambe',zone,
-   value:'Gauche '+(l==null?'—':fr(l)+' s')+' · Droite '+(r==null?'—':fr(r)+' s')+' (sur 30 s)',
-   why:'Tenir sur une jambe sollicite l’équilibre et la force des hanches et des chevilles.'});
- }
- const ranked=out.filter(m=>m.zone!=='reference');
- const strength=ranked.filter(m=>m.zone==='solid').sort((a,b)=>['single_leg','grip','symmetry'].indexOf(a.key)-['single_leg','grip','symmetry'].indexOf(b.key))[0]||null;
- const focus=out.filter(m=>m.zone==='priority'||m.zone==='consolidate').sort((a,b)=>RANK[a.zone]-RANK[b.zone])[0]||null;
- return {measures:out,strength,focus};
-}
+const ageOf=c=>ageAt(c.birthDate,c.createdAt);
+const model=c=>flashModel(c.values||{},c.sex,ageOf(c));
+const dateText=c=>new Date(c.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
+const signature='KŌMØ Longevity';
 function qrSvg(){return '<svg viewBox="-2 -2 '+(QR_SIZE+4)+' '+(QR_SIZE+4)+'" role="img" aria-label="QR code de réservation" shape-rendering="crispEdges"><rect x="-2" y="-2" width="'+(QR_SIZE+4)+'" height="'+(QR_SIZE+4)+'" fill="#fff"/><path d="'+QR_PATH+'" fill="#1c342a"/></svg>'}
 function showReport(){
- const m=model(C),date=new Date(C.createdAt).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});
- $('#report').innerHTML='<h1>Votre mini-bilan KŌMØ Motion</h1><p class="meta">'+esc(C.firstName+' '+(C.lastName||''))+' · '+esc(date)+' · 5 minutes, 3 tests</p>'
-  +m.measures.map(x=>'<div class="m"><div class="row"><div><div class="name">'+esc(x.name)+'</div><div class="val">'+esc(x.value)+'</div></div><span class="badge z-'+x.zone+'">'+ZONE_LABEL[x.zone]+'</span></div><div class="why">'+esc(x.why)+'</div></div>').join('')
+ const m=model(C),age=ageOf(C);
+ $('#report').innerHTML='<h1>Votre mini-bilan KŌMØ Motion</h1><p class="meta">'+esc(C.firstName+' '+(C.lastName||''))+(age!=null?' · '+age+' ans':'')+' · '+esc(dateText(C))+' · 5 minutes, 3 tests</p>'
+  +m.measures.map(x=>'<div class="m"><div class="row"><div><div class="name">'+esc(x.name)+'</div><div class="val">'+esc(x.value)+'</div></div><span class="badge z-'+x.zone+'">'+ZONE_LABEL[x.zone]+'</span></div><div class="norm">'+esc(x.norm)+'</div><div class="mean z-line-'+x.zone+'">'+esc(x.meaning)+'</div></div>').join('')
   +'<div class="focus">'+(m.strength?'<p><b>Votre point fort ce soir :</b> '+esc(m.strength.name.toLowerCase())+'.</p>':'')
   +(m.focus?'<p><b>À regarder de plus près :</b> '+esc(m.focus.name.toLowerCase())+'.</p>':'<p>Tout est solide ce soir : le bilan complet fixe votre point de départ et suit votre trajectoire.</p>')+'</div>'
   +'<div class="book"><div><h3>Aller plus loin : le bilan complet</h3><p style="margin:6px 0 10px">14 mesures en une heure, un passeport de mouvement et un programme de 6 semaines, avec des contrôles à 6 et 12 semaines.</p><a class="btn" href="'+BOOKING_URL+'" target="_blank" rel="noopener">Réserver mon bilan complet</a></div>'+qrSvg()+'</div>'
-  +'<p class="fine">Mesures de démonstration réalisées en 5 minutes. Elles ne constituent pas un diagnostic médical.</p>';
+  +'<p class="fine">Mesures de démonstration réalisées en 5 minutes : elles ne constituent pas un diagnostic médical. '+esc(SOURCES)+'</p>';
  fillTests(C.values||{});
  const st=$('#sendStatus');
  st.className='status'+(C.sent==='auto'?' ok':'');
- st.textContent=C.sent==='auto'?'✓ Rapport envoyé à '+C.email+'.':!C.email?'Pas d’e-mail saisi : imprime le rapport ou montre le QR code.':!C.consent?'Pas d’accord pour l’envoi par e-mail : montre le rapport à l’écran.':emailReady?'Prêt à envoyer à '+C.email+'.':'Envoi automatique indisponible : utilise « Ouvrir dans Mail ».';
+ st.textContent=C.sent==='auto'?'✓ Rapport envoyé à '+C.email+'.':!C.email?'Pas d’e-mail saisi : enregistre le PDF ou montre le QR code.':!C.consent?'Pas d’accord pour l’envoi par e-mail : montre le rapport à l’écran.':emailReady?'Prêt à envoyer à '+C.email+'.':'Envoi automatique indisponible : utilise « Ouvrir dans Gmail ».';
  $('#sendAuto').disabled=!(emailReady&&C.email&&C.consent);
  $('#sendAuto').textContent=C.sent==='auto'?'Renvoyer par e-mail':'Envoyer par e-mail';
- const can=!!(C.email&&C.consent);$('#sendMail').hidden=!can;
- if(can)$('#sendMail').href='mailto:'+encodeURIComponent(C.email)+'?subject='+encodeURIComponent('Votre mini-bilan KŌMØ Motion')+'&body='+encodeURIComponent(mailText(m));
+ $('#sendGmail').hidden=!(C.email&&C.consent);
  show('#stepReport');
-}
-function mailText(m){
- return 'Bonjour '+C.firstName+',\n\nMerci d’avoir fait le mini-bilan KŌMØ Motion. Voici vos mesures :\n\n'
-  +m.measures.map(x=>'• '+x.name+' : '+x.value+' — '+ZONE_LABEL[x.zone]).join('\n')
-  +(m.strength?'\n\nVotre point fort : '+m.strength.name.toLowerCase()+'.':'')
-  +(m.focus?'\nÀ regarder de plus près : '+m.focus.name.toLowerCase()+'.':'')
-  +'\n\nLe bilan complet mesure 14 paramètres en une heure, avec un programme de 6 semaines. Pour réserver : '+BOOKING_URL
-  +'\n\nMesures de démonstration réalisées en 5 minutes, sans valeur de diagnostic médical.\n\nKŌMØ Longevity';
 }
 async function sendAuto(){
  const st=$('#sendStatus'),btn=$('#sendAuto');btn.disabled=true;st.className='status';st.textContent='Envoi en cours…';
  try{
-  await callFlash({action:'send',consultationId:C.id,resend:C.sent==='auto',date:C.createdAt,
+  await callFlash({action:'send',consultationId:C.id,resend:C.sent==='auto',date:C.createdAt,age:ageOf(C),
    patient:{firstName:C.firstName,lastName:C.lastName||'',email:C.email},values:C.values,sex:C.sex});
   C.sent='auto';upsertEvening(C);st.className='status ok';st.textContent='✓ Rapport envoyé à '+C.email+'.';btn.textContent='Renvoyer par e-mail';
- }catch(e){st.className='status err';st.textContent='Envoi impossible ('+e.code+'). Utilise « Ouvrir dans Mail ».'}
+ }catch(e){st.className='status err';st.textContent='Envoi impossible ('+e.code+'). Utilise « Ouvrir dans Gmail ».'}
  finally{btn.disabled=!(emailReady&&C.email&&C.consent)}
 }
 $('#sendAuto').onclick=sendAuto;
-$('#sendMail').addEventListener('click',()=>{if(C&&C.sent!=='auto'){C.sent='mail';upsertEvening(C)}});
-$('#printReport').onclick=()=>window.print();
+
+// ── Gmail : l'app Gmail sur iPad et iPhone, sinon Gmail dans le navigateur ──
+$('#sendGmail').onclick=()=>{
+ if(!C||!C.email)return;
+ const subject='Votre mini-bilan KŌMØ Motion du '+dateText(C);
+ const body=flashText(C,model(C),dateText(C),signature);
+ const web='https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(C.email)+'&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+ const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ if(C.sent!=='auto'){C.sent='mail';upsertEvening(C)}
+ if(!ios){window.open(web,'_blank','noopener');return}
+ let left=false;const onHide=()=>{if(document.hidden)left=true};document.addEventListener('visibilitychange',onHide);
+ location.href='googlegmail:///co?to='+encodeURIComponent(C.email)+'&subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+ setTimeout(()=>{document.removeEventListener('visibilitychange',onHide);if(!left&&!document.hidden)location.href=web},1500);
+};
+
+// ── PDF : partage (Gmail, Fichiers, AirDrop…) sur iPad, téléchargement ailleurs ──
+const pdfClean=t=>String(t??'').replace(/Ō/g,'O').replace(/ō/g,'o').replace(/[’‘]/g,"'").replace(/[“”]/g,'"').replace(/[—–]/g,'-').replace(/[•]/g,'-').replace(/≥/g,'>=').replace(/≤/g,'<=').replace(/[^\x20-\x7e\xa0-\xff·]/g,' ');
+async function buildPdf(){
+ const {jsPDF}=await import('https://esm.sh/jspdf@4.2.1');
+ const m=model(C),age=ageOf(C),doc=new jsPDF({unit:'mm',format:'a4'});
+ const W=210,X=18,TW=W-2*X,ink=[28,52,42],muted=[107,111,102],line=[226,217,202];
+ const zc={solid:[[47,107,74],[228,239,231]],consolidate:[[138,90,18],[246,236,217]],priority:[[155,52,38],[246,225,220]],reference:[[74,90,106],[231,236,241]]};
+ let y=20;
+ const page=need=>{if(y+need>282){doc.addPage();y=20}};
+ const text=(t,size,color,style,maxW)=>{doc.setFont('helvetica',style||'normal');doc.setFontSize(size);doc.setTextColor(...(color||ink));const rows=doc.splitTextToSize(pdfClean(t),maxW||TW);page(rows.length*size*0.42+1);doc.text(rows,X,y);y+=rows.length*size*0.42;return rows.length};
+ doc.setFont('helvetica','bold');doc.setFontSize(13);doc.setTextColor(...ink);doc.text('KOMØ',X,y);y+=12;
+ text('MINI-BILAN · KOMØ MOTION',8,muted,'bold');y+=3;
+ doc.setFont('times','normal');doc.setFontSize(22);doc.setTextColor(...ink);doc.text(pdfClean('Votre mini-bilan du '+dateText(C)),X,y);y+=8;
+ text(C.firstName+' '+(C.lastName||'')+(age!=null?' · '+age+' ans':'')+' · 5 minutes, 3 tests',10,muted);y+=4;
+ for(const x of m.measures){
+  doc.setFont('helvetica','normal');doc.setFontSize(9);
+  const need=8+doc.splitTextToSize(pdfClean(x.norm),TW).length*4+doc.splitTextToSize(pdfClean(x.meaning),TW-4).length*4+10;page(need);
+  doc.setDrawColor(...line);doc.line(X,y,W-X,y);y+=6;
+  const [fg,bg]=zc[x.zone],lab=pdfClean(ZONE_LABEL[x.zone]);doc.setFont('helvetica','bold');doc.setFontSize(8);const bw=doc.getTextWidth(lab)+6;
+  doc.setFillColor(...bg);doc.roundedRect(W-X-bw,y-4,bw,6,3,3,'F');doc.setTextColor(...fg);doc.text(lab,W-X-bw+3,y);
+  text(x.name,11,ink,'bold',TW-bw-4);y+=1;text(x.value,11,ink,'normal',TW-bw-4);y+=1.5;
+  text(x.norm,9,[63,74,66]);y+=1;
+  const top=y-3;const n=text(x.meaning,9,[63,74,66],'normal',TW-4);doc.setDrawColor(...fg);doc.setLineWidth(0.8);doc.line(X-2.5,top,X-2.5,top+n*3.8);doc.setLineWidth(0.2);
+  y+=4;
+ }
+ page(30);doc.setFillColor(245,241,234);
+ const fs=[(m.strength?'Votre point fort ce soir : '+m.strength.name.toLowerCase()+'.':null),(m.focus?'À regarder de plus près : '+m.focus.name.toLowerCase()+'.':'Tout est solide ce soir : le bilan complet fixe votre point de départ.')].filter(Boolean);
+ doc.roundedRect(X,y,TW,6+fs.length*5.5,3,3,'F');y+=6.5;fs.forEach(f=>{text(f,10,ink,'bold');y+=1.3});y+=6;
+ page(46);const by=y;doc.setFillColor(227,235,226);doc.roundedRect(X,by,TW,42,3,3,'F');y=by+9;
+ doc.setFont('times','normal');doc.setFontSize(15);doc.setTextColor(...ink);doc.text('Aller plus loin : le bilan complet',X+5,y);y+=6;
+ doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(63,74,66);
+ doc.text(doc.splitTextToSize(pdfClean('14 mesures en une heure, un passeport de mouvement et un programme de 6 semaines, avec des contrôles à 6 et 12 semaines.'),TW-48),X+5,y);y+=13;
+ doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...ink);doc.textWithLink('Réserver mon bilan complet : '+BOOKING_URL.replace('https://',''),X+5,y,{url:BOOKING_URL});
+ // QR code
+ const q=34,qx=W-X-q-4,qy=by+4,mod=q/QR_SIZE;doc.setFillColor(255,255,255);doc.rect(qx-1.5,qy-1.5,q+3,q+3,'F');doc.setFillColor(...ink);
+ for(const mm of QR_PATH.matchAll(/M(\d+) (\d+)/g))doc.rect(qx+Number(mm[1])*mod,qy+Number(mm[2])*mod,mod+0.02,mod+0.02,'F');
+ y=by+50;text('Mesures de démonstration réalisées en 5 minutes : elles ne constituent pas un diagnostic médical. '+SOURCES,7.5,muted);
+ return new File([doc.output('blob')],pdfClean(('mini-bilan-komo-'+C.firstName+'-'+(C.lastName||'')).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/-+$/,''))+'.pdf',{type:'application/pdf'});
+}
+$('#savePdf').onclick=async()=>{
+ const btn=$('#savePdf'),st=$('#sendStatus');btn.disabled=true;const label=btn.textContent;btn.textContent='Création du PDF…';
+ try{
+  const file=await buildPdf();
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+   try{await navigator.share({files:[file],title:'Mini-bilan KŌMØ Motion'});st.className='status ok';st.textContent='✓ PDF prêt : choisis Gmail, Fichiers ou AirDrop.';return}
+   catch(e){if(e&&e.name==='AbortError')return}
+  }
+  const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=file.name;document.body.appendChild(a);a.click();a.remove();
+  st.className='status ok';st.textContent='✓ PDF enregistré : '+file.name;
+ }catch(e){st.className='status err';st.textContent='Création du PDF impossible (réseau ?). Réessaie dans un instant.'}
+ finally{btn.disabled=false;btn.textContent=label}
+};
 $('#editTests').onclick=()=>show('#stepTests');
 $('#nextPatient').onclick=()=>{
  C=null;$('#patientForm').reset();$('#consent').checked=true;
@@ -354,8 +385,8 @@ renderEvening();checkEmail();
 try{const pre=JSON.parse(sessionStorage.getItem('komo_flash_prefill')||'null');
  if(pre&&pre.firstName){sessionStorage.removeItem('komo_flash_prefill');
   C={id:uid(),createdAt:new Date().toISOString(),values:{},sent:null,firstName:String(pre.firstName).slice(0,60),lastName:String(pre.lastName||'').slice(0,60),
-   phone:String(pre.phone||'').slice(0,30),email:String(pre.email||'').slice(0,120),consent:!!pre.consent,sex:pre.sex==='male'?'male':'female'};
-  fillPatient(C);upsertEvening(C);$('#testsTitle').textContent='Tests · '+C.firstName;show('#stepTests')}}catch{}
+   phone:String(pre.phone||'').slice(0,30),email:String(pre.email||'').slice(0,120),consent:!!pre.consent,sex:pre.sex==='male'?'male':'female',birthDate:/^\d{4}-\d{2}-\d{2}$/.test(pre.birthDate||'')?pre.birthDate:''};
+  fillPatient(C);upsertEvening(C);$('#testsTitle').textContent='Tests · '+C.firstName;show(ageAt(C.birthDate)==null?'#stepPatient':'#stepTests')}}catch{}
 </script>
 </body>
 </html>

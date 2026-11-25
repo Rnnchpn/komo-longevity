@@ -36,4 +36,10 @@ for(const consumer of ['app.js','motion-live-operator-consult-v1.js','motion-liv
  const text=await readFile(join(built,consumer),'utf8');
  if(!text.includes('./motion-protocol.mjs'))throw new Error('[pulse-v14-standard] '+consumer+' doit lire motion-protocol.mjs');
 }
+// Consultation flash : la fonction serveur utilise une copie exacte des repères de la page.
+{
+ const page=await readFile(join(root,'pulse-v14-src/flash/flash-norms.mjs'),'utf8');
+ const server=await readFile(join(root,'supabase/functions/flash-report/flash-norms.mjs'),'utf8');
+ if(page!==server)throw new Error('[pulse-v14-standard] flash-norms.mjs : copier pulse-v14-src/flash/flash-norms.mjs dans supabase/functions/flash-report/ puis redéployer flash-report');
+}
 console.log('[pulse-v14-standard] PASS · protocole unique · version unique · aucune trace Online');

@@ -39,7 +39,7 @@ function loadStyles(){
  if(document.getElementById("mopvStyle"))return;
  const link=document.createElement("link");
  link.id="mopvStyle";link.rel="stylesheet";
- link.href="./motion-live-operator-video-v1.css?v=20261125-consultation-flash-v1";
+ link.href="./motion-live-operator-video-v1.css?v=20261125-flash-normes-v1";
  document.head.append(link);
 }
 function releaseConnection(notify){
