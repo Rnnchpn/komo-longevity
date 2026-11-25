@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.4';
-import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261124-flexion-coude-v1';
+import { STEPS as PROTOCOL_STEPS } from './motion-protocol.mjs?v=20261125-consultation-flash-v1';
 
 const SUPABASE_URL='https://uqlolefsiktbznnymriy.supabase.co';
 const SUPABASE_KEY='sb_publishable_3sUsinfJ_nMFI44OXozkKQ_jmGG8w7n';
@@ -583,7 +583,31 @@ function patients(){
   $('#view').innerHTML=`<section class="op-patients-app" aria-label="Annuaire des patients">
     <header class="op-patients-context"><span class="op-patients-kicker">${isProductionCenter()?'CENTRE ACTUEL · CONSULTATION RÉELLE':'CENTRE ACTUEL · DÉMONSTRATION (DOSSIERS FICTIFS)'}</span><div class="op-patients-context-row"><h2>${esc(S.org?.name||'Centre KŌMØ')}</h2><span class="op-patients-count">${S.patients.length} dossier${S.patients.length>1?'s':''}</span></div></header>
     <div class="op-patients-toolbar"><button type="button" class="button primary" id="opPatientCreateToggle">Nouveau patient</button><label class="op-patient-search" for="opPatientSearch"><span aria-hidden="true">⌕</span><input id="opPatientSearch" type="search" placeholder="Rechercher un patient ou une référence" autocomplete="off" aria-label="Rechercher un dossier patient"></label><p id="opPatientResultCount" class="op-patients-search-count" aria-live="polite" hidden></p></div>
-    ${isProductionCenter()?`<form id="opPatientCreateForm" class="op-create-patient-form op-create-patient-form--real" ${S.patients.length?'hidden':''} data-real-center="1" novalidate>
+    <section id="opNewPatientChooser" class="op-new-chooser" ${S.patients.length?'hidden':''} aria-label="Nouveau patient : type de consultation">
+      <h3>Nouveau patient · quelle consultation ?</h3>
+      <div class="op-new-chooser-options">
+        <button type="button" data-consult-type="classic" aria-pressed="false"><strong>Consultation KŌMØ classique</strong><small>Bilan complet · 14 mesures · environ 60 min · dossier PULSE</small></button>
+        <button type="button" data-consult-type="flash" aria-pressed="false"><strong>Consultation flash</strong><small>5 min · préhension, debout yeux fermés, appui sur une jambe · mini-rapport par e-mail</small></button>
+      </div>
+    </section>
+    <form id="opFlashCreateForm" class="op-create-patient-form op-create-patient-form--real" hidden novalidate>
+      <h3>Consultation flash</h3>
+      <div class="op-create-patient-grid op-flash-grid">
+        <label><span>Prénom</span><input name="first_name" autocomplete="off" autocapitalize="words" maxlength="60"></label>
+        <label><span>Nom</span><input name="last_name" autocomplete="off" autocapitalize="words" maxlength="60"></label>
+        <label><span>Téléphone</span><input name="phone" type="tel" inputmode="tel" autocomplete="off" maxlength="30"></label>
+        <label><span>E-mail</span><input name="email" type="email" inputmode="email" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="120" placeholder="pour lui envoyer son mini-rapport"></label>
+      </div>
+      <fieldset class="op-sex-choice op-sex-choice--two"><legend>Repère de préhension</legend>
+        <label><input type="radio" name="sex" value="female" checked><span>Femme</span></label>
+        <label><input type="radio" name="sex" value="male"><span>Homme</span></label>
+      </fieldset>
+      <label class="op-create-patient-attestation"><input type="checkbox" name="consent" checked> La personne accepte de recevoir son mini-rapport par e-mail.</label>
+      <p id="opFlashCreateFeedback" class="op-create-patient-feedback" aria-live="polite"></p>
+      <button class="button primary" type="submit">Démarrer la consultation flash →</button>
+      <p class="op-create-privacy">Pas de dossier PULSE : l’identité reste sur cet appareil et dans l’e-mail envoyé. Pour un suivi, crée ensuite un dossier classique.</p>
+    </form>
+    ${isProductionCenter()?`<form id="opPatientCreateForm" class="op-create-patient-form op-create-patient-form--real" hidden data-real-center="1" novalidate>
       <h3>Nouveau patient</h3>
       <div class="op-create-code"><span>Code pour VALD et la feuille de mesures</span><strong id="opPatientCodeView">${esc(nextPseudoCode())}</strong>
         <input type="hidden" name="pseudo_code" value="${esc(nextPseudoCode())}"></div>
@@ -622,12 +646,36 @@ function patients(){
     <p id="opPatientNoResult" class="op-patients-no-results" hidden>Aucun dossier ne correspond à votre recherche.</p>
   </section>`;
   const createToggle=$('#opPatientCreateToggle'),createForm=$('#opPatientCreateForm');
+  const chooser=$('#opNewPatientChooser'),flashForm=$('#opFlashCreateForm');
+  const pickConsult=type=>{
+    chooser?.querySelectorAll('[data-consult-type]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.consultType===type)));
+    if(createForm)createForm.hidden=type!=='classic';
+    if(flashForm)flashForm.hidden=type!=='flash';
+    const form=type==='flash'?flashForm:createForm;
+    form?.querySelector('[name="first_name"]')?.focus();
+  };
+  const openChooser=open=>{
+    if(!chooser)return;chooser.hidden=!open;createToggle?.setAttribute('aria-expanded',String(open));
+    if(!open){if(createForm)createForm.hidden=true;if(flashForm)flashForm.hidden=true;
+      chooser.querySelectorAll('[data-consult-type]').forEach(b=>b.setAttribute('aria-pressed','false'))}
+    else chooser.scrollIntoView({block:'nearest'});
+  };
+  chooser?.querySelectorAll('[data-consult-type]').forEach(b=>b.addEventListener('click',()=>pickConsult(b.dataset.consultType)));
+  if(sessionStorage.getItem('komo_open_new_patient')){sessionStorage.removeItem('komo_open_new_patient');openChooser(true)}
+  flashForm?.addEventListener('submit',event=>{
+    event.preventDefault();
+    const fd=new FormData(flashForm),fb=$('#opFlashCreateFeedback');
+    const firstName=String(fd.get('first_name')||'').trim(),lastName=String(fd.get('last_name')||'').trim();
+    const phone=String(fd.get('phone')||'').trim(),email=String(fd.get('email')||'').trim().toLowerCase();
+    const missing=!firstName?['first_name','Indique le prénom.']:
+      email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)?['email','Vérifie l’adresse e-mail.']:
+      !email&&!phone?['phone','Ajoute un téléphone ou un e-mail pour pouvoir la recontacter.']:null;
+    if(missing){if(fb)fb.textContent=missing[1];flashForm.querySelector('[name="'+missing[0]+'"]')?.focus();return}
+    try{sessionStorage.setItem('komo_flash_prefill',JSON.stringify({firstName,lastName,phone,email,sex:fd.get('sex')==='male'?'male':'female',consent:!!fd.get('consent')}))}catch{}
+    location.href='./flash/';
+  });
   if(createToggle&&createForm){
-    createToggle.addEventListener('click',()=>{
-      createForm.hidden=!createForm.hidden;
-      createToggle.setAttribute('aria-expanded',String(!createForm.hidden));
-      if(!createForm.hidden)createForm.querySelector('[name="first_name"],[name="birth_year"]')?.focus();
-    });
+    createToggle.addEventListener('click',()=>openChooser(!!chooser?.hidden));
     const birthInput=createForm.querySelector('[name="birth_date"]');
     if(birthInput)birthInput.max=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/Paris'});
     createForm.addEventListener('input',()=>{const f=$('#opPatientCreateFeedback');if(f&&!createForm.querySelector('[type="submit"]').disabled)f.textContent=''});
@@ -743,7 +791,7 @@ async function motionLiveAPI(body){
 }
 async function openOperatorCamera(sessionId,containerId){
   try{
-    const camera=await import('./motion-live-operator-video-v1.js?v=20261124-flexion-coude-v1');
+    const camera=await import('./motion-live-operator-video-v1.js?v=20261125-consultation-flash-v1');
     await camera.openMotionOperatorVideo({sessionId,signal:motionLiveAPI,containerId});
   }catch(error){console.error('[Operator camera]',error);toast(error.message||'Connexion caméra momentanément indisponible.')}
 }
@@ -775,9 +823,8 @@ function motionLiveMonitor(){
       <li data-journey="questionnaire"><b>3</b><span>Questionnaire</span></li>
       <li data-journey="report"><b>4</b><span>Rapport</span></li>
     </ol>
-    <section class="op-flash-entry" style="display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;border:1px solid var(--line,#e2d9ca);border-radius:14px;padding:14px 16px;margin:0 0 16px;background:#fff"><div><h3 style="margin:0 0 4px">Consultation flash · 5 min</h3><p style="margin:0">Nom, téléphone, e-mail · préhension, debout yeux fermés, appui sur une jambe · mini-rapport envoyé et réservation du bilan complet.</p></div><a class="button primary" href="./flash/" id="opFlashStart">Créer une consultation flash</a></section>
     <header class="op-live-head"><div><h2>Nouvelle consultation</h2><p>Choisis le patient présent : les tests s’ouvrent directement, sans iPhone ni caméra.</p></div><button type="button" class="button secondary" id="opLiveRefresh">Actualiser</button></header>
-    <section class="op-start-panel"><div><h3>Qui consultes-tu ?</h3><p>${real?'Code dossier du patient présent (créé dans Patients).':'Dossier fictif de démonstration.'}</p></div><label>${real?'Patient (code dossier)':'Patient de démonstration'}<select id="opLivePatientChoice"></select></label><button type="button" class="button primary" id="opLiveBegin">Démarrer la consultation</button><p class="op-start-help" id="opLiveStartHelp" role="status">Une seule consultation à la fois · les bilans terminés restent archivés.</p></section>
+    <section class="op-start-panel"><div><h3>Qui consultes-tu ?</h3><p>${real?'Code dossier du patient présent (créé dans Patients).':'Dossier fictif de démonstration.'}</p></div><label>${real?'Patient (code dossier)':'Patient de démonstration'}<select id="opLivePatientChoice"></select></label><button type="button" class="button primary" id="opLiveBegin">Démarrer la consultation</button><button type="button" class="button secondary" id="opLiveNewConsult">Nouveau patient · classique ou flash</button><p class="op-start-help" id="opLiveStartHelp" role="status">Une seule consultation à la fois · les bilans terminés restent archivés.</p></section>
     <section class="op-prep" aria-label="Préparer la salle"><div class="op-prep-head"><h3>Salle prête ?</h3><span id="opPrepCount"></span></div>
       <p>À cocher avant de faire entrer le patient. Les tests suivent cet ordre : DynaMo assis, plateformes ForceDecks, marche 4 m, lever de chaise 30 s.</p>
       <ul class="op-prep-list">${ROOM_PREP.map(([id,label])=>'<li><label><input type="checkbox" data-prep="'+id+'"><span>'+label+'</span></label></li>').join('')}</ul>
@@ -878,6 +925,7 @@ function motionLiveMonitor(){
     catch{window.prompt('Copie ce lien sur ton iPhone :',url)}
   };
   $('#opLiveNewPatient').onclick=()=>{clearInterval(motionLiveTimer);motionLiveTimer=null;location.hash='patients'};
+  $('#opLiveNewConsult').onclick=()=>{clearInterval(motionLiveTimer);motionLiveTimer=null;sessionStorage.setItem('komo_open_new_patient','1');location.hash='patients'};
   // Dossier tout juste créé : la consultation démarre seule.
   const autostart=sessionStorage.getItem('komo_autostart_patient');
   if(autostart&&patientChoice&&[...patientChoice.options].some(o=>o.value===autostart)){
@@ -1073,7 +1121,7 @@ async function operator(){
   $('#view').innerHTML='<div id="motionConsultRoot"></div>';
   const root=$('#motionConsultRoot');
   try{
-    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261124-flexion-coude-v1');
+    motionConsultModule=await import('./motion-live-operator-consult-v1.js?v=20261125-consultation-flash-v1');
     if(root?.isConnected&&S.mode==='pro'&&location.hash==='#operator')
       await motionConsultModule.mountOperatorConsultation({root,patient:S.patient,api:motionLiveAPI,
         practitioner:String(S.profile?.display_name||[S.profile?.first_name,S.profile?.last_name].filter(Boolean).join(' ')||'').trim(),

@@ -532,3 +532,16 @@ body:has(.app-shell-pro){background:var(--pw-canvas)}
  /* Sur tablette verticale, la barre d'action reste au-dessus des onglets du bas. */
  .app-shell-pro .moc-test:is(:has(#mocSave),:has(#mocStart),:has(#mocIntakeNext))>.moc-buttons{bottom:calc(78px + env(safe-area-inset-bottom,0px));border-radius:14px;margin-bottom:12px;border:1px solid var(--pw-line);box-shadow:var(--pw-shadow)}
 }
+/* Nouveau patient : choix consultation classique ou flash (25/11/2026). */
+.app-shell-pro .op-new-chooser{background:var(--pw-panel);border:1px solid var(--pw-line);border-radius:16px;padding:20px 22px;box-shadow:var(--pw-shadow);margin:0 0 14px}
+.app-shell-pro .op-new-chooser h3{font:500 22px/1.15 var(--pw-serif);margin:0 0 14px;color:var(--pw-ink)}
+.app-shell-pro .op-new-chooser-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.app-shell-pro .op-new-chooser-options button{display:grid;gap:6px;text-align:left;padding:16px 18px;border:1px solid var(--pw-line-strong);border-radius:14px;background:#fff;color:var(--pw-ink);cursor:pointer;font:inherit;min-height:88px}
+.app-shell-pro .op-new-chooser-options button strong{font:600 16px/1.25 var(--pw-sans)}
+.app-shell-pro .op-new-chooser-options button small{font:500 13px/1.45 var(--pw-sans);color:var(--pw-ink-2)}
+.app-shell-pro .op-new-chooser-options button[aria-pressed="true"]{border-color:var(--pw-ink);box-shadow:inset 0 0 0 1px var(--pw-ink);background:var(--pw-bronze-soft)}
+.app-shell-pro .op-flash-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.app-shell-pro .op-sex-choice--two{grid-template-columns:repeat(2,minmax(0,1fr));max-width:320px}
+@media (max-width:640px){.app-shell-pro .op-new-chooser-options,.app-shell-pro .op-flash-grid{grid-template-columns:1fr}}
+.app-shell-pro .op-start-panel #opLiveNewConsult{grid-column:1/-1;justify-self:start}
+.app-shell-pro .op-sex-choice--two label span{display:grid;margin:0;place-items:center;min-height:52px;padding:0 6px;border:1px solid var(--pw-line-strong);border-radius:11px;background:#fff;  font:600 15px/1.1 var(--pw-sans);color:var(--pw-ink-2);text-align:center;transition:background .12s,border-color .12s,color .12s}

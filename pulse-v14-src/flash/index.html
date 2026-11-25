@@ -73,7 +73,7 @@ input:focus,select:focus{outline:2px solid var(--gold);outline-offset:1px}
 </head>
 <body>
 <main class="wrap">
- <div class="top no-print"><span class="brand">KŌMØ · PULSE</span><a href="../#live">← Retour à PULSE</a></div>
+ <div class="top no-print"><span class="brand">KŌMØ · PULSE</span><a href="../#patients">← Retour à PULSE</a></div>
  <div id="authBanner" class="banner no-print" hidden></div>
 
  <!-- Étape 1 : la personne -->
@@ -350,6 +350,12 @@ $('#nextPatient').onclick=()=>{
 };
 
 renderEvening();checkEmail();
+// Arrivée depuis PULSE (Patients › Nouveau patient › Consultation flash) : la personne est déjà saisie.
+try{const pre=JSON.parse(sessionStorage.getItem('komo_flash_prefill')||'null');
+ if(pre&&pre.firstName){sessionStorage.removeItem('komo_flash_prefill');
+  C={id:uid(),createdAt:new Date().toISOString(),values:{},sent:null,firstName:String(pre.firstName).slice(0,60),lastName:String(pre.lastName||'').slice(0,60),
+   phone:String(pre.phone||'').slice(0,30),email:String(pre.email||'').slice(0,120),consent:!!pre.consent,sex:pre.sex==='male'?'male':'female'};
+  fillPatient(C);upsertEvening(C);$('#testsTitle').textContent='Tests · '+C.firstName;show('#stepTests')}}catch{}
 </script>
 </body>
 </html>

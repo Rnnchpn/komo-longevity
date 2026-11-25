@@ -4,7 +4,7 @@
 // Sources des repères : EWGSOP2 (préhension, marche), AWGS 2019 (marche 1,0 m/s), Rikli & Jones / CDC STEADI
 // (lever de chaise 30 s), Araujo BJSM 2022 (appui unipodal 10 s), JOA (Two-Step), VALD (asymétrie > 10 %),
 // Alcazar 2020–2021 (puissance relative au lever de chaise : équation, seuils 2,6 / 2,1 W/kg, MCID).
-import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261124-flexion-coude-v1';
+import {stsRelativePower,stsRepsForPower,STS_POWER_LOW,STS_POWER_MCID} from './motion-protocol.mjs?v=20261125-consultation-flash-v1';
 export const LONGEVITY_PLAN_VERSION='KOMO_LONGEVITY_PLAN_V1';
 export const ZONES={
  priority:{label:'Priorité',rank:3},

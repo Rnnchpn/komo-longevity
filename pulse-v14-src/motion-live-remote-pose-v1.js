@@ -1,9 +1,9 @@
 // KŌMØ Pulse — experimental 2D body landmarks, computed ONLY on the Operator browser.
 // The paired iPhone provides an encrypted WebRTC stream. No raw video, skeleton or frame is uploaded.
-import {createPoseEngine} from './motion-engine/pose-engine.js?v=20261124-flexion-coude-v1';
-import {createMovementTracker,frameInfo} from './motion-engine/metrics.mjs?v=20261124-flexion-coude-v1';
-import {createOneLegObserver,oneLegFrame} from './motion-engine/unipodal-metrics.mjs?v=20261124-flexion-coude-v1';
-import {createSideProfileStability,sideProfileFrame,surfaceSagittalIndex} from './motion-engine/profile-photo-metrics.mjs?v=20261124-flexion-coude-v1';
+import {createPoseEngine} from './motion-engine/pose-engine.js?v=20261125-consultation-flash-v1';
+import {createMovementTracker,frameInfo} from './motion-engine/metrics.mjs?v=20261125-consultation-flash-v1';
+import {createOneLegObserver,oneLegFrame} from './motion-engine/unipodal-metrics.mjs?v=20261125-consultation-flash-v1';
+import {createSideProfileStability,sideProfileFrame,surfaceSagittalIndex} from './motion-engine/profile-photo-metrics.mjs?v=20261125-consultation-flash-v1';
 
 const REPETITIONS=new Set(["sts","heels","arms"]);
 const UNIPODAL=new Set(["unipodal_left","unipodal_right"]);
