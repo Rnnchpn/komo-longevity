@@ -24,7 +24,7 @@ for (const [locale, file, marker] of pages) {
 }
 
 const fr = (await readFile(join(site, 'fr', 'cgv', 'index.html'), 'utf8')).toLocaleLowerCase('fr');
-for (const phrase of ['pulse free', 'motion', 'clinical', 'world / experience', '300 €', '500 €', 'à valider avant toute mise en vente', 'rétractation', 'données personnelles']) {
+for (const phrase of ['pulse free', 'motion', 'clinical', 'world / experience', '150 €', '500 €', 'à valider avant toute mise en vente', 'rétractation', 'données personnelles']) {
   if (!fr.includes(phrase)) failures.push(`fr CGV missing: ${phrase}`);
 }
 

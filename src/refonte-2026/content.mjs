@@ -1,12 +1,12 @@
 // KŌMØ Motion — contenus de la refonte (FR, EN, ES).
-// Sources : protocole PULSE KOMO_MOTION 2.5.0 (14 étapes), offres validées (bilan 60 min 300 €,
+// Sources : protocole PULSE KOMO_MOTION 2.5.0 (14 étapes), offres validées (bilan 60 min 150 €,
 // contrôle 45 min 120 €), lieux : Clinique HIRO (Beausoleil, Monaco) et Maison Epigenetic (Palm Beach, Cannes).
 // Règles éditoriales : pas de diagnostic, pas de promesse, pas de score composite ni d'« âge » du mouvement.
 
 export const ORIGIN = 'https://komolongevity.com';
 export const EMAIL = 'contact@komolongevity.com';
 export const PULSE_URL = 'https://pulse.komolongevity.com/';
-export const PRICES = { bilan: 300, controle: 120 };
+export const PRICES = { bilan: 150, controle: 120 };
 export const DURATIONS = { bilan: 60, controle: 45 };
 export const MAPS_CANNES = 'https://www.google.com/maps/search/?api=1&query=Maison%20Epigenetic%2C%20Place%20Franklin%20Roosevelt%2C%2006400%20Cannes';
 
@@ -22,13 +22,13 @@ const fr = {
   langName: 'Français',
   meta: {
     homeTitle: 'KŌMØ Motion — Bilan du mouvement à Monaco et à Cannes',
-    homeDesc: 'Un bilan de 60 minutes sur plateformes de force et au dynamomètre : force, équilibre, puissance et marche. À la Clinique HIRO (Monaco) et à la Maison Epigenetic (Cannes). 300 €.',
+    homeDesc: 'Un bilan de 60 minutes sur plateformes de force et au dynamomètre : force, équilibre, puissance et marche. À la Clinique HIRO (Monaco) et à la Maison Epigenetic (Cannes). 150 €.',
     bookTitle: 'Réserver un bilan KŌMØ Motion — Monaco ou Cannes',
-    bookDesc: 'Demandez votre créneau pour un bilan KŌMØ Motion (60 min, 300 €) ou un contrôle (45 min, 120 €), à Monaco ou à Cannes.',
+    bookDesc: 'Demandez votre créneau pour un bilan KŌMØ Motion (60 min, 150 €) ou un contrôle (45 min, 120 €), à Monaco ou à Cannes.',
     monacoTitle: 'Bilan KŌMØ Motion à Monaco — Clinique HIRO, Beausoleil',
-    monacoDesc: 'Votre bilan du mouvement KŌMØ Motion à la Clinique HIRO, aux portes de Monaco : 14 mesures en 60 minutes, 300 €.',
+    monacoDesc: 'Votre bilan du mouvement KŌMØ Motion à la Clinique HIRO, aux portes de Monaco : 14 mesures en 60 minutes, 150 €.',
     cannesTitle: 'Bilan KŌMØ Motion à Cannes — Maison Epigenetic, Palm Beach',
-    cannesDesc: 'Votre bilan du mouvement KŌMØ Motion à la Maison Epigenetic, Palm Beach, Cannes : 14 mesures en 60 minutes, 300 €.'
+    cannesDesc: 'Votre bilan du mouvement KŌMØ Motion à la Maison Epigenetic, Palm Beach, Cannes : 14 mesures en 60 minutes, 150 €.'
   },
   skip: 'Aller au contenu',
   nav: { bilan: 'Le bilan', deroule: 'Déroulé', adresses: 'Adresses', tarifs: 'Tarifs', questions: 'Questions' },
@@ -136,7 +136,7 @@ const fr = {
       ['Comment modifier ou annuler ?', 'Répondez simplement à l’e-mail de confirmation, ou écrivez à contact@komolongevity.com.']
     ]
   },
-  final: { title: 'Commencez par un premier bilan.', lead: '60 minutes, 300 €, à Monaco ou à Cannes.' },
+  final: { title: 'Commencez par un premier bilan.', lead: '60 minutes, 150 €, à Monaco ou à Cannes.' },
   footer: {
     tagline: 'Mesurer, comprendre et préserver le mouvement, tout au long de la vie.',
     colBilan: 'Le bilan', colPlaces: 'Adresses', colKomo: 'KŌMØ', colInfo: 'Informations',
@@ -153,7 +153,7 @@ const fr = {
     cannes: { sub: 'Votre bilan KŌMØ Motion à la Maison Epigenetic, à Palm Beach, sur la pointe de la Croisette.', placeTitle: 'Le lieu',
       place: 'La Maison Epigenetic accueille les bilans KŌMØ Motion sur rendez-vous. KŌMØ y réalise ses mesures en toute indépendance.',
       address: 'Place Franklin-Roosevelt, 06400 Cannes.', crossQ: 'Plus près de Monaco ?', crossA: 'Le même bilan vous attend à la Clinique HIRO, à Beausoleil.', crossLink: 'Voir Monaco' },
-    facts: [['60 min', 'pour le bilan complet'], ['14', 'mesures'], ['300 €', 'réglés sur place']],
+    facts: [['60 min', 'pour le bilan complet'], ['14', 'mesures'], ['150 €', 'réglés sur place']],
     bilanTitle: 'Le bilan', bilan: 'Force, équilibre, puissance et marche : 14 mesures en 60 minutes, sur plateformes de force et au dynamomètre, puis la lecture de vos résultats.', bilanLink: 'Tout savoir sur le bilan',
     comeTitle: 'Pour venir', come: 'Une tenue souple et des chaussures plates. Arrivez cinq minutes en avance ; le reste est sur place.',
     titleSr: 'Bilan KŌMØ Motion à'
@@ -191,13 +191,13 @@ const en = {
   langName: 'English',
   meta: {
     homeTitle: 'KŌMØ Motion — Movement assessment in Monaco and Cannes',
-    homeDesc: 'A 60-minute assessment on force platforms and a dynamometer: strength, balance, power and gait. At Clinique HIRO (Monaco) and Maison Epigenetic (Cannes). €300.',
+    homeDesc: 'A 60-minute assessment on force platforms and a dynamometer: strength, balance, power and gait. At Clinique HIRO (Monaco) and Maison Epigenetic (Cannes). €150.',
     bookTitle: 'Book a KŌMØ Motion assessment — Monaco or Cannes',
-    bookDesc: 'Request a slot for a KŌMØ Motion assessment (60 min, €300) or a follow-up (45 min, €120), in Monaco or Cannes.',
+    bookDesc: 'Request a slot for a KŌMØ Motion assessment (60 min, €150) or a follow-up (45 min, €120), in Monaco or Cannes.',
     monacoTitle: 'KŌMØ Motion assessment in Monaco — Clinique HIRO, Beausoleil',
-    monacoDesc: 'Your KŌMØ Motion movement assessment at Clinique HIRO, on the doorstep of Monaco: 14 measurements in 60 minutes, €300.',
+    monacoDesc: 'Your KŌMØ Motion movement assessment at Clinique HIRO, on the doorstep of Monaco: 14 measurements in 60 minutes, €150.',
     cannesTitle: 'KŌMØ Motion assessment in Cannes — Maison Epigenetic, Palm Beach',
-    cannesDesc: 'Your KŌMØ Motion movement assessment at Maison Epigenetic, Palm Beach, Cannes: 14 measurements in 60 minutes, €300.'
+    cannesDesc: 'Your KŌMØ Motion movement assessment at Maison Epigenetic, Palm Beach, Cannes: 14 measurements in 60 minutes, €150.'
   },
   skip: 'Skip to content',
   nav: { bilan: 'The assessment', deroule: 'How it works', adresses: 'Locations', tarifs: 'Prices', questions: 'Questions' },
@@ -305,7 +305,7 @@ const en = {
       ['How do I change or cancel?', 'Simply reply to the confirmation email, or write to contact@komolongevity.com.']
     ]
   },
-  final: { title: 'Start with a first assessment.', lead: '60 minutes, €300, in Monaco or Cannes.' },
+  final: { title: 'Start with a first assessment.', lead: '60 minutes, €150, in Monaco or Cannes.' },
   footer: {
     tagline: 'Measuring, understanding and preserving movement, throughout life.',
     colBilan: 'The assessment', colPlaces: 'Locations', colKomo: 'KŌMØ', colInfo: 'Information',
@@ -322,7 +322,7 @@ const en = {
     cannes: { sub: 'Your KŌMØ Motion assessment at Maison Epigenetic, Palm Beach, at the tip of the Croisette.', placeTitle: 'The venue',
       place: 'Maison Epigenetic hosts KŌMØ Motion assessments by appointment. KŌMØ carries out its measurements there independently.',
       address: 'Place Franklin-Roosevelt, 06400 Cannes.', crossQ: 'Closer to Monaco?', crossA: 'The same assessment is available at Clinique HIRO, Beausoleil.', crossLink: 'See Monaco' },
-    facts: [['60 min', 'for the full assessment'], ['14', 'measurements'], ['€300', 'paid on site']],
+    facts: [['60 min', 'for the full assessment'], ['14', 'measurements'], ['€150', 'paid on site']],
     bilanTitle: 'The assessment', bilan: 'Strength, balance, power and gait: 14 measurements in 60 minutes, on force platforms and a dynamometer, followed by a review of your results.', bilanLink: 'All about the assessment',
     comeTitle: 'Before you come', come: 'Comfortable clothes and flat shoes. Arrive five minutes early; everything else is on site.',
     titleSr: 'KŌMØ Motion assessment in'
@@ -360,13 +360,13 @@ const es = {
   langName: 'Español',
   meta: {
     homeTitle: 'KŌMØ Motion — Evaluación del movimiento en Mónaco y Cannes',
-    homeDesc: 'Una evaluación de 60 minutos con plataformas de fuerza y dinamómetro: fuerza, equilibrio, potencia y marcha. En la Clinique HIRO (Mónaco) y en la Maison Epigenetic (Cannes). 300 €.',
+    homeDesc: 'Una evaluación de 60 minutos con plataformas de fuerza y dinamómetro: fuerza, equilibrio, potencia y marcha. En la Clinique HIRO (Mónaco) y en la Maison Epigenetic (Cannes). 150 €.',
     bookTitle: 'Reservar una evaluación KŌMØ Motion — Mónaco o Cannes',
-    bookDesc: 'Solicita tu cita para una evaluación KŌMØ Motion (60 min, 300 €) o un control (45 min, 120 €), en Mónaco o en Cannes.',
+    bookDesc: 'Solicita tu cita para una evaluación KŌMØ Motion (60 min, 150 €) o un control (45 min, 120 €), en Mónaco o en Cannes.',
     monacoTitle: 'Evaluación KŌMØ Motion en Mónaco — Clinique HIRO, Beausoleil',
-    monacoDesc: 'Tu evaluación del movimiento KŌMØ Motion en la Clinique HIRO, a las puertas de Mónaco: 14 mediciones en 60 minutos, 300 €.',
+    monacoDesc: 'Tu evaluación del movimiento KŌMØ Motion en la Clinique HIRO, a las puertas de Mónaco: 14 mediciones en 60 minutos, 150 €.',
     cannesTitle: 'Evaluación KŌMØ Motion en Cannes — Maison Epigenetic, Palm Beach',
-    cannesDesc: 'Tu evaluación del movimiento KŌMØ Motion en la Maison Epigenetic, Palm Beach, Cannes: 14 mediciones en 60 minutos, 300 €.'
+    cannesDesc: 'Tu evaluación del movimiento KŌMØ Motion en la Maison Epigenetic, Palm Beach, Cannes: 14 mediciones en 60 minutos, 150 €.'
   },
   skip: 'Ir al contenido',
   nav: { bilan: 'La evaluación', deroule: 'Cómo funciona', adresses: 'Direcciones', tarifs: 'Precios', questions: 'Preguntas' },
@@ -474,7 +474,7 @@ const es = {
       ['¿Cómo modificar o cancelar?', 'Responde al correo de confirmación o escribe a contact@komolongevity.com.']
     ]
   },
-  final: { title: 'Empieza con una primera evaluación.', lead: '60 minutos, 300 €, en Mónaco o en Cannes.' },
+  final: { title: 'Empieza con una primera evaluación.', lead: '60 minutos, 150 €, en Mónaco o en Cannes.' },
   footer: {
     tagline: 'Medir, comprender y preservar el movimiento, a lo largo de la vida.',
     colBilan: 'La evaluación', colPlaces: 'Direcciones', colKomo: 'KŌMØ', colInfo: 'Información',
@@ -491,7 +491,7 @@ const es = {
     cannes: { sub: 'Tu evaluación KŌMØ Motion en la Maison Epigenetic, en Palm Beach, en la punta de la Croisette.', placeTitle: 'El lugar',
       place: 'La Maison Epigenetic acoge las evaluaciones KŌMØ Motion con cita previa. KŌMØ realiza allí sus mediciones con total independencia.',
       address: 'Place Franklin-Roosevelt, 06400 Cannes.', crossQ: '¿Más cerca de Mónaco?', crossA: 'La misma evaluación te espera en la Clinique HIRO, en Beausoleil.', crossLink: 'Ver Mónaco' },
-    facts: [['60 min', 'para la evaluación completa'], ['14', 'mediciones'], ['300 €', 'pagados en el lugar']],
+    facts: [['60 min', 'para la evaluación completa'], ['14', 'mediciones'], ['150 €', 'pagados en el lugar']],
     bilanTitle: 'La evaluación', bilan: 'Fuerza, equilibrio, potencia y marcha: 14 mediciones en 60 minutos, con plataformas de fuerza y dinamómetro, y después la revisión de tus resultados.', bilanLink: 'Todo sobre la evaluación',
     comeTitle: 'Antes de venir', come: 'Ropa cómoda y calzado plano. Llega cinco minutos antes; todo lo demás está en el lugar.',
     titleSr: 'Evaluación KŌMØ Motion en'
